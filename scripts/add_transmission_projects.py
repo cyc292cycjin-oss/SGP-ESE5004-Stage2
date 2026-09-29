@@ -145,4 +145,12 @@ if __name__ == "__main__":
         if "under_construction" in df.columns:
             df["under_construction"] = df["under_construction"].fillna(0).astype(bool)
 
+    # SGP: follow base_network's bus0 convention for missing line country labels.
+    missing_country = n.lines["country"].fillna("").eq("")
+    inferred_country = n.lines.loc[missing_country, "bus0"].map(n.buses["country"])
+    if inferred_country.fillna("").eq("").any():
+        raise ValueError("Cannot label added lines: bus0 country is missing")
+    n.lines.loc[missing_country, "country"] = inferred_country
+    logger.info("Filled country metadata for %s lines from bus0", int(missing_country.sum()))
+
     n.export_to_netcdf(snakemake.output[0])

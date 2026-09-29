@@ -28,6 +28,11 @@ def download_ports():
     as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
     """
     fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+    # SGP: use frozen local WPI export for tutorial only.
+    if snakemake.config.get("tutorial", False):
+        fn = Path(BASE_DIR) / "data/ports/wpi_tutorial_from_gdb.csv"
+        if not fn.is_file():
+            raise FileNotFoundError(f"Tutorial WPI CSV missing: {fn}")
     wpi_csv = read_csv_nafix(fn, index_col=0)
 
     return wpi_csv

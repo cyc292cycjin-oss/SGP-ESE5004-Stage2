@@ -98,10 +98,10 @@ from _helpers import (
     update_p_nom_max,
 )
 from cluster_network import cluster_regions, clustering_for_n_clusters
+from line_country_clustering import get_clustering_from_busmap
 from pypsa.clustering.spatial import (
     aggregateoneport,
     busmap_by_stubs,
-    get_clustering_from_busmap,
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
@@ -1338,6 +1338,9 @@ if __name__ == "__main__":
         )
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    # SGP: refresh derived labels after restoring national bus countries.
+    if "country" in n.lines.columns:
+        n.lines["country"] = n.lines["bus0"].map(n.buses["country"])
     n.export_to_netcdf(snakemake.output.network)
 
     busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])

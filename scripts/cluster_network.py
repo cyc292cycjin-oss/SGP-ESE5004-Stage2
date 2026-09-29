@@ -143,12 +143,12 @@ from _helpers import (
     update_p_nom_max,
 )
 from build_shapes import add_gdp_data, add_population_data
+from line_country_clustering import get_clustering_from_busmap
 from pypsa.clustering.spatial import (
     aggregateoneport,
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
-    get_clustering_from_busmap,
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from shapely.geometry import Point
@@ -887,6 +887,9 @@ if __name__ == "__main__":
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
     )
+    # SGP: refresh derived labels after restoring national bus countries.
+    if "country" in clustering.network.lines.columns:
+        clustering.network.lines["country"] = clustering.network.lines["bus0"].map(clustering.network.buses["country"])
     clustering.network.export_to_netcdf(outputs.network)
     for attr in (
         "busmap",
