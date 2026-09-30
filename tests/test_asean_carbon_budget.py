@@ -1,0 +1,34 @@
+"""ASEAN config and legacy paper config must yield identical annual budgets."""
+from pathlib import Path
+import ast, sys, logging
+import pandas as pd
+import numpy as np
+import yaml
+import pypsa
+repo=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(repo/'scripts'))
+from _helpers import migrate_config, _deep_merge_dicts
+def extract(path, names, env=None):
+    namespace = dict(logger=logging.getLogger(__name__), **(env or {}))
+    tree = ast.parse(path.read_text())
+    nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
+    assert len(nodes) == len(names), (path, names)
+    exec(compile(ast.fix_missing_locations(ast.Module(body=[ast.ImportFrom(module='__future__', names=[ast.alias('annotations')], level=0), *nodes], type_ignores=[])), str(path), 'exec'), namespace)
+    return namespace
+
+default=yaml.safe_load((repo/'config.default.yaml').read_text())
+asean=yaml.safe_load((repo/'configs/config.asean.yaml').read_text())
+years=dict(zip(range(2025,2051,5),[1.,.82,.64,.46,.28,.1]))
+legacy={'co2_budget':{'enable':True,'override_co2opt':True,'co2base_value':1.e9,'year':years}}
+limit=extract(repo/'scripts/prepare_network.py',['add_co2limit'])['add_co2limit']
+budget=extract(repo/'scripts/prepare_sector_network.py',['add_co2_budget'],{'add_co2limit':limit})['add_co2_budget']
+for override in [asean,legacy]:
+    config=migrate_config(_deep_merge_dicts(default,override))
+    for hours in [8760.,144.]:
+        for year,factor in years.items():
+            n=pypsa.Network();n.set_snapshots(pd.date_range('2013-01-01',periods=1,freq='h'));n.snapshot_weightings[:]=hours
+            budget(n,config['co2'],year)
+            assert np.isclose(n.global_constraints.at['CO2Limit','constant'],1e9*factor*hours/8760.)
+assert not asean['co2']['budget']['enable'], 'Do not enable the budget in Baseline'
+assert 'co2base_value' not in asean['co2']['budget'], 'Do not silently keep the mixed nested key'
+print('Legacy/new trajectories, snapshot scaling and Baseline disable flag: PASS')
