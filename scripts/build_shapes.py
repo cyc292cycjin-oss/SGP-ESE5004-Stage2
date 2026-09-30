@@ -802,55 +802,39 @@ def convert_GDP(
 
     # subset of the database and conversion to dataframe
     GDP_dataset = GDP_dataset.sel(time=year).drop("time")
+    GDP_dataset.rio.write_crs("EPSG:4326", inplace=True)
     GDP_dataset.rio.to_raster(GDP_tif)
 
     return GDP_tif, name_file_tif
 
 
-def load_GDP(
-    year: int = 2015,
-    update: bool = False,
-    out_logging: bool = False,
-    name_file_nc: str = "GDP_PPP_1990_2015_5arcmin_v2.nc",
-) -> tuple[str, str]:
+def load_GDP(year=2015, update=False, out_logging=False,
+             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
+    """Use only a raster derived from this raw NC and selected year.
+
+    Old bundles can contain an unrelated regional TIFF with the global filename.
+    Rebuild that cache from the existing source; do not download or update data.
     """
-    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
-
-    Parameters
-    ----------
-    year : int
-        Year of the data to load
-    update : bool
-        Update = true, forces re-download of files
-    out_logging : bool
-        If True, emits progress information via the module logger.
-    name_file_nc : str
-        Name of the nc file containing the GDP data (e.g. "GDP_PPP_1990_2015_5arcmin_v2.nc")
-
-    Returns
-    -------
-    GDP_tif : str
-        Path of the converted tif file
-    name_file_tif : str
-        Name of the converted tif file
-    """
-
-    if out_logging:
-        logger.info("Stage 5 of 5: Access to GDP raster data")
-
-    # path of the nc file
-    name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath tif
-
-    if update | (not os.path.exists(GDP_tif)):
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
-            )
+    import hashlib
+    GDP_nc = os.path.join(BASE_DIR, "data", "GDP", name_file_nc)
+    GDP_tif = GDP_nc[:-2] + "tif"
+    with open(GDP_nc, "rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
+    with xr.open_dataset(GDP_nc) as source:
+        years = source.time.values
+        selected_year = float(year if year in years else years[-1])
+        shape = (source.sizes["latitude"], source.sizes["longitude"])
+    valid = False
+    if os.path.exists(GDP_tif) and not update:
+        with rasterio.open(GDP_tif) as raster:
+            valid = (raster.shape == shape and raster.crs == rasterio.crs.CRS.from_epsg(4326)
+                     and raster.tags().get("source_sha256") == digest
+                     and raster.tags().get("source_year") == str(selected_year))
+    if not valid:
         convert_GDP(name_file_nc, year, out_logging)
-
-    return GDP_tif, name_file_tif
+        with rasterio.open(GDP_tif, "r+") as raster:
+            raster.update_tags(source_sha256=digest, source_year=str(selected_year))
+    return GDP_tif, os.path.basename(GDP_tif)
 
 
 def generalized_mask(

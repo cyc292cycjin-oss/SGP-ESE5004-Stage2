@@ -23,29 +23,34 @@ def calculate_end_values(df):
 
 
 def country_to_nodal(industrial_production, keys):
-    # keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
+    """Allocate each national quantity without changing its country total.
 
-    nodal_production = pd.DataFrame(
-        index=keys.index, columns=industrial_production.columns, dtype=float
-    )
-
-    countries = keys.country.unique()
-    sectors = industrial_production.columns
-
-    for country, sector in product(countries, sectors):
+    Facility weights are preferred; a country with no facility weight uses the
+    existing GDP fallback. Missing or invalid GDP is an error, never a zero demand.
+    """
+    if not keys.index.is_unique or not industrial_production.index.is_unique:
+        raise ValueError("Industrial inputs require unique node and country indices")
+    if keys.country.isna().any():
+        raise ValueError("Industrial nodes have missing country identifiers")
+    missing = set(keys.country) - set(industrial_production.index)
+    unlocated = set(industrial_production.index) - set(keys.country)
+    if missing or unlocated:
+        raise ValueError(f"Industrial country mismatch: missing totals={missing}, missing nodes={unlocated}")
+    nodal_production = pd.DataFrame(index=keys.index, columns=industrial_production.columns, dtype=float)
+    for country, sector in product(industrial_production.index, industrial_production.columns):
         buses = keys.index[keys.country == country]
-
-        if sector not in keys.columns or keys[sector].sum() == 0:
-            mapping = "gdp"
-        else:
-            mapping = sector
-
-        key = keys.loc[buses, mapping]
-        # print(sector)
-        nodal_production.loc[buses, sector] = (
-            industrial_production.at[country, sector] * key
-        )
-
+        mapping = sector if sector in keys.columns else "gdp"
+        key = pd.to_numeric(keys.loc[buses, mapping], errors="raise")
+        if key.isna().any() or (~key.map(lambda x: float("-inf") < x < float("inf"))).any() or (key < 0).any():
+            raise ValueError(f"Invalid industrial weights for {country}/{sector}/{mapping}")
+        if key.sum() == 0 and mapping != "gdp":
+            key = pd.to_numeric(keys.loc[buses, "gdp"], errors="raise")
+        if key.isna().any() or (~key.map(lambda x: float("-inf") < x < float("inf"))).any() or (key < 0).any() or key.sum() <= 0:
+            raise ValueError(f"Missing positive GDP/facility weights for {country}/{sector}")
+        total = industrial_production.at[country, sector]
+        if pd.isna(total) or not float("-inf") < total < float("inf") or total < 0:
+            raise ValueError(f"Invalid national industrial quantity for {country}/{sector}")
+        nodal_production.loc[buses, sector] = total * key / key.sum()
     return nodal_production
 
 
@@ -176,6 +181,10 @@ if __name__ == "__main__":
             "construction": 0,  # assumed
             "other": 0,
         }
+
+        missing_countries = set(countries) - set(industry_base_totals.index.get_level_values(0))
+        if missing_countries:
+            raise ValueError(f"Missing national industrial data: {sorted(missing_countries)}; do not assume zero")
 
         # fill industry_base_totals
         level_2nd = industry_base_totals.index.get_level_values(1).unique()
