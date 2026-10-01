@@ -1,0 +1,83 @@
+{
+  "fix": "E2",
+  "synthetic_only": true,
+  "optimizer_called": false,
+  "tests": [
+    {
+      "fixture": "annual=6.0,daily=0.0",
+      "checks": {
+        "fail_or_conserve_as_required": false
+      },
+      "detail": {
+        "space_TWh": 0.0,
+        "water_TWh": 2.0,
+        "finite": false
+      }
+    },
+    {
+      "fixture": "annual=0.0,daily=0.0",
+      "checks": {
+        "fail_or_conserve_as_required": false
+      },
+      "detail": {
+        "space_TWh": 0.0,
+        "water_TWh": 2.0,
+        "finite": false
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=1.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "space_TWh": 6.0,
+        "water_TWh": 2.0,
+        "finite": true
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=nan",
+      "checks": {
+        "fail_or_conserve_as_required": false
+      },
+      "detail": {
+        "space_TWh": 0.0,
+        "water_TWh": 2.0,
+        "finite": false
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=-1.0",
+      "checks": {
+        "fail_or_conserve_as_required": false
+      },
+      "detail": {
+        "space_TWh": 6.0,
+        "water_TWh": 2.0,
+        "finite": true
+      }
+    },
+    {
+      "fixture": "annual=-1.0,daily=1.0",
+      "checks": {
+        "fail_or_conserve_as_required": false
+      },
+      "detail": {
+        "space_TWh": -1.0,
+        "water_TWh": 2.0,
+        "finite": true
+      }
+    },
+    {
+      "fixture": "invalid imported CSV profile",
+      "checks": {
+        "consumer_rejects_nan": false
+      },
+      "detail": "invalid imported profile silently accepted"
+    }
+  ],
+  "all_pass": false,
+  "pypsa": "0.30.3",
+  "pandas": "2.3.1"
+}
