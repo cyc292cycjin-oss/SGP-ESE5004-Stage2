@@ -41,7 +41,7 @@ carrier_to_keep = [
     "rail transport electricity",
     "industry electricity",
     "agriculture electricity",
-    "service electricity",
+    "services electricity",
     "electricity distribution grid",
     "low voltage",
     # Battery-related
