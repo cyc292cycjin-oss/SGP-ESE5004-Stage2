@@ -1,0 +1,230 @@
+"""Deterministic, synthetic, solver-free national conservation regressions.
+
+Loads actual functions by AST from the selected frozen checkout, with explicit
+synthetic input adapters. This is a function/Buildings-chain test, not a workflow
+or scientific experiment. MW are integrated with declared hours to MWh.
+"""
+from pathlib import Path
+from types import SimpleNamespace as NS
+from itertools import product
+import argparse, ast, importlib.util, json, logging, sys, warnings
+import numpy as np
+import pandas as pd
+import pypsa, pytz
+
+warnings.filterwarnings('ignore', category=FutureWarning)
+logging.getLogger('pypsa').setLevel(logging.ERROR)
+COUNTRIES = ['BN','KH','ID','LA','MY','MM','PH','SG','TH','TL','VN']
+ATOL_MWH = 1e-6
+RTOL = 1e-12
+ROWS=[]
+
+def load(path, names, env):
+    tree=ast.parse(path.read_text())
+    body=[x for x in tree.body if (isinstance(x,ast.FunctionDef) and x.name in names) or
+          (isinstance(x,ast.Assign) and any(isinstance(t,ast.Name) and t.id in names for t in x.targets))]
+    exec(compile(ast.Module(body=body,type_ignores=[]),str(path),'exec'),env)
+
+def record(case,country,sector,metric,value,expected,unit='MWh',detail=''):
+    numeric=isinstance(expected,(int,float)) and isinstance(value,(int,float,np.number))
+    error=abs(float(value)-float(expected)) if numeric and np.isfinite(value) else None
+    tolerance=(ATOL_MWH+RTOL*abs(expected)) if unit=='MWh' else 0
+    ok=(error is not None and error<=tolerance) if numeric else value==expected
+    ROWS.append(dict(case=case,country=country,sector=sector,metric=metric,actual=value,
+      expected=expected,unit=unit,absolute_error=error,
+      relative_error=(error/abs(expected) if numeric and expected!=0 and error is not None else (0 if error==0 else None)),
+      tolerance=tolerance,test_status='PASS' if ok else 'FAIL',detail=detail))
+
+def fixture(repo, mode='mixed', potential=.3, reduction=0):
+    env=dict(pd=pd,np=np,pypsa=pypsa,logger=logging.getLogger('test'),get=lambda x,y:x)
+    load(repo/'scripts/_helpers.py',['safe_divide'],env)
+    load(repo/'scripts/prepare_sector_network.py',
+      ['normalize_by_country','p_set_from_scaling','add_residential','add_services','add_heat','create_nodes_for_heat_sector'],env)
+    n=pypsa.Network(); n.set_snapshots(pd.date_range('2013-01-01',periods=6,freq='h'))
+    weights=np.array([1.,3.,2.,4.,1.,2.]);n.snapshot_weightings.loc[:,:]=weights[:,None]
+    nodes=pd.Index([c+str(j) for c in COUNTRIES for j in range(2)])
+    for node in nodes:
+        for suffix,carrier in [('', 'AC'),(' oil','oil'),(' gas','gas'),(' biomass','solid biomass')]:
+            n.add('Bus',node+suffix,carrier=carrier,location=node,country=node[:2])
+        n.add('Load',node,bus=node,carrier='AC',p_set=(np.arange(1.,7.)+(int(node[-1])+1))*1e5)
+    n.add('Bus','co2 atmosphere',carrier='co2')
+    # location/country are project-added columns in this PyPSA version, and are
+    # not retained by Bus.add kwargs. Match the workflow's explicit assignment.
+    n.buses['location']=n.buses.index.str.split(' ').str[0]
+    n.buses['country']=n.buses['location'].str[:2]
+    pop=pd.DataFrame(index=nodes,columns=['urban','rural','fraction','ct'])
+    totals=[]; heat={}; original={}
+    for k,c in enumerate(COUNTRIES):
+        r=0. if mode=='zero_R' else 6.+k*.31
+        s=0. if mode=='zero_S' else 4.+k*.19
+        fixed=r*(.65 if mode=='mixed' else 0.)
+        totals.append({'total residential space':r*.6,'total residential water':r*.4,
+          'residential heat oil':fixed*.5,'residential heat gas':fixed*.3,'residential heat biomass':fixed*.2,
+          'residential oil':1.,'residential gas':.5,'residential biomass':.25,
+          'electricity residential':7.+k*.21,'services electricity':3.+k*.11,
+          'services oil':.4,'services gas':.2,'services biomass':.1})
+        for j in range(2):
+            node=c+str(j); fraction=[.3,.7][j]; urban=[.25,.8][j]
+            pop.loc[node]=[fraction*urban,fraction*(1-urban),fraction,c]
+            for si,(sector,quantity) in enumerate([('residential',r),('services',s)]):
+                for ui,(use,share) in enumerate([('space',.6),('water',.4)]):
+                    shape=np.roll(np.array([1.,4.,2.,7.,3.,5.]),j+si+ui+k)
+                    heat[(sector+' '+use,node)]=shape/(shape@weights)*quantity*share*fraction*1e6
+            original[node]=dict(R_MWh=r*fraction*1e6,S_MWh=s*fraction*1e6,
+              fixed_fraction=(fixed/r if r else 0),district_fraction=urban*potential)
+    pop[['urban','rural','fraction']]=pop[['urban','rural','fraction']].astype(float)
+    profiles={'heat':pd.DataFrame(heat,index=n.snapshots),
+      'cop':pd.DataFrame(3.,index=n.snapshots,columns=nodes),
+      'solar':pd.DataFrame(0.,index=n.snapshots,columns=nodes),
+      'district':pd.DataFrame({'district heat share':0.},index=nodes)}
+    costs=pd.DataFrame({'efficiency':[3.,3.,3.,1.,1.],'fixed':[10.,10.,10.,0.,0.],
+      'lifetime':[20.]*5,'CO2 intensity':[0.,0.,0.,.2,.2]},
+      index=['decentral ground-sourced heat pump','decentral air-sourced heat pump','central air-sourced heat pump','oil','gas'])
+    env.update(countries=COUNTRIES,investment_year=2030,pop_layout=pop,
+      options={'district_heating':{'potential':potential,'progress':1.,'district_heating_loss':.15},
+      'reduce_space_heat_exogenously':bool(reduction),'reduce_space_heat_exogenously_factor':reduction,
+      'time_dep_hp_cop':False,'tes':False,'boilers':False,'solar_thermal_collector':{'enable':False},'chp':False,'micro_chp':False},
+      read_csv_nafix=lambda name,**kw:profiles[name].copy(),
+      spatial=NS(nodes=nodes,**{f:NS(nodes=nodes+' '+f) for f in ['oil','gas','biomass']}))
+    return n,env,costs,pd.DataFrame(totals,index=COUNTRIES),profiles,original
+
+def energy(n):
+    return n.loads_t.p_set.mul(n.snapshot_weightings.generators,axis=0).sum(min_count=1)
+
+def test_e1(repo):
+    for mode,potential,reduction in [('mixed',.3,0),('all_service',.3,0),('zero_R',.3,0),
+      ('zero_S',.3,0),('all_service',0.,0),('all_service',1.,0),('all_service',.3,.2)]:
+        case=f'{mode}_dh{potential}_reduction{reduction}'
+        n,e,costs,et,p,original=fixture(repo,mode,potential,reduction)
+        e['add_heat'](n,costs,'heat','solar','cop','cop','district')
+        service_columns=n.loads_t.p_set.columns[n.loads_t.p_set.columns.str.contains('services.*heat')]
+        old_services=n.loads_t.p_set[service_columns].copy()
+        e['add_residential'](n,costs,et);e['add_services'](n,costs,et)
+        a=energy(n)
+        for c in COUNTRIES:
+            for sec,key in [('residential','R_MWh'),('services','S_MWh')]:
+                expected=0.;expected_loss=0.;delivered=0.;loss=0.
+                for node,raw in original.items():
+                    if not node.startswith(c):continue
+                    scale=(1-raw['fixed_fraction']) if sec=='residential' else 1.
+                    quantity=raw[key]*(1-.6*reduction)*scale
+                    expected+=quantity;expected_loss+=quantity*raw['district_fraction']*.15
+                    ids=a.index[a.index.str.startswith(node+' ') & a.index.str.contains(sec) & a.index.str.endswith(' heat')]
+                    central=ids[ids.str.contains('urban central')]
+                    delivered+=a[ids].sum()-a[central].sum()+a[central].sum()/1.15
+                    loss+=a[central].sum()*.15/1.15
+                record(case,c,sec,'heat_service_without_DH_loss',float(delivered),expected)
+                record(case,c,sec,'district_heat_loss',float(loss),expected_loss,detail='Upstream additive markup: supply=service*(1+0.15), not 1/(1-0.15)')
+            si=service_columns[service_columns.str.startswith(c)]
+            diff=(n.loads_t.p_set[si]-old_services[si]).abs().max().max()
+            record(case,c,'services','profile_unchanged',float(diff),0.,'MW')
+            ri=a.index[a.index.str.startswith(c)&n.loads.carrier.reindex(a.index).eq('AC')]
+            si=a.index[a.index.str.startswith(c)&n.loads.carrier.reindex(a.index).eq('services electricity')]
+            record(case,c,'residential','direct_electricity',float(a[ri].sum()),et.at[c,'electricity residential']*1e6)
+            record(case,c,'services','direct_electricity',float(a[si].sum()),et.at[c,'services electricity']*1e6)
+            for fuel in ['oil','gas','biomass']:
+                ids=a.index[a.index.str.startswith(c)&a.index.str.endswith(' residential '+fuel)]
+                record(case,c,'residential','fixed_'+fuel,float(a[ids].sum()),
+                  (et.at[c,'residential '+fuel]+et.at[c,'residential heat '+fuel])*1e6)
+        hi=n.loads.index[n.loads.carrier.str.endswith('heat')]
+        record(case,'ALL','R+S','finite_nonnegative',bool(np.isfinite(n.loads_t.p_set[hi]).all().all() and (n.loads_t.p_set[hi]>=0).all().all()),True,'boolean')
+
+def prepared(repo, annual, shape_kind):
+    env=dict(pd=pd,np=np,pypsa=pypsa,pytz=pytz,product=product)
+    load(repo/'scripts/prepare_heat_data.py',['generate_periodic_profiles','prepare_heat_data','normalize_heat_profile'],env)
+    n=pypsa.Network();n.set_snapshots(pd.date_range('2013-01-04',periods=72,freq='h'))
+    nodes=pd.Index([c+str(j) for c in COUNTRIES for j in range(2)])
+    profiles=pd.DataFrame({f'{s} {u} {d}':np.roll(np.arange(1.,25.),si+ui+di) for si,s in enumerate(['residential','services']) for ui,u in enumerate(['space','water']) for di,d in enumerate(['weekday','weekend'])})
+    totals=pd.DataFrame({f'{t} {s} {u}':[(annual+k*.1 if annual>0 else annual) if u=='space' else 2.+k*.05 for k in range(11)]
+      for t in ['total','electricity'] for s in ['residential','services'] for u in ['space','water']},index=COUNTRIES)
+    totals['district heat share']=0.
+    daily=pd.DataFrame({node:1.+np.arange(72)%3 for node in nodes},index=n.snapshots)
+    if shape_kind=='zero':daily.loc[:,:]=0.
+    elif shape_kind=='nan':daily.iloc[0,0]=np.nan
+    elif shape_kind=='negative':daily.iloc[0,0]=-1.
+    elif shape_kind=='inf':daily.iloc[0,0]=np.inf
+    pop=pd.DataFrame({'ct':nodes.str[:2],'fraction':[.3,.7]*11},index=nodes)
+    env.update(pop_layout=pop,options={'solar_thermal_collector':{'cf_correction':1.}},
+      snakemake=NS(input=NS(cop_air_total='cop',cop_soil_total='cop',solar_thermal_total='solar',energy_totals_name='totals',heat_demand_total='daily',heat_profile='profile')),
+      read_csv_nafix=lambda name,**kw:totals.copy() if name=='totals' else profiles.copy(),
+      xr=NS(open_dataarray=lambda name:NS(to_pandas=lambda:daily.copy() if name=='daily' else pd.DataFrame(1.,index=n.snapshots,columns=nodes))))
+    return env['prepare_heat_data'](n),totals
+
+def test_e2(repo):
+    for annual,kind,should_raise in [(6.,'zero',True),(0.,'zero',False),(6.,'valid',False),
+      (6.,'nan',True),(6.,'negative',True),(6.,'inf',True),(-1.,'valid',True)]:
+        case=f'annual{annual}_{kind}'
+        try:
+            result,totals=prepared(repo,annual,kind);heat=result[1]
+            record(case,'ALL','R+S','raises_invalid_profile',False,should_raise,'boolean')
+            for country in COUNTRIES:
+                for sec,use in product(['residential','services'],['space','water']):
+                    observed=heat[sec+' '+use].filter(like=country).sum().sum()
+                    record(case,country,sec,use+'_annual',float(observed),totals.at[country,'total '+sec+' '+use]*1e6,
+                      detail='Hourly profile over 72 synthetic hours normalized to the stated synthetic annual identity; no real climate inference')
+                    if not should_raise:
+                        coarse=heat[sec+' '+use].filter(like=country).resample('3h').mean()
+                        record(case,country,sec,use+'_3h_integral',float(coarse.sum().sum()*3),
+                          totals.at[country,'total '+sec+' '+use]*1e6,detail='Explicit mean aggregation with 3-hour weights, not a workflow run')
+        except ValueError as exc:
+            record(case,'ALL','R+S','raises_invalid_profile',True,should_raise,'boolean',str(exc))
+    for invalid in [np.nan,-1.,np.inf]:
+        n,e,costs,et,p,_=fixture(repo)
+        p['heat'].iloc[0,0]=invalid
+        try:e['add_heat'](n,costs,'heat','solar','cop','cop','district');raised=False
+        except ValueError:raised=True
+        record(f'imported_{invalid}','ALL','R+S','consumer_rejects_invalid',raised,True,'boolean')
+    # Real producer -> real consumer proof for positive annual/zero-HDD loss.
+    # The patched producer must block; the baseline consumer silently zeroes NaN.
+    try:
+        result,totals=prepared(repo,6.,'zero')
+        n,e,costs,et,p,_=fixture(repo,potential=0.)
+        n.set_snapshots(result[1].index);n.snapshot_weightings.loc[:,:]=1.
+        p['heat']=result[1]
+        for key in ['solar','cop']:
+            p[key]=p[key].reindex(n.snapshots).fillna(1.)
+        e['add_heat'](n,costs,'heat','solar','cop','cop','district')
+        a=energy(n)
+        for c in COUNTRIES:
+            ids=a.index[a.index.str.startswith(c)&a.index.str.endswith(' heat')]
+            expected=sum(totals.at[c,'total '+s+' '+u] for s,u in product(['residential','services'],['space','water']))*1e6
+            record('zero_HDD_producer_consumer',c,'R+S','unsafe_loss_or_block',float(a[ids].sum()),'RAISE','behavior',
+              f'Positive annual identity {expected} MWh; baseline constructed only {float(a[ids].sum())} MWh')
+    except ValueError as exc:
+        for k,c in enumerate(COUNTRIES):
+            record('zero_HDD_producer_consumer',c,'R+S','unsafe_loss_or_block','RAISE','RAISE','behavior',
+              f'Input identity {(2*(6+k*.1)+2*(2+k*.05))*1e6} MWh retained in source; no output demand emitted; {exc}')
+
+def test_e4(repo):
+    for filtered in [False,True]:
+        n,e,costs,et,p,_=fixture(repo)
+        # Construct Buildings electricity using the real producer, with an intact
+        # synthetic base. E3 calibration is deliberately not called or changed.
+        e['add_services'](n,costs,et)
+        n.add('Link','test DC',bus0='SG0',bus1='MY0',carrier='DC',p_nom=0.)
+        before=energy(n)
+        load(repo/'scripts/final_asean_adjustment.py',['strip_network','carrier_to_keep'],e)
+        after=e['strip_network'](n,e['carrier_to_keep']) if filtered else n
+        a=energy(after)
+        for country in COUNTRIES:
+            for carrier in ['AC','services electricity']:
+                ids=n.loads.index[n.loads.carrier.eq(carrier)&n.loads.index.str.startswith(country)]
+                record(f'only_elec_network_{filtered}',country,'services' if carrier.startswith('services') else 'base',
+                  'direct_electricity_retained',float(a.reindex(ids,fill_value=0).sum()),float(before[ids].sum()))
+                record(f'only_elec_network_{filtered}',country,carrier,'load_identities_retained',bool(ids.isin(after.loads.index).all()),True,'boolean')
+
+def main():
+    ap=argparse.ArgumentParser();ap.add_argument('--repo',type=Path,required=True)
+    ap.add_argument('--fix',choices=['E1','E2','E4','combined'],required=True);ap.add_argument('--output',type=Path,required=True)
+    a=ap.parse_args()
+    for fix in (['E1','E2','E4'] if a.fix=='combined' else [a.fix]):
+        start=len(ROWS);globals()['test_'+fix.lower()](a.repo)
+        for row in ROWS[start:]:row['fix']=fix
+    result=dict(fix=a.fix,synthetic_only=True,solver_runs=0,countries=COUNTRIES,nodes_per_country=2,
+      atol_MWh=ATOL_MWH,rtol=RTOL,pypsa=pypsa.__version__,numpy=np.__version__,pandas=pd.__version__,
+      python=sys.version,rows=ROWS,all_pass=all(r['test_status']=='PASS' for r in ROWS))
+    a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2,allow_nan=False))
+    print(json.dumps(dict(fix=a.fix,rows=len(ROWS),failed=sum(r['test_status']=='FAIL' for r in ROWS),all_pass=result['all_pass'])))
+    return 0 if result['all_pass'] else 1
+
+if __name__=='__main__':sys.exit(main())
