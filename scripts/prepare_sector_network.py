@@ -2724,22 +2724,24 @@ def add_heat(
                 )
 
         if name == "urban central":
-            heat_load = (
-                heat_demand.groupby(level=1, axis=1)
-                .sum()[h_nodes[name]]
-                .multiply(
-                    factor * (1 + options["district_heating"]["district_heating_loss"])
+            # Preserve sector demand identities on the shared district heat bus.
+            for sector in sectors:
+                sector_load = (
+                    heat_demand[[sector + " water", sector + " space"]]
+                    .groupby(level=1, axis=1).sum()[h_nodes[name]]
+                    .multiply(factor * (1 + options["district_heating"]["district_heating_loss"]))
                 )
+                n.madd(
+                    "Load", h_nodes[name], suffix=f" {sector} {name} heat",
+                    bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
+                    p_set=sector_load,
+                )
+        else:
+            n.madd(
+                "Load", h_nodes[name], suffix=f" {name} heat",
+                bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
+                p_set=heat_load,
             )
-
-        n.madd(
-            "Load",
-            h_nodes[name],
-            suffix=f" {name} heat",
-            bus=h_nodes[name] + f" {name} heat",
-            carrier=name + " heat",
-            p_set=heat_load,
-        )
 
         ## Add heat pumps
 
@@ -3283,14 +3285,21 @@ def add_residential(
     )
     heat_shape = heat_shape.T.groupby(level=[0, 1]).sum().T
 
-    n.loads_t.p_set[heat_ind] = 1e6 * heat_shape_raw.mul(
+    total_heat = (
         energy_totals["total residential space"]
         + energy_totals["total residential water"]
-        - energy_totals["residential heat biomass"]
-        - energy_totals["residential heat oil"]
-        - energy_totals["residential heat gas"],
-        level=0,
-    ).droplevel(level=0, axis=1).div(temporal_resolution, axis=0)
+    )
+    remaining_heat = total_heat - energy_totals[
+        ["residential heat biomass", "residential heat oil", "residential heat gas"]
+    ].sum(axis=1)
+    if ((remaining_heat < -1e-9) | (total_heat < 0)).any():
+        raise ValueError("Residential remaining heat must be between zero and total heat")
+    fraction = remaining_heat.div(total_heat.where(total_heat > 0)).fillna(0.)
+    # Keep existing nodal allocation and district losses; never rescale services.
+    scale = pd.Series(heat_ind.str[:2], index=heat_ind).map(fraction)
+    if scale.isna().any():
+        raise ValueError("Missing residential country heat totals")
+    n.loads_t.p_set[heat_ind] = n.loads_t.p_set[heat_ind].mul(scale, axis=1)
 
     heat_oil_demand = p_set_from_scaling(
         "residential heat oil", heat_shape, energy_totals, temporal_resolution
@@ -3379,27 +3388,6 @@ def add_residential(
         carrier="gas emissions",
         p_set=-co2,
     )
-
-    for country in countries:
-        rem_heat_demand = (
-            energy_totals.loc[country, "total residential space"]
-            + energy_totals.loc[country, "total residential water"]
-            - energy_totals.loc[country, "residential heat biomass"]
-            - energy_totals.loc[country, "residential heat oil"]
-            - energy_totals.loc[country, "residential heat gas"]
-        )
-
-        heat_buses = (n.loads_t.p_set.filter(regex="heat").filter(like=country)).columns
-
-        safe_division = safe_divide(
-            n.loads_t.p_set.filter(like=country)[heat_buses],
-            n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
-        )
-        n.loads_t.p_set.loc[:, heat_buses] = np.where(
-            safe_division.notna(),
-            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
-            0.0,
-        )
 
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
