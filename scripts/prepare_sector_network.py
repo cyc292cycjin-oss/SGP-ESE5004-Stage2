@@ -2647,7 +2647,9 @@ def add_heat(
     # Load data required for heat sector
     heat_demand = read_csv_nafix(
         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)
+    )
+    if not np.isfinite(heat_demand).all().all() or (heat_demand < 0).any().any():
+        raise ValueError("Invalid heat demand profile; positive annual demand must not be silently dropped")
     # Solar thermal availability profiles
     solar_thermal = read_csv_nafix(solar_thermal_fn, index_col=0, parse_dates=True)
     # Ground-sourced heatpump coefficient of performance

@@ -99,6 +99,25 @@ def generate_periodic_profiles(
     return week_df
 
 
+def normalize_heat_profile(shape, annual, label):
+    """Reject unmappable positive annual demand instead of silently dropping it.
+
+    Inputs use the existing hourly convention: annual TWh -> hourly MW.
+    No synthetic replacement shape is generated for zero-HDD locations.
+    """
+    annual = annual.reindex(shape.columns)
+    if not np.isfinite(annual).all() or (annual < 0).any():
+        raise ValueError(f"{label}: invalid annual demand")
+    positive = annual > 0
+    selected = shape.loc[:, positive]
+    invalid = (~np.isfinite(selected)).any() | (selected < 0).any() | (selected.sum() <= 0)
+    if invalid.any():
+        raise ValueError(f"{label}: positive demand without valid profile at {list(invalid.index[invalid])}")
+    output = pd.DataFrame(0., index=shape.index, columns=shape.columns)
+    output.loc[:, positive] = selected.div(selected.sum()).mul(annual[positive]) * 1e6
+    return output
+
+
 def prepare_heat_data(n: pypsa.Network) -> tuple:
     """Prepare heating sector inputs for a PyPSA network.
 
@@ -190,16 +209,14 @@ def prepare_heat_data(n: pypsa.Network) -> tuple:
         else:
             heat_demand_shape = intraday_year_profile
 
-        heat_demand[f"{sector} {use}"] = (
-            heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(
-            nodal_energy_totals[f"total {sector} {use}"]
-        ) * 1e6  # TODO v0.0.2
-        electric_heat_supply[f"{sector} {use}"] = (
-            heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(
-            nodal_energy_totals[f"electricity {sector} {use}"]
-        ) * 1e6  # TODO v0.0.2
+        heat_demand[f"{sector} {use}"] = normalize_heat_profile(
+            heat_demand_shape, nodal_energy_totals[f"total {sector} {use}"],
+            f"total {sector} {use}",
+        )
+        electric_heat_supply[f"{sector} {use}"] = normalize_heat_profile(
+            heat_demand_shape, nodal_energy_totals[f"electricity {sector} {use}"],
+            f"electricity {sector} {use}",
+        )
 
     heat_demand = pd.concat(heat_demand, axis=1)
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
