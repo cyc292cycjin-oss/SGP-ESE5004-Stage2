@@ -1732,6 +1732,10 @@ def add_shipping(
         ports, navigation_accounts, n.buses.loc[n.buses.carrier == "AC"]
     )
     navigation_mw = allocated.sum(axis=1, skipna=False) * 1e6 / 8760
+    load_nodes = pd.Index(spatial.nodes)
+    if load_nodes.has_duplicates or set(load_nodes) != set(navigation_mw.index):
+        raise ValueError("shipping allocation: load targets differ from allocated AC nodes")
+    navigation_mw = navigation_mw.reindex(load_nodes)
     ports = pd.DataFrame({"p_set": shipping_hydrogen_share * efficiency * navigation_mw})
 
     if options["shipping_hydrogen_liquefaction"]:

@@ -55,11 +55,11 @@ def fixture():
     return national, ports
 
 
-def run(national, ports):
+def run(national, ports, target_nodes=None):
     ns = constructor()
     extras = set(national.index) - {"ID", "SG"}
     n = CaptureNetwork(extras)
-    nodes = n.buses.index
+    nodes = n.buses.index if target_nodes is None else pd.Index(target_nodes)
     ns.update(countries=list(national.index), demand_sc="TEST_FIXTURE", investment_year=2030,
               options={"shipping_average_efficiency": .4, "shipping_hydrogen_share": 0., "shipping_hydrogen_liquefaction": False},
               get=lambda x, _: x, read_csv_nafix=lambda *a, **kw: ports.copy(),
@@ -131,6 +131,12 @@ class ShippingRegression(unittest.TestCase):
     def test_duplicate_national_country_rejected(self):
         self.national = pd.concat([self.national, self.national.loc[["ID"]]])
         self.reject("duplicate country")
+    def test_extra_load_target_rejected(self):
+        with self.assertRaisesRegex(ValueError, "shipping allocation:.*load targets"):
+            run(self.national, self.ports, ["ID0", "ID1", "SG0", "UNKNOWN"])
+    def test_omitted_load_target_rejected(self):
+        with self.assertRaisesRegex(ValueError, "shipping allocation:.*load targets"):
+            run(self.national, self.ports, ["ID1", "SG0"])
 
 
 class RecordingResult(unittest.TextTestResult):
