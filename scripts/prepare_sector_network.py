@@ -248,6 +248,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
+from _shipping_allocation import allocate_shipping_demand
 import pypsa
 from _helpers import (
     BASE_DIR,
@@ -1708,7 +1709,7 @@ def add_shipping(
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
-    navigation_demand = energy_totals.loc[countries, all_navigation].sum(axis=1)
+    navigation_accounts = energy_totals.loc[countries, all_navigation]
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -1727,23 +1728,11 @@ def add_shipping(
         snakemake.params.alternative_clustering,
     ).set_index("gadm_{}".format(gadm_layer_id))
 
-    ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
-    ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-
-    ports["p_set"] = (
-        shipping_hydrogen_share
-        * ports["fraction"]
-        * ports["country"].map(navigation_demand)
-        * efficiency
-        * 1e6
-        / 8760
-        # TODO double check the use of efficiency
-    )  # TODO use real data here
-
-    ports = pd.concat([ports, ind]).drop("Bus", axis=1)
-
-    # ports = ports.fillna(0.0)
-    ports = ports.groupby(ports.index).sum()
+    allocated = allocate_shipping_demand(
+        ports, navigation_accounts, n.buses.loc[n.buses.carrier == "AC"]
+    )
+    navigation_mw = allocated.sum(axis=1, skipna=False) * 1e6 / 8760
+    ports = pd.DataFrame({"p_set": shipping_hydrogen_share * efficiency * navigation_mw})
 
     if options["shipping_hydrogen_liquefaction"]:
         n.madd(
@@ -1787,13 +1776,7 @@ def add_shipping(
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = (
-            shipping_oil_share
-            * ports["fraction"]
-            * ports["country"].map(navigation_demand)
-            * 1e6
-            / 8760
-        )
+        ports["p_set"] = shipping_oil_share * navigation_mw
 
         n.madd(
             "Load",
