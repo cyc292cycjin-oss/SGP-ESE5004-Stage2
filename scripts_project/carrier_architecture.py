@@ -1,0 +1,294 @@
+"""Country/node carrier fragments; no full-network assembly and no solver.
+
+Blueprint topology is auditable even when numeric parameters are pending.
+Only approved component parameters may cross the PyPSA materialisation boundary.
+Shared price identities are metadata, never a physical bus or return route.
+"""
+from copy import deepcopy
+from collections import defaultdict,deque
+import math
+
+COUNTRIES={'BN','KH','ID','LA','MY','MM','PH','SG','TH','TL','VN'}
+FUELS=('gas','oil','coal','lignite','solid biomass','biogas')
+PROHIBITED=FUELS+('H2','co2 captured','co2 sequestered','NH3','methanol','heat')
+ALLOWED_GLOBAL={'ALLOWED_ACCOUNTING_GLOBAL','ALLOWED_EXTERNAL_MARKET_ABSTRACTION',
+                'PROHIBITED_PHYSICAL_SHARING_REMOVED','DEFERRED_WITH_BLOCKER'}
+
+
+def finite(value,nonnegative=True):
+    if value is None or isinstance(value,bool):raise ValueError('Missing/ambiguous numeric assumption')
+    x=float(value)
+    if not math.isfinite(x) or (nonnegative and x<0):raise ValueError('Invalid physical quantity')
+    return x
+
+
+class Fragment:
+    def __init__(self):
+        self.buses={};self.components={};self.markets={};self.blockers=[]
+
+    def bus(self,name,carrier,country,node,role='PHYSICAL'):
+        if name in self.buses:raise ValueError('Duplicate Bus')
+        if role=='ATMOSPHERE':
+            if country or carrier!='co2 atmosphere':raise ValueError('Invalid atmosphere accounting bus')
+        elif country not in COUNTRIES:raise ValueError('Unowned physical carrier pool')
+        self.buses[name]=dict(name=name,carrier=carrier,country=country,node=node,role=role)
+        return name
+
+    def add(self,typ,name,country,carrier,*,inputs=(),outputs=(),role='CONVERSION',params=None,accepted=False,source=''):
+        key=typ+':'+name
+        if key in self.components:raise ValueError('Duplicate component identity')
+        if country not in COUNTRIES:raise ValueError('Component ownership missing')
+        for b in list(inputs)+list(outputs):
+            if b not in self.buses:raise ValueError('Missing port destination')
+            owner=self.buses[b]['country']
+            if self.buses[b]['role']!='ATMOSPHERE' and owner!=country:
+                raise ValueError('Prohibited inter-country physical component')
+        if typ=='Load':raise ValueError('Demand must use Gate2 acceptance and allocation, not carrier builder')
+        if role=='EXTERNAL_SUPPLY' and (typ!='Generator' or inputs or len(outputs)!=1):
+            raise ValueError('External commodity interface must be one-way source')
+        self.components[key]=dict(type=typ,name=name,country=country,carrier=carrier,
+            inputs=list(inputs),outputs=list(outputs),role=role,params=deepcopy(params),
+            accepted=accepted,source=source)
+        return key
+
+    def market(self,identity,commodity,assumption):
+        if commodity not in ('gas','oil','coal','lignite'):raise ValueError('New external commodity not approved')
+        if identity in self.markets and self.markets[identity]!=dict(commodity=commodity,assumption=assumption):
+            raise ValueError('Same market identity with inconsistent assumptions')
+        self.markets[identity]=dict(commodity=commodity,assumption=deepcopy(assumption))
+
+
+def bus_name(node,carrier):return node+' :: '+carrier
+
+
+def local_blueprint(nodes,options=None):
+    """nodes maps explicit node IDs to countries. No resource allocation guessed."""
+    f=Fragment();options=options or {}
+    f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')
+    for node,country in nodes.items():
+        f.bus(bus_name(node,'electricity'),'electricity',country,node)
+        for carrier in FUELS+('H2','co2 captured','co2 sequestered'):
+            f.bus(bus_name(node,carrier),carrier,country,node)
+        # Directions below are read from current source, not economic inputs.
+        for name,carrier,ins,outs,source in [
+            ('electrolysis','H2 Electrolysis',['electricity'],['H2'],'prepare_sector_network.py:add_hydrogen'),
+            ('SMR','SMR',['gas'],['H2','atmosphere'],'prepare_sector_network.py:add_hydrogen'),
+            ('SMR CC','SMR CC',['gas'],['H2','co2 captured','atmosphere'],'prepare_sector_network.py:add_hydrogen'),
+            ('fuel cell','H2 Fuel Cell',['H2'],['electricity'],'prepare_sector_network.py:add_hydrogen'),
+            ('FT','Fischer-Tropsch',['H2','co2 captured','electricity'],['oil'],'prepare_sector_network.py:H2_liquid_fossil_conversions')]:
+            port=lambda x:'ReportingCO2 atmosphere' if x=='atmosphere' else bus_name(node,x)
+            f.add('Link',node+' '+name,country,carrier,inputs=[port(x) for x in ins],outputs=[port(x) for x in outs],source=source)
+        optional=[('H2 turbine','H2 turbine',['H2'],['electricity'],options.get('hydrogen',{}).get('h2_turbine',False)),
+                  ('Sabatier','Sabatier',['H2','co2 captured'],['gas'],options.get('methanation',False)),
+                  ('helmeth','helmeth',['electricity','co2 captured'],['gas'],options.get('helmeth',False))]
+        for name,carrier,ins,outs,enabled in optional:
+            if enabled:f.add('Link',node+' '+name,country,carrier,inputs=[bus_name(node,x) for x in ins],outputs=[bus_name(node,x) for x in outs],source='prepare_sector_network.py:configured domestic conversion')
+        f.add('Link',node+' biogas upgrading',country,'biogas to gas',inputs=[bus_name(node,'biogas'),'ReportingCO2 atmosphere'],outputs=[bus_name(node,'gas')],source='prepare_sector_network.py:add_biomass; negative atmosphere efficiency')
+        f.add('Store',node+' H2 tank',country,'H2',inputs=[bus_name(node,'H2')],outputs=[bus_name(node,'H2')],role='STORAGE',source='prepare_sector_network.py:add_hydrogen')
+        # No DAC, heat service, NH3 or methanol asset is auto-created. Their
+        # upstream capabilities do not establish accepted heat/services/data.
+    return f
+
+
+def external_import(f,node,commodity,market_id,assumption,*,accepted):
+    """Independent source Generator, same source-price record across countries.
+
+    No world market bus, no export link, no return path and no cost charged again
+    at downstream conversion. Capacities/annual-limit assumptions are explicit.
+    """
+    if not accepted:raise ValueError('External supply price/availability is pending')
+    required={'price','price_unit','source_sha256','source_year','basis','capacity_mw','annual_cap_mwh','unlimited_annual_accepted'}
+    if required-assumption.keys():raise ValueError('Incomplete external supply identity')
+    if assumption['price_unit']!='EUR/MWh_fuel' or not assumption['source_sha256'] or not assumption['basis']:
+        raise ValueError('Unaccepted fuel price/energy basis')
+    price=finite(assumption['price']);capacity=finite(assumption['capacity_mw'])
+    cap=assumption['annual_cap_mwh']
+    if cap is None and assumption['unlimited_annual_accepted'] is not True:raise ValueError('No accepted annual availability')
+    if cap is not None:finite(cap)
+    f.market(market_id,commodity,assumption)
+    b=bus_name(node,commodity);country=f.buses[b]['country']
+    key=f.add('Generator',node+' external '+commodity,country,commodity,outputs=[b],role='EXTERNAL_SUPPLY',
+        params=dict(p_nom=capacity,p_nom_extendable=False,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),
+        accepted=True,source=assumption['source_sha256'])
+    return key
+
+
+def allocate_finite_resource(f,carrier,total,allocation,*,accepted,source,fuel_cost):
+    """No duplicated ASEAN potential. Country/node allocations sum to source."""
+    if not accepted:raise ValueError('Finite resource ownership pending')
+    if carrier not in ('solid biomass','biogas'):raise ValueError('Not a biomass resource')
+    total=finite(total);fuel_cost=finite(fuel_cost)
+    if not source or not allocation:raise ValueError('Resource source/allocation missing')
+    values={node:finite(v) for node,v in allocation.items()}
+    if not math.isclose(sum(values.values()),total,rel_tol=1e-10,abs_tol=1e-6):raise ValueError('Regional resource replicated or lost')
+    for node,value in values.items():
+        b=bus_name(node,carrier);country=f.buses[b]['country']
+        f.add('Store',node+' '+carrier+' resource',country,carrier,outputs=[b],role='FINITE_RESOURCE',
+              params=dict(e_nom=value,e_initial=value,e_cyclic=False,p_min_pu=0,marginal_cost=fuel_cost),accepted=True,source=source)
+
+
+def carbon_storage(f,node,capacity,*,accepted,source,storage_cost):
+    """Local captured feedstock differs from permanent, non-withdrawable storage."""
+    if not accepted or not source:raise ValueError('Storage site/cost/capacity pending')
+    capacity=finite(capacity);cost=finite(storage_cost)
+    captured=bus_name(node,'co2 captured');stored=bus_name(node,'co2 sequestered');c=f.buses[captured]['country']
+    f.add('Link',node+' sequestration',c,'CO2 sequestration',inputs=[captured],outputs=[stored],role='PERMANENT_STORAGE',
+          params=dict(p_nom_extendable=True,efficiency=1.,p_min_pu=0.),accepted=True,source=source)
+    f.add('Store',node+' geological inventory',c,'co2 sequestered',inputs=[stored],role='PERMANENT_STORAGE',
+          params=dict(e_nom=0.,e_nom_extendable=True,e_nom_max=capacity,e_initial=0.,e_cyclic=False,p_max_pu=0.,capital_cost=cost),accepted=True,source=source)
+
+
+def combustion_accounting_interface(f,node,fuel,sector,emission_factor,*,accepted,source):
+    """Final-fuel meter, not a useful-energy/service technology.
+
+    Future accepted fuel obligations attach to its final-energy output. The same
+    Link-p consumes fuel and emits CO2, so an emissions-only Load cannot create
+    coal consumption. This function adds no demand and no inferred efficiency.
+    1 MWh_fuel in = 1 MWh_final_fuel obligation; CO2 is a metering side port.
+    """
+    if not accepted or not source:raise ValueError('Fuel carbon factor/basis pending')
+    if fuel not in FUELS or sector not in ('Power','Buildings','Transport','Industry','Agriculture','DomesticShipping','InternationalShipping','DomesticAviation','InternationalAviation'):
+        raise ValueError('Unknown fuel-use ownership')
+    factor=finite(emission_factor);inp=bus_name(node,fuel);country=f.buses[inp]['country']
+    out=f.bus(node+' :: '+sector+' '+fuel+' final obligation',fuel+' final energy',country,node)
+    outputs=[out]+(['ReportingCO2 atmosphere'] if factor>0 else [])
+    params=dict(bus_order=[inp]+outputs,efficiency=1.,p_min_pu=0.,p_nom_extendable=True)
+    if factor>0:params['efficiency2']=factor
+    return f.add('Link',node+' '+sector+' '+fuel+' carbon meter',country,fuel+' final-energy accounting',
+        inputs=[inp],outputs=outputs,role='FUEL_CARBON_METER',params=params,accepted=True,source=source)
+
+
+def graph(f,*,include_pending=True):
+    adj=defaultdict(list)
+    for key,r in f.components.items():
+        if not include_pending and not r['accepted']:continue
+        for a in r['inputs']:
+            for b in r['outputs']:
+                if f.buses[a]['role']=='ATMOSPHERE' or f.buses[b]['role']=='ATMOSPHERE':continue
+                adj[a].append((b,key))
+    return adj
+
+
+def reachability(f):
+    """Potential topology, including pending candidates: non-vacuous guard.
+
+    Coupled multiport Links give an over-approximation, not a dispatch proof.
+    The builder has no electricity border intervention; that is later Gate4.
+    """
+    violations=[];g=graph(f)
+    for name,b in f.buses.items():
+        if b['role']=='ATMOSPHERE':continue
+        if b['country'] not in COUNTRIES:violations.append(dict(origin=name,path=[name],reason='UNOWNED_PHYSICAL_POOL'));continue
+        todo=deque([(name,[name])]);seen={name}
+        while todo:
+            node,path=todo.popleft()
+            if f.buses[node]['country']!=b['country']:
+                violations.append(dict(origin=name,path=path,reason='CROSS_COUNTRY_PHYSICAL_REACHABILITY'));break
+            for target,component in g[node]:
+                if target not in seen:seen.add(target);todo.append((target,path+[component,target]))
+    return violations
+
+
+def validate(f):
+    for name,b in f.buses.items():
+        if b['role']!='ATMOSPHERE' and b['country'] not in COUNTRIES:raise ValueError('Unowned physical bus')
+    for key,r in f.components.items():
+        owners={f.buses[b]['country'] for b in r['inputs']+r['outputs'] if f.buses[b]['role']!='ATMOSPHERE'}
+        if owners!={r['country']}:raise ValueError('Cross-country or unknown component')
+        if r['role']=='EXTERNAL_SUPPLY' and (r['inputs'] or r['type']!='Generator'):
+            raise ValueError('External market cannot be a transit bus')
+        if r['role']=='FINITE_RESOURCE' and r['params'] and r['params'].get('e_nom_extendable',False):
+            raise ValueError('Finite resource made expandable')
+        if any(f.buses[b]['carrier']=='co2 sequestered' for b in r['inputs']) and r['type']!='Store':
+            raise ValueError('Permanent geological carbon cannot feed FT or vent')
+        if r['role']=='PERMANENT_STORAGE' and r['type']=='Store' and r['params']:
+            if r['params'].get('p_max_pu',1)>0 or r['outputs'] or r['params'].get('e_cyclic',False):
+                raise ValueError('Permanent storage is not withdrawable/cyclic')
+    if reachability(f):raise ValueError('Hidden cross-country physical path')
+    return True
+
+
+def to_pypsa_fragment(f,snapshots,weights,*,component_ids):
+    """Materialise an explicitly selected, approved fragment only; never demand.
+
+    Pending blueprints are not silently skipped if selected. This function is
+    NOT a research full-network entry point and never invokes optimise.
+    """
+    import pypsa,pandas as pd
+    validate(f)
+    if not snapshots or len(set(snapshots))!=len(snapshots) or len(weights)!=len(snapshots):raise ValueError('Invalid snapshots')
+    if any(finite(w)<=0 for w in weights):raise ValueError('Physical weights must be positive')
+    if not component_ids or len(set(component_ids))!=len(component_ids):raise ValueError('Explicit unique fragment selection required')
+    selected=[f.components[k] for k in component_ids]
+    if any(r['accepted'] is not True or r['params'] is None or not r['source'] for r in selected):raise ValueError('Unaccepted component parameters')
+    n=pypsa.Network();n.set_snapshots(pd.Index(snapshots,name='snapshot'))
+    for col in n.snapshot_weightings:n.snapshot_weightings[col]=weights
+    for carrier in {b['carrier'] for b in f.buses.values()}:n.add('Carrier',carrier,co2_emissions=0.)
+    used={b for r in selected for b in r['inputs']+r['outputs']}
+    for name in used:
+        b=f.buses[name];n.add('Bus',name,carrier=b['carrier'])
+        n.buses.loc[name,'country']=b['country'];n.buses.loc[name,'location']=b['node'] or ''
+    n.meta={'gate3_fragment':True,'solver_allowed':False,'external_annual_caps':{},'store_power_rules':{}}
+    if any(f.buses[b]['role']=='ATMOSPHERE' for b in used):
+        # Relative atmospheric inventory only: unrestricted reporting balance,
+        # coefficient zero prevents aggregate primary-energy policy leakage.
+        n.add('Store','ReportingCO2 atmosphere inventory',bus='ReportingCO2 atmosphere',
+              carrier='co2 atmosphere',e_nom_extendable=True,e_min_pu=-1,e_initial=0.,e_cyclic=False)
+        n.meta['atmosphere_role']='ALLOWED_ACCOUNTING_GLOBAL'
+    for r in selected:
+        params=deepcopy(r['params']);cap=params.pop('annual_cap_mwh',None);params.pop('market_id',None)
+        if r['type']=='Generator':
+            n.add('Generator',r['name'],bus=r['outputs'][0],carrier=r['carrier'],**params)
+            if cap is not None:n.meta['external_annual_caps'][r['name']]=cap
+        elif r['type']=='Store':
+            # PyPSA 0.30.3 Store has no p_min_pu/p_max_pu attributes. Preserve
+            # their physical intent with explicit Store-p constraints below.
+            params.pop('p_min_pu',None);params.pop('p_max_pu',None)
+            n.add('Store',r['name'],bus=(r['inputs'] or r['outputs'])[0],carrier=r['carrier'],**params)
+            if r['role']=='PERMANENT_STORAGE':n.meta['store_power_rules'][r['name']]='charge_only'
+            elif r['role']=='FINITE_RESOURCE':n.meta['store_power_rules'][r['name']]='discharge_only'
+        elif r['type']=='Link':
+            # The topology graph represents directed conversions. A negative
+            # dispatch bound would create an unaudited reverse physical path.
+            finite(params.get('p_min_pu',0.))
+            # All multiport coefficients must be supplied from an accepted
+            # technology record; no automatic efficiency/CO2 factor inference.
+            bus_order=params.pop('bus_order',None)
+            if bus_order is None:
+                if len(r['inputs'])!=1 or len(r['outputs'])!=1:raise ValueError('Explicit multiport coefficient mapping required')
+                bus_order=r['inputs']+r['outputs']
+            if set(bus_order)!=set(r['inputs']+r['outputs']):raise ValueError('Coefficient ports mismatch')
+            if len(bus_order)!=len(set(bus_order)) or bus_order[0] not in r['inputs']:raise ValueError('Invalid multiport input order')
+            for i,b in enumerate(bus_order[1:],1):
+                coeff=finite(params.get('efficiency' if i==1 else 'efficiency'+str(i)),nonnegative=False)
+                if (b in r['inputs'] and coeff>=0) or (b in r['outputs'] and coeff<=0):raise ValueError('Coefficient sign disagrees with physical port')
+            ports={f'bus{i}':b for i,b in enumerate(bus_order)}
+            n.add('Link',r['name'],carrier=r['carrier'],**ports,**params)
+        else:raise ValueError('Unsupported fragment component')
+    return n
+
+
+def add_external_annual_caps(n):
+    """Attach explicit accepted availability to an already-created model; no solve."""
+    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')
+    import xarray as xr
+    w=xr.DataArray(n.snapshot_weightings.generators,coords={'snapshot':n.snapshots},dims='snapshot')
+    for name,cap in n.meta.get('external_annual_caps',{}).items():
+        n.model.add_constraints((n.model['Generator-p'].sel(Generator=name)*w).sum()<=finite(cap),name='ResearchImportAnnual-'+name)
+
+
+def add_storage_direction_constraints(n):
+    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')
+    for name,rule in n.meta.get('store_power_rules',{}).items():
+        flow=n.model['Store-p'].sel(Store=name)
+        if rule=='charge_only':n.model.add_constraints(flow<=0,name='ResearchStoreDirection-'+name)
+        elif rule=='discharge_only':n.model.add_constraints(flow>=0,name='ResearchStoreDirection-'+name)
+        else:raise ValueError('Unknown storage direction')
+
+
+def install_fragment_constraints(n):
+    """Required post-variable hook; availability and irreversible inventories."""
+    if n.meta.get('atmosphere_role') and not n.snapshot_weightings.stores.equals(n.snapshot_weightings.generators):
+        raise ValueError('Carbon inventory and physical emissions weights differ')
+    add_external_annual_caps(n)
+    add_storage_direction_constraints(n)
