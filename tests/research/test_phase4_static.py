@@ -57,6 +57,8 @@ class Validation(unittest.TestCase):
     def test_unknown_is_not_domestic(self):
         n=self.net();n.buses.loc['MY0','country']=''
         self.assertEqual(v.inventory(n)['edges'][0]['classification'],'UNKNOWN')
+    def test_earth_location_does_not_prove_shared_pool(self):
+        self.assertEqual(v.bus_scope('SG0 biogas',pd.Series({'location':'Earth'}))[0],'UNKNOWN')
     def test_missing_endpoint(self):
         n=self.net();n.links.loc['border','bus1']='missing'
         self.assertEqual(v.inventory(n)['edges'][0]['classification'],'INVALID_ENDPOINT')

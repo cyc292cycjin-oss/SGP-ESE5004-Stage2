@@ -95,7 +95,9 @@ def bus_scope(name, row, country_overrides=None):
     country = '' if pd.isna(country) else str(country)
     if country:
         return 'COUNTRY_SCOPED', country
-    label = (str(name) + ' ' + str(row.get('location', ''))).lower()
+    # Upstream add_biomass can label local biogas buses with location=Earth.
+    # Location metadata alone must not classify them as one physical pool.
+    label = str(name).lower()
     if any(x in label for x in ('earth', 'global', 'atmosphere')):
         return 'GLOBAL_SHARED', ''
     if any(x in label for x in ('regional', 'shared')):

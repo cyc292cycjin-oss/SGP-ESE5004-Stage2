@@ -13,7 +13,7 @@ Reusable implementation: scripts_project/phase4_static.py. Integrated regression
 | G weights | snapshot_weights | Positive finite aligned roles; expected-hours mapping is caller supplied |
 | H carriers | inventory | Actual bus carrier inventory |
 | I cross-border | inventory edges | All Link ports plus Lines/Transformers; missing endpoints INVALID_ENDPOINT; unknown country UNKNOWN |
-| J shared pools | bus_scope / inventory | Explicit country map first; names/location give heuristic GLOBAL/REGIONAL hints; unknown stays unknown |
+| J shared pools | bus_scope / inventory | Explicit country map first; names give heuristic GLOBAL/REGIONAL hints; location=Earth alone stays UNKNOWN; unknown stays unknown |
 | K policy carbon | inventory policy_constraints | Detect actual constraints; scope validation PENDING without independent contract |
 | L coupling | inventory coupling | Multi-carrier Links and available/extendable capacity, not solved dispatch evidence |
 
