@@ -61,3 +61,24 @@ research_carbon:
   full_system_cap: forbidden
   origin_neutrality_assumption: forbidden
   preserved_baseline_enable_semantics: true
+
+# Gate4 input gate only. A runnable Full-SC assembly is blocked until the
+# target-year source, supply, allocation and carbon attribution gates close.
+demand_data:
+  update_data: false
+final_adjustment:
+  only_elec_network: false
+research_assembly:
+  schema: phase4-gate4-v1
+  input_registry: research_inputs/assembly_v1/registry.json
+  target_year: 2050
+  base_year: 2019
+  accepted_status: ASSEMBLY_V1_ACCEPTED
+  preflight: scripts_project/check_assembly_inputs.py
+  legacy_final_adjustment: forbidden
+  legacy_sector_demand_builders: forbidden
+  target_year_fallback: forbidden
+  network_export_enabled: false
+  blocked_reason: target_year_input_freeze_incomplete
+  scenario_switching: false
+  solver_allowed: false

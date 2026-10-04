@@ -1,12 +1,31 @@
 {
   "schema_version": "phase4-gate1-v1",
   "runnable_workflow": false,
-  "reason": "Identity composition only. No research Snakefile invocation or scientific overrides in Gate1.",
-  "base_files": ["config.default.yaml", "configs/plotting.default.yaml", "configs/solving.default.yaml", "configs/bundle_config.yaml", "configs/powerplantmatching_config.yaml", "configs/config.asean.yaml"],
+  "reason": "Gate4 input freeze remains incomplete. Run the explicit assembly preflight only; no full-network entry point is falsely advertised.",
+  "base_files": [
+    "config.default.yaml",
+    "configs/plotting.default.yaml",
+    "configs/solving.default.yaml",
+    "configs/bundle_config.yaml",
+    "configs/powerplantmatching_config.yaml",
+    "configs/config.asean.yaml"
+  ],
   "identities": {
-    "baseline": ["configs/research/baseline.yaml"],
-    "integrated": ["configs/research/baseline.yaml", "configs/research/integrated.yaml"],
-    "disconnected": ["configs/research/baseline.yaml", "configs/research/disconnected.yaml"],
-    "validation": ["configs/research/baseline.yaml", "configs/research/validation.yaml"]
-  }
+    "baseline": [
+      "configs/research/baseline.yaml"
+    ],
+    "integrated": [
+      "configs/research/baseline.yaml",
+      "configs/research/integrated.yaml"
+    ],
+    "disconnected": [
+      "configs/research/baseline.yaml",
+      "configs/research/disconnected.yaml"
+    ],
+    "validation": [
+      "configs/research/baseline.yaml",
+      "configs/research/validation.yaml"
+    ]
+  },
+  "assembly_preflight": "scripts_project/check_assembly_inputs.py"
 }
