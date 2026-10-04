@@ -25,3 +25,18 @@ Before accepting a later assembled network, resolve the evidenced 765/766 endpoi
 Stop reached after Gate1. No A*, Buildings/Transport transfers, growth changes, carbon scope separation, carrier isolation, scientific Integrated/Disconnected differences, Full-SC assembly or solver run.
 
 Final status updates and cleanliness are recorded only after commit/push verification, not assumed from tests. The final receipt is the authority for the delivery HEAD.
+
+
+## Final source snapshot verification
+
+Complete source snapshot: `9c5a9da17516410ff6a49eef29c4dd31188bd640`. Clean local and matching remote research branch verified. All protected remote references exactly match the starting inventory. The subsequent record commit modifies only these identity/readiness records, with no model, configuration, input-registry, schema or test change. The exact record HEAD is in the external delivery receipt; the model manifest intentionally identifies its complete parent source snapshot.
+
+```text
+PHASE4_GATE1_FOUNDATION_BUILT=YES
+APPROVED_ENGINEERING_FIXES_INTEGRATED=PARTIAL
+SCIENTIFIC_ASSUMPTIONS_CHANGED=NO
+RESEARCH_BRANCH_CLEAN=YES
+REMOTE_MAIN_UNCHANGED=YES
+STATIC_VALIDATION_FRAMEWORK_READY=YES
+READY_FOR_PHASE4_GATE2_DEMAND_ACCOUNTING=NO
+```
