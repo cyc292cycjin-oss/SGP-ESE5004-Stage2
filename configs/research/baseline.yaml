@@ -16,7 +16,7 @@ research_demand:
   legacy_demand_builders: forbidden
   astar_boundary: end_user_final_electricity
   aeo8_generation_target: false
-  aeo8_final_electricity_role: validation_only
+  aeo8_final_electricity_role: assembly_v1_regional_anchor
   heat_without_accepted_service: embedded
   future_growth_fallback: forbidden
   solver_allowed: false
@@ -40,7 +40,7 @@ research_carrier_architecture:
   co2_feedstock: local_captured_pool
   co2_geology: local_nonwithdrawable_inventory
   electricity_intervention: deferred_keep_identical_interfaces
-  topology_repair: deferred
+  topology_repair: repaired_d13d5976
   solver_allowed: false
 
 research_carbon:
@@ -63,7 +63,8 @@ research_carbon:
   preserved_baseline_enable_semantics: true
 
 # Gate4 input gate only. A runnable Full-SC assembly is blocked until the
-# target-year source, supply, allocation and carbon attribution gates close.
+# target-year source, supply and allocation gates close. Carbon attribution
+# is validated on the actual network after export, before Gate4 can pass.
 demand_data:
   update_data: false
 final_adjustment:
@@ -82,3 +83,14 @@ research_assembly:
   blocked_reason: target_year_input_freeze_incomplete
   scenario_switching: false
   solver_allowed: false
+  demand_scenario: AEO8_BAS
+  road_parent_method: ASSEMBLY_V1_AEO8_ROAD_PARENT_APPROX
+  road_ev_representation: EMBEDDED_IN_ASTAR
+  road_ev_materialisation: NOT_SEPARATELY_MATERIALISED
+  road_ev_pathway: DEFERRED_TO_EV_SENSITIVITY
+  international_bunker_method: ASSEMBLY_V1_BUNKER_CONSTANT_2019
+  bunker_sensitivity_required: true
+  external_fossil_market: ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED
+  biomass_supply_cap: accepted_country_fixed_obligation_only
+  geological_storage_asset: false
+  carbon_validation_stage: POST_BUILD_STATIC_VALIDATION_BLOCKER
