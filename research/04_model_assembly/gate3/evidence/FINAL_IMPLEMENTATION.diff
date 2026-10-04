@@ -1,0 +1,815 @@
+diff --git a/configs/research/baseline.yaml b/configs/research/baseline.yaml
+index 57f0d55a..7d6940a0 100644
+--- a/configs/research/baseline.yaml
++++ b/configs/research/baseline.yaml
+@@ -1,5 +1,4 @@
+-# Gate2 demand contract only. Not a Snakemake or solver configuration.
+-# All scientific numbers retain their individual human-acceptance gates.
++# Research demand/carrier/carbon contracts only; never an upstream solve config.
+ research_demand:
+   schema: phase4-gate2-v1
+   mode: static_demand_only
+@@ -21,3 +20,44 @@ research_demand:
+   heat_without_accepted_service: embedded
+   future_growth_fallback: forbidden
+   solver_allowed: false
++
++research_carrier_architecture:
++  schema: phase4-gate3-v1
++  mode: static_fragments_only
++  builder: scripts_project/carrier_architecture.py
++  ownership: explicit_node_country
++  cross_border_h2: false
++  cross_border_gas: false
++  cross_border_co2: false
++  cross_border_biomass: false
++  cross_border_synthetic_fuels: false
++  ammonia: deferred
++  methanol: deferred
++  external_h2_imports: deferred
++  h2_export_obligation: deferred_pending_accepted_boundary
++  external_market: independent_source_generators_shared_price_metadata_only
++  finite_resource_allocation: human_accepted_only_no_replication
++  co2_feedstock: local_captured_pool
++  co2_geology: local_nonwithdrawable_inventory
++  electricity_intervention: deferred_keep_identical_interfaces
++  topology_repair: deferred
++  solver_allowed: false
++
++research_carbon:
++  policy_name: PolicyCO2_Power
++  reporting_name: ReportingCO2_FullSystem
++  policy_enabled: false  # Preserve original baseline co2.budget.enable=false.
++  budget_tco2_per_year:
++    2025: 1000000000
++    2030: 820000000
++    2035: 640000000
++    2040: 460000000
++    2045: 280000000
++    2050: 100000000
++  power_scope: explicit_accepted_component_coefficients
++  shared_smr_chp_attribution: pending_human_accepted_split
++  atmosphere: reporting_only_zero_policy_carrier_factor
++  reporting_creates_cap: false
++  full_system_cap: forbidden
++  origin_neutrality_assumption: forbidden
++  preserved_baseline_enable_semantics: true
+diff --git a/scripts_project/carbon_architecture.py b/scripts_project/carbon_architecture.py
+new file mode 100644
+index 00000000..3dff9c9e
+--- /dev/null
++++ b/scripts_project/carbon_architecture.py
+@@ -0,0 +1,147 @@
++"""Power policy and physical full-system CO2 reporting are separate views.
++
++No atmospheric Store/carrier aggregate is used as a power-policy expression.
++All real mixed-use assignments require explicit accepted attribution. No solve.
++"""
++from collections import defaultdict
++import math
++from carrier_architecture import finite,COUNTRIES
++
++TRAJECTORY={2025:1000e6,2030:820e6,2035:640e6,2040:460e6,2045:280e6,2050:100e6}
++SECTORS={'Power','Buildings','Transport','Industry','Agriculture','DomesticShipping',
++         'InternationalShipping','DomesticAviation','InternationalAviation','Other'}
++ORIGINS={'FOSSIL','BIOGENIC','DAC','RECYCLED_POINT_SOURCE','MIXED_UNRESOLVED'}
++
++
++def budget(year,represented_hours):
++    if year not in TRAJECTORY:raise ValueError('No accepted trajectory value for this year')
++    h=finite(represented_hours)
++    if h<=0:raise ValueError('Positive represented hours required')
++    return TRAJECTORY[year]*h/8760.
++
++
++def classify_record(component,carrier,sector,country,coefficient,*,source,
++                    policy_weight=None,accepted=False,flow='physical_atmosphere'):
++    """No technology-name or electric-connectivity heuristic for policy scope."""
++    if sector not in SECTORS or country not in COUNTRIES:raise ValueError('Emission ownership unknown')
++    if not source:raise ValueError('Emission-factor provenance required')
++    coef=finite(coefficient,nonnegative=False)
++    if flow!='physical_atmosphere':raise ValueError('Transfers/storage must not be added as atmosphere emissions')
++    if policy_weight is None:
++        if sector=='Power':policy_weight=1.
++        else:policy_weight=0.
++    weight=finite(policy_weight)
++    if weight>1 or (sector!='Power' and weight!=0):raise ValueError('Non-power event cannot enter power policy')
++    if not accepted:raise ValueError('Policy mapping/physical coefficient not accepted')
++    return dict(Component=component,Carrier=carrier,Sector=sector,Country=country,
++                EmissionFactor=coef,PolicyWeight=weight,PolicyCO2Power=bool(weight),
++                ReportingCO2FullSystem=True,Source=source,Accepted=True)
++
++
++def views(events):
++    """Physical atmosphere events only. Source/fuel production isn't counted again.
++
++    Event IDs and CarbonBatchID+Stage prevent duplicated entries. Policy and
++    reporting totals are two views of the same events; never add the views.
++    """
++    ids={e['EventID'] for e in events}
++    if any(e.get('ParentEventID') in ids for e in events):raise ValueError('Original event and allocated children both present')
++    seen=set();stages=set();policy=0.;report=defaultdict(float);origins=defaultdict(float)
++    for e in events:
++        if e['EventID'] in seen:raise ValueError('Duplicate carbon event')
++        seen.add(e['EventID']);stage=(e['CarbonBatchID'],e['Stage'])
++        if stage in stages:raise ValueError('Carbon stage counted twice')
++        stages.add(stage)
++        if e['Country'] not in COUNTRIES or e['Sector'] not in SECTORS or e['Origin'] not in ORIGINS:
++            raise ValueError('Unknown carbon attribution')
++        if e.get('Accepted') is not True:raise ValueError('Unaccepted carbon event scope')
++        value=finite(e['AtmosphereDelta'],nonnegative=False)
++        if e['Stage'].split(':',1)[0] in ('capture_transfer','FT_transfer','geological_storage') and value!=0:
++            raise ValueError('Internal carbon transfer/storage cannot be a second atmospheric credit')
++        weight=finite(e['PolicyWeight'])
++        if weight>1 or (e['Sector']!='Power' and weight!=0):raise ValueError('Non-power policy leakage')
++        if e['Origin']=='MIXED_UNRESOLVED' and value<0 and weight:
++            raise ValueError('Unresolved-origin removal cannot offset power policy')
++        policy+=value*weight
++        report[(e['Country'],e['Sector'])]+=value
++        origins[e['Origin']]+=value
++    return dict(PolicyCO2_Power=policy,ReportingCO2_FullSystem=sum(report.values()),
++                ByCountrySector={c+':'+s:v for (c,s),v in report.items()},ByOrigin=dict(origins))
++
++
++def allocate_shared_event(event,shares,*,accepted):
++    """Apply a HUMAN ACCEPTED SMR/CHP attribution, never choose its fractions."""
++    if not accepted or not shares or set(shares)-SECTORS:raise ValueError('Shared-use attribution pending')
++    if event.get('ParentEventID'):raise ValueError('Shared event already allocated')
++    views([event])  # Validate physical transfer and acceptance before splitting.
++    weights={s:finite(v) for s,v in shares.items()}
++    if not math.isclose(sum(weights.values()),1.,rel_tol=1e-10,abs_tol=1e-10):raise ValueError('Shared allocation loses/duplicates carbon')
++    return [dict(event,EventID=event['EventID']+':'+s,ParentEventID=event['EventID'],Stage=event['Stage']+':'+s,
++                 Sector=s,AtmosphereDelta=finite(event['AtmosphereDelta'],nonnegative=False)*w,PolicyWeight=1. if s=='Power' else 0.) for s,w in weights.items()]
++
++
++def carbon_batch(batch,country,origin,carbon,*,captured,stored,recycled,remaining,
++                 release_sector,producer_sector='Power',accepted=False,policy_weight=1.):
++    """One declared carbon lineage; synthetic tests or accepted traced balances.
++
++    Fossil carbon splits into immediate stack and captured flow. Captured flow
++    splits into permanent inventory, FT/recycled release and temporary stock.
++    Storage adds no second credit. DAC removes from atmosphere once then release
++    adds it once. Captured amount is not automatically a permanent reduction.
++    Real mixed oil/CO2 pools need an accepted flow-tracing/allocation decision.
++    """
++    if not accepted or origin not in ORIGINS or origin=='MIXED_UNRESOLVED':raise ValueError('Source carbon lineage pending')
++    c,cap,store,rec,rem=map(finite,[carbon,captured,stored,recycled,remaining])
++    if cap>c or not math.isclose(cap,store+rec+rem,rel_tol=1e-10,abs_tol=1e-9):raise ValueError('Captured carbon balance failed')
++    if origin=='DAC' and not math.isclose(cap,c):raise ValueError('DAC intake must equal captured carbon')
++    def event(stage,sector,delta,weight):
++        return dict(EventID=batch+':'+stage,CarbonBatchID=batch,Stage=stage,Country=country,
++            Sector=sector,Origin=origin,AtmosphereDelta=delta,PolicyWeight=weight,Accepted=True)
++    events=[event('atmospheric_uptake' if origin=='DAC' else 'initial_stack',producer_sector,-c if origin=='DAC' else c-cap,policy_weight),
++            event('capture_transfer',producer_sector,0.,0.),event('geological_storage',producer_sector,0.,0.),
++            event('FT_release',release_sector,rec,1. if release_sector=='Power' else 0.)]
++    if origin=='BIOGENIC':
++        # No invented lifecycle uptake. This ledger records the modeled stack;
++        # any modeled upgrading/uptake credit is a separately traced event.
++        pass
++    return events,dict(InputCarbon=c,Captured=cap,PermanentStock=store,RecycledRelease=rec,
++                       TemporaryStock=rem,AtmosphericNet=sum(e['AtmosphereDelta'] for e in events))
++
++
++def install_power_policy(n,terms,year,*,enabled,scope_complete,expected_hours):
++    """Attach only explicit component/variable coefficients to an existing model.
++
++    n.model must already contain variables. This function never creates a model
++    or solves. terms has variable, dimension, component, sector, coefficient,
++    policy_weight, accepted, source. CO2 coefficients are t/input-MWh for Link-p
++    or t/output-MWh for Generator-p, supplied explicitly from a reviewed map.
++    """
++    if not enabled:return {'status':'DISABLED_AS_UPSTREAM_BASELINE','constraint_created':False}
++    if not scope_complete:raise ValueError('Unresolved SMR/CHP/capture attribution blocks full power scope')
++    if getattr(n,'model',None) is None:raise ValueError('No preconstructed variables')
++    if any(str(r.type)=='primary_energy' and 'co2' in str(r.carrier_attribute).lower() for _,r in n.global_constraints.iterrows()):
++        raise ValueError('Legacy aggregate primary-energy cap must not coexist with isolated policy')
++    import xarray as xr
++    w=n.snapshot_weightings.generators
++    if not w.index.equals(n.snapshots) or any(not math.isfinite(v) or v<=0 for v in w):raise ValueError('Invalid physical snapshot weights')
++    if not math.isclose(float(w.sum()),finite(expected_hours),rel_tol=1e-10,abs_tol=1e-8):raise ValueError('Physical represented-hours mismatch')
++    # The old budget uses objective/8760 scaling. Demand/emission physical
++    # weights must have the same total to preserve that numerical convention.
++    if not math.isclose(float(n.snapshot_weightings.objective.sum()),float(w.sum()),rel_tol=1e-10):
++        raise ValueError('Legacy objective-hours and physical-hours scaling differ')
++    wa=xr.DataArray(w.to_numpy(),coords={'snapshot':n.snapshots},dims='snapshot')
++    expression=None;seen=set()
++    for t in terms:
++        key=(t['variable'],t['component'])
++        if key in seen:raise ValueError('Component carbon term counted twice')
++        seen.add(key)
++        if not t['accepted'] or not t['source'] or t['policy_weight'] is None:raise ValueError('Unaccepted policy attribution')
++        coefficient=finite(t['coefficient'],nonnegative=False);weight=finite(t['policy_weight'])
++        if weight>1 or (t['sector']!='Power' and weight!=0):raise ValueError('Non-power policy coefficient')
++        if weight==0:continue
++        term=(n.model[t['variable']].sel({t['dimension']:t['component']})*wa*coefficient*weight).sum()
++        expression=term if expression is None else expression+term
++    if expression is None:raise ValueError('Empty accepted power scope is not a policy constraint')
++    rhs=budget(year,float(w.sum()))
++    n.model.add_constraints(expression<=rhs,name='Research-PolicyCO2_Power')
++    return dict(status='INSTALLED_NOT_SOLVED',constraint_created=True,rhs_tco2=rhs,reporting_constraint_created=False)
+diff --git a/scripts_project/carrier_architecture.py b/scripts_project/carrier_architecture.py
+new file mode 100644
+index 00000000..1563b665
+--- /dev/null
++++ b/scripts_project/carrier_architecture.py
+@@ -0,0 +1,295 @@
++"""Country/node carrier fragments; no full-network assembly and no solver.
++
++Blueprint topology is auditable even when numeric parameters are pending.
++Only approved component parameters may cross the PyPSA materialisation boundary.
++Shared price identities are metadata, never a physical bus or return route.
++"""
++from copy import deepcopy
++from collections import defaultdict,deque
++import math
++
++COUNTRIES={'BN','KH','ID','LA','MY','MM','PH','SG','TH','TL','VN'}
++FUELS=('gas','oil','coal','lignite','solid biomass','biogas')
++PROHIBITED=FUELS+('H2','co2 captured','co2 sequestered','NH3','methanol','heat')
++ALLOWED_GLOBAL={'ALLOWED_ACCOUNTING_GLOBAL','ALLOWED_EXTERNAL_MARKET_ABSTRACTION',
++                'PROHIBITED_PHYSICAL_SHARING_REMOVED','DEFERRED_WITH_BLOCKER'}
++
++
++def finite(value,nonnegative=True):
++    if value is None or isinstance(value,bool):raise ValueError('Missing/ambiguous numeric assumption')
++    x=float(value)
++    if not math.isfinite(x) or (nonnegative and x<0):raise ValueError('Invalid physical quantity')
++    return x
++
++
++class Fragment:
++    def __init__(self):
++        self.buses={};self.components={};self.markets={};self.blockers=[]
++
++    def bus(self,name,carrier,country,node,role='PHYSICAL'):
++        if name in self.buses:raise ValueError('Duplicate Bus')
++        if role=='ATMOSPHERE':
++            if country or carrier!='co2 atmosphere':raise ValueError('Invalid atmosphere accounting bus')
++        elif country not in COUNTRIES:raise ValueError('Unowned physical carrier pool')
++        self.buses[name]=dict(name=name,carrier=carrier,country=country,node=node,role=role)
++        return name
++
++    def add(self,typ,name,country,carrier,*,inputs=(),outputs=(),role='CONVERSION',params=None,accepted=False,source=''):
++        key=typ+':'+name
++        if key in self.components:raise ValueError('Duplicate component identity')
++        if country not in COUNTRIES:raise ValueError('Component ownership missing')
++        for b in list(inputs)+list(outputs):
++            if b not in self.buses:raise ValueError('Missing port destination')
++            owner=self.buses[b]['country']
++            if self.buses[b]['role']!='ATMOSPHERE' and owner!=country:
++                raise ValueError('Prohibited inter-country physical component')
++        if typ=='Load':raise ValueError('Demand must use Gate2 acceptance and allocation, not carrier builder')
++        if role=='EXTERNAL_SUPPLY' and (typ!='Generator' or inputs or len(outputs)!=1):
++            raise ValueError('External commodity interface must be one-way source')
++        self.components[key]=dict(type=typ,name=name,country=country,carrier=carrier,
++            inputs=list(inputs),outputs=list(outputs),role=role,params=deepcopy(params),
++            accepted=accepted,source=source)
++        return key
++
++    def market(self,identity,commodity,assumption):
++        if commodity not in ('gas','oil','coal','lignite'):raise ValueError('New external commodity not approved')
++        if identity in self.markets and self.markets[identity]!=dict(commodity=commodity,assumption=assumption):
++            raise ValueError('Same market identity with inconsistent assumptions')
++        self.markets[identity]=dict(commodity=commodity,assumption=deepcopy(assumption))
++
++
++def bus_name(node,carrier):return node+' :: '+carrier
++
++
++def local_blueprint(nodes,options=None):
++    """nodes maps explicit node IDs to countries. No resource allocation guessed."""
++    f=Fragment();options=options or {}
++    f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')
++    for node,country in nodes.items():
++        f.bus(bus_name(node,'electricity'),'electricity',country,node)
++        for carrier in FUELS+('H2','co2 captured','co2 sequestered'):
++            f.bus(bus_name(node,carrier),carrier,country,node)
++        # Directions below are read from current source, not economic inputs.
++        for name,carrier,ins,outs,source in [
++            ('electrolysis','H2 Electrolysis',['electricity'],['H2'],'prepare_sector_network.py:add_hydrogen'),
++            ('SMR','SMR',['gas'],['H2','atmosphere'],'prepare_sector_network.py:add_hydrogen'),
++            ('SMR CC','SMR CC',['gas'],['H2','co2 captured','atmosphere'],'prepare_sector_network.py:add_hydrogen'),
++            ('fuel cell','H2 Fuel Cell',['H2'],['electricity'],'prepare_sector_network.py:add_hydrogen'),
++            ('FT','Fischer-Tropsch',['H2','co2 captured','electricity'],['oil'],'prepare_sector_network.py:H2_liquid_fossil_conversions')]:
++            port=lambda x:'ReportingCO2 atmosphere' if x=='atmosphere' else bus_name(node,x)
++            f.add('Link',node+' '+name,country,carrier,inputs=[port(x) for x in ins],outputs=[port(x) for x in outs],source=source)
++        optional=[('H2 turbine','H2 turbine',['H2'],['electricity'],options.get('hydrogen',{}).get('h2_turbine',False)),
++                  ('Sabatier','Sabatier',['H2','co2 captured'],['gas'],options.get('methanation',False)),
++                  ('helmeth','helmeth',['electricity','co2 captured'],['gas'],options.get('helmeth',False))]
++        for name,carrier,ins,outs,enabled in optional:
++            if enabled:f.add('Link',node+' '+name,country,carrier,inputs=[bus_name(node,x) for x in ins],outputs=[bus_name(node,x) for x in outs],source='prepare_sector_network.py:configured domestic conversion')
++        f.add('Link',node+' biogas upgrading',country,'biogas to gas',inputs=[bus_name(node,'biogas'),'ReportingCO2 atmosphere'],outputs=[bus_name(node,'gas')],source='prepare_sector_network.py:add_biomass; negative atmosphere efficiency')
++        f.add('Store',node+' H2 tank',country,'H2',inputs=[bus_name(node,'H2')],outputs=[bus_name(node,'H2')],role='STORAGE',source='prepare_sector_network.py:add_hydrogen')
++        # No DAC, heat service, NH3 or methanol asset is auto-created. Their
++        # upstream capabilities do not establish accepted heat/services/data.
++    return f
++
++
++def external_import(f,node,commodity,market_id,assumption,*,accepted):
++    """Independent source Generator, same source-price record across countries.
++
++    No world market bus, no export link, no return path and no cost charged again
++    at downstream conversion. Capacities/annual-limit assumptions are explicit.
++    """
++    if not accepted:raise ValueError('External supply price/availability is pending')
++    required={'price','price_unit','source_sha256','source_year','basis','capacity_mw','annual_cap_mwh','unlimited_annual_accepted'}
++    if required-assumption.keys():raise ValueError('Incomplete external supply identity')
++    if assumption['price_unit']!='EUR/MWh_fuel' or not assumption['source_sha256'] or not assumption['basis']:
++        raise ValueError('Unaccepted fuel price/energy basis')
++    price=finite(assumption['price']);capacity=finite(assumption['capacity_mw'])
++    cap=assumption['annual_cap_mwh']
++    if cap is None and assumption['unlimited_annual_accepted'] is not True:raise ValueError('No accepted annual availability')
++    if cap is not None:finite(cap)
++    # Shared price provenance does not imply identical national availability.
++    f.market(market_id,commodity,{k:assumption[k] for k in ('price','price_unit','source_sha256','source_year','basis')})
++    b=bus_name(node,commodity);country=f.buses[b]['country']
++    key=f.add('Generator',node+' external '+commodity,country,commodity,outputs=[b],role='EXTERNAL_SUPPLY',
++        params=dict(p_nom=capacity,p_nom_extendable=False,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),
++        accepted=True,source=assumption['source_sha256'])
++    return key
++
++
++def allocate_finite_resource(f,carrier,total,allocation,*,accepted,source,fuel_cost):
++    """No duplicated ASEAN potential. Country/node allocations sum to source."""
++    if not accepted:raise ValueError('Finite resource ownership pending')
++    if carrier not in ('solid biomass','biogas'):raise ValueError('Not a biomass resource')
++    total=finite(total);fuel_cost=finite(fuel_cost)
++    if not source or not allocation:raise ValueError('Resource source/allocation missing')
++    values={node:finite(v) for node,v in allocation.items()}
++    if not math.isclose(sum(values.values()),total,rel_tol=1e-10,abs_tol=1e-6):raise ValueError('Regional resource replicated or lost')
++    for node,value in values.items():
++        b=bus_name(node,carrier);country=f.buses[b]['country']
++        f.add('Store',node+' '+carrier+' resource',country,carrier,outputs=[b],role='FINITE_RESOURCE',
++              params=dict(e_nom=value,e_initial=value,e_cyclic=False,p_min_pu=0,marginal_cost=fuel_cost),accepted=True,source=source)
++
++
++def carbon_storage(f,node,capacity,*,accepted,source,storage_cost):
++    """Local captured feedstock differs from permanent, non-withdrawable storage."""
++    if not accepted or not source:raise ValueError('Storage site/cost/capacity pending')
++    capacity=finite(capacity);cost=finite(storage_cost)
++    captured=bus_name(node,'co2 captured');stored=bus_name(node,'co2 sequestered');c=f.buses[captured]['country']
++    f.add('Link',node+' sequestration',c,'CO2 sequestration',inputs=[captured],outputs=[stored],role='PERMANENT_STORAGE',
++          params=dict(p_nom_extendable=True,efficiency=1.,p_min_pu=0.),accepted=True,source=source)
++    f.add('Store',node+' geological inventory',c,'co2 sequestered',inputs=[stored],role='PERMANENT_STORAGE',
++          params=dict(e_nom=0.,e_nom_extendable=True,e_nom_max=capacity,e_initial=0.,e_cyclic=False,p_max_pu=0.,capital_cost=cost),accepted=True,source=source)
++
++
++def combustion_accounting_interface(f,node,fuel,sector,emission_factor,*,accepted,source):
++    """Final-fuel meter, not a useful-energy/service technology.
++
++    Future accepted fuel obligations attach to its final-energy output. The same
++    Link-p consumes fuel and emits CO2, so an emissions-only Load cannot create
++    coal consumption. This function adds no demand and no inferred efficiency.
++    1 MWh_fuel in = 1 MWh_final_fuel obligation; CO2 is a metering side port.
++    """
++    if not accepted or not source:raise ValueError('Fuel carbon factor/basis pending')
++    if fuel not in FUELS or sector not in ('Power','Buildings','Transport','Industry','Agriculture','DomesticShipping','InternationalShipping','DomesticAviation','InternationalAviation'):
++        raise ValueError('Unknown fuel-use ownership')
++    factor=finite(emission_factor);inp=bus_name(node,fuel);country=f.buses[inp]['country']
++    out=f.bus(node+' :: '+sector+' '+fuel+' final obligation',fuel+' final energy',country,node)
++    outputs=[out]+(['ReportingCO2 atmosphere'] if factor>0 else [])
++    params=dict(bus_order=[inp]+outputs,efficiency=1.,p_min_pu=0.,p_nom_extendable=True)
++    if factor>0:params['efficiency2']=factor
++    return f.add('Link',node+' '+sector+' '+fuel+' carbon meter',country,fuel+' final-energy accounting',
++        inputs=[inp],outputs=outputs,role='FUEL_CARBON_METER',params=params,accepted=True,source=source)
++
++
++def graph(f,*,include_pending=True):
++    adj=defaultdict(list)
++    for key,r in f.components.items():
++        if not include_pending and not r['accepted']:continue
++        for a in r['inputs']:
++            for b in r['outputs']:
++                if f.buses[a]['role']=='ATMOSPHERE' or f.buses[b]['role']=='ATMOSPHERE':continue
++                adj[a].append((b,key))
++    return adj
++
++
++def reachability(f):
++    """Potential topology, including pending candidates: non-vacuous guard.
++
++    Coupled multiport Links give an over-approximation, not a dispatch proof.
++    The builder has no electricity border intervention; that is later Gate4.
++    """
++    violations=[];g=graph(f)
++    for name,b in f.buses.items():
++        if b['role']=='ATMOSPHERE':continue
++        if b['country'] not in COUNTRIES:violations.append(dict(origin=name,path=[name],reason='UNOWNED_PHYSICAL_POOL'));continue
++        todo=deque([(name,[name])]);seen={name}
++        while todo:
++            node,path=todo.popleft()
++            if f.buses[node]['country']!=b['country']:
++                violations.append(dict(origin=name,path=path,reason='CROSS_COUNTRY_PHYSICAL_REACHABILITY'));break
++            for target,component in g[node]:
++                if target not in seen:seen.add(target);todo.append((target,path+[component,target]))
++    return violations
++
++
++def validate(f):
++    for name,b in f.buses.items():
++        if b['role']!='ATMOSPHERE' and b['country'] not in COUNTRIES:raise ValueError('Unowned physical bus')
++    for key,r in f.components.items():
++        owners={f.buses[b]['country'] for b in r['inputs']+r['outputs'] if f.buses[b]['role']!='ATMOSPHERE'}
++        if owners!={r['country']}:raise ValueError('Cross-country or unknown component')
++        if r['role']=='EXTERNAL_SUPPLY' and (r['inputs'] or r['type']!='Generator'):
++            raise ValueError('External market cannot be a transit bus')
++        if r['role']=='FINITE_RESOURCE' and r['params'] and r['params'].get('e_nom_extendable',False):
++            raise ValueError('Finite resource made expandable')
++        if any(f.buses[b]['carrier']=='co2 sequestered' for b in r['inputs']) and r['type']!='Store':
++            raise ValueError('Permanent geological carbon cannot feed FT or vent')
++        if r['role']=='PERMANENT_STORAGE' and r['type']=='Store' and r['params']:
++            if r['params'].get('p_max_pu',1)>0 or r['outputs'] or r['params'].get('e_cyclic',False):
++                raise ValueError('Permanent storage is not withdrawable/cyclic')
++    if reachability(f):raise ValueError('Hidden cross-country physical path')
++    return True
++
++
++def to_pypsa_fragment(f,snapshots,weights,*,component_ids):
++    """Materialise an explicitly selected, approved fragment only; never demand.
++
++    Pending blueprints are not silently skipped if selected. This function is
++    NOT a research full-network entry point and never invokes optimise.
++    """
++    import pypsa,pandas as pd
++    validate(f)
++    if not snapshots or len(set(snapshots))!=len(snapshots) or len(weights)!=len(snapshots):raise ValueError('Invalid snapshots')
++    if any(finite(w)<=0 for w in weights):raise ValueError('Physical weights must be positive')
++    if not component_ids or len(set(component_ids))!=len(component_ids):raise ValueError('Explicit unique fragment selection required')
++    selected=[f.components[k] for k in component_ids]
++    if any(r['accepted'] is not True or r['params'] is None or not r['source'] for r in selected):raise ValueError('Unaccepted component parameters')
++    n=pypsa.Network();n.set_snapshots(pd.Index(snapshots,name='snapshot'))
++    for col in n.snapshot_weightings:n.snapshot_weightings[col]=weights
++    for carrier in {b['carrier'] for b in f.buses.values()}:n.add('Carrier',carrier,co2_emissions=0.)
++    used={b for r in selected for b in r['inputs']+r['outputs']}
++    for name in used:
++        b=f.buses[name];n.add('Bus',name,carrier=b['carrier'])
++        n.buses.loc[name,'country']=b['country'];n.buses.loc[name,'location']=b['node'] or ''
++    n.meta={'gate3_fragment':True,'solver_allowed':False,'external_annual_caps':{},'store_power_rules':{}}
++    if any(f.buses[b]['role']=='ATMOSPHERE' for b in used):
++        # Relative atmospheric inventory only: unrestricted reporting balance,
++        # coefficient zero prevents aggregate primary-energy policy leakage.
++        n.add('Store','ReportingCO2 atmosphere inventory',bus='ReportingCO2 atmosphere',
++              carrier='co2 atmosphere',e_nom_extendable=True,e_min_pu=-1,e_initial=0.,e_cyclic=False)
++        n.meta['atmosphere_role']='ALLOWED_ACCOUNTING_GLOBAL'
++    for r in selected:
++        params=deepcopy(r['params']);cap=params.pop('annual_cap_mwh',None);params.pop('market_id',None)
++        if r['type']=='Generator':
++            n.add('Generator',r['name'],bus=r['outputs'][0],carrier=r['carrier'],**params)
++            if cap is not None:n.meta['external_annual_caps'][r['name']]=cap
++        elif r['type']=='Store':
++            # PyPSA 0.30.3 Store has no p_min_pu/p_max_pu attributes. Preserve
++            # their physical intent with explicit Store-p constraints below.
++            params.pop('p_min_pu',None);params.pop('p_max_pu',None)
++            n.add('Store',r['name'],bus=(r['inputs'] or r['outputs'])[0],carrier=r['carrier'],**params)
++            if r['role']=='PERMANENT_STORAGE':n.meta['store_power_rules'][r['name']]='charge_only'
++            elif r['role']=='FINITE_RESOURCE':n.meta['store_power_rules'][r['name']]='discharge_only'
++        elif r['type']=='Link':
++            # The topology graph represents directed conversions. A negative
++            # dispatch bound would create an unaudited reverse physical path.
++            finite(params.get('p_min_pu',0.))
++            # All multiport coefficients must be supplied from an accepted
++            # technology record; no automatic efficiency/CO2 factor inference.
++            bus_order=params.pop('bus_order',None)
++            if bus_order is None:
++                if len(r['inputs'])!=1 or len(r['outputs'])!=1:raise ValueError('Explicit multiport coefficient mapping required')
++                bus_order=r['inputs']+r['outputs']
++            if set(bus_order)!=set(r['inputs']+r['outputs']):raise ValueError('Coefficient ports mismatch')
++            if len(bus_order)!=len(set(bus_order)) or bus_order[0] not in r['inputs']:raise ValueError('Invalid multiport input order')
++            for i,b in enumerate(bus_order[1:],1):
++                coeff=finite(params.get('efficiency' if i==1 else 'efficiency'+str(i)),nonnegative=False)
++                if (b in r['inputs'] and coeff>=0) or (b in r['outputs'] and coeff<=0):raise ValueError('Coefficient sign disagrees with physical port')
++            ports={f'bus{i}':b for i,b in enumerate(bus_order)}
++            n.add('Link',r['name'],carrier=r['carrier'],**ports,**params)
++        else:raise ValueError('Unsupported fragment component')
++    return n
++
++
++def add_external_annual_caps(n):
++    """Attach explicit accepted availability to an already-created model; no solve."""
++    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')
++    import xarray as xr
++    w=xr.DataArray(n.snapshot_weightings.generators,coords={'snapshot':n.snapshots},dims='snapshot')
++    for name,cap in n.meta.get('external_annual_caps',{}).items():
++        n.model.add_constraints((n.model['Generator-p'].sel(Generator=name)*w).sum()<=finite(cap),name='ResearchImportAnnual-'+name)
++
++
++def add_storage_direction_constraints(n):
++    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')
++    for name,rule in n.meta.get('store_power_rules',{}).items():
++        flow=n.model['Store-p'].sel(Store=name)
++        if rule=='charge_only':n.model.add_constraints(flow<=0,name='ResearchStoreDirection-'+name)
++        elif rule=='discharge_only':n.model.add_constraints(flow>=0,name='ResearchStoreDirection-'+name)
++        else:raise ValueError('Unknown storage direction')
++
++
++def install_fragment_constraints(n):
++    """Required post-variable hook; availability and irreversible inventories."""
++    if n.meta.get('atmosphere_role') and not n.snapshot_weightings.stores.equals(n.snapshot_weightings.generators):
++        raise ValueError('Carbon inventory and physical emissions weights differ')
++    add_external_annual_caps(n)
++    add_storage_direction_constraints(n)
+diff --git a/scripts_project/check_research_carriers.py b/scripts_project/check_research_carriers.py
+new file mode 100644
+index 00000000..80ceed61
+--- /dev/null
++++ b/scripts_project/check_research_carriers.py
+@@ -0,0 +1,39 @@
++"""Validate Gate3 contract + 11-country structural template; no full network."""
++from pathlib import Path
++import argparse,json,hashlib
++import yaml
++from carrier_architecture import local_blueprint,validate,reachability,COUNTRIES
++from carbon_architecture import TRAJECTORY
++from check_research_demand import check as check_demand
++from phase4_static import config
++
++
++def check(repo):
++    repo=Path(repo);full=config(repo);baseline=yaml.safe_load((repo/'configs/research/baseline.yaml').read_text())
++    a=baseline['research_carrier_architecture'];co=baseline['research_carbon']
++    for field in ['cross_border_h2','cross_border_gas','cross_border_co2','cross_border_biomass','cross_border_synthetic_fuels','solver_allowed']:
++        if a[field] is not False:raise ValueError('Prohibited physical network/solve: '+field)
++    if a['mode']!='static_fragments_only' or a['external_market']!='independent_source_generators_shared_price_metadata_only':raise ValueError('Wrong carrier assembly contract')
++    if co['budget_tco2_per_year']!=TRAJECTORY or co['reporting_creates_cap'] is not False or co['full_system_cap']!='forbidden':raise ValueError('Carbon trajectory/scope changed')
++    if co['policy_enabled']!=full['co2']['budget']['enable']:raise ValueError('Unrequested baseline budget activation')
++    original=full['co2']['budget']
++    for year,amount in TRAJECTORY.items():
++        if original['base_value']*original['year'][year]!=amount:raise ValueError('Trajectory not equivalent to frozen config')
++    # Run Gate2 entry point: pending numeric demand remains blocked and table
++    # content is unchanged, rather than trusting config text alone.
++    demand=check_demand(repo)
++    if demand['build']['numeric_accepted_rows']!=0 or demand['build']['guarded_country_years']!=44:raise ValueError('Gate2 acceptance state changed')
++    f=local_blueprint({c+'::template':c for c in sorted(COUNTRIES)},options=full['sector']);validate(f)
++    for scenario in ['integrated','disconnected']:
++        other=config(repo,scenario)
++        for key in ['research_carrier_architecture','research_carbon','research_demand']:
++            if full[key]!=other[key]:raise ValueError('Premature scenario difference')
++    return dict(config='PASS',Gate2Guards='PASS',template_buses=len(f.buses),template_components=len(f.components),
++        pending_numeric_components=sum(not r['accepted'] for r in f.components.values()),hidden_template_paths=reachability(f),
++        trajectory=TRAJECTORY,policy_enabled=co['policy_enabled'],full_network_assembled=False,solver_status='NOT_RUN',
++        real_scope_complete=False,real_demand_materialised=False,topology_fix_required=True)
++
++
++if __name__=='__main__':
++    p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
++    result=check(a.repo);a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2));print(json.dumps(result))
+diff --git a/scripts_project/run_gate3_validation.py b/scripts_project/run_gate3_validation.py
+new file mode 100644
+index 00000000..254a9b88
+--- /dev/null
++++ b/scripts_project/run_gate3_validation.py
+@@ -0,0 +1,26 @@
++"""Run bounded Gate3 tests and preserve per-test outcomes. Never solve."""
++from pathlib import Path
++import argparse,json,sys,unittest,importlib.util,io
++
++
++def run(repo,output):
++    path=Path(repo)/'tests/research/test_carrier_carbon.py'
++    spec=importlib.util.spec_from_file_location('gate3_tests',path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
++    records=[]
++    class Result(unittest.TextTestResult):
++        def addSuccess(self,test):
++            super().addSuccess(test);records.append({'Test_ID':test.id(),'Status':'PASS','Evidence':'SYNTHETIC_STATIC_NO_SOLVER'})
++        def addFailure(self,test,err):
++            super().addFailure(test,err);records.append({'Test_ID':test.id(),'Status':'FAIL','Evidence':str(err[1])})
++        def addError(self,test,err):
++            super().addError(test,err);records.append({'Test_ID':test.id(),'Status':'ERROR','Evidence':str(err[1])})
++    stream=io.StringIO();suite=unittest.defaultTestLoader.loadTestsFromModule(module)
++    result=unittest.TextTestRunner(stream=stream,verbosity=2,resultclass=Result).run(suite)
++    output=Path(output);output.mkdir(parents=True,exist_ok=True)
++    (output/'gate3_tests.log').write_text(stream.getvalue());(output/'GATE3_TEST_RESULTS.json').write_text(json.dumps({'tests':result.testsRun,'pass':result.wasSuccessful(),'records':records,'solver_status':'NOT_RUN'},indent=2))
++    if not result.wasSuccessful():raise RuntimeError(stream.getvalue())
++    return result.testsRun
++
++
++if __name__=='__main__':
++    p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--output',type=Path,required=True);a=p.parse_args();print('Gate3 tests PASS:',run(a.repo,a.output))
+diff --git a/tests/research/test_carrier_carbon.py b/tests/research/test_carrier_carbon.py
+new file mode 100644
+index 00000000..8cbdf7ab
+--- /dev/null
++++ b/tests/research/test_carrier_carbon.py
+@@ -0,0 +1,222 @@
++"""Synthetic topology/physical-carbon tests; no solver or dispatch calculation."""
++from pathlib import Path
++import sys,unittest,copy,math
++import pandas as pd
++ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/'scripts_project'))
++import carrier_architecture as c
++import carbon_architecture as k
++
++
++def assumption(price=10):
++    return dict(price=price,price_unit='EUR/MWh_fuel',source_sha256='SYNTHETIC_TEST_ONLY',source_year=2019,basis='LHV',capacity_mw=10,annual_cap_mwh=100,unlimited_annual_accepted=False)
++
++
++class CarrierTests(unittest.TestCase):
++    def setUp(self):self.f=c.local_blueprint({'SG0':'SG','MY0':'MY'})
++    def test_all_11_country_pairs_potential(self):
++        f=c.local_blueprint({x+'0':x for x in sorted(c.COUNTRIES)})
++        self.assertEqual(c.reachability(f),[]);self.assertTrue(c.validate(f))
++        self.assertGreater(len(c.graph(f)),11) # checks pending paths too, not an empty graph
++    def test_no_shared_physical_bus(self):
++        with self.assertRaises(ValueError):self.f.bus('global gas','gas','',None)
++    def test_crossborder_h2_rejected(self):
++        with self.assertRaises(ValueError):self.f.add('Link','pipe','SG','H2',inputs=[c.bus_name('SG0','H2')],outputs=[c.bus_name('MY0','H2')])
++    def test_crossborder_gas_co2_biomass_ft_rejected(self):
++        for carrier in ['gas','co2 captured','solid biomass','oil','lignite','coal']:
++            with self.subTest(carrier=carrier),self.assertRaises(ValueError):self.f.add('Link','bad','SG',carrier,inputs=[c.bus_name('SG0',carrier)],outputs=[c.bus_name('MY0',carrier)])
++    def test_graph_mutation_detected(self):
++        r=self.f.components['Link:SG0 FT'];r['outputs']=[c.bus_name('MY0','oil')]
++        self.assertTrue(c.reachability(self.f))
++        with self.assertRaises(ValueError):c.validate(self.f)
++    def test_shared_pool_mutation_detected(self):
++        self.f.buses['bad']={'name':'bad','carrier':'gas','country':'','node':None,'role':'PHYSICAL'}
++        with self.assertRaises(ValueError):c.validate(self.f)
++    def test_common_price_separate_imports(self):
++        for node in ['SG0','MY0']:c.external_import(self.f,node,'gas','common-price',assumption(),accepted=True)
++        self.assertEqual(len(self.f.markets),1);self.assertFalse(any('market' in x for x in self.f.buses));self.assertEqual(c.reachability(self.f),[])
++    def test_same_market_different_price_rejected(self):
++        c.external_import(self.f,'SG0','gas','same',assumption(),accepted=True)
++        with self.assertRaises(ValueError):c.external_import(self.f,'MY0','gas','same',assumption(20),accepted=True)
++    def test_common_price_different_country_availability(self):
++        a=assumption();b=dict(a,capacity_mw=20,annual_cap_mwh=200)
++        keys=[c.external_import(self.f,node,'gas','same',record,accepted=True) for node,record in [('SG0',a),('MY0',b)]]
++        self.assertEqual([self.f.components[key]['params']['annual_cap_mwh'] for key in keys],[100,200])
++        self.assertEqual(c.reachability(self.f),[])
++    def test_import_unaccepted_rejected(self):
++        with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',assumption(),accepted=False)
++    def test_new_h2_import_rejected(self):
++        with self.assertRaises(ValueError):c.external_import(self.f,'SG0','H2','market',assumption(),accepted=True)
++    def test_missing_availability_rejected(self):
++        a=assumption();a['annual_cap_mwh']=None
++        with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',a,accepted=True)
++    def test_negative_import_price_rejected(self):
++        with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',assumption(-1),accepted=True)
++    def test_resource_allocation_conserves(self):
++        c.allocate_finite_resource(self.f,'solid biomass',100,{'SG0':30,'MY0':70},accepted=True,source='SYNTHETIC',fuel_cost=3)
++        stores=[x for x in self.f.components.values() if x['role']=='FINITE_RESOURCE']
++        self.assertEqual(sum(x['params']['e_initial'] for x in stores),100);self.assertEqual(c.reachability(self.f),[])
++    def test_resource_not_replicated(self):
++        with self.assertRaises(ValueError):c.allocate_finite_resource(self.f,'solid biomass',100,{'SG0':100,'MY0':100},accepted=True,source='SYNTHETIC',fuel_cost=3)
++    def test_resource_unaccepted_rejected(self):
++        with self.assertRaises(ValueError):c.allocate_finite_resource(self.f,'solid biomass',100,{'SG0':100},accepted=False,source='SYNTHETIC',fuel_cost=3)
++    def test_co2_local_geology_not_feedstock(self):
++        c.carbon_storage(self.f,'SG0',100,accepted=True,source='SYNTHETIC',storage_cost=2)
++        self.assertTrue(c.validate(self.f));self.assertEqual(c.reachability(self.f),[])
++        self.f.add('Link','withdraw','SG','CO2',inputs=[c.bus_name('SG0','co2 sequestered')],outputs=[c.bus_name('SG0','co2 captured')])
++        with self.assertRaises(ValueError):c.validate(self.f)
++    def test_geology_missing_resource_rejected(self):
++        with self.assertRaises(ValueError):c.carbon_storage(self.f,'SG0',100,accepted=False,source='SYNTHETIC',storage_cost=2)
++    def test_demands_not_added_by_carrier(self):
++        with self.assertRaises(ValueError):self.f.add('Load','bad','SG','gas',inputs=[c.bus_name('SG0','gas')])
++    def test_h2_is_node_local(self):
++        f=c.local_blueprint({'SG0':'SG','SG1':'SG'});self.assertNotEqual(c.bus_name('SG0','H2'),c.bus_name('SG1','H2'))
++        self.assertFalse(any('pipeline' in r['carrier'].lower() for r in f.components.values()))
++    def test_no_new_dac_ammonia_methanol_heat(self):
++        self.assertFalse(any(r['carrier'] in ['DAC','NH3','methanol','heat'] for r in self.f.components.values()))
++
++
++def event(sector='Power',value=1,identity='x'):
++    return dict(EventID=identity,CarbonBatchID=identity,Stage='combustion',Country='SG',Sector=sector,Origin='FOSSIL',
++                AtmosphereDelta=value,PolicyWeight=1 if sector=='Power' else 0,Accepted=True)
++
++
++class CarbonTests(unittest.TestCase):
++    def test_power_plus_one(self):
++        r=k.views([event()]);self.assertEqual(r['PolicyCO2_Power'],1);self.assertEqual(r['ReportingCO2_FullSystem'],1)
++    def test_road_plus_one(self):
++        r=k.views([event('Transport')]);self.assertEqual(r['PolicyCO2_Power'],0);self.assertEqual(r['ReportingCO2_FullSystem'],1)
++    def nonpower_plus_one(self,sector):
++        r=k.views([event(sector)]);self.assertEqual(r['PolicyCO2_Power'],0);self.assertEqual(r['ReportingCO2_FullSystem'],1)
++    def test_buildings_plus_one(self):self.nonpower_plus_one('Buildings')
++    def test_industry_plus_one(self):self.nonpower_plus_one('Industry')
++    def test_agriculture_plus_one(self):self.nonpower_plus_one('Agriculture')
++    def test_bunkers_separate(self):
++        sectors=['DomesticShipping','InternationalShipping','DomesticAviation','InternationalAviation']
++        r=k.views([event(x,1,x) for x in sectors]);self.assertEqual(r['PolicyCO2_Power'],0);self.assertEqual(len(r['ByCountrySector']),4);self.assertEqual(r['ReportingCO2_FullSystem'],4)
++    def test_nonpower_not_scope_by_connection(self):
++        with self.assertRaises(ValueError):k.classify_record('industrial electricity-connected boiler','gas','Industry','SG',.2,source='test',policy_weight=1,accepted=True)
++    def test_shared_scope_unaccepted_rejected(self):
++        with self.assertRaises(ValueError):k.classify_record('SMR','gas','Power','SG',.2,source='test',accepted=False)
++    def test_shared_allocation_explicit_only(self):
++        e=event();split=k.allocate_shared_event(e,{'Power':.3,'Industry':.7},accepted=True)
++        r=k.views(split);self.assertEqual(r['PolicyCO2_Power'],.3);self.assertEqual(r['ReportingCO2_FullSystem'],1)
++        with self.assertRaises(ValueError):k.allocate_shared_event(e,{'Power':.3,'Industry':.7},accepted=False)
++        with self.assertRaises(ValueError):k.views([e]+split)
++    def test_shared_allocation_conserves(self):
++        with self.assertRaises(ValueError):k.allocate_shared_event(event(),{'Power':.5,'Industry':.6},accepted=True)
++    def test_shared_allocation_cannot_hide_transfer_credit(self):
++        e=dict(event(),Stage='geological_storage',AtmosphereDelta=-1)
++        with self.assertRaises(ValueError):k.allocate_shared_event(e,{'Power':.5,'Industry':.5},accepted=True)
++    def test_allocated_event_cannot_be_split_again(self):
++        child=k.allocate_shared_event(event(),{'Power':.5,'Industry':.5},accepted=True)[0]
++        with self.assertRaises(ValueError):k.allocate_shared_event(child,{'Power':1},accepted=True)
++    def test_geothermal_not_omitted(self):
++        r=k.classify_record('geothermal','geothermal','Power','SG',.1,source='test',accepted=True)
++        self.assertTrue(r['PolicyCO2Power'])
++    def test_duplicate_carbon_event(self):
++        e=event()
++        with self.assertRaises(ValueError):k.views([e,e])
++    def test_duplicate_carbon_stage(self):
++        e=event();other=dict(e,EventID='different')
++        with self.assertRaises(ValueError):k.views([e,other])
++    def test_storage_not_second_credit(self):
++        e=event();e.update(Stage='geological_storage',AtmosphereDelta=-1)
++        with self.assertRaises(ValueError):k.views([e])
++    def test_capture_store_once(self):
++        events,proof=k.carbon_batch('b','SG','FOSSIL',1,captured=.6,stored=.6,recycled=0,remaining=0,release_sector='Transport',accepted=True)
++        self.assertAlmostEqual(k.views(events)['ReportingCO2_FullSystem'],.4)
++    def test_recycled_co2_not_neutral(self):
++        events,proof=k.carbon_batch('b','SG','RECYCLED_POINT_SOURCE',1,captured=.6,stored=0,recycled=.6,remaining=0,release_sector='Transport',accepted=True)
++        r=k.views(events);self.assertAlmostEqual(r['ReportingCO2_FullSystem'],1);self.assertAlmostEqual(r['PolicyCO2_Power'],.4)
++    def test_dac_cycle_one_uptake_one_release(self):
++        events,proof=k.carbon_batch('b','SG','DAC',1,captured=1,stored=0,recycled=1,remaining=0,release_sector='Transport',producer_sector='Other',policy_weight=0,accepted=True)
++        self.assertEqual(k.views(events)['ReportingCO2_FullSystem'],0);self.assertEqual(k.views(events)['PolicyCO2_Power'],0)
++    def test_biogenic_no_invented_uptake(self):
++        events,proof=k.carbon_batch('b','SG','BIOGENIC',1,captured=0,stored=0,recycled=0,remaining=0,release_sector='Transport',accepted=True)
++        self.assertEqual(k.views(events)['ReportingCO2_FullSystem'],1)
++    def test_capture_balance_fail(self):
++        with self.assertRaises(ValueError):k.carbon_batch('b','SG','FOSSIL',1,captured=.5,stored=.5,recycled=.5,remaining=0,release_sector='Transport',accepted=True)
++    def test_missing_origin_no_credit(self):
++        with self.assertRaises(ValueError):k.carbon_batch('b','SG','MIXED_UNRESOLVED',1,captured=1,stored=1,recycled=0,remaining=0,release_sector='Transport',accepted=True)
++    def test_budget_all_six_years(self):self.assertEqual([k.budget(y,8760)/1e6 for y in k.TRAJECTORY],[1000,820,640,460,280,100])
++    def test_budget_time_scale(self):self.assertAlmostEqual(k.budget(2030,4380),410e6)
++    def test_unknown_year_rejected(self):
++        with self.assertRaises(ValueError):k.budget(2031,8760)
++    def test_no_baseline_budget_activation(self):self.assertFalse(k.install_power_policy(None,[],2030,enabled=False,scope_complete=False,expected_hours=8760)['constraint_created'])
++
++
++class PyPSAFragmentTests(unittest.TestCase):
++    def setUp(self):self.f=c.local_blueprint({'SG0':'SG','MY0':'MY'})
++    def test_unaccepted_fragment_rejected(self):
++        with self.assertRaises(ValueError):c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 FT'])
++    def test_distinct_external_generators_and_no_loads(self):
++        keys=[c.external_import(self.f,n,'gas','same',assumption(),accepted=True) for n in ['SG0','MY0']]
++        net=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=keys)
++        self.assertEqual(len(net.generators),2);self.assertTrue(net.loads.empty);self.assertEqual(set(net.buses.country),{'SG','MY'})
++        self.assertTrue((net.generators.p_min_pu==0).all());self.assertEqual(net.generators.marginal_cost.tolist(),[10,10])
++    def test_geological_store_cannot_discharge(self):
++        c.carbon_storage(self.f,'SG0',100,accepted=True,source='SYNTHETIC',storage_cost=2)
++        keys=[key for key,r in self.f.components.items() if r['role']=='PERMANENT_STORAGE']
++        net=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=keys)
++        self.assertEqual(net.meta['store_power_rules']['SG0 geological inventory'],'charge_only');self.assertFalse(net.stores.e_cyclic.iloc[0]);self.assertEqual(net.stores.capital_cost.iloc[0],2)
++        self.assertTrue(net.stores.e_nom_extendable.iloc[0]);self.assertEqual(net.stores.e_nom_max.iloc[0],100);self.assertEqual(net.stores.e_nom.iloc[0],0)
++        import linopy
++        net.model=linopy.Model();net.model.add_variables(coords=[net.snapshots,pd.Index(net.stores.index,name='Store')],name='Store-p')
++        c.add_storage_direction_constraints(net)
++        self.assertTrue((net.model.constraints['ResearchStoreDirection-SG0 geological inventory'].sign.values=='<=').all())
++    def test_ft_multiinput_physical_signs(self):
++        r=self.f.components['Link:SG0 FT'];r.update(accepted=True,source='SYNTHETIC',params=dict(
++            bus_order=[c.bus_name('SG0',x) for x in ['H2','oil','co2 captured','electricity']],
++            efficiency=.5,efficiency2=-.1,efficiency3=-.2,p_nom=1.,p_min_pu=0.))
++        net=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 FT'])
++        self.assertLess(net.links.efficiency2.iloc[0],0);self.assertLess(net.links.efficiency3.iloc[0],0);self.assertTrue(net.loads.empty)
++    def test_ft_wrong_co2_sign_rejected(self):
++        r=self.f.components['Link:SG0 FT'];r.update(accepted=True,params=dict(bus_order=[c.bus_name('SG0',x) for x in ['H2','oil','co2 captured','electricity']],efficiency=.5,efficiency2=.1,efficiency3=-.2))
++        with self.assertRaises(ValueError):c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 FT'])
++    def test_conversion_reverse_flow_rejected(self):
++        r=self.f.components['Link:SG0 electrolysis'];r.update(accepted=True,source='SYNTHETIC',params=dict(efficiency=.7,p_min_pu=-1))
++        with self.assertRaises(ValueError):c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 electrolysis'])
++    def test_atmosphere_is_reporting_not_cap_or_feedstock(self):
++        r=self.f.components['Link:SG0 SMR'];r.update(accepted=True,source='SYNTHETIC',params=dict(
++            bus_order=[c.bus_name('SG0','gas'),c.bus_name('SG0','H2'),'ReportingCO2 atmosphere'],efficiency=.7,efficiency2=.2,p_nom=1.))
++        n=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 SMR'])
++        self.assertEqual(n.carriers.at['co2 atmosphere','co2_emissions'],0)
++        self.assertEqual(n.meta['atmosphere_role'],'ALLOWED_ACCOUNTING_GLOBAL');self.assertIn('ReportingCO2 atmosphere inventory',n.stores.index)
++        self.assertTrue(n.global_constraints.empty)
++    def test_industrial_coal_energy_and_carbon_same_flow(self):
++        key=c.combustion_accounting_interface(self.f,'SG0','coal','Industry',.3,accepted=True,source='SYNTHETIC')
++        n=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=[key]);link=n.links.iloc[0]
++        self.assertEqual(link.bus0,c.bus_name('SG0','coal'));self.assertEqual(link.efficiency,1)
++        self.assertEqual(link.efficiency2,.3);self.assertTrue(n.loads.empty)
++    def test_missing_fuel_factor_does_not_create_carbon_meter(self):
++        with self.assertRaises(ValueError):c.combustion_accounting_interface(self.f,'SG0','coal','Industry',None,accepted=False,source='')
++    def policy_network(self):
++        import pypsa,linopy,xarray as xr
++        n=pypsa.Network();n.set_snapshots(pd.Index(['t0','t1'],name='snapshot'))
++        n.snapshot_weightings.loc[:,:]=4380.
++        # Construct variables directly, without any solve or dispatch.
++        n.model=linopy.Model();n.model.add_variables(lower=0,coords=[n.snapshots,pd.Index(['power','road'],name='Link')],name='Link-p')
++        return n
++    def test_real_linopy_constraint_only_power_terms(self):
++        n=self.policy_network()
++        terms=[dict(variable='Link-p',dimension='Link',component=x,sector='Power' if x=='power' else 'Transport',coefficient=1,policy_weight=1 if x=='power' else 0,accepted=True,source='SYNTHETIC') for x in ['power','road']]
++        r=k.install_power_policy(n,terms,2030,enabled=True,scope_complete=True,expected_hours=8760)
++        con=n.model.constraints['Research-PolicyCO2_Power']
++        self.assertEqual(float(con.rhs),820e6);self.assertFalse(r['reporting_constraint_created'])
++        ids=set(con.vars.values.flatten());power=set(n.model['Link-p'].labels.sel(Link='power').values.flatten());road=set(n.model['Link-p'].labels.sel(Link='road').values.flatten())
++        self.assertTrue(power.issubset(ids));self.assertFalse(road&ids)
++    def test_pending_scope_blocks_constraint(self):
++        with self.assertRaises(ValueError):k.install_power_policy(self.policy_network(),[],2030,enabled=True,scope_complete=False,expected_hours=8760)
++    def test_legacy_cap_coexistence_rejected(self):
++        n=self.policy_network();n.add('GlobalConstraint','CO2Limit',type='primary_energy',constant=1)
++        with self.assertRaises(ValueError):k.install_power_policy(n,[],2030,enabled=True,scope_complete=True,expected_hours=8760)
++    def test_annual_import_availability_constraint(self):
++        import linopy
++        key=c.external_import(self.f,'SG0','gas','m',assumption(),accepted=True)
++        n=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=[key]);n.model=linopy.Model()
++        n.model.add_variables(lower=0,coords=[n.snapshots,pd.Index(n.generators.index,name='Generator')],name='Generator-p')
++        c.add_external_annual_caps(n);self.assertEqual(len(n.model.constraints),1)
++        self.assertEqual(float(n.model.constraints['ResearchImportAnnual-SG0 external gas'].rhs),100)
++
++
++if __name__=='__main__':unittest.main(verbosity=2)

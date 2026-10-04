@@ -1,0 +1,34 @@
+[
+  {
+    "sha": "c6f4ebf5b2236d1b03bc11cd14cf526ffc419026",
+    "message": "feat: isolate research carrier ownership and physical carbon stores\n\nImplement the frozen electricity-only intervention contract using country/node\nH2/fuel/biomass/CO2 interfaces. Shared prices are metadata, finite resources\nrequire accepted allocations, and geology has explicit no-withdrawal constraints.\nEvidence: Phase3 cross-border/supply/carbon contracts; Gate3 static fragment tests.",
+    "paths": [
+      "scripts_project/carrier_architecture.py"
+    ]
+  },
+  {
+    "sha": "631b27bb92e68cc974fe17f15206f86727cade9e",
+    "message": "feat: separate power policy co2 from system emissions reporting\n\nPreserve all six absolute budgets and baseline disabled semantics. Use explicit\naccepted component coefficients, not the whole-atmosphere Store. Require\nshared SMR/CHP attribution, trace physical carbon once, and never add a full-system cap.\nValidation: synthetic +1 sector events, capture/recycle/storage and unsolved Linopy coefficients.",
+    "paths": [
+      "scripts_project/carbon_architecture.py"
+    ]
+  },
+  {
+    "sha": "552bdee8bcc6144aecc0bcd6b7ef09806e7c241a",
+    "message": "test: add carrier reachability and carbon scope gates\n\nValidate explicit config consumers, no scenario difference, no demand acceptance\nchanges and real PyPSA fragment semantics. Gate2 70 tests and input hashes preserved.\nNo optimisation, final network construction or topology repair.",
+    "paths": [
+      "scripts_project/check_research_carriers.py",
+      "scripts_project/run_gate3_validation.py",
+      "tests/research/test_carrier_carbon.py",
+      "configs/research/baseline.yaml"
+    ]
+  },
+  {
+    "sha": "140294807bffe5cc172d5226ee0af3d4f548d180",
+    "message": "fix: keep shared fuel prices independent of national availability\n\nSeparate common price provenance from country/node capacity and annual caps.\nValidation: synthetic equal-price unequal-availability imports stay isolated;\nall Gate3 tests and the unchanged Gate2 acceptance guard pass.",
+    "paths": [
+      "scripts_project/carrier_architecture.py",
+      "tests/research/test_carrier_carbon.py"
+    ]
+  }
+]

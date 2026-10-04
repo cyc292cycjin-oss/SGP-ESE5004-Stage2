@@ -1,0 +1,150 @@
+--- Gate2/scripts_project/carbon_architecture.py
++++ final/scripts_project/carbon_architecture.py
+@@ -0,0 +1,147 @@
++"""Power policy and physical full-system CO2 reporting are separate views.
++
++No atmospheric Store/carrier aggregate is used as a power-policy expression.
++All real mixed-use assignments require explicit accepted attribution. No solve.
++"""
++from collections import defaultdict
++import math
++from carrier_architecture import finite,COUNTRIES
++
++TRAJECTORY={2025:1000e6,2030:820e6,2035:640e6,2040:460e6,2045:280e6,2050:100e6}
++SECTORS={'Power','Buildings','Transport','Industry','Agriculture','DomesticShipping',
++         'InternationalShipping','DomesticAviation','InternationalAviation','Other'}
++ORIGINS={'FOSSIL','BIOGENIC','DAC','RECYCLED_POINT_SOURCE','MIXED_UNRESOLVED'}
++
++
++def budget(year,represented_hours):
++    if year not in TRAJECTORY:raise ValueError('No accepted trajectory value for this year')
++    h=finite(represented_hours)
++    if h<=0:raise ValueError('Positive represented hours required')
++    return TRAJECTORY[year]*h/8760.
++
++
++def classify_record(component,carrier,sector,country,coefficient,*,source,
++                    policy_weight=None,accepted=False,flow='physical_atmosphere'):
++    """No technology-name or electric-connectivity heuristic for policy scope."""
++    if sector not in SECTORS or country not in COUNTRIES:raise ValueError('Emission ownership unknown')
++    if not source:raise ValueError('Emission-factor provenance required')
++    coef=finite(coefficient,nonnegative=False)
++    if flow!='physical_atmosphere':raise ValueError('Transfers/storage must not be added as atmosphere emissions')
++    if policy_weight is None:
++        if sector=='Power':policy_weight=1.
++        else:policy_weight=0.
++    weight=finite(policy_weight)
++    if weight>1 or (sector!='Power' and weight!=0):raise ValueError('Non-power event cannot enter power policy')
++    if not accepted:raise ValueError('Policy mapping/physical coefficient not accepted')
++    return dict(Component=component,Carrier=carrier,Sector=sector,Country=country,
++                EmissionFactor=coef,PolicyWeight=weight,PolicyCO2Power=bool(weight),
++                ReportingCO2FullSystem=True,Source=source,Accepted=True)
++
++
++def views(events):
++    """Physical atmosphere events only. Source/fuel production isn't counted again.
++
++    Event IDs and CarbonBatchID+Stage prevent duplicated entries. Policy and
++    reporting totals are two views of the same events; never add the views.
++    """
++    ids={e['EventID'] for e in events}
++    if any(e.get('ParentEventID') in ids for e in events):raise ValueError('Original event and allocated children both present')
++    seen=set();stages=set();policy=0.;report=defaultdict(float);origins=defaultdict(float)
++    for e in events:
++        if e['EventID'] in seen:raise ValueError('Duplicate carbon event')
++        seen.add(e['EventID']);stage=(e['CarbonBatchID'],e['Stage'])
++        if stage in stages:raise ValueError('Carbon stage counted twice')
++        stages.add(stage)
++        if e['Country'] not in COUNTRIES or e['Sector'] not in SECTORS or e['Origin'] not in ORIGINS:
++            raise ValueError('Unknown carbon attribution')
++        if e.get('Accepted') is not True:raise ValueError('Unaccepted carbon event scope')
++        value=finite(e['AtmosphereDelta'],nonnegative=False)
++        if e['Stage'].split(':',1)[0] in ('capture_transfer','FT_transfer','geological_storage') and value!=0:
++            raise ValueError('Internal carbon transfer/storage cannot be a second atmospheric credit')
++        weight=finite(e['PolicyWeight'])
++        if weight>1 or (e['Sector']!='Power' and weight!=0):raise ValueError('Non-power policy leakage')
++        if e['Origin']=='MIXED_UNRESOLVED' and value<0 and weight:
++            raise ValueError('Unresolved-origin removal cannot offset power policy')
++        policy+=value*weight
++        report[(e['Country'],e['Sector'])]+=value
++        origins[e['Origin']]+=value
++    return dict(PolicyCO2_Power=policy,ReportingCO2_FullSystem=sum(report.values()),
++                ByCountrySector={c+':'+s:v for (c,s),v in report.items()},ByOrigin=dict(origins))
++
++
++def allocate_shared_event(event,shares,*,accepted):
++    """Apply a HUMAN ACCEPTED SMR/CHP attribution, never choose its fractions."""
++    if not accepted or not shares or set(shares)-SECTORS:raise ValueError('Shared-use attribution pending')
++    if event.get('ParentEventID'):raise ValueError('Shared event already allocated')
++    views([event])  # Validate physical transfer and acceptance before splitting.
++    weights={s:finite(v) for s,v in shares.items()}
++    if not math.isclose(sum(weights.values()),1.,rel_tol=1e-10,abs_tol=1e-10):raise ValueError('Shared allocation loses/duplicates carbon')
++    return [dict(event,EventID=event['EventID']+':'+s,ParentEventID=event['EventID'],Stage=event['Stage']+':'+s,
++                 Sector=s,AtmosphereDelta=finite(event['AtmosphereDelta'],nonnegative=False)*w,PolicyWeight=1. if s=='Power' else 0.) for s,w in weights.items()]
++
++
++def carbon_batch(batch,country,origin,carbon,*,captured,stored,recycled,remaining,
++                 release_sector,producer_sector='Power',accepted=False,policy_weight=1.):
++    """One declared carbon lineage; synthetic tests or accepted traced balances.
++
++    Fossil carbon splits into immediate stack and captured flow. Captured flow
++    splits into permanent inventory, FT/recycled release and temporary stock.
++    Storage adds no second credit. DAC removes from atmosphere once then release
++    adds it once. Captured amount is not automatically a permanent reduction.
++    Real mixed oil/CO2 pools need an accepted flow-tracing/allocation decision.
++    """
++    if not accepted or origin not in ORIGINS or origin=='MIXED_UNRESOLVED':raise ValueError('Source carbon lineage pending')
++    c,cap,store,rec,rem=map(finite,[carbon,captured,stored,recycled,remaining])
++    if cap>c or not math.isclose(cap,store+rec+rem,rel_tol=1e-10,abs_tol=1e-9):raise ValueError('Captured carbon balance failed')
++    if origin=='DAC' and not math.isclose(cap,c):raise ValueError('DAC intake must equal captured carbon')
++    def event(stage,sector,delta,weight):
++        return dict(EventID=batch+':'+stage,CarbonBatchID=batch,Stage=stage,Country=country,
++            Sector=sector,Origin=origin,AtmosphereDelta=delta,PolicyWeight=weight,Accepted=True)
++    events=[event('atmospheric_uptake' if origin=='DAC' else 'initial_stack',producer_sector,-c if origin=='DAC' else c-cap,policy_weight),
++            event('capture_transfer',producer_sector,0.,0.),event('geological_storage',producer_sector,0.,0.),
++            event('FT_release',release_sector,rec,1. if release_sector=='Power' else 0.)]
++    if origin=='BIOGENIC':
++        # No invented lifecycle uptake. This ledger records the modeled stack;
++        # any modeled upgrading/uptake credit is a separately traced event.
++        pass
++    return events,dict(InputCarbon=c,Captured=cap,PermanentStock=store,RecycledRelease=rec,
++                       TemporaryStock=rem,AtmosphericNet=sum(e['AtmosphereDelta'] for e in events))
++
++
++def install_power_policy(n,terms,year,*,enabled,scope_complete,expected_hours):
++    """Attach only explicit component/variable coefficients to an existing model.
++
++    n.model must already contain variables. This function never creates a model
++    or solves. terms has variable, dimension, component, sector, coefficient,
++    policy_weight, accepted, source. CO2 coefficients are t/input-MWh for Link-p
++    or t/output-MWh for Generator-p, supplied explicitly from a reviewed map.
++    """
++    if not enabled:return {'status':'DISABLED_AS_UPSTREAM_BASELINE','constraint_created':False}
++    if not scope_complete:raise ValueError('Unresolved SMR/CHP/capture attribution blocks full power scope')
++    if getattr(n,'model',None) is None:raise ValueError('No preconstructed variables')
++    if any(str(r.type)=='primary_energy' and 'co2' in str(r.carrier_attribute).lower() for _,r in n.global_constraints.iterrows()):
++        raise ValueError('Legacy aggregate primary-energy cap must not coexist with isolated policy')
++    import xarray as xr
++    w=n.snapshot_weightings.generators
++    if not w.index.equals(n.snapshots) or any(not math.isfinite(v) or v<=0 for v in w):raise ValueError('Invalid physical snapshot weights')
++    if not math.isclose(float(w.sum()),finite(expected_hours),rel_tol=1e-10,abs_tol=1e-8):raise ValueError('Physical represented-hours mismatch')
++    # The old budget uses objective/8760 scaling. Demand/emission physical
++    # weights must have the same total to preserve that numerical convention.
++    if not math.isclose(float(n.snapshot_weightings.objective.sum()),float(w.sum()),rel_tol=1e-10):
++        raise ValueError('Legacy objective-hours and physical-hours scaling differ')
++    wa=xr.DataArray(w.to_numpy(),coords={'snapshot':n.snapshots},dims='snapshot')
++    expression=None;seen=set()
++    for t in terms:
++        key=(t['variable'],t['component'])
++        if key in seen:raise ValueError('Component carbon term counted twice')
++        seen.add(key)
++        if not t['accepted'] or not t['source'] or t['policy_weight'] is None:raise ValueError('Unaccepted policy attribution')
++        coefficient=finite(t['coefficient'],nonnegative=False);weight=finite(t['policy_weight'])
++        if weight>1 or (t['sector']!='Power' and weight!=0):raise ValueError('Non-power policy coefficient')
++        if weight==0:continue
++        term=(n.model[t['variable']].sel({t['dimension']:t['component']})*wa*coefficient*weight).sum()
++        expression=term if expression is None else expression+term
++    if expression is None:raise ValueError('Empty accepted power scope is not a policy constraint')
++    rhs=budget(year,float(w.sum()))
++    n.model.add_constraints(expression<=rhs,name='Research-PolicyCO2_Power')
++    return dict(status='INSTALLED_NOT_SOLVED',constraint_created=True,rhs_tco2=rhs,reporting_constraint_created=False)
