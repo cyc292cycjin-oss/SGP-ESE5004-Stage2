@@ -8,7 +8,8 @@ class AssemblyInputTests(unittest.TestCase):
  def accepted(self):return copy.deepcopy(next(r for r in self.records if r['Kind']=='DEMAND' and r['AssemblyStatus']==ACCEPTED))
  def test_eleven_baseyear_anchors(self):self.assertEqual(sum(r['Kind']=='DEMAND' and r['AssemblyStatus']==ACCEPTED and r['Year']==2019 for r in self.records),11)
  def test_target_2050_blocks_before_network(self):
-  r=check(self.records,2050);self.assertEqual(r['status'],'BLOCKED_INPUT_FREEZE');self.assertEqual(r['accepted_target_demands'],0);self.assertFalse(r['network_construction_started']);self.assertEqual(r['solver_runs'],0)
+  old=json.loads((ROOT/'tests/research/fixtures/gate4_before_continue.json').read_text())['records']
+  r=check(old,2050);self.assertEqual(r['status'],'BLOCKED_INPUT_FREEZE');self.assertEqual(r['accepted_target_demands'],0);self.assertFalse(r['network_construction_started']);self.assertEqual(r['solver_runs'],0)
   self.assertEqual(r['required_target_demands'],264)
   self.assertGreaterEqual(r['numeric_accepted_target_demands'],17)
   self.assertEqual(r['external_supply_pending'],[])
@@ -61,7 +62,7 @@ class AssemblyInputTests(unittest.TestCase):
   with self.assertRaises(ValueError):validate_records([r])
  def test_bunker_constant_preserves_singapore_and_missing(self):
   sg=next(r for r in self.records if r['Year']==2050 and r['Account']=='InternationalShippingBunker' and r['Country']=='SG')
-  self.assertEqual(sg['Value'],'535341800.0000');self.assertEqual(sg['MethodID'],'ASSEMBLY_V1_BUNKER_CONSTANT_2019');self.assertTrue(sg['Phase5SensitivityRequired'])
+  self.assertEqual(float(sg['Value']),535341800.);self.assertEqual(sg['MethodID'],'ASSEMBLY_V1_BUNKER_CONSTANT_2019');self.assertTrue(sg['Phase5SensitivityRequired'])
   bn=next(r for r in self.records if r['Year']==2050 and r['Account']=='InternationalShippingBunker' and r['Country']=='BN')
   self.assertIsNone(bn['Value']);self.assertEqual(bn['AssemblyStatus'],'PENDING')
  def test_carbon_gate_is_post_build_not_numerical_input(self):

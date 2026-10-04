@@ -101,7 +101,13 @@ def external_import(f,node,commodity,market_id,assumption,*,accepted):
     if required-assumption.keys():raise ValueError('Incomplete external supply identity')
     if assumption['price_unit']!='EUR/MWh_fuel' or not assumption['source_sha256'] or not assumption['basis']:
         raise ValueError('Unaccepted fuel price/energy basis')
-    price=finite(assumption['price']);capacity=finite(assumption['capacity_mw'])
+    price=finite(assumption['price'])
+    unconstrained=assumption.get('unlimited_capacity_accepted') is True
+    if unconstrained:
+        if assumption['capacity_mw'] is not None or assumption['annual_cap_mwh'] is not None or assumption['unlimited_annual_accepted'] is not True:
+            raise ValueError('Conflicting nonbinding external-market boundary')
+        capacity=0.
+    else:capacity=finite(assumption['capacity_mw'])
     cap=assumption['annual_cap_mwh']
     if cap is None and assumption['unlimited_annual_accepted'] is not True:raise ValueError('No accepted annual availability')
     if cap is not None:finite(cap)
@@ -109,7 +115,7 @@ def external_import(f,node,commodity,market_id,assumption,*,accepted):
     f.market(market_id,commodity,{k:assumption[k] for k in ('price','price_unit','source_sha256','source_year','basis')})
     b=bus_name(node,commodity);country=f.buses[b]['country']
     key=f.add('Generator',node+' external '+commodity,country,commodity,outputs=[b],role='EXTERNAL_SUPPLY',
-        params=dict(p_nom=capacity,p_nom_extendable=False,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),
+        params=dict(p_nom=capacity,p_nom_extendable=unconstrained,p_nom_max=float('inf') if unconstrained else capacity,capital_cost=0.,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),
         accepted=True,source=assumption['source_sha256'])
     return key
 

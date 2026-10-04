@@ -21,7 +21,18 @@ def load_registry(folder):
   path=(folder/rel).resolve()
   if not path.is_relative_to(folder.resolve()):raise ValueError('Source outside registry boundary')
   if hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('Source/registry hash changed: '+rel)
- return json.loads((folder/'registry.json').read_text())
+ data=json.loads((folder/'registry.json').read_text())
+ base_path=folder/'sources/BASE_RECONSTRUCTION.json'
+ if base_path.exists():
+  base={r['AccountID']:r for r in json.loads(base_path.read_text())['accounts']}
+  for r in data['records']:
+   if r.get('Source')!='sources/BASE_RECONSTRUCTION.json' or r['Kind']!='DEMAND' or r['Year']!=2050:continue
+   b=base[r['Locator']]
+   if r['SourceSHA256']!=manifest['files']['sources/BASE_RECONSTRUCTION.json']:raise ValueError('Base source reference hash mismatch')
+   if r.get('BaseValueMWh')!=b['ValueMWh'] or r.get('BaseStatus')!=b['Status']:raise ValueError('Base source/value/status mismatch')
+   if r['AssemblyStatus']==ACCEPTED and b['Status']!='NUMERIC_INPUT_READY':raise ValueError('Unqualified base promoted by target method')
+   if r.get('Classification')=='SOURCE_SUPPORTED_NOT_APPLICABLE' and (b['Classification']!='SOURCE_SUPPORTED_NOT_APPLICABLE' or r.get('ZeroEvidence')!=';'.join(b['ZeroEvidence'])):raise ValueError('Exclusion has no pinned source proof')
+ return data
 def validate_records(records):
  seen=set()
  for r in records:
@@ -48,30 +59,50 @@ def validate_records(records):
   if not math.isfinite(value) or value<0:raise ValueError('Invalid accepted input')
   if r['Kind']=='DEMAND':
    if r['Country'] not in COUNTRIES:raise ValueError('Unowned demand')
+   if r['Unit']!='MWh/year':raise ValueError('Demand must be normalised once to MWh/year')
    if r['Year']!=r['SourceYear'] and not r.get('ProjectionEvidence'):raise ValueError('Base-year input relabelled as forecast')
    if r['Account']=='Astar' and r['ParentAccount']:raise ValueError('Astar is a national parent, not a duplicate child')
    if value==0 and not r.get('ZeroEvidence'):raise ValueError('No source-qualified zero evidence')
  return True
-def check(records,year):
+def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=None):
  validate_records(records)
  demands=[r for r in records if r['Kind']=='DEMAND' and r['Year']==year and r['Required']]
  if not demands:raise ValueError('Empty target-year obligation registry')
  if year==2050:
   expected={(c,a,k) for c in COUNTRIES for a,carriers in TARGET_ACCOUNTS.items() for k in carriers}
   actual={(r['Country'],r['Account'],r['Carrier']) for r in demands}
-  if actual!=expected:raise ValueError('Required physical account set changed without an approved representation: '+str(sorted(expected-actual)))
+  if actual!=expected or len(demands)!=len(expected):raise ValueError('Required ownership account set changed without an approved representation')
   embedded=[r for r in records if r['Year']==year and r['Account']=='RoadEVFinalElectricity']
-  if len(embedded)!=11 or {r['Country'] for r in embedded}!=COUNTRIES:
-   raise ValueError('Missing country Road EV embedded ownership decision')
- missing=[r for r in demands if r['AssemblyStatus']!=ACCEPTED or not r['TargetReady']]
- # Even a numerically accepted input requires node/time ownership before it
- # is a materialisable obligation. No default allocation is inferred here.
- allocation_missing=[r['InputID'] for r in demands if r['AssemblyStatus']==ACCEPTED and (not r.get('SpatialEvidence') or not r.get('TemporalEvidence'))]
- astar={r['Country'] for r in demands if r['Account']=='Astar' and r['AssemblyStatus']==ACCEPTED and r['TargetReady']}
+  if len(embedded)!=11 or {r['Country'] for r in embedded}!=COUNTRIES:raise ValueError('Missing country Road EV embedded ownership decision')
+ excluded=[r for r in demands if r.get('Classification')=='SOURCE_SUPPORTED_NOT_APPLICABLE']
+ for r in excluded:
+  if not r.get('ExclusionEvidence') or not r.get('SourceSHA256') or not (r.get('ZeroEvidence') or (r['Country']=='TL' and r['Account']=='IndustryFinalEnergy' and r.get('BaseStatus')=='BOUNDARY_EXCLUSION')):
+   raise ValueError('Unsupported exclusion; empty selection is not zero')
+  if r['Value'] is not None:raise ValueError('Exclusion must not masquerade as a physical zero Load')
+ physical=[r for r in demands if r not in excluded]
+ numeric=[r for r in physical if r['AssemblyStatus']==ACCEPTED]
+ missing=[r for r in physical if r['AssemblyStatus']!=ACCEPTED]
+ allocations=set()
+ if allocation_dir:
+  from allocate_assembly_inputs import verify_allocation
+  allocations=verify_allocation(allocation_dir,records,registry_path)
+ allocation_missing=[r['InputID'] for r in numeric if r['InputID'] not in allocations]
  supply_pending=[r['InputID'] for r in records if r['Kind']=='EXTERNAL_SUPPLY' and r['Year']==year and (r['AssemblyStatus']!=ACCEPTED or not r['TargetReady'])]
- return dict(status='BLOCKED_INPUT_FREEZE' if missing or allocation_missing or supply_pending or astar!=COUNTRIES else 'INPUT_GATE_ONLY_PASS',year=year,required_target_demands=len(demands),numeric_accepted_target_demands=sum(r['AssemblyStatus']==ACCEPTED for r in demands),accepted_target_demands=len(demands)-len(missing),unresolved_by_sector=dict(collections.Counter(r['Sector'] for r in missing)),missing_astar_countries=sorted(COUNTRIES-astar),allocation_missing=allocation_missing,external_supply_pending=supply_pending,embedded_road_ev='EMBEDDED_IN_ASTAR_NOT_SEPARATELY_MATERIALISED' if year==2050 else 'NOT_APPLICABLE',carbon_validation_stage='POST_BUILD_STATIC_VALIDATION_BLOCKER',network_construction_started=False,network_exported=False,solver_status='NOT_RUN',solver_runs=0)
+ unowned=known_unallocated or []
+ numeric_ready=not missing and not supply_pending and not unowned
+ allocation_ready=numeric_ready and not allocation_missing
+ return dict(status='INPUT_GATE_ONLY_PASS' if allocation_ready else 'BLOCKED_INPUT_FREEZE' if not numeric_ready else 'BLOCKED_ALLOCATION',year=year,
+  required_target_demands=len(demands),source_supported_nonphysical_accounts=len(excluded),required_physical_accounts=len(physical),
+  numeric_accepted_target_demands=len(numeric),accepted_target_demands=len(allocations),numeric_unresolved=len(missing),
+  NUMERIC_INPUT_READY=numeric_ready,ALLOCATION_READY=allocation_ready,NETWORK_STATICALLY_VALIDATED=False,
+  unresolved_by_sector=dict(collections.Counter(r['Sector'] for r in missing)),unresolved_input_ids=[r['InputID'] for r in missing],
+  known_positive_unowned_accounts=len(unowned),missing_astar_countries=sorted(COUNTRIES-{r['Country'] for r in numeric if r['Account']=='Astar'}),
+  allocation_missing=allocation_missing,external_supply_pending=supply_pending,
+  embedded_road_ev='EMBEDDED_IN_ASTAR_NOT_SEPARATELY_MATERIALISED' if year==2050 else 'NOT_APPLICABLE',
+  carbon_validation_stage='POST_BUILD_STATIC_VALIDATION_BLOCKER',network_construction_started=False,network_exported=False,solver_status='NOT_RUN',solver_runs=0)
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--year',type=int,default=2050);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
- result=check(load_registry(a.repo/'research_inputs/assembly_v1')['records'],a.year)
- a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2));print(json.dumps(result))
- raise SystemExit(2 if result['status']=='BLOCKED_INPUT_FREEZE' else 0)
+ p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--year',type=int,default=2050);p.add_argument('--output',type=Path,required=True);p.add_argument('--allocation',type=Path);a=p.parse_args()
+ folder=a.repo/'research_inputs/assembly_v1';data=load_registry(folder)
+ result=check(data['records'],a.year,a.allocation,folder/'registry.json',data.get('known_unallocated_base_accounts'))
+ a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2));print(json.dumps({k:v for k,v in result.items() if k not in ['unresolved_input_ids','allocation_missing']}))
+ raise SystemExit(0 if result['status']=='INPUT_GATE_ONLY_PASS' else 2)

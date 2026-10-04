@@ -70,7 +70,10 @@ demand_data:
 final_adjustment:
   only_elec_network: false
 research_assembly:
-  schema: phase4-gate4-v1
+  schema: phase4-gate4-layered-v2
+  builder: scripts_project/build_research_network.py
+  allocation_builder: scripts_project/allocate_assembly_inputs.py
+  research_workflow: workflow/research_assembly.smk
   input_registry: research_inputs/assembly_v1/registry.json
   target_year: 2050
   base_year: 2019
@@ -79,12 +82,18 @@ research_assembly:
   legacy_final_adjustment: forbidden
   legacy_sector_demand_builders: forbidden
   target_year_fallback: forbidden
-  network_export_enabled: false
-  blocked_reason: target_year_input_freeze_incomplete
+  network_export_enabled: true # Authorized, but executable input/allocation/asset gates must pass.
+  blocked_reason: actual_source_accounts_and_qualified_asset_bundle_incomplete
   scenario_switching: false
   solver_allowed: false
   demand_scenario: AEO8_BAS
   road_parent_method: ASSEMBLY_V1_AEO8_ROAD_PARENT_APPROX
+  road_non_electric_method: ASSEMBLY_V1_ROAD_NON_ELECTRIC_TRANSPORT_GROWTH_PROXY
+  road_parent_role: ROAD_TOTAL_REFERENCE_ONLY
+  road_parent_exact_total_enforced: false
+  mtoe_method: ASSEMBLY_V1_MTOE_CONVENTION_11P63_TWH
+  non_electric_growth_method: ASSEMBLY_V1_ACCEPTED_GROWTH_PROXY
+  domestic_shipping_aviation_method: ASSEMBLY_V1_DOMESTIC_CONSTANT_2019
   road_ev_representation: EMBEDDED_IN_ASTAR
   road_ev_materialisation: NOT_SEPARATELY_MATERIALISED
   road_ev_pathway: DEFERRED_TO_EV_SENSITIVITY
