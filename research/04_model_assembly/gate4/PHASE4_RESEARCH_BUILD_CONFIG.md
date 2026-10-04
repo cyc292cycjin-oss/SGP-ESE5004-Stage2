@@ -1,7 +1,7 @@
-# Research build configuration — Gate4 resume
+# Gate4 Research配置
 
-`configs/research/baseline.yaml` records AEO8 BAS as the regional final-demand anchor; the Road EV embedded override; constant2019 international bunker boundary; independent quantity-unconstrained fossil markets; local biomass obligation cap; no geological storage; post-build carbon validation.
+configs/research/baseline.yaml包含独立builder/allocation/DAG入口。network_export_enabled=true表示用户授权通过门禁后导出，不表示当前输入通过；solver_allowed=false。三层门分别校验数值资格、实际数组、实际网络静态验收。TargetReady或SpatialEvidence文字不能替代数组。
 
-`network_export_enabled=false`, `runnable_workflow=false`, `solver_allowed=false`, `scenario_switching=false` remain. This is a truthful blocked configuration, not a runnable Full-SC workflow. `legacy_final_adjustment=forbidden`, legacy demand builders forbidden, `only_elec_network=false`. The topology metadata now cites the already completed d13d5976 repair. Baseline carbon enable=false and its existing budgets are preserved.
+目标2050、气象2013、3h全年8760h。政策carbon.policy_enabled=false；预算表定义未变。外部化石市场在explicit unlimited_capacity_accepted时用零固定容量、可扩张且无数量上限的供应Generator，不用任意巨大有限容量；国家物理接口独立。既有有限接口仍保留原行为并通过回归。
 
-The input preflight runs first. G4-CARBON-01 requires actual components after a permitted build; it does not block this numerical input check. No synthetic network is substituted for the requested complete2050 Research network.
+原上游脚本、Gate2历史观察源、DEA/燃料价格和拓扑均未改动。未开启scenario switching、技术强制使用或求解。

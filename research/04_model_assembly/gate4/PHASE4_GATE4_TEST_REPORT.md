@@ -1,19 +1,11 @@
-# Gate4 resume test report
+# Gate4验证证据
 
-Tests run in the existing WSL pypsa-earth environment (Python3.11.13/PyPSA0.30.3), no optimizer. Exact commands, exit codes and log hashes: `evidence/resume/TEST_RECEIPTS.json`.
+18项新增来源/方法/分层门禁/guarded入口测试；17项输入回归；20项Gate1、70项Gate2、60项Gate3、9项拓扑回归：共194项通过。另有实际数组preflight、真实构网入口调用、Research DAG dry-run与配置审查。门禁/入口返回2为生产输入仍未闭合的结果，不是完整网络验收。
 
-| Suite | Result | Scope |
-|---|---|---|
-| Assembly input tests |17 PASS| Includes rejecting explicit/zero EV, dropped missing obligations, duplicate RoadParent Load; SG constant bunker and post-build carbon ordering |
-| Assembly preflight | BLOCKED_INPUT_FREEZE, expected exit2 | Correct refusal before network construction; not a readiness PASS |
-| Gate1 static |20 PASS| Research contract/config guards |
-| Gate2 demand/accounting |70 PASS| Preserved historical accounting contract |
-| Gate3 carrier/carbon |60 PASS| Synthetic/static architecture, not actual assembled network |
-| Gate3 config |PASS| Existing carrier configuration invariants |
-| Topology regression |9 PASS| Existing single-row repair retained; no topology reinvestigation |
-| Buildings / Shipping full regression |NOT_RERUN_UNCHANGED| Production builders and historical source capsules unchanged |
-| Actual-network tests |NOT_RUN_NO_NETWORK| No component inventory, finite Load/conservation, interconnector set or carbon-attribution claim |
+正向测试使用明确标注的合成数值夹具：数值就绪→仅分配阻断→真实NPZ数组就绪可进入下一门；也验证单位/缺失/重复/来源错误、数组篡改、无证据排除及已知无去向正值继续失败。它们不代替真实研究模型。旧accepted_target_demands=0断言仅作用冻结旧夹具。
 
-Gate3 logs retain a PROJ database startup warning from the existing environment. Its60 bounded tests passed, but this is not a geographical runtime certification. The first native Windows test attempt also encountered sandbox temporary-directory permissions in the hash-tamper fixture; the full authoritative17-test suite subsequently passed in WSL without altering its assertions.
+本轮最终131组真实数组逐组回读检查，NPZ hash、registry hash、物理快照/权重、国别与积分均通过。源国家总量来自批准方法，实际网络检查仍NOT_RUN。
 
-The CSV export roundtrip and error scan passed. `PRESERVATION_GUARD.json` verifies unchanged Gate2 input capsules, upstream prepare_sector_network.py and other untouched contracts. A source-qualified number is distinct from a validated100-cluster, full-year3h allocation.
+完整测试命令、退出码、日志hash见evidence/CONTINUE_TEST_RECEIPTS.json。环境已有PROJ数据目录告警；本次最近节点计算采用经纬度球面距离公式，无坐标重投影。Snakemake dry-run的后端可用性导入产生Gurobi license/参数探测告警，DAG仅1条未执行构网规则；未调用优化求解。Gate3旧配置报告的topology_fix_required描述字段不是本轮状态门；既有修复未重做，9项拓扑回归通过。
+
+补充：131项raw-to-target独立复算通过，证据见CONTINUE_TARGET_REDERIVATION.json；12个CSV逐值回读等于authoring矩阵。输入胶囊和审计路径以.gitattributes限定-text保留精确字节，避免Git换行归一化破坏源hash；Python/YAML/工作流使用LF。
