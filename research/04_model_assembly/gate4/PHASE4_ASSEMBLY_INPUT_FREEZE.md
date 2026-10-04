@@ -1,59 +1,54 @@
-# Assembly V1：部分冻结，目标年门禁未通过
+# Phase4 Gate4 Assembly V1 input freeze — resumed, PARTIAL
 
-**45 条 ASSEMBLY_V1_ACCEPTED，531 条 PENDING，共576条登记。** 接受状态严格区别于 HUMAN_ACCEPTED；原 Gate2 状态/文件不改。45条包含11个2019电力父账数值、4个2050电解参数、6个原Power年度限额、22个R/S表示控制、2个供给可用性控制；不是45个已就绪2050需求。
+This continues the same Gate4. It does not reopen Phase1–3 or overwrite upstream/tutorial inputs. The prior topology repair d13d5976 is retained. No network has been exported and no solver has run.
 
-## 可冻结内容
+## Newly closed human decisions
 
-2019 A* 来自现有 UNSD 原文件 `UNdata_Export_20250502_110820872.txt`，SHA256 `12c99b3c40927449d9a4d0402f255a8b84b24917ff58e54efd4ec43b2125fe6b`。精确 transaction=`Electricity - Final energy consumption`，million kWh ×1000=MWh。原始十进制转换与 Gate2 浮点文本差值均≤1e-6 MWh，差值单列，不做 residual correction。
+1. BAS approximate RoadParent=`350.5315 Mtoe`, `ASSEMBLY_V1_AEO8_ROAD_PARENT_APPROX`. Exact source/page/context is in the source map. Road EV stays in Astar, with no separate fixed EV Load and no assumed zero. The explicit pathway is `DEFERRED_TO_EV_SENSITIVITY`. This supersedes resume section7 only for Assembly V1; the historical Gate2 contract remains intact.
+2. International shipping and aviation: `ASSEMBLY_V1_BUNKER_CONSTANT_2019`, Source2050=`HUMAN_BASELINE_ASSUMPTION`. Verified2019 energy obligations are kept equal in2050. It is `MATERIAL_EXOGENOUS_ASSUMPTION`, `PHASE5_SENSITIVITY_REQUIRED=YES`; not an AEO8/IMO/ICAO forecast or a claim of zero real growth. No future bunker-data hunt remains open.
+3. Frozen coal/gas/oil processed model prices are used without reinflation or second HHV/LHV conversion. Each country has the same independent non-binding external quantity interface by human model boundary. No common physical ASEAN fossil bus is licensed.
+4. Local biomass supply is capped by accepted fixed country obligations; no360TWh regional pool or surplus expansion resource. No geological storage asset is added without an already accepted source.
+5. G4-CARBON-01 is `POST_BUILD_STATIC_VALIDATION_BLOCKER`; it does not prevent numerical preflight but remains mandatory before Gate4 PASS/Gate5.
 
-| 国家 | 2019 A*（MWh/year） |
-|---|---:|
-| BN | 3906135.000 |
-| ID | 258092000 |
-| KH | 10191090.00 |
-| LA | 6595540.00 |
-| MM | 18681010.00 |
-| MY | 158709264.000 |
-| PH | 87118300.0 |
-| SG | 51730200.0 |
-| TH | 193175999.000 |
-| TL | 384247.000 |
-| VN | 207048888.888889000 |
+## Concrete numeric closure
 
-这些是基年锚点。没有将2019值改名为2050，没有设定零增长，没有从A*减去所有UNSD sector rows；未证明互斥的子账户留在父账。未来 EV/电解/FT/HP 电量不能预载到 direct A*。AEO8 generation 继续不作为目标；这不是对实际网络已经验证的声明。
+Six original bunker raw files were hash-verified. Selected records were matched by country, transaction, year, unit and quantity; cached2019 totals were checked within0.000051TWh rounding tolerance. Of44 domestic/international observations,22 have a positive matching base with no listed omitted transaction. **17 of these are international obligations** and become numeric accepted2050 targets under the human boundary. Domestic records are not silently covered by the international decision. Existing raw originals and old cached CSVs are unchanged.
 
-2050 电解参数沿用原 v0.13.2：efficiency=0.6994（LHV H2/electric input）、lifetime=25年、FOM=4%/年、investment=1000 EUR2020/kW_e。现有 pre_costs_2050 与已恢复官方 SHA `ec22a184…` 输出逐字节相同，未更新DEA。前三项已有旧sheet86链；投资为公开冻结 manual override 所载原情景假设，按本轮优先级3沿用，原 private communications 无独立实证核验作为限制保留，不能称为“私人来源已恢复”。未激活组件。
+| Country | International account | Constant2050 MWh/year |
+|---|---|---:|
+| BN | InternationalAviationBunker | 1324700.0000 |
+| ID | InternationalAviationBunker | 11222100.0000 |
+| ID | InternationalShippingBunker | 2607000.000 |
+| KH | InternationalAviationBunker | 1907300.0000 |
+| LA | InternationalAviationBunker | 443500.0000 |
+| MM | InternationalAviationBunker | 882000.000 |
+| MM | InternationalShippingBunker | 11900.0000 |
+| MY | InternationalAviationBunker | 29654300.0000 |
+| MY | InternationalShippingBunker | 4636100.0000 |
+| PH | InternationalAviationBunker | 20087600.0000 |
+| PH | InternationalShippingBunker | 640800.0000 |
+| SG | InternationalShippingBunker | 535341800.0000 |
+| TH | InternationalAviationBunker | 55100500.0000 |
+| TH | InternationalShippingBunker | 13132200.0000 |
+| TL | InternationalAviationBunker | 35800.0000 |
+| VN | InternationalAviationBunker | 15643200.0000 |
+| VN | InternationalShippingBunker | 2053300.0000 |
 
-Power原限额 2025/2030/2035/2040/2045/2050=1000/820/640/460/280/100 MtCO2/year，baseline enable=false；预算年份不是需求预测来源。
+Singapore international marine remains exactly535.3418TWh =535341800MWh; its previous float-format tail is removed by exact decimal conversion, not by rescaling demand. FT/synthetic supply may satisfy this accepted liquid-fuel energy obligation under the existing architecture; FT production electricity remains endogenous, outside the exogenous Astar parent.
 
-地质库采用本轮明确允许的无储存资产 fallback，潜力数值仍 unknown，不创建无限储存；biomass无接受分配的资源暂不可用，不复制360 TWh，也不引入无上限进口。二者是可用性控制，不是观测到自然资源=0。未来正生物质义务仍必须保留；该供给限制可能使验证模型不可行，不能静默删除需求。无地质库会排除永久封存但不自动禁止有来源的本地CO2→FT原料回用。
+International base exceptions retained as PENDING: BN/InternationalShippingBunkerFuel: MISSING_BASE_SOURCE; KH/InternationalShippingBunkerFuel: ZERO_WITHOUT_EXACT_SELECTED_RAW; LA/InternationalShippingBunkerFuel: MISSING_BASE_SOURCE; SG/InternationalAviationBunkerFuel: EXACT_SELECTED_CACHE_MATCH_WITH_OMITTED_TRANSACTION_OR_COMMODITY; TL/InternationalShippingBunkerFuel: MISSING_BASE_SOURCE. These are distinct from the **closed2050 growth decision**. Missing data are not zero; Singapore is not redistributed to another country. SG aviation has an omitted aviation-gasoline record in the existing review, so the incomplete cached aggregate is not silently declared a complete verified total.
 
-## 2050 阻断与最低资料
+## Representation and gate accounting
 
-现有通用增长/工业增长文件只有 DEFAULT、MA、NA、US（效率文件 DEFAULT、MA、US），无 ASEAN 专属行；Git 历史显示通用默认值，不提供所需的 ASEAN growth 依据。`prepare_energy_totals` 又有列对齐后 fillna(0)；旧未来缓存不能充当合格预测。`FUTURE_INDUSTRY_GROWTH_BLOCKER` 保留。
+The original275 target rows contained11 Road EV rows; they did **not** contain separate Residential/Services/Industry/Agriculture direct-electricity child Loads. Exactly those11 EV rows become nonnumeric embedded boundaries. There remain264 required physical target rows. Twelve new informational RoadParent rows (ASEAN10 +11 country entries, TL pending) have `Kind=ACCOUNTING`, `Required=false`, and cannot materialise as duplicate Loads. Registry total:588 records.
 
-旧 DEC_2050 EV share=1 同时参与车种效率/车辆处理，未证明是本轮要求的最终能耗份额。不得仅改名为 s_E；R 和 s_E 必须联合定义，使 EV=R*s_E 与各残余燃料同一基准。原无量纲/里程混用道路链未启用。
+Numeric accepted target demands: 17. Materialisable target demands: 0; node/time ownership is not yet established on an actual100-node/full-year network. Candidate values are never consumed as accepted values. Empty country/carrier entries remain null.
 
-2050需要的275个物理需求记录均未接受（11电力、88 Buildings、77 Transport、44 Industry、33 Agriculture、22国际bunker）；这是依赖账本计数，**不是要求用户分别找275份新资料**。需要的是一套相容的目标年 direct A*、道路最终能耗/份额、各主要部门增长/燃料义务；可采用已有可靠数据或明确来源的简约方法，不能由程序默认补值。空间/时序分配也尚未被物化，空 allocation_missing 仅因无 accepted 2050需求，绝不等于分配已通过。
+## Remaining input work
 
-煤/气/油价格原输出分别为9.5542、24.568、52.9111 EUR2020/MWh_th；source currency_year 仍保留2010/2015，不能再通胀。热值匹配、国家容量/年可用量尚未闭合，数值保留 PENDING。外部供给不等于跨国物理通道或能源自给。
+- Outstanding unit convention: `PENDING_HUMAN_CONVENTION`.225.0Mtoe and350.5315Mtoe are retained directly, without inferring final electricity from generation.
+- C.3 gives2022→2050 ratios, whereas the fixed project fuel core is2019. The explicit rebasing question remains pending; candidates and year labels are saved. Domestic constant-latest-history rebasing and Agriculture-and-Others scope must stay disclosed.
+- Existing2019 fuel source reconciliation is not erased by a future growth method: missing/empty-set zeros, omitted domestic navigation `in` vs `by` transactions, and calorific/industry boundary issues remain visible. No275 independent data searches are proposed.
+- Road carrier composition, rail non-electric ownership and TL road evolution remain source/boundary work, not a renewed search for a BAS Road EV split.
 
-TL无来源独立工业子账户不单列为阻断整个 ASEAN 的原因；保留A*与未知覆盖限制。当前主要阻断来自所有国家目标年父账和主要部门数值，不是要求完整TL工业微观调查。
-
-## Buildings 国家×部门表示矩阵（冻结设计，实际网络未构建）
-
-| Country | Residential | Services | Explicit heat |
-|---|---|---|---|
-| BN | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| ID | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| KH | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| LA | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| MM | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| MY | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| PH | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| SG | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| TH | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| TL | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-| VN | electricity embedded in A*; fixed fuels pending | electricity embedded in A*; fixed fuels pending | none accepted; no default heat Load |
-
-Cooling嵌入；Cooking仅核算；space/water heat未有合格服务量时保持嵌入；不造stock、uniform district heating或BDEW需求。R/S分开标识并不意味数据完整或有新增Load。农业油/biomass/煤、工业煤实际能源量、四类国内/国际船/航空义务均保留输入门禁，未以只有排放的Load替代燃料。
+The input gate returns `BLOCKED_INPUT_FREEZE` (expected exit2). It rejects a zero/explicit EV row, a dropped required obligation, or an additional RoadParent Load. No fake preflight or actual-network PASS is issued.

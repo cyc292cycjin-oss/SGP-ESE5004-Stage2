@@ -1,7 +1,5 @@
-# Gate4 blocked delivery
+# Phase4 Gate4 — Assembly V1 resume
 
-先读PHASE4_GATE4_READINESS与ASSEMBLY_INPUT_FREEZE。16项要求文件均提供，但无网络的actual表明确NOT_RUN；清单齐全不等于Gate4通过。网络manifest中的null为未生成，不是零规模网络。没有.nc成果。
+Start with PHASE4_GATE4_READINESS.md, PHASE4_ASSEMBLY_INPUT_FREEZE.md and AEO8_BAS_2050_DEMAND_SOURCE_MAP.md. The canonical input capsule is research_inputs/assembly_v1; the CSV is its review view. ASSEMBLY_V1_2050_METHOD_REGISTER.csv distinguishes source values, human assumptions and pending candidate rebases.
 
-research_inputs/assembly_v1 是独立部分冻结，原Gate2账本保持。SOURCE→raw→unit/year→transformation→Assembly status可追踪。CSV是registry.json的可审阅投影；ASSEM acceptance不等于HUMAN_ACCEPTED。
-
-原始拓扑修复已用独立commit保存，一行数据删除通过前后验证。最终HEAD、remote保护引用、源/配置hash和包Git字节对应关系在CLOSEOUT.json / SHA256SUMS.json。实际网络项不得用历史tutorial/Gate3合成模板替代。
+Road EV and international bunker future-growth questions are closed for Assembly V1. Current input freeze remains PARTIAL; no unsolved network or solver result exists. Historical Gate4 evidence is retained; current results and source traces live in evidence/resume. Actual-network CSVs remain explicitly NOT_RUN.
