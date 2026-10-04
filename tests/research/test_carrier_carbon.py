@@ -37,6 +37,11 @@ class CarrierTests(unittest.TestCase):
     def test_same_market_different_price_rejected(self):
         c.external_import(self.f,'SG0','gas','same',assumption(),accepted=True)
         with self.assertRaises(ValueError):c.external_import(self.f,'MY0','gas','same',assumption(20),accepted=True)
+    def test_common_price_different_country_availability(self):
+        a=assumption();b=dict(a,capacity_mw=20,annual_cap_mwh=200)
+        keys=[c.external_import(self.f,node,'gas','same',record,accepted=True) for node,record in [('SG0',a),('MY0',b)]]
+        self.assertEqual([self.f.components[key]['params']['annual_cap_mwh'] for key in keys],[100,200])
+        self.assertEqual(c.reachability(self.f),[])
     def test_import_unaccepted_rejected(self):
         with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',assumption(),accepted=False)
     def test_new_h2_import_rejected(self):

@@ -105,7 +105,8 @@ def external_import(f,node,commodity,market_id,assumption,*,accepted):
     cap=assumption['annual_cap_mwh']
     if cap is None and assumption['unlimited_annual_accepted'] is not True:raise ValueError('No accepted annual availability')
     if cap is not None:finite(cap)
-    f.market(market_id,commodity,assumption)
+    # Shared price provenance does not imply identical national availability.
+    f.market(market_id,commodity,{k:assumption[k] for k in ('price','price_unit','source_sha256','source_year','basis')})
     b=bus_name(node,commodity);country=f.buses[b]['country']
     key=f.add('Generator',node+' external '+commodity,country,commodity,outputs=[b],role='EXTERNAL_SUPPLY',
         params=dict(p_nom=capacity,p_nom_extendable=False,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),
