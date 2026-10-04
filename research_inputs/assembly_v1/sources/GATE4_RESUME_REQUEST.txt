@@ -1,0 +1,821 @@
+# SGP ESE5004 Stage2
+# Phase 4 Gate 4 — RESUME
+# Target-Year Input Closure + First Full-SC Network Build
+#
+# This is a continuation of Gate4, NOT a new Gate/Phase.
+
+## 0. Authoritative resume state
+
+Research branch:
+
+research/full-sc-baseline
+
+Gate4 final remote HEAD:
+
+4d944d67809d699e94e50f2b41d16b3679c65a82
+
+Verified tested implementation:
+
+3c4242569ba266d9806c064da9c74d8876fe5ecc
+
+Existing topology fix commit:
+
+d13d5976da7e8486215efb987718f9b3f9c82215
+
+Current Gate4 state:
+
+- topology referential integrity PASS;
+- 765/766 issue resolved by removing obsolete transf_524_0;
+- 2019 A* anchors frozen;
+- Research config guards established;
+- no Full-SC .nc exists;
+- zero solver runs;
+- build stopped correctly at input preflight.
+
+Do NOT redo the topology investigation.
+
+Do NOT reopen Phase1–3 design.
+
+--------------------------------------------------
+1. Main objective
+
+Close only the minimum target-year inputs required for Assembly V1,
+then build the first complete UNSOLVED 2050 Research Full-SC network.
+
+Do NOT search for 275 independent demand sources.
+
+275 target rows must be generated from a small, transparent,
+source-backed target-year methodology.
+
+Then perform the original Gate4 actual-network validation.
+
+NO SOLVER.
+
+--------------------------------------------------
+2. Demand scenario decision
+
+For Assembly V1 use:
+
+AEO8 BAS (Baseline Scenario)
+
+as the regional exogenous demand-evolution anchor.
+
+Reason:
+
+- Power decarbonisation is already represented separately by PolicyCO2_Power;
+- do not preload stronger ATS/CNS electrification assumptions;
+- do not use PyPSA-Earth DEFAULT/MA/NA/US demand growth values;
+- do not use AEO8 electricity generation as direct demand.
+
+This is an Assembly V1 modelling decision.
+
+Document it clearly.
+
+--------------------------------------------------
+3. Recover AEO8 target-year tables
+
+Use existing cached/project AEO8 evidence first.
+
+Perform only targeted recovery.
+
+Recover exact source/table/page for relevant BAS values, preferably:
+
+- final electricity consumption
+- Residential final energy
+- Services/Commercial final energy
+- Industry final energy
+- Agriculture/Other final energy if available
+- Road/Land transport final energy
+- road/EV electricity or final-energy share
+- Domestic shipping/navigation
+- International shipping bunker
+- Domestic aviation
+- International aviation
+- major fuel/carrier splits where reported
+
+Do not perform a broad literature review.
+
+If official AEO8 raw/report source is not locally available,
+retrieve only the official source required for these tables.
+
+Produce:
+
+AEO8_BAS_2050_DEMAND_SOURCE_MAP.md
+
+Every adopted value must have:
+scenario
+year
+unit
+table/page
+definition
+ASEAN coverage
+
+--------------------------------------------------
+4. General target-year construction hierarchy
+
+For a target sector/carrier account (s,k):
+
+### Tier 1 — authoritative country-specific 2050 value
+
+If a compatible country-specific 2050 source already exists and is traceable:
+use it.
+
+### Tier 2 — AEO8 regional sector/carrier total
+
+If AEO8 provides:
+
+D_ASEAN,s,k,2050
+
+allocate using verified 2019 country shares:
+
+D_c,s,k,2050
+=
+D_ASEAN,s,k,2050
+*
+D_c,s,k,2019
+/
+sum_c D_c,s,k,2019
+
+Only countries with valid reported base-year ownership participate.
+
+Missing country data remain missing, not zero.
+
+### Tier 3 — AEO8 sector-total growth only
+
+If only sector total exists:
+
+g_s =
+D_ASEAN,s,2050 / D_ASEAN,s,base
+
+then:
+
+D_c,s,k,2050
+=
+D_c,s,k,2019 * g_s
+
+This preserves base-year carrier composition.
+
+### Tier 4 — low-materiality fallback
+
+Only if no AEO8 compatible quantity exists
+AND the account is demonstrably low-materiality:
+
+carry 2019 final-energy obligation forward unchanged.
+
+Label:
+
+ASSEMBLY_V1_FALLBACK_CONSTANT
+
+Do NOT call it forecast data.
+
+If the account is material:
+STOP that account instead of using Tier4.
+
+--------------------------------------------------
+5. 2050 electricity parent A*
+
+A* remains:
+
+end-user final electricity parent account.
+
+Use AEO8 BAS reported FINAL ELECTRICITY,
+NOT electricity generation,
+as the ASEAN10 2050 parent-total anchor.
+
+Do not infer it from TFEC × share if AEO8 directly reports it.
+
+Country allocation hierarchy:
+
+1. accepted country-specific final-electricity projection, if already available;
+2. otherwise allocate AEO8 ASEAN10 final electricity by 2019 UNSD national A* shares.
+
+For ASEAN10:
+
+A*_c,2050
+=
+A*_ASEAN10,2050
+*
+A*_c,2019
+/
+sum_ASEAN10 A*_2019
+
+Timor-Leste:
+
+AEO8 ASEAN10 totals must NOT silently include TL.
+
+If no independent TL projection exists:
+
+apply the same ASEAN10 aggregate 2019→2050 growth factor
+to TL's verified 2019 A*,
+and label it:
+
+ASSEMBLY_V1_TL_REGIONAL_GROWTH_FALLBACK
+
+Do not alter the AEO8 ASEAN10 total to pretend TL was included.
+
+--------------------------------------------------
+6. A* child ownership
+
+A* is the final-electricity PARENT.
+
+For Assembly V1 keep embedded within A*:
+
+- Residential direct electricity
+- Services direct electricity
+- Industry direct electricity
+- Agriculture electricity
+- Rail electricity
+- cooling
+- electric cooking
+- other accepted direct uses
+
+Do NOT build duplicate separate fixed electricity Loads for these accounts.
+
+Only explicitly transferred electricity children may be subtracted.
+
+--------------------------------------------------
+7. Road EV
+
+Road EV remains EXPLICIT and is a material account.
+
+Do NOT reuse:
+
+DEC_2050 EV share = 1
+
+unless an authoritative trace proves it is the accepted final-energy share.
+
+Do NOT use vehicle share as energy share.
+
+Targeted priority:
+
+recover AEO8 BAS road/land-transport electricity
+or explicit EV final-energy share.
+
+Required contract:
+
+RoadParentFinalEnergy = R
+
+EV final electricity = R * s_E
+
+Residual road fuel =
+R * (1-s_E) distributed across accepted residual carriers.
+
+R and s_E must share the same final-energy denominator.
+
+If no defensible AEO8/official road EV final-energy evidence can be recovered:
+
+ROAD_EV_2050 remains a material blocker.
+
+Do not invent it.
+
+--------------------------------------------------
+8. Other sector target-year demands
+
+### Buildings fuel
+
+Use 2019 country final-fuel accounts
+plus AEO8 BAS Residential/Services target-year totals or growth.
+
+Do not create explicit thermal-service demand.
+
+Cooling remains embedded electricity.
+
+Cooking remains accounting-only.
+
+### Industry
+
+Use 2019 fixed final-energy core.
+
+Project with AEO8 BAS Industry final-energy growth.
+
+Do NOT use DEFAULT industry_growth_cagr.
+
+Preserve carrier shares unless AEO8 supplies compatible carrier-specific targets.
+
+Do not create a full process/service model.
+
+### Agriculture
+
+Use compatible AEO8 Agriculture/Other growth if available.
+
+If unavailable:
+test materiality.
+
+Only if demonstrably minor may 2019 fuel obligations be carried forward
+under ASSEMBLY_V1_FALLBACK_CONSTANT.
+
+### Shipping / aviation
+
+Use AEO8 BAS compatible navigation/aviation/bunker totals or growth.
+
+Maintain four separate ledgers:
+
+DomesticShippingFuel
+InternationalShippingBunker
+DomesticAviationFuel
+InternationalAviationBunker
+
+Do not merge international bunker into domestic final consumption.
+
+--------------------------------------------------
+9. Do not create 275 source hunts
+
+The output should contain the 275 target rows,
+but they should derive from a compact set of:
+
+- 2019 verified parents/fuel accounts
+- AEO8 BAS regional target/growth records
+- transparent allocation formulas
+- a very small number of documented low-materiality fallbacks
+
+Create:
+
+ASSEMBLY_V1_2050_METHOD_REGISTER.csv
+
+Fields:
+
+MethodID
+Sector
+Carrier
+Source2050
+BaseSource2019
+Formula
+Countries
+Fallback
+Materiality
+Status
+SourceLocation
+
+--------------------------------------------------
+10. Fuel-price decision
+
+For Assembly V1 use the already-frozen final model values in:
+
+pre_costs_2050 / costs_2050
+
+for external fossil commodity marginal prices.
+
+Examples already recovered include:
+
+coal fuel
+gas fuel
+oil fuel
+
+Do NOT re-inflate these values from original publication currency years.
+
+The final model cost output is the operational value.
+
+Preserve:
+
+original source
+source currency year
+final model currency/unit
+transformation provenance
+
+as metadata.
+
+Verify the model-facing unit and heat basis.
+
+If the final processed model value is:
+
+EUR2020/MWh_th
+
+record that directly.
+
+Do not apply a second HHV/LHV or inflation conversion.
+
+--------------------------------------------------
+11. External fossil commodity supply boundary
+
+Assembly V1 decision:
+
+Each country receives an independent external commodity import interface
+for accepted fossil fuels.
+
+External gas/oil/coal commodity quantity is NON-BINDING
+unless an already accepted country limit exists.
+
+This is a MODEL BOUNDARY,
+not a statement that real infrastructure is unlimited.
+
+Interpretation:
+
+- import capacity/security constraints are outside the first core experiment;
+- Integrated and Disconnected will use identical external market assumptions;
+- no ASEAN physical fuel bus is created.
+
+Record:
+
+ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED
+
+for this boundary.
+
+No cross-country gas/oil/coal transport network.
+
+--------------------------------------------------
+12. Biomass Assembly V1
+
+Do NOT restore:
+
+Earth solid biomass
+or
+360 TWh free regional pool.
+
+Do NOT create unlimited biomass imports.
+
+For an accepted fixed country biomass final-energy obligation:
+
+allow local biomass supply only up to the accepted fixed obligation.
+
+Thus:
+
+local biomass supply cap
+=
+accepted fixed biomass demand obligation
+
+unless a stronger country-specific resource source already exists.
+
+This is an accounting/supply sufficiency cap,
+NOT a claim that national biomass potential equals demand.
+
+No surplus biomass may be used for new power/H2/heat expansion
+without an accepted resource-potential source.
+
+Countries with no accepted biomass obligation receive no assumed biomass resource.
+
+Record this explicitly.
+
+--------------------------------------------------
+13. Geological CO2 storage
+
+Keep Gate4 conservative boundary:
+
+NO geological storage asset in Assembly V1
+
+unless a previously accepted country-specific storage source already exists.
+
+Do not create:
+
+unlimited `co2 stored`.
+
+This means CCS requiring permanent storage may be unavailable in Assembly V1.
+
+Local captured CO2 used as accepted FT feedstock may remain possible
+under Gate3 carbon-origin rules.
+
+Record this as a baseline limitation and future sensitivity candidate.
+
+Do not broaden source search.
+
+--------------------------------------------------
+14. Re-run input preflight
+
+After creating the 2050 target-year registry:
+
+run the Assembly V1 input gate.
+
+Required:
+
+accepted target demands must cover every material account required by the chosen first-network representation.
+
+Do NOT require explicit rows for demand intentionally EMBEDDED in A*.
+
+Reconcile the required-account list with Phase3 frozen representations.
+
+For example:
+
+embedded direct electricity subaccounts
+must not be independently required as fixed Loads.
+
+Do not reduce requirements merely to force PASS;
+every removal must cite the frozen representation.
+
+--------------------------------------------------
+15. Carbon blocker ordering
+
+G4-CARBON-01 is NOT a pre-network numerical input gate.
+
+It requires ACTUAL assembled components.
+
+Reclassify it as:
+
+POST_BUILD_STATIC_VALIDATION_BLOCKER
+
+Correct order:
+
+target-year input freeze
+→ network build
+→ actual component attribution
+→ carbon static validation
+→ Gate4 readiness
+
+Do NOT waive it for Gate5.
+
+It must be closed before Gate4 PASS,
+but only after the network exists.
+
+--------------------------------------------------
+16. Build configuration
+
+Once input preflight passes:
+
+set Research baseline to permit network export.
+
+Keep:
+
+solver_allowed = false
+
+Integrated / Disconnected scenario switching = false
+
+legacy final demand adjustment = forbidden
+
+legacy only-electric crop = false
+
+Do not run any solve rule.
+
+--------------------------------------------------
+17. Build only the primary 2050 Research network
+
+Primary target:
+
+2050
+
+Weather year:
+2013
+
+Temporal resolution:
+full-year 3h
+
+Spatial resolution:
+accepted 100-cluster Research configuration
+
+Do NOT build multiple years merely for completeness.
+
+Build through unsolved network export only.
+
+Generate a clearly named artifact, e.g.:
+
+research_fullsc_2050_unsolved.nc
+
+Do not commit large network bytes unless repository policy permits.
+
+Record SHA256 and manifest.
+
+--------------------------------------------------
+18. Actual network validation
+
+After the network exists, complete the ORIGINAL Gate4 validation:
+
+- finite Loads
+- no NaN / inf
+- valid Bus/carrier references
+- source→sector→node→time conservation
+- exactly-once demand ownership
+- Buildings embedded-vs-explicit consistency
+- Road accounting
+- Industry/Agriculture fuel conservation
+- bunker separation
+- actual prohibited-carrier reachability
+- external-market nonphysical separation
+- actual carbon component attribution
+- power-policy trajectory/scope
+- electricity domestic/cross-border classification
+- active sector-coupling pathways
+- component inventory
+- snapshot/physical weight identity
+
+Do not substitute Gate2/Gate3 synthetic tests for these actual-network checks.
+
+--------------------------------------------------
+19. Actual carbon attribution
+
+Now close G4-CARBON-01.
+
+Classify actual emitting/conversion components:
+
+PowerPolicy = YES/NO
+FullSystemReporting = YES/NO
+
+Pay special attention to:
+
+CHP
+SMR / SMR-CC
+electrolysis-related power
+H2 used for power vs non-power
+FT
+captured CO2
+recycled CO2
+
+Use actual component function,
+not just carrier name.
+
+No active material emitting component may remain UNKNOWN.
+
+--------------------------------------------------
+20. Electricity interconnection control set
+
+On the actual 2050 Research network classify all electricity:
+
+Line
+AC Link
+DC Link
+Transformer where relevant
+
+as:
+
+DOMESTIC
+CROSS_BORDER
+UNKNOWN
+
+Resolve all material UNKNOWN.
+
+Produce the exact future control set for Gate5/Phase5.
+
+Do NOT switch it yet.
+
+The control set must contain physical cross-border electricity transfer components only.
+
+--------------------------------------------------
+21. Sector-coupling audit
+
+Verify actual nonzero-capable pathways.
+
+At minimum check whether present/valid:
+
+Electricity → EV
+
+Electricity → electrolysis → H2
+
+H2 / electricity / CO2 → FT
+
+FT → accepted road/shipping/aviation fuel obligation
+
+H2 → accepted non-power demand if any
+
+Electricity → heat only where heat is explicitly represented
+
+Do not require every theoretical pathway to exist.
+
+But do not label the network Full-SC if only electricity + disconnected fixed fuel Loads remain.
+
+--------------------------------------------------
+22. Preserve previous tests
+
+Re-run:
+
+Gate1 static
+Gate2 demand/accounting
+Gate3 carrier/carbon
+Buildings regression if touched
+Shipping regression if touched
+Topology tests
+
+All must remain PASS.
+
+--------------------------------------------------
+23. Git discipline
+
+Continue from current Gate4 branch state.
+
+Recommended logical commits:
+
+data: close assembly-v1 2050 target inputs
+
+feat: enable unsolved research full-sc build
+
+test: validate first assembled research network
+
+docs: close Gate4 with actual network evidence
+
+Do not rewrite or squash previous Gate4 topology history.
+
+Remote main unchanged.
+
+No force push.
+
+--------------------------------------------------
+24. Required updated deliverables
+
+Update/complete the existing Gate4 deliverables rather than creating a parallel Gate.
+
+Add:
+
+AEO8_BAS_2050_DEMAND_SOURCE_MAP.md
+
+ASSEMBLY_V1_2050_METHOD_REGISTER.csv
+
+and complete the existing:
+
+PHASE4_ASSEMBLY_INPUT_FREEZE.md
+PHASE4_ASSEMBLY_INPUT_REGISTRY.csv
+PHASE4_FIRST_FULLSC_NETWORK_MANIFEST.json
+PHASE4_NETWORK_COMPONENT_INVENTORY.csv
+PHASE4_ACTUAL_DEMAND_CONSERVATION.csv
+PHASE4_ACTUAL_EXACTLY_ONCE_TESTS.csv
+PHASE4_ACTUAL_CARRIER_REACHABILITY.csv
+PHASE4_ACTUAL_CARBON_ATTRIBUTION.csv
+PHASE4_ACTUAL_ELECTRICITY_LINK_CLASSIFICATION.csv
+PHASE4_ACTIVE_SECTOR_COUPLING_PATHWAYS.csv
+PHASE4_GATE4_BLOCKERS.csv
+PHASE4_GATE4_TEST_REPORT.md
+PHASE4_GATE4_READINESS.md
+
+Do not create fake PASS rows for tests not run.
+
+--------------------------------------------------
+25. Final required answers
+
+Answer:
+
+A. What compact set of AEO8 BAS target-year inputs produced the 2050 ledger?
+
+B. Which target accounts used country-specific projections?
+
+C. Which used regional-total + 2019-share allocation?
+
+D. Which used sector-growth scaling?
+
+E. Which used low-materiality constant fallback?
+
+F. What exact 2050 national A* values were created?
+
+G. Is AEO8 generation completely absent from Research direct-demand calibration?
+
+H. What exact Road parent and EV final-energy source/method was accepted?
+
+I. Which upstream DEFAULT growth values are no longer used?
+
+J. What external fossil fuel price/unit/basis is used?
+
+K. Are country external fossil interfaces physically independent?
+
+L. How is biomass supplied without restoring the global pool?
+
+M. Is geological storage absent in Assembly V1?
+
+N. Did the input preflight pass?
+
+O. Was the first unsolved Full-SC 2050 `.nc` built?
+
+P. What is its SHA256 and component inventory?
+
+Q. Are all Loads finite?
+
+R. Does actual demand conservation pass?
+
+S. Does actual exactly-once accounting pass?
+
+T. Are hidden prohibited cross-border carrier paths absent?
+
+U. Is actual PowerPolicy CO2 attribution complete?
+
+V. What exact electricity interconnector control set was identified?
+
+W. Which active sector-coupling pathways exist?
+
+X. Were ZERO solver runs executed?
+
+Y. What blockers remain before Gate5?
+
+--------------------------------------------------
+26. Required statuses
+
+ASSEMBLY_V1_2050_INPUTS = PASS / PARTIAL / FAIL
+
+TOPOLOGY_REFERENTIAL_INTEGRITY = PASS / FAIL
+
+FIRST_FULLSC_UNSOLVED_NETWORK_BUILT = YES / NO
+
+SOLVER_RUNS_EXECUTED = 0 / >0
+
+ACTUAL_NETWORK_FINITE_VALUES = PASS / FAIL
+
+ACTUAL_DEMAND_CONSERVATION = PASS / PARTIAL / FAIL
+
+ACTUAL_EXACTLY_ONCE_ACCOUNTING = PASS / PARTIAL / FAIL
+
+HIDDEN_CROSSBORDER_CARRIER_SHARING = ELIMINATED / PARTIAL / PRESENT
+
+ACTUAL_POWER_CO2_SCOPE = PASS / PARTIAL / FAIL
+
+ACTIVE_SECTOR_COUPLING_PATHWAYS = PASS / PARTIAL / FAIL
+
+ELECTRICITY_INTERCONNECTION_CONTROL_SET_READY = YES / NO
+
+FULL_SC_RESEARCH_NETWORK_STATICALLY_VALIDATED = YES / NO
+
+READY_FOR_PHASE4_GATE5_VALIDATION_SOLVE = YES / NO
+
+--------------------------------------------------
+27. Stop condition
+
+STOP after Gate4 actual-network validation.
+
+NO solver.
+
+NO Integrated/Disconnected solve.
+
+NO objective comparison.
+
+If one remaining material input cannot be defensibly closed,
+report the exact single blocker and stop rather than inventing it.
