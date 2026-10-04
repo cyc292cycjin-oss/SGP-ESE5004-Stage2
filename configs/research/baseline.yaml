@@ -1,5 +1,4 @@
-# Gate2 demand contract only. Not a Snakemake or solver configuration.
-# All scientific numbers retain their individual human-acceptance gates.
+# Research demand/carrier/carbon contracts only; never an upstream solve config.
 research_demand:
   schema: phase4-gate2-v1
   mode: static_demand_only
@@ -21,3 +20,44 @@ research_demand:
   heat_without_accepted_service: embedded
   future_growth_fallback: forbidden
   solver_allowed: false
+
+research_carrier_architecture:
+  schema: phase4-gate3-v1
+  mode: static_fragments_only
+  builder: scripts_project/carrier_architecture.py
+  ownership: explicit_node_country
+  cross_border_h2: false
+  cross_border_gas: false
+  cross_border_co2: false
+  cross_border_biomass: false
+  cross_border_synthetic_fuels: false
+  ammonia: deferred
+  methanol: deferred
+  external_h2_imports: deferred
+  h2_export_obligation: deferred_pending_accepted_boundary
+  external_market: independent_source_generators_shared_price_metadata_only
+  finite_resource_allocation: human_accepted_only_no_replication
+  co2_feedstock: local_captured_pool
+  co2_geology: local_nonwithdrawable_inventory
+  electricity_intervention: deferred_keep_identical_interfaces
+  topology_repair: deferred
+  solver_allowed: false
+
+research_carbon:
+  policy_name: PolicyCO2_Power
+  reporting_name: ReportingCO2_FullSystem
+  policy_enabled: false  # Preserve original baseline co2.budget.enable=false.
+  budget_tco2_per_year:
+    2025: 1000000000
+    2030: 820000000
+    2035: 640000000
+    2040: 460000000
+    2045: 280000000
+    2050: 100000000
+  power_scope: explicit_accepted_component_coefficients
+  shared_smr_chp_attribution: pending_human_accepted_split
+  atmosphere: reporting_only_zero_policy_carrier_factor
+  reporting_creates_cap: false
+  full_system_cap: forbidden
+  origin_neutrality_assumption: forbidden
+  preserved_baseline_enable_semantics: true
