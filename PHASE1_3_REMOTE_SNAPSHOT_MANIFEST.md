@@ -4,7 +4,7 @@ Preparation UTC: 2026-10-04T11:26:30.849677+00:00
 
 Snapshot branch: `archive/phase1-3-research-snapshot`.
 
-**Snapshot content commit SHA: Recorded in the immediately following identity-only commit.**
+**Snapshot content commit SHA: 1cc05b3d024dd9445884e98195d2bf018ca4187c.**
 
 Construction: one parentless documentation-content commit followed by one provenance-only identity commit. The final branch tip is verified separately in FINAL_REMOTE_REF_VERIFICATION.csv; the content SHA is recorded here without a circular self-hash. This is not the original local ancestry and is not byte-identical to branches containing excluded raw bytes.
 
