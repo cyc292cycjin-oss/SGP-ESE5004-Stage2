@@ -1,0 +1,42 @@
+test_765_is_retained_766_not_fabricated (__main__.TopologyTests.test_765_is_retained_766_not_fabricated) ... ok
+test_actual_all_references_valid (__main__.TopologyTests.test_actual_all_references_valid) ... FAIL
+test_duplicate_bus_rejected (__main__.TopologyTests.test_duplicate_bus_rejected) ... ok
+test_missing_converter_endpoint_detected (__main__.TopologyTests.test_missing_converter_endpoint_detected) ... ok
+test_missing_line_endpoint_detected (__main__.TopologyTests.test_missing_line_endpoint_detected) ... ok
+test_missing_transformer_endpoint_detected (__main__.TopologyTests.test_missing_transformer_endpoint_detected) ... ok
+test_nonfinite_coordinate_rejected (__main__.TopologyTests.test_nonfinite_coordinate_rejected) ... ok
+test_obsolete_transformer_absent (__main__.TopologyTests.test_obsolete_transformer_absent) ... FAIL
+test_unknown_country_rejected (__main__.TopologyTests.test_unknown_country_rejected) ... ok
+
+======================================================================
+FAIL: test_actual_all_references_valid (__main__.TopologyTests.test_actual_all_references_valid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/tests/research/test_topology_integrity.py", line 9, in test_actual_all_references_valid
+    def test_actual_all_references_valid(self):self.assertEqual(inspect(self.t)['issues'],[])
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [{'issue': 'DANGLING_ENDPOINT', 'component[57 chars]6']}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'issue': 'DANGLING_ENDPOINT', 'component': 'Transformer', 'name': 'transf_524_0', 'missing': ['766']}
+
++ []
+- [{'component': 'Transformer',
+-   'issue': 'DANGLING_ENDPOINT',
+-   'missing': ['766'],
+-   'name': 'transf_524_0'}]
+
+======================================================================
+FAIL: test_obsolete_transformer_absent (__main__.TopologyTests.test_obsolete_transformer_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/tests/research/test_topology_integrity.py", line 12, in test_obsolete_transformer_absent
+    def test_obsolete_transformer_absent(self):self.assertFalse(any(r['line_id']=='transf_524_0' for r in self.t['Transformer']))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.522s
+
+FAILED (failures=2)

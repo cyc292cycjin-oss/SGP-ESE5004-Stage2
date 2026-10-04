@@ -1,0 +1,19 @@
+[
+  {
+    "head": "8c9a5473dcfd6a74ba5bb77b7d5848bbca37b16b",
+    "message": "data: freeze source-qualified Assembly V1 anchors and controls\n\nAccept 11 UNSD 2019 final-electricity parents, four frozen upstream electrolyser\nparameters, six existing power budgets and explicit boundary controls under\nASSEMBLY_V1_ACCEPTED, never HUMAN_ACCEPTED. Keep 2050 demand pending and\nnever reuse DEFAULT growth, missing zero, or vehicle shares as energy shares.",
+    "paths": [
+      "research_inputs/assembly_v1"
+    ]
+  },
+  {
+    "head": "3c4242569ba266d9806c064da9c74d8876fe5ecc",
+    "message": "test: gate assembly on source-qualified target-year inputs\n\nAdd hash-pinned input checks and explicit blocked 2050 preflight. Disable\nupstream electricity-only crop and data refresh in Research overrides, but\nkeep full workflow non-runnable until material inputs close. Preserve Gate2\nand Gate3 contracts; no model construction, scenario switch or optimizer.",
+    "paths": [
+      "scripts_project/check_assembly_inputs.py",
+      "tests/research/test_assembly_input_freeze.py",
+      "configs/research/baseline.yaml",
+      "configs/research/composition.json"
+    ]
+  }
+]
