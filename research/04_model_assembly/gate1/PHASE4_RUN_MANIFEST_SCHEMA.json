@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phase4 future formal run identity",
+  "type": "object",
+  "required": [
+    "run_id",
+    "git_commit",
+    "branch",
+    "config",
+    "config_sha256",
+    "input_manifest_sha256",
+    "environment",
+    "Python_version",
+    "PyPSA_version",
+    "solver",
+    "solver_version",
+    "start_time",
+    "end_time",
+    "scenario",
+    "spatial_resolution",
+    "temporal_resolution",
+    "weather_year",
+    "carbon_policy",
+    "cross_border_electricity_status",
+    "other_cross_border_carriers",
+    "objective",
+    "termination_condition",
+    "output_network",
+    "output_sha256",
+    "solver_status"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "git_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "config": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "input_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "environment": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "Python_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "PyPSA_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "solver": {
+      "type": "string",
+      "minLength": 1
+    },
+    "solver_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "scenario": {
+      "type": "string",
+      "minLength": 1
+    },
+    "spatial_resolution": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "temporal_resolution": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "weather_year": {
+      "type": "integer",
+      "minimum": 1900
+    },
+    "carbon_policy": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "cross_border_electricity_status": {
+      "enum": [
+        "INTEGRATED",
+        "DISCONNECTED",
+        "VALIDATION_ONLY",
+        "NOT_IMPLEMENTED"
+      ]
+    },
+    "other_cross_border_carriers": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "objective": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "termination_condition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output_network": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "solver_status": {
+      "enum": [
+        "NOT_RUN",
+        "RUNNING",
+        "FINISHED",
+        "FAILED"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "solver_status": {
+            "const": "NOT_RUN"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "objective": {
+            "type": "null"
+          },
+          "end_time": {
+            "type": "null"
+          },
+          "output_network": {
+            "type": "null"
+          },
+          "output_sha256": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "solver_status": {
+            "const": "FINISHED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "end_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "output_network": {
+            "type": "string",
+            "minLength": 1
+          },
+          "output_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  ]
+}

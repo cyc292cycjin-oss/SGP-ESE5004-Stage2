@@ -1,0 +1,699 @@
+commit 92e9118be20f0b3802f385adac2f56650d57299d
+Author:     cyc292cycjin-oss <329621298+cyc292cycjin-oss@users.noreply.github.com>
+AuthorDate: Thu Oct 1 17:58:22 2026 +0800
+Commit:     cyc292cycjin-oss <329621298+cyc292cycjin-oss@users.noreply.github.com>
+CommitDate: Thu Oct 1 18:22:53 2026 +0800
+
+    fix: preserve residential and services heat demand identities
+
+diff --git a/research/02_sector_coupling/buildings_engineering_tests/E1_README.md b/research/02_sector_coupling/buildings_engineering_tests/E1_README.md
+new file mode 100644
+index 00000000..bd30d8c9
+--- /dev/null
++++ b/research/02_sector_coupling/buildings_engineering_tests/E1_README.md
+@@ -0,0 +1,7 @@
++# E1 engineering candidate
++
++Base: `a3616a68ee44592af6527ca9024a90f1956646ae`. Synthetic fixtures only; no solver and no accepted demand data.
++
++Run: `python research/02_sector_coupling/buildings_engineering_tests/check_E1.py --repo . --fix E1 --output /tmp/E1.json`
++
++The before result fails, the after result passes. Pending human review; not merged into Research Model.
+diff --git a/research/02_sector_coupling/buildings_engineering_tests/E1_after.json b/research/02_sector_coupling/buildings_engineering_tests/E1_after.json
+new file mode 100755
+index 00000000..491e0699
+--- /dev/null
++++ b/research/02_sector_coupling/buildings_engineering_tests/E1_after.json
+@@ -0,0 +1,230 @@
++{
++  "fix": "E1",
++  "synthetic_only": true,
++  "optimizer_called": false,
++  "tests": [
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban central heat": 1.242,
++        "SG0 residential urban decentral heat": 2.52,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.828,
++        "SG0 services urban decentral heat": 1.68
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.8,
++        "SG0 residential urban central heat": 0.414,
++        "SG0 residential urban decentral heat": 0.84,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.828,
++        "SG0 services urban decentral heat": 1.68,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 0.0,
++        "S_TWh": 4.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 0.0,
++        "SG0 residential urban central heat": 0.0,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.828,
++        "SG0 services urban decentral heat": 1.68
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 1.0,
++        "SG0 residential rural heat": 0.0,
++        "SG0 residential urban central heat": 0.0,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.828,
++        "SG0 services urban decentral heat": 1.68,
++        "residential oil emissions": -0.2,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 0.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban central heat": 1.242,
++        "SG0 residential urban decentral heat": 2.52,
++        "SG0 services rural heat": 0.0,
++        "SG0 services urban central heat": 0.0,
++        "SG0 services urban decentral heat": 0.0
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.8,
++        "SG0 residential urban central heat": 0.414,
++        "SG0 residential urban decentral heat": 0.84,
++        "SG0 services rural heat": 0.0,
++        "SG0 services urban central heat": 0.0,
++        "SG0 services urban decentral heat": 0.0,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 0.0,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban central heat": 0.0,
++        "SG0 residential urban decentral heat": 3.6,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.0,
++        "SG0 services urban decentral heat": 2.4
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.8,
++        "SG0 residential urban central heat": 0.0,
++        "SG0 residential urban decentral heat": 1.2,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 0.0,
++        "SG0 services urban decentral heat": 2.4,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 1.0,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban central heat": 4.139999999999999,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 2.76,
++        "SG0 services urban decentral heat": 0.0
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.8,
++        "SG0 residential urban central heat": 1.3799999999999994,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban central heat": 2.76,
++        "SG0 services urban decentral heat": 0.0,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    }
++  ],
++  "all_pass": true,
++  "pypsa": "0.30.3",
++  "pandas": "2.3.1"
++}
+\ No newline at end of file
+diff --git a/research/02_sector_coupling/buildings_engineering_tests/E1_before.json b/research/02_sector_coupling/buildings_engineering_tests/E1_before.json
+new file mode 100755
+index 00000000..4b8e6413
+--- /dev/null
++++ b/research/02_sector_coupling/buildings_engineering_tests/E1_before.json
+@@ -0,0 +1,220 @@
++{
++  "fix": "E1",
++  "synthetic_only": true,
++  "optimizer_called": false,
++  "tests": [
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": false,
++        "services_allocation_conserved": false,
++        "residential_remaining_plus_DH_loss_conserved": false,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban decentral heat": 2.52,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban decentral heat": 1.68,
++        "SG0 urban central heat": 2.07
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.2734332276058187,
++        "SG0 residential urban decentral heat": 0.2871048889861096,
++        "SG0 services rural heat": 0.43049327354260086,
++        "SG0 services urban decentral heat": 0.45201793721973094,
++        "SG0 urban central heat": 0.5569506726457398,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 0.0,
++        "S_TWh": 4.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": false,
++        "services_allocation_conserved": false,
++        "residential_remaining_plus_DH_loss_conserved": true,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 0.0,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban decentral heat": 1.68,
++        "SG0 urban central heat": 0.828
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 1.0,
++        "SG0 residential rural heat": 0.0,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 0.0,
++        "SG0 services urban decentral heat": 0.0,
++        "SG0 urban central heat": 0.0,
++        "residential oil emissions": -0.2,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 0.0,
++        "potential": 0.3,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": true,
++        "services_allocation_conserved": true,
++        "residential_remaining_plus_DH_loss_conserved": false,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban decentral heat": 2.52,
++        "SG0 services rural heat": 0.0,
++        "SG0 services urban decentral heat": 0.0,
++        "SG0 urban central heat": 1.242
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.6112230328397911,
++        "SG0 residential urban decentral heat": 0.6417841844817807,
++        "SG0 services rural heat": 0.0,
++        "SG0 services urban decentral heat": 0.0,
++        "SG0 urban central heat": 0.7469927826784282,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 0.0,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": false,
++        "services_allocation_conserved": false,
++        "residential_remaining_plus_DH_loss_conserved": false,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban decentral heat": 3.6,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban decentral heat": 2.4,
++        "SG0 urban central heat": 0.0
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.273972602739726,
++        "SG0 residential urban decentral heat": 0.410958904109589,
++        "SG0 services rural heat": 0.5260273972602739,
++        "SG0 services urban decentral heat": 0.7890410958904109,
++        "SG0 urban central heat": 0.0,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    },
++    {
++      "fixture": {
++        "R_TWh": 6.0,
++        "S_TWh": 4.0,
++        "potential": 1.0,
++        "hours": [
++          2,
++          3
++        ]
++      },
++      "checks": {
++        "services_unchanged": false,
++        "services_allocation_conserved": false,
++        "residential_remaining_plus_DH_loss_conserved": false,
++        "fixed_residential_fuel_unchanged": true,
++        "direct_residential_unchanged": true,
++        "finite_nonnegative_heat": true,
++        "distributed_heat_pumps_remain": true,
++        "services_direct_conserved": true
++      },
++      "before": {
++        "SG0": 20.0,
++        "SG0 residential rural heat": 2.4,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 1.6,
++        "SG0 services urban decentral heat": 0.0,
++        "SG0 urban central heat": 6.9
++      },
++      "after": {
++        "SG0": 7.0,
++        "SG0 residential biomass": 0.0,
++        "SG0 residential gas": 0.0,
++        "SG0 residential oil": 5.0,
++        "SG0 residential rural heat": 0.39370078740157477,
++        "SG0 residential urban decentral heat": 0.0,
++        "SG0 services rural heat": 0.30236220472440944,
++        "SG0 services urban decentral heat": 0.0,
++        "SG0 urban central heat": 1.3039370078740158,
++        "residential oil emissions": -1.0,
++        "residential gas emissions": 0.0
++      }
++    }
++  ],
++  "all_pass": false,
++  "pypsa": "0.30.3",
++  "pandas": "2.3.1"
++}
+\ No newline at end of file
+diff --git a/research/02_sector_coupling/buildings_engineering_tests/check_E1.py b/research/02_sector_coupling/buildings_engineering_tests/check_E1.py
+new file mode 100755
+index 00000000..d193b4aa
+--- /dev/null
++++ b/research/02_sector_coupling/buildings_engineering_tests/check_E1.py
+@@ -0,0 +1,108 @@
++"""Isolated frozen-function tests on labelled synthetic fixtures; NO optimizer.
++Usage: python check_candidate_fixes.py --repo PATH --fix E1|E2|E4 --output JSON
++Exit 1 is expected on the frozen baseline, and required before each candidate patch.
++"""
++from pathlib import Path
++from types import SimpleNamespace as NS
++from itertools import product
++import argparse, ast, json, logging, warnings
++import numpy as np
++import pandas as pd
++import pypsa, pytz
++warnings.filterwarnings('ignore',category=FutureWarning)
++
++def load(path,names,env):
++    tree=ast.parse(path.read_text());body=[]
++    for x in tree.body:
++        if isinstance(x,ast.FunctionDef) and x.name in names:body.append(x)
++        if isinstance(x,ast.Assign) and any(isinstance(t,ast.Name) and t.id in names for t in x.targets):body.append(x)
++    exec(compile(ast.Module(body=body,type_ignores=[]),str(path),'exec'),env)
++
++def fixture(repo,r=6.,s=4.,potential=.3):
++    env=dict(pd=pd,np=np,pypsa=pypsa,logger=logging.getLogger('audit'),get=lambda x,y:x)
++    load(repo/'scripts/_helpers.py',['safe_divide'],env)
++    load(repo/'scripts/prepare_sector_network.py',['normalize_by_country','p_set_from_scaling','add_residential','add_services','add_heat','create_nodes_for_heat_sector'],env)
++    n=pypsa.Network(); n.set_snapshots(pd.date_range('2013-01-01',periods=2,freq='h'))
++    n.snapshot_weightings.loc[:,:]=np.array([[2.],[3.]])
++    for nm,c in [('SG0','AC'),('SG0 oil','oil'),('SG0 gas','gas'),('SG0 biomass','solid biomass'),('co2 atmosphere','co2')]:n.add('Bus',nm,carrier=c)
++    n.buses['location']='SG0';n.buses['country']='SG'
++    n.add('Load','SG0',bus='SG0',carrier='AC',p_set=[20e6/5]*2)
++    heat=pd.DataFrame({(sec+' '+use,'SG0'):[q*share*1e6/5]*2 for sec,q in [('residential',r),('services',s)] for use,share in [('space',.6),('water',.4)]},index=n.snapshots)
++    profiles={'heat':heat,'cop':pd.DataFrame({'SG0':[3.,3.]},index=n.snapshots),'solar':pd.DataFrame({'SG0':[0.,0.]},index=n.snapshots),'district':pd.DataFrame({'district heat share':[0.]},index=['SG0'])}
++    costs=pd.DataFrame({'efficiency':[3.,3.,3.,1.,1.],'fixed':[10.,10.,10.,0.,0.],'lifetime':[20.,20.,20.,20.,20.],'CO2 intensity':[0.,0.,0.,.2,.2]},index=['decentral ground-sourced heat pump','decentral air-sourced heat pump','central air-sourced heat pump','oil','gas'])
++    env.update(countries=['SG'],investment_year=2030,options={'district_heating':{'potential':potential,'progress':1.,'district_heating_loss':.15},'reduce_space_heat_exogenously':False,'time_dep_hp_cop':False,'tes':False,'boilers':False,'solar_thermal_collector':{'enable':False},'chp':False,'micro_chp':False},
++      pop_layout=pd.DataFrame({'urban':[.6],'rural':[.4],'fraction':[1.],'ct':['SG']},index=['SG0']),
++      read_csv_nafix=lambda name,**kw:profiles[name].copy(),
++      spatial=NS(nodes=pd.Index(['SG0']),**{f:NS(nodes=pd.Index(['SG0 '+f])) for f in ['oil','gas','biomass']}))
++    et=pd.DataFrame({'total residential space':[r*.6],'total residential water':[r*.4],'residential heat oil':[r*2/3],'residential heat gas':[0.],'residential heat biomass':[0.],'residential oil':[1.],'residential gas':[0.],'residential biomass':[0.],'electricity residential':[7.],'services electricity':[3.],'services oil':[0.],'services gas':[0.],'services biomass':[0.]},index=['SG'])
++    return n,env,costs,et,profiles
++
++def amounts(n):return n.loads_t.p_set.mul(n.snapshot_weightings.generators,axis=0).sum()/1e6
++
++def test_e1(repo):
++    results=[]
++    for r,s,p in [(6.,4.,.3),(0.,4.,.3),(6.,0.,.3),(6.,4.,0.),(6.,4.,1.)]:
++        n,env,costs,et,_=fixture(repo,r,s,p)
++        env['add_heat'](n,costs,'heat','solar','cop','cop','district');before=amounts(n)
++        heat_i=n.loads.index[n.loads.carrier.str.contains('heat')]
++        assert np.isclose(before[heat_i].sum(),(r+s)*(1+.6*p*.15))
++        service_i=heat_i[heat_i.str.contains('services')]
++        service_before=n.loads_t.p_set[service_i].copy()
++        env['add_residential'](n,costs,et);after=amounts(n)
++        residential_i=heat_i[heat_i.str.contains('residential')]
++        checks={
++          'services_unchanged':np.allclose(n.loads_t.p_set[service_i],service_before),
++          'services_allocation_conserved':np.isclose(after[service_i].sum(),s*(1+.6*p*.15)),
++          'residential_remaining_plus_DH_loss_conserved':np.isclose(after[residential_i].sum(),r/3*(1+.6*p*.15)),
++          'fixed_residential_fuel_unchanged':np.isclose(after['SG0 residential oil'],1+r*2/3),
++          'direct_residential_unchanged':np.isclose(after['SG0'],7),
++          'finite_nonnegative_heat':bool(np.isfinite(n.loads_t.p_set[heat_i]).all().all() and (n.loads_t.p_set[heat_i]>=0).all().all()),
++          'distributed_heat_pumps_remain':int(n.links.index.str.contains('decentral|rural').sum())==4,
++        }
++        env['add_services'](n,costs,et)
++        checks['services_direct_conserved']=np.isclose(amounts(n)['SG0 services electricity'],3.)
++        results.append(dict(fixture=dict(R_TWh=r,S_TWh=s,potential=p,hours=[2,3]),checks={k:bool(v) for k,v in checks.items()},before=before.to_dict(),after=after.to_dict()))
++    return results
++
++def prepared(repo,annual,daily):
++    env=dict(pd=pd,np=np,pypsa=pypsa,pytz=pytz,product=product)
++    load(repo/'scripts/prepare_heat_data.py',['generate_periodic_profiles','prepare_heat_data','normalize_heat_profile'],env)
++    n=pypsa.Network();n.set_snapshots(pd.date_range('2013-01-01',periods=24,freq='h'))
++    profiles=pd.DataFrame(1.,index=range(24),columns=[f'{s} {u} {d}' for s in ['residential','services'] for u in ['space','water'] for d in ['weekday','weekend']])
++    totals=pd.DataFrame({f'{t} {s} {u}':[annual if u=='space' else 2.] for t in ['total','electricity'] for s in ['residential','services'] for u in ['space','water']},index=['SG']);totals['district heat share']=0.
++    env.update(pop_layout=pd.DataFrame({'ct':['SG'],'fraction':[1.]},index=['SG0']),options={'solar_thermal_collector':{'cf_correction':1.}},
++      snakemake=NS(input=NS(cop_air_total='cop',cop_soil_total='cop',solar_thermal_total='solar',energy_totals_name='totals',heat_demand_total='daily',heat_profile='profile')),
++      read_csv_nafix=lambda name,**kw:totals.copy() if name=='totals' else profiles.copy(),
++      xr=NS(open_dataarray=lambda name:NS(to_pandas=lambda:pd.DataFrame({'SG0':[daily if name=='daily' else 1.]*24},index=n.snapshots))))
++    return env['prepare_heat_data'](n)[1]
++
++def test_e2(repo):
++    results=[]
++    for annual,daily,raise_expected in [(6.,0.,True),(0.,0.,False),(6.,1.,False),(6.,float('nan'),True),(6.,-1.,True),(-1.,1.,True)]:
++        try:
++            h=prepared(repo,annual,daily)
++            ok=not raise_expected and np.isfinite(h.values).all() and np.allclose(h['residential space'].sum().values,annual*1e6) and np.allclose(h['services water'].sum().values,2e6)
++            detail=dict(space_TWh=h['residential space'].sum().iloc[0]/1e6,water_TWh=h['services water'].sum().iloc[0]/1e6,finite=bool(np.isfinite(h.values).all()))
++        except ValueError as e:ok=raise_expected;detail={'raised':str(e)}
++        results.append(dict(fixture=f'annual={annual},daily={daily}',checks={'fail_or_conserve_as_required':bool(ok)},detail=detail))
++    n,env,costs,et,p=fixture(repo);p['heat'].iloc[0,0]=np.nan
++    try:env['add_heat'](n,costs,'heat','solar','cop','cop','district');ok=False;detail='invalid imported profile silently accepted'
++    except ValueError as e:ok=True;detail=str(e)
++    results.append(dict(fixture='invalid imported CSV profile',checks={'consumer_rejects_nan':ok},detail=detail))
++    return results
++
++def test_e4(repo):
++    n,env,_,_,_=fixture(repo)
++    n.add('Link','synthetic retained DC link',bus0='SG0',bus1='SG0',carrier='DC',p_nom=0.)
++    n.add('Load','SG0 services electricity',bus='SG0',carrier='services electricity',p_set=[3e6/5]*2)
++    load(repo/'scripts/final_asean_adjustment.py',['strip_network','carrier_to_keep'],env)
++    after=env['strip_network'](n,env['carrier_to_keep']);a=amounts(after)
++    return [dict(fixture='power-only filter; no recalibration',checks={'service_load_retained':'SG0 services electricity' in after.loads.index,'direct_electricity_conserved':bool(np.isclose(a.sum(),23.))},before=amounts(n).to_dict(),after=a.to_dict())]
++
++if __name__=='__main__':
++    p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,required=True);p.add_argument('--fix',choices=['E1','E2','E4'],required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
++    tests={'E1':test_e1,'E2':test_e2,'E4':test_e4}[a.fix](a.repo)
++    ok=all(all(x['checks'].values()) for x in tests)
++    result=dict(fix=a.fix,synthetic_only=True,optimizer_called=False,tests=tests,all_pass=ok,pypsa=pypsa.__version__,pandas=pd.__version__)
++    a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(result,indent=2,allow_nan=False))
++    print(json.dumps({'fix':a.fix,'all_pass':ok,'cases':len(tests)}));raise SystemExit(0 if ok else 1)
+diff --git a/scripts/prepare_sector_network.py b/scripts/prepare_sector_network.py
+index 572b5e90..bb855e0d 100644
+--- a/scripts/prepare_sector_network.py
++++ b/scripts/prepare_sector_network.py
+@@ -2724,23 +2724,25 @@ def add_heat(
+                 )
+ 
+         if name == "urban central":
+-            heat_load = (
+-                heat_demand.groupby(level=1, axis=1)
+-                .sum()[h_nodes[name]]
+-                .multiply(
+-                    factor * (1 + options["district_heating"]["district_heating_loss"])
++            # Preserve sector demand identities on the shared district heat bus.
++            for sector in sectors:
++                sector_load = (
++                    heat_demand[[sector + " water", sector + " space"]]
++                    .groupby(level=1, axis=1).sum()[h_nodes[name]]
++                    .multiply(factor * (1 + options["district_heating"]["district_heating_loss"]))
++                )
++                n.madd(
++                    "Load", h_nodes[name], suffix=f" {sector} {name} heat",
++                    bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
++                    p_set=sector_load,
+                 )
++        else:
++            n.madd(
++                "Load", h_nodes[name], suffix=f" {name} heat",
++                bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
++                p_set=heat_load,
+             )
+ 
+-        n.madd(
+-            "Load",
+-            h_nodes[name],
+-            suffix=f" {name} heat",
+-            bus=h_nodes[name] + f" {name} heat",
+-            carrier=name + " heat",
+-            p_set=heat_load,
+-        )
+-
+         ## Add heat pumps
+ 
+         heat_pump_type = "air" if "urban" in name else "ground"
+@@ -3283,14 +3285,21 @@ def add_residential(
+     )
+     heat_shape = heat_shape.T.groupby(level=[0, 1]).sum().T
+ 
+-    n.loads_t.p_set[heat_ind] = 1e6 * heat_shape_raw.mul(
++    total_heat = (
+         energy_totals["total residential space"]
+         + energy_totals["total residential water"]
+-        - energy_totals["residential heat biomass"]
+-        - energy_totals["residential heat oil"]
+-        - energy_totals["residential heat gas"],
+-        level=0,
+-    ).droplevel(level=0, axis=1).div(temporal_resolution, axis=0)
++    )
++    remaining_heat = total_heat - energy_totals[
++        ["residential heat biomass", "residential heat oil", "residential heat gas"]
++    ].sum(axis=1)
++    if ((remaining_heat < -1e-9) | (total_heat < 0)).any():
++        raise ValueError("Residential remaining heat must be between zero and total heat")
++    fraction = remaining_heat.div(total_heat.where(total_heat > 0)).fillna(0.)
++    # Keep existing nodal allocation and district losses; never rescale services.
++    scale = pd.Series(heat_ind.str[:2], index=heat_ind).map(fraction)
++    if scale.isna().any():
++        raise ValueError("Missing residential country heat totals")
++    n.loads_t.p_set[heat_ind] = n.loads_t.p_set[heat_ind].mul(scale, axis=1)
+ 
+     heat_oil_demand = p_set_from_scaling(
+         "residential heat oil", heat_shape, energy_totals, temporal_resolution
+@@ -3380,27 +3389,6 @@ def add_residential(
+         p_set=-co2,
+     )
+ 
+-    for country in countries:
+-        rem_heat_demand = (
+-            energy_totals.loc[country, "total residential space"]
+-            + energy_totals.loc[country, "total residential water"]
+-            - energy_totals.loc[country, "residential heat biomass"]
+-            - energy_totals.loc[country, "residential heat oil"]
+-            - energy_totals.loc[country, "residential heat gas"]
+-        )
+-
+-        heat_buses = (n.loads_t.p_set.filter(regex="heat").filter(like=country)).columns
+-
+-        safe_division = safe_divide(
+-            n.loads_t.p_set.filter(like=country)[heat_buses],
+-            n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
+-        )
+-        n.loads_t.p_set.loc[:, heat_buses] = np.where(
+-            safe_division.notna(),
+-            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
+-            0.0,
+-        )
+-
+     # Revise residential electricity demand
+     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
+ 

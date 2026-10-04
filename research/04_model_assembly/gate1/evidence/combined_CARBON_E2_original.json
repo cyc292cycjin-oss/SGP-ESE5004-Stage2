@@ -1,0 +1,75 @@
+{
+  "fix": "E2",
+  "synthetic_only": true,
+  "optimizer_called": false,
+  "tests": [
+    {
+      "fixture": "annual=6.0,daily=0.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "raised": "total residential space: positive demand without valid profile at ['SG0']"
+      }
+    },
+    {
+      "fixture": "annual=0.0,daily=0.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "space_TWh": 0.0,
+        "water_TWh": 2.0,
+        "finite": true
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=1.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "space_TWh": 6.0,
+        "water_TWh": 2.0,
+        "finite": true
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=nan",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "raised": "total residential space: positive demand without valid profile at ['SG0']"
+      }
+    },
+    {
+      "fixture": "annual=6.0,daily=-1.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "raised": "total residential space: positive demand without valid profile at ['SG0']"
+      }
+    },
+    {
+      "fixture": "annual=-1.0,daily=1.0",
+      "checks": {
+        "fail_or_conserve_as_required": true
+      },
+      "detail": {
+        "raised": "total residential space: invalid annual demand"
+      }
+    },
+    {
+      "fixture": "invalid imported CSV profile",
+      "checks": {
+        "consumer_rejects_nan": true
+      },
+      "detail": "Invalid heat demand profile; positive annual demand must not be silently dropped"
+    }
+  ],
+  "all_pass": true,
+  "pypsa": "0.30.3",
+  "pandas": "2.3.1"
+}

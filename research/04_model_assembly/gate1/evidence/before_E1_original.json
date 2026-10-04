@@ -1,0 +1,220 @@
+{
+  "fix": "E1",
+  "synthetic_only": true,
+  "optimizer_called": false,
+  "tests": [
+    {
+      "fixture": {
+        "R_TWh": 6.0,
+        "S_TWh": 4.0,
+        "potential": 0.3,
+        "hours": [
+          2,
+          3
+        ]
+      },
+      "checks": {
+        "services_unchanged": false,
+        "services_allocation_conserved": false,
+        "residential_remaining_plus_DH_loss_conserved": false,
+        "fixed_residential_fuel_unchanged": true,
+        "direct_residential_unchanged": true,
+        "finite_nonnegative_heat": true,
+        "distributed_heat_pumps_remain": true,
+        "services_direct_conserved": true
+      },
+      "before": {
+        "SG0": 20.0,
+        "SG0 residential rural heat": 2.4,
+        "SG0 residential urban decentral heat": 2.52,
+        "SG0 services rural heat": 1.6,
+        "SG0 services urban decentral heat": 1.68,
+        "SG0 urban central heat": 2.07
+      },
+      "after": {
+        "SG0": 7.0,
+        "SG0 residential biomass": 0.0,
+        "SG0 residential gas": 0.0,
+        "SG0 residential oil": 5.0,
+        "SG0 residential rural heat": 0.2734332276058187,
+        "SG0 residential urban decentral heat": 0.2871048889861096,
+        "SG0 services rural heat": 0.43049327354260086,
+        "SG0 services urban decentral heat": 0.45201793721973094,
+        "SG0 urban central heat": 0.5569506726457398,
+        "residential oil emissions": -1.0,
+        "residential gas emissions": 0.0
+      }
+    },
+    {
+      "fixture": {
+        "R_TWh": 0.0,
+        "S_TWh": 4.0,
+        "potential": 0.3,
+        "hours": [
+          2,
+          3
+        ]
+      },
+      "checks": {
+        "services_unchanged": false,
+        "services_allocation_conserved": false,
+        "residential_remaining_plus_DH_loss_conserved": true,
+        "fixed_residential_fuel_unchanged": true,
+        "direct_residential_unchanged": true,
+        "finite_nonnegative_heat": true,
+        "distributed_heat_pumps_remain": true,
+        "services_direct_conserved": true
+      },
+      "before": {
+        "SG0": 20.0,
+        "SG0 residential rural heat": 0.0,
+        "SG0 residential urban decentral heat": 0.0,
+        "SG0 services rural heat": 1.6,
+        "SG0 services urban decentral heat": 1.68,
+        "SG0 urban central heat": 0.828
+      },
+      "after": {
+        "SG0": 7.0,
+        "SG0 residential biomass": 0.0,
+        "SG0 residential gas": 0.0,
+        "SG0 residential oil": 1.0,
+        "SG0 residential rural heat": 0.0,
+        "SG0 residential urban decentral heat": 0.0,
+        "SG0 services rural heat": 0.0,
+        "SG0 services urban decentral heat": 0.0,
+        "SG0 urban central heat": 0.0,
+        "residential oil emissions": -0.2,
+        "residential gas emissions": 0.0
+      }
+    },
+    {
+      "fixture": {
+        "R_TWh": 6.0,
+        "S_TWh": 0.0,
+        "potential": 0.3,
+        "hours": [
+          2,
+          3
+        ]
+      },
+      "checks": {
+        "services_unchanged": true,
+        "services_allocation_conserved": true,
+        "residential_remaining_plus_DH_loss_conserved": false,
+        "fixed_residential_fuel_unchanged": true,
+        "direct_residential_unchanged": true,
+        "finite_nonnegative_heat": true,
+        "distributed_heat_pumps_remain": true,
+        "services_direct_conserved": true
+      },
+      "before": {
+        "SG0": 20.0,
+        "SG0 residential rural heat": 2.4,
+        "SG0 residential urban decentral heat": 2.52,
+        "SG0 services rural heat": 0.0,
+        "SG0 services urban decentral heat": 0.0,
+        "SG0 urban central heat": 1.242
+      },
+      "after": {
+        "SG0": 7.0,
+        "SG0 residential biomass": 0.0,
+        "SG0 residential gas": 0.0,
+        "SG0 residential oil": 5.0,
+        "SG0 residential rural heat": 0.6112230328397911,
+        "SG0 residential urban decentral heat": 0.6417841844817807,
+        "SG0 services rural heat": 0.0,
+        "SG0 services urban decentral heat": 0.0,
+        "SG0 urban central heat": 0.7469927826784282,
+        "residential oil emissions": -1.0,
+        "residential gas emissions": 0.0
+      }
+    },
+    {
+      "fixture": {
+        "R_TWh": 6.0,
+        "S_TWh": 4.0,
+        "potential": 0.0,
+        "hours": [
+          2,
+          3
+        ]
+      },
+      "checks": {
+        "services_unchanged": false,
+        "services_allocation_conserved": false,
+        "residential_remaining_plus_DH_loss_conserved": false,
+        "fixed_residential_fuel_unchanged": true,
+        "direct_residential_unchanged": true,
+        "finite_nonnegative_heat": true,
+        "distributed_heat_pumps_remain": true,
+        "services_direct_conserved": true
+      },
+      "before": {
+        "SG0": 20.0,
+        "SG0 residential rural heat": 2.4,
+        "SG0 residential urban decentral heat": 3.6,
+        "SG0 services rural heat": 1.6,
+        "SG0 services urban decentral heat": 2.4,
+        "SG0 urban central heat": 0.0
+      },
+      "after": {
+        "SG0": 7.0,
+        "SG0 residential biomass": 0.0,
+        "SG0 residential gas": 0.0,
+        "SG0 residential oil": 5.0,
+        "SG0 residential rural heat": 0.273972602739726,
+        "SG0 residential urban decentral heat": 0.410958904109589,
+        "SG0 services rural heat": 0.5260273972602739,
+        "SG0 services urban decentral heat": 0.7890410958904109,
+        "SG0 urban central heat": 0.0,
+        "residential oil emissions": -1.0,
+        "residential gas emissions": 0.0
+      }
+    },
+    {
+      "fixture": {
+        "R_TWh": 6.0,
+        "S_TWh": 4.0,
+        "potential": 1.0,
+        "hours": [
+          2,
+          3
+        ]
+      },
+      "checks": {
+        "services_unchanged": false,
+        "services_allocation_conserved": false,
+        "residential_remaining_plus_DH_loss_conserved": false,
+        "fixed_residential_fuel_unchanged": true,
+        "direct_residential_unchanged": true,
+        "finite_nonnegative_heat": true,
+        "distributed_heat_pumps_remain": true,
+        "services_direct_conserved": true
+      },
+      "before": {
+        "SG0": 20.0,
+        "SG0 residential rural heat": 2.4,
+        "SG0 residential urban decentral heat": 0.0,
+        "SG0 services rural heat": 1.6,
+        "SG0 services urban decentral heat": 0.0,
+        "SG0 urban central heat": 6.9
+      },
+      "after": {
+        "SG0": 7.0,
+        "SG0 residential biomass": 0.0,
+        "SG0 residential gas": 0.0,
+        "SG0 residential oil": 5.0,
+        "SG0 residential rural heat": 0.39370078740157477,
+        "SG0 residential urban decentral heat": 0.0,
+        "SG0 services rural heat": 0.30236220472440944,
+        "SG0 services urban decentral heat": 0.0,
+        "SG0 urban central heat": 1.3039370078740158,
+        "residential oil emissions": -1.0,
+        "residential gas emissions": 0.0
+      }
+    }
+  ],
+  "all_pass": false,
+  "pypsa": "0.30.3",
+  "pandas": "2.3.1"
+}

@@ -1,0 +1,384 @@
+{
+  "source_sha256": "62d9d453812d9a2c8596d87eeaa6a16631cea4d933d704c62198ac3ea4f48db8",
+  "nodes": "SG0/MY0 synthetic identities only; no model assembly",
+  "effective_options": {
+    "enable": {
+      "heat": true,
+      "biomass": true,
+      "industry": true,
+      "shipping": true,
+      "aviation": true,
+      "land_transport": true,
+      "rail_transport": true,
+      "agriculture": true,
+      "residential": true,
+      "services": true
+    },
+    "gas": {
+      "spatial_gas": true,
+      "network": false,
+      "network_data": "GGIT",
+      "network_data_GGIT_status": [
+        "Construction",
+        "Operating",
+        "Idle",
+        "Shelved",
+        "Mothballed",
+        "Proposed"
+      ]
+    },
+    "hydrogen": {
+      "network": false,
+      "H2_retrofit_capacity_per_CH4": 0.6,
+      "network_limit": 2000,
+      "network_routes": "gas",
+      "gas_network_repurposing": true,
+      "h2_turbine": true,
+      "underground_storage": {
+        "enabled": false,
+        "min_area_km2": 13,
+        "method": "surface",
+        "technical_realization_factor": 3.5e-05,
+        "energy_density_MWh_per_m3": 0.336,
+        "cavern_height_bedded_m": 120,
+        "cavern_diameter_bedded_m": 84,
+        "cavern_height_dome_m": 300,
+        "cavern_diameter_dome_m": 58,
+        "salt_buffer_m_bedded": 2000,
+        "salt_buffer_m_dome": 500,
+        "copernicus": {
+          "grid_codes": [
+            50,
+            80,
+            100
+          ],
+          "distance_buffer_by_code": {
+            "50": 2500,
+            "80": 200,
+            "100": 200
+          }
+        },
+        "rho_min": 5.0,
+        "rho_max": 42.0,
+        "theta_safety": 0.8,
+        "lhv_h2": 120,
+        "locations": [
+          "onshore",
+          "offshore"
+        ]
+      },
+      "hydrogen_colors": false,
+      "set_color_shares": false,
+      "blue_share": 0.4,
+      "pink_share": 0.05,
+      "production_technologies": [
+        "H2 Electrolysis",
+        "SMR",
+        "SMR CC"
+      ]
+    },
+    "coal": {
+      "spatial_coal": true,
+      "shift_to_elec": true
+    },
+    "lignite": {
+      "spatial_lignite": false
+    },
+    "oil": {
+      "spatial_oil": true
+    },
+    "ammonia": {
+      "enable": true,
+      "spatial_ammonia": true,
+      "production_year": 2019,
+      "gas_MWh_per_tNH3": 7.81,
+      "elec_MWh_per_tNH3": 1.278,
+      "co2_t_per_tNH3": 1.547
+    },
+    "district_heating": {
+      "potential": 0.3,
+      "progress": 1,
+      "district_heating_loss": 0.15
+    },
+    "reduce_space_heat_exogenously": false,
+    "reduce_space_heat_exogenously_factor": 0.29,
+    "space_heat_share": 0.6,
+    "tes": true,
+    "tes_tau": {
+      "decentral": 3,
+      "central": 180
+    },
+    "boilers": true,
+    "oil_boilers": false,
+    "chp": true,
+    "micro_chp": false,
+    "solar_thermal_collector": {
+      "enable": true,
+      "cf_correction": 0.788457,
+      "clearsky_model": "simple",
+      "orientation": {
+        "slope": 45.0,
+        "azimuth": 180.0
+      }
+    },
+    "heat_pump_sink_T": 55,
+    "time_dep_hp_cop": true,
+    "bev_plug_to_wheel_efficiency": 0.2,
+    "bev_charge_efficiency": 0.9,
+    "transport_heating_deadband_upper": 20.0,
+    "transport_heating_deadband_lower": 15.0,
+    "ICE_lower_degree_factor": 0.375,
+    "ICE_upper_degree_factor": 1.6,
+    "EV_lower_degree_factor": 0.98,
+    "EV_upper_degree_factor": 0.63,
+    "bev_avail_max": 0.95,
+    "bev_avail_mean": 0.8,
+    "bev_dsm_restriction_value": 0.75,
+    "bev_dsm_restriction_time": 7,
+    "v2g": true,
+    "bev_dsm": true,
+    "bev_energy": 0.05,
+    "bev_availability": 0.5,
+    "transport_fuel_cell_efficiency": 0.5,
+    "transport_internal_combustion_efficiency": 0.3,
+    "land_transport_fuel_cell_share": {
+      "BU_2030": 0.0,
+      "AP_2030": 0.004,
+      "NZ_2030": 0.02,
+      "DF_2030": 0.01,
+      "AB_2030": 0.01,
+      "BU_2050": 0.0,
+      "AP_2050": 0.06,
+      "NZ_2050": 0.28,
+      "DF_2050": 0.08,
+      "DEC_2020": 0.0,
+      "DEC_2025": 0.0,
+      "DEC_2030": 0.0,
+      "DEC_2035": 0.0,
+      "DEC_2040": 0.0,
+      "DEC_2045": 0.0,
+      "DEC_2050": 0.0
+    },
+    "land_transport_electric_share": {
+      "BU_2030": 0.0,
+      "AP_2030": 0.075,
+      "NZ_2030": 0.13,
+      "DF_2030": 0.01,
+      "AB_2030": 0.01,
+      "BU_2050": 0.0,
+      "AP_2050": 0.42,
+      "NZ_2050": 0.68,
+      "DF_2050": 0.011,
+      "DEC_2020": 0,
+      "DEC_2025": 0.05,
+      "DEC_2030": 0.2,
+      "DEC_2035": 0.45,
+      "DEC_2040": 0.7,
+      "DEC_2045": 0.85,
+      "DEC_2050": 1
+    },
+    "dynamic_transport": {
+      "enable": false,
+      "land_transport_fuel_cell_share": {
+        "Co2L2.0": 0.01,
+        "Co2L1.0": 0.01,
+        "Co2L0.90": 0.01,
+        "Co2L0.80": 0.01,
+        "Co2L0.70": 0.01,
+        "Co2L0.60": 0.01,
+        "Co2L0.50": 0.01,
+        "Co2L0.40": 0.01,
+        "Co2L0.30": 0.01,
+        "Co2L0.20": 0.01,
+        "Co2L0.10": 0.01,
+        "Co2L0.00": 0.01
+      },
+      "land_transport_electric_share": {
+        "Co2L2.0": 0.0,
+        "Co2L1.0": 0.01,
+        "Co2L0.90": 0.03,
+        "Co2L0.80": 0.06,
+        "Co2L0.70": 0.1,
+        "Co2L0.60": 0.17,
+        "Co2L0.50": 0.27,
+        "Co2L0.40": 0.4,
+        "Co2L0.30": 0.55,
+        "Co2L0.20": 0.69,
+        "Co2L0.10": 0.8,
+        "Co2L0.00": 0.88
+      }
+    },
+    "biomass_transport": false,
+    "biomass_transport_default_cost": 0.1,
+    "solid_biomass_potential": 360,
+    "biogas_potential": 0.5,
+    "electricity_distribution_grid": true,
+    "enable_electricity_connection_cost": false,
+    "solar_rooftop": {
+      "enable": true,
+      "kW_per_m2": 0.1,
+      "m2_per_person": 20,
+      "use_building_size": true,
+      "install_ratio": {
+        "0": 0,
+        "10": 0.3,
+        "100": 0.36,
+        "200": 0.41,
+        "450": 0.49,
+        "2300": 0.66
+      },
+      "tolerance": 100
+    },
+    "home_battery": true,
+    "transmission_efficiency": {
+      "electricity distribution grid": {
+        "efficiency_static": 0.97
+      },
+      "H2 pipeline": {
+        "efficiency_per_1000km": 1,
+        "compression_per_1000km": 0.017
+      }
+    },
+    "shipping_hydrogen_liquefaction": false,
+    "shipping_average_efficiency": 0.4,
+    "shipping_hydrogen_share": {
+      "BU_2030": 0.0,
+      "AP_2030": 0.0,
+      "NZ_2030": 0.1,
+      "DF_2030": 0.05,
+      "AB_2030": 0.05,
+      "BU_2050": 0.0,
+      "AP_2050": 0.25,
+      "NZ_2050": 0.36,
+      "DF_2050": 0.12,
+      "DEC_2020": 0.0,
+      "DEC_2025": 0.0,
+      "DEC_2030": 0.0,
+      "DEC_2035": 0.0,
+      "DEC_2040": 0.0,
+      "DEC_2045": 0.0,
+      "DEC_2050": 0.0
+    },
+    "airport_sizing_factor": 3,
+    "international_bunkers": false,
+    "co2_network": false,
+    "co2_sequestration_potential": 200,
+    "co2_sequestration_cost": 10,
+    "methanation": true,
+    "helmeth": true,
+    "dac": true,
+    "cc_fraction": 0.9,
+    "cc": true,
+    "fischer_tropsch": true,
+    "min_part_load_fischer_tropsch": 0.9,
+    "industry_util_factor": 0.7,
+    "efficiency_heat_oil_to_elec": 0.9,
+    "efficiency_heat_biomass_to_elec": 0.9,
+    "efficiency_heat_gas_to_elec": 0.9,
+    "conventional_generation": {
+      "OCGT": "gas",
+      "CCGT": "gas",
+      "oil": "oil",
+      "coal": "coal",
+      "lignite": "lignite",
+      "biomass": "biomass"
+    },
+    "keep_existing_capacities": false,
+    "marginal_cost_storage": 0
+  },
+  "namespace": {
+    "biomass": {
+      "nodes": [
+        "Earth solid biomass"
+      ],
+      "locations": [
+        "Earth"
+      ],
+      "industry": [
+        "solid biomass for industry"
+      ],
+      "industry_cc": [
+        "solid biomass for industry CC"
+      ]
+    },
+    "co2": {
+      "nodes": [
+        "co2 stored"
+      ],
+      "locations": [
+        "Earth"
+      ],
+      "vents": [
+        "co2 vent"
+      ]
+    },
+    "oil": {
+      "nodes": [
+        "SG0 oil",
+        "MY0 oil"
+      ],
+      "locations": [
+        "SG0",
+        "MY0"
+      ]
+    },
+    "gas": {
+      "nodes": [
+        "SG0 gas",
+        "MY0 gas"
+      ],
+      "locations": [
+        "SG0",
+        "MY0"
+      ],
+      "biogas": [
+        "SG0 biogas",
+        "MY0 biogas"
+      ],
+      "industry": [
+        "SG0 gas for industry",
+        "MY0 gas for industry"
+      ],
+      "industry_cc": [
+        "SG0 gas for industry CC",
+        "MY0 gas for industry CC"
+      ],
+      "biogas_to_gas": [
+        "SG0 biogas to gas",
+        "MY0 biogas to gas"
+      ]
+    },
+    "coal": {
+      "nodes": [
+        "SG0 coal",
+        "MY0 coal"
+      ],
+      "locations": [
+        "SG0",
+        "MY0"
+      ],
+      "industry": [
+        "SG0 coal for industry",
+        "MY0 coal for industry"
+      ]
+    },
+    "lignite": {
+      "nodes": [
+        "Earth lignite"
+      ],
+      "locations": [
+        "Earth"
+      ]
+    },
+    "ammonia": {
+      "nodes": [
+        "SG0 NH3",
+        "MY0 NH3"
+      ],
+      "locations": [
+        "SG0",
+        "MY0"
+      ]
+    }
+  }
+}

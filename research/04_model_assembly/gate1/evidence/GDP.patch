@@ -1,0 +1,246 @@
+commit a7a8f06b43f0dcce0dbd7005b989d8f73d142b81
+Author:     cyc292cycjin-oss <329621298+cyc292cycjin-oss@users.noreply.github.com>
+AuthorDate: Thu Oct 1 01:46:59 2026 +0800
+Commit:     cyc292cycjin-oss <329621298+cyc292cycjin-oss@users.noreply.github.com>
+CommitDate: Thu Oct 1 01:46:59 2026 +0800
+
+    fix: restore ASEAN GDP coverage and conserve national industrial demand
+
+diff --git a/scripts/build_industry_demand.py b/scripts/build_industry_demand.py
+index cb1a12ae..760ac2cb 100644
+--- a/scripts/build_industry_demand.py
++++ b/scripts/build_industry_demand.py
+@@ -23,29 +23,34 @@ def calculate_end_values(df):
+ 
+ 
+ def country_to_nodal(industrial_production, keys):
+-    # keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
+-
+-    nodal_production = pd.DataFrame(
+-        index=keys.index, columns=industrial_production.columns, dtype=float
+-    )
+-
+-    countries = keys.country.unique()
+-    sectors = industrial_production.columns
+-
+-    for country, sector in product(countries, sectors):
++    """Allocate each national quantity without changing its country total.
++
++    Facility weights are preferred; a country with no facility weight uses the
++    existing GDP fallback. Missing or invalid GDP is an error, never a zero demand.
++    """
++    if not keys.index.is_unique or not industrial_production.index.is_unique:
++        raise ValueError("Industrial inputs require unique node and country indices")
++    if keys.country.isna().any():
++        raise ValueError("Industrial nodes have missing country identifiers")
++    missing = set(keys.country) - set(industrial_production.index)
++    unlocated = set(industrial_production.index) - set(keys.country)
++    if missing or unlocated:
++        raise ValueError(f"Industrial country mismatch: missing totals={missing}, missing nodes={unlocated}")
++    nodal_production = pd.DataFrame(index=keys.index, columns=industrial_production.columns, dtype=float)
++    for country, sector in product(industrial_production.index, industrial_production.columns):
+         buses = keys.index[keys.country == country]
+-
+-        if sector not in keys.columns or keys[sector].sum() == 0:
+-            mapping = "gdp"
+-        else:
+-            mapping = sector
+-
+-        key = keys.loc[buses, mapping]
+-        # print(sector)
+-        nodal_production.loc[buses, sector] = (
+-            industrial_production.at[country, sector] * key
+-        )
+-
++        mapping = sector if sector in keys.columns else "gdp"
++        key = pd.to_numeric(keys.loc[buses, mapping], errors="raise")
++        if key.isna().any() or (~key.map(lambda x: float("-inf") < x < float("inf"))).any() or (key < 0).any():
++            raise ValueError(f"Invalid industrial weights for {country}/{sector}/{mapping}")
++        if key.sum() == 0 and mapping != "gdp":
++            key = pd.to_numeric(keys.loc[buses, "gdp"], errors="raise")
++        if key.isna().any() or (~key.map(lambda x: float("-inf") < x < float("inf"))).any() or (key < 0).any() or key.sum() <= 0:
++            raise ValueError(f"Missing positive GDP/facility weights for {country}/{sector}")
++        total = industrial_production.at[country, sector]
++        if pd.isna(total) or not float("-inf") < total < float("inf") or total < 0:
++            raise ValueError(f"Invalid national industrial quantity for {country}/{sector}")
++        nodal_production.loc[buses, sector] = total * key / key.sum()
+     return nodal_production
+ 
+ 
+@@ -177,6 +182,10 @@ if __name__ == "__main__":
+             "other": 0,
+         }
+ 
++        missing_countries = set(countries) - set(industry_base_totals.index.get_level_values(0))
++        if missing_countries:
++            raise ValueError(f"Missing national industrial data: {sorted(missing_countries)}; do not assume zero")
++
+         # fill industry_base_totals
+         level_2nd = industry_base_totals.index.get_level_values(1).unique()
+         mlv_index = pd.MultiIndex.from_product([countries, level_2nd])
+diff --git a/scripts/build_shapes.py b/scripts/build_shapes.py
+index 71036e21..7daa1965 100644
+--- a/scripts/build_shapes.py
++++ b/scripts/build_shapes.py
+@@ -802,55 +802,39 @@ def convert_GDP(
+ 
+     # subset of the database and conversion to dataframe
+     GDP_dataset = GDP_dataset.sel(time=year).drop("time")
++    GDP_dataset.rio.write_crs("EPSG:4326", inplace=True)
+     GDP_dataset.rio.to_raster(GDP_tif)
+ 
+     return GDP_tif, name_file_tif
+ 
+ 
+-def load_GDP(
+-    year: int = 2015,
+-    update: bool = False,
+-    out_logging: bool = False,
+-    name_file_nc: str = "GDP_PPP_1990_2015_5arcmin_v2.nc",
+-) -> tuple[str, str]:
+-    """
+-    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
+-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
++def load_GDP(year=2015, update=False, out_logging=False,
++             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
++    """Use only a raster derived from this raw NC and selected year.
+ 
+-    Parameters
+-    ----------
+-    year : int
+-        Year of the data to load
+-    update : bool
+-        Update = true, forces re-download of files
+-    out_logging : bool
+-        If True, emits progress information via the module logger.
+-    name_file_nc : str
+-        Name of the nc file containing the GDP data (e.g. "GDP_PPP_1990_2015_5arcmin_v2.nc")
+-
+-    Returns
+-    -------
+-    GDP_tif : str
+-        Path of the converted tif file
+-    name_file_tif : str
+-        Name of the converted tif file
++    Old bundles can contain an unrelated regional TIFF with the global filename.
++    Rebuild that cache from the existing source; do not download or update data.
+     """
+-
+-    if out_logging:
+-        logger.info("Stage 5 of 5: Access to GDP raster data")
+-
+-    # path of the nc file
+-    name_file_tif = name_file_nc[:-2] + "tif"
+-    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath tif
+-
+-    if update | (not os.path.exists(GDP_tif)):
+-        if out_logging:
+-            logger.warning(
+-                f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+-            )
++    import hashlib
++    GDP_nc = os.path.join(BASE_DIR, "data", "GDP", name_file_nc)
++    GDP_tif = GDP_nc[:-2] + "tif"
++    with open(GDP_nc, "rb") as source:
++        digest = hashlib.file_digest(source, "sha256").hexdigest()
++    with xr.open_dataset(GDP_nc) as source:
++        years = source.time.values
++        selected_year = float(year if year in years else years[-1])
++        shape = (source.sizes["latitude"], source.sizes["longitude"])
++    valid = False
++    if os.path.exists(GDP_tif) and not update:
++        with rasterio.open(GDP_tif) as raster:
++            valid = (raster.shape == shape and raster.crs == rasterio.crs.CRS.from_epsg(4326)
++                     and raster.tags().get("source_sha256") == digest
++                     and raster.tags().get("source_year") == str(selected_year))
++    if not valid:
+         convert_GDP(name_file_nc, year, out_logging)
+-
+-    return GDP_tif, name_file_tif
++        with rasterio.open(GDP_tif, "r+") as raster:
++            raster.update_tags(source_sha256=digest, source_year=str(selected_year))
++    return GDP_tif, os.path.basename(GDP_tif)
+ 
+ 
+ def generalized_mask(
+diff --git a/tests/test_gdp_cache.py b/tests/test_gdp_cache.py
+new file mode 100644
+index 00000000..0492ecc9
+--- /dev/null
++++ b/tests/test_gdp_cache.py
+@@ -0,0 +1,31 @@
++"""Run with the project's existing Python environment; no network/downloads."""
++from pathlib import Path
++import ast, os, tempfile, logging
++import numpy as np
++import xarray as xr
++import rasterio, rioxarray
++def extract(path, names, env=None):
++    namespace = dict(xr=xr, os=os, rasterio=rasterio, logger=logging.getLogger(__name__), **(env or {}))
++    tree = ast.parse(path.read_text())
++    nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
++    assert len(nodes) == len(names), (path, names)
++    exec(compile(ast.fix_missing_locations(ast.Module(body=[ast.ImportFrom(module='__future__', names=[ast.alias('annotations')], level=0), *nodes], type_ignores=[])), str(path), 'exec'), namespace)
++    return namespace
++
++repo=Path(__file__).resolve().parents[1]
++with tempfile.TemporaryDirectory() as tmp:
++    root=Path(tmp);d=root/'data/GDP';d.mkdir(parents=True)
++    nc=d/'GDP_PPP_1990_2015_5arcmin_v2.nc'
++    xr.Dataset({'GDP_PPP':(('time','latitude','longitude'),np.arange(8.).reshape(1,2,4))},coords={'time':[2015.], 'latitude':[45.,-45.], 'longitude':[-135.,-45.,45.,135.]}).to_netcdf(nc)
++    # Wrong regional cache reproduces the failure independently of private inputs.
++    xr.DataArray([[0.]],coords={'latitude':[0.],'longitude':[0.]},dims=['latitude','longitude']).rio.write_crs('EPSG:4326').rio.to_raster(str(nc)[:-2]+'tif')
++    f=extract(repo/'scripts/build_shapes.py',['convert_GDP','load_GDP'],{'BASE_DIR':str(root)})
++    path,_=f['load_GDP'](year=2020)
++    with rasterio.open(path) as r:
++        assert r.shape==(2,4) and r.crs.to_epsg()==4326
++        assert r.tags()['source_year']=='2015.0'
++        assert np.array_equal(r.read(1),np.arange(8.).reshape(2,4))
++    stamp=Path(path).stat().st_mtime_ns
++    f['load_GDP'](year=2020)
++    assert Path(path).stat().st_mtime_ns==stamp, 'Valid cache should not be rewritten'
++print('GDP coverage, source/year identity, values and cache reuse: PASS')
+diff --git a/tests/test_industrial_conservation.py b/tests/test_industrial_conservation.py
+new file mode 100644
+index 00000000..749c3803
+--- /dev/null
++++ b/tests/test_industrial_conservation.py
+@@ -0,0 +1,38 @@
++"""Regression: country totals, missingness and ordering (run as a script)."""
++import ast
++from pathlib import Path
++from itertools import product
++import pandas as pd
++import numpy as np
++def extract(path, names, env=None):
++    namespace = dict(pd=pd, product=product, **(env or {}))
++    tree = ast.parse(path.read_text())
++    nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
++    assert len(nodes) == len(names), (path, names)
++    exec(compile(ast.fix_missing_locations(ast.Module(body=[ast.ImportFrom(module='__future__', names=[ast.alias('annotations')], level=0), *nodes], type_ignores=[])), str(path), 'exec'), namespace)
++    return namespace
++
++def allocator_tests(repo):
++    f = extract(repo/'scripts/build_industry_demand.py', ['country_to_nodal'])['country_to_nodal']
++    keys = pd.DataFrame({'country':['ID','ID','SG'], 'gdp':[2.,3.,5.], 'steel':[1.,3.,0.]}, index=['ID0','ID1','SG0'])
++    prod = pd.DataFrame({'other':[10.,20.], 'steel':[4.,8.]},index=['ID','SG'])
++    results = {}
++    for label, k, p in [('country_conservation',keys,prod), ('index_permutation',keys.iloc[::-1],prod.iloc[::-1])]:
++        got = f(p,k).groupby(k.country).sum().reindex(p.index)
++        results[label] = bool(np.allclose(got,p))
++    for label, k, p in [
++        ('reject_nan',keys.assign(gdp=[np.nan,3.,5.]),prod),
++        ('reject_negative',keys.assign(gdp=[-2.,3.,5.]),prod),
++        ('reject_infinite',keys.assign(gdp=[np.inf,3.,5.]),prod),
++        ('reject_zero_country',keys.assign(gdp=[2.,3.,0.]),prod),
++        ('reject_missing_total',keys.assign(country=['ID','ID','TL']),prod),
++        ('reject_missing_nodes',keys,prod.rename(index={'SG':'TL'})),
++    ]:
++        try: f(p,k); results[label] = False
++        except (ValueError, KeyError): results[label] = True
++    return results
++
++if __name__ == "__main__":
++    results=allocator_tests(Path(__file__).resolve().parents[1])
++    print(results)
++    assert all(results.values())
