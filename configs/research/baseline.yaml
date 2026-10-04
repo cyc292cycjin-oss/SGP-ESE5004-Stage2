@@ -1,3 +1,23 @@
-# Gate1 identity placeholder; inherits frozen ASEAN settings plus approved fixes.
-# Not a validated scientific baseline. No workflow run authorized.
-{}
+# Gate2 demand contract only. Not a Snakemake or solver configuration.
+# All scientific numbers retain their individual human-acceptance gates.
+research_demand:
+  schema: phase4-gate2-v1
+  mode: static_demand_only
+  builder: scripts_project/build_research_demand.py
+  input_directory: research_inputs/demand
+  electricity_parent: electricity_parent.csv
+  tables:
+    - electricity_parent.csv
+    - buildings_accounting.csv
+    - transport_accounting.csv
+    - industry_accounting.csv
+    - agriculture_accounting.csv
+    - bunker_accounting.csv
+  numeric_acceptance_required: true
+  legacy_demand_builders: forbidden
+  astar_boundary: end_user_final_electricity
+  aeo8_generation_target: false
+  aeo8_final_electricity_role: validation_only
+  heat_without_accepted_service: embedded
+  future_growth_fallback: forbidden
+  solver_allowed: false
