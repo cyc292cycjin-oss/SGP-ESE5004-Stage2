@@ -272,6 +272,8 @@ def to_pypsa_fragment(f,snapshots,weights,*,component_ids):
             ports={f'bus{i}':b for i,b in enumerate(bus_order)}
             n.add('Link',r['name'],carrier=r['carrier'],**ports,**params)
         else:raise ValueError('Unsupported fragment component')
+        for col,value in [('country',r['country']),('research_role',r['role']),('source_identity',r['source'])]:
+            n.df(r['type']).loc[r['name'],col]=value
     return n
 
 

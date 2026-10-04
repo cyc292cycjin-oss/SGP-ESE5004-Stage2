@@ -96,7 +96,7 @@ def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=
   numeric_accepted_target_demands=len(numeric),accepted_target_demands=len(allocations),numeric_unresolved=len(missing),
   NUMERIC_INPUT_READY=numeric_ready,ALLOCATION_READY=allocation_ready,NETWORK_STATICALLY_VALIDATED=False,
   unresolved_by_sector=dict(collections.Counter(r['Sector'] for r in missing)),unresolved_input_ids=[r['InputID'] for r in missing],
-  known_positive_unowned_accounts=len(unowned),missing_astar_countries=sorted(COUNTRIES-{r['Country'] for r in numeric if r['Account']=='Astar'}),
+  known_positive_unowned_accounts=sum(r.get('OwnershipStatus')!='UNIQUE_SOURCE_USE_ASSIGNED' for r in unowned),known_positive_target_method_pending=len(unowned),missing_astar_countries=sorted(COUNTRIES-{r['Country'] for r in numeric if r['Account']=='Astar'}),
   allocation_missing=allocation_missing,external_supply_pending=supply_pending,
   embedded_road_ev='EMBEDDED_IN_ASTAR_NOT_SEPARATELY_MATERIALISED' if year==2050 else 'NOT_APPLICABLE',
   carbon_validation_stage='POST_BUILD_STATIC_VALIDATION_BLOCKER',network_construction_started=False,network_exported=False,solver_status='NOT_RUN',solver_runs=0)

@@ -106,6 +106,9 @@ class Reconstruction:
    q=decimal(p['Quantity']);com=commodity(p['Commodity'])
    if q==0:evidence.append(row_id(p));continue
    parts=[r for r in self.rows if r['Country']==c and commodity(r['Commodity'])==com and r['Unit']==p['Unit'] and account_for_transaction(r['Transaction']) not in {None,account,'InternationalShippingBunker','InternationalAviationBunker'}]
+   # Explicit NEC end-use leaves are disjoint from named sectors. Retain their
+   # original ownership; use them only to prove exhaustion of this commodity FEC.
+   parts += [r for r in self.rows if r['Country']==c and commodity(r['Commodity'])==com and r['Unit']==p['Unit'] and norm(r['Transaction']) in {'consumption not elsewhere specified (transport)','consumption not elsewhere specified (other)'}]
    total=sum(decimal(r['Quantity']) for r in parts)
    if abs(total-q)>D('0.000001'):return None
    evidence.extend([row_id(p),*[row_id(x) for x in parts]])
@@ -152,14 +155,36 @@ class Reconstruction:
      accounts.append(dict(AccountID=c+':2019:'+account+':'+fuel,Country=c,Year=2019,Account=account,Carrier=fuel,ValueMWh=str(quantity) if candidates and not error else '0' if zero_evidence else None,Status=status,Classification=classification,SourceRows=[r['RowID'] for r in selected],ZeroEvidence=zero_evidence,ExcludedOverlappingRows=excluded,CarrierBreakdownMWh={k:str(v) for k,v in carrier_values.items()},EnergyBasis=';'.join(sorted(set(bases))),Reason=error or ('Raw account sum; electricity remains in Astar' if candidates else 'Reported final-energy commodity inventory exhausted by disjoint source accounts; bounded exclusion, not absence guessed from empty selection' if zero_evidence else 'No source-qualified2019 row or zero proof'),SelectedRawRows=len(selected),OriginalCandidateRows=len(old_candidates)))
   return dict(schema='research-base-reconciliation-1',year=2019,accounts=accounts,selected_rows=self.selection,industry_parent_audit=industry_audit,nonenergy_reference=nonenergy,exact_alias_duplicates=self.duplicates,unlabelled_rows=[dict(SourceFile=r['SourceFile'],PhysicalLine=r['PhysicalLine'],Label=r['Commodity - Transaction'],Country=r['Country']) for r in self.raw if not r['Commodity']],conversion_provenance=UNSD_CONVERSION)
 
-def reconstruct(folder):
+def reconstruct(folder, *, allow_blend_evidence=True):
  folder=Path(folder)
  s=json.loads((folder/'UNSD_2019_SOURCE_CAPSULE.json').read_text())
  c=json.loads((folder/'FROZEN_UPSTREAM_CONVERSIONS.json').read_text())
  result=Reconstruction(s,c).build()
+ # New official memo files supplement, never overwrite, the frozen capsule.
+ # Evidence must compare parent and bio totals with the cached version first.
+ resolved={}
+ evidence_path=folder/'COMPATIBLE_BLEND_EVIDENCE.json'
+ if allow_blend_evidence and evidence_path.exists():
+  from reconcile_unsd_blends import reconcile
+  factors=Reconstruction(s,c).factors
+  for entry in json.loads(evidence_path.read_text())['records']:
+   if entry['Status']!='COMPATIBLE_VERIFIED':continue
+   dedup=reconcile(entry['parent'],entry['bio'],entry['memo'])
+   parent=next(z for z in result['selected_rows'] if z['RowID']==entry['CachedParentRow'])
+   bio=next(z for z in result['selected_rows'] if z['RowID']==entry['CachedBioRow'])
+   if D(parent['RawValue'])!=D(entry['parent']['Quantity']) or D(bio['RawValue'])!=D(entry['bio']['Quantity']):raise ValueError('New/old parent or bio version conflict')
+   old=D(parent['MWh']);new=D(dedup['FossilMass'])*factors[commodity(parent['Commodity'])]*1000000
+   parent.update(OriginalMWh=parent['MWh'],MWh=str(new),FossilMass=dedup['FossilMass'],BlendEvidence=dedup,Transformation=dedup['Rule'])
+   for a in result['accounts']:
+    if parent['RowID'] in a['SourceRows']:
+     a['ValueMWh']=str(D(a['ValueMWh'])-old+new)
+     a['CarrierBreakdownMWh']['oil']=str(D(a['CarrierBreakdownMWh']['oil'])-old+new)
+     a['BlendEvidence']=dedup
+   resolved[bio['RowID']]=dedup
  overlap=[]
  for z in result['selected_rows']:
   if z['Commodity'] not in ['Biodiesel','Biogasoline'] or D(z['MWh'])<=0:continue
+  if z['RowID'] in resolved:continue
   peers=[p for p in result['selected_rows'] if p['Country']==z['Country'] and p['Account']==z['Account'] and p['Carrier']=='oil' and p['Commodity'].lower() in ['motor gasoline','gas oil/ diesel oil']]
   # Rail uses an aggregate account but selected_rows retain carrier identity.
   if not peers:continue
@@ -168,6 +193,7 @@ def reconstruct(folder):
    if a['Country']==z['Country'] and a['Account']==z['Account'] and a['Carrier'] in ['oil','biomass','unclassified_fuel']:
     a.update(Status='UNRESOLVED_BIOFUEL_OVERLAP',Classification='UNRESOLVED',Reason='Petroleum/biofuel commodity-series overlap not resolved; memo blended rows missing; raw sum is a candidate, not a qualified disjoint obligation')
  result['biofuel_overlap']=overlap
+ result['resolved_blends']=resolved
  return result
 
 if __name__=='__main__':

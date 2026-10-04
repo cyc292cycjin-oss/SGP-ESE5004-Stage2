@@ -14,7 +14,7 @@ def closest(point,nodes):
  lat=np.radians(nodes.y.to_numpy(float));lon=np.radians(nodes.x.to_numpy(float))
  a=np.sin((lat-np.radians(point.y))/2)**2+np.cos(lat)*np.cos(np.radians(point.y))*np.sin((lon-np.radians(point.x))/2)**2
  return int(np.argmin(a))
-def allocate(registry,reference,ports,airports,output):
+def allocate(registry,reference,ports,airports,output,reuse=None):
  import pypsa
  if sha(reference)!=PIN:raise ValueError('Author reference changed')
  n=pypsa.Network(reference);geo=n.buses[n.buses.carrier.isin(['AC','DC'])].copy()
@@ -35,8 +35,21 @@ def allocate(registry,reference,ports,airports,output):
  data=json.loads(Path(registry).read_text());rows=[r for r in data['records'] if r['Year']==2050 and r['Kind']=='DEMAND' and r.get('NumericStatus')=='NUMERIC_INPUT_READY']
  points={'port':pd.read_csv(ports),'airport':pd.read_csv(airports)}
  arrays={'weights':w,'snapshots':n.snapshots.astype(str).to_numpy(dtype='U19')};out=[];mapping=[];failed=[]
+ reused={};reused_arrays={};reuse_ids=[]
+ if reuse:
+  old=json.loads((reuse/'allocation_manifest.json').read_text())
+  if any(old[k]!=sha(v) for k,v in [('reference_sha256',reference),('ports_sha256',ports),('airports_sha256',airports)]) or sha(reuse/old['arrays_file'])!=old['arrays_sha256']:raise ValueError('Reuse source/hash drift')
+  reused={r['InputID']:r for r in old['records']}
+  with np.load(reuse/old['arrays_file'],allow_pickle=False) as z:
+   reused_arrays={k:z[v['ArrayKey']].copy() for k,v in reused.items()}
+  oldmap=json.loads((reuse/'point_node_mapping.json').read_text())
  for r in rows:
   country=r['Country'];nodes=geo[geo.country==country];ids=list(nodes.index)
+  prev=reused.get(r['InputID'])
+  if prev and prev['Country']==country and prev['Nodes']==ids and prev['AnnualMWh']==float(r['Value']):
+   x=reused_arrays[r['InputID']];key='d'+str(len(out))
+   if hashlib.sha256(x.tobytes()).hexdigest()!=prev['ArraySHA256']:raise ValueError('Reused array hash changed')
+   arrays[key]=x;out.append(dict(prev,ArrayKey=key));reuse_ids.append(r['InputID']);mapping.extend(z for z in oldmap if z['InputID']==r['InputID']);continue
   local=p.reindex(columns=ids,fill_value=0).to_numpy(float);annual=(local*w[:,None]).sum(axis=0)
   if annual.sum()<=0:raise ValueError('No country input shape: '+country)
   if r['Account']=='Astar':
@@ -64,6 +77,7 @@ def allocate(registry,reference,ports,airports,output):
  receipt=dict(schema='actual-allocation-v1',input_registry_sha256=sha(registry),reference_sha256=sha(reference),reference_is_solved=True,used_only_exogenous_inputs=True,
   ports_sha256=sha(ports),airports_sha256=sha(airports),snapshots=len(w),hours=float(w.sum()),geographical_buses=100,arrays_file='allocations.npz',arrays_sha256=sha(output/'allocations.npz'),
   records=out,failures=failed,limitations=['Author2025 base-load input supplies relative shape only; absolute2050 load is independent accepted Astar.','Fuel flat-time and base-load node-share proxies are not observed hourly fuel demands.','Port/airport size weights proxy location, not traffic/fuel-burn measurements.','No qualification of reference2025 infrastructure/costs/brownfield history for2050.'],solver_runs=0)
+ receipt['reused_unchanged_array_ids']=reuse_ids
  (output/'point_node_mapping.json').write_text(json.dumps(mapping,indent=2)+'\n')
  (output/'geographic_nodes.json').write_text(geo[['country','x','y','carrier']].to_json(orient='index',indent=2))
  receipt.update(geographic_nodes_file='geographic_nodes.json',geographic_nodes_sha256=sha(output/'geographic_nodes.json'),point_node_mapping_sha256=sha(output/'point_node_mapping.json'))
@@ -94,4 +108,5 @@ def verify_allocation(folder,records,registry_path=None):
 if __name__=='__main__':
  p=argparse.ArgumentParser()
  for x in ['registry','reference','ports','airports','output']:p.add_argument('--'+x,type=Path,required=True)
+ p.add_argument('--reuse',type=Path)
  a=p.parse_args();allocate(**vars(a))

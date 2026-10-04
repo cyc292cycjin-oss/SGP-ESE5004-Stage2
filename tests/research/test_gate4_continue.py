@@ -35,9 +35,16 @@ class SourceTests(unittest.TestCase):
  def test_no_nonenergy_row_is_a_combustion_obligation(self):
   self.assertTrue(self.base['nonenergy_reference']);self.assertFalse(any('non-energy' in r['Transaction'].lower() for r in self.base['selected_rows']))
  def test_blended_biofuel_pairs_are_not_qualified_by_growth(self):
-  self.assertEqual(self.lookup['ID','RoadResidualFuel','oil']['Status'],'UNRESOLVED_BIOFUEL_OVERLAP')
-  self.assertEqual(self.lookup['ID','RoadResidualFuel','biomass']['Status'],'UNRESOLVED_BIOFUEL_OVERLAP')
-  self.assertTrue(self.base['biofuel_overlap'])
+  # Frozen pre-retrieval capsule; production IDs may later be legitimately closed.
+  import shutil
+  with tempfile.TemporaryDirectory() as td:
+   path=Path(td)
+   shutil.copyfile(ROOT/'tests/research/fixtures/missing_blend_memo.json',path/'UNSD_2019_SOURCE_CAPSULE.json')
+   shutil.copyfile(self.folder/'sources/FROZEN_UPSTREAM_CONVERSIONS.json',path/'FROZEN_UPSTREAM_CONVERSIONS.json')
+   missing=reconstruct(path)
+  lookup={(r['Country'],r['Account'],r['Carrier']):r for r in missing['accounts']}
+  self.assertEqual(lookup['ID','RoadResidualFuel','oil']['Status'],'UNRESOLVED_BIOFUEL_OVERLAP')
+  self.assertEqual(lookup['ID','RoadResidualFuel','biomass']['Status'],'UNRESOLVED_BIOFUEL_OVERLAP')
  def test_road_growth_exact_and_reference_not_posted(self):
   from decimal import Decimal as D
   data=load_registry(self.folder);r=[r for r in data['records'] if r['Year']==2050 and r['Account']=='RoadResidualFuel' and r['AssemblyStatus']==ACCEPTED]

@@ -10,18 +10,20 @@ import numpy as np
 from check_assembly_inputs import load_registry,check
 from carrier_architecture import Fragment,to_pypsa_fragment
 from carbon_architecture import classify_record
+from assembly_components import check_global_constraints,merge_input_components,bind_loads,validate_hooks
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def pinned(folder,entry):
  p=(folder/entry['file']).resolve()
  if not p.is_relative_to(folder.resolve()) or not p.is_file() or sha(p)!=entry['sha256']:raise ValueError('Qualified asset missing or hash changed')
  return p
-def static_validate(n,records,allocation,carbon_map):
+def static_validate(n,records,allocation,carbon_map,*,synthetic_test_only=False):
  import networkx as nx
  import pandas as pd
  if not n.snapshots.equals(pd.date_range('2013-01-01','2013-12-31 21:00',freq='3h')):raise ValueError('Research snapshot boundary changed')
  if not np.all(n.snapshot_weightings.to_numpy()==3):raise ValueError('Physical weights changed')
- if len(n.buses[n.buses.carrier.isin(['AC','DC'])])!=100:raise ValueError('Not100 geographical electric buses')
- if n.global_constraints.shape[0]:raise ValueError('Baseline cannot carry a policy cap')
+ expected_nodes=n.meta.get('synthetic_geographical_nodes') if synthetic_test_only and n.meta.get('purpose')=='SYNTHETIC_TEST_ONLY' else 100
+ if len(n.buses[n.buses.carrier.isin(['AC','DC'])])!=expected_nodes:raise ValueError('Incorrect geographical electric bus count')
+ check_global_constraints(n);validate_hooks(n)
  if n.meta.get('solver_allowed') is not False:raise ValueError('Solver guard missing')
  load=n.loads_t.p_set.reindex(columns=n.loads.index)
  if load.isna().any().any() or not np.isfinite(load.values).all() or (load.values<0).any():raise ValueError('Invalid actual Load')
@@ -34,6 +36,9 @@ def static_validate(n,records,allocation,carbon_map):
  for name,rid in owners.items():
   if rid not in actual:raise ValueError('Unaccepted physical obligation')
   actual[rid]+=float((load[name]*n.snapshot_weightings.generators).sum())
+  identity=n.meta['demand_identity'][name]
+  for col in ['carrier','sector','account','country']:
+   if str(n.loads.at[name,col])!=identity[col]:raise ValueError('Load source identity lost in assembly/roundtrip')
  if any(not np.isclose(v,actual[k],rtol=1e-10,atol=1e-6) for k,v in expected.items()):raise ValueError('Actual network demand conservation failed')
  # Exclude electric and atmosphere buses: electricity-mediated benefits are
  # allowed; direct/multihop physical fuel sharing across countries is not.
@@ -51,37 +56,57 @@ def static_validate(n,records,allocation,carbon_map):
    g.add_edges_from(zip(non,non[1:]))
  for component in nx.connected_components(g):
   if len({n.buses.at[b,'country'] for b in component})!=1:raise ValueError('Hidden cross-country carrier path')
- if any(n.buses.carrier=='co2 sequestered'):raise ValueError('Unaccepted geological inventory asset')
+ if any(n.stores.bus.isin(n.buses.index[n.buses.carrier=='co2 sequestered'])):raise ValueError('Unaccepted geological inventory asset')
  mapped={}
  for r in carbon_map:
   key=(r['component_type'],r['component'])
   if key in mapped:raise ValueError('Duplicate carbon attribution')
   table={'Link':n.links,'Generator':n.generators}[r['component_type']]
   if r['component'] not in table.index:raise ValueError('Carbon map does not refer to actual component')
+  z=table.loc[r['component']]
+  ports=[z[c] for c in table if (c=='bus' or c.startswith('bus') and c[3:].isdigit()) and z[c]]
+  owners_here={n.buses.at[b,'country'] for b in ports if b not in atmo}
+  if owners_here!={r['country']} or z.carrier!=r['carrier']:raise ValueError('Carbon map ownership/carrier mismatch')
+  if r['component_type']=='Link':
+   coefficient=sum(float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]]) for c in table if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] in atmo)
+  else:coefficient=float(n.carriers.at[z.carrier,'co2_emissions'])/float(z.efficiency)
+  if not np.isclose(coefficient,float(r['coefficient']),rtol=1e-12):raise ValueError('Carbon coefficient does not match actual physical port')
   mapped[key]=classify_record(r['component'],r['carrier'],r['sector'],r['country'],r['coefficient'],source=r['source'],policy_weight=r['policy_weight'],accepted=r['accepted'])
  events={('Link',name) for name,z in n.links.iterrows() if any(z[c] in atmo for c in n.links if c.startswith('bus') and c[3:].isdigit() and z[c])}
  events|={('Generator',name) for name,z in n.generators.iterrows() if float(n.carriers.at[z.carrier,'co2_emissions'])!=0}
  if set(mapped)!=events:raise ValueError('Incomplete/extraneous actual carbon scope')
  # Require actual local conversion topology, not merely carrier names.
  paths=set()
+ path_specs=n.meta.get('approved_coupling_path_specs',{
+  'electrolysis':{'inputs':['AC','DC','electricity','low voltage'],'outputs':['H2']},
+  'steam_methane_reforming':{'inputs':['gas'],'outputs':['H2']},
+  'FT':{'inputs':['H2'],'outputs':['oil']},
+  'fuel_cell':{'inputs':['H2'],'outputs':['AC','DC','electricity','low voltage']}})
  for _,z in n.links.iterrows():
   a=n.buses.at[z.bus0,'carrier'];outputs={n.buses.at[z[c],'carrier'] for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] and float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]])>0}
-  if a in ['AC','electricity','low voltage'] and 'H2' in outputs:paths.add('electrolysis')
-  if a=='gas' and 'H2' in outputs:paths.add('steam_methane_reforming')
-  if a=='H2' and 'oil' in outputs:paths.add('FT')
- if not {'electrolysis','steam_methane_reforming','FT'}<=paths:raise ValueError('Missing required actual sector-coupling paths')
+  for label,spec in path_specs.items():
+   if a in spec['inputs'] and set(spec['outputs'])&outputs:paths.add(label)
+ approved=set(n.meta.get('approved_coupling_paths',[]))
+ if not approved or not approved<=paths:raise ValueError('Missing approved actual sector-coupling paths')
+ if paths-approved:raise ValueError('Unapproved conversion pathway')
  # Every finite biomass resource must identify isolated obligation-only buses.
- biomass=[name for name,z in n.stores.iterrows() if z.carrier in ['solid biomass','biomass','biogas']]
  routes=n.meta.get('biomass_obligation_routes',{})
- if set(biomass)!=set(routes):raise ValueError('Biomass routing/cap evidence missing')
+ biomass=list(routes)
+ if any(name not in n.stores.index for name in biomass):raise ValueError('Biomass routing/cap evidence missing')
+ if any(name not in routes for name,z in n.stores.iterrows() if z.get('research_role')=='FINITE_RESOURCE' or str(z.carrier).lower() in ['solid biomass','biomass','biogas','biodiesel','biogasoline','fuelwood','charcoal']):raise ValueError('Unregistered biomass resource')
  for name in biomass:
   z=n.stores.loc[name];allowed=set(routes[name]['buses']);bus=z.bus
+  if any(n.generators.bus.isin(allowed|{bus})):raise ValueError('Extra biomass supply without approved resource')
+  if any(n.stores.bus.isin(allowed)):raise ValueError('Unapproved inventory at final biomass obligation')
   touching=n.links[n.links.filter(regex=r'^bus\d+$').eq(bus).any(axis=1)]
   for _,link in touching.iterrows():
    if link.bus0!=bus or link.bus1 not in allowed:raise ValueError('Biomass diversion to unapproved technology')
   supplied=[k for k,r in n.loads.iterrows() if r.bus in allowed]
   obligation=float((load[supplied].sum(axis=1)*n.snapshot_weightings.generators).sum())
-  if z.e_nom_extendable or z.e_cyclic or not np.isclose(z.e_initial,obligation) or not np.isclose(z.e_nom,obligation):raise ValueError('Biomass cap differs from fixed obligation')
+  cap=float(routes[name].get('annual_cap_mwh',obligation))
+  if z.e_nom_extendable or z.e_cyclic or not np.isclose(z.e_initial,cap) or not np.isclose(z.e_nom,cap):raise ValueError('Biomass cap differs from fixed obligation')
+  related=[k for k,v in routes.items() if set(v['buses'])==allowed]
+  if not np.isclose(sum(n.stores.at[k,'e_nom'] for k in related),obligation):raise ValueError('Commodity resources do not sum to exclusive obligation')
  return dict(status='NETWORK_STATICALLY_VALIDATED',loads=len(n.loads),physical_hours=8760,electricity_border_controls=borders,carbon_components=len(mapped),actual_coupling_paths=sorted(paths),policy_cap_enabled=False,solver_runs=0)
 def build(repo,allocation,assets,output,report):
  import yaml
@@ -97,28 +122,20 @@ def build(repo,allocation,assets,output,report):
   if bundle.get('status')!='SOURCE_QUALIFIED_2050_UNSOLVED' or bundle.get('source_is_solved') is not False:raise ValueError('No qualified2050 electric/carrier asset bundle; solved paper archive is not a substitute')
   import pypsa
   n=pypsa.Network(pinned(root,bundle['electric_base']))
-  if len(n.loads) or len(n.global_constraints):raise ValueError('Legacy demand/policy leakage in electric base')
+  if n.meta.get('asset_qualification')!='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED':raise ValueError('Development electric asset cannot be promoted by bundle status alone')
+  if len(n.loads):raise ValueError('Legacy demand leakage in electric base')
+  check_global_constraints(n)
   for component in n.iterate_components():
    if any(len(v.columns) for k,v in component.pnl.items() if component.attrs.at[k,'status']=='Output'):raise ValueError('Solved outputs cannot enter research base')
   f=Fragment();raw=json.loads(pinned(root,bundle['carrier_fragment']).read_text())
+  if raw.get('qualification_blockers'):raise ValueError('Carrier scientific qualification remains incomplete')
   f.buses=raw['buses'];f.components=raw['components'];f.markets=raw.get('markets',{})
   sub=to_pypsa_fragment(f,list(n.snapshots),list(n.snapshot_weightings.generators),component_ids=list(f.components))
-  # Electric attachment IDs in the reviewed fragment must be actual base buses.
-  for c in sub.iterate_components():
-   duplicate=c.df.index.intersection(n.df(c.name).index)
-   if len(duplicate) and c.name not in ['Bus','Carrier']:raise ValueError('Duplicate base/fragment component')
-   if c.name=='Bus' and any(c.df.at[k,'country']!=n.buses.at[k,'country'] for k in duplicate):raise ValueError('Mismatched electric attachment country')
-   table=c.df.loc[c.df.index.difference(n.df(c.name).index)]
-   if len(table):n.import_components_from_dataframe(table,c.name)
-  n.meta.update(sub.meta);n.meta.update(target_year=2050,weather_year=2013,solver_allowed=False,demand_owners={},biomass_obligation_routes=raw.get('biomass_obligation_routes',{}))
+  merge_input_components(n,sub)
+  n.meta.update(target_year=2050,weather_year=2013,solver_allowed=False,biomass_obligation_routes=raw.get('biomass_obligation_routes',{}),approved_coupling_paths=raw['approved_coupling_paths'],required_constraint_hooks=sorted(set(n.meta.get('required_constraint_hooks',[]))|{'install_fragment_constraints'}))
   m=json.loads((allocation/'allocation_manifest.json').read_text());posting=raw['demand_destinations']
   with np.load(allocation/m['arrays_file'],allow_pickle=False) as z:
-   for r in m['records']:
-    for j,node in enumerate(r['Nodes']):
-     if not np.any(z[r['ArrayKey']][:,j]):continue
-     key=r['InputID']+'@'+node;bus=posting[key]
-     if bus not in n.buses.index or n.buses.at[bus,'country']!=r['Country']:raise ValueError('Missing/misowned demand destination')
-     n.add('Load',key,bus=bus,p_set=z[r['ArrayKey']][:,j]);n.meta['demand_owners'][key]=r['InputID']
+   bind_loads(n,data['records'],m,z,posting)
   carbon=json.loads(pinned(root,bundle['carbon_map']).read_text())
   static_validate(n,data['records'],allocation,carbon)
   output.parent.mkdir(parents=True,exist_ok=True);n.export_to_netcdf(output)
