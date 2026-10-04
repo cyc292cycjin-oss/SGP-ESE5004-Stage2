@@ -29,7 +29,7 @@ Final status updates and cleanliness are recorded only after commit/push verific
 
 ## Final source snapshot verification
 
-Complete source snapshot: `9c5a9da17516410ff6a49eef29c4dd31188bd640`. Clean local and matching remote research branch verified. All protected remote references exactly match the starting inventory. The subsequent record commit modifies only these identity/readiness records, with no model, configuration, input-registry, schema or test change. The exact record HEAD is in the external delivery receipt; the model manifest intentionally identifies its complete parent source snapshot.
+Complete source snapshot: `9ee77cb0ba4c246f83492fbb6027c68066b41bda`. Clean local and matching remote research branch verified. All protected remote references exactly match the starting inventory. The subsequent record commit modifies only these identity/readiness records, with no model, configuration, input-registry, schema or test change. The exact record HEAD is in the external delivery receipt; the model manifest intentionally identifies its complete parent source snapshot.
 
 ```text
 PHASE4_GATE1_FOUNDATION_BUILT=YES
