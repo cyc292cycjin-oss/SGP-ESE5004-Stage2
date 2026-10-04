@@ -1,55 +1,115 @@
 {
-  "schema": "gate4-continue-manifest-1",
-  "starting_git_commit": "881e21e1b6185690b2026e56897f1a97c4801143",
-  "tested_implementation_git_commit": "96202b9bd0f88995756468cd6f5a7889ca13df7d",
-  "final_git_commit": "Resolved by containing final audit commit; exact final SHA in detached package receipt to avoid self-reference",
+  "schema": "gate4-production-assets-manifest-1",
+  "starting_git_commit": "6d56258a50c69dfee8fac2deb6aad658bf673fa0",
+  "executed_base_git_commit": "6d56258a50c69dfee8fac2deb6aad658bf673fa0",
+  "executed_with_uncommitted_research_changes": true,
+  "tested_implementation_git_commit": "18eb5827e4e19588dc4f31b8355319818c5fb950",
+  "implementation_attestation": "evidence/TESTED_IMPLEMENTATION_ATTESTATION.json",
   "config_file": "configs/research/baseline.yaml",
   "config_sha256": "40489a11fdbcd02aa338e7ea856540dd2fb71a7f7851617f05dbbb84a983546a",
-  "input_registry_sha256": "903479409b9cfc8b580606c14b10e6fcab491dd2972583f182627f6e676d52d3",
-  "input_pin_manifest_sha256": "66a894e6128d2d2edb39fb2e0a7c3d4d8c9ebcb0673451325e7fff4a82e187e2",
-  "actual_allocation_sha256": "42e7d20dd18781506237de9e277247a12debc94b23374f2d304eec1cebec1c33",
-  "actual_allocation_manifest_sha256": "591cd6f5f342a532d9a98fc902451fcce9659e424ef212fb26714d6987bb6163",
+  "input_registry_sha256": "a5466eafdd9be63811ba3344b48288e891a70b842801dcc9587b4fe4a7a421e4",
+  "input_pin_manifest_sha256": "d5ab3ba052e2d06c8a76934d900c1a4c34ed2928366a69bfaf7fd404f3ea04c7",
+  "actual_allocation_sha256": "e882dea36f4a196dc54b7b6377717ab7af707000ca071b5a00259313c74e6ffa",
+  "actual_allocation_manifest_sha256": "9deafcc9209bfb05fb6894277c9ab598d4aaecb9c0b824d0549087a58e4f345c",
   "network_path": null,
   "network_sha256": null,
+  "network_exported": false,
   "objective": null,
   "solver_status": "NOT_RUN",
   "solver_runs": 0,
   "policy_cap_enabled": false,
-  "static_network_validation": "NOT_RUN_NO_NETWORK",
-  "status": {
-    "DECISIONS_SYNCHRONISED": "YES",
-    "BASE_ACCOUNTS_RECONCILED": "PARTIAL",
-    "TARGET_NUMERIC_INPUTS_READY": "PARTIAL_131_OF264",
-    "ACTUAL_ALLOCATION_READY": "PARTIAL_131_VERIFIED_ARRAYS",
-    "RESEARCH_BUILD_ENTRYPOINT_IMPLEMENTED": "PARTIAL_EXECUTABLE_GUARDED_PATH; PRODUCTION_ASSET_BUNDLE_AND_EXPORT_UNVERIFIED",
-    "UNSOLVED_NETWORK_EXPORTED": "NO",
-    "ACTUAL_NETWORK_STATIC_VALIDATION": "NOT_RUN_NO_NETWORK",
-    "POLICY_CAP_ACTUALLY_ENABLED": false,
-    "SOLVER_RUNS_EXECUTED": 0,
-    "READY_FOR_GATE5": false
-  },
+  "static_full_network_validation": "NOT_RUN_NO_COMPLETE_NETWORK",
+  "status": "FULLSC_NETWORK_NOT_COMPLETE",
+  "gate5_allowed": false,
+  "development_assets_exported": true,
+  "accepted_numeric_demands": 133,
+  "actual_allocation_count": 133,
+  "original_131_arrays_unchanged": true,
   "checks": [
     {
-      "name": "GATE1_STATIC_REGRESSION",
+      "name": "ASSET_TESTS",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-        "tests/research/test_phase4_static.py"
+        "tests/research/test_gate4_assets.py"
       ],
       "exit_code": 0,
-      "expected_exit": 0,
+      "expected": 0,
       "passed": true,
-      "log_sha256": "d3e3ab3a8df45d9566f43312420936d0c524ece02fd0a72057ccaddb493c0171"
+      "log_sha256": "2cdc5aa2cc74ce842654782c5a6ce59e0944f166645019ae49203c6fd6c230de"
     },
     {
-      "name": "GATE2_REGRESSION",
+      "name": "CONTINUE_REGRESSION",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-        "tests/research/test_demand_accounting.py"
+        "tests/research/test_gate4_continue.py"
       ],
       "exit_code": 0,
-      "expected_exit": 0,
+      "expected": 0,
       "passed": true,
-      "log_sha256": "bab58f018992501eae0c255d0c23369b0a5c2c287a03fc8e9445db0543434bf8"
+      "log_sha256": "0f71dfabae9eb03a79b7c72caaec3819b9ffe9c912581c6a81322bff4feb23c4"
+    },
+    {
+      "name": "ASSEMBLY_REGRESSION",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "tests/research/test_assembly_input_freeze.py"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "passed": true,
+      "log_sha256": "816d42b1aea653d354196ff5bad638208c4d32aa0c757c8728e425521c0e45a2"
+    },
+    {
+      "name": "INDEPENDENT_TARGET_REDERIVATION",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "scripts_project/rebuild_assembly_targets.py",
+        "--repo",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
+        "--output",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/TARGET_REDERIVATION.json"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "passed": true,
+      "log_sha256": "7439505c91388cc006d8afdf3adcceb14652ccc1aca316d3aa3f34c819c04982"
+    },
+    {
+      "name": "RESEARCH_DAG_DRY_RUN",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
+        "--snakefile",
+        "workflow/research_assembly.smk",
+        "--cores",
+        "1",
+        "--configfile",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
+        "--dry-run"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "passed": true,
+      "log_sha256": "85f01741540a16801591692a87c995142130f7a0b23f9517c24be92cdabfd63a"
+    },
+    {
+      "name": "PRODUCTION_DAG_ASSET_BUILD",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
+        "--snakefile",
+        "workflow/research_assembly.smk",
+        "--cores",
+        "1",
+        "--scheduler",
+        "greedy",
+        "--configfile",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
+        "--",
+        "research_build_production_assets"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "passed": true,
+      "log_sha256": "f82dd23d9eed253798f2f19519a54d709781c83be68a9df9ec9c1a041db421e7"
     },
     {
       "name": "GATE3_REGRESSION",
@@ -57,23 +117,23 @@
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "scripts_project/run_gate3_validation.py",
         "--output",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/gate3_regression"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/gate3_regression"
       ],
       "exit_code": 0,
-      "expected_exit": 0,
+      "expected": 0,
       "passed": true,
       "log_sha256": "47d6714e94d79b157a0f08fc922b544735db616aca09d7224f4b8d50b9610468"
     },
     {
-      "name": "GATE3_CONFIG_REGRESSION",
+      "name": "CARRIER_CONFIG_REGRESSION",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "scripts_project/check_research_carriers.py",
         "--output",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/GATE3_CONFIG_REGRESSION.json"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/CARRIER_CONFIG_REGRESSION.json"
       ],
       "exit_code": 0,
-      "expected_exit": 0,
+      "expected": 0,
       "passed": true,
       "log_sha256": "3ce526e978adbaf2f8730fbfeb5cf2a98505e7c89cb2bc4c35fb96d9607d3fd2"
     },
@@ -84,88 +144,76 @@
         "tests/research/test_topology_integrity.py"
       ],
       "exit_code": 0,
-      "expected_exit": 0,
+      "expected": 0,
       "passed": true,
-      "log_sha256": "d6f1ebc6552d568ad42e6bef4c33b686321cce7a11867cb2c64cf720cf9901e5"
+      "log_sha256": "554e197fbbf7912493635fe8e7a96ff4de2d6c3e88722b6671638927837d836d"
     },
     {
-      "name": "RESEARCH_DAG_DRY_RUN",
-      "command": [
-        "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
-        "--snakefile",
-        "workflow/research_assembly.smk",
-        "--dry-run",
-        "--cores",
-        "1",
-        "--config",
-        "research_allocation_dir=/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/actual_allocation",
-        "research_asset_manifest=research_inputs/assembly_v1/asset_bundle.json"
-      ],
-      "exit_code": 0,
-      "expected_exit": 0,
-      "passed": true,
-      "log_sha256": "cba16b459790c30d7fb3f45e42dee23f6b52b8835f722d55e44d1f8d34b4c90d"
-    },
-    {
-      "name": "CONTINUE_SOURCE_AND_GATE_TESTS",
-      "command": [
-        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-        "tests/research/test_gate4_continue.py"
-      ],
-      "exit_code": 0,
-      "expected_exit": 0,
-      "passed": true,
-      "log_sha256": "f9a1ef3dbbc8dce1397155dc8298091d97d4dc64c171ac5fb2c3ca7fc62faefe"
-    },
-    {
-      "name": "ASSEMBLY_INPUT_REGRESSION",
-      "command": [
-        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-        "tests/research/test_assembly_input_freeze.py"
-      ],
-      "exit_code": 0,
-      "expected_exit": 0,
-      "passed": true,
-      "log_sha256": "5956c9ae5b12e0e3f06dd79b522467227463c72751f6ad80431212a363f6634e"
-    },
-    {
-      "name": "ACTUAL_ALLOCATION_PREFLIGHT",
+      "name": "ACTUAL_INPUT_PREFLIGHT",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "scripts_project/check_assembly_inputs.py",
+        "--repo",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
         "--year",
         "2050",
         "--allocation",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/actual_allocation",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
         "--output",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/ASSEMBLY_PREFLIGHT.json"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/ACTUAL_INPUT_PREFLIGHT.json"
       ],
       "exit_code": 2,
-      "expected_exit": 2,
+      "expected": 2,
       "passed": true,
-      "log_sha256": "60cb3753dc52dbd1af114713d16daf43f9b7b5ecdb5f39a242a5267e6ca59721"
+      "log_sha256": "5f4e068a267e9ccb859852ce3473ce0cf505dabad66617849e7c2058ebebfba9"
     },
     {
-      "name": "ACTUAL_BUILD_ATTEMPT",
+      "name": "FULL_NETWORK_GATE",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "scripts_project/build_research_network.py",
         "--repo",
         "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
         "--allocation",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/actual_allocation",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
         "--assets",
-        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/assembly_v1/asset_bundle.json",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/assets/asset_bundle.json",
         "--output",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/research_fullsc_2050_unsolved.nc",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
         "--report",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_continue/evidence/ACTUAL_BUILD_RECEIPT.json"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/FULL_NETWORK_GATE.json"
       ],
       "exit_code": 2,
-      "expected_exit": 2,
+      "expected": 2,
       "passed": true,
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FINAL_PRODUCTION_DAG",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
+        "--snakefile",
+        "workflow/research_assembly.smk",
+        "--cores",
+        "1",
+        "--scheduler",
+        "greedy",
+        "--configfile",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
+        "--",
+        "research_build_production_assets"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "passed": true,
+      "log_sha256": "4be34630f20605935e9b65dbf388a340445cb2b716957ac1bb7ce640de0e0d6d"
     }
   ],
-  "target_rederivation_sha256": "4bc43dfcd99105e20197b77b5fff80609640c8bc6055657850c35d4511d0272e"
+  "development_asset_manifests": [
+    "ELECTRIC_BASE_ASSET_MANIFEST.json",
+    "GATE3_PRODUCTION_FRAGMENT_MANIFEST.json"
+  ],
+  "development_asset_validation": "evidence/ACTUAL_DEVELOPMENT_ASSET_VALIDATION.json",
+  "synthetic_roundtrip": "evidence/EXPORT_ROUNDTRIP_TEST_RECEIPT.json",
+  "target_rederivation_sha256": "b6975fb00f9262d797f76ac9c765c38277367e7717d99d8a3eb8b22023191d29"
 }

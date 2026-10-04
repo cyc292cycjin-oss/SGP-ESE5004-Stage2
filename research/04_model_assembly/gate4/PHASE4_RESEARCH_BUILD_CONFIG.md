@@ -1,7 +1,7 @@
-# Gate4 Research配置
+# Gate4 Research build configuration
 
-configs/research/baseline.yaml包含独立builder/allocation/DAG入口。network_export_enabled=true表示用户授权通过门禁后导出，不表示当前输入通过；solver_allowed=false。三层门分别校验数值资格、实际数组、实际网络静态验收。TargetReady或SpatialEvidence文字不能替代数组。
+Target asset/technology year2050; operating weather/input-shape year2013;3h;8760h. The human asset boundary is ASSEMBLY_V1_2050_SINGLE_YEAR_SURVIVING_ASSETS, with strict retirement-year semantics. Source-aged existing capacity, resource occupancy and existing O&M are not silently inferred. Source-qualified electric status is still pending.
 
-目标2050、气象2013、3h全年8760h。政策carbon.policy_enabled=false；预算表定义未变。外部化石市场在explicit unlimited_capacity_accepted时用零固定容量、可扩张且无数量上限的供应Generator，不用任意巨大有限容量；国家物理接口独立。既有有限接口仍保留原行为并通过回归。
+Input ownership/decision configuration remains configs/research/baseline.yaml. Carbon policy=false; no solver; no scenario intervention. The independent production DAG is workflow/research_assembly.smk; recorded source paths are in evidence/PRODUCTION_SOURCE_PATHS.json. Generated asset_bundle lives under results_project/assembly_v1/assets and currently has DEVELOPMENT_ASSETS_BUILT_FULLSC_NOT_COMPLETE status.
 
-原上游脚本、Gate2历史观察源、DEA/燃料价格和拓扑均未改动。未开启scenario switching、技术强制使用或求解。
+Existing131 allocations are reused; the two MY road accounts use the same accepted node/time method. The allocation manifest binds the current registry SHA; source metadata changes do not permit use of a stale registry manifest. Fixed fuel profiles and port/airport weights remain explicit proxies.

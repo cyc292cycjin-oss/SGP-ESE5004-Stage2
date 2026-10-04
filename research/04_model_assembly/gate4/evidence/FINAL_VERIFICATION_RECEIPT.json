@@ -1,0 +1,71 @@
+[
+  {
+    "name": "FINAL_TARGET_REDERIVATION",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "scripts_project/rebuild_assembly_targets.py",
+      "--repo",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
+      "--output",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/FINAL_TARGET_REDERIVATION.json"
+    ],
+    "exit_code": 0,
+    "expected": 0,
+    "passed": true,
+    "log_sha256": "7439505c91388cc006d8afdf3adcceb14652ccc1aca316d3aa3f34c819c04982"
+  },
+  {
+    "name": "FINAL_INPUT_PREFLIGHT",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "scripts_project/check_assembly_inputs.py",
+      "--repo",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
+      "--year",
+      "2050",
+      "--allocation",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
+      "--output",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/FINAL_INPUT_PREFLIGHT.json"
+    ],
+    "exit_code": 2,
+    "expected": 2,
+    "passed": true,
+    "log_sha256": "5f4e068a267e9ccb859852ce3473ce0cf505dabad66617849e7c2058ebebfba9"
+  },
+  {
+    "name": "FINAL_FULL_NETWORK_GATE",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "scripts_project/build_research_network.py",
+      "--repo",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
+      "--allocation",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
+      "--assets",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/assets/asset_bundle.json",
+      "--output",
+      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
+      "--report",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/FINAL_FULL_NETWORK_GATE.json"
+    ],
+    "exit_code": 2,
+    "expected": 2,
+    "passed": true,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "FINAL_DIFF_CHECK",
+    "command": [
+      "git",
+      "-c",
+      "core.whitespace=cr-at-eol",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "expected": 0,
+    "passed": true,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

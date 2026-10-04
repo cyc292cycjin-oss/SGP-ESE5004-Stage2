@@ -1,15 +1,9 @@
-# Gate4 当前输入冻结状态
+# Gate4 Assembly V1 input freeze
 
-**PARTIAL：已批准方法同步，真实来源/所有权缺口仍阻止完整构网。** 本文件替代上轮“增长及Mtoe方法待决定”的状态；历史保留在Git。
+Partial input freeze only.264 target ownership combinations remain visible:133 qualified numeric,75 nonphysical representations (71 bounded source zero proofs and4 pre-approved TL industry deferrals),56 unresolved.131 earlier target quantities and arrays are unchanged; two compatible MY road oil/biodiesel accounts have been added. All accepted arrays bind the latest registry SHA. No explicit EV or RoadReference Load exists.
 
-264个原有2050所有权组合全部保留：131个数值合格并有实际数组；48个仅在已报告商品库存范围内有原始FEC穷尽零证明；4个TL工业按Phase3既有边界延期（不是零）；81个仍未闭合。两个非物理类别不生成零Load。原Gate2观察台账未重写，新的基年证据通过`BASE_RECONSTRUCTION.json`中的AccountID/源行单独追踪。
+Source/account/node/time annual conservation is evidenced in allocation_manifest.json. Updated BASE_RECONSTRUCTION.json retains original petroleum quantity and mass unit, compatible memo identity, fossil mass after subtraction, separately converted biofuel mass, original per-commodity factors and target method. Memo energy is not posted again. Liquid biofuel source identities remain explicit in the production fragment.
 
-253个非电基年组合：124个原始行/转换就绪，21个油品/生物燃料重叠待定，56个缺原始行或零证明，48个有边界限定零证明，4个TL工业延期。缓存正值或空集零均不自动接受。15条已知正的交通/其他NEC记录另保留，LA褐煤/褐煤子类重叠已去除。
+Rail and NEC source ownership is resolved independently of future demand projection; pending2050 accounts remain blocking and no missing record becomes zero. Source coverage exclusions are limited to traceable disjoint FEC exhaustions or already-approved Phase3 boundaries. New coverage exclusions require a human decision.
 
-机械修复：航运in/by同义交易筛选；SG航空avgas遗漏；工业仅用报告的制造/建筑/非燃料行业总账户、排除商品父子重叠；非能源用途独立；天然气仅原始UNSD天然气TJ/GCV按0.90转换，其他气体及已有MWh不受此转换。保留上游商品特定质量/体积换算系数，不换成新年份成本或国家加权NCV。
-
-热值依据：[UNSD换算说明](https://unstats.un.org/unsd/energy/balance/2014/05.pdf)，PDF1–3，SHA5e9c8fcc…；其旧toe传统定义不用于本轮AEO8操作性换算。该证据支持UNSD天然气GCV→NCV操作，不证明所有技术效率、煤炭国别混合或燃料价格的LHV口径全部关闭。
-
-实质新发现：[UNSD生物燃料说明](https://unstats.un.org/unsd/energy/meetings/2017a/8.1renewables.pdf)，PDF18–19，SHA807c2403…，明确示范商品汽油包含混合生物燃料，另有生物燃料总项和memo。当前52个导出没有memo混合份额；因此21个并存账户保留原始数量但不认证为互斥物理义务。没有按假定比例相减，也没有删除已知生物燃料。
-
-最新道路批准、bunker精度保留与参考差额见`DECISION_SYNC_REPORT.md`。燃料成本和DEA文件均未更新。
+Single-year2050 stock boundary is human-approved, but no unverified source default lifetime is accepted by that approval. Carbon policy remains disabled. Development asset defaults/qualification gaps cannot cross the final model gate. Complete Research network status: FULLSC_NETWORK_NOT_COMPLETE.
