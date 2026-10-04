@@ -1,0 +1,23 @@
+Restricted license - for non-production use only - expires 2026-11-23
+/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pulp/apis/gurobi_api.py:170: UserWarning: GUROBI error: Unknown parameter '_test'.
+  warnings.warn("GUROBI error: {}.".format(e))
+Config file config.default.yaml is extended by additional config specified via the command line.
+Config file configs/bundle_config.yaml is extended by additional config specified via the command line.
+Config file configs/powerplantmatching_config.yaml is extended by additional config specified via the command line.
+Config file config.yaml is extended by additional config specified via the command line.
+Demand data folder: data/ssp2-2.6/2030/era5_2013, load path is ['data/ssp2-2.6/2030/era5_2013/Asia.nc'].
+Expected files: Asia.nc
+Building DAG of jobs...
+WorkflowError:
+MissingInputException: Missing input files for rule build_population_layouts:
+    output: resources/baseline-aims-3H/population_shares/pop_layout_total_2025.nc, resources/baseline-aims-3H/population_shares/pop_layout_urban_2025.nc, resources/baseline-aims-3H/population_shares/pop_layout_rural_2025.nc, resources/baseline-aims-3H/gdp_shares/gdp_layout_2025.nc
+    wildcards: planning_horizons=2025
+    affected files:
+        cutouts/cutout-2013-era5.nc
+MissingInputException: Missing input files for rule build_renewable_profiles:
+    output: resources/baseline-aims-3H/renewable_profiles/profile_onwind.nc
+    wildcards: technology=onwind
+    affected files:
+        data/gebco/GEBCO_2025_sub_ice.nc
+        cutouts/cutout-2013-era5.nc
+        data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif

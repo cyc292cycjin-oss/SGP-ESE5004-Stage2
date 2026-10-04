@@ -1,0 +1,6575 @@
+{
+  "read_at": "2026-09-30T07:20:14.321460+00:00",
+  "root": "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean",
+  "head": "ce327bfae2abe5526d4c1976173f0f8d08366ba5",
+  "status_before": "",
+  "networks": [
+    {
+      "file": "results/baseline-aims-3H-tutorial/postnetworks/elec_s_50_ec_lv2.0__3h_2030_0.071.nc",
+      "sha256": "24d37fc655d028caf67f7218fc6956401ec8323bcf885c47961b9bfdd5953e36",
+      "meta": {
+        "co2": {
+          "budget": {
+            "enable": false,
+            "override_co2opt": true,
+            "co2base_value": 1000000000.0,
+            "year": {
+              "2025": 1.0,
+              "2030": 0.82,
+              "2035": 0.64,
+              "2040": 0.46,
+              "2045": 0.28,
+              "2050": 0.1,
+              "2020": 1.0
+            },
+            "base_value": "limit"
+          },
+          "limit": 77500000.0,
+          "base": 1487000000.0,
+          "emission_price": 0.0,
+          "automatic_emission": {
+            "enable": false,
+            "base_year": 1990
+          }
+        },
+        "sector": {
+          "enable": {
+            "heat": true,
+            "biomass": true,
+            "industry": true,
+            "shipping": true,
+            "aviation": true,
+            "land_transport": false,
+            "rail_transport": true,
+            "agriculture": true,
+            "residential": true,
+            "services": true
+          },
+          "hydrogen": {
+            "network": false,
+            "H2_retrofit_capacity_per_CH4": 0.6,
+            "network_limit": 2000,
+            "network_routes": "gas",
+            "gas_network_repurposing": true,
+            "h2_turbine": true,
+            "underground_storage": {
+              "enabled": false,
+              "min_area_km2": 13,
+              "method": "surface",
+              "technical_realization_factor": 3.5e-05,
+              "energy_density_MWh_per_m3": 0.336,
+              "cavern_height_bedded_m": 120,
+              "cavern_diameter_bedded_m": 84,
+              "cavern_height_dome_m": 300,
+              "cavern_diameter_dome_m": 58,
+              "salt_buffer_m_bedded": 2000,
+              "salt_buffer_m_dome": 500,
+              "copernicus": {
+                "grid_codes": [
+                  50,
+                  80,
+                  100
+                ],
+                "distance_buffer_by_code": {
+                  "50": 2500,
+                  "80": 200,
+                  "100": 200
+                }
+              },
+              "rho_min": 5.0,
+              "rho_max": 42.0,
+              "theta_safety": 0.8,
+              "lhv_h2": 120,
+              "locations": [
+                "onshore",
+                "offshore"
+              ]
+            },
+            "hydrogen_colors": false,
+            "set_color_shares": false,
+            "blue_share": 0.4,
+            "pink_share": 0.05,
+            "production_technologies": [
+              "H2 Electrolysis",
+              "SMR",
+              "SMR CC"
+            ]
+          },
+          "land_transport_fuel_cell_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.004,
+            "NZ_2030": 0.02,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.06,
+            "NZ_2050": 0.28,
+            "DF_2050": 0.08
+          },
+          "land_transport_electric_share": {
+            "DEC_2020": 0,
+            "DEC_2025": 0.05,
+            "DEC_2030": 0.2,
+            "DEC_2035": 0.45,
+            "DEC_2040": 0.7,
+            "DEC_2045": 0.85,
+            "DEC_2050": 1,
+            "BU_2030": 0.0,
+            "AP_2030": 0.075,
+            "NZ_2030": 0.13,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.42,
+            "NZ_2050": 0.68,
+            "DF_2050": 0.011
+          },
+          "shipping_hydrogen_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.0,
+            "NZ_2030": 0.1,
+            "DF_2030": 0.05,
+            "AB_2030": 0.05,
+            "BU_2050": 0.0,
+            "AP_2050": 0.25,
+            "NZ_2050": 0.36,
+            "DF_2050": 0.12
+          },
+          "biomass_transport": false,
+          "solid_biomass_potential": 360,
+          "solar_rooftop": {
+            "use_building_size": false,
+            "enable": true,
+            "kW_per_m2": 0.1,
+            "m2_per_person": 20,
+            "install_ratio": {
+              "0": 0,
+              "10": 0.3,
+              "100": 0.36,
+              "200": 0.41,
+              "450": 0.49,
+              "2300": 0.66
+            },
+            "tolerance": 100
+          },
+          "co2_network": false,
+          "gas": {
+            "spatial_gas": true,
+            "network": false,
+            "network_data": "GGIT",
+            "network_data_GGIT_status": [
+              "Construction",
+              "Operating",
+              "Idle",
+              "Shelved",
+              "Mothballed",
+              "Proposed"
+            ]
+          },
+          "coal": {
+            "spatial_coal": true,
+            "shift_to_elec": true
+          },
+          "lignite": {
+            "spatial_lignite": false
+          },
+          "oil": {
+            "spatial_oil": true
+          },
+          "ammonia": {
+            "enable": true,
+            "spatial_ammonia": true,
+            "production_year": 2019,
+            "gas_MWh_per_tNH3": 7.81,
+            "elec_MWh_per_tNH3": 1.278,
+            "co2_t_per_tNH3": 1.547
+          },
+          "district_heating": {
+            "potential": 0.3,
+            "progress": 1,
+            "district_heating_loss": 0.15
+          },
+          "reduce_space_heat_exogenously": false,
+          "reduce_space_heat_exogenously_factor": 0.29,
+          "space_heat_share": 0.6,
+          "tes": true,
+          "tes_tau": {
+            "decentral": 3,
+            "central": 180
+          },
+          "boilers": true,
+          "oil_boilers": false,
+          "chp": true,
+          "micro_chp": false,
+          "solar_thermal_collector": {
+            "enable": true,
+            "cf_correction": 0.788457,
+            "clearsky_model": "simple",
+            "orientation": {
+              "slope": 45.0,
+              "azimuth": 180.0
+            }
+          },
+          "heat_pump_sink_T": 55,
+          "time_dep_hp_cop": true,
+          "bev_plug_to_wheel_efficiency": 0.2,
+          "bev_charge_efficiency": 0.9,
+          "transport_heating_deadband_upper": 20.0,
+          "transport_heating_deadband_lower": 15.0,
+          "ICE_lower_degree_factor": 0.375,
+          "ICE_upper_degree_factor": 1.6,
+          "EV_lower_degree_factor": 0.98,
+          "EV_upper_degree_factor": 0.63,
+          "bev_avail_max": 0.95,
+          "bev_avail_mean": 0.8,
+          "bev_dsm_restriction_value": 0.75,
+          "bev_dsm_restriction_time": 7,
+          "v2g": true,
+          "bev_dsm": true,
+          "bev_energy": 0.05,
+          "bev_availability": 0.5,
+          "transport_fuel_cell_efficiency": 0.5,
+          "transport_internal_combustion_efficiency": 0.3,
+          "dynamic_transport": {
+            "enable": false,
+            "land_transport_fuel_cell_share": {
+              "Co2L2.0": 0.01,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.01,
+              "Co2L0.80": 0.01,
+              "Co2L0.70": 0.01,
+              "Co2L0.60": 0.01,
+              "Co2L0.50": 0.01,
+              "Co2L0.40": 0.01,
+              "Co2L0.30": 0.01,
+              "Co2L0.20": 0.01,
+              "Co2L0.10": 0.01,
+              "Co2L0.00": 0.01
+            },
+            "land_transport_electric_share": {
+              "Co2L2.0": 0.0,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.03,
+              "Co2L0.80": 0.06,
+              "Co2L0.70": 0.1,
+              "Co2L0.60": 0.17,
+              "Co2L0.50": 0.27,
+              "Co2L0.40": 0.4,
+              "Co2L0.30": 0.55,
+              "Co2L0.20": 0.69,
+              "Co2L0.10": 0.8,
+              "Co2L0.00": 0.88
+            }
+          },
+          "biomass_transport_default_cost": 0.1,
+          "biogas_potential": 0.5,
+          "electricity_distribution_grid": true,
+          "enable_electricity_connection_cost": false,
+          "home_battery": true,
+          "transmission_efficiency": {
+            "electricity distribution grid": {
+              "efficiency_static": 0.97
+            },
+            "H2 pipeline": {
+              "efficiency_per_1000km": 1,
+              "compression_per_1000km": 0.017
+            }
+          },
+          "shipping_hydrogen_liquefaction": false,
+          "shipping_average_efficiency": 0.4,
+          "airport_sizing_factor": 3,
+          "international_bunkers": false,
+          "co2_sequestration_potential": 200,
+          "co2_sequestration_cost": 10,
+          "methanation": true,
+          "helmeth": true,
+          "dac": true,
+          "cc_fraction": 0.9,
+          "cc": true,
+          "fischer_tropsch": true,
+          "min_part_load_fischer_tropsch": 0.9,
+          "industry_util_factor": 0.7,
+          "efficiency_heat_oil_to_elec": 0.9,
+          "efficiency_heat_biomass_to_elec": 0.9,
+          "efficiency_heat_gas_to_elec": 0.9,
+          "conventional_generation": {
+            "OCGT": "gas",
+            "CCGT": "gas",
+            "oil": "oil",
+            "coal": "coal",
+            "lignite": "lignite",
+            "biomass": "biomass"
+          },
+          "keep_existing_capacities": false,
+          "marginal_cost_storage": 0
+        },
+        "final_adjustment": {
+          "only_elec_network": true,
+          "readjust_existing_interconnections": true,
+          "pop_forecast_path": "data/worldbank_pop_forecast.csv",
+          "elec_per_capita": {
+            "BN": 10.67,
+            "KH": 0.93,
+            "ID": 1.45,
+            "LA": 1.67,
+            "MM": 0.37,
+            "MY": 5.08,
+            "PH": 0.93,
+            "SG": 9.75,
+            "TH": 2.97,
+            "TL": 0.29,
+            "VN": 2.59
+          },
+          "total_elec_demand": {
+            "2025": 1401400000.0,
+            "2030": 1658800000.0,
+            "2035": 1940200000.0,
+            "2040": 2264600000.0,
+            "2045": 2635000000.0,
+            "2050": 3036300000.0
+          },
+          "redistribute_industry": true,
+          "industry_share": {
+            "BN": 0.3,
+            "KH": 0.36,
+            "ID": 0.5,
+            "LA": 0.61,
+            "MM": 0.21,
+            "MY": 0.88,
+            "PH": 0.31,
+            "SG": 0.37,
+            "TH": 0.42,
+            "TL": 0.01,
+            "VN": 0.51
+          },
+          "drop_country": false
+        },
+        "scenario": {
+          "clusters": [
+            50
+          ],
+          "ll": [
+            "v2.0"
+          ],
+          "opts": [
+            ""
+          ],
+          "planning_horizons": [
+            2030,
+            2040,
+            2050
+          ],
+          "sopts": [
+            "3h"
+          ],
+          "simpl": [
+            ""
+          ],
+          "unc": [
+            "m0",
+            "m1",
+            "m2",
+            "m3",
+            "m4",
+            "m5",
+            "m6",
+            "m7",
+            "m8"
+          ]
+        },
+        "demand_data": {
+          "scenario": "DEC",
+          "update_data": true,
+          "base_year": 2019,
+          "other_industries": false,
+          "aluminium_year": 2019
+        },
+        "costs": {
+          "append_cost_data": true,
+          "regional_factor": false,
+          "year": 2030,
+          "technology_data_version": "v0.13.2",
+          "discountrate": [
+            0.071
+          ],
+          "country_specific_data": "",
+          "cost_scenario": "moderate",
+          "financial_case": "market",
+          "output_currency": "EUR",
+          "default_exchange_rate": 0.7532,
+          "future_exchange_rate_strategy": "reference",
+          "custom_future_exchange_rate": "None",
+          "rooftop_share": 0.14,
+          "fill_values": {
+            "FOM": 0,
+            "VOM": 0,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": 25,
+            "CO2 intensity": 0,
+            "discount rate": 0.07
+          },
+          "marginal_cost": {
+            "solar": 0.01,
+            "onwind": 0.015,
+            "offwind": 0.015,
+            "hydro": 0.0,
+            "H2": 0.0,
+            "electrolysis": 0.0,
+            "fuel cell": 0.0,
+            "battery": 0.0,
+            "battery inverter": 0.0
+          }
+        }
+      },
+      "weights": {
+        "objective": 8760.0,
+        "generators": 8760.0,
+        "stores": 8760.0
+      },
+      "constraints": [
+        {
+          "GlobalConstraint": "lv_limit",
+          "type": "transmission_volume_expansion_limit",
+          "carrier_attribute": "AC, DC",
+          "sense": "<=",
+          "constant": 240772385.9178782,
+          "investment_period": "NaN",
+          "mu": 0.0
+        }
+      ],
+      "components": {
+        "buses": [
+          {
+            "carrier": "AC",
+            "count": 46
+          },
+          {
+            "carrier": "DC",
+            "count": 4
+          },
+          {
+            "carrier": "H2",
+            "count": 48
+          },
+          {
+            "carrier": "battery",
+            "count": 50
+          },
+          {
+            "carrier": "biomass",
+            "count": 1
+          },
+          {
+            "carrier": "co2",
+            "count": 1
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1
+          },
+          {
+            "carrier": "coal",
+            "count": 48
+          },
+          {
+            "carrier": "gas",
+            "count": 48
+          },
+          {
+            "carrier": "home battery",
+            "count": 48
+          },
+          {
+            "carrier": "lignite",
+            "count": 1
+          },
+          {
+            "carrier": "low voltage",
+            "count": 48
+          },
+          {
+            "carrier": "oil",
+            "count": 48
+          }
+        ],
+        "loads": [
+          {
+            "carrier": "AC",
+            "count": 46,
+            "weighted_demand_MWh": 802598414.1533067,
+            "nonzero_loads": 46
+          },
+          {
+            "carrier": "agriculture electricity",
+            "count": 48,
+            "weighted_demand_MWh": 13690059.447337788,
+            "nonzero_loads": 37
+          },
+          {
+            "carrier": "industry electricity",
+            "count": 48,
+            "weighted_demand_MWh": 0.0,
+            "nonzero_loads": 0
+          },
+          {
+            "carrier": "rail transport electricity",
+            "count": 48,
+            "weighted_demand_MWh": 6147076.454039684,
+            "nonzero_loads": 33
+          }
+        ],
+        "generators": [
+          {
+            "carrier": "coal",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              9.563233240176986,
+              9.565177519485445
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              24.57702428929303,
+              24.578930925027716
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "geothermal",
+            "count": 13,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              263470.01977282774,
+              263470.01977282774
+            ],
+            "marginal_cost_range": [
+              0.27230709258231683,
+              0.2741035325293328
+            ],
+            "p_nom_max_range": [
+              8.0,
+              470.0
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              3.309373374162305,
+              3.309373374162305
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "nuclear",
+            "count": 1,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              654653.6157847332,
+              654653.6157847332
+            ],
+            "marginal_cost_range": [
+              12.582099663665375,
+              12.582099663665375
+            ],
+            "p_nom_max_range": [
+              621.0,
+              621.0
+            ]
+          },
+          {
+            "carrier": "offwind-ac",
+            "count": 41,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              287268.3352589314,
+              365209.7856770969
+            ],
+            "marginal_cost_range": [
+              0.024039918257184593,
+              0.0259802551795828
+            ],
+            "p_nom_max_range": [
+              951.4350577293434,
+              147154.37893226108
+            ]
+          },
+          {
+            "carrier": "offwind-dc",
+            "count": 41,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              297079.1195720039,
+              353418.5181615964
+            ],
+            "marginal_cost_range": [
+              0.024006753518568603,
+              0.025959615110868486
+            ],
+            "p_nom_max_range": [
+              0.0,
+              426568.2414970033
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              52.92012371292573,
+              52.922085763547884
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "onwind",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              123791.45433798528,
+              123791.45433798531
+            ],
+            "marginal_cost_range": [
+              0.024022006459430287,
+              0.02595646802835322
+            ],
+            "p_nom_max_range": [
+              81.49524195724305,
+              540386.2083262193
+            ]
+          },
+          {
+            "carrier": "ror",
+            "count": 51,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              116604.14388733066,
+              116604.1438873307
+            ],
+            "marginal_cost_range": [
+              0.009066723498785612,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solar",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              71545.77136145244,
+              71545.77136145244
+            ],
+            "marginal_cost_range": [
+              0.019011816591027145,
+              0.020988884892469955
+            ],
+            "p_nom_max_range": [
+              578.3153406941843,
+              1096865.0101392595
+            ]
+          },
+          {
+            "carrier": "solar rooftop",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              57483.202043040445,
+              57483.202043040445
+            ],
+            "marginal_cost_range": [
+              0.01907310660520241,
+              0.02096206850229463
+            ],
+            "p_nom_max_range": [
+              398.4728326281365,
+              264629.02058551507
+            ]
+          }
+        ],
+        "links": [
+          {
+            "carrier": "B2B",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009138502810520331,
+              0.01051664063156824
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "CCGT",
+            "count": 105,
+            "p_nom_extendable": 27,
+            "capital_cost_range": [
+              54936.400822767646,
+              54936.400822767646
+            ],
+            "marginal_cost_range": [
+              1.1283504886812765,
+              1.130313084125894
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "DC",
+            "count": 15,
+            "p_nom_extendable": 15,
+            "capital_cost_range": [
+              21335.554186007237,
+              96743.4323651292
+            ],
+            "marginal_cost_range": [
+              0.009100163118941776,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Fischer-Tropsch",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              69943.33466101172,
+              69943.33466101172
+            ],
+            "marginal_cost_range": [
+              0.009002880375132138,
+              0.010973254766942336
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "H2 Electrolysis",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              188715.7758309984,
+              188715.7758309984
+            ],
+            "marginal_cost_range": [
+              0.009033240176985697,
+              0.01097751948544519
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              68192.35692475682,
+              68192.35692475682
+            ],
+            "marginal_cost_range": [
+              0.009073106605202406,
+              0.010962068502294631
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR CC",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              79103.13403637432,
+              79103.13403637432
+            ],
+            "marginal_cost_range": [
+              0.009005666743009361,
+              0.01089564599386162
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Sabatier",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              67651.68975151317,
+              67651.68975151317
+            ],
+            "marginal_cost_range": [
+              0.009017435285188578,
+              0.01096523973228696
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery charger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              34384.78035201654,
+              34384.78035201654
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010943203433738495
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery discharger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009100521555003634,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass EOP",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              124086.45518468428,
+              124086.45518468428
+            ],
+            "marginal_cost_range": [
+              0.6763758619270094,
+              0.6782277585878808
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 vent",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.010274803061746718,
+              0.010274803061746718
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 73,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              90112.86203886422,
+              90112.86203886422
+            ],
+            "marginal_cost_range": [
+              2.351224738262016,
+              2.353186212516875
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "electricity distribution grid",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              50270.361476727056,
+              50270.361476727056
+            ],
+            "marginal_cost_range": [
+              0.009000415742165396,
+              0.010965457230528483
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "helmeth",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              245106.3932412123,
+              245106.3932412123
+            ],
+            "marginal_cost_range": [
+              0.00907233631906455,
+              0.010904660726483557
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery charger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              35347.707483186925,
+              35347.707483186925
+            ],
+            "marginal_cost_range": [
+              0.009020008281805698,
+              0.010981763110760538
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery discharger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009127192375645946,
+              0.010999420680246577
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 10,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              111278.64905784962,
+              111278.64905784962
+            ],
+            "marginal_cost_range": [
+              1.0852197129257315,
+              1.086969163614295
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 33,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              26769.201688908914,
+              26769.201688908914
+            ],
+            "marginal_cost_range": [
+              2.2504404794939687,
+              2.252299411402716
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "stores": [
+          {
+            "carrier": "H2 Store Tank",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              4380.27106930119,
+              4380.27106930119
+            ],
+            "marginal_cost_range": [
+              0.009006753518568604,
+              0.0109802551795828
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery",
+            "count": 50,
+            "e_nom_extendable": 50,
+            "capital_cost_range": [
+              12957.628369768723,
+              12957.628369768723
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009621257159033534,
+              0.009621257159033534
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009932242002676409,
+              0.009932242002676409
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              10.0,
+              10.0
+            ],
+            "marginal_cost_range": [
+              0.009307484591463012,
+              0.009307484591463012
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009068960525287289,
+              0.01096934896318595
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009100521555003634,
+              0.01088680402303481
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              18515.043544944467,
+              18515.043544944467
+            ],
+            "marginal_cost_range": [
+              0.009024289293027028,
+              0.010985763547886088
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009769769898332604,
+              0.009769769898332604
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009011816591027143,
+              0.010967311214861159
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solid biomass",
+            "count": 1,
+            "e_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              13.65803754402753,
+              13.65803754402753
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "storage_units": [
+          {
+            "carrier": "PHS",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              182698.73459185107,
+              182698.73459185107
+            ],
+            "marginal_cost_range": [
+              0.00926550204934281,
+              0.010720156727456676
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "hydro",
+            "count": 76,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "lines": [
+          {
+            "carrier": "AC",
+            "count": 37,
+            "s_nom_extendable": 37,
+            "capital_cost_range": [
+              1942.173551814134,
+              44063.303696015515
+            ]
+          }
+        ]
+      },
+      "co2_stores": [
+        {
+          "Store": "co2 atmosphere",
+          "bus": "co2 atmosphere",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2",
+          "capital_cost": 0.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": -1.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009932242002676409,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": 531749350.54069036,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        },
+        {
+          "Store": "co2 stored",
+          "bus": "co2 stored",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2 stored",
+          "capital_cost": 10.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": 0.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009307484591463012,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": -0.0,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        }
+      ],
+      "emission_carriers": [
+        {
+          "Carrier": "geothermal",
+          "co2_emissions": 0.12,
+          "color": "#ba91b1",
+          "nice_name": "Geothermal",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        },
+        {
+          "Carrier": "co2",
+          "co2_emissions": -1.0,
+          "color": "#123456",
+          "nice_name": "co2",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        }
+      ],
+      "dangling_link_ports": {
+        "bus0": [],
+        "bus1": [],
+        "bus2": [],
+        "bus3": []
+      }
+    },
+    {
+      "file": "results/baseline-aims-3H-tutorial/postnetworks/elec_s_50_ec_lv2.0__3h_2040_0.071.nc",
+      "sha256": "4cc008c72826dd79a9034f23f119e68db87339633f6fdc2c38d19d2310872061",
+      "meta": {
+        "co2": {
+          "budget": {
+            "enable": false,
+            "override_co2opt": true,
+            "co2base_value": 1000000000.0,
+            "year": {
+              "2025": 1.0,
+              "2030": 0.82,
+              "2035": 0.64,
+              "2040": 0.46,
+              "2045": 0.28,
+              "2050": 0.1,
+              "2020": 1.0
+            },
+            "base_value": "limit"
+          },
+          "limit": 77500000.0,
+          "base": 1487000000.0,
+          "emission_price": 0.0,
+          "automatic_emission": {
+            "enable": false,
+            "base_year": 1990
+          }
+        },
+        "sector": {
+          "enable": {
+            "heat": true,
+            "biomass": true,
+            "industry": true,
+            "shipping": true,
+            "aviation": true,
+            "land_transport": false,
+            "rail_transport": true,
+            "agriculture": true,
+            "residential": true,
+            "services": true
+          },
+          "hydrogen": {
+            "network": false,
+            "H2_retrofit_capacity_per_CH4": 0.6,
+            "network_limit": 2000,
+            "network_routes": "gas",
+            "gas_network_repurposing": true,
+            "h2_turbine": true,
+            "underground_storage": {
+              "enabled": false,
+              "min_area_km2": 13,
+              "method": "surface",
+              "technical_realization_factor": 3.5e-05,
+              "energy_density_MWh_per_m3": 0.336,
+              "cavern_height_bedded_m": 120,
+              "cavern_diameter_bedded_m": 84,
+              "cavern_height_dome_m": 300,
+              "cavern_diameter_dome_m": 58,
+              "salt_buffer_m_bedded": 2000,
+              "salt_buffer_m_dome": 500,
+              "copernicus": {
+                "grid_codes": [
+                  50,
+                  80,
+                  100
+                ],
+                "distance_buffer_by_code": {
+                  "50": 2500,
+                  "80": 200,
+                  "100": 200
+                }
+              },
+              "rho_min": 5.0,
+              "rho_max": 42.0,
+              "theta_safety": 0.8,
+              "lhv_h2": 120,
+              "locations": [
+                "onshore",
+                "offshore"
+              ]
+            },
+            "hydrogen_colors": false,
+            "set_color_shares": false,
+            "blue_share": 0.4,
+            "pink_share": 0.05,
+            "production_technologies": [
+              "H2 Electrolysis",
+              "SMR",
+              "SMR CC"
+            ]
+          },
+          "land_transport_fuel_cell_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.004,
+            "NZ_2030": 0.02,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.06,
+            "NZ_2050": 0.28,
+            "DF_2050": 0.08
+          },
+          "land_transport_electric_share": {
+            "DEC_2020": 0,
+            "DEC_2025": 0.05,
+            "DEC_2030": 0.2,
+            "DEC_2035": 0.45,
+            "DEC_2040": 0.7,
+            "DEC_2045": 0.85,
+            "DEC_2050": 1,
+            "BU_2030": 0.0,
+            "AP_2030": 0.075,
+            "NZ_2030": 0.13,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.42,
+            "NZ_2050": 0.68,
+            "DF_2050": 0.011
+          },
+          "shipping_hydrogen_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.0,
+            "NZ_2030": 0.1,
+            "DF_2030": 0.05,
+            "AB_2030": 0.05,
+            "BU_2050": 0.0,
+            "AP_2050": 0.25,
+            "NZ_2050": 0.36,
+            "DF_2050": 0.12
+          },
+          "biomass_transport": false,
+          "solid_biomass_potential": 360,
+          "solar_rooftop": {
+            "use_building_size": false,
+            "enable": true,
+            "kW_per_m2": 0.1,
+            "m2_per_person": 20,
+            "install_ratio": {
+              "0": 0,
+              "10": 0.3,
+              "100": 0.36,
+              "200": 0.41,
+              "450": 0.49,
+              "2300": 0.66
+            },
+            "tolerance": 100
+          },
+          "co2_network": false,
+          "gas": {
+            "spatial_gas": true,
+            "network": false,
+            "network_data": "GGIT",
+            "network_data_GGIT_status": [
+              "Construction",
+              "Operating",
+              "Idle",
+              "Shelved",
+              "Mothballed",
+              "Proposed"
+            ]
+          },
+          "coal": {
+            "spatial_coal": true,
+            "shift_to_elec": true
+          },
+          "lignite": {
+            "spatial_lignite": false
+          },
+          "oil": {
+            "spatial_oil": true
+          },
+          "ammonia": {
+            "enable": true,
+            "spatial_ammonia": true,
+            "production_year": 2019,
+            "gas_MWh_per_tNH3": 7.81,
+            "elec_MWh_per_tNH3": 1.278,
+            "co2_t_per_tNH3": 1.547
+          },
+          "district_heating": {
+            "potential": 0.3,
+            "progress": 1,
+            "district_heating_loss": 0.15
+          },
+          "reduce_space_heat_exogenously": false,
+          "reduce_space_heat_exogenously_factor": 0.29,
+          "space_heat_share": 0.6,
+          "tes": true,
+          "tes_tau": {
+            "decentral": 3,
+            "central": 180
+          },
+          "boilers": true,
+          "oil_boilers": false,
+          "chp": true,
+          "micro_chp": false,
+          "solar_thermal_collector": {
+            "enable": true,
+            "cf_correction": 0.788457,
+            "clearsky_model": "simple",
+            "orientation": {
+              "slope": 45.0,
+              "azimuth": 180.0
+            }
+          },
+          "heat_pump_sink_T": 55,
+          "time_dep_hp_cop": true,
+          "bev_plug_to_wheel_efficiency": 0.2,
+          "bev_charge_efficiency": 0.9,
+          "transport_heating_deadband_upper": 20.0,
+          "transport_heating_deadband_lower": 15.0,
+          "ICE_lower_degree_factor": 0.375,
+          "ICE_upper_degree_factor": 1.6,
+          "EV_lower_degree_factor": 0.98,
+          "EV_upper_degree_factor": 0.63,
+          "bev_avail_max": 0.95,
+          "bev_avail_mean": 0.8,
+          "bev_dsm_restriction_value": 0.75,
+          "bev_dsm_restriction_time": 7,
+          "v2g": true,
+          "bev_dsm": true,
+          "bev_energy": 0.05,
+          "bev_availability": 0.5,
+          "transport_fuel_cell_efficiency": 0.5,
+          "transport_internal_combustion_efficiency": 0.3,
+          "dynamic_transport": {
+            "enable": false,
+            "land_transport_fuel_cell_share": {
+              "Co2L2.0": 0.01,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.01,
+              "Co2L0.80": 0.01,
+              "Co2L0.70": 0.01,
+              "Co2L0.60": 0.01,
+              "Co2L0.50": 0.01,
+              "Co2L0.40": 0.01,
+              "Co2L0.30": 0.01,
+              "Co2L0.20": 0.01,
+              "Co2L0.10": 0.01,
+              "Co2L0.00": 0.01
+            },
+            "land_transport_electric_share": {
+              "Co2L2.0": 0.0,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.03,
+              "Co2L0.80": 0.06,
+              "Co2L0.70": 0.1,
+              "Co2L0.60": 0.17,
+              "Co2L0.50": 0.27,
+              "Co2L0.40": 0.4,
+              "Co2L0.30": 0.55,
+              "Co2L0.20": 0.69,
+              "Co2L0.10": 0.8,
+              "Co2L0.00": 0.88
+            }
+          },
+          "biomass_transport_default_cost": 0.1,
+          "biogas_potential": 0.5,
+          "electricity_distribution_grid": true,
+          "enable_electricity_connection_cost": false,
+          "home_battery": true,
+          "transmission_efficiency": {
+            "electricity distribution grid": {
+              "efficiency_static": 0.97
+            },
+            "H2 pipeline": {
+              "efficiency_per_1000km": 1,
+              "compression_per_1000km": 0.017
+            }
+          },
+          "shipping_hydrogen_liquefaction": false,
+          "shipping_average_efficiency": 0.4,
+          "airport_sizing_factor": 3,
+          "international_bunkers": false,
+          "co2_sequestration_potential": 200,
+          "co2_sequestration_cost": 10,
+          "methanation": true,
+          "helmeth": true,
+          "dac": true,
+          "cc_fraction": 0.9,
+          "cc": true,
+          "fischer_tropsch": true,
+          "min_part_load_fischer_tropsch": 0.9,
+          "industry_util_factor": 0.7,
+          "efficiency_heat_oil_to_elec": 0.9,
+          "efficiency_heat_biomass_to_elec": 0.9,
+          "efficiency_heat_gas_to_elec": 0.9,
+          "conventional_generation": {
+            "OCGT": "gas",
+            "CCGT": "gas",
+            "oil": "oil",
+            "coal": "coal",
+            "lignite": "lignite",
+            "biomass": "biomass"
+          },
+          "keep_existing_capacities": false,
+          "marginal_cost_storage": 0
+        },
+        "final_adjustment": {
+          "only_elec_network": true,
+          "readjust_existing_interconnections": true,
+          "pop_forecast_path": "data/worldbank_pop_forecast.csv",
+          "elec_per_capita": {
+            "BN": 10.67,
+            "KH": 0.93,
+            "ID": 1.45,
+            "LA": 1.67,
+            "MM": 0.37,
+            "MY": 5.08,
+            "PH": 0.93,
+            "SG": 9.75,
+            "TH": 2.97,
+            "TL": 0.29,
+            "VN": 2.59
+          },
+          "total_elec_demand": {
+            "2025": 1401400000.0,
+            "2030": 1658800000.0,
+            "2035": 1940200000.0,
+            "2040": 2264600000.0,
+            "2045": 2635000000.0,
+            "2050": 3036300000.0
+          },
+          "redistribute_industry": true,
+          "industry_share": {
+            "BN": 0.3,
+            "KH": 0.36,
+            "ID": 0.5,
+            "LA": 0.61,
+            "MM": 0.21,
+            "MY": 0.88,
+            "PH": 0.31,
+            "SG": 0.37,
+            "TH": 0.42,
+            "TL": 0.01,
+            "VN": 0.51
+          },
+          "drop_country": false
+        },
+        "scenario": {
+          "clusters": [
+            50
+          ],
+          "ll": [
+            "v2.0"
+          ],
+          "opts": [
+            ""
+          ],
+          "planning_horizons": [
+            2030,
+            2040,
+            2050
+          ],
+          "sopts": [
+            "3h"
+          ],
+          "simpl": [
+            ""
+          ],
+          "unc": [
+            "m0",
+            "m1",
+            "m2",
+            "m3",
+            "m4",
+            "m5",
+            "m6",
+            "m7",
+            "m8"
+          ]
+        },
+        "demand_data": {
+          "scenario": "DEC",
+          "update_data": true,
+          "base_year": 2019,
+          "other_industries": false,
+          "aluminium_year": 2019
+        },
+        "costs": {
+          "append_cost_data": true,
+          "regional_factor": false,
+          "year": 2030,
+          "technology_data_version": "v0.13.2",
+          "discountrate": [
+            0.071
+          ],
+          "country_specific_data": "",
+          "cost_scenario": "moderate",
+          "financial_case": "market",
+          "output_currency": "EUR",
+          "default_exchange_rate": 0.7532,
+          "future_exchange_rate_strategy": "reference",
+          "custom_future_exchange_rate": "None",
+          "rooftop_share": 0.14,
+          "fill_values": {
+            "FOM": 0,
+            "VOM": 0,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": 25,
+            "CO2 intensity": 0,
+            "discount rate": 0.07
+          },
+          "marginal_cost": {
+            "solar": 0.01,
+            "onwind": 0.015,
+            "offwind": 0.015,
+            "hydro": 0.0,
+            "H2": 0.0,
+            "electrolysis": 0.0,
+            "fuel cell": 0.0,
+            "battery": 0.0,
+            "battery inverter": 0.0
+          }
+        }
+      },
+      "weights": {
+        "objective": 8760.0,
+        "generators": 8760.0,
+        "stores": 8760.0
+      },
+      "constraints": [
+        {
+          "GlobalConstraint": "lv_limit",
+          "type": "transmission_volume_expansion_limit",
+          "carrier_attribute": "AC, DC",
+          "sense": "<=",
+          "constant": 240772385.9178782,
+          "investment_period": "NaN",
+          "mu": 0.0
+        }
+      ],
+      "components": {
+        "buses": [
+          {
+            "carrier": "AC",
+            "count": 46
+          },
+          {
+            "carrier": "DC",
+            "count": 4
+          },
+          {
+            "carrier": "H2",
+            "count": 48
+          },
+          {
+            "carrier": "battery",
+            "count": 50
+          },
+          {
+            "carrier": "biomass",
+            "count": 1
+          },
+          {
+            "carrier": "co2",
+            "count": 1
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1
+          },
+          {
+            "carrier": "coal",
+            "count": 48
+          },
+          {
+            "carrier": "gas",
+            "count": 48
+          },
+          {
+            "carrier": "home battery",
+            "count": 48
+          },
+          {
+            "carrier": "lignite",
+            "count": 1
+          },
+          {
+            "carrier": "low voltage",
+            "count": 48
+          },
+          {
+            "carrier": "oil",
+            "count": 48
+          }
+        ],
+        "loads": [
+          {
+            "carrier": "AC",
+            "count": 46,
+            "weighted_demand_MWh": 1088583738.047261,
+            "nonzero_loads": 46
+          },
+          {
+            "carrier": "agriculture electricity",
+            "count": 48,
+            "weighted_demand_MWh": 16493762.53360365,
+            "nonzero_loads": 37
+          },
+          {
+            "carrier": "industry electricity",
+            "count": 48,
+            "weighted_demand_MWh": 0.0,
+            "nonzero_loads": 0
+          },
+          {
+            "carrier": "rail transport electricity",
+            "count": 48,
+            "weighted_demand_MWh": 8890379.601060204,
+            "nonzero_loads": 33
+          }
+        ],
+        "generators": [
+          {
+            "carrier": "coal",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              9.563233240176986,
+              9.565177519485445
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              24.57702428929303,
+              24.578930925027716
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "geothermal",
+            "count": 13,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              263470.01977282774,
+              263470.01977282774
+            ],
+            "marginal_cost_range": [
+              0.27230709258231683,
+              0.2741035325293328
+            ],
+            "p_nom_max_range": [
+              8.0,
+              470.0
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              3.309373374162305,
+              3.309373374162305
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "nuclear",
+            "count": 1,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              654653.6157847332,
+              654653.6157847332
+            ],
+            "marginal_cost_range": [
+              12.582099663665375,
+              12.582099663665375
+            ],
+            "p_nom_max_range": [
+              621.0,
+              621.0
+            ]
+          },
+          {
+            "carrier": "offwind-ac",
+            "count": 42,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              287268.3352589314,
+              365209.7856770969
+            ],
+            "marginal_cost_range": [
+              0.024039918257184593,
+              0.0354101018485162
+            ],
+            "p_nom_max_range": [
+              951.4350577293434,
+              147154.37893226108
+            ]
+          },
+          {
+            "carrier": "offwind-dc",
+            "count": 43,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              297079.1195720039,
+              353418.5181615964
+            ],
+            "marginal_cost_range": [
+              0.024006753518568603,
+              0.03440833320755586
+            ],
+            "p_nom_max_range": [
+              0.0,
+              426568.2414970033
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              52.92012371292573,
+              52.922085763547884
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "onwind",
+            "count": 61,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              123791.45433798528,
+              123791.45433798531
+            ],
+            "marginal_cost_range": [
+              0.024022006459430287,
+              0.03641687343224983
+            ],
+            "p_nom_max_range": [
+              81.59524195724305,
+              540386.2083262193
+            ]
+          },
+          {
+            "carrier": "ror",
+            "count": 51,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              116604.14388733066,
+              116604.1438873307
+            ],
+            "marginal_cost_range": [
+              0.009066723498785612,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solar",
+            "count": 73,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              71545.77136145244,
+              71545.77136145244
+            ],
+            "marginal_cost_range": [
+              0.019011816591027145,
+              0.03129623990916051
+            ],
+            "p_nom_max_range": [
+              578.3153406941843,
+              1096865.0101392595
+            ]
+          },
+          {
+            "carrier": "solar rooftop",
+            "count": 62,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              57483.202043040445,
+              57483.202043040445
+            ],
+            "marginal_cost_range": [
+              0.01907310660520241,
+              0.03154241049047876
+            ],
+            "p_nom_max_range": [
+              398.4728326281365,
+              264629.02058551507
+            ]
+          }
+        ],
+        "links": [
+          {
+            "carrier": "B2B",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009138502810520331,
+              0.01051664063156824
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "CCGT",
+            "count": 108,
+            "p_nom_extendable": 27,
+            "capital_cost_range": [
+              54936.400822767646,
+              55883.580147298126
+            ],
+            "marginal_cost_range": [
+              1.1393850303808484,
+              1.1496230202588893
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "DC",
+            "count": 25,
+            "p_nom_extendable": 25,
+            "capital_cost_range": [
+              21335.554186007237,
+              110781.6858104866
+            ],
+            "marginal_cost_range": [
+              0.009100163118941776,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Fischer-Tropsch",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              60800.0774722321,
+              60800.0774722321
+            ],
+            "marginal_cost_range": [
+              0.009002880375132138,
+              0.01089835788686333
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "H2 Electrolysis",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              150972.62066479874,
+              150972.62066479874
+            ],
+            "marginal_cost_range": [
+              0.009073106605202406,
+              0.01097751948544519
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              68192.35692475682,
+              68192.35692475682
+            ],
+            "marginal_cost_range": [
+              0.009014245874137055,
+              0.010804219592013999
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR CC",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              79103.13403637432,
+              79103.13403637432
+            ],
+            "marginal_cost_range": [
+              0.009005666743009361,
+              0.010973254766942336
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Sabatier",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              59686.581833189135,
+              59686.581833189135
+            ],
+            "marginal_cost_range": [
+              0.009017435285188578,
+              0.01096523973228696
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery charger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              34384.78035201654,
+              34384.78035201654
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010943203433738495
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery discharger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009039918257184596,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass EOP",
+            "count": 52,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              118116.34921212378,
+              124086.45518468428
+            ],
+            "marginal_cost_range": [
+              0.6762670157421654,
+              0.6879490772816662
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 vent",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009814837720213663,
+              0.009814837720213663
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 73,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              90112.86203886422,
+              90112.86203886422
+            ],
+            "marginal_cost_range": [
+              2.3512241618947205,
+              2.353186212516875
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "electricity distribution grid",
+            "count": 94,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              50270.361476727056,
+              50270.361476727056
+            ],
+            "marginal_cost_range": [
+              0.00900382973653271,
+              0.02185709864439044
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "helmeth",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              245106.3932412123,
+              245106.3932412123
+            ],
+            "marginal_cost_range": [
+              0.009081577794949388,
+              0.010904660726483557
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery charger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              22717.93893852968,
+              22717.93893852968
+            ],
+            "marginal_cost_range": [
+              0.009020008281805698,
+              0.01093901782136037
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery discharger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009127192375645946,
+              0.010999420680246577
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 10,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              111278.64905784962,
+              111278.64905784962
+            ],
+            "marginal_cost_range": [
+              1.0852292401769859,
+              1.086754508787757
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 33,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              26769.201688908914,
+              26769.201688908914
+            ],
+            "marginal_cost_range": [
+              2.250456700250665,
+              2.2522500812508497
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "stores": [
+          {
+            "carrier": "H2 Store Tank",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              2849.799785158518,
+              2849.799785158518
+            ],
+            "marginal_cost_range": [
+              0.009006753518568604,
+              0.0109802551795828
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery",
+            "count": 50,
+            "e_nom_extendable": 50,
+            "capital_cost_range": [
+              12957.628369768723,
+              12957.628369768723
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009621257159033534,
+              0.009621257159033534
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009932242002676409,
+              0.009932242002676409
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              10.0,
+              10.0
+            ],
+            "marginal_cost_range": [
+              0.009307484591463012,
+              0.009307484591463012
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009068960525287289,
+              0.01096934896318595
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009100521555003634,
+              0.01088680402303481
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              11668.758114242228,
+              11668.758114242228
+            ],
+            "marginal_cost_range": [
+              0.009024289293027028,
+              0.010985763547886088
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009769769898332604,
+              0.009769769898332604
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009011816591027143,
+              0.010967311214861159
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solid biomass",
+            "count": 1,
+            "e_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              13.65803754402753,
+              13.65803754402753
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "storage_units": [
+          {
+            "carrier": "PHS",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              182698.73459185107,
+              182698.73459185107
+            ],
+            "marginal_cost_range": [
+              0.00926550204934281,
+              0.010720156727456676
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "hydro",
+            "count": 76,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "lines": [
+          {
+            "carrier": "AC",
+            "count": 37,
+            "s_nom_extendable": 37,
+            "capital_cost_range": [
+              1942.173551814134,
+              44063.303696015515
+            ]
+          }
+        ]
+      },
+      "co2_stores": [
+        {
+          "Store": "co2 atmosphere",
+          "bus": "co2 atmosphere",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2",
+          "capital_cost": 0.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": -1.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009932242002676409,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": 765654613.2608095,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        },
+        {
+          "Store": "co2 stored",
+          "bus": "co2 stored",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2 stored",
+          "capital_cost": 10.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": 0.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009307484591463012,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": -0.0,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        }
+      ],
+      "emission_carriers": [
+        {
+          "Carrier": "geothermal",
+          "co2_emissions": 0.12,
+          "color": "#ba91b1",
+          "nice_name": "Geothermal",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        },
+        {
+          "Carrier": "co2",
+          "co2_emissions": -1.0,
+          "color": "#123456",
+          "nice_name": "co2",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        }
+      ],
+      "dangling_link_ports": {
+        "bus0": [],
+        "bus1": [],
+        "bus2": [],
+        "bus3": []
+      }
+    },
+    {
+      "file": "results/baseline-aims-3H-tutorial/postnetworks/elec_s_50_ec_lv2.0__3h_2050_0.071.nc",
+      "sha256": "6c01c5a5adf6bd486904d1fd2dc5eb662752645fc53eab8fb07b3e99d598ab2c",
+      "meta": {
+        "co2": {
+          "budget": {
+            "enable": false,
+            "override_co2opt": true,
+            "co2base_value": 1000000000.0,
+            "year": {
+              "2025": 1.0,
+              "2030": 0.82,
+              "2035": 0.64,
+              "2040": 0.46,
+              "2045": 0.28,
+              "2050": 0.1,
+              "2020": 1.0
+            },
+            "base_value": "limit"
+          },
+          "limit": 77500000.0,
+          "base": 1487000000.0,
+          "emission_price": 0.0,
+          "automatic_emission": {
+            "enable": false,
+            "base_year": 1990
+          }
+        },
+        "sector": {
+          "enable": {
+            "heat": true,
+            "biomass": true,
+            "industry": true,
+            "shipping": true,
+            "aviation": true,
+            "land_transport": false,
+            "rail_transport": true,
+            "agriculture": true,
+            "residential": true,
+            "services": true
+          },
+          "hydrogen": {
+            "network": false,
+            "H2_retrofit_capacity_per_CH4": 0.6,
+            "network_limit": 2000,
+            "network_routes": "gas",
+            "gas_network_repurposing": true,
+            "h2_turbine": true,
+            "underground_storage": {
+              "enabled": false,
+              "min_area_km2": 13,
+              "method": "surface",
+              "technical_realization_factor": 3.5e-05,
+              "energy_density_MWh_per_m3": 0.336,
+              "cavern_height_bedded_m": 120,
+              "cavern_diameter_bedded_m": 84,
+              "cavern_height_dome_m": 300,
+              "cavern_diameter_dome_m": 58,
+              "salt_buffer_m_bedded": 2000,
+              "salt_buffer_m_dome": 500,
+              "copernicus": {
+                "grid_codes": [
+                  50,
+                  80,
+                  100
+                ],
+                "distance_buffer_by_code": {
+                  "50": 2500,
+                  "80": 200,
+                  "100": 200
+                }
+              },
+              "rho_min": 5.0,
+              "rho_max": 42.0,
+              "theta_safety": 0.8,
+              "lhv_h2": 120,
+              "locations": [
+                "onshore",
+                "offshore"
+              ]
+            },
+            "hydrogen_colors": false,
+            "set_color_shares": false,
+            "blue_share": 0.4,
+            "pink_share": 0.05,
+            "production_technologies": [
+              "H2 Electrolysis",
+              "SMR",
+              "SMR CC"
+            ]
+          },
+          "land_transport_fuel_cell_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.004,
+            "NZ_2030": 0.02,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.06,
+            "NZ_2050": 0.28,
+            "DF_2050": 0.08
+          },
+          "land_transport_electric_share": {
+            "DEC_2020": 0,
+            "DEC_2025": 0.05,
+            "DEC_2030": 0.2,
+            "DEC_2035": 0.45,
+            "DEC_2040": 0.7,
+            "DEC_2045": 0.85,
+            "DEC_2050": 1,
+            "BU_2030": 0.0,
+            "AP_2030": 0.075,
+            "NZ_2030": 0.13,
+            "DF_2030": 0.01,
+            "AB_2030": 0.01,
+            "BU_2050": 0.0,
+            "AP_2050": 0.42,
+            "NZ_2050": 0.68,
+            "DF_2050": 0.011
+          },
+          "shipping_hydrogen_share": {
+            "DEC_2020": 0.0,
+            "DEC_2025": 0.0,
+            "DEC_2030": 0.0,
+            "DEC_2035": 0.0,
+            "DEC_2040": 0.0,
+            "DEC_2045": 0.0,
+            "DEC_2050": 0.0,
+            "BU_2030": 0.0,
+            "AP_2030": 0.0,
+            "NZ_2030": 0.1,
+            "DF_2030": 0.05,
+            "AB_2030": 0.05,
+            "BU_2050": 0.0,
+            "AP_2050": 0.25,
+            "NZ_2050": 0.36,
+            "DF_2050": 0.12
+          },
+          "biomass_transport": false,
+          "solid_biomass_potential": 360,
+          "solar_rooftop": {
+            "use_building_size": false,
+            "enable": true,
+            "kW_per_m2": 0.1,
+            "m2_per_person": 20,
+            "install_ratio": {
+              "0": 0,
+              "10": 0.3,
+              "100": 0.36,
+              "200": 0.41,
+              "450": 0.49,
+              "2300": 0.66
+            },
+            "tolerance": 100
+          },
+          "co2_network": false,
+          "gas": {
+            "spatial_gas": true,
+            "network": false,
+            "network_data": "GGIT",
+            "network_data_GGIT_status": [
+              "Construction",
+              "Operating",
+              "Idle",
+              "Shelved",
+              "Mothballed",
+              "Proposed"
+            ]
+          },
+          "coal": {
+            "spatial_coal": true,
+            "shift_to_elec": true
+          },
+          "lignite": {
+            "spatial_lignite": false
+          },
+          "oil": {
+            "spatial_oil": true
+          },
+          "ammonia": {
+            "enable": true,
+            "spatial_ammonia": true,
+            "production_year": 2019,
+            "gas_MWh_per_tNH3": 7.81,
+            "elec_MWh_per_tNH3": 1.278,
+            "co2_t_per_tNH3": 1.547
+          },
+          "district_heating": {
+            "potential": 0.3,
+            "progress": 1,
+            "district_heating_loss": 0.15
+          },
+          "reduce_space_heat_exogenously": false,
+          "reduce_space_heat_exogenously_factor": 0.29,
+          "space_heat_share": 0.6,
+          "tes": true,
+          "tes_tau": {
+            "decentral": 3,
+            "central": 180
+          },
+          "boilers": true,
+          "oil_boilers": false,
+          "chp": true,
+          "micro_chp": false,
+          "solar_thermal_collector": {
+            "enable": true,
+            "cf_correction": 0.788457,
+            "clearsky_model": "simple",
+            "orientation": {
+              "slope": 45.0,
+              "azimuth": 180.0
+            }
+          },
+          "heat_pump_sink_T": 55,
+          "time_dep_hp_cop": true,
+          "bev_plug_to_wheel_efficiency": 0.2,
+          "bev_charge_efficiency": 0.9,
+          "transport_heating_deadband_upper": 20.0,
+          "transport_heating_deadband_lower": 15.0,
+          "ICE_lower_degree_factor": 0.375,
+          "ICE_upper_degree_factor": 1.6,
+          "EV_lower_degree_factor": 0.98,
+          "EV_upper_degree_factor": 0.63,
+          "bev_avail_max": 0.95,
+          "bev_avail_mean": 0.8,
+          "bev_dsm_restriction_value": 0.75,
+          "bev_dsm_restriction_time": 7,
+          "v2g": true,
+          "bev_dsm": true,
+          "bev_energy": 0.05,
+          "bev_availability": 0.5,
+          "transport_fuel_cell_efficiency": 0.5,
+          "transport_internal_combustion_efficiency": 0.3,
+          "dynamic_transport": {
+            "enable": false,
+            "land_transport_fuel_cell_share": {
+              "Co2L2.0": 0.01,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.01,
+              "Co2L0.80": 0.01,
+              "Co2L0.70": 0.01,
+              "Co2L0.60": 0.01,
+              "Co2L0.50": 0.01,
+              "Co2L0.40": 0.01,
+              "Co2L0.30": 0.01,
+              "Co2L0.20": 0.01,
+              "Co2L0.10": 0.01,
+              "Co2L0.00": 0.01
+            },
+            "land_transport_electric_share": {
+              "Co2L2.0": 0.0,
+              "Co2L1.0": 0.01,
+              "Co2L0.90": 0.03,
+              "Co2L0.80": 0.06,
+              "Co2L0.70": 0.1,
+              "Co2L0.60": 0.17,
+              "Co2L0.50": 0.27,
+              "Co2L0.40": 0.4,
+              "Co2L0.30": 0.55,
+              "Co2L0.20": 0.69,
+              "Co2L0.10": 0.8,
+              "Co2L0.00": 0.88
+            }
+          },
+          "biomass_transport_default_cost": 0.1,
+          "biogas_potential": 0.5,
+          "electricity_distribution_grid": true,
+          "enable_electricity_connection_cost": false,
+          "home_battery": true,
+          "transmission_efficiency": {
+            "electricity distribution grid": {
+              "efficiency_static": 0.97
+            },
+            "H2 pipeline": {
+              "efficiency_per_1000km": 1,
+              "compression_per_1000km": 0.017
+            }
+          },
+          "shipping_hydrogen_liquefaction": false,
+          "shipping_average_efficiency": 0.4,
+          "airport_sizing_factor": 3,
+          "international_bunkers": false,
+          "co2_sequestration_potential": 200,
+          "co2_sequestration_cost": 10,
+          "methanation": true,
+          "helmeth": true,
+          "dac": true,
+          "cc_fraction": 0.9,
+          "cc": true,
+          "fischer_tropsch": true,
+          "min_part_load_fischer_tropsch": 0.9,
+          "industry_util_factor": 0.7,
+          "efficiency_heat_oil_to_elec": 0.9,
+          "efficiency_heat_biomass_to_elec": 0.9,
+          "efficiency_heat_gas_to_elec": 0.9,
+          "conventional_generation": {
+            "OCGT": "gas",
+            "CCGT": "gas",
+            "oil": "oil",
+            "coal": "coal",
+            "lignite": "lignite",
+            "biomass": "biomass"
+          },
+          "keep_existing_capacities": false,
+          "marginal_cost_storage": 0
+        },
+        "final_adjustment": {
+          "only_elec_network": true,
+          "readjust_existing_interconnections": true,
+          "pop_forecast_path": "data/worldbank_pop_forecast.csv",
+          "elec_per_capita": {
+            "BN": 10.67,
+            "KH": 0.93,
+            "ID": 1.45,
+            "LA": 1.67,
+            "MM": 0.37,
+            "MY": 5.08,
+            "PH": 0.93,
+            "SG": 9.75,
+            "TH": 2.97,
+            "TL": 0.29,
+            "VN": 2.59
+          },
+          "total_elec_demand": {
+            "2025": 1401400000.0,
+            "2030": 1658800000.0,
+            "2035": 1940200000.0,
+            "2040": 2264600000.0,
+            "2045": 2635000000.0,
+            "2050": 3036300000.0
+          },
+          "redistribute_industry": true,
+          "industry_share": {
+            "BN": 0.3,
+            "KH": 0.36,
+            "ID": 0.5,
+            "LA": 0.61,
+            "MM": 0.21,
+            "MY": 0.88,
+            "PH": 0.31,
+            "SG": 0.37,
+            "TH": 0.42,
+            "TL": 0.01,
+            "VN": 0.51
+          },
+          "drop_country": false
+        },
+        "scenario": {
+          "clusters": [
+            50
+          ],
+          "ll": [
+            "v2.0"
+          ],
+          "opts": [
+            ""
+          ],
+          "planning_horizons": [
+            2030,
+            2040,
+            2050
+          ],
+          "sopts": [
+            "3h"
+          ],
+          "simpl": [
+            ""
+          ],
+          "unc": [
+            "m0",
+            "m1",
+            "m2",
+            "m3",
+            "m4",
+            "m5",
+            "m6",
+            "m7",
+            "m8"
+          ]
+        },
+        "demand_data": {
+          "scenario": "DEC",
+          "update_data": true,
+          "base_year": 2019,
+          "other_industries": false,
+          "aluminium_year": 2019
+        },
+        "costs": {
+          "append_cost_data": true,
+          "regional_factor": false,
+          "year": 2030,
+          "technology_data_version": "v0.13.2",
+          "discountrate": [
+            0.071
+          ],
+          "country_specific_data": "",
+          "cost_scenario": "moderate",
+          "financial_case": "market",
+          "output_currency": "EUR",
+          "default_exchange_rate": 0.7532,
+          "future_exchange_rate_strategy": "reference",
+          "custom_future_exchange_rate": "None",
+          "rooftop_share": 0.14,
+          "fill_values": {
+            "FOM": 0,
+            "VOM": 0,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": 25,
+            "CO2 intensity": 0,
+            "discount rate": 0.07
+          },
+          "marginal_cost": {
+            "solar": 0.01,
+            "onwind": 0.015,
+            "offwind": 0.015,
+            "hydro": 0.0,
+            "H2": 0.0,
+            "electrolysis": 0.0,
+            "fuel cell": 0.0,
+            "battery": 0.0,
+            "battery inverter": 0.0
+          }
+        }
+      },
+      "weights": {
+        "objective": 8760.0,
+        "generators": 8760.0,
+        "stores": 8760.0
+      },
+      "constraints": [
+        {
+          "GlobalConstraint": "lv_limit",
+          "type": "transmission_volume_expansion_limit",
+          "carrier_attribute": "AC, DC",
+          "sense": "<=",
+          "constant": 240772385.9178782,
+          "investment_period": "NaN",
+          "mu": 0.0
+        }
+      ],
+      "components": {
+        "buses": [
+          {
+            "carrier": "AC",
+            "count": 46
+          },
+          {
+            "carrier": "DC",
+            "count": 4
+          },
+          {
+            "carrier": "H2",
+            "count": 48
+          },
+          {
+            "carrier": "battery",
+            "count": 50
+          },
+          {
+            "carrier": "biomass",
+            "count": 1
+          },
+          {
+            "carrier": "co2",
+            "count": 1
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1
+          },
+          {
+            "carrier": "coal",
+            "count": 48
+          },
+          {
+            "carrier": "gas",
+            "count": 48
+          },
+          {
+            "carrier": "home battery",
+            "count": 48
+          },
+          {
+            "carrier": "lignite",
+            "count": 1
+          },
+          {
+            "carrier": "low voltage",
+            "count": 48
+          },
+          {
+            "carrier": "oil",
+            "count": 48
+          }
+        ],
+        "loads": [
+          {
+            "carrier": "AC",
+            "count": 46,
+            "weighted_demand_MWh": 1449431369.3773885,
+            "nonzero_loads": 46
+          },
+          {
+            "carrier": "agriculture electricity",
+            "count": 48,
+            "weighted_demand_MWh": 19871659.69303443,
+            "nonzero_loads": 37
+          },
+          {
+            "carrier": "industry electricity",
+            "count": 48,
+            "weighted_demand_MWh": 0.0,
+            "nonzero_loads": 0
+          },
+          {
+            "carrier": "rail transport electricity",
+            "count": 48,
+            "weighted_demand_MWh": 12857957.76934014,
+            "nonzero_loads": 33
+          }
+        ],
+        "generators": [
+          {
+            "carrier": "coal",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              9.563233240176986,
+              9.565177519485445
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              24.57702428929303,
+              24.578930925027716
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "geothermal",
+            "count": 13,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              263470.01977282774,
+              263470.01977282774
+            ],
+            "marginal_cost_range": [
+              0.27230709258231683,
+              0.2741035325293328
+            ],
+            "p_nom_max_range": [
+              8.0,
+              470.0
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              3.309373374162305,
+              3.309373374162305
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "nuclear",
+            "count": 1,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              654653.6157847332,
+              654653.6157847332
+            ],
+            "marginal_cost_range": [
+              12.582099663665375,
+              12.582099663665375
+            ],
+            "p_nom_max_range": [
+              621.0,
+              621.0
+            ]
+          },
+          {
+            "carrier": "offwind-ac",
+            "count": 41,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              287268.3352589314,
+              365209.7856770969
+            ],
+            "marginal_cost_range": [
+              0.024039918257184593,
+              0.0259802551795828
+            ],
+            "p_nom_max_range": [
+              951.4350577293434,
+              147154.37893226108
+            ]
+          },
+          {
+            "carrier": "offwind-dc",
+            "count": 42,
+            "p_nom_extendable": 41,
+            "capital_cost_range": [
+              297079.1195720039,
+              353418.5181615964
+            ],
+            "marginal_cost_range": [
+              0.024006753518568603,
+              0.033461837343009185
+            ],
+            "p_nom_max_range": [
+              0.0,
+              426568.2414970033
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              52.92012371292573,
+              52.922085763547884
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "onwind",
+            "count": 49,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              123791.45433798528,
+              123791.45433798531
+            ],
+            "marginal_cost_range": [
+              0.024022006459430287,
+              0.03479186139441792
+            ],
+            "p_nom_max_range": [
+              81.59524195724305,
+              540386.2083262193
+            ]
+          },
+          {
+            "carrier": "ror",
+            "count": 51,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              116604.14388733066,
+              116604.1438873307
+            ],
+            "marginal_cost_range": [
+              0.009066723498785612,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solar",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              71545.77136145244,
+              71545.77136145244
+            ],
+            "marginal_cost_range": [
+              0.019011816591027145,
+              0.020988884892469955
+            ],
+            "p_nom_max_range": [
+              1453.982378574783,
+              1100244.9101392594
+            ]
+          },
+          {
+            "carrier": "solar rooftop",
+            "count": 64,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              57483.202043040445,
+              57483.202043040445
+            ],
+            "marginal_cost_range": [
+              0.01907310660520241,
+              0.03166078610294096
+            ],
+            "p_nom_max_range": [
+              302.75663635962366,
+              264629.02058551507
+            ]
+          }
+        ],
+        "links": [
+          {
+            "carrier": "B2B",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009138502810520331,
+              0.01051664063156824
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "CCGT",
+            "count": 109,
+            "p_nom_extendable": 27,
+            "capital_cost_range": [
+              55883.580147298126,
+              56830.759471828605
+            ],
+            "marginal_cost_range": [
+              1.1580028939563856,
+              1.1689220501754878
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "DC",
+            "count": 25,
+            "p_nom_extendable": 25,
+            "capital_cost_range": [
+              21335.554186007237,
+              110781.6858104866
+            ],
+            "marginal_cost_range": [
+              0.009100163118941776,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Fischer-Tropsch",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              51656.82028345247,
+              51656.82028345247
+            ],
+            "marginal_cost_range": [
+              0.009002880375132138,
+              0.01089835788686333
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "H2 Electrolysis",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              125810.5172206656,
+              125810.5172206656
+            ],
+            "marginal_cost_range": [
+              0.009073106605202406,
+              0.01097751948544519
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              68192.35692475682,
+              68192.35692475682
+            ],
+            "marginal_cost_range": [
+              0.009014245874137055,
+              0.010804219592013999
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "SMR CC",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              79103.13403637432,
+              79103.13403637432
+            ],
+            "marginal_cost_range": [
+              0.009005666743009361,
+              0.010973254766942336
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "Sabatier",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              51721.473914865106,
+              51721.473914865106
+            ],
+            "marginal_cost_range": [
+              0.009017435285188578,
+              0.01096523973228696
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery charger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              34384.78035201654,
+              34384.78035201654
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010943203433738495
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery discharger",
+            "count": 50,
+            "p_nom_extendable": 50,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009039918257184596,
+              0.010967311214861159
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass EOP",
+            "count": 52,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              112146.34063970616,
+              118116.34921212378
+            ],
+            "marginal_cost_range": [
+              0.6762670157421654,
+              0.6878452890646891
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 vent",
+            "count": 1,
+            "p_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009814837720213663,
+              0.009814837720213663
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 73,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              90112.86203886422,
+              90112.86203886422
+            ],
+            "marginal_cost_range": [
+              2.3512241618947205,
+              2.353186212516875
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "electricity distribution grid",
+            "count": 94,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              50270.361476727056,
+              50270.361476727056
+            ],
+            "marginal_cost_range": [
+              0.00900382973653271,
+              0.021549477890496993
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "helmeth",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              245106.3932412123,
+              245106.3932412123
+            ],
+            "marginal_cost_range": [
+              0.009081577794949388,
+              0.010904660726483557
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery charger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              14073.793494817184,
+              14073.793494817184
+            ],
+            "marginal_cost_range": [
+              0.009020008281805698,
+              0.01093901782136037
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery discharger",
+            "count": 48,
+            "p_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009127192375645946,
+              0.010999420680246577
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 10,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              111278.64905784962,
+              111278.64905784962
+            ],
+            "marginal_cost_range": [
+              1.0852292401769859,
+              1.086754508787757
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 33,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              26769.201688908914,
+              26769.201688908914
+            ],
+            "marginal_cost_range": [
+              2.250456700250665,
+              2.2522500812508497
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "stores": [
+          {
+            "carrier": "H2 Store Tank",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              2224.975718568028,
+              2224.975718568028
+            ],
+            "marginal_cost_range": [
+              0.009006753518568604,
+              0.0109802551795828
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "battery",
+            "count": 50,
+            "e_nom_extendable": 50,
+            "capital_cost_range": [
+              12957.628369768723,
+              12957.628369768723
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "biomass",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009621257159033534,
+              0.009621257159033534
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009932242002676409,
+              0.009932242002676409
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "co2 stored",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              10.0,
+              10.0
+            ],
+            "marginal_cost_range": [
+              0.009307484591463012,
+              0.009307484591463012
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "coal",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009068960525287289,
+              0.01096934896318595
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "gas",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009100521555003634,
+              0.01088680402303481
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "home battery",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              9306.029232419256,
+              9306.029232419256
+            ],
+            "marginal_cost_range": [
+              0.009024289293027028,
+              0.010985763547886088
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "lignite",
+            "count": 1,
+            "e_nom_extendable": 1,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009769769898332604,
+              0.009769769898332604
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "oil",
+            "count": 48,
+            "e_nom_extendable": 48,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009011816591027143,
+              0.010967311214861159
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "solid biomass",
+            "count": 1,
+            "e_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              13.65803754402753,
+              13.65803754402753
+            ],
+            "e_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "storage_units": [
+          {
+            "carrier": "PHS",
+            "count": 3,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              182698.73459185107,
+              182698.73459185107
+            ],
+            "marginal_cost_range": [
+              0.00926550204934281,
+              0.010720156727456676
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          },
+          {
+            "carrier": "hydro",
+            "count": 76,
+            "p_nom_extendable": 0,
+            "capital_cost_range": [
+              0.0,
+              0.0
+            ],
+            "marginal_cost_range": [
+              0.009015793687241737,
+              0.010988884892469955
+            ],
+            "p_nom_max_range": [
+              "Infinity",
+              "Infinity"
+            ]
+          }
+        ],
+        "lines": [
+          {
+            "carrier": "AC",
+            "count": 37,
+            "s_nom_extendable": 37,
+            "capital_cost_range": [
+              1942.173551814134,
+              44063.303696015515
+            ]
+          }
+        ]
+      },
+      "co2_stores": [
+        {
+          "Store": "co2 atmosphere",
+          "bus": "co2 atmosphere",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2",
+          "capital_cost": 0.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": -1.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009932242002676409,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": 970128413.5804867,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        },
+        {
+          "Store": "co2 stored",
+          "bus": "co2 stored",
+          "e_cyclic": false,
+          "e_nom_extendable": true,
+          "carrier": "co2 stored",
+          "capital_cost": 10.0,
+          "lifetime": "Infinity",
+          "e_nom": 0.0,
+          "e_min_pu": 0.0,
+          "e_initial": 0.0,
+          "marginal_cost": 0.009307484591463012,
+          "location": "",
+          "build_year": 0,
+          "e_nom_opt": -0.0,
+          "type": "",
+          "e_nom_mod": 0.0,
+          "e_nom_min": 0.0,
+          "e_nom_max": "Infinity",
+          "e_max_pu": 1.0,
+          "e_initial_per_period": false,
+          "e_cyclic_per_period": true,
+          "p_set": 0.0,
+          "q_set": 0.0,
+          "sign": 1.0,
+          "marginal_cost_quadratic": 0.0,
+          "marginal_cost_storage": 0.0,
+          "standing_loss": 0.0
+        }
+      ],
+      "emission_carriers": [
+        {
+          "Carrier": "geothermal",
+          "co2_emissions": 0.12,
+          "color": "#ba91b1",
+          "nice_name": "Geothermal",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        },
+        {
+          "Carrier": "co2",
+          "co2_emissions": -1.0,
+          "color": "#123456",
+          "nice_name": "co2",
+          "max_growth": "Infinity",
+          "max_relative_growth": 0.0
+        }
+      ],
+      "dangling_link_ports": {
+        "bus0": [],
+        "bus1": [],
+        "bus2": [],
+        "bus3": []
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2030.csv",
+      "bytes": 269759,
+      "sha256": "1c5243fed40070b94d7ac361560f4bfc93450a65753a67866ea2fd09befa91fc",
+      "rows": 1241,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2030_elec.csv",
+      "bytes": 44179,
+      "sha256": "cff738dbd6077a810a4f9aaf925362522d54ddc09e3d1e6cf705a20bdc7e5ee2",
+      "rows": 303,
+      "columns": [
+        "technology",
+        "Bottom storage temperature",
+        "C in fuel",
+        "C stored",
+        "co2_emissions",
+        "CO2 stored",
+        "FOM",
+        "Motor size",
+        "Temperature difference",
+        "Top storage temperature",
+        "VOM",
+        "ammonia-input",
+        "c_b",
+        "c_v",
+        "capacity",
+        "capture rate",
+        "capture_rate",
+        "carbondioxide-input",
+        "carbondioxide-output",
+        "clinker-input",
+        "coal-input",
+        "commodity",
+        "compression-electricity-input",
+        "compression-heat-output",
+        "discount rate",
+        "district heat surcharge",
+        "district heat-input",
+        "economic_lifetime",
+        "efficiency",
+        "efficiency-biochar",
+        "efficiency-biomass",
+        "efficiency-electricity",
+        "efficiency-heat",
+        "efficiency-hydrogen",
+        "efficiency-tot",
+        "electricity-input",
+        "energy to power ratio",
+        "fuel",
+        "gas-input",
+        "hbi-input",
+        "heat-input",
+        "heat-output",
+        "hydrogen-input",
+        "investment",
+        "lifetime",
+        "lohc-input",
+        "methane-input",
+        "methanol-input",
+        "min_fill_level",
+        "naphtha-input",
+        "nitrogen-input",
+        "oil-input",
+        "ore-input",
+        "p_nom_ratio",
+        "pelletizing cost",
+        "scrap-input",
+        "slag-input",
+        "wood-input",
+        "yield-biochar",
+        "capital_cost",
+        "marginal_cost"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "co2_emissions": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.8,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.38,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 429030.6,
+          "lifetime": 40.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "capital_cost": 44194.072656428354,
+          "marginal_cost": 0.2389
+        },
+        {
+          "technology": "Alkaline electrolyzer medium size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "co2_emissions": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.3,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.416,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 506033.2,
+          "lifetime": 20.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "capital_cost": 59404.71787122204,
+          "marginal_cost": 0.2389
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2030_sec.csv",
+      "bytes": 44148,
+      "sha256": "0eba6451faca89adcabe2c6e9604f81d004f380106e98ea203ff425165fdb12f",
+      "rows": 302,
+      "columns": [
+        "technology",
+        "Bottom storage temperature",
+        "C in fuel",
+        "C stored",
+        "CO2 intensity",
+        "CO2 stored",
+        "FOM",
+        "Motor size",
+        "Temperature difference",
+        "Top storage temperature",
+        "VOM",
+        "ammonia-input",
+        "c_b",
+        "c_v",
+        "capacity",
+        "capture rate",
+        "capture_rate",
+        "carbondioxide-input",
+        "carbondioxide-output",
+        "clinker-input",
+        "coal-input",
+        "commodity",
+        "compression-electricity-input",
+        "compression-heat-output",
+        "discount rate",
+        "district heat surcharge",
+        "district heat-input",
+        "economic_lifetime",
+        "efficiency",
+        "efficiency-biochar",
+        "efficiency-biomass",
+        "efficiency-electricity",
+        "efficiency-heat",
+        "efficiency-hydrogen",
+        "efficiency-tot",
+        "electricity-input",
+        "energy to power ratio",
+        "fuel",
+        "gas-input",
+        "hbi-input",
+        "heat-input",
+        "heat-output",
+        "hydrogen-input",
+        "investment",
+        "lifetime",
+        "lohc-input",
+        "methane-input",
+        "methanol-input",
+        "min_fill_level",
+        "naphtha-input",
+        "nitrogen-input",
+        "oil-input",
+        "ore-input",
+        "p_nom_ratio",
+        "pelletizing cost",
+        "scrap-input",
+        "slag-input",
+        "wood-input",
+        "yield-biochar",
+        "fixed",
+        "marginal_cost"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.8,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.38,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 429030.6,
+          "lifetime": 40.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 44194.072656428354,
+          "marginal_cost": 0.2389
+        },
+        {
+          "technology": "Alkaline electrolyzer medium size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.3,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.416,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 506033.2,
+          "lifetime": 20.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 59404.71787122204,
+          "marginal_cost": 0.2389
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2040.csv",
+      "bytes": 269771,
+      "sha256": "35970c0917902d2c39d3467c1e648da1755454efd45bef3f8392246b3b818237",
+      "rows": 1241,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2040_sec.csv",
+      "bytes": 44105,
+      "sha256": "720bc5936a62f8fe11ac9defc5b67e5610ca80ed01346502eda01c831a6cd215",
+      "rows": 302,
+      "columns": [
+        "technology",
+        "Bottom storage temperature",
+        "C in fuel",
+        "C stored",
+        "CO2 intensity",
+        "CO2 stored",
+        "FOM",
+        "Motor size",
+        "Temperature difference",
+        "Top storage temperature",
+        "VOM",
+        "ammonia-input",
+        "c_b",
+        "c_v",
+        "capacity",
+        "capture rate",
+        "capture_rate",
+        "carbondioxide-input",
+        "carbondioxide-output",
+        "clinker-input",
+        "coal-input",
+        "commodity",
+        "compression-electricity-input",
+        "compression-heat-output",
+        "discount rate",
+        "district heat surcharge",
+        "district heat-input",
+        "economic_lifetime",
+        "efficiency",
+        "efficiency-biochar",
+        "efficiency-biomass",
+        "efficiency-electricity",
+        "efficiency-heat",
+        "efficiency-hydrogen",
+        "efficiency-tot",
+        "electricity-input",
+        "energy to power ratio",
+        "fuel",
+        "gas-input",
+        "hbi-input",
+        "heat-input",
+        "heat-output",
+        "hydrogen-input",
+        "investment",
+        "lifetime",
+        "lohc-input",
+        "methane-input",
+        "methanol-input",
+        "min_fill_level",
+        "naphtha-input",
+        "nitrogen-input",
+        "oil-input",
+        "ore-input",
+        "p_nom_ratio",
+        "pelletizing cost",
+        "scrap-input",
+        "slag-input",
+        "wood-input",
+        "yield-biochar",
+        "fixed",
+        "marginal_cost"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.8,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.38,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 429030.6,
+          "lifetime": 40.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 44194.072656428354,
+          "marginal_cost": 0.2389
+        },
+        {
+          "technology": "Alkaline electrolyzer medium size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.3,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.416,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 506033.2,
+          "lifetime": 20.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 59404.71787122204,
+          "marginal_cost": 0.2389
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2050.csv",
+      "bytes": 269695,
+      "sha256": "021c758ecb7bf60e0d23acd560f2345348805bf36ee2e305b541175ccba82767",
+      "rows": 1241,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/costs_2050_sec.csv",
+      "bytes": 44039,
+      "sha256": "bbcc639010a6775255730278eaa6e21ba56867d0610d3a011adc3eb60d0065f5",
+      "rows": 302,
+      "columns": [
+        "technology",
+        "Bottom storage temperature",
+        "C in fuel",
+        "C stored",
+        "CO2 intensity",
+        "CO2 stored",
+        "FOM",
+        "Motor size",
+        "Temperature difference",
+        "Top storage temperature",
+        "VOM",
+        "ammonia-input",
+        "c_b",
+        "c_v",
+        "capacity",
+        "capture rate",
+        "capture_rate",
+        "carbondioxide-input",
+        "carbondioxide-output",
+        "clinker-input",
+        "coal-input",
+        "commodity",
+        "compression-electricity-input",
+        "compression-heat-output",
+        "discount rate",
+        "district heat surcharge",
+        "district heat-input",
+        "economic_lifetime",
+        "efficiency",
+        "efficiency-biochar",
+        "efficiency-biomass",
+        "efficiency-electricity",
+        "efficiency-heat",
+        "efficiency-hydrogen",
+        "efficiency-tot",
+        "electricity-input",
+        "energy to power ratio",
+        "fuel",
+        "gas-input",
+        "hbi-input",
+        "heat-input",
+        "heat-output",
+        "hydrogen-input",
+        "investment",
+        "lifetime",
+        "lohc-input",
+        "methane-input",
+        "methanol-input",
+        "min_fill_level",
+        "naphtha-input",
+        "nitrogen-input",
+        "oil-input",
+        "ore-input",
+        "p_nom_ratio",
+        "pelletizing cost",
+        "scrap-input",
+        "slag-input",
+        "wood-input",
+        "yield-biochar",
+        "fixed",
+        "marginal_cost"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.8,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.38,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 429030.6,
+          "lifetime": 40.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 44194.072656428354,
+          "marginal_cost": 0.2389
+        },
+        {
+          "technology": "Alkaline electrolyzer medium size",
+          "Bottom storage temperature": "NaN",
+          "C in fuel": "NaN",
+          "C stored": "NaN",
+          "CO2 intensity": 0.0,
+          "CO2 stored": "NaN",
+          "FOM": 2.3,
+          "Motor size": "NaN",
+          "Temperature difference": "NaN",
+          "Top storage temperature": "NaN",
+          "VOM": 0.2389,
+          "ammonia-input": "NaN",
+          "c_b": "NaN",
+          "c_v": "NaN",
+          "capacity": "NaN",
+          "capture rate": "NaN",
+          "capture_rate": "NaN",
+          "carbondioxide-input": "NaN",
+          "carbondioxide-output": "NaN",
+          "clinker-input": "NaN",
+          "coal-input": "NaN",
+          "commodity": "NaN",
+          "compression-electricity-input": "NaN",
+          "compression-heat-output": "NaN",
+          "discount rate": 0.07,
+          "district heat surcharge": "NaN",
+          "district heat-input": "NaN",
+          "economic_lifetime": "NaN",
+          "efficiency": 1.0,
+          "efficiency-biochar": "NaN",
+          "efficiency-biomass": "NaN",
+          "efficiency-electricity": "NaN",
+          "efficiency-heat": "NaN",
+          "efficiency-hydrogen": "NaN",
+          "efficiency-tot": "NaN",
+          "electricity-input": 1.416,
+          "energy to power ratio": "NaN",
+          "fuel": 0.0,
+          "gas-input": "NaN",
+          "hbi-input": "NaN",
+          "heat-input": "NaN",
+          "heat-output": "NaN",
+          "hydrogen-input": "NaN",
+          "investment": 506033.2,
+          "lifetime": 20.0,
+          "lohc-input": "NaN",
+          "methane-input": "NaN",
+          "methanol-input": "NaN",
+          "min_fill_level": "NaN",
+          "naphtha-input": "NaN",
+          "nitrogen-input": "NaN",
+          "oil-input": "NaN",
+          "ore-input": "NaN",
+          "p_nom_ratio": "NaN",
+          "pelletizing cost": "NaN",
+          "scrap-input": "NaN",
+          "slag-input": "NaN",
+          "wood-input": "NaN",
+          "yield-biochar": "NaN",
+          "fixed": 59404.71787122204,
+          "marginal_cost": 0.2389
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/pre_costs_2030.csv",
+      "bytes": 268002,
+      "sha256": "ec8c487a316d0e0b4ca0b71dac6591894023d443039a005b55d522602d6c19a4",
+      "rows": 1231,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/pre_costs_2040.csv",
+      "bytes": 268010,
+      "sha256": "d2fd212b4d2bf76b3593cc83a9f9f40ae7d97e0e0cf553125629e7a3d5d45083",
+      "rows": 1231,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/pre_costs_2050.csv",
+      "bytes": 267933,
+      "sha256": "d9fe69fc0075ccf419569d200438c6dac80cb52fcf56ea18251d31e161ea54a3",
+      "rows": 1231,
+      "columns": [
+        "technology",
+        "parameter",
+        "value",
+        "unit",
+        "source",
+        "further description",
+        "currency_year"
+      ],
+      "sample": [
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "FOM",
+          "value": 2.8,
+          "unit": "%/year",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        },
+        {
+          "technology": "Alkaline electrolyzer large size",
+          "parameter": "VOM",
+          "value": 0.2389,
+          "unit": "EUR/MWh_H2",
+          "source": "JRC, 01_JRC-EU-TIMES Full model, https://zenodo.org/records/3544900, file `SubRES_15_TECHS_HYDROGEN.xlsx`  (SELCH2EC01, H2 Production-Alkaline Electrolyser, large size, centralized) and currency year from file `SubRES_15_TECHS_HYDROGEN.xlsx`, Sheet `INPUT-Data(HP)`",
+          "further description": "Reference capacity 72 MW",
+          "currency_year": 2010.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/energy_totals_2030.csv",
+      "bytes": 6035,
+      "sha256": "f7d1325b455d1692774ec4a656a1098ec2807ff765b233650c1bbca106ce3305",
+      "rows": 11,
+      "columns": [
+        "Unnamed: 0.1",
+        "Unnamed: 0",
+        "agriculture biomass",
+        "agriculture coal",
+        "agriculture electricity",
+        "agriculture oil",
+        "district heat share",
+        "electricity rail",
+        "electricity residential",
+        "electricity residential space",
+        "electricity residential water",
+        "electricity services space",
+        "electricity services water",
+        "non energy biomass",
+        "non energy electricity",
+        "non energy gas",
+        "non energy heat",
+        "non energy oil",
+        "other biomass",
+        "other electricity",
+        "other gas",
+        "other heat",
+        "other oil",
+        "residential biomass",
+        "residential gas",
+        "residential heat biomass",
+        "residential heat gas",
+        "residential heat oil",
+        "residential oil",
+        "road biomass",
+        "road electricity",
+        "road gas",
+        "road oil",
+        "services biomass",
+        "services electricity",
+        "services gas",
+        "services oil",
+        "total domestic aviation",
+        "total domestic navigation",
+        "total international aviation",
+        "total international navigation",
+        "total navigation hydrogen",
+        "total navigation oil",
+        "total rail",
+        "total residential space",
+        "total residential water",
+        "total road",
+        "total road ev",
+        "total road fcev",
+        "total road ice",
+        "total services space",
+        "total services water"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0.1": "BN",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 0.0,
+          "agriculture oil": 0.0,
+          "district heat share": 0,
+          "electricity rail": 0.0,
+          "electricity residential": 2.3785929108858284,
+          "electricity residential space": 0.0407000349,
+          "electricity residential water": 0.0271333566,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 0.0,
+          "other electricity": 0.0,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.2664,
+          "residential biomass": 0.0070068184227258,
+          "residential gas": 0.0586119293018488,
+          "residential heat biomass": 0.0215504401426464,
+          "residential heat gas": 0.174975,
+          "residential heat oil": 0.0731651372969697,
+          "residential oil": 0.037679565,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 0.0,
+          "services electricity": 2.708987944994638,
+          "services gas": 0.0,
+          "services oil": 0.0,
+          "total domestic aviation": 0.0,
+          "total domestic navigation": 0.0,
+          "total international aviation": 1.6750208223076282,
+          "total international navigation": 0.0,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 0.0,
+          "total residential space": 0.2025143813637697,
+          "total residential water": 0.1350095875758465,
+          "total road": 5.3759837005057935,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        },
+        {
+          "Unnamed: 0.1": "ID",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 0.7291087142451178,
+          "agriculture oil": 3.2594662144987923,
+          "district heat share": 0,
+          "electricity rail": 0.4171782472531388,
+          "electricity residential": 232.8201379634877,
+          "electricity residential space": 52.2088203105,
+          "electricity residential water": 34.805880206999994,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 6.3763,
+          "other electricity": 1.8581,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.0,
+          "residential biomass": 20.28549682767489,
+          "residential gas": 0.0607222602325626,
+          "residential heat biomass": 62.39085399027432,
+          "residential heat gas": 0.181275,
+          "residential heat oil": 93.85410886049524,
+          "residential oil": 48.334249425,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 11.31071547105862,
+          "services electricity": 93.06373348690836,
+          "services gas": 2.869727634084714,
+          "services oil": 7.926138602573635,
+          "total domestic aviation": 50.54609891292336,
+          "total domestic navigation": 2.9647464446722305,
+          "total international aviation": 14.189817445473263,
+          "total international navigation": 3.3823134425531785,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 4.444442602163586,
+          "total residential space": 146.0645630209617,
+          "total residential water": 97.37637534730784,
+          "total road": 267.7168677769759,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/energy_totals_2040.csv",
+      "bytes": 6039,
+      "sha256": "ff51b27e9b216c9a1a8488855a82b8f1e3a8cf656e13933753dfc9fa210f5b84",
+      "rows": 11,
+      "columns": [
+        "Unnamed: 0.1",
+        "Unnamed: 0",
+        "agriculture biomass",
+        "agriculture coal",
+        "agriculture electricity",
+        "agriculture oil",
+        "district heat share",
+        "electricity rail",
+        "electricity residential",
+        "electricity residential space",
+        "electricity residential water",
+        "electricity services space",
+        "electricity services water",
+        "non energy biomass",
+        "non energy electricity",
+        "non energy gas",
+        "non energy heat",
+        "non energy oil",
+        "other biomass",
+        "other electricity",
+        "other gas",
+        "other heat",
+        "other oil",
+        "residential biomass",
+        "residential gas",
+        "residential heat biomass",
+        "residential heat gas",
+        "residential heat oil",
+        "residential oil",
+        "road biomass",
+        "road electricity",
+        "road gas",
+        "road oil",
+        "services biomass",
+        "services electricity",
+        "services gas",
+        "services oil",
+        "total domestic aviation",
+        "total domestic navigation",
+        "total international aviation",
+        "total international navigation",
+        "total navigation hydrogen",
+        "total navigation oil",
+        "total rail",
+        "total residential space",
+        "total residential water",
+        "total road",
+        "total road ev",
+        "total road fcev",
+        "total road ice",
+        "total services space",
+        "total services water"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0.1": "BN",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 0.0,
+          "agriculture oil": 0.0,
+          "district heat share": 0,
+          "electricity rail": 0.0,
+          "electricity residential": 3.954952982456736,
+          "electricity residential space": 0.0407000349,
+          "electricity residential water": 0.0271333566,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 0.0,
+          "other electricity": 0.0,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.2664,
+          "residential biomass": 0.0066675386064853,
+          "residential gas": 0.0588739988346999,
+          "residential heat biomass": 0.020976438529708,
+          "residential heat gas": 0.174975,
+          "residential heat oil": 0.0712163647177863,
+          "residential oil": 0.037679565,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 0.0,
+          "services electricity": 3.7975053855830985,
+          "services gas": 0.0,
+          "services oil": 0.0,
+          "total domestic aviation": 0.0,
+          "total domestic navigation": 0.0,
+          "total international aviation": 2.0732849948838403,
+          "total international navigation": 0.0,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 0.0,
+          "total residential space": 0.2010007168484966,
+          "total residential water": 0.1340004778989977,
+          "total road": 3.327376916377116,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        },
+        {
+          "Unnamed: 0.1": "ID",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 0.8784290557831448,
+          "agriculture oil": 2.526002441720213,
+          "district heat share": 0,
+          "electricity rail": 0.603355596292932,
+          "electricity residential": 357.052070329316,
+          "electricity residential space": 52.2088203105,
+          "electricity residential water": 34.805880206999994,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 6.3763,
+          "other electricity": 1.8581,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.0,
+          "residential biomass": 19.30324508075961,
+          "residential gas": 0.0609937656165751,
+          "residential heat biomass": 60.72905726658911,
+          "residential heat gas": 0.181275,
+          "residential heat oil": 91.35428010942414,
+          "residential oil": 48.334249425,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 10.700678313182207,
+          "services electricity": 130.4583247673714,
+          "services gas": 2.6990219157025246,
+          "services oil": 5.503549147071517,
+          "total domestic aviation": 72.79530328084223,
+          "total domestic navigation": 3.1282963360700857,
+          "total international aviation": 17.56368350651917,
+          "total international navigation": 4.2855574837012655,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 6.849716173702639,
+          "total residential space": 143.56758773610795,
+          "total residential water": 95.7117251574053,
+          "total road": 165.69896331383683,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/energy_totals_2050.csv",
+      "bytes": 6035,
+      "sha256": "d49ef144477d321f0532178e1dc267630d53af0fab4481e15f179ef15878f684",
+      "rows": 11,
+      "columns": [
+        "Unnamed: 0.1",
+        "Unnamed: 0",
+        "agriculture biomass",
+        "agriculture coal",
+        "agriculture electricity",
+        "agriculture oil",
+        "district heat share",
+        "electricity rail",
+        "electricity residential",
+        "electricity residential space",
+        "electricity residential water",
+        "electricity services space",
+        "electricity services water",
+        "non energy biomass",
+        "non energy electricity",
+        "non energy gas",
+        "non energy heat",
+        "non energy oil",
+        "other biomass",
+        "other electricity",
+        "other gas",
+        "other heat",
+        "other oil",
+        "residential biomass",
+        "residential gas",
+        "residential heat biomass",
+        "residential heat gas",
+        "residential heat oil",
+        "residential oil",
+        "road biomass",
+        "road electricity",
+        "road gas",
+        "road oil",
+        "services biomass",
+        "services electricity",
+        "services gas",
+        "services oil",
+        "total domestic aviation",
+        "total domestic navigation",
+        "total international aviation",
+        "total international navigation",
+        "total navigation hydrogen",
+        "total navigation oil",
+        "total rail",
+        "total residential space",
+        "total residential water",
+        "total road",
+        "total road ev",
+        "total road fcev",
+        "total road ice",
+        "total services space",
+        "total services water"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0.1": "BN",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 0.0,
+          "agriculture oil": 0.0,
+          "district heat share": 0,
+          "electricity rail": 0.0,
+          "electricity residential": 6.592826535340521,
+          "electricity residential space": 0.0407000349,
+          "electricity residential water": 0.0271333566,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 0.0,
+          "other electricity": 0.0,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.2664,
+          "residential biomass": 0.0063446871870954,
+          "residential gas": 0.0591372401501706,
+          "residential heat biomass": 0.0204177255999461,
+          "residential heat gas": 0.174975,
+          "residential heat oil": 0.0693194982062422,
+          "residential oil": 0.037679565,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 0.0,
+          "services electricity": 5.323407651251538,
+          "services gas": 0.0,
+          "services oil": 0.0,
+          "total domestic aviation": 0.0,
+          "total domestic navigation": 0.0,
+          "total international aviation": 2.5662431253174214,
+          "total international navigation": 0.0,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 0.0,
+          "total residential space": 0.199527369183713,
+          "total residential water": 0.1330182461224753,
+          "total road": 1.1045915718854349,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        },
+        {
+          "Unnamed: 0.1": "ID",
+          "Unnamed: 0": 0.0,
+          "agriculture biomass": 0.0,
+          "agriculture coal": 0.0,
+          "agriculture electricity": 1.058329973250946,
+          "agriculture oil": 1.9575868917413024,
+          "district heat share": 0,
+          "electricity rail": 0.8726197446174744,
+          "electricity residential": 564.9412034795174,
+          "electricity residential space": 52.2088203105,
+          "electricity residential water": 34.805880206999994,
+          "electricity services space": 0,
+          "electricity services water": 0,
+          "non energy biomass": 0.0,
+          "non energy electricity": 0.0,
+          "non energy gas": 0.0,
+          "non energy heat": 0.0,
+          "non energy oil": 0.0,
+          "other biomass": 6.3763,
+          "other electricity": 1.8581,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "other oil": 0.0,
+          "residential biomass": 18.368555318769538,
+          "residential gas": 0.0612664849734086,
+          "residential heat biomass": 59.1115229335306,
+          "residential heat gas": 0.181275,
+          "residential heat oil": 88.92103495134172,
+          "residential oil": 48.334249425,
+          "road biomass": 0.0,
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road oil": 0.0,
+          "services biomass": 10.123543170650636,
+          "services electricity": 182.87869896712385,
+          "services gas": 2.538470625197834,
+          "services oil": 3.821413519616816,
+          "total domestic aviation": 104.83808431742176,
+          "total domestic navigation": 3.300868438127579,
+          "total international aviation": 21.73974256558061,
+          "total international navigation": 5.430012107997931,
+          "total navigation hydrogen": 0.0,
+          "total navigation oil": 0.0,
+          "total rail": 10.556691999451903,
+          "total residential space": 141.13712004142337,
+          "total residential water": 94.09141336094892,
+          "total road": 55.0071972447001,
+          "total road ev": 0.0,
+          "total road fcev": 0.0,
+          "total road ice": 0.0,
+          "total services space": 0.0,
+          "total services water": 0.0
+        }
+      ]
+    },
+    {
+      "file": "resources/baseline-aims-3H-tutorial/energy_totals_base.csv",
+      "bytes": 3107,
+      "sha256": "af27beafc01cfb1920a23e632c05e858883a28efd9bbf94df3dfdba455fde261",
+      "rows": 11,
+      "columns": [
+        "Unnamed: 0.1",
+        "Unnamed: 0",
+        "agriculture biomass",
+        "agriculture electricity",
+        "agriculture oil",
+        "electricity rail",
+        "electricity residential",
+        "residential biomass",
+        "residential gas",
+        "residential heat biomass",
+        "residential heat gas",
+        "residential heat oil",
+        "residential oil",
+        "services biomass",
+        "services electricity",
+        "services gas",
+        "services oil",
+        "total domestic aviation",
+        "total domestic navigation",
+        "total international aviation",
+        "total international navigation",
+        "total rail",
+        "total residential space",
+        "total residential water",
+        "total road",
+        "total services space",
+        "total services water",
+        "electricity residential space",
+        "electricity residential water",
+        "district heat share",
+        "electricity services space",
+        "electricity services water",
+        "road electricity",
+        "road gas",
+        "road biomass",
+        "road oil",
+        "agriculture coal",
+        "other electricity",
+        "other oil",
+        "other biomass",
+        "other gas",
+        "other heat",
+        "non energy electricity",
+        "non energy oil",
+        "non energy biomass",
+        "non energy gas",
+        "non energy heat"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0.1": "BN",
+          "Unnamed: 0": "NaN",
+          "agriculture biomass": "NaN",
+          "agriculture electricity": "NaN",
+          "agriculture oil": "NaN",
+          "electricity rail": "NaN",
+          "electricity residential": 1.3287,
+          "residential biomass": 0.0296,
+          "residential gas": 0.2333,
+          "residential heat biomass": "NaN",
+          "residential heat gas": "NaN",
+          "residential heat oil": "NaN",
+          "residential oil": 0.2261,
+          "services biomass": 0.0,
+          "services electricity": 1.8683,
+          "services gas": 0.0,
+          "services oil": 0.0,
+          "total domestic aviation": 0.0,
+          "total domestic navigation": "NaN",
+          "total international aviation": 1.3247,
+          "total international navigation": "NaN",
+          "total rail": "NaN",
+          "total residential space": 0.0,
+          "total residential water": 0.0,
+          "total road": 5.134,
+          "total services space": 0.0,
+          "total services water": 0.0,
+          "electricity residential space": "NaN",
+          "electricity residential water": "NaN",
+          "district heat share": "NaN",
+          "electricity services space": "NaN",
+          "electricity services water": "NaN",
+          "road electricity": 0.0,
+          "road gas": 0.0,
+          "road biomass": 0.0,
+          "road oil": 5.134,
+          "agriculture coal": "NaN",
+          "other electricity": 0.0,
+          "other oil": 0.2664,
+          "other biomass": 0.0,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "non energy electricity": 0.0,
+          "non energy oil": 1.5273,
+          "non energy biomass": 0.0,
+          "non energy gas": 6.0653,
+          "non energy heat": 0.0
+        },
+        {
+          "Unnamed: 0.1": "ID",
+          "Unnamed: 0": "NaN",
+          "agriculture biomass": 0.0,
+          "agriculture electricity": 0.594,
+          "agriculture oil": 4.3145,
+          "electricity rail": 0.278,
+          "electricity residential": 104.714,
+          "residential biomass": 85.6952,
+          "residential gas": 0.2417,
+          "residential heat biomass": "NaN",
+          "residential heat gas": "NaN",
+          "residential heat oil": "NaN",
+          "residential oil": 290.0345,
+          "services biomass": 12.022,
+          "services electricity": 64.183,
+          "services gas": 3.07,
+          "services oil": 11.8392,
+          "total domestic aviation": 33.84,
+          "total domestic navigation": 2.7947,
+          "total international aviation": 11.2221,
+          "total international navigation": 2.607,
+          "total rail": 2.7617,
+          "total residential space": 0.0,
+          "total residential water": 0.0,
+          "total road": 255.6664,
+          "total services space": 0.0,
+          "total services water": 0.0,
+          "electricity residential space": "NaN",
+          "electricity residential water": "NaN",
+          "district heat share": "NaN",
+          "electricity services space": "NaN",
+          "electricity services water": "NaN",
+          "road electricity": 0.0,
+          "road gas": 0.7914,
+          "road biomass": 47.1449,
+          "road oil": 207.7302,
+          "agriculture coal": 0.0,
+          "other electricity": 1.8581,
+          "other oil": 0.0,
+          "other biomass": 6.3763,
+          "other gas": 0.0,
+          "other heat": 0.0,
+          "non energy electricity": 4.4999,
+          "non energy oil": 26.2596,
+          "non energy biomass": 0.0,
+          "non energy gas": 79.8011,
+          "non energy heat": 0.0
+        }
+      ]
+    },
+    {
+      "file": "data/AEO8-input/AEO8_Table_D15_Cost_Summary.csv",
+      "bytes": 1745,
+      "sha256": "0ee20484c049352f0a6401e838048bb0ef4906ac12e8821e40502963a999a57d",
+      "rows": 47,
+      "columns": [
+        "technology",
+        "sub-technology",
+        "capital_cost",
+        "FOM",
+        "VOM"
+      ],
+      "sample": [
+        {
+          "technology": "Coal",
+          "sub-technology": "Coal Subcritical",
+          "capital_cost": 1513,
+          "FOM": 30.3,
+          "VOM": 2.3
+        },
+        {
+          "technology": "Coal",
+          "sub-technology": "Coal Supercritical",
+          "capital_cost": 1806,
+          "FOM": 32.1,
+          "VOM": 2.3
+        }
+      ]
+    },
+    {
+      "file": "data/AEO8-input/AEO8_Table_D17_Declining_Factor.csv",
+      "bytes": 697,
+      "sha256": "9170f33609ccbe005647a7ebfdffc69e8d95abf06cb7cf54a8eafe2efa07f72d",
+      "rows": 16,
+      "columns": [
+        "Technology",
+        "Parameter",
+        "2020",
+        "2025",
+        "2030",
+        "2035",
+        "2040",
+        "2045",
+        "2050"
+      ],
+      "sample": [
+        {
+          "Technology": "Wind",
+          "Parameter": "Capex",
+          "2020": 0.08,
+          "2025": 0.15,
+          "2030": 0.2,
+          "2035": 0.23,
+          "2040": 0.25,
+          "2045": 0.27,
+          "2050": 0.28
+        },
+        {
+          "Technology": "Wind",
+          "Parameter": "Opex",
+          "2020": 0.08,
+          "2025": 0.16,
+          "2030": 0.2,
+          "2035": 0.24,
+          "2040": 0.24,
+          "2045": 0.28,
+          "2050": 0.28
+        }
+      ]
+    },
+    {
+      "file": "data/AEO8-input/AEO8_Table_D18_Regional_Factor.csv",
+      "bytes": 73,
+      "sha256": "14fa04dfad8f3ac6e85dbe22840b5f41b40d66cb10ed706d63e92f6c062ab6a3",
+      "rows": 1,
+      "columns": [
+        "Unnamed: 0",
+        "2020",
+        "2025",
+        "2030",
+        "2035",
+        "2040",
+        "2045",
+        "2050"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0": "RF",
+          "2020": 2.2,
+          "2025": 1.93,
+          "2030": 1.77,
+          "2035": 1.63,
+          "2040": 1.58,
+          "2045": 1.52,
+          "2050": 1.47
+        }
+      ]
+    },
+    {
+      "file": "data/demand/district_heating.csv",
+      "bytes": 49,
+      "sha256": "c44eaff4b2acedca2fe4e242f558ded0d4b8c6e330d79f949695cb589198d957",
+      "rows": 2,
+      "columns": [
+        "country",
+        "current",
+        "potential"
+      ],
+      "sample": [
+        {
+          "country": "DEFAULT",
+          "current": 0,
+          "potential": 0
+        },
+        {
+          "country": "MA",
+          "current": 0,
+          "potential": 0
+        }
+      ]
+    },
+    {
+      "file": "data/demand/efficiency_gains_cagr.csv",
+      "bytes": 1268,
+      "sha256": "28ee6ffebd93fe8a9aba5b5668e7abb8ae3b9c84f73e94e2364153520c57f024",
+      "rows": 3,
+      "columns": [
+        "Unnamed: 0",
+        "total residential space",
+        "total residential water",
+        "electricity residential",
+        "total services space",
+        "total services water",
+        "total rail",
+        "electricity rail",
+        "total domestic aviation",
+        "total international aviation",
+        "total domestic navigation",
+        "total international navigation",
+        "services electricity",
+        "agriculture electricity",
+        "agriculture oil",
+        "residential oil",
+        "residential biomass",
+        "residential gas",
+        "agriculture biomass",
+        "services oil",
+        "services biomass",
+        "services gas",
+        "total road ev",
+        "total road fcev",
+        "total road ice",
+        "total navigation oil",
+        "total navigation hydrogen",
+        "residential heat biomass",
+        "residential heat oil",
+        "residential heat gas",
+        "other electricity",
+        "other oil",
+        "other gas",
+        "other biomass",
+        "other heat"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0": "DEFAULT",
+          "total residential space": -0.004951,
+          "total residential water": -0.01039,
+          "electricity residential": -0.002696,
+          "total services space": -0.006705,
+          "total services water": -0.01786,
+          "total rail": -0.004951,
+          "electricity rail": -0.002146,
+          "total domestic aviation": 0.0,
+          "total international aviation": 0.0,
+          "total domestic navigation": -0.01786,
+          "total international navigation": 0.2742,
+          "services electricity": -0.002696,
+          "agriculture electricity": -0.002696,
+          "agriculture oil": -0.006705,
+          "residential oil": 0.0,
+          "residential biomass": -0.004951,
+          "residential gas": -0.01039,
+          "agriculture biomass": -0.01232,
+          "services oil": 0.0,
+          "services biomass": -0.005529,
+          "services gas": 0.0,
+          "total road ev": -0.0614,
+          "total road fcev": -0.02652,
+          "total road ice": 0.0,
+          "total navigation oil": -0.001062,
+          "total navigation hydrogen": -0.008517,
+          "residential heat biomass": -0.002696,
+          "residential heat oil": -0.002696,
+          "residential heat gas": 0.0,
+          "other electricity": 0.0,
+          "other oil": 0.0,
+          "other gas": 0.0,
+          "other biomass": 0.0,
+          "other heat": 0.0
+        },
+        {
+          "Unnamed: 0": "MA",
+          "total residential space": -0.004951,
+          "total residential water": -0.01039,
+          "electricity residential": -0.002696,
+          "total services space": -0.006705,
+          "total services water": -0.01786,
+          "total rail": -0.004951,
+          "electricity rail": -0.002146,
+          "total domestic aviation": 0.0,
+          "total international aviation": 0.0,
+          "total domestic navigation": -0.01786,
+          "total international navigation": 0.2742,
+          "services electricity": -0.002696,
+          "agriculture electricity": -0.002696,
+          "agriculture oil": -0.006705,
+          "residential oil": 0.0,
+          "residential biomass": -0.004951,
+          "residential gas": -0.01039,
+          "agriculture biomass": -0.01232,
+          "services oil": 0.0,
+          "services biomass": -0.005529,
+          "services gas": 0.0,
+          "total road ev": -0.0614,
+          "total road fcev": -0.02652,
+          "total road ice": 0.0,
+          "total navigation oil": -0.001062,
+          "total navigation hydrogen": -0.008517,
+          "residential heat biomass": -0.002696,
+          "residential heat oil": -0.002696,
+          "residential heat gas": 0.0,
+          "other electricity": -0.002696,
+          "other oil": 0.0,
+          "other gas": -0.01039,
+          "other biomass": -0.004951,
+          "other heat": 0.0
+        }
+      ]
+    },
+    {
+      "file": "data/demand/fuel_shares.csv",
+      "bytes": 421,
+      "sha256": "533ba9df5a0bebbe081db95252781d36e66f6a0f7f3de8e415c5f472f5d9ea9e",
+      "rows": 4,
+      "columns": [
+        "country",
+        "oil residential heat share",
+        "biomass residential heat share",
+        "biomass to elec heat share",
+        "oil to elec heat share",
+        "biomass to elec share",
+        "oil to elec share",
+        "space to water heat share",
+        "gas to elec share",
+        "gas to elec heat share",
+        "gas residential heat share"
+      ],
+      "sample": [
+        {
+          "country": "DEFAULT",
+          "oil residential heat share": 0.6667,
+          "biomass residential heat share": 0.75,
+          "biomass to elec heat share": 0.0,
+          "oil to elec heat share": 0.5,
+          "biomass to elec share": 0.0,
+          "oil to elec share": 0.5,
+          "space to water heat share": 0.6,
+          "gas to elec share": 0.0,
+          "gas to elec heat share": 0.0,
+          "gas residential heat share": 0.75
+        },
+        {
+          "country": "MA",
+          "oil residential heat share": 0.6667,
+          "biomass residential heat share": 0.75,
+          "biomass to elec heat share": 0.0,
+          "oil to elec heat share": 0.5,
+          "biomass to elec share": 0.0,
+          "oil to elec share": 0.5,
+          "space to water heat share": 0.6,
+          "gas to elec share": 0.0,
+          "gas to elec heat share": 0.0,
+          "gas residential heat share": 0.75
+        }
+      ]
+    },
+    {
+      "file": "data/demand/growth_factors_cagr.csv",
+      "bytes": 1303,
+      "sha256": "446620df89f9b06d1248461122696cd61a29e708cb0983810c8d2456a8a24132",
+      "rows": 4,
+      "columns": [
+        "Unnamed: 0",
+        "total residential space",
+        "total residential water",
+        "electricity residential",
+        "total services space",
+        "total services water",
+        "total road",
+        "total rail",
+        "electricity rail",
+        "total domestic aviation",
+        "total international aviation",
+        "total domestic navigation",
+        "total international navigation",
+        "services electricity",
+        "agriculture electricity",
+        "agriculture oil",
+        "residential oil",
+        "residential biomass",
+        "residential gas",
+        "agriculture biomass",
+        "services oil",
+        "services biomass",
+        "services gas",
+        "residential heat oil",
+        "residential heat biomass",
+        "residential heat gas",
+        "other electricity",
+        "other oil",
+        "other gas",
+        "other biomass",
+        "other heat"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0": "DEFAULT",
+          "total residential space": 0.02156,
+          "total residential water": 0.025,
+          "electricity residential": 0.05568,
+          "total services space": 0.01786,
+          "total services water": 0.02156,
+          "total road": 0.0139,
+          "total rail": 0.0494,
+          "electricity rail": 0.03982,
+          "total domestic aviation": 0.03715,
+          "total international aviation": 0.02156,
+          "total domestic navigation": 0.006453,
+          "total international navigation": 0.02504,
+          "services electricity": 0.03715,
+          "agriculture electricity": 0.02156,
+          "agriculture oil": -0.01859,
+          "residential oil": 0.0,
+          "residential biomass": 0.0,
+          "residential gas": 0.01095,
+          "agriculture biomass": 0.01471,
+          "services oil": -0.03582,
+          "services biomass": 0.0,
+          "services gas": -0.006114,
+          "residential heat oil": 0.0,
+          "residential heat biomass": 0.0,
+          "residential heat gas": 0.0,
+          "other electricity": 0.0,
+          "other oil": 0.0,
+          "other gas": 0.0,
+          "other biomass": 0.0,
+          "other heat": 0.0
+        },
+        {
+          "Unnamed: 0": "MA",
+          "total residential space": 0.02156,
+          "total residential water": 0.02504,
+          "electricity residential": 0.05568,
+          "total services space": 0.01786,
+          "total services water": 0.02156,
+          "total road": 0.0139,
+          "total rail": 0.0494,
+          "electricity rail": 0.03982,
+          "total domestic aviation": 0.03715,
+          "total international aviation": 0.02156,
+          "total domestic navigation": 0.006453,
+          "total international navigation": 0.02504,
+          "services electricity": 0.03715,
+          "agriculture electricity": 0.02156,
+          "agriculture oil": -0.01859,
+          "residential oil": 0.0,
+          "residential biomass": 0.0,
+          "residential gas": 0.01095,
+          "agriculture biomass": 0.01471,
+          "services oil": -0.03582,
+          "services biomass": 0.0,
+          "services gas": -0.006114,
+          "residential heat oil": 0.0,
+          "residential heat biomass": 0.0,
+          "residential heat gas": 0.0,
+          "other electricity": 0.05568,
+          "other oil": 0.0,
+          "other gas": 0.01095,
+          "other biomass": 0.0,
+          "other heat": 0.0
+        }
+      ]
+    },
+    {
+      "file": "data/demand/industry_growth_cagr.csv",
+      "bytes": 569,
+      "sha256": "3da17952b1f5bc57d49008098cd203e6ce0120c135caf7a4c9f87491c4a481a1",
+      "rows": 4,
+      "columns": [
+        "country",
+        "chemical and petrochemical",
+        "construction",
+        "food and tobacco",
+        "iron and steel",
+        "machinery",
+        "mining and quarrying",
+        "non-ferrous metals",
+        "non-metallic minerals",
+        "paper pulp and print",
+        "textile and leather",
+        "transport equipment",
+        "wood and wood products",
+        "ammonia",
+        "other"
+      ],
+      "sample": [
+        {
+          "country": "DEFAULT",
+          "chemical and petrochemical": 0.03,
+          "construction": 0.015,
+          "food and tobacco": 0.02,
+          "iron and steel": 0.017,
+          "machinery": 0.03,
+          "mining and quarrying": 0.03,
+          "non-ferrous metals": 0.03,
+          "non-metallic minerals": 0.03,
+          "paper pulp and print": 0.03,
+          "textile and leather": 0.03,
+          "transport equipment": 0.03,
+          "wood and wood products": 0.03,
+          "ammonia": 0.03,
+          "other": 0.03
+        },
+        {
+          "country": "MA",
+          "chemical and petrochemical": 0.03,
+          "construction": 0.015,
+          "food and tobacco": 0.02,
+          "iron and steel": 0.017,
+          "machinery": 0.03,
+          "mining and quarrying": 0.03,
+          "non-ferrous metals": 0.03,
+          "non-metallic minerals": 0.03,
+          "paper pulp and print": 0.03,
+          "textile and leather": 0.03,
+          "transport equipment": 0.03,
+          "wood and wood products": 0.03,
+          "ammonia": 0.03,
+          "other": 0.03
+        }
+      ]
+    },
+    {
+      "file": "data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
+      "bytes": 9202,
+      "sha256": "b6ada40d0db7c4e5ef6c91a13743d366dbd05b301d7facd8d89d7a0d71d8692c"
+    },
+    {
+      "file": "data/ports/wpi_data_download_original.zip",
+      "bytes": 1496405,
+      "sha256": "34461849e406f2b1fc92009dd928e2f35785ddf1549971c397b4eddfc873e224"
+    },
+    {
+      "file": "data/ports/wpi_tutorial_from_gdb.csv",
+      "bytes": 604721,
+      "sha256": "c86b548f5a214649f2f2b16e700986824ee8dbd9d6451a5195514fc7846d7d19",
+      "rows": 3807,
+      "columns": [
+        "World Port Index Number",
+        "Region Name",
+        "Main Port Name",
+        "Alternate Port Name",
+        "Country Code",
+        "World Water Body",
+        "Liquified Natural Gas Terminal Depth (m)",
+        "Harbor Size",
+        "Harbor Type",
+        "Harbor Use",
+        "Latitude",
+        "Longitude"
+      ],
+      "sample": [
+        {
+          "World Port Index Number": 8225.0,
+          "Region Name": "United States E Coast -- 6585",
+          "Main Port Name": "Annapolis",
+          "Alternate Port Name": "NaN",
+          "Country Code": "United States",
+          "World Water Body": "North Atlantic Ocean",
+          "Liquified Natural Gas Terminal Depth (m)": "NaN",
+          "Harbor Size": "Very Small",
+          "Harbor Type": "River (Natural)",
+          "Harbor Use": "Unknown",
+          "Latitude": 38.98333300000007,
+          "Longitude": -76.48333299999996
+        },
+        {
+          "World Port Index Number": 8210.0,
+          "Region Name": "United States E Coast -- 6585",
+          "Main Port Name": "Baltimore",
+          "Alternate Port Name": "NaN",
+          "Country Code": "United States",
+          "World Water Body": "North Atlantic Ocean",
+          "Liquified Natural Gas Terminal Depth (m)": "NaN",
+          "Harbor Size": "Large",
+          "Harbor Type": "River (Natural)",
+          "Harbor Use": "Unknown",
+          "Latitude": 39.26666700000004,
+          "Longitude": -76.58333299999998
+        }
+      ]
+    },
+    {
+      "file": "data/ports/wpi_tutorial_from_gdb.provenance.json",
+      "bytes": 3750,
+      "sha256": "9c1c97e1949a5790e871b790705664dcaee9ee9e253642a4a83ccf66dddcf471"
+    },
+    {
+      "file": "data/worldbank_pop_forecast.csv",
+      "bytes": 41660374,
+      "sha256": "54846293fe81e42b89c88fa5a0cf32402d8ae03f20f6582977fa0d71483f0455",
+      "rows": 84360,
+      "columns": [
+        "Unnamed: 0",
+        "SortOrder",
+        "LocID",
+        "Notes",
+        "ISO3_code",
+        "ISO2_code",
+        "SDMX_code",
+        "LocTypeID",
+        "LocTypeName",
+        "ParentID",
+        "Location",
+        "VarID",
+        "Variant",
+        "Time",
+        "TPopulation1Jan",
+        "TPopulation1July",
+        "TPopulationMale1July",
+        "TPopulationFemale1July",
+        "PopDensity",
+        "PopSexRatio",
+        "MedianAgePop",
+        "NatChange",
+        "NatChangeRT",
+        "PopChange",
+        "PopGrowthRate",
+        "DoublingTime",
+        "Births",
+        "Births1519",
+        "CBR",
+        "TFR",
+        "NRR",
+        "MAC",
+        "SRB",
+        "Deaths",
+        "DeathsMale",
+        "DeathsFemale",
+        "CDR",
+        "LEx",
+        "LExMale",
+        "LExFemale",
+        "LE15",
+        "LE15Male",
+        "LE15Female",
+        "LE65",
+        "LE65Male",
+        "LE65Female",
+        "LE80",
+        "LE80Male",
+        "LE80Female",
+        "InfantDeaths",
+        "IMR",
+        "LBsurvivingAge1",
+        "Under5Deaths",
+        "Q5",
+        "Q0040",
+        "Q0040Male",
+        "Q0040Female",
+        "Q0060",
+        "Q0060Male",
+        "Q0060Female",
+        "Q1550",
+        "Q1550Male",
+        "Q1550Female",
+        "Q1560",
+        "Q1560Male",
+        "Q1560Female",
+        "NetMigrations",
+        "CNMR"
+      ],
+      "sample": [
+        {
+          "Unnamed: 0": 0,
+          "SortOrder": "NaN",
+          "LocID": 5507,
+          "Notes": "NaN",
+          "ISO3_code": "NaN",
+          "ISO2_code": "NaN",
+          "SDMX_code": "NaN",
+          "LocTypeID": "NaN",
+          "LocTypeName": "NaN",
+          "ParentID": "NaN",
+          "Location": "ADB region: Central and West Asia",
+          "VarID": 2,
+          "Variant": "Medium",
+          "Time": 1950,
+          "TPopulation1Jan": 68501.28,
+          "TPopulation1July": 69213.424,
+          "TPopulationMale1July": 35880.164,
+          "TPopulationFemale1July": 33333.26,
+          "PopDensity": 12.5144,
+          "PopSexRatio": 107.6407,
+          "MedianAgePop": 19.3872,
+          "NatChange": 1223.088,
+          "NatChangeRT": 17.671,
+          "PopChange": 1424.288,
+          "PopGrowthRate": 2.058,
+          "DoublingTime": 33.6806,
+          "Births": 2933.594,
+          "Births1519": 429.475,
+          "CBR": 42.385,
+          "TFR": 5.9875,
+          "NRR": 1.6659,
+          "MAC": 29.297,
+          "SRB": 105.8,
+          "Deaths": 1710.506,
+          "DeathsMale": 896.754,
+          "DeathsFemale": 813.752,
+          "CDR": 24.714,
+          "LEx": 38.6085,
+          "LExMale": 38.1082,
+          "LExFemale": 39.1261,
+          "LE15": 44.2999,
+          "LE15Male": 43.9332,
+          "LE15Female": 44.7392,
+          "LE65": 10.9511,
+          "LE65Male": 10.453,
+          "LE65Female": 11.4857,
+          "LE80": 4.8798,
+          "LE80Male": 4.6064,
+          "LE80Female": 5.1054,
+          "InfantDeaths": 600.102,
+          "IMR": 207.0834,
+          "LBsurvivingAge1": 2523.217,
+          "Under5Deaths": 930.552,
+          "Q5": 326.3591,
+          "Q0040": 483.8022,
+          "Q0040Male": 480.5664,
+          "Q0040Female": 488.1621,
+          "Q0060": 643.6878,
+          "Q0060Male": 654.5798,
+          "Q0060Female": 631.8067,
+          "Q1550": 297.6529,
+          "Q1550Male": 298.4483,
+          "Q1550Female": 297.2079,
+          "Q1560": 443.3215,
+          "Q1560Male": 457.3384,
+          "Q1560Female": 427.3167,
+          "NetMigrations": 201.196,
+          "CNMR": 2.907
+        },
+        {
+          "Unnamed: 0": 1,
+          "SortOrder": "NaN",
+          "LocID": 5507,
+          "Notes": "NaN",
+          "ISO3_code": "NaN",
+          "ISO2_code": "NaN",
+          "SDMX_code": "NaN",
+          "LocTypeID": "NaN",
+          "LocTypeName": "NaN",
+          "ParentID": "NaN",
+          "Location": "ADB region: Central and West Asia",
+          "VarID": 2,
+          "Variant": "Medium",
+          "Time": 1951,
+          "TPopulation1Jan": 69925.568,
+          "TPopulation1July": 70682.76,
+          "TPopulationMale1July": 36615.258,
+          "TPopulationFemale1July": 34067.503,
+          "PopDensity": 12.78,
+          "PopSexRatio": 107.4785,
+          "MedianAgePop": 19.4969,
+          "NatChange": 1319.315,
+          "NatChangeRT": 18.665,
+          "PopChange": 1514.384,
+          "PopGrowthRate": 2.143,
+          "DoublingTime": 32.3447,
+          "Births": 3012.92,
+          "Births1519": 435.748,
+          "CBR": 42.626,
+          "TFR": 5.9815,
+          "NRR": 1.7067,
+          "MAC": 29.309,
+          "SRB": 105.8,
+          "Deaths": 1693.605,
+          "DeathsMale": 888.959,
+          "DeathsFemale": 804.646,
+          "CDR": 23.961,
+          "LEx": 39.6435,
+          "LExMale": 39.1333,
+          "LExFemale": 40.1776,
+          "LE15": 44.5777,
+          "LE15Male": 44.1812,
+          "LE15Female": 45.0496,
+          "LE65": 10.9994,
+          "LE65Male": 10.4858,
+          "LE65Female": 11.5551,
+          "LE80": 4.9081,
+          "LE80Male": 4.603,
+          "LE80Female": 5.1636,
+          "InfantDeaths": 600.824,
+          "IMR": 200.9781,
+          "LBsurvivingAge1": 2603.729,
+          "Under5Deaths": 910.11,
+          "Q5": 311.626,
+          "Q0040": 469.2924,
+          "Q0040Male": 465.844,
+          "Q0040Female": 473.8063,
+          "Q0060": 631.355,
+          "Q0060Male": 642.5944,
+          "Q0060Female": 619.1788,
+          "Q1550": 292.4375,
+          "Q1550Male": 293.1236,
+          "Q1550Female": 292.0887,
+          "Q1560": 436.9979,
+          "Q1560Male": 451.4368,
+          "Q1560Female": 420.7398,
+          "NetMigrations": 195.07,
+          "CNMR": 2.76
+        }
+      ]
+    },
+    {
+      "file": "config.yaml",
+      "bytes": 71,
+      "sha256": "b331580b074e1d5f51b8180607dd76bb99d64e04710f6d089269585214273334"
+    },
+    {
+      "file": "results/baseline-aims-3H-tutorial/configs/config.yaml",
+      "bytes": 71,
+      "sha256": "b331580b074e1d5f51b8180607dd76bb99d64e04710f6d089269585214273334"
+    }
+  ],
+  "resource_top": [
+    "resources/baseline-aims-3H-tutorial",
+    "resources/ammonia_plants.csv",
+    "resources/industrial_database.csv",
+    "resources/ammonia_production.csv"
+  ],
+  "status_after": ""
+}

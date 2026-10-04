@@ -1,0 +1,1010 @@
+# SGP ESE5004 Stage2
+# Phase 3C — Remaining Sector & Carrier Boundary Freeze
+# FINAL Research-Model Design Phase before Full-SC Assembly
+
+## 0. 本轮定位
+
+研究主线：
+
+ASEAN renewable energy transition under sector coupling
+
+当前已经完成：
+
+- Paper / Upstream provenance recovery
+- Research electricity boundary
+- Buildings boundary closeout
+- Transport boundary closeout
+- Industry substantial prior audit
+- Carbon-scope diagnosis
+- Major engineering bug identification
+
+本轮不是新的数据深挖阶段。
+
+本轮只有一个目标：
+
+把第一版 Research Full-SC 中剩余的：
+
+Industry
+Agriculture
+H2
+fuels
+commodity supply
+cross-border carrier networks
+carbon accounting
+
+全部冻结成一个统一、可执行的系统边界。
+
+完成后：
+
+PHASE 3 RESEARCH MODEL DESIGN MUST CLOSE.
+
+下一阶段直接：
+
+Phase 4 — Full-SC Assembly & Validation
+
+核心原则：
+
+major-system correctness
+>
+minor-detail completeness
+
+--------------------------------------------------
+1. 固定代码身份
+--------------------------------------------------
+
+Paper Reference：
+
+5bacad702ccfed17ad19ab510fa710651e966f2c
+
+Upstream SC Baseline：
+
+a3616a68ee44592af6527ca9024a90f1956646ae
+
+Buildings approved engineering validation：
+
+50a73d8f531132c5459174a55cac412d5f684462
+
+继续严格区分：
+
+Paper Reference
+!=
+Upstream SC Baseline
+!=
+Research Validation
+!=
+Future Research Model
+
+不要追随 GitHub main 漂移。
+
+本轮原则上只：
+
+read
+trace
+classify
+freeze
+design Phase4 handoff
+
+不要正式组装Research Model。
+
+--------------------------------------------------
+2. 已冻结的 Research electricity boundary
+--------------------------------------------------
+
+第一版 Full-SC：
+
+A*
+=
+end-user final electricity parent account
+
+Future endogenous conversion electricity：
+
+- heat pumps
+- resistive heating
+- EV charging
+- electrolysis
+- synthetic-fuel production
+- other conversion electricity
+
+不得提前重复装入 fixed direct electricity。
+
+AEO8 electricity-generation trajectory：
+
+PAPER_REFERENCE / COMPARATOR
+
+AEO8 reported final-electricity trajectory：
+
+CONSISTENCY / VALIDATION BENCHMARK
+
+不得直接把 generation trajectory 当 Research Full-SC fixed Load。
+
+--------------------------------------------------
+3. 已冻结的 Buildings 边界
+--------------------------------------------------
+
+Buildings：
+
+Residential
+Services
+
+模型层保持分开。
+
+第一版最低可辩护原则：
+
+有可靠证据才显式拆出 thermal service。
+
+证据不足：
+
+保留在原 direct electricity / direct fuel account。
+
+Missing != zero
+Missing != invented heat service
+
+Cooling：
+
+EMBEDDED in direct electricity
+
+Cooking：
+
+NON-EXPLICIT + ACCOUNTING REQUIRED
+
+District heating：
+
+不自动采用统一ASEAN默认值。
+
+Existing heating stock：
+
+不伪造。
+
+BDEW：
+
+REFERENCE ONLY
+
+不要重新打开 Buildings 深挖。
+
+--------------------------------------------------
+4. 已冻结的 Transport 边界
+--------------------------------------------------
+
+第一版 Transport：
+
+Road aggregate：
+EXPLICIT
+
+Passenger/Freight split：
+不做
+
+Road EV：
+EXPLICIT
+外生 electrification share / pathway
+
+Residual road ICE fuel：
+FIXED / ACCOUNTED
+
+Road FCEV：
+DEFERRED
+
+EV DSM / V2G：
+DEFERRED
+
+Rail：
+EMBEDDED ONCE
+
+Domestic shipping：
+FIXED FUEL OBLIGATION
+
+International shipping：
+SEPARATE BUNKER OBLIGATION
+
+Domestic aviation：
+FIXED FUEL OBLIGATION
+
+International aviation：
+SEPARATE BUNKER OBLIGATION
+
+FT / synthetic-fuel production：
+EXPLICIT SUPPLY OPTION
+
+Direct shipping H2：
+DEFERRED
+
+Marine NH3 / methanol：
+DEFERRED
+
+不要重新打开 Transport 深挖。
+
+--------------------------------------------------
+5. Materiality Rule
+--------------------------------------------------
+
+一个未解决问题只有在有可信路径显著影响以下结果时，才允许成为 Full-SC blocker：
+
+- total system cost
+- major generation mix
+- storage requirement
+- electricity demand magnitude
+- H2 / synthetic-fuel demand
+- cross-border electricity flow
+- country investment pattern
+- sector electrification
+- Integrated vs Disconnected comparison
+
+其余：
+
+document limitation
+and proceed
+
+不要再产生“每一个参数都必须完美”的开发逻辑。
+
+--------------------------------------------------
+6. Track A — Industry final boundary
+--------------------------------------------------
+
+Industry 已经做过大量审计。
+
+本轮不要重新从零研究。
+
+已知基础：
+
+- UNSD2019 industrial data for 10 ASEAN countries exists
+- Timor-Leste industrial data incomplete / missing
+- missing TL != zero
+- industrial GDP spatial allocation bug previously identified and candidate fix validated
+- future industrial growth DEFAULT lacks sufficient ASEAN-specific justification
+- demand data and technology data must remain separate
+- DEA technology catalogue cannot replace industrial-demand statistics
+
+当前科学目标已经倾向：
+
+MODE C
+
+即：
+
+Exogenous industrial activity / service envelope
++
+Endogenous selected technology / fuel substitution
+
+本轮必须确认：
+
+current upstream implementation
+到底属于：
+
+MODE A
+fixed carrier demand
+
+MODE B
+full endogenous process model
+
+MODE C
+service/activity envelope + selected substitution
+
+--------------------------------------------------
+7. Industry 第一版原则
+--------------------------------------------------
+
+目标优先：
+
+MODE C
+
+但不要为了强制MODE C而重建完整工业过程模型。
+
+需要回答：
+
+哪些工业能源服务：
+
+必须保持 fixed final demand
+
+哪些可以合理转成：
+
+heat
+electricity
+H2
+fuel substitution
+
+哪些必须继续：
+
+embedded / fixed
+
+第一版不要做：
+
+steel/cement/chemicals等完整工艺过程优化
+
+除非 upstream 已经可靠提供且不会造成复杂度爆炸。
+
+--------------------------------------------------
+8. Industry demand boundary
+--------------------------------------------------
+
+必须明确区分：
+
+Industrial activity/service demand
+
+和：
+
+Industrial final energy demand
+
+和：
+
+Industrial electricity already inside A*
+
+如果显式创建：
+
+industrial electricity
+industrial heat
+industrial H2
+
+必须检查是否和：
+
+A*
++
+fixed fuel accounts
+
+重复。
+
+原则继续：
+
+exactly once accounting
+
+--------------------------------------------------
+9. Industry growth
+--------------------------------------------------
+
+当前 unsourced DEFAULT future growth：
+
+不得自动进入正式 Research Full-SC。
+
+本轮只做两件事：
+
+1. 确认当前代码如何增长 industrial demand；
+2. 提出最小可辩护处理方案。
+
+候选可以包括：
+
+- keep accepted upstream growth if source recovered
+- ASEAN/AEO sector-growth benchmark
+- transparent calibrated growth
+- sensitivity parameter
+
+不要无限搜索一个“完美工业增长预测”。
+
+如果没有足够数据：
+
+标：
+
+PHASE4_INPUT_DECISION_REQUIRED
+
+不要卡住整个Phase3。
+
+--------------------------------------------------
+10. Timor-Leste Industry
+--------------------------------------------------
+
+TL missing industrial data：
+
+不得写0。
+
+但也不要因此阻塞整个 ASEAN Full-SC。
+
+提出最低可辩护方案，例如：
+
+- retain missing and exclude explicit industry for TL
+- transparent regional estimate candidate
+- separate uncertainty flag
+
+不要自行填最终值。
+
+重点判断：
+
+TL工业规模是否可能 materially affect ASEAN interconnection result。
+
+--------------------------------------------------
+11. Track B — Agriculture
+--------------------------------------------------
+
+本轮快速审计 Agriculture。
+
+回答：
+
+1. upstream 是否显式表示 agriculture？
+2. 数据来源是什么？
+3. demand是 electricity / fuel / heat / service？
+4. 是否存在 sector-coupling substitution？
+5. 是否和 A* / fuel accounts 重复？
+6. 其规模是否有可信路径显著改变系统级结果？
+
+--------------------------------------------------
+12. Agriculture decision rule
+--------------------------------------------------
+
+如果 Agriculture：
+
+规模相对有限
+且
+没有重要 H2 / electricity / synthetic-fuel coupling
+
+则第一版优先：
+
+EMBEDDED
+或
+FIXED FINAL ENERGY
+
+不要建立农业技术模型。
+
+只有发现明显系统级价值时才标：
+
+EXPLICIT_REQUIRED
+
+禁止深挖：
+
+machinery types
+crop types
+irrigation technology classes
+
+--------------------------------------------------
+13. Track C — Carrier inventory
+--------------------------------------------------
+
+建立第一版 Full-SC carrier inventory。
+
+至少审计：
+
+Electricity
+Heat
+Hydrogen
+Natural gas
+Oil / liquid fossil fuels
+Biomass
+Coal if retained
+Synthetic hydrocarbons / FT fuel
+CO2
+Ammonia if existing
+Methanol if existing
+
+对每一个 carrier 标明：
+
+- produced domestically?
+- externally imported?
+- stored?
+- converted?
+- cross-border network?
+- endogenous price?
+- fixed external supply?
+- emissions treatment?
+- first Full-SC status?
+
+--------------------------------------------------
+14. Hydrogen boundary
+--------------------------------------------------
+
+Hydrogen 是系统级carrier，必须明确。
+
+第一版允许：
+
+domestic / national-node H2 production
+
+例如已有：
+
+electrolysis
+other accepted H2 production routes
+
+并允许：
+
+industry / transport / fuel synthesis
+
+在模型结构允许且需求已接受的情况下使用。
+
+但第一版核心实验禁止：
+
+free cross-border H2 network
+
+因此：
+
+Cross-border H2 pipeline/network
+=
+OFF
+
+unless later extension.
+
+原因：
+
+首个实验需要隔离：
+
+cross-border electricity interconnection value
+
+不能让自由H2网络成为替代跨国传输路径。
+
+--------------------------------------------------
+15. Gas boundary
+--------------------------------------------------
+
+第一版不要自动启用新的跨境 gas network optimization。
+
+需要区分：
+
+external gas commodity supply
+
+和：
+
+physical cross-border gas network
+
+原则：
+
+fuel imports may exist as exogenous commodity supply boundary
+
+but
+
+cross-border gas-network expansion/optimization
+=
+OFF in first core experiment
+
+除非 upstream 网络不可避免且必须保留，
+则明确说明。
+
+--------------------------------------------------
+16. CO2 network boundary
+--------------------------------------------------
+
+第一版：
+
+cross-border CO2 transport/network
+=
+OFF
+
+unless required by already accepted domestic CCS representation.
+
+如果 CCS 存在：
+
+允许检查国家内部/节点级 CO2 accounting。
+
+不要建立 ASEAN-wide CO2 network。
+
+不要让CO2网络成为新的跨境基础设施研究问题。
+
+--------------------------------------------------
+17. Ammonia / methanol
+--------------------------------------------------
+
+如果 upstream 已经支持：
+
+ammonia
+methanol
+
+先区分：
+
+technology capability
+
+和：
+
+first-baseline requirement
+
+如果当前主要研究问题不需要：
+
+DEFER
+
+尤其不要自动开启：
+
+cross-border ammonia/methanol infrastructure
+
+作为新的网络优化问题。
+
+如果其作为 imported commodity 出现：
+
+可以保留为外部fuel supply candidate，
+但必须有清晰价格/碳边界。
+
+--------------------------------------------------
+18. Track D — External commodity supply
+--------------------------------------------------
+
+第一版可以允许：
+
+external imports of fuels/commodities
+
+例如：
+
+natural gas
+oil
+biomass
+possibly H2-derived fuels
+
+但必须保证：
+
+Integrated
+和
+Disconnected
+
+使用完全相同的：
+
+commodity supply assumptions
+prices
+carbon factors
+availability constraints
+
+这样：
+
+两组情景唯一主要差异仍然是：
+
+cross-border electricity interconnection.
+
+--------------------------------------------------
+19. Cross-border intervention contract
+--------------------------------------------------
+
+这是本轮最重要的最终冻结之一。
+
+第一版正式核心实验：
+
+INTEGRATED：
+
+cross-border AC/DC electricity links
+=
+enabled according to accepted topology/capacity rules
+
+DISCONNECTED：
+
+cross-border AC/DC electricity links
+=
+disabled
+
+除此之外，两组必须保持相同：
+
+- demand
+- technologies
+- technology costs
+- fuel prices
+- external commodity supply
+- carbon assumptions
+- domestic networks
+- weather
+- temporal resolution
+- spatial resolution
+- sector coupling
+- storage assumptions
+
+禁止同时改变其他跨境carrier。
+
+--------------------------------------------------
+20. Cross-border carrier freeze
+--------------------------------------------------
+
+第一版：
+
+Cross-border electricity：
+CORE INTERVENTION
+
+Cross-border H2：
+OFF
+
+Cross-border gas-network expansion：
+OFF
+
+Cross-border CO2：
+OFF
+
+Cross-border ammonia network：
+OFF
+
+Cross-border methanol network：
+OFF
+
+Fuel commodity imports：
+allowed only through same exogenous supply boundary in both experiments.
+
+--------------------------------------------------
+21. Track E — Carbon scope freeze
+--------------------------------------------------
+
+原研究 carbon assumption：
+
+ASEAN power-sector absolute trajectory
+
+2025 1000 Mt
+2030 820 Mt
+2035 640 Mt
+2040 460 Mt
+2045 280 Mt
+2050 100 Mt
+
+不得自动扩展成：
+
+whole-energy-system carbon cap.
+
+--------------------------------------------------
+22. Carbon accounting architecture
+--------------------------------------------------
+
+第一版 Research Full-SC 必须区分：
+
+PolicyCO2_Power
+
+和：
+
+ReportingCO2_FullSystem
+
+PolicyCO2_Power：
+
+用于保留原 PyPSA-ASEAN power-sector decarbonization assumption。
+
+ReportingCO2_FullSystem：
+
+统计：
+
+power
+industry
+transport
+buildings fuels
+shipping
+aviation
+other sectors
+
+的全系统排放。
+
+非电力部门：
+
+可以被其能源价格、技术和供给路径影响，
+
+但不得未经研究设计改变：
+
+original power-sector carbon policy constraint.
+
+--------------------------------------------------
+23. Carbon scope collision
+--------------------------------------------------
+
+如果现有：
+
+global atmosphere store
+
+会自动把所有sector排放一起约束在：
+
+1000→100 Mt
+
+则标：
+
+SYSTEM_LEVEL_ENGINEERING_BLOCKER
+
+这必须在 Phase4 修复。
+
+本轮：
+
+只冻结正确的目标architecture。
+
+不要实施最终constraint代码。
+
+--------------------------------------------------
+24. Security / resilience
+--------------------------------------------------
+
+不要在本轮增加新的：
+
+resilience objective
+security objective
+
+能源安全和韧性仍属于：
+
+constraints / scenario boundary
+
+而不是额外optimization objective。
+
+第一版核心实验保持主问题清晰。
+
+--------------------------------------------------
+25. Domestic network boundary
+--------------------------------------------------
+
+本轮同时确认：
+
+Domestic electricity network
+
+在 Integrated / Disconnected 中必须保持一致。
+
+不要让：
+
+Disconnected
+
+顺带删除国内线路。
+
+同样：
+
+domestic storage
+domestic generation
+sector technologies
+
+都保持同一候选集合。
+
+--------------------------------------------------
+26. Full-SC sector matrix
+--------------------------------------------------
+
+最终建立一个统一矩阵。
+
+至少包括：
+
+Power
+Buildings Residential
+Buildings Services
+Road
+Rail
+Shipping Domestic
+Shipping International
+Aviation Domestic
+Aviation International
+Industry
+Agriculture
+Hydrogen
+Synthetic fuels
+Gas
+Oil
+Biomass
+CO2
+
+字段至少：
+
+Sector_or_Carrier
+DemandRepresentation
+SupplyRepresentation
+ElectricityInteraction
+HydrogenInteraction
+FuelInteraction
+CarbonTreatment
+DomesticNetwork
+CrossBorderNetwork
+FirstFullSCStatus
+MainSource
+RemainingBlocker
+Materiality
+Phase4Action
+
+Status只使用：
+
+EXPLICIT
+EMBEDDED
+FIXED
+DEFERRED
+EXTERNAL_SUPPLY
+REPORTING_ONLY
+SYSTEM_LEVEL_BLOCKER
+
+--------------------------------------------------
+27. Phase4 blocker register
+--------------------------------------------------
+
+本轮不要继续解决所有 blocker。
+
+只把真正必须在第一次 Full-SC solve 前解决的问题交给 Phase4。
+
+候选系统级blocker应包括但不限于：
+
+- A* numerical implementation
+- carbon scope isolation
+- Buildings embedded-vs-explicit duplication
+- Transport exactly-once accounting
+- Road aggregate demand implementation
+- Shipping allocation conservation
+- Industry demand/growth implementation
+- carrier network switches
+- topology consistency
+- demand conservation
+- solver feasibility
+
+不要把：
+
+minor data uncertainty
+
+列成系统 blocker。
+
+--------------------------------------------------
+28. 本轮禁止事项
+--------------------------------------------------
+
+禁止：
+
+- 新的大规模数据搜索
+- Industry process-level deep dive
+- Agriculture technology model
+- Buildings reopening
+- Transport reopening
+- cross-border H2
+- cross-border CO2
+- cross-border gas expansion
+- ammonia-network research
+- new carbon policy
+- formal Full-SC solve
+- Integrated vs Disconnected experiment
+- cooperative game theory
+- country benefit analysis
+
+--------------------------------------------------
+29. Deliverables
+--------------------------------------------------
+
+请产出：
+
+1. INDUSTRY_FIRST_FULLSC_BOUNDARY.md
+
+2. AGRICULTURE_FIRST_FULLSC_BOUNDARY.md
+
+3. FULLSC_CARRIER_INVENTORY.md
+
+4. HYDROGEN_FUEL_BOUNDARY.md
+
+5. EXTERNAL_COMMODITY_SUPPLY_BOUNDARY.md
+
+6. CROSS_BORDER_INTERVENTION_CONTRACT.md
+
+7. CARBON_SCOPE_FREEZE.md
+
+8. FULLSC_SECTOR_CARRIER_MATRIX.csv
+
+9. PHASE4_SYSTEM_BLOCKER_REGISTER.csv
+
+10. PHASE3_RESEARCH_MODEL_DESIGN_CLOSEOUT.md
+
+11. PHASE4_ASSEMBLY_HANDOFF.md
+
+--------------------------------------------------
+30. Final questions
+--------------------------------------------------
+
+必须回答：
+
+A. 当前 Industry upstream implementation 最接近 Mode A/B/C 哪一种？
+
+B. 第一版 Industry 应冻结为什么表示？
+
+C. Industry 哪些问题是真正 system-level blocker？
+
+D. Timor-Leste industry 是否必须阻塞 Full-SC？
+
+E. Agriculture 是否需要显式建模？
+
+F. 第一版 H2 如何生产、消费和储存？
+
+G. Cross-border H2 是否关闭？
+
+H. Cross-border gas / CO2 是否关闭？
+
+I. 哪些 external commodity imports 被保留？
+
+J. Integrated vs Disconnected 的唯一核心干预是否已经可以定义为 cross-border electricity？
+
+K. Power-policy CO2 与 Full-system reporting CO2 是否已经在概念上分离？
+
+L. Phase4 必须实施哪些engineering fixes？
+
+M. 是否仍有任何尚未处理的sector会阻止第一版Full-SC？
+
+N. Phase3 Research Model Design 是否可以关闭？
+
+最终必须给：
+
+PHASE3_RESEARCH_MODEL_DESIGN_CLOSED
+=
+YES / NO
+
+以及：
+
+READY_TO_ENTER_PHASE4_ASSEMBLY
+=
+YES / NO
+
+如果 NO：
+
+只列最少的 SYSTEM-LEVEL blockers。
+
+不要开启新的 Phase3D。
+
+--------------------------------------------------
+31. Stop condition
+--------------------------------------------------
+
+完成后停止。
+
+不要正式修改/组装 Research Model。
+
+不要运行 solver。
+
+不要运行 Integrated / Disconnected。
+
+不要开始实验。
+
+返回用户 + ChatGPT 做最后一次 Phase3 Human Scientific Review。

@@ -1,0 +1,168 @@
+{
+  "AEO8_evidence_locations": {
+    "BAS_assumptions": "PDF48 / printed46; clean cooking/electrification country growth2005-2022",
+    "own_use_losses": "PDF49 / printed47; constant latest-data percentages",
+    "2050_generation": "PDF82 / printed80 Figure3.25; BAS3036.3TWh",
+    "corrigendum": "November2024 PDF3 revises figure on printed80; BAS3036.3TWh unchanged"
+  },
+  "code_equivalence": {
+    "scripts/build_demand_profiles.py": false,
+    "scripts/add_electricity.py": false,
+    "scripts/final_asean_adjustment.py": false
+  },
+  "normalized_U_V_equivalence": {
+    "scripts/build_demand_profiles.py": true,
+    "scripts/add_electricity.py": true,
+    "scripts/final_asean_adjustment.py": false
+  },
+  "aeo8_corrigendum_visual_check": {
+    "pdf_page": 3,
+    "printed_page_target": 80,
+    "BAS_before_TWh": 3036.3,
+    "BAS_after_TWh": 3036.3,
+    "scope": "Visually checked Figure3.25; total unchanged; not acceptance of model boundary"
+  },
+  "functions": {
+    "P": {
+      "build_demand_profiles": {
+        "path": "scripts/build_demand_profiles.py",
+        "start": 182,
+        "end": 325,
+        "ast_sha256": "839ed653688d57759308275572f43f7a8c43589be50eeb591106f3e7cbe3ea3b"
+      },
+      "add_services": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 2471,
+        "end": 2561,
+        "ast_sha256": "87e4176e3367ea663a58da8b9c31c55b83f82a67ce0e9f3fd1217debebbe6930"
+      },
+      "add_residential": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 2651,
+        "end": 2798,
+        "ast_sha256": "092fa0aaf31284581c972a3379b113048061a8424d3777af88da32efa3502008"
+      },
+      "add_electricity_distribution_grid": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 2801,
+        "end": 2970,
+        "ast_sha256": "42a9e69aa99b85f585ac7d3a5c7307d166bc873c55bf0ffd49bd524363778591"
+      },
+      "actual_elec_carrier": [
+        "AC",
+        "industry electricity",
+        "agriculture electricityrail transport electricity"
+      ],
+      "include_electricity_growth": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 175,
+        "end": 230,
+        "ast_sha256": "e0964c8ad26069a8a39b5b8b92f08846e7b7d3049ffc5a6b6b93acd95b60d573"
+      },
+      "redistribute_industrial_load": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 233,
+        "end": 293,
+        "ast_sha256": "f80db9f7ea8a294b9437544e682adb7201de3eee10cddbd08fa05e1877cfc8ac"
+      }
+    },
+    "U": {
+      "read_demcast_load": {
+        "path": "scripts/build_demand_profiles.py",
+        "start": 226,
+        "end": 287,
+        "ast_sha256": "979b9084d95e39d862c43d890ebb4c220bf0994b16dbe00d5ac391f417983bb8"
+      },
+      "build_demand_profiles": {
+        "path": "scripts/build_demand_profiles.py",
+        "start": 290,
+        "end": 442,
+        "ast_sha256": "43b963a57286b5e3521b6fa41d228aa27cf9a5fbeeab6f38971d069906b636ca"
+      },
+      "add_services": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3033,
+        "end": 3139,
+        "ast_sha256": "ed732d2dc9baeb62bdc237af634a94d732703c804fb6dd4b5a3f0538c721baa9"
+      },
+      "add_residential": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3247,
+        "end": 3410,
+        "ast_sha256": "9ab28fdb2fb195d98cd152f97d81758a4ebba0ad491f99176396628c518e6e1b"
+      },
+      "add_electricity_distribution_grid": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3413,
+        "end": 3598,
+        "ast_sha256": "195eeebab7fe386b17583d23fe530807b1422732eae24f9a06a2f865be3626b7"
+      },
+      "actual_elec_carrier": [
+        "AC",
+        "industry electricity",
+        "agriculture electricityrail transport electricity"
+      ],
+      "include_electricity_growth": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 175,
+        "end": 230,
+        "ast_sha256": "e0964c8ad26069a8a39b5b8b92f08846e7b7d3049ffc5a6b6b93acd95b60d573"
+      },
+      "redistribute_industrial_load": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 233,
+        "end": 293,
+        "ast_sha256": "f80db9f7ea8a294b9437544e682adb7201de3eee10cddbd08fa05e1877cfc8ac"
+      }
+    },
+    "V": {
+      "read_demcast_load": {
+        "path": "scripts/build_demand_profiles.py",
+        "start": 226,
+        "end": 287,
+        "ast_sha256": "979b9084d95e39d862c43d890ebb4c220bf0994b16dbe00d5ac391f417983bb8"
+      },
+      "build_demand_profiles": {
+        "path": "scripts/build_demand_profiles.py",
+        "start": 290,
+        "end": 442,
+        "ast_sha256": "43b963a57286b5e3521b6fa41d228aa27cf9a5fbeeab6f38971d069906b636ca"
+      },
+      "add_services": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3037,
+        "end": 3143,
+        "ast_sha256": "ed732d2dc9baeb62bdc237af634a94d732703c804fb6dd4b5a3f0538c721baa9"
+      },
+      "add_residential": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3251,
+        "end": 3400,
+        "ast_sha256": "073113142f32a86b07816d19c0705e3de54c8b9dddf15f9e37010351a56d208e"
+      },
+      "add_electricity_distribution_grid": {
+        "path": "scripts/prepare_sector_network.py",
+        "start": 3403,
+        "end": 3588,
+        "ast_sha256": "195eeebab7fe386b17583d23fe530807b1422732eae24f9a06a2f865be3626b7"
+      },
+      "actual_elec_carrier": [
+        "AC",
+        "industry electricity",
+        "agriculture electricityrail transport electricity"
+      ],
+      "include_electricity_growth": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 175,
+        "end": 230,
+        "ast_sha256": "e0964c8ad26069a8a39b5b8b92f08846e7b7d3049ffc5a6b6b93acd95b60d573"
+      },
+      "redistribute_industrial_load": {
+        "path": "scripts/final_asean_adjustment.py",
+        "start": 233,
+        "end": 293,
+        "ast_sha256": "f80db9f7ea8a294b9437544e682adb7201de3eee10cddbd08fa05e1877cfc8ac"
+      }
+    }
+  }
+}

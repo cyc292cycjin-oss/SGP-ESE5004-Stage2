@@ -1,0 +1,90 @@
+{
+  "prepare_sector_network.py": {
+    "sha256": "b6c2ef450dc59aa7bfc8f0ca36204bf9e5bd8e1b8491dc1e5247b4e48ef7b8be",
+    "matches": [
+      {
+        "line": 3060,
+        "text": "\"services electricity\", profile_residential, energy_totals, temporal_resolution"
+      },
+      {
+        "line": 3066,
+        "text": "suffix=\" services electricity\","
+      },
+      {
+        "line": 3068,
+        "text": "carrier=\"services electricity\","
+      },
+      {
+        "line": 3468,
+        "text": "# move industry, rail transport, agriculture and services electricity to low voltage"
+      }
+    ]
+  },
+  "prepare_heat_data.py": {
+    "sha256": "8a3298aeda9410d6ea08c82458387062da5a0fffb9bb32e3bed4a3bb2427179a",
+    "matches": [
+      {
+        "line": 177,
+        "text": "electric_heat_supply = {}"
+      },
+      {
+        "line": 198,
+        "text": "electric_heat_supply[f\"{sector} {use}\"] = ("
+      },
+      {
+        "line": 205,
+        "text": "electric_heat_supply = pd.concat(electric_heat_supply, axis=1)"
+      },
+      {
+        "line": 211,
+        "text": "#     - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]"
+      }
+    ]
+  },
+  "prepare_energy_totals.py": {
+    "sha256": "9db43d3e77dc8be2b0c8dc9a11c02432ed7afdbc6991433df66308140d8900e8",
+    "matches": []
+  },
+  "build_base_energy_totals.py": {
+    "sha256": "4405164ab303d3be800a5dca58978d1e403d75cbe70d8d8381178a675de9fefc",
+    "matches": [
+      {
+        "line": 75,
+        "text": "energy_totals_base.at[country, \"services electricity\"] = np.NaN"
+      },
+      {
+        "line": 177,
+        "text": "energy_totals_base.at[country, \"services electricity\"] = round("
+      }
+    ]
+  },
+  "build_demand_profiles.py": {
+    "sha256": "632ef7f59b61f25ac20bb2af98c6d0d33180cbb904c3c7a8855c1878396159a2",
+    "matches": []
+  },
+  "final_asean_adjustment.py": {
+    "sha256": "a4befb638974291d7e0c24e2fb026e2ee5ee2b114d33b9af322e6d6b754fe6f2",
+    "matches": [
+      {
+        "line": 44,
+        "text": "\"service electricity\","
+      },
+      {
+        "line": 83,
+        "text": "elec_carrier = ["
+      },
+      {
+        "line": 199,
+        "text": "loads = n.loads[n.loads.carrier.isin(elec_carrier)].copy()"
+      },
+      {
+        "line": 244,
+        "text": "loads = n.loads[n.loads.carrier.isin(elec_carrier)].copy()"
+      },
+      {
+        "line": 419,
+        "text": "if options[\"only_elec_network\"]:"
+      }
+    ]
+  }
+}

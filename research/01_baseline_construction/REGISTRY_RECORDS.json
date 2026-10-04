@@ -1,0 +1,1631 @@
+{
+  "data_registry/DATA_SOURCES.csv": [
+    {
+      "source_id": "UNSD",
+      "name": "UNSD energy statistics",
+      "official_source": "https://data.un.org/Explorer.aspx?d=EDATA",
+      "version": "52 exports named 20250502; base year 2019",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "UNdata_Export_20250502_*.txt",
+      "sha256": "3c410257fc6365cdd1f3d477998e45240f41d44a59ad2f7a8819e31160dbcb8f",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "UN data terms; redistribution not established in this review",
+      "used_for": "national sector demand",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "scripts/build_energy_totals.py; scripts/build_base_industry_totals.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "GDP",
+      "name": "Gridded GDP PPP",
+      "official_source": "https://doi.org/10.5061/dryad.dk1j0",
+      "version": "v2; available 1990\u20132015; 2015 selected",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "GDP_PPP_1990_2015_5arcmin_v2.nc",
+      "sha256": "89a6b5ee80e80d6213643bcec74a764e6649c21fa8661c5f13ce97f8c791c1c8",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Verify dataset record license; large source manifest only",
+      "used_for": "industrial spatial weights",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "scripts/build_shapes.py; validate_industrial_recovery.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "name": "Industrial facilities and allocation inputs",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/tree/a3616a68ee44592af6527ca9024a90f1956646ae",
+      "version": "existing local inputs; facilities assembled upstream",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "industrial_database.csv; base_industry_totals_2030.csv",
+      "sha256": "5e40ae766624a50b07c37b832fb6e5c828908dd0d8b1a875d2c6cd531d496464",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Mixed source terms; no new public binary publication",
+      "used_for": "industrial allocation regression",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "scripts/build_industrial_database.py; scripts/build_industrial_distribution_key.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "TECHCOST",
+      "name": "technology-data frozen family",
+      "official_source": "https://github.com/PyPSA/technology-data/tree/ec22a1843632fd28ecb9a139ee5156faf23324a3",
+      "version": "v0.13.2 / ec22a1843632fd28ecb9a139ee5156faf23324a3",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "costs_*.csv; source workbooks",
+      "sha256": "a84db1bc242e5ce061ea1520fc353ead9437d7b5c485d6eb5215b2e6a27f15b0",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Repository and original workbook terms must be distinguished",
+      "used_for": "technology costs",
+      "status": "PENDING",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "compile_cost_assumptions.py; append_cost_data.py; process_cost_data.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "ELECTROLYSER_OVERRIDE",
+      "name": "Author electrolyser investment override",
+      "official_source": "https://github.com/PyPSA/technology-data/blob/ec22a1843632fd28ecb9a139ee5156faf23324a3/inputs/manual_input.csv",
+      "version": "v0.13.2 author values, EUR2020/kW_e",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "manual_input.csv",
+      "sha256": "8cfef9a801e34cbf5f82be283896036a23143d6ca82dc31a35c95675c887f1f8",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Public table; private communications not recovered",
+      "used_for": "preserve author investment curve",
+      "status": "SOURCE_PARTIALLY_VERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "add_manual_input in compile_cost_assumptions.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "AEO8",
+      "name": "ASEAN Energy Outlook 8 cost append",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/tree/5bacad702ccfed17ad19ab510fa710651e966f2c/data",
+      "version": "D15/D17/D18 at paper SHA",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "AEO8 cost tables",
+      "sha256": "6e6660c25a00367d8a873196175a4a996b94233a2f05e890ee567c7f7329d032",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Already upstream tracked; retain source attribution; check original terms",
+      "used_for": "ASEAN cost replacement",
+      "status": "PENDING",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "scripts/append_cost_data.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "WEATHER_TUTORIAL",
+      "name": "Existing six-day weather geometry",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean",
+      "version": "2013-03-01 to 2013-03-07; tutorial only",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "asean-2013-era5-tutorial.nc",
+      "sha256": "283644184fdeb548ed8a9a9f9b680cc3ced6976e019d573330cc90eadf694f4b",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Copernicus source terms; retain manifest",
+      "used_for": "geometry in allocation test; NOT formal weather",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "atlite indicator matrices",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "WEATHER_PAPER",
+      "name": "Official Asian weather bundle candidate",
+      "official_source": "https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view",
+      "version": "ZIP member timestamp 2023-08-09; not an edition guarantee",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "bundle_cutouts_asia.zip -> cutout-2013-era5.nc",
+      "sha256": "",
+      "hash_kind": "NOT_AVAILABLE",
+      "license": "Copernicus/source terms; 27.6 GB archive manifest only",
+      "used_for": "paper full-year source candidate",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "retrieve_databundle_light.py; inspect_weather_archive.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "GEOGRAPHY",
+      "name": "Country/GADM/EEZ and cluster geometry",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/blob/5bacad702ccfed17ad19ab510fa710651e966f2c/configs/bundle_config.yaml",
+      "version": "local EEZ v11; existing tutorial GADM/regions",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "eez_v11.gpkg; gadm_shapes.geojson; regions_onshore_elec_s_50.geojson",
+      "sha256": "45194569947a6e38efc967a6619c869385ea243645417fa7405402951f656bd5",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "GADM/EEZ original terms; binary redistribution not cleared",
+      "used_for": "spatial mapping and DAG inspection",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_shapes.py; build_bus_regions.py; cluster_network.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "LANDCOVER",
+      "name": "Protected areas / Copernicus / GEBCO",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/blob/5bacad702ccfed17ad19ab510fa710651e966f2c/configs/bundle_config.yaml",
+      "version": "GEBCO 2025; Copernicus LC100 2019; natura source uncertain",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "GEBCO_2025_sub_ice.nc; PROBAV*.tif; natura.tiff",
+      "sha256": "ebb398dba628c6b1fe070cd9057a911156bb7f923a6bba5c8149091f4281ba8f",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Mixed licenses; inspect upstream bundle terms",
+      "used_for": "renewable exclusions; paper DAG",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_renewable_profiles.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "GRID",
+      "name": "Official prebuilt network",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/tree/138ea07b21c55727c937831c396e80286b5ef586/data/osm-plus-prebuilt/0.1.1",
+      "version": "osm-plus-prebuilt 0.1.1 (0.1 for comparison)",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "all_*_build_network.csv; modification_list.txt",
+      "sha256": "bf02c25ccc61db9066c5e9df451396e4b3abae9923c31ae05c3fcb5a2bed8d89",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Already upstream Git; OSM attribution/ODbL plus model repository licensing",
+      "used_for": "topology diagnosis and power boundary",
+      "status": "PENDING",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "base_network.py; simplify_network.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "DEMAND",
+      "name": "Electricity forecasts and sector demand scalers",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean/tree/a3616a68ee44592af6527ca9024a90f1956646ae",
+      "version": "paper SSP vs current DemandCast; do not conflate",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "forecasts_on_historical_period.parquet; energy_totals_*.csv; growth files",
+      "sha256": "09de28b4f32502dcef9ee05d599c5007c612933d2b8f1741e8c4e1c96f9e3542",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Upstream data and original-source terms vary",
+      "used_for": "electricity and future sector demand",
+      "status": "PENDING",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_demand_profiles.py; build_energy_totals.py; build_industry_demand.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "FLEET",
+      "name": "Existing generation fleet",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean",
+      "version": "existing tutorial compiled fleet; author source identity not fully recovered",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "powerplants.csv; powerplants_osm2pm.csv",
+      "sha256": "fbfc6905baca05b9ea2ac82bf87d86fcee0ee77ddcbbd6ed307343bd3601bce9",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Powerplantmatching and underlying source terms",
+      "used_for": "existing capacity and lifetime",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_powerplants.py; add_existing_baseyear.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "name": "Existing renewable profile intermediates",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean",
+      "version": "tutorial spatial/temporal resolution only",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "profile_*.nc",
+      "sha256": "f88bc3439ffcbc93cad71a7acaee8335d8a4e2efa742ab9d69f246f4fb9d8c45",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "Derived from weather/landcover with their source terms",
+      "used_for": "renewable profiles; NOT formal-year input",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_renewable_profiles.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "POPULATION",
+      "name": "Population and urban shares",
+      "official_source": "https://github.com/pypsa-meets-earth/pypsa-asean",
+      "version": "existing model inputs; source approval pending",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "pop_layout*.csv; urban_percent.csv",
+      "sha256": "ee993ac505ce2b1b8496ee54b435cbe76716f6ad35ca67d07cb8547be857c083",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "WorldPop/UN/World Bank source terms",
+      "used_for": "spatial service-demand allocation",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "build_population_layouts.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    },
+    {
+      "source_id": "AUTHOR_RESULTS",
+      "name": "Author reference networks",
+      "official_source": "https://drive.google.com/file/d/194my_d3eotQ1GvsGGN5KOZGWOHEivoQy/view",
+      "version": "results-asean-paper-v1; metadata SHA 5bacad70",
+      "date": "2026-10-01 audit (not original retrieval)",
+      "filename": "baseline-aims-3H 2025; decarbonize-aims-3H 2050",
+      "sha256": "9ebec4ee2f4bfcac1adcc66be721126cbc45483b33819363aa53660bc8c99ae6",
+      "hash_kind": "SHA256_OF_SORTED_MEMBER_SHA256_LINES",
+      "license": "No new redistribution of large author outputs",
+      "used_for": "reference evidence ONLY, not regenerated outputs",
+      "status": "UNVERIFIED",
+      "retrieval_script": "retrieve_registered_input.py (explicit pinned URL+hash required); upstream retrieval rules are evidence, not auto-update authority",
+      "processing_script": "inspect_results.py",
+      "member_hash_table": "DATA_HASHES.csv",
+      "human_confirmation": "PENDING"
+    }
+  ],
+  "data_registry/DATA_HASHES.csv": [
+    {
+      "source_id": "DEMAND",
+      "path": "data/demand/forecasts_on_historical_period.parquet",
+      "bytes": 1005362,
+      "sha256": "ade3a79fa50602434adcf6bc2954a297cd229165659263089ab073337466ef8c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110244896.txt",
+      "bytes": 472389,
+      "sha256": "9d71d628a6f17b404717c811f0131d5065f0c2c53457f760e865e3b803b93872",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110245975.txt",
+      "bytes": 261482,
+      "sha256": "ea1088c05f10f5f3aa33fbc56b846401c1959ca6fdd8df2fa0b3f56f3335e72c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110247853.txt",
+      "bytes": 1059708,
+      "sha256": "a0b88be91fc6c8253bc1dce071a8a1b1ee196bd100385a102f4835ee50f35a22",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110251099.txt",
+      "bytes": 2420306,
+      "sha256": "d58d6b4f18fcb2cd5c2b6a9f680592924b9cf78066659d7ed2cf757d233cfec9",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110257851.txt",
+      "bytes": 2083028,
+      "sha256": "9c32689fcf967b5d25086511b32fcfbfb4894f2b860deff953d781f92d749211",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110302082.txt",
+      "bytes": 10720,
+      "sha256": "0b817ec632f9540a03ce261b3b7cae7c0254eb84922b2c16f3eb21fa717e9150",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110306307.txt",
+      "bytes": 1016126,
+      "sha256": "5c72caaa64762e177e5e53c55b7f9fd07ee57f6a91681d600bdd6c6be174b8c2",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110314760.txt",
+      "bytes": 1721662,
+      "sha256": "b004f7bd486dbb8576935c5d17c2e49964e7687ea16b5d67ae57602981b5462c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110331798.txt",
+      "bytes": 725407,
+      "sha256": "4030e2d946965aae430c9de2da1b51ae2c19b96dc5a585dc8838dc47384e16af",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110337631.txt",
+      "bytes": 2337634,
+      "sha256": "7759b2a57190ec5e3edac07fa28183896f2eaaff420f43d9cf46577e31a769d6",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110343796.txt",
+      "bytes": 591866,
+      "sha256": "ef9e2118f6a330e33f4e876b8a52d3cf87a9626304f638446c6cd4c0aabcd98e",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110347177.txt",
+      "bytes": 1528800,
+      "sha256": "77d8261ada2f8a5104381fae2e794bcaa31d62a12d27ff7e3a0dd0cde756d194",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110351798.txt",
+      "bytes": 2901774,
+      "sha256": "903a91d8e915854454532b0e917539b325fa6691a335aa08a37c8ebef0bd9088",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110359447.txt",
+      "bytes": 865114,
+      "sha256": "c12e9ae1a3eac4bbe6fe04df4238905185db886709371f6ae3ec1899b9f3be90",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110403305.txt",
+      "bytes": 3552359,
+      "sha256": "da54b258ffb4927f30834c01f4e9aff7c267dd70c5ef5760292dd21ef5802345",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110410799.txt",
+      "bytes": 354004,
+      "sha256": "844c8f8b28eea37c896cd73a1d209742287e7658e809b54e05a00e9b809ca8f3",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110412802.txt",
+      "bytes": 3038315,
+      "sha256": "f36eaf2556be5fbe75713fe7bee8a5d1f6b718eb4ed7881a9a2e697784bd8898",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110427053.txt",
+      "bytes": 1502905,
+      "sha256": "6ab0360c366f648d44dceb82f58db545d15a8c9c972d3311d21a94ae50ae6b40",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110434329.txt",
+      "bytes": 850501,
+      "sha256": "dd1385f6e8082fc4688b91b158de8368753c774cb3856ab9b8add323c693dd3b",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110441347.txt",
+      "bytes": 3641035,
+      "sha256": "b0b748888b81c9c3891726e3d58a5204ca6547de02b15942c900cbab61e0bab9",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110450928.txt",
+      "bytes": 891215,
+      "sha256": "d1c43757250bbe1e5f30961e19da6f8eb5ce62a986af8f54b5770eeccc9a101b",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110459400.txt",
+      "bytes": 981567,
+      "sha256": "f45ee25e8f98c5ad88cb406ef7b2c6b00b81267a225a14543a332f5a880ba0ca",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110505470.txt",
+      "bytes": 10425981,
+      "sha256": "1989e4f319a10b3b8190e58354b21612abc984985f28d5d54b5d92c55c8d0409",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110512447.txt",
+      "bytes": 266679,
+      "sha256": "8105f179e4c22f7719fc020da463501f54f88514ed2fd84d2748166baf8dc223",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110514377.txt",
+      "bytes": 97406,
+      "sha256": "b7859cfcf3f43d5e446c22f5216426de2eb7dbdeb831b034141f42e51b071a1d",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110515832.txt",
+      "bytes": 9951665,
+      "sha256": "b5ec374fcb60a4567468b3279fe6fa584ed0506d32f42a80e0760becce6c5cdb",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110532316.txt",
+      "bytes": 8110285,
+      "sha256": "26a364db4d763d9d5a69eff04aa717af5db5d2736c5c1f4e47223a12eae7db66",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110556493.txt",
+      "bytes": 45041,
+      "sha256": "181058432df7a3c8ea8f38a569a301979520a8ec0a5e5c94dc5bcdb4980ef7ea",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110559984.txt",
+      "bytes": 11083047,
+      "sha256": "1c2952a5f87bfcdb0eef1af6b6c774e741a99e5b72c5ced91a585d6efe9be50a",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110620083.txt",
+      "bytes": 152063,
+      "sha256": "2142e8626a88c42bc412c6d81c67bb4608336f2d0a45ea7a48fb67832496065c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110625445.txt",
+      "bytes": 661663,
+      "sha256": "32dfe73a94f5ebb3a6d219ac4b2e3c3e2f8efc96947cc9c7b9206dde554c4116",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110634475.txt",
+      "bytes": 70611,
+      "sha256": "7a3889bf92ff33dc1179a1f93bdb239134414afce164a48a51404c1111664a12",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110638157.txt",
+      "bytes": 6222767,
+      "sha256": "322eaabc99e9098d5834c09f3d174f6acba91332dd84956e7cd11e7913c6aeb4",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110641692.txt",
+      "bytes": 3883522,
+      "sha256": "21463ba8a4a85c3904df173033f355c7dab36eb864ffad55060ce462e41edfe1",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110648146.txt",
+      "bytes": 5189237,
+      "sha256": "a45d82a3cffd1fcbca3d6702b88e511d913e833c1f4e9e3fa75dd5c1750eea9a",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110653410.txt",
+      "bytes": 1916114,
+      "sha256": "b738c27518f722de4e0d905391b9691a5da2cdacc6378986f6998dcba63d64e6",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110656973.txt",
+      "bytes": 10938437,
+      "sha256": "b02371f39dec320e227fd3223fcf8ad545595b5b53b48d2834bf9a838191076e",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110704276.txt",
+      "bytes": 2564599,
+      "sha256": "97289955797172d255b7f9a98e0d306ea8c7cdb774f7de0b9020e9e80a5cc94e",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110709784.txt",
+      "bytes": 7624635,
+      "sha256": "fe8fc603bb47c3ced818a86a96a4ad4e97b3b8ceb0d6b28a66d123d5e2c4d5ba",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110717641.txt",
+      "bytes": 1921511,
+      "sha256": "ec74e868b3be689b55630fd5f8b8a27c4d2caff112fac9325700633b80251e93",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110721508.txt",
+      "bytes": 10459793,
+      "sha256": "fa8613ee3560bfc2f73f60f4c0995c995b0bec8fd75a59190fe4ad6c63a9e988",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110746038.txt",
+      "bytes": 1185568,
+      "sha256": "4891fe00774011e4b1862ebc0d2dea26d1a13d7788d19064aed2218f5d3d2a8e",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110748262.txt",
+      "bytes": 88194,
+      "sha256": "2ac8edec900588e0811a513f09fe58bc7105b423dd71a751f1f52d3d1264e018",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110749530.txt",
+      "bytes": 4254314,
+      "sha256": "e125dbd0b29b2f8e9a27b32fb272f8b78bbc88a048f888af43237fb15a05fe68",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110752006.txt",
+      "bytes": 966200,
+      "sha256": "a6da649d0e7795b17fc3360596d9e5fe522a8aae5be375473954777df80564ad",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110755527.txt",
+      "bytes": 475901,
+      "sha256": "8622b4b9cc153df5e6a10a8c4619af00fd4d4f5f68ed78a1b01e6bbc3aca018f",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110758678.txt",
+      "bytes": 662331,
+      "sha256": "9483733402ac71f50e0c67a0c07942ffe3f34bf8747a011d21029520689de68c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110801817.txt",
+      "bytes": 302612,
+      "sha256": "0863594ac1c23cae94e1111eaf79f081cfd1ff1311f6bcccd00a0288b3a3b2e7",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110803822.txt",
+      "bytes": 2583721,
+      "sha256": "b635acfa2728521abb05c3175cba6e1834327b8a909d346e14a399df673f946d",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110807801.txt",
+      "bytes": 2093000,
+      "sha256": "98b98fccf6df4eae08a68fe143c48d13a8dd743ef689f46af494a66411304ece",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110817118.txt",
+      "bytes": 845688,
+      "sha256": "e066947dc3b8a3505aa1295bdc18f810242d035c10357cdb54cb755a9ad555de",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/demand/unsd/data/UNdata_Export_20250502_110820872.txt",
+      "bytes": 10275081,
+      "sha256": "12c99b3c40927449d9a4d0402f255a8b84b24917ff58e54efd4ec43b2125fe6b",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "DEMAND",
+      "path": "data/energy_totals_DF_2030.csv",
+      "bytes": 1035,
+      "sha256": "39dc4e650f6c1da566d8925db352e3a6c073c35df0664eed4e6cb380f3a6c1e9",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "UNSD",
+      "path": "data/unsd_transactions.csv",
+      "bytes": 2233,
+      "sha256": "1fac14fc4204640c6014ec5e987eb62d2e62cb57adf13f250ce01c347635d720",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/AL_production.csv",
+      "bytes": 57731,
+      "sha256": "912fc0b6e95c12950ef110acb24aa7826e9af750d52cccf011f99ce9991b8308",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/industry/SFI-Global-Cement-Database-July-2021.xlsx",
+      "bytes": 614696,
+      "sha256": "e86da74886e65d3d7397ecfb06c0859acf784e9bd987b72794760e41da6fbcdf",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx",
+      "bytes": 205998,
+      "sha256": "6f0bffc655d19db97f1ab5f00ca36f9b6b19d47dbc29dd21ba806b84506418bb",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/industry/USGS_ammonia_dataset.xlsx",
+      "bytes": 99562,
+      "sha256": "a84230c54052417fa9eda96f793c8f6b3db9ea0e1704374b70b5c3efe84ade1b",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/industry/ammonia_plants.csv",
+      "bytes": 7952,
+      "sha256": "1c60c531339cca5ce92b0df220392943d6da1e2f6848536ff5db835d53cba5d5",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "data/industry/us_cities.csv",
+      "bytes": 4081899,
+      "sha256": "7ae1a9f4883684a098889e5cf44f6679da2d90ba1e20a26b346c9d3c6ec11098",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/industrial_database.csv",
+      "bytes": 578594,
+      "sha256": "9ae21c81d4e4dde5ee90037d96f24eef19d0faf1b08c9263359454452178ac9f",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/ammonia_production.csv",
+      "bytes": 5600,
+      "sha256": "1141dc362ecd8b1209d4e5b91f9099568f9aefc422bea8109d36770b30dabcf7",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "FLEET",
+      "path": "resources/baseline-aims-3H-tutorial/powerplants.csv",
+      "bytes": 325837,
+      "sha256": "d473f3e770ff76d3b496a7c2ae51b061670237d2aec1c80c679b13d9e28a6584",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "FLEET",
+      "path": "resources/baseline-aims-3H-tutorial/powerplants_osm2pm.csv",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "DEMAND",
+      "path": "resources/baseline-aims-3H-tutorial/demand_profiles.csv",
+      "bytes": 4923422,
+      "sha256": "cb0805ac2e746a8315f873a3a68832ad8bb13bc7ac97019b292133083b3fbba4",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/base_industry_totals_2030.csv",
+      "bytes": 92951,
+      "sha256": "c62e8edab8451f93a4273f9214e6259306ea7e01a6ba9c85e7b7db48978aa404",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/base_industry_totals_2040.csv",
+      "bytes": 92951,
+      "sha256": "c62e8edab8451f93a4273f9214e6259306ea7e01a6ba9c85e7b7db48978aa404",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/base_industry_totals_2050.csv",
+      "bytes": 92951,
+      "sha256": "c62e8edab8451f93a4273f9214e6259306ea7e01a6ba9c85e7b7db48978aa404",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_distribution_key_elec_s_50_2030.csv",
+      "bytes": 3540,
+      "sha256": "4d13694b3aac6992ea3c14712711d8f0ab3aa1e3d3397485f940a2c7790aeab7",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_distribution_key_elec_s_50_2040.csv",
+      "bytes": 3540,
+      "sha256": "4d13694b3aac6992ea3c14712711d8f0ab3aa1e3d3397485f940a2c7790aeab7",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_distribution_key_elec_s_50_2050.csv",
+      "bytes": 3540,
+      "sha256": "4d13694b3aac6992ea3c14712711d8f0ab3aa1e3d3397485f940a2c7790aeab7",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_energy_demand_per_node_elec_s_50_2030.csv",
+      "bytes": 1176,
+      "sha256": "27a09e16263068f1f2b11e49ad6394a86ce693f2f067313a27c2477f1be77214",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_energy_demand_per_node_elec_s_50_2040.csv",
+      "bytes": 1176,
+      "sha256": "e39d1f620351bbed35d348aad297a57967e6fd3c3302c08713799a23c30a4a52",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "INDUSTRY",
+      "path": "resources/baseline-aims-3H-tutorial/demand/industrial_energy_demand_per_node_elec_s_50_2050.csv",
+      "bytes": 1176,
+      "sha256": "938452625fb5a348c0befc66331e58846b9f8c3f21b29e25ddd35cfed7f9c2bf",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "path": "resources/baseline-aims-3H-tutorial/renewable_profiles/profile_hydro.nc",
+      "bytes": 494738,
+      "sha256": "a9dd0c670b1acbbe62980d5fb32f59c912921068860b456fb50a3c721e508fdc",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "path": "resources/baseline-aims-3H-tutorial/renewable_profiles/profile_offwind-ac.nc",
+      "bytes": 1591919,
+      "sha256": "d2a9c478b6a237e5c6595096885cd4ab5ba89fefcbfb10b668bb2a7a8a18a72c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "path": "resources/baseline-aims-3H-tutorial/renewable_profiles/profile_offwind-dc.nc",
+      "bytes": 1591919,
+      "sha256": "47ce794107eb490fadaf8ec411d8d349fe862d3b16bc1997f39c982bd47e1116",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "path": "resources/baseline-aims-3H-tutorial/renewable_profiles/profile_onwind.nc",
+      "bytes": 2832215,
+      "sha256": "cdb24bcf87fca08beeed9b336a1e581ea6c5f190ef845b1cb552eb9cfc01d7f0",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "RENEWABLE",
+      "path": "resources/baseline-aims-3H-tutorial/renewable_profiles/profile_solar.nc",
+      "bytes": 2832215,
+      "sha256": "a522fddfe89a498e04478bfb253e6ca79084b4d68f5cda88b85dbb74af1ecec8",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/all_buses_build_network.csv",
+      "bytes": 270322,
+      "sha256": "cadf63e1043b624072f70c502bc16714bdc98071354e7034741561997af3345a",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/all_clean_generators.csv",
+      "bytes": 412349,
+      "sha256": "8fa2e48cf5c0dd71c2793da5ffadfadff0a63555db35f3eed8990f2e55dfe449",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/all_converters_build_network.csv",
+      "bytes": 1698,
+      "sha256": "4cb020bc6cd29bddc5967cb35741c7fb3fdf9f59bdfce99ef9748aaa5f06e2b0",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/all_lines_build_network.csv",
+      "bytes": 14547223,
+      "sha256": "1d15b7903faa92152e4fdf7353e4c8ef93b14f0cac7d219e22788831cacb9668",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/all_transformers_build_network.csv",
+      "bytes": 147315,
+      "sha256": "080169b7e0fbc61b44e2b12873e243f9ea8baefeaefbd17d27ef45fe3f5d7428",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/transmission_projects/AIMS/new_lines.csv",
+      "bytes": 3716,
+      "sha256": "d04b127a1eca5981915fbb975b679b9157b6cd7ae5b03186f85f1b3fb83fa01b",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/transmission_projects/AIMS/new_links.csv",
+      "bytes": 1373,
+      "sha256": "4bfef2bdfd7d82c6bc76cfada13fbca553c4e0d529205ebcc403526283df0460",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/transmission_projects/AIMS/upgraded_lines.csv",
+      "bytes": 410,
+      "sha256": "39d96f2bc07c3bf2140cc3d25012ba1bfccd26c466435d7b15d24acbd3b7ac29",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/transmission_projects/AIMS/upgraded_links.csv",
+      "bytes": 193,
+      "sha256": "706aaa134c32a46d39573b16a29e45479964380f5a7087a84ec27325ad9fe95c",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/transmission_projects/ID_SuperGrid/new_links.csv",
+      "bytes": 940,
+      "sha256": "3457f08e4d4b3f32d0b082db86fe5beff973479f1698a8610d078241da8f48b0",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "WEATHER_TUTORIAL",
+      "path": "cutouts/asean-2013-era5-tutorial.nc",
+      "bytes": 140110621,
+      "sha256": "b52e197ed9127f8d85458a87b80b72f462b300d1357e6c8675b7f5963499ecf0",
+      "stage": "existing_model_input",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GDP",
+      "path": "data/GDP/GDP_PPP_1990_2015_5arcmin_v2.nc",
+      "bytes": 134025184,
+      "sha256": "975ddfad5d2ee71aa227c269b530a4917f8305299b77d09ee0f9cfabc83e5e5b",
+      "stage": "raw_NC",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GDP",
+      "path": "data/GDP/LICENSE.txt",
+      "bytes": 291,
+      "sha256": "9c13d4ec5b9607496d60ad09a021deaa27a6062cae9dd83bd0f04a2fd589179b",
+      "stage": "INVALID_OLD_CACHE_DIAGNOSTIC",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GDP",
+      "path": "data/GDP/GDP_PPP_1990_2015_5arcmin_v2.tif",
+      "bytes": 335166,
+      "sha256": "275975b0b96a4c177fdcfebdb8ba10e3bf1ee76953bf9b0c86178f29700eda1b",
+      "stage": "INVALID_OLD_CACHE_DIAGNOSTIC",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1/all_buses_build_network.csv",
+      "bytes": 279332,
+      "sha256": "78d9cc7075a068576492338efdebe1937545d0697e6756278e949d89359be9a5",
+      "stage": "upstream_tracked_raw",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1/all_transformers_build_network.csv",
+      "bytes": 148466,
+      "sha256": "d7213700969b08014ec4f529347333596aea817790b1aeeeda8b41c4e43ff2c5",
+      "stage": "upstream_tracked_raw",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1/all_lines_build_network.csv",
+      "bytes": 14585331,
+      "sha256": "7faff6b1292a951bd6f6c2bdf9bec576bd83354ac7db642ac9e77ee39ac7816d",
+      "stage": "upstream_tracked_raw",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GRID",
+      "path": "data/osm-plus-prebuilt/0.1.1/modification_list.txt",
+      "bytes": 963,
+      "sha256": "33d5658d3d2fd4374173d61db0f24aa19c04c8a89287f329ec47af1f7404df4d",
+      "stage": "upstream_tracked_explanation",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GEOGRAPHY",
+      "path": "resources/baseline-aims-3H-tutorial/shapes/gadm_shapes.geojson",
+      "bytes": 146986817,
+      "sha256": "aef8c0d19b0d140960f358c9bcc4791e614307c2201ff050c30949911c0ef4c7",
+      "stage": "existing_intermediate_used_in_diagnostic",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GEOGRAPHY",
+      "path": "resources/baseline-aims-3H-tutorial/bus_regions/regions_onshore_elec_s_50.geojson",
+      "bytes": 112143047,
+      "sha256": "dc936400099c96d8514760d045c7dc18d8529876871431ed5d0a982926be1385",
+      "stage": "existing_intermediate_used_in_diagnostic",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "POPULATION",
+      "path": "resources/baseline-aims-3H-tutorial/population_shares/pop_layout_elec_s_50_2030.csv",
+      "bytes": 4168,
+      "sha256": "86558488aa2d22e2c867d32b8df83a1748f9e96d4af949214268280383f321da",
+      "stage": "existing_intermediate_used_in_diagnostic",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "GEOGRAPHY",
+      "path": "data/eez/eez_v11.gpkg",
+      "bytes": 165474304,
+      "sha256": "b524d635ab984d1fecbe1c64ffdb457b133879107d241e2a390027276a36a65f",
+      "stage": "existing_input_used_in_diagnostic",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "LANDCOVER",
+      "path": "data/natura/natura.tiff",
+      "bytes": 3356668,
+      "sha256": "99388fa350cb514caaca9fa10f0d36ef1e0c63f5462ae0ac8c6e9882744bd88e",
+      "stage": "existing_input_used_in_diagnostic",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/inputs/costs_PyPSA.csv",
+      "bytes": 14997,
+      "sha256": "2d393dcbec015ed841a19f127a524a4533c18bc58d93369700b36a910a0841e0",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/inputs/data_sheets_for_renewable_fuels.xlsx",
+      "bytes": 1129971,
+      "sha256": "efa1ce103b813a2a3d807d20c6cd05c937f80010320a38e51149d234b60cd086",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/inputs/Eurostat_inflation_rates.xlsx",
+      "bytes": 22202,
+      "sha256": "16c771de24c9bf00f907eea47c482ec2631bf14e82d7b4f86f4020ad86aacc62",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "ELECTROLYSER_OVERRIDE",
+      "path": "research/00_source_provenance/official/technology-data/inputs/manual_input.csv",
+      "bytes": 176649,
+      "sha256": "777f6d334fe07114375317f1d9c09feb48a1b93abddf303bcd2859d6da7a6a1f",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "SOURCE_PARTIALLY_VERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/inputs/technology_data_catalogue_for_energy_storage.xlsx",
+      "bytes": 307918,
+      "sha256": "5eaff3f3f242efabafc12ba5d556cf770bc2e569fde55dc0bf1a638a95f70911",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/inputs/technology_data_for_el_and_dh.xlsx",
+      "bytes": 707234,
+      "sha256": "3ab3f61377f4b9026bf74aed95351ef5675c44d321bb9d05b5da05a45071b79f",
+      "stage": "frozen_source_audit_copy",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/outputs/costs_2030.csv",
+      "bytes": 268002,
+      "sha256": "ec8c487a316d0e0b4ca0b71dac6591894023d443039a005b55d522602d6c19a4",
+      "stage": "frozen_prepared_cost",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/outputs/costs_2040.csv",
+      "bytes": 268010,
+      "sha256": "d2fd212b4d2bf76b3593cc83a9f9f40ae7d97e0e0cf553125629e7a3d5d45083",
+      "stage": "frozen_prepared_cost",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "TECHCOST",
+      "path": "research/00_source_provenance/official/technology-data/outputs/costs_2050.csv",
+      "bytes": 267933,
+      "sha256": "d9fe69fc0075ccf419569d200438c6dac80cb52fcf56ea18251d31e161ea54a3",
+      "stage": "frozen_prepared_cost",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "AEO8",
+      "path": "research/00_source_provenance/official/author_run/data/AEO8-input/AEO8_Table_D15_Cost_Summary.csv",
+      "bytes": 1745,
+      "sha256": "0ee20484c049352f0a6401e838048bb0ef4906ac12e8821e40502963a999a57d",
+      "stage": "paper_tracked_cost_append",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "AEO8",
+      "path": "research/00_source_provenance/official/author_run/data/AEO8-input/AEO8_Table_D17_Declining_Factor.csv",
+      "bytes": 697,
+      "sha256": "9170f33609ccbe005647a7ebfdffc69e8d95abf06cb7cf54a8eafe2efa07f72d",
+      "stage": "paper_tracked_cost_append",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "AEO8",
+      "path": "research/00_source_provenance/official/author_run/data/AEO8-input/AEO8_Table_D18_Regional_Factor.csv",
+      "bytes": 73,
+      "sha256": "14fa04dfad8f3ac6e85dbe22840b5f41b40d66cb10ed706d63e92f6c062ab6a3",
+      "stage": "paper_tracked_cost_append",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "AUTHOR_RESULTS",
+      "path": "research/00_source_provenance/cache/results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc",
+      "bytes": 243844813,
+      "sha256": "06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb",
+      "stage": "AUTHOR_OUTPUT_NOT_REPRODUCTION",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    },
+    {
+      "source_id": "AUTHOR_RESULTS",
+      "path": "research/00_source_provenance/cache/results-asean-paper-v1/decarbonize-aims-3H/elec_s_100_ec_lv2.0__3h_2050_0.071_DEC_0export.nc",
+      "bytes": 348035096,
+      "sha256": "3ac28875630cffbf8b7f3b1e80dbc7eb293d36e7f62efd1578beec457d54d745",
+      "stage": "AUTHOR_OUTPUT_NOT_REPRODUCTION",
+      "date": "2026-10-01 audit; original retrieval date unknown",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "INDUSTRIAL_CONSERVATION.csv": [
+    {
+      "country": "BN",
+      "national_MWh": 2207872.88,
+      "node_sum_MWh": 2207872.88,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "ID",
+      "national_MWh": 792118515.7854444,
+      "node_sum_MWh": 792118515.7854444,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "KH",
+      "national_MWh": 11739113.2,
+      "node_sum_MWh": 11739113.2,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "LA",
+      "national_MWh": 7749615.192,
+      "node_sum_MWh": 7749615.192,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "MM",
+      "national_MWh": 59555895.96791111,
+      "node_sum_MWh": 59555895.9679111,
+      "absolute_error_MWh": 7.450580596923828e-09,
+      "relative_error": 1.2510231734131282e-16,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "MY",
+      "national_MWh": 224005188.6058889,
+      "node_sum_MWh": 224005188.60588893,
+      "absolute_error_MWh": 2.9802322387695312e-08,
+      "relative_error": 1.3304300035714368e-16,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "PH",
+      "national_MWh": 69417165.05854407,
+      "node_sum_MWh": 69417165.05854407,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "SG",
+      "national_MWh": 79756933.225097,
+      "node_sum_MWh": 79756933.225097,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "TH",
+      "national_MWh": 354980231.80902,
+      "node_sum_MWh": 354980231.80902,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "VN",
+      "national_MWh": 397223244.42306477,
+      "node_sum_MWh": 397223244.42306477,
+      "absolute_error_MWh": 0.0,
+      "relative_error": 0.0,
+      "status": "OBSERVED_2019_QUANTITIES_ONLY"
+    },
+    {
+      "country": "TL",
+      "national_MWh": null,
+      "node_sum_MWh": null,
+      "absolute_error_MWh": null,
+      "relative_error": null,
+      "status": "MISSING_NOT_ZERO"
+    }
+  ],
+  "SECTOR_ENABLEMENT.csv": [
+    {
+      "Sector": "electricity",
+      "Service_demand": "electrical energy",
+      "Carrier": "AC; low voltage",
+      "Conversion_technology": "renewables; thermal; distribution",
+      "PyPSA_component": "Bus/Generator/Load/Link",
+      "Expandable": "generation/storage grid subject to existing minima and limits",
+      "Cost_source": "v0.13.2 + AEO8",
+      "Demand_source": "paper SSP; current DemandCast + final demand scaling",
+      "Config_switch": "electricity.extendable_carriers; final_adjustment.only_elec_network",
+      "Source_code": "add_electricity.py",
+      "Validation_status": "PENDING demand reconciliation; final electric pruning still true"
+    },
+    {
+      "Sector": "hydrogen",
+      "Service_demand": "conversion/end use",
+      "Carrier": "H2",
+      "Conversion_technology": "electrolysis; SMR; SMR CC; fuel cell; turbine",
+      "PyPSA_component": "Bus/Link/Store",
+      "Expandable": "conversion and tanks yes; H2 network false",
+      "Cost_source": "v0.13.2 manual override + DEA",
+      "Demand_source": "derived from enabled sector substitution; no validated independent ASEAN H2 demand",
+      "Config_switch": "sector.hydrogen.*",
+      "Source_code": "prepare_sector_network.py:add_hydrogen",
+      "Validation_status": "CAPABILITY_ONLY; key efficiencies/tank FOM pending"
+    },
+    {
+      "Sector": "heat",
+      "Service_demand": "space/water/process heat",
+      "Carrier": "urban/rural; central/decentral heat",
+      "Conversion_technology": "heat pumps; boilers; CHP; thermal stores",
+      "PyPSA_component": "Bus/Load/Link/Store",
+      "Expandable": "conversion/store yes; demand fixed",
+      "Cost_source": "v0.13.2; COP weather",
+      "Demand_source": "UNSD energy totals + weather/population/urban fractions",
+      "Config_switch": "sector.enable.heat=true; tes=true; boilers=true; chp=true",
+      "Source_code": "prepare_sector_network.py:add_heat",
+      "Validation_status": "PENDING ASEAN demand shares and service equivalence"
+    },
+    {
+      "Sector": "industry",
+      "Service_demand": "industrial energy + process services",
+      "Carrier": "electricity; gas; oil; biomass; H2; heat",
+      "Conversion_technology": "electrification; fuel supply; process/CC",
+      "PyPSA_component": "Load/Link/Bus",
+      "Expandable": "conversion yes; exogenous service demand",
+      "Cost_source": "v0.13.2 + AEO8 + process factors",
+      "Demand_source": "UNSD 2019; facilities/GDP; DEFAULT CAGR",
+      "Config_switch": "sector.enable.industry=true",
+      "Source_code": "prepare_sector_network.py:add_industry",
+      "Validation_status": "10-country base allocation PASS; TL/growth/process pending"
+    },
+    {
+      "Sector": "ammonia",
+      "Service_demand": "NH3 production/use",
+      "Carrier": "NH3; H2; N2",
+      "Conversion_technology": "Haber-Bosch; production links",
+      "PyPSA_component": "Bus/Link/Store/Load",
+      "Expandable": "conversion/store per source yes",
+      "Cost_source": "v0.13.2",
+      "Demand_source": "USGS/facilities; 2019 production; industrial ammonia adjustments",
+      "Config_switch": "sector.ammonia.enable=true",
+      "Source_code": "prepare_sector_network.py:add_ammonia",
+      "Validation_status": "CURRENT UPSTREAM CAPABILITY; inclusion/energy double counting pending"
+    },
+    {
+      "Sector": "land transport",
+      "Service_demand": "road mobility",
+      "Carrier": "EV batteries; H2; oil",
+      "Conversion_technology": "BEV charger/V2G; fuel use",
+      "PyPSA_component": "Load/Link/Store",
+      "Expandable": "EV infrastructure/stock constrained by exogenous shares",
+      "Cost_source": "v0.13.2 + config efficiencies",
+      "Demand_source": "UNSD; transport fleet profiles and DEC vehicle shares",
+      "Config_switch": "sector.enable.land_transport=true; v2g=true; bev_dsm=true",
+      "Source_code": "prepare_sector_network.py:add_land_transport",
+      "Validation_status": "PENDING ASEAN fleet/profile/share acceptance"
+    },
+    {
+      "Sector": "rail",
+      "Service_demand": "rail mobility",
+      "Carrier": "electricity; oil",
+      "Conversion_technology": "electric demand; oil supply",
+      "PyPSA_component": "Load/Bus",
+      "Expandable": "demand fixed; upstream fuel expandable",
+      "Cost_source": "v0.13.2 fuel",
+      "Demand_source": "nodal energy totals",
+      "Config_switch": "sector.enable.rail_transport=true",
+      "Source_code": "prepare_sector_network.py:add_rail_transport",
+      "Validation_status": "PENDING energy totals; final-adjustment carrier handling"
+    },
+    {
+      "Sector": "shipping",
+      "Service_demand": "shipping energy",
+      "Carrier": "oil; H2",
+      "Conversion_technology": "oil supply; optional H2 liquefaction",
+      "PyPSA_component": "Load/Link/Bus",
+      "Expandable": "supply conversion expandable when enabled",
+      "Cost_source": "v0.13.2 fuel/conversion",
+      "Demand_source": "UNSD totals + ports; shipping profile",
+      "Config_switch": "sector.enable.shipping=true; shipping_hydrogen_share.DEC_*=0",
+      "Source_code": "prepare_sector_network.py:add_shipping",
+      "Validation_status": "PENDING port shares/bunkers boundary"
+    },
+    {
+      "Sector": "aviation",
+      "Service_demand": "aviation energy",
+      "Carrier": "oil/kerosene",
+      "Conversion_technology": "oil/synthetic fuel supply",
+      "PyPSA_component": "Load/Link/Bus",
+      "Expandable": "supply conversion expandable",
+      "Cost_source": "v0.13.2 fuel/FT",
+      "Demand_source": "UNSD + airport spatial allocation",
+      "Config_switch": "sector.enable.aviation=true; international_bunkers=false",
+      "Source_code": "prepare_sector_network.py:add_aviation",
+      "Validation_status": "PENDING airport allocation/international fuel boundary"
+    },
+    {
+      "Sector": "agriculture",
+      "Service_demand": "agricultural energy",
+      "Carrier": "electricity; heat; oil",
+      "Conversion_technology": "fuel/heat service",
+      "PyPSA_component": "Load/Link/Bus",
+      "Expandable": "upstream supply yes; service fixed",
+      "Cost_source": "v0.13.2",
+      "Demand_source": "nodal energy totals",
+      "Config_switch": "sector.enable.agriculture=true",
+      "Source_code": "prepare_sector_network.py:add_agriculture",
+      "Validation_status": "PENDING source acceptance; electricity final scaling"
+    },
+    {
+      "Sector": "residential",
+      "Service_demand": "household electricity and heat",
+      "Carrier": "electricity; heat; gas/oil/biomass",
+      "Conversion_technology": "boilers; heat pumps; rooftop/storage",
+      "PyPSA_component": "Load/Link/Generator/Store",
+      "Expandable": "conversion/rooftop/home store yes",
+      "Cost_source": "v0.13.2 + AEO8",
+      "Demand_source": "UNSD totals; residential profiles; population",
+      "Config_switch": "sector.enable.residential=true",
+      "Source_code": "prepare_sector_network.py:add_residential",
+      "Validation_status": "PENDING service-demand consistency with heat sector"
+    },
+    {
+      "Sector": "services",
+      "Service_demand": "service-sector energy",
+      "Carrier": "electricity; heat; gas/oil/biomass",
+      "Conversion_technology": "heat/fuel conversion",
+      "PyPSA_component": "Load/Link/Bus",
+      "Expandable": "supply yes; service fixed",
+      "Cost_source": "v0.13.2",
+      "Demand_source": "UNSD totals; services profiles",
+      "Config_switch": "sector.enable.services=true",
+      "Source_code": "prepare_sector_network.py:add_services",
+      "Validation_status": "PENDING services naming/scaling and heat overlaps"
+    },
+    {
+      "Sector": "biomass",
+      "Service_demand": "resource and fuel",
+      "Carrier": "solid biomass; biogas",
+      "Conversion_technology": "combustion; upgrading",
+      "PyPSA_component": "Generator/Store/Link",
+      "Expandable": "conversion yes; resource caps apply",
+      "Cost_source": "v0.13.2",
+      "Demand_source": "global/default potential; 360 TWh solid and 0.5 TWh biogas configured",
+      "Config_switch": "sector.enable.biomass=true; biomass_transport=false",
+      "Source_code": "prepare_sector_network.py:add_biomass",
+      "Validation_status": "PENDING ASEAN resource entitlement; not accepted supply data"
+    },
+    {
+      "Sector": "storage",
+      "Service_demand": "temporal balancing",
+      "Carrier": "battery; H2; heat; PHS/hydro",
+      "Conversion_technology": "charging/discharging",
+      "PyPSA_component": "Store/StorageUnit/Link",
+      "Expandable": "battery/H2/TES yes; existing hydro resource limited",
+      "Cost_source": "v0.13.2 + AEO8",
+      "Demand_source": "cost/efficiency/lifetime plus existing capacities",
+      "Config_switch": "sector.tes; sector.home_battery; electricity.extendable_carriers",
+      "Source_code": "prepare_sector_network.py; add_electricity.py",
+      "Validation_status": "PENDING key cost/efficiency verification"
+    },
+    {
+      "Sector": "networks",
+      "Service_demand": "domestic/cross-border transport",
+      "Carrier": "AC/DC; gas/H2/CO2 options",
+      "Conversion_technology": "transmission; distribution; pipelines",
+      "PyPSA_component": "Line/Link/Bus",
+      "Expandable": "electric expansion subject to lv2.0 and route rules; gas/H2/CO2 networks false",
+      "Cost_source": "v0.13.2 + line costs",
+      "Demand_source": "osm-plus-prebuilt 0.1.1; AIMS/ID projects",
+      "Config_switch": "lines/links; transmission_projects; sector.*.network",
+      "Source_code": "base_network.py; add_transmission_projects.py",
+      "Validation_status": "PENDING 765\u2192766; future intervention AC/DC cross-border only"
+    },
+    {
+      "Sector": "external supply / CO2",
+      "Service_demand": "commodity boundary and emissions",
+      "Carrier": "gas/oil/coal/lignite; atmosphere",
+      "Conversion_technology": "fuel source; capture; DAC; sequestration",
+      "PyPSA_component": "Generator/Store/Link/GlobalConstraint",
+      "Expandable": "fuel source unconstrained unless explicit resource cap; CO2 store expandable",
+      "Cost_source": "fuel prices; capture/sequestration costs",
+      "Demand_source": "manual fuel prices; shared default resource/CO2 settings",
+      "Config_switch": "sector gas/oil/coal spatial; co2.budget; sector.dac/cc",
+      "Source_code": "prepare_sector_network.py:add_carrier_buses/add_co2",
+      "Validation_status": "POWER-SCOPE NOT EQUIVALENT under full SC; attribution required"
+    }
+  ]
+}

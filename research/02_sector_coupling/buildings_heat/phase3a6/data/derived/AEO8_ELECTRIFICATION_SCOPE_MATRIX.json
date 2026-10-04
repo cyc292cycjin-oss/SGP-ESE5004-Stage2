@@ -1,0 +1,101 @@
+[
+  {
+    "Sector": "Buildings overall",
+    "AEO8Representation": "BAS fixed latest appliance efficiency; clean-cooking/electrification country2005-2022 growth",
+    "CurrentPyPSARepresentation": "R/S UNSD totals plus explicit heat framework",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "heat conversion dispatch/capacity; future service contract pending",
+    "PotentialDoubleCount": "YES conditional: forecast fixed total plus new heat electricity",
+    "Evidence": "AEO PDF48/printed46; U add_residential/add_services/add_heat",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Water heat",
+    "AEO8Representation": "BAS residential Other includes water heating; no separate regional electricity input recovered",
+    "CurrentPyPSARepresentation": "water/space thermal loads with conversion Links",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "yes if heat branch retained",
+    "PotentialDoubleCount": "historical electric water input and future conversions can overlap",
+    "Evidence": "AEO PDF69/printed67; U prepare_heat_data/add_heat",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Space heat",
+    "AEO8Representation": "No separately recovered BAS electric-space-heating quantity",
+    "CurrentPyPSARepresentation": "framework thermal heat construction",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "yes if heat branch retained",
+    "PotentialDoubleCount": "UNKNOWN magnitude; absent column is not zero",
+    "Evidence": "AEO residential end-use chapter; MY Table42/47; U add_heat",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Road electricity boundary only",
+    "AEO8Representation": "BAS fuel-specific vehicle shares fixed;2050 transport electricity0.2%; ATS/CNS stronger shifts distinct",
+    "CurrentPyPSARepresentation": "framework EV fractions configured; no implementation in this phase",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "charging flows can be endogenous; uptake fractions configured",
+    "PotentialDoubleCount": "existing/forecast electric traction included twice if not reconciled",
+    "Evidence": "AEO PDF48/65; frozen U land-transport constructor",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Industry electricity boundary only",
+    "AEO8Representation": "BAS constant sector intensity and subsector shares; industrial GDP growth",
+    "CurrentPyPSARepresentation": "direct industry Load plus process conversion capability",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "only conversions/dispatch retained by chosen boundary",
+    "PotentialDoubleCount": "generic growing electricity parent plus process electricity",
+    "Evidence": "AEO PDF48; U final adjustment industry redistribution",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Hydrogen electricity boundary only",
+    "AEO8Representation": "AEO non-power transformation has H2/ammonia; BAS finalH2 printed0.0Mtoe; not proof of zero process input",
+    "CurrentPyPSARepresentation": "electrolysis Link framework; power-only final config strips SC",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "electrolyser input endogenous if retained",
+    "PotentialDoubleCount": "DO NOT infer quantified BAS H2 duplication from rounded finalH2 row",
+    "Evidence": "AEO PDF56 and C.2 PDF183; U electrolysis",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Cooling",
+    "AEO8Representation": "BAS appliance growth and commercial AC12.9Mtoe2025 to29.7Mtoe2050",
+    "CurrentPyPSARepresentation": "retain cooling in R/S direct electricity",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "not separately endogenised this phase",
+    "PotentialDoubleCount": "none if subaccount only; yes if another cooling Load is added",
+    "Evidence": "AEO PDF70-71/printed68-69; MY Table42/47",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Efficiency and fuel switching",
+    "AEO8Representation": "BAS latest appliance efficiency fixed; ATS/RAS/CNS policy and technology gains are separate scenarios",
+    "CurrentPyPSARepresentation": "device costs/efficiencies config; no new adoption",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "tech dispatch conditional on framework",
+    "PotentialDoubleCount": "do not import CNS gains into BAS interpretation; device service boundary matters",
+    "Evidence": "AEO PDF48/53/56",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  },
+  {
+    "Sector": "Cooking",
+    "AEO8Representation": "BAS clean-cooking access/electrification evolves; R cooking end-use reported",
+    "CurrentPyPSARepresentation": "NON-EXPLICIT + ACCOUNTING REQUIRED",
+    "ExogenousInAEO8": "scenario-specific fixed inputs/assumptions; LEAP demand construction",
+    "EndogenousInFullSC": "no cooking conversion added in this phase",
+    "PotentialDoubleCount": "retain electric cooking direct and non-electric cooking fuel; not heat",
+    "Evidence": "AEO PDF48/69; MY Table42",
+    "Status": "VERIFIED_SOURCE_SCOPE; MAGNITUDE_AND_MAPPING_PENDING",
+    "HumanConfirmation": "PENDING"
+  }
+]

@@ -1,0 +1,417 @@
+# SGP ESE5004 Stage2
+# GitHub Repository & CodeQL Health Audit
+# IMPORTANT: This is repository infrastructure work, NOT Phase 4 model work.
+
+## 0. Context
+
+Repository:
+
+cyc292cycjin-oss/SGP-ESE5004-Stage2
+
+The user received a GitHub Actions notification:
+
+CodeQL: All jobs have failed
+Job:
+CodeQL / Analyze (python)
+
+Failure occurred after approximately 2m54s.
+GitHub UI shows 10 annotations.
+
+Before Phase 4 Full-SC Assembly starts, perform a bounded GitHub/repository health audit.
+
+DO NOT modify the scientific model, research data, assumptions, configs, or Phase1-3 results as part of this task.
+
+Goal:
+
+Determine whether:
+
+A. the repository itself is healthy and usable;
+B. the CodeQL workflow alone is misconfigured;
+C. there is a permissions / Actions / security-scanning issue;
+D. there is a genuine Python/code problem causing CodeQL setup or analysis to fail.
+
+Do not guess from the email notification.
+Inspect the actual GitHub Actions failure logs.
+
+--------------------------------------------------
+1. Preserve repository integrity
+--------------------------------------------------
+
+Before doing anything:
+
+record:
+
+- repository URL
+- default branch
+- current HEAD SHA
+- working-tree status
+- relevant remote refs
+- current `.github/workflows/`
+- CodeQL workflow filename
+- workflow run ID / URL if available
+- failing job ID
+- event that triggered the run
+- commit SHA associated with the failure
+
+Do NOT:
+
+- force push
+- rewrite history
+- delete branches
+- delete existing workflow history
+- change scientific files
+- combine unrelated fixes
+
+--------------------------------------------------
+2. Inspect exact CodeQL failure
+--------------------------------------------------
+
+Open the failed GitHub Actions run.
+
+Inspect:
+
+- Summary
+- CodeQL / Analyze (python)
+- all failed steps
+- all 10 annotations
+- raw/log output around the FIRST actual error
+
+Do not treat downstream failures as root cause.
+
+Produce:
+
+CODEQL_FAILURE_ROOT_CAUSE.md
+
+Include:
+
+1. first failing step
+2. exact error message
+3. whether later errors are cascading
+4. GitHub Action versions
+5. whether issue is:
+   - workflow syntax
+   - deprecated action
+   - permissions
+   - CodeQL initialization
+   - Python build configuration
+   - database creation
+   - analysis
+   - SARIF upload
+   - repository eligibility/security settings
+   - dependency/environment
+   - other
+
+--------------------------------------------------
+3. Audit workflow file
+--------------------------------------------------
+
+Inspect the CodeQL workflow under:
+
+.github/workflows/
+
+Check at least:
+
+- `actions/checkout`
+- `github/codeql-action/init`
+- `github/codeql-action/analyze`
+- autobuild if present
+- language matrix
+- Python language declaration
+- triggers
+- branches
+- permissions
+- security-events permissions
+- contents permissions
+- package permissions if relevant
+- pull-request behavior
+- fork behavior
+- concurrency
+- runner
+- custom query packs/config
+- paths / paths-ignore
+
+For 2026, verify that CodeQL Action versions are still supported.
+
+In particular check whether an old/deprecated CodeQL Action version is being used.
+
+Do not upgrade blindly:
+first record current version and evidence that it is unsupported or incorrect.
+
+--------------------------------------------------
+4. Python-specific CodeQL audit
+--------------------------------------------------
+
+The failing job is:
+
+Analyze (python)
+
+Verify whether the Python configuration is appropriate.
+
+Check:
+
+- `languages: python`
+- whether an unnecessary manual build/autobuild configuration exists
+- whether CodeQL is trying to build something that Python analysis does not require
+- whether repository Python files are discoverable
+- generated/vendor directories
+- virtual environments accidentally committed
+- very large generated research directories
+- archived source snapshots
+- notebooks/scripts handling
+- malformed Python files if CodeQL explicitly reports them
+
+Do NOT refactor research Python merely to make CodeQL green unless the log proves a genuine source syntax/error issue.
+
+--------------------------------------------------
+5. Permissions and code-scanning audit
+--------------------------------------------------
+
+Check repository/workflow permissions.
+
+At minimum inspect whether workflow needs/has appropriate:
+
+contents: read
+
+security-events: write
+
+and any other permissions actually required by the run.
+
+Check whether the failure is related to:
+
+- SARIF upload
+- GitHub Advanced Security / code scanning availability
+- Actions permissions
+- workflow token restrictions
+- pull-request/fork security restrictions
+
+Distinguish:
+
+analysis succeeded but upload failed
+
+from:
+
+analysis itself failed.
+
+--------------------------------------------------
+6. Repository health audit
+--------------------------------------------------
+
+Independently of CodeQL, verify repository usability.
+
+Check:
+
+- clone/fetch succeeds
+- Git object integrity if appropriate
+- default branch exists
+- no unresolved merge conflicts
+- no invalid Git submodule state
+- Git LFS state if used
+- branch refs healthy
+- workflow YAML parses
+- repository size / very large tracked files
+- accidental generated artifacts
+- zip/pdf/netcdf/raw-data tracking issues
+- `.gitignore`
+- `.gitattributes`
+
+Do NOT delete large research evidence automatically.
+
+If a file should not be tracked:
+report it first.
+
+Remember:
+historical provenance files and evidence may intentionally exist in Git.
+
+--------------------------------------------------
+7. Check other GitHub Actions
+--------------------------------------------------
+
+List current workflows and recent status.
+
+Determine whether:
+
+- only CodeQL fails;
+- all Actions fail;
+- CI/test workflows pass;
+- failures started after a particular commit;
+- failure is reproducible across branches.
+
+Create:
+
+GITHUB_ACTIONS_HEALTH.md
+
+with a small table:
+
+Workflow
+LatestRun
+Commit
+Status
+FailureStage
+RootCauseKnown
+ActionRequired
+
+--------------------------------------------------
+8. Check relationship to Phase1-3 work
+--------------------------------------------------
+
+Very important:
+
+Determine whether this CodeQL failure has any impact on:
+
+- Paper Reference SHA
+- Upstream SC baseline
+- Phase1 provenance
+- Phase2 audit outputs
+- Phase3 Buildings/Transport/Carrier closeouts
+- approved candidate engineering fixes
+- future Phase4 work
+
+Do not claim scientific work is invalid merely because CodeQL failed.
+
+Explicitly classify:
+
+SCIENTIFIC_IMPACT:
+NONE
+LOW
+MEDIUM
+HIGH
+
+with reasoning.
+
+--------------------------------------------------
+9. Minimal fix policy
+--------------------------------------------------
+
+If root cause is clear and mechanical, e.g.:
+
+- deprecated GitHub Action version
+- incorrect permission
+- invalid CodeQL language config
+- broken workflow syntax
+
+create ONE isolated branch, for example:
+
+fix/github-codeql
+
+Make the smallest possible fix.
+
+One logical problem = one commit.
+
+Suggested commit naming:
+
+ci: fix CodeQL Python workflow
+
+Do not mix:
+CodeQL fix
++
+research model changes
++
+data changes
+
+in the same commit.
+
+--------------------------------------------------
+10. Validation
+--------------------------------------------------
+
+After a fix:
+
+1. validate workflow YAML;
+2. inspect diff;
+3. push fix branch;
+4. re-run CodeQL;
+5. wait for final result;
+6. verify Analyze (python);
+7. inspect annotations;
+8. verify SARIF/code-scanning upload if applicable.
+
+Do not consider the issue fixed merely because the workflow starts.
+
+Required target:
+
+CodeQL / Analyze (python)
+=
+PASS
+
+or a documented external blocker that cannot be fixed in repository code.
+
+--------------------------------------------------
+11. Do not merge automatically
+--------------------------------------------------
+
+Even if the fix passes:
+
+DO NOT merge into the main/research branch automatically.
+
+Return:
+
+- branch
+- commit SHA
+- changed files
+- exact root cause
+- before/after workflow status
+
+for human approval.
+
+--------------------------------------------------
+12. Deliverables
+--------------------------------------------------
+
+Produce:
+
+1. GITHUB_REPOSITORY_HEALTH.md
+
+2. CODEQL_FAILURE_ROOT_CAUSE.md
+
+3. GITHUB_ACTIONS_HEALTH.md
+
+4. CODEQL_WORKFLOW_AUDIT.md
+
+5. CODEQL_FIX_REPORT.md
+   only if a fix was implemented
+
+6. GITHUB_PHASE4_READINESS.md
+
+--------------------------------------------------
+13. Final questions
+--------------------------------------------------
+
+Answer explicitly:
+
+A. Is the GitHub repository itself healthy?
+
+B. Is the failure limited to CodeQL?
+
+C. What is the exact first/root error?
+
+D. What do the 10 annotations represent?
+
+E. Is the workflow using supported Action versions?
+
+F. Are workflow permissions correct?
+
+G. Is the Python CodeQL configuration correct?
+
+H. Did CodeQL analysis fail, or did SARIF upload fail?
+
+I. Does this affect any Phase1-3 scientific results or model provenance?
+
+J. Is a repository fix required?
+
+K. If fixed, did a clean rerun pass?
+
+L. Is GitHub ready to support Phase4 development?
+
+Final statuses:
+
+REPOSITORY_HEALTHY = YES / NO
+
+CODEQL_HEALTHY = YES / NO
+
+PHASE1_3_SCIENTIFIC_INTEGRITY_AFFECTED = YES / NO
+
+GITHUB_READY_FOR_PHASE4 = YES / NO
+
+Stop after this audit.
+
+Do NOT begin Phase4 model assembly.

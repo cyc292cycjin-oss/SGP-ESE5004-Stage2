@@ -1,0 +1,179 @@
+diff --git a/scripts/final_asean_adjustment.py b/scripts/final_asean_adjustment.py
+index 25dbfc0a..05dcb4af 100644
+--- a/scripts/final_asean_adjustment.py
++++ b/scripts/final_asean_adjustment.py
+@@ -41,7 +41,7 @@ carrier_to_keep = [
+     "rail transport electricity",
+     "industry electricity",
+     "agriculture electricity",
+-    "service electricity",
++    "services electricity",
+     "electricity distribution grid",
+     "low voltage",
+     # Battery-related
+diff --git a/scripts/prepare_heat_data.py b/scripts/prepare_heat_data.py
+index 9e466c5b..b2c50efd 100644
+--- a/scripts/prepare_heat_data.py
++++ b/scripts/prepare_heat_data.py
+@@ -99,6 +99,25 @@ def generate_periodic_profiles(
+     return week_df
+ 
+ 
++def normalize_heat_profile(shape, annual, label):
++    """Reject unmappable positive annual demand instead of silently dropping it.
++
++    Inputs use the existing hourly convention: annual TWh -> hourly MW.
++    No synthetic replacement shape is generated for zero-HDD locations.
++    """
++    annual = annual.reindex(shape.columns)
++    if not np.isfinite(annual).all() or (annual < 0).any():
++        raise ValueError(f"{label}: invalid annual demand")
++    positive = annual > 0
++    selected = shape.loc[:, positive]
++    invalid = (~np.isfinite(selected)).any() | (selected < 0).any() | (selected.sum() <= 0)
++    if invalid.any():
++        raise ValueError(f"{label}: positive demand without valid profile at {list(invalid.index[invalid])}")
++    output = pd.DataFrame(0., index=shape.index, columns=shape.columns)
++    output.loc[:, positive] = selected.div(selected.sum()).mul(annual[positive]) * 1e6
++    return output
++
++
+ def prepare_heat_data(n: pypsa.Network) -> tuple:
+     """Prepare heating sector inputs for a PyPSA network.
+ 
+@@ -190,16 +209,14 @@ def prepare_heat_data(n: pypsa.Network) -> tuple:
+         else:
+             heat_demand_shape = intraday_year_profile
+ 
+-        heat_demand[f"{sector} {use}"] = (
+-            heat_demand_shape / heat_demand_shape.sum()
+-        ).multiply(
+-            nodal_energy_totals[f"total {sector} {use}"]
+-        ) * 1e6  # TODO v0.0.2
+-        electric_heat_supply[f"{sector} {use}"] = (
+-            heat_demand_shape / heat_demand_shape.sum()
+-        ).multiply(
+-            nodal_energy_totals[f"electricity {sector} {use}"]
+-        ) * 1e6  # TODO v0.0.2
++        heat_demand[f"{sector} {use}"] = normalize_heat_profile(
++            heat_demand_shape, nodal_energy_totals[f"total {sector} {use}"],
++            f"total {sector} {use}",
++        )
++        electric_heat_supply[f"{sector} {use}"] = normalize_heat_profile(
++            heat_demand_shape, nodal_energy_totals[f"electricity {sector} {use}"],
++            f"electricity {sector} {use}",
++        )
+ 
+     heat_demand = pd.concat(heat_demand, axis=1)
+     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
+diff --git a/scripts/prepare_sector_network.py b/scripts/prepare_sector_network.py
+index 572b5e90..f7d6592f 100644
+--- a/scripts/prepare_sector_network.py
++++ b/scripts/prepare_sector_network.py
+@@ -2647,7 +2647,9 @@ def add_heat(
+     # Load data required for heat sector
+     heat_demand = read_csv_nafix(
+         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
+-    ).fillna(0)
++    )
++    if not np.isfinite(heat_demand).all().all() or (heat_demand < 0).any().any():
++        raise ValueError("Invalid heat demand profile; positive annual demand must not be silently dropped")
+     # Solar thermal availability profiles
+     solar_thermal = read_csv_nafix(solar_thermal_fn, index_col=0, parse_dates=True)
+     # Ground-sourced heatpump coefficient of performance
+@@ -2724,23 +2726,25 @@ def add_heat(
+                 )
+ 
+         if name == "urban central":
+-            heat_load = (
+-                heat_demand.groupby(level=1, axis=1)
+-                .sum()[h_nodes[name]]
+-                .multiply(
+-                    factor * (1 + options["district_heating"]["district_heating_loss"])
++            # Preserve sector demand identities on the shared district heat bus.
++            for sector in sectors:
++                sector_load = (
++                    heat_demand[[sector + " water", sector + " space"]]
++                    .groupby(level=1, axis=1).sum()[h_nodes[name]]
++                    .multiply(factor * (1 + options["district_heating"]["district_heating_loss"]))
+                 )
++                n.madd(
++                    "Load", h_nodes[name], suffix=f" {sector} {name} heat",
++                    bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
++                    p_set=sector_load,
++                )
++        else:
++            n.madd(
++                "Load", h_nodes[name], suffix=f" {name} heat",
++                bus=h_nodes[name] + f" {name} heat", carrier=name + " heat",
++                p_set=heat_load,
+             )
+ 
+-        n.madd(
+-            "Load",
+-            h_nodes[name],
+-            suffix=f" {name} heat",
+-            bus=h_nodes[name] + f" {name} heat",
+-            carrier=name + " heat",
+-            p_set=heat_load,
+-        )
+-
+         ## Add heat pumps
+ 
+         heat_pump_type = "air" if "urban" in name else "ground"
+@@ -3283,14 +3287,21 @@ def add_residential(
+     )
+     heat_shape = heat_shape.T.groupby(level=[0, 1]).sum().T
+ 
+-    n.loads_t.p_set[heat_ind] = 1e6 * heat_shape_raw.mul(
++    total_heat = (
+         energy_totals["total residential space"]
+         + energy_totals["total residential water"]
+-        - energy_totals["residential heat biomass"]
+-        - energy_totals["residential heat oil"]
+-        - energy_totals["residential heat gas"],
+-        level=0,
+-    ).droplevel(level=0, axis=1).div(temporal_resolution, axis=0)
++    )
++    remaining_heat = total_heat - energy_totals[
++        ["residential heat biomass", "residential heat oil", "residential heat gas"]
++    ].sum(axis=1)
++    if ((remaining_heat < -1e-9) | (total_heat < 0)).any():
++        raise ValueError("Residential remaining heat must be between zero and total heat")
++    fraction = remaining_heat.div(total_heat.where(total_heat > 0)).fillna(0.)
++    # Keep existing nodal allocation and district losses; never rescale services.
++    scale = pd.Series(heat_ind.str[:2], index=heat_ind).map(fraction)
++    if scale.isna().any():
++        raise ValueError("Missing residential country heat totals")
++    n.loads_t.p_set[heat_ind] = n.loads_t.p_set[heat_ind].mul(scale, axis=1)
+ 
+     heat_oil_demand = p_set_from_scaling(
+         "residential heat oil", heat_shape, energy_totals, temporal_resolution
+@@ -3380,27 +3391,6 @@ def add_residential(
+         p_set=-co2,
+     )
+ 
+-    for country in countries:
+-        rem_heat_demand = (
+-            energy_totals.loc[country, "total residential space"]
+-            + energy_totals.loc[country, "total residential water"]
+-            - energy_totals.loc[country, "residential heat biomass"]
+-            - energy_totals.loc[country, "residential heat oil"]
+-            - energy_totals.loc[country, "residential heat gas"]
+-        )
+-
+-        heat_buses = (n.loads_t.p_set.filter(regex="heat").filter(like=country)).columns
+-
+-        safe_division = safe_divide(
+-            n.loads_t.p_set.filter(like=country)[heat_buses],
+-            n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
+-        )
+-        n.loads_t.p_set.loc[:, heat_buses] = np.where(
+-            safe_division.notna(),
+-            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
+-            0.0,
+-        )
+-
+     # Revise residential electricity demand
+     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
+ 

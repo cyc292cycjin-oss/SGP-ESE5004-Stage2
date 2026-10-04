@@ -1,0 +1,90 @@
+{
+  "synthetic_only": true,
+  "optimizer_called": false,
+  "expected_national_target_TWh": 1.0,
+  "before_TWh": {
+    "SG0": 20.0,
+    "SG0 services electricity": 3.0
+  },
+  "after_TWh": {
+    "SG0": 1.0,
+    "SG0 services electricity": 3.0
+  },
+  "total_after_TWh": 4.0,
+  "regression_result": "KNOWN_E3_BLOCKER_REPRODUCED",
+  "scientific_ASEAN_overestimate_quantified": false,
+  "E3_patch": false,
+  "trace": {
+    "prepare_sector_network.py": {
+      "sha256": "62d9d453812d9a2c8596d87eeaa6a16631cea4d933d704c62198ac3ea4f48db8",
+      "matches": [
+        {
+          "line": 3064,
+          "text": "\"services electricity\", profile_residential, energy_totals, temporal_resolution"
+        },
+        {
+          "line": 3070,
+          "text": "suffix=\" services electricity\","
+        },
+        {
+          "line": 3072,
+          "text": "carrier=\"services electricity\","
+        },
+        {
+          "line": 3458,
+          "text": "# move industry, rail transport, agriculture and services electricity to low voltage"
+        },
+        {
+          "line": 4009,
+          "text": "add_residential(n, costs, energy_totals)"
+        },
+        {
+          "line": 4012,
+          "text": "add_services(n, costs, energy_totals)"
+        }
+      ]
+    },
+    "final_asean_adjustment.py": {
+      "sha256": "ce00c770995667bdba5403c90b01e443430dcbcb30ca74b7f39acd7ee9dc836e",
+      "matches": [
+        {
+          "line": 44,
+          "text": "\"services electricity\","
+        },
+        {
+          "line": 83,
+          "text": "elec_carrier = ["
+        },
+        {
+          "line": 199,
+          "text": "loads = n.loads[n.loads.carrier.isin(elec_carrier)].copy()"
+        },
+        {
+          "line": 244,
+          "text": "loads = n.loads[n.loads.carrier.isin(elec_carrier)].copy()"
+        }
+      ]
+    },
+    "prepare_heat_data.py": {
+      "sha256": "41dfa348df1619ce4f1fdf3f6f488d30643d8df693c9d935276c1ef0d3eb8c0d",
+      "matches": [
+        {
+          "line": 196,
+          "text": "electric_heat_supply = {}"
+        },
+        {
+          "line": 216,
+          "text": "electric_heat_supply[f\"{sector} {use}\"] = normalize_heat_profile("
+        },
+        {
+          "line": 222,
+          "text": "electric_heat_supply = pd.concat(electric_heat_supply, axis=1)"
+        },
+        {
+          "line": 228,
+          "text": "#     - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]"
+        }
+      ]
+    }
+  }
+}

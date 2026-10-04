@@ -1,0 +1,247 @@
+{
+  "networks": [
+    {
+      "scenario": "baseline-aims-3H",
+      "year": "2025",
+      "git_commit": "5bacad702ccfed17ad19ab510fa710651e966f2c drop biomass generator if biomass limit is set, extend scenarios",
+      "pypsa": "0.30.3",
+      "objective": 51958123545.77296,
+      "objective_constant": 8754735116.417757,
+      "weights": {
+        "snapshots_objective": 8760.0,
+        "snapshots_generators": 8760.0,
+        "snapshots_stores": 8760.0
+      },
+      "loads": {
+        "AC": {
+          "time_series_count": 96,
+          "static_count": 0,
+          "static_MW": 0.0,
+          "weighted_MWh": 680330664.226382
+        },
+        "agriculture electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 1423.7837307614925,
+          "weighted_MWh": 12472345.481470674
+        },
+        "industry electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 82313.34417663663,
+          "weighted_MWh": 721064894.9873369
+        },
+        "land transport EV": {
+          "time_series_count": 98,
+          "static_count": 0,
+          "static_MW": 0.0,
+          "weighted_MWh": 14928884.0533206
+        },
+        "rail transport electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 583.4970482606615,
+          "weighted_MWh": 5111434.142763395
+        }
+      },
+      "co2_budget": {
+        "co2base_value": 1000000000.0,
+        "enable": false,
+        "override_co2opt": true,
+        "year": {
+          "2025": 1.0,
+          "2030": 0.82,
+          "2035": 0.64,
+          "2040": 0.46,
+          "2045": 0.28,
+          "2050": 0.1,
+          "2020": 1.0
+        }
+      },
+      "constraints": {
+        "global_constraints_i": [
+          "lv_limit"
+        ],
+        "global_constraints_type": [
+          "transmission_volume_expansion_limit"
+        ],
+        "global_constraints_carrier_attribute": [
+          "AC, DC"
+        ],
+        "global_constraints_sense": [
+          "<="
+        ],
+        "global_constraints_constant": [
+          353746853.52332264
+        ],
+        "global_constraints_mu": [
+          -5.218508147634079e-10
+        ]
+      },
+      "sha256": "06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb"
+    },
+    {
+      "scenario": "decarbonize-aims-3H",
+      "year": "2050",
+      "git_commit": "5bacad702ccfed17ad19ab510fa710651e966f2c drop biomass generator if biomass limit is set, extend scenarios",
+      "pypsa": "0.30.3",
+      "objective": 94026128588.01077,
+      "objective_constant": 9897267130.891512,
+      "weights": {
+        "snapshots_objective": 8760.0,
+        "snapshots_generators": 8760.0,
+        "snapshots_stores": 8760.0
+      },
+      "loads": {
+        "AC": {
+          "time_series_count": 96,
+          "static_count": 0,
+          "static_MW": 0.0,
+          "weighted_MWh": 1449431369.3773882
+        },
+        "agriculture electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 2268.4543028578105,
+          "weighted_MWh": 19871659.69303442
+        },
+        "industry electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 181148.05600727914,
+          "weighted_MWh": 1586856970.6237652
+        },
+        "land transport EV": {
+          "time_series_count": 98,
+          "static_count": 0,
+          "static_MW": 0.0,
+          "weighted_MWh": 68846261.90963386
+        },
+        "rail transport electricity": {
+          "time_series_count": 0,
+          "static_count": 98,
+          "static_MW": 1467.8033983265,
+          "weighted_MWh": 12857957.769340139
+        }
+      },
+      "co2_budget": {
+        "co2base_value": 1000000000.0,
+        "enable": true,
+        "override_co2opt": true,
+        "year": {
+          "2025": 1.0,
+          "2030": 0.82,
+          "2035": 0.64,
+          "2040": 0.46,
+          "2045": 0.28,
+          "2050": 0.1,
+          "2020": 1.0
+        }
+      },
+      "constraints": {
+        "global_constraints_i": [
+          "lv_limit",
+          "CO2Limit"
+        ],
+        "global_constraints_type": [
+          "transmission_volume_expansion_limit",
+          "primary_energy"
+        ],
+        "global_constraints_carrier_attribute": [
+          "AC, DC",
+          "co2_emissions"
+        ],
+        "global_constraints_sense": [
+          "<=",
+          "<="
+        ],
+        "global_constraints_constant": [
+          353746853.52332264,
+          100000000.0
+        ],
+        "global_constraints_mu": [
+          -6.736857435984378e-07,
+          -165.40687556940574
+        ]
+      },
+      "sha256": "3ac28875630cffbf8b7f3b1e80dbc7eb293d36e7f62efd1578beec457d54d745"
+    }
+  ],
+  "zip_entries": 59,
+  "zip_file_count": 44,
+  "zip_directories": 15,
+  "scenario_counts": {
+    "baseline-aims-3H": 6,
+    "baseline-asean-3H": 6,
+    "baseline-existing-3H": 6,
+    "decarbonize-asean-3H": 6,
+    "decarbonize-existing-3H": 6,
+    "sensitivity-roof100-3H": 1,
+    "sensitivity-roof200-3H": 1,
+    "sensitivity-roof450-3H": 1,
+    "decarbonize-aims-3H": 6,
+    "sensitivity-1H": 1,
+    "sensitivity-3H": 1,
+    "sensitivity-6H": 1,
+    "sensitivity-50n-3H": 1,
+    "sensitivity-200n-3H": 1
+  },
+  "AEO_author_current_comparison": [
+    {
+      "file": "AEO8_Table_D15_Cost_Summary.csv",
+      "comparison_path": "C:\\Users\\20122\\Documents\\ChatGPT\\ASEAN\\research\\00_model_audit\\input_snapshot\\data\\AEO8-input\\AEO8_Table_D15_Cost_Summary.csv",
+      "author_sha256": "0ee20484c049352f0a6401e838048bb0ef4906ac12e8821e40502963a999a57d",
+      "current_sha256": "0ee20484c049352f0a6401e838048bb0ef4906ac12e8821e40502963a999a57d",
+      "byte_equal": true,
+      "dataframe_equal": true
+    },
+    {
+      "file": "AEO8_Table_D17_Declining_Factor.csv",
+      "comparison_path": "C:\\Users\\20122\\Documents\\ChatGPT\\ASEAN\\research\\00_model_audit\\input_snapshot\\data\\AEO8-input\\AEO8_Table_D17_Declining_Factor.csv",
+      "author_sha256": "9170f33609ccbe005647a7ebfdffc69e8d95abf06cb7cf54a8eafe2efa07f72d",
+      "current_sha256": "9170f33609ccbe005647a7ebfdffc69e8d95abf06cb7cf54a8eafe2efa07f72d",
+      "byte_equal": true,
+      "dataframe_equal": true
+    },
+    {
+      "file": "AEO8_Table_D18_Regional_Factor.csv",
+      "comparison_path": "C:\\Users\\20122\\Documents\\ChatGPT\\ASEAN\\research\\00_model_audit\\input_snapshot\\data\\AEO8-input\\AEO8_Table_D18_Regional_Factor.csv",
+      "author_sha256": "14fa04dfad8f3ac6e85dbe22840b5f41b40d66cb10ed706d63e92f6c062ab6a3",
+      "current_sha256": "14fa04dfad8f3ac6e85dbe22840b5f41b40d66cb10ed706d63e92f6c062ab6a3",
+      "byte_equal": true,
+      "dataframe_equal": true
+    }
+  ],
+  "inflation": {
+    "2010": {
+      "rates_percent": {
+        "2011": 2.9,
+        "2012": 2.6,
+        "2013": 1.3,
+        "2014": 0.4,
+        "2015": 0.1,
+        "2016": 0.2,
+        "2017": 1.6,
+        "2018": 1.8,
+        "2019": 1.4,
+        "2020": 0.7
+      },
+      "factor_to_2020": 1.137408852909789
+    },
+    "2015": {
+      "rates_percent": {
+        "2016": 0.2,
+        "2017": 1.6,
+        "2018": 1.8,
+        "2019": 1.4,
+        "2020": 0.7
+      },
+      "factor_to_2020": 1.0582216270404479
+    }
+  },
+  "fuel_arithmetic": {
+    "gas_21_6_EUR2010_to_EUR2020": 24.568031222851445,
+    "coal_8_4_EUR2010_to_EUR2020": 9.554234364442229,
+    "fuelcell_1100_EUR2015_to_EUR2020": 1164.0437897444926
+  }
+}

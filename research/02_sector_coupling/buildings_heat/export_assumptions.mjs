@@ -1,0 +1,12 @@
+import fs from 'node:fs/promises';
+import { Workbook } from '@oai/artifact-tool';
+const root=new URL('.',import.meta.url);
+const rows=JSON.parse(await fs.readFile(new URL('ASSUMPTION_RECORDS.json',root),'utf8'));
+const fields=Object.keys(rows[0]);
+const wb=Workbook.create();const sheet=wb.worksheets.add('Heat assumptions');
+const column=n=>{let s='';for(;n;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s;};
+const range=sheet.getRange(`A1:${column(fields.length)}${rows.length+1}`);
+range.values=[fields,...rows.map(r=>fields.map(f=>r[f]??''))];
+const escape=x=>'"'+String(x??'').replaceAll('"','""')+'"';
+await fs.writeFile(new URL('HEAT_ASSUMPTION_REGISTER.csv',root),'\uFEFF'+range.values.map(r=>r.map(escape).join(',')).join('\r\n')+'\r\n','utf8');
+console.log(JSON.stringify({rows:rows.length,columns:fields.length,status:'all UNVERIFIED',authoring:'Artifact Tool'}));

@@ -1,0 +1,44 @@
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 825)   district_heating:
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 826)     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 827)     #increase of today's district heating demand to potential maximum district heating share
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 828)     #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 829)     progress: 1
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 830)     # 2020: 0.0
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 831)     # 2030: 0.3
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 832)     # 2040: 0.6
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 833)     # 2050: 1.0
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 834)     district_heating_loss: 0.15
+fb0ff924f (Ekaterina       2025-12-22 08:37:27 +0100 835)   reduce_space_heat_exogenously: false # reduces space heat demand by a given factor (applied before losses in DH)
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 836)   # this can represent e.g. building renovation, building demolition, or if
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 837)   # the factor is negative: increasing floor area, increased thermal comfort, population growth
+fb0ff924f (Ekaterina       2025-12-22 08:37:27 +0100 838)   # NB The value of space heat reduction are Europe-specific
+fb0ff924f (Ekaterina       2025-12-22 08:37:27 +0100 839)   # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 840)   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 841)   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 842)   # 2020: 0.10  # this results in a space heat demand reduction of 10%
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 843)   # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 844)   # 2030: 0.09
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 845)   # 2035: 0.11
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 846)   # 2040: 0.16
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 847)   # 2045: 0.21
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 848)   # 2050: 0.29
+d965b422b (Virio Andreyana 2026-03-30 22:53:11 +0200 849)   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 850) 
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 851)   tes: true
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 852)   tes_tau: # 180 day time constant for centralised, 3 day for decentralised
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 853)     decentral: 3
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 854)     central: 180
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 855)   boilers: true
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 856)   oil_boilers: false
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 857)   chp: true
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 858)   micro_chp: false
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 859) 
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 860)   solar_thermal_collector:
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 861)     enable: true
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 862)     cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 863)     clearsky_model: simple
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 864)     orientation:
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 865)       slope: 45.
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 866)       azimuth: 180.
+5ea64e917 (Yerbol Akhmetov 2026-06-29 17:36:07 +0500 867) 
+a8987468c (Fabian Hofmann  2024-09-19 23:17:23 +0200 868)   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py

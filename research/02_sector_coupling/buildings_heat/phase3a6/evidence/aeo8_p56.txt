@@ -1,0 +1,46 @@
+54 8th ASEAN Energy Outlook 2023 - 2050
+Demand Side
+As with AEO7, demand-side modelling explores five foundational sectors – Residential, Transport, 
+Industrial, Commercial, and Others (including agricultural and non-energy use). AEO8 utilises a detailed 
+sector-by-sector modelling approach, with additional sub-sectoral or end-use devices where possible, 
+including bottom-up modelling within some sectors. This method is favoured for the demand side as 
+it effectively models energy policies, such as transitions to clean-cooking technologies and efficient 
+appliances, energy savings in specific sub-sectors, the deployment of EVs, and biofuel mandates. By 
+doing so, it enables changes in electricity demand to be factored into electricity sector modelling and 
+fossil fuel demand, incorporating it into non-power process modelling. 
+The AEO8 differs from the AEO7 for the commercial sector. Instead of disaggregating it by building 
+types, AEO8 uses appliance types, similar to the residential sector. This modification was done to get 
+more robust results in energy-intensive appliances, thus providing better policy recommendations. In 
+the transportation sector fuel switching to emerging fuel types was also implemented including the 
+penetration of hydrogen and ammonia to adapt NDCs for some AMS.
+An additional exercise is undertaken in AEO8 to explore the least-cost optimisation impact on modelling 
+end-use applications using GAMS. In the transport sector, the method is employed for optimising road 
+vehicles fuelled by internal combustion engines (ICE), electricity, biofuels, and natural gas. Meanwhile, 
+the residential and commercial sectors cover types of air conditioning (i.e., non-inverter, inverter, and 
+smart inverter), and lighting (fluorescent, light emitting diode (LED), and smart LED). By using the LEAP 
+results in ATS (called BAU in this exercise) as the inputs, and the same assumptions in RAS, the GAMS 
+modelling projects the optimised TFEC and annual costs for these three sectors (called OPT in this 
+exercise). 
+Transformation Side 
+Transformation or supply-side modelling examines both electricity generation and non-power 
+processes (Figure 2.3). The resource module estimates overall fuel requirements by considering fossil 
+fuel reserves and RE potential. For the non-power transformation, the energy is transformed through 
+“modules” , which include coal production/mining, natural gas and crude oil production, gas processing, 
+oil refining, LNG regasification, charcoal production, and hydrogen/ammonia/biofuel production.
+The overall final electricity demand and the export targets drive all related transformation modules in 
+power generation modelling to create just the right amount of electricity and capacity to be built in 
+order to meet the requirements. LEAP and NEMO add the capacity expansion requirements defined 
+by each AMS planning reserve margin, and the energy dispatch process adheres to the maximum 
+availability and minimum utilisation of each generation technology type [37] . Several “Technologies” 
+are modelled, representing the type of power plants, such as various types of coal and gas power 
+plants, and all renewables, including solar, wind, geothermal, hydro, and waste, as well as nuclear. 
+The non-power transformation will produce either primary or secondary fuels. “Primary Fuels” include 
+types of coal and natural gas liquids, whilst the “Secondary Fuels” include various petroleum products 
+(LPG, petroleum coke, gasoline, diesel, SAF), CNG, hydrogen, and others.
+Electricity generation modelling follows two approaches: Simulation (BAS and ATS) and Optimisation 
+(RAS and CNS). BAS forecasts the power sector capacity expansion and dispatch based on the historical 
+behaviour of consumer production and the type of generation technologies in the last historical year. 
+In ATS, capacity build follows the PDP of each AMS up to the last year specified and allows LEAP to add 
+similar technologies following each country’s plan. In both scenarios, energy generation is addressed 
+by merit order dispatch, and the capacity added for each type of technology is distributed according to 
+the historical ratio of non-renewable to renewable technologies.

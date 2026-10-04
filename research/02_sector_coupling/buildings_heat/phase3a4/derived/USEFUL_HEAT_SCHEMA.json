@@ -1,0 +1,412 @@
+[
+  {
+    "Field": "Country",
+    "Type": "string",
+    "Unit": "ISO2",
+    "Required": "YES",
+    "Definition": "Country of the accounted service",
+    "Evidence_Class": "Official balance",
+    "Missing_or_Validation_Rule": "One of frozen11; never infer missing country",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Sector",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Residential or Services; separate accounts",
+    "Evidence_Class": "Official sector definition",
+    "Missing_or_Validation_Rule": "Do not silently map combined commercial/public rows",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Region",
+    "Type": "string",
+    "Unit": "",
+    "Required": "CONDITIONAL",
+    "Definition": "Subnational/climate source coverage",
+    "Evidence_Class": "Survey/balance geography",
+    "Missing_or_Validation_Rule": "National extrapolation needs acceptance",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Fuel",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Raw carrier identity before mapping",
+    "Evidence_Class": "Official balance",
+    "Missing_or_Validation_Rule": "Preserve LPG and oil subclass when available",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "FinalEnergy",
+    "Type": "number",
+    "Unit": "See FinalEnergyUnit",
+    "Required": "YES",
+    "Definition": "Observed final input energy at stated scope",
+    "Evidence_Class": "Official balance/end-use survey",
+    "Missing_or_Validation_Rule": "Blank is unknown; reported zero needs source",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "FinalEnergyUnit",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Original energy/mass/volume unit",
+    "Evidence_Class": "Source table",
+    "Missing_or_Validation_Rule": "Unresolved conversion stops",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "FinalEnergyScope",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "fuel_total; end_use; device_end_use",
+    "Evidence_Class": "Source table",
+    "Missing_or_Validation_Rule": "Prevents applying end-use/device share twice",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "EnergyBasis",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Final input; not useful heat or primary energy",
+    "Evidence_Class": "Source definition",
+    "Missing_or_Validation_Rule": "Do not sum incompatible bases",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "HHV_LHV_Basis",
+    "Type": "string",
+    "Unit": "",
+    "Required": "CONDITIONAL",
+    "Definition": "Fuel heat-value basis; electricity/NA explicitly labelled",
+    "Evidence_Class": "Original fuel data",
+    "Missing_or_Validation_Rule": "Match efficiency basis; no inferred HHV/LHV",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "UnitConversion",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Versioned raw unit to MWh_final expression",
+    "Evidence_Class": "Physical units/source factors",
+    "Missing_or_Validation_Rule": "Mass/volume requires sourced factor; no arbitrary value",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "EndUse",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "space_heating; water_heating; cooking; cooling; other; unclassified",
+    "Evidence_Class": "Country/region evidence",
+    "Missing_or_Validation_Rule": "Cooking/cooling never auto-map to H/I",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "EndUseShare",
+    "Type": "number",
+    "Unit": "fraction",
+    "Required": "CONDITIONAL",
+    "Definition": "Fraction of declared fuel-total denominator",
+    "Evidence_Class": "Country/region end-use evidence",
+    "Missing_or_Validation_Rule": "Required for fuel_total; scope identity1 only for already isolated end use",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "ShareDenominator",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Exact sector/fuel/year/geography covered by share",
+    "Evidence_Class": "Same source lineage",
+    "Missing_or_Validation_Rule": "No mixing energy share and appliance penetration",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "DeviceType",
+    "Type": "string",
+    "Unit": "",
+    "Required": "THERMAL",
+    "Definition": "Historical device for service reconstruction",
+    "Evidence_Class": "National survey/literature",
+    "Missing_or_Validation_Rule": "Missing device/mix blocks service calibration",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "DeviceInputShare",
+    "Type": "number",
+    "Unit": "fraction",
+    "Required": "THERMAL",
+    "Definition": "Historical final-input-energy fraction within end use",
+    "Evidence_Class": "Device energy/use evidence",
+    "Missing_or_Validation_Rule": "Sum1; do not substitute stock-count share",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Efficiency_or_COP",
+    "Type": "number",
+    "Unit": "MWh_useful/MWh_final",
+    "Required": "THERMAL",
+    "Definition": "Historical conversion performance, not future optimized value",
+    "Evidence_Class": "DEA/national survey/literature/PyPSA default/engineering assumption",
+    "Missing_or_Validation_Rule": "Missing blocks; source class alone does not confer acceptance",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "EfficiencySourceType",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "THERMAL",
+    "Definition": "DEA; national_survey; literature; PyPSA_default; engineering_assumption",
+    "Evidence_Class": "Exact source",
+    "Missing_or_Validation_Rule": "Retain distinction; no automatic default adoption",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "EfficiencySource",
+    "Type": "string",
+    "Unit": "",
+    "Required": "THERMAL",
+    "Definition": "File/version/table for efficiency or COP",
+    "Evidence_Class": "Original performance source",
+    "Missing_or_Validation_Rule": "Require device conditions and performance year",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "PerformanceBasis",
+    "Type": "string",
+    "Unit": "",
+    "Required": "THERMAL",
+    "Definition": "Boundary/HHV-LHV/seasonal conditions for efficiency or COP",
+    "Evidence_Class": "Performance source",
+    "Missing_or_Validation_Rule": "Must match FinalEnergy basis and device aggregation",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "UsefulService",
+    "Type": "number",
+    "Unit": "MWh_th",
+    "Required": "DERIVED",
+    "Definition": "Useful space/water energy only after reviewed conversion",
+    "Evidence_Class": "Versioned transform",
+    "Missing_or_Validation_Rule": "Blank until evidence gate; never copy FinalEnergy",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "UsefulServiceBoundary",
+    "Type": "string",
+    "Unit": "",
+    "Required": "THERMAL",
+    "Definition": "Delivered useful service vs plant supply; losses separate",
+    "Evidence_Class": "Human boundary decision",
+    "Missing_or_Validation_Rule": "No default DH markup in service target",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "HistoricalElectricHeating",
+    "Type": "number",
+    "Unit": "MWh_el",
+    "Required": "ELECTRIC_THERMAL",
+    "Definition": "Represented historical electricity to remove exactly once",
+    "Evidence_Class": "Matched end-use input ledger",
+    "Missing_or_Validation_Rule": "Not taken from future fuel-shift electricity_* fields",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "AccountID",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Unique account linked to A–M specification",
+    "Evidence_Class": "Accounting ledger",
+    "Missing_or_Validation_Rule": "Unique; prevent parent/child duplicate sum",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceRowID",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Stable raw row or table-cell identity",
+    "Evidence_Class": "Raw source",
+    "Missing_or_Validation_Rule": "Track partitions/transfers to avoid double use",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "RetainedDestination",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Direct electric/fuel; useful service; unclassified",
+    "Evidence_Class": "Accounting decision",
+    "Missing_or_Validation_Rule": "Every energy amount retains a destination",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Source",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Primary source name and exact version",
+    "Evidence_Class": "Primary source",
+    "Missing_or_Validation_Rule": "No anonymous reasonable default",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceURL",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Source access link",
+    "Evidence_Class": "Primary source",
+    "Missing_or_Validation_Rule": "Retain migrated/archived URL history",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceFile",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Local file reference",
+    "Evidence_Class": "Local raw cache",
+    "Missing_or_Validation_Rule": "File must exist; no external-only final input",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceSHA256",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Hash of raw source file",
+    "Evidence_Class": "Local bytes",
+    "Missing_or_Validation_Rule": "Verify before export",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceLocation",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Sheet/table/page/row",
+    "Evidence_Class": "Raw source",
+    "Missing_or_Validation_Rule": "Precise location required",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SourceYear",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Measurement/reference year",
+    "Evidence_Class": "Source metadata",
+    "Missing_or_Validation_Rule": "Separate publication year",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "PublicationVersion",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Release/revision identity",
+    "Evidence_Class": "Source metadata",
+    "Missing_or_Validation_Rule": "Multiple reasonable versions need joint choice",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "TargetYear",
+    "Type": "integer",
+    "Unit": "year",
+    "Required": "YES",
+    "Definition": "Model demand year",
+    "Evidence_Class": "Accepted scenario",
+    "Missing_or_Validation_Rule": "Year bridge explicit; no silent extrapolation",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "YearBridge",
+    "Type": "string",
+    "Unit": "",
+    "Required": "CONDITIONAL",
+    "Definition": "Source-year to target-year transformation",
+    "Evidence_Class": "Accepted method",
+    "Missing_or_Validation_Rule": "Required when years differ",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "SpatialAllocation",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "R/S-specific region→cluster mapping and weights",
+    "Evidence_Class": "Geographic evidence",
+    "Missing_or_Validation_Rule": "Finite nonnegative weights, per-country sum1",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "TemporalSource",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Profile source/method, R/S and space/water-specific",
+    "Evidence_Class": "Measured/evidenced usage/climate",
+    "Missing_or_Validation_Rule": "Water independent of HDD; BDEW reference only",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "TimeZone",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Local/UTC mapping and calendar",
+    "Evidence_Class": "Time metadata",
+    "Missing_or_Validation_Rule": "No implicit timezone shift",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "PhysicalSnapshotWeight",
+    "Type": "string",
+    "Unit": "hours",
+    "Required": "YES",
+    "Definition": "Explicit physical-integration weights reference",
+    "Evidence_Class": "Run calendar",
+    "Missing_or_Validation_Rule": "Do not confuse with discounted objective weight",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Transformation",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "Versioned calculation and order",
+    "Evidence_Class": "Research script/config",
+    "Missing_or_Validation_Rule": "No hidden defaults",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "Status",
+    "Type": "enum",
+    "Unit": "",
+    "Required": "YES",
+    "Definition": "SOURCE_RECOVERED; ACCEPT_STRUCTURE; ASEAN_VALIDATION_PENDING; ENGINEERING_FIX_REQUIRED; SCIENTIFIC_DECISION_REQUIRED; DATA_UPDATE_CANDIDATE; REJECT_DEFAULT; HUMAN_ACCEPTED",
+    "Evidence_Class": "Evidence/decision record",
+    "Missing_or_Validation_Rule": "Agent never sets HUMAN_ACCEPTED",
+    "Human_Confirmation": "PENDING"
+  },
+  {
+    "Field": "HumanConfirmationRecord",
+    "Type": "string",
+    "Unit": "",
+    "Required": "YES_BEFORE_EXPORT",
+    "Definition": "Date/person/decision ID for accepted source and value",
+    "Evidence_Class": "Human decision",
+    "Missing_or_Validation_Rule": "Pending blocks scientific export",
+    "Human_Confirmation": "PENDING"
+  }
+]

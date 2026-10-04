@@ -1,0 +1,235 @@
+# SGP ESE5004 Stage2
+# Phase 3A-7 — Research Electricity Boundary Freeze & Minimum Defensible Buildings Baseline
+
+## Goal
+
+Stop deep-diving into minor Buildings details.
+
+The project priority is now:
+
+major-system correctness
+>
+minor-detail completeness.
+
+This phase closes Buildings sufficiently for first Full-SC assembly.
+
+Do NOT search indefinitely for perfect 11-country building data.
+
+--------------------------------------------------
+1. Freeze Research electricity boundary
+--------------------------------------------------
+
+Based on Phase3A5–3A6 evidence, formalize the following HUMAN research decision:
+
+Primary Research Full-SC electricity parent account:
+
+A* = end-user final electricity consumption before explicitly represented historical electric-heating components are transferred into thermal-service accounts.
+
+Therefore:
+
+direct electricity
+=
+A*
+-
+explicitly identified historical electric heating
+
+Future endogenous electricity inputs such as:
+
+heat pumps
+resistive heating
+EV charging
+electrolysis
+other conversion technologies
+
+must be produced inside the sector-coupled optimization and must not be pre-added to direct electricity demand.
+
+AEO8 electricity-generation trajectory must NOT automatically be used as Research Full-SC final-demand Load.
+
+Keep the original AEO8 generation calibration only as:
+
+PAPER_REFERENCE / COMPARATOR
+
+AEO8 reported final-electricity trajectory may be used as:
+
+CONSISTENCY / VALIDATION BENCHMARK
+
+until sector-by-sector overlap is fully understood.
+
+Do not replace model data numerically in this phase.
+
+--------------------------------------------------
+2. Loss boundary
+--------------------------------------------------
+
+With A* defined at final-user electricity level:
+
+do not automatically embed generic transmission/distribution losses into A*.
+
+Network losses should be represented by the network where explicitly modelled.
+
+Current generic 0.97 electricity treatment is:
+
+NOT SCIENTIFICALLY ACCEPTED
+
+until its physical boundary is demonstrated.
+
+Do not patch it yet.
+
+--------------------------------------------------
+3. Minimum Defensible Buildings Baseline
+--------------------------------------------------
+
+Create a clear fallback hierarchy.
+
+Rule A:
+If a country/sector/end-use has sufficiently strong and compatible evidence,
+it may be explicitly represented.
+
+Rule B:
+If evidence is incomplete,
+retain the corresponding energy inside the original direct-electricity or direct-fuel account.
+
+Rule C:
+Missing != zero.
+
+Rule D:
+Missing != invented heat service.
+
+Rule E:
+Never force a common ASEAN space/water split.
+
+Rule F:
+Do not require complete device-level detail if it is unlikely to materially affect the ASEAN interconnection question.
+
+--------------------------------------------------
+4. Buildings boundary for first Full-SC baseline
+--------------------------------------------------
+
+Maintain:
+
+Residential and Services separated in model.
+
+Cooling:
+embedded in direct electricity;
+no endogenous cooling flexibility in first baseline.
+
+Cooking:
+non-explicit;
+accounting only;
+retain electricity/fuel once.
+
+Space/water heating:
+explicit only where a defensible service quantity can be constructed.
+
+Where such evidence is unavailable:
+do not invent a service demand merely to make all countries structurally identical.
+
+District heating:
+not automatically activated.
+
+Existing heating stock:
+do not fabricate ASEAN brownfield stock.
+
+BDEW:
+reference only.
+
+--------------------------------------------------
+5. Materiality rule
+--------------------------------------------------
+
+Introduce a research-development rule:
+
+A missing parameter/data item should block Full-SC assembly only if there is a credible pathway for it to materially alter:
+
+- total system cost,
+- major capacity mix,
+- cross-border electricity flows,
+- country-level investment pattern,
+- sector electrification,
+- or integrated vs disconnected comparison.
+
+Otherwise document it as a limitation / later refinement and proceed.
+
+Do not invent a numerical threshold yet.
+
+--------------------------------------------------
+6. E3
+--------------------------------------------------
+
+Do NOT implement a universal 11-country E3 patch in this phase.
+
+Preserve the accepted E3 accounting contract.
+
+Malaysia water-heating evidence remains a validated methodological prototype, not an ASEAN default.
+
+For first Full-SC assembly, propose a practical rule for which Building thermal-service accounts are:
+
+EXPLICIT
+EMBEDDED
+or
+PENDING
+
+by country and sector.
+
+Do not fill missing evidence with Malaysian shares.
+
+--------------------------------------------------
+7. Deliverables
+--------------------------------------------------
+
+Produce:
+
+1. RESEARCH_ELECTRICITY_BOUNDARY_FREEZE.md
+
+2. BUILDINGS_MINIMUM_DEFENSIBLE_BASELINE.md
+
+3. BUILDINGS_FIRST_FULLSC_BOUNDARY.csv
+
+Columns should include at least:
+
+Country
+Sector
+SpaceHeating
+WaterHeating
+Cooling
+Cooking
+DirectElectricity
+DirectFuel
+Representation
+EvidenceStatus
+FullSC_Blocker
+Reason
+
+4. BUILDINGS_MATERIALITY_REGISTER.csv
+
+5. BUILDINGS_PHASE3_CLOSEOUT.md
+
+6. NEXT_SECTOR_HANDOFF.md
+
+--------------------------------------------------
+8. Final questions
+--------------------------------------------------
+
+Answer:
+
+A. Is the Research electricity conceptual boundary now frozen?
+
+B. Which parts of Buildings must be explicit in the first Full-SC baseline?
+
+C. Which parts may safely remain embedded?
+
+D. Which remaining Buildings gaps are genuinely system-level blockers?
+
+E. Which gaps should be documented but no longer block progress?
+
+F. Is Buildings sufficiently closed to proceed to the next sector?
+
+G. What assumptions/limitations must be retained for eventual sensitivity analysis?
+
+Do not start Transport automatically.
+
+Do not solve the model.
+
+Do not implement formal E3 production code.
+
+Stop after delivering the closeout for human review.

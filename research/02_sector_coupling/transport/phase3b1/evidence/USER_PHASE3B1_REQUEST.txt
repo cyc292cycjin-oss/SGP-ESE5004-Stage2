@@ -1,0 +1,743 @@
+# SGP ESE5004 Stage2
+# Phase 3B-1 — Transport Boundary & Source Audit
+
+## 0. 本轮目标
+
+研究主线：
+
+ASEAN renewable energy transition under sector coupling
+
+现在正式结束 Buildings 深挖，进入 Transport。
+
+本轮目标不是重新建立一个精细交通模型，而是回答：
+
+1. 当前 PyPSA-ASEAN / PyPSA-Earth 到底如何表示 Transport；
+2. 哪些交通需求和技术已经存在；
+3. 哪些是真实数据，哪些是欧洲继承默认或工程假设；
+4. 哪些交通电力已经包含在 Research electricity parent account A*；
+5. 如果显式引入 EV / rail / H2 / synthetic fuel，哪里可能 double count；
+6. 第一版 Full-SC 最低可辩护 Transport 应该包含什么。
+
+核心原则：
+
+Major-system correctness
+>
+minor-detail completeness
+
+禁止为了“完整”研究每一种车辆、船型或航空器。
+
+--------------------------------------------------
+1. 固定代码与研究边界
+--------------------------------------------------
+
+Paper Reference SHA：
+
+5bacad702ccfed17ad19ab510fa710651e966f2c
+
+Current Upstream SC Baseline SHA：
+
+a3616a68ee44592af6527ca9024a90f1956646ae
+
+Buildings validation branch：
+
+codex/buildings-accounting-validation
+
+Phase3A4 validation record：
+
+50a73d8f531132c5459174a55cac412d5f684462
+
+继续区分：
+
+Paper Reference
+!=
+Upstream SC Baseline
+!=
+Research Validation
+!=
+Future Research Model
+
+不要追随 main 漂移。
+
+--------------------------------------------------
+2. 已冻结的系统级 electricity boundary
+--------------------------------------------------
+
+Research Full-SC conceptual electricity parent account：
+
+A*
+=
+end-user final electricity consumption
+
+即：
+
+在显式 sector-coupling 服务被分离之前的最终用户电力父账户。
+
+未来内生转换电力：
+
+- EV charging
+- heat pumps
+- resistive heating
+- electrolysis
+- other conversion electricity
+
+原则上不得同时：
+
+包含在 fixed direct electricity
++
+再次作为 endogenous conversion electricity
+
+AEO8 generation trajectory：
+
+PAPER_REFERENCE / COMPARATOR
+
+不得自动作为 Research Full-SC final electricity demand。
+
+AEO8 reported final-electricity trajectory：
+
+CONSISTENCY / VALIDATION BENCHMARK
+
+不得未经 sector overlap 审计直接变为固定 Load。
+
+Transport 审计必须遵守这一边界。
+
+--------------------------------------------------
+3. Materiality Rule
+--------------------------------------------------
+
+本轮任何问题只有在存在可信路径影响以下结果时，才升级为 Full-SC blocker：
+
+- total system cost
+- major generation/storage capacity
+- electricity demand magnitude
+- sector electrification
+- hydrogen/synthetic-fuel demand
+- cross-border electricity flows
+- country investment pattern
+- Integrated vs Disconnected comparison
+
+以下类型的细节原则上不阻塞：
+
+- 精确车型组成
+- 车型级效率差异
+- 私家车不同驾驶风格
+- 每个充电桩类型
+- 每种船舶子类型
+- 每种航空器
+- 小比例用途分类
+
+除非其数量级足以改变系统结果。
+
+不要自行设数值materiality threshold。
+
+--------------------------------------------------
+4. Track A — 原模型 Transport architecture
+--------------------------------------------------
+
+完整追踪 Transport 模块。
+
+搜索并定位：
+
+- config switches
+- demand preparation
+- transport scripts
+- road transport
+- passenger transport
+- freight transport
+- rail
+- EV
+- ICE
+- fuel-cell
+- hydrogen
+- shipping
+- aviation
+- navigation
+- transport fuels
+- battery / V2G if present
+- charging profiles
+- mobility demand
+
+建立：
+
+Source
+→ Raw demand
+→ Unit
+→ Transformation
+→ Temporal profile
+→ Spatial allocation
+→ PyPSA component
+→ Carrier
+→ Final network representation
+
+必须分别说明：
+
+结构存在
+!=
+默认开启
+!=
+当前 ASEAN case 实际进入 final network
+
+--------------------------------------------------
+5. Track B — Transport sectors inventory
+--------------------------------------------------
+
+至少判断以下部门是否被当前代码显式表示：
+
+1. Road passenger
+2. Road freight
+3. Rail
+4. Domestic / international shipping
+5. Aviation
+
+以及是否存在：
+
+- EV
+- ICE liquid fuels
+- FCEV / H2
+- synthetic fuels
+- biofuels
+- electricity
+- ammonia / methanol if relevant
+
+输出分类：
+
+EXPLICIT_CURRENT
+SUPPORTED_NOT_ACTIVE
+EMBEDDED
+ABSENT
+UNKNOWN
+
+不要因为框架“支持”就说研究模型已经表示。
+
+--------------------------------------------------
+6. Track C — Demand definition
+--------------------------------------------------
+
+对每个 transport mode 追踪：
+
+原始 demand 是：
+
+- passenger-km
+- vehicle-km
+- tonne-km
+- energy demand
+- fuel demand
+- electricity demand
+- vehicle stock
+- service demand
+- other
+
+必须区分：
+
+Transport service demand
+
+和：
+
+Final fuel/electricity consumption
+
+例如：
+
+passenger-km
+不能直接等同
+MWh electricity。
+
+记录：
+
+source
+year
+countries
+unit
+coverage
+transformation
+efficiency
+occupancy/load factor if used
+
+--------------------------------------------------
+7. Track D — ASEAN data provenance
+--------------------------------------------------
+
+重点确认：
+
+当前 Transport 输入究竟来自：
+
+- ASEAN / AEO
+- national statistics
+- UNSD
+- IEA
+- World Bank
+- global transport databases
+- European PyPSA defaults
+- manually defined config values
+
+对每个主要需求/参数标：
+
+ASEAN_SPECIFIC
+GLOBAL_HARMONIZED
+EUROPE_INHERITED
+DEFAULT
+MANUAL_OVERRIDE
+UNKNOWN
+
+不要自动更换数据。
+
+本轮只审计。
+
+--------------------------------------------------
+8. Track E — Electricity double-count audit
+--------------------------------------------------
+
+这是本轮最重要部分之一。
+
+必须回答：
+
+当前 A* / direct electricity 是否已经包含：
+
+- road EV electricity
+- rail electricity
+- other electric transport
+
+如果 Transport 模块又显式添加：
+
+EV charging
+rail electricity
+
+是否会重复？
+
+建立 Transport electricity accounting：
+
+A*
+→ direct electricity parent
+→ historical transport electricity
+→ retained direct load
+→ explicit mobility service
+→ endogenous EV electricity
+
+原则沿用 Buildings E3：
+
+如果某一历史交通电力从父账户转成显式 mobility service，
+
+只能：
+
+subtract exactly once
+
+未来 EV electricity：
+
+必须由车辆/充电转换形成，
+
+不能又固定在 parent Load 中。
+
+本轮不要实现patch。
+
+--------------------------------------------------
+9. Track F — Road transport
+--------------------------------------------------
+
+重点回答：
+
+1. passenger / freight 是否分开；
+2. demand source是什么；
+3. ICE fuel是否固定；
+4. EV penetration是否外生还是技术竞争；
+5. FCEV是否存在；
+6. electricity/fuel substitution是否内生；
+7. battery efficiency / charger efficiency来源；
+8. EV profile如何形成；
+9. 是否包含 smart charging / V2G；
+10. 这些机制是否足以显著影响 ASEAN interconnection value。
+
+不要追车型级细节。
+
+--------------------------------------------------
+10. Track G — Rail
+--------------------------------------------------
+
+判断 Rail：
+
+- 是否显式存在；
+- demand是否已经包含在 national electricity；
+- electricity/fuel consumption来源；
+- 是否值得第一版 Full-SC 单独建模。
+
+如果 rail 规模小且固定：
+
+可以提出：
+
+EMBEDDED / FIXED
+
+作为候选。
+
+不要为了结构完整强行内生化。
+
+--------------------------------------------------
+11. Track H — Shipping
+--------------------------------------------------
+
+Shipping 是潜在的大型 sector-coupling 需求，因此重点高于 Buildings cooking。
+
+确认：
+
+- domestic / international shipping 是否区分；
+- demand basis；
+- bunker fuel treatment；
+- shipping energy是否计入国家final energy；
+- hydrogen / ammonia / methanol / synthetic fuel路径是否存在；
+- 是否内生选择；
+- fuel production electricity是否由模型产生；
+- demand spatial location（ports / national aggregate）；
+- 未来航运脱碳是否可能显著影响电力/H2系统。
+
+如果当前实现复杂但数据不足：
+
+不要直接关闭。
+
+标：
+
+SYSTEM_RELEVANT_PENDING
+
+--------------------------------------------------
+12. Track I — Aviation
+--------------------------------------------------
+
+同样确认：
+
+- domestic / international
+- aviation fuel
+- synthetic kerosene
+- hydrogen if supported
+- demand source
+- country allocation
+- future fuel substitution
+- electricity/H2 indirect demand
+
+重点判断：
+
+Aviation 是否通过 synthetic fuel / H2 对未来电力系统产生系统级影响。
+
+不要研究飞机类型。
+
+--------------------------------------------------
+13. Track J — Hydrogen / synthetic-fuel interaction
+--------------------------------------------------
+
+Transport 不能单独看。
+
+如果：
+
+shipping
+aviation
+road freight
+
+可以使用：
+
+H2
+ammonia
+methanol
+synthetic hydrocarbons
+
+必须记录：
+
+这些 fuel demand 是：
+
+exogenous fuel demand
+还是
+endogenous conversion pathway。
+
+重点检查：
+
+是否会导致：
+
+fixed hydrogen demand
++
+endogenous hydrogen production
++
+preloaded electricity
+
+重复计算。
+
+本轮不修改 H2 network。
+
+--------------------------------------------------
+14. Track K — Temporal representation
+--------------------------------------------------
+
+审计：
+
+EV charging profile
+
+是否：
+
+- fixed profile
+- availability profile
+- smart charging
+- V2G
+- uncontrolled charging
+
+以及：
+
+shipping / aviation
+
+是否有时间约束。
+
+第一版 Full-SC 不要求完美行为模型。
+
+判断哪些 temporal mechanics 会：
+
+materially affect electricity peak / storage / interconnection。
+
+只有这些才保留。
+
+--------------------------------------------------
+15. Track L — Spatial allocation
+--------------------------------------------------
+
+确认 Transport demand 如何映射：
+
+country
+→ cluster/node
+
+Road：
+population / GDP / road network / other？
+
+Rail：
+rail network / population / other？
+
+Shipping：
+ports / coastline / country aggregate？
+
+Aviation：
+airports / country aggregate？
+
+不得自动接受欧洲空间分配方法用于 ASEAN。
+
+但如果空间误差对跨国总流影响有限：
+
+记录 limitation，
+不一定阻塞。
+
+--------------------------------------------------
+16. Track M — Brownfield / vehicle stock
+--------------------------------------------------
+
+判断当前模型是否使用：
+
+- vehicle stock
+- existing EV stock
+- ICE stock
+- charging infrastructure
+- fleet turnover
+
+如果只有欧洲数据：
+
+不得冒充 ASEAN brownfield。
+
+但不要自动要求建立完整 ASEAN fleet model。
+
+判断：
+
+是否对 2050 长期系统结果 materially important。
+
+如果不是：
+
+可以考虑 transparent greenfield / service-demand competition。
+
+--------------------------------------------------
+17. Track N — Carbon scope
+--------------------------------------------------
+
+不得改变当前已冻结 carbon policy。
+
+只审计：
+
+Transport emissions currently enter which CO2 ledger？
+
+尤其：
+
+- oil
+- gas
+- H2
+- synthetic fuels
+- shipping
+- aviation
+
+是否会被当前 full-SC global atmosphere store计入。
+
+记住：
+
+现阶段原 research carbon assumption 仍是：
+
+power-sector absolute trajectory
+
+不能未经决策把 Transport emissions 自动纳入同一个原power-sector cap。
+
+如果发现 carbon-scope collision：
+
+标 SYSTEM_LEVEL_BLOCKER。
+
+不要修。
+
+--------------------------------------------------
+18. 第一版 Full-SC 的候选表示
+--------------------------------------------------
+
+本轮最终必须为每个 transport mode给出候选：
+
+EXPLICIT
+EMBEDDED
+FIXED
+DEFERRED
+SYSTEM_RELEVANT_PENDING
+
+但不要最终替用户决定。
+
+优先目标：
+
+最小但科学可辩护的 Transport representation。
+
+--------------------------------------------------
+19. 禁止事项
+--------------------------------------------------
+
+本轮禁止：
+
+- 修改 transport model code
+- 修改 demand
+- 实施 EV subtraction patch
+- 运行 Full-SC
+- Integrated / Disconnected comparison
+- 修改 carbon policy
+- 修改 H2 network
+- 修改 A*
+- 大规模重新搜11国所有车辆数据
+- 建立车型级模型
+- 交通微观行为模型
+- Myerson / Shapley
+- Transport sensitivity experiments
+
+只做：
+
+read
+trace
+audit
+classify
+materiality assessment
+boundary proposal
+
+--------------------------------------------------
+20. 数据搜索规则
+--------------------------------------------------
+
+先穷尽：
+
+1. repository
+2. frozen upstream code
+3. cached raw files
+4. source registry
+5. original cited sources
+
+只有主要输入来源缺失时，
+才做 targeted external source recovery。
+
+禁止再进行大范围无边界数据搜索。
+
+如果确实需要用户原始资料：
+
+生成：
+
+USER_INPUT_NEEDED_TRANSPORT.md
+
+要求必须精确。
+
+--------------------------------------------------
+21. Deliverables
+--------------------------------------------------
+
+请产出：
+
+1. TRANSPORT_ARCHITECTURE_MAP.md
+
+2. TRANSPORT_MODE_INVENTORY.csv
+
+3. TRANSPORT_DEMAND_SOURCE_TRACE.md
+
+4. TRANSPORT_DATA_PROVENANCE.csv
+
+5. TRANSPORT_ELECTRICITY_DOUBLE_COUNT_AUDIT.md
+
+6. ROAD_TRANSPORT_AUDIT.md
+
+7. RAIL_TRANSPORT_AUDIT.md
+
+8. SHIPPING_AVIATION_AUDIT.md
+
+9. TRANSPORT_H2_FUEL_INTERACTION.md
+
+10. TRANSPORT_TEMPORAL_SPATIAL_AUDIT.md
+
+11. TRANSPORT_CARBON_SCOPE_AUDIT.md
+
+12. TRANSPORT_MATERIALITY_REGISTER.csv
+
+13. TRANSPORT_FIRST_FULLSC_OPTIONS.csv
+
+14. USER_INPUT_NEEDED_TRANSPORT.md
+    only if necessary
+
+15. PHASE3B1_TRANSPORT_READINESS.md
+
+--------------------------------------------------
+22. Final questions
+--------------------------------------------------
+
+必须回答：
+
+A. 当前 PyPSA-ASEAN 实际包含哪些 Transport components？
+
+B. 哪些只是框架支持但没有进入当前 ASEAN network？
+
+C. Road passenger/freight demand来源和单位是什么？
+
+D. Rail是否显式表示？
+
+E. Shipping是否显式表示？
+
+F. Aviation是否显式表示？
+
+G. 当前 base electricity 是否与 EV/rail 存在 double-count risk？
+
+H. Road electrification是外生还是内生？
+
+I. Shipping/Aviation未来fuel substitution是否会明显影响H2/electricity system？
+
+J. Transport carbon emissions是否与原power-sector carbon cap发生scope collision？
+
+K. 哪些Transport机制对Integrated vs Disconnected结果具有系统级影响？
+
+L. 哪些细节可以安全忽略？
+
+M. 第一版Full-SC中哪些应：
+EXPLICIT
+EMBEDDED
+FIXED
+DEFERRED
+SYSTEM_RELEVANT_PENDING？
+
+N. Transport还剩哪些真正blocker？
+
+O. 是否可以进入：
+
+TRANSPORT_BOUNDARY_READY_FOR_HUMAN_REVIEW
+
+YES / NO
+
+--------------------------------------------------
+23. Stop condition
+--------------------------------------------------
+
+完成上述审计后立即停止。
+
+不要自动进入 Phase 3B-2。
+
+不要修改代码。
+
+不要运行正式模型。
+
+返回用户 + ChatGPT 做 Human Scientific Review。

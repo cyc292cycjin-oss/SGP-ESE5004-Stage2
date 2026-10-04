@@ -1,0 +1,53 @@
+commit 99159edb7298b847fea517bf05c3f388493501c9
+Author: Virio Andreyana <114650479+virio-andreyana@users.noreply.github.com>
+Date:   Wed Jan 21 21:31:28 2026 +0100
+
+    Finalized Scenarios from Conference Paper. Documentation and Notebooks (#25)
+    
+    * add update for PyPSA-Earth ongoing pull-request
+    
+    * drop biomass generator if biomass limit is set, extend scenarios
+    
+    * update scenarios and clean unused scripts
+    
+    * add notebooks and documentations
+
+ .github/workflows/deploy.yaml                      |  57 ++
+ README.md                                          |   5 +-
+ Snakefile                                          |   4 +-
+ configs/bundle_config.yaml                         |   6 +-
+ configs/config.asean.yaml                          |   2 +-
+ configs/config.sea.yaml                            | 125 ---
+ configs/scenarios.asean.yaml                       |  48 +-
+ doc-asean/docs/Analysis/download-scenarios.md      |  32 +
+ doc-asean/docs/Analysis/index.md                   |  27 +
+ doc-asean/docs/Analysis/jupyter-notebooks.md       |  39 +
+ doc-asean/docs/Configuration/index.md              |  25 +
+ doc-asean/docs/Configuration/project-config.md     | 246 ++++++
+ doc-asean/docs/Configuration/scenarios-config.md   |  48 ++
+ doc-asean/docs/Feature/append-cost-data.md         |  32 +
+ .../docs/Feature/asean-grid-infrastructure.md      |  84 ++
+ doc-asean/docs/Feature/dual-pull-request.md        |  29 +
+ doc-asean/docs/Feature/final-adjustment.md         |  89 +++
+ doc-asean/docs/Feature/index.md                    |  10 +
+ doc-asean/docs/Introduction/contributors.md        |  26 +
+ doc-asean/docs/Introduction/index.md               |  48 ++
+ doc-asean/docs/Introduction/installation.md        | 221 ++++++
+ doc-asean/docs/Introduction/run-scenarios.md       |  87 +++
+ doc-asean/docs/index.md                            |  42 +
+ doc-asean/mkdocs.yml                               |  76 ++
+ doc/release_notes.rst                              |   2 +-
+ notebooks/analysis_helper.py                       | 197 +++++
+ notebooks/postnetwork_analysis.ipynb               | 850 +++++++++++++++++++++
+ notebooks/preparation_analysis.ipynb               | 375 +++++++++
+ notebooks/regional_analysis.ipynb                  | 447 +++++++++++
+ notebooks/sensitivity_analysis.ipynb               | 371 +++++++++
+ notebooks/validation_analysis.ipynb                | 359 +++++++++
+ scripts/add_electricity.py                         |   2 +-
+ scripts/append_asean_cagr.py                       |  11 -
+ scripts/append_asean_cost_data.py                  | 176 -----
+ scripts/cluster_global_buildings.py                |  33 +-
+ scripts/download_global_buildings.py               |  59 +-
+ scripts/prepare_sector_network.py                  |   7 +
+ scripts/solve_network.py                           |   4 +-
+ 38 files changed, 3962 insertions(+), 339 deletions(-)

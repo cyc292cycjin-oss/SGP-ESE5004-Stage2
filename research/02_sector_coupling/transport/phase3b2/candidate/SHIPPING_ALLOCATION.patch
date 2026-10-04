@@ -1,0 +1,311 @@
+diff --git a/.gitattributes b/.gitattributes
+index b8d483ee..6d7f71fd 100644
+--- a/.gitattributes
++++ b/.gitattributes
+@@ -5,3 +5,5 @@
+ # Fix language stats: https://github.com/github/linguist/issues/3316#issuecomment-263485606
+ *.ipynb linguist-vendored
+ * text=auto
++# Preserve the frozen upstream CRLF blob for a minimal shipping review diff.
++/scripts/prepare_sector_network.py -text
+diff --git a/scripts/_shipping_allocation.py b/scripts/_shipping_allocation.py
+new file mode 100644
+index 00000000..332631d3
+--- /dev/null
++++ b/scripts/_shipping_allocation.py
+@@ -0,0 +1,69 @@
++# SPDX-License-Identifier: AGPL-3.0-or-later
++"""Strict annual shipping allocation; no data correction or missing-to-zero fill.
++
++Candidate engineering fix against PyPSA-ASEAN a3616a68. The input table retains
++one column per domestic/international account. Values are annual final-energy
++TWh, not accepted new model inputs. A missing account must be resolved upstream.
++"""
++import numpy as np
++import pandas as pd
++
++
++def allocate_shipping_demand(ports, national, ac_buses):
++    """Allocate each national annual account to verified AC nodes, in TWh.
++
++    Repeated port nodes are allowed. Fractions must already sum to one per
++    country: this routine neither normalizes invalid weights nor fills demand.
++    Nodes without ports receive structural zero ONLY after country coverage,
++    source completeness, and country-total conservation have been checked.
++    """
++    def fail(message):
++        raise ValueError("shipping allocation: " + message)
++
++    if national.index.has_duplicates or ac_buses.index.has_duplicates:
++        fail("duplicate country or AC node")
++    if national.empty or national.shape[1] != 2 or national.columns.has_duplicates:
++        fail("two distinct domestic/international accounts are required")
++    try:
++        values = national.astype(float)
++    except (ValueError, TypeError):
++        fail("non-numeric national account")
++    if not np.isfinite(values.to_numpy()).all() or (values < 0).any().any():
++        fail("missing, non-finite or negative national account")
++    if "country" not in ac_buses or ac_buses.country.isna().any():
++        fail("AC node country is required")
++    if not set(national.index).issubset(set(ac_buses.country)):
++        fail("national country lacks an AC node")
++    if not {"country", "fraction"}.issubset(ports.columns):
++        fail("port country/fraction is required")
++    if ports.country.isna().any() or not ports.country.isin(national.index).all():
++        fail("port country is outside national account")
++    if ports.index.isna().any() or not ports.index.isin(ac_buses.index).all():
++        fail("port mapped to unknown AC node")
++    if not (ports.index.map(ac_buses.country).to_numpy() == ports.country.to_numpy()).all():
++        fail("port mapped across country boundary")
++    try:
++        fractions = ports.fraction.astype(float)
++    except (ValueError, TypeError):
++        fail("non-numeric port fraction")
++    if not np.isfinite(fractions.to_numpy()).all() or (fractions < 0).any():
++        fail("invalid port fraction")
++    sums = fractions.groupby(ports.country).sum()
++    if not np.isclose(sums.to_numpy(), 1.0, rtol=0, atol=1e-9).all():
++        fail("port fractions do not sum to one within country")
++    uncovered = values.loc[~values.index.isin(sums.index)]
++    if (uncovered != 0).any().any():
++        fail("nonzero national account has no ports")
++
++    # Numeric allocation precedes aggregation. Never sum/map country strings.
++    allocated = pd.DataFrame(0.0, index=ac_buses.index, columns=values.columns)
++    for account in values.columns:
++        port_values = fractions * ports.country.map(values[account])
++        grouped = port_values.groupby(level=0).sum(min_count=1)
++        allocated.loc[grouped.index, account] = grouped
++    observed = allocated.groupby(ac_buses.country).sum().reindex(values.index)
++    if not np.isfinite(allocated.to_numpy()).all() or not np.allclose(
++        observed.to_numpy(), values.to_numpy(), rtol=1e-12, atol=1e-10
++    ):
++        fail("national annual conservation failed")
++    return allocated
+diff --git a/scripts/prepare_sector_network.py b/scripts/prepare_sector_network.py
+index 572b5e90..469b11be 100644
+--- a/scripts/prepare_sector_network.py
++++ b/scripts/prepare_sector_network.py
+@@ -248,6 +248,7 @@ from types import SimpleNamespace
+ 
+ import numpy as np
+ import pandas as pd
++from _shipping_allocation import allocate_shipping_demand
+ import pypsa
+ from _helpers import (
+     BASE_DIR,
+@@ -1708,7 +1709,7 @@ def add_shipping(
+ 
+     all_navigation = ["total international navigation", "total domestic navigation"]
+ 
+-    navigation_demand = energy_totals.loc[countries, all_navigation].sum(axis=1)
++    navigation_accounts = energy_totals.loc[countries, all_navigation]
+ 
+     efficiency = (
+         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
+@@ -1727,23 +1728,15 @@ def add_shipping(
+         snakemake.params.alternative_clustering,
+     ).set_index("gadm_{}".format(gadm_layer_id))
+ 
+-    ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
+-    ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+-
+-    ports["p_set"] = (
+-        shipping_hydrogen_share
+-        * ports["fraction"]
+-        * ports["country"].map(navigation_demand)
+-        * efficiency
+-        * 1e6
+-        / 8760
+-        # TODO double check the use of efficiency
+-    )  # TODO use real data here
+-
+-    ports = pd.concat([ports, ind]).drop("Bus", axis=1)
+-
+-    # ports = ports.fillna(0.0)
+-    ports = ports.groupby(ports.index).sum()
++    allocated = allocate_shipping_demand(
++        ports, navigation_accounts, n.buses.loc[n.buses.carrier == "AC"]
++    )
++    navigation_mw = allocated.sum(axis=1, skipna=False) * 1e6 / 8760
++    load_nodes = pd.Index(spatial.nodes)
++    if load_nodes.has_duplicates or set(load_nodes) != set(navigation_mw.index):
++        raise ValueError("shipping allocation: load targets differ from allocated AC nodes")
++    navigation_mw = navigation_mw.reindex(load_nodes)
++    ports = pd.DataFrame({"p_set": shipping_hydrogen_share * efficiency * navigation_mw})
+ 
+     if options["shipping_hydrogen_liquefaction"]:
+         n.madd(
+@@ -1787,13 +1780,7 @@ def add_shipping(
+     if shipping_hydrogen_share < 1:
+         shipping_oil_share = 1 - shipping_hydrogen_share
+ 
+-        ports["p_set"] = (
+-            shipping_oil_share
+-            * ports["fraction"]
+-            * ports["country"].map(navigation_demand)
+-            * 1e6
+-            / 8760
+-        )
++        ports["p_set"] = shipping_oil_share * navigation_mw
+ 
+         n.madd(
+             "Load",
+diff --git a/tests/transport/test_shipping_allocation.py b/tests/transport/test_shipping_allocation.py
+new file mode 100644
+index 00000000..7d663f5e
+--- /dev/null
++++ b/tests/transport/test_shipping_allocation.py
+@@ -0,0 +1,151 @@
++"""Offline regression of the real add_shipping constructor; never runs a solver.
++
++Small numbers are TEST FIXTURES, not ASEAN demand/share assumptions. GIS mapping
++is stubbed explicitly, so this tests accounting and indexing, not geolocation.
++"""
++import ast
++import copy
++import importlib.util
++import json
++from pathlib import Path
++import sys
++import types
++import unittest
++import numpy as np
++import pandas as pd
++
++ROOT = Path(sys.argv.pop(1)).resolve()
++OUT = Path(sys.argv.pop(1)).resolve()
++
++
++def constructor():
++    tree = ast.parse((ROOT / "scripts/prepare_sector_network.py").read_text())
++    fun = next(x for x in tree.body if isinstance(x, ast.FunctionDef) and x.name == "add_shipping")
++    namespace = {"pd": pd, "pypsa": types.SimpleNamespace(Network=object)}
++    helper = ROOT / "scripts/_shipping_allocation.py"
++    if helper.exists():
++        spec = importlib.util.spec_from_file_location("shipping_candidate", helper)
++        module = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(module)
++        namespace["allocate_shipping_demand"] = module.allocate_shipping_demand
++    exec(compile(ast.Module(body=[fun], type_ignores=[]), str(ROOT), "exec"), namespace)
++    return namespace
++
++
++class CaptureNetwork:
++    def __init__(self, countries=None):
++        self.buses = pd.DataFrame({"carrier": ["AC", "AC", "AC"], "country": ["ID", "ID", "SG"]}, index=pd.Index(["ID0", "ID1", "SG0"], name="Bus"))
++        if countries:
++            for country in countries:
++                self.buses.loc[country + "0"] = ["AC", country]
++        self.stores = pd.DataFrame({"carrier": ["oil"]})
++        self.generators = pd.DataFrame({"carrier": ["oil"]})
++        self.records = {}
++    def madd(self, component, names, **kw):
++        if component == "Load":
++            val = kw["p_set"].reindex(names)
++            self.records[kw["carrier"]] = val
++    def add(self, component, name, **kw):
++        pass
++
++
++def fixture():
++    national = pd.DataFrame({"total international navigation": [7., 11.], "total domestic navigation": [1., 1.]}, index=["ID", "SG"])
++    ports = pd.DataFrame({"country": ["ID", "ID", "SG"], "fraction": [.4, .6, 1.], "gadm_1": ["ID0", "ID0", "SG0"]})
++    return national, ports
++
++
++def run(national, ports, target_nodes=None):
++    ns = constructor()
++    extras = set(national.index) - {"ID", "SG"}
++    n = CaptureNetwork(extras)
++    nodes = n.buses.index if target_nodes is None else pd.Index(target_nodes)
++    ns.update(countries=list(national.index), demand_sc="TEST_FIXTURE", investment_year=2030,
++              options={"shipping_average_efficiency": .4, "shipping_hydrogen_share": 0., "shipping_hydrogen_liquefaction": False},
++              get=lambda x, _: x, read_csv_nafix=lambda *a, **kw: ports.copy(),
++              locate_bus=lambda p, *args: p.copy(),
++              snakemake=types.SimpleNamespace(params=types.SimpleNamespace(gadm_layer_id=1, alternative_clustering=False, h2_policy={"is_reference": False, "remove_h2_load": False}, sector_options={"international_bunkers": True}), input=types.SimpleNamespace(shapes_path="STUB_NOT_USED")),
++              spatial=types.SimpleNamespace(nodes=nodes, oil=types.SimpleNamespace(nodes=nodes + " oil", locations=nodes)))
++    costs = pd.DataFrame({"efficiency": {"fuel cell": .5}, "CO2 intensity": {"oil": 1.}})
++    ns["add_shipping"](n, costs, national, "STUB_NOT_USED")
++    return n
++
++
++class ShippingRegression(unittest.TestCase):
++    def setUp(self): self.national, self.ports = fixture()
++    def reject(self, text):
++        with self.assertRaisesRegex(ValueError, "shipping allocation:.*" + text):
++            run(self.national, self.ports)
++    def test_repeated_ports_same_node_country_totals(self):
++        n = run(self.national, self.ports)
++        oil = n.records["shipping oil"] * 8760 / 1e6
++        self.assertTrue(np.isfinite(oil).all(), oil.to_dict())
++        np.testing.assert_allclose(oil.groupby(n.buses.country).sum().loc[self.national.index], [8., 12.])
++    def test_node_without_port_is_structural_zero(self):
++        n = run(self.national, self.ports)
++        self.assertEqual(n.records["shipping oil"].loc["ID1"], 0.)
++        self.assertTrue(np.isfinite(n.records["H2 for shipping"]).all())
++    def test_domestic_and_bunker_each_conserved(self):
++        ns = constructor()
++        self.assertIn("allocate_shipping_demand", ns)
++        p = self.ports.set_index("gadm_1")
++        out = ns["allocate_shipping_demand"](p, self.national, CaptureNetwork().buses)
++        np.testing.assert_allclose(out.groupby(CaptureNetwork().buses.country).sum().loc[self.national.index], self.national)
++    def test_source_tables_not_mutated(self):
++        before = self.national.copy(deep=True)
++        p = self.ports.copy(deep=True)
++        run(self.national, self.ports)
++        pd.testing.assert_frame_equal(self.national, before)
++        pd.testing.assert_frame_equal(self.ports, p)
++    def test_one_missing_account_is_not_summed_as_zero(self):
++        self.national.iloc[0, 0] = np.nan
++        self.reject("national account")
++    def test_infinite_national_account_rejected(self):
++        self.national.iloc[0, 0] = np.inf
++        self.reject("national account")
++    def test_negative_national_account_rejected(self):
++        self.national.iloc[0, 0] = -1
++        self.reject("national account")
++    def test_missing_weight_rejected(self):
++        self.ports.loc[0, "fraction"] = np.nan
++        self.reject("fraction")
++    def test_negative_weight_rejected(self):
++        self.ports.loc[0, "fraction"] = -.1
++        self.reject("fraction")
++    def test_weights_not_normalized_rejected(self):
++        self.ports.loc[0, "fraction"] = .3
++        self.reject("sum to one")
++    def test_nonzero_country_without_port_rejected(self):
++        self.national.loc["BN"] = [1., 2.]
++        self.reject("no ports")
++    def test_explicit_source_zero_country_without_port(self):
++        self.national.loc["BN"] = [0., 0.]
++        n = run(self.national, self.ports)
++        self.assertEqual(n.records["shipping oil"].loc["BN0"], 0.)
++    def test_unknown_node_rejected(self):
++        self.ports.loc[0, "gadm_1"] = "UNKNOWN"
++        self.reject("unknown AC node")
++    def test_cross_country_node_rejected(self):
++        self.ports.loc[0, "gadm_1"] = "SG0"
++        self.reject("country boundary")
++    def test_duplicate_national_country_rejected(self):
++        self.national = pd.concat([self.national, self.national.loc[["ID"]]])
++        self.reject("duplicate country")
++    def test_extra_load_target_rejected(self):
++        with self.assertRaisesRegex(ValueError, "shipping allocation:.*load targets"):
++            run(self.national, self.ports, ["ID0", "ID1", "SG0", "UNKNOWN"])
++    def test_omitted_load_target_rejected(self):
++        with self.assertRaisesRegex(ValueError, "shipping allocation:.*load targets"):
++            run(self.national, self.ports, ["ID1", "SG0"])
++
++
++class RecordingResult(unittest.TextTestResult):
++    def __init__(self, *a, **kw): super().__init__(*a, **kw); self.rows = []
++    def addSuccess(self, t): super().addSuccess(t); self.rows.append({"test": t._testMethodName, "status": "PASS"})
++    def addFailure(self, t, e): super().addFailure(t, e); self.rows.append({"test": t._testMethodName, "status": "FAIL", "detail": self._exc_info_to_string(e,t)})
++    def addError(self, t, e): super().addError(t, e); self.rows.append({"test": t._testMethodName, "status": "ERROR", "detail": self._exc_info_to_string(e,t)})
++
++if __name__ == "__main__":
++    r = unittest.TextTestRunner(verbosity=2, resultclass=RecordingResult).run(unittest.defaultTestLoader.loadTestsFromTestCase(ShippingRegression))
++    OUT.write_text(json.dumps({"source": str(ROOT), "scope": "OFFLINE_CONSTRUCTOR_WITH_STUBBED_GIS_NO_SOLVE", "fixture_not_model_data": True, "python": sys.version, "pandas": pd.__version__, "numpy": np.__version__, "tests": r.rows, "passed": r.wasSuccessful()}, indent=2))
++    sys.exit(0 if r.wasSuccessful() else 1)

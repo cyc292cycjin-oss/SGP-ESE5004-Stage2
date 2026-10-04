@@ -1,0 +1,25 @@
+commit 0ec4af7f749cc1642c86deeffa6c2ccdb8800926
+Author:     Hazem <hazem.abdel-khalek@ieg.fraunhofer.de>
+AuthorDate: Fri Apr 22 17:30:56 2022 +0200
+Commit:     Hazem <hazem.abdel-khalek@ieg.fraunhofer.de>
+CommitDate: Fri Apr 22 17:30:56 2022 +0200
+
+    added cop_profiles, solar_thermal_profiles and prepare_heat_data scripts
+
+ Snakefile                                  |   83 +-
+ config.yaml                                |   11 +-
+ data/heat_load_profile_BDEW.csv            |   25 +
+ data/raw/gadm/gadm36_MAR/gadm36_MAR.gpkg   |  Bin 0 -> 8671232 bytes
+ data/raw/gadm/gadm36_MAR/gadm36_MAR.zip    |  Bin 0 -> 2603209 bytes
+ data/raw/gadm/gadm36_MAR/license.txt       |    1 +
+ resources/heat/ashp_cop__15.csv            | 8761 +++++++++++++++++++++++++++
+ resources/heat/district_heat_share__15.csv |   15 +
+ resources/heat/gshp_cop__15.csv            | 8761 +++++++++++++++++++++++++++
+ resources/heat/heat_demand__15.csv         | 8763 ++++++++++++++++++++++++++++
+ resources/heat/solar_thermal__15.csv       | 8761 +++++++++++++++++++++++++++
+ scripts/build_cop_profiles.py              |   40 +
+ scripts/build_heat_demand.py               |   49 +
+ scripts/build_solar_thermal_profiles.py    |   52 +
+ scripts/prepare_heat_data.py               |  126 +
+ scripts/prepare_sector_network.py          |  378 +-
+ 16 files changed, 35818 insertions(+), 8 deletions(-)

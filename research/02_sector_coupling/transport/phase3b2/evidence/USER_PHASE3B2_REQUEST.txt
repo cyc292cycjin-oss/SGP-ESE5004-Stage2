@@ -1,0 +1,837 @@
+# SGP ESE5004 Stage2
+# Phase 3B-2 — Minimum Defensible Transport Baseline & Closeout
+
+## 0. 本轮定位
+
+研究主线：
+
+ASEAN renewable energy transition under sector coupling
+
+本轮是 Transport 的最后一轮。
+
+目标不是建立高精度交通模型，而是把 Transport 处理到：
+
+- 系统边界正确；
+- 主要能源流正确；
+- 电力不重复；
+- shipping / aviation fuel demand 不丢失；
+- carbon scope 不误改；
+- 足以进入第一版 Full-SC assembly。
+
+核心原则：
+
+major-system correctness
+>
+minor-detail completeness
+
+完成本轮后：
+
+TRANSPORT CLOSED
+
+不要继续 Phase3B-3 / B-4。
+
+--------------------------------------------------
+1. 固定代码身份
+--------------------------------------------------
+
+Paper Reference SHA：
+
+5bacad702ccfed17ad19ab510fa710651e966f2c
+
+Current Upstream SC Baseline：
+
+a3616a68ee44592af6527ca9024a90f1956646ae
+
+Buildings engineering validation：
+
+50a73d8f531132c5459174a55cac412d5f684462
+
+继续区分：
+
+Paper Reference
+!=
+Upstream SC
+!=
+Research Validation
+!=
+Future Research Model
+
+不要追随 main 漂移。
+
+--------------------------------------------------
+2. 已冻结的系统级 electricity boundary
+--------------------------------------------------
+
+Research Full-SC：
+
+A*
+=
+end-user final electricity parent account
+
+原则：
+
+future endogenous electricity：
+
+- EV charging
+- heat pumps
+- resistive heating
+- electrolysis
+- synthetic-fuel conversion electricity
+- other conversion electricity
+
+不能同时：
+
+预装在固定 A*
++
+再次由优化产生。
+
+AEO8 generation trajectory：
+
+PAPER_REFERENCE / COMPARATOR
+
+AEO8 final-electricity trajectory：
+
+CONSISTENCY / VALIDATION BENCHMARK
+
+不自动作为完整未来固定Load。
+
+--------------------------------------------------
+3. 已冻结的 Transport 第一版方向
+--------------------------------------------------
+
+第一版 Full-SC Transport：
+
+### Road aggregate
+EXPLICIT
+
+但不拆：
+
+passenger
+freight
+vehicle classes
+
+### Road EV
+EXPLICIT
+
+EV share / electrification path：
+
+external scenario input
+
+不是车辆购买优化。
+
+### Residual road ICE fuel
+FIXED / ACCOUNTED
+
+### Road FCEV
+DEFERRED
+
+### EV DSM / V2G
+DEFERRED
+
+第一版不依赖 smart charging / V2G 灵活性。
+
+### Rail
+EMBEDDED
+
+不新增独立 rail electricity / fuel Loads，
+前提是确认已包含在 direct accounts 一次。
+
+### Domestic shipping
+FIXED fuel obligation
+
+### International shipping
+FIXED separate bunker obligation
+
+### Domestic aviation
+FIXED kerosene/fuel obligation
+
+### International aviation
+FIXED separate bunker obligation
+
+### FT / synthetic-fuel supply
+EXPLICIT SUPPLY OPTION
+
+### Direct shipping H2
+DEFERRED
+
+### Marine ammonia / methanol
+DEFERRED
+
+不要重新讨论以上边界，除非发现明确系统级矛盾。
+
+--------------------------------------------------
+4. Materiality rule
+--------------------------------------------------
+
+只解决会可信影响以下结果的问题：
+
+- total system cost
+- electricity demand magnitude
+- major capacity mix
+- hydrogen / synthetic fuel demand
+- cross-border electricity flows
+- country investment pattern
+- Integrated vs Disconnected comparison
+
+不要研究：
+
+- vehicle classes
+- detailed trip behavior
+- charger types
+- vessel classes
+- aircraft classes
+- small mode shares
+
+除非证明具有系统级影响。
+
+--------------------------------------------------
+5. Track A — Road energy accounting
+--------------------------------------------------
+
+这是本轮首要任务之一。
+
+Phase3B1 已发现当前 road conversion 存在量纲/定义问题。
+
+必须重新建立清晰的 aggregate road accounting。
+
+目标不是车辆服务模型，而是：
+
+Observed / accepted road final energy
+→ road electrification split
+→ residual liquid-fuel demand
+→ explicit EV electricity demand
+
+--------------------------------------------------
+5.1 Road 输入必须区分
+--------------------------------------------------
+
+至少：
+
+RoadTotalFinalEnergy
+
+RoadElectricShare
+
+RoadFuelShare
+
+EVFinalElectricity
+
+ResidualRoadFuel
+
+如果原输入不是：
+
+passenger-km / tonne-km
+
+则不要强行变成 mobility-service model。
+
+第一版允许：
+
+energy-based aggregate road model
+
+只要会计清晰。
+
+--------------------------------------------------
+5.2 禁止使用量纲不一致公式
+--------------------------------------------------
+
+如果当前代码将：
+
+dimensionless share
+×
+kWh/km
+
+与 final energy 直接组合，
+
+必须明确指出不可接受。
+
+建立替代 accounting method。
+
+候选应优先：
+
+road final-energy parent
+× accepted EV energy share
+
+得到：
+
+EV electricity
+
+剩余：
+
+residual road fuel
+
+而不是人为构造 passenger-km。
+
+--------------------------------------------------
+5.3 Road accounting identity
+--------------------------------------------------
+
+至少满足：
+
+RoadParentEnergy
+=
+EVElectricityEquivalent
++
+ResidualRoadFuelEquivalent
+
+注意：
+
+electricity 与 fuel 若单位不同，
+必须在相同 final-energy basis 下检查守恒。
+
+不要把：
+
+useful traction
++
+final energy
+
+直接相加。
+
+--------------------------------------------------
+6. Track B — EV electricity 与 A* 的关系
+--------------------------------------------------
+
+必须回答：
+
+historical / baseline EV electricity
+是否已经包含在：
+
+A*
+
+如果 Road EV 被显式化，
+
+则该部分只能：
+
+subtract once from direct parent electricity
+
+然后作为：
+
+explicit EV electricity load / transport conversion
+
+重新进入。
+
+不能：
+
+A*
++
+EV Load
+
+直接叠加同一个历史用电。
+
+--------------------------------------------------
+6.1 Future EV
+--------------------------------------------------
+
+future EV electricity 应来自：
+
+external EV electrification path
++
+accepted road energy accounting
+
+但不要再用：
+
+AEO8 gross electricity
+作为额外约束。
+
+--------------------------------------------------
+6.2 Charging
+--------------------------------------------------
+
+第一版：
+
+fixed or simple normalized EV charging profile
+
+不启用：
+
+V2G
+DSM
+smart charging optimization
+
+除非 upstream 现有实现无法关闭。
+
+如果无法关闭：
+
+标 SYSTEM_LEVEL_ENGINEERING_FIX_REQUIRED。
+
+--------------------------------------------------
+7. Track C — Rail
+--------------------------------------------------
+
+Rail 第一版：
+
+EMBEDDED
+
+任务只有：
+
+1. 确认 rail electricity 是否已在 A* 中；
+2. 确认 rail liquid fuel 是否已在 transport/fuel account 中；
+3. 如果已有单独 rail Load：
+   在 Research baseline 中提出避免 duplicate 的处理方案。
+
+不要建立 rail sector competition。
+
+不要研究 rail electrification trajectory。
+
+--------------------------------------------------
+8. Track D — Shipping
+--------------------------------------------------
+
+Shipping 第一版采用：
+
+fixed fuel-service obligation
+
+重点不是船型。
+
+必须建立：
+
+DomesticShippingFuel
+
+InternationalShippingBunkerFuel
+
+两个账户。
+
+--------------------------------------------------
+8.1 Shipping source accounting
+--------------------------------------------------
+
+必须确认：
+
+- source
+- year
+- country allocation
+- domestic vs international
+- unit
+- whether fuel demand already in national final energy
+- whether bunker is separate statistical account
+
+禁止：
+
+国际bunker
+被自动并入
+普通国内最终消费。
+
+--------------------------------------------------
+8.2 Shipping fuel supply
+--------------------------------------------------
+
+需求可以固定，
+
+但供给侧允许：
+
+fossil fuel
+vs
+synthetic fuel pathway
+
+如果当前模型已经有 FT / synthetic fuel production，
+
+保持为候选供给技术。
+
+不要新增 direct H2 vessel。
+
+--------------------------------------------------
+9. Track E — Aviation
+--------------------------------------------------
+
+同 Shipping：
+
+DomesticAviationFuel
+
+InternationalAviationBunker
+
+分别核算。
+
+第一版：
+
+fixed aviation fuel obligation
+
+不做 aircraft technology competition。
+
+允许未来：
+
+synthetic kerosene / FT fuel
+
+作为供应路径。
+
+--------------------------------------------------
+10. Track F — Synthetic fuels / H2 electricity accounting
+--------------------------------------------------
+
+必须保证：
+
+Shipping / Aviation fuel demand
+
+若由：
+
+H2
++
+CO2
++
+electricity
+
+生产 synthetic fuels，
+
+则相关 electricity 由模型内生形成。
+
+禁止：
+
+synthetic-fuel electricity
+预装进 A*。
+
+同样禁止：
+
+fixed H2 demand
++
+endogenous fuel pathway
+
+重复表示同一运输服务。
+
+--------------------------------------------------
+11. Track G — Carbon accounting contract
+--------------------------------------------------
+
+这是本轮另一个系统级重点。
+
+当前原研究 carbon assumption：
+
+power-sector absolute CO2 trajectory
+
+1000 → 100 Mt
+
+不得因为恢复 Transport 自动扩张为：
+
+power + transport unified cap
+
+--------------------------------------------------
+11.1 Transport emissions
+--------------------------------------------------
+
+Transport emissions 应至少进入：
+
+Full-system reporting ledger
+
+但不自动进入：
+
+original power-policy cap。
+
+因此必须明确区分：
+
+PolicyCO2_Power
+
+vs
+
+ReportingCO2_FullSystem
+
+--------------------------------------------------
+11.2 本轮任务
+--------------------------------------------------
+
+只设计 carbon accounting contract。
+
+不要修改正式 carbon constraint。
+
+记录：
+
+road fuel
+rail fuel
+shipping
+aviation
+synthetic fuel
+CO2 recycling
+
+各自：
+
+- emission source
+- accounting destination
+- whether policy constrained
+- whether reporting only
+
+--------------------------------------------------
+11.3 必须发现 scope collision
+--------------------------------------------------
+
+如果当前 shared atmosphere store：
+
+会自动让 Transport emissions 进入原power cap，
+
+标：
+
+SYSTEM_LEVEL_BLOCKER
+
+并提出 Phase4 assembly 所需修复。
+
+不要在本轮直接修改正式模型。
+
+--------------------------------------------------
+12. Track H — Shipping NaN / spatial conservation
+--------------------------------------------------
+
+Phase3B1 若已发现 shipping allocation / NaN 问题：
+
+建立最小 engineering fix candidate。
+
+要求：
+
+- source quantity不变；
+- national annual total守恒；
+- missing != 0；
+- invalid spatial weights must fail；
+- no silent fillna。
+
+如果属于明确工程错误：
+
+允许在独立 validation branch 中写：
+
+candidate patch
++
+failing → passing test
+
+但不要 merge Future Research Model。
+
+--------------------------------------------------
+13. Transport temporal simplification
+--------------------------------------------------
+
+第一版：
+
+Road EV：
+
+采用 simple exogenous charging shape，
+若现有 source合理可继续保留作候选。
+
+不要使用：
+
+V2G flexibility
+DSM optimization
+
+Shipping/Aviation：
+
+不要求小时级行为精细化。
+
+可以采用：
+
+annual fuel obligation
++
+simple temporal allocation
+
+只要不影响燃料生产年度系统价值。
+
+--------------------------------------------------
+14. Transport spatial simplification
+--------------------------------------------------
+
+Road：
+
+country → existing nodes
+使用透明权重即可。
+
+Shipping：
+
+优先 ports / coastal nodes if current framework already supports。
+
+Aviation：
+
+airports if current framework available，
+否则 country-level allocation可接受。
+
+原则：
+
+不要为了空间精细度阻塞Full-SC。
+
+但：
+
+country annual conservation
+
+必须通过。
+
+--------------------------------------------------
+15. 第一版 Transport representation matrix
+--------------------------------------------------
+
+最终必须生成：
+
+Mode
+DemandRepresentation
+EnergyCarrier
+ElectricityTreatment
+FuelTreatment
+TemporalTreatment
+SpatialTreatment
+CarbonTreatment
+FullSCStatus
+Blocker
+Reason
+
+至少包括：
+
+Road EV
+Road residual fuel
+Rail electricity
+Rail fuel
+Domestic shipping
+International shipping
+Domestic aviation
+International aviation
+Synthetic fuel production
+
+--------------------------------------------------
+16. Transport closeout criteria
+--------------------------------------------------
+
+Transport 可以关闭，只要：
+
+1. Road aggregate energy accounting科学可解释；
+2. EV electricity不会和A*重复；
+3. rail不会重复；
+4. shipping/aviation fuel obligation存在明确账本；
+5. synthetic-fuel electricity内生；
+6. transport carbon不误入原power-only cap；
+7. major demand spatial/year totals守恒；
+8. 无系统级NaN/静默丢量。
+
+不要求：
+
+- perfect mobility service
+- complete vehicle stock
+- perfect charger behavior
+- full V2G
+- vessel competition
+- aircraft competition
+
+--------------------------------------------------
+17. 本轮禁止事项
+--------------------------------------------------
+
+禁止：
+
+- passenger/freight精细拆分
+- vehicle-class model
+- new FCEV
+- new direct shipping H2
+- ammonia/methanol shipping
+- V2G
+- DSM
+- transport behavior optimization
+- new carbon policy
+- full Integrated / Disconnected solve
+- country allocation economics
+- Myerson / Shapley
+
+--------------------------------------------------
+18. 本轮允许的工程修改
+--------------------------------------------------
+
+只允许：
+
+明确的 transport engineering bug candidate fixes
+
+例如：
+
+- dimensional road-accounting error
+- NaN / silent demand loss
+- duplicate carrier naming
+- spatial allocation conservation
+
+必须：
+
+Evidence
+→ failing test
+→ minimal patch
+→ passing test
+
+每项独立 branch / commit。
+
+不要直接 merge research main。
+
+--------------------------------------------------
+19. Deliverables
+--------------------------------------------------
+
+请产出：
+
+1. TRANSPORT_MINIMUM_DEFENSIBLE_BASELINE.md
+
+2. ROAD_ENERGY_ACCOUNTING_SPEC.md
+
+3. ROAD_EV_ELECTRICITY_ACCOUNTING.md
+
+4. RAIL_EMBEDDED_ACCOUNTING.md
+
+5. SHIPPING_FUEL_ACCOUNTING.md
+
+6. AVIATION_FUEL_ACCOUNTING.md
+
+7. TRANSPORT_SYNTHETIC_FUEL_ACCOUNTING.md
+
+8. TRANSPORT_CARBON_ACCOUNTING_CONTRACT.md
+
+9. TRANSPORT_SPATIAL_TEMPORAL_MINIMUM.md
+
+10. TRANSPORT_FIRST_FULLSC_BOUNDARY.csv
+
+11. TRANSPORT_ENGINEERING_FIX_REPORT.md
+    only if real fixes are required
+
+12. TRANSPORT_FIX_TEST_MATRIX.csv
+    only if patches are implemented
+
+13. TRANSPORT_MATERIALITY_CLOSEOUT.csv
+
+14. TRANSPORT_PHASE3_CLOSEOUT.md
+
+15. NEXT_FULLSC_HANDOFF.md
+
+--------------------------------------------------
+20. Final questions
+--------------------------------------------------
+
+必须回答：
+
+A. Road aggregate model 是否已经具有清晰能量定义？
+
+B. 当前 road conversion 的量纲问题是否关闭？
+
+C. EV electricity 是否能保证与 A* exactly-once accounting？
+
+D. V2G / DSM 是否可以安全 deferred？
+
+E. Rail 是否可以完全 embedded？
+
+F. Shipping domestic / international bunker 是否区分清楚？
+
+G. Aviation domestic / international bunker 是否区分清楚？
+
+H. Synthetic fuel electricity 是否全部由模型内生产生？
+
+I. Transport emissions 是否能够与原power-policy carbon cap分开？
+
+J. Shipping/Aviation spatial allocation 是否保持国家年度守恒？
+
+K. 还剩哪些真正 system-level blockers？
+
+L. 哪些 Transport 细节可明确记录为 limitation 而不再阻塞？
+
+M. 第一版Full-SC Transport是否可冻结？
+
+最终必须给：
+
+TRANSPORT_CLOSED_FOR_FULLSC_ASSEMBLY
+
+YES / NO
+
+如果 NO：
+
+只列最少的 system-level blocker。
+
+不要继续提出新的 Transport deep-dive phase。
+
+--------------------------------------------------
+21. Stop condition
+--------------------------------------------------
+
+完成后停止。
+
+不要进入 Transport Phase3B-3。
+
+不要运行正式模型。
+
+不要进入 Integrated / Disconnected experiments。
+
+返回用户 + ChatGPT 做 Human Scientific Review。

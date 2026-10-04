@@ -1,0 +1,95 @@
+[
+  {
+    "member": "results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc",
+    "co2_carrier_factors": {
+      "geothermal": 0.12,
+      "co2": -1.0
+    },
+    "emitting_links": [
+      {
+        "port": "bus2",
+        "carriers": {
+          "CCGT": 196,
+          "OCGT": 98,
+          "SMR": 98,
+          "SMR CC": 98,
+          "biomass": 5,
+          "coal": 101,
+          "lignite": 10,
+          "oil": 22
+        }
+      },
+      {
+        "port": "bus3",
+        "carriers": {}
+      }
+    ],
+    "co2_limit": {
+      "lv_limit": {
+        "type": "transmission_volume_expansion_limit",
+        "carrier_attribute": "AC, DC",
+        "sense": "<=",
+        "constant": 353746853.52332264,
+        "mu": -5.218508147634079e-10,
+        "investment_period": null
+      }
+    },
+    "atmosphere_store": {
+      "co2 atmosphere": {
+        "carrier": "co2",
+        "e_cyclic": false,
+        "e_initial": 0.0
+      }
+    }
+  },
+  {
+    "member": "results-asean-paper-v1/decarbonize-aims-3H/elec_s_100_ec_lv2.0__3h_2050_0.071_DEC_0export.nc",
+    "co2_carrier_factors": {
+      "geothermal": 0.12,
+      "co2": -1.0
+    },
+    "emitting_links": [
+      {
+        "port": "bus2",
+        "carriers": {
+          "CCGT": 260,
+          "OCGT": 108,
+          "SMR": 98,
+          "SMR CC": 98,
+          "coal": 79,
+          "lignite": 7,
+          "oil": 20
+        }
+      },
+      {
+        "port": "bus3",
+        "carriers": {}
+      }
+    ],
+    "co2_limit": {
+      "lv_limit": {
+        "type": "transmission_volume_expansion_limit",
+        "carrier_attribute": "AC, DC",
+        "sense": "<=",
+        "constant": 353746853.52332264,
+        "mu": -6.736857435984378e-07,
+        "investment_period": null
+      },
+      "CO2Limit": {
+        "type": "primary_energy",
+        "carrier_attribute": "co2_emissions",
+        "sense": "<=",
+        "constant": 100000000.0,
+        "mu": -165.40687556940574,
+        "investment_period": null
+      }
+    },
+    "atmosphere_store": {
+      "co2 atmosphere": {
+        "carrier": "co2",
+        "e_cyclic": false,
+        "e_initial": 0.0
+      }
+    }
+  }
+]

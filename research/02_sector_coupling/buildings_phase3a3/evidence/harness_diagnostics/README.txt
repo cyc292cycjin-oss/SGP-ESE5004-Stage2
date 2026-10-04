@@ -1,0 +1,1 @@
+First E1 expanded harness omitted custom Bus.location assignment. Fixed fixture only; first attempt is not an engineering verdict. No model source changed.
