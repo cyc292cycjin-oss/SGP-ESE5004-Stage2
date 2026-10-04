@@ -1,0 +1,1294 @@
+# SGP ESE5004 Stage2
+# Phase 4 — Full-SC Research Model Assembly & Validation
+# Gate 4 — First Full-SC Research Network Assembly
+#
+# GOAL:
+# Build the first complete, UNSOLVED ASEAN sector-coupled Research Network.
+# This is NOT yet a formal experiment and MUST NOT run an optimizer.
+
+--------------------------------------------------
+0. Authoritative starting state
+--------------------------------------------------
+
+Research branch:
+
+research/full-sc-baseline
+
+Gate3 accepted Research HEAD:
+
+fa82156ee74a1fd2a93a88b774c9f9827c2d3f4c
+
+Before any change verify:
+
+git branch --show-current
+git status
+git rev-parse HEAD
+git log -1
+
+Required:
+
+branch = research/full-sc-baseline
+
+HEAD =
+fa82156ee74a1fd2a93a88b774c9f9827c2d3f4c
+
+working tree = CLEAN
+
+Remote main must remain unchanged.
+
+If the Research HEAD differs unexpectedly:
+
+STOP.
+
+Do not attempt to reconstruct history from memory.
+
+--------------------------------------------------
+1. Gate4 objective
+--------------------------------------------------
+
+Gate4 has THREE engineering steps:
+
+A. Assembly Input Freeze
+
+B. Topology Repair + Full Research Network Build
+
+C. Actual-Network Static Validation
+
+At the end we want:
+
+one complete unsolved Research Full-SC network
+
+with:
+
+- real Research demand ownership;
+- Research carrier architecture;
+- Research carbon architecture;
+- valid topology;
+- no silent missing-to-zero behaviour;
+- no unintended cross-border carrier sharing;
+- identifiable active sector-coupling pathways;
+- an exact future cross-border electricity control set.
+
+DO NOT run an optimizer.
+
+--------------------------------------------------
+2. Important scope rule
+--------------------------------------------------
+
+Do NOT reopen Phase1–3 sector design.
+
+Already frozen:
+
+Buildings:
+minimum-defensible / mostly embedded
+
+Transport:
+aggregate road + explicit EV structure;
+rail embedded;
+shipping/aviation fixed fuel obligations
+
+Industry:
+fixed final-energy core + qualified substitution only
+
+Agriculture:
+embedded/fixed
+
+Cross-border electricity:
+future core intervention
+
+Cross-border H2:
+OFF
+
+Cross-border gas physical network:
+OFF
+
+Cross-border CO2:
+OFF
+
+NH3/methanol networks:
+OFF/deferred
+
+PolicyCO2_Power:
+separate from ReportingCO2_FullSystem
+
+Do not redesign these unless the assembly proves an actual contradiction.
+
+--------------------------------------------------
+3. Gate4 philosophy — Minimum Defensible Assembly
+--------------------------------------------------
+
+This Gate must NOT become another broad data-search phase.
+
+Use:
+
+major-system correctness
+>
+minor-detail completeness
+
+For an unresolved detail ask:
+
+“Can this credibly change system cost, major capacity,
+sector electrification, H2/synthetic-fuel demand,
+cross-border electricity flows, or Integrated-vs-Disconnected value?”
+
+If NO:
+
+document limitation and proceed.
+
+If YES:
+
+treat as assembly blocker.
+
+Do not invent a numeric materiality threshold.
+
+--------------------------------------------------
+4. Step A — Assembly Input Freeze
+--------------------------------------------------
+
+Gate2 created the demand ledger and many numerical candidates remain PENDING.
+
+Gate4 must create the minimum defensible numerical input set needed to build the first Research network.
+
+Do NOT broadly search for new datasets.
+
+Priority:
+
+1. existing Human-frozen decisions;
+2. authoritative source values already recovered;
+3. validated frozen upstream values when scientifically compatible;
+4. transparent embedded/fixed fallback;
+5. if material source conflict remains, STOP that account rather than guessing.
+
+--------------------------------------------------
+5. Numeric acceptance rule
+--------------------------------------------------
+
+Codex must NOT silently mark arbitrary candidates HUMAN_ACCEPTED.
+
+Create an explicit Gate4 assembly status:
+
+ASSEMBLY_V1_ACCEPTED
+
+This may only be assigned when:
+
+- source identity exists;
+- unit is known;
+- year is known;
+- carrier/sector definition is compatible;
+- transformation is reproducible;
+- there is no unresolved material contradiction;
+- value obeys the Phase3 scientific boundary.
+
+For unresolved minor subcategories:
+
+prefer retaining them in an accepted parent account
+
+instead of inventing child values.
+
+Missing != zero.
+
+--------------------------------------------------
+6. Electricity parent A*
+--------------------------------------------------
+
+Research A* remains:
+
+end-user final electricity parent account
+
+NOT:
+
+AEO8 generation.
+
+Gate4 must freeze the actual numerical A* inputs needed by the first assembled network.
+
+Use the Gate2 source/classification work.
+
+Important:
+
+UNSD sector rows were shown NOT to form a simple mutually exclusive decomposition of the national parent.
+
+Therefore DO NOT construct:
+
+O = A* - sum(all UNSD sector rows)
+
+unless classification has been demonstrated to be mutually exclusive.
+
+Preferred rule:
+
+Use the accepted national final-electricity parent account
+as the physical electricity total.
+
+Only subtract a child account from A*
+when that child's ownership and inclusion in A*
+are explicitly established.
+
+Otherwise leave it embedded.
+
+--------------------------------------------------
+7. Future direct electricity
+--------------------------------------------------
+
+Do NOT restore AEO8 generation as direct Load target.
+
+Do NOT preload:
+
+EV electricity
+HP electricity
+electrolysis electricity
+FT electricity
+
+inside future direct A* if those are endogenous/explicit conversion loads.
+
+If a complete future direct-electricity decomposition remains unavailable:
+
+use the minimum transparent Research Assembly V1 method already supported by accepted sector/account data.
+
+Document:
+
+base year
+target year
+growth method
+which services remain embedded
+which conversion demands are excluded
+
+If a future direct-electricity quantity remains materially ambiguous:
+
+flag it before network construction.
+
+Do not invent a residual correction.
+
+--------------------------------------------------
+8. Buildings Assembly V1
+--------------------------------------------------
+
+Preserve Phase3/Gate2 boundary:
+
+Residential and Services remain distinct accounts.
+
+Cooling:
+embedded in direct electricity
+
+Cooking:
+non-explicit / accounting only
+
+Space/water heat:
+explicit only where already accepted;
+otherwise embedded
+
+District heating:
+no uniform ASEAN default
+
+Existing heating stock:
+do not fabricate
+
+BDEW:
+reference only
+
+Critical validation:
+
+The assembled network must NOT recreate upstream default heat Loads
+for accounts frozen as EMBEDDED.
+
+Produce a final country × sector Buildings representation matrix.
+
+--------------------------------------------------
+9. Transport Assembly V1
+--------------------------------------------------
+
+Freeze the minimum values required for:
+
+aggregate Road parent
+EV share/path where accepted
+residual road fuel
+shipping fuel obligation
+aviation fuel obligation
+bunker separation
+
+Passenger/freight:
+do not split
+
+Rail:
+embedded once
+
+Road FCEV:
+deferred
+
+V2G / DSM:
+deferred
+
+Direct H2 vessel / NH3 / methanol:
+deferred
+
+FT:
+supply option, not preloaded electricity demand.
+
+--------------------------------------------------
+10. Road accounting
+--------------------------------------------------
+
+Do NOT resurrect the rejected upstream dimensionally ambiguous road formula.
+
+Use the accepted aggregate final-energy accounting contract.
+
+If RoadParent = R and accepted EV final-energy share = s_E:
+
+EV obligation
+and
+residual fuel obligation
+
+must derive from the same clearly defined parent energy basis.
+
+Do not manufacture passenger-km / vehicle-km.
+
+If target-year EV data remain genuinely material and unresolved:
+
+record a blocker.
+
+--------------------------------------------------
+11. Industry Assembly V1
+--------------------------------------------------
+
+Use:
+
+fixed final-energy core
+
+unless a specific activity/service conversion is already accepted.
+
+Do not force full Mode C.
+
+Must explicitly account for:
+
+electricity
+gas
+oil
+coal
+biomass
+other accepted industrial fuel
+H2 where accepted
+
+Important known issue:
+
+industrial coal may have emissions bookkeeping without corresponding energy demand.
+
+Gate4 must not allow:
+
+CO2 emission
+without
+physical fuel-energy obligation
+
+for an accepted demand account.
+
+If actual coal energy quantity remains unavailable:
+leave that account blocked/unmaterialised,
+not emission-only.
+
+--------------------------------------------------
+12. Industry growth
+--------------------------------------------------
+
+Do not silently use unsourced DEFAULT growth.
+
+Use only a growth path with a traceable basis already recovered/accepted for Assembly V1.
+
+If none exists for a material account:
+
+flag:
+
+FUTURE_INDUSTRY_GROWTH_BLOCKER
+
+Do not reopen a broad literature search.
+
+Timor-Leste missing industrial data:
+
+missing != zero
+
+but it should not block the entire ASEAN network if materiality remains low.
+
+Keep explicit missing/uncertain status.
+
+--------------------------------------------------
+13. Agriculture Assembly V1
+--------------------------------------------------
+
+Agriculture electricity:
+
+embedded in A*
+
+Agriculture fuel:
+
+fixed carrier obligations
+
+At minimum preserve observed:
+
+oil
+biomass
+coal
+
+where source-supported.
+
+Gate4 must ensure accepted agriculture fuel input is not silently lost because an upstream function only consumes a subset of carriers.
+
+Do not build an agriculture technology model.
+
+--------------------------------------------------
+14. Bunker accounts
+--------------------------------------------------
+
+Maintain distinct:
+
+DomesticShippingFuel
+InternationalShippingBunker
+DomesticAviationFuel
+InternationalAviationBunker
+
+International bunker must not be silently reclassified as normal domestic final consumption.
+
+But it may still create legitimate national port/airport fuel-production obligations if that is the frozen Research boundary.
+
+--------------------------------------------------
+15. External commodity inputs
+--------------------------------------------------
+
+Freeze the minimum defensible actual values needed for:
+
+gas external supply
+oil external supply
+coal if external
+other fossil commodity supply
+biomass resource/potential where applicable
+CO2 storage capacity where applicable
+
+For every source record:
+
+year
+currency year
+unit
+HHV/LHV basis where relevant
+availability/capacity
+country scope
+price source
+
+Do not assume that “same price” means “shared physical pool”.
+
+--------------------------------------------------
+16. Biomass resource freeze
+--------------------------------------------------
+
+Gate3 architecture removed the conceptual legitimacy of free `Earth solid biomass` sharing.
+
+Gate4 must provide an actual first-network representation.
+
+If an ASEAN total biomass resource is used:
+
+country/node allocations must sum to the accepted total.
+
+Do not replicate the full regional potential into every country.
+
+If country allocation is unresolved:
+
+either:
+- use an accepted country resource source;
+or
+- keep biomass constrained/unavailable where unsupported.
+
+Do not invent cross-border biomass trade.
+
+--------------------------------------------------
+17. CO2 geological storage input
+--------------------------------------------------
+
+Gate3 requires country/node-owned physical CO2 storage.
+
+Gate4 must freeze the actual storage representation required by the first network.
+
+No shared `co2 stored` pool.
+
+No cross-country storage without a CO2 network.
+
+If storage capacity is not yet accepted:
+
+do not create unlimited storage.
+
+A constrained/no-storage fallback is preferable to fictional infinite shared storage.
+
+Document consequences.
+
+--------------------------------------------------
+18. Step B — 765 / 766 topology repair
+--------------------------------------------------
+
+Known issue:
+
+bus 765 exists
+bus 766 absent
+Thai transformer `transf_524_0`
+references 765 → 766
+
+This must be resolved before the first full network build.
+
+Do not guess.
+
+Perform provenance recovery from:
+
+- Paper reference tree
+- Upstream history
+- topology/raw source
+- commit where bus 766 was removed
+- all current references to 766
+
+Determine whether the scientifically correct minimal repair is:
+
+A. restore bus 766
+
+or
+
+B. remove/update the obsolete transformer/reference
+
+or another evidence-supported correction.
+
+Preference:
+
+preserve intended upstream topology;
+do not invent a new physical bus merely to satisfy referential integrity.
+
+--------------------------------------------------
+19. Topology fix requirements
+--------------------------------------------------
+
+Before fix:
+
+create failing referential-integrity test.
+
+After fix:
+
+require:
+
+- all Bus references valid
+- all Transformer endpoints valid
+- all Line endpoints valid
+- all Link endpoints valid
+- no new disconnected artifact
+- node/country assignment valid
+
+Record exact provenance.
+
+Use one isolated logical commit:
+
+fix: repair dangling upstream topology reference
+
+Do not mix demand changes into the topology commit.
+
+--------------------------------------------------
+20. Research build configuration
+--------------------------------------------------
+
+Now make:
+
+configs/research/baseline.yaml
+
+a real runnable Research Assembly configuration.
+
+It should inherit upstream defaults where appropriate,
+with explicit Research overrides.
+
+Do not copy the entire upstream config unless technically unavoidable.
+
+The config must activate the intended first Full-SC structure.
+
+Critically inspect and remove/disable any final crop such as:
+
+only_elec_network=true
+
+or equivalent behaviour that would reduce the assembled network back to an electricity-only case.
+
+--------------------------------------------------
+21. Integrated / Disconnected configs
+--------------------------------------------------
+
+Do NOT yet make the final scenario difference operational.
+
+They may inherit the runnable Research baseline.
+
+At Gate4:
+
+integrated.yaml
+disconnected.yaml
+
+must NOT yet be used for formal comparison.
+
+However, Gate4 must produce the exact future control set of cross-border electricity components.
+
+--------------------------------------------------
+22. Build the first complete Research network
+--------------------------------------------------
+
+Run the Research workflow only through:
+
+full network construction / export
+
+NOT optimization.
+
+Generate the first complete unsolved network, e.g.:
+
+research_fullsc_unsolved_<year>.nc
+
+or repository-consistent equivalent.
+
+If multiple target years are naturally produced by the workflow,
+it is acceptable to build them,
+but do not expand scope merely for completeness.
+
+2050 is the primary scientific target.
+
+--------------------------------------------------
+23. Network artifact policy
+--------------------------------------------------
+
+The `.nc` network may be too large for Git.
+
+Do not automatically commit it.
+
+Store:
+
+path
+filename
+SHA256
+size
+git commit
+config SHA
+input manifest SHA
+build timestamp
+PyPSA version
+snapshot count
+node count
+component counts
+
+in a network manifest.
+
+If network bytes are gitignored:
+
+that is acceptable.
+
+--------------------------------------------------
+24. No solver means NO solver
+--------------------------------------------------
+
+Do not call:
+
+n.optimize()
+lopf
+linopf
+solver CLI
+Snakemake solve rules
+
+or equivalent.
+
+Network construction may compute static efficiencies/profiles,
+but no optimization objective may be solved.
+
+If an upstream build rule automatically triggers solve:
+
+split the workflow or stop before that rule.
+
+--------------------------------------------------
+25. Step C — Actual network finite-value validation
+--------------------------------------------------
+
+On the actual assembled Research network verify:
+
+- all active Loads finite
+- no NaN
+- no inf
+- no invalid negative demand
+- all buses valid
+- all components have valid carriers
+- all time series align to snapshots
+- snapshot weights finite and positive where expected
+
+Do not use silent fillna(0) as repair.
+
+--------------------------------------------------
+26. Source → sector → node → time conservation
+--------------------------------------------------
+
+For every accepted numerical demand account verify:
+
+Source annual value
+
+=
+
+Sector ledger value
+
+=
+
+sum spatial nodes
+
+=
+
+sum_t(
+p_set × physical snapshot weights
+)
+
+within declared numerical tolerance.
+
+Report separately for:
+
+electricity
+Buildings direct fuel if any
+Road
+Industry
+Agriculture
+Shipping
+Aviation
+bunker
+
+Missing/PENDING accounts must not appear as zero-valued accepted obligations.
+
+--------------------------------------------------
+27. Exactly-once actual network test
+--------------------------------------------------
+
+Re-run the Gate2 ownership rules against the real network.
+
+Verify no duplicate representation such as:
+
+A*
++
+explicit sector electricity child
++
+conversion electricity
+
+for the same physical obligation.
+
+Also verify:
+
+embedded Buildings heat
+is not recreated as explicit heat Load.
+
+Rail:
+represented once.
+
+Bunker:
+not duplicated into domestic parent.
+
+--------------------------------------------------
+28. Carrier reachability on actual network
+--------------------------------------------------
+
+Gate3 synthetic architecture passed.
+
+Now run graph reachability on the ACTUAL Research network.
+
+For prohibited physical cross-border carriers:
+
+H2
+gas
+CO2
+biomass where trade not enabled
+synthetic fuel where trade not enabled
+
+prove:
+
+country A supply
+cannot reach
+country B demand
+
+without an accepted physical network.
+
+Electricity remains the intended exception.
+
+Any hidden path is a Gate4 blocker.
+
+--------------------------------------------------
+29. External market validation
+--------------------------------------------------
+
+Where multiple countries share an external commodity price:
+
+verify actual network topology is:
+
+external market metadata/source
+→ independent country import interface
+→ country carrier bus
+
+not:
+
+one ASEAN carrier bus
+→ all countries
+
+Price sharing is allowed.
+
+Physical quantity sharing is not.
+
+--------------------------------------------------
+30. Carbon attribution on actual network
+--------------------------------------------------
+
+Apply Gate3 carbon architecture to every relevant actual Research component.
+
+Every emitting component must be classified.
+
+No UNKNOWN policy ownership for an active material emitting component.
+
+For each:
+
+PowerPolicy = YES/NO
+FullSystemReporting = YES/NO
+
+Mixed-use components such as CHP / SMR / H2 conversion must be classified by actual function in the Research network.
+
+Do not decide from carrier name alone.
+
+--------------------------------------------------
+31. Power carbon trajectory validation
+--------------------------------------------------
+
+Verify actual network policy layer uses exactly:
+
+2025 1000 Mt
+2030 820 Mt
+2035 640 Mt
+2040 460 Mt
+2045 280 Mt
+2050 100 Mt
+
+and that the constraint acts only on accepted PowerPolicy components.
+
+Do not solve.
+
+Static structural inspection/test is enough.
+
+--------------------------------------------------
+32. Full-system reporting validation
+--------------------------------------------------
+
+Confirm reporting hooks exist for:
+
+Power
+Buildings direct fuel
+Road
+Industry
+Agriculture
+Domestic shipping
+International shipping
+Domestic aviation
+International aviation
+
+where those emissions are represented.
+
+Reporting totals may not yet be calculated by dispatch,
+because there is no solve.
+
+This Gate only verifies structural accounting readiness.
+
+--------------------------------------------------
+33. Electricity link classification
+--------------------------------------------------
+
+On the ACTUAL assembled Research network classify every relevant:
+
+Line
+Link
+DC connection
+AC interconnector
+
+as:
+
+DOMESTIC
+CROSS_BORDER
+UNKNOWN
+
+No material electricity transfer component may remain UNKNOWN.
+
+Produce the exact candidate set that Gate5 may switch between:
+
+Integrated
+and
+Disconnected.
+
+Do not switch them yet.
+
+--------------------------------------------------
+34. Integrated/Disconnected control-set rules
+--------------------------------------------------
+
+Candidate control set must contain ONLY:
+
+physical cross-border electricity transfer components.
+
+It must NOT contain:
+
+domestic lines
+H2 links
+gas interfaces
+CO2 interfaces
+external fuel imports
+storage
+generation
+sector converters
+
+Record:
+
+Component
+Name
+Country0
+Country1
+Carrier
+ExistingCapacity
+Expandable
+FutureScenarioControl
+
+--------------------------------------------------
+35. Active sector-coupling pathway audit
+--------------------------------------------------
+
+This is scientifically important.
+
+The final network must not merely be called “Full-SC”.
+
+Inspect actual active paths and determine whether the network contains valid nonzero-capable routes such as:
+
+Electricity → EV
+
+Electricity → H2 via electrolysis
+
+H2 → accepted industry demand if represented
+
+Electricity/H2/CO2 → FT synthetic fuel
+
+FT → shipping/aviation/road fuel obligations
+
+Electricity → heat
+only where explicit heat service is actually accepted
+
+Other accepted conversion pathways
+
+For each record:
+
+Pathway
+InputCarrier
+Technology/Link
+OutputCarrier
+DemandSink
+CapacityStatus
+DemandStatus
+CanCarryNonzeroFlow
+ScientificRole
+
+--------------------------------------------------
+36. Full-SC definition test
+--------------------------------------------------
+
+Do NOT impose an arbitrary minimum number of pathways.
+
+But answer honestly:
+
+Does the assembled Research network contain materially meaningful endogenous cross-sector conversion pathways?
+
+If the network has effectively become:
+
+electricity model
++
+fixed fuel Loads
+
+then:
+
+FULL_SC_REPRESENTATION = FAIL
+
+and stop before solver.
+
+--------------------------------------------------
+37. Sector/component inventory
+--------------------------------------------------
+
+Produce actual network counts for at least:
+
+Buses
+Loads
+Generators
+Links
+Stores
+StorageUnits
+Lines
+Transformers
+GlobalConstraints
+
+grouped by:
+
+country
+carrier
+sector where possible.
+
+Compare against:
+
+upstream/reference
+and
+Research design expectations.
+
+Large unexplained disappearance or duplication must be investigated.
+
+--------------------------------------------------
+38. Snapshots and weighting
+--------------------------------------------------
+
+Record actual:
+
+year
+snapshot count
+time resolution
+physical duration weight sum
+objective weighting
+weather year
+
+Verify:
+
+physical annual energy integration is correct.
+
+Do not assume objective weights and physical MWh weights are interchangeable without checking.
+
+--------------------------------------------------
+39. Input identity and network manifest
+--------------------------------------------------
+
+Update Phase4 input registry.
+
+Create:
+
+PHASE4_FIRST_FULLSC_NETWORK_MANIFEST.json
+
+At minimum:
+
+network_id
+git_commit
+branch
+config
+config_sha256
+input_registry_sha256
+network_file
+network_sha256
+build_time
+Python_version
+PyPSA_version
+year
+weather_year
+spatial_resolution
+snapshot_count
+physical_weight_sum
+component_counts
+demand_ledger_version
+carrier_architecture_version
+carbon_architecture_version
+solver_status
+
+solver_status MUST equal:
+
+NOT_RUN
+
+--------------------------------------------------
+40. Git discipline
+--------------------------------------------------
+
+Recommended logical commits:
+
+data: freeze minimum defensible assembly inputs
+
+fix: repair dangling upstream topology reference
+
+feat: assemble first research full-sc network
+
+test: validate assembled full-sc network
+
+Do not combine everything into one commit.
+
+Do not commit generated large `.nc` unless repository policy explicitly allows it.
+
+Commit manifests and reproducible scripts.
+
+--------------------------------------------------
+41. Do not alter main
+--------------------------------------------------
+
+All changes remain:
+
+research/full-sc-baseline
+
+Remote main must remain unchanged.
+
+No force push.
+
+No merge to main.
+
+--------------------------------------------------
+42. Gate4 blockers
+--------------------------------------------------
+
+Do not create hundreds of blocker rows without consolidation.
+
+Classify blockers into system-level groups such as:
+
+INPUT_FREEZE
+TOPOLOGY
+DEMAND_CONSERVATION
+CARRIER_REACHABILITY
+CARBON_ATTRIBUTION
+ACTIVE_SECTOR_COUPLING
+TEMPORAL_SPATIAL_IDENTITY
+WORKFLOW_BUILD_FAILURE
+
+For each blocker state:
+
+material impact
+affected countries/sectors
+minimum resolution
+
+Minor uncertainties belong in limitations,
+not Gate4 blockers.
+
+--------------------------------------------------
+43. Required deliverables
+--------------------------------------------------
+
+Produce:
+
+1. PHASE4_GATE4_START_IDENTITY.md
+
+2. PHASE4_ASSEMBLY_INPUT_FREEZE.md
+
+3. PHASE4_ASSEMBLY_INPUT_REGISTRY.csv
+
+4. PHASE4_TOPOLOGY_FIX_REPORT.md
+
+5. PHASE4_RESEARCH_BUILD_CONFIG.md
+
+6. PHASE4_FIRST_FULLSC_NETWORK_MANIFEST.json
+
+7. PHASE4_NETWORK_COMPONENT_INVENTORY.csv
+
+8. PHASE4_ACTUAL_DEMAND_CONSERVATION.csv
+
+9. PHASE4_ACTUAL_EXACTLY_ONCE_TESTS.csv
+
+10. PHASE4_ACTUAL_CARRIER_REACHABILITY.csv
+
+11. PHASE4_ACTUAL_CARBON_ATTRIBUTION.csv
+
+12. PHASE4_ACTUAL_ELECTRICITY_LINK_CLASSIFICATION.csv
+
+13. PHASE4_ACTIVE_SECTOR_COUPLING_PATHWAYS.csv
+
+14. PHASE4_GATE4_BLOCKERS.csv
+
+15. PHASE4_GATE4_TEST_REPORT.md
+
+16. PHASE4_GATE4_READINESS.md
+
+--------------------------------------------------
+44. Final required answers
+--------------------------------------------------
+
+Answer explicitly:
+
+A. Which numerical inputs were frozen for Assembly V1?
+
+B. Which previously PENDING inputs remain unresolved?
+
+C. What exact A* source/year/boundary is used in the assembled network?
+
+D. Is AEO8 generation absent as the Research direct-demand target?
+
+E. Are Buildings embedded/explicit representations consistent?
+
+F. Is Road accounting dimensionally consistent?
+
+G. Are Industry and Agriculture fuel obligations conserved?
+
+H. Are domestic/international bunker accounts separated?
+
+I. How was 765/766 resolved, and what evidence supports the repair?
+
+J. Was the full Research workflow successfully built through network export?
+
+K. What is the first Research Full-SC `.nc` identity and SHA256?
+
+L. Were ZERO optimization solves run?
+
+M. Are all accepted Loads finite?
+
+N. Does source→sector→node→time conservation pass?
+
+O. Does exactly-once demand accounting pass on the actual network?
+
+P. Are prohibited cross-border H2/gas/CO2/biomass paths absent?
+
+Q. Are external commodity markets non-physical across countries?
+
+R. Is every material emitting component classified for PowerPolicy vs FullSystemReporting?
+
+S. Is the 1000→100 Mt Power policy trajectory structurally correct?
+
+T. What exact physical electricity components form the future Integrated/Disconnected control set?
+
+U. Which active sector-coupling pathways actually exist in the assembled network?
+
+V. Is the network genuinely sector-coupled rather than electricity + fixed Loads?
+
+W. What system-level blockers remain before the first validation solve?
+
+X. What is the final Research branch HEAD?
+
+Y. Is remote main unchanged?
+
+--------------------------------------------------
+45. Final statuses
+--------------------------------------------------
+
+Return:
+
+ASSEMBLY_INPUTS_FROZEN = YES / PARTIAL / NO
+
+TOPOLOGY_REFERENTIAL_INTEGRITY = PASS / FAIL
+
+FIRST_FULLSC_UNSOLVED_NETWORK_BUILT = YES / NO
+
+SOLVER_RUNS_EXECUTED = 0 / >0
+
+ACTUAL_NETWORK_FINITE_VALUES = PASS / FAIL
+
+ACTUAL_DEMAND_CONSERVATION = PASS / PARTIAL / FAIL
+
+ACTUAL_EXACTLY_ONCE_ACCOUNTING = PASS / PARTIAL / FAIL
+
+HIDDEN_CROSSBORDER_CARRIER_SHARING = ELIMINATED / PARTIAL / PRESENT
+
+ACTUAL_POWER_CO2_SCOPE = PASS / PARTIAL / FAIL
+
+ACTIVE_SECTOR_COUPLING_PATHWAYS = PASS / PARTIAL / FAIL
+
+ELECTRICITY_INTERCONNECTION_CONTROL_SET_READY = YES / NO
+
+FULL_SC_RESEARCH_NETWORK_STATICALLY_VALIDATED = YES / NO
+
+READY_FOR_PHASE4_GATE5_VALIDATION_SOLVE = YES / NO
+
+--------------------------------------------------
+46. Stop condition
+--------------------------------------------------
+
+After Gate4 completion:
+
+STOP.
+
+Do NOT:
+
+- run optimizer
+- run formal baseline
+- run Integrated
+- run Disconnected
+- compare objective values
+- generate research conclusions
+
+Return Gate4 results to user + ChatGPT for Human Scientific Review.
+
+The next gate, only after approval, will be:
+
+Phase4 Gate5 — Reduced Validation Solve & Dynamic Balance Validation
