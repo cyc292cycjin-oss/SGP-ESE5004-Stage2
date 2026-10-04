@@ -13,7 +13,13 @@
     "materialisation": "NOT_SEPARATELY_MATERIALISED",
     "explicit_EV_pathway": "DEFERRED_TO_EV_SENSITIVITY",
     "EV_value": null,
-    "forbidden": ["whole-transport 0.2% used as a road electricity share", "ATS vehicle/fuel shares", "BAU/OPT GAMS road-demand substitution", "separate fixed EV Load", "EV null interpreted as zero"],
+    "forbidden": [
+      "whole-transport 0.2% used as a road electricity share",
+      "ATS vehicle/fuel shares",
+      "BAU/OPT GAMS road-demand substitution",
+      "separate fixed EV Load",
+      "EV null interpreted as zero"
+    ],
     "source_context": "AEO8 printed p63 / PDF65 BAS transport total; printed p64 / PDF66 road 93.5% text alongside ATS Figure3.8. Applying that approximate road proportion to BAS is the human modelling decision, not a reported BAS road table.",
     "carrier_shares": "Only directly compatible evidence; no invented share. Unknown residual stays UNCLASSIFIED."
   },
@@ -21,20 +27,23 @@
     "method": "ASSEMBLY_V1_BUNKER_CONSTANT_2019",
     "Source2050": "HUMAN_BASELINE_ASSUMPTION",
     "formula": "D[c,2050]=D[c,2019] only where the 2019 obligation is verified",
-    "accounts": ["InternationalShippingBunker", "InternationalAviationBunker"],
+    "accounts": [
+      "InternationalShippingBunker",
+      "InternationalAviationBunker"
+    ],
     "materiality": "MATERIAL_EXOGENOUS_ASSUMPTION",
     "PHASE5_SENSITIVITY_REQUIRED": "YES",
     "missing_rule": "MISSING/PENDING; missing != zero; do not redistribute Singapore quantities",
     "Singapore_international_shipping_TWh": "535.3418",
     "reason": "No compatible country-level 2050 final-energy trajectory recovered; avoid incompatible global activity/emissions growth. Not an AEO8/IMO/ICAO forecast or claim of zero activity growth.",
     "supply": "Fixed energy obligation may be served by accepted fossil or endogenous synthetic fuel pathways. FT electricity is endogenous, not preloaded in Astar.",
-    "domestic_accounts": "Excluded from this decision; use compatible domestic AEO8 method."
+    "domestic_accounts": "Separate ASSEMBLY_V1_DOMESTIC_CONSTANT_2019 per explicit Gate4 CONTINUE request"
   },
   "Mtoe_to_TWh": {
-    "status": "PENDING_HUMAN_CONVENTION",
-    "value": null,
-    "candidate": "11.63",
-    "note": "INSEE standard toe definition supports 41.868 GJ/toe. AEO8 internal conversion metadata not recovered. Pending prior asynchronous human question; do not treat candidate as accepted."
+    "status": "ASSEMBLY_V1_ACCEPTED",
+    "value": "11.63",
+    "method": "ASSEMBLY_V1_MTOE_CONVENTION_11P63_TWH",
+    "note": "Human operational convention; not an assertion about all AEO8 internal conversion metadata"
   },
   "external_fossil_market": "ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED",
   "biomass": "Local supply capped at accepted fixed obligation only; no surplus resource or free regional pool",
