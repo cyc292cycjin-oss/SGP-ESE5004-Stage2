@@ -40,6 +40,18 @@ class DemandTests(unittest.TestCase):
     def test_wrong_country(self):
         r=accepted();r['Country']='XX'
         with self.assertRaises(ValueError):a.validate_ledger([r])
+    def test_text_false_not_truthy_acceptance(self):
+        r=accepted();r['NumericAccepted']='false'
+        with self.assertRaises(ValueError):a.validate_ledger([r])
+    def test_text_zero_needs_evidence(self):
+        with self.assertRaises(ValueError):a.validate_ledger([accepted(value='0')])
+    def test_raw_nan_not_hidden(self):
+        r=accepted();r['RawValue']='NaN'
+        with self.assertRaises(ValueError):a.validate_ledger([r])
+    def test_year_and_empty_identity(self):
+        r=accepted();r['Year']=None
+        with self.assertRaises(ValueError):a.validate_ledger([r])
+        with self.assertRaises(ValueError):a.validate_ledger([])
     def test_embedded_conflict(self):
         r=accepted();r['Representation']='EMBEDDED'
         with self.assertRaises(ValueError):a.validate_ledger([r])

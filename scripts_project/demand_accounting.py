@@ -123,6 +123,7 @@ def allocate(annual, country, nodes, shapes, physical_weights, *, expected_hours
 
 def validate_ledger(rows):
     """Reject invalid structures; return coverage blockers for honest pending rows."""
+    if not rows:raise ValueError('Empty demand ledger')
     identities=set(); owners=set(); blockers=[]
     for r in rows:
         if set(FIELDS)-r.keys(): raise ValueError('Missing ledger fields')
@@ -131,9 +132,13 @@ def validate_ledger(rows):
         identities.add(rid)
         if r['Country'] not in COUNTRIES or r['Status'] not in STATUSES or r['DemandType'] not in TYPES:
             raise ValueError('Invalid country/status/demand type')
+        if type(r['Year']) is not int or r['Year']<=0:raise ValueError('Invalid accounting year')
+        for field in ('Posting','Required','NumericAccepted','IncludedInAstar','TransferredFromAstar','ExistingEnergyLoad','EmissionsPresent'):
+            if type(r[field]) is not bool:raise ValueError('Untyped ledger boolean: '+field)
+        if r['RawValue'] not in ('',None):energy(r['RawValue'])
         value=r['ConvertedMWh']
         if value is not None:
-            energy(value)
+            value=energy(value)
             if value==0 and r['ZeroEvidence'] not in ('REPORTED_ZERO','NOT_APPLICABLE'):
                 raise ValueError('Zero without source or representation evidence')
         if r['Representation']=='EMBEDDED' and r['Posting']:
