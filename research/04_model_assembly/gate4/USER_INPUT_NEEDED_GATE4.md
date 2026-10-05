@@ -1,11 +1,12 @@
-# Remaining Gate4 evidence and decisions
+# Remaining human review
 
-Already closed: road growth/Mtoe/EV/bunker methods, single-year2050 time boundary, MY road blend reconciliation,23 missing-source combinations,15 NEC base ownership records. Do not ask for cached parent files or reopen broad transport/bunker searches.
+Use CONSOLIDATED_NUMERICAL_DECISIONS.md for one consolidated review. Approved single-year2050 inheritance, demand growth, Mtoe, EV embedded and bunker decisions are not reopened.
 
-1. **Specific blend observations and vintage:** UNSD_MISSING_MEMO_REQUESTS.csv lists country,2019, commodity ZG/ZD, transaction code and official API attempts. ID/PH/VN did not return the selected memo observations; an official transaction-specific memo or explicit exclusion-of-blends metadata is needed. Thailand's new complete road bundle exists locally: AL1284.804 vs old1604kton; BD1575.2 vs old1790kton. The consistent vintage to adopt needs source revision acceptance; do not subtract the new memo from the old totals.
-2. **Rail/NEC quantity methods:** one20-row REMAINING_ACCOUNT_DECISIONS.csv covers5 positive rail parents and15 NEC records. Road-only growth does not authorise their2050 extrapolation. Proposed constant2019 methods are candidates only; no values have been materialised.
-3. **Remaining33 source combinations/coverage:** SOURCE_COVERAGE_REGISTER.csv distinguishes absent source families, absent transactions, retained NEC energy, bounded zeros and existing deferrals. Some Cartesian-product entries may prove nonapplicable; no new coverage exclusion is approved merely by this classification.
-4. **Surviving stock:** approve or replace the visible frozen technology lifetime candidates only with a source-backed decision; resolve material unknown source groups (1440 retirement/lifetime,440 commissioning,318 status) at country×technology level. Exact source raw-bus→100-node map is not present in the reviewed cached inputs: the required artefact is the compatible `busmap_elec_s_100.csv` together with preceding simplification map for author source SHA5bacad702ccfed17ad19ab510fa710651e966f2c, or a separately accepted reproducible mapping method. Existing performance and fixed-O&M basis also need qualification; no blanket2050 efficiency upgrade or zero O&M is approved.
-5. **Actual carrier/carbon parameters:** commodity-specific biomass/liquid-biofuel supply cost and physical CO2/origin evidence; mixed SMR/CC power-policy attribution/lineage for the200 actual events. The physical local architecture exists; it has not guessed these scientific parameters. Policy stays false throughout.
+1.11 existing-stock technology lifetime assumptions, plus grouped missing commissioning/status/capacity qualifications; source-backed existing performance/FOM/VOM. Nuclear project status is shown separately, not automatically inherited.
+2. Exact compatible100-node mapping if available, or approval/rejection of the documented same-country/region/original-partition proxy. Generated electric/carrier files are already provided; do not ask for them as external data.
+3. Thailand local same-vintage replacement choice. All six source series are already cached; no redownload is needed.
+4. RailNonElectric, TransportNEC and OtherNEC2050 methods, plus33 retained source/coverage combinations. No new coverage exclusion was adopted.
+5. Only10 memo observations remain specifically requested: ID ZD121/1221/1235; PH ZD121/1221/1222/1232/1235 and ZG1221; VN ZG1221, all2019. Parent files are cached. Compatible exclusion-of-blends metadata is an alternative; legal ratios are not.
+6. Delivered-cost and physical-carbon/origin treatment for seven actual bio commodities, and mixed-use SMR/SMR-CC attribution by technology structure. SMR means steam methane reforming. Policy remains disabled.
 
-These are distinct from code-generated asset files, which now exist. No complete network or solver run should start until the remaining required inputs and actual asset/static checks pass.
+Every proposed new scientific input remains PENDING. Development assets are not a complete Full-SC or an approved formal scenario.

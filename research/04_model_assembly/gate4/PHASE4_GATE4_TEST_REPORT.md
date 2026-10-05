@@ -1,7 +1,7 @@
 # Gate4 current validation record
 
-Use EXPORT_ROUNDTRIP_TEST_REPORT.md and evidence/TEST_RECEIPTS.json for this delivery. The18 current asset/source tests include a successful SYNTHETIC_TEST_ONLY NetCDF export/readback and positive/negative physical checks. Current continuation and input-freeze regressions, Gate3 validations, actual allocation checks and topology regressions pass. Independent raw-to-target derivation covers all133 accepted2050 demand inputs.
+Current new suite:20 solver-free tests cover unit-first selection, capacity/source identity, missing parts, accepted survivor materialisation, aggregation after screening, same-country/partition mapping, total/additional/shared potential, existing fixed/variable O&M, retained efficiency, thermal fuel/carbon ports and hydro/profile NetCDF roundtrip. A small Linopy constraint-only test creates variables and inspects coefficients/bounds; it does not optimise or invoke a solver.
 
-The actual production DAG asset target ran successfully. Actual development NetCDFs passed structural readback checks. Full-network build status remains BLOCKED_INPUT_FREEZE with56 unresolved target combinations plus15 retained NEC target-method obligations; additional asset/carbon qualifications remain open. No complete-network static-validation pass is claimed. Solver runs=0; Gate5 is closed.
+Related regressions:18 prior asset tests,18 continuation tests and17 input-freeze tests pass. Unchanged completed scientific experiments were not rerun. Exact commands and log hashes are in evidence/TEST_RECEIPTS.json. Synthetic input numbers are marked SYNTHETIC_TEST_ONLY and are not source data.
 
-Earlier194-test results belong to the preceding delivery and remain in Git history. Unchanged completed experiments were not rerun just to increase this count.
+The actual development-asset DAG ran successfully. No candidate lifetime, mapping or Thailand value was accepted or materialised.133 prior targets/arrays are preserved. Actual full export remains blocked; a preflight exit2 is not success of full-network construction. No complete-network static validation or Gate5 pass is claimed. Solver runs=0.

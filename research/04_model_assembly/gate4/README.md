@@ -1,7 +1,9 @@
-# Phase4 Gate4 当前交付
+# Gate4 current delivery index
 
-本轮CONTINUE以`PHASE4_GATE4_READINESS.md`为当前状态；此前方法待批准结论已被显式人类决定替代，历史见Git。
+Read CONSOLIDATED_NUMERICAL_DECISIONS.md, PHASE4_GATE4_READINESS.md and RESEARCH_ASSET_BUILD_REPORT.md first. Full network remains incomplete; no solver and no Gate5.
 
-先读DECISION_SYNC_REPORT、BASE_ACCOUNT_RECONCILIATION、INPUT_AND_ALLOCATION_READINESS、RESEARCH_BUILD_ENTRYPOINT。生产输入仍有具体源账户缺口；131组实际分配已完成，完整.nc未导出，solver=0，Gate5未通过。
+Current stock evidence is UNIT_LEVEL_SURVIVAL_RECONCILIATION.csv and UNIT_PARENT_CAPACITY_RECONCILIATION.csv, plus ASSET_LIFETIME_DECISION_TABLE.csv. The previous ASSET_SURVIVAL_2050.csv / ASSET_SURVIVAL_COUNTRY_TECH.csv are retained prior-delivery aggregate diagnostics, not current unit-first assessments. Their old parent missing-year classifications must not be used instead of the new unit-level result. Git preserves their original context.
 
-交付包另含actual_allocation目录的NPZ、节点表、港口/机场映射及manifest。Git仅保存代码、来源胶囊、审计表和摘要/哈希，不提交作者大型结果或派生数组。源代码与研究层分离，上游不改。
+The current evidence/ASSET_SURVIVAL_2050.json retains source parent records and adds unit_evidence used by the production builder. Unit/parent/country/technology accounting with explicit signed unknown differences is checked in evidence/UNIT_CAPACITY_COUNTRY_TECH_CHECK.json.
+
+Thailand replacement, mapping proxy, numerical lifetimes and grouped methods remain candidates. The existing133 demand values and arrays are unchanged. Synthetic test values are not research inputs. See EXISTING_ASSET_INTEGRATION_CONTRACT.md for the implemented accepted-input interface.

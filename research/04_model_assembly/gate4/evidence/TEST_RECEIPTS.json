@@ -1,14 +1,21 @@
 [
   {
-    "name": "ASSET_TESTS",
+    "name": "SURVIVOR_TESTS",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "tests/research/test_surviving_asset_integration.py"
+    ],
+    "exit_code": 0,
+    "log_sha256": "bf87e111625b3e3cc33b08fff4ef635d4efcf0e226868597f2be08164ea5cbe0"
+  },
+  {
+    "name": "ASSET_REGRESSION",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
       "tests/research/test_gate4_assets.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "2cdc5aa2cc74ce842654782c5a6ce59e0944f166645019ae49203c6fd6c230de"
+    "log_sha256": "c89b3c03dbb96f86aba3819236f112c34aa041246e469900c2ee0f2c7cb5bd8f"
   },
   {
     "name": "CONTINUE_REGRESSION",
@@ -17,112 +24,19 @@
       "tests/research/test_gate4_continue.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "0f71dfabae9eb03a79b7c72caaec3819b9ffe9c912581c6a81322bff4feb23c4"
+    "log_sha256": "3a4d96cfea033510f7f2a5a9ba4d194bcbb19eab5b624422879d69df4aac5a04"
   },
   {
-    "name": "ASSEMBLY_REGRESSION",
+    "name": "INPUT_REGRESSION",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
       "tests/research/test_assembly_input_freeze.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "816d42b1aea653d354196ff5bad638208c4d32aa0c757c8728e425521c0e45a2"
+    "log_sha256": "979bb93a122e5153b2a8fd53735b834c1088ab11f77ca2aeadd803fa58894149"
   },
   {
-    "name": "INDEPENDENT_TARGET_REDERIVATION",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/rebuild_assembly_targets.py",
-      "--repo",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
-      "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/TARGET_REDERIVATION.json"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "7439505c91388cc006d8afdf3adcceb14652ccc1aca316d3aa3f34c819c04982"
-  },
-  {
-    "name": "RESEARCH_DAG_DRY_RUN",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
-      "--snakefile",
-      "workflow/research_assembly.smk",
-      "--cores",
-      "1",
-      "--configfile",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
-      "--dry-run"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "85f01741540a16801591692a87c995142130f7a0b23f9517c24be92cdabfd63a"
-  },
-  {
-    "name": "PRODUCTION_DAG_ASSET_BUILD",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
-      "--snakefile",
-      "workflow/research_assembly.smk",
-      "--cores",
-      "1",
-      "--scheduler",
-      "greedy",
-      "--configfile",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
-      "--",
-      "research_build_production_assets"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "f82dd23d9eed253798f2f19519a54d709781c83be68a9df9ec9c1a041db421e7"
-  },
-  {
-    "name": "GATE3_REGRESSION",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/run_gate3_validation.py",
-      "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/gate3_regression"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "47d6714e94d79b157a0f08fc922b544735db616aca09d7224f4b8d50b9610468"
-  },
-  {
-    "name": "CARRIER_CONFIG_REGRESSION",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/check_research_carriers.py",
-      "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/CARRIER_CONFIG_REGRESSION.json"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "3ce526e978adbaf2f8730fbfeb5cf2a98505e7c89cb2bc4c35fb96d9607d3fd2"
-  },
-  {
-    "name": "TOPOLOGY_REGRESSION",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "tests/research/test_topology_integrity.py"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "passed": true,
-    "log_sha256": "554e197fbbf7912493635fe8e7a96ff4de2d6c3e88722b6671638927837d836d"
-  },
-  {
-    "name": "ACTUAL_INPUT_PREFLIGHT",
+    "name": "FINAL_INPUT_PREFLIGHT",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
       "scripts_project/check_assembly_inputs.py",
@@ -133,15 +47,14 @@
       "--allocation",
       "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
       "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/ACTUAL_INPUT_PREFLIGHT.json"
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_survivors/evidence/FINAL_INPUT_PREFLIGHT.json"
     ],
     "exit_code": 2,
     "expected": 2,
-    "passed": true,
     "log_sha256": "5f4e068a267e9ccb859852ce3473ce0cf505dabad66617849e7c2058ebebfba9"
   },
   {
-    "name": "FULL_NETWORK_GATE",
+    "name": "FINAL_FULL_NETWORK_GATE",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
       "scripts_project/build_research_network.py",
@@ -154,31 +67,23 @@
       "--output",
       "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
       "--report",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/FULL_NETWORK_GATE.json"
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_survivors/evidence/FINAL_FULL_NETWORK_GATE.json"
     ],
     "exit_code": 2,
     "expected": 2,
-    "passed": true,
     "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   {
-    "name": "FINAL_PRODUCTION_DAG",
+    "name": "FINAL_DIFF_CHECK",
     "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
-      "--snakefile",
-      "workflow/research_assembly.smk",
-      "--cores",
-      "1",
-      "--scheduler",
-      "greedy",
-      "--configfile",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_assets/evidence/PRODUCTION_SOURCE_PATHS.json",
-      "--",
-      "research_build_production_assets"
+      "git",
+      "-c",
+      "core.whitespace=cr-at-eol",
+      "diff",
+      "--check"
     ],
     "exit_code": 0,
     "expected": 0,
-    "passed": true,
-    "log_sha256": "4be34630f20605935e9b65dbf388a340445cb2b716957ac1bb7ce640de0e0d6d"
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   }
 ]

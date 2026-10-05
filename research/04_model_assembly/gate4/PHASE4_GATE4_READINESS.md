@@ -1,13 +1,16 @@
-# Gate4 readiness — targeted completion
+# Gate4 readiness — surviving assets and numerical review
 
-**FULLSC_NETWORK_NOT_COMPLETE; Gate5=NO; solver runs=0.**
+**FULLSC_NETWORK_NOT_COMPLETE; Gate5=NO; solver_runs=0.**
 
--133 accepted target values and133 actual allocations; the original131 arrays remain bit-for-bit unchanged.
--Original56 source-missing combinations:23 closed with commodity-bounded FEC+NEC exhaustion proof;33 remain. The proof retains positive NEC energy and does not declare unreported commodities zero.
--Malaysia road DL/BD/ZD is genuinely reconciled. Thailand new AL/BD totals differ from cached values; no mixed-vintage subtraction. ID/PH/VN requested blend memo transactions were not returned by official API; this is not proof of nonexistence.
--264 original target combinations remain:133 numeric,75 nonphysical source/boundary representations,56 unresolved. The latter56 are33 source gaps+19 blend-affected accounts+4 source-qualified rail future-method gaps. Do not confuse this current56 with the original56 missing-source combinations.
--Five positive rail source parents and15 positive NEC rows retain unique base-year ownership;2050 methods remain pending in REMAINING_ACCOUNT_DECISIONS.csv. No automatic Road/Industry/Agriculture reassignment.
--A real2050 electric development net and100-node Gate3 production fragment exist. SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED is **not yet earned**: lifetime/status, raw→100-node mapping, existing O&M and resource occupancy need closure. Carrier cost/carbon qualification is also incomplete.
--The approved single-year asset boundary is recorded; previously approved demand growth, Mtoe, EV embedded, RoadReference and bunker decisions are unchanged.
+- Reused133 qualified target values and133 actual allocations; Malaysia blend reconciliation retained;23 prior source closures retained.
+-229/229 aggregate commissioning-year problems repaired;148,181.9MW is source capacity, not a survival result.
+- Confirmed existing units missing commissioning information:5,954.020MW. Separately22,628.143MW of parent capacity has identity/capacity reconciliation issues. Do not merge these into a fabricated definite stock total.
+- Lifetime table:12 technology categories,11 with matched observed stock; conditional quantities only.
+- Genuine stock integration code, separate O&M, shared resource envelopes and positive NetCDF roundtrip tests are implemented.
+- Original100-node mapping not fully recovered. Country/region/original-partition-safe candidates remain unapproved.
+- Thailand coherent local replacement candidate prepared; no adoption. Ten existing memo requests remain; no repeated API retrieval.
+- Rail/NEC future methods consolidated into three groups.33 source coverage combinations retained (7 transaction,11 source-family,15 NEC-sector split).
+- Seven commodity cost/physical-carbon reviews and two steam-methane-reforming structures remain grouped scientific decisions.
+- Real development NetCDFs regenerated; neither promoted to source-qualified or complete Full-SC. No complete Research network exported.
 
-Next review is limited to missing transaction-specific blend evidence/Thai vintage, remaining source-coverage decisions, rail/NEC2050 methods, source-qualified surviving stock/mapping/costs, and mixed-use/biomass carbon parameters. No broad transport/bunker search or new scenario is proposed.
+Next human review is CONSOLIDATED_NUMERICAL_DECISIONS.md. Existing approved2050 time boundary, demand growth, Mtoe, EV embedded and bunker methods are not pending again.
