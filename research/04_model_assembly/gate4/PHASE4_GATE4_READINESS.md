@@ -1,29 +1,26 @@
 # Phase4 Gate4当前就绪状态
 
-**FULLSC_NETWORK_NOT_COMPLETE；Gate5=NO；solver_runs=0。** 本轮限定来源范围执行已完成，返回人工审阅。
+**FULLSC_NETWORK_NOT_COMPLETE；Gate5=NO；solver_runs=0。** 本轮有限寿命决定及来源范围核算完成，停止并返回审阅。
 
-当前数值与缺口均从`CURRENT_PHYSICAL_READINESS.json`、当前SELECTED两份资产合同、registry及allocation manifest生成；旧专题表为历史，不再作为最新阻断清单。
+|事项|本轮结果|
+|---|---|
+|Avion|2016批次采用本轮25年代理，模型退役界限2041，NOT_ACTIVE_2050；100MW原装机与97MW可靠容量分开，原DOE缓存证据等级不变|
+|实际接入|745条源记录、187400.4MW（含水电47952MW）；新增/改动实际容量0MW|
+|需求|153个合格账户和数组、1437Load；新增/改动0，生产registry、输入manifest和全部数组字节保持|
+|BN/TL限定范围|既有7项非数值解释保持，不扩展到其他燃料/bunker|
+|区间核算|10项memo全部可推导相容数量范围及冻结NCV条件能量范围；10个Z关联18个唯一目标，PH道路汽油/柴油分别核算|
+|正式物理目标|仍33项；区间未被接受为正式点值，没有解除18个掺混目标资格|
+|库存|未决单位记录404→403，仅Avion寿命事项关闭；其他库存、5组684MW水电不变|
+|固定账/碳|471项外置固定账、1598物理碳事件、200个null政策权重保持；policy_enabled=false|
 
-|项目|当前值|本轮变化|
-|---|---:|---|
-|实际源记录/容量|745 / 187400.4MW|0新增；水电47952MW保持|
-|合格需求/数组/Load|153 / 153 / 1437|0新增；153组数值逐元素不变|
-|限定源范围新解释|7个目标|BN4煤炭、TL3天然气；非数值解释，非零Load|
-|仍待决原来源组合|15|22→15；3燃料组11目标+4国际海运|
-|仍待决物理目标|33|40→33，另含18掺混目标|
-|待决原水电|5组/684.0MW|不变；未扩大资源授权|
-|外置固定账/物理碳事件/null政策权重|471 / 1598 / 200|保持；未知全排放未被改为零|
+没有新来源获取，也没有重复下载UN2019PDF。三类完整燃料列及四国bunker统一为ORIGINAL_TABLE_RECOVERED_REPORTING_STATUS_UNRESOLVED，..不是零；真正仍需的是原问卷/脚注/交付量或明确不适用证据。10项memo仍未返回，现有相容P/B只支持核算范围。
 
-真实范围闭合：已验证BN煤炭商品/交易层级与TL天然气供给平衡，按本轮人工决定不额外形成终端Load；原缺FEC、其他范围及国际bunker不被补零。原料胶囊和既有数值记录未变。
+范围推导Q=P+B-Z、0<=Z<=min(P,B)，能源按化石余量与生物总量分别乘自身冻结热值。这不是报告区间/置信区间/新预测，无中点/端点基准。无范围也无法推导的实际memo项为0；真实Z、完整账户总量、热值不确定性及正式输入仍未解决。
 
-新原件：UN2019 Energy Balances官方PDF、Siamgas2Q2023原PDF。UN三类完整燃料列和四国bunker行均为`..`，符号歧义仍在，因此没有额外数值来源闭合。Siamgas恢复MM230MW联合循环设施证据，但GPD别名/投运/重复身份仍未闭合。DOE2016/2018只恢复官方缓存表格文本，原PDF当前未成功下载；ECD的MCL EIA也只有官方索引证据，不伪称原件已取得。
+本轮只刷新现有电力基础网和诊断网的资格meta与manifest，没有物理组件重建。按母线/组件名称对齐比较所有静态和时变输入、时权，保持精确相同。NetCDF文件hash因meta变化更新，绝不称物理参数发生变化；153组数组与1780价层、471固定账字节保持。原物理构网code_sha保留，本轮metadata刷新code_sha单列`qualification_refresh`。
 
-标签/拒绝逻辑修复：Avion派生CCGT→OCGT，原100MW保留为installed口径；没有自动接受OCGT寿命或历史性能。因此原2290.09MW审阅集合现为2190.09MW既有寿命下条件存续和100MW寿命待决，未新增、未标退休。GPD418/366MW重复关系仍分别保留。
+原完整入口和诊断优化hook实际继续拒绝。诊断角色DIAGNOSTIC_PARTIAL_UNSOLVED，完整/覆盖/求解/科学结果许可均false；未创建优化变量。图可达性仅为结构必要检查，不是供需/容量/逐时可行性。24个跨境电力组件仍是现有拓扑候选，未冻结为最终实验控制集合。
 
-联合诊断资产因registry范围和待决库存标签变化重新导出并回读，使用electric_base+未绑定carrier_fragment.json+153组当前数组。1437Load每账户一次绑定；容量、年度积分、国家与载能隔离、外置账、碳事件、hook及元数据通过受影响检查。1780价层和471固定账字节不变；13条连接费用移除、340风光假设及100FT VOM保持。
+本轮29项针对来源保护、寿命、范围和元数据的测试实际通过；没有重跑全套历史实验。初次legacy Infinity序列化失败及修复后成功日志保留，未知值未清零。发现PH铁路PENDING记录残留旧Transformation/Candidate文字，本轮遵守不改生产账本，分析依据已批准constant2019倍率1并登记下次元数据同步事项。
 
-实际网络身份仍`DIAGNOSTIC_PARTIAL_UNSOLVED`，fullsc_network_complete/input_coverage_complete/solver_allowed/scientific_results_allowed均false；没有创建优化变量。可达性是结构必要检查，不能证明容量、多输入或逐时可行；24跨境电力组件仍为现有拓扑候选。原完整入口及诊断优化hook实际拒绝；完整研究网络未生成。
-
-构网代码`7bcfe3258248b464a94de2e13d7ace70777ad4c6`；网络SHA256 `fcf0b91d2362584cabe7eeed49d8f56baba2a5401a18f87ddb8416aea40f3e16`。物理组装、输入覆盖、价格可用性、全成本、全排放、政策资格分开保留，未压成笼统PASS。剩余具体原件与最小选择见`RESIDUAL_DECISIONS_WITH_IMPACT.md`及`EXACT_SOURCE_REQUESTS.csv`。
-
-39项修改相关测试实际通过，日志留存；不以测试数替代来源闭合。不重跑固定账基本证明或正式实验；价格不二次平减，未知固定量参数不变零。main/reference/archive无修改、无force-push，最终Git回执随交付保存。
+源缺口与覆盖选择分开，见EXTERNAL_SOURCE_HANDOFF.md。完整模型仍需33个物理目标和剩余库存/水资源资格闭合，价格可用不等于全成本/全排放完整。不运行solver，不进入Gate5，不输出系统成本或互联收益。
