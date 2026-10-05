@@ -2,7 +2,7 @@
 from pathlib import Path
 from decimal import Decimal
 import json,xml.etree.ElementTree as ET
-from reconstruct_base_accounts import norm,commodity,account_for_transaction
+from reconstruct_base_accounts import norm,commodity,account_for_transaction,transaction_identity
 
 def transaction_name(value):
     # Frozen UNdata display alias, same manufacturing/construction/non-fuel
@@ -58,7 +58,7 @@ def reconcile_commodity_scope(parent,parts):
     if any(account_for_transaction(r['Transaction']) in [None,'InternationalShippingBunker','InternationalAviationBunker'] for r in parts):raise ValueError('Non-leaf or out-of-scope use in final-energy balance')
     if any(any(r[k]!=parent[k] for k in ['Country','Year','Unit','SourceSHA256']) for r in parts):raise ValueError('Incompatible commodity source scope')
     if any(commodity(r['Commodity'])!=commodity(parent['Commodity']) for r in parts):raise ValueError('Incompatible canonical commodity scope')
-    if len({norm(r['Transaction']) for r in parts})!=len(parts):raise ValueError('Overlapping duplicate use')
+    if len({transaction_identity(r['Transaction']) for r in parts})!=len(parts):raise ValueError('Overlapping duplicate use')
     p=Decimal(str(parent['Quantity']));q=sum((Decimal(str(r['Quantity'])) for r in parts),Decimal(0))
     # Decimal values arrive through a legacy binary-float capsule. A bounded
     # floating summation allowance is NOT a statistical reconciliation tolerance:

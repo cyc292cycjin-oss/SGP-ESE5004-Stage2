@@ -30,6 +30,10 @@ def decimal(x):
  v=D(str(x))
  if not v.is_finite() or v<0:raise ValueError('Non-finite or negative raw energy')
  return v
+def transaction_identity(t):
+ t=norm(t)
+ return 'consumption not elsewhere specified (other)' if t=='consumption by other consumers not elsewhere specified' else t
+
 def account_for_transaction(t):
  t=norm(t)
  if t in {'consumption by households'}:return 'ResidentialFuel'
@@ -38,7 +42,8 @@ def account_for_transaction(t):
  if t in {'consumption by road','consumption in road'}:return 'RoadResidualFuel'
  if t in {'consumption by rail','consumption in rail'}:return 'TransportEmbeddedFuelParent'
  if t=='consumption not elsewhere specified (transport)':return 'TransportNEC'
- if t=='consumption not elsewhere specified (other)':return 'OtherNEC'
+ # UNSD LPG legacy label and DSD1234 denote the same leaf; never map123 subtotal.
+ if t in {'consumption not elsewhere specified (other)','consumption by other consumers not elsewhere specified'}:return 'OtherNEC'
  if t in {'consumption by domestic navigation','consumption in domestic navigation'}:return 'DomesticShippingFuel'
  if t in {'consumption by domestic aviation','consumption in domestic aviation'}:return 'DomesticAviationFuel'
  if t=='international marine bunkers':return 'InternationalShippingBunker'
@@ -58,7 +63,7 @@ class Reconstruction:
   out=[];seen={}
   for r in rows:
    if not r['Commodity']:continue # unlabeled 'of which' / generation rows are not end-use totals
-   key=(r['Country'],commodity(r['Commodity']),norm(r['Transaction']),r['Unit'])
+   key=(r['Country'],commodity(r['Commodity']),transaction_identity(r['Transaction']),r['Unit'])
    if key in seen:
     if decimal(seen[key]['Quantity'])!=decimal(r['Quantity']):raise ValueError('Conflicting duplicate raw records: '+str(key))
     self.duplicates.append(dict(kept=row_id(seen[key]),excluded=row_id(r),reason='EXACT_ALIAS_DUPLICATE'))
