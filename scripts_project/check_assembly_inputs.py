@@ -32,10 +32,14 @@ def load_registry(folder):
    if r.get('BaseValueMWh')!=b['ValueMWh'] or r.get('BaseStatus')!=b['Status']:raise ValueError('Base source/value/status mismatch')
    if r['AssemblyStatus']==ACCEPTED and b['Status']!='NUMERIC_INPUT_READY':raise ValueError('Unqualified base promoted by target method')
    if r.get('Classification')=='SOURCE_SUPPORTED_NOT_APPLICABLE' and (b['Classification']!='SOURCE_SUPPORTED_NOT_APPLICABLE' or r.get('ZeroEvidence')!=';'.join(b['ZeroEvidence'])):raise ValueError('Exclusion has no pinned source proof')
+ from source_scope import validate_scope_registry
+ validate_scope_registry(folder,data['records'])
  return data
 def validate_records(records):
+ from source_scope import validate_scope_record
  seen=set()
  for r in records:
+  validate_scope_record(r)
   if r['InputID'] in seen:raise ValueError('Duplicate input ownership')
   seen.add(r['InputID'])
   if r['Year']==2050 and r['Account']=='RoadEVFinalElectricity':
@@ -89,7 +93,9 @@ def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=
   if not r.get('ExclusionEvidence') or not r.get('SourceSHA256') or not (r.get('ZeroEvidence') or (r['Country']=='TL' and r['Account']=='IndustryFinalEnergy' and r.get('BaseStatus')=='BOUNDARY_EXCLUSION')):
    raise ValueError('Unsupported exclusion; empty selection is not zero')
   if r['Value'] is not None:raise ValueError('Exclusion must not masquerade as a physical zero Load')
- physical=[r for r in demands if r not in excluded]
+ from source_scope import STATUS
+ scope_excluded=[r for r in demands if r.get('Classification')==STATUS]
+ physical=[r for r in demands if r not in excluded and r not in scope_excluded]
  numeric=[r for r in physical if r['AssemblyStatus']==ACCEPTED]
  missing=[r for r in physical if r['AssemblyStatus']!=ACCEPTED]
  allocations=set()
@@ -102,7 +108,7 @@ def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=
  numeric_ready=not missing and not supply_pending and not unowned
  allocation_ready=numeric_ready and not allocation_missing
  return dict(status='INPUT_GATE_ONLY_PASS' if allocation_ready else 'BLOCKED_INPUT_FREEZE' if not numeric_ready else 'BLOCKED_ALLOCATION',year=year,
-  required_target_demands=len(demands),source_supported_nonphysical_accounts=len(excluded),required_physical_accounts=len(physical),
+  required_target_demands=len(demands),source_supported_nonphysical_accounts=len(excluded),source_scope_nonphysical_accounts=len(scope_excluded),source_scope_input_ids=[r['InputID'] for r in scope_excluded],required_physical_accounts=len(physical),
   numeric_accepted_target_demands=len(numeric),accepted_target_demands=len(allocations),numeric_unresolved=len(missing),
   NUMERIC_INPUT_READY=numeric_ready,ALLOCATION_READY=allocation_ready,NETWORK_STATICALLY_VALIDATED=False,
   unresolved_by_sector=dict(collections.Counter(r['Sector'] for r in missing)),unresolved_input_ids=[r['InputID'] for r in missing],

@@ -161,6 +161,10 @@ rule research_build_diagnostic_network:
         arrays=ALLOC + "/allocations.npz",
         current="research/04_model_assembly/gate4/CURRENT_GATE4_SELECTED_MANIFEST.json",
         coverage="research/04_model_assembly/gate4/evidence/selected/SOURCE_COVERAGE_ACCOUNT_MAP_CURRENT.json",
+        scope_code="scripts_project/source_scope.py",
+        scope_decisions="research_inputs/assembly_v1/sources/BOUNDED_SOURCE_SCOPE_DECISIONS.json",
+        scope_proof="research_inputs/assembly_v1/sources/BOUNDED_SOURCE_SCOPE_APPLICATION.json",
+        gate_code="scripts_project/check_assembly_inputs.py",
         assembler="scripts_project/build_diagnostic_network.py",
         shared="scripts_project/assembly_components.py",
     output:
