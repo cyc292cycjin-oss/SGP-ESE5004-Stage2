@@ -101,7 +101,7 @@ class Reconstruction:
   to the recorded commodity inventory and records every supporting raw row.
   """
   if account.startswith('International'):return None # bunkers are outside domestic FEC
-  fec=[r for r in self.rows if r['Country']==c and self.fuels.get(commodity(r['Commodity']))==fuel and norm(r['Transaction'])=='final energy consumption']
+  fec=[r for r in self.rows if r['Country']==c and (self.fuels.get(commodity(r['Commodity']))==fuel or fuel=='unclassified_fuel' and self.fuels.get(commodity(r['Commodity'])) not in {None,'electricity','heat'}) and norm(r['Transaction'])=='final energy consumption']
   if not fec:return None
   fec,excluded=self.select_coal_hierarchy(fec);evidence=[]
   for p in fec:
@@ -111,8 +111,9 @@ class Reconstruction:
    # Explicit NEC end-use leaves are disjoint from named sectors. Retain their
    # original ownership; use them only to prove exhaustion of this commodity FEC.
    # NEC already has unique account_for_transaction ownership above.
-   total=sum(decimal(r['Quantity']) for r in parts)
-   if abs(total-q)>D('0.000001'):return None
+   from residual_account_mapping import reconcile_commodity_scope
+   control=reconcile_commodity_scope(p,parts)
+   if control['Status'] not in {'SOURCE_TOTAL_CLOSED','SOURCE_TOTAL_CLOSED_WITH_FLOAT_PRECISION'}:return None
    evidence.extend([row_id(p),*[row_id(x) for x in parts]])
   return evidence
  def build(self):

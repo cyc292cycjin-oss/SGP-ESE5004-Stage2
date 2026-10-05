@@ -56,7 +56,14 @@ def reconcile_commodity_scope(parent,parts):
     """Compare mutually exclusive raw-use leaves with one FEC source parent."""
     if parent is None:return dict(Status='PARENT_NOT_REPORTED',Difference=None)
     if any(account_for_transaction(r['Transaction']) in [None,'InternationalShippingBunker','InternationalAviationBunker'] for r in parts):raise ValueError('Non-leaf or out-of-scope use in final-energy balance')
-    if any(any(r[k]!=parent[k] for k in ['Country','Year','Commodity','Unit','SourceSHA256']) for r in parts):raise ValueError('Incompatible commodity source scope')
+    if any(any(r[k]!=parent[k] for k in ['Country','Year','Unit','SourceSHA256']) for r in parts):raise ValueError('Incompatible commodity source scope')
+    if any(commodity(r['Commodity'])!=commodity(parent['Commodity']) for r in parts):raise ValueError('Incompatible canonical commodity scope')
     if len({norm(r['Transaction']) for r in parts})!=len(parts):raise ValueError('Overlapping duplicate use')
     p=Decimal(str(parent['Quantity']));q=sum((Decimal(str(r['Quantity'])) for r in parts),Decimal(0))
-    return dict(Status='SOURCE_TOTAL_CLOSED' if p==q else 'SOURCE_TOTAL_NOT_CLOSED',ParentRawValue=str(p),ExclusiveUsesRawValue=str(q),Difference=str(p-q))
+    # Decimal values arrive through a legacy binary-float capsule. A bounded
+    # floating summation allowance is NOT a statistical reconciliation tolerance:
+    # 8 machine epsilons times the L1 magnitude, with no absolute data-sized floor.
+    import sys
+    tol=Decimal(str(8*sys.float_info.epsilon))*max(abs(p),sum((abs(Decimal(str(r['Quantity']))) for r in parts),Decimal(0)))
+    diff=p-q
+    return dict(Status='SOURCE_TOTAL_CLOSED' if diff==0 else 'SOURCE_TOTAL_CLOSED_WITH_FLOAT_PRECISION' if abs(diff)<=tol else 'SOURCE_TOTAL_NOT_CLOSED',ParentRawValue=str(p),ExclusiveUsesRawValue=str(q),Difference=str(diff),NumericalTolerance=str(tol),NumericalRule='8 * float64 epsilon * max(abs(parent), sum(abs(leaves))); original difference retained',CanonicalCommodity=commodity(parent['Commodity']),RawParentCommodity=parent['Commodity'],RawUseCommodities=[r['Commodity'] for r in parts])
