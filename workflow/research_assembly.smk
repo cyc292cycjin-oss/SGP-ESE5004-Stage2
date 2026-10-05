@@ -143,3 +143,29 @@ rule research_apply_selected_closure:
         report=ASSETS + "/SELECTED_CLOSURE_IMPLEMENTATION.json",
     shell:
         "python scripts_project/apply_selected_stock.py --repo . --reference {input.reference:q} --survival {input.survival:q} --contract {input.contract:q} --decisions {input.decisions:q} --cohort-evidence {input.cohorts:q} --output-stock {output.stock:q} --output-contract {output.contract:q} --output-report {output.report:q}"
+
+# Explicit separate target. It never supplies the full-model rule's output.
+rule research_build_diagnostic_network:
+    input:
+        bundle=ASSETS + "/asset_bundle.json",
+        electric=ASSETS + "/electric_base_2050_unsolved.nc",
+        carrier=ASSETS + "/carrier_fragment.json",
+        carbon=ASSETS + "/carbon_component_map.json",
+        fixed=ASSETS + "/external_pending_fixed_accounts.json",
+        price=ASSETS + "/model_cost_layer.json",
+        stock=ASSETS + "/SELECTED_ASSET_SURVIVAL_2050.json",
+        contract=ASSETS + "/SELECTED_INTEGRATION_CONTRACT.json",
+        registry="research_inputs/assembly_v1/registry.json",
+        pins="research_inputs/assembly_v1/manifest.json",
+        allocation=ALLOC + "/allocation_manifest.json",
+        arrays=ALLOC + "/allocations.npz",
+        current="research/04_model_assembly/gate4/CURRENT_GATE4_SELECTED_MANIFEST.json",
+        coverage="research/04_model_assembly/gate4/evidence/selected/SOURCE_COVERAGE_ACCOUNT_MAP_CURRENT.json",
+        assembler="scripts_project/build_diagnostic_network.py",
+        shared="scripts_project/assembly_components.py",
+    output:
+        network=ROOT + "/research_2050_diagnostic_partial_unsolved.nc",
+        report=ROOT + "/DIAGNOSTIC_NETWORK_MANIFEST.json",
+        readiness=ROOT + "/CURRENT_PHYSICAL_READINESS.json",
+    shell:
+        "python scripts_project/build_diagnostic_network.py --repo . --allocation " + ALLOC + " --assets {input.bundle:q} --output {output.network:q} --report {output.report:q} --readiness {output.readiness:q}"
