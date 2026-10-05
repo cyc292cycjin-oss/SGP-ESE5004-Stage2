@@ -1,7 +1,7 @@
-# Survivor integration and export/readback tests
+# Export and readback evidence
 
-SYNTHETIC_TEST_ONLY: a qualified60MW source survivor actually enters a100-geographical-node network. Its fixed capacity, source unit/parent identity, existing efficiency, annual fixed O&M, VOM and2920 snapshot availability are preserved after NetCDF readback. Two compatible source units aggregate only after independent survival selection; their roster/capacity remains traceable. Hydro storage inflow and duration also survive readback. Fossil existing generation uses explicit fuel and physical CO2 ports.
+13 new tests plus133 prior related tests passed. New coverage includes separate and shared absolute hydro inflow, refusal of cross-group duplication, capacity-weighted normalised curves, accepted-proxy authority, TH exact four-item reconciliation,133-target preservation, exclusive rail/NEC source ownership and old-vintage zero proofs. Existing synthetic tests remain labelled SYNTHETIC_TEST_ONLY.
 
-Resource tests verify that existing60MW plus all new copies share a150MW TOTAL envelope (90MW remains), while ADDITIONAL_POTENTIAL is not reduced. The actual solver-free Linopy hook test confirms the shared constraint and the fixed-to-one FOM bookkeeping variable. Reinstallation is rejected to prevent double FOM. No dispatch or investment solution is computed.
+Actual development readback confirms536 raw units →90 existing components →139404MW and152 demand accounts →1436 Loads. Existing CAPEX is0; positive FOM and VOM/efficiency basis are preserved. Source IDs, country/partition,2013 snapshots and hooks roundtrip. The133 previous arrays are byte-identical. New renewables have one candidate per node/carrier, unchanged resource limits, and no copied optimised capacity.
 
-The original successful full assembly fixture and related regressions remain passed. Actual development assets are exported/read back separately; their scientific qualification stays incomplete. These test successes do not stand in for a complete Research model or accepted numerical inputs.
+The full gate returns2 because inputs/assets remain incomplete; this is not proof of production build success. Actual production success is independently recorded in PRODUCTION_ASSET_DAG.log and ACTUAL_NETWORK_VALIDATION.json. No solver.

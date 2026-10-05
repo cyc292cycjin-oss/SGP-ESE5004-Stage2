@@ -1,16 +1,13 @@
-# Gate4 readiness — surviving assets and numerical review
+# Gate4 readiness after current human choices
 
 **FULLSC_NETWORK_NOT_COMPLETE; Gate5=NO; solver_runs=0.**
 
-- Reused133 qualified target values and133 actual allocations; Malaysia blend reconciliation retained;23 prior source closures retained.
--229/229 aggregate commissioning-year problems repaired;148,181.9MW is source capacity, not a survival result.
-- Confirmed existing units missing commissioning information:5,954.020MW. Separately22,628.143MW of parent capacity has identity/capacity reconciliation issues. Do not merge these into a fabricated definite stock total.
-- Lifetime table:12 technology categories,11 with matched observed stock; conditional quantities only.
-- Genuine stock integration code, separate O&M, shared resource envelopes and positive NetCDF roundtrip tests are implemented.
-- Original100-node mapping not fully recovered. Country/region/original-partition-safe candidates remain unapproved.
-- Thailand coherent local replacement candidate prepared; no adoption. Ten existing memo requests remain; no repeated API retrieval.
-- Rail/NEC future methods consolidated into three groups.33 source coverage combinations retained (7 transaction,11 source-family,15 NEC-sector split).
-- Seven commodity cost/physical-carbon reviews and two steam-methane-reforming structures remain grouped scientific decisions.
-- Real development NetCDFs regenerated; neither promoted to source-qualified or complete Full-SC. No complete Research network exported.
+- All four current method groups applied underGATE4-20261005-CONSOLIDATED-BASELINE-CHOICES; no retroactive approval.
+-749 source-screened survivors /188040MW;536 real units /139404MW actually integrated into90 components.
+-48636MW hydro still needs source-consistent annual profile/energy-capacity qualification; other unresolved inventory stays separate.
+-152 qualified target accounts are actual arrays and1436 development Loads. Original133 unchanged. TH is updated;4 rail and13 NEC accounts bound. PH rail source overlap still blocks its two children.
+-13 new tests and133 existing related regressions passed; actual production export/readback checked capacity, source identity, cost basis, time, hooks and demand integrals.
+-Both NetCDFs are upgraded development assets, not source-qualified complete assets. No complete Research Full-SC network exported.
+-Remaining requests: hydro profile ownership/full-year input and PHS duration; raw-inventory unresolved groups;10 exact ID/PH/VN memo transactions;33 coverage questions;seven commodity cost/physical-carbon inputs and two SMR structures.
 
-Next human review is CONSOLIDATED_NUMERICAL_DECISIONS.md. Existing approved2050 time boundary, demand growth, Mtoe, EV embedded and bunker methods are not pending again.
+Read DECISIONS_APPLIED_THIS_ROUND.md, ACTUAL_EXISTING_ASSET_INTEGRATION.csv, EXISTING_PERFORMANCE_OM_SOURCE_MAP.csv and CONSOLIDATED_NUMERICAL_DECISIONS.md. Approved growth/Mtoe/EV/bunker/lifetimes/mapping/TH/rail-NEC methods are not pending again.

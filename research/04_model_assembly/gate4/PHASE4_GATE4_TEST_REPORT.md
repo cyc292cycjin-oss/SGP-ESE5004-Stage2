@@ -1,7 +1,7 @@
-# Gate4 current validation record
+# Export and readback evidence
 
-Current new suite:20 solver-free tests cover unit-first selection, capacity/source identity, missing parts, accepted survivor materialisation, aggregation after screening, same-country/partition mapping, total/additional/shared potential, existing fixed/variable O&M, retained efficiency, thermal fuel/carbon ports and hydro/profile NetCDF roundtrip. A small Linopy constraint-only test creates variables and inspects coefficients/bounds; it does not optimise or invoke a solver.
+13 new tests plus133 prior related tests passed. New coverage includes separate and shared absolute hydro inflow, refusal of cross-group duplication, capacity-weighted normalised curves, accepted-proxy authority, TH exact four-item reconciliation,133-target preservation, exclusive rail/NEC source ownership and old-vintage zero proofs. Existing synthetic tests remain labelled SYNTHETIC_TEST_ONLY.
 
-Related regressions:18 prior asset tests,18 continuation tests and17 input-freeze tests pass. Unchanged completed scientific experiments were not rerun. Exact commands and log hashes are in evidence/TEST_RECEIPTS.json. Synthetic input numbers are marked SYNTHETIC_TEST_ONLY and are not source data.
+Actual development readback confirms536 raw units →90 existing components →139404MW and152 demand accounts →1436 Loads. Existing CAPEX is0; positive FOM and VOM/efficiency basis are preserved. Source IDs, country/partition,2013 snapshots and hooks roundtrip. The133 previous arrays are byte-identical. New renewables have one candidate per node/carrier, unchanged resource limits, and no copied optimised capacity.
 
-The actual development-asset DAG ran successfully. No candidate lifetime, mapping or Thailand value was accepted or materialised.133 prior targets/arrays are preserved. Actual full export remains blocked; a preflight exit2 is not success of full-network construction. No complete-network static validation or Gate5 pass is claimed. Solver runs=0.
+The full gate returns2 because inputs/assets remain incomplete; this is not proof of production build success. Actual production success is independently recorded in PRODUCTION_ASSET_DAG.log and ACTUAL_NETWORK_VALIDATION.json. No solver.

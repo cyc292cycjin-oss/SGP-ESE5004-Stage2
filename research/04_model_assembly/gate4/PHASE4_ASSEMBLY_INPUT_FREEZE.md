@@ -7,3 +7,8 @@ Source/account/node/time annual conservation is evidenced in allocation_manifest
 Rail and NEC source ownership is resolved independently of future demand projection; pending2050 accounts remain blocking and no missing record becomes zero. Source coverage exclusions are limited to traceable disjoint FEC exhaustions or already-approved Phase3 boundaries. New coverage exclusions require a human decision.
 
 Single-year2050 stock boundary is human-approved, but no unverified source default lifetime is accepted by that approval. Carbon policy remains disabled. Development asset defaults/qualification gaps cannot cross the final model gate. Complete Research network status: FULLSC_NETWORK_NOT_COMPLETE.
+
+
+## Current authorised activation
+
+See DECISIONS_APPLIED_THIS_ROUND.md.152 target accounts and actual arrays/Loads now qualified; all original133 unchanged. Earlier pending lifetime/mapping/TH/rail-NEC statements are superseded by the current explicit decision, not retroactively changed. Full input freeze still blocked.

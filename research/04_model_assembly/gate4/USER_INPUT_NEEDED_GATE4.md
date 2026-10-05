@@ -1,12 +1,15 @@
-# Remaining human review
+# Remaining numerical/source review after applying current choices
 
-Use CONSOLIDATED_NUMERICAL_DECISIONS.md for one consolidated review. Approved single-year2050 inheritance, demand growth, Mtoe, EV embedded and bunker decisions are not reopened.
+**四组首版方法已执行。这里只列真正尚未闭合的参数或证据。**
 
-1.11 existing-stock technology lifetime assumptions, plus grouped missing commissioning/status/capacity qualifications; source-backed existing performance/FOM/VOM. Nuclear project status is shown separately, not automatically inherited.
-2. Exact compatible100-node mapping if available, or approval/rejection of the documented same-country/region/original-partition proxy. Generated electric/carrier files are already provided; do not ask for them as external data.
-3. Thailand local same-vintage replacement choice. All six source series are already cached; no redownload is needed.
-4. RailNonElectric, TransportNEC and OtherNEC2050 methods, plus33 retained source/coverage combinations. No new coverage exclusion was adopted.
-5. Only10 memo observations remain specifically requested: ID ZD121/1221/1235; PH ZD121/1221/1222/1232/1235 and ZG1221; VN ZG1221, all2019. Parent files are cached. Compatible exclusion-of-blends metadata is an alternative; legal ratios are not.
-6. Delivered-cost and physical-carbon/origin treatment for seven actual bio commodities, and mixed-use SMR/SMR-CC attribution by technology structure. SMR means steam methane reforming. Policy remains disabled.
+|问题组|范围与当前已有证据|还缺什么|
+|---|---|---|
+|水库/径流式水电|39349MW/6601MW；已有机组身份、年限、容量、受限映射、成本候选；原始曲线仅168小时，参考网有全年曲线|相容全年机组曲线及其流入归属，或对已保存全年节点/流域曲线采用明确的分配方法决定。不能将共享绝对流入逐台复制。|
+|抽蓄|2686MW；已有类型与转换效率来源；原始时长/能量缺失，参考网max_hours=0，冻结配置为6h|明确现有储能时长/能量来源；如选6h配置代理须记录冲突处理，不能自动当成实测。|
+|库存资格|5954.020MW确认既有缺投运；301父项22628.143MW未链接/容量不符；状态未知或计划项目另列|按国家×技术处理未决容量；不重找已经恢复的229项年份，不归一化，不将这些组直接相加。|
+|混合燃料原件|已缓存父项、原请求和失败回执；TH与MY已解决|2019共10个memo：ID ZD(5222)121/1221/1235；PH ZD121/1221/1222/1232/1235及ZG(5212)1221；VN ZG1221。相容交易级原件或明确不包含掺混的源元数据，不要重找父项。|
+|来源覆盖|33组合完整保留；已知NEC15条能量已独立保留并绑定|7缺交易、11缺来源族、15尚缺部门拆分证据。新的NEC用途账户不能自动变成对其他预设部门的零证明或自动排除批准。|
+|生物燃料|Animal waste、Bagasse、Biodiesel、Biogases、Biogasoline、Charcoal、Fuelwood|按七类商品确认供给成本、热值基准、物理CO2与碳来源。沿用BIOFUEL_COMMODITY_PARAMETER_REVIEW.csv候选；净CO2=0不能代替物理排放，默认零成本未放行。|
+|SMR/SMR-CC|两种steam methane reforming结构、200项真实物理事件保留|混合用途的报告/政策归属方法仍需评审；不猜未来H2 power share，policy_enabled=false。|
 
-Every proposed new scientific input remains PENDING. Development assets are not a complete Full-SC or an approved formal scenario.
+已批准的11类寿命、受限映射、TH局部版本和铁路/NEC恒定2019方法已关闭数值方法待决。四类火电来源化既有技术代理在本轮Section3授权下应用，未伪称逐机组实测。既有性能/O&M参数与三个水电子类候选集中于EXISTING_PERFORMANCE_OM_SOURCE_MAP.csv。

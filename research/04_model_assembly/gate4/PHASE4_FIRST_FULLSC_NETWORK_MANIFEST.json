@@ -1,66 +1,92 @@
 {
-  "schema": "gate4-survivor-integration-manifest-1",
-  "starting_git_commit": "9915ab1312d32d4b58cbb34895794ebca64d149f",
-  "executed_base_git_commit": "9915ab1312d32d4b58cbb34895794ebca64d149f",
+  "schema": "gate4-current-baseline-activation-v1",
+  "executed_base_git_commit": "7c4b9dda76684e8caebb803759b31f1a90b5f4a3",
   "executed_with_uncommitted_research_changes": true,
-  "tested_implementation_git_commit": "40068176f17c105cf4b55bac735f33be9b1543b7",
-  "implementation_attestation": "evidence/TESTED_IMPLEMENTATION_ATTESTATION.json",
-  "config_file": "configs/research/baseline.yaml",
-  "config_sha256": "40489a11fdbcd02aa338e7ea856540dd2fb71a7f7851617f05dbbb84a983546a",
-  "input_registry_sha256": "a5466eafdd9be63811ba3344b48288e891a70b842801dcc9587b4fe4a7a421e4",
-  "input_pin_manifest_sha256": "d4a5b7f796c6b6af85afb7803943b70288ba2c7387c0d732fd308ce0c9ceeb23",
-  "actual_allocation_sha256": "e882dea36f4a196dc54b7b6377717ab7af707000ca071b5a00259313c74e6ffa",
-  "actual_allocation_manifest_sha256": "9deafcc9209bfb05fb6894277c9ab598d4aaecb9c0b824d0549087a58e4f345c",
-  "network_path": null,
-  "network_sha256": null,
-  "network_exported": false,
-  "objective": null,
-  "solver_status": "NOT_RUN",
-  "solver_runs": 0,
-  "policy_cap_enabled": false,
-  "static_full_network_validation": "NOT_RUN_NO_COMPLETE_NETWORK",
+  "tested_implementation_git_commit": "36a8608c5c641d8f101773c80cce9e96c4815a70",
   "status": "FULLSC_NETWORK_NOT_COMPLETE",
+  "network_exported": false,
+  "solver_runs": 0,
   "gate5_allowed": false,
-  "development_assets_exported": true,
-  "accepted_numeric_demands": 133,
-  "actual_allocation_count": 133,
-  "original_131_arrays_unchanged": true,
+  "actual_development_validation": "evidence/ACTUAL_NETWORK_VALIDATION.json",
+  "decisions": "GATE4-20261005-CONSOLIDATED-BASELINE-CHOICES",
+  "qualified_accounts": 152,
+  "integrated_existing_mw": 139404.0,
   "checks": [
     {
-      "name": "SURVIVOR_TESTS",
+      "name": "test_surviving_asset_integration",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "tests/research/test_surviving_asset_integration.py"
       ],
       "exit_code": 0,
-      "log_sha256": "bf87e111625b3e3cc33b08fff4ef635d4efcf0e226868597f2be08164ea5cbe0"
+      "log_sha256": "efd9a10f3d8d1843385618d2d55e7d76f9cfe3a5de4aed70638f06d1700bbf18"
     },
     {
-      "name": "ASSET_REGRESSION",
+      "name": "test_gate4_assets",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "tests/research/test_gate4_assets.py"
       ],
       "exit_code": 0,
-      "log_sha256": "c89b3c03dbb96f86aba3819236f112c34aa041246e469900c2ee0f2c7cb5bd8f"
+      "log_sha256": "4ce7f658070cf83ddfaf6cb32560859874bc9e69a73dda2af7954281870a43cd"
     },
     {
-      "name": "CONTINUE_REGRESSION",
+      "name": "test_gate4_continue",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "tests/research/test_gate4_continue.py"
       ],
       "exit_code": 0,
-      "log_sha256": "3a4d96cfea033510f7f2a5a9ba4d194bcbb19eab5b624422879d69df4aac5a04"
+      "log_sha256": "505577d4d799a6c4f234392cd1039089db88b343b4b4cd7b842921dcda173ba0"
     },
     {
-      "name": "INPUT_REGRESSION",
+      "name": "test_assembly_input_freeze",
       "command": [
         "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
         "tests/research/test_assembly_input_freeze.py"
       ],
       "exit_code": 0,
-      "log_sha256": "979bb93a122e5153b2a8fd53735b834c1088ab11f77ca2aeadd803fa58894149"
+      "log_sha256": "816d42b1aea653d354196ff5bad638208c4d32aa0c757c8728e425521c0e45a2"
+    },
+    {
+      "name": "PREPARE_STOCK_CONTRACT",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "scripts_project/prepare_existing_stock_contract.py",
+        "--repo",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
+        "--reference",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/research/00_source_provenance/cache/results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc",
+        "--costs",
+        "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2030_elec.csv",
+        "--cost-sources",
+        "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2030.csv",
+        "--output",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/asset_survival/integration_contract.json",
+        "--report",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/EXISTING_PERFORMANCE_SOURCE.json"
+      ],
+      "exit_code": 0,
+      "log_sha256": "b945710dd046502a7600289e8a276f8bf5272a46d0559d22a6cfe69e835ea4d7"
+    },
+    {
+      "name": "PRODUCTION_ASSET_DAG",
+      "command": [
+        "snakemake",
+        "--snakefile",
+        "workflow/research_assembly.smk",
+        "--cores",
+        "1",
+        "--scheduler",
+        "greedy",
+        "--rerun-incomplete",
+        "--configfile",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/PRODUCTION_SOURCE_PATHS.json",
+        "--",
+        "research_build_production_assets"
+      ],
+      "exit_code": 0,
+      "log_sha256": "5fc8585d103c76741101abef6e46b45c6e980ec7a1e4783cf132dbfb5a3be60e"
     },
     {
       "name": "FINAL_INPUT_PREFLIGHT",
@@ -72,13 +98,13 @@
         "--year",
         "2050",
         "--allocation",
-        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/actual_allocation",
         "--output",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_survivors/evidence/FINAL_INPUT_PREFLIGHT.json"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/FINAL_INPUT_PREFLIGHT.json"
       ],
       "exit_code": 2,
       "expected": 2,
-      "log_sha256": "5f4e068a267e9ccb859852ce3473ce0cf505dabad66617849e7c2058ebebfba9"
+      "log_sha256": "9e44b8739f049ba1c09b893fcc97e85e9c30588a1636bcace988fff8e29bd9e0"
     },
     {
       "name": "FINAL_FULL_NETWORK_GATE",
@@ -88,41 +114,37 @@
         "--repo",
         "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
         "--allocation",
-        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/actual_allocation",
         "--assets",
         "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/assets/asset_bundle.json",
         "--output",
         "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
         "--report",
-        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_survivors/evidence/FINAL_FULL_NETWORK_GATE.json"
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_activation/evidence/FINAL_FULL_NETWORK_GATE.json"
       ],
       "exit_code": 2,
       "expected": 2,
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "name": "FINAL_DIFF_CHECK",
+      "name": "test_gate4_activation",
       "command": [
-        "git",
-        "-c",
-        "core.whitespace=cr-at-eol",
-        "diff",
-        "--check"
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "tests/research/test_gate4_activation.py"
       ],
       "exit_code": 0,
-      "expected": 0,
-      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "log_sha256": "cf534de1cfeee6597f36a3678cc57c8176157a291218c93d9af9becf276f655e"
+    },
+    {
+      "name": "test_carrier_carbon",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "tests/research/test_carrier_carbon.py"
+      ],
+      "exit_code": 0,
+      "log_sha256": "53274e97d276d3049df75d16e196b8fede789d48381591a371092fdc208fc8df"
     }
   ],
-  "development_asset_manifests": [
-    "ELECTRIC_BASE_ASSET_MANIFEST.json",
-    "GATE3_PRODUCTION_FRAGMENT_MANIFEST.json"
-  ],
-  "development_asset_validation": "evidence/ACTUAL_DEVELOPMENT_ASSET_VALIDATION.json",
-  "synthetic_roundtrip": "evidence/EXPORT_ROUNDTRIP_TEST_RECEIPT.json",
-  "target_rederivation_sha256": "b6975fb00f9262d797f76ac9c765c38277367e7717d99d8a3eb8b22023191d29",
-  "current_stock_evidence": "evidence/ASSET_SURVIVAL_2050.json",
-  "current_development_validation": "evidence/CURRENT_DEVELOPMENT_ASSET_VALIDATION.json",
-  "synthetic_survivor_roundtrip": "evidence/SURVIVOR_INTEGRATION_ROUNDTRIP.json",
+  "tests_passed": 146,
   "tested_implementation_attestation": "evidence/TESTED_IMPLEMENTATION_ATTESTATION.json"
 }
