@@ -50,7 +50,7 @@ rule research_build_production_assets:
         architecture="scripts_project/carrier_architecture.py",
         existing_integration="scripts_project/integrate_surviving_assets.py",
         existing_selector="scripts_project/asset_survival.py",
-        integration_contract="research_inputs/asset_survival/integration_contract.json",
+        integration_contract=ASSETS + "/HYDRO_INTEGRATION_CONTRACT.json",
         survival=ASSETS + "/ASSET_SURVIVAL_2050.json",
         research_config="configs/research/baseline.yaml",
         upstream_config="configs/config.asean.yaml",
@@ -66,6 +66,20 @@ rule research_build_production_assets:
         fragment_manifest=ASSETS + "/GATE3_PRODUCTION_FRAGMENT_MANIFEST.json",
     shell:
         "python scripts_project/build_research_assets.py --repo . --reference {input.reference:q} --costs {input.costs:q} --oldcosts {input.oldcosts:q} --survival {input.survival:q} --integration-contract {input.integration_contract:q} --allocation " + ALLOC + " --output " + ASSETS
+
+rule research_prepare_hydro_groups:
+    input:
+        reference=lambda w: config["source_reference"],
+        costs=lambda w: config["source_costs2030_electric"],
+        survival=ASSETS + "/ASSET_SURVIVAL_2050.json",
+        contract="research_inputs/asset_survival/integration_contract.json",
+        decisions="research_inputs/asset_survival/hydro_decisions.json",
+        script="scripts_project/prepare_hydro_group_contract.py",
+    output:
+        contract=ASSETS + "/HYDRO_INTEGRATION_CONTRACT.json",
+        report=ASSETS + "/HYDRO_GROUP_QUALIFICATION.json",
+    shell:
+        "python scripts_project/prepare_hydro_group_contract.py --repo . --reference {input.reference:q} --costs {input.costs:q} --survival {input.survival:q} --contract {input.contract:q} --decisions {input.decisions:q} --output {output.contract:q} --report {output.report:q}"
 
 rule research_trace_existing_assets:
     input:

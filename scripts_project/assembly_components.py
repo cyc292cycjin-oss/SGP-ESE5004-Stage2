@@ -12,8 +12,15 @@ def check_global_constraints(n):
     return True
 
 def merge_input_components(n,sub):
-    if not n.snapshots.equals(sub.snapshots) or not n.snapshot_weightings.equals(sub.snapshot_weightings):raise ValueError('Fragment time boundary mismatch')
-    for comp in sub.iterate_components():
+    if len(sub.loads) or sub.meta.get('partial_demand_binding'):raise ValueError('Bound development fragment cannot enter final assembly')
+    if not n.snapshots.equals(sub.snapshots) or set(n.snapshot_weightings)!=set(sub.snapshot_weightings):raise ValueError('Fragment time boundary mismatch')
+    # NetCDF may reorder named weight columns. Compare each physical meaning,
+    # not serialization order; unequal weights still fail exactly.
+    aligned=sub.snapshot_weightings.reindex(columns=n.snapshot_weightings.columns)
+    if not n.snapshot_weightings.equals(aligned):raise ValueError('Fragment time boundary mismatch')
+    # Import carrier/bus definitions before their dependent components.
+    priority={'Carrier':0,'Bus':1,'LineType':2,'TransformerType':3}
+    for comp in sorted(sub.iterate_components(),key=lambda c:(priority.get(c.name,4),c.name)):
         duplicate=comp.df.index.intersection(n.df(comp.name).index)
         if comp.name in ['LineType','TransformerType']:
             if not comp.df.loc[duplicate].equals(n.df(comp.name).loc[duplicate]):raise ValueError('Conflicting equipment type library')
@@ -40,6 +47,7 @@ def merge_input_components(n,sub):
     return n
 
 def bind_loads(n,records,manifest,arrays,destinations):
+    if len(n.loads) or n.meta.get('demand_owners'):raise ValueError('Demand may be bound only once')
     lookup={r['InputID']:r for r in records};n.meta['demand_owners']={};n.meta['demand_identity']={}
     for ar in manifest['records']:
         r=lookup[ar['InputID']]

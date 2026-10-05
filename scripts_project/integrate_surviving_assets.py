@@ -24,6 +24,9 @@ def combined_profiles(members,profile_network,snapshots,used_absolute):
             if attr not in {'p_max_pu','p_min_pu','inflow'} or not p.get('Source'):raise ValueError('Unqualified existing time profile')
             v=profile_network.pnl(p['ComponentType'])[attr][p['Component']].to_numpy()*finite(p['Multiplier'],'profile multiplier')
             if not np.isfinite(v).all() or (v<0).any():raise ValueError('Invalid existing profile')
+            if 'ClipUpper' in p:
+                if attr!='p_max_pu' or p['ClipUpper']!=1.:raise ValueError('Only normalised availability may be turbine-limited')
+                v=np.minimum(v,1.)
             values.append(v);specs.append(p)
         if attr!='inflow':
             if any(p.get('Aggregation','CAPACITY_WEIGHTED_NORMALISED')!='CAPACITY_WEIGHTED_NORMALISED' for p in specs):raise ValueError('Normalised profile aggregation mismatch')
@@ -131,19 +134,25 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         elif typ=='Generator':
             n.add(typ,name,bus=node,p_nom=q['capacity'],efficiency=q['efficiency'],marginal_cost=q['vom'],**common)
         else:
-            n.add(typ,name,bus=node,p_nom=q['capacity'],efficiency_dispatch=q['efficiency'],efficiency_store=finite(p['EfficiencyStore'],'storage efficiency'),max_hours=finite(p['MaxHours'],'storage energy duration'),cyclic_state_of_charge=p['CyclicStateOfCharge'],marginal_cost=q['vom'],**common)
+            store_eff=finite(p['EfficiencyStore'],'storage efficiency')
+            if store_eff>1:raise ValueError('Storage efficiency exceeds one')
+            if p.get('HydroSubtype')=='Pumped Storage' and (not p['CyclicStateOfCharge'] or p.get('StorageInitialMWh')!=0 or p.get('NaturalInflowMW')!=0 or 'inflow' in p.get('Profiles',{})):raise ValueError('Pure PHS cannot obtain free initial/natural energy')
+            n.add(typ,name,bus=node,p_nom=q['capacity'],efficiency_dispatch=q['efficiency'],efficiency_store=store_eff,max_hours=finite(p['MaxHours'],'storage energy duration'),cyclic_state_of_charge=p['CyclicStateOfCharge'],state_of_charge_initial=finite(p.get('StorageInitialMWh',0.),'initial energy'),marginal_cost=q['vom'],**common)
         for attr,v in p.get('StaticOperatingInputs',{}).items():
             if attr not in {'p_min_pu','p_max_pu','standing_loss'}:raise ValueError('Unapproved operating input field')
-            n.df(typ).loc[name,attr]=finite(v,attr)
+            n.df(typ).loc[name,attr]=finite(v,attr,-1. if attr=='p_min_pu' else 0.)
         for attr,values in combined_profiles(q['member_plans'],profile_network,n.snapshots,used_absolute).items():
             n.import_series_from_dataframe(__import__('pandas').DataFrame({name:values},index=n.snapshots),typ,attr)
         df=n.df(typ)
+        if p.get('HydroResourceIdentity'):
+            for key,val in dict(resource_identity=p['HydroResourceIdentity'],hydro_subtype=p['HydroSubtype'],source_group_capacity_mw=p['SourceGroupCapacityMW'],storage_energy_basis=p.get('StorageEnergyBasis','NOT_STORAGE')).items():df.loc[name,key]=val
         for k,v in dict(asset_role='existing_survivor',source_unit_id=r['RawUnitID'] if len(members)==1 else json.dumps([x['RawUnitID'] for x in members]),source_parent_id=json.dumps(sorted({x['ParentAssetID'] for x in members})),country=r['Country'],retained_electric_capacity_mw=q['capacity'],existing_fixed_om_eur_per_mw_year=q['fom'],existing_annual_fixed_om_eur=q['fom']*q['capacity'],source_asset_version=json.dumps(sorted({x['SourceVersion'] for x in members})),age_fields_meaning='Already screened2050 active group; first commissioning and earliest retirement envelope; no mean-age screening').items():df.loc[name,k]=v
         fom_total+=q['fom']*q['capacity']
         for u in members:identity[u['AssetID']]=dict(component_type=typ,component=name,capacity_mw=u['RetainedCapacity2050'],node=node,source=u['Source'],source_version=u['SourceVersion'],commissioning_year=u['CommissioningYear'],retirement_year=u['RetirementYear'])
     for e in envelopes.values():
         for c in e['candidates']:n.df(c['ComponentType']).loc[c['Name'],'p_nom_max']=min(float(n.df(c['ComponentType']).at[c['Name'],'p_nom_max']),e['new_build_limit_mw']/c['CapacityToMW'])
     n.meta.update(existing_unit_components=identity,existing_resource_groups=envelopes,existing_annual_fixed_om_eur=fom_total,existing_cost_boundary='New CAPEX=0; existing annual fixed OM added once by explicit objective hook; VOM charged to dispatch',existing_carbon_components=carbon)
+    if contract.get('hydro_group_qualification'):n.meta['hydro_group_qualification']=contract['hydro_group_qualification']
     if identity:n.meta['required_constraint_hooks']=sorted(set(n.meta.get('required_constraint_hooks',[]))|{'research_existing_assets'})
     return dict(integrated_units=len(identity),integrated_components=len(combined),integrated_capacity_mw=sum(q['capacity'] for q in plans),annual_existing_fixed_om_eur=fom_total,pending_qualified_units=pending,resource_groups=envelopes,existing_units=identity)
 

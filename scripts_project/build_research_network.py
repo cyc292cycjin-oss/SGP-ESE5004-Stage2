@@ -11,6 +11,13 @@ from check_assembly_inputs import load_registry,check
 from carrier_architecture import Fragment,to_pypsa_fragment
 from carbon_architecture import classify_record
 from assembly_components import check_global_constraints,merge_input_components,bind_loads,validate_hooks
+
+def load_unbound_recipe(path):
+ if path.suffix.lower()!='.json':raise ValueError('Full assembly requires unbound JSON recipe, never a bound development NetCDF')
+ raw=json.loads(path.read_text())
+ if raw.get('partial_demand_binding') or any(r.get('type')=='Load' for r in raw.get('components',{}).values()):raise ValueError('Bound demand cannot enter unbound assembly recipe')
+ if raw.get('artifact_role') not in [None,'UNBOUND_CARRIER_RECIPE']:raise ValueError('Incorrect assembly recipe role')
+ return raw
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def pinned(folder,entry):
  p=(folder/entry['file']).resolve()
@@ -71,7 +78,10 @@ def static_validate(n,records,allocation,carbon_map,*,synthetic_test_only=False)
    coefficient=sum(float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]]) for c in table if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] in atmo)
   else:coefficient=float(n.carriers.at[z.carrier,'co2_emissions'])/float(z.efficiency)
   if not np.isclose(coefficient,float(r['coefficient']),rtol=1e-12):raise ValueError('Carbon coefficient does not match actual physical port')
-  mapped[key]=classify_record(r['component'],r['carrier'],r['sector'],r['country'],r['coefficient'],source=r['source'],policy_weight=r['policy_weight'],accepted=r['accepted'])
+  mapped[key]=classify_record(r['component'],r['carrier'],r['sector'],r['country'],r['coefficient'],source=r['source'],policy_weight=r['policy_weight'],accepted=r['accepted'],physical_qualified=r.get('PhysicalReportingQualified'),policy_qualified=r.get('PolicyAttributionQualified'))
+  if r.get('gas_input_carbon_factor') is not None:
+   if n.buses.at[z.bus0,'carrier']!='gas' or not np.isclose(r['gas_input_carbon_factor'],r['coefficient']+r['captured_carbon_factor']):raise ValueError('SMR physical input/stack/capture balance failed')
+   if r['captured_carbon_factor'] and (z.bus3!=r['captured_destination'] or not np.isclose(z.efficiency3,r['captured_carbon_factor'])):raise ValueError('SMR captured carbon destination mismatch')
  events={('Link',name) for name,z in n.links.iterrows() if any(z[c] in atmo for c in n.links if c.startswith('bus') and c[3:].isdigit() and z[c])}
  events|={('Generator',name) for name,z in n.generators.iterrows() if float(n.carriers.at[z.carrier,'co2_emissions'])!=0}
  if set(mapped)!=events:raise ValueError('Incomplete/extraneous actual carbon scope')
@@ -127,7 +137,7 @@ def build(repo,allocation,assets,output,report):
   check_global_constraints(n)
   for component in n.iterate_components():
    if any(len(v.columns) for k,v in component.pnl.items() if component.attrs.at[k,'status']=='Output'):raise ValueError('Solved outputs cannot enter research base')
-  f=Fragment();raw=json.loads(pinned(root,bundle['carrier_fragment']).read_text())
+  f=Fragment();raw=load_unbound_recipe(pinned(root,bundle['carrier_fragment']))
   if raw.get('qualification_blockers'):raise ValueError('Carrier scientific qualification remains incomplete')
   f.buses=raw['buses'];f.components=raw['components'];f.markets=raw.get('markets',{})
   sub=to_pypsa_fragment(f,list(n.snapshots),list(n.snapshot_weightings.generators),component_ids=list(f.components))

@@ -165,7 +165,7 @@ def build_fragment(repo,base,costs,allocation,output):
         for fuel in ['gas','oil','coal','lignite','H2','co2 captured']:f.bus(bus_name(node,fuel),fuel,z.country,node)
     carbon=list(base.meta.get('existing_carbon_components',[]));pending=[];routes={};dest={};allow=[]
     def event(key,sector,factor,policy,accepted=True):
-        r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'PENDING_MIXED_USE_ATTRIBUTION'))
+        r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,PhysicalReportingQualified=True,PolicyAttributionQualified=accepted,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'POLICY_ATTRIBUTION_PENDING'))
     for node,z in geo.iterrows():
         country=z.country
         for fuel in ['gas','oil','coal','lignite']:
@@ -177,11 +177,14 @@ def build_fragment(repo,base,costs,allocation,output):
             return f.add('Link',node+' '+label,country,carrier,inputs=inputs,outputs=outputs,params=pars,accepted=True,source=source)
         h=bus_name(node,'H2');gas=bus_name(node,'gas');oil=bus_name(node,'oil');co2=bus_name(node,'co2 captured');atmo='ReportingCO2 atmosphere'
         link('electrolysis','H2 Electrolysis',[node,h],[c.at['electrolysis','efficiency']],'electrolysis');allow.append('electrolysis')
-        k=link('SMR','SMR',[gas,h,atmo],[c.at['SMR','efficiency'],c.at['gas','CO2 intensity']],'SMR');event(k,'Other',float(c.at['gas','CO2 intensity']),None,False)
+        k=link('SMR','SMR',[gas,h,atmo],[c.at['SMR','efficiency'],c.at['gas','CO2 intensity']],'SMR');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity']),None,False)
+        carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=0.,captured_destination=None,physical_stage='facility immediate atmosphere')
         # Capture fraction read from effective frozen configuration, not inferred.
         from phase4_static import config
         cc=float(config(repo,'baseline')['sector']['cc_fraction']) if node==geo.index[0] else cc
-        k=link('SMR CC','SMR CC',[gas,h,atmo,co2],[c.at['SMR CC','efficiency'],c.at['gas','CO2 intensity']*(1-cc),c.at['gas','CO2 intensity']*cc],'SMR CC');event(k,'Other',float(c.at['gas','CO2 intensity'])*(1-cc),None,False)
+        if not 0<=cc<=1:raise ValueError('Invalid source capture fraction')
+        k=link('SMR CC','SMR CC',[gas,h,atmo,co2],[c.at['SMR CC','efficiency'],c.at['gas','CO2 intensity']*(1-cc),c.at['gas','CO2 intensity']*cc],'SMR CC');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity'])*(1-cc),None,False)
+        carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=float(c.at['gas','CO2 intensity'])*cc,captured_destination=co2,physical_stage='facility immediate atmosphere; captured transfer is not an atmospheric credit',capture_source='effective sector.cc_fraction')
         link('fuel cell','H2 Fuel Cell',[h,node],[c.at['fuel cell','efficiency']],'fuel cell',c.at['fuel cell','efficiency'])
         allow.append('fuel_cell')
         link('FT','Fischer-Tropsch',[h,oil,co2,node],[c.at['Fischer-Tropsch','efficiency'],-c.at['oil','CO2 intensity']*c.at['Fischer-Tropsch','efficiency'],-c.at['Fischer-Tropsch','electricity-input']/c.at['Fischer-Tropsch','hydrogen-input']],'Fischer-Tropsch',c.at['Fischer-Tropsch','efficiency']);allow+=['FT','steam_methane_reforming']
@@ -230,7 +233,7 @@ def build_fragment(repo,base,costs,allocation,output):
                     pending.append(dict(component=store,commodity=commodity,reason='Commodity-specific supply-cost and carbon-origin/physical-factor qualification pending; developer asset cannot supply extra power/H2'))
             else:raise ValueError('Unmapped qualified fuel '+fuel)
     arrays.close()
-    raw=dict(buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=['Mixed-use SMR/CC policy attribution pending','Commodity-specific biomass cost and carbon-origin/factor evidence pending'] if pending else ['Mixed-use SMR/CC policy attribution pending'])
+    raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=['Commodity-specific biomass cost and carbon-origin/factor evidence pending'] if pending else [],policy_qualification_blockers=['Mixed-use SMR/CC policy attribution pending'],policy_enabled=False)
     save(output/'carrier_fragment.json',raw);save(output/'demand_destinations.json',dest);save(output/'carbon_component_map.json',carbon)
     n=to_pypsa_fragment(f,list(base.snapshots),list(base.snapshot_weightings.generators),component_ids=list(f.components))
     n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))
@@ -253,6 +256,7 @@ def build_fragment(repo,base,costs,allocation,output):
     manifest=dict(status='PRODUCTION_FRAGMENT_INSTANTIATED_CARBON_AND_COST_QUALIFICATION_PENDING',target_year=2050,geographical_nodes=100,components={x.name:len(x.df) for x in actual.iterate_components()},files={p.name:sha(p) for p in [path,output/'carrier_fragment.json',output/'demand_destinations.json',output/'carbon_component_map.json']},code_sha=version(repo),builder_sha256=sha(__file__),inputs={str(costs):source,str(allocation/'allocation_manifest.json'):sha(allocation/'allocation_manifest.json')},environment={'python':platform.python_version(),'pypsa':pypsa.__version__},loads=0,demand_interfaces=len(dest),carbon_events=len(carbon),pending_mixed_carbon_events=sum(not x['accepted'] for x in carbon),pending_bio_qualification=pending,solver_runs=0,fullsc_network_complete=False)
     manifest['inputs'][str(output/'electric_base_2050_unsolved.nc')]=sha(output/'electric_base_2050_unsolved.nc')
     manifest.update(loads=len(actual.loads),bound_qualified_accounts=len(actual_totals),binding_status='PARTIAL_QUALIFIED_DEMANDS_BOUND_DEVELOPMENT_ONLY',demand_binding_annual_mwh=actual_totals,unbound_production_recipe='carrier_fragment.json; full assembler binds once only after all source gates pass')
+    manifest.update(physical_reporting_qualified_components=sum(x.get('PhysicalReportingQualified',x['accepted']) for x in carbon),policy_attribution_qualified_components=sum(x.get('PolicyAttributionQualified',x['accepted']) for x in carbon),policy_enabled=False)
     save(output/'GATE3_PRODUCTION_FRAGMENT_MANIFEST.json',manifest)
     return manifest
 def main():

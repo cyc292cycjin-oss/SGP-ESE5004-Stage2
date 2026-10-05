@@ -76,6 +76,9 @@ class RoundtripTests(unittest.TestCase):
  def test_destination_mismatch(self):
   n,r,m,a,d=self.setup_network();d['test-bio@SG test']['source_carrier']='oil'
   n.mremove('Load',n.loads.index)
+  # Recreate an unbound fixture so this test targets destination compatibility;
+  # double-binding rejection is tested independently in the new boundary suite.
+  n.meta.pop('demand_owners',None);n.meta.pop('demand_identity',None)
   with self.assertRaisesRegex(ValueError,'incompatible'):bind_loads(n,r,m,a,d)
  def test_biomass_diversion_fails(self):
   n,r,*_=self.setup_network();n.add('Link','bad diversion',bus0='SG BD',bus1='SG test',efficiency=.3,p_nom_extendable=True)
