@@ -1,12 +1,3 @@
-# 最终验证
+# 当前验证
 
-156项测试通过：
-
-- test_fixed_accounts_price_basis: 25
-- test_hydro_policy_separation: 20
-- test_gate4_activation: 13
-- test_surviving_asset_integration: 20
-- test_carrier_carbon: 60
-- test_gate4_assets: 18
-
-实际开发网络与前轮全部物理输入比较，FT已知VOM为单独预先记录的成本接线变更。完整网络未导出，输入门禁返回2不是生产构网成功证明；生产DAG、回读和实际配方绑定分别有独立记录。
+19项新增与156项保留回归，共175项通过。source/array/NetCDF/价格层等逐字节保留；7个水电条件池逐时守恒、GPD源到父容量逐项相符。费用代数建模无求解。没有通过修改期望值掩盖数据变化。
