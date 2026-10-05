@@ -14,3 +14,7 @@ Section3还授权采用来源明确的既有技术参数代理。四类火电使
 `research_inputs/assembly_v1/sources/GATE4_CONSOLIDATED_BASELINE_DECISIONS.json`、寿命表和映射/性能合同记录授权链。原133目标和数组保持。EV embedded、既有增长、Mtoe、bunker、单年资产边界均未重问或改动。
 
 生物燃料供给成本、物理CO2/碳来源和SMR混合用途归属不包含在本轮数值授权中。policy_enabled=false。No solver。
+
+## 2026-10-05 本轮水电/碳资格决定
+
+新DecisionReference：GATE4-20261005-HYDRO-PHYSICAL-POLICY-SEPARATION。实施同节点水电组代理和PHS6h；实际新增47182MW。物理/政策资格独立，未知政策权重null。此前增长、单位、EV、bunker、寿命、映射、MY/TH、铁路/NEC决定保持。固定生物账与统一真实价格年份仅候选，未自动批准。

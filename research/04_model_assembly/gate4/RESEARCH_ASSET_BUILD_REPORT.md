@@ -1,28 +1,46 @@
-# Gate4 actual stock activation
+# Gate4 — 水电实际接入与物理/政策资格分离
 
-**FULLSC_NETWORK_NOT_COMPLETE. Gate5=NO. solver_runs=0.**
+**FULLSC_NETWORK_NOT_COMPLETE；Gate5=NO；solver_runs=0。**
 
-Source-screened survival and actual components are now different, measured stages:
+本轮在90b82d6b基准上实施新决定`GATE4-20261005-HYDRO-PHYSICAL-POLICY-SEPARATION`。已批准寿命、映射、增长、EV embedded、bunker、MY/TH去重、铁路/NEC方法均保留。
 
-|Technology|Source-screened survival MW|Actual integrated MW|Not integrated MW|
-|---|---:|---:|---:|
-|CCGT|42,706.4|42,706.4|0.0|
-|Hard Coal|90,375.0|90,375.0|0.0|
-|Hydro|48,636.0|0.0|48,636.0|
-|Lignite|4,321.0|4,321.0|0.0|
-|Oil|2,001.6|2,001.6|0.0|
-|Total|188,040.0|139,404.0|48,636.0|
+|技术|本轮实际新增MW|仍未接入MW|
+|---|---:|---:|
+|水库|38,552|797|
+|径流式|5,944|657|
+|抽蓄|2,686|0|
 
-536 original thermal units aggregate after individual survival screening into90 fixed existing Links. Source-unit→node→component capacity was checked after NetCDF readback. New CAPEX is zero for existing stock, annual fixed O&M remains a separate positive input/objective-hook term, and VOM is converted from EUR/MWh-electric to input-side Link cost using the existing efficiency. Fuel costs enter via the independent supply interfaces. No actual objective or system-cost result is reported.
+实际新增水电47,182 MW、197个源机组，形成58个资源组件；连同536个火电源机组139,404 MW，总接入733个源机组、186,586 MW。水库37组、径流式18组、抽蓄3组。未接入16个机组/1,454 MW保持显式待决，没有丢弃或分配到其他节点。
 
-The existing input efficiencies are CCGT0.57, coal0.356, lignite0.33, oil0.35. The processed2030 cost table is the earliest cached compatible electricity O&M source. In particular its CCGT efficiency0.58 is NOT substituted for the corresponding existing-reference efficiency0.57. Source units, parameter year, original currency year and source citations are in EXISTING_PERFORMANCE_OM_SOURCE_MAP.csv. FOM=source investment×source FOM percent/100; the investment level is a conversion base, not charged CAPEX. New2050 candidate parameters remain separate.
+152项合格目标、实际数组和1,436个开发Load保持。原133项以及后来MY/TH与铁路/NEC成果未改；registry和152组数组hash与前轮相同。火电输入组件逐字段比较保持，105条线路和438个可再生候选容量上限保持。
 
-Hydro unresolved quantities are reservoir39,349MW, run-of-river6,601MW and pumped storage2,686MW. Raw plant-owned hydro profiles contain168 hourly points (2013-03-01 through2013-03-07), not the required full year. Full-year author-network curves exist but their ownership relative to the accepted surviving unit set remains unqualified. PHS is a different problem: original Duration/StorageCapacity fields are missing; fixed reference max_hours is0 while frozen config.default.yaml:435 specifies6h. Neither0 nor6h has been silently adopted as usable existing energy capacity. The7-row source map presents the available parameters and the separate blockers.
+物理报告与政策归属现有独立资格。实际碳映射1,595项物理组件通过端口与系数核对；其中200项SMR/SMR-CC政策权重仍为null。政策关闭时不安装约束；启用政策时任何待决归属明确失败。**这不表示生物商品未知物理碳或全系统排放已经合格。**
 
-No finite site-resource limit exists for the four conventional conversion technologies in the frozen input model. They enter as fixed stock, without adding candidate capacity. New renewable candidates are unique by node/carrier (438) and retain the same input p_nom_max; no wind/solar survivors have qualified under the accepted age rule. Unknown renewable inventory is retained and prevents full stock qualification. Total-capacity versus additional-potential envelopes and no-duplicate occupancy remain tested.
+六类已物化生物商品通过固定量/独占用途检查：Bagasse、Biodiesel、Biogases、Biogasoline、Charcoal、Fuelwood。若采用时间不变单位供给价，它们的供给成本仅形成固定项；该数学结论不是未知价格或排放系数为零。Animal waste尚未物化，不能套用已建网络的证明。外置待核账方案只供审阅，本轮未放行完整出口。
 
-Multi-unit profile handling is explicit: normalised availability is capacity-weighted; dedicated absolute inflows sum once per unique source; shared inflows enter once per identified group. Ambiguous or duplicated absolute flow across groups is refused. New positive/negative regression tests cover these cases and NetCDF roundtrip.
+成本链核验发现汇率和单位已转换，但不同真实价格年份没有统一：EUR2020与EUR2023参数并存。未二次通胀，未换成本。正式成本比较/求解前需统一基年及来源化平减方法。
 
-The electric development NetCDF has100 geographic nodes,2013全年2920个3h时点,90 real fixed existing conversion components and no legacy demand. The carrier development NetCDF now binds152 qualified accounts as1,436 actual Loads, preserving carrier/sector/account/country and annual integrals. Its standalone generation/network boundary remains incomplete. carrier_fragment.json deliberately remains the unbound production recipe, so the final assembler binds once only after all gates pass; it does not merge the partially bound development.nc and then bind again.
+20项新测试与111项相关回归通过，共131项。实际资源组输入、能量、效率、源机组容量、原成果保留、NetCDF回读及真实配方单次绑定已核验。新修复了权重列重排造成的误拒绝；真实权重变化仍拒绝。完整Research Full-SC未导出，两份NetCDF均仍为开发资产。
 
-Neither development asset is SOURCE_QUALIFIED as a complete baseline.5954.020MW confirmed-existing units still lack commissioning evidence; separately301 parent records /22628.143MW have missing links or capacity discrepancies. Unknown/planned status is retained in raw evidence. These categories are not summed into a fabricated stock total. The full-network export gate remains closed.
+## 最少剩余水电原件范围
+
+这些组没有唯一同节点参考输入，未使用跨节点兜底；需要相容的全年输入及原资产覆盖，或另行明确组归属。不需要逐台实测。
+
+|国家|已有100节点|类型|待决MW|
+|---|---|---|---:|
+|ID|ID_Java-Bali1 0|Run-Of-River|47|
+|ID|ID_Kalimantan4 8|Reservoir|110|
+|ID|ID_Sulawesi0 0|Reservoir|90|
+|ID|ID_Sumatra3 1|Run-Of-River|57|
+|LA|LA2 0|Reservoir|70|
+|MM|MM2 13|Run-Of-River|66|
+|MM|MM2 7|Reservoir|54|
+|MY|MY_Peninsular2 0|Run-Of-River|54|
+|PH|PH_Mindanao6 0|Reservoir|213|
+|PH|PH_Mindanao6 0|Run-Of-River|304|
+|PH|PH_Mindanao6 1|Reservoir|260|
+|VN|VN2 5|Run-Of-River|129|
+
+此外，库存缺年份/父项容量差异、10项memo、33项来源覆盖/51项物理账户、生物商品与统一真实价格年份仍待闭合。SMR政策归属单列为关闭政策时不阻断物理报告的事项；没有批准新政策份额。
+
+实际生成链：`research_trace_existing_assets` → `research_prepare_hydro_groups` → `research_build_production_assets`。完整组装依旧只能消费electric_base + 未绑定JSON配方 + 合格数组。

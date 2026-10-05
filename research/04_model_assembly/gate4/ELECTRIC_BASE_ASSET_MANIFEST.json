@@ -1,31 +1,32 @@
 {
   "status": "DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION",
   "file": "electric_base_2050_unsolved.nc",
-  "sha256": "813dd770ca01f806b17f8ce0e5ab15c9dc3df031e013ad1079c00885944d6057",
+  "sha256": "6752d3f8600a2cb62669430969e1f443f70a3e244cb54cf5557aa3346737ab0f",
   "target_year": 2050,
   "geographical_nodes": 100,
   "snapshots": 2920,
   "physical_hours": 8760,
   "components": {
-    "Store": 196,
-    "GlobalConstraint": 1,
     "Bus": 485,
-    "LineType": 35,
-    "Carrier": 55,
     "TransformerType": 14,
+    "StorageUnit": 40,
+    "GlobalConstraint": 1,
+    "Carrier": 58,
     "Line": 105,
-    "Link": 593,
-    "Generator": 438
+    "LineType": 35,
+    "Generator": 456,
+    "Store": 196,
+    "Link": 593
   },
   "inputs": {
     "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/research/00_source_provenance/cache/results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc": "06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb",
     "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2050_sec.csv": "bbcc639010a6775255730278eaa6e21ba56867d0610d3a011adc3eb60d0065f5",
     "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2030_elec.csv": "cff738dbd6077a810a4f9aaf925362522d54ddc09e3d1e6cf705a20bdc7e5ee2",
     "results_project/assembly_v1/assets/ASSET_SURVIVAL_2050.json": "a841a4e1a0a8fd2bccd92bdad0fa252b862e0b7e0420ae334b70c5e52d256a49",
-    "research_inputs/asset_survival/integration_contract.json": "57a9a57d4b8284e5ddb87ec2eb02541c70eeabb4e369292c8a1732101ba209a6"
+    "results_project/assembly_v1/assets/HYDRO_INTEGRATION_CONTRACT.json": "1e742ae6a087b6c82ac819385106c9ecc5231a90397426e120cd707b1a7f5e86"
   },
-  "code_sha": "7c4b9dda76684e8caebb803759b31f1a90b5f4a3",
-  "builder_sha256": "f0e9401432b1c48f341ae555fbb9be16d28ad43a1a8c8367d87b4788b89f5296",
+  "code_sha": "90b82d6b8230e6737fdf61a019f6aa59fa85c9a9",
+  "builder_sha256": "d8de83af8382c5add522959bec4f44b302479c04cbf4ab41858c1525c8d938ba",
   "environment": {
     "python": "3.11.13",
     "pypsa": "0.30.3"
@@ -2566,1292 +2567,370 @@
     "numerical_lifetime_acceptance": "Only explicit lifetime decision table or verified retirement records; candidate results excluded"
   },
   "survivor_integration": {
-    "integrated_units": 536,
-    "integrated_components": 90,
-    "integrated_capacity_mw": 139403.99999999994,
-    "annual_existing_fixed_om_eur": 6677911749.597125,
+    "integrated_units": 733,
+    "integrated_components": 148,
+    "integrated_capacity_mw": 186585.99999999997,
+    "annual_existing_fixed_om_eur": 8198600389.177273,
     "pending_qualified_units": [
-      {
-        "AssetID": "GEM:G100001051668",
-        "capacity_mw": 44.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604043",
-        "capacity_mw": 97.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604042",
-        "capacity_mw": 90.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
       {
         "AssetID": "GEM:G100000604041",
         "capacity_mw": 78.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604040",
-        "capacity_mw": 86.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604039",
-        "capacity_mw": 280.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604038",
-        "capacity_mw": 320.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604045",
-        "capacity_mw": 243.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604037",
-        "capacity_mw": 220.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604035",
-        "capacity_mw": 80.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604034",
-        "capacity_mw": 160.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000600378",
-        "capacity_mw": 132.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000600379",
-        "capacity_mw": 206.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000600376",
-        "capacity_mw": 194.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604057",
-        "capacity_mw": 300.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604046",
-        "capacity_mw": 300.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604032",
-        "capacity_mw": 170.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604065",
-        "capacity_mw": 1200.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604063",
-        "capacity_mw": 360.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604062",
-        "capacity_mw": 81.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604061",
-        "capacity_mw": 520.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604060",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604058",
-        "capacity_mw": 2400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604047",
-        "capacity_mw": 125.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604053",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604055",
-        "capacity_mw": 150.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604054",
-        "capacity_mw": 340.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027570",
-        "capacity_mw": 70.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604052",
-        "capacity_mw": 75.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604051",
-        "capacity_mw": 82.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604049",
-        "capacity_mw": 148.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602443",
-        "capacity_mw": 76.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051363",
-        "capacity_mw": 45.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602436",
-        "capacity_mw": 250.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602431",
-        "capacity_mw": 440.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602471",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602470",
-        "capacity_mw": 265.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602426",
-        "capacity_mw": 1070.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027324",
-        "capacity_mw": 72.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602468",
-        "capacity_mw": 108.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603610",
-        "capacity_mw": 300.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602411",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602408",
-        "capacity_mw": 615.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602402",
-        "capacity_mw": 100.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027322",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602391",
-        "capacity_mw": 152.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602487",
-        "capacity_mw": 75.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602486",
-        "capacity_mw": 348.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001027325",
         "capacity_mw": 54.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602482",
-        "capacity_mw": 400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602479",
-        "capacity_mw": 600.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604066",
-        "capacity_mw": 200.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604067",
-        "capacity_mw": 84.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603197",
-        "capacity_mw": 380.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603193",
-        "capacity_mw": 366.0,
-        "technology": "Hydro",
-        "reason": "Original duration/storage energy missing; reference fixed PHS max_hours=0 is not a qualified usable energy capacity. Resolve source duration/config discrepancy; natural river inflow is not this blocker."
-      },
-      {
-        "AssetID": "GEM:G100000603194",
-        "capacity_mw": 370.0,
-        "technology": "Hydro",
-        "reason": "Original duration/storage energy missing; reference fixed PHS max_hours=0 is not a qualified usable energy capacity. Resolve source duration/config discrepancy; natural river inflow is not this blocker."
-      },
-      {
-        "AssetID": "GEM:G100000603184",
-        "capacity_mw": 150.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000603205",
-        "capacity_mw": 435.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603203",
-        "capacity_mw": 255.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000603201",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603179",
-        "capacity_mw": 140.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027571",
-        "capacity_mw": 66.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604072",
-        "capacity_mw": 108.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604078",
-        "capacity_mw": 190.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027579",
-        "capacity_mw": 62.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027578",
-        "capacity_mw": 70.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027577",
-        "capacity_mw": 63.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027575",
-        "capacity_mw": 49.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604077",
-        "capacity_mw": 156.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027576",
-        "capacity_mw": 57.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604075",
-        "capacity_mw": 220.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604074",
-        "capacity_mw": 2400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027574",
-        "capacity_mw": 63.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604073",
-        "capacity_mw": 360.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604071",
-        "capacity_mw": 260.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604070",
-        "capacity_mw": 100.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604068",
-        "capacity_mw": 110.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051654",
-        "capacity_mw": 48.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027573",
-        "capacity_mw": 84.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027572",
-        "capacity_mw": 48.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604079",
-        "capacity_mw": 220.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604080",
-        "capacity_mw": 80.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027580",
-        "capacity_mw": 64.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001027581",
         "capacity_mw": 51.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604224",
-        "capacity_mw": 75.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000603178",
-        "capacity_mw": 218.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000603177",
-        "capacity_mw": 105.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000603170",
         "capacity_mw": 80.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000603171",
         "capacity_mw": 180.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000603173",
         "capacity_mw": 158.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051425",
         "capacity_mw": 55.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000603174",
         "capacity_mw": 250.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051426",
         "capacity_mw": 54.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604033",
-        "capacity_mw": 210.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027583",
-        "capacity_mw": 66.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604087",
-        "capacity_mw": 342.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604085",
-        "capacity_mw": 400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604084",
-        "capacity_mw": 220.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604082",
-        "capacity_mw": 225.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604081",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027582",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051665",
-        "capacity_mw": 66.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001027334",
         "capacity_mw": 54.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602550",
-        "capacity_mw": 240.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602545",
-        "capacity_mw": 168.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051555",
-        "capacity_mw": 52.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027301",
-        "capacity_mw": 54.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602182",
-        "capacity_mw": 90.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027336",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602176",
-        "capacity_mw": 317.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602174",
-        "capacity_mw": 105.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027300",
-        "capacity_mw": 50.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602172",
-        "capacity_mw": 175.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602168",
-        "capacity_mw": 701.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027335",
-        "capacity_mw": 56.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603603",
-        "capacity_mw": 779.0,
-        "technology": "Hydro",
-        "reason": "Original duration/storage energy missing; reference fixed PHS max_hours=0 is not a qualified usable energy capacity. Resolve source duration/config discrepancy; natural river inflow is not this blocker."
-      },
-      {
-        "AssetID": "GEM:G100000604991",
-        "capacity_mw": 171.0,
-        "technology": "Hydro",
-        "reason": "Original duration/storage energy missing; reference fixed PHS max_hours=0 is not a qualified usable energy capacity. Resolve source duration/config discrepancy; natural river inflow is not this blocker."
-      },
-      {
-        "AssetID": "GEM:G100000603602",
-        "capacity_mw": 84.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001027337",
-        "capacity_mw": 74.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602601",
-        "capacity_mw": 790.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602586",
-        "capacity_mw": 600.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602585",
-        "capacity_mw": 75.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001027338",
-        "capacity_mw": 65.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602582",
-        "capacity_mw": 280.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602572",
-        "capacity_mw": 75.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602135",
-        "capacity_mw": 1008.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602163",
-        "capacity_mw": 181.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602129",
-        "capacity_mw": 140.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602128",
-        "capacity_mw": 126.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602125",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602160",
-        "capacity_mw": 210.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051496",
-        "capacity_mw": 68.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602151",
-        "capacity_mw": 82.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602150",
-        "capacity_mw": 165.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602147",
-        "capacity_mw": 114.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602138",
-        "capacity_mw": 187.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603607",
-        "capacity_mw": 240.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603606",
-        "capacity_mw": 136.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603609",
-        "capacity_mw": 360.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603608",
-        "capacity_mw": 500.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000603605",
-        "capacity_mw": 1000.0,
-        "technology": "Hydro",
-        "reason": "Original duration/storage energy missing; reference fixed PHS max_hours=0 is not a qualified usable energy capacity. Resolve source duration/config discrepancy; natural river inflow is not this blocker."
-      },
-      {
-        "AssetID": "GEM:G100001051666",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000604225",
-        "capacity_mw": 2400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051650",
-        "capacity_mw": 46.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051671",
-        "capacity_mw": 48.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602549",
-        "capacity_mw": 99.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604044",
-        "capacity_mw": 175.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604048",
-        "capacity_mw": 98.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051661",
-        "capacity_mw": 63.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051663",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051653",
-        "capacity_mw": 62.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602390",
-        "capacity_mw": 260.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051335",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602392",
-        "capacity_mw": 88.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000602137",
         "capacity_mw": 110.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100000602140",
         "capacity_mw": 90.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604064",
-        "capacity_mw": 100.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051660",
-        "capacity_mw": 64.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000600377",
-        "capacity_mw": 400.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604594",
-        "capacity_mw": 90.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051421",
-        "capacity_mw": 45.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051557",
         "capacity_mw": 66.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602476",
-        "capacity_mw": 944.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602395",
-        "capacity_mw": 104.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051355",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051361",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602400",
-        "capacity_mw": 130.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051350",
-        "capacity_mw": 66.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051351",
-        "capacity_mw": 53.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602401",
-        "capacity_mw": 160.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051365",
-        "capacity_mw": 65.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051356",
-        "capacity_mw": 64.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602406",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602405",
-        "capacity_mw": 290.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602407",
-        "capacity_mw": 275.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602413",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602412",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602414",
-        "capacity_mw": 210.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602415",
-        "capacity_mw": 132.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602418",
-        "capacity_mw": 210.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602417",
-        "capacity_mw": 180.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602416",
-        "capacity_mw": 240.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602421",
-        "capacity_mw": 86.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051376",
-        "capacity_mw": 45.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051375",
-        "capacity_mw": 69.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602424",
-        "capacity_mw": 168.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602425",
-        "capacity_mw": 650.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051658",
-        "capacity_mw": 45.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602166",
-        "capacity_mw": 195.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051487",
-        "capacity_mw": 200.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051489",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051664",
-        "capacity_mw": 64.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051495",
         "capacity_mw": 47.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051492",
         "capacity_mw": 57.0,
         "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602170",
-        "capacity_mw": 286.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604076",
-        "capacity_mw": 100.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051655",
-        "capacity_mw": 60.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000600381",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000600384",
-        "capacity_mw": 246.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602480",
-        "capacity_mw": 150.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602481",
-        "capacity_mw": 150.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602483",
-        "capacity_mw": 100.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604083",
-        "capacity_mw": 82.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602595",
-        "capacity_mw": 120.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000604086",
-        "capacity_mw": 260.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602490",
-        "capacity_mw": 372.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602598",
-        "capacity_mw": 140.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100001051679",
-        "capacity_mw": 57.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100001051493",
-        "capacity_mw": 47.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
-      },
-      {
-        "AssetID": "GEM:G100000602432",
-        "capacity_mw": 1285.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned168h inflow cannot provide the required annual availability; annual reference availability lacks a qualified source-unit ownership join."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       },
       {
         "AssetID": "GEM:G100001051364",
         "capacity_mw": 70.0,
         "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602433",
-        "capacity_mw": 410.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
-      },
-      {
-        "AssetID": "GEM:G100000602434",
-        "capacity_mw": 322.0,
-        "technology": "Hydro",
-        "reason": "Plant-owned inflow covers168h only; full-year reference inflow ownership has not been reconciled to surviving source units. Shared river/node flow cannot be duplicated."
+        "reason": "NO_UNIQUE_SAME_NODE_INPUT_RESOURCE_GROUP; no cross-node or cross-partition fallback"
       }
     ],
     "resource_groups": {},
     "existing_units": {
+      "GEM:G100001051668": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 44.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100000604032": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 170.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000604062": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 81.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000604049": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 148.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100001027579": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 62.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100001027575": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 49.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000604077": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 156.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2014,
+        "retirement_year": 2114.0
+      },
+      "GEM:G100001027576": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 57.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604033": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 210.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2008,
+        "retirement_year": 2108.0
+      },
+      "GEM:G100000604048": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 98.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100001051661": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 63.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
+      },
+      "GEM:G100001051664": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 2::Hydro::2fdf8aaeea34",
+        "capacity_mw": 64.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2007,
+        "retirement_year": 2107.0
+      },
+      "GEM:G100000604043": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 3::Hydro::31fd8e492352",
+        "capacity_mw": 97.0,
+        "node": "VN2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000604038": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 3::Hydro::31fd8e492352",
+        "capacity_mw": 320.0,
+        "node": "VN2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000604060": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 3::Hydro::31fd8e492352",
+        "capacity_mw": 180.0,
+        "node": "VN2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604064": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 3::Hydro::31fd8e492352",
+        "capacity_mw": 100.0,
+        "node": "VN2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100001051658": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 3::Hydro::31fd8e492352",
+        "capacity_mw": 45.0,
+        "node": "VN2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
+      },
+      "GEM:G100000604042": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 90.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000604037": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 220.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604065": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 1200.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000604061": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 520.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000604066": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 200.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604067": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 84.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000604074": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 2400.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100001027572": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 48.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2014,
+        "retirement_year": 2114.0
+      },
+      "GEM:G100000604081": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 1::Hydro::ff86ce2c06d3",
+        "capacity_mw": 120.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1971,
+        "retirement_year": 2071.0
+      },
       "GEM:G100000101199": {
         "component_type": "Link",
         "component": "existing_survivor::VN2 6::Hard Coal::48a795a500b1",
@@ -4172,6 +3251,296 @@
         "commissioning_year": 2018.0,
         "retirement_year": 2063.0
       },
+      "GEM:G100000604040": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 86.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100000604039": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 280.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100000604045": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 243.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1964,
+        "retirement_year": 2064.0
+      },
+      "GEM:G100000604057": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 300.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
+      "GEM:G100000604046": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 300.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2008,
+        "retirement_year": 2108.0
+      },
+      "GEM:G100000604053": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 180.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000604055": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 150.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000604054": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 340.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100001027570": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 70.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000604051": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 82.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000604079": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 220.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000604044": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 175.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
+      "GEM:G100001051653": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 4::Hydro::496c66207529",
+        "capacity_mw": 62.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000604035": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 6::Hydro::d535d7518595",
+        "capacity_mw": 80.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100001051666": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 6::Hydro::d535d7518595",
+        "capacity_mw": 60.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
+      },
+      "GEM:G100001051671": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 6::Hydro::d535d7518595",
+        "capacity_mw": 48.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000604034": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 160.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100000604063": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 360.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2000,
+        "retirement_year": 2100.0
+      },
+      "GEM:G100000604047": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 125.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2014,
+        "retirement_year": 2114.0
+      },
+      "GEM:G100000604072": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 108.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2006,
+        "retirement_year": 2106.0
+      },
+      "GEM:G100001027578": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 70.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
+      "GEM:G100000604075": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 220.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100001027574": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 63.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000604073": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 360.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000604071": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 260.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2006,
+        "retirement_year": 2106.0
+      },
+      "GEM:G100000604070": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 100.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100001027583": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 66.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
+      "GEM:G100000604084": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 220.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100001051660": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 7::Hydro::339b5799c455",
+        "capacity_mw": 64.0,
+        "node": "VN2 7",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
       "GEM:G100000109370": {
         "component_type": "Link",
         "component": "existing_survivor::KH2 0::Hard Coal::df37d107dc97",
@@ -4272,6 +3641,56 @@
         "commissioning_year": 2022.0,
         "retirement_year": 2067.0
       },
+      "GEM:G100000600378": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::KH2 2::Hydro::1f0ea48a6f04",
+        "capacity_mw": 132.0,
+        "node": "KH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000600379": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::KH2 2::Hydro::1f0ea48a6f04",
+        "capacity_mw": 206.0,
+        "node": "KH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000600381": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::KH2 2::Hydro::1f0ea48a6f04",
+        "capacity_mw": 120.0,
+        "node": "KH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000600384": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::KH2 2::Hydro::1f0ea48a6f04",
+        "capacity_mw": 246.0,
+        "node": "KH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000600376": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000600376",
+        "capacity_mw": 194.0,
+        "node": "KH2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
       "GEM:G100000404530": {
         "component_type": "Link",
         "component": "existing_survivor::GEM:G100000404530",
@@ -4281,6 +3700,76 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2015,
         "retirement_year": 2055.0
+      },
+      "GEM:G100000604058": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 2400.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1994,
+        "retirement_year": 2094.0
+      },
+      "GEM:G100000604068": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 110.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100001051654": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 48.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000604087": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 342.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2008,
+        "retirement_year": 2108.0
+      },
+      "GEM:G100001051650": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 46.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
+      },
+      "GEM:G100000604083": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 82.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000604086": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 6::Hydro::152a88962659",
+        "capacity_mw": 260.0,
+        "node": "VN2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
       },
       "GEM:G100000103517": {
         "component_type": "Link",
@@ -4482,6 +3971,166 @@
         "commissioning_year": 2022.0,
         "retirement_year": 2067.0
       },
+      "GEM:G100000604052": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 4::Hydro::f523ed27dfa9",
+        "capacity_mw": 75.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604080": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 4::Hydro::f523ed27dfa9",
+        "capacity_mw": 80.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100001027580": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 4::Hydro::f523ed27dfa9",
+        "capacity_mw": 64.0,
+        "node": "VN2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2014,
+        "retirement_year": 2114.0
+      },
+      "GEM:G100000602443": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 4::Hydro::0d66b994afb2",
+        "capacity_mw": 76.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100001051363": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 4::Hydro::0d66b994afb2",
+        "capacity_mw": 45.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1990,
+        "retirement_year": 2090.0
+      },
+      "GEM:G100000602390": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 4::Hydro::0d66b994afb2",
+        "capacity_mw": 260.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100000602436": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 250.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000602391": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 152.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1999,
+        "retirement_year": 2099.0
+      },
+      "GEM:G100001051335": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 60.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2023,
+        "retirement_year": 2123.0
+      },
+      "GEM:G100000602392": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 88.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100001051350": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 66.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
+      },
+      "GEM:G100001051351": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 53.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2023,
+        "retirement_year": 2123.0
+      },
+      "GEM:G100000602401": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 160.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100000602433": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 410.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100000602434": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 4::Hydro::b7d2112a081a",
+        "capacity_mw": 322.0,
+        "node": "LA2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602431": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000602431",
+        "capacity_mw": 440.0,
+        "node": "LA2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1998,
+        "retirement_year": 2098.0
+      },
       "GEM:G100000106632": {
         "component_type": "Link",
         "component": "existing_survivor::MY_Peninsular2 0::Hard Coal::a89c954fcb8c",
@@ -4501,6 +4150,106 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2017.0,
         "retirement_year": 2062.0
+      },
+      "GEM:G100000602471": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 120.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1984,
+        "retirement_year": 2084.0
+      },
+      "GEM:G100000602470": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 265.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100001027324": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 72.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1983,
+        "retirement_year": 2083.0
+      },
+      "GEM:G100000602486": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 348.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1977,
+        "retirement_year": 2077.0
+      },
+      "GEM:G100000602482": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 400.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1985,
+        "retirement_year": 2085.0
+      },
+      "GEM:G100000602479": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 600.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1997,
+        "retirement_year": 2097.0
+      },
+      "GEM:G100000602480": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 150.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1965,
+        "retirement_year": 2065.0
+      },
+      "GEM:G100000602481": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 150.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1967,
+        "retirement_year": 2067.0
+      },
+      "GEM:G100000602483": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 100.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1963,
+        "retirement_year": 2063.0
+      },
+      "GEM:G100000602490": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Peninsular2 0::Hydro::d639e312f4a7",
+        "capacity_mw": 372.0,
+        "node": "MY_Peninsular2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
       },
       "GEM:G100000105181": {
         "component_type": "Link",
@@ -4661,6 +4410,36 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2017,
         "retirement_year": 2057.0
+      },
+      "GEM:G100000602426": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 3::Hydro::1577c4b59ef0",
+        "capacity_mw": 1070.0,
+        "node": "LA2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2020,
+        "retirement_year": 2120.0
+      },
+      "GEM:G100001051355": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 3::Hydro::1577c4b59ef0",
+        "capacity_mw": 60.0,
+        "node": "LA2 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000602468": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000602468",
+        "capacity_mw": 108.0,
+        "node": "MY_Sarawak4 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1985,
+        "retirement_year": 2085.0
       },
       "GEM:G100000404483": {
         "component_type": "Link",
@@ -5002,6 +4781,26 @@
         "commissioning_year": 2016,
         "retirement_year": 2056.0
       },
+      "GEM:G100000603610": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::TH2 2::Hydro::9b473f82103c",
+        "capacity_mw": 300.0,
+        "node": "TH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1984,
+        "retirement_year": 2084.0
+      },
+      "GEM:G100000603609": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::TH2 2::Hydro::9b473f82103c",
+        "capacity_mw": 360.0,
+        "node": "TH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1980,
+        "retirement_year": 2080.0
+      },
       "GEM:G100000107089": {
         "component_type": "Link",
         "component": "existing_survivor::MY_Sarawak4 1::Hard Coal::9979e52cd256",
@@ -5021,6 +4820,166 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2009.0,
         "retirement_year": 2054.0
+      },
+      "GEM:G100000602411": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 120.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000602395": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 104.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
+      },
+      "GEM:G100001051361": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 60.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602400": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 130.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000602406": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 180.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000602421": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 86.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
+      },
+      "GEM:G100001051376": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 45.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100001051375": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 1::Hydro::bc0b69793276",
+        "capacity_mw": 69.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602408": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 2::Hydro::7909cd705b09",
+        "capacity_mw": 615.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000602402": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 2::Hydro::7909cd705b09",
+        "capacity_mw": 100.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000602405": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 2::Hydro::7909cd705b09",
+        "capacity_mw": 290.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100000602407": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 2::Hydro::7909cd705b09",
+        "capacity_mw": 275.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1971,
+        "retirement_year": 2071.0
+      },
+      "GEM:G100000602425": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 2::Hydro::7909cd705b09",
+        "capacity_mw": 650.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2022,
+        "retirement_year": 2122.0
+      },
+      "GEM:G100001027322": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 2::Hydro::cc3dfd083c77",
+        "capacity_mw": 60.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2000,
+        "retirement_year": 2100.0
+      },
+      "GEM:G100001051365": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 2::Hydro::cc3dfd083c77",
+        "capacity_mw": 65.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100001051356": {
+        "component_type": "Generator",
+        "component": "existing_survivor::LA2 2::Hydro::cc3dfd083c77",
+        "capacity_mw": 64.0,
+        "node": "LA2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
       },
       "GEM:G100000103946": {
         "component_type": "Link",
@@ -5051,6 +5010,16 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2016.0,
         "retirement_year": 2061.0
+      },
+      "GEM:G100000602487": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000602487",
+        "capacity_mw": 75.0,
+        "node": "MY_Sabah4 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1984,
+        "retirement_year": 2084.0
       },
       "GEM:G100000404351": {
         "component_type": "Link",
@@ -5211,6 +5180,56 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2019.0,
         "retirement_year": 2064.0
+      },
+      "GEM:G100000603197": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::644e2f522476",
+        "capacity_mw": 380.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1983,
+        "retirement_year": 2083.0
+      },
+      "GEM:G100000603205": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::644e2f522476",
+        "capacity_mw": 435.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2003,
+        "retirement_year": 2103.0
+      },
+      "GEM:G100000603201": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::644e2f522476",
+        "capacity_mw": 120.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1977,
+        "retirement_year": 2077.0
+      },
+      "GEM:G100000603179": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::644e2f522476",
+        "capacity_mw": 140.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1960,
+        "retirement_year": 2060.0
+      },
+      "GEM:G100000603177": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::644e2f522476",
+        "capacity_mw": 105.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1956,
+        "retirement_year": 2056.0
       },
       "GEM:G100000106294": {
         "component_type": "Link",
@@ -5422,6 +5441,26 @@
         "commissioning_year": 2013.0,
         "retirement_year": 2058.0
       },
+      "GEM:G100000603193": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::9b58cd604c82",
+        "capacity_mw": 366.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1983,
+        "retirement_year": 2083.0
+      },
+      "GEM:G100000603194": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::9b58cd604c82",
+        "capacity_mw": 370.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1983,
+        "retirement_year": 2083.0
+      },
       "GEM:G100000101687": {
         "component_type": "Link",
         "component": "existing_survivor::PH_Visayas7 0::Hard Coal::610bb8bbbc6a",
@@ -5502,6 +5541,36 @@
         "commissioning_year": 2019.0,
         "retirement_year": 2064.0
       },
+      "GEM:G100000603184": {
+        "component_type": "Generator",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::6fb611a07487",
+        "capacity_mw": 150.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
+      "GEM:G100000604224": {
+        "component_type": "Generator",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::6fb611a07487",
+        "capacity_mw": 75.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2000,
+        "retirement_year": 2100.0
+      },
+      "GEM:G100000603178": {
+        "component_type": "Generator",
+        "component": "existing_survivor::PH_Luzon5 0::Hydro::6fb611a07487",
+        "capacity_mw": 218.0,
+        "node": "PH_Luzon5 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1967,
+        "retirement_year": 2067.0
+      },
       "GEM:G100000404389": {
         "component_type": "Link",
         "component": "existing_survivor::GEM:G100000404389",
@@ -5511,6 +5580,126 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2016,
         "retirement_year": 2056.0
+      },
+      "GEM:G100000603203": {
+        "component_type": "Generator",
+        "component": "existing_survivor::PH_Mindanao6 1::Hydro::ee95b23e67c0",
+        "capacity_mw": 255.0,
+        "node": "PH_Mindanao6 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1985,
+        "retirement_year": 2085.0
+      },
+      "GEM:G100001051421": {
+        "component_type": "Generator",
+        "component": "existing_survivor::PH_Mindanao6 1::Hydro::ee95b23e67c0",
+        "capacity_mw": 45.0,
+        "node": "PH_Mindanao6 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
+      },
+      "GEM:G100001027571": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 66.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100001027573": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 84.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2014,
+        "retirement_year": 2114.0
+      },
+      "GEM:G100001027582": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 60.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100001051665": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 66.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2022,
+        "retirement_year": 2122.0
+      },
+      "GEM:G100001051655": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 60.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100001051679": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 1::Hydro::3757fb110e2d",
+        "capacity_mw": 57.0,
+        "node": "VN2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000604078": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 2::Hydro::f39a528e5bba",
+        "capacity_mw": 190.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100001027577": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 2::Hydro::f39a528e5bba",
+        "capacity_mw": 63.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2009,
+        "retirement_year": 2109.0
+      },
+      "GEM:G100001051663": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 2::Hydro::f39a528e5bba",
+        "capacity_mw": 60.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100000604076": {
+        "component_type": "Generator",
+        "component": "existing_survivor::VN2 2::Hydro::f39a528e5bba",
+        "capacity_mw": 100.0,
+        "node": "VN2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
       },
       "GEM:G100000107494": {
         "component_type": "Link",
@@ -5611,6 +5800,26 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2023.0,
         "retirement_year": 2068.0
+      },
+      "GEM:G100000604085": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 5::Hydro::1f892a5bac58",
+        "capacity_mw": 400.0,
+        "node": "VN2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1988,
+        "retirement_year": 2088.0
+      },
+      "GEM:G100000604082": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::VN2 5::Hydro::1f892a5bac58",
+        "capacity_mw": 225.0,
+        "node": "VN2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1995,
+        "retirement_year": 2095.0
       },
       "GEM:G100000100180": {
         "component_type": "Link",
@@ -5842,6 +6051,46 @@
         "commissioning_year": 2022.0,
         "retirement_year": 2067.0
       },
+      "GEM:G100000602550": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 0::Hydro::373b54f8a073",
+        "capacity_mw": 240.0,
+        "node": "MM2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000602549": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 0::Hydro::373b54f8a073",
+        "capacity_mw": 99.0,
+        "node": "MM2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000602545": {
+        "component_type": "Generator",
+        "component": "existing_survivor::MM2 6::Hydro::a343b77646c3",
+        "capacity_mw": 168.0,
+        "node": "MM2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1960,
+        "retirement_year": 2060.0
+      },
+      "GEM:G100001051555": {
+        "component_type": "Generator",
+        "component": "existing_survivor::MM2 6::Hydro::a343b77646c3",
+        "capacity_mw": 52.0,
+        "node": "MM2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
       "GEM:G100000404369": {
         "component_type": "Link",
         "component": "existing_survivor::MM2 1::CCGT::83029d71ad3d",
@@ -5911,6 +6160,36 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2018,
         "retirement_year": 2058.0
+      },
+      "GEM:G100001027301": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Java-Bali1 2::Hydro::7aba215b833d",
+        "capacity_mw": 54.0,
+        "node": "ID_Java-Bali1 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1979,
+        "retirement_year": 2079.0
+      },
+      "GEM:G100000602174": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Java-Bali1 2::Hydro::7aba215b833d",
+        "capacity_mw": 105.0,
+        "node": "ID_Java-Bali1 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1973,
+        "retirement_year": 2073.0
+      },
+      "GEM:G100000602182": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000602182",
+        "capacity_mw": 90.0,
+        "node": "ID_Sumatra3 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
       },
       "GEM:G100000109998": {
         "component_type": "Link",
@@ -6271,6 +6550,56 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2015.0,
         "retirement_year": 2060.0
+      },
+      "GEM:G100001027336": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 10::Hydro::40f204ee6157",
+        "capacity_mw": 60.0,
+        "node": "MM2 10",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100001027338": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 10::Hydro::40f204ee6157",
+        "capacity_mw": 65.0,
+        "node": "MM2 10",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
+      },
+      "GEM:G100000602595": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 10::Hydro::40f204ee6157",
+        "capacity_mw": 120.0,
+        "node": "MM2 10",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
+      },
+      "GEM:G100000602176": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::180fbf570c14",
+        "capacity_mw": 317.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1982,
+        "retirement_year": 2082.0
+      },
+      "GEM:G100000602170": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::180fbf570c14",
+        "capacity_mw": 286.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1982,
+        "retirement_year": 2082.0
       },
       "GEM:G100000109663": {
         "component_type": "Link",
@@ -6762,6 +7091,76 @@
         "commissioning_year": 2022.0,
         "retirement_year": 2067.0
       },
+      "GEM:G100001027300": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::b5a4d920a517",
+        "capacity_mw": 50.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2005,
+        "retirement_year": 2105.0
+      },
+      "GEM:G100000602125": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::b5a4d920a517",
+        "capacity_mw": 180.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000602151": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::b5a4d920a517",
+        "capacity_mw": 82.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2006,
+        "retirement_year": 2106.0
+      },
+      "GEM:G100001051493": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sumatra3 2::Hydro::b5a4d920a517",
+        "capacity_mw": 47.0,
+        "node": "ID_Sumatra3 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602172": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sumatra3 3::Hydro::b4e551307422",
+        "capacity_mw": 175.0,
+        "node": "ID_Sumatra3 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1998,
+        "retirement_year": 2098.0
+      },
+      "GEM:G100001051496": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sumatra3 3::Hydro::b4e551307422",
+        "capacity_mw": 68.0,
+        "node": "ID_Sumatra3 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1983,
+        "retirement_year": 2083.0
+      },
+      "GEM:G100000602147": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sumatra3 3::Hydro::b4e551307422",
+        "capacity_mw": 114.0,
+        "node": "ID_Sumatra3 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1996,
+        "retirement_year": 2096.0
+      },
       "GEM:G100000404288": {
         "component_type": "Link",
         "component": "existing_survivor::ID_Sulawesi0 4::CCGT::68f8cfb2b225",
@@ -6781,6 +7180,36 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2023,
         "retirement_year": 2063.0
+      },
+      "GEM:G100000602168": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Java-Bali1 0::Hydro::484376eceaf1",
+        "capacity_mw": 701.0,
+        "node": "ID_Java-Bali1 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1985,
+        "retirement_year": 2085.0
+      },
+      "GEM:G100000602135": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Java-Bali1 0::Hydro::484376eceaf1",
+        "capacity_mw": 1008.0,
+        "node": "ID_Java-Bali1 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1986,
+        "retirement_year": 2086.0
+      },
+      "GEM:G100000602138": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Java-Bali1 0::Hydro::484376eceaf1",
+        "capacity_mw": 187.0,
+        "node": "ID_Java-Bali1 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1967,
+        "retirement_year": 2067.0
       },
       "GEM:G100000113843": {
         "component_type": "Link",
@@ -7071,6 +7500,16 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2020.0,
         "retirement_year": 2065.0
+      },
+      "GEM:G100001027335": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100001027335",
+        "capacity_mw": 56.0,
+        "node": "MM2 12",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1985,
+        "retirement_year": 2085.0
       },
       "GEM:G100000411301": {
         "component_type": "Link",
@@ -7462,6 +7901,76 @@
         "commissioning_year": 2016,
         "retirement_year": 2056.0
       },
+      "GEM:G100000603603": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::TH2 4::Hydro::6b2ad09f452a",
+        "capacity_mw": 779.0,
+        "node": "TH2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1964,
+        "retirement_year": 2064.0
+      },
+      "GEM:G100000604991": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::TH2 4::Hydro::6b2ad09f452a",
+        "capacity_mw": 171.0,
+        "node": "TH2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1996,
+        "retirement_year": 2096.0
+      },
+      "GEM:G100000603602": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000603602",
+        "capacity_mw": 84.0,
+        "node": "TH2 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1981,
+        "retirement_year": 2081.0
+      },
+      "GEM:G100001027337": {
+        "component_type": "Generator",
+        "component": "existing_survivor::MM2 10::Hydro::47336a26beba",
+        "capacity_mw": 74.0,
+        "node": "MM2 10",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100000602585": {
+        "component_type": "Generator",
+        "component": "existing_survivor::MM2 10::Hydro::47336a26beba",
+        "capacity_mw": 75.0,
+        "node": "MM2 10",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000602601": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 5::Hydro::626f844f6ad9",
+        "capacity_mw": 790.0,
+        "node": "MM2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2010,
+        "retirement_year": 2110.0
+      },
+      "GEM:G100000602586": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 5::Hydro::626f844f6ad9",
+        "capacity_mw": 600.0,
+        "node": "MM2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2008,
+        "retirement_year": 2108.0
+      },
       "GEM:G100000404375": {
         "component_type": "Link",
         "component": "existing_survivor::GEM:G100000404375",
@@ -7471,6 +7980,36 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2019,
         "retirement_year": 2059.0
+      },
+      "GEM:G100000602582": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 6::Hydro::1538d432eea2",
+        "capacity_mw": 280.0,
+        "node": "MM2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2005,
+        "retirement_year": 2105.0
+      },
+      "GEM:G100000602598": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MM2 6::Hydro::1538d432eea2",
+        "capacity_mw": 140.0,
+        "node": "MM2 6",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000602572": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000602572",
+        "capacity_mw": 75.0,
+        "node": "MM2 15",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2004,
+        "retirement_year": 2104.0
       },
       "GEM:G100000102626": {
         "component_type": "Link",
@@ -7541,6 +8080,16 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2022,
         "retirement_year": 2062.0
+      },
+      "GEM:G100000602163": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000602163",
+        "capacity_mw": 181.0,
+        "node": "ID_Java-Bali1 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1989,
+        "retirement_year": 2089.0
       },
       "GEM:G100000404255": {
         "component_type": "Link",
@@ -7712,6 +8261,36 @@
         "commissioning_year": 2013.0,
         "retirement_year": 2058.0
       },
+      "GEM:G100000602129": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sulawesi0 3::Hydro::946ad49abee4",
+        "capacity_mw": 140.0,
+        "node": "ID_Sulawesi0 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1999,
+        "retirement_year": 2099.0
+      },
+      "GEM:G100000602150": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::ID_Sulawesi0 3::Hydro::946ad49abee4",
+        "capacity_mw": 165.0,
+        "node": "ID_Sulawesi0 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1979,
+        "retirement_year": 2079.0
+      },
+      "GEM:G100000602128": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000602128",
+        "capacity_mw": 126.0,
+        "node": "ID_Sulawesi0 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1991,
+        "retirement_year": 2091.0
+      },
       "GEM:G100000105482": {
         "component_type": "Link",
         "component": "existing_survivor::ID_Kalimantan4 4::Lignite::b99f51b3b8ac",
@@ -7862,6 +8441,16 @@
         "commissioning_year": 2023.0,
         "retirement_year": 2068.0
       },
+      "GEM:G100000602160": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000602160",
+        "capacity_mw": 210.0,
+        "node": "ID_Sumatra3 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2006,
+        "retirement_year": 2106.0
+      },
       "GEM:G100000106084": {
         "component_type": "Link",
         "component": "existing_survivor::ID_Sumatra3 2::Lignite::bd8abcb7e03e",
@@ -7942,6 +8531,36 @@
         "commissioning_year": 2015.0,
         "retirement_year": 2060.0
       },
+      "GEM:G100000603607": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000603607",
+        "capacity_mw": 240.0,
+        "node": "TH2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1987,
+        "retirement_year": 2087.0
+      },
+      "GEM:G100000603606": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000603606",
+        "capacity_mw": 136.0,
+        "node": "TH2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1994,
+        "retirement_year": 2094.0
+      },
+      "GEM:G100000603608": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000603608",
+        "capacity_mw": 500.0,
+        "node": "TH2 4",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 1974,
+        "retirement_year": 2074.0
+      },
       "GEM:G100000404431": {
         "component_type": "Link",
         "component": "existing_survivor::GEM:G100000404431",
@@ -8012,6 +8631,16 @@
         "commissioning_year": 2014,
         "retirement_year": 2054.0
       },
+      "GEM:G100000603605": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000603605",
+        "capacity_mw": 1000.0,
+        "node": "TH2 2",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2001,
+        "retirement_year": 2101.0
+      },
       "GEM:G100000411329": {
         "component_type": "Link",
         "component": "existing_survivor::ID_Sumatra3 0::CCGT::173bf0bc7973",
@@ -8031,6 +8660,26 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2015,
         "retirement_year": 2055.0
+      },
+      "GEM:G100000604225": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Sarawak4 0::Hydro::5c236cd72d46",
+        "capacity_mw": 2400.0,
+        "node": "MY_Sarawak4 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2011,
+        "retirement_year": 2111.0
+      },
+      "GEM:G100000602476": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::MY_Sarawak4 0::Hydro::5c236cd72d46",
+        "capacity_mw": 944.0,
+        "node": "MY_Sarawak4 0",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2013,
+        "retirement_year": 2113.0
       },
       "GEM:G100000100481": {
         "component_type": "Link",
@@ -8712,6 +9361,16 @@
         "commissioning_year": 2020,
         "retirement_year": 2060.0
       },
+      "GEM:G100000600377": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::GEM:G100000600377",
+        "capacity_mw": 400.0,
+        "node": "KH2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2017,
+        "retirement_year": 2117.0
+      },
       "GEM:G100000106557": {
         "component_type": "Link",
         "component": "existing_survivor::GEM:G100000106557",
@@ -8721,6 +9380,16 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2019.0,
         "retirement_year": 2064.0
+      },
+      "GEM:G100000604594": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000604594",
+        "capacity_mw": 90.0,
+        "node": "ID_Sulawesi0 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
       },
       "GEM:G100000115063": {
         "component_type": "Link",
@@ -8751,6 +9420,86 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2019,
         "retirement_year": 2059.0
+      },
+      "GEM:G100000602413": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 120.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2015,
+        "retirement_year": 2115.0
+      },
+      "GEM:G100000602412": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 180.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
+      },
+      "GEM:G100000602414": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 210.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2020,
+        "retirement_year": 2120.0
+      },
+      "GEM:G100000602415": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 132.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2020,
+        "retirement_year": 2120.0
+      },
+      "GEM:G100000602418": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 210.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100000602417": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 180.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602416": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 240.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2016,
+        "retirement_year": 2116.0
+      },
+      "GEM:G100000602424": {
+        "component_type": "StorageUnit",
+        "component": "existing_survivor::LA2 5::Hydro::5ba00b25a5fc",
+        "capacity_mw": 168.0,
+        "node": "LA2 5",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2018,
+        "retirement_year": 2118.0
       },
       "GEM:G100000113233": {
         "component_type": "Link",
@@ -8831,6 +9580,36 @@
         "source_version": "0a903cae9037bcc8f6223bd0642efaf8f28169fd0fef0d84e4ca0ecfb17da659",
         "commissioning_year": 2016,
         "retirement_year": 2056.0
+      },
+      "GEM:G100000602166": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sulawesi0 3::Hydro::599e7125a797",
+        "capacity_mw": 195.0,
+        "node": "ID_Sulawesi0 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2012,
+        "retirement_year": 2112.0
+      },
+      "GEM:G100001051487": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sulawesi0 3::Hydro::599e7125a797",
+        "capacity_mw": 200.0,
+        "node": "ID_Sulawesi0 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2021,
+        "retirement_year": 2121.0
+      },
+      "GEM:G100001051489": {
+        "component_type": "Generator",
+        "component": "existing_survivor::ID_Sulawesi0 3::Hydro::599e7125a797",
+        "capacity_mw": 120.0,
+        "node": "ID_Sulawesi0 3",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2020,
+        "retirement_year": 2120.0
       },
       "GEM:G100000115067": {
         "component_type": "Link",
@@ -9211,18 +9990,26 @@
         "source_version": "761e4cc56cdf0d5cc2df776073ca882d359b83724964568dd44e640a0b004644",
         "commissioning_year": 2023.0,
         "retirement_year": 2068.0
+      },
+      "GEM:G100000602432": {
+        "component_type": "Generator",
+        "component": "existing_survivor::GEM:G100000602432",
+        "capacity_mw": 1285.0,
+        "node": "LA2 1",
+        "source": "Global-Hydropower-Tracker-April-2025.xlsx",
+        "source_version": "d2fe29a7d198fd6752cb4cec3d88caf9f1d1105a7052fd0805f5cf5fc43777c4",
+        "commissioning_year": 2019,
+        "retirement_year": 2119.0
       }
     }
   },
   "unit_first_selection": true,
   "conditional_stock_materialised": false,
   "implementation_sha256": {
-    "build_research_assets.py": "f0e9401432b1c48f341ae555fbb9be16d28ad43a1a8c8367d87b4788b89f5296",
-    "integrate_surviving_assets.py": "4bd0f48d34d605c0767f144ac48f08433419608802ec082f9c6ade84869ec389",
+    "build_research_assets.py": "d8de83af8382c5add522959bec4f44b302479c04cbf4ab41858c1525c8d938ba",
+    "integrate_surviving_assets.py": "bb0c22ce3245bf088c4a200ebfa45a49b901aca53faf126a8cf273f9236dea11",
     "unit_asset_survival.py": "3be1cd8d8a2aec2a38fa93dd5a85424e3c2cd548d1d88effed16442fc45f49e9",
     "asset_survival.py": "e254f4d26b6f3d62c2a7ab7901ada2b1bcff3b0defd8f0057ff50bd6b7c54540",
     "trace_asset_survival.py": "189c05c11ff08192a0de98f7dae52fd94d6465fa81af93716a19fc4bc56cebad"
-  },
-  "tested_implementation_git_commit": "36a8608c5c641d8f101773c80cce9e96c4815a70",
-  "tested_implementation_attestation": "evidence/TESTED_IMPLEMENTATION_ATTESTATION.json"
+  }
 }

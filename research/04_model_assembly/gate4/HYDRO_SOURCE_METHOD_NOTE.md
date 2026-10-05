@@ -1,0 +1,15 @@
+# 冻结全年水电资源组的证据边界
+
+已验证结果：固定参考输入文件SHA256=06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb；2920个2013三小时时点，各权重3小时。元数据代码SHA=5bacad702ccfed17ad19ab510fa710651e966f2c。已从本地Git历史恢复该SHA的add_electricity/build_renewable_profiles/cluster_network源码，区别于当前已变动上游。
+
+历史链：build_renewable_profiles.py生成水文输入、按元数据irena2023归一化、multiplier1.1；add_electricity.py:511开始，585-599将径流式转为inflow/p_nom并截到1，602-617对抽蓄效率取平方根，619以后水库单独决定max_hours并输入绝对inflow；cluster_network.py:564-566聚合发电和StorageUnit。所有字段为输入，未复制dispatch、spill、SOC结果或任何*_nom_opt。
+
+本轮方法是人类批准的**同已有节点资源组代理**，不是作者逐机组到100节点映射恢复。SourceInputCapacityMW只说明参考输入组的覆盖规模，不作为继承MW。实际存量完全来自逐机组筛选。原组p_nom与当前存续MW可以不同，两者在CSV并列，不能据此把差额归一化或继承作者容量。
+
+水库：原组绝对inflow每时点保留一次；ResourceIdentity为文件hash+组件类型+节点+技术。能量上限独立读取原水库输入p_nom*max_hours，保持该组MWh不变，当前max_hours=原组MWh/实际存续MW。参考水库max_hours与其独立hydro_max_hours_default逻辑可追溯；不引用本轮PHS6h批准。此为冻结模型输入代理，不是实测库容。
+
+径流式：原p_nom*p_max_pu形成固定逐时可用功率边界；当前曲线=min(该边界/存续MW,1)。曲线按明确存续容量权重聚合。新增存续MW不能凭空增加原资源输入；减少机组时，受限可用量不是新增物理来水损失记录。源available-power envelope不等于原始未截流入。
+
+不同原组件保留不同ResourceIdentity；没有按相同曲线或同一条河流名字全局去重，也没有将不同水头合并成一个新资源。原输入层的水文与梯级近似保持，不新建梯级模型。
+
+168小时缓存仅用于来源对照，未铺满全年。该教程输入与全年参考的重叠段数值不一致，且映射/覆盖和归一化时段不同，**没有把它宣称为恢复出的同版全年原件**。本轮选用人类允许的参考全年输入分支，记录其原组、量纲、容量边界与hash；缺同节点组保持待决。对代理的空间/水文敏感性保留。

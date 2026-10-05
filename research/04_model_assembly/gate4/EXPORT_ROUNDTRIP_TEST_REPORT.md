@@ -1,7 +1,9 @@
-# Export and readback evidence
+# 本轮验证
 
-13 new tests plus133 prior related tests passed. New coverage includes separate and shared absolute hydro inflow, refusal of cross-group duplication, capacity-weighted normalised curves, accepted-proxy authority, TH exact four-item reconciliation,133-target preservation, exclusive rail/NEC source ownership and old-vintage zero proofs. Existing synthetic tests remain labelled SYNTHETIC_TEST_ONLY.
+20项test_hydro_policy_separation、13项test_gate4_activation、20项test_surviving_asset_integration、60项test_carrier_carbon、18项test_gate4_assets，共131项通过。测试不调用solver。
 
-Actual development readback confirms536 raw units →90 existing components →139404MW and152 demand accounts →1436 Loads. Existing CAPEX is0; positive FOM and VOM/efficiency basis are preserved. Source IDs, country/partition,2013 snapshots and hooks roundtrip. The133 previous arrays are byte-identical. New renewables have one candidate per node/carrier, unchanged resource limits, and no copied optimised capacity.
+针对新增水电：绝对共享输入一次、容量加权归一化、径流式资源上界不随MW增长、PHS循环与效率、能量与导出回读。碳：物理可用但政策null、null不转0、启用政策拒绝待决、碳事件重复拒绝。组装：拒绝带Load开发网和重复绑定、按名称比较序列化权重、真权重变化拒绝。
 
-The full gate returns2 because inputs/assets remain incomplete; this is not proof of production build success. Actual production success is independently recorded in PRODUCTION_ASSET_DAG.log and ACTUAL_NETWORK_VALIDATION.json. No solver.
+实际生产DAG和实际NetCDF独立验证见evidence/TEST_RECEIPTS.json、HYDRO_ACTUAL_VALIDATION.json、PHYSICAL_POLICY_VALIDATION.json、REAL_RECIPE_BOUNDARY_CHECK.json。保存精确源路径、hash和日志。PROJ数据库警告出现于环境导入；本轮未调用坐标变换或重算既有映射。环境readiness仍不作整体升级。
+
+两个实际开发NetCDF已导出回读；完整网络未导出。部分合格的真实配方合并仅在内存验证，不冒充完整基准。

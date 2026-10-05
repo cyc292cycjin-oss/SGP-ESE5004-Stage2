@@ -1,9 +1,9 @@
-# Gate4 current delivery
+# Gate4当前交付入口
 
-Current entry points: DECISIONS_APPLIED_THIS_ROUND.md, PHASE4_GATE4_READINESS.md, UPDATED_TARGET_AND_ALLOCATION_SUMMARY.md and CONSOLIDATED_NUMERICAL_DECISIONS.md.
+本轮：Hydro Integration + Physical/Policy Qualification Separation。读取PHASE4_GATE4_READINESS.md、HYDRO_SOURCE_METHOD_NOTE.md和四份专题报告。
 
-ASSET_SURVIVAL_2050_ACCEPTED.csv lists749 source-screened survivors under current accepted lifetimes. ACTUAL_EXISTING_ASSET_INTEGRATION.csv independently records536 integrated units and213 hydro units held for other qualifications. EXISTING_PERFORMANCE_OM_SOURCE_MAP.csv distinguishes applied source proxies from unactivated hydro candidates.
+当前实际存量与水电明细以ACTUAL_EXISTING_ASSET_INTEGRATION.csv、HYDRO_ACTUAL_INTEGRATION.csv及HYDRO_GROUP_INPUT_MAP.csv为准。ASSET_SURVIVAL_2050_ACCEPTED.csv的749项寿命筛选仍有效，入网733项；旧EXISTING_PERFORMANCE_OM_SOURCE_MAP.csv的火电部分保持，水电候选状态由本轮组合同和HYDRO表替代。旧DECISIONS_APPLIED_THIS_ROUND.md与目标分配总结属于90b82d6b轮，保留执行历史，不能当成本轮新增决定。
 
-The earlier UNIT_LEVEL_SURVIVAL_RECONCILIATION.csv / UNIT_PARENT_CAPACITY_RECONCILIATION.csv and ASSET_SURVIVAL_2050.csv / ASSET_SURVIVAL_COUNTRY_TECH.csv are retained prior-delivery assessments; they do not override the current accepted-lifetime output. Current all-unit data are in evidence/ASSET_SURVIVAL_2050.json. The former EXISTING_ASSET_COST_TREATMENT.csv contains previous new2050-cost context only; the current existing-parameter source map supersedes it.
+本轮20项新测试、111项相关回归，共131项通过。未重跑需求源计算；152项数量与数组按hash保留。真实未绑定JSON配方的部分合格需求绑定成功；没有用带Load的开发.nc再次绑定。
 
-Source capsule/XML and prior decisions remain intact. The TH overlay is a separately recorded current local-vintage choice. The carrier development.nc now includes qualified partial Load bindings; the JSON fragment is the unbound recipe for a future fully qualified assembler. Neither is a complete Full-SC model. Gate5=NO; solver_runs=0.
+FULLSC_NETWORK_NOT_COMPLETE；Gate5=NO；solver_runs=0。当前入口和manifest优先；旧专题历史报告通过Git追溯，不据旧状态重新批准已完成方法。
