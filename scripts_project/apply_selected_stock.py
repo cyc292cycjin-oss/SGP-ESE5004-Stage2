@@ -16,6 +16,9 @@ def prepare(repo,reference,survival,contract,decisions,cohort_evidence,output_st
     if evidence['source_powerplants_sha256']!=sha(stock['asset_source']):raise ValueError('Frozen plant identity changed')
     if evidence['gpd_zip_sha256']!=sha(evidence['gpd_zip']):raise ValueError('Frozen GPD identity changed')
     if evidence['gem_identity_sha256']!=sha(repo/evidence['gem_identity_file']):raise ValueError('GEM identity review changed')
+    for entry in evidence['records']:
+        for proof in entry.get('ResidualEvidence',[]):
+            if sha(repo/proof['File'])!=proof['SHA256']:raise ValueError('Residual identity source hash changed')
     bounds=[];seen={u['AssetID'] for u in stock['unit_evidence']['records']}
     snapshots={'Global-Solar-Power-Tracker-February-2025.xlsx':2025,'Global-Wind-Power-Tracker-February-2025.xlsx':2025,'Geothermal-Power-Tracker-March-2025-Final.xlsx':2025,'Global-Oil-and-Gas-Plant-Tracker-GOGPT-August-2025.xlsx':2025}
     for i,u in enumerate(stock['unit_evidence']['records']):
