@@ -47,6 +47,9 @@ def static_validate(n,records,allocation,carbon_map,*,synthetic_test_only=False)
   for col in ['carrier','sector','account','country']:
    if str(n.loads.at[name,col])!=identity[col]:raise ValueError('Load source identity lost in assembly/roundtrip')
  if any(not np.isclose(v,actual[k],rtol=1e-10,atol=1e-6) for k,v in expected.items()):raise ValueError('Actual network demand conservation failed')
+ if n.meta.get('external_fixed_account_method'):
+  from fixed_accounts import validate_exported_accounting
+  validate_exported_accounting(n)
  # Exclude electric and atmosphere buses: electricity-mediated benefits are
  # allowed; direct/multihop physical fuel sharing across countries is not.
  electric=set(n.buses.index[n.buses.carrier.isin(['AC','DC','electricity','low voltage'])]);atmo=set(n.buses.index[n.buses.carrier=='co2 atmosphere'])
@@ -147,6 +150,15 @@ def build(repo,allocation,assets,output,report):
   with np.load(allocation/m['arrays_file'],allow_pickle=False) as z:
    bind_loads(n,data['records'],m,z,posting)
   carbon=json.loads(pinned(root,bundle['carbon_map']).read_text())
+  from fixed_accounts import qualify_fixed_accounts,accounting_report
+  from price_basis import qualify_network_costs
+  layer_path=pinned(root,bundle['price_layer']);layer=json.loads(layer_path.read_text())
+  qualify_network_costs(n,layer,layer_path)
+  qualify_fixed_accounts(n)
+  expected=json.loads(pinned(root,bundle['external_fixed_accounts']).read_text())
+  if expected!=n.meta['external_pending_fixed_accounts']:raise ValueError('Final assembly fixed-account ledger changed')
+  n.meta['accounting_report']=accounting_report(n)
+  n.meta['qualification_dimensions'].update(physical_integrity='ACTUAL_FULL_NETWORK_VALIDATION_REQUIRED',input_coverage='COMPLETE_INPUT_GATE_PASSED')
   static_validate(n,data['records'],allocation,carbon)
   output.parent.mkdir(parents=True,exist_ok=True);n.export_to_netcdf(output)
   actual=pypsa.Network(output);validation=static_validate(actual,data['records'],allocation,carbon)

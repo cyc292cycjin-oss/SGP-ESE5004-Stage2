@@ -17,6 +17,11 @@ rule research_fullsc_unsolved:
         electric=ASSETS + "/electric_base_2050_unsolved.nc",
         carrier=ASSETS + "/carrier_fragment.json",
         carbon=ASSETS + "/carbon_component_map.json",
+        price_layer=ASSETS + "/model_cost_layer.json",
+        fixed_accounts=ASSETS + "/external_pending_fixed_accounts.json",
+        accounting=ASSETS + "/accounting_qualification.json",
+        assembler="scripts_project/build_research_network.py",
+        fixed_accounts_code="scripts_project/fixed_accounts.py",
     output:
         network=ROOT + "/research_fullsc_2050_unsolved.nc",
         report=ROOT + "/build_receipt.json",
@@ -42,6 +47,9 @@ rule research_build_production_assets:
     input:
         reference=lambda w: config["source_reference"],
         costs=lambda w: config["source_costs2050"],
+        price_layer=ASSETS + "/model_cost_layer.json",
+        fixed_accounts_code="scripts_project/fixed_accounts.py",
+        price_code="scripts_project/price_basis.py",
         oldcosts=lambda w: config["source_costs2030_electric"],
         allocation=ALLOC + "/allocation_manifest.json",
         arrays=ALLOC + "/allocations.npz",
@@ -64,8 +72,10 @@ rule research_build_production_assets:
         destinations=ASSETS + "/demand_destinations.json",
         electric_manifest=ASSETS + "/ELECTRIC_BASE_ASSET_MANIFEST.json",
         fragment_manifest=ASSETS + "/GATE3_PRODUCTION_FRAGMENT_MANIFEST.json",
+        external_fixed=ASSETS + "/external_pending_fixed_accounts.json",
+        accounting=ASSETS + "/accounting_qualification.json",
     shell:
-        "python scripts_project/build_research_assets.py --repo . --reference {input.reference:q} --costs {input.costs:q} --oldcosts {input.oldcosts:q} --survival {input.survival:q} --integration-contract {input.integration_contract:q} --allocation " + ALLOC + " --output " + ASSETS
+        "python scripts_project/build_research_assets.py --repo . --reference {input.reference:q} --costs {input.costs:q} --oldcosts {input.oldcosts:q} --survival {input.survival:q} --integration-contract {input.integration_contract:q} --price-layer {input.price_layer:q} --allocation " + ALLOC + " --output " + ASSETS
 
 rule research_prepare_hydro_groups:
     input:
@@ -96,3 +106,21 @@ rule research_trace_existing_assets:
         ASSETS + "/ASSET_SURVIVAL_2050.json",
     shell:
         "python scripts_project/trace_asset_survival.py --repo . --plants {input.plants:q} --cache {params.cache:q} --lifetimes {input.decisions:q} --output {output:q}"
+
+rule research_prepare_common_price_year:
+    input:
+        index="research_inputs/prices/sources/ECB_EA20_GDP_DEFLATOR.csv",
+        policy="research_inputs/prices/decision.json",
+        script="scripts_project/price_basis.py",
+        raw2050=lambda w: str(Path(config["source_costs2050"]).with_name("costs_2050.csv")),
+        raw2030=lambda w: str(Path(config["source_costs2030_electric"]).with_name("costs_2030.csv")),
+        prepared2050=lambda w: config["source_costs2050"],
+        prepared2030=lambda w: config["source_costs2030_electric"],
+        upstream_evidence=lambda w: [str(Path(config["technology_data_evidence"])/p) for p in ["outputs/costs_2030.csv","outputs/costs_2050.csv","config.yaml","scripts/compile_cost_assumptions.py","scripts/_helpers.py"]],
+    output:
+        ASSETS + "/model_cost_layer.json",
+    params:
+        costdir=lambda w: str(Path(config["source_costs2050"]).parent),
+        technology_data=lambda w: config["technology_data_evidence"],
+    shell:
+        "python scripts_project/price_basis.py --costdir {params.costdir:q} --technology-data {params.technology_data:q} --index-file {input.index:q} --output {output:q}"

@@ -94,6 +94,9 @@ def validate_hooks(n):
 def install_research_constraint_hooks(n):
     """Future optimisation must call this after variables exist; never solves."""
     validate_hooks(n)
+    if n.meta.get('external_fixed_account_method'):
+        from fixed_accounts import validate_exported_accounting
+        validate_exported_accounting(n)
     from carrier_architecture import install_fragment_constraints
     install_fragment_constraints(n)
     if n.meta.get('existing_unit_components'):
