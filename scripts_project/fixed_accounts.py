@@ -83,7 +83,12 @@ def qualify_fixed_accounts(n):
 def accounting_report(n,priced_objective=None,claim_full_cost=False,claim_full_emissions=False):
     rows=qualify_fixed_accounts(n)
     if claim_full_cost or claim_full_emissions:raise ValueError('Cannot label incomplete pending accounts as full system cost/emissions')
-    return dict(PricedObjective=priced_objective,KnownFixedCost=n.meta.get('existing_annual_fixed_om_eur'),PendingFixedCostTerms=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','UnitPriceEUR2020PerMWh']} for r in rows],FullSystemCostComplete=False,PendingFixedPhysicalEmissions=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','PhysicalCO2_tPerMWh']} for r in rows],FullSystemEmissionsComplete=False,CostCurrencyYear=2020 if n.meta.get('model_price_year')==2020 else None,Scope='Priced subset and external pending fixed terms; not a full total')
+    known=n.meta.get('existing_annual_fixed_om_eur')
+    model=getattr(n,'model',None)
+    included=bool(model is not None and getattr(n,'_research_existing_assets_model',None) is model)
+    if priced_objective is not None and known and not included:
+        raise ValueError('Known fixed cost inclusion in supplied objective is unverified; do not add it by default')
+    return dict(PricedObjective=priced_objective,KnownFixedCost=known,KnownFixedCostIncludedInPricedObjective=included if priced_objective is not None else None,KnownFixedCostToAddToPricedObjective=0. if priced_objective is not None else None,PricedObjectiveDefinition='Model objective including installed known fixed FOM once; may contain unresolved numerical coefficients, not automatically a pure economic total',PendingFixedCostIncludedInPricedObjective=False,PendingFixedCostTerms=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','UnitPriceEUR2020PerMWh']} for r in rows],FullSystemCostComplete=False,PendingFixedPhysicalEmissions=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','PhysicalCO2_tPerMWh']} for r in rows],FullSystemEmissionsComplete=False,CostCurrencyYear=2020 if n.meta.get('model_price_year')==2020 else None,Scope='Priced subset and external pending fixed terms; not a full total')
 
 def validate_exported_accounting(n):
     expected=n.meta.get('external_pending_fixed_accounts')
