@@ -17,6 +17,12 @@ def distance(a,b):
     if any(v is None for v in [*a,*b]):return None
     la,lo,lb,lob=map(math.radians,[*a,*b]);v=math.sin((lb-la)/2)**2+math.cos(la)*math.cos(lb)*math.sin((lob-lo)/2)**2;return 6371*2*math.asin(min(1,math.sqrt(v)))
 
+def conditional_capacity(raw,unit):
+    # Corrected technology with no approved lifetime stays visible, not retired.
+    if raw['commissioning_year'] is None:return None
+    if unit.get('Lifetime') is None:return None
+    return raw['capacity_mw'] if raw['commissioning_year']+unit['Lifetime']>2050 else 0.
+
 def audit(repo,output):
     a=repo/'results_project/assembly_v1/assets';s=repo/'research_inputs/assembly_v1/sources';g=repo/'research/04_model_assembly/gate4'
     stock=read(a/'SELECTED_ASSET_SURVIVAL_2050.json');u={r['AssetID']:r for r in stock['unit_evidence']['records']}
@@ -37,7 +43,7 @@ def audit(repo,output):
     for r in records:
         raw=r['raw'];unit=u['GPD:'+raw['gppd_idnr']]
         if raw['commissioning_year'] is None:continue
-        if raw['commissioning_year']+unit['Lifetime']<=2050:continue
+        if conditional_capacity(raw,unit)==0:continue
         if r['IdentityStatus']=='DISJOINT_FROZEN_SOURCE_SELECTION':continue # already integrated cohort, preserved
         verdict=r.get('ResidualCloseoutStatus','INSUFFICIENT_IDENTITY_EVIDENCE')
         if r['IdentityStatus']=='DUPLICATE_EXISTING_GEM_SITE':verdict='CONFIRMED_DUPLICATE_REPRESENTED'
@@ -51,7 +57,7 @@ def audit(repo,output):
             dist=distance((raw['latitude'],raw['longitude']),(f.get('Latitude'),f.get('Longitude')))
             candidates.append(dict(GEMID=z['ID'],Names=names,Owners=owners,CapacityMW=gu['OriginalCapacity'],StartYear=gu['CommissioningYear'],Status=gu['AssetClass'],SourceStatus=f.get('Status'),NameTokenSimilarity=match,OwnerTokenSimilarity=owner,DistanceKm=dist,ExactCapacityMatch=math.isclose(gu['OriginalCapacity'],raw['capacity_mw']),EvidenceClass='CANDIDATE_RELATION_ONLY_NOT_DUPLICATE_PROOF',SourceFile=z['File'],SourceRow=z['Sheet']+':'+str(z['Line'])))
         candidates=sorted(candidates,key=lambda x:(-x['NameTokenSimilarity'],-x['OwnerTokenSimilarity'],x['DistanceKm'] if x['DistanceKm'] is not None else float('inf')))[:3]
-        out=dict(AssetID=unit['AssetID'],Country=unit['Country'],Technology=unit['Technology'],PlantName=raw['name'],ConditionalSurvivingMW=raw['capacity_mw'],ReportedPlantYear=raw['commissioning_year'],Status=verdict,RelatedGEMIDs=r.get('RelatedGEMIDs',[]),Evidence=r['Evidence'],Source=raw['source'],SourceURL=raw['url'],OriginalCoordinates=[raw['latitude'],raw['longitude']],Owner=raw['owner'],CachedMatchingEvidence=r.get('NearestOriginalParents',[]),BatchIdentityCandidates=candidates,ActualAddedMW=0.,RemainingQualification='Separate resource contract still required for every independent GPD hydro; seven-pool GEM decision does not cover GPD' if unit['Technology']=='Hydro' else 'Correct conversion technology, status, identity, mapping and existing cost parameters required',ExistingSelection=unit['SurvivalStatus'],NewEvidence=r.get('ResidualEvidence',[]),AlreadyClosedBeforeThisRound=raw['gppd_idnr'] in ['WRI1023892','WRI1023890'])
+        out=dict(AssetID=unit['AssetID'],Country=unit['Country'],Technology=unit['Technology'],PlantName=raw['name'],ConditionalSurvivingMW=conditional_capacity(raw,unit),UnresolvedLifetimeCapacityMW=raw['capacity_mw'] if unit.get('Lifetime') is None else 0.,ReportedPlantYear=raw['commissioning_year'],Status=verdict,RelatedGEMIDs=r.get('RelatedGEMIDs',[]),Evidence=r['Evidence'],Source=raw['source'],SourceURL=raw['url'],OriginalCoordinates=[raw['latitude'],raw['longitude']],Owner=raw['owner'],CachedMatchingEvidence=r.get('NearestOriginalParents',[]),BatchIdentityCandidates=candidates,ActualAddedMW=0.,RemainingQualification='Separate resource contract still required for every independent GPD hydro; seven-pool GEM decision does not cover GPD' if unit['Technology']=='Hydro' else 'Correct conversion technology, status, identity, mapping and existing cost parameters required',ExistingSelection=unit['SurvivalStatus'],NewEvidence=r.get('ResidualEvidence',[]),AlreadyClosedBeforeThisRound=raw['gppd_idnr'] in ['WRI1023892','WRI1023890'])
         close.append(out)
     save(output/'GPD_SURVIVOR_IDENTITY_CLOSEOUT.json',close)
     # Cross-source missing-year review: preserve source-family totals separately.
@@ -76,7 +82,7 @@ def audit(repo,output):
         pool=r['Country']+':'+r['Node'].rsplit(' ',1)[0]+':'+r['HydroSubtype'];candidates=[x for x in old if x['PoolID']==pool]
         hydro.append(dict(CurrentGroup=r,InputCandidates=candidates,CurrentSource='SELECTED_INTEGRATION_CONTRACT.json',CurrentContractSHA256=sha(a/'SELECTED_INTEGRATION_CONTRACT.json'),ProductionChanged=False,UniqueChoice='Choose one compatible unassigned source curve with its original energy/Emax envelope; alternatives not additive' if any(x.get('SourceAlreadyAllocated') is False for x in candidates) else 'Provide compatible2013 same-type group input and storage Emax if reservoir, or approve a separately sourced proxy',ApprovalStatus='PENDING'))
     save(output/'FIVE_HYDRO_CHOICES.json',hydro)
-    summary=dict(memo_requests=len(requests),memo_new_queries=0,memo_source_overlap_resolved=0,lpg_raw_rows_recovered=len(lpg),lpg_recovered_mwh=sum(float(x['RecoveredMWh']) for x in lpg),gpd_review_records=len(close),gpd_review_mw=sum(r['ConditionalSurvivingMW'] for r in close),gpd_new_duplicate_mw=sum(r['ConditionalSurvivingMW'] for r in close if r['Status']=='CONFIRMED_DUPLICATE_REPRESENTED' and not r['AlreadyClosedBeforeThisRound']),gpd_status_mw={status:sum(r['ConditionalSurvivingMW'] for r in close if r['Status']==status) for status in sorted({r['Status'] for r in close})},gpd_actual_added_mw=0,gem_missing_year_mw=sum(r['OriginalCapacity'] for r in missing if r['AssetID'].startswith('GEM:')),gpd_missing_year_mw=sum(r['OriginalCapacity'] for r in missing if r['AssetID'].startswith('GPD:')),missing_year_candidate_links=sum(len(r['Candidates']) for r in edges),pending_hydro_groups=len(pending),pending_hydro_mw=sum(r['SurvivingCapacityMW'] for r in pending),solver_runs=0)
+    summary=dict(memo_requests=len(requests),memo_new_queries=0,memo_source_overlap_resolved=0,lpg_raw_rows_recovered=len(lpg),lpg_recovered_mwh=sum(float(x['RecoveredMWh']) for x in lpg),gpd_review_records=len(close),gpd_review_mw=sum((r['ConditionalSurvivingMW'] or 0.) for r in close),gpd_new_duplicate_mw=sum((r['ConditionalSurvivingMW'] or 0.) for r in close if r['Status']=='CONFIRMED_DUPLICATE_REPRESENTED' and not r['AlreadyClosedBeforeThisRound']),gpd_status_mw={status:sum((r['ConditionalSurvivingMW'] or 0.) for r in close if r['Status']==status) for status in sorted({r['Status'] for r in close})},gpd_actual_added_mw=0,gpd_unresolved_lifetime_mw=sum(r['UnresolvedLifetimeCapacityMW'] for r in close),gem_missing_year_mw=sum(r['OriginalCapacity'] for r in missing if r['AssetID'].startswith('GEM:')),gpd_missing_year_mw=sum(r['OriginalCapacity'] for r in missing if r['AssetID'].startswith('GPD:')),missing_year_candidate_links=sum(len(r['Candidates']) for r in edges),pending_hydro_groups=len(pending),pending_hydro_mw=sum(r['SurvivingCapacityMW'] for r in pending),solver_runs=0)
     save(output/'RESIDUAL_SOURCE_SUMMARY.json',summary);print(json.dumps(summary,indent=2))
 
 if __name__=='__main__':
