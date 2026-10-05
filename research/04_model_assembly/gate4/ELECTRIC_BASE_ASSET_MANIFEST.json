@@ -1,32 +1,33 @@
 {
   "status": "DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION",
   "file": "electric_base_2050_unsolved.nc",
-  "sha256": "6752d3f8600a2cb62669430969e1f443f70a3e244cb54cf5557aa3346737ab0f",
+  "sha256": "c5c011df1291932de723686e9635d466b6011ca113e7a9f15ebb20ebd51b6d33",
   "target_year": 2050,
   "geographical_nodes": 100,
   "snapshots": 2920,
   "physical_hours": 8760,
   "components": {
-    "Bus": 485,
-    "TransformerType": 14,
     "StorageUnit": 40,
-    "GlobalConstraint": 1,
-    "Carrier": 58,
+    "Link": 593,
     "Line": 105,
-    "LineType": 35,
     "Generator": 456,
-    "Store": 196,
-    "Link": 593
+    "Carrier": 58,
+    "TransformerType": 14,
+    "GlobalConstraint": 1,
+    "Bus": 485,
+    "LineType": 35,
+    "Store": 196
   },
   "inputs": {
     "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/research/00_source_provenance/cache/results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc": "06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb",
     "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2050_sec.csv": "bbcc639010a6775255730278eaa6e21ba56867d0610d3a011adc3eb60d0065f5",
     "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2030_elec.csv": "cff738dbd6077a810a4f9aaf925362522d54ddc09e3d1e6cf705a20bdc7e5ee2",
     "results_project/assembly_v1/assets/ASSET_SURVIVAL_2050.json": "a841a4e1a0a8fd2bccd92bdad0fa252b862e0b7e0420ae334b70c5e52d256a49",
-    "results_project/assembly_v1/assets/HYDRO_INTEGRATION_CONTRACT.json": "1e742ae6a087b6c82ac819385106c9ecc5231a90397426e120cd707b1a7f5e86"
+    "results_project/assembly_v1/assets/HYDRO_INTEGRATION_CONTRACT.json": "1e742ae6a087b6c82ac819385106c9ecc5231a90397426e120cd707b1a7f5e86",
+    "results_project/assembly_v1/assets/model_cost_layer.json": "94f7ce6afcfb2a65b26ba9c6bef207cb20e464a1a579d8fb4f113105e00cfe93"
   },
-  "code_sha": "90b82d6b8230e6737fdf61a019f6aa59fa85c9a9",
-  "builder_sha256": "d8de83af8382c5add522959bec4f44b302479c04cbf4ab41858c1525c8d938ba",
+  "code_sha": "ec681b86c7b1b2ac29b9af28a5f468c1fb3ec942",
+  "builder_sha256": "b8ce6316f4401e95be963bb1b4de9302de5a4c3f0e1f6fbc655a7088f29bd65e",
   "environment": {
     "python": "3.11.13",
     "pypsa": "0.30.3"
@@ -10006,10 +10007,27 @@
   "unit_first_selection": true,
   "conditional_stock_materialised": false,
   "implementation_sha256": {
-    "build_research_assets.py": "d8de83af8382c5add522959bec4f44b302479c04cbf4ab41858c1525c8d938ba",
+    "build_research_assets.py": "b8ce6316f4401e95be963bb1b4de9302de5a4c3f0e1f6fbc655a7088f29bd65e",
     "integrate_surviving_assets.py": "bb0c22ce3245bf088c4a200ebfa45a49b901aca53faf126a8cf273f9236dea11",
     "unit_asset_survival.py": "3be1cd8d8a2aec2a38fa93dd5a85424e3c2cd548d1d88effed16442fc45f49e9",
     "asset_survival.py": "e254f4d26b6f3d62c2a7ab7901ada2b1bcff3b0defd8f0057ff50bd6b7c54540",
-    "trace_asset_survival.py": "189c05c11ff08192a0de98f7dae52fd94d6465fa81af93716a19fc4bc56cebad"
+    "trace_asset_survival.py": "189c05c11ff08192a0de98f7dae52fd94d6465fa81af93716a19fc4bc56cebad",
+    "price_basis.py": "44334256d2f9624fd0cc6c826cff4f7e2c1c6a458843644929f851f2beae3250",
+    "fixed_accounts.py": "d2ed69ae46eedbbfb142f3b0a749621df05bdfa9625e9c07dcd35bacaf06e83b",
+    "build_research_network.py": "5777cc24bc4414f69ea11a50665e912a2f50a2e29087e901000aa120499d139a",
+    "assembly_components.py": "15f8f1101fedae89cf41fe4132ec0392556aa2d463bd0ff4ab825625e7702d9f",
+    "audit_fixed_price_residual.py": "a2e18498111178449a5f0dc1605ce5a59f28024bbdea09f07e2ad679e95aedf0"
+  },
+  "qualification_dimensions": {
+    "physical_integrity": "VALIDATED_DEVELOPMENT_SCOPE",
+    "input_coverage": "INCOMPLETE",
+    "price_usability": "PENDING_BEFORE_SOLVE",
+    "full_cost_report": false,
+    "full_physical_emissions_report": false,
+    "policy_constraint_qualification": "DISABLED_WITH_PENDING_ATTRIBUTION"
+  },
+  "price_layer_build_receipt": {
+    "file": "PRICE_LAYER_BUILD_RECEIPT.json",
+    "sha256": "7f7f2e0041e50d7e6713908b882855777a5600768126e15816f6288211a55e24"
   }
 }

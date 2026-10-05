@@ -1,0 +1,83 @@
+{
+  "status": "FINAL_VERIFICATION_PASS_WITH_FULL_NETWORK_BLOCKED",
+  "idempotent_price_layer_sha256": "94f7ce6afcfb2a65b26ba9c6bef207cb20e464a1a579d8fb4f113105e00cfe93",
+  "source_inputs_unchanged": true,
+  "csv_export_all_cells_verified": true,
+  "full_network_exported": false,
+  "solver_runs": 0,
+  "receipts": [
+    {
+      "name": "INPUT_GATE",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "scripts_project/check_assembly_inputs.py",
+        "--repo",
+        ".",
+        "--allocation",
+        "results_project/assembly_v1/allocation",
+        "--output",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_fixed/evidence/FINAL_INPUT_GATE.json"
+      ],
+      "exit_code": 2,
+      "expected": 2,
+      "log_sha256": "9e44b8739f049ba1c09b893fcc97e85e9c30588a1636bcace988fff8e29bd9e0"
+    },
+    {
+      "name": "FULL_EXPORT_GATE",
+      "command": [
+        "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+        "scripts_project/build_research_network.py",
+        "--repo",
+        ".",
+        "--allocation",
+        "results_project/assembly_v1/allocation",
+        "--assets",
+        "results_project/assembly_v1/assets/asset_bundle.json",
+        "--output",
+        "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
+        "--report",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_fixed/evidence/FINAL_EXPORT_GATE.json"
+      ],
+      "exit_code": 2,
+      "expected": 2,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "PRODUCTION_DAG_DRYRUN",
+      "command": [
+        "snakemake",
+        "--snakefile",
+        "workflow/research_assembly.smk",
+        "--cores",
+        "1",
+        "--dryrun",
+        "--configfile",
+        "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_fixed/evidence/PRODUCTION_SOURCE_PATHS.json",
+        "--",
+        "research_build_production_assets"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "log_sha256": "ba9aebe1a752e83ca9f139527a98648dd22e55462e9be24fcf426613bd73a659"
+    },
+    {
+      "name": "GIT_DIFF_CHECK",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "log_sha256": "bd83fdac0b541bcb59af2d2290a6cc8b27962c3b415fdcf985292c604995269d"
+    }
+  ],
+  "implementation_sha256": {
+    "price_basis.py": "44334256d2f9624fd0cc6c826cff4f7e2c1c6a458843644929f851f2beae3250",
+    "fixed_accounts.py": "d2ed69ae46eedbbfb142f3b0a749621df05bdfa9625e9c07dcd35bacaf06e83b",
+    "build_research_assets.py": "b8ce6316f4401e95be963bb1b4de9302de5a4c3f0e1f6fbc655a7088f29bd65e",
+    "build_research_network.py": "5777cc24bc4414f69ea11a50665e912a2f50a2e29087e901000aa120499d139a",
+    "assembly_components.py": "15f8f1101fedae89cf41fe4132ec0392556aa2d463bd0ff4ab825625e7702d9f",
+    "audit_fixed_price_residual.py": "a2e18498111178449a5f0dc1605ce5a59f28024bbdea09f07e2ad679e95aedf0"
+  }
+}

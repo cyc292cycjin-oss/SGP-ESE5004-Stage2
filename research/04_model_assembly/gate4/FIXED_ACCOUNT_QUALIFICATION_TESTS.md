@@ -1,0 +1,11 @@
+# 固定账资格与测试
+
+新批准方法：ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS。适用Bagasse/Biodiesel/Biogases/Biogasoline/Charcoal/Fuelwood。实际471个资源账项，而非471个新科学决定。
+
+对每个独占末端义务，固定初始库存之和等于8760h加权Load积分；库存能量容量固定、不可循环、无损耗，discharge_only约束，末态非负。只有单向效率1的末端计量Link，无其他输入、转供、发电、碳端口或终端储存。因此每个资源全年消耗严格等于各自Q。目标函数/能量/库存权重相等且单位供给价不随时间变化时，成本为固定cQ。不是逐时供给完全固定的声明。
+
+qualify_fixed_accounts在实际开发网和最终组装后的当前拓扑重新检查，任何新供给、用途、端口、存储自由度、时变成本/控制或约束丢失均拒绝并撤销资格。回读校验比较实际物理账与manifest中的完整外置账，不能把占位0读成免费供应。函数accounting_report拒绝完整成本/排放标签；输出PricedObjective=null（未求解）、KnownFixedCost、PendingFixedCostTerms、PendingFixedPhysicalEmissions及两个false完整性标记。
+
+实际变量模型尚未创建或求解。持久化hook契约与可调用实现已检查；SYNTHETIC_TEST_ONLY Linopy变量模型实际安装Store-p>=0约束并核对符号和右端，未调用solver。未来变量建立后必须调用install_research_constraint_hooks，它再次验证外置账及hook契约。
+
+新增测试包括供给/转供/碳信用/损耗/循环/自由度/时间权重改变、未知Animal waste、回读丢失标签、完整报告误标、多商品同义务计量和真实方向约束。合计相关回归156项通过。无两情景运行，也未证明互联差额中固定项抵消。

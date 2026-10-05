@@ -1,7 +1,12 @@
-# 本轮验证
+# 最终验证
 
-20项test_hydro_policy_separation、13项test_gate4_activation、20项test_surviving_asset_integration、60项test_carrier_carbon、18项test_gate4_assets，共131项通过。测试不调用solver。
+156项测试通过：
 
-针对新增水电：绝对共享输入一次、容量加权归一化、径流式资源上界不随MW增长、PHS循环与效率、能量与导出回读。碳：物理可用但政策null、null不转0、启用政策拒绝待决、碳事件重复拒绝。组装：拒绝带Load开发网和重复绑定、按名称比较序列化权重、真权重变化拒绝。
+- test_fixed_accounts_price_basis: 25
+- test_hydro_policy_separation: 20
+- test_gate4_activation: 13
+- test_surviving_asset_integration: 20
+- test_carrier_carbon: 60
+- test_gate4_assets: 18
 
-实际生产DAG和实际NetCDF独立验证见evidence/TEST_RECEIPTS.json、HYDRO_ACTUAL_VALIDATION.json、PHYSICAL_POLICY_VALIDATION.json、REAL_RECIPE_BOUNDARY_CHECK.json。保存精确源路径、hash和日志。PROJ数据库警告出现于环境导入；本轮未调用坐标变换或重算既有映射。环境readiness仍不作整体升级。
+实际开发网络与前轮全部物理输入比较，FT已知VOM为单独预先记录的成本接线变更。完整网络未导出，输入门禁返回2不是生产构网成功证明；生产DAG、回读和实际配方绑定分别有独立记录。

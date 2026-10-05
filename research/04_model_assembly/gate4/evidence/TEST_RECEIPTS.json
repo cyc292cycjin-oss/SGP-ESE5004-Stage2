@@ -1,53 +1,12 @@
 [
   {
-    "name": "test_gate4_activation",
+    "name": "test_fixed_accounts_price_basis",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "tests/research/test_gate4_activation.py"
+      "tests/research/test_fixed_accounts_price_basis.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "71edb1660c2c4291892653d5cf417e6f444822ae414ab0e0791856048fa3bcae"
-  },
-  {
-    "name": "test_surviving_asset_integration",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "tests/research/test_surviving_asset_integration.py"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "ee574b0e4cb22632c83c230a7a8459372541a295c5a5b3c74ba8b4656157f6cb"
-  },
-  {
-    "name": "test_gate4_assets",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "tests/research/test_gate4_assets.py"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "ea15a44a9bb8fb475e927f9658fbc99ac3d4f40a77debfb4880befe9c8661ea2"
-  },
-  {
-    "name": "PRODUCTION_ASSET_DAG",
-    "command": [
-      "snakemake",
-      "--snakefile",
-      "workflow/research_assembly.smk",
-      "--cores",
-      "1",
-      "--scheduler",
-      "greedy",
-      "--rerun-incomplete",
-      "--configfile",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_hydro/evidence/PRODUCTION_SOURCE_PATHS.json",
-      "--",
-      "research_build_production_assets"
-    ],
-    "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "fd9d097d469aab2b29c4e259132d10610d0eab08f21e9eaa06a32d94712ac23b"
+    "log_sha256": "480763da79ae7d781a32389d2e998b7ff0c74b8ba1ebb7a0f4cbb4376f7c890b"
   },
   {
     "name": "test_hydro_policy_separation",
@@ -56,8 +15,25 @@
       "tests/research/test_hydro_policy_separation.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "f06ae9b4aec3a10fa7b5eb6bbd26a1c817d6a3f2c3b9f61aaf4af7446081020d"
+    "log_sha256": "628fd904d5bc44946b918a5ecdc8cd02b2e4899a5c2ea9466c8e67d41dafd566"
+  },
+  {
+    "name": "test_gate4_activation",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "tests/research/test_gate4_activation.py"
+    ],
+    "exit_code": 0,
+    "log_sha256": "2e5be693e1031872c19f6df877ec5bd456ad178fc451e972f98f7dc5596bb2a3"
+  },
+  {
+    "name": "test_surviving_asset_integration",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "tests/research/test_surviving_asset_integration.py"
+    ],
+    "exit_code": 0,
+    "log_sha256": "35ad1272a00a18bbf3b49595fdac42fc18b555332869f37bbac1e913ea782a9d"
   },
   {
     "name": "test_carrier_carbon",
@@ -66,65 +42,15 @@
       "tests/research/test_carrier_carbon.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "3a017c6c746935b8ca45d36ce647b41b00a88429cddce3b50605300335d80edc"
+    "log_sha256": "567f973b3d9c201cd480b8f0491021d754046d74c1877d92b9ec7871b7deae59"
   },
   {
-    "name": "ACTUAL_VALIDATION",
+    "name": "test_gate4_assets",
     "command": [
       "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/audit_hydro_qualification.py",
-      "--repo",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
-      "--prior-delivery",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_activation_20261005",
-      "--source-config",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_hydro/evidence/PRODUCTION_SOURCE_PATHS.json",
-      "--cost-directory",
-      "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial",
-      "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_hydro/evidence"
+      "tests/research/test_gate4_assets.py"
     ],
     "exit_code": 0,
-    "expected": 0,
-    "log_sha256": "f414ee84d0a160abd87fbac248c753036fd0af52c64fbb1949fde1cf325fa295"
-  },
-  {
-    "name": "FINAL_INPUT_PREFLIGHT",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/check_assembly_inputs.py",
-      "--repo",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
-      "--year",
-      "2050",
-      "--allocation",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
-      "--output",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_hydro/evidence/FINAL_INPUT_PREFLIGHT.json"
-    ],
-    "exit_code": 2,
-    "expected": 2,
-    "log_sha256": "9e44b8739f049ba1c09b893fcc97e85e9c30588a1636bcace988fff8e29bd9e0"
-  },
-  {
-    "name": "FINAL_FULL_NETWORK_GATE",
-    "command": [
-      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
-      "scripts_project/build_research_network.py",
-      "--repo",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model",
-      "--allocation",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/allocation",
-      "--assets",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/assets/asset_bundle.json",
-      "--output",
-      "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/research_fullsc_2050_unsolved.nc",
-      "--report",
-      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_hydro/evidence/FINAL_FULL_NETWORK_GATE.json"
-    ],
-    "exit_code": 2,
-    "expected": 2,
-    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    "log_sha256": "d1ede550f7227870a28636adba251e0fb65e1e7f4af77eb11d757bc3cbba8c4b"
   }
 ]
