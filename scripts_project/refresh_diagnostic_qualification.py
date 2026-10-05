@@ -13,6 +13,10 @@ from build_diagnostic_network import current_readiness,verify_guards,normalise_o
 def read(p):return json.loads(Path(p).read_text())
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def save(p,x):Path(p).parent.mkdir(parents=True,exist_ok=True);Path(p).write_text(json.dumps(x,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
+def save_legacy_manifest(p,x):
+ # Existing manifests contain IEEE Infinity for inherited unbounded candidate
+ # limits. Preserve that established representation; do not turn it into zero/null.
+ Path(p).write_text(json.dumps(x,ensure_ascii=False,indent=2,allow_nan=True)+'\n')
 def change_meta(path,meta):
  with Dataset(path,'a') as ds:ds.setncattr('meta',json.dumps(meta,ensure_ascii=False,allow_nan=False))
 def meta(path):
@@ -54,13 +58,13 @@ def refresh(repo,prior,output):
  basepath=a/'electric_base_2050_unsolved.nc';oldbase=pypsa.Network(basepath);oldbasehash=sha(basepath);bm=meta(basepath);bm['unresolved_existing_asset_ages']=unresolved;bm['inventory_qualification_refresh']=dict(method=decisions['records'][0]['MethodID'],code_sha=producer,physical_inputs_changed=False,prior_network_sha256=oldbasehash);change_meta(basepath,bm);newbase=pypsa.Network(basepath);compare_physical(oldbase,newbase)
  bundlepath=a/'asset_bundle.json';bundle=read(bundlepath);save(output/'ASSET_BUNDLE_BEFORE.json',bundle);bundle['electric_base']['sha256']=sha(basepath);save(bundlepath,bundle)
  for name in ['ELECTRIC_BASE_ASSET_MANIFEST.json','GATE3_PRODUCTION_FRAGMENT_MANIFEST.json']:
-  path=a/name;m=read(path);save(output/('PRIOR_'+name),m);oldinputs=copy.deepcopy(m['inputs'])
+  path=a/name;m=read(path);shutil.copyfile(path,output/('PRIOR_'+name));oldinputs=copy.deepcopy(m['inputs'])
   for rel in list(m['inputs']):
    p=Path(rel);p=p if p.is_absolute() else repo/p;m['inputs'][rel]=sha(p)
   m['qualification_refresh']=dict(code_sha=producer,method=decisions['records'][0]['MethodID'],old_build_code_sha=m['code_sha'],original_build_inputs=oldinputs,prior_delivery=str(prior),original_manifest_sha256=sha(output/('PRIOR_'+name)),inputs_meaning='Current effective source/qualification pins after metadata refresh; original physical-build inputs retained above',physical_components_rebuilt=False,current_unresolved_units=unresolved)
   if name.startswith('ELECTRIC'):
    m['sha256']=sha(basepath);m['raw_asset_inventory_summary']['unresolved_unit_records']=unresolved;m['inputs'][OVERRIDE_FILE]=sha(repo/OVERRIDE_FILE)
-  save(path,m)
+  save_legacy_manifest(path,m)
  state,_,_=current_readiness(repo,root/'allocation',a);readiness=root/'CURRENT_PHYSICAL_READINESS.json';save(readiness,state)
  diagpath=root/'research_2050_diagnostic_partial_unsolved.nc';priorhash=sha(diagpath);oldnet=pypsa.Network(diagpath);verify_guards(oldnet);dm=meta(diagpath)
  dm['unresolved_existing_asset_ages']=unresolved;dm['inventory_qualification_refresh']=bm['inventory_qualification_refresh'];scope=dm['unmaterialised_scope'];scope.update(readiness_sha256=sha(readiness),inventory_scopes=state['inventory_scopes'],source_reporting_status=state['source_reporting_status'])

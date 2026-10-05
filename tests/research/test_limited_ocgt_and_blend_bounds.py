@@ -47,6 +47,11 @@ class BlendBounds(unittest.TestCase):
  def test_cached_response_names_and_rows(self):
   r=observations(REPO/'research_inputs/assembly_v1/sources/unsd_targeted/PH_2019.xml');ps=[x for x in r if x['COMMODITY']=='4652' and x['TRANSACTION']=='1221' and x['Year']=='2019'];self.assertEqual(len(ps),1);self.assertEqual(ps[0]['UNIT_MEASURE'],'TN')
 class MetadataPreservation(unittest.TestCase):
+ def test_legacy_unbounded_limit_preserved(self):
+  import tempfile,math
+  from refresh_diagnostic_qualification import save_legacy_manifest
+  with tempfile.TemporaryDirectory() as t:
+   p=Path(t)/'legacy.json';save_legacy_manifest(p,dict(p_nom_max=float('inf'),missing_price=None));r=json.loads(p.read_text());self.assertTrue(math.isinf(r['p_nom_max']));self.assertIsNone(r['missing_price'])
  def test_bus_and_component_order_are_aligned(self):
   import pypsa
   from refresh_diagnostic_qualification import compare_physical
