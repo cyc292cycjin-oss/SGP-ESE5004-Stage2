@@ -38,7 +38,7 @@ def export_checked(n,path):
         for col in [x for x in c.df if x=='bus' or x.startswith('bus') and x[3:].isdigit()]:
             if any(x and x not in r.buses.index for x in c.df[col]):raise ValueError('Dangling asset port')
     return r
-def build_electric(repo,reference,costs,oldcosts,output,survival=None):
+def build_electric(repo,reference,costs,oldcosts,output,survival=None,integration_contract=None):
     if sha(reference)!=REF_SHA:raise ValueError('Reference input identity changed')
     if sha(costs)!=COST2050_SHA or sha(oldcosts)!=ELECTRIC_COST2030_SHA:raise ValueError('Frozen processed cost identity changed')
     output.mkdir(parents=True,exist_ok=True);s=pypsa.Network(reference)
@@ -104,27 +104,12 @@ def build_electric(repo,reference,costs,oldcosts,output,survival=None):
         for name in chosen:
             if s.generators.at[name,'bus'] in lv:d.loc[name,'bus']=s.generators.at[name,'bus']
     copy_input(s,n,'Generator',chosen,d)
-    # Existing fixed input assets are retained in an explicit unresolved inventory
-    # when build_year/lifetime are not supplied. They cannot qualify2050 by rename.
+    # Reference component names/capacities are inventory evidence only. Active
+    # stock comes from unit-first qualification below, never grouped build years.
     for typ in ['Generator','StorageUnit']:
         src=s.df(typ);ids=src.index[(~src.p_nom_extendable)&src.bus.isin(geo)]
-        d=clean_table(s,typ,ids)
-        for name,z in d.iterrows():
-            # Exported component build years can be grouped/imputed. They are
-            # never evidence of observed commissioning. Raw-ID evidence is the
-            # sole source of active existing capacity, handled separately.
-            known=False
-            survives=known and z.build_year<=2050<z.build_year+z.lifetime
-            ledger.append(dict(type=typ,component=name,source_p_nom=float(z.p_nom),build_year=float(z.build_year),lifetime=float(z.lifetime),status='SURVIVES_2050' if survives else 'RETIRED_BEFORE_2050' if known else 'AGE_UNRESOLVED'))
-            if known and not survives:d=d.drop(name);continue
-            if not known:
-                pending.append(dict(type=typ,component=name,OriginalCapacity=float(z.p_nom),country=str(s.buses.at[z.bus,'country']),technology=z.carrier,reason='Missing verified real commissioning/retirement age; capacity retained in inventory, NOT asserted active or zero'))
-                d=d.drop(name);continue
-            tech=z.carrier
-            if tech in c.index:
-                d.loc[name,'capital_cost']=0 if tech=='hydro' else c.at[tech,'fixed']
-                d.loc[name,'marginal_cost']=c.at[tech,'marginal_cost']
-        copy_input(s,n,typ,d.index,d)
+        for name,z in clean_table(s,typ,ids).iterrows():
+            ledger.append(dict(type=typ,component=name,source_p_nom=float(z.p_nom),build_year=float(z.build_year),lifetime=float(z.lifetime),status='REFERENCE_INPUT_INVENTORY_NOT_USED_AS_AGE_EVIDENCE'))
     # Distribution and battery input technologies are already in the frozen model.
     accepted_links={'electricity distribution grid':'electricity distribution grid','battery charger':'battery inverter','battery discharger':'battery inverter','home battery charger':'home battery inverter','home battery discharger':'home battery inverter'}
     for carrier,tech in accepted_links.items():
@@ -150,13 +135,26 @@ def build_electric(repo,reference,costs,oldcosts,output,survival=None):
         if len(other)!=1:raise ValueError('Unpaired battery inverter')
         pairs.append(dict(charger=name,discharger=other.index[0],equation='p_nom_charger = efficiency_discharger * p_nom_discharger'))
     n.meta['battery_inverter_pairs']=pairs
-    n.meta['asset_qualification']='DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION'
+    from integrate_surviving_assets import integrate_survivors,approved
+    raw=json.loads(survival.read_text()) if survival else {}
+    evidence=raw.get('unit_evidence')
+    if evidence is None:raise ValueError('Unit-first source qualification required; aggregated ages are not a substitute')
+    contract=json.loads(integration_contract.read_text()) if integration_contract else {}
+    integrated=integrate_survivors(n,evidence,contract,profile_network=s)
+    unresolved=[r for r in evidence['records'] if r['SurvivalStatus'].startswith('UNRESOLVED')]
+    coverage_complete=all(p['CapacityReconciled'] for p in evidence['parent_reconciliation']) and not unresolved and approved(contract.get('InventoryCoverage',{}))
+    qualified=coverage_complete and not integrated['pending_qualified_units']
+    n.meta['unresolved_existing_asset_ages']=len(unresolved)
+    n.meta['resource_occupancy_status']='QUALIFIED_SHARED_ENVELOPES' if qualified else 'PENDING_COMPLETE_STOCK_AND_RESOURCE_QUALIFICATION'
+    n.meta['asset_qualification']='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED' if qualified else 'DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION'
     path=output/'electric_base_2050_unsolved.nc';actual=export_checked(n,path)
     manifest=dict(status='DEVELOPMENT_ASSET_BUILT_SURVIVOR_QUALIFICATION_PENDING',file=path.name,sha256=sha(path),target_year=2050,geographical_nodes=100,snapshots=2920,physical_hours=8760,components={c.name:len(c.df) for c in actual.iterate_components()},inputs={str(p):sha(p) for p in [reference,costs,oldcosts]},code_sha=version(repo),builder_sha256=sha(__file__),environment={'python':platform.python_version(),'pypsa':pypsa.__version__},source_allowlist='Input attributes only; reference p_nom_opt/s_nom_opt, dispatch, duals, objective excluded',cost_trace=cost_trace,existing_asset_inventory=ledger,unresolved_age_records=pending,solver_runs=0,fullsc_network_complete=False)
     if survival:
         raw=json.loads(survival.read_text());manifest['inputs'][str(survival)]=sha(survival)
-        manifest['raw_asset_inventory_summary']={'source_rows':len(raw['records']),'observed_existing_rows':sum(r['AssetClass']=='OBSERVED_EXISTING' for r in raw['records']),'explicit2050_survivors':sum(r['SurvivalStatus']=='SURVIVES_2050' for r in raw['records']),'numerical_lifetime_acceptance':'PENDING; no automatic uptake of default/imputed ages'}
-        if any(r['SurvivalStatus']=='SURVIVES_2050' for r in raw['records']):raise ValueError('Verified survivors now exist: source-qualified100-node mapping and existing-performance/O&M layer must be materialised before this development builder is rerun')
+        manifest['raw_asset_inventory_summary']={'source_parent_rows':len(raw['records']),'source_unit_rows':len(evidence['records']),'unresolved_unit_records':len(unresolved),'explicit2050_survivors':sum(r['SurvivalStatus']=='SURVIVES_2050' for r in evidence['records']),'numerical_lifetime_acceptance':'Only explicit lifetime decision table or verified retirement records; candidate results excluded'}
+    if integration_contract:manifest['inputs'][str(integration_contract)]=sha(integration_contract)
+    manifest.update(status=n.meta['asset_qualification'],survivor_integration=integrated,unit_first_selection=True,conditional_stock_materialised=False)
+    manifest['implementation_sha256']={f:sha(repo/'scripts_project'/f) for f in ['build_research_assets.py','integrate_surviving_assets.py','unit_asset_survival.py','asset_survival.py','trace_asset_survival.py']}
     save(output/'ELECTRIC_BASE_ASSET_MANIFEST.json',manifest);return n,manifest
 
 def build_fragment(repo,base,costs,allocation,output):
@@ -165,7 +163,7 @@ def build_fragment(repo,base,costs,allocation,output):
     for node,z in geo.iterrows():
         f.bus(node,z.carrier,z.country,node)
         for fuel in ['gas','oil','coal','lignite','H2','co2 captured']:f.bus(bus_name(node,fuel),fuel,z.country,node)
-    carbon=[];pending=[];routes={};dest={};allow=[]
+    carbon=list(base.meta.get('existing_carbon_components',[]));pending=[];routes={};dest={};allow=[]
     def event(key,sector,factor,policy,accepted=True):
         r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'PENDING_MIXED_USE_ATTRIBUTION'))
     for node,z in geo.iterrows():
@@ -235,12 +233,14 @@ def build_fragment(repo,base,costs,allocation,output):
     n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))
     path=output/'carrier_fragment_2050_unsolved.nc';actual=export_checked(n,path)
     manifest=dict(status='PRODUCTION_FRAGMENT_INSTANTIATED_CARBON_AND_COST_QUALIFICATION_PENDING',target_year=2050,geographical_nodes=100,components={x.name:len(x.df) for x in actual.iterate_components()},files={p.name:sha(p) for p in [path,output/'carrier_fragment.json',output/'demand_destinations.json',output/'carbon_component_map.json']},code_sha=version(repo),builder_sha256=sha(__file__),inputs={str(costs):source,str(allocation/'allocation_manifest.json'):sha(allocation/'allocation_manifest.json')},environment={'python':platform.python_version(),'pypsa':pypsa.__version__},loads=0,demand_interfaces=len(dest),carbon_events=len(carbon),pending_mixed_carbon_events=sum(not x['accepted'] for x in carbon),pending_bio_qualification=pending,solver_runs=0,fullsc_network_complete=False)
+    manifest['inputs'][str(output/'electric_base_2050_unsolved.nc')]=sha(output/'electric_base_2050_unsolved.nc')
     save(output/'GATE3_PRODUCTION_FRAGMENT_MANIFEST.json',manifest)
     return manifest
 def main():
     p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
     for k in ['reference','costs','oldcosts','allocation','output','survival']:p.add_argument('--'+k,type=Path,required=True)
-    a=p.parse_args();n,m=build_electric(a.repo,a.reference,a.costs,a.oldcosts,a.output,a.survival);f=build_fragment(a.repo,n,a.costs,a.allocation,a.output)
+    p.add_argument('--integration-contract',type=Path)
+    a=p.parse_args();n,m=build_electric(a.repo,a.reference,a.costs,a.oldcosts,a.output,a.survival,a.integration_contract);f=build_fragment(a.repo,n,a.costs,a.allocation,a.output)
     save(a.output/'asset_bundle.json',dict(status='DEVELOPMENT_ASSETS_BUILT_FULLSC_NOT_COMPLETE',source_is_solved=False,electric_base=dict(file=m['file'],sha256=m['sha256']),carrier_fragment=dict(file='carrier_fragment.json',sha256=f['files']['carrier_fragment.json']),carbon_map=dict(file='carbon_component_map.json',sha256=f['files']['carbon_component_map.json']),solver_allowed=False))
     print(json.dumps(dict(electric=m['status'],fragment=f['status'],solver_runs=0)))
 if __name__=='__main__':main()

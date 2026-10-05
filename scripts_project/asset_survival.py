@@ -17,7 +17,7 @@ def select_asset(r,year=2050):
     else:return dict(out,SurvivalStatus='UNRESOLVED_RETIREMENT_OR_LIFETIME')
     if not math.isfinite(float(commissioning)) or not math.isfinite(float(retirement)) or retirement<=commissioning:raise ValueError('Invalid lifetime boundary')
     survives=commissioning<=year<retirement
-    return dict(out,RetirementYear=retirement,LifetimeSource=basis,SurvivalStatus='SURVIVES_2050' if survives else 'NOT_ACTIVE_2050',RetainedCapacity2050=capacity if survives else 0.)
+    return dict(out,RetirementYear=retirement,RetirementDerivation=basis,SurvivalStatus='SURVIVES_2050' if survives else 'NOT_ACTIVE_2050',RetainedCapacity2050=capacity if survives else 0.)
 
 def remaining_resource(total,survivors,meaning):
     if meaning=='TOTAL_CAPACITY':

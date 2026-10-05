@@ -66,8 +66,17 @@ def validate_hooks(n):
         if name not in n.stores.index or rule not in ['charge_only','discharge_only']:raise ValueError('Invalid persisted Store hook')
     for name in n.meta.get('external_annual_caps',{}):
         if name not in n.generators.index:raise ValueError('Annual cap points to missing source')
-    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality'}
+    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets'}
     if set(n.meta.get('required_constraint_hooks',[]))-allowed:raise ValueError('Unknown required physical hook')
+    if n.meta.get('existing_unit_components'):
+        if 'research_existing_assets' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Existing cost/resource hook lost')
+        total=0.;seen=set()
+        for ident in n.meta['existing_unit_components'].values():
+            row=n.df(ident['component_type']).loc[ident['component']]
+            if row.asset_role!='existing_survivor' or row.p_nom_extendable or row.capital_cost!=0:raise ValueError('Existing capital ownership lost')
+            key=(ident['component_type'],ident['component'])
+            if key not in seen:total+=float(row.existing_annual_fixed_om_eur);seen.add(key)
+        if not np.isclose(total,n.meta['existing_annual_fixed_om_eur']):raise ValueError('Existing fixed OM lost')
     for pair in n.meta.get('battery_inverter_pairs',[]):
         a,b=pair['charger'],pair['discharger']
         if a not in n.links.index or b not in n.links.index or n.links.at[a,'bus1']!=n.links.at[b,'bus0']:raise ValueError('Battery coupling identity lost')
@@ -79,6 +88,9 @@ def install_research_constraint_hooks(n):
     validate_hooks(n)
     from carrier_architecture import install_fragment_constraints
     install_fragment_constraints(n)
+    if n.meta.get('existing_unit_components'):
+        from integrate_surviving_assets import install_existing_asset_constraints
+        install_existing_asset_constraints(n)
     for i,pair in enumerate(n.meta.get('battery_inverter_pairs',[])):
         a,b=pair['charger'],pair['discharger'];eff=float(n.links.at[b,'efficiency'])
         n.model.add_constraints(n.model['Link-p_nom'].sel({'Link-ext':a})-eff*n.model['Link-p_nom'].sel({'Link-ext':b})==0,name='ResearchBatteryNominal-'+str(i))

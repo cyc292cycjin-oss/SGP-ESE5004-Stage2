@@ -4,6 +4,8 @@ ROOT = "results_project/assembly_v1"
 from pathlib import Path
 ALLOC = ROOT + "/allocation"
 ASSETS = ROOT + "/assets"
+if config.get("reuse_allocation") and Path(config["reuse_allocation"]).resolve() == Path(ALLOC).resolve():
+    raise ValueError("reuse_allocation must be an immutable prior allocation directory, not this rule's outputs")
 
 rule research_fullsc_unsolved:
     input:
@@ -46,6 +48,9 @@ rule research_build_production_assets:
         registry="research_inputs/assembly_v1/registry.json",
         builder="scripts_project/build_research_assets.py",
         architecture="scripts_project/carrier_architecture.py",
+        existing_integration="scripts_project/integrate_surviving_assets.py",
+        existing_selector="scripts_project/asset_survival.py",
+        integration_contract="research_inputs/asset_survival/integration_contract.json",
         survival=ASSETS + "/ASSET_SURVIVAL_2050.json",
         research_config="configs/research/baseline.yaml",
         upstream_config="configs/config.asean.yaml",
@@ -60,12 +65,15 @@ rule research_build_production_assets:
         electric_manifest=ASSETS + "/ELECTRIC_BASE_ASSET_MANIFEST.json",
         fragment_manifest=ASSETS + "/GATE3_PRODUCTION_FRAGMENT_MANIFEST.json",
     shell:
-        "python scripts_project/build_research_assets.py --repo . --reference {input.reference:q} --costs {input.costs:q} --oldcosts {input.oldcosts:q} --survival {input.survival:q} --allocation " + ALLOC + " --output " + ASSETS
+        "python scripts_project/build_research_assets.py --repo . --reference {input.reference:q} --costs {input.costs:q} --oldcosts {input.oldcosts:q} --survival {input.survival:q} --integration-contract {input.integration_contract:q} --allocation " + ALLOC + " --output " + ASSETS
 
 rule research_trace_existing_assets:
     input:
         plants=lambda w: config["source_powerplants"],
         tracer="scripts_project/trace_asset_survival.py",
+        unit_selector="scripts_project/unit_asset_survival.py",
+        age_selector="scripts_project/asset_survival.py",
+        decisions="research_inputs/asset_survival/lifetime_decisions.json",
         lifetime_config="configs/powerplantmatching_config.yaml",
         raw_cache=lambda w: sorted(str(p) for p in Path(config["source_plant_cache"]).glob("*.xlsx")),
     params:
@@ -73,4 +81,4 @@ rule research_trace_existing_assets:
     output:
         ASSETS + "/ASSET_SURVIVAL_2050.json",
     shell:
-        "python scripts_project/trace_asset_survival.py --repo . --plants {input.plants:q} --cache {params.cache:q} --output {output:q}"
+        "python scripts_project/trace_asset_survival.py --repo . --plants {input.plants:q} --cache {params.cache:q} --lifetimes {input.decisions:q} --output {output:q}"
