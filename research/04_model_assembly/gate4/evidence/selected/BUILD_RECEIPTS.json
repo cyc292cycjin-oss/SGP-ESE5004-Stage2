@@ -1,0 +1,51 @@
+[
+  {
+    "name": "REFRESH_CANONICAL_COVERAGE",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "scripts_project/refresh_canonical_coverage.py",
+      "--folder",
+      "research_inputs/assembly_v1",
+      "--output",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_selected/evidence/COVERAGE_CHANGES.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "REUSE_ALLOCATIONS",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/python",
+      "scripts_project/allocate_assembly_inputs.py",
+      "--registry",
+      "research_inputs/assembly_v1/registry.json",
+      "--reference",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/research/00_source_provenance/cache/results-asean-paper-v1/baseline-aims-3H/elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc",
+      "--ports",
+      "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/ports.csv",
+      "--airports",
+      "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/airports.csv",
+      "--output",
+      "results_project/assembly_v1/allocation",
+      "--reuse",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_closure_20261006/actual_allocation"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "BUILD_PRODUCTION_DAG",
+    "command": [
+      "/home/jin/miniforge3/envs/pypsa-earth/bin/snakemake",
+      "--snakefile",
+      "workflow/research_assembly.smk",
+      "--cores",
+      "1",
+      "--scheduler",
+      "greedy",
+      "--configfile",
+      "/mnt/c/Users/20122/Documents/ChatGPT/ASEAN/work/phase4_gate4_fixed/evidence/PRODUCTION_SOURCE_PATHS.json",
+      "--",
+      "research_build_production_assets"
+    ],
+    "exit_code": 0
+  }
+]
