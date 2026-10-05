@@ -70,6 +70,16 @@ def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=
  if not demands:raise ValueError('Empty target-year obligation registry')
  if year==2050:
   expected={(c,a,k) for c in COUNTRIES for a,carriers in TARGET_ACCOUNTS.items() for k in carriers}
+  for p in records:
+   if p['Year']!=2050:continue
+   if p.get('Representation')=='APPROVED_CARRIER_SPLIT':
+    if p['Account']!='TransportEmbeddedFuelParent' or p['Kind']!='ACCOUNTING' or p['Required'] or p.get('MethodID')!='ASSEMBLY_V1_RAIL_CONSTANT_2019' or not p.get('DecisionReference'):raise ValueError('Unapproved source parent representation')
+    children=[r for r in demands if r['InputID'] in p.get('PhysicalChildren',[])]
+    if not children or len(children)!=len(p['PhysicalChildren']) or any(r['Country']!=p['Country'] or r['Account']!='RailNonElectric' or r['ParentAccount']!=p['InputID'] for r in children):raise ValueError('Missing/invalid exclusive rail carrier children')
+    expected.remove((p['Country'],p['Account'],p['Carrier']));expected.update((r['Country'],r['Account'],r['Carrier']) for r in children)
+   if p['Account'] in ['TransportNEC','OtherNEC'] and p['Kind']=='DEMAND':
+    if p.get('MethodID') not in ['ASSEMBLY_V1_TRANSPORT_NEC_CONSTANT_2019','ASSEMBLY_V1_OTHER_NEC_CONSTANT_2019'] or not p.get('DecisionReference') or not p.get('BaseSourceRows'):raise ValueError('Unapproved NEC source ownership')
+    expected.add((p['Country'],p['Account'],p['Carrier']))
   actual={(r['Country'],r['Account'],r['Carrier']) for r in demands}
   if actual!=expected or len(demands)!=len(expected):raise ValueError('Required ownership account set changed without an approved representation')
   embedded=[r for r in records if r['Year']==year and r['Account']=='RoadEVFinalElectricity']
@@ -88,7 +98,7 @@ def check(records,year,allocation_dir=None,registry_path=None,known_unallocated=
   allocations=verify_allocation(allocation_dir,records,registry_path)
  allocation_missing=[r['InputID'] for r in numeric if r['InputID'] not in allocations]
  supply_pending=[r['InputID'] for r in records if r['Kind']=='EXTERNAL_SUPPLY' and r['Year']==year and (r['AssemblyStatus']!=ACCEPTED or not r['TargetReady'])]
- unowned=known_unallocated or []
+ unowned=[r for r in (known_unallocated or []) if r.get('Target2050Status')!='MATERIALISED_EXCLUSIVE_SOURCE_USE']
  numeric_ready=not missing and not supply_pending and not unowned
  allocation_ready=numeric_ready and not allocation_missing
  return dict(status='INPUT_GATE_ONLY_PASS' if allocation_ready else 'BLOCKED_INPUT_FREEZE' if not numeric_ready else 'BLOCKED_ALLOCATION',year=year,

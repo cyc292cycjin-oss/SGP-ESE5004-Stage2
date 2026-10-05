@@ -35,6 +35,11 @@ def derive(folder):
     elif a.startswith('International'):
      value=D(frozen[r['InputID']]) if r['InputID'] in frozen else raw;formula='Accepted2019 constant; raw precision and mechanical source correction separately recorded'
     elif a in decisions['domestic']['accounts']:value=raw;formula='Qualified2019 domestic obligation constant'
+    elif a in ['RailNonElectric','TransportNEC','OtherNEC']:
+     latest=json.loads((s/'GATE4_CONSOLIDATED_BASELINE_DECISIONS.json').read_text())
+     key='TransportEmbeddedFuelParent' if a=='RailNonElectric' else a
+     if latest['ApprovalStatus']!='HUMAN_ACCEPTED' or r.get('MethodID')!=latest['Methods'][key]:raise ValueError('Unapproved rail/NEC constant method')
+     value=raw;formula='Qualified exclusive2019 source-use obligation constant; new human baseline assumption'
     else:raise ValueError('No approved numerical rule')
    if not math.isclose(float(value),float(r['Value']),rel_tol=1e-12,abs_tol=1e-6):raise ValueError('Stored target differs from raw/method derivation: '+r['InputID'])
    out.append(dict(InputID=r['InputID'],RecomputedMWh=str(value),Formula=formula,Status='PASS_INDEPENDENT_RAW_TO_TARGET_REDERIVATION'))

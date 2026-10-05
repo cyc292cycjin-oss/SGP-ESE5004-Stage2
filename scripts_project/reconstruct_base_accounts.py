@@ -37,6 +37,8 @@ def account_for_transaction(t):
  if t in {'consumption by agriculture, forestry and fishing','consumption in agriculture, forestry and fishing'}:return 'AgricultureFinalEnergy'
  if t in {'consumption by road','consumption in road'}:return 'RoadResidualFuel'
  if t in {'consumption by rail','consumption in rail'}:return 'TransportEmbeddedFuelParent'
+ if t=='consumption not elsewhere specified (transport)':return 'TransportNEC'
+ if t=='consumption not elsewhere specified (other)':return 'OtherNEC'
  if t in {'consumption by domestic navigation','consumption in domestic navigation'}:return 'DomesticShippingFuel'
  if t in {'consumption by domestic aviation','consumption in domestic aviation'}:return 'DomesticAviationFuel'
  if t=='international marine bunkers':return 'InternationalShippingBunker'
@@ -108,7 +110,7 @@ class Reconstruction:
    parts=[r for r in self.rows if r['Country']==c and commodity(r['Commodity'])==com and r['Unit']==p['Unit'] and account_for_transaction(r['Transaction']) not in {None,account,'InternationalShippingBunker','InternationalAviationBunker'}]
    # Explicit NEC end-use leaves are disjoint from named sectors. Retain their
    # original ownership; use them only to prove exhaustion of this commodity FEC.
-   parts += [r for r in self.rows if r['Country']==c and commodity(r['Commodity'])==com and r['Unit']==p['Unit'] and norm(r['Transaction']) in {'consumption not elsewhere specified (transport)','consumption not elsewhere specified (other)'}]
+   # NEC already has unique account_for_transaction ownership above.
    total=sum(decimal(r['Quantity']) for r in parts)
    if abs(total-q)>D('0.000001'):return None
    evidence.extend([row_id(p),*[row_id(x) for x in parts]])
@@ -121,7 +123,12 @@ class Reconstruction:
     v,formula,basis=self.convert(r)
     nonenergy.append(dict(Country=r['Country'],Commodity=r['Commodity'],MWh=str(v),RawRow=row_id(r),Purpose='NON_ENERGY_REFERENCE_NOT_COMBUSTION',Formula=formula,EnergyBasis=basis))
   for c in COUNTRIES:
-   for account,fuels in ACCOUNTS.items():
+   uses=dict(ACCOUNTS)
+   # Only observed NEC carrier accounts are materialised, no fictitious Cartesian obligations.
+   for use in ['TransportNEC','OtherNEC']:
+    fuels={self.fuels.get(commodity(r['Commodity'])) for r in self.rows if r['Country']==c and account_for_transaction(r['Transaction'])==use}
+    fuels.discard(None);fuels.discard('electricity');uses[use]=sorted(fuels)
+   for account,fuels in uses.items():
     for fuel in fuels:
      candidates=[r for r in self.rows if r['Country']==c and account_for_transaction(r['Transaction'])==account and self.fuels.get(commodity(r['Commodity']))!='electricity' and (fuel=='unclassified_fuel' or self.fuels.get(commodity(r['Commodity']))==fuel)]
      old_candidates=list(candidates);excluded=[];error=None
@@ -141,7 +148,9 @@ class Reconstruction:
       if c=='TL' and account=='IndustryFinalEnergy':
        classification='SOURCE_SUPPORTED_NOT_APPLICABLE';status='BOUNDARY_EXCLUSION';error='Phase3c TL independent industry deferred; unknown fuel is not zero'
       else:
-       zero_evidence=self.reported_zero_bound(c,account,fuel) or []
+       # A road-only vintage overlay must not be mixed into an older complete
+       # FEC balance used as bounded zero evidence for other source accounts.
+       zero_evidence=getattr(self,'zero_scope',self).reported_zero_bound(c,account,fuel) or []
        if zero_evidence:classification='SOURCE_SUPPORTED_NOT_APPLICABLE';status='SOURCE_BOUNDED_ZERO';error=None
      if candidates and quantity==0 and not error:classification='SOURCE_SUPPORTED_NOT_APPLICABLE';status='SOURCE_REPORTED_ZERO';zero_evidence=[r['RowID'] for r in selected]
      if error and classification!='SOURCE_SUPPORTED_NOT_APPLICABLE':status='UNRESOLVED'
@@ -158,8 +167,21 @@ class Reconstruction:
 def reconstruct(folder, *, allow_blend_evidence=True):
  folder=Path(folder)
  s=json.loads((folder/'UNSD_2019_SOURCE_CAPSULE.json').read_text())
+ frozen_scope=json.loads((folder/'UNSD_2019_SOURCE_CAPSULE.json').read_text())
+ overlay=folder/'TH_ROAD_LOCAL_VINTAGE_APPLIED.json'
+ if overlay.exists():
+  replacement=json.loads(overlay.read_text())
+  if replacement.get('ApprovalStatus')!='HUMAN_ACCEPTED' or not replacement.get('DecisionReference'):raise ValueError('Unapproved local vintage update')
+  byid={row_id(r):i for i,r in enumerate(s['records'])}
+  for entry in replacement['replacements']:
+   idx=byid[entry['OldRowID']];prior=s['records'][idx];new=entry['NewRawRow']
+   if any(prior[k]!=new[k] for k in ['Country','Year','Commodity','Transaction','Unit']):raise ValueError('Local vintage scope drift')
+   if new['Country']!='TH' or account_for_transaction(new['Transaction'])!='RoadResidualFuel':raise ValueError('Unapproved vintage replacement scope')
+   s['records'][idx]=new
  c=json.loads((folder/'FROZEN_UPSTREAM_CONVERSIONS.json').read_text())
- result=Reconstruction(s,c).build()
+ builder=Reconstruction(s,c);builder.zero_scope=Reconstruction(frozen_scope,c)
+ result=builder.build()
+ result['zero_proof_vintage_scope']='Original immutable UNSD capsule only; never mix the local TH Road overlay into old FEC closures. Evidence remains bounded to that source version.'
  # New official memo files supplement, never overwrite, the frozen capsule.
  # Evidence must compare parent and bio totals with the cached version first.
  resolved={}
@@ -194,6 +216,16 @@ def reconstruct(folder, *, allow_blend_evidence=True):
     a.update(Status='UNRESOLVED_BIOFUEL_OVERLAP',Classification='UNRESOLVED',Reason='Petroleum/biofuel commodity-series overlap not resolved; memo blended rows missing; raw sum is a candidate, not a qualified disjoint obligation')
  result['biofuel_overlap']=overlap
  result['resolved_blends']=resolved
+ # Preserve the source rail parent as accounting; its disjoint carrier children
+ # are the only possible physical destinations after an explicit target decision.
+ for a in list(result['accounts']):
+  if a['Account']!='TransportEmbeddedFuelParent' or not a['SourceRows']:continue
+  for fuel,value in a['CarrierBreakdownMWh'].items():
+   selected=[r for r in result['selected_rows'] if r['RowID'] in a['SourceRows'] and r['Carrier']==fuel]
+   child=dict(a,Account='RailNonElectric',Carrier=fuel,AccountID=a['Country']+':2019:RailNonElectric:'+fuel,ValueMWh=value,CarrierBreakdownMWh={fuel:value},SourceRows=[r['RowID'] for r in selected],ParentAccountID=a['AccountID'])
+   result['accounts'].append(child)
+  for r in result['selected_rows']:
+   if r['RowID'] in a['SourceRows']:r['Account']='RailNonElectric';r['OriginalParentAccount']='TransportEmbeddedFuelParent'
  return result
 
 if __name__=='__main__':

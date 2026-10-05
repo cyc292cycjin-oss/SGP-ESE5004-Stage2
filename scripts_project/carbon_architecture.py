@@ -9,7 +9,8 @@ from carrier_architecture import finite,COUNTRIES
 
 TRAJECTORY={2025:1000e6,2030:820e6,2035:640e6,2040:460e6,2045:280e6,2050:100e6}
 SECTORS={'Power','Buildings','Transport','Industry','Agriculture','DomesticShipping',
-         'InternationalShipping','DomesticAviation','InternationalAviation','Other'}
+         'InternationalShipping','DomesticAviation','InternationalAviation','Other',
+         'RailNonElectric','TransportNEC','OtherNEC'}
 ORIGINS={'FOSSIL','BIOGENIC','DAC','RECYCLED_POINT_SOURCE','MIXED_UNRESOLVED'}
 
 

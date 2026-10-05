@@ -200,6 +200,9 @@ def build_fragment(repo,base,costs,allocation,output):
     if am['input_registry_sha256']!=sha(repo/'research_inputs/assembly_v1/registry.json'):raise ValueError('Allocation belongs to old registry')
     for ar in am['records']:
         r=records[ar['InputID']];sector='Buildings' if r['Account'] in ['ResidentialFuel','ServicesFuel'] else 'Industry' if r['Account']=='IndustryFinalEnergy' else 'Agriculture' if r['Account']=='AgricultureFinalEnergy' else r['Account'].replace('Bunker','').replace('Fuel','') if 'Shipping' in r['Account'] or 'Aviation' in r['Account'] else 'Transport'
+        if r['Account']=='OtherNEC':sector='OtherNEC'
+        elif r['Account']=='TransportNEC':sector='TransportNEC'
+        elif r['Account']=='RailNonElectric':sector='RailNonElectric'
         for j,node in enumerate(ar['Nodes']):
             annual=float((arrays[ar['ArrayKey']][:,j]*arrays['weights']).sum())
             if annual<=0:continue
@@ -231,9 +234,25 @@ def build_fragment(repo,base,costs,allocation,output):
     save(output/'carrier_fragment.json',raw);save(output/'demand_destinations.json',dest);save(output/'carbon_component_map.json',carbon)
     n=to_pypsa_fragment(f,list(base.snapshots),list(base.snapshot_weightings.generators),component_ids=list(f.components))
     n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))
+    # Materialise ONLY qualified actual arrays in this development fragment.
+    # carrier_fragment.json remains an unbound production recipe; the full
+    # assembler consumes that recipe and binds once after all gates pass.
+    from assembly_components import bind_loads
+    with np.load(allocation/am['arrays_file'],allow_pickle=False) as values:
+        bind_loads(n,registry['records'],am,values,dest)
+    n.meta.update(partial_demand_binding=True,qualified_bound_accounts=len(am['records']),complete_model_claim=False)
     path=output/'carrier_fragment_2050_unsolved.nc';actual=export_checked(n,path)
+    actual_totals={r['InputID']:0. for r in am['records']}
+    for name,rid in actual.meta['demand_owners'].items():
+        z=actual.loads.loc[name];identity=actual.meta['demand_identity'][name]
+        if any(str(z[k])!=identity[k] for k in ['carrier','sector','account','country']):raise ValueError('Development Load identity lost')
+        values=actual.loads_t.p_set[name]
+        if not np.isfinite(values).all() or (values<0).any():raise ValueError('Invalid development demand input')
+        actual_totals[rid]+=float((values*actual.snapshot_weightings.generators).sum())
+    if any(not np.isclose(v,float(records[k]['Value']),rtol=1e-12,atol=1e-6) for k,v in actual_totals.items()):raise ValueError('Actual development demand binding not conserved')
     manifest=dict(status='PRODUCTION_FRAGMENT_INSTANTIATED_CARBON_AND_COST_QUALIFICATION_PENDING',target_year=2050,geographical_nodes=100,components={x.name:len(x.df) for x in actual.iterate_components()},files={p.name:sha(p) for p in [path,output/'carrier_fragment.json',output/'demand_destinations.json',output/'carbon_component_map.json']},code_sha=version(repo),builder_sha256=sha(__file__),inputs={str(costs):source,str(allocation/'allocation_manifest.json'):sha(allocation/'allocation_manifest.json')},environment={'python':platform.python_version(),'pypsa':pypsa.__version__},loads=0,demand_interfaces=len(dest),carbon_events=len(carbon),pending_mixed_carbon_events=sum(not x['accepted'] for x in carbon),pending_bio_qualification=pending,solver_runs=0,fullsc_network_complete=False)
     manifest['inputs'][str(output/'electric_base_2050_unsolved.nc')]=sha(output/'electric_base_2050_unsolved.nc')
+    manifest.update(loads=len(actual.loads),bound_qualified_accounts=len(actual_totals),binding_status='PARTIAL_QUALIFIED_DEMANDS_BOUND_DEVELOPMENT_ONLY',demand_binding_annual_mwh=actual_totals,unbound_production_recipe='carrier_fragment.json; full assembler binds once only after all source gates pass')
     save(output/'GATE3_PRODUCTION_FRAGMENT_MANIFEST.json',manifest)
     return manifest
 def main():

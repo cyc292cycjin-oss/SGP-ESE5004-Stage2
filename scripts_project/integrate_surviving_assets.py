@@ -8,6 +8,43 @@ from carrier_architecture import bus_name
 def approved(x):
     return x.get('ApprovalStatus')=='HUMAN_ACCEPTED' and bool(x.get('Source')) and bool(x.get('DecisionReference'))
 
+def qualified_proxy(x):
+    return approved(x) or (x.get('ApprovalStatus')=='SOURCE_QUALIFIED_ENGINEERING_PROXY' and bool(x.get('Source')) and bool(x.get('AuthorizationReference')))
+
+def combined_profiles(members,profile_network,snapshots,used_absolute):
+    """Normalised availability is capacity-weighted; absolute inflow is not."""
+    attrs=set().union(*(q['performance'].get('Profiles',{}) for q in members))
+    result={}
+    for attr in attrs:
+        values=[];specs=[]
+        for q in members:
+            p=q['performance'].get('Profiles',{}).get(attr)
+            if p is None:raise ValueError('Missing profile on part of aggregated capacity')
+            if profile_network is None or not profile_network.snapshots.equals(snapshots):raise ValueError('Existing profile weather/time mismatch')
+            if attr not in {'p_max_pu','p_min_pu','inflow'} or not p.get('Source'):raise ValueError('Unqualified existing time profile')
+            v=profile_network.pnl(p['ComponentType'])[attr][p['Component']].to_numpy()*finite(p['Multiplier'],'profile multiplier')
+            if not np.isfinite(v).all() or (v<0).any():raise ValueError('Invalid existing profile')
+            values.append(v);specs.append(p)
+        if attr!='inflow':
+            if any(p.get('Aggregation','CAPACITY_WEIGHTED_NORMALISED')!='CAPACITY_WEIGHTED_NORMALISED' for p in specs):raise ValueError('Normalised profile aggregation mismatch')
+            result[attr]=sum(v*q['capacity'] for v,q in zip(values,members))/sum(q['capacity'] for q in members)
+        else:
+            modes={p.get('Aggregation','SINGLE_COMPONENT_ABSOLUTE') for p in specs}
+            if len(modes)!=1:raise ValueError('Incompatible absolute inflow accounting')
+            mode=next(iter(modes));ids=[p.get('ResourceIdentity',(p['ComponentType'],p['Component'])) for p in specs]
+            if mode=='SHARED_GROUP_ONCE':
+                if len(set(ids))!=1 or any(not np.array_equal(v,values[0]) for v in values):raise ValueError('Shared inflow differs inside group')
+                owners=set(ids);result[attr]=values[0]
+            elif mode=='UNIT_ABSOLUTE_SUM':
+                if len(ids)!=len(set(ids)):raise ValueError('Duplicate unit-specific inflow')
+                owners=set(ids);result[attr]=sum(values)
+            elif mode=='SINGLE_COMPONENT_ABSOLUTE' and len(members)==1:
+                owners=set(ids);result[attr]=values[0]
+            else:raise ValueError('Explicit multi-unit absolute inflow ownership required')
+            if owners & used_absolute:raise ValueError('Absolute inflow repeated across components')
+            used_absolute.update(owners)
+    return result
+
 def finite(x,label,minimum=0):
     x=float(x)
     if not math.isfinite(x) or x<minimum:raise ValueError('Invalid '+label)
@@ -24,7 +61,7 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         if checked['SurvivalStatus']!='SURVIVES_2050' or r.get('CapacityReconciliation')!='MATCHED_PARENT' or not math.isclose(float(r['RetainedCapacity2050']),checked['RetainedCapacity2050'],rel_tol=1e-12):raise ValueError('Unqualified unit promoted or retained capacity differs from original source')
         mapping=contract.get('mapping',{}).get(str(r['OriginalMappedBus']),{})
         p=contract.get('performance',{}).get(r['AssetID'],contract.get('performance',{}).get(r['Technology'],{}))
-        if not approved(mapping) or not approved(p):pending.append(dict(AssetID=r['AssetID'],reason='Source-qualified mapping/performance/FOM/VOM pending'));continue
+        if not approved(mapping) or not qualified_proxy(p):pending.append(dict(AssetID=r['AssetID'],capacity_mw=r['RetainedCapacity2050'],technology=r['Technology'],reason=p.get('PendingReason','Source-qualified mapping/performance/FOM/VOM pending')));continue
         node=mapping['Node']
         if node not in n.buses.index or mapping['Country']!=r['Country'] or n.buses.at[node,'country']!=r['Country']:raise ValueError('Mapping crosses country')
         if not mapping.get('OriginalPartition') or mapping['OriginalPartition']!=mapping.get('NodePartition'):raise ValueError('Mapping crosses original grid partition')
@@ -32,14 +69,16 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         if eff>1:raise ValueError('Invalid conversion efficiency')
         fom=finite(p['FixedOM_EUR_per_MW_e_year'],'existing fixed OM');vom=finite(p['VariableOM_EUR_per_MWh_e'],'existing variable OM')
         if fom==0 and p.get('ZeroFixedOMExplicitlyAccepted') is not True:raise ValueError('Unqualified zero existing OM')
-        if p.get('CostBasis')!='EXISTING_NO_NEW_CAPEX' or p.get('PerformanceBasis')!='SOURCE_EXISTING_EQUIPMENT':raise ValueError('Existing investment/performance boundary violated')
+        if p.get('CostBasis')!='EXISTING_NO_NEW_CAPEX' or p.get('PerformanceBasis') not in {'SOURCE_EXISTING_EQUIPMENT','SOURCE_TECHNOLOGY_ENGINEERING_PROXY'}:raise ValueError('Existing investment/performance boundary violated')
         typ=p['ComponentType']
         if typ not in ['Generator','StorageUnit','Link']:raise ValueError('Unsupported existing component type')
         combustion={'CCGT','Hard Coal','Lignite','Oil','Solid Biomass','Biogas','Waste','Natural Gas'}
         if r['Technology'] in combustion and typ!='Link':raise ValueError('Existing combustion must retain explicit fuel and physical carbon ports')
         cap=finite(r['RetainedCapacity2050'],'surviving capacity')
         group=p.get('ResourceGroupByNode',{}).get(node,p.get('ResourceGroup'))
-        if group=='EXISTING_ONLY_NO_NEW_CANDIDATE':
+        if group=='NO_FINITE_TECHNOLOGY_RESOURCE_LIMIT':
+            if not qualified_proxy(p.get('ResourceSemantics',{})):raise ValueError('Unqualified absence of finite resource limit')
+        elif group=='EXISTING_ONLY_NO_NEW_CANDIDATE':
             if p.get('ExistingOnlyEvidence') is None:raise ValueError('Missing existing-only resource evidence')
         elif group not in groups or not approved(groups[group]):pending.append(dict(AssetID=r['AssetID'],reason='Resource limit semantics pending'));continue
         plans.append(dict(record=r,performance=p,node=node,type=typ,capacity=cap,efficiency=eff,fom=fom,vom=vom,group=group))
@@ -48,7 +87,7 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
     for q in plans:use[q['group']]+=q['capacity']
     envelopes={}
     for key,amount in use.items():
-        if key=='EXISTING_ONLY_NO_NEW_CANDIDATE':continue
+        if key in {'EXISTING_ONLY_NO_NEW_CANDIDATE','NO_FINITE_TECHNOLOGY_RESOURCE_LIMIT'}:continue
         g=groups[key];remaining=remaining_resource(finite(g['LimitMW'],'resource limit'),amount,g['Meaning'])
         candidates=g['NewBuildComponents'];seen=set()
         for c in candidates:
@@ -64,15 +103,16 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
     # decide survival. Different qualified performance classes stay distinct.
     aggregate=defaultdict(list)
     for q in plans:
-        key=json.dumps([q['node'],q['record']['Technology'],q['performance'],q['group']],sort_keys=True)
+        static={k:v for k,v in q['performance'].items() if k!='Profiles'}
+        key=json.dumps([q['node'],q['record']['Technology'],static,q['group']],sort_keys=True)
         aggregate[key].append(q)
     combined=[]
     for key,members in aggregate.items():
-        q=dict(members[0]);q['members']=[x['record'] for x in members];q['capacity']=sum(x['capacity'] for x in members)
+        q=dict(members[0]);q['members']=[x['record'] for x in members];q['member_plans']=members;q['capacity']=sum(x['capacity'] for x in members)
         q['group_name']='existing_survivor::'+q['record']['AssetID'] if len(members)==1 else 'existing_survivor::'+q['node']+'::'+q['record']['Technology']+'::'+hashlib.sha256(key.encode()).hexdigest()[:12]
         combined.append(q)
     # Materialise only after all accepted plans and shared resource envelopes pass.
-    identity={};carbon=[];fom_total=0.
+    identity={};carbon=[];fom_total=0.;used_absolute=set()
     for q in combined:
         r=q['record'];p=q['performance'];node=q['node'];typ=q['type'];name=q['group_name'];carrier=p['Carrier'];members=q['members']
         if name in n.df(typ).index:raise ValueError('Duplicate existing component')
@@ -95,12 +135,7 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         for attr,v in p.get('StaticOperatingInputs',{}).items():
             if attr not in {'p_min_pu','p_max_pu','standing_loss'}:raise ValueError('Unapproved operating input field')
             n.df(typ).loc[name,attr]=finite(v,attr)
-        for attr,source in p.get('Profiles',{}).items():
-            if profile_network is None or not profile_network.snapshots.equals(n.snapshots):raise ValueError('Existing profile weather/time mismatch')
-            if attr not in {'p_max_pu','p_min_pu','inflow'} or not source.get('Source'):raise ValueError('Unqualified existing time profile')
-            frame=profile_network.pnl(source['ComponentType'])[attr]
-            values=frame[source['Component']].to_numpy()*finite(source['Multiplier'],'profile multiplier')
-            if not np.isfinite(values).all():raise ValueError('Invalid existing profile')
+        for attr,values in combined_profiles(q['member_plans'],profile_network,n.snapshots,used_absolute).items():
             n.import_series_from_dataframe(__import__('pandas').DataFrame({name:values},index=n.snapshots),typ,attr)
         df=n.df(typ)
         for k,v in dict(asset_role='existing_survivor',source_unit_id=r['RawUnitID'] if len(members)==1 else json.dumps([x['RawUnitID'] for x in members]),source_parent_id=json.dumps(sorted({x['ParentAssetID'] for x in members})),country=r['Country'],retained_electric_capacity_mw=q['capacity'],existing_fixed_om_eur_per_mw_year=q['fom'],existing_annual_fixed_om_eur=q['fom']*q['capacity'],source_asset_version=json.dumps(sorted({x['SourceVersion'] for x in members})),age_fields_meaning='Already screened2050 active group; first commissioning and earliest retirement envelope; no mean-age screening').items():df.loc[name,k]=v
