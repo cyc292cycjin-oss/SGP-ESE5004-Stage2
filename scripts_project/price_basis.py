@@ -129,7 +129,10 @@ def qualify_network_costs(n,layer,path):
             if typ=='Generator' and not existing and carrier in ['onwind','offwind-ac','offwind-dc','solar','solar rooftop'] and z.marginal_cost!=0:
                 # Frozen config marginal_cost overrides raw VOM; no documented real
                 # price year is inferred from its tiny numeric value.
-                rec['MarginalPriceQualification']='CONFIG_OVERRIDE_PRICE_YEAR_PENDING'
+                rec['MarginalPriceQualification']='EUR2020_EXPLICIT_HUMAN_MODEL_ASSUMPTION' if z.get('variable_cost_method')=='ASSEMBLY_V1_EXPLICIT_CONFIG_VARIABLE_COST' and z.marginal_cost==(.01 if carrier=='solar' else .015) else 'CONFIG_OVERRIDE_PRICE_YEAR_PENDING'
+            if typ=='Link' and carrier in ['DC','B2B'] and z.get('variable_cost_method')=='ASSEMBLY_V1_REMOVE_INHERITED_TRANSMISSION_NOISE':
+                if z.marginal_cost!=0:raise ValueError('Transmission noise removal contract violated')
+                rec['MarginalPriceQualification']='EXPLICIT_ZERO_VARIABLE_TRANSMISSION_FEE_EUR2020'
             if existing:rec['FixedOMPriceQualification']=status(2030,tech,'investment')
             if typ=='Link' and tech=='Fischer-Tropsch':
                 row=lookup.get((2050,tech,'VOM'),{})

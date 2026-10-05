@@ -10,7 +10,11 @@ def select_asset(r,year=2050):
         return dict(out,SurvivalStatus='NOT_INHERITED_'+role)
     if role!='OBSERVED_EXISTING':return dict(out,SurvivalStatus='UNRESOLVED_EXISTING_STATUS')
     commissioning=r.get('CommissioningYear');retirement=r.get('RetirementYear')
-    if commissioning is None or r.get('CommissioningEvidenceVerified') is not True:return dict(out,SurvivalStatus='UNRESOLVED_COMMISSIONING')
+    from selected_closure import retirement_upper_bound,DECISION
+    bound=retirement_upper_bound(r,year)
+    if bound:return bound
+    cohort=(r.get('CohortMethod')=='ASSEMBLY_V1_REPORTED_PLANT_COHORT_PROXY' and r.get('CohortDecisionReference')==DECISION+'#D' and r.get('ReportedPlantYearSource') and r.get('ReportedPlantYear')==commissioning)
+    if commissioning is None or not (r.get('CommissioningEvidenceVerified') is True or cohort):return dict(out,SurvivalStatus='UNRESOLVED_COMMISSIONING')
     if retirement is not None and r.get('RetirementEvidenceVerified') is True:basis='VERIFIED_RETIREMENT_RECORD'
     elif r.get('Lifetime') is not None and r.get('LifetimeAccepted') is True:
         retirement=float(commissioning)+float(r['Lifetime']);basis='DERIVED_FROM_ACCEPTED_LIFETIME'

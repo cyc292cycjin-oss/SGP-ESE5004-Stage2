@@ -58,8 +58,10 @@ rule research_build_production_assets:
         architecture="scripts_project/carrier_architecture.py",
         existing_integration="scripts_project/integrate_surviving_assets.py",
         existing_selector="scripts_project/asset_survival.py",
-        integration_contract=ASSETS + "/HYDRO_INTEGRATION_CONTRACT.json",
-        survival=ASSETS + "/ASSET_SURVIVAL_2050.json",
+        selected_code="scripts_project/selected_closure.py",
+        selected_decisions="research_inputs/asset_survival/selected_closure_decisions.json",
+        integration_contract=ASSETS + "/SELECTED_INTEGRATION_CONTRACT.json",
+        survival=ASSETS + "/SELECTED_ASSET_SURVIVAL_2050.json",
         research_config="configs/research/baseline.yaml",
         upstream_config="configs/config.asean.yaml",
         default_config="config.default.yaml",
@@ -124,3 +126,20 @@ rule research_prepare_common_price_year:
         technology_data=lambda w: config["technology_data_evidence"],
     shell:
         "python scripts_project/price_basis.py --costdir {params.costdir:q} --technology-data {params.technology_data:q} --index-file {input.index:q} --output {output:q}"
+
+rule research_apply_selected_closure:
+    input:
+        reference=lambda w: config["source_reference"],
+        survival=ASSETS + "/ASSET_SURVIVAL_2050.json",
+        contract=ASSETS + "/HYDRO_INTEGRATION_CONTRACT.json",
+        decisions="research_inputs/asset_survival/selected_closure_decisions.json",
+        cohorts="research_inputs/asset_survival/GPD_COHORT_SOURCE_REVIEW.json",
+        identities="research_inputs/asset_survival/GEM_FROZEN_IDENTITY_FIELDS.json",
+        script="scripts_project/apply_selected_stock.py",
+        methods="scripts_project/selected_closure.py",
+    output:
+        stock=ASSETS + "/SELECTED_ASSET_SURVIVAL_2050.json",
+        contract=ASSETS + "/SELECTED_INTEGRATION_CONTRACT.json",
+        report=ASSETS + "/SELECTED_CLOSURE_IMPLEMENTATION.json",
+    shell:
+        "python scripts_project/apply_selected_stock.py --repo . --reference {input.reference:q} --survival {input.survival:q} --contract {input.contract:q} --decisions {input.decisions:q} --cohort-evidence {input.cohorts:q} --output-stock {output.stock:q} --output-contract {output.contract:q} --output-report {output.report:q}"

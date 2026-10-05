@@ -151,6 +151,8 @@ def build_electric(repo,reference,costs,oldcosts,output,survival=None,integratio
     n.meta['unresolved_existing_asset_ages']=len(unresolved)
     n.meta['resource_occupancy_status']='QUALIFIED_SHARED_ENVELOPES' if qualified else 'PENDING_COMPLETE_STOCK_AND_RESOURCE_QUALIFICATION'
     n.meta['asset_qualification']='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED' if qualified else 'DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION'
+    from selected_closure import apply_cost_choices
+    apply_cost_choices(n,s,json.loads((repo/'research_inputs/asset_survival/selected_closure_decisions.json').read_text()))
     if layer:
         from price_basis import qualify_network_costs
         qualify_network_costs(n,layer,price_layer)
@@ -161,7 +163,7 @@ def build_electric(repo,reference,costs,oldcosts,output,survival=None,integratio
         manifest['raw_asset_inventory_summary']={'source_parent_rows':len(raw['records']),'source_unit_rows':len(evidence['records']),'unresolved_unit_records':len(unresolved),'explicit2050_survivors':sum(r['SurvivalStatus']=='SURVIVES_2050' for r in evidence['records']),'numerical_lifetime_acceptance':'Only explicit lifetime decision table or verified retirement records; candidate results excluded'}
     if integration_contract:manifest['inputs'][str(integration_contract)]=sha(integration_contract)
     manifest.update(status=n.meta['asset_qualification'],survivor_integration=integrated,unit_first_selection=True,conditional_stock_materialised=False)
-    manifest['implementation_sha256']={f:sha(repo/'scripts_project'/f) for f in ['build_research_assets.py','integrate_surviving_assets.py','unit_asset_survival.py','asset_survival.py','trace_asset_survival.py']}
+    manifest['implementation_sha256']={f:sha(repo/'scripts_project'/f) for f in ['build_research_assets.py','integrate_surviving_assets.py','unit_asset_survival.py','asset_survival.py','trace_asset_survival.py','selected_closure.py','apply_selected_stock.py']}
     manifest['qualification_dimensions']=n.meta.get('qualification_dimensions',{})
     if price_layer:manifest['inputs'][str(price_layer)]=sha(price_layer)
     save(output/'ELECTRIC_BASE_ASSET_MANIFEST.json',manifest);return n,manifest

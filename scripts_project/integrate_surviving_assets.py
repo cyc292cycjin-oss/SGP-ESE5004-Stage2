@@ -22,7 +22,10 @@ def combined_profiles(members,profile_network,snapshots,used_absolute):
             if p is None:raise ValueError('Missing profile on part of aggregated capacity')
             if profile_network is None or not profile_network.snapshots.equals(snapshots):raise ValueError('Existing profile weather/time mismatch')
             if attr not in {'p_max_pu','p_min_pu','inflow'} or not p.get('Source'):raise ValueError('Unqualified existing time profile')
-            v=profile_network.pnl(p['ComponentType'])[attr][p['Component']].to_numpy()*finite(p['Multiplier'],'profile multiplier')
+            if 'ResourceTerms' in p:
+                from selected_closure import resource_profile
+                v=resource_profile(p,profile_network)
+            else:v=profile_network.pnl(p['ComponentType'])[attr][p['Component']].to_numpy()*finite(p['Multiplier'],'profile multiplier')
             if not np.isfinite(v).all() or (v<0).any():raise ValueError('Invalid existing profile')
             if 'ClipUpper' in p:
                 if attr!='p_max_pu' or p['ClipUpper']!=1.:raise ValueError('Only normalised availability may be turbine-limited')
@@ -85,6 +88,9 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
             if p.get('ExistingOnlyEvidence') is None:raise ValueError('Missing existing-only resource evidence')
         elif group not in groups or not approved(groups[group]):pending.append(dict(AssetID=r['AssetID'],reason='Resource limit semantics pending'));continue
         plans.append(dict(record=r,performance=p,node=node,type=typ,capacity=cap,efficiency=eff,fom=fom,vom=vom,group=group))
+    if contract.get('resource_reallocation'):
+        from selected_closure import validate_allocated_resources
+        validate_allocated_resources(contract,profile_network,[q['record']['AssetID'] for q in plans])
     # A resource group owns ONE potential envelope across all candidate copies.
     use=defaultdict(float)
     for q in plans:use[q['group']]+=q['capacity']
@@ -146,9 +152,9 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         df=n.df(typ)
         if p.get('HydroResourceIdentity'):
             for key,val in dict(resource_identity=p['HydroResourceIdentity'],hydro_subtype=p['HydroSubtype'],source_group_capacity_mw=p['SourceGroupCapacityMW'],storage_energy_basis=p.get('StorageEnergyBasis','NOT_STORAGE')).items():df.loc[name,key]=val
-        for k,v in dict(asset_role='existing_survivor',source_unit_id=r['RawUnitID'] if len(members)==1 else json.dumps([x['RawUnitID'] for x in members]),source_parent_id=json.dumps(sorted({x['ParentAssetID'] for x in members})),country=r['Country'],retained_electric_capacity_mw=q['capacity'],existing_fixed_om_eur_per_mw_year=q['fom'],existing_annual_fixed_om_eur=q['fom']*q['capacity'],source_asset_version=json.dumps(sorted({x['SourceVersion'] for x in members})),age_fields_meaning='Already screened2050 active group; first commissioning and earliest retirement envelope; no mean-age screening').items():df.loc[name,k]=v
+        for k,v in dict(asset_role='existing_survivor',source_unit_id=r['RawUnitID'] if len(members)==1 else json.dumps([x['RawUnitID'] for x in members]),source_parent_id=json.dumps(sorted({x['ParentAssetID'] for x in members})),country=r['Country'],retained_electric_capacity_mw=q['capacity'],existing_fixed_om_eur_per_mw_year=q['fom'],existing_annual_fixed_om_eur=q['fom']*q['capacity'],source_asset_version=json.dumps(sorted({x['SourceVersion'] for x in members})),age_fields_meaning='Already screened2050 active group; unit dates or explicitly accepted GPD reported plant-cohort proxy; never infer unit age from group average').items():df.loc[name,k]=v
         fom_total+=q['fom']*q['capacity']
-        for u in members:identity[u['AssetID']]=dict(component_type=typ,component=name,capacity_mw=u['RetainedCapacity2050'],node=node,source=u['Source'],source_version=u['SourceVersion'],commissioning_year=u['CommissioningYear'],retirement_year=u['RetirementYear'])
+        for u in members:identity[u['AssetID']]=dict(component_type=typ,component=name,capacity_mw=u['RetainedCapacity2050'],node=node,source=u['Source'],source_version=u['SourceVersion'],commissioning_year=u['CommissioningYear'],retirement_year=u['RetirementYear'],age_basis=u.get('AgeBasis','SOURCE_UNIT_YEAR'),cohort_method=u.get('CohortMethod'))
     for e in envelopes.values():
         for c in e['candidates']:n.df(c['ComponentType']).loc[c['Name'],'p_nom_max']=min(float(n.df(c['ComponentType']).at[c['Name'],'p_nom_max']),e['new_build_limit_mw']/c['CapacityToMW'])
     n.meta.update(existing_unit_components=identity,existing_resource_groups=envelopes,existing_annual_fixed_om_eur=fom_total,existing_cost_boundary='New CAPEX=0; existing annual fixed OM added once by explicit objective hook; VOM charged to dispatch',existing_carbon_components=carbon)
