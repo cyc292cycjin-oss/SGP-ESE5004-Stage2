@@ -29,7 +29,12 @@ def current_readiness(repo,allocation,root):
     missing=set(gate['unresolved_input_ids']);lookup={r['InputID']:r for r in data['records']}
     cov=[]
     for row in coverage['rows']:
-        x=deepcopy(row);targets=x.get('PreviousTargets',x.get('PendingTargets',[]));x['PendingTargets']=sorted(missing&set(targets));x['RemainingPhysicalTargets']=len(x['PendingTargets']);x['CurrentStatus']='PENDING' if x['PendingTargets'] else 'SOURCE_SCOPE_NO_ADDITIONAL_FINAL_LOAD' if set(targets)&set(gate.get('source_scope_input_ids',[])) else 'CLOSED_EXISTING_SOURCE_RULE';cov.append(x)
+        x=deepcopy(row);targets=x.get('PreviousTargets',x.get('PendingTargets',[]));x['PendingTargets']=sorted(missing&set(targets));x['RemainingPhysicalTargets']=len(x['PendingTargets']);x['CurrentStatus']='PENDING' if x['PendingTargets'] else 'SOURCE_SCOPE_NO_ADDITIONAL_FINAL_LOAD' if set(targets)&set(gate.get('source_scope_input_ids',[])) else 'CLOSED_EXISTING_SOURCE_RULE'
+        if x['CurrentStatus']=='SOURCE_SCOPE_NO_ADDITIONAL_FINAL_LOAD':
+            x['HistoricalBasis']=x.get('Basis');x['HistoricalNextAction']=x.get('NextAction')
+            x['Basis']='GATE4-20261006-BOUNDED-SOURCE-SCOPE applied to verified reported source hierarchy; not an observed final-demand zero'
+            x['NextAction']='No additional final Load in this accepted source scope; retain UNKNOWN_OUTSIDE_COVERAGE and revalidate on source change'
+        cov.append(x)
     covered={t for x in cov for t in x['PendingTargets']}
     if covered!=missing:raise ValueError('Current source-to-target coverage map incomplete')
     groups=[x for x in contract['hydro_group_qualification']['groups'] if x['Status']=='PENDING']
