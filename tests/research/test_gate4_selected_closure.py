@@ -12,6 +12,12 @@ def cohort():
  return dict(AssetClass='OBSERVED_EXISTING',OriginalCapacity=10.,CommissioningYear=2016.25,CommissioningEvidenceVerified=False,ReportedPlantYear=2016.25,ReportedPlantYearSource='SYNTHETIC_SOURCE',CohortMethod='ASSEMBLY_V1_REPORTED_PLANT_COHORT_PROXY',CohortDecisionReference=DECISION+'#D',Lifetime=40,LifetimeAccepted=True)
 
 class CohortBoundTests(unittest.TestCase):
+ def test_known_duplicate_is_represented_elsewhere_not_missing_or_retired(self):
+  from selected_closure import qualify_cohort_identity
+  r=qualify_cohort_identity(select_asset(cohort()),'DUPLICATE_EXISTING_GEM_SITE');self.assertEqual(r['SurvivalStatus'],'NOT_INHERITED_DUPLICATE_SOURCE');self.assertEqual(r['RetainedCapacity2050'],0);self.assertEqual(r['OriginalCapacity'],10);self.assertIn('NOT_PHYSICALLY_RETIRED',r['InventoryDisposition'])
+ def test_different_source_id_does_not_prove_independence(self):
+  from selected_closure import qualify_cohort_identity
+  r=qualify_cohort_identity(select_asset(cohort()),'DIFFERENT_SOURCE_ID_ONLY');self.assertEqual(r['SurvivalStatus'],'UNRESOLVED_PHYSICAL_IDENTITY');self.assertIsNone(r['RetainedCapacity2050'])
  def test_fractional_year_never_rounded(self):
   r=select_asset(cohort());self.assertEqual(r['CommissioningYear'],2016.25);self.assertEqual(r['RetirementYear'],2056.25);self.assertEqual(r['RetainedCapacity2050'],10)
  def test_cohort_requires_explicit_approval_and_source(self):

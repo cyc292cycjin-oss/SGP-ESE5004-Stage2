@@ -3,7 +3,7 @@ from pathlib import Path
 from collections import Counter
 import argparse,copy,json,hashlib,math,ast
 import pandas as pd,pypsa
-from selected_closure import require_decision,reallocate_hydro,DECISION,retirement_upper_bound
+from selected_closure import require_decision,reallocate_hydro,DECISION,retirement_upper_bound,qualify_cohort_identity
 from asset_survival import select_asset
 
 def read(p):return json.loads(Path(p).read_text())
@@ -37,7 +37,7 @@ def prepare(repo,reference,survival,contract,decisions,cohort_evidence,output_st
         selected=select_asset(u);conditional=selected['RetainedCapacity2050'];reason=entry['IdentityStatus']
         # A cohort screening result cannot override source duplicate or technology/resource checks.
         if selected['SurvivalStatus']=='SURVIVES_2050':
-            if reason!='DISJOINT_FROZEN_SOURCE_SELECTION':selected.update(SurvivalStatus='UNRESOLVED_PHYSICAL_IDENTITY',RetainedCapacity2050=None)
+            if reason!='DISJOINT_FROZEN_SOURCE_SELECTION':selected=qualify_cohort_identity(selected,reason)
             elif tech=='Hydro':c['performance'][source_id]=dict(ApprovalStatus='PENDING',PendingReason='GPD hydro cohort needs its own source group/resource assignment; approved seven pools cover GEM units only')
             elif entry.get('PerformanceCompatible') is not True:c['performance'][source_id]=dict(ApprovalStatus='PENDING',PendingReason='Original primary fuel does not prove accepted existing conversion technology')
         stock['unit_evidence']['records'].append(selected)

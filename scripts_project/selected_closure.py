@@ -118,3 +118,13 @@ def retirement_upper_bound(r,year=2050):
     if y is None or life is None or not math.isfinite(float(y)+float(life)):return None
     if y+life<=year:return dict(r,SurvivalStatus='RETIREMENT_PROVEN_BY_COMMISSIONING_UPPER_BOUND',RetainedCapacity2050=0.,RetirementYear=None,CommissioningUpperBound=y,RetirementUpperBound=y+life,DecisionBasis=DECISION+'#9; accepted lifetime applied to dated operating observation; no imputed age')
     return None
+
+def qualify_cohort_identity(selected,identity_status):
+    """Duplicate source entries add no capacity; their physical stock is elsewhere."""
+    out=copy.deepcopy(selected)
+    if out['SurvivalStatus']!='SURVIVES_2050':return out
+    if identity_status=='DUPLICATE_EXISTING_GEM_SITE':
+        out.update(SurvivalStatus='NOT_INHERITED_DUPLICATE_SOURCE',RetainedCapacity2050=0.,InventoryDisposition='ALREADY_REPRESENTED_BY_GEM_NOT_PHYSICALLY_RETIRED')
+    elif identity_status!='DISJOINT_FROZEN_SOURCE_SELECTION':
+        out.update(SurvivalStatus='UNRESOLVED_PHYSICAL_IDENTITY',RetainedCapacity2050=None)
+    return out
