@@ -137,6 +137,8 @@ rule research_apply_selected_closure:
         identities="research_inputs/asset_survival/GEM_FROZEN_IDENTITY_FIELDS.json",
         script="scripts_project/apply_selected_stock.py",
         methods="scripts_project/selected_closure.py",
+        lifetime_overrides="research_inputs/asset_survival/asset_lifetime_overrides.json",
+        lifetime_override_code="scripts_project/asset_lifetime_override.py",
     output:
         stock=ASSETS + "/SELECTED_ASSET_SURVIVAL_2050.json",
         contract=ASSETS + "/SELECTED_INTEGRATION_CONTRACT.json",

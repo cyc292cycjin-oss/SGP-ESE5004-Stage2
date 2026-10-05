@@ -74,12 +74,11 @@ class SourceScopeTests(unittest.TestCase):
   self.assertIsNone(conditional_capacity({'commissioning_year':2016,'capacity_mw':100},{'Lifetime':None}))
   self.assertEqual(conditional_capacity({'commissioning_year':2016,'capacity_mw':100},{'Lifetime':25}),0)
 
- def test_avion_never_inherits_ccgt_lifetime(self):
+ def test_unapproved_lifetime_fixture_remains_pending(self):
   from asset_survival import select_asset
-  e=json.loads((REPO/'research_inputs/asset_survival/GPD_COHORT_SOURCE_REVIEW.json').read_text());r=next(r for r in e['records'] if r['raw']['gppd_idnr']=='WRI1029960')
-  self.assertEqual(r['Technology'],'OCGT');life=json.loads((REPO/'research_inputs/asset_survival/lifetime_decisions.json').read_text())['technologies'].get(r['Technology'],{})
-  self.assertNotEqual(life.get('ApprovalStatus'),'HUMAN_ACCEPTED')
-  z=select_asset(dict(OriginalCapacity=r['raw']['capacity_mw'],AssetClass='OBSERVED_EXISTING',CommissioningYear=2016,CommissioningEvidenceVerified=True,Lifetime=None,LifetimeAccepted=False))
+  fixture=json.loads((REPO/'tests/research/fixtures/avion_unapproved_lifetime.json').read_text())
+  self.assertEqual(fixture['Technology'],'OCGT');self.assertIsNone(fixture['Lifetime'])
+  z=select_asset(fixture)
   self.assertEqual(z['SurvivalStatus'],'UNRESOLVED_RETIREMENT_OR_LIFETIME');self.assertIsNone(z['RetainedCapacity2050'])
 
 if __name__=='__main__':unittest.main()

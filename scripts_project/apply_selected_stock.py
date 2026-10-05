@@ -5,6 +5,7 @@ import argparse,copy,json,hashlib,math,ast
 import pandas as pd,pypsa
 from selected_closure import require_decision,reallocate_hydro,DECISION,retirement_upper_bound,qualify_cohort_identity
 from asset_survival import select_asset
+from asset_lifetime_override import load_overrides,apply_override,FILE as OVERRIDE_FILE
 
 def read(p):return json.loads(Path(p).read_text())
 def save(p,x):Path(p).parent.mkdir(parents=True,exist_ok=True);Path(p).write_text(json.dumps(x,indent=2,allow_nan=False)+'\n')
@@ -19,6 +20,7 @@ def prepare(repo,reference,survival,contract,decisions,cohort_evidence,output_st
     for entry in evidence['records']:
         for proof in entry.get('ResidualEvidence',[]):
             if sha(repo/proof['File'])!=proof['SHA256']:raise ValueError('Residual identity source hash changed')
+    lifetime_overrides=load_overrides(repo)
     bounds=[];seen={u['AssetID'] for u in stock['unit_evidence']['records']}
     snapshots={'Global-Solar-Power-Tracker-February-2025.xlsx':2025,'Global-Wind-Power-Tracker-February-2025.xlsx':2025,'Geothermal-Power-Tracker-March-2025-Final.xlsx':2025,'Global-Oil-and-Gas-Plant-Tracker-GOGPT-August-2025.xlsx':2025}
     for i,u in enumerate(stock['unit_evidence']['records']):
@@ -37,6 +39,7 @@ def prepare(repo,reference,survival,contract,decisions,cohort_evidence,output_st
         seen.add(source_id);p=plants.iloc[int(parent.split(':')[1])];decl=life.get(tech,{})
         if pid not in ast.literal_eval(p.projectID).get('GPD',[]):raise ValueError('GPD parent ownership differs')
         year=r['commissioning_year'];u=dict(AssetID=source_id,RawUnitID=pid,ParentAssetID=parent,Country=entry['Country'],Technology=tech,OriginalCapacity=r['capacity_mw'],CommissioningYear=year,RetirementYear=None,CommissioningEvidenceVerified=False,RetirementEvidenceVerified=False,AssetClass='OBSERVED_EXISTING',Lifetime=decl.get('Lifetime'),LifetimeAccepted=decl.get('ApprovalStatus')=='HUMAN_ACCEPTED',LifetimeSource=decl.get('Source'),LifetimeDecisionReference=decl.get('DecisionReference'),OriginalMappedBus=str(p.bus),Source=evidence['gpd_zip'],SourceVersion=evidence['gpd_zip_sha256'],SourceRow='global_power_plant_database.csv::'+pid,CapacityReconciliation='MATCHED_PARENT',ParentCapacity=float(p.Capacity),ParentCapacityDifference=0.,AgeBasis='REPORTED_PLANT_COHORT_POSSIBLY_CAPACITY_WEIGHTED',CohortMethod='ASSEMBLY_V1_REPORTED_PLANT_COHORT_PROXY',CohortDecisionReference=DECISION+'#D',ReportedPlantYearSource=evidence['gpd_zip']+'::'+pid,ReportedPlantYear=year,IdentityReview=entry['IdentityStatus'],CostTreatment='No new CAPEX; accepted existing technology engineering O&M proxy',ResourceLimitTreatment='Qualification required separately')
+        u=apply_override(u,lifetime_overrides)
         selected=select_asset(u);conditional=selected['RetainedCapacity2050'];reason=entry['IdentityStatus']
         # A cohort screening result cannot override source duplicate or technology/resource checks.
         if selected['SurvivalStatus']=='SURVIVES_2050':
@@ -54,6 +57,8 @@ def prepare(repo,reference,survival,contract,decisions,cohort_evidence,output_st
             p.update(SourceLinkRecovered=True,SourceLinkStatus='RECOVERED_GPD_PARENT_CAPACITY_RECONCILED',CapacityReconciled=True,SourceUnitCount=len(rs),KnownSourceUnitCapacity=total,UnmatchedPositiveParentCapacity=0.,SourceIDs=[r['AssetID'] for r in rs],SourceMeaning='GPD plant cohort records, not fabricated unit decomposition',SignedCapacityDifference=p['ParentCapacity']-total,OriginalSourceStatus=p['OriginalStatus'],KnownReportedPlantYearCapacity=sum(r['CapacityMW'] for r in rs if r['ReportedPlantYear'] is not None),MissingReportedPlantYearCapacity=sum(r['CapacityMW'] for r in rs if r['ReportedPlantYear'] is None),ConditionalSurvivorsMW=sum(r['ConditionalSurvivingMW'] or 0 for r in rs))
     stock['unit_evidence']['status_counts']=dict(Counter(u['SurvivalStatus'] for u in stock['unit_evidence']['records']))
     stock['selected_closure_decision']=DECISION;stock['selected_closure_inputs']={str(p):sha(p) for p in [survival,contract,decisions,cohort_evidence,reference]}
+    if (repo/OVERRIDE_FILE).exists():stock['selected_closure_inputs'][str(repo/OVERRIDE_FILE)]=sha(repo/OVERRIDE_FILE)
+    stock['asset_specific_lifetime_decisions']=lifetime_overrides
     save(output_stock,stock);save(output_contract,c)
     save(output_report,dict(hydro=hydro,gpd=review,retirement_bounds=bounds,inputs=stock['selected_closure_inputs'],solver_runs=0,fullsc_network_complete=False,decision=DECISION))
 
