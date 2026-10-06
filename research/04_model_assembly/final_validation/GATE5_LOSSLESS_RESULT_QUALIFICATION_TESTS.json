@@ -1,0 +1,986 @@
+{
+  "status": "PASS",
+  "solver_runs": 0,
+  "presolve_calls": 0,
+  "scope": "MOCK_RESULT_AND_LIFECYCLE_CONTRACT_NO_REAL_SOLVE",
+  "tested_code_sha256": {
+    "run_gate5_stable_inventory.py": "d8f07be33053ca50c0031a813e2da1e9a748a02b69f421d5668ce85dadafcf85",
+    "precision_handoff.py": "dced59d23ca2aa60fc5bfe2a3fa84976cafb3299a49ebe986ccb9cee8a8e1120",
+    "fixed_inventory_scaling.py": "73c072499e1a7f464d4e13718233c56dba979ea43ab09b3bc1d184a4c19cf09f",
+    "gate5_resources.py": "f091f0d71d3ee6c5da7ee02731c30d663dfef527f4877a7925f256410025f937",
+    "gate5_memory_preflight.py": "c5432320460205cbdd2db04a0a180619493e6647ddd6c07b356838508c6d145d",
+    "lossless_gate5_lifecycle.py": "81c058d6cd3c97f3b1a1274578b1131891b165aeadd2233bd47916cbccc72711",
+    "execute_gate5_lossless.py": "ab193468c8919a09e3937bd4a71b57735aadb56a599830ee9f3214d9c3503dbd",
+    "finish_gate5_lossless.py": "de3834c36dd4b94153cc5ec1bd9a66444d417aea85a3b20a9f6e6061d94847a6",
+    "test_lossless_gate5_lifecycle.py": "cf33d7e0b3243519b1fa53475920233ddcebb3e13b44a82849299c0f4f0053ad",
+    "test_gate5_lossless_integration.py": "81bf4a2cc9ab21495f7cdc1803728d5c7a01efdfcc0afb2b6e148b62d4119b6e",
+    "test_lossless_export.py": "1648f47367d8e1f2e5787c139386bce94790ded8f7baf3087ca742ec727a11b6",
+    "test_solver_result_qualification.py": "2b8965385061fad0eca011743667d2079553bf488c9d11a53a6a48f84acdd08b"
+  },
+  "evidence_sha256": {
+    "UNIT_TESTS_FINAL.json": "c231668b32650bcad9ab4ab0445938ca45b0c4c22d88cca53484ae2faf30683d",
+    "EXPORT_TESTS.json": "7acb7796481d01fca6e7ea23fc09ff6d8b484bd7f2f2a0a02fd630939e1b576d",
+    "INTEGRATION_TESTS.json": "17098ced912d85ace795ac6f220a6da3c50843b0bf0b9934071d8bd3fed4a344",
+    "LEGACY_QUALIFICATION_REGRESSION.json": "53558663d766fd27bccc5b37acbc77cd8d7c765b3f24f9c10693108cb7f8df92"
+  },
+  "evidence": {
+    "UNIT_TESTS_FINAL.json": {
+      "status": "PASS",
+      "solver_runs": 0,
+      "presolve_calls": 0,
+      "checks": [
+        {
+          "test": "integer_compression_boundaries_positive",
+          "status": "PASS"
+        },
+        {
+          "test": "signed_and_unsigned_overflow_rejected",
+          "status": "PASS"
+        },
+        {
+          "test": "scientific_values_and_noninteger_metadata_rejected",
+          "status": "PASS"
+        },
+        {
+          "test": "chunked_mapping_matches_frozen_pandas_order_masks_and_scales",
+          "status": "PASS"
+        },
+        {
+          "test": "unknown_missing_and_out_of_domain_labels_fail_closed",
+          "status": "PASS"
+        },
+        {
+          "test": "single_native_retrieval_optimal",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kOptimal",
+            "model_status_code": 7,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "optimal",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": true,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": true,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_time_limit_feasible",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kTimeLimit",
+            "model_status_code": 13,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "time_limit",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": true,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": true,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_placeholder",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kTimeLimit",
+            "model_status_code": 13,
+            "native_value_valid": false,
+            "native_dual_valid": false,
+            "info_valid": false,
+            "primal_solution_status": 0,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "time_limit",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": false,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_infeasible_primal",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kTimeLimit",
+            "model_status_code": 13,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 1,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "time_limit",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": false,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_invalid_info",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kOptimal",
+            "model_status_code": 7,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": false,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "optimal",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": false,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_nan_primal",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kOptimal",
+            "model_status_code": 7,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "6d1b74dad2e5d3ac271140cd2906900f89c0a7d4a03ea3f22fab38bf0c8bd4bc",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "optimal",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 1,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": false,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  null
+                ],
+                "nonfinite_values": [
+                  {
+                    "position": 0,
+                    "representation": "nan"
+                  }
+                ],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  null
+                ],
+                "nonfinite_values": [
+                  {
+                    "position": 0,
+                    "representation": "nan"
+                  }
+                ],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_FOM_zero",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kOptimal",
+            "model_status_code": 7,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "37303fc84eadf4a9704e81b9128c602955696a647d55e0525964a2ae54fd895c",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "optimal",
+            "linopy_status_allows_candidate": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": true,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  0.0
+                ],
+                "nonfinite_values": [],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  0.0
+                ],
+                "nonfinite_values": [],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "single_native_retrieval_infeasible_status_even_if_flags_claim_feasible",
+          "status": "PASS",
+          "qualification": {
+            "model_status": "kInfeasible",
+            "model_status_code": 8,
+            "native_value_valid": true,
+            "native_dual_valid": false,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 0,
+            "objective": 3.0,
+            "objective_finite": true,
+            "native_getSolution_calls": 1,
+            "arrays": {
+              "col_value": {
+                "file": "col_value.npy",
+                "sha256": "97543ef511946fb0ed9a767d663daec2de16bd78efcb58cc58de37e31c96c0e6",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "col_dual": {
+                "file": "col_dual.npy",
+                "sha256": "3afed06dabc0d9764715404234454ed2e41c4e2dc175c1f257c5e76387176491",
+                "count": 2,
+                "dtype": "<f8",
+                "expected_count": 2
+              },
+              "row_value": {
+                "file": "row_value.npy",
+                "sha256": "23dd9625d24644656662ca7303243396e67b51e057569add945ffb4505059573",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              },
+              "row_dual": {
+                "file": "row_dual.npy",
+                "sha256": "02fcf6a2d17f32c6d543e461ca7153bb33744f77743d69e715d9cfbce788ca0c",
+                "count": 1,
+                "dtype": "<f8",
+                "expected_count": 1
+              }
+            },
+            "linopy_termination_condition": "infeasible",
+            "linopy_status_allows_candidate": false,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "native_feasible_primal": true,
+            "custom_scalar_diagnostics_before_mapping": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "custom_scalar_diagnostics_original_scale": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  2
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "network_writeback_qualified": false,
+            "original_unit_validation": "NOT_RUN"
+          }
+        },
+        {
+          "test": "mapping_hash_corruption_rejected",
+          "status": "PASS"
+        },
+        {
+          "test": "actual_frozen_pypsa_rebuild_and_assignment_from_disk_without_solver",
+          "status": "PASS"
+        },
+        {
+          "test": "float64_mmap_exact_scoped_python_heap",
+          "status": "PASS",
+          "elements": 600000,
+          "traced_peak_bytes": 2102888,
+          "interpretation": "Scoped write only; input list preexists; not full-model RSS savings"
+        },
+        {
+          "test": "binary64_fixed_total_nonzero_residual_cannot_be_dropped",
+          "status": "PASS"
+        },
+        {
+          "test": "multi_stock_temporal_freedom_negative_case",
+          "status": "PASS"
+        }
+      ]
+    },
+    "EXPORT_TESTS.json": {
+      "status": "PASS",
+      "solver_runs": 0,
+      "presolve_calls": 0,
+      "checks": [
+        "sequential_network_weakref_dead_before_readback_validation",
+        "actual_netcdf_frame_signature_roundtrip"
+      ],
+      "limitation": "Physical model checks mocked for this tiny engineering fixture, not a Gate5 validation result"
+    },
+    "INTEGRATION_TESTS.json": {
+      "status": "PASS",
+      "solver_runs": 0,
+      "presolve_calls": 0,
+      "mock_run_calls": 1,
+      "checks": [
+        "actual_native_transfer_and_source_owner_destruction",
+        "D_workspace_mapping_destination",
+        "before_run_receipt_precedes_mock_execution",
+        "one_execution_boundary_then_result_consumer",
+        "frozen_options_preserved",
+        "changed_crossover_rejected"
+      ]
+    },
+    "LEGACY_QUALIFICATION_REGRESSION.json": {
+      "status": "PASS",
+      "role": "MOCK_INTERFACE_TEST_ONLY",
+      "solver_runs": 0,
+      "checks": [
+        {
+          "test": "time_limit_with_zero_placeholder_arrays",
+          "status": "PASS",
+          "native_receipt": {
+            "model_status": "time_limit",
+            "native_value_valid": false,
+            "native_dual_valid": false,
+            "info_valid": false,
+            "primal_solution_status": 0,
+            "dual_solution_status": 0,
+            "returned_primal_entries": 1,
+            "returned_dual_entries": 1,
+            "native_feasible_primal": false,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "objective_finite": true,
+            "linopy_termination_condition": "time_limit",
+            "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+          }
+        },
+        {
+          "test": "infeasible_candidate",
+          "status": "PASS",
+          "native_receipt": {
+            "model_status": "time_limit",
+            "native_value_valid": true,
+            "native_dual_valid": true,
+            "info_valid": true,
+            "primal_solution_status": 1,
+            "dual_solution_status": 1,
+            "returned_primal_entries": 1,
+            "returned_dual_entries": 1,
+            "native_feasible_primal": false,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "objective_finite": true,
+            "linopy_termination_condition": "time_limit",
+            "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+          }
+        },
+        {
+          "test": "feasible_limited_candidate_preserved",
+          "status": "PASS",
+          "native_receipt": {
+            "model_status": "time_limit",
+            "native_value_valid": true,
+            "native_dual_valid": true,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 2,
+            "returned_primal_entries": 1,
+            "returned_dual_entries": 1,
+            "native_feasible_primal": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "objective_finite": true,
+            "linopy_termination_condition": "time_limit",
+            "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+          }
+        },
+        {
+          "test": "optimal_primal_preserved",
+          "status": "PASS",
+          "native_receipt": {
+            "model_status": "optimal",
+            "native_value_valid": true,
+            "native_dual_valid": true,
+            "info_valid": true,
+            "primal_solution_status": 2,
+            "dual_solution_status": 2,
+            "returned_primal_entries": 1,
+            "returned_dual_entries": 1,
+            "native_feasible_primal": true,
+            "nonfinite_primal_count": 0,
+            "nonfinite_dual_count": 0,
+            "objective_finite": true,
+            "linopy_termination_condition": "optimal",
+            "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+          }
+        },
+        {
+          "test": "qualified_limited_primal_routes_to_dynamic_checks_without_gate_pass",
+          "status": "PASS"
+        },
+        {
+          "test": "solve_stage_does_not_revert_when_header_rolls_off",
+          "status": "PASS"
+        },
+        {
+          "test": "nonfinite_native_primal_rejected_without_changing_termination",
+          "status": "PASS"
+        },
+        {
+          "test": "FOM_scalar_0.0",
+          "status": "PASS",
+          "diagnostic": {
+            "stage": "BEFORE_PYPSA_ASSIGNMENT",
+            "scalars": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  4
+                ],
+                "size": 1,
+                "original_values": [
+                  0.0
+                ],
+                "nonfinite_values": [],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "all_qualified": false
+          }
+        },
+        {
+          "test": "FOM_scalar_nan",
+          "status": "PASS",
+          "diagnostic": {
+            "stage": "BEFORE_PYPSA_ASSIGNMENT",
+            "scalars": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  4
+                ],
+                "size": 1,
+                "original_values": [
+                  null
+                ],
+                "nonfinite_values": [
+                  {
+                    "position": 0,
+                    "representation": "nan"
+                  }
+                ],
+                "qualified": false,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "all_qualified": false
+          }
+        },
+        {
+          "test": "FOM_scalar_1.0",
+          "status": "PASS",
+          "diagnostic": {
+            "stage": "BEFORE_PYPSA_ASSIGNMENT",
+            "scalars": [
+              {
+                "name": "Research-existing-FOM-constant",
+                "labels": [
+                  4
+                ],
+                "size": 1,
+                "original_values": [
+                  1.0
+                ],
+                "nonfinite_values": [],
+                "qualified": true,
+                "required_value": 1.0,
+                "values_modified": false
+              }
+            ],
+            "all_qualified": true
+          }
+        },
+        {
+          "test": "backend_before_writeback_scalar_0.0",
+          "status": "PASS",
+          "network_writeback_qualified": false
+        },
+        {
+          "test": "backend_before_writeback_scalar_1.0",
+          "status": "PASS",
+          "network_writeback_qualified": true
+        }
+      ],
+      "tested_code_sha256": {
+        "precision_handoff.py": "dced59d23ca2aa60fc5bfe2a3fa84976cafb3299a49ebe986ccb9cee8a8e1120",
+        "run_gate5_stable_inventory.py": "d8f07be33053ca50c0031a813e2da1e9a748a02b69f421d5668ce85dadafcf85",
+        "test_solver_result_qualification.py": "2b8965385061fad0eca011743667d2079553bf488c9d11a53a6a48f84acdd08b",
+        "fixed_inventory_scaling.py": "73c072499e1a7f464d4e13718233c56dba979ea43ab09b3bc1d184a4c19cf09f",
+        "gate5_resources.py": "f091f0d71d3ee6c5da7ee02731c30d663dfef527f4877a7925f256410025f937",
+        "gate5_memory_preflight.py": "c5432320460205cbdd2db04a0a180619493e6647ddd6c07b356838508c6d145d"
+      }
+    }
+  }
+}
