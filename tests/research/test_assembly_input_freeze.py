@@ -69,11 +69,6 @@ class AssemblyInputTests(unittest.TestCase):
  def test_historical_missing_bunker_requires_explicit_boundary_decision(self):
   old=json.loads((ROOT/'tests/research/fixtures/gate4_before_continue.json').read_text())['records']
   bn=next(r for r in old if r['Year']==2050 and r['Account']=='InternationalShippingBunker' and r['Country']=='BN')
-  self.assertIsNone(bn['Value']);self.assertFalse(bn['Posting']);self.assertFalse(bn['RequiredPhysical'])
-  self.assertEqual(bn['AssemblyStatus'],'HUMAN_COVERAGE_BOUNDARY_APPLIED')
- def test_historical_missing_bunker_requires_explicit_boundary_decision(self):
-  old=json.loads((ROOT/'tests/research/fixtures/gate4_before_continue.json').read_text())['records']
-  bn=next(r for r in old if r['Year']==2050 and r['Account']=='InternationalShippingBunker' and r['Country']=='BN')
   self.assertIsNone(bn['Value']);self.assertEqual(bn['AssemblyStatus'],'PENDING')
  def test_carbon_gate_is_post_build_not_numerical_input(self):
   self.assertEqual(check(self.records,2050)['carbon_validation_stage'],'POST_BUILD_STATIC_VALIDATION_BLOCKER')
