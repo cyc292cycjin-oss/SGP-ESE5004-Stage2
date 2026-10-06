@@ -41,15 +41,17 @@ def fixed_screen(n):
     return rows
 
 
-def run(root,out):
+def run(root,out,time_limit=3600,wall_guard=7200):
+    if (time_limit,wall_guard) not in [(3600,7200),(10800,14400)]:raise ValueError('Unapproved numerical budget')
     os.chdir(root);out.mkdir(parents=True,exist_ok=False)
     manifest=out/'GATE5_VALIDATION_RUN_MANIFEST.json'
     receipt=dict(run_id=out.name,gate='GATE5',role='VALIDATION_ONLY',status='PREFLIGHT',start_time=now(),solver_runs=0,
         objective=None,result_network=None,dynamic_checks='NOT_RUN',gate6_runs=0,formal_phase5_runs=0,
         input_path='results_project/validation/gate5_20261006_01/research_2050_gate5_24h_validation_input.nc',input_sha256=DAILY_SHA,
-        original_failed_runs=['gate5_20261006_01','gate5_20261006_02'],io_api='direct',adapter='PROJECT_STREAMED_FLOAT64',
+        original_failed_runs=['gate5_20261006_01','gate5_20261006_02','gate5_20261006_03'],io_api='direct',adapter='PROJECT_STREAMED_FLOAT64',
         formulation='REVERSIBLE_POWER_OF_TWO_FIXED_INVENTORY_NORMALISATION',
-        solver_options={'threads':2,'time_limit':3600,'solver':'ipm','run_crossover':'on'},
+        solver_options={'threads':2,'time_limit':time_limit,'solver':'ipm','run_crossover':'on'},wall_guard_seconds=wall_guard,
+        execution='NEW_FROM_FROZEN_INPUT_NOT_CHECKPOINT_RESUME',pid=os.getpid(),
         crossover_reason='Local largest-group KKT/postsolve probe failed without crossover and passed with standard crossover; no feasibility tolerance or presolve changes',
         git_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
     stage={'name':'preflight'}; stop=threading.Event(); started=time.monotonic()
@@ -70,8 +72,8 @@ def run(root,out):
                     s,solve_seen=monitor_phase(tail,solve_seen)
                 mem=psutil.virtual_memory();record=dict(time=now(),elapsed_s=time.monotonic()-started,stage=s,rss_bytes=psutil.Process().memory_info().rss,available_bytes=mem.available,**({'progress':stage.get('detail')} if s=='handoff' else {}))
                 f.write(json.dumps(record)+'\n')
-                if mem.available<512*1024**2 or time.monotonic()-started>7200:
-                    receipt.update(status='STOPPED_RESOURCE_GUARD',stop_reason='512 MiB available-memory / 7200 s wall guard',end_time=now());save();os._exit(3)
+                if mem.available<512*1024**2 or time.monotonic()-started>wall_guard:
+                    receipt.update(status='STOPPED_RESOURCE_GUARD',stop_reason=f'512 MiB available-memory / {wall_guard} s wall guard',end_time=now());save();os._exit(3)
     t=threading.Thread(target=monitor,daemon=True);t.start()
     try:
         if subprocess.check_output(['git','status','--porcelain'],text=True).strip():raise ValueError('Clean tree required')
@@ -82,6 +84,16 @@ def run(root,out):
         if synth.get('status')!='PASS':raise ValueError('Synthetic prerequisites not passed')
         for prerequisite in ['inventory_local_20261006_02/LOCAL_NUMERICAL_REGRESSION_RESULTS.json','inventory_mapping_20261006_01/MAPPING_REGRESSION_RESULTS.json']:
             if json.loads((root/'results_project/validation'/prerequisite).read_text()).get('status')!='PASS':raise ValueError('Stable formulation prerequisite not passed: '+prerequisite)
+        qpath=root/'research/04_model_assembly/final_validation/GATE5_RESULT_QUALIFICATION_TESTS.json'
+        qtest=json.loads(qpath.read_text())
+        if qtest.get('status')!='PASS' or qtest.get('solver_runs')!=0:raise ValueError('Mock result qualification prerequisite failed')
+        for name,hash_value in qtest['tested_code_sha256'].items():
+            if sha(root/'scripts_project'/name)!=hash_value:raise ValueError('Qualification test code hash stale: '+name)
+        receipt['qualification_tests_sha256']=sha(qpath)
+        previous=json.loads((root/'results_project/validation/gate5_20261006_03/GATE5_VALIDATION_RUN_MANIFEST.json').read_text())
+        required_bytes=(previous['peak_rss_mib']+512)*1024**2
+        receipt['memory_preflight']=dict(required_available_bytes=required_bytes,available_bytes=psutil.virtual_memory().available,basis='Observed run03 process peak + existing 512 MiB reserve')
+        if psutil.virtual_memory().available<required_bytes:raise MemoryError('Preflight: insufficient available RAM for observed run03 peak plus reserve')
         receipt['environment']=dict(python=sys.version,pypsa=pypsa.__version__,linopy=linopy.__version__,highs=highspy.Highs().version(),ram_bytes=psutil.virtual_memory().total,platform=platform.platform())
         progress('input_validation');n=pypsa.Network(source)
         if len(n.snapshots)!=365 or len(n.loads)!=1737 or n.loads.source_account_id.nunique()!=171:raise ValueError('Accepted input dimensions changed')
@@ -106,9 +118,11 @@ def run(root,out):
             progress('presolve_or_solve');receipt.update(status='SOLVING',solver_runs=1,solve_start_time=now(),solver_transfer_status='PASS',nnz=transfer['nnz']);save()
             print('GATE5 FIDELITY_PASS; starting one real retry',flush=True)
         progress('handoff')
-        with audited_direct_backend(out/'SOLVER_TRANSFER_FIDELITY.json',progress=progress,before_run=before_run,certificate_labels=labels,certificate_factors=factors,transformation=transformation),research_scalar_assignment():
+        with audited_direct_backend(out/'SOLVER_TRANSFER_FIDELITY.json',progress=progress,before_run=before_run,certificate_labels=labels,certificate_factors=factors,transformation=transformation),research_scalar_assignment(out/'FOM_SCALAR_ASSIGNMENT_DIAGNOSTIC.json'):
             status,condition=n.optimize.solve_model(solver_name='highs',solver_options=receipt['solver_options'],io_api='direct',log_fn=out/'gate5_solver.log')
         receipt.update(solver_status=status,termination_condition=condition,solve_end_time=now())
+        qualification=json.loads((out/'SOLVER_TRANSFER_FIDELITY.json').read_text())
+        receipt.update(native_solution_qualification=qualification['native_solution_qualification'],network_writeback_qualified=qualification['network_writeback_qualified'],original_scale_mapping_status=qualification['original_scale_mapping_status'])
         if n.model is not model:raise ValueError('Model replaced during solve')
         route=result_route(status,condition)
         if not route['run_dynamic_checks']:
@@ -132,16 +146,18 @@ def run(root,out):
         receipt['export_roundtrip']='PASS'
         dump(out/'GATE5_DYNAMIC_CHECKS.json',checks);dump(out/'GATE5_DYNAMIC_DETAIL.json',detail)
         dynamic_passed=all(r['Status']=='PASS' for r in checks);passed=dynamic_passed and route['optimal']
-        receipt.update(status='PASS' if passed else ('FAILED_DYNAMIC_CHECKS' if not dynamic_passed else route['failure_status']),dynamic_checks='PASS' if dynamic_passed else 'FAIL',gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 0 if passed else 2
+        receipt.update(status='PASS' if passed else ('FAILED_DYNAMIC_CHECKS' if not dynamic_passed else 'VALIDATION_FEASIBLE_NOT_OPTIMAL'),dynamic_checks='PASS' if dynamic_passed else 'FAIL',gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 0 if passed else 2
     except Exception as e:
         transfer_receipt=out/'SOLVER_TRANSFER_FIDELITY.json'
         if transfer_receipt.exists():
             q=json.loads(transfer_receipt.read_text()).get('native_solution_qualification')
-            if q:receipt['native_solution_qualification']=q
+            if q:
+                receipt['native_solution_qualification']=q
+                receipt['termination_condition']=q['linopy_termination_condition']
         receipt.update(status='FAILED_ENGINEERING' if receipt['solver_runs'] else 'NOT_RUN_PREFLIGHT_FAILED',error_type=type(e).__name__,stop_reason=str(e),end_time=now())
         (out/'failure_traceback.txt').write_text(traceback.format_exc());save();raise
     finally:
         stop.set();t.join(timeout=3);save()
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--output',required=True);a=p.parse_args();raise SystemExit(run(Path(__file__).resolve().parents[1],Path(a.output).resolve()))
+    p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--time-limit',type=int,default=3600);p.add_argument('--wall-guard',type=int,default=7200);a=p.parse_args();raise SystemExit(run(Path(__file__).resolve().parents[1],Path(a.output).resolve(),a.time_limit,a.wall_guard))

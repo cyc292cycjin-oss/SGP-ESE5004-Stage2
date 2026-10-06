@@ -18,8 +18,18 @@ import linopy.solvers
 from scipy.sparse import csr_matrix
 
 
+def scalar_value_diagnostic(name,values,labels=()):
+    a=np.asarray(values,dtype=float).reshape(-1)
+    finite=np.isfinite(a)
+    return dict(name=name,labels=[int(x) for x in np.asarray(labels).reshape(-1)],size=len(a),
+        original_values=[float(x) if np.isfinite(x) else None for x in a],
+        nonfinite_values=[dict(position=int(i),representation=repr(float(a[i]))) for i in np.flatnonzero(~finite)],
+        qualified=bool(name in {'Research-existing-FOM-constant','Research-synthetic-FOM'} and len(a)==1 and finite.all() and a[0]==1.0),
+        required_value=1.0,values_modified=False)
+
+
 @contextmanager
-def research_scalar_assignment():
+def research_scalar_assignment(receipt_path=None):
     """Skip non-component research scalars only during frozen PyPSA annotation.
 
     Their primal values and objective terms remain in the solved Linopy model.
@@ -34,9 +44,12 @@ def research_scalar_assignment():
         old = dict(data)
         allowed = {'Research-existing-FOM-constant','Research-synthetic-FOM'}
         custom = [k for k in data if k.split('-',1)[0] not in n.all_components and k!='objective_constant']
-        for name in custom:
-            if name not in allowed or data[name].solution.size!=1 or float(data[name].solution)!=1.0:
-                raise ValueError('Unqualified custom scalar during result mapping: '+name)
+        diagnostics=[scalar_value_diagnostic(name,data[name].solution,data[name].labels) for name in custom]
+        if receipt_path is not None:
+            Path(receipt_path).write_text(json.dumps(dict(stage='BEFORE_PYPSA_ASSIGNMENT',scalars=diagnostics,
+                all_qualified=all(d['qualified'] for d in diagnostics)),indent=2,allow_nan=False)+'\n')
+        for d in diagnostics:
+            if not d['qualified']:raise ValueError('Unqualified custom scalar during result mapping: '+d['name'])
         try:
             # Frozen mapper skips names with no hyphen. This aliases only its
             # iteration keys, after solve; Variable.name and labels are untouched.
@@ -73,10 +86,13 @@ def qualify_native_solution(result,h):
     from linopy.constants import Solution,SolverStatus
     native=h.getSolution();info=h.getInfo()
     usable=bool(native.value_valid and info.valid and info.primal_solution_status==int(highspy.SolutionStatus.kSolutionStatusFeasible)
-        and len(result.solution.primal) and np.isfinite(result.solution.primal.to_numpy()).all())
+        and len(result.solution.primal) and np.isfinite(result.solution.primal.to_numpy()).all() and np.isfinite(result.solution.objective))
     receipt=dict(model_status=h.modelStatusToString(h.getModelStatus()),native_value_valid=bool(native.value_valid),native_dual_valid=bool(native.dual_valid),
         info_valid=bool(info.valid),primal_solution_status=int(info.primal_solution_status),dual_solution_status=int(info.dual_solution_status),
         returned_primal_entries=len(result.solution.primal),returned_dual_entries=len(result.solution.dual),native_feasible_primal=usable,
+        nonfinite_primal_count=int((~np.isfinite(result.solution.primal.to_numpy())).sum()),
+        nonfinite_dual_count=int((~np.isfinite(result.solution.dual.to_numpy())).sum()),
+        objective_finite=bool(np.isfinite(result.solution.objective)),linopy_termination_condition=result.status.termination_condition.value,
         note='Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required.')
     if not usable:
         result.solution=Solution();result.status.status=SolverStatus.warning
@@ -201,14 +217,35 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
             # a second global long-form matrix while mapping the same model.
             ok(h.setOptionValue("output_flag", True))
             result=self._solve(h,solution_fn=None,log_fn=log_fn,model=mapping,io_api="direct",sense=model.sense)
+            # Capture the raw scalar values before qualification can clear arrays.
+            scalar_raw=[]
+            for name,v in model.variables.items():
+                if name.startswith('Research-'):
+                    labels=v.labels.values.reshape(-1)
+                    scalar_raw.append(scalar_value_diagnostic(name,result.solution.primal.reindex(labels).to_numpy(),labels))
             result,qualification=qualify_native_solution(result,h)
             receipt['native_solution_qualification']=qualification
+            receipt['custom_scalar_diagnostics_before_mapping']=scalar_raw
+            receipt['original_scale_mapping_status']='NOT_RUN' if transformation is not None else 'IDENTITY_NO_TRANSFORMATION'
             Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
-            if transformation is not None:
+            if transformation is not None and len(result.solution.primal):
                 result=transformation.restore(result)
                 receipt['solution_map_verified']=bool(len(result.solution.primal))
                 receipt['dual_map_verified']=bool(len(result.solution.dual))
+                receipt['original_scale_mapping_status']='INVERSE_ARITHMETIC_VERIFIED_NOT_PHYSICAL_ACCEPTANCE'
                 Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
+            scalar_mapped=[]
+            if len(result.solution.primal):
+                for d in scalar_raw:
+                    scalar_mapped.append(scalar_value_diagnostic(d['name'],result.solution.primal.reindex(d['labels']).to_numpy(),d['labels']))
+            receipt['custom_scalar_diagnostics_original_scale']=scalar_mapped
+            qualified=bool(qualification['native_feasible_primal'] and all(d['qualified'] for d in scalar_raw) and all(d['qualified'] for d in scalar_mapped)
+                and np.isfinite(result.solution.primal.to_numpy()).all())
+            receipt['network_writeback_qualified']=qualified
+            if not qualified:
+                from linopy.constants import Solution,SolverStatus
+                result.solution=Solution();result.status.status=SolverStatus.warning
+            Path(receipt_path).write_text(json.dumps(receipt,indent=2,allow_nan=False)+'\n')
             return result
     linopy.solvers.Highs=AuditedHighs
     try: yield
