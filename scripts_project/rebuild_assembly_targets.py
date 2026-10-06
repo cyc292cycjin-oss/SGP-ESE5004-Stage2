@@ -24,7 +24,12 @@ def derive(folder):
   for r in data['records']:
    if r['Year']!=2050 or r['Kind']!='DEMAND' or r['AssemblyStatus']!=ACCEPTED:continue
    c,a,k=r['Country'],r['Account'],r['Carrier']
-   if a=='Astar':value=astar*base[c]/total;formula='225Mtoe *11,630,000 * national2019FinalElectricity/sumASEAN10FinalElectricity; TL independently extrapolated'
+   if r.get('BlendMethodID'):
+    from final_closure_inputs import derive_blends,LOW,read
+    env=read(folder.parents[1]/'research/04_model_assembly/gate4/evidence/uncertainty/BLEND_UNCERTAINTY_ENVELOPES.json')
+    z=derive_blends(read(s/'PRE_FINAL_REGISTRY.json'),reconstruct(s),env,LOW)['records'][r['InputID']]
+    value=D(z['Value']);formula='Approved maximum-overlap separate commodity calculation * approved growth; rail constant2019'
+   elif a=='Astar':value=astar*base[c]/total;formula='225Mtoe *11,630,000 * national2019FinalElectricity/sumASEAN10FinalElectricity; TL independently extrapolated'
    else:
     z=b[c,a,k]
     if z['Status']!='NUMERIC_INPUT_READY':raise ValueError('Promoted unqualified base')

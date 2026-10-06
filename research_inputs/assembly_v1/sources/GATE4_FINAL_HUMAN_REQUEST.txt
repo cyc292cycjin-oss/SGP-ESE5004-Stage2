@@ -1,0 +1,611 @@
+# SGP ESE5004 Stage2
+# Phase4 Gate4 — FINAL CLOSURE
+# Freeze explicit uncertainty boundaries and build the first COMPLETE UNSOLVED Research Network
+#
+# This is the final Gate4 closure attempt.
+# Do not start a new Gate4.x phase.
+# NO SOLVER.
+
+## 0. Resume identity
+
+Research branch:
+research/full-sc-baseline
+
+Latest delivered HEAD:
+7a7931d01a5d85b697efcc675bd6837f6db5b35d
+
+Verify actual local/remote identity and clean tree first.
+Do not overwrite legitimate later commits.
+Unknown drift -> STOP and report.
+
+Preserve all previously accepted work.
+
+Current:
+FULLSC_NETWORK_NOT_COMPLETE
+Gate5 = NO
+solver_runs = 0
+
+--------------------------------------------------
+1. Human decision A — Blend uncertainty becomes an explicit Assembly V1 parameter
+
+For the 10 unresolved ZG/ZD memo variables,
+the current source-supported relation is:
+
+0 <= Z <= min(P,B)
+
+Unique physical quantity:
+Q = P + B - Z
+
+The previous uncertainty-envelope work is accepted.
+
+The missing memo will no longer block Assembly V1 network construction.
+
+### Assembly V1 baseline
+
+Use:
+
+Z = min(P,B)
+
+therefore:
+
+Q_baseline = max(P,B)
+
+Method:
+
+ASSEMBLY_V1_BLEND_MAXIMUM_OVERLAP_BASELINE
+
+Interpretation:
+
+Conservative anti-double-counting baseline:
+all compatible biofuel in the same country/year/transaction account
+is assumed to be included in the petroleum parent where the source definition permits overlap.
+
+This is NOT:
+- a reported Z value;
+- a best estimate;
+- a legal blending mandate;
+- a claim that all biofuel is physically blended in reality.
+
+It deliberately selects the lower unique-energy boundary
+to avoid counting the same energy twice.
+
+### Required sensitivity
+
+Also materialise a separate data variant:
+
+ASSEMBLY_V1_BLEND_NO_OVERLAP_UPPER
+
+with:
+
+Z = 0
+Q_upper = P + B
+
+This is a FUTURE SENSITIVITY INPUT,
+not the Gate4 baseline network.
+
+Do not run it in Gate4.
+
+Do NOT use midpoint.
+
+Do NOT assign probability.
+
+--------------------------------------------------
+2. Blend implementation rules
+
+Use only the 10 source-compatible uncertainty records already derived.
+
+No new broad retrieval.
+
+For each:
+- preserve P/B source rows, versions, units and commodity identity;
+- calculate fossil remainder and biofuel separately;
+- use their own frozen heating values;
+- memo Z is an uncertainty parameter, not a third demand;
+- no duplicate posting.
+
+Update the 18 affected physical targets.
+
+PH road gasoline/diesel are separate uncertainty variables
+even when they affect the same road account.
+
+PH rail uses the already approved constant-2019 target method.
+Fix its stale Transformation/Candidate metadata mechanically.
+Do not reapprove or apply the old transport-growth description.
+
+The baseline and sensitivity variants must have distinct:
+input registry SHA,
+method ID,
+and manifest identity.
+
+--------------------------------------------------
+3. Human decision B — UN '..' accounts become an explicit Assembly V1 coverage boundary
+
+For unresolved accounts where the official UN2019 table reports:
+
+".."
+
+and the recovered legend states:
+not applicable OR not available,
+
+and no compatible numerical source has been recovered,
+
+do NOT set demand to numeric zero.
+
+Instead classify:
+
+UNREPORTED_OUTSIDE_ASSEMBLY_V1_FIXED_DEMAND
+
+with:
+Posting = false
+RequiredPhysical = false
+RawValue = null
+Value = null
+
+This applies to the currently unresolved source-scope groups:
+
+KH natural-gas fixed final-demand accounts
+LA natural-gas fixed final-demand accounts
+TL coal fixed final-demand accounts
+
+and:
+
+BN international marine bunker
+KH international marine bunker
+LA international marine bunker
+TL international marine bunker
+
+ONLY where the current official-table evidence is exactly the unresolved ".." status.
+
+This is a HUMAN research coverage choice,
+not a source-reported zero.
+
+It must not be generalized to:
+other countries,
+other commodities,
+or future endogenous technology use.
+
+--------------------------------------------------
+4. Meaning of the coverage boundary
+
+The classification means:
+
+Assembly V1 does not create an exogenous fixed final-energy obligation
+for a source-unreported account.
+
+It does NOT mean:
+- physical consumption was zero in reality;
+- the country cannot consume/import that carrier in 2050;
+- gas/oil/coal technologies are forbidden;
+- external commodity interfaces are disabled.
+
+Keep:
+source table,
+"..",
+source hash,
+country/account/carrier,
+coverage reason,
+and limitation flag.
+
+Mark these accounts for:
+PHASE5_OR_LATER_COVERAGE_SENSITIVITY
+where material.
+
+Do not create zero Loads merely to fill the Cartesian account table.
+
+--------------------------------------------------
+5. Human decision C — Assembly V1 existing-stock completeness boundary
+
+Define Assembly V1 inherited stock as:
+
+SOURCE_QUALIFIED_SURVIVING_EXISTING_STOCK_ONLY
+
+An existing asset enters the 2050 baseline only when it has passed
+the required current qualification chain, including as applicable:
+
+identity
+status
+capacity
+commissioning/retirement or approved lifetime rule
+technology
+country/node mapping
+performance/cost contract
+resource/input qualification
+
+Unresolved historical assets do NOT block construction forever.
+
+They are classified:
+
+UNRESOLVED_EXISTING_STOCK_NOT_INHERITED_IN_ASSEMBLY_V1
+
+This is NOT equivalent to:
+capacity = 0 in reality
+or
+confirmed retirement.
+
+Maintain an uncertainty register.
+
+--------------------------------------------------
+6. Existing-stock uncertainty register
+
+Include at least:
+
+Asset/source group
+Country
+Technology
+PotentialCapacityMW
+ReasonUnresolved
+PossibleOverlapWithQualifiedStock
+MissingEvidence
+AssemblyV1Treatment
+FutureSensitivityRole
+
+Keep GEM and GPD unresolved sets distinct
+unless physical identity is established.
+
+Do not sum overlapping populations.
+
+Preserve:
+previously qualified 187400.4 MW
+unless current accepted data legitimately changes it.
+
+Avion remains NOT_ACTIVE_2050 under the accepted 25-year proxy.
+
+The remaining 5 hydro groups / 684 MW without source-qualified hydro resource input
+are NOT inherited in Assembly V1.
+
+Label:
+
+UNRESOLVED_HYDRO_RESOURCE_STOCK
+
+Do not give them fabricated inflow or copy another group's absolute resource.
+
+Do not state they are absent in reality.
+
+--------------------------------------------------
+7. This does not waive real engineering errors
+
+The above decisions close data-uncertainty blockers.
+
+They do NOT authorize:
+
+- missing component endpoints;
+- duplicate Loads;
+- invalid bus/carrier ownership;
+- NaN/inf;
+- repeated demand binding;
+- invalid snapshot integration;
+- hidden cross-country carrier sharing;
+- resource duplication;
+- policy/carbon bookkeeping errors;
+- broken cost semantics.
+
+Any such actual engineering failure remains a Gate4 blocker.
+
+--------------------------------------------------
+8. Produce the final Assembly V1 baseline registry
+
+Regenerate the 2050 baseline registry using:
+
+- accepted existing 153 physical accounts;
+- blend maximum-overlap baseline values;
+- accepted nonphysical/source-scope decisions;
+- this round's explicit UN '..' coverage boundary;
+- all previous accepted sector/growth/bunker decisions.
+
+Every required account must end in one of:
+
+PHYSICAL_ACCEPTED_AND_POSTED
+
+EMBEDDED_IN_ACCEPTED_PARENT
+
+SOURCE_SCOPE_NO_ADDITIONAL_FINAL_LOAD
+
+UNREPORTED_OUTSIDE_ASSEMBLY_V1_FIXED_DEMAND
+
+DEFERRED_BY_FROZEN_RESEARCH_BOUNDARY
+
+No unresolved account may be silently converted to zero.
+
+Produce a separate uncertainty/sensitivity registry for:
+blend no-overlap upper variant
+and existing-stock uncertainty.
+
+Do not use the sensitivity registry in the baseline build.
+
+--------------------------------------------------
+9. Rebuild allocations only where values changed
+
+For newly accepted blend-baseline accounts:
+
+generate real node/time allocations using the already accepted
+country/sector allocation rules.
+
+Rebuild affected arrays and manifests.
+
+Unchanged arrays should be reused only if their exact source/value/method hash still matches.
+
+Validate:
+
+source value
+=
+sector account
+=
+node sum
+=
+sum_t p_set * physical weights
+
+No residual balancing.
+
+--------------------------------------------------
+10. Build the COMPLETE unsolved Assembly V1 Research network
+
+Use only:
+
+electric_base
++ UNBOUND carrier_fragment.json recipe
++ final accepted Assembly V1 arrays
+
+Do NOT merge the developer carrier_fragment NetCDF
+that already contains bound Loads.
+
+Build a new artifact such as:
+
+research_fullsc_2050_assembly_v1_unsolved.nc
+
+Required meta:
+
+artifact_role = FULL_SC_RESEARCH_BASELINE_UNSOLVED
+fullsc_network_complete = true
+input_coverage_complete = true
+solver_allowed = false
+scientific_results_allowed = false
+assembly_version = V1
+
+Do not set these flags before all static validation gates pass.
+
+If validation fails:
+keep role as incomplete and report exact engineering failure.
+
+--------------------------------------------------
+11. Full actual-network static validation
+
+Run on the newly built COMPLETE network:
+
+A. all component references valid
+
+B. all accepted active numeric values finite
+
+C. all time series aligned with 2920 snapshots
+
+D. physical weights sum correctly to 8760h
+
+E. source → account → node → time conservation
+
+F. exactly-once demand ownership
+
+G. Buildings embedded/explicit consistency
+
+H. road/bunker/rail ownership
+
+I. qualified existing stock capacity reconciliation
+
+J. hydro resource non-duplication
+
+K. external-market country isolation
+
+L. prohibited physical cross-border paths absent for:
+H2
+gas
+CO2
+biomass/synthetic fuel where trade is disabled
+
+M. physical carbon event attribution complete
+for all active material represented components
+
+N. policy_enabled=false is correctly reflected:
+no power-policy cap installed yet
+
+O. external pending fixed accounts remain qualified and null where unknown
+
+P. cost layer and FT VOM correctly attached
+
+Q. 13 noisy DC/B2B marginal costs remain removed
+
+R. 340 explicit renewable config costs remain as accepted
+
+S. all required constraint hooks survive export/reload
+
+T. no diagnostic-only placeholder flags leak into baseline components
+
+--------------------------------------------------
+12. Active sector-coupling audit
+
+On the actual complete network list valid nonzero-capable pathways.
+
+Do not force utilisation.
+
+At minimum inspect:
+
+electricity -> electrolysis -> H2
+
+H2/CO2/electricity -> FT if components are active
+
+FT -> accepted transport/bunker obligations
+
+other accepted H2 sinks
+
+electricity -> explicit sector conversion where actually represented
+
+Road EV remains embedded for Assembly V1;
+do not add EV solely to make sector-coupling richer.
+
+The model may be called sector-coupled only if
+material endogenous cross-carrier pathways really exist.
+
+--------------------------------------------------
+13. Electricity interconnector control set
+
+Classify the actual complete network's physical electricity transfer components:
+
+DOMESTIC
+CROSS_BORDER
+UNKNOWN
+
+Resolve all material UNKNOWN.
+
+Freeze the exact future Integrated/Disconnected control set
+from the complete network.
+
+Do NOT switch it in Gate4.
+
+Non-electric carriers must not enter this control set.
+
+--------------------------------------------------
+14. Static carbon readiness
+
+policy_enabled=false remains unchanged in the baseline network.
+
+ReportingCO2_FullSystem architecture remains.
+
+Do not automatically enable 1000→100 Mt.
+
+However verify that:
+if policy is later enabled,
+all material policy-attribution blockers are explicitly detectable
+rather than silently treated as zero.
+
+200 SMR/SMR-CC null policy weights remain null unless separately resolved.
+Do not guess future H2-to-power shares.
+
+Gate4 can close with policy OFF only if the network correctly represents
+that this is the no-cap Assembly V1 baseline
+and no report claims the 100 Mt cap is active.
+
+--------------------------------------------------
+15. Distinguish baseline completeness from report completeness
+
+The complete physical baseline may still have:
+
+FullSystemCostComplete = false
+FullSystemEmissionsComplete = false
+
+because of external pending fixed accounts.
+
+That alone does not prevent static physical network completion
+under the previously approved fixed-account boundary.
+
+But:
+these missing fixed report terms must remain machine-readable,
+cannot be shown as zero/free,
+and must be handled before any claim of complete absolute system cost/emissions.
+
+Integrated-minus-Disconnected cancellation must be tested later,
+not assumed now.
+
+--------------------------------------------------
+16. Gate4 deliverables
+
+Update the existing Gate4 directory.
+
+At minimum produce:
+
+ASSEMBLY_V1_FINAL_COVERAGE_DECISIONS.md
+BLEND_BASELINE_AND_SENSITIVITY_REGISTER.csv
+EXISTING_STOCK_UNCERTAINTY_REGISTER.csv
+FINAL_ASSEMBLY_V1_INPUT_REGISTRY.csv
+FINAL_ALLOCATION_MANIFEST.json
+FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+FULLSC_STATIC_VALIDATION.csv
+ACTIVE_SECTOR_COUPLING_FINAL.csv
+ELECTRICITY_INTERCONNECT_CONTROL_SET.csv
+GATE4_FINAL_CLOSEOUT.md
+PHASE4_GATE4_READINESS.md
+
+Preserve all source paths/hashes and previous history.
+
+--------------------------------------------------
+17. Git discipline
+
+Use logical commits, e.g.:
+
+data: freeze assembly-v1 uncertainty boundaries
+
+feat: build complete unsolved assembly-v1 network
+
+test: statically validate complete full-sc network
+
+docs: close gate4 assembly-v1
+
+Do not squash prior history.
+
+Push only research/full-sc-baseline.
+
+Remote main/reference/archive unchanged.
+
+Return:
+local HEAD
+remote HEAD
+working-tree clean
+push status.
+
+--------------------------------------------------
+18. Final required statuses
+
+Return explicitly:
+
+ASSEMBLY_V1_INPUT_COVERAGE_COMPLETE = YES / NO
+
+UNRESOLVED_ACCOUNTS_SILENTLY_ZEROED = YES / NO
+
+BLEND_BASELINE_IMPLEMENTED = YES / NO
+
+BLEND_UPPER_SENSITIVITY_REGISTER_READY = YES / NO
+
+SOURCE_SCOPE_COVERAGE_BOUNDARY_IMPLEMENTED = YES / NO
+
+EXISTING_STOCK_BOUNDARY_IMPLEMENTED = YES / NO
+
+FULL_SC_UNSOLVED_BASELINE_BUILT = YES / NO
+
+SOLVER_RUNS_EXECUTED = 0 / >0
+
+ACTUAL_DEMAND_CONSERVATION = PASS / FAIL
+
+ACTUAL_EXACTLY_ONCE_ACCOUNTING = PASS / FAIL
+
+HIDDEN_CROSSBORDER_CARRIER_SHARING = ELIMINATED / PRESENT
+
+ACTIVE_SECTOR_COUPLING_PATHWAYS = PASS / FAIL
+
+ELECTRICITY_INTERCONNECT_CONTROL_SET_READY = YES / NO
+
+POLICY_CAP_ACTUALLY_ENABLED = YES / NO
+
+FULLSYSTEM_COST_COMPLETE = YES / NO
+
+FULLSYSTEM_EMISSIONS_COMPLETE = YES / NO
+
+GATE4_STATIC_VALIDATION = PASS / FAIL
+
+PHASE4_GATE4_CLOSED = YES / NO
+
+READY_FOR_PHASE4_GATE5_REDUCED_VALIDATION_SOLVE = YES / NO
+
+--------------------------------------------------
+19. Stop condition
+
+If Gate4 closes:
+STOP.
+
+Do not run solver.
+
+Do not start Gate5 automatically.
+
+Do not run Integrated or Disconnected.
+
+Return the complete package for Human Review.
+
+If Gate4 still fails:
+only list genuine engineering/physical failures.
+Do not reopen source searches or previously frozen uncertainty decisions
+unless new contradictory evidence is discovered.
