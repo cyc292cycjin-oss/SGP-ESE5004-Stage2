@@ -26,7 +26,8 @@ class SourceScopeTests(unittest.TestCase):
   for before,after in zip(old['records'],a['records']):
    for k in ['InputID','Value','RawValue','BaseValueMWh','BaseSourceRows']:self.assertEqual(before.get(k),after.get(k))
  def test_gate_counts_from_matched_records_not_literal_seven(self):
-  a=self.apply();expected={r['InputID'] for r in a['records'] if r.get('Classification')==STATUS}
+  # Frozen pre-final fixture tests that BN/TL source scopes alone never exempt bunkers.
+  a=json.loads((self.f/'sources/PRE_FINAL_REGISTRY.json').read_text());expected={r['InputID'] for r in a['records'] if r.get('Classification')==STATUS}
   gate=check(a['records'],2050,known_unallocated=a.get('known_unallocated_base_accounts'))
   self.assertEqual(expected,set(gate['source_scope_input_ids']));self.assertFalse(expected&set(gate['unresolved_input_ids']));self.assertNotEqual(gate['status'],'INPUT_GATE_ONLY_PASS')
   self.assertTrue(any('InternationalShippingBunker' in k for k in gate['unresolved_input_ids']))
