@@ -157,6 +157,9 @@ def build(repo,allocation,assets,output,report):
   from fixed_accounts import qualify_fixed_accounts,accounting_report
   from price_basis import qualify_network_costs
   layer_path=pinned(root,bundle['price_layer']);layer=json.loads(layer_path.read_text())
+  from fixed_account_scope import load_scope
+  if raw.get('additional_fixed_account_scope',[])!=load_scope(repo):raise ValueError('Additional fixed-account recipe scope differs from pinned authorization')
+  n.meta['additional_fixed_account_scope']=raw.get('additional_fixed_account_scope',[])
   qualify_fixed_accounts(n)
   qualify_network_costs(n,layer,layer_path)
   expected=json.loads(pinned(root,bundle['external_fixed_accounts']).read_text())

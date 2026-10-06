@@ -24,7 +24,9 @@ def validate_fixed_accounts(n,*,structure_only=False):
     if 'install_fragment_constraints' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Fixed-account direction hook missing')
     groups=defaultdict(list)
     for name,r in routes.items():
-        if r['commodity'] not in COMMODITIES and not structure_only:raise ValueError('Commodity has no accepted fixed-account proof: '+r['commodity'])
+        from fixed_account_scope import matching_scope
+        scope=matching_scope(n,r['commodity'],n.buses.at[n.stores.at[name,'bus'],'country'],r['input_id'],r['source_row'])
+        if r['commodity'] not in COMMODITIES and scope is None and not structure_only:raise ValueError('Commodity has no accepted fixed-account proof: '+r['commodity'])
         # Structural proof can be inspected for a newly materialised commodity;
         # acceptance remains a separate gate below and is never implied by proof.
         groups[tuple(sorted(r['buses']))].append(name)
@@ -60,7 +62,15 @@ def validate_fixed_accounts(n,*,structure_only=False):
             rows.append(dict(FixedAccountID=name,Commodity=r['commodity'],Country=n.buses.at[bus,'country'],SourceAccountID=r['input_id'],SourceRow=r['source_row'],QuantityMWh=float(z.e_nom),UnitPriceEUR2020PerMWh=None,PhysicalCO2_tPerMWh=None,PendingFixedCostTerm='Q * unknown_price',PendingFixedPhysicalEmissionTerm='Q * unknown_physical_factor',cost_qualification=QUALIFICATION,PhysicalQuantityQualified=True,PhysicalEmissionFactorQualified=False,DecisionReference=DECISION,ResourceBus=bus,FinalBuses=sorted(final),Meter=k))
         touching=n.links[n.links.filter(regex=r'^bus\d+$').isin(final).any(axis=1)]
         if set(touching.index)!=incoming or not touching.bus1.isin(final).all():raise ValueError('Extra final supply/use or reverse route')
-    unknown=[r for r in rows if r['Commodity'] not in COMMODITIES]
+    unknown=[]
+    for r in rows:
+        scope=matching_scope(n,r['Commodity'],r['Country'],r['SourceAccountID'],r['SourceRow'])
+        if scope is not None:
+            r.update(DecisionReference=scope['DecisionReference'],BoundaryAcceptance='HUMAN_ACCEPTED_CONDITIONAL_ON_CURRENT_STRUCTURE')
+        elif r['Commodity'] not in COMMODITIES:unknown.append(r)
+    for scope in n.meta.get('additional_fixed_account_scope',[]):
+        selected=[r for r in rows if r['DecisionReference']==scope['DecisionReference']]
+        if selected and not _same(sum(r['QuantityMWh'] for r in selected),float(scope['ExpectedAnnualMWh'])):raise ValueError('Additional fixed-account source quantity changed')
     for r in unknown:r.update(DecisionReference=None,BoundaryAcceptance='PENDING_ADDITIONAL_COMMODITY_BOUNDARY',cost_qualification='PENDING_FIXED_ACCOUNT_BOUNDARY')
     if unknown and not structure_only:raise ValueError('Structurally fixed but commodity boundary not yet accepted: '+','.join(sorted({r['Commodity'] for r in unknown})))
     return sorted(rows,key=lambda r:r['FixedAccountID'])

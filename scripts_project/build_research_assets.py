@@ -250,6 +250,8 @@ def build_fragment(repo,base,costs,allocation,output,price_layer=None):
             else:raise ValueError('Unmapped qualified fuel '+fuel)
     arrays.close()
     raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=[],external_fixed_account_method='ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS',fixed_account_validation_required_after_binding=True,policy_qualification_blockers=['Mixed-use SMR/CC policy attribution pending'],policy_enabled=False)
+    from fixed_account_scope import load_scope
+    raw['additional_fixed_account_scope']=load_scope(repo)
     save(output/'carrier_fragment.json',raw);save(output/'demand_destinations.json',dest);save(output/'carbon_component_map.json',carbon)
     n=to_pypsa_fragment(f,list(base.snapshots),list(base.snapshot_weightings.generators),component_ids=list(f.components))
     n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))
@@ -262,10 +264,12 @@ def build_fragment(repo,base,costs,allocation,output,price_layer=None):
     n.meta.update(partial_demand_binding=True,qualified_bound_accounts=len(am['records']),complete_model_claim=False)
     from fixed_accounts import qualify_fixed_accounts,validate_exported_accounting,accounting_report
     from fixed_accounts import validate_fixed_accounts
+    n.meta['additional_fixed_account_scope']=raw['additional_fixed_account_scope']
     structural=validate_fixed_accounts(n,structure_only=True)
     if any(r.get('BoundaryAcceptance')=='PENDING_ADDITIONAL_COMMODITY_BOUNDARY' for r in structural):
         save(output/'FIXED_ACCOUNT_STRUCTURAL_PROOF_PENDING.json',dict(Status='STRUCTURE_PROVED_NOT_BOUNDARY_ACCEPTED',records=[r for r in structural if r.get('BoundaryAcceptance')],all_fixed_structure_checks_passed=True,physical_arrays_bound=True,network_complete=False))
     fixed=qualify_fixed_accounts(n)
+    if raw['additional_fixed_account_scope']:save(output/'FIXED_ACCOUNT_ADDITIONAL_SCOPE_PROOF.json',dict(Status='HUMAN_SCOPE_AND_ACTUAL_STRUCTURE_QUALIFIED',scope=raw['additional_fixed_account_scope'],records=[r for r in fixed if r.get('BoundaryAcceptance')],whole_network_requalification_required=True))
     if layer:
         from price_basis import qualify_network_costs
         qualify_network_costs(n,layer,price_layer)
