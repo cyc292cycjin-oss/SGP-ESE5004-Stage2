@@ -8,13 +8,14 @@ from pathlib import Path
 import argparse,hashlib,json
 import numpy as np
 import pandas as pd
+from final_closure_inputs import record_fingerprint
 PIN='06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb'
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def closest(point,nodes):
  lat=np.radians(nodes.y.to_numpy(float));lon=np.radians(nodes.x.to_numpy(float))
  a=np.sin((lat-np.radians(point.y))/2)**2+np.cos(lat)*np.cos(np.radians(point.y))*np.sin((lon-np.radians(point.x))/2)**2
  return int(np.argmin(a))
-def allocate(registry,reference,ports,airports,output,reuse=None):
+def allocate(registry,reference,ports,airports,output,reuse=None,reuse_registry=None):
  import pypsa
  if sha(reference)!=PIN:raise ValueError('Author reference changed')
  n=pypsa.Network(reference);geo=n.buses[n.buses.carrier.isin(['AC','DC'])].copy()
@@ -39,14 +40,16 @@ def allocate(registry,reference,ports,airports,output,reuse=None):
  if reuse:
   old=json.loads((reuse/'allocation_manifest.json').read_text())
   if any(old[k]!=sha(v) for k,v in [('reference_sha256',reference),('ports_sha256',ports),('airports_sha256',airports)]) or sha(reuse/old['arrays_file'])!=old['arrays_sha256']:raise ValueError('Reuse source/hash drift')
-  reused={r['InputID']:r for r in old['records']}
+  if not reuse_registry or sha(reuse_registry)!=old['input_registry_sha256']:raise ValueError('Reuse registry/source identity missing')
+  prior_records={r['InputID']:r for r in json.loads(Path(reuse_registry).read_text())['records']}
+  reused={r['InputID']:dict(r,ScientificInputSHA256=record_fingerprint(prior_records[r['InputID']])) for r in old['records']}
   with np.load(reuse/old['arrays_file'],allow_pickle=False) as z:
    reused_arrays={k:z[v['ArrayKey']].copy() for k,v in reused.items()}
   oldmap=json.loads((reuse/'point_node_mapping.json').read_text())
  for r in rows:
   country=r['Country'];nodes=geo[geo.country==country];ids=list(nodes.index)
   prev=reused.get(r['InputID'])
-  if prev and prev['Country']==country and prev['Nodes']==ids and prev['AnnualMWh']==float(r['Value']):
+  if prev and prev['Country']==country and prev['Nodes']==ids and prev['AnnualMWh']==float(r['Value']) and prev['ScientificInputSHA256']==record_fingerprint(r):
    x=reused_arrays[r['InputID']];key='d'+str(len(out))
    if hashlib.sha256(x.tobytes()).hexdigest()!=prev['ArraySHA256']:raise ValueError('Reused array hash changed')
    arrays[key]=x;out.append(dict(prev,ArrayKey=key));reuse_ids.append(r['InputID']);mapping.extend(z for z in oldmap if z['InputID']==r['InputID']);continue
@@ -72,7 +75,7 @@ def allocate(registry,reference,ports,airports,output,reuse=None):
   total=float((x*w[:,None]).sum())
   if not np.isclose(total,float(r['Value']),rtol=1e-12,atol=1e-6):raise ValueError('Country/node/time non-conservation')
   key='d'+str(len(out));arrays[key]=x
-  out.append(dict(InputID=r['InputID'],Country=country,Year=2050,Nodes=ids,NodeCountries=list(nodes.country),ArrayKey=key,AnnualMWh=float(r['Value']),AllocatedMWh=total,Method=method,ArraySHA256=hashlib.sha256(x.tobytes()).hexdigest()))
+  out.append(dict(InputID=r['InputID'],Country=country,Year=2050,ScientificInputSHA256=record_fingerprint(r),Nodes=ids,NodeCountries=list(nodes.country),ArrayKey=key,AnnualMWh=float(r['Value']),AllocatedMWh=total,Method=method,ArraySHA256=hashlib.sha256(x.tobytes()).hexdigest()))
  output=Path(output);output.mkdir(parents=True,exist_ok=True);np.savez_compressed(output/'allocations.npz',**arrays)
  receipt=dict(schema='actual-allocation-v1',input_registry_sha256=sha(registry),reference_sha256=sha(reference),reference_is_solved=True,used_only_exogenous_inputs=True,
   ports_sha256=sha(ports),airports_sha256=sha(airports),snapshots=len(w),hours=float(w.sum()),geographical_buses=100,arrays_file='allocations.npz',arrays_sha256=sha(output/'allocations.npz'),
@@ -100,6 +103,7 @@ def verify_allocation(folder,records,registry_path=None):
    rid=a['InputID']
    if rid in seen or rid not in expected:raise ValueError('Duplicate/unowned allocation')
    seen.add(rid);r=expected[rid];x=z[a['ArrayKey']]
+   if a.get('ScientificInputSHA256') and a['ScientificInputSHA256']!=record_fingerprint(r):raise ValueError('Allocation source/value/method identity changed')
    if a['Country']!=r['Country'] or set(a['NodeCountries'])!={r['Country']} or len(a['Nodes'])!=len(set(a['Nodes'])) or any(node not in nodes or nodes[node]['country']!=r['Country'] for node in a['Nodes']):raise ValueError('Cross-country/duplicate node allocation')
    if x.shape!=(2920,len(a['Nodes'])) or not np.isfinite(x).all() or (x<0).any():raise ValueError('Invalid demand arrays')
    if hashlib.sha256(x.tobytes()).hexdigest()!=a['ArraySHA256']:raise ValueError('Array fingerprint changed')
@@ -109,4 +113,5 @@ if __name__=='__main__':
  p=argparse.ArgumentParser()
  for x in ['registry','reference','ports','airports','output']:p.add_argument('--'+x,type=Path,required=True)
  p.add_argument('--reuse',type=Path)
+ p.add_argument('--reuse-registry',type=Path)
  a=p.parse_args();allocate(**vars(a))

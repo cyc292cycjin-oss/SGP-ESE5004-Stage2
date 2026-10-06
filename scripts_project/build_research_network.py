@@ -133,6 +133,9 @@ def build(repo,allocation,assets,output,report):
  try:
   bundle=json.loads(assets.read_text());root=assets.parent
   if bundle.get('status')!='SOURCE_QUALIFIED_2050_UNSOLVED' or bundle.get('source_is_solved') is not False:raise ValueError('No qualified2050 electric/carrier asset bundle; solved paper archive is not a substitute')
+  if bundle.get('registry_sha256')!=sha(folder/'registry.json') or bundle.get('allocation_manifest_sha256')!=sha(allocation/'allocation_manifest.json'):raise ValueError('Bundle was prepared for another registry/allocation')
+  from final_closure_inputs import STOCK,DECISION
+  if bundle.get('stock_boundary')!=STOCK or bundle.get('stock_boundary_decision')!=DECISION+'#C':raise ValueError('Missing approved stock boundary')
   import pypsa
   n=pypsa.Network(pinned(root,bundle['electric_base']))
   if n.meta.get('asset_qualification')!='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED':raise ValueError('Development electric asset cannot be promoted by bundle status alone')
@@ -140,6 +143,7 @@ def build(repo,allocation,assets,output,report):
   check_global_constraints(n)
   for component in n.iterate_components():
    if any(len(v.columns) for k,v in component.pnl.items() if component.attrs.at[k,'status']=='Output'):raise ValueError('Solved outputs cannot enter research base')
+  original=n.copy()
   f=Fragment();raw=load_unbound_recipe(pinned(root,bundle['carrier_fragment']))
   if raw.get('qualification_blockers'):raise ValueError('Carrier scientific qualification remains incomplete')
   f.buses=raw['buses'];f.components=raw['components'];f.markets=raw.get('markets',{})
@@ -153,17 +157,46 @@ def build(repo,allocation,assets,output,report):
   from fixed_accounts import qualify_fixed_accounts,accounting_report
   from price_basis import qualify_network_costs
   layer_path=pinned(root,bundle['price_layer']);layer=json.loads(layer_path.read_text())
-  qualify_network_costs(n,layer,layer_path)
   qualify_fixed_accounts(n)
+  qualify_network_costs(n,layer,layer_path)
   expected=json.loads(pinned(root,bundle['external_fixed_accounts']).read_text())
   if expected!=n.meta['external_pending_fixed_accounts']:raise ValueError('Final assembly fixed-account ledger changed')
   n.meta['accounting_report']=accounting_report(n)
-  n.meta['qualification_dimensions'].update(physical_integrity='ACTUAL_FULL_NETWORK_VALIDATION_REQUIRED',input_coverage='COMPLETE_INPUT_GATE_PASSED')
-  static_validate(n,data['records'],allocation,carbon)
+  n.meta.update(artifact_role='FULL_SC_ASSEMBLY_VALIDATION_PENDING',asset_role='FULL_SC_ASSEMBLY_VALIDATION_PENDING',assembly_version='V1',policy_enabled=False,scientific_results_allowed=False,input_coverage_complete=False,fullsc_network_complete=False,physical_carbon_map=carbon,constraint_hook_state='REGISTERED_AND_VALIDATED_NOT_EXECUTED')
+  n.meta['qualification_dimensions'].update(physical_integrity='ACTUAL_FULL_NETWORK_VALIDATION_REQUIRED',input_coverage='COMPLETE_UNDER_EXPLICIT_ASSEMBLY_V1_BOUNDARIES')
+  from build_diagnostic_network import normalise_optional_strings,compare_roundtrip
+  from validate_fullsc_final import audit
+  import pandas as pd
+  # Preserve all frozen physical inputs, including every hydro resource series.
+  for comp in original.iterate_components():
+   actual_df=n.df(comp.name).reindex(index=comp.df.index,columns=comp.df.columns)
+   pd.testing.assert_frame_equal(comp.df,actual_df,check_dtype=False,check_names=False,rtol=0,atol=0)
+   for attr,frame in comp.pnl.items():
+    if len(frame.columns):pd.testing.assert_frame_equal(frame,n.pnl(comp.name)[attr].reindex(columns=frame.columns),check_dtype=False,check_names=False,check_freq=False,rtol=0,atol=0)
+  n.meta['frozen_electric_inputs_preserved']=True
+  n.meta['netcdf_optional_string_normalisation']=normalise_optional_strings(n)
+  before=audit(n,data['records'],allocation,carbon)
   output.parent.mkdir(parents=True,exist_ok=True);n.export_to_netcdf(output)
-  actual=pypsa.Network(output);validation=static_validate(actual,data['records'],allocation,carbon)
-  receipt.update(status='NETWORK_STATICALLY_VALIDATED',network_exported=True,network_sha256=sha(output),actual_network_validation=validation)
- except (ValueError,KeyError,FileNotFoundError) as exc:receipt.update(status='BLOCKED_BUILD_ASSET_OR_STATIC_VALIDATION',reason=str(exc));save();return 2
+  actual=pypsa.Network(output);compare_roundtrip(n,actual);validation=audit(actual,data['records'],allocation,carbon)
+  if before!=validation:raise ValueError('Full static results changed on export/reload')
+  # All static gates, including roundtrip, passed before completion flags change.
+  actual.meta.update(artifact_role='FULL_SC_RESEARCH_BASELINE_UNSOLVED',asset_role='FULL_SC_RESEARCH_BASELINE_UNSOLVED',fullsc_network_complete=True,input_coverage_complete=True,assembly_version='V1',solver_allowed=False,scientific_results_allowed=False,gate5_allowed=False,ready_for_gate5_reduced_validation_solve=True,policy_cap_actually_enabled=False,no_cap_assembly_v1=True,FullSystemCostComplete=False,FullSystemEmissionsComplete=False)
+  actual.meta['qualification_dimensions'].update(physical_integrity='FULL_ACTUAL_STATIC_VALIDATION_PASS',input_coverage='COMPLETE_UNDER_FROZEN_V1_BOUNDARY',full_cost_report=False,full_physical_emissions_report=False)
+  actual.meta['electricity_interconnector_control_set']=validation['interconnect']
+  actual.meta['static_validation']=dict(status='PASS',optimization_variables_created=False,constraints_executed=False)
+  from netCDF4 import Dataset
+  with Dataset(output,'a') as ds:ds.setncattr('meta',json.dumps(actual.meta))
+  reloaded=pypsa.Network(output);compare_roundtrip(actual,reloaded)
+  final_check=audit(reloaded,data['records'],allocation,carbon)
+  if final_check!=validation:raise ValueError('Final metadata refresh changed static validation')
+  import subprocess
+  receipt.update(status='FULL_SC_STATIC_VALIDATION_PASS',network_exported=True,network_sha256=sha(output),network_file=str(output),actual_network_validation=validation,artifact_role=actual.meta['artifact_role'],fullsc_network_complete=True,input_coverage_complete=True,solver_allowed=False,scientific_results_allowed=False,gate5_allowed=False,ready_for_gate5_reduced_validation_solve=True,assembly_version='V1',code_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),registry_sha256=sha(folder/'registry.json'),allocation_manifest_sha256=sha(allocation/'allocation_manifest.json'),asset_bundle_sha256=sha(assets),loads=len(actual.loads),qualified_accounts=len(m['records']),existing_units=len(actual.meta['existing_unit_components']),existing_mw=sum(z['capacity_mw'] for z in actual.meta['existing_unit_components'].values()),physical_carbon_events=len(carbon),policy_weights_null=sum(z['policy_weight'] is None for z in carbon),external_fixed_accounts=len(actual.meta['external_pending_fixed_accounts']),FullSystemCostComplete=False,FullSystemEmissionsComplete=False,optimization_variables_created=False,constraint_hook_state='REGISTERED_AND_VALIDATED_NOT_EXECUTED')
+ except (ValueError,KeyError,FileNotFoundError,AssertionError) as exc:
+  if output.exists():
+   from netCDF4 import Dataset
+   with Dataset(output,'a') as ds:
+    meta=json.loads(ds.meta);meta.update(artifact_role='FULL_SC_ASSEMBLY_VALIDATION_FAILED',fullsc_network_complete=False,input_coverage_complete=False,solver_allowed=False,scientific_results_allowed=False);ds.setncattr('meta',json.dumps(meta))
+  receipt.update(status='BLOCKED_BUILD_ASSET_OR_STATIC_VALIDATION',reason=str(exc),fullsc_network_complete=False);save();return 2
  save();return 0
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])

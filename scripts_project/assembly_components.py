@@ -94,6 +94,7 @@ def validate_hooks(n):
 def install_research_constraint_hooks(n):
     """Future optimisation must call this after variables exist; never solves."""
     if n.meta.get('artifact_role')=='DIAGNOSTIC_PARTIAL_UNSOLVED':raise ValueError('Diagnostic partial network cannot install optimization constraints')
+    if n.meta.get('solver_allowed') is False:raise ValueError('Explicit next-gate authorization required before optimization hooks')
     validate_hooks(n)
     if n.meta.get('external_fixed_account_method'):
         from fixed_accounts import validate_exported_accounting

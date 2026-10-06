@@ -9,24 +9,7 @@ if config.get("reuse_allocation") and Path(config["reuse_allocation"]).resolve()
 
 rule research_fullsc_unsolved:
     input:
-        registry="research_inputs/assembly_v1/registry.json",
-        pins="research_inputs/assembly_v1/manifest.json",
-        allocation=ALLOC + "/allocation_manifest.json",
-        arrays=ALLOC + "/allocations.npz",
-        assets=ASSETS + "/asset_bundle.json",
-        electric=ASSETS + "/electric_base_2050_unsolved.nc",
-        carrier=ASSETS + "/carrier_fragment.json",
-        carbon=ASSETS + "/carbon_component_map.json",
-        price_layer=ASSETS + "/model_cost_layer.json",
-        fixed_accounts=ASSETS + "/external_pending_fixed_accounts.json",
-        accounting=ASSETS + "/accounting_qualification.json",
-        assembler="scripts_project/build_research_network.py",
-        fixed_accounts_code="scripts_project/fixed_accounts.py",
-    output:
-        network=ROOT + "/research_fullsc_2050_unsolved.nc",
-        report=ROOT + "/build_receipt.json",
-    shell:
-        "python scripts_project/build_research_network.py --repo . --allocation " + ALLOC + " --assets {input.assets:q} --output {output.network:q} --report {output.report:q}"
+        ROOT + "/research_fullsc_2050_assembly_v1_unsolved.nc",
 
 rule research_allocate_inputs:
     input:
@@ -175,3 +158,5 @@ rule research_build_diagnostic_network:
         readiness=ROOT + "/CURRENT_PHYSICAL_READINESS.json",
     shell:
         "python scripts_project/build_diagnostic_network.py --repo . --allocation " + ALLOC + " --assets {input.bundle:q} --output {output.network:q} --report {output.report:q} --readiness {output.readiness:q}"
+
+include: "research_final_assembly.smk"
