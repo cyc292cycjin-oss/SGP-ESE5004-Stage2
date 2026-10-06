@@ -68,7 +68,7 @@ def exact(a, b, name):
         raise ValueError(f"Solver transfer mismatch: {name}; {a.shape} !=/or differs {b.shape}")
 
 
-def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(), certificate_factors=None):
+def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(), certificate_factors=None, transformation=None):
     """Transfer and verify all canonical coefficients; never call a solver."""
     if linopy.__version__ != "0.5.5" or model.type != "LP":
         raise ValueError("This audited adapter requires frozen Linopy 0.5.5 LP")
@@ -91,6 +91,7 @@ def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(),
     offset = float(model.objective.expression.const.item())
     # Linopy 0.5.5 rejects nonzero objective constants at construction.
     if offset != 0: raise ValueError("Unexpected objective offset in frozen model")
+    if transformation is not None:lb,ub,costs=transformation.columns(vl,lb,ub,costs)
     ok(h.addVars(len(vl), lb, ub))
     ok(h.changeColsCost(len(vl), np.arange(len(vl), dtype=np.int32), costs))
     if model.sense == "max": ok(h.changeObjectiveSense(highspy.ObjSense.kMaximize))
@@ -135,6 +136,7 @@ def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(),
                     cert_terms[int(vl[a.indices[j]])]+=factor*Decimal.from_float(float(a.data[j]))
             lower=np.where(signs!="<=",rhs,-np.inf); upper=np.where(signs!=">=",rhs,np.inf)
             if not np.isin(signs,["=","<=",">="]).all(): raise ValueError("Unknown constraint sign")
+            if transformation is not None:a,lower,upper=transformation.rows(cl,a,lower,upper)
             ok(h.addRows(len(cl), lower, upper, a.nnz, a.indptr.astype(np.int32), a.indices.astype(np.int32), a.data))
             ids=np.arange(row_count,row_count+len(cl),dtype=np.int32)
             status,count,rl,ru,nz=h.getRows(len(ids),ids); ok(status)
@@ -155,11 +157,15 @@ def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(),
         certificate_rows_verified=len(matched), all_rows_verified=True, all_variable_bounds_verified=True,
         all_objective_coefficients_verified=True, label_mapping="original integer labels retained in solver row/column order")
     receipt['certificate_native_binary64_sum']={'rhs':str(cert_rhs),'nonzero_lhs':{str(k):str(v) for k,v in cert_terms.items() if v},'method':'Exact Decimal.from_float accumulation of original binary64 coefficients; all compared bit-preserving to received solver values'}
+    if transformation is not None:
+        receipt['original_to_solver_mapping']=transformation.finish()
+        receipt['comparison']='Received matrix equals transformed matrix exactly; original-to-transformed inverse mapping separately verified. Original matrix is not required to equal transformed RHS/bounds.'
+        receipt['certificate_native_binary64_sum']['method']='Exact original binary64 algebra before reversible scaling; it is not replaced by the transformed RHS.'
     return h, SimpleNamespace(matrices=SimpleNamespace(vlabels=vl,clabels=cl)), receipt
 
 
 @contextmanager
-def audited_direct_backend(receipt_path, *, progress=None, before_run=None, certificate_labels=(), certificate_factors=None):
+def audited_direct_backend(receipt_path, *, progress=None, before_run=None, certificate_labels=(), certificate_factors=None, transformation=None):
     """Scope backend replacement; use frozen _solve and original Model.solve mapping."""
     original = linopy.solvers.Highs
     class AuditedHighs(original):
@@ -171,7 +177,7 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
                 warmstart_fn=None, basis_fn=None, env=None, explicit_coordinate_names=False):
             if warmstart_fn or basis_fn or env or explicit_coordinate_names:
                 raise ValueError("Unaudited optional direct solver arguments")
-            h, mapping, receipt=transfer(model,progress=progress,certificate_labels=certificate_labels,certificate_factors=certificate_factors)
+            h, mapping, receipt=transfer(model,progress=progress,certificate_labels=certificate_labels,certificate_factors=certificate_factors,transformation=transformation)
             Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
             if before_run: before_run(h,receipt)
             receipt['solver_run_started']=True
@@ -179,7 +185,13 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
             # Frozen backend receives only the verified label vectors, avoiding
             # a second global long-form matrix while mapping the same model.
             ok(h.setOptionValue("output_flag", True))
-            return self._solve(h,solution_fn=None,log_fn=log_fn,model=mapping,io_api="direct",sense=model.sense)
+            result=self._solve(h,solution_fn=None,log_fn=log_fn,model=mapping,io_api="direct",sense=model.sense)
+            if transformation is not None:
+                result=transformation.restore(result)
+                receipt['solution_map_verified']=bool(len(result.solution.primal))
+                receipt['dual_map_verified']=bool(len(result.solution.dual))
+                Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
+            return result
     linopy.solvers.Highs=AuditedHighs
     try: yield
     finally: linopy.solvers.Highs=original
