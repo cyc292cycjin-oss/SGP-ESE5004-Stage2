@@ -1,0 +1,58 @@
+{
+  "status": "VERIFIED_EXACT_DECIMAL_LP_CONTRADICTION",
+  "bus": "PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 :: final obligation",
+  "resources": [
+    "PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 Charcoal fixed resource",
+    "PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 Fuelwood fixed resource"
+  ],
+  "equation_count": 1825,
+  "method": "Sum365final-bus balances*24 +365resource-bus balances*24 perStore +365Store state equations perStore; compare everyselectedLProw to rebuilt unmodified native equations",
+  "remaining_lhs": [
+    {
+      "variable_label": 1985192,
+      "variable": "Store-e",
+      "coordinate": {
+        "snapshot": "2013-12-31 00:00:00",
+        "Store": "PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 Charcoal fixed resource"
+      },
+      "coefficient": "-1",
+      "lower_bound": 0
+    },
+    {
+      "variable_label": 1985193,
+      "variable": "Store-e",
+      "coordinate": {
+        "snapshot": "2013-12-31 00:00:00",
+        "Store": "PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 Fuelwood fixed resource"
+      },
+      "coefficient": "-1",
+      "lower_bound": 0
+    }
+  ],
+  "rhs": "0.00011560",
+  "conclusion": "Negative sum of nonnegative year-end inventories equals a strictly positive value. This saved LP has no exact feasible solution.",
+  "scope": "Sufficient independent infeasibility certificate; not a claim that it is the only failure or that a precision correction guarantees an optimal solve",
+  "original_floating_difference_mwh": -7.450580596923828e-09,
+  "linopy_export_precision": "12 significant decimal digits",
+  "source_stock_total": "43981693.3088",
+  "lp_annual_demand": "43981693.30891560",
+  "nonnegative_inventory_bounds_verified_from_actual_lp": {
+    "1985192": {
+      "constraint_label": 3459209,
+      "raw_lines": [
+        "c3459209:",
+        "+1 x1985192",
+        ">= -0"
+      ]
+    },
+    "1985193": {
+      "constraint_label": 3459210,
+      "raw_lines": [
+        "c3459210:",
+        "+1 x1985193",
+        ">= -0"
+      ]
+    }
+  },
+  "original_lp_sha256": "cfca9f5b6138a9d07de14698b18369b94628c8ab357a8360c15dee18237cc5d9"
+}
