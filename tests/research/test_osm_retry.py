@@ -1,6 +1,6 @@
 import sys,unittest,tempfile,json
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock,call
 import requests
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'))
 from _osm_download_retry import download_file,ExternalOSMDownloadError
@@ -27,7 +27,8 @@ class DownloadTests(unittest.TestCase):
     def test_corrupt_cache_rejected_and_bounded_outage(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(download_file('https://example.org/a.pbf',d,get=Mock(return_value=Response())));p.write_bytes(b'corrupt')
-            get=Mock(side_effect=requests.ConnectionError('outage'))
-            with self.assertRaises(ExternalOSMDownloadError):download_file('https://example.org/a.pbf',d,True,get=get,sleep=lambda x:None)
+            get=Mock(side_effect=requests.ConnectionError('outage'));sleep=Mock()
+            with self.assertRaises(ExternalOSMDownloadError):download_file('https://example.org/a.pbf',d,True,get=get,sleep=sleep)
+            self.assertEqual(sleep.call_args_list,[call(1),call(2)])
             self.assertEqual(get.call_count,3);self.assertEqual(p.read_bytes(),b'corrupt')
 if __name__=='__main__':unittest.main()
