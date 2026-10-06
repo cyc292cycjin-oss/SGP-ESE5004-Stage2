@@ -31,11 +31,14 @@ def validate_fixed_accounts(n,*,structure_only=False):
         # acceptance remains a separate gate below and is never implied by proof.
         groups[tuple(sorted(r['buses']))].append(name)
     rows=[]
+    # The same immutable input matrix is reused within this single validation.
+    # No cross-call cache: every qualification still checks current network data.
+    all_demand=n.get_switchable_as_dense('Load','p_set')
     for allowed,names in groups.items():
         final=set(allowed);loadids=n.loads.index[n.loads.bus.isin(final)]
         if not len(loadids):raise ValueError('No physical fixed obligation')
         if set(n.loads.loc[loadids,'source_account_id'])!={routes[k]['input_id'] for k in names}:raise ValueError('Fixed obligation identity mismatch')
-        demand=n.get_switchable_as_dense('Load','p_set')[loadids]
+        demand=all_demand[loadids]
         if not np.isfinite(demand.to_numpy()).all() or (demand<0).any().any():raise ValueError('Invalid obligation quantity')
         total=float(demand.sum(axis=1).mul(w.generators).sum())
         if not _same(sum(n.stores.at[k,'e_nom'] for k in names),total):raise ValueError('Resource quantity is not strictly fixed by own obligation')

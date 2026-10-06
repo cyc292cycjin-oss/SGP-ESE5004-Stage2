@@ -179,9 +179,12 @@ def build(repo,allocation,assets,output,report):
   n.meta['frozen_electric_inputs_preserved']=True
   n.meta['netcdf_optional_string_normalisation']=normalise_optional_strings(n)
   before=audit(n,data['records'],allocation,carbon)
+  report.parent.mkdir(parents=True,exist_ok=True)
+  report.with_name('ACTUAL_STATIC_BEFORE_EXPORT.json').write_text(json.dumps(before,indent=2)+'\n')
   output.parent.mkdir(parents=True,exist_ok=True);n.export_to_netcdf(output)
   actual=pypsa.Network(output);compare_roundtrip(n,actual);validation=audit(actual,data['records'],allocation,carbon)
-  if before!=validation:raise ValueError('Full static results changed on export/reload')
+  report.with_name('ACTUAL_STATIC_AFTER_RELOAD.json').write_text(json.dumps(validation,indent=2)+'\n')
+  if before!=validation:raise ValueError('Full static results changed on export/reload; compare ACTUAL_STATIC_BEFORE_EXPORT.json and ACTUAL_STATIC_AFTER_RELOAD.json')
   # All static gates, including roundtrip, passed before completion flags change.
   actual.meta.update(artifact_role='FULL_SC_RESEARCH_BASELINE_UNSOLVED',asset_role='FULL_SC_RESEARCH_BASELINE_UNSOLVED',fullsc_network_complete=True,input_coverage_complete=True,assembly_version='V1',solver_allowed=False,scientific_results_allowed=False,gate5_allowed=False,ready_for_gate5_reduced_validation_solve=True,policy_cap_actually_enabled=False,no_cap_assembly_v1=True,FullSystemCostComplete=False,FullSystemEmissionsComplete=False)
   actual.meta['qualification_dimensions'].update(physical_integrity='FULL_ACTUAL_STATIC_VALIDATION_PASS',input_coverage='COMPLETE_UNDER_FROZEN_V1_BOUNDARY',full_cost_report=False,full_physical_emissions_report=False)
@@ -199,7 +202,10 @@ def build(repo,allocation,assets,output,report):
    from netCDF4 import Dataset
    with Dataset(output,'a') as ds:
     meta=json.loads(ds.meta);meta.update(artifact_role='FULL_SC_ASSEMBLY_VALIDATION_FAILED',fullsc_network_complete=False,input_coverage_complete=False,solver_allowed=False,scientific_results_allowed=False);ds.setncattr('meta',json.dumps(meta))
-  receipt.update(status='BLOCKED_BUILD_ASSET_OR_STATIC_VALIDATION',reason=str(exc),fullsc_network_complete=False);save();return 2
+  receipt.update(status='BLOCKED_BUILD_ASSET_OR_STATIC_VALIDATION',reason=str(exc),fullsc_network_complete=False);save()
+  report.with_name('LAST_ASSEMBLY_FAILURE.json').write_text(json.dumps(receipt,indent=2)+'\n')
+  print('ASSEMBLY_FAILURE:',str(exc),flush=True)
+  return 2
  save();return 0
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])

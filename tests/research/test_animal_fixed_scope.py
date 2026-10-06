@@ -9,6 +9,11 @@ def animal():
  n=fixture();scope=load_scope(R);s=scope[0];q=float(s['ExpectedAnnualMWh'])
  n.meta['additional_fixed_account_scope']=scope;n.buses['country']='PH';n.buses.at['resource','carrier']='Animal waste';n.stores.at['stock','carrier']='Animal waste';n.stores.loc['stock',['e_nom','e_initial']]=q;n.loads.at['load','p_set']=q/12;n.loads.at['load','source_account_id']=s['SourceAccountID'];n.meta['biomass_obligation_routes']['stock'].update(commodity='Animal waste',annual_cap_mwh=q,source_row=s['SourceRow'],input_id=s['SourceAccountID']);return n
 class AnimalScopeTests(unittest.TestCase):
+ def test_dense_input_is_read_once_per_current_validation(self):
+  from unittest.mock import patch
+  n=animal()
+  with patch.object(n,'get_switchable_as_dense',wraps=n.get_switchable_as_dense) as spy:
+   qualify_fixed_accounts(n);self.assertEqual(spy.call_count,1)
  def test_actual_scope_with_valid_structure_keeps_unknowns_null(self):
   n=animal();r=qualify_fixed_accounts(n)[0];self.assertIsNone(r['UnitPriceEUR2020PerMWh']);self.assertIsNone(r['PhysicalCO2_tPerMWh']);self.assertIn('ANIMAL-WASTE',r['DecisionReference'])
  def test_not_extended_to_other_country(self):
