@@ -1,0 +1,43 @@
+Restricted license - for non-production use only - expires 2026-11-23
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                                 count
+--------------------------------  -------
+research_final_complete_unsolved        1
+research_fullsc_unsolved                1
+total                                   2
+
+Select jobs to execute...
+
+[Tue Oct  6 09:05:21 2026]
+rule research_final_complete_unsolved:
+    input: results_project/assembly_v1/final_assets/asset_bundle.json, results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc, results_project/assembly_v1/final_assets/carrier_fragment.json, results_project/assembly_v1/final_assets/carbon_component_map.json, research_inputs/assembly_v1/registry.json, research_inputs/assembly_v1/manifest.json, results_project/assembly_v1/final_allocation/allocation_manifest.json, results_project/assembly_v1/final_allocation/allocations.npz, scripts_project/build_research_network.py, scripts_project/validate_fullsc_final.py, scripts_project/fixed_accounts.py, scripts_project/fixed_account_scope.py, research_inputs/assembly_v1/sources/ANIMAL_WASTE_FIXED_ACCOUNT_DECISION.json, scripts_project/assembly_components.py, scripts_project/price_basis.py, scripts_project/carbon_architecture.py
+    output: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc, results_project/assembly_v1/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+    jobid: 1
+    reason: Forced execution
+    resources: tmpdir=/tmp
+
+ERROR 1: PROJ: proj_create_from_database: Open of /home/jin/miniforge3/envs/pypsa-earth/share/proj failed
+INFO:pypsa.io:Imported network electric_base_2050_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, storage_units, stores
+INFO:pypsa.io:Exported network 'research_fullsc_2050_assembly_v1_unsolved.nc' contains: buses, carriers, global_constraints, stores, generators, lines, links, storage_units, loads
+INFO:pypsa.io:Imported network research_fullsc_2050_assembly_v1_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+INFO:pypsa.io:Imported network research_fullsc_2050_assembly_v1_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+[Tue Oct  6 09:08:35 2026]
+Finished job 1.
+1 of 2 steps (50%) done
+Select jobs to execute...
+
+[Tue Oct  6 09:08:35 2026]
+localrule research_fullsc_unsolved:
+    input: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc
+    jobid: 0
+    reason: Input files updated by another job: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc
+    resources: tmpdir=/tmp
+
+[Tue Oct  6 09:08:35 2026]
+Finished job 0.
+2 of 2 steps (100%) done
+Complete log: .snakemake/log/2026-10-06T090520.510466.snakemake.log

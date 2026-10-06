@@ -1,26 +1,13 @@
-# Phase4 Gate4当前就绪状态
+# Current Phase4 Gate4 readiness
 
-**FULLSC_NETWORK_NOT_COMPLETE；Gate5=NO；solver_runs=0。** 本轮有限寿命决定及来源范围核算完成，停止并返回审阅。
+**FULLSC_NETWORK_COMPLETE_UNSOLVED. Gate4 static validation=PASS. Solver runs=0. Gate5 has not been entered.**
 
-|事项|本轮结果|
-|---|---|
-|Avion|2016批次采用本轮25年代理，模型退役界限2041，NOT_ACTIVE_2050；100MW原装机与97MW可靠容量分开，原DOE缓存证据等级不变|
-|实际接入|745条源记录、187400.4MW（含水电47952MW）；新增/改动实际容量0MW|
-|需求|153个合格账户和数组、1437Load；新增/改动0，生产registry、输入manifest和全部数组字节保持|
-|BN/TL限定范围|既有7项非数值解释保持，不扩展到其他燃料/bunker|
-|区间核算|10项memo全部可推导相容数量范围及冻结NCV条件能量范围；10个Z关联18个唯一目标，PH道路汽油/柴油分别核算|
-|正式物理目标|仍33项；区间未被接受为正式点值，没有解除18个掺混目标资格|
-|库存|未决单位记录404→403，仅Avion寿命事项关闭；其他库存、5组684MW水电不变|
-|固定账/碳|471项外置固定账、1598物理碳事件、200个null政策权重保持；policy_enabled=false|
+Current state: `CURRENT_PHYSICAL_READINESS.json`, canonical final registry, `FINAL_ALLOCATION_MANIFEST.json`, and `FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json`. Historical diagnostic files are not the baseline.
 
-没有新来源获取，也没有重复下载UN2019PDF。三类完整燃料列及四国bunker统一为ORIGINAL_TABLE_RECOVERED_REPORTING_STATUS_UNRESOLVED，..不是零；真正仍需的是原问卷/脚注/交付量或明确不适用证据。10项memo仍未返回，现有相容P/B只支持核算范围。
+Complete network:171 accounts, 171arrays, 1737 Loads; 745 source records/187400.4 MW; 2920 snapshots/8760h. Actualexport/readback, A–Tchecks and 500coupling pathways passed. Electricitycontrols:192domestic, 24cross-border, 0unknown. No switching or solving.
 
-范围推导Q=P+B-Z、0<=Z<=min(P,B)，能源按化石余量与生物总量分别乘自身冻结热值。这不是报告区间/置信区间/新预测，无中点/端点基准。无范围也无法推导的实际memo项为0；真实Z、完整账户总量、热值不确定性及正式输入仍未解决。
+Input coverage is complete within explicitly chosen V1 boundaries; 15 UN unreported records remainnull/nonposting, 410 inventoryuncertaintyrows remainoutsideinheritance, including 5hydrogroups/684 MW. Baselineblendmaximumoverlap andtheunusedno-overlapupperinput have distinct registries.
 
-本轮只刷新现有电力基础网和诊断网的资格meta与manifest，没有物理组件重建。按母线/组件名称对齐比较所有静态和时变输入、时权，保持精确相同。NetCDF文件hash因meta变化更新，绝不称物理参数发生变化；153组数组与1780价层、471固定账字节保持。原物理构网code_sha保留，本轮metadata刷新code_sha单列`qualification_refresh`。
+Supplemental PHindustryAnimal waste scope has now been explicitly authorized and passed actualstructure/readback. 807externalpendingfixed terms retain nullprices/factors. 1748 knownphysicalcarbon events and 200 nullpolicyweights remainseparate; policy OFF. Fullcost/emissionsreports are incomplete, even thoughphysicalassembly is complete.
 
-原完整入口和诊断优化hook实际继续拒绝。诊断角色DIAGNOSTIC_PARTIAL_UNSOLVED，完整/覆盖/求解/科学结果许可均false；未创建优化变量。图可达性仅为结构必要检查，不是供需/容量/逐时可行性。24个跨境电力组件仍是现有拓扑候选，未冻结为最终实验控制集合。
-
-本轮29项针对来源保护、寿命、范围和元数据的测试实际通过；没有重跑全套历史实验。初次legacy Infinity序列化失败及修复后成功日志保留，未知值未清零。发现PH铁路PENDING记录残留旧Transformation/Candidate文字，本轮遵守不改生产账本，分析依据已批准constant2019倍率1并登记下次元数据同步事项。
-
-源缺口与覆盖选择分开，见EXTERNAL_SOURCE_HANDOFF.md。完整模型仍需33个物理目标和剩余库存/水资源资格闭合，价格可用不等于全成本/全排放完整。不运行solver，不进入Gate5，不输出系统成本或互联收益。
+ReadyforPhase4Gate5 reduced validation: YES, subject to a new instruction. Current network solver_allowed=false, scientific_results_allowed=false, gate5_allowed=false. No automatic run. See GATE4_FINAL_CLOSEOUT.md for all 19 requested statuses andlimits.

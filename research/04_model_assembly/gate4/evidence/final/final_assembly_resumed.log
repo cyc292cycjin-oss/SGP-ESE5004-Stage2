@@ -1,0 +1,60 @@
+Restricted license - for non-production use only - expires 2026-11-23
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                                 count
+--------------------------------  -------
+research_final_assets                   1
+research_final_complete_unsolved        1
+research_fullsc_unsolved                1
+total                                   3
+
+Select jobs to execute...
+
+[Tue Oct  6 08:47:21 2026]
+rule research_final_assets:
+    input: results_project/assembly_v1/final_allocation/allocation_manifest.json, results_project/assembly_v1/final_allocation/allocations.npz, research_inputs/assembly_v1/registry.json, research_inputs/assembly_v1/sources/ASSEMBLY_V1_FINAL_DECISIONS.json, /mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_uncertainty_20261006/production_assets/electric_base_2050_unsolved.nc, /mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_uncertainty_20261006/production_assets/SELECTED_ASSET_SURVIVAL_2050.json, /mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_uncertainty_20261006/production_assets/SELECTED_INTEGRATION_CONTRACT.json, /home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/costs_2050_sec.csv, scripts_project/build_complete_assembly.py, scripts_project/build_research_assets.py, scripts_project/fixed_accounts.py, scripts_project/fixed_account_scope.py, research_inputs/assembly_v1/sources/ANIMAL_WASTE_FIXED_ACCOUNT_DECISION.json, scripts_project/price_basis.py, scripts_project/carrier_architecture.py, scripts_project/carbon_architecture.py, /mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_uncertainty_20261006/production_assets/model_cost_layer.json, /mnt/c/Users/20122/Documents/ChatGPT/ASEAN/outputs/phase4_gate4_uncertainty_20261006/production_assets/ELECTRIC_BASE_ASSET_MANIFEST.json
+    output: results_project/assembly_v1/final_assets/asset_bundle.json, results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc, results_project/assembly_v1/final_assets/carrier_fragment.json, results_project/assembly_v1/final_assets/carbon_component_map.json
+    jobid: 2
+    reason: Missing output files: results_project/assembly_v1/final_assets/asset_bundle.json; Updated input files: scripts_project/build_research_assets.py, scripts_project/fixed_account_scope.py, scripts_project/fixed_accounts.py, research_inputs/assembly_v1/sources/ANIMAL_WASTE_FIXED_ACCOUNT_DECISION.json
+    resources: tmpdir=/tmp
+
+ERROR 1: PROJ: proj_create_from_database: Open of /home/jin/miniforge3/envs/pypsa-earth/share/proj failed
+INFO:pypsa.io:Imported network electric_base_2050_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, storage_units, stores
+INFO:pypsa.io:Imported network electric_base_2050_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, storage_units, stores
+INFO:pypsa.io:Exported network 'carrier_fragment_2050_unsolved.nc' contains: generators, stores, links, carriers, buses, loads
+INFO:pypsa.io:Imported network carrier_fragment_2050_unsolved.nc has buses, carriers, generators, links, loads, stores
+{"method": "SOURCE_QUALIFIED_SURVIVING_EXISTING_STOCK_ONLY", "DecisionReference": "GATE4-20261006-FINAL-CLOSURE#C", "qualified_source_units": 745, "qualified_capacity_mw": 187400.4, "GEM_GPD_NOT_ADDITIVE": true, "MissingIsZero": false}
+[Tue Oct  6 08:50:51 2026]
+Finished job 2.
+1 of 3 steps (33%) done
+Select jobs to execute...
+
+[Tue Oct  6 08:50:51 2026]
+rule research_final_complete_unsolved:
+    input: results_project/assembly_v1/final_assets/asset_bundle.json, results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc, results_project/assembly_v1/final_assets/carrier_fragment.json, results_project/assembly_v1/final_assets/carbon_component_map.json, research_inputs/assembly_v1/registry.json, research_inputs/assembly_v1/manifest.json, results_project/assembly_v1/final_allocation/allocation_manifest.json, results_project/assembly_v1/final_allocation/allocations.npz, scripts_project/build_research_network.py, scripts_project/validate_fullsc_final.py, scripts_project/fixed_accounts.py, scripts_project/fixed_account_scope.py, research_inputs/assembly_v1/sources/ANIMAL_WASTE_FIXED_ACCOUNT_DECISION.json, scripts_project/assembly_components.py, scripts_project/price_basis.py, scripts_project/carbon_architecture.py
+    output: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc, results_project/assembly_v1/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+    jobid: 1
+    reason: Missing output files: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc; Input files updated by another job: results_project/assembly_v1/final_assets/carrier_fragment.json, results_project/assembly_v1/final_assets/asset_bundle.json, results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc, results_project/assembly_v1/final_assets/carbon_component_map.json
+    resources: tmpdir=/tmp
+
+ERROR 1: PROJ: proj_create_from_database: Open of /home/jin/miniforge3/envs/pypsa-earth/share/proj failed
+INFO:pypsa.io:Imported network electric_base_2050_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, storage_units, stores
+INFO:pypsa.io:Exported network 'research_fullsc_2050_assembly_v1_unsolved.nc' contains: links, carriers, generators, stores, lines, loads, buses, global_constraints, storage_units
+INFO:pypsa.io:Imported network research_fullsc_2050_assembly_v1_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+[Tue Oct  6 08:58:35 2026]
+Error in rule research_final_complete_unsolved:
+    jobid: 1
+    input: results_project/assembly_v1/final_assets/asset_bundle.json, results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc, results_project/assembly_v1/final_assets/carrier_fragment.json, results_project/assembly_v1/final_assets/carbon_component_map.json, research_inputs/assembly_v1/registry.json, research_inputs/assembly_v1/manifest.json, results_project/assembly_v1/final_allocation/allocation_manifest.json, results_project/assembly_v1/final_allocation/allocations.npz, scripts_project/build_research_network.py, scripts_project/validate_fullsc_final.py, scripts_project/fixed_accounts.py, scripts_project/fixed_account_scope.py, research_inputs/assembly_v1/sources/ANIMAL_WASTE_FIXED_ACCOUNT_DECISION.json, scripts_project/assembly_components.py, scripts_project/price_basis.py, scripts_project/carbon_architecture.py
+    output: results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc, results_project/assembly_v1/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+    shell:
+        python scripts_project/build_research_network.py --repo . --allocation results_project/assembly_v1/final_allocation --assets results_project/assembly_v1/final_assets/asset_bundle.json --output results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc --report results_project/assembly_v1/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job research_final_complete_unsolved since they might be corrupted:
+results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc, results_project/assembly_v1/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2026-10-06T084720.082893.snakemake.log
