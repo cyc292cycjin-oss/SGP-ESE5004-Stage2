@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from types import SimpleNamespace
 import hashlib
 import json
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
@@ -72,6 +72,7 @@ def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(),
     """Transfer and verify all canonical coefficients; never call a solver."""
     if linopy.__version__ != "0.5.5" or model.type != "LP":
         raise ValueError("This audited adapter requires frozen Linopy 0.5.5 LP")
+    getcontext().prec = 100  # exact binary64 certificate accumulation
     h = highspy.Highs()
     # No numerical solver option changes. Silence transfer banners only.
     ok(h.setOptionValue("output_flag", False))

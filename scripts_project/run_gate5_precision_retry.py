@@ -1,7 +1,7 @@
 """One authorized Gate5 retry from the byte-identical accepted daily input."""
 import argparse, json, os, sys, time, threading, traceback, platform, subprocess, resource
 from pathlib import Path
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from collections import defaultdict
 import numpy as np
 import pandas as pd
@@ -15,6 +15,7 @@ DAILY_SHA='7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd'
 
 
 def fixed_screen(n):
+    getcontext().prec = 100
     groups=defaultdict(list); rows=[]
     for name,r in n.meta['biomass_obligation_routes'].items():groups[tuple(sorted(r['buses']))].append(name)
     demand=n.get_switchable_as_dense('Load','p_set'); weights=n.snapshot_weightings.stores
