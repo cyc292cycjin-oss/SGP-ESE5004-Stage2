@@ -16,6 +16,17 @@ from inventory_audit import audit
 DAILY_SHA='7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd'
 
 
+def result_route(status,condition):
+    """Only a natively qualified primal reaches PyPSA mapping and dynamic checks."""
+    return dict(run_dynamic_checks=status=='ok',optimal=condition=='optimal',
+        failure_status='FAILED_PRIMAL_QUALIFICATION' if status!='ok' and condition=='optimal' else ('FAILED_INFEASIBLE' if condition=='infeasible' else 'FAILED_'+condition.upper()))
+
+
+def monitor_phase(tail,solve_seen):
+    solve_seen=solve_seen or 'IPX' in tail or 'ipm' in tail.lower() or 'Iter' in tail
+    return ('solve' if solve_seen else 'presolve'),solve_seen
+
+
 def fixed_screen(n):
     getcontext().prec = 100
     groups=defaultdict(list); rows=[]
@@ -50,12 +61,13 @@ def run(root,out):
         if detail:stage['detail']=detail
         if psutil.virtual_memory().available<512*1024**2:raise MemoryError('Available memory below approved 512 MiB guard')
     def monitor():
+        solve_seen=False
         with (out/'RESOURCE_MONITOR.jsonl').open('a',buffering=1) as f:
             while not stop.wait(2):
                 s=stage['name'];log=out/'gate5_solver.log'
                 if s=='presolve_or_solve' and log.exists():
                     with log.open('rb') as source:source.seek(max(0,log.stat().st_size-4096));tail=source.read().decode(errors='replace')
-                    s='solve' if ('IPX' in tail or 'ipm' in tail.lower() or 'Iter' in tail) else 'presolve'
+                    s,solve_seen=monitor_phase(tail,solve_seen)
                 mem=psutil.virtual_memory();record=dict(time=now(),elapsed_s=time.monotonic()-started,stage=s,rss_bytes=psutil.Process().memory_info().rss,available_bytes=mem.available,**({'progress':stage.get('detail')} if s=='handoff' else {}))
                 f.write(json.dumps(record)+'\n')
                 if mem.available<512*1024**2 or time.monotonic()-started>7200:
@@ -98,9 +110,10 @@ def run(root,out):
             status,condition=n.optimize.solve_model(solver_name='highs',solver_options=receipt['solver_options'],io_api='direct',log_fn=out/'gate5_solver.log')
         receipt.update(solver_status=status,termination_condition=condition,solve_end_time=now())
         if n.model is not model:raise ValueError('Model replaced during solve')
-        if (status,condition)!=('ok','optimal'):
-            receipt.update(status='FAILED_INFEASIBLE' if condition=='infeasible' else 'FAILED_'+condition.upper(),objective=None,result_network=None,dynamic_checks='NOT_RUN',gate6_status='NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 2
-        progress('postsolve_export');receipt.update(status='OPTIMAL_DYNAMIC_PENDING',objective=float(n.objective));save()
+        route=result_route(status,condition)
+        if not route['run_dynamic_checks']:
+            receipt.update(status=route['failure_status'],objective=None,result_network=None,dynamic_checks='NOT_RUN',gate6_status='NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 2
+        progress('postsolve_export');receipt.update(status='OPTIMAL_DYNAMIC_PENDING' if route['optimal'] else 'FEASIBLE_CANDIDATE_DYNAMIC_PENDING',objective=float(n.objective));save()
         # Preserve primal state before any previously unexercised dynamic checker.
         n.meta.update(artifact_role='GATE5_VALIDATION_SOLVED_DYNAMIC_PENDING',scientific_results_allowed=False,formal_phase5_allowed=False,solver_allowed=False,constraint_hook_state='INSTALLED_AND_SOLVED_ON_SAME_MODEL')
         result=out/'research_2050_gate5_24h_validation_solved.nc';n.export_to_netcdf(result)
@@ -118,9 +131,13 @@ def run(root,out):
         if not all(r['Status']=='PASS' for r in physical_checks(reread,identity)):raise ValueError('Readback original-unit fixed checks failed')
         receipt['export_roundtrip']='PASS'
         dump(out/'GATE5_DYNAMIC_CHECKS.json',checks);dump(out/'GATE5_DYNAMIC_DETAIL.json',detail)
-        passed=all(r['Status']=='PASS' for r in checks)
-        receipt.update(status='PASS' if passed else 'FAILED_DYNAMIC_CHECKS',dynamic_checks='PASS' if passed else 'FAIL',gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 0 if passed else 2
+        dynamic_passed=all(r['Status']=='PASS' for r in checks);passed=dynamic_passed and route['optimal']
+        receipt.update(status='PASS' if passed else ('FAILED_DYNAMIC_CHECKS' if not dynamic_passed else route['failure_status']),dynamic_checks='PASS' if dynamic_passed else 'FAIL',gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 0 if passed else 2
     except Exception as e:
+        transfer_receipt=out/'SOLVER_TRANSFER_FIDELITY.json'
+        if transfer_receipt.exists():
+            q=json.loads(transfer_receipt.read_text()).get('native_solution_qualification')
+            if q:receipt['native_solution_qualification']=q
         receipt.update(status='FAILED_ENGINEERING' if receipt['solver_runs'] else 'NOT_RUN_PREFLIGHT_FAILED',error_type=type(e).__name__,stop_reason=str(e),end_time=now())
         (out/'failure_traceback.txt').write_text(traceback.format_exc());save();raise
     finally:

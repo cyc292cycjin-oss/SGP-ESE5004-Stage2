@@ -68,6 +68,21 @@ def exact(a, b, name):
         raise ValueError(f"Solver transfer mismatch: {name}; {a.shape} !=/or differs {b.shape}")
 
 
+def qualify_native_solution(result,h):
+    """Array length and Linopy's `ok/time_limit` do not prove a valid primal."""
+    from linopy.constants import Solution,SolverStatus
+    native=h.getSolution();info=h.getInfo()
+    usable=bool(native.value_valid and info.valid and info.primal_solution_status==int(highspy.SolutionStatus.kSolutionStatusFeasible)
+        and len(result.solution.primal) and np.isfinite(result.solution.primal.to_numpy()).all())
+    receipt=dict(model_status=h.modelStatusToString(h.getModelStatus()),native_value_valid=bool(native.value_valid),native_dual_valid=bool(native.dual_valid),
+        info_valid=bool(info.valid),primal_solution_status=int(info.primal_solution_status),dual_solution_status=int(info.dual_solution_status),
+        returned_primal_entries=len(result.solution.primal),returned_dual_entries=len(result.solution.dual),native_feasible_primal=usable,
+        note='Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required.')
+    if not usable:
+        result.solution=Solution();result.status.status=SolverStatus.warning
+    return result,receipt
+
+
 def transfer(model, *, slice_size=200_000, progress=None, certificate_labels=(), certificate_factors=None, transformation=None):
     """Transfer and verify all canonical coefficients; never call a solver."""
     if linopy.__version__ != "0.5.5" or model.type != "LP":
@@ -186,6 +201,9 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
             # a second global long-form matrix while mapping the same model.
             ok(h.setOptionValue("output_flag", True))
             result=self._solve(h,solution_fn=None,log_fn=log_fn,model=mapping,io_api="direct",sense=model.sense)
+            result,qualification=qualify_native_solution(result,h)
+            receipt['native_solution_qualification']=qualification
+            Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
             if transformation is not None:
                 result=transformation.restore(result)
                 receipt['solution_map_verified']=bool(len(result.solution.primal))
