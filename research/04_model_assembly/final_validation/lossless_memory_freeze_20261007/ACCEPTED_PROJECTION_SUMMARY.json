@@ -1,0 +1,31 @@
+{
+  "ledger_terms": 807,
+  "blocks": 385,
+  "structural_single_stock_candidates": 118,
+  "multi_stock_blocks": 267,
+  "exact_annual_zero_blocks": 0,
+  "single_stock_exact_shortfall_blocks": 59,
+  "single_stock_nonnegative_terminal_balance_blocks": 59,
+  "executable_projection_candidates": 0,
+  "implemented_candidates": 0,
+  "variables_saved": 0,
+  "constraints_saved": 0,
+  "estimated_memory_saved_bytes": 0,
+  "potential_single_stock_dynamic_variables": 129210,
+  "potential_counts_are_not_implemented_savings": true,
+  "proof": "For one source with unity efficiency and fixed q_t, p_store_t=p_link_t=q_t; e_t=Q-sum_{k<=t}(h_k*q_k). Existential elimination of these dynamic variables is equivalent only if all 0<=e_t<=Q and original link-capacity inequalities on remaining P are retained using exact source constants. Reconstruction is unique for p/e but not P. Cost remains unchanged because removed terms have coefficient zero; the external Q*unknown terms and their identifiers remain. Nonzero terminal residual is preserved, never rounded to zero.",
+  "negative_cases": [
+    "Exact binary64 q/h/Q need not sum to the same annual quantity; positive required-minus-stock proves infeasibility of the nonnegative-stock subsystem.",
+    "Negative annual difference leaves a nonzero terminal balance; it is not proof of empty feasibility or an exactly exhausted ledger.",
+    "For two unit stocks and two unit demands, releases ((1,0),(0,1)) and ((0,1),(1,0)) are both allowed. Fixing equal-hour splits deletes admissible reporting paths.",
+    "Even an independent zero-cost meter has a nominal-capacity feasibility interval. Keep P or provide a set-valued reporting reconstruction; do not report arbitrary P as uniquely determined."
+  ],
+  "decision": "No rational-prefix replacement, solver elimination, temporal split or reporting change implemented. Lifetime optimization does not need projection.",
+  "evidence": {
+    "source_sha256": "7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd",
+    "identity_sha256": "935dcc7396ae30da7e7c2600429afa4fa28679173ba0f1184586b81951f41392",
+    "local_block_evidence_sha256": "59b3da0ed0aa31596108b7806695a869dce73ed82d9d26d74715a313ca8dc142"
+  },
+  "solver_runs": 0,
+  "presolve_calls": 0
+}
