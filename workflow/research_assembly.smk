@@ -22,7 +22,7 @@ rule research_allocate_inputs:
         arrays=ALLOC + "/allocations.npz",
         nodes=ALLOC + "/geographic_nodes.json",
     params:
-        reuse=lambda w: ("--reuse '" + config["reuse_allocation"].replace("'", "'\"'\"'") + "'") if config.get("reuse_allocation") else "",
+        reuse=lambda w: ("--reuse " + __import__("shlex").quote(config["reuse_allocation"]) + " --reuse-registry " + __import__("shlex").quote(config["reuse_registry"])) if config.get("reuse_allocation") else "",
     shell:
         "python scripts_project/allocate_assembly_inputs.py --registry {input.registry:q} --reference {input.reference:q} --ports {input.ports:q} --airports {input.airports:q} --output " + ALLOC + " {params.reuse}"
 

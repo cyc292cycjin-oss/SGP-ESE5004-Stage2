@@ -261,6 +261,10 @@ def build_fragment(repo,base,costs,allocation,output,price_layer=None):
         bind_loads(n,registry['records'],am,values,dest)
     n.meta.update(partial_demand_binding=True,qualified_bound_accounts=len(am['records']),complete_model_claim=False)
     from fixed_accounts import qualify_fixed_accounts,validate_exported_accounting,accounting_report
+    from fixed_accounts import validate_fixed_accounts
+    structural=validate_fixed_accounts(n,structure_only=True)
+    if any(r.get('BoundaryAcceptance')=='PENDING_ADDITIONAL_COMMODITY_BOUNDARY' for r in structural):
+        save(output/'FIXED_ACCOUNT_STRUCTURAL_PROOF_PENDING.json',dict(Status='STRUCTURE_PROVED_NOT_BOUNDARY_ACCEPTED',records=[r for r in structural if r.get('BoundaryAcceptance')],all_fixed_structure_checks_passed=True,physical_arrays_bound=True,network_complete=False))
     fixed=qualify_fixed_accounts(n)
     if layer:
         from price_basis import qualify_network_costs

@@ -23,6 +23,10 @@ def numeric_inputs(n):
             if col in unbounded and not v[bad].isna().any():
                 if col!='v_ang_min' and (v[bad]<0).any():raise ValueError('Invalid negative unbounded limit')
                 native.append(dict(ComponentType=c.name,Attribute=col,Count=int(bad.sum()),Meaning='PYPSA_NATIVE_UNBOUNDED_NOT_NUMERIC_SOURCE_DATA'));continue
+            if c.name=='Link' and col.startswith('efficiency') and col[10:].isdigit() and v[bad].isna().all():
+                port='bus'+col[10:]
+                if port in c.df and c.df.loc[bad,port].fillna('').eq('').all():
+                    native.append(dict(ComponentType=c.name,Attribute=col,Count=int(bad.sum()),Meaning='NON_APPLICABLE_UNCONNECTED_LINK_PORT'));continue
             if col in optional and v[bad].isna().all():
                 native.append(dict(ComponentType=c.name,Attribute=col,Count=int(bad.sum()),Meaning='PYPSA_NATIVE_OPTIONAL_CONTROL_UNSET'));continue
             if col in existing_only and v[bad].isna().all():

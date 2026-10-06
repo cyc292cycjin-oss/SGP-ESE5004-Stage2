@@ -30,6 +30,12 @@ rule research_final_assets:
         costs=lambda w: config["source_costs2050"],
         builder="scripts_project/build_complete_assembly.py",
         fragment="scripts_project/build_research_assets.py",
+        fixed_accounts="scripts_project/fixed_accounts.py",
+        price_code="scripts_project/price_basis.py",
+        architecture="scripts_project/carrier_architecture.py",
+        carbon_code="scripts_project/carbon_architecture.py",
+        price_layer=lambda w: config["frozen_gate4_assets"] + "/model_cost_layer.json",
+        source_manifest=lambda w: config["frozen_gate4_assets"] + "/ELECTRIC_BASE_ASSET_MANIFEST.json",
     params:
         source=lambda w: config["frozen_gate4_assets"],
     output:
@@ -52,6 +58,10 @@ rule research_final_complete_unsolved:
         arrays=FINALALLOC + "/allocations.npz",
         assembler="scripts_project/build_research_network.py",
         validator="scripts_project/validate_fullsc_final.py",
+        fixed_accounts="scripts_project/fixed_accounts.py",
+        shared="scripts_project/assembly_components.py",
+        price="scripts_project/price_basis.py",
+        carbon_architecture="scripts_project/carbon_architecture.py",
     output:
         network=ROOT + "/research_fullsc_2050_assembly_v1_unsolved.nc",
         manifest=ROOT + "/FULLSC_ASSEMBLY_V1_NETWORK_MANIFEST.json",
