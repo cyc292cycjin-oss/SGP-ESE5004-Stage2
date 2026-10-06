@@ -1,7 +1,5 @@
-# Current Phase4 final-validation entry
+# Current final-validation entry
 
-Start with GATE5_RUN_HISTORY.json, FINAL_STATUS.json and PHASE4_FINAL_VALIDATION_SUMMARY.md. They identify the latest attempt and distinguish executed failure from unexecuted downstream gates. PHASE5_READINESS.md remains the formal-readiness entry.
+Read GATE5_RUN_HISTORY.json, FINAL_STATUS.json, PHASE4_FINAL_VALIDATION_SUMMARY.md and PHASE5_READINESS.md. Latest run: gate5_20261006_04.
 
-The stable-inventory representation and its local checks are in FIXED_INVENTORY_NUMERICAL_REFORMULATION.md, FORMULATION_MAPPING_AND_ROUNDING_AUDIT.json and LOCAL_NUMERICAL_REGRESSION_RESULTS.json.
-
-Precision handoff and residual-diagnosis documents from earlier attempts are historical evidence, not alternate current status sources. Their original certificates remain valid. Previous current-report snapshots are retained under stable_inventory_evidence/previous_current_reports. The report-root gate5_solver.log is historical run 01; read its sidecar and use the latest log path in GATE5_RUN_HISTORY.json.
+GitHub workflow triage is in GITHUB_THREE_RUNS_TRIAGE.md. The report-root gate5_solver.log remains the original run01 log; use the latest path and hash in run history for run04. Original run03 views are preserved under bounded_gate5_20261006/previous_run03_current_views. Older specialized reports are historical evidence, not current gate states.

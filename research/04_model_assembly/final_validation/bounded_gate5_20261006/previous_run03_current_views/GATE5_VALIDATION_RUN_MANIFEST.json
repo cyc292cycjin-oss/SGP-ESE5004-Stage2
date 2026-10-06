@@ -1,9 +1,9 @@
 {
-  "run_id": "gate5_20261006_04",
+  "run_id": "gate5_20261006_03",
   "gate": "GATE5",
   "role": "VALIDATION_ONLY",
-  "status": "STOPPED_RESOURCE_GUARD",
-  "start_time": "2026-10-06T12:16:01.049522+00:00",
+  "status": "FAILED_TIME_LIMIT",
+  "start_time": "2026-10-06T05:10:55.073685+00:00",
   "solver_runs": 1,
   "objective": null,
   "result_network": null,
@@ -14,35 +14,25 @@
   "input_sha256": "7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd",
   "original_failed_runs": [
     "gate5_20261006_01",
-    "gate5_20261006_02",
-    "gate5_20261006_03"
+    "gate5_20261006_02"
   ],
   "io_api": "direct",
   "adapter": "PROJECT_STREAMED_FLOAT64",
   "formulation": "REVERSIBLE_POWER_OF_TWO_FIXED_INVENTORY_NORMALISATION",
   "solver_options": {
     "threads": 2,
-    "time_limit": 10800,
+    "time_limit": 3600,
     "solver": "ipm",
     "run_crossover": "on"
   },
-  "wall_guard_seconds": 14400,
-  "execution": "NEW_FROM_FROZEN_INPUT_NOT_CHECKPOINT_RESUME",
-  "pid": 325,
   "crossover_reason": "Local largest-group KKT/postsolve probe failed without crossover and passed with standard crossover; no feasibility tolerance or presolve changes",
-  "git_commit": "b8a6ad146b6931f5543f9ecdd2e1dc535bd522fa",
-  "qualification_tests_sha256": "cb3763ac176601c7991e0922fa67e913bb703c2b2c11389697e080d161bffb94",
-  "memory_preflight": {
-    "required_available_bytes": 6016856064.0,
-    "available_bytes": 7307984896,
-    "basis": "Observed run03 process peak + existing 512 MiB reserve"
-  },
+  "git_commit": "002f2a6dcbd4d57335653867e8f12a2b024c93ec",
   "environment": {
     "python": "3.11.13 | packaged by conda-forge | (main, Jun  4 2025, 14:48:23) [GCC 13.3.0]",
     "pypsa": "0.30.3",
     "linopy": "0.5.5",
     "highs": "1.11.0",
-    "ram_bytes": 8182722560,
+    "ram_bytes": 8182726656,
     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43"
   },
   "fixed_resource_groups": 385,
@@ -52,12 +42,23 @@
   "accounts": 171,
   "snapshots": 365,
   "policy_enabled": false,
-  "peak_rss_mib": 6937.0625,
+  "peak_rss_mib": 5226.12109375,
   "variables": 2450005,
   "constraints": 6042238,
-  "solve_start_time": "2026-10-06T12:17:05.596578+00:00",
+  "solve_start_time": "2026-10-06T05:11:56.191694+00:00",
   "solver_transfer_status": "PASS",
   "nnz": 11403496,
-  "stop_reason": "512 MiB available-memory / 14400 s wall guard",
-  "end_time": "2026-10-06T13:33:47.252117+00:00"
+  "error_type": "ValueError",
+  "stop_reason": "Unqualified custom scalar during result mapping: Research-existing-FOM-constant",
+  "end_time": "2026-10-06T06:11:59.632612+00:00",
+  "termination_condition": "time_limit",
+  "original_manifest_status": "FAILED_ENGINEERING",
+  "secondary_engineering_error": "Unqualified custom scalar during result mapping: Research-existing-FOM-constant",
+  "raw_manifest_path": "results_project/validation/gate5_20261006_03/GATE5_VALIDATION_RUN_MANIFEST.json",
+  "raw_manifest_sha256": "48255243b0d8702fd36f20cc609fc84a0b37dd2831f1b864e0927253be0a1a49",
+  "accepted_primal": false,
+  "native_solution_validity_flags": "NOT_CAPTURED_IN_THIS_RUN",
+  "ipm_iterations": 73,
+  "highs_runtime_seconds": 3600.47,
+  "current_view_basis": "Raw solver log and immutable manifest; does not replace original run record"
 }
