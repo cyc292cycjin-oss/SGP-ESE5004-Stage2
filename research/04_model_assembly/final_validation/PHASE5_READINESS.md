@@ -1,24 +1,21 @@
 # Phase5 readiness — NO
 
-| Status | Value |
+| Gate | Current state |
 |---|---|
-| GATE4_CLOSED | YES (unchanged accepted boundary) |
-| GATE5_REDUCED_SOLVE | FAILED_INFEASIBLE |
-| GATE5_DYNAMIC_CHECKS | NOT_RUN_NO_PRIMAL |
-| GATE6_FULL_RESOLUTION_SOLVE | NOT_RUN_PREDECESSOR_FAILED |
-| GATE6_FULL_DYNAMIC_VALIDATION | NOT_RUN_PREDECESSOR_FAILED |
-| FORMAL_PHASE5_POLICY_CONFIGURATION | NOT_READY_HUMAN_DECISION_PENDING |
-| POLICY_ATTRIBUTION | NOT_READY (200 null SMR/SMR-CC weights) |
-| FORMAL_COST_REPORTING_CONTRACT | NOT_READY |
-| FORMAL_INTERCONNECT_CONTROL_SET | NOT_READY |
-| INTEGRATED_DISCONNECTED_CONFIG_DIFF_GUARD | NOT_RUN |
-| FORMAL_RUNNER | NOT_READY |
-| FORMAL_SENSITIVITY_REGISTRY | NOT_READY |
-| READY_FOR_PHASE5_FORMAL_EXPERIMENTS | NO |
-| FORMAL_PHASE5_RUNS_EXECUTED | 0 |
+| Gate4 accepted boundary | Preserved |
+| Gate5 latest run | FAILED_TIME_LIMIT |
+| Gate5 dynamic checks | NOT_RUN |
+| Gate6 full-resolution solve | NOT_RUN_PREDECESSOR_FAILED |
+| Gate6 dynamic validation | NOT_RUN_PREDECESSOR_FAILED |
+| Formal policy configuration | NOT_READY_HUMAN_DECISION_PENDING |
+| Policy attribution | NOT_READY — 200 null SMR/SMR-CC weights |
+| Formal cost/report contract | NOT_READY — external pending fixed terms remain |
+| Final interconnection control set | NOT_READY |
+| Integrated/Disconnected config diff guard | NOT_RUN |
+| Formal runner and resource preflight | NOT_READY |
+| Formal sensitivity registry | NOT_READY |
+| Formal Phase5 runs | 0 |
 
-The exact direct handoff passed; Gate5 did not. The new failure is retained separately from the old LP failure. Neither failure's 0.0 log objective is usable; objective=null and result_network=null.
+This authorized package ends with human review even if Gate5 passes. No Gate6 was launched. Future formal policy ON/OFF and attribution need explicit scientific decisions; validation OFF does not settle them. A policy-enabled configuration must reject unresolved material attribution. No numerical budget, unknown fixed price or unknown physical CO2 factor was silently converted into a scientific assumption.
 
-Next step is bounded numerical engineering on the two reproduced fixed-resource blocks, with unchanged quantities, conservation and solver tolerances. A further real Gate5 attempt is outside the one-attempt authorization used this round. No need to reopen Gate4 data searches.
-
-After Gate5 dynamic PASS, formal policy ON/OFF and treatment of pending power-use attribution require an explicit scientific choice. Validation policy OFF does not authorize a formal decarbonisation scenario with policy OFF. Unknown fixed prices/emissions remain external pending terms, and their reports cannot be called complete totals. Gate6 requires all predecessor, formal-config and resource gates to pass. No automatic Integrated/Disconnected run is allowed.
+The current run is `gate5_20261006_03`. Historical failed runs are preserved; see GATE5_RUN_HISTORY.json for exact paths and hashes. No second real retry is authorized within this turn.

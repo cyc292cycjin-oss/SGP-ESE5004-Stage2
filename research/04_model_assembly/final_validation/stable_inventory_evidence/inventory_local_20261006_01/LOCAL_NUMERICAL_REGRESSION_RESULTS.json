@@ -1,0 +1,88 @@
+{
+  "role": "LOCAL_DIAGNOSTIC_AND_SYNTHETIC_TEST_ONLY",
+  "real_gate5_runs": 0,
+  "local_solver_runs": 4,
+  "synthetic_solver_runs": 0,
+  "tests": [
+    {
+      "test": "block_0_A",
+      "group": 0,
+      "method": "A",
+      "solver_status": "kOptimal",
+      "transformed_nnz": 8760,
+      "scale": 32768.0,
+      "source_quantity_changes": 0,
+      "original_unit_validation": {
+        "accepted": true,
+        "max_original_row_violation": 1.382147729600547e-10,
+        "max_variable_bound_violation": 0.0,
+        "worst_row": 5750645,
+        "energy_budget_mwh": 2.339369366232312e-08,
+        "power_budget_mw": 9.7473723593013e-10
+      }
+    },
+    {
+      "test": "block_79_A",
+      "group": 79,
+      "method": "A",
+      "solver_status": "kUnknown",
+      "transformed_nnz": 17520,
+      "scale": 268435456.0,
+      "source_quantity_changes": 0,
+      "original_unit_validation": {
+        "accepted": false,
+        "reason": "no primal"
+      }
+    },
+    {
+      "test": "block_120_A",
+      "group": 120,
+      "method": "A",
+      "solver_status": "kOptimal",
+      "transformed_nnz": 4380,
+      "scale": 16777216.0,
+      "source_quantity_changes": 0,
+      "original_unit_validation": {
+        "accepted": true,
+        "max_original_row_violation": 1.4090619515627623e-07,
+        "max_variable_bound_violation": 0.0,
+        "worst_row": 5751077,
+        "energy_budget_mwh": 1.1726536064348473e-05,
+        "power_budget_mw": 4.88605669347853e-07
+      }
+    },
+    {
+      "test": "block_120_B",
+      "group": 120,
+      "method": "B",
+      "solver_status": "kInfeasible",
+      "transformed_nnz": 70446,
+      "scale": 16777216.0,
+      "source_quantity_changes": 0,
+      "original_unit_validation": {
+        "accepted": false,
+        "reason": "no primal"
+      }
+    }
+  ],
+  "presolve_option": "choose (unchanged)",
+  "primal_feasibility_tolerance": 1e-07,
+  "source_identity": {
+    "method": "POWER_OF_TWO_FIXED_INVENTORY_SCALING",
+    "source_input_sha256": "7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd",
+    "group_count": 385,
+    "store_count": 807,
+    "positive_differences": 180,
+    "negative_differences": 205,
+    "max_relative_difference": 5.727233442941027e-16,
+    "max_energy_error_bound_mwh": 0.00014709214189362183,
+    "source_hashes": {
+      "registry": "2e5963b7e8a89cbd6369258ead0ce4e7d807f90d0a38b40013b91ed91fbfc518",
+      "allocation_manifest": "4e2cc08c6671635ccd1cc472ccabf06bad630650cd948678c042205607703d06",
+      "allocation_arrays": "931c24aac84be29eda6b2a1906a8e85ca0f3876b90c26cdb3b40e84ad8d3b2b9",
+      "base_reconstruction": "28c209015ce8ac748d71a5b4b1518da9a1e9a8ac7cedf547f8de813f93260935"
+    },
+    "distinction": "No RHS or scientific quantity is adjusted. Reversible scaling preserves exact infeasibility. Acceptance within a-priori source-operation rounding bounds is finite-precision treatment, not proof of exact feasibility of the original binary64 model.",
+    "bound_formula": "gamma_n=n*u/(1-n*u), u=2^-53; n=(2*2920-1)+(4*K-2)+8+(2*365-1). B_E=gamma_n*max(node annual, sum stocks, weighted daily total), B_P=B_E/min(hours). Same conservative bound also covers 365-step state arithmetic. Not derived from solver outcomes or solver tolerance."
+  }
+}

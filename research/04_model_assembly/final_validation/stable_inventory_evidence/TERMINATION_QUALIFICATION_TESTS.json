@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "role": "MOCK_INTERFACE_TEST_ONLY",
+  "solver_runs": 0,
+  "checks": [
+    {
+      "test": "time_limit_with_zero_placeholder_arrays",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": false,
+        "native_dual_valid": false,
+        "info_valid": false,
+        "primal_solution_status": 0,
+        "dual_solution_status": 0,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": false,
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "infeasible_candidate",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 1,
+        "dual_solution_status": 1,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": false,
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "feasible_limited_candidate_preserved",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 2,
+        "dual_solution_status": 2,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": true,
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "optimal_primal_preserved",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "optimal",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 2,
+        "dual_solution_status": 2,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": true,
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "qualified_limited_primal_routes_to_dynamic_checks_without_gate_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "solve_stage_does_not_revert_when_header_rolls_off",
+      "status": "PASS"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "status": "PASS",
   "io_api": "direct",
   "adapter": "PROJECT_STREAMED_FLOAT64",
-  "comparison": "Received matrix equals transformed matrix exactly; original-to-transformed inverse mapping separately verified. Original matrix is not required to equal transformed RHS/bounds.",
+  "comparison": "exact float64 equality; canonical duplicate terms coalesced by frozen Constraint.flat; row/column reorder mapped by integer labels",
   "variables": 2450005,
   "variable_labels_sha256": "1c5a5f3ccfcca631d2aa9a83f78ce4d584a9f5f3c12dc99903e0997e15b0b650",
   "bounds_objective_sha256": "a204ba8cfe2bc146f3a39adc07e2b9a2ab7e4b58f42922b7f55c81a954aa9506",
@@ -147,7 +147,7 @@
       "name": "Store-fix-e-upper",
       "rows": 294555,
       "nnz": 294555,
-      "canonical_and_received_sha256": "04ea83f89757db552c1a50916f433b227c37528ce30336a50f4535c6d18ac904",
+      "canonical_and_received_sha256": "179800b71392f0c6e7b00366e90d0e8d216419d0863a2f9c361c30a7e8c298b7",
       "status": "EXACT_FLOAT64_MATCH"
     },
     {
@@ -210,7 +210,7 @@
       "name": "Bus-nodal_balance",
       "rows": 1255235,
       "nnz": 3361285,
-      "canonical_and_received_sha256": "18e446c25cd7024fa83c9b338de11211afc220d3e16368eed2a0a32c301b3b57",
+      "canonical_and_received_sha256": "970b209b5d148552b997845411b74d7cf2344fce6f16e73bded2fe70e6d8f0c8",
       "status": "EXACT_FLOAT64_MATCH"
     },
     {
@@ -238,7 +238,7 @@
       "name": "Store-energy_balance",
       "rows": 402960,
       "nnz": 1208072,
-      "canonical_and_received_sha256": "bd86f02e302ba97d8594cecce303c5020cf5f995db25a61f3546d31ccdfe981f",
+      "canonical_and_received_sha256": "7aa147965759d995dc8fc3bf07b189f08fbd4e92ec1ccff515ac826b5fc55040",
       "status": "EXACT_FLOAT64_MATCH"
     },
     {
@@ -7286,29 +7286,6 @@
       "1985192": "-1",
       "1985193": "-1"
     },
-    "method": "Exact original binary64 algebra before reversible scaling; it is not replaced by the transformed RHS."
-  },
-  "original_to_solver_mapping": {
-    "kind": "REVERSIBLE_POWER_OF_TWO_FIXED_INVENTORY_NORMALISATION",
-    "groups": 385,
-    "stores": 807,
-    "mapped_variables": 884472,
-    "scaled_variables": 883376,
-    "mapped_rows": 2203217,
-    "scaled_rows": 2200296,
-    "column_scale_sha256": "c252ed7072f0b28f3d2a90cc7e19b54ae408e8f1014345288ced8186054256ab",
-    "row_scale_sha256": "a744f9527bc58237a171748a045b119d8720cebf60b6ed415932bc93db92ac2d",
-    "primal_map": "x_original=D*x_solver",
-    "dual_map": "dual_original=R*dual_solver",
-    "reduced_cost_map": "rc_original=rc_solver/D",
-    "matrix_map": "A_solver=R*A_original*D; lhs/rhs_solver=R*lhs/rhs_original; bounds_solver=bounds_original/D; cost_solver=D*cost_original",
-    "inverse_mapping_exact_binary64": true,
-    "scientific_quantity_changes": 0,
-    "original_binary64_infeasibility_preserved": true,
-    "finite_precision_acceptance": "Independent original MW/MWh bounds derived before any solve, not expanded after results",
-    "physical_chain_eliminated": false,
-    "multi_commodity_timing_freedom_preserved": true
-  },
-  "solution_map_verified": true,
-  "dual_map_verified": true
+    "method": "Exact Decimal.from_float accumulation of original binary64 coefficients; all compared bit-preserving to received solver values"
+  }
 }
