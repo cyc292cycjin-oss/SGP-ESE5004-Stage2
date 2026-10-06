@@ -32,6 +32,10 @@ from pathlib import Path
 
 from _helpers import BASE_DIR, configure_logging, create_logger, read_osm_config
 from earth_osm import eo
+from _osm_download_retry import install as install_download_retry
+
+# Raises on exhausted external requests; no empty substitute can reach processing.
+install_download_retry()
 
 logger = create_logger(__name__)
 

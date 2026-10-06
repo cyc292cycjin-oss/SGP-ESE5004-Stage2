@@ -85,6 +85,12 @@ jobs:
     - name: Conda list
       run: conda list
 
+    - name: Restore checksum-verified OSM source cache
+      uses: actions/cache@v6
+      with:
+        path: data/osm/pbf
+        key: osm-source-v1-${{ runner.os }}-${{ hashFiles('envs/*lock.yaml', 'scripts/_osm_download_retry.py') }}
+
     - name: Run Test
       run: make test
 
@@ -275,6 +281,12 @@ jobs:
         pixi-version: latest
         environments: pypsa-earth
         cache: true
+
+    - name: Restore checksum-verified OSM source cache
+      uses: actions/cache@v6
+      with:
+        path: data/osm/pbf
+        key: osm-source-v1-${{ runner.os }}-${{ hashFiles('envs/*lock.yaml', 'scripts/_osm_download_retry.py') }}
 
     - name: Run Test
       run: pixi run -e pypsa-earth make test
