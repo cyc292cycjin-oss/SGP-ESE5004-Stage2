@@ -13,6 +13,8 @@ from precision_handoff import audited_direct_backend,research_scalar_assignment
 from fixed_inventory_scaling import FixedInventoryScaling,physical_checks
 from inventory_audit import audit
 from gate5_resources import current_evidence,budget,admission,host_read,process_tree_sample,cgroup_memory,LogPhases,stop_reason,persist_resource_stop
+from lossless_gate5_lifecycle import bounded_build_allocator
+from execute_gate5_lossless import prepare_detached,execute_prepared
 
 DAILY_SHA='7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd'
 
@@ -88,7 +90,7 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         if synth.get('status')!='PASS':raise ValueError('Synthetic prerequisites not passed')
         for prerequisite in ['inventory_local_20261006_02/LOCAL_NUMERICAL_REGRESSION_RESULTS.json','inventory_mapping_20261006_01/MAPPING_REGRESSION_RESULTS.json']:
             if json.loads((root/'results_project/validation'/prerequisite).read_text()).get('status')!='PASS':raise ValueError('Stable formulation prerequisite not passed: '+prerequisite)
-        qpath=root/'research/04_model_assembly/final_validation/GATE5_RESULT_QUALIFICATION_TESTS.json'
+        qpath=root/'research/04_model_assembly/final_validation/GATE5_LOSSLESS_RESULT_QUALIFICATION_TESTS.json'
         qtest=json.loads(qpath.read_text())
         if qtest.get('status')!='PASS' or qtest.get('solver_runs')!=0:raise ValueError('Mock result qualification prerequisite failed')
         for name,hash_value in qtest['tested_code_sha256'].items():
@@ -109,8 +111,11 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         dump(out/'FORMULATION_MAPPING_AND_ROUNDING_AUDIT.json',identity)
         screen=fixed_screen(n);dump(out/'ALL_FIXED_RESOURCE_PRECISION_SCREEN.json',screen)
         receipt.update(fixed_resource_groups=len(screen),fixed_resource_stores=sum(len(r['resources']) for r in screen),annual_hours=float(n.snapshot_weightings.stores.sum()),loads=1737,accounts=171,snapshots=365,policy_enabled=False)
-        progress('model_build');save();n.optimize.create_model();model=n.model;before=set(model.constraints)
-        install_research_constraint_hooks(n);hooks=hook_receipt(n,before);dump(out/'CONSTRAINT_ATTACHMENT_RECEIPT.json',hooks)
+        progress('model_build');save()
+        with bounded_build_allocator():
+            n.optimize.create_model();model=n.model;before=set(model.constraints)
+            install_research_constraint_hooks(n)
+        hooks=hook_receipt(n,before);dump(out/'CONSTRAINT_ATTACHMENT_RECEIPT.json',hooks)
         if len(hooks['research_constraint_names'])!=1003:raise ValueError('Research hook group count changed')
         transformation=FixedInventoryScaling(n,identity)
         receipt.update(status='MODEL_READY',variables=int(model.nvars),constraints=int(model.ncons));save()
@@ -118,39 +123,26 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         factors={k:v['factor'] for k,v in certificate.items()}
         labels=list(map(int,certificate))+[3459209,3459210]
         def before_run(h,transfer):
-            if n.model is not model or transfer['status']!='PASS':raise ValueError('Same model/fidelity precondition failed')
+            if transfer['status']!='PASS':raise ValueError('Native fidelity precondition failed')
             progress('solver_internal');receipt.update(status='SOLVING',solver_runs=1,solve_start_time=now(),solver_transfer_status='PASS',nnz=transfer['nnz']);save()
             print('GATE5 FIDELITY_PASS; starting one real retry',flush=True)
         progress('handoff')
-        with audited_direct_backend(out/'SOLVER_TRANSFER_FIDELITY.json',progress=progress,before_run=before_run,certificate_labels=labels,certificate_factors=factors,transformation=transformation),research_scalar_assignment(out/'FOM_SCALAR_ASSIGNMENT_DIAGNOSTIC.json',progress=progress):
-            status,condition=n.optimize.solve_model(solver_name='highs',solver_options=receipt['solver_options'],io_api='direct',log_fn=out/'gate5_solver.log')
-        receipt.update(solver_status=status,termination_condition=condition,solve_end_time=now())
-        qualification=json.loads((out/'SOLVER_TRANSFER_FIDELITY.json').read_text())
-        receipt.update(native_solution_qualification=qualification['native_solution_qualification'],network_writeback_qualified=qualification['network_writeback_qualified'],original_scale_mapping_status=qualification['original_scale_mapping_status'])
-        if n.model is not model:raise ValueError('Model replaced during solve')
-        route=result_route(status,condition)
-        if not route['run_dynamic_checks']:
-            receipt.update(status=route['failure_status'],objective=None,result_network=None,dynamic_checks='NOT_RUN',gate6_status='NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 2
-        progress('export');receipt.update(status='OPTIMAL_DYNAMIC_PENDING' if route['optimal'] else 'FEASIBLE_CANDIDATE_DYNAMIC_PENDING',objective=float(n.objective));save()
-        # Preserve primal state before any previously unexercised dynamic checker.
-        n.meta.update(artifact_role='GATE5_VALIDATION_SOLVED_DYNAMIC_PENDING',scientific_results_allowed=False,formal_phase5_allowed=False,solver_allowed=False,constraint_hook_state='INSTALLED_AND_SOLVED_ON_SAME_MODEL')
-        result=out/'research_2050_gate5_24h_validation_solved.nc';n.export_to_netcdf(result)
-        receipt.update(result_network=str(result.relative_to(root)),result_sha256=sha(result));save()
-        progress('dynamic_validation')
-        from validation_dynamics import dynamic_checks
-        checks,detail=dynamic_checks(n)
-        strict=physical_checks(n,identity);dump(out/'FIXED_ORIGINAL_UNIT_CHECKS.json',strict)
-        checks+=strict
-        reread=pypsa.Network(result)
-        if reread.meta!=n.meta:raise ValueError('Solved export metadata changed')
-        for typ in ['Generator','Link','Line','Transformer','Store','StorageUnit','Load']:
-            for attr,frame in n.pnl(typ).items():
-                if not frame.empty and not frame.equals(reread.pnl(typ)[attr]):raise ValueError('Solved time series changed at export: '+typ+'.'+attr)
-        if not all(r['Status']=='PASS' for r in physical_checks(reread,identity)):raise ValueError('Readback original-unit fixed checks failed')
-        receipt['export_roundtrip']='PASS'
-        dump(out/'GATE5_DYNAMIC_CHECKS.json',checks);dump(out/'GATE5_DYNAMIC_DETAIL.json',detail)
-        dynamic_passed=all(r['Status']=='PASS' for r in checks);passed=dynamic_passed and route['optimal']
-        receipt.update(status='PASS' if passed else ('FAILED_DYNAMIC_CHECKS' if not dynamic_passed else 'VALIDATION_FEASIBLE_NOT_OPTIMAL'),dynamic_checks='PASS' if dynamic_passed else 'FAIL',gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now());save();return 0 if passed else 2
+        network_owner=[n];scale_owner=[transformation]
+        del n,model,transformation
+        native,record,fidelity=prepare_detached(network_owner,scale_owner,source,DAILY_SHA,out,labels,factors,progress)
+        native_owner=[native];del native
+        result=execute_prepared(native_owner,record,fidelity,identity,out,receipt['solver_options'],progress,before_run)
+        q=result['qualification'];condition=q['linopy_termination_condition']
+        status='ok' if q['network_writeback_qualified'] else 'warning'
+        passed=result['status']=='PASS_PENDING_HUMAN_REVIEW'
+        result_path=Path(result['result_directory'])/'research_2050_gate5_24h_validation_solved.nc'
+        receipt.update(solver_status=status,termination_condition=condition,solve_end_time=now(),native_solution_qualification=q,
+            network_writeback_qualified=q['network_writeback_qualified'],original_scale_mapping_status='INVERSE_ARITHMETIC_AND_ORIGINAL_UNIT_CHECKS_COMPLETED' if 'export' in result else 'NOT_RUN',
+            status='PASS' if passed else result['status'],objective=q['objective'] if q['network_writeback_qualified'] else None,
+            result_network=str(result_path) if result_path.exists() else None,result_sha256=sha(result_path) if result_path.exists() else None,
+            dynamic_checks=result['dynamic_checks'],export_roundtrip=result.get('export',{}).get('status','NOT_RUN'),
+            gate6_status='NOT_RUN_HUMAN_REVIEW_REQUIRED' if passed else 'NOT_RUN_PREDECESSOR_FAILED',end_time=now())
+        save();return 0 if passed else 2
     except Exception as e:
         transfer_receipt=out/'SOLVER_TRANSFER_FIDELITY.json'
         if transfer_receipt.exists():
