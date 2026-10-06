@@ -1,0 +1,191 @@
+{
+  "status": "PASS",
+  "role": "MOCK_INTERFACE_TEST_ONLY",
+  "solver_runs": 0,
+  "checks": [
+    {
+      "test": "time_limit_with_zero_placeholder_arrays",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": false,
+        "native_dual_valid": false,
+        "info_valid": false,
+        "primal_solution_status": 0,
+        "dual_solution_status": 0,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": false,
+        "nonfinite_primal_count": 0,
+        "nonfinite_dual_count": 0,
+        "objective_finite": true,
+        "linopy_termination_condition": "time_limit",
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "infeasible_candidate",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 1,
+        "dual_solution_status": 1,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": false,
+        "nonfinite_primal_count": 0,
+        "nonfinite_dual_count": 0,
+        "objective_finite": true,
+        "linopy_termination_condition": "time_limit",
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "feasible_limited_candidate_preserved",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "time_limit",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 2,
+        "dual_solution_status": 2,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": true,
+        "nonfinite_primal_count": 0,
+        "nonfinite_dual_count": 0,
+        "objective_finite": true,
+        "linopy_termination_condition": "time_limit",
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "optimal_primal_preserved",
+      "status": "PASS",
+      "native_receipt": {
+        "model_status": "optimal",
+        "native_value_valid": true,
+        "native_dual_valid": true,
+        "info_valid": true,
+        "primal_solution_status": 2,
+        "dual_solution_status": 2,
+        "returned_primal_entries": 1,
+        "returned_dual_entries": 1,
+        "native_feasible_primal": true,
+        "nonfinite_primal_count": 0,
+        "nonfinite_dual_count": 0,
+        "objective_finite": true,
+        "linopy_termination_condition": "optimal",
+        "note": "Native feasibility is necessary, not sufficient: independent original-unit dynamic checks still required."
+      }
+    },
+    {
+      "test": "qualified_limited_primal_routes_to_dynamic_checks_without_gate_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "solve_stage_does_not_revert_when_header_rolls_off",
+      "status": "PASS"
+    },
+    {
+      "test": "nonfinite_native_primal_rejected_without_changing_termination",
+      "status": "PASS"
+    },
+    {
+      "test": "FOM_scalar_0.0",
+      "status": "PASS",
+      "diagnostic": {
+        "stage": "BEFORE_PYPSA_ASSIGNMENT",
+        "scalars": [
+          {
+            "name": "Research-existing-FOM-constant",
+            "labels": [
+              4
+            ],
+            "size": 1,
+            "original_values": [
+              0.0
+            ],
+            "nonfinite_values": [],
+            "qualified": false,
+            "required_value": 1.0,
+            "values_modified": false
+          }
+        ],
+        "all_qualified": false
+      }
+    },
+    {
+      "test": "FOM_scalar_nan",
+      "status": "PASS",
+      "diagnostic": {
+        "stage": "BEFORE_PYPSA_ASSIGNMENT",
+        "scalars": [
+          {
+            "name": "Research-existing-FOM-constant",
+            "labels": [
+              4
+            ],
+            "size": 1,
+            "original_values": [
+              null
+            ],
+            "nonfinite_values": [
+              {
+                "position": 0,
+                "representation": "nan"
+              }
+            ],
+            "qualified": false,
+            "required_value": 1.0,
+            "values_modified": false
+          }
+        ],
+        "all_qualified": false
+      }
+    },
+    {
+      "test": "FOM_scalar_1.0",
+      "status": "PASS",
+      "diagnostic": {
+        "stage": "BEFORE_PYPSA_ASSIGNMENT",
+        "scalars": [
+          {
+            "name": "Research-existing-FOM-constant",
+            "labels": [
+              4
+            ],
+            "size": 1,
+            "original_values": [
+              1.0
+            ],
+            "nonfinite_values": [],
+            "qualified": true,
+            "required_value": 1.0,
+            "values_modified": false
+          }
+        ],
+        "all_qualified": true
+      }
+    },
+    {
+      "test": "backend_before_writeback_scalar_0.0",
+      "status": "PASS",
+      "network_writeback_qualified": false
+    },
+    {
+      "test": "backend_before_writeback_scalar_1.0",
+      "status": "PASS",
+      "network_writeback_qualified": true
+    }
+  ],
+  "tested_code_sha256": {
+    "precision_handoff.py": "4d50cd10ff5a16849913a1b01e307b2fe35712fbd17340e6527b56369ad19cff",
+    "run_gate5_stable_inventory.py": "59b154a37297ffcd2a92e486a75d31acd18d5786919110bea247e731d04e6dc4",
+    "test_solver_result_qualification.py": "f3ec5fa41509cebf1550f68a5c386b33a5a0b422632d6e96f89c3d32116dbe0c"
+  }
+}

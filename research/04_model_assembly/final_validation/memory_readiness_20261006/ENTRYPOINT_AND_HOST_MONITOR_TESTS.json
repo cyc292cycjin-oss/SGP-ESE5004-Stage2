@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "meaning": "Default entrypoint correctly refused resource admission; not Gate5 validation",
+  "preflight_status": "NOT_READY",
+  "reasons": [
+    "INSUFFICIENT_GUEST_AVAILABLE_PHYSICAL_MEMORY",
+    "INSUFFICIENT_HOST_PHYSICAL_HEADROOM",
+    "INSUFFICIENT_HOST_COMMIT_HEADROOM"
+  ],
+  "mode": "PREFLIGHT_ONLY",
+  "run05_created": false,
+  "host_watch": {
+    "status": "PASS",
+    "first_observation": "2026-10-06T14:27:05.7588544Z",
+    "last_observation": "2026-10-06T14:27:07.8463715Z",
+    "scope": "CURRENT_WINDOWS_HOST",
+    "solver_calls": 0,
+    "host_config_changes": 0,
+    "monitor_job_state": "Running"
+  },
+  "powershell_script_sha256": {
+    "Get-Gate5HostResources.ps1": "fa11fa7d24b45533b009e497ea04b935a5bc052c7c71851dc3fed586eb1d44ca",
+    "Invoke-Gate5MemoryReadiness.ps1": "ebf99707f08200e6b6f5b38b2f62404f7b401be221f16335bb5c64d06461cd75"
+  },
+  "initial_repairs": [
+    "New test fixture originally shared its expected ndarray with a mutable Series; fixed the fixture to retain independent expected values, without changing mapping tolerances.",
+    "First Windows entry probe exposed backslash argument loss through wslpath; changed to normalized paths and explicit -e, then verified preflight refusal."
+  ],
+  "solver_calls": 0
+}
