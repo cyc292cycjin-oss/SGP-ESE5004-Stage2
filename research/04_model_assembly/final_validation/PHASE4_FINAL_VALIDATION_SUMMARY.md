@@ -1,38 +1,27 @@
-# Phase4 final validation — stopped at Gate5
+# Phase4 final validation — Gate5 still failed
 
-Gate4 remains CLOSED. Gate5 was executed once and HiGHS returned **infeasible** during presolve. Gate6 and formal Integrated/Disconnected experiments were not executed. No resource, demand, cost, policy, tolerance or physical constraint was changed to force feasibility.
+The precision-preserving handoff is implemented and verified. The single new real attempt `gate5_20261006_02` is **FAILED_INFEASIBLE**. Objective and result network are null; dynamic checks are NOT_RUN. The first failed attempt is retained unchanged. Gate6 is NOT_RUN_PREDECESSOR_FAILED; formal Phase5 runs remain zero.
 
-## Verified starting identity
+## Preserved inputs and changes
 
-- Branch: `research/full-sc-baseline`. Starting local/remote HEAD: `51e028f7631c45092d3b3c5d0c466f00beb109bc`, clean.
-- Gate5 execution code: `f75d8293c9b9896232cc0000736de8b1a20e730d`, clean at launch. Independent CI housekeeping was committed later.
-- Gate4 input SHA256: `238262c9d52e9d087d116799cbba0e3b5140aade7f64e6b8ebc02a448cd1419d` (unchanged).
-- Derived24h input SHA256: `7a07a0ec728b7cc4b9b27a4a2461b67c960790750fd45eed6a3705624c8e06cd`.
-- Frozen Python3.11.13, PyPSA0.30.3, Linopy0.5.5. HiGHS1.11.0. Gurobi12.0.3 restricted license fails the size probe; no upgrade/install was made.
-- WSL RAM7.62GiB; free disk approximately940GiB. Solver threads2, solver limit3600s, wall limit7200s. Actual wall time90.04s; peak sampled process memory5.635GiB. Neither limit caused the failure.
+The original Gate4 network, 365-snapshot Gate5 input and old failed LP retain their exact supplied SHA256 values. All 100 geographical nodes, 171 demand accounts, 1,737 Loads, 187,400.4 MW accepted stock, 2,237 input time series and their annual quantities remain untouched. 807 external pending fixed accounts stay null-qualified, policy stays OFF, and 200 policy weights stay null. Native lv_limit and all 1,003 research constraint groups are present; the known FOM coefficient is installed once.
 
-## Preserved inputs and installed constraints
+Project engineering changes stream the existing Linopy model into HiGHS without text serialization and verify all received matrix data. The frozen backend and PyPSA network mapping remain in use, with a scoped compatibility fix for the custom FOM scalar. No package/environment replacement or scientific-input modification occurred.
 
-100 geographical nodes,171 accounts,1737 Loads,745 source records and187400.4MW existing stock remain. Full2013 becomes365 daily snapshots with24h weights,8760h total. All2237time-varying input series retain annual integrals within documented floating-point tolerance. Static component tables were compared before aggregation and after NetCDF reload. No sector/carrier or cost was removed.
+## Verified execution
 
-The actual model contains2,450,005variables and6,042,238constraint rows. All1003research constraint groups plus native `GlobalConstraint-lv_limit` were attached and checked on the same model passed to `solve_model`. Known existing FOM coefficient is8224491125.573893EUR2020/year and was attached once. This is attachment evidence, not a reconciled optimal objective.
+- Full transfer: 2,450,005 variables, 6,042,238 constraints, 11,403,496 nonzeros; zero numerical transfer differences.
+- Certificate rows plus stock bounds: 1,827 matched. All 385 fixed-resource groups / 807 stores screened.
+- The old PH positive LP deficit is absent in the faithful matrix.
+- New run wall time approximately 60.47 s; HiGHS presolve 3.94 s; process peak RSS 4.637 GiB. The 512 MiB available-memory guard was not reached. IPM iterations did not begin.
+- Synthetic A-F passed. Nine actual synthetic HiGHS solves this round (ten cumulative) plus one historical Gurobi license-rejected dispatch. Real Gate5 attempts: two cumulative, one this round. Gate6/formal runs: zero.
 
-## Verified sufficient conflict
+## Remaining diagnosis and gate
 
-`PH:2050:Buildings:ResidentialFuel:biomass@PH_Luzon5 0 :: final obligation` is supplied by its Charcoal and Fuelwood fixed inventories. Linopy0.5.5's LP writer formats coefficients/RHS with12significant decimal digits. In the actual saved LP:
+Two exact-input local blocks reproduce presolve rejection. Indonesia road Biodiesel has a 4.602e-9 MWh exact binary64 stock contradiction. Vietnam industry has a fully verified rational feasible witness despite presolve rejection. These are numerical evidence, not newly inferred physical fuel shortages. See RESIDUAL_NUMERICAL_DIAGNOSIS.md for scope and proof files. No whole-model IIS or second real retry was run.
 
-- Annual required energy: **43981693.30891560MWh**.
-- Initial inventory sum: **43981693.3088MWh**.
-- Difference: **0.00011560MWh**.
+No real primal solution exists, so bus/state/annual-release/objective/carbon post-solve checks did not execute. The synthetic annotation fix is verified, but the research post-solve checker still requires real successful data. No system-cost or interconnection-benefit result is reported.
 
-Summing1825exact LP equations cancels intermediate flows and states, leaving `-E_Charcoal,end - E_Fuelwood,end = 0.00011560`. Both end stocks have verified nonnegative bounds in that same LP. This is an independent exact-decimal infeasibility certificate. In the unrounded network the same aggregate difference is approximately−7.45e−9MWh, ordinary floating-point arithmetic. It is not a scientific fuel shortfall or a new residual Load.
+OSM documentation now matches actual 1/2-second backoff. Live Ubuntu/macOS GitHub CI was not verified and is not asserted green. Carrier-label warnings, unused efficiency3 NaNs and PROJ warning are separately inventoried; they are not assigned as the infeasibility cause without evidence.
 
-This certificate is sufficient but does not prove that every other block is feasible. A future narrowly scoped engineering correction should preserve binary coefficients via a compatible direct solver interface or a sufficiently precise serialization path, then validate preservation before an explicitly resumed Gate5 attempt. Do not add fuel, relax conservation, set arbitrary bounds, or change feasibility tolerances to hide the conflict. No such correction/re-solve was performed in this package because the user instructed stopping at a failed gate.
-
-## Diagnostic limits
-
-The full IIS API built an internal elastic diagnostic and exited without a certificate while WSL restarted. Resource exhaustion is inferred, not proven from recovered logs. It was not used as a relaxed scientific model. Subsequent native presolve and finite interval propagation made no optimizing run; the exact algebra certificate above was recovered without an IIS or relaxation solution. PyPSA also warned about undefined carrier labels and unused multiport `efficiency3`NaNs; these warnings are retained and are not claimed as the cause.
-
-## What was not reached
-
-There is no primal solution, solvedResearch network, dynamic-validation PASS, objective comparison, carbon-emissions total or interconnection benefit. Gate6 policy selection/reporting freeze, final intervention freeze, scenario configs/diff guard and formal runner were not advanced beyond this stop-gate. Existing uncertainty/sensitivity registers remain unchanged and inactive. `GATE5_DYNAMIC_CHECKS.csv` and `GATE6_FULL_DYNAMIC_CHECKS.csv` explicitly say NOT_RUN, never PASS.
+Stop here for review. First resolve the remaining fixed-chain numerical behavior with local equivalence proofs; then seek authorization for another real validation attempt. Formal policy activation and its pending attribution remain independent scientific gates.

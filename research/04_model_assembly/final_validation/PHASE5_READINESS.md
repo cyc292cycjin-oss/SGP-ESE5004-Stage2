@@ -1,24 +1,24 @@
 # Phase5 readiness — NO
 
-Gate5 failed with a verified LP serialization contradiction. Return for Human Review. No Gate6 or formal scenario run occurred.
-
-| Requested status | Value |
+| Status | Value |
 |---|---|
-| GATE4_CLOSED | YES |
-| GATE5_REDUCED_SOLVE | FAIL |
-| GATE5_ENGINEERING_VALIDATION | FAIL |
-| FORMAL_PHASE5_POLICY_CONFIGURATION_FROZEN | NO |
-| POLICY_ATTRIBUTION_READY | NO |
-| FORMAL_COST_REPORTING_CONTRACT_READY | NO |
-| GATE6_FULL_RESOLUTION_SOLVE | FAIL |
-| GATE6_FULL_DYNAMIC_VALIDATION | FAIL |
-| FORMAL_INTERCONNECT_CONTROL_SET_FROZEN | NO |
-| INTEGRATED_DISCONNECTED_CONFIG_DIFF_GUARD | FAIL |
-| FORMAL_RUNNER_READY | NO |
-| FORMAL_SENSITIVITY_REGISTRY_READY | NO |
+| GATE4_CLOSED | YES (unchanged accepted boundary) |
+| GATE5_REDUCED_SOLVE | FAILED_INFEASIBLE |
+| GATE5_DYNAMIC_CHECKS | NOT_RUN_NO_PRIMAL |
+| GATE6_FULL_RESOLUTION_SOLVE | NOT_RUN_PREDECESSOR_FAILED |
+| GATE6_FULL_DYNAMIC_VALIDATION | NOT_RUN_PREDECESSOR_FAILED |
+| FORMAL_PHASE5_POLICY_CONFIGURATION | NOT_READY_HUMAN_DECISION_PENDING |
+| POLICY_ATTRIBUTION | NOT_READY (200 null SMR/SMR-CC weights) |
+| FORMAL_COST_REPORTING_CONTRACT | NOT_READY |
+| FORMAL_INTERCONNECT_CONTROL_SET | NOT_READY |
+| INTEGRATED_DISCONNECTED_CONFIG_DIFF_GUARD | NOT_RUN |
+| FORMAL_RUNNER | NOT_READY |
+| FORMAL_SENSITIVITY_REGISTRY | NOT_READY |
 | READY_FOR_PHASE5_FORMAL_EXPERIMENTS | NO |
 | FORMAL_PHASE5_RUNS_EXECUTED | 0 |
 
-Gate6 and config-diff FAIL entries mean the gates have not passed because they were **NOT_RUN_PREDECESSOR_FAILED**. They do not describe failed attempted Gate6/Phase5 solves. Phase5 configs and formal runner are intentionally not produced as ready artifacts after the stop-gate. The intervention CSV is a recomputed reference from the unchanged topology (192domestic,24cross-border,0unknown), not the final Gate6-derived freeze. Formal sensitivity readiness has not been asserted; accepted Gate4 registers remain preserved inactive.
+The exact direct handoff passed; Gate5 did not. The new failure is retained separately from the old LP failure. Neither failure's 0.0 log objective is usable; objective=null and result_network=null.
 
-Smallest next action: review the exact LP contradiction, authorize a precision-preserving engineering handoff correction and a resumed Gate5 attempt. No new demand source or model-boundary decision is needed to explain this proven conflict. Other feasibility issues can only be assessed after that correction; a PASS is not promised.
+Next step is bounded numerical engineering on the two reproduced fixed-resource blocks, with unchanged quantities, conservation and solver tolerances. A further real Gate5 attempt is outside the one-attempt authorization used this round. No need to reopen Gate4 data searches.
+
+After Gate5 dynamic PASS, formal policy ON/OFF and treatment of pending power-use attribution require an explicit scientific choice. Validation policy OFF does not authorize a formal decarbonisation scenario with policy OFF. Unknown fixed prices/emissions remain external pending terms, and their reports cannot be called complete totals. Gate6 requires all predecessor, formal-config and resource gates to pass. No automatic Integrated/Disconnected run is allowed.

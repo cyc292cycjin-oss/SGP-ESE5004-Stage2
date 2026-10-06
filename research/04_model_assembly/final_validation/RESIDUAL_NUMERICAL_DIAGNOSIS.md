@@ -1,0 +1,12 @@
+# Residual numerical diagnosis after faithful handoff
+
+Verified: the old PH Luzon5 sum now has RHS -7.4578565545380115509033203125e-9 MWh rather than the positive 0.00011560 MWh in the failed 12-digit LP. The original sufficient certificate is removed by faithful transfer. This does not establish global feasibility.
+
+The one permitted retry again returned infeasible. A bounded screen extracted all 385 closed fixed-resource blocks from the unchanged native model and called only HiGHS presolve, never optimization or full-model IIS. Two were rejected. 263 reduced to empty; 120 remained reduced. Those statuses do not prove global feasibility or identify every possible problem.
+
+1. Indonesia road Biodiesel at ID_Java-Bali1 2: 1,095 native equalities sum exactly to -E_end = 4.60204319097101688385009765625e-9 MWh, with the actual terminal lower-bound row E_end >= 0. This is an exact contradiction between already stored binary64 numbers at an extremely small scale. It is not new evidence of missing fuel. The retained block has 2,921 rows and 1,096 columns.
+2. Vietnam industry Bagasse/Fuelwood at VN2 3: the annual sum has a small surplus (RHS -4.34738467447459697723388671875e-9 MWh), and an explicit rational witness satisfies every one of 5,477 source rows and 2,192 variable bounds exactly. HiGHS 1.11.0 presolve nevertheless rejects this local block. This verifies local numerical rejection of a mathematically feasible block; it does not prove that this is the only global failure.
+
+The witness uses exact fractions of source float64 values, proportional release only as a constructive feasibility proof, and no modified source or production schedule. Binary submatrices, source integer labels, row identities, exact witness, nonnegative-stock certificate and hashes are retained in precision_handoff_evidence. verify_local_fixed_diagnosis.py regenerates and verifies them without a solver.
+
+Next engineering work: investigate a mathematically equivalent, precision-stable representation/scaling of fixed inventory chains on these local blocks, with explicit conservation and mapping proofs. This remains a proposed test, not an implemented fix. Do not change loads, initial stock, stock nonnegativity, annual resource quantities or feasibility tolerance; do not disable presolve. No second real retry is authorized in this package. A future retry needs a separately reviewable change and renewed run authorization. No new scientific fuel-source decision is needed to describe the evidence above.

@@ -1,0 +1,7 @@
+# Precision regressions
+
+The final SYNTHETIC_TEST_ONLY suite passed all A-F checks. It executed four HiGHS solves: rounded LP infeasible, unchanged faithful inventory optimal, real 1 MWh shortage infeasible, and a small PyPSA network with an explicit research constraint and fixed FOM optimal. The solved network was exported and read back with exact dispatch and metadata preservation. Independent small-matrix comparison covered frozen Model.matrices and native to_highspy, duplicate coalescing, row signs/bounds and maximization sense. No tolerance changes were made.
+
+Preserved development attempts: attempt 1 executed one LP solve then failed before direct solver dispatch on backend enum lookup. Its counter of two was a harness pre-dispatch overcount. Attempt 2 executed four solves, then exposed the frozen PyPSA scalar-annotation error. Attempt 3 executed four solves and completed. This round therefore executed nine synthetic HiGHS solves; ten including the prior recorded HiGHS preflight. The earlier Gurobi license-rejected synthetic probe is separately recorded (one dispatch attempt). These are not research Gate5 attempts.
+
+The full research transfer passed exact float64 checks on 2,450,005 variables, 6,042,238 rows and 11,403,496 nonzeros, including all 1,827 requested certificate/bound rows, every variable bound, objective coefficient and zero offset. 385 fixed-resource groups / 807 stores were screened. The only new real Gate5 retry failed at presolve; no post-solve research dynamic check ran. Synthetic success is not a research validation PASS.
