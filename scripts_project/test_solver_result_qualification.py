@@ -9,7 +9,8 @@ import linopy,highspy
 from unittest.mock import patch
 from linopy.constants import Result,Solution,Status
 from precision_handoff import qualify_native_solution,research_scalar_assignment,scalar_value_diagnostic,audited_direct_backend
-from run_gate5_stable_inventory import result_route,monitor_phase
+from run_gate5_stable_inventory import result_route
+from gate5_resources import LogPhases
 
 def run():
     checks=[]
@@ -30,9 +31,10 @@ def run():
     candidate=result_route('ok','time_limit')
     assert candidate['run_dynamic_checks'] and not candidate['optimal'] and candidate['failure_status']=='FAILED_TIME_LIMIT'
     assert result_route('ok','optimal')['optimal']
-    phase,seen=monitor_phase('Presolving model',False);assert phase=='presolve' and not seen
-    phase,seen=monitor_phase('IPX',seen);assert phase=='solve' and seen
-    phase,seen=monitor_phase('73 1.30e-08',seen);assert phase=='solve' and seen
+    phase=LogPhases()
+    assert phase.feed('Presolving model')=='presolve'
+    assert phase.feed('IPX')=='IPM'
+    assert phase.feed('73 1.30e-08')=='IPM'
     checks += [dict(test='qualified_limited_primal_routes_to_dynamic_checks_without_gate_pass',status='PASS'),dict(test='solve_stage_does_not_revert_when_header_rolls_off',status='PASS')]
     h=NS(getSolution=lambda:NS(value_valid=True,dual_valid=True),getInfo=lambda:NS(valid=True,primal_solution_status=2,dual_solution_status=2),getModelStatus=lambda:'optimal',modelStatusToString=lambda z:z)
     for value in [np.nan,np.inf]:
@@ -75,6 +77,6 @@ def run():
             assert d['custom_scalar_diagnostics_before_mapping'][0]['original_values']==[value]
             checks.append(dict(test='backend_before_writeback_scalar_'+str(value),status='PASS',network_writeback_qualified=expected))
     here=Path(__file__).resolve().parent
-    hashes={name:hashlib.sha256((here/name).read_bytes()).hexdigest() for name in ['precision_handoff.py','run_gate5_stable_inventory.py','test_solver_result_qualification.py']}
+    hashes={name:hashlib.sha256((here/name).read_bytes()).hexdigest() for name in ['precision_handoff.py','run_gate5_stable_inventory.py','test_solver_result_qualification.py','fixed_inventory_scaling.py','gate5_resources.py','gate5_memory_preflight.py']}
     return dict(status='PASS',role='MOCK_INTERFACE_TEST_ONLY',solver_runs=0,checks=checks,tested_code_sha256=hashes)
 if __name__=='__main__':Path(sys.argv[1]).write_text(json.dumps(run(),indent=2)+'\n')

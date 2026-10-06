@@ -4,6 +4,21 @@ import numpy as np
 from precision_handoff import exact,digest
 from fixed_accounts import validate_exported_accounting
 
+def restore_series_chunks(series,factors,label,chunk_size=200_000):
+    """Same elementwise float64 map and inverse check, bounded scratch arrays.
+
+    Keep all original labels and the original Series object. No solver API.
+    Do not discard D/R; they are still needed to explain primal/dual mapping.
+    """
+    if len(series)!=len(factors):raise ValueError('Scale-map length mismatch')
+    for start in range(0,len(series),chunk_size):
+        end=min(start+chunk_size,len(series))
+        raw=series.iloc[start:end].to_numpy(copy=True)
+        scale=factors[start:end];mapped=raw*scale
+        exact(mapped/scale,raw,label+' inverse scale')
+        series.iloc[start:end]=mapped
+    return series
+
 class FixedInventoryScaling:
     def __init__(self,n,audit):
         validate_exported_accounting(n)
@@ -62,11 +77,9 @@ class FixedInventoryScaling:
 
     def restore(self,result):
         if len(result.solution.primal):
-            raw=result.solution.primal.to_numpy(copy=True);result.solution.primal*=self.d
-            exact(result.solution.primal.to_numpy()/self.d,raw,'primal inverse scale')
+            restore_series_chunks(result.solution.primal,self.d,'primal')
         if len(result.solution.dual):
-            raw=result.solution.dual.to_numpy(copy=True);result.solution.dual*=self.r
-            exact(result.solution.dual.to_numpy()/self.r,raw,'dual inverse scale')
+            restore_series_chunks(result.solution.dual,self.r,'dual')
         return result
 
 def physical_checks(n,audit):

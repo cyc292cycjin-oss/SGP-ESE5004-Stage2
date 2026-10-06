@@ -29,7 +29,7 @@ def scalar_value_diagnostic(name,values,labels=()):
 
 
 @contextmanager
-def research_scalar_assignment(receipt_path=None):
+def research_scalar_assignment(receipt_path=None,progress=None):
     """Skip non-component research scalars only during frozen PyPSA annotation.
 
     Their primal values and objective terms remain in the solved Linopy model.
@@ -40,6 +40,7 @@ def research_scalar_assignment(receipt_path=None):
     opt = importlib.import_module('pypsa.optimization.optimize')
     original = opt.assign_solution
     def annotate(n):
+        if progress:progress('PyPSA_assignment')
         data = n.model.variables.data
         old = dict(data)
         allowed = {'Research-existing-FOM-constant','Research-synthetic-FOM'}
@@ -66,7 +67,11 @@ def digest(*arrays):
     h = hashlib.sha256()
     for a in arrays:
         a = np.ascontiguousarray(a)
-        h.update(str(a.dtype).encode()); h.update(str(a.shape).encode()); h.update(a.tobytes())
+        h.update(str(a.dtype).encode()); h.update(str(a.shape).encode())
+        # Same bytes and digest; avoid allocating one full bytes object.
+        if a.size:
+            view=memoryview(a).cast('B')
+            for start in range(0,len(view),1024**2):h.update(view[start:start+1024**2])
     return h.hexdigest()
 
 
@@ -217,6 +222,7 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
             # a second global long-form matrix while mapping the same model.
             ok(h.setOptionValue("output_flag", True))
             result=self._solve(h,solution_fn=None,log_fn=log_fn,model=mapping,io_api="direct",sense=model.sense)
+            if progress:progress('native_result_return')
             # Capture the raw scalar values before qualification can clear arrays.
             scalar_raw=[]
             for name,v in model.variables.items():
@@ -229,6 +235,7 @@ def audited_direct_backend(receipt_path, *, progress=None, before_run=None, cert
             receipt['original_scale_mapping_status']='NOT_RUN' if transformation is not None else 'IDENTITY_NO_TRANSFORMATION'
             Path(receipt_path).write_text(json.dumps(receipt,indent=2)+'\n')
             if transformation is not None and len(result.solution.primal):
+                if progress:progress('original_unit_mapping')
                 result=transformation.restore(result)
                 receipt['solution_map_verified']=bool(len(result.solution.primal))
                 receipt['dual_map_verified']=bool(len(result.solution.dual))
