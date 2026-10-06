@@ -8,6 +8,9 @@ from test_fixed_accounts_price_basis import fixture
 class PhysicalChecks(unittest.TestCase):
  def port_fixture(self):
   n=pypsa.Network();n.add('Bus','a');n.add('Bus','b');n.add('Link','x',bus0='a',bus1='b',p_nom=1.);n.links['bus3']='';n.links['efficiency3']=np.nan;return n
+ def test_native_schema_receipt_order_independent_of_columns(self):
+  n=self.port_fixture();before=numeric_inputs(n);n.links=n.links.loc[:,list(reversed(n.links.columns))]
+  self.assertEqual(before,numeric_inputs(n))
  def test_unconnected_port_has_no_coefficient(self):
   self.assertTrue(any(x['Meaning']=='NON_APPLICABLE_UNCONNECTED_LINK_PORT' for x in numeric_inputs(self.port_fixture())))
  def test_connected_port_missing_coefficient_rejects(self):

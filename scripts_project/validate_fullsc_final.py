@@ -37,7 +37,7 @@ def numeric_inputs(n):
             raise ValueError('Nonfinite active/unrecognized input '+c.name+'.'+col+': '+','.join(v.index[bad][:3]))
         for attr,frame in c.pnl.items():
             if len(frame.columns) and not np.isfinite(frame.to_numpy()).all():raise ValueError('Nonfinite actual time series '+c.name+'.'+attr)
-    return native
+    return sorted(native,key=lambda r:(r['ComponentType'],r['Attribute'],r['Meaning']))
 
 def controls(n):
     electric=set(n.buses.index[n.buses.carrier.isin(['AC','DC','electricity','low voltage'])]);out=[]
