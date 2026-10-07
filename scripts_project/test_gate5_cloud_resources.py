@@ -104,8 +104,15 @@ def run():
         (out/'GATE5_DYNAMIC_DETAIL.json').write_text(json.dumps(dict(objective_reconciliation=dict(capital=1.,variable=2.,known_fixed_once=3.,actual=6.))))
         assert collect(out,0,{})['gate5_pass']
         assert not collect(out,-9,{})['gate5_pass']
+        raw.update(status='FAILED_ENGINEERING',dynamic_checks='NOT_RUN',export_roundtrip='NOT_RUN',result_network=None)
+        (out/'GATE5_VALIDATION_RUN_MANIFEST.json').write_text(json.dumps(raw))
+        failed_export=collect(out,1,{})
+        assert failed_export['qualified_primal'] and failed_export['dynamic_checks']=='PASS' and not failed_export['gate5_pass']
+        (out/'GATE5_DYNAMIC_CHECKS.json').write_text(json.dumps([dict(Check='PHYSICAL_BALANCE',Status='FAIL')]))
+        assert collect(out,1,{})['dynamic_checks']=='FAIL'
         missing=p/'missing-manifest';assert collect(missing,125,{})['solver_runs']==0
     passed('durable_collector_unqualified_nulls_time_limit_and_crash_never_pass')
+    passed('failed_export_retains_completed_dynamic_receipt_status_without_claiming_gate5_pass')
     return dict(status='PASS',solver_runs=0,presolve_calls=0,checks=checks)
 
 if __name__=='__main__':Path(sys.argv[1]).write_text(json.dumps(run(),indent=2)+'\n')

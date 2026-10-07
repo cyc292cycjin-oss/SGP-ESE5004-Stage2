@@ -32,6 +32,28 @@ def frame_signature(frame):
     return h.hexdigest()
 
 
+def export_complete_timeseries(n, output):
+    """Keep default columns and signed zeros omitted by PyPSA's compact export.
+
+    The standard exporter still owns static data, snapshots and metadata. Each
+    nonempty dynamic frame is then stored verbatim in its existing NetCDF schema.
+    No values, labels, dtype, tolerances or readback comparisons are changed.
+    """
+    dataset=n.export_to_netcdf(path=None,float32=False)
+    try:
+        for typ in ['Generator','Link','Line','Transformer','Store','StorageUnit','Load']:
+            list_name=n.components[typ]['list_name']
+            for attr,frame in n.pnl(typ).items():
+                if frame.empty:continue
+                key=list_name+'_t_'+attr;coordinate=key+'_i'
+                dataset=dataset.drop_vars([key,coordinate],errors='ignore')
+                # Frozen PyPSA stores snapshot positions here; snapshot labels
+                # are already held by the standard snapshot variables.
+                dataset[key]=frame.reset_index(drop=True).rename_axis(index='snapshots',columns=coordinate)
+        dataset.to_netcdf(output)
+    finally:dataset.close()
+
+
 def export_sequential(owner, output, identity):
     """No simultaneous original and reread PyPSA networks."""
     n=owner[0]
@@ -39,7 +61,7 @@ def export_sequential(owner, output, identity):
         for typ in ['Generator','Link','Line','Transformer','Store','StorageUnit','Load']
         for attr,frame in n.pnl(typ).items() if not frame.empty}
     meta=json.dumps(n.meta,sort_keys=True)
-    n.export_to_netcdf(output)
+    export_complete_timeseries(n,output)
     owner[0]=None
     del n
     trim()
@@ -50,7 +72,7 @@ def export_sequential(owner, output, identity):
     strict=physical_checks(reread,identity)
     if not all(x['Status']=='PASS' for x in strict):raise ValueError('Export original-unit checks failed')
     return dict(status='PASS',sha256=sha(output),compared_nonempty_frames=len(signatures),
-                method='Exact dtype/order/value signatures with normalized NaN payloads; sequential network lifetimes')
+                method='Complete float64 time series including default columns and signed zeros; unchanged exact dtype/order/value signatures with normalized NaN payloads; sequential network lifetimes')
 
 
 def consume_native(owner, out, mapping_folder, record, identity, progress=lambda phase:None):

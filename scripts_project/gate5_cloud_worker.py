@@ -15,18 +15,19 @@ def collect(out,exit_code,identity):
     qualified=q.get('network_writeback_qualified') is True
     checks=out/'GATE5_DYNAMIC_CHECKS.json';detail=out/'GATE5_DYNAMIC_DETAIL.json'
     rows=json.loads(checks.read_text()) if qualified and checks.exists() else []
+    dynamic_status=('PASS' if all(r.get('Status')=='PASS' for r in rows) else 'FAIL') if rows else 'NOT_RUN'
     objective=json.loads(detail.read_text()).get('objective_reconciliation',{}) if qualified and detail.exists() else {}
     network=Path(raw['result_network']) if raw.get('result_network') else None
     exported=bool(network and network.is_file() and sha(network)==raw.get('result_sha256'))
     objective_check=next((r for r in rows if 'OBJECTIVE_RECONCILIATION' in str(r)),{})
     passed=(exit_code==0 and raw.get('status')=='PASS' and qualified and
-            q.get('linopy_termination_condition')=='optimal' and raw.get('dynamic_checks')=='PASS' and raw.get('export_roundtrip')=='PASS'
+            q.get('linopy_termination_condition')=='optimal' and dynamic_status=='PASS' and raw.get('export_roundtrip')=='PASS'
             and exported and bool(rows) and all(r.get('Status')=='PASS' for r in rows) and bool(objective) and objective_check.get('Status')=='PASS')
     result=dict(raw,**identity)
     result.update(worker_exit_code=exit_code,qualified_primal=qualified,gate5_pass=passed,
                   objective=raw.get('objective') if qualified else None,
                   result_network=raw.get('result_network') if qualified else None,
-                  dynamic_checks=raw.get('dynamic_checks','NOT_RUN') if qualified else 'NOT_RUN',
+                  dynamic_checks=dynamic_status,
                   solver_runs=raw.get('solver_runs',0),gate6_runs=0,integrated_runs=0,disconnected_runs=0,
                   ended_at=datetime.datetime.now(datetime.timezone.utc).isoformat())
     json_write(out/'CLOUD_GATE5_RUN_MANIFEST.json',result)
