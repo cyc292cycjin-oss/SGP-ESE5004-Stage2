@@ -39,10 +39,19 @@ def fixed_screen(n):
     return rows
 
 
-def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,execution_authorization=None):
+def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,execution_authorization=None,resource_mode='windows'):
     from gate5_memory_preflight import authorize
     authorize(execution_authorization,root,out.name)
-    if host_memory_file is None:raise ValueError('Live Windows host monitor required')
+    if resource_mode not in ('windows','cloud'):raise ValueError('Unknown resource mode')
+    if resource_mode=='cloud':
+        import gate5_cloud_resources as cloud
+        cloud_root=cloud.validate_run_path(out)
+        read_host=lambda max_age=120:cloud.snapshot(cloud_root)
+        resource_admission=cloud.admission;resource_stop=cloud.stop_reason
+    else:
+        if host_memory_file is None:raise ValueError('Live Windows host monitor required')
+        read_host=lambda max_age=120:host_read(host_memory_file,max_age=max_age)
+        resource_admission=admission;resource_stop=stop_reason
     evidence=current_evidence(root);resource_budget=budget(evidence)
     if (time_limit,wall_guard)!=(10800,14400):raise ValueError('Unapproved numerical budget')
     os.chdir(root);out.mkdir(parents=True,exist_ok=False)
@@ -55,7 +64,7 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         solver_options={'threads':2,'time_limit':time_limit,'solver':'ipm','run_crossover':'on'},wall_guard_seconds=wall_guard,
         execution='NEW_FROM_FROZEN_INPUT_NOT_CHECKPOINT_RESUME',pid=os.getpid(),
         crossover_reason='Local largest-group KKT/postsolve probe failed without crossover and passed with standard crossover; no feasibility tolerance or presolve changes',
-        git_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),execution_authorization_sha256=sha(execution_authorization))
+        git_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),execution_authorization_sha256=sha(execution_authorization),resource_mode=resource_mode)
     stage={'name':'preflight'}; stop=threading.Event(); started=time.monotonic();save_lock=threading.Lock()
     def save():
         receipt['peak_rss_mib']=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
@@ -73,11 +82,11 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
                 s=stage['name'];log=out/'gate5_solver.log'
                 if s=='solver_internal':s=phases.read(log)
                 samples+=1;tree=process_tree_sample(include_pss=samples%15==0)
-                try:host=host_read(host_memory_file,max_age=30)
+                try:host=read_host(max_age=30)
                 except (ValueError,OSError,json.JSONDecodeError):host=None
                 mem=psutil.virtual_memory();record=dict(time=now(),elapsed_s=time.monotonic()-started,stage=s,rss_bytes=psutil.Process().memory_info().rss,available_bytes=mem.available,host=host,process_tree=tree,swap_used_bytes=psutil.swap_memory().used,**({'progress':stage.get('detail')} if s=='handoff' else {}))
                 f.write(json.dumps(record)+'\n')
-                reason=stop_reason(mem.available,host,time.monotonic()-started,wall_guard,tree['process_tree_rss_bytes'],resource_budget['observed_lower_bound_bytes']+resource_budget['unmeasured_postsolve_reserve_bytes'])
+                reason=resource_stop(mem.available,host,time.monotonic()-started,wall_guard,tree['process_tree_rss_bytes'],resource_budget['observed_lower_bound_bytes']+resource_budget['unmeasured_postsolve_reserve_bytes'])
                 if reason:
                     persist_resource_stop(out,receipt,record,reason,save)
     t=threading.Thread(target=monitor,daemon=True);t.start()
@@ -97,7 +106,7 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
             if sha(root/'scripts_project'/name)!=hash_value:raise ValueError('Qualification test code hash stale: '+name)
         receipt['qualification_tests_sha256']=sha(qpath)
         tree=process_tree_sample(include_pss=True)
-        receipt['memory_preflight']=admission(evidence,host_read(host_memory_file),psutil.virtual_memory().available,tree['process_tree_rss_bytes'],cgroup_memory())
+        receipt['memory_preflight']=resource_admission(evidence,read_host(),psutil.virtual_memory().available,tree['process_tree_rss_bytes'],cgroup_memory())
         receipt['resource_evidence']=evidence;receipt['declared_resource_budget']=resource_budget
         if receipt['memory_preflight']['status']!='PASS':raise MemoryError('Current host/guest/postsolve resource admission failed')
         receipt['environment']=dict(python=sys.version,pypsa=pypsa.__version__,linopy=linopy.__version__,highs=highspy.Highs().version(),ram_bytes=psutil.virtual_memory().total,platform=platform.platform())
@@ -124,12 +133,13 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         labels=list(map(int,certificate))+[3459209,3459210]
         def before_run(h,transfer):
             if transfer['status']!='PASS':raise ValueError('Native fidelity precondition failed')
+            if resource_mode=='cloud':receipt['one_solve_claim']=cloud.claim_once(execution_authorization,out,cloud_root)
             progress('solver_internal');receipt.update(status='SOLVING',solver_runs=1,solve_start_time=now(),solver_transfer_status='PASS',nnz=transfer['nnz']);save()
             print('GATE5 FIDELITY_PASS; starting one real retry',flush=True)
         progress('handoff')
         network_owner=[n];scale_owner=[transformation]
         del n,model,transformation
-        native,record,fidelity=prepare_detached(network_owner,scale_owner,source,DAILY_SHA,out,labels,factors,progress)
+        native,record,fidelity=prepare_detached(network_owner,scale_owner,source,DAILY_SHA,out,labels,factors,progress,result_directory=out if resource_mode=='cloud' else None)
         native_owner=[native];del native
         result=execute_prepared(native_owner,record,fidelity,identity,out,receipt['solver_options'],progress,before_run)
         q=result['qualification'];condition=q['linopy_termination_condition']
@@ -156,4 +166,4 @@ def run(root,out,time_limit=10800,wall_guard=14400,host_memory_file=None,executi
         stop.set();t.join(timeout=3);save()
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--time-limit',type=int,default=10800);p.add_argument('--wall-guard',type=int,default=14400);p.add_argument('--host-memory-file',required=True);p.add_argument('--execution-authorization',required=True);a=p.parse_args();raise SystemExit(run(Path(__file__).resolve().parents[1],Path(a.output).resolve(),a.time_limit,a.wall_guard,Path(a.host_memory_file),Path(a.execution_authorization)))
+    p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--time-limit',type=int,default=10800);p.add_argument('--wall-guard',type=int,default=14400);p.add_argument('--host-memory-file');p.add_argument('--execution-authorization',required=True);p.add_argument('--resource-mode',choices=['windows','cloud'],default='windows');a=p.parse_args();raise SystemExit(run(Path(__file__).resolve().parents[1],Path(a.output).resolve(),a.time_limit,a.wall_guard,Path(a.host_memory_file) if a.host_memory_file else None,Path(a.execution_authorization),a.resource_mode))

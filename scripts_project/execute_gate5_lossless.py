@@ -11,7 +11,7 @@ from lossless_gate5_lifecycle import save_mapping,trim
 from finish_gate5_lossless import consume_native
 
 
-def prepare_detached(network_owner,scale_owner,source,input_sha,out,labels,factors,progress):
+def prepare_detached(network_owner,scale_owner,source,input_sha,out,labels,factors,progress,result_directory=None):
     """Consume caller's sole owners, return exact native problem and disk mapping."""
     n=network_owner[0];scaling=scale_owner[0]
     native,mapping,fidelity=transfer(n.model,progress=progress,certificate_labels=labels,
@@ -19,7 +19,7 @@ def prepare_detached(network_owner,scale_owner,source,input_sha,out,labels,facto
     if fidelity['status']!='PASS':raise ValueError('Incomplete native transfer')
     out=Path(out)
     (out/'SOLVER_TRANSFER_FIDELITY.json').write_text(json.dumps(fidelity,indent=2)+'\n')
-    result_dir=out if str(out.resolve()).startswith('/mnt/d/ResearchWorkspaces/ASEAN/') else Path('/mnt/d/ResearchWorkspaces/ASEAN/work/gate5_native_results')/out.name
+    result_dir=Path(result_directory).resolve() if result_directory is not None else (out if str(out.resolve()).startswith('/mnt/d/ResearchWorkspaces/ASEAN/') else Path('/mnt/d/ResearchWorkspaces/ASEAN/work/gate5_native_results')/out.name)
     record=save_mapping(result_dir/'mapping',n,mapping,scaling,source,input_sha)
     record['result_directory']=str(result_dir)
     (result_dir/'mapping/MAPPING_MANIFEST.json').write_text(json.dumps(record,indent=2)+'\n')

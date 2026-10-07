@@ -18,7 +18,7 @@ def run(output):
             n.add('Bus','b');n.add('Generator','g',bus='b',p_nom=10.,marginal_cost=2.)
             n.add('Load','l',bus='b',p_set=[1.,2.,3.]);n.optimize.create_model()
             s=IdentityScaling();nr=weakref.ref(n);sr=weakref.ref(s);no=[n];so=[s];del n,s
-            h,record,fidelity=prepare_detached(no,so,'synthetic-only','synthetic-only',out,[],{},lambda *x:None)
+            h,record,fidelity=prepare_detached(no,so,'synthetic-only','synthetic-only',out,[],{},lambda *x:None,result_directory=out)
             assert no[0] is None and so[0] is None and nr() is None and sr() is None
             assert h.getNumCol()==3 and fidelity['status']=='PASS'
             h.clear();del h
@@ -41,7 +41,7 @@ def run(output):
             except ValueError:pass
             else:raise AssertionError('Changed frozen options accepted')
     return dict(status='PASS',solver_runs=0,presolve_calls=0,mock_run_calls=1,
-        checks=['actual_native_transfer_and_source_owner_destruction','D_workspace_mapping_destination',
+        checks=['actual_native_transfer_and_source_owner_destruction','explicit_workspace_mapping_destination',
                 'before_run_receipt_precedes_mock_execution','one_execution_boundary_then_result_consumer','frozen_options_preserved','changed_crossover_rejected'])
 
 if __name__=='__main__':
