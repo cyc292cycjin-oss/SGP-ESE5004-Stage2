@@ -1,11 +1,3 @@
-# 当前追加状态：Gate6 内部授权传递修复（2026-10-08）
-
-以下旧阶段摘要保留为历史。当前以 gate6_baseline/authorization_handoff_fix_20261008/GATE6_AUTHORIZATION_HANDOFF_FIX.md 和配套 JSON 为准。
-
-既有 cloud_gate6_baseline_20261008T035607Z 为 FAILED_ENGINEERING，基础 PyPSA 构模已返回、研究 hooks 未安装；原 Highs.run/presolve/getSolution=0，旧一次性 claim 已消耗且不可复用。新修复代码 3e8a71ad7ffa7c55632acd01246911defc897bac 在本地/915 云端通过相同 94 项检查＋72 项回归；50 项执行锁 PASS，科学输入 SHA 未变。当前实测资源 PASS，可申请新版本的一次执行，但 RUN_AUTHORIZED=false。本轮完整 Gate6 构模、solver、presolve、getSolution、DEC、Integrated/Disconnected、Phase5 均为 0。未自动创建新授权或开算；可手动关机，未来运行前须重新资源预检与授权。科学报告边界不变。
-
----
-
 # Phase5 readiness — 当前索引（Gate6 Baseline 准备后）
 
 2026-10-08。当前准备结果来自 GATE6_3H_NO_SOLVER_TESTS、3h 来源审计与 DEC 逐项证据，不把 mock 或文件检查当作完整模型结果。原版本已逐字保存在 gate6_baseline/PHASE5_READINESS_BEFORE_GATE6_PREPARATION.md；旧 closeout 文档没有改写。
