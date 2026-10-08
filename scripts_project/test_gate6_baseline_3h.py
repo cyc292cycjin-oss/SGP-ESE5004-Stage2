@@ -11,6 +11,7 @@ from gate6_fixed_term_contract import compare
 from test_gate5_lossless_integration import IdentityScaling
 from test_lossless_export import edge_network
 from execute_gate5_lossless import prepare_detached
+from test_gate6_authorization_flow import ready_context
 
 def run(root,out):
     checks=[];out=Path(out)
@@ -19,7 +20,7 @@ def run(root,out):
         try:action()
         except (ValueError,TypeError,OverflowError,FileNotFoundError):return
         raise AssertionError('Negative case accepted')
-    with patch.object(highspy.Highs,'run',side_effect=AssertionError('REAL RUN FORBIDDEN')) as native_run,patch.object(highspy.Highs,'presolve',side_effect=AssertionError('PRESOLVE FORBIDDEN')) as presolve:
+    with patch.object(highspy.Highs,'run',side_effect=AssertionError('REAL RUN FORBIDDEN')) as native_run,patch.object(highspy.Highs,'presolve',side_effect=AssertionError('PRESOLVE FORBIDDEN')) as presolve,patch.object(highspy.Highs,'getSolution',side_effect=AssertionError('NATIVE GETSOLUTION FORBIDDEN')) as get_solution:
         n=pypsa.Network();n.set_snapshots(pd.date_range('2013-01-01',periods=2920,freq='3h'));n.snapshot_weightings[:]=3.
         entry.validate_temporal(n);yes('2920_3h_8760_hours')
         n.snapshot_weightings.iloc[0,0]=2.;reject(lambda:entry.validate_temporal(n));n.snapshot_weightings[:]=3.
@@ -73,9 +74,10 @@ def run(root,out):
             def setOptionValue(self,k,v):events.append((k,v));return highspy.HighsStatus.kOk
             def run(self):events.append('MOCK_RUN')
         def consume(owner,*args):events.append('CONSUME');owner[0]=None;return {'status':'SYNTHETIC_TEST_ONLY'}
-        owner=[Fake()]
+        owner=[Fake()];context=ready_context(out/'native_boundary_context')
         with patch('run_gate6_baseline.consume',consume):
-            entry.execute_native(owner,target,record,fidelity,ident,entry.read(Path(root)/entry.CONFIG),lambda *x:None,lambda:events.append('AUTHORIZED_BOUNDARY'))
+            entry.execute_native(owner,target,record,fidelity,ident,entry.read(Path(root)/entry.CONFIG),lambda *x:None,lambda:events.append('AUTHORIZED_BOUNDARY'),context)
+        context.close()
         assert events.index('AUTHORIZED_BOUNDARY')<events.index('MOCK_RUN')<events.index('CONSUME') and events.count('MOCK_RUN')==1 and owner[0] is None
         for option in [('threads',2),('solver','ipm'),('run_crossover','on'),('presolve','on'),('time_limit',86400)]:assert option in events
         yes('new_execution_boundary_mock_once_keeps_IPM_crossover_presolve_two_threads')
@@ -89,8 +91,10 @@ def run(root,out):
             calls=[]
             def get():calls.append(1);return NS(value_valid=valid,dual_valid=False,col_value=[value],col_dual=[0.],row_value=[0.],row_dual=[0.])
             native=NS(getSolution=get,getInfo=lambda:NS(valid=info,primal_solution_status=2,dual_solution_status=0),getModelStatus=lambda:highspy.HighsModelStatus.kOptimal,modelStatusToString=lambda x:'Optimal',getObjectiveValue=lambda:1.,clear=lambda:None)
+            context=ready_context(out/(label+'_context'),solved=True)
             with patch('gate6_result.reload_map_validate',side_effect=AssertionError('Unqualified solution must never map')):
-                returned=result.consume([native],folder,rec,{},lambda *x:None)
+                returned=result.consume([native],folder,rec,{},lambda *x:None,context)
+            context.close()
             assert returned['status']=='FAILED_NATIVE_QUALIFICATION' and len(calls)==1
         yes('new_consumer_once_getSolution_no_invalid_placeholder_or_nonfinite_writeback')
         # Metadata finalization tests use synthetic values, not Gate5 dispatch.
@@ -113,13 +117,18 @@ def run(root,out):
         # Exercise Gate6's complete positive postsolve sequence with a labelled mock primal.
         positive=out/'positive_consumer';positive.mkdir();shutil.copytree(mf,positive/'mapping')
         (positive/'GATE6_INPUT_LOCK.json').write_text('{"fixture":"SYNTHETIC_ONLY"}')
-        mapped=edge_network();mapped.meta=copy.deepcopy(old);mapped.objective=12.;mapped.optimize.create_model()
+        context=ready_context(out/'positive_consumer_context',solved=True)
+        def synthetic_mapping(*args,execution_context=None):
+            assert execution_context is context
+            mapped,_=context.build_network('reconstruction')
+            mapped.meta.update(copy.deepcopy(old));mapped.objective=12.
+            return mapped,checks_mock,detail
         calls=[]
         def positive_get():calls.append(1);return NS(value_valid=True,dual_valid=False,col_value=[1.],col_dual=[0.],row_value=[0.],row_dual=[0.])
         native=NS(getSolution=positive_get,getInfo=lambda:NS(valid=True,primal_solution_status=2,dual_solution_status=0),getModelStatus=lambda:highspy.HighsModelStatus.kOptimal,modelStatusToString=lambda x:'Optimal',getObjectiveValue=lambda:12.,clear=lambda:None)
         phases=[]
-        with patch('gate6_result.reload_map_validate',return_value=(mapped,checks_mock,detail)),patch('finish_gate5_lossless.physical_checks',return_value=[{'Status':'PASS'}]):
-            accepted=result.consume([native],positive,{**rec,'input_path':'SYNTHETIC_ONLY','input_sha256':'SYNTHETIC_ONLY'},{'groups':[]},lambda stage:phases.append(stage))
+        with patch('gate6_result.reload_map_validate',side_effect=synthetic_mapping),patch('finish_gate5_lossless.physical_checks',return_value=[{'Status':'PASS'}]):
+            accepted=result.consume([native],positive,{**rec,'input_path':'SYNTHETIC_ONLY','input_sha256':'SYNTHETIC_ONLY'},{'groups':[]},lambda stage:phases.append(stage),context)
         assert accepted['status']=='PASS' and len(calls)==1
         assert phases.index('native_released')<phases.index('postsolve_rebuild_mapping')<phases.index('export_readback')<phases.index('metadata_finalization')
         yes('new_consumer_positive_mock_one_read_durable_vectors_release_map_validate_export_then_finalize')
@@ -149,8 +158,8 @@ def run(root,out):
         assert entry.guard_reason(None,0,0,budget)=='RESOURCE_MONITOR_UNAVAILABLE'
         assert entry.guard_reason(obs,0,108001,budget)=='WALL_GUARD'
         yes('Gate6_resource_budgets_fail_closed_for_all_lifecycle_phases')
-        assert native_run.call_count==presolve.call_count==0
-    return dict(status='PASS',solver_calls=0,presolve_calls=0,checks=checks,full_gate6_model_built=False)
+        assert native_run.call_count==presolve.call_count==get_solution.call_count==0
+    return dict(status='PASS',solver_calls=0,presolve_calls=0,getSolution_calls=0,checks=checks,full_gate6_model_built=False)
 
 if __name__=='__main__':
     root=Path(__file__).resolve().parents[1];p=Path(sys.argv[1]);p.write_text(json.dumps(run(root,p.parent),indent=2)+'\n')

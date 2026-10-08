@@ -18,6 +18,7 @@ from fixed_inventory_scaling import FixedInventoryScaling
 from execute_gate5_lossless import prepare_detached
 from run_gate5_validation import hook_receipt
 from precision_handoff import ok
+from gate6_execution_context import validate_authorization,claim_execution,checked
 
 CONFIG='configs/research/gate6_baseline_3h.json'
 DATA=['results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc',
@@ -104,22 +105,7 @@ def preflight(root,source=None,verify=True):
     del n;trim();return report,rounding,fixed,lock
 
 def authorization(root,cfg,mode,out,path):
-    require(path is not None,'Independent Gate6 authorization required before full build/solve')
-    a=read(path)
-    require(a.get('gate')=='GATE6' and a.get('scenario')=='BASELINE' and a.get('stage')==mode,'Old Gate5 or wrong-stage authorization rejected')
-    require(a.get('human_authorized') is True and bool(a.get('human_decision_reference')) and a.get('max_attempts')==1,'Future explicit one-attempt human authorization required')
-    require(a.get('budget_approved') is True and a.get('budget')==cfg['proposed_budget'],'Resource/time/cost budget not approved')
-    require(a.get('input_sha256')==INPUT_SHA and a.get('code_sha')==git(root,'rev-parse','HEAD'),'Authorized scientific/code identity differs')
-    require(not git(root,'status','--porcelain'),'Clean code tree required')
-    require(a.get('input_lock_sha256')==sha(root/cfg['lock']),'Authorization lock differs')
-    require(a.get('tests_sha256')==sha(root/cfg['tests']),'Authorization test evidence differs')
-    tests=read(root/cfg['tests']);require(tests.get('status')=='PASS' and tests.get('solver_calls')==tests.get('presolve_calls')==0,'No-solver prerequisite missing')
-    require(tests['input_lock_sha256']==sha(root/cfg['lock']),'Tests are stale for execution lock')
-    for rel,digest in tests['tested_code_sha256'].items():require(sha(root/rel)==digest,'Tested code changed: '+rel)
-    require(a.get('run_id')==out.name and re.fullmatch(r'[0-9a-f]{64}',a.get('authorization_id','')),'Invalid authorization identity/run')
-    require(out.parent==Path('/root/autodl-tmp/SGP/runs') and out.name.startswith('cloud_gate6_'),'Gate6 cloud non-overwrite run directory required')
-    require(not out.exists(),'Existing run cannot be overwritten')
-    return a
+    return validate_authorization(root,cfg,mode,out,path,INPUT_SHA,Path('/root/autodl-tmp/SGP/runs'))
 
 def resource_admission(observation,budget):
     reasons=[]
@@ -136,15 +122,17 @@ def guard_reason(observation,rss,elapsed,budget):
     if observation['disk']['free_bytes']<GIB:return 'DISK_EMERGENCY_GUARD'
     return None
 
-def execute_native(owner,out,record,fidelity,identity,cfg,progress,before_run):
+def execute_native(owner,out,record,fidelity,identity,cfg,progress,before_run,context):
+    checked(context)
     require(fidelity['status']=='PASS','Exact transfer failed')
     h=owner[0]
     options=dict(threads=2,solver='ipm',run_crossover='on',presolve='on',time_limit=cfg['proposed_budget']['solver_seconds'])
     for key,val in options.items():ok(h.setOptionValue(key,val))
     ok(h.setOptionValue('output_flag',True));ok(h.setOptionValue('log_file',str(Path(out)/'gate6_solver.log')))
-    before_run();h.run()  # Future independent Gate6 authorization only; trapped in tests.
+    context.begin_solve(h);before_run();h.run()  # One claimed attempt; TEST_ONLY rejects real Highs.
+    context.finish_solve()
     del h
-    return consume(owner,out,record,identity,progress)
+    return consume(owner,out,record,identity,progress,context)
 
 def execute(root,out,mode,auth_path):
     root=Path(root);out=Path(out).resolve();cfg=read(root/CONFIG)
@@ -152,8 +140,7 @@ def execute(root,out,mode,auth_path):
     report,identity,fixed,lock=preflight(root)
     observation=snapshot(out.parent.parent);ready=resource_admission(observation,a['budget'])
     require(ready['status']=='PASS','Fresh cloud admission failed')
-    claim=out.parent.parent/'evidence'/('gate6_authorization_'+a['authorization_id']+'.consumed.json')
-    with claim.open('x') as f:json.dump(dict(authorization=a,claimed_at=now(),stage=mode),f);f.flush();os.fsync(f.fileno())
+    context=claim_execution(root,cfg,mode,out,auth_path,expected_input_sha=INPUT_SHA,runs_root=Path('/root/autodl-tmp/SGP/runs'),observation=observation,network_validator=validate_input)
     out.mkdir(exist_ok=False)
     shutil.copyfile(auth_path,out/'GATE6_EXECUTION_AUTHORIZATION.json')
     for name,obj in [('GATE6_INPUT_LOCK.json',lock),('GATE6_3H_ROUNDING_AUDIT.json',identity),('GATE6_PREFLIGHT.json',report),('GATE6_RESOURCE_ADMISSION.json',ready),('GATE6_FIXED_TERM_CONTRACT.json',fixed)]:write(out/name,obj)
@@ -175,8 +162,8 @@ def execute(root,out,mode,auth_path):
                     receipt.update(status='STOPPED_RESOURCE_GUARD',reason=reason);save();write(out/'EXIT_STATUS.json',dict(exit_code=137,reason=reason));f.flush();os.fsync(f.fileno());os._exit(137)
     worker=threading.Thread(target=monitor,daemon=True);worker.start();save()
     try:
-        source=root/cfg['input'];n=pypsa.Network(source);validate_input(n);progress('build')
-        with bounded_build_allocator():n.optimize.create_model();before=set(n.model.constraints);install_research_constraint_hooks(n)
+        source=root/cfg['input'];progress('build')
+        n,before=context.build_network('initial')
         hooks=hook_receipt(n,before);require(len(hooks['research_constraint_names'])==1003,'Hook attachment changed')
         write(out/'GATE6_HOOK_RECEIPT.json',hooks)
         receipt.update(full_optimization_model_built=True,variables=int(n.model.nvars),constraints=int(n.model.ncons))
@@ -187,12 +174,12 @@ def execute(root,out,mode,auth_path):
         owner=[native];del native
         def before_run():
             receipt.update(status='SOLVING',solver_calls=1,stage='solve');save()
-        result=execute_native(owner,out,record,fidelity,identity,cfg,progress,before_run)
+        result=execute_native(owner,out,record,fidelity,identity,cfg,progress,before_run,context)
         receipt.update(result);return receipt
     except BaseException as error:
         receipt.update(status='FAILED_ENGINEERING',error=str(error));(out/'failure_traceback.txt').write_text(traceback.format_exc());raise
     finally:
-        done.set();worker.join(timeout=3);receipt['ended_at']=now();save()
+        context.close();done.set();worker.join(timeout=3);receipt['ended_at']=now();save()
         write(out/'EXIT_STATUS.json',dict(exit_code=0 if receipt['status'] in ['PASS','BUILD_ONLY_COMPLETED'] else 2,status=receipt['status'],solver_calls=receipt['solver_calls']))
 
 def dispatch(root,out,mode='preflight',authorization_path=None,source=None):
@@ -204,7 +191,7 @@ def dispatch(root,out,mode='preflight',authorization_path=None,source=None):
     # Actual production-file preflight has a hard build/native-call trap.
     from unittest.mock import patch
     from pypsa.optimization.optimize import OptimizationAccessor
-    with patch.object(OptimizationAccessor,'create_model',side_effect=AssertionError('Full build forbidden in preflight')),patch.object(highspy.Highs,'run',side_effect=AssertionError('NO SOLVE')),patch.object(highspy.Highs,'presolve',side_effect=AssertionError('NO PRESOLVE')):
+    with patch.object(OptimizationAccessor,'create_model',side_effect=AssertionError('Full build forbidden in preflight')),patch.object(highspy.Highs,'run',side_effect=AssertionError('NO SOLVE')),patch.object(highspy.Highs,'presolve',side_effect=AssertionError('NO PRESOLVE')),patch.object(highspy.Highs,'getSolution',side_effect=AssertionError('NO SOLUTION READ')):
         report,rounding,fixed,lock=preflight(root,source=source)
     out=Path(out);out.mkdir(parents=True,exist_ok=False)
     for name,obj in [('GATE6_PREFLIGHT.json',report),('GATE6_3H_ROUNDING_AUDIT.json',rounding),('GATE6_FIXED_TERM_CONTRACT.json',fixed),('GATE6_INPUT_LOCK.json',lock)]:write(out/name,obj)

@@ -91,10 +91,14 @@ def validate_hooks(n):
         if not n.links.at[a,'p_nom_extendable'] or not n.links.at[b,'p_nom_extendable']:raise ValueError('Battery nominal variable missing')
     return True
 
-def install_research_constraint_hooks(n):
+def install_research_constraint_hooks(n,execution_context=None):
     """Future optimisation must call this after variables exist; never solves."""
     if n.meta.get('artifact_role')=='DIAGNOSTIC_PARTIAL_UNSOLVED':raise ValueError('Diagnostic partial network cannot install optimization constraints')
-    if n.meta.get('solver_allowed') is False:raise ValueError('Explicit next-gate authorization required before optimization hooks')
+    from gate6_execution_context import PROTECTED_ROLES,checked
+    if execution_context is not None:
+        checked(execution_context).permit_hooks(n)
+    elif n.meta.get('solver_allowed') is False or n.meta.get('artifact_role') in PROTECTED_ROLES or 'gate6_execution_record' in n.meta:
+        raise ValueError('Explicit next-gate authorization required before optimization hooks')
     validate_hooks(n)
     if n.meta.get('external_fixed_account_method'):
         from fixed_accounts import validate_exported_accounting

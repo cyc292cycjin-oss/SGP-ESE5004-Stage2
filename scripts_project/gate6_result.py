@@ -22,6 +22,9 @@ def accepted_metadata(old,q,checks,detail,exported,refs,parent_sha):
     if not np.isfinite(q['objective']) or q['objective']!=obj['actual'] or q['objective']!=account['PricedObjective']:raise ValueError('Priced objective differs')
     if account['KnownFixedCostIncludedInPricedObjective'] is not True or account['KnownFixedCostToAddToPricedObjective']!=0 or obj['known_fixed_once']!=account['KnownFixedCost']:raise ValueError('FOM not counted once')
     m=copy.deepcopy(old)
+    if 'gate6_execution_record' in m:
+        record=m['gate6_execution_record']
+        if record.get('reusable_permission') is not False or record.get('execution_closed') is not True or m.get('solver_allowed') is not False:raise ValueError('Export must not carry live execution permission')
     keys=('PricedObjective','KnownFixedCostIncludedInPricedObjective','KnownFixedCostToAddToPricedObjective')
     if set(account)!=set(m['accounting_report']):raise ValueError('Accounting schema changed')
     for k in account:
@@ -58,14 +61,16 @@ def finalize(parent,output,q,checks,detail,exported,refs):
         if temp.exists():temp.unlink()
     return dict(status='PASS',parent_sha256=digest,sha256=sha(output),scientific_data_unchanged=True,result_network=str(output))
 
-def consume(owner,out,record,identity,progress):
+def consume(owner,out,record,identity,progress,context):
+    from gate6_execution_context import checked
+    checked(context).begin_results(owner[0])
     out=Path(out);progress('solution_retrieval')
     q=qualify_and_store(owner[0],out/'native_result',out/'mapping',record)
     release_native(owner);progress('native_released')
     if not q['network_writeback_qualified']:return dict(status='FAILED_NATIVE_QUALIFICATION',qualification=q,result_network=None)
     # The same frozen input is rebuilt only in a future separately authorized execution.
     progress('postsolve_rebuild_mapping')
-    n,checks,detail=reload_map_validate(record['input_path'],record['input_sha256'],out/'mapping',out/'native_result',record,q,identity)
+    n,checks,detail=reload_map_validate(record['input_path'],record['input_sha256'],out/'mapping',out/'native_result',record,q,identity,execution_context=context)
     # A full-prefix check is independent of the local one-step state equations.
     for group in identity['groups']:
         for store in group['stores']:
@@ -78,6 +83,7 @@ def consume(owner,out,record,identity,progress):
     for k,v in list(vars(n).items()):
         if v is model:setattr(n,k,None)
     del model,v;trim()
+    context.seal_network(n)
     n.meta.update(artifact_role='GATE6_BASELINE_3H_QUALIFIED_EXPORT_PENDING',formal_phase5_allowed=False,solver_allowed=False)
     progress('export_readback');no=[n];del n
     parent=out/'gate6_baseline_3h_accepted_arrays.nc'

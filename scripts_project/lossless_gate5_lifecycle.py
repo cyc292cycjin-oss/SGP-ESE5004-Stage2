@@ -307,7 +307,7 @@ def release_native(owner):
     trim()
 
 
-def reload_map_validate(source, input_sha, mapping_folder, result_folder, record, q, identity):
+def reload_map_validate(source, input_sha, mapping_folder, result_folder, record, q, identity, execution_context=None):
     """Future postsolve path; never solves and never declares Gate5 PASS."""
     import pypsa
     from assembly_components import install_research_constraint_hooks
@@ -315,9 +315,13 @@ def reload_map_validate(source, input_sha, mapping_folder, result_folder, record
     from validation_dynamics import dynamic_checks
     if sha(source) != input_sha:
         raise ValueError('Frozen input changed before result reload')
-    n = pypsa.Network(source)
-    n.optimize.create_model()
-    install_research_constraint_hooks(n)
+    if execution_context is None:
+        n = pypsa.Network(source)
+        n.optimize.create_model()
+        install_research_constraint_hooks(n)
+    else:
+        from gate6_execution_context import checked
+        n, _ = checked(execution_context).build_network('reconstruction', source=source)
     apply_stored_solution(n, mapping_folder, result_folder, record, q)
     checks, detail = dynamic_checks(n)
     checks += physical_checks(n, identity)
