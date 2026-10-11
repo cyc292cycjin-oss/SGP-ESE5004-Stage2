@@ -11,6 +11,7 @@
 | A-03精确LP补证 | FULL_LP_EXACT_INFEASIBILITY_CERTIFIED | 一次CSC结构扫描闭合26,284行完整支撑；精确线性组合给出0≥513/34359738368>0；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
 | A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
 | 精确源常数闭合修复设计 | DESIGN_COMPLETE_PROPOSED_NOT_APPLIED | 385组风险账及A/B/C精确模拟；推荐A保留Load、仅上调180派生Q，待科学批准；见EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md |
+| 方案A受控实施 | SCHEME_A_STATIC_ACCEPTED | 独立源版本180Q×4字段；385/385精确D≤Q′、1737 Load不变；implementation_a_v1/报告及回执；未构模/求解 |
 | A-05 / A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 用户列为实施后剩余审计；本台账此前未明确细分定义，本轮不自行补造或启动 |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
@@ -94,3 +95,16 @@
 - 文件：EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md、PROPOSED_MINIMAL_REPAIR_SPEC.md、CLOSURE_REPAIR_ANALYSIS_METHOD.md、evidence/closure_repair/ALL_385_GROUPS_CLOSURE_LEDGER.json及A/B/C模拟/独立检查/来源索引。
 - 旧A03完整证书、A04和科学源码未改；G6-05为PAUSED_BY_USER；无CSC/大向量重扫、构模、solver或AutoDL操作。未修改Q、Load、V3/V4、参数及历史消费标记。
 - 同轮commit/push及EXACT_CLOSURE_REPAIR_DESIGN_REVIEW.zip，包含相对路径清单、大小/SHA及CRC核验；完成即停止，等待科学审批。发布回执记录本次完整commit与ZIP身份。
+
+## 方案A正式批准与受控实施（2026-10-11）
+
+前轮设计提交 `53c2b28632cb577136d48ebb843823967f0b1c25` 经用户与ChatGPT批准，本轮允许的科学变化仅 EXACT_SOURCE_CLOSURE_A_MAX_ACCOUNT_V1 的180项派生Q。原PROPOSED报告保留其历史语境，不回写批准状态。
+
+- 实施分支 `fix/stage2-exact-source-closure-a-v1`，源版本里程碑 `fe4be3d25b7a5a7283a608c580085b26fa6b1f1e` 已commit并push；本次验收里程碑完整SHA由发布回执记载。新实施PR单独关联审计PR #3，不修改原审计分支或main，不合并。
+- VERIFIED：新unbound recipe、807账户导出及immutable Load引用已生成。180Q各同步Store.e_nom/e_initial、routecap、外置QuantityMWh；627Q和5个Animal waste逐位不变；720项差异全部命中批准清单。
+- VERIFIED：独立源回读385/385精确D≤Q′、0组D=Q′；1737Load×2920及三套权重保持原位。旧Java-Bali证书组新Q′−D=255/34359738368；旧证书对旧LP仍有效，未覆盖。
+- DERIVATION：所有组全部前缀通过精确积分；按不变独占无损结构得局部库存非负解析轨迹，不是完整LP可行性证明。
+- UNCHANGED：原科学源码/registry、成本和碳政策、技术效率、拓扑、NULL语义、原NetCDF及矩阵、V3/V4/P2、历史结果/消费标记；仅新源版本含已批准Q修订。新完整LP目标/缩放界为NOT_CHECKED，未构建。
+- 版本Manifest SHA：`a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720`。目录 `research_inputs/derived/exact_source_closure_a_max_account_v1_20261011`；报告/证据 `research/05_baseline_evolution/20261011/implementation_a_v1`。项目总台账 `research/STAGE2_PROJECT_LEDGER.md`。
+- G6-05继续PAUSED_BY_USER；A-05/A-06仍PLAN_ONLY_SCOPE_TO_BE_CONFIRMED，B—F保持PLAN_ONLY_NOT_AUTHORIZED。未运行solver、365日模型、Gate6或AutoDL操作。
+- 同轮强制交付 EXACT_SOURCE_CLOSURE_A_IMPLEMENTATION_REVIEW.zip，含新报告、更新台账、轻量组件/JSON、脚本及路径/大小/SHA清单和CRC记录；发布后停止，等待联合审阅。
