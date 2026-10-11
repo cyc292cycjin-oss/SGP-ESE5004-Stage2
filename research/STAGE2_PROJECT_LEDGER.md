@@ -19,3 +19,5 @@
 | E/F | PLAN_ONLY_NOT_AUTHORIZED | 跨境载体扩展/互联独立成本实验 |
 
 实施里程碑 `fe4be3d25b7a5a7283a608c580085b26fa6b1f1e` 已推送；验收及交付提交记录在本轮发布回执。没有将本地成功冒称正式模型求解成功。
+
+验收里程碑 `bfd619df747bd94559137ff4f32ef7254c89a58b` 已推送；独立实施 [PR #4](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/4) 已创建，未合并。原审计PR #3保持不变。

@@ -10,7 +10,7 @@
 | A-03 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 385组/807账户静态端口、111↔377逐组联结、精确源常数闭合；见FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md |
 | A-03精确LP补证 | FULL_LP_EXACT_INFEASIBILITY_CERTIFIED | 一次CSC结构扫描闭合26,284行完整支撑；精确线性组合给出0≥513/34359738368>0；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
 | A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
-| 精确源常数闭合修复设计 | DESIGN_COMPLETE_PROPOSED_NOT_APPLIED | 385组风险账及A/B/C精确模拟；推荐A保留Load、仅上调180派生Q，待科学批准；见EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md |
+| 精确源常数闭合修复设计 | DESIGN_COMPLETE_A_APPROVED | 历史A/B/C设计保留；方案A现获批准并完成独立实施，见下列新状态及implementation_a_v1证据 |
 | 方案A受控实施 | SCHEME_A_STATIC_ACCEPTED | 独立源版本180Q×4字段；385/385精确D≤Q′、1737 Load不变；implementation_a_v1/报告及回执；未构模/求解 |
 | A-05 / A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 用户列为实施后剩余审计；本台账此前未明确细分定义，本轮不自行补造或启动 |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
@@ -108,3 +108,10 @@
 - 版本Manifest SHA：`a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720`。目录 `research_inputs/derived/exact_source_closure_a_max_account_v1_20261011`；报告/证据 `research/05_baseline_evolution/20261011/implementation_a_v1`。项目总台账 `research/STAGE2_PROJECT_LEDGER.md`。
 - G6-05继续PAUSED_BY_USER；A-05/A-06仍PLAN_ONLY_SCOPE_TO_BE_CONFIRMED，B—F保持PLAN_ONLY_NOT_AUTHORIZED。未运行solver、365日模型、Gate6或AutoDL操作。
 - 同轮强制交付 EXACT_SOURCE_CLOSURE_A_IMPLEMENTATION_REVIEW.zip，含新报告、更新台账、轻量组件/JSON、脚本及路径/大小/SHA清单和CRC记录；发布后停止，等待联合审阅。
+
+### 方案A真实发布记录
+
+- 源版本里程碑：`fe4be3d25b7a5a7283a608c580085b26fa6b1f1e`，已推送。
+- 三层静态验收里程碑：`bfd619df747bd94559137ff4f32ef7254c89a58b`，已推送。
+- 独立实施PR：[PR #4](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/4)，base为审计分支，关联PR #3，OPEN/DRAFT，未合并。审计分支远端仍为原53c2b28632cb577136d48ebb843823967f0b1c25。
+- 最终交付commit及ZIP指纹见包内PACKAGE_MANIFEST及本地交付回执；不写不存在的自引用SHA。
