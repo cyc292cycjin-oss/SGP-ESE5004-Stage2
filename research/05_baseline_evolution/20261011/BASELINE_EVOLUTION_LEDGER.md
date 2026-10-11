@@ -131,3 +131,10 @@
 - 本轮独立commit/push/PR及强制 `A05_CROSS_BORDER_CARRIER_AUDIT_REVIEW.zip`；最终发布回执记录实际commit和ZIP SHA/CRC，不写不存在的自引用SHA。A-06、B—F没有启动。
 
 下一步仅待用户和ChatGPT审阅：2050候选电网范围、外部供给/固定终端边界、未来H2端用途与比较干预定义。没有自动授权任何新功能、求解或后续审计。
+
+### A-05真实发布里程碑
+
+- 已commit并push：`b6b914c0eef684a6e8d8d385b307848580e01fe6`。
+- 独立审计分支：`audit/stage2-a05-cross-border-20261011`；[PR #5](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/5)为OPEN/DRAFT，base为原审计分支，未合并。
+- PR #3/原审计HEAD仍`53c2b28632cb577136d48ebb843823967f0b1c25`；PR #4/方案A HEAD仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。
+- 最终交付commit及ZIP指纹见包内PACKAGE_MANIFEST与本地发布回执。当前工作到此停止，等待联合审阅。

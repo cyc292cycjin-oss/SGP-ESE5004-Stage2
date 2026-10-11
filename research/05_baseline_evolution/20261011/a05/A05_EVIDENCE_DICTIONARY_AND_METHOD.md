@@ -8,7 +8,7 @@
 - `A05_REACHABILITY_AND_BOUNDARIES.json`：国家对汇总、100个H2节点终端端口联结、实际Store类别及燃料价格。
 - `A05_SOURCE_AND_DECISION_EVIDENCE.json`：固定commit源码片段、行号、Git blob SHA、SHA256；有限关键字检索原输出；Phase3决策原文和SHA；冻结构模清单摘录；方案A既有回执原样引用。
 - `A05_EVIDENCE_INDEX.json`：本轮文件完整SHA/大小和原版本绑定。自身哈希由Git及ZIP清单承载，避免自引用。
-- `verification/extract_a05.py`、`finish_evidence.py`：确定性只读方法；固定本机输入路径，复核者只需替换根路径。使用netCDF4/numpy读取静态字段，不导入PyPSA Network或Gurobi，不调用模型生成代码。
+- `verification/capture_code.py`、`extract_a05.py`、`finish_evidence.py`：确定性只读方法；固定本机输入路径，复核者只需替换根路径。使用netCDF4/numpy读取静态字段，不导入PyPSA Network或Gurobi，不调用模型生成代码。
 - `verification/verify_a05.py`：复核输出计数、国家/端口关联、参数差边界和来源SHA；不重跑此前工程或科学实验。
 
 ## 口径
@@ -36,3 +36,5 @@ NetCDF参数是输入字段，不是优化后容量、实际流量或SCOPE_V3完
 ## 局限
 
 这是一份模型实现与边界谱系审计，不认证燃料产地/进口可用量，不证明2050项目数据真实性或全LP可行性。共同池可达性并不证明跨国流量曾实际发生；所有“作者实际”指文件里存在的结构，非依配置推断的实验行为。缺失跨境管网不等于无外部燃料供应；原科学边界及未来方案应由用户决定。
+
+复核顺序：先将脚本根路径指向已有只读输入和独立输出目录；依次capture_code → extract_a05 → finish_evidence，然后verify_a05。只复核已交付JSON时直接运行verify_a05即可，不必重新读取网络。capture_code生成的中间CODE_CAPTURE不是另一个科学输入，其全部字段已进入最终SOURCE_AND_DECISION证据。

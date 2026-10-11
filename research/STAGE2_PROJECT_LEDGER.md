@@ -30,3 +30,10 @@
 已核19AC+5DC跨境、400独立外部化石供给、无非电跨国物理共享路径、100本地H2节点的FT/回电用途。当前电网沿论文2025，论文2050新增15项跨境记录未继承；科学取舍待用户判断。Integrated/Disconnected仍未执行正式网络干预。
 
 报告与证据：`research/05_baseline_evolution/20261011/a05/`。16项轻量一致性核验PASS。强制ZIP `A05_CROSS_BORDER_CARRIER_AUDIT_REVIEW.zip`附相对路径、大小/SHA和CRC。实际commit、远端与PR/ZIP指纹见发布回执。A-05结束即停止；不自动进入A-06/B—F，不恢复G6-05。
+
+### A-05真实发布里程碑
+
+- 已commit并push：`b6b914c0eef684a6e8d8d385b307848580e01fe6`。
+- 独立审计分支：`audit/stage2-a05-cross-border-20261011`；[PR #5](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/5)为OPEN/DRAFT，base为原审计分支，未合并。
+- PR #3/原审计HEAD仍`53c2b28632cb577136d48ebb843823967f0b1c25`；PR #4/方案A HEAD仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。
+- 最终交付commit及ZIP指纹见包内PACKAGE_MANIFEST与本地发布回执。当前工作到此停止，等待联合审阅。
