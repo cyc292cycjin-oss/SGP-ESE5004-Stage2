@@ -8,6 +8,8 @@
 | A-01 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 上游论文、Sector Coupling及当前Full-SC差异总账 |
 | A-02 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 807固定资源Store谱系与异常生成路径 |
 | A-03 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 385组/807账户静态端口、111↔377逐组联结、精确源常数闭合；见FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md |
+| A-03精确LP补证 | BLOCKED_FULL_ROW_SUPPORT | 指定组局部CSC/有理数正差已验证；严格完整LP证书缺完整所选行支撑；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
+| A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
@@ -34,7 +36,7 @@
 
 本轮验证边界：源码与小型JSON SHA、固定commit/代码位置、NetCDF静态元数据、2份合计约5.03MiB原始UNSD文件SHA及2行原值；未重建模型、未调用求解器、未重跑既有实验或全量数值审计、未连接AutoDL。新文件仅审计文档与小型证据，禁止自行合并PR。
 
-## A-03完成记录（本次更新）
+## A-03完成记录（前轮，保留当时状态）
 
 前一审计HEAD：`08d4d3a74d7844d9bcf8d3b3ae6db7796a32b3d8`，分支与工作区已核实干净；继续原PR #3。本次commit由最终发布回执记录，不捏造自身SHA。
 
@@ -48,3 +50,17 @@
 - 同轮提交推送审计分支，自动交付`A03_BASELINE_EVOLUTION_REVIEW.zip`，含报告/台账/轻量JSON及清单、大小、SHA；CRC和成员完整性检查，最终回执记录ZIP与commit身份。用户上传ChatGPT联合审阅后再决定下一阶段。
 
 仍待科学判断：固定终端核算的适用结论、消费数据/商品与时空代理的一致性，以及精确源常数舍入差未来如何受控处理。本轮不授权任何相应变更或计算。
+
+## A-03精确LP补证与A-04（2026-10-11本轮）
+
+前轮A-03提交`788257a647952685ac1c2007467cbf24d676a84f`已由用户审阅；本轮继续同一审计分支及PR #3，起始工作区干净。未改科学源码、输入或历史结果。
+
+- VERIFIED：指定ID工业Java-Bali1 2组实际CSC局部列/行界给出精确`D−Q=513/34359738368 MWh`。读取35,040列、128,476项，未全矩阵扫描。
+- DERIVATION/BLOCKED：若所列行没有遗漏项，动态+3资源Bus+3最终Bus导出`−Σe_T=D−Q>0`，与`e_T≥0`严格矛盾。但没有所选行完整支撑证据，不能宣称完整冻结LP严格不可行。最小缺项在A03_EXACT_ANNUAL_CLOSURE_PROOF.md；不需要新求解来补结构证据。
+- VERIFIED：A04已批准171账户对应1737唯一Load，全部owner和实际目的Bus国家/carrier匹配；没有正账户缺失、单列电力子账或PRE_FINAL正目标被置0/NULL。年度最大绝对浮点差2.384185791015625e−7 MWh。
+- SCIENTIFIC_ASSUMPTION/UNKNOWN：108未入模账户全部NULL，其中15缺报边界不能认作真实零；A*父账、增长/空间/时间代理及最终能源固定边界已溯源，但未证明全部统计覆盖或服务等价。
+- 本轮交付A03_EXACT_ANNUAL_CLOSURE_PROOF.md、A04_DEMAND_LINEAGE_AUDIT.md及轻量JSON；更新差异总账。源commit/path/行号和文件SHA经发布核查。
+- G6-05继续PAUSED_BY_USER。B—F仅PLAN_ONLY_NOT_AUTHORIZED；没有连接AutoDL、调用solver、构模、调整容差或清除消费标记。未重新核实远端当前状态，不冒称实时进程确认。
+- 同轮commit/push及A03_EXACT_A04_DEMAND_REVIEW.zip；ZIP保留相对路径、附大小/SHA清单并验证CRC。最终发布回执记录新commit及ZIP身份；请用户上传ChatGPT联合审阅。
+
+剩余事项限定为完整所选行支撑和科学代理适用性的审阅，不自行扩展实验或恢复旧求解授权。
