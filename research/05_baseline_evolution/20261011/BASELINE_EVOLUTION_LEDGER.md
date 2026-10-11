@@ -10,8 +10,10 @@
 | A-03 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 385组/807账户静态端口、111↔377逐组联结、精确源常数闭合；见FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md |
 | A-03精确LP补证 | FULL_LP_EXACT_INFEASIBILITY_CERTIFIED | 一次CSC结构扫描闭合26,284行完整支撑；精确线性组合给出0≥513/34359738368>0；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
 | A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
-| 精确源常数闭合修复设计 | DESIGN_COMPLETE_PROPOSED_NOT_APPLIED | 385组风险账及A/B/C精确模拟；推荐A保留Load、仅上调180派生Q，待科学批准；见EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md |
-| A-05 / A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 用户列为实施后剩余审计；本台账此前未明确细分定义，本轮不自行补造或启动 |
+| 精确源常数闭合修复设计 | DESIGN_COMPLETE_A_APPROVED | 历史A/B/C设计保留；方案A现获批准并完成独立实施，见下列新状态及implementation_a_v1证据 |
+| 方案A受控实施 | SCHEME_A_STATIC_ACCEPTED | 独立源版本180Q×4字段；385/385精确D≤Q′、1737 Load不变；implementation_a_v1/报告及回执；未构模/求解 |
+| A-05 | A05_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 已授权跨境载体/网络谱系只读审计；a05/报告与实际静态资产清单 |
+| A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 本轮未授权、未启动 |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
@@ -94,3 +96,38 @@
 - 文件：EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md、PROPOSED_MINIMAL_REPAIR_SPEC.md、CLOSURE_REPAIR_ANALYSIS_METHOD.md、evidence/closure_repair/ALL_385_GROUPS_CLOSURE_LEDGER.json及A/B/C模拟/独立检查/来源索引。
 - 旧A03完整证书、A04和科学源码未改；G6-05为PAUSED_BY_USER；无CSC/大向量重扫、构模、solver或AutoDL操作。未修改Q、Load、V3/V4、参数及历史消费标记。
 - 同轮commit/push及EXACT_CLOSURE_REPAIR_DESIGN_REVIEW.zip，包含相对路径清单、大小/SHA及CRC核验；完成即停止，等待科学审批。发布回执记录本次完整commit与ZIP身份。
+
+## 方案A正式批准与受控实施（2026-10-11）
+
+前轮设计提交 `53c2b28632cb577136d48ebb843823967f0b1c25` 经用户与ChatGPT批准，本轮允许的科学变化仅 EXACT_SOURCE_CLOSURE_A_MAX_ACCOUNT_V1 的180项派生Q。原PROPOSED报告保留其历史语境，不回写批准状态。
+
+- 实施分支 `fix/stage2-exact-source-closure-a-v1`，源版本里程碑 `fe4be3d25b7a5a7283a608c580085b26fa6b1f1e` 已commit并push；本次验收里程碑完整SHA由发布回执记载。新实施PR单独关联审计PR #3，不修改原审计分支或main，不合并。
+- VERIFIED：新unbound recipe、807账户导出及immutable Load引用已生成。180Q各同步Store.e_nom/e_initial、routecap、外置QuantityMWh；627Q和5个Animal waste逐位不变；720项差异全部命中批准清单。
+- VERIFIED：独立源回读385/385精确D≤Q′、0组D=Q′；1737Load×2920及三套权重保持原位。旧Java-Bali证书组新Q′−D=255/34359738368；旧证书对旧LP仍有效，未覆盖。
+- DERIVATION：所有组全部前缀通过精确积分；按不变独占无损结构得局部库存非负解析轨迹，不是完整LP可行性证明。
+- UNCHANGED：原科学源码/registry、成本和碳政策、技术效率、拓扑、NULL语义、原NetCDF及矩阵、V3/V4/P2、历史结果/消费标记；仅新源版本含已批准Q修订。新完整LP目标/缩放界为NOT_CHECKED，未构建。
+- 版本Manifest SHA：`a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720`。目录 `research_inputs/derived/exact_source_closure_a_max_account_v1_20261011`；报告/证据 `research/05_baseline_evolution/20261011/implementation_a_v1`。项目总台账 `research/STAGE2_PROJECT_LEDGER.md`。
+- G6-05继续PAUSED_BY_USER；A-05/A-06仍PLAN_ONLY_SCOPE_TO_BE_CONFIRMED，B—F保持PLAN_ONLY_NOT_AUTHORIZED。未运行solver、365日模型、Gate6或AutoDL操作。
+- 同轮强制交付 EXACT_SOURCE_CLOSURE_A_IMPLEMENTATION_REVIEW.zip，含新报告、更新台账、轻量组件/JSON、脚本及路径/大小/SHA清单和CRC记录；发布后停止，等待联合审阅。
+
+### 方案A真实发布记录
+
+- 源版本里程碑：`fe4be3d25b7a5a7283a608c580085b26fa6b1f1e`，已推送。
+- 三层静态验收里程碑：`bfd619df747bd94559137ff4f32ef7254c89a58b`，已推送。
+- 独立实施PR：[PR #4](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/4)，base为审计分支，关联PR #3，OPEN/DRAFT，未合并。审计分支远端仍为原53c2b28632cb577136d48ebb843823967f0b1c25。
+- 最终交付commit及ZIP指纹见包内PACKAGE_MANIFEST及本地交付回执；不写不存在的自引用SHA。
+
+## A-05 跨境能源载体与网络结构审计（2026-10-11）
+
+用户接受方案A静态验收后授权A-05。本轮从已核审计HEAD `53c2b28632cb577136d48ebb843823967f0b1c25` 创建独立分支 `audit/stage2-a05-cross-border-20261011`，不在方案A实施PR #4增加内容。项目总台账和本台账继承PR #4交付commit `8883de6fb3e15767c632ac92f535e8a423e90b69` 的最新状态；该分支不携带方案A实施代码/源数据，历史implementation_a_v1相对路径应按上述commit或[PR #4](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/4)访问。
+
+- VERIFIED：实际冻结网络19跨境AC+5跨境DC，105 AC+10 DC+3 B2B总集合；12双向DC/B2B与1单向DC分开。国别来自Bus.country/精确location，非资产名称。
+- VERIFIED：当前无直接或多跳非电跨国共享，400个独立外部化石源仍在；上游共同biomass/lignite/co2 stored池与当前本地边界存在科学差异。不能把无管道写成无国际燃料进口。
+- VERIFIED：100本地H2节点均有FT→oil最终Load及fuel cell端口，无直接H2/NH3/methanol需求或跨境运输；联合输入/时序可行性未证明。
+- VERIFIED/RISK：当前电力118资产ID/端口沿用论文2025；未继承论文2050另7 AC/8 DC跨境记录。代码机制确认，但逐项科学排除理由UNKNOWN，不认定为失败根因。
+- VERIFIED：Integrated/Disconnected YAML仍为未来身份空配置，没有执行断联。Baseline碳政策实际关闭，历史Power cap表述不自动生效；共同lv_limit不可忽略。
+- 16项新轻量证据一致性核验通过，复用旧独立构模24项跨境控制清单、方案A回执和大文件SHA；未重扫CSC或旧X/Pi/RC，未重跑旧工程测试。见[a05主报告](a05/A05_CROSS_BORDER_CARRIER_LINEAGE_AUDIT.md)、[差异表](a05/A05_UPSTREAM_CURRENT_NETWORK_DIFF.md)、[方法](a05/A05_EVIDENCE_DICTIONARY_AND_METHOD.md)。
+- 方案A仍SCHEME_A_STATIC_ACCEPTED / 新完整网络与LP未组装未求解。旧精确不可行证书、两次Gate6及消费标记原状。G6-05继续PAUSED_BY_USER；未操作AutoDL、未调用solver、未修改Load/Q/成本/约束/V3/V4/P2。
+- 本轮独立commit/push/PR及强制 `A05_CROSS_BORDER_CARRIER_AUDIT_REVIEW.zip`；最终发布回执记录实际commit和ZIP SHA/CRC，不写不存在的自引用SHA。A-06、B—F没有启动。
+
+下一步仅待用户和ChatGPT审阅：2050候选电网范围、外部供给/固定终端边界、未来H2端用途与比较干预定义。没有自动授权任何新功能、求解或后续审计。
