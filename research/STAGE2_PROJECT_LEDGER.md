@@ -50,3 +50,12 @@
 - 17项本轮静态证据一致性检查PASS；复用A03/A05、Scheme A及Gate6真实回执，未重跑旧实验或大矩阵/大向量扫描。报告在`a06/`，新增成本可比性和科学决策登记表。
 - A阶段已完成各自授权的证据审计，不代表全LP可行或全部科学边界终审。方案A仍SCHEME_A_STATIC_ACCEPTED/未组装；旧证书及两次Gate6历史不改。G6-05 PAUSED_BY_USER，B—F未启动。
 - 下一步只建议用户审批B阶段物理/输入必要条件审计；候选电网、外部供给、NULL成本和未来政策范围列为科学决策，不实施。独立PR与ZIP发布身份由真实发布记录给出。
+
+
+### A-06真实发布里程碑
+
+- 审计/17项新静态检查里程碑 `f88230d6bb6bd44631fa12f586857848173baa37` 已commit并push。
+- 独立分支 `audit/stage2-a06-policy-cost-resource-20261012`；[PR #6](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/6)为OPEN/DRAFT，base为已审阅A05分支；未合并，没有对PR #4/#5追加提交。
+- 原审计/方案A/A05远端身份分别仍为`53c2b28632cb577136d48ebb843823967f0b1c25`、`8883de6fb3e15767c632ac92f535e8a423e90b69`、`4e00897199d28c72b35f6cff550b30ba94337e06`。
+- 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST与外置A06_FINAL_DELIVERY_RECEIPT.json。ZIP名A06_POLICY_COST_RESOURCE_AUDIT_REVIEW.zip，含当前报告、台账、轻量证据/方法、相对路径大小/SHA及实际CRC记录，不含大科学文件或凭据。
+- A阶段审计完成但UNKNOWN保留；G6-05仍PAUSED_BY_USER；本轮到此停止，B—F需后续单独授权。
