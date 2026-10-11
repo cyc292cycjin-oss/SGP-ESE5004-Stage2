@@ -8,7 +8,7 @@
 | A-01 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 上游论文、Sector Coupling及当前Full-SC差异总账 |
 | A-02 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 807固定资源Store谱系与异常生成路径 |
 | A-03 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 385组/807账户静态端口、111↔377逐组联结、精确源常数闭合；见FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md |
-| A-03精确LP补证 | BLOCKED_FULL_ROW_SUPPORT | 指定组局部CSC/有理数正差已验证；严格完整LP证书缺完整所选行支撑；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
+| A-03精确LP补证 | FULL_LP_EXACT_INFEASIBILITY_CERTIFIED | 一次CSC结构扫描闭合26,284行完整支撑；精确线性组合给出0≥513/34359738368>0；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
 | A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
@@ -51,7 +51,7 @@
 
 仍待科学判断：固定终端核算的适用结论、消费数据/商品与时空代理的一致性，以及精确源常数舍入差未来如何受控处理。本轮不授权任何相应变更或计算。
 
-## A-03精确LP补证与A-04（2026-10-11本轮）
+## A-03局部补证与A-04（前轮，保留当时证据边界）
 
 前轮A-03提交`788257a647952685ac1c2007467cbf24d676a84f`已由用户审阅；本轮继续同一审计分支及PR #3，起始工作区干净。未改科学源码、输入或历史结果。
 
@@ -64,3 +64,17 @@
 - 同轮commit/push及A03_EXACT_A04_DEMAND_REVIEW.zip；ZIP保留相对路径、附大小/SHA清单并验证CRC。最终发布回执记录新commit及ZIP身份；请用户上传ChatGPT联合审阅。
 
 剩余事项限定为完整所选行支撑和科学代理适用性的审阅，不自行扩展实验或恢复旧求解授权。
+
+## A-03完整支撑与证书（2026-10-11本轮）
+
+前轮提交`f885725569b35515beee081e4d583ef774c03c55`；继续原审计分支和PR #3。用户本轮明确允许最多一次冻结CSC流式结构扫描以关闭唯一行支撑缺口；A-04不重复、不改动。
+
+- VERIFIED：MATH/MAPPING/FIDELITY绑定及12个数组SHA、dtype/shape匹配；坐标SHA复用并核对。没有原始文件变化。
+- VERIFIED：一次扫描90,782,037个CSC存储位置，提取26,284行完整70,080项；无额外变量、无公式不匹配。13份行支撑JSON逐行保存原生系数、界和R，另存D及SHA。无全模型残差复算或稠密矩阵。
+- VERIFIED：独立Fraction计算全部实际非零项；26,280条等式组合只剩4个终期库存系数，加入4条非负下界后所有列精确抵消，RHS为513/34359738368 MWh>0。结论FULL_LP_EXACT_INFEASIBILITY_CERTIFIED，关闭BLOCKED_FULL_ROW_SUPPORT。
+- 边界：此为冻结binary64约束的精确数学证书；不改写第一次OPTIMAL/V4 NOT_ACCEPTED与第二次INF_OR_UNBD记录，不宣称已解释10.24TWh违规或Presolve因果。其他179个正差组未生成新证书。
+- 仅提出源常数共同闭合的选项；没有选择/实施ΔQ、ΔLoad、放宽容差、负库存或免费补给。修复一份局部证书不证明新全LP可行。
+- G6-05仍PAUSED_BY_USER。B—F未授权，不调用solver、不构模、不操作AutoDL、不清除历史消费标记。
+- 同轮提交推送并交付A03_FULL_LP_CERTIFICATE_REVIEW.zip：报告/台账、目标行轻量JSON、独立校验器及提取源码；没有完整矩阵或X/Pi/RC。包含大小/SHA清单和CRC核验。
+
+下一决策是源常数闭合原则的科学审批，不自动恢复G6-05或其他优化。历史A03/A04文件的当时未知项由本节明确更新，仅本证明缺口关闭。
