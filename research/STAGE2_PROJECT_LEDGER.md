@@ -1,6 +1,6 @@
 # Stage2项目总台账
 
-2026-10-11，当前审计分支 `audit/stage2-a05-cross-border-20261011`；方案A实施分支仍为 `fix/stage2-exact-source-closure-a-v1`。本文件汇总已有阶段状态，不替代历史验收或授权新实验；详细证据见 [Baseline台账](05_baseline_evolution/20261011/BASELINE_EVOLUTION_LEDGER.md)。
+2026-10-12，当前审计分支 `audit/stage2-a06-policy-cost-resource-20261012`；方案A实施分支仍为 `fix/stage2-exact-source-closure-a-v1`。本文件汇总已有阶段状态，不替代历史验收或授权新实验；详细证据见 [Baseline台账](05_baseline_evolution/20261011/BASELINE_EVOLUTION_LEDGER.md)。
 
 | 工作 | 当前状态 | 证据/边界 |
 |---|---|---|
@@ -14,7 +14,7 @@
 | 方案A源实施 | SCHEME_A_STATIC_ACCEPTED | 385/385 D≤Q′；新源Version Manifest SHA `a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720` |
 | 新源版本求解 | NOT_RUN / NOT_AUTHORIZED | 未组装新完整NetCDF或LP |
 | A-05 | A05_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 跨境载体/静态端口/上游共同池/未来电力候选谱系；新独立PR |
-| A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 未授权、未启动 |
+| A-06 | A06_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 政策/成本/资源六身份对照，17项静态核验；独立PR |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束/输入一致性审计 |
 | C/D | PLAN_ONLY_NOT_AUTHORIZED | 365日诊断/2920时段Gate6 |
 | E/F | PLAN_ONLY_NOT_AUTHORIZED | 跨境载体扩展/互联独立成本实验 |
@@ -37,3 +37,25 @@
 - 独立审计分支：`audit/stage2-a05-cross-border-20261011`；[PR #5](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/5)为OPEN/DRAFT，base为原审计分支，未合并。
 - PR #3/原审计HEAD仍`53c2b28632cb577136d48ebb843823967f0b1c25`；PR #4/方案A HEAD仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。
 - 最终交付commit及ZIP指纹见包内PACKAGE_MANIFEST与本地发布回执。当前工作到此停止，等待联合审阅。
+
+
+## A-06发布与A阶段综合状态（2026-10-12）
+
+用户已联合审阅A-05后授权；本轮起点为A05交付`4e00897199d28c72b35f6cff550b30ba94337e06`，独立分支`audit/stage2-a06-policy-cost-resource-20261012`。A05 PR #5及方案A PR #4未追加提交，main未改。
+
+- **A06_COMPLETE_WITH_EXPLICIT_UNKNOWNS**：作者2025仅lv_limit；作者2050另有100MtCO₂/年cap；当前Baseline只有lv_limit、policy关闭。三网络均2920×3h。当前不能称net-zero；运行时封存hook与NetCDF表区别明确。
+- VERIFIED：400个有价外部化石源无有限供应上限；807固定终端商品价仍NULL；共同生物质/褐煤/CO₂池与本地核算边界不等同。未知全系统价格/排放不置零。
+- VERIFIED：V3最终有效台账SHA核对，10,628,915列扰动、offset−12788967.997821666；固定FOM8224491125.573893一次计费。P2只坐标变换，V3改变目标排序；不把旧失败候选作为经济结论。
+- VERIFIED/UNKNOWN：作者2050额外15跨境资产兼有项目输入和历史优化容量；新建/升级/考虑中分类按原CSV与源码，7AC逐行来源及升级容量中间链尚缺。当前2025电网选择机制明确，15项逐项科学取舍理由UNKNOWN。
+- 17项本轮静态证据一致性检查PASS；复用A03/A05、Scheme A及Gate6真实回执，未重跑旧实验或大矩阵/大向量扫描。报告在`a06/`，新增成本可比性和科学决策登记表。
+- A阶段已完成各自授权的证据审计，不代表全LP可行或全部科学边界终审。方案A仍SCHEME_A_STATIC_ACCEPTED/未组装；旧证书及两次Gate6历史不改。G6-05 PAUSED_BY_USER，B—F未启动。
+- 下一步只建议用户审批B阶段物理/输入必要条件审计；候选电网、外部供给、NULL成本和未来政策范围列为科学决策，不实施。独立PR与ZIP发布身份由真实发布记录给出。
+
+
+### A-06真实发布里程碑
+
+- 审计/17项新静态检查里程碑 `f88230d6bb6bd44631fa12f586857848173baa37` 已commit并push。
+- 独立分支 `audit/stage2-a06-policy-cost-resource-20261012`；[PR #6](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/6)为OPEN/DRAFT，base为已审阅A05分支；未合并，没有对PR #4/#5追加提交。
+- 原审计/方案A/A05远端身份分别仍为`53c2b28632cb577136d48ebb843823967f0b1c25`、`8883de6fb3e15767c632ac92f535e8a423e90b69`、`4e00897199d28c72b35f6cff550b30ba94337e06`。
+- 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST与外置A06_FINAL_DELIVERY_RECEIPT.json。ZIP名A06_POLICY_COST_RESOURCE_AUDIT_REVIEW.zip，含当前报告、台账、轻量证据/方法、相对路径大小/SHA及实际CRC记录，不含大科学文件或凭据。
+- A阶段审计完成但UNKNOWN保留；G6-05仍PAUSED_BY_USER；本轮到此停止，B—F需后续单独授权。

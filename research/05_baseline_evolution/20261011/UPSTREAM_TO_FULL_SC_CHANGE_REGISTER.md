@@ -99,3 +99,22 @@ C12/C13/C20/C21的此前精确可行性未知项已取得直接证据：完整CS
 - 源常数方案A已获批准并静态验收，参考独立PR #4及Manifest SHA `a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720`，仅720同步Q字段；新完整LP未生成。当前网络审计不冒称读取了方案A新网络。
 
 未提出新的已证实失败致因。未来电网候选缺席、国家隔离及终端载体固定属于可影响可行域的科学边界，旧微差矛盾/10.24TWh违规/INF_OR_UNBD的因果仍须分开。G6-05暂停，A-06/B—F未开始。
+
+
+## A-06最终对照补充（2026-10-12）
+
+本节复核实际结果字段而不覆盖早期提案。A05已完成；六种身份与固定commit/SHA详见[a06主报告](a06/A06_POLICY_COST_RESOURCE_AUDIT.md)。
+
+| 编号 | 上游→当前差异 | 性质/证据等级 | 边界 |
+|---|---|---|---|
+| A06-P01 | 作者2050 CO2Limit100Mt；当前与作者2025一样关闭 | 实际政策差异 VERIFIED | 当前不是net-zero，不以碳守恒替代cap |
+| A06-P02 | 通用carrier cap/共同captured池→本地物理碳流+独立Power归属接口 | 科学范围和结构 VERIFIED | 200归属pending、地质库未生成；无因果证明 |
+| A06-C01 | 历史报价/年化/配置噪声→EUR2020层、FT VOM修复、存量FOM一次 | 目标/数据 VERIFIED | 已知价格不是完整系统总价，807 NULL另账 |
+| A06-C02 | 原目标→SCOPE_V3扰动及范围例外 | 目标变化 USER_APPROVED/VERIFIED | 非未扰动目标最优性证明；10628915列、固定offset分账 |
+| A06-V01 | V3→P2幂二正对角表达 | 纯数值坐标 VERIFIED_REUSED | 精确科学约束不因此放宽 |
+| A06-R01 | 共享360TWh固体生物质潜力→807需求派生Q/385独占义务 | 科学边界 VERIFIED | 不声称独立资源潜力；旧精确矛盾仅Scheme A源级修订 |
+| A06-R02 | 共同褐煤等→400独立外部有价、无限可扩供给 | 资源/进口边界 VERIFIED | 无管道不等于无外部进口，运输费包涵UNKNOWN |
+| A06-N01 | 作者2050额外7AC+8DC跨境项目→保留2025输入资产集 | 物理候选集 VERIFIED；逐项排除理由UNKNOWN | 输入容量与历史优化容量不混用；不自动恢复 |
+| A06-S01 | Scheme A最小180Q变化 | USER_APPROVED/STATIC_ACCEPTED | 源配方未组装，不能称新LP已可行 |
+
+通过项、未知项及进入B前证据按[A06决策登记](a06/A06_SCIENTIFIC_ASSUMPTION_DECISION_REGISTER.md)；[成本可比性](a06/A06_COST_COMPARABILITY_ASSESSMENT.md)仍NOT_ESTABLISHED。17项新增轻量核验PASS，未修改科学模型或开展B—F。

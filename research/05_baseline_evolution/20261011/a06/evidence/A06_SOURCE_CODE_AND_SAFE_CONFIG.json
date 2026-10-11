@@ -1,0 +1,870 @@
+{
+  "snippets": [
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/prepare_sector_network.py",
+      "blob_sha1": "0e892cefabf95ae693c367d79664d58fabcd6185",
+      "sha256": "ade3014d041da647e78954bccce91ee07ced8c08cf7903e8eae1b38fc8f3fa8f",
+      "snippets": [
+        {
+          "start": 50,
+          "end": 180,
+          "text": "50: def add_carrier_buses(n, carrier, nodes=None):\n51:     \"\"\"\n52:     Add buses to connect e.g. coal, nuclear and oil plants.\n53:     \"\"\"\n54: \n55:     if nodes is None:\n56:         nodes = vars(spatial)[carrier].nodes\n57:     location = vars(spatial)[carrier].locations\n58: \n59:     # skip if carrier already exists\n60:     if carrier in n.carriers.index:\n61:         return\n62: \n63:     if not isinstance(nodes, pd.Index):\n64:         nodes = pd.Index(nodes)\n65: \n66:     n.add(\"Carrier\", carrier, co2_emissions=costs.at[carrier, \"CO2 intensity\"])\n67: \n68:     n.madd(\"Bus\", nodes, location=location, carrier=carrier)\n69: \n70:     # initial fossil reserves\n71:     e_initial = (snakemake.params.fossil_reserves).get(carrier, 0) * 1e6\n72:     # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M\n73:     n.madd(\n74:         \"Store\",\n75:         nodes + \" Store\",\n76:         bus=nodes,\n77:         e_nom_extendable=True,\n78:         e_cyclic=True if e_initial == 0 else False,\n79:         carrier=carrier,\n80:         e_initial=e_initial,\n81:     )\n82: \n83:     n.madd(\n84:         \"Generator\",\n85:         nodes,\n86:         bus=nodes,\n87:         p_nom_extendable=True,\n88:         carrier=carrier,\n89:         marginal_cost=costs.at[carrier, \"fuel\"],\n90:     )\n91: \n92: \n93: def add_generation(\n94:     n, costs, existing_capacities=0, existing_efficiencies=None, existing_nodes=None\n95: ):\n96:     \"\"\"\n97:     Adds conventional generation as specified in config.\n98: \n99:     Args:\n100:         n (network): PyPSA prenetwork\n101:         costs (dataframe): _description_\n102:         existing_capacities: dictionary containing installed capacities for conventional_generation technologies\n103:         existing_efficiencies: dictionary containing efficiencies for conventional_generation technologies\n104:         existing_nodes: dictionary containing nodes for conventional_generation technologies\n105: \n106:     Returns:\n107:         _type_: _description_\n108:     \"\"\" \"\"\"\"\"\"\n109: \n110:     logger.info(\"adding electricity generation\")\n111: \n112:     # Not required, because nodes are already defined in \"nodes\"\n113:     # nodes = pop_layout.index\n114: \n115:     fallback = {\"OCGT\": \"gas\", \"CCGT\": \"gas\"}\n116:     conventionals = options.get(\"conventional_generation\", fallback)\n117: \n118:     for generator, carrier in conventionals.items():\n119:         add_carrier_buses(n, carrier)\n120:         carrier_nodes = vars(spatial)[carrier].nodes\n121:         link_names = spatial.nodes + \" \" + generator\n122:         n.madd(\n123:             \"Link\",\n124:             link_names,\n125:             bus0=carrier_nodes,\n126:             bus1=spatial.nodes,\n127:             bus2=\"co2 atmosphere\",\n128:             marginal_cost=costs.at[generator, \"efficiency\"]\n129:             * costs.at[generator, \"VOM\"],  # NB: VOM is per MWel\n130:             # NB: fixed cost is per MWel\n131:             capital_cost=costs.at[generator, \"efficiency\"]\n132:             * costs.at[generator, \"fixed\"],\n133:             p_nom_extendable=(\n134:                 True\n135:                 if generator\n136:                 in snakemake.params.electricity.get(\"extendable_carriers\", dict()).get(\n137:                     \"Generator\", list()\n138:                 )\n139:                 else False\n140:             ),\n141:             p_nom=(\n142:                 (\n143:                     existing_capacities[generator] / existing_efficiencies[generator]\n144:                 ).reindex(link_names, fill_value=0)\n145:                 if not existing_capacities == 0\n146:                 else 0\n147:             ),  # NB: existing capacities are MWel\n148:             carrier=generator,\n149:             efficiency=(\n150:                 existing_efficiencies[generator].reindex(\n151:                     link_names, fill_value=costs.at[generator, \"efficiency\"]\n152:                 )\n153:                 if existing_efficiencies is not None\n154:                 else costs.at[generator, \"efficiency\"]\n155:             ),\n156:             efficiency2=costs.at[carrier, \"CO2 intensity\"],\n157:             lifetime=costs.at[generator, \"lifetime\"],\n158:         )\n159: \n160:         # remove newly added links that have no capacity and are not extendable\n161:         to_remove = n.links.query(\n162:             \"carrier == @carrier & p_nom == 0 & not p_nom_extendable\"\n163:         ).index\n164:         n.mremove(\"Link\", to_remove)\n165: \n166:         # set the \"co2_emissions\" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)\n167:         n.carriers.loc[carrier, \"co2_emissions\"] = 0\n168: \n169: \n170: def H2_liquid_fossil_conversions(n, costs):\n171:     \"\"\"\n172:     Function to add conversions between H2 and liquid fossil Carrier and bus is\n173:     added in add_oil, which later on might be switched to add_generation.\n174:     \"\"\"\n175: \n176:     n.madd(\n177:         \"Link\",\n178:         spatial.nodes + \" Fischer-Tropsch\",\n179:         bus0=spatial.nodes + \" H2\",\n180:         bus1=spatial.oil.nodes,"
+        },
+        {
+          "start": 1147,
+          "end": 1210,
+          "text": "1147: def add_co2(n, costs, co2_network):\n1148:     \"add carbon carrier, it's networks and storage units\"\n1149: \n1150:     # minus sign because opposite to how fossil fuels used:\n1151:     # CH4 burning puts CH4 down, atmosphere up\n1152:     n.add(\"Carrier\", \"co2\", co2_emissions=-1.0)\n1153: \n1154:     # this tracks CO2 in the atmosphere\n1155:     n.add(\n1156:         \"Bus\",\n1157:         \"co2 atmosphere\",\n1158:         location=\"Earth\",  # TODO Ignoed by pypsa check\n1159:         carrier=\"co2\",\n1160:     )\n1161: \n1162:     # can also be negative\n1163:     n.add(\n1164:         \"Store\",\n1165:         \"co2 atmosphere\",\n1166:         e_nom_extendable=True,\n1167:         e_min_pu=-1,\n1168:         carrier=\"co2\",\n1169:         bus=\"co2 atmosphere\",\n1170:     )\n1171: \n1172:     # this tracks CO2 stored, e.g. underground\n1173:     n.madd(\n1174:         \"Bus\",\n1175:         spatial.co2.nodes,\n1176:         location=spatial.co2.locations,\n1177:         carrier=\"co2 stored\",\n1178:         # x=spatial.co2.x[0],\n1179:         # y=spatial.co2.y[0],\n1180:     )\n1181:     \"\"\"\n1182:     co2_stored_x = n.buses.filter(like=\"co2 stored\", axis=0).loc[:, \"x\"]\n1183:     co2_stored_y = n.buses.loc[n.buses[n.buses.carrier == \"co2\n1184:     stored\"].location].y.\n1185: \n1186:     n.buses[n.buses.carrier == \"co2 stored\"].x = co2_stored_x.values\n1187:     n.buses[n.buses.carrier == \"co2 stored\"].y = co2_stored_y.values\n1188:     \"\"\"\n1189: \n1190:     n.madd(\n1191:         \"Link\",\n1192:         spatial.co2.vents,\n1193:         bus0=spatial.co2.nodes,\n1194:         bus1=\"co2 atmosphere\",\n1195:         carrier=\"co2 vent\",\n1196:         efficiency=1.0,\n1197:         p_nom_extendable=True,\n1198:     )\n1199: \n1200:     n.madd(\n1201:         \"Store\",\n1202:         spatial.co2.nodes,\n1203:         e_nom_extendable=True,\n1204:         e_nom_max=np.inf,\n1205:         capital_cost=options[\"co2_sequestration_cost\"],\n1206:         carrier=\"co2 stored\",\n1207:         bus=spatial.co2.nodes,\n1208:     )\n1209: \n1210:     if co2_network:"
+        },
+        {
+          "start": 2973,
+          "end": 3025,
+          "text": "2973: def add_co2_budget(n, co2_budget, investment_year, elec_opts):\n2974:     # Check if CO2Limit already exists\n2975:     if \"CO2Limit\" in n.global_constraints.index:\n2976:         if co2_budget[\"override_co2opt\"]:\n2977:             logger.warning(\"CO2Limit already exists, value will be overwritten.\")\n2978:             n.global_constraints.drop(index=\"CO2Limit\", inplace=True)\n2979:         else:\n2980:             logger.info(\"CO2Limit already exists, value will not be overwritten.\")\n2981:             return\n2982: \n2983:     # Get base year emission factor\n2984:     factor = (\n2985:         co2_budget[\"year\"][investment_year]\n2986:         if investment_year in co2_budget[\"year\"]\n2987:         else 1.0\n2988:     )\n2989: \n2990:     co2base_value = co2_budget[\"co2base_value\"]\n2991:     if co2base_value == \"co2limit\":\n2992:         annual_emissions = factor * elec_opts[\"co2limit\"]\n2993:     elif co2base_value == \"co2base\":\n2994:         annual_emissions = factor * elec_opts[\"co2base\"]\n2995:     elif co2base_value == \"absolute\":\n2996:         annual_emissions = factor\n2997:     elif isinstance(co2base_value, float):\n2998:         annual_emissions = factor * co2base_value\n2999:     else:\n3000:         raise ValueError(\n3001:             f\"co2base_value: {co2base_value} is not an option for co2_budget\"\n3002:         )\n3003: \n3004:     Nyears = n.snapshot_weightings.objective.sum() / 8760.0\n3005:     logger.info(\n3006:         f\"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year.\"\n3007:     )\n3008: \n3009:     add_co2limit(n, annual_emissions, Nyears)\n3010: \n3011: \n3012: def add_custom_water_cost(n):\n3013:     for country in countries:\n3014:         water_costs = pd.read_csv(\n3015:             os.path.join(\n3016:                 BASE_DIR,\n3017:                 \"resources/custom_data/{}_water_costs.csv\".format(country),\n3018:                 sep=\",\",\n3019:                 index_col=0,\n3020:             )\n3021:         )\n3022:         water_costs = water_costs.filter(like=country, axis=0).loc[spatial.nodes]\n3023:         electrolysis_links = n.links.filter(like=country, axis=0).filter(\n3024:             like=\"lectrolysis\", axis=0\n3025:         )"
+        },
+        {
+          "start": 3120,
+          "end": 3180,
+          "text": "3120:     # remove carriers\n3121:     n.carriers.drop(carriers_to_drop, inplace=True, errors=\"ignore\")\n3122: \n3123:     # remove buses, generators, stores, and storage units with carrier to remote\n3124:     for c in n.iterate_components([\"Bus\", \"Generator\", \"Store\", \"StorageUnit\"]):\n3125:         logger.info(f\"Removing {c.list_name} with carrier {list(carriers_to_drop)}\")\n3126:         names = c.df.index[c.df.carrier.isin(carriers_to_drop)]\n3127:         if c.name == \"Bus\":\n3128:             buses_to_remove = names\n3129:         n.mremove(c.name, names)\n3130: \n3131:     # remove links connected to buses that were removed\n3132:     links_to_remove = n.links.query(\n3133:         \"bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove\"\n3134:     ).index\n3135:     logger.info(\n3136:         f\"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}\"\n3137:     )\n3138:     n.mremove(\"Link\", links_to_remove)\n3139: \n3140: \n3141: if __name__ == \"__main__\":\n3142:     if \"snakemake\" not in globals():\n3143:         # from helper import mock_snakemake #TODO remove func from here to helper script\n3144:         snakemake = mock_snakemake(\n3145:             \"prepare_sector_network\",\n3146:             simpl=\"\",\n3147:             clusters=\"4\",\n3148:             ll=\"c1\",\n3149:             opts=\"Co2L-4H\",\n3150:             planning_horizons=\"2030\",\n3151:             sopts=\"144H\",\n3152:             discountrate=0.071,\n3153:             demand=\"AB\",\n3154:         )\n3155: \n3156:     # Load population layout\n3157:     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)\n3158: \n3159:     # Load all sector wildcards\n3160:     options = snakemake.params.sector_options\n3161:     enable = options[\"enable\"]\n3162: \n3163:     # Load input network\n3164:     overrides = override_component_attrs(snakemake.input.overrides)\n3165:     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)\n3166: \n3167:     # Fetch the country list from the network\n3168:     # countries = list(n.buses.country.unique())\n3169:     countries = snakemake.params.countries\n3170:     # Locate all the AC buses\n3171:     acnodes = n.buses[\n3172:         n.buses.carrier == \"AC\"\n3173:     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout\n3174:     # clustering of regions must be double checked.. refer to regions onshore\n3175: \n3176:     # Add location. TODO: move it into pypsa-earth\n3177:     n.buses.location = n.buses.index\n3178: \n3179:     # Set carrier of AC loads\n3180:     existing_nodes = [node for node in acnodes if node in n.loads.index]"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/solve_network.py",
+      "blob_sha1": "efb7d595b7d2353875e59b08d32913db141c11d7",
+      "sha256": "5204dbdb0214e75afacbc0a666ea6602d9be644a7003380283850b9731c183dc",
+      "snippets": [
+        {
+          "start": 138,
+          "end": 187,
+          "text": "138: def prepare_network(n, solve_opts, config):\n139:     if \"clip_p_max_pu\" in solve_opts:\n140:         for df in (\n141:             n.generators_t.p_max_pu,\n142:             n.generators_t.p_min_pu,\n143:             n.storage_units_t.inflow,\n144:         ):\n145:             df.where(df > solve_opts[\"clip_p_max_pu\"], other=0.0, inplace=True)\n146: \n147:     if \"lv_limit\" in n.global_constraints.index:\n148:         n.line_volume_limit = n.global_constraints.at[\"lv_limit\", \"constant\"]\n149:         n.line_volume_limit_dual = n.global_constraints.at[\"lv_limit\", \"mu\"]\n150: \n151:     if solve_opts.get(\"load_shedding\"):\n152:         required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)\n153:         n.add(\"Carrier\", \"load shedding\", color=\"#dd2e23\", nice_name=\"Load shedding\")\n154:         n.madd(\n155:             \"Generator\",\n156:             n.buses.index,\n157:             \" load shedding\",\n158:             bus=n.buses.index,\n159:             carrier=\"load shedding\",\n160:             sign=1,\n161:             marginal_cost=solve_opts.get(\"load_shedding\") * 1000,  # convert to Eur/MWh\n162:             p_nom=required_p_nom.reindex(n.buses.index, fill_value=0.5e6),\n163:         )\n164: \n165:     if solve_opts.get(\"noisy_costs\"):\n166:         for t in n.iterate_components():\n167:             # if 'capital_cost' in t.df:\n168:             #    t.df['capital_cost'] += 1e1 + 2.*(np.random.random(len(t.df)) - 0.5)\n169:             if \"marginal_cost\" in t.df:\n170:                 np.random.seed(174)\n171:                 t.df[\"marginal_cost\"] += 1e-2 + 2e-3 * (\n172:                     np.random.random(len(t.df)) - 0.5\n173:                 )\n174: \n175:         for t in n.iterate_components([\"Line\", \"Link\"]):\n176:             np.random.seed(123)\n177:             t.df[\"capital_cost\"] += (\n178:                 1e-1 + 2e-2 * (np.random.random(len(t.df)) - 0.5)\n179:             ) * t.df[\"length\"]\n180: \n181:     if solve_opts.get(\"nhours\"):\n182:         nhours = solve_opts[\"nhours\"]\n183:         n.set_snapshots(n.snapshots[:nhours])\n184:         n.snapshot_weightings[:] = 8760.0 / nhours\n185: \n186:     if snakemake.config[\"foresight\"] == \"myopic\":\n187:         add_land_use_constraint(n)"
+        },
+        {
+          "start": 898,
+          "end": 920,
+          "text": "898: def add_co2_sequestration_limit(n, sns):\n899:     co2_stores = n.stores.loc[n.stores.carrier == \"co2 stored\"].index\n900: \n901:     if co2_stores.empty:\n902:         return\n903: \n904:     vars_final_co2_stored = n.model[\"Store-e\"].loc[sns[-1], co2_stores]\n905: \n906:     lhs = (1 * vars_final_co2_stored).sum()\n907:     rhs = (\n908:         n.config[\"sector\"].get(\"co2_sequestration_potential\", 5) * 1e6\n909:     )  # TODO change 200 limit (Europe)\n910: \n911:     name = \"co2_sequestration_limit\"\n912: \n913:     n.model.add_constraints(lhs <= rhs, name=f\"GlobalConstraint-{name}\")\n914: \n915: \n916: def set_h2_colors(n):\n917:     blue_h2 = n.model[\"Link-p\"].loc[\n918:         n.links.index[n.links.index.str.contains(\"blue H2\")]\n919:     ]\n920: "
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/add_electricity.py",
+      "blob_sha1": "914aecadd3621fe710ba30b8eaef2d8a4cd103a2",
+      "sha256": "3795ca600ec28bf6fb6c2734777ad521e772b5ae46b4d70eee0435d89481f4ad",
+      "snippets": [
+        {
+          "start": 130,
+          "end": 246,
+          "text": "130:         return r / (1.0 - 1.0 / (1.0 + r) ** n)\n131:     else:\n132:         return 1 / n\n133: \n134: \n135: def _add_missing_carriers_from_costs(n, costs, carriers):\n136:     missing_carriers = pd.Index(carriers).difference(n.carriers.index)\n137:     if missing_carriers.empty:\n138:         return\n139: \n140:     emissions_cols = (\n141:         costs.columns.to_series().loc[lambda s: s.str.endswith(\"_emissions\")].values\n142:     )\n143:     suptechs = missing_carriers.str.split(\"-\").str[0]\n144:     emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)\n145:     emissions.index = missing_carriers\n146:     n.import_components_from_dataframe(emissions, \"Carrier\")\n147: \n148: \n149: def load_costs(tech_costs, config, elec_config, Nyears=1):\n150:     \"\"\"\n151:     Set all asset costs and other parameters.\n152:     \"\"\"\n153:     costs = pd.read_csv(tech_costs, index_col=[\"technology\", \"parameter\"]).sort_index()\n154: \n155:     # correct units to MW and output_currency\n156:     costs.loc[costs.unit.str.contains(\"/kW\"), \"value\"] *= 1e3\n157:     costs.unit = costs.unit.str.replace(\"/kW\", \"/MW\")\n158:     _currency_conversion_cache = build_currency_conversion_cache(\n159:         costs,\n160:         output_currency=config[\"output_currency\"],\n161:         default_exchange_rate=config[\"default_exchange_rate\"],\n162:         future_exchange_rate_strategy=config.get(\"future_exchange_rate_strategy\"),\n163:         custom_future_exchange_rate=config.get(\"custom_future_rate\", None),\n164:     )\n165:     costs = apply_currency_conversion(\n166:         costs,\n167:         config[\"output_currency\"],\n168:         _currency_conversion_cache,\n169:     )\n170: \n171:     # apply filter on financial_case and scenario, if they are contained in the cost dataframe\n172:     wished_cost_scenario = config[\"cost_scenario\"]\n173:     wished_financial_case = config[\"financial_case\"]\n174:     for col in [\"scenario\", \"financial_case\"]:\n175:         if col in costs.columns:\n176:             costs[col] = costs[col].replace(\"\", pd.NA)\n177: \n178:     if \"scenario\" in costs.columns:\n179:         costs = costs[\n180:             (costs[\"scenario\"].str.casefold() == wished_cost_scenario.casefold())\n181:             | (costs[\"scenario\"].isnull())\n182:         ]\n183: \n184:     if \"financial_case\" in costs.columns:\n185:         costs = costs[\n186:             (costs[\"financial_case\"].str.casefold() == wished_financial_case.casefold())\n187:             | (costs[\"financial_case\"].isnull())\n188:         ]\n189: \n190:     costs = costs.value.unstack().fillna(config[\"fill_values\"])\n191: \n192:     for attr in (\"investment\", \"lifetime\", \"FOM\", \"VOM\", \"efficiency\", \"fuel\"):\n193:         overwrites = config.get(attr)\n194:         if overwrites is not None:\n195:             overwrites = pd.Series(overwrites)\n196:             costs.loc[overwrites.index, attr] = overwrites\n197:             logger.info(\n198:                 f\"Overwriting {attr} of {overwrites.index} to {overwrites.values}\"\n199:             )\n200: \n201:     costs[\"capital_cost\"] = (\n202:         (\n203:             calculate_annuity(costs[\"lifetime\"], costs[\"discount rate\"])\n204:             + costs[\"FOM\"] / 100.0\n205:         )\n206:         * costs[\"investment\"]\n207:         * Nyears\n208:     )\n209: \n210:     costs.at[\"OCGT\", \"fuel\"] = costs.at[\"gas\", \"fuel\"]\n211:     costs.at[\"CCGT\", \"fuel\"] = costs.at[\"gas\", \"fuel\"]\n212: \n213:     costs[\"marginal_cost\"] = costs[\"VOM\"] + costs[\"fuel\"] / costs[\"efficiency\"]\n214: \n215:     costs = costs.rename(columns={\"CO2 intensity\": \"co2_emissions\"})\n216:     # rename because technology data & pypsa earth costs.csv use different names\n217:     # TODO: rename the technologies in hosted tutorial data to match technology data\n218:     costs = costs.rename(\n219:         {\n220:             \"hydrogen storage\": \"hydrogen storage tank\",\n221:             \"hydrogen storage tank\": \"hydrogen storage tank\",\n222:             \"hydrogen storage tank type 1\": \"hydrogen storage tank\",\n223:             \"hydrogen underground storage\": \"hydrogen storage underground\",\n224:         },\n225:     )\n226: \n227:     costs.at[\"OCGT\", \"co2_emissions\"] = costs.at[\"gas\", \"co2_emissions\"]\n228:     costs.at[\"CCGT\", \"co2_emissions\"] = costs.at[\"gas\", \"co2_emissions\"]\n229: \n230:     costs.at[\"solar\", \"capital_cost\"] = (\n231:         config[\"rooftop_share\"] * costs.at[\"solar-rooftop\", \"capital_cost\"]\n232:         + (1 - config[\"rooftop_share\"]) * costs.at[\"solar-utility\", \"capital_cost\"]\n233:     )\n234:     costs.loc[\"csp\"] = costs.loc[\"csp-tower\"]\n235: \n236:     def costs_for_storage(store, link1, link2=None, max_hours=1.0):\n237:         capital_cost = link1[\"capital_cost\"] + max_hours * store[\"capital_cost\"]\n238:         if link2 is not None:\n239:             capital_cost += link2[\"capital_cost\"]\n240:         return pd.Series(\n241:             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)\n242:         )\n243: \n244:     max_hours = elec_config[\"max_hours\"]\n245:     costs.loc[\"battery\"] = costs_for_storage(\n246:         costs.loc[\"battery storage\"],"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/prepare_network.py",
+      "blob_sha1": "e6d5327314d4831748e12d172d4382095ef869c8",
+      "sha256": "6ebd5ab17d63271ac40679d5f380923e09c48ec32e5e99a655b5a1c5090cabd7",
+      "snippets": [
+        {
+          "start": 134,
+          "end": 190,
+          "text": "134:         df[\"IPCC_for_std_report_desc\"] == \"Public electricity and heat production\"\n135:     ]\n136:     df = df.loc[:, \"Y_1970\":\"Y_2018\"].astype(float).ffill(axis=1)\n137:     df = df.loc[:, \"Y_1970\":\"Y_2018\"].astype(float).bfill(axis=1)\n138:     cc_iso3 = cc.convert(names=country_names, to=\"ISO3\")\n139:     if len(country_names) == 1:\n140:         cc_iso3 = [cc_iso3]\n141:     emission_by_country = df.loc[\n142:         df.index.intersection(cc_iso3), \"Y_\" + str(emission_year)\n143:     ]\n144:     missing_ccs = np.setdiff1d(cc_iso3, df.index.intersection(cc_iso3))\n145:     if missing_ccs.size:\n146:         logger.warning(\n147:             f\"The emission value for the following countries has not been found: {missing_ccs}\"\n148:         )\n149:     return emission_by_country\n150: \n151: \n152: def add_co2limit(n, annual_emissions, Nyears=1.0):\n153:     n.add(\n154:         \"GlobalConstraint\",\n155:         \"CO2Limit\",\n156:         carrier_attribute=\"co2_emissions\",\n157:         sense=\"<=\",\n158:         constant=annual_emissions * Nyears,\n159:     )\n160: \n161: \n162: def add_gaslimit(n, gaslimit, Nyears=1.0):\n163:     sel = n.carriers.index.intersection([\"OCGT\", \"CCGT\", \"CHP\"])\n164:     n.carriers.loc[sel, \"gas_usage\"] = 1.0\n165: \n166:     n.add(\n167:         \"GlobalConstraint\",\n168:         \"GasLimit\",\n169:         carrier_attribute=\"gas_usage\",\n170:         sense=\"<=\",\n171:         constant=gaslimit * Nyears,\n172:     )\n173: \n174: \n175: def add_emission_prices(n, emission_prices={\"co2\": 0.0}, exclude_co2=False):\n176:     if exclude_co2:\n177:         emission_prices.pop(\"co2\")\n178:     ep = (\n179:         pd.Series(emission_prices).rename(lambda x: x + \"_emissions\")\n180:         * n.carriers.filter(like=\"_emissions\")\n181:     ).sum(axis=1)\n182:     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency\n183:     n.generators[\"marginal_cost\"] += gen_ep\n184:     su_ep = n.storage_units.carrier.map(ep) / n.storage_units.efficiency_dispatch\n185:     n.storage_units[\"marginal_cost\"] += su_ep\n186: \n187: \n188: def set_line_s_max_pu(n, s_max_pu):\n189:     n.lines[\"s_max_pu\"] = s_max_pu\n190:     logger.info(f\"N-1 security margin of lines set to {s_max_pu}\")"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/build_research_assets.py",
+      "blob_sha1": "4955703f9edfb741bbf22cc6cd8071a87ee348d7",
+      "sha256": "8ccc2d692b38484cb8e7b8c4157ec2029c28687a9470507a840fb71c89b1df94",
+      "snippets": [
+        {
+          "start": 35,
+          "end": 165,
+          "text": "35:     for c in r.iterate_components():\n36:         for attr,d in c.pnl.items():\n37:             if c.attrs.at[attr,'status']=='Output' and len(d.columns):raise ValueError('Solved time output leaked')\n38:         for col in [x for x in c.df if x=='bus' or x.startswith('bus') and x[3:].isdigit()]:\n39:             if any(x and x not in r.buses.index for x in c.df[col]):raise ValueError('Dangling asset port')\n40:     return r\n41: def build_electric(repo,reference,costs,oldcosts,output,survival=None,integration_contract=None,price_layer=None):\n42:     if sha(reference)!=REF_SHA:raise ValueError('Reference input identity changed')\n43:     if sha(costs)!=COST2050_SHA or sha(oldcosts)!=ELECTRIC_COST2030_SHA:raise ValueError('Frozen processed cost identity changed')\n44:     output.mkdir(parents=True,exist_ok=True);s=pypsa.Network(reference)\n45:     c=pd.read_csv(costs,index_col=0);old=pd.read_csv(oldcosts,index_col=0)\n46:     layer=None\n47:     if price_layer:\n48:         from price_basis import load_table\n49:         c,layer=load_table(price_layer,2050,costs)\n50:     from phase4_static import config\n51:     cfg=config(repo,'baseline')\n52:     # Processed sector costs must represent one full physical year, not six days.\n53:     expected=(c['discount rate']/(1-(1+c['discount rate'])**(-c.lifetime))+c.FOM/100)*c.investment\n54:     valid=np.isfinite(expected)&np.isfinite(c.fixed)\n55:     if not np.allclose(c.loc[valid,'fixed'],expected[valid]):raise ValueError('Unqualified annual cost scaling')\n56:     n=pypsa.Network();n.set_snapshots(s.snapshots);n.snapshot_weightings=s.snapshot_weightings.copy()\n57:     geo=s.buses.index[s.buses.carrier.isin(['AC','DC'])]\n58:     if len(geo)!=100:raise ValueError('Expected100 source geographical buses')\n59:     buses=clean_table(s,'Bus',geo);buses['country']=s.buses.loc[geo,'country'];buses['location']=geo\n60:     n.import_components_from_dataframe(buses,'Bus');n.import_components_from_dataframe(clean_table(s,'Carrier',s.carriers.index),'Carrier')\n61:     # Physical CO2 is attached later through explicit fuel/atmosphere interfaces.\n62:     n.carriers['co2_emissions']=0.\n63:     pending=[];ledger=[];cost_trace=[]\n64:     lines=clean_table(s,'Line',s.lines.index)\n65:     for name,z in lines.iterrows():\n66:         if z.bus0 not in geo or z.bus1 not in geo:raise ValueError('Dangling electric line')\n67:         t=s.line_types.loc[z['type']]\n68:         # Recompute impedance from physical input type/length/parallel circuits.\n69:         lines.loc[name,['r','x','b']]=[t.r_per_length*z.length/z.num_parallel,t.x_per_length*z.length/z.num_parallel,2*np.pi*t.f_nom*t.c_per_length*1e-9*z.length*z.num_parallel]\n70:         lines.loc[name,'capital_cost']=z.length*c.at['HVAC overhead','fixed']\n71:     n.import_components_from_dataframe(lines,'Line')\n72:     # Preserve the legitimate transmission volume constraint as an input. Carbon\n73:     # policy constraints are never copied from a decarbonised result.\n74:     gc=clean_table(s,'GlobalConstraint',s.global_constraints.index)\n75:     for name,z in gc.iterrows():\n76:         if z['type'] not in ['transmission_volume_expansion_limit','transmission_expansion_cost_limit']:\n77:             raise ValueError('Unapproved reference GlobalConstraint '+name)\n78:     if len(gc):n.import_components_from_dataframe(gc,'GlobalConstraint')\n79:     links=s.links.index[s.links.carrier.isin(['DC','B2B'])]\n80:     d=clean_table(s,'Link',links)\n81:     for name,z in d.iterrows():\n82:         u=float(z.get('underwater_fraction',0));d.loc[name,'capital_cost']=z.length*(u*c.at['HVDC submarine','fixed']+(1-u)*c.at['HVDC overhead','fixed'])+c.at['HVDC inverter pair','fixed']\n83:     copy_input(s,n,'Link',links,d)\n84:     # Renewable candidates: no inherited endogenous investment. Source limits and\n85:     # exogenous profiles are copied; target-year cost parameters are recomputed.\n86:     renewable={'solar','onwind','offwind-ac','offwind-dc','solar rooftop'}\n87:     chosen=s.generators.index[s.generators.carrier.isin(renewable)&s.generators.p_nom_extendable]\n88:     d=clean_table(s,'Generator',chosen)\n89:     d['asset_role']='new_build_candidate';d['source_component']=d.index\n90:     for name,z in d.iterrows():\n91:         tech={'solar':'solar-utility','solar rooftop':'solar-rooftop','offwind-ac':'offwind','offwind-dc':'offwind'}.get(z.carrier,z.carrier)\n92:         newcost=c.at[tech,'fixed']\n93:         if z.carrier.startswith('offwind'):\n94:             ac=z.carrier;station=old.at[ac+'-station','capital_cost'];conn=z.capital_cost-old.at['offwind','capital_cost']-station\n95:             ratios=[c.at[ac+'-connection-'+k,'fixed']/old.at[ac+'-connection-'+k,'capital_cost'] for k in ['submarine','underground']]\n96:             if conn < -1e-8 or not np.isclose(ratios[0],ratios[1],rtol=1e-9):raise ValueError('Cannot identify2050 offshore connection cost from input-only composite '+str((name,conn,ratios)))\n97:             conn=max(0.,conn) # floating subtraction of exactly zero input connection cost\n98:             newcost+=c.at[ac+'-station','fixed']+conn*ratios[0]\n99:             cost_trace.append(dict(component=name,old_electric_cost_year=2030,old_connection_cost=float(conn),common_connection_multiplier=float(ratios[0]),new2050_cost=float(newcost),rule='2050 offshore plant +2050 station + input connection composite * common unit-cost ratio; no optimised quantity'))\n100:         if z.carrier=='onwind' and not np.isclose(z.capital_cost,old.at['onwind','capital_cost']):raise ValueError('Reference electricity cost-year premise not verified')\n101:         d.loc[name,['p_nom','p_nom_min','build_year','capital_cost','lifetime','efficiency']]=[0,0,2050,newcost,c.at[tech,'lifetime'],c.at[tech,'efficiency']]\n102:         d.loc[name,'marginal_cost']=cfg['costs']['marginal_cost'].get(z.carrier.split('-')[0],0. if z.carrier=='solar rooftop' else c.at[tech,'VOM'])\n103:         if z.bus.endswith(' low voltage'):d.loc[name,'bus']=z.bus[:-12]\n104:     # Low-voltage identity is retained by an explicit distribution asset below.\n105:     lv=s.buses.index[s.buses.carrier=='low voltage']\n106:     if len(lv):\n107:         b=clean_table(s,'Bus',lv);b['country']=[s.buses.at[x[:-12],'country'] for x in lv];n.import_components_from_dataframe(b,'Bus')\n108:         for name in chosen:\n109:             if s.generators.at[name,'bus'] in lv:d.loc[name,'bus']=s.generators.at[name,'bus']\n110:     copy_input(s,n,'Generator',chosen,d)\n111:     # Reference component names/capacities are inventory evidence only. Active\n112:     # stock comes from unit-first qualification below, never grouped build years.\n113:     for typ in ['Generator','StorageUnit']:\n114:         src=s.df(typ);ids=src.index[(~src.p_nom_extendable)&src.bus.isin(geo)]\n115:         for name,z in clean_table(s,typ,ids).iterrows():\n116:             ledger.append(dict(type=typ,component=name,source_p_nom=float(z.p_nom),build_year=float(z.build_year),lifetime=float(z.lifetime),status='REFERENCE_INPUT_INVENTORY_NOT_USED_AS_AGE_EVIDENCE'))\n117:     # Distribution and battery input technologies are already in the frozen model.\n118:     accepted_links={'electricity distribution grid':'electricity distribution grid','battery charger':'battery inverter','battery discharger':'battery inverter','home battery charger':'home battery inverter','home battery discharger':'home battery inverter'}\n119:     for carrier,tech in accepted_links.items():\n120:         ids=s.links.index[s.links.carrier==carrier];d=clean_table(s,'Link',ids)\n121:         needed=set(d.bus0)|set(d.bus1)\n122:         bidx=pd.Index([b for b in needed if b not in n.buses.index]);b=clean_table(s,'Bus',bidx)\n123:         if len(b):\n124:             b['country']=[s.buses.at[s.buses.at[x,'location'],'country'] if s.buses.at[x,'location'] in geo else next(s.buses.at[g,'country'] for g in geo if x.startswith(g+' ')) for x in bidx];n.import_components_from_dataframe(b,'Bus')\n125:         d['build_year']=2050;d['p_nom']=0.;d['p_nom_min']=0.;d['lifetime']=c.at[tech,'lifetime'];d['marginal_cost']=0.\n126:         d['asset_role']='new_build_candidate';d['source_component']=d.index\n127:         d['capital_cost']=0. if 'discharger' in carrier else c.at[tech,'fixed']\n128:         if 'battery' in carrier:d['efficiency']=np.sqrt(c.at[tech,'efficiency'])\n129:         copy_input(s,n,'Link',ids,d)\n130:     for carrier,tech in [('battery','battery storage'),('home battery','home battery storage')]:\n131:         ids=s.stores.index[s.stores.carrier==carrier];d=clean_table(s,'Store',ids)\n132:         d['build_year']=2050;d['e_nom']=0.;d['e_nom_min']=0.;d['capital_cost']=c.at[tech,'fixed'];d['lifetime']=c.at[tech,'lifetime'];d['marginal_cost']=0.\n133:         d['asset_role']='new_build_candidate';d['source_component']=d.index\n134:         copy_input(s,n,'Store',ids,d)\n135:     n.meta=dict(asset_role='ELECTRIC_BASE_DEVELOPMENT_UNSOLVED',target_year=2050,weather_year=2013,solver_allowed=False,fullsc_network_complete=False,source_is_solved=False,reference_source_is_solved=True,input_only_extraction=True,asset_time_boundary='ASSEMBLY_V1_2050_SINGLE_YEAR_SURVIVING_ASSETS',unresolved_existing_asset_ages=len(pending),resource_occupancy_status='PENDING_SURVIVOR_MAPPING_TOTAL_LIMIT_ACCOUNTING',required_constraint_hooks=['research_battery_inverter_capacity_equality'],approved_global_constraints=list(n.global_constraints.index),approved_coupling_paths=[])\n136:     pairs=[]\n137:     for name,z in n.links[n.links.carrier.isin(['battery charger','home battery charger'])].iterrows():\n138:         other=n.links[n.links.carrier.isin(['battery discharger','home battery discharger'])&n.links.bus0.eq(z.bus1)]\n139:         if len(other)!=1:raise ValueError('Unpaired battery inverter')\n140:         pairs.append(dict(charger=name,discharger=other.index[0],equation='p_nom_charger = efficiency_discharger * p_nom_discharger'))\n141:     n.meta['battery_inverter_pairs']=pairs\n142:     from integrate_surviving_assets import integrate_survivors,approved\n143:     raw=json.loads(survival.read_text()) if survival else {}\n144:     evidence=raw.get('unit_evidence')\n145:     if evidence is None:raise ValueError('Unit-first source qualification required; aggregated ages are not a substitute')\n146:     contract=json.loads(integration_contract.read_text()) if integration_contract else {}\n147:     integrated=integrate_survivors(n,evidence,contract,profile_network=s)\n148:     unresolved=[r for r in evidence['records'] if r['SurvivalStatus'].startswith('UNRESOLVED')]\n149:     coverage_complete=all(p['CapacityReconciled'] for p in evidence['parent_reconciliation']) and not unresolved and approved(contract.get('InventoryCoverage',{}))\n150:     qualified=coverage_complete and not integrated['pending_qualified_units']\n151:     n.meta['unresolved_existing_asset_ages']=len(unresolved)\n152:     n.meta['resource_occupancy_status']='QUALIFIED_SHARED_ENVELOPES' if qualified else 'PENDING_COMPLETE_STOCK_AND_RESOURCE_QUALIFICATION'\n153:     n.meta['asset_qualification']='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED' if qualified else 'DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION'\n154:     from selected_closure import apply_cost_choices\n155:     apply_cost_choices(n,s,json.loads((repo/'research_inputs/asset_survival/selected_closure_decisions.json').read_text()))\n156:     if layer:\n157:         from price_basis import qualify_network_costs\n158:         qualify_network_costs(n,layer,price_layer)\n159:     path=output/'electric_base_2050_unsolved.nc';actual=export_checked(n,path)\n160:     manifest=dict(status='DEVELOPMENT_ASSET_BUILT_SURVIVOR_QUALIFICATION_PENDING',file=path.name,sha256=sha(path),target_year=2050,geographical_nodes=100,snapshots=2920,physical_hours=8760,components={c.name:len(c.df) for c in actual.iterate_components()},inputs={str(p):sha(p) for p in [reference,costs,oldcosts]},code_sha=version(repo),builder_sha256=sha(__file__),environment={'python':platform.python_version(),'pypsa':pypsa.__version__},source_allowlist='Input attributes only; reference p_nom_opt/s_nom_opt, dispatch, duals, objective excluded',cost_trace=cost_trace,existing_asset_inventory=ledger,unresolved_age_records=pending,solver_runs=0,fullsc_network_complete=False)\n161:     if survival:\n162:         raw=json.loads(survival.read_text());manifest['inputs'][str(survival)]=sha(survival)\n163:         manifest['raw_asset_inventory_summary']={'source_parent_rows':len(raw['records']),'source_unit_rows':len(evidence['records']),'unresolved_unit_records':len(unresolved),'explicit2050_survivors':sum(r['SurvivalStatus']=='SURVIVES_2050' for r in evidence['records']),'numerical_lifetime_acceptance':'Only explicit lifetime decision table or verified retirement records; candidate results excluded'}\n164:     if integration_contract:manifest['inputs'][str(integration_contract)]=sha(integration_contract)\n165:     manifest.update(status=n.meta['asset_qualification'],survivor_integration=integrated,unit_first_selection=True,conditional_stock_materialised=False)"
+        },
+        {
+          "start": 177,
+          "end": 216,
+          "text": "177:     source=sha(costs);geo=base.buses[base.buses.carrier.isin(['AC','DC'])];f=Fragment()\n178:     f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')\n179:     for node,z in geo.iterrows():\n180:         f.bus(node,z.carrier,z.country,node)\n181:         for fuel in ['gas','oil','coal','lignite','H2','co2 captured']:f.bus(bus_name(node,fuel),fuel,z.country,node)\n182:     carbon=list(base.meta.get('existing_carbon_components',[]));pending=[];routes={};dest={};allow=[]\n183:     def event(key,sector,factor,policy,accepted=True):\n184:         r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,PhysicalReportingQualified=True,PolicyAttributionQualified=accepted,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'POLICY_ATTRIBUTION_PENDING'))\n185:     for node,z in geo.iterrows():\n186:         country=z.country\n187:         for fuel in ['gas','oil','coal','lignite']:\n188:             external_import(f,node,fuel,'frozen-price:'+fuel,dict(price=float(c.at[fuel,'fuel']),price_unit='EUR/MWh_fuel',source_sha256=source,source_year=2050,basis='Frozen prepared cost fuel basis; no additional currency conversion',capacity_mw=None,annual_cap_mwh=None,unlimited_annual_accepted=True,unlimited_capacity_accepted=True),accepted=True)\n189:         def link(label,carrier,ports,coeff,tech,costfactor=1):\n190:             inputs=[ports[0]]+[b for b,k in zip(ports[1:],coeff) if k<0];outputs=[b for b,k in zip(ports[1:],coeff) if k>0]\n191:             pars=dict(bus_order=ports,p_nom_extendable=True,p_min_pu=0.,build_year=2050,lifetime=float(c.at[tech,'lifetime']),capital_cost=float(c.at[tech,'fixed'])*costfactor,marginal_cost=float(c.at[tech,'VOM'])*costfactor)\n192:             pars.update({('efficiency' if i==1 else 'efficiency'+str(i)):float(k) for i,k in enumerate(coeff,1)})\n193:             return f.add('Link',node+' '+label,country,carrier,inputs=inputs,outputs=outputs,params=pars,accepted=True,source=source)\n194:         h=bus_name(node,'H2');gas=bus_name(node,'gas');oil=bus_name(node,'oil');co2=bus_name(node,'co2 captured');atmo='ReportingCO2 atmosphere'\n195:         link('electrolysis','H2 Electrolysis',[node,h],[c.at['electrolysis','efficiency']],'electrolysis');allow.append('electrolysis')\n196:         k=link('SMR','SMR',[gas,h,atmo],[c.at['SMR','efficiency'],c.at['gas','CO2 intensity']],'SMR');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity']),None,False)\n197:         carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=0.,captured_destination=None,physical_stage='facility immediate atmosphere')\n198:         # Capture fraction read from effective frozen configuration, not inferred.\n199:         from phase4_static import config\n200:         cc=float(config(repo,'baseline')['sector']['cc_fraction']) if node==geo.index[0] else cc\n201:         if not 0<=cc<=1:raise ValueError('Invalid source capture fraction')\n202:         k=link('SMR CC','SMR CC',[gas,h,atmo,co2],[c.at['SMR CC','efficiency'],c.at['gas','CO2 intensity']*(1-cc),c.at['gas','CO2 intensity']*cc],'SMR CC');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity'])*(1-cc),None,False)\n203:         carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=float(c.at['gas','CO2 intensity'])*cc,captured_destination=co2,physical_stage='facility immediate atmosphere; captured transfer is not an atmospheric credit',capture_source='effective sector.cc_fraction')\n204:         link('fuel cell','H2 Fuel Cell',[h,node],[c.at['fuel cell','efficiency']],'fuel cell',c.at['fuel cell','efficiency'])\n205:         allow.append('fuel_cell')\n206:         link('FT','Fischer-Tropsch',[h,oil,co2,node],[c.at['Fischer-Tropsch','efficiency'],-c.at['oil','CO2 intensity']*c.at['Fischer-Tropsch','efficiency'],-c.at['Fischer-Tropsch','electricity-input']/c.at['Fischer-Tropsch','hydrogen-input']],'Fischer-Tropsch',c.at['Fischer-Tropsch','efficiency']);allow+=['FT','steam_methane_reforming']\n207:         for powertech in ['OCGT','CCGT']:\n208:             eff=float(c.at[powertech,'efficiency']);factor=float(c.at['gas','CO2 intensity'])\n209:             k=link(powertech,powertech,[gas,node,atmo],[eff,factor],powertech,eff)\n210:             f.components[k]['params']['marginal_cost']=float(c.at[powertech,'VOM'])*eff\n211:             event(k,'Power',factor,1.)\n212:         tech='hydrogen storage tank type 1 including compressor'\n213:         f.add('Store',node+' H2 tank',country,'H2',inputs=[h],outputs=[h],role='STORAGE',params=dict(e_nom_extendable=True,e_cyclic=True,capital_cost=float(c.at[tech,'fixed']),build_year=2050,lifetime=float(c.at[tech,'lifetime'])),accepted=True,source=source)\n214:     # Bind qualified obligation interfaces to source commodity identities; no Load\n215:     # is created here, and incomplete obligations are never converted to zero.\n216:     registry=json.loads((repo/'research_inputs/assembly_v1/registry.json').read_text());records={r['InputID']:r for r in registry['records']}"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/carbon_architecture.py",
+      "blob_sha1": "21dc3035e250e9f9b1a83b0ba2cdd14cd5b81fe1",
+      "sha256": "e9f96465070d4fc21b6d92dae190f24b7fcdf23b8e1853f0467e949d1d4b80be",
+      "snippets": [
+        {
+          "start": 1,
+          "end": 180,
+          "text": "1: \"\"\"Power policy and physical full-system CO2 reporting are separate views.\n2: \n3: No atmospheric Store/carrier aggregate is used as a power-policy expression.\n4: All real mixed-use assignments require explicit accepted attribution. No solve.\n5: \"\"\"\n6: from collections import defaultdict\n7: import math\n8: from carrier_architecture import finite,COUNTRIES\n9: \n10: TRAJECTORY={2025:1000e6,2030:820e6,2035:640e6,2040:460e6,2045:280e6,2050:100e6}\n11: SECTORS={'Power','Buildings','Transport','Industry','Agriculture','DomesticShipping',\n12:          'InternationalShipping','DomesticAviation','InternationalAviation','Other',\n13:          'RailNonElectric','TransportNEC','OtherNEC','HydrogenProduction'}\n14: ORIGINS={'FOSSIL','BIOGENIC','DAC','RECYCLED_POINT_SOURCE','MIXED_UNRESOLVED'}\n15: \n16: \n17: def budget(year,represented_hours):\n18:     if year not in TRAJECTORY:raise ValueError('No accepted trajectory value for this year')\n19:     h=finite(represented_hours)\n20:     if h<=0:raise ValueError('Positive represented hours required')\n21:     return TRAJECTORY[year]*h/8760.\n22: \n23: \n24: def classify_record(component,carrier,sector,country,coefficient,*,source,\n25:                     policy_weight=None,accepted=False,flow='physical_atmosphere',\n26:                     physical_qualified=None,policy_qualified=None):\n27:     \"\"\"No technology-name or electric-connectivity heuristic for policy scope.\"\"\"\n28:     if sector not in SECTORS or country not in COUNTRIES:raise ValueError('Emission ownership unknown')\n29:     if not source:raise ValueError('Emission-factor provenance required')\n30:     coef=finite(coefficient,nonnegative=False)\n31:     if flow!='physical_atmosphere':raise ValueError('Transfers/storage must not be added as atmosphere emissions')\n32:     legacy=physical_qualified is None and policy_qualified is None\n33:     physical=bool(accepted) if physical_qualified is None else physical_qualified is True\n34:     policy=bool(accepted) if policy_qualified is None else policy_qualified is True\n35:     if not physical:raise ValueError('Physical coefficient/source not accepted')\n36:     if policy_weight is None and legacy:\n37:         if sector=='Power':policy_weight=1.\n38:         else:policy=False  # Missing attribution is not evidence for a zero weight.\n39:     if not policy:\n40:         if policy_weight is not None:raise ValueError('Pending policy attribution must retain null weight')\n41:         weight=None\n42:     else:\n43:         if policy_weight is None:raise ValueError('Qualified policy attribution lacks a weight')\n44:         weight=finite(policy_weight)\n45:         if weight>1 or (sector!='Power' and weight!=0):raise ValueError('Non-power event cannot enter power policy')\n46:     return dict(Component=component,Carrier=carrier,Sector=sector,Country=country,\n47:                 EmissionFactor=coef,PolicyWeight=weight,PolicyCO2Power=None if weight is None else bool(weight),\n48:                 PhysicalReportingQualified=True,PolicyAttributionQualified=policy,\n49:                 PolicyAttributionStatus='QUALIFIED' if policy else 'POLICY_ATTRIBUTION_PENDING',\n50:                 ReportingCO2FullSystem=True,Source=source,Accepted=physical and policy)\n51: \n52: \n53: def views(events):\n54:     \"\"\"Physical atmosphere events only. Source/fuel production isn't counted again.\n55: \n56:     Event IDs and CarbonBatchID+Stage prevent duplicated entries. Policy and\n57:     reporting totals are two views of the same events; never add the views.\n58:     \"\"\"\n59:     ids={e['EventID'] for e in events}\n60:     if any(e.get('ParentEventID') in ids for e in events):raise ValueError('Original event and allocated children both present')\n61:     seen=set();stages=set();policy=0.;report=defaultdict(float);origins=defaultdict(float);pending=[]\n62:     for e in events:\n63:         if e['EventID'] in seen:raise ValueError('Duplicate carbon event')\n64:         seen.add(e['EventID']);stage=(e['CarbonBatchID'],e['Stage'])\n65:         if stage in stages:raise ValueError('Carbon stage counted twice')\n66:         stages.add(stage)\n67:         if e['Country'] not in COUNTRIES or e['Sector'] not in SECTORS or e['Origin'] not in ORIGINS:\n68:             raise ValueError('Unknown carbon attribution')\n69:         if e.get('PhysicalReportingQualified',e.get('Accepted')) is not True:raise ValueError('Unaccepted physical carbon event')\n70:         value=finite(e['AtmosphereDelta'],nonnegative=False)\n71:         if e['Stage'].split(':',1)[0] in ('capture_transfer','FT_transfer','geological_storage') and value!=0:\n72:             raise ValueError('Internal carbon transfer/storage cannot be a second atmospheric credit')\n73:         qualified=e.get('PolicyAttributionQualified',e.get('Accepted')) is True\n74:         if not qualified:\n75:             if e.get('PolicyWeight') is not None:raise ValueError('Pending weight must not be replaced by zero')\n76:             pending.append(e['EventID']);weight=None\n77:         else:\n78:             if e.get('PolicyWeight') is None:raise ValueError('Missing accepted policy weight')\n79:             weight=finite(e['PolicyWeight'])\n80:             if weight>1 or (e['Sector']!='Power' and weight!=0):raise ValueError('Non-power policy leakage')\n81:         if e['Origin']=='MIXED_UNRESOLVED' and value<0 and weight:\n82:             raise ValueError('Unresolved-origin removal cannot offset power policy')\n83:         if weight is not None:policy+=value*weight\n84:         report[(e['Country'],e['Sector'])]+=value\n85:         origins[e['Origin']]+=value\n86:     return dict(PolicyCO2_Power=None if pending else policy,PolicyKnownSubtotal=policy,PolicyAttributionPending=pending,ReportingCO2_FullSystem=sum(report.values()),\n87:                 ByCountrySector={c+':'+s:v for (c,s),v in report.items()},ByOrigin=dict(origins))\n88: \n89: \n90: def allocate_shared_event(event,shares,*,accepted):\n91:     \"\"\"Apply a HUMAN ACCEPTED SMR/CHP attribution, never choose its fractions.\"\"\"\n92:     if not accepted or not shares or set(shares)-SECTORS:raise ValueError('Shared-use attribution pending')\n93:     if event.get('ParentEventID'):raise ValueError('Shared event already allocated')\n94:     views([event])  # Validate physical transfer and acceptance before splitting.\n95:     weights={s:finite(v) for s,v in shares.items()}\n96:     if not math.isclose(sum(weights.values()),1.,rel_tol=1e-10,abs_tol=1e-10):raise ValueError('Shared allocation loses/duplicates carbon')\n97:     return [dict(event,EventID=event['EventID']+':'+s,ParentEventID=event['EventID'],Stage=event['Stage']+':'+s,\n98:                  Sector=s,AtmosphereDelta=finite(event['AtmosphereDelta'],nonnegative=False)*w,PolicyWeight=1. if s=='Power' else 0.,PhysicalReportingQualified=True,PolicyAttributionQualified=True,Accepted=True) for s,w in weights.items()]\n99: \n100: \n101: def smr_physical_events(batch,country,gas_input_mwh,co2_per_mwh,capture_fraction,*,source):\n102:     \"\"\"Facility events from declared gas throughput; no hydrogen end-use guess.\n103: \n104:     Captured CO2 remains a transfer to the captured bus. Its eventual release\n105:     must be recorded at that downstream physical stage, never credited here.\n106:     \"\"\"\n107:     if not source:raise ValueError('SMR physical source required')\n108:     total=finite(gas_input_mwh)*finite(co2_per_mwh);cc=finite(capture_fraction)\n109:     if cc>1:raise ValueError('Capture fraction exceeds one')\n110:     base=dict(CarbonBatchID=batch,Country=country,Sector='HydrogenProduction',Origin='FOSSIL',PolicyWeight=None,PhysicalReportingQualified=True,PolicyAttributionQualified=False,Accepted=False,Source=source)\n111:     events=[dict(base,EventID=batch+':initial_stack',Stage='initial_stack',AtmosphereDelta=total*(1-cc)),dict(base,EventID=batch+':capture_transfer',Stage='capture_transfer',AtmosphereDelta=0.)]\n112:     return events,dict(InputCarbon=total,ImmediateAtmosphere=total*(1-cc),CapturedTransfer=total*cc,CapturedDestination='local co2 captured bus; downstream fate remains explicit')\n113: \n114: \n115: def carbon_batch(batch,country,origin,carbon,*,captured,stored,recycled,remaining,\n116:                  release_sector,producer_sector='Power',accepted=False,policy_weight=1.):\n117:     \"\"\"One declared carbon lineage; synthetic tests or accepted traced balances.\n118: \n119:     Fossil carbon splits into immediate stack and captured flow. Captured flow\n120:     splits into permanent inventory, FT/recycled release and temporary stock.\n121:     Storage adds no second credit. DAC removes from atmosphere once then release\n122:     adds it once. Captured amount is not automatically a permanent reduction.\n123:     Real mixed oil/CO2 pools need an accepted flow-tracing/allocation decision.\n124:     \"\"\"\n125:     if not accepted or origin not in ORIGINS or origin=='MIXED_UNRESOLVED':raise ValueError('Source carbon lineage pending')\n126:     c,cap,store,rec,rem=map(finite,[carbon,captured,stored,recycled,remaining])\n127:     if cap>c or not math.isclose(cap,store+rec+rem,rel_tol=1e-10,abs_tol=1e-9):raise ValueError('Captured carbon balance failed')\n128:     if origin=='DAC' and not math.isclose(cap,c):raise ValueError('DAC intake must equal captured carbon')\n129:     def event(stage,sector,delta,weight):\n130:         return dict(EventID=batch+':'+stage,CarbonBatchID=batch,Stage=stage,Country=country,\n131:             Sector=sector,Origin=origin,AtmosphereDelta=delta,PolicyWeight=weight,Accepted=True)\n132:     events=[event('atmospheric_uptake' if origin=='DAC' else 'initial_stack',producer_sector,-c if origin=='DAC' else c-cap,policy_weight),\n133:             event('capture_transfer',producer_sector,0.,0.),event('geological_storage',producer_sector,0.,0.),\n134:             event('FT_release',release_sector,rec,1. if release_sector=='Power' else 0.)]\n135:     if origin=='BIOGENIC':\n136:         # No invented lifecycle uptake. This ledger records the modeled stack;\n137:         # any modeled upgrading/uptake credit is a separately traced event.\n138:         pass\n139:     return events,dict(InputCarbon=c,Captured=cap,PermanentStock=store,RecycledRelease=rec,\n140:                        TemporaryStock=rem,AtmosphericNet=sum(e['AtmosphereDelta'] for e in events))\n141: \n142: \n143: def install_power_policy(n,terms,year,*,enabled,scope_complete,expected_hours):\n144:     \"\"\"Attach only explicit component/variable coefficients to an existing model.\n145: \n146:     n.model must already contain variables. This function never creates a model\n147:     or solves. terms has variable, dimension, component, sector, coefficient,\n148:     policy_weight, accepted, source. CO2 coefficients are t/input-MWh for Link-p\n149:     or t/output-MWh for Generator-p, supplied explicitly from a reviewed map.\n150:     \"\"\"\n151:     if not enabled:return {'status':'DISABLED_AS_UPSTREAM_BASELINE','constraint_created':False}\n152:     if not scope_complete:raise ValueError('Unresolved SMR/CHP/capture attribution blocks full power scope')\n153:     if any(t.get('policy_attribution_qualified',t.get('PolicyAttributionQualified',t.get('accepted'))) is not True or t.get('policy_weight') is None for t in terms):raise ValueError('POLICY_ATTRIBUTION_PENDING blocks enabled policy')\n154:     if getattr(n,'model',None) is None:raise ValueError('No preconstructed variables')\n155:     if any(str(r.type)=='primary_energy' and 'co2' in str(r.carrier_attribute).lower() for _,r in n.global_constraints.iterrows()):\n156:         raise ValueError('Legacy aggregate primary-energy cap must not coexist with isolated policy')\n157:     import xarray as xr\n158:     w=n.snapshot_weightings.generators\n159:     if not w.index.equals(n.snapshots) or any(not math.isfinite(v) or v<=0 for v in w):raise ValueError('Invalid physical snapshot weights')\n160:     if not math.isclose(float(w.sum()),finite(expected_hours),rel_tol=1e-10,abs_tol=1e-8):raise ValueError('Physical represented-hours mismatch')\n161:     # The old budget uses objective/8760 scaling. Demand/emission physical\n162:     # weights must have the same total to preserve that numerical convention.\n163:     if not math.isclose(float(n.snapshot_weightings.objective.sum()),float(w.sum()),rel_tol=1e-10):\n164:         raise ValueError('Legacy objective-hours and physical-hours scaling differ')\n165:     wa=xr.DataArray(w.to_numpy(),coords={'snapshot':n.snapshots},dims='snapshot')\n166:     expression=None;seen=set()\n167:     for t in terms:\n168:         key=(t['variable'],t['component'])\n169:         if key in seen:raise ValueError('Component carbon term counted twice')\n170:         seen.add(key)\n171:         if not t['accepted'] or not t['source'] or t['policy_weight'] is None:raise ValueError('Unaccepted policy attribution')\n172:         coefficient=finite(t['coefficient'],nonnegative=False);weight=finite(t['policy_weight'])\n173:         if weight>1 or (t['sector']!='Power' and weight!=0):raise ValueError('Non-power policy coefficient')\n174:         if weight==0:continue\n175:         term=(n.model[t['variable']].sel({t['dimension']:t['component']})*wa*coefficient*weight).sum()\n176:         expression=term if expression is None else expression+term\n177:     if expression is None:raise ValueError('Empty accepted power scope is not a policy constraint')\n178:     rhs=budget(year,float(w.sum()))\n179:     n.model.add_constraints(expression<=rhs,name='Research-PolicyCO2_Power')\n180:     return dict(status='INSTALLED_NOT_SOLVED',constraint_created=True,rhs_tco2=rhs,reporting_constraint_created=False)"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "configs/research/baseline.yaml",
+      "blob_sha1": "e608b88708c928f57d3333acb57b68329a309a4b",
+      "sha256": "40489a11fdbcd02aa338e7ea856540dd2fb71a7f7851617f05dbbb84a983546a",
+      "snippets": [
+        {
+          "start": 1,
+          "end": 105,
+          "text": "1: # Research demand/carrier/carbon contracts only; never an upstream solve config.\n2: research_demand:\n3:   schema: phase4-gate2-v1\n4:   mode: static_demand_only\n5:   builder: scripts_project/build_research_demand.py\n6:   input_directory: research_inputs/demand\n7:   electricity_parent: electricity_parent.csv\n8:   tables:\n9:     - electricity_parent.csv\n10:     - buildings_accounting.csv\n11:     - transport_accounting.csv\n12:     - industry_accounting.csv\n13:     - agriculture_accounting.csv\n14:     - bunker_accounting.csv\n15:   numeric_acceptance_required: true\n16:   legacy_demand_builders: forbidden\n17:   astar_boundary: end_user_final_electricity\n18:   aeo8_generation_target: false\n19:   aeo8_final_electricity_role: assembly_v1_regional_anchor\n20:   heat_without_accepted_service: embedded\n21:   future_growth_fallback: forbidden\n22:   solver_allowed: false\n23: \n24: research_carrier_architecture:\n25:   schema: phase4-gate3-v1\n26:   mode: static_fragments_only\n27:   builder: scripts_project/carrier_architecture.py\n28:   ownership: explicit_node_country\n29:   cross_border_h2: false\n30:   cross_border_gas: false\n31:   cross_border_co2: false\n32:   cross_border_biomass: false\n33:   cross_border_synthetic_fuels: false\n34:   ammonia: deferred\n35:   methanol: deferred\n36:   external_h2_imports: deferred\n37:   h2_export_obligation: deferred_pending_accepted_boundary\n38:   external_market: independent_source_generators_shared_price_metadata_only\n39:   finite_resource_allocation: human_accepted_only_no_replication\n40:   co2_feedstock: local_captured_pool\n41:   co2_geology: local_nonwithdrawable_inventory\n42:   electricity_intervention: deferred_keep_identical_interfaces\n43:   topology_repair: repaired_d13d5976\n44:   solver_allowed: false\n45: \n46: research_carbon:\n47:   policy_name: PolicyCO2_Power\n48:   reporting_name: ReportingCO2_FullSystem\n49:   policy_enabled: false  # Preserve original baseline co2.budget.enable=false.\n50:   budget_tco2_per_year:\n51:     2025: 1000000000\n52:     2030: 820000000\n53:     2035: 640000000\n54:     2040: 460000000\n55:     2045: 280000000\n56:     2050: 100000000\n57:   power_scope: explicit_accepted_component_coefficients\n58:   shared_smr_chp_attribution: pending_human_accepted_split\n59:   atmosphere: reporting_only_zero_policy_carrier_factor\n60:   reporting_creates_cap: false\n61:   full_system_cap: forbidden\n62:   origin_neutrality_assumption: forbidden\n63:   preserved_baseline_enable_semantics: true\n64: \n65: # Gate4 input gate only. A runnable Full-SC assembly is blocked until the\n66: # target-year source, supply and allocation gates close. Carbon attribution\n67: # is validated on the actual network after export, before Gate4 can pass.\n68: demand_data:\n69:   update_data: false\n70: final_adjustment:\n71:   only_elec_network: false\n72: research_assembly:\n73:   schema: phase4-gate4-layered-v2\n74:   builder: scripts_project/build_research_network.py\n75:   allocation_builder: scripts_project/allocate_assembly_inputs.py\n76:   research_workflow: workflow/research_assembly.smk\n77:   input_registry: research_inputs/assembly_v1/registry.json\n78:   target_year: 2050\n79:   base_year: 2019\n80:   accepted_status: ASSEMBLY_V1_ACCEPTED\n81:   preflight: scripts_project/check_assembly_inputs.py\n82:   legacy_final_adjustment: forbidden\n83:   legacy_sector_demand_builders: forbidden\n84:   target_year_fallback: forbidden\n85:   network_export_enabled: true # Authorized, but executable input/allocation/asset gates must pass.\n86:   blocked_reason: actual_source_accounts_and_qualified_asset_bundle_incomplete\n87:   scenario_switching: false\n88:   solver_allowed: false\n89:   demand_scenario: AEO8_BAS\n90:   road_parent_method: ASSEMBLY_V1_AEO8_ROAD_PARENT_APPROX\n91:   road_non_electric_method: ASSEMBLY_V1_ROAD_NON_ELECTRIC_TRANSPORT_GROWTH_PROXY\n92:   road_parent_role: ROAD_TOTAL_REFERENCE_ONLY\n93:   road_parent_exact_total_enforced: false\n94:   mtoe_method: ASSEMBLY_V1_MTOE_CONVENTION_11P63_TWH\n95:   non_electric_growth_method: ASSEMBLY_V1_ACCEPTED_GROWTH_PROXY\n96:   domestic_shipping_aviation_method: ASSEMBLY_V1_DOMESTIC_CONSTANT_2019\n97:   road_ev_representation: EMBEDDED_IN_ASTAR\n98:   road_ev_materialisation: NOT_SEPARATELY_MATERIALISED\n99:   road_ev_pathway: DEFERRED_TO_EV_SENSITIVITY\n100:   international_bunker_method: ASSEMBLY_V1_BUNKER_CONSTANT_2019\n101:   bunker_sensitivity_required: true\n102:   external_fossil_market: ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED\n103:   biomass_supply_cap: accepted_country_fixed_obligation_only\n104:   geological_storage_asset: false\n105:   carbon_validation_stage: POST_BUILD_STATIC_VALIDATION_BLOCKER"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/_helpers.py",
+      "blob_sha1": "00ccf3c26e0e945862509b10060565b8c74947b7",
+      "sha256": "c1b1493540d7b3e146a8d1a517354485478788e838ca74f8ed1fb8c8f0e4660d",
+      "snippets": [
+        {
+          "start": 951,
+          "end": 975,
+          "text": "951: def annuity(n, r):\n952:     \"\"\"\n953:     Calculate the annuity factor for an asset with lifetime n years and.\n954: \n955:     discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6\n956:     \"\"\"\n957: \n958:     if isinstance(r, pd.Series):\n959:         return pd.Series(1 / n, index=r.index).where(\n960:             r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)\n961:         )\n962:     elif r > 0:\n963:         return r / (1.0 - 1.0 / (1.0 + r) ** n)\n964:     else:\n965:         return 1 / n\n966: \n967: \n968: # Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).\n969: # Change this value to update the reference year everywhere.\n970: TECH_DATA_REFERENCE_YEAR = 2020\n971: \n972: # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)\n973: _currency_conversion_cache = {}\n974: \n975: "
+        },
+        {
+          "start": 1135,
+          "end": 1220,
+          "text": "1135: def prepare_costs(\n1136:     cost_file: str,\n1137:     config: dict,\n1138:     output_currency: str,\n1139:     fill_values: dict,\n1140:     Nyears: float | int = 1,\n1141:     default_exchange_rate: float = None,\n1142:     future_exchange_rate_strategy: str = \"latest\",\n1143:     custom_future_exchange_rate: float = None,\n1144: ):\n1145:     \"\"\"\n1146:     Loads and processes cost data, converting units and currency to a common format.\n1147: \n1148:     Applies currency conversion, fills missing values, and computes fixed annualized costs.\n1149:     Always uses the module-level reference_year.\n1150:     \"\"\"\n1151:     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()\n1152: \n1153:     # correct units to MW\n1154:     costs.loc[costs.unit.str.contains(\"/kW\"), \"value\"] *= 1e3\n1155: \n1156:     # apply filter on financial_case and scenario, if they are contained in the cost dataframe\n1157:     wished_cost_scenario = config[\"cost_scenario\"]\n1158:     wished_financial_case = config[\"financial_case\"]\n1159:     for col in [\"scenario\", \"financial_case\"]:\n1160:         if col in costs.columns:\n1161:             costs[col] = costs[col].replace(\"\", pd.NA)\n1162: \n1163:     if \"scenario\" in costs.columns:\n1164:         costs = costs[\n1165:             (costs[\"scenario\"].str.casefold() == wished_cost_scenario.casefold())\n1166:             | (costs[\"scenario\"].isnull())\n1167:         ]\n1168: \n1169:     if \"financial_case\" in costs.columns:\n1170:         costs = costs[\n1171:             (costs[\"financial_case\"].str.casefold() == wished_financial_case.casefold())\n1172:             | (costs[\"financial_case\"].isnull())\n1173:         ]\n1174: \n1175:     if costs[\"currency_year\"].isnull().any():\n1176:         logger.warning(\n1177:             \"Some rows are missing 'currency_year' and will be skipped in currency conversion.\"\n1178:         )\n1179: \n1180:     # Build a shared cache for exchange rates using the global reference_year\n1181:     _currency_conversion_cache = build_currency_conversion_cache(\n1182:         costs,\n1183:         output_currency,\n1184:         default_exchange_rate=default_exchange_rate,\n1185:         future_exchange_rate_strategy=future_exchange_rate_strategy,\n1186:         custom_future_exchange_rate=custom_future_exchange_rate,\n1187:     )\n1188: \n1189:     modified_costs = apply_currency_conversion(\n1190:         costs, output_currency, _currency_conversion_cache\n1191:     )\n1192: \n1193:     modified_costs = (\n1194:         modified_costs.loc[:, \"value\"]\n1195:         .unstack(level=1)\n1196:         .groupby(\"technology\")\n1197:         .sum(min_count=1)\n1198:     )\n1199:     modified_costs = modified_costs.fillna(fill_values)\n1200: \n1201:     for attr in (\"investment\", \"lifetime\", \"FOM\", \"VOM\", \"efficiency\", \"fuel\"):\n1202:         overwrites = config.get(attr)\n1203:         if overwrites is not None:\n1204:             overwrites = pd.Series(overwrites)\n1205:             modified_costs.loc[overwrites.index, attr] = overwrites\n1206:             logger.info(\n1207:                 f\"Overwriting {attr} of {overwrites.index} to {overwrites.values}\"\n1208:             )\n1209: \n1210:     def annuity_factor(v):\n1211:         return annuity(v[\"lifetime\"], v[\"discount rate\"]) + v[\"FOM\"] / 100\n1212: \n1213:     modified_costs[\"fixed\"] = [\n1214:         annuity_factor(v) * v[\"investment\"] * Nyears\n1215:         for _, v in modified_costs.iterrows()\n1216:     ]\n1217: \n1218:     return modified_costs\n1219: \n1220: "
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/add_transmission_projects.py",
+      "blob_sha1": "cd663e7561fe383e99499147c176a4a3ff1d0c46",
+      "sha256": "30d6561b4f23bcd97ae57df48548c75bf4ebf384f441308296c2b8659dfd4c85",
+      "snippets": [
+        {
+          "start": 18,
+          "end": 60,
+          "text": "18: def attach_transmission_projects(\n19:     n: pypsa.Network, transmission_projects: list[str]\n20: ) -> None:\n21:     logger.info(\"Adding transmission projects to network.\")\n22:     for path in transmission_projects:\n23:         path = Path(path)\n24:         logger.info(path)\n25:         df = pd.read_csv(path, index_col=0, dtype={\"bus0\": str, \"bus1\": str})\n26:         if df.empty:\n27:             continue\n28: \n29:         if \"new_buses\" in path.name:\n30:             logger.info(f\"Adding new buses from {path}\")\n31: \n32:             missing_coords = df[df[\"x\"].isnull() | df[\"y\"].isnull()]\n33:             if not missing_coords.empty:\n34:                 logger.warning(\n35:                     f\"Dropping {len(missing_coords)} buses from {path} \"\n36:                     f\"because they have missing coordinates:\\n\"\n37:                     f\"{missing_coords.index.tolist()}\"\n38:                 )\n39:                 # Drop rows with missing coordinates\n40:                 df = df.drop(missing_coords.index)\n41: \n42:             if not df.empty:\n43:                 df.rename(columns={\"x\": \"lon\", \"y\": \"lat\"}, inplace=True)\n44:                 n.madd(\"Bus\", df.index, **df.to_dict(orient=\"list\"))\n45:             else:\n46:                 logger.warning(f\"No buses added from {path} after filtering.\")\n47: \n48:         elif \"new_lines\" in path.name:\n49:             logger.info(f\"Adding new lines from {path}\")\n50:             n.madd(\"Line\", df.index, **df.to_dict(orient=\"list\"))\n51: \n52:         elif \"new_links\" in path.name:\n53:             logger.info(f\"Adding new links from {path}\")\n54:             n.madd(\"Link\", df.index, **df.to_dict(orient=\"list\"))\n55: \n56:         elif \"adjust_lines\" in path.name:\n57:             logger.info(f\"Adjusting lines from {path}\")\n58:             n.lines.update(df)\n59: \n60:         elif \"adjust_links\" in path.name:"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/build_transmission_projects.py",
+      "blob_sha1": "c189b39f8ecd8297c2c49d19be29ba9f1c2090fe",
+      "sha256": "9818f8b27c990cf6481e7021d6180e5cfea9f2c7cc1ba910272a9f34be64229c",
+      "snippets": [
+        {
+          "start": 270,
+          "end": 365,
+          "text": "270:                     + str(line_map[\"existing_line\"].to_dict())\n271:                     + \"\\n Lines are assumed to be duplicated and will be ignored.\"\n272:                 )\n273:     elif type == \"upgraded\":\n274:         if len(found_i) < len(new_lines):\n275:             not_found = new_lines.index.difference(line_map.index)\n276:             logger.warning(\n277:                 \"Could not find upgraded lines close enough to existing lines:\\n\"\n278:                 + str(not_found.to_list())\n279:                 + \"\\n Lines will be ignored.\"\n280:             )\n281:     # only keep the closer line of the new line pair (since lines are checked in both directions)\n282:     line_map = line_map.sort_values(by=\"D\")[\n283:         lambda ds: ~ds.index.duplicated(keep=\"first\")\n284:     ].sort_index()[\"existing_line\"]\n285:     return line_map\n286: \n287: \n288: def adjust_decommissioning(upgraded_lines, line_map):\n289:     \"\"\"\n290:     Adjust the decommissioning year of the existing lines to the built year of\n291:     the upgraded lines.\n292:     \"\"\"\n293:     to_update = pd.DataFrame(index=line_map)\n294:     to_update[\"build_year\"] = (\n295:         1990  # dummy build_year to make existing lines decommissioned when upgraded lines are built\n296:     )\n297:     to_update[\"lifetime\"] = (\n298:         upgraded_lines.rename(line_map)[\"build_year\"] - 1990\n299:     )  # set lifetime to the difference between build year of upgraded line and existing line\n300:     return to_update\n301: \n302: \n303: def get_upgraded_lines(branch_component, n, upgraded_lines, line_map):\n304:     \"\"\"\n305:     Get upgraded lines or links by merging info of existing and upgraded components.\n306:     \"\"\"\n307: \n308:     # get first the information of the existing lines/links to be upgraded\n309:     df_existing = n.df(branch_component).loc[line_map].copy()\n310: \n311:     # get columns of upgraded lines/links which are not in existing lines\n312:     new_columns = upgraded_lines.columns.difference(df_existing.columns)\n313: \n314:     # rename upgraded lines to match existing lines\n315:     upgraded_lines = upgraded_lines.rename(line_map)\n316: \n317:     # set the same index names to be able to merge\n318:     upgraded_lines.index.name = df_existing.index.name\n319:     # Ensure type is preserved if missing from upgraded lines\n320: \n321:     columns_to_update = upgraded_lines.columns.difference([\"type\"])\n322:     df_existing.update(upgraded_lines[columns_to_update])\n323: \n324:     # add columns which were new in upgraded_lines\n325:     df_existing = pd.concat([df_existing, upgraded_lines[new_columns]], axis=1)\n326:     if \"type\" not in df_existing.columns:\n327:         df_existing[\"type\"] = n.df(branch_component).loc[line_map, \"type\"].values\n328:     else:\n329:         # If type column exists but has nulls for some upgrades, fill from original\n330:         mask_null_type = df_existing[\"type\"].isna()\n331:         if mask_null_type.any():\n332:             df_existing.loc[mask_null_type, \"type\"] = (\n333:                 n.df(branch_component).loc[line_map[mask_null_type], \"type\"].values\n334:             )\n335: \n336:     # only consider columns of original upgraded lines/links and bus0 and bus1\n337:     df_existing = df_existing.loc[:, [\"bus0\", \"bus1\", *upgraded_lines.columns]]\n338: \n339:     # decide capacity attribute:\n340:     capacity_attr = \"s_nom\" if branch_component == \"Line\" else \"p_nom\"\n341: \n342:     for idx, row in df_existing.iterrows():\n343:         original_idx = idx.replace(\"_upgraded\", \"\")\n344:         if original_idx in n.df(branch_component).index:\n345:             cap_existing = n.df(branch_component).at[original_idx, capacity_attr]\n346: \n347:             # defaults\n348:             scaling_factor = 1.0\n349: \n350:             if branch_component == \"Line\":\n351:                 v_nom_existing = n.df(branch_component).at[original_idx, \"v_nom\"]\n352:                 num_parallel_existing = n.df(branch_component).at[\n353:                     original_idx, \"num_parallel\"\n354:                 ]\n355: \n356:                 # ensure no NaN or zero\n357:                 if pd.isna(v_nom_existing) or v_nom_existing == 0:\n358:                     v_nom_existing = row.get(\"v_nom\", 1.0)\n359:                 if pd.isna(num_parallel_existing) or num_parallel_existing == 0:\n360:                     num_parallel_existing = 1.0\n361: \n362:                 scaling_factor = (row[\"v_nom\"] / v_nom_existing) * (\n363:                     row[\"num_parallel\"] / num_parallel_existing\n364:                 )\n365: "
+        },
+        {
+          "start": 690,
+          "end": 802,
+          "text": "690:             adjust_lines_df[\"underground\"].astype(\"bool\").fillna(False)\n691:         )\n692:     # Patch upgraded lines with s_nom still zero\n693:     if not new_lines_df.empty:\n694:         mask_upgraded_lines = new_lines_df.index.str.contains(\"_upgraded\")\n695: \n696:         if mask_upgraded_lines.any():\n697:             # Identify upgraded lines where s_nom is missing or zero\n698:             missing_capacity = (\n699:                 new_lines_df.loc[mask_upgraded_lines, \"s_nom\"].fillna(0) == 0\n700:             )\n701:             affected = new_lines_df.loc[mask_upgraded_lines][missing_capacity]\n702: \n703:             for idx, row in affected.iterrows():\n704:                 original_idx = idx.replace(\"_upgraded\", \"\")\n705:                 fallback_type = row.get(\"type\", \"N2XS(FL)2Y 1x240 RM/35 64/110 kV\")\n706:                 fallback_v_nom = row.get(\"v_nom\", 115)\n707:                 fallback_parallel = row.get(\"num_parallel\", 1)\n708: \n709:                 # If type is missing or unknown, fallback\n710:                 if pd.isna(fallback_type) or fallback_type not in n.line_types.index:\n711:                     logger.warning(\n712:                         f\"Upgraded line {idx} has missing or unknown type. \"\n713:                         f\"Falling back to default type N2XS(FL)2Y 1x240 RM/35 64/110 kV\"\n714:                     )\n715:                     fallback_type = \"N2XS(FL)2Y 1x240 RM/35 64/110 kV\"\n716: \n717:                 # Use fallback current rating\n718:                 i_nom = n.line_types.at[fallback_type, \"i_nom\"]\n719: \n720:                 # Calculate fallback capacity\n721:                 fallback_s_nom = np.sqrt(3) * i_nom * fallback_v_nom * fallback_parallel\n722:                 fallback_s_nom = round(fallback_s_nom, 2)\n723: \n724:                 new_lines_df.at[idx, \"s_nom\"] = fallback_s_nom\n725: \n726:                 logger.warning(\n727:                     f\"Fallback s_nom for upgraded line {idx}: \"\n728:                     f\"type={fallback_type}, v_nom={fallback_v_nom}, \"\n729:                     f\"num_parallel={fallback_parallel} → s_nom={fallback_s_nom}\"\n730:                 )\n731: \n732:         line_type = \"Al/St 240/40 4-bundle 380.0\"\n733: \n734:         # Add new line type for new lines\n735:         # Only fill missing line types for NEW lines\n736:         mask_new_lines = ~new_lines_df.index.str.contains(\"_upgraded\")\n737:         new_lines_df.loc[mask_new_lines, \"type\"] = new_lines_df.loc[\n738:             mask_new_lines, \"type\"\n739:         ].fillna(line_type)\n740: \n741:         new_lines_df[\"num_parallel\"] = new_lines_df[\"num_parallel\"].fillna(2)\n742: \n743:         if \"underground\" in new_lines_df.columns:\n744:             new_lines_df[\"underground\"] = (\n745:                 new_lines_df[\"underground\"].astype(\"bool\").fillna(False)\n746:             )\n747: \n748:         # Add carrier types of lines\n749:         new_lines_df[\"carrier\"] = \"AC\"\n750: \n751:         # Fill empty length values with length calculated from geometry\n752:         new_lines_df[\"length\"] = new_lines_df.apply(\n753:             fill_length_from_geometry, args=(line_factor,), axis=1\n754:         )\n755:         # Only recalculate s_nom for NEW lines (not upgrades)\n756:         mask_new_lines = ~new_lines_df.index.str.contains(\"_upgraded\")\n757: \n758:         if mask_new_lines.any():\n759:             # Check if all new types exist in line_types\n760:             types_new = new_lines_df.loc[mask_new_lines, \"type\"]\n761:             missing_types = types_new[~types_new.isin(n.line_types.index)]\n762:             if not missing_types.empty:\n763:                 logger.warning(\n764:                     f\"Line types missing in network line_types table: \"\n765:                     f\"{missing_types.unique()}\"\n766:                 )\n767:                 # fallback: set s_nom for these rows to 100\n768:                 new_lines_df.loc[missing_types.index, \"s_nom\"] = 100.0\n769: \n770:             # Compute s_nom only for new lines where type is valid\n771:             valid_mask = mask_new_lines & new_lines_df[\"type\"].isin(n.line_types.index)\n772: \n773:             if valid_mask.any():\n774:                 new_lines_df.loc[valid_mask, \"s_nom\"] = (\n775:                     np.sqrt(3)\n776:                     * n.line_types.loc[\n777:                         new_lines_df.loc[valid_mask, \"type\"], \"i_nom\"\n778:                     ].values\n779:                     * new_lines_df.loc[valid_mask, \"v_nom\"]\n780:                     * new_lines_df.loc[valid_mask, \"num_parallel\"]\n781:                 ).round(2)\n782:         # set s_max_pu\n783:         new_lines_df[\"s_max_pu\"] = s_max_pu\n784:     if not new_links_df.empty:\n785:         # Add carrier types of lines and links\n786:         new_links_df[\"carrier\"] = \"DC\"\n787:         # Fill empty length values with length calculated from geometry\n788:         new_links_df[\"length\"] = new_links_df.apply(\n789:             fill_length_from_geometry, args=(line_factor,), axis=1\n790:         )\n791:         # Whether to keep existing link capacity or set to zero\n792:         not_upgraded = ~new_links_df.index.str.contains(\"upgraded\")\n793:         if transmission_projects[\"new_link_capacity\"] == \"keep\":\n794:             new_links_df.loc[not_upgraded, \"p_nom\"] = new_links_df[\"p_nom\"].fillna(0)\n795:         elif transmission_projects[\"new_link_capacity\"] == \"zero\":\n796:             new_links_df.loc[not_upgraded, \"p_nom\"] = 0\n797:     # export csv files for new buses, lines, links and adjusted lines and links\n798:     new_lines_df.to_csv(snakemake.output.new_lines)\n799:     new_links_df.to_csv(snakemake.output.new_links)\n800:     adjust_lines_df.to_csv(snakemake.output.adjust_lines)\n801:     adjust_links_df.to_csv(snakemake.output.adjust_links)\n802:     new_buses_df.to_csv(snakemake.output.new_buses)"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/add_brownfield.py",
+      "blob_sha1": "e95cc3113cf635639628b7e25720a89ba98cfbf0",
+      "sha256": "836790f79c8e7dc6b4ca1f557c01e1c13e47f0397f6c8b190477917d4b1b502b",
+      "snippets": [
+        {
+          "start": 230,
+          "end": 277,
+          "text": "230: #             # replace renewable time series\n231: #             n.generators_t.p_max_pu.loc[:, p_max_pu.columns] = p_max_pu\n232: \n233: \n234: if __name__ == \"__main__\":\n235:     if \"snakemake\" not in globals():\n236: \n237:         from _helpers import mock_snakemake\n238: \n239:         snakemake = mock_snakemake(\n240:             \"add_brownfield\",\n241:             simpl=\"\",\n242:             clusters=\"4\",\n243:             ll=\"c1\",\n244:             opts=\"Co2L-4H\",\n245:             planning_horizons=\"2030\",\n246:             sopts=\"144H\",\n247:             discountrate=0.071,\n248:             demand=\"AB\",\n249:             h2export=\"120\",\n250:         )\n251: \n252:     logger.info(f\"Preparing brownfield from the file {snakemake.input.network_p}\")\n253: \n254:     year = int(snakemake.wildcards.planning_horizons)\n255: \n256:     n = pypsa.Network(snakemake.input.network)\n257: \n258:     # TODO\n259:     # adjust_renewable_profiles(n, snakemake.input, snakemake.params, year)\n260: \n261:     add_build_year_to_new_assets(n, year)\n262: \n263:     n_p = pypsa.Network(snakemake.input.network_p)\n264: \n265:     add_brownfield(n, n_p, year)\n266: \n267:     filter_transmission_project_build_year(\n268:         n,\n269:         snakemake.params.transmission_projects,\n270:         year,\n271:     )\n272: \n273:     disable_grid_expansion_if_limit_hit(n)\n274: \n275:     sanitize_carriers(n, snakemake.config)\n276:     sanitize_locations(n)\n277: "
+        }
+      ]
+    },
+    {
+      "commit": "a3616a68ee44592af6527ca9024a90f1956646ae",
+      "path": "scripts/prepare_sector_network.py",
+      "blob_sha1": "572b5e90e8542ae2d620f1c75c5d010fbd4686dd",
+      "sha256": "b6c2ef450dc59aa7bfc8f0ca36204bf9e5bd8e1b8491dc1e5247b4e48ef7b8be",
+      "snippets": [
+        {
+          "start": 1408,
+          "end": 1500,
+          "text": "1408: def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:\n1409:     \"\"\"\n1410:     Add carbon carrier, its networks and storage units\n1411: \n1412:     Parameters\n1413:     ----------\n1414:     n : pypsa.Network\n1415:         The PyPSA network to which the carbon carrier, its networks and storage units will be added.\n1416:     costs : pd.DataFrame\n1417:         DataFrame containing the costs for the carbon carrier, its networks and storage units.\n1418:     co2_network : bool\n1419:         Whether to add CO2 network components.\n1420: \n1421:     Returns\n1422:     -------\n1423:     None\n1424:     \"\"\"\n1425: \n1426:     # minus sign because opposite to how fossil fuels used:\n1427:     # CH4 burning puts CH4 down, atmosphere up\n1428:     n.add(\"Carrier\", \"co2\", co2_emissions=-1.0)\n1429: \n1430:     # this tracks CO2 in the atmosphere\n1431:     n.add(\n1432:         \"Bus\",\n1433:         \"co2 atmosphere\",\n1434:         location=\"Earth\",  # TODO Ignoed by pypsa check\n1435:         carrier=\"co2\",\n1436:     )\n1437: \n1438:     # can also be negative\n1439:     n.add(\n1440:         \"Store\",\n1441:         \"co2 atmosphere\",\n1442:         e_nom_extendable=True,\n1443:         e_min_pu=-1,\n1444:         carrier=\"co2\",\n1445:         bus=\"co2 atmosphere\",\n1446:     )\n1447: \n1448:     # this tracks CO2 stored, e.g. underground\n1449:     n.madd(\n1450:         \"Bus\",\n1451:         spatial.co2.nodes,\n1452:         location=spatial.co2.locations,\n1453:         carrier=\"co2 stored\",\n1454:         # x=spatial.co2.x[0],\n1455:         # y=spatial.co2.y[0],\n1456:     )\n1457:     \"\"\"\n1458:     co2_stored_x = n.buses.filter(like=\"co2 stored\", axis=0).loc[:, \"x\"]\n1459:     co2_stored_y = n.buses.loc[n.buses[n.buses.carrier == \"co2\n1460:     stored\"].location].y.\n1461: \n1462:     n.buses[n.buses.carrier == \"co2 stored\"].x = co2_stored_x.values\n1463:     n.buses[n.buses.carrier == \"co2 stored\"].y = co2_stored_y.values\n1464:     \"\"\"\n1465: \n1466:     n.madd(\n1467:         \"Link\",\n1468:         spatial.co2.vents,\n1469:         bus0=spatial.co2.nodes,\n1470:         bus1=\"co2 atmosphere\",\n1471:         carrier=\"co2 vent\",\n1472:         efficiency=1.0,\n1473:         p_nom_extendable=True,\n1474:     )\n1475: \n1476:     n.madd(\n1477:         \"Store\",\n1478:         spatial.co2.nodes,\n1479:         e_nom_extendable=True,\n1480:         e_nom_max=np.inf,\n1481:         capital_cost=options[\"co2_sequestration_cost\"],\n1482:         carrier=\"co2 stored\",\n1483:         bus=spatial.co2.nodes,\n1484:     )\n1485: \n1486:     if co2_network:\n1487: \n1488:         logger.info(\"Adding CO2 network.\")\n1489: \n1490:         # Build CO2 pipelines only between locations represented in the\n1491:         # spatial CO2 topology.\n1492:         co2_links = create_network_topology(\n1493:             n,\n1494:             \"CO2 pipeline \",\n1495:         )\n1496: \n1497:         co2_bus_map = spatial.co2.df[\"nodes\"]\n1498: \n1499:         valid_co2_routes = co2_links[\"bus0\"].isin(co2_bus_map.index) & co2_links[\n1500:             \"bus1\""
+        },
+        {
+          "start": 3601,
+          "end": 3662,
+          "text": "3601: def add_co2_budget(\n3602:     n: pypsa.Network,\n3603:     co2: dict,\n3604:     investment_year: int,\n3605:     elec_opts: dict | None = None,\n3606: ) -> None:\n3607:     \"\"\"\n3608:     Add CO2 budget constraint to the network based on the specified co2_budget parameters.\n3609: \n3610:     Parameters\n3611:     ----------\n3612:     n: pypsa.Network\n3613:         The PyPSA network to which the CO2 budget constraint will be added.\n3614:     co2: dict\n3615:         Dictionary containing CO2 budget parameters\n3616:     investment_year: int\n3617:         The year for which the CO2 budget constraint is being added\n3618:     elec_opts: dict\n3619:         Dictionary containing electricity options, used if co2base_value is 'co2limit' or 'co2base'\n3620: \n3621:     Returns\n3622:     -------\n3623:     None\n3624:     \"\"\"\n3625: \n3626:     budget = co2[\"budget\"]\n3627: \n3628:     # Check if CO2Limit already exists\n3629:     if \"CO2Limit\" in n.global_constraints.index:\n3630:         if budget[\"override_co2opt\"]:\n3631:             logger.warning(\"CO2Limit already exists, value will be overwritten.\")\n3632:             n.global_constraints.drop(index=\"CO2Limit\", inplace=True)\n3633:         else:\n3634:             logger.info(\"CO2Limit already exists, value will not be overwritten.\")\n3635:             return\n3636: \n3637:     # Get base year emission factor\n3638:     factor = (\n3639:         budget[\"year\"][investment_year] if investment_year in budget[\"year\"] else 1.0\n3640:     )\n3641: \n3642:     base_value = budget[\"base_value\"]\n3643:     if base_value == \"limit\":\n3644:         annual_emissions = factor * co2[\"limit\"]\n3645:     elif base_value == \"base\":\n3646:         annual_emissions = factor * co2[\"base\"]\n3647:     elif base_value == \"absolute\":\n3648:         annual_emissions = factor\n3649:     elif isinstance(base_value, float):\n3650:         annual_emissions = factor * base_value\n3651:     else:\n3652:         raise ValueError(\n3653:             f\"co2.budget.base_value: '{base_value}' is not valid. \"\n3654:             \"Choose from: 'limit', 'base', 'absolute', or a float.\"\n3655:         )\n3656: \n3657:     Nyears = n.snapshot_weightings.objective.sum() / 8760.0\n3658:     logger.info(\n3659:         f\"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year.\"\n3660:     )\n3661: \n3662:     add_co2limit(n, annual_emissions, Nyears)"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/price_basis.py",
+      "blob_sha1": "b92cc3deb53192ce3c502bc625f0e667e416d2aa",
+      "sha256": "5125d0e02b537d022af021f6dfc1d9fa2b5e84363fef2293892f9f22f270160d",
+      "snippets": [
+        {
+          "start": 1,
+          "end": 150,
+          "text": "1: \"\"\"Research-side EUR2020 layer; retain frozen source values and prior rebasing.\n2: \n3: No web refresh, no forecasts, no solver. Technology-data currency_year can be\n4: source metadata AFTER values were rebased. Never use that field alone.\n5: \"\"\"\n6: from pathlib import Path\n7: import argparse, copy, hashlib, json, math\n8: import pandas as pd\n9: import numpy as np\n10: \n11: METHOD='ASSEMBLY_V1_COMMON_PRICE_YEAR_EUR2020'\n12: DECISION='GATE4-20261006-FIXED-ACCOUNTS-EUR2020#B'\n13: SERIES='MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N'\n14: PRIOR_REBASED={'investment','VOM','fuel'}\n15: \n16: def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()\n17: \n18: def read_index(path):\n19:     d=pd.read_csv(path)\n20:     for col,value in {'KEY':SERIES,'FREQ':'A','REF_AREA':'I9','STO':'B1GQ','UNIT_MEASURE':'IX','PRICES':'D','TRANSFORMATION':'N','UNIT_MULT':0}.items():\n21:         if not d[col].eq(value).all(): raise ValueError('Wrong price index definition '+col)\n22:     if d.TIME_PERIOD.duplicated().any() or not np.isfinite(d.OBS_VALUE).all() or not d.OBS_VALUE.gt(0).all():\n23:         raise ValueError('Invalid annual index observations')\n24:     if not d.COMMENT_TS.str.contains('Euro area 20 (fixed composition)',regex=False).all():raise ValueError('Wrong geographical composition')\n25:     values=dict(zip(d.TIME_PERIOD.astype(int),d.OBS_VALUE.astype(float)))\n26:     if 2020 not in values: raise ValueError('Missing base-year observation')\n27:     return values\n28: \n29: def rebase(value,current_price_year,index,already_model_year=None):\n30:     if already_model_year is not None:\n31:         if already_model_year!=2020:raise ValueError('Unknown prior normalisation')\n32:         return float(value),1.\n33:     if current_price_year is None or not math.isfinite(float(current_price_year)) or float(current_price_year)!=int(current_price_year):\n34:         raise ValueError('Unknown actual price year; publication year cannot substitute')\n35:     year=int(current_price_year)\n36:     if year not in index:raise ValueError('Missing official observation '+str(year))\n37:     factor=index[2020]/index[year]\n38:     return float(value)*factor,factor\n39: \n40: def same_source(a,b):\n41:     return np.isclose(float(a['value']),float(b['value']),rtol=1e-12,atol=1e-10) and a['unit']==b['unit'] and a['source']==b['source']\n42: \n43: def row_basis(row,pre):\n44:     \"\"\"Resolve the last real-price conversion, not the retained source year.\"\"\"\n45:     key=(row['technology'],row['parameter'])\n46:     if key in pre.index and same_source(row,pre.loc[key]):\n47:         if row['parameter'] in PRIOR_REBASED:\n48:             return 2020,'TECHNOLOGY_DATA_V0_13_2_ALREADY_REBASED_EUR2020'\n49:         return row['currency_year'],'NOT_IN_UPSTREAM_INFLATION_PARAMETER_FILTER'\n50:     if str(row['source']).startswith('8th ASEAN Energy Outlook') and row['currency_year']==2020 and str(row['unit']).startswith('EUR'):\n51:         return 2020,'AEO8_APPEND_USD2020_TO_EUR2020_WITH_FROZEN_TECHNOLOGY_DECLINE'\n52:     raise ValueError('No compatible prior transformation evidence')\n53: \n54: def build_layer(costdir,technology_data,index_file,output):\n55:     index=read_index(index_file);rows=[];tables={};inputs={str(index_file):sha(index_file)}\n56:     for p in [technology_data/'config.yaml',technology_data/'scripts/compile_cost_assumptions.py',technology_data/'scripts/_helpers.py']:\n57:         inputs[str(p)]=sha(p)\n58:     # The archived end-of-pipeline inflation stage affects these three parameters.\n59:     cfg=(technology_data/'config.yaml').read_text()\n60:     helper=(technology_data/'scripts/_helpers.py').read_text()\n61:     compiler=(technology_data/'scripts/compile_cost_assumptions.py').read_text()\n62:     if 'eur_year: 2020' not in cfg or 'paras = [\"investment\", \"VOM\", \"fuel\"]' not in helper or compiler.rfind('adjust_for_inflation(')>compiler.rfind('costs_tot.to_csv('):\n63:         raise ValueError('Frozen prior inflation evidence differs')\n64:     for year,suffix in [(2030,'elec'),(2050,'sec')]:\n65:         rawpath=costdir/f'costs_{year}.csv';processed=costdir/f'costs_{year}_{suffix}.csv';prepath=technology_data/f'outputs/costs_{year}.csv'\n66:         for p in [rawpath,processed,prepath]:inputs[str(p)]=sha(p)\n67:         raw=pd.read_csv(rawpath);pre=pd.read_csv(prepath).set_index(['technology','parameter']);original=pd.read_csv(processed,index_col=0);model=original.copy()\n68:         if raw.duplicated(['technology','parameter']).any() or pre.index.duplicated().any():raise ValueError('Ambiguous cost row identity')\n69:         resolved={}\n70:         for _,r in raw.iterrows():\n71:             unit=str(r.unit);monetary=unit.startswith(('EUR','USD','GBP','DKK'))\n72:             if not monetary and r.parameter!='FOM':continue\n73:             t,p=r.technology,r.parameter;source_t={'hydrogen storage tank type 1':'hydrogen storage tank'}.get(t,t) if year==2030 else t\n74:             scale=1000. if '/kW' in unit else 1.\n75:             rec=dict(RowID=f'{year}:{t}:{p}',Technology=t,Parameter=p,TechnologyYear=year,SourcePublicationYear=None,SourceCurrency=unit[:3] if monetary else None,SourceCurrencyYear=r.currency_year,OriginalValue=float(r.value),OriginalUnit=unit,PreparedValue=None,UnitScale=scale,EffectivePriceYearBefore=None,PriorTransformation=None,Index2020=index[2020],IndexSourceYear=None,RebaseFactor=None,ModelValue=None,ModelCurrencyYear=None,Status='PENDING',Source=r.source,RawFile=str(rawpath),RawSHA256=inputs[str(rawpath)],PreCostSHA256=inputs[str(prepath)],PreparedSHA256=inputs[str(processed)],DecisionReference=DECISION)\n76:             try:\n77:                 if not monetary:\n78:                     rec.update(Status='NONMONETARY_PERCENT_UNCHANGED',ModelValue=float(r.value),PriorTransformation='FOM percent not rebased; monetary FOM derived from common-price investment')\n79:                 else:\n80:                     current,basis=row_basis(r,pre);rec.update(EffectivePriceYearBefore=int(current),PriorTransformation=basis)\n81:                     if not unit.startswith('EUR'):raise ValueError('Non-EUR requires explicit frozen FX reconciliation before real-price adjustment')\n82:                     expected=float(r.value)*scale\n83:                     if source_t not in model.index or p not in model or not np.isclose(expected,float(original.at[source_t,p]),rtol=1e-11,atol=1e-8):raise ValueError('Prepared value differs: override/aggregation must be resolved separately')\n84:                     # Preserve the prepared numeric representation exactly when\n85:                     # already EUR2020; unit-scale multiplication is evidence only.\n86:                     value,factor=rebase(float(original.at[source_t,p]),current,index)\n87:                     rec.update(PreparedValue=float(original.at[source_t,p]),ModelValue=value,ModelUnit=unit.replace('/kW','/MW'),RebaseFactor=factor,IndexSourceYear=index[int(current)],ModelCurrencyYear=2020,Status='ALREADY_EUR2020_UNCHANGED' if current==2020 else 'REBASED_TO_EUR2020')\n88:                     model.at[source_t,p]=value;resolved[(source_t,p)]=rec\n89:             except (ValueError,KeyError,TypeError) as exc:rec['PendingReason']=str(exc)\n90:             rows.append(rec)\n91:         # Annual cost combines one rebased investment base and an unchanged FOM%.\n92:         # Defaults/overrides are preserved as source values, not assigned fake years.\n93:         fixed='capital_cost' if suffix=='elec' else 'fixed'\n94:         for t in model.index:\n95:             if (t,'investment') in resolved:\n96:                 factor=resolved[(t,'investment')]['RebaseFactor']\n97:                 # Preserve original annualisation and component units exactly.\n98:                 model.at[t,fixed]=float(original.at[t,fixed])*factor\n99:                 monetary_fom=float(model.at[t,'investment'])*float(model.at[t,'FOM'])/100\n100:                 rows.append(dict(RowID=f'{year}:{t}:monetary_FOM',Technology=t,Parameter='monetary_FOM',TechnologyYear=year,ModelValue=monetary_fom,ModelCurrencyYear=2020,Status='DERIVED_ONCE_FROM_EUR2020_INVESTMENT_AND_UNCHANGED_FOM_PERCENT',Formula='investment_EUR2020 * FOM_percent /100',PreparedValue=float(original.at[t,'investment'])*float(original.at[t,'FOM'])/100,PriorTransformation=resolved[(t,'investment')]['PriorTransformation'],DecisionReference=DECISION))\n101:         tables[str(year)]={'columns':list(model.columns),'index':list(model.index),'values':model.replace({np.nan:None}).values.tolist(),'original_sha256':sha(processed)}\n102:     payload=dict(schema='research-cost-layer-v1',method=METHOD,decision=DECISION,model_price_year=2020,index_series=SERIES,index_file_sha256=sha(index_file),index_observations=index,source_inputs=inputs,rows=rows,tables=tables,solver_allowed=False)\n103:     output.parent.mkdir(parents=True,exist_ok=True);output.write_text(json.dumps(payload,indent=2,allow_nan=False)+'\\n')\n104:     return payload\n105: \n106: def load_table(path,year,source_path):\n107:     layer=json.loads(Path(path).read_text());table=layer['tables'][str(year)]\n108:     if table['original_sha256']!=sha(source_path) or layer['model_price_year']!=2020:raise ValueError('Cost layer source mismatch')\n109:     return pd.DataFrame(table['values'],index=table['index'],columns=table['columns']),layer\n110: \n111: def qualify_network_costs(n,layer,path):\n112:     \"\"\"Separate price usability from coverage/physical/policy qualification.\"\"\"\n113:     lookup={(r['TechnologyYear'],r['Technology'],r['Parameter']):r for r in layer['rows']}\n114:     def status(year,t,p):\n115:         r=lookup.get((year,t,p))\n116:         if r and r.get('ModelCurrencyYear')==2020 and r['Status']!='PENDING':return 'EUR2020_SOURCE_TRACED'\n117:         return 'SOURCE_PRICE_OR_TRANSFORMATION_PENDING'\n118:     records=[]\n119:     for typ in ['Generator','Link','Store','StorageUnit','Line']:\n120:         for name,z in n.df(typ).iterrows():\n121:             if z.get('cost_qualification')=='EXTERNAL_PENDING_FIXED_ACCOUNT':continue\n122:             carrier=str(z.carrier);existing=z.get('asset_role')=='existing_survivor';year=2030 if existing else 2050\n123:             tech={'solar':'solar-utility','solar rooftop':'solar-rooftop','onwind':'onwind','offwind-ac':'offwind','offwind-dc':'offwind','electricity distribution grid':'electricity distribution grid','battery charger':'battery inverter','battery discharger':'battery inverter','home battery charger':'home battery inverter','home battery discharger':'home battery inverter','battery':'battery storage','home battery':'home battery storage','H2 Electrolysis':'electrolysis','H2 electrolysis':'electrolysis','SMR':'SMR','SMR CC':'SMR CC','Fischer-Tropsch':'Fischer-Tropsch','FT':'Fischer-Tropsch','H2 Fuel Cell':'fuel cell','H2 fuel cell':'fuel cell','fuel cell':'fuel cell','H2':'hydrogen storage underground'}.get(carrier,carrier.removesuffix(' existing'))\n124:             if typ=='Line':tech='HVAC overhead'\n125:             if typ=='Store' and carrier=='H2':tech='hydrogen storage tank type 1 including compressor'\n126:             if carrier in ['DC','B2B']:tech='HVDC overhead'\n127:             rec=dict(ComponentType=typ,Component=name,Carrier=carrier,Technology=tech,TechnologyYear=year,CapitalPriceQualification='STRUCTURAL_ZERO_NO_NEW_CAPEX' if existing or z.capital_cost==0 else status(year,tech,'investment'),MarginalPriceQualification='FROZEN_ZERO_IMPLEMENTATION' if z.marginal_cost==0 else status(year,tech,'VOM')) if typ!='Line' else dict(ComponentType=typ,Component=name,Carrier=carrier,Technology=tech,TechnologyYear=year,CapitalPriceQualification=status(year,tech,'investment'),MarginalPriceQualification='NOT_APPLICABLE')\n128:             if typ=='Generator' and carrier in ['gas','oil','coal','lignite']:rec['MarginalPriceQualification']=status(2050,carrier,'fuel')\n129:             if typ=='Generator' and not existing and carrier in ['onwind','offwind-ac','offwind-dc','solar','solar rooftop'] and z.marginal_cost!=0:\n130:                 # Frozen config marginal_cost overrides raw VOM; no documented real\n131:                 # price year is inferred from its tiny numeric value.\n132:                 rec['MarginalPriceQualification']='EUR2020_EXPLICIT_HUMAN_MODEL_ASSUMPTION' if z.get('variable_cost_method')=='ASSEMBLY_V1_EXPLICIT_CONFIG_VARIABLE_COST' and z.marginal_cost==(.01 if carrier=='solar' else .015) else 'CONFIG_OVERRIDE_PRICE_YEAR_PENDING'\n133:             if typ=='Link' and carrier in ['DC','B2B'] and z.get('variable_cost_method')=='ASSEMBLY_V1_REMOVE_INHERITED_TRANSMISSION_NOISE':\n134:                 if z.marginal_cost!=0:raise ValueError('Transmission noise removal contract violated')\n135:                 rec['MarginalPriceQualification']='EXPLICIT_ZERO_VARIABLE_TRANSMISSION_FEE_EUR2020'\n136:             if existing:rec['FixedOMPriceQualification']=status(2030,tech,'investment')\n137:             if typ=='Link' and tech=='Fischer-Tropsch':\n138:                 row=lookup.get((2050,tech,'VOM'),{})\n139:                 expected=float(row.get('ModelValue',float('nan')))*z.efficiency\n140:                 if not np.isclose(z.marginal_cost,expected):rec['MarginalPriceQualification']='KNOWN_VOM_NOT_ATTACHED_PENDING_ENGINEERING_BINDING'\n141:             q='PENDING_BEFORE_SOLVE' if any('PENDING' in str(v) for v in rec.values()) else 'EUR2020_SOURCE_TRACED_OR_STRUCTURAL_ZERO'\n142:             n.df(typ).loc[name,'price_qualification']=q;records.append(rec)\n143:     n.meta.update(model_price_year=2020,price_layer_sha256=sha(path),price_method=METHOD,component_price_qualification=records)\n144:     pending=[r for r in records if any('PENDING' in str(v) for v in r.values())]\n145:     n.meta['qualification_dimensions']=dict(physical_integrity='VALIDATED_DEVELOPMENT_SCOPE',input_coverage='INCOMPLETE',price_usability='PENDING_BEFORE_SOLVE' if pending else 'ACTIVE_PRICED_PARAMETERS_EUR2020',full_cost_report=False,full_physical_emissions_report=False,policy_constraint_qualification='DISABLED_WITH_PENDING_ATTRIBUTION')\n146:     return records\n147: \n148: if __name__=='__main__':\n149:     p=argparse.ArgumentParser()\n150:     for k in ['costdir','technology-data','index-file','output']:p.add_argument('--'+k,type=Path,required=True)"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/fixed_accounts.py",
+      "blob_sha1": "2aad160dd3635225510b6b57b35a6a233135b6bf",
+      "sha256": "b8be749dc3b216b6c72c9fbd4b70dc4d369b8b3da41219f873cfa2328743e132",
+      "snippets": [
+        {
+          "start": 1,
+          "end": 112,
+          "text": "1: \"\"\"Revocable qualification for externally pending, strictly fixed commodities.\n2: \n3: Null scientific prices/emission factors are kept outside the priced objective.\n4: Zero implementation costs MUST carry this contract; they are not free supply.\n5: \"\"\"\n6: from collections import defaultdict\n7: import hashlib,json\n8: import numpy as np\n9: \n10: COMMODITIES={'Bagasse','Biodiesel','Biogases','Biogasoline','Charcoal','Fuelwood'}\n11: METHOD='ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS'\n12: QUALIFICATION='EXTERNAL_PENDING_FIXED_ACCOUNT'\n13: DECISION='GATE4-20261006-FIXED-ACCOUNTS-EUR2020#A'\n14: \n15: def _same(a,b):return bool(np.isclose(a,b,rtol=1e-10,atol=1e-6))\n16: \n17: def validate_fixed_accounts(n,*,structure_only=False):\n18:     from assembly_components import validate_hooks\n19:     validate_hooks(n)\n20:     routes=n.meta.get('biomass_obligation_routes',{})\n21:     if not routes:return []\n22:     w=n.snapshot_weightings\n23:     if not w.generators.equals(w.stores) or not w.generators.equals(w.objective) or not np.isfinite(w.to_numpy()).all() or not w.gt(0).all().all():raise ValueError('Fixed quantity/objective weights differ')\n24:     if 'install_fragment_constraints' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Fixed-account direction hook missing')\n25:     groups=defaultdict(list)\n26:     for name,r in routes.items():\n27:         from fixed_account_scope import matching_scope\n28:         scope=matching_scope(n,r['commodity'],n.buses.at[n.stores.at[name,'bus'],'country'],r['input_id'],r['source_row'])\n29:         if r['commodity'] not in COMMODITIES and scope is None and not structure_only:raise ValueError('Commodity has no accepted fixed-account proof: '+r['commodity'])\n30:         # Structural proof can be inspected for a newly materialised commodity;\n31:         # acceptance remains a separate gate below and is never implied by proof.\n32:         groups[tuple(sorted(r['buses']))].append(name)\n33:     rows=[]\n34:     # The same immutable input matrix is reused within this single validation.\n35:     # No cross-call cache: every qualification still checks current network data.\n36:     all_demand=n.get_switchable_as_dense('Load','p_set')\n37:     for allowed,names in groups.items():\n38:         final=set(allowed);loadids=n.loads.index[n.loads.bus.isin(final)]\n39:         if not len(loadids):raise ValueError('No physical fixed obligation')\n40:         if set(n.loads.loc[loadids,'source_account_id'])!={routes[k]['input_id'] for k in names}:raise ValueError('Fixed obligation identity mismatch')\n41:         demand=all_demand[loadids]\n42:         if not np.isfinite(demand.to_numpy()).all() or (demand<0).any().any():raise ValueError('Invalid obligation quantity')\n43:         total=float(demand.sum(axis=1).mul(w.generators).sum())\n44:         if not _same(sum(n.stores.at[k,'e_nom'] for k in names),total):raise ValueError('Resource quantity is not strictly fixed by own obligation')\n45:         if n.generators.bus.isin(final).any() or n.stores.bus.isin(final).any() or n.storage_units.bus.isin(final).any():raise ValueError('Alternative supply or inventory at fixed destination')\n46:         incoming=set()\n47:         for name in names:\n48:             r=routes[name];z=n.stores.loc[name];bus=z.bus\n49:             if z.carrier!=r['commodity'] or n.buses.at[bus,'carrier']!=r['commodity']:raise ValueError('Commodity identity lost')\n50:             if z.e_nom_extendable or z.e_cyclic or not _same(z.e_initial,z.e_nom) or not _same(z.e_nom,r['annual_cap_mwh']) or z.standing_loss!=0 or z.e_min_pu!=0 or z.e_max_pu!=1:raise ValueError('Fixed stock/storage boundary changed')\n51:             if n.meta.get('store_power_rules',{}).get(name)!='discharge_only':raise ValueError('Discharge-only hook missing')\n52:             if n.generators.bus.eq(bus).any() or n.loads.bus.eq(bus).any() or n.storage_units.bus.eq(bus).any() or sum(n.stores.bus.eq(bus))!=1:raise ValueError('Alternative supply or resource use')\n53:             touch=n.links[n.links.filter(regex=r'^bus\\d+$').eq(bus).any(axis=1)]\n54:             if len(touch)!=1:raise ValueError('Fixed resource diversion or alternative supply')\n55:             k=touch.index[0];a=touch.iloc[0];incoming.add(k)\n56:             ports=[v for col,v in a.items() if col.startswith('bus') and col[3:].isdigit() and v]\n57:             if len(ports)!=2 or a.bus0!=bus or a.bus1 not in final or a.efficiency!=1 or a.p_min_pu<0:raise ValueError('Diversion, substitution or carbon-credit port')\n58:             for typ,comp in [('Store',name),('Link',k)]:\n59:                 zc=n.df(typ).loc[comp]\n60:                 if zc.capital_cost!=0 or zc.marginal_cost!=0:raise ValueError('Pending price placeholder changed without source qualification')\n61:                 for attr,frame in n.pnl(typ).items():\n62:                     if comp in frame and (attr in ['marginal_cost','standing_loss','e_min_pu','e_max_pu','e_set','efficiency','p_min_pu','p_max_pu']):raise ValueError('Time-varying fixed-account control needs new qualification')\n63:             for comp in [n.lines,n.transformers]:\n64:                 if comp.filter(regex=r'^bus\\d+$').isin(final|{bus}).any().any():raise ValueError('Fixed commodity connected to another network')\n65:             rows.append(dict(FixedAccountID=name,Commodity=r['commodity'],Country=n.buses.at[bus,'country'],SourceAccountID=r['input_id'],SourceRow=r['source_row'],QuantityMWh=float(z.e_nom),UnitPriceEUR2020PerMWh=None,PhysicalCO2_tPerMWh=None,PendingFixedCostTerm='Q * unknown_price',PendingFixedPhysicalEmissionTerm='Q * unknown_physical_factor',cost_qualification=QUALIFICATION,PhysicalQuantityQualified=True,PhysicalEmissionFactorQualified=False,DecisionReference=DECISION,ResourceBus=bus,FinalBuses=sorted(final),Meter=k))\n66:         touching=n.links[n.links.filter(regex=r'^bus\\d+$').isin(final).any(axis=1)]\n67:         if set(touching.index)!=incoming or not touching.bus1.isin(final).all():raise ValueError('Extra final supply/use or reverse route')\n68:     unknown=[]\n69:     for r in rows:\n70:         scope=matching_scope(n,r['Commodity'],r['Country'],r['SourceAccountID'],r['SourceRow'])\n71:         if scope is not None:\n72:             r.update(DecisionReference=scope['DecisionReference'],BoundaryAcceptance='HUMAN_ACCEPTED_CONDITIONAL_ON_CURRENT_STRUCTURE')\n73:         elif r['Commodity'] not in COMMODITIES:unknown.append(r)\n74:     for scope in n.meta.get('additional_fixed_account_scope',[]):\n75:         selected=[r for r in rows if r['DecisionReference']==scope['DecisionReference']]\n76:         if selected and not _same(sum(r['QuantityMWh'] for r in selected),float(scope['ExpectedAnnualMWh'])):raise ValueError('Additional fixed-account source quantity changed')\n77:     for r in unknown:r.update(DecisionReference=None,BoundaryAcceptance='PENDING_ADDITIONAL_COMMODITY_BOUNDARY',cost_qualification='PENDING_FIXED_ACCOUNT_BOUNDARY')\n78:     if unknown and not structure_only:raise ValueError('Structurally fixed but commodity boundary not yet accepted: '+','.join(sorted({r['Commodity'] for r in unknown})))\n79:     return sorted(rows,key=lambda r:r['FixedAccountID'])\n80: \n81: def qualify_fixed_accounts(n):\n82:     \"\"\"Re-evaluate the current actual network, including after merge/readback.\"\"\"\n83:     n.meta['external_fixed_account_status']='REVOKED_PENDING_CURRENT_VALIDATION'\n84:     n.meta['external_pending_fixed_accounts']=[]\n85:     try:rows=validate_fixed_accounts(n)\n86:     except (ValueError,KeyError) as exc:\n87:         n.meta['external_fixed_account_failure']=str(exc)\n88:         for name in n.meta.get('biomass_obligation_routes',{}):\n89:             if name in n.stores.index:n.stores.loc[name,'cost_qualification']='REVOKED'\n90:         raise\n91:     for r in rows:\n92:         for typ,k in [('Store',r['FixedAccountID']),('Link',r['Meter'])]:\n93:             n.df(typ).loc[k,'cost_qualification']=QUALIFICATION\n94:             n.df(typ).loc[k,'physical_emissions_qualification']='EXTERNAL_PENDING_FIXED_ACCOUNT'\n95:             n.df(typ).loc[k,'fixed_account_id']=r['FixedAccountID']\n96:     n.meta.pop('external_fixed_account_failure',None)\n97:     n.meta.update(external_fixed_account_status='QUALIFIED_FOR_PHYSICAL_ASSEMBLY_ONLY',external_fixed_account_method=METHOD,external_pending_fixed_accounts=rows,full_system_cost_complete=False,full_system_emissions_complete=False)\n98:     n.meta['external_fixed_account_fingerprint']=hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest()\n99:     return rows\n100: \n101: def accounting_report(n,priced_objective=None,claim_full_cost=False,claim_full_emissions=False):\n102:     rows=qualify_fixed_accounts(n)\n103:     if claim_full_cost or claim_full_emissions:raise ValueError('Cannot label incomplete pending accounts as full system cost/emissions')\n104:     known=n.meta.get('existing_annual_fixed_om_eur')\n105:     model=getattr(n,'model',None)\n106:     included=bool(model is not None and getattr(n,'_research_existing_assets_model',None) is model)\n107:     if priced_objective is not None and known and not included:\n108:         raise ValueError('Known fixed cost inclusion in supplied objective is unverified; do not add it by default')\n109:     return dict(PricedObjective=priced_objective,KnownFixedCost=known,KnownFixedCostIncludedInPricedObjective=included if priced_objective is not None else None,KnownFixedCostToAddToPricedObjective=0. if priced_objective is not None else None,PricedObjectiveDefinition='Model objective including installed known fixed FOM once; may contain unresolved numerical coefficients, not automatically a pure economic total',PendingFixedCostIncludedInPricedObjective=False,PendingFixedCostTerms=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','UnitPriceEUR2020PerMWh']} for r in rows],FullSystemCostComplete=False,PendingFixedPhysicalEmissions=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','PhysicalCO2_tPerMWh']} for r in rows],FullSystemEmissionsComplete=False,CostCurrencyYear=2020 if n.meta.get('model_price_year')==2020 else None,Scope='Priced subset and external pending fixed terms; not a full total')\n110: \n111: def validate_exported_accounting(n):\n112:     expected=n.meta.get('external_pending_fixed_accounts')"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/selected_closure.py",
+      "blob_sha1": "108645863d98f8f3e2e61bb985d97c67d16c1c16",
+      "sha256": "abe60fd1e8ea5e550d30e983ec6033a96f9dac3e653c1db3e5324604860c5b3e",
+      "snippets": [
+        {
+          "start": 1,
+          "end": 110,
+          "text": "1: \"\"\"Explicit Gate4 choices; source-fixed resource allocations and cost semantics.\n2: \n3: No solver, no new resource. Source identities are retained through allocations.\n4: \"\"\"\n5: import copy,json,hashlib,math\n6: from pathlib import Path\n7: from collections import defaultdict\n8: import numpy as np\n9: \n10: DECISION='GATE4-20261006-CANONICAL-SELECTED-CLOSURE'\n11: POOLS={'ID:ID_Sulawesi0:Reservoir','ID:ID_Sumatra3:Run-Of-River','LA:LA2:Reservoir','MM:MM2:Reservoir','MM:MM2:Run-Of-River','PH:PH_Mindanao6:Run-Of-River','VN:VN2:Run-Of-River'}\n12: \n13: def require_decision(d):\n14:     if d.get('ApprovalStatus')!='HUMAN_ACCEPTED' or d.get('DecisionReference')!=DECISION:raise ValueError('Selected closure needs explicit human decision')\n15:     if set(d.get('HydroPools',[]))!=POOLS:raise ValueError('Hydro approval scope differs')\n16: \n17: def apply_cost_choices(n,source,d):\n18:     require_decision(d)\n19:     expected=.01+.002*(np.random.RandomState(174).random_sample(len(source.links))-.5)\n20:     noise=dict(zip(source.links.index,expected));rows=[]\n21:     ids=n.links.index[n.links.carrier.isin(['DC','B2B'])]\n22:     if len(ids)!=13:raise ValueError('Frozen transmission scope changed')\n23:     for name in ids:\n24:         old=float(n.links.at[name,'marginal_cost'])\n25:         if old!=noise[name]:raise ValueError('Connection marginal cost is not traced inherited noise')\n26:         n.links.at[name,'marginal_cost']=0.\n27:         n.links.loc[name,'variable_cost_method']='ASSEMBLY_V1_REMOVE_INHERITED_TRANSMISSION_NOISE'\n28:         rows.append(dict(Component=name,Before=old,After=0.,Method=n.links.at[name,'variable_cost_method'],DecisionReference=DECISION,CapitalCostAfterRebuild=float(n.links.at[name,'capital_cost']),CapitalNoiseTreatment='Already rebuilt from frozen2050 unit costs; no second subtraction'))\n29:     count=0\n30:     for name,z in n.generators.iterrows():\n31:         if z.get('asset_role')!='new_build_candidate' or z.carrier not in ['solar','onwind','offwind-ac','offwind-dc']:continue\n32:         value=.01 if z.carrier=='solar' else .015\n33:         if z.marginal_cost!=value:raise ValueError('Frozen renewable configuration differs')\n34:         n.generators.loc[name,'variable_cost_method']='ASSEMBLY_V1_EXPLICIT_CONFIG_VARIABLE_COST';count+=1\n35:     if count!=340:raise ValueError('Frozen explicit configuration scope changed')\n36:     n.meta['selected_cost_decision']=dict(DecisionReference=DECISION,transmission=rows,renewable_components=count,renewable_units='EUR2020/MWh',classification='EXPLICIT_MODEL_ASSUMPTION_NOT_MEASURED_VOM',solver_runs=0)\n37:     return rows\n38: \n39: def resource_profile(spec,n):\n40:     \"\"\"Rebuild each accepted envelope from original INPUT series, before sharing.\"\"\"\n41:     total=np.zeros(len(n.snapshots))\n42:     for t in spec['ResourceTerms']:\n43:         v=n.pnl(t['ComponentType'])[t['Attribute']][t['Component']].to_numpy()*float(t['SourceMultiplier'])\n44:         if t.get('AcceptedClipMW') is not None:v=np.minimum(v,float(t['AcceptedClipMW']))\n45:         if not np.isfinite(v).all() or (v<0).any():raise ValueError('Invalid accepted envelope')\n46:         if hashlib.sha256(v.tobytes()).hexdigest()!=t['AcceptedEnvelopeSHA256']:raise ValueError('Accepted envelope changed')\n47:         total+=v*float(t['AllocationShare'])\n48:     return total/float(spec.get('NormalisationMW',1.))\n49: \n50: def validate_allocated_resources(contract,n,admitted_unit_ids=None):\n51:     ledger=contract.get('resource_reallocation',[]);seen=set();totals=defaultdict(float);emax=defaultdict(float)\n52:     if not ledger:return True\n53:     for r in ledger:\n54:         key=(r['ResourceIdentity'],r['RecipientNode'])\n55:         if key in seen:raise ValueError('Duplicate allocated resource recipient')\n56:         seen.add(key);totals[r['ResourceIdentity']]+=r['AllocationShare'];emax[r['ResourceIdentity']]+=r['AllocatedEmaxMWh']\n57:         if admitted_unit_ids is not None and not set(r['RecipientUnits'])<=set(admitted_unit_ids):raise ValueError('Accepted resource beneficiary failed integration')\n58:     for ident in totals:\n59:         rs=[r for r in ledger if r['ResourceIdentity']==ident]\n60:         if not math.isclose(totals[ident],1.,rel_tol=1e-12,abs_tol=1e-12):raise ValueError('Resource shares must sum to one')\n61:         if not math.isclose(emax[ident],rs[0]['OriginalEmaxMWh'],rel_tol=1e-12,abs_tol=1e-8):raise ValueError('Resource Emax budget changed')\n62:     # Contract terms must match the ledger, rather than trusting unique derived IDs.\n63:     for u,p in contract['performance'].items():\n64:         for spec in p.get('Profiles',{}).values():\n65:             if 'ResourceTerms' not in spec:continue\n66:             expected=[r for r in ledger if u in r['RecipientUnits']]\n67:             got={(t['ResourceIdentity'],t['AllocationShare']) for t in spec['ResourceTerms']}\n68:             if got!={(r['ResourceIdentity'],r['AllocationShare']) for r in expected}:raise ValueError('Profile allocation not backed by resource ledger')\n69:             resource_profile(spec,n)\n70:     return True\n71: \n72: def reallocate_hydro(contract,n,d):\n73:     require_decision(d);c=copy.deepcopy(contract);groups=c['hydro_group_qualification']['groups'];ledger=[]\n74:     def pool(g):return g['Country']+':'+g['Node'].rsplit(' ',1)[0]+':'+g['HydroSubtype']\n75:     for pid in sorted(POOLS):\n76:         recipients=[g for g in groups if pool(g)==pid]\n77:         original=[g for g in recipients if g['Status']=='SOURCE_QUALIFIED_GROUP_PROXY']\n78:         pending=[g for g in recipients if g['Status']=='PENDING']\n79:         if not original or not pending:raise ValueError('Approved pool is not a mix of accepted resource and pending turbines')\n80:         cap=sum(g['SurvivingCapacityMW'] for g in recipients)\n81:         if len({g['Node'] for g in recipients})!=len(recipients):raise ValueError('Duplicate recipient node')\n82:         prototype=c['performance'][original[0]['SourceUnitIDs'][0]]\n83:         for g in original:\n84:             p=c['performance'][g['SourceUnitIDs'][0]]\n85:             for k in ['ComponentType','Efficiency','FixedOM_EUR_per_MW_e_year','VariableOM_EUR_per_MWh_e','HydroSubtype']:\n86:                 if p[k]!=prototype[k]:raise ValueError('Incompatible resource-group performance classes')\n87:         terms=[];emax=0.\n88:         for g in original:\n89:             is_ror=g['HydroSubtype']=='Run-Of-River';attr='p_max_pu' if is_ror else 'inflow';typ='Generator' if is_ror else 'StorageUnit'\n90:             v=n.pnl(typ)[attr][g['SourceComponent']].to_numpy()*(g['SourceInputCapacityMW'] if is_ror else 1.)\n91:             if is_ror:v=np.minimum(v,g['SurvivingCapacityMW'])\n92:             energy=float(v@n.snapshot_weightings['generators' if is_ror else 'stores'].to_numpy());E=0. if is_ror else g['EnergyCapacityMWh'];emax+=E\n93:             terms.append(dict(ResourceIdentity=g['ResourceIdentity'],ComponentType=typ,Component=g['SourceComponent'],Attribute=attr,SourceMultiplier=g['SourceInputCapacityMW'] if is_ror else 1.,AcceptedClipMW=g['SurvivingCapacityMW'] if is_ror else None,AcceptedEnvelopeSHA256=hashlib.sha256(v.tobytes()).hexdigest(),OriginalAnnualMWh=energy,OriginalEmaxMWh=E))\n94:         for g in recipients:\n95:             share=g['SurvivingCapacityMW']/cap;is_ror=g['HydroSubtype']=='Run-Of-River';p=copy.deepcopy(prototype)\n96:             ident=pid+'::allocated::'+g['Node'];ts=[dict(t,AllocationShare=share) for t in terms]\n97:             spec=dict(ComponentType='Generator' if is_ror else 'StorageUnit',Component=ident,ResourceIdentity=ident,ResourceTerms=ts,NormalisationMW=g['SurvivingCapacityMW'] if is_ror else 1.,Aggregation='CAPACITY_WEIGHTED_NORMALISED' if is_ror else 'SHARED_GROUP_ONCE',Source=DECISION+'#C; exact original ResourceIdentity terms retained')\n98:             p.update(Profiles={'p_max_pu' if is_ror else 'inflow':spec},HydroResourceIdentity=ident,AdmittedGroupCapacityMW=g['SurvivingCapacityMW'],SourceGroupCapacityMW=sum(x['SourceInputCapacityMW'] for x in original),AuthorizationReference=DECISION+'#C',SpatialMethod='ASSEMBLY_V1_ACCEPTED_RESOURCE_SPATIAL_PROXY')\n99:             if not is_ror:p.update(MaxHours=emax/cap,StorageEnergyBasis='ACCEPTED_RESOURCE_EMAX_CONSERVED_SPATIAL_PROXY')\n100:             v=resource_profile(spec,n)\n101:             if is_ror and (v>1+1e-12).any():raise ValueError('ROR envelope requires additional unapproved clipping')\n102:             was_pending=g['Status']=='PENDING'\n103:             g.update(Status='SOURCE_QUALIFIED_SPATIAL_PROXY',OriginalStatus=g['Status'],ResourceIdentity=ident,SourceResources=[t['ResourceIdentity'] for t in terms],AdmittedAnnualEnvelopeMWh=float((v*(g['SurvivingCapacityMW'] if is_ror else 1.))@n.snapshot_weightings['generators' if is_ror else 'stores'].to_numpy()),EnergyCapacityMWh=emax*share if not is_ror else 0.,DecisionReference=DECISION+'#C',SensitivityRequired=True,HydrologicalEquivalenceEstablished=False)\n104:             for u in g['SourceUnitIDs']:c['performance'][u]=copy.deepcopy(p)\n105:             for t in terms:ledger.append(dict(PoolID=pid,ResourceIdentity=t['ResourceIdentity'],SourceComponent=t['Component'],RecipientNode=g['Node'],RecipientUnits=g['SourceUnitIDs'],RecipientCapacityMW=g['SurvivingCapacityMW'],NewlyAdmitted=was_pending,AllocationShare=share,OriginalAnnualMWh=t['OriginalAnnualMWh'],AllocatedAnnualMWh=t['OriginalAnnualMWh']*share,OriginalEmaxMWh=t['OriginalEmaxMWh'],AllocatedEmaxMWh=t['OriginalEmaxMWh']*share,AcceptedEnvelopeSHA256=t['AcceptedEnvelopeSHA256'],Method='ASSEMBLY_V1_ACCEPTED_RESOURCE_SPATIAL_PROXY',DecisionReference=DECISION+'#C',BasinEquivalence=False))\n106:     covered={u for r in ledger for u in r['RecipientUnits']};c['resource_reallocation']=ledger\n107:     c['hydro_group_qualification']['pending']=[r for r in c['hydro_group_qualification']['pending'] if r['AssetID'] not in covered]\n108:     c['hydro_group_qualification']['resource_reallocation']=ledger\n109:     validate_allocated_resources(c,n)\n110:     return c,ledger"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/integrate_surviving_assets.py",
+      "blob_sha1": "9d6983e28edff97276b508bc944e159199def298",
+      "sha256": "706ee0f124a8156eaccbd0e5465cbec6c6421ecce6debdb961f299205d1c074d",
+      "snippets": [
+        {
+          "start": 165,
+          "end": 178,
+          "text": "165: def install_existing_asset_constraints(n):\n166:     \"\"\"Future hook after model/objective creation; never calls a solver.\"\"\"\n167:     if getattr(n,'_research_existing_assets_model',None) is n.model:raise ValueError('Existing cost/resource hook already installed')\n168:     for key,g in n.meta.get('existing_resource_groups',{}).items():\n169:         terms=[n.model[c['ComponentType']+'-p_nom'].sel({c['ComponentType']+'-ext':c['Name']})*c['CapacityToMW'] for c in g['candidates']]\n170:         if terms:n.model.add_constraints(sum(terms)<=g['new_build_limit_mw'],name='ResearchExistingResource-'+key)\n171:     # This frozen Linopy version rejects literal objective constants. A scalar\n172:     # fixed at one carries the audited annual FOM without introducing capacity,\n173:     # dispatch, a financing assumption or an optimisation choice.\n174:     cost=float(n.meta.get('existing_annual_fixed_om_eur',0.))\n175:     if cost:\n176:         one=n.model.add_variables(lower=1.,upper=1.,name='Research-existing-FOM-constant')\n177:         n.model.objective+=one*cost\n178:     n._research_existing_assets_model=n.model"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/prepare_sector_network.py",
+      "sha256": "ade3014d041da647e78954bccce91ee07ced8c08cf7903e8eae1b38fc8f3fa8f",
+      "snippets": [
+        {
+          "start": 3181,
+          "end": 3220,
+          "text": "3181:     if len(existing_nodes) < len(acnodes):\n3182:         print(\n3183:             f\"Warning: For {len(acnodes) - len(existing_nodes)} of {len(acnodes)} nodes there were no load nodes found in network and were skipped.\"\n3184:         )\n3185:     n.loads.loc[existing_nodes, \"carrier\"] = \"AC\"\n3186: \n3187:     Nyears = n.snapshot_weightings.generators.sum() / 8760\n3188: \n3189:     # Fetch wildcards\n3190:     investment_year = int(snakemake.wildcards.planning_horizons[-4:])\n3191:     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard\n3192: \n3193:     # Prepare the costs dataframe\n3194:     costs = prepare_costs(\n3195:         snakemake.input.costs,\n3196:         snakemake.config[\"costs\"],\n3197:         snakemake.params.costs[\"output_currency\"],\n3198:         snakemake.params.costs[\"fill_values\"],\n3199:         Nyears,\n3200:         snakemake.params.costs[\"default_exchange_rate\"],\n3201:         snakemake.params.costs[\"future_exchange_rate_strategy\"],\n3202:         snakemake.params.costs[\"custom_future_exchange_rate\"],\n3203:     )\n3204: \n3205:     # Define spatial for biomass and co2. They require the same spatial definition\n3206:     spatial = define_spatial(pop_layout.index, options)\n3207: \n3208:     if snakemake.params.foresight in [\"myopic\", \"perfect\"]:\n3209:         add_lifetime_wind_solar(n, costs)\n3210: \n3211:     # TODO logging\n3212: \n3213:     energy_totals = pd.read_csv(\n3214:         snakemake.input.energy_totals,\n3215:         index_col=0,\n3216:         keep_default_na=False,\n3217:         na_values=[\"\"],\n3218:     )\n3219: \n3220:     ##########################################################################"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/_helpers.py",
+      "sha256": "c1b1493540d7b3e146a8d1a517354485478788e838ca74f8ed1fb8c8f0e4660d",
+      "snippets": [
+        {
+          "start": 2540,
+          "end": 2013,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/build_research_network.py",
+      "sha256": "648ef857a4136b739dbb09cc7507aec7c6d562bf4c89e6679df57ec20a69f00a",
+      "snippets": [
+        {
+          "start": 65,
+          "end": 106,
+          "text": "65:    non=[b for b in physical if b not in electric]\n66:    g.add_edges_from(zip(non,non[1:]))\n67:  for component in nx.connected_components(g):\n68:   if len({n.buses.at[b,'country'] for b in component})!=1:raise ValueError('Hidden cross-country carrier path')\n69:  if any(n.stores.bus.isin(n.buses.index[n.buses.carrier=='co2 sequestered'])):raise ValueError('Unaccepted geological inventory asset')\n70:  mapped={}\n71:  for r in carbon_map:\n72:   key=(r['component_type'],r['component'])\n73:   if key in mapped:raise ValueError('Duplicate carbon attribution')\n74:   table={'Link':n.links,'Generator':n.generators}[r['component_type']]\n75:   if r['component'] not in table.index:raise ValueError('Carbon map does not refer to actual component')\n76:   z=table.loc[r['component']]\n77:   ports=[z[c] for c in table if (c=='bus' or c.startswith('bus') and c[3:].isdigit()) and z[c]]\n78:   owners_here={n.buses.at[b,'country'] for b in ports if b not in atmo}\n79:   if owners_here!={r['country']} or z.carrier!=r['carrier']:raise ValueError('Carbon map ownership/carrier mismatch')\n80:   if r['component_type']=='Link':\n81:    coefficient=sum(float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]]) for c in table if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] in atmo)\n82:   else:coefficient=float(n.carriers.at[z.carrier,'co2_emissions'])/float(z.efficiency)\n83:   if not np.isclose(coefficient,float(r['coefficient']),rtol=1e-12):raise ValueError('Carbon coefficient does not match actual physical port')\n84:   mapped[key]=classify_record(r['component'],r['carrier'],r['sector'],r['country'],r['coefficient'],source=r['source'],policy_weight=r['policy_weight'],accepted=r['accepted'],physical_qualified=r.get('PhysicalReportingQualified'),policy_qualified=r.get('PolicyAttributionQualified'))\n85:   if r.get('gas_input_carbon_factor') is not None:\n86:    if n.buses.at[z.bus0,'carrier']!='gas' or not np.isclose(r['gas_input_carbon_factor'],r['coefficient']+r['captured_carbon_factor']):raise ValueError('SMR physical input/stack/capture balance failed')\n87:    if r['captured_carbon_factor'] and (z.bus3!=r['captured_destination'] or not np.isclose(z.efficiency3,r['captured_carbon_factor'])):raise ValueError('SMR captured carbon destination mismatch')\n88:  events={('Link',name) for name,z in n.links.iterrows() if any(z[c] in atmo for c in n.links if c.startswith('bus') and c[3:].isdigit() and z[c])}\n89:  events|={('Generator',name) for name,z in n.generators.iterrows() if float(n.carriers.at[z.carrier,'co2_emissions'])!=0}\n90:  if set(mapped)!=events:raise ValueError('Incomplete/extraneous actual carbon scope')\n91:  # Require actual local conversion topology, not merely carrier names.\n92:  paths=set()\n93:  path_specs=n.meta.get('approved_coupling_path_specs',{\n94:   'electrolysis':{'inputs':['AC','DC','electricity','low voltage'],'outputs':['H2']},\n95:   'steam_methane_reforming':{'inputs':['gas'],'outputs':['H2']},\n96:   'FT':{'inputs':['H2'],'outputs':['oil']},\n97:   'fuel_cell':{'inputs':['H2'],'outputs':['AC','DC','electricity','low voltage']}})\n98:  for _,z in n.links.iterrows():\n99:   a=n.buses.at[z.bus0,'carrier'];outputs={n.buses.at[z[c],'carrier'] for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] and float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]])>0}\n100:   for label,spec in path_specs.items():\n101:    if a in spec['inputs'] and set(spec['outputs'])&outputs:paths.add(label)\n102:  approved=set(n.meta.get('approved_coupling_paths',[]))\n103:  if not approved or not approved<=paths:raise ValueError('Missing approved actual sector-coupling paths')\n104:  if paths-approved:raise ValueError('Unapproved conversion pathway')\n105:  # Every finite biomass resource must identify isolated obligation-only buses.\n106:  routes=n.meta.get('biomass_obligation_routes',{})"
+        }
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "scripts_project/carrier_architecture.py",
+      "sha256": "d0a5167da4d3861806034c89caaa68b6897b3b01f11e3988f12cff0acec686af",
+      "snippets": [
+        {
+          "start": 90,
+          "end": 125,
+          "text": "90:     return f\n91: \n92: \n93: def external_import(f,node,commodity,market_id,assumption,*,accepted):\n94:     \"\"\"Independent source Generator, same source-price record across countries.\n95: \n96:     No world market bus, no export link, no return path and no cost charged again\n97:     at downstream conversion. Capacities/annual-limit assumptions are explicit.\n98:     \"\"\"\n99:     if not accepted:raise ValueError('External supply price/availability is pending')\n100:     required={'price','price_unit','source_sha256','source_year','basis','capacity_mw','annual_cap_mwh','unlimited_annual_accepted'}\n101:     if required-assumption.keys():raise ValueError('Incomplete external supply identity')\n102:     if assumption['price_unit']!='EUR/MWh_fuel' or not assumption['source_sha256'] or not assumption['basis']:\n103:         raise ValueError('Unaccepted fuel price/energy basis')\n104:     price=finite(assumption['price'])\n105:     unconstrained=assumption.get('unlimited_capacity_accepted') is True\n106:     if unconstrained:\n107:         if assumption['capacity_mw'] is not None or assumption['annual_cap_mwh'] is not None or assumption['unlimited_annual_accepted'] is not True:\n108:             raise ValueError('Conflicting nonbinding external-market boundary')\n109:         capacity=0.\n110:     else:capacity=finite(assumption['capacity_mw'])\n111:     cap=assumption['annual_cap_mwh']\n112:     if cap is None and assumption['unlimited_annual_accepted'] is not True:raise ValueError('No accepted annual availability')\n113:     if cap is not None:finite(cap)\n114:     # Shared price provenance does not imply identical national availability.\n115:     f.market(market_id,commodity,{k:assumption[k] for k in ('price','price_unit','source_sha256','source_year','basis')})\n116:     b=bus_name(node,commodity);country=f.buses[b]['country']\n117:     key=f.add('Generator',node+' external '+commodity,country,commodity,outputs=[b],role='EXTERNAL_SUPPLY',\n118:         params=dict(p_nom=capacity,p_nom_extendable=unconstrained,p_nom_max=float('inf') if unconstrained else capacity,capital_cost=0.,p_min_pu=0,marginal_cost=price,annual_cap_mwh=cap,market_id=market_id),\n119:         accepted=True,source=assumption['source_sha256'])\n120:     return key\n121: \n122: \n123: def allocate_finite_resource(f,carrier,total,allocation,*,accepted,source,fuel_cost):\n124:     \"\"\"No duplicated ASEAN potential. Country/node allocations sum to source.\"\"\"\n125:     if not accepted:raise ValueError('Finite resource ownership pending')"
+        }
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "path": "scripts/solve_network.py",
+      "sha256": "5204dbdb0214e75afacbc0a666ea6602d9be644a7003380283850b9731c183dc",
+      "snippets": [
+        {
+          "start": 1120,
+          "end": 1132,
+          "text": "1120:             )\n1121: \n1122:     if snakemake.config[\"sector\"][\"hydrogen\"][\"set_color_shares\"]:\n1123:         logger.info(\"setting H2 color mix\")\n1124:         set_h2_colors(n)\n1125: \n1126:     add_co2_sequestration_limit(n, snapshots)\n1127: \n1128: \n1129: def solve_network(n, config, solving, **kwargs):\n1130:     set_of_options = solving[\"solver\"][\"options\"]\n1131:     cf_solving = solving[\"options\"]\n1132: "
+        }
+      ]
+    }
+  ],
+  "searches": [
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "term": "transmission_projects",
+      "matches": [
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_brownfield.py:269:        snakemake.params.transmission_projects,",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_existing_baseyear.py:645:        snakemake.params.transmission_projects,",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:18:def attach_transmission_projects(",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:19:    n: pypsa.Network, transmission_projects: list[str]",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:22:    for path in transmission_projects:",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:69:        snakemake = mock_snakemake(\"add_transmission_projects\")",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:76:    if params[\"transmission_projects\"][\"enable\"]:",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/add_transmission_projects.py:77:        attach_transmission_projects(n, snakemake.input.transmission_projects)",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:15:- ``data/transmission_projects/\"project_name\"/``: Takes the transmission projects from the subfolder of data/transmission_projects. The subfolder name is the project name.",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:22:- ``transmission_projects/new_lines.csv``: New project lines to be added to the network. This includes new lines and upgraded lines.",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:23:- ``transmission_projects/new_links.csv``: New project links to be added to the network. This includes new links and upgraded links.",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:24:- ``transmission_projects/adjust_lines.csv``: For lines which are upgraded, the decommissioning year of the existing line is adjusted to the build year of the upgraded line.",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:25:- ``transmission_projects/adjust_links.csv``: For links which are upgraded, the decommissioning year of the existing link is adjusted to the build year of the upgraded link.",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:26:- ``transmission_projects/new_buses.csv``: For some links, we have to add new buses (e.g. North Sea Wind Power Hub).",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:638:        snakemake = mock_snakemake(\"build_transmission_projects\")",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:661:    transmission_projects = snakemake.params.transmission_projects",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:664:        for project, include in transmission_projects[\"include\"].items()",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:667:    paths = snakemake.input.transmission_projects",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:683:                status=transmission_projects[\"status\"],",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:684:                skip=transmission_projects[\"skip\"],",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:685:                distance_upper_bound=transmission_projects[\"distance_upper_bound\"],",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:793:        if transmission_projects[\"new_link_capacity\"] == \"keep\":",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/build_transmission_projects.py:795:        elif transmission_projects[\"new_link_capacity\"] == \"zero\":"
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "term": "def prepare_costs",
+      "matches": [
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/_helpers.py:1135:def prepare_costs("
+      ]
+    },
+    {
+      "commit": "5bacad702ccfed17ad19ab510fa710651e966f2c",
+      "term": "def annuity",
+      "matches": [
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/_helpers.py:951:def annuity(n, r):",
+        "5bacad702ccfed17ad19ab510fa710651e966f2c:scripts/_helpers.py:1210:    def annuity_factor(v):"
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "term": "KnownFixedCostToAdd",
+      "matches": [
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/closeout_gate5_metadata.py:11:ACCOUNTING_KEYS=('PricedObjective','KnownFixedCostIncludedInPricedObjective','KnownFixedCostToAddToPricedObjective')",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/closeout_gate5_metadata.py:50:    require(report['KnownFixedCostIncludedInPricedObjective'] is True and report['KnownFixedCostToAddToPricedObjective']==0.,'FOM not verified once')",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/fixed_accounts.py:109:    return dict(PricedObjective=priced_objective,KnownFixedCost=known,KnownFixedCostIncludedInPricedObjective=included if priced_objective is not None else None,KnownFixedCostToAddToPricedObjective=0. if priced_objective is not None else None,PricedObjectiveDefinition='Model objective including installed known fixed FOM once; may contain unresolved numerical coefficients, not automatically a pure economic total',PendingFixedCostIncludedInPricedObjective=False,PendingFixedCostTerms=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','UnitPriceEUR2020PerMWh']} for r in rows],FullSystemCostComplete=False,PendingFixedPhysicalEmissions=[{k:r[k] for k in ['FixedAccountID','QuantityMWh','PhysicalCO2_tPerMWh']} for r in rows],FullSystemEmissionsComplete=False,CostCurrencyYear=2020 if n.meta.get('model_price_year')==2020 else None,Scope='Priced subset and external pending fixed terms; not a full total')",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/gate6_result.py:23:    if account['KnownFixedCostIncludedInPricedObjective'] is not True or account['KnownFixedCostToAddToPricedObjective']!=0 or obj['known_fixed_once']!=account['KnownFixedCost']:raise ValueError('FOM not counted once')",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/gate6_result.py:28:    keys=('PricedObjective','KnownFixedCostIncludedInPricedObjective','KnownFixedCostToAddToPricedObjective')",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/test_gate5_metadata_closeout.py:15: report=dict(PricedObjective=None,KnownFixedCost=2.,KnownFixedCostIncludedInPricedObjective=None,KnownFixedCostToAddToPricedObjective=None,",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/test_gate5_metadata_closeout.py:22: report=copy.deepcopy(report);report.update(PricedObjective=12.5,KnownFixedCostIncludedInPricedObjective=True,KnownFixedCostToAddToPricedObjective=0.)",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/test_gate6_baseline_3h.py:101:        account=dict(PricedObjective=None,KnownFixedCost=2.,KnownFixedCostIncludedInPricedObjective=None,KnownFixedCostToAddToPricedObjective=None)",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/test_gate6_baseline_3h.py:106:        detail=dict(accounting_report={**account,'PricedObjective':12.,'KnownFixedCostIncludedInPricedObjective':True,'KnownFixedCostToAddToPricedObjective':0.},objective_reconciliation=dict(actual=12.,known_fixed_once=2.))",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/test_gate6_baseline_3h.py:108:        bad_detail=copy.deepcopy(detail);bad_detail['accounting_report']['KnownFixedCostToAddToPricedObjective']=2.;reject(lambda:result.accepted_metadata(old,q,checks_mock,bad_detail,dict(status='PASS',sha256='test'),{},'test'))"
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "term": "install_existing_asset_constraints",
+      "matches": [
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/assembly_components.py:109:        from integrate_surviving_assets import install_existing_asset_constraints",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/assembly_components.py:110:        install_existing_asset_constraints(n)",
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/integrate_surviving_assets.py:165:def install_existing_asset_constraints(n):"
+      ]
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "term": "2050",
+      "matches": []
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "term": "price_method",
+      "matches": [
+        "b9be7d0ab788a4151346c098d2e657c7e94a22da:scripts_project/price_basis.py:143:    n.meta.update(model_price_year=2020,price_layer_sha256=sha(path),price_method=METHOD,component_price_qualification=records)"
+      ]
+    }
+  ],
+  "safe_network_config": {
+    "elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc": {
+      "git_commit": "5bacad702ccfed17ad19ab510fa710651e966f2c drop biomass generator if biomass limit is set, extend scenarios",
+      "wildcards": {
+        "simpl": "",
+        "clusters": "100",
+        "ll": "v2.0",
+        "opts": "",
+        "sopts": "3h",
+        "planning_horizons": "2025",
+        "discountrate": "0.071",
+        "demand": "DEC",
+        "h2export": "0"
+      },
+      "co2_budget": {
+        "co2base_value": 1000000000.0,
+        "enable": false,
+        "override_co2opt": true,
+        "year": {
+          "2025": 1.0,
+          "2030": 0.82,
+          "2035": 0.64,
+          "2040": 0.46,
+          "2045": 0.28,
+          "2050": 0.1,
+          "2020": 1.0
+        }
+      },
+      "costs": {
+        "append_cost_data": true,
+        "regional_factor": false,
+        "year": 2030,
+        "technology_data_version": "v0.13.2",
+        "discountrate": [
+          0.071
+        ],
+        "country_specific_data": "",
+        "cost_scenario": "moderate",
+        "financial_case": "market",
+        "output_currency": "EUR",
+        "default_exchange_rate": 0.7532,
+        "future_exchange_rate_strategy": "reference",
+        "custom_future_exchange_rate": "None",
+        "rooftop_share": 0.14,
+        "fill_values": {
+          "FOM": 0,
+          "VOM": 0,
+          "efficiency": 1,
+          "fuel": 0,
+          "investment": 0,
+          "lifetime": 25,
+          "CO2 intensity": 0,
+          "discount rate": 0.07
+        },
+        "marginal_cost": {
+          "solar": 0.01,
+          "onwind": 0.015,
+          "offwind": 0.015,
+          "hydro": 0.0,
+          "H2": 0.0,
+          "electrolysis": 0.0,
+          "fuel cell": 0.0,
+          "battery": 0.0,
+          "battery inverter": 0.0
+        },
+        "emission_prices": {
+          "co2": 0.0
+        },
+        "lines": {
+          "length_factor": 1.25
+        }
+      },
+      "policy_config": {
+        "hydrogen": {
+          "temporal_matching": "no_temporal_matching",
+          "spatial_matching": false,
+          "temporal_matching_carriers": [
+            "csp",
+            "solar",
+            "onwind",
+            "offwind-ac",
+            "offwind-dc",
+            "ror",
+            "hydro"
+          ],
+          "matching_technologies": [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC"
+          ],
+          "additionality": false,
+          "allowed_excess": 1.0,
+          "is_reference": false,
+          "remove_h2_load": false,
+          "path_to_ref": "",
+          "re_country_load": false
+        }
+      },
+      "transmission_projects": {
+        "delay_construction": 0,
+        "distance_upper_bound": 0.3,
+        "enable": true,
+        "include": {
+          "AIMS": true,
+          "ID_SuperGrid": true
+        },
+        "new_link_capacity": "keep",
+        "set_by_build_year": true,
+        "skip": [],
+        "status": [
+          "in_planning",
+          "under_construction",
+          "existing",
+          "under_consideration"
+        ]
+      },
+      "final_adjustment": {
+        "elec_per_capita": {
+          "BN": 10.67,
+          "ID": 1.45,
+          "KH": 0.93,
+          "LA": 1.67,
+          "MM": 0.37,
+          "MY": 5.08,
+          "PH": 0.93,
+          "SG": 9.75,
+          "TH": 2.97,
+          "TL": 0.29,
+          "VN": 2.59
+        },
+        "industry_share": {
+          "BN": 0.3,
+          "ID": 0.5,
+          "KH": 0.36,
+          "LA": 0.61,
+          "MM": 0.21,
+          "MY": 0.88,
+          "PH": 0.31,
+          "SG": 0.37,
+          "TH": 0.42,
+          "TL": 0.01,
+          "VN": 0.51
+        },
+        "only_elec_network": true,
+        "pop_forecast_path": "data/worldbank_pop_forecast.csv",
+        "readjust_existing_interconnections": true,
+        "redistribute_industry": true,
+        "total_elec_demand": {
+          "2025": 1401400000.0,
+          "2030": 1658800000.0,
+          "2035": 1940200000.0,
+          "2040": 2264600000.0,
+          "2045": 2635000000.0,
+          "2050": 3036300000.0
+        }
+      },
+      "sector_carbon_resource": {
+        "biomass_transport": false,
+        "co2_network": false,
+        "solid_biomass_potential": 360,
+        "lignite": {
+          "spatial_lignite": false
+        },
+        "biomass_transport_default_cost": 0.1,
+        "biogas_potential": 0.5,
+        "efficiency_heat_biomass_to_elec": 0.9,
+        "co2_sequestration_potential": 200,
+        "co2_sequestration_cost": 10,
+        "dac": true,
+        "fischer_tropsch": true,
+        "min_part_load_fischer_tropsch": 0.9
+      },
+      "stored_weight_fields": {
+        "snapshots_snapshot": [
+          0,
+          3,
+          6
+        ],
+        "snapshots_objective": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_generators": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_stores": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "generators_weight": [
+          383.2586630327811,
+          178.93822170928135,
+          129.68758553544194
+        ]
+      }
+    },
+    "elec_s_100_ec_lv2.0__3h_2050_0.071_DEC_0export.nc": {
+      "git_commit": "5bacad702ccfed17ad19ab510fa710651e966f2c drop biomass generator if biomass limit is set, extend scenarios",
+      "wildcards": {
+        "simpl": "",
+        "clusters": "100",
+        "ll": "v2.0",
+        "opts": "",
+        "sopts": "3h",
+        "planning_horizons": "2050",
+        "discountrate": "0.071",
+        "demand": "DEC",
+        "h2export": "0"
+      },
+      "co2_budget": {
+        "co2base_value": 1000000000.0,
+        "enable": true,
+        "override_co2opt": true,
+        "year": {
+          "2025": 1.0,
+          "2030": 0.82,
+          "2035": 0.64,
+          "2040": 0.46,
+          "2045": 0.28,
+          "2050": 0.1,
+          "2020": 1.0
+        }
+      },
+      "costs": {
+        "append_cost_data": true,
+        "regional_factor": false,
+        "year": 2030,
+        "technology_data_version": "v0.13.2",
+        "discountrate": [
+          0.071
+        ],
+        "country_specific_data": "",
+        "cost_scenario": "moderate",
+        "financial_case": "market",
+        "output_currency": "EUR",
+        "default_exchange_rate": 0.7532,
+        "future_exchange_rate_strategy": "reference",
+        "custom_future_exchange_rate": "None",
+        "rooftop_share": 0.14,
+        "fill_values": {
+          "FOM": 0,
+          "VOM": 0,
+          "efficiency": 1,
+          "fuel": 0,
+          "investment": 0,
+          "lifetime": 25,
+          "CO2 intensity": 0,
+          "discount rate": 0.07
+        },
+        "marginal_cost": {
+          "solar": 0.01,
+          "onwind": 0.015,
+          "offwind": 0.015,
+          "hydro": 0.0,
+          "H2": 0.0,
+          "electrolysis": 0.0,
+          "fuel cell": 0.0,
+          "battery": 0.0,
+          "battery inverter": 0.0
+        },
+        "emission_prices": {
+          "co2": 0.0
+        },
+        "lines": {
+          "length_factor": 1.25
+        }
+      },
+      "policy_config": {
+        "hydrogen": {
+          "temporal_matching": "no_temporal_matching",
+          "spatial_matching": false,
+          "temporal_matching_carriers": [
+            "csp",
+            "solar",
+            "onwind",
+            "offwind-ac",
+            "offwind-dc",
+            "ror",
+            "hydro"
+          ],
+          "matching_technologies": [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC"
+          ],
+          "additionality": false,
+          "allowed_excess": 1.0,
+          "is_reference": false,
+          "remove_h2_load": false,
+          "path_to_ref": "",
+          "re_country_load": false
+        }
+      },
+      "transmission_projects": {
+        "delay_construction": 0,
+        "distance_upper_bound": 0.3,
+        "enable": true,
+        "include": {
+          "AIMS": true,
+          "ID_SuperGrid": true
+        },
+        "new_link_capacity": "keep",
+        "set_by_build_year": true,
+        "skip": [],
+        "status": [
+          "in_planning",
+          "under_construction",
+          "existing",
+          "under_consideration"
+        ]
+      },
+      "final_adjustment": {
+        "elec_per_capita": {
+          "BN": 10.67,
+          "ID": 1.45,
+          "KH": 0.93,
+          "LA": 1.67,
+          "MM": 0.37,
+          "MY": 5.08,
+          "PH": 0.93,
+          "SG": 9.75,
+          "TH": 2.97,
+          "TL": 0.29,
+          "VN": 2.59
+        },
+        "industry_share": {
+          "BN": 0.3,
+          "ID": 0.5,
+          "KH": 0.36,
+          "LA": 0.61,
+          "MM": 0.21,
+          "MY": 0.88,
+          "PH": 0.31,
+          "SG": 0.37,
+          "TH": 0.42,
+          "TL": 0.01,
+          "VN": 0.51
+        },
+        "only_elec_network": true,
+        "pop_forecast_path": "data/worldbank_pop_forecast.csv",
+        "readjust_existing_interconnections": true,
+        "redistribute_industry": true,
+        "total_elec_demand": {
+          "2025": 1401400000.0,
+          "2030": 1658800000.0,
+          "2035": 1940200000.0,
+          "2040": 2264600000.0,
+          "2045": 2635000000.0,
+          "2050": 3036300000.0
+        }
+      },
+      "sector_carbon_resource": {
+        "biomass_transport": false,
+        "co2_network": false,
+        "solid_biomass_potential": 360,
+        "lignite": {
+          "spatial_lignite": false
+        },
+        "biomass_transport_default_cost": 0.1,
+        "biogas_potential": 0.5,
+        "efficiency_heat_biomass_to_elec": 0.9,
+        "co2_sequestration_potential": 200,
+        "co2_sequestration_cost": 10,
+        "dac": true,
+        "fischer_tropsch": true,
+        "min_part_load_fischer_tropsch": 0.9
+      },
+      "stored_weight_fields": {
+        "snapshots_snapshot": [
+          0,
+          3,
+          6
+        ],
+        "snapshots_objective": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_generators": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_stores": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "generators_weight": [
+          383.2586630327811,
+          178.93822170928135,
+          129.68758553544194
+        ]
+      }
+    },
+    "research_fullsc_2050_assembly_v1_unsolved.nc": {
+      "accounting_report": {
+        "PricedObjective": null,
+        "KnownFixedCost": 8224491125.573893,
+        "KnownFixedCostIncludedInPricedObjective": null,
+        "KnownFixedCostToAddToPricedObjective": null,
+        "PricedObjectiveDefinition": "Model objective including installed known fixed FOM once; may contain unresolved numerical coefficients, not automatically a pure economic total",
+        "PendingFixedCostIncludedInPricedObjective": false,
+        "FullSystemCostComplete": false,
+        "FullSystemEmissionsComplete": false,
+        "CostCurrencyYear": 2020,
+        "Scope": "Priced subset and external pending fixed terms; not a full total",
+        "PendingFixedCostTerms_count": 807,
+        "PendingFixedPhysicalEmissions_count": 807
+      },
+      "stored_weight_fields": {
+        "snapshots_snapshot": [
+          0,
+          3,
+          6
+        ],
+        "snapshots_objective": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_generators": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "snapshots_stores": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "generators_weight": [
+          383.2586630327811,
+          178.93822170928135,
+          129.68758553544194
+        ]
+      }
+    }
+  },
+  "historical_decision_documents": [
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "research/04_model_assembly/gate4/MODEL_FACING_COST_YEAR_CHECK.md",
+      "sha256": "0cd91a2b0b985c1e7a9affd319dc6daac2b970386d9b1579f5afd3e4aa869c48",
+      "text": "# EUR2020模型侧价格年核验与前轮更正\n\n前轮“EUR2020与EUR2023仍混合”的总体结论证据不足，现予更正。仅看到currency_year和处理表数值相等，不能推断未通胀。证据：technology-data v0.13.2 SHA ec22a1843632fd28ecb9a139ee5156faf23324a3，compile_cost_assumptions.py:4165-4178最终执行adjust_for_inflation；_helpers.py:236-305仅对investment/VOM/fuel调整到config eur_year2020，同时不重写原currency_year。当前冻结值与同版本输出逐项核对。ASEAN append_cost_data.py:80-140追加AEO8 USD2020经冻结汇率转EUR2020，保留技术递减情景。\n\n本轮决定ASSEMBLY_V1_COMMON_PRICE_YEAR_EUR2020，官方指数只用于尚未调整的EUR货币量。原currency_year保留为SourceCurrencyYear，新增EffectivePriceYearBefore和ModelCurrencyYear；SourcePublicationYear未知留空，绝不代入价格年。SourceCurrency指冻结成本表所载币种，上游更早转换保留源码链，不冒充重新恢复全部原始报价。\n\n序列：MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N。index2020=100.0。下载hash=77a6cea533abe6318da7482e90dc8429c38953221d9363a1ae3add2e327dcf4c。元数据确认年度、EA20固定组成、GDP deflator、Eurostat来源。\n\n官方定义：https://ec.europa.eu/eurostat/cache/metadata/en/nama_10_gdp_esms.htm\n\n官方入口：https://data.ecb.europa.eu/data/datasets/MNA/MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N\n\n公式value_EUR2020=value_EUR_y×index2020/index_y。不改变已转换成2020的历史EU27通胀结果，也不以新指数反算替换它们。本轮宏观代理不是技术专属价格预测。\n\n本层746货币项保持；2制粒费用实际转换，因子=1.0181126154701645；488百分比保持；534货币FOM只用统一投资×原百分比一次。固定年化项沿用原寿命/折现率/年度权重。10非EUR项保持PENDING，未使用发表年份或暗中换汇。\n\n新建投资/变动运维/可变燃料价可影响优化。既有固定FOM独立常数账，未重复CAPEX；既有VOM按发电输出/Link输入效率口径处理。当前配置边际费用涉及onwind/solar/offwind-ac/offwind-dc及DC/B2B：需一次明确货币年或数值正则化定义，不能将微小数值自动当已批准EUR2020价。无求解开发可保留，但价格资格明确待决。\n\nFT已知VOM接线修复独立于本平减方法：原EUR2020/MWh_FT×效率进入Link.marginal_cost，100个组件。数量、物理排放及载能路径不变。\n"
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "research/04_model_assembly/gate4/CONFIG_MARGINAL_COST_SEMANTICS.md",
+      "sha256": "aa663bfb8dedde5341f68c60167cc93e888cb1033a03d75600f582a3e22b4150",
+      "text": "# 配置边际费用的来源与方向语义\n\n当前值未修改。共同EUR2020方法不重新批准；746条已为EUR2020的货币记录、FOM及100个FT VOM接线保持。\n\n|费用规则|组件数|来源分类|当前证据|尚需的决定|\n|---|---:|---|---|---|\n|solar 0.01；onwind/offwind 0.015|340|EXPLICIT_MODEL_ASSUMPTION|冻结config.default.yaml的costs.marginal_cost（EUR/MWh），经process_cost_data覆盖；本研究builder直接沿用这些固定值|保留为明确建模费用并指定币值身份，或明确改作单列数值扰动；不能因小就当来源化VOM|\n|DC/B2B约0.00910–0.01099|13|NUMERICAL_PERTURBATION|原run noisy_costs=true；所有13个值与原Link行序、seed174公式逐位一致；源Link默认零加扰动|去除继承扰动，或明确新的方向不变输送费用/数值正则方法|\n|已冻结燃料、技术VOM及本轮前已修复FT|原有范围|SOURCE_BACKED_VOM|既有cost/source转换链|本轮保留，不再通胀或新增费用|\n\n来源：official/author_run/scripts/solve_network.py:165–173，config.default.yaml costs.marginal_cost；参考network meta git_commit=5bacad702ccfed17ad19ab510fa710651e966f2c，run=baseline-aims-3H，wildcard2025/100clusters/3h/DEC；只读输入字段与meta，未读取p_nom_opt、dispatch或对偶。原费用为 `0.01 + 0.002*(RandomState(174).random_sample(len(reference.links))-0.5)`。这是数值扰动，不能写成EUR2020来源化可变运维。复制参考输入字段仍可能复制求解准备阶段改过的参数；本发现解释了该风险。\n\n冻结PyPSA0.30.3 `optimization.optimize.define_objective` 对Link-p直接采用 `sum_t weight_t * marginal_cost_t * p_t`。12条Link的p_min_pu=-1、efficiency=1；另1条只能正向。故+100MWh和-100MWh费用符号相反，bus0/bus1互换会改变同一物理输送的扰动贡献；并非epsilon*abs(f)。相连的相反取向平行连接可能引入循环流的数值激励，是否发生依赖完整约束，本轮没有求解或声称实际发生。\n\n待审方案：\n\n|方案|表达式/实现|报告与容量含义|状态|\n|---|---|---|---|\n|T1 去除参考数值扰动，13条无损连接可变输送费为0|仅将这13条已溯源扰动去除；保留资本费用、FOM、效率、容量和拓扑|推荐首版候选；不等于删除输电成本|未批准|\n|T2 对绝对输送量收费|单一有符号f与同一扩建K；g>=f,g>=-f,g<=K，费用c*g且c>0|需另外批准系数及经济/数值含义；不可虚构真实输送费|未批准|\n|T3 保留方向不变数值正则|可采用T2结构但标为数值项；另行报告，不混作经济成本|仍会影响解，不能声称无影响；固定、可复现系数，不重新随机抽样|未批准|\n|保留当前epsilon*f|含负向补贴并依赖端口命名|不推荐；不能只更换价格年标签掩盖方向问题|未批准|\n\n若采用两个非负方向变量，两者必须共享一个K（例如f_plus+f_minus<=K），不能获得两份独立扩建容量。两方向费用方法未实施。\n"
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "research/04_model_assembly/gate3/evidence/phase3_design/CARBON_SCOPE_FREEZE.md",
+      "sha256": "b9af0e3ece1760444ded74e9432240216737da3e108d6b2c3eb6a0d99977f0ea",
+      "text": "# Carbon scope冻结：目标架构，不改正式约束\n\n## Policy与reporting\n\n**PolicyCO2_Power**保持原ASEAN power-system范围。DEC轨迹：2025=1000、2030=820、2035=640、2040=460、2045=280、2050=100 MtCO2/year；Baseline按原预算关闭语义。没有新国家配额、carbon intensity政策或全系统cap。\n\n**ReportingCO2_FullSystem**报告实际建模的power、industry、transport、buildings fuels、shipping、aviation、agriculture及其他保留部门的物理CO2。Power事件在报告中出现一次；两个视图不能相加。缺失工业process排放不自动0，范围外生命周期/其他GHG不伪称已计入。\n\n| 事件 | PolicyCO2_Power | ReportingCO2_FullSystem |\n|---|---|---|\n| 发电，为任意终端或转换供电 | 计入；EV/HP/电解/FT用途不豁免 | 同一物理事件一次 |\n| 原paper供电H2/SMR及被保留geothermal等 | 保留原口径，不能只按化石Generator名字筛选 | 完整物理事件一次 |\n| Buildings/Industry/Transport/Agriculture直接燃料燃烧 | 不因恢复sector自动并入Power cap | 按实际fuel与计量范围报告 |\n| 国内/国际shipping与aviation | 同上 | 分domestic/bunker，不用失真的区域比例重建 |\n| 工业非能源feedstock/过程排放 | 不自动并入 | 来源/碳去向可追踪，避免将全部oil视同立即燃烧 |\n| 共享SMR/H2、CHP、capture/DAC/FT | 仅属于原power边界的守恒份额/信用 | 所有真实碳流一次，利用与永久封存分开 |\n\n共享用途/CHP归属方法的实际映射须在Phase4共同接受并写成可测表达式；不得以任意比例或技术名称替代来源/用途，也不得为两账复制物理供给。这个实现决定已落在统一架构内，不再开新碳政策或Phase3D。\n\n## 已有证据与必须处理的冲突\n\nU `add_co2:1408–1500`建共同atmosphere及physical stored CO2；`add_co2_budget:3601–3662` / `prepare_network.add_co2limit`按co2_emissions建global constraint，没有power用途过滤。恢复非电部门会把其排放一起放进原cap：**SYSTEM_LEVEL_ENGINEERING_BLOCKER，交P4-06**。\n\n已完成的Phase2键修复候选 `753ac81c23f8b9a1ca8ceed531d0630b56f6953d`恢复base_value消费与六年原限额；只证明key/value等价，不能证明scope等价。旧0.4→0.65 t微型演示与paper网络读取已留证，不重跑。\n\n物理CO2与报告大气另有空间问题：co2_network=false依旧共用stored池；工业process emissions可共池捕集。国家内CCS/FT不能从外国共享物理碳池取料。U `solve_network.add_co2_sequestration_limit:939–952`汇总stored CO2末期库存；default的欧洲潜力/价格不能未经接受当作ASEAN或复制给每国。资源/时间尺度与信用的两个问题都须检查，不能把封存上限当Power预算。\n\n## Phase4验收契约（本轮未运行）\n\n1. Paper退化边界的排放表达式、六年绝对值及时间缩放与原参考一致，含其供电H2/SMR与非零carrier因子。\n2. 固定电力调度，仅添加非电直接燃烧时Policy账不变、FullSystem正确增加；若新增用电改变发电，新增发电排放正常进入Policy。\n3. 同一燃料不在源Generator、燃烧Link和报告负Load重复计；rail燃烧、工业煤能流/排放、农业保留燃料均有归属。\n4. 物理CO2来源、capture、FT使用、燃烧回排、永久封存和跨期库存守恒；非电信用不可无依据抵Power；不共用跨国物理仓库。\n5. 共享用途标签合计回到同一实际流；两情景使用相同原区域预算及scope，不复制成11个国家配额。\n\n本轮只冻结目标架构；没有修改policy数值、constraint代码或重新执行solver。\n"
+    },
+    {
+      "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+      "path": "research_inputs/asset_survival/selected_closure_decisions.json",
+      "sha256": "d4996fd818907c8d9ee212ff3426bd0f58108690b78d30ec0c208f39c353ae6b",
+      "text": "{\r\n  \"DecisionReference\": \"GATE4-20261006-CANONICAL-SELECTED-CLOSURE\",\r\n  \"ApprovalStatus\": \"HUMAN_ACCEPTED\",\r\n  \"Source\": \"Current user instruction: Canonical commodity repair + Selected closure implementation; choices A-D and retirement upper-bound rule\",\r\n  \"Methods\": [\r\n    \"ASSEMBLY_V1_REMOVE_INHERITED_TRANSMISSION_NOISE\",\r\n    \"ASSEMBLY_V1_EXPLICIT_CONFIG_VARIABLE_COST\",\r\n    \"ASSEMBLY_V1_ACCEPTED_RESOURCE_SPATIAL_PROXY\",\r\n    \"ASSEMBLY_V1_REPORTED_PLANT_COHORT_PROXY\"\r\n  ],\r\n  \"HydroPools\": [\r\n    \"ID:ID_Sulawesi0:Reservoir\",\r\n    \"ID:ID_Sumatra3:Run-Of-River\",\r\n    \"LA:LA2:Reservoir\",\r\n    \"MM:MM2:Reservoir\",\r\n    \"MM:MM2:Run-Of-River\",\r\n    \"PH:PH_Mindanao6:Run-Of-River\",\r\n    \"VN:VN2:Run-Of-River\"\r\n  ],\r\n  \"solver_allowed\": false,\r\n  \"Gate5\": false,\r\n  \"Exclusions\": \"Other2groups157MW and3groups527MW are not approved; no new hydro resource; cohort duplicate/parameter qualification remains necessary\"\r\n}\r\n"
+    }
+  ]
+}
