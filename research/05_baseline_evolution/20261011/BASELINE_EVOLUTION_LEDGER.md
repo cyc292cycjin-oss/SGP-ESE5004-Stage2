@@ -10,6 +10,8 @@
 | A-03 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 385组/807账户静态端口、111↔377逐组联结、精确源常数闭合；见FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md |
 | A-03精确LP补证 | FULL_LP_EXACT_INFEASIBILITY_CERTIFIED | 一次CSC结构扫描闭合26,284行完整支撑；精确线性组合给出0≥513/34359738368>0；见A03_EXACT_ANNUAL_CLOSURE_PROOF.md |
 | A-04 | COMPLETE_WITH_EXPLICIT_UNKNOWNS | 171需求账户→1737 Load、108 NULL边界、A*及部门需求谱系；见A04_DEMAND_LINEAGE_AUDIT.md |
+| 精确源常数闭合修复设计 | DESIGN_COMPLETE_PROPOSED_NOT_APPLIED | 385组风险账及A/B/C精确模拟；推荐A保留Load、仅上调180派生Q，待科学批准；见EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md |
+| A-05 / A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 用户列为实施后剩余审计；本台账此前未明确细分定义，本轮不自行补造或启动 |
 | B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
@@ -78,3 +80,17 @@
 - 同轮提交推送并交付A03_FULL_LP_CERTIFICATE_REVIEW.zip：报告/台账、目标行轻量JSON、独立校验器及提取源码；没有完整矩阵或X/Pi/RC。包含大小/SHA清单和CRC核验。
 
 下一决策是源常数闭合原则的科学审批，不自动恢复G6-05或其他优化。历史A03/A04文件的当时未知项由本节明确更新，仅本证明缺口关闭。
+
+## 精确源常数闭合修复设计（2026-10-11，PROPOSED）
+
+起始提交`aa9437a71dfe2538fea56fe6687a75171d4a706b`，同一审计分支和PR #3。用户只授权设计、核算和比较，**没有授权修复正式输入或新的优化**。
+
+- VERIFIED：复用385/807轻量映射，全部有理数δ与既有记录一致；1组完整LP证书、179组正差但未逐组原生证书、205组无正差。其余约束/机制不在本轮重审范围，不能宣称没有其他风险。
+- VERIFIED_SIMULATION：A保持所有Load位不变，180个Q各增1–7 ULP，合计1.600385921563e−7 MWh，最大2.235174179077e−8 MWh；最大份额绝对变化1.775575033016e−16。全部385组精确D≤Q，0组D=Q；有限余量明示。5个Animal waste账户不变。
+- VERIFIED_SIMULATION：B仅减180组平坦Load，年量绝对变化合计1.703564266216e−7 MWh；C共同量化方案改384组Load及806个Q，385组D=Q。全部逐项变更仅存在分析JSON，未进入正式输入。
+- DERIVATION：独立位邻居校验A/B指定规则最小性；C配额精确闭合；指定无旁路拓扑下局部库存轨迹满足年度和所有前缀必要关系。不是新完整LP可行证书，没有逐组扫描矩阵。
+- PROPOSED：采用EXACT_SOURCE_CLOSURE_A_MAX_ACCOUNT_V1_DRAFT，符合先Load后派生Q的历史权威顺序。明确改变库存常数/有限精确可行域，不将其称为无科学影响的等价缩放；商品份额及余量须经用户与ChatGPT批准。
+- 顺序：科学批准 → 独立实施分支及源版本 → 全385/807严格闭合与字段回读 → 检查新增矛盾 → 剩余A-05/A-06及B审计 → 再判断365日诊断和2920时段Gate6授权。后续全部未启动。
+- 文件：EXACT_SOURCE_CLOSURE_REPAIR_OPTIONS.md、PROPOSED_MINIMAL_REPAIR_SPEC.md、CLOSURE_REPAIR_ANALYSIS_METHOD.md、evidence/closure_repair/ALL_385_GROUPS_CLOSURE_LEDGER.json及A/B/C模拟/独立检查/来源索引。
+- 旧A03完整证书、A04和科学源码未改；G6-05为PAUSED_BY_USER；无CSC/大向量重扫、构模、solver或AutoDL操作。未修改Q、Load、V3/V4、参数及历史消费标记。
+- 同轮commit/push及EXACT_CLOSURE_REPAIR_DESIGN_REVIEW.zip，包含相对路径清单、大小/SHA及CRC核验；完成即停止，等待科学审批。发布回执记录本次完整commit与ZIP身份。
