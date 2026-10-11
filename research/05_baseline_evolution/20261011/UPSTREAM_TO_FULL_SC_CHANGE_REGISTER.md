@@ -86,3 +86,16 @@ A-03可在用户审阅后开展**限定资源义务语义、商品份额和已�
 C12/C13/C20/C21的此前精确可行性未知项已取得直接证据：完整CSC一次流式支撑核验后，ID工业Java-Bali1 2组26,284条约束构成精确矛盾证书，`0≥513/34359738368 MWh>0`。状态FULL_LP_EXACT_INFEASIBILITY_CERTIFIED；详见[A03_EXACT_ANNUAL_CLOSURE_PROOF](A03_EXACT_ANNUAL_CLOSURE_PROOF.md)。
 
 此结论针对写入冻结LP的binary64常数，不证明理想未舍入科学数据本身冲突；也不将微小常数差直接视为10.24TWh违规或INF_OR_UNBD的全部原因。目标/正对角等价缩放不消除此约束矛盾。源常数修复属于未来独立输入版本及科学批准事项，本轮未实施。A-04及B—F不重新审计或启动。
+
+## A-05 跨境载体谱系增补（2026-10-11）
+
+已在独立A05分支完成只读核查，见[a05差异总表](a05/A05_UPSTREAM_CURRENT_NETWORK_DIFF.md)的A05-01至A05-13、[主报告](a05/A05_CROSS_BORDER_CARRIER_LINEAGE_AUDIT.md)及逐资产JSON。此前C09/C14–C18的概述由以下直接证据细化：
+
+- C15：19跨境AC+5跨境DC；电网总105 AC/10 DC/3 B2B。与论文2025输入118资产ID/端口一致，资本重定；论文2050另7 AC/8 DC记录未进入当前候选集，是否有意科学排除UNKNOWN。
+- C09/C14：作者两份实际网络hydrogen.network=false且无氢管网；当前不是删除已启用的论文管网。通用SC能力与论文生效配置分开。原共同biomass/lignite/co2 stored池实际存在，当前无非电跨国多跳物理池。
+- C09/C18：400独立化石供给按共享价格进入本地Bus，无有限年度进口量/运输限制；无跨境Link不等于无外部商品供应。Q固定终端核算不成为独立生物质资源潜力。
+- C09：100H2节点均可回电或经有共同CO2/电力输入的FT接oil Load；没有直接H2终端Load、氨/甲醇链。Sabatier候选未进入实际配方；可达性不证明运行可行或收益。
+- C16/C17：大气报告没有反向Link供料，Baseline政策off；lv_limit仍共享。Integrated/Disconnected配置仍相同空覆盖，不能声称已有正式干预实验。
+- 源常数方案A已获批准并静态验收，参考独立PR #4及Manifest SHA `a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720`，仅720同步Q字段；新完整LP未生成。当前网络审计不冒称读取了方案A新网络。
+
+未提出新的已证实失败致因。未来电网候选缺席、国家隔离及终端载体固定属于可影响可行域的科学边界，旧微差矛盾/10.24TWh违规/INF_OR_UNBD的因果仍须分开。G6-05暂停，A-06/B—F未开始。
