@@ -173,3 +173,12 @@
 - 15项独立轻量核验PASS；只读取静态表、约40.6MB既有Load输入及更小profile表，不读CSC/X/Pi/RC，不重新实验或构模。没有optimize/presolve/IIS/feasRelax或AutoDL操作。
 - 旧LP精确证书与两次Gate6结论保留；Scheme A新LP NOT_ASSEMBLED/可行性NOT_PROVEN。G6-05仍PAUSED_BY_USER。剩余B、C—F均未启动。
 - 当前报告/风险登记/方法在`b01_b02/`；独立PR及本轮ZIP同次交付，真实commit及ZIP指纹由发布记录给出。任务到此停止，等待用户与ChatGPT联合验收。
+
+
+### B-01/B-02真实发布里程碑
+
+- 审计及15项独立轻量核验提交`b83a0f215bacdba83e34ba226d9b82d99b608786`已commit并push。
+- 分支`audit/stage2-b01-b02-physical-feasibility-20261012`；独立[PR #7](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/7)为OPEN/DRAFT，base为已审阅A06分支。没有合并任何PR。
+- A06远端仍`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`；未把新源配方冒充已运行网络。
+- 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST和外置`B01_B02_FINAL_DELIVERY_RECEIPT.json`。同次交付`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，保留相对路径，逐成员大小/SHA/CRC核验，不含矩阵、原始向量、NetCDF或凭据。
+- 当前B-01/B-02完成即停止；全LP可行性NOT_PROVEN，G6-05保持PAUSED_BY_USER，后续B/C—F未启动。

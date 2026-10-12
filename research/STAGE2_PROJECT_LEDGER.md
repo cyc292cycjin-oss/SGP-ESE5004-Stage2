@@ -70,3 +70,12 @@
 风险/科学决定见`05_baseline_evolution/20261011/b01_b02/B_PHYSICAL_FEASIBILITY_RISK_REGISTER.md`，继承A06的无限外部市场、2025电网候选、NULL成本/排放和未来政策待决边界。没有新的科学修改、优化授权、AutoDL操作或G6-05恢复。B后续及C—F保持未执行。
 
 交付B01/B02报告、风险登记、轻量证据、独立方法及`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，含清单/大小/SHA/CRC。实际commit、远端及独立PR由发布里程碑记录，不把本地结果冒称已推送。
+
+
+### B-01/B-02真实发布里程碑
+
+- 审计及15项独立轻量核验提交`b83a0f215bacdba83e34ba226d9b82d99b608786`已commit并push。
+- 分支`audit/stage2-b01-b02-physical-feasibility-20261012`；独立[PR #7](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/7)为OPEN/DRAFT，base为已审阅A06分支。没有合并任何PR。
+- A06远端仍`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`；未把新源配方冒充已运行网络。
+- 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST和外置`B01_B02_FINAL_DELIVERY_RECEIPT.json`。同次交付`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，保留相对路径，逐成员大小/SHA/CRC核验，不含矩阵、原始向量、NetCDF或凭据。
+- 当前B-01/B-02完成即停止；全LP可行性NOT_PROVEN，G6-05保持PAUSED_BY_USER，后续B/C—F未启动。
