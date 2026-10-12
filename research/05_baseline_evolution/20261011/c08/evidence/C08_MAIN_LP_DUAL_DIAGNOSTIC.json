@@ -1,0 +1,28 @@
+{
+ "scope": "C07A canonical_raw_for_V4 X/Pi, restricted to main LP (block removed); read-only post-processing, no optimization",
+ "main_LP": {
+  "rows": 3839021,
+  "cols": 1565533,
+  "nnz": 7868836
+ },
+ "objective_P_full_equals_main_EUR": 428014092431.8249,
+ "block_objective_contribution": 0,
+ "dual_repair": {
+  "method": "zero duals on singleton (bound) rows and wrong-sign rows; recompute r=c-A^T y; greedily absorb residual of columns lacking the needed bound into sign-feasible coupling-row duals (mostly capacity rows)",
+  "columns_with_unbounded_needed_side_before": 205339,
+  "after_repair_genuine_residual_columns_(>10x_rounding_noise)": 5326,
+  "genuine_residual_by_family": {
+   "Line-s": 3376,
+   "Link-p": 1931,
+   "Link-p_nom": 19
+  },
+  "sum_abs_residual": 0.36453429956082056,
+  "max_abs_residual": 0.005706734630983113,
+  "finite_part_lower_estimate_EUR": 428013887182.1742,
+  "finite_part_gap_EUR": 205249.65069580078,
+  "finite_part_gap_relative": 4.795394692021582e-07
+ },
+ "rigorous_bound_status": "NOT_ACHIEVED: residual columns need finite bounds; objective-cutoff bounds on Line-s_nom are 1.3e7-8.4e7 (canonical units) and 107,463 non-block Store-p columns need multi-row propagation; resulting bound would be far looser than 1e-6. Finite-part gap is NOT a certificate.",
+ "max_abs_dual_main": 822853.9177636595,
+ "script": "methods/c4_main_lp_dual_repair.py, methods/c5_cutoff_bound_attempt.py"
+}
