@@ -170,3 +170,11 @@
 - 新NetCDF及轻量回执本地SHA/CRC通过；部分列/标签数组云端保留、本地LOCAL_SYNC_PENDING；报告/逐产物SHA见c02目录。云端封存成功不等于完整LP存在。
 - C03 NO-GO；G6-05继续PAUSED_BY_USER；后续完整build-only重新执行需用户审阅后另行批准。未进入任何求解或D—F。
 - 独立分支codex/c02-controlled-daily-build-20261012。真实发布commit/PR/ZIP身份见后续发布记录；代码、回执、台账与强制C02_DAILY_BUILD_STATIC_REVIEW.zip同轮交付。失败版本和旧报告原件保留。
+
+
+### C-02真实发布里程碑
+
+- 实际受控构建、部分产物SHA和阻断证据提交 `e89f96814fabf11826ca6f365b871e8f70a5c3e0` 已push。
+- 分支 `codex/c02-controlled-daily-build-20261012`；独立 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12) 为OPEN/DRAFT，base为已核C01R分支；未合并main或任何历史PR。
+- C02_BLOCKED_WITH_SPECIFIC_EVIDENCE：新网络回读通过，完整LP导出和日V4绑定未完成；没有重试或求解。失败版本和实例均保持，G6-05暂停，C03未授权。
+- 同轮审阅ZIP包含报告/最新台账/轻量证据/代码及成员SHA、大小与CRC记录；最终提交和ZIP整体SHA由本地 `C02_FINAL_DELIVERY_RECEIPT.json` 记录。用户上传ChatGPT联合审阅后再决定修复及新窗口。
