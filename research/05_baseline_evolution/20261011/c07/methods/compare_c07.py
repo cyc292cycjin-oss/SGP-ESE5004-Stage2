@@ -42,6 +42,8 @@ for k in ('A','B'):
  rec=read(pfile);p=Path(rec['local_run'].replace('D:\\','/mnt/d/').replace('\\','/'));raw=read(p/'raw/vectors/RAW_RECEIPT.json');info=raw['native_info'];post=read(p/'postprocess/POSTPROCESS_RECEIPT.json') if (p/'postprocess/POSTPROCESS_RECEIPT.json').exists() else None
  summ[k]=dict(run_id=raw['run_id'],native_status=raw['native_status'],info=info,postprocess=post,backup_status=rec['status'])
  provenance[k]={'raw_receipt_sha256':sha(p/'raw/vectors/RAW_RECEIPT.json'),'backup_receipt_sha256':sha(pfile)}
+ resources=[json.loads(s) for s in (p/'RESOURCE.jsonl').read_text().splitlines() if s.strip()]
+ summ[k]['resources']=dict(sampled_process_RSS_max=max(r['rss_bytes'] for r in resources),cgroup_current_max=max(c['current'] for r in resources for c in r['cgroup']),cgroup_headroom_min=min(r['cgroup_headroom_bytes'] for r in resources),disk_free_min=min(r['disk_free_bytes'] for r in resources),protection_reasons=[r['reason'] for r in resources if r.get('reason')],resource_samples=len(resources),cgroup_peak_scope='shared cgroup lifetime; not run-exclusive')
  if not post:continue
  assert read(p/'C07_CANONICAL_MAPPING.json')['status']=='PASS'
  V[k]={'path':p,'X':load(p/'canonical_raw_for_V4/vectors/X.npy'),'Pi':load(p/'canonical_raw_for_V4/vectors/Pi.npy'),'RC':load(p/'canonical_raw_for_V4/vectors/RC.npy'),'original':load(p/'postprocess/original_vectors/X_original.npy'),'native':{q:load(p/'raw/vectors'/f'{q}.npy') for q in ('X','Pi','RC')},'phys':read(p/'postprocess/PHYSICAL_CHECKS.json'),'kkt':read(p/'postprocess/KKT.json'),'de':load(p/'expression/D_exponent.npy'),'re':load(p/'expression/R_exponent.npy')}
@@ -73,6 +75,7 @@ for k in ('A','B'):
  print(k,'resources and rows classified',flush=True)
 
 # One streaming traversal of 11.4M saved daily coefficients; evaluate both returned points together.
+assert 'A' in V and summ['B']['native_status']==3 and summ['B']['info']['SolCount']==0
 fail={k:[] for k in V};nnz=0
 for s in range(0,M['num_col'],20000):
  e=min(M['num_col'],s+20000);p,q=map(int,(A['start'][s],A['start'][e]));assert q-p<=5_000_000;rr=A['index'][p:q];coef=A['value'][p:q];ci=np.repeat(np.arange(e-s),np.diff(A['start'][s:e+1]));nnz+=q-p
@@ -93,13 +96,18 @@ for k,v in V.items():
   if r['kind']=='column':r.update(ds[r['index']])
  summary=dict(stationarity_families=dict(collections.Counter(r['family'] for r in fail[k])),sign_families=dict(collections.Counter(r.get('family',r['kind']) for r in sign)),free_RC_failures=sum(r['kind']=='column' and r['free'] for r in sign),C06_stationarity=transitions({r['column'] for r in oldks['failed_columns']},{r['column'] for r in fail[k]}))
  summ[k]['KKT_classification']=summary;v['sign']=sign
- write(k+'_KKT_CLASSIFICATION.json',dict(**summary,failed_columns=fail[k],dual_sign_failures=sign,source_receipt_sha256=sha(v['path']/'postprocess/KKT.json')))
+ grouped={}
+ for r in sign:
+  coordinates=r.get('coordinates',{});static={n:x for n,x in coordinates.items() if n!='snapshot'};key=json.dumps([r['kind'],r.get('family','row'),static],sort_keys=True)
+  g=grouped.setdefault(key,dict(kind=r['kind'],family=r.get('family','row'),asset_coordinates=static,entries=[]))
+  g['entries'].append([r['index'],coordinates.get('snapshot'),r['original_multiplier'],r['normalized'],r['free']])
+ write(k+'_KKT_CLASSIFICATION.json',dict(**summary,failed_columns=fail[k],dual_sign_failure_groups=list(grouped.values()),dual_sign_entry_schema=['index','snapshot','original_multiplier','normalized','free'],all_dual_sign_failures_included=len(sign),source_receipt_sha256=sha(v['path']/'postprocess/KKT.json')))
 
 # Exact local checks: worst/new physical rows; historically diagnosed resource/Line/Link columns.
 LP=read(B/'artifacts/lp/MATH_PROBLEM.json');ends=np.array([r['end'] for r in MAP['row_ranges']]);starts=np.array([r['start'] for r in MAP['row_ranges']]);rows={3357088,3258844}
 for v in V.values():
  rows.update(r['row'] for r in v['badrows'][:10]);rows.update(r['worst_row'] for r in v['families'] if r['family'] in ('Store-energy_balance','Bus-nodal_balance','Bus-meshed-nodal_balance'))
-cols_set={318846,1407794,356365}
+cols_set={318846,1407794,356365,2047858}
 for k in V:
  for family in set(r['family'] for r in fail[k]):cols_set.add(max((r for r in fail[k] if r['family']==family),key=lambda r:r['normalized'])['column'])
  for r in V[k]['sign'][:2]:
@@ -107,7 +115,8 @@ for k in V:
 erows=[];ecols=[]
 for row in sorted(rows):
  j=int(np.searchsorted(ends,row,side='right'));c=LP['chunks'][j];folder=B/'artifacts/lp'/c['dir'];i=int(row-starts[j]);ptr=load(folder/'indptr.npy');s,e=map(int,ptr[i:i+2]);ix=load(folder/'indices.npy')[s:e];av=load(folder/'value_original.npy')[s:e];asc=load(folder/'value_scaled.npy')[s:e];lo=load(folder/'row_lower_original.npy')[i];hi=load(folder/'row_upper_original.npy')[i]
- rec=dict(row=row,label=int(cl[row]),family=c['family'],support=[dict(column=int(x),coefficient_hex=float(y).hex()) for x,y in zip(ix,av)],lower=str(float(lo)),upper=str(float(hi)))
+ descriptions=describe(ix)
+ rec=dict(row=row,label=int(cl[row]),family=c['family'],support=[dict(column=int(x),coefficient_hex=float(y).hex(),**descriptions[int(x)]) for x,y in zip(ix,av)],lower=str(float(lo)),upper=str(float(hi)))
  for k,v in V.items():
   dn=np.ldexp(1.,v['de'][ix]);rn=math.ldexp(1.,int(v['re'][row]));newcoef=np.ldexp(asc,v['re'][row]-np.frexp(R[row])[1]+1+v['de'][ix]-np.frexp(D[ix])[1]+1)
   original=sum((ff(y)*ff(v['original'][x]) for x,y in zip(ix,av)),F(0));old=sum((ff(y)*ff(v['X'][x]) for x,y in zip(ix,asc)),F(0));new=sum((ff(y)*ff(v['native']['X'][x]) for x,y in zip(ix,newcoef)),F(0));assert original==old/ff(R[row])==new/ff(rn)
@@ -123,4 +132,4 @@ for c in sorted(cols_set):
  ecols.append(rec)
 write('C07_EXACT_LOCAL_CROSS_COORDINATE_CHECK.json',dict(rows=erows,columns=ecols,all_identities_exact=True,old_annual_matrix_reads=0,full_daily_scans_for_exact_checks=0))
 write('C07_C06_A_B_COMPARISON.json',dict(results=summ,source_provenance=provenance,method=dict(one_daily_CSC_traversal_nnz=nnz,exact_rows=len(erows),exact_columns=len(ecols),seconds=time.time()-t0,peak_RSS_KiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,solver_imports=0,solver_calls=0,models_built=0)))
-print(json.dumps({k:dict(status=s.get('native_status'),gates=s.get('postprocess',{}).get('gates'),resource=s.get('resource_totals'),KKT=s.get('KKT')) for k,s in summ.items()},indent=2),flush=True)
+print(json.dumps({k:dict(status=s.get('native_status'),gates=(s.get('postprocess') or {}).get('gates'),resource=s.get('resource_totals'),KKT=s.get('KKT')) for k,s in summ.items()},indent=2),flush=True)
