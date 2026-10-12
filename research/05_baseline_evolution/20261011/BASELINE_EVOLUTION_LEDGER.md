@@ -378,3 +378,14 @@
 - PROPOSED（待授权）：方案 (a) 精确分解。块用精确有理数解，只对主 LP 做一次 Barrier+Crossover 求解，合并后按原 V4 全量验收，并预先写定判定规则。方案 (b)（修改 Scheme A 的余量）严格劣于 (a)。建议暂缓 C07 分层准入指令。
 - 交付：`work/c08_block_decomposition_20261013/`，以及 `outputs/C08_BLOCK_DECOMPOSITION_REVIEW.zip`（含成员 SHA/CRC 清单）。GitHub 尚未推送：本会话 GitHub 账户待关联。
 - 补记（2026-10-13）：C08 报告、证据和方法随分支 `codex/c09-exact-decomposition-20261013` 入库于 `research/05_baseline_evolution/20261011/c08/`，成员字节与 PACKAGE_MANIFEST 中的 SHA 逐个一致；以上条目原文未改。
+
+
+## C09 精确分解后主 LP 单次求解 — 2026-10-13
+
+- **R1：C09_DAILY_BASELINE_ACCEPTED（仅限日诊断，不是 Gate6/2920 通过）。** 本轮优化调用恰好 1 次，没有重试；V4、Scheme A、C01R、D/R、成本及科学约束均未改动。原始结果为 LOCAL_BACKUP_SHA_VERIFIED。
+- run `c09_daily122_20261012T185116Z_b867e3d3`：只求主 LP（1,565,533 列 / 3,839,021 行 / 7,868,836 非零，冻结 C03 CSC 的纯限制），154 项参数中相对 C06 只改 Crossover 0→−1，与 C07B 相同。结果 Status 2、SolCount 1、145 次 Barrier（Barrier 以 sub-optimal 结束）、481,420 次 simplex、378.51 秒，ObjVal 428,014,041,779.74。
+- 块（884,472 列 / 2,203,217 行）使用预构造的精确原始解，对偶取 0；运行时复核了解耦、零成本、行集合和残差（1.106e−16）。合并时主向量逐位拷贝。
+- 原 V4 的 10 项门槛全部 PASS：矩阵失败行 0、列失败 0、stationarity 失败 0（最大归一化值 5.23e−14）、对偶符号失败 0；807/385 失败为 0；1,849 项物理检查通过；FOM 一次；NetCDF 精确回读；daily binding。相对目标差 2.85e−16。本地用冻结 CSC 独立重算，结果与云端逐项相同。
+- 与 C07B（Status 3）相比，唯一区别是去掉了零成本块，结果与"块导致 C07B Status 3"一致（INFERENCE，单次运行，不是证明）。C07A 遗留的 3,353 列 stationarity 失败由 Crossover 基解清除；807/385 通过来自精确块解，与求解器无关。
+- 资源：进程 RSS 峰值 3.53 GiB，cgroup 最小余量 82.64 GiB，保护未触发，所有进程已退出并封存。归档 59,076,784 字节，SHA `6209efc5…1104`。122 实例未关机或释放。
+- 下一步（R1）：用同一分解准备 D 阶段，需要另行授权，本轮不执行。G6-05 仍为 PAUSED_BY_USER；2920 时段和情景未授权。报告见 `c09/C09_RESULT.md`。

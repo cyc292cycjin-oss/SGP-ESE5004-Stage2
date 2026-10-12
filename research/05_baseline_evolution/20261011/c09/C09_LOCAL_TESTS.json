@@ -1,0 +1,101 @@
+{
+ "status": "PASS",
+ "tests": {
+  "T01_block_verify_real_csc": {
+   "status": "PASS",
+   "detail": {
+    "status": "BLOCK_DECOUPLED_ZERO_COST_FEASIBLE",
+    "cross_entries": 0,
+    "block_columns": 884472,
+    "block_rows": 2203217,
+    "block_binary64_max_row_violation_LP_units": 1.1058862159352145e-16,
+    "block_column_index_sha256": "9013af3aa90eb74d8041eeb0cb28185288893f54bdb70577df71da5ffbf78566",
+    "block_row_index_sha256": "ec91f2cb1d975b12dc5df1b2b156481b5878c48ba95e9df383bd5d8a90d8d348"
+   },
+   "seconds": 0.69
+  },
+  "T02_negative_nonzero_block_cost": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_COST_NONZERO",
+   "seconds": 0.21
+  },
+  "T03_negative_perturbed_block_primal": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_PRIMAL_RESIDUAL 0.001",
+   "seconds": 0.56
+  },
+  "T04_negative_cross_entry": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+   "seconds": 0.13
+  },
+  "T05_negative_row_set": {
+   "status": "PASS",
+   "detail": "REJECTED: ValueError",
+   "seconds": 0.12
+  },
+  "T06_main_problem_validate_dims": {
+   "status": "PASS",
+   "detail": {
+    "num_col": 1565533,
+    "num_row": 3839021,
+    "nnz": 7868836,
+    "row_senses": {
+     "=": 957226,
+     ">": 1442526,
+     "<": 1439269,
+     "free_columns": 1550931
+    },
+    "source_array_bytes": 205947432
+   },
+   "seconds": 0.15
+  },
+  "T07_main_restriction_bitwise": {
+   "status": "PASS",
+   "detail": "bitwise restriction on 20000 sampled columns + all cost/bounds",
+   "seconds": 0.34
+  },
+  "T08_load_and_exact_readback_fake_backend": {
+   "status": "PASS",
+   "detail": {
+    "status": "EXACT_READBACK_PASS",
+    "basis_required": false
+   },
+   "seconds": 0.79
+  },
+  "T09_parameter_gate": {
+   "status": "PASS",
+   "detail": {
+    "authorized": [
+     {
+      "parameter": "Crossover",
+      "C06": 0,
+      "C09": -1,
+      "classification": "AUTHORIZED_CROSSOVER_AS_C07B"
+     }
+    ],
+    "rejects_extra_change": [
+     "NumericFocus"
+    ],
+    "rejects_missing_crossover": [
+     "Crossover"
+    ]
+   },
+   "seconds": 0.0
+  },
+  "T10_merge_plus_unchanged_V4_dryrun": {
+   "status": "PASS",
+   "detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 3353,
+    "dual_sign_fail_count": 0,
+    "relative_gap": 2.71643137673048e-07,
+    "independent_kkt_pass": false
+   },
+   "seconds": 3.44
+  }
+ },
+ "solver_calls": 0,
+ "note": "run in Claude cloud workspace on SHA-verified read-only copies of the frozen C03 CSC"
+}
