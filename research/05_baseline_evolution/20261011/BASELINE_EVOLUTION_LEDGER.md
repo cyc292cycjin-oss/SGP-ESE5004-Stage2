@@ -328,3 +328,16 @@
 - 未改变Scheme A/C01R/V3/V4/日LP/参数/旧解/消费标记；未操作实例电源或云端进程，G6-05持续PAUSED_BY_USER，2920时段及正式情景未授权。交付后停止。
 
 - C04首个审计里程碑已提交并核实远端：`662d1de6037f4f8615eff61219e65ea3062fbcf6`；[独立PR #14](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/14)，基于PR #13交付分支，未合并。最终交付提交与ZIP身份见独立交付回执及包内清单。
+
+
+## C-05 单因素Aggregate=0真实诊断终态（2026-10-12）
+
+**C05_NUMERIC_NO_SOLUTION_NOT_ACCEPTED；云端及本地保全完成。** 此项为用户后续明确授权，C04提议时的未授权状态与旧结果原件保留。
+
+- 独立Run `c05_aggregate0_daily122_20261012T074925Z_a39647d9`；生产commit `d6c48dbd95d12f0354561372e9a65d6e92511754` 已push。复用C03现成日CSC，2,450,005列/6,042,238行/11,403,496非零；17,369输入SHA通过，构建0、CSR→CSC转换0。WLS原生启动和同模型完整EXACT_READBACK_PASS通过。
+- 154项实际数值参数只有Aggregate 1→0；TimeLimit3600、SoftMemLimit65GB、MemLimit1e100不变。唯一调用返回码0、Status12 NUMERIC、SolCount0、24Barrier、81.595145秒。无重试；不是数学不可行/无界证明。
+- 无合法完整X/Pi/RC；真实状态/质量属性/日志已先保存。日V4、377/111模式、4304 stationarity及365自由RC变化均NOT_AVAILABLE，不记零、不伪造PASS。没有新NetCDF解或合格双账成本。
+- 固定总7200秒未延长；实际至封存guard退出96.067秒。RSS采样3.444138GiB，cgroup lifetime peak6.249012GiB，保护无触发，所有本次进程退出；122实例仍运行/计费。
+- 云端新增32项封存；新独立60分钟窗口传输6.526404秒。394,606字节新归档SHA `4b78d58396be73378ede9589a3bf3db56ad671a9643d82d50da7dd7b1e1bac63`，大小/SHA/CRC/安全路径/逐项BACKUP_INDEX核验通过，LOCAL_BACKUP_SHA_VERIFIED。旧17,369项输入按不可变引用复用；历史LOCAL_SYNC_PENDING不覆盖。
+- 报告、参数差异、完整条件验收状态和方法见 `research/05_baseline_evolution/20261011/c05/`。独立分支codex/c05-aggregate0-daily-20261012，关联PR #13/#14；真实结果commit/PR及同轮C05_AGGREGATE0_DAILY_DIAGNOSTIC_REVIEW.zip由发布回执记录。
+- 科学结果NOT_ACCEPTED；不能进入2920/Integrated/Disconnected/DEC。G6-05保持PAUSED_BY_USER。用户本次唯一优化授权已消费；不自动改变第二个参数或再求解。交付后停止。
