@@ -1,0 +1,19 @@
+{
+  "status": "PROPOSED_NOT_APPLIED",
+  "candidate_count": 1,
+  "id": "EXACT_NONNEGATIVE_TWO_TERM_DAILY_DEMAND",
+  "scope": {
+    "varying_Loads": 96,
+    "daily_cells": 35040,
+    "inexact_cells_requiring_remainder": 31542,
+    "annual_drift_Loads": 95,
+    "annual_exact_varying_Loads": 1,
+    "maximum_significant_bits": 57,
+    "source_MW_min": 24.829192545449292,
+    "source_MW_max": 37475.48025016492
+  },
+  "construction": "For exact m=N/2^k>=0 in lowest dyadic form, p=bit_length(N). If p<=53 use m. Else q=p-53, H=floor(N/2^q)*2^(q-k), L=(N mod 2^q)*2^-k. m=H+L exactly, H,L>=0. For actual p<=57, L has at most 4 significant bits.",
+  "projection_proof": "Keep separate native constants: impose v=L with fixed bounds and S-v=H (S is physical net supply). Eliminating v gives S=H+L=m. Weighted annual sum 24*sum(m)=3*sum(original P). All source Q and physical demands unchanged.",
+  "warning": "Ordinary two PyPSA Load entries sharing a Bus are insufficient: float64 groupby may collapse H+L back to rounded m. Future implementation must retain separate terms through CSC/native readback and acceptance/export mapping. This changes numerical representation and requires explicit approval; no production/model implementation in C01.",
+  "not_guaranteed": "Numerical enforcement, presolve behavior, solver convergence or V4 PASS not demonstrated. No new supply/negative correction Load/slack is permitted."
+}

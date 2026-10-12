@@ -101,3 +101,23 @@
 - 分支`audit/stage2-b03-c00-daily-protocol-20261012`；独立[PR #8](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/8)为OPEN/DRAFT，base为已接受B01/B02分支；未合并任何PR。
 - B01/B02远端仍`14baa96de5778ab487cbe9017d660825dc0a9a62`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有对科学源码/方案A或旧结果追加修改。
 - 最终提交与ZIP SHA/CRC由PACKAGE_MANIFEST及本地B03_C00_FINAL_DELIVERY_RECEIPT.json记录。设计完成不等于实际测试获准；日构模/求解尚未执行，G6-05继续暂停。交付后停止，等待联合审阅。
+
+
+## C-01日聚合表示预检（2026-10-12）
+
+从已核C-00提交`5d757c5a4a9dad965d9c7cbe6e55d486d167ff93`建立独立`audit/stage2-c01-daily-representation-20261012`。**C01_REPRESENTATION_DECISION_REQUIRED**，不是日模型构建/优化授权。
+
+- VERIFIED：冻结NetCDF只有3类非空动态属性（1737 Load、460 CF、40 inflow），2920×3h完整日历；源NPZ/各实际Load SHA与Scheme A引用吻合，无实际NaN/Inf/负值或缺桶。161既存零源列保持原状。
+- EXACT：Load1642条年度相等，52正漂移、43负漂移；95条均时变电Load；最大绝对差159/137438953472≈1.1568772606551647e-9 MWh。31542个日Load均值不可单字精确表示，不能用isclose放行。
+- VERIFIED：460 CF和40入流的全部序列化误差均在半ULP累计表示界；6条CF的44个原值1+1ULP未裁剪。385生物质组年度精确不变且D≤Q′，807 Q不改不重新派生。
+- PROPOSED_NOT_APPLIED：仅提出一个非负双字常数表示方案，数学上保留每日精确均值及科学年度量；31542格可能需固定数值辅助项，必须保留至CSC/验收，普通同Bus拆Load再浮点求和不足。等待用户批准，不实施。
+- 独立16类轻量证据检查及2237代表桶整数舍入复核通过；未重复旧LP审计、未构模/求解、未操作AutoDL。G6-05继续PAUSED_BY_USER，C执行门槛保持NO-GO直到表示决策；D—F未启动。
+- 报告与证据目录`research/05_baseline_evolution/20261011/c01`；同轮commit/push/独立PR和强制C01_DAILY_REPRESENTATION_REVIEW.zip，最终发布记录给出真实SHA/CRC。交付后停止。
+
+
+### C-01真实发布里程碑
+
+- 实际聚合、轻量独立验证及报告提交`0a93200588fd193a727e5939acea199a154821de`已commit并push。
+- 分支`audit/stage2-c01-daily-representation-20261012`；[PR #9](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/9)为OPEN/DRAFT，base为已审阅C-00分支，未合并。
+- 原C-00远端仍`5d757c5a4a9dad965d9c7cbe6e55d486d167ff93`，Scheme A仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有改写原始输入、旧结果或消费标记。
+- 最终commit、C01_DAILY_REPRESENTATION_REVIEW.zip大小/SHA/CRC由包内清单及本地C01_FINAL_DELIVERY_RECEIPT.json记录。C01_REPRESENTATION_DECISION_REQUIRED，日构模/求解仍NO-GO，唯一候选未实施。交付后停止，等待联合验收。
