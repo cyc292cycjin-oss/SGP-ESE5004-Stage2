@@ -282,3 +282,13 @@
 - 分支 `codex/c02-controlled-daily-build-20261012`；独立 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12) 为OPEN/DRAFT，base为已核C01R分支；未合并main或任何历史PR。
 - C02_BLOCKED_WITH_SPECIFIC_EVIDENCE：新网络回读通过，完整LP导出和日V4绑定未完成；没有重试或求解。失败版本和实例均保持，G6-05暂停，C03未授权。
 - 同轮审阅ZIP包含报告/最新台账/轻量证据/代码及成员SHA、大小与CRC记录；最终提交和ZIP整体SHA由本地 `C02_FINAL_DELIVERY_RECEIPT.json` 记录。用户上传ChatGPT联合审阅后再决定修复及新窗口。
+
+
+## C-02R最小检查器修复准备（2026-10-12）
+
+- C02R_CHECKER_PATCH_READY_FOR_REVIEW：只在c02r/candidate创建新SHA版本；原C02失败代码/Run/消费标记/部分产物不变。本轮无云端连接、无网络/LP构建、无solver。
+- Store动态/库存界、最终Bus RHS及对应导出行界采用零容差精确语义比较；±0相等，非零1 ULP、NaN/Inf异常、shape/方向/界错误拒绝。原bits函数与11个保留位检查不变；Scheme A/C01R/V3/V4/成本不改。
+- 34项独立小型与候选循环接线测试通过；仅NumPy/pandas/xarray替身，没有PyPSA/Linopy对象。失败记录完整资产/家族/行号/hex且不覆盖。
+- 另有确定的既有counts[fam]>0覆盖断言，会拒绝3个已核+Inf上界的零行家族；不属本轮±0修复，未擅改。新完整构建仍需明确处置此阻断和取得独立C02R运行授权。
+- 优先复用封存日NetCDF的方案仅记录未执行。C02整体仍BLOCKED，完整矩阵/目标offset/日V4绑定未完成；C03未授权，G6-05保持PAUSED_BY_USER。
+- 继续独立codex/c02-controlled-daily-build-20261012分支和PR #12，不改main/旧PR；本轮真实commit和ZIP身份由发布回执记录。

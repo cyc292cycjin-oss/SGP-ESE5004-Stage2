@@ -17,3 +17,10 @@
 | 科学PASS/下一研究阶段 | NOT_ESTABLISHED | 未求解，不进入Gate6或其他实验 |
 
 当前实际报告：[C02_BUILD_AND_STATIC_ACCEPTANCE.md](../c02/C02_BUILD_AND_STATIC_ACCEPTANCE.md)。旧清单逐字保留于[c02/history](../c02/history/C00_GO_NO_GO_CHECKLIST_PRE_C02.md)。协议与原V4阈值没有修改。不能自动重建或启动C03；G6-05继续PAUSED_BY_USER。
+
+
+## C02R候选检查器（仅本地准备）
+
+34项小型测试通过，±0仅在有限约束语义中视为相等，所有输入和回读位身份保留。新候选代码与诊断格式见[c02r审阅报告](../c02r/C02R_MINIMAL_CHECKER_REPAIR_REVIEW.md)。未运行或部署。
+
+新build-only仍NO-GO：未获新的运行授权；另有counts[fam]>0拒绝三类已核零行上界的明确覆盖断言，未在本轮越界修复。后续仅需处置该具体工程阻断和单次新窗口授权；科学模型、阈值、参数不变。C03仍未授权，G6-05暂停。
