@@ -118,3 +118,11 @@ C12/C13/C20/C21的此前精确可行性未知项已取得直接证据：完整CS
 | A06-S01 | Scheme A最小180Q变化 | USER_APPROVED/STATIC_ACCEPTED | 源配方未组装，不能称新LP已可行 |
 
 通过项、未知项及进入B前证据按[A06决策登记](a06/A06_SCIENTIFIC_ASSUMPTION_DECISION_REGISTER.md)；[成本可比性](a06/A06_COST_COMPARABILITY_ASSESSMENT.md)仍NOT_ESTABLISHED。17项新增轻量核验PASS，未修改科学模型或开展B—F。
+
+## B-01/B-02必要条件补充（2026-10-12；不新增模型变更）
+
+本轮直接取PR #4固定Scheme A源对象与旧NetCDF结构分别核对。180个Q最小修订后的385组D≤Q′全部通过，但新LP未组装；原模型/源变更分类不因此被改写。当前1737个Load均有已核本地供给路径，非电跨境关闭没有发现全路径断路；400无有限上限的有价外部供给仍是科学边界，不代表现实资源潜力。
+
+当前100 captured-CO₂ Bus仅SMR CC/FT两端，无永久封存或丢弃；实际多端口强制f≈0.8674787475s，额外需H₂、电力且受油消纳限制。这是既有物理结构的解析后果，不是新增约束。不能因为技术有联动限制就认定旧10.24TWh违规或P2 INF_OR_UNBD已找到原因。
+
+报告、15项轻量核验及风险登记在[b01_b02/](b01_b02/B_PHYSICAL_FEASIBILITY_RISK_REGISTER.md)。不恢复通用上游共享资源、2050线路、地质库或跨境能源；A06全部科学UNKNOWN保留，G6-05暂停。

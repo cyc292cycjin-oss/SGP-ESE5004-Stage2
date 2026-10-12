@@ -1,0 +1,1744 @@
+{
+  "scripts_project/build_research_assets.py": {
+    "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+    "sha256": "8ccc2d692b38484cb8e7b8c4157ec2029c28687a9470507a840fb71c89b1df94",
+    "excerpts": [
+      {
+        "match": "def build_fragment",
+        "line_1_based": 171,
+        "excerpt": [
+          {
+            "line": 169,
+            "text": "    save(output/'ELECTRIC_BASE_ASSET_MANIFEST.json',manifest);return n,manifest"
+          },
+          {
+            "line": 170,
+            "text": ""
+          },
+          {
+            "line": 171,
+            "text": "def build_fragment(repo,base,costs,allocation,output,price_layer=None):"
+          },
+          {
+            "line": 172,
+            "text": "    c=pd.read_csv(costs,index_col=0)"
+          },
+          {
+            "line": 173,
+            "text": "    layer=None"
+          },
+          {
+            "line": 174,
+            "text": "    if price_layer:"
+          },
+          {
+            "line": 175,
+            "text": "        from price_basis import load_table"
+          },
+          {
+            "line": 176,
+            "text": "        c,layer=load_table(price_layer,2050,costs)"
+          },
+          {
+            "line": 177,
+            "text": "    source=sha(costs);geo=base.buses[base.buses.carrier.isin(['AC','DC'])];f=Fragment()"
+          },
+          {
+            "line": 178,
+            "text": "    f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')"
+          },
+          {
+            "line": 179,
+            "text": "    for node,z in geo.iterrows():"
+          },
+          {
+            "line": 180,
+            "text": "        f.bus(node,z.carrier,z.country,node)"
+          },
+          {
+            "line": 181,
+            "text": "        for fuel in ['gas','oil','coal','lignite','H2','co2 captured']:f.bus(bus_name(node,fuel),fuel,z.country,node)"
+          },
+          {
+            "line": 182,
+            "text": "    carbon=list(base.meta.get('existing_carbon_components',[]));pending=[];routes={};dest={};allow=[]"
+          },
+          {
+            "line": 183,
+            "text": "    def event(key,sector,factor,policy,accepted=True):"
+          },
+          {
+            "line": 184,
+            "text": "        r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,PhysicalReportingQualified=True,PolicyAttributionQualified=accepted,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'POLICY_ATTRIBUTION_PENDING'))"
+          },
+          {
+            "line": 185,
+            "text": "    for node,z in geo.iterrows():"
+          },
+          {
+            "line": 186,
+            "text": "        country=z.country"
+          },
+          {
+            "line": 187,
+            "text": "        for fuel in ['gas','oil','coal','lignite']:"
+          },
+          {
+            "line": 188,
+            "text": "            external_import(f,node,fuel,'frozen-price:'+fuel,dict(price=float(c.at[fuel,'fuel']),price_unit='EUR/MWh_fuel',source_sha256=source,source_year=2050,basis='Frozen prepared cost fuel basis; no additional currency conversion',capacity_mw=None,annual_cap_mwh=None,unlimited_annual_accepted=True,unlimited_capacity_accepted=True),accepted=True)"
+          }
+        ]
+      },
+      {
+        "match": "for powertech",
+        "line_1_based": 207,
+        "excerpt": [
+          {
+            "line": 205,
+            "text": "        allow.append('fuel_cell')"
+          },
+          {
+            "line": 206,
+            "text": "        link('FT','Fischer-Tropsch',[h,oil,co2,node],[c.at['Fischer-Tropsch','efficiency'],-c.at['oil','CO2 intensity']*c.at['Fischer-Tropsch','efficiency'],-c.at['Fischer-Tropsch','electricity-input']/c.at['Fischer-Tropsch','hydrogen-input']],'Fischer-Tropsch',c.at['Fischer-Tropsch','efficiency']);allow+=['FT','steam_methane_reforming']"
+          },
+          {
+            "line": 207,
+            "text": "        for powertech in ['OCGT','CCGT']:"
+          },
+          {
+            "line": 208,
+            "text": "            eff=float(c.at[powertech,'efficiency']);factor=float(c.at['gas','CO2 intensity'])"
+          },
+          {
+            "line": 209,
+            "text": "            k=link(powertech,powertech,[gas,node,atmo],[eff,factor],powertech,eff)"
+          },
+          {
+            "line": 210,
+            "text": "            f.components[k]['params']['marginal_cost']=float(c.at[powertech,'VOM'])*eff"
+          },
+          {
+            "line": 211,
+            "text": "            event(k,'Power',factor,1.)"
+          },
+          {
+            "line": 212,
+            "text": "        tech='hydrogen storage tank type 1 including compressor'"
+          },
+          {
+            "line": 213,
+            "text": "        f.add('Store',node+' H2 tank',country,'H2',inputs=[h],outputs=[h],role='STORAGE',params=dict(e_nom_extendable=True,e_cyclic=True,capital_cost=float(c.at[tech,'fixed']),build_year=2050,lifetime=float(c.at[tech,'lifetime'])),accepted=True,source=source)"
+          },
+          {
+            "line": 214,
+            "text": "    # Bind qualified obligation interfaces to source commodity identities; no Load"
+          },
+          {
+            "line": 215,
+            "text": "    # is created here, and incomplete obligations are never converted to zero."
+          },
+          {
+            "line": 216,
+            "text": "    registry=json.loads((repo/'research_inputs/assembly_v1/registry.json').read_text());records={r['InputID']:r for r in registry['records']}"
+          },
+          {
+            "line": 217,
+            "text": "    reconstruction=json.loads((repo/'research_inputs/assembly_v1/sources/BASE_RECONSTRUCTION.json').read_text())"
+          },
+          {
+            "line": 218,
+            "text": "    am=json.loads((allocation/'allocation_manifest.json').read_text());arrays=np.load(allocation/am['arrays_file'],allow_pickle=False)"
+          },
+          {
+            "line": 219,
+            "text": "    if am['input_registry_sha256']!=sha(repo/'research_inputs/assembly_v1/registry.json'):raise ValueError('Allocation belongs to old registry')"
+          },
+          {
+            "line": 220,
+            "text": "    for ar in am['records']:"
+          },
+          {
+            "line": 221,
+            "text": "        r=records[ar['InputID']];sector='Buildings' if r['Account'] in ['ResidentialFuel','ServicesFuel'] else 'Industry' if r['Account']=='IndustryFinalEnergy' else 'Agriculture' if r['Account']=='AgricultureFinalEnergy' else r['Account'].replace('Bunker','').replace('Fuel','') if 'Shipping' in r['Account'] or 'Aviation' in r['Account'] else 'Transport'"
+          },
+          {
+            "line": 222,
+            "text": "        if r['Account']=='OtherNEC':sector='OtherNEC'"
+          },
+          {
+            "line": 223,
+            "text": "        elif r['Account']=='TransportNEC':sector='TransportNEC'"
+          },
+          {
+            "line": 224,
+            "text": "        elif r['Account']=='RailNonElectric':sector='RailNonElectric'"
+          }
+        ]
+      },
+      {
+        "match": "elif fuel",
+        "line_1_based": 236,
+        "excerpt": [
+          {
+            "line": 234,
+            "text": "                factor=float(c.at[fuel,'CO2 intensity']);pars=dict(bus_order=[bus_name(node,fuel),final,'ReportingCO2 atmosphere'],efficiency=1.,efficiency2=factor,p_nom_extendable=True,p_min_pu=0.)"
+          },
+          {
+            "line": 235,
+            "text": "                k=f.add('Link',key+' final-fuel meter',r['Country'],fuel+' final-energy accounting',inputs=[bus_name(node,fuel)],outputs=[final,'ReportingCO2 atmosphere'],role='FUEL_CARBON_METER',params=pars,accepted=True,source=source);event(k,sector,factor,0.)"
+          },
+          {
+            "line": 236,
+            "text": "            elif fuel=='biomass':"
+          },
+          {
+            "line": 237,
+            "text": "                raw=[z for z in reconstruction['selected_rows'] if z['Country']==r['Country'] and z['Account']==r['Account'] and z['Carrier']=='biomass']"
+          },
+          {
+            "line": 238,
+            "text": "                total=sum(float(z['MWh']) for z in raw)"
+          },
+          {
+            "line": 239,
+            "text": "                if total<=0:raise ValueError('Missing positive commodity composition')"
+          },
+          {
+            "line": 240,
+            "text": "                for zraw in raw:"
+          },
+          {
+            "line": 241,
+            "text": "                    commodity=zraw['Commodity'];val=annual*float(zraw['MWh'])/total;resource=key+' :: '+commodity"
+          },
+          {
+            "line": 242,
+            "text": "                    f.bus(resource,commodity,r['Country'],node)"
+          },
+          {
+            "line": 243,
+            "text": "                    store=key+' '+commodity+' fixed resource'"
+          },
+          {
+            "line": 244,
+            "text": "                    # No unsupported fossil-neutrality/CO2 factor or commodity"
+          },
+          {
+            "line": 245,
+            "text": "                    # cost is silently borrowed from the solid-biomass pool."
+          },
+          {
+            "line": 246,
+            "text": "                    f.add('Store',store,r['Country'],commodity,outputs=[resource],role='FINITE_RESOURCE',params=dict(e_nom=val,e_initial=val,e_cyclic=False,p_min_pu=0.),accepted=True,source=zraw['RowID'])"
+          },
+          {
+            "line": 247,
+            "text": "                    f.add('Link',key+' '+commodity+' final-energy meter',r['Country'],commodity+' obligation metering',inputs=[resource],outputs=[final],role='FUEL_CARBON_METER',params=dict(efficiency=1.,p_nom_extendable=True,p_min_pu=0.),accepted=True,source=zraw['RowID'])"
+          },
+          {
+            "line": 248,
+            "text": "                    routes[store]=dict(buses=[final],commodity=commodity,source_row=zraw['RowID'],annual_cap_mwh=val,input_id=r['InputID'])"
+          },
+          {
+            "line": 249,
+            "text": "                    pending.append(dict(component=store,commodity=commodity,reason='Commodity-specific supply-cost and carbon-origin/physical-factor qualification pending; developer asset cannot supply extra power/H2'))"
+          },
+          {
+            "line": 250,
+            "text": "            else:raise ValueError('Unmapped qualified fuel '+fuel)"
+          },
+          {
+            "line": 251,
+            "text": "    arrays.close()"
+          },
+          {
+            "line": 252,
+            "text": "    raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=[],external_fixed_account_method='ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS',fixed_account_validation_required_after_binding=True,policy_qualification_blockers=['Mixed-use SMR/CC policy attribution pending'],policy_enabled=False)"
+          },
+          {
+            "line": 253,
+            "text": "    from fixed_account_scope import load_scope"
+          }
+        ]
+      },
+      {
+        "match": "fixed resource",
+        "line_1_based": 243,
+        "excerpt": [
+          {
+            "line": 241,
+            "text": "                    commodity=zraw['Commodity'];val=annual*float(zraw['MWh'])/total;resource=key+' :: '+commodity"
+          },
+          {
+            "line": 242,
+            "text": "                    f.bus(resource,commodity,r['Country'],node)"
+          },
+          {
+            "line": 243,
+            "text": "                    store=key+' '+commodity+' fixed resource'"
+          },
+          {
+            "line": 244,
+            "text": "                    # No unsupported fossil-neutrality/CO2 factor or commodity"
+          },
+          {
+            "line": 245,
+            "text": "                    # cost is silently borrowed from the solid-biomass pool."
+          },
+          {
+            "line": 246,
+            "text": "                    f.add('Store',store,r['Country'],commodity,outputs=[resource],role='FINITE_RESOURCE',params=dict(e_nom=val,e_initial=val,e_cyclic=False,p_min_pu=0.),accepted=True,source=zraw['RowID'])"
+          },
+          {
+            "line": 247,
+            "text": "                    f.add('Link',key+' '+commodity+' final-energy meter',r['Country'],commodity+' obligation metering',inputs=[resource],outputs=[final],role='FUEL_CARBON_METER',params=dict(efficiency=1.,p_nom_extendable=True,p_min_pu=0.),accepted=True,source=zraw['RowID'])"
+          },
+          {
+            "line": 248,
+            "text": "                    routes[store]=dict(buses=[final],commodity=commodity,source_row=zraw['RowID'],annual_cap_mwh=val,input_id=r['InputID'])"
+          },
+          {
+            "line": 249,
+            "text": "                    pending.append(dict(component=store,commodity=commodity,reason='Commodity-specific supply-cost and carbon-origin/physical-factor qualification pending; developer asset cannot supply extra power/H2'))"
+          },
+          {
+            "line": 250,
+            "text": "            else:raise ValueError('Unmapped qualified fuel '+fuel)"
+          },
+          {
+            "line": 251,
+            "text": "    arrays.close()"
+          },
+          {
+            "line": 252,
+            "text": "    raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=[],external_fixed_account_method='ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS',fixed_account_validation_required_after_binding=True,policy_qualification_blockers=['Mixed-use SMR/CC policy attribution pending'],policy_enabled=False)"
+          },
+          {
+            "line": 253,
+            "text": "    from fixed_account_scope import load_scope"
+          },
+          {
+            "line": 254,
+            "text": "    raw['additional_fixed_account_scope']=load_scope(repo)"
+          },
+          {
+            "line": 255,
+            "text": "    save(output/'carrier_fragment.json',raw);save(output/'demand_destinations.json',dest);save(output/'carbon_component_map.json',carbon)"
+          },
+          {
+            "line": 256,
+            "text": "    n=to_pypsa_fragment(f,list(base.snapshots),list(base.snapshot_weightings.generators),component_ids=list(f.components))"
+          },
+          {
+            "line": 257,
+            "text": "    n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))"
+          },
+          {
+            "line": 258,
+            "text": "    # Materialise ONLY qualified actual arrays in this development fragment."
+          },
+          {
+            "line": 259,
+            "text": "    # carrier_fragment.json remains an unbound production recipe; the full"
+          },
+          {
+            "line": 260,
+            "text": "    # assembler consumes that recipe and binds once after all gates pass."
+          }
+        ]
+      }
+    ]
+  },
+  "scripts_project/carrier_architecture.py": {
+    "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+    "sha256": "d0a5167da4d3861806034c89caaa68b6897b3b01f11e3988f12cff0acec686af",
+    "excerpts": [
+      {
+        "match": "def add_external_annual_caps",
+        "line_1_based": 280,
+        "excerpt": [
+          {
+            "line": 278,
+            "text": ""
+          },
+          {
+            "line": 279,
+            "text": ""
+          },
+          {
+            "line": 280,
+            "text": "def add_external_annual_caps(n):"
+          },
+          {
+            "line": 281,
+            "text": "    \"\"\"Attach explicit accepted availability to an already-created model; no solve.\"\"\""
+          },
+          {
+            "line": 282,
+            "text": "    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')"
+          },
+          {
+            "line": 283,
+            "text": "    import xarray as xr"
+          },
+          {
+            "line": 284,
+            "text": "    w=xr.DataArray(n.snapshot_weightings.generators,coords={'snapshot':n.snapshots},dims='snapshot')"
+          },
+          {
+            "line": 285,
+            "text": "    for name,cap in n.meta.get('external_annual_caps',{}).items():"
+          },
+          {
+            "line": 286,
+            "text": "        n.model.add_constraints((n.model['Generator-p'].sel(Generator=name)*w).sum()<=finite(cap),name='ResearchImportAnnual-'+name)"
+          },
+          {
+            "line": 287,
+            "text": ""
+          },
+          {
+            "line": 288,
+            "text": ""
+          },
+          {
+            "line": 289,
+            "text": "def add_storage_direction_constraints(n):"
+          },
+          {
+            "line": 290,
+            "text": "    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')"
+          },
+          {
+            "line": 291,
+            "text": "    for name,rule in n.meta.get('store_power_rules',{}).items():"
+          },
+          {
+            "line": 292,
+            "text": "        flow=n.model['Store-p'].sel(Store=name)"
+          },
+          {
+            "line": 293,
+            "text": "        if rule=='charge_only':n.model.add_constraints(flow<=0,name='ResearchStoreDirection-'+name)"
+          },
+          {
+            "line": 294,
+            "text": "        elif rule=='discharge_only':n.model.add_constraints(flow>=0,name='ResearchStoreDirection-'+name)"
+          },
+          {
+            "line": 295,
+            "text": "        else:raise ValueError('Unknown storage direction')"
+          },
+          {
+            "line": 296,
+            "text": ""
+          },
+          {
+            "line": 297,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "match": "def add_storage_direction_constraints",
+        "line_1_based": 289,
+        "excerpt": [
+          {
+            "line": 287,
+            "text": ""
+          },
+          {
+            "line": 288,
+            "text": ""
+          },
+          {
+            "line": 289,
+            "text": "def add_storage_direction_constraints(n):"
+          },
+          {
+            "line": 290,
+            "text": "    if getattr(n,'model',None) is None:raise ValueError('Model variables not constructed')"
+          },
+          {
+            "line": 291,
+            "text": "    for name,rule in n.meta.get('store_power_rules',{}).items():"
+          },
+          {
+            "line": 292,
+            "text": "        flow=n.model['Store-p'].sel(Store=name)"
+          },
+          {
+            "line": 293,
+            "text": "        if rule=='charge_only':n.model.add_constraints(flow<=0,name='ResearchStoreDirection-'+name)"
+          },
+          {
+            "line": 294,
+            "text": "        elif rule=='discharge_only':n.model.add_constraints(flow>=0,name='ResearchStoreDirection-'+name)"
+          },
+          {
+            "line": 295,
+            "text": "        else:raise ValueError('Unknown storage direction')"
+          },
+          {
+            "line": 296,
+            "text": ""
+          },
+          {
+            "line": 297,
+            "text": ""
+          },
+          {
+            "line": 298,
+            "text": "def install_fragment_constraints(n):"
+          },
+          {
+            "line": 299,
+            "text": "    \"\"\"Required post-variable hook; availability and irreversible inventories.\"\"\""
+          },
+          {
+            "line": 300,
+            "text": "    if n.meta.get('atmosphere_role') and not n.snapshot_weightings.stores.equals(n.snapshot_weightings.generators):"
+          },
+          {
+            "line": 301,
+            "text": "        raise ValueError('Carbon inventory and physical emissions weights differ')"
+          },
+          {
+            "line": 302,
+            "text": "    add_external_annual_caps(n)"
+          },
+          {
+            "line": 303,
+            "text": "    add_storage_direction_constraints(n)"
+          }
+        ]
+      },
+      {
+        "match": "ReportingCO2 atmosphere inventory",
+        "line_1_based": 242,
+        "excerpt": [
+          {
+            "line": 240,
+            "text": "        # Relative atmospheric inventory only: unrestricted reporting balance,"
+          },
+          {
+            "line": 241,
+            "text": "        # coefficient zero prevents aggregate primary-energy policy leakage."
+          },
+          {
+            "line": 242,
+            "text": "        n.add('Store','ReportingCO2 atmosphere inventory',bus='ReportingCO2 atmosphere',"
+          },
+          {
+            "line": 243,
+            "text": "              carrier='co2 atmosphere',e_nom_extendable=True,e_min_pu=-1,e_initial=0.,e_cyclic=False)"
+          },
+          {
+            "line": 244,
+            "text": "        n.meta['atmosphere_role']='ALLOWED_ACCOUNTING_GLOBAL'"
+          },
+          {
+            "line": 245,
+            "text": "    for r in selected:"
+          },
+          {
+            "line": 246,
+            "text": "        params=deepcopy(r['params']);cap=params.pop('annual_cap_mwh',None);params.pop('market_id',None)"
+          },
+          {
+            "line": 247,
+            "text": "        if r['type']=='Generator':"
+          },
+          {
+            "line": 248,
+            "text": "            n.add('Generator',r['name'],bus=r['outputs'][0],carrier=r['carrier'],**params)"
+          },
+          {
+            "line": 249,
+            "text": "            if cap is not None:n.meta['external_annual_caps'][r['name']]=cap"
+          },
+          {
+            "line": 250,
+            "text": "        elif r['type']=='Store':"
+          },
+          {
+            "line": 251,
+            "text": "            # PyPSA 0.30.3 Store has no p_min_pu/p_max_pu attributes. Preserve"
+          },
+          {
+            "line": 252,
+            "text": "            # their physical intent with explicit Store-p constraints below."
+          },
+          {
+            "line": 253,
+            "text": "            params.pop('p_min_pu',None);params.pop('p_max_pu',None)"
+          },
+          {
+            "line": 254,
+            "text": "            n.add('Store',r['name'],bus=(r['inputs'] or r['outputs'])[0],carrier=r['carrier'],**params)"
+          },
+          {
+            "line": 255,
+            "text": "            if r['role']=='PERMANENT_STORAGE':n.meta['store_power_rules'][r['name']]='charge_only'"
+          },
+          {
+            "line": 256,
+            "text": "            elif r['role']=='FINITE_RESOURCE':n.meta['store_power_rules'][r['name']]='discharge_only'"
+          },
+          {
+            "line": 257,
+            "text": "        elif r['type']=='Link':"
+          },
+          {
+            "line": 258,
+            "text": "            # The topology graph represents directed conversions. A negative"
+          },
+          {
+            "line": 259,
+            "text": "            # dispatch bound would create an unaudited reverse physical path."
+          }
+        ]
+      }
+    ]
+  },
+  "scripts_project/integrate_surviving_assets.py": {
+    "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+    "sha256": "706ee0f124a8156eaccbd0e5465cbec6c6421ecce6debdb961f299205d1c074d",
+    "excerpts": [
+      {
+        "match": "envelopes[key]",
+        "line_1_based": 108,
+        "excerpt": [
+          {
+            "line": 106,
+            "text": "            candidate_bus=df.at[name,'bus'] if typ in ['Generator','StorageUnit'] else df.at[name,'bus1']"
+          },
+          {
+            "line": 107,
+            "text": "            if any(q['node']!=candidate_bus for q in plans if q['group']==key):raise ValueError('Resource envelope crosses research node')"
+          },
+          {
+            "line": 108,
+            "text": "        envelopes[key]=dict(meaning=g['Meaning'],source_limit_mw=g['LimitMW'],existing_mw=amount,new_build_limit_mw=remaining,candidates=candidates,source=g['Source'])"
+          },
+          {
+            "line": 109,
+            "text": "    if len({(c['ComponentType'],c['Name']) for e in envelopes.values() for c in e['candidates']})!=sum(len(e['candidates']) for e in envelopes.values()):raise ValueError('Candidate assigned to multiple resource groups')"
+          },
+          {
+            "line": 110,
+            "text": "    # Aggregate only after screening: same node, technology, source-qualified"
+          },
+          {
+            "line": 111,
+            "text": "    # performance/profile contract and resource envelope. Never average ages to"
+          },
+          {
+            "line": 112,
+            "text": "    # decide survival. Different qualified performance classes stay distinct."
+          },
+          {
+            "line": 113,
+            "text": "    aggregate=defaultdict(list)"
+          },
+          {
+            "line": 114,
+            "text": "    for q in plans:"
+          },
+          {
+            "line": 115,
+            "text": "        static={k:v for k,v in q['performance'].items() if k!='Profiles'}"
+          },
+          {
+            "line": 116,
+            "text": "        key=json.dumps([q['node'],q['record']['Technology'],static,q['group']],sort_keys=True)"
+          },
+          {
+            "line": 117,
+            "text": "        aggregate[key].append(q)"
+          },
+          {
+            "line": 118,
+            "text": "    combined=[]"
+          },
+          {
+            "line": 119,
+            "text": "    for key,members in aggregate.items():"
+          },
+          {
+            "line": 120,
+            "text": "        q=dict(members[0]);q['members']=[x['record'] for x in members];q['member_plans']=members;q['capacity']=sum(x['capacity'] for x in members)"
+          },
+          {
+            "line": 121,
+            "text": "        q['group_name']='existing_survivor::'+q['record']['AssetID'] if len(members)==1 else 'existing_survivor::'+q['node']+'::'+q['record']['Technology']+'::'+hashlib.sha256(key.encode()).hexdigest()[:12]"
+          },
+          {
+            "line": 122,
+            "text": "        combined.append(q)"
+          },
+          {
+            "line": 123,
+            "text": "    # Materialise only after all accepted plans and shared resource envelopes pass."
+          },
+          {
+            "line": 124,
+            "text": "    identity={};carbon=[];fom_total=0.;used_absolute=set()"
+          },
+          {
+            "line": 125,
+            "text": "    for q in combined:"
+          }
+        ]
+      },
+      {
+        "match": "existing_resource_groups",
+        "line_1_based": 160,
+        "excerpt": [
+          {
+            "line": 158,
+            "text": "    for e in envelopes.values():"
+          },
+          {
+            "line": 159,
+            "text": "        for c in e['candidates']:n.df(c['ComponentType']).loc[c['Name'],'p_nom_max']=min(float(n.df(c['ComponentType']).at[c['Name'],'p_nom_max']),e['new_build_limit_mw']/c['CapacityToMW'])"
+          },
+          {
+            "line": 160,
+            "text": "    n.meta.update(existing_unit_components=identity,existing_resource_groups=envelopes,existing_annual_fixed_om_eur=fom_total,existing_cost_boundary='New CAPEX=0; existing annual fixed OM added once by explicit objective hook; VOM charged to dispatch',existing_carbon_components=carbon)"
+          },
+          {
+            "line": 161,
+            "text": "    if contract.get('hydro_group_qualification'):n.meta['hydro_group_qualification']=contract['hydro_group_qualification']"
+          },
+          {
+            "line": 162,
+            "text": "    if identity:n.meta['required_constraint_hooks']=sorted(set(n.meta.get('required_constraint_hooks',[]))|{'research_existing_assets'})"
+          },
+          {
+            "line": 163,
+            "text": "    return dict(integrated_units=len(identity),integrated_components=len(combined),integrated_capacity_mw=sum(q['capacity'] for q in plans),annual_existing_fixed_om_eur=fom_total,pending_qualified_units=pending,resource_groups=envelopes,existing_units=identity)"
+          },
+          {
+            "line": 164,
+            "text": ""
+          },
+          {
+            "line": 165,
+            "text": "def install_existing_asset_constraints(n):"
+          },
+          {
+            "line": 166,
+            "text": "    \"\"\"Future hook after model/objective creation; never calls a solver.\"\"\""
+          },
+          {
+            "line": 167,
+            "text": "    if getattr(n,'_research_existing_assets_model',None) is n.model:raise ValueError('Existing cost/resource hook already installed')"
+          },
+          {
+            "line": 168,
+            "text": "    for key,g in n.meta.get('existing_resource_groups',{}).items():"
+          },
+          {
+            "line": 169,
+            "text": "        terms=[n.model[c['ComponentType']+'-p_nom'].sel({c['ComponentType']+'-ext':c['Name']})*c['CapacityToMW'] for c in g['candidates']]"
+          },
+          {
+            "line": 170,
+            "text": "        if terms:n.model.add_constraints(sum(terms)<=g['new_build_limit_mw'],name='ResearchExistingResource-'+key)"
+          },
+          {
+            "line": 171,
+            "text": "    # This frozen Linopy version rejects literal objective constants. A scalar"
+          },
+          {
+            "line": 172,
+            "text": "    # fixed at one carries the audited annual FOM without introducing capacity,"
+          },
+          {
+            "line": 173,
+            "text": "    # dispatch, a financing assumption or an optimisation choice."
+          },
+          {
+            "line": 174,
+            "text": "    cost=float(n.meta.get('existing_annual_fixed_om_eur',0.))"
+          },
+          {
+            "line": 175,
+            "text": "    if cost:"
+          },
+          {
+            "line": 176,
+            "text": "        one=n.model.add_variables(lower=1.,upper=1.,name='Research-existing-FOM-constant')"
+          },
+          {
+            "line": 177,
+            "text": "        n.model.objective+=one*cost"
+          }
+        ]
+      },
+      {
+        "match": "existing_resource_groups",
+        "line_1_based": 168,
+        "excerpt": [
+          {
+            "line": 166,
+            "text": "    \"\"\"Future hook after model/objective creation; never calls a solver.\"\"\""
+          },
+          {
+            "line": 167,
+            "text": "    if getattr(n,'_research_existing_assets_model',None) is n.model:raise ValueError('Existing cost/resource hook already installed')"
+          },
+          {
+            "line": 168,
+            "text": "    for key,g in n.meta.get('existing_resource_groups',{}).items():"
+          },
+          {
+            "line": 169,
+            "text": "        terms=[n.model[c['ComponentType']+'-p_nom'].sel({c['ComponentType']+'-ext':c['Name']})*c['CapacityToMW'] for c in g['candidates']]"
+          },
+          {
+            "line": 170,
+            "text": "        if terms:n.model.add_constraints(sum(terms)<=g['new_build_limit_mw'],name='ResearchExistingResource-'+key)"
+          },
+          {
+            "line": 171,
+            "text": "    # This frozen Linopy version rejects literal objective constants. A scalar"
+          },
+          {
+            "line": 172,
+            "text": "    # fixed at one carries the audited annual FOM without introducing capacity,"
+          },
+          {
+            "line": 173,
+            "text": "    # dispatch, a financing assumption or an optimisation choice."
+          },
+          {
+            "line": 174,
+            "text": "    cost=float(n.meta.get('existing_annual_fixed_om_eur',0.))"
+          },
+          {
+            "line": 175,
+            "text": "    if cost:"
+          },
+          {
+            "line": 176,
+            "text": "        one=n.model.add_variables(lower=1.,upper=1.,name='Research-existing-FOM-constant')"
+          },
+          {
+            "line": 177,
+            "text": "        n.model.objective+=one*cost"
+          },
+          {
+            "line": 178,
+            "text": "    n._research_existing_assets_model=n.model"
+          }
+        ]
+      },
+      {
+        "match": "def install_existing_asset_constraints",
+        "line_1_based": 165,
+        "excerpt": [
+          {
+            "line": 163,
+            "text": "    return dict(integrated_units=len(identity),integrated_components=len(combined),integrated_capacity_mw=sum(q['capacity'] for q in plans),annual_existing_fixed_om_eur=fom_total,pending_qualified_units=pending,resource_groups=envelopes,existing_units=identity)"
+          },
+          {
+            "line": 164,
+            "text": ""
+          },
+          {
+            "line": 165,
+            "text": "def install_existing_asset_constraints(n):"
+          },
+          {
+            "line": 166,
+            "text": "    \"\"\"Future hook after model/objective creation; never calls a solver.\"\"\""
+          },
+          {
+            "line": 167,
+            "text": "    if getattr(n,'_research_existing_assets_model',None) is n.model:raise ValueError('Existing cost/resource hook already installed')"
+          },
+          {
+            "line": 168,
+            "text": "    for key,g in n.meta.get('existing_resource_groups',{}).items():"
+          },
+          {
+            "line": 169,
+            "text": "        terms=[n.model[c['ComponentType']+'-p_nom'].sel({c['ComponentType']+'-ext':c['Name']})*c['CapacityToMW'] for c in g['candidates']]"
+          },
+          {
+            "line": 170,
+            "text": "        if terms:n.model.add_constraints(sum(terms)<=g['new_build_limit_mw'],name='ResearchExistingResource-'+key)"
+          },
+          {
+            "line": 171,
+            "text": "    # This frozen Linopy version rejects literal objective constants. A scalar"
+          },
+          {
+            "line": 172,
+            "text": "    # fixed at one carries the audited annual FOM without introducing capacity,"
+          },
+          {
+            "line": 173,
+            "text": "    # dispatch, a financing assumption or an optimisation choice."
+          },
+          {
+            "line": 174,
+            "text": "    cost=float(n.meta.get('existing_annual_fixed_om_eur',0.))"
+          },
+          {
+            "line": 175,
+            "text": "    if cost:"
+          },
+          {
+            "line": 176,
+            "text": "        one=n.model.add_variables(lower=1.,upper=1.,name='Research-existing-FOM-constant')"
+          },
+          {
+            "line": 177,
+            "text": "        n.model.objective+=one*cost"
+          },
+          {
+            "line": 178,
+            "text": "    n._research_existing_assets_model=n.model"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts_project/assembly_components.py": {
+    "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+    "sha256": "dc3a88ec8eac2503277e4a1a182c79c59f2bd9999499fa2a6d6de2abebc24e31",
+    "excerpts": [
+      {
+        "match": "def bind_loads",
+        "line_1_based": 49,
+        "excerpt": [
+          {
+            "line": 47,
+            "text": "    return n"
+          },
+          {
+            "line": 48,
+            "text": ""
+          },
+          {
+            "line": 49,
+            "text": "def bind_loads(n,records,manifest,arrays,destinations):"
+          },
+          {
+            "line": 50,
+            "text": "    if len(n.loads) or n.meta.get('demand_owners'):raise ValueError('Demand may be bound only once')"
+          },
+          {
+            "line": 51,
+            "text": "    lookup={r['InputID']:r for r in records};n.meta['demand_owners']={};n.meta['demand_identity']={}"
+          },
+          {
+            "line": 52,
+            "text": "    for ar in manifest['records']:"
+          },
+          {
+            "line": 53,
+            "text": "        r=lookup[ar['InputID']]"
+          },
+          {
+            "line": 54,
+            "text": "        for j,node in enumerate(ar['Nodes']):"
+          },
+          {
+            "line": 55,
+            "text": "            values=arrays[ar['ArrayKey']][:,j]"
+          },
+          {
+            "line": 56,
+            "text": "            if not np.any(values):continue"
+          },
+          {
+            "line": 57,
+            "text": "            key=r['InputID']+'@'+node;dest=destinations[key]"
+          },
+          {
+            "line": 58,
+            "text": "            if not isinstance(dest,dict):raise ValueError('Destination lacks explicit carrier/account contract')"
+          },
+          {
+            "line": 59,
+            "text": "            bus=dest['bus']"
+          },
+          {
+            "line": 60,
+            "text": "            if dest['source_carrier']!=r['Carrier'] or dest['account']!=r['Account']:raise ValueError('Demand destination incompatible with source fuel/account')"
+          },
+          {
+            "line": 61,
+            "text": "            if bus not in n.buses.index or n.buses.at[bus,'country']!=r['Country']:raise ValueError('Missing/misowned demand destination')"
+          },
+          {
+            "line": 62,
+            "text": "            expected={'electricity':['AC','DC','electricity','low voltage']}.get(dest['carrier'],[dest['carrier']+' final energy'])"
+          },
+          {
+            "line": 63,
+            "text": "            if n.buses.at[bus,'carrier'] not in expected:raise ValueError('Destination physical carrier mismatch')"
+          },
+          {
+            "line": 64,
+            "text": "            if dest['carrier'] not in n.carriers.index:n.add('Carrier',dest['carrier'],co2_emissions=0.)"
+          },
+          {
+            "line": 65,
+            "text": "            n.add('Load',key,bus=bus,carrier=dest['carrier'],p_set=values)"
+          },
+          {
+            "line": 66,
+            "text": "            for col,val in [('sector',dest['sector']),('account',r['Account']),('source_account_id',r['InputID']),('country',r['Country'])]:n.loads.loc[key,col]=val"
+          }
+        ]
+      },
+      {
+        "match": "def install_research_constraint_hooks",
+        "line_1_based": 94,
+        "excerpt": [
+          {
+            "line": 92,
+            "text": "    return True"
+          },
+          {
+            "line": 93,
+            "text": ""
+          },
+          {
+            "line": 94,
+            "text": "def install_research_constraint_hooks(n,execution_context=None):"
+          },
+          {
+            "line": 95,
+            "text": "    \"\"\"Future optimisation must call this after variables exist; never solves.\"\"\""
+          },
+          {
+            "line": 96,
+            "text": "    if n.meta.get('artifact_role')=='DIAGNOSTIC_PARTIAL_UNSOLVED':raise ValueError('Diagnostic partial network cannot install optimization constraints')"
+          },
+          {
+            "line": 97,
+            "text": "    from gate6_execution_context import PROTECTED_ROLES,checked"
+          },
+          {
+            "line": 98,
+            "text": "    if execution_context is not None:"
+          },
+          {
+            "line": 99,
+            "text": "        checked(execution_context).permit_hooks(n)"
+          },
+          {
+            "line": 100,
+            "text": "    elif n.meta.get('solver_allowed') is False or n.meta.get('artifact_role') in PROTECTED_ROLES or 'gate6_execution_record' in n.meta:"
+          },
+          {
+            "line": 101,
+            "text": "        raise ValueError('Explicit next-gate authorization required before optimization hooks')"
+          },
+          {
+            "line": 102,
+            "text": "    validate_hooks(n)"
+          },
+          {
+            "line": 103,
+            "text": "    if n.meta.get('external_fixed_account_method'):"
+          },
+          {
+            "line": 104,
+            "text": "        from fixed_accounts import validate_exported_accounting"
+          },
+          {
+            "line": 105,
+            "text": "        validate_exported_accounting(n)"
+          },
+          {
+            "line": 106,
+            "text": "    from carrier_architecture import install_fragment_constraints"
+          },
+          {
+            "line": 107,
+            "text": "    install_fragment_constraints(n)"
+          },
+          {
+            "line": 108,
+            "text": "    if n.meta.get('existing_unit_components'):"
+          },
+          {
+            "line": 109,
+            "text": "        from integrate_surviving_assets import install_existing_asset_constraints"
+          },
+          {
+            "line": 110,
+            "text": "        install_existing_asset_constraints(n)"
+          },
+          {
+            "line": 111,
+            "text": "    for i,pair in enumerate(n.meta.get('battery_inverter_pairs',[])):"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts_project/build_research_network.py": {
+    "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+    "sha256": "648ef857a4136b739dbb09cc7507aec7c6d562bf4c89e6679df57ec20a69f00a",
+    "excerpts": [
+      {
+        "match": "if any(n.stores.bus",
+        "line_1_based": 69,
+        "excerpt": [
+          {
+            "line": 67,
+            "text": " for component in nx.connected_components(g):"
+          },
+          {
+            "line": 68,
+            "text": "  if len({n.buses.at[b,'country'] for b in component})!=1:raise ValueError('Hidden cross-country carrier path')"
+          },
+          {
+            "line": 69,
+            "text": " if any(n.stores.bus.isin(n.buses.index[n.buses.carrier=='co2 sequestered'])):raise ValueError('Unaccepted geological inventory asset')"
+          },
+          {
+            "line": 70,
+            "text": " mapped={}"
+          },
+          {
+            "line": 71,
+            "text": " for r in carbon_map:"
+          },
+          {
+            "line": 72,
+            "text": "  key=(r['component_type'],r['component'])"
+          },
+          {
+            "line": 73,
+            "text": "  if key in mapped:raise ValueError('Duplicate carbon attribution')"
+          },
+          {
+            "line": 74,
+            "text": "  table={'Link':n.links,'Generator':n.generators}[r['component_type']]"
+          },
+          {
+            "line": 75,
+            "text": "  if r['component'] not in table.index:raise ValueError('Carbon map does not refer to actual component')"
+          },
+          {
+            "line": 76,
+            "text": "  z=table.loc[r['component']]"
+          },
+          {
+            "line": 77,
+            "text": "  ports=[z[c] for c in table if (c=='bus' or c.startswith('bus') and c[3:].isdigit()) and z[c]]"
+          },
+          {
+            "line": 78,
+            "text": "  owners_here={n.buses.at[b,'country'] for b in ports if b not in atmo}"
+          },
+          {
+            "line": 79,
+            "text": "  if owners_here!={r['country']} or z.carrier!=r['carrier']:raise ValueError('Carbon map ownership/carrier mismatch')"
+          },
+          {
+            "line": 80,
+            "text": "  if r['component_type']=='Link':"
+          },
+          {
+            "line": 81,
+            "text": "   coefficient=sum(float(z['efficiency' if c=='bus1' else 'efficiency'+c[3:]]) for c in table if c.startswith('bus') and c[3:].isdigit() and c!='bus0' and z[c] in atmo)"
+          },
+          {
+            "line": 82,
+            "text": "  else:coefficient=float(n.carriers.at[z.carrier,'co2_emissions'])/float(z.efficiency)"
+          },
+          {
+            "line": 83,
+            "text": "  if not np.isclose(coefficient,float(r['coefficient']),rtol=1e-12):raise ValueError('Carbon coefficient does not match actual physical port')"
+          },
+          {
+            "line": 84,
+            "text": "  mapped[key]=classify_record(r['component'],r['carrier'],r['sector'],r['country'],r['coefficient'],source=r['source'],policy_weight=r['policy_weight'],accepted=r['accepted'],physical_qualified=r.get('PhysicalReportingQualified'),policy_qualified=r.get('PolicyAttributionQualified'))"
+          },
+          {
+            "line": 85,
+            "text": "  if r.get('gas_input_carbon_factor') is not None:"
+          },
+          {
+            "line": 86,
+            "text": "   if n.buses.at[z.bus0,'carrier']!='gas' or not np.isclose(r['gas_input_carbon_factor'],r['coefficient']+r['captured_carbon_factor']):raise ValueError('SMR physical input/stack/capture balance failed')"
+          }
+        ]
+      },
+      {
+        "match": "if any(n.stores.bus",
+        "line_1_based": 113,
+        "excerpt": [
+          {
+            "line": 111,
+            "text": "  z=n.stores.loc[name];allowed=set(routes[name]['buses']);bus=z.bus"
+          },
+          {
+            "line": 112,
+            "text": "  if any(n.generators.bus.isin(allowed|{bus})):raise ValueError('Extra biomass supply without approved resource')"
+          },
+          {
+            "line": 113,
+            "text": "  if any(n.stores.bus.isin(allowed)):raise ValueError('Unapproved inventory at final biomass obligation')"
+          },
+          {
+            "line": 114,
+            "text": "  touching=n.links[n.links.filter(regex=r'^bus\\d+$').eq(bus).any(axis=1)]"
+          },
+          {
+            "line": 115,
+            "text": "  for _,link in touching.iterrows():"
+          },
+          {
+            "line": 116,
+            "text": "   if link.bus0!=bus or link.bus1 not in allowed:raise ValueError('Biomass diversion to unapproved technology')"
+          },
+          {
+            "line": 117,
+            "text": "  supplied=[k for k,r in n.loads.iterrows() if r.bus in allowed]"
+          },
+          {
+            "line": 118,
+            "text": "  obligation=float((load[supplied].sum(axis=1)*n.snapshot_weightings.generators).sum())"
+          },
+          {
+            "line": 119,
+            "text": "  cap=float(routes[name].get('annual_cap_mwh',obligation))"
+          },
+          {
+            "line": 120,
+            "text": "  if z.e_nom_extendable or z.e_cyclic or not np.isclose(z.e_initial,cap) or not np.isclose(z.e_nom,cap):raise ValueError('Biomass cap differs from fixed obligation')"
+          },
+          {
+            "line": 121,
+            "text": "  related=[k for k,v in routes.items() if set(v['buses'])==allowed]"
+          },
+          {
+            "line": 122,
+            "text": "  if not np.isclose(sum(n.stores.at[k,'e_nom'] for k in related),obligation):raise ValueError('Commodity resources do not sum to exclusive obligation')"
+          },
+          {
+            "line": 123,
+            "text": " return dict(status='NETWORK_STATICALLY_VALIDATED',loads=len(n.loads),physical_hours=8760,electricity_border_controls=borders,carbon_components=len(mapped),actual_coupling_paths=sorted(paths),policy_cap_enabled=False,solver_runs=0)"
+          },
+          {
+            "line": 124,
+            "text": "def build(repo,allocation,assets,output,report):"
+          },
+          {
+            "line": 125,
+            "text": " import yaml"
+          },
+          {
+            "line": 126,
+            "text": " config=yaml.safe_load((repo/'configs/research/baseline.yaml').read_text())"
+          },
+          {
+            "line": 127,
+            "text": " if config['research_carbon']['policy_enabled'] or config['research_assembly']['solver_allowed'] or config['research_assembly']['target_year']!=2050:raise ValueError('Unapproved carbon/solve/target-year configuration')"
+          },
+          {
+            "line": 128,
+            "text": " folder=repo/'research_inputs/assembly_v1';data=load_registry(folder)"
+          },
+          {
+            "line": 129,
+            "text": " gate=check(data['records'],2050,allocation,folder/'registry.json',data.get('known_unallocated_base_accounts'))"
+          },
+          {
+            "line": 130,
+            "text": " receipt=dict(input_gate=gate,network_exported=False,network_sha256=None,solver_runs=0,policy_cap_enabled=False)"
+          }
+        ]
+      },
+      {
+        "match": "for name in biomass",
+        "line_1_based": 108,
+        "excerpt": [
+          {
+            "line": 106,
+            "text": " routes=n.meta.get('biomass_obligation_routes',{})"
+          },
+          {
+            "line": 107,
+            "text": " biomass=list(routes)"
+          },
+          {
+            "line": 108,
+            "text": " if any(name not in n.stores.index for name in biomass):raise ValueError('Biomass routing/cap evidence missing')"
+          },
+          {
+            "line": 109,
+            "text": " if any(name not in routes for name,z in n.stores.iterrows() if z.get('research_role')=='FINITE_RESOURCE' or str(z.carrier).lower() in ['solid biomass','biomass','biogas','biodiesel','biogasoline','fuelwood','charcoal']):raise ValueError('Unregistered biomass resource')"
+          },
+          {
+            "line": 110,
+            "text": " for name in biomass:"
+          },
+          {
+            "line": 111,
+            "text": "  z=n.stores.loc[name];allowed=set(routes[name]['buses']);bus=z.bus"
+          },
+          {
+            "line": 112,
+            "text": "  if any(n.generators.bus.isin(allowed|{bus})):raise ValueError('Extra biomass supply without approved resource')"
+          },
+          {
+            "line": 113,
+            "text": "  if any(n.stores.bus.isin(allowed)):raise ValueError('Unapproved inventory at final biomass obligation')"
+          },
+          {
+            "line": 114,
+            "text": "  touching=n.links[n.links.filter(regex=r'^bus\\d+$').eq(bus).any(axis=1)]"
+          },
+          {
+            "line": 115,
+            "text": "  for _,link in touching.iterrows():"
+          },
+          {
+            "line": 116,
+            "text": "   if link.bus0!=bus or link.bus1 not in allowed:raise ValueError('Biomass diversion to unapproved technology')"
+          },
+          {
+            "line": 117,
+            "text": "  supplied=[k for k,r in n.loads.iterrows() if r.bus in allowed]"
+          },
+          {
+            "line": 118,
+            "text": "  obligation=float((load[supplied].sum(axis=1)*n.snapshot_weightings.generators).sum())"
+          },
+          {
+            "line": 119,
+            "text": "  cap=float(routes[name].get('annual_cap_mwh',obligation))"
+          },
+          {
+            "line": 120,
+            "text": "  if z.e_nom_extendable or z.e_cyclic or not np.isclose(z.e_initial,cap) or not np.isclose(z.e_nom,cap):raise ValueError('Biomass cap differs from fixed obligation')"
+          },
+          {
+            "line": 121,
+            "text": "  related=[k for k,v in routes.items() if set(v['buses'])==allowed]"
+          },
+          {
+            "line": 122,
+            "text": "  if not np.isclose(sum(n.stores.at[k,'e_nom'] for k in related),obligation):raise ValueError('Commodity resources do not sum to exclusive obligation')"
+          },
+          {
+            "line": 123,
+            "text": " return dict(status='NETWORK_STATICALLY_VALIDATED',loads=len(n.loads),physical_hours=8760,electricity_border_controls=borders,carbon_components=len(mapped),actual_coupling_paths=sorted(paths),policy_cap_enabled=False,solver_runs=0)"
+          },
+          {
+            "line": 124,
+            "text": "def build(repo,allocation,assets,output,report):"
+          },
+          {
+            "line": 125,
+            "text": " import yaml"
+          }
+        ]
+      },
+      {
+        "match": "for name in biomass",
+        "line_1_based": 110,
+        "excerpt": [
+          {
+            "line": 108,
+            "text": " if any(name not in n.stores.index for name in biomass):raise ValueError('Biomass routing/cap evidence missing')"
+          },
+          {
+            "line": 109,
+            "text": " if any(name not in routes for name,z in n.stores.iterrows() if z.get('research_role')=='FINITE_RESOURCE' or str(z.carrier).lower() in ['solid biomass','biomass','biogas','biodiesel','biogasoline','fuelwood','charcoal']):raise ValueError('Unregistered biomass resource')"
+          },
+          {
+            "line": 110,
+            "text": " for name in biomass:"
+          },
+          {
+            "line": 111,
+            "text": "  z=n.stores.loc[name];allowed=set(routes[name]['buses']);bus=z.bus"
+          },
+          {
+            "line": 112,
+            "text": "  if any(n.generators.bus.isin(allowed|{bus})):raise ValueError('Extra biomass supply without approved resource')"
+          },
+          {
+            "line": 113,
+            "text": "  if any(n.stores.bus.isin(allowed)):raise ValueError('Unapproved inventory at final biomass obligation')"
+          },
+          {
+            "line": 114,
+            "text": "  touching=n.links[n.links.filter(regex=r'^bus\\d+$').eq(bus).any(axis=1)]"
+          },
+          {
+            "line": 115,
+            "text": "  for _,link in touching.iterrows():"
+          },
+          {
+            "line": 116,
+            "text": "   if link.bus0!=bus or link.bus1 not in allowed:raise ValueError('Biomass diversion to unapproved technology')"
+          },
+          {
+            "line": 117,
+            "text": "  supplied=[k for k,r in n.loads.iterrows() if r.bus in allowed]"
+          },
+          {
+            "line": 118,
+            "text": "  obligation=float((load[supplied].sum(axis=1)*n.snapshot_weightings.generators).sum())"
+          },
+          {
+            "line": 119,
+            "text": "  cap=float(routes[name].get('annual_cap_mwh',obligation))"
+          },
+          {
+            "line": 120,
+            "text": "  if z.e_nom_extendable or z.e_cyclic or not np.isclose(z.e_initial,cap) or not np.isclose(z.e_nom,cap):raise ValueError('Biomass cap differs from fixed obligation')"
+          },
+          {
+            "line": 121,
+            "text": "  related=[k for k,v in routes.items() if set(v['buses'])==allowed]"
+          },
+          {
+            "line": 122,
+            "text": "  if not np.isclose(sum(n.stores.at[k,'e_nom'] for k in related),obligation):raise ValueError('Commodity resources do not sum to exclusive obligation')"
+          },
+          {
+            "line": 123,
+            "text": " return dict(status='NETWORK_STATICALLY_VALIDATED',loads=len(n.loads),physical_hours=8760,electricity_border_controls=borders,carbon_components=len(mapped),actual_coupling_paths=sorted(paths),policy_cap_enabled=False,solver_runs=0)"
+          },
+          {
+            "line": 124,
+            "text": "def build(repo,allocation,assets,output,report):"
+          },
+          {
+            "line": 125,
+            "text": " import yaml"
+          },
+          {
+            "line": 126,
+            "text": " config=yaml.safe_load((repo/'configs/research/baseline.yaml').read_text())"
+          },
+          {
+            "line": 127,
+            "text": " if config['research_carbon']['policy_enabled'] or config['research_assembly']['solver_allowed'] or config['research_assembly']['target_year']!=2050:raise ValueError('Unapproved carbon/solve/target-year configuration')"
+          }
+        ]
+      }
+    ]
+  },
+  "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/optimization/constraints.py": {
+    "version": "0.30.3",
+    "sha256": "6945ae0e21e64d8cee5b083b2ff7a333379e48c35fe4f3fddff4db60f1cca1ef",
+    "excerpts": [
+      {
+        "function": "define_nodal_balance_constraints",
+        "start_line": 524,
+        "end_line": 616,
+        "lines": [
+          "def define_nodal_balance_constraints(",
+          "    n: Network,",
+          "    sns: pd.Index,",
+          "    transmission_losses: int = 0,",
+          "    buses: Sequence | None = None,",
+          "    suffix: str = \"\",",
+          ") -> None:",
+          "    \"\"\"",
+          "    Defines nodal balance constraints.",
+          "    \"\"\"",
+          "    m = n.model",
+          "    if buses is None:",
+          "        buses = n.buses.index",
+          "",
+          "    args = [",
+          "        [\"Generator\", \"p\", \"bus\", 1],",
+          "        [\"Store\", \"p\", \"bus\", 1],",
+          "        [\"StorageUnit\", \"p_dispatch\", \"bus\", 1],",
+          "        [\"StorageUnit\", \"p_store\", \"bus\", -1],",
+          "        [\"Line\", \"s\", \"bus0\", -1],",
+          "        [\"Line\", \"s\", \"bus1\", 1],",
+          "        [\"Transformer\", \"s\", \"bus0\", -1],",
+          "        [\"Transformer\", \"s\", \"bus1\", 1],",
+          "        [\"Link\", \"p\", \"bus0\", -1],",
+          "        [\"Link\", \"p\", \"bus1\", get_as_dense(n, \"Link\", \"efficiency\", sns)],",
+          "    ]",
+          "",
+          "    if not n.links.empty:",
+          "        for i in additional_linkports(n):",
+          "            eff = get_as_dense(n, \"Link\", f\"efficiency{i}\", sns)",
+          "            args.append([\"Link\", \"p\", f\"bus{i}\", eff])",
+          "",
+          "    if transmission_losses:",
+          "        args.extend(",
+          "            [",
+          "                [\"Line\", \"loss\", \"bus0\", -0.5],",
+          "                [\"Line\", \"loss\", \"bus1\", -0.5],",
+          "                [\"Transformer\", \"loss\", \"bus0\", -0.5],",
+          "                [\"Transformer\", \"loss\", \"bus1\", -0.5],",
+          "            ]",
+          "        )",
+          "",
+          "    exprs = []",
+          "",
+          "    for arg in args:",
+          "        c, attr, column, sign = arg",
+          "",
+          "        if n.df(c).empty:",
+          "            continue",
+          "",
+          "        if \"sign\" in n.df(c):",
+          "            # additional sign necessary for branches in reverse direction",
+          "            sign = sign * n.df(c).sign",
+          "",
+          "        expr = DataArray(sign) * m[f\"{c}-{attr}\"]",
+          "        cbuses = n.df(c)[column][lambda ds: ds.isin(buses)].rename(\"Bus\")",
+          "",
+          "        #  drop non-existent multiport buses which are ''",
+          "        if column in [\"bus\" + i for i in additional_linkports(n)]:",
+          "            cbuses = cbuses[cbuses != \"\"]",
+          "",
+          "        expr = expr.sel({c: cbuses.index})",
+          "",
+          "        if expr.size:",
+          "            exprs.append(expr.groupby(cbuses).sum())",
+          "",
+          "    lhs = merge(exprs, join=\"outer\").reindex(Bus=buses)",
+          "    rhs = (",
+          "        (-get_as_dense(n, \"Load\", \"p_set\", sns) * n.loads.sign)",
+          "        .T.groupby(n.loads.bus)",
+          "        .sum()",
+          "        .T.reindex(columns=buses, fill_value=0)",
+          "    )",
+          "    # the name for multi-index is getting lost by groupby before pandas 1.4.0",
+          "    # TODO remove once we bump the required pandas version to >= 1.4.0",
+          "    rhs.index.name = \"snapshot\"",
+          "",
+          "    empty_nodal_balance = (lhs.vars == -1).all(\"_term\")",
+          "    rhs = DataArray(rhs)",
+          "    if empty_nodal_balance.any():",
+          "        if (empty_nodal_balance & (rhs != 0)).any().item():",
+          "            raise ValueError(\"Empty LHS with non-zero RHS in nodal balance constraint.\")",
+          "",
+          "        mask = ~empty_nodal_balance",
+          "    else:",
+          "        mask = None",
+          "",
+          "    if suffix:",
+          "        lhs = lhs.rename(Bus=f\"Bus{suffix}\")",
+          "        rhs = rhs.rename(Bus=f\"Bus{suffix}\")",
+          "        if mask is not None:",
+          "            mask = mask.rename(Bus=f\"Bus{suffix}\")",
+          "    n.model.add_constraints(lhs, \"=\", rhs, name=f\"Bus{suffix}-nodal_balance\", mask=mask)"
+        ]
+      },
+      {
+        "function": "define_storage_unit_constraints",
+        "start_line": 769,
+        "end_line": 855,
+        "lines": [
+          "def define_storage_unit_constraints(n: Network, sns: pd.Index) -> None:",
+          "    \"\"\"",
+          "    Defines energy balance constraints for storage units. In principal the",
+          "    constraints states:",
+          "",
+          "    previous_soc + p_store - p_dispatch + inflow - spill == soc",
+          "    \"\"\"",
+          "    m = n.model",
+          "    c = \"StorageUnit\"",
+          "    dim = \"snapshot\"",
+          "    assets = n.df(c)",
+          "    active = DataArray(get_activity_mask(n, c, sns))",
+          "",
+          "    if assets.empty:",
+          "        return",
+          "",
+          "    # elapsed hours",
+          "    eh = expand_series(n.snapshot_weightings.stores[sns], assets.index)",
+          "    # efficiencies",
+          "    eff_stand = (1 - get_as_dense(n, c, \"standing_loss\", sns)).pow(eh)",
+          "    eff_dispatch = get_as_dense(n, c, \"efficiency_dispatch\", sns)",
+          "    eff_store = get_as_dense(n, c, \"efficiency_store\", sns)",
+          "",
+          "    soc = m[f\"{c}-state_of_charge\"]",
+          "",
+          "    lhs = [",
+          "        (-1, soc),",
+          "        (-1 / eff_dispatch * eh, m[f\"{c}-p_dispatch\"]),",
+          "        (eff_store * eh, m[f\"{c}-p_store\"]),",
+          "    ]",
+          "",
+          "    if f\"{c}-spill\" in m.variables:",
+          "        lhs += [(-eh, m[f\"{c}-spill\"])]",
+          "",
+          "    # We create a mask `include_previous_soc` which excludes the first snapshot",
+          "    # for non-cyclic assets.",
+          "    noncyclic_b = ~assets.cyclic_state_of_charge.to_xarray()",
+          "    include_previous_soc = (active.cumsum(dim) != 1).where(noncyclic_b, True)",
+          "",
+          "    previous_soc = (",
+          "        soc.where(active)",
+          "        .ffill(dim)",
+          "        .roll(snapshot=1)",
+          "        .ffill(dim)",
+          "        .where(include_previous_soc)",
+          "    )",
+          "",
+          "    # We add inflow and initial soc for noncyclic assets to rhs",
+          "    soc_init = assets.state_of_charge_initial.to_xarray()",
+          "    rhs = DataArray(-get_as_dense(n, c, \"inflow\", sns).mul(eh))",
+          "",
+          "    if isinstance(sns, pd.MultiIndex):",
+          "        # If multi-horizon optimizing, we update the previous_soc and the rhs",
+          "        # for all assets which are cyclid/non-cyclid per period.",
+          "        periods = soc.coords[\"period\"]",
+          "        per_period = (",
+          "            assets.cyclic_state_of_charge_per_period.to_xarray()",
+          "            | assets.state_of_charge_initial_per_period.to_xarray()",
+          "        )",
+          "",
+          "        # We calculate the previous soc per period while cycling within a period",
+          "        # Normally, we should use groupby, but is broken for multi-index",
+          "        # see https://github.com/pydata/xarray/issues/6836",
+          "        ps = sns.unique(\"period\")",
+          "        sl = slice(None)",
+          "        previous_soc_pp_list = [",
+          "            soc.data.sel(snapshot=(p, sl)).roll(snapshot=1) for p in ps",
+          "        ]",
+          "        previous_soc_pp = concat(previous_soc_pp_list, dim=\"snapshot\")",
+          "",
+          "        # We create a mask `include_previous_soc_pp` which excludes the first",
+          "        # snapshot of each period for non-cyclic assets.",
+          "        include_previous_soc_pp = active & (periods == periods.shift(snapshot=1))",
+          "        include_previous_soc_pp = include_previous_soc_pp.where(noncyclic_b, True)",
+          "        # We take values still to handle internal xarray multi-index difficulties",
+          "        previous_soc_pp = previous_soc_pp.where(",
+          "            include_previous_soc_pp.values, linopy.variables.FILL_VALUE",
+          "        )",
+          "",
+          "        # update the previous_soc variables and right hand side",
+          "        previous_soc = previous_soc.where(~per_period, previous_soc_pp)",
+          "        include_previous_soc = include_previous_soc_pp.where(",
+          "            per_period, include_previous_soc",
+          "        )",
+          "    lhs += [(eff_stand, previous_soc)]",
+          "    rhs = rhs.where(include_previous_soc, rhs - soc_init)",
+          "    m.add_constraints(lhs, \"=\", rhs, name=f\"{c}-energy_balance\", mask=active)"
+        ]
+      },
+      {
+        "function": "define_store_constraints",
+        "start_line": 858,
+        "end_line": 929,
+        "lines": [
+          "def define_store_constraints(n: Network, sns: pd.Index) -> None:",
+          "    \"\"\"",
+          "    Defines energy balance constraints for stores. In principal the constraints",
+          "    states:",
+          "",
+          "    previous_e - p == e",
+          "    \"\"\"",
+          "    m = n.model",
+          "    c = \"Store\"",
+          "    dim = \"snapshot\"",
+          "    assets = n.df(c)",
+          "    active = DataArray(get_activity_mask(n, c, sns))",
+          "",
+          "    if assets.empty:",
+          "        return",
+          "",
+          "    # elapsed hours",
+          "    eh = expand_series(n.snapshot_weightings.stores[sns], assets.index)",
+          "    # efficiencies",
+          "    eff_stand = (1 - get_as_dense(n, c, \"standing_loss\", sns)).pow(eh)",
+          "",
+          "    e = m[f\"{c}-e\"]",
+          "    p = m[f\"{c}-p\"]",
+          "",
+          "    lhs = [(-1, e), (-eh, p)]",
+          "",
+          "    # We create a mask `include_previous_e` which excludes the first snapshot",
+          "    # for non-cyclic assets.",
+          "    noncyclic_b = ~assets.e_cyclic.to_xarray()",
+          "    include_previous_e = (active.cumsum(dim) != 1).where(noncyclic_b, True)",
+          "",
+          "    previous_e = (",
+          "        e.where(active).ffill(dim).roll(snapshot=1).ffill(dim).where(include_previous_e)",
+          "    )",
+          "",
+          "    # We add inflow and initial e for for noncyclic assets to rhs",
+          "    e_init = assets.e_initial.to_xarray()",
+          "",
+          "    if isinstance(sns, pd.MultiIndex):",
+          "        # If multi-horizon optimizing, we update the previous_e and the rhs",
+          "        # for all assets which are cyclid/non-cyclid per period.",
+          "        periods = e.coords[\"period\"]",
+          "        per_period = (",
+          "            assets.e_cyclic_per_period.to_xarray()",
+          "            | assets.e_initial_per_period.to_xarray()",
+          "        )",
+          "",
+          "        # We calculate the previous e per period while cycling within a period",
+          "        # Normally, we should use groupby, but is broken for multi-index",
+          "        # see https://github.com/pydata/xarray/issues/6836",
+          "        ps = sns.unique(\"period\")",
+          "        sl = slice(None)",
+          "        previous_e_pp_list = [e.data.sel(snapshot=(p, sl)).roll(snapshot=1) for p in ps]",
+          "        previous_e_pp = concat(previous_e_pp_list, dim=\"snapshot\")",
+          "",
+          "        # We create a mask `include_previous_e_pp` which excludes the first",
+          "        # snapshot of each period for non-cyclic assets.",
+          "        include_previous_e_pp = active & (periods == periods.shift(snapshot=1))",
+          "        include_previous_e_pp = include_previous_e_pp.where(noncyclic_b, True)",
+          "        # We take values still to handle internal xarray multi-index difficulties",
+          "        previous_e_pp = previous_e_pp.where(",
+          "            include_previous_e_pp.values, linopy.variables.FILL_VALUE",
+          "        )",
+          "",
+          "        # update the previous_e variables and right hand side",
+          "        previous_e = previous_e.where(~per_period, previous_e_pp)",
+          "        include_previous_e = include_previous_e_pp.where(per_period, include_previous_e)",
+          "",
+          "    lhs += [(eff_stand, previous_e)]",
+          "    rhs = -e_init.where(~include_previous_e, 0)",
+          "",
+          "    m.add_constraints(lhs, \"=\", rhs, name=f\"{c}-energy_balance\", mask=active)"
+        ]
+      }
+    ]
+  },
+  "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/optimization/variables.py": {
+    "version": "0.30.3",
+    "sha256": "bdac273db31f39048752d213aa960a4b104ca7ff3716df8da5e418b09f0a72b8",
+    "excerpts": [
+      {
+        "function": "define_spillage_variables",
+        "start_line": 130,
+        "end_line": 143,
+        "lines": [
+          "def define_spillage_variables(n: Network, sns: Sequence) -> None:",
+          "    \"\"\"",
+          "    Defines the spillage variables for storage units.",
+          "    \"\"\"",
+          "    c = \"StorageUnit\"",
+          "    if n.df(c).empty:",
+          "        return",
+          "",
+          "    upper = get_as_dense(n, c, \"inflow\", sns)",
+          "    if (upper.max() <= 0).all():",
+          "        return",
+          "",
+          "    active = get_activity_mask(n, c, sns).where(upper > 0, False)",
+          "    n.model.add_variables(0, upper, name=\"StorageUnit-spill\", mask=active)"
+        ]
+      }
+    ]
+  }
+}

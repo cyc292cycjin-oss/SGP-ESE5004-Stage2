@@ -1,6 +1,6 @@
 # Stage2项目总台账
 
-2026-10-12，当前审计分支 `audit/stage2-a06-policy-cost-resource-20261012`；方案A实施分支仍为 `fix/stage2-exact-source-closure-a-v1`。本文件汇总已有阶段状态，不替代历史验收或授权新实验；详细证据见 [Baseline台账](05_baseline_evolution/20261011/BASELINE_EVOLUTION_LEDGER.md)。
+2026-10-12，当前审计分支 `audit/stage2-b01-b02-physical-feasibility-20261012`；方案A实施分支仍为 `fix/stage2-exact-source-closure-a-v1`。本文件汇总已有阶段状态，不替代历史验收或授权新实验；详细证据见 [Baseline台账](05_baseline_evolution/20261011/BASELINE_EVOLUTION_LEDGER.md)。
 
 | 工作 | 当前状态 | 证据/边界 |
 |---|---|---|
@@ -15,7 +15,8 @@
 | 新源版本求解 | NOT_RUN / NOT_AUTHORIZED | 未组装新完整NetCDF或LP |
 | A-05 | A05_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 跨境载体/静态端口/上游共同池/未来电力候选谱系；新独立PR |
 | A-06 | A06_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 政策/成本/资源六身份对照，17项静态核验；独立PR |
-| B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束/输入一致性审计 |
+| B-01/B-02 | B01_B02_COMPLETE_WITH_EXPLICIT_LIMITS | 本地供给必要条件、CC/FT/油消纳联动，15项独立轻量核验；未构模/求解 |
+| B后续 | PLAN_ONLY_NOT_AUTHORIZED | 本轮结束后等待联合审阅 |
 | C/D | PLAN_ONLY_NOT_AUTHORIZED | 365日诊断/2920时段Gate6 |
 | E/F | PLAN_ONLY_NOT_AUTHORIZED | 跨境载体扩展/互联独立成本实验 |
 
@@ -59,3 +60,22 @@
 - 原审计/方案A/A05远端身份分别仍为`53c2b28632cb577136d48ebb843823967f0b1c25`、`8883de6fb3e15767c632ac92f535e8a423e90b69`、`4e00897199d28c72b35f6cff550b30ba94337e06`。
 - 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST与外置A06_FINAL_DELIVERY_RECEIPT.json。ZIP名A06_POLICY_COST_RESOURCE_AUDIT_REVIEW.zip，含当前报告、台账、轻量证据/方法、相对路径大小/SHA及实际CRC记录，不含大科学文件或凭据。
 - A阶段审计完成但UNKNOWN保留；G6-05仍PAUSED_BY_USER；本轮到此停止，B—F需后续单独授权。
+
+## B-01/B-02资源与转换路径审计（2026-10-12）
+
+本轮独立于Scheme A PR #4和A06 PR #6，起始A06提交`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`。Scheme A固定对象仍`8883de6fb3e15767c632ac92f535e8a423e90b69`，新源配方仅作为审计输入，不擅自合并或组装。
+
+385组新源精确年度条件全部通过；1737个实际Load均有已核本地路径，未发现本轮范围内供给断路/单体界矛盾；未证明全LP联合可行。100节点SMR CC捕集必须跟随FT，需额外H₂和电力，并受有限本地油消纳限制。当前无CO₂ cap/地质库不等于无碳守恒，也不能直接解释历史求解失败。
+
+风险/科学决定见`05_baseline_evolution/20261011/b01_b02/B_PHYSICAL_FEASIBILITY_RISK_REGISTER.md`，继承A06的无限外部市场、2025电网候选、NULL成本/排放和未来政策待决边界。没有新的科学修改、优化授权、AutoDL操作或G6-05恢复。B后续及C—F保持未执行。
+
+交付B01/B02报告、风险登记、轻量证据、独立方法及`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，含清单/大小/SHA/CRC。实际commit、远端及独立PR由发布里程碑记录，不把本地结果冒称已推送。
+
+
+### B-01/B-02真实发布里程碑
+
+- 审计及15项独立轻量核验提交`b83a0f215bacdba83e34ba226d9b82d99b608786`已commit并push。
+- 分支`audit/stage2-b01-b02-physical-feasibility-20261012`；独立[PR #7](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/7)为OPEN/DRAFT，base为已审阅A06分支。没有合并任何PR。
+- A06远端仍`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`；未把新源配方冒充已运行网络。
+- 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST和外置`B01_B02_FINAL_DELIVERY_RECEIPT.json`。同次交付`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，保留相对路径，逐成员大小/SHA/CRC核验，不含矩阵、原始向量、NetCDF或凭据。
+- 当前B-01/B-02完成即停止；全LP可行性NOT_PROVEN，G6-05保持PAUSED_BY_USER，后续B/C—F未启动。
