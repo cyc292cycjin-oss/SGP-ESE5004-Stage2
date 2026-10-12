@@ -148,3 +148,11 @@
 - 新协议 `C00_DAILY_365_PROTOCOL_C01R_V1` SHA `661a81e532184003938213a3e81ad35bd4a687108332d14b3582bf7a8eac2856`；机器规则SHA `49d85c8449b32bb1fbf972b564dacb70a12e918dee58e4678efc36f0c736b140`。原C00文档逐字保留，旧GO清单存history，原C01决定及双字候选保留历史；双字方案未实施。
 - 目录`research/05_baseline_evolution/20261011/c01r`；独立分支`audit/stage2-c01r-bounded-binary64-20261012`。Git真实commit/PR见发布记录，强制ZIP同轮交付；没有改main、Scheme A或合并旧PR。
 - 仅具备申请C-02受控构建审查的表示前提；C02/C03未授权/未执行。G6-05继续PAUSED_BY_USER，后续阶段不自动启动。等待联合验收。
+
+
+### C-01R真实发布里程碑
+
+- 受限binary64规则、独立源级验收及版本化协议提交 `4db15881c40875b4385790c88382c664faad977b` 已push。
+- 分支 `audit/stage2-c01r-bounded-binary64-20261012`；独立 [PR #11](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/11) 为OPEN/DRAFT，基于已核C01/122审计分支，未合并任何PR。
+- 当前C01R_REPRESENTATION_ACCEPTED，95条漂移全部AND通过，385/807精确关系和V4不变。只具备申请C02审查的表示前提；无构模/求解/AutoDL操作，G6-05暂停。
+- 本轮最终commit和ZIP整体SHA/CRC在PACKAGE_MANIFEST及外置C01R_FINAL_DELIVERY_RECEIPT.json记录。旧C00和C01历史保留；交付后停止。
