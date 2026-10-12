@@ -79,3 +79,17 @@
 - A06远端仍`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`；未把新源配方冒充已运行网络。
 - 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST和外置`B01_B02_FINAL_DELIVERY_RECEIPT.json`。同次交付`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，保留相对路径，逐成员大小/SHA/CRC核验，不含矩阵、原始向量、NetCDF或凭据。
 - 当前B-01/B-02完成即停止；全LP可行性NOT_PROVEN，G6-05保持PAUSED_BY_USER，后续B/C—F未启动。
+
+
+## B-03收口与C-00日诊断设计（2026-10-12）
+
+本轮从已审阅B01/B02交付`14baa96de5778ab487cbe9017d660825dc0a9a62`创建`audit/stage2-b03-c00-daily-protocol-20261012`。状态**B03_C00_DESIGN_COMPLETE**；不修改PR #4源版本或PR #7历史结果，不合并任何PR。
+
+- B03最终12项风险使用PROVEN / NECESSARY_CHECK_PASS / RISK / UNKNOWN；旧精确矛盾与Scheme A源修复分开，1737供给路径/807账户是必要条件，不证明新LP可行。未发现本轮必须先实施其他物理修复的直接证据。
+- C00设计365×24h三权重与8760年量；保持Scheme A Q、所有原需求年度身份、技术/网络/政策边界。时变Load的binary64年度相等未实际验证，设NO-GO硬门槛，禁止静默补Q/减Load。CF/入流表示规则待联合批准。
+- 首次真实154项参数小回执已对备份SHA核对；基准含NumericFocus0/FeasibilityTol1e-6/DualReductions1，非P2/非G6-05。建议新TimeLimit≤3600、全流程9150秒，仅设计无授权。原固定组缩放规则重绑日维度，旧V3/D/R向量不可复制。
+- V4科学阈值保持；原合同含旧维数，日适配需独立binding和实现验证，未虚报通过。未来一次流程涵盖身份、组装、原生交接、唯一调用、raw优先、全部验收和备份；无新准备实验。
+- 新日模型与旧Gate6同时存在Q版本和时序差异；日PASS不等于2920可行或原始目标严格最优。师哥建议尚未动态验证。
+- G6-05继续PAUSED_BY_USER；新网络/LP/solver/AutoDL操作均0，C实际测试及D—F未启动。交付三份主报告、轻量证据/方法、最新台账和强制ZIP；最终commit/PR/ZIP SHA见发布记录。
+
+实际报告目录：`research/05_baseline_evolution/20261011/b03_c00`。
