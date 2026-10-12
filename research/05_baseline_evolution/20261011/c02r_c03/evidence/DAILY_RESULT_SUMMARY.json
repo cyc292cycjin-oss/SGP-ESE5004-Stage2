@@ -1,0 +1,235 @@
+{
+  "run_id": "c02r_c03_daily122_20261012T044259Z_25e62c10",
+  "status": "OPTIMAL_BUT_NOT_ACCEPTED",
+  "method": "JSON receipt aggregation; no new physical recomputation, optimization or model build",
+  "source_manifest_sha256": "ac1d2d063a919684044a86b1abff9cd2e0499c0f5bc82f4d1e189a1f006f4cfb",
+  "source_seal_sha256": "365226c80767f356625883b0ed73abfce6c8a2f6771da8d8212eae34aed0030c",
+  "native": {
+    "SolCount": 1,
+    "BarIterCount": 69,
+    "IterCount": 0.0,
+    "Runtime": 155.37094283103943,
+    "ObjVal": 428014262628.2498,
+    "BoundVio": 0.0,
+    "ConstrVio": 6.891766654441827e-05,
+    "DualVio": 0.02547632459915626,
+    "MaxVio": 803.4719448953265,
+    "ComplVio": 803.4719448953265
+  },
+  "native_status": 2,
+  "native_return_code": 0,
+  "optimization_calls": 1,
+  "gates": {
+    "native_optimal": true,
+    "complete_primal_dual": true,
+    "full_matrix_and_column_bounds": false,
+    "independent_KKT": false,
+    "physical_dynamics": false,
+    "807_inventory": false,
+    "385_obligations": false,
+    "FOM_once": true,
+    "NetCDF_exact_readback": true,
+    "daily_binding": true
+  },
+  "KKT": {
+    "row_violation_max": 18298.40598338966,
+    "column_violation_max": 0.0,
+    "stationarity_max_original": 0.03851123219624242,
+    "stationarity_normalized_max": 1.869757959330463e-05,
+    "dual_sign_error_max_original": 3.802943433194802e-05,
+    "complementarity_max": 803.4719448953265,
+    "row_fail_count": 48298,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 4304,
+    "source": "original units via frozen D/R",
+    "primal_objective": 428014262628.2893,
+    "dual_objective_numeric": 428014178357.0322,
+    "absolute_gap": 84271.25708007812,
+    "relative_gap": 1.9688889936189775e-07,
+    "complementarity_l1": 189887.48498384244,
+    "stationarity_weighted_l1": 101694.67655237838,
+    "formal_exact_lower_bound": false,
+    "qualification": "DIAGNOSTIC_ONLY_PENDING_SEMANTIC_AND_EXPORT_GATES",
+    "dual_sign_normalized_max": 3.802943433194802e-05,
+    "dual_sign_fail_count": 365,
+    "independent_kkt_pass": false
+  },
+  "engineering": {
+    "check_count": 1849,
+    "status_counts": {
+      "FAIL": 379,
+      "PASS": 1470
+    },
+    "non_account_failures": [
+      {
+        "Check": "BUS_BALANCES",
+        "Status": "FAIL",
+        "MaxAbsoluteResidual": 8.320790671128634,
+        "Unit": "MW",
+        "Tolerance": "1e-3 + 1e-7*abs(reference)",
+        "Detail": ""
+      },
+      {
+        "Check": "STORE_ENERGY_LOWER",
+        "Status": "FAIL",
+        "MaxAbsoluteResidual": 18298.40598338966,
+        "Unit": "MWh",
+        "Tolerance": "1e-3 + 1e-7*abs(reference)",
+        "Detail": ""
+      }
+    ],
+    "statuses_identical_after_NetCDF_readback": true,
+    "fixed_V4_account_and_group_receipts_identical_after_readback": true,
+    "derived_float_reductions_identical": false,
+    "derived_float_reduction_difference_count": 723,
+    "max_derived_residual_differences_by_unit": {
+      "EUR2020/year": {
+        "check": "OBJECTIVE_RECONCILIATION_KNOWN_FOM_ONCE",
+        "before": 0.00018310546875,
+        "after": 0.0001220703125,
+        "delta": -6.103515625e-05,
+        "unit": "EUR2020/year"
+      },
+      "MWh": {
+        "check": "FIXED_RESOURCE_USAGE:ID:2050:Industry:IndustryFinalEnergy:biomass@ID_Java-Bali1 0 Fuelwood fixed resource",
+        "before": 18199.470230072737,
+        "after": 18199.470229893923,
+        "delta": -1.7881393432617188e-07,
+        "unit": "MWh"
+      }
+    }
+  },
+  "fixed_accounts": {
+    "total": 807,
+    "failed": 377,
+    "subcheck_failures": {
+      "annual": 377,
+      "terminal": 377,
+      "stock_lower": 377,
+      "cumulative_resource_cap": 377
+    },
+    "gross_annual_excess_mwh": 338137.84746811516,
+    "gross_annual_excess_over_budget_mwh": 338045.1883362083,
+    "max_annual_excess": {
+      "asset": "ID:2050:Industry:IndustryFinalEnergy:biomass@ID_Java-Bali1 0 Bagasse fixed resource",
+      "Q_mwh": 16183494.888810169,
+      "annual_release_mwh": 16201793.294793567,
+      "annual_excess_mwh": 18298.405983397737,
+      "budget_mwh": 1.6193494888810167,
+      "passed": false,
+      "checks": {
+        "all_prefixes": true,
+        "all_steps": true,
+        "gross_state_error": true,
+        "annual": false,
+        "terminal": false,
+        "stock_lower": false,
+        "stock_upper": true,
+        "release_direction": true,
+        "cumulative_resource_cap": false,
+        "zero_Q_exact_zero": true
+      }
+    },
+    "note": "Derived from stored annual release and approved Q; binary64 reporting arithmetic, not exact-rational feasibility proof"
+  },
+  "obligation_groups": {
+    "total": 385,
+    "failed": 111,
+    "subcheck_failures": {
+      "each_period": 111,
+      "gross_oversupply": 111,
+      "all_delivery_prefixes": 111
+    },
+    "gross_oversupply_mwh": 338137.84746726364,
+    "gross_undersupply_mwh": 0.0,
+    "max_oversupply": {
+      "checks": {
+        "each_period": false,
+        "gross_oversupply": false,
+        "gross_undersupply": true,
+        "all_delivery_prefixes": false,
+        "zero_total_Q_exact_supply_zero": true
+      },
+      "passed": false,
+      "group_budget_mwh": 20.10852550594109,
+      "gross_oversupply_mwh": 72890.12627905741,
+      "gross_undersupply_mwh": 0.0,
+      "max_delivery_prefix_error_mwh": 72890.12627905741,
+      "periods": 365,
+      "zero_demand_periods": 0,
+      "source_demand_integral_mwh": 201045255.05941078,
+      "source_integral_minus_stocks_mwh": -8.940696716308594e-08,
+      "source_roundoff_added_to_solver_budget": false,
+      "buses": [
+        "ID:2050:Industry:IndustryFinalEnergy:biomass@ID_Java-Bali1 0 :: final obligation"
+      ]
+    }
+  },
+  "scheme_A_source": {
+    "all_385_exact_D_le_Q": true,
+    "candidate_feasible": false
+  },
+  "costs": {
+    "original_scientific_objective_known_scope": 427765450088.104,
+    "adapted_objective": 428014262628.28937,
+    "numerical_perturbation_contribution": 248812540.18522856,
+    "reconciliation_residual": 0.00013521313667297363,
+    "original_objective_optimality": "NOT_PROVEN",
+    "FullSystemCostComplete": false
+  },
+  "parameters_count": 154,
+  "parameter_differences": {
+    "TimeLimit": {
+      "first_gate6": 43199.999811410904,
+      "daily": 3600.0
+    }
+  },
+  "resources": {
+    "count": 2463,
+    "first": {
+      "epoch": 1791780180.2704463,
+      "rss_bytes": 23396352,
+      "cpu_seconds": 0.08,
+      "disk_free_bytes": 31648587776,
+      "cgroup_headroom_bytes": 95843725312,
+      "cgroup": [
+        {
+          "path": "/sys/fs/cgroup/memory",
+          "limit": 96636764160,
+          "current": 793038848,
+          "memory_peak": 3125039104,
+          "memory_events": "max 0\noom 0\noom_kill 0\n",
+          "hierarchical_memory_limit": 96636764160
+        }
+      ],
+      "effective_memory_limit": 96636764160,
+      "reason": null
+    },
+    "last": {
+      "epoch": 1791780810.945152,
+      "rss_bytes": 636047360,
+      "cpu_seconds": 110.77000000000001,
+      "disk_free_bytes": 29684035584,
+      "cgroup_headroom_bytes": 93355171840,
+      "cgroup": [
+        {
+          "path": "/sys/fs/cgroup/memory",
+          "limit": 96636764160,
+          "current": 3281592320,
+          "memory_peak": 6602719232,
+          "memory_events": "max 0\noom 0\noom_kill 0\n",
+          "hierarchical_memory_limit": 96636764160
+        }
+      ],
+      "effective_memory_limit": 96636764160,
+      "reason": null
+    },
+    "max_rss": 4627083264,
+    "min_disk": 29684035584,
+    "min_cgroup_headroom": 90035617792
+  },
+  "processes_exited": true,
+  "original_scientific_objective_optimality": "NOT_PROVEN",
+  "Gate6_2920_PASS": false,
+  "causality": "NOT_ESTABLISHED; this receipt summary does not isolate root causes or prove LP infeasibility"
+}

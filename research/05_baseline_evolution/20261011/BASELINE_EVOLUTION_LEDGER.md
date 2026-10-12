@@ -300,3 +300,17 @@
 - 继续 `codex/c02-controlled-daily-build-20261012`，已更新 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12)，仍OPEN/DRAFT，未合并。
 - 状态C02R_CHECKER_PATCH_READY_FOR_REVIEW；C02整体仍BLOCKED，未获新的C02R运行授权；没有云端连接/模型构建/求解，G6-05仍暂停。
 - 强制ZIP为C02R_MINIMAL_CHECKER_REPAIR_REVIEW.zip；最终Git提交、大小、SHA与完整CRC记录由本地C02R_FINAL_DELIVERY_RECEIPT.json给出。等待用户与ChatGPT复核。
+
+
+## C-02R→C-03合并授权的真实终态（2026-10-12）
+
+**C02_BUILD_STATIC_ACCEPTED_NO_SOLVE；C03 OPTIMAL_BUT_NOT_ACCEPTED。** 以下是后续新增授权与实际执行，不改写前述C02失败、未授权时点或旧Gate6记录。
+
+- 用户确认合并附件后，独立分支`codex/c02r-c03-daily-diagnostic-20261012`实施两项限定检查器修复、CSR→CSC桥接、365日实际标签恢复及冻结V4调用链。生产代码里程碑`a3c1f5e97e03b99f4fa5fa885f6fe0747768d7d7`已push；独立PR #13，未合并main/历史PR。
+- 122唯一Run `c02r_c03_daily122_20261012T044259Z_25e62c10`。复用SHA匹配日NetCDF，不重聚合或派生Q；Scheme A 180改/627不变、385精确D≤Q′。±0语义和三类经证实+Inf零行检查通过，45项局部接口测试通过。
+- 实际日LP2,450,005列/6,042,238行/11,403,496非零；完整CSR反向重排与原生逐值回读通过。同一原生模型只调用一次GRBoptimize；154项参数回读，较首次Gate6只有授权TimeLimit变为3600秒。WLS真实启动通过，未使用P2/G6-05。
+- 真实Status=2、返回码0、SolCount1，69次Barrier，Runtime155.370943秒；X/Pi/RC完整合法保存。日V4失败：48,298矩阵行、4,304 stationarity列、365对偶符号项；377/807账户、111/385义务组失败，年度超用约0.338138TWh，Bus最大8.320791MW。1849工程检查1470PASS/379FAIL。FOM一次计量与NetCDF逐值回读通过，不能抵消物理/KKT失败。
+- 旧2920目标/物理和新Scheme A日模型必须区分；当前结果不证明LP数学不可行，也未定位全部根因。原科学未扰动目标最优性NOT_PROVEN、完整系统成本仍不齐全。不能转入2920或Integrated/Disconnected。
+- worker/supervisor/guard全部退出，无遗留PID；RSS采样最大4.309GiB，cgroup峰值6.149GiB，计算保护无触发，固定总9150秒未延长。云端17,417文件/1,946,512,966字节封存。完整本地同步LOCAL_SYNC_PENDING：239,468,544/314,868,916字节保留partial，收尾截止后5秒轮询产生3.313344秒停止延迟，已明确披露；没有重试或改deadline。轻量证据SHA/CRC通过，不能替代完整本地备份。
+- 报告及真实机器证据：`research/05_baseline_evolution/20261011/c02r_c03/C03_DAILY_DIAGNOSTIC_RESULT.md`。同轮强制ZIP `C02R_C03_DAILY_DIAGNOSTIC_REVIEW.zip`含成员SHA/大小/CRC，大型数组不提交。结果发布的完整commit/ZIP SHA见FINAL_DELIVERY_RECEIPT.json。
+- 实例122保持运行，未关机/释放；G6-05继续PAUSED_BY_USER。已消费本次唯一诊断授权；没有自动重试、参数改变、容差放宽、后续实验或第二次optimize。交付后停止，等待联合审阅。
