@@ -1,0 +1,80 @@
+"""365-day label bridge to unchanged V4 algebra and frozen physical equations."""
+from pathlib import Path
+import sys,os,math,json
+import numpy as np,pandas as pd
+from c02_common import read,write as _write,sha
+from adapter import save_original_vectors,open_problem
+from scatter import scatter_active
+from author_objective import reconcile_objectives
+from v4_algebra_extracted import complete_kkt
+from daily_physics import require_contract,engineering_checks,netcdf_roundtrip
+
+def write(path,value):
+    def convert(x):
+        if isinstance(x,np.generic):return x.item()
+        raise TypeError(type(x).__name__)
+    _write(path,json.loads(json.dumps(value,default=convert,allow_nan=False)))
+
+def restore_daily(n,folder,active,x):
+    folder=Path(folder);mapping=read(folder/'LABELS.json');scalars={};covered=[]
+    assert len(n.snapshots)==365
+    for b in mapping['variables']:
+        p=folder/b['labels_file'];assert sha(p)==b['sha256']
+        lab=np.load(p,mmap_mode='r');assert list(lab.shape)==b['shape']
+        ids=lab[lab>=0];covered.extend(ids.tolist())
+        v=scatter_active(lab,active,x);name=b['name'];dims=b['dims']
+        if not dims:
+            scalars[name]=float(v);continue
+        c,attr=name.split('-',1);df=n.df(c)
+        if 'snapshot' not in dims:
+            assert len(dims)==1
+            assets=b['coordinates'][dims[0]];assert assets==list(map(str,n.get_extendable_i(c)))
+            df.loc[assets,attr+'_opt']=v;continue
+        assert len(dims)==2
+        sd=dims.index('snapshot');other=dims[1-sd]
+        assert pd.DatetimeIndex(b['coordinates']['snapshot']).equals(pd.DatetimeIndex(n.snapshots))
+        assets=b['coordinates'][other];assert assets==list(map(str,df.index))
+        frame=pd.DataFrame(np.moveaxis(v,sd,0),index=n.snapshots,columns=df.index)
+        if name in ('Line-s','Transformer-s'):
+            n.pnl(c)['p0']=frame;n.pnl(c)['p1']=-frame
+        elif name=='Link-p':
+            n.links_t['p0']=frame
+            for port in [k for k in df if k.startswith('bus') and k[3:].isdigit() and k!='bus0']:
+                suffix=port[3:];eff='efficiency'+('' if suffix=='1' else suffix)
+                result=-frame*n.get_switchable_as_dense('Link',eff);result.loc[:,df[port]=='']=0.
+                n.links_t['p'+suffix]=result
+        else:n.pnl(c)[attr]=frame
+    assert np.array_equal(np.sort(np.asarray(covered,dtype=np.int64)),active),'complete unique variable label coverage'
+    for c,nom in [('Generator','p_nom'),('Link','p_nom'),('Line','s_nom'),('StorageUnit','p_nom'),('Store','e_nom')]:
+        df=n.df(c);ids=df.index[~df[nom+'_extendable']];df.loc[ids,nom+'_opt']=df.loc[ids,nom]
+    n.storage_units_t['p']=n.storage_units_t.p_dispatch-n.storage_units_t.p_store
+    n.loads_t['p']=n.get_switchable_as_dense('Load','p_set').copy()
+    return scalars
+
+def postprocess(run,release,progress=lambda s:None,raw_directory=None):
+    import pypsa
+    run=Path(run);release=Path(release);out=run/'postprocess';out.mkdir(exist_ok=False)
+    contract=read(release/'V4_APPROVED.json');require_contract(contract)
+    assert sha(release/'V4_APPROVED.json')=='955cfe48f0de95d1ce9df531ee7d5b0a3dff47dad9f6b06f70a180745cf0657f'
+    source=run/'artifacts';bridge=run/'bridge';raw=Path(raw_directory) if raw_directory is not None else run/'raw/vectors';rec=read(raw/'RAW_RECEIPT.json')
+    if not all(rec['vectors'].get(k,{}).get('status')=='SAVED_UNQUALIFIED' for k in ('X','Pi','RC')):raise ValueError('COMPLETE_LEGAL_PRIMAL_DUAL_REQUIRED')
+    binding=read(source/'DAILY_V4_BINDING.json');meta,a=open_problem(bridge/'math_problem')
+    assert binding['rows']==meta['num_row'] and binding['columns']==meta['num_col']
+    assert binding['network_SHA256']==sha(source/'daily_365_unsolved.nc') and binding['LP_manifest_SHA256']==sha(source/'lp/MATH_PROBLEM.json')
+    assert binding['labels_SHA256']==sha(source/'mapping/LABELS.json') and binding['annual_resource_budget_multiplier']==1
+    save_original_vectors(raw,bridge/'mapping',out/'original_vectors');progress('ORIGINAL_VECTORS_SAVED')
+    z,pi,rc=[np.load(raw/(k+'.npy'),mmap_mode='r') for k in ('X','Pi','RC')]
+    D=np.load(bridge/'mapping/D.npy',mmap_mode='r');R=np.load(bridge/'mapping/R.npy',mmap_mode='r')
+    kkt=complete_kkt(meta,a,z,pi,rc,D,R,out/'kkt',contract);write(out/'KKT.json',kkt);progress('KKT_CHECKED')
+    costs=reconcile_objectives(a['cost_scientific'],a['cost'],z,meta['scientific_offset'],meta['offset']);write(out/'DUAL_COST_LEDGER.json',costs)
+    n=pypsa.Network(source/'daily_365_unsolved.nc')
+    scalars=restore_daily(n,source/'mapping',np.load(bridge/'mapping/vlabels.npy',mmap_mode='r'),np.load(out/'original_vectors/X_original.npy',mmap_mode='r'))
+    physics=engineering_checks(n,scalars,costs['original_scientific_objective_known_scope'],contract)
+    assert len(physics['details']['fixed_prefix_checks'])==807 and len(physics['details']['fixed_group_obligations_v4'])==385
+    write(out/'PHYSICAL_CHECKS.json',physics);progress('PHYSICS_CHECKED')
+    back,export=netcdf_roundtrip(n,out/'daily_candidate_UNQUALIFIED.nc','UNQUALIFIED_PENDING_ALL_GATES')
+    after=engineering_checks(back,scalars,costs['original_scientific_objective_known_scope'],contract)
+    write(out/'PHYSICAL_CHECKS_AFTER_READBACK.json',after);write(out/'NETCDF_READBACK.json',export)
+    gates={'native_optimal':rec['native_status']==2,'complete_primal_dual':True,'full_matrix_and_column_bounds':kkt['row_fail_count']==kkt['column_fail_count']==0,'independent_KKT':kkt['independent_kkt_pass'],'physical_dynamics':physics['all_physics_pass'] and after['all_physics_pass'],'807_inventory':all(x['passed'] for x in physics['details']['fixed_prefix_checks']),'385_obligations':all(x['passed'] for x in physics['details']['fixed_group_obligations_v4']),'FOM_once':any(x['Check']=='OBJECTIVE_RECONCILIATION_KNOWN_FOM_ONCE' and x['Status']=='PASS' for x in physics['checks']),'NetCDF_exact_readback':True,'daily_binding':True}
+    result={'status':'SCIENCE_PASS_DELIVERY_PENDING' if all(gates.values()) else ('OPTIMAL_BUT_NOT_ACCEPTED' if rec['native_status']==2 else 'NONOPTIMAL_NOT_ACCEPTED'),'native_status':rec['native_status'],'gates':gates,'costs':costs,'V4_sha256':sha(release/'V4_APPROVED.json'),'original_scientific_objective_optimality':'NOT_PROVEN','Gate6_2920_PASS':False,'representation_budget_deducted':False,'basis_required':False}
+    write(out/'POSTPROCESS_RECEIPT.json',result);return result

@@ -1,0 +1,80 @@
+{
+  "status": "CURRENT_V4_APPLICABLE_WITH_EXPLICIT_NUMERICAL_LIMITS",
+  "requirements": [
+    {
+      "requirement": "physical_rows_bounds",
+      "classification": "A",
+      "meaning": "Direct frozen LP and engineering equations",
+      "unit": "native row units: MW/MWh/tCO2/MWkm",
+      "budget": "0.001+1e-7*reference",
+      "source": "release/helpers/v4_algebra_extracted.py",
+      "source_sha256": "4714dfd05b0f10c2ea3dd1aa3d9165e58eb8f6c1cf7a5e3da58807abf02396be",
+      "function": "budget_arrays",
+      "line": 137,
+      "formal_contract_changed": false
+    },
+    {
+      "requirement": "resource_terminal_annual",
+      "classification": "B",
+      "meaning": "Derived for frozen exclusive lossless fixed-demand group: sum(eT)=sumQ-D, eT>=0",
+      "unit": "MWh",
+      "budget": "Bi=min(.001+1e-7Qi,1e-6Qi); all Sg<Bi",
+      "source": "release/helpers/fixed_resource_acceptance.py",
+      "source_sha256": "3f2ed73aff250eb48ebcd4c831147ddcdd06ec0414d598f0a940e8875a2dc184",
+      "function": "inventory",
+      "line": 20,
+      "formal_contract_changed": false
+    },
+    {
+      "requirement": "resource_dynamic_prefix",
+      "classification": "A/B",
+      "meaning": "Store dynamics and cumulative resource conservation",
+      "unit": "MWh",
+      "budget": "Same single annual Bi, no daily reset",
+      "source": "release/helpers/fixed_resource_acceptance.py",
+      "source_sha256": "3f2ed73aff250eb48ebcd4c831147ddcdd06ec0414d598f0a940e8875a2dc184",
+      "function": "inventory",
+      "line": 20,
+      "formal_contract_changed": false
+    },
+    {
+      "requirement": "gross_L1",
+      "classification": "C",
+      "meaning": "Approved cumulative numerical leakage and cancellation control",
+      "unit": "MWh",
+      "budget": "Existing V4/1ppm rule",
+      "source": "release/helpers/fixed_resource_acceptance.py",
+      "source_sha256": "3f2ed73aff250eb48ebcd4c831147ddcdd06ec0414d598f0a940e8875a2dc184",
+      "function": "obligation",
+      "line": 46,
+      "formal_contract_changed": false
+    },
+    {
+      "requirement": "stationarity_sign_complementarity",
+      "classification": "C",
+      "meaning": "Minimization LP primal/dual stationarity and endpoint sign, no 0*Inf",
+      "unit": "EUR/original unit; EUR",
+      "budget": "Existing normalized 1e-6 and explicit free RC sign check",
+      "source": "release/helpers/v4_algebra_extracted.py",
+      "source_sha256": "4714dfd05b0f10c2ea3dd1aa3d9165e58eb8f6c1cf7a5e3da58807abf02396be",
+      "function": "complete_kkt",
+      "line": 155,
+      "formal_contract_changed": false
+    },
+    {
+      "requirement": "identity_export",
+      "classification": "D",
+      "meaning": "Complete label/coordinate/SHA binding and exact export readback",
+      "unit": "identity",
+      "budget": "Exact, no 1ULP relaxation",
+      "source": "release/daily_acceptance.py",
+      "source_sha256": "bd76b7aa47c354b8a1982c8c502f33c17b64ffd699b94468ae7dd30df7e69c96",
+      "function": "postprocess",
+      "line": 54,
+      "formal_contract_changed": false
+    }
+  ],
+  "scientific_decision_required": false,
+  "universal_optimal_threshold_claim": false,
+  "candidate_V5_created": false
+}

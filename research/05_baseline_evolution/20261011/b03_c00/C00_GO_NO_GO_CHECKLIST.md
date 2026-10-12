@@ -60,3 +60,14 @@
 - 云端封存完成；**LOCAL_SYNC_PENDING**：已收140640256/153715959字节，缺13075703，原60分钟窗过期且未重开。完整gzipCRC/BACKUP_INDEX待新传输授权；审阅ZIP不替代原始备份。
 - 唯一建议为预算匹配等价坐标的受控日模型对照，PROPOSED/未执行，须另行批准。仍在C阶段，D及2920时段未获授权；G6-05 PAUSED_BY_USER。
 - 详细报告：`research/05_baseline_evolution/20261011/c06/C03_C05_C06_COMPARATIVE_FORENSICS.md`；本轮独立分支`codex/c06-barconvtol-daily-20261012`，关联#13/#14/#15。真实结果提交与PR在Git发布回执绑定，不自动合并。
+
+
+## C07 V4可靠性与有限补救收口 — 2026-10-13
+
+- **A ORIGINAL_V4_FAIL；B NO_QUALIFIED_SOLUTION；C06/A/B LOCAL_BACKUP_SHA_VERIFIED。** 本轮新增调用恰好2，全部结束，未改科学模型或V4。方法/代码及初始终态里程碑提交`6a65bea3a92aa9fa9c209b911c9a4654c25c58aa`已push。最终交付提交见包内GIT_PUBLICATION。
+- A `c07a_daily122_20261012T162928Z_0d9301f2`：Status2、SolCount1、153 Barrier、281.128073秒；807/385全部通过；剩1矩阵库存下界、3353 stationarity、12045对偶符号项失败。完整X/Pi/RC先保存后映射，NetCDF/FOM通过不替代V4。
+- B `c07b_daily122_20261012T163744Z_4250e585`：仅Crossover0→−1；Status3、SolCount0、153 Barrier/511564 simplex、343.263406秒；向量及V4 NOT_AVAILABLE，未伪造零残差，也不称严格不可行证明。
+- 同一日CSC、Scheme A/C01R/V3/V4，唯一D/R表达SHA5561a91045ca9196183e6d4ae61c9dde76d85343e8397d880b5c4652a6b5e77f；全量反变换及同模型真实回读通过，154参数A无差异、B仅Crossover。没有重建、warm start或额外presolve。
+- V4在此冻结组内语义可推导，未发现必须放宽的冲突；合法Scheme A余量小于各预算，未启用V5。独立局部Fraction核算支持真实残差，详细剩余数值阻断见c07主报告。
+- 两个Run均资源保护无触发并全退出封存。C06旧备份缺口已依新授权补齐；A/B全部新增文件SHA/CRC/索引通过，云端原件/历史消费标记保留。122实例未关机/释放。
+- 唯一建议为成对原生回执和冻结表达的供应商定点复核；不自动对外提交私有模型或第三次优化。G6-05 PAUSED_BY_USER，仍C阶段，2920及新情景未授权。
