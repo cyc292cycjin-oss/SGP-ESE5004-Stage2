@@ -1,0 +1,132 @@
+{
+  "status": "INPUT_AND_DEPLOYMENT_VERIFIED_BUILD_BLOCKED",
+  "scientific_identities": {
+    "C01R_base_commit": "68ebb96b7d48318654e9ca3f2b2780a0133bc889",
+    "Scheme_A_commit": "8883de6fb3e15767c632ac92f535e8a423e90b69",
+    "Scheme_A_manifest_sha256": "a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720",
+    "C01R_protocol_sha256": "661a81e532184003938213a3e81ad35bd4a687108332d14b3582bf7a8eac2856",
+    "C01R_rule_sha256": "49d85c8449b32bb1fbf972b564dacb70a12e918dee58e4678efc36f0c736b140",
+    "V4_parent_sha256": "955cfe48f0de95d1ce9df531ee7d5b0a3dff47dad9f6b06f70a180745cf0657f",
+    "source_NetCDF_sha256": "238262c9d52e9d087d116799cbba0e3b5140aade7f64e6b8ebc02a448cd1419d"
+  },
+  "runtime": {
+    "status": "DEPLOYED_BUILD_NOT_STARTED",
+    "files": 40,
+    "versions": {
+      "pypsa": "0.30.3",
+      "linopy": "0.5.5",
+      "numpy": "1.26.4",
+      "scipy": "1.15.2",
+      "pandas": "2.3.1",
+      "xarray": "2025.1.2",
+      "netCDF4": "1.7.2",
+      "psutil": "7.0.0"
+    },
+    "resources": {
+      "timestamp": 1791773744.6206994,
+      "hostname": "autodl-container-21104cb00b-43be1fed",
+      "cgroup_version": 1,
+      "ancestors": [
+        {
+          "path": "/sys/fs/cgroup/memory",
+          "limit": 96636764160,
+          "current": 449376256,
+          "memory_peak": 548904960,
+          "memory_events": "max 0\noom 0\noom_kill 0\n",
+          "hierarchical_memory_limit": 96636764160
+        }
+      ],
+      "effective_memory_limit": 96636764160,
+      "memory_headroom": 96187387904,
+      "effective_cpu_cores": 12.0,
+      "cpu_affinity": 48,
+      "cpuset": "0-47",
+      "ancestor_scope": "visible namespace ancestors plus kernel hierarchical_memory_limit; host ancestors outside mount not directly exposed",
+      "disk_free": 31971016704,
+      "host_available": 450240012288
+    },
+    "manifest_sha256": "856e948628a37565ca736d673f853277349817f5484a1492895cb7df5fa3ca41",
+    "no_solver_calls": true
+  },
+  "execution": {
+    "run": "/root/autodl-tmp/SGP/runs/c02_daily_build_20261012T025604Z_fcc0f784",
+    "source": "/root/autodl-tmp/SGP/inputs/repo/results_project/assembly_v1/research_fullsc_2050_assembly_v1_unsolved.nc",
+    "t0": 1791773764.0483007,
+    "deadline": 1791775564.0483007,
+    "root": "/root/autodl-tmp/SGP/incoming/c02_build_only_122_20261012_856e9486/release",
+    "instance_id": 122,
+    "hostname": "autodl-container-21104cb00b-43be1fed",
+    "payload_manifest_sha256": "856e948628a37565ca736d673f853277349817f5484a1492895cb7df5fa3ca41",
+    "input_manifest_sha256": "1b4ba7fb99bacda40f09c10a146049e16bb375ed4c3556aaa1243e2e3d2c4291",
+    "claim": "/root/autodl-tmp/SGP/c02_claims/C02_C02_DAILY_122_20261012_V1.json",
+    "initial_resources": {
+      "timestamp": 1791773764.048087,
+      "hostname": "autodl-container-21104cb00b-43be1fed",
+      "cgroup_version": 1,
+      "ancestors": [
+        {
+          "path": "/sys/fs/cgroup/memory",
+          "limit": 96636764160,
+          "current": 441364480,
+          "memory_peak": 548904960,
+          "memory_events": "max 0\noom 0\noom_kill 0\n",
+          "hierarchical_memory_limit": 96636764160
+        }
+      ],
+      "effective_memory_limit": 96636764160,
+      "memory_headroom": 96195399680,
+      "effective_cpu_cores": 12.0,
+      "cpu_affinity": 48,
+      "cpuset": "0-47",
+      "ancestor_scope": "visible namespace ancestors plus kernel hierarchical_memory_limit; host ancestors outside mount not directly exposed",
+      "disk_free": 31971012608,
+      "host_available": 450333802496
+    },
+    "phases": "INPUT -> DAILY_NETWORK -> ONE_LINOPY_BUILD -> STREAM_EXPORT -> STATIC_READBACK; no optimizer",
+    "full_build_calls_max": 1,
+    "solver_calls_allowed": 0
+  },
+  "source_resolved_inside_SGP": true,
+  "source_sha_check": "passed before aggregation per immutable worker execution path",
+  "transport_host_key_type": "ssh-ed25519",
+  "transport_host_key_match": true,
+  "instance_id": 122,
+  "hostname": "autodl-container-21104cb00b-43be1fed",
+  "WLS_or_native_Gurobi_started": false,
+  "new_daily_network": {
+    "status": "EXACT_VALUES_PASS",
+    "path": "/root/autodl-tmp/SGP/runs/c02_daily_build_20261012T025604Z_fcc0f784/artifacts/daily_365_unsolved.nc",
+    "sha256": "b2df7dc771d4759668988f7a0abd7ccfafacd976dff644f7acafd20aee50b9f2",
+    "bytes": 21259211,
+    "snapshots": 365,
+    "weight_sums": {
+      "objective": 8760,
+      "generators": 8760,
+      "stores": 8760
+    },
+    "aggregation": [
+      {
+        "component": "Generator",
+        "attribute": "p_max_pu",
+        "assets": 460,
+        "accepted_value_hashes_matched": true
+      },
+      {
+        "component": "Load",
+        "attribute": "p_set",
+        "assets": 1737,
+        "accepted_value_hashes_matched": true
+      },
+      {
+        "component": "StorageUnit",
+        "attribute": "inflow",
+        "assets": 40,
+        "accepted_value_hashes_matched": true
+      }
+    ],
+    "representation_error_deducted_from_V4": false
+  },
+  "full_sparse_LP_manifest": null,
+  "full_sparse_LP_status": "NOT_EXPORTED",
+  "preserve_old_models": true
+}

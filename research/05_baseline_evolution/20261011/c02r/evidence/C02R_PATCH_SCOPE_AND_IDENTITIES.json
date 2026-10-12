@@ -1,0 +1,121 @@
+{
+  "status": "LOCAL_CANDIDATE_ONLY_NOT_DEPLOYED",
+  "version": "C02R_EXACT_FINITE_ROW_CHECK_V1",
+  "parent_commit": "2b3442826ddc2364f63e3bd44a4eab6aa94fc263",
+  "parent_path": "research/05_baseline_evolution/20261011/c02/code/c02_model.py",
+  "parent_sha256": "676edc30c5860c4a6b52fe63a117d1a395e9230db0d58db3e6ff9bb5ba4934a1",
+  "candidate_sha256": "fa8c3905dfc6bfd36b57cf7ceed8592b63dba7943d8d0c2babdee32f507e0f76",
+  "helper_sha256": "c05266882fa9f7122ceda9442be9c4d7a1b36ee02a4edea700c9c71cf508e891",
+  "changed_existing_functions": [
+    "export_model"
+  ],
+  "bits_function_AST_unchanged": true,
+  "other_existing_functions_AST_unchanged": [
+    "bits",
+    "arrsha",
+    "average",
+    "exact_energy",
+    "assemble_daily",
+    "add_hooks",
+    "canonical_rows",
+    "family",
+    "objectives"
+  ],
+  "semantic_call_sites": [
+    {
+      "line": 214,
+      "name": "rhs_exact",
+      "call": "rhs_exact(rhs,np.r_[-q,np.zeros(364)],actual_signs=signs,expected_sign='=',asset_id=asset,family='Store-energy_balance',row_labels=row,report_path=failure_path)"
+    },
+    {
+      "line": 232,
+      "name": "rhs_exact",
+      "call": "rhs_exact(rr,dd,actual_signs=signs,expected_sign='=',asset_id=bus,family=nm,row_labels=lab,report_path=failure_path)"
+    },
+    {
+      "line": 219,
+      "name": "rhs_exact",
+      "call": "rhs_exact(rr,np.full(365,val),actual_signs=signs,expected_sign='>=' if nm=='Store-fix-e-lower' else '<=',asset_id=asset,family=nm,row_labels=lab,report_path=failure_path)"
+    },
+    {
+      "line": 240,
+      "name": "bounds_exact",
+      "call": "bounds_exact(np.array([lower[j]]),np.array([upper[j]]),np.array([x]),np.array([y]),asset_id=why.split(':',1)[1],family=name,row_labels=np.array([l]),report_path=failure_path)"
+    }
+  ],
+  "remaining_bits_call_sites": [
+    {
+      "line": 32,
+      "call": "bits(n.snapshot_weightings[col].to_numpy(),np.full(2920,3.))",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 169,
+      "call": "bits(c[pos],np.asarray(original)[mask])",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 195,
+      "call": "bits(arrays['col_lower_scaled']*D,lb)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 195,
+      "call": "bits(arrays['col_upper_scaled']*D,ub)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 195,
+      "call": "bits(arrays['cost_V3_scaled']/D,adapted)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 198,
+      "call": "bits(np.load(path,mmap_mode='r'),a)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 203,
+      "call": "bits(np.load(path,mmap_mode='r'),labels)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 245,
+      "call": "bits(scaled/factor,a.data)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 248,
+      "call": "bits(values['row_lower_scaled']/R,lower)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 248,
+      "call": "bits(values['row_upper_scaled']/R,upper)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    },
+    {
+      "line": 251,
+      "call": "bits(np.load(p,mmap_mode='r'),val)",
+      "disposition": "RETAINED_BIT_EXACT_INPUT_OBJECTIVE_COORDINATE_OR_FILE_READBACK"
+    }
+  ],
+  "nonfinite_policy": "All RHS values finite binary64; only exact expected inactive-side bound sentinels are permitted. No active endpoint may become NaN/Inf.",
+  "new_run_authorized": false,
+  "cloud_connected": false,
+  "new_network_or_LP_created": false,
+  "candidate_worker_or_launcher_created": false,
+  "old_runtime_and_payload_unchanged": true,
+  "reuse_network_if_later_authorized": {
+    "sha256": "b2df7dc771d4759668988f7a0abd7ccfafacd976dff644f7acafd20aee50b9f2",
+    "cloud_path": "/root/autodl-tmp/SGP/runs/c02_daily_build_20261012T025604Z_fcc0f784/artifacts/daily_365_unsolved.nc",
+    "local_path": "D:/ResearchWorkspaces/ASEAN/work/c02_daily_build_20261012/cloud_evidence/daily_365_unsolved.nc"
+  },
+  "additional_known_blocker": {
+    "kind": "OUTSIDE_APPROVED_SIGNED_ZERO_REPAIR_NOT_MODIFIED",
+    "parent_line": 247,
+    "expression": "assert len(names)==v4['constraint_blocks'][fam] and counts[fam]>0",
+    "direct_evidence": "C02_CONSTRAINT_COVERAGE.json and C02_ZERO_ROW_BOUNDARY_CHECK.json: Line-ext-s_nom-upper, Link-ext-p_nom-upper, Store-ext-e_nom-upper each have zero active rows and +Inf expected maxima.",
+    "implication": "If earlier checks pass, existing export coverage assertion will reject these known valid zero-row families. Requires a separately explicit, narrow disposition before a new full build; no constraint/model change is proposed or applied."
+  }
+}

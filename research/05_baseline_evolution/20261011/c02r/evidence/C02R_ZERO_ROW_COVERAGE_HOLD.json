@@ -1,0 +1,10 @@
+{
+  "kind": "OUTSIDE_APPROVED_SIGNED_ZERO_REPAIR_NOT_MODIFIED",
+  "parent_line": 247,
+  "expression": "assert len(names)==v4['constraint_blocks'][fam] and counts[fam]>0",
+  "direct_evidence": "C02_CONSTRAINT_COVERAGE.json and C02_ZERO_ROW_BOUNDARY_CHECK.json: Line-ext-s_nom-upper, Link-ext-p_nom-upper, Store-ext-e_nom-upper each have zero active rows and +Inf expected maxima.",
+  "implication": "If earlier checks pass, existing export coverage assertion will reject these known valid zero-row families. Requires a separately explicit, narrow disposition before a new full build; no constraint/model change is proposed or applied.",
+  "status": "KNOWN_CHECKER_BLOCKER_NOT_REPAIRED_IN_THIS_SCOPE",
+  "model_change_needed": false,
+  "proposed_disposition": "Only if separately approved: accept zero rows for exactly the three frozen +Inf-upper-bound families, after checking their actual extendable asset bounds and label masks. Missing/unknown finite families must still stop. No implementation in this patch."
+}

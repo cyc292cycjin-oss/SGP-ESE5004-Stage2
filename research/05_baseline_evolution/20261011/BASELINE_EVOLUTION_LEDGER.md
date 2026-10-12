@@ -18,7 +18,8 @@
 | B-03 | B03_C00_DESIGN_COMPLETE | 复用已接受证据收口；b03_c00/；无新物理修复或求解 |
 | C-00 | B03_C00_DESIGN_COMPLETE | 365日科学/数学/预算/验收协议；等待联合审阅，无执行授权 |
 | C-01 | C01_REPRESENTATION_DECISION_REQUIRED | 95条时变电Load出现精确年度漂移；385生物质源闭合保持；c01/ |
-| C实际测试 | PLAN_ONLY_NOT_AUTHORIZED | 表示规则待联合决定；未构建日网络/LP、未调用求解器 |
+| C-02构建 | C02_BLOCKED_WITH_SPECIFIC_EVIDENCE | 日网络导出回读通过，Linopy建立后RHS逐位检查停止；完整矩阵/V4绑定未完成，无求解 |
+| C-03求解 | NOT_AUTHORIZED | C02阻断；G6-05继续暂停 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
 | E | PLAN_ONLY_NOT_AUTHORIZED | 跨境氢气及其他能源载体扩展；未执行 |
 | F | PLAN_ONLY_NOT_AUTHORIZED | 可比的互联与独立运行成本实验；未执行 |
@@ -259,3 +260,43 @@
 - 分支 `audit/stage2-c01r-bounded-binary64-20261012`；独立 [PR #11](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/11) 为OPEN/DRAFT，基于已核C01/122审计分支，未合并任何PR。
 - 当前C01R_REPRESENTATION_ACCEPTED，95条漂移全部AND通过，385/807精确关系和V4不变。只具备申请C02审查的表示前提；无构模/求解/AutoDL操作，G6-05暂停。
 - 本轮最终commit和ZIP整体SHA/CRC在PACKAGE_MANIFEST及外置C01R_FINAL_DELIVERY_RECEIPT.json记录。旧C00和C01历史保留；交付后停止。
+
+
+## C-02受控构建真实交付（2026-10-12）
+
+**C02_BLOCKED_WITH_SPECIFIC_EVIDENCE**。用户授权仅build-only，已在122执行唯一一次365日日网络组装和Linopy模型创建，未调用任何优化/原生Gurobi/WLS。
+
+- 固定C01R基线68ebb96b7d48318654e9ca3f2b2780a0133bc889；Scheme A PR #4对象8883de6fb3e15767c632ac92f535e8a423e90b69。未合并旧PR或修改原科学源码。
+- 新未求解NetCDF真实导出/回读，365×24h三权重各8760h；1737 Load/460 CF/40入流全部匹配已接受日值SHA；180Q/627不变及385精确D≤Q′在网络层通过。
+- 实际Linopy持久化标签2,450,005列、6,042,238行，807资源方向块及196电池耦合已生成。Store动态RHS位比较停止；完整稀疏矩阵、NNZ、全部行界/R与日V4绑定没有完成。
+- 新检查器对±0的误拒绝由冻结PyPSA表达式及微型算术证实；原失败RHS未逐元素保存，其他差异不能完全排除。没有将此异常称为数学不可行，没有重建/重试。
+- Run c02_daily_build_20261012T025604Z_fcc0f784；1800秒固定窗口，约60.24秒失败、61.17秒轻量封存；worker/supervisor/guard已退出。90GiB/12核准入，cgroup峰值约2.91GiB，未触发保护。
+- 新NetCDF及轻量回执本地SHA/CRC通过；部分列/标签数组云端保留、本地LOCAL_SYNC_PENDING；报告/逐产物SHA见c02目录。云端封存成功不等于完整LP存在。
+- C03 NO-GO；G6-05继续PAUSED_BY_USER；后续完整build-only重新执行需用户审阅后另行批准。未进入任何求解或D—F。
+- 独立分支codex/c02-controlled-daily-build-20261012。真实发布commit/PR/ZIP身份见后续发布记录；代码、回执、台账与强制C02_DAILY_BUILD_STATIC_REVIEW.zip同轮交付。失败版本和旧报告原件保留。
+
+
+### C-02真实发布里程碑
+
+- 实际受控构建、部分产物SHA和阻断证据提交 `e89f96814fabf11826ca6f365b871e8f70a5c3e0` 已push。
+- 分支 `codex/c02-controlled-daily-build-20261012`；独立 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12) 为OPEN/DRAFT，base为已核C01R分支；未合并main或任何历史PR。
+- C02_BLOCKED_WITH_SPECIFIC_EVIDENCE：新网络回读通过，完整LP导出和日V4绑定未完成；没有重试或求解。失败版本和实例均保持，G6-05暂停，C03未授权。
+- 同轮审阅ZIP包含报告/最新台账/轻量证据/代码及成员SHA、大小与CRC记录；最终提交和ZIP整体SHA由本地 `C02_FINAL_DELIVERY_RECEIPT.json` 记录。用户上传ChatGPT联合审阅后再决定修复及新窗口。
+
+
+## C-02R最小检查器修复准备（2026-10-12）
+
+- C02R_CHECKER_PATCH_READY_FOR_REVIEW：只在c02r/candidate创建新SHA版本；原C02失败代码/Run/消费标记/部分产物不变。本轮无云端连接、无网络/LP构建、无solver。
+- Store动态/库存界、最终Bus RHS及对应导出行界采用零容差精确语义比较；±0相等，非零1 ULP、NaN/Inf异常、shape/方向/界错误拒绝。原bits函数与11个保留位检查不变；Scheme A/C01R/V3/V4/成本不改。
+- 34项独立小型与候选循环接线测试通过；仅NumPy/pandas/xarray替身，没有PyPSA/Linopy对象。失败记录完整资产/家族/行号/hex且不覆盖。
+- 另有确定的既有counts[fam]>0覆盖断言，会拒绝3个已核+Inf上界的零行家族；不属本轮±0修复，未擅改。新完整构建仍需明确处置此阻断和取得独立C02R运行授权。
+- 优先复用封存日NetCDF的方案仅记录未执行。C02整体仍BLOCKED，完整矩阵/目标offset/日V4绑定未完成；C03未授权，G6-05保持PAUSED_BY_USER。
+- 继续独立codex/c02-controlled-daily-build-20261012分支和PR #12，不改main/旧PR；本轮真实commit和ZIP身份由发布回执记录。
+
+
+### C-02R真实发布里程碑
+
+- 候选补丁、34项小型检查、未修复零行覆盖阻断及台账提交 `6270883d679108e4af7aaaf655a6655ecc0e2d49` 已push。
+- 继续 `codex/c02-controlled-daily-build-20261012`，已更新 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12)，仍OPEN/DRAFT，未合并。
+- 状态C02R_CHECKER_PATCH_READY_FOR_REVIEW；C02整体仍BLOCKED，未获新的C02R运行授权；没有云端连接/模型构建/求解，G6-05仍暂停。
+- 强制ZIP为C02R_MINIMAL_CHECKER_REPAIR_REVIEW.zip；最终Git提交、大小、SHA与完整CRC记录由本地C02R_FINAL_DELIVERY_RECEIPT.json给出。等待用户与ChatGPT复核。

@@ -1,0 +1,42 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /root/autodl-tmp/SGP/env/gate5/share/proj failed
+INFO:pypsa.io:Imported network research_fullsc_2050_assembly_v1_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+INFO:pypsa.io:Exported network 'daily_365_unsolved.nc' contains: loads, stores, generators, global_constraints, lines, storage_units, links, buses, carriers
+INFO:pypsa.io:Imported network daily_365_unsolved.nc has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+WARNING:pypsa.consistency:The following links have carriers which are not defined:
+Index(['BN4 0 fuel cell',
+       'BN:2050:Buildings:ResidentialFuel:biomass@BN4 0 Charcoal final-energy meter',
+       'BN:2050:Buildings:ResidentialFuel:biomass@BN4 0 Fuelwood final-energy meter',
+       'BN:2050:Buildings:ResidentialFuel:gas@BN4 0 final-fuel meter',
+       'BN:2050:Buildings:ResidentialFuel:oil@BN4 0 final-fuel meter',
+       'BN:2050:Bunker:InternationalAviationBunker:oil@BN4 0 final-fuel meter',
+       'BN:2050:Industry:IndustryFinalEnergy:oil@BN4 0 final-fuel meter',
+       'BN:2050:OtherNEC:OtherNEC:oil@BN4 0 final-fuel meter',
+       'BN:2050:Transport:RoadResidualFuel:oil@BN4 0 final-fuel meter',
+       'ID:2050:Agriculture:AgricultureFinalEnergy:oil@ID_Java-Bali1 0 final-fuel meter',
+       ...
+       'VN:2050:Transport:RoadResidualFuel:oil@VN2 6 final-fuel meter',
+       'VN:2050:Transport:RoadResidualFuel:oil@VN2 7 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 0 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 1 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 2 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 3 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 4 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 5 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 6 final-fuel meter',
+       'VN:2050:Transport:TransportNEC:gas@VN2 7 final-fuel meter'],
+      dtype='object', name='Link', length=2163)
+WARNING:pypsa.consistency:Encountered nan's in static data for columns ['efficiency3'] of component 'Link'.
+Traceback (most recent call last):
+  File "/root/autodl-tmp/SGP/incoming/c02_build_only_122_20261012_856e9486/release/c02_worker.py", line 63, in <module>
+    if __name__=='__main__':main(Path(sys.argv[1]))
+                            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/SGP/incoming/c02_build_only_122_20261012_856e9486/release/c02_worker.py", line 47, in main
+    built=time.time();record=export_model(n,root,out,progress);del n;gc.collect()
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/SGP/incoming/c02_build_only_122_20261012_856e9486/release/c02_model.py", line 210, in export_model
+    bits(rhs,np.r_[-q,np.zeros(364)]);bounds[int(row[0])]=(-q,-q,'initial:'+asset)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/SGP/incoming/c02_build_only_122_20261012_856e9486/release/c02_model.py", line 15, in bits
+    if not np.array_equal(a.astype('<f8').view('<u8'),b.astype('<f8').view('<u8')):raise ValueError('binary64 differs')
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: binary64 differs
