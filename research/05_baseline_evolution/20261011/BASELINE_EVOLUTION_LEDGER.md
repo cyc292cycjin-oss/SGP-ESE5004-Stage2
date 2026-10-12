@@ -234,3 +234,10 @@
 - 122状态 **AWAITING_USER_JUPYTER_READONLY_RECEIPT**；当前无GO。入口本地合成测试不等同于云端执行。报告 `c01/instance122/C01_INSTANCE122_READONLY_HANDOFF.md`。
 - 本轮独立分支 `audit/stage2-c01-instance122-handoff-20261012`；commit/PR见发布记录及交付Manifest。新ZIP保留原C01 ZIP，放在独立实例交接目录；无NetCDF、大向量或凭据。
 - G6-05仍PAUSED_BY_USER；新网络/LP/求解/AutoDL操作均0，不自动进入C模型构建或后续阶段。
+
+
+### C-01 / 122只读交接发布里程碑
+
+- 交接入口、16项本地检查及报告提交 `c872806117aebb8216c8b5f883e71ca8d6d648a4` 已push。
+- 分支 `audit/stage2-c01-instance122-handoff-20261012`；独立 [PR #10](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/10) 为OPEN/DRAFT，base为原C01审计分支；未合并或改写旧分支。
+- 122实际身份回执仍待用户Jupyter返回；当前仅复用原C01证据，科学结论仍DECISION_REQUIRED。新交付的最终commit和ZIP SHA/CRC记录在PACKAGE_MANIFEST及本地最终回执中；旧ZIP保留。G6-05保持暂停，无构模/求解/AutoDL操作。
