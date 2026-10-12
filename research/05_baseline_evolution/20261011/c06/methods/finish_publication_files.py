@@ -1,0 +1,28 @@
+from pathlib import Path
+import json,hashlib,shutil
+W=Path('/mnt/d/ResearchWorkspaces/ASEAN/work/c06_barconvtol_20261012')
+R=Path('/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model');O=R/'research/05_baseline_evolution/20261011/c06'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+for name in ('check_publication.py','finish_publication_files.py','compute_receipt_metrics.py'):
+ shutil.copyfile(W/name,O/'methods'/name)
+shutil.copyfile(W/'C06_PUBLICATION_CONSISTENCY.json',O/'evidence/C06_PUBLICATION_CONSISTENCY.json')
+p=O/'C03_C05_C06_COMPARATIVE_FORENSICS.md';s=p.read_text(encoding='utf-8').replace('新增资产数2','新增资产数2：Line 49与Line 59');p.write_text(s,encoding='utf-8')
+(O/'C06_FORENSICS_METHOD.md').write_text('''# 只读取证复核方法
+
+本轮没有任何求解调用或新模型。报告中的原生运行来自已经结束的C06，不来自这些脚本。
+
+1. `salvage_received_evidence.py`：核对已验证的27,656,192字节前缀与唯一续传偏移，顺序读取两段已有本地文件；仅提取完整、路径安全的普通tar成员，保留不完整成员与原partial。全包CRC未完成，明确输出PARTIAL而非完整备份。
+2. `authenticate_partial_analysis.py`：检查已恢复原单位NPY对ORIGINAL_VECTOR_INDEX；按冻结D/R逆映射到独立analysis_view。X/Pi/RC的NPY SHA必须逐一与原始云端RAW_RECEIPT一致，RAW_RECEIPT由已有监控对象序列化后也必须匹配RAW_DURABLE原SHA。原位文件不修改，不把derived副本冒充已传输原件。
+3. `compare_saved_results.py`：从三向量与标签复算全部807账户年度释放、库存和385组对照；复用原V4各自预算。对日CSC唯一一次有界遍历分类全部stationarity，复用C04旧失败集合；行失败集合读取已有activity及预算。未扫描历史全年矩阵。
+4. `local_exact_forensics.py`：读取163个代表性日CSR行和5个日CSC列的完整支撑，以Fraction(float64)验证原单位/输入坐标恒等式、局部残差及乘子符号。通过NetCDF实际snapshots_snapshot坐标核对159个显式值。1个未在动态表单独保存的StorageUnit条目列为NOT_EXPLICITLY_STORED，未把默认语义猜测成直接回读。
+5. `compute_receipt_metrics.py`：核对154项真实参数、同一原生模型句柄、真实调用/返回区间资源、日志轨迹、全部原V4门槛及双成本。C05无合法点，残差比较NOT_AVAILABLE。
+6. `check_publication.py`：检查报告文件SHA/大小、回执一致性、准确的LOCAL_SYNC_PENDING资格及公开副本脱敏。此检查不是新的日V4或完整LP可行性认证。
+
+实际分析在既有Python/NumPy/xarray环境执行；Fraction只用于小规模支撑，不构造密集全矩阵。路径按D盘工作区与既有WSL研究目录绑定。独立结果源见C06_ANALYSIS_PROVENANCE、C06_COMPARISON_METHOD_RECEIPT和C06_EXACT_LOCAL_FORENSICS。
+
+此前本地核验脚本经历了观察快照摘要字段格式、NetCDF整数snapshots索引及未显式存储资产列的读取修正；均仅涉及本轮只读取证方法，不修改生产代码、原始返回点或验收公式。报告没有将这些本地读取错误解释为求解失败原因。
+
+BACKUP_INDEX原件缺失是剩余完整备份缺口，需新授权传输补齐；本轮不执行。审阅ZIP不含NPY、NetCDF、许可证、私钥或令牌。
+''',encoding='utf-8')
+p=O/'C06_EVIDENCE_INDEX.json';p.write_text(json.dumps({'status':'COMPARATIVE_CLOSEOUT_BACKUP_PENDING','production_commit':'34a34b69ef752d7809487ca609cd91e12f75bffd','files':[{'relative':x.relative_to(O).as_posix(),'bytes':x.stat().st_size,'sha256':sha(x)} for x in sorted(O.rglob('*')) if x.is_file() and x!=p]},indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+print('Publication files and index updated')

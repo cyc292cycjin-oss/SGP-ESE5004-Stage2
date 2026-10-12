@@ -50,3 +50,13 @@
 当前GO/NO-GO：身份/交接/单因素/一次执行/状态保全/本地备份PASS；C05科学验收NOT_ACCEPTED_NO_SOLUTION；任何进一步优化NO-GO_NOT_AUTHORIZED。C03仍OPTIMAL_BUT_NOT_ACCEPTED。
 
 - C05结果与全部索引脱敏日志已push并核实远端提交 `869d72a90376b1862cf2058576b01917131f0a12`；独立[PR #15](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/15)为OPEN/DRAFT，关联#13/#14，未合并。生产提交为`d6c48dbd95d12f0354561372e9a65d6e92511754`。最终审阅包导出提交和ZIP SHA见包内GIT_PUBLICATION及外部C05_FINAL_DELIVERY_RECEIPT。
+
+## C06 final comparative closeout — 2026-10-12
+
+- **C06_EXECUTION_ACCEPTED_SCIENCE_NOT_ACCEPTED**；Run `c06_barconvtol_daily122_20261012T095705Z_321aa0f1`，真实Status2/SolCount1/143 Barrier/282.179754秒，唯一optimize已结束，生产提交`34a34b69ef752d7809487ca609cd91e12f75bffd`。
+- C03单因素BarConvTol 1e-6→1e-9，Aggregate1；154项实际参数核验。C05 NUMERIC/SolCount0，无可比较返回解。
+- 资源账户377→85（无新增），义务组111→0；矩阵48298→243（均库存下界，无新增）；stationarity4304→3336（保留3291/新增45），自由RC365→0；目标差与加权stationarity L1恶化，不能宣称科学PASS。
+- 原单位/原生三向量由已接收数据与D/R逆映射核得一致云端SHA；163局部行/5列精确核算支持真实返回点违规。科学模型、阈值及旧结果未修改。
+- 云端封存完成；**LOCAL_SYNC_PENDING**：已收140640256/153715959字节，缺13075703，原60分钟窗过期且未重开。完整gzipCRC/BACKUP_INDEX待新传输授权；审阅ZIP不替代原始备份。
+- 唯一建议为预算匹配等价坐标的受控日模型对照，PROPOSED/未执行，须另行批准。仍在C阶段，D及2920时段未获授权；G6-05 PAUSED_BY_USER。
+- 详细报告：`research/05_baseline_evolution/20261011/c06/C03_C05_C06_COMPARATIVE_FORENSICS.md`；本轮独立分支`codex/c06-barconvtol-daily-20261012`，关联#13/#14/#15。真实结果提交与PR在Git发布回执绑定，不自动合并。
