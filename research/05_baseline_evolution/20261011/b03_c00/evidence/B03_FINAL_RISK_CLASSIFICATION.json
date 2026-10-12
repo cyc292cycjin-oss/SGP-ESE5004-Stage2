@@ -1,0 +1,103 @@
+{
+  "schema": "B03_RISK_V1",
+  "rows": [
+    {
+      "id": "B03-01",
+      "classification": "PROVEN",
+      "topic": "旧完整LP严格D>Q",
+      "evidence_summary": "0≥513/34359738368 MWh>0，完整行支撑证书仅对旧LP有效",
+      "disposition": "BLOCK_IF_OLD_Q_USED",
+      "reference": "../A03_EXACT_ANNUAL_CLOSURE_PROOF.md"
+    },
+    {
+      "id": "B03-02",
+      "classification": "PROVEN",
+      "topic": "Scheme A源级闭合",
+      "evidence_summary": "180Q修订，627不变，385/385精确D≤Q′；0组等号。新LP尚未组装",
+      "disposition": "GO_CONDITION_REBIND_AND_READBACK",
+      "reference": "../b01_b02/evidence/B01_SCHEME_A_SOURCE_BRIDGE.json"
+    },
+    {
+      "id": "B03-03",
+      "classification": "PROVEN",
+      "topic": "旧候选物理违规",
+      "evidence_summary": "377账户/111组约10.24TWh；277644库存行、324120 Bus行；非新模型结果",
+      "disposition": "HISTORICAL_COMPARATOR_NOT_CAUSAL_BLOCK",
+      "reference": "../FINAL_OBLIGATION_BUS_IMPLEMENTATION_AUDIT.md"
+    },
+    {
+      "id": "B03-04",
+      "classification": "NECESSARY_CHECK_PASS",
+      "topic": "1737固定Load供给路径",
+      "evidence_summary": "385 biomass、1256 fossil、96 electricity均有实际合法路径",
+      "disposition": "DAILY_TEST_JOINT_FEASIBILITY",
+      "reference": "../b01_b02/evidence/B01_LOAD_SUPPLY_PATHS.json"
+    },
+    {
+      "id": "B03-05",
+      "classification": "NECESSARY_CHECK_PASS",
+      "topic": "807独占资源账户",
+      "evidence_summary": "Store→meter→final Bus→唯一Load，无旁路；非负平坦需求下源级年度/前缀必要条件",
+      "disposition": "BLOCK_ON_TOPOLOGY_OR_Q_DIFF",
+      "reference": "../b01_b02/evidence/B01_RESOURCE_TOPOLOGY.json"
+    },
+    {
+      "id": "B03-06",
+      "classification": "RISK",
+      "topic": "外部供给与源边界",
+      "evidence_summary": "400有价外部Generator无有限进口cap，807资源是终端核算非独立潜力；NULL仍NULL",
+      "disposition": "KEEP_BOUNDARY_DO_NOT_BLOCK_THIS_DIAGNOSTIC",
+      "reference": "../a06/A06_POLICY_COST_RESOURCE_AUDIT.md"
+    },
+    {
+      "id": "B03-07",
+      "classification": "RISK",
+      "topic": "共享电网/容量/KVL",
+      "evidence_summary": "20弱分量、13单点；lv最低容量通过，联合网流/扩建未证明",
+      "disposition": "DAILY_TEST_CAN_DIAGNOSE",
+      "reference": "../b01_b02/evidence/B_SHARED_CAPACITY_AND_STORAGE_NECESSARY_CHECKS.json"
+    },
+    {
+      "id": "B03-08",
+      "classification": "NECESSARY_CHECK_PASS",
+      "topic": "CO2/SMR CC/FT/H2局部必要关系",
+      "evidence_summary": "captured CO2仅SMR CC→FT，无地质库；FT需额外H2/电且受本地oil消纳，技术可选pmin0",
+      "disposition": "DAILY_TEST_CAN_DIAGNOSE_COUPLED_OPERATION",
+      "reference": "../b01_b02/B02_CARBON_CONVERSION_PATH_AUDIT.md"
+    },
+    {
+      "id": "B03-09",
+      "classification": "RISK",
+      "topic": "时间聚合改变可行域",
+      "evidence_summary": "日均负荷/可再生与日末库存不保证3h峰值/日内库存；精确年度表示需新门槛",
+      "disposition": "BLOCK_ON_ANNUAL_DRIFT_ACCEPT_COARSENING_ONLY_AFTER_REVIEW",
+      "reference": "C00_DAILY_365_DIAGNOSTIC_PROTOCOL.md"
+    },
+    {
+      "id": "B03-10",
+      "classification": "UNKNOWN",
+      "topic": "其他联合与跨期约束",
+      "evidence_summary": "电/燃料/储能/效率/共享约束和全部新binary64行的联合可行性未知",
+      "disposition": "DAILY_TEST_CAN_DIAGNOSE_NO_EXHAUSTIVE_PREAUDIT",
+      "reference": "../b01_b02/B_PHYSICAL_FEASIBILITY_RISK_REGISTER.md"
+    },
+    {
+      "id": "B03-11",
+      "classification": "UNKNOWN",
+      "topic": "历史异常因果",
+      "evidence_summary": "微小严格矛盾未证明造成10.24TWh违规或P2 INF_OR_UNBD；数值精度/条件性未知",
+      "disposition": "DO_NOT_REOPEN_G6_05",
+      "reference": "../A03_EXACT_ANNUAL_CLOSURE_PROOF.md"
+    },
+    {
+      "id": "B03-12",
+      "classification": "RISK",
+      "topic": "科学与经济结论外推",
+      "evidence_summary": "无年度CO2cap，2025电网，NULL成本/排放与固定终端用途；非净零/完整经济比较",
+      "disposition": "BOUND_CONCLUSIONS_NOT_ADD_POLICY",
+      "reference": "../a06/A06_SCIENTIFIC_ASSUMPTION_DECISION_REGISTER.md"
+    }
+  ],
+  "global_feasibility": "NOT_PROVEN",
+  "new_physical_repair_required_by_this_audit": false
+}

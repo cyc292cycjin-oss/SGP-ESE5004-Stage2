@@ -1,0 +1,428 @@
+{
+  "commit": "b9be7d0ab788a4151346c098d2e657c7e94a22da",
+  "path": "scripts_project/fixed_inventory_scaling.py",
+  "sha256": "73c072499e1a7f464d4e13718233c56dba979ea43ab09b3bc1d184a4c19cf09f",
+  "lines": [
+    {
+      "line": 1,
+      "text": "\"\"\"Reversible power-of-two scale map for qualified fixed inventory groups only.\"\"\""
+    },
+    {
+      "line": 2,
+      "text": "import hashlib,json,math"
+    },
+    {
+      "line": 3,
+      "text": "import numpy as np"
+    },
+    {
+      "line": 4,
+      "text": "from precision_handoff import exact,digest"
+    },
+    {
+      "line": 5,
+      "text": "from fixed_accounts import validate_exported_accounting"
+    },
+    {
+      "line": 6,
+      "text": ""
+    },
+    {
+      "line": 7,
+      "text": "def restore_series_chunks(series,factors,label,chunk_size=200_000):"
+    },
+    {
+      "line": 8,
+      "text": "    \"\"\"Same elementwise float64 map and inverse check, bounded scratch arrays."
+    },
+    {
+      "line": 9,
+      "text": ""
+    },
+    {
+      "line": 10,
+      "text": "    Keep all original labels and the original Series object. No solver API."
+    },
+    {
+      "line": 11,
+      "text": "    Do not discard D/R; they are still needed to explain primal/dual mapping."
+    },
+    {
+      "line": 12,
+      "text": "    \"\"\""
+    },
+    {
+      "line": 13,
+      "text": "    if len(series)!=len(factors):raise ValueError('Scale-map length mismatch')"
+    },
+    {
+      "line": 14,
+      "text": "    for start in range(0,len(series),chunk_size):"
+    },
+    {
+      "line": 15,
+      "text": "        end=min(start+chunk_size,len(series))"
+    },
+    {
+      "line": 16,
+      "text": "        raw=series.iloc[start:end].to_numpy(copy=True)"
+    },
+    {
+      "line": 17,
+      "text": "        scale=factors[start:end];mapped=raw*scale"
+    },
+    {
+      "line": 18,
+      "text": "        exact(mapped/scale,raw,label+' inverse scale')"
+    },
+    {
+      "line": 19,
+      "text": "        series.iloc[start:end]=mapped"
+    },
+    {
+      "line": 20,
+      "text": "    return series"
+    },
+    {
+      "line": 21,
+      "text": ""
+    },
+    {
+      "line": 22,
+      "text": "class FixedInventoryScaling:"
+    },
+    {
+      "line": 23,
+      "text": "    def __init__(self,n,audit):"
+    },
+    {
+      "line": 24,
+      "text": "        validate_exported_accounting(n)"
+    },
+    {
+      "line": 25,
+      "text": "        self.audit=audit;self.groups=audit['groups'];m=n.model"
+    },
+    {
+      "line": 26,
+      "text": "        self.label_group=np.full(m.shape[1],-1,dtype=np.int32)"
+    },
+    {
+      "line": 27,
+      "text": "        self.group_scales=np.array([g['scale'] for g in self.groups],dtype=float)"
+    },
+    {
+      "line": 28,
+      "text": "        for g in self.groups:"
+    },
+    {
+      "line": 29,
+      "text": "            stores=g['stores'];resource_buses=n.stores.loc[stores,'bus']"
+    },
+    {
+      "line": 30,
+      "text": "            links=n.links.index[n.links.bus0.isin(resource_buses)]"
+    },
+    {
+      "line": 31,
+      "text": "            if len(links)!=len(stores):raise ValueError('Fixed-group meter identity changed')"
+    },
+    {
+      "line": 32,
+      "text": "            for kind,names in [('Store',stores),('Link',links)]:"
+    },
+    {
+      "line": 33,
+      "text": "                d=n.df(kind).loc[names]"
+    },
+    {
+      "line": 34,
+      "text": "                if d.capital_cost.ne(0).any() or d.marginal_cost.ne(0).any():raise ValueError('Scaled fixed group has an optimizing economic coefficient')"
+    },
+    {
+      "line": 35,
+      "text": "            labels=[]"
+    },
+    {
+      "line": 36,
+      "text": "            for var,dim,ids in [('Store-e','Store',stores),('Store-p','Store',stores),('Link-p','Link',links),('Link-p_nom','Link-ext',links)]:"
+    },
+    {
+      "line": 37,
+      "text": "                labels.extend(m[var].labels.sel({dim:ids}).values.ravel())"
+    },
+    {
+      "line": 38,
+      "text": "            labels=np.asarray(labels,dtype=int)"
+    },
+    {
+      "line": 39,
+      "text": "            if (labels<0).any() or (self.label_group[labels]!=-1).any():raise ValueError('Missing/duplicate fixed variable ownership')"
+    },
+    {
+      "line": 40,
+      "text": "            self.label_group[labels]=g['group']"
+    },
+    {
+      "line": 41,
+      "text": "        self.row_factors=[];self.scaled_rows=0;self.mapped_rows=0"
+    },
+    {
+      "line": 42,
+      "text": ""
+    },
+    {
+      "line": 43,
+      "text": "    def columns(self,vl,lower,upper,cost):"
+    },
+    {
+      "line": 44,
+      "text": "        self.vgroups=self.label_group[vl]"
+    },
+    {
+      "line": 45,
+      "text": "        self.d=np.ones(len(vl));mask=self.vgroups>=0;self.d[mask]=self.group_scales[self.vgroups[mask]]"
+    },
+    {
+      "line": 46,
+      "text": "        if np.any(cost[mask]!=0):raise ValueError('Fixed-account objective no longer constant/external')"
+    },
+    {
+      "line": 47,
+      "text": "        lo=lower/self.d;up=upper/self.d;c=cost*self.d"
+    },
+    {
+      "line": 48,
+      "text": "        exact(lo*self.d,lower,'invertible column lower');exact(up*self.d,upper,'invertible column upper');exact(c/self.d,cost,'invertible objective')"
+    },
+    {
+      "line": 49,
+      "text": "        return lo,up,c"
+    },
+    {
+      "line": 50,
+      "text": ""
+    },
+    {
+      "line": 51,
+      "text": "    def rows(self,cl,a,lower,upper):"
+    },
+    {
+      "line": 52,
+      "text": "        counts=np.diff(a.indptr)"
+    },
+    {
+      "line": 53,
+      "text": "        if (counts==0).any():raise ValueError('Empty active row needs separate treatment')"
+    },
+    {
+      "line": 54,
+      "text": "        gids=self.vgroups[a.indices];rg=gids[a.indptr[:-1]]"
+    },
+    {
+      "line": 55,
+      "text": "        if not np.array_equal(gids,np.repeat(rg,counts)):"
+    },
+    {
+      "line": 56,
+      "text": "            raise ValueError('Fixed inventory variable participates in an external/cross-group row')"
+    },
+    {
+      "line": 57,
+      "text": "        r=np.ones(len(cl));active=rg>=0;r[active]=1/self.group_scales[rg[active]]"
+    },
+    {
+      "line": 58,
+      "text": "        factor=self.d[a.indices]*np.repeat(r,counts)"
+    },
+    {
+      "line": 59,
+      "text": "        before=a.data;after=before*factor"
+    },
+    {
+      "line": 60,
+      "text": "        exact(after/factor,before,'invertible A prime=R A D')"
+    },
+    {
+      "line": 61,
+      "text": "        a.data=after"
+    },
+    {
+      "line": 62,
+      "text": "        lo=lower*r;up=upper*r"
+    },
+    {
+      "line": 63,
+      "text": "        exact(lo/r,lower,'invertible row lower');exact(up/r,upper,'invertible row upper')"
+    },
+    {
+      "line": 64,
+      "text": "        self.row_factors.append(r);self.scaled_rows+=int((r!=1).sum());self.mapped_rows+=int(active.sum())"
+    },
+    {
+      "line": 65,
+      "text": "        return a,lo,up"
+    },
+    {
+      "line": 66,
+      "text": ""
+    },
+    {
+      "line": 67,
+      "text": "    def finish(self):"
+    },
+    {
+      "line": 68,
+      "text": "        self.r=np.concatenate(self.row_factors);self.row_factors=[]"
+    },
+    {
+      "line": 69,
+      "text": "        return dict(kind='REVERSIBLE_POWER_OF_TWO_FIXED_INVENTORY_NORMALISATION',groups=len(self.groups),stores=self.audit['store_count'],"
+    },
+    {
+      "line": 70,
+      "text": "            mapped_variables=int((self.vgroups>=0).sum()),scaled_variables=int((self.d!=1).sum()),mapped_rows=self.mapped_rows,scaled_rows=self.scaled_rows,"
+    },
+    {
+      "line": 71,
+      "text": "            column_scale_sha256=digest(self.d),row_scale_sha256=digest(self.r),"
+    },
+    {
+      "line": 72,
+      "text": "            primal_map='x_original=D*x_solver',dual_map='dual_original=R*dual_solver',reduced_cost_map='rc_original=rc_solver/D',"
+    },
+    {
+      "line": 73,
+      "text": "            matrix_map='A_solver=R*A_original*D; lhs/rhs_solver=R*lhs/rhs_original; bounds_solver=bounds_original/D; cost_solver=D*cost_original',"
+    },
+    {
+      "line": 74,
+      "text": "            inverse_mapping_exact_binary64=True,scientific_quantity_changes=0,original_binary64_infeasibility_preserved=True,"
+    },
+    {
+      "line": 75,
+      "text": "            finite_precision_acceptance='Independent original MW/MWh bounds derived before any solve, not expanded after results',"
+    },
+    {
+      "line": 76,
+      "text": "            physical_chain_eliminated=False,multi_commodity_timing_freedom_preserved=True)"
+    },
+    {
+      "line": 77,
+      "text": ""
+    },
+    {
+      "line": 78,
+      "text": "    def restore(self,result):"
+    },
+    {
+      "line": 79,
+      "text": "        if len(result.solution.primal):"
+    },
+    {
+      "line": 80,
+      "text": "            restore_series_chunks(result.solution.primal,self.d,'primal')"
+    },
+    {
+      "line": 81,
+      "text": "        if len(result.solution.dual):"
+    },
+    {
+      "line": 82,
+      "text": "            restore_series_chunks(result.solution.dual,self.r,'dual')"
+    },
+    {
+      "line": 83,
+      "text": "        return result"
+    },
+    {
+      "line": 84,
+      "text": ""
+    },
+    {
+      "line": 85,
+      "text": "def physical_checks(n,audit):"
+    },
+    {
+      "line": 86,
+      "text": "    \"\"\"Strict independent MW/MWh acceptance for all 807 fixed stores.\"\"\""
+    },
+    {
+      "line": 87,
+      "text": "    from fixed_accounts import validate_exported_accounting"
+    },
+    {
+      "line": 88,
+      "text": "    validate_exported_accounting(n);checks=[]"
+    },
+    {
+      "line": 89,
+      "text": "    demand=n.get_switchable_as_dense('Load','p_set');h=n.snapshot_weightings.stores.to_numpy()"
+    },
+    {
+      "line": 90,
+      "text": "    for g in audit['groups']:"
+    },
+    {
+      "line": 91,
+      "text": "        be,bp=g['original_energy_error_bound_mwh'],g['original_power_error_bound_mw'];stores=g['stores'];supplies=[];violations=[]"
+    },
+    {
+      "line": 92,
+      "text": "        def add(name,values,bound,unit):"
+    },
+    {
+      "line": 93,
+      "text": "            a=np.asarray(values,dtype=float);maximum=float(np.max(np.abs(a))) if a.size else 0."
+    },
+    {
+      "line": 94,
+      "text": "            good=bool(np.isfinite(a).all() and np.all(np.abs(a)<=bound))"
+    },
+    {
+      "line": 95,
+      "text": "            checks.append(dict(Check='FIXED_ORIGINAL:'+str(g['group'])+':'+name,Status='PASS' if good else 'FAIL',MaxAbsoluteResidual=maximum,Bound=bound,Unit=unit,Tolerance='PRE_SOLVE_OPERATION_CHAIN_BOUND',Detail='Source identity '+g['source_account_id']))"
+    },
+    {
+      "line": 96,
+      "text": "        for s in stores:"
+    },
+    {
+      "line": 97,
+      "text": "            z=n.stores.loc[s];p=n.stores_t.p[s].to_numpy();e=n.stores_t.e[s].to_numpy();prev=np.r_[z.e_initial,e[:-1]]"
+    },
+    {
+      "line": 98,
+      "text": "            link=n.links.index[n.links.bus0.eq(z.bus)][0];p0=n.links_t.p0[link].to_numpy();p1=n.links_t.p1[link].to_numpy();supplies.append(-p1)"
+    },
+    {
+      "line": 99,
+      "text": "            add('state:'+s,e-prev+p*h,be,'MWh');add('stock_lower:'+s,np.minimum(e,0),be,'MWh');add('stock_upper:'+s,np.maximum(e-z.e_nom,0),be,'MWh')"
+    },
+    {
+      "line": 100,
+      "text": "            add('release_direction:'+s,np.minimum(p,0),bp,'MW');add('source_meter:'+s,p-p0,bp,'MW');add('efficiency:'+s,p1+p0,bp,'MW')"
+    },
+    {
+      "line": 101,
+      "text": "            add('meter_capacity:'+s,np.maximum(p0-n.links.at[link,'p_nom_opt'],0),bp,'MW')"
+    },
+    {
+      "line": 102,
+      "text": "            energy=math.fsum(float(v)*float(w) for v,w in zip(p,h))"
+    },
+    {
+      "line": 103,
+      "text": "            add('annual_release:'+s,energy-z.e_initial,be,'MWh');add('terminal:'+s,e[-1],be,'MWh')"
+    },
+    {
+      "line": 104,
+      "text": "        add('final_obligation',np.sum(supplies,axis=0)-demand[g['load']].to_numpy(),bp,'MW')"
+    },
+    {
+      "line": 105,
+      "text": "    return checks"
+    }
+  ],
+  "note": "Historical fixed-group normalization; regenerate dimensions from daily labels, never reuse 2920 D/R arrays or P2 arrays; no model built here."
+}

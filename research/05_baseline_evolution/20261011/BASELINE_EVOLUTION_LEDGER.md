@@ -15,8 +15,9 @@
 | A-05 | A05_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 已授权跨境载体/网络谱系只读审计；a05/报告与实际静态资产清单 |
 | A-06 | A06_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 已完成并经联合审阅；独立PR #6，A06最终提交85397fdfd587a4e0cda298139b3c8f43fbbc6d6a |
 | B-01/B-02 | B01_B02_COMPLETE_WITH_EXPLICIT_LIMITS | 资源—需求必要条件、CO₂/H₂/FT实际多端口；b01_b02/；未构模或求解 |
-| B后续 | PLAN_ONLY_NOT_AUTHORIZED | 本轮后续范围须联合审阅后单独决定 |
-| C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
+| B-03 | B03_C00_DESIGN_COMPLETE | 复用已接受证据收口；b03_c00/；无新物理修复或求解 |
+| C-00 | B03_C00_DESIGN_COMPLETE | 365日科学/数学/预算/验收协议；等待联合审阅，无执行授权 |
+| C实际测试 | PLAN_ONLY_NOT_AUTHORIZED | 未构建日网络/LP、未调用求解器 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
 | E | PLAN_ONLY_NOT_AUTHORIZED | 跨境氢气及其他能源载体扩展；未执行 |
 | F | PLAN_ONLY_NOT_AUTHORIZED | 可比的互联与独立运行成本实验；未执行 |
@@ -182,3 +183,23 @@
 - A06远端仍`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`；未把新源配方冒充已运行网络。
 - 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST和外置`B01_B02_FINAL_DELIVERY_RECEIPT.json`。同次交付`B01_B02_PHYSICAL_FEASIBILITY_REVIEW.zip`，保留相对路径，逐成员大小/SHA/CRC核验，不含矩阵、原始向量、NetCDF或凭据。
 - 当前B-01/B-02完成即停止；全LP可行性NOT_PROVEN，G6-05保持PAUSED_BY_USER，后续B/C—F未启动。
+
+
+## B-03收口与C-00日诊断设计（2026-10-12）
+
+本轮从已审阅B01/B02交付`14baa96de5778ab487cbe9017d660825dc0a9a62`创建`audit/stage2-b03-c00-daily-protocol-20261012`。状态**B03_C00_DESIGN_COMPLETE**；不修改PR #4源版本或PR #7历史结果，不合并任何PR。
+
+- B03最终12项风险使用PROVEN / NECESSARY_CHECK_PASS / RISK / UNKNOWN；旧精确矛盾与Scheme A源修复分开，1737供给路径/807账户是必要条件，不证明新LP可行。未发现本轮必须先实施其他物理修复的直接证据。
+- C00设计365×24h三权重与8760年量；保持Scheme A Q、所有原需求年度身份、技术/网络/政策边界。时变Load的binary64年度相等未实际验证，设NO-GO硬门槛，禁止静默补Q/减Load。CF/入流表示规则待联合批准。
+- 首次真实154项参数小回执已对备份SHA核对；基准含NumericFocus0/FeasibilityTol1e-6/DualReductions1，非P2/非G6-05。建议新TimeLimit≤3600、全流程9150秒，仅设计无授权。原固定组缩放规则重绑日维度，旧V3/D/R向量不可复制。
+- V4科学阈值保持；原合同含旧维数，日适配需独立binding和实现验证，未虚报通过。未来一次流程涵盖身份、组装、原生交接、唯一调用、raw优先、全部验收和备份；无新准备实验。
+- 新日模型与旧Gate6同时存在Q版本和时序差异；日PASS不等于2920可行或原始目标严格最优。师哥建议尚未动态验证。
+- G6-05继续PAUSED_BY_USER；新网络/LP/solver/AutoDL操作均0，C实际测试及D—F未启动。交付三份主报告、轻量证据/方法、最新台账和强制ZIP；最终commit/PR/ZIP SHA见发布记录。
+
+
+### B-03/C-00真实发布里程碑
+
+- 报告、协议及37项轻量设计核验提交`40331c99d208c66d6c283df4397831f712dba90d`已commit并push。
+- 分支`audit/stage2-b03-c00-daily-protocol-20261012`；独立[PR #8](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/8)为OPEN/DRAFT，base为已接受B01/B02分支；未合并任何PR。
+- B01/B02远端仍`14baa96de5778ab487cbe9017d660825dc0a9a62`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有对科学源码/方案A或旧结果追加修改。
+- 最终提交与ZIP SHA/CRC由PACKAGE_MANIFEST及本地B03_C00_FINAL_DELIVERY_RECEIPT.json记录。设计完成不等于实际测试获准；日构模/求解尚未执行，G6-05继续暂停。交付后停止，等待联合审阅。
