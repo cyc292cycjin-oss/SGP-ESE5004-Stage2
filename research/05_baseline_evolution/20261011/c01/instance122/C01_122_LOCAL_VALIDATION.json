@@ -1,0 +1,144 @@
+{
+  "status": "PASS_LOCAL_HANDOFF_TESTS_ONLY",
+  "tests": [
+    {
+      "check": "regular_file_exact_SHA",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "wrong_SHA_fails",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "wrong_size_fails_before_content_read",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "internal_regular_target_link_allowed",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "outside_root_link_rejected",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "dangling_link_rejected",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "loop_link_rejected",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "directory_rejected",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "synthetic_source_unchanged",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "three_dynamic_tables_metadata_pass",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "extra_dynamic_attribute_blocks",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "wrong_time_shape_blocks",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "float32_instead_of_float64_blocks",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "fixed_window_timeout_stops",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "no_solver_model_network_or_subprocess_import",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_SYNTHETIC_NO_CLOUD_EXECUTION"
+    },
+    {
+      "check": "local_frozen_NetCDF_metadata_reader",
+      "status": "PASS",
+      "evidence_kind": "LOCAL_HEADER_ONLY_NO_CLOUD_EXECUTION_NO_DATA_TABLES_READ",
+      "observed": [
+        {
+          "variable": "generators_t_p_max_pu",
+          "shape": [
+            2920,
+            460
+          ],
+          "dtype": "float64",
+          "dimensions": [
+            "snapshots",
+            "generators_t_p_max_pu_i"
+          ]
+        },
+        {
+          "variable": "loads_t_p_set",
+          "shape": [
+            2920,
+            1737
+          ],
+          "dtype": "float64",
+          "dimensions": [
+            "snapshots",
+            "loads_t_p_set_i"
+          ]
+        },
+        {
+          "variable": "storage_units_t_inflow",
+          "shape": [
+            2920,
+            40
+          ],
+          "dtype": "float64",
+          "dimensions": [
+            "snapshots",
+            "storage_units_t_inflow_i"
+          ]
+        }
+      ]
+    }
+  ],
+  "test_count": 16,
+  "source_script_sha256": "0c58926794d264a61b18cec8e290e30a75bd4cac57bfb5ef10f4214ed6aa70b6",
+  "imports": [
+    "argparse",
+    "datetime",
+    "hashlib",
+    "json",
+    "netCDF4",
+    "os",
+    "pathlib",
+    "resource",
+    "signal",
+    "stat",
+    "sys",
+    "time",
+    "uuid"
+  ],
+  "Python": "3.11.13",
+  "cloud_script_executed": false,
+  "exact_aggregation_reexecuted": false,
+  "note": "Synthetic byte files/metadata objects plus local frozen NetCDF header-only reader check. No re-aggregation. Does not verify the 122 filesystem or native environment."
+}
