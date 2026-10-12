@@ -93,3 +93,11 @@
 - G6-05继续PAUSED_BY_USER；新网络/LP/solver/AutoDL操作均0，C实际测试及D—F未启动。交付三份主报告、轻量证据/方法、最新台账和强制ZIP；最终commit/PR/ZIP SHA见发布记录。
 
 实际报告目录：`research/05_baseline_evolution/20261011/b03_c00`。
+
+
+### B-03/C-00真实发布里程碑
+
+- 报告、协议及37项轻量设计核验提交`40331c99d208c66d6c283df4397831f712dba90d`已commit并push。
+- 分支`audit/stage2-b03-c00-daily-protocol-20261012`；独立[PR #8](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/8)为OPEN/DRAFT，base为已接受B01/B02分支；未合并任何PR。
+- B01/B02远端仍`14baa96de5778ab487cbe9017d660825dc0a9a62`，Scheme A远端仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有对科学源码/方案A或旧结果追加修改。
+- 最终提交与ZIP SHA/CRC由PACKAGE_MANIFEST及本地B03_C00_FINAL_DELIVERY_RECEIPT.json记录。设计完成不等于实际测试获准；日构模/求解尚未执行，G6-05继续暂停。交付后停止，等待联合审阅。
