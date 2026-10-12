@@ -13,8 +13,9 @@
 | 精确源常数闭合修复设计 | DESIGN_COMPLETE_A_APPROVED | 历史A/B/C设计保留；方案A现获批准并完成独立实施，见下列新状态及implementation_a_v1证据 |
 | 方案A受控实施 | SCHEME_A_STATIC_ACCEPTED | 独立源版本180Q×4字段；385/385精确D≤Q′、1737 Load不变；implementation_a_v1/报告及回执；未构模/求解 |
 | A-05 | A05_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 已授权跨境载体/网络谱系只读审计；a05/报告与实际静态资产清单 |
-| A-06 | PLAN_ONLY_SCOPE_TO_BE_CONFIRMED | 本轮未授权、未启动 |
-| B | PLAN_ONLY_NOT_AUTHORIZED | 物理约束与输入数据一致性审计；未执行 |
+| A-06 | A06_COMPLETE_WITH_EXPLICIT_UNKNOWNS | 已完成并经联合审阅；独立PR #6，A06最终提交85397fdfd587a4e0cda298139b3c8f43fbbc6d6a |
+| B-01/B-02 | B01_B02_COMPLETE_WITH_EXPLICIT_LIMITS | 资源—需求必要条件、CO₂/H₂/FT实际多端口；b01_b02/；未构模或求解 |
+| B后续 | PLAN_ONLY_NOT_AUTHORIZED | 本轮后续范围须联合审阅后单独决定 |
 | C | PLAN_ONLY_NOT_AUTHORIZED | 365日时间分辨率诊断；未执行 |
 | D | PLAN_ONLY_NOT_AUTHORIZED | 完整2920时段Gate6科学验收；未执行 |
 | E | PLAN_ONLY_NOT_AUTHORIZED | 跨境氢气及其他能源载体扩展；未执行 |
@@ -160,3 +161,15 @@
 - 原审计/方案A/A05远端身份分别仍为`53c2b28632cb577136d48ebb843823967f0b1c25`、`8883de6fb3e15767c632ac92f535e8a423e90b69`、`4e00897199d28c72b35f6cff550b30ba94337e06`。
 - 最终交付commit和ZIP整体SHA见包内PACKAGE_MANIFEST与外置A06_FINAL_DELIVERY_RECEIPT.json。ZIP名A06_POLICY_COST_RESOURCE_AUDIT_REVIEW.zip，含当前报告、台账、轻量证据/方法、相对路径大小/SHA及实际CRC记录，不含大科学文件或凭据。
 - A阶段审计完成但UNKNOWN保留；G6-05仍PAUSED_BY_USER；本轮到此停止，B—F需后续单独授权。
+
+## B-01/B-02第一轮完成记录（2026-10-12）
+
+从已联合审阅A06最终提交`85397fdfd587a4e0cda298139b3c8f43fbbc6d6a`建立独立分支`audit/stage2-b01-b02-physical-feasibility-20261012`。PR #4 Scheme A对象固定为`8883de6fb3e15767c632ac92f535e8a423e90b69`，按Git对象核SHA读取，未合并到本分支、未误当已组装网络。PR #3/#4/#5/#6及main未改。
+
+- B01_COMPLETE_WITH_EXPLICIT_LIMITS：385/385源级精确D≤Q′，180改变/627不变；实际807独占Store/meter结构与Scheme A四字段绑定。独立Fraction推导只证明所列源子系统的条件性年度/前缀关系，不是新全LP可行证书。
+- 1737个固定Load都有已核本地供应路径：385资源账户组、1256化石外部源+meter、96电力本地CCGT。400有价external无有限量上限；当前非电跨境关闭未发现固定Load全路径断路。该边界不证明现实进口充足。
+- 本轮静态界无lower>upper和正最低出力；lv最低容量volume约126.797百万<353.747百万MWkm；20弱电分量、43储能初值合法。438有限风光候选中4个全年0、6个max=1+1ULP已逐资产记录，未改数据。
+- B02_COMPLETE_WITH_EXPLICIT_LIMITS：100捕集Bus只连接SMR CC产出与FT消耗，无库/旁路；f≈0.8674787475s，CC自身H₂不足且FT另需电力。100节点油消纳给出有限局部FT/CC必要上限。技术可选，不据此宣布Baseline不可行或Gate6异常已解释。
+- 15项独立轻量核验PASS；只读取静态表、约40.6MB既有Load输入及更小profile表，不读CSC/X/Pi/RC，不重新实验或构模。没有optimize/presolve/IIS/feasRelax或AutoDL操作。
+- 旧LP精确证书与两次Gate6结论保留；Scheme A新LP NOT_ASSEMBLED/可行性NOT_PROVEN。G6-05仍PAUSED_BY_USER。剩余B、C—F均未启动。
+- 当前报告/风险登记/方法在`b01_b02/`；独立PR及本轮ZIP同次交付，真实commit及ZIP指纹由发布记录给出。任务到此停止，等待用户与ChatGPT联合验收。
