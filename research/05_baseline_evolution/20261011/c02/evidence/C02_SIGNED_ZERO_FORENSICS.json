@@ -1,0 +1,34 @@
+{
+  "status": "CHECKER_SIGNED_ZERO_DEFECT_REPRODUCED_SOURCE_EXPRESSION_ONLY",
+  "evidence_grade": "VERIFIED_SOURCE_AND_TINY_ARITHMETIC; ACTUAL_FAILED_RHS_ARRAY_NOT_SAVED",
+  "cloud_PyPSA_source": {
+    "path": "/root/autodl-tmp/SGP/env/gate5/lib/python3.11/site-packages/pypsa/optimization/constraints.py",
+    "sha256": "6945ae0e21e64d8cee5b083b2ff7a333379e48c35fe4f3fddff4db60f1cca1ef",
+    "line": 927
+  },
+  "checker": {
+    "file": "c02_model.py",
+    "sha256": "676edc30c5860c4a6b52fe63a117d1a395e9230db0d58db3e6ff9bb5ba4934a1",
+    "line": 210,
+    "expected": "[-q, +0.0, ...]",
+    "comparison": "uint64 binary64 bits"
+  },
+  "scalar_test_q": 1.0,
+  "source_expression_rhs_hex": [
+    "-0x1.0000000000000p+0",
+    "-0x0.0p+0",
+    "-0x0.0p+0"
+  ],
+  "checker_expected_hex": [
+    "-0x1.0000000000000p+0",
+    "0x0.0p+0",
+    "0x0.0p+0"
+  ],
+  "numeric_exact_equal": true,
+  "bits_equal": false,
+  "interpretation": "The checker can reject exact real equality solely for zero sign. Source derives -0 for later noncyclic Store rows. The production exception has no per-element dump, so absence of any additional mismatch is NOT_PROVEN.",
+  "full_model_rebuilt": false,
+  "solver_calls": 0,
+  "failed_code_modified": false,
+  "proposed_fix_not_applied": "Compare exact finite numeric equality for row semantics, explicitly retain/report signed-zero differences; retain bit-exact checks for immutable inputs and file roundtrips. Record first mismatching asset/row/hex before abort. A new full build is not executed."
+}

@@ -156,3 +156,17 @@
 - 分支 `audit/stage2-c01r-bounded-binary64-20261012`；独立 [PR #11](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/11) 为OPEN/DRAFT，基于已核C01/122审计分支，未合并任何PR。
 - 当前C01R_REPRESENTATION_ACCEPTED，95条漂移全部AND通过，385/807精确关系和V4不变。只具备申请C02审查的表示前提；无构模/求解/AutoDL操作，G6-05暂停。
 - 本轮最终commit和ZIP整体SHA/CRC在PACKAGE_MANIFEST及外置C01R_FINAL_DELIVERY_RECEIPT.json记录。旧C00和C01历史保留；交付后停止。
+
+
+## C-02受控构建真实交付（2026-10-12）
+
+**C02_BLOCKED_WITH_SPECIFIC_EVIDENCE**。用户授权仅build-only，已在122执行唯一一次365日日网络组装和Linopy模型创建，未调用任何优化/原生Gurobi/WLS。
+
+- 固定C01R基线68ebb96b7d48318654e9ca3f2b2780a0133bc889；Scheme A PR #4对象8883de6fb3e15767c632ac92f535e8a423e90b69。未合并旧PR或修改原科学源码。
+- 新未求解NetCDF真实导出/回读，365×24h三权重各8760h；1737 Load/460 CF/40入流全部匹配已接受日值SHA；180Q/627不变及385精确D≤Q′在网络层通过。
+- 实际Linopy持久化标签2,450,005列、6,042,238行，807资源方向块及196电池耦合已生成。Store动态RHS位比较停止；完整稀疏矩阵、NNZ、全部行界/R与日V4绑定没有完成。
+- 新检查器对±0的误拒绝由冻结PyPSA表达式及微型算术证实；原失败RHS未逐元素保存，其他差异不能完全排除。没有将此异常称为数学不可行，没有重建/重试。
+- Run c02_daily_build_20261012T025604Z_fcc0f784；1800秒固定窗口，约60.24秒失败、61.17秒轻量封存；worker/supervisor/guard已退出。90GiB/12核准入，cgroup峰值约2.91GiB，未触发保护。
+- 新NetCDF及轻量回执本地SHA/CRC通过；部分列/标签数组云端保留、本地LOCAL_SYNC_PENDING；报告/逐产物SHA见c02目录。云端封存成功不等于完整LP存在。
+- C03 NO-GO；G6-05继续PAUSED_BY_USER；后续完整build-only重新执行需用户审阅后另行批准。未进入任何求解或D—F。
+- 独立分支codex/c02-controlled-daily-build-20261012。真实发布commit/PR/ZIP身份见后续发布记录；代码、回执、台账与强制C02_DAILY_BUILD_STATIC_REVIEW.zip同轮交付。失败版本和旧报告原件保留。

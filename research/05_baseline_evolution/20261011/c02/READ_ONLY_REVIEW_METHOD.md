@@ -1,0 +1,9 @@
+# C02证据复核方法与运行边界
+
+1. 先读evidence/deployed_identity中的两个Manifest，将六个c02入口和helpers按大小/SHA与原部署逐项比较。INPUT_MANIFEST记录固定Git/原始本地文件路径，Scheme A及C01R大账沿用已核Git对象，不在审阅包重复复制。
+2. 原云端回执保留于evidence/original_run；核查BUILD_AUTHORIZATION绝对截止、BUILD_RESULT异常栈、PROCESS_IDENTITIES、SUPERVISOR_EXIT和GUARD_EXIT。只读事后索引证明所列PID已不存在，不能代替历史身份或假称实例已停费。
+3. 所有.partial数组身份由evidence/READ_ONLY_CLOUD_ARTIFACT_INDEX.json记录。coverage从现存标签计数；没有全矩阵值不能推导NNZ或实际RHS PASS。
+4. NETWORK_READBACK逐值比对、Scheme A精确组账和C01R每资产日值SHA是已执行证据。SIGNED_ZERO_FORENSICS只做3元素xarray/RHS算术，没有创建PyPSA或Linopy模型；原失败RHS未转储限制必须保留。
+5. code保留此次实际失败版本。不要直接执行c02_launch.py、prepare_payload.py或test_build_only.py来“检查”：完整构建授权已经消费。read_only_closeout.py是本轮已执行的只读收集方法记录；analyze_closeout.py仅用于现存本地文件，但需明确本机路径和完整下载后才可核对。
+6. LOCAL_NO_SOLVE_TESTS包含部署前10项工程检查及10项V4合成检查。这些是实现单元/模拟证据，不是真实解物理/KKT验收，也没有运行Gurobi/WLS。
+7. ZIP包含相对路径/大小/SHA清单和CRC验证记录。大产物位于报告给出的云端/本地路径，禁止写入Git或审阅ZIP。

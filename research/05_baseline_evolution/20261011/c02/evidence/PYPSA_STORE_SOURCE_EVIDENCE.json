@@ -1,0 +1,570 @@
+{
+  "path": "/root/autodl-tmp/SGP/env/gate5/lib/python3.11/site-packages/pypsa/optimization/constraints.py",
+  "sha256": "6945ae0e21e64d8cee5b083b2ff7a333379e48c35fe4f3fddff4db60f1cca1ef",
+  "lines": [
+    {
+      "line": 825,
+      "text": "            assets.cyclic_state_of_charge_per_period.to_xarray()"
+    },
+    {
+      "line": 826,
+      "text": "            | assets.state_of_charge_initial_per_period.to_xarray()"
+    },
+    {
+      "line": 827,
+      "text": "        )"
+    },
+    {
+      "line": 828,
+      "text": ""
+    },
+    {
+      "line": 829,
+      "text": "        # We calculate the previous soc per period while cycling within a period"
+    },
+    {
+      "line": 830,
+      "text": "        # Normally, we should use groupby, but is broken for multi-index"
+    },
+    {
+      "line": 831,
+      "text": "        # see https://github.com/pydata/xarray/issues/6836"
+    },
+    {
+      "line": 832,
+      "text": "        ps = sns.unique(\"period\")"
+    },
+    {
+      "line": 833,
+      "text": "        sl = slice(None)"
+    },
+    {
+      "line": 834,
+      "text": "        previous_soc_pp_list = ["
+    },
+    {
+      "line": 835,
+      "text": "            soc.data.sel(snapshot=(p, sl)).roll(snapshot=1) for p in ps"
+    },
+    {
+      "line": 836,
+      "text": "        ]"
+    },
+    {
+      "line": 837,
+      "text": "        previous_soc_pp = concat(previous_soc_pp_list, dim=\"snapshot\")"
+    },
+    {
+      "line": 838,
+      "text": ""
+    },
+    {
+      "line": 839,
+      "text": "        # We create a mask `include_previous_soc_pp` which excludes the first"
+    },
+    {
+      "line": 840,
+      "text": "        # snapshot of each period for non-cyclic assets."
+    },
+    {
+      "line": 841,
+      "text": "        include_previous_soc_pp = active & (periods == periods.shift(snapshot=1))"
+    },
+    {
+      "line": 842,
+      "text": "        include_previous_soc_pp = include_previous_soc_pp.where(noncyclic_b, True)"
+    },
+    {
+      "line": 843,
+      "text": "        # We take values still to handle internal xarray multi-index difficulties"
+    },
+    {
+      "line": 844,
+      "text": "        previous_soc_pp = previous_soc_pp.where("
+    },
+    {
+      "line": 845,
+      "text": "            include_previous_soc_pp.values, linopy.variables.FILL_VALUE"
+    },
+    {
+      "line": 846,
+      "text": "        )"
+    },
+    {
+      "line": 847,
+      "text": ""
+    },
+    {
+      "line": 848,
+      "text": "        # update the previous_soc variables and right hand side"
+    },
+    {
+      "line": 849,
+      "text": "        previous_soc = previous_soc.where(~per_period, previous_soc_pp)"
+    },
+    {
+      "line": 850,
+      "text": "        include_previous_soc = include_previous_soc_pp.where("
+    },
+    {
+      "line": 851,
+      "text": "            per_period, include_previous_soc"
+    },
+    {
+      "line": 852,
+      "text": "        )"
+    },
+    {
+      "line": 853,
+      "text": "    lhs += [(eff_stand, previous_soc)]"
+    },
+    {
+      "line": 854,
+      "text": "    rhs = rhs.where(include_previous_soc, rhs - soc_init)"
+    },
+    {
+      "line": 855,
+      "text": "    m.add_constraints(lhs, \"=\", rhs, name=f\"{c}-energy_balance\", mask=active)"
+    },
+    {
+      "line": 856,
+      "text": ""
+    },
+    {
+      "line": 857,
+      "text": ""
+    },
+    {
+      "line": 858,
+      "text": "def define_store_constraints(n: Network, sns: pd.Index) -> None:"
+    },
+    {
+      "line": 859,
+      "text": "    \"\"\""
+    },
+    {
+      "line": 860,
+      "text": "    Defines energy balance constraints for stores. In principal the constraints"
+    },
+    {
+      "line": 861,
+      "text": "    states:"
+    },
+    {
+      "line": 862,
+      "text": ""
+    },
+    {
+      "line": 863,
+      "text": "    previous_e - p == e"
+    },
+    {
+      "line": 864,
+      "text": "    \"\"\""
+    },
+    {
+      "line": 865,
+      "text": "    m = n.model"
+    },
+    {
+      "line": 866,
+      "text": "    c = \"Store\""
+    },
+    {
+      "line": 867,
+      "text": "    dim = \"snapshot\""
+    },
+    {
+      "line": 868,
+      "text": "    assets = n.df(c)"
+    },
+    {
+      "line": 869,
+      "text": "    active = DataArray(get_activity_mask(n, c, sns))"
+    },
+    {
+      "line": 870,
+      "text": ""
+    },
+    {
+      "line": 871,
+      "text": "    if assets.empty:"
+    },
+    {
+      "line": 872,
+      "text": "        return"
+    },
+    {
+      "line": 873,
+      "text": ""
+    },
+    {
+      "line": 874,
+      "text": "    # elapsed hours"
+    },
+    {
+      "line": 875,
+      "text": "    eh = expand_series(n.snapshot_weightings.stores[sns], assets.index)"
+    },
+    {
+      "line": 876,
+      "text": "    # efficiencies"
+    },
+    {
+      "line": 877,
+      "text": "    eff_stand = (1 - get_as_dense(n, c, \"standing_loss\", sns)).pow(eh)"
+    },
+    {
+      "line": 878,
+      "text": ""
+    },
+    {
+      "line": 879,
+      "text": "    e = m[f\"{c}-e\"]"
+    },
+    {
+      "line": 880,
+      "text": "    p = m[f\"{c}-p\"]"
+    },
+    {
+      "line": 881,
+      "text": ""
+    },
+    {
+      "line": 882,
+      "text": "    lhs = [(-1, e), (-eh, p)]"
+    },
+    {
+      "line": 883,
+      "text": ""
+    },
+    {
+      "line": 884,
+      "text": "    # We create a mask `include_previous_e` which excludes the first snapshot"
+    },
+    {
+      "line": 885,
+      "text": "    # for non-cyclic assets."
+    },
+    {
+      "line": 886,
+      "text": "    noncyclic_b = ~assets.e_cyclic.to_xarray()"
+    },
+    {
+      "line": 887,
+      "text": "    include_previous_e = (active.cumsum(dim) != 1).where(noncyclic_b, True)"
+    },
+    {
+      "line": 888,
+      "text": ""
+    },
+    {
+      "line": 889,
+      "text": "    previous_e = ("
+    },
+    {
+      "line": 890,
+      "text": "        e.where(active).ffill(dim).roll(snapshot=1).ffill(dim).where(include_previous_e)"
+    },
+    {
+      "line": 891,
+      "text": "    )"
+    },
+    {
+      "line": 892,
+      "text": ""
+    },
+    {
+      "line": 893,
+      "text": "    # We add inflow and initial e for for noncyclic assets to rhs"
+    },
+    {
+      "line": 894,
+      "text": "    e_init = assets.e_initial.to_xarray()"
+    },
+    {
+      "line": 895,
+      "text": ""
+    },
+    {
+      "line": 896,
+      "text": "    if isinstance(sns, pd.MultiIndex):"
+    },
+    {
+      "line": 897,
+      "text": "        # If multi-horizon optimizing, we update the previous_e and the rhs"
+    },
+    {
+      "line": 898,
+      "text": "        # for all assets which are cyclid/non-cyclid per period."
+    },
+    {
+      "line": 899,
+      "text": "        periods = e.coords[\"period\"]"
+    },
+    {
+      "line": 900,
+      "text": "        per_period = ("
+    },
+    {
+      "line": 901,
+      "text": "            assets.e_cyclic_per_period.to_xarray()"
+    },
+    {
+      "line": 902,
+      "text": "            | assets.e_initial_per_period.to_xarray()"
+    },
+    {
+      "line": 903,
+      "text": "        )"
+    },
+    {
+      "line": 904,
+      "text": ""
+    },
+    {
+      "line": 905,
+      "text": "        # We calculate the previous e per period while cycling within a period"
+    },
+    {
+      "line": 906,
+      "text": "        # Normally, we should use groupby, but is broken for multi-index"
+    },
+    {
+      "line": 907,
+      "text": "        # see https://github.com/pydata/xarray/issues/6836"
+    },
+    {
+      "line": 908,
+      "text": "        ps = sns.unique(\"period\")"
+    },
+    {
+      "line": 909,
+      "text": "        sl = slice(None)"
+    },
+    {
+      "line": 910,
+      "text": "        previous_e_pp_list = [e.data.sel(snapshot=(p, sl)).roll(snapshot=1) for p in ps]"
+    },
+    {
+      "line": 911,
+      "text": "        previous_e_pp = concat(previous_e_pp_list, dim=\"snapshot\")"
+    },
+    {
+      "line": 912,
+      "text": ""
+    },
+    {
+      "line": 913,
+      "text": "        # We create a mask `include_previous_e_pp` which excludes the first"
+    },
+    {
+      "line": 914,
+      "text": "        # snapshot of each period for non-cyclic assets."
+    },
+    {
+      "line": 915,
+      "text": "        include_previous_e_pp = active & (periods == periods.shift(snapshot=1))"
+    },
+    {
+      "line": 916,
+      "text": "        include_previous_e_pp = include_previous_e_pp.where(noncyclic_b, True)"
+    },
+    {
+      "line": 917,
+      "text": "        # We take values still to handle internal xarray multi-index difficulties"
+    },
+    {
+      "line": 918,
+      "text": "        previous_e_pp = previous_e_pp.where("
+    },
+    {
+      "line": 919,
+      "text": "            include_previous_e_pp.values, linopy.variables.FILL_VALUE"
+    },
+    {
+      "line": 920,
+      "text": "        )"
+    },
+    {
+      "line": 921,
+      "text": ""
+    },
+    {
+      "line": 922,
+      "text": "        # update the previous_e variables and right hand side"
+    },
+    {
+      "line": 923,
+      "text": "        previous_e = previous_e.where(~per_period, previous_e_pp)"
+    },
+    {
+      "line": 924,
+      "text": "        include_previous_e = include_previous_e_pp.where(per_period, include_previous_e)"
+    },
+    {
+      "line": 925,
+      "text": ""
+    },
+    {
+      "line": 926,
+      "text": "    lhs += [(eff_stand, previous_e)]"
+    },
+    {
+      "line": 927,
+      "text": "    rhs = -e_init.where(~include_previous_e, 0)"
+    },
+    {
+      "line": 928,
+      "text": ""
+    },
+    {
+      "line": 929,
+      "text": "    m.add_constraints(lhs, \"=\", rhs, name=f\"{c}-energy_balance\", mask=active)"
+    },
+    {
+      "line": 930,
+      "text": ""
+    },
+    {
+      "line": 931,
+      "text": ""
+    },
+    {
+      "line": 932,
+      "text": "def define_loss_constraints("
+    },
+    {
+      "line": 933,
+      "text": "    n: Network, sns: pd.Index, c: str, transmission_losses: int"
+    },
+    {
+      "line": 934,
+      "text": ") -> None:"
+    },
+    {
+      "line": 935,
+      "text": "    if n.df(c).empty or c not in n.passive_branch_components:"
+    },
+    {
+      "line": 936,
+      "text": "        return"
+    },
+    {
+      "line": 937,
+      "text": ""
+    },
+    {
+      "line": 938,
+      "text": "    tangents = transmission_losses"
+    },
+    {
+      "line": 939,
+      "text": "    active = get_activity_mask(n, c, sns) if n._multi_invest else None"
+    },
+    {
+      "line": 940,
+      "text": ""
+    },
+    {
+      "line": 941,
+      "text": "    s_max_pu = get_as_dense(n, c, \"s_max_pu\").loc[sns]"
+    },
+    {
+      "line": 942,
+      "text": ""
+    },
+    {
+      "line": 943,
+      "text": "    s_nom_max = n.df(c)[\"s_nom_max\"].where("
+    },
+    {
+      "line": 944,
+      "text": "        n.df(c)[\"s_nom_extendable\"], n.df(c)[\"s_nom\"]"
+    },
+    {
+      "line": 945,
+      "text": "    )"
+    },
+    {
+      "line": 946,
+      "text": ""
+    },
+    {
+      "line": 947,
+      "text": "    if not isfinite(s_nom_max).all():"
+    },
+    {
+      "line": 948,
+      "text": "        msg = ("
+    },
+    {
+      "line": 949,
+      "text": "            f\"Loss approximation requires finite 's_nom_max' for extendable \""
+    },
+    {
+      "line": 950,
+      "text": "            f\"branches:\\n {s_nom_max[~isfinite(s_nom_max)]}\""
+    },
+    {
+      "line": 951,
+      "text": "        )"
+    },
+    {
+      "line": 952,
+      "text": "        raise ValueError(msg)"
+    },
+    {
+      "line": 953,
+      "text": ""
+    },
+    {
+      "line": 954,
+      "text": "    r_pu_eff = n.df(c)[\"r_pu_eff\"]"
+    },
+    {
+      "line": 955,
+      "text": ""
+    },
+    {
+      "line": 956,
+      "text": "    upper_limit = r_pu_eff * (s_max_pu * s_nom_max) ** 2"
+    },
+    {
+      "line": 957,
+      "text": ""
+    },
+    {
+      "line": 958,
+      "text": "    loss = n.model[f\"{c}-loss\"]"
+    },
+    {
+      "line": 959,
+      "text": "    flow = n.model[f\"{c}-s\"]"
+    },
+    {
+      "line": 960,
+      "text": ""
+    },
+    {
+      "line": 961,
+      "text": "    n.model.add_constraints(loss <= upper_limit, name=f\"{c}-loss_upper\", mask=active)"
+    },
+    {
+      "line": 962,
+      "text": ""
+    },
+    {
+      "line": 963,
+      "text": "    for k in range(1, tangents + 1):"
+    },
+    {
+      "line": 964,
+      "text": "        p_k = k / tangents * s_max_pu * s_nom_max"
+    },
+    {
+      "line": 965,
+      "text": "        loss_k = r_pu_eff * p_k**2"
+    }
+  ]
+}
