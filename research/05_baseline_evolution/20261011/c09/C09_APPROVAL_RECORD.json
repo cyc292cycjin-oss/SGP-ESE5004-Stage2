@@ -1,0 +1,21 @@
+{
+  "approved_by_user": true,
+  "authority": "User instruction 2026-10-13 02:24 SGT: agreed with C08 findings and said '请开始下一步' (C09 = plan (a) exact block decomposition, one main-LP solve). The actual start is a separate command the user runs personally; running it is the final confirmation.",
+  "scope": "C09_EXACT_BLOCK_DECOMPOSITION_SINGLE_DAILY_MAIN_LP",
+  "max_optimize_calls_total": 1,
+  "per_run_native_seconds": 3600,
+  "per_run_total_seconds": 7200,
+  "algorithm": "C06/C07A 154 parameters with Crossover 0 -> -1 (identical algorithm to C07B); only model difference vs C07B is removal of the decoupled zero-cost block",
+  "V4_changed": false,
+  "scientific_model_changed": false,
+  "mathematical_equivalence": "LP is block-separable; block cost identically 0; optimal set = main optimal set x block feasible set (C08 report section 2-3)",
+  "G6_05": "PAUSED_BY_USER",
+  "no_2920_no_scenarios": true,
+  "preregistered_decision_rule": {
+    "R1_all_V4_gates_pass": "C09_DAILY_BASELINE_ACCEPTED (daily diagnostic only, not Gate6/2920). Next: prepare D stage with the same decomposition; needs new authorization.",
+    "R2_status2_block_gates_pass_main_KKT_fails": "Main-LP numerical issue isolated to network part. Next: targeted Line-s/Link-p analysis; no automatic re-run.",
+    "R3_status_not_2_or_no_solution": "Hypothesis 'block caused C07B Status 3' refuted for the main LP. Next: reanalysis; no retry.",
+    "R4_block_gate_fails": "Implementation error in decomposition -> BLOCKED_WITH_SPECIFIC_EVIDENCE; no retry.",
+    "R5_identity_resource_readback_failure": "BLOCKED_WITH_SPECIFIC_EVIDENCE; no retry."
+  }
+}
