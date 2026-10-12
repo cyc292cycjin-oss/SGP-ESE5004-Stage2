@@ -292,3 +292,11 @@
 - 另有确定的既有counts[fam]>0覆盖断言，会拒绝3个已核+Inf上界的零行家族；不属本轮±0修复，未擅改。新完整构建仍需明确处置此阻断和取得独立C02R运行授权。
 - 优先复用封存日NetCDF的方案仅记录未执行。C02整体仍BLOCKED，完整矩阵/目标offset/日V4绑定未完成；C03未授权，G6-05保持PAUSED_BY_USER。
 - 继续独立codex/c02-controlled-daily-build-20261012分支和PR #12，不改main/旧PR；本轮真实commit和ZIP身份由发布回执记录。
+
+
+### C-02R真实发布里程碑
+
+- 候选补丁、34项小型检查、未修复零行覆盖阻断及台账提交 `6270883d679108e4af7aaaf655a6655ecc0e2d49` 已push。
+- 继续 `codex/c02-controlled-daily-build-20261012`，已更新 [PR #12](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/12)，仍OPEN/DRAFT，未合并。
+- 状态C02R_CHECKER_PATCH_READY_FOR_REVIEW；C02整体仍BLOCKED，未获新的C02R运行授权；没有云端连接/模型构建/求解，G6-05仍暂停。
+- 强制ZIP为C02R_MINIMAL_CHECKER_REPAIR_REVIEW.zip；最终Git提交、大小、SHA与完整CRC记录由本地C02R_FINAL_DELIVERY_RECEIPT.json给出。等待用户与ChatGPT复核。
