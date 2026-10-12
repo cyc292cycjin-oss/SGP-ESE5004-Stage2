@@ -1,0 +1,37 @@
+{
+  "version": "C00_DAILY_365_PROTOCOL_C01R_V1",
+  "rounding_rule": "C01R_BOUNDED_BINARY64_V1",
+  "approval": "USER_AND_CHATGPT_EXPLICIT_APPROVAL_20261012",
+  "scope": "365_DAY_DIAGNOSTIC_INPUT_REPRESENTATION_ONLY",
+  "applicability": "Only actual nonconstant Electricity/Astar/electricity Load profiles in the pinned 2920-slot input",
+  "mean": "sum(Fraction(binary64_source_value)*Fraction(3))/Fraction(24)",
+  "serialization": "IEEE754 binary64 round-to-nearest ties-to-even; no bias or corrections",
+  "A": "Exact nearest adjacent-value comparison; tie selects even significand; error <= bracket gap/2",
+  "half_ULP_definition": "For an inexact mean use half of its two adjacent binary64 bracketing values distance. For an exactly representable mean use half the smaller neighboring distance (including subnormals).",
+  "B": "abs(E_daily-E_original) <= sum(24*per_day_half_ULP), all quantities exact rational",
+  "C_absolute_MWh": {
+    "decimal": "2e-9",
+    "exact": "1/500000000"
+  },
+  "C_relative": {
+    "decimal": "1e-15",
+    "exact": "1/1000000000000000"
+  },
+  "zero_annual_case": "E_original=0 requires DeltaE=0 AND finite nonnegative source values",
+  "logic": "A AND B AND C_absolute AND C_relative_or_zero_rule, per asset; no cancellation across assets",
+  "flat_Load": "Preserve source binary64 exactly; no new drift in formerly exact assets",
+  "Scheme_A": "385 exact D<=Q_prime; 807 accounts and 180 approved repairs unchanged; no rounding exception",
+  "CF_inflow": "Retain C00/C01 budget and physical-range evidence, no clipping or electricity C caps",
+  "V4_sha256": "955cfe48f0de95d1ce9df531ee7d5b0a3dff47dad9f6b06f70a180745cf0657f",
+  "V4_unchanged": true,
+  "subtract_representation_error_from_future_V4_residual": false,
+  "scientific_annual_demand_authority": "Original exact integral of pinned 2920 binary64 values; installed daily input is a separately recorded approximation",
+  "mathematically_equivalent_to_original_LP": false,
+  "network_or_LP_build_authorized": false,
+  "solver_authorized": false,
+  "previous_two_term_candidate": "NOT_SELECTED_NOT_IMPLEMENTED",
+  "C00_parent_commit": "5d757c5a4a9dad965d9c7cbe6e55d486d167ff93",
+  "C00_parent_document_sha256": "8530ea85ac087c89adafa594f885d3fa83d54d5f0a4fdd87e643f4b2d8e9ec86",
+  "Scheme_A_commit": "8883de6fb3e15767c632ac92f535e8a423e90b69",
+  "Scheme_A_manifest_sha256": "a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720"
+}
