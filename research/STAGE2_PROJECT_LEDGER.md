@@ -113,3 +113,11 @@
 - PROPOSED_NOT_APPLIED：仅提出一个非负双字常数表示方案，数学上保留每日精确均值及科学年度量；31542格可能需固定数值辅助项，必须保留至CSC/验收，普通同Bus拆Load再浮点求和不足。等待用户批准，不实施。
 - 独立16类轻量证据检查及2237代表桶整数舍入复核通过；未重复旧LP审计、未构模/求解、未操作AutoDL。G6-05继续PAUSED_BY_USER，C执行门槛保持NO-GO直到表示决策；D—F未启动。
 - 报告与证据目录`research/05_baseline_evolution/20261011/c01`；同轮commit/push/独立PR和强制C01_DAILY_REPRESENTATION_REVIEW.zip，最终发布记录给出真实SHA/CRC。交付后停止。
+
+
+### C-01真实发布里程碑
+
+- 实际聚合、轻量独立验证及报告提交`0a93200588fd193a727e5939acea199a154821de`已commit并push。
+- 分支`audit/stage2-c01-daily-representation-20261012`；[PR #9](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/9)为OPEN/DRAFT，base为已审阅C-00分支，未合并。
+- 原C-00远端仍`5d757c5a4a9dad965d9c7cbe6e55d486d167ff93`，Scheme A仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有改写原始输入、旧结果或消费标记。
+- 最终commit、C01_DAILY_REPRESENTATION_REVIEW.zip大小/SHA/CRC由包内清单及本地C01_FINAL_DELIVERY_RECEIPT.json记录。C01_REPRESENTATION_DECISION_REQUIRED，日构模/求解仍NO-GO，唯一候选未实施。交付后停止，等待联合验收。
