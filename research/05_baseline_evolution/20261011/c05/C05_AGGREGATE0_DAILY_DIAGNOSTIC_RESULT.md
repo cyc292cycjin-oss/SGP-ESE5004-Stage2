@@ -106,3 +106,5 @@ C03原科学已知口径427,765,450,088.104 EUR，V3目标428,014,262,628.28937 
 保持现有科学输入、V3/V4、Scheme A及历史结论。后续唯一行动是用户与ChatGPT审阅本次结果后作出新的科学决策；**没有授权或执行第二个参数、更长预算、第二次optimize或其他情景**。G6-05暂停。实例不关机/释放，任务在GitHub和ZIP交付后停止。
 
 逐文件证据见[C05_EVIDENCE_INDEX.json](C05_EVIDENCE_INDEX.json)；完整机器对照见[C05_BASELINE_RESULT_COMPARISON.json](C05_BASELINE_RESULT_COMPARISON.json)。实际最终提交、PR及审阅ZIP整体SHA由同轮发布/交付回执绑定，不能把生产代码提交误写成最终报告提交。
+
+真实发布里程碑：结果及全部脱敏日志已推送 `869d72a90376b1862cf2058576b01917131f0a12`；[独立PR #15](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/15)已建立（OPEN/DRAFT，关联#13/#14，未合并）。最终导出提交及ZIP整体SHA以交付回执为准。

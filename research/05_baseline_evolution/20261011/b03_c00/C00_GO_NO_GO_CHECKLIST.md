@@ -48,3 +48,5 @@
 - 科学结果NOT_ACCEPTED；不能进入2920/Integrated/Disconnected/DEC。G6-05保持PAUSED_BY_USER。用户本次唯一优化授权已消费；不自动改变第二个参数或再求解。交付后停止。
 
 当前GO/NO-GO：身份/交接/单因素/一次执行/状态保全/本地备份PASS；C05科学验收NOT_ACCEPTED_NO_SOLUTION；任何进一步优化NO-GO_NOT_AUTHORIZED。C03仍OPTIMAL_BUT_NOT_ACCEPTED。
+
+- C05结果与全部索引脱敏日志已push并核实远端提交 `869d72a90376b1862cf2058576b01917131f0a12`；独立[PR #15](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/15)为OPEN/DRAFT，关联#13/#14，未合并。生产提交为`d6c48dbd95d12f0354561372e9a65d6e92511754`。最终审阅包导出提交和ZIP SHA见包内GIT_PUBLICATION及外部C05_FINAL_DELIVERY_RECEIPT。

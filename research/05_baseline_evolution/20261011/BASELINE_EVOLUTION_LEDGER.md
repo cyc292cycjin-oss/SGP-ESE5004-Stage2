@@ -341,3 +341,5 @@
 - 云端新增32项封存；新独立60分钟窗口传输6.526404秒。394,606字节新归档SHA `4b78d58396be73378ede9589a3bf3db56ad671a9643d82d50da7dd7b1e1bac63`，大小/SHA/CRC/安全路径/逐项BACKUP_INDEX核验通过，LOCAL_BACKUP_SHA_VERIFIED。旧17,369项输入按不可变引用复用；历史LOCAL_SYNC_PENDING不覆盖。
 - 报告、参数差异、完整条件验收状态和方法见 `research/05_baseline_evolution/20261011/c05/`。独立分支codex/c05-aggregate0-daily-20261012，关联PR #13/#14；真实结果commit/PR及同轮C05_AGGREGATE0_DAILY_DIAGNOSTIC_REVIEW.zip由发布回执记录。
 - 科学结果NOT_ACCEPTED；不能进入2920/Integrated/Disconnected/DEC。G6-05保持PAUSED_BY_USER。用户本次唯一优化授权已消费；不自动改变第二个参数或再求解。交付后停止。
+
+- C05结果与全部索引脱敏日志已push并核实远端提交 `869d72a90376b1862cf2058576b01917131f0a12`；独立[PR #15](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/15)为OPEN/DRAFT，关联#13/#14，未合并。生产提交为`d6c48dbd95d12f0354561372e9a65d6e92511754`。最终审阅包导出提交和ZIP SHA见包内GIT_PUBLICATION及外部C05_FINAL_DELIVERY_RECEIPT。
