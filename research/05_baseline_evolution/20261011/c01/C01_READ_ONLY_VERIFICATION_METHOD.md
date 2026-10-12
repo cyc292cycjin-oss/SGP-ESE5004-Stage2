@@ -1,0 +1,15 @@
+# C-01只读方法、数据字典与复核边界
+
+`verification/audit_representation.py`使用netCDF4只读原件、np.load(allow_pickle=False)、固定Git对象和Fraction；不导入PyPSA、Gurobi或优化接口。仅对用户批准范围执行一次实际聚合模拟。最大单表约40.6MB；内存中日值只用于SHA和浮点序列化核对，未写出派生输入。
+
+结果表中exact为约分后的精确有理数字符串；approx只用于阅读，所有PASS与方向判断用exact。annual_delta是daily−original；relative用原年度绝对值分母。ULP来自最近binary64的实际间距，包含偶数中点校验。`nonrepresentable_day_bitmap_hex`第d位对应从2013-01-01起的0基日序号；置1表示该精确日均不能直接用一个binary64表示。每资产保存一个最大日误差的8值十六进制例子，不是整份原时序。`daily_simulation_SHA256`仅标识模拟数组，不表示已生成可投产的文件。
+
+源表SHA统一little-endian float64、C-order；每列源SHA及UTF8 JSON有序资产ID SHA共同绑定数值与标签。CF年度单位为等效满负荷小时，inflow/Load为MWh，不能互加不同单位的汇总数。范围字段`source_above_one_count`对CF有约束意义，对MW数据仅为通用数值计数，不能解释为MW违法。
+
+`verification/verify_evidence.py`只读已生成轻量JSON，对每资产代表桶用整数有效位规则重算nearest/ties-even，不使用float(Fraction)决定舍入；另核总差、各类计数、385组不等式和候选方案位长范围。16类核验、2237个代表桶通过；没有重扫全原时序。它只记录一个PROPOSED数值表示，不生成H/L日数组、不创建固定变量，也不启动模型。
+
+`verification/check_source_completeness.py`独立核对171个NPZ需求源数组的NaN/Inf/负值，以及Scheme A引用中161个既存全零列；不重复聚合。确认1737条实际Load与另外161零列完整覆盖1898源列，无新删除。
+
+在有既定原件与Python依赖的本地审计仓库，可用现有Python3.11环境运行上述脚本复核。证据已完成，不建议无变化重复运行；单纯联合审阅可只检查JSON、Manifest与ZIP的SHA/CRC。脚本源码中的固定源路径仅为读取引用，不包含许可证、凭据或云端入口。
+
+主要证据：C01_SOURCE_IDENTITY_AND_SCOPE（输入及执行边界）、C01_DYNAMIC_ATTRIBUTE_INVENTORY（全动态表/源数组/日历）、C01_LOAD_ANNUAL_EXACT_CHECK（1737条及385组）、C01_CF_INFLOW_ROUNDING_CHECK（460+40）、C01_SOURCE_ARRAY_COMPLETENESS、C01_INDEPENDENT_CHECK_RECEIPT、C01_PROPOSED_REPRESENTATION_RULE、C01_RESULT_SUMMARY。最终Git及ZIP身份在发布记录/包清单，不伪造自引用SHA。

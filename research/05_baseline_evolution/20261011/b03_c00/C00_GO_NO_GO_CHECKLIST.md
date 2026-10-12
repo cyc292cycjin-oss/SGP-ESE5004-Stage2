@@ -34,3 +34,10 @@
 本轮[verification/verify_design.py](verification/verify_design.py)只检查轻量JSON中的参数引用、身份、预算和有理数公式示例；没有PyPSA、Gurobi导入或模型构建。其PASS仅为设计一致性。未来数据验收另需逐Load年度Fraction、全部385/807、每profile聚合误差、组件差异白名单以及原生逐值回读，不能拿本轮脚本替代。
 
 **最终设计状态：B03_C00_DESIGN_COMPLETE。执行状态：AWAITING_JOINT_REVIEW_AND_NEW_AUTHORIZATION。** C测试、完整Gate6及后续情景均未启动。
+
+
+## C-01实际表示门槛结果（2026-10-12更新）
+
+原协议和候选阈值不变。本轮实际只读预检已核身份与3类动态属性，无协议未涵盖属性；CF/入流全部通过半ULP累计界，385/807 Scheme A精确年度关系不变。**Load年度硬门槛实际未通过**：1642/1737精确相等，52正漂移、43负漂移（全部电Load），最大绝对1.1568772606551647e-9 MWh。不得以误差小而改成PASS。
+
+当前状态C01_REPRESENTATION_DECISION_REQUIRED / NO-GO_REPRESENTATION。详见[../c01/C01_DAILY_REPRESENTATION_PREFLIGHT.md](../c01/C01_DAILY_REPRESENTATION_PREFLIGHT.md)。一个非负双字常数表示候选仅为PROPOSED，尚未批准或实施；不自动修改Load、Q、V4、日权重或年度相等要求。日模型构建与求解仍未授权/未执行，G6-05保持暂停。

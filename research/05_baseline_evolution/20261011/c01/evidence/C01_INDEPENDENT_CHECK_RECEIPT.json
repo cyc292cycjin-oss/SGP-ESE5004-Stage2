@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "All asset annual identities and bounds",
+      "status": "PASS",
+      "detail": "Exact stored Fractions rechecked for 1737 Load + 460 CF + 40 inflow; no source scan repeated"
+    },
+    {
+      "check": "Independent nearest-even integer arithmetic",
+      "status": "PASS",
+      "detail": "Each saved representative bucket recomputed using integer significand rounding, independent of float(Fraction)"
+    },
+    {
+      "check": "Actual dynamic coverage",
+      "status": "PASS",
+      "detail": "Only Load.p_set, Generator.p_max_pu, StorageUnit.inflow"
+    },
+    {
+      "check": "Missing/invalid observations",
+      "status": "PASS",
+      "detail": "No NaN, Inf or negative observations; _FillValue metadata does not imply NULL data"
+    },
+    {
+      "check": "loads classification counts",
+      "status": "PASS",
+      "detail": 1737
+    },
+    {
+      "check": "loads aggregate exact drift",
+      "status": "PASS",
+      "detail": "Both signed and gross errors checked; no cancellation masquerades as per-asset preservation"
+    },
+    {
+      "check": "CF classification counts",
+      "status": "PASS",
+      "detail": 460
+    },
+    {
+      "check": "CF aggregate exact drift",
+      "status": "PASS",
+      "detail": "Both signed and gross errors checked; no cancellation masquerades as per-asset preservation"
+    },
+    {
+      "check": "inflow classification counts",
+      "status": "PASS",
+      "detail": 40
+    },
+    {
+      "check": "inflow aggregate exact drift",
+      "status": "PASS",
+      "detail": "Both signed and gross errors checked; no cancellation masquerades as per-asset preservation"
+    },
+    {
+      "check": "Biomass closure",
+      "status": "PASS",
+      "detail": "807 approved accounts reused, no Q regeneration"
+    },
+    {
+      "check": "Scope of demand drift",
+      "status": "PASS",
+      "detail": "1641 flat and one varying Load exact annually"
+    },
+    {
+      "check": "CF source range issue preserved",
+      "status": "PASS",
+      "detail": "No clipping performed; input exceeds 1 by one ULP"
+    },
+    {
+      "check": "Local rounding lattice obstruction",
+      "status": "PASS",
+      "detail": "Cannot repair within unchanged daily binades by ordinary integer-ULP changes; remaining 9 not thereby proven repairable"
+    },
+    {
+      "check": "Proposed two-term proof range",
+      "status": "PASS",
+      "detail": "Means have at most 57 significant bits. Original exponents >=4 imply exact mean quantum >=2^-51; a <=4-bit remainder is safely representable in binary64."
+    },
+    {
+      "check": "Decision classification",
+      "status": "PASS",
+      "detail": "Identities/coverage pass, annual demand representation needs a decision"
+    }
+  ],
+  "check_count": 16,
+  "representative_exact_rounding_checks": 2237,
+  "source_full_scan_repeated": false,
+  "models_built": 0,
+  "solver_calls": 0,
+  "proposed_rule_applied": false
+}
