@@ -1,0 +1,102 @@
+# SGP ESE5004 Stage2 — C-05正式执行确认
+
+我批准按照附件 C05_AGGREGATE0_CONDITIONAL_CODEX_INSTRUCTION.md 执行C-05。
+本消息即该文件首节要求的明确执行确认；“待用户授权”是指令模板的初始状态。
+保留附件和旧授权原件，另生成本次独立的Run、Release、授权及一次调用标记。
+
+## 1. 唯一任务
+复用现成365日LP，只将 Aggregate 从1改为0，执行一次Gurobi对照优化、完整日V4验收、云端封存、本地备份及最终交付。
+不重新构建PyPSA网络或Linopy模型，不重复CSR→CSC转换，不重做A/B/C01R或C04取证。
+允许将已冻结日CSC载入新的Gurobi原生模型对象；这不等于重建科学模型。
+
+## 2. 基准身份和材料
+基准Run：c02r_c03_daily122_20261012T044259Z_25e62c10
+C03生产代码提交：a3c1f5e97e03b99f4fa5fa885f6fe0747768d7d7
+C04交付提交：4b76dc65662faef61ff429d3a299cc7db8bccd9b
+
+本地完整旧结果目录：
+D:\ResearchWorkspaces\ASEAN\outputs\c03_daily_diagnostic\c02r_c03_daily122_20261012T044259Z_25e62c10\cloud_run
+
+云端旧结果目录：
+/root/autodl-tmp/SGP/runs/c02r_c03_daily122_20261012T044259Z_25e62c10
+
+先读取完整C05指令和C04审阅ZIP中的原始证据、Manifest、参数与备份回执。
+C04_CHATGPT_INDEPENDENT_REVIEW.json只作辅助复核记录，不替代原始矩阵或生产回执。
+所有源文件按真实Manifest/SHA核对，不凭目录名认定身份。
+旧完整归档已完成本地核验，不重复下载约315MB旧归档，不要求用户重传已有大矩阵或原始向量。
+若必要文件确实缺失，仅列明最小缺口；不得用新建模替代缺失源文件。
+
+## 3. 参数与唯一对照因素
+使用Gurobi 12.0.3，唯一算法变化为 Aggregate=0。
+其余保持C03实际参数：
+Method=2，Crossover=0，BarConvTol=1e-6，NumericFocus=0，
+FeasibilityTol=1e-6，OptimalityTol=1e-6，Threads=4，Seed=123，
+AggFill=0，PreDual=0，Presolve=-1，DualReductions=1，
+ScaleFlag=-1，ObjScale=0，历史GURO_PAR_BARDENSETHRESH=200。
+其他参数依C03原始回执，逐项核对154项非秘密数值参数。
+不使用P2，不恢复DualReductions=0的旧G6-05，不改变D/R、成本、offset、Scheme A、C01R或日V4。
+Run路径、LogFile、授权和时间信息可变，但不得混入第二个算法变化。
+
+## 4. 连续执行
+使用已确认的122号实例和既有可信连接，重新核实实例身份、资源、磁盘及WLS运行环境，不输出凭据。
+核对无本次同目的活跃任务或已消费的新授权后，创建独立执行版本。
+复用C03成熟求解、映射、日V4、监督与保全代码；若旧合并入口包含构建步骤，分离最小solve-from-frozen-CSC入口，禁止再次运行C02。
+允许必要的入口/路径/参数覆盖适配和无求解单元检查，不再形成单独的补丁审批轮次。
+
+完整日CSC为2,450,005列、6,042,238行、11,403,496非零元。
+实际载入、完整精确回读、参数差异表、WLS及资源保护全部通过后，
+在同一原生模型句柄上直接执行唯一一次GRBoptimize。
+正常成功步骤之间无需再询问“是否开始求解”；真实阻断时停止并交付证据。
+
+## 5. 明确时间与资源授权
+正式优化最多一次，原生TimeLimit最多3600秒。
+计算、验收和云端封存独立总窗口7200秒，从实际生产启动t0冻结。
+阶段上限依完整附件：载入/回读900秒、原生3600秒、退出宽限150秒、
+RAW保存300秒、后处理1200秒、云端封存1050秒；同时执行累计绝对截止。
+不滚动延长，不自动重试。
+
+保留SoftMemLimit=65十进制GB、MemLimit默认1e100、RSS上限75GiB、
+cgroup余量至少12GiB、启动磁盘至少20GiB且核实际产物需求、运行磁盘底线8GiB。
+核实有效90GiB内存与至少4核CPU配额；监督、停止及保存不得依赖Codex会话在线。
+不恢复旧费用启动门槛，不自动开关机、克隆、迁移、扩容或释放实例。
+
+## 6. 原始结果与全量验收
+先保存真实返回码、Status、SolCount、Runtime、迭代、参数、日志和合法可用的X/Pi/RC，fsync及SHA完成后再映射与验收。
+无解或属性不可用时如实标记，不把partial数组当可用解，不伪造V4。
+
+有完整向量时执行全部日V4，而不只检查历史失败资产：
+全矩阵/列界、807资源账户、385义务组、动态/前缀/L1、stationarity、自由RC、对偶符号、互补性、目标差、原/V3双账、FOM和NetCDF回读。
+重点对照C03的377/111资产集合、1/2/3/4账户组模式及4304/365局部KKT失败，报告新增失败项。
+数值改善不等于PASS；即使日V4通过，也不能宣布2920时段Gate6通过或已证明唯一根因。
+
+## 7. 新的独立备份窗口
+同时批准云端封存完成后、从实际传输开始计时的本次60分钟本地传输窗口。
+它与7200秒计算窗口分开，不复用已经结束的C04授权，也不延长优化时限。
+只备份本次新增运行结果，旧矩阵、网络、D/R和目标通过不可变引用复用。
+允许完整源SHA及partial前缀核验后的一次安全续传，不盲目拼接或无限重试。
+完成后核SHA、CRC、路径及BACKUP_INDEX；传输超时则保留partial和云端原件，标记LOCAL_SYNC_PENDING。
+本地离线核验可在传输结束后完成，科学状态与备份状态分列。
+
+## 8. GitHub和ZIP同轮交付
+建立独立C05执行分支，关联PR #13和#14，不改main、不force-push、不自动合并。
+更新BASELINE_EVOLUTION_LEDGER、research/STAGE2_PROJECT_LEDGER及日模型台账。
+真实commit、push、PR信息必须回报；若失败如实记录。
+
+交付：
+C05_AGGREGATE0_DAILY_DIAGNOSTIC_RESULT.md
+C05_SINGLE_FACTOR_PARAMETER_DIFF.json
+C05_BASELINE_RESULT_COMPARISON.json
+C05_AGGREGATE0_DAILY_DIAGNOSTIC_REVIEW.zip
+
+ZIP同轮包含报告、台账、原生/日V4/备份回执、轻量证据及必要代码，
+附相对路径、大小、SHA256和CRC核验，提供真实本地绝对路径。
+大矩阵、NetCDF及向量保存在原始证据目录，审阅ZIP只含引用与SHA。
+许可证、密钥、令牌及敏感连接凭据不得进入GitHub或ZIP。
+
+## 9. 停止边界
+任何终态后停止，不自动改第二个参数或进行第二次optimize。
+不调用独立presolve、IIS、feasRelax，不启用Crossover，不修补返回解、不放宽V4。
+不恢复G6-05，不重算2920时段，不启动Integrated/Disconnected/DEC或跨境能源扩展。
+
+本轮最终必须交付真实优化结果，或阻止其启动/完成的具体证据，
+不得仅以PREPARED、PATCH_READY或LAUNCH_DISPATCHED作为最终成果。
