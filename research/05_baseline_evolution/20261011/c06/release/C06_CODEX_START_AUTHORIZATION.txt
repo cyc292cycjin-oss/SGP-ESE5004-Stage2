@@ -1,0 +1,69 @@
+# SGP ESE5004 Stage2 — C06正式执行请求
+
+我确认并授权执行附件中的：
+C06_BARCONVTOL_AUTHORIZED_CODEX_INSTRUCTION.md
+
+本次授权已成立。旧C06条件指令中的“待用户批准”条款已被本次独立授权替代；不需要再次询问是否开始。旧提案、历史授权、消费标记和结果保留，不覆盖。
+
+1. 目标与唯一变化
+以C03运行c02r_c03_daily122_20261012T044259Z_25e62c10为基准，直接复用相同365日CSC、行列界、目标/offset、D/R、标签、Scheme A、C01R和日V4。
+唯一算法变化：BarConvTol由1e-6改为1e-9。
+Aggregate必须保持1，不得沿用C05的0。
+相对C05的Aggregate和BarConvTol两项差异须另外披露，不能将C05误称为单因素基准。
+
+2. 连续执行而不重新建模
+复用C05已运行的solve-from-frozen-CSC、监督、RAW保全和日V4框架，必要修改仅限新Run/授权、参数及对照绑定。
+完成安全连接及实时资源/WLS核验、冻结输入核验、原生完整载入和逐值回读、参数双对照后，在同一原生模型上调用唯一一次GRBoptimize。
+不重建PyPSA或Linopy模型，不重做CSR→CSC，不使用旧X/Pi/RC热启动，不引入P2。
+成功步骤之间不再停下来申请普通审批，不以PATCH_READY或LAUNCH_DISPATCHED作为正常最终交付。
+
+3. 冻结求解配置
+Gurobi 12.0.3：
+Method=2，Crossover=0，Threads=4，Seed=123，
+Aggregate=1，AggFill=0，PreDual=0，Presolve=-1，
+BarConvTol=1e-9，NumericFocus=0，
+FeasibilityTol=1e-6，OptimalityTol=1e-6，
+DualReductions=1，BarHomogeneous=-1，
+ScaleFlag=-1，ObjScale=0，GURO_PAR_BARDENSETHRESH=200。
+其余按C03实际参数原件保持。
+实际设置并回读154项数值参数，同时生成相对C03、C05的完整差异表。
+相对C03出现任何未授权算法差异，优化前停止。
+
+4. 时间、资源和一次调用
+仅一次优化，TimeLimit最多3600秒，生产全流程最多7200秒。
+阶段预算为900/3600/150/300/1200/1050秒，分别对应载入回读、原生优化、退出宽限、RAW、日V4和封存；实际t0冻结截止，不滚动延期。
+SoftMemLimit=65十进制GB，MemLimit保持默认1e100。
+按完整附件核实122号机有效90GiB及至少4核CPU；RSS上限75GiB、cgroup余量12GiB、启动盘至少20GiB并核算需求、运行盘底线8GiB。
+使用独立supervisor/guard，不依赖Codex或浏览器在线。
+不自动重试、换机、扩容、开关机或释放实例，不恢复费用启动阻断。
+
+5. 原始结果与完整验收
+先持久保存真实返回码、Status、SolCount、日志、参数、质量属性及合法可取得的X/Pi/RC，完成fsync及SHA，再进行坐标还原和完整日V4。
+检查所有807账户、385义务组、全矩阵/列界、年度/前缀/状态L1、Bus/转换/储能、每列stationarity、自由RC及对偶符号、互补性、加权stationarity、双目标差、原/V3已知成本、FOM和NetCDF回读。
+不得只检查旧失败资产；同时披露377/111旧失败集合与1/2/3/4账户组模式的变化、新失败项，以及全部KKT结果。
+无完整合法向量就标NOT_AVAILABLE，不造partial解或伪造V4结果。
+只有合法OPTIMAL和全量日V4通过才可报告日模型科学通过；不等于2920时段Gate6通过。
+
+6. 新的本地备份窗口
+云端封存完成后，为本次新增结果授权独立60分钟传输窗口，从实际开始传输时计时，不延长7200秒生产窗。
+旧数据以不可变引用复用，不重复下载旧完整归档。
+验证大小、SHA、压缩流CRC、路径安全及BACKUP_INDEX；partial须核源SHA和前缀再安全续传，不无限重试。
+未完成如实记录LOCAL_SYNC_PENDING，不删除云端原件或重新求解。
+
+7. GitHub及ZIP同轮交付
+独立C06分支/PR，关联PR #13/#14/#15；核实当前HEAD及工作区，不改main、不force-push、不自动合并。
+更新BASELINE_EVOLUTION_LEDGER.md、research/STAGE2_PROJECT_LEDGER.md及日模型准入台账。
+同轮提交、push并返回真实commit/PR，同时交付：
+C06_BARCONVTOL_DAILY_DIAGNOSTIC_RESULT.md
+C06_C03_C05_PARAMETER_COMPARISON.json
+C06_COMPLETE_V4_AND_BASELINE_COMPARISON.json
+C06_BARCONVTOL_DAILY_DIAGNOSTIC_REVIEW.zip
+ZIP包括完整轻量报告、必要代码、原生/日V4/资源/封存/本地备份回执、最新台账及文件大小/SHA256/CRC清单，给出真实本地绝对路径。
+不得放入完整矩阵、NetCDF、大向量、许可证或凭据。
+
+8. 终止边界
+任何终态后完成允许的验收/保全分支并停止，不自动再试1e-10、1e-12、NumericFocus、BarHomogeneous或其他组合。
+不执行独立presolve、IIS、feasRelax；不修改物理模型、成本、Scheme A、C01R或V4；不修补旧解，不清除消费标记。
+不恢复G6-05，不进入2920时段或Integrated/Disconnected/DEC。
+如已有同目的活跃任务或本次授权已消费，只读取并报告，不重复启动。
+真实身份、安全、资源或完整性阻断时保存证据并报告，其余按附件连续执行到交付结束。
