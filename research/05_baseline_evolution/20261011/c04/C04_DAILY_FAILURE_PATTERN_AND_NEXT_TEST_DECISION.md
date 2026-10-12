@@ -121,6 +121,6 @@ Java-Bali1 0最终Bus在2013-01-01的原生行4259016、Linopy标签4263081，�
 
 主要轻量复核文件：`C04_RECEIPT_PATTERN.json`、`C04_SCALE_CONFOUNDING.json`、`C04_SELECTED_PHYSICAL_RECOMPUTATION.json`、`C04_KKT_COLUMN_CLASSIFICATION.json`、`C04_TARGETED_CROSSCHECKS.json`、`C04_ACCOUNT_BUDGET_SEVERITY.json`、`C04_BACKUP_RECEIPT.json`；字段方法见`C04_METHOD.md`及methods目录，全部来源SHA见`C04_EVIDENCE_INDEX.json`。原始大数组仅以真实本地路径/大小/SHA引用，不进入GitHub或审阅ZIP。
 
-独立分支 `codex/c04-daily-pattern-20261012`，关联[PR #13](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/13)。实际本轮commit/新PR/ZIP SHA由发布回执给出；不合并任何PR。
+独立分支 `codex/c04-daily-pattern-20261012`，关联[PR #13](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/13)。首个审计提交`662d1de6037f4f8615eff61219e65ea3062fbcf6`已推送并核实远端；[独立PR #14](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/14)。最终交付commit与ZIP SHA由发布回执给出；不合并任何PR。
 
 **C02R构建/静态交接完成；C03诊断已执行但科学NOT_ACCEPTED；C04取证与单因素建议完成。完成交付后停止，等待新的独立求解授权。**
