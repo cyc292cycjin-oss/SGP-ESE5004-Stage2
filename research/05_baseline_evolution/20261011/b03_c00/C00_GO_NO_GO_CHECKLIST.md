@@ -41,3 +41,10 @@
 原协议和候选阈值不变。本轮实际只读预检已核身份与3类动态属性，无协议未涵盖属性；CF/入流全部通过半ULP累计界，385/807 Scheme A精确年度关系不变。**Load年度硬门槛实际未通过**：1642/1737精确相等，52正漂移、43负漂移（全部电Load），最大绝对1.1568772606551647e-9 MWh。不得以误差小而改成PASS。
 
 当前状态C01_REPRESENTATION_DECISION_REQUIRED / NO-GO_REPRESENTATION。详见[../c01/C01_DAILY_REPRESENTATION_PREFLIGHT.md](../c01/C01_DAILY_REPRESENTATION_PREFLIGHT.md)。一个非负双字常数表示候选仅为PROPOSED，尚未批准或实施；不自动修改Load、Q、V4、日权重或年度相等要求。日模型构建与求解仍未授权/未执行，G6-05保持暂停。
+
+
+## 122迁移后的状态边界（2026-10-12）
+
+原C01 exact结果已核SHA复用，仍为NO-GO_REPRESENTATION，不因设备迁移变成GO。新实例输入SHA/内部链接等待用户执行只读身份入口后返回JSON；环境导入/资源来自用户陈述，不是当前独立准入验收。可选Scheme A云端文件核对尚未执行，本地固定配方证据不变。WLS不属于本次表示审计的前置条件，未读取许可证或启动原生环境。
+
+详见 [C01_INSTANCE122_READONLY_HANDOFF.md](../c01/instance122/C01_INSTANCE122_READONLY_HANDOFF.md)。本次不批准或实施双字表示候选，不调整年度相等条件、Q、Load或V4，不授权日构模/求解；G6-05保持PAUSED_BY_USER。

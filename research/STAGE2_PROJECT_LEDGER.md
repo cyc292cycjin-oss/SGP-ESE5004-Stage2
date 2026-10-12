@@ -121,3 +121,20 @@
 - 分支`audit/stage2-c01-daily-representation-20261012`；[PR #9](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/9)为OPEN/DRAFT，base为已审阅C-00分支，未合并。
 - 原C-00远端仍`5d757c5a4a9dad965d9c7cbe6e55d486d167ff93`，Scheme A仍`8883de6fb3e15767c632ac92f535e8a423e90b69`。没有改写原始输入、旧结果或消费标记。
 - 最终commit、C01_DAILY_REPRESENTATION_REVIEW.zip大小/SHA/CRC由包内清单及本地C01_FINAL_DELIVERY_RECEIPT.json记录。C01_REPRESENTATION_DECISION_REQUIRED，日构模/求解仍NO-GO，唯一候选未实施。交付后停止，等待联合验收。
+
+
+## C-01迁移至122：证据复用与最小只读入口（2026-10-12）
+
+- 科学状态保持 **C01_REPRESENTATION_DECISION_REQUIRED**：95条时变电Load有非零年度表示差；385/807 Scheme A精确关系保持；候选修订仍未批准/未实施。
+- 已核原C01提交 `efb0ddb5b66c0305715d285c9d622ed65228b728` 的轻量证据SHA和旧ZIP CRC；Scheme A PR #4固定Git对象仍匹配。没有因迁移重做时序积分。
+- 122环境为USER_REPORTED；尚未连接实例或取得新云端身份回执。提供独立 `c01/instance122/c01_122_readonly_identity.py`，只核迁移NetCDF SHA及动态元数据并生成新JSON。可选核已存在的Scheme A四文件，不假定配方已部署。
+- 122状态 **AWAITING_USER_JUPYTER_READONLY_RECEIPT**；当前无GO。入口本地合成测试不等同于云端执行。报告 `c01/instance122/C01_INSTANCE122_READONLY_HANDOFF.md`。
+- 本轮独立分支 `audit/stage2-c01-instance122-handoff-20261012`；commit/PR见发布记录及交付Manifest。新ZIP保留原C01 ZIP，放在独立实例交接目录；无NetCDF、大向量或凭据。
+- G6-05仍PAUSED_BY_USER；新网络/LP/求解/AutoDL操作均0，不自动进入C模型构建或后续阶段。
+
+
+### C-01 / 122只读交接发布里程碑
+
+- 交接入口、16项本地检查及报告提交 `c872806117aebb8216c8b5f883e71ca8d6d648a4` 已push。
+- 分支 `audit/stage2-c01-instance122-handoff-20261012`；独立 [PR #10](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/10) 为OPEN/DRAFT，base为原C01审计分支；未合并或改写旧分支。
+- 122实际身份回执仍待用户Jupyter返回；当前仅复用原C01证据，科学结论仍DECISION_REQUIRED。新交付的最终commit和ZIP SHA/CRC记录在PACKAGE_MANIFEST及本地最终回执中；旧ZIP保留。G6-05保持暂停，无构模/求解/AutoDL操作。
