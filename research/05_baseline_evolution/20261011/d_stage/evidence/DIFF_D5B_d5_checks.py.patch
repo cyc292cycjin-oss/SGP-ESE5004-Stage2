@@ -1,0 +1,43 @@
+--- release_d5/d5_checks.py
++++ release_d5b/d5_checks.py
+@@ -4,7 +4,7 @@
+ from c02_common import read, write, sha, resources, resource_gate, versions
+ ROOT = Path('/root/autodl-tmp/SGP'); HERE = Path(__file__).resolve().parent
+ SYSROOT = Path('/root/sgp_d_stage'); RUNROOT = SYSROOT / 'runs'   # user decision: D-5 run directory on the system disk
+-IDENTITY = 'D5_GATE6_2920_EXACT_DECOMPOSITION_MAIN_LP_USER_20261013_V1'
++IDENTITY = 'D5B_GATE6_2920_EXACT_DECOMPOSITION_MAIN_LP_TIMELIMIT43200_USER_20261013_V1'
+ GIB = 1024 ** 3
+ BASELINE = 'C06_EFFECTIVE_MODEL_PARAMETERS.json'   # frozen C06 = C07A algorithm (Aggregate 1, BarConvTol 1e-9)
+ 
+@@ -18,7 +18,7 @@
+         v = actual[k]; kind = 'UNCHANGED'
+         if v != b:
+             if k == 'Crossover' and b == 0 and v == -1: kind = 'AUTHORIZED_CROSSOVER_AS_C07B'
+-            elif k == 'TimeLimit' and 0 < v <= 14400: kind = 'AUTHORIZED_D_STAGE_TIME_LIMIT_MAX_14400'
++            elif k == 'TimeLimit' and 0 < v <= 43200: kind = 'AUTHORIZED_D5B_TIME_LIMIT_MAX_43200'
+             else: kind = 'UNAUTHORIZED'; bad.append(k)
+         rows.append({'parameter': k, 'C06': b, 'D5': v, 'classification': kind})
+     if actual['Crossover'] != -1: bad.append('Crossover')
+@@ -28,18 +28,18 @@
+ 
+ 
+ def verify_release(expected):
+-    assert sha(HERE / 'D5_RELEASE_MANIFEST.json') == expected
+-    m = read(HERE / 'D5_RELEASE_MANIFEST.json')
++    assert sha(HERE / 'D5B_RELEASE_MANIFEST.json') == expected
++    m = read(HERE / 'D5B_RELEASE_MANIFEST.json')
+     for rel, r in m['files'].items():
+         p = HERE / rel
+         assert not p.is_symlink() and p.is_file() and p.resolve().is_relative_to(HERE)
+         assert p.stat().st_size == r['bytes'] and sha(p) == r['sha256'], rel
+-    assert read(HERE / 'D5_APPROVAL_RECORD.json')['approved_by_user'] is True
++    assert read(HERE / 'D5B_APPROVAL_RECORD.json')['approved_by_user'] is True
+     assert sha(HERE / 'V4_APPROVED.json') == '955cfe48f0de95d1ce9df531ee7d5b0a3dff47dad9f6b06f70a180745cf0657f'
+     assert sha(HERE / 'C06_EFFECTIVE_MODEL_PARAMETERS.json') == 'f2f4bc219e3757dff6deda9035d67464e86e96e8ee9186427d2e27aced112f3c'
+     assert sha(HERE / 'C03_EFFECTIVE_MODEL_PARAMETERS.json') == '9514025d6234626f26d0f7dca7f9cf8070de4d24360a64429edbed790b9432a2'
+     assert read(HERE / 'LOCAL_INTERFACE_TESTS.json')['status'] == 'PASS'
+-    assert read(HERE / 'D5_LOCAL_TESTS.json')['status'] == 'PASS'
++    assert read(HERE / 'D5B_LOCAL_TESTS.json')['status'] == 'PASS'
+     assert read(HERE / 'D2_CLOUD_READONLY_CHECKS.json')['status'] == 'PASS'
+     return m
+ 

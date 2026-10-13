@@ -1,0 +1,99 @@
+--- c09_release/c09_native.py
++++ release_d5/d5_native.py
+@@ -1,4 +1,4 @@
+-"""C09 native worker. Sole optimize call site, on the MAIN LP only, after full same-model readback."""
++"""D-5 native worker (derived from c09_native.py). Sole optimize call site, on the 2920 MAIN LP only, after full same-model readback."""
+ from pathlib import Path
+ import ctypes as C, os, sys, time, threading, traceback, math, json
+ import numpy as np
+@@ -6,7 +6,7 @@
+ from c02_common import read, write, sha
+ from adapter import CBackend, open_problem, load_candidate, exact_readback, ranges
+ from license_binding import bind_license, safe_error_category
+-from c09_decompose import load_block, verify_block, main_problem
++from d5_decompose import load_block, verify_block, main_problem
+ 
+ 
+ def stage(run, phase): write(run / 'PHASE.json', {'phase': phase, 'entered_epoch': time.time()})
+@@ -46,7 +46,7 @@
+     root = run / 'raw'; root.mkdir(exist_ok=False); folder = root / 'vectors'; folder.mkdir()
+     status = b.scalar('Status', int)
+     receipt = {'run_id': authorization['run_id'], 'source_model_manifest_sha256': sha(run / 'bridge/math_problem/MATH_PROBLEM.json'),
+-               'main_problem_identity_sha256': sha(run / 'C09_MAIN_PROBLEM_IDENTITY.json'), 'native_coordinate_space': 'C09_MAIN_LP_C03_COORDINATES',
++               'main_problem_identity_sha256': sha(run / 'D5_MAIN_PROBLEM_IDENTITY.json'), 'native_coordinate_space': 'D5_MAIN_LP_D1_COORDINATES',
+                'native_status': status, 'qualification': 'UNQUALIFIED', 'native_returned': True, 'collected_epoch': time.time(),
+                'GRBoptimize_return_code': call['native_return_code']}
+     write(root / 'NATIVE_RETURN.json', receipt)
+@@ -87,8 +87,8 @@
+ def main(run):
+     a = read(run / 'AUTHORIZATION.json'); lib = None; env = C.c_void_p(); backend = None; entered = False
+     try:
+-        assert a['scope'] == 'C09_EXACT_BLOCK_DECOMPOSITION_SINGLE_DAILY_MAIN_LP' and a['maximum_native_seconds'] == 3600
+-        assert read(run / 'BUILD_RESULT.json')['status'] == 'C02_BUILD_STATIC_ACCEPTED_NO_SOLVE'
++        assert a['scope'] == 'D5_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP' and a['maximum_native_seconds'] == 14400
++        assert read(run / 'BUILD_RESULT.json')['status'] == 'D1_BUILD_STATIC_ACCEPTED_NO_SOLVE'
+         assert read(run / 'bridge/BRIDGE_RECEIPT.json')['status'] == 'EXACT_CSR_CSC_REVERSE_PERMUTATION_PASS'
+         assert read(HERE / 'LOCAL_INTERFACE_TESTS.json')['status'] == 'PASS'
+         dll = Path(a['library_path']); assert sha(dll) == a['library_sha256']
+@@ -97,9 +97,9 @@
+         rec, cols, rows, xb = load_block()
+         bv = verify_block(meta, arrays, cols, rows, xb)
+         mmeta, marr, mc, mr, ident = main_problem(meta, arrays, cols, rows)
+-        write(run / 'C09_BLOCK_VERIFICATION.json', dict(bv, block_receipt=rec))
+-        write(run / 'C09_MAIN_PROBLEM_IDENTITY.json', dict(mmeta, arrays_sha256=ident, source_manifest_sha256=sha(run / 'bridge/math_problem/MATH_PROBLEM.json')))
+-        np.save(run / 'C09_MAIN_COLUMNS.npy', mc.astype(np.int64)); np.save(run / 'C09_MAIN_ROWS.npy', mr.astype(np.int64))
++        write(run / 'D5_BLOCK_VERIFICATION.json', dict(bv, block_receipt=rec))
++        write(run / 'D5_MAIN_PROBLEM_IDENTITY.json', dict(mmeta, arrays_sha256=ident, source_manifest_sha256=sha(run / 'bridge/math_problem/MATH_PROBLEM.json')))
++        np.save(run / 'D5_MAIN_COLUMNS.npy', mc.astype(np.int64)); np.save(run / 'D5_MAIN_ROWS.npy', mr.astype(np.int64))
+         bind_license(); lib = C.CDLL(str(dll)); bind(lib)
+         lib.GRBversion.argtypes = [C.POINTER(C.c_int)] * 3; lib.GRBversion.restype = None
+         vv = [C.c_int() for _ in range(3)]; lib.GRBversion(*[C.byref(x) for x in vv]); assert [x.value for x in vv] == [12, 0, 3]
+@@ -110,28 +110,28 @@
+         if rc: license_receipt['safe_categories'] = safe_error_category(lib.GRBgeterrormsg(env))
+         write(run / 'WLS_ENVIRONMENT.json', license_receipt); ok(rc)
+         expected = dict(read(HERE / 'C06_EFFECTIVE_MODEL_PARAMETERS.json'), Crossover=-1); types = read(HERE / 'NATIVE_PARAMETER_EVIDENCE.json')['parameters']
+-        ok(lib.GRBsetintparam(env, b'LogToConsole', 0)); parameters(lib, env, expected, types, 3600., apply=True)
++        ok(lib.GRBsetintparam(env, b'LogToConsole', 0)); parameters(lib, env, expected, types, 14400., apply=True)
+         backend = CBackend(lib, env); loadstart = time.time(); load_candidate(backend, mmeta, marr)
+         transfer = exact_readback(backend, mmeta, marr); modelenv = lib.GRBgetenv(backend.model)
+         current = read(run / 'PHASE.json'); assert current['phase'] == 'BRIDGE'
+-        if time.time() >= min(current['entered_epoch'] + 900, a['load_absolute_deadline_epoch']): raise TimeoutError('NATIVE_HANDOFF_DEADLINE')
+-        limit = min(3600., a['native_absolute_deadline_epoch'] - time.time()); assert limit > 0
++        if time.time() >= min(current['entered_epoch'] + a['bridge_phase_seconds'], a['load_absolute_deadline_epoch']): raise TimeoutError('NATIVE_HANDOFF_DEADLINE')
++        limit = min(14400., a['native_absolute_deadline_epoch'] - time.time()); assert limit > 0
+         effective = parameters(lib, modelenv, expected, types, limit, apply=True)
+         ok(lib.GRBsetstrparam(modelenv, b'LogFile', str(run / 'gurobi.log').encode()))
+-        transfer.update(input_space='C09_MAIN_LP_C03_COORDINATES', run_id=a['run_id'], load_and_readback_seconds=time.time() - loadstart,
+-                        model_manifest_sha256=sha(run / 'bridge/math_problem/MATH_PROBLEM.json'), main_identity_sha256=sha(run / 'C09_MAIN_PROBLEM_IDENTITY.json'),
++        transfer.update(input_space='D5_MAIN_LP_D1_COORDINATES', run_id=a['run_id'], load_and_readback_seconds=time.time() - loadstart,
++                        model_manifest_sha256=sha(run / 'bridge/math_problem/MATH_PROBLEM.json'), main_identity_sha256=sha(run / 'D5_MAIN_PROBLEM_IDENTITY.json'),
+                         native_model_handle=str(backend.model.value), optimizer_calls_so_far=0)
+         write(run / 'NATIVE_TRANSFER.json', transfer); write(run / 'EFFECTIVE_MODEL_PARAMETERS.json', effective)
+-        from c09_checks import parameter_diff
++        from d5_checks import parameter_diff
+         diff = parameter_diff(read(HERE / 'C06_EFFECTIVE_MODEL_PARAMETERS.json'), effective)
+-        write(run / 'C09_PARAMETER_DIFF.json', diff); assert diff['status'] == 'PASS'
+-        write(run / 'C09_EXECUTION_METADATA.json', {'run_id': a['run_id'], 'source_model_manifest_sha256': transfer['model_manifest_sha256'],
++        write(run / 'D5_PARAMETER_DIFF.json', diff); assert diff['status'] == 'PASS'
++        write(run / 'D5_EXECUTION_METADATA.json', {'run_id': a['run_id'], 'source_model_manifest_sha256': transfer['model_manifest_sha256'],
+               'main_rows': mmeta['num_row'], 'main_columns': mmeta['num_col'], 'main_nnz': mmeta['nnz'], 'model_handle': str(backend.model.value),
+               'ModelSense': backend.scalar('ModelSense', int), 'ObjCon': backend.scalar('ObjCon', float), 'old_candidate_warm_start': False})
+         from c02_common import resource_gate, resources
+         resource_gate(resources(run))
+         if (run / 'STOP_REQUEST.json').exists(): raise RuntimeError('PROTECTION_STOP_BEFORE_OPTIMIZE')
+-        from production_control import alive
++        from d_production_control import alive
+         assert alive(read(run / 'GUARD_READY.json')) and time.time() - read(run / 'GUARD_HEARTBEAT.json')['epoch'] < 8
+         claim = Path(a['optimize_claim']); claim.parent.mkdir(exist_ok=True)
+         marker = {'run_id': a['run_id'], 'authorization_sha256': sha(run / 'AUTHORIZATION.json'), 'model_manifest_sha256': transfer['model_manifest_sha256'],
+@@ -145,8 +145,8 @@
+                 if (run / 'STOP_REQUEST.json').exists() or time.time() >= native_deadline:
+                     lib.GRBterminate(backend.model); return
+         t = threading.Thread(target=terminate_monitor); t.start()
+-        write(run / 'C09_NATIVE_OPTIMIZE_ENTERED.json', dict(marker, native_deadline=native_deadline, actual_time_limit=limit, model_handle=str(backend.model.value),
+-                                                            call_site='c09_native.main:lib.GRBoptimize(backend.model)'))
++        write(run / 'D5_NATIVE_OPTIMIZE_ENTERED.json', dict(marker, native_deadline=native_deadline, actual_time_limit=limit, model_handle=str(backend.model.value),
++                                                            call_site='d5_native.main:lib.GRBoptimize(backend.model)'))
+         entered = True
+         try: code = int(lib.GRBoptimize(backend.model))  # THE ONLY OPTIMIZE CALL SITE
+         finally: done.set(); t.join(timeout=5)

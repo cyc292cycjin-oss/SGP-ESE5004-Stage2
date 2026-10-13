@@ -1,0 +1,49 @@
+--- c09_release/c09_decompose.py
++++ release_d5/d5_decompose.py
+@@ -1,4 +1,4 @@
+-"""C09 exact block decomposition. No optimizer, environment or launch.
++"""D-5 exact block decomposition (derived from c09_decompose.py; dimensions and block files bound to D-1/D-2 receipts). No optimizer, environment or launch.
+ 
+ The frozen C03 daily CSC is split into
+   * the decoupled zero-cost fixed-resource block (884,472 columns / 2,203,217 rows), and
+@@ -13,9 +13,8 @@
+ import numpy as np
+ 
+ HERE = Path(__file__).resolve().parent
+-BLOCK = HERE / 'block'
+-EXPECTED = {'block_columns': 884472, 'block_rows': 2203217, 'num_col': 2450005, 'num_row': 6042238,
+-            'nnz': 11403496}
++EXPECTED = json.loads((HERE / 'D5_EXPECTED.json').read_text())
++BLOCK = Path(EXPECTED['block_dir'])
+ 
+ 
+ def sha(p):
+@@ -31,13 +30,15 @@
+ 
+ 
+ def load_block():
+-    rec = json.loads((BLOCK / 'C09_BLOCK_PRIMAL_RECEIPT.json').read_text())
++    if sha(BLOCK / 'BLOCK_RECEIPT.json') != EXPECTED['block_receipt_sha256']: raise ValueError('BLOCK_RECEIPT_SHA')
++    rec = json.loads((BLOCK / 'BLOCK_RECEIPT.json').read_text())
+     for name, h in rec['files'].items():
+         if sha(BLOCK / name) != h:
+             raise ValueError('BLOCK_FILE_SHA_MISMATCH ' + name)
+-    cols = np.load(BLOCK / 'C09_BLOCK_COLUMNS.npy')
+-    rows = np.load(BLOCK / 'C09_BLOCK_ROWS.npy')
+-    xb = np.load(BLOCK / 'C09_BLOCK_PRIMAL.npy')
++    if set(rec['files']) != {'BLOCK_COLUMNS.npy', 'BLOCK_ROWS.npy', 'BLOCK_PRIMAL.npy'}: raise ValueError('BLOCK_FILE_SET')
++    cols = np.load(BLOCK / 'BLOCK_COLUMNS.npy')
++    rows = np.load(BLOCK / 'BLOCK_ROWS.npy')
++    xb = np.load(BLOCK / 'BLOCK_PRIMAL.npy')
+     if len(cols) != EXPECTED['block_columns'] or len(rows) != EXPECTED['block_rows'] or len(xb) != len(cols):
+         raise ValueError('BLOCK_DIMENSIONS')
+     if not (np.all(np.diff(cols) > 0) and np.all(np.diff(rows) > 0)):
+@@ -110,7 +111,7 @@
+         'row_upper': np.ascontiguousarray(np.asarray(a['row_upper'])[mr]),
+     }
+     mmeta = {'num_col': int(len(mc)), 'num_row': int(len(mr)), 'nnz': int(len(out['value'])),
+-             'sense': meta['sense'], 'offset': meta['offset'], 'derivation': 'C09 restriction of frozen C03 CSC'}
++             'sense': meta['sense'], 'offset': meta['offset'], 'derivation': 'D5 restriction of frozen D-1 2920 CSC'}
+     ident = {k: arr_sha(v) for k, v in out.items()}
+     ident.update(main_columns_sha256=arr_sha(mc), main_rows_sha256=arr_sha(mr))
+     return mmeta, out, mc, mr, ident

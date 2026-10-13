@@ -1,0 +1,29 @@
+--- c02r_c03/code/daily_bridge.py
++++ release_d1/d1_bridge.py
+@@ -1,4 +1,4 @@
+-"""Lossless storage conversion of certified daily CSR chunks to legacy native CSC."""
++"""Lossless storage conversion of certified D-1 2920 CSR chunks to legacy native CSC (derived from daily_bridge.py)."""
+ from pathlib import Path
+ import gc,os
+ import numpy as np
+@@ -9,7 +9,7 @@
+ def bridge(source,dest,progress=lambda s:None):
+     source=Path(source);dest=Path(dest);dest.mkdir(exist_ok=False)
+     m=read(source/'lp/MATH_PROBLEM.json');labels=source/'mapping/LABELS.json'
+-    assert m['version']=='C02_DAILY_CHUNKED_CSR_LP' and m['status']=='EXACT_NUMPY_EXPORT_READBACK_PASS' and m['sense']=='min'
++    assert m['version']=='D1_2920_CHUNKED_CSR_LP' and m['status']=='EXACT_NUMPY_EXPORT_READBACK_PASS' and m['sense']=='min'
+     assert sha(labels)==m['label_manifest_sha256']
+     n,r,nz=m['columns'],m['rows'],m['nnz'];assert max(n,r,nz)<2_000_000_000
+     maps=dest/'mapping';maps.mkdir();mathdir=dest/'math_problem';mathdir.mkdir()
+@@ -51,9 +51,9 @@
+     for key in ('D','vlabels'):
+         p=source/'lp'/m['arrays'][key]['file'];assert sha(p)==m['arrays'][key]['sha256']
+         mapping[key]=save(maps,key,np.load(p,mmap_mode='r',allow_pickle=False))
+-    meta={'num_col':n,'num_row':r,'nnz':nz,'sense':1,'offset':m['V3_offset'],'scientific_offset':m['scientific_offset'],'arrays':files,'source_manifest_sha256':sha(source/'lp/MATH_PROBLEM.json'),'network_sha256':m['network_sha256'],'label_manifest_sha256':sha(labels),'row_order':'source chunks in manifest order','same_scientific_problem_as_daily_CSR':True}
++    meta={'num_col':n,'num_row':r,'nnz':nz,'sense':1,'offset':m['V3_offset'],'scientific_offset':m['scientific_offset'],'arrays':files,'source_manifest_sha256':sha(source/'lp/MATH_PROBLEM.json'),'network_sha256':m['network_sha256'],'label_manifest_sha256':sha(labels),'row_order':'source chunks in manifest order','same_scientific_problem_as_2920_CSR':True,'snapshots':m['snapshots']}
+     write(mathdir/'MATH_PROBLEM.json',meta)
+-    write(maps/'MAPPING_MANIFEST.json',{'arrays':mapping,'source_labels_path':str(labels),'source_labels_sha256':sha(labels),'row_ranges':row_ranges,'snapshots':365,'no_2920_label_reconstruction':True})
++    write(maps/'MAPPING_MANIFEST.json',{'arrays':mapping,'source_labels_path':str(labels),'source_labels_sha256':sha(labels),'row_ranges':row_ranges,'snapshots':m['snapshots'],'labels_from_actual_build':True})
+     from adapter import open_problem
+     mm,aa=open_problem(mathdir);check=validate(mm,aa)
+     rec={'status':'EXACT_CSR_CSC_REVERSE_PERMUTATION_PASS','source_manifest_sha256':meta['source_manifest_sha256'],'native_manifest_sha256':sha(mathdir/'MATH_PROBLEM.json'),'mapping_manifest_sha256':sha(maps/'MAPPING_MANIFEST.json'),'row_order_checked':True,'all_values_bounds_objective_preserved':True,'cost_binding':'cost_V3_scaled','V3_offset':meta['offset'],'scientific_offset':meta['scientific_offset'],'dimensions':check,'native_model_created':False}

@@ -1,0 +1,11 @@
+--- release_d5/d5_seal.py
++++ release_d5b/d5_seal.py
+@@ -22,7 +22,7 @@
+         if not p.is_file() or p.name in ('BACKUP_INDEX.json','CLOUD_SEAL_COMPLETE.json'):continue
+         with p.open('rb') as f:os.fsync(f.fileno())
+         files.append({'relative':str(p.relative_to(run)),'bytes':p.stat().st_size,'sha256':sha(p)})
+-    write(run/'BACKUP_INDEX.json',{'run_id':a['run_id'],'files':files,'cloud_originals_preserved':True,'local_sync':'LOCAL_SYNC_PENDING','immutable_references':{'baseline_path':source['baseline_path'],'baseline_ARTIFACT_SHA_INDEX_sha256':source['baseline_ARTIFACT_SHA_INDEX_sha256'],'source_binding_path':str(HERE/'SOURCE_BINDING.json'),'source_binding_sha256':sha(HERE/'SOURCE_BINDING.json'),'release_manifest_path':str(HERE/'D5_RELEASE_MANIFEST.json'),'release_manifest_sha256':a['release_manifest_sha256'],'files':source['files']},'qualification':'USE_POSTPROCESS_AND_NATIVE_RECEIPTS'})
++    write(run/'BACKUP_INDEX.json',{'run_id':a['run_id'],'files':files,'cloud_originals_preserved':True,'local_sync':'LOCAL_SYNC_PENDING','immutable_references':{'baseline_path':source['baseline_path'],'baseline_ARTIFACT_SHA_INDEX_sha256':source['baseline_ARTIFACT_SHA_INDEX_sha256'],'source_binding_path':str(HERE/'SOURCE_BINDING.json'),'source_binding_sha256':sha(HERE/'SOURCE_BINDING.json'),'release_manifest_path':str(HERE/'D5B_RELEASE_MANIFEST.json'),'release_manifest_sha256':a['release_manifest_sha256'],'files':source['files']},'qualification':'USE_POSTPROCESS_AND_NATIVE_RECEIPTS'})
+     write(run/'CLOUD_SEAL_COMPLETE.json',{'run_id':a['run_id'],'index_sha256':sha(run/'BACKUP_INDEX.json'),'file_count':len(files),'bytes':sum(x['bytes'] for x in files),'epoch':time.time(),'local_sync':'LOCAL_SYNC_PENDING','no_solve_retry':True})
+     dest=HERE.parent/(a['run_id']+'_NEW_RESULTS.tar.gz');part=dest.with_name(dest.name+'.partial')
+     with tarfile.open(part,'x:gz',compresslevel=1) as t:

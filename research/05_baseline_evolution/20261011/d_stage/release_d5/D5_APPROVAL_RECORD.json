@@ -1,0 +1,22 @@
+{
+  "approved_by_user": true,
+  "authority": "User chat instruction 2026-10-13: execute D_STAGE_CLAUDE_CODE_INSTRUCTION.md (D-0..D-6). The single D-5 optimize additionally requires the user's explicit reply '开始' after the D-4 admission summary; running d5 start is the final confirmation. Storage decision by user: D-5 run directory on the system disk, D-1 inputs on the data disk, protections unchanged.",
+  "scope": "D5_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP",
+  "max_optimize_calls_total": 1,
+  "per_run_native_seconds": 14400,
+  "per_run_total_seconds": 21600,
+  "algorithm": "C06/C07A 154 parameters with Crossover 0 -> -1 (as C07B/C09); TimeLimit 14400 (D instruction); Threads 4 unchanged for comparability with C09",
+  "model": "D-1 single 2920x3h Scheme A build (no time aggregation); decoupled zero-cost fixed-resource block from D-2 exact primal, zero duals; main LP to the solver",
+  "V4_changed": false,
+  "V4_binding": "GATE6_2920_V4_D1_V1: dimensions and labels re-bound only, thresholds unchanged (parent V4 955cfe48...)",
+  "scientific_model_changed": false,
+  "G6_05": "PAUSED_BY_USER",
+  "no_scenarios": true,
+  "preregistered_decision_rule": {
+    "DR1_status2_all_original_V4_gates_pass": "GATE6_2920_BASELINE_ACCEPTED. Next: rigorous lower bound on the 2920 main LP (read-only, c10_bound method with parameterised paths/dims); telescoping storage sums only after verifying lossless energy-balance rows, otherwise report.",
+    "DR2_status2_block_gates_pass_main_KKT_fails": "Numerical issue isolated to the network part. Next: targeted analysis; no re-run.",
+    "DR3_status_not_2_or_TIME_LIMIT_or_no_solution": "Record the true status; no retry. If stopped by TIME_LIMIT, only propose a longer limit or different Threads; do not execute.",
+    "DR4_block_gate_fails": "BLOCKED.",
+    "DR5_identity_resource_readback_failure": "BLOCKED."
+  }
+}
