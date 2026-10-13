@@ -1,0 +1,143 @@
+{
+ "status": "PASS",
+ "tests": {
+  "T01_block_verify_truncated_d1_csc": {
+   "status": "PASS",
+   "detail": {
+    "status": "BLOCK_DECOUPLED_ZERO_COST_FEASIBLE",
+    "cross_entries": 0,
+    "block_columns": 39543,
+    "block_rows": 97351,
+    "block_binary64_max_row_violation_LP_units": 1.0733601507606494e-16,
+    "block_column_index_sha256": "37a2f099cffb68a55ffb801875c860f1efe57bc6fe127f5379de614ce437c52f",
+    "block_row_index_sha256": "5ed13ee730d1fe78fafe7c59a737d0e4e751bb923149ca907e6aaba08a18e817"
+   },
+   "seconds": 0.01
+  },
+  "T02_negative_nonzero_block_cost": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_COST_NONZERO",
+   "seconds": 0.0
+  },
+  "T03_negative_perturbed_block_primal": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_PRIMAL_RESIDUAL 0.001",
+   "seconds": 0.01
+  },
+  "T04_negative_cross_entry": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+   "seconds": 0.0
+  },
+  "T05_negative_row_set": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+   "seconds": 0.0
+  },
+  "T05b_negative_block_receipt_binding": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_RECEIPT_SHA",
+   "seconds": 0.0
+  },
+  "T06_main_problem_validate_dims": {
+   "status": "PASS",
+   "detail": {
+    "num_col": 72162,
+    "num_row": 172427,
+    "nnz": 347348,
+    "row_senses": {
+     "=": 42148,
+     ">": 66768,
+     "<": 63511,
+     "free_columns": 71520
+    },
+    "source_array_bytes": 9236200
+   },
+   "seconds": 0.01
+  },
+  "T07_main_restriction_bitwise": {
+   "status": "PASS",
+   "detail": "bitwise restriction on ALL main columns + all cost/bounds",
+   "seconds": 0.42
+  },
+  "T08_load_and_exact_readback_fake_backend": {
+   "status": "PASS",
+   "detail": {
+    "status": "EXACT_READBACK_PASS",
+    "basis_required": false
+   },
+   "seconds": 0.02
+  },
+  "T09_parameter_gate_crossover_and_timelimit_14400": {
+   "status": "PASS",
+   "detail": {
+    "authorized": [
+     {
+      "parameter": "Crossover",
+      "C06": 0,
+      "D5": -1,
+      "classification": "AUTHORIZED_CROSSOVER_AS_C07B"
+     },
+     {
+      "parameter": "TimeLimit",
+      "C06": 3600.0,
+      "D5": 14400.0,
+      "classification": "AUTHORIZED_D_STAGE_TIME_LIMIT_MAX_14400"
+     }
+    ],
+    "rejects_extra_NumericFocus": [
+     "NumericFocus"
+    ],
+    "rejects_missing_crossover": [
+     "Crossover"
+    ],
+    "rejects_TimeLimit_20000": [
+     "TimeLimit"
+    ],
+    "rejects_Threads_8": [
+     "Threads"
+    ]
+   },
+   "seconds": 0.0
+  },
+  "T10_merge_plus_unchanged_V4_pipeline": {
+   "status": "PASS",
+   "detail": {
+    "merge_bitwise": true,
+    "block_rows_max_violation_LP_units": 1.0733601507606494e-16,
+    "V4_ran": true,
+    "independent_kkt_pass_expected_false_for_random_main": false
+   },
+   "seconds": 0.09
+  },
+  "T11_D1_binding_and_tamper_negative": {
+   "status": "PASS",
+   "detail": {
+    "files_bound": 11689,
+    "tamper_one_byte": "REJECTED artifacts/NETWORK_READBACK.json"
+   },
+   "seconds": 1.05
+  },
+  "T12_acceptance_2920_rebinding_guard": {
+   "status": "PASS",
+   "detail": {
+    "binding_file": "GATE6_2920_V4_BINDING.json",
+    "network_file_sha_bound": true,
+    "restore_rejects_binding_snapshots_16": true
+   },
+   "seconds": 5.29
+  },
+  "T13_authorization_deadlines_14400_21600": {
+   "status": "PASS",
+   "detail": {
+    "BRIDGE": 2400.0,
+    "NATIVE": 14400.0,
+    "RAW_SAVE": 600.0,
+    "POSTPROCESS": 3000.0
+   },
+   "seconds": 0.0
+  }
+ },
+ "solver_calls": 0,
+ "note": "Local WSL (same package versions as 122). Truncated T=16 D-1 build + D-2 block from the same code; T01-T07 also ran on the real 2920 CSC in the cloud D-2 job. T10 is a pipeline test with synthetic main vectors, not an acceptance."
+}

@@ -1,0 +1,36 @@
+--- release_d5/d5_launch.py
++++ release_d5b/d5_launch.py
+@@ -8,23 +8,24 @@
+     verify_release(expected);early=admission()
+     claims=ROOT/'d_claims';claims.mkdir(exist_ok=True)
+     intent=claims/(IDENTITY+'_INTENT.json');opt=claims/(IDENTITY+'_OPTIMIZE_CONSUMED.json')
+-    if intent.exists() or opt.exists():raise RuntimeError('D5_AUTHORIZATION_ALREADY_RESERVED_NO_RETRY')
++    if intent.exists() or opt.exists():raise RuntimeError('D5B_AUTHORIZATION_ALREADY_RESERVED_NO_RETRY')
+     RUNROOT.mkdir(parents=True,exist_ok=True)
+-    if any(RUNROOT.glob('d5_main2920_*')):raise RuntimeError('PRIOR_D5_RUN_REQUIRES_RECONCILIATION')
+-    now=time.time();rid='d5_main2920_'+time.strftime('%Y%m%dT%H%M%SZ',time.gmtime(now))+'_'+uuid.uuid4().hex[:8]
++    if any(RUNROOT.glob('d5b_main2920_*')):raise RuntimeError('PRIOR_D5B_RUN_REQUIRES_RECONCILIATION')
++    if not any(RUNROOT.glob('d5_main2920_*')):raise RuntimeError('D5B_REQUIRES_COMPLETED_D5')
++    now=time.time();rid='d5b_main2920_'+time.strftime('%Y%m%dT%H%M%SZ',time.gmtime(now))+'_'+uuid.uuid4().hex[:8]
+     run=RUNROOT/rid
+-    a={'scope':'D5_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP','run_id':rid,'run_directory':str(run),'authorization_identity':IDENTITY,'release':str(HERE),
+-       'release_manifest_sha256':expected,'user_authorization_sha256':sha(HERE/'D5_APPROVAL_RECORD.json'),'started_epoch':now,
++    a={'scope':'D5B_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP_TL43200','run_id':rid,'run_directory':str(run),'authorization_identity':IDENTITY,'release':str(HERE),
++       'release_manifest_sha256':expected,'user_authorization_sha256':sha(HERE/'D5B_APPROVAL_RECORD.json'),'started_epoch':now,
+        'build_phase_seconds':1,'build_absolute_deadline_epoch':now+1,'bridge_phase_seconds':2400,'post_phase_seconds':3000,
+-       'load_absolute_deadline_epoch':now+2400,'native_absolute_deadline_epoch':now+16800,'raw_absolute_deadline_epoch':now+17700,'post_absolute_deadline_epoch':now+20400,
+-       'absolute_deadline_epoch':now+21600,'maximum_native_seconds':14400,'native_exit_grace_seconds':120,'term_grace_seconds':30,'raw_save_seconds':600,
++       'load_absolute_deadline_epoch':now+2400,'native_absolute_deadline_epoch':now+45600,'raw_absolute_deadline_epoch':now+46500,'post_absolute_deadline_epoch':now+49500,
++       'absolute_deadline_epoch':now+50400,'maximum_native_seconds':43200,'native_exit_grace_seconds':120,'term_grace_seconds':30,'raw_save_seconds':600,
+        'supervisor_lease_seconds':8,'soft_memory_limit_decimal_gb':65,'resource_limits':{'rss_bytes':75*1024**3,'cgroup_headroom_bytes':12*1024**3,'disk_free_bytes':8*1024**3},
+        'library_path':'/root/autodl-tmp/SGP/env/gate5/lib/libgurobi120.so','library_sha256':'af7c367e21efc6fe9d273f84cdc5dda3bf62edf8ddcb273be50be3b37a0cec3c',
+        'optimize_claim':str(opt),'auto_retry':False,'max_builds':0,'max_optimize_calls':1,'G6_05':'PAUSED_BY_USER',
+        'baseline_run_id':read(HERE/'SOURCE_BINDING.json')['baseline_run_id'],'input_binding_sha256':sha(HERE/'SOURCE_BINDING.json'),'run_disk':'SYSTEM_DISK_/root','threads':4,
+        'model_change':'EXACT_BLOCK_DECOMPOSITION: main LP to solver; zero-cost decoupled block from exact pre-built primal, zero duals',
+-       'proposed_algorithm_override':{'Crossover':-1,'TimeLimit':14400},'algorithm_baseline':'C06/C07A (154 parameters)','comparison_runs':['c09_daily122_20261012T185116Z_b867e3d3'],
+-       'preregistered_decision_rule':read(HERE/'D5_APPROVAL_RECORD.json')['preregistered_decision_rule'],
++       'proposed_algorithm_override':{'Crossover':-1,'TimeLimit':43200},'save_final_basis':'VBasis/CBasis saved only, never used for warm start','algorithm_baseline':'C06/C07A (154 parameters)','comparison_runs':['c09_daily122_20261012T185116Z_b867e3d3','d5_main2920_20261012T212658Z_0162bbf4'],
++       'preregistered_decision_rule':read(HERE/'D5B_APPROVAL_RECORD.json')['preregistered_decision_rule'],
+        'seal_seconds_max':1050,'separate_local_transfer_seconds_max':3600}
+     from d_production_control import limits_valid
+     limits_valid(a)

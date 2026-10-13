@@ -1,0 +1,63 @@
+--- release_d5/d5_native.py
++++ release_d5b/d5_native.py
+@@ -84,10 +84,28 @@
+     return result
+ 
+ 
++def save_basis(lib, b, meta, run, authorization):
++    """Save VBasis/CBasis (int32) after the raw vectors; failures are recorded and never change the run status."""
++    folder = run / 'raw' / 'basis'; folder.mkdir(exist_ok=False); out = {'run_id': authorization['run_id'], 'use': 'SAVED_ONLY_NOT_FOR_WARM_START', 'arrays': {}}
++    f = lib.GRBgetintattrarray; f.argtypes = [C.c_void_p, C.c_char_p, C.c_int, C.c_int, C.c_void_p]; f.restype = C.c_int
++    for name, count in [('VBasis', meta['num_col']), ('CBasis', meta['num_row'])]:
++        try:
++            arr = np.empty(count, dtype=np.int32)
++            for s, e in ranges(count):
++                if time.time() >= authorization['raw_absolute_deadline_epoch']: raise TimeoutError('RAW_ABSOLUTE_DEADLINE')
++                code = f(b.model, name.encode(), s, e - s, arr[s:].ctypes.data_as(C.c_void_p))
++                if code: raise RuntimeError('GRBgetintattrarray native error ' + str(code))
++            p = folder / (name + '.npy'); np.save(p, arr)
++            with p.open('rb') as fh: os.fsync(fh.fileno())
++            out['arrays'][name] = {'status': 'SAVED', 'count': count, 'sha256': sha(p), 'values': {str(k): int(v) for k, v in zip(*np.unique(arr, return_counts=True))}}
++        except Exception as e: out['arrays'][name] = {'status': 'NOT_AVAILABLE', 'error': type(e).__name__ + ': ' + str(e)[:300]}
++    write(folder / 'BASIS_RECEIPT.json', out); return out
++
++
+ def main(run):
+     a = read(run / 'AUTHORIZATION.json'); lib = None; env = C.c_void_p(); backend = None; entered = False
+     try:
+-        assert a['scope'] == 'D5_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP' and a['maximum_native_seconds'] == 14400
++        assert a['scope'] == 'D5B_GATE6_2920_EXACT_DECOMPOSITION_SINGLE_MAIN_LP_TL43200' and a['maximum_native_seconds'] == 43200
+         assert read(run / 'BUILD_RESULT.json')['status'] == 'D1_BUILD_STATIC_ACCEPTED_NO_SOLVE'
+         assert read(run / 'bridge/BRIDGE_RECEIPT.json')['status'] == 'EXACT_CSR_CSC_REVERSE_PERMUTATION_PASS'
+         assert read(HERE / 'LOCAL_INTERFACE_TESTS.json')['status'] == 'PASS'
+@@ -110,12 +128,12 @@
+         if rc: license_receipt['safe_categories'] = safe_error_category(lib.GRBgeterrormsg(env))
+         write(run / 'WLS_ENVIRONMENT.json', license_receipt); ok(rc)
+         expected = dict(read(HERE / 'C06_EFFECTIVE_MODEL_PARAMETERS.json'), Crossover=-1); types = read(HERE / 'NATIVE_PARAMETER_EVIDENCE.json')['parameters']
+-        ok(lib.GRBsetintparam(env, b'LogToConsole', 0)); parameters(lib, env, expected, types, 14400., apply=True)
++        ok(lib.GRBsetintparam(env, b'LogToConsole', 0)); parameters(lib, env, expected, types, 43200., apply=True)
+         backend = CBackend(lib, env); loadstart = time.time(); load_candidate(backend, mmeta, marr)
+         transfer = exact_readback(backend, mmeta, marr); modelenv = lib.GRBgetenv(backend.model)
+         current = read(run / 'PHASE.json'); assert current['phase'] == 'BRIDGE'
+         if time.time() >= min(current['entered_epoch'] + a['bridge_phase_seconds'], a['load_absolute_deadline_epoch']): raise TimeoutError('NATIVE_HANDOFF_DEADLINE')
+-        limit = min(14400., a['native_absolute_deadline_epoch'] - time.time()); assert limit > 0
++        limit = min(43200., a['native_absolute_deadline_epoch'] - time.time()); assert limit > 0
+         effective = parameters(lib, modelenv, expected, types, limit, apply=True)
+         ok(lib.GRBsetstrparam(modelenv, b'LogFile', str(run / 'gurobi.log').encode()))
+         transfer.update(input_space='D5_MAIN_LP_D1_COORDINATES', run_id=a['run_id'], load_and_readback_seconds=time.time() - loadstart,
+@@ -146,13 +164,14 @@
+                     lib.GRBterminate(backend.model); return
+         t = threading.Thread(target=terminate_monitor); t.start()
+         write(run / 'D5_NATIVE_OPTIMIZE_ENTERED.json', dict(marker, native_deadline=native_deadline, actual_time_limit=limit, model_handle=str(backend.model.value),
+-                                                            call_site='d5_native.main:lib.GRBoptimize(backend.model)'))
++                                                            call_site='d5_native.main:lib.GRBoptimize(backend.model) [D-5b]'))
+         entered = True
+         try: code = int(lib.GRBoptimize(backend.model))  # THE ONLY OPTIMIZE CALL SITE
+         finally: done.set(); t.join(timeout=5)
+         call = {'run_id': a['run_id'], 'native_return_code': code, 'optimization_calls': 1, 'returned_utc_epoch': time.time(),
+                 'wall_seconds': time.time() - native_start, 'model_manifest_sha256': transfer['model_manifest_sha256']}
+         write(run / 'NATIVE_CALL_EXIT.json', call); stage(run, 'RAW_SAVE'); raw_save(backend, mmeta, run, a, call)
++        save_basis(lib, backend, mmeta, run, a)  # D-5b: final basis saved only; never used for a warm start
+         write(run / 'NATIVE_WORKER_EXIT.json', {'run_id': a['run_id'], 'status': 'RETURNED_RAW_CAPTURE_ATTEMPTED', 'optimize_calls': 1, 'epoch': time.time()})
+     except BaseException as e:
+         write(run / 'NATIVE_WORKER_FAILURE.json', {'run_id': a['run_id'], 'error_type': type(e).__name__, 'detail': str(e), 'traceback': traceback.format_exc(),

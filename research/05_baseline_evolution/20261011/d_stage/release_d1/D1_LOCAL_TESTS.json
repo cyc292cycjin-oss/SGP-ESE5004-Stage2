@@ -1,0 +1,123 @@
+{
+ "status": "PASS",
+ "tests": {
+  "T01_scheme_A_files_equal_PR4_commit": {
+   "status": "PASS",
+   "detail": {
+    "EXACT_SOURCE_CLOSURE_A_VERSION_MANIFEST.json": "a94f4ce099be43f080378a677cfabb5eb48561f6813bed2dcfb751ed6c2e9720",
+    "EXACT_SOURCE_CLOSURE_A_CHANGESET.json": "cb001d73a4214f1be03ce4235d41f11338778f289cf23b8f4352f8651449ae32",
+    "LOADS_AND_WEIGHTS_REFERENCE.json": "a5abcbfdd03a66d5b8bb16457b99eb5c860a32544a671440e1f5a97de2a467cd",
+    "carrier_fragment.json": "1b0ea897bc17d652a6ac5047935dc6af6c53536a51b197582b3567313d155e8e",
+    "external_pending_fixed_accounts.json": "20d9d0dc2028f1ca4e07b8e4e02fe51fce3a4a357c0d86366076a528b9a2a8e0"
+   },
+   "seconds": 0.23
+  },
+  "T02_negative_changeset_after_hex": {
+   "status": "PASS",
+   "detail": "REJECTED: ()",
+   "seconds": 15.32
+  },
+  "T03_negative_load_reference": {
+   "status": "PASS",
+   "detail": "REJECTED: (('LOAD_REFERENCE', 'BN:2050:Industry:IndustryFinalEnergy:oil@BN4 0'),)",
+   "seconds": 2.59
+  },
+  "T04_negative_group_D_gt_Q": {
+   "status": "PASS",
+   "detail": "REJECTED: (('SCHEME_A_GROUP_D_GT_Q', 'BN:2050:Buildings:ResidentialFuel:biomass@BN4 0'),)",
+   "seconds": 2.92
+  },
+  "T05_negative_wrong_source_network": {
+   "status": "PASS",
+   "detail": "REJECTED: ()",
+   "seconds": 2.21
+  },
+  "T06_truncated_end_to_end_build_bridge_gates_index": {
+   "status": "PASS",
+   "detail": {
+    "build_result": {
+     "snapshots": 16,
+     "rows": 269778,
+     "columns": 111705,
+     "nnz": 502292,
+     "build_seconds": 12.473461151123047,
+     "peak_worker_rss_bytes": 784621568
+    },
+    "gates": {
+     "scheme_A_385_D_le_Q": true,
+     "scheme_A_180_changed_627_unchanged": true,
+     "loads_1737_equal_frozen": true,
+     "labels_complete": true,
+     "CSC_readback_exact": true,
+     "V4_binding_2920_thresholds_unchanged": true
+    },
+    "label_coverage": {
+     "variables": {
+      "exported_labels": 111705,
+      "lp_labels": 111705,
+      "unique": true,
+      "equal_sets": true
+     },
+     "constraints": {
+      "exported_labels": 269778,
+      "lp_labels": 269778,
+      "unique": true,
+      "equal_sets": true
+     }
+    },
+    "dims": {
+     "columns": 111705,
+     "rows": 269778,
+     "nnz": 502292,
+     "snapshots": 16
+    },
+    "scheme_A_slack_MWh": {
+     "min": "105/576460752303423488",
+     "max": "3373/34359738368",
+     "zero_slack_groups": 0
+    },
+    "artifact_files": 11689,
+    "artifact_bytes": 138971437,
+    "families": 36,
+    "binding": {
+     "binding_id": "GATE6_2920_V4_D1_V1",
+     "snapshots": 16,
+     "expected_snapshots": 16,
+     "hours_per_snapshot": 3,
+     "V4_formulas_changed": false,
+     "physical_absolute_floor": 0.001,
+     "physical_relative_budget": 1e-07,
+     "kkt_normalized_budget": 1e-06
+    },
+    "full_2920_network_gates": "BUILD_STATIC_DIFF_WHITELIST_PASS",
+    "harness_only_skipped_on_truncated_horizon": [
+     "validate_exported_accounting@T=16"
+    ]
+   },
+   "seconds": 109.93
+  },
+  "T07_authorization_limits_and_phase_budgets": {
+   "status": "PASS",
+   "detail": {
+    "phase_budgets_seconds": {
+     "BUILD": 10800.0,
+     "BRIDGE": 3600.0,
+     "POSTPROCESS": 1800.0,
+     "DONE": 16651.0
+    },
+    "rss_soft_limit_negative": "REJECTED"
+   },
+   "seconds": 0.0
+  },
+  "T08_solver_import_firewall": {
+   "status": "PASS",
+   "detail": "BLOCKED D1_NO_SOLVER_IMPORT:gurobipy",
+   "seconds": 0.73
+  }
+ },
+ "solver_calls": 0,
+ "cloud_actions": 0,
+ "seconds": 133.9,
+ "environment": "WSL pypsa-earth env: python 3.11.13, pypsa 0.30.3, linopy 0.5.5, numpy 1.26.4, scipy 1.15.2, pandas 2.3.1, xarray 2025.1.2, netCDF4 1.7.2, psutil 7.0.0",
+ "note": "Real frozen 2920 network for all network-level gates; Linopy build/export/bridge/gates on T=16 (10 GB RAM). Cloud runs identical code at T=2920."
+}

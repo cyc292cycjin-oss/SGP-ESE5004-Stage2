@@ -1,0 +1,169 @@
+{
+ "receipts": {
+  "D2_STATUS.json": {
+   "phase": "DONE",
+   "epoch": 1791839952.8189294,
+   "solver_calls": 0,
+   "elapsed": 920.7504420280457
+  },
+  "D2_CLOUD_READONLY_CHECKS.json": {
+   "status": "PASS",
+   "requirements": {
+    "cross_entries_0": true,
+    "zero_cost": true,
+    "stores_807": true,
+    "meters_found_807": true,
+    "groups_385": true,
+    "snapshots_2920": true,
+    "exact_block_residual_le_1e-12_LP_units": true
+   },
+   "block_receipt": {
+    "stores": 807,
+    "meters_found": 807,
+    "block_columns": 7070127,
+    "block_rows": 17620087,
+    "cross_entries": 0,
+    "zero_cost": true,
+    "block_column_index_sha256": "e39147af6375a1638207bf36333fa83f59f05367e8709e53abdad8233dfb6e6d",
+    "block_row_index_sha256": "0210685c62c997d1745dca2e87bf39ddbcbb0bfdd2084f279b620b17bd237e4c",
+    "groups": 385,
+    "snapshots": 2920,
+    "rows_with_nonzero_exact_violation": 1129370,
+    "max_exact_violation_LP_units": 1.1085967213664283e-16,
+    "seconds": 879.4901735782623,
+    "files": {
+     "BLOCK_COLUMNS.npy": "94d8782770b3b6b2cd0c749db028686e38b0a4e836e3174f8b4359d8f6686c70",
+     "BLOCK_ROWS.npy": "e1714bacf724d8f8a15ad73cbd74cb6bb7d9f12d27099be25c1839c9523d2bc8",
+     "BLOCK_PRIMAL.npy": "bfd32b08d4bc7d42a3350c0231acd9375c3c6206c19d661c29ff4515c2ca465b"
+    },
+    "source_manifest_sha256": "22896bd51c9646d594ae8bef7f2092801d0193c248107bda3d4fea7321ca0a25",
+    "block_duals": "exactly 0",
+    "tool_sha256": "c9f500a3fdd89ac5dd59bfb1fe207f327a67f26cc610d08482fa334a65ca5c8c",
+    "d1_run": "/root/autodl-tmp/SGP/runs/d1_build2920_20261012T201449Z_d709e072"
+   },
+   "expected_for_D5": {
+    "block_dir": "/root/autodl-tmp/SGP/runs/d2_block2920_20261012T210355Z/block",
+    "block_receipt_sha256": "7b89c313801cfbc9876ecb52453d609facd509d71f908674e0dd2bc50048b5bb",
+    "block_columns": 7070127,
+    "block_rows": 17620087,
+    "num_col": 19568505,
+    "num_row": 48301938,
+    "nnz": 90782037,
+    "source_manifest_sha256": "22896bd51c9646d594ae8bef7f2092801d0193c248107bda3d4fea7321ca0a25",
+    "d1_run": "/root/autodl-tmp/SGP/runs/d1_build2920_20261012T201449Z_d709e072"
+   },
+   "main_problem": {
+    "dims": [
+     12498378,
+     30681851,
+     62504757
+    ]
+   },
+   "tests": {
+    "T01_block_verify_real_2920_csc": {
+     "status": "PASS",
+     "detail": {
+      "status": "BLOCK_DECOUPLED_ZERO_COST_FEASIBLE",
+      "cross_entries": 0,
+      "block_columns": 7070127,
+      "block_rows": 17620087,
+      "block_binary64_max_row_violation_LP_units": 1.1085967213664283e-16,
+      "block_column_index_sha256": "e39147af6375a1638207bf36333fa83f59f05367e8709e53abdad8233dfb6e6d",
+      "block_row_index_sha256": "0210685c62c997d1745dca2e87bf39ddbcbb0bfdd2084f279b620b17bd237e4c"
+     },
+     "seconds": 6.8
+    },
+    "T02_negative_nonzero_block_cost": {
+     "status": "PASS",
+     "detail": "REJECTED: BLOCK_COST_NONZERO",
+     "seconds": 2.4
+    },
+    "T03_negative_perturbed_block_primal": {
+     "status": "PASS",
+     "detail": "REJECTED: BLOCK_PRIMAL_RESIDUAL 0.001",
+     "seconds": 6.0
+    },
+    "T04_negative_cross_entry": {
+     "status": "PASS",
+     "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+     "seconds": 2.2
+    },
+    "T05_negative_row_set": {
+     "status": "PASS",
+     "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+     "seconds": 1.6
+    },
+    "T06_main_problem_validate_dims": {
+     "status": "PASS",
+     "detail": {
+      "dims": [
+       12498378,
+       30681851,
+       62504757
+      ],
+      "validate": {
+       "num_col": 12498378,
+       "num_row": 30681851,
+       "nnz": 62504757,
+       "row_senses": {
+        "=": 7656436,
+        ">": 11514336,
+        "<": 11511079,
+        "free_columns": 12381576
+       },
+       "source_array_bytes": 1640914804
+      },
+      "arrays_sha256": {
+       "start": "0770d0e4d9b33d115d2d07cc1c3ec38f1a00a4b33907464eaa459af8d78f6a59",
+       "index": "da0989b37467c0746eb90cb7b0f6b81886f268cf2013ee4d2074aa52df53dd8a",
+       "value": "a724acb3afa2c6801429691e37289ee6bc44f00e821dfb35a5453f7c24dd64fe",
+       "cost": "bbabb7b7aa90c202ed2af3f1848f2794cc37e399f0821b3e16a0186e5b6fab82",
+       "col_lower": "3424b27088358537cdb4071b0c9495bf820c203505f0a47e05a13eed7a74cfc0",
+       "col_upper": "555a0cdb6d2fd8eb69f24cdf7020e50c49046d5d499cebe791e9e14f9597f254",
+       "row_lower": "8a6ded382358457b483b5e866e0645220142c2a95adeb5df05f78d71b621cf60",
+       "row_upper": "bd5cdd8245dda36c6a004d91d3d92bb430f68b4e382aef73dad880ef50450eec",
+       "main_columns_sha256": "e14773b6ced2f5931d5c174f11da18eedab5471b32568829b5022f58b7a1b4dc",
+       "main_rows_sha256": "1dcddbc1b9109dd537e2b5c0db6d441c985b6d10ca3b4007bebce97ba6ac17b0"
+      }
+     },
+     "seconds": 10.8
+    },
+    "T07_main_restriction_bitwise": {
+     "status": "PASS",
+     "detail": "bitwise restriction on 20000 sampled columns + all cost/bounds",
+     "seconds": 1.5
+    }
+   },
+   "solver_calls": 0,
+   "builds": 0,
+   "d1_files_rechecked": 54459,
+   "seconds": 920.7494933605194
+  },
+  "block/BLOCK_RECEIPT.json": {
+   "stores": 807,
+   "meters_found": 807,
+   "block_columns": 7070127,
+   "block_rows": 17620087,
+   "cross_entries": 0,
+   "zero_cost": true,
+   "block_column_index_sha256": "e39147af6375a1638207bf36333fa83f59f05367e8709e53abdad8233dfb6e6d",
+   "block_row_index_sha256": "0210685c62c997d1745dca2e87bf39ddbcbb0bfdd2084f279b620b17bd237e4c",
+   "groups": 385,
+   "snapshots": 2920,
+   "rows_with_nonzero_exact_violation": 1129370,
+   "max_exact_violation_LP_units": 1.1085967213664283e-16,
+   "seconds": 879.4901735782623,
+   "files": {
+    "BLOCK_COLUMNS.npy": "94d8782770b3b6b2cd0c749db028686e38b0a4e836e3174f8b4359d8f6686c70",
+    "BLOCK_ROWS.npy": "e1714bacf724d8f8a15ad73cbd74cb6bb7d9f12d27099be25c1839c9523d2bc8",
+    "BLOCK_PRIMAL.npy": "bfd32b08d4bc7d42a3350c0231acd9375c3c6206c19d661c29ff4515c2ca465b"
+   },
+   "source_manifest_sha256": "22896bd51c9646d594ae8bef7f2092801d0193c248107bda3d4fea7321ca0a25",
+   "block_duals": "exactly 0",
+   "tool_sha256": "c9f500a3fdd89ac5dd59bfb1fe207f327a67f26cc610d08482fa334a65ca5c8c",
+   "d1_run": "/root/autodl-tmp/SGP/runs/d1_build2920_20261012T201449Z_d709e072"
+  }
+ },
+ "alive": false,
+ "log_tail": []
+}

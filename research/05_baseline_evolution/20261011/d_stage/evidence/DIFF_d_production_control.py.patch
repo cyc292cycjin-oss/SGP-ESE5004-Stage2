@@ -1,0 +1,43 @@
+--- c02r_c03/code/production_control_c09.py
++++ release_d1/d_production_control.py
+@@ -1,4 +1,4 @@
+-"""Linux process protection. No solver imports and no network operations.
++"""Linux process protection (D-stage copy of the C07/C09 module; only phase_deadline reads phase budgets from the authorization). No solver imports and no network operations.
+ 
+ The supervisor monitors resources. A separately detached guard owns all signals,
+ absolute phase deadlines and supervisor-loss handling. Neither starts a retry.
+@@ -77,11 +77,11 @@
+ 
+ def phase_deadline(stage,a):
+  phase=stage.get('phase','BUILD');entered=stage['entered_epoch']
+- if phase=='BUILD':return min(entered+1800,a['build_absolute_deadline_epoch'])
+- if phase=='BRIDGE':return min(entered+900,a['load_absolute_deadline_epoch'])
+- if phase=='NATIVE':return min(entered+3600,a['native_absolute_deadline_epoch'])
+- if phase=='RAW_SAVE':return min(entered+300,a['raw_absolute_deadline_epoch'])
+- if phase=='POSTPROCESS':return min(entered+1200,a['post_absolute_deadline_epoch'])
++ if phase=='BUILD':return min(entered+a['build_phase_seconds'],a['build_absolute_deadline_epoch'])
++ if phase=='BRIDGE':return min(entered+a['bridge_phase_seconds'],a['load_absolute_deadline_epoch'])
++ if phase=='NATIVE':return min(entered+a['maximum_native_seconds'],a['native_absolute_deadline_epoch'])
++ if phase=='RAW_SAVE':return min(entered+a['raw_save_seconds'],a['raw_absolute_deadline_epoch'])
++ if phase=='POSTPROCESS':return min(entered+a['post_phase_seconds'],a['post_absolute_deadline_epoch'])
+  if phase in ('DONE','FAILED'):return a['post_absolute_deadline_epoch']
+  raise ValueError('unknown protected phase '+phase)
+ 
+@@ -98,7 +98,7 @@
+  remaining=a['absolute_deadline_epoch']-time.time()
+  if remaining<=a['term_grace_seconds']:
+   put(Path(root)/'LOCAL_SYNC_PENDING.json',{'reason':'NO_CLOSEOUT_BUDGET','source_preserved':True});return None
+- command=['timeout','--signal=TERM','--kill-after='+str(a['term_grace_seconds'])+'s',str(remaining-a['term_grace_seconds'])+'s',sys.executable,str(HERE/'production_backup.py'),'seal',str(root)]
++ raise RuntimeError('D stage seals through its own launcher; production_backup is not shipped')
+  with open(Path(root)/'closeout.stdout.log','xb') as log:
+   return subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+ 
+@@ -201,7 +201,7 @@
+   expected=ident(worker.pid,a['run_id']);assert expected['pid']==expected['pgid']==expected['sid']
+   cfg={'root':str(root),'authorization':a,'worker':expected,'supervisor':ident(os.getpid(),a['run_id']),'require_cgroup':require_cgroup,'launch_closeout':launch_closeout}
+   put(root/'GUARD_CONFIG.json',cfg)
+-  with open(root/'guard.stdout.log','xb') as log:guard=subprocess.Popen([sys.executable,str(HERE/'production_control.py'),'guard',str(root/'GUARD_CONFIG.json')],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
++  with open(root/'guard.stdout.log','xb') as log:guard=subprocess.Popen([sys.executable,str(HERE/'d_production_control.py'),'guard',str(root/'GUARD_CONFIG.json')],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+   for _ in range(500):
+    if (root/'GUARD_READY.json').exists() or guard.poll() is not None:break
+    time.sleep(.01)

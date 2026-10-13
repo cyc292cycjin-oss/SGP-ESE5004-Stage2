@@ -1,0 +1,133 @@
+{
+ "status": "R4_BLOCKED",
+ "requirements": {
+  "cross_entries_0": true,
+  "zero_cost": true,
+  "stores_807": true,
+  "meters_found_807": true,
+  "groups_385": true,
+  "snapshots_2920": false,
+  "exact_block_residual_le_1e-12_LP_units": true
+ },
+ "block_receipt": {
+  "stores": 807,
+  "meters_found": 807,
+  "block_columns": 39543,
+  "block_rows": 97351,
+  "cross_entries": 0,
+  "zero_cost": true,
+  "block_column_index_sha256": "37a2f099cffb68a55ffb801875c860f1efe57bc6fe127f5379de614ce437c52f",
+  "block_row_index_sha256": "5ed13ee730d1fe78fafe7c59a737d0e4e751bb923149ca907e6aaba08a18e817",
+  "groups": 385,
+  "snapshots": 16,
+  "rows_with_nonzero_exact_violation": 6906,
+  "max_exact_violation_LP_units": 1.0734956760322101e-16,
+  "seconds": 2.3191986083984375,
+  "files": {
+   "BLOCK_COLUMNS.npy": "489e9d637a1649f035ebe301160ff501a403cb2311d443de538253a21f397489",
+   "BLOCK_ROWS.npy": "bfab56d81fd6413a79f75acfd0c5c3cc80944de3ca54cd177087402fcea87dfa",
+   "BLOCK_PRIMAL.npy": "4b6b81d99dde305d82443d2f3f05f66ffea1bdaddb4679f765cd3290929ea01a"
+  },
+  "source_manifest_sha256": "69b23222d609b382f27ee459346e36f33c1ae0c1f654dba9642eab46454626a5",
+  "block_duals": "exactly 0",
+  "tool_sha256": "c9f500a3fdd89ac5dd59bfb1fe207f327a67f26cc610d08482fa334a65ca5c8c",
+  "d1_run": "/home/jin/d_local/d1run"
+ },
+ "expected_for_D5": {
+  "block_dir": "/home/jin/d_local/d2out/block",
+  "block_receipt_sha256": "e3bc2b5ae6cc1e25369b223a46b5dc40fc1ce50bbc47c16ce95909f0ee4166e5",
+  "block_columns": 39543,
+  "block_rows": 97351,
+  "num_col": 111705,
+  "num_row": 269778,
+  "nnz": 502292,
+  "source_manifest_sha256": "69b23222d609b382f27ee459346e36f33c1ae0c1f654dba9642eab46454626a5",
+  "d1_run": "/home/jin/d_local/d1run"
+ },
+ "main_problem": {
+  "dims": [
+   72162,
+   172427,
+   347348
+  ]
+ },
+ "tests": {
+  "T01_block_verify_real_2920_csc": {
+   "status": "PASS",
+   "detail": {
+    "status": "BLOCK_DECOUPLED_ZERO_COST_FEASIBLE",
+    "cross_entries": 0,
+    "block_columns": 39543,
+    "block_rows": 97351,
+    "block_binary64_max_row_violation_LP_units": 1.0733601507606494e-16,
+    "block_column_index_sha256": "37a2f099cffb68a55ffb801875c860f1efe57bc6fe127f5379de614ce437c52f",
+    "block_row_index_sha256": "5ed13ee730d1fe78fafe7c59a737d0e4e751bb923149ca907e6aaba08a18e817"
+   },
+   "seconds": 0.0
+  },
+  "T02_negative_nonzero_block_cost": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_COST_NONZERO",
+   "seconds": 0.0
+  },
+  "T03_negative_perturbed_block_primal": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_PRIMAL_RESIDUAL 0.001",
+   "seconds": 0.0
+  },
+  "T04_negative_cross_entry": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+   "seconds": 0.0
+  },
+  "T05_negative_row_set": {
+   "status": "PASS",
+   "detail": "REJECTED: BLOCK_NOT_DECOUPLED: 1 cross entries",
+   "seconds": 0.0
+  },
+  "T06_main_problem_validate_dims": {
+   "status": "PASS",
+   "detail": {
+    "dims": [
+     72162,
+     172427,
+     347348
+    ],
+    "validate": {
+     "num_col": 72162,
+     "num_row": 172427,
+     "nnz": 347348,
+     "row_senses": {
+      "=": 42148,
+      ">": 66768,
+      "<": 63511,
+      "free_columns": 71520
+     },
+     "source_array_bytes": 9236200
+    },
+    "arrays_sha256": {
+     "start": "0142a67066c6b5e26a259a37718dfe34b720781eef196c92f7ca160e162cd143",
+     "index": "eded0579f84367a136b3a51489eccbb61269f38839c22b892a32e33cd843ce1d",
+     "value": "8efd40e4cd307ef77109fbcd0523891c460e764c076b61d73e1117cd5ebc4879",
+     "cost": "9fae09512bbe831c02b45a430e8e57d06388b2ed0cba5bf888c2e32303e754fe",
+     "col_lower": "ccf83d0731cf96053c635b69bc7ddba4d8d021ec5896ff69660ecfb8455e9f2e",
+     "col_upper": "8c11f633ff8bf4e7a596df38422a033a71e799eb8bc490c2c6152a1da9b7011b",
+     "row_lower": "220729fc9f0f8507ca1db61be70cfa2db84a139f124b626dc2eba4b7275187fe",
+     "row_upper": "b2b67ec2e7ebd5b06d6333fe5bfab150d0647dec8bce6b702621f7a086f28aee",
+     "main_columns_sha256": "c5abeface78e6cca22e3c1ab02991dec261d448bebf1ce52df93e3750a4d1735",
+     "main_rows_sha256": "e30ae7e6cffd158435b1ee93e9b3e44fd17f4b62c82cd45ec279f50379cce21f"
+    }
+   },
+   "seconds": 0.0
+  },
+  "T07_main_restriction_bitwise": {
+   "status": "PASS",
+   "detail": "bitwise restriction on 20000 sampled columns + all cost/bounds",
+   "seconds": 0.1
+  }
+ },
+ "solver_calls": 0,
+ "builds": 0,
+ "d1_files_rechecked": 11689,
+ "seconds": 2.5276739597320557
+}
