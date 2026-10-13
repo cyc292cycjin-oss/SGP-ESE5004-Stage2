@@ -67,3 +67,28 @@ D-7 的以下结论**不受影响**：成本对比（总额、资本、运行）
 - 只做后处理，没有求解，没有改变任何结果或回执；所有数字都来自 D-5 和 C09 已封存的求解结果。
 - CO₂ 是报告值；成本按国家拆分只是描述；没有加任何约束，也没有做成本分摊。
 - 原未扰动科学目标的最优性仍为 NOT_PROVEN；FullSystemCostComplete 仍为 false。
+
+## 附录 A：final-energy accounting 类 Link 的流量是否被外生固定（只读核实，未求解）
+
+核实对象为 oil / gas / coal final-energy accounting Link，共 1,256 条（oil 819、gas 274、coal 163）。脚本是 `methods/d7b_fe_check.py`，数据见 `evidence/D7B_FINAL_ENERGY_LINK_CHECK.json`；使用与正文相同的两个 NetCDF，SHA 见开头。日模型和 2920 的结果完全一致。
+
+| 检查项 | 结果（日模型与 2920 相同，VERIFIED） |
+|---|---|
+| p_min_pu / p_max_pu | 全部为 0 / 1；p_min_pu = p_max_pu 的条数为 **0** |
+| 时变覆盖（links_t 中的 p_min_pu、p_max_pu、p_set、efficiency） | 无 |
+| p_nom | 全部可扩建，p_nom 下限为 0；capital_cost = 0，marginal_cost = 0 |
+| efficiency / efficiency2 | 1.0 / 0.198–0.3361 tCO₂/MWh，排放进入 co2 atmosphere |
+| 终端母线 bus1 上的连接 | 每条 Link 的 bus1（gas / oil / coal final energy）上**只有 1 个 Load**；没有 Generator、Store、StorageUnit、Line，也没有其他任何 Link 端口 |
+| 这些 Load | 1,256 个，全部是**时变 p_set**（外生数据） |
+| 解中 −p1 与母线 Load 的逐时段偏差 | 最大绝对偏差 **0.0 MW**，最大相对偏差 0.0 |
+| 年输送量 / 年负荷 | 7,723.86 / 7,723.86 TWh（两个模型相同） |
+| 年 CO₂（这类 Link 合计） | 2,080.27 Mt（两个模型相同；oil 1,269.31 + coal 630.76 + gas 180.21） |
+| 作用于这些 Link 的约束族（D-1 实际导出的约束覆盖表） | 只有 PyPSA 标准的 `Link-ext-p-lower/upper`（0 ≤ p ≤ p_nom）、`Link-ext-p_nom-lower` 和节点平衡 `Bus-nodal_balance`。研究附加约束只有 `ResearchStoreDirection`（807 个固定资源 Store）和 `ResearchBatteryNominal`（电池充放电），`ResearchImportAnnual` 不存在（external_annual_caps 为空）。GlobalConstraint 只有 `lv_limit`，**没有 CO₂ 约束** |
+| 网络元数据 | 这些 Link 的名称出现在 demand_owners、physical_carbon_map 等记账元数据中，但 required_constraint_hooks 里只有 install_fragment_constraints、battery inverter、existing assets 三项，没有针对这些 Link 的约束钩子 |
+
+**结论（VERIFIED，机制为 EXACT 的结构推理）：** 这些 Link 的流量**没有**通过 p_min_pu = p_max_pu 或专门约束来固定，而是被**拓扑加固定负荷结构性地固定**了。每个终端能源母线只有这一条 Link 供能，并且只有一个 p_set 外生的 Load。节点平衡 −p1 = Load 成立，efficiency = 1，所以输入 p0 也就等于 Load，与优化无关。解里的偏差为 0，两个模型的年输送量和对应的 2,080.27 MtCO₂ 也完全相同，都与此一致。
+
+**对正文的影响：**
+1. 第 4 节的一次能源供应里，终端用能部分（oil、coal、gas 的 final-energy 合计 7,723.86 TWh_th）是外生固定的。两个模型之间的燃料差异，只来自发电用燃料。
+2. 第 5 节的 CO₂ 中，2,080.27 Mt 是外生固定的终端用能排放，与电力系统的优化选择无关。可被优化影响的只有发电部分：日模型约 1,183.1 Mt，2920 约 1,273.5 Mt。和 100 Mt 参照的对比仍然只是并列列出，不作结论。
+3. 这些 Link 可扩建、成本为 0，p_nom_opt 只是记账量，不代表任何真实投资。
