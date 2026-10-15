@@ -28,7 +28,7 @@ def qualify_stock(n,stock,contract):
 
 def prepare(repo,source_assets,allocation,output,costs):
     import pypsa
-    from build_diagnostic_network import assert_input_only
+    from network_checks import assert_input_only  # S1-2: diagnostic builder retired, helper kept
     from build_research_assets import build_fragment
     from assembly_components import validate_hooks
     from netCDF4 import Dataset

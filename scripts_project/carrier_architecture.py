@@ -10,9 +10,25 @@ import math
 
 COUNTRIES={'BN','KH','ID','LA','MY','MM','PH','SG','TH','TL','VN'}
 FUELS=('gas','oil','coal','lignite','solid biomass','biogas')
-PROHIBITED=FUELS+('H2','co2 captured','co2 sequestered','NH3','methanol','heat')
+# S1: physical carriers may cross borders when the research.cross_border switch for the
+# carrier is on; the network layer tags and controls them (scenario_network.tag_cross_border).
+PROHIBITED=()
 ALLOWED_GLOBAL={'ALLOWED_ACCOUNTING_GLOBAL','ALLOWED_EXTERNAL_MARKET_ABSTRACTION',
                 'PROHIBITED_PHYSICAL_SHARING_REMOVED','DEFERRED_WITH_BLOCKER'}
+LEGACY_SEPARATOR=' :: '
+ATMOSPHERE_CARRIER='co2 atmosphere'
+LEGACY_ATMOSPHERE='ReportingCO2 atmosphere'
+
+
+def atmosphere_bus(country):
+    """National atmosphere accounting bus (S1-5). Emissions are attributed to the country of the emitter."""
+    if country not in COUNTRIES:raise ValueError('Atmosphere bus requires an ASEAN country')
+    return ATMOSPHERE_CARRIER+' '+country
+
+
+def rename_legacy_bus(name):
+    """'<node> :: <carrier>' (Phase4 research naming) -> '<node> <carrier>' (upstream naming)."""
+    return name.replace(LEGACY_SEPARATOR,' ') if LEGACY_SEPARATOR in name else name
 
 
 def finite(value,nonnegative=True):
@@ -29,7 +45,8 @@ class Fragment:
     def bus(self,name,carrier,country,node,role='PHYSICAL'):
         if name in self.buses:raise ValueError('Duplicate Bus')
         if role=='ATMOSPHERE':
-            if country or carrier!='co2 atmosphere':raise ValueError('Invalid atmosphere accounting bus')
+            # S1-5: one atmosphere bus per country; '' keeps the legacy global reporting bus for tests.
+            if carrier!=ATMOSPHERE_CARRIER or (country and country not in COUNTRIES):raise ValueError('Invalid atmosphere accounting bus')
         elif country not in COUNTRIES:raise ValueError('Unowned physical carrier pool')
         self.buses[name]=dict(name=name,carrier=carrier,country=country,node=node,role=role)
         return name
@@ -41,8 +58,14 @@ class Fragment:
         for b in list(inputs)+list(outputs):
             if b not in self.buses:raise ValueError('Missing port destination')
             owner=self.buses[b]['country']
-            if self.buses[b]['role']!='ATMOSPHERE' and owner!=country:
-                raise ValueError('Prohibited inter-country physical component')
+            if self.buses[b]['role']=='ATMOSPHERE':
+                # Emissions must be booked in the emitter's own national atmosphere.
+                if owner and owner!=country:raise ValueError('Emission port belongs to another country atmosphere')
+            elif owner!=country and role!='TRANSPORT':
+                # Conversion/storage/supply assets sit in one country. Cross-border transport
+                # (role TRANSPORT) is allowed here and controlled by research.cross_border switches
+                # plus V5 gate B5 at network level (S1-6), replacing the Phase3 isolation guard.
+                raise ValueError('Single-country component references a foreign bus')
         if typ=='Load':raise ValueError('Demand must use Gate2 acceptance and allocation, not carrier builder')
         if role=='EXTERNAL_SUPPLY' and (typ!='Generator' or inputs or len(outputs)!=1):
             raise ValueError('External commodity interface must be one-way source')
@@ -52,19 +75,24 @@ class Fragment:
         return key
 
     def market(self,identity,commodity,assumption):
-        if commodity not in ('gas','oil','coal','lignite'):raise ValueError('New external commodity not approved')
+        # S1: the fossil-only whitelist is replaced by explicit per-commodity source records
+        # (external_import requires price/basis/source); imports from outside ASEAN are not
+        # cut by the disconnected scenario (decision 18).
+        if not commodity or not isinstance(commodity,str):raise ValueError('External commodity identity missing')
         if identity in self.markets and self.markets[identity]!=dict(commodity=commodity,assumption=assumption):
             raise ValueError('Same market identity with inconsistent assumptions')
         self.markets[identity]=dict(commodity=commodity,assumption=deepcopy(assumption))
 
 
-def bus_name(node,carrier):return node+' :: '+carrier
+def bus_name(node,carrier):
+    """S1-1 naming decision: upstream '<node> <carrier>' replaces the Phase4 '<node> :: <carrier>'."""
+    return node+' '+carrier
 
 
 def local_blueprint(nodes,options=None):
     """nodes maps explicit node IDs to countries. No resource allocation guessed."""
     f=Fragment();options=options or {}
-    f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')
+    for country in sorted(set(nodes.values())):f.bus(atmosphere_bus(country),ATMOSPHERE_CARRIER,country,None,role='ATMOSPHERE')
     for node,country in nodes.items():
         f.bus(bus_name(node,'electricity'),'electricity',country,node)
         for carrier in FUELS+('H2','co2 captured','co2 sequestered'):
@@ -76,14 +104,14 @@ def local_blueprint(nodes,options=None):
             ('SMR CC','SMR CC',['gas'],['H2','co2 captured','atmosphere'],'prepare_sector_network.py:add_hydrogen'),
             ('fuel cell','H2 Fuel Cell',['H2'],['electricity'],'prepare_sector_network.py:add_hydrogen'),
             ('FT','Fischer-Tropsch',['H2','co2 captured','electricity'],['oil'],'prepare_sector_network.py:H2_liquid_fossil_conversions')]:
-            port=lambda x:'ReportingCO2 atmosphere' if x=='atmosphere' else bus_name(node,x)
+            port=lambda x:atmosphere_bus(country) if x=='atmosphere' else bus_name(node,x)
             f.add('Link',node+' '+name,country,carrier,inputs=[port(x) for x in ins],outputs=[port(x) for x in outs],source=source)
         optional=[('H2 turbine','H2 turbine',['H2'],['electricity'],options.get('hydrogen',{}).get('h2_turbine',False)),
                   ('Sabatier','Sabatier',['H2','co2 captured'],['gas'],options.get('methanation',False)),
                   ('helmeth','helmeth',['electricity','co2 captured'],['gas'],options.get('helmeth',False))]
         for name,carrier,ins,outs,enabled in optional:
             if enabled:f.add('Link',node+' '+name,country,carrier,inputs=[bus_name(node,x) for x in ins],outputs=[bus_name(node,x) for x in outs],source='prepare_sector_network.py:configured domestic conversion')
-        f.add('Link',node+' biogas upgrading',country,'biogas to gas',inputs=[bus_name(node,'biogas'),'ReportingCO2 atmosphere'],outputs=[bus_name(node,'gas')],source='prepare_sector_network.py:add_biomass; negative atmosphere efficiency')
+        f.add('Link',node+' biogas upgrading',country,'biogas to gas',inputs=[bus_name(node,'biogas'),atmosphere_bus(country)],outputs=[bus_name(node,'gas')],source='prepare_sector_network.py:add_biomass; negative atmosphere efficiency')
         f.add('Store',node+' H2 tank',country,'H2',inputs=[bus_name(node,'H2')],outputs=[bus_name(node,'H2')],role='STORAGE',source='prepare_sector_network.py:add_hydrogen')
         # No DAC, heat service, NH3 or methanol asset is auto-created. Their
         # upstream capabilities do not establish accepted heat/services/data.
@@ -157,8 +185,8 @@ def combustion_accounting_interface(f,node,fuel,sector,emission_factor,*,accepte
     if fuel not in FUELS or sector not in ('Power','Buildings','Transport','Industry','Agriculture','DomesticShipping','InternationalShipping','DomesticAviation','InternationalAviation'):
         raise ValueError('Unknown fuel-use ownership')
     factor=finite(emission_factor);inp=bus_name(node,fuel);country=f.buses[inp]['country']
-    out=f.bus(node+' :: '+sector+' '+fuel+' final obligation',fuel+' final energy',country,node)
-    outputs=[out]+(['ReportingCO2 atmosphere'] if factor>0 else [])
+    out=f.bus(node+' '+sector+' '+fuel+' final obligation',fuel+' final energy',country,node)
+    outputs=[out]+([atmosphere_bus(country)] if factor>0 else [])
     params=dict(bus_order=[inp]+outputs,efficiency=1.,p_min_pu=0.,p_nom_extendable=True)
     if factor>0:params['efficiency2']=factor
     return f.add('Link',node+' '+sector+' '+fuel+' carbon meter',country,fuel+' final-energy accounting',
@@ -169,6 +197,7 @@ def graph(f,*,include_pending=True):
     adj=defaultdict(list)
     for key,r in f.components.items():
         if not include_pending and not r['accepted']:continue
+        if r['role']=='TRANSPORT':continue  # cross-border transport is governed by scenario switches, not isolation
         for a in r['inputs']:
             for b in r['outputs']:
                 if f.buses[a]['role']=='ATMOSPHERE' or f.buses[b]['role']=='ATMOSPHERE':continue
@@ -201,7 +230,11 @@ def validate(f):
         if b['role']!='ATMOSPHERE' and b['country'] not in COUNTRIES:raise ValueError('Unowned physical bus')
     for key,r in f.components.items():
         owners={f.buses[b]['country'] for b in r['inputs']+r['outputs'] if f.buses[b]['role']!='ATMOSPHERE'}
-        if owners!={r['country']}:raise ValueError('Cross-country or unknown component')
+        if r['role']=='TRANSPORT':
+            if not owners or len(owners)>2 or r['country'] not in owners:raise ValueError('Transport component ownership unknown')
+        elif owners!={r['country']}:raise ValueError('Cross-country or unknown component')
+        for b in r['inputs']+r['outputs']:
+            if f.buses[b]['role']=='ATMOSPHERE' and f.buses[b]['country'] and f.buses[b]['country']!=r['country']:raise ValueError('Emission booked in a foreign atmosphere')
         if r['role']=='EXTERNAL_SUPPLY' and (r['inputs'] or r['type']!='Generator'):
             raise ValueError('External market cannot be a transit bus')
         if r['role']=='FINITE_RESOURCE' and r['params'] and r['params'].get('e_nom_extendable',False):
@@ -230,18 +263,22 @@ def to_pypsa_fragment(f,snapshots,weights,*,component_ids):
     if any(r['accepted'] is not True or r['params'] is None or not r['source'] for r in selected):raise ValueError('Unaccepted component parameters')
     n=pypsa.Network();n.set_snapshots(pd.Index(snapshots,name='snapshot'))
     for col in n.snapshot_weightings:n.snapshot_weightings[col]=weights
-    for carrier in {b['carrier'] for b in f.buses.values()}:n.add('Carrier',carrier,co2_emissions=0.)
+    # Deterministic component order (set iteration depends on hash randomisation; byte-identical NetCDF is required for V5 B12).
+    for carrier in sorted({b['carrier'] for b in f.buses.values()}):n.add('Carrier',carrier,co2_emissions=0.)
     used={b for r in selected for b in r['inputs']+r['outputs']}
-    for name in used:
+    for name in sorted(used):
         b=f.buses[name];n.add('Bus',name,carrier=b['carrier'])
         n.buses.loc[name,'country']=b['country'];n.buses.loc[name,'location']=b['node'] or ''
     n.meta={'gate3_fragment':True,'solver_allowed':False,'external_annual_caps':{},'store_power_rules':{}}
-    if any(f.buses[b]['role']=='ATMOSPHERE' for b in used):
-        # Relative atmospheric inventory only: unrestricted reporting balance,
-        # coefficient zero prevents aggregate primary-energy policy leakage.
-        n.add('Store','ReportingCO2 atmosphere inventory',bus='ReportingCO2 atmosphere',
-              carrier='co2 atmosphere',e_nom_extendable=True,e_min_pu=-1,e_initial=0.,e_cyclic=False)
-        n.meta['atmosphere_role']='ALLOWED_ACCOUNTING_GLOBAL'
+    for name in sorted(b for b in used if f.buses[b]['role']=='ATMOSPHERE'):
+        # Relative atmospheric inventory per country (S1-5): e_min_pu=-1 so the Store may go
+        # negative (removals); the country cap is applied to the final-snapshot level by the
+        # research_country_net_zero hook. Carrier coefficient zero prevents aggregate
+        # primary-energy policy leakage.
+        store=name+' inventory' if name==LEGACY_ATMOSPHERE else name
+        n.add('Store',store,bus=name,carrier=ATMOSPHERE_CARRIER,e_nom_extendable=True,e_min_pu=-1,e_initial=0.,e_cyclic=False)
+        n.stores.loc[store,'country']=f.buses[name]['country'];n.stores.loc[store,'research_role']='ATMOSPHERE'
+        n.meta['atmosphere_role']='ALLOWED_ACCOUNTING_GLOBAL' if name==LEGACY_ATMOSPHERE else 'NATIONAL_ACCOUNTING_WITH_COUNTRY_CAP'
     for r in selected:
         params=deepcopy(r['params']);cap=params.pop('annual_cap_mwh',None);params.pop('market_id',None)
         if r['type']=='Generator':

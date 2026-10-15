@@ -65,7 +65,7 @@ class IntegrationTests(unittest.TestCase):
   n=network();integrate_survivors(n,evidence(),contract(),n);n.model=linopy.Model()
   x=n.model.add_variables(lower=0,coords=[pd.Index(['new-a','new-b'],name='Generator-ext')],name='Generator-p_nom');n.model.add_objective(x.sum())
   install_existing_asset_constraints(n)
-  fixed=n.model.variables['Research-existing-FOM-constant'];self.assertEqual(float(fixed.lower),1.);self.assertEqual(float(fixed.upper),1.)
+  fixed=n.model.variables['Research_existing_FOM_constant'];self.assertEqual(float(fixed.lower),1.);self.assertEqual(float(fixed.upper),1.)
   self.assertIn(720000.,n.model.objective.expression.coeffs.values);self.assertEqual(float(n.model.constraints['ResearchExistingResource-wind-sg0'].rhs),90.)
   self.assertEqual(len(n.model.constraints['ResearchExistingResource-wind-sg0'].coeffs.values),2)
   with self.assertRaisesRegex(ValueError,'already'):install_existing_asset_constraints(n)

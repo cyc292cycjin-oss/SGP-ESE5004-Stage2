@@ -1,0 +1,31 @@
+{
+  "purpose": "S1 supplement 02 section 1.2: estimate peak RSS of the local network assembly (2920x3h + exact 365x24h reduction) before building",
+  "evidence": [
+    {
+      "source": "work/c02_daily_build_20261012/C02_RESOURCE_AND_EXIT_SUMMARY.json",
+      "peak_worker_ru_maxrss_bytes": 2773585920,
+      "peak_cgroup_memory_bytes": 3125039104,
+      "meaning": "C02 daily network build (load 2920 network with 1737 Loads/1104 Stores, exact daily aggregation, export) on 122"
+    },
+    {
+      "source": "work/d_stage_2920_20261013/D_STAGE_RESULT.md",
+      "d1_lp_build_rss_gib": 25.2,
+      "d5_solve_rss_gib": 33.2,
+      "meaning": "2920x3h LP build and solve (19.6M columns) - NOT performed locally"
+    },
+    {
+      "source": "work/p0_sector_coupling_audit_20261014/P0_SCALE_ESTIMATE.json",
+      "build_GiB_per_M_nnz": 0.2775879549827682,
+      "solve_GiB_per_M_nnz_D5": 0.3983696792869701,
+      "meaning": "LP build/solve memory per million nonzeros (used for the cloud estimate, not for the local assembly)"
+    }
+  ],
+  "reasoning": "The local step only assembles PyPSA networks (no linopy model): the S1 network has ~100 Loads and ~400 Stores instead of 1737/1104 but more candidates; the C02 worker did the same kind of work (load network, exact daily mean, export) and peaked at 2.77 GiB RSS. Estimate: <= 3.5 GiB peak for one scenario build, with a safety factor of 1.25 on the C02 measurement.",
+  "estimated_peak_rss_gib": 3.5,
+  "wsl_total_bytes": 11483623424,
+  "wsl_available_bytes": 10673483776,
+  "wsl_available_gib": 9.94,
+  "threshold_gib": 7.94,
+  "decision": "BUILD_LOCALLY",
+  "measurement_plan": "/usr/bin/time -v around scenario_network.py records the actual maximum resident set size per scenario; recorded in S1_BUILD_MEMORY_MEASURED.json"
+}
