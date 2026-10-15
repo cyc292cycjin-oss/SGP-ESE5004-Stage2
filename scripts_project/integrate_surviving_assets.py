@@ -3,7 +3,7 @@ import math,json,hashlib
 from collections import defaultdict
 import numpy as np
 from asset_survival import select_asset,remaining_resource
-from carrier_architecture import bus_name
+from carrier_architecture import bus_name,atmosphere_bus,ATMOSPHERE_CARRIER
 
 def approved(x):
     return x.get('ApprovalStatus')=='HUMAN_ACCEPTED' and bool(x.get('Source')) and bool(x.get('DecisionReference'))
@@ -129,9 +129,10 @@ def integrate_survivors(n,evidence,contract,profile_network=None):
         first=min(float(x['CommissioningYear']) for x in members);last=min(float(x['RetirementYear']) for x in members)
         common=dict(carrier=carrier,p_nom_extendable=False,build_year=first,lifetime=last-first,capital_cost=0.)
         if typ=='Link':
-            fuel=p['FuelCarrier'];fuelbus=bus_name(node,fuel);atmo='ReportingCO2 atmosphere'
+            # S1-5: physical CO2 of every existing combustion unit goes to its own country atmosphere bus.
+            fuel=p['FuelCarrier'];fuelbus=bus_name(node,fuel);atmo=atmosphere_bus(r['Country'])
             if fuel not in {'gas','oil','coal','lignite'} and not approved(p.get('DedicatedFuelSupply',{})):raise ValueError('Existing conversion lacks an approved dedicated fuel boundary; fixed biomass obligations are unavailable to power')
-            for b,ca,co in [(fuelbus,fuel,r['Country']),(atmo,'co2 atmosphere','')]:
+            for b,ca,co in [(fuelbus,fuel,r['Country']),(atmo,ATMOSPHERE_CARRIER,r['Country'])]:
                 if ca not in n.carriers.index:n.add('Carrier',ca,co2_emissions=0.)
                 if b not in n.buses.index:n.add('Bus',b,carrier=ca);n.buses.loc[b,'country']=co
             factor=finite(p['PhysicalCO2_t_per_MWh_fuel'],'existing physical CO2')
@@ -168,11 +169,13 @@ def install_existing_asset_constraints(n):
     for key,g in n.meta.get('existing_resource_groups',{}).items():
         terms=[n.model[c['ComponentType']+'-p_nom'].sel({c['ComponentType']+'-ext':c['Name']})*c['CapacityToMW'] for c in g['candidates']]
         if terms:n.model.add_constraints(sum(terms)<=g['new_build_limit_mw'],name='ResearchExistingResource-'+key)
+    # Variable names must not contain '-': PyPSA assign_solution splits names at the first
+    # hyphen into (component, attribute) and fails on scalars; a hyphen-free name is skipped.
     # This frozen Linopy version rejects literal objective constants. A scalar
     # fixed at one carries the audited annual FOM without introducing capacity,
     # dispatch, a financing assumption or an optimisation choice.
     cost=float(n.meta.get('existing_annual_fixed_om_eur',0.))
     if cost:
-        one=n.model.add_variables(lower=1.,upper=1.,name='Research-existing-FOM-constant')
+        one=n.model.add_variables(lower=1.,upper=1.,name='Research_existing_FOM_constant')
         n.model.objective+=one*cost
     n._research_existing_assets_model=n.model

@@ -5,11 +5,10 @@ import numpy as np,pypsa
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/'scripts_project'))
 from test_surviving_asset_integration import network,contract,evidence
 import test_gate4_activation as hydro_fixtures
-import test_gate4_assets as assembly_fixtures
+# S1-2: Assembly V1 fixture module retired (tests/research/retired/retired_test_gate4_assets.py)
 from integrate_surviving_assets import integrate_survivors,combined_profiles
 import carbon_architecture as carbon
 from assembly_components import bind_loads,merge_input_components
-from build_research_network import load_unbound_recipe
 
 class HydroTests(unittest.TestCase):
  def test_phs_duration_efficiencies_cycle_export(self):
@@ -74,20 +73,4 @@ class AssemblyBoundaryTests(unittest.TestCase):
  def test_physical_weight_change_still_rejected(self):
   n=network();sub=pypsa.Network();sub.set_snapshots(n.snapshots);sub.snapshot_weightings=n.snapshot_weightings.copy();sub.snapshot_weightings.loc[:,'stores']=6.
   with self.assertRaisesRegex(ValueError,'time boundary'):merge_input_components(n,sub)
- def test_double_binding_refused(self):
-  n,r,m,a,d=assembly_fixtures.RoundtripTests().setup_network()
-  with self.assertRaisesRegex(ValueError,'only once'):bind_loads(n,r,m,a,d)
- def test_bound_fragment_refused_before_merge(self):
-  n,*_=assembly_fixtures.RoundtripTests().setup_network();empty=pypsa.Network();empty.set_snapshots(n.snapshots);empty.snapshot_weightings=n.snapshot_weightings.copy()
-  with self.assertRaisesRegex(ValueError,'Bound development'):merge_input_components(empty,n)
- def test_real_unbound_recipe_excludes_loads(self):
-  p=ROOT/'results_project/assembly_v1/assets/carrier_fragment.json'
-  if not p.exists():self.skipTest('Production assets not available')
-  raw=load_unbound_recipe(p);self.assertFalse(any(x['type']=='Load' for x in raw['components'].values()));self.assertGreater(len(raw['demand_destinations']),0)
-  with self.assertRaisesRegex(ValueError,'never a bound'):load_unbound_recipe(p.with_name('carrier_fragment_2050_unsolved.nc'))
- def test_recipe_with_load_rejected(self):
-  with tempfile.TemporaryDirectory() as td:
-   p=Path(td)/'bad.json';p.write_text(json.dumps({'components':{'x':{'type':'Load'}}}))
-   with self.assertRaisesRegex(ValueError,'Bound demand'):load_unbound_recipe(p)
-
 if __name__=='__main__':unittest.main(verbosity=2)

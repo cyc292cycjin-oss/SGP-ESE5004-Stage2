@@ -1,0 +1,23 @@
+{
+  "requested_by": "S1_SUPPLEMENT_01 section 1 (local licence review, read-only)",
+  "python_environment_used_for_all_S1_runs": "/home/jin/miniforge3/envs/pypsa-earth/bin/python (WSL Ubuntu; Python 3.11.13, gurobipy 12.0.3, pypsa 0.30.3, linopy 0.5.5)",
+  "raw_outputs": {
+    "python -c 'import gurobipy as gp; m=gp.Model(); print(gp.gurobi.version())'": [
+      "Restricted license - for non-production use only - expires 2026-11-23",
+      "(12, 0, 3)"
+    ],
+    "gurobi_cl --license": [
+      "Set parameter LogFile to value \"gurobi.log\"",
+      "Using license file /home/jin/miniforge3/envs/pypsa-earth/lib/gurobi.lic",
+      "Restricted license - for non-production use only - expires 2026-11-23"
+    ],
+    "size probe (3000 variables, earlier in this session)": "GurobiError: Model too large for size-limited license"
+  },
+  "licence_files_checked_for_existence_only": {
+    "wsl": ["~/gurobi.lic (absent)", "~/.config/gurobi/gurobi.lic (absent)", "/opt/gurobi*/gurobi.lic (absent)", "/home/jin/miniforge3/envs/pypsa-earth/lib/gurobi.lic (present; the pip gurobipy restricted licence)"],
+    "windows": ["%USERPROFILE%/gurobi.lic (absent)", "C:/gurobi*/gurobi.lic (absent)", "GRB_LICENSE_FILE / GUROBI_HOME environment variables (not set, Windows and WSL)"]
+  },
+  "finding": "WSL (the environment that runs every S1 script) only has the pip-bundled restricted licence (size-limited, expires 2026-11-23). No academic licence is activated on Windows or in WSL. Gurobi treats Windows and WSL as different hosts; an academic licence must be activated inside WSL to be usable there. Not activated in S1 (user action).",
+  "consequence": "S1 formal daily solves cannot run locally with Gurobi; the local smoke test uses HiGHS and is labelled SMOKE_TEST_ONLY. Cloud Gurobi (WLS) solves wait for the new instance (S1_SUPPLEMENT_02).",
+  "no_licence_file_was_opened_copied_or_modified": true
+}

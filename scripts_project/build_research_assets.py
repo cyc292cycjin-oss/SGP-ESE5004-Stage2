@@ -2,13 +2,18 @@
 
 Source inputs are allowlisted. Unresolved asset-age and carbon-origin decisions
 remain explicit in manifests and prevent qualification as the full research model.
+
+S1 (2026-10-15): `build_fragment` no longer creates fixed final-energy accounts or
+metering Links (R13); hydrogen conversion/storage comes from the upstream library
+(sector_adapter.add_hydrogen); emissions are booked per country (country_carbon).
+`build_electric` is unchanged; the frozen electric base is consumed by scenario_network.
 """
 from pathlib import Path
 import argparse,hashlib,json,platform,subprocess,sys
 import numpy as np
 import pandas as pd
 import pypsa
-from carrier_architecture import Fragment,bus_name,external_import,to_pypsa_fragment
+from carrier_architecture import Fragment,bus_name,external_import,to_pypsa_fragment,atmosphere_bus,ATMOSPHERE_CARRIER
 
 REF_SHA='06152be56ee41f64bfdca42fd24aeaf363ab61f931fec7b5e4bc12f6d6456ecb'
 COST2050_SHA='bbcc639010a6775255730278eaa6e21ba56867d0610d3a011adc3eb60d0065f5'
@@ -168,20 +173,32 @@ def build_electric(repo,reference,costs,oldcosts,output,survival=None,integratio
     if price_layer:manifest['inputs'][str(price_layer)]=sha(price_layer)
     save(output/'ELECTRIC_BASE_ASSET_MANIFEST.json',manifest);return n,manifest
 
-def build_fragment(repo,base,costs,allocation,output,price_layer=None):
+# S1: hydrogen conversion and storage are supplied by the upstream library
+# (sector_adapter.add_hydrogen); the fragment must not duplicate them.
+UPSTREAM_SUPPLIED=('H2 Electrolysis','H2 Fuel Cell','H2 Store Tank','H2 turbine','H2 pipeline')
+
+def build_fragment(repo,base,costs,output,price_layer=None,cc_fraction=None):
+    """Research carrier recipe for one target year: fuel pools, external fossil supply, gas power
+    candidates, SMR/SMR CC/FT with explicit per-country atmosphere ports. No Load, no fixed
+    account, no metering Link (S1-2). Returns (fragment, carbon_map, manifest)."""
     c=pd.read_csv(costs,index_col=0)
     layer=None
     if price_layer:
         from price_basis import load_table
         c,layer=load_table(price_layer,2050,costs)
     source=sha(costs);geo=base.buses[base.buses.carrier.isin(['AC','DC'])];f=Fragment()
-    f.bus('ReportingCO2 atmosphere','co2 atmosphere','',None,role='ATMOSPHERE')
+    for country in sorted(set(geo.country)):f.bus(atmosphere_bus(country),ATMOSPHERE_CARRIER,country,None,role='ATMOSPHERE')
     for node,z in geo.iterrows():
         f.bus(node,z.carrier,z.country,node)
         for fuel in ['gas','oil','coal','lignite','H2','co2 captured']:f.bus(bus_name(node,fuel),fuel,z.country,node)
-    carbon=list(base.meta.get('existing_carbon_components',[]));pending=[];routes={};dest={};allow=[]
-    def event(key,sector,factor,policy,accepted=True):
-        r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,policy_weight=policy,accepted=accepted,source=source,physical_reporting=True,PhysicalReportingQualified=True,PolicyAttributionQualified=accepted,policy_assignment_status='SOURCE_ROLE_DETERMINED' if accepted else 'POLICY_ATTRIBUTION_PENDING'))
+    carbon=[];allow=[]
+    def event(key,sector,factor):
+        r=f.components[key];carbon.append(dict(component_type=r['type'],component=r['name'],carrier=r['carrier'],sector=sector,country=r['country'],coefficient=factor,atmosphere=atmosphere_bus(r['country']),source=source,physical_reporting=True,attribution='COUNTRY_OF_EMITTER'))
+    if cc_fraction is None:
+        from phase4_static import config
+        cc_fraction=float(config(repo,'baseline')['sector']['cc_fraction'])
+    cc=float(cc_fraction)
+    if not 0<=cc<=1:raise ValueError('Invalid source capture fraction')
     for node,z in geo.iterrows():
         country=z.country
         for fuel in ['gas','oil','coal','lignite']:
@@ -191,115 +208,29 @@ def build_fragment(repo,base,costs,allocation,output,price_layer=None):
             pars=dict(bus_order=ports,p_nom_extendable=True,p_min_pu=0.,build_year=2050,lifetime=float(c.at[tech,'lifetime']),capital_cost=float(c.at[tech,'fixed'])*costfactor,marginal_cost=float(c.at[tech,'VOM'])*costfactor)
             pars.update({('efficiency' if i==1 else 'efficiency'+str(i)):float(k) for i,k in enumerate(coeff,1)})
             return f.add('Link',node+' '+label,country,carrier,inputs=inputs,outputs=outputs,params=pars,accepted=True,source=source)
-        h=bus_name(node,'H2');gas=bus_name(node,'gas');oil=bus_name(node,'oil');co2=bus_name(node,'co2 captured');atmo='ReportingCO2 atmosphere'
-        link('electrolysis','H2 Electrolysis',[node,h],[c.at['electrolysis','efficiency']],'electrolysis');allow.append('electrolysis')
-        k=link('SMR','SMR',[gas,h,atmo],[c.at['SMR','efficiency'],c.at['gas','CO2 intensity']],'SMR');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity']),None,False)
-        carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=0.,captured_destination=None,physical_stage='facility immediate atmosphere')
-        # Capture fraction read from effective frozen configuration, not inferred.
-        from phase4_static import config
-        cc=float(config(repo,'baseline')['sector']['cc_fraction']) if node==geo.index[0] else cc
-        if not 0<=cc<=1:raise ValueError('Invalid source capture fraction')
-        k=link('SMR CC','SMR CC',[gas,h,atmo,co2],[c.at['SMR CC','efficiency'],c.at['gas','CO2 intensity']*(1-cc),c.at['gas','CO2 intensity']*cc],'SMR CC');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity'])*(1-cc),None,False)
-        carbon[-1].update(gas_input_carbon_factor=float(c.at['gas','CO2 intensity']),captured_carbon_factor=float(c.at['gas','CO2 intensity'])*cc,captured_destination=co2,physical_stage='facility immediate atmosphere; captured transfer is not an atmospheric credit',capture_source='effective sector.cc_fraction')
-        link('fuel cell','H2 Fuel Cell',[h,node],[c.at['fuel cell','efficiency']],'fuel cell',c.at['fuel cell','efficiency'])
-        allow.append('fuel_cell')
-        link('FT','Fischer-Tropsch',[h,oil,co2,node],[c.at['Fischer-Tropsch','efficiency'],-c.at['oil','CO2 intensity']*c.at['Fischer-Tropsch','efficiency'],-c.at['Fischer-Tropsch','electricity-input']/c.at['Fischer-Tropsch','hydrogen-input']],'Fischer-Tropsch',c.at['Fischer-Tropsch','efficiency']);allow+=['FT','steam_methane_reforming']
+        h=bus_name(node,'H2');gas=bus_name(node,'gas');oil=bus_name(node,'oil');co2=bus_name(node,'co2 captured');atmo=atmosphere_bus(country)
+        k=link('SMR','SMR',[gas,h,atmo],[c.at['SMR','efficiency'],c.at['gas','CO2 intensity']],'SMR');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity']))
+        k=link('SMR CC','SMR CC',[gas,h,atmo,co2],[c.at['SMR CC','efficiency'],c.at['gas','CO2 intensity']*(1-cc),c.at['gas','CO2 intensity']*cc],'SMR CC');event(k,'HydrogenProduction',float(c.at['gas','CO2 intensity'])*(1-cc))
+        carbon[-1].update(captured_carbon_factor=float(c.at['gas','CO2 intensity'])*cc,captured_destination=co2,capture_source='effective sector.cc_fraction')
+        allow+=['steam_methane_reforming']
+        link('FT','Fischer-Tropsch',[h,oil,co2,node],[c.at['Fischer-Tropsch','efficiency'],-c.at['oil','CO2 intensity']*c.at['Fischer-Tropsch','efficiency'],-c.at['Fischer-Tropsch','electricity-input']/c.at['Fischer-Tropsch','hydrogen-input']],'Fischer-Tropsch',c.at['Fischer-Tropsch','efficiency']);allow+=['FT']
         for powertech in ['OCGT','CCGT']:
             eff=float(c.at[powertech,'efficiency']);factor=float(c.at['gas','CO2 intensity'])
             k=link(powertech,powertech,[gas,node,atmo],[eff,factor],powertech,eff)
             f.components[k]['params']['marginal_cost']=float(c.at[powertech,'VOM'])*eff
-            event(k,'Power',factor,1.)
-        tech='hydrogen storage tank type 1 including compressor'
-        f.add('Store',node+' H2 tank',country,'H2',inputs=[h],outputs=[h],role='STORAGE',params=dict(e_nom_extendable=True,e_cyclic=True,capital_cost=float(c.at[tech,'fixed']),build_year=2050,lifetime=float(c.at[tech,'lifetime'])),accepted=True,source=source)
-    # Bind qualified obligation interfaces to source commodity identities; no Load
-    # is created here, and incomplete obligations are never converted to zero.
-    registry=json.loads((repo/'research_inputs/assembly_v1/registry.json').read_text());records={r['InputID']:r for r in registry['records']}
-    reconstruction=json.loads((repo/'research_inputs/assembly_v1/sources/BASE_RECONSTRUCTION.json').read_text())
-    am=json.loads((allocation/'allocation_manifest.json').read_text());arrays=np.load(allocation/am['arrays_file'],allow_pickle=False)
-    if am['input_registry_sha256']!=sha(repo/'research_inputs/assembly_v1/registry.json'):raise ValueError('Allocation belongs to old registry')
-    for ar in am['records']:
-        r=records[ar['InputID']];sector='Buildings' if r['Account'] in ['ResidentialFuel','ServicesFuel'] else 'Industry' if r['Account']=='IndustryFinalEnergy' else 'Agriculture' if r['Account']=='AgricultureFinalEnergy' else r['Account'].replace('Bunker','').replace('Fuel','') if 'Shipping' in r['Account'] or 'Aviation' in r['Account'] else 'Transport'
-        if r['Account']=='OtherNEC':sector='OtherNEC'
-        elif r['Account']=='TransportNEC':sector='TransportNEC'
-        elif r['Account']=='RailNonElectric':sector='RailNonElectric'
-        for j,node in enumerate(ar['Nodes']):
-            annual=float((arrays[ar['ArrayKey']][:,j]*arrays['weights']).sum())
-            if annual<=0:continue
-            key=r['InputID']+'@'+node
-            if r['Account']=='Astar':
-                dest[key]=dict(bus=node,carrier='electricity',sector='Astar',account=r['Account'],source_carrier=r['Carrier']);continue
-            fuel=r['Carrier'];final=key+' :: final obligation';f.bus(final,fuel+' final energy',r['Country'],node)
-            dest[key]=dict(bus=final,carrier=fuel,sector=sector,account=r['Account'],source_carrier=fuel)
-            if fuel in ['oil','gas','coal']:
-                factor=float(c.at[fuel,'CO2 intensity']);pars=dict(bus_order=[bus_name(node,fuel),final,'ReportingCO2 atmosphere'],efficiency=1.,efficiency2=factor,p_nom_extendable=True,p_min_pu=0.)
-                k=f.add('Link',key+' final-fuel meter',r['Country'],fuel+' final-energy accounting',inputs=[bus_name(node,fuel)],outputs=[final,'ReportingCO2 atmosphere'],role='FUEL_CARBON_METER',params=pars,accepted=True,source=source);event(k,sector,factor,0.)
-            elif fuel=='biomass':
-                raw=[z for z in reconstruction['selected_rows'] if z['Country']==r['Country'] and z['Account']==r['Account'] and z['Carrier']=='biomass']
-                total=sum(float(z['MWh']) for z in raw)
-                if total<=0:raise ValueError('Missing positive commodity composition')
-                for zraw in raw:
-                    commodity=zraw['Commodity'];val=annual*float(zraw['MWh'])/total;resource=key+' :: '+commodity
-                    f.bus(resource,commodity,r['Country'],node)
-                    store=key+' '+commodity+' fixed resource'
-                    # No unsupported fossil-neutrality/CO2 factor or commodity
-                    # cost is silently borrowed from the solid-biomass pool.
-                    f.add('Store',store,r['Country'],commodity,outputs=[resource],role='FINITE_RESOURCE',params=dict(e_nom=val,e_initial=val,e_cyclic=False,p_min_pu=0.),accepted=True,source=zraw['RowID'])
-                    f.add('Link',key+' '+commodity+' final-energy meter',r['Country'],commodity+' obligation metering',inputs=[resource],outputs=[final],role='FUEL_CARBON_METER',params=dict(efficiency=1.,p_nom_extendable=True,p_min_pu=0.),accepted=True,source=zraw['RowID'])
-                    routes[store]=dict(buses=[final],commodity=commodity,source_row=zraw['RowID'],annual_cap_mwh=val,input_id=r['InputID'])
-                    pending.append(dict(component=store,commodity=commodity,reason='Commodity-specific supply-cost and carbon-origin/physical-factor qualification pending; developer asset cannot supply extra power/H2'))
-            else:raise ValueError('Unmapped qualified fuel '+fuel)
-    arrays.close()
-    raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',buses=f.buses,components=f.components,markets=f.markets,demand_destinations=dest,biomass_obligation_routes=routes,approved_coupling_paths=sorted(set(allow)),qualification_blockers=[],external_fixed_account_method='ASSEMBLY_V1_EXTERNAL_PENDING_FIXED_ACCOUNTS',fixed_account_validation_required_after_binding=True,policy_qualification_blockers=['Mixed-use SMR/CC policy attribution pending'],policy_enabled=False)
-    from fixed_account_scope import load_scope
-    raw['additional_fixed_account_scope']=load_scope(repo)
-    save(output/'carrier_fragment.json',raw);save(output/'demand_destinations.json',dest);save(output/'carbon_component_map.json',carbon)
-    n=to_pypsa_fragment(f,list(base.snapshots),list(base.snapshot_weightings.generators),component_ids=list(f.components))
-    n.meta.update(target_year=2050,asset_role='GATE3_PRODUCTION_FRAGMENT_DEVELOPMENT',fullsc_network_complete=False,biomass_obligation_routes=routes,required_constraint_hooks=['install_fragment_constraints'],unbound_required_demands=sum(r.get('Year')==2050 and r.get('Kind')=='DEMAND' and r.get('Classification')=='UNRESOLVED' for r in records.values()))
-    # Materialise ONLY qualified actual arrays in this development fragment.
-    # carrier_fragment.json remains an unbound production recipe; the full
-    # assembler consumes that recipe and binds once after all gates pass.
-    from assembly_components import bind_loads
-    with np.load(allocation/am['arrays_file'],allow_pickle=False) as values:
-        bind_loads(n,registry['records'],am,values,dest)
-    n.meta.update(partial_demand_binding=True,qualified_bound_accounts=len(am['records']),complete_model_claim=False)
-    from fixed_accounts import qualify_fixed_accounts,validate_exported_accounting,accounting_report
-    from fixed_accounts import validate_fixed_accounts
-    n.meta['additional_fixed_account_scope']=raw['additional_fixed_account_scope']
-    structural=validate_fixed_accounts(n,structure_only=True)
-    if any(r.get('BoundaryAcceptance')=='PENDING_ADDITIONAL_COMMODITY_BOUNDARY' for r in structural):
-        save(output/'FIXED_ACCOUNT_STRUCTURAL_PROOF_PENDING.json',dict(Status='STRUCTURE_PROVED_NOT_BOUNDARY_ACCEPTED',records=[r for r in structural if r.get('BoundaryAcceptance')],all_fixed_structure_checks_passed=True,physical_arrays_bound=True,network_complete=False))
-    fixed=qualify_fixed_accounts(n)
-    if raw['additional_fixed_account_scope']:save(output/'FIXED_ACCOUNT_ADDITIONAL_SCOPE_PROOF.json',dict(Status='HUMAN_SCOPE_AND_ACTUAL_STRUCTURE_QUALIFIED',scope=raw['additional_fixed_account_scope'],records=[r for r in fixed if r.get('BoundaryAcceptance')],whole_network_requalification_required=True))
-    if layer:
-        from price_basis import qualify_network_costs
-        qualify_network_costs(n,layer,price_layer)
-    save(output/'external_pending_fixed_accounts.json',fixed)
-    save(output/'accounting_qualification.json',accounting_report(n))
-    path=output/'carrier_fragment_2050_unsolved.nc';actual=export_checked(n,path)
-    validate_exported_accounting(actual)
-    actual_totals={r['InputID']:0. for r in am['records']}
-    for name,rid in actual.meta['demand_owners'].items():
-        z=actual.loads.loc[name];identity=actual.meta['demand_identity'][name]
-        if any(str(z[k])!=identity[k] for k in ['carrier','sector','account','country']):raise ValueError('Development Load identity lost')
-        values=actual.loads_t.p_set[name]
-        if not np.isfinite(values).all() or (values<0).any():raise ValueError('Invalid development demand input')
-        actual_totals[rid]+=float((values*actual.snapshot_weightings.generators).sum())
-    if any(not np.isclose(v,float(records[k]['Value']),rtol=1e-12,atol=1e-6) for k,v in actual_totals.items()):raise ValueError('Actual development demand binding not conserved')
-    manifest=dict(status='PRODUCTION_FRAGMENT_INSTANTIATED_CARBON_AND_COST_QUALIFICATION_PENDING',target_year=2050,geographical_nodes=100,components={x.name:len(x.df) for x in actual.iterate_components()},files={p.name:sha(p) for p in [path,output/'carrier_fragment.json',output/'demand_destinations.json',output/'carbon_component_map.json']},code_sha=version(repo),builder_sha256=sha(__file__),inputs={str(costs):source,str(allocation/'allocation_manifest.json'):sha(allocation/'allocation_manifest.json')},environment={'python':platform.python_version(),'pypsa':pypsa.__version__},loads=0,demand_interfaces=len(dest),carbon_events=len(carbon),pending_mixed_carbon_events=sum(not x['accepted'] for x in carbon),pending_bio_qualification=pending,solver_runs=0,fullsc_network_complete=False)
-    manifest['inputs'][str(output/'electric_base_2050_unsolved.nc')]=sha(output/'electric_base_2050_unsolved.nc')
-    manifest.update(loads=len(actual.loads),bound_qualified_accounts=len(actual_totals),binding_status='PARTIAL_QUALIFIED_DEMANDS_BOUND_DEVELOPMENT_ONLY',demand_binding_annual_mwh=actual_totals,unbound_production_recipe='carrier_fragment.json; full assembler binds once only after all source gates pass')
-    manifest.update(physical_reporting_qualified_components=sum(x.get('PhysicalReportingQualified',x['accepted']) for x in carbon),policy_attribution_qualified_components=sum(x.get('PolicyAttributionQualified',x['accepted']) for x in carbon),policy_enabled=False)
-    manifest.update(status='DEVELOPMENT_FRAGMENT_PHYSICAL_FIXED_ACCOUNTS_EXTERNALISED',pending_bio_qualification=[],external_pending_fixed_accounts=len(fixed),qualification_dimensions=n.meta.get('qualification_dimensions',{}))
-    manifest['files'].update({p.name:sha(p) for p in [output/'external_pending_fixed_accounts.json',output/'accounting_qualification.json']})
+            event(k,'Power',factor)
+    raw=dict(artifact_role='UNBOUND_CARRIER_RECIPE',stage='S1',buses=f.buses,components=f.components,markets=f.markets,approved_coupling_paths=sorted(set(allow)),upstream_supplied_carriers=list(UPSTREAM_SUPPLIED),fixed_accounts='RETIRED_S1_2',metering_links='RETIRED_S1_2',demand_binding='scenario_network.bind_astar (electricity only in S1)')
+    save(output/'carrier_fragment.json',raw);save(output/'carbon_component_map.json',carbon)
+    manifest=dict(status='S1_CARRIER_RECIPE_BUILT',target_year=2050,geographical_nodes=int(len(geo)),buses=len(f.buses),components=len(f.components),carbon_events=len(carbon),files={p.name:sha(p) for p in [output/'carrier_fragment.json',output/'carbon_component_map.json']},inputs={str(costs):source},code_sha=version(repo),builder_sha256=sha(__file__),environment={'python':platform.python_version(),'pypsa':pypsa.__version__},solver_runs=0)
     if price_layer:manifest['inputs'][str(price_layer)]=sha(price_layer)
-    save(output/'GATE3_PRODUCTION_FRAGMENT_MANIFEST.json',manifest)
-    return manifest
+    save(output/'S1_CARRIER_FRAGMENT_MANIFEST.json',manifest)
+    return f,carbon,manifest
+
 def main():
     p=argparse.ArgumentParser();p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
-    for k in ['reference','costs','oldcosts','allocation','output','survival']:p.add_argument('--'+k,type=Path,required=True)
+    for k in ['reference','costs','oldcosts','output','survival']:p.add_argument('--'+k,type=Path,required=True)
     p.add_argument('--integration-contract',type=Path)
     p.add_argument('--price-layer',type=Path,required=True)
-    a=p.parse_args();n,m=build_electric(a.repo,a.reference,a.costs,a.oldcosts,a.output,a.survival,a.integration_contract,a.price_layer);f=build_fragment(a.repo,n,a.costs,a.allocation,a.output,a.price_layer)
-    save(a.output/'asset_bundle.json',dict(status='DEVELOPMENT_ASSETS_BUILT_FULLSC_NOT_COMPLETE',source_is_solved=False,electric_base=dict(file=m['file'],sha256=m['sha256']),carrier_fragment=dict(file='carrier_fragment.json',sha256=f['files']['carrier_fragment.json']),carbon_map=dict(file='carbon_component_map.json',sha256=f['files']['carbon_component_map.json']),external_fixed_accounts=dict(file='external_pending_fixed_accounts.json',sha256=sha(a.output/'external_pending_fixed_accounts.json')),accounting=dict(file='accounting_qualification.json',sha256=sha(a.output/'accounting_qualification.json')),price_layer=dict(file=a.price_layer.name,sha256=sha(a.price_layer)),qualification_dimensions=dict(physical_integrity='DEVELOPMENT_SCOPE_VALIDATED',input_coverage='INCOMPLETE',price_usability='SEE_COMPONENT_PRICE_QUALIFICATION',full_cost_report=False,full_physical_emissions_report=False,policy_constraint_qualification='DISABLED_WITH_PENDING_ATTRIBUTION'),solver_allowed=False))
-    print(json.dumps(dict(electric=m['status'],fragment=f['status'],solver_runs=0)))
+    a=p.parse_args();n,m=build_electric(a.repo,a.reference,a.costs,a.oldcosts,a.output,a.survival,a.integration_contract,a.price_layer);f,carbon,fm=build_fragment(a.repo,n,a.costs,a.output,a.price_layer)
+    print(json.dumps(dict(electric=m['status'],fragment=fm['status'],solver_runs=0)))
 if __name__=='__main__':main()

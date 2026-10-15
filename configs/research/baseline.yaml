@@ -103,3 +103,89 @@ research_assembly:
   biomass_supply_cap: accepted_country_fixed_obligation_only
   geological_storage_asset: false
   carbon_validation_stage: POST_BUILD_STATIC_VALIDATION_BLOCKER
+
+# ---------------------------------------------------------------------------
+# S1 (2026-10-15) sector-coupling skeleton. These keys supersede the Phase3
+# isolation contract above (research_carrier_architecture.cross_border_* and
+# research_carbon.policy_*), which is retained only as historical record.
+# Scenario files integrated.yaml / disconnected.yaml override research.cross_border.
+# ---------------------------------------------------------------------------
+research:
+  stage: S1
+  scenario: baseline
+  skeleton_status: INTERIM_S1_SKELETON   # electricity demand only; results carry no scientific meaning
+  fuel_bus_naming: upstream_space        # "<node> <carrier>" as in scripts/prepare_sector_network.py
+  cross_border:                          # decisions 13/41; per carrier; scenario files set all true / all false
+    electricity: true
+    H2: true
+    gas: false                           # gas network not built before step 3
+    co2: false                           # CO2 network not built before step 2
+  existing_cross_border_electricity:     # decision 15: 2025 capacity is the lower bound, expandable
+    corridors_file: research_inputs/corridors/cross_border_corridors.csv
+    capacity_year: 2025
+    capex_on_existing: false             # existing capacity carries no new CAPEX (PyPSA objective_constant)
+    fom_on_existing: true                # annual FOM of existing cross-border capacity added once (fixed-at-1 column)
+  transmission:
+    volume_limit_mode: inherit_reference_constant   # decision 45 pending: keep the frozen lv2.0 constant as-is
+    volume_limit_factor: 2.0                        # used only when volume_limit_mode == factor_of_existing
+  nuclear:                                # decision 38; siting table is a grade-C assumption
+    evidence_grade: C
+    large_pwr:
+      carrier: nuclear
+      cost_technology: nuclear
+      allowed_countries: [BN, KH, ID, LA, MY, MM, PH, TH, TL, VN]   # all except Singapore
+    smr:
+      carrier: nuclear SMR
+      cost_technology: null              # technology-data "SMR" is steam methane reforming, not a reactor
+      allowed_countries: [BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN]
+      p_nom_max: 0.0
+      status: DATA_PENDING
+  site_candidates:                        # decision 39; structure built, potentials pending -> p_nom_max 0
+    geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
+    ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
+    hydro_new: {carrier: hydro, component: StorageUnit, cost_technology: hydro, p_nom_max: 0.0, status: DATA_PENDING}
+    PHS_new: {carrier: PHS, component: StorageUnit, cost_technology: PHS, p_nom_max: 0.0, status: DATA_PENDING}
+  hydrogen:                               # upstream add_hydrogen as component library (decision 42)
+    production_technologies: [H2 Electrolysis]
+    h2_turbine: true                      # upstream proxy: OCGT techno-economics
+    underground_storage: false            # no ASEAN cavern data; DATA_PENDING
+    network: greenfield_along_grid        # upstream add_links_elec_routing_new_H2_pipelines
+    network_limit_GWkm: null              # upstream Europe default 2000 GWkm not applied
+    gas_network_repurposing: false        # upstream 0.8 CH4->H2 repurposing factor not applied
+    hydrogen_colors: false
+  cost_scaling:                           # decision 41; multiplies capital_cost per technology carrier; 1.0 = no change
+    nuclear: 1.0
+    nuclear SMR: 1.0
+    geothermal: 1.0
+    ror: 1.0
+    hydro: 1.0
+    PHS: 1.0
+    solar: 1.0
+    solar rooftop: 1.0
+    onwind: 1.0
+    offwind-ac: 1.0
+    offwind-dc: 1.0
+    OCGT: 1.0
+    CCGT: 1.0
+    H2 Electrolysis: 1.0
+    H2 Fuel Cell: 1.0
+    H2 turbine: 1.0
+    H2 Store Tank: 1.0
+    H2 pipeline: 1.0
+    battery: 1.0
+    battery charger: 1.0
+    home battery: 1.0
+    home battery charger: 1.0
+    SMR: 1.0
+    SMR CC: 1.0
+    Fischer-Tropsch: 1.0
+    electricity distribution grid: 1.0
+    AC: 1.0
+    DC: 1.0
+  carbon:                                 # decisions 9/10: per-country net zero in 2050
+    constraint_scope: per_country         # per_country | asean_total (sensitivity)
+    country_cap_tco2: {BN: 0.0, KH: 0.0, ID: 0.0, LA: 0.0, MY: 0.0, MM: 0.0, PH: 0.0, SG: 0.0, TH: 0.0, TL: 0.0, VN: 0.0}
+    asean_total_cap_tco2: 0.0
+  demand:
+    scope: electricity_only_astar         # step 2 (R8) reconnects the other sectors
+    status: INTERIM_S1_SKELETON

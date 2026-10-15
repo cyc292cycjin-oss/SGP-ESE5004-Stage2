@@ -44,8 +44,10 @@ class CarrierTests(unittest.TestCase):
         self.assertEqual(c.reachability(self.f),[])
     def test_import_unaccepted_rejected(self):
         with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',assumption(),accepted=False)
-    def test_new_h2_import_rejected(self):
-        with self.assertRaises(ValueError):c.external_import(self.f,'SG0','H2','market',assumption(),accepted=True)
+    def test_sourced_h2_import_accepted_empty_commodity_rejected(self):
+        # S1-1/S1-6: imports from outside ASEAN are per-commodity source records (decision 18), no fossil-only whitelist.
+        key=c.external_import(self.f,'SG0','H2','market',assumption(),accepted=True);self.assertEqual(self.f.components[key]['carrier'],'H2')
+        with self.assertRaises(ValueError):self.f.market('m','',{})
     def test_missing_availability_rejected(self):
         a=assumption();a['annual_cap_mwh']=None
         with self.assertRaises(ValueError):c.external_import(self.f,'SG0','gas','market',a,accepted=True)
@@ -178,10 +180,11 @@ class PyPSAFragmentTests(unittest.TestCase):
         with self.assertRaises(ValueError):c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 electrolysis'])
     def test_atmosphere_is_reporting_not_cap_or_feedstock(self):
         r=self.f.components['Link:SG0 SMR'];r.update(accepted=True,source='SYNTHETIC',params=dict(
-            bus_order=[c.bus_name('SG0','gas'),c.bus_name('SG0','H2'),'ReportingCO2 atmosphere'],efficiency=.7,efficiency2=.2,p_nom=1.))
+            bus_order=[c.bus_name('SG0','gas'),c.bus_name('SG0','H2'),c.atmosphere_bus('SG')],efficiency=.7,efficiency2=.2,p_nom=1.))
         n=c.to_pypsa_fragment(self.f,['t0'],[8760],component_ids=['Link:SG0 SMR'])
         self.assertEqual(n.carriers.at['co2 atmosphere','co2_emissions'],0)
-        self.assertEqual(n.meta['atmosphere_role'],'ALLOWED_ACCOUNTING_GLOBAL');self.assertIn('ReportingCO2 atmosphere inventory',n.stores.index)
+        # S1-5: national atmosphere Store per country, extendable with e_min_pu=-1; the cap is a hook, never a GlobalConstraint
+        self.assertEqual(n.meta['atmosphere_role'],'NATIONAL_ACCOUNTING_WITH_COUNTRY_CAP');self.assertIn(c.atmosphere_bus('SG'),n.stores.index);self.assertEqual(n.stores.at[c.atmosphere_bus('SG'),'e_min_pu'],-1)
         self.assertTrue(n.global_constraints.empty)
     def test_industrial_coal_energy_and_carbon_same_flow(self):
         key=c.combustion_accounting_interface(self.f,'SG0','coal','Industry',.3,accepted=True,source='SYNTHETIC')

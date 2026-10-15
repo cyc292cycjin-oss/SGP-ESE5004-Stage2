@@ -3,11 +3,14 @@ from copy import deepcopy
 import numpy as np
 
 def check_global_constraints(n):
+    """Every GlobalConstraint must be reviewed. S1: carbon caps are not GlobalConstraints; the
+    per-country net-zero limit is the research_country_net_zero hook (country_carbon.py) so
+    that every atmosphere Store, not an aggregate carrier coefficient, carries the policy."""
     approved=n.meta.get('approved_global_constraints',[])
     for name,r in n.global_constraints.iterrows():
         attr=str(r.get('carrier_attribute','')).lower()
         if ('co2' in attr or 'carbon' in attr) and r['type']=='primary_energy':
-            raise ValueError('Unapproved carbon policy constraint')
+            raise ValueError('Carrier-coefficient carbon cap would double count Link atmosphere ports (U4); use the country hook')
         if name not in approved:raise ValueError('Unreviewed system constraint '+name)
     return True
 
@@ -59,12 +62,29 @@ def bind_loads(n,records,manifest,arrays,destinations):
             bus=dest['bus']
             if dest['source_carrier']!=r['Carrier'] or dest['account']!=r['Account']:raise ValueError('Demand destination incompatible with source fuel/account')
             if bus not in n.buses.index or n.buses.at[bus,'country']!=r['Country']:raise ValueError('Missing/misowned demand destination')
-            expected={'electricity':['AC','DC','electricity','low voltage']}.get(dest['carrier'],[dest['carrier']+' final energy'])
+            # S1: a demand may sit on the physical carrier bus itself (electricity, H2, heat, ...)
+            # or on a legacy '<carrier> final energy' interface; the old electricity/final-energy
+            # whitelist blocked sector Loads (S2 will add them through this same single binding).
+            expected={'electricity':['AC','DC','electricity','low voltage']}.get(dest['carrier'],[dest['carrier'],dest['carrier']+' final energy'])
             if n.buses.at[bus,'carrier'] not in expected:raise ValueError('Destination physical carrier mismatch')
             if dest['carrier'] not in n.carriers.index:n.add('Carrier',dest['carrier'],co2_emissions=0.)
             n.add('Load',key,bus=bus,carrier=dest['carrier'],p_set=values)
-            for col,val in [('sector',dest['sector']),('account',r['Account']),('source_account_id',r['InputID']),('country',r['Country'])]:n.loads.loc[key,col]=val
-            n.meta['demand_owners'][key]=r['InputID'];n.meta['demand_identity'][key]=dict(carrier=dest['carrier'],sector=dest['sector'],account=r['Account'],country=r['Country'])
+            for col,val in [('sector',dest['sector']),('account',r['Account']),('source_account_id',r['InputID']),('country',r['Country']),('demand_owner_kind','REGISTRY')]:n.loads.loc[key,col]=val
+            n.meta['demand_owners'][key]=r['InputID'];n.meta['demand_identity'][key]=dict(carrier=dest['carrier'],sector=dest['sector'],account=r['Account'],country=r['Country'],owner_kind='REGISTRY')
+
+def register_upstream_loads(n,names,function,sector):
+    """S1-1: every Load created by an upstream prepare_sector_network function is written
+    into the single demand ownership table exactly once (owner = the upstream function)."""
+    n.meta.setdefault('demand_owners',{});n.meta.setdefault('demand_identity',{})
+    for name in names:
+        if name not in n.loads.index:raise ValueError('Upstream Load missing: '+name)
+        if name in n.meta['demand_owners']:raise ValueError('Demand bound twice: '+name)
+        z=n.loads.loc[name];country=n.buses.at[z.bus,'country']
+        if country not in {'BN','KH','ID','LA','MY','MM','PH','SG','TH','TL','VN'}:raise ValueError('Upstream Load without country: '+name)
+        owner='UPSTREAM:'+function+':'+name
+        for col,val in [('sector',sector),('account','UPSTREAM:'+function),('source_account_id',owner),('country',country),('demand_owner_kind','UPSTREAM_FUNCTION')]:n.loads.loc[name,col]=val
+        n.meta['demand_owners'][name]=owner;n.meta['demand_identity'][name]=dict(carrier=str(z.carrier),sector=sector,account='UPSTREAM:'+function,country=country,owner_kind='UPSTREAM_FUNCTION')
+    return list(names)
 
 def validate_hooks(n):
     from carrier_architecture import install_fragment_constraints
@@ -74,7 +94,8 @@ def validate_hooks(n):
         if name not in n.stores.index or rule not in ['charge_only','discharge_only']:raise ValueError('Invalid persisted Store hook')
     for name in n.meta.get('external_annual_caps',{}):
         if name not in n.generators.index:raise ValueError('Annual cap points to missing source')
-    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets'}
+    # S1 adds the per-country net-zero hook and the existing cross-border FOM hook.
+    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets','research_country_net_zero','research_cross_border_existing_fom'}
     if set(n.meta.get('required_constraint_hooks',[]))-allowed:raise ValueError('Unknown required physical hook')
     if n.meta.get('existing_unit_components'):
         if 'research_existing_assets' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Existing cost/resource hook lost')
@@ -100,9 +121,6 @@ def install_research_constraint_hooks(n,execution_context=None):
     elif n.meta.get('solver_allowed') is False or n.meta.get('artifact_role') in PROTECTED_ROLES or 'gate6_execution_record' in n.meta:
         raise ValueError('Explicit next-gate authorization required before optimization hooks')
     validate_hooks(n)
-    if n.meta.get('external_fixed_account_method'):
-        from fixed_accounts import validate_exported_accounting
-        validate_exported_accounting(n)
     from carrier_architecture import install_fragment_constraints
     install_fragment_constraints(n)
     if n.meta.get('existing_unit_components'):
@@ -111,3 +129,10 @@ def install_research_constraint_hooks(n,execution_context=None):
     for i,pair in enumerate(n.meta.get('battery_inverter_pairs',[])):
         a,b=pair['charger'],pair['discharger'];eff=float(n.links.at[b,'efficiency'])
         n.model.add_constraints(n.model['Link-p_nom'].sel({'Link-ext':a})-eff*n.model['Link-p_nom'].sel({'Link-ext':b})==0,name='ResearchBatteryNominal-'+str(i))
+    hooks=set(n.meta.get('required_constraint_hooks',[]))
+    if 'research_country_net_zero' in hooks:
+        from country_carbon import add_country_net_zero
+        add_country_net_zero(n,n.snapshots)
+    if 'research_cross_border_existing_fom' in hooks:
+        from scenario_network import install_existing_cross_border_fom
+        install_existing_cross_border_fom(n)

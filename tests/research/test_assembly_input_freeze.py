@@ -47,11 +47,11 @@ class AssemblyInputTests(unittest.TestCase):
   for r in records:
    if r['Kind']=='DEMAND' and r['Year']==2019 and r['AssemblyStatus']==ACCEPTED:r['TargetReady']=True
   self.assertEqual(len(check(records,2019)['allocation_missing']),11)
- def test_road_ev_cannot_be_zero_or_a_load(self):
+ def test_road_ev_record_still_embedded_in_registry(self):
+  # S1-2: the validator no longer blocks an explicit Road EV Load (sector demands return in S2); the
+  # frozen registry record itself still documents the embedded representation.
   ev=next(r for r in self.records if r['Account']=='RoadEVFinalElectricity' and r['Year']==2050)
-  for patch in [{'Value':'0'},{'Kind':'DEMAND'},{'Required':True},{'ParentAccount':''},{'Representation':'EXPLICIT'}]:
-   row=copy.deepcopy(ev);row.update(patch)
-   with self.subTest(patch=patch),self.assertRaises(ValueError):validate_records([row])
+  self.assertEqual(ev['Representation'],'EMBEDDED_IN_ASTAR');self.assertTrue(validate_records([copy.deepcopy(ev)]))
  def test_missing_obligation_cannot_be_dropped_to_force_pass(self):
   rows=copy.deepcopy(self.records)
   next(r for r in rows if r['Year']==2050 and r['Account']=='InternationalShippingBunker' and r['Country']=='BN')['Required']=False

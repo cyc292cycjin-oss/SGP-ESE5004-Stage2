@@ -1,7 +1,12 @@
-"""Independent equations for validation solves. Never claims complete cost/CO2."""
+"""Independent equations for validation solves (V5 group A physics). Never claims complete cost/CO2.
+
+S1: fixed-account checks removed (R13). Per-country atmosphere levels are checked against
+the configured caps; the objective reconciliation accepts the two fixed-at-1 constants
+(existing-asset FOM, existing cross-border transmission FOM) exactly once each.
+"""
+import json
 import numpy as np
 import pandas as pd
-from fixed_accounts import validate_exported_accounting,accounting_report
 
 def dynamic_checks(n):
     rows=[];weights=n.snapshot_weightings;h=weights.stores
@@ -59,41 +64,39 @@ def dynamic_checks(n):
             check('STORAGE_UNIT_ENERGY_LOWER',np.minimum(n.storage_units_t.state_of_charge,0),n.storage_units_t.state_of_charge,'MWh')
             check('STORAGE_UNIT_CHARGE_BOUND',np.maximum(n.storage_units_t.p_store+cap*dense(typ,'p_min_pu'),0),n.storage_units_t.p_store)
             check('STORAGE_UNIT_DISCHARGE_BOUND',np.maximum(n.storage_units_t.p_dispatch-cap*dense(typ,'p_max_pu'),0),n.storage_units_t.p_dispatch)
-    for name,rule in n.meta['store_power_rules'].items():
+    for name,rule in n.meta.get('store_power_rules',{}).items():
         v=n.stores_t.p[name];check('DIRECTION:'+name,np.minimum(v,0) if rule=='discharge_only' else np.maximum(v,0),v)
-    for pair in n.meta['battery_inverter_pairs']:
+    for pair in n.meta.get('battery_inverter_pairs',[]):
         a,b=pair['charger'],pair['discharger'];check('BATTERY_CAPACITY:'+a,n.links.at[a,'p_nom_opt']-n.links.at[b,'p_nom_opt']*n.links.at[b,'efficiency'],n.links.at[a,'p_nom_opt'])
-    for key,g in n.meta['existing_resource_groups'].items():
+    for key,g in n.meta.get('existing_resource_groups',{}).items():
         used=sum(n.df(x['ComponentType']).at[x['Name'],'p_nom_opt']*x['CapacityToMW'] for x in g['candidates'])
         check('RESOURCE_LIMIT:'+key,max(0.,used-g['new_build_limit_mw']),g['new_build_limit_mw'])
     for name,cap in n.meta.get('external_annual_caps',{}).items():check('IMPORT_ANNUAL:'+name,max(0.,float(n.generators_t.p[name]@weights.generators)-cap),cap,'MWh')
-    validate_exported_accounting(n)
-    for x in n.meta['external_pending_fixed_accounts']:
-        energy=float(n.stores_t.p[x['FixedAccountID']]@weights.stores)
-        check('FIXED_RESOURCE_USAGE:'+x['FixedAccountID'],energy-x['QuantityMWh'],x['QuantityMWh'],'MWh')
-    lv=n.global_constraints.loc['lv_limit'];carriers=lv.carrier_attribute.split(', ')
-    volume=0.
-    for typ,nom in [('Line','s_nom_opt'),('Link','p_nom_opt')]:
-        d=n.df(typ);d=d[d.carrier.isin(carriers)&d[nom.replace('_opt','_extendable')]]
-        volume+=float((d[nom]*d.length).sum())
-    check('LV_LIMIT',max(0.,volume-float(lv.constant)),float(lv.constant),'MW km')
+    if 'lv_limit' in n.global_constraints.index:
+        lv=n.global_constraints.loc['lv_limit'];carriers=lv.carrier_attribute.split(', ')
+        volume=0.
+        for typ,nom in [('Line','s_nom_opt'),('Link','p_nom_opt')]:
+            d=n.df(typ);d=d[d.carrier.isin(carriers)&d[nom.replace('_opt','_extendable')]]
+            volume+=float((d[nom]*d.length).sum())
+        check('LV_LIMIT',max(0.,volume-float(lv.constant)),float(lv.constant),'MW km')
+    # S1-5: national atmosphere level at the last snapshot against the configured cap (per
+    # country or ASEAN total). Removals make the Store negative (e_min_pu=-1).
+    carbon=n.meta.get('research_carbon');levels=None
+    if carbon:
+        from carrier_architecture import atmosphere_bus,COUNTRIES
+        levels={c:float(n.stores_t.e[atmosphere_bus(c)].iloc[-1]) for c in sorted(COUNTRIES)}
+        if carbon['constraint_scope']=='per_country':
+            for c,v in levels.items():check('COUNTRY_CO2_CAP:'+c,max(0.,v-float(carbon['country_cap_tco2'][c])),max(1.,abs(float(carbon['country_cap_tco2'][c]))),'tCO2')
+        else:check('ASEAN_CO2_CAP',max(0.,sum(levels.values())-float(carbon['asean_total_cap_tco2'])),max(1.,abs(float(carbon['asean_total_cap_tco2']))),'tCO2')
     # Native objective subtracts initial nominal capacity from extendable capital terms.
     capital=0.;variable=0.
     for typ,nom in [('Generator','p_nom'),('Link','p_nom'),('Line','s_nom'),('StorageUnit','p_nom'),('Store','e_nom')]:
         d=n.df(typ);ext=d[nom+'_extendable'];capital+=float(((d.loc[ext,nom+'_opt']-d.loc[ext,nom])*d.loc[ext,'capital_cost']).sum())
     for typ,flow in [('Generator','p'),('Link','p0'),('Store','p'),('StorageUnit','p_dispatch')]:
         variable+=float((n.pnl(typ)[flow]*dense(typ,'marginal_cost')).sum(axis=1)@weights.objective)
-    known=float(n.meta['existing_annual_fixed_om_eur']);expected=capital+variable+known
+    known=float(n.meta.get('existing_annual_fixed_om_eur',0.))+float(n.meta.get('existing_cross_border_fom_eur',0.));expected=capital+variable+known
     check('OBJECTIVE_RECONCILIATION_KNOWN_FOM_ONCE',float(n.objective)-expected,expected,'EUR2020/year',json_detail(capital,variable,known))
-    report=accounting_report(n,priced_objective=float(n.objective))
-    if report['FullSystemCostComplete'] or report['FullSystemEmissionsComplete']:raise ValueError('Pending terms mislabelled complete')
-    carbon=n.meta['physical_carbon_map'];ids=[x.get('EventID',x.get('component')) for x in carbon]
-    # Atmosphere inventory is covered by Store state equations; all physical Link ports
-    # (including SMR capture and FT multi-input ports) by node and multiport equations.
-    check('POLICY_WEIGHTS_REMAIN_NULL',sum(x['policy_weight'] is None for x in carbon)-200,200,'count')
-    if n.meta['policy_enabled']:raise ValueError('Gate5 policy changed')
-    return rows,dict(objective_reconciliation={'capital':capital,'variable':variable,'known_fixed_once':known,'actual':float(n.objective)},accounting_report=report,physical_carbon_events=len(carbon),physical_emissions_complete=False,carbon_validation='Link multiport equations + CO2 bus balance + atmosphere/captured Store state; unknown fixed terms remain external null')
+    return rows,dict(objective_reconciliation={'capital':capital,'variable':variable,'known_fixed_once':known,'actual':float(n.objective)},country_co2_levels_tco2=levels,carbon_validation='Link multiport equations + CO2 bus balance + national atmosphere Store state; caps checked on final level')
 
 def json_detail(capital,variable,known):
-    import json
     return json.dumps(dict(annualised_new_capital=capital,variable_cost=variable,known_fixed_om_once=known))

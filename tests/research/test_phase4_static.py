@@ -76,11 +76,16 @@ class Validation(unittest.TestCase):
         v.identity(repo,h,{'config.default.yaml':v.sha256(repo/'config.default.yaml')})
         with self.assertRaises(ValueError):v.identity(repo,'0'*40,{})
         with self.assertRaises(ValueError):v.identity(repo,h,{'config.default.yaml':'0'*64})
-    def test_config_no_scenario_difference(self):
+    def test_config_scenarios_differ_only_by_switches(self):
+        # S1-6: integrated/disconnected differ from baseline only in research.scenario and research.cross_border.
         repo=Path(__file__).resolve().parents[2]
         baseline=v.config(repo)
-        for name in ['integrated','disconnected','validation']:
-            self.assertEqual(v.config(repo,name),baseline)
+        for name in ['integrated','disconnected']:
+            other=v.config(repo,name);b=dict(baseline);o=dict(other)
+            rb=dict(b.pop('research'));ro=dict(o.pop('research'));self.assertEqual(b,o)
+            for k in ['scenario','cross_border']:rb.pop(k);ro.pop(k)
+            self.assertEqual(rb,ro);self.assertEqual(other['research']['scenario'],name)
+        self.assertEqual(v.config(repo,'validation')['research']['scenario'],'baseline')
         self.assertFalse(baseline['co2']['budget']['enable'])
         self.assertEqual(baseline['co2']['budget']['base_value'],1e9)
 

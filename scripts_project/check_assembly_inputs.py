@@ -44,13 +44,9 @@ def validate_records(records):
   validate_scope_record(r)
   if r['InputID'] in seen:raise ValueError('Duplicate input ownership')
   seen.add(r['InputID'])
-  if r['Year']==2050 and r['Account']=='RoadEVFinalElectricity':
-   if (r['Kind']!='BOUNDARY' or r['Required'] or r['Value'] is not None
-       or r['Representation']!='EMBEDDED_IN_ASTAR'
-       or r.get('Materialisation')!='NOT_SEPARATELY_MATERIALISED'
-       or r.get('Sensitivity')!='DEFERRED_TO_EV_SENSITIVITY'
-       or r['ParentAccount']!=r['Country']+':2050:Electricity:Astar:electricity'):
-    raise ValueError('Assembly V1 Road EV must remain embedded, unknown, and non-materialised')
+  # S1-2: the Assembly V1 guard forcing Road EV electricity to stay embedded in Astar (never its own
+  # Load) is removed; sector demands return in S2 through bind_loads/register_upstream_loads and
+  # V5 gate B11 checks technology/path completeness instead.
   if r['Account']=='RoadParent' and (r['Kind']!='ACCOUNTING' or r['Required']):
    raise ValueError('Road parent is accounting-only, not an additional demand Load')
   if r['AssemblyStatus']=='HUMAN_ACCEPTED':raise ValueError('Assembly status cannot impersonate human acceptance')

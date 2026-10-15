@@ -117,11 +117,5 @@ class LayeredGateTests(unittest.TestCase):
   k=external_import(f,'SG2 0','gas','shared-price-only',a,accepted=True);p=f.components[k]['params']
   self.assertEqual(p['p_nom'],0);self.assertTrue(p['p_nom_extendable']);self.assertEqual(p['p_nom_max'],float('inf'));self.assertEqual(p['capital_cost'],0)
   with self.assertRaises(ValueError):external_import(f,'SG2 0','oil','shared-price-only',dict(a,capacity_mw=1e9),accepted=True)
- def test_guarded_builder_does_not_export_incomplete_inputs(self):
-  from build_research_network import build
-  with tempfile.TemporaryDirectory() as td:
-   p=Path(td)
-   # No allocation folder: production source failures must stop before assets.
-   status=build(ROOT,None,p/'missing_assets.json',p/'network.nc',p/'receipt.json')
-   self.assertEqual(status,2);self.assertFalse((p/'network.nc').exists());self.assertEqual(json.loads((p/'receipt.json').read_text())['solver_runs'],0)
+ # S1-2: the Assembly V1 guarded builder (build_research_network.build) is retired; scenario_network.py has its own tests.
 if __name__=='__main__':unittest.main(verbosity=2)

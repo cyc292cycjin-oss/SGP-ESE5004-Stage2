@@ -9,7 +9,7 @@ import pypsa,pandas as pd
 from netCDF4 import Dataset
 from asset_lifetime_override import load_overrides,apply_override,FILE as OVERRIDE_FILE
 from asset_survival import select_asset
-from build_diagnostic_network import current_readiness,verify_guards,normalise_optional_strings
+from network_checks import normalise_optional_strings  # S1-2: diagnostic builder retired; its helpers live in network_checks
 def read(p):return json.loads(Path(p).read_text())
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def save(p,x):Path(p).parent.mkdir(parents=True,exist_ok=True);Path(p).write_text(json.dumps(x,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
@@ -34,6 +34,8 @@ def compare_physical(old,new):
  pd.testing.assert_frame_equal(old.snapshot_weightings.sort_index(),new.snapshot_weightings.sort_index(),check_exact=True,check_freq=False)
  return True
 def refresh(repo,prior,output):
+ import sys;sys.path.insert(0,str(Path(__file__).resolve().parent/'retired'))
+ from build_diagnostic_network import current_readiness,verify_guards  # historical one-off refresh of the retired diagnostic network
  root=repo/'results_project/assembly_v1';a=root/'assets';g=repo/'research/04_model_assembly/gate4';output.mkdir(parents=True,exist_ok=True)
  original=read(a/'SELECTED_ASSET_SURVIVAL_2050.json');expected=read(prior/'production_assets/SELECTED_ASSET_SURVIVAL_2050.json');assert original==expected,'Unknown stock drift or refresh already applied'
  protected=[repo/'research_inputs/assembly_v1/registry.json',repo/'research_inputs/assembly_v1/manifest.json',root/'allocation/allocations.npz',root/'allocation/allocation_manifest.json',a/'SELECTED_INTEGRATION_CONTRACT.json',a/'carrier_fragment_2050_unsolved.nc',a/'carrier_fragment.json',a/'carbon_component_map.json',a/'external_pending_fixed_accounts.json',a/'model_cost_layer.json']
