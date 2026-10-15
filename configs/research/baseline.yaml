@@ -100,7 +100,7 @@ research_assembly:
   international_bunker_method: ASSEMBLY_V1_BUNKER_CONSTANT_2019
   bunker_sensitivity_required: true
   external_fossil_market: ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED
-  biomass_supply_cap: accepted_country_fixed_obligation_only
+  biomass_supply_cap: d1_biomass_v5_country_category_stores   # S2-3: the Assembly-V1 regional pool (360 TWh) is retired; potentials per country x category
   geological_storage_asset: false
   carbon_validation_stage: POST_BUILD_STATIC_VALIDATION_BLOCKER
 
@@ -126,8 +126,8 @@ research:
     capex_on_existing: false             # existing capacity carries no new CAPEX (PyPSA objective_constant)
     fom_on_existing: true                # annual FOM of existing cross-border capacity added once (fixed-at-1 column)
   transmission:
-    volume_limit_mode: inherit_reference_constant   # decision 45 pending: keep the frozen lv2.0 constant as-is
-    volume_limit_factor: 2.0                        # used only when volume_limit_mode == factor_of_existing
+    volume_limit_mode: lvopt                        # decision 45 (S2-1): no transmission volume cap in the main run
+    volume_limit_factor: 2.79                       # sensitivity: factor_of_existing with the frozen 2.79x (S1 inherit_reference_constant / existing volume)
   nuclear:                                # decision 38; siting table is a grade-C assumption
     evidence_grade: C
     large_pwr:
@@ -136,10 +136,10 @@ research:
       allowed_countries: [BN, KH, ID, LA, MY, MM, PH, TH, TL, VN]   # all except Singapore
     smr:
       carrier: nuclear SMR
-      cost_technology: null              # technology-data "SMR" is steam methane reforming, not a reactor
+      cost_technology: nuclear SMR       # S2-1: AEO8 D.15 Nuclear SMR row appended by s2_costs.py (grade C, decision 46); technology-data "SMR" is steam methane reforming
       allowed_countries: [BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN]
-      p_nom_max: 0.0
-      status: DATA_PENDING
+      p_nom_max: .inf
+      status: PRICED_AEO8_GRADE_C
   site_candidates:                        # decision 39; structure built, potentials pending -> p_nom_max 0
     geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
     ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
@@ -168,6 +168,42 @@ research:
         aeo8_overrides: true
     smr_cost_source: aeo8_author_rule_2050   # decision 46: SMR always from AEO8 D.15 (grade C, +-30 %) in both layers
     registry: research_inputs/registry_v5/DATA_REGISTRY.csv
+  s2:                                     # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
+    status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
+    co2:
+      storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50
+      sequestration_cost_eur_per_t: 30    # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
+      vent: true                          # captured CO2 may be vented to the capturing country's atmosphere (counts as emission)
+      dac: true                           # decision 11; sensitivity switch
+      dac_heat_supply: electricity_cop_1  # DAC heat demand supplied electrically (no heat buses); COP 1 (grade C)
+      cc_fraction_source: sector.cc_fraction
+      pipeline_topology: h2_pipeline_routes   # CO2 pipelines follow the greenfield H2 routing along the grid
+      process_emissions_scope: [minerals, metals]   # 2.A and 2.C on the process bus; 2.B/2.D/4.C covered by feedstock carbon (method question)
+    biomass:
+      potential_layer: main               # BIOMASS_POTENTIAL_2050.csv potential_main_mwh; low/high are sensitivities
+      categories_excluded: [logging_residues]   # ZERO_BY_DECISION (decision 54)
+      cross_border: false                 # decision 36
+    demand:
+      table: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv
+      node_allocation: assembly_v1_allocation_shares_then_astar   # node shares per (country, account) from results_project/assembly_v1/final_allocation
+      time_shape: flat_fuels_astar_shape_electricity
+      international_bunkers: true         # decision 10; sensitivity switch
+      shipping: deferred_to_S3            # domestic and international shipping fuel not bound in S2
+      land_transport_shares: pypsa_eur_v2025.07.0   # D1 section 4 registry rows share_land_transport_*
+      bev_dsm: false                      # no ASEAN fleet data (number of cars) -> no DSM store; DATA_PENDING
+      clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
+      cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
+    industry:
+      low_temperature_heat_share_of_fuels: 0.20   # grade C: heat = 2/3 of industrial energy (IEA 2018 commentary) x 30 % below 150 C (IEA Renewable Energy for Industry 2017, via secondary citation); range 0.10-0.30
+      existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
+      feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
+      feedstock_end_of_life_release_fraction: 1.0   # PyPSA-Eur default (HVC_environment_sequestration_fraction 0): all remaining feedstock carbon emitted; method question for user
+      hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
+      steel_aluminium_routes: DATA_PENDING          # no ASEAN steel/aluminium production split (worldsteel) -> St_primary/DRI/Al fractions not applied
+    gap_diagnostic:                       # decisions 49, 53: off in the main run; separate labelled run
+      enabled: false
+      penalty_eur_per_mwh: 10000          # electricity slack; above any supply cost in the model (max marginal ~ 300 EUR/MWh)
+      penalty_eur_per_tco2: 10000         # CO2 slack; above the DAC levelised cost (< 1,000 EUR/t at the registered costs)
   cost_scaling:                           # decision 41; multiplies capital_cost per technology carrier; 1.0 = no change
     nuclear: 1.0
     nuclear SMR: 1.0

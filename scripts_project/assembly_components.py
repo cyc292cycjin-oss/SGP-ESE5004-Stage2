@@ -95,7 +95,8 @@ def validate_hooks(n):
     for name in n.meta.get('external_annual_caps',{}):
         if name not in n.generators.index:raise ValueError('Annual cap points to missing source')
     # S1 adds the per-country net-zero hook and the existing cross-border FOM hook.
-    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets','research_country_net_zero','research_cross_border_existing_fom'}
+    allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets','research_country_net_zero','research_cross_border_existing_fom',
+             'research_co2_storage_cap','research_gap_diagnostic'}  # S2: national storage cap; gap diagnostic replaces the hard net-zero limit (decisions 49, 53)
     if set(n.meta.get('required_constraint_hooks',[]))-allowed:raise ValueError('Unknown required physical hook')
     if n.meta.get('existing_unit_components'):
         if 'research_existing_assets' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Existing cost/resource hook lost')
@@ -136,3 +137,9 @@ def install_research_constraint_hooks(n,execution_context=None):
     if 'research_cross_border_existing_fom' in hooks:
         from scenario_network import install_existing_cross_border_fom
         install_existing_cross_border_fom(n)
+    if 'research_co2_storage_cap' in hooks:
+        from s2_layers import install_co2_storage_cap
+        install_co2_storage_cap(n)
+    if 'research_gap_diagnostic' in hooks:
+        from s2_layers import install_gap_diagnostic
+        install_gap_diagnostic(n)
