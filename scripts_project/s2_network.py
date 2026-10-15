@@ -25,7 +25,7 @@ from network_checks import assert_input_only, compare_roundtrip, normalise_optio
 from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOOK, sha, save, git_head, config_sha, jsonable, rename_legacy_buses,
                               tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
 from s2_costs import build_research_costs, write_costs
-from s3_layers import add_gas_network
+from s3_layers import add_gas_network, add_imports
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -276,6 +276,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                               totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()}))
     # S3-1: gas network (domestic production, pipelines along the candidate topology incl. the 2025 cross-border stock, LNG terminals; unlimited external gas removed)
     gas_net = add_gas_network(n, costs, cfg, repo, registry, nodes, candidates) if (candidates is not None and "s3" in R and "gas" in R["s3"]) else None
+    imports = add_imports(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "imports" in R["s3"]) else None   # S3-2: regional oil pool, green carrier imports, H2 at LNG terminals
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
     xb = apply_cross_border_switches_s2(n, R["cross_border"], corridors, R["existing_cross_border_electricity"], costs)
@@ -292,7 +293,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   cross_border_tags=tags, demand_binding=demand_astar, electric_base_sha256=ELECTRIC_BASE_SHA, physical_carbon_map=carbon,
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
                                   s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
-                                  s3_layers=dict(gas=gas_net),
+                                  s3_layers=dict(gas=gas_net, imports=imports),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass"]:
         if key in n.meta:

@@ -8,8 +8,8 @@
 | 子步骤 | 内容 | 状态 | 提交 | 说明 |
 |---|---|---|---|---|
 | S3-0 | 收尾修正：第 61 项 IDEES 工业比率；第 59/62 项走廊（TH–MM、LA–MM）与 APG 核对；第 63 项废塑料代理值；柬埔寨交通链核对；重算结构表 + 冒烟 | 完成（见下） | 9a6f9e20 | 详见下表；报告 §1 |
-| S3-1 | 天然气网络与国内生产、LNG | 完成 | 本步提交 | `s3_1_gas_data.py` → `gas_v5/`（存量跨境管道 7 条：6 条登记容量、MY–SG DATA_PENDING；产量上限表）；`s3_layers.add_gas_network`：移除 100 个节点外部气源，84 个井口发电机（年上限 = UNSD 2019 产量 × 负荷份额，C 级；价格 = 进口价；逸散因子 S2-0），111 条候选 + 14 条连通性补全（PyPSA-Eur 1968–2010 行）+ 6 条存量管道，16 个 LNG 接收站节点（2.5× 规则，再气化加价 DATA_PENDING = 0）；两情景构建通过（`results_project/s3_1/`），结构表同 S3-0；测试 374 通过 / 4 基线失败；报告 §2、§9 |
-| S3-2 | 东盟外进口（化石 + 绿色载体，Neumann 等 2024 价格 +20%） | 待做 | — | 已只读获取：arXiv:2404.03927 v1 PDF（SHA b6a9f1b3…，2026-10-15T10:05:48Z）、Nat. Commun. 2025 补充材料 PDF（SHA c4321de9…，10:15:10Z）；两文件各 23/36 MB，不入 git，只登记 URL/时间/SHA |
+| S3-1 | 天然气网络与国内生产、LNG | 完成 | ca4657b6（draft PR #24） | `s3_1_gas_data.py` → `gas_v5/`（存量跨境管道 7 条：6 条登记容量、MY–SG DATA_PENDING；产量上限表）；`s3_layers.add_gas_network`：移除 100 个节点外部气源，84 个井口发电机（年上限 = UNSD 2019 产量 × 负荷份额，C 级；价格 = 进口价；逸散因子 S2-0），111 条候选 + 14 条连通性补全（PyPSA-Eur 1968–2010 行）+ 6 条存量管道，16 个 LNG 接收站节点（2.5× 规则，再气化加价 DATA_PENDING = 0）；两情景构建通过（`results_project/s3_1/`），结构表同 S3-0；测试 374 通过 / 4 基线失败；报告 §2、§9 |
+| S3-2 | 东盟外进口（化石 + 绿色载体，Neumann 等 2025 价格 +20%） | 完成 | 本步提交 | 价格基准取 Zenodo 10.5281/zenodo.14872184 `results.parquet`（2040，default，按出口地最小值，与 PyPSA-Eur 进口分支 5a87cedd 同法）：液氢 88.13 / 氨 97.32 / 甲醇 120.97 / FT 125.09 → ×1.20；`s3_layers.add_imports`：全区油池（节点外部油源移除，100 条双向分配链路）、`ASEAN ammonia/methanol/oil non-fossil` 母线 + 进口发电机、16 个 LNG 站址液氢进口（LNG 容量上限、终端成本 8,421.6 EUR/MW/a）；煤分节点不变；第 64 项引用进口分支 4553–4557 / 4659–4665 行；两情景构建通过（`results_project/s3_2/`）；测试 376 通过 / 4 基线；报告 §3。大文件（arXiv/SI PDF、parquet）不入 git，只登记 URL/时间/SHA |
 | S3-3 | 氨与甲醇（全区母线、哈伯-博施、甲醇合成、氨裂解） | 待做 | — | S3-0 已把比率表的氨/甲醇行暂按 PyPSA-Eur `ammonia: false` 路线折成 H2+电 / 甲烷+电（开关 `ammonia_methanol_mode`），S3-3 切到 `regional_buses` |
 | S3-4 | 航运（670.2 TWh，甲醇份额 1） | 待做 | — | |
 | S3-5 | 合成/生物燃料碳归属（origin_neutral 主算，producer_credit 敏感性） | 待做 | — | 第 64 项已由用户确认 |

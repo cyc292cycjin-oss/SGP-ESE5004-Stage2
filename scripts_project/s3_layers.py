@@ -155,3 +155,76 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, terminals=terms)
     n.meta["research_gas_network"] = led
     return led
+
+
+def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
+    """S3-2 (decisions 17/18/64): extra-ASEAN imports.
+    * Oil: one regional pool bus (ASEAN oil, country tag ASEAN -> not a cross-border port, scenario_network.tag_cross_border) with the external
+      import generator at the WEO NZE crude price; the 100 per-node external oil generators are removed and every node oil bus joins the pool
+      through a free bidirectional distribution link (decision 18: oil is not network-constrained). Coal/lignite keep the per-node S2 pools.
+    * Green carriers (Neumann et al. 2025 base x 1.20, research_inputs/imports_v5/IMPORT_PRICES_2050.csv): ammonia and methanol on new regional
+      buses (ASEAN ammonia / ASEAN methanol; demands connect in S3-3/S3-4), Fischer-Tropsch fuel on the regional non-fossil oil bus (consumers
+      connect in S3-5), liquid hydrogen at the LNG terminal nodes (node H2 bus, p_nom_max = LNG terminal capacity x 2.5 as PyPSA-Eur maps
+      shipping-lh2 to LNG entry points, terminal capital cost 7018 x 1.2 EUR/MW/a, import branch 5a87cedd lines 4540/4560-4563/4651).
+    * Imports only (generators), same prices in both scenarios, no CO2 port (decision 64); price_sensitivity switch +-20 %.
+    """
+    I = cfg["research"]["s3"]["imports"]
+    sens = float(I.get("price_sensitivity", 0.0))
+    prices = pd.read_csv(repo / I["price_table"], keep_default_na=False)
+    prices = prices[prices.status == "REGISTERED"].set_index("carrier")
+    led = dict(price_sensitivity=sens, markup=float(prices.markup.iloc[0]))
+
+    def pool_bus(name, carrier):
+        if name not in n.buses.index:
+            add_bus(n, name, carrier, "ASEAN", "")   # country tag ASEAN: excluded from cross-border tagging (scenario_network.tag_cross_border)
+        return name
+
+    def import_gen(name, bus, carrier, price, country="ASEAN", **kw):
+        ensure_carrier(n, carrier)
+        n.add("Generator", name, bus=bus, carrier=carrier, p_nom_extendable=True, p_nom=0.0, marginal_cost=float(price), capital_cost=float(kw.pop("capital_cost", 0.0)), **kw)
+        n.generators.loc[name, ["country", "research_role"]] = [country, "EXTERNAL_SUPPLY"]
+        return name
+
+    # 1. oil regional pool
+    oil_price = float(registry.loc["fuel_price_oil_NZE_2050_main", "value"])
+    pool = pool_bus("ASEAN oil", "oil")
+    ext = list(n.generators.index[(n.generators.carrier == "oil") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
+    n.mremove("Generator", ext)
+    import_gen("ASEAN oil import", pool, "oil import", oil_price)
+    ensure_carrier(n, "oil pool")
+    k = 0
+    for b in n.buses.index[n.buses.carrier == "oil"]:
+        if b == pool or not b.endswith(" oil"):
+            continue
+        node = b[:-4]
+        add_link(n, f"oil pool {node}", country_of(n, node) if node in n.buses.index else "ASEAN", "oil pool", [b, pool], [1.0], p_min_pu=-1.0, role="TRANSPORT",
+                 extra={"gas_pipeline_kind": "", "pool": "ASEAN oil"})
+        k += 1
+    led["oil"] = dict(pool=pool, external_removed=len(ext), distribution_links=k, price=oil_price, direction="bidirectional (node <-> pool)")
+    # 2. coal / lignite unchanged (per node, S2 structure)
+    led["coal"] = dict(structure="per_node_unchanged", generators=int(((n.generators.carrier.isin(["coal", "lignite"])) & (n.generators.research_role == "EXTERNAL_SUPPLY")).sum()))
+    # 3. green carriers on regional buses
+    f = 1.0 + sens
+    green = {}
+    for carrier, bus_name, bus_carrier, gcar in [("ammonia", "ASEAN ammonia", "ammonia", "ammonia import"), ("methanol", "ASEAN methanol", "methanol", "methanol import"),
+                                                   ("oil non-fossil", "ASEAN oil non-fossil", "oil non-fossil", "FT fuel import")]:
+        p = float(prices.at[carrier, "applied_eur2020_per_mwh"]) * f
+        pool_bus(bus_name, bus_carrier)
+        import_gen(f"{bus_name} import", bus_name, gcar, p)
+        green[carrier] = dict(bus=bus_name, generator=f"{bus_name} import", price_applied=p, base=float(prices.at[carrier, "base_eur2020_per_mwh"]), esc=prices.at[carrier, "esc"])
+    # 4. liquid hydrogen by ship at the LNG terminal nodes
+    h2p = float(prices.at["hydrogen", "applied_eur2020_per_mwh"]) * f
+    term_cost = float(I.get("h2_terminal_capital_cost_eur_per_mw_a", 7018.0 * 1.2))
+    lng = n.generators[n.generators.carrier == "LNG import"]
+    h2 = {}
+    for g, z in lng.iterrows():
+        node = str(z.bus)[:-4]
+        cap = float(z.p_nom_max)
+        if cap <= 0 or f"{node} H2" not in n.buses.index:
+            continue
+        name = import_gen(f"{node} H2 import", f"{node} H2", "H2 import", h2p, country=country_of(n, node), p_nom_max=cap, capital_cost=term_cost)
+        h2[node] = dict(generator=name, p_nom_max=cap, lng_generator=g)
+    green["hydrogen"] = dict(nodes=len(h2), price_applied=h2p, base=float(prices.at["hydrogen", "base_eur2020_per_mwh"]), terminal_capital_cost=term_cost, terminals=h2)
+    led["green"] = green
+    n.meta["research_imports"] = led
+    return led

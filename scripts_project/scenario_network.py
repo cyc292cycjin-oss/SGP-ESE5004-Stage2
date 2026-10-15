@@ -65,6 +65,7 @@ def rename_legacy_buses(n):
 def tag_cross_border(n):
     """Every Line/Link/Transformer gets border_class in {domestic, cross_border} from buses.country (S1-6)."""
     atmo=set(n.buses.index[n.buses.carrier==ATMOSPHERE_CARRIER]);summary={}
+    atmo|=set(n.buses.index[n.buses.country=='ASEAN'])  # S3-2 (decision 18): regional commodity pools (ASEAN oil/ammonia/methanol) are not network-constrained; ports to them do not make a component cross-border
     for typ in ['Line','Link','Transformer']:
         df=n.df(typ)
         if not len(df):continue

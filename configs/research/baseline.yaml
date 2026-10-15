@@ -123,6 +123,12 @@ research:
       lng_terminals: research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv   # D1 registry; existing = operating + construction
       lng_cap_factor: 2.5                 # decision 17: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity
       lng_regasification_adder_eur_per_mwh: 0.0   # DATA_PENDING (registry fuel_price_lng_regasification_adder): LNG cost understated
+    imports:                             # S3-2 (decisions 17, 18, 64): extra-ASEAN imports, same prices in both scenarios, imports only
+      price_table: research_inputs/imports_v5/IMPORT_PRICES_2050.csv   # Neumann et al. 2025 Zenodo results (2040, min over exporters) x 1.20 (s3_2_imports_data.py)
+      markup: 0.20                         # decision 17 (already applied in the table; documented here)
+      price_sensitivity: 0.0               # sensitivity switch: -0.2 / +0.2 on the applied green-carrier prices
+      h2_terminal_capital_cost_eur_per_mw_a: 8421.6   # PyPSA-Eur import branch 5a87cedd lines 4560-4563: LNG terminal 7018 EUR/MW/a x 1.2 for liquid H2
+      oil_pool: regional                    # one ASEAN oil pool (decision 18); coal/lignite per node unchanged
   cross_border:                          # decisions 13/41; per carrier; scenario files set all true / all false
     electricity: true
     H2: true
