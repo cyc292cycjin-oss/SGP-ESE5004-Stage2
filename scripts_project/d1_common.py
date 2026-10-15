@@ -50,7 +50,23 @@ COLUMNS = ["param_id", "description", "value", "unit", "country", "node", "tier"
            "sensitivity_high", "decision_ref", "status"]
 TIERS = {"A", "B", "C"}
 STATUSES = {"REGISTERED", "DATA_PENDING", "CANDIDATE_ONLY", "SENSITIVITY", "SOURCE_ZERO",
-            "REFERENCE_ONLY"}
+            "REFERENCE_ONLY", "ZERO_BY_DECISION"}
+# EA20 GDP deflator (ECB Data Portal MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N, 2020 = 100), used by S2-0
+EA20_DEFLATOR_FILE = ROOT / "research_inputs" / "prices" / "sources" / "ECB_EA20_GDP_DEFLATOR.csv"
+EA20_DEFLATOR_SERIES = "MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N"
+EA20_DEFLATOR_URL = ("https://data-api.ecb.europa.eu/service/data/MNA/A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N"
+                     "?format=csvdata&startPeriod=1990&endPeriod=2025")
+
+
+def ea20_deflator() -> dict:
+    """year -> EA20 GDP deflator index (2020 = 100) from the ECB CSV pinned in research_inputs/prices."""
+    out = {}
+    for r in read_csv(EA20_DEFLATOR_FILE):
+        if r.get("KEY") == EA20_DEFLATOR_SERIES and r.get("TIME_PERIOD", "").isdigit():
+            out[int(r["TIME_PERIOD"])] = float(r["OBS_VALUE"])
+    if 2020 not in out or 2025 not in out:
+        raise ValueError("EA20 deflator series incomplete")
+    return out
 
 # --- Unit constants used across D1 (registered once by d1_registry.py) ---------------------
 # param_id: (value, unit, description, source, locator, tier)

@@ -41,3 +41,30 @@
 | raw3/ASFR_AE_SSPs_V15.csv | Wittgenstein Centre 分年龄、性别、教育的人口明细（区域为数字编码） | 不需要，存档不用 | — |
 
 缺口：导出从 2025 年开始，没有 2019/2020 年的基年值，需从同一网站的 Historical Reference 情景或 World Bank WDI 补齐。
+
+## 第四批（用户 2026-10-15 上传 WDI 导出）
+
+原始文件保存在 `raw4/`，SHA256 见 `SHA256SUMS_raw4.txt`。
+
+| 文件 | 文献 | 用途 | 抽取结果 |
+|---|---|---|---|
+| raw4/b5f8c3ae-…_Data.csv、raw4/b5f8c3ae-…_Series - Metadata.csv | World Bank WDI（DataBank 导出），11 国 GDP 与人口，2019–2025 | 补齐 SSP2 导出缺少的 2019–2025 段，形成 2019→2050 增长链（第 34 项） | extraction/GROWTH_CHAIN_2019_2050_WDI_SSP2.csv |
+
+## 第五批（用户 2026-10-15 13:04 上传 `数据4.zip`）
+
+原始文件保存在 `raw5/`，SHA256 见 `SHA256SUMS_raw5.txt`。
+
+| 文件 | 文献 | 用途 | 抽取结果 |
+|---|---|---|---|
+| raw5/IEA_EDGAR_CO2_1970_2024.zip | EDGAR 2025 GHG（IEA-EDGAR CO2），JRC，https://edgar.jrc.ec.europa.eu/dataset_ghg2025 ，CC BY-NC-ND 4.0 | 各国工业过程排放（L19）、逸散排放、垃圾焚烧 | extraction/EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv；说明见 extraction/EDGAR2025_USGS2025_PROCESS_EMISSIONS.md |
+| raw5/mcs2025-cement.pdf | USGS Mineral Commodity Summaries 2025, Cement | 交叉核对（东盟只列出 ID、VN） | 同上，第 2 节 |
+| raw5/mcs2025-iron-steel.pdf | USGS Mineral Commodity Summaries 2025, Iron and Steel | 交叉核对（东盟只列出 VN） | 同上 |
+
+## 第六批（用户 2026-10-15 13:16 上传 `数据5.zip`）
+
+原始文件保存在 `raw6/`（已重命名，原名对照见 extraction/BATCH6_BUNKERS_AND_FOREST_RESIDUES.md 第 3 节），SHA256 见 `SHA256SUMS_raw6.txt`。
+
+| 文件 | 文献 | 用途 | 抽取结果 |
+|---|---|---|---|
+| raw6/UNSD_EB_2019_{BN,KH,LA,TL}.csv | UNSD Energy Balance Visualization，"Energy Balances" 导出，2019，TJ，https://unstats.un.org/unsd/energystats/dataPortal/ | 四国国际海运、航空燃料舱（D1 的 DATA_PENDING） | extraction/UNSD_EB_2019_BUNKERS_BN_KH_LA_TL.csv |
+| raw6/JRC98626_biomass_potentials_in_europe_web_rev.pdf | Ruiz et al.（2015）JRC-EU-TIMES 生物质潜力报告（ENSPRESO 方法学） | 林业残余系数核查：无可迁移的残余/原木比，只有采收约束 | extraction/BATCH6_BUNKERS_AND_FOREST_RESIDUES.md |

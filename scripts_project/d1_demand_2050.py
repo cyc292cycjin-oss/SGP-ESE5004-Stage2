@@ -20,7 +20,7 @@ import json
 
 import pandas as pd
 
-from d1_common import (ASEAN, ASEAN10, DEMAND_DIR, ISO2_FROM_ISO3, REG_DIR, ROOT, SRC_DIR, Registry, sha256, src_sha,
+from d1_common import (ASEAN, ASEAN10, DEMAND_DIR, ISO2_FROM_ISO3, REG_DIR, ROOT, SRC_DIR, Registry, read_csv, sha256, src_sha,
                        write_csv, write_json)
 
 SCRIPT = "scripts_project/d1_demand_2050.py"
@@ -32,6 +32,7 @@ REGISTRY_JSON = A1 / "registry.json"
 FROZEN_BUNKER_JSON = A1 / "sources" / "FROZEN_ACCEPTED_BUNKER_2019.json"
 AEO8_CSV = "AEO8_2050_ASEAN_TOTALS.csv"
 GROWTH_CSV = "GROWTH_CHAIN_2019_2050_WDI_SSP2.csv"
+BUNKER_EB_CSV = "UNSD_EB_2019_BUNKERS_BN_KH_LA_TL.csv"  # S2-0.4 (batch 6)
 AEO8_PDF_SHA = "48c2a81913ed785cb0e14a55e332ea7bc87f912f7fabfbc8c654e09b66b11c06"
 MWH_PER_MTOE = 11.63e6
 SECTORS = ["Industry", "Transport", "Residential", "Commercial", "AgricultureOthers"]
@@ -147,6 +148,14 @@ def main():
                          account="NonEnergy:" + ne["Commodity"], base_2019_mwh=float(ne["MWh"]), base_status="NONENERGY_REFERENCE",
                          base_source="BASE_RECONSTRUCTION.json nonenergy_reference", base_source_sha256=shas["base"]))
     df = pd.DataFrame(rows)
+    # ---- S2-0.4 (batch 6): UNSD Energy Balance 2019 for BN/KH/LA/TL: marine bunkers show no flow ("---") -> 0, grade A
+    eb = {(r["iso2"], r["flow"]): r for r in read_csv(SRC_DIR / BUNKER_EB_CSV)}
+    eb_sha = src_sha(BUNKER_EB_CSV)
+    eb_countries = sorted({k[0] for k in eb})
+    for i in df.index[(df.sector == "InternationalBunkers") & (df.account == "InternationalShippingBunker") & df.country.isin(eb_countries)]:
+        r = eb[(df.at[i, "country"], "International marine bunkers")]
+        df.at[i, "base_2019_mwh"] = float(r["value_MWh"]); df.at[i, "base_status"] = "UNSD_EB_2019_NO_FLOW_ZERO"
+        df.at[i, "base_source"] = "UNSD Energy Balance 2019 export (" + r["source_file"] + "): " + r["note"]; df.at[i, "base_source_sha256"] = eb_sha
     # ---- multipliers -------------------------------------------------------------------------------
     def allocate(weight_key):
         g = {c: float(growth[c][weight_key]) for c in ASEAN}
@@ -172,13 +181,13 @@ def main():
                 mult, method = g[c] * k["Industry"], f"industry multiplier ({label})"
             else:  # international bunkers
                 mult, method = 1.0, "CONSTANT_2019 (research-layer convention ASSEMBLY_V1_BUNKER_CONSTANT_2019)"
-            pending = s == "InternationalBunkers" and r["base_status"] not in ("NUMERIC_INPUT_READY", "ACCEPTED_BLEND_BASELINE_A", "SOURCE_BOUNDED_ZERO")
+            pending = s == "InternationalBunkers" and r["base_status"] not in ("NUMERIC_INPUT_READY", "ACCEPTED_BLEND_BASELINE_A", "SOURCE_BOUNDED_ZERO", "UNSD_EB_2019_NO_FLOW_ZERO")
             out.append(dict(r, aeo8_sector=AEO8_LABEL.get(s, "outside TFEC" if s != "NonEnergyUse" else "outside TFEC (non-energy use)"),
                             growth_method=method, country_multiplier=g[c], sector_calibration_k=k.get(s, k["Industry"] if s == "NonEnergyUse" else 1.0),
                             multiplier_total=mult, value_2050_mwh=("" if pending else r["base_2019_mwh"] * mult),
                             in_existing_electricity_load=r["carrier"] == "electricity" and s in SECTORS,
                             existing_electricity_load_2050_mwh=astar.get(c, "") if (r["carrier"] == "electricity" and s in SECTORS) else "",
-                            status="DATA_PENDING" if pending else ("FLAGGED_BASE_" + r["base_status"] if r["base_status"].startswith("UNRESOLVED") else "REGISTERED"),
+                            status="DATA_PENDING" if pending else ("SOURCE_ZERO" if r["base_status"] == "UNSD_EB_2019_NO_FLOW_ZERO" else ("FLAGGED_BASE_" + r["base_status"] if r["base_status"].startswith("UNRESOLVED") else "REGISTERED")),
                             decision_ref="22,34" if s in SECTORS else ("22 (non-energy)" if s == "NonEnergyUse" else "10,22 (bunkers)")))
         return pd.DataFrame(out), g, k, cal
 
@@ -273,6 +282,22 @@ def main():
         reg.add(f"demand_bunker_pending_{r.country}_{r.account}", f"{r.country} {r.account} 2019 value missing in UNSD export (no international marine "
                 "bunker transaction) -> download list", None, "MWh/a", "A", "UNSD Energy Statistics Database", "no 2019 row", shas["base"], country=r.country,
                 decision_ref="10", status="DATA_PENDING")
+    aviation_check = []
+    for c in eb_countries:
+        r = eb[(c, "International marine bunkers")]
+        reg.add(f"demand_bunker_marine_zero_{c}", f"{c} international marine bunkers 2019 = 0 (UNSD Energy Balance shows no flow '---'; {r['note']}); closes D1 DATA_PENDING",
+                0.0, "MWh/a", "A", "UNSD Energy Balance Visualization 2019 export (raw6/" + r["source_file"].split("/")[-1] + ")", f"flow {r['flow']}, commodity {r['commodity']}, unsd_notation {r['unsd_notation']}",
+                eb_sha, country=c, decision_ref="10, S2-0.4", status="SOURCE_ZERO")
+        a = eb[(c, "International aviation bunkers")]
+        base_av = df[(df.country == c) & (df.account == "InternationalAviationBunker")].base_2019_mwh.sum()
+        eb_av = float(a["value_MWh"])
+        aviation_check.append(dict(country=c, unsd_eb_2019_aviation_mwh=eb_av, unsd_eb_tj=float(a["value_TJ"]), research_layer_2019_aviation_mwh=float(base_av),
+                                   rel_diff=(eb_av / base_av - 1) if base_av else None, eb_estimate_flag=a["estimate_flag"]))
+        reg.add(f"demand_bunker_aviation_check_{c}", f"{c} international aviation bunkers 2019: UNSD Energy Balance {eb_av:,.0f} MWh ({a['value_TJ']} TJ{'; UNSD estimate' if a['estimate_flag'] == '*' else ''}) vs research-layer UNSD export {base_av:,.0f} MWh; "
+                f"relative difference {((eb_av / base_av - 1) * 100) if base_av else float('nan'):+.3f} % (rounding of TJ); research-layer value kept", eb_av, "MWh/a", "A",
+                "UNSD Energy Balance Visualization 2019 export", f"flow {a['flow']}", eb_sha, country=c, decision_ref="10, S2-0.4", status="REFERENCE_ONLY")
+    checks["bunkers_aviation_unsd_eb_vs_research_layer"] = aviation_check
+    write_json(dict(script=SCRIPT, sources=dict(shas, bunker_eb=eb_sha), aeo8_pdf_sha256=AEO8_PDF_SHA, checks=checks), DEMAND_DIR / "DEMAND_2050_CROSSCHECKS.json")
     reg.write(REG_DIR / "fragments" / "demand_2050.csv")
     # ---- console summary -----------------------------------------------------------------------------------
     print("sector calibration k (GDP):", {s: round(k_gdp[s], 4) for s in SECTORS})

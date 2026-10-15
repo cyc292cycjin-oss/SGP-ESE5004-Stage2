@@ -18,35 +18,24 @@ from d1_common import (ASEAN, COLUMNS, COST_DIR, BIOMASS_DIR, DEMAND_DIR, LNG_DI
 
 SCRIPT = "scripts_project/d1_registry.py"
 FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050",
-             "demand_shares", "biomass"]
+             "demand_shares", "biomass", "process_emissions", "cost_layer_v015"]  # the last two are S2-0 (supplement 01)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
 }
+CLOSED_IN_S2_0 = [  # D1 download-list items delivered by the user in batches 5 and 6 (S2 supplement 01) and closed by S2-0
+    dict(item="EDGAR_2025_GHG annual fossil CO2 (IEA-EDGAR CO2 v4)", closed_by="raw5/IEA_EDGAR_CO2_1970_2024.zip -> s2_0_process_emissions.py (55 process_emissions_* rows replaced)"),
+    dict(item="USGS MCS 2025 cement / iron and steel", closed_by="raw5 PDFs used only as cross-check (EDGAR2025_USGS2025_PROCESS_EMISSIONS.md section 2); industrial_output_* rows dropped (not needed)"),
+    dict(item="UNSD international marine bunkers 2019 for BN/KH/LA/TL", closed_by="raw6/UNSD_EB_2019_*.csv -> marine bunkers = 0 (grade A), demand_bunker_pending_* replaced by demand_bunker_marine_zero_*"),
+    dict(item="Logging-residue factors", closed_by="decision 54: logging residues = 0 in the main potential (ZERO_BY_DECISION); FAO/APFC 2001 Table 7 x JRC98626 A3-3 67 % as high-biomass sensitivity"),
+    dict(item="Wood processing residues for BN/KH/LA/MM/PH/SG/TL", closed_by="FAO/APFC 2001 Tables 9/12/13 recovery rates x FAOSTAT FO sawnwood and plywood production"),
+    dict(item="technology-data geothermal electricity parameters", closed_by="decision 52: v0.15.0 still has no geothermal investment/VOM -> AEO8 D.15 Geothermal average (grade C, +-30 %), registered in S2-1"),
+]
 DOWNLOAD_LIST = [
-    dict(item="EDGAR_2025_GHG annual fossil CO2 by country and sector (IEA-EDGAR CO2 v4)",
-         link="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/EDGAR_2025_GHG/IEA_EDGAR_CO2_1970_2024.zip",
-         landing="https://edgar.jrc.ec.europa.eu/dataset_ghg2025",
-         fields="xlsx inside zip: Country_code_A3, ipcc_code_1996_for_standard_report (2A non-metallic minerals, 2B chemical, 2C metal), Y_1970..Y_2024 (kt CO2); licence CC BY-NC-ND 4.0",
-         purpose="L19 industrial process emissions by country (cement, chemicals, metals) for 2019 base and process-CC structure",
-         param_ids="process_emissions_*", section="6"),
-    dict(item="USGS Mineral Commodity Summaries 2025 - Cement (world production table by country)",
-         link="https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-cement.pdf", landing="https://www.usgs.gov/centers/national-minerals-information-center/cement-statistics-and-information",
-         fields="Table 'World Mine/Plant Production': country, 2023, 2024e (thousand metric tons); Indonesia, Vietnam, Thailand, Philippines, Malaysia listed",
-         purpose="L19 cement physical output for process-emission intensity", param_ids="industrial_output_cement_*", section="6"),
-    dict(item="USGS Mineral Commodity Summaries 2025 - Iron and Steel (world raw steel production by country)",
-         link="https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-iron-steel.pdf", landing="https://www.usgs.gov/centers/national-minerals-information-center/iron-and-steel-statistics-and-information",
-         fields="Table 'World Production, raw steel': country, 2023, 2024e (million metric tons)",
-         purpose="L19 steel output for DRI/EAF share and process emissions", param_ids="industrial_output_steel_*", section="6"),
-    dict(item="UNSD Energy Statistics Database - International marine bunkers 2019 for Brunei, Cambodia, Lao PDR, Timor-Leste",
-         link="https://unstats.un.org/unsd/energystats/dataPortal/", landing="https://unstats.un.org/unsd/energystats/",
-         fields="Commodity - Transaction = 'Fuel oil - International marine bunkers' and 'Gas Oil/ Diesel Oil - International marine bunkers', Year 2019, Quantity (kt)",
-         purpose="section 3 bunkers: the 2019 export in pypsa-asean/data/demand/unsd/data has no marine bunker rows for these four countries (likely not reported; confirm zero vs missing)",
-         param_ids="demand_bunker_pending_*", section="3"),
-    dict(item="Logging-residue factors for Southeast Asian industrial roundwood (e.g. FAO/IEA Bioenergy Task 43 or JRC ENSPRESO methodology)",
-         link="https://data.jrc.ec.europa.eu/dataset/74ed5a04-7d74-4807-9eab-b94774309d9f", landing="https://publications.jrc.ec.europa.eu/repository/handle/JRC98626",
-         fields="residue-to-roundwood ratio (t/m3), sustainable removal share",
-         purpose="section 5 logging residues (DATA_PENDING)", param_ids="biomass_potential_*_logging_residues", section="5"),
+    dict(item="worldsteel Steel Statistical Yearbook 2019/2020 - crude steel production by process (BF-BOF / EAF) for ASEAN countries",
+         link="https://worldsteel.org/data/steel-statistical-yearbook/", landing="https://worldsteel.org/data/",
+         fields="Table 'Crude steel production by process', 2019, thousand tonnes, by country", purpose="S2 steel base-year process structure (only if steel routes are modelled explicitly); DATA_PENDING",
+         param_ids="steel_process_structure_2019", section="6 (S2-0.3)"),
     dict(item="Oil palm trunk/frond feedstock price survey (none found in NEDO/NRI 2024 or ERIA 2024)",
          link="https://www.nedo.go.jp/content/800028002.pdf", landing="https://www.eria.org/uploads/Development-of-the-Bioenergy-Supply-Chain-in-AZEC-Partner-Countries.pdf",
          fields="USD/t delivered, moisture basis", purpose="section 5 cost of oil_palm_trunk (DATA_PENDING)", param_ids="biomass_cost_*_oil_palm_trunk", section="5"),
@@ -65,10 +54,6 @@ DOWNLOAD_LIST = [
          link="https://www.iea.org/reports/world-energy-outlook-2025", landing="https://www.iea.org/reports/world-energy-outlook-2025",
          fields="USD/MBtu regasification + send-out cost", purpose="section 1 fuel price (fuel_price_lng_regasification_adder DATA_PENDING)",
          param_ids="fuel_price_lng_regasification_adder", section="1"),
-    dict(item="technology-data geothermal electricity investment/efficiency/VOM (absent in v0.13.2; v0.15.0 to be checked by user)",
-         link="https://github.com/PyPSA/technology-data/releases", landing="https://technology-data.readthedocs.io/",
-         fields="technology geothermal: investment EUR/kW_e, efficiency, VOM", purpose="section 1 existing geothermal performance (DATA_PENDING in layer A; layer B has AEO8 Geothermal average)",
-         param_ids="geothermal_existing_efficiency, geothermal_existing_VOM, geothermal_existing_investment", section="1"),
 ]
 
 
@@ -123,6 +108,9 @@ def validate(df: pd.DataFrame):
     nosrc = df[(df.source_sha256 == "") & (df.status != "DATA_PENDING")]
     if len(nosrc):
         problems.append(f"rows without source_sha256: {nosrc.param_id.tolist()[:10]}")
+    zbd = df[df.status == "ZERO_BY_DECISION"]
+    if len(zbd) and not (pd.to_numeric(zbd.value, errors="coerce") == 0).all():
+        problems.append("ZERO_BY_DECISION rows must carry value 0")
     return problems
 
 
@@ -135,7 +123,7 @@ def main():
         frames.append(pd.read_csv(p, dtype=str, keep_default_na=False))
     reg = Registry(SCRIPT)
     unit_rows(reg)
-    process_emission_rows(reg)
+    # process_emission_rows(reg): the 55 D1 DATA_PENDING rows are superseded by scripts_project/s2_0_process_emissions.py (S2-0.3)
     frames.append(pd.DataFrame(reg.rows, columns=COLUMNS))
     df = pd.concat(frames, ignore_index=True)[COLUMNS].sort_values("param_id").reset_index(drop=True)
     problems = validate(df)
@@ -146,6 +134,7 @@ def main():
     pending = df[df.status == "DATA_PENDING"][["param_id", "description", "country", "source", "decision_ref"]]
     write_csv(pending.to_dict("records"), REG_DIR / "DATA_PENDING_LIST.csv", list(pending.columns))
     write_csv(DOWNLOAD_LIST, REG_DIR / "DOWNLOAD_LIST.csv", list(DOWNLOAD_LIST[0].keys()))
+    write_csv(CLOSED_IN_S2_0, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2_0.csv", list(CLOSED_IN_S2_0[0].keys()))
     summary = dict(rows=int(len(df)), by_tier=df.tier.value_counts().to_dict(), by_status=df.status.value_counts().to_dict(),
                    by_script=df.derivation_script.value_counts().to_dict(), data_pending=int(len(pending)))
     outputs = {}
@@ -156,8 +145,9 @@ def main():
     evidence = dict(schema="d1-data-registry-evidence-v1", generated_utc=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                     python=sys.version.split()[0], pandas=pd.__version__, platform=platform.platform(), registry=str(out.relative_to(ROOT)),
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
-                    scripts={f"scripts_project/d1_{s}.py": sha256(ROOT / "scripts_project" / f"d1_{s}.py") for s in ["common"] + FRAGMENTS + ["registry"]},
-                    download_list=DOWNLOAD_LIST, solver_runs=0, network_builds=0)
+                    scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
+                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py"]},
+                    download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)
     print("DATA_PENDING:", len(pending))
