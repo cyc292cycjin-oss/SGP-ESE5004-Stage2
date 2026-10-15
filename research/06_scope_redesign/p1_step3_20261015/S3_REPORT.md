@@ -234,9 +234,28 @@ S3-0（IDEES 比率，全部子部门；煤、油为 0）：
 
 **3.5 构建结果。** 两情景构建通过（Link 5,020 → 5,120：+100 油池链路；Generator 1,439 → 1,359：−100 节点外部油源 +1 油进口 +3 绿色载体进口 +16 液氢进口；Bus +4 全区母线）；跨境标记：油池链路全部 domestic；静态验证通过；结构表与 S3-1 相同（`s2_structural_gap.py` 已排除 `ASEAN` 池行）；登记表 1,274 行（片段 `imports.csv` 19 行）；测试 376 通过 / 4 基线失败（新增 `test_s3_imports.py` 2 项）。
 
-## 4. S3-3 氨与甲醇
+## 4. S3-3 氨与甲醇（第 44 项）
 
-（待填）
+代码：`s3_layers.add_ammonia_methanol`（在进口层之后调用）、`s2_layers.add_demand_layer` 的 `ammonia_methanol_mode: regional_buses`、`scripts_project/s3_3_ammonia_methanol_data.py`（登记片段 `ammonia_methanol.csv`）；配置 `research.s3.ammonia_methanol`。构建输出 `results_project/s3_3/`（证据 `evidence/s3_3/`）。
+
+**4.1 母线。** 氨、甲醇各一个全区母线（`ASEAN ammonia`、`ASEAN methanol`，国家标签 ASEAN，S3-2 已建），各带一个可扩建储存：NH3 (l) storage tank incl. liquefaction（technology-data 第 507 行，PyPSA-Eur `add_ammonia` 1453–1462 行）、General liquid hydrocarbon storage (product)（第 256 行，`add_carrier_buses` 的甲醇储存）。
+
+**4.2 工艺（PyPSA-Eur v2025.07.0 默认，每个带 H₂ 母线的节点各一套，97 个节点；代码位置与参数均登记）：**
+
+| 组件 | PyPSA-Eur 代码 | 端口与系数 | 成本（technology-data v0.15.0） |
+|---|---|---|---|
+| 哈伯-博施 | `add_ammonia` 1424–1440 行 | bus0 节点电、bus1 ASEAN ammonia、bus2 节点 H₂；效率 1/0.2473 = 4.044 MWh_NH3/MWh_e，efficiency2 = −1.1484/0.2473 = −4.644 MWh_H2/MWh_e | Haber-Bosch 投资 962.87 EUR/kW_NH3（382–389 行）÷ 电输入，VOM 0.0237，寿命 30 |
+| 氨裂解 | 1441–1452 行 | ASEAN ammonia → 节点 H₂，效率 1/1.46（配置 854 行） | Ammonia cracker 587,202 EUR/MW_H2（17–20 行）÷ 1.46，寿命 25 |
+| 甲醇合成 | 4628–4645 行 | bus0 节点 H₂、bus1 ASEAN methanol、bus2 节点电、bus3 节点 `co2 stored`（捕集 CO₂ 缓冲）；效率 0.8787（配置 607 行），efficiency2 = −0.8787/3.6907（609），efficiency3 = −0.8787/4.0321（608）；p_min_pu 0.3（736 行） | methanolisation 909.68 EUR/kW_MeOH（1139–1146 行）× 0.8787，寿命 30 |
+| 生物质制甲醇 | `biomass_to_methanol: true`（配置 731 行）→ `add_biomass_to_methanol` 983–1002 行 | 国家固体生物质池 → ASEAN methanol，效率 0.65，大气端口 −0.2482 × 0.65（燃料碳在生产端记信用，与 S2 的 BtL 同约定，PyPSA-Eur 为 −EF_biomass + CO2 stored = −0.161） | biomass-to-methanol 投资 ÷ 效率，寿命 25 |
+| 甲醇 OCGT | `methanol_to_power.ocgt: true`（728 行）→ `add_methanol_to_power` | ASEAN methanol → 节点电，大气端口 +0.2482 t/MWh | OCGT 投资 × 效率 |
+| 未建 | 甲醇 CCGT / CCGT CC / Allam（默认 false）、甲醇重整（false）、余热利用（本模型无区域供热母线）、产能搬迁选项 | | |
+
+**4.3 需求。** 化肥/化工用氨：S3-0 工业比率的氨行，77 个节点负荷直接挂在 `ASEAN ammonia`，合计 55.03 TWh_NH3/a（= 表值；ID 14.0、TH 18.5、SG 9.6、VN 10.9、PH 1.4、MM 0.5、BN 0.1），无燃烧排放（合成氨过程排放已在 EDGAR 2.B 过程排放内）。工业甲醇：比率表甲醇行 5.62 TWh/a，经节点链路 `<node> industry methanol use` 从 `ASEAN methanol` 取用，大气端口 0.2482 t/MWh（PyPSA-Eur 工业甲醇链路 4617–4626 行，efficiency2 = 1/MWh_MeOH_per_tCO2），排放记在消费国；S3-5 按来源拆分后非化石甲醇记零。航运甲醇需求在 S3-4 接入。S3-0 的过渡折算（氨 → H₂+电、甲醇 → 甲烷+电）随开关关闭：工业氢负荷回到 70.57 TWh（= 表值）。
+
+**4.4 碳口径（过渡）。** 甲醇合成从节点捕集 CO₂ 缓冲取碳，甲醇在使用端排放——即"生产端信用 + 消费端排放"（S2 行为，producer_credit）；S3-5 的 origin_neutral 主算把非化石甲醇改为消费端记零、生产端不记信用。结构表的"不可避免 CO₂"只计化石终端计量链路，工业甲醇不再计入（S3-2 → S3-3 各国合计 −2.06 Mt，主要是 S3-0 过渡折算把甲醇当甲烷计入化石终端）。
+
+**4.5 构建结果。** 两情景构建通过（Link 5,120 → 5,682：+97×5 工艺链路 +77 工业甲醇使用链路 +77 甲醇终端母线；Load 1,920 → 2,073：+77 氨 +77 甲醇；Store +2）；排放归属验证通过（`country_carbon.component_country` 对 ASEAN 池端口的处理：归属取国家端口）；登记表片段 `ammonia_methanol.csv`；测试 `test_s3_ammonia_methanol.py`。
 
 ## 5. S3-4 航运
 

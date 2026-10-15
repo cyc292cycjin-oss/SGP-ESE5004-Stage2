@@ -631,11 +631,21 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * s, f"{src_ind}:electricity", f"{node} industry electricity demand")
             if ind_car.get("hydrogen", 0.0) * s > 0:
                 plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * s, f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
-            for am_car, am_bus in [("ammonia", "ammonia"), ("methanol", "methanol")]:   # regional_buses mode only (S3-3)
-                if ind_car.get(am_car, 0.0) * s > 0:
-                    if am_bus not in n.buses.index:
-                        raise ValueError(f"ammonia_methanol_mode regional_buses needs the regional {am_bus} bus (S3-3)")
-                    plain_load(node, c, "Industry", f"Industry{am_car.capitalize()}", f"industry {am_car}", am_bus, ind_car[am_car] * s, f"{src_ind}:{am_car}", f"{node} industry {am_car} demand")
+            # S3-3 (decision 44), regional_buses mode: ammonia load on the regional ammonia bus (no CO2); methanol through a node link that books the
+            # methanol carbon in the consuming country's atmosphere (PyPSA-Eur industry methanol link, prepare_sector_network.py lines 4617-4626,
+            # efficiency2 = 1 / MWh_MeOH_per_tCO2 = technology-data methanol CO2 intensity 0.2482 t/MWh); the regional buses are created here when the
+            # import layer (S3-2) has not created them yet. S3-5 (origin-neutral) replaces the fossil EF by the fuel-origin split.
+            if ind_car.get("ammonia", 0.0) * s > 0:
+                add_bus(n, "ASEAN ammonia", "ammonia", "ASEAN", "")
+                plain_load(node, c, "Industry", "IndustryAmmonia", "industry ammonia", "ASEAN ammonia", ind_car["ammonia"] * s, f"{src_ind}:ammonia", f"{node} industry ammonia demand")
+            if ind_car.get("methanol", 0.0) * s > 0:
+                add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+                fb = add_bus(n, f"{node} industry methanol final", "methanol final energy", c, node)
+                link = f"{node} industry methanol use"
+                if link not in n.links.index:
+                    add_link(n, link, c, "industry methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, cost(costs, "methanol", "CO2 intensity")], role="CONVERSION",
+                             extra={"carbon_rule": "methanol carbon released at use (PyPSA-Eur industry methanol link); origin-neutral split in S3-5"})
+                plain_load(node, c, "Industry", "IndustryMethanol", "industry methanol", fb, ind_car["methanol"] * s, f"{src_ind}:methanol", f"{node} industry methanol demand")
             # industrial biomass with capture (BECCS in industry): alternative route into the same biomass final bus
             fb = f"{node} industry biomass final"
             if fb in n.buses.index and f"{node} industry biomass CC" not in n.links.index:

@@ -129,6 +129,14 @@ research:
       price_sensitivity: 0.0               # sensitivity switch: -0.2 / +0.2 on the applied green-carrier prices
       h2_terminal_capital_cost_eur_per_mw_a: 8421.6   # PyPSA-Eur import branch 5a87cedd lines 4560-4563: LNG terminal 7018 EUR/MW/a x 1.2 for liquid H2
       oil_pool: regional                    # one ASEAN oil pool (decision 18); coal/lignite per node unchanged
+    ammonia_methanol:                    # S3-3 (decision 44): PyPSA-Eur v2025.07.0 defaults (config lines 607-609, 722-736, 854) and technology-data v0.15.0 rows
+      MWh_MeOH_per_MWh_H2: 0.8787          # config line 607 (technology-data methanolisation hydrogen-input 1.138)
+      MWh_MeOH_per_tCO2: 4.0321            # config line 608 (carbondioxide-input 0.248 t/MWh)
+      MWh_MeOH_per_MWh_e: 3.6907           # config line 609 (electricity-input 0.271)
+      MWh_NH3_per_MWh_H2_cracker: 1.46     # config line 854 (technology-data Ammonia cracker ammonia-input 1.46)
+      min_part_load_methanolisation: 0.3   # config line 736
+      biomass_to_methanol: true            # config line 731 (default true)
+      methanol_to_power_ocgt: true         # config line 728 (ocgt: true; ccgt/ccgt_cc/allam false)
   cross_border:                          # decisions 13/41; per carrier; scenario files set all true / all false
     electricity: true
     H2: true
@@ -223,7 +231,7 @@ research:
         aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_TD_SENSITIVITY.csv
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp_TD_SENSITIVITY.csv
         population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population_TD_SENSITIVITY.csv
-      ammonia_methanol_mode: convert_to_h2_and_gas   # S3-0 interim: ratio ammonia row -> H2 + electricity (PyPSA-Eur ammonia:false route, config lines 849/852/853), methanol row -> methane + electricity (SMR route, lines 904-906); S3-3: regional_buses
+      ammonia_methanol_mode: regional_buses   # S3-3 (decision 44): ammonia load on ASEAN ammonia, methanol via node use links on ASEAN methanol | convert_to_h2_and_gas = S3-0 interim (ammonia -> H2 + electricity, methanol -> methane + electricity)
       pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
         aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv

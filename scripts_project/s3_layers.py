@@ -228,3 +228,69 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
     led["green"] = green
     n.meta["research_imports"] = led
     return led
+
+
+def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
+    """S3-3 (decision 44): single regional ammonia and methanol buses with the PyPSA-Eur v2025.07.0 default conversions.
+    * Haber-Bosch per node (add_ammonia, prepare_sector_network.py lines 1424-1440): bus0 electricity, bus1 ASEAN ammonia, bus2 node H2;
+      efficiency 1/electricity-input, efficiency2 = -hydrogen-input/electricity-input, capital cost / electricity-input (technology-data Haber-Bosch).
+    * Ammonia cracker per node (lines 1441-1452): ASEAN ammonia -> node H2, efficiency 1/MWh_NH3_per_MWh_H2_cracker (1.46), cost per MW_H2 / 1.46.
+    * Ammonia store on the regional bus (lines 1453-1462, NH3 (l) storage tank incl. liquefaction); methanol store (add_carrier_buses, General
+      liquid hydrocarbon storage (product)).
+    * Methanolisation per node (lines 4628-4645): bus0 node H2, bus1 ASEAN methanol, bus2 electricity, bus3 node co2 stored (captured CO2);
+      efficiency MWh_MeOH_per_MWh_H2, efficiency2 = -MWh_MeOH_per_MWh_H2 / MWh_MeOH_per_MWh_e, efficiency3 = -MWh_MeOH_per_MWh_H2 / MWh_MeOH_per_tCO2;
+      p_min_pu = min_part_load_methanolisation (config line 736); capital cost x MWh_MeOH_per_MWh_H2 (per MW_H2).
+    * PyPSA-Eur defaults also switch on biomass-to-methanol (config biomass_to_methanol: true, add_biomass_to_methanol lines 983-1002: country
+      solid-biomass pool -> ASEAN methanol, atmosphere port -EF_methanol x efficiency, i.e. the fuel carbon is credited at production like BtL)
+      and the methanol OCGT (methanol_to_power.ocgt: true, add_methanol_to_power; ASEAN methanol -> node electricity, +carbondioxide-input to the
+      node country's atmosphere). Not built: methanol CCGT / CCGT CC / Allam (default false), methanol reforming (false), waste-heat use
+      (no district-heat buses in this model), relocation options.
+    """
+    A = cfg["research"]["s3"]["ammonia_methanol"]
+    meoh_per_h2, meoh_per_tco2, meoh_per_e = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"]), float(A["MWh_MeOH_per_MWh_e"])
+    cracker_in = float(A["MWh_NH3_per_MWh_H2_cracker"]); min_pl = float(A["min_part_load_methanolisation"])
+    nh3 = add_bus(n, "ASEAN ammonia", "ammonia", "ASEAN", ""); meoh = add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+    led = dict(buses=[nh3, meoh], components={})
+    # stores on the regional buses
+    st_nh3 = "NH3 (l) storage tank incl. liquefaction"
+    ensure_carrier(n, "ammonia store"); ensure_carrier(n, "methanol store")
+    n.add("Store", "ASEAN ammonia store", bus=nh3, carrier="ammonia store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, st_nh3, "fixed"), lifetime=cost(costs, st_nh3, "lifetime"))
+    n.add("Store", "ASEAN methanol store", bus=meoh, carrier="methanol store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, "General liquid hydrocarbon storage (product)", "fixed"),
+          lifetime=cost(costs, "General liquid hydrocarbon storage (product)", "lifetime"))
+    for s in ["ASEAN ammonia store", "ASEAN methanol store"]:
+        n.stores.loc[s, ["country", "research_role"]] = ["ASEAN", "REGIONAL_STORE"]
+    hb_el, hb_h2 = cost(costs, "Haber-Bosch", "electricity-input"), cost(costs, "Haber-Bosch", "hydrogen-input")
+    hb_fixed, hb_vom, hb_life = cost(costs, "Haber-Bosch", "fixed"), cost(costs, "Haber-Bosch", "VOM"), cost(costs, "Haber-Bosch", "lifetime")
+    cr_fixed, cr_life = cost(costs, "Ammonia cracker", "fixed"), cost(costs, "Ammonia cracker", "lifetime")
+    me_fixed, me_vom, me_life = cost(costs, "methanolisation", "fixed"), cost(costs, "methanolisation", "VOM"), cost(costs, "methanolisation", "lifetime")
+    ef_meoh = cost(costs, "methanol", "CO2 intensity")
+    btm = A.get("biomass_to_methanol", True); ocgt = A.get("methanol_to_power_ocgt", True)
+    btm_eff, btm_fixed, btm_vom, btm_life = (cost(costs, "biomass-to-methanol", k) for k in ["efficiency", "fixed", "VOM", "lifetime"])
+    oc_eff, oc_fixed, oc_vom, oc_life = (cost(costs, "OCGT", k) for k in ["efficiency", "fixed", "VOM", "lifetime"])
+    counts = dict(haber_bosch=0, ammonia_cracker=0, methanolisation=0, biomass_to_methanol=0, methanol_ocgt=0)
+    for node in nodes:
+        c = country_of(n, node); atmo = atmosphere_bus(c); h2 = f"{node} H2"; co2s = f"{node} co2 stored"
+        if h2 not in n.buses.index:
+            continue
+        add_link(n, f"{node} Haber-Bosch", c, "Haber-Bosch", [node, nh3, h2], [1.0 / hb_el, -hb_h2 / hb_el], capital_cost=hb_fixed / hb_el, marginal_cost=hb_vom / hb_el, lifetime=hb_life)
+        counts["haber_bosch"] += 1
+        add_link(n, f"{node} ammonia cracker", c, "ammonia cracker", [nh3, h2], [1.0 / cracker_in], capital_cost=cr_fixed / cracker_in, lifetime=cr_life)
+        counts["ammonia_cracker"] += 1
+        if co2s in n.buses.index:
+            add_link(n, f"{node} methanolisation", c, "methanolisation", [h2, meoh, node, co2s], [meoh_per_h2, -meoh_per_h2 / meoh_per_e, -meoh_per_h2 / meoh_per_tco2],
+                     capital_cost=me_fixed * meoh_per_h2, marginal_cost=me_vom * meoh_per_h2, lifetime=me_life, p_min_pu=min_pl,
+                     extra={"carbon_rule": "CO2 taken from the node captured-CO2 buffer; methanol carbon released at use (producer credit until S3-5)"})
+            counts["methanolisation"] += 1
+        bio = f"solid biomass {c}"
+        if btm and bio in n.buses.index:
+            add_link(n, f"{node} biomass-to-methanol", c, "biomass-to-methanol", [bio, meoh, atmo], [btm_eff, -ef_meoh * btm_eff], capital_cost=btm_fixed / btm_eff, marginal_cost=btm_vom / btm_eff, lifetime=btm_life,
+                     extra={"carbon_rule": "fuel carbon credited at production (-EF_methanol x efficiency, PyPSA-Eur add_biomass_to_methanol), released at use"})
+            counts["biomass_to_methanol"] += 1
+        if ocgt:
+            add_link(n, f"{node} OCGT methanol", c, "OCGT methanol", [meoh, node, atmo], [oc_eff, ef_meoh], capital_cost=oc_fixed * oc_eff, marginal_cost=oc_vom * oc_eff, lifetime=oc_life)
+            counts["methanol_ocgt"] += 1
+    led["components"] = counts
+    led["parameters"] = dict(MWh_MeOH_per_MWh_H2=meoh_per_h2, MWh_MeOH_per_tCO2=meoh_per_tco2, MWh_MeOH_per_MWh_e=meoh_per_e, MWh_NH3_per_MWh_H2_cracker=cracker_in, min_part_load_methanolisation=min_pl,
+                             haber_bosch_electricity_input=hb_el, haber_bosch_hydrogen_input=hb_h2, methanol_co2_intensity=ef_meoh, biomass_to_methanol=bool(btm), methanol_ocgt=bool(ocgt))
+    n.meta["research_ammonia_methanol"] = led
+    return led
