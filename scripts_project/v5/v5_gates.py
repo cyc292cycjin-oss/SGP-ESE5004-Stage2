@@ -30,13 +30,18 @@ def gate_a1_a2_kkt(lp_dir,sol_dir,out_dir,contract):
     kkt=complete_kkt(meta,a,z,pi,rc,D,R,Path(out_dir)/'kkt',contract)
     return dict(gate='A1_A2_KKT_AND_BUDGETS',passed=bool(kkt['independent_kkt_pass']),row_fail_count=kkt['row_fail_count'],column_fail_count=kkt['column_fail_count'],stationarity_fail_count=kkt['stationarity_fail_count'],dual_sign_fail_count=kkt['dual_sign_fail_count'],relative_gap=kkt['relative_gap'],primal_objective=kkt['primal_objective'],dual_objective_numeric=kkt['dual_objective_numeric'],stationarity_normalized_max=kkt['stationarity_normalized_max'],complementarity_l1=kkt['complementarity_l1'],scale=dict(num_col=meta['num_col'],num_row=meta['num_row'],nnz=meta['nnz']))
 
-def gate_a3_a5_physics(n):
-    """A3 physical equations + A5 FOM counted once (objective reconciliation) on the solved network."""
+def gate_a3_a5_physics(n,known_terms=None,ignore_checks=()):
+    """A3 physical equations + A5 FOM counted once (objective reconciliation) on the solved network.
+    known_terms (R7, diagnostic runs only): {label: EUR} objective terms added by hooks (gap slack x penalty) counted as known constants;
+    ignore_checks: check names that are expected to fail in a diagnostic run (per-country CO2 caps replaced by slack) and are reported separately."""
     from validation_dynamics import dynamic_checks
-    rows,details=dynamic_checks(n)
-    failed=[r for r in rows if r['Status']!='PASS']
+    extra=float(sum((known_terms or {}).values()))
+    rows,details=dynamic_checks(n,extra_known_objective=extra,extra_known_label=';'.join(known_terms or {}))
+    failed=[r for r in rows if r['Status']!='PASS' and not any(r['Check'].startswith(p) for p in ignore_checks)]
+    diagnostic=[r for r in rows if r['Status']!='PASS' and any(r['Check'].startswith(p) for p in ignore_checks)]
     fom=next((r for r in rows if r['Check']=='OBJECTIVE_RECONCILIATION_KNOWN_FOM_ONCE'),None)
-    return dict(gate='A3_PHYSICS',passed=not failed,checks=len(rows),failed=[dict(check=r['Check'],residual=r['MaxAbsoluteResidual']) for r in failed][:20],details=details),dict(gate='A5_FOM_ONCE',passed=bool(fom and fom['Status']=='PASS'),reconciliation=details['objective_reconciliation'],known_constants=dict(existing_asset_fom=float(n.meta.get('existing_annual_fixed_om_eur',0.)),existing_cross_border_fom=float(n.meta.get('existing_cross_border_fom_eur',0.))))
+    details=dict(details,known_terms=known_terms or {},diagnostic_expected_failures=[dict(check=r['Check'],residual=r['MaxAbsoluteResidual']) for r in diagnostic])
+    return dict(gate='A3_PHYSICS',passed=not failed,checks=len(rows),failed=[dict(check=r['Check'],residual=r['MaxAbsoluteResidual']) for r in failed][:20],details=details),dict(gate='A5_FOM_ONCE',passed=bool(fom and fom['Status']=='PASS'),reconciliation=details['objective_reconciliation'],known_constants=dict(existing_asset_fom=float(n.meta.get('existing_annual_fixed_om_eur',0.)),existing_cross_border_fom=float(n.meta.get('existing_cross_border_fom_eur',0.)),**(known_terms or {})))
 
 def gate_a4_readback(n,path):
     from netcdf_readback import netcdf_readback
@@ -173,8 +178,15 @@ def gate_b8_demand_consistency(n):
     return dict(gate='B8_DEMAND_CONSISTENCY',passed=all(checks.values()),checks=checks,sector_totals=diffs,horizon_fraction=frac,deductions=dedu,deferred=led.get('deferred',[]))
 
 def gate_b11_supply_routes(n,cfg,min_routes=2):
-    """B11 (S2): every end-use bus type at every node has at least two supply routes; DATA_PENDING candidates listed."""
+    """B11 (S2, R7): every end-use bus type at every LOAD-BEARING node has at least two supply routes; auxiliary nodes without loads are listed, not failed; DATA_PENDING candidates listed."""
     rows=[];ok=True
+    geo=[b for b in n.buses.index if n.buses.at[b,'carrier'] in ('AC','DC')];geo_sorted=sorted(geo,key=len,reverse=True)
+    def node_of(bus):
+        if bus in geo:return bus
+        loc=str(n.buses.at[bus,'location']) if 'location' in n.buses and bus in n.buses.index else ''
+        if loc in geo:return loc
+        return next((g for g in geo_sorted if str(bus).startswith(g+' ')),None)
+    load_nodes={node_of(b) for b in n.loads.bus}-{None}
     def suppliers(bus):
         s=set(n.generators.index[n.generators.bus==bus])
         for col in [c for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0']:
@@ -186,8 +198,10 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
     carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (import, FT, BtL)','gas':'gas (import, biogas upgrading, pipelines)','H2':'hydrogen','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
     for carrier,label in carriers.items():
         buses=n.buses.index[n.buses.carrier==('Li ion' if carrier=='EV battery' else carrier)]
-        short=[b for b in buses if len(suppliers(b))<min_routes]
-        rows.append(dict(end_use=label,carrier=carrier,buses=int(len(buses)),buses_with_fewer_than_min_routes=short[:10],count_short=len(short)))
+        with_load=[b for b in buses if node_of(b) in load_nodes];aux=[b for b in buses if node_of(b) not in load_nodes]
+        short=[b for b in with_load if len(suppliers(b))<min_routes];short_aux=[b for b in aux if len(suppliers(b))<min_routes]
+        rows.append(dict(end_use=label,carrier=carrier,buses=int(len(buses)),load_bearing_buses=len(with_load),buses_with_fewer_than_min_routes=short[:10],count_short=len(short),
+                         auxiliary_nodes_without_loads=aux[:10],auxiliary_count=len(aux),auxiliary_short=short_aux[:10]))
         ok&=len(short)==0 or carrier in ('EV battery','co2 stored')  # single charger / single buffer are by design
     pending=[]
     for typ in ['Generator','StorageUnit','Link','Store']:

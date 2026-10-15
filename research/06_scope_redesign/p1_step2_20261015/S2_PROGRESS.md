@@ -24,7 +24,7 @@
 | R5 | 跨境 CO₂ 与氢管道候选走廊（第 59 项） | 完成 | 见 git log "R5" | `s2_layers.pipeline_candidates`（PyPSA-Eur create_network_topology 做法：交流线路 + 直流链路 → 每个节点对一条候选，走廊端点经换流母线映射到节点）；长度 = 大圆距离 × 1.25（config 第 325/341 行）；海底份额取走廊表 subsea_share（冻结底座全为 0），国内段 0；上游氢管道 110 条全部替换为 109 条候选，CO₂ 管道同拓扑；跨境 19 对（ID–MY 1、KH–LA/TH/VN 各 1、LA–TH 9、LA–VN 4、MY–SG 1、MY–TH 1）；MM 无跨境电力走廊→无跨境管道（数据缺口），MM 国内 21 条；试构建通过 |
 | R6 | DAC 用热（第 60 项） | 完成 | 见 git log "R6" | DAC Link 增加第 4 端口 = 节点工业低温热母线（热 = heat-input 1.6 − compression-heat-output 0.2 = 1.4 MWh_th/t；电 = 0.4 + 0.15 = 0.55 MWh_el/t，technology-data v0.15.0 源表第 938–942 行；组合方式同 PyPSA-Eur add_dac 第 1198–1225 行）；热源由热泵/电锅炉/燃气锅炉/生物质锅炉内生；`research.s2.co2.dac_heat_mode: industry_heat_bus`，electric_cop1 为敏感性 |
 | R4 | 短时域时段权重（第 58 项） | 完成 | 见 git log "R4" | `s2_solve.set_representative_weights`：截断运行的 objective/generators/stores 权重 = 8760/N（N = 56 → 156.43 h），年度上限（封存、生物质、外部年度上限）不再按时域缩放；B12 登记权重和、唯一值与权重向量 SHA256（对应 PyPSA-Eur prepare_network 代表性时段做法） |
-| R7 | 验收细节（B11 只查有负荷节点；A3/A5 对账已知项） | 待做 | — | |
+| R7 | 验收细节（B11 只查有负荷节点；A3/A5 对账已知项） | 完成 | 见 git log "R7" | B11 按负荷节点判定，无负荷辅助节点单独列出；`gate_a3_a5_physics(n, known_terms, ignore_checks)` 与 `validation_dynamics.dynamic_checks(extra_known_objective)`：诊断运行把 CO₂ 松弛量 × 惩罚价计入已知项，分国上限检查列为预期失败项（只影响诊断运行） |
 | 构建与冒烟 | 两情景构建、结构性缺口表、HiGHS 56×3h（R4 权重）、必要时 gap_diagnostic、全部测试 | 待做 | — | |
 | 交付 | `S2B_REPORT.md`、更新 `S2_EVIDENCE.json`、`S2_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md` | 待做 | — | |
 
