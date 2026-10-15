@@ -257,9 +257,17 @@ S3-0（IDEES 比率，全部子部门；煤、油为 0）：
 
 **4.5 构建结果。** 两情景构建通过（Link 5,120 → 5,682：+97×5 工艺链路 +77 工业甲醇使用链路 +77 甲醇终端母线；Load 1,920 → 2,073：+77 氨 +77 甲醇；Store +2）；排放归属验证通过（`country_carbon.component_country` 对 ASEAN 池端口的处理：归属取国家端口）；登记表片段 `ammonia_methanol.csv`；测试 `test_s3_ammonia_methanol.py`。
 
-## 5. S3-4 航运
+## 5. S3-4 航运（第 10 项，D1 第 4 节）
 
-（待填）
+代码：`s2_layers.add_demand_layer`（S3-4 段，替换 S2 的"推迟到 S3"）、`scripts_project/s3_4_shipping_data.py`（`research_inputs/shipping_v5/SHIPPING_DEMAND_2050.csv`，登记片段 `shipping.csv`）；配置 `research.s3.shipping`。构建输出 `results_project/s3_4/`（证据 `evidence/s3_4/`）。
+
+**需求量（VERIFIED）。** D1 需求表 2050：国内航运 `DomesticShippingFuel` 92.76 TWh（油当量；ID 45.8、PH 38.6、KH 3.6、VN 2.6、SG 2.1）+ 国际燃料舱 `InternationalShippingBunker` 558.42 TWh（SG 535.3、TH 13.1、MY 4.6、ID 2.6、VN 2.1、PH 0.6、MM 0.01；BN/KH/LA/TL 为 0，UNSD 能源平衡无流量），合计 651.19 TWh——与 S3-3 构建回执中 S2 推迟账目的 651.19 TWh 一致。指令中的 670.2 TWh 未能从当前 D1 表复现（可能是 R3 分配修正前的数字），本轮按表值执行并登记（`shipping_demand_total_2050`），请用户确认。国际燃料舱单列（`InternationalShippingBunker` 账户），与航空共用开关 `research.s2.demand.international_bunkers`（第 10 项）。
+
+**燃料结构与换算（EXACT）。** 2050 份额取 D1 登记的 PyPSA-Eur 配置值：甲醇 1、氢 0、油 0（`share_shipping_*_share_2050`）。甲醇能量 = 油当量 × `shipping_oil_efficiency` 0.40 / `shipping_methanol_efficiency` 0.46（配置 636/635 行；`add_shipping` 5195–5200 行）= 0.8696 → 566.25 TWh 甲醇/a（SG 467.3，ID 42.1，PH 34.2，TH 11.4，MY 4.0，VN 4.1，KH 3.2）。氢（0.40/燃料电池效率）与油（计量链路）路径已实现但份额为 0。
+
+**节点与排放。** 负荷按 Assembly-V1 同账户分配数组放到节点（SG 全部在 SG2 0）；每个节点一条 `<node> shipping methanol` 链路从 `ASEAN methanol` 取用，第二端口按 1/MWh_MeOH_per_tCO2 = 0.2482 t/MWh 记入消费国大气（PyPSA-Eur 航运甲醇链路 5218–5227 行）——即第 64 项要求的"燃烧排放在消费国"，来源拆分在 S3-5 完成（非化石甲醇记零）。
+
+**构建结果。** 两情景构建通过（Load 2,073 → 2,205：+132 航运甲醇负荷；Link +76 航运链路；Bus +76 航运终端母线）；推迟账目清空；结构表与 S3-3 相同（航运甲醇不计入"化石终端"不可避免 CO₂）；测试 379 通过 / 4 基线失败（新增 `test_s3_shipping.py` 2 项）。
 
 ## 6. S3-5 燃料碳归属（第 64 项）
 

@@ -129,6 +129,10 @@ research:
       price_sensitivity: 0.0               # sensitivity switch: -0.2 / +0.2 on the applied green-carrier prices
       h2_terminal_capital_cost_eur_per_mw_a: 8421.6   # PyPSA-Eur import branch 5a87cedd lines 4560-4563: LNG terminal 7018 EUR/MW/a x 1.2 for liquid H2
       oil_pool: regional                    # one ASEAN oil pool (decision 18); coal/lignite per node unchanged
+    shipping:                            # S3-4 (decision 10, D1 section 4): D1 shipping demand (domestic + international bunkers) x PyPSA-Eur 2050 shares (registry share_shipping_*_2050)
+      shipping_oil_efficiency: 0.40        # PyPSA-Eur v2025.07.0 config.default.yaml line 636
+      shipping_methanol_efficiency: 0.46   # line 635; methanol demand = oil-equivalent x 0.40 / 0.46 (add_shipping lines 5195-5200)
+      international_bunkers_switch: research.s2.demand.international_bunkers   # shared with aviation (decision 10)
     ammonia_methanol:                    # S3-3 (decision 44): PyPSA-Eur v2025.07.0 defaults (config lines 607-609, 722-736, 854) and technology-data v0.15.0 rows
       MWh_MeOH_per_MWh_H2: 0.8787          # config line 607 (technology-data methanolisation hydrogen-input 1.138)
       MWh_MeOH_per_tCO2: 4.0321            # config line 608 (carbondioxide-input 0.248 t/MWh)

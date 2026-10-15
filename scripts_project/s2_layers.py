@@ -578,10 +578,43 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 for node, s in sh2.items():
                     if s > 0:
                         meter_load(node, c, sector, fuel, v * s, f"{c}:{account}:{carrier}", account)
-        for account in ["DomesticShippingFuel", "InternationalShippingBunker"]:
+        # S3-4 (decision 10, D1 section 4): shipping. Oil-equivalent demand (D1 table) x PyPSA-Eur 2050 fuel shares (methanol 1 / hydrogen 0 / oil 0,
+        # registry share_shipping_*_2050) x energy conversion shipping_oil_efficiency / shipping_methanol_efficiency (config lines 635-636), served
+        # from the regional methanol bus through a node link that books 1/MWh_MeOH_per_tCO2 in the consuming country (add_shipping lines 5195-5227);
+        # the international bunker part shares the switch research.s2.demand.international_bunkers with aviation. S3-5 splits by fuel origin.
+        SHIP = cfg["research"].get("s3", {}).get("shipping")
+        for account, switch in [("DomesticShippingFuel", True), ("InternationalShippingBunker", bool(D["international_bunkers"]))]:
             rows = d[d.account == account]
-            if len(rows):
-                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=float(rows.v.sum()), reason="shipping deferred to S3 (methanol/ammonia)"))
+            if not len(rows):
+                continue
+            v_oil = float(rows.v.sum())
+            if SHIP is None:
+                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=v_oil, reason="shipping deferred to S3 (methanol/ammonia)"))
+                continue
+            if not switch:
+                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=v_oil, reason="switch research.s2.demand.international_bunkers=false"))
+                continue
+            sh2 = shares.get((c, account)) or _shares_for(shares, astar_shares, c, "Transport")[0]
+            m_share, h_share, o_share = rv("share_shipping_methanol_share_2050"), rv("share_shipping_hydrogen_share_2050"), rv("share_shipping_oil_share_2050")
+            conv_m = float(SHIP["shipping_oil_efficiency"]) / float(SHIP["shipping_methanol_efficiency"])
+            ef_meoh = cost(costs, "methanol", "CO2 intensity")
+            sector = "shipping domestic" if account == "DomesticShippingFuel" else "shipping international"
+            for node, s in sh2.items():
+                if s <= 0:
+                    continue
+                if m_share > 0:
+                    add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+                    fb = add_bus(n, f"{node} shipping methanol final", "methanol final energy", c, node)
+                    link = f"{node} shipping methanol"
+                    if link not in n.links.index:
+                        add_link(n, link, c, "shipping methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, ef_meoh], role="CONVERSION",
+                                 extra={"carbon_rule": "methanol carbon released at use in the consuming country (PyPSA-Eur shipping methanol link); origin-neutral split in S3-5"})
+                    plain_load(node, c, "Transport", account, "shipping methanol", fb, v_oil * s * m_share * conv_m, f"{c}:{account}:oil x {m_share} x {conv_m:.4f}", f"{node} {sector} methanol")
+                if h_share > 0:
+                    conv_h = float(SHIP["shipping_oil_efficiency"]) / cost(costs, "fuel cell", "efficiency")
+                    plain_load(node, c, "Transport", account, "shipping hydrogen", f"{node} H2", v_oil * s * h_share * conv_h, f"{c}:{account}:oil x {h_share} x {conv_h:.4f}", f"{node} {sector} hydrogen")
+                if o_share > 0:
+                    meter_load(node, c, sector, "oil", v_oil * s * o_share, f"{c}:{account}:oil x {o_share}", account)
         # ---- industry (R1: carrier structure by mode) --------------------------------------------------------
         ind = d[(d.sector == "Industry") & (d.carrier != "electricity")]
         sh, _ = _shares_for(shares, astar_shares, c, "Industry")

@@ -10,8 +10,8 @@
 | S3-0 | 收尾修正：第 61 项 IDEES 工业比率；第 59/62 项走廊（TH–MM、LA–MM）与 APG 核对；第 63 项废塑料代理值；柬埔寨交通链核对；重算结构表 + 冒烟 | 完成（见下） | 9a6f9e20 | 详见下表；报告 §1 |
 | S3-1 | 天然气网络与国内生产、LNG | 完成 | ca4657b6（draft PR #24） | `s3_1_gas_data.py` → `gas_v5/`（存量跨境管道 7 条：6 条登记容量、MY–SG DATA_PENDING；产量上限表）；`s3_layers.add_gas_network`：移除 100 个节点外部气源，84 个井口发电机（年上限 = UNSD 2019 产量 × 负荷份额，C 级；价格 = 进口价；逸散因子 S2-0），111 条候选 + 14 条连通性补全（PyPSA-Eur 1968–2010 行）+ 6 条存量管道，16 个 LNG 接收站节点（2.5× 规则，再气化加价 DATA_PENDING = 0）；两情景构建通过（`results_project/s3_1/`），结构表同 S3-0；测试 374 通过 / 4 基线失败；报告 §2、§9 |
 | S3-2 | 东盟外进口（化石 + 绿色载体，Neumann 等 2025 价格 +20%） | 完成 | b0c6b068 | 价格基准取 Zenodo 10.5281/zenodo.14872184 `results.parquet`（2040，default，按出口地最小值，与 PyPSA-Eur 进口分支 5a87cedd 同法）：液氢 88.13 / 氨 97.32 / 甲醇 120.97 / FT 125.09 → ×1.20；`s3_layers.add_imports`：全区油池（节点外部油源移除，100 条双向分配链路）、`ASEAN ammonia/methanol/oil non-fossil` 母线 + 进口发电机、16 个 LNG 站址液氢进口（LNG 容量上限、终端成本 8,421.6 EUR/MW/a）；煤分节点不变；第 64 项引用进口分支 4553–4557 / 4659–4665 行；两情景构建通过（`results_project/s3_2/`）；测试 376 通过 / 4 基线；报告 §3。大文件（arXiv/SI PDF、parquet）不入 git，只登记 URL/时间/SHA |
-| S3-3 | 氨与甲醇（全区母线、哈伯-博施、甲醇合成、氨裂解） | 完成 | 本步提交 | `s3_layers.add_ammonia_methanol`：97 节点 × {哈伯-博施、氨裂解、甲醇合成（节点捕集 CO₂）、生物质制甲醇、甲醇 OCGT}（PyPSA-Eur 默认开关与代码行已登记）+ 两个全区储存；需求层切到 `regional_buses`（氨负荷 55.03 TWh 直接挂全区母线，工业甲醇 5.62 TWh 经节点使用链路记排放 0.2482 t/MWh）；`country_carbon.component_country` 忽略 ASEAN 池端口；两情景构建通过（`results_project/s3_3/`）；报告 §4 |
-| S3-4 | 航运（670.2 TWh，甲醇份额 1） | 待做 | — | |
+| S3-3 | 氨与甲醇（全区母线、哈伯-博施、甲醇合成、氨裂解） | 完成 | e18ccd46 + 077028c8（测试修正） | `s3_layers.add_ammonia_methanol`：97 节点 × {哈伯-博施、氨裂解、甲醇合成（节点捕集 CO₂）、生物质制甲醇、甲醇 OCGT}（PyPSA-Eur 默认开关与代码行已登记）+ 两个全区储存；需求层切到 `regional_buses`（氨负荷 55.03 TWh 直接挂全区母线，工业甲醇 5.62 TWh 经节点使用链路记排放 0.2482 t/MWh）；`country_carbon.component_country` 忽略 ASEAN 池端口；两情景构建通过（`results_project/s3_3/`）；报告 §4 |
+| S3-4 | 航运（D1 表 651.19 TWh 油当量，甲醇份额 1） | 完成 | 本步提交 | 需求层 S3-4 段：国内 92.76 + 国际燃料舱 558.42 TWh（开关与航空共用）× 0.40/0.46 = 566.25 TWh 甲醇，节点链路从 `ASEAN methanol` 取用并按 0.2482 t/MWh 记消费国排放；指令的 670.2 TWh 未从当前 D1 表复现（已登记，待用户确认）；两情景构建通过（`results_project/s3_4/`）；测试 379 通过 / 4 基线；报告 §5 |
 | S3-5 | 合成/生物燃料碳归属（origin_neutral 主算，producer_credit 敏感性） | 待做 | — | 第 64 项已由用户确认 |
 | S3-6 | V5 门槛新增 B 组检查 | 待做 | — | |
 | S3-7 | 构建与冒烟（两种碳归属模式各一次） | 待做 | — | |
@@ -26,6 +26,11 @@
 | 0.3 第 63 项 | `s2b_feedstock.py`：LA 塑料份额 = 10 国 MSW-2050 加权均值 0.165（敏感性 0–0.29）；KH/TH/VN 未收集垃圾露天焚烧份额 = ID+MM+PH 加权均值 0.739（敏感性 0–0.739） | `FEEDSTOCK_CARBON_TERRITORIAL_2050_*.csv`、登记表 C 级行 |
 | 0.4 KH 核对 | `scripts_project/s3_0_kh_check.py`（只报告） | `KH_TRANSPORT_CHAIN_CHECK.json` |
 | 0.5 构建与冒烟 | `results_project/s3/`：两情景构建通过（Line 107 = 105 + 2），年度结构性缺口表（一体化 11 国全部有 CO₂ 去向；不互联 KH/LA/MM/SG/VN 缺口），56×3h 冒烟：一体化 HiGHS IPM "imprecise" → 报不可行，gap_diagnostic 最优且全部松弛为 0（求解精度问题，非物理缺口，报告 §1.5）；不互联真实不可行，gap_diagnostic CO₂ 缺口 KH 16.5 / LA 8.5 / MM 4.3 / SG 11.9 / VN 96.4 Mt；测试 371 通过 / 4 基线失败 | `evidence/s3_0/`（回执、结构表、测试日志）、`S3_0_SMOKE_CHECK.json`（`s3_0_smoke_check.py`） |
+
+## 用户补充（2026-10-16，在 S3-7 与 S3_REPORT.md 中处理）
+
+1. 进口价格年份：Zenodo 14872184 的到岸价是 2040 年假设，模型其余技术取 technology-data 2050。用 technology-data 2040 与 2050 两套数据比较进口供应链主要成本项（光伏、陆上风电、电解槽、氨合成、甲醇合成、FT、液氢储运）的降幅，估算 2040→2050 进口价格的可能降幅并说明偏差方向；若估算降幅超过 20%，把进口价格敏感性下限从 −20% 放宽到估算值并登记依据；主算仍用论文数据，不自行改价。
+2. 一体化情景可行性确认：S3-7 冒烟中用独立方法确认一体化情景可行（HiGHS 开启 crossover / 单纯形法求同一 LP），并报告 LP 系数范围（矩阵、目标、右端项的最大/最小值之比）；若范围过大，指出造成的组件并提出缩放建议（PROPOSED，不自行修改）。
 
 ## 如果再次中断，从哪里开始
 
