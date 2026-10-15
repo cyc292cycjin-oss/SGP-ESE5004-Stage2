@@ -13,9 +13,9 @@
 | S3-3 | 氨与甲醇（全区母线、哈伯-博施、甲醇合成、氨裂解） | 完成 | e18ccd46 + 077028c8（测试修正） | `s3_layers.add_ammonia_methanol`：97 节点 × {哈伯-博施、氨裂解、甲醇合成（节点捕集 CO₂）、生物质制甲醇、甲醇 OCGT}（PyPSA-Eur 默认开关与代码行已登记）+ 两个全区储存；需求层切到 `regional_buses`（氨负荷 55.03 TWh 直接挂全区母线，工业甲醇 5.62 TWh 经节点使用链路记排放 0.2482 t/MWh）；`country_carbon.component_country` 忽略 ASEAN 池端口；两情景构建通过（`results_project/s3_3/`）；报告 §4 |
 | S3-4 | 航运（D1 表 651.19 TWh 油当量，甲醇份额 1） | 完成 | cfa53849 | 需求层 S3-4 段：国内 92.76 + 国际燃料舱 558.42 TWh（开关与航空共用）× 0.40/0.46 = 566.25 TWh 甲醇，节点链路从 `ASEAN methanol` 取用并按 0.2482 t/MWh 记消费国排放；指令的 670.2 TWh 未从当前 D1 表复现（已登记，待用户确认）；两情景构建通过（`results_project/s3_4/`）；测试 379 通过 / 4 基线；报告 §5 |
 | S3-5 | 合成/生物燃料碳归属（origin_neutral 主算，producer_credit 敏感性） | 完成 | ededdc9e | `s3_layers.add_fuel_carbon_mode`：油分化石/非化石池（100 节点非化石母线 + 723 条零排放孪生消费链路），甲醇母线即非化石母线（消费端口移除），FT/甲醇合成在生产国记 +碳，BtL/生物质制甲醇信用移除，进口零；`co2 stored` 不拆分的等价性已论证；`s2_network.py --override` 构建 producer_credit（`results_project/s3_5_pc/`）；SG 算例 115.5 Mt；测试 382 通过 / 4 基线；报告 §6 |
-| S3-6 | V5 门槛新增 B 组检查 | 完成 | 本步提交 | `v5_gates.py`：B13 只进不出、B14 接收站 ≤ 2.5×、B15 国内生产上限、B16 两情景进口价格一致；B1 扩展（进口载体零碳、S3 燃料端口）、B11 扩展（油池合并、全区母线）、B12 扩展（`--override` 哈希、S3 开关登记）；`s2_solve.py` 求解后运行 B13–B15；`s3_6_gates_check.py` 静态检查三个 S3-5 网络全部通过（`evidence/s3_6/`）；报告 §7 |
-| S3-7 | 构建与冒烟（两种碳归属模式各一次） | 待做 | — | |
-| 交付 | `S3_REPORT.md`、`S3_EVIDENCE.json`、`S3_TEST_RUN.json`、`DOWNLOAD_LIST.csv` | 待做 | — | |
+| S3-6 | V5 门槛新增 B 组检查 | 完成 | b8ac3ed9 | `v5_gates.py`：B13 只进不出、B14 接收站 ≤ 2.5×、B15 国内生产上限、B16 两情景进口价格一致；B1 扩展（进口载体零碳、S3 燃料端口）、B11 扩展（油池合并、全区母线）、B12 扩展（`--override` 哈希、S3 开关登记）；`s2_solve.py` 求解后运行 B13–B15；`s3_6_gates_check.py` 静态检查三个 S3-5 网络全部通过（`evidence/s3_6/`）；报告 §7 |
+| S3-7 | 构建与冒烟（两种碳归属模式 × 两情景） | 完成（本步提交） | 本步提交 | 四网络构建（`results_project/s3_7/`，LP 559k/1.27M/2.83M）；HiGHS IPM 一体化冒烟"不可行"、单纯形 2 h 20 min 未收敛（第 65 项停止）；Gurobi（Method 2 / NumericFocus 3 / BarHomogeneous 1 / Crossover 1 / Threads 8）：一体化 barrier 最优 6.988e11 → crossover INF_OR_UNBD，诊断 LP 最优同目标（松弛 0）→ 可行，HiGHS"不可行"定性为数值问题；pc 一体化同样 barrier 最优 / INF_OR_UNBD；不互联诊断 INF_OR_UNBD；止损规则（30 min、非最优即停、不重试）已执行，一次重复运行事故已登记；用户补充 1（进口价格 2040→2050 降幅 9–12%，下限保持 −20%）与 2（LP 系数范围、缩放建议 PROPOSED）完成；报告 §8，云资源 §8 |
+| 交付 | `S3_REPORT.md`、`S3_EVIDENCE.json`、`S3_TEST_RUN.json`、`DOWNLOAD_LIST.csv`（+ `DOWNLOAD_LIST_CLOSED_S3.csv`、`DATA_PENDING_LIST.csv`、`DATA_REGISTRY.csv` 副本）、`CLOUD_RESOURCE_ESTIMATE.md` §8（在 p1_step2 目录） | 完成 | 本步提交 | `s3_collect_evidence.py` 汇总；证据目录 `evidence/s3_0 … s3_7`（Gurobi 日志只保留剔除许可行的副本）；镜像到 `D:\ResearchWorkspaces\ASEAN\work\p1_step3_20261015\` |
 
 ## S3-0 明细
 

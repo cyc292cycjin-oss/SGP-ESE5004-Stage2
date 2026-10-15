@@ -144,6 +144,34 @@ def gap_table(n, m):
     return rows
 
 
+LICENSE_MARKERS = ("license", "licenseid", "wls", "registered to", "academic", "secret", "accessid", "token")
+
+
+def gurobi_log_stats(log_path, scrubbed_path):
+    """Coefficient statistics and solve summary from the Gurobi log; a scrubbed copy without any licence/credential line is kept, the raw log is not copied anywhere."""
+    import re
+    if not Path(log_path).exists():
+        return dict(error="log missing")
+    keep = []
+    stats = dict(coefficient_statistics={}, lines={})
+    for line in Path(log_path).read_text(errors="ignore").splitlines():
+        low = line.lower()
+        if any(mk in low for mk in LICENSE_MARKERS):
+            continue
+        keep.append(line)
+        m = re.match(r"\s*(Matrix|Objective|Bounds|RHS) range\s+\[(\S+), (\S+)\]", line)
+        if m:
+            lo, hi = float(m.group(2)), float(m.group(3)); stats["coefficient_statistics"][m.group(1).lower()] = dict(min=lo, max=hi, ratio=(hi / lo if lo else None))
+        for key, pat in [("presolved", r"^Presolved: (\d+) rows, (\d+) columns, (\d+) nonzeros"), ("barrier", r"^Barrier solved model in (\d+) iterations and ([\d.]+) seconds"),
+                         ("crossover", r"^Solved with (barrier|dual simplex|primal simplex)|^Crossover .*"), ("result", r"^(Optimal objective|Model is infeasible|Model is unbounded|Infeasible or unbounded|Time limit reached|Solved in).*"),
+                         ("warning", r"^Warning: .*")]:
+            if re.match(pat, line):
+                stats["lines"].setdefault(key, []).append(line.strip()[:200])
+    Path(scrubbed_path).write_text("\n".join(keep))
+    stats["scrubbed_log"] = str(scrubbed_path.name); stats["scrubbed_lines"] = len(keep)
+    return stats
+
+
 def main(a):
     import pypsa, logging
     logging.getLogger("pypsa").setLevel(logging.ERROR)
@@ -172,11 +200,18 @@ def main(a):
         run.update(input_network=dict(path=str(a.network), sha256=net_sha, snapshots=int(len(n.snapshots)), truncated_to=a.truncate, horizon_scaling=scaling),
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
         save(out / "SOLVE_RECEIPT.json", run)
-        params = dict(threads=4, log_file=str(out / "highs.log"), time_limit=float(a.time_limit), solver="ipm" if a.highs_ipm else "choose")
-        run["solver_parameters"] = params; run["parameter_source"] = "HiGHS defaults (smoke test / diagnostic only)"
+        if a.solver == "gurobi":   # decision 65: PyPSA-Eur numeric-robust style; license via GRB_LICENSE_FILE (read-only, never copied or logged)
+            params = dict(Method=2, NumericFocus=3, BarHomogeneous=1, Crossover=1, Threads=8, TimeLimit=float(a.time_limit))
+            run["parameter_source"] = "decision 65: Gurobi Method 2 (barrier), NumericFocus 3, BarHomogeneous 1 (separates true infeasibility from numerics), Crossover 1 (on), Threads 8, TimeLimit; log file via linopy log_fn"
+        else:
+            params = dict(threads=4, log_file=str(out / "highs.log"), time_limit=float(a.time_limit), solver="ipm" if a.highs_ipm else "choose")
+            run["parameter_source"] = "HiGHS defaults (smoke test / diagnostic only)"
+        run["solver_parameters"] = params
         t1 = time.time(); run["optimize_calls"] = 1; save(out / "SOLVE_RECEIPT.json", run)
         status, condition = n.optimize.solve_model(solver_name=a.solver, solver_options=params, log_fn=str(out / (a.solver + ".linopy.log")))
         run.update(status=status, termination_condition=condition, solve_seconds=time.time() - t1)
+        if a.solver == "gurobi":
+            run["gurobi_log_stats"] = gurobi_log_stats(out / (a.solver + ".linopy.log"), out / "GUROBI_LOG_SCRUBBED.txt")
         if status != "ok":
             diag = dict(status=status, condition=condition, structural=structural_diagnosis_s2(n),
                         reading="countries with can_store_or_export_co2 == false and positive unavoidable CO2 cannot meet the per-country net-zero cap (decisions 49/53): no relaxation; see the GAP_DIAGNOSTIC run")
@@ -239,5 +274,5 @@ def main(a):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--network", type=Path, required=True); p.add_argument("--scenario", required=True); p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--solver", choices=["highs"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
+    p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     sys.exit(main(p.parse_args()))
