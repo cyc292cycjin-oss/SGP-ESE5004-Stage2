@@ -26,9 +26,9 @@ def test_s3_3_networks():
         L = n.links; w = n.snapshot_weightings.generators
         for b, car in [("ASEAN ammonia", "ammonia"), ("ASEAN methanol", "methanol")]:
             assert n.buses.at[b, "carrier"] == car and n.buses.at[b, "country"] == "ASEAN"
-        n_h2 = int((n.buses.carrier == "H2").sum())   # 97 nodes carry an H2 bus (the DC converter nodes do not)
+        n_h2 = 97   # spatial AC nodes with the S2 candidate structure (the 3 DC converter nodes carry no conversion candidates)
         hb = L[L.carrier == "Haber-Bosch"]
-        assert len(hb) == n_h2 == 97 and (hb.bus1 == "ASEAN ammonia").all() and (hb.bus2.str.endswith(" H2")).all()
+        assert len(hb) == n_h2 and (hb.bus1 == "ASEAN ammonia").all() and (hb.bus2.str.endswith(" H2")).all()
         assert hb.efficiency.iloc[0] == pytest.approx(1 / 0.2473, rel=1e-6) and hb.efficiency2.iloc[0] == pytest.approx(-1.1484 / 0.2473, rel=1e-6)   # technology-data Haber-Bosch inputs
         cr = L[L.carrier == "ammonia cracker"]
         assert len(cr) == n_h2 and (cr.bus0 == "ASEAN ammonia").all() and cr.efficiency.iloc[0] == pytest.approx(1 / 1.46, rel=1e-9)

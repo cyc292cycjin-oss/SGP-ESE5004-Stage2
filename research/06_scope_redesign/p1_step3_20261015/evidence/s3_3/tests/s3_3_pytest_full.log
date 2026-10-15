@@ -2,7 +2,7 @@
 ........................................................................ [ 37%]
 ..................................F.FFF................................. [ 56%]
 ........................................................................ [ 75%]
-...........................................F............................ [ 94%]
+........................................................................ [ 94%]
 .....................                                                    [100%]
 =================================== FAILURES ===================================
 ________ AppliedInputTests.test_coverage_and_ev_boundary_remain_guarded ________
@@ -48,24 +48,6 @@ E    AssertionError: Items in the first set but not the second:
 E    'PH'
 
 tests/research/test_gate4_activation.py:60: AssertionError
-______________________________ test_s3_3_networks ______________________________
-
-    @pytest.mark.skipif(not (built("integrated") and built("disconnected")), reason="S3-3 networks not built")
-    def test_s3_3_networks():
-        import pypsa
-        summary = pd.read_csv(DEM / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv").set_index("country")
-        for sc in ["integrated", "disconnected"]:
-            n = pypsa.Network(str(S33 / sc / f"{sc}_2920_3h_unsolved.nc"))
-            L = n.links; w = n.snapshot_weightings.generators
-            for b, car in [("ASEAN ammonia", "ammonia"), ("ASEAN methanol", "methanol")]:
-                assert n.buses.at[b, "carrier"] == car and n.buses.at[b, "country"] == "ASEAN"
-            n_h2 = int((n.buses.carrier == "H2").sum())   # 97 nodes carry an H2 bus (the DC converter nodes do not)
-            hb = L[L.carrier == "Haber-Bosch"]
->           assert len(hb) == n_h2 == 97 and (hb.bus1 == "ASEAN ammonia").all() and (hb.bus2.str.endswith(" H2")).all()
-E           assert (97 == 100)
-E            +  where 97 = len(                                          bus0  ... p_nom_opt\nLink                                            ...     ...             VN2 7  ...       0.0\nPH_Luzon9 0 Haber-Bosch            PH_Luzon9 0  ...       0.0\n\n[97 rows x 68 columns])
-
-tests/research/test_s3_ammonia_methanol.py:31: AssertionError
 =============================== warnings summary ===============================
 tests/research/test_gate4_activation.py::HydroAggregationTests::test_two_dedicated_hydro_inflows_sum_and_roundtrip
   <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
@@ -94,5 +76,4 @@ FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_coverage
 FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_nec_source_rows_unique_and_retained
 FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_prior133_values_unchanged_new19_have_sources
 FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_rail_parent_not_posted_and_ph_stays_blocked
-FAILED tests/research/test_s3_ammonia_methanol.py::test_s3_3_networks - asser...
-5 failed, 376 passed, 293 warnings in 25.35s
+4 failed, 377 passed, 293 warnings in 25.63s
