@@ -18,11 +18,15 @@ from d1_common import (ASEAN, COLUMNS, COST_DIR, BIOMASS_DIR, DEMAND_DIR, LNG_DI
 
 SCRIPT = "scripts_project/d1_registry.py"
 FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050",
-             "demand_shares", "biomass", "process_emissions", "cost_layer_v015"]  # the last two are S2-0 (supplement 01)
+             "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
+             "industry_2050"]  # S2 supplement 02 R1 (scripts_project/s2b_industry.py)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
 }
+CLOSED_IN_S2B = [  # S2 supplement 02 (batch 7)
+    dict(item="worldsteel Steel Statistical Yearbook 2019/2020 - crude steel production by process", closed_by="raw7/worldsteel_SSY2020_concise.pdf -> extraction/WORLDSTEEL_2019_ASEAN.csv -> scripts_project/s2b_industry.py (R1, decision 55)"),
+]
 CLOSED_IN_S2_0 = [  # D1 download-list items delivered by the user in batches 5 and 6 (S2 supplement 01) and closed by S2-0
     dict(item="EDGAR_2025_GHG annual fossil CO2 (IEA-EDGAR CO2 v4)", closed_by="raw5/IEA_EDGAR_CO2_1970_2024.zip -> s2_0_process_emissions.py (55 process_emissions_* rows replaced)"),
     dict(item="USGS MCS 2025 cement / iron and steel", closed_by="raw5 PDFs used only as cross-check (EDGAR2025_USGS2025_PROCESS_EMISSIONS.md section 2); industrial_output_* rows dropped (not needed)"),
@@ -32,10 +36,10 @@ CLOSED_IN_S2_0 = [  # D1 download-list items delivered by the user in batches 5 
     dict(item="technology-data geothermal electricity parameters", closed_by="decision 52: v0.15.0 still has no geothermal investment/VOM -> AEO8 D.15 Geothermal average (grade C, +-30 %), registered in S2-1"),
 ]
 DOWNLOAD_LIST = [
-    dict(item="worldsteel Steel Statistical Yearbook 2019/2020 - crude steel production by process (BF-BOF / EAF) for ASEAN countries",
-         link="https://worldsteel.org/data/steel-statistical-yearbook/", landing="https://worldsteel.org/data/",
-         fields="Table 'Crude steel production by process', 2019, thousand tonnes, by country", purpose="S2 steel base-year process structure (only if steel routes are modelled explicitly); DATA_PENDING",
-         param_ids="steel_process_structure_2019", section="6 (S2-0.3)"),
+    dict(item="JRC-IDEES-2021 Industry workbook EU27 (JRC-IDEES-2021_Industry_EU27.xlsx)",
+         link="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/POTEnCIA/JRC-IDEES-2021/JRC-IDEES-2021.zip", landing="https://joint-research-centre.ec.europa.eu/potencia-policy-oriented-tool-energy-and-climate-change-impact-assessment/jrc-idees_en",
+         fields="Industry workbook sheets fec/ued/emi/out for EU27 (PyPSA-Eur rule retrieve_jrc_idees)",
+         purpose="PyPSA-Eur v2025.07.0 build_industry_sector_ratios.py 2050 sector ratios (27 sub-sectors incl. the low-temperature heat row) for R1 (decision 55); requested in S2B, not downloaded (no authorisation)"),
     dict(item="Oil palm trunk/frond feedstock price survey (none found in NEDO/NRI 2024 or ERIA 2024)",
          link="https://www.nedo.go.jp/content/800028002.pdf", landing="https://www.eria.org/uploads/Development-of-the-Bioenergy-Supply-Chain-in-AZEC-Partner-Countries.pdf",
          fields="USD/t delivered, moisture basis", purpose="section 5 cost of oil_palm_trunk (DATA_PENDING)", param_ids="biomass_cost_*_oil_palm_trunk", section="5"),
@@ -135,6 +139,7 @@ def main():
     write_csv(pending.to_dict("records"), REG_DIR / "DATA_PENDING_LIST.csv", list(pending.columns))
     write_csv(DOWNLOAD_LIST, REG_DIR / "DOWNLOAD_LIST.csv", list(DOWNLOAD_LIST[0].keys()))
     write_csv(CLOSED_IN_S2_0, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2_0.csv", list(CLOSED_IN_S2_0[0].keys()))
+    write_csv(CLOSED_IN_S2B, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2B.csv", list(CLOSED_IN_S2B[0].keys()))
     summary = dict(rows=int(len(df)), by_tier=df.tier.value_counts().to_dict(), by_status=df.status.value_counts().to_dict(),
                    by_script=df.derivation_script.value_counts().to_dict(), data_pending=int(len(pending)))
     outputs = {}
@@ -146,8 +151,8 @@ def main():
                     python=sys.version.split()[0], pandas=pd.__version__, platform=platform.platform(), registry=str(out.relative_to(ROOT)),
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
                     scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
-                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py"]},
-                    download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, solver_runs=0, network_builds=0)
+                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py"]},
+                    download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)
     print("DATA_PENDING:", len(pending))

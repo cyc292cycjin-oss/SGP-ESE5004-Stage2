@@ -198,12 +198,18 @@ research:
       clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
       cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
     industry:
-      low_temperature_heat_share_of_fuels: 0.20   # grade C: heat = 2/3 of industrial energy (IEA 2018 commentary) x 30 % below 150 C (IEA Renewable Energy for Industry 2017, via secondary citation); range 0.10-0.30
+      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s2b_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
+        aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
+        gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv
+        population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population.csv
+      biomass_overflow_to_methane: true     # R1.6 / decision 36: fixed solid-biomass demand above the national potential is served by methane at equal heat
+      low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30
       existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
       feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
       feedstock_end_of_life_release_fraction: 1.0   # PyPSA-Eur default (HVC_environment_sequestration_fraction 0): all remaining feedstock carbon emitted; method question for user
       hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
-      steel_aluminium_routes: DATA_PENDING          # no ASEAN steel/aluminium production split (worldsteel) -> St_primary/DRI/Al fractions not applied
+      steel_aluminium_routes: "steel: worldsteel 2019 + PyPSA-Eur St_primary_fraction 0.3 / DRI_fraction 1.0 (R1); aluminium: DATA_PENDING (no ASEAN production split)"
     gap_diagnostic:                       # decisions 49, 53: off in the main run; separate labelled run
       enabled: false
       penalty_eur_per_mwh: 10000          # electricity slack; above any supply cost in the model (max marginal ~ 300 EUR/MWh)

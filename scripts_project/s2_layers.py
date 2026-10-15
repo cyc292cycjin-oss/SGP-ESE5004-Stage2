@@ -383,6 +383,14 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     ag_gain = rv("share_agriculture_machinery_fuel_efficiency") / rv("share_agriculture_machinery_electric_efficiency")
     hvc_primary = rv("share_HVC_primary_fraction_2050"); eol_release = float(I["feedstock_end_of_life_release_fraction"])
     s_lt, boiler_eff = float(I["low_temperature_heat_share_of_fuels"]), float(I["existing_boiler_efficiency"])
+    # R1 (decision 55): industrial carrier structure. pypsa_eur_2050 = 2050 process routes (scripts_project/s2b_industry.py);
+    # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
+    carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = str(cfg["research"]["demand"].get("country_allocation", "aeo8_ats_relative"))
+    if carrier_mode not in ("pypsa_eur_2050", "bas_fixed"):
+        raise ValueError("Unknown research.s2.industry.carrier_mode " + carrier_mode)
+    ind_path = repo / I["pypsa_eur_tables"][alloc_mode]
+    ind_summary = pd.read_csv(ind_path).set_index("country")
+    overflow_ledger, hydrogen_ledger = {}, {}
     loads, deductions, deferred = [], [], []
     n.meta.setdefault("demand_owners", {}); n.meta.setdefault("demand_identity", {})
 
@@ -456,18 +464,44 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             rows = d[d.account == account]
             if len(rows):
                 deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=float(rows.v.sum()), reason="shipping deferred to S3 (methanol/ammonia)"))
-        # ---- industry ---------------------------------------------------------------------------------
+        # ---- industry (R1: carrier structure by mode) --------------------------------------------------------
         ind = d[(d.sector == "Industry") & (d.carrier != "electricity")]
         sh, _ = _shares_for(shares, astar_shares, c, "Industry")
-        heat_total = float(ind.v.sum()) * s_lt * boiler_eff
+        m = ind_summary.loc[c] if c in ind_summary.index else None
+        if carrier_mode == "pypsa_eur_2050" and m is not None:
+            ov_summary = float(m["biomass_overflow_industry_to_gas_mwh"])
+            ind_car = {"coal": float(m["pe_coal_mwh"]), "oil": float(m["pe_oil_mwh"]), "gas": float(m["pe_gas_mwh"]) - ov_summary, "biomass": float(m["pe_biomass_before_overflow_mwh"]),
+                       "electricity": float(m["pe_electricity_mwh"]), "hydrogen": float(m["pe_hydrogen_mwh"]), "heat": float(m["pe_heat_mwh"])}
+            src_ind = f"{c}:Industry2050PyPSAEurRoutes"; heat_src = "PyPSA-Eur ratio heat row (technology-data steel/cement rows carry none; other sectors pending)"
+        else:
+            ind_car = {carrier: float(v) * (1 - s_lt) for carrier, v in ind.groupby("carrier").v.sum().items()}
+            ind_car["heat"] = float(ind.v.sum()) * s_lt * boiler_eff; ind_car["electricity"] = 0.0; ind_car["hydrogen"] = 0.0
+            src_ind = f"{c}:IndustryFinalEnergy"; heat_src = "IndustryFinalEnergy x low_temperature_heat_share x boiler_eff"
+        # decision 36 / R1.6: fixed solid-biomass demand above the national main potential moves to methane at equal heat (industry first, then agriculture)
+        ag_rows = d[(d.sector == "AgricultureOthers") & (d.carrier == "biomass")]
+        ag_bio = float(ag_rows.v.sum())
+        pot_c = float(n.stores[(n.stores.bus == f"solid biomass {c}") & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
+        overflow = max(0.0, ind_car.get("biomass", 0.0) + ag_bio - pot_c)
+        ov_ind = min(overflow, ind_car.get("biomass", 0.0)); ov_ag = min(overflow - ov_ind, ag_bio)
+        ind_car["biomass"] = ind_car.get("biomass", 0.0) - ov_ind
+        overflow_ledger[c] = dict(solid_biomass_potential_mwh=pot_c, industry_biomass_before_mwh=ind_car.get("biomass", 0.0) + ov_ind, agriculture_biomass_before_mwh=ag_bio,
+                                  overflow_industry_to_gas_mwh=ov_ind, overflow_agriculture_to_gas_mwh=ov_ag, mode=carrier_mode)
+        hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
         for node, s in sh.items():
             if s <= 0:
                 continue
-            if heat_total > 0:
-                plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", heat_total * s, "IndustryFinalEnergy x low_temperature_heat_share x boiler_eff", f"{node} industry heat demand")
-            for carrier, v in ind.groupby("carrier").v.sum().items():
-                if v * (1 - s_lt) * s > 0:
-                    meter_load(node, c, "industry", carrier, v * (1 - s_lt) * s, f"{c}:IndustryFinalEnergy:{carrier}", "IndustryFinalEnergy")
+            if ind_car.get("heat", 0.0) * s > 0:
+                plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * s, heat_src, f"{node} industry heat demand")
+            for carrier in ["coal", "oil", "gas", "biomass", "unclassified_fuel"]:
+                v = ind_car.get(carrier, 0.0)
+                if v * s > 0:
+                    meter_load(node, c, "industry", carrier, v * s, f"{src_ind}:{carrier}", "IndustryFinalEnergy")
+            if ov_ind * s > 0:
+                meter_load(node, c, "industry overflow", "gas", ov_ind * s, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
+            if ind_car.get("electricity", 0.0) * s > 0:
+                plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * s, f"{src_ind}:electricity", f"{node} industry electricity demand")
+            if ind_car.get("hydrogen", 0.0) * s > 0:
+                plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * s, f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
             # industrial biomass with capture (BECCS in industry): alternative route into the same biomass final bus
             fb = f"{node} industry biomass final"
             if fb in n.buses.index and f"{node} industry biomass CC" not in n.links.index:
@@ -516,6 +550,11 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                         plain_load(node, c, "AgricultureOthers", "AgricultureMachineryElectric", "agriculture machinery electric", node, v * s * ag_el_share / ag_gain, f"{c}:AgricultureFinalEnergy:oil x electric share", f"{node} agriculture machinery electric")
                     if ag_oil_share > 0:
                         meter_load(node, c, "agriculture", "oil", v * s * ag_oil_share, f"{c}:AgricultureFinalEnergy:{carrier}", "AgricultureFinalEnergy")
+                elif carrier == "biomass":
+                    if (v - ov_ag) * s > 0:
+                        meter_load(node, c, "agriculture", "biomass", (v - ov_ag) * s, f"{c}:AgricultureFinalEnergy:biomass", "AgricultureFinalEnergy")
+                    if ov_ag * s > 0:
+                        meter_load(node, c, "agriculture overflow", "gas", ov_ag * s, f"{c}:AgricultureFinalEnergy:biomass -> gas (above solid-biomass potential, decision 36)", "AgricultureBiomassOverflowToGas")
                 else:
                     meter_load(node, c, "agriculture", carrier, v * s, f"{c}:AgricultureFinalEnergy:{carrier}", "AgricultureFinalEnergy")
         # ---- non-energy use: feedstock carbon (PyPSA-Eur structure; method question) -----------------------
@@ -550,26 +589,30 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="EDGAR 2.A+2.C x industry multiplier", carrier="process emissions", source_row=f"process_emissions_*_2050_{c}", annual_mwh=proc * s, bus=f"{node} process emissions"))
         # ---- Astar deduction: transport electricity already explicit ------------------------------------------
         te = float(d[(d.sector == "Transport") & (d.carrier == "electricity")].v.sum())
+        ie = float(d[(d.sector == "Industry") & (d.carrier == "electricity")].v.sum()) if carrier_mode == "pypsa_eur_2050" else 0.0   # R1: industry electricity is explicit in the route mode
         astar_c = [l for l in n.loads.index if n.loads.at[l, "account"] == "Astar" and n.loads.at[l, "country"] == c]
         pset = n.loads_t.p_set
         w = n.snapshot_weightings.generators
         astar_total = float(sum((pset[l] * w).sum() for l in astar_c if l in pset))
-        if te > 0 and astar_total > 0:
-            factor = 1.0 - te / astar_total
+        ded_total = te + ie
+        parts = [p for p, v in [("transport electricity (rail/road, embedded in Astar)", te), ("industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)", ie)] if v > 0]
+        explicit = dict(ev_mwh=E_land * ev_share * oil_to_el, fcev_h2_mwh=E_land * fc_share * oil_to_h2, industry_electricity_mwh=ind_car.get("electricity", 0.0), industry_hydrogen_mwh=ind_car.get("hydrogen", 0.0))
+        if ded_total > 0 and astar_total > 0:
+            factor = 1.0 - ded_total / astar_total
             if factor < 0:
-                raise ValueError("Transport electricity exceeds Astar for " + c)
+                raise ValueError("Deducted electricity exceeds Astar for " + c)
             for l in astar_c:
                 if l in pset:
                     n.loads_t.p_set[l] = pset[l] * factor
-            deductions.append(dict(country=c, deducted="transport electricity (rail/road, embedded in Astar)", deducted_mwh=te, astar_before_mwh=astar_total, astar_after_mwh=astar_total * factor, factor=factor,
-                                   added_explicit=dict(ev_mwh=E_land * ev_share * oil_to_el, fcev_h2_mwh=E_land * fc_share * oil_to_h2)))
+            deductions.append(dict(country=c, deducted=" + ".join(parts), deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total * factor, factor=factor,
+                                   added_explicit=explicit))
         else:
-            deductions.append(dict(country=c, deducted="none", deducted_mwh=te, astar_before_mwh=astar_total, astar_after_mwh=astar_total, factor=1.0,
-                                   added_explicit=dict(ev_mwh=E_land * ev_share * oil_to_el, fcev_h2_mwh=E_land * fc_share * oil_to_h2)))
+            deductions.append(dict(country=c, deducted="none", deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total, factor=1.0, added_explicit=explicit))
     ledger = dict(loads=loads, deductions=deductions, deferred=deferred, parameters=dict(ev_share=ev_share, fcev_share=fc_share, ice_share=ice_share, oil_to_electricity=oil_to_el, oil_to_hydrogen=oil_to_h2,
                   bev_charge_efficiency=bev_eff, bev_availability=bev_avail, agriculture_electric_share=ag_el_share, agriculture_efficiency_gain=ag_gain, hvc_primary_fraction=hvc_primary,
-                  feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=s_lt, existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
-                  cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN), node_share_source=D["node_allocation"])
+                  feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
+                  cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
+                  industry=dict(carrier_mode=carrier_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger, hydrogen_mwh=hydrogen_ledger))
     return ledger
 
 

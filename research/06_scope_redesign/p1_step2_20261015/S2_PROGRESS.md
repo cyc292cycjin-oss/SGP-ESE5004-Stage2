@@ -19,7 +19,7 @@
 | 节 | 内容 | 状态 | 提交 | 说明 |
 |---|---|---|---|---|
 | R3 | 需求分国分配改用 AEO8 ATS 人均×人口相对因子（第 57 项） | 完成 | 见 git log "R3" | `d1_demand_2050.py`：`load_aeo8_country`，r_c = G_c/G_ASEAN（TL 用 GDP 相对因子）；主表 = AEO8 分配，`_GDP_SENSITIVITY` / `_POP_SENSITIVITY` 为敏感性；`DEMAND_2050_ALLOCATION_COMPARISON.csv` 为新旧对比；配置 `research.demand.country_allocation`（s2_network 按它选表）；核对 Σ人均×人口 = 431.96 / 746.07 Mtoe vs AEO8 432.2 / 746.2；过程排放表与登记表已重算（972 行）；测试 16 项通过 |
-| R1 | 工业终端能源按 2050 工艺折算（第 55 项） | 待做 | — | 从 R3 之后的工业乘数出发 |
+| R1 | 工业终端能源按 2050 工艺折算（第 55 项） | 完成 | 见 git log "R1" | `scripts_project/s2b_industry.py` → `research_inputs/demand_v5/INDUSTRY_2050_{PYPSA_EUR,SUMMARY}_{分配}.csv`、`INDUSTRY_2050_GAPS.csv`；钢铁（worldsteel + PyPSA-Eur 0.3/1.0 + technology-data EAF）、水泥（EDGAR 2.A.1/0.52 熟料 + technology-data 比率，窑炉燃料→甲烷）、其余子部门 2019 份额×乘数（PyPSA-Eur 比率待 JRC-IDEES，DATA_PENDING）；低温热行 = 0；生物质超潜力→甲烷（需求层内按实际绑定量计算）；`research.s2.industry.carrier_mode: pypsa_eur_2050`（bas_fixed 对照）；工业电力显式负荷并从 Astar 扣除；试构建通过（Load 1,985） |
 | R2 | 化工原料碳属地口径（第 56 项） | 待做 | — | |
 | R5 | 跨境 CO₂ 与氢管道候选走廊（第 59 项） | 待做 | — | |
 | R6 | DAC 用热（第 60 项） | 待做 | — | |
