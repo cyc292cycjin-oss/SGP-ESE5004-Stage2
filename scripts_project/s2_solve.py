@@ -190,7 +190,8 @@ def main(a):
             np.save(sol_dir / (k + ".npy"), v)
         run["solution"] = {k: dict(count=int(len(v)), sha256=sha(sol_dir / (k + ".npy"))) for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]}
         from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
-                                 gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows)
+                                 gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows,
+                                 gate_b13_imports_one_way, gate_b14_terminal_caps, gate_b15_domestic_production_caps)
         from country_carbon import emission_report
         n.meta["artifact_role"] = a.label + "_SOLVED"; n.meta["result_label"] = a.label
         capacity_reduced_costs(n, m, rc_map).to_csv(out / "capacity_reduced_costs.csv", index=False)
@@ -219,6 +220,7 @@ def main(a):
             gates["B1"] = gate_b1_country_net_zero(n)
         gates["B2"] = gate_b2_storage_cap(n); gates["B3"] = gate_b3_biomass(n); gates["B8"] = gate_b8_demand_consistency(n)
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
+        gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
         gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
         gates["all_passed"] = all(v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v)
         save(out / "V5_GATES.json", gates)

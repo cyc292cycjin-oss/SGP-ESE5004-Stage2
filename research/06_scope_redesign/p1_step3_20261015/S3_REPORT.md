@@ -292,9 +292,21 @@ S3-0（IDEES 比率，全部子部门；煤、油为 0）：
 
 **6.5 构建结果。** origin_neutral 两情景构建通过（Link 5,758 → 6,581：+100 非化石池链路 +723 孪生消费链路；Bus +100）；producer_credit 一体化构建通过（`--override s3.fuel_carbon_mode=producer_credit`，回执 `config_overrides`，B12 配置哈希与主算不同）；结构表与 S3-4 相同（结构表只计化石终端计量链路）；排放归属验证通过；测试 382 通过 / 4 基线失败（新增 `test_s3_fuel_carbon.py` 3 项）。
 
-## 7. S3-6 V5 门槛
+## 7. S3-6 V5 门槛（B 组新增）
 
-（待填）
+代码：`scripts_project/v5/v5_gates.py`（新增 B13–B16，扩展 B1/B11/B12）、`s2_solve.py`（求解后自动运行 B13–B15）、`scripts_project/s3_6_gates_check.py`（在未求解网络上运行静态 B 组门槛，含两情景间的 B16）。静态结果 `evidence/s3_6/S3_6_GATES_STATIC.json`（S3-5 的一体化、不互联与 producer_credit 三个网络）。
+
+| 门槛 | 内容 | 静态结果 |
+|---|---|---|
+| B1（扩展） | 国家净零之外，检查进口/生产载体的 CO₂ 强度为 0（U4）并列出带大气端口的 S3 载体（gas production delivery、Fischer-Tropsch、methanolisation 合成端口等）及 `fuel_carbon_mode` | 三个网络通过（求解后完整 B1 在 S3-7） |
+| B11（扩展） | 供给路径：化石与非化石节点油母线合并计数；国家标签 ASEAN 且带负荷的全区母线视为承载负荷；新增氨、甲醇终端用途 | 通过（oil/gas/H2/ammonia/methanol 无短缺；EV battery 单充电器按设计豁免） |
+| B12（扩展） | 配置哈希对 `--override` 敏感性构建按"文件配置 + 记录的覆盖项"重算；登记 S3 开关（`fuel_carbon_mode`、`imports.price_sensitivity`、`cross_border.gas`、`ammonia_methanol_mode`、`ratio_source`）与覆盖项；无 S3 配置的 S1/S2 网络豁免 | 通过（producer_credit 网络记录 `s3.fuel_carbon_mode=producer_credit`） |
+| B13 只进不出 | 全部进口/生产供给为 sign +1、p_min_pu ≥ 0 的发电机（36 个）；无 import 链路/线路；全区池上的负荷均有国家所有者（77 个氨负荷）；接池链路的其他端口都在模型内；池储存循环（无出口汇） | 通过 |
+| B14 接收站 ≤ 2.5× | 16 个 LNG 站点：p_nom_max ≤ 2.5 × 现有（仅拟建站 ≤ 拟建容量，取构建账目）；同节点液氢进口 p_nom_max ≤ LNG 上限；求解后 p_nom_opt ≤ p_nom_max | 通过 |
+| B15 国内生产上限 | 84 个井口发电机均在 `external_annual_caps` 登记、钩子 `install_fragment_constraints` 注册；分国上限和 = UNSD 2019 产量；求解后年产量 ≤ 上限 | 通过（求解后部分在 S3-7） |
+| B16 两情景进口价格一致 | 7 类进口/生产发电机的边际成本逐个相同；`research.s3` 配置两情景相同 | 通过 |
+
+测试 `tests/research/test_s3_gates.py`（3 项）；完整测试集 385 通过 / 4 基线失败。
 
 ## 8. S3-7 构建与冒烟
 

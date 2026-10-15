@@ -65,7 +65,13 @@ def gate_b1_country_net_zero(n):
         ok&=bool(within)
     if cfg['constraint_scope']=='asean_total':ok&=rep['asean_total']<=float(cfg['asean_total_cap_tco2'])+1e-3
     ok&=bool(rep['every_tonne_booked_once'])
-    return dict(gate='B1_COUNTRY_NET_ZERO',passed=bool(ok),scope=cfg['constraint_scope'],countries=rows,every_tonne_booked_once=rep['every_tonne_booked_once'],by_country_source=rep['by_country_source'],asean_total_tco2=rep['asean_total'],scope_note='only the emission sources built in S1 (existing fossil power, OCGT/CCGT, SMR, SMR CC)')
+    # S3-6: B1 covers fuels and imports - every import/production generator carrier has zero CO2 intensity (U4), the S3 fuel ports are national atmosphere ports
+    imp=[c for c in IMPORT_CARRIERS if c in n.carriers.index];imp_zero=bool((n.carriers.loc[imp,'co2_emissions'].fillna(0.)==0).all()) if imp else True
+    L=n.links;atmo_cols=[c for c in L if c.startswith('bus') and c[3:].isdigit() and c!='bus0']
+    port_carriers=sorted(set(L.carrier[L[atmo_cols].apply(lambda col:col.astype(str).str.startswith('co2 atmosphere')).any(axis=1)]))
+    s3_ports={k:(k in port_carriers) for k in ['gas production delivery','Fischer-Tropsch','methanolisation','shipping methanol','industry methanol','OCGT methanol','BtL','biomass-to-methanol']}
+    ok&=imp_zero
+    return dict(gate='B1_COUNTRY_NET_ZERO',passed=bool(ok),s3_scope=dict(import_carriers_zero_co2=imp_zero,import_carriers=imp,atmosphere_port_carriers=port_carriers,s3_fuel_ports_present=s3_ports,fuel_carbon_mode=n.meta.get('research_fuel_carbon',{}).get('mode')),scope=cfg['constraint_scope'],countries=rows,every_tonne_booked_once=rep['every_tonne_booked_once'],by_country_source=rep['by_country_source'],asean_total_tco2=rep['asean_total'],scope_note='only the emission sources built in S1 (existing fossil power, OCGT/CCGT, SMR, SMR CC)')
 
 def _flatten(d,prefix=''):
     out={}
@@ -124,7 +130,14 @@ def gate_b11_completeness(n,cfg):
     return dict(gate='B11_TECHNOLOGY_PATH_COMPLETENESS',passed=not missing,present_nodes_by_carrier=present,missing=missing[:50],missing_count=len(missing),data_pending_count=len(pending),data_pending_by_carrier=by,data_pending=pending,scope_note='only the technologies built in S1; biomass power, gas CCS, floating offshore, CO2/gas networks are later steps')
 
 def gate_b12_hash(n,cfg,network_path=None,receipt=None):
-    R=cfg['research'];expected=config_sha(R);actual=n.meta.get('research_config_sha256')
+    import copy
+    R=copy.deepcopy(cfg['research']);overrides=list(n.meta.get('research_config',{}).get('config_overrides',[]))
+    for ov in overrides:  # S3-6: sensitivity builds record their --override list; the expected hash is the file config with the same overrides applied (s2_network.py)
+        key,val=ov.split('=',1);d=R;parts=key.split('.')
+        for k in parts[:-1]:d=d[k]
+        old=d[parts[-1]];d[parts[-1]]=type(old)(val) if not isinstance(old,bool) else (val.lower() in ('1','true','yes'))
+    if 'config_overrides' in n.meta.get('research_config',{}):R['config_overrides']=overrides  # S3 builds carry the key (possibly empty); S1/S2 networks do not
+    expected=config_sha(R);actual=n.meta.get('research_config_sha256')
     allowed_status={'INTERIM_S1_SKELETON',R.get('s2',{}).get('status')}
     checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_border',{}).get('switches')=={k:bool(v) for k,v in R['cross_border'].items()},skeleton_flag=n.meta.get('skeleton_status') in allowed_status)
     if network_path is not None and receipt is not None:checks['network_file_sha256_matches_receipt']=sha(network_path)==receipt['network']['sha256']
@@ -134,7 +147,11 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     checks['weights_sum_8760_h']=(not research_horizon) or all(abs(v-8760.)<1e-6 for v in wsum.values());checks['weights_columns_agree']=bool((w.nunique(axis=1)==1).all())
     weights=dict(snapshots=int(len(n.snapshots)),sums_h=wsum,unique_values={c:sorted(set(float(x) for x in w[c].unique())) for c in w.columns},
                  sha256=hashlib.sha256(np.ascontiguousarray(w.to_numpy(dtype='<f8')).tobytes()).hexdigest(),representative=n.meta.get('representative_weights'))
-    return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,snapshot_weightings=weights)
+    s3=n.meta.get('research_config',{}).get('s3',{});ind=n.meta.get('research_config',{}).get('s2',{}).get('industry',{})
+    s3_switches=dict(fuel_carbon_mode=s3.get('fuel_carbon_mode'),import_price_sensitivity=(s3.get('imports') or {}).get('price_sensitivity'),cross_border_gas=n.meta.get('research_config',{}).get('cross_border',{}).get('gas'),
+                     ammonia_methanol_mode=ind.get('ammonia_methanol_mode'),industry_ratio_source=ind.get('ratio_source'),config_overrides=overrides)
+    checks['s3_switches_recorded']=(not s3) or all(v is not None for k,v in s3_switches.items() if k!='config_overrides')  # S1/S2 networks without an s3 config section are exempt
+    return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,s3_switches=s3_switches,snapshot_weightings=weights)
 
 # ------------------------------------------------------------------ group B, S2 additions
 def gate_b2_storage_cap(n):
@@ -206,11 +223,14 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
             s|=set(n.links.index[(n.links[col]==bus)&(n.links[eff]>0)]) if eff in n.links else set()
         s|=set(n.links.index[(n.links.bus0==bus)&(n.links.p_min_pu<0)])  # bidirectional pipelines
         s|=set(n.stores.index[n.stores.bus==bus])
+        twin=str(bus)[:-4]+' oil non-fossil' if str(bus).endswith(' oil') else None  # S3-5: the fossil and non-fossil node oil buses feed the same loads
+        if twin and twin in n.buses.index:
+            s|=set(n.generators.index[n.generators.bus==twin])|set(n.links.index[(n.links.bus1==twin)&(n.links.efficiency>0)])|set(n.links.index[(n.links.bus0==twin)&(n.links.p_min_pu<0)])
         return s
-    carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (import, FT, BtL)','gas':'gas (import, biogas upgrading, pipelines)','H2':'hydrogen','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
+    carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (fossil pool + non-fossil pool: FT, BtL, imports)','gas':'gas (LNG, production, pipelines, biogas upgrading)','H2':'hydrogen','ammonia':'ammonia (Haber-Bosch, import)','methanol':'methanol (methanolisation, biomass-to-methanol, import)','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
     for carrier,label in carriers.items():
         buses=n.buses.index[n.buses.carrier==('Li ion' if carrier=='EV battery' else carrier)]
-        with_load=[b for b in buses if node_of(b) in load_nodes and serves_demand(b)];aux=[b for b in buses if b not in with_load]
+        with_load=[b for b in buses if (node_of(b) in load_nodes or str(n.buses.at[b,'country'])=='ASEAN') and serves_demand(b)];aux=[b for b in buses if b not in with_load]  # S3-6: regional pools with loads are load-bearing
         short=[b for b in with_load if len(suppliers(b))<min_routes];short_aux=[b for b in aux if len(suppliers(b))<min_routes]
         rows.append(dict(end_use=label,carrier=carrier,buses=int(len(buses)),load_bearing_buses=len(with_load),buses_with_fewer_than_min_routes=short[:10],count_short=len(short),
                          auxiliary_nodes_without_loads=aux[:10],auxiliary_count=len(aux),auxiliary_short=short_aux[:10]))
@@ -221,6 +241,69 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
         if 's1_candidate_status' in df:
             for k,z in df[df.s1_candidate_status=='DATA_PENDING'].iterrows():pending.append(dict(component=typ,name=k,carrier=str(z.carrier),country=str(z.country)))
     return dict(gate='B11_SUPPLY_ROUTES_PER_END_USE',passed=bool(ok),rows=rows,data_pending_count=len(pending),data_pending_by_carrier=pd.Series([p['carrier'] for p in pending]).value_counts().to_dict() if pending else {})
+
+# ------------------------------------------------------------------ group B, S3 additions (S3-6)
+IMPORT_CARRIERS=('LNG import','oil import','ammonia import','methanol import','FT fuel import','H2 import','gas production')
+POOL_BUSES=('ASEAN oil','ASEAN oil non-fossil','ASEAN ammonia','ASEAN methanol')
+
+def gate_b13_imports_one_way(n):
+    """B13: every extra-ASEAN supply is a one-way Generator (sign +1, p_min_pu >= 0); the regional pools carry only nationally owned loads and
+    links whose other ports are model buses; pool stores are cyclic (no sink that could absorb energy as an export)."""
+    g=n.generators;imp=g[g.carrier.isin([c for c in IMPORT_CARRIERS if c!='gas production'])]
+    checks=dict(import_generators=int(len(imp)),all_sign_positive=bool((imp.sign>0).all()) if len(imp) else True,all_p_min_pu_nonneg=bool((imp.p_min_pu>=0).all()) if len(imp) else True,
+                import_links_or_lines=int(n.links.carrier.str.contains('import',case=False).sum()+n.lines.carrier.astype(str).str.contains('import',case=False).sum()))
+    pools=[b for b in POOL_BUSES if b in n.buses.index]
+    foreign=[l for l in n.loads.index[n.loads.bus.isin(pools)] if ('country' not in n.loads) or str(n.loads.at[l,'country']) not in COUNTRIES]
+    checks['pool_loads']=int(n.loads.bus.isin(pools).sum());checks['pool_loads_without_national_owner']=foreign[:10]
+    L=n.links;port_cols=[c for c in L if c.startswith('bus') and c[3:].isdigit()];bad=[]
+    for name,z in L[L[port_cols].isin(pools).any(axis=1)].iterrows():
+        others=[z[c] for c in port_cols if z[c] and z[c] not in pools]
+        if not others or any(b not in n.buses.index for b in others):bad.append(name)
+    checks['pool_links_without_national_port']=bad[:10]
+    st=n.stores[n.stores.bus.isin(pools)];checks['pool_stores_cyclic']=bool(st.e_cyclic.all()) if len(st) else True
+    passed=checks['all_sign_positive'] and checks['all_p_min_pu_nonneg'] and checks['import_links_or_lines']==0 and not foreign and not bad and checks['pool_stores_cyclic']
+    return dict(gate='B13_IMPORTS_ONE_WAY',passed=bool(passed),checks=checks)
+
+def gate_b14_terminal_caps(n,cap_factor=2.5):
+    """B14: LNG regasification expansion <= cap_factor x existing capacity (proposed-only sites <= their proposed capacity, recorded in the build ledger),
+    liquid-H2 imports at a node <= the LNG cap of that node, and in solved networks p_nom_opt <= p_nom_max."""
+    g=n.generators;rows=[];ok=True;lng=g[g.carrier=='LNG import']
+    led=n.meta.get('research_gas_network',{}).get('lng',{}).get('terminals',{})
+    for name,z in lng.iterrows():
+        existing=float(z.p_nom);pmax=float(z.p_nom_max);opt=float(z.p_nom_opt) if 'p_nom_opt' in g else 0.;node=str(z.bus)[:-4]
+        proposed=float(led.get(node,{}).get('proposed_mw',0.))
+        limit_ok=(pmax<=cap_factor*existing*(1+1e-9)+1e-6) if existing>0 else (pmax<=proposed*(1+1e-9)+1e-6)
+        within=opt<=pmax*(1+1e-9)+1e-6
+        h2=g[(g.carrier=='H2 import')&(g.bus==node+' H2')];h2_ok=bool((h2.p_nom_max<=pmax*(1+1e-9)+1e-6).all()) if len(h2) else True
+        h2_within=bool((h2.p_nom_opt<=h2.p_nom_max*(1+1e-9)+1e-6).all()) if (len(h2) and 'p_nom_opt' in g) else True
+        rows.append(dict(generator=name,existing_mw=existing,proposed_mw=proposed,p_nom_max_mw=pmax,p_nom_opt_mw=opt,ratio_to_existing=(pmax/existing if existing else None),limit_ok=bool(limit_ok),within_max=bool(within),h2_import_within_lng_cap=bool(h2_ok and h2_within)))
+        ok&=bool(limit_ok and within and h2_ok and h2_within)
+    return dict(gate='B14_TERMINAL_CAP_2_5X',passed=bool(ok),cap_factor=cap_factor,terminals=rows)
+
+def gate_b15_domestic_production_caps(n):
+    """B15: every domestic gas production generator carries an annual cap (meta external_annual_caps -> ResearchImportAnnual constraints through the
+    install_fragment_constraints hook) and, in solved networks, its annual energy stays within the cap; caps sum to the UNSD 2019 production per country."""
+    g=n.generators;prod=g[g.carrier=='gas production'];caps=n.meta.get('external_annual_caps',{});w=n.snapshot_weightings.generators;rows=[];ok=True
+    hook_ok='install_fragment_constraints' in n.meta.get('required_constraint_hooks',[])
+    solved='p' in n.generators_t and len(n.generators_t.p.columns)>0
+    for name in prod.index:
+        cap=caps.get(name);energy=float((n.generators_t.p[name]*w).sum()) if (solved and name in n.generators_t.p) else None
+        within=(energy<=float(cap)*(1+1e-6)+1e-3) if (cap is not None and energy is not None) else (cap is not None)
+        rows.append(dict(generator=name,country=str(g.at[name,'country']),cap_mwh=(float(cap) if cap is not None else None),annual_mwh=energy,within=bool(within)));ok&=bool(within)
+    df=pd.DataFrame(rows)
+    by_c={c:dict(cap_mwh=float(d.cap_mwh.sum()),annual_mwh=(float(d.annual_mwh.sum()) if solved else None),generators=int(len(d))) for c,d in df.groupby('country')} if len(df) else {}
+    return dict(gate='B15_DOMESTIC_PRODUCTION_CAPS',passed=bool(ok and hook_ok),hook_registered=hook_ok,solved=bool(solved),generators=len(rows),by_country=by_c,short=[r for r in rows if not r['within']][:10])
+
+def gate_b16_import_prices_identical(n_a,n_b,label_a='integrated',label_b='disconnected'):
+    """B16: the import prices (marginal costs of the import and production generators) and the S3 switches are identical in the two scenarios."""
+    rows={};ok=True
+    for car in IMPORT_CARRIERS:
+        a=n_a.generators[n_a.generators.carrier==car].marginal_cost.sort_index();b=n_b.generators[n_b.generators.carrier==car].marginal_cost
+        same=(set(a.index)==set(b.index)) and (len(a)==0 or bool(np.allclose(a.values,b.reindex(a.index).values,rtol=1e-12,atol=1e-9)))
+        rows[car]=dict(count={label_a:int(len(a)),label_b:int(len(b))},unique_prices={label_a:sorted(set(round(float(x),6) for x in a)),label_b:sorted(set(round(float(x),6) for x in b))},identical=bool(same));ok&=bool(same)
+    sa=n_a.meta.get('research_config',{}).get('s3',{});sb=n_b.meta.get('research_config',{}).get('s3',{})
+    same_sw=sa==sb;ok&=same_sw
+    return dict(gate='B16_IMPORT_PRICES_IDENTICAL_ACROSS_SCENARIOS',passed=bool(ok),carriers=rows,s3_config_identical=bool(same_sw))
 
 # ------------------------------------------------------------------ outputs
 CAPACITY_VARS=[('Generator-p_nom','Generator','p_nom'),('Link-p_nom','Link','p_nom'),('Line-s_nom','Line','s_nom'),('StorageUnit-p_nom','StorageUnit','p_nom'),('Store-e_nom','Store','e_nom')]
