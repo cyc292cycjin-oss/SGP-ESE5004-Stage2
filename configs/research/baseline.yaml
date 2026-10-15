@@ -116,6 +116,7 @@ research:
   skeleton_status: INTERIM_S1_SKELETON   # electricity demand only; results carry no scientific meaning
   fuel_bus_naming: upstream_space        # "<node> <carrier>" as in scripts/prepare_sector_network.py
   s3:                                    # step 3 layers (scripts_project/s3_layers.py)
+    fuel_carbon_mode: origin_neutral     # S3-5 (decision 64): origin_neutral = non-fossil liquid fuels zero at combustion, carbon booked at synthesis in the producer country, imports zero | producer_credit = S2 behaviour (sensitivity)
     gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
       existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0

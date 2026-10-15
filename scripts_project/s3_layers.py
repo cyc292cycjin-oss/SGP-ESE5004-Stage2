@@ -294,3 +294,92 @@ def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
                              haber_bosch_electricity_input=hb_el, haber_bosch_hydrogen_input=hb_h2, methanol_co2_intensity=ef_meoh, biomass_to_methanol=bool(btm), methanol_ocgt=bool(ocgt))
     n.meta["research_ammonia_methanol"] = led
     return led
+
+
+def _drop_port(n, name, col):
+    """Remove an optional Link port (bus2..bus4) by blanking the bus and zeroing its efficiency."""
+    n.links.at[name, col] = ""
+    n.links.at[name, "efficiency" + col[3:]] = 0.0
+
+
+def add_fuel_carbon_mode(n, costs, cfg, nodes):
+    """S3-5 (decision 64): carbon attribution of synthetic and biogenic liquid fuels.
+
+    origin_neutral (main):
+      * Liquid carriers are split by origin. Oil: the fossil pool (ASEAN oil + node oil buses, S3-2) keeps the consumer meters that book the
+        fossil EF in the consuming country; a non-fossil pool (ASEAN oil non-fossil + new node 'oil non-fossil' buses) receives Fischer-Tropsch,
+        BtL and the imported FT fuel, and every oil consumer gets a twin meter from the node non-fossil bus WITHOUT an atmosphere port
+        (zero at combustion). Methanol has no fossil production route in the 2050 technology set (methanolisation, biomass-to-methanol,
+        imports), so the single regional methanol bus is the non-fossil bus and all methanol consumers (industry use, shipping, OCGT) lose
+        their atmosphere port.
+      * Producers book the carbon at synthesis instead of crediting it: Fischer-Tropsch and methanolisation get an atmosphere port equal to the
+        carbon content of their output (+EF_oil x eta, +MWh_MeOH_per_MWh_H2 / MWh_MeOH_per_tCO2) in the producing country; BtL and
+        biomass-to-methanol lose their production credit (-EF x eta). This is the simpler equivalent of tracking the origin of 'co2 stored':
+        for captured fossil CO2 the synthesis port books the fossil carbon once in the producer country (decision 64, sentence 3); for DAC or
+        biogenic CO2 the capture credit (-1 t at DAC, -EF x cc at BECCS) is offset by the same +1 t at synthesis (sentence 2), and biogenic
+        fuels made directly from biomass carry neither credit nor emission. No split of the co2 stored buffers is needed because both origins
+        receive the identical +carbon port at synthesis; the national atmospheres therefore never book a negative removal for carbon that
+        leaves the country inside a fuel.
+      * Imported green fuels: zero (generators on the non-fossil pools, S3-2).
+      * Gas stays a network carrier with the PyPSA-Eur treatment: biogas upgrading credits -EF_gas at the producer and Sabatier draws captured
+        CO2 without a synthesis port, gas consumers book the fossil EF (asymmetry documented).
+    producer_credit (sensitivity, S2 behaviour): domestic FT/BtL/biomass-to-methanol/methanolisation unchanged (credit at production or at
+      capture, fossil EF at use); imported FT fuel still enters the non-fossil pool with zero-EF twins (decision 64 holds for imports);
+      imported methanol cannot be credited on a regional bus with national atmospheres, so its import generator is capped at 0 in this mode.
+    """
+    mode = str(cfg["research"]["s3"].get("fuel_carbon_mode", "origin_neutral"))
+    if mode not in ("origin_neutral", "producer_credit"):
+        raise ValueError("Unknown research.s3.fuel_carbon_mode " + mode)
+    ef_oil, ef_meoh = cost(costs, "oil", "CO2 intensity"), cost(costs, "methanol", "CO2 intensity")
+    A = cfg["research"]["s3"]["ammonia_methanol"]
+    meoh_per_h2, meoh_per_tco2 = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"])
+    nf_pool = add_bus(n, "ASEAN oil non-fossil", "oil non-fossil", "ASEAN", "")
+    L = n.links
+    led = dict(mode=mode, node_non_fossil_buses=0, twin_meters=0, producer_ports_added=0, credits_removed=0, consumer_ports_removed=0, notes=[])
+    # node non-fossil oil buses with pool links (both modes: imported FT fuel needs a zero-EF path)
+    ensure_carrier(n, "oil pool")
+    oil_nodes = [b[:-4] for b in n.buses.index if n.buses.at[b, "carrier"] == "oil" and b.endswith(" oil") and b != "ASEAN oil"]
+    for node in oil_nodes:
+        c = country_of(n, node)
+        nb = add_bus(n, f"{node} oil non-fossil", "oil non-fossil", c, node)
+        add_link(n, f"oil non-fossil pool {node}", c, "oil pool", [nb, nf_pool], [1.0], p_min_pu=-1.0, role="TRANSPORT", extra={"pool": nf_pool})
+        led["node_non_fossil_buses"] += 1
+    # twin consumer meters from the node non-fossil bus (no atmosphere port)
+    twins = []
+    for name, z in L[L.carrier.isin(["oil final-energy accounting", "oil feedstock", "cooking LPG"])].iterrows():
+        node = str(z.bus0)[:-4]
+        if not str(z.bus0).endswith(" oil") or f"{node} oil non-fossil" not in n.buses.index:
+            continue
+        twin = f"{name} non-fossil"
+        add_link(n, twin, str(z.country), str(z.carrier), [f"{node} oil non-fossil", str(z.bus1)], [float(z.efficiency)], role=str(z.research_role) if "research_role" in L else "CONVERSION",
+                 extra={"carbon_rule": "non-fossil oil: zero at combustion (decision 64)", "twin_of": name})
+        twins.append(twin)
+    led["twin_meters"] = len(twins)
+    if mode == "origin_neutral":
+        for name, z in L[L.carrier == "Fischer-Tropsch"].iterrows():
+            node = str(z.bus1)[:-4]
+            n.links.at[name, "bus1"] = f"{node} oil non-fossil"
+            n.links.at[name, "bus4"] = atmosphere_bus(str(z.country)); n.links.at[name, "efficiency4"] = ef_oil * float(z.efficiency)
+            led["producer_ports_added"] += 1
+        for name, z in L[L.carrier == "BtL"].iterrows():
+            node = str(z.bus1)[:-4]
+            n.links.at[name, "bus1"] = f"{node} oil non-fossil"
+            _drop_port(n, name, "bus2"); led["credits_removed"] += 1
+        for name, z in L[L.carrier == "biomass-to-methanol"].iterrows():
+            _drop_port(n, name, "bus2"); led["credits_removed"] += 1
+        for name, z in L[L.carrier == "methanolisation"].iterrows():
+            n.links.at[name, "bus4"] = atmosphere_bus(str(z.country)); n.links.at[name, "efficiency4"] = meoh_per_h2 / meoh_per_tco2
+            led["producer_ports_added"] += 1
+        for name, z in L[L.carrier.isin(["industry methanol", "shipping methanol", "OCGT methanol"])].iterrows():
+            if str(z.bus2).startswith("co2 atmosphere"):
+                _drop_port(n, name, "bus2"); led["consumer_ports_removed"] += 1
+        led["notes"].append("methanol: no fossil production route in the technology set -> the regional methanol bus is the non-fossil bus; all methanol consumers zero at use")
+        led["notes"].append("gas: PyPSA-Eur treatment kept (biogas upgrading credit at the producer, Sabatier without synthesis port, consumers book the fossil EF) - network carrier, origin not traceable")
+    else:
+        g = "ASEAN methanol import"
+        if g in n.generators.index:
+            n.generators.at[g, "p_nom_max"] = 0.0
+            led["notes"].append("producer_credit: imported methanol capped at 0 (no regional atmosphere to credit); imported FT fuel zero through the non-fossil twins")
+        led["notes"].append("producer_credit: FT/BtL/biomass-to-methanol/methanolisation as built in S2/S3-3 (credit at production or capture, fossil EF at use)")
+    n.meta["research_fuel_carbon"] = led
+    return led
