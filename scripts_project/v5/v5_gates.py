@@ -130,7 +130,8 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     if network_path is not None and receipt is not None:checks['network_file_sha256_matches_receipt']=sha(network_path)==receipt['network']['sha256']
     # R4 (decision 58): register the snapshot weightings (sum must be 8760 h for any horizon; the three columns must agree)
     w=n.snapshot_weightings;wsum={c:float(w[c].sum()) for c in w.columns}
-    checks['weights_sum_8760_h']=all(abs(v-8760.)<1e-6 for v in wsum.values());checks['weights_columns_agree']=bool((w.nunique(axis=1)==1).all())
+    research_horizon=len(n.snapshots)>1  # synthetic single-snapshot test networks are exempt; research networks (full year or R4 representative weights) must sum to 8760 h
+    checks['weights_sum_8760_h']=(not research_horizon) or all(abs(v-8760.)<1e-6 for v in wsum.values());checks['weights_columns_agree']=bool((w.nunique(axis=1)==1).all())
     weights=dict(snapshots=int(len(n.snapshots)),sums_h=wsum,unique_values={c:sorted(set(float(x) for x in w[c].unique())) for c in w.columns},
                  sha256=hashlib.sha256(np.ascontiguousarray(w.to_numpy(dtype='<f8')).tobytes()).hexdigest(),representative=n.meta.get('representative_weights'))
     return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,snapshot_weightings=weights)
@@ -182,11 +183,22 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
     rows=[];ok=True
     geo=[b for b in n.buses.index if n.buses.at[b,'carrier'] in ('AC','DC')];geo_sorted=sorted(geo,key=len,reverse=True)
     def node_of(bus):
+        # the node is the geographical bus the carrier bus is named after ('<node> gas'); the location attribute is a fallback only
+        # (converter-node buses carry the location of the co-located AC node, which would hide the auxiliary node)
         if bus in geo:return bus
+        pref=next((g for g in geo_sorted if str(bus).startswith(g+' ')),None)
+        if pref is not None:return pref
         loc=str(n.buses.at[bus,'location']) if 'location' in n.buses and bus in n.buses.index else ''
-        if loc in geo:return loc
-        return next((g for g in geo_sorted if str(bus).startswith(g+' ')),None)
+        return loc if loc in geo else None
     load_nodes={node_of(b) for b in n.loads.bus}-{None}
+    port_cols=[c for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0']
+    def serves_demand(bus):
+        """A load-bearing end-use bus has a Load on it or on a bus it feeds directly (one conversion hop); otherwise it is auxiliary."""
+        if bool((n.loads.bus==bus).any()):return True
+        down=set()
+        for col in port_cols:down|=set(n.links.loc[n.links.bus0==bus,col].astype(str))
+        down.discard('')
+        return bool(n.loads.bus.isin(down).any())
     def suppliers(bus):
         s=set(n.generators.index[n.generators.bus==bus])
         for col in [c for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0']:
@@ -198,7 +210,7 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
     carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (import, FT, BtL)','gas':'gas (import, biogas upgrading, pipelines)','H2':'hydrogen','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
     for carrier,label in carriers.items():
         buses=n.buses.index[n.buses.carrier==('Li ion' if carrier=='EV battery' else carrier)]
-        with_load=[b for b in buses if node_of(b) in load_nodes];aux=[b for b in buses if node_of(b) not in load_nodes]
+        with_load=[b for b in buses if node_of(b) in load_nodes and serves_demand(b)];aux=[b for b in buses if b not in with_load]
         short=[b for b in with_load if len(suppliers(b))<min_routes];short_aux=[b for b in aux if len(suppliers(b))<min_routes]
         rows.append(dict(end_use=label,carrier=carrier,buses=int(len(buses)),load_bearing_buses=len(with_load),buses_with_fewer_than_min_routes=short[:10],count_short=len(short),
                          auxiliary_nodes_without_loads=aux[:10],auxiliary_count=len(aux),auxiliary_short=short_aux[:10]))

@@ -49,7 +49,7 @@ def trim_solve(r):
 
 
 def main():
-    ev = dict(schema="s2-evidence-v1", generated_epoch=time.time(), branch=git(["rev-parse", "--abbrev-ref", "HEAD"]), head=git(["rev-parse", "HEAD"]),
+    ev = dict(schema="s2-evidence-v2", generated_epoch=time.time(), branch=git(["rev-parse", "--abbrev-ref", "HEAD"]), head=git(["rev-parse", "HEAD"]),
               status="S2_SECTOR_COUPLED_SMOKE", formal_solves=0, smoke_label="SMOKE_TEST_ONLY", diagnostic_label="GAP_DIAGNOSTIC_NOT_FOR_INTERCONNECTION_VALUE")
     ev["s2_0"] = dict(report="S2_0_DATA_TOPUP.md", commits=["f0ad4070", "f64e1fd0"], registry=dict(file="research_inputs/registry_v5/DATA_REGISTRY.csv", sha256=sha(REPO / "research_inputs/registry_v5/DATA_REGISTRY.csv")),
                       pending_list=dict(file="DATA_PENDING_LIST.csv", sha256=sha(HERE / "DATA_PENDING_LIST.csv")),
@@ -98,6 +98,46 @@ def main():
                     if (REPO / f).exists()}
     ev["scripts"] = {f: sha(REPO / "scripts_project" / f) for f in ["s2_costs.py", "s2_layers.py", "s2_network.py", "s2_solve.py", "s2_structural_gap.py", "v5/v5_gates.py", "assembly_components.py"]}
     ev["tests"] = opt(HERE / "S2_TEST_RUN.json")
+    # ---- S2 supplement 02 (R1-R7 correction round) -------------------------------------------------------------------
+    S2B = REPO / "results_project" / "s2b"
+    if S2B.exists():
+        b = dict(status_file=(S2B / "STATUS.txt").read_text().split() if (S2B / "STATUS.txt").exists() else None, builds={}, smoke={}, gap_diagnostic={})
+        for sc in ["integrated", "disconnected"]:
+            r = opt(S2B / sc / f"{sc}_BUILD_RECEIPT.json")
+            if r:
+                tb = trim_build(r); tb["pipelines"] = {k: v for k, v in r.get("pipelines", {}).items() if k != "table"}; tb["pipelines_cross_border_table"] = [x for x in r.get("pipelines", {}).get("table", []) if x.get("cross_border")]
+                tb["memory_estimate"] = opt(S2B / f"{sc}_MEMORY_ESTIMATE.json"); b["builds"][sc] = tb
+            g = opt(S2B / f"{sc}_gap" / f"{sc}_gap_diagnostic_BUILD_RECEIPT.json")
+            if g:
+                b["builds"][sc + "_gap_diagnostic"] = dict(network=g["network"], status=g["status"], code_sha=g["code_sha"], gap_diagnostic=g["gap_diagnostic"])
+            d = S2B / "smoke" / sc
+            if (d / "SOLVE_RECEIPT.json").exists():
+                r = read(d / "SOLVE_RECEIPT.json"); gates = opt(d / "V5_GATES.json")
+                b["smoke"][sc] = dict(receipt=trim_solve(r), gates={k: ({kk: vv for kk, vv in v.items() if kk not in ("rows", "stores", "countries", "details")} if isinstance(v, dict) else v) for k, v in gates.items()} if gates else None,
+                                      gate_b11_rows=gates["B11"]["rows"] if gates else None, gate_b12_weights=gates["B12"].get("snapshot_weightings") if gates else None,
+                                      infeasibility=opt(d / "INFEASIBILITY_DIAGNOSIS.json"), co2_flows=opt(d / "CO2_FLOWS.json"),
+                                      emissions_by_country=(lambda e: {k: v for k, v in e.items() if k != "ports"})(read(d / "EMISSIONS_BY_COUNTRY.json")) if (d / "EMISSIONS_BY_COUNTRY.json").exists() else None,
+                                      lp=opt(d / "lp" / "MATH_PROBLEM.json"), files={p.name: sha(p) for p in d.glob("*.csv")})
+            d = S2B / "gap_diagnostic" / sc
+            if (d / "SOLVE_RECEIPT.json").exists():
+                r = read(d / "SOLVE_RECEIPT.json"); gates = opt(d / "V5_GATES.json")
+                b["gap_diagnostic"][sc] = dict(receipt=trim_solve(r), gap_table=opt(d / "GAP_TABLE.json"), co2_flows=opt(d / "CO2_FLOWS.json"),
+                                               emissions_by_country=(lambda e: {k: v for k, v in e.items() if k != "ports"})(read(d / "EMISSIONS_BY_COUNTRY.json")) if (d / "EMISSIONS_BY_COUNTRY.json").exists() else None,
+                                               gates={k: ({kk: vv for kk, vv in v.items() if kk not in ("rows", "stores", "countries", "details")} if isinstance(v, dict) else v) for k, v in gates.items()} if gates else None,
+                                               gate_a3_details=(gates["A3"].get("details", {}) if gates else {}), gate_b11_rows=gates["B11"]["rows"] if gates else None, lp=opt(d / "lp" / "MATH_PROBLEM.json"))
+        b["structural_gap_annual"] = opt(S2B / "S2B_STRUCTURAL_GAP_ANNUAL.json")
+        b["inputs"] = {f: sha(REPO / f) for f in ["research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv",
+                                                  "research_inputs/demand_v5/DEMAND_2050_ALLOCATION_COMPARISON.csv", "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv",
+                                                  "research_inputs/demand_v5/INDUSTRY_2050_PYPSA_EUR_aeo8_ats_relative.csv", "research_inputs/demand_v5/INDUSTRY_2050_GAPS.csv",
+                                                  "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative.csv", "research_inputs/registry_v5/DATA_REGISTRY.csv",
+                                                  "research_inputs/registry_v5/sources/AEO8_2050_BY_COUNTRY.csv", "research_inputs/registry_v5/sources/WORLDSTEEL_2019_ASEAN.csv",
+                                                  "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_build_industry_sector_ratios.py", "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_prepare_sector_network.py",
+                                                  "research_inputs/registry_v5/sources/IPCC2006_V3_Ch2_Mineral_Industry.pdf", "research_inputs/registry_v5/sources/WHAT_A_WASTE_3_ASEAN11_COUNTRY.csv"] if (REPO / f).exists()}
+        b["scripts"] = {f: sha(REPO / "scripts_project" / f) for f in ["s2b_industry.py", "s2b_feedstock.py", "d1_demand_2050.py", "s2_layers.py", "s2_network.py", "s2_solve.py", "s2_structural_gap.py", "v5/v5_gates.py", "validation_dynamics.py"]}
+        b["industry_evidence"] = opt(REPO / "research_inputs/demand_v5/INDUSTRY_2050_EVIDENCE.json"); b["feedstock_evidence"] = opt(REPO / "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_EVIDENCE.json")
+        b["demand_crosschecks_r3"] = (opt(REPO / "research_inputs/demand_v5/DEMAND_2050_CROSSCHECKS.json") or {}).get("checks", {}).get("r3_aeo8_country_allocation")
+        b["tests"] = opt(HERE / "S2B_TEST_RUN.json")
+        ev["s2b_supplement_02"] = b
     out = HERE / "S2_EVIDENCE.json"
     out.write_text(json.dumps(ev, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     print("written", out, sha(out), f"{out.stat().st_size / 1e6:.2f} MB")

@@ -32,13 +32,17 @@ def country_table(n):
         for name, z in meters.iterrows():
             dem = float(annual[[l for l in loads.index if n.loads.at[l, "bus"] == z.bus1]].sum())
             fossil[str(z.carrier).split(" ")[0]] = fossil.get(str(z.carrier).split(" ")[0], 0.0) + dem * float(z.efficiency2)
-        proc = float(n.generators[(n.generators.carrier == "process emissions") & (n.generators.country == c)].p_nom.sum()) * 8760.0
+        proc = float(n.generators[(n.generators.carrier == "process emissions") & (n.generators.country == c)].p_nom.sum()) * 8760.0   # EDGAR 2.A+2.C (+2.B+2.D in territorial mode)
+        plastics = float(n.generators[(n.generators.carrier == "plastic waste") & (n.generators.country == c)].p_nom.sum()) * 8760.0 if "plastic waste" in set(n.generators.carrier) else 0.0
         feed = links[(links.country == c) & links.carrier.str.endswith(" feedstock")]
         feed_t = 0.0
-        for name, z in feed.iterrows():
+        for name, z in feed.iterrows():   # full_release mode only: carbon ports to the process bus (bus2) and the atmosphere (bus3)
             dem = float(annual[[l for l in loads.index if n.loads.at[l, "bus"] == z.bus1]].sum())
-            feed_t += dem * (float(z.efficiency2) + float(z.efficiency3))
-        unavoidable = sum(fossil.values()) + proc + feed_t
+            if str(z.get("bus2", "")).endswith(" process emissions"):
+                feed_t += dem * float(z.efficiency2)
+            if str(z.get("bus3", "")) == atm:
+                feed_t += dem * float(z.efficiency3)
+        unavoidable = sum(fossil.values()) + proc + plastics + feed_t
         cap = float(caps.get(c, 0.0))
         pipes = [x for x in xb.index if c in (str(n.buses.at[xb.at[x, "bus0"], "country"]), str(n.buses.at[xb.at[x, "bus1"], "country"]))]
         partners = sorted({str(n.buses.at[xb.at[x, p], "country"]) for x in pipes for p in ("bus0", "bus1")} - {c})
@@ -50,7 +54,7 @@ def country_table(n):
         else:
             co2_gap = unavoidable
             co2_reading = "no storage potential and no cross-border CO2 pipeline"
-        rows.append(dict(country=c, fossil_final_co2_t=sum(fossil.values()), fossil_by_fuel_t=fossil, process_emissions_t=proc, feedstock_release_t=feed_t,
+        rows.append(dict(country=c, fossil_final_co2_t=sum(fossil.values()), fossil_by_fuel_t=fossil, process_emissions_t=proc, plastics_burned_t=plastics, feedstock_release_t=feed_t,
                          unavoidable_co2_t=unavoidable, storage_cap_t_per_year=cap, cross_border_co2_pipelines=len(pipes), pipeline_partners=partners,
                          structural_co2_gap_t=co2_gap, co2_reading=co2_reading, biomass_final_demand_mwh=bio_dem, solid_biomass_potential_mwh=bio_pot,
                          structural_biomass_gap_mwh=max(0.0, bio_dem - bio_pot),

@@ -9,7 +9,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts_project"))
-OUT = ROOT / "results_project" / "s2"
+OUT = ROOT / "results_project" / "s2b"   # S2 supplement 02 rebuild (R1-R7)
 INT = OUT / "integrated" / "integrated_2920_3h_unsolved.nc"
 DIS = OUT / "disconnected" / "disconnected_2920_3h_unsolved.nc"
 pytestmark = pytest.mark.skipif(not INT.exists() or not DIS.exists(), reason="S2 networks not built")
@@ -50,7 +50,7 @@ def test_s2_co2_two_layer_storage(nets, receipts):
     for carrier in ["CCGT CC", "DAC", "process emissions CC", "biomass EOP CC", "biogas upgrading", "BtL", "co2 vent", "CO2 sequestration"]:
         assert (ni.links.carrier == carrier).any(), carrier
     dac = ni.links[ni.links.carrier == "DAC"].iloc[0]
-    assert dac.bus0.endswith(" ") is False and ni.buses.at[dac.bus0, "carrier"] in ("AC", "DC") and dac.bus1.endswith(" co2 stored") and dac.efficiency2 < 0
+    assert dac.bus0.endswith(" ") is False and ni.buses.at[dac.bus0, "carrier"] in ("AC", "DC") and dac.bus1.endswith(" co2 stored") and dac.efficiency2 < 0 and dac.bus3.endswith(" industry heat")  # R6
     assert "research_co2_storage_cap" in ni.meta["required_constraint_hooks"]
 
 
@@ -73,7 +73,7 @@ def test_s2_demand_ownership_and_deductions(nets, receipts):
     assert ded["SG"]["deducted_mwh"] > 0 and ded["SG"]["astar_after_mwh"] == pytest.approx(ded["SG"]["astar_before_mwh"] - ded["SG"]["deducted_mwh"], rel=1e-9)
     assert all(d["account"] in ("DomesticShippingFuel", "InternationalShippingBunker") for d in ri["demand_s2"]["deferred"])
     assert (ni.loads.carrier == "land transport EV").sum() == 96 and (ni.links.carrier == "BEV charger").sum() == 96
-    assert (ni.loads.carrier == "industry heat").sum() > 0 and (ni.links.carrier == "industry heat pump").sum() == 97
+    assert (ni.links.carrier == "industry heat pump").sum() == 97   # R1: the industry heat demand itself is 0 in pypsa_eur_2050 mode (ratio heat rows pending); DAC heat (R6) uses the bus
     rail = ni.links[(ni.links.carrier == "oil final-energy accounting") & ni.links.index.str.contains(" rail ")]
     assert len(rail) > 0 and (rail.efficiency2 > 0).all()  # U2: rail oil emits
 

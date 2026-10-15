@@ -71,12 +71,16 @@ def structural_diagnosis_s2(n):
         for name, z in meters.iterrows():
             dem = [l for l in loads_c.index if n.loads.at[l, "bus"] == z.bus1]
             fixed_co2 += float(sum((pset[l] * w).sum() for l in dem)) * float(z.efficiency2)
-        proc = float(sum(n.generators.at[x, "p_nom"] * w.sum() for x in g.index[g.carrier == "process emissions"]))
+        proc = float(sum(n.generators.at[x, "p_nom"] * w.sum() for x in g.index[g.carrier.isin(["process emissions", "plastic waste"])]))
         feed = n.links[(n.links.country == c) & n.links.carrier.str.endswith(" feedstock")]
         feed_co2 = 0.0
-        for name, z in feed.iterrows():
+        for name, z in feed.iterrows():   # full_release mode only (territorial feedstock links carry no carbon ports)
             dem = [l for l in loads_c.index if n.loads.at[l, "bus"] == z.bus1]
-            feed_co2 += float(sum((pset[l] * w).sum() for l in dem)) * (float(z.efficiency2) + float(z.efficiency3))
+            e = float(sum((pset[l] * w).sum() for l in dem))
+            if str(z.get("bus2", "")).endswith(" process emissions"):
+                feed_co2 += e * float(z.efficiency2)
+            if str(z.get("bus3", "")) == f"co2 atmosphere {c}":
+                feed_co2 += e * float(z.efficiency3)
         ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"])) & g.p_nom_extendable]
         potential = float(sum((pmax[k] * w).sum() * min(float(z.p_nom_max), 1e9) for k, z in ren.iterrows()))
         pipes = [x for x in xb.index if c in (str(n.buses.at[xb.at[x, "bus0"], "country"]), str(n.buses.at[xb.at[x, "bus1"], "country"]))]
@@ -202,7 +206,11 @@ def main(a):
         except Exception as e:
             gates["A1_A2"] = dict(gate="A1_A2_KKT_AND_BUDGETS", passed=False, error=str(e)[:500])
         try:
-            a3, a5 = gate_a3_a5_physics(n); gates["A3"] = a3; gates["A5"] = a5
+            known = {}
+            if gap and "Research_gap_co2_slack" in m.variables:
+                sol = m.variables["Research_gap_co2_slack"].solution
+                known["gap_co2_slack_x_penalty_eur"] = float(sol.sum().item()) * float(n.meta["gap_diagnostic"]["penalty_eur_per_tco2"])
+            a3, a5 = gate_a3_a5_physics(n, known_terms=known, ignore_checks=("COUNTRY_CO2_CAP:",) if gap else ()); gates["A3"] = a3; gates["A5"] = a5
         except Exception as e:
             gates["A3"] = dict(gate="A3_PHYSICS", passed=False, error=str(e)[:500]); gates["A5"] = dict(gate="A5_FOM_ONCE", passed=False, error=str(e)[:500])
         gates["A4"] = gate_a4_readback(n, out / (a.scenario + "_" + a.label + "_solved.nc"))
