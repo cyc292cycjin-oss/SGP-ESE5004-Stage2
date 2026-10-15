@@ -206,8 +206,13 @@ research:
       biomass_overflow_to_methane: true     # R1.6 / decision 36: fixed solid-biomass demand above the national potential is served by methane at equal heat
       low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30
       existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
-      feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
-      feedstock_end_of_life_release_fraction: 1.0   # PyPSA-Eur default (HVC_environment_sequestration_fraction 0): all remaining feedstock carbon emitted; method question for user
+      feedstock_carbon_mode: territorial    # R2 (decision 56): territorial = EDGAR 2.B+2.D x multiplier on the process bus + domestic plastics burned (s2b_feedstock.py) | full_release = PyPSA-Eur default (sensitivity)
+      territorial_tables:
+        aeo8_ats_relative: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative.csv
+        gdp: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_gdp.csv
+        population: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_population.csv
+      feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # full_release mode only: S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
+      feedstock_end_of_life_release_fraction: 1.0   # full_release mode only: PyPSA-Eur default (HVC_environment_sequestration_fraction 0)
       hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
       steel_aluminium_routes: "steel: worldsteel 2019 + PyPSA-Eur St_primary_fraction 0.3 / DRI_fraction 1.0 (R1); aluminium: DATA_PENDING (no ASEAN production split)"
     gap_diagnostic:                       # decisions 49, 53: off in the main run; separate labelled run

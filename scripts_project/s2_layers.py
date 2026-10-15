@@ -391,6 +391,14 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     ind_path = repo / I["pypsa_eur_tables"][alloc_mode]
     ind_summary = pd.read_csv(ind_path).set_index("country")
     overflow_ledger, hydrogen_ledger = {}, {}
+    # R2 (decision 56): feedstock carbon. territorial = EDGAR 2.B+2.D on the process bus + domestic plastics burned (s2b_feedstock.py);
+    # full_release = PyPSA-Eur default (all feedstock carbon released) as implemented in S2.
+    fc_mode = str(I.get("feedstock_carbon_mode", "full_release"))
+    if fc_mode not in ("territorial", "full_release"):
+        raise ValueError("Unknown research.s2.industry.feedstock_carbon_mode " + fc_mode)
+    fc_path = repo / I["territorial_tables"][alloc_mode]
+    fc_table = pd.read_csv(fc_path, keep_default_na=False).set_index("country")
+    feedstock_ledger = {}
     loads, deductions, deferred = [], [], []
     n.meta.setdefault("demand_owners", {}); n.meta.setdefault("demand_identity", {})
 
@@ -572,21 +580,45 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 fb = add_bus(n, f"{node} feedstock {carrier} final", f"{carrier} feedstock", c, node)
                 link = f"{node} feedstock {carrier}"
                 if link not in n.links.index:
-                    add_link(n, link, c, f"{carrier} feedstock", [f"{node} {carrier}", fb, f"{node} process emissions", atmosphere_bus(c)],
-                             [1.0, f_process * ef[carrier], (1 - f_process) * eol_release * ef[carrier]], role="FEEDSTOCK_CARBON",
-                             extra={"process_share": f_process, "end_of_life_release": eol_release})
+                    if fc_mode == "territorial":
+                        # the fuel is still drawn from the fuel bus; its carbon is booked only where it is emitted domestically (process bus + plastics below)
+                        add_link(n, link, c, f"{carrier} feedstock", [f"{node} {carrier}", fb], [1.0], role="FEEDSTOCK_CARBON", extra={"feedstock_carbon_mode": "territorial"})
+                    else:
+                        add_link(n, link, c, f"{carrier} feedstock", [f"{node} {carrier}", fb, f"{node} process emissions", atmosphere_bus(c)],
+                                 [1.0, f_process * ef[carrier], (1 - f_process) * eol_release * ef[carrier]], role="FEEDSTOCK_CARBON",
+                                 extra={"process_share": f_process, "end_of_life_release": eol_release, "feedstock_carbon_mode": "full_release"})
                 plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, f"{c}:NonEnergy:{carrier} x HVC primary {scale if carrier == 'oil' else 1.0}", f"{node} feedstock {carrier} demand")
-        # ---- process emissions (EDGAR 2.A + 2.C, 2050) ------------------------------------------------------
+        # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
         proc = sum(float(reg.loc[f"process_emissions_{g}_2050_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
+        fc_row = fc_table.loc[c] if c in fc_table.index else None
+        proc_feed = float(fc_row["process_2B_2D_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
+        plastics = float(fc_row["plastics_burned_co2_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
+        feedstock_ledger[c] = dict(mode=fc_mode, process_2B_2D_2050_t=proc_feed, plastics_burned_co2_2050_t=plastics, edgar_2A_2C_2050_t=proc,
+                                   full_release_2050_t=(float(fc_row["full_release_2050_t"]) if fc_row is not None else None))
         sh, _ = _shares_for(shares, astar_shares, c, "ProcessEmissions")
         ensure_carrier(n, "process emissions")
         for node, s in sh.items():
-            if proc * s <= 0:
+            if (proc + proc_feed) * s <= 0:
                 continue
             g = f"{node} process emissions source"
-            n.add("Generator", g, bus=f"{node} process emissions", carrier="process emissions", p_nom=proc * s / HOURS, p_nom_extendable=False, p_min_pu=1.0, p_max_pu=1.0, marginal_cost=0.0, capital_cost=0.0)
+            n.add("Generator", g, bus=f"{node} process emissions", carrier="process emissions", p_nom=(proc + proc_feed) * s / HOURS, p_nom_extendable=False, p_min_pu=1.0, p_max_pu=1.0, marginal_cost=0.0, capital_cost=0.0)
             n.generators.loc[g, ["country", "research_role", "asset_role"]] = [c, "PROCESS_EMISSION_SOURCE", "exogenous_process_emission"]
-            loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="EDGAR 2.A+2.C x industry multiplier", carrier="process emissions", source_row=f"process_emissions_*_2050_{c}", annual_mwh=proc * s, bus=f"{node} process emissions"))
+            loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="EDGAR 2.A+2.C x industry multiplier" + (" + 2.B+2.D (territorial feedstock carbon, R2)" if proc_feed > 0 else ""),
+                              carrier="process emissions", source_row=f"process_emissions_*_2050_{c}" + (f";feedstock_process_2B_2D_2050_{c}" if proc_feed > 0 else ""), annual_mwh=(proc + proc_feed) * s, bus=f"{node} process emissions"))
+        # ---- domestic plastics burned (R2 b): exogenous release to the national atmosphere, no capture ---------------------
+        if plastics > 0:
+            ensure_carrier(n, "plastic waste"); ensure_carrier(n, "waste incineration")
+            for node, s in sh.items():
+                if plastics * s <= 0:
+                    continue
+                pb = add_bus(n, f"{node} plastic waste", "plastic waste", c, node)
+                g = f"{node} plastic waste source"
+                n.add("Generator", g, bus=pb, carrier="plastic waste", p_nom=plastics * s / HOURS, p_nom_extendable=False, p_min_pu=1.0, p_max_pu=1.0, marginal_cost=0.0, capital_cost=0.0)
+                n.generators.loc[g, ["country", "research_role", "asset_role"]] = [c, "PLASTIC_WASTE_SOURCE", "exogenous_waste_emission"]
+                add_link(n, f"{node} plastic waste burning", c, "waste incineration", [pb, atmosphere_bus(c)], [1.0], role="WASTE_BURNING_RELEASE",
+                         extra={"energy_recovery": "not modelled (R2: emissions only)"})
+                loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="domestic end-of-life plastics burned (What a Waste 3.0 x IPCC Table 2.4)", carrier="plastic waste",
+                                  source_row=f"feedstock_plastics_burned_co2_2050_{c}", annual_mwh=plastics * s, bus=pb))
         # ---- Astar deduction: transport electricity already explicit ------------------------------------------
         te = float(d[(d.sector == "Transport") & (d.carrier == "electricity")].v.sum())
         ie = float(d[(d.sector == "Industry") & (d.carrier == "electricity")].v.sum()) if carrier_mode == "pypsa_eur_2050" else 0.0   # R1: industry electricity is explicit in the route mode
@@ -612,7 +644,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                   bev_charge_efficiency=bev_eff, bev_availability=bev_avail, agriculture_electric_share=ag_el_share, agriculture_efficiency_gain=ag_gain, hvc_primary_fraction=hvc_primary,
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
-                  industry=dict(carrier_mode=carrier_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger, hydrogen_mwh=hydrogen_ledger))
+                  industry=dict(carrier_mode=carrier_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger, hydrogen_mwh=hydrogen_ledger),
+                  feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))
     return ledger
 
 

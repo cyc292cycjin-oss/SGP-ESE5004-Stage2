@@ -19,7 +19,7 @@ from d1_common import (ASEAN, COLUMNS, COST_DIR, BIOMASS_DIR, DEMAND_DIR, LNG_DI
 SCRIPT = "scripts_project/d1_registry.py"
 FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050",
              "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
-             "industry_2050"]  # S2 supplement 02 R1 (scripts_project/s2b_industry.py)
+             "industry_2050", "feedstock_territorial"]  # S2 supplement 02 R1/R2 (scripts_project/s2b_industry.py, s2b_feedstock.py)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
@@ -151,7 +151,7 @@ def main():
                     python=sys.version.split()[0], pandas=pd.__version__, platform=platform.platform(), registry=str(out.relative_to(ROOT)),
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
                     scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
-                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py"]},
+                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py", "scripts_project/s2b_feedstock.py"]},
                     download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)
