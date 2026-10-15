@@ -208,7 +208,11 @@ def test_s2_0_cost_layer_v015_rebase(registry):
     assert r.loc["technology_data_v0_15_0_tag_commit", "value"] == "07e43575c7996a988c60964d00772376ab9bd10c"
     long = pd.read_csv(COST / "technology_data_v0.15.0_EUR2020" / "costs_2050_EUR2020.csv")
     mon = long[long.monetary]
-    assert (mon.currency_year == 2020).all() and (mon.conversion_factor <= 1).all() and (mon.conversion_factor < 1).sum() == 375  # one row was already EUR2020
+    import numpy as np
+    assert (mon.currency_year == 2020).all()
+    assert np.allclose(mon[mon.source_currency_year == 2025].conversion_factor, factor) and (mon.source_currency_year == 2025).sum() == 374
+    assert (mon[mon.source_currency_year == 2020].conversion_factor == 1.0).all()  # 'commodity' row already EUR2020
+    assert (mon[mon.source_currency_year == 2019].conversion_factor > 1.0).all()  # 'pelletizing cost' row inflated 2019 -> 2020
     assert (long[~long.monetary].conversion_factor == 1.0).all()
     wide = pd.read_csv(COST / "technology_data_v0.15.0_EUR2020" / "costs_2050_EUR2020_prepared.csv", index_col=0)
     inv = float(wide.at["direct air capture", "investment"]); fom = float(wide.at["direct air capture", "FOM"]); life = float(wide.at["direct air capture", "lifetime"])
