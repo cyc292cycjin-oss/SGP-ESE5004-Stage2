@@ -123,7 +123,12 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     allowed_status={'INTERIM_S1_SKELETON',R.get('s2',{}).get('status')}
     checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_border',{}).get('switches')=={k:bool(v) for k,v in R['cross_border'].items()},skeleton_flag=n.meta.get('skeleton_status') in allowed_status)
     if network_path is not None and receipt is not None:checks['network_file_sha256_matches_receipt']=sha(network_path)==receipt['network']['sha256']
-    return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected)
+    # R4 (decision 58): register the snapshot weightings (sum must be 8760 h for any horizon; the three columns must agree)
+    w=n.snapshot_weightings;wsum={c:float(w[c].sum()) for c in w.columns}
+    checks['weights_sum_8760_h']=all(abs(v-8760.)<1e-6 for v in wsum.values());checks['weights_columns_agree']=bool((w.nunique(axis=1)==1).all())
+    weights=dict(snapshots=int(len(n.snapshots)),sums_h=wsum,unique_values={c:sorted(set(float(x) for x in w[c].unique())) for c in w.columns},
+                 sha256=hashlib.sha256(np.ascontiguousarray(w.to_numpy(dtype='<f8')).tobytes()).hexdigest(),representative=n.meta.get('representative_weights'))
+    return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,snapshot_weightings=weights)
 
 # ------------------------------------------------------------------ group B, S2 additions
 def gate_b2_storage_cap(n):

@@ -19,8 +19,24 @@ if str(HERE) not in sys.path:
 from s1_solve import Sampler, sha, save, export_lp, reduced_costs, structural_supply_diagnosis
 
 
+def set_representative_weights(n):
+    """R4 (decision 58): a truncated run (N snapshots < full year) represents the whole year. Every snapshot weighting
+    (objective, generators, stores) is set to 8760 / N so that the weights sum to 8,760 h; annual quantities (CO2
+    injection caps, biomass potentials, external annual caps) are NOT scaled. This is the PyPSA-Eur representative-period
+    convention: scripts/prepare_network.py average_every_nhours / time-segmentation set snapshot_weightings so that
+    their sum stays 8760 (and PyPSA.Network.snapshot_weightings docs: weightings sum to the hours of the year)."""
+    N = int(len(n.snapshots)); w = 8760.0 / N
+    for col in ["objective", "generators", "stores"]:
+        n.snapshot_weightings[col] = w
+    if "research_co2_storage" in n.meta:
+        n.meta["research_co2_storage"] = dict(n.meta["research_co2_storage"], horizon_fraction=1.0, weights_note="R4: representative weights, annual caps unscaled")
+    n.meta["representative_weights"] = dict(snapshots=N, weight_hours_per_snapshot=w, sum_hours=w * N, annual_caps_scaled=False, decision="58",
+                                            reference="PyPSA-Eur v2025.07.0 scripts/prepare_network.py (average_every_nhours: snapshot_weightings = n.snapshot_weightings.resample(offset).sum(); segmentation: weightings sum 8760)")
+    return dict(method="representative_weights_sum_8760", snapshots=N, weight_hours_per_snapshot=w, horizon_fraction=1.0, scaled_stores=[], annual_caps_scaled=False)
+
+
 def scale_to_horizon(n):
-    """Annual quantities -> truncated horizon (fraction of 8760 h)."""
+    """S2 (superseded by set_representative_weights in R4): annual quantities -> truncated horizon (fraction of 8760 h)."""
     frac = float(n.snapshot_weightings.generators.sum() / 8760.0)
     ledger = dict(horizon_fraction=frac, scaled_stores=[])
     if "research_role" in n.stores:
@@ -141,7 +157,7 @@ def main(a):
             sns = n.snapshots[:a.truncate]; n.set_snapshots(sns)
             if a.label not in ("SMOKE_TEST_ONLY", "GAP_DIAGNOSTIC"):
                 raise ValueError("Truncated horizons are smoke tests or diagnostics only")
-        scaling = scale_to_horizon(n)
+        scaling = set_representative_weights(n) if a.truncate else dict(method="full_year", snapshots=int(len(n.snapshots)), horizon_fraction=1.0, annual_caps_scaled=False)
         n.meta.update(solver_allowed=True, artifact_role=a.label + "_UNSOLVED", s2_solve_authorization=a.authorization, s2_solve_label=a.label)
         from assembly_components import install_research_constraint_hooks
         from phase4_static import config
