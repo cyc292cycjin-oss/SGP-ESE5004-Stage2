@@ -1,0 +1,382 @@
+{
+ "download_list": [
+  {
+   "fields": "xlsx inside zip: Country_code_A3, ipcc_code_1996_for_standard_report (2A non-metallic minerals, 2B chemical, 2C metal), Y_1970..Y_2024 (kt CO2); licence CC BY-NC-ND 4.0",
+   "item": "EDGAR_2025_GHG annual fossil CO2 by country and sector (IEA-EDGAR CO2 v4)",
+   "landing": "https://edgar.jrc.ec.europa.eu/dataset_ghg2025",
+   "link": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/EDGAR_2025_GHG/IEA_EDGAR_CO2_1970_2024.zip",
+   "param_ids": "process_emissions_*",
+   "purpose": "L19 industrial process emissions by country (cement, chemicals, metals) for 2019 base and process-CC structure",
+   "section": "6"
+  },
+  {
+   "fields": "Table 'World Mine/Plant Production': country, 2023, 2024e (thousand metric tons); Indonesia, Vietnam, Thailand, Philippines, Malaysia listed",
+   "item": "USGS Mineral Commodity Summaries 2025 - Cement (world production table by country)",
+   "landing": "https://www.usgs.gov/centers/national-minerals-information-center/cement-statistics-and-information",
+   "link": "https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-cement.pdf",
+   "param_ids": "industrial_output_cement_*",
+   "purpose": "L19 cement physical output for process-emission intensity",
+   "section": "6"
+  },
+  {
+   "fields": "Table 'World Production, raw steel': country, 2023, 2024e (million metric tons)",
+   "item": "USGS Mineral Commodity Summaries 2025 - Iron and Steel (world raw steel production by country)",
+   "landing": "https://www.usgs.gov/centers/national-minerals-information-center/iron-and-steel-statistics-and-information",
+   "link": "https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-iron-steel.pdf",
+   "param_ids": "industrial_output_steel_*",
+   "purpose": "L19 steel output for DRI/EAF share and process emissions",
+   "section": "6"
+  },
+  {
+   "fields": "Commodity - Transaction = 'Fuel oil - International marine bunkers' and 'Gas Oil/ Diesel Oil - International marine bunkers', Year 2019, Quantity (kt)",
+   "item": "UNSD Energy Statistics Database - International marine bunkers 2019 for Brunei, Cambodia, Lao PDR, Timor-Leste",
+   "landing": "https://unstats.un.org/unsd/energystats/",
+   "link": "https://unstats.un.org/unsd/energystats/dataPortal/",
+   "param_ids": "demand_bunker_pending_*",
+   "purpose": "section 3 bunkers: the 2019 export in pypsa-asean/data/demand/unsd/data has no marine bunker rows for these four countries (likely not reported; confirm zero vs missing)",
+   "section": "3"
+  },
+  {
+   "fields": "residue-to-roundwood ratio (t/m3), sustainable removal share",
+   "item": "Logging-residue factors for Southeast Asian industrial roundwood (e.g. FAO/IEA Bioenergy Task 43 or JRC ENSPRESO methodology)",
+   "landing": "https://publications.jrc.ec.europa.eu/repository/handle/JRC98626",
+   "link": "https://data.jrc.ec.europa.eu/dataset/74ed5a04-7d74-4807-9eab-b94774309d9f",
+   "param_ids": "biomass_potential_*_logging_residues",
+   "purpose": "section 5 logging residues (DATA_PENDING)",
+   "section": "5"
+  },
+  {
+   "fields": "USD/t delivered, moisture basis",
+   "item": "Oil palm trunk/frond feedstock price survey (none found in NEDO/NRI 2024 or ERIA 2024)",
+   "landing": "https://www.eria.org/uploads/Development-of-the-Bioenergy-Supply-Chain-in-AZEC-Partner-Countries.pdf",
+   "link": "https://www.nedo.go.jp/content/800028002.pdf",
+   "param_ids": "biomass_cost_*_oil_palm_trunk",
+   "purpose": "section 5 cost of oil_palm_trunk (DATA_PENDING)",
+   "section": "5"
+  },
+  {
+   "fields": "Composition - food, garden/green (% weight MSW)",
+   "item": "What a Waste 3.0 composition for Lao PDR (food/garden share missing in the country dataset)",
+   "landing": "https://datatopics.worldbank.org/what-a-waste/",
+   "link": "https://datacatalog.worldbank.org/search/dataset/0039597",
+   "param_ids": "biomass_potential_LA_msw_organic",
+   "purpose": "section 5 msw_organic LA (DATA_PENDING)",
+   "section": "5"
+  },
+  {
+   "fields": "GtCO2 storage resource by basin, P10/P50/P90",
+   "item": "National CO2 storage assessments for Lao PDR and Myanmar (none published; ERIA 2024 p.56)",
+   "landing": "https://www.eria.org/",
+   "link": "https://www.eria.org/research/carbon-capture-utilisation-and-storage-in-asean",
+   "param_ids": "co2_storage_potential_unassessed_LA, co2_storage_potential_unassessed_MM",
+   "purpose": "section 1 CO2 storage LA/MM (treated as 0, decision 30)",
+   "section": "1"
+  },
+  {
+   "fields": "CapacityinMtpa for UnitIDs listed in LNG_IMPORT_TERMINALS_GEM_2025.csv with empty capacity",
+   "item": "GEM LNG terminal units without capacity (Haiphong FSRU VN under construction; proposed units in MY/VN/ID)",
+   "landing": "https://www.gem.wiki/Haiphong_FSRU",
+   "link": "https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/",
+   "param_ids": "lng_candidate_* with DATA_PENDING, lng_existing_capacity_VN",
+   "purpose": "section 1 LNG caps (VN existing cap excludes one unit)",
+   "section": "1"
+  },
+  {
+   "fields": "USD/MBtu regasification + send-out cost",
+   "item": "Regasification tariff for ASEAN LNG terminals (to add to the WEO Japan customs-border price)",
+   "landing": "https://www.iea.org/reports/world-energy-outlook-2025",
+   "link": "https://www.iea.org/reports/world-energy-outlook-2025",
+   "param_ids": "fuel_price_lng_regasification_adder",
+   "purpose": "section 1 fuel price (fuel_price_lng_regasification_adder DATA_PENDING)",
+   "section": "1"
+  },
+  {
+   "fields": "technology geothermal: investment EUR/kW_e, efficiency, VOM",
+   "item": "technology-data geothermal electricity investment/efficiency/VOM (absent in v0.13.2; v0.15.0 to be checked by user)",
+   "landing": "https://technology-data.readthedocs.io/",
+   "link": "https://github.com/PyPSA/technology-data/releases",
+   "param_ids": "geothermal_existing_efficiency, geothermal_existing_VOM, geothermal_existing_investment",
+   "purpose": "section 1 existing geothermal performance (DATA_PENDING in layer A; layer B has AEO8 Geothermal average)",
+   "section": "1"
+  }
+ ],
+ "generated_utc": "2026-10-15T04:38:51+00:00",
+ "network_builds": 0,
+ "outputs": {
+  "research_inputs/biomass_v5/BIOMASS_CROSSCHECK_IRENA.csv": {
+   "bytes": 923,
+   "sha256": "3ddeec9b069b3c0abacfd8e4c4a66b9b4ca45798c7ff7bc34f3c7f14e7a6f97a"
+  },
+  "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv": {
+   "bytes": 77950,
+   "sha256": "ccf8c117e6e4d2576625d2dd57c404641af51fcb69607745e7d1bf3b754a6820"
+  },
+  "research_inputs/biomass_v5/REPLICATION_FAOSTAT2010_VS_R1A.csv": {
+   "bytes": 617,
+   "sha256": "ee2ab9ec3ffc8e1581d4e432e83616e5d66a9f5e34d74750016088e3c199da91"
+  },
+  "research_inputs/biomass_v5/REPLICATION_FAOSTAT2010_VS_R3_BY_CATEGORY.csv": {
+   "bytes": 1453,
+   "sha256": "cd1eb46116f5752b17acf6f503607f7808cf1037fc0210880cbb9d4b747af44e"
+  },
+  "research_inputs/biomass_v5/REPLICATION_R3_FACTOR_CONSISTENCY.csv": {
+   "bytes": 1562,
+   "sha256": "9d790d65cabc857599583e6a0153a234fb9c0fd7e334d28085b5b2a9822b66ec"
+  },
+  "research_inputs/biomass_v5/REPLICATION_R3_VS_R1A.csv": {
+   "bytes": 542,
+   "sha256": "c0a139a95f89564f9f411748c9037f89934cb703c2597a4632fda6369fcc936c"
+  },
+  "research_inputs/biomass_v5/sources/ERIA_AZEC_2024_pdf36_37_table3_8_excerpt.txt": {
+   "bytes": 2600,
+   "sha256": "973d705b6d87a079256dc36e6aace5fc0ddfcd4832bed9d66e62035f034b018b"
+  },
+  "research_inputs/biomass_v5/sources/ERIA_AZEC_2024_table5_3_excerpt.txt": {
+   "bytes": 5091,
+   "sha256": "87b2b43f32d609abcad1ad193b2abac95d07da4d42aa3b68252cb75016e9e881"
+  },
+  "research_inputs/biomass_v5/sources/IRENA2017_TABLE_R3_PARSED.csv": {
+   "bytes": 11562,
+   "sha256": "1b104acbfadad43875a2d1d5b6dc89d583d5989b90bba403e4c8b7063ea55316"
+  },
+  "research_inputs/biomass_v5/sources/IRENA2017_pdf20_40_pypdf_text.txt": {
+   "bytes": 39105,
+   "sha256": "eaf81aa2062ff19d8540123a1932f7ed4236ad17267360d225200cfa9516f445"
+  },
+  "research_inputs/biomass_v5/sources/NEDO_NRI_2024_800028002_pdf7_8_prices_excerpt.txt": {
+   "bytes": 1720,
+   "sha256": "32f2ab22e6218bd2d374fc01c60c04d3c6142470763b3a5c4eed569f765cd34f"
+  },
+  "research_inputs/cost_layers_v5/LAYER_A_COVERAGE_WATCHLIST.csv": {
+   "bytes": 4441,
+   "sha256": "dc61184590e2d647c8e0722402949a96dcc45c31c828cc37c8eef0fc231f06f3"
+  },
+  "research_inputs/cost_layers_v5/LAYER_A_TECHNOLOGY_DATA_V0_13_2_2050.json": {
+   "bytes": 768,
+   "sha256": "0e5a32aebd48acd136b92864da95fa2fca45de8df3f16b0cff740b0c4059f6de"
+  },
+  "research_inputs/cost_layers_v5/LAYER_B_AEO8_AUTHOR_RULE_2050.csv": {
+   "bytes": 5636,
+   "sha256": "384b271d51841aa71d86d9a66b32a3c693fa6994fa5a4a9ab53524a10bd7785c"
+  },
+  "research_inputs/cost_layers_v5/LAYER_B_VERIFICATION_VS_AUTHOR_OUTPUT.csv": {
+   "bytes": 5588,
+   "sha256": "de0083291e6911c3a2fac7c55416271c77b860417402a85aa4c7e9af38b549d0"
+  },
+  "research_inputs/cost_layers_v5/TECHNOLOGY_DATA_VERSION_COMPARISON_2050.csv": {
+   "bytes": 5612,
+   "sha256": "3d3440b81ade2a482d8f981232b27d6256625d7ff64d7bbb245c1cce4b0f250a"
+  },
+  "research_inputs/cost_layers_v5/sources/AEO8_Table_D15_Cost_Summary.csv": {
+   "bytes": 1745,
+   "sha256": "0ee20484c049352f0a6401e838048bb0ef4906ac12e8821e40502963a999a57d"
+  },
+  "research_inputs/cost_layers_v5/sources/AEO8_Table_D17_Declining_Factor.csv": {
+   "bytes": 697,
+   "sha256": "9170f33609ccbe005647a7ebfdffc69e8d95abf06cb7cf54a8eafe2efa07f72d"
+  },
+  "research_inputs/cost_layers_v5/sources/AEO8_Table_D18_Regional_Factor.csv": {
+   "bytes": 73,
+   "sha256": "14fa04dfad8f3ac6e85dbe22840b5f41b40d66cb10ed706d63e92f6c062ab6a3"
+  },
+  "research_inputs/cost_layers_v5/sources/costs_2050_v0.13.4.csv": {
+   "bytes": 268897,
+   "sha256": "180988f612c46ed41c82e763eb6eacddc9461b8a43ba4ad11234272f21125d1c"
+  },
+  "research_inputs/cost_layers_v5/sources/costs_2050_v0.15.0.csv": {
+   "bytes": 281294,
+   "sha256": "244c8f9ed3a5b8b0be5f3610c9cf27a8a5a27b09ed42afad13c53221c92992f6"
+  },
+  "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv": {
+   "bytes": 128806,
+   "sha256": "16f1b0942d87f725a58ecc70b384be08cfe6e2fa4a2664d8598ac074dc0ef589"
+  },
+  "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv": {
+   "bytes": 131110,
+   "sha256": "ab1fddeea0d3c2a29ff16aa6376d09c24c0a863ee5c73919125b8b82a2b99361"
+  },
+  "research_inputs/demand_v5/DEMAND_2050_COUNTRY_SHARES_2019_2050.csv": {
+   "bytes": 5032,
+   "sha256": "f86eb24cf0540ba991eb31d07a1fca876e4d16d5f9cd75a5b7b1e5c64bf8bec5"
+  },
+  "research_inputs/demand_v5/DEMAND_2050_CROSSCHECKS.json": {
+   "bytes": 10726,
+   "sha256": "b1c51208bbb72e16a81c227a53b1d497813eb98d1aef4d8705acad26c3b402ea"
+  },
+  "research_inputs/lng_terminals_v5/LNG_IMPORT_CAPS_BY_COUNTRY.csv": {
+   "bytes": 663,
+   "sha256": "4249b116b4a560645d0372b1d62d07773c778ec5032a0bebdaed8cbe1134a6bf"
+  },
+  "research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv": {
+   "bytes": 8663,
+   "sha256": "9c1bb82f6e20531144b4a157150b9d9aa02e26255cc7553ec18caa7156f4a7f6"
+  },
+  "research_inputs/registry_v5/DATA_PENDING_LIST.csv": {
+   "bytes": 20819,
+   "sha256": "6e8325a551b8f622a20849e2e3a37769ec6fb09f9a333a1f2bd9a362de7df9e6"
+  },
+  "research_inputs/registry_v5/DATA_REGISTRY.csv": {
+   "bytes": 333199,
+   "sha256": "8c2f38b184d4b227c73febbdecb82735ab59c2894f054153057698ace0c76631"
+  },
+  "research_inputs/registry_v5/DOWNLOAD_LIST.csv": {
+   "bytes": 4742,
+   "sha256": "6e834213f256dfebb21a117960f974ad36bcce5ba7b56ad2ac7ca999e1b82279"
+  },
+  "research_inputs/registry_v5/FOSSIL_PRODUCTION_2019_UNSD.csv": {
+   "bytes": 6826,
+   "sha256": "3b771950fa0b3cd9f6e9048ef60dfe14f1bea1ad020ee8f89ed3810894168068"
+  },
+  "research_inputs/registry_v5/FOSSIL_PRODUCTION_CAPS_2050.csv": {
+   "bytes": 4043,
+   "sha256": "b3349d0b2818a3398c84c7efa05f54a9a988173804b1f57dafb75e66b781bc87"
+  },
+  "research_inputs/registry_v5/FUEL_PRICES_2050_EUR2020.csv": {
+   "bytes": 2031,
+   "sha256": "86e4a0a3db91ca465dc2f2eb2e2ff0f88f89a30379f9519aba36f18262df749e"
+  },
+  "research_inputs/registry_v5/FUEL_PRICES_CROSSCHECK_TECHNOLOGY_DATA.csv": {
+   "bytes": 481,
+   "sha256": "b3ae8fe3fb27f9b511d42a8f031448d333a7d10dc21d7404791513ef4b016d1c"
+  },
+  "research_inputs/registry_v5/sources/A191RD3A086NBEA.csv": {
+   "bytes": 1771,
+   "sha256": "32380c55db729bf4fd6c09ec924a048d89bb0eee43785e3a9b6daf3238cdc5e7"
+  },
+  "research_inputs/registry_v5/sources/AEO8_2050_ASEAN_TOTALS.csv": {
+   "bytes": 12195,
+   "sha256": "6a57f0d5167f0b2e463efb1701ea7bf3d9f56c3a3526375e990b6e2f609a3652"
+  },
+  "research_inputs/registry_v5/sources/AEO8_2050_DEMAND.md": {
+   "bytes": 9419,
+   "sha256": "395dc88d1d84fdf3d169a8c066309e0f39a3f771f3003e472b80c85856fc9e96"
+  },
+  "research_inputs/registry_v5/sources/BIOMASS_EXTRACTION.md": {
+   "bytes": 45345,
+   "sha256": "ff4bdbef52a92878e1512220e13524b5d1c78500122800aa272f2192fb4a8ac1"
+  },
+  "research_inputs/registry_v5/sources/BIOMASS_RAW_DATA_SUMMARY.md": {
+   "bytes": 2656,
+   "sha256": "ecc165fab298a4468d7c32fcbaed879be5ae3d5ab2251cd6ae24c4e6d95b1296"
+  },
+  "research_inputs/registry_v5/sources/CO2_STORAGE_EXTRACTION.md": {
+   "bytes": 41186,
+   "sha256": "df6c9ac9721e0dc0e78b0fc93e290f070beaf115a8f5461c89876314feb29eba"
+  },
+  "research_inputs/registry_v5/sources/CO2_STORAGE_OGCI_EXTRACTION.md": {
+   "bytes": 32882,
+   "sha256": "f0fb5d3e14918cd745730a78fd5b5b9a4f8429ac2fdd838a0b653513711e7bfb"
+  },
+  "research_inputs/registry_v5/sources/FAOSTAT_FO_ASEAN11_2019_2024.csv": {
+   "bytes": 548899,
+   "sha256": "eb43fb06a8f24cc5cfb9f9027c6d69f3d475064b4f5acfa37c2fc365c2004de9"
+  },
+  "research_inputs/registry_v5/sources/FAOSTAT_QCL_ASEAN11_2019_2024.csv": {
+   "bytes": 268039,
+   "sha256": "a93fcf6d47d5eb175ac2b22d8992d52838ddc16bf76e5b0672a3817af9b4cf07"
+  },
+  "research_inputs/registry_v5/sources/GEM_LNG_IMPORT_CAPACITY_BY_COUNTRY_STATUS_Mtpa.csv": {
+   "bytes": 408,
+   "sha256": "6c581f356911b15f19cb2cbae50c4bbba4a530a3fee2e9c02f4416d6555642c4"
+  },
+  "research_inputs/registry_v5/sources/GEM_LNG_TERMINALS_ASEAN_UNITS.csv": {
+   "bytes": 69162,
+   "sha256": "e67e97db1108bfc9e185b93aaf7b5d9f19eb56cdbf752b6ca4b8a842e16e2fa9"
+  },
+  "research_inputs/registry_v5/sources/GROWTH_CHAIN_2019_2050_WDI_SSP2.csv": {
+   "bytes": 1947,
+   "sha256": "1f991f99440b1870cd5786c5b6f3555efd6da9c71d8526d305570800db7ff9c6"
+  },
+  "research_inputs/registry_v5/sources/SHA256SUMS.txt": {
+   "bytes": 1159,
+   "sha256": "39a58348b7c855dea03706e5a92a8465cbf622b0cfd58872b60771bc48d47b25"
+  },
+  "research_inputs/registry_v5/sources/SHA256SUMS_raw2.txt": {
+   "bytes": 1276,
+   "sha256": "0ed82b61589ab1ffb4f524307890a261ff0507503c8698fe1d3fddde5ababd03"
+  },
+  "research_inputs/registry_v5/sources/SHA256SUMS_raw3.txt": {
+   "bytes": 214,
+   "sha256": "2764df7ac173ec4622ae04330a9948a19a765d6e67d85307b2c0d3cc08b82f57"
+  },
+  "research_inputs/registry_v5/sources/SHA256SUMS_raw4.txt": {
+   "bytes": 247,
+   "sha256": "c82bf2f5f4fd4c07448a459d5bc83cc2740ce63c360060b85d8d64e44dc27f49"
+  },
+  "research_inputs/registry_v5/sources/SOURCE_MANIFEST.md": {
+   "bytes": 4734,
+   "sha256": "cff100e850df18c939f9300adb3af076ab77e770d96d0907bfa6d16434d6ef2c"
+  },
+  "research_inputs/registry_v5/sources/SSP2_2025_POP_GDP_ASEAN11.csv": {
+   "bytes": 4837,
+   "sha256": "47381eba37cea9328793c1aadd86cc4a81b3001595965df19dcac2f345dda1a3"
+  },
+  "research_inputs/registry_v5/sources/WEO2025_FOSSIL_PRICES.csv": {
+   "bytes": 17463,
+   "sha256": "3aa521f8ce95fd3f66c0d062d3936a200b6ea30cd22eea6515db6a88112e6833"
+  },
+  "research_inputs/registry_v5/sources/WEO2025_FOSSIL_PRICES.md": {
+   "bytes": 6580,
+   "sha256": "6775588b3b89e445c45607739b156ebe634687470992fbb5e3878eb8f86fcdb2"
+  },
+  "research_inputs/registry_v5/sources/WHAT_A_WASTE_3_ASEAN11_COUNTRY.csv": {
+   "bytes": 14423,
+   "sha256": "bef076412d82afb68232dae69cca6c6f65ac44e1e802d7b4351cb2c274525a8e"
+  },
+  "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml": {
+   "bytes": 29181,
+   "sha256": "bfbe9160db09c3e960b97173bc755492b7638e0f4a5081ffaa1dddd4635da787"
+  },
+  "research_inputs/registry_v5/sources/s1_network_nodes_xy.csv": {
+   "bytes": 4386,
+   "sha256": "b3593a91434d28a0235f1a2092b0b03cbb68b6667edd060bd5f37b57c3185b18"
+  }
+ },
+ "pandas": "2.3.1",
+ "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+ "python": "3.11.13",
+ "registry": "research_inputs/registry_v5/DATA_REGISTRY.csv",
+ "registry_sha256": "8c2f38b184d4b227c73febbdecb82735ab59c2894f054153057698ace0c76631",
+ "schema": "d1-data-registry-evidence-v1",
+ "scripts": {
+  "scripts_project/d1_biomass.py": "4673d2fc1b1d6fa1f7289a04f26e1be27df8f42ab63c5ac1200607a71bf8c985",
+  "scripts_project/d1_co2_storage.py": "1f602433cdafe9ff99f78bd52c9b34d69ac418bc242d17b6311c334df1221e6a",
+  "scripts_project/d1_common.py": "3a1380751e180144332c68340d4dddea4c3916ca1472593dced662c4c129e9db",
+  "scripts_project/d1_cost_layers.py": "c8579f6d73f8c9eac2c88205db14f124ffbdbd789a073d784d6915dd3e7991ec",
+  "scripts_project/d1_demand_2050.py": "0a641d65bf7e9651420a25873e78cac61b05b9c1a96a1f6cd067bf32142da9df",
+  "scripts_project/d1_demand_shares.py": "4be741d5875adde0c8fabb24353666f5e87e8f9a5c710c0ef8b19925fbe13656",
+  "scripts_project/d1_fossil_production.py": "94a1e9c5ee977d87d8bf20f2c87abcfa8cd31136605ffa5921094d6003a15444",
+  "scripts_project/d1_fuel_prices.py": "f3d13d870a463990f9ac5363bbb843fac11b78c1fbc85ecbe037808abbf81f68",
+  "scripts_project/d1_lng_terminals.py": "9e5e92c17ab1cdc5e4f9a642f79ce4cd745726393002351a329ca9be840e7ec0",
+  "scripts_project/d1_registry.py": "2f29e9658611d5bf5a8663722e3b391cd5caae6faa9ff4af77db9c320be3f720"
+ },
+ "solver_runs": 0,
+ "summary": {
+  "by_script": {
+   "scripts_project/d1_biomass.py": 258,
+   "scripts_project/d1_co2_storage.py": 42,
+   "scripts_project/d1_cost_layers.py": 67,
+   "scripts_project/d1_demand_2050.py": 38,
+   "scripts_project/d1_demand_shares.py": 47,
+   "scripts_project/d1_fossil_production.py": 66,
+   "scripts_project/d1_fuel_prices.py": 22,
+   "scripts_project/d1_lng_terminals.py": 57,
+   "scripts_project/d1_registry.py": 72
+  },
+  "by_status": {
+   "CANDIDATE_ONLY": 24,
+   "DATA_PENDING": 98,
+   "REFERENCE_ONLY": 28,
+   "REGISTERED": 436,
+   "SENSITIVITY": 55,
+   "SOURCE_ZERO": 28
+  },
+  "by_tier": {
+   "A": 201,
+   "B": 206,
+   "C": 262
+  },
+  "data_pending": 98,
+  "rows": 669
+ }
+}

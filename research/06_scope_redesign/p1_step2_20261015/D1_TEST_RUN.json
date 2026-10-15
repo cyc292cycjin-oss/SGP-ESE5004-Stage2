@@ -1,0 +1,25 @@
+{
+ "generated_epoch": 1792039800.4567573,
+ "python": "3.11.13",
+ "command": "PYTHONHASHSEED=0 python -m pytest tests/research -q --no-header -p no:cacheprovider (WSL, /home/jin/miniforge3/envs/pypsa-earth)",
+ "d1_tests": {
+  "file": "tests/research/test_d1_registry.py",
+  "command": "python -m pytest tests/research/test_d1_registry.py -q --no-header -p no:cacheprovider",
+  "result": "11 passed"
+ },
+ "full_suite": {
+  "file": "d1_pytest_full.log",
+  "sha256": "12c297b9df2d716691703c8e62cabb218693805c056022b0f8257253763f5836",
+  "summary": "4 failed, 354 passed, 291 warnings in 24.72s",
+  "failed": [
+   "tests/research/test_gate4_activation.py::AppliedInputTests::test_coverage_and_ev_boundary_remain_guarded",
+   "tests/research/test_gate4_activation.py::AppliedInputTests::test_nec_source_rows_unique_and_retained",
+   "tests/research/test_gate4_activation.py::AppliedInputTests::test_prior133_values_unchanged_new19_have_sources",
+   "tests/research/test_gate4_activation.py::AppliedInputTests::test_rail_parent_not_posted_and_ph_stays_blocked"
+  ],
+  "elapsed_s": 27
+ },
+ "note": "The 4 failures are identical to the baseline branch (345fc30f) and S1 records (S1_TEST_RUN.json): tests/research/test_gate4_activation.py AppliedInputTests depend on the Assembly-V1 registry state and are unrelated to D1. D1 adds 11 passing tests (343 -> 354 passed).",
+ "solver_runs": 0,
+ "network_builds": 0
+}

@@ -153,6 +153,17 @@ research:
     network_limit_GWkm: null              # upstream Europe default 2000 GWkm not applied
     gas_network_repurposing: false        # upstream 0.8 CH4->H2 repurposing factor not applied
     hydrogen_colors: false
+  cost_layer:                             # D1 (2026-10-15), decision 46 option A: two registered cost layers, switchable here
+    active: technology_data_v0_13_2_2050  # main run: every technology from technology-data v0.13.2, year 2050, EUR2020
+    layers:
+      technology_data_v0_13_2_2050:
+        file: research_inputs/cost_layers_v5/LAYER_A_TECHNOLOGY_DATA_V0_13_2_2050.json
+        aeo8_overrides: false             # the author's append_cost_data step is NOT applied
+      aeo8_author_rule_2050:              # sensitivity: AEO8 D.15 x ECB2020 FX x (1 - D.17 2050 decline where labels match)
+        file: research_inputs/cost_layers_v5/LAYER_B_AEO8_AUTHOR_RULE_2050.csv
+        aeo8_overrides: true
+    smr_cost_source: aeo8_author_rule_2050   # decision 46: SMR always from AEO8 D.15 (grade C, +-30 %) in both layers
+    registry: research_inputs/registry_v5/DATA_REGISTRY.csv
   cost_scaling:                           # decision 41; multiplies capital_cost per technology carrier; 1.0 = no change
     nuclear: 1.0
     nuclear SMR: 1.0
