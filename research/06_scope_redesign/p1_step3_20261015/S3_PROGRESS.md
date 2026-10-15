@@ -1,0 +1,33 @@
+# S3 进度记录（防中断用；每个子步骤提交后更新）
+
+分支 `codex/s3-gas-imports-shipping-20261015`（自 S2 分支 `codex/s2-co2-biomass-demand-20261015` @ 8d61bd37 开出）；draft PR 叠在 PR #23 上（S3-1 后开）。
+仓库 `cyc292cycjin-oss/SGP-ESE5004-Stage2`；WSL 路径 `/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model`。
+求解环境：`/home/jin/miniforge3/envs/pypsa-earth/bin/python`，`PYTHONHASHSEED=0`，PyPSA 0.30.3 / linopy 0.5.5 / HiGHS 1.11（IPM）；截断运行权重按第 58 项（8760/N）。
+构建/冒烟输出：`results_project/s3/`（忽略于 git；回执复制到本目录 `evidence/`）。
+
+| 子步骤 | 内容 | 状态 | 提交 | 说明 |
+|---|---|---|---|---|
+| S3-0 | 收尾修正：第 61 项 IDEES 工业比率；第 59/62 项走廊（TH–MM、LA–MM）与 APG 核对；第 63 项废塑料代理值；柬埔寨交通链核对；重算结构表 + 冒烟 | 完成（见下） | 本步提交 | 详见下表 |
+| S3-1 | 天然气网络与国内生产、LNG | 待做 | — | 第九批 GEM 管道数据已入库（`raw9/`，`extraction/GEM_GGIT_GAS_PIPELINES_ASEAN.csv`） |
+| S3-2 | 东盟外进口（化石 + 绿色载体，Neumann 等 2024 价格 +20%） | 待做 | — | 已只读获取：arXiv:2404.03927 v1 PDF（SHA b6a9f1b3…，2026-10-15T10:05:48Z）、Nat. Commun. 2025 补充材料 PDF（SHA c4321de9…，10:15:10Z）；两文件各 23/36 MB，不入 git，只登记 URL/时间/SHA |
+| S3-3 | 氨与甲醇（全区母线、哈伯-博施、甲醇合成、氨裂解） | 待做 | — | S3-0 已把比率表的氨/甲醇行暂按 PyPSA-Eur `ammonia: false` 路线折成 H2+电 / 甲烷+电（开关 `ammonia_methanol_mode`），S3-3 切到 `regional_buses` |
+| S3-4 | 航运（670.2 TWh，甲醇份额 1） | 待做 | — | |
+| S3-5 | 合成/生物燃料碳归属（origin_neutral 主算，producer_credit 敏感性） | 待做 | — | 第 64 项已由用户确认 |
+| S3-6 | V5 门槛新增 B 组检查 | 待做 | — | |
+| S3-7 | 构建与冒烟（两种碳归属模式各一次） | 待做 | — | |
+| 交付 | `S3_REPORT.md`、`S3_EVIDENCE.json`、`S3_TEST_RUN.json`、`DOWNLOAD_LIST.csv` | 待做 | — | |
+
+## S3-0 明细
+
+| 项 | 做法 | 输出 |
+|---|---|---|
+| 0.1 第 61 项 | `scripts_project/s3_0_industry_ratios.py`：原样导入 PyPSA-Eur v2025.07.0 `build_industry_sector_ratios.py` 的 11 个部门函数（iron_and_steel 102、chemicals_industry 296、nonmetalic_mineral_products 635、pulp_paper_printing 832、food_beverages_tobacco 991、non_ferrous_metals 1057、transport_equipment 1259、machinery_equipment 1309、textiles_and_leather 1361、wood_and_wood_products 1410、other_industrial_sectors 1455 行），参数取 config.default.yaml 815–910 行，`reference_year` 2019；EU27 氨产量按 PyPSA-Eur 规则从 USGS 氮表 T12 复现（只读获取，15,712.9 kt NH3，18 国）；`scripts_project/s3_0_industry.py`：全部子部门改用这些比率（钢铁 0.3 DRI+EAF / 0.7 EAF；水泥 = 熟料/0.656 × Cement 比率；其余子部门 = UNSD 2019 能耗 × 乘数 × 效率因子（2050/2019 EU27 单耗）× 2050 载体份额；UNSD→PyPSA-Eur 映射表 C 级）；低温热行 → 节点工业低温热母线；S2B technology-data 钢铁/水泥 → `*_TD_SENSITIVITY.csv`（开关 `research.s2.industry.ratio_source`） | `registry_v5/INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv`（27 列）、`..._TODAY_EU27_2019.csv`、`demand_v5/INDUSTRY_2050_SUMMARY_*.csv`（覆盖 S2B）、`INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv`、`INDUSTRY_2050_COMPARISON_BAS_S2B_S3.csv`（S2B 列取自冻结文件 `..._S2B_FROZEN.csv` = 提交 8d61bd37）、`INDUSTRY_2050_GAPS.csv` |
+| 0.2 第 59/62 项 | `scripts_project/s3_0_corridors.py`：走廊表新增 `APG11_TH_MM`（MM2 4–TH2 4，大圆 233 km × 1.25 = 291.8 km，2025 容量 0，候选）与 `APG17_LA_MM`（LA2 5–MM2 13，284 km × 1.25 = 354.7 km，2025 容量 30 MW 存量）；线路在构建时由 `s2_layers.add_apg_corridor_lines` 生成（成本 42.01 EUR/MW/km/a、线型/电气参数按基础网最小并联数的跨境线）；24 走廊 vs 18 个 APG 项目核对表 | `corridors/cross_border_corridors.csv`（26 行）、`CORRIDOR_APG_CROSSCHECK_2024.csv`、`CORRIDOR_APG_EVIDENCE.json`；H2/CO₂ 候选自动再生成（跨境候选 19 → 21，MM 接入） |
+| 0.3 第 63 项 | `s2b_feedstock.py`：LA 塑料份额 = 10 国 MSW-2050 加权均值 0.165（敏感性 0–0.29）；KH/TH/VN 未收集垃圾露天焚烧份额 = ID+MM+PH 加权均值 0.739（敏感性 0–0.739） | `FEEDSTOCK_CARBON_TERRITORIAL_2050_*.csv`、登记表 C 级行 |
+| 0.4 KH 核对 | `scripts_project/s3_0_kh_check.py`（只报告） | `KH_TRANSPORT_CHAIN_CHECK.json` |
+| 0.5 构建与冒烟 | `results_project/s3/`：两情景构建通过（Line 107 = 105 + 2），年度结构性缺口表（一体化 11 国全部有 CO₂ 去向；不互联 KH/LA/MM/SG/VN 缺口），56×3h 冒烟：一体化 HiGHS IPM "imprecise" → 报不可行，gap_diagnostic 最优且全部松弛为 0（求解精度问题，非物理缺口，报告 §1.5）；不互联真实不可行，gap_diagnostic CO₂ 缺口 KH 16.5 / LA 8.5 / MM 4.3 / SG 11.9 / VN 96.4 Mt；测试 371 通过 / 4 基线失败 | `evidence/s3_0/`（回执、结构表、测试日志）、`S3_0_SMOKE_CHECK.json`（`s3_0_smoke_check.py`） |
+
+## 如果再次中断，从哪里开始
+
+- 按上表第一个"进行中/待做"的子步骤继续；每步完成后提交并更新本表。
+- S3-0 的构建/冒烟脚本：`/home/jin/run_s3_build.sh`（输出 `results_project/s3/STATUS.txt`，`DONE` 为结束标志）；测试：`/home/jin/run_s3_tests.sh`。

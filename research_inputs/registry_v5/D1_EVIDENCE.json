@@ -31,13 +31,33 @@
    "item": "worldsteel Steel Statistical Yearbook 2019/2020 - crude steel production by process"
   }
  ],
+ "closed_in_s3": [
+  {
+   "closed_by": "raw8/JRC-IDEES-2021_EU27.zip -> registry_v5/sources/jrc_idees_2021/EU27/ -> scripts_project/s3_0_industry_ratios.py (decision 61)",
+   "item": "JRC-IDEES-2021 Industry workbook EU27 (JRC-IDEES-2021_Industry_EU27.xlsx)"
+  },
+  {
+   "closed_by": "raw8/ACE2024_APG_Interconnections_Project_Profiles.pdf -> extraction/APG_AIMS3_PRIORITY_INTERCONNECTIONS_2024.csv -> scripts_project/s3_0_corridors.py (decisions 59/62)",
+   "item": "ACE 2024 APG Interconnections Project Profiles (AIMS III priority interconnections)"
+  },
+  {
+   "closed_by": "raw9/GEM-GGIT-Gas-Pipelines-2025-11.xlsx -> extraction/GEM_GGIT_GAS_PIPELINES_ASEAN.csv -> S3-1 gas network (existing cross-border pipeline capacities; units without capacity stay DATA_PENDING)",
+   "item": "GEM Global Gas Infrastructure Tracker - gas pipelines (ASEAN cross-border and domestic)"
+  },
+  {
+   "closed_by": "read-only fetch of myb1-2022-nitro-ert.xlsx (public S3 URL from PyPSA-Eur v2025.07.0 retrieve.smk) -> s3_0_industry_ratios.build_ammonia_production (grade B, replaces the 17,000 kt proxy)",
+   "item": "USGS Minerals Yearbook nitrogen table (PyPSA-Eur ammonia_production.csv input)"
+  }
+ ],
  "download_list": [
   {
-   "fields": "Industry workbook sheets fec/ued/emi/out for EU27 (PyPSA-Eur rule retrieve_jrc_idees)",
-   "item": "JRC-IDEES-2021 Industry workbook EU27 (JRC-IDEES-2021_Industry_EU27.xlsx)",
-   "landing": "https://joint-research-centre.ec.europa.eu/potencia-policy-oriented-tool-energy-and-climate-change-impact-assessment/jrc-idees_en",
-   "link": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/POTEnCIA/JRC-IDEES-2021/JRC-IDEES-2021.zip",
-   "purpose": "PyPSA-Eur v2025.07.0 build_industry_sector_ratios.py 2050 sector ratios (27 sub-sectors incl. the low-temperature heat row) for R1 (decision 55); requested in S2B, not downloaded (no authorisation)"
+   "fields": "Capacity (bcm/y or BOE/d) for the GEM_GGIT_GAS_PIPELINES_ASEAN.csv rows with empty capacity; owner/operator capacity statements",
+   "item": "GEM gas pipeline units without capacity (Malaysia-Singapore pipeline 1991; JDA-Arthit 2008 TH; other ASEAN rows with CapacityBcm/y '--')",
+   "landing": "https://www.gem.wiki/Malaysia-Singapore_Gas_Pipeline",
+   "link": "https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/",
+   "param_ids": "gas_pipeline_existing_* with DATA_PENDING",
+   "purpose": "S3-1 existing cross-border gas pipeline capacities (rows without capacity carried as DATA_PENDING)",
+   "section": "S3-1"
   },
   {
    "fields": "USD/t delivered, moisture basis",
@@ -85,7 +105,7 @@
    "section": "1"
   }
  ],
- "generated_utc": "2026-10-15T08:59:01+00:00",
+ "generated_utc": "2026-10-15T10:54:40+00:00",
  "network_builds": 0,
  "outputs": {
   "research_inputs/biomass_v5/BIOMASS_CROSSCHECK_IRENA.csv": {
@@ -228,37 +248,61 @@
    "bytes": 15351,
    "sha256": "1ccb3af99a3db10dc495c68d57ac123ade5ca47845d39b43884ac86ff5af004b"
   },
+  "research_inputs/demand_v5/INDUSTRY_2050_COMPARISON_BAS_S2B_S3.csv": {
+   "bytes": 3496,
+   "sha256": "d9ab734565a940326ca3fb964b33d8f8408b55ed96523d1a49d5d2515a8eea53"
+  },
   "research_inputs/demand_v5/INDUSTRY_2050_EVIDENCE.json": {
-   "bytes": 38442,
-   "sha256": "ec4df57ed35573ffdd74e58df0de7f83dd34fb74c702d4ea3b307ecd0c981604"
+   "bytes": 43456,
+   "sha256": "64c335e6659ed0e007509b998ab846d4eef9680c8279119229b2d83889ee8a94"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_GAPS.csv": {
-   "bytes": 12558,
-   "sha256": "dc065fb4b2dbfa12c719c7346d6a72372351ea627b8dececa3e93607ad3176f6"
+   "bytes": 11985,
+   "sha256": "1dac26f1f2c7187380ab36d1fa17c01c6b0c48923de5b98504f31efc76498f0d"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_PYPSA_EUR_aeo8_ats_relative.csv": {
-   "bytes": 38591,
-   "sha256": "a58cc1fd6e4318e16852f87d3a862d2fde4226f34b9b981e4a5fa23047579111"
+   "bytes": 51374,
+   "sha256": "e0fa9da09996517ed7778ca157d70dc01ed6b7a584bc9d6f2008d72a5c0edac9"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_PYPSA_EUR_gdp.csv": {
-   "bytes": 38596,
-   "sha256": "262b7bdc745f6f579c6e4545c96abd08bd510ee070ec6f2da072126691639b62"
+   "bytes": 51384,
+   "sha256": "2044031bccac615055d98aa8ac3d62fd0e17bb2430e2128fbef4a6a01ecffc46"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_PYPSA_EUR_population.csv": {
-   "bytes": 38594,
-   "sha256": "7a4ddaf31a5c1cea955ffaa34d9fe56639c460164b7ea7f23f1c5195eb21c1e7"
+   "bytes": 51386,
+   "sha256": "2dcb93778a5e06a8ec05cd1c868a555589757d91aafb04fa73a902318808ab09"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv": {
+   "bytes": 6608,
+   "sha256": "319f81744eb8bd0ab63bc91832d8dbf70c305a7baf8e0566455cde281aa6df3d"
+  },
+  "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_S2B_FROZEN.csv": {
    "bytes": 5124,
    "sha256": "1f7f00c7b08e9c419cf3873c205aa4d62a3c3406d3a0e6ff966d6b88c2ad437e"
   },
+  "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_TD_SENSITIVITY.csv": {
+   "bytes": 1394,
+   "sha256": "f545c0d5e97e285ff9cbce305f710f15ad43eb040eed3531ad4b078691be5900"
+  },
   "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv": {
-   "bytes": 5124,
-   "sha256": "9ae1ab93c6dabf9f4d96a78da16126a2406c042cae4d5c364b7fc28ac6b396da"
+   "bytes": 6611,
+   "sha256": "fd4b5a5a0ebcbc7a72998d5459b86eeaa8bc10fa83a79ec661695a52a56342a4"
+  },
+  "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp_TD_SENSITIVITY.csv": {
+   "bytes": 1394,
+   "sha256": "63aa994773ca6241adb2ad4a999c9cf69c19bafc9712be630eb096198af036a8"
   },
   "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population.csv": {
-   "bytes": 5115,
-   "sha256": "42a883417a38850324cc4d296a49e53b3084b31b930cae9d991ba094aaa55a73"
+   "bytes": 6609,
+   "sha256": "2ec8a1fb45bf804ca1cfa8f9e21a42f7c6d793e94b277f8c89a7622137f4c2d8"
+  },
+  "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population_TD_SENSITIVITY.csv": {
+   "bytes": 1400,
+   "sha256": "fab6793b456109a5718d5623e4088dc8b08a317d5a5a991415a9cf2e8c1033ae"
+  },
+  "research_inputs/demand_v5/INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv": {
+   "bytes": 8886,
+   "sha256": "30fb961e352b299a2b2f72d05a561a475d337870b6aa7a1f9d954445deeacbea"
   },
   "research_inputs/lng_terminals_v5/LNG_IMPORT_CAPS_BY_COUNTRY.csv": {
    "bytes": 663,
@@ -269,20 +313,20 @@
    "sha256": "9c1bb82f6e20531144b4a157150b9d9aa02e26255cc7553ec18caa7156f4a7f6"
   },
   "research_inputs/registry_v5/D1_EVIDENCE.json": {
-   "bytes": 23715,
-   "sha256": "29dd708e92969a29c2a9bea9ec2b7c89e4e313ebcad1a99ad0cea23ee9905d63"
+   "bytes": 29047,
+   "sha256": "e5f0a3ecff6f6287836f8633b642d0c3be1aff6ec932519e0ec8a040191c55a1"
   },
   "research_inputs/registry_v5/DATA_PENDING_LIST.csv": {
-   "bytes": 5954,
-   "sha256": "ae6b96e5bafb256134654609ccd69ad38ef76330d81a328bd1b7049c6066783e"
+   "bytes": 3760,
+   "sha256": "6a8a19cd5a4f8a25f6f3028c528a9c01bb92b658fd399ac0d9301014fa5b4ce0"
   },
   "research_inputs/registry_v5/DATA_REGISTRY.csv": {
-   "bytes": 583653,
-   "sha256": "ae693b3fe35ba8a69c6b45642a73c7286c22d0f43d603f0f40a648179116ddee"
+   "bytes": 619056,
+   "sha256": "1b53bf94f855657f07d4bdecc74aa548cc8d5ec454ea063facd0fdd193703023"
   },
   "research_inputs/registry_v5/DOWNLOAD_LIST.csv": {
-   "bytes": 2187,
-   "sha256": "04e36688a0fd518fc1b849682e98f5d035338a08706d7a7e4322346cb37361a9"
+   "bytes": 2409,
+   "sha256": "f4646b249e31a92804ed7223ecb1d01ae7cf690577f85bd0e7d7f1b5dd021383"
   },
   "research_inputs/registry_v5/DOWNLOAD_LIST_CLOSED_S2B.csv": {
    "bytes": 230,
@@ -291,6 +335,10 @@
   "research_inputs/registry_v5/DOWNLOAD_LIST_CLOSED_S2_0.csv": {
    "bytes": 1010,
    "sha256": "ee1cecc9b5b4d9b18a3ff1f77a5cb6bf5deb963be3c804a9dc4409b3bef9b33f"
+  },
+  "research_inputs/registry_v5/DOWNLOAD_LIST_CLOSED_S3.csv": {
+   "bytes": 1023,
+   "sha256": "c769b41574b16286f1843b8dbc1264ff9b89501addc9edcbbfd603b586cd7a91"
   },
   "research_inputs/registry_v5/EDGAR_1A_VS_UNSD_2019.csv": {
    "bytes": 4180,
@@ -301,20 +349,20 @@
    "sha256": "c206369e63527e1f5f4a6990215f7e301cf60c13c3f70d2c8d7bc27f28c23798"
   },
   "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative.csv": {
-   "bytes": 3524,
-   "sha256": "87bcbec34e834cb4dd2f8c9f9bade235e5c692450e03e2fb5de40c7667edf497"
+   "bytes": 4214,
+   "sha256": "90e71922b83bba2fe45406a59b5e0d1da9d0cc6b42e749eaa1d5d9be968b68fd"
   },
   "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_gdp.csv": {
-   "bytes": 3518,
-   "sha256": "08874d2fd44579fe6f8f9bc9fa7f45dff0a17d2f71aa3236fc7afe64d69026a1"
+   "bytes": 4208,
+   "sha256": "b17ccaf103502dae49622a97dd902758358ff68d84578aba534dc0a2ca7d0ebc"
   },
   "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_population.csv": {
-   "bytes": 3519,
-   "sha256": "c2b1f0ba275a47ccba6800087edb840767bf90c5ef02632945d0d47a74b29451"
+   "bytes": 4210,
+   "sha256": "bb46be39d6f9db7e87804b53707e0dd047080f7c519c6fa3d124449576116593"
   },
   "research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_EVIDENCE.json": {
-   "bytes": 10637,
-   "sha256": "5974820a65d622925900ffd0393daddd2062d16b184172bbc85ba00553784a80"
+   "bytes": 13307,
+   "sha256": "87f211bbc7e0844d2cb546f7ee2c7f4a0522894ac929562f073a6418495ec40a"
   },
   "research_inputs/registry_v5/FOSSIL_PRODUCTION_2019_UNSD.csv": {
    "bytes": 6826,
@@ -336,6 +384,18 @@
    "bytes": 1307,
    "sha256": "4e73e03459d131688638de1f96984feb703e8bf7ab71d1a4a12e828020b537e3"
   },
+  "research_inputs/registry_v5/INDUSTRY_SECTOR_RATIOS_EVIDENCE.json": {
+   "bytes": 25333,
+   "sha256": "f5afd1e41a5523f0511967da3b8b6d4d039d3d327ed35f7b24bf0541a8229700"
+  },
+  "research_inputs/registry_v5/INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv": {
+   "bytes": 3138,
+   "sha256": "bc7216fce433d1e634c664a85f9baf0df89fac35867754f4afa8ec4d8da34384"
+  },
+  "research_inputs/registry_v5/INDUSTRY_SECTOR_RATIOS_TODAY_EU27_2019.csv": {
+   "bytes": 4877,
+   "sha256": "e28c07939bbd78f986348400ea689e4ea22cebe80b26d341510997a2ecd18797"
+  },
   "research_inputs/registry_v5/PROCESS_EMISSIONS_2019_2050.csv": {
    "bytes": 5337,
    "sha256": "dea0a8936f8b1e22a753b7f3b8838055fce254bada36f4713f5cbfcddd311394"
@@ -355,6 +415,10 @@
   "research_inputs/registry_v5/sources/AEO8_2050_DEMAND.md": {
    "bytes": 9419,
    "sha256": "395dc88d1d84fdf3d169a8c066309e0f39a3f771f3003e472b80c85856fc9e96"
+  },
+  "research_inputs/registry_v5/sources/APG_AIMS3_PRIORITY_INTERCONNECTIONS_2024.csv": {
+   "bytes": 1654,
+   "sha256": "39a1503516ced562bf95e0afcdccd1623909e34f0ee1d9447dfe96974c92e3e8"
   },
   "research_inputs/registry_v5/sources/BATCH6_BUNKERS_AND_FOREST_RESIDUES.md": {
    "bytes": 3929,
@@ -436,6 +500,10 @@
    "bytes": 102,
    "sha256": "23d5a14cbab32a60fa4ff2e13db6cc4eed428cd33ee1aaed08cb23c227930341"
   },
+  "research_inputs/registry_v5/sources/SHA256SUMS_raw8.txt": {
+   "bytes": 306,
+   "sha256": "481fae554e3cfa449e97186d0af90d7e0c8cbd7bb67b597fbd34ee7ec8702ff3"
+  },
   "research_inputs/registry_v5/sources/SOURCE_MANIFEST.md": {
    "bytes": 6868,
    "sha256": "a5fab126bbdb3f7d5eb86c85cf64992c810dbecb625d3f132cdf7eeaa47be53e"
@@ -444,9 +512,25 @@
    "bytes": 4837,
    "sha256": "47381eba37cea9328793c1aadd86cc4a81b3001595965df19dcac2f345dda1a3"
   },
+  "research_inputs/registry_v5/sources/UNSD_EB_2019_BN.csv": {
+   "bytes": 4636,
+   "sha256": "dea9c7aad89c14e060d94e00d3c6bf1da5640805ef03e2ed1c5b3f76d2dbb561"
+  },
   "research_inputs/registry_v5/sources/UNSD_EB_2019_BUNKERS_BN_KH_LA_TL.csv": {
    "bytes": 989,
    "sha256": "25075f86c85235ab4356b86305915a27713489600ce458067d7c7c54321b8ae1"
+  },
+  "research_inputs/registry_v5/sources/UNSD_EB_2019_KH.csv": {
+   "bytes": 4187,
+   "sha256": "2600226aeaddb7b9ac40e222a84d703352552c3d9c1f70a13ce0a919bbb18a53"
+  },
+  "research_inputs/registry_v5/sources/UNSD_EB_2019_LA.csv": {
+   "bytes": 5489,
+   "sha256": "c6926b2e72c88408c3abf3a6ef71c027891f8c33a2897ea9bc1ed90ab20fae70"
+  },
+  "research_inputs/registry_v5/sources/UNSD_EB_2019_TL.csv": {
+   "bytes": 4221,
+   "sha256": "da21d32905350b5a97f8a27c0edba4700569104c56724e57af31aba0af3fb5ab"
   },
   "research_inputs/registry_v5/sources/WEO2025_FOSSIL_PRICES.csv": {
    "bytes": 17463,
@@ -468,6 +552,10 @@
    "bytes": 1326,
    "sha256": "e6dea65a35cba97410d52ca456758dfbaf6e601eb7766a5301b420538fc5e1f9"
   },
+  "research_inputs/registry_v5/sources/jrc_idees_2021/ammonia_production.csv": {
+   "bytes": 5504,
+   "sha256": "c8414b7e89858b7813301b27d67279f46bbdfafcb7a262ad2218dbbcd07700b0"
+  },
   "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml": {
    "bytes": 29181,
    "sha256": "bfbe9160db09c3e960b97173bc755492b7638e0f4a5081ffaa1dddd4635da787"
@@ -481,7 +569,7 @@
  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
  "python": "3.11.13",
  "registry": "research_inputs/registry_v5/DATA_REGISTRY.csv",
- "registry_sha256": "ae693b3fe35ba8a69c6b45642a73c7286c22d0f43d603f0f40a648179116ddee",
+ "registry_sha256": "1b53bf94f855657f07d4bdecc74aa548cc8d5ec454ea063facd0fdd193703023",
  "schema": "d1-data-registry-evidence-v1",
  "scripts": {
   "scripts_project/d1_biomass.py": "8a4ef9ad210144ffff6989606dd32a877a24c1ba82774c0b9a0839c9b4b60727",
@@ -493,11 +581,14 @@
   "scripts_project/d1_fossil_production.py": "94a1e9c5ee977d87d8bf20f2c87abcfa8cd31136605ffa5921094d6003a15444",
   "scripts_project/d1_fuel_prices.py": "f3d13d870a463990f9ac5363bbb843fac11b78c1fbc85ecbe037808abbf81f68",
   "scripts_project/d1_lng_terminals.py": "9e5e92c17ab1cdc5e4f9a642f79ce4cd745726393002351a329ca9be840e7ec0",
-  "scripts_project/d1_registry.py": "5b8baa3ab6d45f4c86d6ca748db44fa96cfc538995692b6f2a3ef786f5d43089",
+  "scripts_project/d1_registry.py": "e09ec8c2f721750076f8a426a8acd663a7d556639d6198f13f6425c035153f26",
   "scripts_project/s2_0_cost_layer_v015.py": "dc9fbd23772a280977a7d598a279c890228bdb18c6b2a01d1102cab2ddf102a8",
   "scripts_project/s2_0_process_emissions.py": "1dc60b194395dc70b64a5a0121cc003e753a9a1e9565f9caff3690da6061f8ee",
-  "scripts_project/s2b_feedstock.py": "72acd42f4afd6bfeba1b67d18de29395a335a58ed67488711ec8507b1eff9921",
-  "scripts_project/s2b_industry.py": "8e08c3c86f445c27fc3e39e9127480748e495adff88c583db91a8421eb8f352e"
+  "scripts_project/s2b_feedstock.py": "fffc08854948a5cc86aac18749c3460393790a449e0b2cfaf7ef8396baffbf08",
+  "scripts_project/s2b_industry.py": "8e08c3c86f445c27fc3e39e9127480748e495adff88c583db91a8421eb8f352e",
+  "scripts_project/s3_0_corridors.py": "932304dac6f05e37077564ac0a2b3d6f5e4aa6ad8860b5dab2fdbd2006a76e2d",
+  "scripts_project/s3_0_industry.py": "710c6929a80faac930776f20e9a3156a2c2ea7b37f752ecf69bdfaf6bc331855",
+  "scripts_project/s3_0_industry_ratios.py": "d5f9f8a2610499cbd7c59920bd467f1e210f1dfc223ec91039784db1f549df25"
  },
  "solver_runs": 0,
  "summary": {
@@ -514,23 +605,25 @@
    "scripts_project/s2_0_cost_layer_v015.py": 184,
    "scripts_project/s2_0_process_emissions.py": 129,
    "scripts_project/s2b_feedstock.py": 82,
-   "scripts_project/s2b_industry.py": 92
+   "scripts_project/s3_0_corridors.py": 8,
+   "scripts_project/s3_0_industry.py": 109,
+   "scripts_project/s3_0_industry_ratios.py": 55
   },
   "by_status": {
    "CANDIDATE_ONLY": 24,
-   "DATA_PENDING": 28,
-   "REFERENCE_ONLY": 95,
-   "REGISTERED": 813,
+   "DATA_PENDING": 22,
+   "REFERENCE_ONLY": 130,
+   "REGISTERED": 861,
    "SENSITIVITY": 77,
-   "SOURCE_ZERO": 98,
+   "SOURCE_ZERO": 101,
    "ZERO_BY_DECISION": 11
   },
   "by_tier": {
-   "A": 217,
-   "B": 613,
-   "C": 316
+   "A": 219,
+   "B": 649,
+   "C": 358
   },
-  "data_pending": 28,
-  "rows": 1146
+  "data_pending": 22,
+  "rows": 1226
  }
 }

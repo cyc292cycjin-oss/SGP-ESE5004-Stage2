@@ -203,7 +203,13 @@ research:
       clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
       cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
     industry:
-      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s2b_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s3_0_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      ratio_source: jrc_idees_2021          # S3-0 (decision 61): jrc_idees_2021 = PyPSA-Eur v2025.07.0 sector ratios reproduced from JRC-IDEES-2021 for ALL sub-sectors incl. steel/cement (main) | technology_data_v015 = S2B steel/cement substitutes (sensitivity)
+      technology_data_sensitivity_tables:   # ratio_source technology_data_v015
+        aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_TD_SENSITIVITY.csv
+        gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp_TD_SENSITIVITY.csv
+        population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population_TD_SENSITIVITY.csv
+      ammonia_methanol_mode: convert_to_h2_and_gas   # S3-0 interim: ratio ammonia row -> H2 + electricity (PyPSA-Eur ammonia:false route, config lines 849/852/853), methanol row -> methane + electricity (SMR route, lines 904-906); S3-3: regional_buses
       pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
         aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv

@@ -19,11 +19,18 @@ from d1_common import (ASEAN, COLUMNS, COST_DIR, BIOMASS_DIR, DEMAND_DIR, LNG_DI
 SCRIPT = "scripts_project/d1_registry.py"
 FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050",
              "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
-             "industry_2050", "feedstock_territorial"]  # S2 supplement 02 R1/R2 (scripts_project/s2b_industry.py, s2b_feedstock.py)
+             "industry_2050", "feedstock_territorial",  # S2 supplement 02 R1/R2 (scripts_project/s3_0_industry.py (ex s2b_industry.py), s2b_feedstock.py)
+             "industry_sector_ratios", "corridors_apg"]  # S3-0 (scripts_project/s3_0_industry_ratios.py, s3_0_corridors.py)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
 }
+CLOSED_IN_S3 = [  # S3 (batches 8 and 9; read-only public fetches)
+    dict(item="JRC-IDEES-2021 Industry workbook EU27 (JRC-IDEES-2021_Industry_EU27.xlsx)", closed_by="raw8/JRC-IDEES-2021_EU27.zip -> registry_v5/sources/jrc_idees_2021/EU27/ -> scripts_project/s3_0_industry_ratios.py (decision 61)"),
+    dict(item="ACE 2024 APG Interconnections Project Profiles (AIMS III priority interconnections)", closed_by="raw8/ACE2024_APG_Interconnections_Project_Profiles.pdf -> extraction/APG_AIMS3_PRIORITY_INTERCONNECTIONS_2024.csv -> scripts_project/s3_0_corridors.py (decisions 59/62)"),
+    dict(item="GEM Global Gas Infrastructure Tracker - gas pipelines (ASEAN cross-border and domestic)", closed_by="raw9/GEM-GGIT-Gas-Pipelines-2025-11.xlsx -> extraction/GEM_GGIT_GAS_PIPELINES_ASEAN.csv -> S3-1 gas network (existing cross-border pipeline capacities; units without capacity stay DATA_PENDING)"),
+    dict(item="USGS Minerals Yearbook nitrogen table (PyPSA-Eur ammonia_production.csv input)", closed_by="read-only fetch of myb1-2022-nitro-ert.xlsx (public S3 URL from PyPSA-Eur v2025.07.0 retrieve.smk) -> s3_0_industry_ratios.build_ammonia_production (grade B, replaces the 17,000 kt proxy)"),
+]
 CLOSED_IN_S2B = [  # S2 supplement 02 (batch 7)
     dict(item="worldsteel Steel Statistical Yearbook 2019/2020 - crude steel production by process", closed_by="raw7/worldsteel_SSY2020_concise.pdf -> extraction/WORLDSTEEL_2019_ASEAN.csv -> scripts_project/s2b_industry.py (R1, decision 55)"),
 ]
@@ -36,10 +43,10 @@ CLOSED_IN_S2_0 = [  # D1 download-list items delivered by the user in batches 5 
     dict(item="technology-data geothermal electricity parameters", closed_by="decision 52: v0.15.0 still has no geothermal investment/VOM -> AEO8 D.15 Geothermal average (grade C, +-30 %), registered in S2-1"),
 ]
 DOWNLOAD_LIST = [
-    dict(item="JRC-IDEES-2021 Industry workbook EU27 (JRC-IDEES-2021_Industry_EU27.xlsx)",
-         link="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/POTEnCIA/JRC-IDEES-2021/JRC-IDEES-2021.zip", landing="https://joint-research-centre.ec.europa.eu/potencia-policy-oriented-tool-energy-and-climate-change-impact-assessment/jrc-idees_en",
-         fields="Industry workbook sheets fec/ued/emi/out for EU27 (PyPSA-Eur rule retrieve_jrc_idees)",
-         purpose="PyPSA-Eur v2025.07.0 build_industry_sector_ratios.py 2050 sector ratios (27 sub-sectors incl. the low-temperature heat row) for R1 (decision 55); requested in S2B, not downloaded (no authorisation)"),
+    dict(item="GEM gas pipeline units without capacity (Malaysia-Singapore pipeline 1991; JDA-Arthit 2008 TH; other ASEAN rows with CapacityBcm/y '--')",
+         link="https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/", landing="https://www.gem.wiki/Malaysia-Singapore_Gas_Pipeline",
+         fields="Capacity (bcm/y or BOE/d) for the GEM_GGIT_GAS_PIPELINES_ASEAN.csv rows with empty capacity; owner/operator capacity statements",
+         purpose="S3-1 existing cross-border gas pipeline capacities (rows without capacity carried as DATA_PENDING)", param_ids="gas_pipeline_existing_* with DATA_PENDING", section="S3-1"),
     dict(item="Oil palm trunk/frond feedstock price survey (none found in NEDO/NRI 2024 or ERIA 2024)",
          link="https://www.nedo.go.jp/content/800028002.pdf", landing="https://www.eria.org/uploads/Development-of-the-Bioenergy-Supply-Chain-in-AZEC-Partner-Countries.pdf",
          fields="USD/t delivered, moisture basis", purpose="section 5 cost of oil_palm_trunk (DATA_PENDING)", param_ids="biomass_cost_*_oil_palm_trunk", section="5"),
@@ -140,6 +147,7 @@ def main():
     write_csv(DOWNLOAD_LIST, REG_DIR / "DOWNLOAD_LIST.csv", list(DOWNLOAD_LIST[0].keys()))
     write_csv(CLOSED_IN_S2_0, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2_0.csv", list(CLOSED_IN_S2_0[0].keys()))
     write_csv(CLOSED_IN_S2B, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2B.csv", list(CLOSED_IN_S2B[0].keys()))
+    write_csv(CLOSED_IN_S3, REG_DIR / "DOWNLOAD_LIST_CLOSED_S3.csv", list(CLOSED_IN_S3[0].keys()))
     summary = dict(rows=int(len(df)), by_tier=df.tier.value_counts().to_dict(), by_status=df.status.value_counts().to_dict(),
                    by_script=df.derivation_script.value_counts().to_dict(), data_pending=int(len(pending)))
     outputs = {}
@@ -151,8 +159,9 @@ def main():
                     python=sys.version.split()[0], pandas=pd.__version__, platform=platform.platform(), registry=str(out.relative_to(ROOT)),
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
                     scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
-                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py", "scripts_project/s2b_feedstock.py"]},
-                    download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, solver_runs=0, network_builds=0)
+                             + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py", "scripts_project/s2b_feedstock.py",
+                                "scripts_project/s3_0_industry_ratios.py", "scripts_project/s3_0_industry.py", "scripts_project/s3_0_corridors.py"]},
+                    download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, closed_in_s3=CLOSED_IN_S3, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)
     print("DATA_PENDING:", len(pending))

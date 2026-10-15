@@ -26,7 +26,7 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
                               tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
 from s2_costs import build_research_costs, write_costs
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
-                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines)
+                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
 AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TWh (2022) / C.4 capacity 4.3 GW (2022), BAS panels (PDF p.185/187)
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
@@ -230,6 +230,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         raise ValueError("Electric base is not the source-qualified asset")
     rename_map = rename_legacy_buses(n)
     corridors = pd.read_csv(repo / R["existing_cross_border_electricity"]["corridors_file"], float_precision="round_trip")
+    apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base
     cc = float(cfg["sector"]["cc_fraction"])
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
