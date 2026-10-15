@@ -312,8 +312,15 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
     cap_fixed = cost(costs, "biomass CHP capture", "fixed"); cap_vom = cost(costs, "biomass CHP capture", "VOM")
     cap_el = cost(costs, "biomass CHP capture", "electricity-input") + cost(costs, "biomass CHP capture", "compression-electricity-input")
     ccgt_eff = cost(costs, "CCGT", "efficiency"); ccgt_fixed = cost(costs, "CCGT", "fixed"); ccgt_vom = cost(costs, "CCGT", "VOM")
-    dac_el = cost(costs, "direct air capture", "electricity-input") + cost(costs, "direct air capture", "compression-electricity-input") \
-        + cost(costs, "direct air capture", "heat-input") - cost(costs, "direct air capture", "compression-heat-output")  # heat supplied electrically, COP 1
+    # R6 (decision 60): DAC inputs per technology-data v0.15.0 (sources/costs_2050_v0.15.0.csv lines 938-942: compression-electricity-input 0.15,
+    # compression-heat-output 0.2, electricity-input 0.4, heat-input 1.6 MWh/tCO2) combined as in PyPSA-Eur v2025.07.0 prepare_sector_network.add_dac
+    # (lines 1198-1225): electricity = electricity-input + compression-electricity-input; heat = heat-input - compression-heat-output.
+    dac_el_only = cost(costs, "direct air capture", "electricity-input") + cost(costs, "direct air capture", "compression-electricity-input")
+    dac_heat = cost(costs, "direct air capture", "heat-input") - cost(costs, "direct air capture", "compression-heat-output")
+    dac_heat_mode = str(R.get("dac_heat_mode", "electric_cop1"))
+    if dac_heat_mode not in ("industry_heat_bus", "electric_cop1"):
+        raise ValueError("Unknown research.s2.co2.dac_heat_mode " + dac_heat_mode)
+    dac_el = dac_el_only + (dac_heat if dac_heat_mode == "electric_cop1" else 0.0)   # electric_cop1: heat supplied electrically at COP 1 (S2 treatment, now sensitivity)
     dac_fixed = cost(costs, "direct air capture", "fixed"); dac_life = cost(costs, "direct air capture", "lifetime")
     cem_fixed = cost(costs, "cement capture", "fixed"); cem_vom = cost(costs, "cement capture", "VOM"); cem_rate = cost(costs, "cement capture", "capture_rate")
     cem_el = cost(costs, "cement capture", "electricity-input") + cost(costs, "cement capture", "compression-electricity-input")
@@ -326,9 +333,14 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
                  lifetime=cost(costs, "CCGT", "lifetime"), extra={"capture_fraction": cc, "capture_cost_row": "biomass CHP capture (generic post-combustion, PyPSA-Eur practice)"})
         counts["ccgt_cc"] += 1
         if R.get("dac", True):
-            t_per_mwh = 1.0 / dac_el
-            add_link(n, f"{node} DAC", c, "DAC", [node, co2s, atmo], [t_per_mwh, -t_per_mwh], capital_cost=dac_fixed * t_per_mwh, lifetime=dac_life,
-                     extra={"electricity_mwh_per_t": dac_el, "heat_supply": R.get("dac_heat_supply", "electricity_cop_1")})
+            t_per_mwh = 1.0 / dac_el   # t CO2 captured per MWh of electricity input
+            if dac_heat_mode == "industry_heat_bus":
+                hb = add_bus(n, f"{node} industry heat", "industry heat", c, node)   # served by the industrial heat options (add_industrial_heat): heat pump, electric/gas/biomass boiler
+                add_link(n, f"{node} DAC", c, "DAC", [node, co2s, atmo, hb], [t_per_mwh, -t_per_mwh, -dac_heat * t_per_mwh], capital_cost=dac_fixed * t_per_mwh, lifetime=dac_life,
+                         extra={"electricity_mwh_per_t": dac_el_only, "heat_mwh_per_t": dac_heat, "heat_supply": "industry heat bus (R6, decision 60)"})
+            else:
+                add_link(n, f"{node} DAC", c, "DAC", [node, co2s, atmo], [t_per_mwh, -t_per_mwh], capital_cost=dac_fixed * t_per_mwh, lifetime=dac_life,
+                         extra={"electricity_mwh_per_t": dac_el, "heat_mwh_per_t": dac_heat, "heat_supply": "electricity COP 1 (sensitivity)"})
             counts["dac"] += 1
         pb = add_bus(n, f"{node} process emissions", "process emissions", c, node)
         add_link(n, f"{node} process emissions", c, "process emissions", [pb, atmo], [1.0], role="PROCESS_EMISSION_RELEASE")
@@ -336,7 +348,8 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
                  capital_cost=cem_fixed, marginal_cost=cem_vom * cem_rate, lifetime=cost(costs, "cement capture", "lifetime"))
         counts["process"] += 1
     ledger["capture_links"] = counts
-    ledger["parameters"] = dict(cc_fraction=cc, dac_electricity_mwh_per_t=dac_el, process_capture_rate=cem_rate, co2_storage_tank_fixed_eur_per_t_a=tank_fixed,
+    ledger["parameters"] = dict(cc_fraction=cc, dac_electricity_mwh_per_t=dac_el, dac_electricity_only_mwh_per_t=dac_el_only, dac_heat_mwh_per_t=dac_heat, dac_heat_mode=dac_heat_mode,
+                                process_capture_rate=cem_rate, co2_storage_tank_fixed_eur_per_t_a=tank_fixed,
                                 sequestration_cost_eur_per_t=seq_cost, pipeline_fixed_onshore=on_fixed, pipeline_fixed_submarine=sub_fixed)
     return ledger
 

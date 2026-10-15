@@ -175,7 +175,7 @@ research:
       sequestration_cost_eur_per_t: 30    # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
       vent: true                          # captured CO2 may be vented to the capturing country's atmosphere (counts as emission)
       dac: true                           # decision 11; sensitivity switch
-      dac_heat_supply: electricity_cop_1  # DAC heat demand supplied electrically (no heat buses); COP 1 (grade C)
+      dac_heat_mode: industry_heat_bus    # R6 (decision 60): DAC heat (technology-data heat-input 1.6 - compression-heat-output 0.2 MWh_th/t) from the node industrial low-T heat bus; electric_cop1 = S2 treatment kept as sensitivity
       cc_fraction_source: sector.cc_fraction
       pipeline_topology: electricity_network_topology   # R5 (decision 59): see research.s2.pipelines (former: h2_pipeline_routes)
       process_emissions_scope: [minerals, metals]   # 2.A and 2.C on the process bus; 2.B/2.D/4.C covered by feedstock carbon (method question)
