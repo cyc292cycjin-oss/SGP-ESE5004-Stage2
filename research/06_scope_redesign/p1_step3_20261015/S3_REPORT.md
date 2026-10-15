@@ -174,7 +174,41 @@ S3-0（IDEES 比率，全部子部门；煤、油为 0）：
 
 ## 2. S3-1 天然气网络与国内生产
 
-（待填）
+代码：`scripts_project/s3_1_gas_data.py`（数据层）、`scripts_project/s3_layers.py::add_gas_network`（模型层，在 `s2_network.build_scenario_s2` 的需求层之后、跨境开关之前调用）；配置 `research.s3.gas`，`research.cross_border.gas: true`（情景文件统一设 true/false）。构建输出 `results_project/s3_1/`（证据副本 `evidence/s3_1/`）。
+
+**2.1 节点气母线（VERIFIED）。** 沿用 PyPSA-Eur `gas_network` 结构：每个 AC 节点和 HVDC 换流节点一个 `<node> gas` 母线（100 个）。S2 的用气组件已全部在节点气母线上（CCGT/OCGT/CCGT CC、SMR/SMR CC、工业燃气锅炉、清洁炊事、工业与原料计量链路；沼气提纯 97 条链路向节点气母线供气），本轮不改接。S1/S2 配方中每个节点的无限量外部气源（100 个 `EXTERNAL_SUPPLY` 发电机，13.674 EUR/MWh）被移除，气只能来自国内生产、LNG 接收站和管道。
+
+**2.2 管道（VERIFIED）。** 候选：每条电网连接（AC 线 + DC 链路，与 R5 的 H₂/CO₂ 候选同拓扑）一条双向候选，共 111 条，其中跨境 21 条（含本轮走廊 LA–MM、MM–TH）；成本 technology-data v0.15.0 `CH4 (g) pipeline` 91.37 EUR/MW/km（年金 7.99 EUR/MW/km/a，寿命 50 a）与 `CH4 (g) submarine pipeline` 125.49（13.88，30 a），海底份额取走廊表。连通性补全（PyPSA-Eur `prepare_sector_network.py` 1968–2010 行，`gas_network_connectivity_upgrade: 1`，配置 768 行）：电网拓扑之外的 14 个带气母线的节点（印尼的 Maluku/Nusa Tenggara/Papua 岛屿节点与 Batam 节点、3 个 HVDC 换流节点 PH_Visayas10 0、MY_Peninsular22 0、TH21 0）各加一条到本国最近气母线的双向候选（大圆 × 1.25；最长 Papua19→Sulawesi 2,299 km，仅为候选）。2025 年跨境存量（第 15 项，GEM GGIT 2025-11 第九批）：
+
+| 管道 | 节点对 | 投运 | bcm/a | MW_NCV | 方向 | 处理 |
+|---|---|---|---|---|---|---|
+| Gresik–Batam–Singapore | ID_Sumatra2 0 → SG2 0 | 2003 | 4.75 | 5,126 | 单向 | p_nom_min = 容量，可扩建 |
+| West Natuna | ID_Sumatra2 0 → SG2 0 | 2001 | 3.4 | 3,669 | 单向 | 同上 |
+| Malaysia Singapore | MY_Peninsular2 1 → SG2 0 | 1991 | — | — | — | DATA_PENDING（GEM 无容量），只有走廊候选 |
+| TTM | MY_Peninsular22 0 ↔ TH21 0 | 2007 | 10.42 | 11,244 | 双向（JDA 气供两国） | p_nom_min = 容量 |
+| Yetagun | MM2 4 → TH2 2 | 2000 | 4.1 | 4,424 | 单向 | 同上 |
+| Yadana 1 | MM2 4 → TH2 2 | 1998 | 5.2 | 5,611 | 单向 | GEM 登记为缅甸单国，终点 Daminseik 为对泰出口落地点 |
+| Zawtika | MM2 4 → TH2 2 | 2014 | 3.53 | 3,809 | 单向 | GEM 登记为缅甸单国，经 Kanbauk 接 Yadana 系统 |
+
+换算：1 bcm/a = 1,199 MW（PyPSA-Eur `build_gas_input_locations.py` 127 行，GCV 口径）× 0.90（登记表 `fuel_price_basis` GCV→NCV）。缅泰三条合计 12.83 bcm/a，与 GEM 泰国境内 Ban I-Tong–Ratchaburi 段 12.93 bcm/a 相符（交叉核对）。节点依据登记在 `gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv` 的 `node_basis` 列：缅泰管道落地点 Kanbauk/Daminseik（14.5N）取最南的缅甸节点 MM2 4，泰国端 Ratchaburi 取 TH2 2，与电力统一走廊 MM2 4–TH2 4 不同，故存量链路与候选分列；TTM 用 HVDC 走廊节点对；印尼–新加坡两条经 Batam（ID_Sumatra2 0）。不建模：JDA–Arthit（联合开发区产量已含在马、泰 UNSD 产量内，容量 DATA_PENDING）、中缅管道（出口东盟外）、Trans-ASEAN（搁置）。`research.cross_border.gas = false` 时移除全部 27 条跨境气管道（不互联情景核对通过）。
+
+**2.3 国内生产（第 43 项，VERIFIED 结构 / C 级分配）。** 年产量上限 = UNSD 2019 各国天然气毛产量（D1 `FOSSIL_PRODUCTION_CAPS_2050.csv`）：BN 109.8、ID 727.6、MY 849.5、MM 184.9、PH 43.0、TH 367.2、TL 61.3、VN 103.6 TWh/a；KH、LA、SG 为 0。每个节点一个井口发电机（价格 = 进口价 13.674 EUR/MWh）经交付链路进入节点气母线，链路第二出口按 S2-0 逸散因子（tCO₂/MWh 产量：BN 0.00452、ID 0.00392、MY 0.00445、MM 0.00024、PH 0.00334、TH 0.00513、TL 0.00109、VN 0.00633）记入本国大气；年度上限由 `external_annual_caps` 钩子（`ResearchImportAnnual-*` 约束）执行，共 84 个节点（BN 1、ID 39、MY 7、MM 17、PH 5、TH 6、TL 1、VN 8）。节点分配按各国 AC 节点电力负荷份额（C 级，登记 `gas_production_node_allocation`）：第九批 GEM 表没有坐标，气田/处理厂落点无法登记，留作数据缺口。TL 的 2019 年产量全部出口（UNSD 能源平衡：产量 164,980 TJ = 出口），上限只是可用性上界。
+
+**2.4 LNG（第 17、19 项，VERIFIED）。** 接收站位置与容量取 D1 登记（`LNG_IMPORT_TERMINALS_GEM_2025.csv`，运营 + 在建 = 现有）；每个接收站节点一个进口发电机，p_nom = 现有、p_nom_max = 2.5×；只有拟建的站址 p_nom = 0、p_nom_max = 拟建容量（现有为 0 的处理方式）；无容量数据的站址不建（MY_Peninsular2 0、MY_Peninsular22 0、VN2 4）。价格 WEO 2025 NZE 2050 日本 LNG 到岸价 13.674 EUR/MWh_NCV；再气化加价仍为 DATA_PENDING（本轮按 0），方向：LNG 成本被低估，相对国内生产、管道与非气方案偏向 LNG。接收站扩建不计资本成本（C 级登记 `lng_terminal_expansion_capex`，PyPSA-Eur 固定气入口容量，无可引用的接收站 capex）。
+
+| 节点 | 现有 MW | 拟建 MW | p_nom_max MW |
+|---|---|---|---|
+| ID_Java-Bali1 0 / 1 2 / Nusa-Tenggara12 0 / Sumatra3 0 | 12,329 / 457 / 533 / 4,566 | 0 | 2.5× |
+| ID_Maluku16 0 | 0 | 3,501 | 3,501 |
+| KH2 0 | 0 | 1,674 | 1,674 |
+| MY_Peninsular2 1 | 11,111 | 0 | 27,778 |
+| PH_Luzon9 0 / PH_Luzon5 0 | 22,374 / 0 | 12,177 / 2,283 | 55,936 / 2,283 |
+| SG2 0 | 16,743 | 7,610 | 41,857 |
+| TH2 3 | 28,919 | 16,438 | 72,298 |
+| VN2 5 | 6,088 | 22,770 | 15,221（2.5× 规则，低于拟建） |
+| VN2 0 / 2 / 3 / 6 | 0 | 4,566 / 2,283 / 4,566 / 5,175 | = 拟建 |
+
+**2.5 构建结果。** 两情景构建通过（Link 4,805 → 5,020：+111 候选 +14 补全 +6 存量 +84 交付链路；Generator 1,439 = −100 外部气源 +84 井口 +16 LNG；Bus +84 井口）；静态验证通过；年度结构表与 S3-0 相同（气网不改变不可避免 CO₂）。登记表 1,255 行（片段 `gas_network.csv` 29 行）；测试 `tests/research/test_s3_gas_network.py`（3 项）。
 
 ## 3. S3-2 东盟外进口
 
@@ -202,7 +236,17 @@ S3-0（IDEES 比率，全部子部门；煤、油为 0）：
 
 ## 9. 天然气数据缺口清单
 
-（待填）
+| 项 | 状态 | 处理 | 影响方向 |
+|---|---|---|---|
+| Malaysia–Singapore 管道容量（GEM 无） | DATA_PENDING（下载清单） | 只有 MY_Peninsular2 1–SG2 0 走廊候选，无存量 | 低估新加坡既有进口能力 |
+| JDA–Arthit 管道容量（GEM 无） | DATA_PENDING | 不建跨境链路；JDA 产量已含在马、泰 UNSD 产量 | 无直接影响 |
+| LNG 站址缺容量（MY 3 个单元、VN 6 个、ID 1 个） | DATA_PENDING（D1 清单保留） | 不建或按已知单元建 | 低估 MY/VN 接收能力 |
+| 再气化加价 | DATA_PENDING | 0 | LNG 成本低估 |
+| 国内生产的节点分配 | C 级（负荷份额） | GEM 第九批无坐标；GIS 路由文件未提供 | 气田所在节点的供给被摊平 |
+| 接收站扩建 capex | C 级（0） | 无可引用来源 | 扩建偏便宜 |
+| bcm→MW 换算 | B 级（PyPSA-Eur 1,199 MW/bcm × 0.90） | GCV/NCV 口径差 ±10% | 管道容量 ±10% |
+| TL 产量全部出口 | 已注明 | 上限保留 | TL 国内可用气可能高估 |
+| Yadana 1 / Zawtika 跨境判定 | B 级（落地点 + 泰国境内段 12.93 bcm/a 交叉核对） | 建为 MM2 4 → TH2 2 | — |
 
 ## 10. 测试、证据与交付
 

@@ -1,0 +1,79 @@
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+..................................F.FFF................................. [ 57%]
+........................................................................ [ 76%]
+........................................................................ [ 95%]
+..................                                                       [100%]
+=================================== FAILURES ===================================
+________ AppliedInputTests.test_coverage_and_ev_boundary_remain_guarded ________
+
+self = <test_gate4_activation.AppliedInputTests testMethod=test_coverage_and_ev_boundary_remain_guarded>
+
+    def test_coverage_and_ev_boundary_remain_guarded(self):
+>    q=check(self.data['records'],2050,known_unallocated=self.data['known_unallocated_base_accounts']);self.assertFalse(q['NUMERIC_INPUT_READY']);self.assertEqual(q['known_positive_target_method_pending'],0)
+                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: True is not false
+
+tests/research/test_gate4_activation.py:67: AssertionError
+__________ AppliedInputTests.test_nec_source_rows_unique_and_retained __________
+
+self = <test_gate4_activation.AppliedInputTests testMethod=test_nec_source_rows_unique_and_retained>
+
+    def test_nec_source_rows_unique_and_retained(self):
+     rows=[r for r in self.data['records'] if r['Year']==2050 and r['Kind']=='DEMAND' and r['Account'] in ['TransportNEC','OtherNEC']];ids=[x for r in rows for x in r['BaseSourceRows']]
+>    self.assertEqual(len(ids),15);self.assertEqual(len(set(ids)),15);self.assertTrue(all(r['Value']==r['BaseValueMWh'] for r in rows))
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: 17 != 15
+
+tests/research/test_gate4_activation.py:65: AssertionError
+_____ AppliedInputTests.test_prior133_values_unchanged_new19_have_sources ______
+
+self = <test_gate4_activation.AppliedInputTests testMethod=test_prior133_values_unchanged_new19_have_sources>
+
+    def test_prior133_values_unchanged_new19_have_sources(self):
+     old=json.loads(subprocess.check_output(['git','show','7c4b9dda:research_inputs/assembly_v1/registry.json'],cwd=ROOT));accepted=lambda d:{r['InputID']:r for r in d['records'] if r['Year']==2050 and r['Kind']=='DEMAND' and r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED'}
+>    before=accepted(old);after=accepted(self.data);self.assertEqual(len(before),133);self.assertEqual(len(after),152)
+                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: 171 != 152
+
+tests/research/test_gate4_activation.py:50: AssertionError
+______ AppliedInputTests.test_rail_parent_not_posted_and_ph_stays_blocked ______
+
+self = <test_gate4_activation.AppliedInputTests testMethod=test_rail_parent_not_posted_and_ph_stays_blocked>
+
+    def test_rail_parent_not_posted_and_ph_stays_blocked(self):
+     records=self.data['records'];rail=[r for r in records if r['Year']==2050 and r['Account']=='RailNonElectric']
+>    self.assertEqual({r['Country'] for r in rail if r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED'},{'ID','KH','MM','TH'})
+E    AssertionError: Items in the first set but not the second:
+E    'PH'
+
+tests/research/test_gate4_activation.py:60: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_gate4_activation.py::HydroAggregationTests::test_two_dedicated_hydro_inflows_sum_and_roundtrip
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/research/test_phase4_static.py::Validation::test_config_scenarios_differ_only_by_switches
+tests/research/test_s1_adapter_daily_v5.py::Adapter::test_inject_records_every_global
+tests/research/test_s1_built_networks.py::BuiltNetworks::test_country_atmosphere_and_u4
+tests/research/test_s2_costs.py::test_fuel_prices_are_weo_nze_not_layer
+  /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_phase4_static.py::Validation::test_config_scenarios_differ_only_by_switches
+tests/research/test_s1_adapter_daily_v5.py::Adapter::test_inject_records_every_global
+tests/research/test_s1_built_networks.py::BuiltNetworks::test_country_atmosphere_and_u4
+tests/research/test_s2_costs.py::test_fuel_prices_are_weo_nze_not_layer
+  /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+tests/research/test_validation_temporal.py: 284 warnings
+  /home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/components.py:929: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    cls_pnl[k][name] = pd.Series(data=v, index=self.snapshots, dtype=typ)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_coverage_and_ev_boundary_remain_guarded
+FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_nec_source_rows_unique_and_retained
+FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_prior133_values_unchanged_new19_have_sources
+FAILED tests/research/test_gate4_activation.py::AppliedInputTests::test_rail_parent_not_posted_and_ph_stays_blocked
+4 failed, 374 passed, 293 warnings in 24.16s
