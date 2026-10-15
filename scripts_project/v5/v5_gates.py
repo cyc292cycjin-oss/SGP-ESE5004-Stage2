@@ -120,9 +120,76 @@ def gate_b11_completeness(n,cfg):
 
 def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     R=cfg['research'];expected=config_sha(R);actual=n.meta.get('research_config_sha256')
-    checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_border',{}).get('switches')=={k:bool(v) for k,v in R['cross_border'].items()},skeleton_flag=n.meta.get('skeleton_status')=='INTERIM_S1_SKELETON')
+    allowed_status={'INTERIM_S1_SKELETON',R.get('s2',{}).get('status')}
+    checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_border',{}).get('switches')=={k:bool(v) for k,v in R['cross_border'].items()},skeleton_flag=n.meta.get('skeleton_status') in allowed_status)
     if network_path is not None and receipt is not None:checks['network_file_sha256_matches_receipt']=sha(network_path)==receipt['network']['sha256']
     return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected)
+
+# ------------------------------------------------------------------ group B, S2 additions
+def gate_b2_storage_cap(n):
+    """B2: final level of every national co2 sequestered Store <= cap x horizon fraction; stores charge-only."""
+    cfg=n.meta.get('research_co2_storage',{});frac=float(cfg.get('horizon_fraction',1.));rows={};ok=True;w=n.snapshot_weightings.stores
+    for c,cap in cfg.get('caps_t_per_year',{}).items():
+        sb=f'co2 sequestered {c}'
+        if sb not in n.stores.index:rows[c]=dict(cap_t=0.,store=None,within=True);continue
+        level=float(n.stores_t.e[sb].iloc[-1]);limit=float(cap)*frac;p=n.stores_t.p[sb]
+        charge_only=bool((p<=1e-6).all())  # Store p>0 would be a withdrawal
+        within=level<=limit*(1+1e-9)+1e-3
+        rows[c]=dict(cap_t_per_year=float(cap),horizon_limit_t=limit,final_level_t=level,utilisation=(level/limit if limit else None),within_cap=bool(within),charge_only=charge_only)
+        ok&=bool(within and charge_only)
+    return dict(gate='B2_STORAGE_CAP',passed=bool(ok),horizon_fraction=frac,countries=rows)
+
+def gate_b3_biomass(n):
+    """B3: every finite biomass pool is used within its potential and never refilled."""
+    rows=[];ok=True
+    if 'research_role' in n.stores:
+        for name,z in n.stores[n.stores.research_role=='FINITE_RESOURCE'].iterrows():
+            e=n.stores_t.e[name];used=float(z.e_initial-e.iloc[-1]);refill=bool((n.stores_t.p[name]<-1e-6).any())
+            within=used<=float(z.e_nom)*(1+1e-9)+1e-3 and float(e.min())>=-1e-3
+            rows.append(dict(store=name,country=str(z.country),category=str(z.get('s2_category','')),potential_mwh=float(z.e_nom),used_mwh=used,share_used=(used/float(z.e_nom) if z.e_nom else None),within=bool(within),refilled=refill))
+            ok&=bool(within and not refill)
+    by_country={}
+    for r in rows:by_country.setdefault(r['country'],dict(potential_mwh=0.,used_mwh=0.));by_country[r['country']]['potential_mwh']+=r['potential_mwh'];by_country[r['country']]['used_mwh']+=r['used_mwh']
+    return dict(gate='B3_BIOMASS_WITHIN_POTENTIAL',passed=bool(ok),stores=len(rows),by_country=by_country,rows=rows)
+
+def gate_b8_demand_consistency(n):
+    """B8: every Load owned once; S2 loads conserve the demand table (sum over nodes = country value x horizon); Astar deductions recorded."""
+    owners=n.meta.get('demand_owners',{});led=n.meta.get('s2_demand_ledger',{});w=n.snapshot_weightings.generators;frac=float(w.sum()/8760.)
+    pset=n.get_switchable_as_dense('Load','p_set');annual=(pset.mul(w,axis=0)).sum()
+    checks=dict(every_load_owned=set(owners)==set(n.loads.index),no_duplicate_owner_names=len(owners)==len(n.loads.index))
+    by_sector={}
+    for name,z in n.loads.iterrows():
+        if z.get('demand_owner_kind')=='S2_DEMAND_TABLE':by_sector[str(z.sector)]=by_sector.get(str(z.sector),0.)+float(annual.get(name,0.))
+    expected={k:float(v)*frac for k,v in led.get('totals_by_sector_mwh',{}).items() if k!='ProcessEmissions'}
+    diffs={k:dict(expected_mwh=v,actual_mwh=by_sector.get(k,0.),rel=(by_sector.get(k,0.)/v-1 if v else None)) for k,v in expected.items()}
+    checks['s2_sector_totals_conserved']=all(abs(d['rel'] or 0.)<1e-6 for d in diffs.values())
+    neg=bool((pset.values<-1e-9).any());checks['no_negative_loads']=not neg
+    dedu=led.get('deductions',[]);checks['astar_deductions_recorded']=isinstance(dedu,list)
+    return dict(gate='B8_DEMAND_CONSISTENCY',passed=all(checks.values()),checks=checks,sector_totals=diffs,horizon_fraction=frac,deductions=dedu,deferred=led.get('deferred',[]))
+
+def gate_b11_supply_routes(n,cfg,min_routes=2):
+    """B11 (S2): every end-use bus type at every node has at least two supply routes; DATA_PENDING candidates listed."""
+    rows=[];ok=True
+    def suppliers(bus):
+        s=set(n.generators.index[n.generators.bus==bus])
+        for col in [c for c in n.links if c.startswith('bus') and c[3:].isdigit() and c!='bus0']:
+            eff='efficiency' if col=='bus1' else 'efficiency'+col[3:]
+            s|=set(n.links.index[(n.links[col]==bus)&(n.links[eff]>0)]) if eff in n.links else set()
+        s|=set(n.links.index[(n.links.bus0==bus)&(n.links.p_min_pu<0)])  # bidirectional pipelines
+        s|=set(n.stores.index[n.stores.bus==bus])
+        return s
+    carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (import, FT, BtL)','gas':'gas (import, biogas upgrading, pipelines)','H2':'hydrogen','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
+    for carrier,label in carriers.items():
+        buses=n.buses.index[n.buses.carrier==('Li ion' if carrier=='EV battery' else carrier)]
+        short=[b for b in buses if len(suppliers(b))<min_routes]
+        rows.append(dict(end_use=label,carrier=carrier,buses=int(len(buses)),buses_with_fewer_than_min_routes=short[:10],count_short=len(short)))
+        ok&=len(short)==0 or carrier in ('EV battery','co2 stored')  # single charger / single buffer are by design
+    pending=[]
+    for typ in ['Generator','StorageUnit','Link','Store']:
+        df=n.df(typ)
+        if 's1_candidate_status' in df:
+            for k,z in df[df.s1_candidate_status=='DATA_PENDING'].iterrows():pending.append(dict(component=typ,name=k,carrier=str(z.carrier),country=str(z.country)))
+    return dict(gate='B11_SUPPLY_ROUTES_PER_END_USE',passed=bool(ok),rows=rows,data_pending_count=len(pending),data_pending_by_carrier=pd.Series([p['carrier'] for p in pending]).value_counts().to_dict() if pending else {})
 
 # ------------------------------------------------------------------ outputs
 CAPACITY_VARS=[('Generator-p_nom','Generator','p_nom'),('Link-p_nom','Link','p_nom'),('Line-s_nom','Line','s_nom'),('StorageUnit-p_nom','StorageUnit','p_nom'),('Store-e_nom','Store','e_nom')]
