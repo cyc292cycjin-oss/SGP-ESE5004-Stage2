@@ -150,7 +150,79 @@ def set_transmission_s2(n, cfg_transmission):
 # ----------------------------------------------------------------------------------------------
 # S2-2: CO2 capture, transport, storage
 # ----------------------------------------------------------------------------------------------
-def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: float):
+
+# ----------------------------------------------------------------------------------------------
+# R5 (decision 59): pipeline candidate topology = electricity network connections (PyPSA-Eur create_network_topology)
+# ----------------------------------------------------------------------------------------------
+def _haversine_km(x0, y0, x1, y1):
+    r = 6371.0088
+    p0, p1 = np.radians(y0), np.radians(y1); dphi = p1 - p0; dl = np.radians(x1 - x0)
+    a = np.sin(dphi / 2) ** 2 + np.cos(p0) * np.cos(p1) * np.sin(dl / 2) ** 2
+    return 2 * r * np.arcsin(np.sqrt(a))
+
+
+def pipeline_candidates(n, nodes, corridors, dc_map, length_factor: float):
+    """One candidate per connected node pair of the electricity network (AC lines + DC links, incl. the 24 cross-border
+    corridors), following PyPSA-Eur v2025.07.0 prepare_sector_network.create_network_topology (lines 368-420): candidates
+    from lines and DC links, mapped to locations, ordered pairs, one row per pair. Deviations: length = great-circle
+    distance x length_factor (config lines 325/341) instead of the grid length; underwater fraction from the corridor
+    table subsea_share for cross-border pairs (domestic pairs 0: no data)."""
+    node_set = set(nodes)
+    def loc(b):
+        if b in node_set:
+            return b
+        if b in dc_map:
+            return dc_map[b]
+        return None
+    cand = []
+    for name, z in n.lines.iterrows():
+        cand.append((loc(z.bus0), loc(z.bus1), "line", name))
+    for name, z in n.links[n.links.carrier == "DC"].iterrows():
+        cand.append((loc(z.bus0), loc(z.bus1), "DC link", name))
+    xy = n.buses[["x", "y"]]
+    sub = {}
+    for _, r in corridors.iterrows():   # corridor endpoints may be DC converter buses -> same location mapping as the candidates
+        key = tuple(sorted((loc(str(r["from"])) or str(r["from"]), loc(str(r["to"])) or str(r["to"]))))
+        sub[key] = max(sub.get(key, 0.0), float(r.get("subsea_share", 0.0) or 0.0))
+    rows = {}
+    for a, b, kind, name in cand:
+        if a is None or b is None or a == b:
+            continue
+        key = tuple(sorted((a, b)))
+        if key not in rows:
+            L = float(_haversine_km(xy.at[key[0], "x"], xy.at[key[0], "y"], xy.at[key[1], "x"], xy.at[key[1], "y"])) * float(length_factor)
+            rows[key] = dict(a=key[0], b=key[1], length_km=L, underwater_fraction=sub.get(key, 0.0), country_a=country_of(n, key[0]), country_b=country_of(n, key[1]),
+                             cross_border=country_of(n, key[0]) != country_of(n, key[1]), sources=[], grid_elements=0)
+        rows[key]["sources"].append(kind); rows[key]["grid_elements"] += 1
+    df = pd.DataFrame(sorted(rows.values(), key=lambda r: (r["a"], r["b"])))
+    df["sources"] = df.sources.map(lambda s: ";".join(sorted(set(s))))
+    corridor_pairs = {tuple(sorted((loc(str(r["from"])) or str(r["from"]), loc(str(r["to"])) or str(r["to"])))) for _, r in corridors.iterrows()}
+    missing = sorted(k for k in corridor_pairs if k not in rows)
+    if missing:
+        raise ValueError("Corridor pairs absent from the electricity topology: " + str(missing[:5]))
+    return df
+
+
+def replace_h2_pipelines(n, costs, cand: pd.DataFrame):
+    """Drop the upstream greenfield H2 pipelines and add one candidate per electricity connection (R5)."""
+    old = n.links.index[n.links.carrier == "H2 pipeline"]
+    removed = int(len(old))
+    for name in old:
+        n.remove("Link", name)
+    on_fixed, sub_fixed = cost(costs, "H2 (g) pipeline", "fixed"), cost(costs, "H2 (g) submarine pipeline", "fixed")
+    life = cost(costs, "H2 (g) pipeline", "lifetime")
+    added = 0
+    for _, r in cand.iterrows():
+        a, b, L, u = r.a, r.b, float(r.length_km), float(r.underwater_fraction)
+        if f"{a} H2" not in n.buses.index or f"{b} H2" not in n.buses.index:
+            raise ValueError("H2 bus missing for pipeline candidate " + a + " / " + b)
+        add_link(n, f"H2 pipeline {a} -> {b}", country_of(n, a), "H2 pipeline", [f"{a} H2", f"{b} H2"], [1.0], p_min_pu=-1.0,
+                 capital_cost=L * ((1 - u) * on_fixed + u * sub_fixed), lifetime=life, length=L, role="TRANSPORT", extra={"underwater_fraction": u})
+        added += 1
+    return dict(removed_upstream=removed, added=added, cost_rows=dict(onshore="H2 (g) pipeline", submarine="H2 (g) submarine pipeline", fixed_onshore=on_fixed, fixed_submarine=sub_fixed))
+
+
+def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: float, candidates: pd.DataFrame | None = None):
     R = s2cfg["co2"]
     ledger = dict(renamed_buses=0, buffers=0, sequestration_countries={}, vents=0, pipelines=0, capture_links={})
     # 1. captured -> stored (upstream naming), one buffer Store per node
@@ -203,27 +275,38 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
         for node in nodes:
             add_link(n, f"{node} co2 vent", country_of(n, node), "co2 vent", [f"{node} co2 stored", atmosphere_bus(country_of(n, node))], [1.0], role="CO2_VENT")
             ledger["vents"] += 1
-    # 4. pipelines along the greenfield H2 routes (decision 35; cross-border controlled by research.cross_border.co2)
+    # 4. pipelines (decision 35; cross-border controlled by research.cross_border.co2). R5: one candidate per electricity
+    #    connection (pipeline_candidates); the former H2-route dedup/shortest-path method is kept only as a fallback.
     on_fixed, sub_fixed = cost(costs, "CO2 pipeline", "fixed"), cost(costs, "CO2 submarine pipeline", "fixed")
     life = cost(costs, "CO2 pipeline", "lifetime")
-    h2 = n.links[n.links.carrier == "H2 pipeline"]
-    routes = {}
-    for name, z in h2.iterrows():
-        a, b = z.bus0[:-3], z.bus1[:-3]
-        key = tuple(sorted((a, b)))
-        u = float(z.underwater_fraction) if "underwater_fraction" in h2 and np.isfinite(z.get("underwater_fraction", np.nan)) else 0.0
-        L = float(z.length)
-        if key not in routes or L < routes[key]["length"]:
-            routes[key] = dict(a=a, b=b, length=L, underwater_fraction=u, h2_routes=routes.get(key, {}).get("h2_routes", 0) + 1)
-        else:
-            routes[key]["h2_routes"] += 1
-    ledger["h2_routes_merged"] = int(sum(r["h2_routes"] for r in routes.values()) - len(routes))
-    for key in sorted(routes):
-        r = routes[key]; a, b, L, u = r["a"], r["b"], r["length"], r["underwater_fraction"]
-        add_link(n, f"CO2 pipeline {a} -> {b}", country_of(n, a), "CO2 pipeline", [f"{a} co2 stored", f"{b} co2 stored"], [1.0], p_min_pu=-1.0,
-                 capital_cost=L * ((1 - u) * on_fixed + u * sub_fixed), lifetime=life, length=L, role="TRANSPORT",
-                 extra={"underwater_fraction": u})
-        ledger["pipelines"] += 1
+    if candidates is not None:
+        ledger["topology"] = "electricity_network_topology (R5)"
+        for _, r in candidates.iterrows():
+            a, b, L, u = r.a, r.b, float(r.length_km), float(r.underwater_fraction)
+            add_link(n, f"CO2 pipeline {a} -> {b}", country_of(n, a), "CO2 pipeline", [f"{a} co2 stored", f"{b} co2 stored"], [1.0], p_min_pu=-1.0,
+                     capital_cost=L * ((1 - u) * on_fixed + u * sub_fixed), lifetime=life, length=L, role="TRANSPORT", extra={"underwater_fraction": u})
+            ledger["pipelines"] += 1
+        ledger["cross_border_candidates"] = int(candidates.cross_border.sum())
+    else:
+        ledger["topology"] = "h2_pipeline_routes (S2 fallback)"
+        h2 = n.links[n.links.carrier == "H2 pipeline"]
+        routes = {}
+        for name, z in h2.iterrows():
+            a, b = z.bus0[:-3], z.bus1[:-3]
+            key = tuple(sorted((a, b)))
+            u = float(z.underwater_fraction) if "underwater_fraction" in h2 and np.isfinite(z.get("underwater_fraction", np.nan)) else 0.0
+            L = float(z.length)
+            if key not in routes or L < routes[key]["length"]:
+                routes[key] = dict(a=a, b=b, length=L, underwater_fraction=u, h2_routes=routes.get(key, {}).get("h2_routes", 0) + 1)
+            else:
+                routes[key]["h2_routes"] += 1
+        ledger["h2_routes_merged"] = int(sum(r["h2_routes"] for r in routes.values()) - len(routes))
+        for key in sorted(routes):
+            r = routes[key]; a, b, L, u = r["a"], r["b"], r["length"], r["underwater_fraction"]
+            add_link(n, f"CO2 pipeline {a} -> {b}", country_of(n, a), "CO2 pipeline", [f"{a} co2 stored", f"{b} co2 stored"], [1.0], p_min_pu=-1.0,
+                     capital_cost=L * ((1 - u) * on_fixed + u * sub_fixed), lifetime=life, length=L, role="TRANSPORT",
+                     extra={"underwater_fraction": u})
+            ledger["pipelines"] += 1
     # 5. capture technologies at every node
     ef_gas = cost(costs, "gas", "CO2 intensity"); cc = float(cc_fraction)
     cap_fixed = cost(costs, "biomass CHP capture", "fixed"); cap_vom = cost(costs, "biomass CHP capture", "VOM")

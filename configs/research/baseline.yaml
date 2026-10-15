@@ -177,8 +177,13 @@ research:
       dac: true                           # decision 11; sensitivity switch
       dac_heat_supply: electricity_cop_1  # DAC heat demand supplied electrically (no heat buses); COP 1 (grade C)
       cc_fraction_source: sector.cc_fraction
-      pipeline_topology: h2_pipeline_routes   # CO2 pipelines follow the greenfield H2 routing along the grid
+      pipeline_topology: electricity_network_topology   # R5 (decision 59): see research.s2.pipelines (former: h2_pipeline_routes)
       process_emissions_scope: [minerals, metals]   # 2.A and 2.C on the process bus; 2.B/2.D/4.C covered by feedstock carbon (method question)
+    pipelines:                            # R5 (decision 59): H2 and CO2 candidate corridors
+      topology: electricity_network_topology   # PyPSA-Eur v2025.07.0 prepare_sector_network.create_network_topology (lines 368-420): one candidate per connected node pair (AC lines + DC links incl. the 24 corridors); no dedup/shortest-path post-processing
+      length_factor: 1.25                 # great-circle distance x factor; PyPSA-Eur config.default.yaml lines 325 (lines.length_factor) and 341 (links.length_factor)
+      length_factor_source: "PyPSA-Eur v2025.07.0 config/config.default.yaml lines 325, 341"
+      underwater_fraction: corridor_subsea_share   # cross-border pairs from cross_border_corridors.csv subsea_share (all 0 in the frozen base); domestic pairs 0 (no data)
     biomass:
       potential_layer: main               # BIOMASS_POTENTIAL_2050.csv potential_main_mwh; low/high are sensitivities
       categories_excluded: [logging_residues]   # ZERO_BY_DECISION (decision 54)

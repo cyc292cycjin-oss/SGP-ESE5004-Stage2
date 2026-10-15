@@ -26,7 +26,7 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
                               tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
 from s2_costs import build_research_costs, write_costs
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
-                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS)
+                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines)
 
 AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TWh (2022) / C.4 capacity 4.3 GW (2022), BAS panels (PDF p.185/187)
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
@@ -234,7 +234,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
     injected = inject(psn, n, options, nodes, COUNTRIES, output / "empty_gas_pipelines.csv", cfg["research_assembly"]["demand_scenario"])
-    h2 = add_hydrogen(psn, n, costs, nodes, dc_to_ac(n))
+    dcmap = dc_to_ac(n)
+    h2 = add_hydrogen(psn, n, costs, nodes, dcmap)
+    # R5 (decision 59): pipeline candidates from the electricity topology; the upstream greenfield H2 routes are replaced
+    P = S2.get("pipelines", {})
+    candidates = pipeline_candidates(n, nodes, corridors, dcmap, float(P.get("length_factor", 1.25))) if P.get("topology") == "electricity_network_topology" else None
+    h2_pipes = replace_h2_pipelines(n, costs, candidates) if candidates is not None else dict(removed_upstream=0, added=0, note="upstream greenfield routes kept")
     # 2. research carrier recipe (fuel pools priced with the registry fuel prices, SMR/SMR CC/FT, OCGT/CCGT, national atmosphere)
     f, carbon, fragment_manifest = build_fragment(repo, n, costs_path, output, price_layer=None, cc_fraction=cc)
     sub = to_pypsa_fragment(f, list(n.snapshots), list(n.snapshot_weightings.generators), component_ids=list(f.components))
@@ -251,7 +256,13 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     geo = add_existing_geothermal(n, costs, survival_json, AEO8_GEOTHERMAL_CF, AEO8_GEOTHERMAL_CF_SOURCE, bus_mapping=contract.get("mapping", {}))
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
     # 4. S2 layers
-    co2 = add_co2_layer(n, costs, S2, registry, nodes, cc)
+    co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
+    pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
+                     candidates=(int(len(candidates)) if candidates is not None else None), cross_border_candidates=(int(candidates.cross_border.sum()) if candidates is not None else None),
+                     by_country_pair=({f"{a}-{b}": int(k) for (a, b), k in candidates[candidates.cross_border].groupby(["country_a", "country_b"]).size().items()} if candidates is not None else None),
+                     domestic_by_country=({str(c): int(k) for c, k in candidates[~candidates.cross_border].groupby("country_a").size().items()} if candidates is not None else None),
+                     h2=h2_pipes, underwater_fraction_source="corridor table subsea_share (cross-border); 0 for domestic pairs (no data)",
+                     table=(candidates.to_dict("records") if candidates is not None else None))
     bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
     heat = add_industrial_heat(n, costs, nodes, cc)
     demand_astar = bind_astar(n, repo, allocation)
@@ -276,7 +287,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   upstream_adapter=injected, upstream_add_hydrogen=h2, candidate_ledger=dict(nuclear=nuclear, sites=sites, extendable=extendable),
                                   cross_border_tags=tags, demand_binding=demand_astar, electric_base_sha256=ELECTRIC_BASE_SHA, physical_carbon_map=carbon,
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
-                                  s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat),
+                                  s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass"]:
         if key in n.meta:
@@ -297,7 +308,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                            "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(sha256=sha(repo / R["existing_cross_border_electricity"]["corridors_file"])),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
                    research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
-                   geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, cost_layer=cost_ledger,
+                   geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,
                    static_validation=static, inventory=inventory, candidates=dict(nuclear=len(nuclear), sites=len(sites), extendable=extendable), optional_string_normalisation=normalise,
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
     pd.DataFrame(demand["loads"]).to_csv(output / f"{scenario}{suffix}_S2_DEMAND_OWNERSHIP.csv", index=False)
