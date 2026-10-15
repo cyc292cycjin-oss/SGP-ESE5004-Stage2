@@ -100,7 +100,7 @@ research_assembly:
   international_bunker_method: ASSEMBLY_V1_BUNKER_CONSTANT_2019
   bunker_sensitivity_required: true
   external_fossil_market: ASSEMBLY_V1_EXTERNAL_MARKET_UNCONSTRAINED
-  biomass_supply_cap: accepted_country_fixed_obligation_only
+  biomass_supply_cap: d1_biomass_v5_country_category_stores   # S2-3: the Assembly-V1 regional pool (360 TWh) is retired; potentials per country x category
   geological_storage_asset: false
   carbon_validation_stage: POST_BUILD_STATIC_VALIDATION_BLOCKER
 
@@ -126,8 +126,8 @@ research:
     capex_on_existing: false             # existing capacity carries no new CAPEX (PyPSA objective_constant)
     fom_on_existing: true                # annual FOM of existing cross-border capacity added once (fixed-at-1 column)
   transmission:
-    volume_limit_mode: inherit_reference_constant   # decision 45 pending: keep the frozen lv2.0 constant as-is
-    volume_limit_factor: 2.0                        # used only when volume_limit_mode == factor_of_existing
+    volume_limit_mode: lvopt                        # decision 45 (S2-1): no transmission volume cap in the main run
+    volume_limit_factor: 2.79                       # sensitivity: factor_of_existing with the frozen 2.79x (S1 inherit_reference_constant / existing volume)
   nuclear:                                # decision 38; siting table is a grade-C assumption
     evidence_grade: C
     large_pwr:
@@ -136,10 +136,10 @@ research:
       allowed_countries: [BN, KH, ID, LA, MY, MM, PH, TH, TL, VN]   # all except Singapore
     smr:
       carrier: nuclear SMR
-      cost_technology: null              # technology-data "SMR" is steam methane reforming, not a reactor
+      cost_technology: nuclear SMR       # S2-1: AEO8 D.15 Nuclear SMR row appended by s2_costs.py (grade C, decision 46); technology-data "SMR" is steam methane reforming
       allowed_countries: [BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN]
-      p_nom_max: 0.0
-      status: DATA_PENDING
+      p_nom_max: .inf
+      status: PRICED_AEO8_GRADE_C
   site_candidates:                        # decision 39; structure built, potentials pending -> p_nom_max 0
     geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
     ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
@@ -153,10 +153,14 @@ research:
     network_limit_GWkm: null              # upstream Europe default 2000 GWkm not applied
     gas_network_repurposing: false        # upstream 0.8 CH4->H2 repurposing factor not applied
     hydrogen_colors: false
-  cost_layer:                             # D1 (2026-10-15), decision 46 option A: two registered cost layers, switchable here
-    active: technology_data_v0_13_2_2050  # main run: every technology from technology-data v0.13.2, year 2050, EUR2020
+  cost_layer:                             # D1 (2026-10-15), decision 46 option A; S2-0 (decision 50): three registered layers, switchable here
+    active: technology_data_v0_15_0_2050_eur2020   # main run (decision 50): technology-data v0.15.0, year 2050, rebased EUR2025 -> EUR2020 (EA20 GDP deflator)
     layers:
-      technology_data_v0_13_2_2050:
+      technology_data_v0_15_0_2050_eur2020:
+        file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json
+        prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv
+        aeo8_overrides: false
+      technology_data_v0_13_2_2050:       # sensitivity (D1 main layer)
         file: research_inputs/cost_layers_v5/LAYER_A_TECHNOLOGY_DATA_V0_13_2_2050.json
         aeo8_overrides: false             # the author's append_cost_data step is NOT applied
       aeo8_author_rule_2050:              # sensitivity: AEO8 D.15 x ECB2020 FX x (1 - D.17 2050 decline where labels match)
@@ -164,6 +168,62 @@ research:
         aeo8_overrides: true
     smr_cost_source: aeo8_author_rule_2050   # decision 46: SMR always from AEO8 D.15 (grade C, +-30 %) in both layers
     registry: research_inputs/registry_v5/DATA_REGISTRY.csv
+  s2:                                     # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
+    status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
+    co2:
+      storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50
+      sequestration_cost_eur_per_t: 30    # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
+      vent: true                          # captured CO2 may be vented to the capturing country's atmosphere (counts as emission)
+      dac: true                           # decision 11; sensitivity switch
+      dac_heat_mode: industry_heat_bus    # R6 (decision 60): DAC heat (technology-data heat-input 1.6 - compression-heat-output 0.2 MWh_th/t) from the node industrial low-T heat bus; electric_cop1 = S2 treatment kept as sensitivity
+      cc_fraction_source: sector.cc_fraction
+      pipeline_topology: electricity_network_topology   # R5 (decision 59): see research.s2.pipelines (former: h2_pipeline_routes)
+      process_emissions_scope: [minerals, metals]   # 2.A and 2.C on the process bus; 2.B/2.D/4.C covered by feedstock carbon (method question)
+    pipelines:                            # R5 (decision 59): H2 and CO2 candidate corridors
+      topology: electricity_network_topology   # PyPSA-Eur v2025.07.0 prepare_sector_network.create_network_topology (lines 368-420): one candidate per connected node pair (AC lines + DC links incl. the 24 corridors); no dedup/shortest-path post-processing
+      length_factor: 1.25                 # great-circle distance x factor; PyPSA-Eur config.default.yaml lines 325 (lines.length_factor) and 341 (links.length_factor)
+      length_factor_source: "PyPSA-Eur v2025.07.0 config/config.default.yaml lines 325, 341"
+      underwater_fraction: corridor_subsea_share   # cross-border pairs from cross_border_corridors.csv subsea_share (all 0 in the frozen base); domestic pairs 0 (no data)
+    biomass:
+      potential_layer: main               # BIOMASS_POTENTIAL_2050.csv potential_main_mwh; low/high are sensitivities
+      categories_excluded: [logging_residues]   # ZERO_BY_DECISION (decision 54)
+      cross_border: false                 # decision 36
+    demand:
+      table: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv   # aeo8_ats_relative variant; research.demand.country_allocation selects _GDP_SENSITIVITY / _POP_SENSITIVITY
+      tables_by_allocation:
+        aeo8_ats_relative: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv
+        gdp: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv
+        population: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv
+      node_allocation: assembly_v1_allocation_shares_then_astar   # node shares per (country, account) from results_project/assembly_v1/final_allocation
+      time_shape: flat_fuels_astar_shape_electricity
+      international_bunkers: true         # decision 10; sensitivity switch
+      shipping: deferred_to_S3            # domestic and international shipping fuel not bound in S2
+      land_transport_shares: pypsa_eur_v2025.07.0   # D1 section 4 registry rows share_land_transport_*
+      bev_dsm: false                      # no ASEAN fleet data (number of cars) -> no DSM store; DATA_PENDING
+      clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
+      cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
+    industry:
+      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s2b_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
+        aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
+        gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv
+        population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population.csv
+      biomass_overflow_to_methane: true     # R1.6 / decision 36: fixed solid-biomass demand above the national potential is served by methane at equal heat
+      low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30
+      existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
+      feedstock_carbon_mode: territorial    # R2 (decision 56): territorial = EDGAR 2.B+2.D x multiplier on the process bus + domestic plastics burned (s2b_feedstock.py) | full_release = PyPSA-Eur default (sensitivity)
+      territorial_tables:
+        aeo8_ats_relative: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative.csv
+        gdp: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_gdp.csv
+        population: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_population.csv
+      feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # full_release mode only: S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
+      feedstock_end_of_life_release_fraction: 1.0   # full_release mode only: PyPSA-Eur default (HVC_environment_sequestration_fraction 0)
+      hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
+      steel_aluminium_routes: "steel: worldsteel 2019 + PyPSA-Eur St_primary_fraction 0.3 / DRI_fraction 1.0 (R1); aluminium: DATA_PENDING (no ASEAN production split)"
+    gap_diagnostic:                       # decisions 49, 53: off in the main run; separate labelled run
+      enabled: false
+      penalty_eur_per_mwh: 10000          # electricity slack; above any supply cost in the model (max marginal ~ 300 EUR/MWh)
+      penalty_eur_per_tco2: 10000         # CO2 slack; above the DAC levelised cost (< 1,000 EUR/t at the registered costs)
   cost_scaling:                           # decision 41; multiplies capital_cost per technology carrier; 1.0 = no change
     nuclear: 1.0
     nuclear SMR: 1.0
@@ -200,3 +260,4 @@ research:
   demand:
     scope: electricity_only_astar         # step 2 (R8) reconnects the other sectors
     status: INTERIM_S1_SKELETON
+    country_allocation: aeo8_ats_relative   # R3 (decision 57): aeo8_ats_relative (main) | gdp (former main, sensitivity) | population; selects the D1 demand table variant

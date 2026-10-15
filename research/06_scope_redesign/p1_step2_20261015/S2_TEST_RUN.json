@@ -1,0 +1,23 @@
+{
+  "generated_epoch": 1792050093.008928,
+  "command": "PYTHONHASHSEED=0 python -m pytest tests/research -q -p no:cacheprovider (WSL, /home/jin/miniforge3/envs/pypsa-earth)",
+  "s2_branch": {
+    "commit": "717ff6e0+ (S2-7 working tree)",
+    "file": "evidence/tests/s2_pytest_full.log",
+    "sha256": "6511bfab405f6a0ba774665a68d145908d102edddd1feb2c990e299cf7e3a0fc",
+    "summary": "4 failed, 364 passed, 293 warnings",
+    "failed": [
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_coverage_and_ev_boundary_remain_guarded",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_nec_source_rows_unique_and_retained",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_prior133_values_unchanged_new19_have_sources",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_rail_parent_not_posted_and_ph_stays_blocked"
+    ]
+  },
+  "s2_tests": {
+    "test_s2_built_networks": 5,
+    "test_s2_costs": 3,
+    "test_d1_registry": 13,
+    "note": "21 passed when run alone (tests/research/test_s2_built_networks.py test_s2_costs.py test_d1_registry.py)"
+  },
+  "note": "The 4 failures are the baseline test_gate4_activation.py AppliedInputTests failures recorded in S1_TEST_RUN.json; unrelated to S2. The first full run of this session recorded 5 failures because test_s2_costs.py still referenced a wrong registry column name (key instead of param_id); fixed and re-run (this record)."
+}

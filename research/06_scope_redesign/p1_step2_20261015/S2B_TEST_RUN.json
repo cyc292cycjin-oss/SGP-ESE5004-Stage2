@@ -1,0 +1,32 @@
+{
+  "generated_epoch": 1792055752.9050837,
+  "command": "PYTHONHASHSEED=0 python -m pytest tests/research -q -p no:cacheprovider (WSL, /home/jin/miniforge3/envs/pypsa-earth)",
+  "s2b_branch": {
+    "commit": "47ce2e15+ (build/smoke working tree)",
+    "file": "evidence/s2b/tests/s2b_pytest_full.log",
+    "sha256": "08834caa429f26fbe3efe3b052123ec1f14fd7295cca51623ffd3246e0fb7f7d",
+    "summary": "4 failed, 371 passed, 293 warnings",
+    "failed": [
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_coverage_and_ev_boundary_remain_guarded",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_nec_source_rows_unique_and_retained",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_prior133_values_unchanged_new19_have_sources",
+      "tests/research/test_gate4_activation.py::AppliedInputTests::test_rail_parent_not_posted_and_ph_stays_blocked"
+    ]
+  },
+  "new_tests": {
+    "test_s2b_supplement02": [
+      "test_r3_aeo8_relative_allocation",
+      "test_r1_industry_routes",
+      "test_r2_territorial_feedstock",
+      "test_r4_representative_weights",
+      "test_r7_gate_signatures",
+      "test_s2b_networks_r5_pipelines",
+      "test_s2b_networks_r1_r2_r6"
+    ],
+    "updated": [
+      "test_s2_built_networks.py (results_project/s2b, DAC heat port, industry heat demand 0 in pypsa_eur_2050 mode)",
+      "test_d1_registry.py (R3 multiplier rows)"
+    ]
+  },
+  "note": "The 4 failures are the baseline test_gate4_activation.py AppliedInputTests failures recorded since S1; unrelated. An intermediate run recorded a 5th failure (test_s1_adapter_daily_v5 GatesB.test_b12_hash) caused by the new B12 weights check on a synthetic single-snapshot network; the check now exempts single-snapshot networks and the suite was re-run (this record)."
+}

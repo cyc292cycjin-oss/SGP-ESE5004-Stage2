@@ -36,7 +36,10 @@ def test_registry_schema_and_tiers(registry):
     assert list(registry.columns) == COLUMNS
     assert registry.param_id.is_unique
     assert set(registry.tier) <= {"A", "B", "C"}
-    assert set(registry.status) <= {"REGISTERED", "DATA_PENDING", "CANDIDATE_ONLY", "SENSITIVITY", "SOURCE_ZERO", "REFERENCE_ONLY"}
+    from d1_common import STATUSES
+    assert set(registry.status) <= STATUSES
+    zbd = registry[registry.status == "ZERO_BY_DECISION"]
+    assert len(zbd) == 11 and (pd.to_numeric(zbd.value) == 0).all()
     pend = registry[registry.status == "DATA_PENDING"]
     assert (pend.value == "DATA_PENDING").all()
     c = registry[(registry.tier == "C") & (registry.status == "REGISTERED")]
@@ -121,7 +124,9 @@ def test_demand_2050_calibration():
     vals = [float(r["value_2050_mwh"]) for r in rows if r["value_2050_mwh"] != ""]
     assert min(vals) >= 0.0
     pend = [r for r in rows if r["status"] == "DATA_PENDING"]
-    assert sorted(r["country"] for r in pend) == ["BN", "KH", "LA", "TL"]
+    assert pend == []  # S2-0.4: the four marine bunkers are 0 (UNSD Energy Balance 2019 shows no flow)
+    zero = [r for r in rows if r["sector"] == "InternationalBunkers" and r["account"] == "InternationalShippingBunker" and r["country"] in ("BN", "KH", "LA", "TL")]
+    assert len(zero) == 4 and all(r["status"] == "SOURCE_ZERO" and float(r["value_2050_mwh"]) == 0.0 for r in zero)
     elec = [r for r in rows if r["carrier"] == "electricity" and r["sector"] in AEO8_BAS_2050_MTOE]
     assert all(r["in_existing_electricity_load"] == "true" and r["existing_electricity_load_2050_mwh"] != "" for r in elec)
     ne = [r for r in rows if r["sector"] == "NonEnergyUse"]
@@ -149,7 +154,19 @@ def test_biomass_replication_and_potentials():
         if r["cost_eur2020_per_mwh"] != "":
             assert float(r["cost_low_eur2020_per_mwh"]) == pytest.approx(0.5 * float(r["cost_eur2020_per_mwh"]))
             assert float(r["cost_high_eur2020_per_mwh"]) == pytest.approx(1.5 * float(r["cost_eur2020_per_mwh"]))
-    assert all(r["country"] != "SG" or r["category"] in ("msw_organic", "wood_processing_residues", "logging_residues", "other_crop_residues", "coconut_residues", "rice_residues", "sugarcane_residues", "maize_residues", "cassava_residues") for r in pot)
+    assert all(r["country"] != "SG" or r["category"] in ("msw_organic_biogas", "wood_processing_residues", "logging_residues", "other_crop_residues", "coconut_residues", "rice_residues", "sugarcane_residues", "maize_residues", "cassava_residues") for r in pot)
+    # S2-0.2: MSW organic fraction is a biogas feedstock (IPCC DOC method), no direct-combustion row left
+    assert not any(r["category"] == "msw_organic" for r in pot)
+    msw = [r for r in pot if r["category"] == "msw_organic_biogas" and r["status"] != "DATA_PENDING"]
+    assert msw and all(r["feedstock_group"] == "biogas" and 0.5 < float(r["lhv_gj_per_t"]) < 3.5 for r in msw)
+    assert [r["country"] for r in pot if r["category"] == "msw_organic_biogas" and r["status"] == "DATA_PENDING"] == ["LA"]
+    # S2-0.5: logging residues are zero by decision with a high-biomass sensitivity; wood processing residues derived for the FAO-gap countries
+    logs = [r for r in pot if r["category"] == "logging_residues"]
+    assert len(logs) == 11 and all(r["status"] == "ZERO_BY_DECISION" and float(r["potential_main_mwh"]) == 0.0 for r in logs)
+    assert sum(float(r["potential_high_mwh"]) for r in logs) > 0
+    wood = {r["country"]: r for r in pot if r["category"] == "wood_processing_residues"}
+    assert all(wood[c]["status"] == "REGISTERED" for c in ["BN", "KH", "LA", "MM", "PH", "SG", "TL", "ID", "MY", "TH", "VN"])
+    assert "FAO/APFC 2001" in wood["KH"]["potential_method"] and wood["KH"]["potential_tier"] == "B" and wood["SG"]["potential_tier"] == "C"
 
 
 def test_demand_shares(registry):
@@ -166,10 +183,59 @@ def test_cost_layer_config_switch():
     import d1_cost_layers as cl
     cfg = yaml.safe_load((ROOT / "configs" / "research" / "baseline.yaml").read_text())
     cl_cfg = cfg["research"]["cost_layer"]
-    assert cl_cfg["active"] == "technology_data_v0_13_2_2050"
-    assert set(cl_cfg["layers"]) == {"technology_data_v0_13_2_2050", "aeo8_author_rule_2050"}
+    assert cl_cfg["active"] == "technology_data_v0_15_0_2050_eur2020"  # S2-0.1, decision 50
+    assert set(cl_cfg["layers"]) == {"technology_data_v0_15_0_2050_eur2020", "technology_data_v0_13_2_2050", "aeo8_author_rule_2050"}
+    name, layer = cl.load_cost_layer(cfg)
+    assert name == "technology_data_v0_15_0_2050_eur2020" and layer["manifest"]["aeo8_overrides"] is False
+    assert layer["manifest"]["technology_data"]["tag"] == "v0.15.0" and layer["manifest"]["technology_data"]["eur_year"] == 2025
+    cfg["research"]["cost_layer"]["active"] = "technology_data_v0_13_2_2050"
     name, layer = cl.load_cost_layer(cfg)
     assert name == "technology_data_v0_13_2_2050" and layer["manifest"]["aeo8_overrides"] is False
     cfg["research"]["cost_layer"]["active"] = "aeo8_author_rule_2050"
     name, layer = cl.load_cost_layer(cfg)
     assert name == "aeo8_author_rule_2050" and "nuclear SMR" in set(layer["overrides"].technology_data_name)
+
+
+def test_s2_0_cost_layer_v015_rebase(registry):
+    import pandas as pd
+    r = registry.set_index("param_id")
+    d2025 = float(r.loc["deflator_ea20_gdp_2025", "value"])
+    assert d2025 == pytest.approx(120.01983244779059, rel=1e-9)
+    factor = 100.0 / d2025
+    assert float(r.loc["conv_eur2025_to_eur2020", "value"]) == pytest.approx(factor, rel=1e-9)
+    assert float(r.loc["cost_C_onwind_investment", "value"]) == pytest.approx(1286.4669 * factor, rel=1e-6)
+    assert float(r.loc["cost_C_electrolysis_investment", "value"]) == pytest.approx(1257.3346 * factor, rel=1e-6)
+    assert r.loc["technology_data_v0_15_0_tag_commit", "value"] == "07e43575c7996a988c60964d00772376ab9bd10c"
+    long = pd.read_csv(COST / "technology_data_v0.15.0_EUR2020" / "costs_2050_EUR2020.csv")
+    mon = long[long.monetary]
+    import numpy as np
+    assert (mon.currency_year == 2020).all()
+    assert np.allclose(mon[mon.source_currency_year == 2025].conversion_factor, factor) and (mon.source_currency_year == 2025).sum() == 374
+    assert (mon[mon.source_currency_year == 2020].conversion_factor == 1.0).all()  # 'commodity' row already EUR2020
+    assert (mon[mon.source_currency_year == 2019].conversion_factor > 1.0).all()  # 'pelletizing cost' row inflated 2019 -> 2020
+    assert (long[~long.monetary].conversion_factor == 1.0).all()
+    wide = pd.read_csv(COST / "technology_data_v0.15.0_EUR2020" / "costs_2050_EUR2020_prepared.csv", index_col=0)
+    inv = float(wide.at["direct air capture", "investment"]); fom = float(wide.at["direct air capture", "FOM"]); life = float(wide.at["direct air capture", "lifetime"])
+    assert float(wide.at["direct air capture", "fixed"]) == pytest.approx(inv * (0.07 / (1 - 1.07 ** -life) + fom / 100), rel=1e-9)
+    assert "SMR" in wide.index and float(wide.at["nuclear", "marginal_cost"]) > float(wide.at["nuclear", "VOM"])
+
+
+def test_s2_0_process_emissions(registry):
+    r = registry.set_index("param_id")
+    # EDGAR 2025 2019 kt: ID 2.A.1 29.38 + 2.A.2 0.34 + 2.A.3-4 0.40 Mt (extraction md section 1)
+    assert float(r.loc["process_emissions_minerals_2019_ID", "value"]) == pytest.approx(30.12e6, rel=0.01)
+    assert float(r.loc["process_emissions_chemicals_2019_SG", "value"]) == pytest.approx(10.36e6, rel=0.01)
+    assert r.loc["process_emissions_chemicals_2050_SG", "status"] == "REFERENCE_ONLY"  # covered by feedstock carbon (method question)
+    assert r.loc["process_emissions_metals_2050_VN", "status"] == "REGISTERED"
+    mult = float(r.loc["demand_country_multiplier_2019_2050_VN", "value"])  # R3: AEO8 ATS relative factor x k_Industry (main allocation)
+    assert r.loc["demand_country_allocation_mode", "value"] == "aeo8_ats_relative" and r.loc["demand_gdp_multiplier_2019_2050_VN", "status"] == "SENSITIVITY"
+    assert abs(float(r.loc["demand_aeo8_percapita_sum_check_2050", "value"]) / 746.2 - 1) < 1e-3 and abs(float(r.loc["demand_aeo8_percapita_sum_check_2022", "value"]) / 432.2 - 1) < 1e-3
+    assert float(r.loc["demand_aeo8_ats_relative_factor_VN", "value"]) > 1 and float(r.loc["demand_aeo8_ats_relative_factor_MM", "value"]) < 1
+    assert float(r.loc["process_emissions_minerals_2050_VN", "value"]) == pytest.approx(float(r.loc["process_emissions_minerals_2019_VN", "value"]) * mult, rel=1e-9)
+    assert not any(registry.param_id.str.startswith("process_emissions_") & (registry.status == "DATA_PENDING"))
+    assert float(r.loc["fugitive_factor_oilgas_MY", "value"]) > 0 and r.loc["fugitive_factor_oilgas_MY", "unit"] == "tCO2/MWh_production"
+    assert r.loc["demand_bunker_marine_zero_LA", "status"] == "SOURCE_ZERO" and float(r.loc["demand_bunker_marine_zero_LA", "value"]) == 0.0
+    assert "demand_bunker_pending_LA_InternationalShippingBunker" not in r.index
+    bound = load(REG / "FEEDSTOCK_CARBON_BOUNDARY_2019.csv")
+    sg = next(b for b in bound if b["country"] == "SG")
+    assert float(sg["edgar_2B_chemicals_tco2"]) == pytest.approx(10.36e6, rel=0.01) and float(sg["feedstock_carbon_potential_tco2"]) > float(sg["edgar_2B_chemicals_tco2"])

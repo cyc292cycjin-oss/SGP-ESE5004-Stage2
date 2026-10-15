@@ -8,7 +8,8 @@ import json
 import numpy as np
 import pandas as pd
 
-def dynamic_checks(n):
+def dynamic_checks(n,extra_known_objective=0.,extra_known_label=''):
+    """extra_known_objective (R7): objective terms added by research hooks that are not component costs (e.g. the gap-diagnostic CO2 slack x penalty)."""
     rows=[];weights=n.snapshot_weightings;h=weights.stores
     def check(name,residual,scale=1.,unit='MW',detail=''):
         a=np.asarray(residual,dtype=float);s=np.asarray(scale,dtype=float)
@@ -94,7 +95,7 @@ def dynamic_checks(n):
         d=n.df(typ);ext=d[nom+'_extendable'];capital+=float(((d.loc[ext,nom+'_opt']-d.loc[ext,nom])*d.loc[ext,'capital_cost']).sum())
     for typ,flow in [('Generator','p'),('Link','p0'),('Store','p'),('StorageUnit','p_dispatch')]:
         variable+=float((n.pnl(typ)[flow]*dense(typ,'marginal_cost')).sum(axis=1)@weights.objective)
-    known=float(n.meta.get('existing_annual_fixed_om_eur',0.))+float(n.meta.get('existing_cross_border_fom_eur',0.));expected=capital+variable+known
+    known=float(n.meta.get('existing_annual_fixed_om_eur',0.))+float(n.meta.get('existing_cross_border_fom_eur',0.))+float(extra_known_objective);expected=capital+variable+known
     check('OBJECTIVE_RECONCILIATION_KNOWN_FOM_ONCE',float(n.objective)-expected,expected,'EUR2020/year',json_detail(capital,variable,known))
     return rows,dict(objective_reconciliation={'capital':capital,'variable':variable,'known_fixed_once':known,'actual':float(n.objective)},country_co2_levels_tco2=levels,carbon_validation='Link multiport equations + CO2 bus balance + national atmosphere Store state; caps checked on final level')
 

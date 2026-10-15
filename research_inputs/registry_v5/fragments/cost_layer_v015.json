@@ -1,0 +1,64 @@
+{
+ "comparison_rows": 181,
+ "manifest": {
+  "aeo8_overrides": false,
+  "files": {
+   "comparison": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/COMPARISON_v0.13.2_vs_v0.15.0_EUR2020.csv",
+   "long": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020.csv",
+   "long_sha256": "708daebadfc81680079e1f8794772e0ab945f33088b624ad6eb6499c06ef17e9",
+   "prepared": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv",
+   "prepared_sha256": "17b1b23037807745571c3cadee0b2c41989d08ecf985c371f94c5619017aba4e"
+  },
+  "layer": "technology_data_v0_15_0_2050_eur2020",
+  "prepared_table": {
+   "fill_values": {
+    "CO2 intensity": 0.0,
+    "FOM": 0.0,
+    "VOM": 0.0,
+    "discount rate": 0.07,
+    "efficiency": 1.0,
+    "fuel": 0.0,
+    "investment": 0.0,
+    "lifetime": 25.0
+   },
+   "formula": "fixed = (annuity(lifetime, discount rate) + FOM/100) x investment [EUR/MW]; marginal_cost = VOM + fuel/efficiency; per-kW units x 1e3",
+   "source": "pypsa-asean scripts/process_cost_data.prepare_costs; configs/config.default.yaml costs.fill_values"
+  },
+  "rebase": {
+   "deflator_file": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/prices/sources/ECB_EA20_GDP_DEFLATOR.csv",
+   "deflator_series": "MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N",
+   "deflator_sha256": "77a6cea533abe6318da7482e90dc8429c38953221d9363a1ae3add2e327dcf4c",
+   "deflator_url": "https://data-api.ecb.europa.eu/service/data/MNA/A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N?format=csvdata&startPeriod=1990&endPeriod=2025",
+   "factor_2019_to_2020": 1.0181126154701643,
+   "factor_2025_to_2020": 0.8331956307596134,
+   "index_2019": 98.22096149336093,
+   "index_2020": 100.0,
+   "index_2025": 120.01983244779059,
+   "method": "EUR(currency_year) -> EUR2020 with the ECB EA20 GDP deflator, factor = index(2020)/index(currency_year); non-monetary rows unchanged",
+   "monetary_rows": 376,
+   "monetary_rows_by_source_year": {
+    "2019.0": 1,
+    "2020.0": 1,
+    "2025.0": 374
+   },
+   "note": "technology-data inflated 2020->2025 with Eurostat HICP (about +25.7 %); dividing by the EA20 GDP deflator (+20.0 %) leaves about +4.8 % on unchanged source values"
+  },
+  "role": "main (decision 50; supersedes v0.13.2 main layer from D1)",
+  "rows": 1280,
+  "smr_cost_source": "aeo8_author_rule_2050 (decision 46, unchanged)",
+  "technology_data": {
+   "config_yaml_sha256": "c7a14f597cdeb6aabddc7773e1fec83bbd7c8a8d853503aa11a305ad4cc92280",
+   "costs_2050_csv": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/cost_layers_v5/sources/costs_2050_v0.15.0.csv",
+   "costs_2050_sha256": "244c8f9ed3a5b8b0be5f3610c9cf27a8a5a27b09ed42afad13c53221c92992f6",
+   "eur_year": 2025,
+   "eur_year_locator": "config.yaml line 18 'eur_year: 2025'; docs/release_notes.rst v0.14.0 and v0.15.0 entries",
+   "release_asset": "https://github.com/PyPSA/technology-data/releases/download/v0.15.0/costs_2050.csv",
+   "release_notes_sha256": "0ace273464f09267abc33ed1a368d8076e13ef5fcd4ffeb28271648bf4ddfd9c",
+   "source_tarball_sha256": "c4787c1d72b9ec9fae032d37f906a4d6c92d4adfe111c55680f59f62bb162ccb",
+   "tag": "v0.15.0",
+   "tag_commit": "07e43575c7996a988c60964d00772376ab9bd10c",
+   "upstream_inflation_index": "Eurostat HICP annual (prc_hicp_aind), scripts/_helpers.py prepare_inflation_rate/adjust_for_inflation"
+  }
+ },
+ "script": "scripts_project/s2_0_cost_layer_v015.py"
+}

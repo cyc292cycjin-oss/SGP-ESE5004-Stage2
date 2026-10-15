@@ -55,6 +55,18 @@ FEED_SHARE_REGIONAL = (306 + 87 + 303 + 226 + 426) / (1732 + 163 + 680 + 1220 + 
 PALM = dict(EFB=0.21, fibre=0.144, PKS=0.064, POME=0.583)   # IRENA 2022 Box 4 (Eriza 2010), share of FFB mass
 OPT_REPLANT, OPT_DENSITY, OPT_T_PER_TREE, OPF_PER_OPT = 0.04, 140.0, 2.0, 3.3  # IRENA 2022 Appendix A p.138-139 (Malaysia)
 OPT_DRY_MATTER = 0.20  # IRENA 2022 Appendix A: OPT moisture content 80 %
+# S2-0.2 (decision 51): MSW organic fraction -> biogas by anaerobic digestion, IPCC 2006 Vol.5 defaults, WET-weight basis
+DOC_WET = {"food": (0.15, 0.08, 0.20), "garden": (0.20, 0.18, 0.22)}  # Vol.5 Ch.2 Table 2.4: DOC in % of wet waste (default, min, max)
+DOCF, F_CH4, MCF_DIGESTER = 0.5, 0.5, 1.0  # Vol.5 Ch.3 §3.2.3: DOCf default 0.5; F (CH4 volume fraction) default 0.5; MCF 1 = fully anaerobic (digester)
+LHV_CH4_GJ_T = 50.04  # methane LHV: NIST WebBook dHc = -890.8 kJ/mol, minus 2 x 44.0 kJ/mol H2O(l->g) = 802.8 kJ/mol / 16.043 g/mol
+# S2-0.5 (decision 54): forestry residues, FAO/APFC 2001 "Trash or treasure?" (X6966E01/02.htm) and JRC98626 Table A3-3
+FAO2001_SAWMILL_RECOVERY = {"KH": 0.50, "ID": 0.54, "LA": 0.40, "MY": 0.52, "MM": 0.40, "PH": 0.50, "TH": 0.50, "VN": 0.50}  # Table 12 (assumed recovery rate, %)
+FAO2001_PLYWOOD_RECOVERY = {"KH": 0.47, "ID": 0.43, "LA": 0.47, "MY": 0.50, "MM": 0.47, "PH": 0.47, "TH": 0.47, "VN": 0.47}  # Table 13
+FAO2001_AVG_SAWMILL, FAO2001_AVG_PLYWOOD = 0.508, 0.469  # Table 9 text: sawmills 42-60 % (avg 50.8), plywood 43-50 % (avg 46.9); used for BN, SG, TL
+FAO2001_LOGGING_RESIDUE_FACTOR = {"KH": 2.0, "ID": 2.0, "LA": 2.0, "MY": 2.0, "MM": 1.5, "PH": 1.0, "TH": 1.0, "VN": 1.5}  # Table 7: m3 residue per m3 industrial roundwood
+FAO2001_LOGGING_RESIDUE_FACTOR_DEFAULT = (1 - 0.55) / 0.55  # "fairly common recovery rate of about 55 percent" (BN, SG, TL not in Table 7)
+JRC_LOGGING_EXTRACTION_MAX = 0.67  # JRC98626 Table A3-3 (PDF p.92): 67 % extraction on slopes <= 35 %
+FAO2001_LOGGING_ECONOMIC_SHARE = 0.10  # FAO 2001 Table 7: 10 % of logging residues economically usable
 R4_GROWTH_2010_2050 = {"ID": 1.011 ** 20 * 1.003 ** 20, "PH": 1.011 ** 20 * 1.003 ** 20, "VN": 1.011 ** 20 * 1.003 ** 20,
                        "MY": 1.011 ** 20 * 1.004 ** 20, "TH": 1.011 ** 20 * 1.004 ** 20}  # IRENA 2017 Table R-4
 R1A = {"ID": (816, 494), "MY": (77, 44), "PH": (297, 218), "TH": (476, 429), "VN": (384, 267)}  # Table R-1a 2010 Harvest/Process PJ
@@ -243,6 +255,11 @@ def main():
         fo[y] = pd.to_numeric(fo[y], errors="coerce")
     fo["mean"] = fo[["Y2019", "Y2020", "Y2021", "Y2022", "Y2023"]].mean(axis=1, skipna=True)
     wood_res = fo[(fo.Item == "Wood residues") & (fo.Element == "Production") & (fo.Unit == "m3")].set_index("ISO2")["mean"]
+
+    def fo_series(item):
+        return fo[(fo.Item == item) & (fo.Element == "Production") & (fo.Unit == "m3")].set_index("ISO2")["mean"]
+    sawn, ply, indrw = fo_series("Sawnwood"), fo_series("Plywood and LVL"), fo_series("Industrial roundwood")
+    fao2001_src = "FAO/APFC 2001 Trash or treasure? Logging and mill residues in Asia and the Pacific (X6966E01/02.htm, text copies in biomass_v5/sources)"
     waw = {r["ISO2"]: r for r in read_csv(SRC_DIR / WAW_CSV)}
     qcl_sha, fo_sha, waw_sha = src_sha(QCL_CSV), src_sha(FO_CSV), src_sha(WAW_CSV)
     zip_sha = sha256(QCL_ZIP)
@@ -296,33 +313,56 @@ def main():
                                m_main * OPT_DRY_MATTER * LHV_RESIDUE_GJ_T / 3.6, (opt + opf) * HARVEST_MAIN * LHV_RESIDUE_GJ_T / 3.6, m_main, LHV_RESIDUE_GJ_T, "C",
                                f"FAOSTAT oil palm area harvested {ha:,.0f} ha x {OPT_REPLANT} replanting x {OPT_DENSITY:g} trees/ha x {OPT_T_PER_TREE:g} t OPT (IRENA 2022 Appendix A, Malaysian parameters); harvest cap {HARVEST_MAIN}; 15 GJ/t on reported mass; low = dry matter {OPT_DRY_MATTER} (80 % moisture, Appendix A); high = trunks + fronds (OPF = {OPF_PER_OPT} x OPT) at {HARVEST_MAIN}",
                                ref_src, costs["oil_palm_trunk"], "REGISTERED", f"fronds excluded from main (soil mulch); cross-check IRENA 2017 harvest factor 3.0 x FFB x 0.25 = {ffb * 3.0 * 0.25:,.0f} t incl. fronds"))
+        gj_m3 = UNIT_CONSTANTS["conv_gj_per_m3_wood_residues"][0]
+        s_m3 = float(sawn.get(c, 0.0)) if c in sawn.index and sawn.get(c) == sawn.get(c) else 0.0
+        p_m3 = float(ply.get(c, 0.0)) if c in ply.index and ply.get(c) == ply.get(c) else 0.0
+        rs = FAO2001_SAWMILL_RECOVERY.get(c, FAO2001_AVG_SAWMILL); rp = FAO2001_PLYWOOD_RECOVERY.get(c, FAO2001_AVG_PLYWOOD)
+        derived_m3 = (s_m3 / rs - s_m3) + (p_m3 / rp - p_m3)
+        own_use = ("mill self-consumption is not deducted here: it is part of the UNSD industry biomass demand (D1 IndustryFinalEnergy biomass), "
+                   "which draws from the same national biomass bus; deducting it from supply as well would count it twice")
         wr = float(wood_res.get(c, float("nan"))) if c in wood_res.index else float("nan")
         if wr == wr and wr > 0:
-            e_main = wr * COLLECTION_2050_WOODY * UNIT_CONSTANTS["conv_gj_per_m3_wood_residues"][0] / 3.6
-            out.append(row(c, "wood_processing_residues", "solid_biomass", e_main, e_main * 0.5 / COLLECTION_2050_WOODY, wr * UNIT_CONSTANTS["conv_gj_per_m3_wood_residues"][0] / 3.6,
-                           wr * COLLECTION_2050_WOODY, UNIT_CONSTANTS["conv_gj_per_m3_wood_residues"][0], "B",
+            e_main = wr * COLLECTION_2050_WOODY * gj_m3 / 3.6
+            out.append(row(c, "wood_processing_residues", "solid_biomass", e_main, e_main * 0.5 / COLLECTION_2050_WOODY, wr * gj_m3 / 3.6,
+                           wr * COLLECTION_2050_WOODY, gj_m3, "B",
                            f"FAOSTAT FO Wood residues production 2019-2023 mean {wr:,.0f} m3 (held constant) x {COLLECTION_2050_WOODY} collection (IRENA 2022 woody 2050) x 9.14 GJ/m3 (UNSD); low = 2030 collection rate 50 % (IRENA 2022); high = 100 %",
-                           f"FAOSTAT FO extraction:{fo_sha}; UNSD 2014 NCV", costs["wood_processing_residues"], "REGISTERED", "reported processing residues only; logging residues DATA_PENDING; unit m3 solid"))
+                           f"FAOSTAT FO extraction:{fo_sha}; UNSD 2014 NCV", costs["wood_processing_residues"], "REGISTERED",
+                           f"reported processing residues; FAO 2001 recovery-rate derivation gives {derived_m3:,.0f} m3 (sawnwood {s_m3:,.0f} m3 / {rs}, plywood {p_m3:,.0f} m3 / {rp}) as cross-check; " + own_use))
+        elif derived_m3 > 0:
+            e_main = derived_m3 * COLLECTION_2050_WOODY * gj_m3 / 3.6
+            tier = "B" if c in FAO2001_SAWMILL_RECOVERY else "C"
+            out.append(row(c, "wood_processing_residues", "solid_biomass", e_main, e_main * 0.5 / COLLECTION_2050_WOODY, derived_m3 * gj_m3 / 3.6,
+                           derived_m3 * COLLECTION_2050_WOODY, gj_m3, tier,
+                           f"S2-0.5: residues = sawnwood {s_m3:,.0f} m3 / recovery {rs} - sawnwood + plywood {p_m3:,.0f} m3 / recovery {rp} - plywood (FAO/APFC 2001 Tables 12-13{'' if c in FAO2001_SAWMILL_RECOVERY else ', 10-country averages Table 9 for ' + c}) = {derived_m3:,.0f} m3; FAOSTAT FO 2019-2023 means; x {COLLECTION_2050_WOODY} collection x 9.14 GJ/m3; low = 50 % collection; high = 100 %",
+                           f"FAOSTAT FO extraction:{fo_sha}; {fao2001_src}", costs["wood_processing_residues"], "REGISTERED", own_use))
         else:
-            out.append(row(c, "wood_processing_residues", "solid_biomass", None, None, None, None, UNIT_CONSTANTS["conv_gj_per_m3_wood_residues"][0], "C",
-                           "FAOSTAT FO has no Wood residues production for this country", f"FAOSTAT FO extraction:{fo_sha}", costs["wood_processing_residues"], "DATA_PENDING", ""))
-        out.append(row(c, "logging_residues", "solid_biomass", None, None, None, None, LHV_WOOD_GJ_T, "C",
-                       "no sourced residue-to-roundwood ratio for ASEAN logging residues; IRENA 2017 plantation method needs species areas (5 countries only)",
-                       ref_src, costs["wood_processing_residues"], "DATA_PENDING", "download list"))
+            out.append(row(c, "wood_processing_residues", "solid_biomass", None, None, None, None, gj_m3, "C",
+                           "FAOSTAT FO has neither Wood residues nor sawnwood/plywood production for this country", f"FAOSTAT FO extraction:{fo_sha}", costs["wood_processing_residues"], "DATA_PENDING", ""))
+        irw = float(indrw.get(c, 0.0)) if c in indrw.index and indrw.get(c) == indrw.get(c) else 0.0
+        lf = FAO2001_LOGGING_RESIDUE_FACTOR.get(c, FAO2001_LOGGING_RESIDUE_FACTOR_DEFAULT)
+        log_high = irw * lf * JRC_LOGGING_EXTRACTION_MAX * gj_m3 / 3.6
+        log_econ = irw * lf * FAO2001_LOGGING_ECONOMIC_SHARE * gj_m3 / 3.6
+        out.append(row(c, "logging_residues", "solid_biomass", 0.0, 0.0, log_high, 0.0, gj_m3, "C",
+                       f"main = 0 by decision 54 (IRENA 2022 p.41/63/84/105: only plantation and processing wood; decision 32); high-biomass sensitivity = FAOSTAT industrial roundwood {irw:,.0f} m3 x FAO 2001 Table 7 residue factor {lf:.3g} x JRC98626 Table A3-3 extraction {JRC_LOGGING_EXTRACTION_MAX} x 9.14 GJ/m3 = {log_high:,.0f} MWh; FAO 2001 10 % economically usable = {log_econ:,.0f} MWh",
+                       f"{fao2001_src}; JRC98626 pdf p.92 Table A3-3 (raw6, sha e6e0d90b...); FAOSTAT FO extraction:{fo_sha}", costs["wood_processing_residues"], "ZERO_BY_DECISION",
+                       "not counted in the main biomass potential; sensitivity only"))
         w = waw.get(c)
         if w:
             msw = float(w["MSW generation - projected 2050 (t/y)"])
             food = w["Composition - food  (% weight MSW)"]; garden = w["Composition - garden/green/horticultural (% weight MSW)"]
             if food not in ("", "nan", "NaN"):
-                org = float(food) + (float(garden) if garden not in ("", "nan", "NaN") else 0.0)
-                mass = msw * org
-                lhv = UNIT_CONSTANTS["conv_gj_per_t_msw_biomass_fraction"][0]
-                out.append(row(c, "msw_organic", "waste", mass * lhv / 3.6, mass * 6.8 / 3.6, mass * 18.0 / 3.6, mass, lhv, "C",
-                               f"What a Waste 3.0 MSW 2050 {msw:,.0f} t x organic share {org:.3f} (food {food}{' + garden ' + garden if garden not in ('', 'nan', 'NaN') else ', garden share not reported'}) x IPCC 11.6 GJ/t (CI 6.8-18.0)",
-                               f"WaW extraction:{waw_sha}; IPCC 2006 Table 1.2", costs["msw_organic"], "REGISTERED", "food+garden fraction; collection/treatment split not applied"))
+                has_garden = garden not in ("", "nan", "NaN")
+                frac = {"food": float(food), "garden": float(garden) if has_garden else 0.0}
+                mass = msw * (frac["food"] + frac["garden"])
+                ch4 = lambda which: sum(msw * frac[f] * DOC_WET[f][which] * DOCF * MCF_DIGESTER * F_CH4 * 16.0 / 12.0 for f in frac)  # t CH4 (IPCC Vol.5 Eq. 3.2-3.3, MCF = 1)
+                e_main, e_low, e_high = (ch4(i) * LHV_CH4_GJ_T / 3.6 for i in (0, 1, 2))
+                out.append(row(c, "msw_organic_biogas", "biogas", e_main, e_low, e_high, mass, (e_main * 3.6 / mass) if mass else 0.0, "C",
+                               f"S2-0.2 (decision 51): What a Waste 3.0 MSW 2050 {msw:,.0f} t x (food {frac['food']:.3f}{' + garden ' + str(round(frac['garden'], 3)) if has_garden else ', garden share not reported'}) -> anaerobic digestion CH4 = wet mass x DOC(wet; IPCC Vol.5 Table 2.4: food 0.15 [0.08-0.20], garden 0.20 [0.18-0.22]) x DOCf 0.5 x MCF 1 x F 0.5 x 16/12 (Vol.5 Ch.3 Eq. 3.2-3.3) x methane LHV {LHV_CH4_GJ_T} GJ/t; wet-weight basis; low/high = DOC range",
+                               f"WaW extraction:{waw_sha}; IPCC 2006 Vol.5 Ch.2 Table 2.4 and Ch.3 §3.2.3 (sources/IPCC2006_V5_Ch2_WasteData.pdf, IPCC2006_V5_Ch3_SWDS.pdf)", costs["msw_organic_biogas"], "REGISTERED",
+                               "technology-data v0.15.0 has no MSW digestion yield (biogas rows carry only costs/efficiency), so IPCC defaults are used; enters the biogas route (biogas upgrading -> gas), not the solid biomass bus; collection/treatment split not applied"))
             else:
-                out.append(row(c, "msw_organic", "waste", None, None, None, None, UNIT_CONSTANTS["conv_gj_per_t_msw_biomass_fraction"][0], "C",
-                               f"What a Waste 3.0 MSW 2050 {msw:,.0f} t but no composition data", f"WaW extraction:{waw_sha}", costs["msw_organic"], "DATA_PENDING", "composition missing"))
+                out.append(row(c, "msw_organic_biogas", "biogas", None, None, None, None, None, "C",
+                               f"What a Waste 3.0 MSW 2050 {msw:,.0f} t but no composition data", f"WaW extraction:{waw_sha}", costs["msw_organic_biogas"], "DATA_PENDING", "composition missing"))
     # ---- outputs -----------------------------------------------------------------------------------------------
     cols = ["country", "category", "feedstock_group", "potential_main_mwh", "potential_low_mwh", "potential_high_mwh", "mass_main_t", "lhv_gj_per_t",
             "potential_tier", "potential_method", "potential_sources", "cost_eur2020_per_mwh", "cost_low_eur2020_per_mwh", "cost_high_eur2020_per_mwh",
@@ -354,10 +394,12 @@ def main():
     for r in out:
         key = f"biomass_potential_{r['country']}_{r['category']}"
         pending = r["status"] == "DATA_PENDING"
+        status = r["status"] if r["status"] in ("DATA_PENDING", "ZERO_BY_DECISION") else "REGISTERED"
         reg.add(key, f"{r['country']} {r['category']} sustainable potential 2050 ({r['feedstock_group']}); {r['potential_method'][:160]}",
                 None if pending else r["potential_main_mwh"], "MWh/a", r["potential_tier"], r["potential_sources"], r["potential_method"][:200],
                 qcl_sha, country=r["country"], sensitivity_low=None if pending else r["potential_low_mwh"],
-                sensitivity_high=None if pending else r["potential_high_mwh"], decision_ref="31,32,36", status="DATA_PENDING" if pending else "REGISTERED")
+                sensitivity_high=None if pending else r["potential_high_mwh"], decision_ref="31,32,36" + (",54" if r["category"] == "logging_residues" else ",51" if r["category"] == "msw_organic_biogas" else ""),
+                status=status)
         cost_pending = r["cost_eur2020_per_mwh"] in (None, "")
         reg.add(key.replace("potential", "cost"), f"{r['country']} {r['category']} feedstock cost (grade C, +-50 %); {r['cost_source'][:200]}",
                 None if cost_pending else r["cost_eur2020_per_mwh"], "EUR2020/MWh", "C", r["cost_source"], "see BIOMASS_POTENTIAL_2050.csv",
@@ -374,10 +416,25 @@ def main():
         ("biomass_growth_factor_2021_2050", GROWTH_2021_2050, "ratio", "Crop output growth 1.1 %/a to 2030 then 0.3 %/a (base 2019-2023 mean)", "IRENA 2022 p.43/65/85; IRENA 2017 Table R-4"),
         ("biomass_lhv_residues", LHV_RESIDUE_GJ_T, "GJ/t", "Residue energy content (moisture basis not stated by source)", "IRENA 2017 p.5"),
         ("biomass_cross_border", 0, "flag", "No cross-border biomass trade (decision 36)", "S2 instruction decision 36"),
+        ("biomass_msw_ch4_yield_food_wet", DOC_WET["food"][0] * DOCF * MCF_DIGESTER * F_CH4 * 16.0 / 12.0, "tCH4/t wet food waste", "Anaerobic-digestion CH4 yield of food waste = DOC 0.15 x DOCf 0.5 x MCF 1 x F 0.5 x 16/12 (wet basis); range from DOC 0.08-0.20", "IPCC 2006 Vol.5 Ch.2 Table 2.4; Ch.3 Eq. 3.2-3.3, §3.2.3"),
+        ("biomass_msw_ch4_yield_garden_wet", DOC_WET["garden"][0] * DOCF * MCF_DIGESTER * F_CH4 * 16.0 / 12.0, "tCH4/t wet garden waste", "Anaerobic-digestion CH4 yield of garden/park waste = DOC 0.20 x 0.5 x 1 x 0.5 x 16/12 (wet basis); range from DOC 0.18-0.22", "IPCC 2006 Vol.5 Ch.2 Table 2.4; Ch.3"),
+        ("biomass_methane_lhv", LHV_CH4_GJ_T, "GJ/t CH4", "Methane lower heating value derived from NIST WebBook standard enthalpy of combustion (-890.8 kJ/mol) minus water vaporisation (2 x 44.0 kJ/mol), / 16.043 g/mol", "NIST Chemistry WebBook, methane condensed-phase thermochemistry"),
+        ("biomass_logging_residues_decision", 0, "flag", "Logging residues = 0 in the main potential (decision 54; IRENA 2022 counts plantation and processing wood only); FAO 2001 x JRC 67 % as high-biomass sensitivity", "IRENA 2022 p.41, 63, 84, 105; S2 supplement 0.5"),
+        ("biomass_logging_extraction_rate_sensitivity", JRC_LOGGING_EXTRACTION_MAX, "fraction", "Maximum logging-residue extraction rate on slopes <= 35 % (JRC98626 Table A3-3, current/medium/high scenarios)", "JRC98626 PDF p.92 Table A3-3"),
+        ("biomass_wood_residue_own_use_treatment", 1, "flag", "Mill self-consumption of processing residues is not deducted from supply: it is already a demand (UNSD industry biomass in D1) served from the same national biomass bus", "S2 supplement 0.5; UNSD 2019 has only TH Fuelwood - Consumption by wood and wood products (33.1 thousand m3)"),
     ]:
-        tier = "A" if "constraint" in pid or "lhv" in pid else "B"
-        reg.add(pid, desc, val, unit, tier, "IRENA 2017/2022 (extraction BIOMASS_EXTRACTION.md)", loc, src_sha("BIOMASS_EXTRACTION.md"), decision_ref="31,32,36",
-                sensitivity_low=(0.5 if pid.endswith("removal_max") else None), sensitivity_high=(HARVEST_HIGH if pid.endswith("removal_max") else None))
+        tier = "C" if "msw_ch4" in pid or "extraction_rate" in pid else ("A" if "constraint" in pid or "lhv" in pid or "decision" in pid or "own_use" in pid else "B")
+        lo = hi = None
+        if pid.endswith("removal_max"):
+            lo, hi = 0.5, HARVEST_HIGH
+        elif pid == "biomass_msw_ch4_yield_food_wet":
+            lo, hi = (DOC_WET["food"][1] * DOCF * F_CH4 * 16 / 12, DOC_WET["food"][2] * DOCF * F_CH4 * 16 / 12)
+        elif pid == "biomass_msw_ch4_yield_garden_wet":
+            lo, hi = (DOC_WET["garden"][1] * DOCF * F_CH4 * 16 / 12, DOC_WET["garden"][2] * DOCF * F_CH4 * 16 / 12)
+        elif pid == "biomass_logging_extraction_rate_sensitivity":
+            lo, hi = FAO2001_LOGGING_ECONOMIC_SHARE, JRC_LOGGING_EXTRACTION_MAX
+        src_name = "IRENA 2017/2022 (extraction BIOMASS_EXTRACTION.md)" if "msw" not in pid and "logging" not in pid and "own_use" not in pid else ("IPCC 2006 Vol.5; NIST WebBook" if "msw" in pid or "methane" in pid else "S2 supplement 01; FAO/APFC 2001; JRC98626; IRENA 2022")
+        reg.add(pid, desc, val, unit, tier, src_name, loc, src_sha("BIOMASS_EXTRACTION.md"), decision_ref="31,32,36,51,54", sensitivity_low=lo, sensitivity_high=hi)
     for _, r in rep_df.iterrows():
         reg.add(f"biomass_replication_r3_vs_r1a_{r.country}", f"IRENA 2017 replication: R-3 rows summed (excl. oil palm fruit, coconuts) vs Table R-1a; "
                 f"H err {r.err_H_pct:+.2f} %, P err {r.err_P_pct:+.2f} %", r.err_H_pct, "% error (harvest)", "B", "IRENA 2017 Tables R-1a, R-3", "PDF 22, 27-36",
@@ -438,7 +495,7 @@ def feedstock_costs():
         "oil_palm_pome": dict(usd_t=0.0, eur=0.0, source="mill effluent, no feedstock price (capture cost sits in the biogas plant CAPEX; IRENA 2022 Box 8)"),
         "oil_palm_trunk": None,
         "wood_processing_residues": dict(usd_t=sawdust, eur=per_mwh(sawdust, 2450 * 4.1868 / 1e3), source=f"sawdust Rp350-600/kg -> {sawdust:.1f} USD/t at NCV 2,450 kcal/kg ({eria}); wood chips 50-250 USD/t (NEDO) as upper context"),
-        "msw_organic": dict(usd_t=0.0, eur=0.0, source="negative or zero gate fee (tipping fee 17 USD/t, Cilacap RDF, IRENA 2022 Table 49); set to 0"),
+        "msw_organic_biogas": dict(usd_t=0.0, eur=0.0, source="negative or zero gate fee (tipping fee 17 USD/t, Cilacap RDF, IRENA 2022 Table 49); set to 0; digester CAPEX sits in the biogas plant"),
     }
 
 
