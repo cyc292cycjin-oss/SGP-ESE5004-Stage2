@@ -227,7 +227,10 @@ def test_s2_0_process_emissions(registry):
     assert float(r.loc["process_emissions_chemicals_2019_SG", "value"]) == pytest.approx(10.36e6, rel=0.01)
     assert r.loc["process_emissions_chemicals_2050_SG", "status"] == "REFERENCE_ONLY"  # covered by feedstock carbon (method question)
     assert r.loc["process_emissions_metals_2050_VN", "status"] == "REGISTERED"
-    mult = float(r.loc["demand_gdp_multiplier_2019_2050_VN", "value"]) * float(r.loc["demand_sector_calibration_k_Industry", "value"])
+    mult = float(r.loc["demand_country_multiplier_2019_2050_VN", "value"])  # R3: AEO8 ATS relative factor x k_Industry (main allocation)
+    assert r.loc["demand_country_allocation_mode", "value"] == "aeo8_ats_relative" and r.loc["demand_gdp_multiplier_2019_2050_VN", "status"] == "SENSITIVITY"
+    assert abs(float(r.loc["demand_aeo8_percapita_sum_check_2050", "value"]) / 746.2 - 1) < 1e-3 and abs(float(r.loc["demand_aeo8_percapita_sum_check_2022", "value"]) / 432.2 - 1) < 1e-3
+    assert float(r.loc["demand_aeo8_ats_relative_factor_VN", "value"]) > 1 and float(r.loc["demand_aeo8_ats_relative_factor_MM", "value"]) < 1
     assert float(r.loc["process_emissions_minerals_2050_VN", "value"]) == pytest.approx(float(r.loc["process_emissions_minerals_2019_VN", "value"]) * mult, rel=1e-9)
     assert not any(registry.param_id.str.startswith("process_emissions_") & (registry.status == "DATA_PENDING"))
     assert float(r.loc["fugitive_factor_oilgas_MY", "value"]) > 0 and r.loc["fugitive_factor_oilgas_MY", "unit"] == "tCO2/MWh_production"

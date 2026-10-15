@@ -184,7 +184,11 @@ research:
       categories_excluded: [logging_residues]   # ZERO_BY_DECISION (decision 54)
       cross_border: false                 # decision 36
     demand:
-      table: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv
+      table: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv   # aeo8_ats_relative variant; research.demand.country_allocation selects _GDP_SENSITIVITY / _POP_SENSITIVITY
+      tables_by_allocation:
+        aeo8_ats_relative: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv
+        gdp: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv
+        population: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv
       node_allocation: assembly_v1_allocation_shares_then_astar   # node shares per (country, account) from results_project/assembly_v1/final_allocation
       time_shape: flat_fuels_astar_shape_electricity
       international_bunkers: true         # decision 10; sensitivity switch
@@ -240,3 +244,4 @@ research:
   demand:
     scope: electricity_only_astar         # step 2 (R8) reconnects the other sectors
     status: INTERIM_S1_SKELETON
+    country_allocation: aeo8_ats_relative   # R3 (decision 57): aeo8_ats_relative (main) | gdp (former main, sensitivity) | population; selects the D1 demand table variant

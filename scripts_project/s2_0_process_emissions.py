@@ -3,7 +3,7 @@
 Source: EDGAR_2025_GHG, IEA-EDGAR CO2 v4 (fossil CO2), sheet "IPCC 2006", 2019, kt CO2
 (extraction/EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv; raw zip raw5/IEA_EDGAR_CO2_1970_2024.zip).
 Mapping (D1/S2 supplement 0.3): 2.A.1-2.A.4 -> non-metallic minerals; 2.B -> chemicals; 2.C -> metals.
-Growth 2019 -> 2050: the D1 country industry multiplier (AEO8 BAS industry total, GDP allocation).
+Growth 2019 -> 2050: the D1 country industry multiplier (AEO8 BAS industry total; R3 AEO8 ATS relative allocation in the main table).
 Fugitive 1.B: 2019 emission / UNSD 2019 domestic production (MWh) -> emission factor on endogenous
 domestic production (countries without production: factor not applicable).
 Boundary with the PyPSA-Eur feedstock-carbon accounting: 2.B (chemical industry process CO2),
@@ -75,7 +75,7 @@ def main():
             reg.add(f"process_emissions_{g}_2019_{c}", f"{c} {g} process CO2 2019 (EDGAR 2025 IPCC 2006 {'+'.join(codes)}: {comp})", v19, "tCO2/a", "B",
                     "EDGAR_2025_GHG IEA-EDGAR CO2 v4, sheet IPCC 2006, 2019; " + LICENCE, f"extraction {EXT} rows {c} {'/'.join(codes)}", sha, country=c,
                     decision_ref="10, L19, S2-0.3", status=status)
-            reg.add(f"process_emissions_{g}_2050_{c}", f"{c} {g} process CO2 2050 = 2019 x D1 industry multiplier {mult[c]:.4f} (AEO8 BAS industry, GDP allocation)" +
+            reg.add(f"process_emissions_{g}_2050_{c}", f"{c} {g} process CO2 2050 = 2019 x D1 industry multiplier {mult[c]:.4f} (AEO8 BAS industry; country allocation per research.demand.country_allocation, R3 = AEO8 ATS relative factor)" +
                     ("" if in_bus else "; chemicals (2.B) are covered by the feedstock-carbon accounting and are not loaded on the process bus (user to confirm)"),
                     v50, "tCO2/a", "B", "EDGAR 2025 x D1 DEMAND_2050 industry multiplier", "process_emissions_*_2019 x multiplier_total(Industry)", sha, country=c,
                     sensitivity_low=v19, sensitivity_high=(v19 * mult_pop[c]) if mult_pop else None, decision_ref="10, L19, S2-0.3",

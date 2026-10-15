@@ -255,7 +255,10 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
     heat = add_industrial_heat(n, costs, nodes, cc)
     demand_astar = bind_astar(n, repo, allocation)
-    demand = add_demand_layer(n, costs, cfg, repo, registry, repo / S2["demand"]["table"], repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
+    allocation_mode = R["demand"].get("country_allocation", "aeo8_ats_relative")   # R3 (decision 57)
+    demand_table = repo / S2["demand"].get("tables_by_allocation", {}).get(allocation_mode, S2["demand"]["table"])
+    demand = add_demand_layer(n, costs, cfg, repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
+    demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
     n.meta["s2_demand_ledger"] = jsonable(dict(deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"],
                                               totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()}))
     # 5. network switches, transmission, carbon metadata
@@ -289,11 +292,11 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     receipt = dict(status="S2_SCENARIO_BUILT_STATIC_PASS", scenario=scenario, gap_diagnostic=gap_diagnostic, s2_status=S2["status"],
                    network=dict(file=str(path), sha256=sha(path), bytes=path.stat().st_size, snapshots=int(len(n.snapshots)), components={c.name: int(len(c.df)) for c in n.iterate_components()}),
                    inputs={"electric_base": dict(path=str(electric_base), sha256=ELECTRIC_BASE_SHA), "costs_active": dict(path=str(costs_path), sha256=sha(costs_path)),
-                           "registry": dict(path=str(registry_csv), sha256=sha(registry_csv)), "demand_table": dict(sha256=sha(repo / S2["demand"]["table"])),
+                           "registry": dict(path=str(registry_csv), sha256=sha(registry_csv)), "demand_table": dict(path=str(demand_table.relative_to(repo)), sha256=sha(demand_table), country_allocation=allocation_mode),
                            "biomass_table": dict(sha256=sha(repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")), "survival": dict(sha256=sha(survival_json)),
                            "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(sha256=sha(repo / R["existing_cross_border_electricity"]["corridors_file"])),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
-                   research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"]),
+                   research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, cost_layer=cost_ledger,
                    static_validation=static, inventory=inventory, candidates=dict(nuclear=len(nuclear), sites=len(sites), extendable=extendable), optional_string_normalisation=normalise,
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
