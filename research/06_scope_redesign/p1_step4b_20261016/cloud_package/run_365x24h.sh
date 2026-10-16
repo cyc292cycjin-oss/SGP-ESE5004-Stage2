@@ -41,8 +41,8 @@ want() { case ",$RUNS," in *",$1,"*) return 0;; *) return 1;; esac; }
 REPO="$HERE/repo"                 # unpacked code snapshot (make_package.sh -> code_<commit>.tar.gz)
 NETS="$HERE/networks"             # integrated_365_24h_unsolved.nc, disconnected_365_24h_unsolved.nc, disconnected_gap_diagnostic_365_24h_unsolved.nc
 PY="${PY:-python}"                # python of the pypsa-earth environment (environment_pypsa-earth.yml)
-RUN="$HERE/runs/$(date -u +%Y%m%dT%H%M%SZ)"; EXP="$RUN/export"
-mkdir -p "$RUN" "$EXP"
+RUN="$HERE/runs/$(date -u +%Y%m%dT%H%M%SZ)_$$"; EXP="$RUN/export"   # process id keeps two starts in the same second apart
+mkdir -p "$(dirname "$RUN")" && mkdir "$RUN" && mkdir "$EXP" || { echo "run folder $RUN exists or cannot be created"; exit 2; }
 ST="$RUN/STATUS.txt"
 export PYTHONHASHSEED=0
 echo "START:$(date -u +%Y-%m-%dT%H:%M:%SZ) mode:$MODE runs:$RUNS commit:$(cat "$HERE/COMMIT" 2>/dev/null)" >> "$ST"
