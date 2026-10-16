@@ -173,6 +173,10 @@ research:
   transmission:
     volume_limit_mode: lvopt                        # decision 45 (S2-1): no transmission volume cap in the main run
     volume_limit_factor: 2.79                       # sensitivity: factor_of_existing with the frozen 2.79x (S1 inherit_reference_constant / existing volume)
+  renewable:                              # S4A-1 (L14, decisions 70-73): wind / solar availability profiles of the electric-base candidates
+    profile_variant: pypsa_eur            # original = author profiles inherited by the electric base (former main, comparison) | fork = rebuilt from the ASEAN ERA5 2013 cutout with the pypsa-asean defaults (method check) | pypsa_eur = rebuilt with the PyPSA-Eur v2025.07.0 defaults (offshore NREL 2020ATB 5.5 MW @120 m x 0.8855, solar without the 0.854337 correction; onshore V112 unchanged) - main
+    resource_classes: 1                   # PyPSA-Eur resource_classes: 1 = one profile per node (default) | N > 1 = per-node capacity-factor classes, node p_nom_max split by class potential (sensitivity; profiles_<variant>_c<N>_3h.nc must exist)
+    profile_dir: research_inputs/renewable_v5
   nuclear:                                # decision 38; siting table is a grade-C assumption
     evidence_grade: C
     large_pwr:
