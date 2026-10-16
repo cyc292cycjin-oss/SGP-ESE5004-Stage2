@@ -438,7 +438,20 @@ gap_diagnostic 的松弛列按第 49、53 项只覆盖各国的电力、CO₂、
 
 ### 7.3 打包结果
 
-（打包后填写：部署提交、产物大小与 SHA256、本机预检输出。）
+- **部署提交：** 68edca4f（`COMMIT`、`PACKAGE_MANIFEST.json`）。两份网络在 af83b635 构建（构建回执 `code_sha`）；`git diff af83b635 68edca4f -- scripts_project configs scripts research_inputs` 为空，即求解所用的代码、配置与输入完全相同。
+- **产物：** `work/p1_step3_20261015/cloud_package_dist/`，共 116 MB、10 个文件：
+
+| 文件 | 字节 | SHA256（前 16 位） |
+|---|---|---|
+| `code_68edca4f.tar.gz` | 75,827,330 | ed2843341cd19e6c |
+| `networks/integrated_365_24h_unsolved.nc` | 21,360,693 | 3f13bc6867e81fe1 |
+| `networks/disconnected_365_24h_unsolved.nc` | 20,900,307 | f6b9617571d6c274 |
+| `networks/*_BUILD_RECEIPT.json` | 1.41 MB × 2 | fcf93057… / 6c3b6934… |
+| `run_365x24h.sh` / `preflight.sh` | 6,201 / 2,401 | c9394c887531c015 / 09bf555ae8c59d0b |
+| `environment_pypsa-earth.yml` / `conda_explicit_linux64.txt` | 11,450 / 44,787 | f2d28554d08b48bd / 62f2935b6677194a |
+
+  完整清单写回仓库 `cloud_package/PACKAGE_MANIFEST.json`、`SHA256SUMS`。
+- **本机预检（产物的临时副本，未求解；VERIFIED）：** SHA256 全部通过；代码解包到 `repo/`（439 MB）；Python 3.11.13、pypsa 0.30.3、linopy 0.5.5、gurobipy 12.0.3、numpy 1.26.4 一致；Gurobi 许可可用（输出已屏蔽）；资源检查为 16 核 / 11 GiB / 933 GiB 空闲，因内存低于串行门槛 32 GiB 判为未通过。这是预期结果，再次说明本机不能运行 365×24h。临时副本已删除。
 
 ## 8. 需要用户决定的事项
 
