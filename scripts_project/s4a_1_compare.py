@@ -17,6 +17,7 @@ import xarray as xr
 ROOT = Path(__file__).resolve().parents[1]
 RV = ROOT / "research_inputs/renewable_v5"
 TECHS = ["onwind", "offwind-ac", "offwind-dc", "solar"]
+CLIP = 0.01   # research.renewable.clip_p_max_pu
 
 
 def main():
@@ -38,6 +39,9 @@ def main():
                 var = tech.replace("-", "_")
                 if key in d[var].bus.values:
                     s = d[var].sel(bus=key).values.astype(float)
+                    if np.isnan(s).any():   # node without a rebuilt profile for this technology (Dataset alignment NaN): keeps the original series in the network
+                        continue
+                    s = np.where(s >= CLIP, s, 0.0)   # same clip_p_max_pu as the original chain (the original series are clipped)
                     r[f"cf_{v}"] = float((s * w.values).sum() / w.sum())
                     if orig is not None and orig.std() > 0 and s.std() > 0:
                         r[f"corr_{v}_vs_original"] = float(np.corrcoef(orig, s)[0, 1]); r[f"mae_{v}_vs_original"] = float(np.abs(orig - s).mean())

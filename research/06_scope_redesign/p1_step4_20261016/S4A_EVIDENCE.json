@@ -1,0 +1,2812 @@
+{
+ "stage": "S4A",
+ "instruction": "work/p1_step4_20261016/S4A_CLAUDE_CODE_INSTRUCTION.md + S4A_RESUME_01.md",
+ "decisions": "70-73",
+ "ledger": [
+  "L14",
+  "L15",
+  "L16"
+ ],
+ "branch": "codex/s4a-resources-fleet-20261016",
+ "head": "437c328dabe981c3a19d3d75ede059152f18f0f1",
+ "commits": [
+  "437c328d S4A-3: candidate potential audit and source register for nuclear, geothermal, hydro and pumped hydro (L16)",
+  "3f0bbcc3 S4A-2: GEM fleet additions and GEM gas-field production allocation (L15)",
+  "6cc72794 S4A-1: renewable profile audit and rebuild (L14, decisions 70-73)",
+  "fa7482c3 S4A-0: branch from the S3B final commit, batch-10 data verification, baseline inventory and progress file (decisions 70-73, ledger L14-L16)"
+ ],
+ "label": "SMOKE_TEST_ONLY results have no scientific meaning before the cloud run (decision 47)",
+ "cutout": {
+  "file": "cutouts/asean_zenodo_20325289/cutout-2013-era5.nc",
+  "sha256": "eaa033a328f39c82bbd4c46f74d72b19b7c7f2fcc1056e10b5cdf3a05f0d6f05",
+  "zip_sha256": "028ae70154a9a84a696f96788fdf97ecde52ebc16a9c011cd30ebc3567f706df",
+  "zip_md5": "78a3525403077ef69d6078552722ca75",
+  "doi": "10.5281/zenodo.20325289",
+  "dims": {
+   "x": 175,
+   "y": 146,
+   "time": 8760
+  },
+  "x": [
+   89.7,
+   141.9
+  ],
+  "y": [
+   -14.4,
+   29.1
+  ],
+  "dx": 0.29999999999999716,
+  "dy": 0.3000000000000007,
+  "time": [
+   "2013-01-01T00:00:00.000000000",
+   "2013-12-31T23:00:00.000000000"
+  ],
+  "steps": 8760,
+  "step_hours": 1.0,
+  "variables": [
+   "height",
+   "wnd100m",
+   "wnd_shear_exp",
+   "wnd_azimuth",
+   "roughness",
+   "influx_toa",
+   "influx_direct",
+   "influx_diffuse",
+   "albedo",
+   "solar_altitude",
+   "solar_azimuth",
+   "temperature",
+   "soil temperature",
+   "dewpoint temperature",
+   "runoff"
+  ],
+  "attrs": {
+   "module": "era5",
+   "prepared_features": "['wind', 'temperature', 'height', 'runoff', 'influx']",
+   "chunksize_time": "100",
+   "dx": "0.3",
+   "dy": "0.3",
+   "GRIB_centre": "ecmf",
+   "GRIB_centreDescription": "European Centre for Medium-Range Weather Forecasts",
+   "GRIB_subCentre": "0",
+   "Conventions": "CF-1.7",
+   "institution": "European Centre for Medium-Range Weather Forecasts",
+   "history": "2026-03-29T16:15 GRIB to CDM+CF via cfgrib-0.9.15.0/ecCodes-2.42.0 with {\"source\": \"../../../../tmp/tmpq2wfbty0/tmpamjbvqhz.grib\", \"filter_by_keys\": {}, \"encode"
+  },
+  "coverage": {
+   "inner_box": {
+    "x": [
+     90.0,
+     141.60000000000002
+    ],
+    "y": [
+     -14.100000000000003,
+     28.800000000000004
+    ]
+   },
+   "nodes_outside": 0,
+   "country_shapes": {
+    "features": 11,
+    "total_bounds": [
+     92.173,
+     -10.943,
+     141.019,
+     28.543
+    ],
+    "exceeding": []
+   },
+   "offshore_shapes": {
+    "features": 10,
+    "total_bounds": [
+     90.145,
+     -13.942,
+     141.4,
+     22.254
+    ],
+    "exceeding": []
+   },
+   "regions_offshore_elec_s_50": {
+    "features": 41,
+    "total_bounds": [
+     90.145,
+     -13.942,
+     141.4,
+     22.254
+    ],
+    "exceeding": []
+   },
+   "regions_onshore_elec_s_50": {
+    "features": 48,
+    "total_bounds": [
+     92.173,
+     -11.008,
+     141.019,
+     28.543
+    ],
+    "exceeding": []
+   }
+  },
+  "spot_check_vs_tutorial_cutout": {
+   "tutorial": "pypsa-asean/cutouts/asean-2013-era5-tutorial.nc",
+   "common_x": 175,
+   "common_y": 146,
+   "points": [
+    [
+     134.1,
+     13.2
+    ],
+    [
+     116.4,
+     -2.7
+    ],
+    [
+     105.6,
+     -12.9
+    ],
+    [
+     93.6,
+     -13.8
+    ],
+    [
+     98.7,
+     21.0
+    ],
+    [
+     123.6,
+     25.5
+    ],
+    [
+     116.1,
+     12.0
+    ],
+    [
+     140.4,
+     17.4
+    ]
+   ],
+   "times": [
+    "2013-03-01T00:00",
+    "2013-03-03T12:00",
+    "2013-03-05T06:00",
+    "2013-03-07T18:00"
+   ],
+   "result": {
+    "wnd100m": {
+     "max_abs_diff": 0.0,
+     "n": 32
+    },
+    "influx_direct": {
+     "max_abs_diff": 0.0,
+     "n": 32
+    },
+    "temperature": {
+     "max_abs_diff": 0.0,
+     "n": 32
+    },
+    "roughness": {
+     "max_abs_diff": 0.0,
+     "n": 32
+    },
+    "runoff": {
+     "max_abs_diff": 0.0,
+     "n": 32
+    }
+   }
+  },
+  "weather_year_consistency": {
+   "author_meta_cutout": "cutout-2013-era5",
+   "author_meta_load_weather_year": 2013,
+   "config_asean_yaml_snapshots": "37-40 (2013-01-01..2014-01-01)",
+   "config_asean_yaml_load_weather_year": "line 192",
+   "research_snapshots": "s2_network.py:73, daily_resolution.py:22 (2013)",
+   "electric_base_meta_weather_year": 2013,
+   "d_stage_meta_weather_year": 2013,
+   "hydro": "renewable.hydro.cutout cutout-2013-era5, normalization irena 2023 x 1.1"
+  }
+ },
+ "s4a_1": {
+  "manifest": {
+   "profiles_fork_c1_3h.nc": {
+    "sha256": "98bee83d4a43f8df52ee92baad49c01f8b0b018b99f80b3bf61921f43ba1e0d6",
+    "bytes": 3089585,
+    "buses": {
+     "onwind": 96,
+     "offwind_ac": 96,
+     "offwind_dc": 96,
+     "solar": 96
+    }
+   },
+   "profiles_pypsa_eur_c1_3h.nc": {
+    "sha256": "ce25cc8693a990053a09f2dde28a5f4c0d792ee3d646910bfcdeddc516a7740f",
+    "bytes": 3092981,
+    "buses": {
+     "onwind": 96,
+     "offwind_ac": 96,
+     "offwind_dc": 96,
+     "solar": 96
+    }
+   },
+   "profiles_fork_c3_3h.nc": {
+    "sha256": "2e04d6cad4cda53118d342420d991468abd529b1f61a474da596dcbd7ad23d2d",
+    "bytes": 8669493,
+    "buses": {
+     "onwind": 288,
+     "offwind_ac": 288,
+     "offwind_dc": 288,
+     "solar": 288
+    }
+   },
+   "profiles_pypsa_eur_c3_3h.nc": {
+    "sha256": "d7c6ba5e15e47335eefd3d073b5aeaec214daeba0f49f145bf66bd0b675a346b",
+    "bytes": 8679955,
+    "buses": {
+     "onwind": 288,
+     "offwind_ac": 288,
+     "offwind_dc": 288,
+     "solar": 288
+    }
+   }
+  },
+  "evidence": {
+   "manifest": {
+    "profiles_fork_c1_3h.nc": {
+     "buses": {
+      "offwind_ac": 96,
+      "offwind_dc": 96,
+      "onwind": 96,
+      "solar": 96
+     },
+     "bytes": 3089585,
+     "sha256": "98bee83d4a43f8df52ee92baad49c01f8b0b018b99f80b3bf61921f43ba1e0d6"
+    },
+    "profiles_fork_c3_3h.nc": {
+     "buses": {
+      "offwind_ac": 288,
+      "offwind_dc": 288,
+      "onwind": 288,
+      "solar": 288
+     },
+     "bytes": 8669493,
+     "sha256": "2e04d6cad4cda53118d342420d991468abd529b1f61a474da596dcbd7ad23d2d"
+    },
+    "profiles_pypsa_eur_c1_3h.nc": {
+     "buses": {
+      "offwind_ac": 96,
+      "offwind_dc": 96,
+      "onwind": 96,
+      "solar": 96
+     },
+     "bytes": 3092981,
+     "sha256": "ce25cc8693a990053a09f2dde28a5f4c0d792ee3d646910bfcdeddc516a7740f"
+    },
+    "profiles_pypsa_eur_c3_3h.nc": {
+     "buses": {
+      "offwind_ac": 288,
+      "offwind_dc": 288,
+      "onwind": 288,
+      "solar": 288
+     },
+     "bytes": 8679955,
+     "sha256": "d7c6ba5e15e47335eefd3d073b5aeaec214daeba0f49f145bf66bd0b675a346b"
+    }
+   },
+   "rows": 40,
+   "script": "scripts_project/s4a_1_data.py"
+  },
+  "comparison_overall": {
+   "onwind": {
+    "cf_original": 0.0588388905074812,
+    "cf_fork": 0.05840837452685916,
+    "cf_pypsa_eur": 0.05840837452685916,
+    "corr_fork_median": 0.9929078658269885,
+    "corr_fork_p10": 0.9081171809582531,
+    "mae_fork_median": 0.004961706381986763,
+    "quantiles_pypsa_eur": {
+     "0.1": 0.009141056250130172,
+     "0.25": 0.021193460066011815,
+     "0.5": 0.054639223789834504,
+     "0.75": 0.08121589726277256,
+     "0.9": 0.11600781755158295
+    },
+    "quantiles_original": {
+     "0.1": 0.007901479996245768,
+     "0.25": 0.02066839702673945,
+     "0.5": 0.050423473104827844,
+     "0.75": 0.08199450097664984,
+     "0.9": 0.11792976257602766
+    }
+   },
+   "offwind-ac": {
+    "cf_original": 0.11121527936541716,
+    "cf_fork": 0.11203958278044977,
+    "cf_pypsa_eur": 0.15026045624430046,
+    "corr_fork_median": 0.9937348322708982,
+    "corr_fork_p10": 0.9218711306776887,
+    "mae_fork_median": 0.012775049508414321,
+    "quantiles_pypsa_eur": {
+     "0.1": 0.05197537172684599,
+     "0.25": 0.07780984213961645,
+     "0.5": 0.14311284701330332,
+     "0.75": 0.18992145553722417,
+     "0.9": 0.27845623830948923
+    },
+    "quantiles_original": {
+     "0.1": 0.03760330752142771,
+     "0.25": 0.05551745747972837,
+     "0.5": 0.09268902850486951,
+     "0.75": 0.1381126289957341,
+     "0.9": 0.2183028541141713
+    }
+   },
+   "offwind-dc": {
+    "cf_original": 0.15660790236054212,
+    "cf_fork": 0.16588993003764507,
+    "cf_pypsa_eur": 0.21013472174623998,
+    "corr_fork_median": 0.9905780415374853,
+    "corr_fork_p10": 0.8460655250547283,
+    "mae_fork_median": 0.015678465610752954,
+    "quantiles_pypsa_eur": {
+     "0.1": 0.07900156920125122,
+     "0.25": 0.11892124301568949,
+     "0.5": 0.1998141792000029,
+     "0.75": 0.2524472420035274,
+     "0.9": 0.37519861149601635
+    },
+    "quantiles_original": {
+     "0.1": 0.044357143450463675,
+     "0.25": 0.07463302228798104,
+     "0.5": 0.13921451338922303,
+     "0.75": 0.19626551358597305,
+     "0.9": 0.3086892909415347
+    }
+   },
+   "solar": {
+    "cf_original": 0.13613898237668484,
+    "cf_fork": 0.13632325101645795,
+    "cf_pypsa_eur": 0.1596043225905222,
+    "corr_fork_median": 0.9998074742383078,
+    "corr_fork_p10": 0.9968204114295245,
+    "mae_fork_median": 0.0017280680263779056,
+    "quantiles_pypsa_eur": {
+     "0.1": 0.14938646318815163,
+     "0.25": 0.15445811670267165,
+     "0.5": 0.16029372280304105,
+     "0.75": 0.16472369948360585,
+     "0.9": 0.16836937806387242
+    },
+    "quantiles_original": {
+     "0.1": 0.1271321164609056,
+     "0.25": 0.13223884495722685,
+     "0.5": 0.1364313717596178,
+     "0.75": 0.14092921494693922,
+     "0.9": 0.14341743924353192
+    }
+   }
+  },
+  "method_validation": {
+   "onwind": {
+    "buses_with_potential": 729,
+    "max_abs_diff": 0.6886031396394168,
+    "mean_abs_diff": 0.010609521057996722,
+    "cap_weighted_cf_mine": 0.04717808150390983,
+    "cap_weighted_cf_theirs": 0.04498077407765358,
+    "corr_median": 0.9922867103038124,
+    "corr_p10": 0.9138199141609371,
+    "worst_buses": {
+     "1873": {
+      "diff": 0.6886031396394168,
+      "p_nom_max": 1128.3693720126485
+     },
+     "30": {
+      "diff": 0.5718085094508445,
+      "p_nom_max": 200.3344322866912
+     },
+     "145": {
+      "diff": 0.5275261175230653,
+      "p_nom_max": 67.51654698389028
+     }
+    }
+   },
+   "solar": {
+    "buses_with_potential": 729,
+    "max_abs_diff": 0.18640637799793564,
+    "mean_abs_diff": 0.0025793162629503086,
+    "cap_weighted_cf_mine": 0.1545283767134547,
+    "cap_weighted_cf_theirs": 0.15436993472463256,
+    "corr_median": 0.9998784556619159,
+    "corr_p10": 0.998449746427857,
+    "worst_buses": {
+     "2218": {
+      "diff": 0.18640637799793564,
+      "p_nom_max": 542.3999667951517
+     },
+     "1873": {
+      "diff": 0.16457812548895556,
+      "p_nom_max": 36.96756589953911
+     },
+     "1194": {
+      "diff": 0.16134137241547764,
+      "p_nom_max": 152.26128077857058
+     }
+    }
+   },
+   "offwind-ac": {
+    "buses_with_potential": 452,
+    "max_abs_diff": 0.8687209085629113,
+    "mean_abs_diff": 0.020405569688869404,
+    "cap_weighted_cf_mine": 0.139748907842444,
+    "cap_weighted_cf_theirs": 0.13641953531357734,
+    "corr_median": 0.9968601906728654,
+    "corr_p10": 0.8682921248121664,
+    "worst_buses": {
+     "1949": {
+      "diff": 0.8687209085629113,
+      "p_nom_max": 192.73724295978099
+     },
+     "1873": {
+      "diff": 0.866097283258907,
+      "p_nom_max": 485.39694817437993
+     },
+     "1330": {
+      "diff": 0.7266336004793333,
+      "p_nom_max": 24.94321546846135
+     }
+    }
+   }
+  },
+  "rebuild_resources": [
+   "# profile rebuild resources (scripts_project/s4a_profiles.py; /usr/bin/time -v)",
+   "test 1 month c1: see first-run notes 1:40 / 2.28 GiB",
+   "first run profiles_full_c1: \tElapsed (wall clock) time (h:mm:ss or m:ss): 5:02.35;\tMaximum resident set size (kbytes): 3649456;",
+   "first run profiles_full_c3: \tElapsed (wall clock) time (h:mm:ss or m:ss): 5:38.87;\tMaximum resident set size (kbytes): 4221684;",
+   "rerun (float64 fix) profiles_full_c1_v2: \tElapsed (wall clock) time (h:mm:ss or m:ss): 5:26.64;\tMaximum resident set size (kbytes): 3709696;",
+   "rerun (float64 fix) profiles_full_c3_v2: \tElapsed (wall clock) time (h:mm:ss or m:ss): 5:35.59;\tMaximum resident set size (kbytes): 4063212;",
+   "build check S4A-1 state: \tElapsed (wall clock) time (h:mm:ss or m:ss): 1:05.43;\tMaximum resident set size (kbytes): 597868;"
+  ],
+  "files": {
+   "research_inputs/renewable_v5/.gitignore": {
+    "sha256": "8fd55f5909fad566b29162e304ea020a29d94929e5dfbb1c362aa1b12760a017",
+    "bytes": 235
+   },
+   "research_inputs/renewable_v5/MANIFEST.json": {
+    "sha256": "256ceeb1758c1e56fa8e152c2f42734f32dc9edf567b5f8baca4ff7b658de140",
+    "bytes": 916
+   },
+   "research_inputs/renewable_v5/RENEWABLE_S4A_EVIDENCE.json": {
+    "sha256": "95cff786fba8466ad94fa808b51a3ce7ec40e7e91e122acce387c7666861870a",
+    "bytes": 1032
+   },
+   "research_inputs/renewable_v5/S4A_PROFILES_LOG_c1.json": {
+    "sha256": "f6fac55257fb823926b9bbffa38d61e3f326ab2008cc384de3ae870938e24ea6",
+    "bytes": 12995
+   },
+   "research_inputs/renewable_v5/S4A_PROFILES_LOG_c3.json": {
+    "sha256": "6e6526f4ecbe5da95ef8409ea472c67da9ffc7c303af4e900185fec2854ce64f",
+    "bytes": 12996
+   },
+   "research_inputs/renewable_v5/S4A_PROFILE_CLASSES_c1.csv": {
+    "sha256": "d6a8034dcf339f998fd94ccb7f320f28e038a96e65c94d78b5150a124014f996",
+    "bytes": 91356
+   },
+   "research_inputs/renewable_v5/S4A_PROFILE_CLASSES_c3.csv": {
+    "sha256": "be3fa5f6b065219dd5433f87b722bbe914f892a3601dd9d1350be9bba40f1788",
+    "bytes": 300465
+   },
+   "research_inputs/renewable_v5/profiles_fork_c1_3h.nc": {
+    "sha256": "98bee83d4a43f8df52ee92baad49c01f8b0b018b99f80b3bf61921f43ba1e0d6",
+    "bytes": 3089585
+   },
+   "research_inputs/renewable_v5/profiles_fork_c3_3h.nc": {
+    "sha256": "2e04d6cad4cda53118d342420d991468abd529b1f61a474da596dcbd7ad23d2d",
+    "bytes": 8669493
+   },
+   "research_inputs/renewable_v5/profiles_pypsa_eur_c1_3h.nc": {
+    "sha256": "ce25cc8693a990053a09f2dde28a5f4c0d792ee3d646910bfcdeddc516a7740f",
+    "bytes": 3092981
+   },
+   "research_inputs/renewable_v5/profiles_pypsa_eur_c3_3h.nc": {
+    "sha256": "d7c6ba5e15e47335eefd3d073b5aeaec214daeba0f49f145bf66bd0b675a346b",
+    "bytes": 8679955
+   },
+   "research_inputs/renewable_v5/regions_offshore.geojson": {
+    "sha256": "991172d7f962ebacec91309eb11f3c7b71367a3691e027e9dfcd35e58503417a",
+    "bytes": 64479493
+   },
+   "research_inputs/renewable_v5/regions_onshore.geojson": {
+    "sha256": "742a7f11a015c7928da57c03c897817fb95bef5fd48eb627c06cda7679d4f5e7",
+    "bytes": 1073898
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/GWA_COUNTRY_STATS.csv": {
+    "sha256": "b3c2d9131b20ebf8b3a220bb3fd8c4c961576c1db117029457f148b6c62f4cb6",
+    "bytes": 9247
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/IRENA_RPGC2024_fig2_12_row2_ID.png": {
+    "sha256": "9564ac58205752f6651a42b101e505dc6c3252356153e9762d03348ed179eef6",
+    "bytes": 97691
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/IRENA_RPGC2024_fig2_12_row3_PH_VN.png": {
+    "sha256": "8d29e7f04f9831a4d022c78ff2da93435c4429182a14e1ea28d84944d2c5b776",
+    "bytes": 93219
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/MODEL_CF_BY_COUNTRY_S3B.json": {
+    "sha256": "77711cd663d95403a2b58003d7d658cadb9446514c6b1ee49267417cc87dbf99",
+    "bytes": 14228
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_CUTOUT_CHECK.json": {
+    "sha256": "70d6b9390a9e5e262f94050fdb3265096cacfa418c5bb96064f77574657690d4",
+    "bytes": 3537
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILES_LOG_c1.json": {
+    "sha256": "f6fac55257fb823926b9bbffa38d61e3f326ab2008cc384de3ae870938e24ea6",
+    "bytes": 12995
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILES_LOG_c3.json": {
+    "sha256": "6e6526f4ecbe5da95ef8409ea472c67da9ffc7c303af4e900185fec2854ce64f",
+    "bytes": 12996
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILE_CLASSES_c3_BY_COUNTRY.csv": {
+    "sha256": "89612c3a5d7701626487358f5b313aeca33918906374d628502c5035b010827b",
+    "bytes": 15540
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILE_COMPARISON.json": {
+    "sha256": "d541620509acfb94523d539ab00468154cd609a49956622fa77e69fb8b152a48",
+    "bytes": 47391
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILE_COMPARISON_BY_NODE.csv": {
+    "sha256": "69afac88e85f881d9eb503c4b39ba036db7350ee8b0859392850142586fd7ae3",
+    "bytes": 60018
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILE_METHOD_VALIDATION_TUTORIAL_WEEK.json": {
+    "sha256": "0fc2cda44dad2d27e313c920b40b5df4f4f90d06e9dea197394623ab7b08ecd1",
+    "bytes": 765
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/S4A_PROFILE_METHOD_VALIDATION_TUTORIAL_WEEK_v2.json": {
+    "sha256": "bfd4b6a1bcc20b328c559c481b1e69c5940110e0ac6244a5d08b1a1a95f4bdbb",
+    "bytes": 1728
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/SHA256SUMS_gwa.txt": {
+    "sha256": "520e56806bad07624e9b549bd27b77cac880c91bbdf89220ff298dda850db3cf",
+    "bytes": 4730
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/profile_rebuild_resources.txt": {
+    "sha256": "75070324baca4b65e857b08de44743e67ca1981dd7f8a6fe81dd120214ed4fb4",
+    "bytes": 795
+   },
+   "research/06_scope_redesign/p1_step4_20261016/evidence/s4a_1/pytest_s4a1_full.log": {
+    "sha256": "135c6a4976216b9480bf9c6667eee7432dcff34e1e84d4be575843d0973779e4",
+    "bytes": 6793
+   }
+  }
+ },
+ "s4a_2": {
+  "evidence": {
+   "additions_by_class": {
+    "CCGT existing": 30961.5,
+    "OCGT existing": 3787.2,
+    "PHS existing": 2600.0,
+    "coal existing": 17187.4,
+    "geothermal existing": 752.1,
+    "hydro existing": 8385.0,
+    "lignite existing": 200.0,
+    "offwind existing": 80.0,
+    "oil existing": 272.2,
+    "onwind existing": 555.2,
+    "ror existing": 3010.0,
+    "solar existing": 5724.1,
+    "waste existing": 100.0
+   },
+   "additions_units": 299,
+   "coverage_totals": {
+    "bioenergy": {
+     "gem_operating_mw": 5494.8,
+     "matched_in_network_mw": 0.0,
+     "survives_2050_missing_mw": 100.0,
+     "survives_2050_mw": 100.0,
+     "unresolved_mw": 1991.8
+    },
+    "coal": {
+     "gem_operating_mw": 124482.4,
+     "matched_in_network_mw": 94176.0,
+     "survives_2050_missing_mw": 17387.4,
+     "survives_2050_mw": 111563.4,
+     "unresolved_mw": 2200.0
+    },
+    "geothermal": {
+     "gem_operating_mw": 4450.9,
+     "matched_in_network_mw": 186.0,
+     "survives_2050_missing_mw": 752.1,
+     "survives_2050_mw": 938.1,
+     "unresolved_mw": 465.0
+    },
+    "hydropower": {
+     "gem_operating_mw": 51684.0,
+     "matched_in_network_mw": 47952.0,
+     "survives_2050_missing_mw": 13995.0,
+     "survives_2050_mw": 61947.0,
+     "unresolved_mw": 1899.0
+    },
+    "oil/gas": {
+     "gem_operating_mw": 115060.1,
+     "matched_in_network_mw": 42420.0,
+     "survives_2050_missing_mw": 35020.9,
+     "survives_2050_mw": 77320.9,
+     "unresolved_mw": 3701.0
+    },
+    "utility-scale solar": {
+     "gem_operating_mw": 30675.9,
+     "matched_in_network_mw": 0.0,
+     "survives_2050_missing_mw": 5724.1,
+     "survives_2050_mw": 5724.1,
+     "unresolved_mw": 1156.0
+    },
+    "wind": {
+     "gem_operating_mw": 11035.0,
+     "matched_in_network_mw": 0.0,
+     "survives_2050_missing_mw": 635.2,
+     "survives_2050_mw": 635.2,
+     "unresolved_mw": 3214.9
+    }
+   },
+   "gas_coverage": [
+    {
+     "allocation": "gem_fields",
+     "country": "BN",
+     "coverage_ratio": 0.9894838101784413,
+     "gem_fields_with_production": 1,
+     "gem_latest_production_bcm": 11.4975,
+     "gem_production_twh_ncv": 108.68490171,
+     "nodes_with_fields": 1,
+     "unsd_2019_cap_twh": 109.84
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "ID",
+     "coverage_ratio": 0.3588518575570961,
+     "gem_fields_with_production": 16,
+     "gem_latest_production_bcm": 27.620411999999998,
+     "gem_production_twh_ncv": 261.093434521392,
+     "nodes_with_fields": 6,
+     "unsd_2019_cap_twh": 727.58
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "MM",
+     "coverage_ratio": 0.40688540631433223,
+     "gem_fields_with_production": 1,
+     "gem_latest_production_bcm": 7.9587200000000005,
+     "gem_production_twh_ncv": 75.23311162752003,
+     "nodes_with_fields": 1,
+     "unsd_2019_cap_twh": 184.9
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "MY",
+     "coverage_ratio": 0.2769786061870776,
+     "gem_fields_with_production": 10,
+     "gem_latest_production_bcm": 24.891963000000004,
+     "gem_production_twh_ncv": 235.30163531410804,
+     "nodes_with_fields": 4,
+     "unsd_2019_cap_twh": 849.53
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "PH",
+     "coverage_ratio": 0.7536112551713555,
+     "gem_fields_with_production": 1,
+     "gem_latest_production_bcm": 3.42887,
+     "gem_production_twh_ncv": 32.41282008492,
+     "nodes_with_fields": 1,
+     "unsd_2019_cap_twh": 43.01
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "TH",
+     "coverage_ratio": 0.3631308667193529,
+     "gem_fields_with_production": 6,
+     "gem_latest_production_bcm": 14.105107,
+     "gem_production_twh_ncv": 133.334391642012,
+     "nodes_with_fields": 3,
+     "unsd_2019_cap_twh": 367.18
+    },
+    {
+     "allocation": "load_shares (no GEM field with production; DATA_PENDING)",
+     "country": "TL",
+     "coverage_ratio": 0.0,
+     "gem_fields_with_production": 0,
+     "gem_latest_production_bcm": 0.0,
+     "gem_production_twh_ncv": 0.0,
+     "nodes_with_fields": 0,
+     "unsd_2019_cap_twh": 61.29
+    },
+    {
+     "allocation": "gem_fields",
+     "country": "VN",
+     "coverage_ratio": 0.17905986802547771,
+     "gem_fields_with_production": 2,
+     "gem_latest_production_bcm": 1.9628,
+     "gem_production_twh_ncv": 18.554183524800003,
+     "nodes_with_fields": 2,
+     "unsd_2019_cap_twh": 103.62
+    }
+   ],
+   "include_construction": true,
+   "reverse_check_mw": 2854.4,
+   "reverse_check_units": 11,
+   "script": "scripts_project/s4a_2_fleet_data.py",
+   "sources": {
+    "gipt_csv": "68ba008b32da1a8101c87580fa82289f31e114b0d48fe2647f245b17ccf9dbda",
+    "goget_fields": "7f250e34bb2890e429786e09af6ddfdcfb995e43ba1094933530dc796d80a32f",
+    "goget_prod": "f9156a3bc7107062eb4cf6da6001bb2493caafcd897d652b1c3d948f720cd667"
+   }
+  },
+  "gas_allocation_old_vs_new": {
+   "BN": {
+    "load_nodes": 1,
+    "gem_nodes": 1,
+    "hhi_load": 1.0,
+    "hhi_gem": 1.0,
+    "top_load": [
+     [
+      "BN4 0",
+      1.0
+     ]
+    ],
+    "top_gem": [
+     [
+      "BN4 0",
+      1.0
+     ]
+    ],
+    "gem_share_on_load_top": 1.0,
+    "load_share_on_gem_nodes": 1.0,
+    "cap_twh": 109.84
+   },
+   "ID": {
+    "load_nodes": 39,
+    "gem_nodes": 6,
+    "hhi_load": 0.173,
+    "hhi_gem": 0.297,
+    "top_load": [
+     [
+      "ID_Java-Bali1 0",
+      0.359
+     ],
+     [
+      "ID_Java-Bali1 1",
+      0.134
+     ],
+     [
+      "ID_Java-Bali1 2",
+      0.132
+     ]
+    ],
+    "top_gem": [
+     [
+      "ID_Kalimantan4 6",
+      0.48
+     ],
+     [
+      "ID_Sumatra3 1",
+      0.142
+     ],
+     [
+      "ID_Java-Bali1 2",
+      0.129
+     ]
+    ],
+    "gem_share_on_load_top": 0.256,
+    "load_share_on_gem_nodes": 0.185,
+    "cap_twh": 727.58
+   },
+   "MM": {
+    "load_nodes": 17,
+    "gem_nodes": 1,
+    "hhi_load": 0.082,
+    "hhi_gem": 1.0,
+    "top_load": [
+     [
+      "MM2 1",
+      0.182
+     ],
+     [
+      "MM2 11",
+      0.091
+     ],
+     [
+      "MM2 4",
+      0.085
+     ]
+    ],
+    "top_gem": [
+     [
+      "MM2 11",
+      1.0
+     ]
+    ],
+    "gem_share_on_load_top": 1.0,
+    "load_share_on_gem_nodes": 0.091,
+    "cap_twh": 184.9
+   },
+   "MY": {
+    "load_nodes": 7,
+    "gem_nodes": 4,
+    "hhi_load": 0.382,
+    "hhi_gem": 0.556,
+    "top_load": [
+     [
+      "MY_Peninsular2 1",
+      0.54
+     ],
+     [
+      "MY_Peninsular2 0",
+      0.29
+     ],
+     [
+      "MY_Sarawak4 1",
+      0.046
+     ]
+    ],
+    "top_gem": [
+     [
+      "MY_Sarawak4 0",
+      0.716
+     ],
+     [
+      "MY_Peninsular2 0",
+      0.189
+     ],
+     [
+      "MY_Sabah4 0",
+      0.09
+     ]
+    ],
+    "gem_share_on_load_top": 0.194,
+    "load_share_on_gem_nodes": 0.362,
+    "cap_twh": 849.53
+   },
+   "PH": {
+    "load_nodes": 5,
+    "gem_nodes": 1,
+    "hhi_load": 0.507,
+    "hhi_gem": 1.0,
+    "top_load": [
+     [
+      "PH_Luzon5 0",
+      0.683
+     ],
+     [
+      "PH_Visayas7 0",
+      0.156
+     ],
+     [
+      "PH_Mindanao6 1",
+      0.122
+     ]
+    ],
+    "top_gem": [
+     [
+      "PH_Luzon5 0",
+      1.0
+     ]
+    ],
+    "gem_share_on_load_top": 1.0,
+    "load_share_on_gem_nodes": 0.683,
+    "cap_twh": 43.01
+   },
+   "TH": {
+    "load_nodes": 6,
+    "gem_nodes": 3,
+    "hhi_load": 0.286,
+    "hhi_gem": 0.527,
+    "top_load": [
+     [
+      "TH2 2",
+      0.459
+     ],
+     [
+      "TH2 3",
+      0.206
+     ],
+     [
+      "TH2 1",
+      0.134
+     ]
+    ],
+    "top_gem": [
+     [
+      "TH2 5",
+      0.615
+     ],
+     [
+      "TH2 0",
+      0.384
+     ],
+     [
+      "TH2 1",
+      0.0
+     ]
+    ],
+    "gem_share_on_load_top": 0.0,
+    "load_share_on_gem_nodes": 0.235,
+    "cap_twh": 367.18
+   },
+   "TL": {
+    "load_nodes": 1,
+    "gem_nodes": 0,
+    "hhi_load": 1.0,
+    "hhi_gem": null,
+    "top_load": [
+     [
+      "TL11 0",
+      1.0
+     ]
+    ],
+    "top_gem": [],
+    "gem_share_on_load_top": 0,
+    "load_share_on_gem_nodes": 0.0,
+    "cap_twh": 61.29
+   },
+   "VN": {
+    "load_nodes": 8,
+    "gem_nodes": 2,
+    "hhi_load": 0.213,
+    "hhi_gem": 0.668,
+    "top_load": [
+     [
+      "VN2 6",
+      0.331
+     ],
+     [
+      "VN2 5",
+      0.242
+     ],
+     [
+      "VN2 0",
+      0.177
+     ]
+    ],
+    "top_gem": [
+     [
+      "VN2 4",
+      0.79
+     ],
+     [
+      "VN2 0",
+      0.21
+     ]
+    ],
+    "gem_share_on_load_top": 0.21,
+    "load_share_on_gem_nodes": 0.227,
+    "cap_twh": 103.62
+   }
+  },
+  "files": {
+   "research_inputs/fleet_v5/FLEET_ADDITIONS_2050.csv": {
+    "sha256": "6196422dd9c82256755135f3c1b2005e3dc6d9574d91e57014ce33abe198d526",
+    "bytes": 97422
+   },
+   "research_inputs/fleet_v5/FLEET_COVERAGE_GEM_2026_BY_COUNTRY_TYPE.csv": {
+    "sha256": "5aa2661e3b221f8bdbf2ef684b9baba7d3e8780bc005b49606f1ed30d04c815d",
+    "bytes": 2840
+   },
+   "research_inputs/fleet_v5/FLEET_NETWORK_UNITS_NOT_OPERATING_IN_GIPT_2026.csv": {
+    "sha256": "24f7dc0a9d5b52879aaa5a94277934d8c43a34799152edea8bf5728e58f8b2dd",
+    "bytes": 1740
+   },
+   "research_inputs/fleet_v5/FLEET_S4A_EVIDENCE.json": {
+    "sha256": "1d56e80ccffbea0d4dfec07e88a26d324423e371f1a58c017913458fe1b6f399",
+    "bytes": 4484
+   },
+   "research_inputs/fleet_v5/FLEET_UNRESOLVED_START_YEAR.csv": {
+    "sha256": "4c9a8a527c167344cbfa4ed269a61f04ac8c97bf3488d327b6ac7c4a54f2f70d",
+    "bytes": 33235
+   },
+   "research_inputs/fleet_v5/GAS_FIELD_COVERAGE_VS_UNSD.csv": {
+    "sha256": "4ac8153f46b895157e8c57586d3bda63e44f3d7d99d55ac1af7112907bb2423e",
+    "bytes": 660
+   },
+   "research_inputs/fleet_v5/GAS_FIELD_NODE_ALLOCATION.csv": {
+    "sha256": "e649328487e5e26c172a466eccbdc8b84c55e1d4042c54c6bbf045cec9472063",
+    "bytes": 5470
+   },
+   "research_inputs/fleet_v5/GAS_PRODUCTION_NODE_SHARES_GEM.csv": {
+    "sha256": "b523a8914b4ad18993666b1da5070d3f7c6ddedfa595d8156f2fea499108f0a3",
+    "bytes": 532
+   }
+  }
+ },
+ "s4a_3": {
+  "rows": 88,
+  "status_counts": {
+   "CANDIDATE_ONLY": 9,
+   "DATA_PENDING": 13,
+   "REFERENCE_ONLY": 64,
+   "SOURCE_ZERO": 2
+  },
+  "documents": [
+   {
+    "bytes": 7255449,
+    "file": "doe_ph_renewable_energy.pdf",
+    "key": "DOE_RE_2024",
+    "sha256": "f33a274df0ab6ae15a1d9283954ff0ef53317b05bf80035976918cd871cb078e",
+    "title": "DOE Philippines, Renewable Energy sector brief (data as of 31 Dec 2023; PDF modified 2024-05-04), 8 pages",
+    "url": "https://prod-cms.doe.gov.ph/documents/d/guest/doe-renewable-energy"
+   },
+   {
+    "bytes": 13189775,
+    "file": "pep_2023_2050_vol1.pdf",
+    "key": "PEP_2023_2050",
+    "sha256": "f0a616c07c7defd321814aa1dc0fad46797455b6330912150de37f031628c1da",
+    "title": "DOE Philippines, Philippine Energy Plan 2023-2050 Volume I",
+    "url": "https://prod-cms.doe.gov.ph/documents/d/eppb/pep_2023-2050_-28volume_i-29-pdf"
+   },
+   {
+    "bytes": 2525237,
+    "file": "adb_myanmar_energy_assessment_2016.pdf",
+    "key": "ADB_MM_2016",
+    "sha256": "feb3c9382363df8cd75408497cfb2f0578c654da0720e640d8a3f4a2d22badf5",
+    "title": "ADB (2016) Myanmar: Energy Sector Assessment, Strategy, and Road Map",
+    "url": "https://www.adb.org/sites/default/files/institutional-document/218286/mya-energy-sector-assessment.pdf"
+   },
+   {
+    "bytes": 1323589,
+    "file": "cambodia_pdp_2022_2040_en.pdf",
+    "key": "KH_PDP_2022",
+    "sha256": "00faa26e38349a5a86d422aa2638f8e96dff81c0b370fae1d33e379748f1ff60",
+    "title": "Royal Government of Cambodia, Power Development Master Plan 2022-2040 (English, 30 pages)",
+    "url": "https://vdb-loi.com/wp-content/uploads/2023/06/Final-PDP-Cambodia-English-version.pdf"
+   },
+   {
+    "bytes": 55383,
+    "file": "anu_phes_global_summary.xlsx",
+    "in_repo": "research_inputs/registry_v5/sources/ANU_PHES_global_summary_spreadsheet.xlsx",
+    "key": "ANU_PHES",
+    "sha256": "7cbfb952b65b84293e473f3bd6e165dedf6692e44d313e98b7d7e224092c2f76",
+    "title": "ANU RE100 Group, Global Greenfield Pumped Hydro Energy Storage Atlas, global summary spreadsheet (Stocks, Stocks, Lu, Cheng, Blakers 2021, Joule 5(1):270-284)",
+    "url": "https://re100.eng.anu.edu.au/global/ (Dropbox link, ?dl=1)"
+   }
+  ],
+  "comparison": [
+   {
+    "country": "ID",
+    "grade": "B",
+    "kind": "resource_potential",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 23.59,
+    "ratio_model_over_public": 0.0,
+    "source": "Badan Geologi / PSDMBP (ESDM) 2024-08-26",
+    "status": "CANDIDATE_ONLY",
+    "tech": "geothermal"
+   },
+   {
+    "country": "ID",
+    "grade": "B",
+    "kind": "ebtke_statistics",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 94.47,
+    "ratio_model_over_public": 0.0,
+    "source": "Direktorat Jenderal EBTKE potency page (Buku Statistik EBTKE)",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "ID",
+    "grade": "B",
+    "kind": "esdm_2023",
+    "model_p_nom_max_gw": 859.02,
+    "public_potential_gw": 3294.0,
+    "ratio_model_over_public": 0.26,
+    "source": "Kementerian ESDM press release 2023-07-22",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar"
+   },
+   {
+    "country": "ID",
+    "grade": "B",
+    "kind": "aeo8_potential",
+    "model_p_nom_max_gw": 356.06,
+    "public_potential_gw": 655.0,
+    "ratio_model_over_public": 0.54,
+    "source": "AEO8 p.140",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar rooftop"
+   },
+   {
+    "country": "ID",
+    "grade": "B",
+    "kind": "esdm_2023",
+    "model_p_nom_max_gw": 6736.13,
+    "public_potential_gw": 155.0,
+    "ratio_model_over_public": 43.46,
+    "source": "Kementerian ESDM press release 2023-07-22",
+    "status": "REFERENCE_ONLY",
+    "tech": "wind"
+   },
+   {
+    "country": "LA",
+    "grade": "C",
+    "kind": "aeo8_potential",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 26.0,
+    "ratio_model_over_public": 0.0,
+    "source": "ACE ASEAN Energy Outlook 8 (2024), chapter 2 text p.75 citing ref [44] (Phouthonesy)",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "MM",
+    "grade": "B",
+    "kind": "adb_identified_projects",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 46.0,
+    "ratio_model_over_public": 0.0,
+    "source": "ADB (2016) Myanmar Energy Sector Assessment",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "MY",
+    "grade": "B",
+    "kind": "myrer",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 0.23,
+    "ratio_model_over_public": 0.0,
+    "source": "SEDA MyRER resource map (2021-10-06)",
+    "status": "CANDIDATE_ONLY",
+    "tech": "geothermal"
+   },
+   {
+    "country": "MY",
+    "grade": "B",
+    "kind": "myrer_large_hydro",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 13.6,
+    "ratio_model_over_public": 0.0,
+    "source": "SEDA MyRER resource map (2021-10-06)",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "MY",
+    "grade": "B",
+    "kind": "myrer",
+    "model_p_nom_max_gw": 77.93,
+    "public_potential_gw": 269.0,
+    "ratio_model_over_public": 0.29,
+    "source": "SEDA MyRER resource map (2021-10-06)",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar"
+   },
+   {
+    "country": "MY",
+    "grade": "B",
+    "kind": "myrer",
+    "model_p_nom_max_gw": 83.15,
+    "public_potential_gw": 42.0,
+    "ratio_model_over_public": 1.98,
+    "source": "SEDA MyRER resource map (2021-10-06)",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar rooftop"
+   },
+   {
+    "country": "PH",
+    "grade": "B",
+    "kind": "awarded_pipeline_2022",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 0.87,
+    "ratio_model_over_public": 0.0,
+    "source": "PEP 2023-2050 Vol I (DOE)",
+    "status": "CANDIDATE_ONLY",
+    "tech": "geothermal"
+   },
+   {
+    "country": "PH",
+    "grade": "B",
+    "kind": "doe_resource_assessments",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 23.38,
+    "ratio_model_over_public": 0.0,
+    "source": "DOE RE sector brief 2024",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "PH",
+    "grade": "B",
+    "kind": "doe_wb_roadmap_technical",
+    "model_p_nom_max_gw": 279.65,
+    "public_potential_gw": 178.0,
+    "ratio_model_over_public": 1.57,
+    "source": "DOE / World Bank Philippines Offshore Wind Roadmap (2022)",
+    "status": "REFERENCE_ONLY",
+    "tech": "offwind"
+   },
+   {
+    "country": "PH",
+    "grade": "B",
+    "kind": "crez_zones",
+    "model_p_nom_max_gw": 549.81,
+    "public_potential_gw": 93.99,
+    "ratio_model_over_public": 5.85,
+    "source": "DOE RE sector brief 2024 (CREZ report)",
+    "status": "REFERENCE_ONLY",
+    "tech": "onwind"
+   },
+   {
+    "country": "PH",
+    "grade": "B",
+    "kind": "crez_zones",
+    "model_p_nom_max_gw": 298.92,
+    "public_potential_gw": 58.11,
+    "ratio_model_over_public": 5.14,
+    "source": "DOE RE sector brief 2024 (CREZ report)",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar"
+   },
+   {
+    "country": "VN",
+    "grade": "A",
+    "kind": "pdp8_total_potential",
+    "model_p_nom_max_gw": 0.0,
+    "public_potential_gw": 40.0,
+    "ratio_model_over_public": 0.0,
+    "source": "Decision 500/QD-TTg (PDP VIII) 2023-05-15, Dieu 1 Muc III.1.b; confirmed in Decision 768/QD-TTg 2025",
+    "status": "CANDIDATE_ONLY",
+    "tech": "hydro"
+   },
+   {
+    "country": "VN",
+    "grade": "A",
+    "kind": "pdp8_technical",
+    "model_p_nom_max_gw": 635.6,
+    "public_potential_gw": 600.0,
+    "ratio_model_over_public": 1.06,
+    "source": "Decision 500/QD-TTg Muc III.1.b (confirmed in 768)",
+    "status": "REFERENCE_ONLY",
+    "tech": "offwind"
+   },
+   {
+    "country": "VN",
+    "grade": "A",
+    "kind": "pdp8_technical",
+    "model_p_nom_max_gw": 576.7,
+    "public_potential_gw": 221.0,
+    "ratio_model_over_public": 2.61,
+    "source": "Decision 500/QD-TTg Muc III.1.b (confirmed in 768)",
+    "status": "REFERENCE_ONLY",
+    "tech": "onwind"
+   },
+   {
+    "country": "VN",
+    "grade": "A",
+    "kind": "pdp8_technical",
+    "model_p_nom_max_gw": 411.3,
+    "public_potential_gw": 963.0,
+    "ratio_model_over_public": 0.43,
+    "source": "Decision 500/QD-TTg Muc III.1.b (confirmed in 768)",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar"
+   },
+   {
+    "country": "VN",
+    "grade": "A",
+    "kind": "pdp8_technical",
+    "model_p_nom_max_gw": 122.25,
+    "public_potential_gw": 48.2,
+    "ratio_model_over_public": 2.54,
+    "source": "Decision 500/QD-TTg Muc III.1.b",
+    "status": "REFERENCE_ONLY",
+    "tech": "solar rooftop"
+   }
+  ],
+  "cost_consistency": [
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 9003265.19,
+    "fixed_eur_per_mw_a": 789668.64,
+    "fom_pct": 1.27,
+    "investment_eur_per_mw": 9003265.19,
+    "lifetime_a": 40.0,
+    "marginal_cost_eur_per_mwh": 22.7652,
+    "rule": "TD v0.15.0 2050 EUR2020 (decision 50)",
+    "technology": "nuclear"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 2406708.83,
+    "fixed_eur_per_mw_a": 193291.38,
+    "fom_pct": 1.0,
+    "investment_eur_per_mw": 2406708.83,
+    "lifetime_a": 80.0,
+    "marginal_cost_eur_per_mwh": 0.0,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "hydro"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 3610063.28,
+    "fixed_eur_per_mw_a": 326037.71,
+    "fom_pct": 2.0,
+    "investment_eur_per_mw": 3610063.28,
+    "lifetime_a": 80.0,
+    "marginal_cost_eur_per_mwh": 0.0,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "ror"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 2406708.83,
+    "fixed_eur_per_mw_a": 193291.38,
+    "fom_pct": 1.0,
+    "investment_eur_per_mw": 2406708.83,
+    "lifetime_a": 80.0,
+    "marginal_cost_eur_per_mwh": 0.0,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "PHS"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 1071878.6,
+    "fixed_eur_per_mw_a": 99000.21,
+    "fom_pct": 1.1775,
+    "investment_eur_per_mw": 1071878.6,
+    "lifetime_a": 30.0,
+    "marginal_cost_eur_per_mwh": 1.3523,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "onwind"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 1596478.9,
+    "fixed_eur_per_mw_a": 163226.24,
+    "fom_pct": 2.1655,
+    "investment_eur_per_mw": 1596478.9,
+    "lifetime_a": 30.0,
+    "marginal_cost_eur_per_mwh": 0.0222,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "offwind"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 428174.74,
+    "fixed_eur_per_mw_a": 40969.96,
+    "fom_pct": 2.0676,
+    "investment_eur_per_mw": 428174.74,
+    "lifetime_a": 40.0,
+    "marginal_cost_eur_per_mwh": 0.0112,
+    "rule": "TD v0.15.0 (decision 50)",
+    "technology": "solar"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 8421394.87,
+    "fixed_eur_per_mw_a": 728176.73,
+    "fom_pct": 1.1458,
+    "investment_eur_per_mw": 8421394.87,
+    "lifetime_a": 40.0,
+    "marginal_cost_eur_per_mwh": 20.9799,
+    "rule": "AEO8 D.15 Nuclear SMR 9,600 kUSD/MW x FX (decision 46, grade C)",
+    "technology": "nuclear SMR"
+   },
+   {
+    "consistent": true,
+    "expected_eur_per_mw": 3596637.39,
+    "fixed_eur_per_mw_a": 306946.03,
+    "fom_pct": 0.4756,
+    "investment_eur_per_mw": 3596637.39,
+    "lifetime_a": 30.0,
+    "marginal_cost_eur_per_mwh": 0.2632,
+    "rule": "AEO8 D.15 Geothermal average 4,100 kUSD/MW x FX (decision 52, grade C)",
+    "technology": "geothermal"
+   }
+  ],
+  "files": {
+   "research_inputs/potentials_v5/CANDIDATE_COST_CONSISTENCY.csv": {
+    "sha256": "8fb741ffe77134c70d7c193b3a30f5a92457322b9706e78d3173f7ee4f50a418",
+    "bytes": 1004
+   },
+   "research_inputs/potentials_v5/CANDIDATE_POTENTIAL_SOURCES.csv": {
+    "sha256": "e686550a3e6e31e5c28f3ac54ee161cb67e8e984872d5e1818af2d7a7daa3664",
+    "bytes": 15284
+   },
+   "research_inputs/potentials_v5/CANDIDATE_POTENTIAL_VS_MODEL_BY_COUNTRY.csv": {
+    "sha256": "33babe132f7a6b4f65ad74d6a9230d527ada2feb4cb098b71adfb27f71737d0b",
+    "bytes": 2296
+   },
+   "research_inputs/potentials_v5/GEM_PIPELINE_2026-09_BY_COUNTRY_TYPE.csv": {
+    "sha256": "a0b7e5fd0f5427ee46808b8017f1dcd460eb75df9ffbf679d293eabd530ed920",
+    "bytes": 584
+   },
+   "research_inputs/potentials_v5/GEM_PIPELINE_2026-09_GEO_HYDRO_PHS_NUCLEAR_BY_STATUS.csv": {
+    "sha256": "b31b6c6008aaed06ec13b6ce82687671535f2bc1da327a21c714261c24cdc500",
+    "bytes": 604
+   },
+   "research_inputs/potentials_v5/POTENTIALS_S4A_EVIDENCE.json": {
+    "sha256": "fcd7ee95a9a1e51e74fac9c2574cfeaf79e2e8f4c240a03023cf2c878d5bec66",
+    "bytes": 14173
+   },
+   "research_inputs/potentials_v5/S4A3_SOURCE_FILES.csv": {
+    "sha256": "c8c4721803ae09e4df9505dfb38ef175be5f448b9d29d64e470708b8d2e31c3b",
+    "bytes": 1581
+   },
+   "research_inputs/potentials_v5/S4A3_WEB_QUOTES.json": {
+    "sha256": "216ddde4d98dd214427c99f435044941d97cdaf06aae88c66c845ed899e3b164",
+    "bytes": 11059
+   }
+  }
+ },
+ "s4a_4": {
+  "status": [
+   "START:2026-10-16T07:34:25Z commit:437c328d",
+   "BUILD_integrated:0:\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\"",
+   "BUILD_disconnected:0:\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\"",
+   "RUN_integrated:optimal:210s:\tMaximum resident set size (kbytes): 3288160",
+   "RUN_disconnected:other:120s:\tMaximum resident set size (kbytes): 3126764",
+   "DONE:2026-10-16T07:42:07Z"
+  ],
+  "builds": {
+   "integrated": {
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "scenario": "integrated",
+    "research_config_sha256": "c3ca86961b70364c418cc1bd6e4337bd019c7824c1b4360e58108679fed590d0",
+    "code_sha": "437c328dabe981c3a19d3d75ede059152f18f0f1",
+    "build_seconds": 58.26030707359314,
+    "network": {
+     "file": "results_project/s4a/smoke/builds/integrated/integrated_2920_3h_unsolved.nc",
+     "sha256": "c65dece70002dbf2d557a06fe004215252467d5805ca8f18fac7ffac298e7211",
+     "bytes": 35548626,
+     "snapshots": 2920,
+     "components": {
+      "StorageUnit": 272,
+      "Link": 6585,
+      "Store": 518,
+      "TransformerType": 14,
+      "LineType": 35,
+      "Generator": 1320,
+      "Bus": 2987,
+      "Load": 2205,
+      "Carrier": 127,
+      "Line": 107
+     }
+    }
+   },
+   "disconnected": {
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "scenario": "disconnected",
+    "research_config_sha256": "3e8ef7e01ccf912d70838e450925ac5cc0d989449b450ae19530083290dd1423",
+    "code_sha": "437c328dabe981c3a19d3d75ede059152f18f0f1",
+    "build_seconds": 58.14660310745239,
+    "network": {
+     "file": "results_project/s4a/smoke/builds/disconnected/disconnected_2920_3h_unsolved.nc",
+     "sha256": "591295a5e780364fbb7b21bf85032e350212b47a32635558501102639302fff6",
+     "bytes": 35078897,
+     "snapshots": 2920,
+     "components": {
+      "StorageUnit": 272,
+      "Link": 6511,
+      "Store": 518,
+      "TransformerType": 14,
+      "LineType": 35,
+      "Generator": 1320,
+      "Bus": 2987,
+      "Load": 2205,
+      "Carrier": 127,
+      "Line": 86
+     }
+    }
+   }
+  },
+  "solves": {
+   "integrated": {
+    "receipt": {
+     "label": "SMOKE_TEST_ONLY",
+     "scenario": "integrated",
+     "authorization": "S4A-4 smoke (S4A instruction S4A-4; decisions 70-73, ledger L14-L16, user authorization 2026-10-16): 56x3h smoke only, Gurobi formal_barrier, stop-loss 30 min, no retry; run integrated",
+     "solver": "gurobi",
+     "started_epoch": 1792136198.405238,
+     "optimize_calls": 1,
+     "retry": false,
+     "stage": "S2",
+     "solver_profile": "formal_barrier",
+     "input_network": {
+      "path": "results_project/s4a/smoke/builds/integrated/integrated_2920_3h_unsolved.nc",
+      "sha256": "c65dece70002dbf2d557a06fe004215252467d5805ca8f18fac7ffac298e7211",
+      "snapshots": 56,
+      "truncated_to": 56,
+      "horizon_scaling": {
+       "method": "representative_weights_sum_8760",
+       "snapshots": 56,
+       "weight_hours_per_snapshot": 156.42857142857142,
+       "horizon_fraction": 1.0,
+       "scaled_stores": [],
+       "annual_caps_scaled": false
+      }
+     },
+     "lp": {
+      "num_col": 564622,
+      "num_row": 1275795,
+      "nnz": 2840571,
+      "build_seconds": 13.669429779052734
+     },
+     "parameter_source": "decision 69: research.solver.profiles.formal_barrier (PyPSA-Eur gurobi-default basis; differences registered) + TimeLimit (stop-loss)",
+     "status": "ok",
+     "termination_condition": "optimal",
+     "solve_seconds": 158.42681694030762,
+     "gurobi_log_stats": {
+      "coefficient_statistics": {
+       "matrix": {
+        "min": 3e-09,
+        "max": 1000.0,
+        "ratio": 333333333333.3333
+       },
+       "objective": {
+        "min": 2.0,
+        "max": 1000000.0,
+        "ratio": 500000.0
+       },
+       "bounds": {
+        "min": 0.5,
+        "max": 30000.0,
+        "ratio": 60000.0
+       },
+       "rhs": {
+        "min": 4e-05,
+        "max": 600000000.0,
+        "ratio": 14999999999999.998
+       }
+      },
+      "lines": {
+       "crossover": [
+        "Crossover  0"
+       ],
+       "presolved": [
+        "Presolved: 339793 rows, 313535 columns, 1310110 nonzeros"
+       ],
+       "barrier": [
+        "Barrier solved model in 92 iterations and 134.52 seconds (156.45 work units)"
+       ],
+       "result": [
+        "Optimal objective 7.07077801e+11"
+       ]
+      },
+      "scrubbed_log": "GUROBI_LOG_SCRUBBED.txt",
+      "scrubbed_lines": 141
+     },
+     "objective": 712004633048.0646,
+     "objective_lp": 707077800907.6332,
+     "solution": {
+      "X": {
+       "count": 564622,
+       "sha256": "f9c6ad41e6bfd8c4db36dc85c431a90498b739ea4cde8eb0ca162fdb6692aded"
+      },
+      "Pi": {
+       "count": 1275795,
+       "sha256": "9ae0e5d47f38347ca3e3ba7e3b0fbbaf145ec8b3f00adf6c63c7d889631eda62"
+      },
+      "RC": {
+       "count": 564622,
+       "sha256": "3839fc51b5fdac3c906a1bcffb54bb46b4a6c7a205a4d0021d81e89ad3d601ab"
+      }
+     },
+     "gates": {
+      "A1_A2": false,
+      "A3": false,
+      "A5": true,
+      "A4": true,
+      "A6": true,
+      "B1": false,
+      "B2": true,
+      "B3": false,
+      "B8": true,
+      "B11": true,
+      "B12": true,
+      "B13": true,
+      "B14": true,
+      "B15": true
+     },
+     "peak_rss_bytes": 3368144896,
+     "finished_epoch": 1792136396.9209766,
+     "solved_network": "results_project/s4a/smoke/solves/integrated/integrated_SMOKE_TEST_ONLY_solved.nc",
+     "decision": "SOLVED_SMOKE_TEST_ONLY"
+    },
+    "gates": {
+     "A1_A2": {
+      "gate": "A1_A2_INTERIOR_POINT",
+      "passed": false,
+      "criteria": {
+       "primal_rows_within_budget": false,
+       "primal_columns_within_budget": true,
+       "dual_stationarity": false,
+       "dual_sign": false,
+       "relative_gap": true,
+       "complementarity": true
+      },
+      "thresholds": {
+       "barconvtol": 1e-08,
+       "relative_gap": 1e-07,
+       "complementarity_over_scale": 1e-07,
+       "dual_normalized": 1e-06,
+       "primal": "1e-3 + 1e-7 x reference (V4 budget; 1e-7 = 10 x BarConvTol)"
+      },
+      "v4_independent_kkt_pass": false,
+      "note": "interior solution: degenerate equal-cost alternatives may be split across options"
+     },
+     "A3": {
+      "gate": "A3_PHYSICS",
+      "passed": false,
+      "failed": [
+       {
+        "check": "STORE_ENERGY_LOWER",
+        "residual": 0.0026726343094196636
+       },
+       {
+        "check": "COUNTRY_CO2_CAP:LA",
+        "residual": 0.0023248781508300453
+       },
+       {
+        "check": "COUNTRY_CO2_CAP:PH",
+        "residual": 0.0022334070526994765
+       },
+       {
+        "check": "COUNTRY_CO2_CAP:VN",
+        "residual": 0.002649659290909767
+       }
+      ]
+     },
+     "A5": {
+      "gate": "A5_FOM_ONCE",
+      "passed": true
+     },
+     "A4": {
+      "gate": "A4_NETCDF_READBACK",
+      "passed": true,
+      "error": null,
+      "file": "results_project/s4a/smoke/solves/integrated/integrated_SMOKE_TEST_ONLY_solved.nc",
+      "sha256": "f21cc8de643ff4b16928efd19272a39500830d395c02760e9c783de95cb570e0",
+      "status": "EXACT_SEMANTIC_ROUNDTRIP",
+      "dynamic_tables": 22,
+      "pypsa_omitted_declared_default_columns_restored": []
+     },
+     "A6": {
+      "gate": "A6_SCALE_BINDING",
+      "passed": true,
+      "input_network_sha256": "c65dece70002dbf2d557a06fe004215252467d5805ca8f18fac7ffac298e7211"
+     },
+     "B1": {
+      "gate": "B1_COUNTRY_NET_ZERO",
+      "passed": false,
+      "s3_scope": {
+       "import_carriers_zero_co2": true,
+       "import_carriers": [
+        "LNG import",
+        "oil import",
+        "ammonia import",
+        "methanol import",
+        "FT fuel import",
+        "H2 import",
+        "gas production"
+       ],
+       "atmosphere_port_carriers": [
+        "CCGT",
+        "CCGT CC",
+        "CCGT existing",
+        "DAC",
+        "Fischer-Tropsch",
+        "OCGT",
+        "OCGT existing",
+        "SMR",
+        "SMR CC",
+        "biogas upgrading",
+        "biomass EOP CC",
+        "co2 vent",
+        "coal existing",
+        "coal final-energy accounting",
+        "cooking LPG",
+        "cooking gas",
+        "gas final-energy accounting",
+        "gas production delivery",
+        "industry biomass CC",
+        "industry biomass boiler CC",
+        "industry gas boiler",
+        "lignite existing",
+        "methanolisation",
+        "oil existing",
+        "oil final-energy accounting",
+        "process emissions",
+        "process emissions CC",
+        "waste incineration"
+       ],
+       "s3_fuel_ports_present": {
+        "gas production delivery": true,
+        "Fischer-Tropsch": true,
+        "methanolisation": true,
+        "shipping methanol": false,
+        "industry methanol": false,
+        "OCGT methanol": false,
+        "BtL": false,
+        "biomass-to-methanol": false
+       },
+       "fuel_carbon_mode": "origin_neutral"
+      },
+      "scope": "per_country",
+      "every_tonne_booked_once": true,
+      "by_country_source": {
+       "BN|CCGT": 9.730277509081408e-05,
+       "BN|CCGT CC": 793508.869294866,
+       "BN|CCGT existing": 70188.01511703427,
+       "BN|DAC": -3117241.1491915714,
+       "BN|Fischer-Tropsch": 1.1944083051249317e-05,
+       "BN|OCGT": 7.524196356785094e-05,
+       "BN|SMR": 1.6900258024417022e-05,
+       "BN|SMR CC": 1171224.0344600435,
+       "BN|biogas upgrading": -23600.7064070259,
+       "BN|biomass EOP CC": -2.4215308334309724e-08,
+       "BN|co2 vent": 1.3056661244915536e-05,
+       "BN|coal existing": 1.7665224696882297e-05,
+       "BN|cooking LPG": 0.0001036367952025376,
+       "BN|cooking gas": 116.4876662956141,
+       "BN|gas final-energy accounting": 210627.05411568505,
+       "BN|gas production delivery": 496450.9683514639,
+       "BN|industry biomass CC": -38262.301437166025,
+       "BN|industry biomass boiler CC": -2.4214283735899063e-08,
+       "BN|industry gas boiler": 2.1552332899310202e-05,
+       "BN|methanolisation": 0.0015062772215853613,
+       "BN|oil final-energy accounting": 426232.157344591,
+       "BN|process emissions": 1.518653584383817e-05,
+       "BN|process emissions CC": 10756.568782593284,
+       "ID|CCGT": 240838.60459838176,
+       "ID|CCGT CC": 2017133.2839596889,
+       "ID|CCGT existing": 4042735.506451445,
+       "ID|DAC": -17005124.545378443,
+       "ID|Fischer-Tropsch": 0.0003349190219629923,
+       "ID|OCGT": 132845.97071845978,
+       "ID|OCGT existing": 266669.7092695379,
+       "ID|SMR": 0.0008228308671754238,
+       "ID|SMR CC": 9905989.880966289,
+       "ID|biogas upgrading": -11318912.247245621,
+       "ID|biomass EOP CC": -105607999.8135021,
+       "ID|co2 vent": 0.000565022971234489,
+       "ID|coal existing": 57716813.96220444,
+       "ID|coal final-energy accounting": 2135955.7516620858,
+       "ID|cooking LPG": 2922118.697620923,
+       "ID|cooking gas": 0.01473913121438996,
+       "ID|gas final-energy accounting": 39975408.87896645,
+       "ID|gas production delivery": 2854867.7171185515,
+       "ID|industry biomass CC": -183377637.5015861,
+       "ID|industry biomass boiler CC": -26173163.05926768,
+       "ID|industry gas boiler": 0.0003619414257162217,
+       "ID|lignite existing": 0.00012067549417938214,
+       "ID|methanolisation": 74811512.75733145,
+       "ID|oil existing": 528083.7481229343,
+       "ID|oil final-energy accounting": 122329870.10209815,
+       "ID|process emissions": 0.0007839105225778299,
+       "ID|process emissions CC": 9638518.952875588,
+       "ID|waste incineration": 13963473.585501341,
+       "KH|CCGT": 0.00023803204298668873,
+       "KH|CCGT CC": 2.3868359413693186e-05,
+       "KH|CCGT existing": 278755.71430444403,
+       "KH|DAC": -0.00031782790337277184,
+       "KH|Fischer-Tropsch": 5.114449752405308e-05,
+       "KH|OCGT": 0.00032391615387639106,
+       "KH|SMR": 4.714085453291886e-05,
+       "KH|SMR CC": 6.596189005200987e-06,
+       "KH|biogas upgrading": -560892.6707685934,
+       "KH|biomass EOP CC": -12622299.763314832,
+       "KH|co2 vent": 0.00010424179484922879,
+       "KH|coal existing": 1177280.3856050929,
+       "KH|cooking LPG": 238610.79049506012,
+       "KH|cooking gas": 3.428753714471414e-05,
+       "KH|gas final-energy accounting": 4591748.645868362,
+       "KH|industry biomass CC": -3542177.988773279,
+       "KH|industry biomass boiler CC": -122043.25176811393,
+       "KH|industry gas boiler": 2.318595884920262e-05,
+       "KH|methanolisation": 0.000923108767039587,
+       "KH|oil existing": 1011822.033822346,
+       "KH|oil final-energy accounting": 8225466.336707295,
+       "KH|process emissions": 0.00016339113653999538,
+       "KH|process emissions CC": 726065.3765023134,
+       "KH|waste incineration": 597664.3895692201,
+       "LA|CCGT": 0.0006553493573229704,
+       "LA|CCGT CC": 4.60764208858542e-05,
+       "LA|DAC": -0.000247629741074572,
+       "LA|Fischer-Tropsch": 6.651954652495175e-05,
+       "LA|OCGT": 0.00033689102984189737,
+       "LA|SMR": 6.702945634344046e-05,
+       "LA|SMR CC": 8.365538958184955e-06,
+       "LA|biogas upgrading": 0.0,
+       "LA|biomass EOP CC": -6077683.304666344,
+       "LA|co2 vent": 0.000160190537334853,
+       "LA|coal existing": 797495.7063220402,
+       "LA|coal final-energy accounting": 875819.6870778766,
+       "LA|cooking LPG": 327236.4892251682,
+       "LA|cooking gas": 3.955113235437566e-05,
+       "LA|gas final-energy accounting": 1954938.677137467,
+       "LA|industry biomass CC": -1652839.673822279,
+       "LA|industry biomass boiler CC": -84901.209661488,
+       "LA|industry gas boiler": 2.9838533682505348e-05,
+       "LA|lignite existing": 1086692.5052427705,
+       "LA|methanolisation": 1920483.643685692,
+       "LA|oil final-energy accounting": 427474.6025246045,
+       "LA|process emissions": 0.0002986650048390083,
+       "LA|process emissions CC": 305195.643169705,
+       "LA|waste incineration": 120087.23462700238,
+       "MM|CCGT": 0.004005135967868354,
+       "MM|CCGT CC": 0.00011756718019966684,
+       "MM|CCGT existing": 2336050.022445215,
+       "MM|DAC": -0.0005054302085572761,
+       "MM|Fischer-Tropsch": 0.00018670497425693564,
+       "MM|OCGT": 0.0011592462605800758,
+       "MM|OCGT existing": 201525.255161142,
+       "MM|SMR": 0.00024122465474347909,
+       "MM|SMR CC": 2.4207758212280427e-05,
+       "MM|biogas upgrading": -1493092.3615459222,
+       "MM|biomass EOP CC": -2566795.088318546,
+       "MM|co2 vent": 0.0006458258275976809,
+       "MM|coal existing": 194339.66606302306,
+       "MM|cooking LPG": 1526193.855974291,
+       "MM|cooking gas": 0.00011556127102898623,
+       "MM|gas final-energy accounting": 1542022.917108358,
+       "MM|gas production delivery": 44734.96306286736,
+       "MM|industry biomass CC": -9285103.49644133,
+       "MM|industry biomass boiler CC": -946857.155151127,
+       "MM|industry gas boiler": 0.00010163485866233164,
+       "MM|methanolisation": 0.002653844764381788,
+       "MM|oil final-energy accounting": 7915873.309811156,
+       "MM|process emissions": 0.0022363173902059438,
+       "MM|process emissions CC": 254341.59772922721,
+       "MM|waste incineration": 276766.5033479888,
+       "MY|CCGT": 0.0007112448672443468,
+       "MY|CCGT CC": 5446234.717006082,
+       "MY|CCGT existing": 4482169.871703004,
+       "MY|DAC": -0.0015359075932503173,
+       "MY|Fischer-Tropsch": 7.791540674787035e-05,
+       "MY|OCGT": 0.0006689974747615614,
+       "MY|OCGT existing": 115463.93029842933,
+       "MY|SMR": 0.0001223146122087636,
+       "MY|SMR CC": 3672125.4263439574,
+       "MY|biogas upgrading": -4121078.262764763,
+       "MY|biomass EOP CC": -34794247.84909996,
+       "MY|co2 vent": 0.00010302740739474114,
+       "MY|coal existing": 7089133.273877487,
+       "MY|cooking LPG": 120312.62455481896,
+       "MY|cooking gas": 10726.371062381973,
+       "MY|gas final-energy accounting": 7016099.360087718,
+       "MY|gas production delivery": 3778739.6900952514,
+       "MY|industry biomass CC": -42004366.75401461,
+       "MY|industry biomass boiler CC": -4689631.369143781,
+       "MY|industry gas boiler": 7.791725633154946e-05,
+       "MY|lignite existing": 2.285743880909811e-05,
+       "MY|methanolisation": 27509486.990314197,
+       "MY|oil final-energy accounting": 23882875.58477891,
+       "MY|process emissions": 0.00013593250377643781,
+       "MY|process emissions CC": 2450214.727208915,
+       "MY|waste incineration": 35741.66565554726,
+       "PH|CCGT": 29132.213877985396,
+       "PH|CCGT CC": 1236825.9109544968,
+       "PH|CCGT existing": 1260413.1320985025,
+       "PH|DAC": -32372962.113927152,
+       "PH|Fischer-Tropsch": 7.884914872350891e-05,
+       "PH|OCGT": 0.0005038991487024422,
+       "PH|SMR": 0.00014200769089081804,
+       "PH|SMR CC": 2356395.0617708345,
+       "PH|biogas upgrading": -2192775.6257044184,
+       "PH|biomass EOP CC": -3757370.410550837,
+       "PH|co2 vent": 9.707041271491365e-05,
+       "PH|coal existing": 5356077.860181092,
+       "PH|cooking LPG": 1401898.6256959809,
+       "PH|cooking gas": 0.00021235937131457128,
+       "PH|gas final-energy accounting": 12294598.745311178,
+       "PH|gas production delivery": 143549.34217770377,
+       "PH|industry biomass CC": -24711295.56187734,
+       "PH|industry biomass boiler CC": -18143411.44307154,
+       "PH|industry gas boiler": 5.47895329500889e-05,
+       "PH|lignite existing": 63265.02333842792,
+       "PH|methanolisation": 19829441.426864605,
+       "PH|oil existing": 1100628.0399653837,
+       "PH|oil final-energy accounting": 33512194.678640276,
+       "PH|process emissions": 0.00011230243542906091,
+       "PH|process emissions CC": 1948823.8436421403,
+       "PH|waste incineration": 644571.2515936941,
+       "SG|CCGT": 1.9233042377107876e-05,
+       "SG|CCGT CC": 2.6595367611695034e-05,
+       "SG|CCGT existing": 896398.8326520707,
+       "SG|DAC": -35538703.66866817,
+       "SG|Fischer-Tropsch": 5.648870456110705e-06,
+       "SG|OCGT": 1.3094663172893994e-05,
+       "SG|OCGT existing": 56327.38206680146,
+       "SG|SMR": 7.714370435771693e-06,
+       "SG|SMR CC": 2.010704042172013e-06,
+       "SG|biogas upgrading": -41967.687287685854,
+       "SG|biomass EOP CC": -2.1667435496172314e-08,
+       "SG|co2 vent": 1.0440416016301836e-05,
+       "SG|gas final-energy accounting": 6247066.262347272,
+       "SG|industry biomass boiler CC": -2.1807450821395264e-08,
+       "SG|industry gas boiler": 2.0066928143118027e-05,
+       "SG|methanolisation": 1.5780256929126813e-05,
+       "SG|oil final-energy accounting": 26938430.597084574,
+       "SG|process emissions": 1.6575734270944587e-05,
+       "SG|process emissions CC": 1116543.1621174922,
+       "SG|waste incineration": 325905.1195294319,
+       "TH|CCGT": 0.006153067339806101,
+       "TH|CCGT CC": 0.0006022117863684928,
+       "TH|CCGT existing": 15999860.328630647,
+       "TH|DAC": -0.00018566533738534365,
+       "TH|Fischer-Tropsch": 6.156044393851289e-05,
+       "TH|OCGT": 89495.10940450004,
+       "TH|OCGT existing": 15126.279077318866,
+       "TH|SMR": 8.238463013322188e-05,
+       "TH|SMR CC": 1.1121748087500997e-05,
+       "TH|biogas upgrading": -3447167.3689850816,
+       "TH|biomass EOP CC": -5838851.744239082,
+       "TH|co2 vent": 0.00016845303609533947,
+       "TH|coal existing": 9012085.84741634,
+       "TH|cooking LPG": 1519569.3395133289,
+       "TH|cooking gas": 3.932208356561835e-05,
+       "TH|gas final-energy accounting": 22145083.722637616,
+       "TH|gas production delivery": 1882618.8046253002,
+       "TH|industry biomass CC": -94060421.56132942,
+       "TH|industry biomass boiler CC": -5518837.770935658,
+       "TH|industry gas boiler": 3.676290245138589e-05,
+       "TH|lignite existing": 505348.6624210853,
+       "TH|methanolisation": 423943.33463954995,
+       "TH|oil final-energy accounting": 49741944.80359591,
+       "TH|process emissions": 0.00037949007373796453,
+       "TH|process emissions CC": 4991342.686163839,
+       "TH|waste incineration": 2538859.5208118637,
+       "TL|CCGT": 0.00012147876332428519,
+       "TL|CCGT CC": 161978.6617415679,
+       "TL|DAC": -381863.48576123326,
+       "TL|Fischer-Tropsch": 1.2743619340372868e-05,
+       "TL|OCGT": 6.035927523269653e-05,
+       "TL|SMR": 1.6644970074905392e-05,
+       "TL|SMR CC": 334871.4302000695,
+       "TL|biogas upgrading": -28484.073926706275,
+       "TL|biomass EOP CC": -6.49634212385042e-05,
+       "TL|co2 vent": 1.3174035316848985e-05,
+       "TL|cooking LPG": 4.741960705534077e-05,
+       "TL|cooking gas": 2619.144943494916,
+       "TL|gas production delivery": 27098.77101299888,
+       "TL|industry biomass boiler CC": -196041.07591786073,
+       "TL|industry gas boiler": 1.6395709779313843e-05,
+       "TL|methanolisation": 64397.101746071174,
+       "TL|oil existing": 294.97114639200277,
+       "TL|oil final-energy accounting": 14347.411840953548,
+       "TL|process emissions": 1.8097397191310908e-05,
+       "TL|process emissions CC": 781.1427482090309,
+       "VN|CCGT": 0.0001612324993960563,
+       "VN|CCGT CC": 4.0670143464728265e-05,
+       "VN|CCGT existing": 2627441.8697098065,
+       "VN|DAC": -146666913.50644258,
+       "VN|Fischer-Tropsch": 6.0453186625069096e-05,
+       "VN|OCGT": 0.00012673279439943236,
+       "VN|OCGT existing": 56183.32226296217,
+       "VN|SMR": 5.1220072877891683e-05,
+       "VN|SMR CC": 9.519626869925033e-06,
+       "VN|biogas upgrading": -2493561.774144164,
+       "VN|biomass EOP CC": -4.134134256792314e-07,
+       "VN|co2 vent": 0.00010091675297309825,
+       "VN|coal existing": 6627712.88333751,
+       "VN|coal final-energy accounting": 20445673.442839034,
+       "VN|cooking LPG": 75507.85101053561,
+       "VN|cooking gas": 5.8242476977405715e-05,
+       "VN|gas final-energy accounting": 115166509.09066199,
+       "VN|gas production delivery": 655705.327437077,
+       "VN|industry biomass CC": -35219923.3286103,
+       "VN|industry biomass boiler CC": -4.1657872011631674e-07,
+       "VN|industry gas boiler": 0.0003170483177002682,
+       "VN|methanolisation": 0.0002916746946182974,
+       "VN|oil final-energy accounting": 25553051.62114896,
+       "VN|process emissions": 0.00015330334856942837,
+       "VN|process emissions CC": 10937807.457171652,
+       "VN|waste incineration": 2234805.7447503456
+      },
+      "asean_total_tco2": -0.03356439497586317,
+      "scope_note": "only the emission sources built in S1 (existing fossil power, OCGT/CCGT, SMR, SMR CC)"
+     },
+     "B2": {
+      "gate": "B2_STORAGE_CAP",
+      "passed": true,
+      "horizon_fraction": 1.0
+     },
+     "B3": {
+      "gate": "B3_BIOMASS_WITHIN_POTENTIAL",
+      "passed": false
+     },
+     "B8": {
+      "gate": "B8_DEMAND_CONSISTENCY",
+      "passed": true,
+      "sector_totals": {
+       "AgricultureOthers": {
+        "expected_mwh": 57687891.42255849,
+        "actual_mwh": 57687891.42255848,
+        "rel": -1.1102230246251565e-16
+       },
+       "Commercial": {
+        "expected_mwh": 6540649.5928256,
+        "actual_mwh": 6540649.592825596,
+        "rel": -5.551115123125783e-16
+       },
+       "Industry": {
+        "expected_mwh": 4236063411.0103407,
+        "actual_mwh": 4236063411.0103426,
+        "rel": 4.440892098500626e-16
+       },
+       "NonEnergyUse": {
+        "expected_mwh": 1335260897.988941,
+        "actual_mwh": 1335260897.9889407,
+        "rel": -2.220446049250313e-16
+       },
+       "Residential": {
+        "expected_mwh": 23045872.17525043,
+        "actual_mwh": 23045872.175250426,
+        "rel": -1.1102230246251565e-16
+       },
+       "Transport": {
+        "expected_mwh": 1351926329.5919275,
+        "actual_mwh": 1351926329.5919268,
+        "rel": -5.551115123125783e-16
+       },
+       "agriculture": {
+        "expected_mwh": 185720589.45813182,
+        "actual_mwh": 185720589.4581317,
+        "rel": -6.661338147750939e-16
+       },
+       "agriculture overflow": {
+        "expected_mwh": 176789.1589327827,
+        "actual_mwh": 176789.15893278268,
+        "rel": -1.1102230246251565e-16
+       },
+       "aviation domestic": {
+        "expected_mwh": 215408575.75910565,
+        "actual_mwh": 215408575.75910556,
+        "rel": -4.440892098500626e-16
+       },
+       "aviation international": {
+        "expected_mwh": 239550418.6,
+        "actual_mwh": 239550418.5999999,
+        "rel": -3.3306690738754696e-16
+       },
+       "commercial": {
+        "expected_mwh": 204906973.50039527,
+        "actual_mwh": 204906973.50039524,
+        "rel": -1.1102230246251565e-16
+       },
+       "industry": {
+        "expected_mwh": 1996586646.2045772,
+        "actual_mwh": 1996586646.204577,
+        "rel": -1.1102230246251565e-16
+       },
+       "industry overflow": {
+        "expected_mwh": 252382989.1055977,
+        "actual_mwh": 252382989.10559765,
+        "rel": -2.220446049250313e-16
+       },
+       "rail": {
+        "expected_mwh": 20272327.425797474,
+        "actual_mwh": 20272327.42579747,
+        "rel": -2.220446049250313e-16
+       },
+       "residential": {
+        "expected_mwh": 418672664.91725415,
+        "actual_mwh": 418672664.9172538,
+        "rel": -8.881784197001252e-16
+       }
+      },
+      "horizon_fraction": 1.0,
+      "deductions": [
+       {
+        "added_explicit": {
+         "ev_mwh": 2006950.4853924036,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 2176166.13032,
+         "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 9060907.672486186,
+        "astar_before_mwh": 10270178.264136186,
+        "country": "BN",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 1209270.59165,
+        "deducted_mwh": 1209270.59165,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.8822541770406446
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 168924341.36577207,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 1801005557.61,
+         "industry_hydrogen_mwh": 13579747.7844
+        },
+        "astar_after_mwh": 357212279.686672,
+        "astar_before_mwh": 678586594.817495,
+        "country": "ID",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 320608647.624,
+        "deducted_mwh": 321374315.130823,
+        "deducted_transport_mwh": 765667.506823,
+        "factor": 0.526406331063383
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 24839997.616305634,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 12834310.1847,
+         "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 10886395.242255408,
+        "astar_before_mwh": 26794852.45795541,
+        "country": "KH",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 15908457.2157,
+        "deducted_mwh": 15908457.2157,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.40628681420573487
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 6256756.268379294,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 6958848.70677,
+         "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 8525999.870763468,
+        "astar_before_mwh": 17341277.643563468,
+        "country": "LA",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 8815277.7728,
+        "deducted_mwh": 8815277.7728,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.49165926790452197
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 11219309.580642136,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 80703162.8721,
+         "industry_hydrogen_mwh": 349222.465108
+        },
+        "astar_after_mwh": 37422653.711445615,
+        "astar_before_mwh": 49116915.53264561,
+        "country": "MM",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 11694261.8212,
+        "deducted_mwh": 11694261.8212,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.7619096864210173
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 171154111.77046195,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 425860079.01,
+         "industry_hydrogen_mwh": 10202921.3076
+        },
+        "astar_after_mwh": 186010228.38078976,
+        "astar_before_mwh": 417285227.84026974,
+        "country": "MY",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 230211662.165,
+        "deducted_mwh": 231274999.45948,
+        "deducted_transport_mwh": 1063337.29448,
+        "factor": 0.44576279237948857
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 91432367.68819085,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 102180067.843,
+         "industry_hydrogen_mwh": 3091189.73468
+        },
+        "astar_after_mwh": 137180671.0301932,
+        "astar_before_mwh": 229055183.9781512,
+        "country": "PH",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 91612685.0652,
+        "deducted_mwh": 91874512.94795801,
+        "deducted_transport_mwh": 261827.882758,
+        "factor": 0.5988979103100256
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 10537665.690423999,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 100790950.62,
+         "industry_hydrogen_mwh": 240431.725843
+        },
+        "astar_after_mwh": 86764205.39262076,
+        "astar_before_mwh": 136011268.33543074,
+        "country": "SG",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 44497760.9071,
+        "deducted_mwh": 49247062.94281,
+        "deducted_transport_mwh": 4749302.03571,
+        "factor": 0.6379192434162368
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 241633369.40554118,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 472698306.039,
+         "industry_hydrogen_mwh": 6249281.78014
+        },
+        "astar_after_mwh": 215313533.63571647,
+        "astar_before_mwh": 507906650.9689484,
+        "country": "TH",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 292039829.367,
+        "deducted_mwh": 292593117.333232,
+        "deducted_transport_mwh": 553287.966232,
+        "factor": 0.42392343794860043
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 927475.2330534046,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 0.0,
+         "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 1010278.750596059,
+        "astar_before_mwh": 1010278.750596059,
+        "country": "TL",
+        "deducted": "none",
+        "deducted_industry_mwh": 0.0,
+        "deducted_mwh": 0.0,
+        "deducted_transport_mwh": 0.0,
+        "factor": 1.0
+       },
+       {
+        "added_explicit": {
+         "ev_mwh": 82130589.0801821,
+         "fcev_h2_mwh": 0.0,
+         "industry_electricity_mwh": 963710356.649,
+         "industry_hydrogen_mwh": 40301246.6941
+        },
+        "astar_after_mwh": 29966658.468404245,
+        "astar_before_mwh": 544381850.1614043,
+        "country": "VN",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 514415191.693,
+        "deducted_mwh": 514415191.693,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.05504712998701078
+       }
+      ],
+      "deferred": []
+     },
+     "B11": {
+      "gate": "B11_SUPPLY_ROUTES_PER_END_USE",
+      "passed": true,
+      "data_pending_count": 388,
+      "data_pending_by_carrier": {
+       "geothermal": 97,
+       "ror": 97,
+       "hydro": 97,
+       "PHS": 97
+      }
+     },
+     "B12": {
+      "gate": "B12_CONFIG_SWITCH_HASH_CONSISTENCY",
+      "passed": true,
+      "research_config_sha256": "c3ca86961b70364c418cc1bd6e4337bd019c7824c1b4360e58108679fed590d0",
+      "s3_switches": {
+       "fuel_carbon_mode": "origin_neutral",
+       "import_price_sensitivity": 0.0,
+       "cross_border_gas": true,
+       "ammonia_methanol_mode": "regional_buses",
+       "industry_ratio_source": "jrc_idees_2021",
+       "config_overrides": [],
+       "demand_growth_method": "ratio",
+       "industry_other_bucket": "pypsa_eur_2050",
+       "lng_expansion": "existing_only",
+       "renewable_profile_variant": "pypsa_eur",
+       "renewable_resource_classes": 1,
+       "fleet_gem_additions": true,
+       "gas_production_node_allocation": "gem_fields"
+      },
+      "snapshot_weightings": {
+       "snapshots": 56,
+       "sums_h": {
+        "objective": 8760.0,
+        "generators": 8760.0,
+        "stores": 8760.0
+       },
+       "unique_values": {
+        "objective": [
+         156.42857142857142
+        ],
+        "generators": [
+         156.42857142857142
+        ],
+        "stores": [
+         156.42857142857142
+        ]
+       },
+       "sha256": "aa913a15f41c26562ea5a13dd6775296b03d3df25dd5e7f9aafd675c2f049172",
+       "representative": {
+        "snapshots": 56,
+        "weight_hours_per_snapshot": 156.42857142857142,
+        "sum_hours": 8760.0,
+        "annual_caps_scaled": false,
+        "decision": "58",
+        "reference": "PyPSA-Eur v2025.07.0 scripts/prepare_network.py (average_every_nhours: snapshot_weightings = n.snapshot_weightings.resample(offset).sum(); segmentation: weightings sum 8760)"
+       }
+      }
+     },
+     "B13": {
+      "gate": "B13_IMPORTS_ONE_WAY",
+      "passed": true
+     },
+     "B14": {
+      "gate": "B14_TERMINAL_CAP_2_5X",
+      "passed": true,
+      "cap_factor": 2.5,
+      "expansion": "existing_only"
+     },
+     "B15": {
+      "gate": "B15_DOMESTIC_PRODUCTION_CAPS",
+      "passed": true,
+      "hook_registered": true,
+      "solved": true,
+      "short": []
+     },
+     "contract": {
+      "id": "RESEARCH_V5_SKELETON",
+      "status": "SKELETON_INHERITS_V4_NUMERICAL_BUDGETS_PENDING_USER_APPROVAL",
+      "result_label": "SMOKE_TEST_ONLY"
+     },
+     "all_passed": false
+    },
+    "gate_b1_countries": {
+     "BN": {
+      "final_level_tco2": -2.13581656680617e-05,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": -2.447507541983025e-05
+     },
+     "ID": {
+      "final_level_tco2": -0.039698084350675344,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": -0.03978581049409701
+     },
+     "KH": {
+      "final_level_tco2": -0.00012960009189555421,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": -0.00012960065870497596
+     },
+     "LA": {
+      "final_level_tco2": 0.0023248781508300453,
+      "cap_tco2": 0.0,
+      "within_cap": false,
+      "sum_of_ports_tco2": 0.00232306242330972
+     },
+     "MM": {
+      "final_level_tco2": 0.00022818775323685259,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": 0.00022818574044263665
+     },
+     "MY": {
+      "final_level_tco2": -0.0016261059499811381,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": -0.0016521440090594905
+     },
+     "PH": {
+      "final_level_tco2": 0.0022334070526994765,
+      "cap_tco2": 0.0,
+      "within_cap": false,
+      "sum_of_ports_tco2": 0.0021823085844516754
+     },
+     "SG": {
+      "final_level_tco2": 1.4432414900511503e-05,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": -2.110124229769848e-05
+     },
+     "TH": {
+      "final_level_tco2": 0.000797195709310472,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": 0.0007967651813138362
+     },
+     "TL": {
+      "final_level_tco2": 1.574940306170447e-05,
+      "cap_tco2": 0.0,
+      "within_cap": true,
+      "sum_of_ports_tco2": 1.5306693967431784e-05
+     },
+     "VN": {
+      "final_level_tco2": 0.002649659290909767,
+      "cap_tco2": 0.0,
+      "within_cap": false,
+      "sum_of_ports_tco2": 0.0025031078802305344
+     }
+    },
+    "files": {
+     "CAPACITY_BY_TECH_COUNTRY.json": "18f8d8c95b10c4a96b8b0eeba49a08a9f325ed215a24e93f6f1b3c8317379da8",
+     "CO2_FLOWS.json": "bf64ad369d53a0b33be5b858190b506d4e03b54fc5fdc70cb9ff7e95fac67136",
+     "EMISSIONS_BY_COUNTRY.json": "d40fd158fc380821768b95d6a98f97b647c6191690bfd16cf2de8dab9bac9965",
+     "INTERIOR_CHECKS.json": "31c7c0190a9eb052e8c789441b7fb39718e45e404925f8c9e08ba9df9f76c4ef",
+     "SOLVE_RECEIPT.json": "bf32196fbc4fb0a43d91e19d6cc5e6d80c3b73f6ed0902ee17e8b42d18fda9ed",
+     "V5_GATES.json": "44bdb4579b827d51d92092883923f412ce94b5f11ef130ba1a81204660de1e48",
+     "capacity_reduced_costs.csv": "e1a491eac9f056a91025ab7eae97483b7e90956341579819fbb78b8cf9b6bef5",
+     "cross_border_flows.csv": "9922b76acc808849cebc57033bc5473093d119eb53058fae4d637683e0da27b6",
+     "nodal_prices_summary.csv": "cdcc919919c6b9ba16717a2a1d94a39bec5a2008907d734eddb4c43c74d59001"
+    }
+   },
+   "disconnected": {
+    "receipt": {
+     "label": "SMOKE_TEST_ONLY",
+     "scenario": "disconnected",
+     "authorization": "S4A-4 smoke (S4A instruction S4A-4; decisions 70-73, ledger L14-L16, user authorization 2026-10-16): 56x3h smoke only, Gurobi formal_barrier, stop-loss 30 min, no retry; run disconnected",
+     "solver": "gurobi",
+     "started_epoch": 1792136409.3210232,
+     "optimize_calls": 1,
+     "retry": false,
+     "stage": "S2",
+     "solver_profile": "formal_barrier",
+     "input_network": {
+      "path": "results_project/s4a/smoke/builds/disconnected/disconnected_2920_3h_unsolved.nc",
+      "sha256": "591295a5e780364fbb7b21bf85032e350212b47a32635558501102639302fff6",
+      "snapshots": 56,
+      "truncated_to": 56,
+      "horizon_scaling": {
+       "method": "representative_weights_sum_8760",
+       "snapshots": 56,
+       "weight_hours_per_snapshot": 156.42857142857142,
+       "horizon_fraction": 1.0,
+       "scaled_stores": [],
+       "annual_caps_scaled": false
+      }
+     },
+     "lp": {
+      "num_col": 559207,
+      "num_row": 1264276,
+      "nnz": 2804860,
+      "build_seconds": 13.730253458023071
+     },
+     "parameter_source": "decision 69: research.solver.profiles.formal_barrier (PyPSA-Eur gurobi-default basis; differences registered) + TimeLimit (stop-loss)",
+     "status": "warning",
+     "termination_condition": "other",
+     "solve_seconds": 94.18831825256348,
+     "gurobi_log_stats": {
+      "coefficient_statistics": {
+       "matrix": {
+        "min": 3e-09,
+        "max": 900.0,
+        "ratio": 300000000000.0
+       },
+       "objective": {
+        "min": 2.0,
+        "max": 1000000.0,
+        "ratio": 500000.0
+       },
+       "bounds": {
+        "min": 0.5,
+        "max": 30000.0,
+        "ratio": 60000.0
+       },
+       "rhs": {
+        "min": 4e-05,
+        "max": 600000000.0,
+        "ratio": 14999999999999.998
+       }
+      },
+      "lines": {
+       "crossover": [
+        "Crossover  0"
+       ],
+       "presolved": [
+        "Presolved: 328369 rows, 308120 columns, 1274494 nonzeros"
+       ]
+      },
+      "scrubbed_log": "GUROBI_LOG_SCRUBBED.txt",
+      "scrubbed_lines": 108
+     },
+     "decision": "STOP_INFEASIBLE_OR_FAILED_NO_RELAXATION"
+    },
+    "gates": null,
+    "gate_b1_countries": null,
+    "files": {
+     "INFEASIBILITY_DIAGNOSIS.json": "3a50fcb80fc2aded7b731e7de4cfdb4f803f5649ca6ce093fcb34b5d65b112ef",
+     "SOLVE_RECEIPT.json": "f435fa034e7282901c0f03e89501c46f562154eb796b92e601cbd243c882286a"
+    }
+   }
+  },
+  "compare": {
+   "new": "results_project/s4a/smoke/solves/integrated/integrated_SMOKE_TEST_ONLY_solved.nc",
+   "objective": 712004633048.0646,
+   "weights_sum": 8760.0,
+   "asean_new": {
+    "PHS": {
+     "gw": 5.29,
+     "twh": 0.17
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "coal": {
+     "gw": 112.08,
+     "twh": 94.52
+    },
+    "gas CCGT/OCGT": {
+     "gw": 134.16,
+     "twh": 381.13
+    },
+    "geothermal": {
+     "gw": 0.94,
+     "twh": 5.63
+    },
+    "hydro reservoir": {
+     "gw": 47.15,
+     "twh": 86.57
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 241.51,
+     "twh": 2022.14
+    },
+    "offwind": {
+     "gw": 509.03,
+     "twh": 2592.0
+    },
+    "oil": {
+     "gw": 2.32,
+     "twh": 3.6
+    },
+    "onwind": {
+     "gw": 486.35,
+     "twh": 901.81
+    },
+    "ror": {
+     "gw": 9.51,
+     "twh": 13.78
+    },
+    "solar": {
+     "gw": 236.44,
+     "twh": 322.91
+    },
+    "solar rooftop": {
+     "gw": 0.0,
+     "twh": 0.0
+    }
+   },
+   "asean_old": {
+    "PHS": {
+     "gw": 2.69,
+     "twh": 0.09
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "coal": {
+     "gw": 94.7,
+     "twh": 75.56
+    },
+    "gas CCGT/OCGT": {
+     "gw": 200.05,
+     "twh": 730.28
+    },
+    "geothermal": {
+     "gw": 0.19,
+     "twh": 1.17
+    },
+    "hydro reservoir": {
+     "gw": 38.77,
+     "twh": 63.27
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 212.08,
+     "twh": 1839.24
+    },
+    "offwind": {
+     "gw": 415.13,
+     "twh": 2062.0
+    },
+    "oil": {
+     "gw": 2.05,
+     "twh": 1.55
+    },
+    "onwind": {
+     "gw": 689.43,
+     "twh": 1369.97
+    },
+    "ror": {
+     "gw": 6.5,
+     "twh": 10.26
+    },
+    "solar": {
+     "gw": 260.89,
+     "twh": 324.87
+    },
+    "solar rooftop": {
+     "gw": 1.01,
+     "twh": 1.08
+    }
+   },
+   "objective_old": 720640445505.4865,
+   "gates": {
+    "A1_A2": {
+     "passed": false
+    },
+    "A3": {
+     "passed": false
+    },
+    "A5": {
+     "passed": true
+    },
+    "A4": {
+     "passed": true
+    },
+    "A6": {
+     "passed": true
+    },
+    "B1": {
+     "passed": false
+    },
+    "B2": {
+     "passed": true
+    },
+    "B3": {
+     "passed": false
+    },
+    "B8": {
+     "passed": true
+    },
+    "B11": {
+     "passed": true
+    },
+    "B12": {
+     "passed": true
+    },
+    "B13": {
+     "passed": true
+    },
+    "B14": {
+     "passed": true
+    },
+    "B15": {
+     "passed": true
+    }
+   },
+   "gates_B1_countries": {
+    "BN": {
+     "final_level_tco2": -2.13581656680617e-05,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": -2.447507541983025e-05
+    },
+    "ID": {
+     "final_level_tco2": -0.039698084350675344,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": -0.03978581049409701
+    },
+    "KH": {
+     "final_level_tco2": -0.00012960009189555421,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": -0.00012960065870497596
+    },
+    "LA": {
+     "final_level_tco2": 0.0023248781508300453,
+     "cap_tco2": 0.0,
+     "within_cap": false,
+     "sum_of_ports_tco2": 0.00232306242330972
+    },
+    "MM": {
+     "final_level_tco2": 0.00022818775323685259,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": 0.00022818574044263665
+    },
+    "MY": {
+     "final_level_tco2": -0.0016261059499811381,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": -0.0016521440090594905
+    },
+    "PH": {
+     "final_level_tco2": 0.0022334070526994765,
+     "cap_tco2": 0.0,
+     "within_cap": false,
+     "sum_of_ports_tco2": 0.0021823085844516754
+    },
+    "SG": {
+     "final_level_tco2": 1.4432414900511503e-05,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": -2.110124229769848e-05
+    },
+    "TH": {
+     "final_level_tco2": 0.000797195709310472,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": 0.0007967651813138362
+    },
+    "TL": {
+     "final_level_tco2": 1.574940306170447e-05,
+     "cap_tco2": 0.0,
+     "within_cap": true,
+     "sum_of_ports_tco2": 1.5306693967431784e-05
+    },
+    "VN": {
+     "final_level_tco2": 0.002649659290909767,
+     "cap_tco2": 0.0,
+     "within_cap": false,
+     "sum_of_ports_tco2": 0.0025031078802305344
+    }
+   }
+  },
+  "files": {
+   "results_project/s4a/smoke/analysis/integrated/CAP_GEN_BY_COUNTRY_S3B.csv": {
+    "sha256": "1dda3c2069af4ffa4f54a3ce8de281da0a0630a897a88cfc919906fccf154224",
+    "bytes": 11292
+   },
+   "results_project/s4a/smoke/analysis/integrated/CAP_GEN_BY_COUNTRY_S4A.csv": {
+    "sha256": "3914529bbd8c128b6880ab49b6cb1c029cbdd5d49b3a31a88f7f4d11a1ae57cd",
+    "bytes": 11368
+   },
+   "results_project/s4a/smoke/analysis/integrated/CAP_GEN_BY_COUNTRY_S4A_VS_S3B.csv": {
+    "sha256": "363f698b9b3d72537fd2992314082eb0cd2d4742c149c901353763baae3f31b5",
+    "bytes": 26480
+   }
+  }
+ },
+ "registry": {
+  "fragments": {
+   "renewable_s4a.csv": "2a0dc392f86421e8b7a3b6381815a7292c7764e3acf8a71595168d2cbd123b0c",
+   "fleet_s4a.csv": "0e0b5f10fbc9242109424a3e70586d766c65f0b47a1e465d65ba4839795662e5",
+   "potentials_s4a.csv": "cad6eecb3e9a7abb8d3d27075c252c57a9df789e1a03e66618e039545dbc2974"
+  },
+  "data_registry_sha256": "a323c853e877aadd4c6638a2336f9770f1d175f7135c917e0bd4f338fdb4cb72",
+  "data_pending_list_sha256": "e27a3e05f2f54059faee8cab47ac191781a37b2f96a7ab2214ca61041568145f",
+  "d1_evidence_counts": null
+ },
+ "deliverables": {
+  "research/06_scope_redesign/p1_step4_20261016/CLOUD_RESOURCE_ESTIMATE.md": {
+   "sha256": "c99f8f82bfbd106d497453dbaaa391f1d56ca7d30c39e99729c7bf0b14f91214",
+   "bytes": 19220
+  },
+  "research/06_scope_redesign/p1_step4_20261016/S4A_CLAUDE_CODE_INSTRUCTION.md": {
+   "sha256": "9146e49724301b8b63e49c809997a3e809179285bb8c1d0b4b9a6d2295431cf7",
+   "bytes": 6567
+  },
+  "research/06_scope_redesign/p1_step4_20261016/S4A_PROGRESS.md": {
+   "sha256": "47c148d03f849ef268787f2c3878a7cfe4d8886d0a73fa99fb0060f71e120047",
+   "bytes": 9657
+  },
+  "research/06_scope_redesign/p1_step4_20261016/S4A_REPORT.md": {
+   "sha256": "e007f10fd0a3ee7c36bed5d462007016ebe7b3404fc26e1c3ba5e02f2c5245e9",
+   "bytes": 63766
+  },
+  "research/06_scope_redesign/p1_step4_20261016/DATA_PENDING_LIST.csv": {
+   "sha256": "e27a3e05f2f54059faee8cab47ac191781a37b2f96a7ab2214ca61041568145f",
+   "bytes": 10030
+  },
+  "research/06_scope_redesign/p1_step4_20261016/DATA_REGISTRY.csv": {
+   "sha256": "a323c853e877aadd4c6638a2336f9770f1d175f7135c917e0bd4f338fdb4cb72",
+   "bytes": 812073
+  },
+  "research/06_scope_redesign/p1_step4_20261016/DOWNLOAD_LIST.csv": {
+   "sha256": "e7187b9030a0b9bb0282d64daf879d8bf5f4050897b91b8f47d374402ab74dba",
+   "bytes": 7158
+  },
+  "research/06_scope_redesign/p1_step4_20261016/s4a_collect_evidence.py": {
+   "sha256": "57a27ca1d7b7be09e916f05519f83f64d16afb7a96f63f86addebc59e364a0b2",
+   "bytes": 5205
+  }
+ },
+ "collector_seconds": 0.6
+}

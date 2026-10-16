@@ -34,12 +34,13 @@ def _sha(p: Path) -> str:
 def apply_renewable_profiles(n, cfg, repo: Path):
     RN = dict(cfg["research"].get("renewable") or {})
     variant = str(RN.get("profile_variant", "original")); ncls = int(RN.get("resource_classes", 1))
+    clip = float(RN.get("clip_p_max_pu", 0.0))   # original chain and PyPSA-Eur: profile.where(profile >= clip, 0)
     pdir = Path(repo) / str(RN.get("profile_dir", "research_inputs/renewable_v5"))
     if variant not in VARIANTS:
         raise ValueError("Unknown research.renewable.profile_variant " + variant)
     if ncls < 1:
         raise ValueError("research.renewable.resource_classes must be >= 1")
-    led = dict(profile_variant=variant, resource_classes=ncls, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
+    led = dict(profile_variant=variant, resource_classes=ncls, clip_p_max_pu=clip, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
     if variant == "original":
         n.meta["research_renewable"] = led
         return led
@@ -59,6 +60,8 @@ def apply_renewable_profiles(n, cfg, repo: Path):
     for tech in TECHS:
         prof = ds[tech.replace("-", "_")].to_pandas()   # time x bus ("node|cls"); buses absent for a technology carry NaN after the Dataset alignment -> not applied
         prof = prof.loc[:, ~prof.isna().any()]; prof1 = ds1[tech.replace("-", "_")].to_pandas(); prof1 = prof1.loc[:, ~prof1.isna().any()]
+        if clip > 0:
+            prof = prof.where(prof >= clip, 0.0); prof1 = prof1.where(prof1 >= clip, 0.0)
         gens = g.index[g.carrier == tech]
         shares = cls[cls.tech == tech].set_index(["node", "cls"]).potential_share if ncls > 1 else None
         for name in gens:

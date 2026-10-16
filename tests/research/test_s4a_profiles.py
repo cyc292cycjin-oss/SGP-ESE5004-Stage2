@@ -61,6 +61,8 @@ def test_apply_profiles_on_electric_base():
     assert np.allclose(n.generators_t.p_max_pu[sol].values, n.generators_t.p_max_pu[roof].values)
     cf_new = (n.generators_t.p_max_pu[sol] * w).sum() / w.sum(); cf_old = (base_pm[sol] * w).sum() / w.sum()
     assert cf_new > cf_old * 1.05   # solar without the 0.854 correction
+    rep = [k for k in led["replaced"]]; v = n.generators_t.p_max_pu[rep].values
+    assert led["clip_p_max_pu"] == 0.01 and v[v > 0].min() >= 0.01   # clip_p_max_pu as in the original chain / PyPSA-Eur
     # three classes: p_nom_max split conserved
     c3 = copy.deepcopy(cfg); c3["research"]["renewable"]["resource_classes"] = 3
     n = pypsa.Network(str(EB)); led = apply_renewable_profiles(n, c3, ROOT)

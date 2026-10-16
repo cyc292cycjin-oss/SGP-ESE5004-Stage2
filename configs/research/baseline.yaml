@@ -178,6 +178,7 @@ research:
     profile_variant: pypsa_eur            # original = author profiles inherited by the electric base (former main, comparison) | fork = rebuilt from the ASEAN ERA5 2013 cutout with the pypsa-asean defaults (method check) | pypsa_eur = rebuilt with the PyPSA-Eur v2025.07.0 defaults (offshore NREL 2020ATB 5.5 MW @120 m x 0.8855, solar without the 0.854337 correction; onshore V112 unchanged) - main
     resource_classes: 1                   # PyPSA-Eur resource_classes: 1 = one profile per node (default) | N > 1 = per-node capacity-factor classes, node p_nom_max split by class potential (sensitivity; profiles_<variant>_c<N>_3h.nc must exist)
     profile_dir: research_inputs/renewable_v5
+    clip_p_max_pu: 0.01                   # S4A-4 fix: availability below 0.01 set to 0, as in the original chain (pypsa-asean config.default.yaml 365/383/402/423, build_renewable_profiles.py 846-848) and PyPSA-Eur v2025.07.0 (config lines 200/218/237); applied to the rebuilt 3 h series
   fleet:                                  # S4A-2 (L15): GEM GIPT 2026-09 units in service in 2050 (S1 lifetime rule) that are absent from the frozen electric base
     gem_additions: true                   # true = add them (scripts_project/s4a_fleet.py) | false = frozen stock only (former main, comparison)
     include_construction: true            # count GEM status construction as in service in 2050 when start year + lifetime > 2050 (the instruction compares operating + construction); false = operating only
