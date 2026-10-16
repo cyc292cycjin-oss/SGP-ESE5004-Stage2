@@ -196,6 +196,10 @@ research:
     profile_variant: calibrated_modern    # S4B-3 (decision 74): calibrated_modern = onshore wind from the ERA5 100 m wind speed x country alpha calibrated on Ember 2019-2025 generation at the GEM farms (WIND_CALIBRATION_ALPHA.csv) + the DEA 2050 turbine of technology-data v0.15.0 onwind (6 MW, 165 m, hub 110 m), offshore / solar = pypsa_eur (main) | pypsa_eur = PyPSA-Eur v2025.07.0 defaults (onshore V112 uncalibrated, lower bound; S4A main) | fork | original
     resource_classes: 3                   # S4B-3 (decision 75): 3 = per-node capacity-factor classes, node p_nom_max split by class potential (main) | 1 = one profile per node (PyPSA-Eur default, comparison); profiles_<variant>_c<N>_3h.nc must exist
     profile_dir: research_inputs/renewable_v5
+    typhoon_premium: "off"                # S4B-4 (decision 76): off (main) | on = +typhoon_premium_pct capital cost of onshore / offshore wind candidates at nodes with >= 50 % of their wind potential in cells passed by a >= 50 m/s tropical cyclone at least typhoon_threshold_per_decade times per 10 years (IBTrACS v04r01 WP+NI 1980-2024); implemented only, not run
+    typhoon_premium_pct: 25.0             # Tarp-Johansen & Clausen (2006) DTU, +20-30 % for typhoon-class turbines; grade C, +-10 pp
+    typhoon_threshold_per_decade: 1.0     # default 1 per 10 years; sensitivity 0.5 / 2 (columns of the exposure table)
+    typhoon_node_table: research_inputs/renewable_v5/TYPHOON_EXPOSURE_BY_NODE.csv
     clip_p_max_pu: 0.01                   # S4A-4 fix: availability below 0.01 set to 0, as in the original chain (pypsa-asean config.default.yaml 365/383/402/423, build_renewable_profiles.py 846-848) and PyPSA-Eur v2025.07.0 (config lines 200/218/237); applied to the rebuilt 3 h series
   fleet:                                  # S4A-2 (L15): GEM GIPT 2026-09 units in service in 2050 (S1 lifetime rule) that are absent from the frozen electric base
     gem_additions: true                   # true = add them (scripts_project/s4a_fleet.py) | false = frozen stock only (former main, comparison)

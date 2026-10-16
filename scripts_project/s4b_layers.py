@@ -86,3 +86,35 @@ def apply_sector_alignment(n, costs, cfg, nodes):
                            methanol_to_power_ocgt=bool(R["s3"]["ammonia_methanol"].get("methanol_to_power_ocgt", True)), biomass_to_methanol=bool(R["s3"]["ammonia_methanol"].get("biomass_to_methanol", True)))
     n.meta["research_sector_alignment"] = led
     return led
+
+
+def apply_typhoon_premium(n, cfg, repo):
+    """S4B-4 (decision 76): research.renewable.typhoon_premium = off (main) | on. With on, the onshore and offshore wind candidates (incl. the
+    resource-class generators) at nodes whose wind potential lies for >= 50 % in cells passed by a >= 50 m/s tropical cyclone at least
+    typhoon_threshold_per_decade times per 10 years (IBTrACS 1980-2024, TYPHOON_EXPOSURE_BY_NODE.csv, scripts_project/s4b_4_typhoon.py) get their
+    capital cost multiplied by 1 + typhoon_premium_pct / 100 (Tarp-Johansen & Clausen 2006, +25 %, grade C, +-10 pp). The annualised capital cost
+    carries the FOM as a share of investment, so the premium scales both. Implemented only; not run in S4B."""
+    import pandas as pd
+    from pathlib import Path
+    RN = cfg["research"].get("renewable") or {}
+    mode = str(RN.get("typhoon_premium", "off")); led = dict(mode=mode, applied=[])
+    if mode == "off":
+        n.meta["research_typhoon_premium"] = led
+        return led
+    if mode != "on":
+        raise ValueError("Unknown research.renewable.typhoon_premium " + mode)
+    th = float(RN.get("typhoon_threshold_per_decade", 1.0)); pct = float(RN.get("typhoon_premium_pct", 25.0))
+    t = pd.read_csv(Path(repo) / str(RN.get("typhoon_node_table", "research_inputs/renewable_v5/TYPHOON_EXPOSURE_BY_NODE.csv")))
+    col = f"potential_share_ge_{th:g}"
+    if col not in t:
+        raise ValueError(f"typhoon_threshold_per_decade {th} not in the exposure table (0.5, 1, 2)")
+    flagged = {(str(r["node"]), str(r["tech"])) for _, r in t.iterrows() if float(r[col]) >= 0.5}
+    g = n.generators; ext = g.p_nom_extendable & g.carrier.isin(["onwind", "offwind-ac", "offwind-dc"])
+    for name in g.index[ext]:
+        key = (str(g.at[name, "bus"]), str(g.at[name, "carrier"]))
+        if key in flagged:
+            before = float(g.at[name, "capital_cost"]); n.generators.at[name, "capital_cost"] = before * (1.0 + pct / 100.0)
+            led["applied"].append(dict(generator=name, node=key[0], tech=key[1], capital_cost_before=before, capital_cost_after=before * (1.0 + pct / 100.0)))
+    led.update(threshold_per_decade=th, premium_pct=pct, flagged=sorted(map(list, flagged)), generators=len(led["applied"]))
+    n.meta["research_typhoon_premium"] = led
+    return led

@@ -184,6 +184,7 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
                      gas_production_node_allocation=((s3.get('gas') or {}).get('production_node_allocation') or 'load_shares (key absent: built before S4A-2)'),
                      sector_switches=(n.meta.get('research_config',{}).get('sector') or 'absent (built before S4B-0)'),   # S4B-0 (decision 70)
                      candidates_s4b2=(n.meta.get('research_config',{}).get('candidates') or 'absent (built before S4B-2)'),   # S4B-2 (decisions 78, 79)
+                     typhoon_premium=((n.meta.get('research_config',{}).get('renewable') or {}).get('typhoon_premium') or 'absent (built before S4B-4)'),   # S4B-4 (decision 76)
                      fleet_s4b1={k:((n.meta.get('research_config',{}).get('fleet') or {}).get(k,'absent (built before S4B-1)')) for k in ['include_construction','include_construction_no_start_year','remove_not_operating_gipt2026']},   # S4B-1 (decision 77)
                      co2_vent=(((n.meta.get('research_config',{}).get('s2') or {}).get('co2') or {}).get('vent') if 'vent' in (((n.meta.get('research_config',{}).get('s2') or {}).get('co2')) or {}) else 'absent'),
                      lng_expansion_capital_cost=((s3.get('gas') or {}).get('lng_expansion_capital_cost_eur_per_mw_a','absent (built before S4B-0)')),

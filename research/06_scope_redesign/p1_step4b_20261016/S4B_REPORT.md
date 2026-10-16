@@ -208,7 +208,29 @@
 
 登记片段 `s4b_3`（21 行：观测 CF 4、α 11、机型 2、开关 2、交叉检验与局限 2）。测试 `test_s4b_3.py` 5 项；`test_s4a_profiles.py` 中两项原本固定 S4A 主算（`pypsa_eur`、1 级），按第 74、75 项改为显式测试 `pypsa_eur` 并断言新的主算设置。
 
-（S4B-4 至 S4B-6 见后续各节。）
+## 4. S4B-4 台风敏感性开关（第 76 项；`s4b_4_typhoon.py`、`s4b_layers.apply_typhoon_premium`）
+
+**4.1 频次统计（VERIFIED）。** IBTrACS v04r01 西太平洋（WP，114,617,115 B，SHA256 28fe39b4…）与北印度洋（NI，27,886,424 B，b30984b5…），1980–2024 年。对 cutout 的每个 0.3° 格点，统计热带气旋中心在 100 km 内经过、且持续风速 ≥ 50 m/s 的不同风暴数，折算为每 10 年次数（÷ 4.5）。风速取 `USA_WIND`（JTWC/NHC，1 分钟平均，节；50 m/s = 97.19 kt）；缺失时用 `WMO_WIND` ÷ 0.93（报告机构多为 10 分钟平均；WMO 指南 Harper 等 2010 的海上 1→10 分钟比 0.93）——达到阈值的轨迹点中 29,903 个用 `USA_WIND`、131 个用换算值。轨迹在相邻记录之间按 30 分钟线性插值。共 357 个风暴计入；最大频次 8.2 次/10 年（菲律宾北部）。用时 7 min 40 s、1.0 GiB。
+
+**4.2 各国与节点分布（`TYPHOON_EXPOSURE_BY_COUNTRY.csv`、`..._BY_NODE.csv`）。** 按国家（面积份额，≥ 0.5 / ≥ 1 / ≥ 2 次/10 年）：PH 陆地 0.59 / 0.49 / 0.31、海域 0.51 / 0.42 / 0.31；VN 海域 0.20 / 0.10 / 0、陆地 0.002 / 0 / 0（最大 0.67）；MM 海域 0.15 / 0.01 / 0；其余国家均为 0（ID、MY、TH、KH 最大 ≤ 0.22）。节点按"该节点风电潜力中 ≥ 50% 位于达到阈值的格点"判定：
+
+| 阈值（次/10 年） | 陆上风 | 海上风 AC | 海上风 DC | 受影响潜力 GW |
+|---|---|---|---|---|
+| 0.5 | PH5 0、PH_Luzon5 0、PH_Visayas7 0 | 同左 | PH5 0、VN2 7 | 陆风 320.9、海上 AC 111.3、DC 1.6 |
+| **1（默认）** | PH5 0、PH_Luzon5 0、PH_Visayas7 0 | 同左 | PH5 0、VN2 7 | 同上 |
+| 2 | PH5 0、PH_Luzon5 0 | PH5 0、PH_Luzon5 0 | PH5 0 | 陆风 189.1、海上 AC 37.8、DC 0.9 |
+
+接近而未达标的有 PH_Luzon5 0 海上 DC（25% 潜力 ≥ 1）、PH_Mindanao6 1（陆风 1%、海上 AC 10%）、VN2 2（海上 1–15%）。
+
+**4.3 开关（只实现，不运行）。** `research.renewable.typhoon_premium: off`（主算）`| on`：受影响节点的陆上与海上风电候选（含分级发电机）年化投资成本 × 1.25（Tarp-Johansen & Clausen 2006，C 级，±10 个百分点；年化成本中的固定运维按投资比例计，一并放大），参数 `typhoon_premium_pct: 25`、`typhoon_threshold_per_decade: 1`（0.5 / 2 可选）。构建核对：主算不变；`on` 时 17 台发电机（PH5 0、PH_Luzon5 0、PH_Visayas7 0、VN2 7）成本恰为 1.25 倍，其他不变；两者静态 PASS（各 45 s）。
+
+**4.4 推迟项与两项核对（第 76 项）。** 漂浮式海上风、航道排除、PyPSA-Eur 装机密度与 60 m 水深推迟到首次云端正式试算之后。
+- `raw12/shipdensity_global.zip`（534,907,276 B）SHA256 7d103de5… 与 `SHA256SUMS_raw12.txt` 一致；只列目录未解压（内含 tif 9.82 GB + ovr 3.29 GB，共 13.1 GB），以后用 GDAL `/vsizip/` 只裁东盟窗口。
+- 保护区数据：本机有原作者链路用过的 `pypsa-asean/data/natura/natura.tiff`（3,356,668 B，SHA256 99388fa3…，全球 2.5′ 浮点栅格，来源 Harvard Dataverse "Protected areas (WDPA)" doi:10.7910/DVN/XIV9BL V1.3，2022-01-27，CC0）。全分辨率 WDPA 不在本机：2026 年 10 月版 `WDPA_Oct2026_Public_shp.zip` 4,682,783,045 B、`WDPA_Oct2026_Public.zip`（gdb）2,002,587,756 B（2026-10-16 HTTP HEAD 查询，未下载；超过 2 GB，需用户决定，§8）。
+
+登记片段 `s4b_4`（9 行）；测试 `test_s4b_4.py` 3 项。
+
+（S4B-5、S4B-6 见后续各节。）
 
 ## 7. 附加诊断：4 个失败的 `test_gate4_activation`（只诊断，未修改、未跳过）
 
