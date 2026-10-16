@@ -1,0 +1,80 @@
+pypsa_eur_key,pypsa_eur_lines,pypsa_eur_value,model_config_or_component,model_original,model_new,components,origin_of_original,status,reason
+transport,479,true,"research.s2.demand (land transport loads, D1 section 4)",on,on,land transport EV / oil / BEV charger,"S2 demand layer (decision 10, D1)",aligned,
+heating,480,true,research_demand.heat_without_accepted_service,embedded,embedded,none (no space / water heat buses),S1 instruction: add_heat / add_residential / add_services not called (sector_adapter.NOT_CALLED),deviation_confirmed,"confirmed S1 decision; tropical ASEAN has no space-heating demand class in the accepted demand tables, heat services embedded in electricity (research_demand)"
+biomass,481,true,research.s2.biomass,on,on,national biomass pools + conversions,"S2-3 (decisions 31, 32, 36, 54)",aligned,
+industry,482,true,research.s2.industry,on,on,industry loads (S3-0 routes),"decisions 55, 61",aligned,
+shipping,483,true,research.s3.shipping,on,on,shipping oil / methanol,S3-4 (decision 10),aligned,
+aviation,484,true,research.s2.demand.international_bunkers,on,on,aviation kerosene loads,decision 10,aligned,
+agriculture,485,true,research.s2.demand,on,on,agriculture machinery / heat loads,S2 demand (share_agriculture_machinery_* = PyPSA-Eur),aligned,
+fossil_fuels,486,true,research.s3.gas / imports,on,on,"domestic gas production, LNG, oil / coal supply","S3-1, S3-2",aligned,
+district_heating (and sub-keys),487-549,potential 0.6 ...,-,none,none,none,S1 (add_heat not called),not_applicable,no district-heat buses (tropical climate; S1 decision)
+heat_pump_sources / cluster_heat_buses / heat_demand_cutout,550-559,...,-,none,none,none,S1,not_applicable,heat sector not modelled (S1)
+bev_dsm_* / transport_heating_* / ICE / EV degree factors,560-567,...,-,none,none,none,S2,not_applicable,"BEV DSM off, no climate-dependent transport demand"
+bev_dsm,568,true,research.s2.demand.bev_dsm,false,false,no EV battery DSM store,"S2 (DATA_PENDING: no ASEAN fleet data, number of cars)",deviation_confirmed,confirmed S2 data gap (DATA_PENDING)
+bev_dsm_availability / bev_energy / bev_charge_* / bev_avail_*,569-574,...,-,-,-,-,S2,not_applicable,only used with bev_dsm
+v2g,575,true,-,not built,not built,-,S2 (needs bev_dsm),deviation_confirmed,depends on bev_dsm (DATA_PENDING)
+land_transport_fuel_cell / electric / ice_share (2050),576-599,0 / 1 / 0,research.s2.demand.land_transport_shares,pypsa_eur_v2025.07.0,same,land transport loads,D1 section 4 registry share_land_transport_*_2050,aligned,
+transport_electric / fuel_cell / ice_efficiency,600-602,53.19 / 30.003 / 16.0712,registry share_transport_*_efficiency,same,same,land transport loads,D1 registry,aligned,
+"agriculture_machinery_* (shares, efficiencies)",603-606,0.5 / 0.5 / 0.7 / 0.3,registry share_agriculture_machinery_*,same,same,agriculture loads,D1 registry,aligned,
+MWh_MeOH_per_MWh_H2 / per_tCO2 / per_MWh_e,607-609,0.8787 / 4.0321 / 3.6907,research.s3.ammonia_methanol,same,same,methanolisation,S3-3 (decision 44),aligned,
+shipping_hydrogen_liquefaction / shipping shares (2050) / efficiencies,610-636,"false / H2 0, methanol 1, oil 0 / 0.46, 0.40",research.s3.shipping,same,same,shipping loads,S3-4 (registry share_shipping_*_2050),aligned,
+aviation_demand_factor / HVC_demand_factor,637-638,1 / 1,registry share_aviation_demand_factor / share_HVC_demand_factor,1 / 1,1 / 1,-,D1 registry,aligned,
+time_dep_hp_cop ... biomass_boiler / overdimension_heat_generators,639-667,...,research S2-5 industrial heat bus,industrial low-T heat only,same,industry heat pump / electric / gas / biomass boiler,"S2-5 (heat sector not modelled, S1)",not_applicable,building heat not modelled; the industrial heat bus uses the same technology rows
+"chp (enable, fuel solid biomass + gas)",668-673,true,-,not built (biomass EOP power-only + CC),same,biomass EOP / EOP CC,S2-3,deviation_confirmed,"PyPSA-Eur CHPs feed urban central heat buses, which do not exist here (no district heating, S1 decision); power-only biomass EOP kept"
+solar_thermal / solar_cf_correction,674-675,true / 0.788,-,none,none,-,S1,not_applicable,heat sector not modelled
+methanation,676,true,research.sector.methanation,"not built (PyPSA-Earth config.default.yaml:1000 is true, but the S1 research recipe build_research_assets.build_fragment did not build it)",true,Sabatier per node: H2 + captured CO2 -> node gas (decision 64: gas producer credit),S1 recipe omission (no decision),aligned,aligned in S4B-0
+coal_cc,677,false,-,not built,not built,-,S1 recipe,aligned,
+dac,678,true,research.s2.co2.dac,true,true,DAC per node,decision 11,aligned,
+co2_vent,679,false,research.s2.co2.vent,true (S2 implementation; no confirmed decision; vented 0 in every smoke),false,co2 vent links removed,S2 implementation choice,aligned,aligned in S4B-0; true kept as sensitivity
+heat_vent / marginal_cost_heat_vent,680-684,...,-,-,-,-,S1,not_applicable,heat sector not modelled
+allam_cycle_gas,685,false,-,not built,not built,-,-,aligned,
+hydrogen_fuel_cell,686,true,research.sector.hydrogen_fuel_cell,true (upstream add_hydrogen),true,H2 Fuel Cell,S1 adapter,aligned,
+hydrogen_turbine,687,true,research.hydrogen.h2_turbine,true (PyPSA-Earth config.default.yaml:746),true,H2 turbine (OCGT proxy),S1 (decision 42),aligned,
+SMR,688,true,research.sector.SMR,true (S1 recipe),true,SMR,S1,aligned,
+SMR_cc,689,true,research.sector.SMR_cc,true (S1 recipe),true,SMR CC,S1,aligned,
+regional_oil_demand,690,true,research.s3.imports.oil_pool,regional (node oil buses + one ASEAN oil pool),same,"oil pool links, node meters with national atmospheres",decision 18,aligned,node-resolved demand with one supply pool = PyPSA-Eur regional demand + EU oil bus
+regional_coal_demand,691,false,-,per-node coal supply at one price (unlimited),same,coal external supply,S2 / decision 18 (coal per node unchanged),deviation_confirmed,decision 18 keeps coal per node; with unlimited supply at one price the per-node pools are economically equivalent to one bus
+regional_co2_sequestration_potential,692-702,"enable true, years 25, offshore only",research.s2.co2 (national caps),national caps = D1 potential / 50 a,same,co2 sequestered stores,"decisions 20, 28-30",deviation_confirmed,"confirmed decisions (national storage assessments, 50 years)"
+co2_sequestration_potential (2050),703-710,250 Mt/a (Europe),registry co2_injection_cap_*,national caps,same,-,decisions 28-30,deviation_confirmed,confirmed decisions
+co2_sequestration_cost,711,30,research.s2.co2.sequestration_cost_eur_per_t,30,30,co2 sequestered stores,S2 (PyPSA-Eur value),aligned,
+co2_sequestration_lifetime,712,50,research.s2.co2.storage_years,50,50,-,decisions 28-30,aligned,
+co2_spatial,713,true,-,per-node co2 stored buses,same,-,S2,aligned,
+co2_network,714,true,research.cross_border.co2 + R5 pipelines,true (PyPSA-Earth config.asean.yaml:255 false overridden by the research layer),true,CO2 pipelines,"decisions 35, 59",aligned,
+co2_network_cost_factor,715,1,-,1,1,-,S2,aligned,
+cc_fraction,716,0.9,sector.cc_fraction,0.9 (PyPSA-Earth config.default.yaml:1003),0.9,all CC links,S1,aligned,
+hydrogen_underground_storage (+ locations),717-721,true,research.hydrogen.underground_storage,false,false,-,S1 (DATA_PENDING: no ASEAN salt-cavern data),deviation_confirmed,confirmed S1 data gap
+methanol.regional_methanol_demand,723,false,research.s2.industry.ammonia_methanol_mode,one ASEAN methanol bus,same,ASEAN methanol,decision 44,aligned,"false = one bus, as here"
+methanol.methanol_reforming / _cc / methanol_to_kerosene,724-726,false,-,not built,not built,-,S3-3,aligned,
+methanol.methanol_to_power (ccgt / ccgt_cc / ocgt / allam),727-731,false / false / true / false,research.s3.ammonia_methanol.methanol_to_power_ocgt,ocgt only,same,OCGT methanol,S3-3 (decision 44),aligned,
+methanol.biomass_to_methanol,732,true,research.s3.ammonia_methanol.biomass_to_methanol,true,true,biomass-to-methanol,S3-3,aligned,
+methanol.biomass_to_methanol_cc,733,false,-,not built,not built,-,S3-3,aligned,
+ammonia,734,true,research.s2.industry.ammonia_methanol_mode,"regional_buses (Haber-Bosch, cracker, store)",same,ASEAN ammonia,S3-3 (decision 44),aligned,
+min_part_load_fischer_tropsch,735,0.5,research.sector.min_part_load_fischer_tropsch,0 (S1 recipe p_min_pu 0; PyPSA-Earth config.default.yaml:1006 0.9 not applied),0.5,Fischer-Tropsch p_min_pu,S1 recipe (no decision),aligned,aligned in S4B-0
+min_part_load_methanolisation,736,0.3,research.s3.ammonia_methanol.min_part_load_methanolisation,0.3,0.3,methanolisation,S3-3,aligned,
+min_part_load_methanation,737,0.3,research.sector.min_part_load_methanation,- (no Sabatier),0.3,Sabatier p_min_pu,S4B-0,aligned,aligned in S4B-0
+use_*_waste_heat,738-743,0.25 / 1,-,none,none,-,S1,not_applicable,"waste heat feeds urban central heat buses, which do not exist (no district heating)"
+electricity_transmission_grid,744,true,electric base,true,true,"AC lines, DC links",frozen electric base (S1),aligned,
+electricity_distribution_grid,745,true,electric base,true,true,electricity distribution grid links,frozen electric base,aligned,
+electricity_grid_connection,746,true,-,not applied (PyPSA-Earth config.default.yaml:952 enable_electricity_connection_cost false),not applied,onwind / solar capital cost,PyPSA-Earth default,USER_DECISION,"the decision-50 cost layer technology-data v0.15.0 has no 'electricity grid connection' row (removed in v0.15.0, D1 report section 2); applying it needs a cost row from another layer (v0.13.2) -> user decision"
+transmission_efficiency.DC / electricity distribution grid,"747-755, 762-763","DC 0.98 static, 0.977 per 1000 km; distribution 0.97",electric base,1.0 / 1.0 (frozen electric base),same,"DC links, distribution grid links",frozen electric base (S1),deviation_confirmed,"the electric base identity is frozen (S1, ELECTRIC_BASE_SHA); changing link efficiencies changes the base -> listed for the user"
+transmission_efficiency.H2 pipeline / gas pipeline,756-761,compression 0.018 / 0.01 MWh_el per MWh per 1000 km (lossless otherwise),R5 / S3-1 pipelines,no compression electricity,same,H2 / gas pipelines,"R5 (decision 59), S3-1 (no decision on losses)",USER_DECISION,"PyPSA-Eur splits every bidirectional pipeline into two one-way links with a compression port (lossy_bidirectional_links, line 5727) and ties their capacities in the solve; structural change to 242 links -> user decision (impact 0.2-2.3 % of the transported energy as electricity)"
+H2_network,764,true,research.hydrogen.network,greenfield_along_grid,same,H2 pipelines,decision 59,aligned,
+gas_network,765,true,research.s3.gas,true,true,gas pipelines,S3-1,aligned,
+H2_retrofit / H2_retrofit_capacity_per_CH4,766-767,false / 0.6,research.hydrogen.gas_network_repurposing,false,false,-,S1,aligned,
+gas_network_connectivity_upgrade,768,1,s3_layers.add_gas_network,1,1,gas pipeline new <-> links,S3-1,aligned,
+gas_distribution_grid / cost factor,769-770,true / 1.0,-,none,none,-,S1 (heat not modelled),not_applicable,"the PyPSA-Eur cost adder applies to building gas boilers, which are not modelled"
+biomass_spatial,771,true,research.s2.biomass,"national pools per country x category, conversion at every node",same,biomass Stores,"decision 36, S2-3",deviation_confirmed,"confirmed decision (national potentials, no cross-border biomass)"
+biomass_transport,772,false,research.s2.biomass.cross_border,false,false,-,decision 36,aligned,
+biogas_upgrading,773,true,-,true,true,biogas upgrading,S2-3,aligned,
+biogas_upgrading_cc,774,false,-,not built,not built,-,S2-3,aligned,
+conventional_generation,775-776,OCGT: gas,S1 recipe,OCGT + CCGT on gas (PyPSA-Earth config.default.yaml:1018-1024),same,"OCGT, CCGT",S1,aligned,CCGT additionally (PyPSA-Earth default)
+biomass_to_liquid,777,true,research.sector.biomass_to_liquid,true (S2 biomass layer),true,BtL,S2-3,aligned,capital cost convention differs (see USER_DECISION row btl_capital_cost)
+biomass_to_liquid_cc,778,false,-,not built,not built,-,S2-3,aligned,
+electrobiofuels,779,true,research.sector.electrobiofuels,not built,true,electrobiofuels per node,S2 omission (no decision),aligned,aligned in S4B-0
+biosng / biosng_cc / bioH2,780-782,false,-,not built,not built,-,-,aligned,
+municipal_solid_waste,783,false,-,not built as a resource (waste incineration links are the S2 territorial plastics release),same,-,S2 R2 (decision 56),aligned,
+limit_max_growth,784-797,enable false,-,not applied,not applied,-,-,aligned,
+enhanced_geothermal,798-804,enable false,-,not built,not built,-,-,aligned,
+solid_biomass_import,805-809,enable false,-,none,none,-,decision 36,aligned,
+imports,810-819,enable false,research.s3.imports,"extra-ASEAN imports of oil, ammonia, methanol, FT fuel, liquid H2, LNG",same,import generators,"S3-2 (decisions 17, 18, 64)",deviation_confirmed,confirmed decisions (ASEAN imports are part of the study design)
+"btl_capital_cost (formula, add_biomass line 4227-4228)",4227-4228 (code),capital_cost = BtL capital_cost x BtL efficiency (per MW biomass input),s2_layers.add_biomass_layer,"BtL fixed (not x efficiency): 252,723 EUR/MW_biomass/a",unchanged,BtL,S2-3 implementation,USER_DECISION,"found while aligning electrobiofuels: PyPSA-Eur multiplies by the efficiency (output reading, 113,726 EUR/MW_biomass/a); technology-data v0.15.0 gives the unit EUR/kW_th (input reading = model, 252,723) -> user decision"

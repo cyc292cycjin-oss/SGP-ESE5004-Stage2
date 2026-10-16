@@ -181,7 +181,14 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
                      renewable_profile_variant=((n.meta.get('research_config',{}).get('renewable') or {}).get('profile_variant') or 'original (key absent: built before S4A-1)'),
                      renewable_resource_classes=((n.meta.get('research_config',{}).get('renewable') or {}).get('resource_classes') or 1),
                      fleet_gem_additions=((n.meta.get('research_config',{}).get('fleet') or {}).get('gem_additions') if 'fleet' in n.meta.get('research_config',{}) else 'absent (built before S4A-2)'),
-                     gas_production_node_allocation=((s3.get('gas') or {}).get('production_node_allocation') or 'load_shares (key absent: built before S4A-2)'))
+                     gas_production_node_allocation=((s3.get('gas') or {}).get('production_node_allocation') or 'load_shares (key absent: built before S4A-2)'),
+                     sector_switches=(n.meta.get('research_config',{}).get('sector') or 'absent (built before S4B-0)'),   # S4B-0 (decision 70)
+                     candidates_s4b2=(n.meta.get('research_config',{}).get('candidates') or 'absent (built before S4B-2)'),   # S4B-2 (decisions 78, 79)
+                     typhoon_premium=((n.meta.get('research_config',{}).get('renewable') or {}).get('typhoon_premium') or 'absent (built before S4B-4)'),   # S4B-4 (decision 76)
+                     fleet_s4b1={k:((n.meta.get('research_config',{}).get('fleet') or {}).get(k,'absent (built before S4B-1)')) for k in ['include_construction','include_construction_no_start_year','remove_not_operating_gipt2026']},   # S4B-1 (decision 77)
+                     co2_vent=(((n.meta.get('research_config',{}).get('s2') or {}).get('co2') or {}).get('vent') if 'vent' in (((n.meta.get('research_config',{}).get('s2') or {}).get('co2')) or {}) else 'absent'),
+                     lng_expansion_capital_cost=((s3.get('gas') or {}).get('lng_expansion_capital_cost_eur_per_mw_a','absent (built before S4B-0)')),
+                     lng_expansion_cost_sensitivity=((s3.get('gas') or {}).get('lng_expansion_cost_sensitivity','absent (built before S4B-0)')))
     checks['s3_switches_recorded']=(not s3) or all(v is not None for k,v in s3_switches.items() if k!='config_overrides')  # S1/S2 networks without an s3 config section are exempt
     return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,s3_switches=s3_switches,snapshot_weightings=weights)
 
@@ -315,7 +322,8 @@ def gate_b14_terminal_caps(n,cap_factor=2.5):
         limit_ok=pmax<=limit*(1+1e-9)+1e-6
         within=opt<=pmax*(1+1e-9)+1e-6
         _,h2_ok=h2_check(node,float(led.get(node,{}).get('h2_import_cap_mw',pmax)))
-        rows.append(dict(generator=name,existing_mw=existing,proposed_mw=proposed,p_nom_max_mw=pmax,p_nom_opt_mw=opt,ratio_to_existing=(pmax/existing if existing else None),limit_ok=bool(limit_ok),within_max=bool(within),h2_import_within_lng_cap=h2_ok))
+        rows.append(dict(generator=name,existing_mw=existing,proposed_mw=proposed,p_nom_max_mw=pmax,p_nom_opt_mw=opt,ratio_to_existing=(pmax/existing if existing else None),limit_ok=bool(limit_ok),within_max=bool(within),h2_import_within_lng_cap=h2_ok,
+                         capital_cost_eur_per_mw_a=float(z.capital_cost)))   # S4B-0 (decision 72): cap_factor_cost prices the expansion; cap rule as cap_factor
         ok&=bool(limit_ok and within and h2_ok)
     for node,t in led.items():   # S3B R3: H2 import at proposed-only sites without an LNG generator (existing_only mode)
         if f'{node} LNG import' in lng.index:continue

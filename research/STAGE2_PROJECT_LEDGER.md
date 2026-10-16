@@ -370,3 +370,15 @@
 - **构建与冒烟：** 两情景构建通过（RSS 0.58 GiB）；冒烟两情景不可行（MM 过程 + 塑料无去向；不互联 KH/LA/SG/VN）；gap_diagnostic（全年口径）最优：一体化只剩 MM 5.13 Mt/a，不互联 VN 234.5 / KH 16.5 / SG 12.8 / LA 8.6 / MM 5.1 Mt/a，电力与生物质缺口 0；MM 的化石终端能源由 FT（生物质 CC 碳 + 电解氢）与 BtL 替代；结构上界（化石供给不变）与诊断缺口的差额即合成燃料碳循环。门槛 A1–A6、B2、B3、B8、B12 通过，B11 细化后通过；B1/B5/B6 不可评估。测试 371 通过 / 4 基线失败。
 - **待用户决定：** JRC-IDEES-2021 下载授权；钢铁/水泥替代比率是否接受；MM 跨境走廊（TH–MM/LA–MM）；R2 数据缺口代理；KH 交通链；子部门拆分缺口；full_release 敏感性是否正式运行。
 - **交付：** `research/06_scope_redesign/p1_step2_20261015/`（S2B_REPORT.md、S2_EVIDENCE.json v2、S2B_TEST_RUN.json、CLOUD_RESOURCE_ESTIMATE.md §7、evidence/s2b/、S2_PROGRESS.md）；镜像 `work/p1_step2_20261015/`。
+
+## S4B 第 70–81 项、冒烟、云端部署包 — 2026-10-16
+
+- **说明：** S3、S3B、S4A 三轮没有在本台账追加条目，其结果见各自报告（`p1_step3_20261015/`、`p1_step4_20261016/`）；本条只记 S4B。
+- **范围：** 指令 `S4B_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 52f1b758…dbc51 核对一致）；分支 `codex/s4b-fixes-calibration-20261016`（自 S4A a58ca3fa），draft PR #26 叠在 #25 上；每个子步骤一个提交；无云端操作，无 365×24h / 2920×3h 求解。
+- **S4B-0（70–73）：** PyPSA-Eur 部门开关对齐（含 Sabatier、电制生物燃料、FT 最低负荷），79 行对照表；验收容差挂钩 FeasibilityTol/OptimalityTol（k = 10，净零行用国家 CO₂ 毛流量，生物质池用容量）；LNG 按 7,018 EUR/MW/a 扩建；诊断加分国气松弛。冒烟：一体化 OPTIMAL 6.6598e11，不互联诊断 OPTIMAL（CO₂ 缺口 KH/LA/MM/SG）。
+- **S4B-1（77）：** 在建与无投运年在建计入、GIPT 2026 非在运 11 台移出；存量 261,101 → 267,491 MW。**S4B-2（78、79）：** 新建水电 195.2 GW、地热 25.8 GW、抽蓄 14.4 GW 国家上限与节点分配；核电规划上限开关只实现。
+- **S4B-3（74、75）：** Ember 观测 CF 校准 ERA5 风速（α PH 0.910、TH 1.294、VN 0.995，其余 1.046），DEA 2050 引用版机型（6 MW / 165 m / 110 m）；`calibrated_modern` + 3 级资源分级为主算。**S4B-4（76）：** IBTrACS 台风暴露与 +25% 开关只实现；raw12 核对；完整 WDPA 未下载。
+- **S4B-5：** 一体化 OPTIMAL 5.9438e11（S4A 7.1200e11），不互联主算 NUMERIC（预期），不互联诊断 OPTIMAL（CO₂ 缺口 KH 13.42、LA 7.10、MM 4.64、SG 22.66 Mt/a），一体化诊断 SUBOPTIMAL（只记录）；一体化门槛新旧口径均未通过（数值残差，barrier 精度下降）；SMR 241.5 → 96.6 GW；ID 新建水电 77 GW（入流代理偏高）。
+- **S4B-6：** 365×24h 每运行约 21 GiB（上限 30），串行 2.3–3.3 h、并行 1.7–2.6 h；部署包代码 949163f3 + 三个日网络，上传 193,276,010 B（只准备）。
+- **待用户决定：** 14 项（S4B 报告 §8），其中求解精度（是否用 crossover）、ID 新建水电入流代理、风光候选成本层、云端运行方式与授权最关键。
+- **交付：** `research/06_scope_redesign/p1_step4b_20261016/`（S4B_REPORT.md、S4B_EVIDENCE.json、S4B_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §11、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/）；镜像与审阅 ZIP 在 `work/p1_step4b_20261016/`；测试 430 通过 / 4 失败（test_gate4_activation 既有）。

@@ -37,7 +37,8 @@ def test_config_default_and_switch_validation():
     from s4a_layers import apply_renewable_profiles, VARIANTS
     cfg = config(ROOT, "integrated")
     RN = cfg["research"]["renewable"]
-    assert RN["profile_variant"] == "pypsa_eur" and RN["resource_classes"] == 1 and set(VARIANTS) == {"original", "fork", "pypsa_eur"}
+    # S4B-3 (decisions 74, 75): main = calibrated_modern with 3 resource classes; the S4A variants stay available
+    assert RN["profile_variant"] == "calibrated_modern" and RN["resource_classes"] == 3 and set(VARIANTS) == {"original", "fork", "pypsa_eur", "calibrated_modern"}
 
 
 @pytest.mark.skipif(not EB.exists(), reason="electric base not available")
@@ -46,6 +47,7 @@ def test_apply_profiles_on_electric_base():
     from phase4_static import config
     from s4a_layers import apply_renewable_profiles
     cfg = config(ROOT, "integrated")
+    cfg["research"]["renewable"].update(profile_variant="pypsa_eur", resource_classes=1)   # the S4A variant tested explicitly (S4B-3 changed the main setting)
     n0 = pypsa.Network(str(EB)); base_pm = n0.generators_t.p_max_pu.copy(); base_pmax = n0.generators.p_nom_max.copy()
     # original: untouched
     c = copy.deepcopy(cfg); c["research"]["renewable"]["profile_variant"] = "original"

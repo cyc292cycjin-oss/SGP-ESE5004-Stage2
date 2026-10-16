@@ -27,7 +27,9 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
 from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s4a_layers import apply_renewable_profiles
-from s4a_fleet import add_gem_fleet
+from s4a_fleet import add_gem_fleet, remove_not_operating_units
+from s4b_layers import apply_sector_alignment, apply_typhoon_premium
+from s4b_candidates import apply_candidate_caps
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -266,7 +268,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     contract = json.loads(contract_path.read_text())
     geo = add_existing_geothermal(n, costs, survival_json, AEO8_GEOTHERMAL_CF, AEO8_GEOTHERMAL_CF_SOURCE, bus_mapping=contract.get("mapping", {}))
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
-    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock
+    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
+    fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
+    cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
     pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
@@ -289,6 +293,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     gas_net = add_gas_network(n, costs, cfg, repo, registry, nodes, candidates) if (candidates is not None and "s3" in R and "gas" in R["s3"]) else None
     imports = add_imports(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "imports" in R["s3"]) else None   # S3-2: regional oil pool, green carrier imports, H2 at LNG terminals
     nh3_meoh = add_ammonia_methanol(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "ammonia_methanol" in R["s3"]) else None   # S3-3: Haber-Bosch, cracker, methanolisation, biomass-to-methanol, methanol OCGT, stores
+    sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -297,6 +302,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     n.meta["transmission_limit"] = jsonable(lv)
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
+    typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
     if gap_diagnostic:
         add_gap_slack(n, S2["gap_diagnostic"], nodes)
     n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
@@ -308,8 +314,11 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
                                   s3_layers=dict(gas=gas_net, imports=imports, ammonia_methanol=nh3_meoh, fuel_carbon=fuel_carbon),
                                   s4a_layers=dict(renewable={k: v for k, v in renewable.items() if k not in ("replaced", "added")}, fleet={k: v for k, v in fleet.items() if k != "added"}),
+                                  s4b_layers=dict(sector=sector, candidate_caps=({k: v for k, v in cand_caps.items() if k != "set"} if cand_caps else None),
+                                                  typhoon_premium={k: v for k, v in typhoon.items() if k != "applied"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
-    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet"]:
+    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
+                "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
@@ -333,8 +342,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
     pd.DataFrame(demand["loads"]).to_csv(output / f"{scenario}{suffix}_S2_DEMAND_OWNERSHIP.csv", index=False)
     pd.DataFrame(geo["units"]).to_csv(output / f"{scenario}{suffix}_GEOTHERMAL_UNITS.csv", index=False)
-    if daily and not gap_diagnostic:
-        d, ledger = to_daily(n); dpath = output / f"{scenario}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)
+    if daily:   # S4B-6: the gap diagnostic also gets its daily network (cloud run of the disconnected diagnostic)
+        d, ledger = to_daily(n); dpath = output / f"{scenario}{suffix}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)
         dback = pypsa.Network(str(dpath)); compare_roundtrip(d, dback)
         receipt["daily_network"] = dict(file=str(dpath), sha256=sha(dpath), bytes=dpath.stat().st_size, snapshots=int(len(d.snapshots)), aggregation_series=len(ledger))
     save(output / f"{scenario}{suffix}_BUILD_RECEIPT.json", receipt)

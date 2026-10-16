@@ -24,7 +24,7 @@ import pandas as pd
 import xarray as xr
 
 TECHS = ["onwind", "offwind-ac", "offwind-dc", "solar"]
-VARIANTS = ("original", "fork", "pypsa_eur")
+VARIANTS = ("original", "fork", "pypsa_eur", "calibrated_modern")   # S4B-3 (decision 74): calibrated_modern = onshore wind from the Ember-calibrated ERA5 wind speed + DEA 2050 turbine, offshore / solar = pypsa_eur
 
 
 def _sha(p: Path) -> str:

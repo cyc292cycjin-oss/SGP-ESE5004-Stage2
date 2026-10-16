@@ -46,21 +46,30 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
     table = Path(repo) / str(F.get("table", "research_inputs/fleet_v5/FLEET_ADDITIONS_2050.csv"))
     df = pd.read_csv(table, keep_default_na=False)
     df["capacity_mw"] = df.capacity_mw.astype(float); df["start_year"] = df.start_year.astype(float)
+    df["batch"] = "S4A"; df["age_basis"] = "SOURCE_UNIT_YEAR"
     if not bool(F.get("include_construction", True)):
         df = df[df.Status == "operating"]
     import hashlib
     led["table"] = dict(path=str(table.relative_to(repo)), sha256=hashlib.sha256(table.read_bytes()).hexdigest(), units=int(len(df)), mw=float(df.capacity_mw.sum()))
+    # S4B-1 (decision 77): GEM units under construction without a start year (start >= 2026 from the 2026-09 status) are counted; components "::S4B1"
+    t2 = F.get("construction_no_start_year_table")
+    if t2 and bool(F.get("include_construction", True)) and bool(F.get("include_construction_no_start_year", False)):
+        p2 = Path(repo) / str(t2); d2 = pd.read_csv(p2, keep_default_na=False)
+        d2["capacity_mw"] = d2.capacity_mw.astype(float); d2["start_year"] = d2.assumed_start_year.astype(float); d2["batch"] = "S4B1"
+        led["table_construction_no_start_year"] = dict(path=str(p2.relative_to(repo)), sha256=hashlib.sha256(p2.read_bytes()).hexdigest(), units=int(len(d2)), mw=float(d2.capacity_mw.sum()))
+        df = pd.concat([df, d2[[c for c in d2.columns if c in df.columns]]], ignore_index=True)
     n.meta.setdefault("existing_unit_components", {})
     ident = n.meta["existing_unit_components"]
     w = n.snapshot_weightings.generators
     su = n.storage_units; g = n.generators
-    for (node, cls), d in df.groupby(["node", "model_class"]):
+    for (node, cls, batch), d in df.groupby(["node", "model_class", "batch"]):
         if node not in n.buses.index:
             led["skipped"].append(dict(node=node, cls=cls, mw=float(d.capacity_mw.sum()), reason="node not in network")); continue
-        c = country_of(n, node); mw = float(d.capacity_mw.sum()); name = f"existing_survivor::{node}::{cls}::S4A"
+        c = country_of(n, node); mw = float(d.capacity_mw.sum()); name = f"existing_survivor::{node}::{cls}::{batch}"
         start = int(d.start_year.min()); life = float(d.lifetime.iloc[0])
         units = {f"GEM:{u.gem_unit_id}": dict(component=name, node=node, capacity_mw=float(u.capacity_mw), commissioning_year=int(u.start_year), retirement_year=float(u.retire_year), source="Global Integrated Power September 2026.xlsx (GEM GIPT 2026-09)",
-                                             source_version="1c99186c44ef7c1753b36ffee3c011041ba4723da43941286fd571d38b2db18e", age_basis="SOURCE_UNIT_YEAR", cohort_method=None, gem_status=str(u.Status), s4a_added=True) for u in d.itertuples()}
+                                             source_version="1c99186c44ef7c1753b36ffee3c011041ba4723da43941286fd571d38b2db18e", age_basis=str(u.age_basis), cohort_method=None, gem_status=str(u.Status), s4a_added=True,
+                                             **({"s4b1_added": True} if batch == "S4B1" else {})) for u in d.itertuples()}
         ensure_carrier(n, cls)
         if cls in FUEL_OF:
             fuel, tech = FUEL_OF[cls]
@@ -133,6 +142,45 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
         led["fom_eur"] += fom_total; led["by_class_mw"][cls] = led["by_class_mw"].get(cls, 0.0) + mw
         led["added"].append(dict(component=name, component_type=comp[0], node=node, country=c, cls=cls, mw=mw, units=len(units), annual_fom_eur=fom_total))
     n.meta["existing_annual_fixed_om_eur"] = float(n.meta.get("existing_annual_fixed_om_eur", 0.0)) + led["fom_eur"]
-    led["summary"] = dict(components=len(led["added"]), mw=float(sum(a["mw"] for a in led["added"])), skipped_mw=float(sum(s["mw"] for s in led["skipped"])), fom_eur=led["fom_eur"])
+    led["summary"] = dict(components=len(led["added"]), mw=float(sum(a["mw"] for a in led["added"])), skipped_mw=float(sum(s["mw"] for s in led["skipped"])), fom_eur=led["fom_eur"],
+                          mw_s4b1=float(sum(a["mw"] for a in led["added"] if a["component"].endswith("::S4B1"))))
     n.meta["research_fleet"] = led
+    return led
+
+
+def remove_not_operating_units(n, cfg, repo: Path):
+    """S4B-1 (decision 77): remove the frozen-stock units that GEM GIPT 2026-09 lists as cancelled / mothballed / retired / absent
+    (research.fleet.remove_not_operating_gipt2026, data correction). Each identity leaves existing_unit_components (kept in
+    n.meta["existing_unit_removed_s4b1"] with its reason); its component loses the unit capacity (MW_el) and the proportional share of the
+    component's annual fixed O&M (also subtracted from the existing-FOM constant); a component left without units is removed."""
+    F = dict(cfg["research"].get("fleet") or {})
+    led = dict(enabled=bool(F.get("remove_not_operating_gipt2026", False)), removed=[], components_removed=[], mw=0.0, fom_eur=0.0, missing=[])
+    if not led["enabled"]:
+        n.meta["research_fleet_removed"] = led
+        return led
+    import hashlib
+    p = Path(repo) / str(F["removal_table"]); tab = pd.read_csv(p, keep_default_na=False)
+    led["table"] = dict(path=str(p.relative_to(repo)), sha256=hashlib.sha256(p.read_bytes()).hexdigest(), units=int(len(tab)))
+    ident = n.meta["existing_unit_components"]; gone = n.meta.setdefault("existing_unit_removed_s4b1", {})
+    for r in tab.itertuples():
+        if r.identity not in ident:
+            led["missing"].append(r.identity); continue
+        z = ident.pop(r.identity); typ, comp, mw = z["component_type"], z["component"], float(z["capacity_mw"])
+        if typ not in ("Link", "Generator"):
+            raise ValueError("removal of a " + typ + " unit needs time-series scaling: " + r.identity)
+        df = n.df(typ); eff = float(df.at[comp, "efficiency"]) if typ == "Link" else 1.0
+        total = float(df.at[comp, "p_nom"]) * eff; fom = float(df.at[comp, "existing_annual_fixed_om_eur"]) if "existing_annual_fixed_om_eur" in df else 0.0
+        cut = fom * mw / total if total > 0 else 0.0
+        rest = [v for v in ident.values() if v["component"] == comp]
+        if rest:
+            df.at[comp, "p_nom"] = sum(float(v["capacity_mw"]) for v in rest) / eff
+            if "existing_annual_fixed_om_eur" in df:
+                df.at[comp, "existing_annual_fixed_om_eur"] = fom - cut
+        else:
+            n.remove(typ, comp); led["components_removed"].append(comp)
+        gone[r.identity] = dict(z, removal_reason=str(r.removal_reason), gipt_status_2026=str(r.gipt_status_2026), removed_fom_eur=cut)
+        led["mw"] += mw; led["fom_eur"] += cut
+        led["removed"].append(dict(identity=r.identity, component=comp, component_type=typ, mw=mw, fom_eur=cut, gipt_status_2026=str(r.gipt_status_2026)))
+    n.meta["existing_annual_fixed_om_eur"] = float(n.meta.get("existing_annual_fixed_om_eur", 0.0)) - led["fom_eur"]
+    n.meta["research_fleet_removed"] = led
     return led

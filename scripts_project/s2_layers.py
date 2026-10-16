@@ -500,11 +500,15 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     ind_path = repo / (I["pypsa_eur_tables"] if ratio_source == "jrc_idees_2021" else I["technology_data_sensitivity_tables"])[alloc_mode]
     # S3B R2 (decision 67): other bucket. pypsa_eur_2050 = 'Other industrial sectors' 2050 ratios (main); idees_today = JRC-IDEES-2021 EU27 2019 carrier structure
     # of that sector without process switch (sensitivity tables *_OTHER_IDEES_TODAY.csv written by s3_0_industry.py next to the main tables).
+    # S4B-0 (S3B section 8 item 6): asean_own_2019 = the UNSD 2019 carrier composition of the ASEAN country's own other bucket, no conversion (tables
+    # *_OTHER_ASEAN_OWN_2019.csv; implemented only, not run in the formal trial).
     other_bucket = str(((cfg["research"].get("s3") or {}).get("industry") or {}).get("other_bucket", "pypsa_eur_2050"))
-    if other_bucket not in ("pypsa_eur_2050", "idees_today"):
+    if other_bucket not in ("pypsa_eur_2050", "idees_today", "asean_own_2019"):
         raise ValueError("Unknown research.s3.industry.other_bucket " + other_bucket)
     if other_bucket == "idees_today":
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_IDEES_TODAY.csv")
+    elif other_bucket == "asean_own_2019":
+        ind_path = ind_path.with_name(ind_path.stem + "_OTHER_ASEAN_OWN_2019.csv")
     ind_summary = pd.read_csv(ind_path).set_index("country")
     # S3-0 interim handling of the ratio ammonia/methanol rows: convert_to_h2_and_gas = ammonia -> H2 + electricity (PyPSA-Eur ammonia:false route,
     # config MWh_H2_per_tNH3_electrolysis 5.93 / MWh_elec_per_tNH3_electrolysis 0.2473 per 5.166 MWh_NH3, lines 849/852/853), methanol -> methane +
@@ -853,10 +857,23 @@ def add_gap_slack(n, gcfg, nodes):
             name = f"{c} gap slack biomass"
             n.add("Generator", name, bus=bus, carrier="gap slack biomass", p_nom_extendable=True, p_nom=0.0, capital_cost=0.0, marginal_cost=float(gcfg["penalty_eur_per_mwh"]))
             n.generators.loc[name, ["country", "research_role", "asset_role"]] = [c, "GAP_DIAGNOSTIC_SLACK", "diagnostic_slack"]
+    # S4B-0 (decision 73): gas slack per country balance - one penalised source on every node gas bus (the gas balance is nodal; nodes of a country
+    # are joined by the domestic pipeline candidates), reported per country in the gap table; same penalty as the other slacks. Main runs unchanged.
+    slacks = ["electricity", "co2", "biomass"]
+    gas_pen = float(gcfg.get("penalty_eur_per_mwh_gas", gcfg["penalty_eur_per_mwh"]))
+    if "gas" in list(gcfg.get("slacks", ["electricity", "co2", "biomass", "gas"])):
+        ensure_carrier(n, "gap slack gas")
+        for node in nodes:
+            bus = f"{node} gas"
+            if bus in n.buses.index:
+                name = f"{node} gap slack gas"
+                n.add("Generator", name, bus=bus, carrier="gap slack gas", p_nom_extendable=True, p_nom=0.0, capital_cost=0.0, marginal_cost=gas_pen)
+                n.generators.loc[name, ["country", "research_role", "asset_role"]] = [country_of(n, node), "GAP_DIAGNOSTIC_SLACK", "diagnostic_slack"]
+        slacks.append("gas")
     hooks = set(n.meta.get("required_constraint_hooks", [])) - {"research_country_net_zero"} | {"research_gap_diagnostic"}
     n.meta["required_constraint_hooks"] = sorted(hooks)
     n.meta["gap_diagnostic"] = dict(enabled=True, penalty_eur_per_mwh=float(gcfg["penalty_eur_per_mwh"]), penalty_eur_per_tco2=float(gcfg["penalty_eur_per_tco2"]),
-                                    slacks=["electricity", "co2", "biomass"], label="GAP_DIAGNOSTIC_NOT_FOR_INTERCONNECTION_VALUE")
+                                    penalty_eur_per_mwh_gas=gas_pen, slacks=slacks, label="GAP_DIAGNOSTIC_NOT_FOR_INTERCONNECTION_VALUE")
     n.meta["artifact_role"] = "GAP_DIAGNOSTIC_UNSOLVED"
 
 
