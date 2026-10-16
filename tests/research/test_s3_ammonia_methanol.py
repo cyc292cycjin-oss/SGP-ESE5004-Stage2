@@ -20,7 +20,7 @@ def built(sc):
 @pytest.mark.skipif(not (built("integrated") and built("disconnected")), reason="S3-3 networks not built")
 def test_s3_3_networks():
     import pypsa
-    summary = pd.read_csv(DEM / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv").set_index("country")
+    summary = pd.read_csv(DEM / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative_level.csv").set_index("country")   # S3-3 networks predate S3B R1: level method = the pre-R1 main table
     for sc in ["integrated", "disconnected"]:
         n = pypsa.Network(str(S33 / sc / f"{sc}_2920_3h_unsolved.nc"))
         L = n.links; w = n.snapshot_weightings.generators

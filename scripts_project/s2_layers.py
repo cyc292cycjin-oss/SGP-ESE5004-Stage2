@@ -463,6 +463,14 @@ def _shares_for(shares, astar, country, sector):
     return s, (acc if (country, acc) in shares else ("IndustryFinalEnergy" if (country, "IndustryFinalEnergy") in shares else "Astar"))
 
 
+def demand_table_key(cfg):
+    """Country allocation (decision 57) plus the growth method suffix (S3B R1, decision 66): ratio = main tables, level = *_level tables."""
+    D = cfg["research"]["demand"]; key = str(D.get("country_allocation", "aeo8_ats_relative")); gm = str(D.get("growth_method", "ratio"))
+    if gm not in ("ratio", "level"):
+        raise ValueError("Unknown research.demand.growth_method " + gm)
+    return key + ("_level" if gm == "level" else "")
+
+
 def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_csv: Path, boundary_csv: Path, allocation_dir: Path, nodes, cc_fraction: float):
     S2 = cfg["research"]["s2"]; D = S2["demand"]; I = S2["industry"]
     dem = pd.read_csv(demand_csv, keep_default_na=False)
@@ -481,7 +489,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     s_lt, boiler_eff = float(I["low_temperature_heat_share_of_fuels"]), float(I["existing_boiler_efficiency"])
     # R1 (decision 55): industrial carrier structure. pypsa_eur_2050 = 2050 process routes (scripts_project/s2b_industry.py);
     # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
-    carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = str(cfg["research"]["demand"].get("country_allocation", "aeo8_ats_relative"))
+    carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = demand_table_key(cfg)
     if carrier_mode not in ("pypsa_eur_2050", "bas_fixed"):
         raise ValueError("Unknown research.s2.industry.carrier_mode " + carrier_mode)
     # S3-0 (decision 61): ratio source. jrc_idees_2021 = PyPSA-Eur v2025.07.0 ratios reproduced from JRC-IDEES-2021 for all sub-sectors (s3_0_industry.py, main);
@@ -758,7 +766,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                  extra={"process_share": f_process, "end_of_life_release": eol_release, "feedstock_carbon_mode": "full_release"})
                 plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, f"{c}:NonEnergy:{carrier} x HVC primary {scale if carrier == 'oil' else 1.0}", f"{node} feedstock {carrier} demand")
         # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
-        proc = sum(float(reg.loc[f"process_emissions_{g}_2050_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
+        pe_sfx = "_level" if alloc_mode.endswith("_level") else ""   # S3B R1: level growth method uses the level process-emission rows
+        proc = sum(float(reg.loc[f"process_emissions_{g}_2050{pe_sfx}_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
         fc_row = fc_table.loc[c] if c in fc_table.index else None
         proc_feed = float(fc_row["process_2B_2D_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
         plastics = float(fc_row["plastics_burned_co2_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0

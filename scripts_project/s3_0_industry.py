@@ -36,7 +36,8 @@ TD = ROOT / "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/cost
 RATIOS = REG_DIR / "INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv"
 TODAY = REG_DIR / "INDUSTRY_SECTOR_RATIOS_TODAY_EU27_2019.csv"
 ALLOCATIONS = {"aeo8_ats_relative": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", "gdp": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv",
-               "population": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv"}
+               "population": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv",
+               "aeo8_ats_relative_level": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv"}   # S3B R1: level growth method (sensitivity)
 CARRIERS = ["coal", "oil", "gas", "biomass", "electricity"]
 FUELS = ["coal", "oil", "gas", "biomass"]
 OUT_CARRIERS = ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat", "ammonia", "methanol"]

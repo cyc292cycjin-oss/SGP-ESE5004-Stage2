@@ -274,7 +274,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
     heat = add_industrial_heat(n, costs, nodes, cc)
     demand_astar = bind_astar(n, repo, allocation)
-    allocation_mode = R["demand"].get("country_allocation", "aeo8_ats_relative")   # R3 (decision 57)
+    from s2_layers import demand_table_key
+    allocation_mode = demand_table_key(cfg)   # R3 (decision 57) + S3B R1 growth method suffix (decision 66)
     demand_table = repo / S2["demand"].get("tables_by_allocation", {}).get(allocation_mode, S2["demand"]["table"])
     demand = add_demand_layer(n, costs, cfg, repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
     demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
