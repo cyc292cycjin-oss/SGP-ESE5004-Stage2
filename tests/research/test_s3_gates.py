@@ -38,7 +38,8 @@ def test_static_b_gates():
         assert b11["passed"], [r for r in b11["rows"] if r["count_short"]]
         rows = {r["carrier"]: r for r in b11["rows"]}
         assert rows["oil"]["count_short"] == 0 and rows["ammonia"]["load_bearing_buses"] == 1 and rows["methanol"]["load_bearing_buses"] == 1
-        b12 = gate_b12_hash(n, cfg); assert b12["passed"] and b12["s3_switches"]["fuel_carbon_mode"] == "origin_neutral" and b12["s3_switches"]["industry_ratio_source"] == "jrc_idees_2021"
+        b12 = gate_b12_hash(n, cfg)   # S3-5 networks predate the S3B research.solver block: only the config-hash check is expected to differ
+        assert all(v for k, v in b12["checks"].items() if k != "research_config_sha256_matches") and b12["s3_switches"]["fuel_carbon_mode"] == "origin_neutral" and b12["s3_switches"]["industry_ratio_source"] == "jrc_idees_2021"
         b13 = gate_b13_imports_one_way(n); assert b13["passed"], b13["checks"]
         b14 = gate_b14_terminal_caps(n); assert b14["passed"] and len(b14["terminals"]) == 16
         b15 = gate_b15_domestic_production_caps(n); assert b15["passed"] and b15["generators"] == 84 and b15["by_country"]["MY"]["cap_mwh"] == pytest.approx(849525174.4, rel=1e-6)
@@ -52,4 +53,17 @@ def test_b12_with_override():
     from v5.v5_gates import gate_b12_hash
     n = pypsa.Network(str(S35PC / "integrated" / "integrated_2920_3h_unsolved.nc"))
     b12 = gate_b12_hash(n, config(ROOT, "integrated"))
-    assert b12["passed"] and b12["s3_switches"]["fuel_carbon_mode"] == "producer_credit" and b12["s3_switches"]["config_overrides"] == ["s3.fuel_carbon_mode=producer_credit"]
+    assert all(v for k, v in b12["checks"].items() if k != "research_config_sha256_matches") and b12["s3_switches"]["fuel_carbon_mode"] == "producer_credit" and b12["s3_switches"]["config_overrides"] == ["s3.fuel_carbon_mode=producer_credit"]
+
+
+S3B_R4 = ROOT / "results_project" / "s3b" / "r4" / "integrated" / "integrated_2920_3h_unsolved.nc"
+
+
+@pytest.mark.skipif(not S3B_R4.exists(), reason="S3B R4 network not built")
+def test_b12_s3b_rebuilt():
+    import pypsa
+    from phase4_static import config
+    from v5.v5_gates import gate_b12_hash
+    n = pypsa.Network(str(S3B_R4)); cfg = config(ROOT, "integrated")
+    b12 = gate_b12_hash(n, cfg)
+    assert b12["passed"] and cfg["research"]["solver"]["profile"] == "formal_barrier" and cfg["research"]["solver"]["profiles"]["formal_barrier"]["Crossover"] == 0

@@ -27,6 +27,18 @@
 | 0.4 KH 核对 | `scripts_project/s3_0_kh_check.py`（只报告） | `KH_TRANSPORT_CHAIN_CHECK.json` |
 | 0.5 构建与冒烟 | `results_project/s3/`：两情景构建通过（Line 107 = 105 + 2），年度结构性缺口表（一体化 11 国全部有 CO₂ 去向；不互联 KH/LA/MM/SG/VN 缺口），56×3h 冒烟：一体化 HiGHS IPM "imprecise" → 报不可行，gap_diagnostic 最优且全部松弛为 0（求解精度问题，非物理缺口，报告 §1.5）；不互联真实不可行，gap_diagnostic CO₂ 缺口 KH 16.5 / LA 8.5 / MM 4.3 / SG 11.9 / VN 96.4 Mt；测试 371 通过 / 4 基线失败 | `evidence/s3_0/`（回执、结构表、测试日志）、`S3_0_SMOKE_CHECK.json`（`s3_0_smoke_check.py`） |
 
+## S3B 修正轮（第 66–69 项，指令 `S3B_CLAUDE_CODE_INSTRUCTION.md`；顺序 R4 → R1 → R2 → R3 → R5 → 冒烟 → 云端部署包）
+
+| 节 | 内容 | 状态 | 提交 | 说明 |
+|---|---|---|---|---|
+| R4 | 求解配置与缩放（第 69 项） | 完成 | 本节提交 | `research.solver`（formal_barrier / crossover_diagnostic，PyPSA-Eur gurobi-default 第 1056–1064 行为基础）；缩放 (a) 三列目标常数移出 LP（+2.529e9 EUR 求解后加回）、(b) 生物质池/封存/捕集缓冲 GWh·kt；等价性：运行 A/B 均最优，目标与 S3-7 参照相对差 ≤ 6e-10，A–B 2.9e-11，A 的 LP 与 S3-7 完全相同；Gurobi 三条警告消失（目标 [1,8e9]→[2,1e6]、边界 [0.9,6e9]→[0.9,3e4]、右端项 3e9→5e8）；A1/A2 新口径：间隙/互补性通过，原始（CO₂ 净零行 ≤0.08 t）与对偶残差未过预先登记的阈值，如实记录并给出 PROPOSED；PHS existing 3 个时段同时充放（681 MW）；报告 `S3B_REPORT.md` §1 |
+| R1 | 需求增长改用倍数法（第 66 项） | 待做 | — | AEO8 第 1 章 PDF 第 30–31 页有 2019 年工业 156.2 Mtoe、工业占比 38.4%、交通占比 36% |
+| R2 | 工业"其他"子部门敏感性（第 67 项） | 待做 | — | |
+| R3 | LNG 接收站扩建成本与马新管道（第 68 项） | 待做 | — | |
+| R5 | S3 报告第 11 节其余事项 | 待做 | — | |
+| 冒烟 | 4 次 56×3h（Gurobi formal_barrier）+ gap_diagnostic + crossover 对照 | 待做 | — | |
+| 部署包 | 云端部署包、`CLOUD_DEPLOY_STEPS.md`、资源估算更新 | 待做 | — | |
+
 ## 用户补充（2026-10-16，在 S3-7 与 S3_REPORT.md 中处理）
 
 1. 进口价格年份：Zenodo 14872184 的到岸价是 2040 年假设，模型其余技术取 technology-data 2050。用 technology-data 2040 与 2050 两套数据比较进口供应链主要成本项（光伏、陆上风电、电解槽、氨合成、甲醇合成、FT、液氢储运）的降幅，估算 2040→2050 进口价格的可能降幅并说明偏差方向；若估算降幅超过 20%，把进口价格敏感性下限从 −20% 放宽到估算值并登记依据；主算仍用论文数据，不自行改价。

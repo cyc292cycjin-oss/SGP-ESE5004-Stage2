@@ -21,7 +21,7 @@ FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production",
              "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
              "industry_2050", "feedstock_territorial",  # S2 supplement 02 R1/R2 (scripts_project/s3_0_industry.py (ex s2b_industry.py), s2b_feedstock.py)
              "industry_sector_ratios", "corridors_apg",  # S3-0 (scripts_project/s3_0_industry_ratios.py, s3_0_corridors.py)
-             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py)
+             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline", "solver_r4"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
@@ -161,7 +161,7 @@ def main():
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
                     scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
                              + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py", "scripts_project/s2b_feedstock.py",
-                                "scripts_project/s3_0_industry_ratios.py", "scripts_project/s3_0_industry.py", "scripts_project/s3_0_corridors.py", "scripts_project/s3_1_gas_data.py", "scripts_project/s3_2_imports_data.py", "scripts_project/s3_3_ammonia_methanol_data.py", "scripts_project/s3_4_shipping_data.py", "scripts_project/s3_5_fuel_carbon_data.py", "scripts_project/s3_7_import_price_decline.py"]},
+                                "scripts_project/s3_0_industry_ratios.py", "scripts_project/s3_0_industry.py", "scripts_project/s3_0_corridors.py", "scripts_project/s3_1_gas_data.py", "scripts_project/s3_2_imports_data.py", "scripts_project/s3_3_ammonia_methanol_data.py", "scripts_project/s3_4_shipping_data.py", "scripts_project/s3_5_fuel_carbon_data.py", "scripts_project/s3_7_import_price_decline.py", "scripts_project/s3b_r4_solver_data.py"]},
                     download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, closed_in_s3=CLOSED_IN_S3, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)

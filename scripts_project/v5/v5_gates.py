@@ -28,7 +28,32 @@ def gate_a1_a2_kkt(lp_dir,sol_dir,out_dir,contract):
     z,pi,rc=[np.load(sol_dir/(k+'.npy'),mmap_mode='r') for k in ['X','Pi','RC']]
     D=np.ones(meta['num_col']);R=np.ones(meta['num_row'])
     kkt=complete_kkt(meta,a,z,pi,rc,D,R,Path(out_dir)/'kkt',contract)
+    Path(out_dir).mkdir(parents=True,exist_ok=True);(Path(out_dir)/'kkt_summary.json').write_text(json.dumps({k:(float(v) if isinstance(v,(np.floating,)) else v) for k,v in kkt.items()},default=str))
     return dict(gate='A1_A2_KKT_AND_BUDGETS',passed=bool(kkt['independent_kkt_pass']),row_fail_count=kkt['row_fail_count'],column_fail_count=kkt['column_fail_count'],stationarity_fail_count=kkt['stationarity_fail_count'],dual_sign_fail_count=kkt['dual_sign_fail_count'],relative_gap=kkt['relative_gap'],primal_objective=kkt['primal_objective'],dual_objective_numeric=kkt['dual_objective_numeric'],stationarity_normalized_max=kkt['stationarity_normalized_max'],complementarity_l1=kkt['complementarity_l1'],scale=dict(num_col=meta['num_col'],num_row=meta['num_row'],nnz=meta['nnz']))
+
+def gate_a1_a2_interior(lp_dir,sol_dir,out_dir,contract,barconvtol,gap_factor=10.,dual_factor=100.):
+    """S3B R4 (decision 69): A1/A2 for barrier solutions without crossover. The frozen V4 algebra (complete_kkt, unchanged) supplies the
+    original-unit residuals; the decision uses three criteria tied to BarConvTol:
+      primal feasibility  - every row/column within the V4 physical budget 1e-3 + 1e-7 x reference, where 1e-7 = gap_factor x BarConvTol;
+      dual feasibility    - stationarity_normalized_max and the normalized dual-sign error <= dual_factor x BarConvTol (= 1e-6, the V4 KKT budget
+                            and Gurobi's default OptimalityTol);
+      relative primal-dual gap <= gap_factor x BarConvTol (and complementarity_l1 / scale <= the same).
+    Interior solutions may split degenerate alternatives across equal-cost options; this gate does not ask for a vertex."""
+    kkt=gate_a1_a2_kkt(lp_dir,sol_dir,out_dir,contract)
+    d=json.loads((Path(out_dir)/'kkt_summary.json').read_text()) if (Path(out_dir)/'kkt_summary.json').exists() else None
+    gap_tol=gap_factor*barconvtol;dual_tol=dual_factor*barconvtol
+    k=dict(kkt,**(d or {}))
+    scale=max(1.,abs(k.get('primal_objective',0.)),abs(k.get('dual_objective_numeric',0.)))
+    crit=dict(primal_rows_within_budget=k.get('row_fail_count',1)==0,primal_columns_within_budget=k.get('column_fail_count',1)==0,
+              dual_stationarity=float(k.get('stationarity_normalized_max',1.))<=dual_tol and k.get('stationarity_fail_count',1)==0,
+              dual_sign=float(k.get('dual_sign_normalized_max',1.))<=dual_tol,
+              relative_gap=float(k.get('relative_gap',1.))<=gap_tol,
+              complementarity=float(k.get('complementarity_l1',scale))/scale<=gap_tol)
+    return dict(gate='A1_A2_INTERIOR_POINT',passed=bool(all(crit.values())),criteria=crit,thresholds=dict(barconvtol=barconvtol,relative_gap=gap_tol,complementarity_over_scale=gap_tol,
+                dual_normalized=dual_tol,primal='1e-3 + 1e-7 x reference (V4 budget; 1e-7 = %g x BarConvTol)'%gap_factor),
+                metrics={kk:k.get(kk) for kk in ['row_violation_max','column_violation_max','row_fail_count','column_fail_count','stationarity_normalized_max','stationarity_fail_count',
+                                                  'dual_sign_normalized_max','dual_sign_fail_count','relative_gap','complementarity_l1','primal_objective','dual_objective_numeric']},
+                v4_independent_kkt_pass=k.get('independent_kkt_pass'),note='interior solution: degenerate equal-cost alternatives may be split across options')
 
 def gate_a3_a5_physics(n,known_terms=None,ignore_checks=()):
     """A3 physical equations + A5 FOM counted once (objective reconciliation) on the solved network.
