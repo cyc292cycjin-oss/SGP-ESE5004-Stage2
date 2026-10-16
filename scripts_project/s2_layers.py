@@ -396,8 +396,12 @@ def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction:
                  capital_cost=eop_fixed * eop_eff + cap_fixed * ef_bio * cc, marginal_cost=eop_vom * eop_eff + cap_vom * ef_bio * cc, lifetime=eop_life,
                  extra={"capture_fraction": cc})
         add_link(n, f"{node} biogas upgrading", c, "biogas upgrading", [bg, f"{node} gas", atmo], [1.0, -ef_gas], capital_cost=up_fixed, marginal_cost=up_vom, lifetime=up_life)
-        add_link(n, f"{node} BtL", c, "BtL", [bio, f"{node} oil", atmo], [btl_eff, -ef_oil * btl_eff], capital_cost=btl_fixed, marginal_cost=btl_vom * btl_eff, lifetime=btl_life)
+        # S4C-0 (decision 86 a): BtL capital cost x efficiency per MW biomass input as PyPSA-Eur v2025.07.0 prepare_sector_network.py lines 4230-4231
+        # (former model: BtL fixed per MW biomass, 2.2 x higher)
+        add_link(n, f"{node} BtL", c, "BtL", [bio, f"{node} oil", atmo], [btl_eff, -ef_oil * btl_eff], capital_cost=btl_fixed * btl_eff, marginal_cost=btl_vom * btl_eff, lifetime=btl_life)
         ledger["conversion_links"] += 4
+    ledger["btl_capital_cost"] = dict(eur_per_mw_biomass_a=btl_fixed * btl_eff, rule="BtL fixed x BtL efficiency (S4C-0, decision 86 a)",
+                                      code_ref="PyPSA-Eur v2025.07.0 scripts/prepare_sector_network.py lines 4230-4231", former_eur_per_mw_biomass_a=btl_fixed)
     ledger["carbon_treatment"] = ("biomass combustion carbon-neutral (no atmosphere port); CC variants book -EF x cc in the atmosphere and +EF x cc in co2 stored; "
                                   "biogas upgrading and BtL credit -EF of the produced fossil-equivalent carrier so its later combustion nets to zero; no biomass-to-hydrogen in S2 (upstream U3 not reproduced)")
     return ledger

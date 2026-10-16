@@ -1,8 +1,13 @@
 """D1 section 1: fossil fuel import prices for 2050 from WEO 2025 Table 2.3 (USD MER 2024).
 
-Main = NZE 2050 (crude 25 USD/bbl, natural gas Japan LNG 4.9 USD/MBtu GCV, steam coal Japan
-49 USD/t at 6,000 kcal/kg). High-price sensitivity = STEPS 2050. 2024 historical kept as
-reference. Conversion to EUR2020/MWh (NCV, consistent with the model fuel buses whose UNSD
+S4C-0 (decision 85, modifies decision 33 after the smoke results): main = STEPS 2050 (crude 76 USD/bbl,
+natural gas Japan LNG 9.7 USD/MBtu GCV, steam coal Japan 84 USD/t at 6,000 kcal/kg); NZE 2050 (25 / 4.9 / 49)
+is the low-price sensitivity; CPS 2050 (106 / 12.9 / 105) is registered as an optional value. The model
+selects one scenario for all three fuels with research.fuels.price_scenario (s2_costs.fuel_price_ids).
+The param_id suffixes _main / _high_price are the D1 names, kept for traceability; the status column
+carries the current role. 2024 historical kept as reference.
+D1 (superseded): main = NZE 2050, high-price sensitivity = STEPS 2050.
+Conversion to EUR2020/MWh (NCV, consistent with the model fuel buses whose UNSD
 reconstruction is NCV-based and with technology-data fuel rows in EUR/MWh_th LHV):
   USD2024 -> USD2020 with the US GDP implicit price deflator (FRED A191RD3A086NBEA),
   USD2020 -> EUR2020 with the 2020 ECB annual mean rate used by the author pipeline,
@@ -59,9 +64,12 @@ def main():
         "coal": ("Steam coal", "Japan", "USD/tonne",
                  lambda p: p / mwh_per_t_coal(), "Japan = pure import price adjusted to 6,000 kcal/kg (treated as net as received); Coastal China 2050 identical (49)"),
     }
+    roles = {"STEPS": "S4C-0 main (decision 85, research.fuels.price_scenario: steps; param_id suffix is the D1 name)",
+             "NZE": "S4C-0 low-price sensitivity (decision 85, research.fuels.price_scenario: nze; D1 main until S4B, param_id suffix is the D1 name)",
+             "CPS": "S4C-0 optional value, not a main run (decision 85, research.fuels.price_scenario: cps)", "historical": "reference only"}
     for carrier, (fuel, region, unit, to_usd_mwh, note) in specs.items():
-        for scenario, year, status, tag in [("NZE", 2050, "REGISTERED", "main"), ("STEPS", 2050, "SENSITIVITY", "high_price"),
-                                            ("historical", 2024, "REFERENCE_ONLY", "ref_2024")]:
+        for scenario, year, status, tag in [("NZE", 2050, "SENSITIVITY", "main"), ("STEPS", 2050, "REGISTERED", "high_price"),
+                                            ("CPS", 2050, "SENSITIVITY", "optional"), ("historical", 2024, "REFERENCE_ONLY", "ref_2024")]:
             p, r = pick(rows, fuel, region, scenario, year)
             usd_mwh = to_usd_mwh(p)
             eur_mwh = usd_mwh * fx
@@ -69,10 +77,10 @@ def main():
                               usd2024_per_mwh_ncv=usd_mwh, eur2020_per_mwh_ncv=eur_mwh, region=region,
                               table="Table 2.3", pdf_page=r["pdf_page"], note=note))
             reg.add(f"fuel_price_{carrier}_{scenario}_{year}_{tag}",
-                    f"{fuel} ({region}) {scenario} {year}: {p:g} {unit} (USD MER 2024) -> EUR2020/MWh NCV; {note}",
+                    f"{fuel} ({region}) {scenario} {year}: {p:g} {unit} (USD MER 2024) -> EUR2020/MWh NCV; {note}; role: {roles[scenario]}",
                     eur_mwh, "EUR2020/MWh_NCV", "B", "IEA WEO 2025 Table 2.3",
                     f"PDF p.{r['pdf_page']} (printed {r['printed_page']}); extraction {WEO_CSV}", sha,
-                    sensitivity_low=None, sensitivity_high=None, decision_ref="46,D1-1", status=status)
+                    sensitivity_low=None, sensitivity_high=None, decision_ref=("46,D1-1,33,85" if scenario != "historical" else "46,D1-1"), status=status)
             reg.add(f"fuel_price_{carrier}_{scenario}_{year}_{tag}_source_value",
                     f"{fuel} ({region}) {scenario} {year} as printed", p, unit + " (USD MER 2024)", "A",
                     "IEA WEO 2025 Table 2.3", f"PDF p.{r['pdf_page']}", sha, status="REFERENCE_ONLY")

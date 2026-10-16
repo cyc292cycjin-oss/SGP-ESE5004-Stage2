@@ -93,7 +93,12 @@ def test_fuel_price_conversion(registry):
     coal = 49 / (25.1208 / 3.6) * fx
     assert float(r.loc["fuel_price_coal_NZE_2050_main", "value"]) == pytest.approx(coal, rel=1e-9)
     assert r.loc["fuel_price_basis", "value"] == "NCV"
-    assert r.loc["fuel_price_gas_STEPS_2050_high_price", "status"] == "SENSITIVITY"
+    # S4C-0 (decision 85): STEPS 2050 is the main price, NZE the low-price sensitivity, CPS an optional value
+    assert float(r.loc["fuel_price_gas_STEPS_2050_high_price", "value"]) == pytest.approx(9.7 / 0.29307107 / 0.90 * fx, rel=1e-9)
+    assert float(r.loc["fuel_price_gas_STEPS_2050_high_price", "value"]) == pytest.approx(27.07, abs=5e-3)
+    assert r.loc["fuel_price_gas_STEPS_2050_high_price", "status"] == "REGISTERED" and r.loc["fuel_price_gas_NZE_2050_main", "status"] == "SENSITIVITY"
+    assert all(r.loc[f"fuel_price_{c}_CPS_2050_optional", "status"] == "SENSITIVITY" for c in ["gas", "oil", "coal"])
+    assert r.loc["fuel_price_scenario_main", "value"] == "steps" and "85" in r.loc["fuel_price_scenario_main", "decision_ref"]
 
 
 def test_lng_caps(registry):

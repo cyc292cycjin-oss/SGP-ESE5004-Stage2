@@ -136,7 +136,13 @@ research:
       solver_tol_factor: 10              # option 1 (S3B report section 1.4): budget = 10 x the Gurobi tolerance; primal row/column budget 1e-3 + 10 x FeasibilityTol x reference, dual (stationarity, sign) <= 10 x OptimalityTol; gap and complementarity stay <= gap_factor x BarConvTol
       net_zero_reference: country_gross_co2_flow   # relative term of the per-country net-zero rows (A1/A2, A3 COUNTRY_CO2_CAP, B1): annual gross CO2 throughput of the national atmosphere (sum of |port flows| x weights)
       biomass_pool_reference: pool_capacity        # relative term of the finite biomass pools (A1/A2 Store energy-balance and level-bound rows, A3 STORE_ENERGY_* and state equations, B3): pool capacity e_nom
-      column_dual_sign_scale: stationarity_scale   # A1/A2 dual-sign error of columns without the bound (free Link-p flows: the reduced cost itself) measured on the column dual activity max(1, |c| + |a|'|pi| + |rc|) like stationarity; V4 form max(1, |rc|) reported alongside (chosen after the S3B/S4A values; user to confirm)
+      column_dual_sign_scale: stationarity_scale   # A1/A2 dual-sign error of columns without the bound (free Link-p flows: the reduced cost itself) measured on the column dual activity max(1, |c| + |a|'|pi| + |rc|) like stationarity; V4 form max(1, |rc|) reported alongside. S4C-0 (decision 84 d / 86 f): confirmed by the user; chosen after seeing the S3B/S4A values (stated in every report)
+  fuels:                                 # S4C-0 (decision 85, modifies decision 33 after the smoke results): WEO 2025 Table 2.3 2050 prices, one scenario for gas, oil and coal (asserted at build, s4c_layers.check_fuel_prices)
+    price_scenario: steps                # steps = STEPS 2050 (main: gas Japan LNG 9.7 USD/MBtu = 27.07 EUR2020/MWh, crude 76 USD/bbl, coal 84 USD/t) | nze = NZE 2050 (low-price sensitivity; D1-S4B main) | cps = CPS 2050 (registered optional value, not a main run); domestic gas production at the same price (decision 43); lignite keeps the cost-layer row
+  finance:                               # S4C-0 (decision 90): discount rate / WACC
+    wacc_mode: uniform                   # uniform (main: one discount rate for every country, social-planner view) | country_specific (implemented only, not run: new-build capital costs re-annualised with the country WACC of country_wacc_table; refuses to build while a country is DATA_PENDING)
+    uniform_discount_rate: 0.07          # value in use: technology-data v0.15.0 / pypsa-asean costs.fill_values "discount rate" 0.07 (all rows except decentral heat and solar-rooftop 0.04); SMR / geothermal annuities s2_costs.DISCOUNT 0.07; recorded only, not applied by this key
+    country_wacc_table: research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv
   sector:                                # S4B-0 (decision 70): PyPSA-Eur v2025.07.0 config.default.yaml sector defaults (scripts_project/s4b_layers.py; table research_inputs/sector_v5/SECTOR_SWITCHES_VS_PYPSA_EUR.csv)
     methanation: true                    # line 676: Sabatier per node (H2 + captured CO2 -> node gas bus); carbon per decision 64 (gas producer credit) - former model: not built
     min_part_load_methanation: 0.3       # line 737
@@ -223,7 +229,7 @@ research:
       status: PRICED_AEO8_GRADE_C
   candidates:                             # S4B-2 (decisions 78, 79): caps of the site candidates below and the nuclear plan caps (scripts_project/s4b_candidates.py)
     hydro_geothermal_cap: national_potential   # national_potential = A/B national potential - 2050 stock, GEM pipeline where no official potential (main) | national_potential_la_mem_18gw (LA hydro 18 GW) | gem_pipeline_only | zero (former DATA_PENDING state)
-    pipeline_cap_statuses: announced_preconstruction   # announced + pre-construction (main: construction units are 2050 stock after decision 77) | announced_preconstruction_construction (literal reading; double counts the construction units)
+    pipeline_cap_statuses: announced_preconstruction   # announced + pre-construction (main, confirmed by the user in S4C-0, decision 86 b: construction units are 2050 stock after decision 77) | announced_preconstruction_construction (literal reading; double counts the construction units)
     caps_table: research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv
     nuclear_cap: none                     # decision 79: none (main, decision 38) | national_plans (PH 4.8, VN 14.4, ID 10, TH 0.6 GW on nuclear + nuclear SMR, others 0; implemented only)
     nuclear_caps_table: research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv

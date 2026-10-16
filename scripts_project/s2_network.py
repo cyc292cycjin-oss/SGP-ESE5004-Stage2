@@ -30,6 +30,7 @@ from s4a_layers import apply_renewable_profiles
 from s4a_fleet import add_gem_fleet, remove_not_operating_units
 from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
+from s4c_layers import check_fuel_prices, apply_wacc_mode
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -303,6 +304,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
+    fuel_prices = check_fuel_prices(n, cfg, registry, cost_ledger)   # S4C-0 (decision 85): one WEO scenario for gas / oil / coal, network prices = registry values (asserted)
+    finance = apply_wacc_mode(n, costs, cfg, repo)   # S4C-0 (decision 90): uniform (main) | country_specific (implemented only)
     if gap_diagnostic:
         add_gap_slack(n, S2["gap_diagnostic"], nodes)
     n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
@@ -316,9 +319,11 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4a_layers=dict(renewable={k: v for k, v in renewable.items() if k not in ("replaced", "added")}, fleet={k: v for k, v in fleet.items() if k != "added"}),
                                   s4b_layers=dict(sector=sector, candidate_caps=({k: v for k, v in cand_caps.items() if k != "set"} if cand_caps else None),
                                                   typhoon_premium={k: v for k, v in typhoon.items() if k != "applied"}),
+                                  s4c_layers=dict(fuel_prices=fuel_prices, finance={k: v for k, v in finance.items() if k != "rates_by_carrier"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
-                "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium"]:
+                "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
+                "research_fuel_prices", "research_finance"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

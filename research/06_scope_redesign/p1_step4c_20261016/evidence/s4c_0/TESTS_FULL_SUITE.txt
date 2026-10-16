@@ -1,0 +1,26 @@
+
+tests/research/test_validation_temporal.py: 284 warnings
+  /home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/components.py:929: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    cls_pnl[k][name] = pd.Series(data=v, index=self.snapshots, dtype=typ)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_cross_country_node_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_domestic_and_bunker_each_conserved
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_duplicate_national_country_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_explicit_source_zero_country_without_port
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_extra_load_target_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_infinite_national_account_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_missing_weight_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_negative_national_account_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_negative_weight_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_node_without_port_is_structural_zero
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_nonzero_country_without_port_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_omitted_load_target_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_one_missing_account_is_not_summed_as_zero
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_repeated_ports_same_node_country_totals
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_source_tables_not_mutated
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_unknown_node_rejected
+FAILED tests/transport/test_shipping_allocation.py::ShippingRegression::test_weights_not_normalized_rejected
+17 failed, 439 passed, 934 warnings in 51.82s
+DONE
