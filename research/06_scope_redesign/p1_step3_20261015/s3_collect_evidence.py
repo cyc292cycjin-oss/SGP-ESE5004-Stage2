@@ -92,6 +92,26 @@ def main():
         for f in base.glob("S3_*_STRUCTURAL_GAP_ANNUAL.json"):
             s["structural_gap_annual"] = read(f)
         ev["steps"][step] = s
+    # ---- S3B correction round (decisions 66-69): R4 solver/scaling, R1 growth method, R2 other bucket, R3 LNG expansion, smoke, cloud package ----
+    sb, E = RES / "s3b", HERE / "evidence"
+    ev["commits"].update(s3_7="31f4db90", s3b_r4="5c5cde3d", s3b_r1="f3f71edf", s3b_r2="059e9792", s3b_r3="bd477d02", s3b_r5="af83b635")
+    ev["status"] = "S3B_CORRECTIONS_SMOKE_CLOUD_PACKAGE"
+    tags = ["integrated", "disconnected", "pc_integrated", "pc_disconnected", "integrated_gap", "disconnected_gap", "pc_integrated_gap", "pc_disconnected_gap", "integrated_crossover"]
+    sm = sb / "smoke"
+    r1 = opt(REPO / "research_inputs/demand_v5/DEMAND_2050_R1_GROWTH_METHOD.json")
+    ev["s3b"] = dict(
+        r4_equivalence=opt(E / "s3b_r4" / "S3B_R4_EQUIVALENCE.json"),
+        r1={k: v for k, v in r1["r1"].items() if not k.startswith("calibration")} if r1 else None,
+        r2_ois_today=opt(REPO / "research_inputs/registry_v5/INDUSTRY_OIS_TODAY_EVIDENCE.json"), r2_network=opt(E / "s3b_r2" / "builds" / "NETWORK_LOAD_DIFF.json"), r2_b12=opt(E / "s3b_r2" / "builds" / "B12_CHECK.json"),
+        r3_lng=opt(REPO / "research_inputs/lng_terminals_v5/LNG_EXPANSION_EVIDENCE_S3B_R3.json"), r3_build=opt(E / "s3b_r3" / "builds" / "R3_BUILD_CHECK.json"), r3_pre_flows=opt(E / "s3b_r3" / "PRE_R3_R4B_GAS_FLOWS.json"),
+        smoke_status=(sm / "STATUS.txt").read_text().splitlines() if (sm / "STATUS.txt").exists() else None,
+        smoke_builds={t: trim_build(r) for t in tags for r in [opt(sm / "builds" / t / f"{t.replace('pc_', '').replace('_gap', '')}{'_gap_diagnostic' if t.endswith('_gap') else ''}_BUILD_RECEIPT.json")] if r},
+        smoke={t: solve_dir(sm / "solves" / t) for t in tags if (sm / "solves" / t / "SOLVE_RECEIPT.json").exists()},
+        smoke_interior={t: opt(sm / "solves" / t / "INTERIOR_CHECKS.json") for t in tags if (sm / "solves" / t / "INTERIOR_CHECKS.json").exists()},
+        structural_gap=opt(sm / "S3B_STRUCTURAL_GAP_ANNUAL.json"), smoke_summary=opt(E / "s3b_smoke" / "S3B_SMOKE_SUMMARY.json"),
+        cloud_package_manifest=opt(HERE / "cloud_package" / "PACKAGE_MANIFEST.json"))
+    for t, v in (ev["s3b"]["smoke"] or {}).items():
+        v["gurobi_log_stats"] = v["receipt"].get("gurobi_log_stats") if v and v.get("receipt") else None
     ev["s3_5_pc_build"] = (lambda r: trim_build(r) if r else None)(opt(RES / "s3_5_pc" / "integrated" / "integrated_BUILD_RECEIPT.json"))
     ev["gates_static_s3_6"] = opt(HERE / "evidence" / "s3_6" / "S3_6_GATES_STATIC.json")
     ev["lp_ranges"] = {p.name: read(p) for p in (HERE / "evidence" / "s3_7").glob("S3_7_LP_RANGES_*.json")}
@@ -116,10 +136,17 @@ def main():
             ev["data"][key] = dict(file=f, sha256=sha(REPO / f), content=e)
     ev["inputs"] = {f: sha(REPO / f) for f in ["research_inputs/corridors/cross_border_corridors.csv", "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv", "research_inputs/demand_v5/INDUSTRY_2050_COMPARISON_BAS_S2B_S3.csv",
                                                 "research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv", "research_inputs/imports_v5/IMPORT_PRICES_2050.csv", "research_inputs/shipping_v5/SHIPPING_DEMAND_2050.csv",
-                                                "research_inputs/registry_v5/INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv", "research_inputs/registry_v5/DOWNLOAD_LIST.csv", "research_inputs/registry_v5/DATA_PENDING_LIST.csv"] if (REPO / f).exists()}
+                                                "research_inputs/registry_v5/INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv", "research_inputs/registry_v5/DOWNLOAD_LIST.csv", "research_inputs/registry_v5/DATA_PENDING_LIST.csv",
+                                                "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv",
+                                                "research_inputs/demand_v5/DEMAND_2050_BASIS_GAP_BY_SECTOR.csv", "research_inputs/demand_v5/DEMAND_2050_GROWTH_METHOD_COMPARISON.csv",
+                                                "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_OTHER_IDEES_TODAY.csv", "research_inputs/demand_v5/INDUSTRY_2050_OTHER_BUCKET.csv",
+                                                "research_inputs/registry_v5/INDUSTRY_OIS_TODAY_CARRIERS_EU27_2019.csv", "research_inputs/lng_terminals_v5/LNG_EXPANSION_MODES_S3B_R3.csv",
+                                                "research_inputs/registry_v5/sources/WDI_DATABANK_2019_2025_ASEAN11.csv", "research_inputs/registry_v5/sources/ERIA_RPR_FY2016_7b_Chapter_6.pdf"] if (REPO / f).exists()}
     ev["scripts"] = {f: sha(REPO / "scripts_project" / f) for f in ["s3_0_industry_ratios.py", "s3_0_industry.py", "s3_0_corridors.py", "s3_0_kh_check.py", "s3_1_gas_data.py", "s3_2_imports_data.py", "s3_3_ammonia_methanol_data.py", "s3_4_shipping_data.py",
                                                                       "s3_5_fuel_carbon_data.py", "s3_6_gates_check.py", "s3_7_lp_ranges.py", "s3_7_import_price_decline.py", "s3_layers.py", "s2_layers.py", "s2_network.py", "s2_solve.py", "s2_structural_gap.py",
-                                                                      "v5/v5_gates.py", "scenario_network.py", "country_carbon.py", "d1_registry.py"] if (REPO / "scripts_project" / f).exists()}
+                                                                      "v5/v5_gates.py", "scenario_network.py", "country_carbon.py", "d1_registry.py", "d1_demand_2050.py", "s2_0_process_emissions.py", "s2b_feedstock.py",
+                                                                      "s3b_scaling.py", "s3b_interior.py", "s3b_r4_solver_data.py", "s3b_r4_compare.py", "s3b_r2_ois_today.py", "s3b_r3_lng_data.py", "s3b_gas_flows.py",
+                                                                      "s3_7_results_summary.py"] if (REPO / "scripts_project" / f).exists()}
     ev["configs"] = {f: sha(REPO / "configs/research" / f) for f in ["baseline.yaml", "integrated.yaml", "disconnected.yaml"] if (REPO / "configs/research" / f).exists()}
     ev["tests"] = opt(HERE / "S3_TEST_RUN.json")
     (HERE / "S3_EVIDENCE.json").write_text(json.dumps(ev, indent=1, default=str))
