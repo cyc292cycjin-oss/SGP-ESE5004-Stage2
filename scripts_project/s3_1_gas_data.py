@@ -110,10 +110,12 @@ def main():
                 "D1 FOSSIL_PRODUCTION_CAPS_2050.csv (UNSD 2019)", "carrier gas", caps_sha, country=r["country"], decision_ref="43", status="REGISTERED" if r["cap_mwh_per_year"] > 0 else "SOURCE_ZERO")
     reg.add("lng_import_price_rule", "LNG imports priced at the WEO 2025 NZE 2050 Japan LNG customs-border price (fuel_price_gas_NZE_2050_main); regasification adder fuel_price_lng_regasification_adder stays DATA_PENDING (adder = 0 in the build; LNG cost understated -> favours LNG over domestic production, pipelines and non-gas options)",
             13.6739681303, "EUR2020/MWh_NCV", "B", "S3 instruction S3-1.4; D1 registry", "fuel_price_gas_NZE_2050_main", caps_sha, decision_ref="17,19")
-    reg.add("lng_terminal_expansion_cap_factor", "LNG regasification capacity per terminal node may expand to 2.5 x the existing (operating + under construction) capacity; proposed sites are candidates with p_nom_max = proposed capacity, zero existing", 2.5, "ratio", "B",
-            "D1 instruction / S3 instruction S3-1.4", "LNG_IMPORT_CAPS_BY_COUNTRY.csv cap_factor", sha256(ROOT / "research_inputs/lng_terminals_v5/LNG_IMPORT_CAPS_BY_COUNTRY.csv"), decision_ref="17,19")
-    reg.add("lng_terminal_expansion_capex", "No capital cost is charged for LNG regasification expansion within the 2.5 x cap (PyPSA-Eur keeps gas entry capacities fixed; no sourced terminal capex) - stated simplification, cost direction: LNG expansion too cheap", 0.0, "EUR/MW", "C",
-            "stated assumption (S3-1)", "s3_layers.add_gas_network", caps_sha, decision_ref="17", sensitivity_low=0.0, sensitivity_high=None, status="REFERENCE_ONLY")
+    reg.add("lng_terminal_expansion_cap_factor", "LNG regasification capacity per terminal node may expand to 2.5 x the existing (operating + under construction) capacity; proposed sites are candidates with p_nom_max = proposed capacity, zero existing. "
+            "S3B R3 (decision 68): sensitivity only (research.s3.gas.lng_expansion = cap_factor); main = existing_only (lng_terminal_expansion_mode); the factor still sets the liquid-H2 terminal cap (S3-2)", 2.5, "ratio", "B",
+            "D1 instruction / S3 instruction S3-1.4", "LNG_IMPORT_CAPS_BY_COUNTRY.csv cap_factor", sha256(ROOT / "research_inputs/lng_terminals_v5/LNG_IMPORT_CAPS_BY_COUNTRY.csv"), decision_ref="17,19,68", status="SENSITIVITY")
+    reg.add("lng_terminal_expansion_capex", "No capital cost is charged for LNG regasification expansion within the 2.5 x cap (PyPSA-Eur keeps gas entry capacities fixed; no sourced terminal capex) - stated simplification, cost direction: LNG expansion too cheap. "
+            "S3B R3: applies only to the cap_factor sensitivity; candidate unit costs registered as lng_regas_capex_ref_* (REFERENCE_ONLY)", 0.0, "EUR/MW", "C",
+            "stated assumption (S3-1)", "s3_layers.add_gas_network", caps_sha, decision_ref="17,68", sensitivity_low=0.0, sensitivity_high=None, status="REFERENCE_ONLY")
     reg.write(REG_DIR / "fragments" / "gas_network.csv")
     write_json(dict(script=SCRIPT, sources=dict(gem_csv=gem_sha, gem_xlsx=GEM_XLSX_SHA, nodes_xy=xy_sha, pypsa_eur_build_gas_input_locations=pe_sha, production_caps=caps_sha),
                     conversion=dict(mw_per_bcm_year_gcv=MW_PER_BCM_Y_GCV, gcv_to_ncv=GCV_TO_NCV), existing=rows, noted=noted, production=prod), OUT / "GAS_NETWORK_EVIDENCE.json")

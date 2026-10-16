@@ -238,7 +238,61 @@ COVID-19 的影响（INFERENCE）：2019→2022 跨过 2020–2021 年的收缩�
 
 ## 4. R3 LNG 接收站扩建成本与马新管道（第 68 项）
 
-（待填）
+代码：`scripts_project/s3b_r3_lng_data.py`（检索结果登记、候选成本换算、分国上限表）、`scripts_project/s3_layers.py`（开关 `research.s3.gas.lng_expansion`；液氢接收站上限单独保留）、`v5_gates.gate_b14_terminal_caps`（按开关核对）、`scripts_project/s3b_gas_flows.py`（求解后的气供应结构与再出口核对）。证据 `evidence/s3b_r3/`。
+
+### 4.1 再气化接收站投资数据检索（只读，2026-10-16）
+
+| 来源 | 内容 | 能否使用 |
+|---|---|---|
+| IGU World LNG Report 2024（公开 PDF）、OIES NG149《Floating LNG Update》（2019） | 自动抓取 HTTP 403 | 列入下载清单（`DOWNLOAD_LIST.csv` 新增一行），请用户手动下载 |
+| Ulvestad & Overland（2012），Int. J. Environ. Stud. 69(3):407–426，"LNG CAPEX" 节（PMC3962073） | 原文称成本"highly site-specific"，粗估每 10 Mtpa 10 亿美元，即 100 美元/吨年；**未给出处和价格年份** | 参考（REFERENCE_ONLY） |
+| ERIA RPR FY2016 No.7b 第 6 章（PDF SHA 0952b487…） | 接收站投资 = 容量（千吨，储罐按一周需求定）× JPY 4.5 亿/千吨（公式 (1)，PDF 第 8 页，印刷页 73），折合约 JPY 8,650/吨年；表 22–23（PDF 第 4 页）印的"US$100 billion"等显然是日元误印 | 参考，未换算 |
+| PyPSA-Eur 进口分支 5a87cedd，`prepare_sector_network.py` 第 4561 行 | `terminal_capital_cost["shipping-lch4"] = 7018` EUR/MW/a，代码常数；代码和 Neumann 等（2025）正文、附录都没有给出处（已检索） | 参考；液氢接收站成本 7018 × 1.2 沿用它 |
+| 其他（GECF 2026 专题、FGE 2025 夏威夷报告、市场研究）只在检索摘要里看到 | 只有总价（陆上 > 10 亿美元，FSRU 3.4–5 亿美元），没有产能口径 | 未核实原文，未登记 |
+
+**判定。** 能折成单位产能的只有前三项，它们都不是有出处、有价格年份的单位成本；把检索摘要里的数一并算上，范围约为每吨年 80–670 美元，超出指令允许的 ±50%。因此执行指令的兜底规则（第 68 项）：**主算不允许扩建**，只计 GEM 的运营和在建容量，只有拟建容量的站点不建；原来的"2.5 倍现有容量、零投资"改为敏感性 `lng_expansion: cap_factor`。登记 `lng_terminal_expansion_mode = existing_only`（C 级）；`lng_terminal_expansion_cap_factor` 改为 SENSITIVITY。
+
+**候选成本换算（仅供用户决定，REFERENCE_ONLY）。** 按 Ulvestad & Overland 的 100 美元/吨年，价格年份假定为 2011（论文未给），乘美国 GDP 平减指数 2020/2011（1.1519）和 0.8772 EUR/USD，得 101.0 EUR2020/吨年；按 GEM 接收站表自身的换算系数 13.33 MWh/t 折成 63,700 EUR/MW；乘以（7%/25 年年金 + 3.5% 运维，取 technology-data "CH4 liquefaction" 的寿命和运维作类比）后为 **8,020 EUR/MW/a**，与 PyPSA-Eur 的 7,018 相差 14%，ERIA 的储罐口径折算约 80 美元/吨年也在同一量级。按这个成本，满负荷时每 MWh 气的接收站成本约 0.9 EUR（LNG 价格为 13.67 EUR/MWh），因此"按成本扩建"的结果会接近零投资的 2.5 倍敏感性，真正起约束作用的是扩建上限本身（INFERENCE）。
+
+### 4.2 主算与敏感性的接收站上限（GW；VERIFIED）
+
+| 国家 | 运营 + 在建 | 仅拟建 | 主算上限（existing_only） | 敏感性上限（cap_factor，原 S3） |
+|---|---|---|---|---|
+| ID | 17.88 | 3.50 | 17.88 | 48.21 |
+| KH | 0 | 1.67 | **0** | 1.67 |
+| MY | 11.11 | 0 | 11.11 | 27.78 |
+| PH | 22.37 | 14.46 | 22.37 | 58.22 |
+| SG | 16.74 | 7.61 | 16.74 | 41.86 |
+| TH | 28.92 | 16.44 | 28.92 | 72.30 |
+| VN | 6.09 | 39.36 | 6.09 | 31.81 |
+| **合计** | **103.1** | 83.0 | **103.1**（满负荷约 903 TWh/a） | **281.8** |
+
+- 主算的 LNG 进口发电机由 16 个减为 9 个，去掉的 7 个是只有拟建容量的站点（KH 全部 LNG 进口随之取消）。
+- 液氢进口上限沿用 S3-2 的规则（LNG 接收站容量 × 2.5，或拟建容量），不受 R3 影响：主算与敏感性的 16 个液氢进口发电机及其上限完全相同。
+- 用 `--override s3.gas.lng_expansion=cap_factor` 重建的网络与 R3 之前的网络逐组件相同（发电机、链路、储能、负荷、线路、母线，数值差 0）。
+- 两份网络的 B14、B12 均通过；B14 的口径按开关切换，`s3_switches` 新增 `lng_expansion`。
+
+### 4.3 马新管道容量
+
+检索（GEM wiki、Petronas Gas Berhad 网页及新闻）未找到公开的管道容量。GEM 的容量字段为空；Petronas 半岛供气网的 3,500 mmscfd 是整个网络的输送能力；1988 年谅解备忘录规定的不少于 150 mmscfd 和 2012 年 Keppel 的 43 mmscfd 都是合同量，不是容量。`gas_pipeline_existing_malaysia_singapore` 维持 DATA_PENDING，模型中仍然只有 MY_Peninsular2 1 – SG2 0 走廊上的候选管道。检索记录登记为 `gas_pipeline_MY_SG_capacity_search_s3b`。
+
+### 4.4 SG/TH/PH 的 LNG 进口与 SG 再出口：改前基准（VERIFIED）
+
+改前基准取 R4 运行 B 的解（与 S3-7 是同一个 LP，56×3h，一体化主算）：
+
+| 国家 | LNG 进口 TWh/a | 接收站容量（现有 → 最优） | 是否触上限 |
+|---|---|---|---|
+| SG | 364.6 | 16.7 → 41.9 GW | 是（2.5 倍） |
+| TH | 633.3 | 28.9 → 72.3 GW | 是 |
+| PH | 510.0（Luzon9 490.0 + 只有拟建容量的 Luzon5 20.0） | 22.4 → 58.2 GW | 是 |
+
+**SG 再出口（改前）：** SG 的 364.6 TWh LNG 中，本国只用约 39.5 TWh（存量 CCGT 9.5、终端气 30.0），**325.3 TWh 经 MY_Peninsular2 1 – SG2 0 走廊上新建的候选管道（38.5 GW）送往 MY**；ID → SG 的两条存量管道都没有输气。同时 TH 向 MY 输气 589.1 TWh（候选管道 513.4 + TTM 存量 75.8）。MY 的气主要用于 CCGT CC（1,522.6 TWh）。解读（INFERENCE）：零投资的 2.5 倍扩建让 SG、TH 成为 LNG 转运枢纽，为 MY 的 CCGT CC 供气。改后的进口量，以及再出口是否消失，见 §6 的冒烟结果（同一个分析脚本）。
+
+### 4.5 登记与测试
+
+- 登记（片段 `lng_r3.csv`）：`lng_terminal_expansion_mode`、`lng_regas_capex_ref_ulvestad_overland_2012`（8,020 EUR/MW/a，±50%）、`lng_regas_capex_ref_eria_2016`、`lng_regas_capex_ref_pypsa_eur_import_branch`、`gas_pipeline_MY_SG_capacity_search_s3b`；`s3_1_gas_data.py` 的两行改为 sensitivity 口径。登记表 1,431 行，DATA_PENDING 23 项（不变）。
+- 新文件：`lng_terminals_v5/LNG_EXPANSION_MODES_S3B_R3.csv`、`LNG_EXPANSION_EVIDENCE_S3B_R3.json`；`gas_v5` 的数据输出与改前逐字节相同。
+- 测试：新增 `test_s3b_r3.py`（2 项）。结果：397 通过、4 失败，失败的均为 `test_gate4`，R1 之前就已存在。
 
 ## 5. R5 S3 报告第 11 节其余事项
 

@@ -135,6 +135,12 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     lng = pd.read_csv(repo / G["lng_terminals"], keep_default_na=False)
     lng["cap"] = pd.to_numeric(lng.capacity_mwh_per_year, errors="coerce").fillna(0.0)
     factor = float(G.get("lng_cap_factor", 2.5))
+    # S3B R3 (decision 68): existing_only (main) = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced
+    # terminal unit cost, s3b_r3_lng_data.py); cap_factor (sensitivity) = the S3-1 rule: expansion to factor x existing at zero capex, proposed-only sites
+    # up to the proposed capacity. The rule cap is kept as h2_import_cap_mw: the liquid-H2 terminal cap of S3-2 is unchanged by R3.
+    expansion = str(G.get("lng_expansion", "cap_factor"))
+    if expansion not in ("existing_only", "cap_factor"):
+        raise ValueError("Unknown research.s3.gas.lng_expansion " + expansion)
     ensure_carrier(n, "LNG import")
     terms = {}
     for node, g in lng.groupby("node"):
@@ -143,16 +149,21 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
         existing = float(g[g.status.isin(["operating", "construction"])].cap.sum()) / HOURS
         proposed = float(g[g.status == "proposed"].cap.sum()) / HOURS
         missing = int((g.cap <= 0).sum())
-        p_max = factor * existing if existing > 0 else proposed
+        p_rule = factor * existing if existing > 0 else proposed
+        if p_rule <= 0:
+            terms[node] = dict(existing_mw=0.0, proposed_mw=0.0, p_nom_max_mw=0.0, h2_import_cap_mw=0.0, units_missing_capacity=missing, skipped="no capacity data")
+            continue
+        p_max = p_rule if expansion == "cap_factor" else existing
+        c = country_of(n, node)
         if p_max <= 0:
-            terms[node] = dict(existing_mw=0.0, proposed_mw=0.0, p_nom_max_mw=0.0, units_missing_capacity=missing, skipped="no capacity data")
+            terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=0.0, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
+                               skipped="proposed only: no LNG import in the main run (decision 68)")
             continue
         name = f"{node} LNG import"
-        c = country_of(n, node)
         n.add("Generator", name, bus=f"{node} gas", carrier="LNG import", p_nom=existing, p_nom_min=existing, p_nom_extendable=True, p_nom_max=p_max, capital_cost=0.0, marginal_cost=price + adder)
         n.generators.loc[name, ["country", "research_role"]] = [c, "EXTERNAL_SUPPLY"]
-        terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=p_max, units_missing_capacity=missing, terminals=";".join(g.terminal))
-    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, terminals=terms)
+        terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=p_max, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal))
+    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, expansion=expansion, terminals=terms)
     n.meta["research_gas_network"] = led
     return led
 
@@ -216,14 +227,14 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
     h2p = float(prices.at["hydrogen", "applied_eur2020_per_mwh"]) * f
     term_cost = float(I.get("h2_terminal_capital_cost_eur_per_mw_a", 7018.0 * 1.2))
     lng = n.generators[n.generators.carrier == "LNG import"]
+    lng_terms = ((n.meta.get("research_gas_network") or {}).get("lng") or {}).get("terminals", {})
     h2 = {}
-    for g, z in lng.iterrows():
-        node = str(z.bus)[:-4]
-        cap = float(z.p_nom_max)
+    for node, t in lng_terms.items():   # S3B R3: the H2 cap keeps the S3-2 rule (LNG terminal capacity x 2.5, or proposed) whatever research.s3.gas.lng_expansion
+        cap = float(t.get("h2_import_cap_mw", 0.0))
         if cap <= 0 or f"{node} H2" not in n.buses.index:
             continue
         name = import_gen(f"{node} H2 import", f"{node} H2", "H2 import", h2p, country=country_of(n, node), p_nom_max=cap, capital_cost=term_cost)
-        h2[node] = dict(generator=name, p_nom_max=cap, lng_generator=g)
+        h2[node] = dict(generator=name, p_nom_max=cap, lng_generator=(f"{node} LNG import" if f"{node} LNG import" in lng.index else None))
     green["hydrogen"] = dict(nodes=len(h2), price_applied=h2p, base=float(prices.at["hydrogen", "base_eur2020_per_mwh"]), terminal_capital_cost=term_cost, terminals=h2)
     led["green"] = green
     n.meta["research_imports"] = led

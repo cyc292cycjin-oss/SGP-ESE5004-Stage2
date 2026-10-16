@@ -176,7 +176,8 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     s3_switches=dict(fuel_carbon_mode=s3.get('fuel_carbon_mode'),import_price_sensitivity=(s3.get('imports') or {}).get('price_sensitivity'),cross_border_gas=n.meta.get('research_config',{}).get('cross_border',{}).get('gas'),
                      ammonia_methanol_mode=ind.get('ammonia_methanol_mode'),industry_ratio_source=ind.get('ratio_source'),config_overrides=overrides,
                      demand_growth_method=(n.meta.get('research_config',{}).get('demand',{}).get('growth_method') or 'level (key absent: built before S3B R1)'),
-                     industry_other_bucket=((s3.get('industry') or {}).get('other_bucket') or 'pypsa_eur_2050 (key absent: built before S3B R2)'))
+                     industry_other_bucket=((s3.get('industry') or {}).get('other_bucket') or 'pypsa_eur_2050 (key absent: built before S3B R2)'),
+                     lng_expansion=((s3.get('gas') or {}).get('lng_expansion') or 'cap_factor (key absent: built before S3B R3)'))
     checks['s3_switches_recorded']=(not s3) or all(v is not None for k,v in s3_switches.items() if k!='config_overrides')  # S1/S2 networks without an s3 config section are exempt
     return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,s3_switches=s3_switches,snapshot_weightings=weights)
 
@@ -292,20 +293,33 @@ def gate_b13_imports_one_way(n):
     return dict(gate='B13_IMPORTS_ONE_WAY',passed=bool(passed),checks=checks)
 
 def gate_b14_terminal_caps(n,cap_factor=2.5):
-    """B14: LNG regasification expansion <= cap_factor x existing capacity (proposed-only sites <= their proposed capacity, recorded in the build ledger),
-    liquid-H2 imports at a node <= the LNG cap of that node, and in solved networks p_nom_opt <= p_nom_max."""
+    """B14: LNG regasification capacity within the registered rule. research.s3.gas.lng_expansion (build ledger) = existing_only (S3B R3 main):
+    p_nom_max = existing (operating + under construction), proposed-only sites not built; cap_factor (S3-1 rule, sensitivity): <= cap_factor x existing,
+    proposed-only sites <= their proposed capacity. Liquid-H2 imports at a node <= the terminal rule cap of that node (h2_import_cap_mw, S3-2; older
+    ledgers: the LNG p_nom_max), and in solved networks p_nom_opt <= p_nom_max."""
     g=n.generators;rows=[];ok=True;lng=g[g.carrier=='LNG import']
-    led=n.meta.get('research_gas_network',{}).get('lng',{}).get('terminals',{})
+    L=n.meta.get('research_gas_network',{}).get('lng',{});led=L.get('terminals',{});mode=L.get('expansion','cap_factor');cap_factor=float(L.get('cap_factor',cap_factor))
+    def h2_check(node,h2cap):
+        h2=g[(g.carrier=='H2 import')&(g.bus==node+' H2')]
+        h2_ok=bool((h2.p_nom_max<=h2cap*(1+1e-9)+1e-6).all()) if len(h2) else True
+        h2_within=bool((h2.p_nom_opt<=h2.p_nom_max*(1+1e-9)+1e-6).all()) if (len(h2) and 'p_nom_opt' in g) else True
+        return len(h2),bool(h2_ok and h2_within)
     for name,z in lng.iterrows():
         existing=float(z.p_nom);pmax=float(z.p_nom_max);opt=float(z.p_nom_opt) if 'p_nom_opt' in g else 0.;node=str(z.bus)[:-4]
         proposed=float(led.get(node,{}).get('proposed_mw',0.))
-        limit_ok=(pmax<=cap_factor*existing*(1+1e-9)+1e-6) if existing>0 else (pmax<=proposed*(1+1e-9)+1e-6)
+        limit=existing if mode=='existing_only' else (cap_factor*existing if existing>0 else proposed)
+        limit_ok=pmax<=limit*(1+1e-9)+1e-6
         within=opt<=pmax*(1+1e-9)+1e-6
-        h2=g[(g.carrier=='H2 import')&(g.bus==node+' H2')];h2_ok=bool((h2.p_nom_max<=pmax*(1+1e-9)+1e-6).all()) if len(h2) else True
-        h2_within=bool((h2.p_nom_opt<=h2.p_nom_max*(1+1e-9)+1e-6).all()) if (len(h2) and 'p_nom_opt' in g) else True
-        rows.append(dict(generator=name,existing_mw=existing,proposed_mw=proposed,p_nom_max_mw=pmax,p_nom_opt_mw=opt,ratio_to_existing=(pmax/existing if existing else None),limit_ok=bool(limit_ok),within_max=bool(within),h2_import_within_lng_cap=bool(h2_ok and h2_within)))
-        ok&=bool(limit_ok and within and h2_ok and h2_within)
-    return dict(gate='B14_TERMINAL_CAP_2_5X',passed=bool(ok),cap_factor=cap_factor,terminals=rows)
+        _,h2_ok=h2_check(node,float(led.get(node,{}).get('h2_import_cap_mw',pmax)))
+        rows.append(dict(generator=name,existing_mw=existing,proposed_mw=proposed,p_nom_max_mw=pmax,p_nom_opt_mw=opt,ratio_to_existing=(pmax/existing if existing else None),limit_ok=bool(limit_ok),within_max=bool(within),h2_import_within_lng_cap=h2_ok))
+        ok&=bool(limit_ok and within and h2_ok)
+    for node,t in led.items():   # S3B R3: H2 import at proposed-only sites without an LNG generator (existing_only mode)
+        if f'{node} LNG import' in lng.index:continue
+        k,h2_ok=h2_check(node,float(t.get('h2_import_cap_mw',0.)))
+        if not k:continue
+        rows.append(dict(generator=None,node=node,existing_mw=float(t.get('existing_mw',0.)),proposed_mw=float(t.get('proposed_mw',0.)),p_nom_max_mw=0.,p_nom_opt_mw=0.,ratio_to_existing=None,limit_ok=True,within_max=True,h2_import_within_lng_cap=h2_ok))
+        ok&=h2_ok
+    return dict(gate='B14_TERMINAL_CAP_2_5X',passed=bool(ok),cap_factor=cap_factor,expansion=mode,terminals=rows)
 
 def gate_b15_domestic_production_caps(n):
     """B15: every domestic gas production generator carries an annual cap (meta external_annual_caps -> ResearchImportAnnual constraints through the

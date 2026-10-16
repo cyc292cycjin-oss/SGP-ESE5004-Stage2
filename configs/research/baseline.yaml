@@ -139,7 +139,8 @@ research:
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0
       production_node_allocation: load_shares   # grade C: electricity load share per AC node within the country (no field-level basis registered)
       lng_terminals: research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv   # D1 registry; existing = operating + construction
-      lng_cap_factor: 2.5                 # decision 17: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity
+      lng_expansion: existing_only        # S3B R3 (decision 68): existing_only = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced terminal unit cost; main) | cap_factor = expansion to lng_cap_factor x existing at zero capex, proposed-only sites up to the proposed capacity (former S3 rule, sensitivity)
+      lng_cap_factor: 2.5                 # decision 17, used when lng_expansion = cap_factor: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity; also the liquid-H2 terminal cap (S3-2) in both modes
       lng_regasification_adder_eur_per_mwh: 0.0   # DATA_PENDING (registry fuel_price_lng_regasification_adder): LNG cost understated
     imports:                             # S3-2 (decisions 17, 18, 64): extra-ASEAN imports, same prices in both scenarios, imports only
       price_table: research_inputs/imports_v5/IMPORT_PRICES_2050.csv   # Neumann et al. 2025 Zenodo results (2040, min over exporters) x 1.20 (s3_2_imports_data.py)
