@@ -123,8 +123,32 @@ def main():
                 val.append(dict(tech=tech, node=node, average_distance_to_bus_km=float((d_bus * lw).sum() / lw.sum()), underwater_fraction=uw))
         log["timings"][tech] = round(time.time() - t0, 1)
     d = pd.DataFrame(rows)
-    # author cost reproduction
+    d["basis"] = "LAYOUT"
+    # nodes whose electric-base offshore generator has no S4A layout cell (S4A kept the author profile: research_renewable.untouched) get the
+    # potential-weighted mean distance of the same country and technology (grade C proxy; ASEAN mean when the country has no layout row)
     eb = pypsa.Network(str(EB)); g = eb.generators[eb.generators.p_nom_extendable]
+    proxy = []
+    for tech in ["offwind-ac", "offwind-dc"]:
+        have = set(zip(d.loc[d.tech == tech, "node"], d.loc[d.tech == tech, "cls"]))
+        for name, z in g[g.carrier == tech].iterrows():   # electric-base generators are class 0
+            node = str(z.bus)
+            if (node, 0) in have:
+                continue
+            c = str(nodes.at[node, "country"]) if node in nodes.index else str(eb.buses.at[node, "country"])   # DC converter nodes are not in the S4A AC node table
+            pool = d[(d.tech == tech) & (d.node == node)]; scope = "node"
+            if pool.empty:
+                pool = d[(d.tech == tech) & (d.country == c)]; scope = "country"
+            if pool.empty:
+                pool = d[d.tech == tech]; scope = "ASEAN"
+            avg = float((pool.average_distance_km * pool.potential_mw).sum() / pool.potential_mw.sum())
+            proxy.append(dict(tech=tech, node=node, country=c, cls=0, generator_key=f"{node}|0", cells=0, potential_mw=float(z.p_nom_max) if np.isfinite(z.p_nom_max) else np.nan,
+                              potential_mw_s4a=np.nan, average_distance_km=avg, landfall_km=LANDFALL_KM[tech], line_length_factor=LINE_LENGTH_FACTOR, onshore_region=node in on_reg.index,
+                              distance_basis=f"PROXY (grade C): no S4A layout cell at this node (author profile kept by S4A); potential-weighted mean distance of {scope} {tech} layout rows",
+                              basis=f"PROXY_{scope.upper()}_MEAN"))
+    if proxy:
+        d = pd.concat([d, pd.DataFrame(proxy)], ignore_index=True)
+    log["proxy_rows"] = proxy
+    # author cost reproduction
     v = pd.DataFrame(val)
     out = []
     for tech in ["offwind-ac", "offwind-dc"]:
@@ -145,8 +169,9 @@ def main():
     summ = {t: dict(nodes=int(len(x)), median_abs_rel_diff=float(x.rel_diff.abs().median()), p90_abs_rel_diff=float(x.rel_diff.abs().quantile(0.9)), max_abs_rel_diff=float(x.rel_diff.abs().max()),
                     corr_connection=float(np.corrcoef(x.connection_author_base, x.connection_predicted)[0, 1]) if len(x) > 2 else None)
             for t, x in ok.groupby("tech")}
-    log.update(validation=summ, rows=len(d), potential_check=dict(max_abs_rel=float((d.potential_mw / d.potential_mw_s4a - 1).abs().max())),
-               distance_summary={t: x.average_distance_km.describe().round(2).to_dict() for t, x in d.groupby("tech")}, seconds=round(time.time() - t0, 1))
+    lay = d[d.basis == "LAYOUT"]
+    log.update(validation=summ, rows=len(d), layout_rows=int(len(lay)), proxy_rows_n=int(len(d) - len(lay)), potential_check=dict(max_abs_rel=float((lay.potential_mw / lay.potential_mw_s4a - 1).abs().max())),
+               distance_summary={t: x.average_distance_km.describe().round(2).to_dict() for t, x in lay.groupby("tech")}, seconds=round(time.time() - t0, 1))
     (a.output / "OFFWIND_DISTANCE_S4C1_LOG.json").write_text(json.dumps(log, indent=1, default=str) + "\n")
     print(json.dumps(dict(validation=summ, potential_check=log["potential_check"], distance=log["distance_summary"], seconds=log["seconds"]), indent=1))
 

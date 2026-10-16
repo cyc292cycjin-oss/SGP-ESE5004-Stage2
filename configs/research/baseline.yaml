@@ -206,6 +206,7 @@ research:
     typhoon_premium_pct: 25.0             # Tarp-Johansen & Clausen (2006) DTU, +20-30 % for typhoon-class turbines; grade C, +-10 pp
     typhoon_threshold_per_decade: 1.0     # default 1 per 10 years; sensitivity 0.5 / 2 (columns of the exposure table)
     typhoon_node_table: research_inputs/renewable_v5/TYPHOON_EXPOSURE_BY_NODE.csv
+    offwind_distance_table: research_inputs/renewable_v5/OFFWIND_CONNECTION_DISTANCE_S4C1.csv   # S4C-1 (decision 82; user decision 2026-10-16): distance to shore per node x class, PyPSA-Eur v2025.07.0 formula on the S4A layout (scripts_project/s4c_1_offwind_distance.py); used when research.cost_layer.electric_base_candidates = cost_layer
     clip_p_max_pu: 0.01                   # S4A-4 fix: availability below 0.01 set to 0, as in the original chain (pypsa-asean config.default.yaml 365/383/402/423, build_renewable_profiles.py 846-848) and PyPSA-Eur v2025.07.0 (config lines 200/218/237); applied to the rebuilt 3 h series
   fleet:                                  # S4A-2 (L15): GEM GIPT 2026-09 units in service in 2050 (S1 lifetime rule) that are absent from the frozen electric base
     gem_additions: true                   # true = add them (scripts_project/s4a_fleet.py) | false = frozen stock only (former main, comparison)
@@ -260,6 +261,10 @@ research:
         file: research_inputs/cost_layers_v5/LAYER_B_AEO8_AUTHOR_RULE_2050.csv
         aeo8_overrides: true
     smr_cost_source: aeo8_author_rule_2050   # decision 46: SMR always from AEO8 D.15 (grade C, +-30 %) in both layers
+    electric_base_candidates: cost_layer     # S4C-1 (decision 82, implementing decision 50): cost_layer = the new-build components inherited from the frozen electric base (onwind incl. classes, offwind-ac/dc with the per-node connection cost, solar <- solar-utility, solar rooftop, AC lines, DC links, battery / home battery chargers and stores, distribution grid) priced from the active layer (s4c_layers.apply_cost_layer_s4c1) | electric_base = author costs of the frozen base (comparison)
+  corridors:                              # S4C supplement 01 (ledger L18, decision 16): corridor subsea shares (scripts_project/s4c_1_subsea_shares.py)
+    subsea_share: landmass_nonland        # landmass_nonland (main; user decision 2026-10-16, ASEAN-specific treatment "archipelagic subsea corridors", working principle 3: 0 when both nodes lie on the same connected landmass of the author land shape, else the not-land share of the great-circle route) | geometric_all (upper bound: not-land share for every pair) | zero (former state)
+    subsea_table: research_inputs/corridors/SUBSEA_SHARE_S4C1.csv
     registry: research_inputs/registry_v5/DATA_REGISTRY.csv
   s2:                                     # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)

@@ -5,23 +5,38 @@
   "country_shapes": "0e981608dde5490df001a283092f615e45ae8cbe00baae59ae9e790c1fabea92",
   "offshore_shapes": "84c0d6fe933816484c2cd55f5d39645a1a874b44a1d0c79366d6e795c3576f5f"
  },
+ "land_polygons": 223,
  "step_km": 0.5,
- "gap_stop": 0.05,
+ "gap_flag": 0.05,
  "pairs": 133,
  "candidate_pairs": 129,
  "cross_border_pairs": 24,
- "pairs_with_subsea_gt_0_05": 31,
- "max_gap": 0.25236593059936907,
- "stop_pairs": [
+ "components": 473,
+ "same_landmass_pairs": 110,
+ "different_landmass_pairs": 19,
+ "pairs_main_share_gt_0_05": 18,
+ "pairs_geometric_all_gt_0_05": 32,
+ "nodes_off_land": [
+  "ID_Maluku8 0",
+  "ID_Nusa-Tenggara14 0",
+  "ID_Sulawesi0 0",
+  "PH_Visayas7 0",
+  "TH2 3"
+ ],
+ "gap_pairs": [
   {
    "loc0": "ID_Sumatra2 0",
    "loc1": "ID_Sumatra3 4",
-   "gap_share": 0.07950530035335689
+   "gap_share": 0.07950530035335689,
+   "same_landmass": false,
+   "share_landmass_nonland": 0.4487632508833922
   },
   {
    "loc0": "MM2 16",
    "loc1": "MM2 3",
-   "gap_share": 0.25236593059936907
+   "gap_share": 0.25236593059936907,
+   "same_landmass": true,
+   "share_landmass_nonland": 0.0
   }
  ],
  "checks": [
@@ -30,81 +45,91 @@
    "check_expectation": "subsea",
    "candidate": true,
    "great_circle_km": 36.80552800376384,
-   "subsea_share": 0.527027027027027,
-   "not_land_share": 0.5540540540540541,
-   "gap_share": 0.02702702702702703
+   "same_landmass": false,
+   "subsea_share_eez": 0.527027027027027,
+   "subsea_share_not_land": 0.5540540540540541,
+   "share_landmass_nonland": 0.5540540540540541
   },
   {
    "check_label": "KH - VN",
    "check_expectation": "land",
    "candidate": true,
    "great_circle_km": 188.2526880900062,
-   "subsea_share": 0.0,
-   "not_land_share": 0.0,
-   "gap_share": 0.0
+   "same_landmass": true,
+   "subsea_share_eez": 0.0,
+   "subsea_share_not_land": 0.0,
+   "share_landmass_nonland": 0.0
   },
   {
    "check_label": "LA - TH",
    "check_expectation": "land (Mekong crossing)",
    "candidate": true,
    "great_circle_km": 220.13977672421473,
-   "subsea_share": 0.0,
-   "not_land_share": 0.0,
-   "gap_share": 0.0
+   "same_landmass": true,
+   "subsea_share_eez": 0.0,
+   "subsea_share_not_land": 0.0,
+   "share_landmass_nonland": 0.0
   },
   {
    "check_label": "MY peninsular - SG (existing AC line)",
    "check_expectation": "mostly land (Johor causeway)",
    "candidate": true,
    "great_circle_km": 191.49403910103794,
-   "subsea_share": 0.010443864229765013,
-   "not_land_share": 0.02088772845953002,
-   "gap_share": 0.010443864229765013
+   "same_landmass": false,
+   "subsea_share_eez": 0.010443864229765013,
+   "subsea_share_not_land": 0.02088772845953002,
+   "share_landmass_nonland": 0.02088772845953002
   },
   {
    "check_label": "MY - TH (existing HVDC / TTM gas)",
    "check_expectation": "land",
    "candidate": true,
    "great_circle_km": 105.50518781063218,
-   "subsea_share": 0.0,
-   "not_land_share": 0.0,
-   "gap_share": 0.0
+   "same_landmass": true,
+   "subsea_share_eez": 0.0,
+   "subsea_share_not_land": 0.0,
+   "share_landmass_nonland": 0.0
   },
   {
    "check_label": "MY peninsular - Sarawak (no candidate)",
    "check_expectation": "subsea",
    "candidate": false,
    "great_circle_km": 1213.6240523638235,
-   "subsea_share": 0.8513179571663921,
-   "not_land_share": 0.8542009884678747,
-   "gap_share": 0.002883031301482702
+   "same_landmass": false,
+   "subsea_share_eez": 0.8513179571663921,
+   "subsea_share_not_land": 0.8542009884678747,
+   "share_landmass_nonland": 0.8542009884678747
   },
   {
    "check_label": "MY peninsular - Sabah (no candidate)",
    "check_expectation": "subsea",
    "candidate": false,
    "great_circle_km": 1537.3447197793487,
-   "subsea_share": 0.9102439024390244,
-   "not_land_share": 0.9105691056910569,
-   "gap_share": 0.0003252032520325203
+   "same_landmass": false,
+   "subsea_share_eez": 0.9102439024390244,
+   "subsea_share_not_land": 0.9105691056910569,
+   "share_landmass_nonland": 0.9105691056910569
   },
   {
    "check_label": "PH Mindanao - MY Sabah (no candidate)",
    "check_expectation": "subsea",
    "candidate": false,
    "great_circle_km": 827.1654877831313,
-   "subsea_share": 0.6120845921450151,
-   "not_land_share": 0.6138972809667673,
-   "gap_share": 0.0018126888217522659
+   "same_landmass": false,
+   "subsea_share_eez": 0.6120845921450151,
+   "subsea_share_not_land": 0.6138972809667673,
+   "share_landmass_nonland": 0.6138972809667673
   },
   {
    "check_label": "ID Sumatra - MY peninsular (no candidate)",
    "check_expectation": "subsea",
    "candidate": false,
    "great_circle_km": 228.22825543682077,
-   "subsea_share": 0.10722100656455143,
-   "not_land_share": 0.11816192560175054,
-   "gap_share": 0.010940919037199124
+   "same_landmass": false,
+   "subsea_share_eez": 0.10722100656455143,
+   "subsea_share_not_land": 0.11816192560175054,
+   "share_landmass_nonland": 0.11816192560175054
   }
- ]
+ ],
+ "decision": "user 2026-10-16 ~23:15 / 23:20 SGT: landmass_nonland main (ASEAN-specific treatment 'archipelagic subsea corridors', working principle 3); zero and geometric_all kept as comparisons"
 }

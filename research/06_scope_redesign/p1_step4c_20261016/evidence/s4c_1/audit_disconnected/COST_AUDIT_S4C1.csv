@@ -1,0 +1,85 @@
+component,carrier,n,status,value_min,value_max,cost_rows,code,decision,max_abs_rel_dev,mismatches,before_mean,after_mean,ratio
+Generator,FT fuel import,1,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,H2 import,16,EXCEPTION_CONFIRMED,8421.6,8421.6,"PyPSA-Eur import-branch liquid-H2 terminal 7,018 x 1.2",s3_layers.add_imports,17,0.0,0.0,8421.6,8421.6,1.0
+Generator,LNG import,16,EXCEPTION_CONFIRMED,7018.0,7018.0,"PyPSA-Eur import-branch terminal constant 7,018 EUR/MW/a",s3_layers.add_gas_network,72,0.0,0.0,7018.0,7018.0,1.0
+Generator,ammonia import,1,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,coal,100,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,gas production,19,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,geothermal,97,EXCEPTION_CONFIRMED,306946.0306148886,306946.0306148886,geothermal (appended AEO8 D.15 row),s2_costs.build_research_costs; s1_candidates.add_site_candidates,"46, 52",3.629610806992863e-13,0.0,306946.0306148886,306946.0306148886,1.0
+Generator,lignite,100,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,methanol import,1,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,nuclear,96,COST_LAYER,789668.637168,789668.637168,nuclear,s1_candidates.add_nuclear,"38, 50",0.0,0.0,789668.6371680001,789668.6371680001,1.0
+Generator,nuclear SMR,97,EXCEPTION_CONFIRMED,728176.7270986043,728176.7270986043,nuclear SMR (appended AEO8 D.15 row),s2_costs.build_research_costs; s1_candidates.add_nuclear,46,5.434061048149294e-13,0.0,728176.7270986042,728176.7270986042,1.0
+Generator,offwind-ac,208,COST_LAYER,224325.3737211496,317575.74742668704,offwind + offwind-ac-station + 1.25 x (d x -connection-submarine + 20 km x -connection-underground),"s4c_layers.apply_cost_layer_s4c1; PyPSA-Eur v2025.07.0 add_electricity.py 541, 555-576","50, 82",0.0,0.0,277841.9200946472,230294.94308501988,0.8288703987021455
+Generator,offwind-dc,200,COST_LAYER,243664.27091296169,348013.248115362,offwind + offwind-dc-station + 1.25 x (d x -connection-submarine + 30 km x -connection-underground),"s4c_layers.apply_cost_layer_s4c1; PyPSA-Eur v2025.07.0 add_electricity.py 541, 555-576","50, 82",0.0,0.0,291037.96277334174,265075.79240195965,0.9107945570949407
+Generator,oil import,1,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Generator,onwind,290,COST_LAYER,99000.2119077,99000.2119077,onwind,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,114912.45114815164,99000.21190769998,0.8615272837585137
+Generator,ror,97,COST_LAYER,326037.709106,326037.709106,ror,s1_candidates.add_site_candidates,"50, 78",0.0,0.0,326037.709106,326037.709106,1.0
+Generator,solar,289,COST_LAYER,30742.8266909,30742.8266909,solar-utility,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,71545.77136145243,30742.8266909,0.4296945312894297
+Generator,solar rooftop,98,COST_LAYER,36609.9907189,36609.9907189,solar-rooftop,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,57483.20204304044,36609.9907189,0.6368815483084665
+Link,BEV charger,96,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,BtL,97,COST_LAYER,113725.55210625,113725.55210625,BtL x efficiency (decision 86 a),s2_layers.add_biomass_layer,"50, 86",0.0,0.0,113725.55210625002,113725.55210625002,1.0
+Link,CCGT,100,COST_LAYER,63205.3774716,63205.3774716,CCGT x efficiency,build_research_assets.build_fragment,50,0.0,0.0,63205.377471600004,63205.377471600004,1.0
+Link,CCGT CC,97,COST_LAYER,106445.1646469166,106445.1646469166,CCGT x eff + biomass CHP capture x EF_gas x cc,s2_layers.add_co2_layer,50,0.0,0.0,106445.16464691659,106445.16464691659,1.0
+Link,CO2 pipeline,90,COST_LAYER,21790.44000853744,277009.9047346137,L x ((1-s) CO2 pipeline + s CO2 submarine pipeline),s4c_layers.apply_cost_layer_s4c1,"16, 50, 59",0.0,0.0,51561.013397929084,54242.95713222101,1.052014953887614
+Link,CO2 sequestration,73,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,DAC,97,COST_LAYER,1096313.080978182,1096313.080978182,direct air capture x t/MWh_el,s2_layers.add_co2_layer,"11, 50",0.0,0.0,1096313.080978182,1096313.080978182,1.0
+Link,DC,5,COST_LAYER,64375.6838228504,110859.66808986187,length x ((1-s) HVDC overhead + s HVDC submarine) + HVDC inverter pair,s4c_layers.apply_cost_layer_s4c1; PyPSA-Eur add_electricity.py 491-502,"16, 50, 82",0.0,0.0,33365.22831767301,91156.99118363057,2.732095531183469
+Link,Fischer-Tropsch,100,COST_LAYER,114597.37881142201,114597.37881142201,Fischer-Tropsch x efficiency,build_research_assets.build_fragment,50,0.0,0.0,114597.378811422,114597.378811422,1.0
+Link,H2 Electrolysis,97,COST_LAYER,131799.814347,131799.814347,electrolysis,sector_adapter.add_hydrogen,50,0.0,0.0,131799.81434700004,131799.81434700004,1.0
+Link,H2 Fuel Cell,97,COST_LAYER,85645.3351355,85645.3351355,fuel cell x efficiency,sector_adapter.add_hydrogen,50,0.0,0.0,85645.33513549999,85645.33513549999,1.0
+Link,H2 pipeline,90,COST_LAYER,3343.7380938926717,36682.31763800727,L x ((1-s) H2 (g) pipeline + s H2 (g) submarine pipeline),s4c_layers.apply_cost_layer_s4c1,"16, 50, 59",0.0,0.0,7912.025851282371,8212.955014604293,1.0380344009206122
+Link,H2 turbine,97,COST_LAYER,20465.578133145,20465.578133145,"OCGT x efficiency (H2 turbine proxy, decision 42)",sector_adapter.add_hydrogen,"42, 50",0.0,0.0,20465.578133145,20465.578133145,1.0
+Link,Haber-Bosch,97,COST_LAYER,430572.2160816822,430572.2160816822,Haber-Bosch / electricity-input,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,430572.21608168224,430572.21608168224,1.0
+Link,OCGT,100,COST_LAYER,20465.578133145,20465.578133145,OCGT x efficiency,build_research_assets.build_fragment,50,0.0,0.0,20465.578133145,20465.578133145,1.0
+Link,OCGT methanol,97,COST_LAYER,20465.578133145,20465.578133145,OCGT x efficiency,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,20465.578133145,20465.578133145,1.0
+Link,SMR,100,COST_LAYER,71721.3576648,71721.3576648,SMR,build_research_assets.build_fragment,50,0.0,0.0,71721.35766479999,71721.35766479999,1.0
+Link,SMR CC,100,COST_LAYER,83196.7748942,83196.7748942,SMR CC,build_research_assets.build_fragment,50,0.0,0.0,83196.77489419999,83196.77489419999,1.0
+Link,Sabatier,97,COST_LAYER,54290.42196688001,54290.42196688001,methanation x efficiency,s4b_layers.apply_sector_alignment,"50, 70",0.0,0.0,54290.42196688,54290.42196688,1.0
+Link,ammonia cracker,97,COST_LAYER,51806.742412671236,51806.742412671236,Ammonia cracker / ammonia-input,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,51806.742412671236,51806.742412671236,1.0
+Link,battery charger,98,COST_LAYER,10118.2922469,10118.2922469,battery inverter,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,24093.216297021772,10118.292246900004,0.41996436350221755
+Link,battery discharger,98,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,biogas upgrading,97,COST_LAYER,34722.8061247,34722.8061247,biogas upgrading,s2_layers.add_biomass_layer,50,0.0,0.0,34722.8061247,34722.8061247,1.0
+Link,biomass EOP,97,COST_LAYER,117949.9917291696,117949.9917291696,biomass EOP x efficiency,s2_layers.add_biomass_layer,50,0.0,0.0,117949.99172916959,117949.99172916959,1.0
+Link,biomass EOP CC,97,COST_LAYER,198030.95110891,198030.95110891,EOP x eff + capture x EF_bio x cc,s2_layers.add_biomass_layer,50,0.0,0.0,198030.95110891003,198030.95110891003,1.0
+Link,biomass final-energy accounting,159,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,biomass-to-methanol,97,COST_LAYER,303041.67687076924,303041.67687076924,biomass-to-methanol / efficiency,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,303041.67687076924,303041.67687076924,1.0
+Link,coal feedstock,44,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,coal final-energy accounting,69,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,cooking LPG,190,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,cooking electric,95,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,cooking gas,95,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,electricity distribution grid,98,COST_LAYER,52871.8917317,52871.8917317,electricity distribution grid,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,50270.36147672705,52871.8917317,1.0517507767708683
+Link,electrobiofuels,97,COST_LAYER,192155.99816478722,192155.99816478722,BtL x eff + C stored x FT x eff,s4b_layers.apply_sector_alignment,"50, 70",0.0,0.0,192155.9981647872,192155.9981647872,1.0
+Link,gas feedstock,78,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,gas final-energy accounting,219,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,gas pipeline,104,COST_LAYER,423.87222021722584,26357.269337330046,L x ((1-s) CH4 (g) pipeline + s CH4 (g) submarine pipeline),s4c_layers.apply_cost_layer_s4c1,"15, 16, 50",0.0,0.0,2773.8622216053022,3234.714952933161,1.1661411759164995
+Link,gas production delivery,19,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,home battery charger,98,COST_LAYER,14743.788265,14743.788265,home battery inverter,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,14073.793494817186,14743.788265000003,1.0476058406306408
+Link,home battery discharger,98,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,industry biomass CC,94,COST_LAYER,64064.76750234019,64064.76750234019,biomass boiler capture x EF_bio x cc,s2_layers.add_demand_layer,50,0.0,0.0,64064.76750234018,64064.76750234018,1.0
+Link,industry biomass boiler,97,COST_LAYER,75695.36732946,75695.36732946,solid biomass boiler steam x eff,s2_layers.add_industrial_heat,50,0.0,0.0,75695.36732946,75695.36732946,1.0
+Link,industry biomass boiler CC,97,COST_LAYER,139760.13483180018,139760.13483180018,solid biomass boiler steam x eff + biomass boiler capture x EF_bio x cc,s2_layers.add_industrial_heat,50,0.0,0.0,139760.13483180018,139760.13483180018,1.0
+Link,industry electric boiler,97,COST_LAYER,7234.2200200446005,7234.2200200446005,electric boiler steam x eff,s2_layers.add_industrial_heat,50,0.0,0.0,7234.2200200446,7234.2200200446,1.0
+Link,industry gas boiler,97,COST_LAYER,5553.669358442399,5553.669358442399,gas boiler steam x eff,s2_layers.add_industrial_heat,50,0.0,0.0,5553.669358442398,5553.669358442398,1.0
+Link,industry heat pump,97,COST_LAYER,270097.91700672003,270097.91700672003,industrial heat pump high temperature x COP,s2_layers.add_industrial_heat,50,0.0,0.0,270097.91700672,270097.91700672,1.0
+Link,industry methanol,77,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,methanolisation,97,COST_LAYER,88395.64784401921,88395.64784401921,methanolisation x MWh_MeOH_per_MWh_H2,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,88395.64784401921,88395.64784401921,1.0
+Link,oil feedstock,192,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,oil final-energy accounting,1064,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,oil pool,200,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,process emissions,97,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,process emissions CC,97,COST_LAYER,218382.763515,218382.763515,cement capture,s2_layers.add_co2_layer,50,0.0,0.0,218382.76351499994,218382.76351499994,1.0
+Link,shipping methanol,76,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Link,waste incineration,94,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+StorageUnit,PHS,97,COST_LAYER,193291.381973,193291.381973,PHS,s1_candidates.add_site_candidates; s4b_candidates,"50, 78",0.0,0.0,193291.38197299998,193291.38197299998,1.0
+StorageUnit,hydro,97,COST_LAYER,193291.381973,193291.381973,hydro,s1_candidates.add_site_candidates; s4b_candidates,"50, 78",0.0,0.0,193291.38197299998,193291.38197299998,1.0
+Store,H2 Store Tank,97,COST_LAYER,2330.89375708,2330.89375708,hydrogen storage tank type 1 including compressor,sector_adapter.add_hydrogen,50,0.0,0.0,2330.8937570800003,2330.8937570800003,1.0
+Store,ammonia store,1,COST_LAYER,20.1894550568,20.1894550568,NH3 (l) storage tank incl. liquefaction,s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,20.1894550568,20.1894550568,1.0
+Store,battery,98,COST_LAYER,6733.1370299,6733.1370299,battery storage,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,6427.168612028674,6733.137029899998,1.0476054754964252
+Store,co2 atmosphere,11,NO_CAPEX_BY_DESIGN,0.0,0.0,-,-,-,0.0,,,,
+Store,co2 sequestered,8,EXCEPTION_CONFIRMED,30.0,30.0,PyPSA-Eur config sector.co2_sequestration_cost 30 EUR/t (technology-data has no sequestration-cost row),s2_layers.add_co2_layer,28-30,0.0,0.0,30.0,30.0,1.0
+Store,co2 stored,97,COST_LAYER,260.940172223,260.940172223,CO2 storage tank,s2_layers.add_co2_layer,50,0.0,0.0,260.940172223,260.940172223,1.0
+Store,home battery,98,COST_LAYER,9749.0481123,9749.0481123,home battery storage,s4c_layers.apply_cost_layer_s4c1,"50, 82",0.0,0.0,9306.029232419256,9749.048112300003,1.047605575784934
+Store,methanol store,1,COST_LAYER,26.0438958137,26.0438958137,General liquid hydrocarbon storage (product),s3_layers.add_ammonia_methanol,"44, 50",0.0,0.0,26.0438958137,26.0438958137,1.0
+Line,AC,86,COST_LAYER,5587.630124441775,29291.328759043652,length x ((1-s) HVAC overhead + s HVAC submarine),s4c_layers.apply_cost_layer_s4c1; PyPSA-Eur add_electricity.py 475-479,"16, 50, 82",0.0,0.0,11526.090718845242,12757.94570995776,1.1068753509894231
