@@ -132,6 +132,8 @@ research:
       cleanup_factor: 10                 # reporting cleanup tau_g = 10 x BarConvTol x max|x_g|
   s3:                                    # step 3 layers (scripts_project/s3_layers.py)
     fuel_carbon_mode: origin_neutral     # S3-5 (decision 64): origin_neutral = non-fossil liquid fuels zero at combustion, carbon booked at synthesis in the producer country, imports zero | producer_credit = S2 behaviour (sensitivity)
+    industry:                            # S3B R2 (decision 67)
+      other_bucket: pypsa_eur_2050       # pypsa_eur_2050 = UNSD other / construction / mining mapped to the PyPSA-Eur 'Other industrial sectors' 2050 ratios (main) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables)
     gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
       existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0

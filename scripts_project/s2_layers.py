@@ -498,6 +498,13 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     if ratio_source not in ("jrc_idees_2021", "technology_data_v015"):
         raise ValueError("Unknown research.s2.industry.ratio_source " + ratio_source)
     ind_path = repo / (I["pypsa_eur_tables"] if ratio_source == "jrc_idees_2021" else I["technology_data_sensitivity_tables"])[alloc_mode]
+    # S3B R2 (decision 67): other bucket. pypsa_eur_2050 = 'Other industrial sectors' 2050 ratios (main); idees_today = JRC-IDEES-2021 EU27 2019 carrier structure
+    # of that sector without process switch (sensitivity tables *_OTHER_IDEES_TODAY.csv written by s3_0_industry.py next to the main tables).
+    other_bucket = str(((cfg["research"].get("s3") or {}).get("industry") or {}).get("other_bucket", "pypsa_eur_2050"))
+    if other_bucket not in ("pypsa_eur_2050", "idees_today"):
+        raise ValueError("Unknown research.s3.industry.other_bucket " + other_bucket)
+    if other_bucket == "idees_today":
+        ind_path = ind_path.with_name(ind_path.stem + "_OTHER_IDEES_TODAY.csv")
     ind_summary = pd.read_csv(ind_path).set_index("country")
     # S3-0 interim handling of the ratio ammonia/methanol rows: convert_to_h2_and_gas = ammonia -> H2 + electricity (PyPSA-Eur ammonia:false route,
     # config MWh_H2_per_tNH3_electrolysis 5.93 / MWh_elec_per_tNH3_electrolysis 0.2473 per 5.166 MWh_NH3, lines 849/852/853), methanol -> methane +

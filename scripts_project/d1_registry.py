@@ -21,7 +21,7 @@ FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production",
              "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
              "industry_2050", "feedstock_territorial",  # S2 supplement 02 R1/R2 (scripts_project/s3_0_industry.py (ex s2b_industry.py), s2b_feedstock.py)
              "industry_sector_ratios", "corridors_apg",  # S3-0 (scripts_project/s3_0_industry_ratios.py, s3_0_corridors.py)
-             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline", "solver_r4"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py)
+             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline", "solver_r4", "industry_other_bucket"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
