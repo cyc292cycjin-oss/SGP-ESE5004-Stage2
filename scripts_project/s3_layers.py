@@ -59,7 +59,15 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     led["external_gas_generators_removed"] = len(ext)
     # 2. domestic production (decision 43)
     caps = pd.read_csv(repo / G["production_caps"], keep_default_na=False)
-    shares = electricity_load_shares(n, nodes)
+    load_shares = electricity_load_shares(n, nodes); shares = dict(load_shares); alloc_mode = str(G.get("production_node_allocation", "load_shares")); alloc_used = {}
+    if alloc_mode == "gem_fields":   # S4A-2: GEM GOGET field production shares (nearest node); countries without a field keep the load shares
+        gs = pd.read_csv(repo / G["gem_field_shares"])
+        for c, d in gs.groupby("country"):
+            tot = float(d.share_in_country.sum())
+            if tot > 0 and all(nd in n.buses.index for nd in d.node):
+                shares[c] = {str(nd): float(s) / tot for nd, s in zip(d.node, d.share_in_country)}; alloc_used[c] = "gem_fields"
+    elif alloc_mode != "load_shares":
+        raise ValueError("Unknown research.s3.gas.production_node_allocation " + alloc_mode)
     ensure_carrier(n, "gas wellhead"); ensure_carrier(n, "gas production"); ensure_carrier(n, "gas production delivery")
     n.meta.setdefault("external_annual_caps", {})
     prod_led = {}
@@ -85,7 +93,8 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
             add_link(n, f"{node} gas production delivery", c, "gas production delivery", [wb, f"{node} gas", atmosphere_bus(c)], [1.0, fug], role="SUPPLY",
                      extra=dict(fugitive_factor_id=fid))
             k += 1
-        prod_led[c] = dict(cap_mwh=cap, nodes=k, fugitive_t_per_mwh=fug, allocation=str(r.node_allocation))
+        prod_led[c] = dict(cap_mwh=cap, nodes=k, fugitive_t_per_mwh=fug, allocation=alloc_used.get(c, "load_shares" + (" (no GEM field with production; DATA_PENDING)" if alloc_mode == "gem_fields" else "")), shares={str(nd): float(s) for nd, s in shares[c].items() if s > 0})
+    led["production_node_allocation"] = alloc_mode
     led["production"] = prod_led
     # 3. pipelines
     on, sub = cost(costs, "CH4 (g) pipeline", "fixed"), cost(costs, "CH4 (g) submarine pipeline", "fixed")

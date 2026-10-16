@@ -179,7 +179,9 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
                      industry_other_bucket=((s3.get('industry') or {}).get('other_bucket') or 'pypsa_eur_2050 (key absent: built before S3B R2)'),
                      lng_expansion=((s3.get('gas') or {}).get('lng_expansion') or 'cap_factor (key absent: built before S3B R3)'),
                      renewable_profile_variant=((n.meta.get('research_config',{}).get('renewable') or {}).get('profile_variant') or 'original (key absent: built before S4A-1)'),
-                     renewable_resource_classes=((n.meta.get('research_config',{}).get('renewable') or {}).get('resource_classes') or 1))
+                     renewable_resource_classes=((n.meta.get('research_config',{}).get('renewable') or {}).get('resource_classes') or 1),
+                     fleet_gem_additions=((n.meta.get('research_config',{}).get('fleet') or {}).get('gem_additions') if 'fleet' in n.meta.get('research_config',{}) else 'absent (built before S4A-2)'),
+                     gas_production_node_allocation=((s3.get('gas') or {}).get('production_node_allocation') or 'load_shares (key absent: built before S4A-2)'))
     checks['s3_switches_recorded']=(not s3) or all(v is not None for k,v in s3_switches.items() if k!='config_overrides')  # S1/S2 networks without an s3 config section are exempt
     return dict(gate='B12_CONFIG_SWITCH_HASH_CONSISTENCY',passed=all(checks.values()),checks=checks,research_config_sha256=expected,s3_switches=s3_switches,snapshot_weightings=weights)
 
