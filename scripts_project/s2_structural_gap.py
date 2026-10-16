@@ -24,7 +24,7 @@ def country_table(n):
     links = n.links
     xb = links[(links.carrier == "CO2 pipeline") & (links.border_class == "cross_border")] if "border_class" in links else links.iloc[0:0]
     rows = []
-    for c in sorted(set(n.buses.country.dropna()) - {""}):
+    for c in sorted(set(n.buses.country.dropna()) - {"", "ASEAN"}):   # ASEAN = regional commodity pools (S3-2), not a country
         loads = n.loads[n.loads.country == c]
         atm = f"co2 atmosphere {c}"
         meters = links[(links.country == c) & links.carrier.str.endswith("final-energy accounting") & (links.bus2 == atm)]

@@ -51,14 +51,23 @@ def test_r1_industry_routes(registry):
     vn = s.loc["VN"]
     assert vn.crude_steel_2019_t == pytest.approx(17469e3) and vn.crude_steel_2050_t == pytest.approx(17469e3 * vn.industry_multiplier, rel=1e-9)
     assert vn.primary_dri_2050_t == pytest.approx(0.3 * vn.crude_steel_2050_t, rel=1e-9)
-    assert vn.pe_hydrogen_mwh == pytest.approx(1.7 * vn.primary_dri_2050_t, rel=1e-9)        # PyPSA-Eur config H2_DRI line 839
+    # S3-0 (decision 61): PyPSA-Eur ratios reproduced from JRC-IDEES-2021 for all sub-sectors; technology-data steel/cement = sensitivity file
+    ratios = pd.read_csv(REG / "INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv", index_col=0)
+    assert ratios.shape[1] == 27 and ratios.at["hydrogen", "DRI + Electric arc"] == pytest.approx(1.7) and ratios.at["heat", "Cement"] > 0   # H2_DRI line 839; low-T heat row
+    h2_dri = 1.7 * vn.primary_dri_2050_t
+    assert abs(vn.pe_hydrogen_mwh - h2_dri) < 0.05 * h2_dri   # DRI hydrogen +- the chemical rows (HVC +0.173, chlorine by-product -0.937 MWh_H2/t)
     assert s.loc["ID"].clinker_2019_t == pytest.approx(29379.1246447e3 / 0.52, rel=1e-9)         # EDGAR 2.A.1 / IPCC EF
-    assert s.loc["ID"].cement_fuel_to_methane_2050_mwh == pytest.approx((0.9444 + 0.0002) * s.loc["ID"].clinker_2050_t, rel=1e-6)
-    assert vn.steel_coal_removed_2050_mwh > 0 and vn.pe_coal_mwh < vn.bas_coal_mwh
+    assert s.loc["ID"].cement_2050_t == pytest.approx(s.loc["ID"].clinker_2019_t / 0.656 * s.loc["ID"].industry_multiplier, rel=1e-6)   # technology-data cement finishing clinker-input
+    assert (s.pe_coal_mwh == 0).all() and vn.pe_coal_mwh < vn.bas_coal_mwh   # 2050 ratios carry coal/coke only in Integrated steelworks (not used: primary route = H2-DRI)
     assert s.loc["SG"].biomass_overflow_agriculture_to_gas_mwh > 0 and s.loc["VN"].biomass_overflow_industry_to_gas_mwh > 0
-    assert (s.pe_heat_mwh == 0).all()   # ratio heat rows pending / technology-data rows carry none
-    assert r.loc["industry_sector_ratios_pypsa_eur_2050", "status"] == "DATA_PENDING" and r.loc["industry_carrier_mode", "value"] == "pypsa_eur_2050"
-    assert float(r.loc["industry_clinker_emission_factor_ipcc", "value"]) == 0.52 and float(r.loc["industry_eaf_electricity_td_v015", "value"]) == pytest.approx(0.6395)
+    assert (s.pe_heat_mwh > 0).sum() >= 10 and (s.pe_ammonia_mwh >= 0).all()   # low-temperature heat row for every country with industry (TL none)
+    assert r.loc["industry_sector_ratios_pypsa_eur_2050", "status"] == "REGISTERED" and r.loc["industry_carrier_mode", "value"] == "pypsa_eur_2050"
+    assert r.loc["industry_ratio_source", "value"].startswith("jrc_idees_2021") and float(r.loc["industry_sector_ratios_eu27_ammonia_2019", "value"]) == pytest.approx(15712.857, rel=1e-5)
+    assert float(r.loc["industry_clinker_emission_factor_ipcc", "value"]) == 0.52
+    td = pd.read_csv(DEM / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative_TD_SENSITIVITY.csv").set_index("country")
+    assert td.loc["VN"].pe_hydrogen_mwh == pytest.approx(vn.pe_hydrogen_mwh, rel=1e-9) and td.loc["ID"].pe_gas_mwh > 0 and td.loc["ID"].pe_electricity_mwh != s.loc["ID"].pe_electricity_mwh   # S2B steel/cement method kept as sensitivity
+    cmp = pd.read_csv(DEM / "INDUSTRY_2050_COMPARISON_BAS_S2B_S3.csv")
+    assert len(cmp) == 99 and set(cmp.columns) >= {"bas_fixed_mwh", "s2b_technology_data_mwh", "s3_0_idees_mwh"}
     gaps = pd.read_csv(DEM / "INDUSTRY_2050_GAPS.csv")
     assert (gaps[gaps["mode"] == "aeo8_ats_relative"].country == "VN").any()
 
@@ -72,7 +81,10 @@ def test_r2_territorial_feedstock(registry):
     idn = f.loc["ID"]
     expect = float(idn.msw_2050_t) * float(idn.plastic_share) * (0.3747 * 0.739) * 1.0 * 0.75 * 1.0 * 44 / 12
     assert float(idn.plastics_burned_co2_2050_t) == pytest.approx(expect, rel=1e-3)
-    assert float(f.loc["LA"].plastics_burned_co2_2050_t) == 0.0 and r.loc["waste_plastic_share_LA", "status"] == "DATA_PENDING"
+    la = f.loc["LA"]   # S3-0 (decision 63): MSW-weighted proxies, grade C, sensitivity 0 .. observed max
+    assert float(la.plastics_burned_co2_2050_t) > 0 and str(la.plastic_share_is_proxy) == "True" and "proxy" in str(la["flags"])
+    assert r.loc["waste_plastic_share_LA", "status"] == "REGISTERED" and float(r.loc["waste_plastic_share_LA", "sensitivity_low"]) == 0.0 and float(r.loc["waste_plastic_share_LA", "sensitivity_high"]) == pytest.approx(0.29)
+    assert all(str(f.loc[c].open_burned_share_is_proxy) == "True" for c in ["KH", "TH", "VN"]) and str(f.loc["ID"].open_burned_share_is_proxy) == "False"
     assert r.loc["feedstock_carbon_mode", "value"] == "territorial" and float(r.loc["plastics_total_carbon_fraction_ipcc", "value"]) == 0.75
     assert float(f.loc["TH"].full_release_2050_t) > float(f.loc["TH"].territorial_total_2050_t)
 

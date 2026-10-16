@@ -3,7 +3,10 @@
 Base year 2019: the frozen UNSD reconstruction (research_inputs/assembly_v1/sources/
 BASE_RECONSTRUCTION.json, decision A maximum-overlap baseline values where accepted) for fuels,
 and the UNSD 2019 electricity transactions (electricity.json) by sector.
-Growth: ASEAN totals per sector follow AEO8 BAS 2050 (Appendix C.3, Mtoe x 11.63 TWh/Mtoe).
+Growth (S3B R1, decision 66): ratio method (main) - ASEAN-10 sector total 2050 = UNSD 2019 base x bridge 2019->2022 x AEO8 BAS
+sector growth 2022->2050 (Appendix C.3); bridge from the AEO8 2019 historical values (Chapter 1, PDF p.30-31) where printed,
+otherwise 1 (grade C, WDI real GDP 2019->2022 as sensitivity). The former level method (ASEAN totals = AEO8 BAS 2050 absolute,
+Mtoe x 11.63 TWh/Mtoe) is written as DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv (research.demand.growth_method).
 Country allocation (R3, decision 57, S2 supplement 02): 2019 country-sector energy x r_c, where
 r_c = G_c / G_ASEAN and G_c = (AEO8 C.8 final energy per capita ATS 2050 x D.1 population 2050) /
 (same product 2022); calibrated per sector so that the ASEAN-10 sum equals the AEO8 BAS 2050 sector
@@ -37,6 +40,13 @@ AEO8_CSV = "AEO8_2050_ASEAN_TOTALS.csv"
 AEO8_COUNTRY_CSV = "AEO8_2050_BY_COUNTRY.csv"   # R3: C.8 per-capita indicators + D.1 population (PDF p.189-190)
 AEO8_COUNTRY_NAME = {"Brunei Darussalam": "BN", "Cambodia": "KH", "Indonesia": "ID", "Lao PDR": "LA", "Malaysia": "MY", "Myanmar": "MM",
                      "Philippines": "PH", "Singapore": "SG", "Thailand": "TH", "Vietnam": "VN"}
+WDI_CSV = "WDI_DATABANK_2019_2025_ASEAN11.csv"   # raw4 World Bank DataBank export (GDP per capita PPP constant 2021 intl$, population)
+# S3B R1: AEO8 2019 historical values printed in Chapter 1 (text under Figure 1.6): industry 156.2 Mtoe in 2019 vs 185.7 in 2022; industry
+# share of TFEC 38.4 % (2019) -> 43 % (2022); domestic transport ~145 Mtoe in 2022 = 33.6 % of TFEC vs 36 % in 2019. PDF p.30 (printed 28) and p.31 (printed 29).
+AEO8_2019 = dict(industry_2019_mtoe=156.2, industry_2022_mtoe_text=185.7, industry_share_2019=0.384, transport_share_2019=0.36, transport_share_rounding=0.005,
+                 locator_industry="AEO8 Chapter 1, text under Figure 1.6 (TFEC by sector 2005-2022), PDF p.30 (printed 28)",
+                 locator_transport="AEO8 Chapter 1, PDF p.31 (printed 29): domestic transport ~145 Mtoe in 2022, 33.6 % of TFEC vs 36 % in 2019",
+                 locator_gdp="AEO8 Chapter 1, PDF p.28 (printed 26): GDP -3 % in 2020 vs 2019; 2022 growth 5.3 %")
 ALLOCATION_FILES = {"aeo8_ats_relative": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", "gdp": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv",
                     "population": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv"}
 GROWTH_CSV = "GROWTH_CHAIN_2019_2050_WDI_SSP2.csv"
@@ -189,32 +199,59 @@ def main():
         df.at[i, "base_2019_mwh"] = float(r["value_MWh"]); df.at[i, "base_status"] = "UNSD_EB_2019_NO_FLOW_ZERO"
         df.at[i, "base_source"] = "UNSD Energy Balance 2019 export (" + r["source_file"] + "): " + r["note"]; df.at[i, "base_source_sha256"] = eb_sha
     # ---- multipliers -------------------------------------------------------------------------------
-    def allocate(g):
+    # ---- S3B R1: bridge 2019 -> 2022 and AEO8 BAS growth 2022 -> 2050 per sector -----------------------------
+    tfec19 = AEO8_2019["industry_2019_mtoe"] / AEO8_2019["industry_share_2019"]
+    tr19 = AEO8_2019["transport_share_2019"] * tfec19
+    wdi = pd.read_csv(SRC_DIR / WDI_CSV); shas["wdi"] = src_sha(WDI_CSV)
+    def wdi_val(iso3, code, year):
+        r = wdi[(wdi["Country Code"] == iso3) & (wdi["Series Code"] == code)]
+        return float(r[f"{year} [YR{year}]"].iloc[0])
+    gdp_wdi = {ISO2_FROM_ISO3[i]: {y: wdi_val(i, "NY.GDP.PCAP.PP.KD", y) * wdi_val(i, "SP.POP.TOTL", y) for y in (2019, 2022)} for i in sorted(set(wdi["Country Code"].dropna())) if i in ISO2_FROM_ISO3}
+    gdp_growth_19_22 = {c: v[2022] / v[2019] for c, v in gdp_wdi.items()}
+    gdp_growth_asean10 = sum(gdp_wdi[c][2022] for c in ASEAN10) / sum(gdp_wdi[c][2019] for c in ASEAN10)
+    bridge_main = {"Industry": aeo8_sec["Industry"]["2022"] / AEO8_2019["industry_2019_mtoe"], "Transport": aeo8_sec["Transport"]["2022"] / tr19,
+                   "Residential": 1.0, "Commercial": 1.0, "AgricultureOthers": 1.0}
+    bridge_gdp = dict(bridge_main, Residential=gdp_growth_asean10, Commercial=gdp_growth_asean10, AgricultureOthers=gdp_growth_asean10)
+    growth_bas = {s: aeo8_sec[s]["2050"] / aeo8_sec[s]["2022"] for s in SECTORS}
+    rest19 = tfec19 - AEO8_2019["industry_2019_mtoe"] - tr19
+    rest22 = aeo8_2022_total - aeo8_sec["Industry"]["2022"] - aeo8_sec["Transport"]["2022"]
+    tr_lo = (AEO8_2019["transport_share_2019"] + AEO8_2019["transport_share_rounding"]) * tfec19; tr_hi = (AEO8_2019["transport_share_2019"] - AEO8_2019["transport_share_rounding"]) * tfec19
+    bridge_info = dict(tfec_2019_mtoe_derived=tfec19, transport_2019_mtoe_derived=tr19, transport_bridge_range=[aeo8_sec["Transport"]["2022"] / tr_lo, aeo8_sec["Transport"]["2022"] / tr_hi],
+                       residential_commercial_agriculture_2019_mtoe_derived=rest19, residential_commercial_agriculture_2022_mtoe=rest22, combined_bridge_rest=rest22 / rest19,
+                       industry_2022_c3_vs_text=[aeo8_sec["Industry"]["2022"], AEO8_2019["industry_2022_mtoe_text"]], wdi_gdp_growth_2019_2022=gdp_growth_19_22, wdi_gdp_growth_2019_2022_asean10=gdp_growth_asean10,
+                       bridge_main=bridge_main, bridge_gdp_sensitivity=bridge_gdp, growth_bas_2022_2050=growth_bas)
+
+    def allocate(g, method="ratio", bridge=None):
         tfec = df[df.sector.isin(SECTORS)]
         base_cs = tfec.groupby(["country", "sector"]).base_2019_mwh.sum()
         k, cal = {}, {}
+        bridge = bridge or bridge_main
         for s in SECTORS:
-            target = aeo8_sec[s]["2050"] * MWH_PER_MTOE
+            base_s = sum(base_cs.get((c, s), 0.0) for c in ASEAN10)
+            target = aeo8_sec[s]["2050"] * MWH_PER_MTOE if method == "level" else base_s * bridge[s] * growth_bas[s]
             w = sum(base_cs.get((c, s), 0.0) * g[c] for c in ASEAN10)
             k[s] = target / w
-            cal[s] = dict(target_mwh=target, weighted_base_asean10_mwh=w, k=k[s],
-                          base_2019_asean10_mwh=sum(base_cs.get((c, s), 0.0) for c in ASEAN10))
+            cal[s] = dict(target_mwh=target, weighted_base_asean10_mwh=w, k=k[s], method=method, bridge=(bridge[s] if method == "ratio" else None), growth_bas=growth_bas[s],
+                          base_2019_asean10_mwh=base_s)
         return g, k, cal
 
-    def build(g, label, weight_key):
-        g, k, cal = allocate(g)
+    def build(g, label, weight_key, method="ratio", bridge=None):
+        g, k, cal = allocate(g, method, bridge)
         out = []
         for r in df.to_dict("records"):
             c, s = r["country"], r["sector"]
+            gm = method
             if s in SECTORS:
-                mult, method = g[c] * k[s], f"AEO8_BAS_sector_total x {label} share (2019 energy x {weight_key}), k_sector calibration"
+                mult = g[c] * k[s]
+                method_txt = (f"AEO8_BAS_sector_total x {label} share (2019 energy x {weight_key}), k_sector calibration" if gm == "level" else
+                              f"ratio: UNSD 2019 x bridge 2019-2022 x AEO8 BAS growth 2022-2050 (ASEAN-10 sector), {label} share (2019 energy x {weight_key}), k_sector normalisation")
             elif s == "NonEnergyUse":
-                mult, method = g[c] * k["Industry"], f"industry multiplier ({label})"
+                mult, method_txt = g[c] * k["Industry"], f"industry multiplier ({label}, {gm})"
             else:  # international bunkers
-                mult, method = 1.0, "CONSTANT_2019 (research-layer convention ASSEMBLY_V1_BUNKER_CONSTANT_2019)"
+                mult, method_txt = 1.0, "CONSTANT_2019 (research-layer convention ASSEMBLY_V1_BUNKER_CONSTANT_2019)"
             pending = s == "InternationalBunkers" and r["base_status"] not in ("NUMERIC_INPUT_READY", "ACCEPTED_BLEND_BASELINE_A", "SOURCE_BOUNDED_ZERO", "UNSD_EB_2019_NO_FLOW_ZERO")
             out.append(dict(r, aeo8_sector=AEO8_LABEL.get(s, "outside TFEC" if s != "NonEnergyUse" else "outside TFEC (non-energy use)"),
-                            growth_method=method, country_multiplier=g[c], sector_calibration_k=k.get(s, k["Industry"] if s == "NonEnergyUse" else 1.0),
+                            growth_method=method_txt, country_multiplier=g[c], sector_calibration_k=k.get(s, k["Industry"] if s == "NonEnergyUse" else 1.0),
                             multiplier_total=mult, value_2050_mwh=("" if pending else r["base_2019_mwh"] * mult),
                             in_existing_electricity_load=r["carrier"] == "electricity" and s in SECTORS,
                             existing_electricity_load_2050_mwh=astar.get(c, "") if (r["carrier"] == "electricity" and s in SECTORS) else "",
@@ -228,16 +265,53 @@ def main():
     main_df, g_aeo8, k_aeo8, cal_aeo8 = build(g_aeo8_in, "AEO8 ATS per-capita x population relative factor", "aeo8_ats_rel")
     gdp_df, g_gdp, k_gdp, cal_gdp = build(g_gdp_in, "GDP", "gdp_19_50")
     pop_df, g_pop, k_pop, cal_pop = build(g_pop_in, "population", "pop_19_50")
+    level_df, _, k_level, cal_level = build(g_aeo8_in, "AEO8 ATS per-capita x population relative factor", "aeo8_ats_rel", method="level")
+    bgdp_df, _, k_bgdp, cal_bgdp = build(g_aeo8_in, "AEO8 ATS per-capita x population relative factor", "aeo8_ats_rel", method="ratio", bridge=bridge_gdp)
+    level_gdp_df, _, k_level_gdp, _ = build(g_gdp_in, "GDP", "gdp_19_50", method="level")   # S2 (pre-R3) main: level + GDP allocation, for the shipping chain only
     cols = ["country", "sector", "carrier", "account", "aeo8_sector", "base_2019_mwh", "base_status", "growth_method",
             "country_multiplier", "sector_calibration_k", "multiplier_total", "value_2050_mwh", "in_existing_electricity_load",
             "existing_electricity_load_2050_mwh", "status", "decision_ref", "base_source", "base_source_sha256"]
     order = {s: i for i, s in enumerate(SECTORS + ["NonEnergyUse", "InternationalBunkers"])}
-    for d in (main_df, gdp_df, pop_df):
+    for d in (main_df, gdp_df, pop_df, level_df, bgdp_df):
         d["_o"] = d.sector.map(order)
         d.sort_values(["country", "_o", "carrier", "account"], inplace=True)
     write_csv(main_df.to_dict("records"), DEMAND_DIR / ALLOCATION_FILES["aeo8_ats_relative"], cols)
     write_csv(gdp_df.to_dict("records"), DEMAND_DIR / ALLOCATION_FILES["gdp"], cols)
     write_csv(pop_df.to_dict("records"), DEMAND_DIR / ALLOCATION_FILES["population"], cols)
+    write_csv(level_df.to_dict("records"), DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv", cols)
+    write_csv(bgdp_df.to_dict("records"), DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_BRIDGE_GDP_SENSITIVITY.csv", cols)
+    # ---- S3B R1 tables: basis gap per sector, level vs ratio by country and sector, shipping chain ---------------
+    def vals(d):
+        x = d.copy(); x["v"] = pd.to_numeric(x.value_2050_mwh, errors="coerce").fillna(0.0); return x
+    base_tf0 = df[df.sector.isin(SECTORS)]
+    gap_rows = []
+    for s in SECTORS:
+        b19 = float(base_tf0[(base_tf0.sector == s) & base_tf0.country.isin(ASEAN10)].base_2019_mwh.sum())
+        a22 = aeo8_sec[s]["2022"] * MWH_PER_MTOE
+        gap_rows.append(dict(sector=s, unsd_2019_asean10_mwh=b19, bridge_main=bridge_main[s], bridge_gdp_sensitivity=bridge_gdp[s], aeo8_2022_mwh=a22,
+                             basis_gap_main=a22 / (b19 * bridge_main[s]) if b19 else None, basis_gap_gdp_bridge=a22 / (b19 * bridge_gdp[s]) if b19 else None,
+                             aeo8_bas_growth_2022_2050=growth_bas[s], level_2050_asean10_mwh=cal_level[s]["target_mwh"], ratio_2050_asean10_mwh=cal_aeo8[s]["target_mwh"],
+                             level_over_ratio=cal_level[s]["target_mwh"] / cal_aeo8[s]["target_mwh"] if cal_aeo8[s]["target_mwh"] else None))
+    write_csv(gap_rows, DEMAND_DIR / "DEMAND_2050_BASIS_GAP_BY_SECTOR.csv", list(gap_rows[0].keys()))
+    lv, rt = vals(level_df), vals(main_df)
+    gm_rows = []
+    for (c, s), g_ in rt.groupby(["country", "sector"]):
+        lv_v = float(lv[(lv.country == c) & (lv.sector == s)].v.sum()); rt_v = float(g_.v.sum())
+        gm_rows.append(dict(country=c, sector=s, base_2019_mwh=float(g_.base_2019_mwh.sum()), level_2050_mwh=lv_v, ratio_2050_mwh=rt_v, ratio_minus_level_mwh=rt_v - lv_v, ratio_over_level=(rt_v / lv_v) if lv_v else None))
+    write_csv(gm_rows, DEMAND_DIR / "DEMAND_2050_GROWTH_METHOD_COMPARISON.csv", list(gm_rows[0].keys()))
+    lg = vals(level_gdp_df); bg = vals(bgdp_df)
+    def ship(d):
+        return dict(domestic_mwh=float(d[d.account == "DomesticShippingFuel"].v.sum()), international_mwh=float(d[d.account == "InternationalShippingBunker"].v.sum()))
+    ship_chain = dict(s2_level_gdp_allocation=ship(lg), r3_level_aeo8_allocation=ship(lv), s3b_ratio_aeo8_allocation=ship(rt), s3b_ratio_bridge_gdp=ship(bg),
+                      transport_k=dict(level_gdp=k_level_gdp["Transport"], level_aeo8=k_level["Transport"], ratio_aeo8=k_aeo8["Transport"]),
+                      domestic_by_country={c: dict(level_gdp=float(lg[(lg.country == c) & (lg.account == "DomesticShippingFuel")].v.sum()), level_aeo8=float(lv[(lv.country == c) & (lv.account == "DomesticShippingFuel")].v.sum()),
+                                                   ratio_aeo8=float(rt[(rt.country == c) & (rt.account == "DomesticShippingFuel")].v.sum()), base_2019=float(df[(df.country == c) & (df.account == "DomesticShippingFuel")].base_2019_mwh.sum()))
+                                           for c in ASEAN})
+    kh = {nm: dict(transport_mwh=float(d_[(d_.country == "KH") & (d_.sector == "Transport")].v.sum()), road_mwh=float(d_[(d_.country == "KH") & (d_.account == "RoadResidualFuel")].v.sum()),
+                   multiplier=float(d_[(d_.country == "KH") & (d_.sector == "Transport")].multiplier_total.astype(float).iloc[0])) for nm, d_ in [("level", lv), ("ratio", rt), ("ratio_bridge_gdp", bg)]}
+    r1 = dict(bridge=bridge_info, basis_gap=gap_rows, shipping_chain=ship_chain, kh_transport=kh, calibration_ratio=cal_aeo8, calibration_level=cal_level, calibration_ratio_bridge_gdp=cal_bgdp,
+              aeo8_2019=AEO8_2019, energy_totals_year_pypsa_eur=dict(value=2019, locator="PyPSA-Eur v2025.07.0 config.default.yaml energy: energy_totals_year: 2019"))
+    write_json(dict(script=SCRIPT, sources=shas, r1=r1), DEMAND_DIR / "DEMAND_2050_R1_GROWTH_METHOD.json")
     # ---- cross-checks ----------------------------------------------------------------------------------
     def num(d):
         return pd.to_numeric(d.value_2050_mwh, errors="coerce").fillna(0.0)
@@ -305,6 +379,8 @@ def main():
     checks["bunkers_vs_frozen_accepted_2019"] = [dict(key=k, frozen_mwh=float(v), table_mwh=(float(bunk[(bunk.country == k.split(":")[0]) & (bunk.account == k.split(":")[3])].value_2050_mwh.iloc[0]) if len(bunk[(bunk.country == k.split(":")[0]) & (bunk.account == k.split(":")[3]) & (bunk.value_2050_mwh != "")]) else None)) for k, v in frozen.items()]
     checks["electricity_sector_split_method"] = {c: es[c]["method"] for c in ASEAN}
     checks["calibration_aeo8"] = cal_aeo8
+    checks["calibration_level_sensitivity"] = cal_level
+    checks["growth_method_main"] = "ratio (S3B R1, decision 66)"
     checks["calibration_gdp"] = cal_gdp
     checks["calibration_pop"] = cal_pop
     checks["country_allocation_main"] = "aeo8_ats_relative"
@@ -317,9 +393,9 @@ def main():
         reg.add(f"demand_aeo8_bas_2050_{s}", f"AEO8 BAS 2050 TFEC {AEO8_LABEL[s]} (ASEAN-10 total)", aeo8_sec[s]["2050"], "Mtoe", "A",
                 "8th ASEAN Energy Outlook, Appendix C.3 TFEC by Sector", "PDF p.184 (printed 182), BAS 2050", f"AEO8 pdf:{AEO8_PDF_SHA}; extraction:{shas['aeo8_csv']}",
                 decision_ref="22,34")
-        reg.add(f"demand_sector_calibration_k_{s}", f"Sector calibration factor k = AEO8 BAS 2050 {s} / sum(ASEAN10 2019 base x r_c) with r_c the AEO8 ATS relative factor (R3, decision 57); "
-                f"GDP allocation k = {k_gdp[s]:.6g}, population allocation k = {k_pop[s]:.6g}",
-                k_aeo8[s], "ratio", "B", "derived", "d1_demand_2050.allocate", src, sensitivity_low=min(k_gdp[s], k_pop[s]), sensitivity_high=max(k_gdp[s], k_pop[s]), decision_ref="22,34,57")
+        reg.add(f"demand_sector_calibration_k_{s}", f"Sector normalisation k (ratio method, S3B R1) = UNSD 2019 ASEAN-10 {s} x bridge x AEO8 BAS growth / sum(ASEAN10 2019 base x r_c); "
+                f"level method k = {k_level[s]:.6g}; GDP allocation k = {k_gdp[s]:.6g}, population allocation k = {k_pop[s]:.6g}",
+                k_aeo8[s], "ratio", "B", "derived", "d1_demand_2050.allocate", src, sensitivity_low=min(k_gdp[s], k_pop[s], k_level[s]), sensitivity_high=max(k_gdp[s], k_pop[s], k_level[s]), decision_ref="22,34,57,66")
     for c in ASEAN:
         tot = float(tf[tf.country == c].v.sum())
         alt = [float(pd.to_numeric(x[(x.country == c) & x.sector.isin(SECTORS)].value_2050_mwh, errors="coerce").sum()) for x in (gdp_df, pop_df)]
@@ -351,9 +427,31 @@ def main():
             "aeo8_ats_relative", "flag", "B", "S2 supplement 02 R3", "configs/research/baseline.yaml research.demand.country_allocation", f"AEO8 pdf:{AEO8_PDF_SHA}", decision_ref="57")
     reg.add("demand_mtoe_to_mwh", "Mtoe -> MWh conversion used for AEO8 totals (1 toe = 11.63 MWh)", MWH_PER_MTOE, "MWh/Mtoe", "A",
             "IEA toe definition; research convention", "configs/research/baseline.yaml: mtoe_method ASSEMBLY_V1_MTOE_CONVENTION_11P63_TWH", shas["aeo8_csv"])
-    reg.add("demand_2019_2022_bridge", "AEO8 prints only 2005 and 2022 historical values; 2019 (UNSD) -> 2050 uses the AEO8 2050 absolute level; the implied "
-            "AEO8-2022 / UNSD-2019 ratios are reported in DEMAND_2050_CROSSCHECKS.json as a consistency check, not applied",
-            "ABSOLUTE_2050_ANCHOR", "method", "B", "AEO8 Appendix C.3 columns 2005, 2022, 2025..2050", "PDF p.184", f"AEO8 pdf:{AEO8_PDF_SHA}", decision_ref="22")
+    reg.add("demand_growth_method", "Main growth method = ratio (S3B R1, decision 66): 2050 = UNSD 2019 base x bridge 2019->2022 x AEO8 BAS sector growth 2022->2050, ASEAN-10 sector totals "
+            "normalised over the r_c allocation (decision 57); level (former main: AEO8 BAS 2050 absolute sector totals) kept as sensitivity file *_LEVEL_SENSITIVITY.csv (research.demand.growth_method)",
+            "ratio", "flag", "B", "S3B instruction R1", "configs/research/baseline.yaml research.demand.growth_method", f"AEO8 pdf:{AEO8_PDF_SHA}", decision_ref="66")
+    reg.add("demand_base_year", "Base year 2019, consistent with PyPSA-Eur v2025.07.0 energy_totals_year: 2019 (config.default.yaml, energy section)", 2019, "year", "A",
+            "PyPSA-Eur v2025.07.0 config.default.yaml", "energy: energy_totals_year", src_sha("pypsa_eur_v2025.07.0_config.default.yaml"), decision_ref="66", status="REFERENCE_ONLY")
+    reg.add("demand_bridge_2019_2022_Industry", f"Industry bridge 2019->2022 = AEO8 C.3 2022 {aeo8_sec['Industry']['2022']} Mtoe / AEO8 2019 {AEO8_2019['industry_2019_mtoe']} Mtoe (text: 2022 value {AEO8_2019['industry_2022_mtoe_text']} Mtoe)",
+            bridge_main["Industry"], "ratio", "B", "8th ASEAN Energy Outlook, Chapter 1 and Appendix C.3", AEO8_2019["locator_industry"] + "; C.3 PDF p.184", f"AEO8 pdf:{AEO8_PDF_SHA}", decision_ref="66")
+    reg.add("demand_bridge_2019_2022_Transport", f"Transport bridge 2019->2022 = AEO8 C.3 2022 {aeo8_sec['Transport']['2022']} Mtoe / (2019 share 36 % x TFEC 2019 {tfec19:.2f} Mtoe = industry 156.2 / share 0.384) = {tr19:.2f} Mtoe; "
+            f"range from the rounded share (35.5-36.5 %): {bridge_info['transport_bridge_range'][0]:.4f}-{bridge_info['transport_bridge_range'][1]:.4f}", bridge_main["Transport"], "ratio", "C",
+            "8th ASEAN Energy Outlook, Chapter 1", AEO8_2019["locator_transport"], f"AEO8 pdf:{AEO8_PDF_SHA}", decision_ref="66",
+            sensitivity_low=min(bridge_info["transport_bridge_range"]), sensitivity_high=max(bridge_info["transport_bridge_range"]))
+    for s in ["Residential", "Commercial", "AgricultureOthers"]:
+        reg.add(f"demand_bridge_2019_2022_{s}", f"{s} bridge 2019->2022 = 1 (AEO8 prints no 2019 value for this sector; Chapter 1 only says the residential and agriculture shares fell and commercial stayed steady; "
+                f"the three sectors together: {rest19:.1f} Mtoe 2019 -> {rest22:.1f} Mtoe 2022, combined {rest22 / rest19:.4f}); COVID-19 years 2020-2021 lie between the base and AEO8 2022; sensitivity = WDI real GDP 2019->2022 ASEAN-10 {gdp_growth_asean10:.4f}",
+                1.0, "ratio", "C", "S3B instruction R1.2 (no AEO8 2019 value) / WDI DataBank (raw4)", AEO8_2019["locator_industry"], f"AEO8 pdf:{AEO8_PDF_SHA}; wdi:{shas['wdi']}", decision_ref="66",
+                sensitivity_low=min(1.0, rest22 / rest19), sensitivity_high=max(1.0, gdp_growth_asean10))
+    reg.add("demand_wdi_real_gdp_growth_2019_2022_asean10", "WDI real GDP (GDP per capita PPP constant 2021 intl$ x population) 2019->2022, ASEAN-10 sum; bridge sensitivity for sectors without an AEO8 2019 value",
+            gdp_growth_asean10, "ratio", "A", "World Bank WDI DataBank export (raw4)", "NY.GDP.PCAP.PP.KD x SP.POP.TOTL, 2019 and 2022", shas["wdi"], decision_ref="66", status="SENSITIVITY")
+    for s in SECTORS:
+        gr = next(r for r in gap_rows if r["sector"] == s)
+        reg.add(f"demand_aeo8_bas_growth_2022_2050_{s}", f"AEO8 BAS {AEO8_LABEL[s]} 2050 / 2022 = {aeo8_sec[s]['2050']} / {aeo8_sec[s]['2022']} Mtoe", growth_bas[s], "ratio", "A",
+                "8th ASEAN Energy Outlook, Appendix C.3 TFEC by Sector", "PDF p.184 (printed 182)", f"AEO8 pdf:{AEO8_PDF_SHA}; extraction:{shas['aeo8_csv']}", decision_ref="66")
+        reg.add(f"demand_basis_gap_{s}", f"{s} statistical-basis gap = AEO8 2022 / (UNSD 2019 ASEAN-10 x bridge) = {gr['aeo8_2022_mwh']/1e6:.1f} / ({gr['unsd_2019_asean10_mwh']/1e6:.1f} x {bridge_main[s]:.4f}) TWh; "
+                f"with the GDP bridge {gr['basis_gap_gdp_bridge']:.4f}; equals level / ratio for 2050", gr["basis_gap_main"], "ratio", "B", "derived", "DEMAND_2050_BASIS_GAP_BY_SECTOR.csv", src,
+                decision_ref="66", status="REFERENCE_ONLY")
     for r in pend.itertuples():
         reg.add(f"demand_bunker_pending_{r.country}_{r.account}", f"{r.country} {r.account} 2019 value missing in UNSD export (no international marine "
                 "bunker transaction) -> download list", None, "MWh/a", "A", "UNSD Energy Statistics Database", "no 2019 row", shas["base"], country=r.country,

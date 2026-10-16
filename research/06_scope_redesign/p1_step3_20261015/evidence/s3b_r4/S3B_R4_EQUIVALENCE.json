@@ -1,0 +1,2037 @@
+{
+ "reference_objective": 698803335000.0,
+ "tolerance_objective": 1e-06,
+ "tolerance_quantities": 0.0001,
+ "A_unscaled": {
+  "status": "optimal",
+  "objective_total": 698803334599.3875,
+  "objective_lp": 698803334599.3875,
+  "rel_diff_to_reference": 5.732836819219316e-10,
+  "solve_seconds": 104.75470924377441,
+  "peak_rss_gib": 3.1805076599121094,
+  "lp": {
+   "num_col": 559050,
+   "num_row": 1269844,
+   "nnz": 2830657
+  },
+  "coefficient_statistics": {
+   "matrix": {
+    "min": 0.0002,
+    "max": 1000.0,
+    "ratio": 5000000.0
+   },
+   "objective": {
+    "min": 1.0,
+    "max": 8000000000.0,
+    "ratio": 8000000000.0
+   },
+   "bounds": {
+    "min": 0.9,
+    "max": 6000000000.0,
+    "ratio": 6666666666.666666
+   },
+   "rhs": {
+    "min": 0.0003,
+    "max": 3000000000.0,
+    "ratio": 10000000000000.0
+   }
+  },
+  "warnings": [
+   "Warning: Model contains large objective coefficients",
+   "Warning: Model contains large rhs",
+   "Warning: Model contains large bounds"
+  ],
+  "barrier": [
+   "Barrier solved model in 92 iterations and 89.53 seconds (147.62 work units)"
+  ],
+  "result": [
+   "Optimal objective 6.98803335e+11"
+  ],
+  "scaling": {
+   "enabled": false,
+   "objective_constants": null,
+   "store_energy": null
+  },
+  "gates": {
+   "A1_A2": false,
+   "A3": false,
+   "A5": true,
+   "A4": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true
+  },
+  "simultaneous_charge_discharge": {
+   "StorageUnit": {
+    "tau_mw": 0.0003343999999996435,
+    "instances": 8,
+    "max_simultaneous_mw": 680.9433986256615,
+    "energy_mwh": 106519.42325002515,
+    "by_carrier": {
+     "PHS": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     "PHS existing": {
+      "instances": 8,
+      "max_mw": 680.9433986256615,
+      "energy_mwh": 106519.42325002517
+     },
+     "hydro": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     "hydro existing": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     }
+    }
+   },
+   "battery": {
+    "pairs": 98,
+    "tau_mw": 0.012525174310540656,
+    "instances": 0,
+    "max_simultaneous_mw": 0.0,
+    "energy_mwh": 0.0
+   },
+   "home battery": {
+    "pairs": 98,
+    "tau_mw": 0.012525174310540656,
+    "instances": 0,
+    "max_simultaneous_mw": 0.0,
+    "energy_mwh": 0.0
+   },
+   "Store_single_p": {
+    "carriers": {
+     "battery": 98,
+     "home battery": 98,
+     "H2 Store Tank": 97,
+     "co2 stored": 97,
+     "solid biomass": 92,
+     "biogas": 15,
+     "co2 atmosphere": 11,
+     "co2 sequestered": 8,
+     "ammonia store": 1,
+     "methanol store": 1
+    },
+    "note": "one p variable per Store: simultaneous charge and discharge is structurally impossible (H2 Store Tank, gas/ammonia/methanol/CO2 stores, battery energy stores behind charger/discharger links)"
+   }
+  },
+  "cleanup_below_threshold": {
+   "Generator.p_nom_opt": {
+    "tau": 0.019191617455575065,
+    "below": 564,
+    "share": 1.915311723342285e-10
+   },
+   "Link.p_nom_opt": {
+    "tau": 0.012525174308922823,
+    "below": 3496,
+    "share": 1.2366446925752453e-08
+   },
+   "Line.s_nom_opt": {
+    "tau": 0.014141898637190134,
+    "below": 0,
+    "share": 0.0
+   },
+   "StorageUnit.p_nom_opt": {
+    "tau": 1e-06,
+    "below": 0,
+    "share": 0.0
+   },
+   "Store.e_nom_opt": {
+    "tau": 54.217389119418925,
+    "below": 390,
+    "share": 3.729951839104632e-12
+   },
+   "Generator.p": {
+    "tau": 0.019191617455575065,
+    "below": 26131,
+    "share": 3.5177036904152024e-10
+   },
+   "Link.p0": {
+    "tau": 0.012525174310540656,
+    "below": 194539,
+    "share": 1.0814765486400197e-08
+   },
+   "Line.p0": {
+    "tau": 0.009899329046011613,
+    "below": 0,
+    "share": 0.0
+   },
+   "StorageUnit.p_dispatch": {
+    "tau": 0.0003343999999996435,
+    "below": 479,
+    "share": 2.18056129153468e-08
+   },
+   "StorageUnit.p_store": {
+    "tau": 9.499998917321127e-05,
+    "below": 120,
+    "share": 8.935899445039605e-09
+   },
+   "StorageUnit.state_of_charge": {
+    "tau": 0.003216899999946763,
+    "below": 718,
+    "share": 6.582483034814729e-09
+   },
+   "Store.p": {
+    "tau": 0.007468052835180238,
+    "below": 21941,
+    "share": 1.0798037783510674e-09
+   },
+   "Store.e": {
+    "tau": 54.217389119417845,
+    "below": 22126,
+    "share": 2.5181182512312646e-08
+   }
+  },
+  "A1_A2": {
+   "gate": "A1_A2_INTERIOR_POINT",
+   "passed": false,
+   "criteria": {
+    "primal_rows_within_budget": false,
+    "primal_columns_within_budget": true,
+    "dual_stationarity": false,
+    "dual_sign": false,
+    "relative_gap": true,
+    "complementarity": true
+   },
+   "thresholds": {
+    "barconvtol": 1e-08,
+    "relative_gap": 1e-07,
+    "complementarity_over_scale": 1e-07,
+    "dual_normalized": 1e-06,
+    "primal": "1e-3 + 1e-7 x reference (V4 budget; 1e-7 = 10 x BarConvTol)"
+   },
+   "v4_independent_kkt_pass": false,
+   "note": "interior solution: degenerate equal-cost alternatives may be split across options",
+   "metrics": {
+    "row_violation_max": 0.08001274103298783,
+    "column_violation_max": 0.0035076141357421875,
+    "row_fail_count": 1,
+    "column_fail_count": 0,
+    "stationarity_normalized_max": 5.230783890258194e-05,
+    "stationarity_fail_count": 15,
+    "dual_sign_normalized_max": 0.029153297161545307,
+    "dual_sign_fail_count": 5356,
+    "relative_gap": 5.978115227316893e-11,
+    "complementarity_l1": 179.72784729029829,
+    "primal_objective": 698803334599.4426,
+    "dual_objective_numeric": 698803334557.6674
+   }
+  }
+ },
+ "B_scaled": {
+  "status": "optimal",
+  "objective_total": 698803334578.8589,
+  "objective_lp": 696274441786.0238,
+  "rel_diff_to_reference": 6.026604227371783e-10,
+  "solve_seconds": 111.28404521942139,
+  "peak_rss_gib": 3.097057342529297,
+  "lp": {
+   "num_col": 559047,
+   "num_row": 1269844,
+   "nnz": 2830657
+  },
+  "coefficient_statistics": {
+   "matrix": {
+    "min": 0.0002,
+    "max": 1000.0,
+    "ratio": 5000000.0
+   },
+   "objective": {
+    "min": 2.0,
+    "max": 1000000.0,
+    "ratio": 500000.0
+   },
+   "bounds": {
+    "min": 0.9,
+    "max": 30000.0,
+    "ratio": 33333.333333333336
+   },
+   "rhs": {
+    "min": 0.0003,
+    "max": 500000000.0,
+    "ratio": 1666666666666.6667
+   }
+  },
+  "warnings": [],
+  "barrier": [
+   "Barrier solved model in 93 iterations and 95.90 seconds (159.30 work units)"
+  ],
+  "result": [
+   "Optimal objective 6.96274442e+11"
+  ],
+  "scaling": {
+   "enabled": true,
+   "objective_constants": {
+    "columns": {
+     "objective_constant": {
+      "value": 5723738530.233507,
+      "objective_coefficient": -1.0,
+      "contribution_eur": -5723738530.233507
+     },
+     "Research_existing_FOM_constant": {
+      "value": 1.0,
+      "objective_coefficient": 8227672833.824235,
+      "contribution_eur": 8227672833.824235
+     },
+     "Research_existing_cross_border_FOM_constant": {
+      "value": 1.0,
+      "objective_coefficient": 24958489.24440152,
+      "contribution_eur": 24958489.24440152
+     }
+    },
+    "total_eur": 2528892792.8351293
+   },
+   "store_energy": {
+    "factor": 1000.0,
+    "stores": [
+     "BN biomass cassava_residues",
+     "BN biomass coconut_residues",
+     "BN biomass maize_residues",
+     "BN biomass msw_organic_biogas",
+     "BN biomass other_crop_residues",
+     "BN biomass rice_residues",
+     "BN biomass sugarcane_residues",
+     "BN biomass wood_processing_residues",
+     "BN4 0 co2 stored",
+     "ID biomass cassava_residues",
+     "ID biomass coconut_residues",
+     "ID biomass maize_residues",
+     "ID biomass msw_organic_biogas",
+     "ID biomass oil_palm_efb",
+     "ID biomass oil_palm_fibre",
+     "ID biomass oil_palm_pks",
+     "ID biomass oil_palm_pome",
+     "ID biomass oil_palm_trunk",
+     "ID biomass other_crop_residues",
+     "ID biomass rice_residues",
+     "ID biomass sugarcane_residues",
+     "ID biomass wood_processing_residues",
+     "ID_Java-Bali1 0 co2 stored",
+     "ID_Java-Bali1 1 co2 stored",
+     "ID_Java-Bali1 2 co2 stored",
+     "ID_Kalimantan4 0 co2 stored",
+     "ID_Kalimantan4 1 co2 stored",
+     "ID_Kalimantan4 10 co2 stored",
+     "ID_Kalimantan4 11 co2 stored",
+     "ID_Kalimantan4 12 co2 stored",
+     "ID_Kalimantan4 13 co2 stored",
+     "ID_Kalimantan4 2 co2 stored",
+     "ID_Kalimantan4 3 co2 stored",
+     "ID_Kalimantan4 4 co2 stored",
+     "ID_Kalimantan4 5 co2 stored",
+     "ID_Kalimantan4 6 co2 stored",
+     "ID_Kalimantan4 7 co2 stored",
+     "ID_Kalimantan4 8 co2 stored",
+     "ID_Kalimantan4 9 co2 stored",
+     "ID_Maluku16 0 co2 stored",
+     "ID_Maluku17 0 co2 stored",
+     "ID_Maluku8 0 co2 stored",
+     "ID_Nusa-Tenggara12 0 co2 stored",
+     "ID_Nusa-Tenggara13 0 co2 stored",
+     "ID_Nusa-Tenggara14 0 co2 stored",
+     "ID_Nusa-Tenggara15 0 co2 stored",
+     "ID_Papua18 0 co2 stored",
+     "ID_Papua19 0 co2 stored",
+     "ID_Papua20 0 co2 stored",
+     "ID_Sulawesi0 0 co2 stored",
+     "ID_Sulawesi0 1 co2 stored",
+     "ID_Sulawesi0 2 co2 stored",
+     "ID_Sulawesi0 3 co2 stored",
+     "ID_Sulawesi0 4 co2 stored",
+     "ID_Sumatra2 0 co2 stored",
+     "ID_Sumatra3 0 co2 stored",
+     "ID_Sumatra3 1 co2 stored",
+     "ID_Sumatra3 2 co2 stored",
+     "ID_Sumatra3 3 co2 stored",
+     "ID_Sumatra3 4 co2 stored",
+     "ID_Sumatra3 5 co2 stored",
+     "KH biomass cassava_residues",
+     "KH biomass coconut_residues",
+     "KH biomass maize_residues",
+     "KH biomass msw_organic_biogas",
+     "KH biomass oil_palm_efb",
+     "KH biomass oil_palm_fibre",
+     "KH biomass oil_palm_pks",
+     "KH biomass oil_palm_pome",
+     "KH biomass oil_palm_trunk",
+     "KH biomass other_crop_residues",
+     "KH biomass rice_residues",
+     "KH biomass sugarcane_residues",
+     "KH biomass wood_processing_residues",
+     "KH2 0 co2 stored",
+     "KH2 1 co2 stored",
+     "KH2 2 co2 stored",
+     "KH2 3 co2 stored",
+     "KH2 4 co2 stored",
+     "LA biomass cassava_residues",
+     "LA biomass maize_residues",
+     "LA biomass other_crop_residues",
+     "LA biomass rice_residues",
+     "LA biomass sugarcane_residues",
+     "LA biomass wood_processing_residues",
+     "LA2 0 co2 stored",
+     "LA2 1 co2 stored",
+     "LA2 2 co2 stored",
+     "LA2 3 co2 stored",
+     "LA2 4 co2 stored",
+     "LA2 5 co2 stored",
+     "MM biomass cassava_residues",
+     "MM biomass coconut_residues",
+     "MM biomass maize_residues",
+     "MM biomass msw_organic_biogas",
+     "MM biomass other_crop_residues",
+     "MM biomass rice_residues",
+     "MM biomass sugarcane_residues",
+     "MM biomass wood_processing_residues",
+     "MM2 0 co2 stored",
+     "MM2 1 co2 stored",
+     "MM2 10 co2 stored",
+     "MM2 11 co2 stored",
+     "MM2 12 co2 stored",
+     "MM2 13 co2 stored",
+     "MM2 14 co2 stored",
+     "MM2 15 co2 stored",
+     "MM2 16 co2 stored",
+     "MM2 2 co2 stored",
+     "MM2 3 co2 stored",
+     "MM2 4 co2 stored",
+     "MM2 5 co2 stored",
+     "MM2 6 co2 stored",
+     "MM2 7 co2 stored",
+     "MM2 8 co2 stored",
+     "MM2 9 co2 stored",
+     "MY biomass cassava_residues",
+     "MY biomass coconut_residues",
+     "MY biomass maize_residues",
+     "MY biomass msw_organic_biogas",
+     "MY biomass oil_palm_efb",
+     "MY biomass oil_palm_fibre",
+     "MY biomass oil_palm_pks",
+     "MY biomass oil_palm_pome",
+     "MY biomass oil_palm_trunk",
+     "MY biomass other_crop_residues",
+     "MY biomass rice_residues",
+     "MY biomass sugarcane_residues",
+     "MY biomass wood_processing_residues",
+     "MY_Peninsular2 0 co2 stored",
+     "MY_Peninsular2 1 co2 stored",
+     "MY_Sabah4 0 co2 stored",
+     "MY_Sabah4 1 co2 stored",
+     "MY_Sarawak4 0 co2 stored",
+     "MY_Sarawak4 1 co2 stored",
+     "MY_Sarawak4 2 co2 stored",
+     "PH biomass cassava_residues",
+     "PH biomass coconut_residues",
+     "PH biomass maize_residues",
+     "PH biomass msw_organic_biogas",
+     "PH biomass oil_palm_efb",
+     "PH biomass oil_palm_fibre",
+     "PH biomass oil_palm_pks",
+     "PH biomass oil_palm_pome",
+     "PH biomass oil_palm_trunk",
+     "PH biomass other_crop_residues",
+     "PH biomass rice_residues",
+     "PH biomass sugarcane_residues",
+     "PH biomass wood_processing_residues",
+     "PH5 0 co2 stored",
+     "PH_Luzon5 0 co2 stored",
+     "PH_Luzon9 0 co2 stored",
+     "PH_Mindanao6 0 co2 stored",
+     "PH_Mindanao6 1 co2 stored",
+     "PH_Visayas7 0 co2 stored",
+     "SG biomass cassava_residues",
+     "SG biomass coconut_residues",
+     "SG biomass msw_organic_biogas",
+     "SG biomass other_crop_residues",
+     "SG biomass wood_processing_residues",
+     "SG2 0 co2 stored",
+     "TH biomass cassava_residues",
+     "TH biomass coconut_residues",
+     "TH biomass maize_residues",
+     "TH biomass msw_organic_biogas",
+     "TH biomass oil_palm_efb",
+     "TH biomass oil_palm_fibre",
+     "TH biomass oil_palm_pks",
+     "TH biomass oil_palm_pome",
+     "TH biomass oil_palm_trunk",
+     "TH biomass other_crop_residues",
+     "TH biomass rice_residues",
+     "TH biomass sugarcane_residues",
+     "TH biomass wood_processing_residues",
+     "TH2 0 co2 stored",
+     "TH2 1 co2 stored",
+     "TH2 2 co2 stored",
+     "TH2 3 co2 stored",
+     "TH2 4 co2 stored",
+     "TH2 5 co2 stored",
+     "TL biomass cassava_residues",
+     "TL biomass coconut_residues",
+     "TL biomass maize_residues",
+     "TL biomass msw_organic_biogas",
+     "TL biomass other_crop_residues",
+     "TL biomass rice_residues",
+     "TL biomass wood_processing_residues",
+     "TL11 0 co2 stored",
+     "VN biomass cassava_residues",
+     "VN biomass coconut_residues",
+     "VN biomass maize_residues",
+     "VN biomass msw_organic_biogas",
+     "VN biomass other_crop_residues",
+     "VN biomass rice_residues",
+     "VN biomass sugarcane_residues",
+     "VN biomass wood_processing_residues",
+     "VN2 0 co2 stored",
+     "VN2 1 co2 stored",
+     "VN2 2 co2 stored",
+     "VN2 3 co2 stored",
+     "VN2 4 co2 stored",
+     "VN2 5 co2 stored",
+     "VN2 6 co2 stored",
+     "VN2 7 co2 stored",
+     "co2 sequestered BN",
+     "co2 sequestered ID",
+     "co2 sequestered KH",
+     "co2 sequestered MY",
+     "co2 sequestered PH",
+     "co2 sequestered TH",
+     "co2 sequestered TL",
+     "co2 sequestered VN"
+    ],
+    "extendable": [
+     "BN4 0 co2 stored",
+     "ID_Java-Bali1 0 co2 stored",
+     "ID_Java-Bali1 1 co2 stored",
+     "ID_Java-Bali1 2 co2 stored",
+     "ID_Kalimantan4 0 co2 stored",
+     "ID_Kalimantan4 1 co2 stored",
+     "ID_Kalimantan4 10 co2 stored",
+     "ID_Kalimantan4 11 co2 stored",
+     "ID_Kalimantan4 12 co2 stored",
+     "ID_Kalimantan4 13 co2 stored",
+     "ID_Kalimantan4 2 co2 stored",
+     "ID_Kalimantan4 3 co2 stored",
+     "ID_Kalimantan4 4 co2 stored",
+     "ID_Kalimantan4 5 co2 stored",
+     "ID_Kalimantan4 6 co2 stored",
+     "ID_Kalimantan4 7 co2 stored",
+     "ID_Kalimantan4 8 co2 stored",
+     "ID_Kalimantan4 9 co2 stored",
+     "ID_Maluku16 0 co2 stored",
+     "ID_Maluku17 0 co2 stored",
+     "ID_Maluku8 0 co2 stored",
+     "ID_Nusa-Tenggara12 0 co2 stored",
+     "ID_Nusa-Tenggara13 0 co2 stored",
+     "ID_Nusa-Tenggara14 0 co2 stored",
+     "ID_Nusa-Tenggara15 0 co2 stored",
+     "ID_Papua18 0 co2 stored",
+     "ID_Papua19 0 co2 stored",
+     "ID_Papua20 0 co2 stored",
+     "ID_Sulawesi0 0 co2 stored",
+     "ID_Sulawesi0 1 co2 stored",
+     "ID_Sulawesi0 2 co2 stored",
+     "ID_Sulawesi0 3 co2 stored",
+     "ID_Sulawesi0 4 co2 stored",
+     "ID_Sumatra2 0 co2 stored",
+     "ID_Sumatra3 0 co2 stored",
+     "ID_Sumatra3 1 co2 stored",
+     "ID_Sumatra3 2 co2 stored",
+     "ID_Sumatra3 3 co2 stored",
+     "ID_Sumatra3 4 co2 stored",
+     "ID_Sumatra3 5 co2 stored",
+     "KH2 0 co2 stored",
+     "KH2 1 co2 stored",
+     "KH2 2 co2 stored",
+     "KH2 3 co2 stored",
+     "KH2 4 co2 stored",
+     "LA2 0 co2 stored",
+     "LA2 1 co2 stored",
+     "LA2 2 co2 stored",
+     "LA2 3 co2 stored",
+     "LA2 4 co2 stored",
+     "LA2 5 co2 stored",
+     "MM2 0 co2 stored",
+     "MM2 1 co2 stored",
+     "MM2 10 co2 stored",
+     "MM2 11 co2 stored",
+     "MM2 12 co2 stored",
+     "MM2 13 co2 stored",
+     "MM2 14 co2 stored",
+     "MM2 15 co2 stored",
+     "MM2 16 co2 stored",
+     "MM2 2 co2 stored",
+     "MM2 3 co2 stored",
+     "MM2 4 co2 stored",
+     "MM2 5 co2 stored",
+     "MM2 6 co2 stored",
+     "MM2 7 co2 stored",
+     "MM2 8 co2 stored",
+     "MM2 9 co2 stored",
+     "MY_Peninsular2 0 co2 stored",
+     "MY_Peninsular2 1 co2 stored",
+     "MY_Sabah4 0 co2 stored",
+     "MY_Sabah4 1 co2 stored",
+     "MY_Sarawak4 0 co2 stored",
+     "MY_Sarawak4 1 co2 stored",
+     "MY_Sarawak4 2 co2 stored",
+     "PH5 0 co2 stored",
+     "PH_Luzon5 0 co2 stored",
+     "PH_Luzon9 0 co2 stored",
+     "PH_Mindanao6 0 co2 stored",
+     "PH_Mindanao6 1 co2 stored",
+     "PH_Visayas7 0 co2 stored",
+     "SG2 0 co2 stored",
+     "TH2 0 co2 stored",
+     "TH2 1 co2 stored",
+     "TH2 2 co2 stored",
+     "TH2 3 co2 stored",
+     "TH2 4 co2 stored",
+     "TH2 5 co2 stored",
+     "TL11 0 co2 stored",
+     "VN2 0 co2 stored",
+     "VN2 1 co2 stored",
+     "VN2 2 co2 stored",
+     "VN2 3 co2 stored",
+     "VN2 4 co2 stored",
+     "VN2 5 co2 stored",
+     "VN2 6 co2 stored",
+     "VN2 7 co2 stored",
+     "co2 sequestered BN",
+     "co2 sequestered ID",
+     "co2 sequestered KH",
+     "co2 sequestered MY",
+     "co2 sequestered PH",
+     "co2 sequestered TH",
+     "co2 sequestered TL",
+     "co2 sequestered VN"
+    ],
+    "scaled_columns": 11977,
+    "row_groups": {
+     "Store-ext-e_nom-lower": {
+      "rows": 105,
+      "dim": "Store-ext"
+     },
+     "Store-ext-e_nom-upper": {
+      "rows": 105,
+      "dim": "Store-ext"
+     },
+     "Store-fix-e-lower": {
+      "rows": 5992,
+      "dim": "Store-fix"
+     },
+     "Store-fix-e-upper": {
+      "rows": 5992,
+      "dim": "Store-fix"
+     },
+     "Store-ext-e-lower": {
+      "rows": 5880,
+      "dim": "Store-ext"
+     },
+     "Store-ext-e-upper": {
+      "rows": 5880,
+      "dim": "Store-ext"
+     },
+     "Store-energy_balance": {
+      "rows": 11872,
+      "dim": "Store"
+     },
+     "research_co2_storage_cap-BN": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-ID": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-KH": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-MY": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-PH": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-TH": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-TL": {
+      "rows": 1,
+      "dim": null
+     },
+     "research_co2_storage_cap-VN": {
+      "rows": 1,
+      "dim": null
+     }
+    },
+    "unscaled_rows_with_scaled_columns": {},
+    "objective_terms_scaled": 105,
+    "by_group": {
+     "biomass_pools": 107,
+     "sequestration": 8,
+     "capture_buffers": 97
+    }
+   }
+  },
+  "gates": {
+   "A1_A2": false,
+   "A3": false,
+   "A5": true,
+   "A4": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true
+  },
+  "simultaneous_charge_discharge": {
+   "StorageUnit": {
+    "tau_mw": 0.0003343999999997342,
+    "instances": 3,
+    "max_simultaneous_mw": 680.9434117549654,
+    "energy_mwh": 106519.13016213752,
+    "by_carrier": {
+     "PHS": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     "PHS existing": {
+      "instances": 3,
+      "max_mw": 680.9434117549654,
+      "energy_mwh": 106519.13016213752
+     },
+     "hydro": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     "hydro existing": {
+      "instances": 0,
+      "max_mw": 0.0,
+      "energy_mwh": 0.0
+     }
+    }
+   },
+   "battery": {
+    "pairs": 98,
+    "tau_mw": 0.012636878856881001,
+    "instances": 0,
+    "max_simultaneous_mw": 0.0,
+    "energy_mwh": 0.0
+   },
+   "home battery": {
+    "pairs": 98,
+    "tau_mw": 0.012636878856881001,
+    "instances": 0,
+    "max_simultaneous_mw": 0.0,
+    "energy_mwh": 0.0
+   },
+   "Store_single_p": {
+    "carriers": {
+     "battery": 98,
+     "home battery": 98,
+     "H2 Store Tank": 97,
+     "co2 stored": 97,
+     "solid biomass": 92,
+     "biogas": 15,
+     "co2 atmosphere": 11,
+     "co2 sequestered": 8,
+     "ammonia store": 1,
+     "methanol store": 1
+    },
+    "note": "one p variable per Store: simultaneous charge and discharge is structurally impossible (H2 Store Tank, gas/ammonia/methanol/CO2 stores, battery energy stores behind charger/discharger links)"
+   }
+  },
+  "cleanup_below_threshold": {
+   "Generator.p_nom_opt": {
+    "tau": 0.019191617455091153,
+    "below": 564,
+    "share": 1.1683249527523525e-10
+   },
+   "Link.p_nom_opt": {
+    "tau": 0.012636878856650451,
+    "below": 3491,
+    "share": 1.1132329818518032e-08
+   },
+   "Line.s_nom_opt": {
+    "tau": 0.0141418986408012,
+    "below": 0,
+    "share": 0.0
+   },
+   "StorageUnit.p_nom_opt": {
+    "tau": 1e-06,
+    "below": 0,
+    "share": 0.0
+   },
+   "Store.e_nom_opt": {
+    "tau": 54.21738913463102,
+    "below": 390,
+    "share": 1.7190648324646195e-12
+   },
+   "Generator.p": {
+    "tau": 0.019191617455091153,
+    "below": 26131,
+    "share": 1.6778209522499611e-10
+   },
+   "Link.p0": {
+    "tau": 0.012636878856881001,
+    "below": 194539,
+    "share": 1.0378276536902027e-08
+   },
+   "Line.p0": {
+    "tau": 0.009899329048555129,
+    "below": 0,
+    "share": 0.0
+   },
+   "StorageUnit.p_dispatch": {
+    "tau": 0.0003343999999997342,
+    "below": 485,
+    "share": 1.8246647364714667e-08
+   },
+   "StorageUnit.p_store": {
+    "tau": 9.499999203851967e-05,
+    "below": 120,
+    "share": 6.103509681969809e-09
+   },
+   "StorageUnit.state_of_charge": {
+    "tau": 0.0032168999999692255,
+    "below": 721,
+    "share": 5.377831116571028e-09
+   },
+   "Store.p": {
+    "tau": 0.0074680528361978065,
+    "below": 21961,
+    "share": 2.114383240661755e-09
+   },
+   "Store.e": {
+    "tau": 54.217389134539424,
+    "below": 22125,
+    "share": 2.471377476681795e-08
+   }
+  },
+  "A1_A2": {
+   "gate": "A1_A2_INTERIOR_POINT",
+   "passed": false,
+   "criteria": {
+    "primal_rows_within_budget": false,
+    "primal_columns_within_budget": true,
+    "dual_stationarity": false,
+    "dual_sign": false,
+    "relative_gap": true,
+    "complementarity": true
+   },
+   "thresholds": {
+    "barconvtol": 1e-08,
+    "relative_gap": 1e-07,
+    "complementarity_over_scale": 1e-07,
+    "dual_normalized": 1e-06,
+    "primal": "1e-3 + 1e-7 x reference (V4 budget; 1e-7 = 10 x BarConvTol)"
+   },
+   "v4_independent_kkt_pass": false,
+   "note": "interior solution: degenerate equal-cost alternatives may be split across options",
+   "metrics": {
+    "row_violation_max": 0.017056999960914254,
+    "column_violation_max": 0.0,
+    "row_fail_count": 4,
+    "column_fail_count": 0,
+    "stationarity_normalized_max": 5.526870589074616e-05,
+    "stationarity_fail_count": 4,
+    "dual_sign_normalized_max": 0.0012977863039819984,
+    "dual_sign_fail_count": 5269,
+    "relative_gap": 3.0821209346641826e-11,
+    "complementarity_l1": 151.9863959213996,
+    "primal_objective": 698803334578.8945,
+    "dual_objective_numeric": 698803334557.3566
+   }
+  }
+ },
+ "rel_diff_A_B": 2.9376740832087886e-11,
+ "objective_equivalent": true,
+ "lp_identity_A_vs_S3_7": {
+  "cost": true,
+  "col_lower": true,
+  "col_upper": true,
+  "row_lower": true,
+  "row_upper": true,
+  "start": true,
+  "index": true,
+  "value": true,
+  "vlabels": true,
+  "clabels": true
+ },
+ "lp_identity_A_vs_S3_7_all": true,
+ "quantities": {
+  "count": 130,
+  "within": 117,
+  "outside": [
+   {
+    "quantity": "energy|Generator|ammonia import",
+    "A": 0.009283159556594943,
+    "B": 0.002060638050042188,
+    "abs_diff": 0.0072225215065527554,
+    "rel_diff": 0.7780240620147191,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|FT fuel import",
+    "A": 0.00010366601386565807,
+    "B": 4.10359936923382e-05,
+    "abs_diff": 6.263002017331987e-05,
+    "rel_diff": 0.6041519089803414,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|SMR",
+    "A": 0.049859434130627565,
+    "B": 0.027909678253884795,
+    "abs_diff": 0.02194975587674277,
+    "rel_diff": 0.4402327515237385,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|nuclear",
+    "A": 0.04184021362282328,
+    "B": 0.02634483144113559,
+    "abs_diff": 0.015495382181687691,
+    "rel_diff": 0.37034663162511117,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|H2 import",
+    "A": 0.006432275395287134,
+    "B": 0.004913303178053278,
+    "abs_diff": 0.0015189722172338563,
+    "rel_diff": 0.23614850482720198,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|DC",
+    "A": 137759525.71092087,
+    "B": 139070864.7747455,
+    "abs_diff": 1311339.0638246238,
+    "rel_diff": 0.009429286759297953,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|onwind",
+    "A": 1424530265.3801541,
+    "B": 1427742475.6530476,
+    "abs_diff": 3212210.272893429,
+    "rel_diff": 0.0022498527064022298,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|offwind-dc",
+    "A": 1901279218.883074,
+    "B": 1898177788.0890045,
+    "abs_diff": 3101430.7940695286,
+    "rel_diff": 0.0016312337310936875,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|offwind-ac",
+    "A": 81998571.63309744,
+    "B": 81887768.32812548,
+    "abs_diff": 110803.30497196317,
+    "rel_diff": 0.0013512833548827226,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Link|cooking gas",
+    "A": 462.35734511372186,
+    "B": 462.0657853258074,
+    "abs_diff": 0.2915597879144798,
+    "rel_diff": 0.0006305940437536846,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|gas pipeline",
+    "A": 4507989120.208464,
+    "B": 4506472734.687978,
+    "abs_diff": 1516385.520485878,
+    "rel_diff": 0.0003363773691662671,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Generator|gas production",
+    "A": 529937.417181016,
+    "B": 529822.6290675616,
+    "abs_diff": 114.78811345435679,
+    "rel_diff": 0.00021660692325702958,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Link|gas production delivery",
+    "A": 529937.417181016,
+    "B": 529822.6290675616,
+    "abs_diff": 114.78811345435679,
+    "rel_diff": 0.00021660692325702958,
+    "within_tolerance": false
+   }
+  ],
+  "max_rel_diff": 0.7780240620147191,
+  "table": [
+   {
+    "quantity": "capacity|Generator|FT fuel import",
+    "A": 1.4904702664460443e-08,
+    "B": 5.931365102285875e-09,
+    "abs_diff": 8.973337562174568e-09,
+    "rel_diff": 0.6020474050496201,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|H2 import",
+    "A": 1.7416558868063746e-05,
+    "B": 1.3304660432369854e-05,
+    "abs_diff": 4.111898435693892e-06,
+    "rel_diff": 0.2360913235985878,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|LNG import",
+    "A": 281849.31506853,
+    "B": 281849.31506853,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|ammonia import",
+    "A": 3.167492171102502e-06,
+    "B": 5.479793351188816e-06,
+    "abs_diff": 2.3123011800863143e-06,
+    "rel_diff": 0.4219686823746138,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|coal",
+    "A": 234115.3269504721,
+    "B": 234117.08354242655,
+    "abs_diff": 1.756591954443138,
+    "rel_diff": 7.503049020875102e-06,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|gas production",
+    "A": 529937.417181016,
+    "B": 529822.6290675616,
+    "abs_diff": 114.78811345435679,
+    "rel_diff": 0.00021660692325702958,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Generator|geothermal",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|lignite",
+    "A": 10493.939393969915,
+    "B": 10493.93939389663,
+    "abs_diff": 7.328526407945901e-08,
+    "rel_diff": 6.9835798862694585e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|methanol import",
+    "A": 26610.672618083012,
+    "B": 26610.649180780467,
+    "abs_diff": 0.023437302545062266,
+    "rel_diff": 8.807482201383999e-07,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|nuclear",
+    "A": 5.602451782052722e-06,
+    "B": 3.5141995951226784e-06,
+    "abs_diff": 2.0882521869300434e-06,
+    "rel_diff": 0.37273898431749003,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|nuclear SMR",
+    "A": 131859.1024082228,
+    "B": 131859.10254989122,
+    "abs_diff": 0.00014166842447593808,
+    "rel_diff": 1.0743924517636947e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|offwind-ac",
+    "A": 16060.06980288903,
+    "B": 16060.069802082979,
+    "abs_diff": 8.060505933826789e-07,
+    "rel_diff": 5.018973163103434e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|offwind-dc",
+    "A": 385861.05617056135,
+    "B": 385861.0560770336,
+    "abs_diff": 9.352777851745486e-05,
+    "rel_diff": 2.423871935811863e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|oil import",
+    "A": 191916.17455575065,
+    "B": 191916.17455091156,
+    "abs_diff": 4.839093890041113e-06,
+    "rel_diff": 2.5214622484231423e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|onwind",
+    "A": 709673.2855744065,
+    "B": 709673.2855666107,
+    "abs_diff": 7.79575202614069e-06,
+    "rel_diff": 1.0984987295711494e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|ror",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|solar",
+    "A": 386098.6018382606,
+    "B": 386098.6004475859,
+    "abs_diff": 0.0013906746753491461,
+    "rel_diff": 3.6018640542285864e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Generator|solar rooftop",
+    "A": 9236.348596542715,
+    "B": 9236.348546381147,
+    "abs_diff": 5.0161568651674315e-05,
+    "rel_diff": 5.430887339012999e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Line|AC",
+    "A": 2230612.131533108,
+    "B": 2230612.1311843256,
+    "abs_diff": 0.00034878263249993324,
+    "rel_diff": 1.5636184685331808e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|BEV charger",
+    "A": 187648.9617735532,
+    "B": 187648.9617735532,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|BtL",
+    "A": 3.142066888512272e-06,
+    "B": 1.515258806465166e-06,
+    "abs_diff": 1.6268080820471062e-06,
+    "rel_diff": 0.5177509390378952,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|CCGT",
+    "A": 27429.341488284244,
+    "B": 27429.34194894751,
+    "abs_diff": 0.00046066326467553154,
+    "rel_diff": 1.679454306752728e-08,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|CCGT CC",
+    "A": 411209.0416601234,
+    "B": 411209.041630853,
+    "abs_diff": 2.9270362574607134e-05,
+    "rel_diff": 7.118122319596262e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|CO2 pipeline",
+    "A": 73916.22354799489,
+    "B": 73916.22363770391,
+    "abs_diff": 8.970902126748115e-05,
+    "rel_diff": 1.2136580692648033e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|CO2 sequestration",
+    "A": 240722.00074464385,
+    "B": 240719.51347352093,
+    "abs_diff": 2.487271122925449,
+    "rel_diff": 1.0332545904534619e-05,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|DAC",
+    "A": 17479.598932852085,
+    "B": 17479.598908748518,
+    "abs_diff": 2.4103566829580814e-05,
+    "rel_diff": 1.3789542267059283e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|DC",
+    "A": 23104.62509095,
+    "B": 23104.625055028413,
+    "abs_diff": 3.5921588278142735e-05,
+    "rel_diff": 1.554735821799294e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|Fischer-Tropsch",
+    "A": 3.928360981690096e-06,
+    "B": 2.2858470035337626e-06,
+    "abs_diff": 1.642513978156333e-06,
+    "rel_diff": 0.41811686497549816,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|H2 Electrolysis",
+    "A": 19134.21098807765,
+    "B": 19134.210914023788,
+    "abs_diff": 7.405386350001208e-05,
+    "rel_diff": 3.870233454943836e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|H2 Fuel Cell",
+    "A": 7.744908483951108e-06,
+    "B": 4.707482056067365e-06,
+    "abs_diff": 3.0374264278837435e-06,
+    "rel_diff": 0.3921836435095207,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|H2 pipeline",
+    "A": 36855.41177466648,
+    "B": 36855.411715468705,
+    "abs_diff": 5.919777322560549e-05,
+    "rel_diff": 1.6062165737704934e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|H2 turbine",
+    "A": 3.6114899535023377,
+    "B": 3.61147725740738,
+    "abs_diff": 1.2696094957576065e-05,
+    "rel_diff": 3.5154728715951965e-06,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|Haber-Bosch",
+    "A": 1553.6892766667256,
+    "B": 1553.6892848582283,
+    "abs_diff": 8.191502729459899e-06,
+    "rel_diff": 5.272291448033871e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|OCGT",
+    "A": 35911.670651458226,
+    "B": 35911.669928988245,
+    "abs_diff": 0.0007224699802463874,
+    "rel_diff": 2.0117971877675674e-08,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|OCGT methanol",
+    "A": 3.6842024667309025e-05,
+    "B": 2.389275036133121e-05,
+    "abs_diff": 1.2949274305977815e-05,
+    "rel_diff": 0.351481071491385,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|SMR",
+    "A": 1.2111789200842924e-05,
+    "B": 7.14487191389639e-06,
+    "abs_diff": 4.966917286946535e-06,
+    "rel_diff": 0.41008947601241774,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|SMR CC",
+    "A": 71981.35800723967,
+    "B": 71981.35813251561,
+    "abs_diff": 0.0001252759393537417,
+    "rel_diff": 1.7403942160012083e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|ammonia cracker",
+    "A": 9.609777737967256e-06,
+    "B": 6.122889738603754e-06,
+    "abs_diff": 3.4868879993635023e-06,
+    "rel_diff": 0.3628479340981178,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|battery charger",
+    "A": 8.49949985104948e-05,
+    "B": 5.6127635523033795e-05,
+    "abs_diff": 2.8867362987460998e-05,
+    "rel_diff": 0.33963601968763596,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|battery discharger",
+    "A": 8.674765709974422e-05,
+    "B": 5.72850281251592e-05,
+    "abs_diff": 2.9462628974585018e-05,
+    "rel_diff": 0.3396360196876359,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|biogas upgrading",
+    "A": 15738.830835167913,
+    "B": 15738.830769546192,
+    "abs_diff": 6.562172166013625e-05,
+    "rel_diff": 4.169415272798194e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|biomass EOP",
+    "A": 7.535151292476474e-06,
+    "B": 3.993140239196359e-06,
+    "abs_diff": 3.542011053280115e-06,
+    "rel_diff": 0.4700650213641578,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|biomass EOP CC",
+    "A": 38175.534136396986,
+    "B": 38175.53411172899,
+    "abs_diff": 2.466799196554348e-05,
+    "rel_diff": 6.461728047447209e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|biomass final-energy accounting",
+    "A": 3851.7619548311236,
+    "B": 3851.7619509485316,
+    "abs_diff": 3.882591954607051e-06,
+    "rel_diff": 1.008004129055083e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|biomass-to-methanol",
+    "A": 35874.53327495108,
+    "B": 35874.53330952624,
+    "abs_diff": 3.457516140770167e-05,
+    "rel_diff": 9.63780102988001e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|co2 vent",
+    "A": 5.885452491589115e-07,
+    "B": 3.5769705048793786e-07,
+    "abs_diff": 2.3084819867097366e-07,
+    "rel_diff": 0.3922352597372559,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|coal feedstock",
+    "A": 2145.070598117376,
+    "B": 2145.070598117376,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|coal final-energy accounting",
+    "A": 7117.338751739689,
+    "B": 7117.338751739689,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|cooking LPG",
+    "A": 5260.244409879923,
+    "B": 5260.24441178784,
+    "abs_diff": 1.907917067001108e-06,
+    "rel_diff": 3.62705022360862e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|cooking electric",
+    "A": 5176.676237847983,
+    "B": 5176.676237797476,
+    "abs_diff": 5.05078787682578e-08,
+    "rel_diff": 9.75681623644569e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|cooking gas",
+    "A": 462.35734511372186,
+    "B": 462.0657853258074,
+    "abs_diff": 0.2915597879144798,
+    "rel_diff": 0.0006305940437536846,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Link|electricity distribution grid",
+    "A": 3651.99206764281,
+    "B": 3651.9920461095544,
+    "abs_diff": 2.1533255676331464e-05,
+    "rel_diff": 5.8963040656958965e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|gas feedstock",
+    "A": 91565.97936420153,
+    "B": 91565.97936420153,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|gas final-energy accounting",
+    "A": 115133.13087862018,
+    "B": 115133.13087862018,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|gas pipeline",
+    "A": 661059.1431741837,
+    "B": 661059.1444675847,
+    "abs_diff": 0.001293401001021266,
+    "rel_diff": 1.956558670802395e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|gas production delivery",
+    "A": 529937.417181016,
+    "B": 529822.6290675616,
+    "abs_diff": 114.78811345435679,
+    "rel_diff": 0.00021660692325702958,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "capacity|Link|home battery charger",
+    "A": 0.00014481721656968213,
+    "B": 9.619739379946508e-05,
+    "abs_diff": 4.8619822770217046e-05,
+    "rel_diff": 0.33573233847387546,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|home battery discharger",
+    "A": 0.00014780345273581027,
+    "B": 9.818105391430377e-05,
+    "abs_diff": 4.962239882150651e-05,
+    "rel_diff": 0.33573233847387546,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry biomass CC",
+    "A": 130868.72751636231,
+    "B": 130868.72751583366,
+    "abs_diff": 5.286565283313394e-07,
+    "rel_diff": 4.039594014278486e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry biomass boiler",
+    "A": 8.558723904859978e-06,
+    "B": 4.5239346092084765e-06,
+    "abs_diff": 4.034789295651501e-06,
+    "rel_diff": 0.47142416796041176,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry biomass boiler CC",
+    "A": 23353.56562308658,
+    "B": 23353.565607765486,
+    "abs_diff": 1.5321093087550253e-05,
+    "rel_diff": 6.560494159574637e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry electric boiler",
+    "A": 13766.412446955843,
+    "B": 13766.412316957063,
+    "abs_diff": 0.0001299987798120128,
+    "rel_diff": 9.44318502100083e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry gas boiler",
+    "A": 0.0002737565605640213,
+    "B": 0.00022084495339842647,
+    "abs_diff": 5.291160716559484e-05,
+    "rel_diff": 0.1932797776848925,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry heat pump",
+    "A": 11741.703516594092,
+    "B": 11741.703511287691,
+    "abs_diff": 5.306401362759061e-06,
+    "rel_diff": 4.5192772541562906e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|industry methanol",
+    "A": 641.722593317813,
+    "B": 641.722593317813,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|methanolisation",
+    "A": 47761.966491079555,
+    "B": 47761.96650809678,
+    "abs_diff": 1.7017227946780622e-05,
+    "rel_diff": 3.562924475460155e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|oil feedstock",
+    "A": 51628.52329836926,
+    "B": 51628.52329823491,
+    "abs_diff": 1.3435055734589696e-07,
+    "rel_diff": 2.602254505120439e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|oil final-energy accounting",
+    "A": 132213.48355066674,
+    "B": 132213.48354646997,
+    "abs_diff": 4.196772351861e-06,
+    "rel_diff": 3.1742392978040827e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|oil pool",
+    "A": 194118.17592749026,
+    "B": 194118.17591996232,
+    "abs_diff": 7.527938578277826e-06,
+    "rel_diff": 3.878018399003382e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|process emissions",
+    "A": 2.8747833369775896e-06,
+    "B": 1.541667136746028e-06,
+    "abs_diff": 1.3331162002315615e-06,
+    "rel_diff": 0.4637275383796876,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|process emissions CC",
+    "A": 70490.37741916656,
+    "B": 70490.37742834164,
+    "abs_diff": 9.175084414891899e-06,
+    "rel_diff": 1.3016080704375584e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|shipping methanol",
+    "A": 64640.36161064445,
+    "B": 64640.36161064445,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Link|waste incineration",
+    "A": 2367.3373305235655,
+    "B": 2367.3373305235655,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|StorageUnit|PHS",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|StorageUnit|hydro",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|H2 Store Tank",
+    "A": 0.0003923551707216193,
+    "B": 0.0002472023967903583,
+    "abs_diff": 0.000145152773931261,
+    "rel_diff": 0.36995249397196966,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|ammonia store",
+    "A": 576.3850719420781,
+    "B": 576.3894077989453,
+    "abs_diff": 0.004335856867214716,
+    "rel_diff": 7.5224436961324915e-06,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|battery",
+    "A": 0.000141427148865113,
+    "B": 8.834253237045359e-05,
+    "abs_diff": 5.308461649465942e-05,
+    "rel_diff": 0.37534954865907105,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|co2 atmosphere",
+    "A": 69703143.77357867,
+    "B": 69703165.68229935,
+    "abs_diff": 21.908720672130585,
+    "rel_diff": 3.1431457176548525e-07,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|co2 sequestered",
+    "A": 1843104699.9003425,
+    "B": 1843104699.7856545,
+    "abs_diff": 0.11468791961669922,
+    "rel_diff": 6.222539588928423e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|co2 stored",
+    "A": 0.006510859630868689,
+    "B": 0.002897124966430922,
+    "abs_diff": 0.003613734664437767,
+    "rel_diff": 0.5550318804762217,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|home battery",
+    "A": 9.00469379257663e-05,
+    "B": 5.557441087061349e-05,
+    "abs_diff": 3.44725270551528e-05,
+    "rel_diff": 0.38282842092389163,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "capacity|Store|methanol store",
+    "A": 1502.459267017768,
+    "B": 1502.4554109901014,
+    "abs_diff": 0.003856027666643058,
+    "rel_diff": 2.5664773423754034e-06,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|BN",
+    "A": 21101977.99624858,
+    "B": 21101977.998177208,
+    "abs_diff": 0.0019286274909973145,
+    "rel_diff": 9.139557870659848e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|ID",
+    "A": 542173891.1941785,
+    "B": 542173891.3453943,
+    "abs_diff": 0.1512157917022705,
+    "rel_diff": 2.789064433313662e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|KH",
+    "A": 1699999.9999857983,
+    "B": 1699999.9999837235,
+    "abs_diff": 2.0747538655996323e-06,
+    "rel_diff": 1.2204434503629204e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|MY",
+    "A": 529810161.3679818,
+    "B": 529810161.0932405,
+    "abs_diff": 0.2747412919998169,
+    "rel_diff": 5.18565539193187e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|PH",
+    "A": 186838669.3558227,
+    "B": 186838669.34845817,
+    "abs_diff": 0.007364541292190552,
+    "rel_diff": 3.9416579649072736e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|TH",
+    "A": 320479999.9926921,
+    "B": 320479999.9999604,
+    "abs_diff": 0.007268309593200684,
+    "rel_diff": 2.2679448306295498e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|TL",
+    "A": 5000000.000010882,
+    "B": 5000000.000076451,
+    "abs_diff": 6.556976586580276e-05,
+    "rel_diff": 1.3113953172960037e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "co2_sequestered|VN",
+    "A": 235999999.9934341,
+    "B": 235999999.99979728,
+    "abs_diff": 0.006363183259963989,
+    "rel_diff": 2.6962640932073963e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|FT fuel import",
+    "A": 0.00010366601386565807,
+    "B": 4.10359936923382e-05,
+    "abs_diff": 6.263002017331987e-05,
+    "rel_diff": 0.6041519089803414,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|H2 import",
+    "A": 0.006432275395287134,
+    "B": 0.004913303178053278,
+    "abs_diff": 0.0015189722172338563,
+    "rel_diff": 0.23614850482720198,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|LNG import",
+    "A": 2465009290.338607,
+    "B": 2465009290.320211,
+    "abs_diff": 0.01839590072631836,
+    "rel_diff": 7.462811924652584e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|ammonia import",
+    "A": 0.009283159556594943,
+    "B": 0.002060638050042188,
+    "abs_diff": 0.0072225215065527554,
+    "rel_diff": 0.7780240620147191,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|coal",
+    "A": 253964611.77808744,
+    "B": 253964611.39628887,
+    "abs_diff": 0.38179856538772583,
+    "rel_diff": 1.5033534109915237e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|gas production",
+    "A": 2410618768.779502,
+    "B": 2410618768.748852,
+    "abs_diff": 0.03065013885498047,
+    "rel_diff": 1.271463545042365e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|geothermal",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|geothermal existing",
+    "A": 1172232.5579950719,
+    "B": 1172232.5580733747,
+    "abs_diff": 7.830280810594559e-05,
+    "rel_diff": 6.679801509236387e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|lignite",
+    "A": 3306362.117253436,
+    "B": 3306362.0821229042,
+    "abs_diff": 0.035130531527101994,
+    "rel_diff": 1.0625131271551285e-08,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|methanol import",
+    "A": 69678226.65166965,
+    "B": 69678226.69270599,
+    "abs_diff": 0.04103633761405945,
+    "rel_diff": 5.889406140462985e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|nuclear",
+    "A": 0.04184021362282328,
+    "B": 0.02634483144113559,
+    "abs_diff": 0.015495382181687691,
+    "rel_diff": 0.37034663162511117,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|nuclear SMR",
+    "A": 1148832585.8265972,
+    "B": 1148832587.1448903,
+    "abs_diff": 1.3182930946350098,
+    "rel_diff": 1.1475067032275496e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|offwind-ac",
+    "A": 81998571.63309744,
+    "B": 81887768.32812548,
+    "abs_diff": 110803.30497196317,
+    "rel_diff": 0.0013512833548827226,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|offwind-dc",
+    "A": 1901279218.883074,
+    "B": 1898177788.0890045,
+    "abs_diff": 3101430.7940695286,
+    "rel_diff": 0.0016312337310936875,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|oil import",
+    "A": 1650418632.0867734,
+    "B": 1650418632.140131,
+    "abs_diff": 0.053357601165771484,
+    "rel_diff": 3.232973751428243e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|onwind",
+    "A": 1424530265.3801541,
+    "B": 1427742475.6530476,
+    "abs_diff": 3212210.272893429,
+    "rel_diff": 0.0022498527064022298,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "energy|Generator|plastic waste",
+    "A": 20737875.015386432,
+    "B": 20737875.015386432,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|process emissions",
+    "A": 617495706.2353841,
+    "B": 617495706.2353841,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|ror",
+    "A": 0.0,
+    "B": 0.0,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|ror existing",
+    "A": 10852408.653040627,
+    "B": 10852408.681759756,
+    "abs_diff": 0.028719129040837288,
+    "rel_diff": 2.6463368532284558e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|solar",
+    "A": 471582362.47819996,
+    "B": 471582384.46907336,
+    "abs_diff": 21.990873396396637,
+    "rel_diff": 4.6632092547635884e-08,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "energy|Generator|solar rooftop",
+    "A": 9557835.363168199,
+    "B": 9557835.321385084,
+    "abs_diff": 0.04178311489522457,
+    "rel_diff": 4.371608560682975e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|CCGT",
+    "A": 65536025.48164246,
+    "B": 65536025.88403002,
+    "abs_diff": 0.4023875594139099,
+    "rel_diff": 6.139944465444993e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|CCGT CC",
+    "A": 2354648438.4704876,
+    "B": 2354648438.657402,
+    "abs_diff": 0.18691444396972656,
+    "rel_diff": 7.938104088111913e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|CCGT existing",
+    "A": 155079396.78822416,
+    "B": 155079396.98341113,
+    "abs_diff": 0.19518697261810303,
+    "rel_diff": 1.2586260742230138e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|CO2 pipeline",
+    "A": 644992791.8663473,
+    "B": 644992790.9535887,
+    "abs_diff": 0.9127585887908936,
+    "rel_diff": 1.4151454098420863e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|DAC",
+    "A": 144018196.03165847,
+    "B": 144018195.995406,
+    "abs_diff": 0.0362524688243866,
+    "rel_diff": 2.5172144786772275e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|DC",
+    "A": 137759525.71092087,
+    "B": 139070864.7747455,
+    "abs_diff": 1311339.0638246238,
+    "rel_diff": 0.009429286759297953,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|H2 Electrolysis",
+    "A": 85077400.81912811,
+    "B": 85077400.5178753,
+    "abs_diff": 0.3012528121471405,
+    "rel_diff": 3.5409263711240374e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|H2 pipeline",
+    "A": 322853405.582659,
+    "B": 322853405.9530021,
+    "abs_diff": 0.37034308910369873,
+    "rel_diff": 1.1470936414950186e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|Haber-Bosch",
+    "A": 13608987.741085064,
+    "B": 13608987.741912665,
+    "abs_diff": 0.0008276011794805527,
+    "rel_diff": 6.081283892494991e-11,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|OCGT",
+    "A": 20430703.007466882,
+    "B": 20430702.391563486,
+    "abs_diff": 0.6159033961594105,
+    "rel_diff": 3.014597177269495e-08,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|SMR",
+    "A": 0.049859434130627565,
+    "B": 0.027909678253884795,
+    "abs_diff": 0.02194975587674277,
+    "rel_diff": 0.4402327515237385,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|SMR CC",
+    "A": 599014871.7057512,
+    "B": 599014871.5523864,
+    "abs_diff": 0.15336477756500244,
+    "rel_diff": 2.560283305292268e-10,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|biomass-to-methanol",
+    "A": 314260911.4390679,
+    "B": 314260911.81241465,
+    "abs_diff": 0.373346745967865,
+    "rel_diff": 1.188015218993316e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|gas pipeline",
+    "A": 4507989120.208464,
+    "B": 4506472734.687978,
+    "abs_diff": 1516385.520485878,
+    "rel_diff": 0.0003363773691662671,
+    "within_tolerance": false
+   },
+   {
+    "quantity": "flow_abs|Link|methanolisation",
+    "A": 339050004.0316156,
+    "B": 339050003.6851609,
+    "abs_diff": 0.3464547395706177,
+    "rel_diff": 1.0218396562482022e-09,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "flow_abs|Link|process emissions CC",
+    "A": 617495706.2250603,
+    "B": 617495706.2304146,
+    "abs_diff": 0.00535428524017334,
+    "rel_diff": 8.67096756487473e-12,
+    "within_tolerance": true
+   },
+   {
+    "quantity": "xb_line_capacity_total",
+    "A": 640444.1426165187,
+    "B": 640444.1427274568,
+    "abs_diff": 0.00011093809735029936,
+    "rel_diff": 1.7322056671148206e-10,
+    "within_tolerance": true
+   }
+  ]
+ }
+}

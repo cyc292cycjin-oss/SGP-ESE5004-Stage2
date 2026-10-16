@@ -25,8 +25,9 @@ from network_checks import assert_input_only, compare_roundtrip, normalise_optio
 from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOOK, sha, save, git_head, config_sha, jsonable, rename_legacy_buses,
                               tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
 from s2_costs import build_research_costs, write_costs
+from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
-                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines)
+                       add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
 AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TWh (2022) / C.4 capacity 4.3 GW (2022), BAS panels (PDF p.185/187)
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
@@ -213,10 +214,16 @@ def estimate_memory(output):
     return est
 
 
-def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_decisions, survival_json, daily=True, gap_diagnostic=False):
+def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_decisions, survival_json, daily=True, gap_diagnostic=False, overrides=None):
     repo = Path(repo); output = Path(output); output.mkdir(parents=True, exist_ok=True); t0 = time.time()
     from phase4_static import config
     cfg = config(repo, scenario); R = cfg["research"]; S2 = R["s2"]
+    for ov in (overrides or []):
+        key, val = ov.split("=", 1); d = cfg["research"]; parts = key.split(".")
+        for k in parts[:-1]:
+            d = d[k]
+        old = d[parts[-1]]; d[parts[-1]] = type(old)(val) if not isinstance(old, bool) else (val.lower() in ("1", "true", "yes"))
+    cfg["research"]["config_overrides"] = list(overrides or [])
     if R["scenario"] != scenario:
         raise ValueError("Scenario identity does not match the composed config")
     if sha(electric_base) != ELECTRIC_BASE_SHA:
@@ -230,6 +237,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         raise ValueError("Electric base is not the source-qualified asset")
     rename_map = rename_legacy_buses(n)
     corridors = pd.read_csv(repo / R["existing_cross_border_electricity"]["corridors_file"], float_precision="round_trip")
+    apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base
     cc = float(cfg["sector"]["cc_fraction"])
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
@@ -266,12 +274,18 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
     heat = add_industrial_heat(n, costs, nodes, cc)
     demand_astar = bind_astar(n, repo, allocation)
-    allocation_mode = R["demand"].get("country_allocation", "aeo8_ats_relative")   # R3 (decision 57)
+    from s2_layers import demand_table_key
+    allocation_mode = demand_table_key(cfg)   # R3 (decision 57) + S3B R1 growth method suffix (decision 66)
     demand_table = repo / S2["demand"].get("tables_by_allocation", {}).get(allocation_mode, S2["demand"]["table"])
     demand = add_demand_layer(n, costs, cfg, repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
     demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
     n.meta["s2_demand_ledger"] = jsonable(dict(deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"],
                                               totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()}))
+    # S3-1: gas network (domestic production, pipelines along the candidate topology incl. the 2025 cross-border stock, LNG terminals; unlimited external gas removed)
+    gas_net = add_gas_network(n, costs, cfg, repo, registry, nodes, candidates) if (candidates is not None and "s3" in R and "gas" in R["s3"]) else None
+    imports = add_imports(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "imports" in R["s3"]) else None   # S3-2: regional oil pool, green carrier imports, H2 at LNG terminals
+    nh3_meoh = add_ammonia_methanol(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "ammonia_methanol" in R["s3"]) else None   # S3-3: Haber-Bosch, cracker, methanolisation, biomass-to-methanol, methanol OCGT, stores
+    fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
     xb = apply_cross_border_switches_s2(n, R["cross_border"], corridors, R["existing_cross_border_electricity"], costs)
@@ -288,6 +302,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   cross_border_tags=tags, demand_binding=demand_astar, electric_base_sha256=ELECTRIC_BASE_SHA, physical_carbon_map=carbon,
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
                                   s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
+                                  s3_layers=dict(gas=gas_net, imports=imports, ammonia_methanol=nh3_meoh, fuel_carbon=fuel_carbon),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass"]:
         if key in n.meta:
@@ -325,6 +340,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--scenario", required=True, choices=["integrated", "disconnected", "baseline"]); p.add_argument("--output", type=Path, required=True)
     p.add_argument("--electric-base", type=Path, default=None); p.add_argument("--allocation", type=Path, default=None); p.add_argument("--survival", type=Path, default=None)
     p.add_argument("--no-daily", action="store_true"); p.add_argument("--gap-diagnostic", action="store_true"); p.add_argument("--estimate-only", action="store_true")
+    p.add_argument("--override", action="append", default=[], help="research config override key=value (dotted path under research, e.g. s3.fuel_carbon_mode=producer_credit); recorded in the receipt")
     a = p.parse_args(); repo = a.repo.resolve()
     if a.estimate_only:
         print(json.dumps(estimate_memory(a.output))); sys.exit(0)
@@ -332,5 +348,5 @@ if __name__ == "__main__":
     al = a.allocation or repo / "results_project/assembly_v1/final_allocation"
     sv = a.survival or repo / "results_project/s1/S1_SELECTED_ASSET_SURVIVAL_2050.json"
     hydro = json.loads((repo / "research_inputs/asset_survival/hydro_decisions.json").read_text())
-    n, r = build_scenario_s2(repo, a.scenario, a.output, eb, al, hydro, sv, daily=not a.no_daily, gap_diagnostic=a.gap_diagnostic)
+    n, r = build_scenario_s2(repo, a.scenario, a.output, eb, al, hydro, sv, daily=not a.no_daily, gap_diagnostic=a.gap_diagnostic, overrides=a.override)
     print(json.dumps(dict(status=r["status"], network=r["network"]["sha256"], components=r["network"]["components"], seconds=round(r["build_seconds"], 1))))

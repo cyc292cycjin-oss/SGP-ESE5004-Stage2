@@ -1,0 +1,24 @@
+{
+  "purpose": "S2-7: estimate peak RSS of the local network assembly before building",
+  "s1_measured": {
+    "peak_rss_gib": 0.5,
+    "components": {
+      "Generator": 1437,
+      "Link": 1196,
+      "Store": 304,
+      "Load": 96
+    },
+    "source": "results_project/s1/S1_BUILD_MEMORY_MEASURED.json"
+  },
+  "s2_expected_components": {
+    "Generator": 1540,
+    "Link": 3796,
+    "Store": 535,
+    "Load": 1896
+  },
+  "component_ratio": 2.5608308605341246,
+  "estimated_peak_rss_gib": 1.6,
+  "threshold_gib": 7.94,
+  "decision": "BUILD_LOCALLY",
+  "measurement_plan": "/usr/bin/time -v around scripts_project/s2_network.py (recorded in S2_BUILD_MEMORY_MEASURED.json)"
+}

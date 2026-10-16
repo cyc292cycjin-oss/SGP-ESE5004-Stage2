@@ -144,6 +144,34 @@ def gap_table(n, m):
     return rows
 
 
+LICENSE_MARKERS = ("license", "licenseid", "wls", "registered to", "academic", "secret", "accessid", "token")
+
+
+def gurobi_log_stats(log_path, scrubbed_path):
+    """Coefficient statistics and solve summary from the Gurobi log; a scrubbed copy without any licence/credential line is kept, the raw log is not copied anywhere."""
+    import re
+    if not Path(log_path).exists():
+        return dict(error="log missing")
+    keep = []
+    stats = dict(coefficient_statistics={}, lines={})
+    for line in Path(log_path).read_text(errors="ignore").splitlines():
+        low = line.lower()
+        if any(mk in low for mk in LICENSE_MARKERS):
+            continue
+        keep.append(line)
+        m = re.match(r"\s*(Matrix|Objective|Bounds|RHS) range\s+\[(\S+), (\S+)\]", line)
+        if m:
+            lo, hi = float(m.group(2)), float(m.group(3)); stats["coefficient_statistics"][m.group(1).lower()] = dict(min=lo, max=hi, ratio=(hi / lo if lo else None))
+        for key, pat in [("presolved", r"^Presolved: (\d+) rows, (\d+) columns, (\d+) nonzeros"), ("barrier", r"^Barrier solved model in (\d+) iterations and ([\d.]+) seconds"),
+                         ("crossover", r"^Solved with (barrier|dual simplex|primal simplex)|^Crossover .*"), ("result", r"^(Optimal objective|Model is infeasible|Model is unbounded|Infeasible or unbounded|Time limit reached|Solved in).*"),
+                         ("warning", r"^Warning: .*")]:
+            if re.match(pat, line):
+                stats["lines"].setdefault(key, []).append(line.strip()[:200])
+    Path(scrubbed_path).write_text("\n".join(keep))
+    stats["scrubbed_log"] = str(scrubbed_path.name); stats["scrubbed_lines"] = len(keep)
+    return stats
+
+
 def main(a):
     import pypsa, logging
     logging.getLogger("pypsa").setLevel(logging.ERROR)
@@ -168,29 +196,68 @@ def main(a):
         cfg = config(a.repo, a.scenario)
         t0 = time.time(); m = n.optimize.create_model(); install_research_constraint_hooks(n)
         hooks = sorted(k for k in m.constraints if k.startswith("research_") or k.startswith("Research"))
+        SV = cfg["research"].get("solver", {})
+        profile = a.solver_profile or SV.get("profile")
+        scaling_on = (a.scaling == "on") if a.scaling else bool(SV.get("scaling", {}).get("enabled", False))
+        const_led, store_led = None, None
+        if scaling_on and SV.get("scaling", {}).get("objective_constants_out", True):   # S3B R4 (a)
+            from s3b_scaling import remove_objective_constants
+            const_led = remove_objective_constants(m)
         lp_meta, M = export_lp(m, out / "lp"); build_seconds = time.time() - t0
+        if const_led:   # exported LP is in original units without the constant columns; record the removed constants as the objective offset
+            lp_meta["offset"] = float(lp_meta.get("offset", 0.0)) + const_led["total_eur"]; lp_meta["offset_source"] = "S3B R4 (a): objective constant columns moved out of the LP"
+            save(out / "lp" / "MATH_PROBLEM.json", lp_meta)
+        if scaling_on and SV.get("scaling", {}).get("store_energy_units", True):   # S3B R4 (b)
+            from s3b_scaling import select_stores, scale_store_energy
+            groups = SV.get("scaling", {}).get("store_groups", ["biomass_pools", "sequestration", "capture_buffers"])
+            sel = select_stores(n, groups); allst = sorted({s for v in sel.values() for s in v})
+            store_led = scale_store_energy(m, allst, float(SV.get("scaling", {}).get("store_energy_factor", 1000.0)))
+            store_led["by_group"] = {k: len(v) for k, v in sel.items()}
+        from s3b_scaling import public as _pub
+        run["solver_profile"] = profile; run["scaling"] = dict(enabled=scaling_on, objective_constants=const_led, store_energy=(_pub(store_led) if store_led else None))
         run.update(input_network=dict(path=str(a.network), sha256=net_sha, snapshots=int(len(n.snapshots)), truncated_to=a.truncate, horizon_scaling=scaling),
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
         save(out / "SOLVE_RECEIPT.json", run)
-        params = dict(threads=4, log_file=str(out / "highs.log"), time_limit=float(a.time_limit), solver="ipm" if a.highs_ipm else "choose")
-        run["solver_parameters"] = params; run["parameter_source"] = "HiGHS defaults (smoke test / diagnostic only)"
+        if a.solver == "gurobi" and profile:   # S3B R4 (decision 69): research.solver.profiles (PyPSA-Eur v2025.07.0 gurobi-default lines 1056-1064 as basis)
+            params = dict(SV["profiles"][profile]); params["TimeLimit"] = float(a.time_limit)
+            run["parameter_source"] = f"decision 69: research.solver.profiles.{profile} (PyPSA-Eur gurobi-default basis; differences registered) + TimeLimit (stop-loss)"
+        elif a.solver == "gurobi":   # decision 65: PyPSA-Eur numeric-robust style; license via GRB_LICENSE_FILE (read-only, never copied or logged)
+            params = dict(Method=2, NumericFocus=3, BarHomogeneous=1, Crossover=1, Threads=8, TimeLimit=float(a.time_limit))
+            run["parameter_source"] = "decision 65: Gurobi Method 2 (barrier), NumericFocus 3, BarHomogeneous 1 (separates true infeasibility from numerics), Crossover 1 (on), Threads 8, TimeLimit; log file via linopy log_fn"
+        else:
+            params = dict(threads=4, log_file=str(out / "highs.log"), time_limit=float(a.time_limit), solver="ipm" if a.highs_ipm else "choose")
+            run["parameter_source"] = "HiGHS defaults (smoke test / diagnostic only)"
+        run["solver_parameters"] = params
         t1 = time.time(); run["optimize_calls"] = 1; save(out / "SOLVE_RECEIPT.json", run)
-        status, condition = n.optimize.solve_model(solver_name=a.solver, solver_options=params, log_fn=str(out / (a.solver + ".linopy.log")))
+        status, condition = m.solve(solver_name=a.solver, **params, log_fn=str(out / (a.solver + ".linopy.log")))   # = PyPSA solve_model without the assignment step
+        if status == "ok":
+            if store_led:
+                from s3b_scaling import unscale_solution
+                unscale_solution(m, store_led)
+            n.optimize.assign_solution(); n.optimize.assign_duals(); n.optimize.post_processing()
+            if const_led:
+                n.objective = float(m.objective.value) + const_led["total_eur"]   # total-cost definition unchanged (constants added back)
         run.update(status=status, termination_condition=condition, solve_seconds=time.time() - t1)
+        if a.solver == "gurobi":
+            run["gurobi_log_stats"] = gurobi_log_stats(out / (a.solver + ".linopy.log"), out / "GUROBI_LOG_SCRUBBED.txt")
         if status != "ok":
             diag = dict(status=status, condition=condition, structural=structural_diagnosis_s2(n),
                         reading="countries with can_store_or_export_co2 == false and positive unavoidable CO2 cannot meet the per-country net-zero cap (decisions 49/53): no relaxation; see the GAP_DIAGNOSTIC run")
             save(out / "INFEASIBILITY_DIAGNOSIS.json", diag); run["decision"] = "STOP_INFEASIBLE_OR_FAILED_NO_RELAXATION"; save(out / "SOLVE_RECEIPT.json", run)
             print(json.dumps(dict(status=status, condition=condition))); return 2
-        run["objective"] = float(m.objective.value)
+        run["objective"] = float(n.objective); run["objective_lp"] = float(m.objective.value)
         sol_dir = out / "solution"; sol_dir.mkdir(exist_ok=True)
         X = np.asarray(M.sol, dtype="<f8"); Pi = np.asarray(M.dual, dtype="<f8"); rc_map = reduced_costs(m, a.solver)
+        if store_led:
+            from s3b_scaling import unscale_reduced_costs
+            rc_map = unscale_reduced_costs(rc_map, store_led)
         RC = np.array([rc_map.get(int(l), np.nan) for l in M.vlabels], dtype="<f8")
         for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]:
             np.save(sol_dir / (k + ".npy"), v)
         run["solution"] = {k: dict(count=int(len(v)), sha256=sha(sol_dir / (k + ".npy"))) for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]}
         from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
-                                 gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows)
+                                 gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows,
+                                 gate_b13_imports_one_way, gate_b14_terminal_caps, gate_b15_domestic_production_caps)
         from country_carbon import emission_report
         n.meta["artifact_role"] = a.label + "_SOLVED"; n.meta["result_label"] = a.label
         capacity_reduced_costs(n, m, rc_map).to_csv(out / "capacity_reduced_costs.csv", index=False)
@@ -201,10 +268,20 @@ def main(a):
         caps = {typ: n.df(typ).groupby(["carrier", "country"])[nom + "_opt"].sum().reset_index().to_dict("records") for typ, nom in [("Generator", "p_nom"), ("Link", "p_nom"), ("StorageUnit", "p_nom"), ("Store", "e_nom")] if "country" in n.df(typ)}
         save(out / "CAPACITY_BY_TECH_COUNTRY.json", caps)
         contract = load_contract(); gates = {}
+        interior = a.solver == "gurobi" and int(params.get("Crossover", 1)) == 0
         try:
-            gates["A1_A2"] = gate_a1_a2_kkt(out / "lp", sol_dir, out / "v5", contract)
+            if interior:   # S3B R4.4: interior-point criteria tied to BarConvTol
+                from v5.v5_gates import gate_a1_a2_interior
+                I = SV.get("interior", {})
+                gates["A1_A2"] = gate_a1_a2_interior(out / "lp", sol_dir, out / "v5", contract, float(params["BarConvTol"]), float(I.get("gap_factor", 10)), float(I.get("dual_factor", 100)))
+            else:
+                gates["A1_A2"] = gate_a1_a2_kkt(out / "lp", sol_dir, out / "v5", contract)
         except Exception as e:
             gates["A1_A2"] = dict(gate="A1_A2_KKT_AND_BUDGETS", passed=False, error=str(e)[:500])
+        if a.solver == "gurobi":   # S3B R4.4: cleanup thresholds (reporting) and simultaneous charge/discharge
+            from s3b_interior import cleanup_thresholds, simultaneous_charge_discharge
+            thr = cleanup_thresholds(n, float(params.get("BarConvTol", 1e-8)), float(SV.get("interior", {}).get("cleanup_factor", 10)))
+            save(out / "INTERIOR_CHECKS.json", dict(cleanup_thresholds=thr, simultaneous_charge_discharge=simultaneous_charge_discharge(n, thr), interior_solution=interior))
         try:
             known = {}
             if gap and "Research_gap_co2_slack" in m.variables:
@@ -219,6 +296,7 @@ def main(a):
             gates["B1"] = gate_b1_country_net_zero(n)
         gates["B2"] = gate_b2_storage_cap(n); gates["B3"] = gate_b3_biomass(n); gates["B8"] = gate_b8_demand_consistency(n)
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
+        gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
         gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
         gates["all_passed"] = all(v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v)
         save(out / "V5_GATES.json", gates)
@@ -237,5 +315,6 @@ def main(a):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--network", type=Path, required=True); p.add_argument("--scenario", required=True); p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--solver", choices=["highs"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
+    p.add_argument("--solver-profile", default=None, help="research.solver.profiles key (S3B R4); default research.solver.profile"); p.add_argument("--scaling", choices=["on", "off"], default=None, help="S3B R4 scaling override; default research.solver.scaling.enabled")
+    p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     sys.exit(main(p.parse_args()))

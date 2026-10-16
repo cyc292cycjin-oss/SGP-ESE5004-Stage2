@@ -115,10 +115,55 @@ research:
   scenario: baseline
   skeleton_status: INTERIM_S1_SKELETON   # electricity demand only; results carry no scientific meaning
   fuel_bus_naming: upstream_space        # "<node> <carrier>" as in scripts/prepare_sector_network.py
+  solver:                                # S3B R4 (decision 69): Gurobi profiles on the PyPSA-Eur v2025.07.0 config.default.yaml gurobi-default basis (lines 1056-1064)
+    profile: formal_barrier              # formal_barrier (main, Crossover 0) | crossover_diagnostic (same settings, Crossover 1)
+    profiles:
+      formal_barrier: {Method: 2, Crossover: 0, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
+      crossover_diagnostic: {Method: 2, Crossover: 1, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
+    scaling:                             # only (a) and (b) of decision 69; Kirchhoff row normalisation not implemented
+      enabled: true
+      objective_constants_out: true      # (a) constant-only objective columns removed from the LP, added back after the solve
+      store_energy_units: true           # (b) large Stores in GWh / kt
+      store_energy_factor: 1000.0
+      store_groups: [biomass_pools, sequestration, capture_buffers]
+    interior:                            # R4.4 thresholds tied to BarConvTol
+      gap_factor: 10                     # relative primal-dual gap and complementarity / scale <= 10 x BarConvTol; primal budget 1e-7 relative = 10 x BarConvTol
+      dual_factor: 100                   # normalized stationarity and dual-sign error <= 100 x BarConvTol = 1e-6 (V4 KKT budget, Gurobi OptimalityTol default)
+      cleanup_factor: 10                 # reporting cleanup tau_g = 10 x BarConvTol x max|x_g|
+  s3:                                    # step 3 layers (scripts_project/s3_layers.py)
+    fuel_carbon_mode: origin_neutral     # S3-5 (decision 64): origin_neutral = non-fossil liquid fuels zero at combustion, carbon booked at synthesis in the producer country, imports zero | producer_credit = S2 behaviour (sensitivity)
+    industry:                            # S3B R2 (decision 67)
+      other_bucket: pypsa_eur_2050       # pypsa_eur_2050 = UNSD other / construction / mining mapped to the PyPSA-Eur 'Other industrial sectors' 2050 ratios (main) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables)
+    gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
+      existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
+      production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0
+      production_node_allocation: load_shares   # grade C: electricity load share per AC node within the country (no field-level basis registered)
+      lng_terminals: research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv   # D1 registry; existing = operating + construction
+      lng_expansion: existing_only        # S3B R3 (decision 68): existing_only = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced terminal unit cost; main) | cap_factor = expansion to lng_cap_factor x existing at zero capex, proposed-only sites up to the proposed capacity (former S3 rule, sensitivity)
+      lng_cap_factor: 2.5                 # decision 17, used when lng_expansion = cap_factor: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity; also the liquid-H2 terminal cap (S3-2) in both modes
+      lng_regasification_adder_eur_per_mwh: 0.0   # DATA_PENDING (registry fuel_price_lng_regasification_adder): LNG cost understated
+    imports:                             # S3-2 (decisions 17, 18, 64): extra-ASEAN imports, same prices in both scenarios, imports only
+      price_table: research_inputs/imports_v5/IMPORT_PRICES_2050.csv   # Neumann et al. 2025 Zenodo results (2040, min over exporters) x 1.20 (s3_2_imports_data.py)
+      markup: 0.20                         # decision 17 (already applied in the table; documented here)
+      price_sensitivity: 0.0               # sensitivity switch: -0.2 / +0.2 on the applied green-carrier prices
+      h2_terminal_capital_cost_eur_per_mw_a: 8421.6   # PyPSA-Eur import branch 5a87cedd lines 4560-4563: LNG terminal 7018 EUR/MW/a x 1.2 for liquid H2
+      oil_pool: regional                    # one ASEAN oil pool (decision 18); coal/lignite per node unchanged
+    shipping:                            # S3-4 (decision 10, D1 section 4): D1 shipping demand (domestic + international bunkers) x PyPSA-Eur 2050 shares (registry share_shipping_*_2050)
+      shipping_oil_efficiency: 0.40        # PyPSA-Eur v2025.07.0 config.default.yaml line 636
+      shipping_methanol_efficiency: 0.46   # line 635; methanol demand = oil-equivalent x 0.40 / 0.46 (add_shipping lines 5195-5200)
+      international_bunkers_switch: research.s2.demand.international_bunkers   # shared with aviation (decision 10)
+    ammonia_methanol:                    # S3-3 (decision 44): PyPSA-Eur v2025.07.0 defaults (config lines 607-609, 722-736, 854) and technology-data v0.15.0 rows
+      MWh_MeOH_per_MWh_H2: 0.8787          # config line 607 (technology-data methanolisation hydrogen-input 1.138)
+      MWh_MeOH_per_tCO2: 4.0321            # config line 608 (carbondioxide-input 0.248 t/MWh)
+      MWh_MeOH_per_MWh_e: 3.6907           # config line 609 (electricity-input 0.271)
+      MWh_NH3_per_MWh_H2_cracker: 1.46     # config line 854 (technology-data Ammonia cracker ammonia-input 1.46)
+      min_part_load_methanolisation: 0.3   # config line 736
+      biomass_to_methanol: true            # config line 731 (default true)
+      methanol_to_power_ocgt: true         # config line 728 (ocgt: true; ccgt/ccgt_cc/allam false)
   cross_border:                          # decisions 13/41; per carrier; scenario files set all true / all false
     electricity: true
     H2: true
-    gas: false                           # gas network not built before step 3
+    gas: true                            # S3-1: gas pipelines along the unified corridors (candidates + 2025 stock from GEM); scenario files set all true / all false
     co2: false                           # CO2 network not built before step 2
   existing_cross_border_electricity:     # decision 15: 2025 capacity is the lower bound, expandable
     corridors_file: research_inputs/corridors/cross_border_corridors.csv
@@ -194,6 +239,7 @@ research:
         aeo8_ats_relative: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv
         gdp: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv
         population: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv
+        aeo8_ats_relative_level: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv   # S3B R1 growth_method level
       node_allocation: assembly_v1_allocation_shares_then_astar   # node shares per (country, account) from results_project/assembly_v1/final_allocation
       time_shape: flat_fuels_astar_shape_electricity
       international_bunkers: true         # decision 10; sensitivity switch
@@ -203,11 +249,19 @@ research:
       clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
       cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
     industry:
-      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s2b_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s3_0_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
+      ratio_source: jrc_idees_2021          # S3-0 (decision 61): jrc_idees_2021 = PyPSA-Eur v2025.07.0 sector ratios reproduced from JRC-IDEES-2021 for ALL sub-sectors incl. steel/cement (main) | technology_data_v015 = S2B steel/cement substitutes (sensitivity)
+      technology_data_sensitivity_tables:   # ratio_source technology_data_v015
+        aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_TD_SENSITIVITY.csv
+        gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp_TD_SENSITIVITY.csv
+        population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population_TD_SENSITIVITY.csv
+        aeo8_ats_relative_level: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_level_TD_SENSITIVITY.csv
+      ammonia_methanol_mode: regional_buses   # S3-3 (decision 44): ammonia load on ASEAN ammonia, methanol via node use links on ASEAN methanol | convert_to_h2_and_gas = S3-0 interim (ammonia -> H2 + electricity, methanol -> methane + electricity)
       pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
         aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv
         population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population.csv
+        aeo8_ats_relative_level: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_level.csv
       biomass_overflow_to_methane: true     # R1.6 / decision 36: fixed solid-biomass demand above the national potential is served by methane at equal heat
       low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30
       existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
@@ -216,6 +270,7 @@ research:
         aeo8_ats_relative: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative.csv
         gdp: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_gdp.csv
         population: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_population.csv
+        aeo8_ats_relative_level: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative_level.csv
       feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # full_release mode only: S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
       feedstock_end_of_life_release_fraction: 1.0   # full_release mode only: PyPSA-Eur default (HVC_environment_sequestration_fraction 0)
       hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
@@ -261,3 +316,4 @@ research:
     scope: electricity_only_astar         # step 2 (R8) reconnects the other sectors
     status: INTERIM_S1_SKELETON
     country_allocation: aeo8_ats_relative   # R3 (decision 57): aeo8_ats_relative (main) | gdp (former main, sensitivity) | population; selects the D1 demand table variant
+    growth_method: ratio                  # S3B R1 (decision 66): ratio = UNSD 2019 x bridge 2019-2022 x AEO8 BAS growth 2022-2050 (main) | level = AEO8 BAS 2050 absolute sector totals (former main, sensitivity; *_level tables)

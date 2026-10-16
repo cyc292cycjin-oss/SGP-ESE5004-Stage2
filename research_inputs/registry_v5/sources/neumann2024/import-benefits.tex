@@ -1,0 +1,287 @@
+\documentclass[1p,11pt]{elsarticle}
+
+\journal{Nature Communications}
+
+% \usepackage{natbib}
+\bibliographystyle{naturemag}
+\biboptions{numbers,sort&compress,super}
+
+% format hacks
+\usepackage{libertine}
+\usepackage{libertinust1math}
+\usepackage{geometry}
+\geometry{
+    top=12mm,
+    bottom=15mm,
+	% left=10mm,
+	% right=10mm,
+}
+
+\usepackage{afterpage}
+\usepackage{changepage}
+
+% Command for full width figures
+\newcommand{\fullwidthfigure}[1]{%
+  \begin{adjustwidth}{-\dimexpr\marginparwidth+\marginparsep\relax}{-\dimexpr\marginparwidth+\marginparsep\relax}
+    #1
+  \end{adjustwidth}
+}
+
+% \usepackage[final]{microtype}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{graphicx}
+\usepackage{eurosym}
+\usepackage{mathtools}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{epstopdf}
+\usepackage{xfrac}
+\usepackage{tabularx}
+\usepackage{bm}
+\usepackage{subcaption}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage[export]{adjustbox}
+\usepackage[version=4]{mhchem}
+\usepackage[colorlinks]{hyperref}
+% \usepackage[parfill]{parskip}
+\usepackage[nameinlink,sort&compress,capitalise]{cleveref}
+\usepackage[leftcaption,raggedright]{sidecap}
+\usepackage[prependcaption,textsize=footnotesize]{todonotes}
+\usepackage{blindtext}
+% \usepackage{pdflscape}
+
+% \usepackage[pagewise]{lineno}
+\usepackage{lineno}
+\linenumbers
+
+\usepackage{xr}
+\externaldocument{import-benefits-si}
+
+\urlstyle{sf}
+
+% Adjust the hyphenation penalty
+\hyphenpenalty=1000
+
+% Adjust the line breaking tolerance
+\tolerance=5000
+
+\renewcommand{\thefootnote}{\Alph{footnote}}
+
+\usepackage{lipsum}
+
+% \graphicspath{
+%     {../workflow/notebooks/},
+%     {../workflow/pypsa-eur/resources/},
+%     {../workflow/pypsa-eur/results/},
+% }
+
+% \usepackage[
+% 	type={CC},
+% 	modifier={by},
+% 	version={4.0},
+% ]{doclicense}
+
+\usepackage{siunitx}
+\sisetup{range-units=single, per-mode=symbol}
+\DeclareSIUnit\year{a}
+\DeclareSIUnit{\tco}{t_{\ce{CO2}}}
+\DeclareSIUnit{\sieuro}{\mbox{\euro}}
+\DeclareSIUnit{\twh}{{\tera\watt\hour}}
+\DeclareSIUnit{\mwh}{{\mega\watt\hour}}
+\DeclareSIUnit{\kwh}{{\kilo\watt\hour}}
+\newcommand{\co}{\ce{CO2}~}
+\def\el{${}_{\textrm{el}}$}
+\def\th{${}_{\textrm{th}}$}
+
+\newcommand{\bneuro}[1]{#1\,bn\euro{}$_\text{2020}$~a$^{-1}$}
+
+\renewcommand{\ttdefault}{\sfdefault}
+
+\newcommand{\sfigref}[1]{%
+    \begingroup%
+    \crefname{figure}{Supplementary Fig.}{Supplementary Figs.}%
+    \cref{#1}%
+    \endgroup%
+}
+
+\newcommand{\snoteref}[1]{%
+    \begingroup%
+    \crefname{section}{Supplementary Note}{Supplementary Notes}%
+    \cref{#1}%
+    \endgroup%
+}
+
+\newcommand{\Sfigref}[1]{%
+    \begingroup%
+    \Crefname{figure}{Supplementary Fig.}{Supplementary Figs.}%
+    \Cref{#1}%
+    \endgroup%
+}
+
+\newcommand{\stabref}[1]{%
+    \begingroup%
+    \crefname{table}{Supplementary Table}{Supplementary Tables}%
+    \cref{#1}%
+    \endgroup%
+}
+
+\newcommand{\Stabref}[1]{%
+    \begingroup%
+    \Crefname{table}{Supplementary Table}{Supplementary Tables}%
+    \Cref{#1}%
+    \endgroup%
+}
+
+
+
+\begin{document}
+
+
+\begin{frontmatter}
+
+	\title{Energy Imports and Infrastructure in a\\Carbon-Neutral European Energy System}
+
+	\author[tub]{Fabian Neumann\corref{correspondingauthor}}
+	\ead{f.neumann@tu-berlin.de}
+	\author[pik]{Johannes Hampp}
+	\author[tub]{Tom Brown}
+
+	\address[tub]{Department of Digital Transformation in Energy Systems, Institute of Energy Technology,\\Technische Universität Berlin, Fakultät III, Einsteinufer 25 (TA 8), 10587 Berlin, Germany}
+	\address[pik]{Potsdam Institute for Climate Impact Research (PIK), Member of the Leibniz Association, P.O.~Box 60 12 03, 14412 Potsdam, Germany}
+
+	\begin{abstract}
+		\input{sections/abstract.tex}
+	\end{abstract}
+
+	% \begin{keyword}
+	% 	TODO
+	% \end{keyword}
+
+	% \begin{graphicalabstract}
+	% \end{graphicalabstract}
+
+	% \begin{highlights}
+	% 	\item A
+	% 	\item B
+	% 	\item C
+	% \end{highlights}
+
+\end{frontmatter}
+
+% \listoftodos[TODOs]
+
+% \tableofcontents
+
+% \section*{Introduction}
+% \label{sec:intro}
+
+\input{sections/introduction.tex}
+
+% \section*{Results}
+% \label{sec:results}
+
+\input{sections/results.tex}
+
+\section*{Discussion}
+\label{sec:discussion}
+
+\input{sections/discussion.tex}
+
+\section*{Methods}
+
+\label{sec:methods}
+
+\input{sections/methods.tex}
+
+\section*{Acknowledgements}
+
+J.H. gratefully acknowledges funding from the Kopernikus-Ariadne project (FKZ
+03SFK5A and 03SFK5A0-2) by the German Federal Ministry of Education and
+Research (\textit{Bundesministerium für Bildung und Forschung, BMBF}).
+
+% \section*{License}
+% \doclicenseLongText
+% \doclicenseIcon
+
+\section*{Author contributions}
+
+% following https://casrai.org/credit/
+
+\textbf{F.N.}:
+Conceptualization --
+Data curation --
+Formal Analysis --
+% Funding acquisition --
+Investigation --
+Methodology --
+% Project administration --
+% Resources --
+Software --
+% Supervision --
+Validation --
+Visualization --
+Writing - original draft --
+% Writing - review \& editing
+\textbf{J.H.}:
+Conceptualization --
+Data curation --
+Formal Analysis --
+% Funding acquisition --
+Investigation --
+Methodology --
+% Project administration --
+% Resources --
+Software --
+% Supervision --
+Validation --
+Visualization --
+% Writing - original draft --
+Writing - review \& editing
+\textbf{T.B.}:
+Conceptualization --
+% Data curation --
+Formal Analysis --
+Funding acquisition --
+Investigation --
+Methodology --
+Project administration --
+% Resources --
+Software --
+Supervision --
+Validation --
+% Visualization --
+% Writing - original draft --
+Writing - review \& editing
+
+\section*{Declaration of interests}
+
+The authors declare no competing interests.
+
+\section*{Data availability}
+
+A dataset of the model results is available on Zenodo under
+\url{https://doi.org/10.5281/zenodo.14872184}. Data on techno-economic
+assumptions for years can be found at
+\url{https://github.com/PyPSA/technology-data/releases/tag/import-benefits-v2}
+and has been archived on Zenodo under \url{10.5281/zenodo.14872325}.
+
+\section*{Code availability}
+
+The code to reproduce the experiments is available at
+\url{https://github.com/fneum/import-benefits/tree/v3.0.1} (v3.0.1), which uses a
+derivative of TRACE v1.1 and PyPSA-Eur v0.13.0. The code has been archived on
+Zenodo under \url{10.5281/zenodo.14872325}. We also refer to the documentation
+of PyPSA-Eur at \url{https://pypsa-eur.readthedocs.io/en/v0.13.0-docs-fix} for more
+details.
+
+\renewcommand{\ttdefault}{\sfdefault}
+% \bibliography{import-benefits}
+\bibliography{/home/fneum/zotero-bibtex.bib}
+
+\newcounter{LastMainFigure}
+\setcounter{LastMainFigure}{\value{figure}}
+
+\end{document}

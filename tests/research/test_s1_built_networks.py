@@ -18,6 +18,7 @@ class BuiltNetworks(unittest.TestCase):
         cls.cfg={s:config(ROOT,s) for s in ['integrated','disconnected']}
         cls.receipt={s:json.loads((S1/s/f'{s}_BUILD_RECEIPT.json').read_text()) for s in ['integrated','disconnected']}
         cls.corridors=pd.read_csv(ROOT/'research_inputs/corridors/cross_border_corridors.csv',float_precision='round_trip')
+        cls.corridors=cls.corridors[cls.corridors.status=='EXISTING_2025']  # S3-0 (decision 62) APG additions are created at S2/S3 build time; the S1 networks predate them
     def test_static_validation_passes_on_reload(self):
         from build_research_network import static_validate_s1
         for s,n in self.n.items():

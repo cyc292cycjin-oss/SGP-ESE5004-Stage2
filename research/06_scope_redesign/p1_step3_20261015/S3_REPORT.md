@@ -1,0 +1,420 @@
+# S3 报告：天然气网络、东盟外进口、氨/甲醇、航运与燃料碳归属（第 61–64 项已确认）
+
+分支 `codex/s3-gas-imports-shipping-20261015`（自 S2 分支 @ 8d61bd37 开出）；仓库 `cyc292cycjin-oss/SGP-ESE5004-Stage2`。结论分级：VERIFIED / EXACT / INFERENCE / PROPOSED。本轮没有正式求解，只有本地构建、56×3h 冒烟与 gap_diagnostic。
+
+## 摘要（≤10 行）
+
+1. S3-0：PyPSA-Eur v2025.07.0 工业比率从 JRC-IDEES-2021 原样复现（EU27 氨产量按 USGS 表复现），用于全部子部门；东盟工业电力 1,503 → 3,784 TWh，煤/油归零（UNSD"其他"桶电化的后果需用户确认）；APG #11 TH–MM、#17 LA–MM 走廊加入，24 走廊 vs 18 项目核对；废塑料代理值；KH 交通链 5.2 倍的来源已定位（报告只）。
+2. S3-1：节点气母线 + 84 个井口（UNSD 2019 上限、进口价、逸散因子）+ 111 候选 + 14 连通性补全 + GEM 6 条存量跨境管道（MY–SG 容量待补）+ 16 个 LNG 站点（2.5×）。
+3. S3-2：油改全区池；绿色载体价格取 Zenodo 14872184（2040，最低出口地）×1.20：液氢 105.8、氨 116.8、甲醇 145.2、FT 150.1 EUR/MWh；2040→2050 降幅估计 9–12%，敏感性下限保持 −20%。
+4. S3-3/S3-4：氨、甲醇全区母线与 PyPSA-Eur 默认工艺；航运 651.19 TWh 油当量 → 566.25 TWh 甲醇（指令的 670.2 未复现）。
+5. S3-5：origin_neutral 主算——油分化石/非化石池、甲醇母线即非化石、合成时在生产国记碳、进口零；`co2 stored` 不拆分的等价性已论证；SG 燃料舱甲醇在 producer_credit 下为 115.5 Mt。
+6. S3-6：B13–B16 新门槛与 B1/B11/B12 扩展，三个网络静态全部通过。
+7. S3-7：HiGHS IPM 再报"不可行"，单纯形 2 h 20 min 未收敛；Gurobi（第 65 项）barrier 最优 6.988e11，crossover 终态 INF_OR_UNBD，诊断 LP 最优且目标一致（松弛 0）→ 一体化情景可行，"不可行"为数值问题；系数范围 1e13，缩放建议 PROPOSED。
+8. 一体化解：11 国净零；LNG 2,465 TWh（SG/TH/PH 触 2.5× 上限）、国内气 2,411（触 UNSD 上限）、油 1,650、甲醇进口 70；SG 以核 SMR + 电力进口供电、LNG 转口 327 TWh 至 MY、CO₂ 56 Mt 出口到 MY 封存。
+9. 本机 10.7 GiB 内存不足以完成 365×24h 正式试算（预计 14–18 GiB），见 `CLOUD_RESOURCE_ESTIMATE.md` §8。
+10. 测试 385 通过 / 4 基线失败；登记表 1,341 行、DATA_PENDING 23；全部提交在 draft PR #24。
+
+---
+
+## 1. S3-0 收尾修正
+
+### 1.1 第 61 项：PyPSA-Eur 工业部门比率（JRC-IDEES-2021）
+
+**复现方法（VERIFIED）。** `scripts_project/s3_0_industry_ratios.py` 以 importlib 原样加载本地登记的 PyPSA-Eur v2025.07.0 `scripts/build_industry_sector_ratios.py`（SHA 70c45a81…），替换 `snakemake` 与 `scripts._helpers` 为桩，输入 `raw8/JRC-IDEES-2021_EU27.zip` 解出的 `JRC-IDEES-2021_Industry_EU27.xlsx`（SHA 1fd3bc14…），参数取 `config.default.yaml` 815–910 行（`reference_year` 2019，`ammonia: true`）。调用的函数与行号：`iron_and_steel` 102、`chemicals_industry` 296、`nonmetalic_mineral_products` 635、`pulp_paper_printing` 832、`food_beverages_tobacco` 991、`non_ferrous_metals` 1057、`transport_equipment` 1259、`machinery_equipment` 1309、`textiles_and_leather` 1361、`wood_and_wood_products` 1410、`other_industrial_sectors` 1455；`load_idees_data` 79–99。输出 `registry_v5/INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv`（12 行 × 27 列，含 `heat` 低温热行）。
+
+**氨产量输入（VERIFIED）。** 该脚本在 431–436 行用 `resources/ammonia_production.csv`（USGS）扣除 2019 年 EU27 的合成氨能耗。该资源按 PyPSA-Eur 规则复现：`retrieve.smk` 299–305 行给出 USGS 氮矿物年鉴表 `myb1-2022-nitro-ert.xlsx` 的公开地址，`scripts/build_ammonia_production.py` 读表 T12（skiprows 5、skipfooter 7、`--`→NaN、ktN×17/14）。两文件只读获取并登记（表：2026-10-15T10:30:38Z，SHA 9b055fcd…；脚本 10:29:18Z，SHA 5aca047c…；规则文件 10:29:53Z）。EU27 2019 合成氨 = 15,712.9 kt NH₃（18 国），替代 S2B 报告里 17,000 kt 的配置注释代理（C 级 → B 级）。
+
+**与公开 PyPSA-Eur 结果的对比。** PyPSA-Eur 不发布 `industry_sector_ratios.csv` 产物，无法逐值对照；可核对的是配置常数行（如 DRI+EAF 氢 1.7 MWh/t、Ammonia 5.166、Methanol 5.528、HVC 机械回收 0.547、化学回收 6.9）与脚本输出一致（EXACT）。
+
+**2050 比率摘录（MWh/t，EXACT，节选）：**
+
+| 部门 | 电 | 甲烷 | 氢 | 生物质 | 低温热 | 煤/焦 | 过程排放 t/t |
+|---|---|---|---|---|---|---|---|
+| Electric arc | 1.122 | 0.167 | 0 | 0 | 0.005 | 0 | 0.041 |
+| DRI + Electric arc | 1.444 | 0.167 | 1.700 | 0 | 0.005 | 0 | 0.041 |
+| Integrated steelworks | 1.032 | 0.332 | 0 | 0 | 0 | 0.154+0.185 | 0.774 |
+| HVC（不含石脑油 12.62） | 2.454 | 3.295 | 0.173 | 0 | 0.182 | 0 | −0.063（+0.490 原料） |
+| Cement | 0.107 | 0.556 | 0 | 0.198 | 0.004 | 0 | 0.525 |
+| Alumina / Al primary | 1.393 / 14.761 | 3.690 / 0 | 0 | 0 | 0.015 / 0.045 | 0 | 0 / 1.507 |
+| Other industrial sectors | 0.242 | 0 | 0 | 0.071 | 0.008 | 0 | 0 |
+
+**应用到东盟（`scripts_project/s3_0_industry.py`，覆盖 S2B 的 `INDUSTRY_2050_SUMMARY_*.csv`）：**
+- 钢铁、水泥按活动量：粗钢 2050 = worldsteel 2019 × 工业乘数，0.3 DRI+EAF / 0.7 Electric arc；水泥 = EDGAR 2.A.1/0.52 熟料 ÷ 0.656（technology-data 熟料投入）× Cement 比率。S2B 的 technology-data 替代比率改为敏感性文件 `INDUSTRY_2050_SUMMARY_*_TD_SENSITIVITY.csv`（开关 `research.s2.industry.ratio_source: jrc_idees_2021 | technology_data_v015`）。
+- 其余 UNSD 子部门按能量：2019 能耗 × 乘数 × 效率因子（PyPSA-Eur 2050 单耗 ÷ EU27 2019 单耗）× 2050 载体份额；UNSD→PyPSA-Eur 映射与 EU27 2019 能耗权重见 `demand_v5/INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv`（C 级）。化工子部门按 EU27 能耗拆成 HVC 28.9% / 合成氨 30.8% / 氯碱 4.3% / 甲醇 2.7% / 其他化工 24.2% / 制药 9.1%（脚本 431–448 行的扣减逻辑）。
+- HVC 口径（INFERENCE，已登记）：PyPSA-Eur 把 IDEES 基础化工的原料天然气计入 `methane`（脚本 330–345 行），石脑油单列为原料；本轮 2019 单耗按同一口径（能耗 + 原料天然气 − 氨/氯/甲醇能耗）/52 Mt = 6.67 MWh/t，2050 为 6.10（不含石脑油），效率因子 0.915；若严格只算能源用途，因子为 0.86 且甲烷份额为 0——两者差别只影响 HVC 部分。
+- 低温热行接入现有节点工业低温热母线（`IndustryLowTemperatureHeat` 负荷）。氨、甲醇行在 S3-0 暂按 PyPSA-Eur `ammonia: false` 路线折算（氨 → 1.148 MWh H₂ + 0.048 MWh 电 /MWh NH₃，配置 849/852/853 行；甲醇 → 1.854 MWh CH₄ + 0.030 MWh 电 /MWh MeOH，904–906 行），开关 `ammonia_methanol_mode`，S3-3 切到全区母线。
+- 生物质超出国家潜力的部分改甲烷（第 36 项）：SG 17.8 TWh、VN 214.0 TWh（与 S2B 同）。
+- 氯碱副产氢使国家净工业氢为负时记 0、不计信用（仅 BN，−0.008 TWh）。
+
+**三列对比（TWh/a，2050，主分配 aeo8_ats_relative；VERIFIED）。** 煤保留量：S3-0 全部国家为 0（2050 比率中只有一体化长流程钢保留煤/焦，而主路线为 H₂-DRI + 废钢电炉）。
+
+BAS 固定结构（2019 载体份额 × 乘数）：
+
+| 国家 | 生物质 | 煤 | 电 | 气 | 油 | 合计 |
+|---|---|---|---|---|---|---|
+| BN | 0.0 | 0.0 | 1.2 | 0.0 | 2.4 | 3.6 |
+| ID | 642.1 | 1002.2 | 305.7 | 415.9 | 314.6 | 2680.5 |
+| KH | 11.2 | 5.8 | 15.2 | 0.0 | 12.9 | 45.1 |
+| LA | 4.0 | 4.6 | 8.4 | 0.0 | 0.3 | 17.3 |
+| MM | 41.9 | 7.3 | 11.2 | 6.3 | 52.2 | 118.9 |
+| MY | 0.0 | 37.0 | 219.5 | 250.7 | 91.5 | 598.7 |
+| PH | 22.9 | 50.6 | 87.4 | 2.3 | 51.1 | 214.3 |
+| SG | 0.0 | 4.2 | 42.4 | 27.4 | 80.6 | 154.6 |
+| TH | 187.3 | 162.4 | 278.5 | 142.5 | 183.0 | 953.7 |
+| TL | 0 | 0 | 0 | 0 | 0 | 0 |
+| VN | 209.1 | 994.9 | 490.5 | 24.3 | 19.1 | 1737.9 |
+| 东盟 | 1118.5 | 2269.0 | 1459.8 | 869.4 | 807.7 | 6524.4 |
+
+S2B（technology-data 钢铁/水泥 + 其余子部门 2019 份额；冻结自提交 8d61bd37）：
+
+| 国家 | 生物质 | 煤 | 电 | 气 | 油 | 氢 | 合计 |
+|---|---|---|---|---|---|---|---|
+| BN | 0.0 | 0.0 | 1.2 | 0.3 | 2.1 | 0.0 | 3.6 |
+| ID | 587.4 | 904.7 | 317.0 | 479.8 | 280.6 | 13.7 | 2583.2 |
+| KH | 2.3 | 0.2 | 15.2 | 24.6 | 2.7 | 0.0 | 45.0 |
+| LA | 0.0 | 0.0 | 8.4 | 10.5 | 0.0 | 0.0 | 18.9 |
+| MM | 41.9 | 0.1 | 11.7 | 11.6 | 52.2 | 0.4 | 117.9 |
+| MY | 0.0 | 0.0 | 222.6 | 277.7 | 89.2 | 9.7 | 599.2 |
+| PH | 22.6 | 8.9 | 99.3 | 63.2 | 38.8 | 3.0 | 235.8 |
+| SG | 0.0 | 4.2 | 42.6 | 27.4 | 80.6 | 0.8 | 155.6 |
+| TH | 187.3 | 93.7 | 260.2 | 204.5 | 161.1 | 7.0 | 913.8 |
+| TL | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| VN | 110.2 | 512.8 | 525.2 | 382.4 | 10.9 | 39.0 | 1580.5 |
+| 东盟 | 951.7 | 1524.6 | 1503.3 | 1482.0 | 718.0 | 73.7 | 6253.3 |
+
+S3-0（IDEES 比率，全部子部门；煤、油为 0）：
+
+| 国家 | 生物质 | 电 | 气 | 低温热 | 氢 | 氨 | 甲醇 | 合计 |
+|---|---|---|---|---|---|---|---|---|
+| BN | 0.1 | 2.1 | 0.9 | 0.1 | 0.0 | 0.1 | 0.0 | 3.2 |
+| ID | 529.8 | 1717.3 | 184.9 | 53.9 | 12.9 | 14.0 | 1.4 | 2514.2 |
+| KH | 10.2 | 12.2 | 22.1 | 0.4 | 0.0 | 0.0 | 0.0 | 44.9 |
+| LA | 4.8 | 6.6 | 9.4 | 0.2 | 0.0 | 0.0 | 0.0 | 21.0 |
+| MM | 26.8 | 77.0 | 7.4 | 2.5 | 0.3 | 0.5 | 0.0 | 114.5 |
+| MY | 121.4 | 406.1 | 33.2 | 12.2 | 9.7 | 0.0 | 0.0 | 582.6 |
+| PH | 71.4 | 97.4 | 59.2 | 4.0 | 2.9 | 1.4 | 0.1 | 236.4 |
+| SG | 0.0 | 96.1 | 28.0 | 3.3 | 0.2 | 9.6 | 1.0 | 138.2 |
+| TH | 271.8 | 450.7 | 106.6 | 19.8 | 6.0 | 18.5 | 1.9 | 875.3 |
+| TL | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| VN | 110.2 | 918.9 | 546.2 | 27.2 | 38.4 | 10.9 | 1.1 | 1652.9 |
+| 东盟 | 1146.4 | 3784.4 | 998.0 | 123.5 | 70.6 | 55.0 | 5.6 | 6183.5 |
+
+**需要注意的后果（INFERENCE）。** 东盟工业电力从 S2B 的 1,503 TWh 升到 3,784 TWh，煤 1,525 → 0、油 718 → 0。原因是多数国家的 UNSD 工业表只有化工、钢铁和"其他"行（ID/MY/SG/KH/LA/BN 没有非金属矿物、造纸、食品等行），"其他"桶映射到 PyPSA-Eur `Other industrial sectors`，其 2050 比率 76% 为电。ID 的 1,002 TWh 工业煤（含镍冶炼等）因此几乎全部电化。这是第 61 项的直接结果，不是数据错误；若用户希望为"其他"桶保留更多燃料份额，需另行决定。
+
+**登记：** `fragments/industry_sector_ratios.csv`（55 行：比率、参数、效率因子、USGS 来源）、`fragments/industry_2050.csv`（108 行）。缺口表 `INDUSTRY_2050_GAPS.csv`（108 行，均为 C 级推算说明：无 UNSD 行时从"其他"桶取能量等）。
+
+### 1.2 第 59/62 项：走廊 TH–MM、LA–MM 与 APG 核对
+
+**新增走廊（EXACT）。** `scripts_project/s3_0_corridors.py` 向 `corridors/cross_border_corridors.csv` 追加两行（24 → 26 行），线路在构建时由 `s2_layers.add_apg_corridor_lines` 生成：
+
+| 走廊 | 节点对 | 选点依据 | 长度 | 2025 容量 | 处理 |
+|---|---|---|---|---|---|
+| APG #11 TH–MM | MM2 4 (97.98E, 16.70N) – TH2 4 (99.99E, 17.55N) | 两国 AC 节点大圆距离最小对 233 km（次近 MM2 4–TH2 2 364 km、MM2 1–TH2 4 386 km） | 233 × 1.25 = 291.8 km | 0 | 可扩建候选（s_nom 0） |
+| APG #17 LA–MM | LA2 5 (101.52E, 20.40N) – MM2 13 (99.21E, 21.77N) | 最小对 284 km（次近 MM2 7–LA2 5 407 km） | 284 × 1.25 = 354.7 km | 30 MW 存量（s_nom_min） | 扩建内生（APG 规划 100–600 MW 仅作参考） |
+
+长度系数 1.25 是基础网 19 条既有跨境 AC 线 `length/大圆距离` 的中位数（与 PyPSA-Eur `lines.length_factor` 一致）。单位投资 42.01 EUR/MW/km/a 取既有跨境线中位数（基础网统一值）；线型 `Al/St 240/40 4-bundle 380.0`、`s_max_pu` 0.7 与每公里电气参数取并联数最接近中位数的既有跨境线（Line 43 KH–LA，并联数 1.286；构建回执 `apg_corridor_additions`）。H₂/CO₂ 候选管道随电力拓扑自动再生成：跨境候选 19 → 21（新增 LA–MM、MM–TH），缅甸 17 节点 21 条国内候选一个连通分量，不再是无 CO₂ 去向的孤岛。
+
+**24 走廊 vs 18 个 APG 优先项目核对（`corridors/CORRIDOR_APG_CROSSCHECK_2024.csv`，VERIFIED）：**
+
+| 分类 | APG 项目 | 说明 |
+|---|---|---|
+| 已覆盖（表中有） | #1 MY–SG 525 MW（Line 92）；#2 TH–MY 380（Line 91 + 4 条 HVDC 491.4 + Khlong Ngae–Gurun 300 = 2645.6 MW，表值 ≫ APG 的 380）；#6 Sarawak–W.Kalimantan 230（Line 23）；#9 TH–LA 955（9 条线）；#10 LA–VN（4 条 0.2–0.4 MW 线，合计 1.0 MW；APG 未给既有容量）；#12 VN–KH 200；#13 LA–KH 300；#14 TH–KH 250 | 差异只记录，不改表 |
+| 本轮新增 | #11 TH–MM、#17 LA–MM | 第 62 项 |
+| 仅 APG（同国家对但另一段） | #4 Peninsular–Sumatera、#15 E.Sabah–N.Kalimantan | 表中 ID–MY 只有 #6；不新增 |
+| 仅 APG | #5/#16 SG–Sumatera/Batam、#7 PH–Sabah、#8a Sarawak–Brunei、其他 SG–VN、SG–KH | 不新增 |
+| 单国内部（范围外） | #3 Sarawak–Peninsular、#8b Sarawak–Sabah、#18a/b Kalimantan/Sumatera–Java | 国内输电内生 |
+| 仅表中 | 无 | |
+
+### 1.3 第 63 项：废塑料代理值（`s2b_feedstock.py`，C 级）
+
+| 项 | 代理值 | 依据 | 敏感性 |
+|---|---|---|---|
+| LA 塑料占 MSW 份额 | 0.165 | 10 个有数据国家按 2050 MSW 加权均值（BN 0.29、KH 0.10、ID 0.19、MY 0.24、MM 0.105、PH 0.1055、SG 0.136、TH 0.176、TL 0.097、VN 0.10） | 0 – 0.29 |
+| KH/TH/VN 未收集垃圾露天焚烧份额 | 0.739 | 有数据的 ID 0.739、MM 0.21、PH 0.163 按 MSW 加权 | 0 – 0.739 |
+
+结果：LA 塑料焚烧 0.12 Mt CO₂/a（原 0）；KH 0.60、TH 2.54、VN 2.23 Mt（含代理份额）；登记行 `waste_plastic_share_LA` 等由 DATA_PENDING 改为 C 级 REGISTERED，`feedstock_plastics_burned_co2_2050_*` 的敏感性区间并入代理值的 0 / 最大值。
+
+### 1.4 柬埔寨交通链核对（只报告，`scripts_project/s3_0_kh_check.py` → `KH_TRANSPORT_CHAIN_CHECK.json`）
+
+| 环节 | 数值 | 结论 |
+|---|---|---|
+| UNSD EB 2019 交通油品：公路 73,274 TJ、铁路 9,718、国内航空 3,047、国内航运 2,513 | = 20.35 / 2.70 / 0.85 / 0.70 TWh | 与 D1 2019 基准四项逐一相等（VERIFIED） |
+| D1 链：r_KH 1.326 × k_transport 3.925 = 5.206 | 2050 交通燃料 128.0 TWh | 算术一致（EXACT） |
+| 对照：Astar 2050 KH 电力 26.8 TWh；D1 2050 电力行合计 31.3 TWh | 交通燃料 / Astar = 4.8（2019 年交通燃料 / 全部用电 = 2.4） | 异常 |
+| 东盟层面：D1 交通 2019 基准合计 1,161 TWh（99.8 Mtoe） vs AEO8 2022 历史 145.2 Mtoe（比值 0.69）；D1 2050 合计 4,335 TWh = 372.7 Mtoe ≈ AEO8 **BAS** 2050 交通 374.9 Mtoe（ATS 为 228.2） | 隐含东盟乘数 3.73 | k 偏大的来源（INFERENCE） |
+
+解读（INFERENCE）：KH 的 2019 基准正确；5.2 倍来自 (a) 部门校准目标是 AEO8 BAS 2050 部门总量而非 ATS；(b) UNSD 2019 基准比 AEO8 2022 历史低 31%（口径与年份差），把 k 推到 3.93；(c) KH 的 ATS 人均增长因子 1.33 高于均值。各国交通乘数：BN 1.9、SG 2.3、MM 2.3、LA 3.1、MY 3.2、PH 3.6、TH 3.8、TL 3.8、ID 4.0、VN 5.1、KH 5.2。是否改用 ATS 总量或 AEO8 历史口径的基准，由用户决定；本轮未改模型。
+
+### 1.5 S3-0 结构表与冒烟
+
+年度结构性缺口表 `results_project/s3/S3_STRUCTURAL_GAP_ANNUAL.json`（证据副本 `evidence/s3_0/`）：
+
+| 国家 | 不可避免 CO₂（化石终端 + 过程 + 塑料）Mt/a | 存储上限 Mt/a | 跨境 CO₂ 候选 | 一体化 | 不互联 |
+|---|---|---|---|---|---|
+| BN | 0.82 | 371.6 | 0 | 可行 | 可行 |
+| ID | 353.5（S2B 787.6） | 1025.5 | 1 | 可行 | 可行 |
+| KH | 28.2 | 1.7 | 3 | 可行 | 缺口 26.5 |
+| LA | 9.0 | 0 | 15 | 可行 | 缺口 9.0 |
+| MM | 13.8（S2B 28.1） | 0 | 2（新增） | 可行 | 缺口 13.8 |
+| MY | 78.5 | 2575.5 | 3 | 可行 | 可行 |
+| PH | 84.1 | 446.0 | 0 | 可行 | 可行 |
+| SG | 54.9 | 0 | 1 | 可行 | 缺口 54.9 |
+| TH | 170.4 | 320.5 | 12 | 可行 | 可行 |
+| TL | 0.03 | 5.0 | 0 | 可行 | 可行 |
+| VN | 365.6（S2B 506.6） | 236.0 | 5 | 可行 | 缺口 129.6 |
+
+不可避免 CO₂ 从 S2B 的 1,946 Mt/a 降到 1,159 Mt/a，主因是工业煤、油按 IDEES 比率归零；生物质缺口两情景均为 0。
+
+**冒烟（56×3h，第 58 项权重 156.43 h/时段，HiGHS IPM + crossover，各一次求解，无重试；`evidence/s3_0/`）：**
+
+| 运行 | HiGHS 状态 | 目标值 EUR/a | 用时 | 结论 |
+|---|---|---|---|---|
+| 一体化 冒烟 | IPM "imprecise"，crossover "imprecise"，基解原始不可行量 1.03e1 → `Model status: Infeasible` | —（未写入） | 512 s | 见下 |
+| 一体化 gap_diagnostic | IPM optimal，crossover imprecise（原始不可行量 4.3），`Optimal` | 5.4216e11 | 520 s，峰值 2.3 GiB | 电力、CO₂、生物质松弛全部为 0（生物质松弛合计 3e-4 MWh，为数值噪声）；11 国净排放 = 0；门槛 A1–A6、B2/B3/B8/B11/B12 全部通过 |
+| 不互联 冒烟 | IPM "primal infeasible"，crossover 未运行 | — | 64 s | 真实不可行 |
+| 不互联 gap_diagnostic | IPM optimal，`Optimal` | 2.0185e12 | 316 s，峰值 2.2 GiB | CO₂ 缺口 KH 16.5 / LA 8.5 / MM 4.3 / SG 11.9 / VN 96.4 Mt/a（S2B：16.55 / 8.61 / 5.13 / 12.84 / 234.47）；电力、生物质缺口 0 |
+
+**一体化"结构可行、冒烟不可行"的原因（VERIFIED 的事实 + INFERENCE 的解读）。** 两个 LP 只差 108 个松弛列（每国电力/CO₂/生物质各一列，带罚款）。gap_diagnostic 解中所有松弛为 0，即原冒烟 LP 的全部约束在该解下同时满足——一体化网络在 56×3h 结构下**可行**，且逐国净零可达。冒烟 LP 的 HiGHS 日志显示 IPM 未达到最优容差（"imprecise"），crossover 得到的基解原始不可行量 1.03e1 MW 级，HiGHS 据此报 `Infeasible`；而带松弛列的 LP 条件更好，IPM 收敛到 optimal。使 LP 条件变差的触界约束（在最优解处同时成立）：(a) 4 个国家的年度封存上限恰好触界（ID 1,025.5、KH 1.7、TH 320.5、VN 236.0 Mt）；(b) 107 个有限生物质池中大部分用尽到 100%（BN 全部、ID 多数），且 BN、SG 的固定生物质终端需求等于本国潜力（第 36 项溢出规则使二者相等，是等式约束）；(c) 时段权重 156.43 把每个时段的流量放大到年尺度，使系数跨度从 1e0（效率）到 1e9（Store 上限 t）。年度外部进口上限：S3-0 无（计数 0）；跨境电力线下界 s_nom_min 均不触界（最优容量远高于 2025 存量，如 Line 60 41.4 GW、APG11 6.2 GW、APG17 1.2 GW）；权重和 8,760 h 核对通过（B12）。因此不是任一平衡的物理缺口，而是求解精度问题；主算约束未放宽，未开特例。对云端日分辨率运行的建议（PROPOSED，未执行）：保留 IPM，但在授权运行时启用 HiGHS 的 `run_crossover: off` 或放宽 `ipm_optimality_tolerance`，并在回执中登记。
+
+不互联情景的不可行是真实的（IPM 直接判原始不可行），缺口与结构表一致（无存储且无跨境管道的 KH/LA/MM/SG 与超出本国上限的 VN）；VN 缺口由 S2B 的 234 Mt 降到 96 Mt，因为工业煤按 IDEES 比率电化后不可避免 CO₂ 减少。
+
+---
+
+## 2. S3-1 天然气网络与国内生产
+
+代码：`scripts_project/s3_1_gas_data.py`（数据层）、`scripts_project/s3_layers.py::add_gas_network`（模型层，在 `s2_network.build_scenario_s2` 的需求层之后、跨境开关之前调用）；配置 `research.s3.gas`，`research.cross_border.gas: true`（情景文件统一设 true/false）。构建输出 `results_project/s3_1/`（证据副本 `evidence/s3_1/`）。
+
+**2.1 节点气母线（VERIFIED）。** 沿用 PyPSA-Eur `gas_network` 结构：每个 AC 节点和 HVDC 换流节点一个 `<node> gas` 母线（100 个）。S2 的用气组件已全部在节点气母线上（CCGT/OCGT/CCGT CC、SMR/SMR CC、工业燃气锅炉、清洁炊事、工业与原料计量链路；沼气提纯 97 条链路向节点气母线供气），本轮不改接。S1/S2 配方中每个节点的无限量外部气源（100 个 `EXTERNAL_SUPPLY` 发电机，13.674 EUR/MWh）被移除，气只能来自国内生产、LNG 接收站和管道。
+
+**2.2 管道（VERIFIED）。** 候选：每条电网连接（AC 线 + DC 链路，与 R5 的 H₂/CO₂ 候选同拓扑）一条双向候选，共 111 条，其中跨境 21 条（含本轮走廊 LA–MM、MM–TH）；成本 technology-data v0.15.0 `CH4 (g) pipeline` 91.37 EUR/MW/km（年金 7.99 EUR/MW/km/a，寿命 50 a）与 `CH4 (g) submarine pipeline` 125.49（13.88，30 a），海底份额取走廊表。连通性补全（PyPSA-Eur `prepare_sector_network.py` 1968–2010 行，`gas_network_connectivity_upgrade: 1`，配置 768 行）：电网拓扑之外的 14 个带气母线的节点（印尼的 Maluku/Nusa Tenggara/Papua 岛屿节点与 Batam 节点、3 个 HVDC 换流节点 PH_Visayas10 0、MY_Peninsular22 0、TH21 0）各加一条到本国最近气母线的双向候选（大圆 × 1.25；最长 Papua19→Sulawesi 2,299 km，仅为候选）。2025 年跨境存量（第 15 项，GEM GGIT 2025-11 第九批）：
+
+| 管道 | 节点对 | 投运 | bcm/a | MW_NCV | 方向 | 处理 |
+|---|---|---|---|---|---|---|
+| Gresik–Batam–Singapore | ID_Sumatra2 0 → SG2 0 | 2003 | 4.75 | 5,126 | 单向 | p_nom_min = 容量，可扩建 |
+| West Natuna | ID_Sumatra2 0 → SG2 0 | 2001 | 3.4 | 3,669 | 单向 | 同上 |
+| Malaysia Singapore | MY_Peninsular2 1 → SG2 0 | 1991 | — | — | — | DATA_PENDING（GEM 无容量），只有走廊候选 |
+| TTM | MY_Peninsular22 0 ↔ TH21 0 | 2007 | 10.42 | 11,244 | 双向（JDA 气供两国） | p_nom_min = 容量 |
+| Yetagun | MM2 4 → TH2 2 | 2000 | 4.1 | 4,424 | 单向 | 同上 |
+| Yadana 1 | MM2 4 → TH2 2 | 1998 | 5.2 | 5,611 | 单向 | GEM 登记为缅甸单国，终点 Daminseik 为对泰出口落地点 |
+| Zawtika | MM2 4 → TH2 2 | 2014 | 3.53 | 3,809 | 单向 | GEM 登记为缅甸单国，经 Kanbauk 接 Yadana 系统 |
+
+换算：1 bcm/a = 1,199 MW（PyPSA-Eur `build_gas_input_locations.py` 127 行，GCV 口径）× 0.90（登记表 `fuel_price_basis` GCV→NCV）。缅泰三条合计 12.83 bcm/a，与 GEM 泰国境内 Ban I-Tong–Ratchaburi 段 12.93 bcm/a 相符（交叉核对）。节点依据登记在 `gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv` 的 `node_basis` 列：缅泰管道落地点 Kanbauk/Daminseik（14.5N）取最南的缅甸节点 MM2 4，泰国端 Ratchaburi 取 TH2 2，与电力统一走廊 MM2 4–TH2 4 不同，故存量链路与候选分列；TTM 用 HVDC 走廊节点对；印尼–新加坡两条经 Batam（ID_Sumatra2 0）。不建模：JDA–Arthit（联合开发区产量已含在马、泰 UNSD 产量内，容量 DATA_PENDING）、中缅管道（出口东盟外）、Trans-ASEAN（搁置）。`research.cross_border.gas = false` 时移除全部 27 条跨境气管道（不互联情景核对通过）。
+
+**2.3 国内生产（第 43 项，VERIFIED 结构 / C 级分配）。** 年产量上限 = UNSD 2019 各国天然气毛产量（D1 `FOSSIL_PRODUCTION_CAPS_2050.csv`）：BN 109.8、ID 727.6、MY 849.5、MM 184.9、PH 43.0、TH 367.2、TL 61.3、VN 103.6 TWh/a；KH、LA、SG 为 0。每个节点一个井口发电机（价格 = 进口价 13.674 EUR/MWh）经交付链路进入节点气母线，链路第二出口按 S2-0 逸散因子（tCO₂/MWh 产量：BN 0.00452、ID 0.00392、MY 0.00445、MM 0.00024、PH 0.00334、TH 0.00513、TL 0.00109、VN 0.00633）记入本国大气；年度上限由 `external_annual_caps` 钩子（`ResearchImportAnnual-*` 约束）执行，共 84 个节点（BN 1、ID 39、MY 7、MM 17、PH 5、TH 6、TL 1、VN 8）。节点分配按各国 AC 节点电力负荷份额（C 级，登记 `gas_production_node_allocation`）：第九批 GEM 表没有坐标，气田/处理厂落点无法登记，留作数据缺口。TL 的 2019 年产量全部出口（UNSD 能源平衡：产量 164,980 TJ = 出口），上限只是可用性上界。
+
+**2.4 LNG（第 17、19 项，VERIFIED）。** 接收站位置与容量取 D1 登记（`LNG_IMPORT_TERMINALS_GEM_2025.csv`，运营 + 在建 = 现有）；每个接收站节点一个进口发电机，p_nom = 现有、p_nom_max = 2.5×；只有拟建的站址 p_nom = 0、p_nom_max = 拟建容量（现有为 0 的处理方式）；无容量数据的站址不建（MY_Peninsular2 0、MY_Peninsular22 0、VN2 4）。价格 WEO 2025 NZE 2050 日本 LNG 到岸价 13.674 EUR/MWh_NCV；再气化加价仍为 DATA_PENDING（本轮按 0），方向：LNG 成本被低估，相对国内生产、管道与非气方案偏向 LNG。接收站扩建不计资本成本（C 级登记 `lng_terminal_expansion_capex`，PyPSA-Eur 固定气入口容量，无可引用的接收站 capex）。
+
+| 节点 | 现有 MW | 拟建 MW | p_nom_max MW |
+|---|---|---|---|
+| ID_Java-Bali1 0 / 1 2 / Nusa-Tenggara12 0 / Sumatra3 0 | 12,329 / 457 / 533 / 4,566 | 0 | 2.5× |
+| ID_Maluku16 0 | 0 | 3,501 | 3,501 |
+| KH2 0 | 0 | 1,674 | 1,674 |
+| MY_Peninsular2 1 | 11,111 | 0 | 27,778 |
+| PH_Luzon9 0 / PH_Luzon5 0 | 22,374 / 0 | 12,177 / 2,283 | 55,936 / 2,283 |
+| SG2 0 | 16,743 | 7,610 | 41,857 |
+| TH2 3 | 28,919 | 16,438 | 72,298 |
+| VN2 5 | 6,088 | 22,770 | 15,221（2.5× 规则，低于拟建） |
+| VN2 0 / 2 / 3 / 6 | 0 | 4,566 / 2,283 / 4,566 / 5,175 | = 拟建 |
+
+**2.5 构建结果。** 两情景构建通过（Link 4,805 → 5,020：+111 候选 +14 补全 +6 存量 +84 交付链路；Generator 1,439 = −100 外部气源 +84 井口 +16 LNG；Bus +84 井口）；静态验证通过；年度结构表与 S3-0 相同（气网不改变不可避免 CO₂）。登记表 1,255 行（片段 `gas_network.csv` 29 行）；测试 `tests/research/test_s3_gas_network.py`（3 项）。
+
+## 3. S3-2 东盟外进口（第 17、18、64 项）
+
+代码：`scripts_project/s3_2_imports_data.py`（价格表 `research_inputs/imports_v5/`）、`s3_layers.add_imports`（在气网层之后调用）；配置 `research.s3.imports`；`scenario_network.tag_cross_border` 把国家标签为 `ASEAN` 的全区母线排除在跨境判定之外（第 18 项：油、氨、甲醇不受管网约束）。构建输出 `results_project/s3_2/`（证据 `evidence/s3_2/`）。
+
+**3.1 化石燃料（VERIFIED）。** LNG 经接收站（S3-1，WEO NZE 日本到岸价 13.674 EUR/MWh）。油：一个全区油池母线 `ASEAN oil`，外部进口发电机按 WEO NZE 2050 原油进口价 11.618 EUR/MWh（D1 `fuel_price_oil_NZE_2050_main`），100 个节点油母线经免费双向分配链路接入油池，S2 的 100 个节点外部油源移除；FT/BtL 产出仍在节点油母线上（S3-5 再分化石/非化石）。煤、褐煤：沿用 S2 结构——**分节点**各一个无限量单向外部供给（5.169 / 6.617 EUR/MWh），不互联。燃烧排放仍由消费侧计量链路记入消费国大气。
+
+**3.2 绿色载体价格登记表（第 17 项，+20%；EUR2020/MWh）。** 来源：Neumann 等（arXiv:2404.03927；Nature Communications 2025，doi:10.1038/s41467-025-60652-1）的结果数据集 Zenodo 10.5281/zenodo.14872184 `results.parquet`（CC-BY-4.0，只读获取 2026-10-15T16:18:42Z，SHA 65894a1c…；11.7 MB，不入 git）。取法与 PyPSA-Eur 进口分支（提交 5a87cedd，`add_import_options` 4616–4620 / 4703–4708 行）相同：情景 `default`、年份 2040（数据集仅此一年；正文引用的即这些值：FT 125–132、管道氢 74–88 EUR/MWh）、`Cost per MWh delivered`、按出口地取最小值。
+
+| 载体（esc） | 最低到岸基准 | 最低出口地 | +10% 内出口行数 | 应用价 ×1.20 | 敏感性 ±20% | 模型母线 |
+|---|---|---|---|---|---|---|
+| 液氢船运 shipping-lh2 | 88.13 | EH（西撒哈拉） | 8 | 105.75 | 84.6 / 126.9 | 16 个 LNG 接收站节点的 `<node> H2` |
+| 氨船运 shipping-lnh3 | 97.32 | EH | 17 | 116.78 | 93.4 / 140.1 | `ASEAN ammonia` |
+| 甲醇船运 shipping-meoh | 120.97 | EH | 41 | 145.16 | 116.1 / 174.2 | `ASEAN methanol` |
+| FT 合成油船运 shipping-ftfuel | 125.09 | CL（智利） | 77 | 150.11 | 120.1 / 180.1 | `ASEAN oil non-fossil` |
+| 参考：管道氢 / 绿色 LNG / HVDC 电 | 73.79 / 121.77 / 40.05 | EH | — | — | — | 不建（无陆路出口通道 / LNG 已按化石价 / 非进口选项） |
+
+正文页码：arXiv v1 p.12（管道氢 ≈57、船运氢 84、衍生物 88–110、甲醇低于 FT）与 p.15 表 A.1（FT 参考 109.8，2050 假设）；Nature Communications 正文（FT 125–132、管道氢 74–88、船运氢比最低管道供应高 18%、十个地区在最低成本 +10% 内）。两组数字差别来自 2040 vs 2050 技术成本假设，本轮采用已发表（2040）数据集值并登记（B 级）。**代表性（INFERENCE，C 级登记）：** 数据集给的是到欧洲入口的成本，最低出口地（西撒哈拉、智利、阿根廷）离欧洲和东盟都远，海运在到岸成本中占比小，且有多个地区落在最小值 +10% 以内（智利之外还有十个），因此"欧洲最小值 ×1.20"作为东盟代理；论文没有东盟供给曲线。两个情景同一组价格；只进不出（全部为发电机）；开关 `research.s3.imports.price_sensitivity`（−0.2 / 0 / +0.2）。
+
+**3.3 接收站。** 液氢按 PyPSA-Eur 进口分支的做法进 LNG 接收站节点（`translate` 字典 shipping-lh2 → lng，约 4540 行）：p_nom_max = 该节点 LNG 接收能力（现有 ×2.5 或拟建），终端资本成本 7,018 × 1.2 = 8,421.6 EUR/MW/a（4560–4563 行）；现有氢接收能力为 0 的处理方式即"借用 LNG 站址与容量上限，按终端成本付费"。氨、甲醇、FT 油按 PyPSA-Eur 的 copperplated 处理（全区母线，无容量约束）。
+
+**3.4 碳处理（第 64 项）。** 进口绿色载体在进口国记零：进口发电机没有 CO₂ 端口，载体 `co2_emissions = 0`。PyPSA-Eur 进口分支的做法：进口链路对含碳载体加一个到大气的负系数端口（`co2_intensity` 字典 4553–4557 行；`efficiency2 = -CO2 intensity` 4659–4665、4711–4717 行），即把出口国 DAC 的碳作为进口方的负排放记入，燃烧时再按消费侧排放，净零。本模型用非化石母线（燃烧侧 EF 0、生产侧不记信用）实现同样的净结果，避免把负排放记到无法归国的全区母线（S3-5 详述）。
+
+**3.5 构建结果。** 两情景构建通过（Link 5,020 → 5,120：+100 油池链路；Generator 1,439 → 1,359：−100 节点外部油源 +1 油进口 +3 绿色载体进口 +16 液氢进口；Bus +4 全区母线）；跨境标记：油池链路全部 domestic；静态验证通过；结构表与 S3-1 相同（`s2_structural_gap.py` 已排除 `ASEAN` 池行）；登记表 1,274 行（片段 `imports.csv` 19 行）；测试 376 通过 / 4 基线失败（新增 `test_s3_imports.py` 2 项）。
+
+## 4. S3-3 氨与甲醇（第 44 项）
+
+代码：`s3_layers.add_ammonia_methanol`（在进口层之后调用）、`s2_layers.add_demand_layer` 的 `ammonia_methanol_mode: regional_buses`、`scripts_project/s3_3_ammonia_methanol_data.py`（登记片段 `ammonia_methanol.csv`）；配置 `research.s3.ammonia_methanol`。构建输出 `results_project/s3_3/`（证据 `evidence/s3_3/`）。
+
+**4.1 母线。** 氨、甲醇各一个全区母线（`ASEAN ammonia`、`ASEAN methanol`，国家标签 ASEAN，S3-2 已建），各带一个可扩建储存：NH3 (l) storage tank incl. liquefaction（technology-data 第 507 行，PyPSA-Eur `add_ammonia` 1453–1462 行）、General liquid hydrocarbon storage (product)（第 256 行，`add_carrier_buses` 的甲醇储存）。
+
+**4.2 工艺（PyPSA-Eur v2025.07.0 默认，每个带 H₂ 母线的节点各一套，97 个节点；代码位置与参数均登记）：**
+
+| 组件 | PyPSA-Eur 代码 | 端口与系数 | 成本（technology-data v0.15.0） |
+|---|---|---|---|
+| 哈伯-博施 | `add_ammonia` 1424–1440 行 | bus0 节点电、bus1 ASEAN ammonia、bus2 节点 H₂；效率 1/0.2473 = 4.044 MWh_NH3/MWh_e，efficiency2 = −1.1484/0.2473 = −4.644 MWh_H2/MWh_e | Haber-Bosch 投资 962.87 EUR/kW_NH3（382–389 行）÷ 电输入，VOM 0.0237，寿命 30 |
+| 氨裂解 | 1441–1452 行 | ASEAN ammonia → 节点 H₂，效率 1/1.46（配置 854 行） | Ammonia cracker 587,202 EUR/MW_H2（17–20 行）÷ 1.46，寿命 25 |
+| 甲醇合成 | 4628–4645 行 | bus0 节点 H₂、bus1 ASEAN methanol、bus2 节点电、bus3 节点 `co2 stored`（捕集 CO₂ 缓冲）；效率 0.8787（配置 607 行），efficiency2 = −0.8787/3.6907（609），efficiency3 = −0.8787/4.0321（608）；p_min_pu 0.3（736 行） | methanolisation 909.68 EUR/kW_MeOH（1139–1146 行）× 0.8787，寿命 30 |
+| 生物质制甲醇 | `biomass_to_methanol: true`（配置 731 行）→ `add_biomass_to_methanol` 983–1002 行 | 国家固体生物质池 → ASEAN methanol，效率 0.65，大气端口 −0.2482 × 0.65（燃料碳在生产端记信用，与 S2 的 BtL 同约定，PyPSA-Eur 为 −EF_biomass + CO2 stored = −0.161） | biomass-to-methanol 投资 ÷ 效率，寿命 25 |
+| 甲醇 OCGT | `methanol_to_power.ocgt: true`（728 行）→ `add_methanol_to_power` | ASEAN methanol → 节点电，大气端口 +0.2482 t/MWh | OCGT 投资 × 效率 |
+| 未建 | 甲醇 CCGT / CCGT CC / Allam（默认 false）、甲醇重整（false）、余热利用（本模型无区域供热母线）、产能搬迁选项 | | |
+
+**4.3 需求。** 化肥/化工用氨：S3-0 工业比率的氨行，77 个节点负荷直接挂在 `ASEAN ammonia`，合计 55.03 TWh_NH3/a（= 表值；ID 14.0、TH 18.5、SG 9.6、VN 10.9、PH 1.4、MM 0.5、BN 0.1），无燃烧排放（合成氨过程排放已在 EDGAR 2.B 过程排放内）。工业甲醇：比率表甲醇行 5.62 TWh/a，经节点链路 `<node> industry methanol use` 从 `ASEAN methanol` 取用，大气端口 0.2482 t/MWh（PyPSA-Eur 工业甲醇链路 4617–4626 行，efficiency2 = 1/MWh_MeOH_per_tCO2），排放记在消费国；S3-5 按来源拆分后非化石甲醇记零。航运甲醇需求在 S3-4 接入。S3-0 的过渡折算（氨 → H₂+电、甲醇 → 甲烷+电）随开关关闭：工业氢负荷回到 70.57 TWh（= 表值）。
+
+**4.4 碳口径（过渡）。** 甲醇合成从节点捕集 CO₂ 缓冲取碳，甲醇在使用端排放——即"生产端信用 + 消费端排放"（S2 行为，producer_credit）；S3-5 的 origin_neutral 主算把非化石甲醇改为消费端记零、生产端不记信用。结构表的"不可避免 CO₂"只计化石终端计量链路，工业甲醇不再计入（S3-2 → S3-3 各国合计 −2.06 Mt，主要是 S3-0 过渡折算把甲醇当甲烷计入化石终端）。
+
+**4.5 构建结果。** 两情景构建通过（Link 5,120 → 5,682：+97×5 工艺链路 +77 工业甲醇使用链路 +77 甲醇终端母线；Load 1,920 → 2,073：+77 氨 +77 甲醇；Store +2）；排放归属验证通过（`country_carbon.component_country` 对 ASEAN 池端口的处理：归属取国家端口）；登记表片段 `ammonia_methanol.csv`；测试 `test_s3_ammonia_methanol.py`。
+
+## 5. S3-4 航运（第 10 项，D1 第 4 节）
+
+代码：`s2_layers.add_demand_layer`（S3-4 段，替换 S2 的"推迟到 S3"）、`scripts_project/s3_4_shipping_data.py`（`research_inputs/shipping_v5/SHIPPING_DEMAND_2050.csv`，登记片段 `shipping.csv`）；配置 `research.s3.shipping`。构建输出 `results_project/s3_4/`（证据 `evidence/s3_4/`）。
+
+**需求量（VERIFIED）。** D1 需求表 2050：国内航运 `DomesticShippingFuel` 92.76 TWh（油当量；ID 45.8、PH 38.6、KH 3.6、VN 2.6、SG 2.1）+ 国际燃料舱 `InternationalShippingBunker` 558.42 TWh（SG 535.3、TH 13.1、MY 4.6、ID 2.6、VN 2.1、PH 0.6、MM 0.01；BN/KH/LA/TL 为 0，UNSD 能源平衡无流量），合计 651.19 TWh——与 S3-3 构建回执中 S2 推迟账目的 651.19 TWh 一致。指令中的 670.2 TWh 未能从当前 D1 表复现（可能是 R3 分配修正前的数字），本轮按表值执行并登记（`shipping_demand_total_2050`），请用户确认。国际燃料舱单列（`InternationalShippingBunker` 账户），与航空共用开关 `research.s2.demand.international_bunkers`（第 10 项）。
+
+**燃料结构与换算（EXACT）。** 2050 份额取 D1 登记的 PyPSA-Eur 配置值：甲醇 1、氢 0、油 0（`share_shipping_*_share_2050`）。甲醇能量 = 油当量 × `shipping_oil_efficiency` 0.40 / `shipping_methanol_efficiency` 0.46（配置 636/635 行；`add_shipping` 5195–5200 行）= 0.8696 → 566.25 TWh 甲醇/a（SG 467.3，ID 42.1，PH 34.2，TH 11.4，MY 4.0，VN 4.1，KH 3.2）。氢（0.40/燃料电池效率）与油（计量链路）路径已实现但份额为 0。
+
+**节点与排放。** 负荷按 Assembly-V1 同账户分配数组放到节点（SG 全部在 SG2 0）；每个节点一条 `<node> shipping methanol` 链路从 `ASEAN methanol` 取用，第二端口按 1/MWh_MeOH_per_tCO2 = 0.2482 t/MWh 记入消费国大气（PyPSA-Eur 航运甲醇链路 5218–5227 行）——即第 64 项要求的"燃烧排放在消费国"，来源拆分在 S3-5 完成（非化石甲醇记零）。
+
+**构建结果。** 两情景构建通过（Load 2,073 → 2,205：+132 航运甲醇负荷；Link +76 航运链路；Bus +76 航运终端母线）；推迟账目清空；结构表与 S3-3 相同（航运甲醇不计入"化石终端"不可避免 CO₂）；测试 379 通过 / 4 基线失败（新增 `test_s3_shipping.py` 2 项）。
+
+## 6. S3-5 合成燃料与生物燃料的碳归属（第 64 项，用户已确认）
+
+代码：`s3_layers.add_fuel_carbon_mode`（在氨/甲醇层之后调用）、`scripts_project/s3_5_fuel_carbon_data.py`（登记片段 `fuel_carbon.csv`）；开关 `research.s3.fuel_carbon_mode: origin_neutral | producer_credit`；`s2_network.py --override key=value` 可在不改配置文件的情况下构建敏感性（覆盖项记入回执与 B12 哈希）。构建输出 `results_project/s3_5/`（主算两情景）与 `results_project/s3_5_pc/`（producer_credit，一体化）。
+
+**6.1 PyPSA-Eur 的做法（VERIFIED）。** v2025.07.0 不追踪液体燃料来源：油、甲醇各一条母线（`add_carrier_buses`），消费侧链路一律按化石 EF 记入唯一的欧洲大气（航运油 5261–5270 行、航运甲醇 5218–5227 行、工业甲醇 4617–4626 行），生产侧记信用：FT 与甲醇合成从捕集 CO₂ 母线取碳（4628–4645 行），BtL / 生物质制甲醇记 −生物质 EF + CO2 stored（983–1002 行），沼气提纯记 −气 EF。单一大气下信用与排放抵消；11 个国家大气下不抵消——生产国得负排放、消费国得正排放，这正是第 64 项要解决的问题。
+
+**6.2 主算 origin_neutral 的实现。**
+
+| 项 | 做法 |
+|---|---|
+| 液体母线分化石/非化石 | 油：化石池 `ASEAN oil` + 节点油母线（S3-2）保留消费计量链路（化石 EF 0.2571 记消费国）；非化石池 `ASEAN oil non-fossil` + 100 个节点 `oil non-fossil` 母线（池链路双向），接收 FT、BtL 与进口 FT 油；每条油消费链路（532 条终端计量、96 条原料、95 条 LPG 炊事）各加一条从节点非化石母线出发、**无大气端口**的孪生链路（消费国记零）。甲醇：2050 技术集中没有化石甲醇路线（甲醇合成、生物质制甲醇、进口），单一全区甲醇母线即非化石母线，工业使用、航运、甲醇 OCGT 链路的大气端口全部移除 |
+| 非化石燃料生产端不记信用 | BtL、生物质制甲醇的生产信用端口（−EF × 效率）移除 |
+| 化石捕集碳合成的燃料在合成时记入生产国大气 | FT 增加大气端口 +0.2571 × 0.754 t/MWh_H2，甲醇合成增加 +0.8787/4.0321 = 0.2179 t/MWh_H2（生产节点所在国） |
+| `co2 stored` 不拆分的等价性（INFERENCE） | 捕集 CO₂ 缓冲里的碳无论来源，合成时都加同一个 +碳量端口：化石来源 → 化石碳在生产国记一次（第 64 项第 3 句）；DAC/生物源 → 捕集时的负排放（DAC −1 t、BECCS −EF×cc）被合成时的 +1 t 抵消（第 2 句"抵消捕集信用"）。两种来源的操作完全相同，因此无需把缓冲拆成两部分；国家大气也不会为随燃料出境的碳记负排放 |
+| 进口绿色燃料 | 进口发电机无 CO₂ 端口，经非化石池/甲醇母线进入零排放消费链路（S3-2） |
+| 天然气（不对称） | 沿用 PyPSA-Eur：沼气提纯在生产国记 −0.198 t/MWh（97 条），气消费侧记化石 EF；甲烷化（Sabatier）在本网络未启用（上游 `methanation: false`）；管网气无法追溯来源 |
+
+**6.3 敏感性 producer_credit（S2 行为）。** FT/BtL/生物质制甲醇/甲醇合成保持 S2/S3-3 的建法（生产端信用或捕集端信用，消费端化石 EF）；进口 FT 油仍经非化石孪生链路记零（第 64 项对进口的要求在两种模式下都成立）；进口甲醇在该模式下无法在全区母线上记信用，进口发电机上限置 0（登记说明）。
+
+**6.4 新加坡船用甲醇算例（EXACT）。** SG 国际燃料舱 535.3 TWh 油当量 × 0.8696 = 465.5 TWh 甲醇/a（加国内航运 1.8 TWh 共 467.3）。origin_neutral：SG 的 `SG2 0 shipping methanol` 链路无大气端口，SG 记 0；碳在生产节点记账——若甲醇来自泰国的甲醇合成，TH 大气在合成时记 +0.2179 t/MWh_H2（相当于每 MWh 甲醇 0.248 t），TH 需用自己的 DAC/BECCS/封存平衡；若来自进口，记 0。producer_credit：SG 记 465.5 × 0.2482 = 115.5 Mt CO₂/a，是 SG 结构性不可避免 CO₂（54.9 Mt）的 2.1 倍，SG 无本国封存，只能靠跨境 CO₂ 管道或在境内 DAC 抵消——这说明在国家净零约束下，producer_credit 会把新加坡的燃料舱责任全部压到新加坡，而 origin_neutral 把它放到生产端（登记 `fuel_carbon_sg_bunker_example`）。
+
+**6.5 构建结果。** origin_neutral 两情景构建通过（Link 5,758 → 6,581：+100 非化石池链路 +723 孪生消费链路；Bus +100）；producer_credit 一体化构建通过（`--override s3.fuel_carbon_mode=producer_credit`，回执 `config_overrides`，B12 配置哈希与主算不同）；结构表与 S3-4 相同（结构表只计化石终端计量链路）；排放归属验证通过；测试 382 通过 / 4 基线失败（新增 `test_s3_fuel_carbon.py` 3 项）。
+
+## 7. S3-6 V5 门槛（B 组新增）
+
+代码：`scripts_project/v5/v5_gates.py`（新增 B13–B16，扩展 B1/B11/B12）、`s2_solve.py`（求解后自动运行 B13–B15）、`scripts_project/s3_6_gates_check.py`（在未求解网络上运行静态 B 组门槛，含两情景间的 B16）。静态结果 `evidence/s3_6/S3_6_GATES_STATIC.json`（S3-5 的一体化、不互联与 producer_credit 三个网络）。
+
+| 门槛 | 内容 | 静态结果 |
+|---|---|---|
+| B1（扩展） | 国家净零之外，检查进口/生产载体的 CO₂ 强度为 0（U4）并列出带大气端口的 S3 载体（gas production delivery、Fischer-Tropsch、methanolisation 合成端口等）及 `fuel_carbon_mode` | 三个网络通过（求解后完整 B1 在 S3-7） |
+| B11（扩展） | 供给路径：化石与非化石节点油母线合并计数；国家标签 ASEAN 且带负荷的全区母线视为承载负荷；新增氨、甲醇终端用途 | 通过（oil/gas/H2/ammonia/methanol 无短缺；EV battery 单充电器按设计豁免） |
+| B12（扩展） | 配置哈希对 `--override` 敏感性构建按"文件配置 + 记录的覆盖项"重算；登记 S3 开关（`fuel_carbon_mode`、`imports.price_sensitivity`、`cross_border.gas`、`ammonia_methanol_mode`、`ratio_source`）与覆盖项；无 S3 配置的 S1/S2 网络豁免 | 通过（producer_credit 网络记录 `s3.fuel_carbon_mode=producer_credit`） |
+| B13 只进不出 | 全部进口/生产供给为 sign +1、p_min_pu ≥ 0 的发电机（36 个）；无 import 链路/线路；全区池上的负荷均有国家所有者（77 个氨负荷）；接池链路的其他端口都在模型内；池储存循环（无出口汇） | 通过 |
+| B14 接收站 ≤ 2.5× | 16 个 LNG 站点：p_nom_max ≤ 2.5 × 现有（仅拟建站 ≤ 拟建容量，取构建账目）；同节点液氢进口 p_nom_max ≤ LNG 上限；求解后 p_nom_opt ≤ p_nom_max | 通过 |
+| B15 国内生产上限 | 84 个井口发电机均在 `external_annual_caps` 登记、钩子 `install_fragment_constraints` 注册；分国上限和 = UNSD 2019 产量；求解后年产量 ≤ 上限 | 通过（求解后部分在 S3-7） |
+| B16 两情景进口价格一致 | 7 类进口/生产发电机的边际成本逐个相同；`research.s3` 配置两情景相同 | 通过 |
+
+测试 `tests/research/test_s3_gates.py`（3 项）；完整测试集 385 通过 / 4 基线失败。
+
+## 8. S3-7 构建与冒烟
+
+### 8.1 用户补充 1：进口价格的年份口径（2040 → 2050 降幅估计）
+
+来源：technology-data v0.15.0 `outputs/costs_2040.csv` 与 `costs_2050.csv`（只读获取 2026-10-15T17:03:42Z，SHA 3162c6fd… / 244c8f9e…，入库 `registry_v5/sources/technology_data_v0.15.0/`）；脚本 `scripts_project/s3_7_import_price_decline.py` → `imports_v5/IMPORT_CHAIN_COST_DECLINE_2040_2050.csv`、`IMPORT_PRICE_DECLINE_ESTIMATE_2040_2050.csv`，登记片段 `import_price_decline.csv`。
+
+| 供应链成本项 | 投资 2040 | 投资 2050 | 降幅 |
+|---|---|---|---|
+| 光伏（solar-utility，EUR/kW） | 403.4 | 367.9 | 8.8% |
+| 陆上风电（onwind） | 1,305.8 | 1,286.5 | 1.5% |
+| 电解槽（electrolysis，EUR/kW_e） | 1,508.8 | 1,257.3 | 16.7% |
+| 哈伯-博施（EUR/kW_NH3） | 1,507.4 | 1,155.6 | 23.3% |
+| 甲醇合成（EUR/kW_MeOH） | 1,201.0 | 1,091.8 | 9.1% |
+| FT（EUR/kW_FT） | 1,470.8 | 1,203.3 | 18.2% |
+| 氢液化（EUR/kW_H2） | 895.2 | 671.4 | 25.0% |
+| 液氢储罐 / 液氢运输船 | 1,002.0 / 4.95e8 | 同 | 0 / 0 |
+| DAC（EUR/(tCO₂/h)） | 6.29e6 | 5.03e6 | 20.0% |
+
+按论文表 A.1 隐含的成本份额（FT 链：电解槽 +100% → +15.2%，DAC +100% → +25.6%；其余份额为 C 级假设：可再生电 49.2%、合成 6%、运输 4%；出口地可再生组合光伏 0.6 / 风电 0.4 → 可再生降幅 5.9%）估算到岸价降幅：FT 11.6%、甲醇 11.1%、液氢 9.2%、氨 9.1%（INFERENCE，C 级登记 `import_price_decline_estimate_*`）。**偏差方向：** 主算采用的 2040 年基准价高于 2050 口径约 9–12%，加上 20% 加价后应用价偏高；估计降幅未超过 20%，因此进口价格敏感性下限保持 −20%（登记 `import_price_sensitivity_low_fraction` = 0.20，依据同上），主算价格不改。
+
+### 8.2 用户补充 2：LP 系数范围（一体化 56×3h 冒烟 LP，`scripts_project/s3_7_lp_ranges.py` → `evidence/s3_7/S3_7_LP_RANGES_integrated.json`）
+
+| 项 | 最小 | 1% 分位 | 中位 | 99% 分位 | 最大 | 最大/最小 |
+|---|---|---|---|---|---|---|
+| 约束矩阵非零元 |A| | 2.42e-4 | 3.1e-2 | 1.0 | 156 | 1,302 | 5.4e6 |
+| 右端项 |b| | 2.91e-4 | 4.6e-2 | 71.8 | 2.68e7 | 2.575e9 | 8.9e12 |
+| 目标系数 |c| | 1.0 | 1.56 | 366 | 1.15e5 | 8.23e9 | 8.2e9 |
+
+造成极值的组件（EXACT）：
+- 矩阵最小值 2.4e-4 来自节点平衡中的链路效率（如 FT 的电输入 0.005 MWh_e/MWh_H2、DAC 电输入等）与可再生发电机 `p ≤ CF × p_nom` 中的小容量因子（2,264 条）；最大值来自 Store / StorageUnit 能量平衡中的时段权重（156.43 h × 效率，13,272 + 8,885 + 3,086 条）、基尔霍夫电压定律的线路电抗（1,456 条，Ω 量级，新增 APG 线 55.8 / 67.8 Ω，既有线最大 223 Ω）以及国内气井口年度上限行的权重系数。
+- 右端项最大值 2.575e9 是固定 Store 的能量上限（`Store-fix-e-upper` 1,365 行：生物质池、封存上限，以 MWh / t 计）；最小值来自节点平衡的微小固定负荷。
+- 目标最大值 8.23e9 是目标常数项（既有资产固定运维 `Research_existing_FOM_constant`、跨境线 FOM 常数）以及 `Link-p_nom` / `Generator-p_nom` 的年化投资（1e5 量级）；变量上界最大 5.7e9（目标常数变量）。
+
+缩放建议（PROPOSED，未修改主算）：(1) 把目标常数项移出 LP（求解后加回），上界 5.7e9 与目标系数 8.2e9 即消失，目标范围降到 ~1e5；(2) 大容量 Store 的能量单位改 GWh / kt（生物质池、封存、捕集缓冲），右端项最大值降 3 个数量级；(3) 基尔霍夫行按各环路最大电抗归一（或用标幺电抗），把 1e3 量级系数压到 1；(4) 小于 1e-4 的效率/容量因子保持但可考虑对可再生 `p_nom` 变量改用 GW 单位。这些都属于求解器层面的预处理，不改变物理约束与成本。
+
+### 8.3 冒烟与独立可行性确认（第 65 项：Gurobi；止损规则：30 分钟 / 非最优即停、不重试）
+
+**构建（VERIFIED）。** 四个网络（origin_neutral / producer_credit × 一体化 / 不互联）构建通过：Link 6,581（不互联 6,507）、Bus 3,052、Load 2,205、Generator 1,359、Line 107（86）；组装峰值 RSS 0.60 GiB、35–40 s；冒烟 LP 559,050 列 / 1,269,844 行 / 2,830,657 非零元（比 S2B 大 19%）；Gurobi 预处理后 302,795 行 × 298,386 列 × 1.31 M 非零元。结构表与 S3-5 相同（一体化 11 国均有 CO₂ 去向）。
+
+**求解器设置（逐项，VERIFIED）。** HiGHS 1.11：IPM + crossover（S3-0 同）；单纯形确认用 HiGHS 默认（对偶单纯形），时限 3 h。Gurobi 12.0.3（WLS 学术许可，`GRB_LICENSE_FILE` 只读引用，许可内容不写入任何文件；日志副本已剔除许可行）：Method 2（barrier）、NumericFocus 3、BarHomogeneous 1、Crossover 1（开启）、Threads 8、TimeLimit 3,600 s（止损规则后 1,750 s + 30 分钟墙钟看门狗）。Gurobi 对该 LP 给出警告："large objective coefficients / large rhs / large bounds"（系数范围见 §8.2）。
+
+| 运行（56×3h） | 求解器 | 状态 | 目标值 EUR/a | 用时（墙钟 / 求解） | 峰值 RSS | 说明 |
+|---|---|---|---|---|---|---|
+| 一体化 主算 冒烟 | HiGHS IPM | "infeasible"（IPM imprecise，crossover 后） | 6.988e11（crossover 阶段打印） | 10.4 min / 622 s | ≈1.6 GiB | 同 S3-0 现象 |
+| 一体化 主算 单纯形确认 | HiGHS 对偶单纯形 | **约 2 h 20 min 未收敛**，852,842 次迭代，原始不可行行数 ~58,000 保持不降，目标单调升至 4.16e11（已知最优 6.99e11）；按第 65 项于 19:38 UTC 停止 | — | 8,448 s（停止时） | — | 日志末尾存 `evidence/s3_7/highs/smoke_simplex/` |
+| 一体化 主算 冒烟 | Gurobi barrier + crossover | barrier **optimal**（123 次迭代，256 s，目标 6.98803335e11）→ crossover 188,715 次迭代后终状态 **INF_OR_UNBD** | 6.98803335e11（barrier） | 8 min 45 s / 505 s | 2.09 GiB | 非最优终状态，按止损规则不重试 |
+| 一体化 主算 gap_diagnostic | Gurobi | **optimal**（barrier 80 次 / 172 s；crossover 202,376 次；总 413 s） | **6.988033346e11**（与冒烟 barrier 目标值一致 → 松弛全为 0） | 7 min 38 s / 428 s | 2.72 GiB（time -v 2.83） | 门槛 A1–A6、B2/B3/B8、B11–B15 全部通过 |
+| 不互联 主算 冒烟 | Gurobi | 非最优（退出码 2；结果目录在止损切换时被重复运行覆盖，终态字符串未保留，见下） | — | — | — | 已登记事故 |
+| 不互联 主算 gap_diagnostic | Gurobi | barrier 48 次 / 89 s 未报最优 → crossover 后 INF_OR_UNBD | — | 2 min 54 s / 157 s | 2.09 GiB | HiGHS 版（S3-0 结构）为最优、缺口 KH/LA/MM/SG/VN |
+| 一体化 producer_credit 冒烟 | Gurobi | barrier optimal（88 次 / 186 s，7.0663e11）→ crossover 176,214 次后 INF_OR_UNBD | 7.06628682e11（barrier） | 6 min 24 s / 368 s | 2.19 GiB | 不重试；无精确 "infeasible" 故不跑诊断 |
+| 不互联 producer_credit 冒烟 | Gurobi | barrier 54 次 / 87 s 未达最优 → 终态 INF_OR_UNBD（在止损看门狗内结束） | — | 96 s | ≈2.1 GiB | 与不互联主算一致：不互联情景的不可行是真实的（结构表缺口），不重试 |
+
+**事故记录（VERIFIED）。** 止损指令到达时，第一版 Gurobi 运行脚本已完成一体化冒烟、一体化诊断、不互联冒烟、不互联诊断与 producer_credit 一体化冒烟；我在切换到带看门狗的第二版脚本时，第二版错误地重新启动了不互联冒烟（属重复运行），在 34 s 内被终止，但其输出目录已覆盖第一版的不互联冒烟回执与日志（保留为 `smoke/disconnected_v1_overwritten_by_v2_restart/`，仅含重启后的片段）。第一版的状态行（退出码 2 = 非最优）与不互联 gap_diagnostic 的完整回执保留。未做任何参数更换或重试。
+
+**可行性结论。** 事实（VERIFIED）：(a) Gurobi 齐次 barrier（BarHomogeneous 1，专用于区分真不可行与数值问题）在一体化主算 LP 上达到最优，目标 6.98803335e11；(b) 同一 LP 加 108 个松弛列（gap_diagnostic）由 Gurobi 求到最优，目标 6.988033346e11，与 (a) 一致到 9 位有效数字，即全部松弛为 0，11 国净排放 |净| < 2e-4 t；(c) HiGHS IPM 与 Gurobi crossover 都在精化/基解阶段给出"不可行 / INF_OR_UNBD"，HiGHS 单纯形 2 h 20 min 未能消除原始不可行量。解读（INFERENCE）：一体化情景**可行**；两个求解器的"不可行"判定是数值问题——同一 LP 的内点解可行且最优，而基解阶段在 1e13 量级的系数范围下无法达到可行容差（Gurobi 给出的三类"large"警告与 §8.2 的缩放建议对应）。按用户第 5 点，HiGHS 的"不可行"定性为数值问题；§8.2 的缩放建议仍为 PROPOSED，本步未实施。不互联情景：Gurobi 版诊断 LP 终态 INF_OR_UNBD（未得到可用解），HiGHS 版（S3-0 结构）诊断为最优并定位缺口 KH/LA/MM/SG/VN；S3-7 结构下的不互联缺口量以 HiGHS S3-0 诊断为准（结构表相同），未再运行。
+
+**一体化主算解（Gurobi gap_diagnostic 解，松弛 0；冒烟性质，无科学含义，第 47 项）。**
+- 分国净零：11 国净排放均为 0（B1 通过）；封存：ID 542 / MY 530 / TH 320（触上限）/ VN 236（上限）/ PH 187 / BN 21 / TL 5（上限）/ KH 1.7（上限）Mt；捕集来源：过程排放 CC 587、CCGT CC 420、工业生物质 CC 378、DAC 262（VN 73、PH 49、SG 20）、生物质 EOP CC 109、SMR CC 107、工业生物质锅炉 CC 54 Mt；跨境 CO₂：SG→MY 56 Mt、MY→TH 62、LA↔TH/VN 多条（LA 作为过境），KH→TH 27、MM→TH 17 Mt。
+- 进口量与结构（TWh/a）：LNG 2,465（ID 421、TH 633、PH 510、SG 367、VN 279、MY 240、KH 15；SG、TH、PH 达 2.5× 上限）；国内气生产 2,411（除 TL 外全部触及 UNSD 上限）；油进口 1,650（全区池）；甲醇进口 69.7；FT 油、氨、液氢进口 0。
+- 氨/甲醇：哈伯-博施 55.0 TWh（= 工业氨需求，无进口）；航运甲醇 566.3 = 甲醇合成 297.9 + 生物质制甲醇 204.3 + 进口 69.7（取整差为储存）；FT、BtL、氨裂解、甲醇发电均为 0。
+- 新加坡供给组合：电力 = 核 SMR 105.4 TWh + 经 MY–SG 线路进口 118.3 + 既有 CCGT 5.4；气：LNG 进口 366.7（上限）中 327.3 经 MY–SG 管道候选反向送往马来西亚（SG 成为转口枢纽），本地用气 30.0（终端）+ 9.5（既有 CCGT）；SG 船用甲醇 467.3 TWh 在 origin_neutral 下记零；SG 的 54.9 Mt 不可避免 CO₂ 由 DAC 19.9 Mt 与 56 Mt 管道出口到 MY 封存平衡。
+- B5/B6 试算：不互联情景无可用最优解（Gurobi INF_OR_UNBD），B5 只能在未求解网络上核对（跨境组件 0，已在 S3-6 静态检查通过），B6 不可评估。
+
+## 9. 天然气数据缺口清单
+
+| 项 | 状态 | 处理 | 影响方向 |
+|---|---|---|---|
+| Malaysia–Singapore 管道容量（GEM 无） | DATA_PENDING（下载清单） | 只有 MY_Peninsular2 1–SG2 0 走廊候选，无存量 | 低估新加坡既有进口能力 |
+| JDA–Arthit 管道容量（GEM 无） | DATA_PENDING | 不建跨境链路；JDA 产量已含在马、泰 UNSD 产量 | 无直接影响 |
+| LNG 站址缺容量（MY 3 个单元、VN 6 个、ID 1 个） | DATA_PENDING（D1 清单保留） | 不建或按已知单元建 | 低估 MY/VN 接收能力 |
+| 再气化加价 | DATA_PENDING | 0 | LNG 成本低估 |
+| 国内生产的节点分配 | C 级（负荷份额） | GEM 第九批无坐标；GIS 路由文件未提供 | 气田所在节点的供给被摊平 |
+| 接收站扩建 capex | C 级（0） | 无可引用来源 | 扩建偏便宜 |
+| bcm→MW 换算 | B 级（PyPSA-Eur 1,199 MW/bcm × 0.90） | GCV/NCV 口径差 ±10% | 管道容量 ±10% |
+| TL 产量全部出口 | 已注明 | 上限保留 | TL 国内可用气可能高估 |
+| Yadana 1 / Zawtika 跨境判定 | B 级（落地点 + 泰国境内段 12.93 bcm/a 交叉核对） | 建为 MM2 4 → TH2 2 | — |
+
+## 10. 测试、证据与交付
+
+- 测试：`PYTHONHASHSEED=0 python -m pytest tests/research -q -p no:cacheprovider`（WSL）→ 385 通过 / 4 基线失败（`test_gate4_activation` 的 4 项，D1 以来不变）；记录 `S3_TEST_RUN.json`，日志 `evidence/s3_7/tests/s3_pytest_full.log`。新增测试 6 个文件（气网、进口、氨/甲醇、航运、燃料碳、门槛），修改 2 个（S1 走廊过滤、S2B R1/R2 预期）。
+- 证据：`S3_EVIDENCE.json`（`s3_collect_evidence.py` 汇总各子步骤的构建/求解回执、门槛、结构表、LP 系数范围、数据证据与脚本/输入 SHA256）；分步证据目录 `evidence/s3_0 … s3_7`。
+- 登记表：`DATA_REGISTRY.csv`（1,341 行；本目录有副本）、`DATA_PENDING_LIST.csv`（23 项）、`DOWNLOAD_LIST.csv`（含 GEM 管道缺容量单元）、`DOWNLOAD_LIST_CLOSED_S3.csv`（第八、九批与只读获取已关闭的项）。
+- 只读获取并登记（URL / UTC 时间 / SHA256，均在 `S3_EVIDENCE.json` 与登记表）：USGS 氮矿物年鉴表（PyPSA-Eur 氨产量输入）、PyPSA-Eur v2025.07.0 规则与脚本（氨产量、气入口、气网、聚类）、PyPSA-Eur 进口分支 5a87cedd 的脚本/规则/配置、Neumann 等 arXiv v1 PDF 与 Nature Communications 补充材料 PDF、Nature Communications 正文页面、Zenodo 14872184 的 `results.parquet` 与配置、technology-data v0.15.0 的 2040/2050 成本表。大文件（两份 PDF 59 MB、parquet 11.7 MB、IDEES/USGS/GEM 工作簿）不入 git，只登记。
+- 分支 `codex/s3-gas-imports-shipping-20261015`，draft PR #24（叠在 #23 上）；提交：S3-0 9a6f9e20、S3-1 ca4657b6、S3-2 b0c6b068、S3-3 e18ccd46 + 077028c8、S3-4 cfa53849、S3-5 ededdc9e、S3-6 b8ac3ed9、S3-7 见 `S3_PROGRESS.md`。交付目录镜像到 `D:\ResearchWorkspaces\ASEAN\work\p1_step3_20261015\`。
+
+## 11. 待用户决定的事项
+
+| # | 事项 | 现状 | 需要的决定 |
+|---|---|---|---|
+| 1 | 航运需求总量 | 当前 D1 表 651.19 TWh 油当量（国内 92.76 + 国际 558.42），与 S2 推迟账目一致；指令中的 670.2 TWh 未复现 | 确认 651.19，或指出 670.2 的来源 |
+| 2 | UNSD "其他"工业桶的电化 | 第 61 项把"其他"桶映射到 PyPSA-Eur `Other industrial sectors`（2050 比率 76% 电），ID 的 1,002 TWh 工业煤因此几乎全部电化；东盟工业电力 1,503 → 3,784 TWh | 接受，或为"其他"桶另定燃料保留份额 |
+| 3 | 柬埔寨交通链 | 2019 基准正确；5.2 倍来自 AEO8 BAS 2050 部门总量校准 + UNSD 基准比 AEO8 2022 低 31%；各国交通乘数 1.9–5.2 | 是否改用 ATS 总量或 AEO8 历史口径的基准 |
+| 4 | 进口价格基准年份 | 主算用 Zenodo 2040 年到岸价 ×1.20；technology-data 2040→2050 供应链成本降幅估计 9–12%（低于 20%），敏感性下限保持 −20%；应用价相对 2050 口径偏高约 10% | 接受主算口径，或改用 2050 折算价 |
+| 5 | 进口价格代表性 | 欧洲最小到岸价 ×1.20 作为东盟代理（C 级），论文无东盟供给曲线 | 接受，或指定东盟专用加价 |
+| 6 | HVC 2019 口径 | 按 PyPSA-Eur 惯例把原料天然气计入甲烷（效率因子 0.915）；严格能源用途口径为 0.86、甲烷份额 0 | 接受 PyPSA-Eur 惯例 |
+| 7 | 天然气数据缺口 | MY–SG 管道容量、JDA–Arthit、LNG 缺容量单元、再气化加价（§9） | 提供数据或维持 DATA_PENDING |
+| 8 | 国内气生产节点分配 | 负荷份额（C 级）；GEM 第九批无坐标 | 提供 GIS 路由文件或气田清单 |
+| 9 | 连通性补全候选 | 印尼岛屿节点到苏拉威西的候选管道最长 2,299 km（PyPSA-Eur 规则），仅为候选 | 接受，或限制海底长度 |
+| 10 | producer_credit 模式下的甲醇进口 | 全区母线无法记信用，进口甲醇上限置 0 | 接受该敏感性定义 |
+| 11 | 一体化冒烟的求解精度 | IPM 不精确 → "不可行"，gap_diagnostic 松弛全为 0；S3-7 以单纯形法独立确认（§8）；LP 系数范围与缩放建议（§8，PROPOSED） | 云端运行是否采用缩放/求解器参数建议 |
+| 12 | 缅甸–泰国天然气存量链路的节点 | 按落地点取 MM2 4 → TH2 2，与电力统一走廊 MM2 4–TH2 4 不同 | 接受 |

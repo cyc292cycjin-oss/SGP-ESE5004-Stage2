@@ -36,6 +36,7 @@ def component_country(n,typ,name):
     """Owner country = country of the component's non-atmosphere physical ports (unique)."""
     df=n.df(typ);z=df.loc[name];atmo=atmosphere_buses(n)
     countries={str(n.buses.at[z[c],'country']) for c in port_columns(df) if z[c] and z[c] not in atmo}
+    countries-={'ASEAN'} if len(countries)>1 else set()  # S3-2/S3-3: regional commodity pools (country tag ASEAN) do not own emissions; the national port does
     if len(countries)!=1:raise ValueError('Ambiguous emitter country for '+typ+' '+name+': '+str(sorted(countries)))
     return countries.pop()
 

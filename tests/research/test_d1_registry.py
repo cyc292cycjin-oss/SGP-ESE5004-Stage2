@@ -116,11 +116,17 @@ def test_fossil_production_caps(registry):
     assert float(r.loc["fossil_production_cap_gas_MY", "value"]) == pytest.approx(3398100.728 * 0.9 / 0.0036, rel=1e-9)
 
 
+AEO8_HIST_2022_MTOE = {"Industry": 185.6, "Transport": 145.2, "Residential": 63.0, "Commercial": 29.5, "AgricultureOthers": 8.8}   # AEO8 C.3 historical 2022
+BRIDGE_2019_2022 = {"Industry": 185.6 / 156.2, "Transport": 145.2 / (0.36 * 156.2 / 0.384), "Residential": 1.0, "Commercial": 1.0, "AgricultureOthers": 1.0}   # S3B R1 (decision 66): AEO8 Chapter 1, PDF p.30-31
+
+
 def test_demand_2050_calibration():
     rows = load(DEM / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv")
+    lvl = load(DEM / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv")
+    tot = lambda rr, s, col="value_2050_mwh": sum(float(r[col]) for r in rr if r["sector"] == s and r["country"] in ASEAN10 and r[col] != "")
     for s, mtoe in AEO8_BAS_2050_MTOE.items():
-        tot = sum(float(r["value_2050_mwh"]) for r in rows if r["sector"] == s and r["country"] in ASEAN10 and r["value_2050_mwh"] != "")
-        assert tot == pytest.approx(mtoe * MWH_PER_MTOE, rel=1e-9)
+        assert tot(lvl, s) == pytest.approx(mtoe * MWH_PER_MTOE, rel=1e-9)   # level method (sensitivity): AEO8 BAS 2050 absolute sector totals
+        assert tot(rows, s) == pytest.approx(tot(rows, s, "base_2019_mwh") * BRIDGE_2019_2022[s] * mtoe / AEO8_HIST_2022_MTOE[s], rel=1e-9)   # ratio method (main)
     vals = [float(r["value_2050_mwh"]) for r in rows if r["value_2050_mwh"] != ""]
     assert min(vals) >= 0.0
     pend = [r for r in rows if r["status"] == "DATA_PENDING"]

@@ -463,6 +463,14 @@ def _shares_for(shares, astar, country, sector):
     return s, (acc if (country, acc) in shares else ("IndustryFinalEnergy" if (country, "IndustryFinalEnergy") in shares else "Astar"))
 
 
+def demand_table_key(cfg):
+    """Country allocation (decision 57) plus the growth method suffix (S3B R1, decision 66): ratio = main tables, level = *_level tables."""
+    D = cfg["research"]["demand"]; key = str(D.get("country_allocation", "aeo8_ats_relative")); gm = str(D.get("growth_method", "ratio"))
+    if gm not in ("ratio", "level"):
+        raise ValueError("Unknown research.demand.growth_method " + gm)
+    return key + ("_level" if gm == "level" else "")
+
+
 def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_csv: Path, boundary_csv: Path, allocation_dir: Path, nodes, cc_fraction: float):
     S2 = cfg["research"]["s2"]; D = S2["demand"]; I = S2["industry"]
     dem = pd.read_csv(demand_csv, keep_default_na=False)
@@ -481,12 +489,33 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     s_lt, boiler_eff = float(I["low_temperature_heat_share_of_fuels"]), float(I["existing_boiler_efficiency"])
     # R1 (decision 55): industrial carrier structure. pypsa_eur_2050 = 2050 process routes (scripts_project/s2b_industry.py);
     # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
-    carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = str(cfg["research"]["demand"].get("country_allocation", "aeo8_ats_relative"))
+    carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = demand_table_key(cfg)
     if carrier_mode not in ("pypsa_eur_2050", "bas_fixed"):
         raise ValueError("Unknown research.s2.industry.carrier_mode " + carrier_mode)
-    ind_path = repo / I["pypsa_eur_tables"][alloc_mode]
+    # S3-0 (decision 61): ratio source. jrc_idees_2021 = PyPSA-Eur v2025.07.0 ratios reproduced from JRC-IDEES-2021 for all sub-sectors (s3_0_industry.py, main);
+    # technology_data_v015 = S2B steel/cement substitutes (sensitivity tables *_TD_SENSITIVITY.csv).
+    ratio_source = str(I.get("ratio_source", "jrc_idees_2021"))
+    if ratio_source not in ("jrc_idees_2021", "technology_data_v015"):
+        raise ValueError("Unknown research.s2.industry.ratio_source " + ratio_source)
+    ind_path = repo / (I["pypsa_eur_tables"] if ratio_source == "jrc_idees_2021" else I["technology_data_sensitivity_tables"])[alloc_mode]
+    # S3B R2 (decision 67): other bucket. pypsa_eur_2050 = 'Other industrial sectors' 2050 ratios (main); idees_today = JRC-IDEES-2021 EU27 2019 carrier structure
+    # of that sector without process switch (sensitivity tables *_OTHER_IDEES_TODAY.csv written by s3_0_industry.py next to the main tables).
+    other_bucket = str(((cfg["research"].get("s3") or {}).get("industry") or {}).get("other_bucket", "pypsa_eur_2050"))
+    if other_bucket not in ("pypsa_eur_2050", "idees_today"):
+        raise ValueError("Unknown research.s3.industry.other_bucket " + other_bucket)
+    if other_bucket == "idees_today":
+        ind_path = ind_path.with_name(ind_path.stem + "_OTHER_IDEES_TODAY.csv")
     ind_summary = pd.read_csv(ind_path).set_index("country")
-    overflow_ledger, hydrogen_ledger = {}, {}
+    # S3-0 interim handling of the ratio ammonia/methanol rows: convert_to_h2_and_gas = ammonia -> H2 + electricity (PyPSA-Eur ammonia:false route,
+    # config MWh_H2_per_tNH3_electrolysis 5.93 / MWh_elec_per_tNH3_electrolysis 0.2473 per 5.166 MWh_NH3, lines 849/852/853), methanol -> methane +
+    # electricity (today's SMR route, MWh_CH4_per_tMeOH 10.25 / MWh_elec_per_tMeOH 0.167 per 5.528 MWh_MeOH, lines 904-906); regional_buses = loads on the
+    # regional ammonia / methanol buses (S3-3).
+    am_mode = str(I.get("ammonia_methanol_mode", "convert_to_h2_and_gas"))
+    if am_mode not in ("convert_to_h2_and_gas", "regional_buses"):
+        raise ValueError("Unknown research.s2.industry.ammonia_methanol_mode " + am_mode)
+    NH3_H2, NH3_EL = 5.93 / 5.166, 0.2473 / 5.166
+    MEOH_CH4, MEOH_EL = 10.25 / 5.528, 0.167 / 5.528
+    overflow_ledger, hydrogen_ledger, am_ledger = {}, {}, {}
     # R2 (decision 56): feedstock carbon. territorial = EDGAR 2.B+2.D on the process bus + domestic plastics burned (s2b_feedstock.py);
     # full_release = PyPSA-Eur default (all feedstock carbon released) as implemented in S2.
     fc_mode = str(I.get("feedstock_carbon_mode", "full_release"))
@@ -564,10 +593,43 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 for node, s in sh2.items():
                     if s > 0:
                         meter_load(node, c, sector, fuel, v * s, f"{c}:{account}:{carrier}", account)
-        for account in ["DomesticShippingFuel", "InternationalShippingBunker"]:
+        # S3-4 (decision 10, D1 section 4): shipping. Oil-equivalent demand (D1 table) x PyPSA-Eur 2050 fuel shares (methanol 1 / hydrogen 0 / oil 0,
+        # registry share_shipping_*_2050) x energy conversion shipping_oil_efficiency / shipping_methanol_efficiency (config lines 635-636), served
+        # from the regional methanol bus through a node link that books 1/MWh_MeOH_per_tCO2 in the consuming country (add_shipping lines 5195-5227);
+        # the international bunker part shares the switch research.s2.demand.international_bunkers with aviation. S3-5 splits by fuel origin.
+        SHIP = cfg["research"].get("s3", {}).get("shipping")
+        for account, switch in [("DomesticShippingFuel", True), ("InternationalShippingBunker", bool(D["international_bunkers"]))]:
             rows = d[d.account == account]
-            if len(rows):
-                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=float(rows.v.sum()), reason="shipping deferred to S3 (methanol/ammonia)"))
+            if not len(rows):
+                continue
+            v_oil = float(rows.v.sum())
+            if SHIP is None:
+                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=v_oil, reason="shipping deferred to S3 (methanol/ammonia)"))
+                continue
+            if not switch:
+                deferred.append(dict(country=c, account=account, carrier="oil", annual_mwh=v_oil, reason="switch research.s2.demand.international_bunkers=false"))
+                continue
+            sh2 = shares.get((c, account)) or _shares_for(shares, astar_shares, c, "Transport")[0]
+            m_share, h_share, o_share = rv("share_shipping_methanol_share_2050"), rv("share_shipping_hydrogen_share_2050"), rv("share_shipping_oil_share_2050")
+            conv_m = float(SHIP["shipping_oil_efficiency"]) / float(SHIP["shipping_methanol_efficiency"])
+            ef_meoh = cost(costs, "methanol", "CO2 intensity")
+            sector = "shipping domestic" if account == "DomesticShippingFuel" else "shipping international"
+            for node, s in sh2.items():
+                if s <= 0:
+                    continue
+                if m_share > 0:
+                    add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+                    fb = add_bus(n, f"{node} shipping methanol final", "methanol final energy", c, node)
+                    link = f"{node} shipping methanol"
+                    if link not in n.links.index:
+                        add_link(n, link, c, "shipping methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, ef_meoh], role="CONVERSION",
+                                 extra={"carbon_rule": "methanol carbon released at use in the consuming country (PyPSA-Eur shipping methanol link); origin-neutral split in S3-5"})
+                    plain_load(node, c, "Transport", account, "shipping methanol", fb, v_oil * s * m_share * conv_m, f"{c}:{account}:oil x {m_share} x {conv_m:.4f}", f"{node} {sector} methanol")
+                if h_share > 0:
+                    conv_h = float(SHIP["shipping_oil_efficiency"]) / cost(costs, "fuel cell", "efficiency")
+                    plain_load(node, c, "Transport", account, "shipping hydrogen", f"{node} H2", v_oil * s * h_share * conv_h, f"{c}:{account}:oil x {h_share} x {conv_h:.4f}", f"{node} {sector} hydrogen")
+                if o_share > 0:
+                    meter_load(node, c, sector, "oil", v_oil * s * o_share, f"{c}:{account}:oil x {o_share}", account)
         # ---- industry (R1: carrier structure by mode) --------------------------------------------------------
         ind = d[(d.sector == "Industry") & (d.carrier != "electricity")]
         sh, _ = _shares_for(shares, astar_shares, c, "Industry")
@@ -575,8 +637,19 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         if carrier_mode == "pypsa_eur_2050" and m is not None:
             ov_summary = float(m["biomass_overflow_industry_to_gas_mwh"])
             ind_car = {"coal": float(m["pe_coal_mwh"]), "oil": float(m["pe_oil_mwh"]), "gas": float(m["pe_gas_mwh"]) - ov_summary, "biomass": float(m["pe_biomass_before_overflow_mwh"]),
-                       "electricity": float(m["pe_electricity_mwh"]), "hydrogen": float(m["pe_hydrogen_mwh"]), "heat": float(m["pe_heat_mwh"])}
-            src_ind = f"{c}:Industry2050PyPSAEurRoutes"; heat_src = "PyPSA-Eur ratio heat row (technology-data steel/cement rows carry none; other sectors pending)"
+                       "electricity": float(m["pe_electricity_mwh"]), "hydrogen": float(m["pe_hydrogen_mwh"]), "heat": float(m["pe_heat_mwh"]),
+                       "ammonia": float(m["pe_ammonia_mwh"]) if "pe_ammonia_mwh" in m.index else 0.0, "methanol": float(m["pe_methanol_mwh"]) if "pe_methanol_mwh" in m.index else 0.0}
+            if am_mode == "convert_to_h2_and_gas":
+                am_ledger[c] = dict(mode=am_mode, ammonia_mwh=ind_car["ammonia"], methanol_mwh=ind_car["methanol"], to_hydrogen_mwh=ind_car["ammonia"] * NH3_H2,
+                                    to_gas_mwh=ind_car["methanol"] * MEOH_CH4, to_electricity_mwh=ind_car["ammonia"] * NH3_EL + ind_car["methanol"] * MEOH_EL)
+                ind_car["hydrogen"] += ind_car["ammonia"] * NH3_H2; ind_car["gas"] += ind_car["methanol"] * MEOH_CH4
+                ind_car["electricity"] += ind_car["ammonia"] * NH3_EL + ind_car["methanol"] * MEOH_EL
+                ind_car["ammonia"] = 0.0; ind_car["methanol"] = 0.0
+            else:
+                am_ledger[c] = dict(mode=am_mode, ammonia_mwh=ind_car["ammonia"], methanol_mwh=ind_car["methanol"])
+            src_ind = f"{c}:Industry2050PyPSAEurRoutes"
+            heat_src = ("PyPSA-Eur ratio heat row, all sub-sectors (JRC-IDEES-2021 reproduction, decision 61)" if ratio_source == "jrc_idees_2021"
+                        else "PyPSA-Eur ratio heat row with technology-data steel/cement substitutes (S2B method, sensitivity)")
         else:
             ind_car = {carrier: float(v) * (1 - s_lt) for carrier, v in ind.groupby("carrier").v.sum().items()}
             ind_car["heat"] = float(ind.v.sum()) * s_lt * boiler_eff; ind_car["electricity"] = 0.0; ind_car["hydrogen"] = 0.0
@@ -606,6 +679,21 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * s, f"{src_ind}:electricity", f"{node} industry electricity demand")
             if ind_car.get("hydrogen", 0.0) * s > 0:
                 plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * s, f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
+            # S3-3 (decision 44), regional_buses mode: ammonia load on the regional ammonia bus (no CO2); methanol through a node link that books the
+            # methanol carbon in the consuming country's atmosphere (PyPSA-Eur industry methanol link, prepare_sector_network.py lines 4617-4626,
+            # efficiency2 = 1 / MWh_MeOH_per_tCO2 = technology-data methanol CO2 intensity 0.2482 t/MWh); the regional buses are created here when the
+            # import layer (S3-2) has not created them yet. S3-5 (origin-neutral) replaces the fossil EF by the fuel-origin split.
+            if ind_car.get("ammonia", 0.0) * s > 0:
+                add_bus(n, "ASEAN ammonia", "ammonia", "ASEAN", "")
+                plain_load(node, c, "Industry", "IndustryAmmonia", "industry ammonia", "ASEAN ammonia", ind_car["ammonia"] * s, f"{src_ind}:ammonia", f"{node} industry ammonia demand")
+            if ind_car.get("methanol", 0.0) * s > 0:
+                add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+                fb = add_bus(n, f"{node} industry methanol final", "methanol final energy", c, node)
+                link = f"{node} industry methanol use"
+                if link not in n.links.index:
+                    add_link(n, link, c, "industry methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, cost(costs, "methanol", "CO2 intensity")], role="CONVERSION",
+                             extra={"carbon_rule": "methanol carbon released at use (PyPSA-Eur industry methanol link); origin-neutral split in S3-5"})
+                plain_load(node, c, "Industry", "IndustryMethanol", "industry methanol", fb, ind_car["methanol"] * s, f"{src_ind}:methanol", f"{node} industry methanol demand")
             # industrial biomass with capture (BECCS in industry): alternative route into the same biomass final bus
             fb = f"{node} industry biomass final"
             if fb in n.buses.index and f"{node} industry biomass CC" not in n.links.index:
@@ -685,7 +773,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                  extra={"process_share": f_process, "end_of_life_release": eol_release, "feedstock_carbon_mode": "full_release"})
                 plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, f"{c}:NonEnergy:{carrier} x HVC primary {scale if carrier == 'oil' else 1.0}", f"{node} feedstock {carrier} demand")
         # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
-        proc = sum(float(reg.loc[f"process_emissions_{g}_2050_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
+        pe_sfx = "_level" if alloc_mode.endswith("_level") else ""   # S3B R1: level growth method uses the level process-emission rows
+        proc = sum(float(reg.loc[f"process_emissions_{g}_2050{pe_sfx}_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
         fc_row = fc_table.loc[c] if c in fc_table.index else None
         proc_feed = float(fc_row["process_2B_2D_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
         plastics = float(fc_row["plastics_burned_co2_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
@@ -740,7 +829,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                   bev_charge_efficiency=bev_eff, bev_availability=bev_avail, agriculture_electric_share=ag_el_share, agriculture_efficiency_gain=ag_gain, hvc_primary_fraction=hvc_primary,
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
-                  industry=dict(carrier_mode=carrier_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger, hydrogen_mwh=hydrogen_ledger),
+                  industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,
+                                hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger),
                   feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))
     return ledger
 
@@ -790,3 +880,28 @@ def install_gap_diagnostic(n):
         m.add_constraints(e.sel(snapshot=last, Store=atmosphere_bus(ct)) - slack.sel(country=ct) <= float(cfg["country_cap_tco2"][ct]), name="research_gap_co2_limit-" + ct)
     m.objective += (slack * float(g["penalty_eur_per_tco2"])).sum()
     n._research_gap_model = m
+
+
+def add_apg_corridor_lines(n, corridors):
+    """S3-0 (decisions 59/62): corridor-table rows whose Line component is absent from the frozen electric base (APG AIMS III 2024 #11 TH-MM and
+    #17 LA-MM, scripts_project/s3_0_corridors.py) are added as AC lines with the base conventions: capital cost per km = median of the existing
+    cross-border AC lines (uniform 42.01 EUR/MW/km/a), line type / s_max_pu / electrical parameters per km from the existing cross-border line
+    closest to the median num_parallel, s_nom = s_nom_min = capacity_2025_mw (0 for #11, 30 MW for #17), extendable, border_class cross_border."""
+    added = []
+    cty = n.buses.country
+    xb = n.lines[cty.reindex(n.lines.bus0).to_numpy() != cty.reindex(n.lines.bus1).to_numpy()]   # border_class is tagged later (tag_cross_border)
+    cpk = float((xb.capital_cost / xb.length).median())
+    tmpl = xb.iloc[int((xb.num_parallel - xb.num_parallel.median()).abs().argsort().iloc[0])]   # typical border line: closest to the median num_parallel of the existing cross-border AC lines
+    for _, r in corridors.iterrows():
+        if r.component_type != "Line" or str(r.component) in n.lines.index:
+            continue
+        name = str(r.component); length = float(r.length_km); cap = float(r.capacity_2025_mw); npar = float(tmpl.num_parallel)
+        n.add("Line", name, bus0=r["from"], bus1=r["to"], carrier="AC", type=tmpl.type, s_max_pu=float(tmpl.s_max_pu), length=length, num_parallel=npar,
+              s_nom=cap, s_nom_min=cap, s_nom_extendable=True, capital_cost=cpk * length, build_year=0,
+              x=float(tmpl.x) / float(tmpl.length) * length, r=float(tmpl.r) / float(tmpl.length) * length, b=float(tmpl.b) / float(tmpl.length) * length)
+        if "price_qualification" in n.lines.columns:
+            n.lines.at[name, "price_qualification"] = tmpl.price_qualification
+        added.append(dict(component=name, bus0=r["from"], bus1=r["to"], length_km=length, capacity_2025_mw=cap, capital_cost_eur_per_mw_a=cpk * length,
+                          capital_cost_eur_per_mw_km_a=cpk, template_line=str(tmpl.name), num_parallel=npar, line_type=str(tmpl.type), status=str(r.status)))
+    n.meta["apg_corridor_additions"] = added
+    return added

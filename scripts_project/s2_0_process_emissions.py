@@ -57,6 +57,8 @@ def main():
     pop_path = DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv"
     if pop_path.exists():
         dp = pd.read_csv(pop_path); mult_pop = dp[dp.sector == "Industry"].groupby("country").multiplier_total.first().to_dict()
+    lvl_path = DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv"   # S3B R1: level growth method (sensitivity)
+    dl = pd.read_csv(lvl_path); mult_lvl = dl[dl.sector == "Industry"].groupby("country").multiplier_total.first().to_dict()
     prod = pd.read_csv(REG_DIR / "FOSSIL_PRODUCTION_CAPS_2050.csv")
     prod_mwh = {(r.country, r.carrier): float(r.cap_mwh_per_year) for r in prod.itertuples()}
     reg = Registry(SCRIPT)
@@ -70,12 +72,15 @@ def main():
             status = "REGISTERED" if v19 > 0 else "SOURCE_ZERO"
             in_bus = g != "chemicals"
             proc_rows.append(dict(country=c, group=g, ipcc_codes="+".join(codes), tco2_2019=v19, industry_multiplier=mult[c], tco2_2050=v50,
-                                  tco2_2050_pop_sensitivity=(v19 * mult_pop[c]) if mult_pop else "", components=comp,
+                                  tco2_2050_pop_sensitivity=(v19 * mult_pop[c]) if mult_pop else "", tco2_2050_level_sensitivity=v19 * mult_lvl[c], components=comp,
                                   model_treatment="process emission bus (capturable by process CC)" if in_bus else "covered by feedstock-carbon accounting (not added to the process bus; method question)"))
             reg.add(f"process_emissions_{g}_2019_{c}", f"{c} {g} process CO2 2019 (EDGAR 2025 IPCC 2006 {'+'.join(codes)}: {comp})", v19, "tCO2/a", "B",
                     "EDGAR_2025_GHG IEA-EDGAR CO2 v4, sheet IPCC 2006, 2019; " + LICENCE, f"extraction {EXT} rows {c} {'/'.join(codes)}", sha, country=c,
                     decision_ref="10, L19, S2-0.3", status=status)
-            reg.add(f"process_emissions_{g}_2050_{c}", f"{c} {g} process CO2 2050 = 2019 x D1 industry multiplier {mult[c]:.4f} (AEO8 BAS industry; country allocation per research.demand.country_allocation, R3 = AEO8 ATS relative factor)" +
+            reg.add(f"process_emissions_{g}_2050_level_{c}", f"{c} {g} process CO2 2050 with the level growth method (S3B R1 sensitivity) = 2019 x level industry multiplier {mult_lvl[c]:.4f}; used when research.demand.growth_method = level",
+                    v19 * mult_lvl[c], "tCO2/a", "B", "EDGAR 2025 x D1 DEMAND_2050 level-sensitivity industry multiplier", "process_emissions_*_2019 x multiplier_total(Industry), *_LEVEL_SENSITIVITY.csv", sha, country=c,
+                    decision_ref="66", status="SENSITIVITY" if v19 > 0 else "SOURCE_ZERO")
+            reg.add(f"process_emissions_{g}_2050_{c}", f"{c} {g} process CO2 2050 = 2019 x D1 industry multiplier {mult[c]:.4f} (ratio growth method, S3B R1: UNSD 2019 x bridge x AEO8 BAS growth 2022-2050; country allocation per research.demand.country_allocation, R3 = AEO8 ATS relative factor)" +
                     ("" if in_bus else "; chemicals (2.B) are covered by the feedstock-carbon accounting and are not loaded on the process bus (user to confirm)"),
                     v50, "tCO2/a", "B", "EDGAR 2025 x D1 DEMAND_2050 industry multiplier", "process_emissions_*_2019 x multiplier_total(Industry)", sha, country=c,
                     sensitivity_low=v19, sensitivity_high=(v19 * mult_pop[c]) if mult_pop else None, decision_ref="10, L19, S2-0.3",
