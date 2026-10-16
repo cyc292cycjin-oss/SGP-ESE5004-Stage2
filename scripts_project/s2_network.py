@@ -342,8 +342,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
     pd.DataFrame(demand["loads"]).to_csv(output / f"{scenario}{suffix}_S2_DEMAND_OWNERSHIP.csv", index=False)
     pd.DataFrame(geo["units"]).to_csv(output / f"{scenario}{suffix}_GEOTHERMAL_UNITS.csv", index=False)
-    if daily and not gap_diagnostic:
-        d, ledger = to_daily(n); dpath = output / f"{scenario}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)
+    if daily:   # S4B-6: the gap diagnostic also gets its daily network (cloud run of the disconnected diagnostic)
+        d, ledger = to_daily(n); dpath = output / f"{scenario}{suffix}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)
         dback = pypsa.Network(str(dpath)); compare_roundtrip(d, dback)
         receipt["daily_network"] = dict(file=str(dpath), sha256=sha(dpath), bytes=dpath.stat().st_size, snapshots=int(len(d.snapshots)), aggregation_series=len(ledger))
     save(output / f"{scenario}{suffix}_BUILD_RECEIPT.json", receipt)
