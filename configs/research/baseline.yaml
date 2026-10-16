@@ -217,7 +217,13 @@ research:
       allowed_countries: [BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN]
       p_nom_max: .inf
       status: PRICED_AEO8_GRADE_C
-  site_candidates:                        # decision 39; structure built, potentials pending -> p_nom_max 0
+  candidates:                             # S4B-2 (decisions 78, 79): caps of the site candidates below and the nuclear plan caps (scripts_project/s4b_candidates.py)
+    hydro_geothermal_cap: national_potential   # national_potential = A/B national potential - 2050 stock, GEM pipeline where no official potential (main) | national_potential_la_mem_18gw (LA hydro 18 GW) | gem_pipeline_only | zero (former DATA_PENDING state)
+    pipeline_cap_statuses: announced_preconstruction   # announced + pre-construction (main: construction units are 2050 stock after decision 77) | announced_preconstruction_construction (literal reading; double counts the construction units)
+    caps_table: research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv
+    nuclear_cap: none                     # decision 79: none (main, decision 38) | national_plans (PH 4.8, VN 14.4, ID 10, TH 0.6 GW on nuclear + nuclear SMR, others 0; implemented only)
+    nuclear_caps_table: research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv
+  site_candidates:                        # decision 39 structure; S4B-2 replaces the 0 caps (research.candidates) and sets the availability / inflow proxies
     geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
     ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
     hydro_new: {carrier: hydro, component: StorageUnit, cost_technology: hydro, p_nom_max: 0.0, status: DATA_PENDING}
