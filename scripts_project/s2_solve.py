@@ -130,6 +130,7 @@ def gap_table(n, m):
         sol = m.variables["Research_gap_co2_slack"].solution
         co2 = {str(c): float(sol.sel(country=c).item()) for c in sol.coords["country"].values}
     bslack = n.generators[n.generators.carrier == "gap slack biomass"] if "gap slack biomass" in set(n.generators.carrier) else n.generators.iloc[0:0]
+    gslack = n.generators[n.generators.carrier == "gap slack gas"] if "gap slack gas" in set(n.generators.carrier) else n.generators.iloc[0:0]   # S4B-0 (decision 73)
     pset = n.get_switchable_as_dense("Load", "p_set")
     for c in sorted(set(n.buses.country.dropna()) - {""}):
         gens = slack[slack.country == c]
@@ -139,8 +140,11 @@ def gap_table(n, m):
         b = float(sum((n.generators_t.p[g] * w).sum() for g in bg.index if g in n.generators_t.p))
         bdem = float(sum((pset[l] * w).sum() for l in n.loads.index[(n.loads.country == c) & (n.loads.carrier == "biomass final energy")]))
         bpot = float(n.stores[(n.stores.bus == f"solid biomass {c}") & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
+        gg = gslack[gslack.country == c]
+        gs = float(sum((n.generators_t.p[g] * w).sum() for g in gg.index if g in n.generators_t.p))
+        gdem = float(sum((pset[l] * w).sum() for l in n.loads.index[(n.loads.country == c) & (n.loads.carrier.isin(["gas final energy", "gas feedstock"]))]))
         rows.append(dict(country=c, electricity_gap_mwh=e, electricity_demand_mwh=dem, electricity_gap_share=(e / dem if dem else None), co2_gap_t=co2.get(c), cap_tco2=n.meta["research_carbon"]["country_cap_tco2"].get(c),
-                         biomass_gap_mwh=b, biomass_final_demand_mwh=bdem, solid_biomass_potential_mwh=bpot))
+                         biomass_gap_mwh=b, biomass_final_demand_mwh=bdem, solid_biomass_potential_mwh=bpot, gas_gap_mwh=gs, gas_fixed_demand_mwh=gdem, gas_slack_generators=int(len(gg))))
     return rows
 
 
@@ -282,8 +286,8 @@ def main(a):
             from s3b_interior import cleanup_thresholds, simultaneous_charge_discharge
             thr = cleanup_thresholds(n, float(params.get("BarConvTol", 1e-8)), float(SV.get("interior", {}).get("cleanup_factor", 10)))
             save(out / "INTERIOR_CHECKS.json", dict(cleanup_thresholds=thr, simultaneous_charge_discharge=simultaneous_charge_discharge(n, thr), interior_solution=interior))
+        known = {}
         try:
-            known = {}
             if gap and "Research_gap_co2_slack" in m.variables:
                 sol = m.variables["Research_gap_co2_slack"].solution
                 known["gap_co2_slack_x_penalty_eur"] = float(sol.sum().item()) * float(n.meta["gap_diagnostic"]["penalty_eur_per_tco2"])
@@ -298,7 +302,19 @@ def main(a):
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
         gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
         gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
-        gates["all_passed"] = all(v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v)
+        # S4B-0 (decision 71, option 1): budgets tied to Gurobi FeasibilityTol / OptimalityTol with row-activity relative terms (s4b_acceptance.py);
+        # the S3B gates above stay unchanged for comparison and both verdicts are recorded; research.solver.interior.acceptance_basis selects all_passed.
+        I = SV.get("interior", {}); basis = str(I.get("acceptance_basis", "barconvtol"))
+        if a.solver == "gurobi":
+            try:
+                from s4b_acceptance import evaluate as s4b_evaluate
+                gates.update(s4b_evaluate(n, out / "lp", sol_dir, out / "v5", I, float(params.get("BarConvTol", 1e-8)), m=m, gap=gap, known_terms=(known if gap else None)))
+            except Exception as e:
+                gates["A1_A2_S4B"] = dict(gate="A1_A2_SOLVER_TOLERANCES", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
+        from s4b_acceptance import all_passed as acceptance_all_passed
+        gates["acceptance_basis"] = basis
+        gates["all_passed_barconvtol"] = acceptance_all_passed(gates, "barconvtol"); gates["all_passed_solver_tolerances"] = acceptance_all_passed(gates, "solver_tolerances")
+        gates["all_passed"] = gates["all_passed_" + basis] if basis in ("barconvtol", "solver_tolerances") else all(v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v)
         save(out / "V5_GATES.json", gates)
         if gap:
             table = gap_table(n, m); save(out / "GAP_TABLE.json", dict(label="GAP_DIAGNOSTIC_NOT_FOR_INTERCONNECTION_VALUE", rows=table, penalties=n.meta["gap_diagnostic"]))

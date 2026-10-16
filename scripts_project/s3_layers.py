@@ -147,9 +147,13 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     # S3B R3 (decision 68): existing_only (main) = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced
     # terminal unit cost, s3b_r3_lng_data.py); cap_factor (sensitivity) = the S3-1 rule: expansion to factor x existing at zero capex, proposed-only sites
     # up to the proposed capacity. The rule cap is kept as h2_import_cap_mw: the liquid-H2 terminal cap of S3-2 is unchanged by R3.
+    # S4B-0 (decision 72): cap_factor_cost (main) = the same cap rule, expansion priced at lng_expansion_capital_cost_eur_per_mw_a (PyPSA-Eur import-branch
+    # constant 7,018 EUR/MW/a, grade C) x (1 + lng_expansion_cost_sensitivity, +-0.5); existing capacity carries no new capex (PyPSA objective constant);
+    # existing_only becomes a sensitivity.
     expansion = str(G.get("lng_expansion", "cap_factor"))
-    if expansion not in ("existing_only", "cap_factor"):
+    if expansion not in ("existing_only", "cap_factor", "cap_factor_cost"):
         raise ValueError("Unknown research.s3.gas.lng_expansion " + expansion)
+    capex = float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)) * (1.0 + float(G.get("lng_expansion_cost_sensitivity", 0.0))) if expansion == "cap_factor_cost" else 0.0
     ensure_carrier(n, "LNG import")
     terms = {}
     for node, g in lng.groupby("node"):
@@ -162,17 +166,21 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
         if p_rule <= 0:
             terms[node] = dict(existing_mw=0.0, proposed_mw=0.0, p_nom_max_mw=0.0, h2_import_cap_mw=0.0, units_missing_capacity=missing, skipped="no capacity data")
             continue
-        p_max = p_rule if expansion == "cap_factor" else existing
+        p_max = p_rule if expansion in ("cap_factor", "cap_factor_cost") else existing
         c = country_of(n, node)
         if p_max <= 0:
             terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=0.0, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
                                skipped="proposed only: no LNG import in the main run (decision 68)")
             continue
         name = f"{node} LNG import"
-        n.add("Generator", name, bus=f"{node} gas", carrier="LNG import", p_nom=existing, p_nom_min=existing, p_nom_extendable=True, p_nom_max=p_max, capital_cost=0.0, marginal_cost=price + adder)
+        n.add("Generator", name, bus=f"{node} gas", carrier="LNG import", p_nom=existing, p_nom_min=existing, p_nom_extendable=True, p_nom_max=p_max, capital_cost=capex, marginal_cost=price + adder)
         n.generators.loc[name, ["country", "research_role"]] = [c, "EXTERNAL_SUPPLY"]
-        terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=p_max, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal))
-    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, expansion=expansion, terminals=terms)
+        terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=p_max, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
+                           expansion_capital_cost_eur_per_mw_a=capex)
+    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, expansion=expansion, terminals=terms,
+                      expansion_capital_cost_eur_per_mw_a=capex, expansion_cost_base_eur_per_mw_a=float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)),
+                      expansion_cost_sensitivity=float(G.get("lng_expansion_cost_sensitivity", 0.0)),
+                      expansion_cost_source=("PyPSA-Eur import branch 5a87cedd prepare_sector_network.py line 4561 terminal_capital_cost shipping-lch4 (grade C, +-50 %; decision 72)" if expansion == "cap_factor_cost" else "no capex"))
     n.meta["research_gas_network"] = led
     return led
 
@@ -385,6 +393,10 @@ def add_fuel_carbon_mode(n, costs, cfg, nodes):
             node = str(z.bus1)[:-4]
             n.links.at[name, "bus1"] = f"{node} oil non-fossil"
             _drop_port(n, name, "bus2"); led["credits_removed"] += 1
+        for name, z in L[L.carrier == "electrobiofuels"].iterrows():   # S4B-0 (decision 70): biogenic carbon + H2, treated like BtL
+            node = str(z.bus1)[:-4]
+            n.links.at[name, "bus1"] = f"{node} oil non-fossil"
+            _drop_port(n, name, "bus3"); led["credits_removed"] += 1
         for name, z in L[L.carrier == "biomass-to-methanol"].iterrows():
             _drop_port(n, name, "bus2"); led["credits_removed"] += 1
         for name, z in L[L.carrier == "methanolisation"].iterrows():

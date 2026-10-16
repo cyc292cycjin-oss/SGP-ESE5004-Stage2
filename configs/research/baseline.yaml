@@ -130,18 +130,36 @@ research:
       gap_factor: 10                     # relative primal-dual gap and complementarity / scale <= 10 x BarConvTol; primal budget 1e-7 relative = 10 x BarConvTol
       dual_factor: 100                   # normalized stationarity and dual-sign error <= 100 x BarConvTol = 1e-6 (V4 KKT budget, Gurobi OptimalityTol default)
       cleanup_factor: 10                 # reporting cleanup tau_g = 10 x BarConvTol x max|x_g|
+      acceptance_basis: solver_tolerances   # S4B-0 (decision 71, option 1): solver_tolerances = primal / dual budgets tied to Gurobi FeasibilityTol / OptimalityTol with row-activity relative terms (scripts_project/s4b_acceptance.py; main) | barconvtol = S3B R4.4 budgets above (comparison, reported alongside)
+      feasibility_tol: 1.0e-6            # Gurobi FeasibilityTol default (not set in the profiles, so the solver uses this value)
+      optimality_tol: 1.0e-6             # Gurobi OptimalityTol default
+      solver_tol_factor: 10              # option 1 (S3B report section 1.4): budget = 10 x the Gurobi tolerance; primal row/column budget 1e-3 + 10 x FeasibilityTol x reference, dual (stationarity, sign) <= 10 x OptimalityTol; gap and complementarity stay <= gap_factor x BarConvTol
+      net_zero_reference: country_gross_co2_flow   # relative term of the per-country net-zero rows (A1/A2, A3 COUNTRY_CO2_CAP, B1): annual gross CO2 throughput of the national atmosphere (sum of |port flows| x weights)
+      biomass_pool_reference: pool_capacity        # relative term of the finite biomass pools (A1/A2 Store energy-balance and level-bound rows, A3 STORE_ENERGY_* and state equations, B3): pool capacity e_nom
+      column_dual_sign_scale: stationarity_scale   # A1/A2 dual-sign error of columns without the bound (free Link-p flows: the reduced cost itself) measured on the column dual activity max(1, |c| + |a|'|pi| + |rc|) like stationarity; V4 form max(1, |rc|) reported alongside (chosen after the S3B/S4A values; user to confirm)
+  sector:                                # S4B-0 (decision 70): PyPSA-Eur v2025.07.0 config.default.yaml sector defaults (scripts_project/s4b_layers.py; table research_inputs/sector_v5/SECTOR_SWITCHES_VS_PYPSA_EUR.csv)
+    methanation: true                    # line 676: Sabatier per node (H2 + captured CO2 -> node gas bus); carbon per decision 64 (gas producer credit) - former model: not built
+    min_part_load_methanation: 0.3       # line 737
+    electrobiofuels: true                # line 779: biomass + H2 -> oil (Fischer-Tropsch based) - former model: not built
+    min_part_load_fischer_tropsch: 0.5   # line 735 - former model: 0 (S1 recipe)
+    hydrogen_fuel_cell: true             # line 686 (already built: upstream add_hydrogen)
+    SMR: true                            # line 688 (already built: S1 recipe)
+    SMR_cc: true                         # line 689 (already built: S1 recipe)
+    biomass_to_liquid: true              # line 777 (already built: S2 biomass layer)
   s3:                                    # step 3 layers (scripts_project/s3_layers.py)
     fuel_carbon_mode: origin_neutral     # S3-5 (decision 64): origin_neutral = non-fossil liquid fuels zero at combustion, carbon booked at synthesis in the producer country, imports zero | producer_credit = S2 behaviour (sensitivity)
     industry:                            # S3B R2 (decision 67)
-      other_bucket: pypsa_eur_2050       # pypsa_eur_2050 = UNSD other / construction / mining mapped to the PyPSA-Eur 'Other industrial sectors' 2050 ratios (main) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables)
+      other_bucket: pypsa_eur_2050       # pypsa_eur_2050 = UNSD other / construction / mining mapped to the PyPSA-Eur 'Other industrial sectors' 2050 ratios (main) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables) | asean_own_2019 = the country's own UNSD 2019 carrier composition, no conversion (S4B-0, S3B section 8 item 6; implemented only, not run; *_OTHER_ASEAN_OWN_2019 tables)
     gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
       existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0
       production_node_allocation: gem_fields    # S4A-2 (S3 section 11 item 8): gem_fields = shares of the latest-year production of the GEM GOGET 2026-03 operating gas fields mapped to the nearest node (research_inputs/fleet_v5/GAS_PRODUCTION_NODE_SHARES_GEM.csv; countries without a field fall back to load shares, DATA_PENDING) | load_shares = S3-1 grade-C electricity load shares
       gem_field_shares: research_inputs/fleet_v5/GAS_PRODUCTION_NODE_SHARES_GEM.csv
       lng_terminals: research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv   # D1 registry; existing = operating + construction
-      lng_expansion: existing_only        # S3B R3 (decision 68): existing_only = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced terminal unit cost; main) | cap_factor = expansion to lng_cap_factor x existing at zero capex, proposed-only sites up to the proposed capacity (former S3 rule, sensitivity)
-      lng_cap_factor: 2.5                 # decision 17, used when lng_expansion = cap_factor: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity; also the liquid-H2 terminal cap (S3-2) in both modes
+      lng_expansion: cap_factor_cost      # S4B-0 (decision 72): cap_factor_cost = expansion up to the decision-17 cap (lng_cap_factor x existing; proposed-only sites up to the proposed capacity) priced at lng_expansion_capital_cost_eur_per_mw_a (main) | existing_only = GEM operating + under construction capacity, no expansion (S3B R3 main, now sensitivity) | cap_factor = the same cap at zero capex (former S3 rule, sensitivity)
+      lng_cap_factor: 2.5                 # decision 17, used when lng_expansion = cap_factor / cap_factor_cost: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity; also the liquid-H2 terminal cap (S3-2) in every mode
+      lng_expansion_capital_cost_eur_per_mw_a: 7018.0   # decision 72: PyPSA-Eur import branch 5a87cedd prepare_sector_network.py line 4561 (terminal_capital_cost shipping-lch4; same source as the liquid-H2 terminal), grade C; references 8,020 (Ulvestad & Overland 2012 converted) and ERIA 2016 (storage-based) registered
+      lng_expansion_cost_sensitivity: 0.0   # decision 72 sensitivity: -0.5 / +0.5 on the expansion capital cost
       lng_regasification_adder_eur_per_mwh: 0.0   # DATA_PENDING (registry fuel_price_lng_regasification_adder): LNG cost understated
     imports:                             # S3-2 (decisions 17, 18, 64): extra-ASEAN imports, same prices in both scenarios, imports only
       price_table: research_inputs/imports_v5/IMPORT_PRICES_2050.csv   # Neumann et al. 2025 Zenodo results (2040, min over exporters) x 1.20 (s3_2_imports_data.py)
@@ -228,7 +246,7 @@ research:
     co2:
       storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50
       sequestration_cost_eur_per_t: 30    # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
-      vent: true                          # captured CO2 may be vented to the capturing country's atmosphere (counts as emission)
+      vent: false                         # S4B-0 (decision 70): PyPSA-Eur v2025.07.0 co2_vent false (config line 679); former S2 value true (captured CO2 vented to the capturing country's atmosphere; no confirmed decision; every smoke so far vented 0) kept as sensitivity
       dac: true                           # decision 11; sensitivity switch
       dac_heat_mode: industry_heat_bus    # R6 (decision 60): DAC heat (technology-data heat-input 1.6 - compression-heat-output 0.2 MWh_th/t) from the node industrial low-T heat bus; electric_cop1 = S2 treatment kept as sensitivity
       cc_fraction_source: sector.cc_fraction
@@ -289,6 +307,8 @@ research:
       enabled: false
       penalty_eur_per_mwh: 10000          # electricity slack; above any supply cost in the model (max marginal ~ 300 EUR/MWh)
       penalty_eur_per_tco2: 10000         # CO2 slack; above the DAC levelised cost (< 1,000 EUR/t at the registered costs)
+      penalty_eur_per_mwh_gas: 10000      # S4B-0 (decision 73): gas slack on every node gas bus, reported per country; same penalty as the other slacks
+      slacks: [electricity, co2, biomass, gas]   # S4B-0 (decision 73): gas added
   cost_scaling:                           # decision 41; multiplies capital_cost per technology carrier; 1.0 = no change
     nuclear: 1.0
     nuclear SMR: 1.0

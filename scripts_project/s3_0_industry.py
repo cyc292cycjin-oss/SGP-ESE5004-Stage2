@@ -48,7 +48,8 @@ PE = dict(St_primary_fraction=0.3, DRI_fraction=1.0, MWh_CH4_per_tNH3_SMR=10.8, 
           MWh_H2_per_tCl=-0.9372, methanol_production_today=1.5, MWh_elec_per_tMeOH=0.167, MWh_CH4_per_tMeOH=10.25, HVC_production_today=52.0)
 OIS_TODAY = REG_DIR / "INDUSTRY_OIS_TODAY_CARRIERS_EU27_2019.csv"   # S3B R2 (decision 67): scripts_project/s3b_r2_ois_today.py
 OTHER_BUCKET_MODES = ["pypsa_eur_2050", "idees_today"]
-OTHER_BUCKET_SUFFIX = {"pypsa_eur_2050": "", "idees_today": "_OTHER_IDEES_TODAY"}
+OTHER_BUCKET_SUFFIX = {"pypsa_eur_2050": "", "idees_today": "_OTHER_IDEES_TODAY", "asean_own_2019": "_OTHER_ASEAN_OWN_2019"}
+SUMMARY_MODES = OTHER_BUCKET_MODES + ["asean_own_2019"]   # S4B-0 (S3B section 8 item 6): UNSD 2019 own carrier composition of the other bucket (tables only; not in INDUSTRY_2050_OTHER_BUCKET.csv)
 RATIO_EVIDENCE = REG_DIR / "INDUSTRY_SECTOR_RATIOS_EVIDENCE.json"   # EU27 ammonia 2019 (USGS T12 via the reproduced PyPSA-Eur build_ammonia_production)
 # UNSD sub-sector -> PyPSA-Eur sectors (weights = EU27 2019 final energy of the mapped sectors unless stated). Grade C mapping.
 MAPPING = {
@@ -125,7 +126,7 @@ def main():
     reg = Registry(SCRIPT)
     for mode, fname in ALLOCATIONS.items():
         dem = pd.read_csv(DEMAND_DIR / fname, keep_default_na=False)
-        rows, summaries, tds = [], {ob: [] for ob in OTHER_BUCKET_MODES}, {ob: [] for ob in OTHER_BUCKET_MODES}
+        rows, summaries, tds = [], {ob: [] for ob in SUMMARY_MODES}, {ob: [] for ob in SUMMARY_MODES}
         summary, td_rows = summaries["pypsa_eur_2050"], tds["pypsa_eur_2050"]
         for c in ASEAN:
             d = dem[(dem.country == c) & (dem.sector == "Industry")]
@@ -249,6 +250,23 @@ def main():
                     else:
                         for oc in OUT_CARRIERS:
                             rest50_today[oc] += e_main * m_["future_shares"][oc]
+            # ---- S4B-0 (S3B section 8 item 6): other-bucket variant asean_own_2019 -------------------------------------------
+            # UNSD sub-sectors of the other bucket keep the country's own UNSD 2019 carrier composition (coal/oil/gas/biomass/electricity) x industry multiplier,
+            # no conversion and no efficiency factor; every other sub-sector, steel and cement unchanged.
+            rest50_own = {oc: 0.0 for oc in OUT_CARRIERS}
+            for s_ in subs:
+                src_bucket = sub19[s_] if s_ != "non-metallic minerals" else nmm_rest19
+                e_sub = sum(src_bucket.values())
+                if e_sub <= 0:
+                    continue
+                for p in MAPPING.get(s_, ["Other industrial sectors"]):
+                    m_ = mp[(s_, p)]; share = m_["weight"]; eff = m_["efficiency_factor"] or 1.0
+                    if s_ in OTHER_BUCKET:
+                        for car in CARRIERS:
+                            rest50_own[car] += src_bucket[car] * share * mult
+                    else:
+                        for oc in OUT_CARRIERS:
+                            rest50_own[oc] += e_sub * share * mult * eff * m_["future_shares"][oc]
             e19_tot = sum(e19.values())
             other_rows.append(dict(mode=mode, country=c, industry_2019_mwh=e19_tot, other_2019_mwh=sum(other19.values()),
                                    other_share_of_industry_2019=(sum(other19.values()) / e19_tot if e19_tot else 0.0), industry_multiplier=mult,
@@ -258,7 +276,7 @@ def main():
             td_steel = {oc: 0.0 for oc in OUT_CARRIERS}; td_steel["hydrogen"] = 1.7 * dri; td_steel["electricity"] = 0.322 * dri + EAF_EL_TD * (dri + secondary)
             td_cement = {oc: 0.0 for oc in OUT_CARRIERS}; td_cement["gas"] = (ck_heat + ck_gas) * clk19 * mult; td_cement["electricity"] = (ck_el + cf_el / cf_ck) * clk19 * mult
             s2b = s2b_summary.get(c, {})
-            for ob, rest in (("pypsa_eur_2050", rest50), ("idees_today", rest50_today)):
+            for ob, rest in (("pypsa_eur_2050", rest50), ("idees_today", rest50_today), ("asean_own_2019", rest50_own)):
                 main_ob = ob == "pypsa_eur_2050"
                 pe = {oc: rest[oc] + steel50[oc] + cement50[oc] for oc in OUT_CARRIERS}
                 if pe["hydrogen"] < 0:   # chlorine H2 by-product (ratio -0.9372 MWh_H2/t Cl) exceeds the H2 uses: no net industrial H2 demand, by-product not credited (logged)
@@ -281,8 +299,9 @@ def main():
                                           **{f"bas_{car}_mwh": bas[car] for car in CARRIERS}, bas_hydrogen_mwh=0.0, bas_heat_mwh=0.0, bas_ammonia_mwh=0.0, bas_methanol_mwh=0.0,
                                           **{f"pe_{oc}_mwh": pe_final[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=pe["biomass"],
                                           biomass_overflow_industry_to_gas_mwh=ov_ind, biomass_overflow_agriculture_to_gas_mwh=ov_ag, solid_biomass_potential_main_mwh=pot, agriculture_biomass_2050_mwh=ag_bio_50,
-                                          coal_retained_2050_mwh=pe_final["coal"], coal_retained_in=(("mapped PyPSA-Eur ratios (coal/coke rows: none in 2050 except Integrated steelworks, not used)" if main_ob else
-                                                                                                       "other bucket with the JRC-IDEES-2021 EU27 2019 carrier structure (solids, derived gases)") if pe_final["coal"] > 0 else ""),
+                                          coal_retained_2050_mwh=pe_final["coal"], coal_retained_in=({"pypsa_eur_2050": "mapped PyPSA-Eur ratios (coal/coke rows: none in 2050 except Integrated steelworks, not used)",
+                                                                                                      "idees_today": "other bucket with the JRC-IDEES-2021 EU27 2019 carrier structure (solids, derived gases)",
+                                                                                                      "asean_own_2019": "other bucket with the country's own UNSD 2019 carrier composition (no conversion)"}[ob] if pe_final["coal"] > 0 else ""),
                                           **{f"s2b_td_{oc}_mwh": float(s2b.get(f"pe_{oc}_mwh", 0.0)) for oc in ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat"]},
                                           **{f"td_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, other_bucket=ob))
                 tds[ob].append(dict(country=c, **{f"pe_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=td["biomass"], biomass_overflow_industry_to_gas_mwh=0.0, biomass_overflow_agriculture_to_gas_mwh=0.0))
@@ -293,6 +312,9 @@ def main():
         sfx = OTHER_BUCKET_SUFFIX["idees_today"]; outputs_today[mode] = summaries["idees_today"]   # S3B R2 sensitivity tables (research.s3.industry.other_bucket = idees_today)
         write_csv(summaries["idees_today"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx}.csv", list(summaries["idees_today"][0].keys()))
         write_csv(tds["idees_today"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx}.csv", list(tds["idees_today"][0].keys()))
+        sfx_own = OTHER_BUCKET_SUFFIX["asean_own_2019"]   # S4B-0: research.s3.industry.other_bucket = asean_own_2019 (implemented only)
+        write_csv(summaries["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_own}.csv", list(summaries["asean_own_2019"][0].keys()))
+        write_csv(tds["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_own}.csv", list(tds["asean_own_2019"][0].keys()))
     write_csv(gaps, DEMAND_DIR / "INDUSTRY_2050_GAPS.csv", ["mode", "country", "item", "carrier", "mwh"])
     write_csv(other_rows, DEMAND_DIR / "INDUSTRY_2050_OTHER_BUCKET.csv", list(other_rows[0].keys()))
     ob_cmp = []

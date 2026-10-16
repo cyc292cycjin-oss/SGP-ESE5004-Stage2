@@ -28,6 +28,7 @@ from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s4a_layers import apply_renewable_profiles
 from s4a_fleet import add_gem_fleet
+from s4b_layers import apply_sector_alignment
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -289,6 +290,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     gas_net = add_gas_network(n, costs, cfg, repo, registry, nodes, candidates) if (candidates is not None and "s3" in R and "gas" in R["s3"]) else None
     imports = add_imports(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "imports" in R["s3"]) else None   # S3-2: regional oil pool, green carrier imports, H2 at LNG terminals
     nh3_meoh = add_ammonia_methanol(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "ammonia_methanol" in R["s3"]) else None   # S3-3: Haber-Bosch, cracker, methanolisation, biomass-to-methanol, methanol OCGT, stores
+    sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -308,8 +310,10 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
                                   s3_layers=dict(gas=gas_net, imports=imports, ammonia_methanol=nh3_meoh, fuel_carbon=fuel_carbon),
                                   s4a_layers=dict(renewable={k: v for k, v in renewable.items() if k not in ("replaced", "added")}, fleet={k: v for k, v in fleet.items() if k != "added"}),
+                                  s4b_layers=dict(sector=sector),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
-    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet"]:
+    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
+                "research_sector_alignment"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

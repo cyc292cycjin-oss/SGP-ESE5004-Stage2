@@ -67,8 +67,9 @@ def main():
     reg.add("lng_terminal_expansion_mode", "S3B R3 (decision 68): no public regasification terminal unit cost with source, page and price year was found within the +-50 % band "
             f"(search {FETCHED}: IGU World LNG Report 2024 and OIES NG149 not retrievable (HTTP 403, download list); Ulvestad & Overland 2012 rule of thumb without source or year; "
             "ERIA 2016 storage-based unit cost; PyPSA-Eur code constant without source) -> main = existing LNG import capacity only (GEM operating + under construction), "
-            "proposed-only sites not built; the former 2.5 x cap at zero capex is the sensitivity research.s3.gas.lng_expansion = cap_factor", "existing_only", "flag", "C",
-            "S3B instruction R3 (fallback)", "configs/research/baseline.yaml research.s3.gas.lng_expansion", sha256(LNG), decision_ref="68")
+            "proposed-only sites not built; the former 2.5 x cap at zero capex is the sensitivity research.s3.gas.lng_expansion = cap_factor. "
+            "S4B-0 (decision 72): superseded as the main rule by cap_factor_cost (registry lng_terminal_expansion_mode_s4b, expansion at 7,018 EUR/MW/a); existing_only is now a sensitivity", "existing_only", "flag", "C",
+            "S3B instruction R3 (fallback)", "configs/research/baseline.yaml research.s3.gas.lng_expansion", sha256(LNG), decision_ref="68, 72", status="SENSITIVITY")
     reg.add("lng_regas_capex_ref_ulvestad_overland_2012", f"Regasification terminal capex rough estimate US$1 billion per 10 Mtpa = US$100 per t/a ('highly site-specific'; no source, no price year) - "
             f"indicative only: price year {price_year} assumed, x US GDP deflator 2020/{price_year} {float(defl[2020] / defl[price_year]):.4f} x {fx:.4f} EUR/USD = {eur2020_per_tpa:.1f} EUR2020 per t/a; "
             f"/ ({LNG_MWH_PER_T:.3f} MWh/t (GEM table conversion) / 8760 h) = {eur_per_mw:,.0f} EUR/MW; x (annuity 7 %/25 a + FOM 3.5 %) = {eur_per_mw_a:,.0f} EUR/MW/a", eur_per_mw_a, "EUR2020/MW/a", "C",
