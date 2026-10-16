@@ -26,6 +26,8 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
                               tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
 from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
+from s4a_layers import apply_renewable_profiles
+from s4a_fleet import add_gem_fleet
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -236,6 +238,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     if n.meta.get("asset_qualification") != "SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED":
         raise ValueError("Electric base is not the source-qualified asset")
     rename_map = rename_legacy_buses(n)
+    renewable = apply_renewable_profiles(n, cfg, repo)   # S4A-1 (L14): rebuilt wind / solar profiles per research.renewable (original keeps the electric base untouched)
     corridors = pd.read_csv(repo / R["existing_cross_border_electricity"]["corridors_file"], float_precision="round_trip")
     apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base
     cc = float(cfg["sector"]["cc_fraction"])
@@ -263,6 +266,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     contract = json.loads(contract_path.read_text())
     geo = add_existing_geothermal(n, costs, survival_json, AEO8_GEOTHERMAL_CF, AEO8_GEOTHERMAL_CF_SOURCE, bus_mapping=contract.get("mapping", {}))
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
+    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
     pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
@@ -303,8 +307,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
                                   s2_layers=dict(geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, heat=heat, pipelines={k: v for k, v in pipelines.items() if k != "table"}),
                                   s3_layers=dict(gas=gas_net, imports=imports, ammonia_methanol=nh3_meoh, fuel_carbon=fuel_carbon),
+                                  s4a_layers=dict(renewable={k: v for k, v in renewable.items() if k not in ("replaced", "added")}, fleet={k: v for k, v in fleet.items() if k != "added"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
-    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass"]:
+    for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

@@ -137,7 +137,8 @@ research:
     gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
       existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0
-      production_node_allocation: load_shares   # grade C: electricity load share per AC node within the country (no field-level basis registered)
+      production_node_allocation: gem_fields    # S4A-2 (S3 section 11 item 8): gem_fields = shares of the latest-year production of the GEM GOGET 2026-03 operating gas fields mapped to the nearest node (research_inputs/fleet_v5/GAS_PRODUCTION_NODE_SHARES_GEM.csv; countries without a field fall back to load shares, DATA_PENDING) | load_shares = S3-1 grade-C electricity load shares
+      gem_field_shares: research_inputs/fleet_v5/GAS_PRODUCTION_NODE_SHARES_GEM.csv
       lng_terminals: research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv   # D1 registry; existing = operating + construction
       lng_expansion: existing_only        # S3B R3 (decision 68): existing_only = GEM operating + under construction capacity, no expansion, proposed-only sites not built (no sourced terminal unit cost; main) | cap_factor = expansion to lng_cap_factor x existing at zero capex, proposed-only sites up to the proposed capacity (former S3 rule, sensitivity)
       lng_cap_factor: 2.5                 # decision 17, used when lng_expansion = cap_factor: expansion cap = 2.5 x existing per terminal node; proposed-only sites: p_nom_max = proposed capacity; also the liquid-H2 terminal cap (S3-2) in both modes
@@ -173,6 +174,15 @@ research:
   transmission:
     volume_limit_mode: lvopt                        # decision 45 (S2-1): no transmission volume cap in the main run
     volume_limit_factor: 2.79                       # sensitivity: factor_of_existing with the frozen 2.79x (S1 inherit_reference_constant / existing volume)
+  renewable:                              # S4A-1 (L14, decisions 70-73): wind / solar availability profiles of the electric-base candidates
+    profile_variant: pypsa_eur            # original = author profiles inherited by the electric base (former main, comparison) | fork = rebuilt from the ASEAN ERA5 2013 cutout with the pypsa-asean defaults (method check) | pypsa_eur = rebuilt with the PyPSA-Eur v2025.07.0 defaults (offshore NREL 2020ATB 5.5 MW @120 m x 0.8855, solar without the 0.854337 correction; onshore V112 unchanged) - main
+    resource_classes: 1                   # PyPSA-Eur resource_classes: 1 = one profile per node (default) | N > 1 = per-node capacity-factor classes, node p_nom_max split by class potential (sensitivity; profiles_<variant>_c<N>_3h.nc must exist)
+    profile_dir: research_inputs/renewable_v5
+    clip_p_max_pu: 0.01                   # S4A-4 fix: availability below 0.01 set to 0, as in the original chain (pypsa-asean config.default.yaml 365/383/402/423, build_renewable_profiles.py 846-848) and PyPSA-Eur v2025.07.0 (config lines 200/218/237); applied to the rebuilt 3 h series
+  fleet:                                  # S4A-2 (L15): GEM GIPT 2026-09 units in service in 2050 (S1 lifetime rule) that are absent from the frozen electric base
+    gem_additions: true                   # true = add them (scripts_project/s4a_fleet.py) | false = frozen stock only (former main, comparison)
+    include_construction: true            # count GEM status construction as in service in 2050 when start year + lifetime > 2050 (the instruction compares operating + construction); false = operating only
+    table: research_inputs/fleet_v5/FLEET_ADDITIONS_2050.csv
   nuclear:                                # decision 38; siting table is a grade-C assumption
     evidence_grade: C
     large_pwr:
