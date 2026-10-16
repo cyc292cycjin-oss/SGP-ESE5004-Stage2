@@ -12,8 +12,8 @@
 | 节 | 内容 | 状态 | 提交 | 说明 |
 |---|---|---|---|---|
 | S4B-0 | 补做第 70–73 项 + S3B §8 其余事项 + 重算与冒烟 | 完成 | 3afb044d（代码与数据）+ 冒烟证据提交（见下一行） | 第 70 项：`research.sector`（Sabatier 97、电制生物燃料 97、FT 最低负荷 0.5、co2 vent 关），对照表 79 行（一致 56 / 确认偏离 11 / 不适用 9 / 用户决定 3）；第 71 项：`s4b_acceptance.py`（k = 10 × FeasibilityTol/OptimalityTol，净零行用 CO₂ 毛流量、生物质池用容量），S3B/S4A 只读重评；第 72 项：`cap_factor_cost` 7,018 EUR/MW/a；第 73 项：节点气松弛；`asean_own_2019` 表；冒烟：一体化 OPTIMAL 6.6598e11（−6.5% vs S4A；LNG 全部扩到 2.5 倍、气电 1,153 TWh、SMR 1,096 TWh）、不互联主算 NUMERIC（预期）、不互联诊断 OPTIMAL（气缺口 0，CO₂ 缺口 KH 13.4 / LA 7.1 / MM 4.6 / SG 22.7 Mt）；新口径下一体化只剩 3 列 `Line-s` 平稳性残差（5.7e-4）；测试 411 通过 / 4 失败（test_gate4 既有）+ test_s4b_0 6 项 |
-| S4B-1 | 存量口径（第 77 项） | 完成 | 见 git log（S4B-1 提交） | 在建计入（S1 规则只对在建放宽，45 条 S1 记录逐条对照：计入 25 个子单元 1,420 MW）；无投运年在建 74 台 9,314 MW 计入（垃圾 70 MW 跳过，补入 9,244 MW），在运 170 台 5,313 MW 不计；移出 11 台 2,854 MW（`remove_not_operating_gipt2026`）；存量 261,101 → 267,491 MW；两情景构建静态 PASS；test_s4b_1 3 项 |
-| S4B-2 | 地热/新建水电/抽蓄上限，核电敏感性开关（第 78、79 项） | 未开始 | | |
+| S4B-1 | 存量口径（第 77 项） | 完成 | 31da24c8 | 在建计入（S1 规则只对在建放宽，45 条 S1 记录逐条对照：计入 25 个子单元 1,420 MW）；无投运年在建 74 台 9,314 MW 计入（垃圾 70 MW 跳过，补入 9,244 MW），在运 170 台 5,313 MW 不计；移出 11 台 2,854 MW（`remove_not_operating_gipt2026`）；存量 261,101 → 267,491 MW；两情景构建静态 PASS；test_s4b_1 3 项 |
+| S4B-2 | 地热/新建水电/抽蓄上限，核电敏感性开关（第 78、79 项） | 完成 | 2d9e2f09 | 主算上限：新建水电 195.2 GW（水库 161.3 + 径流 33.9）、地热 25.8 GW（含 PH 原址重建 1.8）、抽蓄 14.4 GW；项目库只取宣布 + 预建（在建已入存量，字面口径为开关值，待用户确认）；入流按建成容量约束（新钩子）；改正 S1 候选缺陷（抽蓄往返 0.5625、水库可抽水、径流/地热可用率 1.0）；核电 `national_plans` 开关只实现；五个构建静态 PASS；发现风光候选成本沿用电力底座、未用第 50 项成本层（待用户决定） |
 | S4B-3 | 陆上风实际发电校准 + 现代机型；资源分级（第 74、75 项） | 未开始 | | |
 | S4B-4 | 台风敏感性开关（第 76 项） | 未开始 | | |
 | S4B-5 | 构建与冒烟 | 未开始 | | |
@@ -23,8 +23,12 @@
 ## 用户中途指示（2026-10-16，执行中收到）
 
 1. **DEA 版本（第 74 项口径）：** 机型参数只取 technology-data v0.15.0 实际引用的 DEA 版本；若与 2026 年 8 月版不同，主算用引用版、新版只作对照，报告列两版单机容量/转子直径/轮毂高度差异；引用版取不到就停下报告。
-   - 核实结果（VERIFIED）：GitHub `PyPSA/technology-data` 标签 v0.15.0 下 `inputs/technology_data_for_el_and_dh.xlsx` 最后修改提交 24da26c58b（2022-03-17，"update offshore assumptions to new DEA release"），之前 bd90c3327a（2022-02-21）；文件 git blob `ce07675ba570a3b6376910505bd2bebcf163c0ba`（707,234 B）与本机 `phase2/research_audit/research/00_source_provenance/official/technology-data/inputs/technology_data_for_el_and_dh.xlsx` 的 `git hash-object` 完全一致（SHA256 3ab3f613…）。表 "20 Onshore turbines" 2050：单机 6 MW、转子 165 m、轮毂 110 m、比功率 280.6 W/m²、平均 CF 0.434；投资 0.963 M€/MW（表头 2015€）。ens.dk 当前页面为 2026 年 8 月版（PDF media/8614，15.6 MB，作对照，后台下载中）。
+   - 核实结果（VERIFIED）：GitHub `PyPSA/technology-data` 标签 v0.15.0 下 `inputs/technology_data_for_el_and_dh.xlsx` 最后修改提交 24da26c58b（2022-03-17，"update offshore assumptions to new DEA release"），之前 bd90c3327a（2022-02-21）；文件 git blob `ce07675ba570a3b6376910505bd2bebcf163c0ba`（707,234 B）与本机 `phase2/research_audit/research/00_source_provenance/official/technology-data/inputs/technology_data_for_el_and_dh.xlsx` 的 `git hash-object` 完全一致（SHA256 3ab3f613…）。表 "20 Onshore turbines" 2050：单机 6 MW、转子 165 m、轮毂 110 m、比功率 280.6 W/m²、平均 CF 0.434；投资 0.963 M€/MW（表头 2015€）。ens.dk 当前页面为 2026 年 8 月版（PDF media/8614，15,584,745 B，SHA256 de99f7a0…，作对照）：第 20 章修订记录为 2019 年 5 月与 2023 年 11 月（"财务与技术数据更新"），PDF 内无数据表；图 24（第 122–123 页）给出 2050 年满负荷小时 3,800、比功率 ≈ 280.6 W/m²、轮毂 110 m——与引用版完全相同；单机容量与转子直径不在 PDF 中（在未授权下载的 2026 xlsx 中），无法对比。主算用引用版参数。
 2. **附加诊断：** 4 个失败的 `test_gate4_activation` 只诊断不修改，写入报告单独一节并列入用户决定事项（S4B-5 之前完成）。
+
+## S4B-3 预先写定的停止判据（2026-10-16，在计算校准后节点/分级 CF 之前写入）
+
+"明显超过"定义为：某国校准后陆上风最优级（3 级中的第 3 级）CF > 1.10 × max（GWA 3.3 IEC2 陆地 p90，IRENA RPGC 2024 新建项目读数上沿）；IRENA 读数取 ID 0.38、PH 0.35、VN 0.43（图 2.12），其余国家取 Other Asia 加权平均 0.39（表 2.3）。即阈值 ID 0.418、PH 0.503、VN 0.528、TH/MY/LA/KH/MM/BN/TL/SG 0.429。任一国超过即停下报告，不采用。α 判据：所用 α（校准机型）∉ [0.8, 1.6] 即停。
 
 ## 续行点
 

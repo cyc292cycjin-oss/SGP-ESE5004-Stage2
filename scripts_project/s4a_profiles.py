@@ -52,6 +52,16 @@ VARIANTS = {
         "offwind-dc": dict(method="wind", turbine="NREL_ReferenceTurbine_2020ATB_5.5MW", correction_factor=0.8855, add_cutout_windspeed=True),
         "solar": dict(method="pv", panel="CSi", orientation="latitude_optimal", correction_factor=1.0),
     },
+    # S4B-3 (decisions 74, 75): onshore wind = ERA5 100 m wind speed scaled by the country calibration factor alpha (WIND_CALIBRATION_ALPHA.csv,
+    # scripts_project/s4b_3_wind_calibration.py) + the DEA 2050 turbine (technology-data v0.15.0 onwind: 6 MW, 165 m, hub 110 m); offshore wind and solar
+    # are the pypsa_eur specs (the export takes them from the pypsa_eur run, identical inputs)
+    "calibrated_modern": {
+        "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_main"),
+    },
+    # S4B-3 cross-check only (no network variant): alpha = GWA 3.3 country mean 100 m speed / ERA5 2013 land mean; annual CF per class only
+    "gwa_check": {
+        "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_gwa_check", cf_only=True),
+    },
 }
 
 
@@ -89,14 +99,33 @@ def author_potential(tech: str, cutout: atlite.Cutout) -> xr.DataArray:
 def convert(cutout: atlite.Cutout, spec: dict, **kw):
     spec = dict(spec); method = spec.pop("method"); cf = spec.pop("correction_factor")
     if method == "wind":
-        return cf, cutout.wind(turbine=spec["turbine"], add_cutout_windspeed=spec["add_cutout_windspeed"], **kw)
+        turb = spec["turbine"]
+        if turb == "DEA2050":   # S4B-3 synthetic DEA 2050 power curve (atlite custom turbine dict)
+            from s4b_3_wind_calibration import dea2050_turbine
+            t = dea2050_turbine(); turb = dict(V=np.asarray(t["V"], float), POW=np.asarray(t["POW"], float), hub_height=float(t["hub_height"]), P=float(t["P"]))
+        return cf, cutout.wind(turbine=turb, add_cutout_windspeed=spec["add_cutout_windspeed"], **kw)
     return cf, cutout.pv(panel=spec["panel"], orientation=spec["orientation"], **kw)
+
+
+def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, column: str) -> tuple[atlite.Cutout, dict]:
+    """S4B-3: copy of the cutout whose wnd100m is multiplied by the country alpha (cell -> country with the largest area share; no country -> 1)."""
+    al = pd.read_csv(table).set_index("country")[column]
+    I = cutout.indicatormatrix(shapes.geometry).toarray().reshape(len(shapes), len(cutout.data.y), len(cutout.data.x))
+    grid = np.ones((len(cutout.data.y), len(cutout.data.x)))
+    best = I.argmax(axis=0); has = I.max(axis=0) > 0
+    for i, c in enumerate(shapes.index):
+        if c in al.index and np.isfinite(al[c]):
+            grid[(best == i) & has] = float(al[c])
+    da = xr.DataArray(grid, coords=dict(y=cutout.data.y, x=cutout.data.x), dims=["y", "x"])
+    out = atlite.Cutout(str(CUTOUT)); out.data = cutout.data.assign(wnd100m=cutout.data["wnd100m"] * da)
+    return out, {str(c): float(al[c]) for c in shapes.index if c in al.index}
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", nargs="+", default=["fork"]); ap.add_argument("--classes", type=int, default=1); ap.add_argument("--months", type=int, default=12)
     ap.add_argument("--techs", nargs="+", default=list(TECHS)); ap.add_argument("--output", type=Path, required=True); ap.add_argument("--nprocesses", type=int, default=1)
+    ap.add_argument("--alpha-table", type=Path, default=ROOT / "research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA.csv")   # S4B-3 variants with an alpha column
     a = ap.parse_args(); a.output.mkdir(parents=True, exist_ok=True)
     t0 = time.time(); log = dict(cutout=str(CUTOUT), months=a.months, classes=a.classes, variants=a.variant, atlite=atlite.__version__, timings={})
     cutout = atlite.Cutout(str(CUTOUT))
@@ -109,6 +138,19 @@ def main():
     for k, r in regions.items():
         r.to_file(a.output / f"regions_{k}.geojson", driver="GeoJSON"); log[f"regions_{k}"] = int(len(r))
     log["timings"]["regions"] = round(time.time() - t0, 1)
+    scaled = {}
+
+    def cut_for(spec):   # S4B-3: alpha-scaled cutout copies, one per alpha column
+        k = spec.get("alpha")
+        if not k:
+            return cutout
+        if k not in scaled:
+            scaled[k], log.setdefault("alpha", {})[k] = alpha_cutout(cutout, onshore, a.alpha_table, k)
+            log.setdefault("alpha_table", str(a.alpha_table))
+        return scaled[k]
+
+    def plain(spec):
+        return {kk: vv for kk, vv in spec.items() if kk not in ("alpha", "cf_only")}
     results = []
     for tech in a.techs:
         kind = TECHS[tech]; reg = regions[kind]
@@ -121,8 +163,10 @@ def main():
         cov = I_arr.sum(axis=0); pot_eff = np.where(cov > 0, pot.values / np.maximum(cov, 1e-12), 0.0)
         pot_bus = (I_arr * pot_eff[None]).sum(axis=(1, 2))
         for var in a.variant:
+            if tech not in VARIANTS[var]:
+                continue
             spec = VARIANTS[var][tech]
-            corr, cf_cell = convert(cutout, spec, capacity_factor=True)
+            corr, cf_cell = convert(cut_for(spec), plain(spec), capacity_factor=True)
             cf_cell = (corr * cf_cell).fillna(0.0).load()
             # float64: the cutout is float32 and numpy 1.x compares a float32 array against a float64 scalar in float32, where
             # cmax + 1e-9 rounds back to cmax and the best cell of a node falls out of the last class (found by the partition test)
@@ -145,11 +189,11 @@ def main():
                 assert abs(wsum_cls - float(w.sum())) <= 1e-9 * float(w.sum()), ("class potentials do not partition the node potential", tech, var, node, wsum_cls, float(w.sum()))
             # time series per node x class: layout = potential x cf (PyPSA-Earth weighting)
             rows = [r for r in results if r["tech"] == tech and r["variant"] == var]
-            if rows:
+            if rows and not spec.get("cf_only"):
                 mat = np.stack([r["_w"].reshape(-1) * cfv.reshape(-1) for r in rows]); mat = mat / mat.sum(axis=1, keepdims=True)
                 from scipy import sparse
                 M = sparse.csr_matrix(mat)
-                _, ts = convert(cutout, spec, matrix=M, layout=xr.ones_like(cf_cell), index=pd.Index([f"{r['node']}|{r['cls']}" for r in rows], name="bus"), per_unit=True, return_capacity=False)
+                _, ts = convert(cut_for(spec), plain(spec), matrix=M, layout=xr.ones_like(cf_cell), index=pd.Index([f"{r['node']}|{r['cls']}" for r in rows], name="bus"), per_unit=True, return_capacity=False)
                 ts = (corr * ts).clip(max=1.0)
                 ts3 = ts.resample(time="3h").mean()
                 ts3.to_netcdf(a.output / f"profile_{tech}_{var}_c{n_cls}_3h.nc"); ts.to_netcdf(a.output / f"profile_{tech}_{var}_c{n_cls}_1h.nc")
