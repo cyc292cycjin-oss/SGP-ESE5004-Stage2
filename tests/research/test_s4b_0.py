@@ -86,5 +86,10 @@ def test_built_network_sector_and_lng():
 def test_gap_network_gas_slack():
     import pypsa
     n = pypsa.Network(str(GAP)); g = n.generators[n.generators.carrier == "gap slack gas"]
-    assert len(g) == int(n.buses.index.str.endswith(" gas").sum() - (n.buses.index == "ASEAN gas").sum()) and (g.marginal_cost == 10000).all()
+    from sector_adapter import spatial_nodes
+    nodes = spatial_nodes(n); gas = [b for b in n.buses.index if b.endswith(" gas")]
+    assert set(g.bus) == {f"{x} gas" for x in nodes if f"{x} gas" in n.buses.index} and (g.marginal_cost == 10000).all()
+    b2b = n.links[n.links.carrier == "B2B"]; coupled = set(b2b.bus0) | set(b2b.bus1)
+    rest = set(gas) - set(g.bus)   # gas buses of the B2B-coupled DC converter nodes (outside the spatial node list) carry no fixed gas load
+    assert all(b[:-4] in coupled for b in rest) and not n.loads.bus.isin(rest).any()
     assert n.meta["gap_diagnostic"]["slacks"] == ["electricity", "co2", "biomass", "gas"]

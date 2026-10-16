@@ -50,7 +50,7 @@ def gas_table(n):
         h2 = residual / eff_sab if (eff_sab and residual > 0) else 0.0
         co2 = h2 * t_per_mwh_h2 if t_per_mwh_h2 else 0.0
         e_need = (h2 / eff_el if eff_el else 0.0) + (co2 / dac_t_per_mwh_el if dac_t_per_mwh_el else 0.0)
-        ren = g[g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"]) & g.p_nom_extendable & (g.country == c)]
+        ren = g[g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"]) & g.p_nom_extendable & (g.bus.map(n.buses.country) == c)]   # electric-base generators carry no country column
         pot = float(sum((pmax[k] * w).sum() * scale * min(float(z.p_nom_max), 1e9) for k, z in ren.iterrows()))
         rows.append(dict(country=c, fixed_gas_demand_twh=dem / 1e6, production_cap_twh=pc / 1e6, lng_cap_twh=lc / 1e6, lng_existing_twh=le / 1e6, biogas_twh=bgc / 1e6,
                          supply_max_without_methanation_twh=supply / 1e6, gas_gap_without_methanation_twh=residual / 1e6, sabatier_links=n_sab,
