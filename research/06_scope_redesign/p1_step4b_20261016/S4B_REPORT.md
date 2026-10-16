@@ -6,7 +6,31 @@
 
 ## 摘要（≤10 行）
 
-（全部完成后填写）
+1. 第 70–79 项全部实现并按顺序提交（S4B-0 3afb044d/c3472937 … S4B-6 c02ce694/949163f3），每个子步骤构建静态 PASS；测试 430 通过 / 4 失败（`test_gate4_activation`，既有，已诊断为被决定取代的旧状态，§7）。
+2. S4B-5 冒烟（56×3h，Gurobi `formal_barrier`）：一体化主算 **OPTIMAL** 5.944e11 EUR/a（S4A 7.120e11）；不互联主算 NUMERIC（预期，未触发止损）；不互联诊断 **OPTIMAL**，CO₂ 缺口 KH 13.42 / LA 7.10 / MM 4.64 / SG 22.66 Mt/a，电、生物质、气缺口 0；可选的一体化诊断 SUBOPTIMAL（只记录）。
+3. 一体化主算门槛在新旧口径下均未通过：全部是绝对量级很小的数值残差（barrier 精度比 S4B-0 低约一个数量级，无 crossover 清理），已逐项归类；是否改用 crossover 待用户决定（§8 第 11 项）。
+4. 结构变化：SMR 241.5 → 96.6 GW（LNG 扩建、校准后 TH 陆风、ID 新建水电/地热共同作用）；地热上限全部用满（27 GW）；ID 新建水库水电 77 GW 但入流代理偏高（CF 0.71，§8 第 12 项）；LA 电力净出口 32 → 136 TWh，KH 转为净出口，MM 净进口 77 → 10 TWh。
+5. 陆风校准（Ember 观测 + DEA 2050 引用版机型）：α PH 0.910、TH 1.294、VN 0.995，其余 1.046；最优级 CF 均未超过预先写定阈值；台风开关只实现（默认阈值下 PH 3 个节点、VN 1 个节点）。
+6. 云端包（只准备）：代码 949163f3 + 三个 365×24h 网络，上传 193,276,010 B；估算每运行峰值 21 GiB（上限 30），串行 2.3–3.3 h、并行 1.7–2.6 h。
+7. 下载只用了指令点名的 3 项（174.2 MB）；WDPA 全量（> 2 GB）与 DEA 2026 xlsx 列入清单未下载。需要用户决定的事项 14 项（§8）。
+
+---
+
+## 第 70–81 项：实现位置与结果
+
+| 项 | 内容 | 实现位置 | 结果 |
+|---|---|---|---|
+| 70 | 部门开关与 PyPSA-Eur 对齐（含甲烷化） | §0.1；`s4b_layers.apply_sector_alignment`、`configs/research/baseline.yaml` `research.sector`、`research_inputs/sector_v5/SECTOR_SWITCHES_VS_PYPSA_EUR.csv` | 79 行对照（一致 56 / 确认偏离 11 / 不适用 9 / 用户决定 3）；一体化中合成燃料为 0，诊断中合成甲烷补足气缺口 |
+| 71 | 验收容差挂钩求解器容差 | §0.2、§5.4；`s4b_acceptance.py`、`s2_solve.py` | 新旧两套门槛同时输出；S3B/S4A 只读重评；S4B-5 一体化失败为数值残差 |
+| 72 | LNG 接收站按成本扩建（7,018 EUR/MW/a） | §0.3；`s3_layers.py` `cap_factor_cost` | 一体化 LNG 扩建约 175 GW，15/16 接收站到 2.5 倍上限 |
+| 73 | 诊断加分国气松弛 | §0.4；`s2_layers.add_gap_slack` | 诊断中气缺口 0 |
+| 74 | 陆风实际发电校准 + 现代机型 | §3；`s4b_3_wind_calibration.py`、`s4a_profiles.py` `calibrated_modern` | α 在 [0.8, 1.6] 内；DEA 引用版 6 MW / 165 m / 110 m |
+| 75 | 资源分级 3 级（主算） | §3；`research.renewable.resource_classes: 3` | 新增 647 台分级发电机 |
+| 76 | 台风敏感性开关；漂浮式海上风等推迟 | §4；`s4b_4_typhoon.py`、`s4b_layers.apply_typhoon_premium` | 开关只实现；raw12 核对；保护区数据现状 |
+| 77 | 存量口径 | §1；`s4b_1_fleet_data.py`、`s4a_fleet.py` | 存量 261,101 → 267,491 MW |
+| 78 | 地热/新建水电/抽蓄上限 | §2；`s4b_2_candidates_data.py`、`s4b_candidates.py` | 水电 195.2 GW、地热 25.8 GW、抽蓄 14.4 GW 上限；冒烟中地热用满、ID 水电 77 GW |
+| 79 | 核电国家规划上限开关 | §2；`research.candidates.nuclear_cap` | 开关只实现，主算不设上限 |
+| 80、81 | 指令写"第 74–81 项已全部确认"，但正文只逐项展开到第 79 项，本机文件中未找到第 80、81 项的原文 | — | INFERENCE：对照 S4A §5 的待决事项，指令中未编号的落实内容有 PH 地热原址重建（S4A 第 8 项，已在 S4B-2 实现）、用修正 `clip_p_max_pu` 后的网络重跑冒烟（S4A 第 17 项，S4B-0/S4B-5 已做）以及部署包更新（S4B-6）；请审阅端确认（§8 第 14 项） |
 
 ---
 
@@ -310,7 +334,33 @@ LP 规模较 S4A：列 +8.5%、行 +7.3%、非零元 +7.0%（3 级资源分级 +
 
 **5.6 B5 / B6 试评（只作试评，不作门槛结论）：** 不互联主算无解，B5 用不互联诊断的解（拓扑相同）：两套主算配置只在 `research.scenario` 与 `research.cross_border.{electricity, H2, gas, co2}` 上不同，不互联解中跨境组件、容量、潮流均为 0 → **B5 试评通过**（一体化跨境组件 95 个、容量 841.6 GW）。B6：一体化 5.944e11 ≤ 不互联诊断 1.193e12（含罚金），扣除罚金后 7.144e11 仍高 1.20e11（16.8%）→ 两种比较都满足"一体化不高于不互联"，但诊断以罚价放松了国家约束，**两个目标都不是不互联系统的成本**，不能作为互联价值。
 
-（S4B-6 见下一节。）
+## 6. S4B-6 云端资源估算与部署包（只准备，未连接云端；提交 c02ce694、949163f3）
+
+**6.1 资源估算（`CLOUD_RESOURCE_ESTIMATE.md` §11；INFERENCE，以 §5.2 实测为基）。** 365×24h 每个运行峰值约 20–21 GiB（上限 ×1.4 为 28–30 GiB）；单次墙钟：一体化主算 50–70 min，不互联主算 20–30 min（预期非最优提前停止；若不停止，最长到 3 h 上限），不互联诊断 70–100 min。
+
+| 运行方式 | 峰值内存（中值 / 上限） | 预计墙钟 | 实例 |
+|---|---|---|---|
+| 串行（一体化 → 不互联主算 → 不互联诊断） | 21 / 30 GiB | 2.3–3.3 h | 下限 32 GiB、8 核，推荐 ≥ 48 GiB；数据盘 ≥ 30 GB |
+| 并行（通道 1 一体化 ‖ 通道 2 不互联主算 → 诊断） | 42 / 59 GiB | 1.7–2.6 h（含内存带宽竞争） | 下限 64 GiB、16 核，推荐 ≥ 96 GiB；数据盘 ≥ 40 GB |
+
+只跑一体化与不互联诊断时串行 2.0–2.8 h。barrier 已比 S4A 慢 59%，且一体化解的精度下降（§5.4），时间按上限取整；墙钟上限 3 h 对最慢运行的余量约 1.8 倍。2920×3h（参考）：峰值约 168 GiB、barrier 10–22 h。
+
+**6.2 部署包（`cloud_package/` 脚本与清单进 git；打包产物 `work/p1_step4b_20261016/cloud_package_dist/` 不进 git）。** 代码快照 = 提交 **949163f3**（`code_949163f3.tar.gz`，`git archive`）；三个 365×24h 网络由提交 7141868d 构建，`make_package.sh` 核对 7141868d 至 949163f3 之间构建路径（`scripts_project`、`configs`、`scripts`、`research_inputs`）只多了两个不参与构建的脚本（`s4b_5_summary.py`、`s4b_5_kkt_diag.py`），否则拒绝打包。
+
+| 文件 | 字节 |
+|---|---|
+| `code_949163f3.tar.gz`（含 `configs/`、`research_inputs/`，其中由 raw11 cutout 生成的 `profiles_calibrated_modern_c3_3h.nc` 8,678,622 B，SHA256 0470f6e1…） | 112,901,246 |
+| `networks/integrated_365_24h_unsolved.nc`（SHA256 351271ac…） | 25,569,863 |
+| `networks/disconnected_365_24h_unsolved.nc`（b1f39585…） | 25,096,576 |
+| `networks/disconnected_gap_diagnostic_365_24h_unsolved.nc`（953afb09…） | 25,354,685 |
+| 三个构建回执 | 4,172,169 |
+| `DATA_CONFIG_MANIFEST.json`（`configs/` 与 `research_inputs/` 408 个文件逐个 SHA256；出力曲线清单；cutout 身份：`cutout-2013-era5.nc` 7,348,721,462 B、SHA256 eaa033a3…，来源 raw11 zip 028ae701…、DOI 10.5281/zenodo.20325289，**不在包内**；三个网络的构建输入） | 109,460 |
+| 环境文件（与 S3 版逐字相同：显式清单 SHA256 62f2935b… 一致）、`preflight.sh`、`run_365x24h.sh`、`COMMIT`、`SHA256SUMS` | 69,119 |
+| **上传总量**（含 `PACKAGE_MANIFEST.json` 2,892 B） | **193,276,010 B（约 184 MiB）** |
+
+**6.3 运行脚本（`run_365x24h.sh`）。** 三个运行：一体化主算（`FORMAL_TRIAL_365X24H`）、不互联主算（预期非最优，记录 `DISCONNECTED_MAIN_EXPECTED_NON_OPTIMAL`，不算失败）、不互联诊断（`GAP_DIAGNOSTIC`）；`--mode serial | parallel`（两条通道），`--runs` 可选子集；每运行 Gurobi TimeLimit 10,500 s、墙钟 3 h 强杀；每 60 s 记录进程树 RSS、可用内存、剩余磁盘与 Gurobi 末行（剔除许可行）；结束后自动导出回执、V5 门槛（含第 71 项 `*_S4B`）、KKT 摘要、缺口表、CO₂ 流、跨境潮流、求解网络与监控表；打包前检查许可特征串。**相对 S3 版的修正：** S3 版直接复制 `solve.log`，而 s2_solve 的标准输出含 Gurobi 许可横幅（本机冒烟日志中 6 行），会触发许可串检查导致拒绝打包——改为逐行剔除后导出 `solve_log_scrubbed.txt`；运行目录名附加进程号（本机空跑测试中同一秒启动的两次共用了一个目录）。
+
+**6.4 本机验证（不求解）：** 在临时副本中运行 `preflight.sh parallel`：SHA256 全部一致、代码解包、三个网络在、版本一致（Python 3.11.13 / pypsa 0.30.3 / linopy 0.5.5 / gurobipy 12.0.3 / numpy 1.26.4）、许可检查通过（输出屏蔽）、资源检查按预期失败（本机 11 GiB）；`run_365x24h.sh --dry-run` 串行、并行、子集三种方式命令正确；临时副本已删除。`CLOUD_DEPLOY_STEPS.md` 已改为 S4B 版。
 
 ## 7. 附加诊断：4 个失败的 `test_gate4_activation`（只诊断，未修改、未跳过）
 
@@ -342,4 +392,7 @@ LP 规模较 S4A：列 +8.5%、行 +7.3%、非零元 +7.0%（3 级资源分级 +
 | 9 | LNG 扩建对再气化加价高度敏感（加价仍为 DATA_PENDING，扩建上限成为约束） | §0.6、§5 | 补数据后再定 / 加敏感性运行 | 一体化中 LNG、气电、SMR 的规模 |
 | 10 | 合成甲烷在第 64 项口径下的跨境不对称（信用留生产国、排放记燃烧国） | §0.1 | 接受（与 S3 指令第 135 行一致）/ 改为 origin_neutral | 经管道出口的合成甲烷的国别记账 |
 
-（S4B-5 新增事项见下。）
+| 11 | **一体化主算解的精度**：OPTIMAL 但新旧口径门槛均未通过（数值残差，§5.4）；可选的一体化诊断 SUBOPTIMAL | §5.2、§5.4、`KKT_DIAG_INTEGRATED.json` | 云端主算仍用 `formal_barrier`，以 365×24h 结果的门槛再判断 / 云端一体化主算改为 barrier 后做 crossover（C07B/C09 的 `Crossover = −1` 做法，用时与内存增加，需改求解档案）/ 先在本机用 crossover 重跑一次 56×3h 冒烟核对（需单独授权，约 10 min、< 4 GiB） | 决定云端结果能否通过 A/B 门槛；按项目规则我未改参数、未重试 |
+| 12 | **ID 新建水库水电的入流代理偏高**（同节点存量单位入流折合 CF 1.01–1.08，新建实现 CF 0.71；根源是冻结电力底座的存量入流偏高） | §5.3 | 对新建水电的单位入流按国家实际水电 CF 封顶（需选数据源，如 IRENA/Ember ID 水电 CF）/ 改用同国容量加权平均 / 维持（C 级，记入局限） | ID 新建 77 GW、482 TWh，直接压低 ID 的 SMR 与海上风，并支撑 ID 电力出口 |
+| 13 | 云端试算的运行方式与范围 | §6、`CLOUD_DEPLOY_STEPS.md` | 串行三项（≥ 48 GiB 推荐）/ 并行两通道（≥ 96 GiB 推荐）/ 只跑一体化 + 不互联诊断（`--runs integrated,disconnected_gap`，不跑预期不可行的不互联主算） | 用时 1.7–3.3 h；**正式运行需用户单独授权**，本步未连接云端 |
+| 14 | 第 80、81 项的口径 | 下文"第 70–81 项" | 请审阅端给出两项的原文；当前按推断对应处理 | 只影响索引表的归属 |
