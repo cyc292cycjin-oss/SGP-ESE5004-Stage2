@@ -27,7 +27,7 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
 from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s4a_layers import apply_renewable_profiles
-from s4a_fleet import add_gem_fleet
+from s4a_fleet import add_gem_fleet, remove_not_operating_units
 from s4b_layers import apply_sector_alignment
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
@@ -267,7 +267,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     contract = json.loads(contract_path.read_text())
     geo = add_existing_geothermal(n, costs, survival_json, AEO8_GEOTHERMAL_CF, AEO8_GEOTHERMAL_CF_SOURCE, bus_mapping=contract.get("mapping", {}))
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
-    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock
+    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
+    fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
     pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
@@ -313,7 +314,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4b_layers=dict(sector=sector),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
-                "research_sector_alignment"]:
+                "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

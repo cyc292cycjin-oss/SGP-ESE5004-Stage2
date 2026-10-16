@@ -105,4 +105,25 @@
 
 **甲烷化与 LNG 扩建前后（一体化主算，S4A → S4B-0；GW / TWh，56 代表时段年化）：** LNG 进口 903 → 2,388 TWh（16 个接收站全部扩到上限，扩建 178.7 GW）；气电（CCGT/OCGT/CCGT CC）134 → 269 GW、381 → 1,153 TWh；SMR 核电 241.5 → 132.8 GW、2,022 → 1,096 TWh；煤电 94.5 → 50.9 TWh；陆风 486 → 374 GW；海上风 509 → 527 GW；地面光伏 236 → 306 GW；SMR CC 制氢 608 → 720 TWh；一体化中 Sabatier、电制生物燃料、FT 产量均为 0（化石气更便宜）。解读（INFERENCE）：按 7,018 EUR/MW/a 扩建时，满负荷每 MWh 气的接收站成本约 0.8 EUR，而 LNG 价格 13.67 EUR/MWh、再气化加价仍为 0（DATA_PENDING），扩建上限本身成为约束（S3B §4.1 已预计）；更便宜的气挤出了 SMR 核电与部分陆风。这一结果对再气化加价与扩建上限高度敏感。
 
-（S4B-1 至 S4B-6、test_gate4 诊断、用户决定事项见后续各节。）
+## 1. S4B-1 存量口径（第 77 项；`scripts_project/s4b_1_fleet_data.py`、`s4a_fleet.py`）
+
+1. **在建计入、宣布与预建不计：** `research.fleet.include_construction: true`（保留），`false` 为敏感性。注册表新增 `fleet_survival_rule_committed_planned_item77`：S1 的 `NOT_INHERITED_COMMITTED_OR_PLANNED`（`S1_SELECTED_ASSET_SURVIVAL_2050.json`，45 条、3,881 MW）改为"只对在建放宽"。逐条对照 GIPT 2026-09（`FLEET_S1_NOT_INHERITED_ITEM77.csv`，49 个 GEM 子单元）：计入 25 个、1,420 MW（S4A-2 已补 8 个 560 MW；本步无投运年在建 17 个 860 MW）；不计 24 个——寿命规则下 2050 年前退役 7 个 261 MW、搁置 4 个 1,172 MW（含 1,050 MW 一台）、宣布 6 个 41 MW、预建 1 个 30 MW、在运无投运年 3 个 37 MW、不在 GIPT 3 个（VERIFIED）。
+2. **无投运年的单元：** 在建 74 台、9,314 MW 计入——GIPT 2026-09 仍为"在建"，说明 2026 年前未投运，投运年 ≥ 2026（指令"≥ 2025"的严格化），任何寿命规则（≥ 25 a）下 2050 年在役；节点映射（同国最近 AC 节点，距离中位数 93 km、最大 313 km）与参数来源同 S4A-2；其中垃圾发电 70 MW 跳过（见第 4 条），实际补入 9,244 MW，组件 `existing_survivor::<节点>::<类>::S4B1`。在运 170 台、5,313 MW 不计（UNRESOLVED，生物质 1,922、风 1,332、油气 1,075、光伏 617、水电 267、地热 101 MW）。逐台列表 `FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv`、`FLEET_UNRESOLVED_OPERATING_NO_START_YEAR.csv`。
+3. **移出 11 台：** `research.fleet.remove_not_operating_gipt2026: true`，2,854.4 MW（封存 TH CCGT 828 + 1,220；退役 TH 煤 150；取消 VN 煤 75；不在 GIPT 的 ID 煤 135 + 80 + 80、PH 油 242 + 23 + 10.9 + 10.5）。身份从 `existing_unit_components` 移到 `existing_unit_removed_s4b1` 并注明原因（数据更正），注册表逐台登记 `fleet_removed_*`；所在组件按单元容量减少 `p_nom`，固定运维按比例扣除（合计 −8.55e7 EUR/a），两个只含被移出单元的组件删除。
+4. **垃圾发电继续跳过**（S4A 100 MW + 本步 70 MW），登记 `fleet_waste_to_energy_skipped_s4b`（DATA_PENDING），记入局限性。
+5. **补入/移出前后的 2050 存量（MW_el；`FLEET_STOCK_2050_S4B1_BY_COUNTRY_CLASS.csv`；VERIFIED）：** 合计 261,101 → 267,491（+9,244 −2,854）。
+
+| 国家 | S4A 后 | 补入（在建无投运年） | 移出 | S4B-1 后 | 主要变化 |
+|---|---|---|---|---|---|
+| ID | 80,020 | 3,215 | 295 | 82,940 | 煤 +2,200/−295、地热 +330、陆风 +597、径流 +88 |
+| MY | 29,544 | 2,500 | 0 | 32,044 | CCGT +1,500、OCGT +1,000 |
+| VN | 63,169 | 1,115 | 75 | 64,209 | 陆风 +752、海上风 +171、径流 +102、水库 +51、光伏 +39；煤 −75 |
+| LA | 15,909 | 1,036 | 0 | 16,945 | 水库 +520、陆风 +350、径流 +166 |
+| PH | 21,942 | 731 | 286 | 22,386 | 光伏 +460、抽蓄 +120、径流 +60、水库 +44、地热 +34、陆风 +13；油 −286 |
+| MM | 7,804 | 647 | 0 | 8,451 | 水库 +481、OCGT +126、光伏 +40 |
+| TH | 30,419 | 0 | 2,198 | 28,221 | CCGT −2,048、煤 −150 |
+| BN / KH / SG / TL | 352 / 4,948 / 6,739 / 255 | 0 | 0 | 不变 | |
+
+构建（`results_project/s4b/build_s4b1/`，两情景，不含日网络）：静态 PASS（各 42 s、0.57 GiB）；身份 1,104 个（另 11 个在移出登记中）；存量固定运维常数 1.0626e10 → 1.0806e10 EUR/a。测试 `test_s4b_1.py` 3 项通过；注册表新增片段 `s4b_1`（16 行），DATA_PENDING 39（+1 垃圾发电）。
+
+（S4B-2 至 S4B-6、test_gate4 诊断、用户决定事项见后续各节。）
