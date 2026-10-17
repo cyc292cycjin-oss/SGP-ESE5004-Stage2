@@ -33,7 +33,7 @@ from s4b_candidates import apply_candidate_caps
 from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
                         apply_extra_asean_storage, demand_cfg)
 from s4d_layers import apply_intra_asean_shipping
-from s4e_layers import add_corridor_dc_links, add_domestic_candidates, corridor_mode, corridor_tables
+from s4e_layers import add_corridor_dc_links, add_domestic_candidates, apply_lao_transit_shipping, corridor_mode, corridor_tables
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -349,6 +349,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     bunkers = apply_bunker_attribution(n, costs, cfg, demand)   # S4C-3 (decision 88): asean_pool (main: regional bunker loads, separate net-zero bunker account) | bunkering_country | excluded
     extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off); S4D-1 (decision 93): coastal nodes only, Lao transit
     shipping = apply_intra_asean_shipping(n, cfg, registry)   # S4D-2 (decision 92): intra-ASEAN CO2 shipping into the receivers' national stores, maritime trade, both scenarios
+    lao_shipping = apply_lao_transit_shipping(n, cfg, registry)   # S4E-2 (decision 95 c): Lao rail transit to the coast, then shipping into another country's national store
     cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -379,12 +380,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                   bunkers={k: v for k, v in bunkers.items() if k not in ("by_country", "deferred")},
                                                   extra_asean_storage={k: v for k, v in extra_co2.items() if k != "countries"}),
                                   s4d_layers=dict(intra_asean_shipping={k: v for k, v in shipping.items() if k != "links"}),
-                                  s4e_layers=dict(corridors=dict(mode=s4e_corridors["mode"], table=s4e_corridors["table"], table_sha256=s4e_corridors["table_sha256"], ac_added=s4e_corridors["ac_added"], dc_added=len(s4e_corridors["dc_added"]), domestic_table=s4e_corridors["domestic_table"], domestic_added=len(s4e_corridors["domestic_added"]))),
+                                  s4e_layers=dict(lao_transit_shipping={k: v for k, v in lao_shipping.items()}, corridors=dict(mode=s4e_corridors["mode"], table=s4e_corridors["table"], table_sha256=s4e_corridors["table_sha256"], ac_added=s4e_corridors["ac_added"], dc_added=len(s4e_corridors["dc_added"]), domestic_table=s4e_corridors["domestic_table"], domestic_added=len(s4e_corridors["domestic_added"]))),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
-                "research_intra_asean_shipping"]:
+                "research_intra_asean_shipping", "research_lao_transit_shipping"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

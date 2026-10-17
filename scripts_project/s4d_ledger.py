@@ -122,7 +122,7 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
             var = (flow * mc).mul(w, axis=0).sum()
             for name, v in var[var != 0].items():
                 car = str(d.at[name, "carrier"])
-                subj = "co2_ship_freight" if car == "CO2 ship" else ("co2_transit_freight" if car == "CO2 transit export extra-ASEAN" else "variable_cost")
+                subj = {"CO2 ship": "co2_ship_freight", "CO2 transit export extra-ASEAN": "co2_transit_freight", "CO2 transit ship": "co2_transit_ship_freight"}.get(car, "variable_cost")
                 add(own[t][name], subj, car, v)
     xb_led = pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", []))
     for _, r in xb_led.iterrows():
@@ -196,7 +196,7 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
     s_main = float(tot.loc[countries, "eur"].sum()) + side("eur")
     s_len = float(tot.loc[countries, "eur_length_split"].sum()) + side("eur_length_split")
     pool = float(tot.at[POOL, "eur"]) if POOL in tot.index else 0.0
-    DIRECT = ["capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight"] + list(extra_terms or {})
+    DIRECT = ["capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight", "co2_transit_ship_freight"] + list(extra_terms or {})
     direct = float(L[L.subject.isin(DIRECT)].eur.sum())
     settle = float(L[~L.subject.isin(DIRECT)].eur.sum())
     xb_net = xb.groupby("pair").eur.sum()

@@ -112,6 +112,28 @@ def connected_coalitions(edges: set, countries) -> dict:
 
 SHIP_CARRIER = "CO2 ship"
 SHIP_IDS = ("co2_ship_chain_fixed_cost", "co2_ship_chain_per_km_cost", "co2_ship_route_factor")
+TRANSIT_SHIP_CARRIER = "CO2 transit ship"   # S4E-2 (decision 95 c): Lao rail transit to the coast, then shipping into another country's national store
+
+
+def ship_distance_mode(cfg) -> str:
+    """S4E-2 (decision 95 b): research.co2.ship_distance = sea_path (main: pair-specific shortest sea path, CO2_SHIP_ROUTES_S4D2.csv sea_km) |
+    route_factor (great-circle x co2_ship_route_factor, the S4D-2 rule, comparison; default when the key is absent)."""
+    v = str(_co2(cfg).get("ship_distance", "route_factor")).lower()
+    if v not in ("sea_path", "route_factor"):
+        raise ValueError("Unknown research.co2.ship_distance " + v)
+    return v
+
+
+def ship_route_km(r, dist_mode: str, factor: float, scale: float) -> float:
+    """Port-to-port distance of a route-table row: sea path x ship_route_factor_scale, or great-circle x (route factor x scale)."""
+    return float(r.sea_km) * scale if dist_mode == "sea_path" else float(r.gc_km) * factor
+
+
+def ship_cost_function(cfg, registry: pd.DataFrame):
+    """Returns f(route-table row) -> EUR2020/t (IEAGHG 2004 chain at the port-to-port distance of the active distance mode)."""
+    rows = {k: float(registry.loc[k, "value"]) for k in SHIP_IDS}
+    scale = float(_co2(cfg).get("ship_route_factor_scale", 1.0)); factor = rows["co2_ship_route_factor"] * scale; mode = ship_distance_mode(cfg)
+    return lambda r: rows["co2_ship_chain_fixed_cost"] + rows["co2_ship_chain_per_km_cost"] * ship_route_km(r, mode, factor, scale)
 
 
 def shipping_mode(cfg) -> str:
@@ -141,6 +163,7 @@ def apply_intra_asean_shipping(n, cfg, registry: pd.DataFrame) -> dict:
         rows[k] = float(r["value"])
     scale = float(_co2(cfg).get("ship_route_factor_scale", 1.0))
     factor = rows["co2_ship_route_factor"] * scale
+    dist_mode = ship_distance_mode(cfg)   # S4E-2 (decision 95 b): sea_path (pair-specific sea distance, main) | route_factor (great-circle x 1.091, comparison)
     p = ROOT / str(_co2(cfg).get("ship_routes_table", "research_inputs/co2_v5/CO2_SHIP_ROUTES_S4D2.csv"))
     routes = pd.read_csv(p)
     coast, _ = coastal_table(cfg)
@@ -154,14 +177,14 @@ def apply_intra_asean_shipping(n, cfg, registry: pd.DataFrame) -> dict:
         raise ValueError(f"ship route table does not match the network: missing {sorted(need - have)[:5]}, extra {sorted(have - need)[:5]}")
     by_pair = {}
     for _, r in routes.sort_values(["origin", "receiver"]).iterrows():
-        i = str(n.buses.at[r.origin, "country"]); route_km = float(r.gc_km) * factor
+        i = str(n.buses.at[r.origin, "country"]); route_km = ship_route_km(r, dist_mode, factor, scale)
         cost = rows["co2_ship_chain_fixed_cost"] + rows["co2_ship_chain_per_km_cost"] * route_km
         add_link(n, f"{r.origin} co2 ship to {r.receiver}", i, SHIP_CARRIER, [f"{r.origin} co2 stored", f"co2 sequestered {r.receiver}"], [1.0], capital_cost=0.0,
                  marginal_cost=cost, lifetime=years, role="CO2_SHIPPING",
                  extra={"landing_node": r.landing, "great_circle_km": float(r.gc_km), "route_km": route_km, "trade_class": "maritime_trade (decision 92)",
                         "carbon_rule": "shipped captured CO2 counts as abatement of the exporting country (decision 20); stored in the receiver's national store (decision 28)"})
         by_pair.setdefault(f"{i}->{r.receiver}", []).append(cost)
-    led.update(links=int(len(routes)), route_factor=rows["co2_ship_route_factor"], route_factor_scale=scale, fixed_eur2020_per_t=rows["co2_ship_chain_fixed_cost"],
+    led.update(links=int(len(routes)), distance=dist_mode, route_factor=rows["co2_ship_route_factor"], route_factor_scale=scale, fixed_eur2020_per_t=rows["co2_ship_chain_fixed_cost"],
                per_km_eur2020_per_t=rows["co2_ship_chain_per_km_cost"], routes_table=str(p.relative_to(ROOT)), routes_table_sha256=sha256(p),
                origins=len(origins), receivers=sorted(receivers),
                cost_range_by_pair={k: [round(min(v), 3), round(max(v), 3)] for k, v in sorted(by_pair.items())})
@@ -170,15 +193,16 @@ def apply_intra_asean_shipping(n, cfg, registry: pd.DataFrame) -> dict:
 
 
 def shipping_report(n) -> dict:
-    """Post-solve: shipped tonnes and freight (exporter) per country pair; storage enters the receiver's national store."""
-    sl = n.links[n.links.carrier == SHIP_CARRIER]
+    """Post-solve: shipped tonnes and freight (exporter) per country pair; storage enters the receiver's national store. Flows below 1 t / year
+    (interior-point residue) are not listed. S4E-2: the Lao transit-ship links are included (freight = land leg + ship leg)."""
+    sl = n.links[n.links.carrier.isin([SHIP_CARRIER, TRANSIT_SHIP_CARRIER])]
     if not len(sl):
         return {}
     w = n.snapshot_weightings.objective
     out = {}
     for k, z in sl.iterrows():
         t = float((n.links_t.p0[k] * w).sum()) if k in n.links_t.p0 else 0.0
-        if t <= 0:
+        if t <= 1.0:
             continue
         key = f"{n.buses.at[z.bus0, 'country']}->{str(z.bus1).split()[-1]}"
         d = out.setdefault(key, dict(t=0.0, freight_eur=0.0, links=[]))

@@ -152,10 +152,12 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     # S4B-0 (decision 72): cap_factor_cost (main) = the same cap rule, expansion priced at lng_expansion_capital_cost_eur_per_mw_a (PyPSA-Eur import-branch
     # constant 7,018 EUR/MW/a, grade C) x (1 + lng_expansion_cost_sensitivity, +-0.5); existing capacity carries no new capex (PyPSA objective constant);
     # existing_only becomes a sensitivity.
+    # S4E-2 (decision 95 e): uncapped_cost (registered sensitivity, not run) = no expansion cap at the terminal nodes (incl. proposed-only sites), the
+    # expansion priced at the same 7,018 EUR/MW/a; the liquid-H2 cap keeps the rule cap.
     expansion = str(G.get("lng_expansion", "cap_factor"))
-    if expansion not in ("existing_only", "cap_factor", "cap_factor_cost"):
+    if expansion not in ("existing_only", "cap_factor", "cap_factor_cost", "uncapped_cost"):
         raise ValueError("Unknown research.s3.gas.lng_expansion " + expansion)
-    capex = float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)) * (1.0 + float(G.get("lng_expansion_cost_sensitivity", 0.0))) if expansion == "cap_factor_cost" else 0.0
+    capex = float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)) * (1.0 + float(G.get("lng_expansion_cost_sensitivity", 0.0))) if expansion in ("cap_factor_cost", "uncapped_cost") else 0.0
     ensure_carrier(n, "LNG import")
     terms = {}
     for node, g in lng.groupby("node"):
@@ -168,7 +170,7 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
         if p_rule <= 0:
             terms[node] = dict(existing_mw=0.0, proposed_mw=0.0, p_nom_max_mw=0.0, h2_import_cap_mw=0.0, units_missing_capacity=missing, skipped="no capacity data")
             continue
-        p_max = p_rule if expansion in ("cap_factor", "cap_factor_cost") else existing
+        p_max = float("inf") if expansion == "uncapped_cost" else (p_rule if expansion in ("cap_factor", "cap_factor_cost") else existing)
         c = country_of(n, node)
         if p_max <= 0:
             terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=0.0, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
