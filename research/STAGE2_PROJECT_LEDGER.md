@@ -481,3 +481,33 @@
   - `existing_port` 敏感性中泰国港口节点是否进入泰国封存；
   - 上云前信息与授权。
 - **交付：** `research/06_scope_redesign/p1_step4f_20261017/`，内容为 S4F_REPORT.md、S4F_EVIDENCE.json、S4F_PROGRESS.md、S4F_STOP_01_LINE91.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §15、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4f_20261017/`；测试 `tests/research` 499 通过、整个 `tests/` 516 通过。
+
+## S4G 第 98–99 项：作者 readjust 跨境交流线的电气参数、S4F 其余事项、冒烟、云端部署包与上云前清单 — 2026-10-17
+
+- **范围：**
+  - 指令 `S4G_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 2fd959e9…a0d915c，已核对），开头为用户对 S4F §7 四项的答复。
+  - 分支 `codex/s4g-readjust-impedance-20261017`（自 S4F 04681769），draft PR #31 叠在 #30 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载；没有触发停止条件。
+- **S4G-0：** 登记 §7 四项答复（`s4g_0`）。
+- **S4G-1（98）：**
+  - 依据：PyPSA-Earth `base_network.py` 680–701 与 `simplify_network.py` 181，PyPSA 0.30.3 `apply_line_types` 与 `calculate_dependent_values`。
+  - 19 条线按 `num_parallel = s_nom / (√3·v_nom·i_nom)` 修正，`x`、`r`、`b` 按线型重算，PyPSA 实际使用重算值。
+  - 开关 `research.network.readjust_impedance`：pypsa_eur | author（与 S4F 逐组件一致）。
+  - LA–VN 电抗 558,762 Ω；基尔霍夫系数跨度 943 → 2.3e5。
+  - 只记录：国内存量线一致；APG17 比值 0.0137；零容量候选沿用模板线 43；库内 OSM 有 LA–VN 500 / 220 kV 跨境线（按线型约 13 GW），作者记为 1 MW。
+- **S4G-2（99）：** `apg_plans` 规则确认；`existing_port` 敏感性中 LA2 1 / 2 / 3 / 5 经是拉差进入泰国封存；S4F 部署包作废。
+- **S4G-3：** 冒烟三项均最优，求解器容差门槛全部通过。
+  - 目标值：一体化 6.40080e11（+0.16 %）、不互联与 S4F 相同、NZE 5.39913e11（+0.19 %）。
+  - LA–TH 61、LA–VN 60 不再触及上限，湄公河潮流转到新候选走廊。
+  - B6 为 53.11 bn EUR（7.7 %）；LA 互联价值 3.96 → 3.26 bn EUR。
+- **S4G-4：**
+  - 部署包重建到 ed6af79c，四个网络与冒烟网络逐组件一致；上传 232,464,773 B。
+  - 365×24h 单运行 30–56 min（悲观 83），串行 1.8–2.5 h；预检下限 36 / 72 / 104 GiB 不变。
+  - 第二批敏感性 8 项只登记。
+- **S4G-5：** 上云前清单（报告 §10），格式同 S4F，填入 ed6af79c。
+- **待用户决定：** 4 项（S4G 报告 §7）：
+  - LA–VN 存量；
+  - APG17 与零容量候选线的电抗口径；
+  - 数值风险的处置；
+  - 上云前信息与授权。
+- **交付：** `research/06_scope_redesign/p1_step4g_20261017/`，内容为 S4G_REPORT.md、S4G_EVIDENCE.json、S4G_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §16、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4g_20261017/`；测试 `tests/research` 506 通过、整个 `tests/` 523 通过。
