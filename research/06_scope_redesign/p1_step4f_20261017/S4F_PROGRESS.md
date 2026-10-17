@@ -19,7 +19,7 @@
 | S4F-1 | 单条输电扩建上限（第 96 项） | 完成 | 见提交记录 | 开关 `research.network.max_extension`：`pypsa_eur`（主算）/ `none` / `apg_plans`。`lines.max_extension` = 20,000 MW 同时作用于交流线与 DC 链路（新增量口径），`links.max_extension` 不使用（用户同意）；管道不设上限，与 PyPSA-Eur 相同。`none` 构建与 S4E 一体化网络逐组件一致；主算构建只有 `s_nom_max` / `p_nom_max` 不同。`apg_plans` 为 18 个 APG 分组上限，钩子 `research_apg_corridor_cap`，只构建核对。S4E 冒烟超限：一体化 22 个（405.6 GW）、不互联 16 个（555.3 GW）、NZE 20 个（367.8 GW） |
 | S4F-2 | S4E 其余事项（第 97 项） | 完成 | 见提交记录 | (a) 停止 01 → 用户方案 1：线路 91 = 80 MW（C 级），Khlong Ngae–Gurun 300（AIMS），删除 4 条 OSM 250878579 重复记录，TH–MY 合计 380 MW；开关 `research.network.th_my_stock`（`apg_aims` / `frozen_base`）。作者 readjust 清单 19 条线（只记录）。(b) #4 印尼端为 ID_Sumatra3 3：432.2 km，海底份额 0.236，DC。(c) 老挝进越南封存 6 条 `CO2 transit rail`，陆运段 9.66–24.57 EUR/t，贸易类。(d) SG–VN、SG–KH 开关 `optional_sg_vn_kh`，构建核对。(g) `tests/transport` 改为在 pytest 下可运行。`tests/research` 499 通过，整个 `tests/` 516 通过 |
 | S4F-3 | 冒烟 | 完成 | 见提交记录 | 代码 d9bc8012，档案 A，三项全部最优。目标值较 S4E 高 1.4–2.4 %。B5、B6（541.3 亿，7.8 %）、B16 通过，三项 `all_passed_solver_tolerances`。触及上限的组件：一体化 11 个、不互联 6 个；新走廊合计 263 GW（S4E 301），单条最大 20 GW。不互联中老挝进越南封存 7.5 Mt；越南封存用满（236 Mt） |
-| S4F-4 | 云端部署包 | 未开始 | — | |
+| S4F-4 | 云端部署包 | 完成 | 见提交记录 | 在 7e09744d 上重建四个网络，与冒烟网络逐组件一致；包 232,095,769 B、15 个文件；预检下限 36 / 72 / 104 GiB 不变；资源估算 §15（365×24h 单运行 34–67 min，悲观 98 min）；部署步骤 §10 第二批 7 项、§11 联盟规则；许可扫描无新增命中；`tests/research` 499、整个 `tests/` 516 通过 |
 | S4F-5 | 上云前清单与交付 | 未开始 | — | |
 
 ## 提交记录（分支 `codex/s4f-extension-caps-20261017`）
