@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | S4G-0 | 准备：§7 答复登记 | 完成 | 见提交记录 | 注册表片段 `s4g_0`（4 行）；整个 `tests/` 516 通过 |
 | S4G-1 | 跨境交流线的电气参数（第 98 项） | 完成 | 见提交记录 | 依据：PyPSA-Earth `base_network.py` 680–701 / `simplify_network.py` 181，PyPSA 0.30.3 `pf.apply_line_types` 862–901 与 `calculate_dependent_values` 1002–1019，关系与指令一致。19 条线按 `num_parallel = s_nom / (√3·v_nom·i_nom)` 修正，PyPSA 实际使用重算后的 `x`（VERIFIED）。`author` 构建与 S4F 一致，主算只有 19 条线的 `num_parallel` / `x` / `r` / `b` 不同；不互联与 S4F 一致。`x` 最大值 2,290 → 558,762 Ω（LA–VN）；基尔霍夫系数跨度 943 → 2.3e5（行内比值 > 1e4 的 5 行）。其他交流线：国内 86 条比值都是 1，APG17 为 0.0137，零容量候选沿用模板线 43 的 1.286 回。LA–VN：OSM 中有 500 / 220 kV 跨境线（聚合约 13.0 GW），只记录。整个 `tests/` 520 通过 |
-| S4G-2 | `existing_port` 敏感性补泰国封存（第 99 项 b） | 未开始 | — | |
+| S4G-2 | `existing_port` 敏感性补泰国封存（第 99 项 b） | 完成 | 见提交记录 | 开关 `research.co2.lao_transit_th_store: on`，只在 `existing_port` 下生效：LA2 1 / 2 / 3 / 5 经是拉差（TH2 3）进入泰国封存，4 条，陆运段 31.8–41.9 EUR/t；LA2 0 / 4 经芽庄（VN2 4）仍入越南封存。贸易类，两个情景都有。主算与 S4G-1 逐组件一致。`apg_plans` 规则登记为已确认。整个 `tests/` 523 通过 |
 | S4G-3 | 冒烟 | 未开始 | — | |
 | S4G-4 | 云端部署包 | 未开始 | — | |
 | S4G-5 | 上云前清单与交付 | 未开始 | — | |
