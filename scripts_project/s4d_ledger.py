@@ -220,7 +220,9 @@ def ledger_gate(identity: dict) -> dict:
 
 
 def load_length_shares(path: Path | None = None) -> pd.DataFrame | None:
-    p = path or (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4D3.csv")
+    p = path or next((q for q in (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4E1.csv", ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4D3.csv") if q.exists()), None)   # S4E-1 superset first
+    if p is None:
+        return None
     return pd.read_csv(p) if Path(p).exists() else None
 
 

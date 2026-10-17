@@ -33,6 +33,7 @@ from s4b_candidates import apply_candidate_caps
 from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
                         apply_extra_asean_storage, demand_cfg)
 from s4d_layers import apply_intra_asean_shipping
+from s4e_layers import add_corridor_dc_links, add_domestic_candidates, corridor_mode, corridor_tables
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -286,8 +287,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         raise ValueError("Electric base is not the source-qualified asset")
     rename_map = rename_legacy_buses(n)
     renewable = apply_renewable_profiles(n, cfg, repo)   # S4A-1 (L14): rebuilt wind / solar profiles per research.renewable (original keeps the electric base untouched)
-    corridors = pd.read_csv(repo / R["existing_cross_border_electricity"]["corridors_file"], float_precision="round_trip")
-    apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base
+    corridors_path, domestic_path = corridor_tables(cfg)   # S4E-1 (decision 94): research.corridors.adjacency_completion on -> CORRIDORS_S4E1.csv + domestic candidates
+    corridors = pd.read_csv(repo / corridors_path, float_precision="round_trip")
+    apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base; S4E-1 land-adjacency AC candidates
+    s4e_corridors = dict(mode=corridor_mode(cfg), table=corridors_path, table_sha256=sha(repo / corridors_path), ac_added=len(apg_added),
+                         dc_added=add_corridor_dc_links(n, corridors), domestic_table=domestic_path,
+                         domestic_added=(add_domestic_candidates(n, pd.read_csv(repo / domestic_path, float_precision="round_trip")) if domestic_path else []))
     cc = float(cfg["sector"]["cc_fraction"])
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
@@ -374,6 +379,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                   bunkers={k: v for k, v in bunkers.items() if k not in ("by_country", "deferred")},
                                                   extra_asean_storage={k: v for k, v in extra_co2.items() if k != "countries"}),
                                   s4d_layers=dict(intra_asean_shipping={k: v for k, v in shipping.items() if k != "links"}),
+                                  s4e_layers=dict(corridors=dict(mode=s4e_corridors["mode"], table=s4e_corridors["table"], table_sha256=s4e_corridors["table_sha256"], ac_added=s4e_corridors["ac_added"], dc_added=len(s4e_corridors["dc_added"]), domestic_table=s4e_corridors["domestic_table"], domestic_added=len(s4e_corridors["domestic_added"]))),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
@@ -394,7 +400,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                    inputs={"electric_base": dict(path=str(electric_base), sha256=ELECTRIC_BASE_SHA), "costs_active": dict(path=str(costs_path), sha256=sha(costs_path)),
                            "registry": dict(path=str(registry_csv), sha256=sha(registry_csv)), "demand_table": dict(path=str(demand_table.relative_to(repo)), sha256=sha(demand_table), country_allocation=allocation_mode),
                            "biomass_table": dict(sha256=sha(repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")), "survival": dict(sha256=sha(survival_json)),
-                           "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(sha256=sha(repo / R["existing_cross_border_electricity"]["corridors_file"])),
+                           "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(file=corridors_path, sha256=sha(repo / corridors_path)),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
                    research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,
