@@ -35,6 +35,7 @@ from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c
 from s4d_layers import apply_intra_asean_shipping
 from s4e_layers import add_corridor_dc_links, add_domestic_candidates, apply_lao_transit_shipping, corridor_mode, corridor_tables
 from s4f_layers import apply_lao_vn_store, apply_max_extension, apply_th_my_stock, extend_optional_corridors
+from s4g_layers import apply_lao_th_store, apply_readjust_impedance
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -296,6 +297,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     s4e_corridors = dict(mode=corridor_mode(cfg), table=corridors_path, table_sha256=sha(repo / corridors_path), ac_added=len(apg_added),
                          dc_added=add_corridor_dc_links(n, corridors), domestic_table=domestic_path,
                          domestic_added=(add_domestic_candidates(n, pd.read_csv(repo / domestic_path, float_precision="round_trip")) if domestic_path else []))
+    readjust = apply_readjust_impedance(n, cfg, repo)   # S4G-1 (decision 98): line-type num_parallel / x / r / b of the 19 author-readjusted cross-border AC lines (after the candidates: their template keeps the frozen values)
     cc = float(cfg["sector"]["cc_fraction"])
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
@@ -354,6 +356,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     shipping = apply_intra_asean_shipping(n, cfg, registry)   # S4D-2 (decision 92): intra-ASEAN CO2 shipping into the receivers' national stores, maritime trade, both scenarios
     lao_shipping = apply_lao_transit_shipping(n, cfg, registry)   # S4E-2 (decision 95 c): Lao rail transit to the coast, then shipping into another country's national store
     lao_vn = apply_lao_vn_store(n, cfg, registry)   # S4F-2 c (decision 97 c): Lao rail transit to the Vietnamese coast, then the Vietnamese national store (trade)
+    lao_th = apply_lao_th_store(n, cfg, registry)   # S4G-2 (decision 99 b): existing_port sensitivity only - Lao transit ending at a Thai port, then the Thai national store
     cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -388,11 +391,13 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4e_layers=dict(lao_transit_shipping={k: v for k, v in lao_shipping.items()}, corridors=dict(mode=s4e_corridors["mode"], table=s4e_corridors["table"], table_sha256=s4e_corridors["table_sha256"], ac_added=s4e_corridors["ac_added"], dc_added=len(s4e_corridors["dc_added"]), domestic_table=s4e_corridors["domestic_table"], domestic_added=len(s4e_corridors["domestic_added"]))),
                                   s4f_layers=dict(max_extension={k: v for k, v in max_ext.items() if k != "apg_caps"}, th_my_stock=th_my, optional_corridors=optional_corridors,
                                                   lao_vn_store={k: v for k, v in lao_vn.items() if k != "table"}),
+                                  s4g_layers=dict(readjust_impedance={k: v for k, v in readjust.items() if k != "rows"}, lao_th_store={k: v for k, v in lao_th.items() if k != "table"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
-                "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store"]:
+                "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
+                "research_readjust_impedance", "research_lao_th_store"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
@@ -410,7 +415,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                            "biomass_table": dict(sha256=sha(repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")), "survival": dict(sha256=sha(survival_json)),
                            "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(file=corridors_path, sha256=sha(repo / corridors_path), th_my_stock=th_my["mode"], optional_sg_vn_kh=optional_corridors["mode"],
                                                  corrections={k: dict(file=f, sha256=sha(repo / f)) for k, f in [("th_my_stock", th_my.get("table")), ("optional", optional_corridors.get("table")),
-                                                                                                                  ("apg_plan_caps", max_ext.get("apg_table"))] if f}),
+                                                                                                                  ("apg_plan_caps", max_ext.get("apg_table")),
+                                                                                                                  ("readjust_impedance", readjust.get("table"))] if f}),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
                    research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,

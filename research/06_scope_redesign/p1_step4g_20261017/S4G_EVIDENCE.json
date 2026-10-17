@@ -1,0 +1,2365 @@
+{
+ "instruction": {
+  "file": "work/p1_step4g_20261017/S4G_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "2fd959e9134804a51aecc68b252b2ebe966813e65ed7dabd945ad3953a0d915c",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4g-readjust-impedance-20261017",
+  "head": "a0a24270cedb3ba35d35b20781d1553cf300cb5a",
+  "base": "04681769cc4af29abbc034962ab1e212dc5b4361 (PR #30 head)",
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/31 (draft)",
+  "log": [
+   "a0a24270 S4G-4: cloud package rebuilt at ed6af79c (S4F package void), resource estimate section 16, deploy steps",
+   "ed6af79c S4G-3 smoke: three runs optimal with the line-type parameters of the 19 lines (56x3h, profile A)",
+   "3e64dca0 S4G-2: Thai national store for the Lao transit existing_port sensitivity; apg_plans rule confirmed (decision 99 a, b)",
+   "dba30ca6 S4G-1: line-type electrical parameters of the 19 author-readjusted cross-border AC lines (decision 98)",
+   "71f43cb6 S4G-0: answers to S4F section 7 registered (registry fragment s4g_0)"
+  ]
+ },
+ "stops": [],
+ "downloads": [],
+ "s4g0": {
+  "s4g_answer_readjust_lines": {
+   "value": "all_19_line_type_relation",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4g_answer_apg_plans_rule": {
+   "value": "confirmed",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4g_answer_lao_th_store": {
+   "value": "existing_port_only",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4g_answer_cloud_package": {
+   "value": "s4f_package_void_use_s4g",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  }
+ },
+ "s4g1": {
+  "registry": {
+   "s4g1_line_type_relation": {
+    "value": "relation",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4g1_readjust_impedance_table": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4g1_readjust_impedance_switch": {
+    "value": "pypsa_eur|author",
+    "unit": "flag",
+    "tier": "C",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "sources": {
+   "sources": {
+    "base_network": {
+     "file": "scripts/base_network.py",
+     "sha256": "c4c4a7f352d2d7271fc56b5c503cb07b5fdf35f316e2745194953ce3f395e66d",
+     "function": "def _set_lines_s_nom_from_linetypes(n: \"pypsa.Network\") -> None:",
+     "lines": {
+      "694": "np.sqrt(3)",
+      "695": "* n.lines[\"type\"].map(n.line_types.i_nom)",
+      "696": "* n.lines.eval(\"v_nom * num_parallel\")"
+     }
+    },
+    "simplify_network": {
+     "file": "scripts/simplify_network.py",
+     "sha256": "e6a9bb63dc1edc5954f887efeb4a0aac5cd1c191a350c5d172e95c68d9a4f5b5",
+     "lines": {
+      "181": "n.lines[\"num_parallel\"] = n.lines.eval(\"s_nom / (sqrt(3) * v_nom * i_nom)\")"
+     }
+    },
+    "pypsa": {
+     "version": "0.30.3",
+     "pf_sha256": "34e946b8c197a67706d6b7ab9a0b558e9e2342495919f02dc12c4cb0fbee01ec",
+     "apply_line_types": "def apply_line_types(network: Network) -> None:",
+     "x_r": {
+      "887": "lines[attr + \"_per_length\"] * lines[\"length\"] / lines[\"num_parallel\"]"
+     },
+     "b": {
+      "894": "* lines[\"c_per_length\"]",
+      "896": "* lines[\"num_parallel\"]"
+     },
+     "calculate_dependent_values": {
+      "1002": "def calculate_dependent_values(network: Network) -> None:",
+      "1007": "apply_line_types(network)",
+      "1015": "network.lines[\"x_pu\"] = network.lines.x / (network.lines.v_nom**2)",
+      "1019": "network.lines[\"x_pu_eff\"] = network.lines[\"x_pu\"]"
+     },
+     "optimisation": {
+      "abstract.py:315": "n.calculate_dependent_values()",
+      "constraints.py:624": "n.calculate_dependent_values()",
+      "constraints.py:651": "weightings = branches.x_pu_eff if carrier == \"AC\" else branches.r_pu_eff",
+      "constraints.py:652": "C = 1e5 * sparse.diags(weightings.values) * sub.C"
+     }
+    },
+    "pypsa_asean_base_network_sha256": "c4c4a7f352d2d7271fc56b5c503cb07b5fdf35f316e2745194953ce3f395e66d"
+   },
+   "lines": 19,
+   "base_sha256": "6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b417f7",
+   "audit_sha256": "528601312403f5111b4c94ab7363582b87d07ed51278f48a52d547fbbe4b326c",
+   "stored_x_equals_type_x_frozen": true,
+   "stored_x_vs_type_x_max_rel": 0.0
+  },
+  "check": {
+   "lines_19": {
+    "used_values_recomputed": true,
+    "author_build_uses_author_x": true,
+    "x_factor_min": 0.8730550640803116,
+    "x_factor_max": 27841.5783821098,
+    "ratio_after_min": 0.9999999999999999,
+    "ratio_after_max": 1.0
+   },
+   "disconnected": {
+    "lines_19_left": [],
+    "cross_border_lines": 0
+   },
+   "x_range": {
+    "author": {
+     "x_min": 2.427976835081782,
+     "x_max": 2289.906884068495,
+     "x_pu_eff_min": 1.6814244010261648e-05,
+     "x_pu_eff_max": 0.015858080914601766,
+     "x_max_line": "94",
+     "x_min_line": "102"
+    },
+    "main": {
+     "x_min": 2.427976835081782,
+     "x_max": 558761.6791519079,
+     "x_pu_eff_min": 1.6814244010261648e-05,
+     "x_pu_eff_max": 3.8695407143483926,
+     "x_max_line": "59",
+     "x_min_line": "102"
+    }
+   },
+   "kvl": {
+    "author": {
+     "cycles": 61,
+     "coefficients": 257,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 1585.8080914601767,
+     "span": 943.1337445158796,
+     "within_row_ratio_max": 534.9028087662392,
+     "within_row_ratio_median": 8.19058002459378,
+     "within_row_ratio_p99": 317.7736660791435,
+     "rows_ratio_over_1e4": 0,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 120
+    },
+    "main": {
+     "cycles": 61,
+     "coefficients": 257,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 386954.0714348393,
+     "span": 230134.682950172,
+     "within_row_ratio_max": 230134.68295017193,
+     "within_row_ratio_median": 10.712752546120146,
+     "within_row_ratio_p99": 136717.81245964023,
+     "rows_ratio_over_1e4": 5,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 120
+    }
+   }
+  },
+  "consistency": {
+   "by_category": {
+    "apg_APG11_TH_MM": {
+     "ratio": {},
+     "lines": 1,
+     "zero_capacity": 1,
+     "over_10pct": 0
+    },
+    "apg_APG17_LA_MM": {
+     "ratio": {
+      "n": 1,
+      "min": 0.01373580608314104,
+      "p10": 0.01373580608314104,
+      "median": 0.01373580608314104,
+      "p90": 0.01373580608314104,
+      "max": 0.01373580608314104
+     },
+     "lines": 1,
+     "zero_capacity": 0,
+     "over_10pct": 1
+    },
+    "candidate_s4e1": {
+     "ratio": {},
+     "lines": 31,
+     "zero_capacity": 31,
+     "over_10pct": 0
+    },
+    "cross_border_readjusted_19": {
+     "ratio": {
+      "n": 19,
+      "min": 0.9999999999999999,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0,
+      "max": 1.0
+     },
+     "lines": 19,
+     "zero_capacity": 0,
+     "over_10pct": 0
+    },
+    "domestic_stock": {
+     "ratio": {
+      "n": 86,
+      "min": 0.9999999999999998,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0000000000000002,
+      "max": 1.0000000000000004
+     },
+     "lines": 86,
+     "zero_capacity": 0,
+     "over_10pct": 0
+    }
+   },
+   "domestic_by_country": {
+    "ID": {
+     "ratio": {
+      "n": 33,
+      "min": 0.9999999999999998,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0,
+      "max": 1.0000000000000004
+     },
+     "over_10pct": 0
+    },
+    "KH": {
+     "ratio": {
+      "n": 7,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0,
+      "max": 1.0000000000000002
+     },
+     "over_10pct": 0
+    },
+    "LA": {
+     "ratio": {
+      "n": 5,
+      "min": 0.9999999999999999,
+      "p10": 0.9999999999999999,
+      "median": 1.0,
+      "p90": 1.0000000000000002,
+      "max": 1.0000000000000002
+     },
+     "over_10pct": 0
+    },
+    "MM": {
+     "ratio": {
+      "n": 21,
+      "min": 0.9999999999999998,
+      "p10": 0.9999999999999999,
+      "median": 1.0,
+      "p90": 1.0,
+      "max": 1.0000000000000002
+     },
+     "over_10pct": 0
+    },
+    "MY": {
+     "ratio": {
+      "n": 5,
+      "min": 0.9999999999999999,
+      "p10": 0.9999999999999999,
+      "median": 1.0,
+      "p90": 1.0000000000000002,
+      "max": 1.0000000000000002
+     },
+     "over_10pct": 0
+    },
+    "PH": {
+     "ratio": {
+      "n": 2,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0000000000000002,
+      "max": 1.0000000000000002
+     },
+     "over_10pct": 0
+    },
+    "TH": {
+     "ratio": {
+      "n": 6,
+      "min": 1.0,
+      "p10": 1.0,
+      "median": 1.0,
+      "p90": 1.0,
+      "max": 1.0
+     },
+     "over_10pct": 0
+    },
+    "VN": {
+     "ratio": {
+      "n": 7,
+      "min": 0.9999999999999999,
+      "p10": 0.9999999999999999,
+      "median": 1.0,
+      "p90": 1.0000000000000002,
+      "max": 1.0000000000000004
+     },
+     "over_10pct": 0
+    }
+   },
+   "zero_capacity_lines": {
+    "count": 32,
+    "num_parallel_values": [
+     1.286184
+    ],
+    "types": [
+     "Al/St 240/40 4-bundle 380.0"
+    ],
+    "template": "43",
+    "x_rule": "x = x_per_length(type) x length / num_parallel(template) at every optimisation (pf.apply_line_types); the template is the existing cross-border AC line closest to the median num_parallel (s2_layers.add_apg_corridor_lines), taken before the S4G-1 correction"
+   }
+  },
+  "la_vn": {
+   "aims": [
+    {
+     "table": "new_lines.csv",
+     "name": "Nam Ou – Dien Bien",
+     "status": "in_planning",
+     "build_year": 2030,
+     "length_km": 94.98,
+     "v_nom": 220,
+     "p_nom": null,
+     "num_parallel": 1,
+     "type": "24-AL1/4-ST1A 0.4",
+     "ends": [
+      "LA",
+      "VN"
+     ]
+    }
+   ],
+   "apg": [
+    {
+     "apg_no": "10",
+     "connection": "Lao PDR - Vietnam",
+     "country_a": "LA",
+     "country_b": "VN",
+     "existing_MW": "",
+     "ongoing_to_2024_MW": "",
+     "future_MW": "TBC",
+     "total_MW": "TBC",
+     "aims3_2040_projection_MW": "625",
+     "note": "",
+     "source_locator": "Table 1 p.2"
+    }
+   ],
+   "corridor_crosscheck": [
+    {
+     "apg_no": "10",
+     "connection": "Lao PDR - Vietnam",
+     "country_pair": "LA-VN",
+     "apg_existing_mw": "",
+     "apg_ongoing_to_2024_mw": "",
+     "apg_future_mw": "TBC",
+     "apg_total_mw": "TBC",
+     "aims3_2040_projection_mw": "625",
+     "apg_note": "",
+     "classification": "covered",
+     "corridor_components": "59;60;63;64",
+     "corridor_capacity_2025_mw": "1",
+     "difference": "APG existing not stated vs corridor-table 2025 capacity 1.0 MW",
+     "source_locator": "Table 1 p.2"
+    }
+   ],
+   "networks": {
+    "pypsa_asean_base": {
+     "file": "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/networks/baseline-aims-3H-tutorial/base.nc",
+     "lines": [
+      {
+       "name": "400632255-1_0",
+       "v_nom": 500.0,
+       "num_parallel": 1.5,
+       "s_nom": 3351.5183126457778,
+       "length": 20.2140096181324,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "476096975-1_0",
+       "v_nom": 220.0,
+       "num_parallel": 2.0,
+       "s_nom": 983.1120383760948,
+       "length": 21.6606768481367,
+       "type": "Al/St 240/40 2-bundle 220.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "1270939005-1_0",
+       "v_nom": 220.0,
+       "num_parallel": 2.0,
+       "s_nom": 983.1120383760948,
+       "length": 89.0954361593432,
+       "type": "Al/St 240/40 2-bundle 220.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "1386901768-1_0",
+       "v_nom": 500.0,
+       "num_parallel": 1.0,
+       "s_nom": 2234.345541763852,
+       "length": 6.51611492702308,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "1387002603-1_0",
+       "v_nom": 500.0,
+       "num_parallel": 1.0,
+       "s_nom": 2234.345541763852,
+       "length": 6.68560235591954,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "1389590408-1_0",
+       "v_nom": 500.0,
+       "num_parallel": 1.0,
+       "s_nom": 2234.345541763852,
+       "length": 2.02332145685451,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "476096975-2_0",
+       "v_nom": 220.0,
+       "num_parallel": 2.0,
+       "s_nom": 983.1120383760948,
+       "length": 21.660676848219797,
+       "type": "Al/St 240/40 2-bundle 220.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "Nam Ou – Dien Bien",
+       "v_nom": 220.0,
+       "num_parallel": 1.0,
+       "s_nom": 53.35,
+       "length": 94.98,
+       "type": "24-AL1/4-ST1A 0.4",
+       "build_year": 2030.0
+      }
+     ],
+     "links": []
+    },
+    "frozen_electric_base": {
+     "file": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc",
+     "lines": [
+      {
+       "name": "59",
+       "v_nom": NaN,
+       "num_parallel": 2.6315789473684217,
+       "s_nom": 0.385110546485834,
+       "length": 515.1254286870109,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "60",
+       "v_nom": NaN,
+       "num_parallel": 3.2894736842105265,
+       "s_nom": 0.2006302867512334,
+       "length": 268.3638851581767,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "63",
+       "v_nom": NaN,
+       "num_parallel": 1.1578947368421053,
+       "s_nom": 0.17261042375385396,
+       "length": 230.8844027862045,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      },
+      {
+       "name": "64",
+       "v_nom": NaN,
+       "num_parallel": 0.5789473684210527,
+       "s_nom": 0.24164874300907863,
+       "length": 323.23033858748875,
+       "type": "Al/St 240/40 4-bundle 380.0",
+       "build_year": 0.0
+      }
+     ],
+     "links": []
+    }
+   },
+   "gem_lao_plants_vietnamese_party": [
+    {
+     "Plant / Project name": "Sekong solar farm",
+     "Unit / Phase name": "--",
+     "Capacity (MW)": "500.0",
+     "Status": "cancelled - inferred 4 y",
+     "Start year": "",
+     "Type": "utility-scale solar",
+     "Operator(s)": "",
+     "Owner(s)": "Wealth Power Viet Nam Group JSC; Power Company Limited Thepvongsa; National Consulting Group",
+     "Country/area 2 (hydropower only)": "",
+     "Latitude": "15.3525",
+     "Longitude": "106.7175"
+    },
+    {
+     "Plant / Project name": "Truong Son wind farm",
+     "Unit / Phase name": "1",
+     "Capacity (MW)": "250.0",
+     "Status": "operating",
+     "Start year": "2025.0",
+     "Type": "wind",
+     "Operator(s)": "",
+     "Owner(s)": "Viet-Lao Power JSC",
+     "Country/area 2 (hydropower only)": "",
+     "Latitude": "19.001",
+     "Longitude": "103.001"
+    },
+    {
+     "Plant / Project name": "Luang Prabang hydroelectric plant",
+     "Unit / Phase name": "",
+     "Capacity (MW)": "1460.0",
+     "Status": "construction",
+     "Start year": "2030.0",
+     "Type": "hydropower",
+     "Operator(s)": "",
+     "Owner(s)": "CK Power Public Co Ltd; PetroVietnam Power Corporation JSC",
+     "Country/area 2 (hydropower only)": "Thailand",
+     "Latitude": "20.0735",
+     "Longitude": "102.1875"
+    },
+    {
+     "Plant / Project name": "Xekaman 1 hydroelectric plant",
+     "Unit / Phase name": "",
+     "Capacity (MW)": "322.0",
+     "Status": "operating",
+     "Start year": "2016.0",
+     "Type": "hydropower",
+     "Operator(s)": "",
+     "Owner(s)": "Viet-Lao Power JSC - Song Da Corp [100%]",
+     "Country/area 2 (hydropower only)": "",
+     "Latitude": "14.9601",
+     "Longitude": "107.1555"
+    },
+    {
+     "Plant / Project name": "Xekaman 3 hydroelectric plant",
+     "Unit / Phase name": "",
+     "Capacity (MW)": "250.0",
+     "Status": "operating",
+     "Start year": "2013.0",
+     "Type": "hydropower",
+     "Operator(s)": "Xekaman 3 Power",
+     "Owner(s)": "Viet-Lao Power JSC [85%]; Electricite Du Laos [15%]",
+     "Country/area 2 (hydropower only)": "",
+     "Latitude": "15.461",
+     "Longitude": "107.268"
+    }
+   ]
+  },
+  "la_vn_osm": {
+   "data/osm-plus-prebuilt/0.1/all_lines_build_network.csv": [
+    {
+     "line_id": "1270939004-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.56733460239715,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "400632255-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.5,
+     "dc": false,
+     "length_km": 20.214009618132422,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.660676848136728,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.5673346023992,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939005-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 89.09543615934317,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1386901768-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.516114927023079,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1387002603-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.685602355919537,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1389590408-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 2.0233214568545077,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.660676848219794,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-3_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.56733460240835,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    }
+   ],
+   "data/osm-plus-prebuilt/0.1.1/all_lines_build_network.csv": [
+    {
+     "line_id": "1270939004-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.567334602397,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "400632255-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.5,
+     "dc": false,
+     "length_km": 20.2140096181324,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.6606768481367,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.567334602399,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939005-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 89.0954361593432,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1386901768-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.51611492702308,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1387002603-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.68560235591954,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1389590408-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 2.02332145685451,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.660676848219797,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-3_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.567334602408,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    }
+   ],
+   "data/osm-prebuilt/0.1/all_lines_build_network.csv": [
+    {
+     "line_id": "1270939004-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.56733460239715,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.660676848219794,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.56733460240835,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "400632255-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.5,
+     "dc": false,
+     "length_km": 20.214009618132422,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "476096975-2_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 21.660676848136728,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939004-3_0",
+     "voltage_kv": 220.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 118.5673346023992,
+     "end_countries": [
+      "LA"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1270939005-1_0",
+     "voltage_kv": 220.0,
+     "circuits": 2.0,
+     "dc": false,
+     "length_km": 89.09543615934317,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1386901768-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.516114927023079,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1387002603-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 6.685602355919537,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    },
+    {
+     "line_id": "1389590408-1_0",
+     "voltage_kv": 500.0,
+     "circuits": 1.0,
+     "dc": false,
+     "length_km": 2.0233214568545077,
+     "end_countries": [
+      "LA",
+      "VN"
+     ],
+     "countries_along": [
+      "LA",
+      "VN"
+     ]
+    }
+   ]
+  },
+  "status": [
+   "START:2026-10-17T11:00:13Z",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"b173:\tMaximum resident set size (kbytes): 711620",
+   "BUILD_integrated_author:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6b52:\tMaximum resident set size (kbytes): 677984",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"55a9:\tMaximum resident set size (kbytes): 708240",
+   "CHECK:0",
+   "COMPARE_author_vs_s4f:{}",
+   "COMPARE_main_vs_s4f:{\"Line\": [\"b\", \"num_parallel\", \"r\", \"x\"]}",
+   "COMPARE_disconnected_vs_s4f:{}",
+   "LA_VN:0",
+   "2 failed, 2 passed, 1 warning in 2.23s",
+   "FULL_TESTS:2 failed, 518 passed, 934 warnings in 72.66s (0:01:12)",
+   "DONE:2026-10-17T11:04:42Z"
+  ]
+ },
+ "s4g2": {
+  "registry": {
+   "s4g2_lao_th_store": {
+    "value": "on|off",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4g2_apg_plans_rule_confirmed": {
+    "value": "confirmed",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4g2_sensitivity_readjust_author": {
+    "value": "author",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "status": [
+   "START:2026-10-17T11:07:55Z",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"de4c:\tMaximum resident set size (kbytes): 710892",
+   "BUILD_integrated_existing_port:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6402:\tMaximum resident set size (kbytes): 711700",
+   "BUILD_disconnected_existing_port:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"bbfb:\tMaximum resident set size (kbytes): 708036",
+   "COMPARE_main_vs_s4g1:{}",
+   "CHECK:{\"integrated_existing_port\": {\"LA2 0 co2 transit to VN store\": {\"bus1\": \"co2 sequestered VN\", \"cost\": 31.216, \"border_class\": \"maritime_trade\", \"via\": \"VN2 4\"}, \"LA2 4 co2 transit to VN store\": {\"bus1\": \"co2 sequestered VN\", \"cost\": 24.102, \"border_class\": \"maritime_trade\", \"via\": \"VN2 4\"}, \"LA2 1 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 36.349, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 2 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 31.796, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 3 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 34.277, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 5 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 41.888, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}}, \"integrated_existing_port_meta\": {\"destination\": \"existing_port\", \"links\": 4, \"mode\": \"on\", \"table\": [{\"land\": 36.34908676779347, \"mode\": \"rail\", \"node\": \"LA2 1\", \"via\": \"TH2 3\"}, {\"land\": 31.796278431821023, \"mode\": \"rail\", \"node\": \"LA2 2\", \"via\": \"TH2 3\"}, {\"land\": 34.27745956863046, \"mode\": \"rail\", \"node\": \"LA2 3\", \"via\": \"TH2 3\"}, {\"land\": 41.8880055555748, \"mode\": \"rail\", \"node\": \"LA2 5\", \"via\": \"TH2 3\"}]}, \"disconnected_existing_port\": {\"LA2 0 co2 transit to VN store\": {\"bus1\": \"co2 sequestered VN\", \"cost\": 31.216, \"border_class\": \"maritime_trade\", \"via\": \"VN2 4\"}, \"LA2 4 co2 transit to VN store\": {\"bus1\": \"co2 sequestered VN\", \"cost\": 24.102, \"border_class\": \"maritime_trade\", \"via\": \"VN2 4\"}, \"LA2 1 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 36.349, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 2 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 31.796, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 3 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 34.277, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}, \"LA2 5 co2 transit to TH store\": {\"bus1\": \"co2 sequestered TH\", \"cost\": 41.888, \"border_class\": \"maritime_trade\", \"via\": \"TH2 3\"}}, \"disconnected_existing_port_meta\": {\"destination\": \"existing_port\", \"links\": 4, \"mode\": \"on\", \"table\": [{\"land\": 36.34908676779347, \"mode\": \"rail\", \"node\": \"LA2 1\", \"via\": \"TH2 3\"}, {\"land\": 31.796278431821023, \"mode\": \"rail\", \"node\": \"LA2 2\", \"via\": \"TH2 3\"}, {\"land\": 34.27745956863046, \"mode\": \"rail\", \"node\": \"LA2 3\", \"via\": \"TH2 3\"}, {\"land\": 41.8880055555748, \"mode\": \"rail\", \"node\": \"LA2 5\", \"via\": \"TH2 3\"}]}}",
+   "FULL_TESTS:523 passed, 934 warnings in 74.16s (0:01:14)",
+   "DONE:2026-10-17T11:11:33Z"
+  ]
+ },
+ "s4g3": {
+  "runs": [
+   {
+    "run": "integrated",
+    "termination": "optimal",
+    "objective_eur": 640079626181.7434,
+    "num_col": 648478,
+    "num_row": 1438072,
+    "nnz": 3224984,
+    "barrier_iterations": 96,
+    "barrier_seconds": 131.04,
+    "solve_seconds": 145.69035124778748,
+    "peak_rss_gib_receipt": 3.8515167236328125,
+    "matrix_min": 4e-06,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "disconnected",
+    "termination": "optimal",
+    "objective_eur": 693191116147.2216,
+    "num_col": 635539,
+    "num_row": 1409957,
+    "nnz": 3137621,
+    "barrier_iterations": 150,
+    "barrier_seconds": 171.04,
+    "solve_seconds": 184.56964874267578,
+    "peak_rss_gib_receipt": 3.5445098876953125,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "integrated_nze",
+    "termination": "optimal",
+    "objective_eur": 539912571610.1577,
+    "num_col": 648478,
+    "num_row": 1438072,
+    "nnz": 3224984,
+    "barrier_iterations": 141,
+    "barrier_seconds": 188.52,
+    "solve_seconds": 202.4204454421997,
+    "peak_rss_gib_receipt": 3.8354263305664062,
+    "matrix_min": 4e-06,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   }
+  ],
+  "vs_s4f": {
+   "integrated": {
+    "objective": 639062536870.334,
+    "objective_change_eur": 1017089311.4094238,
+    "objective_change_rel": 0.001591533305003907
+   },
+   "disconnected": {
+    "objective": 693191116147.2216,
+    "objective_change_eur": 0.0,
+    "objective_change_rel": 0.0
+   },
+   "integrated_nze": {
+    "objective": 538892502651.3916,
+    "objective_change_eur": 1020068958.7661133,
+    "objective_change_rel": 0.0018928987761887527
+   }
+  },
+  "disconnected_objective_vs_s4f": {
+   "s4g": 693191116147.2216,
+   "s4f": 693191116147.2216,
+   "relative": 0.0
+  },
+  "b5_passed": true,
+  "b6": {
+   "passed": true,
+   "difference": 53111489965.47815
+  },
+  "gates": {
+   "integrated": {
+    "all_passed_solver_tolerances": true,
+    "A1_A2_S4B": true
+   },
+   "disconnected": {
+    "all_passed_solver_tolerances": true,
+    "A1_A2_S4B": true
+   },
+   "integrated_nze": {
+    "all_passed_solver_tolerances": true,
+    "A1_A2_S4B": true
+   }
+  },
+  "lines_19": {
+   "integrated": {
+    "23": {
+     "country_pair": "ID-MY",
+     "s_nom": 230.0,
+     "s_nom_opt": 1304.08,
+     "added": 1074.08,
+     "at_cap": false,
+     "abs_flow_twh": 3.1752,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 10286.33,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 26.0225
+    },
+    "43": {
+     "country_pair": "KH-LA",
+     "s_nom": 300.0,
+     "s_nom_opt": 2272.88,
+     "added": 1972.88,
+     "at_cap": false,
+     "abs_flow_twh": 5.5649,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 11581.0,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 45.5458
+    },
+    "47": {
+     "country_pair": "KH-TH",
+     "s_nom": 250.0,
+     "s_nom_opt": 2357.43,
+     "added": 2107.43,
+     "at_cap": false,
+     "abs_flow_twh": 8.3213,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 6026.08,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 20.7139
+    },
+    "39": {
+     "country_pair": "KH-VN",
+     "s_nom": 200.0,
+     "s_nom_opt": 1809.99,
+     "added": 1609.99,
+     "at_cap": false,
+     "abs_flow_twh": 6.999,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 8906.63,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 38.9052
+    },
+    "49": {
+     "country_pair": "LA-TH",
+     "s_nom": 69.93430858139246,
+     "s_nom_opt": 1426.77,
+     "added": 1356.83,
+     "at_cap": false,
+     "abs_flow_twh": 3.5319,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 3362.84,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 12.7086
+    },
+    "52": {
+     "country_pair": "LA-TH",
+     "s_nom": 120.00388556289535,
+     "s_nom_opt": 980.08,
+     "added": 860.08,
+     "at_cap": false,
+     "abs_flow_twh": 2.7127,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 251.31,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 0.8812
+    },
+    "53": {
+     "country_pair": "LA-TH",
+     "s_nom": 101.90693406505751,
+     "s_nom_opt": 1056.33,
+     "added": 954.42,
+     "at_cap": false,
+     "abs_flow_twh": 3.2483,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 15352.99,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 68.8961
+    },
+    "55": {
+     "country_pair": "LA-TH",
+     "s_nom": 89.54447063267305,
+     "s_nom_opt": 926.97,
+     "added": 837.42,
+     "at_cap": false,
+     "abs_flow_twh": 2.4998,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 16757.82,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 65.5996
+    },
+    "56": {
+     "country_pair": "LA-TH",
+     "s_nom": 91.30135905484386,
+     "s_nom_opt": 1099.56,
+     "added": 1008.25,
+     "at_cap": false,
+     "abs_flow_twh": 3.0029,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 741.17,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 3.2287
+    },
+    "58": {
+     "country_pair": "LA-TH",
+     "s_nom": 70.90859891987014,
+     "s_nom_opt": 1225.58,
+     "added": 1154.67,
+     "at_cap": false,
+     "abs_flow_twh": 2.7398,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 10000.47,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 37.9295
+    },
+    "61": {
+     "country_pair": "LA-TH",
+     "s_nom": 95.14851589005835,
+     "s_nom_opt": 1173.97,
+     "added": 1078.83,
+     "at_cap": false,
+     "abs_flow_twh": 2.9206,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20095.15,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 79.9195
+    },
+    "62": {
+     "country_pair": "LA-TH",
+     "s_nom": 203.28040197478592,
+     "s_nom_opt": 1549.45,
+     "added": 1346.17,
+     "at_cap": false,
+     "abs_flow_twh": 4.4954,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 669.41,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 2.8635
+    },
+    "66": {
+     "country_pair": "LA-TH",
+     "s_nom": 112.97152531842329,
+     "s_nom_opt": 898.04,
+     "added": 785.07,
+     "at_cap": false,
+     "abs_flow_twh": 2.9847,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 7665.85,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 22.6137
+    },
+    "59": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.385110546485834,
+     "s_nom_opt": 2.99,
+     "added": 2.6,
+     "at_cap": false,
+     "abs_flow_twh": 0.0075,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 11270.09,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 48.0235
+    },
+    "60": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.2006302867512334,
+     "s_nom_opt": 2.67,
+     "added": 2.47,
+     "at_cap": false,
+     "abs_flow_twh": 0.0088,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20000.2,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 77.9572
+    },
+    "63": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.17261042375385396,
+     "s_nom_opt": 1.42,
+     "added": 1.25,
+     "at_cap": false,
+     "abs_flow_twh": 0.0032,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 6550.86,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 24.1642
+    },
+    "64": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.24164874300907863,
+     "s_nom_opt": 1.61,
+     "added": 1.37,
+     "at_cap": false,
+     "abs_flow_twh": 0.0051,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 4585.43,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 18.8412
+    },
+    "92": {
+     "country_pair": "MY-SG",
+     "s_nom": 525.0,
+     "s_nom_opt": 20525.0,
+     "added": 20000.0,
+     "at_cap": true,
+     "abs_flow_twh": 114.2568,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20525.0,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 113.6615
+    },
+    "91": {
+     "country_pair": "MY-TH",
+     "s_nom": 80.0,
+     "s_nom_opt": 20080.0,
+     "added": 20000.0,
+     "at_cap": true,
+     "abs_flow_twh": 86.0342,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20080.0,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 87.0116
+    }
+   },
+   "disconnected": {},
+   "integrated_nze": {
+    "23": {
+     "country_pair": "ID-MY",
+     "s_nom": 230.0,
+     "s_nom_opt": 1274.45,
+     "added": 1044.45,
+     "at_cap": false,
+     "abs_flow_twh": 3.0465,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 10258.01,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 24.7004
+    },
+    "43": {
+     "country_pair": "KH-LA",
+     "s_nom": 300.0,
+     "s_nom_opt": 2262.26,
+     "added": 1962.26,
+     "at_cap": false,
+     "abs_flow_twh": 6.0636,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 11452.43,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 44.7124
+    },
+    "47": {
+     "country_pair": "KH-TH",
+     "s_nom": 250.0,
+     "s_nom_opt": 2343.97,
+     "added": 2093.97,
+     "at_cap": false,
+     "abs_flow_twh": 8.0533,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 6013.06,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 20.7649
+    },
+    "39": {
+     "country_pair": "KH-VN",
+     "s_nom": 200.0,
+     "s_nom_opt": 1808.26,
+     "added": 1608.26,
+     "at_cap": false,
+     "abs_flow_twh": 7.1379,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 8885.3,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 38.2931
+    },
+    "49": {
+     "country_pair": "LA-TH",
+     "s_nom": 69.93430858139246,
+     "s_nom_opt": 1383.93,
+     "added": 1313.99,
+     "at_cap": false,
+     "abs_flow_twh": 3.4242,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 3471.9,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 12.9078
+    },
+    "52": {
+     "country_pair": "LA-TH",
+     "s_nom": 120.00388556289535,
+     "s_nom_opt": 962.2,
+     "added": 842.2,
+     "at_cap": false,
+     "abs_flow_twh": 2.9589,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 250.76,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 0.876
+    },
+    "53": {
+     "country_pair": "LA-TH",
+     "s_nom": 101.90693406505751,
+     "s_nom_opt": 1038.15,
+     "added": 936.24,
+     "at_cap": false,
+     "abs_flow_twh": 3.4645,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 15363.24,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 69.3184
+    },
+    "55": {
+     "country_pair": "LA-TH",
+     "s_nom": 89.54447063267305,
+     "s_nom_opt": 910.9,
+     "added": 821.35,
+     "at_cap": false,
+     "abs_flow_twh": 2.6223,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 16705.57,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 65.2937
+    },
+    "56": {
+     "country_pair": "LA-TH",
+     "s_nom": 91.30135905484386,
+     "s_nom_opt": 1081.83,
+     "added": 990.53,
+     "at_cap": false,
+     "abs_flow_twh": 3.2129,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 740.82,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 3.2302
+    },
+    "58": {
+     "country_pair": "LA-TH",
+     "s_nom": 70.90859891987014,
+     "s_nom_opt": 1207.45,
+     "added": 1136.54,
+     "at_cap": false,
+     "abs_flow_twh": 2.6183,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 10088.17,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 38.4128
+    },
+    "61": {
+     "country_pair": "LA-TH",
+     "s_nom": 95.14851589005835,
+     "s_nom_opt": 1135.26,
+     "added": 1040.11,
+     "at_cap": false,
+     "abs_flow_twh": 2.8678,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20095.15,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 79.1432
+    },
+    "62": {
+     "country_pair": "LA-TH",
+     "s_nom": 203.28040197478592,
+     "s_nom_opt": 1510.73,
+     "added": 1307.45,
+     "at_cap": false,
+     "abs_flow_twh": 4.4288,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 669.41,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 2.8626
+    },
+    "66": {
+     "country_pair": "LA-TH",
+     "s_nom": 112.97152531842329,
+     "s_nom_opt": 881.14,
+     "added": 768.17,
+     "at_cap": false,
+     "abs_flow_twh": 3.1894,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 7722.11,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 22.9498
+    },
+    "59": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.385110546485834,
+     "s_nom_opt": 3.02,
+     "added": 2.63,
+     "at_cap": false,
+     "abs_flow_twh": 0.0076,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 11288.18,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 47.9796
+    },
+    "60": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.2006302867512334,
+     "s_nom_opt": 2.61,
+     "added": 2.41,
+     "at_cap": false,
+     "abs_flow_twh": 0.0089,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20000.2,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 78.7084
+    },
+    "63": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.17261042375385396,
+     "s_nom_opt": 1.42,
+     "added": 1.25,
+     "at_cap": false,
+     "abs_flow_twh": 0.0032,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 6614.38,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 24.3265
+    },
+    "64": {
+     "country_pair": "LA-VN",
+     "s_nom": 0.24164874300907863,
+     "s_nom_opt": 1.6,
+     "added": 1.35,
+     "at_cap": false,
+     "abs_flow_twh": 0.0052,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 4585.19,
+     "s4f_at_cap": false,
+     "s4f_abs_flow_twh": 18.807
+    },
+    "92": {
+     "country_pair": "MY-SG",
+     "s_nom": 525.0,
+     "s_nom_opt": 20525.0,
+     "added": 20000.0,
+     "at_cap": true,
+     "abs_flow_twh": 114.7898,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20525.0,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 114.2564
+    },
+    "91": {
+     "country_pair": "MY-TH",
+     "s_nom": 80.0,
+     "s_nom_opt": 20080.0,
+     "added": 20000.0,
+     "at_cap": true,
+     "abs_flow_twh": 86.323,
+     "loading_max": 0.7,
+     "s4f_s_nom_opt": 20080.0,
+     "s4f_at_cap": true,
+     "s4f_abs_flow_twh": 87.6417
+    }
+   }
+  },
+  "mekong": {
+   "integrated": {
+    "KH-LA": {
+     "s4g": {
+      "abs_twh": 5.5649,
+      "net_twh": 2.8502
+     },
+     "s4f": {
+      "abs_twh": 45.5458,
+      "net_twh": 39.7582
+     }
+    },
+    "KH-TH": {
+     "s4g": {
+      "abs_twh": 175.5162,
+      "net_twh": 135.213
+     },
+     "s4f": {
+      "abs_twh": 119.7977,
+      "net_twh": 99.2534
+     }
+    },
+    "KH-VN": {
+     "s4g": {
+      "abs_twh": 170.7384,
+      "net_twh": -129.4529
+     },
+     "s4f": {
+      "abs_twh": 158.6269,
+      "net_twh": -129.7684
+     }
+    },
+    "LA-TH": {
+     "s4g": {
+      "abs_twh": 28.1363,
+      "net_twh": 11.9856
+     },
+     "s4f": {
+      "abs_twh": 294.6403,
+      "net_twh": 51.4262
+     }
+    },
+    "LA-VN": {
+     "s4g": {
+      "abs_twh": 190.7492,
+      "net_twh": 140.4322
+     },
+     "s4f": {
+      "abs_twh": 313.5237,
+      "net_twh": 104.7696
+     }
+    }
+   },
+   "disconnected": {},
+   "integrated_nze": {
+    "KH-LA": {
+     "s4g": {
+      "abs_twh": 6.0636,
+      "net_twh": 3.542
+     },
+     "s4f": {
+      "abs_twh": 44.7124,
+      "net_twh": 38.9206
+     }
+    },
+    "KH-TH": {
+     "s4g": {
+      "abs_twh": 176.6191,
+      "net_twh": 138.9802
+     },
+     "s4f": {
+      "abs_twh": 118.5512,
+      "net_twh": 97.2583
+     }
+    },
+    "KH-VN": {
+     "s4g": {
+      "abs_twh": 170.6745,
+      "net_twh": -126.118
+     },
+     "s4f": {
+      "abs_twh": 155.3125,
+      "net_twh": -127.1759
+     }
+    },
+    "LA-TH": {
+     "s4g": {
+      "abs_twh": 28.7872,
+      "net_twh": 9.8241
+     },
+     "s4f": {
+      "abs_twh": 294.9945,
+      "net_twh": 49.541
+     }
+    },
+    "LA-VN": {
+     "s4g": {
+      "abs_twh": 197.9402,
+      "net_twh": 146.2238
+     },
+     "s4f": {
+      "abs_twh": 317.0252,
+      "net_twh": 108.0837
+     }
+    }
+   }
+  },
+  "corridors": {
+   "integrated": {
+    "new_built_gw_by_pair": {
+     "BN-MY": {
+      "s4g": 2.386,
+      "s4f": 2.388
+     },
+     "ID-ID": {
+      "s4g": 34.65,
+      "s4f": 34.597
+     },
+     "ID-MY": {
+      "s4g": 76.686,
+      "s4f": 72.435
+     },
+     "ID-SG": {
+      "s4g": 7.513,
+      "s4f": 7.492
+     },
+     "ID-TL": {
+      "s4g": 0.26,
+      "s4f": 0.226
+     },
+     "KH-TH": {
+      "s4g": 48.132,
+      "s4f": 28.399
+     },
+     "KH-VN": {
+      "s4g": 47.274,
+      "s4f": 30.776
+     },
+     "LA-MM": {
+      "s4g": 9.549,
+      "s4f": 2.677
+     },
+     "LA-VN": {
+      "s4g": 65.249,
+      "s4f": 49.867
+     },
+     "MM-TH": {
+      "s4g": 31.191,
+      "s4f": 24.879
+     },
+     "MY-MY": {
+      "s4g": 12.745,
+      "s4f": 13.323
+     },
+     "MY-PH": {
+      "s4g": 3.563,
+      "s4f": 3.822
+     }
+    },
+    "total_gw": 339.2,
+    "s4f_total_gw": 270.88
+   },
+   "disconnected": {
+    "new_built_gw_by_pair": {
+     "ID-ID": {
+      "s4g": 24.586,
+      "s4f": 24.586
+     },
+     "MY-MY": {
+      "s4g": 0.112,
+      "s4f": 0.112
+     }
+    },
+    "total_gw": 24.7,
+    "s4f_total_gw": 24.7
+   },
+   "integrated_nze": {
+    "new_built_gw_by_pair": {
+     "BN-MY": {
+      "s4g": 2.387,
+      "s4f": 2.387
+     },
+     "ID-ID": {
+      "s4g": 33.946,
+      "s4f": 32.96
+     },
+     "ID-MY": {
+      "s4g": 74.29,
+      "s4f": 70.311
+     },
+     "ID-SG": {
+      "s4g": 7.49,
+      "s4f": 7.482
+     },
+     "ID-TL": {
+      "s4g": 0.194,
+      "s4f": 0.19
+     },
+     "KH-TH": {
+      "s4g": 47.989,
+      "s4f": 28.247
+     },
+     "KH-VN": {
+      "s4g": 46.932,
+      "s4f": 30.37
+     },
+     "LA-MM": {
+      "s4g": 9.35,
+      "s4f": 2.692
+     },
+     "LA-VN": {
+      "s4g": 64.636,
+      "s4f": 50.081
+     },
+     "MM-TH": {
+      "s4g": 30.781,
+      "s4f": 24.915
+     },
+     "MY-MY": {
+      "s4g": 12.231,
+      "s4f": 13.288
+     },
+     "MY-PH": {
+      "s4g": 3.188,
+      "s4f": 3.431
+     }
+    },
+    "total_gw": 333.41,
+    "s4f_total_gw": 266.35
+   }
+  },
+  "at_cap": {
+   "integrated": {
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:108",
+     "Line:109",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "s4f": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:60",
+     "Line:61",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0"
+    ],
+    "added": [
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "removed": [
+     "Line:105",
+     "Line:60",
+     "Line:61"
+    ]
+   },
+   "disconnected": {
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "s4f": [
+     "Line:1",
+     "Line:100",
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [],
+    "removed": []
+   },
+   "integrated_nze": {
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:108",
+     "Line:109",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3"
+    ],
+    "s4f": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:60",
+     "Line:61",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0"
+    ],
+    "added": [
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3"
+    ],
+    "removed": [
+     "Line:105",
+     "Line:60",
+     "Line:61"
+    ]
+   }
+  },
+  "focus": {
+   "LA": {
+    "integrated_bn_eur": -1.1015,
+    "disconnected_bn_eur": 2.1618,
+    "disconnected_minus_integrated": 3.2633,
+    "disconnected_minus_integrated_s4f": 3.9621
+   },
+   "KH": {
+    "integrated_bn_eur": 4.6427,
+    "disconnected_bn_eur": 6.8709,
+    "disconnected_minus_integrated": 2.2282,
+    "disconnected_minus_integrated_s4f": 2.2523
+   },
+   "TH": {
+    "integrated_bn_eur": 79.9122,
+    "disconnected_bn_eur": 85.6617,
+    "disconnected_minus_integrated": 5.7495,
+    "disconnected_minus_integrated_s4f": 6.2027
+   },
+   "VN": {
+    "integrated_bn_eur": 127.265,
+    "disconnected_bn_eur": 149.3171,
+    "disconnected_minus_integrated": 22.0521,
+    "disconnected_minus_integrated_s4f": 21.9657
+   },
+   "MY": {
+    "integrated_bn_eur": 70.9131,
+    "disconnected_bn_eur": 76.0107,
+    "disconnected_minus_integrated": 5.0976,
+    "disconnected_minus_integrated_s4f": 5.1398
+   },
+   "ID": {
+    "integrated_bn_eur": 204.7342,
+    "disconnected_bn_eur": 214.0173,
+    "disconnected_minus_integrated": 9.2831,
+    "disconnected_minus_integrated_s4f": 9.5529
+   },
+   "PH": {
+    "integrated_bn_eur": 26.509,
+    "disconnected_bn_eur": 27.5901,
+    "disconnected_minus_integrated": 1.0811,
+    "disconnected_minus_integrated_s4f": 1.0517
+   },
+   "BN": {
+    "integrated_bn_eur": 0.671,
+    "disconnected_bn_eur": 1.4995,
+    "disconnected_minus_integrated": 0.8285,
+    "disconnected_minus_integrated_s4f": 0.7986
+   },
+   "TL": {
+    "integrated_bn_eur": -0.156,
+    "disconnected_bn_eur": 0.1306,
+    "disconnected_minus_integrated": 0.2866,
+    "disconnected_minus_integrated_s4f": 0.268
+   },
+   "MM": {
+    "integrated_bn_eur": 9.4075,
+    "disconnected_bn_eur": 10.4005,
+    "disconnected_minus_integrated": 0.993,
+    "disconnected_minus_integrated_s4f": 1.0114
+   },
+   "SG": {
+    "integrated_bn_eur": 24.5832,
+    "disconnected_bn_eur": 26.5703,
+    "disconnected_minus_integrated": 1.9871,
+    "disconnected_minus_integrated_s4f": 1.9622
+   }
+  },
+  "disconnected_minus_integrated_bn_eur": {
+   "ASEAN_BUNKER": 0.2614,
+   "ASEAN_POOL": -0.0,
+   "BN": 0.8285,
+   "ID": 9.2831,
+   "KH": 2.2282,
+   "LA": 3.2633,
+   "MM": 0.993,
+   "MY": 5.0976,
+   "PH": 1.0811,
+   "SG": 1.9871,
+   "TH": 5.7495,
+   "TL": 0.2866,
+   "VN": 22.0521
+  },
+  "ledgers": {
+   "integrated": {
+    "relative_error": 6.419355901533685e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.6993,
+     "ASEAN_POOL": 0.0,
+     "BN": 0.671,
+     "ID": 204.7342,
+     "KH": 4.6427,
+     "LA": -1.1015,
+     "MM": 9.4075,
+     "MY": 70.9131,
+     "PH": 26.509,
+     "SG": 24.5832,
+     "TH": 79.9122,
+     "TL": -0.156,
+     "VN": 127.265
+    }
+   },
+   "disconnected": {
+    "relative_error": 3.4297055326731473e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.9607,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4995,
+     "ID": 214.0173,
+     "KH": 6.8709,
+     "LA": 2.1618,
+     "MM": 10.4005,
+     "MY": 76.0107,
+     "PH": 27.5901,
+     "SG": 26.5703,
+     "TH": 85.6617,
+     "TL": 0.1306,
+     "VN": 149.3171
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 1.4143683515812457e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.497,
+     "ASEAN_POOL": 0.0,
+     "BN": -0.781,
+     "ID": 176.5775,
+     "KH": 3.7855,
+     "LA": -1.0382,
+     "MM": 6.098,
+     "MY": 53.8855,
+     "PH": 16.3193,
+     "SG": 18.1513,
+     "TH": 56.1789,
+     "TL": -0.9492,
+     "VN": 119.1879
+    }
+   }
+  }
+ },
+ "s4g4": {
+  "status": [
+   "START:2026-10-17T11:26:39Z commit:ed6af79c dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"de4c:\tMaximum resident set size (kbytes): 711032:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:55.40:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"fe86:\tMaximum resident set size (kbytes): 707976:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:55.32:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"328a:\tMaximum resident set size (kbytes): 711476:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:03.68:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6199:\tMaximum resident set size (kbytes): 709968:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:57.88:daily=1",
+   "COMPARE_integrated_vs_smoke:{}",
+   "COMPARE_disconnected_vs_smoke:{}",
+   "COMPARE_integrated_nze_vs_smoke:{}",
+   "PACKAGE:0",
+   "DONE:2026-10-17T11:31:02Z"
+  ],
+  "extrapolation": {
+   "integrated": {
+    "barrier_iterations": 96,
+    "barrier_seconds": 131.04,
+    "wall_seconds": 195,
+    "peak_rss_gib": 3.8515167236328125,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1498.7878820812814,
+       2180.525353023572
+      ],
+      "barrier_s_with_1_5x_iterations": 3270.788029535358,
+      "non_solve_s": 321.3932463313852,
+      "wall_s": [
+       1820.1811284126666,
+       2501.918599354957,
+       3592.1812758667434
+      ],
+      "peak_rss_gib": [
+       22.89649293082101,
+       32.05509010314942
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       22374.696660758622,
+       49339.65643750906
+      ],
+      "barrier_s_with_1_5x_iterations": 74009.4846562636,
+      "non_solve_s": 2571.145970651082,
+      "wall_s": [
+       24945.842631409705,
+       51910.80240816014,
+       76580.63062691467
+      ],
+      "peak_rss_gib": [
+       180.3719434465681,
+       252.52072082519533
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "barrier_iterations": 150,
+    "barrier_seconds": 171.04,
+    "wall_seconds": 225,
+    "peak_rss_gib": 3.5445098876953125,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1956.2933405920512,
+       2846.1313826400465
+      ],
+      "barrier_s_with_1_5x_iterations": 4269.197073960069,
+      "non_solve_s": 263.5192537307739,
+      "wall_s": [
+       2219.812594322825,
+       3109.6506363708204,
+       4532.716327690843
+      ],
+      "peak_rss_gib": [
+       20.895466232299803,
+       29.253652725219723
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       29204.579646338178,
+       64400.60162600389
+      ],
+      "barrier_s_with_1_5x_iterations": 96600.90243900583,
+      "non_solve_s": 2108.1540298461914,
+      "wall_s": [
+       31312.73367618437,
+       66508.75565585008,
+       98709.05646885202
+      ],
+      "peak_rss_gib": [
+       164.36372985839844,
+       230.1092218017578
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "barrier_iterations": 141,
+    "barrier_seconds": 188.52,
+    "wall_seconds": 240,
+    "peak_rss_gib": 3.8354263305664062,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       2156.223225961258,
+       3137.0012175824463
+      ],
+      "barrier_s_with_1_5x_iterations": 4705.501826373669,
+      "non_solve_s": 244.93816809994834,
+      "wall_s": [
+       2401.161394061206,
+       3381.9393856823945,
+       4950.439994473618
+      ],
+      "peak_rss_gib": [
+       22.791618047441755,
+       31.908265266418454
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       32189.238511036445,
+       70982.23467337614
+      ],
+      "barrier_s_with_1_5x_iterations": 106473.3520100642,
+      "non_solve_s": 1959.5053447995867,
+      "wall_s": [
+       34148.74385583603,
+       72941.74001817573,
+       108432.8573548638
+      ],
+      "peak_rss_gib": [
+       179.53294437953406,
+       251.34612213134767
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   }
+  },
+  "package": {
+   "commit": "ed6af79cf121a2749483da1c09b1e67c866df5e4",
+   "upload_total_bytes": 232464773,
+   "files": 15,
+   "run": {
+    "script": "run_365x24h.sh",
+    "runs": [
+     "integrated (STEPS)",
+     "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+     "integrated_nze (NZE fuel prices)",
+     "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+    ],
+    "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+    "modes": [
+     "serial",
+     "lanes2",
+     "lanes3"
+    ],
+    "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+    "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+    "scaling": "on",
+    "exports_per_run": [
+     "SOLVE_RECEIPT.json",
+     "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+     "COUNTRY_COST_LEDGER.csv",
+     "COUNTRY_COST_LEDGER_DETAIL.csv",
+     "LEDGER_IDENTITY.json",
+     "NODAL_PRICES.csv",
+     "CO2_FLOWS.json",
+     "BUNKER_ACCOUNT.json",
+     "solved network"
+    ],
+    "threads_per_run": 8,
+    "wall_clock_cap_h": 3,
+    "gurobi_time_limit_s": 10500,
+    "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+   },
+   "second_batch_sensitivities": [
+    {
+     "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+     "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+     "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+     "override": "co2.ship_distance=route_factor",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "Lao transit: nearest existing sea port and / or truck",
+     "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+     "override": "s3.gas.lng_expansion=uncapped_cost",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+     "override": "network.max_extension=apg_plans",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+     "override": "corridors.optional_sg_vn_kh=on",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "author electrical parameters of the 19 readjusted cross-border AC lines (decision 98 comparison)",
+     "override": "network.readjust_impedance=author",
+     "scenarios": "integrated"
+    }
+   ],
+   "supersedes": "the S4F package (code 7e09744d) is void (decision 99 c)",
+   "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+  }
+ },
+ "resources": {
+  "cloud": false,
+  "formal_solves": false,
+  "downloads": "none (S4G needs no download)"
+ },
+ "tests": "tests/research: 506 passed, 927 warnings; full tests/: 523 passed, 934 warnings. Licence scan of the package: no licence value (tarball hits = the S4E set: parameter-name lists, presence booleans, scrub keyword lists)."
+}

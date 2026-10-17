@@ -212,9 +212,10 @@ def apply_lao_vn_store(n, cfg, registry: pd.DataFrame) -> dict:
     return led
 
 
-def lao_vn_store_report(n) -> dict:
-    """Post-solve (S4F-2 c): tonnes and land freight per LA node into the Vietnamese national store; flows below 1 t / year not listed."""
-    sl = n.links[n.links.carrier == TRANSIT_RAIL_CARRIER]
+def lao_vn_store_report(n, store: str = "co2 sequestered VN") -> dict:
+    """Post-solve (S4F-2 c): tonnes and land freight per LA node into the Vietnamese national store (S4G-2: the same for the Thai store with
+    store='co2 sequestered TH'); flows below 1 t / year not listed."""
+    sl = n.links[(n.links.carrier == TRANSIT_RAIL_CARRIER) & (n.links.bus1 == store)]
     w = n.snapshot_weightings.objective; out = {}
     for k, z in sl.iterrows():
         t = float((n.links_t.p0[k] * w).sum()) if k in n.links_t.p0 else 0.0

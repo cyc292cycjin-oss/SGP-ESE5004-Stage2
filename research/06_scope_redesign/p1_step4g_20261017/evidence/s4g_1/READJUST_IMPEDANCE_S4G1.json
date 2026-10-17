@@ -1,0 +1,51 @@
+{
+ "sources": {
+  "base_network": {
+   "file": "scripts/base_network.py",
+   "sha256": "c4c4a7f352d2d7271fc56b5c503cb07b5fdf35f316e2745194953ce3f395e66d",
+   "function": "def _set_lines_s_nom_from_linetypes(n: \"pypsa.Network\") -> None:",
+   "lines": {
+    "694": "np.sqrt(3)",
+    "695": "* n.lines[\"type\"].map(n.line_types.i_nom)",
+    "696": "* n.lines.eval(\"v_nom * num_parallel\")"
+   }
+  },
+  "simplify_network": {
+   "file": "scripts/simplify_network.py",
+   "sha256": "e6a9bb63dc1edc5954f887efeb4a0aac5cd1c191a350c5d172e95c68d9a4f5b5",
+   "lines": {
+    "181": "n.lines[\"num_parallel\"] = n.lines.eval(\"s_nom / (sqrt(3) * v_nom * i_nom)\")"
+   }
+  },
+  "pypsa": {
+   "version": "0.30.3",
+   "pf_sha256": "34e946b8c197a67706d6b7ab9a0b558e9e2342495919f02dc12c4cb0fbee01ec",
+   "apply_line_types": "def apply_line_types(network: Network) -> None:",
+   "x_r": {
+    "887": "lines[attr + \"_per_length\"] * lines[\"length\"] / lines[\"num_parallel\"]"
+   },
+   "b": {
+    "894": "* lines[\"c_per_length\"]",
+    "896": "* lines[\"num_parallel\"]"
+   },
+   "calculate_dependent_values": {
+    "1002": "def calculate_dependent_values(network: Network) -> None:",
+    "1007": "apply_line_types(network)",
+    "1015": "network.lines[\"x_pu\"] = network.lines.x / (network.lines.v_nom**2)",
+    "1019": "network.lines[\"x_pu_eff\"] = network.lines[\"x_pu\"]"
+   },
+   "optimisation": {
+    "abstract.py:315": "n.calculate_dependent_values()",
+    "constraints.py:624": "n.calculate_dependent_values()",
+    "constraints.py:651": "weightings = branches.x_pu_eff if carrier == \"AC\" else branches.r_pu_eff",
+    "constraints.py:652": "C = 1e5 * sparse.diags(weightings.values) * sub.C"
+   }
+  },
+  "pypsa_asean_base_network_sha256": "c4c4a7f352d2d7271fc56b5c503cb07b5fdf35f316e2745194953ce3f395e66d"
+ },
+ "lines": 19,
+ "base_sha256": "6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b417f7",
+ "audit_sha256": "528601312403f5111b4c94ab7363582b87d07ed51278f48a52d547fbbe4b326c",
+ "stored_x_equals_type_x_frozen": true,
+ "stored_x_vs_type_x_max_rel": 0.0
+}
