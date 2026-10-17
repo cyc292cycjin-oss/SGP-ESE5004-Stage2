@@ -1,0 +1,4738 @@
+{
+ "label": "SMOKE_TEST_ONLY (56x3h 2013-01-01..01-07, representative weights 8760/56; decision 47) - wind / solar scale cannot be judged from 56 snapshots",
+ "builds": {
+  "BUILD_integrated": {
+   "line": "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"88b9:\tMaximum resident set size (kbytes): 695716:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:51.36:daily=1",
+   "peak_rss_gib": 0.6634864807128906,
+   "wall_s": null,
+   "elapsed": "0:51.36:"
+  },
+  "BUILD_disconnected": {
+   "line": "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9777:\tMaximum resident set size (kbytes): 693100:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:49.30:daily=1",
+   "peak_rss_gib": 0.6609916687011719,
+   "wall_s": null,
+   "elapsed": "0:49.30:"
+  },
+  "BUILD_integrated_nze": {
+   "line": "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9731:\tMaximum resident set size (kbytes): 695396:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:48.48:daily=1",
+   "peak_rss_gib": 0.6631813049316406,
+   "wall_s": null,
+   "elapsed": "0:48.48:"
+  },
+  "BUILD_disconnected_gap": {
+   "line": "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"b1f0:\tMaximum resident set size (kbytes): 694604:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:49.45:daily=1",
+   "peak_rss_gib": 0.6624259948730469,
+   "wall_s": null,
+   "elapsed": "0:49.45:"
+  }
+ },
+ "sets": {
+  "main": {
+   "runs": [
+    {
+     "source": "main",
+     "run": "integrated",
+     "status_line": null,
+     "wall_s": null,
+     "peak_rss_gib_time": null,
+     "termination": "optimal",
+     "objective_eur": 651182991033.4481,
+     "num_col": 610060,
+     "num_row": 1360136,
+     "nnz": 3020376,
+     "barrier_iterations": 99,
+     "barrier_seconds": 109.08,
+     "solve_seconds": 122.87547254562378,
+     "peak_rss_gib_receipt": 3.6109390258789062,
+     "matrix_min": 0.0002,
+     "matrix_max": 200.0,
+     "solver_profile": "formal_barrier",
+     "kvl": true
+    },
+    {
+     "source": "main",
+     "run": "disconnected",
+     "status_line": null,
+     "wall_s": null,
+     "peak_rss_gib_time": null,
+     "termination": "optimal",
+     "objective_eur": 698298611056.0613,
+     "num_col": 604645,
+     "num_row": 1348617,
+     "nnz": 2984665,
+     "barrier_iterations": 117,
+     "barrier_seconds": 116.38,
+     "solve_seconds": 129.4221956729889,
+     "peak_rss_gib_receipt": 3.4937400817871094,
+     "matrix_min": 0.0002,
+     "matrix_max": 200.0,
+     "solver_profile": "formal_barrier",
+     "kvl": true
+    },
+    {
+     "source": "main",
+     "run": "integrated_nze",
+     "status_line": null,
+     "wall_s": null,
+     "peak_rss_gib_time": null,
+     "termination": "optimal",
+     "objective_eur": 556921506352.5294,
+     "num_col": 610060,
+     "num_row": 1360136,
+     "nnz": 3020376,
+     "barrier_iterations": 99,
+     "barrier_seconds": 108.03,
+     "solve_seconds": 121.1552197933197,
+     "peak_rss_gib_receipt": 3.6329002380371094,
+     "matrix_min": 0.0002,
+     "matrix_max": 200.0,
+     "solver_profile": "formal_barrier",
+     "kvl": true
+    }
+   ],
+   "gates": {
+    "integrated": {
+     "run": "integrated",
+     "acceptance_basis": "solver_tolerances",
+     "all_passed_barconvtol": false,
+     "all_passed_solver_tolerances": false,
+     "A1_A2": false,
+     "A3": true,
+     "A4": true,
+     "A5": true,
+     "A6": true,
+     "B1": true,
+     "B2": true,
+     "B3": true,
+     "B8": true,
+     "B11": true,
+     "B12": true,
+     "B13": true,
+     "B14": true,
+     "B15": true,
+     "A1_A2_S4B": false,
+     "A3_S4B": true,
+     "A5_S4B": true,
+     "B1_S4B": true,
+     "B3_S4B": true,
+     "A1_A2_S4B_detail": {
+      "row_fail_count": 0,
+      "column_fail_count": 0,
+      "row_max_ratio_to_budget": 0.04959075223110505,
+      "column_max_ratio_to_budget": 0.0,
+      "stationarity_fail_count": 33,
+      "stationarity_normalized_max": 0.0017691722329690892,
+      "dual_sign_fail_count": 0,
+      "dual_sign_normalized_max": 9.835027252008557e-07
+     },
+     "A1_A2_failed_criteria": [
+      "dual_stationarity",
+      "dual_sign"
+     ],
+     "A3_failed": [],
+     "A3_S4B_failed": [],
+     "B1_failed_countries": [],
+     "B3_S4B_failing": []
+    },
+    "disconnected": {
+     "run": "disconnected",
+     "acceptance_basis": "solver_tolerances",
+     "all_passed_barconvtol": false,
+     "all_passed_solver_tolerances": false,
+     "A1_A2": false,
+     "A3": false,
+     "A4": true,
+     "A5": true,
+     "A6": true,
+     "B1": false,
+     "B2": true,
+     "B3": false,
+     "B8": true,
+     "B11": true,
+     "B12": true,
+     "B13": true,
+     "B14": true,
+     "B15": true,
+     "A1_A2_S4B": false,
+     "A3_S4B": true,
+     "A5_S4B": true,
+     "B1_S4B": true,
+     "B3_S4B": true,
+     "A1_A2_S4B_detail": {
+      "row_fail_count": 0,
+      "column_fail_count": 0,
+      "row_max_ratio_to_budget": 0.18905711115559645,
+      "column_max_ratio_to_budget": 0.0,
+      "stationarity_fail_count": 0,
+      "stationarity_normalized_max": 3.935917752241849e-06,
+      "dual_sign_fail_count": 1,
+      "dual_sign_normalized_max": 1.6881505577214184e-05
+     },
+     "A1_A2_failed_criteria": [
+      "primal_rows_within_budget",
+      "dual_stationarity",
+      "dual_sign"
+     ],
+     "A3_failed": [
+      {
+       "check": "STORE_ENERGY_LOWER",
+       "residual": 0.003734556969448022
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:ID",
+       "residual": 0.04469413496553898
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:KH",
+       "residual": 0.0031426620262209326
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:LA",
+       "residual": 0.010079312734887935
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:MY",
+       "residual": 0.004602621134836227
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:PH",
+       "residual": 0.015278329723514616
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:TH",
+       "residual": 0.008391526062041521
+      },
+      {
+       "check": "COUNTRY_CO2_CAP:VN",
+       "residual": 0.011533440498169512
+      }
+     ],
+     "A3_S4B_failed": [],
+     "B1_failed_countries": [],
+     "B3_S4B_failing": []
+    },
+    "integrated_nze": {
+     "run": "integrated_nze",
+     "acceptance_basis": "solver_tolerances",
+     "all_passed_barconvtol": false,
+     "all_passed_solver_tolerances": false,
+     "A1_A2": false,
+     "A3": false,
+     "A4": true,
+     "A5": true,
+     "A6": true,
+     "B1": false,
+     "B2": true,
+     "B3": true,
+     "B8": true,
+     "B11": true,
+     "B12": true,
+     "B13": true,
+     "B14": true,
+     "B15": true,
+     "A1_A2_S4B": false,
+     "A3_S4B": true,
+     "A5_S4B": true,
+     "B1_S4B": true,
+     "B3_S4B": true,
+     "A1_A2_S4B_detail": {
+      "row_fail_count": 0,
+      "column_fail_count": 0,
+      "row_max_ratio_to_budget": 0.0077707667237684065,
+      "column_max_ratio_to_budget": 0.0,
+      "stationarity_fail_count": 29,
+      "stationarity_normalized_max": 0.0018759730267414786,
+      "dual_sign_fail_count": 0,
+      "dual_sign_normalized_max": 9.154926301579884e-07
+     },
+     "A1_A2_failed_criteria": [
+      "primal_rows_within_budget",
+      "dual_stationarity",
+      "dual_sign"
+     ],
+     "A3_failed": [
+      {
+       "check": "COUNTRY_CO2_CAP:ID",
+       "residual": 0.01838774827774614
+      }
+     ],
+     "A3_S4B_failed": [],
+     "B1_failed_countries": [],
+     "B3_S4B_failing": []
+    }
+   },
+   "items_integrated": {
+    "objective": 651182991033.4481,
+    "sabatier_gas_twh": {},
+    "sabatier_capacity_gw_h2": {},
+    "electrobiofuels_oil_twh": {
+     "KH": 8.729716673761997,
+     "LA": 11.37460030114107,
+     "MM": 15.02318513702711,
+     "MY": 140.03938864718432,
+     "PH": 17.71375964497148,
+     "TH": 19.573290378640696,
+     "TL": 0.7159769271599282
+    },
+    "fischer_tropsch_oil_twh": {},
+    "btl_oil_twh": {
+     "LA": 1.6873232730401386,
+     "MM": 24.693177597792193
+    },
+    "methanolisation_twh": {
+     "ID": 410.3812300846251,
+     "MY": 6.818267907659207,
+     "PH": 92.83638524860126,
+     "TH": 13.852941688852686
+    },
+    "smr_h2_twh": {
+     "ID": 0.005711181721761072
+    },
+    "smr_cc_h2_twh": {
+     "ID": 399.6717017824872,
+     "MM": 0.13931105416733777,
+     "MY": 132.6702243314938,
+     "PH": 84.14116216654975,
+     "TH": 73.47902526230668,
+     "TL": 0.5852353528867439,
+     "VN": 9.221894805477572
+    },
+    "electrolysis_h2_twh": {
+     "": 206.26513225969782
+    },
+    "lng_import_twh": {
+     "ID": 420.05132796724365,
+     "KH": 14.666666666404854,
+     "MY": 231.87933643654912,
+     "PH": 174.8199638444366,
+     "SG": 337.6711199548743,
+     "TH": 633.3333333316978,
+     "VN": 278.66666666273335
+    },
+    "lng_terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "existing_gw": 12.32876712328767,
+      "optimal_gw": 30.82191780820596,
+      "max_gw": 30.82191780821918,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "existing_gw": 0.45662100456621,
+      "optimal_gw": 1.1415525114258689,
+      "max_gw": 1.141552511415525,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Maluku16 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 3.5007610350112666,
+      "max_gw": 3.5007610350114153,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "existing_gw": 0.5327245053276256,
+      "optimal_gw": 1.331811263322911,
+      "max_gw": 1.331811263319064,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "existing_gw": 4.5662100456621,
+      "optimal_gw": 11.415525114200845,
+      "max_gw": 11.415525114155251,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "KH2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 1.6742770167497933,
+      "max_gw": 1.6742770167465753,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "existing_gw": 11.11111111111872,
+      "optimal_gw": 27.777777777791442,
+      "max_gw": 27.7777777777968,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon5 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 1.486914362799955e-09,
+      "max_gw": 2.2831050228344747,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon9 0 LNG import": {
+      "existing_gw": 22.37442922375571,
+      "optimal_gw": 22.374429223966352,
+      "max_gw": 55.93607305938927,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "SG2 0 LNG import": {
+      "existing_gw": 16.742770167431505,
+      "optimal_gw": 41.856925418599374,
+      "max_gw": 41.85692541857877,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "TH2 3 LNG import": {
+      "existing_gw": 28.91933028915525,
+      "optimal_gw": 72.29832572289716,
+      "max_gw": 72.29832572288812,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045660011,
+      "max_gw": 4.5662100456621,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 2 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.2831050228287326,
+      "max_gw": 2.28310502283105,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 3 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045659197,
+      "max_gw": 4.566210045658676,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 5 LNG import": {
+      "existing_gw": 6.088280060878995,
+      "optimal_gw": 15.220700152200253,
+      "max_gw": 15.22070015219749,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 6 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 5.1750380517498416,
+      "max_gw": 5.175038051746576,
+      "capex_eur_per_mw_a": 7018.0
+     }
+    },
+    "domestic_gas_twh": {
+     "BN": 27.64442592625756,
+     "ID": 727.5777749987858,
+     "MM": 184.8966452267426,
+     "MY": 677.5045295739981,
+     "PH": 16.41632986388685,
+     "TH": 367.17785474904235,
+     "TL": 2.6049384153704844,
+     "VN": 103.62460511369677
+    },
+    "dac_captured_mt": {
+     "BN": 0.7605297838584708,
+     "ID": 32.839741659013605,
+     "PH": 31.11892473231971,
+     "SG": 10.870874971861204,
+     "TL": 0.03535223716816514,
+     "VN": 146.80506446661514
+    },
+    "co2_vent_links": 0,
+    "lng_expansion_gw": 142.88432268057215
+   },
+   "lng_integrated": {
+    "terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "optimal_gw": 30.82191780820596,
+      "existing_gw": 12.32876712328767,
+      "max_gw": 30.82191780821918,
+      "binding": true
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "optimal_gw": 1.1415525114258689,
+      "existing_gw": 0.45662100456621,
+      "max_gw": 1.141552511415525,
+      "binding": true
+     },
+     "ID_Maluku16 0 LNG import": {
+      "optimal_gw": 3.5007610350112666,
+      "existing_gw": 0.0,
+      "max_gw": 3.5007610350114153,
+      "binding": true
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "optimal_gw": 1.331811263322911,
+      "existing_gw": 0.5327245053276256,
+      "max_gw": 1.331811263319064,
+      "binding": true
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "optimal_gw": 11.415525114200845,
+      "existing_gw": 4.5662100456621,
+      "max_gw": 11.415525114155251,
+      "binding": true
+     },
+     "KH2 0 LNG import": {
+      "optimal_gw": 1.6742770167497933,
+      "existing_gw": 0.0,
+      "max_gw": 1.6742770167465753,
+      "binding": true
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "optimal_gw": 27.777777777791442,
+      "existing_gw": 11.11111111111872,
+      "max_gw": 27.7777777777968,
+      "binding": true
+     },
+     "PH_Luzon5 0 LNG import": {
+      "optimal_gw": 1.486914362799955e-09,
+      "existing_gw": 0.0,
+      "max_gw": 2.2831050228344747,
+      "binding": false
+     },
+     "PH_Luzon9 0 LNG import": {
+      "optimal_gw": 22.374429223966352,
+      "existing_gw": 22.37442922375571,
+      "max_gw": 55.93607305938927,
+      "binding": false
+     },
+     "SG2 0 LNG import": {
+      "optimal_gw": 41.856925418599374,
+      "existing_gw": 16.742770167431505,
+      "max_gw": 41.85692541857877,
+      "binding": true
+     },
+     "TH2 3 LNG import": {
+      "optimal_gw": 72.29832572289716,
+      "existing_gw": 28.91933028915525,
+      "max_gw": 72.29832572288812,
+      "binding": true
+     },
+     "VN2 0 LNG import": {
+      "optimal_gw": 4.566210045660011,
+      "existing_gw": 0.0,
+      "max_gw": 4.5662100456621,
+      "binding": true
+     },
+     "VN2 2 LNG import": {
+      "optimal_gw": 2.2831050228287326,
+      "existing_gw": 0.0,
+      "max_gw": 2.28310502283105,
+      "binding": true
+     },
+     "VN2 3 LNG import": {
+      "optimal_gw": 4.566210045659197,
+      "existing_gw": 0.0,
+      "max_gw": 4.566210045658676,
+      "binding": true
+     },
+     "VN2 5 LNG import": {
+      "optimal_gw": 15.220700152200253,
+      "existing_gw": 6.088280060878995,
+      "max_gw": 15.22070015219749,
+      "binding": true
+     },
+     "VN2 6 LNG import": {
+      "optimal_gw": 5.1750380517498416,
+      "existing_gw": 0.0,
+      "max_gw": 5.175038051746576,
+      "binding": true
+     }
+    },
+    "binding_count": 14,
+    "expansion_gw": 142.88432268057215,
+    "import_twh": {
+     "ID": 420.05132796724365,
+     "KH": 14.666666666404854,
+     "MY": 231.87933643654912,
+     "PH": 174.8199638444366,
+     "SG": 337.6711199548743,
+     "TH": 633.3333333316978,
+     "VN": 278.66666666273335
+    }
+   },
+   "asean_integrated": {
+    "PHS": {
+     "gw": 5.406,
+     "twh": 0.227
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "coal": {
+     "gw": 113.763,
+     "twh": 52.803
+    },
+    "gas CCGT/OCGT": {
+     "gw": 226.491,
+     "twh": 807.055
+    },
+    "geothermal": {
+     "gw": 27.122,
+     "twh": 149.778
+    },
+    "hydro reservoir": {
+     "gw": 134.545,
+     "twh": 647.396
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 68.15,
+     "twh": 474.837
+    },
+    "offwind": {
+     "gw": 408.788,
+     "twh": 2167.608
+    },
+    "oil": {
+     "gw": 2.032,
+     "twh": 0.129
+    },
+    "onwind": {
+     "gw": 461.011,
+     "twh": 1245.52
+    },
+    "ror": {
+     "gw": 16.486,
+     "twh": 50.063
+    },
+    "solar": {
+     "gw": 824.27,
+     "twh": 1045.589
+    },
+    "solar rooftop": {
+     "gw": 1.461,
+     "twh": 1.716
+    }
+   },
+   "new_builds_integrated": [
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 80312.2184084921,
+     "new_p_nom_max_mw": 80312.218409,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 2.4270130919577336e-07,
+     "new_p_nom_max_mw": 4170.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 3.9764135058447844e-07,
+     "new_p_nom_max_mw": 5056.766057,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 7.54064511082915e-07,
+     "new_p_nom_max_mw": 38064.223568,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 5985.999999999529,
+     "new_p_nom_max_mw": 5986.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 6.018705804221887e-07,
+     "new_p_nom_max_mw": 11756.925782,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 3.144093224026382e-07,
+     "new_p_nom_max_mw": 15949.569789,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "ID",
+     "existing_mw": 6319.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "KH",
+     "existing_mw": 1528.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "LA",
+     "existing_mw": 9758.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MM",
+     "existing_mw": 3548.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MY",
+     "existing_mw": 7614.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "PH",
+     "existing_mw": 1562.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "TH",
+     "existing_mw": 1726.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "VN",
+     "existing_mw": 16192.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 4188.81119858473,
+     "new_p_nom_max_mw": 6222.781591999999,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 6.241990107298965e-08,
+     "new_p_nom_max_mw": 6526.233943,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 1.5481770973693604e-08,
+     "new_p_nom_max_mw": 3877.7764319999997,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 2370.9999999995043,
+     "new_p_nom_max_mw": 2371.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 1.3114932501583713e-07,
+     "new_p_nom_max_mw": 8814.074219,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 7.40907177628445e-08,
+     "new_p_nom_max_mw": 6088.430210999999,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "ID",
+     "existing_mw": 1616.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "LA",
+     "existing_mw": 4659.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MM",
+     "existing_mw": 510.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MY",
+     "existing_mw": 129.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "PH",
+     "existing_mw": 1242.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "VN",
+     "existing_mw": 1770.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 2.1785425941964818e-07,
+     "new_p_nom_max_mw": 2399.9999999999995,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 6.964029811259276e-08,
+     "new_p_nom_max_mw": 100.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 2.1081696018692976e-07,
+     "new_p_nom_max_mw": 7958.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 1.3928134940312525e-07,
+     "new_p_nom_max_mw": 2480.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 1.468431324614248e-07,
+     "new_p_nom_max_mw": 1500.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "ID",
+     "existing_mw": 1040.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "PH",
+     "existing_mw": 856.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "TH",
+     "existing_mw": 2310.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "VN",
+     "existing_mw": 1200.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 22421.499999004194,
+     "new_p_nom_max_mw": 22421.499999000003,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 229.00000000095127,
+     "new_p_nom_max_mw": 229.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 3123.999999992291,
+     "new_p_nom_max_mw": 3124.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 44.99999999989797,
+     "new_p_nom_max_mw": 45.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "ID",
+     "existing_mw": 1168.5,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "PH",
+     "existing_mw": 133.6,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 1.924162266563128e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 1.006032240891298e-06,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 5.7336364530220974e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 7.453704959534082e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 2.614132178154121e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 8.051410087493135e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 5.7828765051503404e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 8.279551125304143e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 1.3452002624568903e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 9.152979839911031e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 3.0836860994295265e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 68149.76849179174,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 7.155964038138835e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 9.526465057641802e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 3.5321656269777325e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 1.0941812830790893e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 6.911482079236432e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 4.6555660859316686e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 1.1179203750017439e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 1.785781061709738e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 1.1466589165496636e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    }
+   ],
+   "net_exports_twh_integrated": {
+    "H2": {
+     "KH": -5.145,
+     "LA": 2.568,
+     "MM": -12.49,
+     "MY": 0.24,
+     "SG": -0.24,
+     "TH": 35.465,
+     "VN": -20.399
+    },
+    "co2": {
+     "KH": 14.675,
+     "LA": 10.432,
+     "MM": 2.893,
+     "MY": -32.105,
+     "SG": 32.105,
+     "TH": -28.0
+    },
+    "electricity": {
+     "ID": 66.216,
+     "KH": 47.98,
+     "LA": 115.127,
+     "MM": -26.126,
+     "MY": -427.635,
+     "SG": -197.421,
+     "TH": 296.398,
+     "VN": 125.461
+    },
+    "gas": {
+     "ID": -255.691,
+     "KH": -8.937,
+     "LA": -11.139,
+     "MM": 152.847,
+     "MY": 33.398,
+     "SG": 290.709,
+     "TH": 70.962,
+     "VN": -272.148
+    }
+   },
+   "bunker_account_integrated": {
+    "gate": "B1_BUNKERS",
+    "passed": true,
+    "present": true,
+    "final_level_tco2": -3.875497743148729e-06,
+    "cap_tco2": 0.0,
+    "tolerance_t": 0.00101,
+    "gross_co2_flow_t": 3.875497743138112e-06,
+    "port_tonnes": {
+     "ASEAN aviation international oil meter": -3.875497743138112e-06
+    },
+    "supply_mwh": {
+     "ASEAN aviation international oil meter": -1.507389242760837e-05,
+     "ASEAN aviation international oil meter non-fossil": 239550418.5996031,
+     "ASEAN shipping international methanol": 485585336.24322
+    }
+   },
+   "co2_flows_integrated": {
+    "extra_asean_by_country": {
+     "BN": {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "exported_t": 0.0006088964951664867,
+      "e_nom_opt": 0.0006093495353874616,
+      "cost_eur": 0.024813730518303885
+     },
+     "ID": {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "exported_t": 0.01126473821316848,
+      "e_nom_opt": 0.01125809998202753,
+      "cost_eur": 0.4590602517828178
+     },
+     "KH": {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "exported_t": 11537871.330018228,
+      "e_nom_opt": 11537871.330015302,
+      "cost_eur": 470190963.83475846
+     },
+     "LA": {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "exported_t": 0.01352428254687271,
+      "e_nom_opt": 0.013525421839589762,
+      "cost_eur": 0.55114113028314
+     },
+     "MM": {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "exported_t": 15858071.440893937,
+      "e_nom_opt": 15858071.4407899,
+      "cost_eur": 646247620.7335724
+     },
+     "MY": {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "exported_t": 0.002312443530451533,
+      "e_nom_opt": 0.0023121981380166703,
+      "cost_eur": 0.09423662487617117
+     },
+     "PH": {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "exported_t": 0.0018093247923315987,
+      "e_nom_opt": 0.0018105193158188548,
+      "cost_eur": 0.0737335461336935
+     },
+     "SG": {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "exported_t": 242820.3268332522,
+      "e_nom_opt": 242820.3268324398,
+      "cost_eur": 9895406.201606302
+     },
+     "TH": {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "exported_t": 0.002195226109624243,
+      "e_nom_opt": 0.0021962275767567875,
+      "cost_eur": 0.089459784287421
+     },
+     "TL": {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "exported_t": 0.0007144326093863758,
+      "e_nom_opt": 0.000715399423079922,
+      "cost_eur": 0.029114534873377795
+     },
+     "VN": {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "exported_t": 156224984.05125156,
+      "e_nom_opt": 156224984.05136243,
+      "cost_eur": 6366475559.058925
+     }
+    },
+    "sequestered_by_country": {
+     "BN": {
+      "final_level_t": 4056327.065965092,
+      "e_nom_max": 371586000.0
+     },
+     "ID": {
+      "final_level_t": 596360677.1483967,
+      "e_nom_max": 1025500000.0
+     },
+     "KH": {
+      "final_level_t": 1699999.9999884418,
+      "e_nom_max": 1700000.0
+     },
+     "MY": {
+      "final_level_t": 203293633.44662336,
+      "e_nom_max": 2575460000.0
+     },
+     "PH": {
+      "final_level_t": 109063530.3064658,
+      "e_nom_max": 446000000.0
+     },
+     "TH": {
+      "final_level_t": 320479999.9890004,
+      "e_nom_max": 320480000.0
+     },
+     "TL": {
+      "final_level_t": 542008.3486074557,
+      "e_nom_max": 5000000.0
+     },
+     "VN": {
+      "final_level_t": 235999999.99984324,
+      "e_nom_max": 236000000.0
+     }
+    },
+    "cross_border_pipeline": {
+     "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+      "from_country": "ID",
+      "to_country": "MY",
+      "capacity_opt_t_per_h": 7.700810296081648e-08,
+      "net_t_0_to_1": -1.2466390629229075e-05,
+      "abs_t": 1.5264359087131644e-05
+     },
+     "CO2 pipeline KH2 0 -> VN2 0": {
+      "from_country": "KH",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 1.3676387530467938e-07,
+      "net_t_0_to_1": -4.7847760970555854e-05,
+      "abs_t": 4.7847760970555854e-05
+     },
+     "CO2 pipeline KH2 1 -> LA2 4": {
+      "from_country": "KH",
+      "to_country": "LA",
+      "capacity_opt_t_per_h": 1.3449391125196907e-07,
+      "net_t_0_to_1": 0.0005057529605387454,
+      "abs_t": 0.0005057529605387454
+     },
+     "CO2 pipeline KH2 4 -> TH2 3": {
+      "from_country": "KH",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1675.2171936772183,
+      "net_t_0_to_1": 14674902.595353793,
+      "abs_t": 14674902.595353793
+     },
+     "CO2 pipeline LA2 0 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 87.71405413674192,
+      "net_t_0_to_1": 768375.1137048082,
+      "abs_t": 768375.1137048082
+     },
+     "CO2 pipeline LA2 1 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 2.726568422012692e-07,
+      "net_t_0_to_1": 0.0020987433295164906,
+      "abs_t": 0.0020987433295164906
+     },
+     "CO2 pipeline LA2 1 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 99.75057951256731,
+      "net_t_0_to_1": 873815.0762648906,
+      "abs_t": 873815.0762648906
+     },
+     "CO2 pipeline LA2 2 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 618.0157617241308,
+      "net_t_0_to_1": 5413818.072155771,
+      "abs_t": 5413818.072155771
+     },
+     "CO2 pipeline LA2 2 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 3.0887382904838815e-06,
+      "net_t_0_to_1": 0.02668724590949044,
+      "abs_t": 0.02668724590949044
+     },
+     "CO2 pipeline LA2 3 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 121.00117537655323,
+      "net_t_0_to_1": 1059970.296749189,
+      "abs_t": 1059970.296749189
+     },
+     "CO2 pipeline LA2 3 -> VN2 2": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 7.541332283107029e-08,
+      "net_t_0_to_1": -0.00029343653821258886,
+      "abs_t": 0.00029343653821258886
+     },
+     "CO2 pipeline LA2 3 -> VN2 3": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 3.503966822105174e-07,
+      "net_t_0_to_1": -0.002464182013040687,
+      "abs_t": 0.002464182013040687
+     },
+     "CO2 pipeline LA2 4 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 127.33309934683824,
+      "net_t_0_to_1": 1115437.9501281562,
+      "abs_t": 1115437.9501281562
+     },
+     "CO2 pipeline LA2 4 -> TH2 2": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 4.983362545814127e-08,
+      "net_t_0_to_1": 0.00022055862790573233,
+      "abs_t": 0.00022055862790573233
+     },
+     "CO2 pipeline LA2 4 -> VN2 2": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 1.990315863400975e-07,
+      "net_t_0_to_1": -0.0009206527038671446,
+      "abs_t": 0.0009206527038671446
+     },
+     "CO2 pipeline LA2 4 -> VN2 7": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 1.1876991416849291e-07,
+      "net_t_0_to_1": -0.0004190694537269675,
+      "abs_t": 0.0004190694537269675
+     },
+     "CO2 pipeline LA2 5 -> MM2 13": {
+      "from_country": "LA",
+      "to_country": "MM",
+      "capacity_opt_t_per_h": 9.142309000169483e-08,
+      "net_t_0_to_1": -0.0001498859401141148,
+      "abs_t": 0.0001498859401141148
+     },
+     "CO2 pipeline LA2 5 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 137.03182401899218,
+      "net_t_0_to_1": 1200398.7736784494,
+      "abs_t": 1200398.7736784494
+     },
+     "CO2 pipeline MM2 4 -> TH2 4": {
+      "from_country": "MM",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 330.2807854608404,
+      "net_t_0_to_1": 2893259.6834982294,
+      "abs_t": 2893259.6834982294
+     },
+     "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+      "from_country": "MY",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1.1249093222666495e-07,
+      "net_t_0_to_1": -8.582117988721692e-05,
+      "abs_t": 8.582117988721692e-05
+     },
+     "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+      "from_country": "MY",
+      "to_country": "SG",
+      "capacity_opt_t_per_h": 3708.6552707198257,
+      "net_t_0_to_1": -32105430.083211124,
+      "abs_t": 32105430.083211124
+     }
+    },
+    "dac_by_country": {
+     "BN": 760529.7838584709,
+     "ID": 32839741.659013618,
+     "KH": 0.0018691192573950075,
+     "LA": 0.0019523280123269733,
+     "MM": 0.002529898120380833,
+     "MY": 0.0016519598028412522,
+     "PH": 31118924.73231971,
+     "SG": 10870874.971861204,
+     "TH": 0.0005276494152393927,
+     "TL": 35352.23716816514,
+     "VN": 146805064.46661517
+    }
+   },
+   "emissions_integrated": {
+    "by_country": {
+     "BN": 1.2700419225305217e-05,
+     "ID": -0.019330536609078804,
+     "KH": 3.052428166732616e-05,
+     "LA": -0.00015179639720938154,
+     "MM": 0.00027255744182822373,
+     "MY": 9.948946232098458e-05,
+     "PH": -0.00040364591404795647,
+     "SG": 0.00036690204002223027,
+     "TH": -0.000845926693529994,
+     "TL": -0.00030815857701165677,
+     "VN": -0.0009821232556244484
+    },
+    "store_final_level": {
+     "BN": 1.3460986792779295e-05,
+     "ID": -0.01920151407830417,
+     "KH": 3.0524541216436774e-05,
+     "LA": -0.00015179621368588414,
+     "MM": 0.000272556790150702,
+     "MY": 0.00010106794070452452,
+     "PH": -0.0003507696674205363,
+     "SG": 0.00037777156103402376,
+     "TH": -0.0008427031571045518,
+     "TL": -0.0003081232149497737,
+     "VN": -0.0008353106677532196
+    },
+    "asean_total": -0.021240013801438175,
+    "every_tonne_booked_once": true
+   },
+   "items_disconnected": {
+    "objective": 698298611056.0613,
+    "sabatier_gas_twh": {
+     "KH": 5.691191784113718,
+     "LA": 9.87342767573849,
+     "VN": 221.99154225598295
+    },
+    "sabatier_capacity_gw_h2": {
+     "KH": 1.2088540585677026,
+     "LA": 1.408879562856983,
+     "VN": 48.13474696498185
+    },
+    "electrobiofuels_oil_twh": {
+     "LA": 2.302020287859667e-06,
+     "MM": 44.91381922768576,
+     "MY": 140.16229761280454,
+     "PH": 4.165498843397021,
+     "TH": 23.47156513716874,
+     "TL": 0.7165492975954155
+    },
+    "fischer_tropsch_oil_twh": {},
+    "btl_oil_twh": {
+     "KH": 11.910632120615519,
+     "LA": 5.546504418194285,
+     "MM": 8.663549389243784
+    },
+    "methanolisation_twh": {
+     "ID": 299.74446701545196,
+     "LA": 26.26625162617074,
+     "MY": 18.2818511968729,
+     "PH": 134.04968435146205,
+     "TH": 39.40347138807693
+    },
+    "smr_h2_twh": {
+     "ID": 0.0055099028708998085
+    },
+    "smr_cc_h2_twh": {
+     "ID": 223.43625112229162,
+     "MM": 37.061515342590916,
+     "MY": 145.57632947616133,
+     "PH": 115.32940846077928,
+     "SG": 0.24043169054075778,
+     "TH": 71.44790190891698,
+     "TL": 0.5857032212132206
+    },
+    "electrolysis_h2_twh": {
+     "": 568.2544226568853
+    },
+    "lng_import_twh": {
+     "ID": 419.79838277275354,
+     "KH": 14.666666665900692,
+     "MY": 243.33333333431412,
+     "PH": 196.0000003450163,
+     "SG": 349.14532411344845,
+     "TH": 546.8784664679955,
+     "VN": 278.66666668079444
+    },
+    "lng_terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "existing_gw": 12.32876712328767,
+      "optimal_gw": 30.82191780828457,
+      "max_gw": 30.82191780821918,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "existing_gw": 0.45662100456621,
+      "optimal_gw": 1.141552511504513,
+      "max_gw": 1.141552511415525,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Maluku16 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 3.500761035049288,
+      "max_gw": 3.5007610350114153,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "existing_gw": 0.5327245053276256,
+      "optimal_gw": 1.3318112633603942,
+      "max_gw": 1.331811263319064,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "existing_gw": 4.5662100456621,
+      "optimal_gw": 11.415525114238786,
+      "max_gw": 11.415525114155251,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "KH2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 1.6742770167936831,
+      "max_gw": 1.6742770167465753,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "existing_gw": 11.11111111111872,
+      "optimal_gw": 27.77777777787666,
+      "max_gw": 27.7777777777968,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon5 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 7.381101793625427e-08,
+      "max_gw": 2.2831050228344747,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon9 0 LNG import": {
+      "existing_gw": 22.37442922375571,
+      "optimal_gw": 22.37442922390585,
+      "max_gw": 55.93607305938927,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "SG2 0 LNG import": {
+      "existing_gw": 16.742770167431505,
+      "optimal_gw": 41.856925418521776,
+      "max_gw": 41.85692541857877,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "TH2 3 LNG import": {
+      "existing_gw": 28.91933028915525,
+      "optimal_gw": 72.29832571541289,
+      "max_gw": 72.29832572288812,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045747832,
+      "max_gw": 4.5662100456621,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 2 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.283105022873436,
+      "max_gw": 2.28310502283105,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 3 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045703445,
+      "max_gw": 4.566210045658676,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 5 LNG import": {
+      "existing_gw": 6.088280060878995,
+      "optimal_gw": 15.22070015224343,
+      "max_gw": 15.22070015219749,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 6 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 5.1750380517934325,
+      "max_gw": 5.175038051746576,
+      "capex_eur_per_mw_a": 7018.0
+     }
+    },
+    "domestic_gas_twh": {
+     "BN": 27.644425943517057,
+     "ID": 727.5777750005572,
+     "MM": 184.89664522929365,
+     "MY": 530.1091235747754,
+     "PH": 43.00797067350627,
+     "TH": 201.0459323834222,
+     "TL": 2.5934945514113243,
+     "VN": 103.62460511454918
+    },
+    "dac_captured_mt": {
+     "BN": 0.7605297806488427,
+     "ID": 9.980698060359781,
+     "KH": 7.499832039955615,
+     "LA": 5.63164002675074,
+     "PH": 39.3918583042535,
+     "SG": 14.96901791625702,
+     "TL": 0.03507521443953273,
+     "VN": 146.2289178593592
+    },
+    "co2_vent_links": 0,
+    "lng_expansion_gw": 142.8843227459372
+   },
+   "lng_disconnected": {
+    "terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "optimal_gw": 30.82191780828457,
+      "existing_gw": 12.32876712328767,
+      "max_gw": 30.82191780821918,
+      "binding": true
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "optimal_gw": 1.141552511504513,
+      "existing_gw": 0.45662100456621,
+      "max_gw": 1.141552511415525,
+      "binding": true
+     },
+     "ID_Maluku16 0 LNG import": {
+      "optimal_gw": 3.500761035049288,
+      "existing_gw": 0.0,
+      "max_gw": 3.5007610350114153,
+      "binding": true
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "optimal_gw": 1.3318112633603942,
+      "existing_gw": 0.5327245053276256,
+      "max_gw": 1.331811263319064,
+      "binding": true
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "optimal_gw": 11.415525114238786,
+      "existing_gw": 4.5662100456621,
+      "max_gw": 11.415525114155251,
+      "binding": true
+     },
+     "KH2 0 LNG import": {
+      "optimal_gw": 1.6742770167936831,
+      "existing_gw": 0.0,
+      "max_gw": 1.6742770167465753,
+      "binding": true
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "optimal_gw": 27.77777777787666,
+      "existing_gw": 11.11111111111872,
+      "max_gw": 27.7777777777968,
+      "binding": true
+     },
+     "PH_Luzon5 0 LNG import": {
+      "optimal_gw": 7.381101793625427e-08,
+      "existing_gw": 0.0,
+      "max_gw": 2.2831050228344747,
+      "binding": false
+     },
+     "PH_Luzon9 0 LNG import": {
+      "optimal_gw": 22.37442922390585,
+      "existing_gw": 22.37442922375571,
+      "max_gw": 55.93607305938927,
+      "binding": false
+     },
+     "SG2 0 LNG import": {
+      "optimal_gw": 41.856925418521776,
+      "existing_gw": 16.742770167431505,
+      "max_gw": 41.85692541857877,
+      "binding": true
+     },
+     "TH2 3 LNG import": {
+      "optimal_gw": 72.29832571541289,
+      "existing_gw": 28.91933028915525,
+      "max_gw": 72.29832572288812,
+      "binding": true
+     },
+     "VN2 0 LNG import": {
+      "optimal_gw": 4.566210045747832,
+      "existing_gw": 0.0,
+      "max_gw": 4.5662100456621,
+      "binding": true
+     },
+     "VN2 2 LNG import": {
+      "optimal_gw": 2.283105022873436,
+      "existing_gw": 0.0,
+      "max_gw": 2.28310502283105,
+      "binding": true
+     },
+     "VN2 3 LNG import": {
+      "optimal_gw": 4.566210045703445,
+      "existing_gw": 0.0,
+      "max_gw": 4.566210045658676,
+      "binding": true
+     },
+     "VN2 5 LNG import": {
+      "optimal_gw": 15.22070015224343,
+      "existing_gw": 6.088280060878995,
+      "max_gw": 15.22070015219749,
+      "binding": true
+     },
+     "VN2 6 LNG import": {
+      "optimal_gw": 5.1750380517934325,
+      "existing_gw": 0.0,
+      "max_gw": 5.175038051746576,
+      "binding": true
+     }
+    },
+    "binding_count": 14,
+    "expansion_gw": 142.8843227459372,
+    "import_twh": {
+     "ID": 419.79838277275354,
+     "KH": 14.666666665900692,
+     "MY": 243.33333333431412,
+     "PH": 196.0000003450163,
+     "SG": 349.14532411344845,
+     "TH": 546.8784664679955,
+     "VN": 278.66666668079444
+    }
+   },
+   "asean_disconnected": {
+    "PHS": {
+     "gw": 5.406,
+     "twh": 0.245
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "coal": {
+     "gw": 113.763,
+     "twh": 68.451
+    },
+    "gas CCGT/OCGT": {
+     "gw": 260.271,
+     "twh": 841.741
+    },
+    "geothermal": {
+     "gw": 27.122,
+     "twh": 149.403
+    },
+    "hydro reservoir": {
+     "gw": 133.884,
+     "twh": 636.171
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 121.719,
+     "twh": 918.715
+    },
+    "offwind": {
+     "gw": 426.952,
+     "twh": 2282.573
+    },
+    "oil": {
+     "gw": 2.032,
+     "twh": 0.156
+    },
+    "onwind": {
+     "gw": 420.658,
+     "twh": 1111.871
+    },
+    "ror": {
+     "gw": 16.486,
+     "twh": 50.722
+    },
+    "solar": {
+     "gw": 881.622,
+     "twh": 1084.89
+    },
+    "solar rooftop": {
+     "gw": 9.458,
+     "twh": 10.59
+    }
+   },
+   "new_builds_disconnected": [
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 79651.07097659328,
+     "new_p_nom_max_mw": 80312.218409,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 1.6210923982588094e-06,
+     "new_p_nom_max_mw": 4170.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 2.3855968566762153e-06,
+     "new_p_nom_max_mw": 5056.766057,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 5.00823582298616e-06,
+     "new_p_nom_max_mw": 38064.223568,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 5986.0000000106365,
+     "new_p_nom_max_mw": 5986.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 4.121508014967661e-06,
+     "new_p_nom_max_mw": 11756.925782,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 2.2208021547769045e-06,
+     "new_p_nom_max_mw": 15949.569789,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "ID",
+     "existing_mw": 6319.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "KH",
+     "existing_mw": 1528.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "LA",
+     "existing_mw": 9758.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MM",
+     "existing_mw": 3548.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MY",
+     "existing_mw": 7614.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "PH",
+     "existing_mw": 1562.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "TH",
+     "existing_mw": 1726.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "VN",
+     "existing_mw": 16192.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 4188.811206688107,
+     "new_p_nom_max_mw": 6222.781591999999,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 4.2460072093995357e-07,
+     "new_p_nom_max_mw": 6526.233943,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 8.217548639203996e-08,
+     "new_p_nom_max_mw": 3877.7764319999997,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 2371.0000000064206,
+     "new_p_nom_max_mw": 2371.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 1.0634754744208916e-06,
+     "new_p_nom_max_mw": 8814.074219,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 6.053791601809815e-07,
+     "new_p_nom_max_mw": 6088.430210999999,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "ID",
+     "existing_mw": 1616.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "LA",
+     "existing_mw": 4659.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MM",
+     "existing_mw": 510.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MY",
+     "existing_mw": 129.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "PH",
+     "existing_mw": 1242.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "VN",
+     "existing_mw": 1770.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 1.4345335631193813e-06,
+     "new_p_nom_max_mw": 2399.9999999999995,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 4.738365814388913e-07,
+     "new_p_nom_max_mw": 100.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 1.5045680979728436e-06,
+     "new_p_nom_max_mw": 7958.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 9.645053043029056e-07,
+     "new_p_nom_max_mw": 2480.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 1.0316061094870796e-06,
+     "new_p_nom_max_mw": 1500.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "ID",
+     "existing_mw": 1040.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "PH",
+     "existing_mw": 856.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "TH",
+     "existing_mw": 2310.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "VN",
+     "existing_mw": 1200.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 22421.49999908898,
+     "new_p_nom_max_mw": 22421.499999000003,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 229.00000003470066,
+     "new_p_nom_max_mw": 229.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 3123.999999985852,
+     "new_p_nom_max_mw": 3124.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 45.000000004787076,
+     "new_p_nom_max_mw": 45.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "ID",
+     "existing_mw": 1168.5,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "PH",
+     "existing_mw": 133.6,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 1.664094833460328e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 8.409425983801619e-06,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 4.945013628333128e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 4.659207415724748e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 2.369595782998723e-06,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 1.6161844356726054e-06,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 5.390444340750963e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 6.70274490964583e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 1.2733247822540495e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 8.071657807569491e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 2.6057516344986677e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 64529.982767490976,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 5.98962673028192e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 5.379134659805431e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 3.260535603545589e-06,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 54983.90921309155,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 6.442147646581072e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 2205.5931254003017,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 8.409743314383861e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 1.6821468434072667e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 9.999451935297095e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    }
+   ],
+   "net_exports_twh_disconnected": {},
+   "bunker_account_disconnected": {
+    "gate": "B1_BUNKERS",
+    "passed": true,
+    "present": true,
+    "final_level_tco2": -4.894015654632467e-05,
+    "cap_tco2": 0.0,
+    "tolerance_t": 0.00101,
+    "gross_co2_flow_t": 4.92125884699947e-05,
+    "port_tonnes": {
+     "ASEAN aviation international oil meter": -4.894015654619059e-05
+    },
+    "supply_mwh": {
+     "ASEAN aviation international oil meter": -0.00019035455677242547,
+     "ASEAN aviation international oil meter non-fossil": 239550418.59977835,
+     "ASEAN shipping international methanol": 485585336.24322
+    }
+   },
+   "co2_flows_disconnected": {
+    "extra_asean_by_country": {
+     "BN": {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "exported_t": 0.005249927663778228,
+      "e_nom_opt": 0.005253224380720642,
+      "cost_eur": 0.2139448844322263
+     },
+     "ID": {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "exported_t": 0.0729480609389949,
+      "e_nom_opt": 0.0728334409611908,
+      "cost_eur": 2.9727770488777434
+     },
+     "KH": {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "exported_t": 26019481.590434104,
+      "e_nom_opt": 26019481.59042239,
+      "cost_eur": 1060345082.5159824
+     },
+     "LA": {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "exported_t": 7590045.03696347,
+      "e_nom_opt": 7590045.036921382,
+      "cost_eur": 309309272.8633715
+     },
+     "MM": {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "exported_t": 49018204.525202654,
+      "e_nom_opt": 49018204.524994306,
+      "cost_eur": 1997588304.8019693
+     },
+     "MY": {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "exported_t": 0.017719180161612714,
+      "e_nom_opt": 0.01770540660482916,
+      "cost_eur": 0.7220914638625331
+     },
+     "PH": {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "exported_t": 0.014496366071795696,
+      "e_nom_opt": 0.014489411863992186,
+      "cost_eur": 0.5907554470351631
+     },
+     "SG": {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "exported_t": 92180527.93665014,
+      "e_nom_opt": 92180527.936612,
+      "cost_eur": 3756537929.53695
+     },
+     "TH": {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "exported_t": 0.01484697447969042,
+      "e_nom_opt": 0.014834534091490556,
+      "cost_eur": 0.6050434296726268
+     },
+     "TL": {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "exported_t": 0.006208835942542289,
+      "e_nom_opt": 0.006214170626380314,
+      "cost_eur": 0.2530222839736971
+     },
+     "VN": {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "exported_t": 109312857.50375028,
+      "e_nom_opt": 109312857.50417157,
+      "cost_eur": 4454714076.720316
+     }
+    },
+    "sequestered_by_country": {
+     "BN": {
+      "final_level_t": 4056327.064488669,
+      "e_nom_max": 371586000.0
+     },
+     "ID": {
+      "final_level_t": 555697641.6113104,
+      "e_nom_max": 1025500000.0
+     },
+     "KH": {
+      "final_level_t": 1699999.999954494,
+      "e_nom_max": 1700000.0
+     },
+     "MY": {
+      "final_level_t": 147892887.77261427,
+      "e_nom_max": 2575460000.0
+     },
+     "PH": {
+      "final_level_t": 118536075.4264746,
+      "e_nom_max": 446000000.0
+     },
+     "TH": {
+      "final_level_t": 255100489.1880092,
+      "e_nom_max": 320480000.0
+     },
+     "TL": {
+      "final_level_t": 539730.0334003994,
+      "e_nom_max": 5000000.0
+     },
+     "VN": {
+      "final_level_t": 235999999.99947643,
+      "e_nom_max": 236000000.0
+     }
+    },
+    "cross_border_pipeline": {},
+    "dac_by_country": {
+     "BN": 760529.7806488427,
+     "ID": 9980698.060359782,
+     "KH": 7499832.039955615,
+     "LA": 5631640.026750741,
+     "MM": 0.01528247435682271,
+     "MY": 0.0029055918420444822,
+     "PH": 39391858.3042535,
+     "SG": 14969017.91625702,
+     "TH": 0.012952781168046,
+     "TL": 35075.21443953273,
+     "VN": 146228917.8593592
+    }
+   },
+   "emissions_disconnected": {
+    "by_country": {
+     "BN": -0.0005255820839623579,
+     "ID": 0.044613945884665884,
+     "KH": 0.003135165311872026,
+     "LA": 0.010067522395562285,
+     "MM": -0.0050429095202287845,
+     "MY": 0.004598327073170098,
+     "PH": 0.01520751602947712,
+     "SG": -0.0005840762426640332,
+     "TH": 0.008382266387343407,
+     "TL": -1.0608039118682419e-05,
+     "VN": 0.011387292805893496
+    },
+    "store_final_level": {
+     "BN": -0.0005248215077244822,
+     "ID": 0.04469413496553898,
+     "KH": 0.0031426620262209326,
+     "LA": 0.010079312734887935,
+     "MM": -0.005042905220761895,
+     "MY": 0.004602621134836227,
+     "PH": 0.015278329723514616,
+     "SG": -0.0005691095975635108,
+     "TH": 0.008391526062041521,
+     "TL": -1.057294184647617e-05,
+     "VN": 0.011533440498169512
+    },
+    "asean_total": 0.09122886000201047,
+    "every_tonne_booked_once": true
+   },
+   "items_integrated_nze": {
+    "objective": 556921506352.5294,
+    "sabatier_gas_twh": {},
+    "sabatier_capacity_gw_h2": {},
+    "electrobiofuels_oil_twh": {
+     "ID": 21.84891959260183,
+     "MY": 138.98223173286198,
+     "PH": 37.467369425124836,
+     "TL": 0.7087479698367358
+    },
+    "fischer_tropsch_oil_twh": {},
+    "btl_oil_twh": {
+     "KH": 1.5686928711704293,
+     "LA": 5.387522657873714,
+     "MM": 28.50037077611891,
+     "TH": 5.086563535260534
+    },
+    "methanolisation_twh": {
+     "ID": 431.1869072893951,
+     "PH": 115.92309420262441
+    },
+    "smr_h2_twh": {},
+    "smr_cc_h2_twh": {
+     "ID": 497.7217763599658,
+     "MM": 0.24519369291669849,
+     "MY": 124.04661586511655,
+     "PH": 231.07369250865884,
+     "TH": 44.62383977285953,
+     "TL": 0.8373867732029808,
+     "VN": 1.0957386080040092
+    },
+    "electrolysis_h2_twh": {
+     "": 23.748208768292383
+    },
+    "lng_import_twh": {
+     "ID": 421.51397252588475,
+     "KH": 14.66666666656914,
+     "MY": 236.47279240277481,
+     "PH": 442.08730784314,
+     "SG": 351.72864958196925,
+     "TH": 633.3333333325535,
+     "VN": 278.66666666668374
+    },
+    "lng_terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "existing_gw": 12.32876712328767,
+      "optimal_gw": 30.82191780820121,
+      "max_gw": 30.82191780821918,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "existing_gw": 0.45662100456621,
+      "optimal_gw": 1.1415525114212128,
+      "max_gw": 1.141552511415525,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Maluku16 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 3.500761035010416,
+      "max_gw": 3.5007610350114153,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "existing_gw": 0.5327245053276256,
+      "optimal_gw": 1.331811263320528,
+      "max_gw": 1.331811263319064,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "existing_gw": 4.5662100456621,
+      "optimal_gw": 11.415525114200406,
+      "max_gw": 11.415525114155251,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "KH2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 1.67427701675027,
+      "max_gw": 1.6742770167465753,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "existing_gw": 11.11111111111872,
+      "optimal_gw": 27.777777777800868,
+      "max_gw": 27.7777777777968,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon5 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.2831050228057235,
+      "max_gw": 2.2831050228344747,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon9 0 LNG import": {
+      "existing_gw": 22.37442922375571,
+      "optimal_gw": 55.93607305893686,
+      "max_gw": 55.93607305938927,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "SG2 0 LNG import": {
+      "existing_gw": 16.742770167431505,
+      "optimal_gw": 41.85692541860026,
+      "max_gw": 41.85692541857877,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "TH2 3 LNG import": {
+      "existing_gw": 28.91933028915525,
+      "optimal_gw": 72.29832572290024,
+      "max_gw": 72.29832572288812,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045660995,
+      "max_gw": 4.5662100456621,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 2 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.2831050228302256,
+      "max_gw": 2.28310502283105,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 3 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210045660251,
+      "max_gw": 4.566210045658676,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 5 LNG import": {
+      "existing_gw": 6.088280060878995,
+      "optimal_gw": 15.220700152200294,
+      "max_gw": 15.22070015219749,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 6 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 5.175038051750272,
+      "max_gw": 5.175038051746576,
+      "capex_eur_per_mw_a": 7018.0
+     }
+    },
+    "domestic_gas_twh": {
+     "BN": 30.91077704056842,
+     "ID": 727.5777749972581,
+     "MM": 184.89664522349534,
+     "MY": 849.5251819932462,
+     "PH": 43.00797067492229,
+     "TH": 367.17785474861086,
+     "TL": 3.3164408164684205,
+     "VN": 103.62460511365286
+    },
+    "dac_captured_mt": {
+     "BN": 0.8561972183877886,
+     "ID": 55.08757350034315,
+     "MY": 0.5116320414585459,
+     "PH": 47.2130450586153,
+     "SG": 10.931785409604654,
+     "TL": 0.03885084153110835,
+     "VN": 148.57958115019238
+    },
+    "co2_vent_links": 0,
+    "lng_expansion_gw": 178.7290715368663
+   },
+   "lng_integrated_nze": {
+    "terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "optimal_gw": 30.82191780820121,
+      "existing_gw": 12.32876712328767,
+      "max_gw": 30.82191780821918,
+      "binding": true
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "optimal_gw": 1.1415525114212128,
+      "existing_gw": 0.45662100456621,
+      "max_gw": 1.141552511415525,
+      "binding": true
+     },
+     "ID_Maluku16 0 LNG import": {
+      "optimal_gw": 3.500761035010416,
+      "existing_gw": 0.0,
+      "max_gw": 3.5007610350114153,
+      "binding": true
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "optimal_gw": 1.331811263320528,
+      "existing_gw": 0.5327245053276256,
+      "max_gw": 1.331811263319064,
+      "binding": true
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "optimal_gw": 11.415525114200406,
+      "existing_gw": 4.5662100456621,
+      "max_gw": 11.415525114155251,
+      "binding": true
+     },
+     "KH2 0 LNG import": {
+      "optimal_gw": 1.67427701675027,
+      "existing_gw": 0.0,
+      "max_gw": 1.6742770167465753,
+      "binding": true
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "optimal_gw": 27.777777777800868,
+      "existing_gw": 11.11111111111872,
+      "max_gw": 27.7777777777968,
+      "binding": true
+     },
+     "PH_Luzon5 0 LNG import": {
+      "optimal_gw": 2.2831050228057235,
+      "existing_gw": 0.0,
+      "max_gw": 2.2831050228344747,
+      "binding": true
+     },
+     "PH_Luzon9 0 LNG import": {
+      "optimal_gw": 55.93607305893686,
+      "existing_gw": 22.37442922375571,
+      "max_gw": 55.93607305938927,
+      "binding": true
+     },
+     "SG2 0 LNG import": {
+      "optimal_gw": 41.85692541860026,
+      "existing_gw": 16.742770167431505,
+      "max_gw": 41.85692541857877,
+      "binding": true
+     },
+     "TH2 3 LNG import": {
+      "optimal_gw": 72.29832572290024,
+      "existing_gw": 28.91933028915525,
+      "max_gw": 72.29832572288812,
+      "binding": true
+     },
+     "VN2 0 LNG import": {
+      "optimal_gw": 4.566210045660995,
+      "existing_gw": 0.0,
+      "max_gw": 4.5662100456621,
+      "binding": true
+     },
+     "VN2 2 LNG import": {
+      "optimal_gw": 2.2831050228302256,
+      "existing_gw": 0.0,
+      "max_gw": 2.28310502283105,
+      "binding": true
+     },
+     "VN2 3 LNG import": {
+      "optimal_gw": 4.566210045660251,
+      "existing_gw": 0.0,
+      "max_gw": 4.566210045658676,
+      "binding": true
+     },
+     "VN2 5 LNG import": {
+      "optimal_gw": 15.220700152200294,
+      "existing_gw": 6.088280060878995,
+      "max_gw": 15.22070015219749,
+      "binding": true
+     },
+     "VN2 6 LNG import": {
+      "optimal_gw": 5.175038051750272,
+      "existing_gw": 0.0,
+      "max_gw": 5.175038051746576,
+      "binding": true
+     }
+    },
+    "binding_count": 16,
+    "expansion_gw": 178.7290715368663,
+    "import_twh": {
+     "ID": 421.51397252588475,
+     "KH": 14.66666666656914,
+     "MY": 236.47279240277481,
+     "PH": 442.08730784314,
+     "SG": 351.72864958196925,
+     "TH": 633.3333333325535,
+     "VN": 278.66666666668374
+    }
+   },
+   "asean_integrated_nze": {
+    "PHS": {
+     "gw": 5.406,
+     "twh": 0.228
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "coal": {
+     "gw": 113.763,
+     "twh": 63.16
+    },
+    "gas CCGT/OCGT": {
+     "gw": 246.667,
+     "twh": 930.63
+    },
+    "geothermal": {
+     "gw": 25.629,
+     "twh": 144.09
+    },
+    "hydro reservoir": {
+     "gw": 127.134,
+     "twh": 590.306
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 65.902,
+     "twh": 458.078
+    },
+    "offwind": {
+     "gw": 379.661,
+     "twh": 2000.394
+    },
+    "oil": {
+     "gw": 2.032,
+     "twh": 1.628
+    },
+    "onwind": {
+     "gw": 462.114,
+     "twh": 1249.062
+    },
+    "ror": {
+     "gw": 17.082,
+     "twh": 53.017
+    },
+    "solar": {
+     "gw": 775.743,
+     "twh": 973.833
+    },
+    "solar rooftop": {
+     "gw": 0.0,
+     "twh": 0.0
+    }
+   },
+   "new_builds_integrated_nze": [
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 72901.42990119004,
+     "new_p_nom_max_mw": 80312.218409,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 1.1025491199897986e-07,
+     "new_p_nom_max_mw": 4170.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 1.7250612706274654e-07,
+     "new_p_nom_max_mw": 5056.766057,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 3.83387659619572e-07,
+     "new_p_nom_max_mw": 38064.223568,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 5985.999999996877,
+     "new_p_nom_max_mw": 5986.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 2.636886006298819e-07,
+     "new_p_nom_max_mw": 11756.925782,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 1.7138935604702414e-07,
+     "new_p_nom_max_mw": 15949.569789,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "ID",
+     "existing_mw": 6319.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "KH",
+     "existing_mw": 1528.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "LA",
+     "existing_mw": 9758.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MM",
+     "existing_mw": 3548.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "MY",
+     "existing_mw": 7614.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "PH",
+     "existing_mw": 1562.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "TH",
+     "existing_mw": 1726.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "hydro",
+     "component_carrier": "hydro existing",
+     "country": "VN",
+     "existing_mw": 16192.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 4784.659162441712,
+     "new_p_nom_max_mw": 6222.781591999999,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 2.885369319368652e-08,
+     "new_p_nom_max_mw": 6526.233943,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 8.60501253715683e-09,
+     "new_p_nom_max_mw": 3877.7764319999997,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 2370.99999999918,
+     "new_p_nom_max_mw": 2371.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 5.2089815770705573e-08,
+     "new_p_nom_max_mw": 8814.074219,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 3.094260508751246e-08,
+     "new_p_nom_max_mw": 6088.430210999999,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "ID",
+     "existing_mw": 1616.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "LA",
+     "existing_mw": 4659.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MM",
+     "existing_mw": 510.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "MY",
+     "existing_mw": 129.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "PH",
+     "existing_mw": 1242.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "ror",
+     "component_carrier": "ror existing",
+     "country": "VN",
+     "existing_mw": 1770.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 9.494516057847917e-08,
+     "new_p_nom_max_mw": 2399.9999999999995,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 2.9708469840959762e-08,
+     "new_p_nom_max_mw": 100.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 9.296821793740642e-08,
+     "new_p_nom_max_mw": 7958.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 5.847090965004566e-08,
+     "new_p_nom_max_mw": 2480.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 6.227710579148525e-08,
+     "new_p_nom_max_mw": 1500.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "ID",
+     "existing_mw": 1040.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "PH",
+     "existing_mw": 856.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "TH",
+     "existing_mw": 2310.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "PHS",
+     "component_carrier": "PHS existing",
+     "country": "VN",
+     "existing_mw": 1200.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 22421.49999899963,
+     "new_p_nom_max_mw": 22421.499999000003,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 228.99999999900388,
+     "new_p_nom_max_mw": 229.0,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 1631.594643074183,
+     "new_p_nom_max_mw": 3124.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": 0.0,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 44.9999999995757,
+     "new_p_nom_max_mw": 45.0,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "ID",
+     "existing_mw": 1168.5,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "geothermal",
+     "component_carrier": "geothermal existing",
+     "country": "PH",
+     "existing_mw": 133.6,
+     "new_mw": 0.0,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 0
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 4.51754789465113e-09,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 4.5745601854954436e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 2.1747682437589484e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 2.7704609170988007e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 1.0349557755603318e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 3.076209473105443e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 2.0691711361874625e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 3.1252105882103994e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 4.040678890173334e-09,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear",
+     "component_carrier": "nuclear",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 3.662631560884264e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "BN",
+     "existing_mw": 0.0,
+     "new_mw": 5.562177572473717e-09,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "ID",
+     "existing_mw": 0.0,
+     "new_mw": 65902.08644926874,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 39
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "KH",
+     "existing_mw": 0.0,
+     "new_mw": 2.7072055747182437e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 5
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "LA",
+     "existing_mw": 0.0,
+     "new_mw": 3.503462002216772e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MM",
+     "existing_mw": 0.0,
+     "new_mw": 1.3706092788534135e-07,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 17
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "MY",
+     "existing_mw": 0.0,
+     "new_mw": 4.122617759519776e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 7
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "PH",
+     "existing_mw": 0.0,
+     "new_mw": 2.442787226123638e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "SG",
+     "existing_mw": 0.0,
+     "new_mw": 1.2686805613692884e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TH",
+     "existing_mw": 0.0,
+     "new_mw": 4.1421197043494994e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 6
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "TL",
+     "existing_mw": 0.0,
+     "new_mw": 4.8668767059047554e-09,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 1
+    },
+    {
+     "carrier": "nuclear SMR",
+     "component_carrier": "nuclear SMR",
+     "country": "VN",
+     "existing_mw": 0.0,
+     "new_mw": 4.6221419673891894e-08,
+     "new_p_nom_max_mw": NaN,
+     "extendable_units": 8
+    }
+   ],
+   "net_exports_twh_integrated_nze": {
+    "H2": {
+     "MM": -0.104,
+     "MY": 0.24,
+     "SG": -0.24,
+     "TH": 38.375,
+     "VN": -38.271
+    },
+    "co2": {
+     "KH": 14.144,
+     "LA": 7.355,
+     "MM": 1.283,
+     "MY": -32.771,
+     "SG": 32.771,
+     "TH": -22.781
+    },
+    "electricity": {
+     "ID": 40.808,
+     "KH": 58.462,
+     "LA": 126.189,
+     "MM": -28.922,
+     "MY": -394.637,
+     "SG": -195.638,
+     "TH": 317.427,
+     "VN": 76.311
+    },
+    "gas": {
+     "ID": -398.296,
+     "KH": -9.072,
+     "LA": -9.873,
+     "MM": 155.636,
+     "MY": 170.329,
+     "SG": 301.597,
+     "TH": 62.936,
+     "VN": -273.256
+    }
+   },
+   "bunker_account_integrated_nze": {
+    "gate": "B1_BUNKERS",
+    "passed": true,
+    "present": true,
+    "final_level_tco2": -7.255584909496584e-07,
+    "cap_tco2": 0.0,
+    "tolerance_t": 0.00101,
+    "gross_co2_flow_t": 7.255584909476705e-07,
+    "port_tonnes": {
+     "ASEAN aviation international oil meter": -7.255584909476705e-07
+    },
+    "supply_mwh": {
+     "ASEAN aviation international oil meter": -2.8220867014689636e-06,
+     "ASEAN aviation international oil meter non-fossil": 239550418.59959084,
+     "ASEAN shipping international methanol": 485585336.24322
+    }
+   },
+   "co2_flows_integrated_nze": {
+    "extra_asean_by_country": {
+     "BN": {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "exported_t": 0.00027132896990173514,
+      "e_nom_opt": 0.0002718170900528925,
+      "cost_eur": 0.011057189513153244
+     },
+     "ID": {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "exported_t": 0.004906916729815358,
+      "e_nom_opt": 0.004912210827391988,
+      "cost_eur": 0.19996651380971323
+     },
+     "KH": {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "exported_t": 13087063.17041269,
+      "e_nom_opt": 13087063.17040389,
+      "cost_eur": 533323580.2217072
+     },
+     "LA": {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "exported_t": 3189651.8435479617,
+      "e_nom_opt": 3189651.843512339,
+      "cost_eur": 129984590.02686425
+     },
+     "MM": {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "exported_t": 18717549.1244578,
+      "e_nom_opt": 18717549.124477528,
+      "cost_eur": 762776963.9410036
+     },
+     "MY": {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "exported_t": 0.0009877332045644914,
+      "e_nom_opt": 0.0009901869554193492,
+      "cost_eur": 0.0402520719968056
+     },
+     "PH": {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "exported_t": 0.0008226296966525054,
+      "e_nom_opt": 0.0008251895544514617,
+      "cost_eur": 0.03352377911702066
+     },
+     "SG": {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "exported_t": 204409.03893523023,
+      "e_nom_opt": 204409.03893334643,
+      "cost_eur": 8330070.62433073
+     },
+     "TH": {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "exported_t": 0.0014806705054231475,
+      "e_nom_opt": 0.0014819951370443184,
+      "cost_eur": 0.060340237133283126
+     },
+     "TL": {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "exported_t": 0.00037031013478352993,
+      "e_nom_opt": 0.0003704804335192697,
+      "cost_eur": 0.015090866782215379
+     },
+     "VN": {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "exported_t": 157121059.83883935,
+      "e_nom_opt": 157121059.8388642,
+      "cost_eur": 6402992410.927321
+     }
+    },
+    "sequestered_by_country": {
+     "BN": {
+      "final_level_t": 4717828.16424379,
+      "e_nom_max": 371586000.0
+     },
+     "ID": {
+      "final_level_t": 634172855.6775348,
+      "e_nom_max": 1025500000.0
+     },
+     "KH": {
+      "final_level_t": 1699999.99998298,
+      "e_nom_max": 1700000.0
+     },
+     "MY": {
+      "final_level_t": 212717728.81496912,
+      "e_nom_max": 2575460000.0
+     },
+     "PH": {
+      "final_level_t": 165776538.90275967,
+      "e_nom_max": 446000000.0
+     },
+     "TH": {
+      "final_level_t": 320479999.9957099,
+      "e_nom_max": 320480000.0
+     },
+     "TL": {
+      "final_level_t": 688591.7212619679,
+      "e_nom_max": 5000000.0
+     },
+     "VN": {
+      "final_level_t": 235999999.99951816,
+      "e_nom_max": 236000000.0
+     }
+    },
+    "cross_border_pipeline": {
+     "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+      "from_country": "ID",
+      "to_country": "MY",
+      "capacity_opt_t_per_h": 3.172355849246389e-08,
+      "net_t_0_to_1": 1.4121643418616024e-05,
+      "abs_t": 1.437077005225954e-05
+     },
+     "CO2 pipeline KH2 0 -> VN2 0": {
+      "from_country": "KH",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 5.566002238968416e-08,
+      "net_t_0_to_1": 1.075336171322566e-05,
+      "abs_t": 1.075336171322566e-05
+     },
+     "CO2 pipeline KH2 1 -> LA2 4": {
+      "from_country": "KH",
+      "to_country": "LA",
+      "capacity_opt_t_per_h": 4.485480961110365e-08,
+      "net_t_0_to_1": 1.2286439250694251e-06,
+      "abs_t": 3.4568451849285913e-06
+     },
+     "CO2 pipeline KH2 4 -> TH2 3": {
+      "from_country": "KH",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1614.6370591033517,
+      "net_t_0_to_1": 14144220.638687896,
+      "abs_t": 14144220.638687896
+     },
+     "CO2 pipeline LA2 0 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 87.71405371751248,
+      "net_t_0_to_1": 768375.1104931836,
+      "abs_t": 768375.1104931836
+     },
+     "CO2 pipeline LA2 1 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 6.736504377186226e-08,
+      "net_t_0_to_1": 0.000473993001296546,
+      "abs_t": 0.000473993001296546
+     },
+     "CO2 pipeline LA2 1 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1.6482746201480503e-07,
+      "net_t_0_to_1": 0.0013139201795406555,
+      "abs_t": 0.0013139201795406555
+     },
+     "CO2 pipeline LA2 2 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 287.4955335924086,
+      "net_t_0_to_1": 2518460.8631263743,
+      "abs_t": 2518460.8631263743
+     },
+     "CO2 pipeline LA2 2 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1.2817341860341779e-06,
+      "net_t_0_to_1": 0.011088352062426107,
+      "abs_t": 0.011088352062426107
+     },
+     "CO2 pipeline LA2 3 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 464.35381607953383,
+      "net_t_0_to_1": 4067739.4323471845,
+      "abs_t": 4067739.4323471845
+     },
+     "CO2 pipeline LA2 3 -> VN2 2": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 2.4288616167457805e-08,
+      "net_t_0_to_1": -3.3065931440183523e-05,
+      "abs_t": 3.311153418331229e-05
+     },
+     "CO2 pipeline LA2 3 -> VN2 3": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 5.8229229536454945e-08,
+      "net_t_0_to_1": -0.00015359336399488522,
+      "abs_t": 0.00015359336399488522
+     },
+     "CO2 pipeline LA2 4 -> TH2 1": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 4.1973320820500093e-07,
+      "net_t_0_to_1": 0.0035378973125157094,
+      "abs_t": 0.0035378973125157094
+     },
+     "CO2 pipeline LA2 4 -> TH2 2": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 1.8115855459267797e-08,
+      "net_t_0_to_1": 7.95064255495509e-05,
+      "abs_t": 7.95064255495509e-05
+     },
+     "CO2 pipeline LA2 4 -> VN2 2": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 5.849232102208946e-08,
+      "net_t_0_to_1": -1.1890151726057523e-05,
+      "abs_t": 1.1890151726057523e-05
+     },
+     "CO2 pipeline LA2 4 -> VN2 7": {
+      "from_country": "LA",
+      "to_country": "VN",
+      "capacity_opt_t_per_h": 3.9544902889663443e-08,
+      "net_t_0_to_1": 2.115631381506512e-06,
+      "abs_t": 2.3954893414375463e-06
+     },
+     "CO2 pipeline LA2 5 -> MM2 13": {
+      "from_country": "LA",
+      "to_country": "MM",
+      "capacity_opt_t_per_h": 3.583582977873438e-08,
+      "net_t_0_to_1": -1.0062280476983154e-05,
+      "abs_t": 1.0062280476983154e-05
+     },
+     "CO2 pipeline LA2 5 -> TH2 4": {
+      "from_country": "LA",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 8.686001406633839e-08,
+      "net_t_0_to_1": 0.0006413322913240811,
+      "abs_t": 0.0006413322913240811
+     },
+     "CO2 pipeline MM2 4 -> TH2 4": {
+      "from_country": "MM",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 146.4197602251046,
+      "net_t_0_to_1": 1282637.0985526475,
+      "abs_t": 1282637.0985526475
+     },
+     "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+      "from_country": "MY",
+      "to_country": "TH",
+      "capacity_opt_t_per_h": 8.280515060415731e-08,
+      "net_t_0_to_1": -0.0004990234090308226,
+      "abs_t": 0.0004990234090308226
+     },
+     "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+      "from_country": "MY",
+      "to_country": "SG",
+      "capacity_opt_t_per_h": 3844.5170581342063,
+      "net_t_0_to_1": -32771426.0978949,
+      "abs_t": 32771426.0978949
+     }
+    },
+    "dac_by_country": {
+     "BN": 856197.2183877886,
+     "ID": 55087573.50034315,
+     "KH": 0.0004046212306752379,
+     "LA": 0.0004085249926349466,
+     "MM": 0.0008056784477557311,
+     "MY": 511632.0414585459,
+     "PH": 47213045.0586153,
+     "SG": 10931785.409604654,
+     "TH": 0.00014199644205023092,
+     "TL": 38850.84153110835,
+     "VN": 148579581.15019238
+    }
+   },
+   "emissions_integrated_nze": {
+    "by_country": {
+     "BN": -1.70558610577572e-05,
+     "ID": 0.018231524261783393,
+     "KH": 0.00022836242025297507,
+     "LA": 0.0004524103708301668,
+     "MM": -0.0010560144909360007,
+     "MY": -0.0010852630419768232,
+     "PH": 0.0007326938211917877,
+     "SG": 7.279427553978186e-05,
+     "TH": -0.0006023353658994727,
+     "TL": 0.00015662669148680666,
+     "VN": -6.722979043146334e-05
+    },
+    "store_final_level": {
+     "BN": -1.619959618892608e-05,
+     "ID": 0.01838774827774614,
+     "KH": 0.00022836061361886095,
+     "LA": 0.00045241084626468364,
+     "MM": -0.0010560135706327856,
+     "MY": -0.00108473957516253,
+     "PH": 0.0008070756157394499,
+     "SG": 8.372514275833964e-05,
+     "TH": -0.0006023196037858725,
+     "TL": 0.00015666556248561392,
+     "VN": 8.135297684930265e-05
+    },
+    "asean_total": 0.01704651329078339,
+    "every_tonne_booked_once": true
+   },
+   "items_S4B5_integrated": {
+    "objective": 594376831941.3313,
+    "sabatier_gas_twh": {
+     "ID": 4.707546543133459e-06,
+     "MM": 2.3062144235417355e-06
+    },
+    "sabatier_capacity_gw_h2": {
+     "ID": 1.3183122965071507e-06
+    },
+    "electrobiofuels_oil_twh": {
+     "ID": 9.988357488162069e-06,
+     "KH": 1.926653018706773e-06,
+     "LA": 3.221476584928693e-06,
+     "MM": 9.010085775031033e-06,
+     "MY": 3.1336906141836835e-06,
+     "PH": 3.2221736053572803e-06,
+     "TH": 1.945944558818194e-06,
+     "TL": 1.0350948517784012e-06
+    },
+    "fischer_tropsch_oil_twh": {
+     "ID": -4.6888158415028005e-06,
+     "LA": -3.250090876134221e-06,
+     "MY": -3.524201148126897e-06,
+     "TH": 1.4848288764187408e-06
+    },
+    "btl_oil_twh": {
+     "ID": 2.9988739977481984e-06,
+     "KH": 1.415374598898511e-06,
+     "LA": 2.478387640892192e-06,
+     "MM": 7.3539371104105325e-06
+    },
+    "methanolisation_twh": {
+     "BN": 1.1939697679680787e-06,
+     "ID": 365.085493479038,
+     "KH": 4.353520946948931e-06,
+     "LA": 4.807991432608606e-06,
+     "MM": 1.1860574255649145e-05,
+     "MY": 71.63536613308047,
+     "PH": 109.29443643660622,
+     "TH": 4.340671065324934e-06,
+     "TL": 0.4671523641151671,
+     "VN": 2.1281958711931114e-06
+    },
+    "smr_h2_twh": {
+     "ID": 1.1871879669894582e-05,
+     "KH": 5.23563182574971e-06,
+     "LA": 9.716802828020065e-06,
+     "MM": 9.288077334424099e-05,
+     "MY": 1.906566223139608e-06,
+     "PH": 1.5167617940267261e-06,
+     "TH": 6.238988563113886e-06,
+     "VN": 1.516246660292014e-06
+    },
+    "smr_cc_h2_twh": {
+     "BN": 9.631287000794629e-06,
+     "ID": 406.8837847481157,
+     "KH": 2.2050838890607002e-05,
+     "LA": 6.393632752830348e-05,
+     "MM": 0.00013575920062441603,
+     "MY": 91.96769997756061,
+     "PH": 187.03801283800638,
+     "SG": 6.1813634108264e-06,
+     "TH": 46.89938795685446,
+     "TL": 0.5342301896886198,
+     "VN": 1.704622600217988e-05
+    },
+    "electrolysis_h2_twh": {
+     "": 33.203501330280396
+    },
+    "lng_import_twh": {
+     "ID": 421.6544663937232,
+     "KH": 14.666666415584947,
+     "MY": 241.00784968629648,
+     "PH": 407.81592834366467,
+     "SG": 362.56350254029513,
+     "TH": 633.3333324703589,
+     "VN": 278.6666655824046
+    },
+    "lng_terminals": {
+     "ID_Java-Bali1 0 LNG import": {
+      "existing_gw": 12.32876712328767,
+      "optimal_gw": 30.821917822119904,
+      "max_gw": 30.82191780821918,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Java-Bali1 2 LNG import": {
+      "existing_gw": 0.45662100456621,
+      "optimal_gw": 1.1415525253639884,
+      "max_gw": 1.141552511415525,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Maluku16 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 3.500761039784119,
+      "max_gw": 3.5007610350114153,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Nusa-Tenggara12 0 LNG import": {
+      "existing_gw": 0.5327245053276256,
+      "optimal_gw": 1.331811269854356,
+      "max_gw": 1.331811263319064,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "ID_Sumatra3 0 LNG import": {
+      "existing_gw": 4.5662100456621,
+      "optimal_gw": 11.415525119210413,
+      "max_gw": 11.415525114155251,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "KH2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 1.6742770221189955,
+      "max_gw": 1.6742770167465753,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "MY_Peninsular2 1 LNG import": {
+      "existing_gw": 11.11111111111872,
+      "optimal_gw": 27.777777790287388,
+      "max_gw": 27.7777777777968,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon5 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.283104932552861,
+      "max_gw": 2.2831050228344747,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "PH_Luzon9 0 LNG import": {
+      "existing_gw": 22.37442922375571,
+      "optimal_gw": 52.472985491733844,
+      "max_gw": 55.93607305938927,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "SG2 0 LNG import": {
+      "existing_gw": 16.742770167431505,
+      "optimal_gw": 41.85692542412666,
+      "max_gw": 41.85692541857877,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "TH2 3 LNG import": {
+      "existing_gw": 28.91933028915525,
+      "optimal_gw": 72.2983257287472,
+      "max_gw": 72.29832572288812,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 0 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210058526112,
+      "max_gw": 4.5662100456621,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 2 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 2.283105028174987,
+      "max_gw": 2.28310502283105,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 3 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 4.566210051035258,
+      "max_gw": 4.566210045658676,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 5 LNG import": {
+      "existing_gw": 6.088280060878995,
+      "optimal_gw": 15.220700157587798,
+      "max_gw": 15.22070015219749,
+      "capex_eur_per_mw_a": 7018.0
+     },
+     "VN2 6 LNG import": {
+      "existing_gw": 0.0,
+      "optimal_gw": 5.175038057187289,
+      "max_gw": 5.175038051746576,
+      "capex_eur_per_mw_a": 7018.0
+     }
+    },
+    "domestic_gas_twh": {
+     "BN": 34.07379925209435,
+     "ID": 727.5777750523183,
+     "MM": 184.89664533239144,
+     "MY": 647.748590591032,
+     "PH": 43.0079706773864,
+     "TH": 367.17785492237243,
+     "TL": 4.025227006141119,
+     "VN": 103.62460522974337
+    },
+    "dac_captured_mt": {
+     "BN": 1.2712405536145148,
+     "ID": 23.55903438592848,
+     "MM": 1.198241075130927e-06,
+     "MY": 3.34964699599404e-06,
+     "PH": 39.691858692599816,
+     "SG": 36.54551871227129,
+     "TL": 3.3712427788589744e-06,
+     "VN": 145.6559570723023
+    },
+    "co2_vent_links": 0,
+    "lng_expansion_gw": 175.2659839872274
+   },
+   "asean_S4B5_integrated": {
+    "PHS": {
+     "gw": 5.406,
+     "twh": 0.223
+    },
+    "battery (discharge)": {
+     "gw": 0.0,
+     "twh": 0.001
+    },
+    "coal": {
+     "gw": 113.763,
+     "twh": 48.717
+    },
+    "gas CCGT/OCGT": {
+     "gw": 227.957,
+     "twh": 947.402
+    },
+    "geothermal": {
+     "gw": 27.122,
+     "twh": 163.746
+    },
+    "hydro reservoir": {
+     "gw": 126.893,
+     "twh": 580.688
+    },
+    "nuclear": {
+     "gw": 0.0,
+     "twh": 0.0
+    },
+    "nuclear SMR": {
+     "gw": 96.632,
+     "twh": 813.021
+    },
+    "offwind": {
+     "gw": 356.082,
+     "twh": 2026.834
+    },
+    "oil": {
+     "gw": 2.032,
+     "twh": 1.948
+    },
+    "onwind": {
+     "gw": 420.471,
+     "twh": 1230.849
+    },
+    "ror": {
+     "gw": 16.129,
+     "twh": 47.293
+    },
+    "solar": {
+     "gw": 347.665,
+     "twh": 482.124
+    },
+    "solar rooftop": {
+     "gw": 11.787,
+     "twh": 13.182
+    }
+   },
+   "B5_trial": {
+    "gate": "B5_SINGLE_SWITCH_AND_DISCONNECTED_ZERO",
+    "config_differences": [
+     "research.cross_border.H2",
+     "research.cross_border.co2",
+     "research.cross_border.electricity",
+     "research.cross_border.gas",
+     "research.scenario"
+    ],
+    "differences_within_switch_set": true,
+    "disconnected_cross_border_components": 0,
+    "disconnected_cross_border_capacity_mw": 0.0,
+    "disconnected_cross_border_abs_flow_mw": 0.0,
+    "integrated_cross_border_components": 95,
+    "integrated_cross_border_capacity_mw": 711092.7751633441,
+    "passed": true
+   },
+   "B6_trial": {
+    "real": {
+     "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+     "passed": true,
+     "objective": {
+      "integrated": 651182991033.4481,
+      "disconnected": 698298611056.0613
+     },
+     "difference": 47115620022.61316,
+     "relative": 0.067472023109653,
+     "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant"
+    },
+    "note": "trial on the 56-snapshot smoke: the disconnected main is solved (extra-ASEAN CO2 storage on), so B6 uses the real disconnected cost"
+   }
+  }
+ }
+}
