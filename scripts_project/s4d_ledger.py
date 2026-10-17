@@ -122,7 +122,8 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
             var = (flow * mc).mul(w, axis=0).sum()
             for name, v in var[var != 0].items():
                 car = str(d.at[name, "carrier"])
-                subj = {"CO2 ship": "co2_ship_freight", "CO2 transit export extra-ASEAN": "co2_transit_freight", "CO2 transit ship": "co2_transit_ship_freight"}.get(car, "variable_cost")
+                subj = {"CO2 ship": "co2_ship_freight", "CO2 transit export extra-ASEAN": "co2_transit_freight", "CO2 transit ship": "co2_transit_ship_freight",
+                        "CO2 transit rail": "co2_transit_rail_freight"}.get(car, "variable_cost")   # S4F-2 c (97 c): Lao rail transit into the VN store
                 add(own[t][name], subj, car, v)
     xb_led = pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", []))
     for _, r in xb_led.iterrows():
@@ -220,7 +221,8 @@ def ledger_gate(identity: dict) -> dict:
 
 
 def load_length_shares(path: Path | None = None) -> pd.DataFrame | None:
-    p = path or next((q for q in (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4E1.csv", ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4D3.csv") if q.exists()), None)   # S4E-1 superset first
+    p = path or next((q for q in (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4F2.csv", ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4E1.csv",
+                                  ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4D3.csv") if q.exists()), None)   # S4F-2 superset first (new #4 end, optional SG-VN / SG-KH)
     if p is None:
         return None
     return pd.read_csv(p) if Path(p).exists() else None

@@ -446,3 +446,38 @@
   - SG–VN / SG–KH 可选候选；
   - PH 负互联价值与 `adjacency_completion=off` 对照。
 - **交付：** `research/06_scope_redesign/p1_step4e_20261017/`，内容为 S4E_REPORT.md、S4E_EVIDENCE.json、S4E_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §14、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4e_20261017/`；测试 `tests/research` 488 通过 / 0 失败。
+
+## S4F 第 96–97 项：单条输电扩建上限、TH–MY 存量与 S4E 其余事项、冒烟、云端部署包与上云前清单 — 2026-10-17
+
+- **范围：**
+  - 指令 `S4F_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 28d7458d…7216f03，已核对），开头为用户对 S4E §7 七项的答复。
+  - 分支 `codex/s4f-extension-caps-20261017`（自 S4E bcda8001），draft PR #30 叠在 #29 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载。
+  - 停下 1 次请用户决定：停止 01，线路 91 不是 Sadao–Chuping → 用户选方案 1。
+- **S4F-0：** 登记 §7 七项答复（`s4f_0`）；核查 PyPSA-Eur v2025.07.0 的 `lines.max_extension` 与 `links.max_extension`。
+- **S4F-1（96）：**
+  - PyPSA-Eur 的实际做法：`prepare_sector_network.py` 只读 `lines.max_extension` = 20,000 MW，以新增量口径同时作用于交流线与 DC 链路；`links.max_extension`（30,000）不使用（用户同意）；管道不设上限。
+  - 开关 `research.network.max_extension`：pypsa_eur | none | apg_plans；`apg_plans` 为 18 组 APG 上限，钩子 `research_apg_corridor_cap`。
+  - `none` 构建与 S4E 网络逐组件一致。
+- **S4F-2（97）：**
+  - TH–MY：线路 91 = 80 MW（C 级，聚类伪影），Khlong Ngae–Gurun 300 MW，删除 4 条 OSM 250878579 重复直流，合计 380 MW = APG；开关 `research.network.th_my_stock`。
+  - 作者 readjust 改过的 19 条跨境交流线清单（只记录）。
+  - #4 印尼端改为北干巴鲁（432 km，DC）。
+  - 老挝经铁路进入越南国内封存（6 条，贸易类）。
+  - SG–VN / SG–KH 第二批开关。
+  - `tests/transport` 在 pytest 下可运行（整个 `tests/` 516 项通过）。
+- **S4F-3：** 冒烟三项均最优：一体化 6.39063e11、不互联 6.93191e11、NZE 5.38893e11，较 S4E 高 1.4–2.4 %。
+  - 新走廊 263 GW，单条最大 20 GW；触及上限的组件：一体化 11 个、不互联 6 个。
+  - B5、B6（54.13 bn EUR，7.8 %）、B16 与全部求解器容差门槛通过。
+  - 分国差额：VN 22.0、ID 9.6、TH 6.2、MY 5.1、LA 4.0、KH 2.3、SG 2.0、PH 1.05、MM 1.0、BN 0.8、TL 0.27 bn EUR。
+- **S4F-4：**
+  - 部署包重建到 7e09744d，四个网络与冒烟网络逐组件一致；上传 232,095,769 B。
+  - 365×24h 单运行 34–67 min（悲观 98），串行 2.0–2.8 h；预检下限 36 / 72 / 104 GiB 不变。
+  - 第二批敏感性 7 项只登记。
+- **S4F-5：** 上云前清单（报告 §10）：部署包哈希、实例规格、用户需提供的信息、首次正式运行授权原文模板。
+- **待用户决定：** 4 项（S4F 报告 §7）：
+  - 作者 readjust 改过的 19 条线如何处理；
+  - `apg_plans` 取值规则；
+  - `existing_port` 敏感性中泰国港口节点是否进入泰国封存；
+  - 上云前信息与授权。
+- **交付：** `research/06_scope_redesign/p1_step4f_20261017/`，内容为 S4F_REPORT.md、S4F_EVIDENCE.json、S4F_PROGRESS.md、S4F_STOP_01_LINE91.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §15、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4f_20261017/`；测试 `tests/research` 499 通过、整个 `tests/` 516 通过。

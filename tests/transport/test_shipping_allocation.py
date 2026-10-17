@@ -14,8 +14,15 @@ import unittest
 import numpy as np
 import pandas as pd
 
-ROOT = Path(sys.argv.pop(1)).resolve()
-OUT = Path(sys.argv.pop(1)).resolve()
+def _paths():
+    """Script mode: python test_shipping_allocation.py <repository root> <result json>. Under pytest (S4F-2 g): the repository of this file and no
+    result file; sys.argv is left untouched (popping it under pytest took the pytest options as the root)."""
+    if __name__ == "__main__" and len(sys.argv) >= 3:
+        return Path(sys.argv.pop(1)).resolve(), Path(sys.argv.pop(1)).resolve()
+    return Path(__file__).resolve().parents[2], None
+
+
+ROOT, OUT = _paths()
 
 
 def constructor():
