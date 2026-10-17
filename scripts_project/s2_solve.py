@@ -102,6 +102,8 @@ def co2_flows(n):
     from s4d_layers import shipping_report
     out["extra_asean_by_country"] = extra_asean_report(n)   # S4C-4 (decision 89); S4D-1 transit tonnes and freight
     out["intra_asean_shipping"] = shipping_report(n)   # S4D-2 (decision 92): tonnes and freight per exporter -> receiver
+    from s4f_layers import lao_vn_store_report
+    out["lao_transit_vn_store"] = lao_vn_store_report(n)   # S4F-2 c (decision 97 c): Lao CO2 by rail into the Vietnamese national store
     for name, z in n.stores[n.stores.carrier == "co2 sequestered"].iterrows():
         out["sequestered_by_country"][str(z.country)] = dict(final_level_t=float(n.stores_t.e[name].iloc[-1]), e_nom_max=float(z.e_nom_max))
     links = n.links

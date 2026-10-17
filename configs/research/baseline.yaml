@@ -275,12 +275,17 @@ research:
   network:                                # S4F (decisions 96-97; scripts_project/s4f_layers.py)
     max_extension: pypsa_eur              # S4F-1 (decision 96): pypsa_eur (main: PyPSA-Eur v2025.07.0 lines.max_extension = 20000 MW per line and per DC link above the existing capacity, prepare_sector_network.py limit_individual_line_extension; links.max_extension is not read by the sector workflow and not used; both scenarios; no pipeline cap, as in PyPSA-Eur) | none (former state, comparison) | apg_plans (conservative sensitivity, build check only: + APG / AIMS plan cap per project group)
     apg_plan_caps_table: research_inputs/corridors/APG_PLAN_CAPS_S4F1.csv   # scripts_project/s4f_1_data.py
+    th_my_stock: apg_aims                 # S4F-2 a (decision 97 a): apg_aims (main: th_my_stock_table applied at build time - the four OSM 250878579 HVDC duplicates removed, line 91 = 80 MW (grade C, cluster artefact; = APG 380 - 300), Khlong Ngae - Gurun 300 MW (AIMS); TH-MY 380 MW = APG; the frozen base file is unchanged) | frozen_base (original 2,645.6 MW, comparison)
+    th_my_stock_table: research_inputs/corridors/TH_MY_STOCK_S4F2.csv   # scripts_project/s4f_2_corridors.py
   corridors:                              # S4C supplement 01 (ledger L18, decision 16): corridor subsea shares (scripts_project/s4c_1_subsea_shares.py)
     subsea_share: landmass_nonland        # landmass_nonland (main; user decision 2026-10-16, ASEAN-specific treatment "archipelagic subsea corridors", working principle 3: 0 when both nodes lie on the same connected landmass of the author land shape, else the not-land share of the great-circle route) | geometric_all (upper bound: not-land share for every pair) | zero (former state)
-    subsea_table: research_inputs/corridors/SUBSEA_SHARE_S4E1.csv   # S4E-1: SUBSEA_SHARE_S4C1.csv rows unchanged + the new corridor node pairs (same method; scripts_project/s4e_1_corridors.py)
+    subsea_table: research_inputs/corridors/SUBSEA_SHARE_S4F2.csv   # S4F-2: SUBSEA_SHARE_S4E1.csv rows unchanged + the S4F-2 node pairs (new #4 end, SG-VN, SG-KH, second pass; same method; scripts_project/s4f_2_corridors.py); S4E-1: SUBSEA_SHARE_S4E1.csv
     adjacency_completion: "on"            # S4E-1 (decision 94, implementing decision 15): on (main: corridors_table_s4e1 = cross_border_corridors.csv + 31 land-adjacency AC candidates + APG #4 / #7 / #16 DC candidates, and the domestic candidates of domestic_table_s4e1 - APG #3 / #18a / #18b; capacity 0, extendable; scripts_project/s4e_layers.py) | off (original corridor table, comparison)
     corridors_table_s4e1: research_inputs/corridors/CORRIDORS_S4E1.csv
     domestic_table_s4e1: research_inputs/corridors/DOMESTIC_CORRIDORS_S4E1.csv
+    corridors_table_s4f2: research_inputs/corridors/CORRIDORS_S4F2.csv   # S4F-2 b (decision 97 b): CORRIDORS_S4E1.csv with APG #4 at ID_Sumatra3 3 (Pekanbaru); used instead of corridors_table_s4e1 when adjacency_completion = on
+    optional_sg_vn_kh: "off"              # S4F-2 d (decision 97 d): off (main) | on (second-batch sensitivity: SG-VN and SG-KH DC candidates of optional_table_s4f2 appended)
+    optional_table_s4f2: research_inputs/corridors/OPTIONAL_CORRIDORS_S4F2.csv
   bunkers:                                # S4C-3 (decision 88, modifying decision 10): international aviation and shipping bunkers (scripts_project/s4c_layers.apply_bunker_attribution)
     attribution: asean_pool               # asean_pool (main: bunker demand on the regional liquid buses, not attributed to any country; fossil combustion in the separate 'co2 bunkers ASEAN' account, net zero on its own, no national removals transferred) | bunkering_country (former state, decision 10) | excluded (demand and emissions not bound; drives research.s2.demand.international_bunkers to false)
   co2:                                    # S4C-4 (decision 89): extra-ASEAN CO2 storage option (scripts_project/s4c_layers.apply_extra_asean_storage; unit cost scripts_project/s4c_4_data.py)
@@ -296,6 +301,7 @@ research:
     lao_transit_shipping: "on"            # S4E-2 (decision 95 c): on (main: after the rail transit to the nearest coast, Lao CO2 can be shipped along the routes of that coastal node into other ASEAN national stores; land + ship leg, receiver storage) | off
     lao_transit_destination: nearest_coast   # S4E-2 (95 d): nearest_coast (main, nearest physical coast) | existing_port (sensitivity: nearest sea port of the author WPI subset)
     lao_transit_mode: rail                # S4E-2 (95 d): rail (main, Stolaroff 2021 0.044 $/t-km + 2 $/t) | truck (sensitivity, 0.111 $/t-km)
+    lao_transit_vn_store: "on"            # S4F-2 c (decision 97 c): on (main: after the rail transit to a Vietnamese coastal node, Lao CO2 can enter the Vietnamese national store - land leg on the link 'CO2 transit rail', VN store cost and annual cap on the store; trade class, both scenarios) | off
   s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
     co2:

@@ -210,3 +210,14 @@ def apply_lao_vn_store(n, cfg, registry: pd.DataFrame) -> dict:
                land_leg_range=([round(min(x["land"] for x in rows), 3), round(max(x["land"] for x in rows), 3)] if rows else None), table=rows)
     n.meta["research_lao_vn_store"] = led
     return led
+
+
+def lao_vn_store_report(n) -> dict:
+    """Post-solve (S4F-2 c): tonnes and land freight per LA node into the Vietnamese national store; flows below 1 t / year not listed."""
+    sl = n.links[n.links.carrier == TRANSIT_RAIL_CARRIER]
+    w = n.snapshot_weightings.objective; out = {}
+    for k, z in sl.iterrows():
+        t = float((n.links_t.p0[k] * w).sum()) if k in n.links_t.p0 else 0.0
+        if t > 1.0:
+            out[str(z.bus0).split(" co2")[0]] = dict(t=t, freight_eur=t * float(z.marginal_cost), link=k)
+    return out

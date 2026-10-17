@@ -69,7 +69,10 @@ def test_stock_and_graph():
 
 def test_switch():
     assert corridor_mode(CFG) == "on"
-    assert corridor_tables(CFG) == ("research_inputs/corridors/CORRIDORS_S4E1.csv", "research_inputs/corridors/DOMESTIC_CORRIDORS_S4E1.csv")
+    # S4F-2 b (decision 97 b): the main corridor table moved to CORRIDORS_S4F2.csv (APG #4 at ID_Sumatra3 3); without that key the S4E-1 table
+    assert corridor_tables(CFG) == ("research_inputs/corridors/CORRIDORS_S4F2.csv", "research_inputs/corridors/DOMESTIC_CORRIDORS_S4E1.csv")
+    c = copy.deepcopy(CFG); del c["research"]["corridors"]["corridors_table_s4f2"]
+    assert corridor_tables(c) == ("research_inputs/corridors/CORRIDORS_S4E1.csv", "research_inputs/corridors/DOMESTIC_CORRIDORS_S4E1.csv")
     c = copy.deepcopy(CFG); del c["research"]["corridors"]["adjacency_completion"]
     assert corridor_mode(c) == "off" and corridor_tables(c) == ("research_inputs/corridors/cross_border_corridors.csv", None)
     c["research"]["corridors"]["adjacency_completion"] = "maybe"

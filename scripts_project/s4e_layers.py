@@ -44,8 +44,8 @@ def corridor_mode(cfg) -> str:
 def corridor_tables(cfg) -> tuple[str, str | None]:
     """(corridor table, domestic candidate table or None), paths relative to the repository."""
     R = cfg["research"]; C = R.get("corridors") or {}
-    if corridor_mode(cfg) == "on":
-        return str(C["corridors_table_s4e1"]), str(C["domestic_table_s4e1"])
+    if corridor_mode(cfg) == "on":   # S4F-2 b (decision 97 b): corridors_table_s4f2 (APG #4 at ID_Sumatra3 3) replaces the S4E-1 table when present
+        return str(C.get("corridors_table_s4f2", C["corridors_table_s4e1"])), str(C["domestic_table_s4e1"])
     return str(R["existing_cross_border_electricity"]["corridors_file"]), None
 
 

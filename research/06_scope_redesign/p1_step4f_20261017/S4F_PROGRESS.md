@@ -17,7 +17,7 @@
 |---|---|---|---|---|
 | S4F-0 | 准备：§7 答复登记 | 完成 | 见提交记录 | 注册表片段 `s4f_0`（7 行）；`tests/research` 488 通过 / 0 失败 |
 | S4F-1 | 单条输电扩建上限（第 96 项） | 完成 | 见提交记录 | 开关 `research.network.max_extension`：`pypsa_eur`（主算）/ `none` / `apg_plans`。`lines.max_extension` = 20,000 MW 同时作用于交流线与 DC 链路（新增量口径），`links.max_extension` 不使用（用户同意）；管道不设上限，与 PyPSA-Eur 相同。`none` 构建与 S4E 一体化网络逐组件一致；主算构建只有 `s_nom_max` / `p_nom_max` 不同。`apg_plans` 为 18 个 APG 分组上限，钩子 `research_apg_corridor_cap`，只构建核对。S4E 冒烟超限：一体化 22 个（405.6 GW）、不互联 16 个（555.3 GW）、NZE 20 个（367.8 GW） |
-| S4F-2 | S4E 其余事项（第 97 项） | 停止 01 已解除，进行中 | — | 用户答复（2026-10-17）：方案 1，线路 91 = 80 MW（C 级），直流 300（AIMS），删除 4 条 OSM 重复记录，TH–MY 合计 380 MW；另单列作者 readjust 清单（只记录） |
+| S4F-2 | S4E 其余事项（第 97 项） | 完成 | 见提交记录 | (a) 停止 01 → 用户方案 1：线路 91 = 80 MW（C 级），Khlong Ngae–Gurun 300（AIMS），删除 4 条 OSM 250878579 重复记录，TH–MY 合计 380 MW；开关 `research.network.th_my_stock`（`apg_aims` / `frozen_base`）。作者 readjust 清单 19 条线（只记录）。(b) #4 印尼端为 ID_Sumatra3 3：432.2 km，海底份额 0.236，DC。(c) 老挝进越南封存 6 条 `CO2 transit rail`，陆运段 9.66–24.57 EUR/t，贸易类。(d) SG–VN、SG–KH 开关 `optional_sg_vn_kh`，构建核对。(g) `tests/transport` 改为在 pytest 下可运行。`tests/research` 499 通过，整个 `tests/` 516 通过 |
 | S4F-3 | 冒烟 | 未开始 | — | |
 | S4F-4 | 云端部署包 | 未开始 | — | |
 | S4F-5 | 上云前清单与交付 | 未开始 | — | |
@@ -30,12 +30,9 @@
 
 ## 续行点
 
-**停止 01（2026-10-17 09:44 UTC）：** 线路 91 的限时核查（只读，约 3.5 分钟）显示，线路 91 是聚类伪影下的 TH–MY 交流代表线，成员不是 Sadao–Chuping。按用户规则停下，没有修改。详见 `S4F_STOP_01_LINE91.md`；等待用户就 TH–MY 处理方式作决定（报告 §5 四个选项）。
-
-用户答复后，依次做：
-- S4F-1：施加单条扩建上限，开关 `research.network.max_extension`，列出 S4E 冒烟中超过上限的组件（已统计：一体化 22 个，超出 405.6 GW；不互联 16 个，超出 555.3 GW）；
-- S4F-2 (a)，按用户决定处理；然后 (b)(c)(d)(g)；
-- S4F-3 至 S4F-5。
+- **停止 01（2026-10-17 09:44 UTC）：** 线路 91 不是 Sadao–Chuping，见 `S4F_STOP_01_LINE91.md`。用户已答复方案 1，停止解除。
+- **S4F-0 至 S4F-2 已完成。** 下一步 S4F-3 冒烟：在 S4F-2 提交上构建一体化、不互联、一体化 NZE，档案 A，56×3h；脚本 `/home/jin/s4f3_run.sh`，汇总 `scripts_project/s4f_3_summary.py`。
+- **之后：** S4F-4 部署包与资源估算（§15），S4F-5 上云前清单与交付。
 
 ## S4F-1 前置核查（PyPSA-Eur v2025.07.0，本地已入库副本，VERIFIED）
 
