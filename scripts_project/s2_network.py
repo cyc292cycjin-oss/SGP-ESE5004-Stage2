@@ -23,7 +23,7 @@ from build_research_network import REQUIRED_PER_NODE
 from daily_resolution import to_daily
 from network_checks import assert_input_only, compare_roundtrip, normalise_optional_strings
 from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOOK, sha, save, git_head, config_sha, jsonable, rename_legacy_buses,
-                              tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory)
+                              tag_cross_border, existing_cross_border_fom, bind_astar, component_inventory, MARITIME_TRADE_CARRIERS)
 from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s4a_layers import apply_renewable_profiles
@@ -32,6 +32,7 @@ from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
 from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
                         apply_extra_asean_storage, demand_cfg)
+from s4d_layers import apply_intra_asean_shipping
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -39,8 +40,14 @@ AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TW
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
 
 
+NEW_OVERRIDE_KEYS = ("cross_border.coalition", "co2.extra_asean_cost_scale")   # keys an --override may add (absent from the config files): S4D-4 coalition (decision 91b), S4D-6 sensitivity; same list in v5_gates.gate_b12_hash
+
+
 def apply_cross_border_switches_s2(n, switches, corridors, existing_cfg, costs):
-    """research.cross_border.{electricity,H2,gas,co2}; S1 logic for electricity/H2, removal for gas/CO2 pipelines."""
+    """research.cross_border.{electricity,H2,gas,co2}; S1 logic for electricity/H2, removal for gas/CO2 pipelines. S4D-4 (decision 91b):
+    research.cross_border.coalition (list of ISO2, with the integrated switches) keeps only the cross-border components whose two countries
+    are both members (corridor table filtered the same way: lower bounds and existing FOM only for the kept corridors)."""
+    from s4d_layers import coalition_members
     ledger = {}
     xb_lines = set(n.lines.index[n.lines.border_class == "cross_border"])
     xb_elec_links = set(n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")])
@@ -48,6 +55,21 @@ def apply_cross_border_switches_s2(n, switches, corridors, existing_cfg, costs):
     expected = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()}
     if actual != expected:
         raise ValueError("Existing cross-border electricity set differs from the corridor table: " + str(sorted(actual ^ expected))[:300])
+    members = coalition_members(switches)
+    if members is not None:
+        def pair(typ, name):
+            z = n.df(typ).loc[name]
+            return {str(n.buses.at[z.bus0, "country"]), str(n.buses.at[z.bus1, "country"])}
+        out_l = sorted(x for x in xb_lines if not pair("Line", x) <= members)
+        out_k = sorted(x for x in n.links.index[n.links.border_class == "cross_border"] if not pair("Link", x) <= members)
+        n.mremove("Line", out_l); n.mremove("Link", out_k)
+        inside = corridors.apply(lambda r: {str(r.country_from), str(r.country_to)} <= members, axis=1)
+        ledger["coalition"] = dict(members=sorted(members), removed_lines=len(out_l), removed_links=len(out_k),
+                                   kept_corridors=int(inside.sum()), removed_corridors=int((~inside).sum()))
+        corridors = corridors[inside]
+        xb_lines = set(n.lines.index[n.lines.border_class == "cross_border"])
+        xb_elec_links = set(n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")])
+        actual = {("Line", x) for x in xb_lines} | {("Link", x) for x in xb_elec_links}
     if switches["electricity"]:
         checks = []
         for _, r in corridors.iterrows():
@@ -115,8 +137,10 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
         raise ValueError("Carbon constraint scope metadata differs from config")
     for typ in ["Line", "Link"]:
         df = n.df(typ)
-        if len(df) and ("border_class" not in df or df.border_class.isna().any() or not df.border_class.isin(["domestic", "cross_border"]).all()):
+        if len(df) and ("border_class" not in df or df.border_class.isna().any() or not df.border_class.isin(["domestic", "cross_border", "maritime_trade"]).all()):
             raise ValueError("Untagged " + typ)
+        if len(df) and not set(df.carrier[df.border_class == "maritime_trade"]) <= MARITIME_TRADE_CARRIERS:   # S4D-2 (decision 92): only shipping is trade
+            raise ValueError("maritime_trade on a network carrier: " + typ)
     sw = R["cross_border"]; xb = {}
     for key, sel in [("electricity", (n.lines.border_class == "cross_border").sum() + ((n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")).sum()),
                      ("H2", ((n.links.border_class == "cross_border") & (n.links.carrier == "H2 pipeline")).sum()),
@@ -125,12 +149,21 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
         xb[key] = int(sel)
         if not sw[key] and xb[key]:
             raise ValueError("Cross-border " + key + " components present although the switch is off")
+    from s4d_layers import coalition_members
+    members = coalition_members(sw)   # S4D-4 (decision 91b)
     if sw["electricity"]:
-        expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()}
+        expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()
+                          if members is None or {str(r.country_from), str(r.country_to)} <= members}
         actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")]}
         if actual != expected_edges:
             raise ValueError("Cross-border electricity set differs from the corridor table")
-    report["cross_border"] = dict(switches=sw, components=xb)
+    if members is not None:
+        for typ in ("Line", "Link"):
+            d = n.df(typ); d = d[d.border_class == "cross_border"]
+            out = [x for x, z in d.iterrows() if not {str(n.buses.at[z.bus0, "country"]), str(n.buses.at[z.bus1, "country"])} <= members]
+            if out:
+                raise ValueError(f"cross-border {typ} outside the coalition: {out[:3]}")
+    report["cross_border"] = dict(switches=sw, components=xb, coalition=(sorted(members) if members is not None else None))
     if n.meta.get("research_cross_border", {}).get("switches") != {k: bool(v) for k, v in sw.items()}:
         raise ValueError("Cross-border switch metadata differs from config")
     # candidate structure: resolve every port to its geographical node (bus itself, its location, or the node-name prefix of carrier buses)
@@ -228,7 +261,16 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         key, val = ov.split("=", 1); d = cfg["research"]; parts = key.split(".")
         for k in parts[:-1]:
             d = d[k]
-        old = d[parts[-1]]; d[parts[-1]] = type(old)(val) if not isinstance(old, bool) else (val.lower() in ("1", "true", "yes"))
+        if parts[-1] not in d and key not in NEW_OVERRIDE_KEYS:
+            raise KeyError(f"override of an unknown config key: {key}")
+        old = d.get(parts[-1])
+        if isinstance(old, bool):
+            d[parts[-1]] = val.lower() in ("1", "true", "yes")
+        elif old is None or isinstance(old, (list, dict)):   # S4D-4: list / null / new keys (cross_border.coalition); same rule in v5_gates.gate_b12_hash
+            import yaml
+            d[parts[-1]] = yaml.safe_load(val)
+        else:
+            d[parts[-1]] = type(old)(val)
     cfg["research"]["config_overrides"] = list(overrides or [])
     bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution checked early (no config mutation; the demand layer gets demand_cfg)
     if R["scenario"] != scenario:
@@ -300,7 +342,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
     bunkers = apply_bunker_attribution(n, costs, cfg, demand)   # S4C-3 (decision 88): asean_pool (main: regional bunker loads, separate net-zero bunker account) | bunkering_country | excluded
-    extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off)
+    extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off); S4D-1 (decision 93): coastal nodes only, Lao transit
+    shipping = apply_intra_asean_shipping(n, cfg, registry)   # S4D-2 (decision 92): intra-ASEAN CO2 shipping into the receivers' national stores, maritime trade, both scenarios
     cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -330,10 +373,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                   hydro_inflow={k: v for k, v in hydro_inflow.items() if k not in ("units", "new_build")},
                                                   bunkers={k: v for k, v in bunkers.items() if k not in ("by_country", "deferred")},
                                                   extra_asean_storage={k: v for k, v in extra_co2.items() if k != "countries"}),
+                                  s4d_layers=dict(intra_asean_shipping={k: v for k, v in shipping.items() if k != "links"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
-                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage"]:
+                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
+                "research_intra_asean_shipping"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

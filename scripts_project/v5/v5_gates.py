@@ -160,7 +160,11 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
     for ov in overrides:  # S3-6: sensitivity builds record their --override list; the expected hash is the file config with the same overrides applied (s2_network.py)
         key,val=ov.split('=',1);d=R;parts=key.split('.')
         for k in parts[:-1]:d=d[k]
-        old=d[parts[-1]];d[parts[-1]]=type(old)(val) if not isinstance(old,bool) else (val.lower() in ('1','true','yes'))
+        if parts[-1] not in d and key not in ('cross_border.coalition','co2.extra_asean_cost_scale'):raise KeyError('override of an unknown config key: '+key)  # S4D-4: same list as s2_network.NEW_OVERRIDE_KEYS
+        old=d.get(parts[-1])
+        if isinstance(old,bool):d[parts[-1]]=val.lower() in ('1','true','yes')
+        elif old is None or isinstance(old,(list,dict)):import yaml;d[parts[-1]]=yaml.safe_load(val)  # S4D-4: list / null keys (cross_border.coalition), same rule as s2_network.py
+        else:d[parts[-1]]=type(old)(val)
     if 'config_overrides' in n.meta.get('research_config',{}):R['config_overrides']=overrides  # S3 builds carry the key (possibly empty); S1/S2 networks do not
     expected=config_sha(R);actual=n.meta.get('research_config_sha256')
     allowed_status={'INTERIM_S1_SKELETON',R.get('s2',{}).get('status')}

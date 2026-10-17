@@ -346,8 +346,8 @@ def evaluate(n, lp_dir, sol_dir, out_dir, interior: dict, barconvtol: float, m=N
     return res
 
 
-S4B_MAIN_SET = ("A1_A2_S4B", "A3_S4B", "A4", "A5_S4B", "A6", "B1_S4B", "B2", "B3_S4B", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS")
-S3B_SET = ("A1_A2", "A3", "A4", "A5", "A6", "B1", "B2", "B3", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS")   # B1_BUNKERS (S4C-3) only when the bunker account exists
+S4B_MAIN_SET = ("A1_A2_S4B", "A3_S4B", "A4", "A5_S4B", "A6", "B1_S4B", "B2", "B3_S4B", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS", "B16_LEDGER")
+S3B_SET = ("A1_A2", "A3", "A4", "A5", "A6", "B1", "B2", "B3", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS", "B16_LEDGER")   # B1_BUNKERS (S4C-3) only when the bunker account exists; B16_LEDGER (S4D-3, decision 91a): country ledger identity
 
 
 def all_passed(gates: dict, basis: str) -> bool:

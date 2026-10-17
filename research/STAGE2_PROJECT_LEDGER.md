@@ -395,3 +395,16 @@
 - **S4C-6：** 冒烟三项均 OPTIMAL（一体化 6.5118e11、不互联 6.9830e11、NZE 5.5692e11）；B6 真实差 4.71e10 EUR/a；部署包代码 c5a33851 + 四个日网络，上传 220,953,139 B，`--solver-profile` 必填（只准备）。
 - **待用户决定：** 10 项（S4C 报告 §8），其中云端求解档案、东盟外封存单价口径、云端运行方式与授权最关键。
 - **交付：** `research/06_scope_redesign/p1_step4c_20261016/`（S4C_REPORT.md、S4C_EVIDENCE.json、S4C_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §12、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/、两份停止报告）；镜像与审阅 ZIP 在 `work/p1_step4c_20261016/`；测试 457 通过 / 0 失败。
+
+## S4D 第 91–93 项：分国成本账本与子集互联、东盟内 CO₂ 船运、出口节点与老挝过境、云端部署包 — 2026-10-17
+
+- **范围：** 指令 `S4D_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 a35fa7d5…3b2586，已核对）；分支 `codex/s4d-allocation-ledger-20261017`（自 S4C afec19e6），draft PR #28 叠在 #27 上；每个子步骤提交。无云端操作，无 365×24h / 2920×3h 求解。停下 1 次请用户决定（停止 01：沿海节点判定）。
+- **S4D-0：** 登记对 S4C §8 十项的答复（云端档案 A `formal_barrier` 等）与工作原则第 8 条；盘点 CO₂ 链路。
+- **S4D-1（93）：** 沿海判定按用户决定（方案 A + 物理海岸线，含内水与群岛水域；只有河港的不算）：73 / 100 个节点沿海，带缓冲节点 71 沿海 / 26 内陆，TH2 2、KH2 4 判内陆。东盟外出口链路 97 → 71 条，内陆 CO₂ 经国内管道到沿海。老挝铁路过境到最近的越南海岸：Stolaroff 2021 表 2，0.044 $/t-km + 2 $/t，C 级 ±50 %，陆运段 9.7–24.6 EUR/t。
+- **S4D-2（92）：** 东盟内 CO₂ 船运 504 条链路，`border_class = maritime_trade`，两个情景都有，B5 不计入。IEAGHG 2004 分项 11.42 + 0.00295 EUR/(t·km) × 大圆 km × 航线系数 1.091（模型几何推导，±25 %）。成本排序：船运 + 国内封存 ≥ 41.4，高于东盟外 40.75，冒烟中船运量为 0（列为用户决定）。
+- **S4D-3（91a）：** 分国成本账本（A5 分解按组件归属；跨主体流量按端口母线对偶价格结算；跨境走廊两端各半，按境内长度作敏感性；燃料舱单列），门槛 `B16_LEDGER` 纳入两套验收集合，求解后导出账本与节点价格（按日）。S4C 三个解只读试算，相对误差 ≤ 1e-11；修正了国家氨负荷挂在区域母线上被错记给区域池的问题。
+- **S4D-4（91b）：** `--override cross_border.coalition=[…]`。11 国 = 一体化、[] = 不互联，目标相对差 0.0；{MY, SG} 最优，{LA, TH} SUBOPTIMAL（未重试）。成员 ≥ 2 的连通联盟 81 个；BN、PH、TL 没有跨境走廊。
+- **S4D-5：** 冒烟三项均最优（一体化 6.51296e11、不互联 6.98615e11、NZE 5.57055e11，较 S4C +0.02–0.05 %）。B5、B6（差 47.32 bn EUR）、B16 通过；不互联 − 一体化的分国差额：VN 20.3、MY 11.8、TH 5.2、LA 3.0、SG 2.8、KH 2.1 bn EUR 等。
+- **S4D-6：** 敏感性键 `co2.extra_asean_cost_scale`；第一批敏感性只登记（东盟外 ±50 %、航线系数 ±25 %、LNG 上限）。部署包重建到 c45f1448：四个日网络与冒烟网络逐组件一致，上传 228,863,868 B，运行命令 `--solver-profile formal_barrier`（只准备）。365×24h 单运行 25–59 min，串行 1.6–2.2 h。
+- **待用户决定：** 8 项（S4D 报告 §9）：老挝港口口径与运输方式、LA 是否可船运进东盟封存、封存单价统一口径、航线系数口径、BN / PH / TL 走廊、{LA, TH} 次优结果的处理、LNG 上限取值。
+- **交付：** `research/06_scope_redesign/p1_step4d_20261017/`（S4D_REPORT.md、S4D_EVIDENCE.json、S4D_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §13、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/、停止报告 01）；镜像与审阅 ZIP 在 `work/p1_step4d_20261017/`；测试 479 通过 / 0 失败。

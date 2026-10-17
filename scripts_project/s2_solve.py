@@ -97,9 +97,11 @@ def structural_diagnosis_s2(n):
 
 def co2_flows(n):
     w = n.snapshot_weightings.stores
-    out = dict(sequestered_by_country={}, captured_by_carrier={}, vented_by_country={}, cross_border_pipeline={}, dac_by_country={}, extra_asean_by_country={})
+    out = dict(sequestered_by_country={}, captured_by_carrier={}, vented_by_country={}, cross_border_pipeline={}, dac_by_country={}, extra_asean_by_country={}, intra_asean_shipping={})
     from s4c_layers import extra_asean_report
-    out["extra_asean_by_country"] = extra_asean_report(n)   # S4C-4 (decision 89)
+    from s4d_layers import shipping_report
+    out["extra_asean_by_country"] = extra_asean_report(n)   # S4C-4 (decision 89); S4D-1 transit tonnes and freight
+    out["intra_asean_shipping"] = shipping_report(n)   # S4D-2 (decision 92): tonnes and freight per exporter -> receiver
     for name, z in n.stores[n.stores.carrier == "co2 sequestered"].iterrows():
         out["sequestered_by_country"][str(z.country)] = dict(final_level_t=float(n.stores_t.e[name].iloc[-1]), e_nom_max=float(z.e_nom_max))
     links = n.links
@@ -318,6 +320,15 @@ def main(a):
         gates["B2"] = gate_b2_storage_cap(n); gates["B3"] = gate_b3_biomass(n); gates["B8"] = gate_b8_demand_consistency(n)
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
         gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
+        try:   # S4D-3 (decision 91a): country cost ledger, nodal prices, identity gate B16_LEDGER (exported with the run)
+            from s4d_ledger import country_cost_ledger, ledger_gate, ledger_table, load_length_shares, nodal_prices
+            led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
+            ledger_table(led_rows).to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f"); led_rows.to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
+            nodal_prices(n).to_csv(out / "NODAL_PRICES.csv", float_format="%.6g")
+            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag))
+            gates["B16_LEDGER"] = ledger_gate(led_id)
+        except Exception as e:
+            gates["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
         gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
         # S4B-0 (decision 71, option 1): budgets tied to Gurobi FeasibilityTol / OptimalityTol with row-activity relative terms (s4b_acceptance.py);
         # the S3B gates above stay unchanged for comparison and both verdicts are recorded; research.solver.interior.acceptance_basis selects all_passed.

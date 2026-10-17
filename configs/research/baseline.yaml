@@ -192,6 +192,10 @@ research:
     H2: true
     gas: true                            # S3-1: gas pipelines along the unified corridors (candidates + 2025 stock from GEM); scenario files set all true / all false
     co2: false                           # CO2 network not built before step 2
+    # coalition (S4D-4, decision 91b): key absent = no effect (kept out of this file so that the switch metadata of every existing network stays
+    # valid); set only by --override cross_border.coalition=[MY,SG] (list of ISO2 codes, integrated scenario): only cross-border corridors with both
+    # ends in the list stay (all network carriers of decision 15: AC / DC electricity incl. the 2025 stock, H2, gas incl. the 2025 stock, CO2
+    # pipelines); maritime trade (liquid fuels, CO2 shipping) and extra-ASEAN options unaffected; [] = disconnected, all 11 = integrated
   existing_cross_border_electricity:     # decision 15: 2025 capacity is the lower bound, expandable
     corridors_file: research_inputs/corridors/cross_border_corridors.csv
     capacity_year: 2025
@@ -275,6 +279,12 @@ research:
     attribution: asean_pool               # asean_pool (main: bunker demand on the regional liquid buses, not attributed to any country; fossil combustion in the separate 'co2 bunkers ASEAN' account, net zero on its own, no national removals transferred) | bunkering_country (former state, decision 10) | excluded (demand and emissions not bound; drives research.s2.demand.international_bunkers to false)
   co2:                                    # S4C-4 (decision 89): extra-ASEAN CO2 storage option (scripts_project/s4c_layers.apply_extra_asean_storage; unit cost scripts_project/s4c_4_data.py)
     extra_asean_storage: "on"             # on (main: per country an uncapped export from the captured-CO2 buffers to an extra-ASEAN offshore sink at registry co2_extra_asean_storage_cost = 40.75 EUR2020/t, IEAGHG 2004 ship transport 4,500 km + ZEP 2011 offshore storage, grade C +-50 %; counts as storage of the capturing country, decision 20; both scenarios) | off (sensitivity: reproduces the infeasible disconnected case)
+    extra_asean_export_nodes: coastal     # S4D-1 (decision 93; scripts_project/s4d_layers.py): coastal (main: export links only at the coastal nodes of coastal_nodes_table - onshore region touching the physical coast incl. internal / archipelagic waters, or a sea port / LNG record, converter nodes <= 5 km from the sea; user decision 2026-10-17; inland CO2 reaches the coast through domestic CO2 pipelines, decision 35) | all (S4C-4 behaviour)
+    coastal_nodes_table: research_inputs/co2_v5/COASTAL_NODES_S4D1_FINAL.csv   # scripts_project/s4d_1_coastline.py
+    landlocked_transit: "on"              # S4D-1 (decision 93): on (main: per LA node a transit export link, marginal cost = rail land leg to the nearest neighbouring coast, registry co2_lao_transit_land_cost_<node>, Stolaroff et al. 2021 Table 2, grade C +-50 %, + the extra-ASEAN unit cost on the store; trade like decision 44; both scenarios) | off
+    intra_asean_shipping: "on"            # S4D-2 (decision 92, revised): on (main: from every coastal buffered node to every other country's national store 'co2 sequestered <ISO2>' - occupies the receiver's annual cap, pays its store unit cost; counts as the exporter's abatement; IEAGHG 2004 Table 5-3 chain by great-circle km x route factor; border_class maritime_trade, kept in both scenarios like the liquid fuels, decisions 18 / 44, outside B5) | off
+    ship_routes_table: research_inputs/co2_v5/CO2_SHIP_ROUTES_S4D2.csv   # scripts_project/s4d_2_ship_routes.py (landing node = shortest sea path; great-circle km per pair)
+    ship_route_factor_scale: 1.0          # x registry co2_ship_route_factor (1.091, derived, grade C); first-batch sensitivity 0.75 / 1.25 (S4D-6)
   s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
     co2:

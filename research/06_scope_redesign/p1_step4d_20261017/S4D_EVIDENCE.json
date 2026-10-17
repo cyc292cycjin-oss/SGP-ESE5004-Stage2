@@ -1,0 +1,1024 @@
+{
+ "instruction": {
+  "file": "work/p1_step4d_20261017/S4D_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "a35fa7d52c0d645830562e57fb242563b864994682eeb1ce6a2a8d59f73b2586",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4d-allocation-ledger-20261017",
+  "head": "c45f1448820b687b05394b9ac52d8659c21cc3d5",
+  "base": "afec19e61f226652c0ee941a76298d4cbbc64ba8 (PR #27 head)",
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/28 (draft)",
+  "log": [
+   "c45f1448 S4D-6 code: first-batch sensitivity key co2.extra_asean_cost_scale, registry fragment s4d_6 (sensitivities registered, cloud package settings)",
+   "226ae331 S4D-5 smoke: integrated STEPS / disconnected STEPS (S4D-4 mains) and integrated NZE (f47db599), profile A, 56x3h",
+   "f47db599 S4D-4 (decision 91b) verification: coalition switch on the 56x3h smoke, profile A (formal_barrier), at 6dbc9b9e",
+   "6dbc9b9e S4D-4 (decision 91b) code: coalition switch research.cross_border.coalition",
+   "be299dc0 S4D-3 (decision 91a): country cost ledger, identity gate B16_LEDGER, nodal prices; read-only trial on the S4C smoke solutions",
+   "d96bb6cf S4D-2 (decision 92, revised): intra-ASEAN CO2 shipping as maritime trade in both scenarios",
+   "06d3c4f1 S4D-1 (decision 93): CO2 export only from coastal nodes (physical-coast rule), Lao rail transit to the nearest neighbouring coast",
+   "19792af6 S4D-0 (answers to S4C section 8, CO2 chain inventory) and S4D-1 stop 01: coastal-node classification unclear (decision 93)"
+  ]
+ },
+ "stops": [
+  {
+   "id": "S4D_STOP_01",
+   "step": "S4D-1 item 1",
+   "reason": "coastal-node classification unclear (TH2 2, PH_Luzon9 0; KH2 4 / KH2 3 noted)",
+   "resolution": "user decision 2026-10-17: option A with the physical coastline (s4d1_coastal_rule_user_decision)"
+  }
+ ],
+ "s4d1": {
+  "coastal": {
+   "nodes": 100,
+   "coastal": 73,
+   "buffered": {
+    "coastal": 71,
+    "inland": 26,
+    "inland_nodes": [
+     "ID_Kalimantan4 0",
+     "ID_Kalimantan4 10",
+     "KH2 1",
+     "KH2 3",
+     "KH2 4",
+     "LA2 0",
+     "LA2 1",
+     "LA2 2",
+     "LA2 3",
+     "LA2 4",
+     "LA2 5",
+     "MM2 0",
+     "MM2 10",
+     "MM2 12",
+     "MM2 13",
+     "MM2 14",
+     "MM2 15",
+     "MM2 2",
+     "MM2 5",
+     "MM2 6",
+     "MM2 7",
+     "MM2 8",
+     "TH2 1",
+     "TH2 2",
+     "TH2 4",
+     "VN2 1"
+    ]
+   },
+   "sea_mask": {
+    "internal_water_polygons": 29254,
+    "internal_water_km2": 50895.0,
+    "lakes_excluded": 111,
+    "spot_checks": {
+     "Bight of Bangkok": true,
+     "Cambodian coast (Kampot)": true,
+     "Gulf of Martaban": true,
+     "Java Sea": true,
+     "Makassar Strait": true,
+     "Sibuyan Sea": true,
+     "Gulf of Tonkin": true,
+     "Tonle Sap (lake)": false
+    },
+    "land_not_in_any_onshore_region_km2": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 0.0,
+     "LA": 0.0,
+     "MM": 0.0,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 0.0,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 0.0
+    }
+   }
+  },
+  "export_links": {
+   "before": 97,
+   "after": 71
+  },
+  "lao_transit": {
+   "summary": {
+    "f_usd": 0.903693595865179,
+    "rail_eur2020_per_tkm": 0.03976251821806787,
+    "loading_eur2020_per_t": 1.807387191730358,
+    "truck_eur2020_per_tkm": 0.10030998914103487,
+    "extra_asean_eur2020_per_t": 40.7519680525,
+    "stolaroff_sha256": "0d42dcaffc052d5b8b634e1885a7db94dd132d4fe7e4cd714100683f87b48082",
+    "inland_reach": {
+     "true": 20
+    }
+   },
+   "transit": [
+    {
+     "node": "LA2 0",
+     "coast_country": "VN",
+     "great_circle_km": 164.9,
+     "route_km": 206.1,
+     "land_cost_rail_eur2020_per_t": 10.0033,
+     "transit_unit_cost_eur2020_per_t": 50.7553,
+     "alt_sea_port": "Nha Trang (VN, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 31.2145,
+     "land_cost_truck_eur2020_per_t": 20.6761
+    },
+    {
+     "node": "LA2 1",
+     "coast_country": "VN",
+     "great_circle_km": 334.5,
+     "route_km": 418.1,
+     "land_cost_rail_eur2020_per_t": 18.4339,
+     "transit_unit_cost_eur2020_per_t": 59.1859,
+     "alt_sea_port": "Si Racha (TH, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 36.3495,
+     "land_cost_truck_eur2020_per_t": 41.9442
+    },
+    {
+     "node": "LA2 2",
+     "coast_country": "VN",
+     "great_circle_km": 329.4,
+     "route_km": 411.7,
+     "land_cost_rail_eur2020_per_t": 18.1775,
+     "transit_unit_cost_eur2020_per_t": 58.9295,
+     "alt_sea_port": "Si Racha (TH, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 31.7946,
+     "land_cost_truck_eur2020_per_t": 41.2972
+    },
+    {
+     "node": "LA2 3",
+     "coast_country": "VN",
+     "great_circle_km": 158.0,
+     "route_km": 197.5,
+     "land_cost_rail_eur2020_per_t": 9.6617,
+     "transit_unit_cost_eur2020_per_t": 50.4137,
+     "alt_sea_port": "Si Racha (TH, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 34.2793,
+     "land_cost_truck_eur2020_per_t": 19.8144
+    },
+    {
+     "node": "LA2 4",
+     "coast_country": "VN",
+     "great_circle_km": 226.6,
+     "route_km": 283.3,
+     "land_cost_rail_eur2020_per_t": 13.0722,
+     "transit_unit_cost_eur2020_per_t": 53.8242,
+     "alt_sea_port": "Nha Trang (VN, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 24.1005,
+     "land_cost_truck_eur2020_per_t": 28.418
+    },
+    {
+     "node": "LA2 5",
+     "coast_country": "VN",
+     "great_circle_km": 457.9,
+     "route_km": 572.4,
+     "land_cost_rail_eur2020_per_t": 24.5688,
+     "transit_unit_cost_eur2020_per_t": 65.3208,
+     "alt_sea_port": "Si Racha (TH, Open Roadstead)",
+     "alt_port_land_cost_rail_eur2020_per_t": 41.8898,
+     "land_cost_truck_eur2020_per_t": 57.421
+    }
+   ]
+  },
+  "inland_reach": {
+   "ID_Kalimantan4 0": 170.2,
+   "ID_Kalimantan4 10": 215.9,
+   "KH2 1": 375.8,
+   "KH2 3": 154.6,
+   "KH2 4": 217.6,
+   "MM2 0": 933.1,
+   "MM2 10": 210.2,
+   "MM2 12": 404.1,
+   "MM2 13": 818.9,
+   "MM2 14": 732.8,
+   "MM2 15": 227.3,
+   "MM2 2": 403.0,
+   "MM2 5": 538.6,
+   "MM2 6": 363.6,
+   "MM2 7": 584.6,
+   "MM2 8": 598.2,
+   "TH2 1": 705.6,
+   "TH2 2": 208.1,
+   "TH2 4": 647.6,
+   "VN2 1": 244.9
+  },
+  "registry": {
+   "co2_land_transport_rail_unit_cost": {
+    "value": "0.0397625182181",
+    "unit": "EUR2020/(tCO2 km)",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "co2_land_transport_rail_loading_cost": {
+    "value": "1.80738719173",
+    "unit": "EUR2020/tCO2",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "co2_land_transport_truck_unit_cost": {
+    "value": "0.100309989141",
+    "unit": "EUR2020/(tCO2 km)",
+    "tier": "C",
+    "status": "REFERENCE_ONLY"
+   },
+   "conv_usd2018_to_eur2020": {
+    "value": "0.903693595865",
+    "unit": "EUR2020/US$2018",
+    "tier": "A",
+    "status": "REGISTERED"
+   },
+   "co2_land_route_length_factor": {
+    "value": "1.25",
+    "unit": "ratio",
+    "tier": "B",
+    "status": "REGISTERED"
+   }
+  }
+ },
+ "s4d2": {
+  "links": 504,
+  "route_factor": 1.091,
+  "quantiles": {
+   "0.1": 1.0179,
+   "0.25": 1.0332,
+   "0.5": 1.091,
+   "0.75": 1.3075,
+   "0.9": 1.825
+  },
+  "grid_bias": {
+   "n": 14,
+   "median_ratio": 1.0096
+  },
+  "registry": {
+   "co2_ship_chain_fixed_cost": {
+    "value": "11.4166656499",
+    "unit": "EUR2020/tCO2",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "co2_ship_chain_per_km_cost": {
+    "value": "0.00295150322083",
+    "unit": "EUR2020/(tCO2 km)",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "co2_ship_route_factor": {
+    "value": "1.091",
+    "unit": "ratio",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "co2_intra_vs_extra_asean_cost_note": {
+    "value": "dominated_in_main",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  }
+ },
+ "s4d3": {
+  "trial_on_s4c_smokes": {
+   "integrated": {
+    "relative_error": 1.4164425268328648e-12,
+    "pool_surplus_eur": 0.759429931640625,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 89.6807,
+     "ASEAN_POOL": 0.0,
+     "BN": 1.4994,
+     "ID": 221.4778,
+     "KH": 4.6964,
+     "LA": -0.7692,
+     "MM": 9.4019,
+     "MY": 71.3145,
+     "PH": 28.4293,
+     "SG": 23.636,
+     "TH": 78.6312,
+     "TL": 0.1347,
+     "VN": 123.0502
+    }
+   },
+   "disconnected": {
+    "relative_error": 1.0134146114865847e-11,
+    "pool_surplus_eur": -7.270561218261719,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 90.2812,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4995,
+     "ID": 222.2422,
+     "KH": 6.7977,
+     "LA": 2.0961,
+     "MM": 10.2822,
+     "MY": 83.1293,
+     "PH": 28.2619,
+     "SG": 26.4865,
+     "TH": 83.784,
+     "TL": 0.1343,
+     "VN": 143.3038
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 3.4714938951400385e-12,
+    "pool_surplus_eur": -1.9329471588134766,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 75.8714,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.0843,
+     "ID": 198.015,
+     "KH": 4.1436,
+     "LA": -0.1485,
+     "MM": 6.5477,
+     "MY": 59.4047,
+     "PH": 23.9851,
+     "SG": 17.8303,
+     "TH": 56.3966,
+     "TL": 0.1019,
+     "VN": 113.6896
+    }
+   }
+  },
+  "gate": "B16_LEDGER",
+  "tolerance": 1e-06
+ },
+ "s4d4": {
+  "checks": {
+   "a_all11_vs_integrated": 0.0,
+   "b_empty_vs_disconnected": 0.0,
+   "a_passed": true,
+   "b_passed": true
+  },
+  "runs": {
+   "integrated": {
+    "termination": "optimal",
+    "objective": 651296099225.0947,
+    "b16": 1.7916123228372315e-12,
+    "cross_border_pairs": [
+     "ID-MY",
+     "ID-SG",
+     "KH-LA",
+     "KH-TH",
+     "KH-VN",
+     "LA-MM",
+     "LA-TH",
+     "LA-VN",
+     "MM-TH",
+     "MY-SG",
+     "MY-TH"
+    ],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "A1_A2_S4B"
+    ]
+   },
+   "disconnected": {
+    "termination": "optimal",
+    "objective": 698614859183.83,
+    "b16": 3.0567251823233585e-11,
+    "cross_border_pairs": [],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B3",
+     "A1_A2_S4B"
+    ]
+   },
+   "coal_all11": {
+    "termination": "optimal",
+    "objective": 651296099225.0947,
+    "b16": 1.7916123228372315e-12,
+    "cross_border_pairs": [
+     "ID-MY",
+     "ID-SG",
+     "KH-LA",
+     "KH-TH",
+     "KH-VN",
+     "LA-MM",
+     "LA-TH",
+     "LA-VN",
+     "MM-TH",
+     "MY-SG",
+     "MY-TH"
+    ],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "A1_A2_S4B"
+    ]
+   },
+   "coal_empty": {
+    "termination": "optimal",
+    "objective": 698614859183.83,
+    "b16": 3.0567251823233585e-11,
+    "cross_border_pairs": [],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B3",
+     "A1_A2_S4B"
+    ]
+   },
+   "coal_MY_SG": {
+    "termination": "optimal",
+    "objective": 694824029902.3524,
+    "b16": 3.116357136530029e-11,
+    "cross_border_pairs": [
+     "MY-SG"
+    ],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B3",
+     "A1_A2_S4B"
+    ]
+   },
+   "coal_LA_TH": {
+    "termination": "suboptimal",
+    "objective": 696003577423.507,
+    "b16": 3.87772612444572e-09,
+    "cross_border_pairs": [
+     "LA-TH"
+    ],
+    "failed": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B2",
+     "B3",
+     "B14",
+     "B15",
+     "A1_A2_S4B",
+     "A3_S4B",
+     "B3_S4B"
+    ]
+   }
+  },
+  "corridor_edges": [
+   "ID-MY",
+   "ID-SG",
+   "KH-LA",
+   "KH-TH",
+   "KH-VN",
+   "LA-MM",
+   "LA-TH",
+   "LA-VN",
+   "MM-TH",
+   "MY-SG",
+   "MY-TH"
+  ],
+  "isolated": [
+   "BN",
+   "PH",
+   "TL"
+  ],
+  "connected_coalitions": {
+   "by_size": {
+    "1": 11,
+    "2": 11,
+    "3": 14,
+    "4": 17,
+    "5": 18,
+    "6": 14,
+    "7": 6,
+    "8": 1
+   },
+   "total": 92,
+   "with_two_or_more": 81
+  }
+ },
+ "s4d5": {
+  "runs": [
+   {
+    "run": "integrated",
+    "termination": "optimal",
+    "objective_eur": 651296099225.0947,
+    "num_col": 637648,
+    "num_row": 1414828,
+    "nnz": 3156380,
+    "barrier_iterations": 160,
+    "barrier_seconds": 192.4,
+    "solve_seconds": 206.7354075908661,
+    "peak_rss_gib_receipt": 3.693359375,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "disconnected",
+    "termination": "optimal",
+    "objective_eur": 698614859183.83,
+    "num_col": 632233,
+    "num_row": 1403309,
+    "nnz": 3120669,
+    "barrier_iterations": 117,
+    "barrier_seconds": 127.36,
+    "solve_seconds": 140.31627559661865,
+    "peak_rss_gib_receipt": 3.641094207763672,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "integrated_nze",
+    "termination": "optimal",
+    "objective_eur": 557055384522.0432,
+    "num_col": 637648,
+    "num_row": 1414828,
+    "nnz": 3156380,
+    "barrier_iterations": 91,
+    "barrier_seconds": 109.23,
+    "solve_seconds": 123.70665049552917,
+    "peak_rss_gib_receipt": 3.6806411743164062,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   }
+  ],
+  "vs_s4c": {
+   "integrated": {
+    "objective": 651182991033.4481,
+    "objective_change_eur": 113108191.64660645,
+    "objective_change_rel": 0.0001736964773405708
+   },
+   "disconnected": {
+    "objective": 698298611056.0613,
+    "objective_change_eur": 316248127.76867676,
+    "objective_change_rel": 0.0004528837989386857
+   },
+   "integrated_nze": {
+    "objective": 556921506352.5294,
+    "objective_change_eur": 133878169.51379395,
+    "objective_change_rel": 0.00024038965632806704
+   }
+  },
+  "b5_passed": true,
+  "b6": {
+   "passed": true,
+   "difference": 47318759958.73523
+  },
+  "disconnected_minus_integrated_bn_eur": {
+   "ASEAN_BUNKER": 0.5696,
+   "ASEAN_POOL": 0.0,
+   "BN": 0.0001,
+   "ID": 0.7715,
+   "KH": 2.1173,
+   "LA": 2.9779,
+   "MM": 0.9429,
+   "MY": 11.8256,
+   "PH": -0.1586,
+   "SG": 2.8439,
+   "TH": 5.1731,
+   "TL": -0.0004,
+   "VN": 20.2558
+  },
+  "co2": {
+   "integrated": {
+    "extra_asean_mt": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 10.6918,
+     "LA": 0.0,
+     "MM": 14.0014,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 0.2428,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 156.2323
+    },
+    "transit_mt": {
+     "LA": 0.0
+    },
+    "shipping_mt": 0.0
+   },
+   "disconnected": {
+    "extra_asean_mt": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 26.0468,
+     "LA": 7.5181,
+     "MM": 49.0328,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 92.1805,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 109.3129
+    },
+    "transit_mt": {
+     "LA": 7.5181
+    },
+    "shipping_mt": 0.0
+   },
+   "integrated_nze": {
+    "extra_asean_mt": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 11.5379,
+     "LA": 0.0,
+     "MM": 18.0862,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 0.0306,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 159.435
+    },
+    "transit_mt": {
+     "LA": 0.0
+    },
+    "shipping_mt": 0.0
+   }
+  },
+  "ledgers": {
+   "integrated": {
+    "relative_error": 1.7916123228372315e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 89.6941,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4994,
+     "ID": 221.4729,
+     "KH": 4.7249,
+     "LA": -0.767,
+     "MM": 9.5007,
+     "MY": 71.307,
+     "PH": 28.4278,
+     "SG": 23.6423,
+     "TH": 78.6118,
+     "TL": 0.1347,
+     "VN": 123.0476
+    }
+   },
+   "disconnected": {
+    "relative_error": 3.0567251823233585e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 90.2637,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4995,
+     "ID": 222.2444,
+     "KH": 6.8422,
+     "LA": 2.2109,
+     "MM": 10.4436,
+     "MY": 83.1326,
+     "PH": 28.2692,
+     "SG": 26.4862,
+     "TH": 83.7849,
+     "TL": 0.1343,
+     "VN": 143.3034
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 3.6433379373333915e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 75.8714,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.0843,
+     "ID": 198.015,
+     "KH": 4.1768,
+     "LA": -0.1542,
+     "MM": 6.682,
+     "MY": 59.4149,
+     "PH": 23.9851,
+     "SG": 17.8306,
+     "TH": 56.348,
+     "TL": 0.1019,
+     "VN": 113.6997
+    }
+   }
+  }
+ },
+ "s4d6": {
+  "status": [
+   "START:2026-10-17T04:44:42Z commit:c45f1448 dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9ea6:\tMaximum resident set size (kbytes): 706360:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:54.26:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1134:\tMaximum resident set size (kbytes): 705292:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:52.51:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9c6a:\tMaximum resident set size (kbytes): 707484:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:52.82:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"40ac:\tMaximum resident set size (kbytes): 678188:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:50.87:daily=1",
+   "BUILD_integrated_extra150:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"e992:\tMaximum resident set size (kbytes): 707100:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:43.58:daily=0",
+   "COMPARE_integrated_vs_smoke:{}",
+   "COMPARE_disconnected_vs_smoke:{}",
+   "COMPARE_integrated_nze_vs_smoke:{}",
+   "PACKAGE:0",
+   "DONE:2026-10-17T04:49:11Z"
+  ],
+  "extrapolation": {
+   "integrated": {
+    "barrier_iterations": 160,
+    "barrier_seconds": 192.4,
+    "wall_seconds": 255,
+    "peak_rss_gib": 3.693359375,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       2200.6012554368026,
+       3201.565002455244
+      ],
+      "barrier_s_with_1_5x_iterations": 4802.347503682866,
+      "non_solve_s": 314.5817183809621,
+      "wall_s": [
+       2515.182973817765,
+       3516.1467208362064,
+       5116.929222063828
+      ],
+      "peak_rss_gib": [
+       21.865645926339287,
+       30.611904296875
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       32851.73716063766,
+       72443.14635666013
+      ],
+      "barrier_s_with_1_5x_iterations": 108664.7195349902,
+      "non_solve_s": 2516.653747047697,
+      "wall_s": [
+       35368.39090768536,
+       74959.80010370782,
+       111181.3732820379
+      ],
+      "peak_rss_gib": [
+       172.1251674107143,
+       240.975234375
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "barrier_iterations": 117,
+    "barrier_seconds": 127.36,
+    "wall_seconds": 180,
+    "peak_rss_gib": 3.641094207763672,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1456.6973798982908,
+       2119.289598298856
+      ],
+      "barrier_s_with_1_5x_iterations": 3178.9343974482845,
+      "non_solve_s": 258.65284655775343,
+      "wall_s": [
+       1715.3502264560443,
+       2377.9424448566097,
+       3437.587244006038
+      ],
+      "peak_rss_gib": [
+       21.524989032745363,
+       30.134984645843506
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       21746.347426085304,
+       47954.04948016754
+      ],
+      "barrier_s_with_1_5x_iterations": 71931.0742202513,
+      "non_solve_s": 2069.2227724620275,
+      "wall_s": [
+       23815.57019854733,
+       50023.27225262956,
+       74000.29699271334
+      ],
+      "peak_rss_gib": [
+       169.39991226196292,
+       237.1598771667481
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "barrier_iterations": 91,
+    "barrier_seconds": 109.23,
+    "wall_seconds": 165,
+    "peak_rss_gib": 3.6806411743164062,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1249.3330308282843,
+       1817.603665375189
+      ],
+      "barrier_s_with_1_5x_iterations": 2726.4054980627834,
+      "non_solve_s": 269.14415302021166,
+      "wall_s": [
+       1518.477183848496,
+       2086.747818395401,
+       2995.5496510829953
+      ],
+      "peak_rss_gib": [
+       21.782750511169436,
+       30.495850715637207
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       18650.70296287137,
+       41127.67607348226
+      ],
+      "barrier_s_with_1_5x_iterations": 61691.51411022339,
+      "non_solve_s": 2153.1532241616933,
+      "wall_s": [
+       20803.856187033067,
+       43280.829297643955,
+       63844.667334385085
+      ],
+      "peak_rss_gib": [
+       171.4620040893555,
+       240.0468057250977
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "coal_MY_SG": {
+    "barrier_iterations": 130,
+    "barrier_seconds": 145.64,
+    "wall_seconds": 195,
+    "peak_rss_gib": 3.651775360107422,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1665.7773744377123,
+       2423.471553833585
+      ],
+      "barrier_s_with_1_5x_iterations": 3635.2073307503774,
+      "non_solve_s": 237.38626120345936,
+      "wall_s": [
+       1903.1636356411716,
+       2660.8578150370445,
+       3872.593591953837
+      ],
+      "peak_rss_gib": [
+       21.59460725784302,
+       30.232450160980225
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       24867.60395049516,
+       54836.90143130967
+      ],
+      "barrier_s_with_1_5x_iterations": 82255.3521469645,
+      "non_solve_s": 1899.0900896276748,
+      "wall_s": [
+       26766.694040122835,
+       56735.99152093734,
+       84154.44223659218
+      ],
+      "peak_rss_gib": [
+       169.95685806274417,
+       237.93960128784184
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   }
+  },
+  "package": {
+   "commit": "c45f1448820b687b05394b9ac52d8659c21cc3d5",
+   "upload_total_bytes": 228863868,
+   "files": 15,
+   "run": {
+    "script": "run_365x24h.sh",
+    "runs": [
+     "integrated (STEPS)",
+     "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+     "integrated_nze (NZE fuel prices)",
+     "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+    ],
+    "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+    "modes": [
+     "serial",
+     "lanes2",
+     "lanes3"
+    ],
+    "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+    "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+    "scaling": "on",
+    "exports_per_run": [
+     "SOLVE_RECEIPT.json",
+     "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+     "COUNTRY_COST_LEDGER.csv",
+     "COUNTRY_COST_LEDGER_DETAIL.csv",
+     "LEDGER_IDENTITY.json",
+     "NODAL_PRICES.csv",
+     "CO2_FLOWS.json",
+     "BUNKER_ACCOUNT.json",
+     "solved network"
+    ],
+    "threads_per_run": 8,
+    "wall_clock_cap_h": 3,
+    "gurobi_time_limit_s": 10500,
+    "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+   },
+   "first_batch_sensitivities": [
+    {
+     "name": "extra-ASEAN CO2 storage price -50 % / +50 %",
+     "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "CO2 shipping route factor -25 % / +25 %",
+     "override": "co2.ship_route_factor_scale=0.75 | 1.25",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "LNG terminal expansion cap (decision 17, main 2.5 x existing)",
+     "override": "s3.gas.lng_cap_factor=<value set by the user>",
+     "scenarios": "integrated and disconnected"
+    }
+   ]
+  },
+  "registry": {
+   "s4d6_sensitivity_extra_asean_cost": {
+    "value": "0.5|1.5",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4d6_sensitivity_ship_route_factor": {
+    "value": "0.75|1.25",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4d6_sensitivity_lng_cap": {
+    "value": "user_value",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4d6_cloud_package": {
+    "value": "profile_A",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  }
+ },
+ "downloads": [
+  {
+   "file": "sources_s4d/co2_land/Stolaroff_2021_FrontEnergyRes_9_639943.pdf",
+   "url": "https://www.frontiersin.org/articles/10.3389/fenrg.2021.639943/pdf",
+   "bytes": 873889,
+   "sha256": "0d42dcaffc052d5b8b634e1885a7db94dd132d4fe7e4cd714100683f87b48082",
+   "category": "CO2 rail / road transport cost literature"
+  }
+ ],
+ "resources": {
+  "local_max_single_compute_min": 5,
+  "cloud": false,
+  "formal_solves": false
+ },
+ "tests": "tests/research: 479 passed, 0 failed (at c45f1448 with the S4D-6 builds present)"
+}

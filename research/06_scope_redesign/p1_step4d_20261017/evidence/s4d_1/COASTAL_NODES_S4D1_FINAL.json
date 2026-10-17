@@ -1,0 +1,105 @@
+{
+ "rule": "option A with the physical coastline (user decision 2026-10-17)",
+ "open_m": 1000.0,
+ "touch_m": 1000.0,
+ "min_contact_km": 1.0,
+ "converter_km": 5.0,
+ "sea_mask": {
+  "internal_water_polygons": 29254,
+  "internal_water_km2": 50895.0,
+  "lakes_excluded": 111,
+  "spot_checks": {
+   "Bight of Bangkok": true,
+   "Cambodian coast (Kampot)": true,
+   "Gulf of Martaban": true,
+   "Java Sea": true,
+   "Makassar Strait": true,
+   "Sibuyan Sea": true,
+   "Gulf of Tonkin": true,
+   "Tonle Sap (lake)": false
+  },
+  "land_not_in_any_onshore_region_km2": {
+   "BN": 0.0,
+   "ID": 0.0,
+   "KH": 0.0,
+   "LA": 0.0,
+   "MM": 0.0,
+   "MY": 0.0,
+   "PH": 0.0,
+   "SG": 0.0,
+   "TH": 0.0,
+   "TL": 0.0,
+   "VN": 0.0
+  }
+ },
+ "nodes": 100,
+ "coastal": 73,
+ "buffered": {
+  "coastal": 71,
+  "inland": 26,
+  "inland_nodes": [
+   "ID_Kalimantan4 0",
+   "ID_Kalimantan4 10",
+   "KH2 1",
+   "KH2 3",
+   "KH2 4",
+   "LA2 0",
+   "LA2 1",
+   "LA2 2",
+   "LA2 3",
+   "LA2 4",
+   "LA2 5",
+   "MM2 0",
+   "MM2 10",
+   "MM2 12",
+   "MM2 13",
+   "MM2 14",
+   "MM2 15",
+   "MM2 2",
+   "MM2 5",
+   "MM2 6",
+   "MM2 7",
+   "MM2 8",
+   "TH2 1",
+   "TH2 2",
+   "TH2 4",
+   "VN2 1"
+  ]
+ },
+ "changed_vs_instruction_rule": [
+  {
+   "node": "TH2 2",
+   "country": "TH",
+   "coastal": false,
+   "basis": "river port only: Bangkok; no coast contact (region 7.3 km from the sea, land between in region TH2 3; node 109 km from the sea)"
+  }
+ ],
+ "coast_only_no_eez_region": [
+  {
+   "node": "MY_Peninsular22 0",
+   "basis": "sea port Pulau Pinang; LNG RGT Yan LNG Terminal"
+  },
+  {
+   "node": "PH_Luzon9 0",
+   "basis": "sea port Puerto Princesa/Batangas City; LNG Batangas Clean Energy LNG Terminal;FGEN Batangas FSRU;FGEN Batangas LNG Terminal;Filipinas LNG Gateway Project FSRU;Philippines LNG Terminal; converter node 0.4 km from the sea"
+  },
+  {
+   "node": "PH_Visayas10 0",
+   "basis": "sea port Masbate; converter node 1.6 km from the sea"
+  }
+ ],
+ "sources": {
+  "land": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/shapes/country_shapes.geojson",
+   "sha256": "0e981608dde5490df001a283092f615e45ae8cbe00baae59ae9e790c1fabea92"
+  },
+  "eez": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/resources/baseline-aims-3H-tutorial/shapes/offshore_shapes.geojson",
+   "sha256": "84c0d6fe933816484c2cd55f5d39645a1a874b44a1d0c79366d6e795c3576f5f"
+  },
+  "regions_onshore": {
+   "path": "research_inputs/renewable_v5/regions_onshore.geojson",
+   "sha256": "742a7f11a015c7928da57c03c897817fb95bef5fd48eb627c06cda7679d4f5e7"
+  }
+ }
+}
