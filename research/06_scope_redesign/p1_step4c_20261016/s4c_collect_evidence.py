@@ -83,7 +83,7 @@ def main():
     ev["s4c_3"]["config_key_check"] = {p.name: {kk: vv for kk, vv in read(p).items() if kk in ("label", "unaffected", "static", "series", "costs_active_research", "research_config", "key_values")}
                                        for p in sorted((EV / "s4c_3/config_key_check").glob("*.json"))}
     s5 = RES / "s4c5"
-    ev["s4c_5"] = dict(status=lines(s5 / "STATUS.txt"), builds=builds(s5 / "builds"), solves={t: solve_dir(s5 / f"solves/{t}") for t in ["A_kvl_off", "A", "B", "C"]},
+    ev["s4c_5"] = dict(status=lines(s5 / "STATUS.txt"), builds=builds(s5 / "builds"), solves={t: solve_dir(s5 / f"solves/{t}") for t in ["A_kvl_off", "A", "B", "C", "C_rerun"]}, extrapolation=opt(s5 / "analysis/S4C5_CLOUD_EXTRAPOLATION.json"),
                        comparison=opt(s5 / "analysis/S4C5_COMPARISON.json"), files=files(EV / "s4c_5"))
     s6 = RES / "s4c6"
     summ = opt(s6 / "analysis/S4C6_SMOKE_SUMMARY.json") or {}
