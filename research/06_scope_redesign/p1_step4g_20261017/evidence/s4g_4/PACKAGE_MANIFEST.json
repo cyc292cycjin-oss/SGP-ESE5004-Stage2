@@ -1,0 +1,175 @@
+{
+ "commit": "ed6af79cf121a2749483da1c09b1e67c866df5e4",
+ "files": [
+  {
+   "path": "COMMIT",
+   "sha256": "0bc3328e0da56e42cd26d71765b9eca01b6bb043c99960469c1207055666815f",
+   "bytes": 41
+  },
+  {
+   "path": "DATA_CONFIG_MANIFEST.json",
+   "sha256": "548b9c802b7918ba5fe60daffc7b50c4c587f9417dc12ed92fe5ecefc42f8713",
+   "bytes": 129712
+  },
+  {
+   "path": "code_ed6af79c.tar.gz",
+   "sha256": "fb5e86502c5899e20eb60366377abdc0c88db906cc620da9f55cf67b880586b3",
+   "bytes": 116423051
+  },
+  {
+   "path": "conda_explicit_linux64.txt",
+   "sha256": "62f2935b6677194a298b44d12cbb1cc0a85d1566cd4e28aea55136fd86dc3e0f",
+   "bytes": 44787
+  },
+  {
+   "path": "environment_pypsa-earth.yml",
+   "sha256": "f2d28554d08b48bda83037b14ebc1d201b550283e1c36dc4b2657d31f0fe67a3",
+   "bytes": 11450
+  },
+  {
+   "path": "networks/disconnected_365_24h_unsolved.nc",
+   "sha256": "5c35114cdfb63fd434cea446598b32f06908de3fa43f7078a9d4b23c60960794",
+   "bytes": 27317686
+  },
+  {
+   "path": "networks/disconnected_BUILD_RECEIPT.json",
+   "sha256": "50d19ca276cc0cb2721772a45cf899eec8e55b2392de1d1158db502d6644861e",
+   "bytes": 1377000
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_365_24h_unsolved.nc",
+   "sha256": "eeef99d45bf670e4b44e05af2b8651efdfa22eb01d1656d30f6675bdeed42aac",
+   "bytes": 27575550
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_BUILD_RECEIPT.json",
+   "sha256": "f02ee07a4dcf1497209e1658204e6972fda1feab8da5c688d2d933f01f28362a",
+   "bytes": 1383351
+  },
+  {
+   "path": "networks/integrated_365_24h_unsolved.nc",
+   "sha256": "91db74eef547ea7e3fdacd5a3c471423001506034dfca16ddd6cb04a2cff3502",
+   "bytes": 27715061
+  },
+  {
+   "path": "networks/integrated_BUILD_RECEIPT.json",
+   "sha256": "28e9a4ba9d45327acdc99a2c9acff220098b6e2ca45816a9609a8503eac651c5",
+   "bytes": 1377602
+  },
+  {
+   "path": "networks/integrated_nze_365_24h_unsolved.nc",
+   "sha256": "f61bf5d997daf8cc39d560b0d5125405492bfdbf5df2a34f628513d5daf20384",
+   "bytes": 27714973
+  },
+  {
+   "path": "networks/integrated_nze_BUILD_RECEIPT.json",
+   "sha256": "69e002faa0700ca04ead50964be049255d669f9e50fff37cdcc96446d47f8cba",
+   "bytes": 1377589
+  },
+  {
+   "path": "preflight.sh",
+   "sha256": "4b324a78d023c0e61e56d5afb17db83fe881112bea00525f8563653dc8916dfe",
+   "bytes": 3732
+  },
+  {
+   "path": "run_365x24h.sh",
+   "sha256": "63282c6e2ddfa92b890da91b8b42b21247e670e50b3c26067a46b3cc8147c773",
+   "bytes": 11699
+  }
+ ],
+ "upload_total_bytes_excluding_this_manifest": 232464773,
+ "environment": {
+  "python": "3.11.13",
+  "pypsa": "0.30.3",
+  "linopy": "0.5.5",
+  "gurobipy": "12.0.3",
+  "numpy": "1.26.4",
+  "pandas": "2.3.1",
+  "xarray": "2025.1.2",
+  "scipy": "1.15.2",
+  "netCDF4": "1.7.2"
+ },
+ "run": {
+  "script": "run_365x24h.sh",
+  "runs": [
+   "integrated (STEPS)",
+   "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+   "integrated_nze (NZE fuel prices)",
+   "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+  ],
+  "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+  "modes": [
+   "serial",
+   "lanes2",
+   "lanes3"
+  ],
+  "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+  "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+  "scaling": "on",
+  "exports_per_run": [
+   "SOLVE_RECEIPT.json",
+   "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+   "COUNTRY_COST_LEDGER.csv",
+   "COUNTRY_COST_LEDGER_DETAIL.csv",
+   "LEDGER_IDENTITY.json",
+   "NODAL_PRICES.csv",
+   "CO2_FLOWS.json",
+   "BUNKER_ACCOUNT.json",
+   "solved network"
+  ],
+  "threads_per_run": 8,
+  "wall_clock_cap_h": 3,
+  "gurobi_time_limit_s": 10500,
+  "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+ },
+ "first_batch_runs": [
+  "integrated (STEPS)",
+  "disconnected (STEPS)",
+  "integrated_nze (NZE fuel prices)",
+  "disconnected_gap (conditional)"
+ ],
+ "second_batch_sensitivities_registered_not_packaged": [
+  {
+   "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+   "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+   "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+   "override": "co2.ship_distance=route_factor",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "Lao transit: nearest existing sea port and / or truck",
+   "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+   "override": "s3.gas.lng_expansion=uncapped_cost",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+   "override": "network.max_extension=apg_plans",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+   "override": "corridors.optional_sg_vn_kh=on",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "author electrical parameters of the 19 readjusted cross-border AC lines (decision 98 comparison)",
+   "override": "network.readjust_impedance=author",
+   "scenarios": "integrated"
+  }
+ ],
+ "supersedes": "the S4F package (code 7e09744d) is void (decision 99 c)",
+ "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+}
