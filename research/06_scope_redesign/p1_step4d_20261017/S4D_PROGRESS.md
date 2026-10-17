@@ -17,17 +17,13 @@
 | S4D-2 | 东盟内 CO₂ 船运（第 92 项） | 完成（第 5 条的流量与成本随 S4D-5 冒烟报告） | d96bb6cf | 504 条船运链路（71 个沿海缓冲节点 × 8 个有封存上限的接收国，不含本国），`border_class = maritime_trade`，两个情景都有；不互联构建跨境线路 / 链路为 0。单价 = IEAGHG 2004 固定段 11.417 + 0.0029515 EUR2020/(t·km) × 大圆 km × 航线系数 1.091（推导，C 级，±25 %）= 11.5–26.9 EUR/t，另加接收国封存 30 EUR/t（store 上，不重复计）。测试 466 通过 / 0 失败 |
 | S4D-3 | 分国成本账本（第 91 项 a） | 完成 | be299dc0 | `scripts_project/s4d_ledger.py`；门槛 `B16_LEDGER` 纳入新旧两套验收集合；求解后自动导出 `COUNTRY_COST_LEDGER.csv`（国家 × 科目）、`COUNTRY_COST_LEDGER_DETAIL.csv`、`NODAL_PRICES.csv`（按日加权平均，宽表）、`LEDGER_IDENTITY.json`。S4C 三个冒烟解只读试算：恒等式相对误差 1.4e-12 / 1.0e-11 / 3.5e-12，全部通过。测试 471 通过 / 0 失败 |
 | S4D-4 | 子集互联开关（第 91 项 b） | 完成（{LA, TH} 非最优，已记录） | 代码 6dbc9b9e；验证 f47db599（该提交顺带包含 S4D-6 部署包脚本草稿，S4D-6 定稿） | (a) 11 国 = 一体化、(b) 空 = 不互联：网络逐组件一致，目标相对差 0.0。(c) {MY, SG} 最优；{LA, TH} SUBOPTIMAL（barrier 停滞），不重试。连通联盟（≥ 2 国）81 个。测试 475 通过 / 0 失败 |
-| S4D-5 | 冒烟 | 完成 | 见下方提交记录 | 三项全部 optimal；船运 0 Mt；B5、B6、B16 通过；门槛状态与 S4C 冒烟相同（A1_A2_S4B 未过） |
-| S4D-6 | 云端部署包 | 未开始 | — | |
-| 交付 | S4D_REPORT.md、S4D_EVIDENCE.json、DOWNLOAD_LIST.csv | 未开始 | — | |
+| S4D-5 | 冒烟 | 完成 | 226ae331 | 三项全部 optimal；船运 0 Mt；B5、B6、B16 通过；门槛状态与 S4C 冒烟相同（A1_A2_S4B 未过） |
+| S4D-6 | 云端部署包 | 完成 | 代码 c45f1448；交付见下 | 敏感性键 `co2.extra_asean_cost_scale` 与 `s4d_6` 登记；四个网络在 c45f1448 重建，与冒烟网络逐组件一致；打包 `work/p1_step4d_20261017/cloud_package_dist`（15 个文件，228,863,868 B）；资源估算 §13；部署步骤定稿；测试 479 通过 / 0 失败 |
+| 交付 | S4D_REPORT.md、S4D_EVIDENCE.json、DOWNLOAD_LIST.csv、台账条目、审阅 ZIP | 完成 | 本交付提交（哈希见 PR #28 最新提交） | 报告 11 节；需要用户决定的事项 8 项（§9） |
 
 ## 续行点
 
-S4D-0 至 S4D-5 完成。下一步 S4D-6：
-- 新增 `co2.extra_asean_cost_scale`（键缺省 = 1.0，只允许经覆盖项白名单加入），登记第一批敏感性（`s4d_6` 片段）；
-- 提交后在最终提交上重建四个网络（含 365×24h），并与冒烟网络逐组件比对；另做 ×1.5 覆盖构建作验证；
-- `make_package.sh` 打包到 `work/p1_step4d_20261017/cloud_package_dist`；
-- 资源估算 §13（`s4c_5_extrapolate.py`）与部署步骤定稿。
+S4D-0 至 S4D-6 全部完成并交付，停止并等待用户审阅 `S4D_REPORT.md`（尤其 §9 的 8 项决定）。未连接云端，未做正式求解。
 
 ## S4D-5 结果摘要（冒烟，56×3h，档案 A）
 
