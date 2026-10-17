@@ -1,0 +1,3155 @@
+{
+ "label": "SMOKE_TEST_ONLY (56x3h 2013-01-01..01-07, representative weights 8760/56; decision 47) - wind / solar scale cannot be judged from 56 snapshots",
+ "reference": "S4F-3 smoke (results_project/s4f/s4f3/solves, code d9bc8012)",
+ "runs": [
+  {
+   "run": "integrated",
+   "termination": "optimal",
+   "objective_eur": 640079626181.7434,
+   "num_col": 648478,
+   "num_row": 1438072,
+   "nnz": 3224984,
+   "barrier_iterations": 96,
+   "barrier_seconds": 131.04,
+   "solve_seconds": 145.69035124778748,
+   "peak_rss_gib_receipt": 3.8515167236328125,
+   "matrix_min": 4e-06,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  },
+  {
+   "run": "disconnected",
+   "termination": "optimal",
+   "objective_eur": 693191116147.2216,
+   "num_col": 635539,
+   "num_row": 1409957,
+   "nnz": 3137621,
+   "barrier_iterations": 150,
+   "barrier_seconds": 171.04,
+   "solve_seconds": 184.56964874267578,
+   "peak_rss_gib_receipt": 3.5445098876953125,
+   "matrix_min": 0.0002,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  },
+  {
+   "run": "integrated_nze",
+   "termination": "optimal",
+   "objective_eur": 539912571610.1577,
+   "num_col": 648478,
+   "num_row": 1438072,
+   "nnz": 3224984,
+   "barrier_iterations": 141,
+   "barrier_seconds": 188.52,
+   "solve_seconds": 202.4204454421997,
+   "peak_rss_gib_receipt": 3.8354263305664062,
+   "matrix_min": 4e-06,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  }
+ ],
+ "gates": {
+  "integrated": {
+   "run": "integrated",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": false,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": false,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.06155986035784104,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 8.855091386715934e-10,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 8.836146789966259e-07
+   },
+   "A1_A2_failed_criteria": [
+    "primal_rows_within_budget",
+    "dual_sign"
+   ],
+   "A3_failed": [
+    {
+     "check": "STORE_ENERGY_LOWER",
+     "residual": 0.002574072141214856
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:ID",
+     "residual": 0.17799160588765517
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:KH",
+     "residual": 0.07821080080248066
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:LA",
+     "residual": 0.004482774216285179
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:PH",
+     "residual": 0.01457828062120825
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:TH",
+     "residual": 0.04379912163130939
+    }
+   ],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  },
+  "disconnected": {
+   "run": "disconnected",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": false,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.04120998874565571,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 4.201912346019326e-09,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 9.941113670121652e-06
+   },
+   "A1_A2_failed_criteria": [
+    "primal_rows_within_budget",
+    "dual_sign"
+   ],
+   "A3_failed": [
+    {
+     "check": "COUNTRY_CO2_CAP:ID",
+     "residual": 0.04293469316326082
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:KH",
+     "residual": 0.0011396864720154554
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:TH",
+     "residual": 0.0014441425446420908
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:VN",
+     "residual": 0.0018305574776604772
+    }
+   ],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  },
+  "integrated_nze": {
+   "run": "integrated_nze",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": false,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.07665254730537303,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 3.293681043880063e-08,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 9.358658302056554e-07
+   },
+   "A1_A2_failed_criteria": [
+    "primal_rows_within_budget",
+    "dual_sign"
+   ],
+   "A3_failed": [
+    {
+     "check": "COUNTRY_CO2_CAP:ID",
+     "residual": 0.28855171269970015
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:KH",
+     "residual": 0.03044658798535238
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:LA",
+     "residual": 0.025838687640316493
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:MY",
+     "residual": 0.0018610223196446896
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:PH",
+     "residual": 0.014640080567914993
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:TH",
+     "residual": 0.03300892378319986
+    }
+   ],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  }
+ },
+ "vs_s4f": {
+  "integrated": {
+   "objective": 639062536870.334,
+   "objective_change_eur": 1017089311.4094238,
+   "objective_change_rel": 0.001591533305003907
+  },
+  "disconnected": {
+   "objective": 693191116147.2216,
+   "objective_change_eur": 0.0,
+   "objective_change_rel": 0.0
+  },
+  "integrated_nze": {
+   "objective": 538892502651.3916,
+   "objective_change_eur": 1020068958.7661133,
+   "objective_change_rel": 0.0018928987761887527
+  }
+ },
+ "B5": {
+  "gate": "B5_SINGLE_SWITCH_AND_DISCONNECTED_ZERO",
+  "config_differences": [
+   "research.cross_border.H2",
+   "research.cross_border.co2",
+   "research.cross_border.electricity",
+   "research.cross_border.gas",
+   "research.scenario"
+  ],
+  "differences_within_switch_set": true,
+  "disconnected_cross_border_components": 0,
+  "disconnected_cross_border_capacity_mw": 0.0,
+  "disconnected_cross_border_abs_flow_mw": 0.0,
+  "integrated_cross_border_components": 227,
+  "integrated_cross_border_capacity_mw": 754534.0177069687,
+  "passed": true
+ },
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 640079626181.7434,
+   "disconnected": 693191116147.2216
+  },
+  "difference": 53111489965.47815,
+  "relative": 0.0766188266529922,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant"
+ },
+ "co2": {
+  "integrated": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "MM->ID": {
+     "mt": 2.8241,
+     "freight_meur": 44.755
+    },
+    "VN->ID": {
+     "mt": 8.1354,
+     "freight_meur": 117.902
+    },
+    "VN->BN": {
+     "mt": 71.4108,
+     "freight_meur": 1019.972
+    },
+    "VN->MY": {
+     "mt": 59.2908,
+     "freight_meur": 858.586
+    }
+   },
+   "sequestered_mt": {
+    "BN": 72.4063,
+    "ID": 749.4952,
+    "KH": 1.7,
+    "MY": 289.3539,
+    "PH": 104.6687,
+    "TH": 320.48,
+    "TL": 0.5945,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.011417098418758e-07,
+     "net_t_0_to_1": 0.0001953780611544978,
+     "abs_t": 0.0001953780611544978
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.141325574713199e-08,
+     "net_t_0_to_1": -8.966518397006862e-06,
+     "abs_t": 8.966518397006862e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.630789151456858e-08,
+     "net_t_0_to_1": -1.561688207501149e-05,
+     "abs_t": 1.561688207501149e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 8.89565429944129e-08,
+     "net_t_0_to_1": -1.5846609137117036e-05,
+     "abs_t": 1.5846609137117036e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.718950664656285e-08,
+     "net_t_0_to_1": 2.7647389474070297e-06,
+     "abs_t": 3.047781158728169e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.687763071718456e-08,
+     "net_t_0_to_1": -2.2083184405791078e-05,
+     "abs_t": 2.2083184405791078e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.997599606906972e-08,
+     "net_t_0_to_1": -9.698001319857436e-06,
+     "abs_t": 9.698001319857436e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.865711238494952e-08,
+     "net_t_0_to_1": -6.612426863819159e-06,
+     "abs_t": 6.612426863819159e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.96480476186572e-08,
+     "net_t_0_to_1": -1.772201178788203e-05,
+     "abs_t": 1.772201178788203e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.5403740004217924e-08,
+     "net_t_0_to_1": -1.2500909023715793e-05,
+     "abs_t": 1.2500909023715793e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.375429009555154e-08,
+     "net_t_0_to_1": -0.00010827469732599857,
+     "abs_t": 0.00010890515571193856
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 8.177781577210551e-08,
+     "net_t_0_to_1": -0.00012385904487528088,
+     "abs_t": 0.00012385904487528088
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 4586.086200501006,
+     "net_t_0_to_1": -37472223.644282594,
+     "abs_t": 37472223.644282594
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.015261671711072e-08,
+     "net_t_0_to_1": -2.009521976296987e-05,
+     "abs_t": 2.009521976296987e-05
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 8.458738879259773e-08,
+     "net_t_0_to_1": -0.00011817118017561129,
+     "abs_t": 0.00011817118017561129
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 8.821052580780966e-08,
+     "net_t_0_to_1": 0.0002174940989535413,
+     "abs_t": 0.00024812014012904796
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 18.20980340969471,
+     "net_t_0_to_1": 159517.87764067732,
+     "abs_t": 159517.87764067732
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.375567737414198e-08,
+     "net_t_0_to_1": -8.778865463109115e-05,
+     "abs_t": 0.0003825856045830949
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.385984689373e-07,
+     "net_t_0_to_1": -0.00020282366488178942,
+     "abs_t": 0.000893075704204755
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.15432102711535e-08,
+     "net_t_0_to_1": -9.42318945109916e-05,
+     "abs_t": 0.0003688406461252957
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1161.2028848422794,
+     "net_t_0_to_1": 10172136.742179442,
+     "abs_t": 10172136.742179442
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.1020660698837228e-07,
+     "net_t_0_to_1": 8.015101221398872e-05,
+     "abs_t": 0.0004690866851304025
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 9.88428341411924e-08,
+     "net_t_0_to_1": 7.487094078009962e-05,
+     "abs_t": 0.0003992434777633048
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.1861506773539483e-07,
+     "net_t_0_to_1": 0.002547559729075167,
+     "abs_t": 0.002547559729075167
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1775.3426822946353,
+     "net_t_0_to_1": 15552002.039101552,
+     "abs_t": 15552002.039101552
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 177.19436803060123,
+     "net_t_0_to_1": 1552222.6779815,
+     "abs_t": 1552222.6779815
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 89.48031570117043,
+     "net_t_0_to_1": -783847.5657222327,
+     "abs_t": 783847.5657222327
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 6.95410325378493e-08,
+     "net_t_0_to_1": -0.0003589233400171396,
+     "abs_t": 0.0003742238210026227
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.4502632431216412e-07,
+     "net_t_0_to_1": 0.0010912599034848991,
+     "abs_t": 0.0010912599034848991
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75058024843572,
+     "net_t_0_to_1": 873815.0810233103,
+     "abs_t": 873815.0810233103
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.376032633148272e-08,
+     "net_t_0_to_1": -0.00016918083455642945,
+     "abs_t": 0.00017499643200937789
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.23503326667405e-08,
+     "net_t_0_to_1": -0.00015249638046018323,
+     "abs_t": 0.00015980104987401269
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.495536304289,
+     "net_t_0_to_1": 2518460.899164054,
+     "abs_t": 2518460.899164054
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.4262839537032304e-06,
+     "net_t_0_to_1": 0.012250433218660409,
+     "abs_t": 0.012250433218660409
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2356.513558941735,
+     "net_t_0_to_1": 20643058.780325323,
+     "abs_t": 20643058.780325323
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.010556325205021e-08,
+     "net_t_0_to_1": -0.00024054368767784237,
+     "abs_t": 0.00024054368767784237
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2235.5123690442138,
+     "net_t_0_to_1": -19583088.491494298,
+     "abs_t": 19583088.491494298
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 127.333099824044,
+     "net_t_0_to_1": 1115437.9503315315,
+     "abs_t": 1115437.9503315315
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.7320564274160345e-08,
+     "net_t_0_to_1": 0.00012751262271752572,
+     "abs_t": 0.00012751262271752572
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.415592793118917e-07,
+     "net_t_0_to_1": -0.0015419475818184243,
+     "abs_t": 0.0015419475818184243
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 9.345794607551314e-08,
+     "net_t_0_to_1": -0.00043766984491743746,
+     "abs_t": 0.00043766984491743746
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 7.015108267186624e-08,
+     "net_t_0_to_1": -0.0002524627815598136,
+     "abs_t": 0.0002571439380742007
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 378.0285597321427,
+     "net_t_0_to_1": 3311530.1829052763,
+     "abs_t": 3311530.1829052763
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.627763836512448e-08,
+     "net_t_0_to_1": -0.00012164494569727403,
+     "abs_t": 0.00016220743244075035
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.52718189347385,
+     "net_t_0_to_1": 784258.11319699,
+     "abs_t": 784258.11319699
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.88165990846202,
+     "net_t_0_to_1": 463243.3406038062,
+     "abs_t": 463243.3406038062
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 7.247225683579165e-08,
+     "net_t_0_to_1": 0.00043315764533842656,
+     "abs_t": 0.00043315764533842656
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.409175577479222e-08,
+     "net_t_0_to_1": 0.00014707449685260227,
+     "abs_t": 0.00014707449685260227
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 681.7097787867539,
+     "net_t_0_to_1": 5971777.315807771,
+     "abs_t": 5971777.315807771
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.4578713606054324e-08,
+     "net_t_0_to_1": 4.262450811111234e-05,
+     "abs_t": 4.262450811111234e-05
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4229768288553,
+     "net_t_0_to_1": 6354705.672721783,
+     "abs_t": 6354705.672721783
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01250964926894,
+     "net_t_0_to_1": 622069.5846014394,
+     "abs_t": 622069.5846014394
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 9.493876248295812e-08,
+     "net_t_0_to_1": -0.00047216722419681347,
+     "abs_t": 0.00047216722419681347
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 9.400914597898771e-08,
+     "net_t_0_to_1": -0.00026590764933537086,
+     "abs_t": 0.0002680638626635079
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 8.741705115186386e-09,
+     "net_t_0_to_1": 6.7537532031427575e-06,
+     "abs_t": 6.7537532031427575e-06
+    }
+   }
+  },
+  "disconnected": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "KH->ID": {
+     "mt": 3.9108,
+     "freight_meur": 57.258
+    },
+    "KH->TH": {
+     "mt": 22.0122,
+     "freight_meur": 274.277
+    },
+    "MM->ID": {
+     "mt": 49.0278,
+     "freight_meur": 764.145
+    },
+    "SG->ID": {
+     "mt": 92.1007,
+     "freight_meur": 1063.036
+    },
+    "VN->ID": {
+     "mt": 66.5419,
+     "freight_meur": 964.353
+    },
+    "VN->BN": {
+     "mt": 10.1115,
+     "freight_meur": 144.424
+    },
+    "VN->MY": {
+     "mt": 54.7429,
+     "freight_meur": 792.727
+    }
+   },
+   "sequestered_mt": {
+    "BN": 14.1533,
+    "ID": 764.1648,
+    "KH": 1.7,
+    "MY": 272.633,
+    "PH": 145.9529,
+    "TH": 320.48,
+    "TL": 0.5391,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {}
+  },
+  "integrated_nze": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "MM->ID": {
+     "mt": 2.8322,
+     "freight_meur": 44.883
+    },
+    "VN->ID": {
+     "mt": 15.9541,
+     "freight_meur": 231.213
+    },
+    "VN->BN": {
+     "mt": 69.5065,
+     "freight_meur": 992.773
+    },
+    "VN->MY": {
+     "mt": 59.0589,
+     "freight_meur": 855.228
+    }
+   },
+   "sequestered_mt": {
+    "BN": 70.5077,
+    "ID": 755.895,
+    "KH": 1.7,
+    "MY": 295.1445,
+    "PH": 107.3692,
+    "TH": 320.48,
+    "TL": 0.4338,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 9.306377389166289e-07,
+     "net_t_0_to_1": 0.0009716863501007134,
+     "abs_t": 0.0009716863501007134
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 8.985147995246207e-08,
+     "net_t_0_to_1": -2.6817740345236225e-05,
+     "abs_t": 2.6817740345236225e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.6145758399520658e-07,
+     "net_t_0_to_1": -3.7396362731225575e-05,
+     "abs_t": 3.7396362731225575e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.584714337340551e-07,
+     "net_t_0_to_1": -8.416291500072079e-05,
+     "abs_t": 8.416291500072079e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.0624713669480635e-07,
+     "net_t_0_to_1": 3.374025112879735e-05,
+     "abs_t": 3.374025112879735e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.6331900357623664e-07,
+     "net_t_0_to_1": -5.713847333214409e-05,
+     "abs_t": 5.713847333214409e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 8.577591699240958e-08,
+     "net_t_0_to_1": -3.218693497919729e-05,
+     "abs_t": 3.218693497919729e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 8.215366180531419e-08,
+     "net_t_0_to_1": -8.913310512117552e-06,
+     "abs_t": 8.913310512117552e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.4200019246983762e-07,
+     "net_t_0_to_1": -5.4382733889654426e-05,
+     "abs_t": 5.4382733889654426e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.2969589015847978e-07,
+     "net_t_0_to_1": -3.892374023869817e-05,
+     "abs_t": 3.892374023869817e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.2668574206786573e-07,
+     "net_t_0_to_1": -0.0003102552314365713,
+     "abs_t": 0.00032884075195874506
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 2.3440438622324698e-07,
+     "net_t_0_to_1": -0.00047863961258925915,
+     "abs_t": 0.00047863961258925915
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 4574.47973453283,
+     "net_t_0_to_1": -37347047.48256105,
+     "abs_t": 37347047.48256105
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 8.781039808748938e-08,
+     "net_t_0_to_1": -0.0001061257931766066,
+     "abs_t": 0.0001061257931766066
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.437959214944509e-07,
+     "net_t_0_to_1": -0.0002601280647886011,
+     "abs_t": 0.0002601280647886011
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 2.522811466696424e-07,
+     "net_t_0_to_1": 0.0006745245041707103,
+     "abs_t": 0.0007475493954420002
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 4.476889852664545e-05,
+     "net_t_0_to_1": 0.3916169943212414,
+     "abs_t": 0.3916169943212414
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.1578637921191364e-07,
+     "net_t_0_to_1": -0.00025721510893723075,
+     "abs_t": 0.0011390756852599087
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 4.0343259915190203e-07,
+     "net_t_0_to_1": -0.000619002467193692,
+     "abs_t": 0.0025874037940302698
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.096385627040754e-07,
+     "net_t_0_to_1": -0.00028670661383683755,
+     "abs_t": 0.0011040951712708443
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 999.4901522188575,
+     "net_t_0_to_1": 8755533.717203308,
+     "abs_t": 8755533.717203308
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.4875197559119095e-07,
+     "net_t_0_to_1": 0.00025437541432612716,
+     "abs_t": 0.0016247445874695199
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.0891247161253536e-07,
+     "net_t_0_to_1": 0.0002625941408883855,
+     "abs_t": 0.0013566659379630778
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.0605601862705674e-06,
+     "net_t_0_to_1": 0.008621639061308658,
+     "abs_t": 0.008621639061308658
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1976.8874160361386,
+     "net_t_0_to_1": 17317533.56517873,
+     "abs_t": 17317533.56517873
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 87.71405911113189,
+     "net_t_0_to_1": 768375.1571408954,
+     "abs_t": 768375.1571408954
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.573276287366121e-06,
+     "net_t_0_to_1": -0.03006217334399163,
+     "abs_t": 0.03006217334399163
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.0582873570593756e-07,
+     "net_t_0_to_1": -0.0010603586449347156,
+     "abs_t": 0.0010603586449347156
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 4.595211478534896e-07,
+     "net_t_0_to_1": 0.0035188002597917396,
+     "abs_t": 0.0035188002597917396
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75058112845916,
+     "net_t_0_to_1": 873815.0901523523,
+     "abs_t": 873815.0901523523
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.5017391343826748e-07,
+     "net_t_0_to_1": -0.0004082715551064676,
+     "abs_t": 0.00046665383324243385
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.51792470789189e-07,
+     "net_t_0_to_1": -0.00043729624482513477,
+     "abs_t": 0.0004893630057864245
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.49553355503053,
+     "net_t_0_to_1": 2518460.8733132025,
+     "abs_t": 2518460.8733132025
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 5.628006458972195e-06,
+     "net_t_0_to_1": 0.04862787442096657,
+     "abs_t": 0.04862787442096657
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1794.284656357922,
+     "net_t_0_to_1": 15717933.589707024,
+     "abs_t": 15717933.589707024
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.4618229783002426e-07,
+     "net_t_0_to_1": -0.0007130525214755763,
+     "abs_t": 0.0007130525214755763
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1673.2834817274572,
+     "net_t_0_to_1": -14657963.295400318,
+     "abs_t": 14657963.295400318
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 127.33309978713922,
+     "net_t_0_to_1": 1115437.9535062779,
+     "abs_t": 1115437.9535062779
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 8.272488800687579e-08,
+     "net_t_0_to_1": 0.00040772770691003765,
+     "abs_t": 0.00040772770691003765
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 6.838347640122326e-07,
+     "net_t_0_to_1": -0.0040242043214101155,
+     "abs_t": 0.0040242043214101155
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.6580898823507785e-07,
+     "net_t_0_to_1": -0.0011591019093262146,
+     "abs_t": 0.0011591019093262146
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 2.1290327591642634e-07,
+     "net_t_0_to_1": -0.000706945712057974,
+     "abs_t": 0.000841540527206157
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 393.64615048930153,
+     "net_t_0_to_1": 3448340.2783737034,
+     "abs_t": 3448340.2783737034
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.6038699560772835e-07,
+     "net_t_0_to_1": -0.00028692102402709063,
+     "abs_t": 0.000494102556126993
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.5271824419371,
+     "net_t_0_to_1": 784258.117699805,
+     "abs_t": 784258.117699805
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.881659934246365,
+     "net_t_0_to_1": 463243.3406027821,
+     "abs_t": 463243.3406027821
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.1690992607043928e-07,
+     "net_t_0_to_1": 0.0013080282622932849,
+     "abs_t": 0.0013080282622932849
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 9.961884198218356e-08,
+     "net_t_0_to_1": 0.00044739991709876164,
+     "abs_t": 0.00044739991709876164
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 749.3595233182906,
+     "net_t_0_to_1": 6564389.413603215,
+     "abs_t": 6564389.413603215
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 4.395938235676115e-08,
+     "net_t_0_to_1": 0.0001399354533851688,
+     "abs_t": 0.0001399354533851688
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4230187674,
+     "net_t_0_to_1": 6354705.6619778015,
+     "abs_t": 6354705.6619778015
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01251103213589,
+     "net_t_0_to_1": 622069.59600511,
+     "abs_t": 622069.59600511
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.351951686209717e-07,
+     "net_t_0_to_1": -0.00205862133616024,
+     "abs_t": 0.00205862133616024
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 2.807370221157334e-07,
+     "net_t_0_to_1": -0.0008554521466575648,
+     "abs_t": 0.0008606362699023578
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 2.6733308686049416e-08,
+     "net_t_0_to_1": -7.0744355680957755e-06,
+     "abs_t": 7.0744355680957755e-06
+    }
+   }
+  }
+ },
+ "co2_s4f": {
+  "integrated": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "MM->ID": {
+     "mt": 2.8241,
+     "freight_meur": 44.755
+    },
+    "VN->ID": {
+     "mt": 29.9039,
+     "freight_meur": 433.38
+    },
+    "VN->BN": {
+     "mt": 45.3794,
+     "freight_meur": 648.161
+    },
+    "VN->MY": {
+     "mt": 59.7894,
+     "freight_meur": 865.806
+    }
+   },
+   "sequestered_mt": {
+    "BN": 46.3915,
+    "ID": 773.6019,
+    "KH": 1.7,
+    "MY": 291.4308,
+    "PH": 105.6625,
+    "TH": 320.48,
+    "TL": 0.5631,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.682291445379828e-07,
+     "net_t_0_to_1": 0.0006279248967001414,
+     "abs_t": 0.0006279248967001414
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.9713809874255865e-08,
+     "net_t_0_to_1": -7.470166305040299e-06,
+     "abs_t": 7.470166305040299e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 9.20576711791857e-08,
+     "net_t_0_to_1": -4.6651789999800634e-05,
+     "abs_t": 5.0733269947147484e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.521956003423865e-07,
+     "net_t_0_to_1": -9.782900238663493e-05,
+     "abs_t": 0.00011636906114555743
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.9305538639197386e-08,
+     "net_t_0_to_1": -7.574933142349224e-06,
+     "abs_t": 2.4117361889016288e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 9.328884218065057e-08,
+     "net_t_0_to_1": -5.8697956184484974e-05,
+     "abs_t": 6.025676202083315e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.73786282412852e-08,
+     "net_t_0_to_1": -7.241450418849202e-06,
+     "abs_t": 7.241450418849202e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.5335412331381465e-08,
+     "net_t_0_to_1": -2.1730649899476524e-06,
+     "abs_t": 2.378800663883274e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 7.954184255685704e-08,
+     "net_t_0_to_1": -3.57302789435791e-05,
+     "abs_t": 3.57302789435791e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 7.24348860932382e-08,
+     "net_t_0_to_1": -2.2179202958645335e-05,
+     "abs_t": 2.2179202958645335e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 7.460916079627159e-08,
+     "net_t_0_to_1": -0.00018994595882553618,
+     "abs_t": 0.00019218406458256927
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 1.1891137095950293e-07,
+     "net_t_0_to_1": -5.599499997116221e-05,
+     "abs_t": 5.599499997116221e-05
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 4619.915207077614,
+     "net_t_0_to_1": -37753624.24797754,
+     "abs_t": 37753624.24797754
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.9258881587229714e-08,
+     "net_t_0_to_1": -5.452326972139903e-05,
+     "abs_t": 5.452326972139903e-05
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.364173869929492e-07,
+     "net_t_0_to_1": -0.00013093993969922872,
+     "abs_t": 0.00018899113486076178
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 1.8840295471780165e-07,
+     "net_t_0_to_1": 0.0007329219643620694,
+     "abs_t": 0.0009051008539311681
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1170.0562481248937,
+     "net_t_0_to_1": 10249692.474467505,
+     "abs_t": 10249692.474467505
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.647959848726214e-07,
+     "net_t_0_to_1": -0.0002622263268445259,
+     "abs_t": 0.0019260018873511757
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 85.68946193008871,
+     "net_t_0_to_1": -99398.81433597716,
+     "abs_t": 742804.2571305997
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.469836011824793e-07,
+     "net_t_0_to_1": -0.00026285379072508953,
+     "abs_t": 0.0017755815071090362
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1321.3361199104315,
+     "net_t_0_to_1": 11574908.37449911,
+     "abs_t": 11574908.37449911
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.1488333454583293e-07,
+     "net_t_0_to_1": 0.00013445139368552857,
+     "abs_t": 0.0011248143542959702
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.8781804856696657e-07,
+     "net_t_0_to_1": 0.00012348768622936514,
+     "abs_t": 0.000933270384417339
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 6.641417659822861e-07,
+     "net_t_0_to_1": 0.005409243945104912,
+     "abs_t": 0.005409243945104912
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 486.11534350943145,
+     "net_t_0_to_1": 4258370.410165416,
+     "abs_t": 4258370.410165416
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1056.1470821340445,
+     "net_t_0_to_1": 9251848.408910368,
+     "abs_t": 9251848.408910368
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 968.4330562826487,
+     "net_t_0_to_1": -8483473.300683755,
+     "abs_t": 8483473.300683755
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.250982123081472e-07,
+     "net_t_0_to_1": -0.0006083529166164242,
+     "abs_t": 0.0006083529166164242
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.7384446565697e-07,
+     "net_t_0_to_1": 0.0021139978484357343,
+     "abs_t": 0.0021139978484357343
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75057938299351,
+     "net_t_0_to_1": 873815.0762435097,
+     "abs_t": 873815.0762435097
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 8.581580140917335e-08,
+     "net_t_0_to_1": -0.0002669708797940845,
+     "abs_t": 0.00026912766896062157
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 8.400587528919717e-08,
+     "net_t_0_to_1": -0.00024440014024300507,
+     "abs_t": 0.0002484487115268504
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.4955342156671,
+     "net_t_0_to_1": 2518460.875040821,
+     "abs_t": 2518460.875040821
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.9124544902368305e-06,
+     "net_t_0_to_1": 0.03387835511188246,
+     "abs_t": 0.03387835511188246
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2762.46203192467,
+     "net_t_0_to_1": 24199167.641488492,
+     "abs_t": 24199167.641488492
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 8.897586227314085e-08,
+     "net_t_0_to_1": -0.00040488839576318416,
+     "abs_t": 0.00040488839576318416
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2235.512380824044,
+     "net_t_0_to_1": -19583088.466384664,
+     "abs_t": 19583088.466384664
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 5.712003570598052e-07,
+     "net_t_0_to_1": 0.00431539505977361,
+     "abs_t": 0.00431539505977361
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 4.287412559883715e-08,
+     "net_t_0_to_1": 0.0001579925833135858,
+     "abs_t": 0.0001579925833135858
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 171.8004213414082,
+     "net_t_0_to_1": -382890.27365203964,
+     "abs_t": 1365037.7497798046
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.617201796551644e-07,
+     "net_t_0_to_1": -0.0010146154486856914,
+     "abs_t": 0.0012740941394237472
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 1.238829534276733e-07,
+     "net_t_0_to_1": -0.0004456626347506336,
+     "abs_t": 0.0005377971064504223
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 137.03182417434869,
+     "net_t_0_to_1": 1200398.7791927208,
+     "abs_t": 1200398.7791927208
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 8.874846574857523e-08,
+     "net_t_0_to_1": -0.00019219867435963972,
+     "abs_t": 0.00023928378252565183
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.5271821404573,
+     "net_t_0_to_1": 784258.115204206,
+     "abs_t": 784258.115204206
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.88165988111208,
+     "net_t_0_to_1": 463243.34045780846,
+     "abs_t": 463243.34045780846
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.1659372579355282e-07,
+     "net_t_0_to_1": 0.0006585814136032863,
+     "abs_t": 0.0006585814136032863
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 5.3775317026164605e-08,
+     "net_t_0_to_1": 0.00021944943003024083,
+     "abs_t": 0.00021944943003024083
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 683.9265526435868,
+     "net_t_0_to_1": 5991196.698742143,
+     "abs_t": 5991196.698742143
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.318424456419651e-08,
+     "net_t_0_to_1": 6.676281824995986e-05,
+     "abs_t": 6.676281824995986e-05
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4230105844262,
+     "net_t_0_to_1": 6354705.667199624,
+     "abs_t": 6354705.667199624
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01251006132556,
+     "net_t_0_to_1": 622069.5896715599,
+     "abs_t": 622069.5896715599
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.5989909401809825e-07,
+     "net_t_0_to_1": -0.0008142373527720523,
+     "abs_t": 0.0008142373527720523
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 1.5683569192418707e-07,
+     "net_t_0_to_1": -0.00042888543546819064,
+     "abs_t": 0.00043546363626286366
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 1.4446642567425482e-08,
+     "net_t_0_to_1": 1.677607478384518e-05,
+     "abs_t": 1.677607478384518e-05
+    }
+   }
+  },
+  "disconnected": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "KH->ID": {
+     "mt": 3.9108,
+     "freight_meur": 57.258
+    },
+    "KH->TH": {
+     "mt": 22.0122,
+     "freight_meur": 274.277
+    },
+    "MM->ID": {
+     "mt": 49.0278,
+     "freight_meur": 764.145
+    },
+    "SG->ID": {
+     "mt": 92.1007,
+     "freight_meur": 1063.036
+    },
+    "VN->ID": {
+     "mt": 66.5419,
+     "freight_meur": 964.353
+    },
+    "VN->BN": {
+     "mt": 10.1115,
+     "freight_meur": 144.424
+    },
+    "VN->MY": {
+     "mt": 54.7429,
+     "freight_meur": 792.727
+    }
+   },
+   "sequestered_mt": {
+    "BN": 14.1533,
+    "ID": 764.1648,
+    "KH": 1.7,
+    "MY": 272.633,
+    "PH": 145.9529,
+    "TH": 320.48,
+    "TL": 0.5391,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {}
+  },
+  "integrated_nze": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "KH->ID": {
+     "mt": 0.0021,
+     "freight_meur": 0.031
+    },
+    "MM->ID": {
+     "mt": 2.8241,
+     "freight_meur": 44.755
+    },
+    "VN->ID": {
+     "mt": 40.2116,
+     "freight_meur": 582.764
+    },
+    "VN->BN": {
+     "mt": 43.0442,
+     "freight_meur": 614.808
+    },
+    "VN->MY": {
+     "mt": 59.6691,
+     "freight_meur": 864.064
+    }
+   },
+   "sequestered_mt": {
+    "BN": 44.051,
+    "ID": 784.4593,
+    "KH": 1.7,
+    "MY": 292.0789,
+    "PH": 109.2293,
+    "TH": 320.48,
+    "TL": 0.4314,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.9828652216518867e-07,
+     "net_t_0_to_1": 0.0002401780544642941,
+     "abs_t": 0.0002401780544642941
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.193968292144134e-08,
+     "net_t_0_to_1": -2.2786188526524194e-06,
+     "abs_t": 2.445770123830312e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 6.046926236328066e-08,
+     "net_t_0_to_1": -1.0353013638294825e-05,
+     "abs_t": 1.3105145332649323e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.0148509446322934e-07,
+     "net_t_0_to_1": -1.831546733957064e-05,
+     "abs_t": 3.416999328371999e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.826375355861841e-08,
+     "net_t_0_to_1": -2.189536340149614e-06,
+     "abs_t": 5.6279220415126935e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 6.119477808980965e-08,
+     "net_t_0_to_1": -1.458484914885163e-05,
+     "abs_t": 1.5283149150631894e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.038706910457851e-08,
+     "net_t_0_to_1": -1.3260778678528669e-06,
+     "abs_t": 1.4206382504519146e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.8994554127064623e-08,
+     "net_t_0_to_1": -1.2427187087351857e-06,
+     "abs_t": 1.555944379522562e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.2403723015892097e-08,
+     "net_t_0_to_1": -1.7461934149950984e-05,
+     "abs_t": 1.7461934149950984e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.749214757444418e-08,
+     "net_t_0_to_1": -1.219761543053991e-05,
+     "abs_t": 1.219761543053991e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.579766478342347e-08,
+     "net_t_0_to_1": -0.00011035554141413498,
+     "abs_t": 0.00011252549684358828
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 8.102447771550655e-08,
+     "net_t_0_to_1": 1.8231112924364506e-05,
+     "abs_t": 2.819096159156754e-05
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 4609.862707190066,
+     "net_t_0_to_1": -37570571.938264005,
+     "abs_t": 37570571.938264005
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.157033433687494e-08,
+     "net_t_0_to_1": -2.8262117524132277e-05,
+     "abs_t": 2.8262117524132277e-05
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 9.401912129168045e-08,
+     "net_t_0_to_1": -0.00012586426242849606,
+     "abs_t": 0.00015437805146538457
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 1.2169597282945332e-07,
+     "net_t_0_to_1": 0.0004855163070791326,
+     "abs_t": 0.0005644689332232103
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1190.4347850624506,
+     "net_t_0_to_1": 10428208.874559095,
+     "abs_t": 10428208.874559095
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.556160318653894e-07,
+     "net_t_0_to_1": -0.000144748449829221,
+     "abs_t": 0.0011221229680678907
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 59.7724556984294,
+     "net_t_0_to_1": -56100.719129946316,
+     "abs_t": 523606.71127386193
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.454142294809163e-07,
+     "net_t_0_to_1": -0.00014578771287622304,
+     "abs_t": 0.001034725189339733
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1320.5309361099473,
+     "net_t_0_to_1": 11567852.145731606,
+     "abs_t": 11567852.145731606
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.3880325822408417e-07,
+     "net_t_0_to_1": 7.409372232386073e-05,
+     "abs_t": 0.0007132406384766373
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.2209033593087862e-07,
+     "net_t_0_to_1": 5.729872869879971e-05,
+     "abs_t": 0.0005974966095762973
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.371294165657453e-07,
+     "net_t_0_to_1": 0.0026859145170474337,
+     "abs_t": 0.0026859145170474337
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 486.1153437693555,
+     "net_t_0_to_1": 4258370.410070412,
+     "abs_t": 4258370.410070412
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 209.2381040940993,
+     "net_t_0_to_1": 1832925.7997664441,
+     "abs_t": 1832925.7997664441
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 121.52405268621338,
+     "net_t_0_to_1": -1064550.6900422904,
+     "abs_t": 1064550.6900422904
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.777981706617415e-08,
+     "net_t_0_to_1": -0.00039441716251740046,
+     "abs_t": 0.00039441716251740046
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.5230444181154496e-07,
+     "net_t_0_to_1": 0.0011385099772654962,
+     "abs_t": 0.0011385099772654962
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75057915601558,
+     "net_t_0_to_1": 873815.0777007205,
+     "abs_t": 873815.0777007205
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.699225971362797e-08,
+     "net_t_0_to_1": -0.00018497779156040605,
+     "abs_t": 0.00018966357755561804
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.519114463268386e-08,
+     "net_t_0_to_1": -0.0001626952375716237,
+     "abs_t": 0.0001715168210508046
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.4955358282978,
+     "net_t_0_to_1": 2518460.8933278164,
+     "abs_t": 2518460.8933278164
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.7605404051283459e-06,
+     "net_t_0_to_1": 0.015145950733871706,
+     "abs_t": 0.015145950733871706
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2784.225783936598,
+     "net_t_0_to_1": 24389817.371524535,
+     "abs_t": 24389817.371524535
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.518130988308031e-08,
+     "net_t_0_to_1": -0.00024091043282695597,
+     "abs_t": 0.00024368096893467614
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2235.5123882795615,
+     "net_t_0_to_1": -19583088.487846404,
+     "abs_t": 19583088.487846404
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.050940912863468e-07,
+     "net_t_0_to_1": 0.002226869560104753,
+     "abs_t": 0.002226869560104753
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.6323221151699433e-08,
+     "net_t_0_to_1": 9.290344286863899e-05,
+     "abs_t": 9.290344286863899e-05
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 183.51521961190463,
+     "net_t_0_to_1": -438532.7020153097,
+     "abs_t": 1466921.2515021416
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.6555779027873007e-07,
+     "net_t_0_to_1": -0.0006570125929777239,
+     "abs_t": 0.0007872413592594808
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 7.309018420963087e-08,
+     "net_t_0_to_1": -0.00026713087187632333,
+     "abs_t": 0.0002724241793356753
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 137.03182406955656,
+     "net_t_0_to_1": 1200398.7780353883,
+     "abs_t": 1200398.7780353883
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 6.024637890880971e-08,
+     "net_t_0_to_1": -0.0001397340915264051,
+     "abs_t": 0.0001829603434005611
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.52718192030724,
+     "net_t_0_to_1": 784258.1134989422,
+     "abs_t": 784258.1134989422
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.88165992013876,
+     "net_t_0_to_1": 463243.3406304911,
+     "abs_t": 463243.3406304911
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 7.19326655313029e-08,
+     "net_t_0_to_1": 0.0003814024531524654,
+     "abs_t": 0.0003814024531524654
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 3.355190658108528e-08,
+     "net_t_0_to_1": 0.00013020750670398825,
+     "abs_t": 0.00013020750670398825
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 740.0957635069564,
+     "net_t_0_to_1": 6483238.906725293,
+     "abs_t": 6483238.906725293
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.4722126876725869e-08,
+     "net_t_0_to_1": 4.270256652883495e-05,
+     "abs_t": 4.270256652883495e-05
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4230141647689,
+     "net_t_0_to_1": 6354705.6719498215,
+     "abs_t": 6354705.6719498215
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01250949290043,
+     "net_t_0_to_1": 622069.5854428535,
+     "abs_t": 622069.5854428535
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.0273217936077731e-07,
+     "net_t_0_to_1": -0.0004782509544439638,
+     "abs_t": 0.0004782509544439638
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 9.958473186864464e-08,
+     "net_t_0_to_1": -0.00023188808150927012,
+     "abs_t": 0.0002657486487836376
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 9.069285849567668e-09,
+     "net_t_0_to_1": 8.44020718667523e-06,
+     "abs_t": 8.44020718667523e-06
+    }
+   }
+  }
+ },
+ "ledgers": {
+  "integrated": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 92.6993,
+    "ASEAN_POOL": 0.0,
+    "BN": 0.671,
+    "ID": 204.7342,
+    "KH": 4.6427,
+    "LA": -1.1015,
+    "MM": 9.4075,
+    "MY": 70.9131,
+    "PH": 26.509,
+    "SG": 24.5832,
+    "TH": 79.9122,
+    "TL": -0.156,
+    "VN": 127.265
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 92.6993,
+    "ASEAN_POOL": 0.0,
+    "BN": 0.671,
+    "ID": 204.6744,
+    "KH": 5.0267,
+    "LA": -0.9243,
+    "MM": 9.4419,
+    "MY": 70.6597,
+    "PH": 26.509,
+    "SG": 24.8939,
+    "TH": 79.4811,
+    "TL": -0.156,
+    "VN": 127.103
+   },
+   "relative_error": 6.419355901533685e-11,
+   "pool_surplus_eur": 40.889015197753906
+  },
+  "disconnected": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 92.9607,
+    "ASEAN_POOL": -0.0,
+    "BN": 1.4995,
+    "ID": 214.0173,
+    "KH": 6.8709,
+    "LA": 2.1618,
+    "MM": 10.4005,
+    "MY": 76.0107,
+    "PH": 27.5901,
+    "SG": 26.5703,
+    "TH": 85.6617,
+    "TL": 0.1306,
+    "VN": 149.3171
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 92.9607,
+    "ASEAN_POOL": -0.0,
+    "BN": 1.4995,
+    "ID": 214.0173,
+    "KH": 6.8709,
+    "LA": 2.1618,
+    "MM": 10.4005,
+    "MY": 76.0107,
+    "PH": 27.5901,
+    "SG": 26.5703,
+    "TH": 85.6617,
+    "TL": 0.1306,
+    "VN": 149.3171
+   },
+   "relative_error": 3.4297055326731473e-12,
+   "pool_surplus_eur": -2.5765914916992188
+  },
+  "integrated_nze": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 92.497,
+    "ASEAN_POOL": 0.0,
+    "BN": -0.781,
+    "ID": 176.5775,
+    "KH": 3.7855,
+    "LA": -1.0382,
+    "MM": 6.098,
+    "MY": 53.8855,
+    "PH": 16.3193,
+    "SG": 18.1513,
+    "TH": 56.1789,
+    "TL": -0.9492,
+    "VN": 119.1879
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 92.497,
+    "ASEAN_POOL": 0.0,
+    "BN": -0.781,
+    "ID": 176.536,
+    "KH": 4.1551,
+    "LA": -0.8701,
+    "MM": 6.1332,
+    "MY": 53.6274,
+    "PH": 16.3193,
+    "SG": 18.4486,
+    "TH": 55.7609,
+    "TL": -0.9492,
+    "VN": 119.0355
+   },
+   "relative_error": 1.4143683515812457e-11,
+   "pool_surplus_eur": 7.610786437988281
+  }
+ },
+ "disconnected_minus_integrated_bn_eur": {
+  "ASEAN_BUNKER": 0.2614,
+  "ASEAN_POOL": -0.0,
+  "BN": 0.8285,
+  "ID": 9.2831,
+  "KH": 2.2282,
+  "LA": 3.2633,
+  "MM": 0.993,
+  "MY": 5.0976,
+  "PH": 1.0811,
+  "SG": 1.9871,
+  "TH": 5.7495,
+  "TL": 0.2866,
+  "VN": 22.0521
+ },
+ "lines_19": {
+  "integrated": {
+   "23": {
+    "country_pair": "ID-MY",
+    "s_nom": 230.0,
+    "s_nom_opt": 1304.08,
+    "added": 1074.08,
+    "at_cap": false,
+    "abs_flow_twh": 3.1752,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 10286.33,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 26.0225
+   },
+   "43": {
+    "country_pair": "KH-LA",
+    "s_nom": 300.0,
+    "s_nom_opt": 2272.88,
+    "added": 1972.88,
+    "at_cap": false,
+    "abs_flow_twh": 5.5649,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 11581.0,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 45.5458
+   },
+   "47": {
+    "country_pair": "KH-TH",
+    "s_nom": 250.0,
+    "s_nom_opt": 2357.43,
+    "added": 2107.43,
+    "at_cap": false,
+    "abs_flow_twh": 8.3213,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 6026.08,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 20.7139
+   },
+   "39": {
+    "country_pair": "KH-VN",
+    "s_nom": 200.0,
+    "s_nom_opt": 1809.99,
+    "added": 1609.99,
+    "at_cap": false,
+    "abs_flow_twh": 6.999,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 8906.63,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 38.9052
+   },
+   "49": {
+    "country_pair": "LA-TH",
+    "s_nom": 69.93430858139246,
+    "s_nom_opt": 1426.77,
+    "added": 1356.83,
+    "at_cap": false,
+    "abs_flow_twh": 3.5319,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 3362.84,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 12.7086
+   },
+   "52": {
+    "country_pair": "LA-TH",
+    "s_nom": 120.00388556289535,
+    "s_nom_opt": 980.08,
+    "added": 860.08,
+    "at_cap": false,
+    "abs_flow_twh": 2.7127,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 251.31,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 0.8812
+   },
+   "53": {
+    "country_pair": "LA-TH",
+    "s_nom": 101.90693406505751,
+    "s_nom_opt": 1056.33,
+    "added": 954.42,
+    "at_cap": false,
+    "abs_flow_twh": 3.2483,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 15352.99,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 68.8961
+   },
+   "55": {
+    "country_pair": "LA-TH",
+    "s_nom": 89.54447063267305,
+    "s_nom_opt": 926.97,
+    "added": 837.42,
+    "at_cap": false,
+    "abs_flow_twh": 2.4998,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 16757.82,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 65.5996
+   },
+   "56": {
+    "country_pair": "LA-TH",
+    "s_nom": 91.30135905484386,
+    "s_nom_opt": 1099.56,
+    "added": 1008.25,
+    "at_cap": false,
+    "abs_flow_twh": 3.0029,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 741.17,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 3.2287
+   },
+   "58": {
+    "country_pair": "LA-TH",
+    "s_nom": 70.90859891987014,
+    "s_nom_opt": 1225.58,
+    "added": 1154.67,
+    "at_cap": false,
+    "abs_flow_twh": 2.7398,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 10000.47,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 37.9295
+   },
+   "61": {
+    "country_pair": "LA-TH",
+    "s_nom": 95.14851589005835,
+    "s_nom_opt": 1173.97,
+    "added": 1078.83,
+    "at_cap": false,
+    "abs_flow_twh": 2.9206,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20095.15,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 79.9195
+   },
+   "62": {
+    "country_pair": "LA-TH",
+    "s_nom": 203.28040197478592,
+    "s_nom_opt": 1549.45,
+    "added": 1346.17,
+    "at_cap": false,
+    "abs_flow_twh": 4.4954,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 669.41,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 2.8635
+   },
+   "66": {
+    "country_pair": "LA-TH",
+    "s_nom": 112.97152531842329,
+    "s_nom_opt": 898.04,
+    "added": 785.07,
+    "at_cap": false,
+    "abs_flow_twh": 2.9847,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 7665.85,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 22.6137
+   },
+   "59": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.385110546485834,
+    "s_nom_opt": 2.99,
+    "added": 2.6,
+    "at_cap": false,
+    "abs_flow_twh": 0.0075,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 11270.09,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 48.0235
+   },
+   "60": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.2006302867512334,
+    "s_nom_opt": 2.67,
+    "added": 2.47,
+    "at_cap": false,
+    "abs_flow_twh": 0.0088,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20000.2,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 77.9572
+   },
+   "63": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.17261042375385396,
+    "s_nom_opt": 1.42,
+    "added": 1.25,
+    "at_cap": false,
+    "abs_flow_twh": 0.0032,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 6550.86,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 24.1642
+   },
+   "64": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.24164874300907863,
+    "s_nom_opt": 1.61,
+    "added": 1.37,
+    "at_cap": false,
+    "abs_flow_twh": 0.0051,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 4585.43,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 18.8412
+   },
+   "92": {
+    "country_pair": "MY-SG",
+    "s_nom": 525.0,
+    "s_nom_opt": 20525.0,
+    "added": 20000.0,
+    "at_cap": true,
+    "abs_flow_twh": 114.2568,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20525.0,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 113.6615
+   },
+   "91": {
+    "country_pair": "MY-TH",
+    "s_nom": 80.0,
+    "s_nom_opt": 20080.0,
+    "added": 20000.0,
+    "at_cap": true,
+    "abs_flow_twh": 86.0342,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20080.0,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 87.0116
+   }
+  },
+  "disconnected": {},
+  "integrated_nze": {
+   "23": {
+    "country_pair": "ID-MY",
+    "s_nom": 230.0,
+    "s_nom_opt": 1274.45,
+    "added": 1044.45,
+    "at_cap": false,
+    "abs_flow_twh": 3.0465,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 10258.01,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 24.7004
+   },
+   "43": {
+    "country_pair": "KH-LA",
+    "s_nom": 300.0,
+    "s_nom_opt": 2262.26,
+    "added": 1962.26,
+    "at_cap": false,
+    "abs_flow_twh": 6.0636,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 11452.43,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 44.7124
+   },
+   "47": {
+    "country_pair": "KH-TH",
+    "s_nom": 250.0,
+    "s_nom_opt": 2343.97,
+    "added": 2093.97,
+    "at_cap": false,
+    "abs_flow_twh": 8.0533,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 6013.06,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 20.7649
+   },
+   "39": {
+    "country_pair": "KH-VN",
+    "s_nom": 200.0,
+    "s_nom_opt": 1808.26,
+    "added": 1608.26,
+    "at_cap": false,
+    "abs_flow_twh": 7.1379,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 8885.3,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 38.2931
+   },
+   "49": {
+    "country_pair": "LA-TH",
+    "s_nom": 69.93430858139246,
+    "s_nom_opt": 1383.93,
+    "added": 1313.99,
+    "at_cap": false,
+    "abs_flow_twh": 3.4242,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 3471.9,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 12.9078
+   },
+   "52": {
+    "country_pair": "LA-TH",
+    "s_nom": 120.00388556289535,
+    "s_nom_opt": 962.2,
+    "added": 842.2,
+    "at_cap": false,
+    "abs_flow_twh": 2.9589,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 250.76,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 0.876
+   },
+   "53": {
+    "country_pair": "LA-TH",
+    "s_nom": 101.90693406505751,
+    "s_nom_opt": 1038.15,
+    "added": 936.24,
+    "at_cap": false,
+    "abs_flow_twh": 3.4645,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 15363.24,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 69.3184
+   },
+   "55": {
+    "country_pair": "LA-TH",
+    "s_nom": 89.54447063267305,
+    "s_nom_opt": 910.9,
+    "added": 821.35,
+    "at_cap": false,
+    "abs_flow_twh": 2.6223,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 16705.57,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 65.2937
+   },
+   "56": {
+    "country_pair": "LA-TH",
+    "s_nom": 91.30135905484386,
+    "s_nom_opt": 1081.83,
+    "added": 990.53,
+    "at_cap": false,
+    "abs_flow_twh": 3.2129,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 740.82,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 3.2302
+   },
+   "58": {
+    "country_pair": "LA-TH",
+    "s_nom": 70.90859891987014,
+    "s_nom_opt": 1207.45,
+    "added": 1136.54,
+    "at_cap": false,
+    "abs_flow_twh": 2.6183,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 10088.17,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 38.4128
+   },
+   "61": {
+    "country_pair": "LA-TH",
+    "s_nom": 95.14851589005835,
+    "s_nom_opt": 1135.26,
+    "added": 1040.11,
+    "at_cap": false,
+    "abs_flow_twh": 2.8678,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20095.15,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 79.1432
+   },
+   "62": {
+    "country_pair": "LA-TH",
+    "s_nom": 203.28040197478592,
+    "s_nom_opt": 1510.73,
+    "added": 1307.45,
+    "at_cap": false,
+    "abs_flow_twh": 4.4288,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 669.41,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 2.8626
+   },
+   "66": {
+    "country_pair": "LA-TH",
+    "s_nom": 112.97152531842329,
+    "s_nom_opt": 881.14,
+    "added": 768.17,
+    "at_cap": false,
+    "abs_flow_twh": 3.1894,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 7722.11,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 22.9498
+   },
+   "59": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.385110546485834,
+    "s_nom_opt": 3.02,
+    "added": 2.63,
+    "at_cap": false,
+    "abs_flow_twh": 0.0076,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 11288.18,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 47.9796
+   },
+   "60": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.2006302867512334,
+    "s_nom_opt": 2.61,
+    "added": 2.41,
+    "at_cap": false,
+    "abs_flow_twh": 0.0089,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20000.2,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 78.7084
+   },
+   "63": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.17261042375385396,
+    "s_nom_opt": 1.42,
+    "added": 1.25,
+    "at_cap": false,
+    "abs_flow_twh": 0.0032,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 6614.38,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 24.3265
+   },
+   "64": {
+    "country_pair": "LA-VN",
+    "s_nom": 0.24164874300907863,
+    "s_nom_opt": 1.6,
+    "added": 1.35,
+    "at_cap": false,
+    "abs_flow_twh": 0.0052,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 4585.19,
+    "s4f_at_cap": false,
+    "s4f_abs_flow_twh": 18.807
+   },
+   "92": {
+    "country_pair": "MY-SG",
+    "s_nom": 525.0,
+    "s_nom_opt": 20525.0,
+    "added": 20000.0,
+    "at_cap": true,
+    "abs_flow_twh": 114.7898,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20525.0,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 114.2564
+   },
+   "91": {
+    "country_pair": "MY-TH",
+    "s_nom": 80.0,
+    "s_nom_opt": 20080.0,
+    "added": 20000.0,
+    "at_cap": true,
+    "abs_flow_twh": 86.323,
+    "loading_max": 0.7,
+    "s4f_s_nom_opt": 20080.0,
+    "s4f_at_cap": true,
+    "s4f_abs_flow_twh": 87.6417
+   }
+  }
+ },
+ "mekong": {
+  "integrated": {
+   "KH-LA": {
+    "s4g": {
+     "abs_twh": 5.5649,
+     "net_twh": 2.8502
+    },
+    "s4f": {
+     "abs_twh": 45.5458,
+     "net_twh": 39.7582
+    }
+   },
+   "KH-TH": {
+    "s4g": {
+     "abs_twh": 175.5162,
+     "net_twh": 135.213
+    },
+    "s4f": {
+     "abs_twh": 119.7977,
+     "net_twh": 99.2534
+    }
+   },
+   "KH-VN": {
+    "s4g": {
+     "abs_twh": 170.7384,
+     "net_twh": -129.4529
+    },
+    "s4f": {
+     "abs_twh": 158.6269,
+     "net_twh": -129.7684
+    }
+   },
+   "LA-TH": {
+    "s4g": {
+     "abs_twh": 28.1363,
+     "net_twh": 11.9856
+    },
+    "s4f": {
+     "abs_twh": 294.6403,
+     "net_twh": 51.4262
+    }
+   },
+   "LA-VN": {
+    "s4g": {
+     "abs_twh": 190.7492,
+     "net_twh": 140.4322
+    },
+    "s4f": {
+     "abs_twh": 313.5237,
+     "net_twh": 104.7696
+    }
+   }
+  },
+  "disconnected": {},
+  "integrated_nze": {
+   "KH-LA": {
+    "s4g": {
+     "abs_twh": 6.0636,
+     "net_twh": 3.542
+    },
+    "s4f": {
+     "abs_twh": 44.7124,
+     "net_twh": 38.9206
+    }
+   },
+   "KH-TH": {
+    "s4g": {
+     "abs_twh": 176.6191,
+     "net_twh": 138.9802
+    },
+    "s4f": {
+     "abs_twh": 118.5512,
+     "net_twh": 97.2583
+    }
+   },
+   "KH-VN": {
+    "s4g": {
+     "abs_twh": 170.6745,
+     "net_twh": -126.118
+    },
+    "s4f": {
+     "abs_twh": 155.3125,
+     "net_twh": -127.1759
+    }
+   },
+   "LA-TH": {
+    "s4g": {
+     "abs_twh": 28.7872,
+     "net_twh": 9.8241
+    },
+    "s4f": {
+     "abs_twh": 294.9945,
+     "net_twh": 49.541
+    }
+   },
+   "LA-VN": {
+    "s4g": {
+     "abs_twh": 197.9402,
+     "net_twh": 146.2238
+    },
+    "s4f": {
+     "abs_twh": 317.0252,
+     "net_twh": 108.0837
+    }
+   }
+  }
+ },
+ "corridors": {
+  "integrated": {
+   "new_built_gw_by_pair": {
+    "BN-MY": {
+     "s4g": 2.386,
+     "s4f": 2.388
+    },
+    "ID-ID": {
+     "s4g": 34.65,
+     "s4f": 34.597
+    },
+    "ID-MY": {
+     "s4g": 76.686,
+     "s4f": 72.435
+    },
+    "ID-SG": {
+     "s4g": 7.513,
+     "s4f": 7.492
+    },
+    "ID-TL": {
+     "s4g": 0.26,
+     "s4f": 0.226
+    },
+    "KH-TH": {
+     "s4g": 48.132,
+     "s4f": 28.399
+    },
+    "KH-VN": {
+     "s4g": 47.274,
+     "s4f": 30.776
+    },
+    "LA-MM": {
+     "s4g": 9.549,
+     "s4f": 2.677
+    },
+    "LA-VN": {
+     "s4g": 65.249,
+     "s4f": 49.867
+    },
+    "MM-TH": {
+     "s4g": 31.191,
+     "s4f": 24.879
+    },
+    "MY-MY": {
+     "s4g": 12.745,
+     "s4f": 13.323
+    },
+    "MY-PH": {
+     "s4g": 3.563,
+     "s4f": 3.822
+    }
+   },
+   "total_gw": 339.2,
+   "s4f_total_gw": 270.88
+  },
+  "disconnected": {
+   "new_built_gw_by_pair": {
+    "ID-ID": {
+     "s4g": 24.586,
+     "s4f": 24.586
+    },
+    "MY-MY": {
+     "s4g": 0.112,
+     "s4f": 0.112
+    }
+   },
+   "total_gw": 24.7,
+   "s4f_total_gw": 24.7
+  },
+  "integrated_nze": {
+   "new_built_gw_by_pair": {
+    "BN-MY": {
+     "s4g": 2.387,
+     "s4f": 2.387
+    },
+    "ID-ID": {
+     "s4g": 33.946,
+     "s4f": 32.96
+    },
+    "ID-MY": {
+     "s4g": 74.29,
+     "s4f": 70.311
+    },
+    "ID-SG": {
+     "s4g": 7.49,
+     "s4f": 7.482
+    },
+    "ID-TL": {
+     "s4g": 0.194,
+     "s4f": 0.19
+    },
+    "KH-TH": {
+     "s4g": 47.989,
+     "s4f": 28.247
+    },
+    "KH-VN": {
+     "s4g": 46.932,
+     "s4f": 30.37
+    },
+    "LA-MM": {
+     "s4g": 9.35,
+     "s4f": 2.692
+    },
+    "LA-VN": {
+     "s4g": 64.636,
+     "s4f": 50.081
+    },
+    "MM-TH": {
+     "s4g": 30.781,
+     "s4f": 24.915
+    },
+    "MY-MY": {
+     "s4g": 12.231,
+     "s4f": 13.288
+    },
+    "MY-PH": {
+     "s4g": 3.188,
+     "s4f": 3.431
+    }
+   },
+   "total_gw": 333.41,
+   "s4f_total_gw": 266.35
+  }
+ },
+ "at_cap": {
+  "integrated": {
+   "s4g": [
+    "Line:1",
+    "Line:100",
+    "Line:108",
+    "Line:109",
+    "Line:91",
+    "Line:92",
+    "Line:99",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4E1 KH2 1 - TH2 1",
+    "Line:S4E1 LA2 0 - VN2 3",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "s4f": [
+    "Line:1",
+    "Line:100",
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:60",
+    "Line:61",
+    "Line:91",
+    "Line:92",
+    "Line:99",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0"
+   ],
+   "added": [
+    "Line:S4E1 KH2 1 - TH2 1",
+    "Line:S4E1 LA2 0 - VN2 3",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "removed": [
+    "Line:105",
+    "Line:60",
+    "Line:61"
+   ]
+  },
+  "disconnected": {
+   "s4g": [
+    "Line:1",
+    "Line:100",
+    "Line:107",
+    "Line:13",
+    "Line:22",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "s4f": [
+    "Line:1",
+    "Line:100",
+    "Line:107",
+    "Line:13",
+    "Line:22",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "added": [],
+   "removed": []
+  },
+  "integrated_nze": {
+   "s4g": [
+    "Line:1",
+    "Line:100",
+    "Line:108",
+    "Line:109",
+    "Line:91",
+    "Line:92",
+    "Line:99",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4E1 KH2 1 - TH2 1",
+    "Line:S4E1 LA2 0 - VN2 3"
+   ],
+   "s4f": [
+    "Line:1",
+    "Line:100",
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:60",
+    "Line:61",
+    "Line:91",
+    "Line:92",
+    "Line:99",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0"
+   ],
+   "added": [
+    "Line:S4E1 KH2 1 - TH2 1",
+    "Line:S4E1 LA2 0 - VN2 3"
+   ],
+   "removed": [
+    "Line:105",
+    "Line:60",
+    "Line:61"
+   ]
+  }
+ },
+ "focus": {
+  "LA": {
+   "integrated_bn_eur": -1.1015,
+   "disconnected_bn_eur": 2.1618,
+   "disconnected_minus_integrated": 3.2633,
+   "disconnected_minus_integrated_s4f": 3.9621
+  },
+  "KH": {
+   "integrated_bn_eur": 4.6427,
+   "disconnected_bn_eur": 6.8709,
+   "disconnected_minus_integrated": 2.2282,
+   "disconnected_minus_integrated_s4f": 2.2523
+  },
+  "TH": {
+   "integrated_bn_eur": 79.9122,
+   "disconnected_bn_eur": 85.6617,
+   "disconnected_minus_integrated": 5.7495,
+   "disconnected_minus_integrated_s4f": 6.2027
+  },
+  "VN": {
+   "integrated_bn_eur": 127.265,
+   "disconnected_bn_eur": 149.3171,
+   "disconnected_minus_integrated": 22.0521,
+   "disconnected_minus_integrated_s4f": 21.9657
+  },
+  "MY": {
+   "integrated_bn_eur": 70.9131,
+   "disconnected_bn_eur": 76.0107,
+   "disconnected_minus_integrated": 5.0976,
+   "disconnected_minus_integrated_s4f": 5.1398
+  },
+  "ID": {
+   "integrated_bn_eur": 204.7342,
+   "disconnected_bn_eur": 214.0173,
+   "disconnected_minus_integrated": 9.2831,
+   "disconnected_minus_integrated_s4f": 9.5529
+  },
+  "PH": {
+   "integrated_bn_eur": 26.509,
+   "disconnected_bn_eur": 27.5901,
+   "disconnected_minus_integrated": 1.0811,
+   "disconnected_minus_integrated_s4f": 1.0517
+  },
+  "BN": {
+   "integrated_bn_eur": 0.671,
+   "disconnected_bn_eur": 1.4995,
+   "disconnected_minus_integrated": 0.8285,
+   "disconnected_minus_integrated_s4f": 0.7986
+  },
+  "TL": {
+   "integrated_bn_eur": -0.156,
+   "disconnected_bn_eur": 0.1306,
+   "disconnected_minus_integrated": 0.2866,
+   "disconnected_minus_integrated_s4f": 0.268
+  },
+  "MM": {
+   "integrated_bn_eur": 9.4075,
+   "disconnected_bn_eur": 10.4005,
+   "disconnected_minus_integrated": 0.993,
+   "disconnected_minus_integrated_s4f": 1.0114
+  },
+  "SG": {
+   "integrated_bn_eur": 24.5832,
+   "disconnected_bn_eur": 26.5703,
+   "disconnected_minus_integrated": 1.9871,
+   "disconnected_minus_integrated_s4f": 1.9622
+  }
+ },
+ "disconnected_objective_vs_s4f": {
+  "s4g": 693191116147.2216,
+  "s4f": 693191116147.2216,
+  "relative": 0.0
+ }
+}
