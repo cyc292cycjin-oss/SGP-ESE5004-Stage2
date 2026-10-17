@@ -25,6 +25,16 @@ S4C-1 (decision 82, implementing decision 50) and S4C supplement 01 (ledger L18,
     ASEAN-specific treatment "archipelagic subsea corridors": 0 on the same landmass, else the not-land share of the great-circle route) |
     geometric_all (upper bound: not-land share for every pair) | zero (former state); table SUBSEA_SHARE_S4C1.csv
     (scripts_project/s4c_1_subsea_shares.py). Existing capacity carries no new investment (PyPSA objective constant, decision 48).
+
+S4C-2 (decision 83; user decision 2026-10-17 on stop report S4C_STOP_02):
+  * apply_hydro_inflow_normalization: research.hydro.inflow_normalization = national_observed (main, option B) | national_observed_runoff_shares
+    (option A, sensitivity) | frozen_base (former state). Stock = 'hydro existing' StorageUnits (inflow) + 'ror existing' Generators
+    (p_max_pu x p_nom), author units and S4A/S4B additions alike; national annual target = Ember 2019-2025 median hydro generation x 1.1
+    (HYDRO_NATIONAL_TARGET_S4C2.csv). B: unit energy = target x capacity share, unit seasonal shape kept (series scaled by target_u / energy_u;
+    a unit without inflow takes the capacity-weighted shape of its country and kind); A: one factor target / energy per country (author
+    runoff shares kept). Run-of-river availability is clipped at 1 (energy lost reported). New-build reservoir / run-of-river candidates:
+    capacity-weighted per-MW inflow (availability) of the corrected same-country stock of the same kind (else the other kind of the country,
+    else ASEAN); max_hours of the S4B-2 proxies unchanged; the research_new_hydro_inflow hook stays. PHS unaffected.
 """
 from __future__ import annotations
 
@@ -248,4 +258,103 @@ def apply_cost_layer_s4c1(n, costs: pd.DataFrame, cfg, repo) -> dict:
     led["summary"] = ({f"{c}:{k}": dict(n=int(len(x)), before_mean=float(x.before.mean()), after_mean=float(x.after.mean())) for (c, k), x in ba.groupby(["component", "carrier"])}
                       if len(ba) else {})
     n.meta["research_cost_layer_s4c1"] = {k: v for k, v in led.items() if k != "before_after"}
+    return led
+
+
+HYDRO_MODES = ("national_observed", "national_observed_runoff_shares", "frozen_base")
+
+
+def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
+    """S4C-2 (decision 83): renormalise the national inflow of the existing hydro stock and re-derive the new-build proxies (see module doc)."""
+    H = (cfg["research"].get("hydro") or {})
+    mode = str(H.get("inflow_normalization", "frozen_base"))
+    if mode not in HYDRO_MODES:
+        raise ValueError("Unknown research.hydro.inflow_normalization " + mode)
+    led = dict(mode=mode, countries={}, units=[], new_build=[])
+    if mode == "frozen_base":
+        n.meta["research_hydro_inflow"] = led
+        return led
+    tp = Path(repo) / H["target_table"]
+    tgt = pd.read_csv(tp, keep_default_na=False)
+    tgt = {r.country: float(r.target_mwh) for r in tgt.itertuples() if r.status == "REGISTERED"}
+    led["target_table"] = dict(file=str(H["target_table"]), sha256=hashlib.sha256(tp.read_bytes()).hexdigest())
+    w = n.snapshot_weightings.generators.values
+    su, g = n.storage_units, n.generators
+    inf, pmax = n.storage_units_t.inflow, n.generators_t.p_max_pu
+    res = su.index[(su.carrier == "hydro existing")]; ror = g.index[(g.carrier == "ror existing")]
+    # per-unit hourly energy series (MW) and annual energy (MWh)
+    series = {}
+    for name in res:
+        series[name] = (inf[name].values.astype(float) if name in inf else np.zeros(len(n.snapshots)), "reservoir", float(su.at[name, "p_nom"]), str(su.at[name, "country"]))
+    for name in ror:
+        s = pmax[name].values.astype(float) if name in pmax else np.full(len(n.snapshots), float(g.at[name, "p_max_pu"]))
+        series[name] = (s * float(g.at[name, "p_nom"]), "ror", float(g.at[name, "p_nom"]), str(g.at[name, "country"]))
+    by_c = {}
+    for name, (s, kind, cap, c) in series.items():
+        by_c.setdefault(c, []).append(name)
+    new_series = {}
+    for c, names in sorted(by_c.items()):
+        caps = np.array([series[x][2] for x in names]); energy = np.array([float((series[x][0] * w).sum()) for x in names])
+        if c not in tgt:
+            raise ValueError(f"no national hydro target for {c} (stock {caps.sum():.0f} MW)")
+        T = tgt[c]
+        if mode == "national_observed":
+            target_u = T * caps / caps.sum()
+        else:
+            target_u = energy * (T / energy.sum())
+        for kind in ("reservoir", "ror"):
+            idx = [i for i, x in enumerate(names) if series[x][1] == kind]
+            shape_kind = None
+            if idx:
+                tot = sum(series[names[i]][0] for i in idx); e_tot = float((tot * w).sum())
+                shape_kind = tot / e_tot if e_tot > 0 else None
+            for i in idx:
+                x = names[i]; s = series[x][0]; e = energy[i]
+                if e > 0:
+                    new = s * (target_u[i] / e); basis = "own shape"
+                else:
+                    if shape_kind is None or target_u[i] == 0:
+                        new = np.zeros_like(s); basis = "zero (no shape in the country)"
+                    else:
+                        new = shape_kind * target_u[i]; basis = f"country {kind} capacity-weighted shape (unit had no inflow)"
+                lost = 0.0
+                if kind == "ror":
+                    pu = new / series[x][2]; clipped = np.minimum(pu, 1.0); lost = float(((pu - clipped) * series[x][2] * w).sum()); new = clipped * series[x][2]
+                new_series[x] = new
+                led["units"].append(dict(name=x, country=c, kind=kind, node=(str(su.at[x, "bus"]) if kind == "reservoir" else str(g.at[x, "bus"])), p_nom=series[x][2],
+                                         energy_before_mwh=e, energy_after_mwh=float((new * w).sum()), cf_before=e / (series[x][2] * 8760) if series[x][2] else np.nan,
+                                         cf_after=float((new * w).sum()) / (series[x][2] * 8760) if series[x][2] else np.nan, shape_basis=basis, ror_clipped_mwh=lost))
+        after = sum(float((new_series[x] * w).sum()) for x in names)
+        led["countries"][c] = dict(target_mwh=T, stock_mw=float(caps.sum()), energy_before_mwh=float(energy.sum()), energy_after_mwh=after, cf_before=float(energy.sum() / (caps.sum() * 8760)),
+                                   cf_after=float(after / (caps.sum() * 8760)), ror_clipped_mwh=float(sum(u["ror_clipped_mwh"] for u in led["units"] if u["country"] == c)))
+    for x, s in new_series.items():
+        if x in res:
+            n.storage_units_t.inflow[x] = s
+        else:
+            n.generators_t.p_max_pu[x] = s / float(g.at[x, "p_nom"])
+    # new-build candidates: capacity-weighted per-MW inflow of the corrected same-country stock
+    def per_mw(c, kind):
+        for scope, pick in [("country " + kind, lambda nm: series[nm][3] == c and series[nm][1] == kind), ("country all kinds", lambda nm: series[nm][3] == c),
+                            ("ASEAN " + kind, lambda nm: series[nm][1] == kind)]:
+            sel = [nm for nm in new_series if pick(nm)]
+            cap = sum(series[nm][2] for nm in sel)
+            if sel and cap > 0:
+                return sum(new_series[nm] for nm in sel) / cap, scope
+        raise ValueError(f"no stock to derive the new-build {kind} inflow for {c}")
+    tie = set(n.meta.get("research_new_hydro_inflow_tie", []))
+    for name in su.index[(su.carrier == "hydro") & su.p_nom_extendable & (su.p_nom_max > 0)]:
+        c = str(su.at[name, "country"]); r, scope = per_mw(c, "reservoir"); cap = float(su.at[name, "p_nom_max"])
+        old = float((inf[name] * w).sum()) if name in inf else 0.0
+        n.storage_units_t.inflow[name] = r * cap
+        led["new_build"].append(dict(name=name, kind="reservoir", country=c, p_nom_max=cap, scope=scope, cf_before=old / (cap * 8760), cf_after=float((r * w).sum()) / 8760, in_inflow_tie=name in tie))
+    for name in g.index[(g.carrier == "ror") & g.p_nom_extendable & (g.p_nom_max > 0)]:
+        c = str(g.at[name, "country"]); r, scope = per_mw(c, "ror"); cap = float(g.at[name, "p_nom_max"])
+        old = float((pmax[name] * w).sum()) / 8760 if name in pmax else float(g.at[name, "p_max_pu"])
+        n.generators_t.p_max_pu[name] = np.minimum(r, 1.0)
+        led["new_build"].append(dict(name=name, kind="ror", country=c, p_nom_max=cap, scope=scope, cf_before=old, cf_after=float((np.minimum(r, 1.0) * w).sum()) / 8760))
+    led["totals"] = dict(stock_mw=float(sum(v[2] for v in series.values())), energy_before_twh=sum(v["energy_before_mwh"] for v in led["countries"].values()) / 1e6,
+                         energy_after_twh=sum(v["energy_after_mwh"] for v in led["countries"].values()) / 1e6, target_twh=sum(v["target_mwh"] for v in led["countries"].values()) / 1e6,
+                         ror_clipped_twh=sum(v["ror_clipped_mwh"] for v in led["countries"].values()) / 1e6,
+                         anomalous_units_cf_gt_1_before=[u["name"] for u in led["units"] if u["cf_before"] > 1])
+    n.meta["research_hydro_inflow"] = led
     return led

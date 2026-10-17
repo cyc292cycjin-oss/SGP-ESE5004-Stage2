@@ -30,7 +30,7 @@ from s4a_layers import apply_renewable_profiles
 from s4a_fleet import add_gem_fleet, remove_not_operating_units
 from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
-from s4c_layers import check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1
+from s4c_layers import check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -272,6 +272,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
     fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
     cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch
+    hydro_inflow = apply_hydro_inflow_normalization(n, cfg, repo)   # S4C-2 (decision 83): national hydro inflow = Ember median x 1.1 by capacity share (main); new-build proxies from the corrected country stock
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
     pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
@@ -321,11 +322,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4b_layers=dict(sector=sector, candidate_caps=({k: v for k, v in cand_caps.items() if k != "set"} if cand_caps else None),
                                                   typhoon_premium={k: v for k, v in typhoon.items() if k != "applied"}),
                                   s4c_layers=dict(fuel_prices=fuel_prices, finance={k: v for k, v in finance.items() if k != "rates_by_carrier"},
-                                                  cost_layer_s4c1={k: v for k, v in cost_s4c1.items() if k not in ("before_after",)}),
+                                                  cost_layer_s4c1={k: v for k, v in cost_s4c1.items() if k not in ("before_after",)},
+                                                  hydro_inflow={k: v for k, v in hydro_inflow.items() if k not in ("units", "new_build")}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
-                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1"]:
+                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

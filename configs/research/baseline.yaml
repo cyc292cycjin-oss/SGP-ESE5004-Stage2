@@ -234,6 +234,9 @@ research:
     caps_table: research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv
     nuclear_cap: none                     # decision 79: none (main, decision 38) | national_plans (PH 4.8, VN 14.4, ID 10, TH 0.6 GW on nuclear + nuclear SMR, others 0; implemented only)
     nuclear_caps_table: research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv
+  hydro:                                  # S4C-2 (decision 83; user decision 2026-10-17): data correction of the frozen electric base, deviating from the PyPSA-Earth runoff allocation
+    inflow_normalization: national_observed   # national_observed (main, option B: national inflow of the existing stock = Ember 2019-2025 median hydro generation x 1.1, allocated by capacity share, unit seasonal shape kept; new-build per-MW inflow from the corrected same-country stock) | national_observed_runoff_shares (option A, sensitivity: same target, author runoff shares kept) | frozen_base (former state)
+    target_table: research_inputs/hydro_v5/HYDRO_NATIONAL_TARGET_S4C2.csv
   site_candidates:                        # decision 39 structure; S4B-2 replaces the 0 caps (research.candidates) and sets the availability / inflow proxies
     geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
     ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
