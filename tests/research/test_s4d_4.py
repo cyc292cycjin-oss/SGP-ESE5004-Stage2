@@ -37,9 +37,9 @@ def test_override_parsing():
     from v5.v5_gates import gate_b12_hash  # noqa: F401  (import check: the module loads with the new parser)
     assert yaml.safe_load("[MY,SG]") == ["MY", "SG"] and yaml.safe_load("[]") == [] and yaml.safe_load("null") is None
     src = (ROOT / "scripts_project/s2_network.py").read_text()
-    assert "old is None or isinstance(old, (list, dict))" in src and 'NEW_OVERRIDE_KEYS = ("cross_border.coalition",)' in src
+    assert "old is None or isinstance(old, (list, dict))" in src and 'NEW_OVERRIDE_KEYS = ("cross_border.coalition",' in src
     g = (ROOT / "scripts_project/v5/v5_gates.py").read_text()
-    assert "old is None or isinstance(old,(list,dict))" in g and "key not in ('cross_border.coalition',)" in g
+    assert "old is None or isinstance(old,(list,dict))" in g and "key not in ('cross_border.coalition'," in g
 
 
 def test_connected_coalitions_toy():

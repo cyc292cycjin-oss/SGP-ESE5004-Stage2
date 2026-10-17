@@ -53,6 +53,15 @@ def transit_mode(cfg) -> str:
     return v
 
 
+def extra_asean_cost_scale(cfg) -> float:
+    """S4D-6 first-batch sensitivity: research.co2.extra_asean_cost_scale multiplies the registry extra-ASEAN unit cost (key absent = 1.0, so
+    the main configuration and its hash stay unchanged; added only by --override co2.extra_asean_cost_scale=0.5 | 1.5)."""
+    v = float(_co2(cfg).get("extra_asean_cost_scale", 1.0))
+    if not v > 0:
+        raise ValueError("research.co2.extra_asean_cost_scale must be > 0")
+    return v
+
+
 def coastal_table(cfg) -> tuple[pd.Series, Path]:
     """node -> coastal (bool) from research.co2.coastal_nodes_table."""
     p = ROOT / str(_co2(cfg).get("coastal_nodes_table", "research_inputs/co2_v5/COASTAL_NODES_S4D1_FINAL.csv"))

@@ -588,7 +588,7 @@ def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
     (s4d_layers module docstring)."""
     from carrier_architecture import COUNTRIES
     from s2_layers import add_bus, add_link, country_of
-    from s4d_layers import LANDLOCKED, ROOT as S4D_ROOT, TRANSIT_LINK, coastal_table, export_nodes_mode, transit_cost_id, transit_mode
+    from s4d_layers import LANDLOCKED, ROOT as S4D_ROOT, TRANSIT_LINK, coastal_table, export_nodes_mode, extra_asean_cost_scale, transit_cost_id, transit_mode
     mode = extra_asean_mode(cfg)
     led = dict(mode=mode, cost_param=EXTRA_ASEAN_COST_ID, unit_cost_eur2020_per_t=None, countries={}, links=0, stores=0, transit_links=0)
     if mode == "off":
@@ -597,8 +597,9 @@ def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
     row = registry.loc[EXTRA_ASEAN_COST_ID]
     if row["status"] != "REGISTERED":
         raise ValueError(f"{EXTRA_ASEAN_COST_ID} is {row['status']}: no citable unit cost (S4C-4 stop condition)")
-    price = float(row["value"]); years = float(cfg["research"]["s2"]["co2"]["storage_years"])
-    led.update(unit_cost_eur2020_per_t=price, sensitivity=[float(row["sensitivity_low"]), float(row["sensitivity_high"])], tier=row["tier"], source=row["source"])
+    scale = extra_asean_cost_scale(cfg)   # S4D-6 first-batch sensitivity (1.0 main)
+    price = float(row["value"]) * scale; years = float(cfg["research"]["s2"]["co2"]["storage_years"])
+    led.update(unit_cost_eur2020_per_t=price, cost_scale=scale, sensitivity=[float(row["sensitivity_low"]), float(row["sensitivity_high"])], tier=row["tier"], source=row["source"])
     sel, tr = export_nodes_mode(cfg), transit_mode(cfg)
     coast = None
     if sel == "coastal":

@@ -40,7 +40,7 @@ AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TW
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
 
 
-NEW_OVERRIDE_KEYS = ("cross_border.coalition",)   # S4D-4 (decision 91b): keys an --override may add (absent from the config files); same list in v5_gates.gate_b12_hash
+NEW_OVERRIDE_KEYS = ("cross_border.coalition", "co2.extra_asean_cost_scale")   # keys an --override may add (absent from the config files): S4D-4 coalition (decision 91b), S4D-6 sensitivity; same list in v5_gates.gate_b12_hash
 
 
 def apply_cross_border_switches_s2(n, switches, corridors, existing_cfg, costs):
