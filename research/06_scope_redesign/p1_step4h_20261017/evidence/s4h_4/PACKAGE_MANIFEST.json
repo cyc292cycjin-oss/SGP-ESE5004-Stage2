@@ -1,0 +1,185 @@
+{
+ "commit": "6eead6753508472a5839035043adea590eabaded",
+ "files": [
+  {
+   "path": "COMMIT",
+   "sha256": "2ea39cc05514a631554a58c53d778d9b478ad70b34574fe447a557e4cd679ffa",
+   "bytes": 41
+  },
+  {
+   "path": "DATA_CONFIG_MANIFEST.json",
+   "sha256": "c42cf2e0fe98a4df912d063df812304a77cd239be7d0e0cb05fb3ba5d22e4247",
+   "bytes": 133186
+  },
+  {
+   "path": "code_6eead675.tar.gz",
+   "sha256": "e0f28790e6435ab9d03e2feab1ad0831f1608180eea057f9866c26369a04815a",
+   "bytes": 116807000
+  },
+  {
+   "path": "conda_explicit_linux64.txt",
+   "sha256": "62f2935b6677194a298b44d12cbb1cc0a85d1566cd4e28aea55136fd86dc3e0f",
+   "bytes": 44787
+  },
+  {
+   "path": "environment_pypsa-earth.yml",
+   "sha256": "f2d28554d08b48bda83037b14ebc1d201b550283e1c36dc4b2657d31f0fe67a3",
+   "bytes": 11450
+  },
+  {
+   "path": "networks/disconnected_365_24h_unsolved.nc",
+   "sha256": "9ef4dc54b2d8affaa0cfa172435a832263dc2fffd291ee7955fd4bd639dd915b",
+   "bytes": 27333127
+  },
+  {
+   "path": "networks/disconnected_BUILD_RECEIPT.json",
+   "sha256": "a5b8fddb2f5434c1decf3fbc95e7e9b0bc3b6d7ab4ab9b25c0cdfbc0c9d413d2",
+   "bytes": 1377214
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_365_24h_unsolved.nc",
+   "sha256": "891f44b0002865a13c556da778bfa43870896af791dce7e601934791807e0004",
+   "bytes": 27590991
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_BUILD_RECEIPT.json",
+   "sha256": "74168e126b4bee5fbcd4f8b49550f8a7de806216a3d36f04c6f8b4e6ac2e038a",
+   "bytes": 1383566
+  },
+  {
+   "path": "networks/integrated_365_24h_unsolved.nc",
+   "sha256": "bfb725b7f8801a785774a4af1b5f680869f9f7de074cae2f476fe1f2128aeec9",
+   "bytes": 27742598
+  },
+  {
+   "path": "networks/integrated_BUILD_RECEIPT.json",
+   "sha256": "fffca5d9f6946c37adecb87444eeadfb5e3c6b41124c339de6983521fd6a57b1",
+   "bytes": 1377818
+  },
+  {
+   "path": "networks/integrated_nze_365_24h_unsolved.nc",
+   "sha256": "6822e497ac11bd570853c10f04abc93b912b612cfd635cd6f0e707886d44abb3",
+   "bytes": 27742510
+  },
+  {
+   "path": "networks/integrated_nze_BUILD_RECEIPT.json",
+   "sha256": "6bb1808ba6ca08b1eb1d1bda63c4d09d54605bc13cd824aa35d310c636758ce9",
+   "bytes": 1377803
+  },
+  {
+   "path": "preflight.sh",
+   "sha256": "18672029212df80e90c2df92b5e1b0572fc8e865e968fbbcfee4a68932c5d733",
+   "bytes": 3732
+  },
+  {
+   "path": "run_365x24h.sh",
+   "sha256": "393f6b6ea1b0e7cc2560b3c669a8c8d27951a01723005d12ea75aa1f6371a13e",
+   "bytes": 11977
+  }
+ ],
+ "upload_total_bytes_excluding_this_manifest": 232939289,
+ "environment": {
+  "python": "3.11.13",
+  "pypsa": "0.30.3",
+  "linopy": "0.5.5",
+  "gurobipy": "12.0.3",
+  "numpy": "1.26.4",
+  "pandas": "2.3.1",
+  "xarray": "2025.1.2",
+  "scipy": "1.15.2",
+  "netCDF4": "1.7.2"
+ },
+ "run": {
+  "script": "run_365x24h.sh",
+  "runs": [
+   "integrated (STEPS)",
+   "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+   "integrated_nze (NZE fuel prices)",
+   "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+  ],
+  "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+  "modes": [
+   "serial",
+   "lanes2",
+   "lanes3"
+  ],
+  "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+  "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+  "scaling": "on",
+  "exports_per_run": [
+   "SOLVE_RECEIPT.json",
+   "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+   "COUNTRY_COST_LEDGER.csv",
+   "COUNTRY_COST_LEDGER_DETAIL.csv",
+   "LEDGER_IDENTITY.json",
+   "NODAL_PRICES.csv",
+   "CO2_FLOWS.json",
+   "BUNKER_ACCOUNT.json",
+   "solved network"
+  ],
+  "threads_per_run": 8,
+  "wall_clock_cap_h": 3,
+  "gurobi_time_limit_s": 10500,
+  "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+ },
+ "first_batch_runs": [
+  "integrated (STEPS)",
+  "disconnected (STEPS)",
+  "integrated_nze (NZE fuel prices)",
+  "disconnected_gap (conditional)"
+ ],
+ "second_batch_sensitivities_registered_not_packaged": [
+  {
+   "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+   "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+   "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+   "override": "co2.ship_distance=route_factor",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "Lao transit: nearest existing sea port and / or truck",
+   "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+   "override": "s3.gas.lng_expansion=uncapped_cost",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+   "override": "network.max_extension=apg_plans",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+   "override": "corridors.optional_sg_vn_kh=on",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "author electrical parameters of the 19 readjusted cross-border AC lines and APG17 (decisions 98, 101 b comparison)",
+   "override": "network.readjust_impedance=author",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "LA-VN grid stock of the author (1 MW split over lines 59 / 60 / 63 / 64; decision 100 comparison)",
+   "override": "network.la_vn_stock=author",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "zero-capacity AC candidates with num_parallel 1.286 of template line 43 (former convention; decision 101 a comparison)",
+   "override": "corridors.candidate_num_parallel=template43",
+   "scenarios": "integrated"
+  }
+ ],
+ "supersedes": "the S4G package (code ed6af79c) is void (S4H answer to S4G section 7 item 4); the S4F package (code 7e09744d) was voided earlier (decision 99 c)",
+ "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+}
