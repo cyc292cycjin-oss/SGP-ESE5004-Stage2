@@ -48,6 +48,13 @@ S4C-3 (decision 88, modifying decision 10):
     validate_bunker_account), so no country's negative emissions are transferred to it (decision 9) and the account can only be met with
     non-fossil fuel. Methanol is zero at use under origin_neutral (decision 64: its carbon is booked at synthesis in the producing
     country), so asean_pool requires research.s3.fuel_carbon_mode = origin_neutral.
+
+S4C-4 (decision 89):
+  * apply_extra_asean_storage: research.co2.extra_asean_storage = on (main) | off (sensitivity). Per country an uncapped, charge-only store
+    'co2 sequestered extra-ASEAN <ISO2>' fed by one link per node from '<node> co2 stored' (captured CO2); the unit cost (registry
+    co2_extra_asean_storage_cost, EUR2020/t: liquefaction + ship transport over 4,500 km + offshore storage, IEAGHG 2004 / ZEP 2011, grade C
+    +-50 %) sits on the store size exactly as the national sequestration cost does on 'co2 sequestered <ISO2>' (s2_layers.add_co2_layer).
+    The export counts as storage of the capturing country (decision 20) and is outside the national injection cap; both scenarios.
 """
 from __future__ import annotations
 
@@ -552,3 +559,59 @@ def bunker_account_report(n, primal_relative: float = 1e-5, abs_floor: float = 1
         supply[name] = float((n.links_t.p0[name] * w).sum())
     return dict(gate="B1_BUNKERS", passed=bool(level <= tol), present=True, final_level_tco2=level, cap_tco2=0.0, tolerance_t=tol, gross_co2_flow_t=gross,
                 port_tonnes=tonnes, supply_mwh=supply)
+
+
+# ---------------------------------------------------------------------------------------------------------------- S4C-4 (decision 89)
+EXTRA_ASEAN_CARRIER = "co2 sequestered extra-ASEAN"
+EXTRA_ASEAN_LINK = "CO2 export extra-ASEAN"
+EXTRA_ASEAN_COST_ID = "co2_extra_asean_storage_cost"
+
+
+def extra_asean_mode(cfg) -> str:
+    v = cfg["research"].get("co2", {}).get("extra_asean_storage", "off")
+    v = {True: "on", False: "off"}.get(v, v) if isinstance(v, bool) else str(v).lower()
+    if v not in ("on", "off"):
+        raise ValueError("Unknown research.co2.extra_asean_storage " + str(v))
+    return v
+
+
+def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
+    """S4C-4 (decision 89): see the module docstring."""
+    from carrier_architecture import COUNTRIES
+    from s2_layers import add_bus, add_link, country_of
+    mode = extra_asean_mode(cfg)
+    led = dict(mode=mode, cost_param=EXTRA_ASEAN_COST_ID, unit_cost_eur2020_per_t=None, countries={}, links=0, stores=0)
+    if mode == "off":
+        n.meta["research_extra_asean_storage"] = led
+        return led
+    row = registry.loc[EXTRA_ASEAN_COST_ID]
+    if row["status"] != "REGISTERED":
+        raise ValueError(f"{EXTRA_ASEAN_COST_ID} is {row['status']}: no citable unit cost (S4C-4 stop condition)")
+    price = float(row["value"]); years = float(cfg["research"]["s2"]["co2"]["storage_years"])
+    led.update(unit_cost_eur2020_per_t=price, sensitivity=[float(row["sensitivity_low"]), float(row["sensitivity_high"])], tier=row["tier"], source=row["source"])
+    for c in sorted(COUNTRIES):
+        cn = [x for x in nodes if country_of(n, x) == c and f"{x} co2 stored" in n.buses.index]
+        if not cn:
+            led["countries"][c] = dict(store=None, links=0, note="no captured-CO2 buffer")
+            continue
+        sb = f"{EXTRA_ASEAN_CARRIER} {c}"
+        add_bus(n, sb, EXTRA_ASEAN_CARRIER, c, "")
+        n.add("Store", sb, bus=sb, carrier=EXTRA_ASEAN_CARRIER, e_nom_extendable=True, e_cyclic=False, e_initial=0.0, capital_cost=price, lifetime=years)
+        n.stores.loc[sb, ["country", "research_role"]] = [c, "PERMANENT_STORAGE_EXTRA_ASEAN"]
+        n.meta.setdefault("store_power_rules", {})[sb] = "charge_only"
+        for node in cn:
+            add_link(n, f"{node} co2 export extra-ASEAN", c, EXTRA_ASEAN_LINK, [f"{node} co2 stored", sb], [1.0], capital_cost=0.0, lifetime=years, role="PERMANENT_STORAGE",
+                     extra={"carbon_rule": "exported captured CO2 counts as storage of the capturing country (decision 20)"})
+        led["countries"][c] = dict(store=sb, links=len(cn)); led["links"] += len(cn); led["stores"] += 1
+    n.meta["research_extra_asean_storage"] = led
+    return led
+
+
+def extra_asean_report(n) -> dict:
+    """Post-solve: exported tonnes and cost per country (store final level x unit cost)."""
+    st = n.stores[n.stores.carrier == EXTRA_ASEAN_CARRIER]
+    out = {}
+    for name, z in st.iterrows():
+        t = float(n.stores_t.e[name].iloc[-1]) if name in n.stores_t.e else 0.0
+        out[str(z.country)] = dict(store=name, exported_t=t, e_nom_opt=float(z.get("e_nom_opt", float("nan"))), cost_eur=t * float(z.capital_cost))
+    return out

@@ -30,7 +30,8 @@ from s4a_layers import apply_renewable_profiles
 from s4a_fleet import add_gem_fleet, remove_not_operating_units
 from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
-from s4c_layers import check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution
+from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
+                        apply_extra_asean_storage)
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -299,6 +300,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
     bunkers = apply_bunker_attribution(n, costs, cfg, demand)   # S4C-3 (decision 88): asean_pool (main: regional bunker loads, separate net-zero bunker account) | bunkering_country | excluded
+    extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off)
     cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -326,11 +328,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4c_layers=dict(fuel_prices=fuel_prices, finance={k: v for k, v in finance.items() if k != "rates_by_carrier"},
                                                   cost_layer_s4c1={k: v for k, v in cost_s4c1.items() if k not in ("before_after",)},
                                                   hydro_inflow={k: v for k, v in hydro_inflow.items() if k not in ("units", "new_build")},
-                                                  bunkers={k: v for k, v in bunkers.items() if k not in ("by_country", "deferred")}),
+                                                  bunkers={k: v for k, v in bunkers.items() if k not in ("by_country", "deferred")},
+                                                  extra_asean_storage={k: v for k, v in extra_co2.items() if k != "countries"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
-                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers"]:
+                "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

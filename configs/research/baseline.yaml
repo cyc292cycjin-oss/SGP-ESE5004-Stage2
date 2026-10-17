@@ -271,7 +271,9 @@ research:
     subsea_table: research_inputs/corridors/SUBSEA_SHARE_S4C1.csv
   bunkers:                                # S4C-3 (decision 88, modifying decision 10): international aviation and shipping bunkers (scripts_project/s4c_layers.apply_bunker_attribution)
     attribution: asean_pool               # asean_pool (main: bunker demand on the regional liquid buses, not attributed to any country; fossil combustion in the separate 'co2 bunkers ASEAN' account, net zero on its own, no national removals transferred) | bunkering_country (former state, decision 10) | excluded (demand and emissions not bound; drives research.s2.demand.international_bunkers to false)
-  s2:                                     # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
+  co2:                                    # S4C-4 (decision 89): extra-ASEAN CO2 storage option (scripts_project/s4c_layers.apply_extra_asean_storage; unit cost scripts_project/s4c_4_data.py)
+    extra_asean_storage: "on"             # on (main: per country an uncapped export from the captured-CO2 buffers to an extra-ASEAN offshore sink at registry co2_extra_asean_storage_cost = 40.75 EUR2020/t, IEAGHG 2004 ship transport 4,500 km + ZEP 2011 offshore storage, grade C +-50 %; counts as storage of the capturing country, decision 20; both scenarios) | off (sensitivity: reproduces the infeasible disconnected case)
+  s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
     co2:
       storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50

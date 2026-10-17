@@ -16,15 +16,15 @@
 | S4C-1 | 风光候选成本改用第 50 项成本层；全组件成本审计（第 82 项） | 完成 | d7e93d20 / 24c0b552（停止前部分提交）+ S4C-1 提交（见下一提交） | 2026-10-16 23:10 因补充 01 结果不合理停下，23:15/23:20 用户决定（A 同陆块按陆上、非陆地口径、PyPSA-Eur 公式）后继续。`research.cost_layer.electric_base_candidates: cost_layer`（`s4c_layers.apply_cost_layer_s4c1`）：陆风 114,912 → 99,000；地面光伏 71,546 → 30,743（solar-utility）；屋顶 57,483 → 36,610；海上风 AC 均值 277,842 → 230,295、DC 291,038 → 265,076（并网按到岸距离：AC 中位 12.6 km、DC 60.6 km，并网段占海上风年化成本按潜力加权 AC 5.9%、DC 14.5%；10 台无 S4A 布局的发电机用同节点/同国均值代理，C 级）；电池充电器 24,093 → 10,118；电池储能 +4.8%；配电网 +5.2%；DC 链路 ×2.5（换流站 15,753 → 40,497）；AC 线路 +11%（含海底段）；管道 +3–14%。全组件审计 84 组：成本层 51、已确认例外 5（SMR、地热、LNG 接收站、H₂ 进口接收站、CO₂ 封存 30 EUR/t——technology-data 无此行）、无投资 28、无法判断 0（两情景相同）。补充 01：`research.corridors.subsea_share: landmass_nonland`（主算）/ `geometric_all` / `zero`；129 对候选（跨境 24），主算 > 0.05 的 18 对、全几何 32 对。五个构建静态 PASS（各约 42 s、0.70 GiB）；`tests/research` 444 通过 / 0 失败 |
 | 补充 01 | 走廊海底份额与走廊成本（台账 L18，第 16 项），作为 S4C-1 第 5 条 | 完成（并入 S4C-1） | 同上 | 判定表：`SUBSEA_SHARE_S4C1.csv`（节点对）、`COMPONENT_SUBSEA_SHARE_S4C1.csv`（473 条组件）、`CORRIDOR_SUBSEA_SHARE_S4C1.csv`（走廊表 26 行）；登记为东盟特有处理"群岛海底通道"（工作原则第 3 条） |
 | S4C-2 | 水电入流诊断与重新归一（第 83 项） | 完成 | 315b22da（诊断，停止）+ 9a5ea111 | 2026-10-17 用户决定 B（按容量分配）+ Ember 2019–2025 中位 × 1.1。`research.hydro.inflow_normalization: national_observed`（B 主算）/ `national_observed_runoff_shares`（A 敏感性）/ `frozen_base`；存量 58.2 GW 年入流 232.8 → 230.2 TWh（目标 231.6，径流式截断 1.40 TWh）；逐国 ID 31.4 → 34.1、KH 4.9 → 5.3、LA 46.1 → 38.8、MM 6.5 → 10.4、MY 35.4 → 35.1、PH 10.7 → 10.8、TH 6.6 → 7.3、VN 91.4 → 88.4 TWh；8 个原 CF > 1 单元消除；新建代理改同国口径；四个构建静态 PASS（各约 42 s、0.70 GiB）；`tests/research` 447 通过 / 0 失败。诊断（315b22da，停止）：与推断机理只部分吻合——补入照抄单位入流导致重复计算成立（ID、LA 合计 = IRENA 2023 × 1.1 的 1.16 / 1.15）；但底座只拿到全国目标的 48–95%，单位入流偏高只在 VN、PH 成立；主导偏差是作者链路按上游径流分配（单元 CF 最高 4.6）。另证实 S4B §8 第 12 项 ID 新建代理 CF 1.01–1.08 是 56 时段冒烟（1 月第一周）口径产物，全年 0.48–0.52（`S4C_STOP_02_HYDRO_DIAGNOSIS.md`） |
-| S4C-3 | 国际燃料舱归属（第 88 项） | 完成 | S4C-3 提交（见下一提交） | 现状（`bunkering_country`）：国际航空煤油 239.6 TWh 按加注国挂节点、化石部分计入该国大气（0.2571 t/MWh）；国际航运甲醇 485.6 TWh（SG 465.5）在 origin_neutral 下燃烧为零（碳在合成国记账）。主算 `research.bunkers.attribution: asean_pool`：两条东盟负荷（航空、航运分列，country=ASEAN）挂在区域液体母线（`ASEAN oil` 化石计量 + `ASEAN oil non-fossil` 孪生；`ASEAN methanol`），化石燃烧进新账户 `co2 bunkers ASEAN`，单独净零（钩子 `research_bunker_net_zero`，行 `research_bunker_co2_limit`，门槛 `B1_BUNKERS`），账户只有排放口、拒绝负排放端口（不转入他国负排放）→ 化石航煤在任何可行解中为 0；`excluded` 不计入（22 行 798.0 TWh 列为 deferred）。各国差异：SG 国家需求 881.1 → 312.3 TWh，MY 1,479.9 → 1,446.3 TWh；化石当量 CO₂ 上限 61.6 Mt（SG 26.5、TH 14.2、MY 7.6）。`tag_cross_border` 最小改动：端口全在区域母线的链路记为 domestic。四个构建静态 PASS（各约 44 s、0.69 GiB）；`tests/research` 452 通过 / 0 失败。另：查实 `research.cost_layer.registry` 自 077ebd0b 起被误挪到 `corridors` 下（S4C-1 插入 corridors 块所致），无任何代码读取该键（构建器用固定路径），S4C-1 / S4C-2 主算及 frozen_base 构建与修正后配置的构建逐项一致（静态属性、时间序列、成本表全同），不需重建；已挪回 |
-| S4C-4 | 东盟外 CO₂ 封存选项（第 89 项） | 未开始 | — | |
+| S4C-3 | 国际燃料舱归属（第 88 项） | 完成 | 93d2d922 | 现状（`bunkering_country`）：国际航空煤油 239.6 TWh 按加注国挂节点、化石部分计入该国大气（0.2571 t/MWh）；国际航运甲醇 485.6 TWh（SG 465.5）在 origin_neutral 下燃烧为零（碳在合成国记账）。主算 `research.bunkers.attribution: asean_pool`：两条东盟负荷（航空、航运分列，country=ASEAN）挂在区域液体母线（`ASEAN oil` 化石计量 + `ASEAN oil non-fossil` 孪生；`ASEAN methanol`），化石燃烧进新账户 `co2 bunkers ASEAN`，单独净零（钩子 `research_bunker_net_zero`，行 `research_bunker_co2_limit`，门槛 `B1_BUNKERS`），账户只有排放口、拒绝负排放端口（不转入他国负排放）→ 化石航煤在任何可行解中为 0；`excluded` 不计入（22 行 798.0 TWh 列为 deferred）。各国差异：SG 国家需求 881.1 → 312.3 TWh，MY 1,479.9 → 1,446.3 TWh；化石当量 CO₂ 上限 61.6 Mt（SG 26.5、TH 14.2、MY 7.6）。`tag_cross_border` 最小改动：端口全在区域母线的链路记为 domestic。四个构建静态 PASS（各约 44 s、0.69 GiB）；`tests/research` 452 通过 / 0 失败。另：查实 `research.cost_layer.registry` 自 077ebd0b 起被误挪到 `corridors` 下（S4C-1 插入 corridors 块所致），无任何代码读取该键（构建器用固定路径），S4C-1 / S4C-2 主算及 frozen_base 构建与修正后配置的构建逐项一致（静态属性、时间序列、成本表全同），不需重建；已挪回 |
+| S4C-4 | 东盟外 CO₂ 封存选项（第 89 项） | 完成 | S4C-4 提交（见下一提交） | 单价查到可引用来源（不触发停止）：IEAGHG（2004）《Ship Transport of CO2》PH4/30 表 5-3（MHI 研究；CO₂ 以 100 bar 进液化——模型捕集已含压缩电耗，报告注明与含压缩的捕集成本合用时取此口径；5 万 t 船、15 节、6.205 Mt/a、资本回收 11.02 %/a = 10 %/25 年；3,000 km 17.3、6,000 km 24.9 US$/t，报告称日本—澳北约 6,000 km）+ ZEP（2011）图 19 海上咸水层（无旧井）Medium 14 EUR2009/t（Low 6 / High 20）。距离取指令区间中点 4,500 km（两表值间线性，只船舶分项随距离变）：船运链 21.13 US$2004/t（液化 1.50、船 13.46、港费 1.84、缓冲罐 3.87、装卸 0.47）× 1.16898（FRED 美国 GDP 平减 105.377/79.077 × ECB 2020 年均 0.877229）= 24.70 + 封存 14 × 1.14668（EA20 平减 100/87.208）= 16.05 → **40.75 EUR2020/t**（C 级，±50 % = 20.38–61.13；3,000 / 6,000 km 端点 36.3 / 45.2；若按常压进液化 +8.4）。交叉核对：GCCSI 2025 表 3 列 IEAGHG 2004 为唯一超过 2,000 km 的公开来源；其他研究 ≤ 2,000 km 为 9–50 US$/t（IEAGHG 2020：1,000 km 41–44 US$/t），2004 口径偏低端，列为用户决定事项。结构：`research.co2.extra_asean_storage: "on"`（主算）/ `off`；每国一个无上限、只充的 `co2 sequestered extra-ASEAN <ISO2>` 存储（单价挂在存储规模上，同国内封存写法），97 个有捕集缓冲的节点各一条出口链路（与国内封存链路同一节点集；MY_Peninsular22 0、PH_Visayas10 0、TH21 0 三个辅助节点原本无缓冲/排空/封存）；出口计为捕集国封存（第 20 项），不占国内注入上限；两个情景都有。局限：东盟统一单价、内陆节点到港口无运输成本（LA 为内陆国）、离岸卸载设施不在 IEAGHG 2004 范围。三个构建静态 PASS（各约 43 s、0.69 GiB）；`tests/research` 455 通过 / 0 失败 |
 | S4C-5 | 基尔霍夫行归一化与求解设置对比（第 84 项） | 未开始 | — | |
 | S4C-6 | 冒烟与云端部署包（只准备） | 未开始 | — | |
 | 交付 | S4C_REPORT.md、S4C_EVIDENCE.json、DOWNLOAD_LIST.csv | 未开始 | — | |
 
 ## 续行点
 
-S4C-0（901b354e）、S4C-1（077ebd0b，含补充 01）、S4C-2（315b22da 诊断 + 9a5ea111 修正）、S4C-3 完成并提交，draft PR #27（叠在 #26 上）。下一步：S4C-4（东盟外 CO₂ 封存，第 89 项；先只读查找单价文献，查不到可引用来源时停下）。
+S4C-0（901b354e）、S4C-1（077ebd0b，含补充 01）、S4C-2（315b22da 诊断 + 9a5ea111 修正）、S4C-3（93d2d922）、S4C-4 完成并提交，draft PR #27（叠在 #26 上）。下一步：S4C-5（基尔霍夫行归一化与等价性检验；三档求解设置 56×3h 对比，每次 30 分钟上限；只给推荐）。
 
 ## 用户中途指示
 
@@ -57,4 +57,20 @@ S4C-0（901b354e）、S4C-1（077ebd0b，含补充 01）、S4C-2（315b22da 诊�
 | `IEA_commentary_SEA_cost_of_capital_20251008.html` | https://www.iea.org/commentaries/high-cost-of-capital-and-limited-project-pipeline-hinder-clean-energy-investment-in-southeast-asia | 270,294 | a9ae6970…38a9f1d | 2026-10-16T13:57:17Z |
 | IRENA 2023《The cost of financing for renewable power》PDF | irena.org（HTTP 403）、apren.pt 镜像（404） | — | 未取得 | 2026-10-16 |
 
-累计下载 0.58 MB（上限 300 MB）。
+## 下载登记（第 7 条，第 1 类：CO₂ 船运与海外封存成本文献，S4C-4）
+
+目录 `sources_s4c/co2/`，逐项见 `DOWNLOAD_LOG_S4C4.tsv`（curl，单文件上限 50 MB 由 `--max-filesize` 拦截）。
+
+| 文件 | 来源 | 字节 | SHA256 | 取得时间（UTC） | 用途 |
+|---|---|---|---|---|---|
+| `IEAGHG_2004_PH4-30_Ship_Transport_of_CO2.pdf` | publications.ieaghg.org/docs/General_Docs/Reports/PH4-30 Ship Transport.pdf | 3,083,789 | 3e5f1aa0…63abe3c | 2026-10-17 | 主算船运链（表 5-2、5-3） |
+| `ZEP_2025_Report_Costs.pdf`（内容为 ZEP 2011《The Costs of CO2 Capture, Transport and Storage》，carbonmanagementeurope.org 2025-07 重新托管） | carbonmanagementeurope.org/wp-content/uploads/2025/07/ZEP-Report-Costs.pdf | 1,927,946 | 846f51a7…0d265136 | 2026-10-17 | 主算封存（图 19） |
+| `ERIA_CCUS_ASEAN_Vol_II.pdf` | eria.org（Study on the Potential for Promoting CCUS in ASEAN Countries Vol. II） | 1,716,812 | 2f6260c8…c46577bb | 2026-10-17T00:57:03Z | 交叉核对（表 2.8、2.9） |
+| `IEAGHG_2020-10_CO2_Shipping_Infrastructures.pdf` | publications.ieaghg.org/technicalreports/2020-10 … | 5,647,430 | 9d001065…eb51e73e | 2026-10-17T00:57:08Z | 交叉核对（1,000 km） |
+| `IEAGHG_2025-08_CO2_Transport_Storage_Cost_Review.pdf` | publications.ieaghg.org/technicalreports/2025-08 … | 3,827,259 | 0816f311…0ac440148 | 2026-10-17 | 交叉核对（Clarksons 2024） |
+| `GCCSI_2025_CO2_Shipping_in_CCS_Projects.pdf` | globalccsinstitute.com/wp-content/uploads/2025/11/… | 2,017,556 | 9694b064…a631bad8 | 2026-10-17 | 交叉核对（表 3 文献汇总） |
+| ZEP 2011《The Costs of CO2 Transport》单行本（upm.es 镜像） | minasyenergia.upm.es | — | 未取得 | 2026-10-17 | SSL 证书校验失败，未绕过校验 |
+
+另：WebFetch 只读取 ERIA 与 ZEP 两个 PDF 时，工具在会话结果目录各留了一份副本（与上表同一文件），未作他用。
+
+累计下载 0.58 + 18.2 = 18.8 MB（上限 300 MB），无单个文件 > 50 MB。

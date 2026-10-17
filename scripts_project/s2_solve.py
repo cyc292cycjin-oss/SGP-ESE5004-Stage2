@@ -84,6 +84,7 @@ def structural_diagnosis_s2(n):
         ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"])) & g.p_nom_extendable]
         potential = float(sum((pmax[k] * w).sum() * min(float(z.p_nom_max), 1e9) for k, z in ren.iterrows()))
         pipes = [x for x in xb.index if c in (str(n.buses.at[xb.at[x, "bus0"], "country"]), str(n.buses.at[xb.at[x, "bus1"], "country"]))]
+        pipes += [f"co2 sequestered extra-ASEAN {c}"] if f"co2 sequestered extra-ASEAN {c}" in n.stores.index else []   # S4C-4 (decision 89): uncapped export option
         bio = float(n.stores[(n.stores.country == c) & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
         out[c] = dict(horizon_fraction=frac, electricity_demand_mwh=elec, renewable_potential_mwh=potential,
                       nuclear_or_smr_candidate=bool(((g.carrier.isin(["nuclear", "nuclear SMR"])) & g.p_nom_extendable & (g.p_nom_max > 0)).any()),
@@ -96,7 +97,9 @@ def structural_diagnosis_s2(n):
 
 def co2_flows(n):
     w = n.snapshot_weightings.stores
-    out = dict(sequestered_by_country={}, captured_by_carrier={}, vented_by_country={}, cross_border_pipeline={}, dac_by_country={})
+    out = dict(sequestered_by_country={}, captured_by_carrier={}, vented_by_country={}, cross_border_pipeline={}, dac_by_country={}, extra_asean_by_country={})
+    from s4c_layers import extra_asean_report
+    out["extra_asean_by_country"] = extra_asean_report(n)   # S4C-4 (decision 89)
     for name, z in n.stores[n.stores.carrier == "co2 sequestered"].iterrows():
         out["sequestered_by_country"][str(z.country)] = dict(final_level_t=float(n.stores_t.e[name].iloc[-1]), e_nom_max=float(z.e_nom_max))
     links = n.links
