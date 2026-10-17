@@ -408,3 +408,41 @@
 - **S4D-6：** 敏感性键 `co2.extra_asean_cost_scale`；第一批敏感性只登记（东盟外 ±50 %、航线系数 ±25 %、LNG 上限）。部署包重建到 c45f1448：四个日网络与冒烟网络逐组件一致，上传 228,863,868 B，运行命令 `--solver-profile formal_barrier`（只准备）。365×24h 单运行 25–59 min，串行 1.6–2.2 h。
 - **待用户决定：** 8 项（S4D 报告 §9）：老挝港口口径与运输方式、LA 是否可船运进东盟封存、封存单价统一口径、航线系数口径、BN / PH / TL 走廊、{LA, TH} 次优结果的处理、LNG 上限取值。
 - **交付：** `research/06_scope_redesign/p1_step4d_20261017/`（S4D_REPORT.md、S4D_EVIDENCE.json、S4D_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §13、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/、停止报告 01）；镜像与审阅 ZIP 在 `work/p1_step4d_20261017/`；测试 479 通过 / 0 失败。
+
+## S4E 第 94–95 项：补齐相邻跨境走廊、统一 CO₂ 封存单价与船运细节、冒烟、云端部署包 — 2026-10-17
+
+- **范围：**
+  - 指令 `S4E_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 e5c184c1…bb7e9db，已核对），开头为用户对 S4D §9 八项的答复。
+  - 分支 `codex/s4e-corridors-storage-20261017`（自 S4D 0429a0eb），draft PR #29 叠在 #28 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载；没有触发停止条件。
+- **S4E-0：** 登记 §9 八项答复，以及联盟运行规则（第 95 项 f：档案 A 非最优 → 档案 C 重跑一次 → 仍非最优标 UNVERIFIED）。
+- **S4E-1（94）：**
+  - 陆上相邻按共享边界 ≥ 1 km（1 km 对齐容差）判定，共 49 对，新增 31 条交流候选。
+  - APG AIMS III 跨海 #4 / #7 / #16 为直流候选；国内 #3 / #18a / #18b 为直流候选，两个情景都有。
+  - 存量只有 TH–MY 不一致（2,645.6 vs 380 MW），已列出，未改动。
+  - 走廊图 11 → 14 条边，BN、PH、TL 接入；连通联盟 81 → 383。
+  - 开关 `research.corridors.adjacency_completion`，`off` 与 S4D 网络逐组件一致。
+- **S4E-2（95）：**
+  - 统一封存 30 EUR/t，东盟外 54.70 EUR2020/t（对第 89 项单价构成的修改，±50 % 作用于它）；ZEP 16.05 作敏感性。
+  - 船运按逐对海上距离计价，单一系数 1.091 作对照。
+  - 老挝过境后船运进东盟各国国内封存，共 42 条 `CO2 transit ship`。
+  - 过境口径（现有海港 / 罐车）与 LNG 不设上限（7,018 EUR/MW/a）两项敏感性已构建核对。
+- **S4E-3：** 冒烟三项均最优：一体化 6.30166e11、不互联 6.76828e11、NZE 5.30241e11，较 S4D 低 3.1–4.8 %。
+  - 东盟外封存降为 0，东盟内船运 144 / 284 / 153 Mt。
+  - 新走廊在一体化中全部建设，约 301 GW，远超 APG 规划；#18a 国内直流 40.5 / 79.3 GW。
+  - B5、B6（46.66 bn EUR）、B16 通过。
+  - 分国差额：VN 20.4、MY 7.5、TH 4.8、SG 3.1、LA 2.6、KH 2.3、ID 2.1、MM 0.8、BN 0.6、TL 0.14、PH −0.6 bn EUR。
+- **S4E-4：**
+  - 部署包重建到 a3d58a46，四个网络与冒烟网络逐组件一致；上传 232,117,286 B。
+  - 预检内存下限 36 / 72 / 104 GiB；365×24h 单运行 25–52 min，串行 1.6–2.3 h。
+  - 联盟研究 383 个，约 160–330 h 串行。
+  - 第一批敏感性 5 项只登记。
+- **待用户决定：** 7 项（S4E 报告 §7）：
+  - 新候选走廊的容量上限；
+  - TH–MY 存量；
+  - #4 印尼端点；
+  - 联盟研究范围；
+  - LA 经越南海岸进入越南国内封存；
+  - SG–VN / SG–KH 可选候选；
+  - PH 负互联价值与 `adjacency_completion=off` 对照。
+- **交付：** `research/06_scope_redesign/p1_step4e_20261017/`，内容为 S4E_REPORT.md、S4E_EVIDENCE.json、S4E_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §14、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4e_20261017/`；测试 `tests/research` 488 通过 / 0 失败。

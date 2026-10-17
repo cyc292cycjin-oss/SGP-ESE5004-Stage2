@@ -1,0 +1,153 @@
+{
+ "commit": "a3d58a4695b1285ac1013204bce60e0ecc2b3b91",
+ "files": [
+  {
+   "path": "COMMIT",
+   "sha256": "818eb9b718632cd3c1d4077802a5a5acda6218dd9d62578c9ffa1a3f4bc8e5da",
+   "bytes": 41
+  },
+  {
+   "path": "DATA_CONFIG_MANIFEST.json",
+   "sha256": "ea91cd2bae7651a2cc081356e4d02a88fe2079ffe09cebef9845ad9bfcef7954",
+   "bytes": 123451
+  },
+  {
+   "path": "code_a3d58a46.tar.gz",
+   "sha256": "4ce21b5e7455ca413a2c4054c7f4f6dbf66d7e99edad19872b5552d0bf058a86",
+   "bytes": 115712905
+  },
+  {
+   "path": "conda_explicit_linux64.txt",
+   "sha256": "62f2935b6677194a298b44d12cbb1cc0a85d1566cd4e28aea55136fd86dc3e0f",
+   "bytes": 44787
+  },
+  {
+   "path": "environment_pypsa-earth.yml",
+   "sha256": "f2d28554d08b48bda83037b14ebc1d201b550283e1c36dc4b2657d31f0fe67a3",
+   "bytes": 11450
+  },
+  {
+   "path": "networks/disconnected_365_24h_unsolved.nc",
+   "sha256": "8448141c3027a4d43eb082fcdc8c49a4140d32291c1250f42d8399710d7b8bf8",
+   "bytes": 27231000
+  },
+  {
+   "path": "networks/disconnected_BUILD_RECEIPT.json",
+   "sha256": "8601c00b2d9986f4111924c00edc8080fa0f611f59ff9e3e00c12e6ff5cca048",
+   "bytes": 1376315
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_365_24h_unsolved.nc",
+   "sha256": "794f1df6fe12d5152333efd810a745ad58b03653c84c4fe9a0bc9c1009fc607a",
+   "bytes": 27488864
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_BUILD_RECEIPT.json",
+   "sha256": "40712991da5b68959bd5620681bc4b076ddde659ab0e4315a633aee60fd46501",
+   "bytes": 1382667
+  },
+  {
+   "path": "networks/integrated_365_24h_unsolved.nc",
+   "sha256": "f4d22db09d101d746ca88ec6dacae886fd9258c4e488dad7ee7c4d82273deb00",
+   "bytes": 27987785
+  },
+  {
+   "path": "networks/integrated_BUILD_RECEIPT.json",
+   "sha256": "6e6d5f226d6b1529ffee2da691020902cbe576e1cc661d882131d3020772925d",
+   "bytes": 1376928
+  },
+  {
+   "path": "networks/integrated_nze_365_24h_unsolved.nc",
+   "sha256": "c26cd05525fb12c260d0b582e71cc9eb5a01b27f0568ea5426de8bd9a2c20d78",
+   "bytes": 27987697
+  },
+  {
+   "path": "networks/integrated_nze_BUILD_RECEIPT.json",
+   "sha256": "0300d0f01342c785040d6aae2cd3babc5f15935c1a22bc580b5ae423b9ef9aa1",
+   "bytes": 1376914
+  },
+  {
+   "path": "preflight.sh",
+   "sha256": "174fc439b43c7c5654fa20e8a8d789719d577b65abeab3af038be657ed1eed18",
+   "bytes": 3732
+  },
+  {
+   "path": "run_365x24h.sh",
+   "sha256": "9c7c9647fd118a9a0d50a871a54582fee3b13685a57d27b5eaa7d37ea574920a",
+   "bytes": 11261
+  }
+ ],
+ "upload_total_bytes_excluding_this_manifest": 232117286,
+ "environment": {
+  "python": "3.11.13",
+  "pypsa": "0.30.3",
+  "linopy": "0.5.5",
+  "gurobipy": "12.0.3",
+  "numpy": "1.26.4",
+  "pandas": "2.3.1",
+  "xarray": "2025.1.2",
+  "scipy": "1.15.2",
+  "netCDF4": "1.7.2"
+ },
+ "run": {
+  "script": "run_365x24h.sh",
+  "runs": [
+   "integrated (STEPS)",
+   "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+   "integrated_nze (NZE fuel prices)",
+   "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+  ],
+  "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+  "modes": [
+   "serial",
+   "lanes2",
+   "lanes3"
+  ],
+  "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+  "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+  "scaling": "on",
+  "exports_per_run": [
+   "SOLVE_RECEIPT.json",
+   "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+   "COUNTRY_COST_LEDGER.csv",
+   "COUNTRY_COST_LEDGER_DETAIL.csv",
+   "LEDGER_IDENTITY.json",
+   "NODAL_PRICES.csv",
+   "CO2_FLOWS.json",
+   "BUNKER_ACCOUNT.json",
+   "solved network"
+  ],
+  "threads_per_run": 8,
+  "wall_clock_cap_h": 3,
+  "gurobi_time_limit_s": 10500,
+  "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+ },
+ "first_batch_sensitivities_registered_not_packaged": [
+  {
+   "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+   "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+   "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+   "override": "co2.ship_distance=route_factor",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "Lao transit: nearest existing sea port and / or truck",
+   "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+   "override": "s3.gas.lng_expansion=uncapped_cost",
+   "scenarios": "integrated and disconnected"
+  }
+ ],
+ "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED"
+}

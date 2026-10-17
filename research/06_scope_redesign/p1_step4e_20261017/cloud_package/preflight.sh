@@ -43,7 +43,7 @@ fi
 echo "== resources"
 cores=$(nproc); mem=$(awk '/MemTotal/ {printf "%.0f", $2/1048576}' /proc/meminfo); disk=$(df -Pk "$HERE" | awk 'NR==2 {printf "%.0f", $4/1048576}')
 # CLOUD_RESOURCE_ESTIMATE.md section 14: lower bound / recommended per mode (one run at a time / two lanes / three lanes)
-case "$MODE" in serial) need_c=8; need_m=32; need_d=35; rec_m=48;; lanes2) need_c=16; need_m=64; need_d=45; rec_m=96;; lanes3) need_c=24; need_m=96; need_d=50; rec_m=128;; esac
+case "$MODE" in serial) need_c=8; need_m=36; need_d=35; rec_m=48;; lanes2) need_c=16; need_m=72; need_d=45; rec_m=96;; lanes3) need_c=24; need_m=104; need_d=50; rec_m=128;; esac
 echo "cores $cores (need >= $need_c), memory ${mem} GiB (need >= $need_m), free disk ${disk} GiB (need >= $need_d) for mode $MODE"
 [ "$cores" -ge $need_c ] && [ "$mem" -ge $need_m ] && [ "$disk" -ge $need_d ] || { echo "RESOURCE CHECK FAILED"; ok=0; }
 [ "$mem" -ge $rec_m ] || echo "WARNING: memory below the recommended ${rec_m} GiB for mode $MODE (upper peak estimate leaves little margin; not a failure)"
