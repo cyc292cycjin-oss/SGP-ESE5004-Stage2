@@ -1,6 +1,6 @@
 # 云端部署步骤（AutoDL，365×24h 日分辨率运行；S4F 最终提交，云端档案 A `formal_barrier`）
 
-本文件只说明操作步骤。Claude Code 不连接云端，也不启动任何正式求解；每一步由用户在 AutoDL 上执行。**正式运行前须由用户单独明确授权**（CLAUDE.md：每次优化都需要用户单独明确授权；不自动重试、不做参数网格、不 warm start）。授权原文模板见 `S4F_REPORT.md` §9.4。
+本文件只说明操作步骤。Claude Code 不连接云端，也不启动任何正式求解；每一步由用户在 AutoDL 上执行。**正式运行前须由用户单独明确授权**（CLAUDE.md：每次优化都需要用户单独明确授权；不自动重试、不做参数网格、不 warm start）。授权原文模板见 `S4F_REPORT.md` §10.4。
 
 - 资源需求见 `CLOUD_RESOURCE_ESTIMATE.md` §15。
 - 部署包脚本在 `cloud_package/`（仓库 `research/06_scope_redesign/p1_step4f_20261017/cloud_package/`）。
@@ -48,7 +48,7 @@
 
 ## 2. 上传部署包
 
-1. 本机：把 `work/p1_step4f_20261017/cloud_package_dist/` 整个文件夹上传。上传总大小见 `PACKAGE_MANIFEST.json` 的 `upload_total_bytes_excluding_this_manifest`（S4F 报告 §9.1 列出）。
+1. 本机：把 `work/p1_step4f_20261017/cloud_package_dist/` 整个文件夹上传。上传总大小见 `PACKAGE_MANIFEST.json` 的 `upload_total_bytes_excluding_this_manifest`（S4F 报告 §10.1 列出）。
 2. 上传到实例的 `/root/autodl-tmp/s4f_cloud/`。可用 JupyterLab 拖拽、`scp -P <端口> -r cloud_package_dist root@<地址>:/root/autodl-tmp/s4f_cloud`，或经 AutoDL 网盘中转。
 3. 实例上核对：`cd /root/autodl-tmp/s4f_cloud && sha256sum -c SHA256SUMS`，应全部 OK。
 

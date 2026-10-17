@@ -1,0 +1,1048 @@
+{
+ "instruction": {
+  "file": "work/p1_step4f_20261017/S4F_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "28d7458d47e282df6aaf5fa324e3772b886a67f9b178dd728696c5eac7216f03",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4f-extension-caps-20261017",
+  "head": "34835d55bc14ebb1d8146a6587c02cee2505b567",
+  "base": "bcda8001456618a1cc9eb863ccbdb49ff41a59e1 (PR #29 head)",
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/30 (draft)",
+  "log": [
+   "34835d55 S4F-4: cloud package rebuilt at 7e09744d, resource estimate section 15, deploy steps, second-batch sensitivities",
+   "7e09744d S4F-3 smoke: three runs optimal under the individual extension limit (56x3h, profile A)",
+   "d9bc8012 S4F-2: TH-MY stock, APG #4 endpoint, Lao CO2 into the VN store, SG-VN / SG-KH second batch, tests/transport (decision 97)",
+   "e80509bf S4F-1: PyPSA-Eur individual line / DC-link extension limit (decision 96)",
+   "fd866f08 S4F-0: answers to S4E section 7 registered (registry fragment s4f_0)"
+  ]
+ },
+ "stops": [
+  {
+   "id": "S4F_STOP_01_LINE91",
+   "file": "work/p1_step4f_20261017/S4F_STOP_01_LINE91.md",
+   "finding": "line 91 is a cluster artefact (members: MY-internal line 1599 + TH 115 kV border line 1393), not Sadao - Chuping; 380 MW from the author's readjust_existing_interconnections",
+   "user_decision": "option 1: line 91 = 80 MW (grade C), Khlong Ngae - Gurun 300 MW, four OSM 250878579 duplicates removed, TH-MY 380 MW"
+  }
+ ],
+ "downloads": [],
+ "s4f0": {
+  "s4f_answer_corridor_caps": {
+   "value": "pypsa_eur_main;apg_plans_sensitivity",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_th_my_stock": {
+   "value": "remove_duplicates_align_apg_380",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_apg4_endpoint": {
+   "value": "ID_Sumatra3 3",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_coalition_scope": {
+   "value": "deferred_with_item_14",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_lao_to_vn_store": {
+   "value": "allowed",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_sg_vn_kh": {
+   "value": "second_batch_sensitivity",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4f_answer_ph_value": {
+   "value": "ledger_analysis_after_formal_results",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  }
+ },
+ "s4f1": {
+  "registry": {
+   "pypsa_eur_lines_max_extension": {
+    "value": "20000",
+    "unit": "MW",
+    "tier": "B",
+    "status": "REGISTERED"
+   },
+   "pypsa_eur_links_max_extension": {
+    "value": "30000",
+    "unit": "MW",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f1_pipeline_extension_caps": {
+    "value": "none",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f1_max_extension_switch": {
+    "value": "pypsa_eur|none|apg_plans",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f1_apg_plan_caps": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "C",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "status": [
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "....s                                                                    [100%]",
+   "4 passed, 1 skipped in 2.41s",
+   "START_BUILDS:2026-10-17T09:56:40Z",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"2417:\tMaximum resident set size (kbytes): 711516:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:47.62",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"75d5:\tMaximum resident set size (kbytes): 708132:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.38",
+   "BUILD_integrated_none:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"470c:\tMaximum resident set size (kbytes): 711772:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.52",
+   "BUILD_integrated_apg:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"09e5:\tMaximum resident set size (kbytes): 712660:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.26",
+   "COMPARE_none_vs_s4e4:{}",
+   "COMPARE_main_vs_s4e4:{\"Link\": [\"p_nom_max\"], \"Line\": [\"s_nom_max\"]}",
+   "CAPS_main:{\"lines\": 138, \"lines_ok\": true, \"dc\": 16, \"dc_ok\": true, \"pipes_inf\": true, \"b2b_inf\": true}",
+   "APG_groups:{\"1\": {\"cap\": 1050.0, \"stock\": 525.0, \"plan\": 1050.0, \"n\": 1}, \"10\": {\"cap\": 625.0, \"stock\": 1.0, \"plan\": 625.0, \"n\": 9}, \"11\": {\"cap\": 1262.0, \"stock\": 0.0, \"plan\": 1262.0, \"n\": 8}, \"12\": {\"cap\": 1353.0, \"stock\": 200.0, \"plan\": 1353.0, \"n\": 6}, \"13\": {\"cap\": 625.0, \"stock\": 300.0, \"plan\": 625.0, \"n\": 1}, \"14\": {\"cap\": 1315.0, \"stock\": 250.0, \"plan\": 1315.0, \"n\": 4}, \"15\": {\"cap\": 174.0, \"stock\": 0.0, \"plan\": 174.0, \"n\": 2}, \"16\": {\"cap\": 3400.0, \"stock\": 0.0, \"plan\": 3400.0, \"n\": 1}, \"17\": {\"cap\": 630.0, \"stock\": 30.0, \"plan\": 630.0, \"n\": 1}, \"18a\": {\"cap\": 435.0, \"stock\": 0.0, \"plan\": 435.0, \"n\": 1}, \"18b\": {\"cap\": 10000.0, \"stock\": 0.0, \"plan\": 10000.0, \"n\": 1}, \"2\": {\"cap\": 2645.6, \"stock\": 2645.6, \"plan\": 1043.0, \"n\": 6}, \"3\": {\"cap\": 1600.0, \"stock\": 0.0, \"plan\": 1600.0, \"n\": 1}, \"4\": {\"cap\": 2130.0, \"stock\": 0.0, \"plan\": 2130.0, \"n\": 1}, \"6\": {\"cap\": 777.0, \"stock\": 230.0, \"plan\": 777.0, \"n\": 8}, \"7\": {\"cap\": 500.0, \"stock\": 0.0, \"plan\": 500.0, \"n\": 1}, \"8b\": {\"cap\": 177.0, \"stock\": 50.01, \"plan\": 177.0, \"n\": 1}, \"9\": {\"cap\": 955.0, \"stock\": 955.0, \"plan\": 955.0, \"n\": 9}}",
+   "APG_hooks:[\"install_fragment_constraints\", \"research_apg_corridor_cap\", \"research_battery_inverter_capacity_equality\", \"research_bunker_net_zero\", \"research_co2_storage_cap\", \"research_country_net_zero\", \"research_cross_border_existing_fom\", \"research_existing_assets\", \"research_new_hydro_inflow\"]",
+   "EXCESS:0",
+   "493 passed, 927 warnings in 69.99s (0:01:09)",
+   "DONE:2026-10-17T10:01:04Z"
+  ],
+  "excess_s4e3": {
+   "cap_mw": 20000.0,
+   "basis": "added = s_nom_opt - s_nom (lines), p_nom_opt - p_nom (DC links); S4E-3 smoke, 56 x 3h",
+   "runs": {
+    "integrated": {
+     "components": 154,
+     "added_total_gw": 1468.5212115359823,
+     "over_cap": 22,
+     "excess_total_gw": 405.5710216741332,
+     "over_cap_cross_border": 8,
+     "over_cap_domestic": 14,
+     "max_added_gw": 87.78757075725872
+    },
+    "disconnected": {
+     "components": 94,
+     "added_total_gw": 1059.8493576270566,
+     "over_cap": 16,
+     "excess_total_gw": 555.2543014691919,
+     "over_cap_cross_border": 0,
+     "over_cap_domestic": 16,
+     "max_added_gw": 106.03989826720633
+    },
+    "integrated_nze": {
+     "components": 154,
+     "added_total_gw": 1393.7984437626885,
+     "over_cap": 20,
+     "excess_total_gw": 367.7551841288902,
+     "over_cap_cross_border": 8,
+     "over_cap_domestic": 12,
+     "max_added_gw": 86.98844857538741
+    }
+   }
+  }
+ },
+ "s4f2": {
+  "registry": {
+   "th_my_line91_s_nom_2025": {
+    "value": "80",
+    "unit": "MW",
+    "tier": "C",
+    "status": "REGISTERED"
+   },
+   "th_my_hvdc_khlong_ngae_gurun_2025": {
+    "value": "300",
+    "unit": "MW",
+    "tier": "B",
+    "status": "REGISTERED"
+   },
+   "s4f2_th_my_stock": {
+    "value": "apg_aims|frozen_base",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_apg4_endpoint": {
+    "value": "ID_Sumatra3 3",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_sensitivity_sg_vn_kh": {
+    "value": "off|on",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_lao_vn_store": {
+    "value": "on|off",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_corridors_s4f2": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_subsea_share_s4f2": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_xb_length_shares_s4f2": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4f2_author_readjust_lines_s4f2": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "corridors": {
+   "apg4": {
+    "old": {
+     "from": "ID_Sumatra2 0",
+     "to": "MY_Peninsular2 1",
+     "component": "APG4 ID_Sumatra2 0 - MY_Peninsular2 1 DC",
+     "length_km": 285.285319296026,
+     "subsea_share": 0.11816192560175054
+    },
+    "new": {
+     "from": "ID_Sumatra3 3",
+     "to": "MY_Peninsular2 1",
+     "component": "APG4 ID_Sumatra3 3 - MY_Peninsular2 1 DC",
+     "length_km": 432.2417148432882,
+     "subsea_share": 0.23554913294797686,
+     "component_type": "Link"
+    },
+    "great_circle_km": 345.79337187463057,
+    "same_landmass": false
+   },
+   "optional": [
+    {
+     "from": "SG2 0",
+     "to": "VN2 0",
+     "component": "APGother1 SG2 0 - VN2 0 DC",
+     "component_type": "Link",
+     "length_km": 1212.6249196790798,
+     "subsea_share": 0.7691911385883565
+    },
+    {
+     "from": "KH2 0",
+     "to": "SG2 0",
+     "component": "APGother2 KH2 0 - SG2 0 DC",
+     "component_type": "Link",
+     "length_km": 1330.1946869429717,
+     "subsea_share": 0.84687646782527
+    }
+   ],
+   "subsea_pairs_added": [
+    [
+     "ID_Sumatra3 3",
+     "MY_Peninsular2 1"
+    ],
+    [
+     "SG2 0",
+     "VN2 0"
+    ],
+    [
+     "KH2 0",
+     "SG2 0"
+    ]
+   ],
+   "th_my": [
+    {
+     "component_type": "Link",
+     "component": "250878579-1_0",
+     "action": "remove",
+     "frozen_base_mw": 491.4,
+     "corrected_mw": 0.0,
+     "grade": "B",
+     "basis": "duplicate of Khlong Ngae - Gurun: OSM way 250878579 split -1..-4 (osm-plus-prebuilt 0.1.1: dc=True, 300 kV, 1 circuit, 111.0 km, same geometry 100.45E 6.71N - 100.54E 5.81N)"
+    },
+    {
+     "component_type": "Link",
+     "component": "250878579-2_0",
+     "action": "remove",
+     "frozen_base_mw": 491.4,
+     "corrected_mw": 0.0,
+     "grade": "B",
+     "basis": "duplicate of Khlong Ngae - Gurun: OSM way 250878579 split -1..-4 (osm-plus-prebuilt 0.1.1: dc=True, 300 kV, 1 circuit, 111.0 km, same geometry 100.45E 6.71N - 100.54E 5.81N)"
+    },
+    {
+     "component_type": "Link",
+     "component": "250878579-3_0",
+     "action": "remove",
+     "frozen_base_mw": 491.4,
+     "corrected_mw": 0.0,
+     "grade": "B",
+     "basis": "duplicate of Khlong Ngae - Gurun: OSM way 250878579 split -1..-4 (osm-plus-prebuilt 0.1.1: dc=True, 300 kV, 1 circuit, 111.0 km, same geometry 100.45E 6.71N - 100.54E 5.81N)"
+    },
+    {
+     "component_type": "Link",
+     "component": "250878579-4_0",
+     "action": "remove",
+     "frozen_base_mw": 491.4,
+     "corrected_mw": 0.0,
+     "grade": "B",
+     "basis": "duplicate of Khlong Ngae - Gurun: OSM way 250878579 split -1..-4 (osm-plus-prebuilt 0.1.1: dc=True, 300 kV, 1 circuit, 111.0 km, same geometry 100.45E 6.71N - 100.54E 5.81N)"
+    },
+    {
+     "component_type": "Line",
+     "component": "91",
+     "action": "set_capacity",
+     "frozen_base_mw": 380.0,
+     "corrected_mw": 80.0,
+     "grade": "C",
+     "basis": "cluster artefact: member lines are not Sadao - Chuping (S4F_STOP_01_LINE91.md); 80 MW = APG 380 - 300, consistent with the AIMS line type 94-AL1/15-ST1A (0.35 kA) x 132 kV x sqrt3 = 80.02 MW of Sadao - Chuping (AIMS new_lines.csv: existing 1980, 1 circuit); 380 MW came from the author's readjust_existing_interconnections (AIMS 2024 total on the AC line); num_parallel and impedance unchanged"
+    },
+    {
+     "component_type": "Link",
+     "component": "Khlong Ngae – Gurun",
+     "action": "keep",
+     "frozen_base_mw": 300.0,
+     "corrected_mw": 300.0,
+     "grade": "B",
+     "basis": "AIMS new_links.csv: Khlong Ngae - Gurun existing, 2002, 110 km, 300 MW (HVDC)"
+    }
+   ],
+   "th_my_total_before_mw": 2645.6,
+   "th_my_total_after_mw": 380.0,
+   "sources": {
+    "corridors_s4e1": "c4188f0bca79bff16f478e602af33cf41d9d5e291e3960554a35406d086d1860",
+    "subsea_s4e1": "7713e2fc926f6a84890f7572566f668769934073d8a492fef69a1329e4780600",
+    "aims_new_lines": "d04b127a1eca5981915fbb975b679b9157b6cd7ae5b03186f85f1b3fb83fa01b",
+    "aims_new_links": "4bfef2bdfd7d82c6bc76cfada13fbca553c4e0d529205ebcc403526283df0460",
+    "osm_prebuilt": "1d15b7903faa92152e4fdf7353e4c8ef93b14f0cac7d219e22788831cacb9668",
+    "network": "results_project/s4f/s4f1/builds/integrated/integrated_2920_3h_unsolved.nc"
+   },
+   "second_pass": {
+    "network": "results_project/s4f/s4f2/builds/zero_opt/integrated_2920_3h_unsolved.nc",
+    "added_pairs": []
+   },
+   "second_passes": [
+    {
+     "network": "results_project/s4f/s4f2/builds/zero_main/integrated_2920_3h_unsolved.nc",
+     "added_pairs": []
+    },
+    {
+     "network": "results_project/s4f/s4f2/builds/zero_opt/integrated_2920_3h_unsolved.nc",
+     "added_pairs": []
+    }
+   ]
+  },
+  "author_readjust": {
+   "base": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc",
+   "base_sha256": "6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b417f7",
+   "author_script": "/mnt/d/ResearchWorkspaces/ASEAN/research/00_source_provenance/official/author_run/scripts/final_asean_adjustment.py",
+   "author_script_sha256": "dc89f99eefc05b52a09f63fe6fcdff9be8f8b3c33f9886c54d264ba4b5193809",
+   "lines": 19,
+   "pair_sums": {
+    "ID-MY": {
+     "s_nom": 230.0,
+     "aims": 230.0
+    },
+    "KH-LA": {
+     "s_nom": 300.0,
+     "aims": 300.0
+    },
+    "KH-TH": {
+     "s_nom": 250.0,
+     "aims": 250.0
+    },
+    "KH-VN": {
+     "s_nom": 200.0,
+     "aims": 200.0
+    },
+    "LA-TH": {
+     "s_nom": 955.0,
+     "aims": 955.0
+    },
+    "LA-VN": {
+     "s_nom": 1.0,
+     "aims": 1.0
+    },
+    "MY-SG": {
+     "s_nom": 525.0,
+     "aims": 525.0
+    },
+    "MY-TH": {
+     "s_nom": 380.0,
+     "aims": 380.0
+    }
+   },
+   "in_ac_loop": 16,
+   "via_third_country": 16,
+   "ratio_range": [
+    3.5917503895633e-05,
+    1.1454031264951356
+   ]
+  },
+  "status": [
+   "START:2026-10-17T10:03:16Z",
+   "CORRIDORS:0",
+   "BUILD_zero_main:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"baf7:\tMaximum resident set size (kbytes): 678312:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.51",
+   "BUILD_zero_opt:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"553f:\tMaximum resident set size (kbytes): 711156:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.86",
+   "FILL_zero_main:0",
+   "FILL_zero_opt:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"b435:\tMaximum resident set size (kbytes): 711728:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:47.38",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"bc2c:\tMaximum resident set size (kbytes): 708296:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:47.43",
+   "BUILD_integrated_frozen_th_my:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"625a:\tMaximum resident set size (kbytes): 712196:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.63",
+   "BUILD_integrated_sg_vn_kh:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"dbac:\tMaximum resident set size (kbytes): 711872:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:46.69",
+   "LENGTH_SHARES:0",
+   "READJUST:0",
+   "REGISTRY_FRAGMENT:0",
+   "DATA_PENDING: 51",
+   "CHECK:{\"integrated\": {\"th_my_links\": {\"Khlong Ngae \\u2013 Gurun\": 300.0}, \"line91\": 80.0, \"apg4\": [\"APG4 ID_Sumatra3 3 - MY_Peninsular2 1 DC\"], \"optional\": [], \"rail\": 6, \"rail_bus1\": [\"co2 sequestered VN\"], \"rail_class\": [\"maritime_trade\"], \"rail_cost\": [9.662, 10.003, 13.072, 18.177, 18.434, 24.569], \"xb_lines\": 52, \"xb_dc\": 4, \"xb_h2\": 55, \"max_ext\": \"pypsa_eur\", \"th_my\": \"apg_aims\"}, \"disconnected\": {\"th_my_links\": {}, \"line91\": null, \"apg4\": [], \"optional\": [], \"rail\": 6, \"rail_bus1\": [\"co2 sequestered VN\"], \"rail_class\": [\"maritime_trade\"], \"rail_cost\": [9.662, 10.003, 13.072, 18.177, 18.434, 24.569], \"xb_lines\": 0, \"xb_dc\": 0, \"xb_h2\": 0, \"max_ext\": \"pypsa_eur\", \"th_my\": \"apg_aims\"}, \"integrated_frozen_th_my\": {\"th_my_links\": {\"250878579-1_0\": 491.4, \"250878579-2_0\": 491.4, \"250878579-3_0\": 491.4, \"250878579-4_0\": 491.4, \"Khlong Ngae \\u2013 Gurun\": 300.0}, \"line91\": 380.0, \"apg4\": [\"APG4 ID_Sumatra3 3 - MY_Peninsular2 1 DC\"], \"optional\": [], \"rail\": 6, \"rail_bus1\": [\"co2 sequestered VN\"], \"rail_class\": [\"maritime_trade\"], \"rail_cost\": [9.662, 10.003, 13.072, 18.177, 18.434, 24.569], \"xb_lines\": 52, \"xb_dc\": 8, \"xb_h2\": 55, \"max_ext\": \"pypsa_eur\", \"th_my\": \"frozen_base\"}, \"integrated_sg_vn_kh\": {\"th_my_links\": {\"Khlong Ngae \\u2013 Gurun\": 300.0}, \"line91\": 80.0, \"apg4\": [\"APG4 ID_Sumatra3 3 - MY_Peninsular2 1 DC\"], \"optional\": [\"APGother1 SG2 0 - VN2 0 DC\", \"APGother2 KH2 0 - SG2 0 DC\"], \"rail\": 6, \"rail_bus1\": [\"co2 sequestered VN\"], \"rail_class\": [\"maritime_trade\"], \"rail_cost\": [9.662, 10.003, 13.072, 18.177, 18.434, 24.569], \"xb_lines\": 52, \"xb_dc\": 6, \"xb_h2\": 57, \"max_ext\": \"pypsa_eur\", \"th_my\": \"apg_aims\"}}",
+   "499 passed, 927 warnings in 65.45s (0:01:05)",
+   "FULL_TESTS:516 passed, 934 warnings in 65.29s (0:01:05)",
+   "DONE:2026-10-17T10:11:11Z"
+  ]
+ },
+ "s4f3": {
+  "runs": [
+   {
+    "run": "integrated",
+    "termination": "optimal",
+    "objective_eur": 639062536870.334,
+    "num_col": 648478,
+    "num_row": 1438072,
+    "nnz": 3224984,
+    "barrier_iterations": 168,
+    "barrier_seconds": 222.72,
+    "solve_seconds": 236.99869537353516,
+    "peak_rss_gib_receipt": 3.8778648376464844,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "disconnected",
+    "termination": "optimal",
+    "objective_eur": 693191116147.2216,
+    "num_col": 635539,
+    "num_row": 1409957,
+    "nnz": 3137621,
+    "barrier_iterations": 150,
+    "barrier_seconds": 170.43,
+    "solve_seconds": 183.43105125427246,
+    "peak_rss_gib_receipt": 3.5410728454589844,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "integrated_nze",
+    "termination": "optimal",
+    "objective_eur": 538892502651.3916,
+    "num_col": 648478,
+    "num_row": 1438072,
+    "nnz": 3224984,
+    "barrier_iterations": 117,
+    "barrier_seconds": 152.44,
+    "solve_seconds": 165.96518301963806,
+    "peak_rss_gib_receipt": 3.853668212890625,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   }
+  ],
+  "vs_s4e": {
+   "integrated": {
+    "objective": 630165832202.5092,
+    "objective_change_eur": 8896704667.82483,
+    "objective_change_rel": 0.014118037210506515
+   },
+   "disconnected": {
+    "objective": 676828076717.4764,
+    "objective_change_eur": 16363039429.745117,
+    "objective_change_rel": 0.02417606478310359
+   },
+   "integrated_nze": {
+    "objective": 530240470981.101,
+    "objective_change_eur": 8652031670.290588,
+    "objective_change_rel": 0.016317184643189875
+   }
+  },
+  "b5_passed": true,
+  "b6": {
+   "passed": true,
+   "difference": 54128579276.88757
+  },
+  "corridors": {
+   "integrated": {
+    "new_components": 37,
+    "built_total_mw": 262963.1,
+    "largest_mw": 20000.0,
+    "s4e_built_total_mw": 301273.8,
+    "s4e_largest_mw": 40527.2,
+    "xb_pipelines_built_over_1mw": {
+     "H2 pipeline": 19,
+     "CO2 pipeline": 18,
+     "gas pipeline": 41
+    }
+   },
+   "disconnected": {
+    "new_components": 3,
+    "built_total_mw": 24697.8,
+    "largest_mw": 20000.0,
+    "s4e_built_total_mw": 83251.5,
+    "s4e_largest_mw": 79264.6,
+    "xb_pipelines_built_over_1mw": {
+     "H2 pipeline": 0,
+     "CO2 pipeline": 0,
+     "gas pipeline": 0
+    }
+   },
+   "integrated_nze": {
+    "new_components": 37,
+    "built_total_mw": 258431.7,
+    "largest_mw": 20000.0,
+    "s4e_built_total_mw": 285915.6,
+    "s4e_largest_mw": 36563.7,
+    "xb_pipelines_built_over_1mw": {
+     "H2 pipeline": 21,
+     "CO2 pipeline": 18,
+     "gas pipeline": 37
+    }
+   }
+  },
+  "at_cap": {
+   "integrated": {
+    "count": 11,
+    "cross_border": 5,
+    "domestic": 6,
+    "all_added_gw": 868.0
+   },
+   "disconnected": {
+    "count": 6,
+    "cross_border": 0,
+    "domestic": 6,
+    "all_added_gw": 356.3
+   },
+   "integrated_nze": {
+    "count": 11,
+    "cross_border": 5,
+    "domestic": 6,
+    "all_added_gw": 854.8
+   }
+  },
+  "th_my": {
+   "integrated": {
+    "91": {
+     "existing_mw": 80.0,
+     "optimal_mw": 20079.999999995183
+    },
+    "Khlong Ngae – Gurun": {
+     "existing_mw": 300.0,
+     "optimal_mw": 1999.9999999496588
+    }
+   },
+   "disconnected": {},
+   "integrated_nze": {
+    "91": {
+     "existing_mw": 80.0,
+     "optimal_mw": 20079.999999995493
+    },
+    "Khlong Ngae – Gurun": {
+     "existing_mw": 300.0,
+     "optimal_mw": 1999.9999999731765
+    }
+   }
+  },
+  "shipping": {
+   "integrated": {
+    "by_pair_mt": {
+     "VN->MY": 59.7894,
+     "VN->BN": 45.3794,
+     "VN->ID": 29.9039,
+     "MM->ID": 2.8241
+    },
+    "total_mt": 137.897,
+    "freight_meur": 1992.1,
+    "extra_asean_total_mt": 0.0,
+    "s4e_total_mt": 144.407
+   },
+   "disconnected": {
+    "by_pair_mt": {
+     "SG->ID": 92.1007,
+     "VN->ID": 66.5419,
+     "VN->MY": 54.7429,
+     "MM->ID": 49.0278,
+     "KH->TH": 22.0122,
+     "VN->BN": 10.1115,
+     "KH->ID": 3.9108
+    },
+    "total_mt": 298.448,
+    "freight_meur": 4060.22,
+    "extra_asean_total_mt": 0.0,
+    "s4e_total_mt": 284.049
+   },
+   "integrated_nze": {
+    "by_pair_mt": {
+     "VN->MY": 59.6691,
+     "VN->BN": 43.0442,
+     "VN->ID": 40.2116,
+     "MM->ID": 2.8241,
+     "KH->ID": 0.0021
+    },
+    "total_mt": 145.751,
+    "freight_meur": 2106.42,
+    "extra_asean_total_mt": 0.0,
+    "s4e_total_mt": 153.156
+   }
+  },
+  "lao_vn_store": {
+   "integrated": {
+    "links": 6,
+    "by_node_mt": {
+     "LA2 0": 0.0,
+     "LA2 1": 0.0,
+     "LA2 2": 0.0,
+     "LA2 3": 0.0,
+     "LA2 4": 0.0,
+     "LA2 5": 0.0
+    },
+    "total_mt": 0.0,
+    "freight_meur": 0.0
+   },
+   "disconnected": {
+    "links": 6,
+    "by_node_mt": {
+     "LA2 0": 1.8249,
+     "LA2 1": 0.0,
+     "LA2 2": 0.0,
+     "LA2 3": 5.6526,
+     "LA2 4": 0.0211,
+     "LA2 5": 0.0
+    },
+    "total_mt": 7.4986,
+    "freight_meur": 73.145
+   },
+   "integrated_nze": {
+    "links": 6,
+    "by_node_mt": {
+     "LA2 0": 0.0,
+     "LA2 1": 0.0,
+     "LA2 2": 0.0,
+     "LA2 3": 0.0,
+     "LA2 4": 0.0,
+     "LA2 5": 0.0
+    },
+    "total_mt": 0.0,
+    "freight_meur": 0.0
+   }
+  },
+  "focus": {
+   "KH": {
+    "integrated_bn_eur": 4.6186,
+    "disconnected_bn_eur": 6.8709,
+    "disconnected_minus_integrated": 2.2523,
+    "disconnected_minus_integrated_s4e": 2.2675
+   },
+   "LA": {
+    "integrated_bn_eur": -1.8003,
+    "disconnected_bn_eur": 2.1618,
+    "disconnected_minus_integrated": 3.9621,
+    "disconnected_minus_integrated_s4e": 2.6442
+   },
+   "VN": {
+    "integrated_bn_eur": 127.3514,
+    "disconnected_bn_eur": 149.3171,
+    "disconnected_minus_integrated": 21.9657,
+    "disconnected_minus_integrated_s4e": 20.428
+   },
+   "TH": {
+    "integrated_bn_eur": 79.459,
+    "disconnected_bn_eur": 85.6617,
+    "disconnected_minus_integrated": 6.2027,
+    "disconnected_minus_integrated_s4e": 4.7668
+   },
+   "MY": {
+    "integrated_bn_eur": 70.8709,
+    "disconnected_bn_eur": 76.0107,
+    "disconnected_minus_integrated": 5.1398,
+    "disconnected_minus_integrated_s4e": 7.5447
+   },
+   "ID": {
+    "integrated_bn_eur": 204.4644,
+    "disconnected_bn_eur": 214.0173,
+    "disconnected_minus_integrated": 9.5529,
+    "disconnected_minus_integrated_s4e": 2.1016
+   },
+   "PH": {
+    "integrated_bn_eur": 26.5384,
+    "disconnected_bn_eur": 27.5901,
+    "disconnected_minus_integrated": 1.0517,
+    "disconnected_minus_integrated_s4e": -0.6085
+   },
+   "BN": {
+    "integrated_bn_eur": 0.7009,
+    "disconnected_bn_eur": 1.4995,
+    "disconnected_minus_integrated": 0.7986,
+    "disconnected_minus_integrated_s4e": 0.5887
+   },
+   "TL": {
+    "integrated_bn_eur": -0.1374,
+    "disconnected_bn_eur": 0.1306,
+    "disconnected_minus_integrated": 0.268,
+    "disconnected_minus_integrated_s4e": 0.1409
+   }
+  },
+  "disconnected_minus_integrated_bn_eur": {
+   "ASEAN_BUNKER": -0.0389,
+   "ASEAN_POOL": -0.0,
+   "BN": 0.7986,
+   "ID": 9.5529,
+   "KH": 2.2523,
+   "LA": 3.9621,
+   "MM": 1.0114,
+   "MY": 5.1398,
+   "PH": 1.0517,
+   "SG": 1.9622,
+   "TH": 6.2027,
+   "TL": 0.268,
+   "VN": 21.9657
+  },
+  "ledgers": {
+   "integrated": {
+    "relative_error": 3.615754681366716e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.9996,
+     "ASEAN_POOL": 0.0,
+     "BN": 0.7009,
+     "ID": 204.4644,
+     "KH": 4.6186,
+     "LA": -1.8003,
+     "MM": 9.3891,
+     "MY": 70.8709,
+     "PH": 26.5384,
+     "SG": 24.6081,
+     "TH": 79.459,
+     "TL": -0.1374,
+     "VN": 127.3514
+    }
+   },
+   "disconnected": {
+    "relative_error": 3.4297055326731473e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.9607,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4995,
+     "ID": 214.0173,
+     "KH": 6.8709,
+     "LA": 2.1618,
+     "MM": 10.4005,
+     "MY": 76.0107,
+     "PH": 27.5901,
+     "SG": 26.5703,
+     "TH": 85.6617,
+     "TL": 0.1306,
+     "VN": 149.3171
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 7.198828174753012e-13,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.6056,
+     "ASEAN_POOL": 0.0,
+     "BN": -0.7653,
+     "ID": 176.494,
+     "KH": 3.7285,
+     "LA": -1.7305,
+     "MM": 6.0601,
+     "MY": 53.8753,
+     "PH": 16.3555,
+     "SG": 18.159,
+     "TH": 55.7272,
+     "TL": -0.94,
+     "VN": 119.3232
+    }
+   }
+  }
+ },
+ "s4f4": {
+  "status": [
+   "START:2026-10-17T10:28:17Z commit:7e09744d dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"b435:\tMaximum resident set size (kbytes): 710532:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:55.00:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"bc2c:\tMaximum resident set size (kbytes): 708064:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:52.83:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"0c44:\tMaximum resident set size (kbytes): 711200:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:53.78:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1382:\tMaximum resident set size (kbytes): 709832:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:52.10:daily=1",
+   "COMPARE_integrated_vs_smoke:{}",
+   "COMPARE_disconnected_vs_smoke:{}",
+   "COMPARE_integrated_nze_vs_smoke:{}",
+   "PACKAGE:0",
+   "DONE:2026-10-17T10:32:07Z"
+  ],
+  "extrapolation": {
+   "integrated": {
+    "barrier_iterations": 168,
+    "barrier_seconds": 222.72,
+    "wall_seconds": 285,
+    "peak_rss_gib": 3.8778648376464844,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       2547.3903929879657,
+       3706.094372904532
+      ],
+      "barrier_s_with_1_5x_iterations": 5559.141559356798,
+      "non_solve_s": 312.8656462260655,
+      "wall_s": [
+       2860.2560392140313,
+       4018.9600191305976,
+       5872.007205582863
+      ],
+      "peak_rss_gib": [
+       23.068226173945835,
+       32.29551664352417
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       38028.788463706966,
+       83859.34280953922
+      ],
+      "barrier_s_with_1_5x_iterations": 125789.01421430882,
+      "non_solve_s": 2502.925169808524,
+      "wall_s": [
+       40531.71363351549,
+       86362.26797934774,
+       128291.93938411734
+      ],
+      "peak_rss_gib": [
+       181.7458093915667,
+       254.44413314819334
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "barrier_iterations": 150,
+    "barrier_seconds": 170.43,
+    "wall_seconds": 225,
+    "peak_rss_gib": 3.5410728454589844,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1949.316382349762,
+       2835.9808906883954
+      ],
+      "barrier_s_with_1_5x_iterations": 4253.971336032593,
+      "non_solve_s": 270.9404695034027,
+      "wall_s": [
+       2220.256851853165,
+       3106.921360191798,
+       4524.911805535996
+      ],
+      "peak_rss_gib": [
+       20.873064082009453,
+       29.222289714813233
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       29100.42393080809,
+       64170.92221187935
+      ],
+      "barrier_s_with_1_5x_iterations": 96256.38331781903,
+      "non_solve_s": 2167.5237560272217,
+      "wall_s": [
+       31267.947686835312,
+       66338.44596790656,
+       98423.90707384625
+      ],
+      "peak_rss_gib": [
+       164.18451265607564,
+       229.85831771850587
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "barrier_iterations": 117,
+    "barrier_seconds": 152.44,
+    "wall_seconds": 210,
+    "peak_rss_gib": 3.853668212890625,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1743.5533023845433,
+       2536.624578868386
+      ],
+      "barrier_s_with_1_5x_iterations": 3804.9368683025787,
+      "non_solve_s": 287.01264638985907,
+      "wall_s": [
+       2030.5659487744024,
+       2823.637225258245,
+       4091.949514692438
+      ],
+      "peak_rss_gib": [
+       22.910516030447823,
+       32.07472244262695
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       26028.684058043684,
+       57397.26211335379
+      ],
+      "barrier_s_with_1_5x_iterations": 86095.89317003069,
+      "non_solve_s": 2296.1011711188726,
+      "wall_s": [
+       28324.785229162557,
+       59693.36328447266,
+       88391.99434114956
+      ],
+      "peak_rss_gib": [
+       180.4841282435826,
+       252.67777954101564
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   }
+  },
+  "package": {
+   "commit": "7e09744dc89324c472497cce45025add19a11b6b",
+   "upload_total_bytes": 232095769,
+   "files": 15,
+   "run": {
+    "script": "run_365x24h.sh",
+    "runs": [
+     "integrated (STEPS)",
+     "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+     "integrated_nze (NZE fuel prices)",
+     "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+    ],
+    "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+    "modes": [
+     "serial",
+     "lanes2",
+     "lanes3"
+    ],
+    "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+    "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+    "scaling": "on",
+    "exports_per_run": [
+     "SOLVE_RECEIPT.json",
+     "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+     "COUNTRY_COST_LEDGER.csv",
+     "COUNTRY_COST_LEDGER_DETAIL.csv",
+     "LEDGER_IDENTITY.json",
+     "NODAL_PRICES.csv",
+     "CO2_FLOWS.json",
+     "BUNKER_ACCOUNT.json",
+     "solved network"
+    ],
+    "threads_per_run": 8,
+    "wall_clock_cap_h": 3,
+    "gurobi_time_limit_s": 10500,
+    "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+   },
+   "second_batch_sensitivities": [
+    {
+     "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+     "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+     "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+     "override": "co2.ship_distance=route_factor",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "Lao transit: nearest existing sea port and / or truck",
+     "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+     "override": "s3.gas.lng_expansion=uncapped_cost",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+     "override": "network.max_extension=apg_plans",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+     "override": "corridors.optional_sg_vn_kh=on",
+     "scenarios": "integrated"
+    }
+   ],
+   "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+  }
+ },
+ "resources": {
+  "cloud": false,
+  "formal_solves": false,
+  "downloads": "none (S4F needs no download)"
+ },
+ "tests": "tests/research: 499 passed, 927 warnings; full tests/: 516 passed, 934 warnings (tests/transport fixed in S4F-2 g). Licence scan of the package: no licence value (tarball hits = the S4E set: parameter-name lists, presence booleans, scrub keyword lists)."
+}
