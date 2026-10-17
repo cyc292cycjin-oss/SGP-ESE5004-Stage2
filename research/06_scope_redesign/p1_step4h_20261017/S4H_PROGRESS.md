@@ -19,7 +19,7 @@
 |---|---|---|---|---|
 | S4H-0 | 准备：§7 答复登记 | 完成 | 见提交记录 | 注册表片段 `s4h_0`（5 行：4 项答复与本步范围规则）；整个 `tests/` 523 通过 |
 | S4H-1 | LA–VN 存量（第 100 项） | 完成 | 见提交记录 | `s4h_layers.apply_la_vn_stock`（构建时；`research.network.la_vn_stock: aims_zero \| author`）；线路 59/60/63/64 `s_nom = s_nom_min = 0`、可扩建、上限 20,000 MW、跨境类、长度与单位成本不变（46.497 EUR/MW/km/a）；注册表 `la_vn_grid_stock_2025` = 0（B 级）；IPP 估算 572 MW × 230.9–515.1 km × 46.497 = 6.14–13.70 M EUR/a（C 级）；author 构建与 S4G 逐组件相同，不互联构建与 S4G 相同；主算只有 4 条线改变，x 由 558,762 Ω 降为 44–99 Ω（回路数暂按模板 1.286，S4H-2 改为 1），基尔霍夫系数跨度 2.3e5 → 943；整个 `tests/` 526 通过 |
-| S4H-2 | 候选线与 APG17 的电抗（第 101 项） | 未开始 | — | |
+| S4H-2 | 候选线与 APG17 的电抗（第 101 项） | 完成 | 见提交记录 | (a) `apply_candidate_num_parallel`，`corridors.candidate_num_parallel: one_circuit`：46 条零容量交流候选线（32 条 S4E-1/APG11 + 4 条 LA–VN + 10 条新补）`num_parallel` = 1，存储 x = 线型公式 = PyPSA 重算（相对差 0）；(b) `READJUST_IMPEDANCE_S4H2.csv` = S4G1 19 行 + APG17：np 1.286 → 0.017667，x 67.84 → 4,938.81 Ω；(c) 缺参考候选的国家对 KH–LA、LA–MM、LA–TH（7 个节点对）、MY–SG（陆块不同 → 直流）、MY–TH，补 10 条交流 + 1 条直流（`CORRIDORS_S4H2.csv`），海底份额重算一致，管道数不变，`apg_plans` 分组无重叠；(d) x 最大 4,938.8 Ω（APG17）/ 最小 2.43 Ω，基尔霍夫系数跨度 2,034（S4G 2.3e5，S4H-1 943），环路 61 → 71，行内比 > 1e4 的行 0；复现 S4G 的构建与 S4G 逐组件相同，不互联与 S4G 相同；整个 `tests/` 531 通过 |
 | S4H-3 | 冒烟 | 未开始 | — | |
 | S4H-4 | 云端部署包 | 未开始 | — | |
 | S4H-5 | 上云前清单与交付 | 未开始 | — | |
@@ -29,15 +29,20 @@
 | 提交 | 内容 |
 |---|---|
 | 533a6d8d | S4H-0：§7 答复登记 |
-| （S4H-1 提交） | S4H-1：LA–VN 存量为 0，4 条聚类线改为零容量候选线 |
+| 92986eae | S4H-1：LA–VN 存量为 0，4 条聚类线改为零容量候选线 |
+| （S4H-2 提交） | S4H-2：候选线参考回路数 1、APG17 线型修正、补 11 条参考候选 |
 
 ## 续行点
 
-S4H-1 完成。下一步 S4H-2：`s4h_2_data.py`（相邻国家对完整性表；为缺参考电抗候选线的国家对按 S4E-1 规则补线，写 CORRIDORS_S4H2.csv / SUBSEA_SHARE_S4H2.csv；READJUST_IMPEDANCE_S4H2.csv = S4G1 19 行 + APG17）；配置 `candidate_num_parallel: one_circuit`、`corridors_table_s4h2`、readjust 表改为 S4H2；账本长度分摊表优先 S4H2。
+S4H-2 完成。下一步 S4H-3 冒烟：`/home/jin/s4h3_run.sh`（三个运行，档案 A，30 分钟止损，不重试），汇总 `scripts_project/s4h_3_summary.py --ref results_project/s4g/s4g3`。部署包脚本已复制到 `research/06_scope_redesign/p1_step4h_20261017/cloud_package/` 并改为 S4H 版（ALLOW = s4h_3_summary / s4h_4_*）。
 
 ## 发现但未处理（执行中随时记录，交付时写入报告）
 
-（暂无）
+1. 指令括注"PyPSA-Earth 的 augmented connection 用 DC 链路"与已入库源码不完全一致：`config.default.yaml` 第 177 行缺省 `new_line_type: ["HVAC"]`（脚本第 93 行兜底才是 `["HVDC"]`），HVAC 增补线不设 `num_parallel`（PyPSA 缺省 1），`s_nom_min` = 1 MW；该规则缺省不启用（第 174 行）。注册表按源码写明；与 one_circuit 约定一致，不影响实现。
+2. MY–SG：按 S4E-1 陆块规则，新加坡与半岛不同陆块（柔佛海峡，海底份额 2.09%），补的参考候选为直流链路，MY–SG 因此没有交流参考电抗候选线；存量线 92 为交流。列入用户决定事项。
+3. LA–TH 存量 9 条交流线，只有 7 个相邻节点对；线路 52、62 连接的节点对不相邻（聚类伪影），未补线。
+4. 已有候选线的国家对中，存量线所在节点对没有同节点对的参考候选：ID_Kalimantan4 8–MY_Sarawak4 1（线 23）、KH2 4–TH2 3（线 47）、KH2 0–VN2 0（线 39）。按"每个国家对至少一条"未补。
+5. LA–VN 线路 59（LA2 3–VN2 2）的节点对在 ADJACENCY_S4E1 中不相邻（聚类伪影），按第 100 项仍改为零容量候选线保留。
 
 ## 对 S4G 报告 §7 的答复（用户已确认，指令原文摘要）
 

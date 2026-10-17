@@ -221,7 +221,8 @@ def ledger_gate(identity: dict) -> dict:
 
 
 def load_length_shares(path: Path | None = None) -> pd.DataFrame | None:
-    p = path or next((q for q in (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4F2.csv", ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4E1.csv",
+    p = path or next((q for q in (ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4H2.csv",   # S4H-2 c (decision 101): + the reference candidates
+                                  ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4F2.csv", ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4E1.csv",
                                   ROOT / "research_inputs/corridors/XB_LENGTH_SHARES_S4D3.csv") if q.exists()), None)   # S4F-2 superset first (new #4 end, optional SG-VN / SG-KH)
     if p is None:
         return None
