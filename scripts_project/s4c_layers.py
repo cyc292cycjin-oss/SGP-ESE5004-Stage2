@@ -390,22 +390,30 @@ BUNKER_ROW = "research_bunker_co2_limit"
 
 
 def bunker_mode(cfg) -> str:
-    """research.bunkers.attribution (decision 88). 'excluded' drives research.s2.demand.international_bunkers (decision 10) to false, so the
-    S2 demand layer lists the bunker rows as deferred; the two switches must agree otherwise. Call before the demand layer."""
+    """research.bunkers.attribution (decision 88). 'excluded' means research.s2.demand.international_bunkers (decision 10) = false for the
+    S2 demand layer (bunker rows listed as deferred; see demand_cfg); the two switches must agree otherwise. The config is never mutated, so
+    the research_config hash checked by gate B12 stays the file config plus the --override list."""
     R = cfg["research"]
     mode = str(R.get("bunkers", {}).get("attribution", "bunkering_country"))
     if mode not in BUNKER_MODES:
         raise ValueError("Unknown research.bunkers.attribution " + mode)
     D = R["s2"]["demand"]
-    if mode == "excluded":
-        D["international_bunkers"] = False
-    elif not bool(D.get("international_bunkers", True)):
+    if mode != "excluded" and not bool(D.get("international_bunkers", True)):
         raise ValueError(f"research.s2.demand.international_bunkers = false contradicts research.bunkers.attribution = {mode} (use excluded)")
     if mode == "asean_pool" and str(R.get("s3", {}).get("fuel_carbon_mode", "origin_neutral")) != "origin_neutral":
         raise ValueError("research.bunkers.attribution = asean_pool needs research.s3.fuel_carbon_mode = origin_neutral: under producer_credit the "
                          "bunker methanol would book its carbon in the bunker account while the capture credit stays in the producing country, "
                          "i.e. a transfer of national removals that decision 88 excludes")
     return mode
+
+
+def demand_cfg(cfg):
+    """Config seen by the S2 demand layer: under 'excluded' a copy with research.s2.demand.international_bunkers = false."""
+    if bunker_mode(cfg) != "excluded":
+        return cfg
+    import copy
+    c = copy.deepcopy(cfg); c["research"]["s2"]["demand"]["international_bunkers"] = False
+    return c
 
 
 def _attached(n, bus):

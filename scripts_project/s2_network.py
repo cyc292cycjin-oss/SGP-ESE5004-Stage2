@@ -31,7 +31,7 @@ from s4a_fleet import add_gem_fleet, remove_not_operating_units
 from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
 from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
-                        apply_extra_asean_storage)
+                        apply_extra_asean_storage, demand_cfg)
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -230,7 +230,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
             d = d[k]
         old = d[parts[-1]]; d[parts[-1]] = type(old)(val) if not isinstance(old, bool) else (val.lower() in ("1", "true", "yes"))
     cfg["research"]["config_overrides"] = list(overrides or [])
-    bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution; excluded drives research.s2.demand.international_bunkers to false before the demand layer
+    bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution checked early (no config mutation; the demand layer gets demand_cfg)
     if R["scenario"] != scenario:
         raise ValueError("Scenario identity does not match the composed config")
     if sha(electric_base) != ELECTRIC_BASE_SHA:
@@ -289,7 +289,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     from s2_layers import demand_table_key
     allocation_mode = demand_table_key(cfg)   # R3 (decision 57) + S3B R1 growth method suffix (decision 66)
     demand_table = repo / S2["demand"].get("tables_by_allocation", {}).get(allocation_mode, S2["demand"]["table"])
-    demand = add_demand_layer(n, costs, cfg, repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
+    demand = add_demand_layer(n, costs, demand_cfg(cfg), repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
     demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
     n.meta["s2_demand_ledger"] = jsonable(dict(deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"],
                                               totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()}))

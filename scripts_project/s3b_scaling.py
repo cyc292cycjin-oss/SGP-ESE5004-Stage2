@@ -10,6 +10,13 @@
     Net effect: Store-p coefficients in the stores' energy balances become w/k, right-hand sides /k, e_nom cost coefficients x k.
     After the solve, solutions of scaled columns are multiplied by k, duals of scaled rows divided by k, reduced costs of scaled columns
     divided by k, so every reported value is in the original units (MWh, t).
+(c) S4C-5 (decision 69 c, implemented under decision 84): Kirchhoff-Voltage-Law row normalisation. PyPSA builds every cycle row as
+    1e5 x reactance-weighted flows with one uniform factor (pypsa 0.30.3 optimization/constraints.py line 652 `C = 1e5 * sparse.diags(
+    weightings.values) * sub.C`; current PyPSA master: `flow @ C_branch * 1e5`, docstring "The impedances are scaled by 1e5 to improve
+    numerical conditioning"); neither PyPSA nor linopy nor PyPSA-Eur rescales rows individually. normalise_kvl_rows divides each KVL row by
+    its largest |coefficient| (row infinity norm -> 1); the right-hand side is 0, so the feasible set and the primal solution are unchanged.
+    Applied like (b) after the LP export (the exported LP stays in original units); after the solve unscale_kvl_duals restores the KVL
+    duals in original units (pi = pi_normalised / row_max); reduced costs are unaffected by row scaling.
 """
 from __future__ import annotations
 
@@ -140,6 +147,46 @@ def unscale_reduced_costs(rc_map, led):
         if int(lab) in rc_map:
             rc_map[int(lab)] = rc_map[int(lab)] / k
     return rc_map
+
+
+KVL_ROW = "Kirchhoff-Voltage-Law"
+
+
+def _abs_stats(a):
+    a = np.asarray(a, dtype=float); a = a[np.isfinite(a) & (a > 0)]
+    return dict(min=float(a.min()), max=float(a.max()), ratio=float(a.max() / a.min())) if a.size else dict(min=None, max=None, ratio=None)
+
+
+def normalise_kvl_rows(m):
+    """(c) Divide every Kirchhoff-Voltage-Law row by its largest |coefficient|. Returns the ledger (row maxima kept privately for unscaling)."""
+    if KVL_ROW not in m.constraints:
+        return dict(applied=False, reason="no Kirchhoff-Voltage-Law rows")
+    con = m.constraints[KVL_ROW]
+    c = con.coeffs; valid = (con.vars != -1) & c.notnull() & (c != 0)
+    a = abs(c).where(valid)
+    rowmax = a.max("_term"); rowmin = a.min("_term")
+    ok = (rowmax > 0) & (con.labels != -1)
+    scale = xr.where(ok, rowmax, 1.0)
+    _assign(con, coeffs=c / scale)
+    after = abs(con.coeffs).where(valid)
+    rr = (rowmax / rowmin).where(ok)
+    led = dict(applied=True, constraint=KVL_ROW, rows=int(ok.sum()), method="row infinity norm: each KVL row divided by its largest |coefficient|; rhs 0 unchanged",
+               coefficients_before=_abs_stats(a.values), coefficients_after=_abs_stats(after.values),
+               row_max_before=_abs_stats(rowmax.where(ok).values), within_row_ratio_max=float(rr.max()), within_row_ratio_median=float(rr.median()),
+               duals="restored after the solve: pi = pi_normalised / row_max (unscale_kvl_duals)")
+    led["_rowmax"] = scale
+    m.matrices.clean_cached_properties()
+    return led
+
+
+def unscale_kvl_duals(m, led):
+    """(c) After the solve: KVL duals back to the original row scale (pi = pi_normalised / row_max)."""
+    if not led.get("applied"):
+        return
+    con = m.constraints[KVL_ROW]
+    if "dual" in con.data:
+        con.dual = con.dual / led["_rowmax"]
+    m.matrices.clean_cached_properties()
 
 
 def public(led):

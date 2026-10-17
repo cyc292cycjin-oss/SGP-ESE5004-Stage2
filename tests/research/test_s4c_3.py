@@ -24,10 +24,12 @@ def test_config_main_and_registry_key_position():
 
 
 def test_mode_switch_rules():
+    from s4c_layers import demand_cfg
     c = copy.deepcopy(CFG)
-    assert bunker_mode(c) == "asean_pool" and c["research"]["s2"]["demand"]["international_bunkers"] is True
+    assert bunker_mode(c) == "asean_pool" and demand_cfg(c) is c
     c["research"]["bunkers"]["attribution"] = "excluded"; bunker_mode(c)
-    assert c["research"]["s2"]["demand"]["international_bunkers"] is False   # excluded drives the S2 switch
+    assert c["research"]["s2"]["demand"]["international_bunkers"] is True   # the config itself is never mutated (gate B12 hash)
+    assert demand_cfg(c)["research"]["s2"]["demand"]["international_bunkers"] is False   # the demand layer sees the S2 switch off
     c = copy.deepcopy(CFG); c["research"]["s2"]["demand"]["international_bunkers"] = False
     with pytest.raises(ValueError, match="contradicts"):
         bunker_mode(c)

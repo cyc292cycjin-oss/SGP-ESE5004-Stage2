@@ -220,8 +220,14 @@ def main(a):
             sel = select_stores(n, groups); allst = sorted({s for v in sel.values() for s in v})
             store_led = scale_store_energy(m, allst, float(SV.get("scaling", {}).get("store_energy_factor", 1000.0)))
             store_led["by_group"] = {k: len(v) for k, v in sel.items()}
+        kvl_led = None
+        kvl_on = (a.kvl_norm == "on") if a.kvl_norm else bool(scaling_on and SV.get("scaling", {}).get("kirchhoff_row_normalisation", False))
+        if kvl_on:   # S4C-5 (decision 69 c / 84): KVL row normalisation after the export (exported LP in original units), duals restored after the solve
+            from s3b_scaling import normalise_kvl_rows
+            kvl_led = normalise_kvl_rows(m)
         from s3b_scaling import public as _pub
-        run["solver_profile"] = profile; run["scaling"] = dict(enabled=scaling_on, objective_constants=const_led, store_energy=(_pub(store_led) if store_led else None))
+        run["solver_profile"] = profile; run["scaling"] = dict(enabled=scaling_on, objective_constants=const_led, store_energy=(_pub(store_led) if store_led else None),
+                                                               kirchhoff_row_normalisation=(_pub(kvl_led) if kvl_led else dict(applied=False)))
         run.update(input_network=dict(path=str(a.network), sha256=net_sha, snapshots=int(len(n.snapshots)), truncated_to=a.truncate, horizon_scaling=scaling),
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
         save(out / "SOLVE_RECEIPT.json", run)
@@ -241,6 +247,9 @@ def main(a):
             if store_led:
                 from s3b_scaling import unscale_solution
                 unscale_solution(m, store_led)
+            if kvl_led:
+                from s3b_scaling import unscale_kvl_duals
+                unscale_kvl_duals(m, kvl_led)
             n.optimize.assign_solution(); n.optimize.assign_duals(); n.optimize.post_processing()
             if const_led:
                 n.objective = float(m.objective.value) + const_led["total_eur"]   # total-cost definition unchanged (constants added back)
@@ -340,5 +349,6 @@ def main(a):
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--network", type=Path, required=True); p.add_argument("--scenario", required=True); p.add_argument("--output", type=Path, required=True)
     p.add_argument("--solver-profile", default=None, help="research.solver.profiles key (S3B R4); default research.solver.profile"); p.add_argument("--scaling", choices=["on", "off"], default=None, help="S3B R4 scaling override; default research.solver.scaling.enabled")
+    p.add_argument("--kvl-norm", choices=["on", "off"], default=None, help="S4C-5 Kirchhoff row normalisation override; default research.solver.scaling.kirchhoff_row_normalisation (with scaling on)")
     p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     sys.exit(main(p.parse_args()))

@@ -116,16 +116,18 @@ research:
   skeleton_status: INTERIM_S1_SKELETON   # electricity demand only; results carry no scientific meaning
   fuel_bus_naming: upstream_space        # "<node> <carrier>" as in scripts/prepare_sector_network.py
   solver:                                # S3B R4 (decision 69): Gurobi profiles on the PyPSA-Eur v2025.07.0 config.default.yaml gurobi-default basis (lines 1056-1064)
-    profile: formal_barrier              # formal_barrier (main, Crossover 0) | crossover_diagnostic (same settings, Crossover 1)
+    profile: formal_barrier              # formal_barrier (main, Crossover 0) | crossover_diagnostic (same settings, Crossover 1) | barrier_numericfocus2 (S4C-5 C: formal_barrier + NumericFocus 2); S4C-5 gives a recommendation only, the cloud profile is the user's choice
     profiles:
       formal_barrier: {Method: 2, Crossover: 0, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
       crossover_diagnostic: {Method: 2, Crossover: 1, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
-    scaling:                             # only (a) and (b) of decision 69; Kirchhoff row normalisation not implemented
+      barrier_numericfocus2: {Method: 2, Crossover: 0, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200, NumericFocus: 2}   # S4C-5 (decision 84) C
+    scaling:                             # (a), (b) of decision 69 (S3B R4) and (c) Kirchhoff row normalisation (S4C-5, decision 84)
       enabled: true
       objective_constants_out: true      # (a) constant-only objective columns removed from the LP, added back after the solve
       store_energy_units: true           # (b) large Stores in GWh / kt
       store_energy_factor: 1000.0
       store_groups: [biomass_pools, sequestration, capture_buffers]
+      kirchhoff_row_normalisation: true  # (c) S4C-5 (decision 69 c under decision 84): each Kirchhoff-Voltage-Law row divided by its largest |coefficient| after the LP export, KVL duals restored after the solve (s3b_scaling.normalise_kvl_rows); equivalence test S4C-5 item 1; --kvl-norm off for the comparison
     interior:                            # R4.4 thresholds tied to BarConvTol
       gap_factor: 10                     # relative primal-dual gap and complementarity / scale <= 10 x BarConvTol; primal budget 1e-7 relative = 10 x BarConvTol
       dual_factor: 100                   # normalized stationarity and dual-sign error <= 100 x BarConvTol = 1e-6 (V4 KKT budget, Gurobi OptimalityTol default)
