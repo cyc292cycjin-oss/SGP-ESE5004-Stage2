@@ -382,3 +382,16 @@
 - **S4B-6：** 365×24h 每运行约 21 GiB（上限 30），串行 2.3–3.3 h、并行 1.7–2.6 h；部署包代码 949163f3 + 三个日网络，上传 193,276,010 B（只准备）。
 - **待用户决定：** 14 项（S4B 报告 §8），其中求解精度（是否用 crossover）、ID 新建水电入流代理、风光候选成本层、云端运行方式与授权最关键。
 - **交付：** `research/06_scope_redesign/p1_step4b_20261016/`（S4B_REPORT.md、S4B_EVIDENCE.json、S4B_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §11、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/）；镜像与审阅 ZIP 在 `work/p1_step4b_20261016/`；测试 430 通过 / 4 失败（test_gate4_activation 既有）。
+
+## S4C 第 82–90 项（含补充 01）、求解设置对比、云端部署包 — 2026-10-17
+
+- **范围：** 指令 `S4C_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 e1bad922…1dcdd3 核对一致）、补充 01（e0bc1743…a8340a，第 16 项）；分支 `codex/s4c-allocation-fixes-20261016`（自 S4B 819ade64），draft PR #27 叠在 #26 上；每个子步骤一个提交；无云端操作，无 365×24h / 2920×3h 求解。两次按规则停下请用户决定（停止 01 海底份额、停止 02 水电）。
+- **S4C-0（85、86、90）：** 化石燃料价格改 WEO 2025 STEPS（气 27.07、油 35.32、煤 8.86 EUR2020/MWh；NZE 敏感性、CPS 可选，构建时断言同一情景）；BtL 乘效率（PyPSA-Eur 第 4230–4231 行）；gate4 测试改断言已接受状态；折现率统一 0.07，`wacc_mode: country_specific` 只实现（11 国实际值 DATA_PENDING）。
+- **S4C-1（82 + 16）：** 风光与电力底座候选改用成本层（光伏 −57 %、陆风 −14 %、海上风 −9~−17 % 含按 PyPSA-Eur 公式的并网成本、DC 链路 ×2.5）；全组件审计 84 组无法判断 0；走廊海底份额按用户决定"同陆块按陆上 + 非陆地口径"（东盟特有处理"群岛海底通道"）。
+- **S4C-2（83）：** 诊断与推断机理只部分吻合（作者链路按上游径流分配，单元 CF 最高 4.6）；用户决定 B（Ember 2019–2025 中位 × 1.1，按容量分配），存量入流 232.8 → 230.2 TWh；S4B §8 第 12 项前提更正为冒烟口径产物。
+- **S4C-3（88）：** 燃料舱 `asean_pool`：东盟负荷 + 单独净零燃料舱账户（拒绝负排放端口）；冒烟中化石航煤 0。另查实 `cost_layer.registry` 键误挪（077ebd0b–9a5ea111）无影响，已挪回。
+- **S4C-4（89）：** 东盟外 CO₂ 封存 40.75 EUR2020/t（IEAGHG 2004 PH4/30 船运 4,500 km + ZEP 2011 海上咸水层，C 级 ±50 %）；下载第 1 类 6 个 PDF 18.2 MB。
+- **S4C-5（84）：** 基尔霍夫行归一化（矩阵上界 1e3 → 2e2，目标差 2.8e-11）；A、C 最优，B crossover INF_OR_UNBD；三档均未过新口径（A 只剩 33 个 `Line-s` 列平稳性残差）；推荐 A；365×24h 单运行外推 A 28–39 min、C 60–85 min。
+- **S4C-6：** 冒烟三项均 OPTIMAL（一体化 6.5118e11、不互联 6.9830e11、NZE 5.5692e11）；B6 真实差 4.71e10 EUR/a；部署包代码 c5a33851 + 四个日网络，上传 220,953,139 B，`--solver-profile` 必填（只准备）。
+- **待用户决定：** 10 项（S4C 报告 §8），其中云端求解档案、东盟外封存单价口径、云端运行方式与授权最关键。
+- **交付：** `research/06_scope_redesign/p1_step4c_20261016/`（S4C_REPORT.md、S4C_EVIDENCE.json、S4C_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §12、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/、两份停止报告）；镜像与审阅 ZIP 在 `work/p1_step4c_20261016/`；测试 457 通过 / 0 失败。
