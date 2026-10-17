@@ -40,8 +40,14 @@ AEO8_GEOTHERMAL_CF = 27.1 / (4.3 * 8.76)  # AEO8 Appendix C.5 generation 27.1 TW
 AEO8_GEOTHERMAL_CF_SOURCE = "AEO8 Appendix C.4 Installed Capacity (Geothermal 4.3 GW, 2022) and C.5 Electricity Generation (27.1 TWh, 2022): 27.1/(4.3x8.76) = 0.72 (grade B derivation)"
 
 
+NEW_OVERRIDE_KEYS = ("cross_border.coalition",)   # S4D-4 (decision 91b): keys an --override may add (absent from the config files); same list in v5_gates.gate_b12_hash
+
+
 def apply_cross_border_switches_s2(n, switches, corridors, existing_cfg, costs):
-    """research.cross_border.{electricity,H2,gas,co2}; S1 logic for electricity/H2, removal for gas/CO2 pipelines."""
+    """research.cross_border.{electricity,H2,gas,co2}; S1 logic for electricity/H2, removal for gas/CO2 pipelines. S4D-4 (decision 91b):
+    research.cross_border.coalition (list of ISO2, with the integrated switches) keeps only the cross-border components whose two countries
+    are both members (corridor table filtered the same way: lower bounds and existing FOM only for the kept corridors)."""
+    from s4d_layers import coalition_members
     ledger = {}
     xb_lines = set(n.lines.index[n.lines.border_class == "cross_border"])
     xb_elec_links = set(n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")])
@@ -49,6 +55,21 @@ def apply_cross_border_switches_s2(n, switches, corridors, existing_cfg, costs):
     expected = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()}
     if actual != expected:
         raise ValueError("Existing cross-border electricity set differs from the corridor table: " + str(sorted(actual ^ expected))[:300])
+    members = coalition_members(switches)
+    if members is not None:
+        def pair(typ, name):
+            z = n.df(typ).loc[name]
+            return {str(n.buses.at[z.bus0, "country"]), str(n.buses.at[z.bus1, "country"])}
+        out_l = sorted(x for x in xb_lines if not pair("Line", x) <= members)
+        out_k = sorted(x for x in n.links.index[n.links.border_class == "cross_border"] if not pair("Link", x) <= members)
+        n.mremove("Line", out_l); n.mremove("Link", out_k)
+        inside = corridors.apply(lambda r: {str(r.country_from), str(r.country_to)} <= members, axis=1)
+        ledger["coalition"] = dict(members=sorted(members), removed_lines=len(out_l), removed_links=len(out_k),
+                                   kept_corridors=int(inside.sum()), removed_corridors=int((~inside).sum()))
+        corridors = corridors[inside]
+        xb_lines = set(n.lines.index[n.lines.border_class == "cross_border"])
+        xb_elec_links = set(n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")])
+        actual = {("Line", x) for x in xb_lines} | {("Link", x) for x in xb_elec_links}
     if switches["electricity"]:
         checks = []
         for _, r in corridors.iterrows():
@@ -128,12 +149,21 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
         xb[key] = int(sel)
         if not sw[key] and xb[key]:
             raise ValueError("Cross-border " + key + " components present although the switch is off")
+    from s4d_layers import coalition_members
+    members = coalition_members(sw)   # S4D-4 (decision 91b)
     if sw["electricity"]:
-        expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()}
+        expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()
+                          if members is None or {str(r.country_from), str(r.country_to)} <= members}
         actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")]}
         if actual != expected_edges:
             raise ValueError("Cross-border electricity set differs from the corridor table")
-    report["cross_border"] = dict(switches=sw, components=xb)
+    if members is not None:
+        for typ in ("Line", "Link"):
+            d = n.df(typ); d = d[d.border_class == "cross_border"]
+            out = [x for x, z in d.iterrows() if not {str(n.buses.at[z.bus0, "country"]), str(n.buses.at[z.bus1, "country"])} <= members]
+            if out:
+                raise ValueError(f"cross-border {typ} outside the coalition: {out[:3]}")
+    report["cross_border"] = dict(switches=sw, components=xb, coalition=(sorted(members) if members is not None else None))
     if n.meta.get("research_cross_border", {}).get("switches") != {k: bool(v) for k, v in sw.items()}:
         raise ValueError("Cross-border switch metadata differs from config")
     # candidate structure: resolve every port to its geographical node (bus itself, its location, or the node-name prefix of carrier buses)
@@ -231,7 +261,16 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         key, val = ov.split("=", 1); d = cfg["research"]; parts = key.split(".")
         for k in parts[:-1]:
             d = d[k]
-        old = d[parts[-1]]; d[parts[-1]] = type(old)(val) if not isinstance(old, bool) else (val.lower() in ("1", "true", "yes"))
+        if parts[-1] not in d and key not in NEW_OVERRIDE_KEYS:
+            raise KeyError(f"override of an unknown config key: {key}")
+        old = d.get(parts[-1])
+        if isinstance(old, bool):
+            d[parts[-1]] = val.lower() in ("1", "true", "yes")
+        elif old is None or isinstance(old, (list, dict)):   # S4D-4: list / null / new keys (cross_border.coalition); same rule in v5_gates.gate_b12_hash
+            import yaml
+            d[parts[-1]] = yaml.safe_load(val)
+        else:
+            d[parts[-1]] = type(old)(val)
     cfg["research"]["config_overrides"] = list(overrides or [])
     bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution checked early (no config mutation; the demand layer gets demand_cfg)
     if R["scenario"] != scenario:

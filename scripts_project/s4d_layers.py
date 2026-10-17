@@ -64,6 +64,43 @@ def transit_cost_id(node: str) -> str:
     return "co2_lao_transit_land_cost_" + node.replace(" ", "_")
 
 
+def coalition_members(switches: dict) -> set | None:
+    """S4D-4 (decision 91b): research.cross_border.coalition -> set of ISO2 codes, or None when the key is null / absent. A coalition is
+    defined on top of the integrated switches (all network carriers on); [] keeps no cross-border corridor."""
+    from carrier_architecture import COUNTRIES
+    v = switches.get("coalition")
+    if v is None:
+        return None
+    if not isinstance(v, (list, tuple)):
+        raise ValueError("research.cross_border.coalition must be a list of ISO2 codes or null")
+    m = {str(x).upper() for x in v}
+    if m - set(COUNTRIES):
+        raise ValueError(f"unknown coalition members {sorted(m - set(COUNTRIES))}")
+    if not all(bool(switches[k]) for k in ("electricity", "H2", "gas", "co2")):
+        raise ValueError("research.cross_border.coalition requires the integrated switches (electricity, H2, gas, co2 all true)")
+    return m
+
+
+def connected_coalitions(edges: set, countries) -> dict:
+    """Coalitions S (subsets of the countries) whose corridor graph restricted to S is connected - the coalitions a Myerson value needs runs
+    for (singletons are connected; a disconnected S is the sum of its components)."""
+    cs = sorted(countries); adj = {c: set() for c in cs}
+    for a, b in edges:
+        adj[a].add(b); adj[b].add(a)
+    by_size = {}
+    for mask in range(1, 1 << len(cs)):
+        S = [cs[i] for i in range(len(cs)) if mask >> i & 1]
+        seen = {S[0]}; stack = [S[0]]
+        while stack:
+            u = stack.pop()
+            for v in adj[u]:
+                if v in S and v not in seen:
+                    seen.add(v); stack.append(v)
+        if len(seen) == len(S):
+            by_size[len(S)] = by_size.get(len(S), 0) + 1
+    return dict(by_size=by_size, total=sum(by_size.values()), with_two_or_more=sum(v for k, v in by_size.items() if k >= 2))
+
+
 SHIP_CARRIER = "CO2 ship"
 SHIP_IDS = ("co2_ship_chain_fixed_cost", "co2_ship_chain_per_km_cost", "co2_ship_route_factor")
 

@@ -192,6 +192,10 @@ research:
     H2: true
     gas: true                            # S3-1: gas pipelines along the unified corridors (candidates + 2025 stock from GEM); scenario files set all true / all false
     co2: false                           # CO2 network not built before step 2
+    # coalition (S4D-4, decision 91b): key absent = no effect (kept out of this file so that the switch metadata of every existing network stays
+    # valid); set only by --override cross_border.coalition=[MY,SG] (list of ISO2 codes, integrated scenario): only cross-border corridors with both
+    # ends in the list stay (all network carriers of decision 15: AC / DC electricity incl. the 2025 stock, H2, gas incl. the 2025 stock, CO2
+    # pipelines); maritime trade (liquid fuels, CO2 shipping) and extra-ASEAN options unaffected; [] = disconnected, all 11 = integrated
   existing_cross_border_electricity:     # decision 15: 2025 capacity is the lower bound, expandable
     corridors_file: research_inputs/corridors/cross_border_corridors.csv
     capacity_year: 2025
