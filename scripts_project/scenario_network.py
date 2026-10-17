@@ -27,6 +27,7 @@ ELECTRIC_BASE_SHA='6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b41
 XB_FOM_HOOK='research_cross_border_existing_fom'
 EXTENDABLE_REQUIRED=('H2 turbine','H2 Fuel Cell','H2 Store Tank','battery','battery charger','home battery','home battery charger')
 TRANSPORT_CARRIERS={'AC':'electricity','DC':'electricity','B2B':'electricity','H2 pipeline':'H2','gas pipeline':'gas','CO2 pipeline':'co2'}
+MARITIME_TRADE_CARRIERS={'CO2 ship'}  # S4D-2 (decision 92): maritime trade between countries, kept in both scenarios like the liquid fuels (decisions 18, 44); not cross-border network
 SKELETON='INTERIM_S1_SKELETON'
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -63,7 +64,8 @@ def rename_legacy_buses(n):
     return mapping
 
 def tag_cross_border(n):
-    """Every Line/Link/Transformer gets border_class in {domestic, cross_border} from buses.country (S1-6)."""
+    """Every Line/Link/Transformer gets border_class in {domestic, cross_border} from buses.country (S1-6); S4D-2: links of a
+    MARITIME_TRADE_CARRIERS carrier between two countries get maritime_trade (not network, outside B5 and the cross-border switches)."""
     atmo=set(n.buses.index[n.buses.carrier==ATMOSPHERE_CARRIER]);summary={}
     regional=set(n.buses.index[n.buses.country=='ASEAN'])
     atmo|=regional  # S3-2 (decision 18): regional commodity pools (ASEAN oil/ammonia/methanol) are not network-constrained; ports to them do not make a component cross-border
@@ -76,9 +78,9 @@ def tag_cross_border(n):
             countries={str(n.buses.at[b,'country']) for b in ports}
             if not ports and all(z[c] in regional for c in df if c.startswith('bus') and c[3:].isdigit() and z[c]):countries={'ASEAN'}  # S4C-3 (decision 88): the international bunker meters link regional buses only -> domestic (regional)
             if not countries or '' in countries or 'nan' in countries:raise ValueError('Port without country: '+typ+' '+name)
-            cls.append('cross_border' if len(countries)>1 else 'domestic');tc.append(TRANSPORT_CARRIERS.get(str(z.carrier),'local'))
+            cls.append(('maritime_trade' if str(z.carrier) in MARITIME_TRADE_CARRIERS else 'cross_border') if len(countries)>1 else 'domestic');tc.append(TRANSPORT_CARRIERS.get(str(z.carrier),'local'))
         df['border_class']=cls;df['transport_carrier']=tc
-        summary[typ]=dict(domestic=int(cls.count('domestic')),cross_border=int(cls.count('cross_border')),cross_border_by_carrier={k:int(((df.border_class=='cross_border')&(df.transport_carrier==k)).sum()) for k in sorted(set(tc))})
+        summary[typ]=dict(domestic=int(cls.count('domestic')),cross_border=int(cls.count('cross_border')),maritime_trade=int(cls.count('maritime_trade')),cross_border_by_carrier={k:int(((df.border_class=='cross_border')&(df.transport_carrier==k)).sum()) for k in sorted(set(tc))})
     return summary
 
 def existing_cross_border_fom(n,corridors,costs):

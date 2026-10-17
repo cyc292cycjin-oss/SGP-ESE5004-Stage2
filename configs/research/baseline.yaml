@@ -278,6 +278,9 @@ research:
     extra_asean_export_nodes: coastal     # S4D-1 (decision 93; scripts_project/s4d_layers.py): coastal (main: export links only at the coastal nodes of coastal_nodes_table - onshore region touching the physical coast incl. internal / archipelagic waters, or a sea port / LNG record, converter nodes <= 5 km from the sea; user decision 2026-10-17; inland CO2 reaches the coast through domestic CO2 pipelines, decision 35) | all (S4C-4 behaviour)
     coastal_nodes_table: research_inputs/co2_v5/COASTAL_NODES_S4D1_FINAL.csv   # scripts_project/s4d_1_coastline.py
     landlocked_transit: "on"              # S4D-1 (decision 93): on (main: per LA node a transit export link, marginal cost = rail land leg to the nearest neighbouring coast, registry co2_lao_transit_land_cost_<node>, Stolaroff et al. 2021 Table 2, grade C +-50 %, + the extra-ASEAN unit cost on the store; trade like decision 44; both scenarios) | off
+    intra_asean_shipping: "on"            # S4D-2 (decision 92, revised): on (main: from every coastal buffered node to every other country's national store 'co2 sequestered <ISO2>' - occupies the receiver's annual cap, pays its store unit cost; counts as the exporter's abatement; IEAGHG 2004 Table 5-3 chain by great-circle km x route factor; border_class maritime_trade, kept in both scenarios like the liquid fuels, decisions 18 / 44, outside B5) | off
+    ship_routes_table: research_inputs/co2_v5/CO2_SHIP_ROUTES_S4D2.csv   # scripts_project/s4d_2_ship_routes.py (landing node = shortest sea path; great-circle km per pair)
+    ship_route_factor_scale: 1.0          # x registry co2_ship_route_factor (1.091, derived, grade C); first-batch sensitivity 0.75 / 1.25 (S4D-6)
   s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
     co2:
