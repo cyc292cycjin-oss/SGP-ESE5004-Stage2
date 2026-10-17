@@ -1,0 +1,2934 @@
+{
+ "instruction": {
+  "file": "work/p1_step4h_20261017/S4H_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "a029bd64cef2ae1b84aec4ebc186ede21630283d17153df9aed4ae32d1fd33bd",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4h-lavn-candidates-20261017",
+  "head": "a95075e9c437a08b10e854c4cd9e727af80da964",
+  "base": "78c95a75cd48afefc11e4e9e747c2ce96f0f2f1d (PR #31 head)",
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/32 (draft)",
+  "log": [
+   "a95075e9 S4H-4: cloud package rebuilt at 6eead675 (S4G package void), resource estimate section 17, deploy steps",
+   "6eead675 S4H-3 smoke: three runs optimal with LA-VN stock 0 and the reference candidates (56x3h, profile A)",
+   "1887d975 S4H-2: reference reactance of the AC candidates (decision 101)",
+   "92986eae S4H-1: LA-VN grid stock 0 (decision 100), lines 59/60/63/64 as zero-capacity candidates",
+   "533a6d8d S4H-0: answers to S4G section 7 registered (registry fragment s4h_0)"
+  ]
+ },
+ "stops": [],
+ "downloads": [],
+ "s4h0": {
+  "s4h_answer_la_vn_stock": {
+   "value": "aims_zero",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4h_answer_candidate_reactance": {
+   "value": "one_circuit;apg17_line_type;complete_pairs",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4h_answer_numerical_risk": {
+   "value": "by_decision_100",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4h_answer_cloud_package": {
+   "value": "s4g_package_void_use_s4h",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4h_scope_rule": {
+   "value": "only_100_101",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  }
+ },
+ "s4h1": {
+  "registry": {
+   "la_vn_grid_stock_2025": {
+    "value": "0",
+    "unit": "MW",
+    "tier": "B",
+    "status": "REGISTERED"
+   },
+   "s4h1_la_vn_stock_switch": {
+    "value": "aims_zero|author",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h1_ipp_export_lines_estimate": {
+    "value": "13700433.0991",
+    "unit": "EUR/a",
+    "tier": "C",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "table": {
+   "lines": [
+    {
+     "component": "59",
+     "bus0": "LA2 3",
+     "bus1": "VN2 2",
+     "type": "Al/St 240/40 4-bundle 380.0",
+     "length_km": 515.1254286870109,
+     "s_nom_author_mw": 0.385110546485834,
+     "capital_cost_eur_per_mw_a": 23951.806203584314,
+     "unit_cost_eur_per_mw_km_a": 46.4970371675,
+     "action": "zero-capacity candidate (decision 100)"
+    },
+    {
+     "component": "60",
+     "bus0": "LA2 3",
+     "bus1": "VN2 3",
+     "type": "Al/St 240/40 4-bundle 380.0",
+     "length_km": 268.3638851581767,
+     "s_nom_author_mw": 0.2006302867512334,
+     "capital_cost_eur_per_mw_a": 12478.125542614442,
+     "unit_cost_eur_per_mw_km_a": 46.4970371675,
+     "action": "zero-capacity candidate (decision 100)"
+    },
+    {
+     "component": "63",
+     "bus0": "LA2 4",
+     "bus1": "VN2 2",
+     "type": "Al/St 240/40 4-bundle 380.0",
+     "length_km": 230.8844027862045,
+     "s_nom_author_mw": 0.17261042375385396,
+     "capital_cost_eur_per_mw_a": 10735.44065774619,
+     "unit_cost_eur_per_mw_km_a": 46.4970371675,
+     "action": "zero-capacity candidate (decision 100)"
+    },
+    {
+     "component": "64",
+     "bus0": "LA2 4",
+     "bus1": "VN2 7",
+     "type": "Al/St 240/40 4-bundle 380.0",
+     "length_km": 323.23033858748875,
+     "s_nom_author_mw": 0.24164874300907863,
+     "capital_cost_eur_per_mw_a": 15029.253066966072,
+     "unit_cost_eur_per_mw_km_a": 46.4970371675,
+     "action": "zero-capacity candidate (decision 100)"
+    }
+   ],
+   "ipp_estimate": {
+    "capacity_mw": 572.0,
+    "plants": {
+     "Xekaman 1 hydroelectric plant": 322.0,
+     "Xekaman 3 hydroelectric plant": 250.0
+    },
+    "length_km": [
+     230.8844027862045,
+     515.1254286870109
+    ],
+    "length_basis": "LA-VN line lengths of the model (the four clustered lines and the S4E-1 LA-VN candidates)",
+    "unit_cost_eur_per_mw_km_a": 46.497037,
+    "unit_cost_basis": "capital_cost / length of the LA-VN AC lines in the built network (decision-50 cost layer)",
+    "annualised_value_eur_per_a": [
+     6140672.034109787,
+     13700433.09909606
+    ],
+    "note": "order of magnitude of the stock not modelled (grade C): what the model would otherwise pay to build 572 MW of LA-VN AC capacity"
+   },
+   "author_line_312": "(\"LA\", \"VN\", 1),  # no grid-to-grid connections in 2024.",
+   "network": "results_project/s4g/s4g4/builds/integrated/integrated_2920_3h_unsolved.nc"
+  },
+  "status": [
+   "START:2026-10-17T13:41:55Z",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"bd19:\tMaximum resident set size (kbytes): 711836",
+   "BUILD_integrated_author:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6a7b:\tMaximum resident set size (kbytes): 711284",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"a5af:\tMaximum resident set size (kbytes): 708596",
+   "COMPARE_author_vs_s4g:{}",
+   "COMPARE_main_vs_s4g:{\"Line\": [\"b\", \"num_parallel\", \"r\", \"s_nom\", \"s_nom_max\", \"s_nom_min\", \"x\"]}",
+   "COMPARE_disconnected_vs_s4g:{}",
+   "LINES_CHANGED:[\"59\", \"60\", \"63\", \"64\"]",
+   "LA_VN:{\"59\": {\"s_nom\": 0.0, \"s_nom_min\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.2861842105263157, \"x\": 98.52465488217244, \"capital_cost\": 23951.806203584314, \"s4g_capital_cost\": 23951.806203584314, \"border_class\": \"cross_border\"}, \"60\": {\"s_nom\": 0.0, \"s_nom_min\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.2861842105263157, \"x\": 51.328196387900476, \"capital_cost\": 12478.125542614442, \"s4g_capital_cost\": 12478.125542614442, \"border_class\": \"cross_border\"}, \"63\": {\"s_nom\": 0.0, \"s_nom_min\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.2861842105263157, \"x\": 44.15974214312921, \"capital_cost\": 10735.44065774619, \"s4g_capital_cost\": 10735.44065774619, \"border_class\": \"cross_border\"}, \"64\": {\"s_nom\": 0.0, \"s_nom_min\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.2861842105263157, \"x\": 61.82214230416051, \"capital_cost\": 15029.253066966072, \"s4g_capital_cost\": 15029.253066966072, \"border_class\": \"cross_border\"}}",
+   "META:{\"candidates\": 36, \"changed\": 4, \"la_vn_lines\": [\"59\", \"60\", \"63\", \"64\"], \"mode\": \"template43\", \"num_parallel\": 1.2861842105263157, \"template_line\": \"43\", \"template_num_parallel\": 1.2861842105263157, \"type\": [\"Al/St 240/40 4-bundle 380.0\"], \"unchanged\": 32}",
+   "KVL_main:{\"cycles\": 61, \"coefficients\": 257, \"abs_min\": 1.6814244010261647, \"abs_max\": 1585.8080914601767, \"span\": 943.1337445158796, \"within_row_ratio_max\": 676.1265492259951, \"within_row_ratio_median\": 9.264629426016796, \"within_row_ratio_p99\": 676.1265492259951, \"rows_ratio_over_1e4\": 0, \"rows_ratio_over_1e6\": 0, \"lines_in_cycles\": 120}",
+   "XMAX_main:{\"x_max\": 2289.906884068495, \"line\": \"94\"}",
+   "3 passed, 1 warning in 2.23s",
+   "FULL_TESTS:526 passed, 934 warnings in 77.00s (0:01:17)",
+   "DONE:2026-10-17T13:46:03Z"
+  ]
+ },
+ "s4h2": {
+  "registry": {
+   "s4h2_candidate_num_parallel_switch": {
+    "value": "one_circuit|template43",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_candidate_convention_sources": {
+    "value": "reference",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_apg17_readjust": {
+    "value": "0.017666776903",
+    "unit": "circuits",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_readjust_impedance_table": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_reference_candidates": {
+    "value": "11",
+    "unit": "components",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_candidate_completeness_table": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_subsea_table": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4h2_length_shares_table": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "corridors": {
+   "network": "results_project/s4h/s4h1/builds/integrated/integrated_2920_3h_unsolved.nc",
+   "completeness_rule": "country pair with AC stock and no zero-capacity AC candidate -> one candidate at every adjacent node pair of ADJACENCY_S4E1.csv",
+   "pairs": 14,
+   "pairs_needing": [
+    "KH-LA",
+    "LA-MM",
+    "LA-TH",
+    "MY-SG",
+    "MY-TH"
+   ],
+   "added": {
+    "KH-LA": [
+     "S4H2 KH2 1 - LA2 4"
+    ],
+    "LA-MM": [
+     "S4H2 LA2 5 - MM2 13"
+    ],
+    "LA-TH": [
+     "S4H2 LA2 0 - TH2 1",
+     "S4H2 LA2 1 - TH2 4",
+     "S4H2 LA2 2 - TH2 1",
+     "S4H2 LA2 2 - TH2 4",
+     "S4H2 LA2 3 - TH2 1",
+     "S4H2 LA2 4 - TH2 1",
+     "S4H2 LA2 5 - TH2 4"
+    ],
+    "MY-SG": [
+     "S4H2 MY_Peninsular2 1 - SG2 0 DC"
+    ],
+    "MY-TH": [
+     "S4H2 MY_Peninsular2 0 - TH2 0"
+    ]
+   },
+   "new_components": [
+    {
+     "component": "S4H2 KH2 1 - LA2 4",
+     "country_pair": "KH-LA",
+     "type": "Line",
+     "length_km": 288.2756929463942,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:43",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 5 - MM2 13",
+     "country_pair": "LA-MM",
+     "type": "Line",
+     "length_km": 354.6387877913247,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:APG17_LA_MM",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 0 - TH2 1",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 275.17472090526843,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:49",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 1 - TH2 4",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 400.2261608924692,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:53",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 2 - TH2 1",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 350.62902878247553,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:55",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 2 - TH2 4",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 359.1031151419497,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:56",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 3 - TH2 1",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 277.6116808739521,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:58",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 4 - TH2 1",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 374.1317882250743,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:61",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 LA2 5 - TH2 4",
+     "country_pair": "LA-TH",
+     "type": "Line",
+     "length_km": 442.5002284911931,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:66",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 MY_Peninsular2 1 - SG2 0 DC",
+     "country_pair": "MY-SG",
+     "type": "Link",
+     "length_km": 239.36754887629743,
+     "subsea_share": 0.02088772845953002,
+     "table_share": 0.02088772845953,
+     "same_landmass": false,
+     "existing_at_pair": "Line:92",
+     "consistent": true
+    },
+    {
+     "component": "S4H2 MY_Peninsular2 0 - TH2 0",
+     "country_pair": "MY-TH",
+     "type": "Line",
+     "length_km": 274.10657711222603,
+     "subsea_share": 0.0,
+     "table_share": 0.0,
+     "same_landmass": true,
+     "existing_at_pair": "Line:91;Link:250878579-1_0;Link:250878579-2_0;Link:250878579-3_0;Link:250878579-4_0;Link:Khlong Ngae – Gurun",
+     "consistent": true
+    }
+   ],
+   "n_ac": 10,
+   "n_dc": 1,
+   "apg17": {
+    "line": "APG17_LA_MM",
+    "country_pair": "LA-MM",
+    "bus0": "LA2 5",
+    "bus1": "MM2 13",
+    "type": "Al/St 240/40 4-bundle 380.0",
+    "length_km": 354.6864736515406,
+    "v_nom_kv": 380.0,
+    "i_nom_ka": 2.58,
+    "s_nom_frozen_mw": 30.0,
+    "s_nom_min_frozen_mw": 30.0,
+    "s_nom_used_mw": 30.0,
+    "num_parallel_frozen": 1.2861842105263157,
+    "num_parallel_s4g": 0.017666776902987326,
+    "x_stored_frozen": 67.8385505001453,
+    "r_stored_frozen": 8.272993963432354,
+    "b_stored_frozen": 0.0019777744374912805,
+    "x_type_frozen": 67.8385505001453,
+    "r_type_frozen": 8.272993963432354,
+    "b_type_frozen": 0.0019777744374912805,
+    "x_s4g": 4938.811023505094,
+    "r_s4g": 602.2940272567188,
+    "b_s4g": 2.7166326149573583e-05,
+    "x_factor": 72.80242556913883,
+    "rating_check_mw": 30.0
+   },
+   "inputs": {
+    "corridors_s4f2": "d420e8ab6c34645ff8c3d9b64986a6baff79f63616bed389e717f3ef027d7b92",
+    "subsea_s4f2": "e373672d2462557f8328208ef80508c904be07cc9493dd44129ee6730bc8f3da",
+    "adjacency_s4e1": "bf4ea0d6205bb23091e0fd00584201c84cd2495f3b8cae05332172428785b535",
+    "readjust_s4g1": "d7023d2afa4ad134527024c274ae6fdee0bd28e4d94e62a967caaf60795014ad"
+   }
+  },
+  "sources": {
+   "pypsa_eur_under_construction": {
+    "file": "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml",
+    "line": 327,
+    "text": "under_construction: keep # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity for lines in grid extract",
+    "sha256": "bfbe9160db09c3e960b97173bc755492b7638e0f4a5081ffaa1dddd4635da787"
+   },
+   "pypsa_earth_rule_off": {
+    "file": "config.default.yaml",
+    "line": 174,
+    "text": "add_to_snakefile: false # If True, includes this rule to the workflow",
+    "sha256": "ff7607a4510e7002edc33ac16b813102bedcb97e36e41d3b44e65df83d287c27"
+   },
+   "pypsa_earth_new_line_type": {
+    "file": "config.default.yaml",
+    "line": 177,
+    "text": "new_line_type: [\"HVAC\"] # Expanded lines can be either [\"HVAC\"] or [\"HVDC\"] or both [\"HVAC\", \"HVDC\"]",
+    "sha256": "ff7607a4510e7002edc33ac16b813102bedcb97e36e41d3b44e65df83d287c27"
+   },
+   "pypsa_earth_min_expansion": {
+    "file": "config.default.yaml",
+    "line": 178,
+    "text": "min_expansion: 1 # [MW] New created line expands by float/int input",
+    "sha256": "ff7607a4510e7002edc33ac16b813102bedcb97e36e41d3b44e65df83d287c27"
+   },
+   "pypsa_earth_script_fallback": {
+    "file": "scripts/augmented_line_connections.py",
+    "line": 93,
+    "text": "line_type_option = options.get(\"new_line_type\", [\"HVDC\"])",
+    "sha256": "f37dd46a001039f13b15117267ca343512c6897fd0f36e9d44358250c14e049b"
+   },
+   "pypsa_earth_hvdc_links": {
+    "file": "scripts/augmented_line_connections.py",
+    "line": 187,
+    "text": "\"Link\",",
+    "sha256": "f37dd46a001039f13b15117267ca343512c6897fd0f36e9d44358250c14e049b"
+   },
+   "pypsa_earth_hvac_lines": {
+    "file": "scripts/augmented_line_connections.py",
+    "line": 206,
+    "text": "\"Line\",",
+    "sha256": "f37dd46a001039f13b15117267ca343512c6897fd0f36e9d44358250c14e049b"
+   },
+   "pypsa_earth_hvac_no_num_parallel": {
+    "num_parallel_in_script": false
+   },
+   "pypsa_default_num_parallel": {
+    "version": "0.30.3",
+    "default": "1"
+   }
+  },
+  "check": {
+   "readback": {
+    "candidates": 46,
+    "candidates_np_one": true,
+    "np_values": [
+     1.0
+    ],
+    "max_rel_stored_vs_formula": 0.0,
+    "max_rel_pypsa_vs_stored": 0.0,
+    "meta": {
+     "candidates": 46,
+     "changed": 46,
+     "la_vn_lines": [
+      "59",
+      "60",
+      "63",
+      "64"
+     ],
+     "mode": "one_circuit",
+     "num_parallel": 1.0,
+     "template_line": "43",
+     "template_num_parallel": 1.2861842105263157,
+     "type": [
+      "Al/St 240/40 4-bundle 380.0"
+     ],
+     "unchanged": 0
+    }
+   },
+   "xrange": {
+    "s4g": {
+     "x_max_ohm": 558761.6791519079,
+     "x_max_line": "59",
+     "x_min_ohm": 2.427976835081782,
+     "x_min_line": "102",
+     "x_span": 230134.682950172,
+     "x_pu_eff_max": 3.8695407143483926,
+     "x_pu_eff_min": 1.6814244010261648e-05
+    },
+    "s4h1": {
+     "x_max_ohm": 2289.906884068495,
+     "x_max_line": "94",
+     "x_min_ohm": 2.427976835081782,
+     "x_min_line": "102",
+     "x_span": 943.1337445158794,
+     "x_pu_eff_max": 0.015858080914601766,
+     "x_pu_eff_min": 1.6814244010261648e-05
+    },
+    "s4h2": {
+     "x_max_ohm": 4938.811023505094,
+     "x_max_line": "APG17_LA_MM",
+     "x_min_ohm": 2.427976835081782,
+     "x_min_line": "102",
+     "x_span": 2034.1260889083974,
+     "x_pu_eff_max": 0.034202292406544973,
+     "x_pu_eff_min": 1.6814244010261648e-05
+    },
+    "s4h2_template43": {
+     "x_max_ohm": 4938.811023505094,
+     "x_max_line": "APG17_LA_MM",
+     "x_min_ohm": 2.427976835081782,
+     "x_min_line": "102",
+     "x_span": 2034.1260889083974,
+     "x_pu_eff_max": 0.034202292406544973,
+     "x_pu_eff_min": 1.6814244010261648e-05
+    }
+   },
+   "kvl": {
+    "s4g": {
+     "cycles": 61,
+     "coefficients": 257,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 386954.0714348393,
+     "span": 230134.682950172,
+     "within_row_ratio_max": 230134.68295017193,
+     "within_row_ratio_median": 10.712752546120146,
+     "within_row_ratio_p99": 136717.81245964023,
+     "rows_ratio_over_1e4": 5,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 120
+    },
+    "s4h1": {
+     "cycles": 61,
+     "coefficients": 257,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 1585.8080914601767,
+     "span": 943.1337445158796,
+     "within_row_ratio_max": 676.1265492259951,
+     "within_row_ratio_median": 9.264629426016796,
+     "within_row_ratio_p99": 676.1265492259951,
+     "rows_ratio_over_1e4": 0,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 120
+    },
+    "s4h2": {
+     "cycles": 71,
+     "coefficients": 277,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 3420.2292406544975,
+     "span": 2034.1260889083976,
+     "within_row_ratio_max": 676.1265492259951,
+     "within_row_ratio_median": 13.778573176095318,
+     "within_row_ratio_p99": 676.1265492259951,
+     "rows_ratio_over_1e4": 0,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 131
+    },
+    "s4h2_template43": {
+     "cycles": 71,
+     "coefficients": 277,
+     "abs_min": 1.6814244010261647,
+     "abs_max": 3420.2292406544975,
+     "span": 2034.1260889083976,
+     "within_row_ratio_max": 676.1265492259951,
+     "within_row_ratio_median": 10.81835506100309,
+     "within_row_ratio_p99": 676.1265492259951,
+     "rows_ratio_over_1e4": 0,
+     "rows_ratio_over_1e6": 0,
+     "lines_in_cycles": 131
+    }
+   },
+   "apg_groups": {
+    "1": {
+     "cap_mw": 1050.0,
+     "stock_mw": 525.0,
+     "new": [
+      "S4H2 MY_Peninsular2 1 - SG2 0 DC"
+     ],
+     "n_lines": 1,
+     "n_links": 1
+    },
+    "10": {
+     "cap_mw": 625.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 9,
+     "n_links": 0
+    },
+    "11": {
+     "cap_mw": 1262.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 8,
+     "n_links": 0
+    },
+    "12": {
+     "cap_mw": 1353.0,
+     "stock_mw": 200.0,
+     "new": [],
+     "n_lines": 6,
+     "n_links": 0
+    },
+    "13": {
+     "cap_mw": 625.0,
+     "stock_mw": 300.0,
+     "new": [
+      "S4H2 KH2 1 - LA2 4"
+     ],
+     "n_lines": 2,
+     "n_links": 0
+    },
+    "14": {
+     "cap_mw": 1315.0,
+     "stock_mw": 250.0,
+     "new": [],
+     "n_lines": 4,
+     "n_links": 0
+    },
+    "15": {
+     "cap_mw": 174.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 2,
+     "n_links": 0
+    },
+    "16": {
+     "cap_mw": 3400.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "17": {
+     "cap_mw": 630.0,
+     "stock_mw": 30.0,
+     "new": [
+      "S4H2 LA2 5 - MM2 13"
+     ],
+     "n_lines": 2,
+     "n_links": 0
+    },
+    "18a": {
+     "cap_mw": 435.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "18b": {
+     "cap_mw": 10000.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "2": {
+     "cap_mw": 1043.0,
+     "stock_mw": 380.0,
+     "new": [
+      "S4H2 MY_Peninsular2 0 - TH2 0"
+     ],
+     "n_lines": 2,
+     "n_links": 1
+    },
+    "3": {
+     "cap_mw": 1600.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "4": {
+     "cap_mw": 2130.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "6": {
+     "cap_mw": 777.0,
+     "stock_mw": 230.0,
+     "new": [],
+     "n_lines": 8,
+     "n_links": 0
+    },
+    "7": {
+     "cap_mw": 500.0,
+     "stock_mw": 0.0,
+     "new": [],
+     "n_lines": 0,
+     "n_links": 1
+    },
+    "8b": {
+     "cap_mw": 177.0,
+     "stock_mw": 50.010000000000005,
+     "new": [],
+     "n_lines": 1,
+     "n_links": 0
+    },
+    "9": {
+     "cap_mw": 955.0,
+     "stock_mw": 954.9999999999998,
+     "new": [
+      "S4H2 LA2 0 - TH2 1",
+      "S4H2 LA2 1 - TH2 4",
+      "S4H2 LA2 2 - TH2 1",
+      "S4H2 LA2 2 - TH2 4",
+      "S4H2 LA2 3 - TH2 1",
+      "S4H2 LA2 4 - TH2 1",
+      "S4H2 LA2 5 - TH2 4"
+     ],
+     "n_lines": 16,
+     "n_links": 0
+    }
+   },
+   "new_lines": [
+    "S4H2 KH2 1 - LA2 4",
+    "S4H2 LA2 0 - TH2 1",
+    "S4H2 LA2 1 - TH2 4",
+    "S4H2 LA2 2 - TH2 1",
+    "S4H2 LA2 2 - TH2 4",
+    "S4H2 LA2 3 - TH2 1",
+    "S4H2 LA2 4 - TH2 1",
+    "S4H2 LA2 5 - MM2 13",
+    "S4H2 LA2 5 - TH2 4",
+    "S4H2 MY_Peninsular2 0 - TH2 0"
+   ],
+   "new_links": [
+    "S4H2 MY_Peninsular2 1 - SG2 0 DC"
+   ],
+   "lines_changed": [
+    "59",
+    "60",
+    "63",
+    "64",
+    "APG11_TH_MM",
+    "APG17_LA_MM",
+    "S4E1 BN4 0 - MY_Sarawak4 2",
+    "S4E1 ID_Kalimantan4 0 - MY_Sarawak4 0",
+    "S4E1 ID_Kalimantan4 1 - MY_Sabah4 0",
+    "S4E1 ID_Kalimantan4 1 - MY_Sabah4 1",
+    "S4E1 ID_Kalimantan4 1 - MY_Sarawak4 0",
+    "S4E1 ID_Kalimantan4 1 - MY_Sarawak4 2",
+    "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 0",
+    "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 1",
+    "S4E1 ID_Kalimantan4 2 - MY_Sarawak4 1",
+    "S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "S4E1 ID_Nusa-Tenggara15 0 - TL11 0",
+    "S4E1 KH2 1 - TH2 1",
+    "S4E1 KH2 1 - VN2 4",
+    "S4E1 KH2 1 - VN2 5",
+    "S4E1 KH2 1 - VN2 7",
+    "S4E1 KH2 2 - TH2 3",
+    "S4E1 KH2 3 - VN2 0",
+    "S4E1 KH2 3 - VN2 5",
+    "S4E1 KH2 4 - TH2 1",
+    "S4E1 LA2 0 - VN2 2",
+    "S4E1 LA2 0 - VN2 3",
+    "S4E1 LA2 1 - VN2 1",
+    "S4E1 LA2 1 - VN2 3",
+    "S4E1 LA2 5 - VN2 1",
+    "S4E1 MM2 10 - TH2 4",
+    "S4E1 MM2 13 - TH2 4",
+    "S4E1 MM2 4 - TH2 2",
+    "S4E1 MM2 4 - TH2 3",
+    "S4E1 MM2 4 - TH2 5",
+    "S4E1 MM2 6 - TH2 4",
+    "S4E1 MM2 7 - TH2 4"
+   ]
+  },
+  "status": [
+   "START:2026-10-17T13:54:42Z",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "BUILD_integrated_optional:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6d5c:\tMaximum resident set size (kbytes): 678524",
+   "LENGTH_SHARES:246 components; 8 with > 50 of 401 samples outside the two end countries",
+   "DATA_PENDING: 51",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"89b9:\tMaximum resident set size (kbytes): 711132",
+   "BUILD_integrated_s4g:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"ff00:\tMaximum resident set size (kbytes): 711512",
+   "BUILD_integrated_template43:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c1e1:\tMaximum resident set size (kbytes): 711304",
+   "BUILD_integrated_apg:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"350a:\tMaximum resident set size (kbytes): 711800",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"5908:\tMaximum resident set size (kbytes): 708476",
+   "COMPARE_s4g_repro_vs_s4g:{}",
+   "COMPARE_disconnected_vs_s4g:{}",
+   "DIFF_main_vs_s4h1:{\"Link\": {\"only_a\": [\"S4H2 MY_Peninsular2 1 - SG2 0 DC\"], \"only_b\": []}, \"Line\": {\"only_a\": [\"S4H2 KH2 1 - LA2 4\", \"S4H2 LA2 0 - TH2 1\", \"S4H2 LA2 1 - TH2 4\", \"S4H2 LA2 2 - TH2 1\", \"S4H2 LA2 2 - TH2 4\", \"S4H2 LA2 3 - TH2 1\", \"S4H2 LA2 4 - TH2 1\", \"S4H2 LA2 5 - MM2 13\", \"S4H2 LA2 5 - TH2 4\", \"S4H2 MY_Peninsular2 0 - TH2 0\"], \"only_b\": []}}",
+   "DIFF_lines_changed:{\"n\": 37, \"names\": [\"59\", \"60\", \"63\", \"64\", \"APG11_TH_MM\", \"APG17_LA_MM\", \"S4E1 BN4 0 - MY_Sarawak4 2\", \"S4E1 ID_Kalimantan4 0 - MY_Sarawak4 0\", \"S4E1 ID_Kalimantan4 1 - MY_Sabah4 0\", \"S4E1 ID_Kalimantan4 1 - MY_Sabah4 1\", \"S4E1 ID_Kalimantan4 1 - MY_Sarawak4 0\", \"S4E1 ID_Kalimantan4 1 - MY_Sarawak4 2\", \"S4E1 ID_Kalimantan4 10 - MY_Sarawak4 0\", \"S4E1 ID_Kalimantan4 10 - MY_Sarawak4 1\", \"S4E1 ID_Kalimantan4 2 - MY_Sarawak4 1\", \"S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0\", \"S4E1 ID_Nusa-Tenggara15 0 - TL11 0\", \"S4E1 KH2 1 - TH2 1\", \"S4E1 KH2 1 - VN2 4\", \"S4E1 KH2 1 - VN2 5\", \"S4E1 KH2 1 - VN2 7\", \"S4E1 KH2 2 - TH2 3\", \"S4E1 KH2 3 - VN2 0\", \"S4E1 KH2 3 - VN2 5\", \"S4E1 KH2 4 - TH2 1\", \"S4E1 LA2 0 - VN2 2\", \"S4E1 LA2 0 - VN2 3\", \"S4E1 LA2 1 - VN2 1\", \"S4E1 LA2 1 - VN2 3\", \"S4E1 LA2 5 - VN2 1\", \"S4E1 MM2 10 - TH2 4\", \"S4E1 MM2 13 - TH2 4\", \"S4E1 MM2 4 - TH2 2\", \"S4E1 MM2 4 - TH2 3\", \"S4E1 MM2 4 - TH2 5\", \"S4E1 MM2 6 - TH2 4\", \"S4E1 MM2 7 - TH2 4\"]}",
+   "NEW:{\"lines\": {\"S4H2 KH2 1 - LA2 4\": {\"bus0\": \"KH2 1\", \"bus1\": \"LA2 4\", \"length\": 288.2756929463942, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 70.91582046481297, \"capital_cost\": 13403.965609415307, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 0 - TH2 1\": {\"bus0\": \"LA2 0\", \"bus1\": \"TH2 1\", \"length\": 275.17472090526843, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 67.69298134269603, \"capital_cost\": 12794.809225488705, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 1 - TH2 4\": {\"bus0\": \"LA2 1\", \"bus1\": \"TH2 4\", \"length\": 400.2261608924692, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 98.45563557954742, \"capital_cost\": 18609.33067842297, \"unit_cost\": 46.49703716749999, \"border_class\": \"cross_border\"}, \"S4H2 LA2 2 - TH2 1\": {\"bus0\": \"LA2 2\", \"bus1\": \"TH2 1\", \"length\": 350.62902878247553, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 86.25474108048898, \"capital_cost\": 16303.21098330319, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 2 - TH2 4\": {\"bus0\": \"LA2 2\", \"bus1\": \"TH2 4\", \"length\": 359.1031151419497, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 88.33936632491962, \"capital_cost\": 16697.230891720264, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 3 - TH2 1\": {\"bus0\": \"LA2 3\", \"bus1\": \"TH2 1\", \"length\": 277.6116808739521, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 68.29247349499221, \"capital_cost\": 12908.120643728298, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 4 - TH2 1\": {\"bus0\": \"LA2 4\", \"bus1\": \"TH2 1\", \"length\": 374.1317882250743, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 92.03641990336827, \"capital_cost\": 17396.019662644518, \"unit_cost\": 46.497037167500004, \"border_class\": \"cross_border\"}, \"S4H2 LA2 5 - MM2 13\": {\"bus0\": \"LA2 5\", \"bus1\": \"MM2 13\", \"length\": 354.6387877913247, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 87.24114179666589, \"capital_cost\": 16489.65289697037, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}, \"S4H2 LA2 5 - TH2 4\": {\"bus0\": \"LA2 5\", \"bus1\": \"TH2 4\", \"length\": 442.5002284911931, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 108.8550562088335, \"capital_cost\": 20574.949570782246, \"unit_cost\": 46.49703716749999, \"border_class\": \"cross_border\"}, \"S4H2 MY_Peninsular2 0 - TH2 0\": {\"bus0\": \"MY_Peninsular2 0\", \"bus1\": \"TH2 0\", \"length\": 274.10657711222603, \"s_nom\": 0.0, \"s_nom_max\": 20000.0, \"num_parallel\": 1.0, \"x\": 67.4302179696076, \"capital_cost\": 12745.143703843378, \"unit_cost\": 46.4970371675, \"border_class\": \"cross_border\"}}, \"links\": {\"S4H2 MY_Peninsular2 1 - SG2 0 DC\": {\"bus0\": \"MY_Peninsular2 1\", \"bus1\": \"SG2 0\", \"carrier\": \"DC\", \"length\": 239.36754887629743, \"p_nom\": 0.0, \"p_nom_max\": 20000.0, \"capital_cost\": 50402.19781674706, \"border_class\": \"cross_border\"}}}",
+   "READBACK:{\"candidates\": 46, \"candidates_np_one\": true, \"np_values\": [1.0], \"max_rel_stored_vs_formula\": 0.0, \"max_rel_pypsa_vs_stored\": 0.0, \"meta\": {\"candidates\": 46, \"changed\": 46, \"la_vn_lines\": [\"59\", \"60\", \"63\", \"64\"], \"mode\": \"one_circuit\", \"num_parallel\": 1.0, \"template_line\": \"43\", \"template_num_parallel\": 1.2861842105263157, \"type\": [\"Al/St 240/40 4-bundle 380.0\"], \"unchanged\": 0}}",
+   "APG17:{\"num_parallel\": 0.017666776902987326, \"expected\": 0.017666776902987326, \"x_stored\": 4938.811023505094, \"x_pypsa\": 4938.811023505094, \"x_s4h1\": 67.8385505001453, \"s_nom\": 30.0, \"s_nom_max\": 20030.0}",
+   "T43:{\"candidates\": 46, \"np_values\": [1.2861842105263157], \"changed\": 4}",
+   "PIPES:{\"main\": {\"H2 pipeline\": 148, \"CO2 pipeline\": 148, \"gas pipeline\": 166, \"DC\": 13}, \"s4h1\": {\"H2 pipeline\": 148, \"CO2 pipeline\": 148, \"gas pipeline\": 166, \"DC\": 12}}",
+   "XRANGE:{\"s4g\": {\"x_max_ohm\": 558761.6791519079, \"x_max_line\": \"59\", \"x_min_ohm\": 2.427976835081782, \"x_min_line\": \"102\", \"x_span\": 230134.682950172, \"x_pu_eff_max\": 3.8695407143483926, \"x_pu_eff_min\": 1.6814244010261648e-05}, \"s4h1\": {\"x_max_ohm\": 2289.906884068495, \"x_max_line\": \"94\", \"x_min_ohm\": 2.427976835081782, \"x_min_line\": \"102\", \"x_span\": 943.1337445158794, \"x_pu_eff_max\": 0.015858080914601766, \"x_pu_eff_min\": 1.6814244010261648e-05}, \"s4h2\": {\"x_max_ohm\": 4938.811023505094, \"x_max_line\": \"APG17_LA_MM\", \"x_min_ohm\": 2.427976835081782, \"x_min_line\": \"102\", \"x_span\": 2034.1260889083974, \"x_pu_eff_max\": 0.034202292406544973, \"x_pu_eff_min\": 1.6814244010261648e-05}, \"s4h2_template43\": {\"x_max_ohm\": 4938.811023505094, \"x_max_line\": \"APG17_LA_MM\", \"x_min_ohm\": 2.427976835081782, \"x_min_line\": \"102\", \"x_span\": 2034.1260889083974, \"x_pu_eff_max\": 0.034202292406544973, \"x_pu_eff_min\": 1.6814244010261648e-05}}",
+   "KVL:{\"s4g\": {\"cycles\": 61, \"coefficients\": 257, \"abs_min\": 1.6814244010261647, \"abs_max\": 386954.0714348393, \"span\": 230134.682950172, \"within_row_ratio_max\": 230134.68295017193, \"within_row_ratio_median\": 10.712752546120146, \"within_row_ratio_p99\": 136717.81245964023, \"rows_ratio_over_1e4\": 5, \"rows_ratio_over_1e6\": 0, \"lines_in_cycles\": 120}, \"s4h1\": {\"cycles\": 61, \"coefficients\": 257, \"abs_min\": 1.6814244010261647, \"abs_max\": 1585.8080914601767, \"span\": 943.1337445158796, \"within_row_ratio_max\": 676.1265492259951, \"within_row_ratio_median\": 9.264629426016796, \"within_row_ratio_p99\": 676.1265492259951, \"rows_ratio_over_1e4\": 0, \"rows_ratio_over_1e6\": 0, \"lines_in_cycles\": 120}, \"s4h2\": {\"cycles\": 71, \"coefficients\": 277, \"abs_min\": 1.6814244010261647, \"abs_max\": 3420.2292406544975, \"span\": 2034.1260889083976, \"within_row_ratio_max\": 676.1265492259951, \"within_row_ratio_median\": 13.778573176095318, \"within_row_ratio_p99\": 676.1265492259951, \"rows_ratio_over_1e4\": 0, \"rows_ratio_over_1e6\": 0, \"lines_in_cycles\": 131}, \"s4h2_template43\": {\"cycles\": 71, \"coefficients\": 277, \"abs_min\": 1.6814244010261647, \"abs_max\": 3420.2292406544975, \"span\": 2034.1260889083976, \"within_row_ratio_max\": 676.1265492259951, \"within_row_ratio_median\": 10.81835506100309, \"within_row_ratio_p99\": 676.1265492259951, \"rows_ratio_over_1e4\": 0, \"rows_ratio_over_1e6\": 0, \"lines_in_cycles\": 131}}",
+   "APG_GROUPS:{\"1\": {\"cap_mw\": 1050.0, \"stock_mw\": 525.0, \"new\": [\"S4H2 MY_Peninsular2 1 - SG2 0 DC\"], \"n_lines\": 1, \"n_links\": 1}, \"10\": {\"cap_mw\": 625.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 9, \"n_links\": 0}, \"11\": {\"cap_mw\": 1262.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 8, \"n_links\": 0}, \"12\": {\"cap_mw\": 1353.0, \"stock_mw\": 200.0, \"new\": [], \"n_lines\": 6, \"n_links\": 0}, \"13\": {\"cap_mw\": 625.0, \"stock_mw\": 300.0, \"new\": [\"S4H2 KH2 1 - LA2 4\"], \"n_lines\": 2, \"n_links\": 0}, \"14\": {\"cap_mw\": 1315.0, \"stock_mw\": 250.0, \"new\": [], \"n_lines\": 4, \"n_links\": 0}, \"15\": {\"cap_mw\": 174.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 2, \"n_links\": 0}, \"16\": {\"cap_mw\": 3400.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"17\": {\"cap_mw\": 630.0, \"stock_mw\": 30.0, \"new\": [\"S4H2 LA2 5 - MM2 13\"], \"n_lines\": 2, \"n_links\": 0}, \"18a\": {\"cap_mw\": 435.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"18b\": {\"cap_mw\": 10000.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"2\": {\"cap_mw\": 1043.0, \"stock_mw\": 380.0, \"new\": [\"S4H2 MY_Peninsular2 0 - TH2 0\"], \"n_lines\": 2, \"n_links\": 1}, \"3\": {\"cap_mw\": 1600.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"4\": {\"cap_mw\": 2130.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"6\": {\"cap_mw\": 777.0, \"stock_mw\": 230.0, \"new\": [], \"n_lines\": 8, \"n_links\": 0}, \"7\": {\"cap_mw\": 500.0, \"stock_mw\": 0.0, \"new\": [], \"n_lines\": 0, \"n_links\": 1}, \"8b\": {\"cap_mw\": 177.0, \"stock_mw\": 50.010000000000005, \"new\": [], \"n_lines\": 1, \"n_links\": 0}, \"9\": {\"cap_mw\": 955.0, \"stock_mw\": 954.9999999999998, \"new\": [\"S4H2 LA2 0 - TH2 1\", \"S4H2 LA2 1 - TH2 4\", \"S4H2 LA2 2 - TH2 1\", \"S4H2 LA2 2 - TH2 4\", \"S4H2 LA2 3 - TH2 1\", \"S4H2 LA2 4 - TH2 1\", \"S4H2 LA2 5 - TH2 4\"], \"n_lines\": 16, \"n_links\": 0}}",
+   "14 passed, 1 warning in 4.16s",
+   "FULL_TESTS:531 passed, 934 warnings in 77.38s (0:01:17)",
+   "DONE:2026-10-17T14:02:46Z"
+  ]
+ },
+ "s4h3": {
+  "runs": [
+   {
+    "run": "integrated",
+    "termination": "optimal",
+    "objective_eur": 639881452621.7074,
+    "num_col": 649105,
+    "num_row": 1439886,
+    "nnz": 3229822,
+    "barrier_iterations": 123,
+    "barrier_seconds": 171.45,
+    "solve_seconds": 186.36032700538635,
+    "peak_rss_gib_receipt": 3.9121055603027344,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "disconnected",
+    "termination": "optimal",
+    "objective_eur": 693191116147.2216,
+    "num_col": 635539,
+    "num_row": 1409957,
+    "nnz": 3137621,
+    "barrier_iterations": 150,
+    "barrier_seconds": 172.59,
+    "solve_seconds": 186.64204788208008,
+    "peak_rss_gib_receipt": 3.534229278564453,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "integrated_nze",
+    "termination": "optimal",
+    "objective_eur": 539724152725.6391,
+    "num_col": 649105,
+    "num_row": 1439886,
+    "nnz": 3229822,
+    "barrier_iterations": 120,
+    "barrier_seconds": 168.88,
+    "solve_seconds": 182.99194645881653,
+    "peak_rss_gib_receipt": 3.945392608642578,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   }
+  ],
+  "vs_s4g": {
+   "integrated": {
+    "objective": 640079626181.7434,
+    "objective_change_eur": -198173560.03601074,
+    "objective_change_rel": -0.0003096076674368973
+   },
+   "disconnected": {
+    "objective": 693191116147.2216,
+    "objective_change_eur": 0.0,
+    "objective_change_rel": 0.0
+   },
+   "integrated_nze": {
+    "objective": 539912571610.1577,
+    "objective_change_eur": -188418884.51861572,
+    "objective_change_rel": -0.0003489803616846748
+   }
+  },
+  "disconnected_objective_vs_s4g": {
+   "s4h": 693191116147.2216,
+   "s4g": 693191116147.2216,
+   "relative": 0.0,
+   "identical": true
+  },
+  "tolerance": {
+   "integrated": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   },
+   "disconnected": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   },
+   "integrated_nze": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   }
+  },
+  "b5_passed": true,
+  "b6": {
+   "passed": true,
+   "difference": 53309663525.51416,
+   "s4g_difference": 53111489965.47815
+  },
+  "B16": {
+   "integrated": {
+    "passed": true,
+    "relative_error": 1.4131874853264396e-11,
+    "tolerance": 1e-06,
+    "difference_eur": -9.042724609375,
+    "s4g_relative_error": 6.419355901533685e-11
+   },
+   "disconnected": {
+    "passed": true,
+    "relative_error": 3.4297055326731473e-12,
+    "tolerance": 1e-06,
+    "difference_eur": 2.37744140625,
+    "s4g_relative_error": 3.4297055326731473e-12
+   },
+   "integrated_nze": {
+    "passed": true,
+    "relative_error": 6.284405998871789e-12,
+    "tolerance": 1e-06,
+    "difference_eur": -3.391845703125,
+    "s4g_relative_error": 1.4143683515812457e-11
+   }
+  },
+  "lao": {
+   "integrated": {
+    "LA-TH": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 955.0,
+       "opt_mw": 54088.27,
+       "stock_expansion_mw": 3050.93,
+       "candidate_build_mw": 50082.34
+      },
+      "components": {
+       "49": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 69.934,
+        "opt_mw": 532.21,
+        "added_mw": 462.28,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.5958,
+        "num_parallel": 0.041184,
+        "x": 1641.62
+       },
+       "52": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 1",
+        "stock_mw": 120.004,
+        "opt_mw": 512.52,
+        "added_mw": 392.52,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.2213,
+        "num_parallel": 0.070669,
+        "x": 1641.62
+       },
+       "53": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 101.907,
+        "opt_mw": 285.24,
+        "added_mw": 183.34,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.997,
+        "num_parallel": 0.060012,
+        "x": 1641.62
+       },
+       "55": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 89.544,
+        "opt_mw": 397.59,
+        "added_mw": 308.04,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.0602,
+        "num_parallel": 0.052732,
+        "x": 1641.62
+       },
+       "56": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 91.301,
+        "opt_mw": 254.25,
+        "added_mw": 162.95,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.8326,
+        "num_parallel": 0.053767,
+        "x": 1641.62
+       },
+       "58": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 70.909,
+        "opt_mw": 233.09,
+        "added_mw": 162.18,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.6945,
+        "num_parallel": 0.041758,
+        "x": 1641.62
+       },
+       "61": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 95.149,
+        "opt_mw": 553.58,
+        "added_mw": 458.43,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.9973,
+        "num_parallel": 0.056032,
+        "x": 1641.62
+       },
+       "62": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 2",
+        "stock_mw": 203.28,
+        "opt_mw": 929.05,
+        "added_mw": 725.77,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.4572,
+        "num_parallel": 0.11971,
+        "x": 1641.62
+       },
+       "66": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 112.972,
+        "opt_mw": 308.39,
+        "added_mw": 195.42,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.9589,
+        "num_parallel": 0.066528,
+        "x": 1641.62
+       },
+       "S4H2 LA2 0 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 12906.68,
+        "added_mw": 12906.68,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 38.6986,
+        "num_parallel": 1.0,
+        "x": 67.693
+       },
+       "S4H2 LA2 1 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4756.07,
+        "added_mw": 4756.07,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 16.6232,
+        "num_parallel": 1.0,
+        "x": 98.456
+       },
+       "S4H2 LA2 2 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 7566.99,
+        "added_mw": 7566.99,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 20.1784,
+        "num_parallel": 1.0,
+        "x": 86.255
+       },
+       "S4H2 LA2 2 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4724.77,
+        "added_mw": 4724.77,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 15.4732,
+        "num_parallel": 1.0,
+        "x": 88.339
+       },
+       "S4H2 LA2 3 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 5603.07,
+        "added_mw": 5603.07,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 16.6934,
+        "num_parallel": 1.0,
+        "x": 68.292
+       },
+       "S4H2 LA2 4 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 9874.01,
+        "added_mw": 9874.01,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 35.6251,
+        "num_parallel": 1.0,
+        "x": 92.036
+       },
+       "S4H2 LA2 5 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4650.74,
+        "added_mw": 4650.74,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 14.4605,
+        "num_parallel": 1.0,
+        "x": 108.855
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 955.0,
+       "opt_mw": 10336.75,
+       "stock_expansion_mw": 9381.75,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "49": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 69.934,
+        "opt_mw": 1426.77,
+        "added_mw": 1356.83,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.5319,
+        "num_parallel": 0.041184,
+        "x": 1641.62
+       },
+       "52": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 1",
+        "stock_mw": 120.004,
+        "opt_mw": 980.08,
+        "added_mw": 860.08,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.7127,
+        "num_parallel": 0.070669,
+        "x": 1641.62
+       },
+       "53": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 101.907,
+        "opt_mw": 1056.33,
+        "added_mw": 954.42,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.2483,
+        "num_parallel": 0.060012,
+        "x": 1641.62
+       },
+       "55": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 89.544,
+        "opt_mw": 926.97,
+        "added_mw": 837.42,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.4998,
+        "num_parallel": 0.052732,
+        "x": 1641.62
+       },
+       "56": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 91.301,
+        "opt_mw": 1099.56,
+        "added_mw": 1008.25,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.0029,
+        "num_parallel": 0.053767,
+        "x": 1641.62
+       },
+       "58": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 70.909,
+        "opt_mw": 1225.58,
+        "added_mw": 1154.67,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.7398,
+        "num_parallel": 0.041758,
+        "x": 1641.62
+       },
+       "61": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 95.149,
+        "opt_mw": 1173.97,
+        "added_mw": 1078.83,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.9206,
+        "num_parallel": 0.056032,
+        "x": 1641.62
+       },
+       "62": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 2",
+        "stock_mw": 203.28,
+        "opt_mw": 1549.45,
+        "added_mw": 1346.17,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 4.4954,
+        "num_parallel": 0.11971,
+        "x": 1641.62
+       },
+       "66": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 112.972,
+        "opt_mw": 898.04,
+        "added_mw": 785.07,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.9847,
+        "num_parallel": 0.066528,
+        "x": 1641.62
+       }
+      }
+     }
+    },
+    "LA-VN": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 0.0,
+       "opt_mw": 81368.39,
+       "stock_expansion_mw": 0.0,
+       "candidate_build_mw": 81368.39
+      },
+      "components": {
+       "59": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 6886.94,
+        "added_mw": 6886.94,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 25.9127,
+        "num_parallel": 1.0,
+        "x": 126.721
+       },
+       "60": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 14482.15,
+        "added_mw": 14482.15,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 52.3714,
+        "num_parallel": 1.0,
+        "x": 66.018
+       },
+       "63": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 3309.18,
+        "added_mw": 3309.18,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 8.898,
+        "num_parallel": 1.0,
+        "x": 56.798
+       },
+       "64": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 7",
+        "stock_mw": 0.0,
+        "opt_mw": 5387.54,
+        "added_mw": 5387.54,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 20.37,
+        "num_parallel": 1.0,
+        "x": 79.515
+       },
+       "S4E1 LA2 0 - VN2 2": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 9356.51,
+        "added_mw": 9356.51,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 22.4371,
+        "num_parallel": 1.0,
+        "x": 69.606
+       },
+       "S4E1 LA2 0 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 13618.53,
+        "added_mw": 13618.53,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 54.0948,
+        "num_parallel": 1.0,
+        "x": 108.215
+       },
+       "S4E1 LA2 1 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 9912.9,
+        "added_mw": 9912.9,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 26.3162,
+        "num_parallel": 1.0,
+        "x": 102.413
+       },
+       "S4E1 LA2 1 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 8236.27,
+        "added_mw": 8236.27,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 21.4646,
+        "num_parallel": 1.0,
+        "x": 103.425
+       },
+       "S4E1 LA2 5 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10178.38,
+        "added_mw": 10178.38,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 27.1092,
+        "num_parallel": 1.0,
+        "x": 96.009
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 1.0,
+       "opt_mw": 65257.7,
+       "stock_expansion_mw": 7.69,
+       "candidate_build_mw": 65249.01
+      },
+      "components": {
+       "59": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 2",
+        "stock_mw": 0.385,
+        "opt_mw": 2.99,
+        "added_mw": 2.6,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0075,
+        "num_parallel": 0.000227,
+        "x": 558761.679
+       },
+       "60": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 3",
+        "stock_mw": 0.201,
+        "opt_mw": 2.67,
+        "added_mw": 2.47,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0088,
+        "num_parallel": 0.000118,
+        "x": 558761.679
+       },
+       "63": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 2",
+        "stock_mw": 0.173,
+        "opt_mw": 1.42,
+        "added_mw": 1.25,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0032,
+        "num_parallel": 0.000102,
+        "x": 558761.679
+       },
+       "64": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 7",
+        "stock_mw": 0.242,
+        "opt_mw": 1.61,
+        "added_mw": 1.37,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0051,
+        "num_parallel": 0.000142,
+        "x": 558761.679
+       },
+       "S4E1 LA2 0 - VN2 2": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 15094.61,
+        "added_mw": 15094.61,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 29.5497,
+        "num_parallel": 1.286184,
+        "x": 54.118
+       },
+       "S4E1 LA2 0 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 20000.0,
+        "added_mw": 20000.0,
+        "candidate": true,
+        "at_cap": true,
+        "abs_flow_twh": 86.4308,
+        "num_parallel": 1.286184,
+        "x": 84.136
+       },
+       "S4E1 LA2 1 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10735.51,
+        "added_mw": 10735.51,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 24.9778,
+        "num_parallel": 1.286184,
+        "x": 79.626
+       },
+       "S4E1 LA2 1 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 8368.22,
+        "added_mw": 8368.22,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 20.5749,
+        "num_parallel": 1.286184,
+        "x": 80.412
+       },
+       "S4E1 LA2 5 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 11050.67,
+        "added_mw": 11050.67,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 29.1915,
+        "num_parallel": 1.286184,
+        "x": 74.646
+       }
+      }
+     }
+    },
+    "LA-MM": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 30.0,
+       "opt_mw": 4589.53,
+       "stock_expansion_mw": 49.66,
+       "candidate_build_mw": 4509.86
+      },
+      "components": {
+       "APG17_LA_MM": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 30.0,
+        "opt_mw": 79.66,
+        "added_mw": 49.66,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.2141,
+        "num_parallel": 0.017667,
+        "x": 4938.811
+       },
+       "S4H2 LA2 5 - MM2 13": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 0.0,
+        "opt_mw": 4509.86,
+        "added_mw": 4509.86,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 12.1197,
+        "num_parallel": 1.0,
+        "x": 87.241
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 30.0,
+       "opt_mw": 9549.07,
+       "stock_expansion_mw": 9519.07,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "APG17_LA_MM": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 30.0,
+        "opt_mw": 9549.07,
+        "added_mw": 9519.07,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 32.9449,
+        "num_parallel": 1.286184,
+        "x": 67.839
+       }
+      }
+     }
+    },
+    "KH-LA": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 300.0,
+       "opt_mw": 8035.46,
+       "stock_expansion_mw": 902.02,
+       "candidate_build_mw": 6833.44
+      },
+      "components": {
+       "43": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 300.0,
+        "opt_mw": 1202.02,
+        "added_mw": 902.02,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.7971,
+        "num_parallel": 0.176668,
+        "x": 403.152
+       },
+       "S4H2 KH2 1 - LA2 4": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 6833.44,
+        "added_mw": 6833.44,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 21.5864,
+        "num_parallel": 1.0,
+        "x": 70.916
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 300.0,
+       "opt_mw": 2272.88,
+       "stock_expansion_mw": 1972.88,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "43": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 300.0,
+        "opt_mw": 2272.88,
+        "added_mw": 1972.88,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 5.5649,
+        "num_parallel": 0.176668,
+        "x": 403.152
+       }
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "LA-TH": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 955.0,
+       "opt_mw": 53805.02,
+       "stock_expansion_mw": 3035.95,
+       "candidate_build_mw": 49814.07
+      },
+      "components": {
+       "49": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 69.934,
+        "opt_mw": 523.33,
+        "added_mw": 453.4,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.5755,
+        "num_parallel": 0.041184,
+        "x": 1641.62
+       },
+       "52": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 1",
+        "stock_mw": 120.004,
+        "opt_mw": 510.0,
+        "added_mw": 390.0,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.2212,
+        "num_parallel": 0.070669,
+        "x": 1641.62
+       },
+       "53": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 101.907,
+        "opt_mw": 287.81,
+        "added_mw": 185.9,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.0035,
+        "num_parallel": 0.060012,
+        "x": 1641.62
+       },
+       "55": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 89.544,
+        "opt_mw": 395.02,
+        "added_mw": 305.48,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.0508,
+        "num_parallel": 0.052732,
+        "x": 1641.62
+       },
+       "56": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 91.301,
+        "opt_mw": 252.55,
+        "added_mw": 161.25,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.8384,
+        "num_parallel": 0.053767,
+        "x": 1641.62
+       },
+       "58": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 70.909,
+        "opt_mw": 232.0,
+        "added_mw": 161.09,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.6809,
+        "num_parallel": 0.041758,
+        "x": 1641.62
+       },
+       "61": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 95.149,
+        "opt_mw": 551.73,
+        "added_mw": 456.58,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 1.9864,
+        "num_parallel": 0.056032,
+        "x": 1641.62
+       },
+       "62": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 2",
+        "stock_mw": 203.28,
+        "opt_mw": 927.2,
+        "added_mw": 723.92,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.4511,
+        "num_parallel": 0.11971,
+        "x": 1641.62
+       },
+       "66": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 112.972,
+        "opt_mw": 311.31,
+        "added_mw": 198.34,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.9638,
+        "num_parallel": 0.066528,
+        "x": 1641.62
+       },
+       "S4H2 LA2 0 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 12691.35,
+        "added_mw": 12691.35,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 38.2076,
+        "num_parallel": 1.0,
+        "x": 67.693
+       },
+       "S4H2 LA2 1 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4798.79,
+        "added_mw": 4798.79,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 16.7327,
+        "num_parallel": 1.0,
+        "x": 98.456
+       },
+       "S4H2 LA2 2 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 7518.18,
+        "added_mw": 7518.18,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 19.9994,
+        "num_parallel": 1.0,
+        "x": 86.255
+       },
+       "S4H2 LA2 2 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4693.12,
+        "added_mw": 4693.12,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 15.5806,
+        "num_parallel": 1.0,
+        "x": 88.339
+       },
+       "S4H2 LA2 3 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 5576.84,
+        "added_mw": 5576.84,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 16.3678,
+        "num_parallel": 1.0,
+        "x": 68.292
+       },
+       "S4H2 LA2 4 - TH2 1": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 9841.03,
+        "added_mw": 9841.03,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 35.4307,
+        "num_parallel": 1.0,
+        "x": 92.036
+       },
+       "S4H2 LA2 5 - TH2 4": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 4694.75,
+        "added_mw": 4694.75,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 14.5354,
+        "num_parallel": 1.0,
+        "x": 108.855
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 955.0,
+       "opt_mw": 10111.57,
+       "stock_expansion_mw": 9156.57,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "49": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "TH2 1",
+        "stock_mw": 69.934,
+        "opt_mw": 1383.93,
+        "added_mw": 1313.99,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.4242,
+        "num_parallel": 0.041184,
+        "x": 1641.62
+       },
+       "52": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 1",
+        "stock_mw": 120.004,
+        "opt_mw": 962.2,
+        "added_mw": 842.2,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.9589,
+        "num_parallel": 0.070669,
+        "x": 1641.62
+       },
+       "53": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "TH2 4",
+        "stock_mw": 101.907,
+        "opt_mw": 1038.15,
+        "added_mw": 936.24,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.4645,
+        "num_parallel": 0.060012,
+        "x": 1641.62
+       },
+       "55": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 1",
+        "stock_mw": 89.544,
+        "opt_mw": 910.9,
+        "added_mw": 821.35,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.6223,
+        "num_parallel": 0.052732,
+        "x": 1641.62
+       },
+       "56": {
+        "type": "Line",
+        "bus0": "LA2 2",
+        "bus1": "TH2 4",
+        "stock_mw": 91.301,
+        "opt_mw": 1081.83,
+        "added_mw": 990.53,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.2129,
+        "num_parallel": 0.053767,
+        "x": 1641.62
+       },
+       "58": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "TH2 1",
+        "stock_mw": 70.909,
+        "opt_mw": 1207.45,
+        "added_mw": 1136.54,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.6183,
+        "num_parallel": 0.041758,
+        "x": 1641.62
+       },
+       "61": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 1",
+        "stock_mw": 95.149,
+        "opt_mw": 1135.26,
+        "added_mw": 1040.11,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 2.8678,
+        "num_parallel": 0.056032,
+        "x": 1641.62
+       },
+       "62": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "TH2 2",
+        "stock_mw": 203.28,
+        "opt_mw": 1510.73,
+        "added_mw": 1307.45,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 4.4288,
+        "num_parallel": 0.11971,
+        "x": 1641.62
+       },
+       "66": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "TH2 4",
+        "stock_mw": 112.972,
+        "opt_mw": 881.14,
+        "added_mw": 768.17,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.1894,
+        "num_parallel": 0.066528,
+        "x": 1641.62
+       }
+      }
+     }
+    },
+    "LA-VN": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 0.0,
+       "opt_mw": 81747.14,
+       "stock_expansion_mw": 0.0,
+       "candidate_build_mw": 81747.14
+      },
+      "components": {
+       "59": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 6890.72,
+        "added_mw": 6890.72,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 25.9581,
+        "num_parallel": 1.0,
+        "x": 126.721
+       },
+       "60": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 14488.96,
+        "added_mw": 14488.96,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 52.4604,
+        "num_parallel": 1.0,
+        "x": 66.018
+       },
+       "63": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 3368.64,
+        "added_mw": 3368.64,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 8.9199,
+        "num_parallel": 1.0,
+        "x": 56.798
+       },
+       "64": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 7",
+        "stock_mw": 0.0,
+        "opt_mw": 5357.66,
+        "added_mw": 5357.66,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 20.3172,
+        "num_parallel": 1.0,
+        "x": 79.515
+       },
+       "S4E1 LA2 0 - VN2 2": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 9447.43,
+        "added_mw": 9447.43,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 22.7974,
+        "num_parallel": 1.0,
+        "x": 69.606
+       },
+       "S4E1 LA2 0 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 13591.75,
+        "added_mw": 13591.75,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 54.0226,
+        "num_parallel": 1.0,
+        "x": 108.215
+       },
+       "S4E1 LA2 1 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10023.49,
+        "added_mw": 10023.49,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 26.4946,
+        "num_parallel": 1.0,
+        "x": 102.413
+       },
+       "S4E1 LA2 1 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 8318.48,
+        "added_mw": 8318.48,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 21.5749,
+        "num_parallel": 1.0,
+        "x": 103.425
+       },
+       "S4E1 LA2 5 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10260.02,
+        "added_mw": 10260.02,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 27.2646,
+        "num_parallel": 1.0,
+        "x": 96.009
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 1.0,
+       "opt_mw": 64644.5,
+       "stock_expansion_mw": 7.65,
+       "candidate_build_mw": 64635.86
+      },
+      "components": {
+       "59": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 2",
+        "stock_mw": 0.385,
+        "opt_mw": 3.02,
+        "added_mw": 2.63,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0076,
+        "num_parallel": 0.000227,
+        "x": 558761.679
+       },
+       "60": {
+        "type": "Line",
+        "bus0": "LA2 3",
+        "bus1": "VN2 3",
+        "stock_mw": 0.201,
+        "opt_mw": 2.61,
+        "added_mw": 2.41,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0089,
+        "num_parallel": 0.000118,
+        "x": 558761.679
+       },
+       "63": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 2",
+        "stock_mw": 0.173,
+        "opt_mw": 1.42,
+        "added_mw": 1.25,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0032,
+        "num_parallel": 0.000102,
+        "x": 558761.679
+       },
+       "64": {
+        "type": "Line",
+        "bus0": "LA2 4",
+        "bus1": "VN2 7",
+        "stock_mw": 0.242,
+        "opt_mw": 1.6,
+        "added_mw": 1.35,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.0052,
+        "num_parallel": 0.000142,
+        "x": 558761.679
+       },
+       "S4E1 LA2 0 - VN2 2": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 2",
+        "stock_mw": 0.0,
+        "opt_mw": 14891.58,
+        "added_mw": 14891.58,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 30.265,
+        "num_parallel": 1.286184,
+        "x": 54.118
+       },
+       "S4E1 LA2 0 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 0",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 20000.0,
+        "added_mw": 20000.0,
+        "candidate": true,
+        "at_cap": true,
+        "abs_flow_twh": 91.5168,
+        "num_parallel": 1.286184,
+        "x": 84.136
+       },
+       "S4E1 LA2 1 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10622.81,
+        "added_mw": 10622.81,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 25.5319,
+        "num_parallel": 1.286184,
+        "x": 79.626
+       },
+       "S4E1 LA2 1 - VN2 3": {
+        "type": "Line",
+        "bus0": "LA2 1",
+        "bus1": "VN2 3",
+        "stock_mw": 0.0,
+        "opt_mw": 8222.56,
+        "added_mw": 8222.56,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 20.1832,
+        "num_parallel": 1.286184,
+        "x": 80.412
+       },
+       "S4E1 LA2 5 - VN2 1": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "VN2 1",
+        "stock_mw": 0.0,
+        "opt_mw": 10898.91,
+        "added_mw": 10898.91,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 30.4183,
+        "num_parallel": 1.286184,
+        "x": 74.646
+       }
+      }
+     }
+    },
+    "LA-MM": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 30.0,
+       "opt_mw": 4612.16,
+       "stock_expansion_mw": 50.06,
+       "candidate_build_mw": 4532.1
+      },
+      "components": {
+       "APG17_LA_MM": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 30.0,
+        "opt_mw": 80.06,
+        "added_mw": 50.06,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 0.2149,
+        "num_parallel": 0.017667,
+        "x": 4938.811
+       },
+       "S4H2 LA2 5 - MM2 13": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 0.0,
+        "opt_mw": 4532.1,
+        "added_mw": 4532.1,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 12.1637,
+        "num_parallel": 1.0,
+        "x": 87.241
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 30.0,
+       "opt_mw": 9350.13,
+       "stock_expansion_mw": 9320.13,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "APG17_LA_MM": {
+        "type": "Line",
+        "bus0": "LA2 5",
+        "bus1": "MM2 13",
+        "stock_mw": 30.0,
+        "opt_mw": 9350.13,
+        "added_mw": 9320.13,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 34.5756,
+        "num_parallel": 1.286184,
+        "x": 67.839
+       }
+      }
+     }
+    },
+    "KH-LA": {
+     "s4h": {
+      "totals": {
+       "stock_mw": 300.0,
+       "opt_mw": 8080.97,
+       "stock_expansion_mw": 908.83,
+       "candidate_build_mw": 6872.14
+      },
+      "components": {
+       "43": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 300.0,
+        "opt_mw": 1208.83,
+        "added_mw": 908.83,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 3.7999,
+        "num_parallel": 0.176668,
+        "x": 403.152
+       },
+       "S4H2 KH2 1 - LA2 4": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 0.0,
+        "opt_mw": 6872.14,
+        "added_mw": 6872.14,
+        "candidate": true,
+        "at_cap": false,
+        "abs_flow_twh": 21.6021,
+        "num_parallel": 1.0,
+        "x": 70.916
+       }
+      }
+     },
+     "s4g": {
+      "totals": {
+       "stock_mw": 300.0,
+       "opt_mw": 2262.26,
+       "stock_expansion_mw": 1962.26,
+       "candidate_build_mw": 0.0
+      },
+      "components": {
+       "43": {
+        "type": "Line",
+        "bus0": "KH2 1",
+        "bus1": "LA2 4",
+        "stock_mw": 300.0,
+        "opt_mw": 2262.26,
+        "added_mw": 1962.26,
+        "candidate": false,
+        "at_cap": false,
+        "abs_flow_twh": 6.0636,
+        "num_parallel": 0.176668,
+        "x": 403.152
+       }
+      }
+     }
+    }
+   }
+  },
+  "at_cap": {
+   "integrated": {
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:108",
+     "Line:109",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [
+     "Line:105",
+     "Line:95",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0"
+    ],
+    "removed": [
+     "Line:91",
+     "Line:99",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3"
+    ]
+   },
+   "disconnected": {
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [],
+    "removed": []
+   },
+   "integrated_nze": {
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "s4g": [
+     "Line:1",
+     "Line:100",
+     "Line:108",
+     "Line:109",
+     "Line:91",
+     "Line:92",
+     "Line:99",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3"
+    ],
+    "added": [
+     "Line:105",
+     "Line:95",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "removed": [
+     "Line:91",
+     "Line:99",
+     "Line:S4E1 KH2 1 - TH2 1",
+     "Line:S4E1 LA2 0 - VN2 3"
+    ]
+   }
+  },
+  "focus": {
+   "LA": {
+    "integrated_bn_eur": -0.3359,
+    "disconnected_bn_eur": 2.1618,
+    "disconnected_minus_integrated": 2.4977,
+    "s4g_integrated_bn_eur": -1.1015,
+    "s4g_disconnected_minus_integrated": 3.2633
+   },
+   "MM": {
+    "integrated_bn_eur": 9.461,
+    "disconnected_bn_eur": 10.4005,
+    "disconnected_minus_integrated": 0.9395,
+    "s4g_integrated_bn_eur": 9.4075,
+    "s4g_disconnected_minus_integrated": 0.993
+   },
+   "VN": {
+    "integrated_bn_eur": 126.0724,
+    "disconnected_bn_eur": 149.3171,
+    "disconnected_minus_integrated": 23.2447,
+    "s4g_integrated_bn_eur": 127.265,
+    "s4g_disconnected_minus_integrated": 22.0521
+   },
+   "TH": {
+    "integrated_bn_eur": 79.6101,
+    "disconnected_bn_eur": 85.6617,
+    "disconnected_minus_integrated": 6.0516,
+    "s4g_integrated_bn_eur": 79.9122,
+    "s4g_disconnected_minus_integrated": 5.7495
+   },
+   "KH": {
+    "integrated_bn_eur": 4.7794,
+    "disconnected_bn_eur": 6.8709,
+    "disconnected_minus_integrated": 2.0915,
+    "s4g_integrated_bn_eur": 4.6427,
+    "s4g_disconnected_minus_integrated": 2.2282
+   },
+   "MY": {
+    "integrated_bn_eur": 70.9479,
+    "disconnected_bn_eur": 76.0107,
+    "disconnected_minus_integrated": 5.0628,
+    "s4g_integrated_bn_eur": 70.9131,
+    "s4g_disconnected_minus_integrated": 5.0976
+   },
+   "ID": {
+    "integrated_bn_eur": 204.8594,
+    "disconnected_bn_eur": 214.0173,
+    "disconnected_minus_integrated": 9.1579,
+    "s4g_integrated_bn_eur": 204.7342,
+    "s4g_disconnected_minus_integrated": 9.2831
+   },
+   "PH": {
+    "integrated_bn_eur": 26.3119,
+    "disconnected_bn_eur": 27.5901,
+    "disconnected_minus_integrated": 1.2782,
+    "s4g_integrated_bn_eur": 26.509,
+    "s4g_disconnected_minus_integrated": 1.0811
+   },
+   "BN": {
+    "integrated_bn_eur": 0.6272,
+    "disconnected_bn_eur": 1.4995,
+    "disconnected_minus_integrated": 0.8723,
+    "s4g_integrated_bn_eur": 0.671,
+    "s4g_disconnected_minus_integrated": 0.8285
+   },
+   "TL": {
+    "integrated_bn_eur": -0.1798,
+    "disconnected_bn_eur": 0.1306,
+    "disconnected_minus_integrated": 0.3104,
+    "s4g_integrated_bn_eur": -0.156,
+    "s4g_disconnected_minus_integrated": 0.2866
+   },
+   "SG": {
+    "integrated_bn_eur": 24.3858,
+    "disconnected_bn_eur": 26.5703,
+    "disconnected_minus_integrated": 2.1845,
+    "s4g_integrated_bn_eur": 24.5832,
+    "s4g_disconnected_minus_integrated": 1.9871
+   }
+  },
+  "ipp_vs_ledger": {
+   "ipp_bn_eur_per_a": [
+    0.0061,
+    0.0137
+   ],
+   "ledger_disconnected_minus_integrated_bn_eur": {
+    "LA": 2.4977,
+    "VN": 23.2447
+   },
+   "ledger_integrated_change_vs_s4g_bn_eur": {
+    "LA": 0.7656,
+    "VN": -1.1926
+   },
+   "note": "IPP estimate = annualised value of 572 MW LA-VN AC capacity the model now has to build (grade C); smoke ledgers at 56 snapshots"
+  },
+  "disconnected_minus_integrated_bn_eur": {
+   "ASEAN_BUNKER": -0.3814,
+   "ASEAN_POOL": -0.0,
+   "BN": 0.8723,
+   "ID": 9.1579,
+   "KH": 2.0915,
+   "LA": 2.4977,
+   "MM": 0.9395,
+   "MY": 5.0628,
+   "PH": 1.2782,
+   "SG": 2.1845,
+   "TH": 6.0516,
+   "TL": 0.3104,
+   "VN": 23.2447
+  },
+  "status": [
+   "START:2026-10-17T14:03:28Z commit:1887d975 dirty:0 profile:formal_barrier",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"89b9:\tMaximum resident set size (kbytes): 711728",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"5908:\tMaximum resident set size (kbytes): 708588",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"f464:\tMaximum resident set size (kbytes): 711784",
+   "RUN_integrated:optimal:225s:\tMaximum resident set size (kbytes): 4101496",
+   "RUN_disconnected:optimal:225s:\tMaximum resident set size (kbytes): 3704948",
+   "RUN_integrated_nze:optimal:225s:\tMaximum resident set size (kbytes): 4136368",
+   "DONE:2026-10-17T14:17:07Z",
+   "SUMMARY:1",
+   "SUMMARY_RERUN:0"
+  ],
+  "ledgers": {
+   "integrated": {
+    "relative_error": 1.4131874853264396e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 93.3421,
+     "ASEAN_POOL": 0.0,
+     "BN": 0.6272,
+     "ID": 204.8594,
+     "KH": 4.7794,
+     "LA": -0.3359,
+     "MM": 9.461,
+     "MY": 70.9479,
+     "PH": 26.3119,
+     "SG": 24.3858,
+     "TH": 79.6101,
+     "TL": -0.1798,
+     "VN": 126.0724
+    }
+   },
+   "disconnected": {
+    "relative_error": 3.4297055326731473e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.9607,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.4995,
+     "ID": 214.0173,
+     "KH": 6.8709,
+     "LA": 2.1618,
+     "MM": 10.4005,
+     "MY": 76.0107,
+     "PH": 27.5901,
+     "SG": 26.5703,
+     "TH": 85.6617,
+     "TL": 0.1306,
+     "VN": 149.3171
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 6.284405998871789e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.9207,
+     "ASEAN_POOL": 0.0,
+     "BN": -0.8179,
+     "ID": 176.6757,
+     "KH": 3.8973,
+     "LA": -0.3157,
+     "MM": 6.163,
+     "MY": 53.9444,
+     "PH": 16.2219,
+     "SG": 17.985,
+     "TH": 55.9511,
+     "TL": -0.9679,
+     "VN": 118.0666
+    }
+   }
+  }
+ },
+ "s4h4": {
+  "status": [
+   "START:2026-10-17T14:21:03Z commit:6eead675 dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"89b9:\tMaximum resident set size (kbytes): 711624:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:53.49:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"5908:\tMaximum resident set size (kbytes): 708568:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:53.35:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"f464:\tMaximum resident set size (kbytes): 711700:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:53.95:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6b47:\tMaximum resident set size (kbytes): 702660:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:54.01:daily=1",
+   "COMPARE_integrated_vs_smoke:{}",
+   "COMPARE_disconnected_vs_smoke:{}",
+   "COMPARE_integrated_nze_vs_smoke:{}",
+   "PACKAGE:0",
+   "DONE:2026-10-17T14:24:55Z"
+  ],
+  "extrapolation": {
+   "integrated": {
+    "barrier_iterations": 123,
+    "barrier_seconds": 171.45,
+    "wall_seconds": 225,
+    "peak_rss_gib": 3.9121055603027344,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1960.9827715417866,
+       2852.9538444436153
+      ],
+      "barrier_s_with_1_5x_iterations": 4279.430766665423,
+      "non_solve_s": 251.84786862560682,
+      "wall_s": [
+       2212.8306401673935,
+       3104.801713069222,
+       4531.27863529103
+      ],
+      "peak_rss_gib": [
+       23.291402312687467,
+       32.607963237762455
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       29274.585946940366,
+       64554.97631418596
+      ],
+      "barrier_s_with_1_5x_iterations": 96832.46447127894,
+      "non_solve_s": 2014.7829490048546,
+      "wall_s": [
+       31289.36889594522,
+       66569.75926319082,
+       98847.2474202838
+      ],
+      "peak_rss_gib": [
+       183.53121850149975,
+       256.9437059020996
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "barrier_iterations": 150,
+    "barrier_seconds": 172.59,
+    "wall_seconds": 225,
+    "peak_rss_gib": 3.534229278564453,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1974.0216771093437,
+       2871.923616287685
+      ],
+      "barrier_s_with_1_5x_iterations": 4307.885424431528,
+      "non_solve_s": 250.01165219715665,
+      "wall_s": [
+       2224.0333293065005,
+       3121.935268484842,
+       4557.897076628685
+      ],
+      "peak_rss_gib": [
+       20.82845869064331,
+       29.15984216690063
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       29469.23761202939,
+       64984.21325205806
+      ],
+      "barrier_s_with_1_5x_iterations": 97476.31987808709,
+      "non_solve_s": 2000.0932175772532,
+      "wall_s": [
+       31469.330829606643,
+       66984.30646963531,
+       99476.41309566433
+      ],
+      "peak_rss_gib": [
+       163.8276695251465,
+       229.35873733520506
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "barrier_iterations": 120,
+    "barrier_seconds": 168.88,
+    "wall_seconds": 225,
+    "peak_rss_gib": 3.945392608642578,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1931.5880458324698,
+       2810.188657040757
+      ],
+      "barrier_s_with_1_5x_iterations": 4215.282985561135,
+      "non_solve_s": 273.802491830928,
+      "wall_s": [
+       2205.390537663398,
+       3083.991148871685,
+       4489.085477392064
+      ],
+      "peak_rss_gib": [
+       23.508362538473946,
+       32.91170755386352
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       28835.765965116883,
+       63587.310585825166
+      ],
+      "barrier_s_with_1_5x_iterations": 95380.96587873774,
+      "non_solve_s": 2190.419934647424,
+      "wall_s": [
+       31026.185899764307,
+       65777.73052047259,
+       97571.38581338516
+      ],
+      "peak_rss_gib": [
+       185.2669003077916,
+       259.3736604309082
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   }
+  },
+  "package": {
+   "commit": "6eead6753508472a5839035043adea590eabaded",
+   "upload_total_bytes": 232939289,
+   "files": 15,
+   "run": {
+    "script": "run_365x24h.sh",
+    "runs": [
+     "integrated (STEPS)",
+     "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+     "integrated_nze (NZE fuel prices)",
+     "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+    ],
+    "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+    "modes": [
+     "serial",
+     "lanes2",
+     "lanes3"
+    ],
+    "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+    "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+    "scaling": "on",
+    "exports_per_run": [
+     "SOLVE_RECEIPT.json",
+     "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+     "COUNTRY_COST_LEDGER.csv",
+     "COUNTRY_COST_LEDGER_DETAIL.csv",
+     "LEDGER_IDENTITY.json",
+     "NODAL_PRICES.csv",
+     "CO2_FLOWS.json",
+     "BUNKER_ACCOUNT.json",
+     "solved network"
+    ],
+    "threads_per_run": 8,
+    "wall_clock_cap_h": 3,
+    "gurobi_time_limit_s": 10500,
+    "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+   },
+   "second_batch_sensitivities": [
+    {
+     "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+     "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+     "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+     "override": "co2.ship_distance=route_factor",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "Lao transit: nearest existing sea port and / or truck",
+     "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+     "override": "s3.gas.lng_expansion=uncapped_cost",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+     "override": "network.max_extension=apg_plans",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+     "override": "corridors.optional_sg_vn_kh=on",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "author electrical parameters of the 19 readjusted cross-border AC lines and APG17 (decisions 98, 101 b comparison)",
+     "override": "network.readjust_impedance=author",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "LA-VN grid stock of the author (1 MW split over lines 59 / 60 / 63 / 64; decision 100 comparison)",
+     "override": "network.la_vn_stock=author",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "zero-capacity AC candidates with num_parallel 1.286 of template line 43 (former convention; decision 101 a comparison)",
+     "override": "corridors.candidate_num_parallel=template43",
+     "scenarios": "integrated"
+    }
+   ],
+   "supersedes": "the S4G package (code ed6af79c) is void (S4H answer to S4G section 7 item 4); the S4F package (code 7e09744d) was voided earlier (decision 99 c)",
+   "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+  }
+ },
+ "resources": {
+  "cloud": false,
+  "formal_solves": false,
+  "downloads": "none (S4H needs no download)"
+ },
+ "tests": "tests/research: 514 passed; full tests/: 531 passed (S4H-4 final checks, code 6eead675). Licence scan of the package: no licence value (tarball hits = the S4E set: parameter-name lists, presence booleans, scrub keyword lists)."
+}

@@ -36,6 +36,7 @@ from s4d_layers import apply_intra_asean_shipping
 from s4e_layers import add_corridor_dc_links, add_domestic_candidates, apply_lao_transit_shipping, corridor_mode, corridor_tables
 from s4f_layers import apply_lao_vn_store, apply_max_extension, apply_th_my_stock, extend_optional_corridors
 from s4g_layers import apply_lao_th_store, apply_readjust_impedance
+from s4h_layers import apply_candidate_num_parallel, apply_la_vn_stock
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -298,6 +299,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                          dc_added=add_corridor_dc_links(n, corridors), domestic_table=domestic_path,
                          domestic_added=(add_domestic_candidates(n, pd.read_csv(repo / domestic_path, float_precision="round_trip")) if domestic_path else []))
     readjust = apply_readjust_impedance(n, cfg, repo)   # S4G-1 (decision 98): line-type num_parallel / x / r / b of the 19 author-readjusted cross-border AC lines (after the candidates: their template keeps the frozen values)
+    corridors, la_vn_stock = apply_la_vn_stock(n, corridors, cfg, repo)   # S4H-1 (decision 100): LA-VN grid stock 0, lines 59 / 60 / 63 / 64 as zero-capacity candidates (author = S4G state)
+    cand_np = apply_candidate_num_parallel(n, cfg)   # S4H-2 a (decision 101): reference num_parallel of every zero-capacity AC candidate (one_circuit main; template43 = former convention)
     cc = float(cfg["sector"]["cc_fraction"])
     # 1. upstream hydrogen library
     psn = load_upstream(repo); nodes = spatial_nodes(n); options = build_options(cfg["sector"], R["hydrogen"])
@@ -392,12 +395,13 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4f_layers=dict(max_extension={k: v for k, v in max_ext.items() if k != "apg_caps"}, th_my_stock=th_my, optional_corridors=optional_corridors,
                                                   lao_vn_store={k: v for k, v in lao_vn.items() if k != "table"}),
                                   s4g_layers=dict(readjust_impedance={k: v for k, v in readjust.items() if k != "rows"}, lao_th_store={k: v for k, v in lao_th.items() if k != "table"}),
+                                  s4h_layers=dict(la_vn_stock={k: v for k, v in la_vn_stock.items() if k != "rows"}, candidate_num_parallel={k: v for k, v in cand_np.items() if k != "rows"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
-                "research_readjust_impedance", "research_lao_th_store"]:
+                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
@@ -416,7 +420,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                            "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(file=corridors_path, sha256=sha(repo / corridors_path), th_my_stock=th_my["mode"], optional_sg_vn_kh=optional_corridors["mode"],
                                                  corrections={k: dict(file=f, sha256=sha(repo / f)) for k, f in [("th_my_stock", th_my.get("table")), ("optional", optional_corridors.get("table")),
                                                                                                                   ("apg_plan_caps", max_ext.get("apg_table")),
-                                                                                                                  ("readjust_impedance", readjust.get("table"))] if f}),
+                                                                                                                  ("readjust_impedance", readjust.get("table")),
+                                                                                                                  ("la_vn_stock", la_vn_stock.get("table"))] if f}),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
                    research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,
