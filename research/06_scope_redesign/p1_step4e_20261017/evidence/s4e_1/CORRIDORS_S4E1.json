@@ -1,0 +1,476 @@
+{
+ "rule": {
+  "tolerance_m": 1000.0,
+  "min_shared_km": 1.0,
+  "length_factor": 1.25,
+  "type": "AC line if same landmass else DC link"
+ },
+ "adjacency": {
+  "pairs": 49,
+  "existing": 18,
+  "new": 31,
+  "unclear_below_1km": [],
+  "min_shared_km": 4.18,
+  "by_country_pair_new": {
+   "BN-MY": 1,
+   "ID-MY": 9,
+   "ID-TL": 1,
+   "KH-TH": 3,
+   "KH-VN": 5,
+   "LA-VN": 5,
+   "MM-TH": 7
+  }
+ },
+ "cross_sea": [
+  {
+   "apg_no": "4",
+   "project": "Peninsular Malaysia - Sumatera",
+   "node_a": "ID_Sumatra2 0",
+   "node_b": "MY_Peninsular2 1",
+   "great_circle_km": 228.9,
+   "next_pairs": "MY_Peninsular2 1-ID_Sumatra3 3 347 km; MY_Peninsular2 0-ID_Sumatra3 2 371 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": false,
+   "optional": false,
+   "action": "new candidate"
+  },
+  {
+   "apg_no": "7",
+   "project": "Philippines - Sabah",
+   "node_a": "MY_Sabah4 1",
+   "node_b": "PH_Mindanao6 0",
+   "great_circle_km": 681.7,
+   "next_pairs": "PH_Mindanao6 0-MY_Sabah4 0 827 km; PH_Mindanao6 1-MY_Sabah4 1 843 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": false,
+   "optional": false,
+   "action": "new candidate"
+  },
+  {
+   "apg_no": "15",
+   "project": "East Sabah - North Kalimantan",
+   "node_a": "ID_Kalimantan4 1",
+   "node_b": "MY_Sabah4 1",
+   "great_circle_km": 169.8,
+   "next_pairs": "MY_Sabah4 0-ID_Kalimantan4 1 263 km; MY_Sabah4 1-ID_Kalimantan4 9 279 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": true,
+   "optional": false,
+   "action": "covered by the land-adjacency candidate"
+  },
+  {
+   "apg_no": "16",
+   "project": "Singapore - Sumatera (#5 Batam merged)",
+   "node_a": "ID_Sumatra2 0",
+   "node_b": "SG2 0",
+   "great_circle_km": 36.9,
+   "next_pairs": "SG2 0-ID_Sumatra3 4 303 km; SG2 0-ID_Sumatra3 3 362 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": false,
+   "optional": false,
+   "action": "new candidate"
+  },
+  {
+   "apg_no": "other1",
+   "project": "Singapore - Vietnam",
+   "node_a": "SG2 0",
+   "node_b": "VN2 0",
+   "great_circle_km": 975.2,
+   "next_pairs": "SG2 0-VN2 5 1151 km; SG2 0-VN2 4 1279 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": false,
+   "optional": true,
+   "action": "optional (other initiative, not in the main run)"
+  },
+  {
+   "apg_no": "other2",
+   "project": "Singapore - Cambodia",
+   "node_a": "KH2 0",
+   "node_b": "SG2 0",
+   "great_circle_km": 1070.0,
+   "next_pairs": "SG2 0-KH2 3 1156 km; SG2 0-KH2 2 1163 km",
+   "existing_components": "",
+   "covered_by_land_adjacency": false,
+   "optional": true,
+   "action": "optional (other initiative, not in the main run)"
+  }
+ ],
+ "domestic": [
+  {
+   "apg_no": "3",
+   "project": "Sarawak - Peninsular Malaysia",
+   "existing_components": "",
+   "node_a": "MY_Peninsular2 1",
+   "node_b": "MY_Sarawak4 1",
+   "great_circle_km": 986.0,
+   "action": "new domestic candidate"
+  },
+  {
+   "apg_no": "8b",
+   "project": "Sarawak - Sabah",
+   "existing_components": "Line:94",
+   "node_a": "MY_Sabah4 0",
+   "node_b": "MY_Sarawak4 2",
+   "great_circle_km": 219.3,
+   "action": "existing domestic connection"
+  },
+  {
+   "apg_no": "18a",
+   "project": "Kalimantan - Java",
+   "existing_components": "",
+   "node_a": "ID_Java-Bali1 1",
+   "node_b": "ID_Kalimantan4 12",
+   "great_circle_km": 547.7,
+   "action": "new domestic candidate"
+  },
+  {
+   "apg_no": "18b",
+   "project": "Sumatera - Java",
+   "existing_components": "",
+   "node_a": "ID_Java-Bali1 0",
+   "node_b": "ID_Sumatra3 1",
+   "great_circle_km": 397.4,
+   "action": "new domestic candidate"
+  }
+ ],
+ "new_corridors": 34,
+ "new_domestic": 3,
+ "new_types": {
+  "Line": 31,
+  "Link": 6
+ },
+ "gap_pairs": [],
+ "stock_check": [
+  {
+   "apg_no": "1",
+   "connection": "Peninsular Malaysia - Singapore",
+   "country_a": "MY",
+   "country_b": "SG",
+   "apg_existing_mw": "525",
+   "model_2025_mw": 525.0,
+   "model_components": "92",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "2",
+   "connection": "Thailand - Peninsular Malaysia",
+   "country_a": "TH",
+   "country_b": "MY",
+   "apg_existing_mw": "380",
+   "model_2025_mw": 2645.6,
+   "model_components": "91;250878579-1_0;250878579-2_0;250878579-3_0;250878579-4_0;Khlong Ngae \u2013 Gurun",
+   "difference_mw": 2265.6,
+   "verdict": "DIFFERENT - listed, verified stock not changed"
+  },
+  {
+   "apg_no": "3",
+   "connection": "Sarawak - Peninsular Malaysia",
+   "country_a": "MY",
+   "country_b": "MY",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "national project (S4E-1 item 4)"
+  },
+  {
+   "apg_no": "4",
+   "connection": "Peninsular Malaysia - Sumatera",
+   "country_a": "MY",
+   "country_b": "ID",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "5",
+   "connection": "Batam - Singapore",
+   "country_a": "ID",
+   "country_b": "SG",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "6",
+   "connection": "Sarawak - West Kalimantan",
+   "country_a": "MY",
+   "country_b": "ID",
+   "apg_existing_mw": "230",
+   "model_2025_mw": 230.0,
+   "model_components": "23",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "7",
+   "connection": "Philippines - Sabah",
+   "country_a": "PH",
+   "country_b": "MY",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "8a",
+   "connection": "Sarawak - Brunei",
+   "country_a": "MY",
+   "country_b": "BN",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "8b",
+   "connection": "Sarawak - Sabah",
+   "country_a": "MY",
+   "country_b": "MY",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "national project (S4E-1 item 4)"
+  },
+  {
+   "apg_no": "9",
+   "connection": "Thailand - Lao PDR",
+   "country_a": "TH",
+   "country_b": "LA",
+   "apg_existing_mw": "955",
+   "model_2025_mw": 955.0,
+   "model_components": "49;52;53;55;56;58;61;62;66",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "10",
+   "connection": "Lao PDR - Vietnam",
+   "country_a": "LA",
+   "country_b": "VN",
+   "apg_existing_mw": "",
+   "model_2025_mw": 1.0,
+   "model_components": "59;60;63;64",
+   "difference_mw": NaN,
+   "verdict": "no APG stock; model stock negligible"
+  },
+  {
+   "apg_no": "11",
+   "connection": "Thailand - Myanmar",
+   "country_a": "TH",
+   "country_b": "MM",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "APG11_TH_MM",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "12",
+   "connection": "Vietnam - Cambodia",
+   "country_a": "VN",
+   "country_b": "KH",
+   "apg_existing_mw": "200",
+   "model_2025_mw": 200.0,
+   "model_components": "39",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "13",
+   "connection": "Lao PDR - Cambodia",
+   "country_a": "LA",
+   "country_b": "KH",
+   "apg_existing_mw": "300",
+   "model_2025_mw": 300.0,
+   "model_components": "43",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "14",
+   "connection": "Thailand - Cambodia",
+   "country_a": "TH",
+   "country_b": "KH",
+   "apg_existing_mw": "250",
+   "model_2025_mw": 250.0,
+   "model_components": "47",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "15",
+   "connection": "East Sabah - North Kalimantan",
+   "country_a": "MY",
+   "country_b": "ID",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "16",
+   "connection": "Singapore - Sumatera",
+   "country_a": "SG",
+   "country_b": "ID",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "17",
+   "connection": "Lao PDR - Myanmar",
+   "country_a": "LA",
+   "country_b": "MM",
+   "apg_existing_mw": "30",
+   "model_2025_mw": 30.0,
+   "model_components": "APG17_LA_MM",
+   "difference_mw": 0.0,
+   "verdict": "consistent"
+  },
+  {
+   "apg_no": "18a",
+   "connection": "Kalimantan - Java",
+   "country_a": "ID",
+   "country_b": "ID",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "national project (S4E-1 item 4)"
+  },
+  {
+   "apg_no": "18b",
+   "connection": "Sumatera - Java",
+   "country_a": "ID",
+   "country_b": "ID",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "national project (S4E-1 item 4)"
+  },
+  {
+   "apg_no": "other1",
+   "connection": "Singapore - Vietnam",
+   "country_a": "SG",
+   "country_b": "VN",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  },
+  {
+   "apg_no": "other2",
+   "connection": "Singapore - Cambodia",
+   "country_a": "SG",
+   "country_b": "KH",
+   "apg_existing_mw": "",
+   "model_2025_mw": 0.0,
+   "model_components": "",
+   "difference_mw": NaN,
+   "verdict": "no stock on either side"
+  }
+ ],
+ "graph": {
+  "edges_before": [
+   "ID-MY",
+   "ID-SG",
+   "KH-LA",
+   "KH-TH",
+   "KH-VN",
+   "LA-MM",
+   "LA-TH",
+   "LA-VN",
+   "MM-TH",
+   "MY-SG",
+   "MY-TH"
+  ],
+  "edges_after": [
+   "BN-MY",
+   "ID-MY",
+   "ID-SG",
+   "ID-TL",
+   "KH-LA",
+   "KH-TH",
+   "KH-VN",
+   "LA-MM",
+   "LA-TH",
+   "LA-VN",
+   "MM-TH",
+   "MY-PH",
+   "MY-SG",
+   "MY-TH"
+  ],
+  "isolated_after": [],
+  "components_after": [
+   "TL"
+  ],
+  "connected_coalitions_before": {
+   "by_size": {
+    "1": 11,
+    "2": 11,
+    "3": 14,
+    "4": 17,
+    "5": 18,
+    "6": 14,
+    "7": 6,
+    "8": 1
+   },
+   "total": 92,
+   "with_two_or_more": 81
+  },
+  "connected_coalitions_after": {
+   "by_size": {
+    "1": 11,
+    "2": 14,
+    "3": 23,
+    "4": 36,
+    "5": 57,
+    "6": 78,
+    "7": 80,
+    "8": 58,
+    "9": 28,
+    "10": 8,
+    "11": 1
+   },
+   "total": 394,
+   "with_two_or_more": 383
+  }
+ },
+ "sources": {
+  "regions_onshore": "742a7f11a015c7928da57c03c897817fb95bef5fd48eb627c06cda7679d4f5e7",
+  "corridors": "b15486c6e28a221dac7e96d2cc5c4d3de3a6933155fc444d33f4393f2cc25a9e",
+  "subsea_s4c1": "08e68cdf2e046e133cb81d2082487779b53ad2c6c26e0ca309e2f087d4d5ff21",
+  "apg": "39a1503516ced562bf95e0afcdccd1623909e34f0ee1d9447dfe96974c92e3e8",
+  "network": "../results_project/s4d/s4d6/builds/integrated/integrated_2920_3h_unsolved.nc"
+ },
+ "second_pass": {
+  "network": "../results_project/s4e/build_s4e1/topology_zero/integrated_2920_3h_unsolved.nc",
+  "added_pairs": [
+   {
+    "loc0": "ID_Nusa-Tenggara13 0",
+    "loc1": "ID_Nusa-Tenggara15 0",
+    "country0": "ID",
+    "country1": "ID",
+    "components": "Link:gas pipeline",
+    "great_circle_km": 378.9677332023361,
+    "same_landmass": false,
+    "share_landmass_nonland": 0.7058047493403694,
+    "gap_share": 0.0
+   }
+  ]
+ }
+}

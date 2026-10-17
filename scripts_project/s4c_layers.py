@@ -597,9 +597,11 @@ def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
     row = registry.loc[EXTRA_ASEAN_COST_ID]
     if row["status"] != "REGISTERED":
         raise ValueError(f"{EXTRA_ASEAN_COST_ID} is {row['status']}: no citable unit cost (S4C-4 stop condition)")
+    from s4e_layers import extra_asean_unit_cost, lao_transit_legs
     scale = extra_asean_cost_scale(cfg)   # S4D-6 first-batch sensitivity (1.0 main)
-    price = float(row["value"]) * scale; years = float(cfg["research"]["s2"]["co2"]["storage_years"])
-    led.update(unit_cost_eur2020_per_t=price, cost_scale=scale, sensitivity=[float(row["sensitivity_low"]), float(row["sensitivity_high"])], tier=row["tier"], source=row["source"])
+    base = extra_asean_unit_cost(cfg, registry)   # S4E-2 (95 a): unified storage basis (shipping chain + national store unit cost) | s4c4 (40.75)
+    price = base["price"] * scale; years = float(cfg["research"]["s2"]["co2"]["storage_years"])
+    led.update(unit_cost_eur2020_per_t=price, cost_scale=scale, cost_basis=base, sensitivity=[0.5 * base["price"], 1.5 * base["price"]], tier=row["tier"], source=row["source"])
     sel, tr = export_nodes_mode(cfg), transit_mode(cfg)
     coast = None
     if sel == "coastal":
@@ -630,11 +632,12 @@ def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
             add_link(n, f"{node} co2 export extra-ASEAN", c, EXTRA_ASEAN_LINK, [f"{node} co2 stored", sb], [1.0], capital_cost=0.0, lifetime=years, role="PERMANENT_STORAGE",
                      extra={"carbon_rule": "exported captured CO2 counts as storage of the capturing country (decision 20)"})
         land = {}
+        legs = lao_transit_legs(cfg, registry) if tn else {}   # S4E-2 (95 d): main = registered rail leg to the nearest coast; existing port / truck as sensitivities
         for node in tn:   # S4D-1 (decision 93): land leg by rail to the nearest neighbouring coast, then the extra-ASEAN chain (store unit cost)
             r = registry.loc[transit_cost_id(node)]
             if r["status"] != "REGISTERED":
                 raise ValueError(f"{transit_cost_id(node)} is {r['status']}: no citable land transport cost (S4D-1 stop condition)")
-            land[node] = float(r["value"])
+            land[node] = float(legs[node]["land_cost"])
             add_link(n, f"{node} co2 transit export extra-ASEAN", c, TRANSIT_LINK, [f"{node} co2 stored", sb], [1.0], capital_cost=0.0, marginal_cost=land[node], lifetime=years,
                      role="PERMANENT_STORAGE", extra={"carbon_rule": "exported captured CO2 counts as storage of the capturing country (decision 20)",
                                                       "trade_class": "transit_trade (decision 93, like the liquid-fuel transit of decision 44)"})

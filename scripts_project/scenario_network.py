@@ -27,7 +27,7 @@ ELECTRIC_BASE_SHA='6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b41
 XB_FOM_HOOK='research_cross_border_existing_fom'
 EXTENDABLE_REQUIRED=('H2 turbine','H2 Fuel Cell','H2 Store Tank','battery','battery charger','home battery','home battery charger')
 TRANSPORT_CARRIERS={'AC':'electricity','DC':'electricity','B2B':'electricity','H2 pipeline':'H2','gas pipeline':'gas','CO2 pipeline':'co2'}
-MARITIME_TRADE_CARRIERS={'CO2 ship'}  # S4D-2 (decision 92): maritime trade between countries, kept in both scenarios like the liquid fuels (decisions 18, 44); not cross-border network
+MARITIME_TRADE_CARRIERS={'CO2 ship','CO2 transit ship'}  # S4D-2 (decision 92): maritime trade between countries, kept in both scenarios like the liquid fuels (decisions 18, 44); not cross-border network; S4E-2 (95 c): Lao transit then ship
 SKELETON='INTERIM_S1_SKELETON'
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
