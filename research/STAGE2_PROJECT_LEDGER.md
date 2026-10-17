@@ -541,4 +541,5 @@
   - MY–SG 的参考候选按陆块规则为直流；
   - 是否把参考候选扩到每个有存量交流线的节点对。
   - 另需上云前信息与授权。
+- **用户决定（2026-10-18）：** §7 两项维持现状——MY–SG 保持直流候选，参考候选不扩到节点对；首批正式运行用当前 S4H 部署包（6eead675），上云前信息由用户另行提供。
 - **交付：** `research/06_scope_redesign/p1_step4h_20261017/`，内容为 S4H_REPORT.md、S4H_EVIDENCE.json、S4H_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §17、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4h_20261017/`；测试 `tests/research` 514 通过、整个 `tests/` 531 通过。
