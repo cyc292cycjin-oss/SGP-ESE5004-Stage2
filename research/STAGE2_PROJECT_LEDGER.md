@@ -511,3 +511,34 @@
   - 数值风险的处置；
   - 上云前信息与授权。
 - **交付：** `research/06_scope_redesign/p1_step4g_20261017/`，内容为 S4G_REPORT.md、S4G_EVIDENCE.json、S4G_PROGRESS.md、DOWNLOAD_LIST.csv、CLOUD_RESOURCE_ESTIMATE.md §16、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4g_20261017/`；测试 `tests/research` 506 通过、整个 `tests/` 523 通过。
+
+## S4H 第 100–101 项：LA–VN 存量、候选线参考电抗、冒烟、云端部署包与上云前清单 — 2026-10-17
+
+- **范围：**
+  - 指令 `S4H_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 a029bd64…1fd33bd，已核对），开头为用户对 S4G §7 四项的答复；本步只实现第 100、101 项，其他发现只记录。
+  - 分支 `codex/s4h-lavn-candidates-20261017`（自 S4G 78c95a75），draft PR #32 叠在 #31 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载；没有触发停止条件。
+- **S4H-0：** 登记 §7 四项答复与本步范围规则（`s4h_0`）。
+- **S4H-1（100）：**
+  - LA–VN 存量按 AIMS 电网间口径记为 0（`la_vn_grid_stock_2025`，B 级）；线路 59 / 60 / 63 / 64 改为零容量候选线（可扩建，单条上限 20,000 MW，长度、单位成本、海底份额不变）。
+  - 开关 `research.network.la_vn_stock`：aims_zero | author（与 S4G 逐组件一致）。
+  - 独立电站专用出口线估算：572 MW × 230.9–515.1 km × 46.497 EUR/MW/km/a = 6.1–13.7 M EUR/a（C 级，不建模）。
+- **S4H-2（101）：**
+  - 46 条零容量交流候选线 `num_parallel` = 1（开关 `research.corridors.candidate_num_parallel`：one_circuit | template43）；PyPSA 读回的电抗与新回路数一致。
+  - APG17 按第 98 项关系修正：回路数 1.286 → 0.017667，x 67.8 → 4,939 Ω（`READJUST_IMPEDANCE_S4H2.csv`）。
+  - KH–LA、LA–MM、LA–TH（7 个节点对）、MY–SG（直流）、MY–TH 补参考候选，共 10 条交流线 + 1 条直流链路（`CORRIDORS_S4H2.csv`）。
+  - 基尔霍夫系数跨度 2.3e5 → 2,034；复现 S4G 的构建与 S4G 逐组件相同。
+- **S4H-3：** 冒烟三项均最优，求解器容差门槛全部通过。
+  - 目标值：一体化 6.39881e11（−0.03 %）、不互联与 S4G 相同、NZE 5.39724e11（−0.03 %）。
+  - 老挝方向扩建转到参考候选线：LA–TH 10 → 54 GW、LA–VN 65 → 81 GW、KH–LA 2 → 8 GW、LA–MM 9.5 → 4.6 GW。
+  - B6 为 53.31 bn EUR（7.7 %）；LA 互联价值 3.26 → 2.50 bn EUR。
+- **S4H-4：**
+  - 部署包重建到 6eead675，四个网络与冒烟网络逐组件一致；上传 232,939,289 B；S4G 部署包作废。
+  - 365×24h 单运行 37–52 min（悲观 76），串行 1.9–2.6 h；预检下限 36 / 72 / 104 GiB 不变。
+  - 第二批敏感性 10 项只登记（加 `la_vn_stock=author`、`candidate_num_parallel=template43`）。
+- **S4H-5：** 上云前清单（报告 §10），格式同 S4G，填入 6eead675。
+- **待用户决定：** 2 项（S4H 报告 §7）：
+  - MY–SG 的参考候选按陆块规则为直流；
+  - 是否把参考候选扩到每个有存量交流线的节点对。
+  - 另需上云前信息与授权。
+- **交付：** `research/06_scope_redesign/p1_step4h_20261017/`，内容为 S4H_REPORT.md、S4H_EVIDENCE.json、S4H_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §17、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4h_20261017/`；测试 `tests/research` 514 通过、整个 `tests/` 531 通过。
