@@ -65,7 +65,8 @@ def rename_legacy_buses(n):
 def tag_cross_border(n):
     """Every Line/Link/Transformer gets border_class in {domestic, cross_border} from buses.country (S1-6)."""
     atmo=set(n.buses.index[n.buses.carrier==ATMOSPHERE_CARRIER]);summary={}
-    atmo|=set(n.buses.index[n.buses.country=='ASEAN'])  # S3-2 (decision 18): regional commodity pools (ASEAN oil/ammonia/methanol) are not network-constrained; ports to them do not make a component cross-border
+    regional=set(n.buses.index[n.buses.country=='ASEAN'])
+    atmo|=regional  # S3-2 (decision 18): regional commodity pools (ASEAN oil/ammonia/methanol) are not network-constrained; ports to them do not make a component cross-border
     for typ in ['Line','Link','Transformer']:
         df=n.df(typ)
         if not len(df):continue
@@ -73,6 +74,7 @@ def tag_cross_border(n):
         for name,z in df.iterrows():
             ports=[z[c] for c in df if c.startswith('bus') and c[3:].isdigit() and z[c] and z[c] not in atmo]
             countries={str(n.buses.at[b,'country']) for b in ports}
+            if not ports and all(z[c] in regional for c in df if c.startswith('bus') and c[3:].isdigit() and z[c]):countries={'ASEAN'}  # S4C-3 (decision 88): the international bunker meters link regional buses only -> domestic (regional)
             if not countries or '' in countries or 'nan' in countries:raise ValueError('Port without country: '+typ+' '+name)
             cls.append('cross_border' if len(countries)>1 else 'domestic');tc.append(TRANSPORT_CARRIERS.get(str(z.carrier),'local'))
         df['border_class']=cls;df['transport_carrier']=tc

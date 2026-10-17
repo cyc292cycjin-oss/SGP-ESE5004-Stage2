@@ -298,6 +298,11 @@ def main(a):
         gates["A6"] = gate_a6_binding(run, lp_meta, net_sha)
         if not gap:
             gates["B1"] = gate_b1_country_net_zero(n)
+        if "research_bunker_net_zero" in n.meta.get("required_constraint_hooks", []):   # S4C-3 (decision 88): ASEAN bunker account, net zero on its own (also in the gap diagnostic)
+            from s4c_layers import bunker_account_report
+            from s4b_acceptance import ABS_FLOOR
+            gates["B1_BUNKERS"] = bunker_account_report(n, float(SV.get("interior", {}).get("solver_tol_factor", 10)) * float(SV.get("interior", {}).get("feasibility_tol", 1e-6)), ABS_FLOOR)
+            save(out / "BUNKER_ACCOUNT.json", gates["B1_BUNKERS"])
         gates["B2"] = gate_b2_storage_cap(n); gates["B3"] = gate_b3_biomass(n); gates["B8"] = gate_b8_demand_consistency(n)
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
         gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6

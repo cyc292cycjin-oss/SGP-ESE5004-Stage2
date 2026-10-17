@@ -35,6 +35,19 @@ S4C-2 (decision 83; user decision 2026-10-17 on stop report S4C_STOP_02):
     runoff shares kept). Run-of-river availability is clipped at 1 (energy lost reported). New-build reservoir / run-of-river candidates:
     capacity-weighted per-MW inflow (availability) of the corrected same-country stock of the same kind (else the other kind of the country,
     else ASEAN); max_hours of the S4B-2 proxies unchanged; the research_new_hydro_inflow hook stays. PHS unaffected.
+
+S4C-3 (decision 88, modifying decision 10):
+  * bunker_mode / apply_bunker_attribution: research.bunkers.attribution = asean_pool (main) | bunkering_country (former state: the
+    international aviation and shipping bunkers sit on the nodes of the bunkering country, fossil kerosene booked in its atmosphere) |
+    excluded (demand and emissions not bound: research.s2.demand.international_bunkers is driven to false, rows listed as deferred).
+  * asean_pool: the bunker loads of all countries are moved to the regional liquid buses (decision 44; regional in both scenarios) as two
+    ASEAN loads (aviation, shipping) with country tag ASEAN: aviation kerosene through a fossil meter from 'ASEAN oil' and a non-fossil twin
+    from 'ASEAN oil non-fossil'; shipping methanol through one link from 'ASEAN methanol'. Fossil combustion is booked in the new
+    'co2 bunkers ASEAN' account (same Store contract as the national atmospheres) whose final level must be <= 0 on its own
+    (hook research_bunker_net_zero, row research_bunker_co2_limit). No removal can enter the account (every port is an emission port;
+    validate_bunker_account), so no country's negative emissions are transferred to it (decision 9) and the account can only be met with
+    non-fossil fuel. Methanol is zero at use under origin_neutral (decision 64: its carbon is booked at synthesis in the producing
+    country), so asean_pool requires research.s3.fuel_carbon_mode = origin_neutral.
 """
 from __future__ import annotations
 
@@ -358,3 +371,184 @@ def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
                          anomalous_units_cf_gt_1_before=[u["name"] for u in led["units"] if u["cf_before"] > 1])
     n.meta["research_hydro_inflow"] = led
     return led
+
+
+# ---------------------------------------------------------------------------------------------------------------- S4C-3 (decision 88)
+BUNKER_MODES = ("asean_pool", "bunkering_country", "excluded")
+BUNKER_ACCOUNTS = {"InternationalAviationBunker": "aviation", "InternationalShippingBunker": "shipping"}
+BUNKER_CO2_BUS = "co2 bunkers ASEAN"
+BUNKER_CO2_CARRIER = "co2 bunkers"
+BUNKER_HOOK = "research_bunker_net_zero"
+BUNKER_ROW = "research_bunker_co2_limit"
+
+
+def bunker_mode(cfg) -> str:
+    """research.bunkers.attribution (decision 88). 'excluded' drives research.s2.demand.international_bunkers (decision 10) to false, so the
+    S2 demand layer lists the bunker rows as deferred; the two switches must agree otherwise. Call before the demand layer."""
+    R = cfg["research"]
+    mode = str(R.get("bunkers", {}).get("attribution", "bunkering_country"))
+    if mode not in BUNKER_MODES:
+        raise ValueError("Unknown research.bunkers.attribution " + mode)
+    D = R["s2"]["demand"]
+    if mode == "excluded":
+        D["international_bunkers"] = False
+    elif not bool(D.get("international_bunkers", True)):
+        raise ValueError(f"research.s2.demand.international_bunkers = false contradicts research.bunkers.attribution = {mode} (use excluded)")
+    if mode == "asean_pool" and str(R.get("s3", {}).get("fuel_carbon_mode", "origin_neutral")) != "origin_neutral":
+        raise ValueError("research.bunkers.attribution = asean_pool needs research.s3.fuel_carbon_mode = origin_neutral: under producer_credit the "
+                         "bunker methanol would book its carbon in the bunker account while the capture credit stays in the producing country, "
+                         "i.e. a transfer of national removals that decision 88 excludes")
+    return mode
+
+
+def _attached(n, bus):
+    """Every component port on a bus: [(type, name, port)]."""
+    out = []
+    for typ in ["Generator", "Load", "Store", "StorageUnit"]:
+        df = n.df(typ)
+        out += [(typ, x, "bus") for x in df.index[df.bus == bus]]
+    for col in [c for c in n.links if c.startswith("bus") and c[3:].isdigit()]:
+        out += [("Link", x, col) for x in n.links.index[n.links[col] == bus]]
+    return out
+
+
+def validate_bunker_account(n) -> dict:
+    """The bunker account: one Store with the national atmosphere contract; every Link port on it is an output port with a non-negative
+    coefficient (emission), never bus0 and never a removal; nothing else attached."""
+    if BUNKER_CO2_BUS not in n.buses.index:
+        return dict(present=False)
+    st = n.stores.index[n.stores.bus == BUNKER_CO2_BUS]
+    if len(st) != 1 or not n.stores.at[st[0], "e_nom_extendable"] or n.stores.at[st[0], "e_min_pu"] != -1 or n.stores.at[st[0], "e_cyclic"] or n.stores.at[st[0], "e_initial"] != 0:
+        raise ValueError("Bunker account Store contract broken")
+    ports = []
+    for typ, name, col in _attached(n, BUNKER_CO2_BUS):
+        if typ == "Store":
+            continue
+        if typ != "Link" or col == "bus0":
+            raise ValueError(f"Bunker account: {typ} {name} {col} is not a Link emission port")
+        k = float(n.links.at[name, "efficiency" if col == "bus1" else "efficiency" + col[3:]])
+        if k < 0:
+            raise ValueError("Bunker account: removal port " + name + " (decision 88: no negative emissions enter the account)")
+        ports.append(dict(link=name, port=col, coefficient_t_per_mwh=k, carrier=str(n.links.at[name, "carrier"])))
+    return dict(present=True, store=st[0], ports=ports)
+
+
+def apply_bunker_attribution(n, costs: pd.DataFrame, cfg, demand: dict) -> dict:
+    """S4C-3 (decision 88): see the module docstring. demand is the ledger of s2_layers.add_demand_layer (its 'loads' rows are updated in place)."""
+    from s2_costs import cost
+    from s2_layers import HOURS, S2_OWNER_KIND, add_bus, add_link
+    mode = bunker_mode(cfg)
+    ef_oil, ef_meoh = cost(costs, "oil", "CO2 intensity"), cost(costs, "methanol", "CO2 intensity")
+    rows = [r for r in demand["loads"] if r["account"] in BUNKER_ACCOUNTS]
+    src = pd.DataFrame(rows, columns=["load", "country", "sector", "account", "carrier", "source_row", "annual_mwh", "bus"])
+    led = dict(mode=mode, ef_oil_t_per_mwh=ef_oil, ef_methanol_t_per_mwh=ef_meoh, by_country={}, deferred=[d for d in demand["deferred"] if d["account"] in BUNKER_ACCOUNTS],
+               loads_moved=0, links_removed=0, buses_removed=0, asean_loads={}, account=dict(present=False), notes=[])
+    for c, x in src.groupby("country"):
+        led["by_country"][str(c)] = {f"{BUNKER_ACCOUNTS[a]}_{car.replace(' ', '_')}_mwh": float(v) for (a, car), v in x.groupby(["account", "carrier"]).annual_mwh.sum().items()}
+    if mode == "excluded" and len(src):
+        raise ValueError("excluded: bunker loads were bound")
+    if mode != "asean_pool":
+        led["notes"].append("bunkering_country: loads on the nodes of the bunkering country; fossil kerosene in its atmosphere (decision 10)" if mode == "bunkering_country"
+                            else "excluded: bunker demand and emissions not bound (rows in deferred)")
+        n.meta["research_bunkers"] = led
+        return led
+    # bunker account
+    add_bus(n, BUNKER_CO2_BUS, BUNKER_CO2_CARRIER, "ASEAN", "")
+    n.add("Store", BUNKER_CO2_BUS, bus=BUNKER_CO2_BUS, carrier=BUNKER_CO2_CARRIER, e_nom_extendable=True, e_min_pu=-1.0, e_initial=0.0, e_cyclic=False, capital_cost=0.0, marginal_cost=0.0)
+    n.stores.loc[BUNKER_CO2_BUS, ["country", "research_role"]] = ["ASEAN", "BUNKER_ATMOSPHERE"]
+    removed_loads = set()
+
+    def drop_bus_if_empty(bus):
+        att = _attached(n, bus)
+        if any(t == "Load" for t, _, _ in att):
+            return
+        feeders = [x for t, x, col in att if t == "Link"]
+        if any(n.links.at[x, "bus1"] != bus for x in feeders):
+            raise ValueError("Bunker final bus feeds something else: " + bus)
+        n.mremove("Link", feeders); n.remove("Bus", bus)
+        led["links_removed"] += len(feeders); led["buses_removed"] += 1
+
+    def pooled_load(name, bus, load_carrier, carrier, sector, account, total, sources):
+        """load_carrier: Load carrier; carrier: ledger carrier (the fuel for metered loads, as s2_layers.register records it)."""
+        n.add("Load", name, bus=bus, carrier=load_carrier, p_set=total / HOURS)
+        srow = f"ASEAN:{account}:{carrier} (sum of " + ",".join(sorted(sources)) + ")"
+        for col, val in [("sector", sector), ("account", account), ("source_account_id", srow), ("country", "ASEAN"), ("demand_owner_kind", S2_OWNER_KIND)]:
+            n.loads.loc[name, col] = val
+        n.meta["demand_owners"][name] = f"S2:ASEAN:{sector}:{account}:{carrier}"
+        n.meta["demand_identity"][name] = dict(carrier=carrier, sector=sector, account=account, country="ASEAN", owner_kind=S2_OWNER_KIND)
+        demand["loads"].append(dict(load=name, country="ASEAN", sector=sector, account=account, carrier=carrier, source_row=srow, annual_mwh=total, bus=bus))
+        led["asean_loads"][name] = dict(bus=bus, carrier=carrier, sector=sector, account=account, annual_mwh=total, sources=sorted(sources))
+
+    for account, label in BUNKER_ACCOUNTS.items():
+        x = src[src.account == account]
+        for carrier, y in x.groupby("carrier"):
+            sectors = set(y.sector)
+            if len(sectors) != 1:
+                raise ValueError(f"{account} {carrier}: several sectors {sorted(sectors)}")
+            sector = sectors.pop(); total = float(y.annual_mwh.sum()); buses = sorted(set(y.bus))
+            for ld in y.load:
+                if n.loads.at[ld, "bus"] not in buses:
+                    raise ValueError("Bunker load moved before S4C-3: " + ld)
+            n.mremove("Load", list(y.load)); removed_loads |= set(y.load)
+            for ld in y.load:
+                n.meta["demand_owners"].pop(ld); n.meta["demand_identity"].pop(ld)
+            if carrier == "oil":   # kerosene (aviation; shipping oil share if > 0; ledger carrier = fuel): fossil meter -> bunker account, non-fossil twin at zero
+                fb = add_bus(n, f"ASEAN {sector} oil final", "oil final energy", "ASEAN", "")
+                add_link(n, f"ASEAN {sector} oil meter", "ASEAN", "oil final-energy accounting", ["ASEAN oil", fb, BUNKER_CO2_BUS], [1.0, ef_oil], role="FUEL_CARBON_METER",
+                         extra={"carbon_rule": "fossil oil combustion booked in the ASEAN international bunker account (decision 88)"})
+                add_link(n, f"ASEAN {sector} oil meter non-fossil", "ASEAN", "oil final-energy accounting", ["ASEAN oil non-fossil", fb], [1.0], role="FUEL_CARBON_METER",
+                         extra={"carbon_rule": "non-fossil oil: zero at combustion (decision 64)", "twin_of": f"ASEAN {sector} oil meter"})
+                pooled_load(f"ASEAN {sector} oil demand", fb, "oil final energy", carrier, sector, account, total, set(y.country))
+            elif carrier == "shipping methanol":   # methanol: zero at use (origin_neutral, decision 64)
+                fb = add_bus(n, "ASEAN shipping international methanol final", "methanol final energy", "ASEAN", "")
+                add_link(n, "ASEAN shipping international methanol", "ASEAN", "shipping methanol", ["ASEAN methanol", fb], [1.0], role="CONVERSION",
+                         extra={"carbon_rule": "methanol carbon booked at synthesis in the producing country (origin_neutral, decision 64); zero at use"})
+                pooled_load("ASEAN shipping international methanol", fb, "shipping methanol", carrier, sector, account, total, set(y.country))
+            else:
+                raise ValueError(f"asean_pool: no regional bus for the bunker carrier {carrier} (hydrogen bunkers would need a regional H2 bus)")
+            for b in buses:
+                drop_bus_if_empty(b)
+            led["loads_moved"] += len(y)
+    demand["loads"][:] = [r for r in demand["loads"] if r["load"] not in removed_loads]
+    n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {BUNKER_HOOK})
+    led["account"] = validate_bunker_account(n)
+    led["hook"] = BUNKER_HOOK; led["row"] = BUNKER_ROW
+    led["notes"].append("asean_pool: bunker account final level <= 0 on its own; only emission ports (fossil kerosene), so fossil bunker fuel is 0 in any feasible solution; "
+                        "methanol shipping is zero at use (its carbon is booked at synthesis in the producing country, decision 64)")
+    n.meta["research_bunkers"] = led
+    return led
+
+
+def install_bunker_net_zero(n):
+    """extra_functionality hook (research_bunker_net_zero): final-snapshot level of the bunker account <= 0."""
+    if getattr(n, "_research_bunker_net_zero_model", None) is n.model:
+        raise ValueError("Bunker net-zero hook already installed")
+    if BUNKER_CO2_BUS not in n.stores.index:
+        raise ValueError("Bunker account Store missing")
+    validate_bunker_account(n)
+    m = n.model
+    m.add_constraints(m["Store-e"].sel(snapshot=n.snapshots[-1], Store=BUNKER_CO2_BUS) <= 0.0, name=BUNKER_ROW)
+    n._research_bunker_net_zero_model = m
+
+
+def bunker_gross_co2_flow(n) -> float:
+    """Annual gross CO2 throughput of the bunker account (t): sum over its ports of sum_t w_t |flow_t| (row reference of the S4B acceptance)."""
+    if BUNKER_CO2_BUS not in n.buses.index:
+        return 0.0
+    w = n.snapshot_weightings.stores
+    return float(sum((n.links_t["p" + p["port"][3:]][p["link"]].abs() * w).sum() for p in validate_bunker_account(n)["ports"]))
+
+
+def bunker_account_report(n, primal_relative: float = 1e-5, abs_floor: float = 1e-3) -> dict:
+    """Post-solve gate B1_BUNKERS: bunker account final level <= 0 within the S4B budget; kerosene / methanol supply of the bunker loads."""
+    if BUNKER_CO2_BUS not in n.stores.index:
+        return dict(gate="B1_BUNKERS", passed=True, present=False)
+    w = n.snapshot_weightings.stores; acc = validate_bunker_account(n)
+    tonnes = {p["link"]: float((-n.links_t["p" + p["port"][3:]][p["link"]] * w).sum()) for p in acc["ports"]}
+    level = float(n.stores_t.e[BUNKER_CO2_BUS].iloc[-1]); gross = bunker_gross_co2_flow(n)
+    tol = abs_floor + primal_relative * max(1.0, gross)
+    supply = {}
+    for name, z in n.links[n.links.bus1.isin([v["bus"] for v in n.meta.get("research_bunkers", {}).get("asean_loads", {}).values()])].iterrows():
+        supply[name] = float((n.links_t.p0[name] * w).sum())
+    return dict(gate="B1_BUNKERS", passed=bool(level <= tol), present=True, final_level_tco2=level, cap_tco2=0.0, tolerance_t=tol, gross_co2_flow_t=gross,
+                port_tonnes=tonnes, supply_mwh=supply)

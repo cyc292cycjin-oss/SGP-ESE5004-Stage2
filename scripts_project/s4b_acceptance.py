@@ -87,6 +87,12 @@ def special_references(m, n, row_labels: np.ndarray, col_labels: np.ndarray, gro
                 for l in np.asarray(m.constraints[name].labels).ravel():
                     if int(l) in rpos:
                         row_ref[rpos[int(l)]] = max(row_ref[rpos[int(l)]], gross.get(c, 0.0)); tagged["net_zero_rows"][name] = gross.get(c, 0.0)
+    if "research_bunker_co2_limit" in m.constraints:   # S4C-3 (decision 88): the bunker account row takes its own gross flow
+        from s4c_layers import bunker_gross_co2_flow
+        gb = bunker_gross_co2_flow(n)
+        for l in np.asarray(m.constraints["research_bunker_co2_limit"].labels).ravel():
+            if int(l) in rpos:
+                row_ref[rpos[int(l)]] = max(row_ref[rpos[int(l)]], gb); tagged["net_zero_rows"]["research_bunker_co2_limit"] = gb
     if pools:
         # every Store row of a pool: energy balance and the level bounds of fixed stores (Store-fix-e-lower / -upper), whatever the store dimension name
         for cname in [c for c in m.constraints if str(c).startswith("Store-")]:
@@ -340,8 +346,8 @@ def evaluate(n, lp_dir, sol_dir, out_dir, interior: dict, barconvtol: float, m=N
     return res
 
 
-S4B_MAIN_SET = ("A1_A2_S4B", "A3_S4B", "A4", "A5_S4B", "A6", "B1_S4B", "B2", "B3_S4B", "B8", "B11", "B12", "B13", "B14", "B15")
-S3B_SET = ("A1_A2", "A3", "A4", "A5", "A6", "B1", "B2", "B3", "B8", "B11", "B12", "B13", "B14", "B15")
+S4B_MAIN_SET = ("A1_A2_S4B", "A3_S4B", "A4", "A5_S4B", "A6", "B1_S4B", "B2", "B3_S4B", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS")
+S3B_SET = ("A1_A2", "A3", "A4", "A5", "A6", "B1", "B2", "B3", "B8", "B11", "B12", "B13", "B14", "B15", "B1_BUNKERS")   # B1_BUNKERS (S4C-3) only when the bunker account exists
 
 
 def all_passed(gates: dict, basis: str) -> bool:
