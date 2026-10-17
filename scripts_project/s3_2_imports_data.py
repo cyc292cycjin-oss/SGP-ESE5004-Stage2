@@ -5,7 +5,8 @@ results deposited on Zenodo (doi:10.5281/zenodo.14872184, results.parquet, CC-BY
 dataset; the published text quotes these 2040 values, e.g. Fischer-Tropsch 125-132 EUR/MWh, hydrogen by pipeline 74-88 EUR/MWh), subcategory
 "Cost per MWh delivered", minimum over exporters - the same reduction PyPSA-Eur's add_import_options applies (import branch commit 5a87cedd,
 prepare_sector_network.py lines 4616-4620 and 4703-4708). Decision 17: +20 % markup for ASEAN; sensitivity switch +-20 % on the applied price.
-Fossil imports: WEO 2025 NZE 2050 prices registered in D1 (LNG via terminals, S3-1; oil regional bus and coal per node, S3-2).
+Fossil imports: WEO 2025 2050 prices registered in D1 (LNG via terminals, S3-1; oil regional bus and coal per node, S3-2); scenario per
+research.fuels.price_scenario (S4C-0, decision 85: STEPS main, NZE low-price sensitivity; the reference table lists the main scenario).
 
     python scripts_project/s3_2_imports_data.py
 """
@@ -14,6 +15,9 @@ from __future__ import annotations
 import pandas as pd
 
 from d1_common import REG_DIR, ROOT, SRC_DIR, Registry, sha256, write_csv, write_json
+from s2_costs import FUEL_PRICE_IDS
+
+MAIN_FUEL_SCENARIO = "steps"   # S4C-0 (decision 85): configs/research/baseline.yaml research.fuels.price_scenario (main)
 
 SCRIPT = "scripts_project/s3_2_imports_data.py"
 NEU = SRC_DIR / "neumann2024"
@@ -55,12 +59,13 @@ def main():
                          source=f"Zenodo {ZENODO_DOI} results.parquet (scenario default, year 2040, Cost per MWh delivered, min over exporters as PyPSA-Eur add_import_options lines 4616-4620/4703-4708)"))
     write_csv(rows, OUT / "IMPORT_PRICES_2050.csv", list(rows[0].keys()))
     # fossil references (D1 registry)
-    reg_df = pd.read_csv(REG_DIR / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
-    fossil = [dict(carrier=c, price_eur2020_per_mwh=float(reg_df.loc[pid, "value"]), registry_id=pid, model_bus=bus, note=note) for c, pid, bus, note in [
-        ("gas (LNG)", "fuel_price_gas_NZE_2050_main", "node gas via LNG terminals (S3-1)", "WEO 2025 NZE 2050 Japan LNG; regasification adder DATA_PENDING"),
-        ("oil", "fuel_price_oil_NZE_2050_main", "ASEAN oil (regional, S3-2)", "WEO 2025 NZE 2050 crude import price; one regional pool (decision 18), per-node pools removed"),
-        ("coal", "fuel_price_coal_NZE_2050_main", "node coal (per node, unchanged S2 structure)", "WEO 2025 NZE 2050 steam coal Japan; per-node unlimited supply kept (decision 18)"),
-        ("lignite", "fuel_price_lignite_NZE_2050_main" if "fuel_price_lignite_NZE_2050_main" in reg_df.index else "fuel_price_coal_NZE_2050_main", "node lignite (per node)", "S2 structure kept")]]
+    reg_df = pd.read_csv(REG_DIR / "fragments" / "fuel_prices.csv", dtype=str, keep_default_na=False).set_index("param_id")
+    ids = {c: FUEL_PRICE_IDS[MAIN_FUEL_SCENARIO].format(c=c) for c in ("gas", "oil", "coal")}; scen = ids["gas"].split("_")[3]
+    fossil = [dict(carrier=c, price_eur2020_per_mwh=(float(reg_df.loc[pid, "value"]) if pid else None), registry_id=pid, model_bus=bus, note=note) for c, pid, bus, note in [
+        ("gas (LNG)", ids["gas"], "node gas via LNG terminals (S3-1)", f"WEO 2025 {scen} 2050 Japan LNG (S4C-0 main, decision 85); regasification adder DATA_PENDING"),
+        ("oil", ids["oil"], "ASEAN oil (regional, S3-2)", f"WEO 2025 {scen} 2050 crude import price (S4C-0 main); one regional pool (decision 18), per-node pools removed"),
+        ("coal", ids["coal"], "node coal (per node, unchanged S2 structure)", f"WEO 2025 {scen} 2050 steam coal Japan (S4C-0 main); per-node unlimited supply kept (decision 18)"),
+        ("lignite", "", "node lignite (per node)", "S2 structure kept; cost-layer lignite fuel row (technology-data v0.15.0); WEO Table 2.3 has no lignite price (S3 table listed the coal NZE id here, which the build never applied)")]]
     write_csv(fossil, OUT / "IMPORT_PRICES_FOSSIL_2050.csv", list(fossil[0].keys()))
     # registry
     reg = Registry(SCRIPT)
@@ -87,9 +92,9 @@ def main():
     reg.add("import_h2_terminal_rule", "Hydrogen (liquid) ship imports enter the node H2 bus at the LNG terminal nodes: p_nom_max = LNG terminal capacity (existing x 2.5, or proposed) as PyPSA-Eur maps shipping-lh2 to LNG entry points (translate dict line ~4540) with "
             "capacity_boost (config line 710); terminal capital cost 7018 x 1.2 EUR/MW/a (lines 4560-4563); nodes without LNG capacity get no H2 import", "lng_terminal_nodes", "method", "B",
             "PyPSA-Eur import branch commit 5a87cedd", "add_import_options", PE_IMPORT_SHA, decision_ref="17")
-    reg.add("import_coal_structure", "Coal and lignite keep the S2 per-node pools with unlimited one-way supply at the WEO NZE price (decision 18: not network-constrained); emissions booked at the consuming link in the consuming country", "per_node", "method", "B",
+    reg.add("import_coal_structure", "Coal and lignite keep the S2 per-node pools with unlimited one-way supply (decision 18: not network-constrained) at the WEO price of research.fuels.price_scenario (coal; S4C-0 main STEPS) and the cost-layer lignite row; emissions booked at the consuming link in the consuming country", "per_node", "method", "B",
             "S3 instruction S3-2.1", "s3_layers.add_imports", pq_sha, decision_ref="18")
-    reg.add("import_oil_structure", "Oil: one regional pool bus ASEAN oil with the external import generator (WEO NZE crude price); node oil buses connect to the pool through free bidirectional distribution links (decision 18), per-node external oil removed; FT/BtL outputs stay on the node buses until S3-5",
+    reg.add("import_oil_structure", "Oil: one regional pool bus ASEAN oil with the external import generator (WEO crude price of research.fuels.price_scenario; S4C-0 main STEPS); node oil buses connect to the pool through free bidirectional distribution links (decision 18), per-node external oil removed; FT/BtL outputs stay on the node buses until S3-5",
             "regional_pool", "method", "B", "S3 instruction S3-2.1", "s3_layers.add_imports", pq_sha, decision_ref="18")
     reg.write(REG_DIR / "fragments" / "imports.csv")
     write_json(dict(script=SCRIPT, sources=dict(parquet=pq_sha, zenodo_doi=ZENODO_DOI, zenodo_url=ZENODO_URL, fetched_utc=FETCHED_UTC, natcomms_html=NATCOMMS_HTML_SHA, arxiv_v1=ARXIV_SHA, pypsa_eur_import_branch=PE_IMPORT_SHA,

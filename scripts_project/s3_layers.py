@@ -9,7 +9,8 @@ S3-1 add_gas_network: node gas buses keep the PyPSA-Eur gas_network structure (o
     submarine costs; the 2025 cross-border stock (GEM, batch 9) is added with p_nom_min = capacity (decision 15), extendable at the
     candidate cost; cross-border pipelines are removed by research.cross_border.gas = false (apply_cross_border_switches_s2);
   * LNG: one import Generator per terminal node (D1 registry), p_nom = existing (operating + construction) capacity, p_nom_max = 2.5 x,
-    proposed-only sites p_nom 0 / p_nom_max = proposed capacity; price = WEO NZE Japan LNG + regasification adder (DATA_PENDING -> 0).
+    proposed-only sites p_nom 0 / p_nom_max = proposed capacity; price = WEO Japan LNG + regasification adder (DATA_PENDING -> 0).
+WEO scenario of the gas and oil prices (S4C-0, decision 85): research.fuels.price_scenario (steps main, nze low-price sensitivity).
 """
 from __future__ import annotations
 
@@ -17,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from carrier_architecture import atmosphere_bus
-from s2_costs import cost
+from s2_costs import cost, fuel_price, fuel_price_ids, fuel_price_scenario
 from s2_layers import add_bus, add_link, country_of, ensure_carrier
 
 HOURS = 8760.0
@@ -51,7 +52,8 @@ def electricity_load_shares(n, nodes):
 def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidates: pd.DataFrame):
     G = cfg["research"]["s3"]["gas"]
     led = {}
-    price = float(registry.loc["fuel_price_gas_NZE_2050_main", "value"])
+    price = fuel_price(cfg, registry, "gas")   # S4C-0 (decision 85): WEO 2025 scenario of research.fuels.price_scenario; domestic production at the same price (decision 43)
+    led["price_scenario"] = fuel_price_scenario(cfg); led["price_registry_id"] = fuel_price_ids(cfg)["gas"]
     adder = float(G.get("lng_regasification_adder_eur_per_mwh", 0.0))
     # 1. remove the unlimited per-node external gas supply of the carrier recipe
     ext = list(n.generators.index[(n.generators.carrier == "gas") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
@@ -214,7 +216,7 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
         return name
 
     # 1. oil regional pool
-    oil_price = float(registry.loc["fuel_price_oil_NZE_2050_main", "value"])
+    oil_price = fuel_price(cfg, registry, "oil")   # S4C-0 (decision 85): same WEO scenario as gas and coal
     pool = pool_bus("ASEAN oil", "oil")
     ext = list(n.generators.index[(n.generators.carrier == "oil") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
     n.mremove("Generator", ext)
@@ -228,7 +230,7 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
         add_link(n, f"oil pool {node}", country_of(n, node) if node in n.buses.index else "ASEAN", "oil pool", [b, pool], [1.0], p_min_pu=-1.0, role="TRANSPORT",
                  extra={"gas_pipeline_kind": "", "pool": "ASEAN oil"})
         k += 1
-    led["oil"] = dict(pool=pool, external_removed=len(ext), distribution_links=k, price=oil_price, direction="bidirectional (node <-> pool)")
+    led["oil"] = dict(pool=pool, external_removed=len(ext), distribution_links=k, price=oil_price, price_registry_id=fuel_price_ids(cfg)["oil"], direction="bidirectional (node <-> pool)")
     # 2. coal / lignite unchanged (per node, S2 structure)
     led["coal"] = dict(structure="per_node_unchanged", generators=int(((n.generators.carrier.isin(["coal", "lignite"])) & (n.generators.research_role == "EXTERNAL_SUPPLY")).sum()))
     # 3. green carriers on regional buses

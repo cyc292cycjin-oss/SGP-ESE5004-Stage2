@@ -1,0 +1,3563 @@
+{
+  "A1_A2": {
+    "gate": "A1_A2_INTERIOR_POINT",
+    "passed": false,
+    "criteria": {
+      "primal_rows_within_budget": false,
+      "primal_columns_within_budget": true,
+      "dual_stationarity": false,
+      "dual_sign": false,
+      "relative_gap": true,
+      "complementarity": true
+    },
+    "thresholds": {
+      "barconvtol": 1e-08,
+      "relative_gap": 1e-07,
+      "complementarity_over_scale": 1e-07,
+      "dual_normalized": 1e-06,
+      "primal": "1e-3 + 1e-7 x reference (V4 budget; 1e-7 = 10 x BarConvTol)"
+    },
+    "metrics": {
+      "row_violation_max": 0.04469413496553898,
+      "column_violation_max": 0.0,
+      "row_fail_count": 8,
+      "column_fail_count": 0,
+      "stationarity_normalized_max": 3.935917752241849e-06,
+      "stationarity_fail_count": 1,
+      "dual_sign_normalized_max": 0.1971407418051132,
+      "dual_sign_fail_count": 9800,
+      "relative_gap": 2.72742470715476e-10,
+      "complementarity_l1": 586.6593071676295,
+      "primal_objective": 698298611055.8674,
+      "dual_objective_numeric": 698298610865.4117
+    },
+    "v4_independent_kkt_pass": false,
+    "note": "interior solution: degenerate equal-cost alternatives may be split across options"
+  },
+  "A3": {
+    "gate": "A3_PHYSICS",
+    "passed": false,
+    "checks": 387,
+    "failed": [
+      {
+        "check": "STORE_ENERGY_LOWER",
+        "residual": 0.003734556969448022
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:ID",
+        "residual": 0.04469413496553898
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:KH",
+        "residual": 0.0031426620262209326
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:LA",
+        "residual": 0.010079312734887935
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:MY",
+        "residual": 0.004602621134836227
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:PH",
+        "residual": 0.015278329723514616
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:TH",
+        "residual": 0.008391526062041521
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:VN",
+        "residual": 0.011533440498169512
+      }
+    ],
+    "details": {
+      "objective_reconciliation": {
+        "capital": 484664801894.36786,
+        "variable": 202827651919.29886,
+        "known_fixed_once": 10806157242.20073,
+        "actual": 698298611056.0613
+      },
+      "country_co2_levels_tco2": {
+        "BN": -0.0005248215077244822,
+        "ID": 0.04469413496553898,
+        "KH": 0.0031426620262209326,
+        "LA": 0.010079312734887935,
+        "MM": -0.005042905220761895,
+        "MY": 0.004602621134836227,
+        "PH": 0.015278329723514616,
+        "SG": -0.0005691095975635108,
+        "TH": 0.008391526062041521,
+        "TL": -1.057294184647617e-05,
+        "VN": 0.011533440498169512
+      },
+      "carbon_validation": "Link multiport equations + CO2 bus balance + national atmosphere Store state; caps checked on final level",
+      "known_terms": {},
+      "diagnostic_expected_failures": []
+    }
+  },
+  "A5": {
+    "gate": "A5_FOM_ONCE",
+    "passed": true,
+    "reconciliation": {
+      "capital": 484664801894.36786,
+      "variable": 202827651919.29886,
+      "known_fixed_once": 10806157242.20073,
+      "actual": 698298611056.0613
+    },
+    "known_constants": {
+      "existing_asset_fom": 10806157242.20073,
+      "existing_cross_border_fom": 0.0
+    }
+  },
+  "A4": {
+    "gate": "A4_NETCDF_READBACK",
+    "passed": true,
+    "error": null,
+    "file": "results_project/s4c/s4c6/solves_main/disconnected/disconnected_SMOKE_TEST_ONLY_solved.nc",
+    "sha256": "754077060b42916658b81f33d0125ccdc30225d270424e9530a5d93dc2b290e9",
+    "status": "EXACT_SEMANTIC_ROUNDTRIP",
+    "dynamic_tables": 22,
+    "pypsa_omitted_declared_default_columns_restored": []
+  },
+  "A6": {
+    "gate": "A6_SCALE_BINDING",
+    "passed": true,
+    "lp": {
+      "num_col": 604645,
+      "num_row": 1348617,
+      "nnz": 2984665,
+      "build_seconds": 9.97267746925354,
+      "research_constraints": [
+        "ResearchBatteryNominal-0",
+        "ResearchBatteryNominal-1",
+        "ResearchBatteryNominal-10",
+        "ResearchBatteryNominal-100",
+        "ResearchBatteryNominal-101",
+        "ResearchBatteryNominal-102",
+        "ResearchBatteryNominal-103",
+        "ResearchBatteryNominal-104",
+        "ResearchBatteryNominal-105",
+        "ResearchBatteryNominal-106",
+        "ResearchBatteryNominal-107",
+        "ResearchBatteryNominal-108",
+        "ResearchBatteryNominal-109",
+        "ResearchBatteryNominal-11",
+        "ResearchBatteryNominal-110",
+        "ResearchBatteryNominal-111",
+        "ResearchBatteryNominal-112",
+        "ResearchBatteryNominal-113",
+        "ResearchBatteryNominal-114",
+        "ResearchBatteryNominal-115",
+        "ResearchBatteryNominal-116",
+        "ResearchBatteryNominal-117",
+        "ResearchBatteryNominal-118",
+        "ResearchBatteryNominal-119",
+        "ResearchBatteryNominal-12",
+        "ResearchBatteryNominal-120",
+        "ResearchBatteryNominal-121",
+        "ResearchBatteryNominal-122",
+        "ResearchBatteryNominal-123",
+        "ResearchBatteryNominal-124",
+        "ResearchBatteryNominal-125",
+        "ResearchBatteryNominal-126",
+        "ResearchBatteryNominal-127",
+        "ResearchBatteryNominal-128",
+        "ResearchBatteryNominal-129",
+        "ResearchBatteryNominal-13",
+        "ResearchBatteryNominal-130",
+        "ResearchBatteryNominal-131",
+        "ResearchBatteryNominal-132",
+        "ResearchBatteryNominal-133",
+        "ResearchBatteryNominal-134",
+        "ResearchBatteryNominal-135",
+        "ResearchBatteryNominal-136",
+        "ResearchBatteryNominal-137",
+        "ResearchBatteryNominal-138",
+        "ResearchBatteryNominal-139",
+        "ResearchBatteryNominal-14",
+        "ResearchBatteryNominal-140",
+        "ResearchBatteryNominal-141",
+        "ResearchBatteryNominal-142",
+        "ResearchBatteryNominal-143",
+        "ResearchBatteryNominal-144",
+        "ResearchBatteryNominal-145",
+        "ResearchBatteryNominal-146",
+        "ResearchBatteryNominal-147",
+        "ResearchBatteryNominal-148",
+        "ResearchBatteryNominal-149",
+        "ResearchBatteryNominal-15",
+        "ResearchBatteryNominal-150",
+        "ResearchBatteryNominal-151",
+        "ResearchBatteryNominal-152",
+        "ResearchBatteryNominal-153",
+        "ResearchBatteryNominal-154",
+        "ResearchBatteryNominal-155",
+        "ResearchBatteryNominal-156",
+        "ResearchBatteryNominal-157",
+        "ResearchBatteryNominal-158",
+        "ResearchBatteryNominal-159",
+        "ResearchBatteryNominal-16",
+        "ResearchBatteryNominal-160",
+        "ResearchBatteryNominal-161",
+        "ResearchBatteryNominal-162",
+        "ResearchBatteryNominal-163",
+        "ResearchBatteryNominal-164",
+        "ResearchBatteryNominal-165",
+        "ResearchBatteryNominal-166",
+        "ResearchBatteryNominal-167",
+        "ResearchBatteryNominal-168",
+        "ResearchBatteryNominal-169",
+        "ResearchBatteryNominal-17",
+        "ResearchBatteryNominal-170",
+        "ResearchBatteryNominal-171",
+        "ResearchBatteryNominal-172",
+        "ResearchBatteryNominal-173",
+        "ResearchBatteryNominal-174",
+        "ResearchBatteryNominal-175",
+        "ResearchBatteryNominal-176",
+        "ResearchBatteryNominal-177",
+        "ResearchBatteryNominal-178",
+        "ResearchBatteryNominal-179",
+        "ResearchBatteryNominal-18",
+        "ResearchBatteryNominal-180",
+        "ResearchBatteryNominal-181",
+        "ResearchBatteryNominal-182",
+        "ResearchBatteryNominal-183",
+        "ResearchBatteryNominal-184",
+        "ResearchBatteryNominal-185",
+        "ResearchBatteryNominal-186",
+        "ResearchBatteryNominal-187",
+        "ResearchBatteryNominal-188",
+        "ResearchBatteryNominal-189",
+        "ResearchBatteryNominal-19",
+        "ResearchBatteryNominal-190",
+        "ResearchBatteryNominal-191",
+        "ResearchBatteryNominal-192",
+        "ResearchBatteryNominal-193",
+        "ResearchBatteryNominal-194",
+        "ResearchBatteryNominal-195",
+        "ResearchBatteryNominal-2",
+        "ResearchBatteryNominal-20",
+        "ResearchBatteryNominal-21",
+        "ResearchBatteryNominal-22",
+        "ResearchBatteryNominal-23",
+        "ResearchBatteryNominal-24",
+        "ResearchBatteryNominal-25",
+        "ResearchBatteryNominal-26",
+        "ResearchBatteryNominal-27",
+        "ResearchBatteryNominal-28",
+        "ResearchBatteryNominal-29",
+        "ResearchBatteryNominal-3",
+        "ResearchBatteryNominal-30",
+        "ResearchBatteryNominal-31",
+        "ResearchBatteryNominal-32",
+        "ResearchBatteryNominal-33",
+        "ResearchBatteryNominal-34",
+        "ResearchBatteryNominal-35",
+        "ResearchBatteryNominal-36",
+        "ResearchBatteryNominal-37",
+        "ResearchBatteryNominal-38",
+        "ResearchBatteryNominal-39",
+        "ResearchBatteryNominal-4",
+        "ResearchBatteryNominal-40",
+        "ResearchBatteryNominal-41",
+        "ResearchBatteryNominal-42",
+        "ResearchBatteryNominal-43",
+        "ResearchBatteryNominal-44",
+        "ResearchBatteryNominal-45",
+        "ResearchBatteryNominal-46",
+        "ResearchBatteryNominal-47",
+        "ResearchBatteryNominal-48",
+        "ResearchBatteryNominal-49",
+        "ResearchBatteryNominal-5",
+        "ResearchBatteryNominal-50",
+        "ResearchBatteryNominal-51",
+        "ResearchBatteryNominal-52",
+        "ResearchBatteryNominal-53",
+        "ResearchBatteryNominal-54",
+        "ResearchBatteryNominal-55",
+        "ResearchBatteryNominal-56",
+        "ResearchBatteryNominal-57",
+        "ResearchBatteryNominal-58",
+        "ResearchBatteryNominal-59",
+        "ResearchBatteryNominal-6",
+        "ResearchBatteryNominal-60",
+        "ResearchBatteryNominal-61",
+        "ResearchBatteryNominal-62",
+        "ResearchBatteryNominal-63",
+        "ResearchBatteryNominal-64",
+        "ResearchBatteryNominal-65",
+        "ResearchBatteryNominal-66",
+        "ResearchBatteryNominal-67",
+        "ResearchBatteryNominal-68",
+        "ResearchBatteryNominal-69",
+        "ResearchBatteryNominal-7",
+        "ResearchBatteryNominal-70",
+        "ResearchBatteryNominal-71",
+        "ResearchBatteryNominal-72",
+        "ResearchBatteryNominal-73",
+        "ResearchBatteryNominal-74",
+        "ResearchBatteryNominal-75",
+        "ResearchBatteryNominal-76",
+        "ResearchBatteryNominal-77",
+        "ResearchBatteryNominal-78",
+        "ResearchBatteryNominal-79",
+        "ResearchBatteryNominal-8",
+        "ResearchBatteryNominal-80",
+        "ResearchBatteryNominal-81",
+        "ResearchBatteryNominal-82",
+        "ResearchBatteryNominal-83",
+        "ResearchBatteryNominal-84",
+        "ResearchBatteryNominal-85",
+        "ResearchBatteryNominal-86",
+        "ResearchBatteryNominal-87",
+        "ResearchBatteryNominal-88",
+        "ResearchBatteryNominal-89",
+        "ResearchBatteryNominal-9",
+        "ResearchBatteryNominal-90",
+        "ResearchBatteryNominal-91",
+        "ResearchBatteryNominal-92",
+        "ResearchBatteryNominal-93",
+        "ResearchBatteryNominal-94",
+        "ResearchBatteryNominal-95",
+        "ResearchBatteryNominal-96",
+        "ResearchBatteryNominal-97",
+        "ResearchBatteryNominal-98",
+        "ResearchBatteryNominal-99",
+        "ResearchImportAnnual-BN4 0 gas production",
+        "ResearchImportAnnual-ID_Java-Bali1 0 gas production",
+        "ResearchImportAnnual-ID_Java-Bali1 2 gas production",
+        "ResearchImportAnnual-ID_Kalimantan4 5 gas production",
+        "ResearchImportAnnual-ID_Kalimantan4 6 gas production",
+        "ResearchImportAnnual-ID_Sulawesi0 3 gas production",
+        "ResearchImportAnnual-ID_Sumatra3 1 gas production",
+        "ResearchImportAnnual-MM2 11 gas production",
+        "ResearchImportAnnual-MY_Peninsular2 0 gas production",
+        "ResearchImportAnnual-MY_Peninsular2 1 gas production",
+        "ResearchImportAnnual-MY_Sabah4 0 gas production",
+        "ResearchImportAnnual-MY_Sarawak4 0 gas production",
+        "ResearchImportAnnual-PH_Luzon5 0 gas production",
+        "ResearchImportAnnual-TH2 0 gas production",
+        "ResearchImportAnnual-TH2 1 gas production",
+        "ResearchImportAnnual-TH2 5 gas production",
+        "ResearchImportAnnual-TL11 0 gas production",
+        "ResearchImportAnnual-VN2 0 gas production",
+        "ResearchImportAnnual-VN2 4 gas production",
+        "ResearchStoreDirection-BN biomass cassava_residues",
+        "ResearchStoreDirection-BN biomass coconut_residues",
+        "ResearchStoreDirection-BN biomass maize_residues",
+        "ResearchStoreDirection-BN biomass msw_organic_biogas",
+        "ResearchStoreDirection-BN biomass other_crop_residues",
+        "ResearchStoreDirection-BN biomass rice_residues",
+        "ResearchStoreDirection-BN biomass sugarcane_residues",
+        "ResearchStoreDirection-BN biomass wood_processing_residues",
+        "ResearchStoreDirection-ID biomass cassava_residues",
+        "ResearchStoreDirection-ID biomass coconut_residues",
+        "ResearchStoreDirection-ID biomass maize_residues",
+        "ResearchStoreDirection-ID biomass msw_organic_biogas",
+        "ResearchStoreDirection-ID biomass oil_palm_efb",
+        "ResearchStoreDirection-ID biomass oil_palm_fibre",
+        "ResearchStoreDirection-ID biomass oil_palm_pks",
+        "ResearchStoreDirection-ID biomass oil_palm_pome",
+        "ResearchStoreDirection-ID biomass oil_palm_trunk",
+        "ResearchStoreDirection-ID biomass other_crop_residues",
+        "ResearchStoreDirection-ID biomass rice_residues",
+        "ResearchStoreDirection-ID biomass sugarcane_residues",
+        "ResearchStoreDirection-ID biomass wood_processing_residues",
+        "ResearchStoreDirection-KH biomass cassava_residues",
+        "ResearchStoreDirection-KH biomass coconut_residues",
+        "ResearchStoreDirection-KH biomass maize_residues",
+        "ResearchStoreDirection-KH biomass msw_organic_biogas",
+        "ResearchStoreDirection-KH biomass oil_palm_efb",
+        "ResearchStoreDirection-KH biomass oil_palm_fibre",
+        "ResearchStoreDirection-KH biomass oil_palm_pks",
+        "ResearchStoreDirection-KH biomass oil_palm_pome",
+        "ResearchStoreDirection-KH biomass oil_palm_trunk",
+        "ResearchStoreDirection-KH biomass other_crop_residues",
+        "ResearchStoreDirection-KH biomass rice_residues",
+        "ResearchStoreDirection-KH biomass sugarcane_residues",
+        "ResearchStoreDirection-KH biomass wood_processing_residues",
+        "ResearchStoreDirection-LA biomass cassava_residues",
+        "ResearchStoreDirection-LA biomass maize_residues",
+        "ResearchStoreDirection-LA biomass other_crop_residues",
+        "ResearchStoreDirection-LA biomass rice_residues",
+        "ResearchStoreDirection-LA biomass sugarcane_residues",
+        "ResearchStoreDirection-LA biomass wood_processing_residues",
+        "ResearchStoreDirection-MM biomass cassava_residues",
+        "ResearchStoreDirection-MM biomass coconut_residues",
+        "ResearchStoreDirection-MM biomass maize_residues",
+        "ResearchStoreDirection-MM biomass msw_organic_biogas",
+        "ResearchStoreDirection-MM biomass other_crop_residues",
+        "ResearchStoreDirection-MM biomass rice_residues",
+        "ResearchStoreDirection-MM biomass sugarcane_residues",
+        "ResearchStoreDirection-MM biomass wood_processing_residues",
+        "ResearchStoreDirection-MY biomass cassava_residues",
+        "ResearchStoreDirection-MY biomass coconut_residues",
+        "ResearchStoreDirection-MY biomass maize_residues",
+        "ResearchStoreDirection-MY biomass msw_organic_biogas",
+        "ResearchStoreDirection-MY biomass oil_palm_efb",
+        "ResearchStoreDirection-MY biomass oil_palm_fibre",
+        "ResearchStoreDirection-MY biomass oil_palm_pks",
+        "ResearchStoreDirection-MY biomass oil_palm_pome",
+        "ResearchStoreDirection-MY biomass oil_palm_trunk",
+        "ResearchStoreDirection-MY biomass other_crop_residues",
+        "ResearchStoreDirection-MY biomass rice_residues",
+        "ResearchStoreDirection-MY biomass sugarcane_residues",
+        "ResearchStoreDirection-MY biomass wood_processing_residues",
+        "ResearchStoreDirection-PH biomass cassava_residues",
+        "ResearchStoreDirection-PH biomass coconut_residues",
+        "ResearchStoreDirection-PH biomass maize_residues",
+        "ResearchStoreDirection-PH biomass msw_organic_biogas",
+        "ResearchStoreDirection-PH biomass oil_palm_efb",
+        "ResearchStoreDirection-PH biomass oil_palm_fibre",
+        "ResearchStoreDirection-PH biomass oil_palm_pks",
+        "ResearchStoreDirection-PH biomass oil_palm_pome",
+        "ResearchStoreDirection-PH biomass oil_palm_trunk",
+        "ResearchStoreDirection-PH biomass other_crop_residues",
+        "ResearchStoreDirection-PH biomass rice_residues",
+        "ResearchStoreDirection-PH biomass sugarcane_residues",
+        "ResearchStoreDirection-PH biomass wood_processing_residues",
+        "ResearchStoreDirection-SG biomass cassava_residues",
+        "ResearchStoreDirection-SG biomass coconut_residues",
+        "ResearchStoreDirection-SG biomass msw_organic_biogas",
+        "ResearchStoreDirection-SG biomass other_crop_residues",
+        "ResearchStoreDirection-SG biomass wood_processing_residues",
+        "ResearchStoreDirection-TH biomass cassava_residues",
+        "ResearchStoreDirection-TH biomass coconut_residues",
+        "ResearchStoreDirection-TH biomass maize_residues",
+        "ResearchStoreDirection-TH biomass msw_organic_biogas",
+        "ResearchStoreDirection-TH biomass oil_palm_efb",
+        "ResearchStoreDirection-TH biomass oil_palm_fibre",
+        "ResearchStoreDirection-TH biomass oil_palm_pks",
+        "ResearchStoreDirection-TH biomass oil_palm_pome",
+        "ResearchStoreDirection-TH biomass oil_palm_trunk",
+        "ResearchStoreDirection-TH biomass other_crop_residues",
+        "ResearchStoreDirection-TH biomass rice_residues",
+        "ResearchStoreDirection-TH biomass sugarcane_residues",
+        "ResearchStoreDirection-TH biomass wood_processing_residues",
+        "ResearchStoreDirection-TL biomass cassava_residues",
+        "ResearchStoreDirection-TL biomass coconut_residues",
+        "ResearchStoreDirection-TL biomass maize_residues",
+        "ResearchStoreDirection-TL biomass msw_organic_biogas",
+        "ResearchStoreDirection-TL biomass other_crop_residues",
+        "ResearchStoreDirection-TL biomass rice_residues",
+        "ResearchStoreDirection-TL biomass wood_processing_residues",
+        "ResearchStoreDirection-VN biomass cassava_residues",
+        "ResearchStoreDirection-VN biomass coconut_residues",
+        "ResearchStoreDirection-VN biomass maize_residues",
+        "ResearchStoreDirection-VN biomass msw_organic_biogas",
+        "ResearchStoreDirection-VN biomass other_crop_residues",
+        "ResearchStoreDirection-VN biomass rice_residues",
+        "ResearchStoreDirection-VN biomass sugarcane_residues",
+        "ResearchStoreDirection-VN biomass wood_processing_residues",
+        "ResearchStoreDirection-co2 sequestered BN",
+        "ResearchStoreDirection-co2 sequestered ID",
+        "ResearchStoreDirection-co2 sequestered KH",
+        "ResearchStoreDirection-co2 sequestered MY",
+        "ResearchStoreDirection-co2 sequestered PH",
+        "ResearchStoreDirection-co2 sequestered TH",
+        "ResearchStoreDirection-co2 sequestered TL",
+        "ResearchStoreDirection-co2 sequestered VN",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN BN",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN ID",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN KH",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN LA",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN MM",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN MY",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN PH",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN SG",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN TH",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN TL",
+        "ResearchStoreDirection-co2 sequestered extra-ASEAN VN",
+        "research_bunker_co2_limit",
+        "research_co2_storage_cap-BN",
+        "research_co2_storage_cap-ID",
+        "research_co2_storage_cap-KH",
+        "research_co2_storage_cap-MY",
+        "research_co2_storage_cap-PH",
+        "research_co2_storage_cap-TH",
+        "research_co2_storage_cap-TL",
+        "research_co2_storage_cap-VN",
+        "research_country_co2_limit-BN",
+        "research_country_co2_limit-ID",
+        "research_country_co2_limit-KH",
+        "research_country_co2_limit-LA",
+        "research_country_co2_limit-MM",
+        "research_country_co2_limit-MY",
+        "research_country_co2_limit-PH",
+        "research_country_co2_limit-SG",
+        "research_country_co2_limit-TH",
+        "research_country_co2_limit-TL",
+        "research_country_co2_limit-VN",
+        "research_new_hydro_inflow-ID_Kalimantan4 0 hydro_new",
+        "research_new_hydro_inflow-ID_Kalimantan4 1 hydro_new",
+        "research_new_hydro_inflow-ID_Kalimantan4 10 hydro_new",
+        "research_new_hydro_inflow-ID_Kalimantan4 2 hydro_new",
+        "research_new_hydro_inflow-ID_Kalimantan4 9 hydro_new",
+        "research_new_hydro_inflow-ID_Sulawesi0 1 hydro_new",
+        "research_new_hydro_inflow-ID_Sulawesi0 3 hydro_new",
+        "research_new_hydro_inflow-ID_Sumatra3 0 hydro_new",
+        "research_new_hydro_inflow-ID_Sumatra3 2 hydro_new",
+        "research_new_hydro_inflow-ID_Sumatra3 5 hydro_new",
+        "research_new_hydro_inflow-KH2 2 hydro_new",
+        "research_new_hydro_inflow-KH2 3 hydro_new",
+        "research_new_hydro_inflow-KH2 4 hydro_new",
+        "research_new_hydro_inflow-LA2 1 hydro_new",
+        "research_new_hydro_inflow-LA2 3 hydro_new",
+        "research_new_hydro_inflow-LA2 4 hydro_new",
+        "research_new_hydro_inflow-LA2 5 hydro_new",
+        "research_new_hydro_inflow-MM2 0 hydro_new",
+        "research_new_hydro_inflow-MM2 10 hydro_new",
+        "research_new_hydro_inflow-MM2 13 hydro_new",
+        "research_new_hydro_inflow-MM2 15 hydro_new",
+        "research_new_hydro_inflow-MM2 3 hydro_new",
+        "research_new_hydro_inflow-MM2 4 hydro_new",
+        "research_new_hydro_inflow-MM2 5 hydro_new",
+        "research_new_hydro_inflow-MM2 6 hydro_new",
+        "research_new_hydro_inflow-MM2 7 hydro_new",
+        "research_new_hydro_inflow-MY_Peninsular2 0 hydro_new",
+        "research_new_hydro_inflow-MY_Sarawak4 0 hydro_new",
+        "research_new_hydro_inflow-PH5 0 hydro_new",
+        "research_new_hydro_inflow-PH_Luzon5 0 hydro_new",
+        "research_new_hydro_inflow-PH_Mindanao6 0 hydro_new",
+        "research_new_hydro_inflow-PH_Mindanao6 1 hydro_new",
+        "research_new_hydro_inflow-PH_Visayas7 0 hydro_new",
+        "research_new_hydro_inflow-VN2 1 hydro_new",
+        "research_new_hydro_inflow-VN2 5 hydro_new",
+        "research_new_hydro_inflow-VN2 7 hydro_new"
+      ]
+    },
+    "input_network_sha256": "9777fd6b80f3ae4140591fb260e505916f944395616aaf16fffbb6fec21793d6"
+  },
+  "B1": {
+    "gate": "B1_COUNTRY_NET_ZERO",
+    "passed": false,
+    "s3_scope": {
+      "import_carriers_zero_co2": true,
+      "import_carriers": [
+        "LNG import",
+        "oil import",
+        "ammonia import",
+        "methanol import",
+        "FT fuel import",
+        "H2 import",
+        "gas production"
+      ],
+      "atmosphere_port_carriers": [
+        "CCGT",
+        "CCGT CC",
+        "CCGT existing",
+        "DAC",
+        "Fischer-Tropsch",
+        "OCGT",
+        "OCGT existing",
+        "SMR",
+        "SMR CC",
+        "biogas upgrading",
+        "biomass EOP CC",
+        "coal existing",
+        "coal final-energy accounting",
+        "cooking LPG",
+        "cooking gas",
+        "gas final-energy accounting",
+        "gas production delivery",
+        "industry biomass CC",
+        "industry biomass boiler CC",
+        "industry gas boiler",
+        "lignite existing",
+        "methanolisation",
+        "oil existing",
+        "oil final-energy accounting",
+        "process emissions",
+        "process emissions CC",
+        "waste incineration"
+      ],
+      "s3_fuel_ports_present": {
+        "gas production delivery": true,
+        "Fischer-Tropsch": true,
+        "methanolisation": true,
+        "shipping methanol": false,
+        "industry methanol": false,
+        "OCGT methanol": false,
+        "BtL": false,
+        "biomass-to-methanol": false
+      },
+      "fuel_carbon_mode": "origin_neutral"
+    },
+    "scope": "per_country",
+    "countries": {
+      "BN": {
+        "final_level_tco2": -0.0005248215077244822,
+        "cap_tco2": 0.0,
+        "within_cap": true,
+        "sum_of_ports_tco2": -0.0005255820839623579
+      },
+      "ID": {
+        "final_level_tco2": 0.04469413496553898,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.044613945884665884
+      },
+      "KH": {
+        "final_level_tco2": 0.0031426620262209326,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.003135165311872026
+      },
+      "LA": {
+        "final_level_tco2": 0.010079312734887935,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.010067522395562285
+      },
+      "MM": {
+        "final_level_tco2": -0.005042905220761895,
+        "cap_tco2": 0.0,
+        "within_cap": true,
+        "sum_of_ports_tco2": -0.0050429095202287845
+      },
+      "MY": {
+        "final_level_tco2": 0.004602621134836227,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.004598327073170098
+      },
+      "PH": {
+        "final_level_tco2": 0.015278329723514616,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.01520751602947712
+      },
+      "SG": {
+        "final_level_tco2": -0.0005691095975635108,
+        "cap_tco2": 0.0,
+        "within_cap": true,
+        "sum_of_ports_tco2": -0.0005840762426640332
+      },
+      "TH": {
+        "final_level_tco2": 0.008391526062041521,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.008382266387343407
+      },
+      "TL": {
+        "final_level_tco2": -1.057294184647617e-05,
+        "cap_tco2": 0.0,
+        "within_cap": true,
+        "sum_of_ports_tco2": -1.0608039118682419e-05
+      },
+      "VN": {
+        "final_level_tco2": 0.011533440498169512,
+        "cap_tco2": 0.0,
+        "within_cap": false,
+        "sum_of_ports_tco2": 0.011387292805893496
+      }
+    },
+    "every_tonne_booked_once": true,
+    "by_country_source": {
+      "BN|CCGT": 0.00048281098394433,
+      "BN|CCGT CC": 339240.0199225247,
+      "BN|CCGT existing": 50689.50692410757,
+      "BN|DAC": -760529.7806488427,
+      "BN|Fischer-Tropsch": -0.0008732415344848663,
+      "BN|OCGT": 0.0003279201162489743,
+      "BN|SMR": 0.00014585324886692673,
+      "BN|SMR CC": 0.00021088529139383372,
+      "BN|biogas upgrading": -23600.706425322154,
+      "BN|biomass EOP CC": -4.211294426358818e-05,
+      "BN|coal existing": 0.00016372096977442159,
+      "BN|cooking LPG": 0.00024026227031209973,
+      "BN|cooking gas": 465.9450205738435,
+      "BN|gas final-energy accounting": 210627.05411568505,
+      "BN|gas production delivery": 124950.01414689037,
+      "BN|industry biomass CC": -38262.30131060739,
+      "BN|industry biomass boiler CC": -4.396441900246215e-05,
+      "BN|industry gas boiler": 0.00016038091959420878,
+      "BN|methanolisation": 0.0003001198568706176,
+      "BN|oil final-energy accounting": 85663.677739828,
+      "BN|process emissions": 0.00014062443663099948,
+      "BN|process emissions CC": 10756.568776321386,
+      "ID|CCGT": 1088875.2803386971,
+      "ID|CCGT CC": 7117887.185603815,
+      "ID|CCGT existing": 8642156.425471902,
+      "ID|DAC": -9980698.060359782,
+      "ID|Fischer-Tropsch": -0.016469950725322067,
+      "ID|OCGT": 1830030.9203251416,
+      "ID|OCGT existing": 22795.795146341246,
+      "ID|SMR": 1435.4746953133717,
+      "ID|SMR CC": 6411648.945248369,
+      "ID|biogas upgrading": -11318912.24775399,
+      "ID|biomass EOP CC": -108318509.80595185,
+      "ID|coal existing": 46312755.85706157,
+      "ID|coal final-energy accounting": 2135955.7516620858,
+      "ID|cooking LPG": 2655076.154076609,
+      "ID|cooking gas": 23320.50658276612,
+      "ID|gas final-energy accounting": 39975408.87896645,
+      "ID|gas production delivery": 2854867.7171269283,
+      "ID|industry biomass CC": -183377637.4919818,
+      "ID|industry biomass boiler CC": -23462652.960088756,
+      "ID|industry gas boiler": 0.003957498724129085,
+      "ID|lignite existing": 0.0016158933351482514,
+      "ID|methanolisation": 74339541.92987576,
+      "ID|oil existing": 0.000412271220567635,
+      "ID|oil final-energy accounting": 119444661.25010456,
+      "ID|process emissions": 0.011086164082469187,
+      "ID|process emissions CC": 9638518.952360477,
+      "ID|waste incineration": 13963473.585501341,
+      "KH|CCGT": 0.00036359255831293347,
+      "KH|CCGT CC": 4.416955328484892e-05,
+      "KH|CCGT existing": 8.122431990996364e-05,
+      "KH|DAC": -7499832.039955615,
+      "KH|Fischer-Tropsch": -0.000263707908000739,
+      "KH|OCGT": 0.00026096933242571505,
+      "KH|SMR": 0.0003298388528314416,
+      "KH|SMR CC": 3.8288579717817435e-05,
+      "KH|biogas upgrading": -560892.6710072872,
+      "KH|biomass EOP CC": -0.042649484154433655,
+      "KH|coal existing": 1770696.3871939124,
+      "KH|cooking LPG": 78746.24908296917,
+      "KH|cooking gas": 0.0002592070512352593,
+      "KH|gas final-energy accounting": 4591748.645868362,
+      "KH|industry biomass CC": -3542177.9878270617,
+      "KH|industry biomass boiler CC": -4009085.3502729353,
+      "KH|industry gas boiler": 0.00020179403749748134,
+      "KH|methanolisation": 0.011433981666947656,
+      "KH|oil existing": 111973.95380197912,
+      "KH|oil final-energy accounting": 7735093.078938654,
+      "KH|process emissions": 0.0011922222557700134,
+      "KH|process emissions CC": 726065.3764508718,
+      "KH|waste incineration": 597664.3895692201,
+      "LA|CCGT": 0.0002878128728659985,
+      "LA|CCGT CC": 3.275119000475981e-05,
+      "LA|DAC": -5631640.026750741,
+      "LA|Fischer-Tropsch": -0.0014649917647861878,
+      "LA|OCGT": 0.0002676381554095018,
+      "LA|SMR": 0.00036307820324012614,
+      "LA|SMR CC": 4.433880225884399e-05,
+      "LA|biogas upgrading": 0.0,
+      "LA|biomass EOP CC": -0.0060941797121913865,
+      "LA|coal existing": 126571.71633563515,
+      "LA|coal final-energy accounting": 875819.6870778766,
+      "LA|cooking LPG": 45852.479269459574,
+      "LA|cooking gas": 0.00027847473112717363,
+      "LA|gas final-energy accounting": 1954938.677137467,
+      "LA|industry biomass CC": -1652839.6727309264,
+      "LA|industry biomass boiler CC": -2976072.550793003,
+      "LA|industry gas boiler": 0.0002548868924404518,
+      "LA|lignite existing": 4337.456670543736,
+      "LA|methanolisation": 6514285.763292264,
+      "LA|oil final-energy accounting": 313463.60732339654,
+      "LA|process emissions": 0.0015306312360641283,
+      "LA|process emissions CC": 305195.6431081067,
+      "LA|waste incineration": 120087.23462700238,
+      "MM|CCGT": 0.012077696875604029,
+      "MM|CCGT CC": 1977132.0336062338,
+      "MM|CCGT existing": 3733300.200808705,
+      "MM|DAC": -0.01528247435682271,
+      "MM|Fischer-Tropsch": 0.0009852919337980906,
+      "MM|OCGT": 0.005432492535439028,
+      "MM|OCGT existing": 255875.6889059822,
+      "MM|SMR": 0.007206766596870985,
+      "MM|SMR CC": 1063504.3533091308,
+      "MM|biogas upgrading": -1493092.3623014318,
+      "MM|biomass EOP CC": -6576408.536846661,
+      "MM|coal existing": 13744.845546017867,
+      "MM|cooking LPG": 17429.24477369511,
+      "MM|cooking gas": 1445115.5492833091,
+      "MM|gas final-energy accounting": 1542022.917108358,
+      "MM|gas production delivery": 44734.96306676501,
+      "MM|industry biomass CC": -9285103.494070824,
+      "MM|industry biomass boiler CC": -958474.6467915729,
+      "MM|industry gas boiler": 0.001926208846424841,
+      "MM|methanolisation": 0.01087701735261477,
+      "MM|oil final-energy accounting": 7689111.109558716,
+      "MM|process emissions": 0.004830143840492078,
+      "MM|process emissions CC": 254341.5975995359,
+      "MM|waste incineration": 276766.5033479888,
+      "MY|CCGT": 0.006141433797503799,
+      "MY|CCGT CC": 2401417.253681772,
+      "MY|CCGT existing": 11068763.05229797,
+      "MY|DAC": -0.0029055918420444822,
+      "MY|Fischer-Tropsch": -0.0027467926822305633,
+      "MY|OCGT": 0.00268942032848316,
+      "MY|OCGT existing": 284974.07502775174,
+      "MY|SMR": 0.002961126813603043,
+      "MY|SMR CC": 4177407.7154028895,
+      "MY|biogas upgrading": -4121078.2628308665,
+      "MY|biomass EOP CC": -0.0064405482511205306,
+      "MY|coal existing": 50864.20725454022,
+      "MY|cooking LPG": 123755.82583621025,
+      "MY|cooking gas": 24510.360062813168,
+      "MY|gas final-energy accounting": 7016099.360087718,
+      "MY|gas production delivery": 2357957.630652993,
+      "MY|industry biomass CC": -42004366.75196139,
+      "MY|industry biomass boiler CC": -4659093.323078015,
+      "MY|industry gas boiler": 0.0013249202682847276,
+      "MY|lignite existing": 0.0003178442934510358,
+      "MY|methanolisation": 4534076.832636318,
+      "MY|oil final-energy accounting": 16258755.633050947,
+      "MY|process emissions": 0.0023827349227138355,
+      "MY|process emissions CC": 2450214.7270965762,
+      "MY|waste incineration": 35741.66565554726,
+      "PH|CCGT": 2645136.178999573,
+      "PH|CCGT CC": 0.0011590176553406832,
+      "PH|CCGT existing": 965803.9966691908,
+      "PH|DAC": -39391858.3042535,
+      "PH|Fischer-Tropsch": 0.009517198166192167,
+      "PH|OCGT": 0.05319313467109582,
+      "PH|SMR": 0.002013826052086121,
+      "PH|SMR CC": 3309452.5906136665,
+      "PH|biogas upgrading": -2192775.625254604,
+      "PH|biomass EOP CC": -0.0054251626344508615,
+      "PH|coal existing": 3100214.1456242464,
+      "PH|cooking LPG": 0.0010542236419556989,
+      "PH|cooking gas": 516288.99959282717,
+      "PH|gas final-energy accounting": 12294598.745311178,
+      "PH|gas production delivery": 143549.3421709768,
+      "PH|industry biomass CC": -24711295.560926754,
+      "PH|industry biomass boiler CC": -20865820.173889443,
+      "PH|industry gas boiler": 0.0008081339537135783,
+      "PH|lignite existing": 0.0002441690337048219,
+      "PH|methanolisation": 33245624.947660528,
+      "PH|oil existing": 0.0006514777521758493,
+      "PH|oil final-energy accounting": 28347685.573326156,
+      "PH|process emissions": 0.0011642149649004634,
+      "PH|process emissions CC": 1948823.843589545,
+      "PH|waste incineration": 644571.2515936941,
+      "SG|CCGT": 0.0003360482063481463,
+      "SG|CCGT CC": 6215010.6492200885,
+      "SG|CCGT existing": 706575.6646822677,
+      "SG|DAC": -14969017.91625702,
+      "SG|Fischer-Tropsch": -0.0014260130314953773,
+      "SG|OCGT": 0.00016162868599248095,
+      "SG|OCGT existing": 0.00012972417852307654,
+      "SG|SMR": 0.00016537398714003488,
+      "SG|SMR CC": 6899.344163343484,
+      "SG|biogas upgrading": -41967.687306690015,
+      "SG|biomass EOP CC": -5.544257551871877e-05,
+      "SG|gas final-energy accounting": 6247066.262347272,
+      "SG|industry biomass boiler CC": -6.0523185456684206e-05,
+      "SG|industry gas boiler": 0.00013777823786461044,
+      "SG|methanolisation": 0.00013287377548517685,
+      "SG|oil final-energy accounting": 392985.4012100804,
+      "SG|process emissions": 0.00019724274217289143,
+      "SG|process emissions CC": 1116543.1621084588,
+      "SG|waste incineration": 325905.1195294319,
+      "TH|CCGT": 0.010223556244079092,
+      "TH|CCGT CC": 5777652.128383026,
+      "TH|CCGT existing": 13095887.003644807,
+      "TH|DAC": -0.012952781168046,
+      "TH|Fischer-Tropsch": -0.0007074367831665537,
+      "TH|OCGT": 4121272.3389759012,
+      "TH|OCGT existing": 14996.310235588226,
+      "TH|SMR": 0.0019038725182443739,
+      "TH|SMR CC": 2050244.1417341398,
+      "TH|biogas upgrading": -3447167.369294026,
+      "TH|biomass EOP CC": -0.006490260733170505,
+      "TH|coal existing": 372460.0322101616,
+      "TH|cooking LPG": 41140.842970798956,
+      "TH|cooking gas": 1379380.8300013666,
+      "TH|gas final-energy accounting": 22145083.722637616,
+      "TH|gas production delivery": 1030816.1235823677,
+      "TH|industry biomass CC": -94060421.55998747,
+      "TH|industry biomass boiler CC": -5525934.141339563,
+      "TH|industry gas boiler": 0.0008878881640622426,
+      "TH|lignite existing": 126337.16578887805,
+      "TH|methanolisation": 9772443.984047253,
+      "TH|oil final-energy accounting": 35575606.25327992,
+      "TH|process emissions": 0.0017389289115502004,
+      "TH|process emissions CC": 4991342.686095867,
+      "TH|waste incineration": 2538859.5208118637,
+      "TL|CCGT": 3454.097467990931,
+      "TL|CCGT CC": 35615.77432835657,
+      "TL|DAC": -35075.21443953273,
+      "TL|Fischer-Tropsch": -1.1317829908104612e-05,
+      "TL|OCGT": 8928.216132510326,
+      "TL|SMR": 0.00024836462609007567,
+      "TL|SMR CC": 16807.135913075028,
+      "TL|biogas upgrading": -28484.07394488821,
+      "TL|biomass EOP CC": -0.011118286351907439,
+      "TL|cooking LPG": 0.00029096825057634804,
+      "TL|cooking gas": 5384.578790321259,
+      "TL|gas production delivery": 2815.409022718131,
+      "TL|industry biomass boiler CC": -18006.91102396338,
+      "TL|industry gas boiler": 0.00010360708561386032,
+      "TL|methanolisation": 0.0009743985963052709,
+      "TL|oil existing": 2628.9097071743718,
+      "TL|oil final-energy accounting": 5150.944574330101,
+      "TL|process emissions": 0.00023626450999447132,
+      "TL|process emissions CC": 781.1427373006752,
+      "VN|CCGT": 0.0004360707491379932,
+      "VN|CCGT CC": 5.1031550505474146e-05,
+      "VN|CCGT existing": 174554.32751191375,
+      "VN|DAC": -146228917.8593592,
+      "VN|Fischer-Tropsch": 0.0009904583854732343,
+      "VN|OCGT": 0.00033133770707964057,
+      "VN|OCGT existing": 4.03071394117542e-05,
+      "VN|SMR": 0.00036382318024581213,
+      "VN|SMR CC": 4.9877047840777215e-05,
+      "VN|biogas upgrading": -2493561.775092299,
+      "VN|biomass EOP CC": -0.00034321762643869767,
+      "VN|coal existing": 12777688.948461277,
+      "VN|coal final-energy accounting": 20445673.442839034,
+      "VN|cooking LPG": 18486.58270662518,
+      "VN|cooking gas": 0.0003234367450691708,
+      "VN|gas final-energy accounting": 115166509.09066199,
+      "VN|gas production delivery": 655705.327484762,
+      "VN|industry biomass CC": -35219923.32718313,
+      "VN|industry biomass boiler CC": -0.0003548102854852343,
+      "VN|industry gas boiler": 0.00029598884141471905,
+      "VN|methanolisation": 0.001269462708763813,
+      "VN|oil final-energy accounting": 21531172.045790426,
+      "VN|process emissions": 0.0022973013582183463,
+      "VN|process emissions CC": 10937807.457064454,
+      "VN|waste incineration": 2234805.7447503456
+    },
+    "asean_total_tco2": 0.09122886000201047,
+    "scope_note": "only the emission sources built in S1 (existing fossil power, OCGT/CCGT, SMR, SMR CC)"
+  },
+  "B1_BUNKERS": {
+    "gate": "B1_BUNKERS",
+    "passed": true,
+    "present": true,
+    "final_level_tco2": -4.894015654632467e-05,
+    "cap_tco2": 0.0,
+    "tolerance_t": 0.00101,
+    "gross_co2_flow_t": 4.92125884699947e-05,
+    "port_tonnes": {
+      "ASEAN aviation international oil meter": -4.894015654619059e-05
+    },
+    "supply_mwh": {
+      "ASEAN aviation international oil meter": -0.00019035455677242547,
+      "ASEAN aviation international oil meter non-fossil": 239550418.59977835,
+      "ASEAN shipping international methanol": 485585336.24322
+    }
+  },
+  "B2": {
+    "gate": "B2_STORAGE_CAP",
+    "passed": true,
+    "horizon_fraction": 1.0,
+    "countries": {
+      "BN": {
+        "cap_t_per_year": 371586000.0,
+        "horizon_limit_t": 371586000.0,
+        "final_level_t": 4056327.064488669,
+        "utilisation": 0.010916253746074042,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "ID": {
+        "cap_t_per_year": 1025500000.0,
+        "horizon_limit_t": 1025500000.0,
+        "final_level_t": 555697641.6113104,
+        "utilisation": 0.5418797090310193,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "KH": {
+        "cap_t_per_year": 1700000.0,
+        "horizon_limit_t": 1700000.0,
+        "final_level_t": 1699999.999954494,
+        "utilisation": 0.9999999999732317,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "LA": {
+        "cap_t": 0.0,
+        "store": null,
+        "within": true
+      },
+      "MM": {
+        "cap_t": 0.0,
+        "store": null,
+        "within": true
+      },
+      "MY": {
+        "cap_t_per_year": 2575460000.0,
+        "horizon_limit_t": 2575460000.0,
+        "final_level_t": 147892887.77261427,
+        "utilisation": 0.05742387292856976,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "PH": {
+        "cap_t_per_year": 446000000.0,
+        "horizon_limit_t": 446000000.0,
+        "final_level_t": 118536075.4264746,
+        "utilisation": 0.26577595387101927,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "SG": {
+        "cap_t": 0.0,
+        "store": null,
+        "within": true
+      },
+      "TH": {
+        "cap_t_per_year": 320480000.0,
+        "horizon_limit_t": 320480000.0,
+        "final_level_t": 255100489.1880092,
+        "utilisation": 0.7959950361582914,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "TL": {
+        "cap_t_per_year": 5000000.0,
+        "horizon_limit_t": 5000000.0,
+        "final_level_t": 539730.0334003994,
+        "utilisation": 0.10794600668007988,
+        "within_cap": true,
+        "charge_only": true
+      },
+      "VN": {
+        "cap_t_per_year": 236000000.0,
+        "horizon_limit_t": 236000000.0,
+        "final_level_t": 235999999.99947643,
+        "utilisation": 0.9999999999977814,
+        "within_cap": true,
+        "charge_only": true
+      }
+    }
+  },
+  "B3": {
+    "gate": "B3_BIOMASS_WITHIN_POTENTIAL",
+    "passed": false,
+    "stores": 107,
+    "by_country": {
+      "BN": {
+        "potential_mwh": 235131.3153223502,
+        "used_mwh": 235131.31682874335
+      },
+      "ID": {
+        "potential_mwh": 1033914911.3537,
+        "used_mwh": 1033914911.3557818
+      },
+      "KH": {
+        "potential_mwh": 52181398.98792169,
+        "used_mwh": 52181398.99005518
+      },
+      "LA": {
+        "potential_mwh": 26351298.84452,
+        "used_mwh": 26351298.845535137
+      },
+      "MM": {
+        "potential_mwh": 111571234.570323,
+        "used_mwh": 111571234.57455064
+      },
+      "MY": {
+        "potential_mwh": 267838343.41474044,
+        "used_mwh": 267838343.41711277
+      },
+      "PH": {
+        "potential_mwh": 152452380.0487152,
+        "used_mwh": 152452380.05102494
+      },
+      "SG": {
+        "potential_mwh": 243468.26349521737,
+        "used_mwh": 243468.26459773892
+      },
+      "TH": {
+        "potential_mwh": 336829719.48273003,
+        "used_mwh": 336829719.4850979
+      },
+      "TL": {
+        "potential_mwh": 737868.825142919,
+        "used_mwh": 737868.8262859439
+      },
+      "VN": {
+        "potential_mwh": 138366312.49138,
+        "used_mwh": 138366312.49440703
+      }
+    },
+    "rows": [
+      {
+        "store": "BN biomass cassava_residues",
+        "country": "BN",
+        "category": "cassava_residues",
+        "potential_mwh": 753.36548992,
+        "used_mwh": 753.3656809364675,
+        "share_used": 1.0000002535508596,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass coconut_residues",
+        "country": "BN",
+        "category": "coconut_residues",
+        "potential_mwh": 1667.05395546,
+        "used_mwh": 1667.054146355368,
+        "share_used": 1.0000001145106117,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass maize_residues",
+        "country": "BN",
+        "category": "maize_residues",
+        "potential_mwh": 82.0556119114,
+        "used_mwh": 82.05580287101469,
+        "share_used": 1.0000023271974974,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass msw_organic_biogas",
+        "country": "BN",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 119195.486905,
+        "used_mwh": 119195.4869969031,
+        "share_used": 1.0000000007710284,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass other_crop_residues",
+        "country": "BN",
+        "category": "other_crop_residues",
+        "potential_mwh": 38508.057421,
+        "used_mwh": 38508.057642499734,
+        "share_used": 1.0000000057520362,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass rice_residues",
+        "country": "BN",
+        "category": "rice_residues",
+        "potential_mwh": 6161.30906228,
+        "used_mwh": 6161.309252609516,
+        "share_used": 1.0000000308910841,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass sugarcane_residues",
+        "country": "BN",
+        "category": "sugarcane_residues",
+        "potential_mwh": 71.4548275788,
+        "used_mwh": 71.4550185868244,
+        "share_used": 1.000002673129736,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "BN biomass wood_processing_residues",
+        "country": "BN",
+        "category": "wood_processing_residues",
+        "potential_mwh": 68692.5320492,
+        "used_mwh": 68692.5322879813,
+        "share_used": 1.0000000034760883,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass cassava_residues",
+        "country": "ID",
+        "category": "cassava_residues",
+        "potential_mwh": 29498790.5546,
+        "used_mwh": 29498790.554774314,
+        "share_used": 1.0000000000059093,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass coconut_residues",
+        "country": "ID",
+        "category": "coconut_residues",
+        "potential_mwh": 84827596.0983,
+        "used_mwh": 84827596.0984614,
+        "share_used": 1.0000000000019027,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass maize_residues",
+        "country": "ID",
+        "category": "maize_residues",
+        "potential_mwh": 35874401.2891,
+        "used_mwh": 35874401.289270625,
+        "share_used": 1.0000000000047562,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass msw_organic_biogas",
+        "country": "ID",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 26427042.056,
+        "used_mwh": 26427042.056181625,
+        "share_used": 1.0000000000068725,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass oil_palm_efb",
+        "country": "ID",
+        "category": "oil_palm_efb",
+        "potential_mwh": 216634547.216,
+        "used_mwh": 216634547.2159799,
+        "share_used": 0.9999999999999073,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass oil_palm_fibre",
+        "country": "ID",
+        "category": "oil_palm_fibre",
+        "potential_mwh": 148549403.805,
+        "used_mwh": 148549403.80517367,
+        "share_used": 1.000000000001169,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass oil_palm_pks",
+        "country": "ID",
+        "category": "oil_palm_pks",
+        "potential_mwh": 66021957.2467,
+        "used_mwh": 66021957.24686876,
+        "share_used": 1.0000000000025562,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass oil_palm_pome",
+        "country": "ID",
+        "category": "oil_palm_pome",
+        "potential_mwh": 30739181.4139,
+        "used_mwh": 30739181.414087124,
+        "share_used": 1.0000000000060876,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass oil_palm_trunk",
+        "country": "ID",
+        "category": "oil_palm_trunk",
+        "potential_mwh": 158456666.667,
+        "used_mwh": 158456666.66717172,
+        "share_used": 1.0000000000010838,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass other_crop_residues",
+        "country": "ID",
+        "category": "other_crop_residues",
+        "potential_mwh": 93646235.4612,
+        "used_mwh": 93646235.46138328,
+        "share_used": 1.000000000001957,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass rice_residues",
+        "country": "ID",
+        "category": "rice_residues",
+        "potential_mwh": 110577188.025,
+        "used_mwh": 110577188.02517997,
+        "share_used": 1.0000000000016274,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass sugarcane_residues",
+        "country": "ID",
+        "category": "sugarcane_residues",
+        "potential_mwh": 31775321.5209,
+        "used_mwh": 31775321.52107622,
+        "share_used": 1.0000000000055458,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "ID biomass wood_processing_residues",
+        "country": "ID",
+        "category": "wood_processing_residues",
+        "potential_mwh": 886580.0,
+        "used_mwh": 886580.0001731978,
+        "share_used": 1.000000000195355,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass cassava_residues",
+        "country": "KH",
+        "category": "cassava_residues",
+        "potential_mwh": 20380660.901,
+        "used_mwh": 20380660.901169572,
+        "share_used": 1.0000000000083202,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass coconut_residues",
+        "country": "KH",
+        "category": "coconut_residues",
+        "potential_mwh": 377076.781873,
+        "used_mwh": 377076.7820422631,
+        "share_used": 1.0000000004488823,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass maize_residues",
+        "country": "KH",
+        "category": "maize_residues",
+        "potential_mwh": 1990370.24295,
+        "used_mwh": 1990370.243115791,
+        "share_used": 1.0000000000832965,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass msw_organic_biogas",
+        "country": "KH",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 2763142.23898,
+        "used_mwh": 2763142.239046138,
+        "share_used": 1.0000000000239357,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass oil_palm_efb",
+        "country": "KH",
+        "category": "oil_palm_efb",
+        "potential_mwh": 490851.904128,
+        "used_mwh": 490851.9043013729,
+        "share_used": 1.0000000003532081,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass oil_palm_fibre",
+        "country": "KH",
+        "category": "oil_palm_fibre",
+        "potential_mwh": 336584.16283,
+        "used_mwh": 336584.1630031617,
+        "share_used": 1.0000000005144678,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass oil_palm_pks",
+        "country": "KH",
+        "category": "oil_palm_pks",
+        "potential_mwh": 149592.961258,
+        "used_mwh": 149592.9614198535,
+        "share_used": 1.0000000010819594,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass oil_palm_pome",
+        "country": "KH",
+        "category": "oil_palm_pome",
+        "potential_mwh": 69649.0283857,
+        "used_mwh": 69649.028578768,
+        "share_used": 1.0000000027720128,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass oil_palm_trunk",
+        "country": "KH",
+        "category": "oil_palm_trunk",
+        "potential_mwh": 581256.666667,
+        "used_mwh": 581256.6668472696,
+        "share_used": 1.0000000003101377,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass other_crop_residues",
+        "country": "KH",
+        "category": "other_crop_residues",
+        "potential_mwh": 2764461.60367,
+        "used_mwh": 2764461.6038397592,
+        "share_used": 1.0000000000614078,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass rice_residues",
+        "country": "KH",
+        "category": "rice_residues",
+        "potential_mwh": 20691175.541,
+        "used_mwh": 20691175.541172784,
+        "share_used": 1.0000000000083507,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass sugarcane_residues",
+        "country": "KH",
+        "category": "sugarcane_residues",
+        "potential_mwh": 566377.9339,
+        "used_mwh": 566377.9340701587,
+        "share_used": 1.0000000003004332,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "KH biomass wood_processing_residues",
+        "country": "KH",
+        "category": "wood_processing_residues",
+        "potential_mwh": 1020199.02128,
+        "used_mwh": 1020199.0214482883,
+        "share_used": 1.0000000001649565,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass cassava_residues",
+        "country": "LA",
+        "category": "cassava_residues",
+        "potential_mwh": 6125112.39977,
+        "used_mwh": 6125112.399939481,
+        "share_used": 1.0000000000276699,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass maize_residues",
+        "country": "LA",
+        "category": "maize_residues",
+        "potential_mwh": 1129467.74057,
+        "used_mwh": 1129467.7407356594,
+        "share_used": 1.0000000001466705,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass other_crop_residues",
+        "country": "LA",
+        "category": "other_crop_residues",
+        "potential_mwh": 10122227.9644,
+        "used_mwh": 10122227.964569274,
+        "share_used": 1.0000000000167228,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass rice_residues",
+        "country": "LA",
+        "category": "rice_residues",
+        "potential_mwh": 6444117.79323,
+        "used_mwh": 6444117.793402044,
+        "share_used": 1.0000000000266978,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass sugarcane_residues",
+        "country": "LA",
+        "category": "sugarcane_residues",
+        "potential_mwh": 1260335.91464,
+        "used_mwh": 1260335.9148103956,
+        "share_used": 1.0000000001351985,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "LA biomass wood_processing_residues",
+        "country": "LA",
+        "category": "wood_processing_residues",
+        "potential_mwh": 1270037.03191,
+        "used_mwh": 1270037.0320782827,
+        "share_used": 1.0000000001325022,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass cassava_residues",
+        "country": "MM",
+        "category": "cassava_residues",
+        "potential_mwh": 468615.422093,
+        "used_mwh": 468615.4221643098,
+        "share_used": 1.0000000001521714,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass coconut_residues",
+        "country": "MM",
+        "category": "coconut_residues",
+        "potential_mwh": 5228242.83179,
+        "used_mwh": 5228242.831861139,
+        "share_used": 1.0000000000136067,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass maize_residues",
+        "country": "MM",
+        "category": "maize_residues",
+        "potential_mwh": 4171668.96511,
+        "used_mwh": 4171668.965176578,
+        "share_used": 1.0000000000159595,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass msw_organic_biogas",
+        "country": "MM",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 7540870.51296,
+        "used_mwh": 7540870.516694557,
+        "share_used": 1.000000000495242,
+        "within": false,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass other_crop_residues",
+        "country": "MM",
+        "category": "other_crop_residues",
+        "potential_mwh": 30527451.5471,
+        "used_mwh": 30527451.547170684,
+        "share_used": 1.0000000000023155,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass rice_residues",
+        "country": "MM",
+        "category": "rice_residues",
+        "potential_mwh": 46997260.2104,
+        "used_mwh": 46997260.2104723,
+        "share_used": 1.0000000000015383,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass sugarcane_residues",
+        "country": "MM",
+        "category": "sugarcane_residues",
+        "potential_mwh": 10437111.4923,
+        "used_mwh": 10437111.492371649,
+        "share_used": 1.0000000000068647,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MM biomass wood_processing_residues",
+        "country": "MM",
+        "category": "wood_processing_residues",
+        "potential_mwh": 6200013.58857,
+        "used_mwh": 6200013.588639417,
+        "share_used": 1.0000000000111964,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass cassava_residues",
+        "country": "MY",
+        "category": "cassava_residues",
+        "potential_mwh": 40515.4338557,
+        "used_mwh": 40515.43403051737,
+        "share_used": 1.0000000043148338,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass coconut_residues",
+        "country": "MY",
+        "category": "coconut_residues",
+        "potential_mwh": 1576488.30789,
+        "used_mwh": 1576488.308065965,
+        "share_used": 1.0000000001116183,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass maize_residues",
+        "country": "MY",
+        "category": "maize_residues",
+        "potential_mwh": 792.390024464,
+        "used_mwh": 792.390197697162,
+        "share_used": 1.0000002186210788,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass msw_organic_biogas",
+        "country": "MY",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 8318982.79504,
+        "used_mwh": 8318982.795228192,
+        "share_used": 1.000000000022622,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass oil_palm_efb",
+        "country": "MY",
+        "category": "oil_palm_efb",
+        "potential_mwh": 88055364.8757,
+        "used_mwh": 88055364.87589964,
+        "share_used": 1.0000000000022673,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass oil_palm_fibre",
+        "country": "MY",
+        "category": "oil_palm_fibre",
+        "potential_mwh": 60380821.629,
+        "used_mwh": 60380821.62920531,
+        "share_used": 1.0000000000034002,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass oil_palm_pks",
+        "country": "MY",
+        "category": "oil_palm_pks",
+        "potential_mwh": 26835920.724,
+        "used_mwh": 26835920.724172894,
+        "share_used": 1.0000000000064426,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass oil_palm_pome",
+        "country": "MY",
+        "category": "oil_palm_pome",
+        "potential_mwh": 12494543.7843,
+        "used_mwh": 12494543.784487844,
+        "share_used": 1.0000000000150342,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass oil_palm_trunk",
+        "country": "MY",
+        "category": "oil_palm_trunk",
+        "potential_mwh": 60317149.6667,
+        "used_mwh": 60317149.66689115,
+        "share_used": 1.000000000003169,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass other_crop_residues",
+        "country": "MY",
+        "category": "other_crop_residues",
+        "potential_mwh": 3927769.13627,
+        "used_mwh": 3927769.1364458296,
+        "share_used": 1.0000000000447657,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass rice_residues",
+        "country": "MY",
+        "category": "rice_residues",
+        "potential_mwh": 2668474.13995,
+        "used_mwh": 2668474.1401273306,
+        "share_used": 1.0000000000664537,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass sugarcane_residues",
+        "country": "MY",
+        "category": "sugarcane_residues",
+        "potential_mwh": 13380.5320103,
+        "used_mwh": 13380.53218530783,
+        "share_used": 1.0000000130792879,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "MY biomass wood_processing_residues",
+        "country": "MY",
+        "category": "wood_processing_residues",
+        "potential_mwh": 3208140.0,
+        "used_mwh": 3208140.000175103,
+        "share_used": 1.0000000000545808,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass cassava_residues",
+        "country": "PH",
+        "category": "cassava_residues",
+        "potential_mwh": 3005947.68701,
+        "used_mwh": 3005947.687185876,
+        "share_used": 1.0000000000585094,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass coconut_residues",
+        "country": "PH",
+        "category": "coconut_residues",
+        "potential_mwh": 47934760.3727,
+        "used_mwh": 47934760.37287604,
+        "share_used": 1.0000000000036726,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass maize_residues",
+        "country": "PH",
+        "category": "maize_residues",
+        "potential_mwh": 12330638.465,
+        "used_mwh": 12330638.465173123,
+        "share_used": 1.00000000001404,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass msw_organic_biogas",
+        "country": "PH",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 11006828.7058,
+        "used_mwh": 11006828.70598496,
+        "share_used": 1.0000000000168041,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass oil_palm_efb",
+        "country": "PH",
+        "category": "oil_palm_efb",
+        "potential_mwh": 477790.322681,
+        "used_mwh": 477790.3228589825,
+        "share_used": 1.0000000003725118,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass oil_palm_fibre",
+        "country": "PH",
+        "category": "oil_palm_fibre",
+        "potential_mwh": 327627.649839,
+        "used_mwh": 327627.65001687827,
+        "share_used": 1.0000000005429281,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass oil_palm_pks",
+        "country": "PH",
+        "category": "oil_palm_pks",
+        "potential_mwh": 145612.288817,
+        "used_mwh": 145612.28898895116,
+        "share_used": 1.0000000011808836,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass oil_palm_pome",
+        "country": "PH",
+        "category": "oil_palm_pome",
+        "potential_mwh": 67795.6659982,
+        "used_mwh": 67795.66618351146,
+        "share_used": 1.0000000027333822,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass oil_palm_trunk",
+        "country": "PH",
+        "category": "oil_palm_trunk",
+        "potential_mwh": 741601.0,
+        "used_mwh": 741601.0001846461,
+        "share_used": 1.000000000248983,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass other_crop_residues",
+        "country": "PH",
+        "category": "other_crop_residues",
+        "potential_mwh": 31992145.8962,
+        "used_mwh": 31992145.89637536,
+        "share_used": 1.0000000000054814,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass rice_residues",
+        "country": "PH",
+        "category": "rice_residues",
+        "potential_mwh": 26757275.7521,
+        "used_mwh": 26757275.752275944,
+        "share_used": 1.0000000000065756,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass sugarcane_residues",
+        "country": "PH",
+        "category": "sugarcane_residues",
+        "potential_mwh": 16080654.5381,
+        "used_mwh": 16080654.538275512,
+        "share_used": 1.0000000000109144,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "PH biomass wood_processing_residues",
+        "country": "PH",
+        "category": "wood_processing_residues",
+        "potential_mwh": 1583701.70447,
+        "used_mwh": 1583701.7046451457,
+        "share_used": 1.0000000001105926,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "SG biomass cassava_residues",
+        "country": "SG",
+        "category": "cassava_residues",
+        "potential_mwh": 0.468293847392,
+        "used_mwh": 0.46848378984597516,
+        "share_used": 1.0004056052733408,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "SG biomass coconut_residues",
+        "country": "SG",
+        "category": "coconut_residues",
+        "potential_mwh": 472.96083155,
+        "used_mwh": 472.96102209344207,
+        "share_used": 1.0000004028736194,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "SG biomass msw_organic_biogas",
+        "country": "SG",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 211958.016606,
+        "used_mwh": 211958.01670103535,
+        "share_used": 1.0000000004483687,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "SG biomass other_crop_residues",
+        "country": "SG",
+        "category": "other_crop_residues",
+        "potential_mwh": 23649.6498072,
+        "used_mwh": 23649.650227320428,
+        "share_used": 1.0000000177643404,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "SG biomass wood_processing_residues",
+        "country": "SG",
+        "category": "wood_processing_residues",
+        "potential_mwh": 7387.16795662,
+        "used_mwh": 7387.168163499861,
+        "share_used": 1.000000028005301,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass cassava_residues",
+        "country": "TH",
+        "category": "cassava_residues",
+        "potential_mwh": 54679891.5701,
+        "used_mwh": 54679891.5702941,
+        "share_used": 1.0000000000035496,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass coconut_residues",
+        "country": "TH",
+        "category": "coconut_residues",
+        "potential_mwh": 4169139.24654,
+        "used_mwh": 4169139.246716217,
+        "share_used": 1.000000000042267,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass maize_residues",
+        "country": "TH",
+        "category": "maize_residues",
+        "potential_mwh": 11250013.6052,
+        "used_mwh": 11250013.605373906,
+        "share_used": 1.0000000000154583,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass msw_organic_biogas",
+        "country": "TH",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 15147782.0573,
+        "used_mwh": 15147782.057482738,
+        "share_used": 1.0000000000120637,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass oil_palm_efb",
+        "country": "TH",
+        "category": "oil_palm_efb",
+        "potential_mwh": 15942543.5804,
+        "used_mwh": 15942543.580577873,
+        "share_used": 1.000000000011157,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass oil_palm_fibre",
+        "country": "TH",
+        "category": "oil_palm_fibre",
+        "potential_mwh": 10932029.8837,
+        "used_mwh": 10932029.883878807,
+        "share_used": 1.0000000000163562,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass oil_palm_pks",
+        "country": "TH",
+        "category": "oil_palm_pks",
+        "potential_mwh": 4858679.94832,
+        "used_mwh": 4858679.948493273,
+        "share_used": 1.0000000000356626,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass oil_palm_pome",
+        "country": "TH",
+        "category": "oil_palm_pome",
+        "potential_mwh": 2262154.14677,
+        "used_mwh": 2262154.1469541574,
+        "share_used": 1.000000000081408,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass oil_palm_trunk",
+        "country": "TH",
+        "category": "oil_palm_trunk",
+        "potential_mwh": 11167541.0,
+        "used_mwh": 11167541.000184981,
+        "share_used": 1.000000000016564,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass other_crop_residues",
+        "country": "TH",
+        "category": "other_crop_residues",
+        "potential_mwh": 34935145.0198,
+        "used_mwh": 34935145.019972086,
+        "share_used": 1.0000000000049258,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass rice_residues",
+        "country": "TH",
+        "category": "rice_residues",
+        "potential_mwh": 64701306.6385,
+        "used_mwh": 64701306.63870109,
+        "share_used": 1.000000000003108,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass sugarcane_residues",
+        "country": "TH",
+        "category": "sugarcane_residues",
+        "potential_mwh": 93073492.7861,
+        "used_mwh": 93073492.78629322,
+        "share_used": 1.0000000000020761,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TH biomass wood_processing_residues",
+        "country": "TH",
+        "category": "wood_processing_residues",
+        "potential_mwh": 13710000.0,
+        "used_mwh": 13710000.0001754,
+        "share_used": 1.0000000000127935,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass cassava_residues",
+        "country": "TL",
+        "category": "cassava_residues",
+        "potential_mwh": 28698.2579701,
+        "used_mwh": 28698.258145138778,
+        "share_used": 1.0000000060992824,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass coconut_residues",
+        "country": "TL",
+        "category": "coconut_residues",
+        "potential_mwh": 131362.563137,
+        "used_mwh": 131362.56331256297,
+        "share_used": 1.0000000013364765,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass maize_residues",
+        "country": "TL",
+        "category": "maize_residues",
+        "potential_mwh": 146815.406892,
+        "used_mwh": 146815.40706531735,
+        "share_used": 1.0000000011805121,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass msw_organic_biogas",
+        "country": "TL",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 143858.959227,
+        "used_mwh": 143858.9593180114,
+        "share_used": 1.000000000632643,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass other_crop_residues",
+        "country": "TL",
+        "category": "other_crop_residues",
+        "potential_mwh": 177259.801967,
+        "used_mwh": 177259.80214259736,
+        "share_used": 1.0000000009906214,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass rice_residues",
+        "country": "TL",
+        "category": "rice_residues",
+        "potential_mwh": 109209.926501,
+        "used_mwh": 109209.92667794204,
+        "share_used": 1.000000001620201,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "TL biomass wood_processing_residues",
+        "country": "TL",
+        "category": "wood_processing_residues",
+        "potential_mwh": 663.909448819,
+        "used_mwh": 663.9096243739197,
+        "share_used": 1.0000002644259995,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass cassava_residues",
+        "country": "VN",
+        "category": "cassava_residues",
+        "potential_mwh": 11095395.5837,
+        "used_mwh": 11095395.583888358,
+        "share_used": 1.0000000000169762,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass coconut_residues",
+        "country": "VN",
+        "category": "coconut_residues",
+        "potential_mwh": 5516792.4107,
+        "used_mwh": 5516792.410888492,
+        "share_used": 1.000000000034167,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass maize_residues",
+        "country": "VN",
+        "category": "maize_residues",
+        "potential_mwh": 6186310.64317,
+        "used_mwh": 6186310.643359092,
+        "share_used": 1.0000000000305662,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass msw_organic_biogas",
+        "country": "VN",
+        "category": "msw_organic_biogas",
+        "potential_mwh": 12593746.3381,
+        "used_mwh": 12593746.338884493,
+        "share_used": 1.0000000000622924,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass other_crop_residues",
+        "country": "VN",
+        "category": "other_crop_residues",
+        "potential_mwh": 39955913.3831,
+        "used_mwh": 39955913.38368288,
+        "share_used": 1.0000000000145879,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass rice_residues",
+        "country": "VN",
+        "category": "rice_residues",
+        "potential_mwh": 53873460.1124,
+        "used_mwh": 53873460.11310552,
+        "share_used": 1.0000000000130957,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass sugarcane_residues",
+        "country": "VN",
+        "category": "sugarcane_residues",
+        "potential_mwh": 7659444.02021,
+        "used_mwh": 7659444.020408195,
+        "share_used": 1.000000000025876,
+        "within": true,
+        "refilled": false
+      },
+      {
+        "store": "VN biomass wood_processing_residues",
+        "country": "VN",
+        "category": "wood_processing_residues",
+        "potential_mwh": 1485250.0,
+        "used_mwh": 1485250.0001899826,
+        "share_used": 1.0000000001279128,
+        "within": true,
+        "refilled": false
+      }
+    ]
+  },
+  "B8": {
+    "gate": "B8_DEMAND_CONSISTENCY",
+    "passed": true,
+    "checks": {
+      "every_load_owned": true,
+      "no_duplicate_owner_names": true,
+      "s2_sector_totals_conserved": true,
+      "no_negative_loads": true,
+      "astar_deductions_recorded": true
+    },
+    "sector_totals": {
+      "AgricultureOthers": {
+        "expected_mwh": 57687891.42255849,
+        "actual_mwh": 57687891.42255848,
+        "rel": -1.1102230246251565e-16
+      },
+      "Commercial": {
+        "expected_mwh": 6540649.5928256,
+        "actual_mwh": 6540649.592825596,
+        "rel": -5.551115123125783e-16
+      },
+      "Industry": {
+        "expected_mwh": 4236063411.0103407,
+        "actual_mwh": 4236063411.0103426,
+        "rel": 4.440892098500626e-16
+      },
+      "NonEnergyUse": {
+        "expected_mwh": 1335260897.988941,
+        "actual_mwh": 1335260897.9889407,
+        "rel": -2.220446049250313e-16
+      },
+      "Residential": {
+        "expected_mwh": 23045872.17525043,
+        "actual_mwh": 23045872.175250426,
+        "rel": -1.1102230246251565e-16
+      },
+      "Transport": {
+        "expected_mwh": 1351926329.5919275,
+        "actual_mwh": 1351926329.5919273,
+        "rel": -2.220446049250313e-16
+      },
+      "agriculture": {
+        "expected_mwh": 185720589.45813182,
+        "actual_mwh": 185720589.4581317,
+        "rel": -6.661338147750939e-16
+      },
+      "agriculture overflow": {
+        "expected_mwh": 176789.1589327827,
+        "actual_mwh": 176789.15893278268,
+        "rel": -1.1102230246251565e-16
+      },
+      "aviation domestic": {
+        "expected_mwh": 215408575.75910565,
+        "actual_mwh": 215408575.75910556,
+        "rel": -4.440892098500626e-16
+      },
+      "aviation international": {
+        "expected_mwh": 239550418.6,
+        "actual_mwh": 239550418.5999999,
+        "rel": -3.3306690738754696e-16
+      },
+      "commercial": {
+        "expected_mwh": 204906973.50039527,
+        "actual_mwh": 204906973.50039524,
+        "rel": -1.1102230246251565e-16
+      },
+      "industry": {
+        "expected_mwh": 1996586646.2045772,
+        "actual_mwh": 1996586646.204577,
+        "rel": -1.1102230246251565e-16
+      },
+      "industry overflow": {
+        "expected_mwh": 252382989.1055977,
+        "actual_mwh": 252382989.10559765,
+        "rel": -2.220446049250313e-16
+      },
+      "rail": {
+        "expected_mwh": 20272327.425797474,
+        "actual_mwh": 20272327.42579747,
+        "rel": -2.220446049250313e-16
+      },
+      "residential": {
+        "expected_mwh": 418672664.91725415,
+        "actual_mwh": 418672664.9172538,
+        "rel": -8.881784197001252e-16
+      }
+    },
+    "horizon_fraction": 1.0,
+    "deductions": [
+      {
+        "added_explicit": {
+          "ev_mwh": 2006950.4853924036,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 2176166.13032,
+          "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 9060907.672486186,
+        "astar_before_mwh": 10270178.264136186,
+        "country": "BN",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 1209270.59165,
+        "deducted_mwh": 1209270.59165,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.8822541770406446
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 168924341.36577207,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 1801005557.61,
+          "industry_hydrogen_mwh": 13579747.7844
+        },
+        "astar_after_mwh": 357212279.686672,
+        "astar_before_mwh": 678586594.817495,
+        "country": "ID",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 320608647.624,
+        "deducted_mwh": 321374315.130823,
+        "deducted_transport_mwh": 765667.506823,
+        "factor": 0.526406331063383
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 24839997.616305634,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 12834310.1847,
+          "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 10886395.242255408,
+        "astar_before_mwh": 26794852.45795541,
+        "country": "KH",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 15908457.2157,
+        "deducted_mwh": 15908457.2157,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.40628681420573487
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 6256756.268379294,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 6958848.70677,
+          "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 8525999.870763468,
+        "astar_before_mwh": 17341277.643563468,
+        "country": "LA",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 8815277.7728,
+        "deducted_mwh": 8815277.7728,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.49165926790452197
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 11219309.580642136,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 80703162.8721,
+          "industry_hydrogen_mwh": 349222.465108
+        },
+        "astar_after_mwh": 37422653.711445615,
+        "astar_before_mwh": 49116915.53264561,
+        "country": "MM",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 11694261.8212,
+        "deducted_mwh": 11694261.8212,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.7619096864210173
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 171154111.77046195,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 425860079.01,
+          "industry_hydrogen_mwh": 10202921.3076
+        },
+        "astar_after_mwh": 186010228.38078976,
+        "astar_before_mwh": 417285227.84026974,
+        "country": "MY",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 230211662.165,
+        "deducted_mwh": 231274999.45948,
+        "deducted_transport_mwh": 1063337.29448,
+        "factor": 0.44576279237948857
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 91432367.68819085,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 102180067.843,
+          "industry_hydrogen_mwh": 3091189.73468
+        },
+        "astar_after_mwh": 137180671.0301932,
+        "astar_before_mwh": 229055183.9781512,
+        "country": "PH",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 91612685.0652,
+        "deducted_mwh": 91874512.94795801,
+        "deducted_transport_mwh": 261827.882758,
+        "factor": 0.5988979103100256
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 10537665.690423999,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 100790950.62,
+          "industry_hydrogen_mwh": 240431.725843
+        },
+        "astar_after_mwh": 86764205.39262076,
+        "astar_before_mwh": 136011268.33543074,
+        "country": "SG",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 44497760.9071,
+        "deducted_mwh": 49247062.94281,
+        "deducted_transport_mwh": 4749302.03571,
+        "factor": 0.6379192434162368
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 241633369.40554118,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 472698306.039,
+          "industry_hydrogen_mwh": 6249281.78014
+        },
+        "astar_after_mwh": 215313533.63571647,
+        "astar_before_mwh": 507906650.9689484,
+        "country": "TH",
+        "deducted": "transport electricity (rail/road, embedded in Astar) + industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 292039829.367,
+        "deducted_mwh": 292593117.333232,
+        "deducted_transport_mwh": 553287.966232,
+        "factor": 0.42392343794860043
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 927475.2330534046,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 0.0,
+          "industry_hydrogen_mwh": 0.0
+        },
+        "astar_after_mwh": 1010278.750596059,
+        "astar_before_mwh": 1010278.750596059,
+        "country": "TL",
+        "deducted": "none",
+        "deducted_industry_mwh": 0.0,
+        "deducted_mwh": 0.0,
+        "deducted_transport_mwh": 0.0,
+        "factor": 1.0
+      },
+      {
+        "added_explicit": {
+          "ev_mwh": 82130589.0801821,
+          "fcev_h2_mwh": 0.0,
+          "industry_electricity_mwh": 963710356.649,
+          "industry_hydrogen_mwh": 40301246.6941
+        },
+        "astar_after_mwh": 29966658.468404245,
+        "astar_before_mwh": 544381850.1614043,
+        "country": "VN",
+        "deducted": "industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)",
+        "deducted_industry_mwh": 514415191.693,
+        "deducted_mwh": 514415191.693,
+        "deducted_transport_mwh": 0.0,
+        "factor": 0.05504712998701078
+      }
+    ],
+    "deferred": []
+  },
+  "B11": {
+    "gate": "B11_SUPPLY_ROUTES_PER_END_USE",
+    "passed": true,
+    "rows": [
+      {
+        "end_use": "electricity",
+        "carrier": "AC",
+        "buses": 96,
+        "load_bearing_buses": 96,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [],
+        "auxiliary_count": 0,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "industrial low-temperature heat",
+        "carrier": "industry heat",
+        "buses": 97,
+        "load_bearing_buses": 95,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [
+          "TL11 0 industry heat",
+          "PH_Luzon9 0 industry heat"
+        ],
+        "auxiliary_count": 2,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "clean cooking",
+        "carrier": "clean cooking useful",
+        "buses": 95,
+        "load_bearing_buses": 95,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [],
+        "auxiliary_count": 0,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "oil (fossil pool + non-fossil pool: FT, BtL, imports)",
+        "carrier": "oil",
+        "buses": 101,
+        "load_bearing_buses": 97,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [
+          "MY_Peninsular22 0 oil",
+          "PH_Luzon9 0 oil",
+          "PH_Visayas10 0 oil",
+          "TH21 0 oil"
+        ],
+        "auxiliary_count": 4,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "gas (LNG, production, pipelines, biogas upgrading)",
+        "carrier": "gas",
+        "buses": 100,
+        "load_bearing_buses": 96,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [
+          "MY_Peninsular22 0 gas",
+          "PH_Luzon9 0 gas",
+          "PH_Visayas10 0 gas",
+          "TH21 0 gas"
+        ],
+        "auxiliary_count": 4,
+        "auxiliary_short": [
+          "MY_Peninsular22 0 gas",
+          "PH_Visayas10 0 gas",
+          "TH21 0 gas"
+        ]
+      },
+      {
+        "end_use": "hydrogen",
+        "carrier": "H2",
+        "buses": 100,
+        "load_bearing_buses": 97,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [
+          "MY_Peninsular22 0 H2",
+          "PH_Visayas10 0 H2",
+          "TH21 0 H2"
+        ],
+        "auxiliary_count": 3,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "ammonia (Haber-Bosch, import)",
+        "carrier": "ammonia",
+        "buses": 1,
+        "load_bearing_buses": 1,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [],
+        "auxiliary_count": 0,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "methanol (methanolisation, biomass-to-methanol, import)",
+        "carrier": "methanol",
+        "buses": 1,
+        "load_bearing_buses": 1,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [],
+        "auxiliary_count": 0,
+        "auxiliary_short": []
+      },
+      {
+        "end_use": "captured CO2 handling",
+        "carrier": "co2 stored",
+        "buses": 100,
+        "load_bearing_buses": 0,
+        "buses_with_fewer_than_min_routes": [],
+        "count_short": 0,
+        "auxiliary_nodes_without_loads": [
+          "BN4 0 co2 stored",
+          "ID_Java-Bali1 0 co2 stored",
+          "ID_Java-Bali1 1 co2 stored",
+          "ID_Java-Bali1 2 co2 stored",
+          "ID_Kalimantan4 0 co2 stored",
+          "ID_Kalimantan4 1 co2 stored",
+          "ID_Kalimantan4 10 co2 stored",
+          "ID_Kalimantan4 11 co2 stored",
+          "ID_Kalimantan4 12 co2 stored",
+          "ID_Kalimantan4 13 co2 stored"
+        ],
+        "auxiliary_count": 100,
+        "auxiliary_short": [
+          "MY_Peninsular22 0 co2 stored",
+          "PH_Visayas10 0 co2 stored",
+          "TH21 0 co2 stored"
+        ]
+      },
+      {
+        "end_use": "land transport EV",
+        "carrier": "EV battery",
+        "buses": 96,
+        "load_bearing_buses": 96,
+        "buses_with_fewer_than_min_routes": [
+          "BN4 0 EV battery",
+          "ID_Java-Bali1 0 EV battery",
+          "ID_Java-Bali1 1 EV battery",
+          "ID_Java-Bali1 2 EV battery",
+          "ID_Kalimantan4 0 EV battery",
+          "ID_Kalimantan4 1 EV battery",
+          "ID_Kalimantan4 10 EV battery",
+          "ID_Kalimantan4 11 EV battery",
+          "ID_Kalimantan4 12 EV battery",
+          "ID_Kalimantan4 13 EV battery"
+        ],
+        "count_short": 96,
+        "auxiliary_nodes_without_loads": [],
+        "auxiliary_count": 0,
+        "auxiliary_short": []
+      }
+    ],
+    "data_pending_count": 0,
+    "data_pending_by_carrier": {}
+  },
+  "B12": {
+    "gate": "B12_CONFIG_SWITCH_HASH_CONSISTENCY",
+    "passed": true,
+    "checks": {
+      "research_config_sha256_matches": true,
+      "scenario_tag_matches": true,
+      "switch_metadata_matches": true,
+      "skeleton_flag": true,
+      "weights_sum_8760_h": true,
+      "weights_columns_agree": true,
+      "s3_switches_recorded": true
+    },
+    "research_config_sha256": "8174f58dbff42efd061238ee6bf43ab59f29634b1e763836e42115629b6a8ef4",
+    "s3_switches": {
+      "fuel_carbon_mode": "origin_neutral",
+      "import_price_sensitivity": 0.0,
+      "cross_border_gas": false,
+      "ammonia_methanol_mode": "regional_buses",
+      "industry_ratio_source": "jrc_idees_2021",
+      "config_overrides": [],
+      "demand_growth_method": "ratio",
+      "industry_other_bucket": "pypsa_eur_2050",
+      "lng_expansion": "cap_factor_cost",
+      "renewable_profile_variant": "calibrated_modern",
+      "renewable_resource_classes": 3,
+      "fleet_gem_additions": true,
+      "gas_production_node_allocation": "gem_fields",
+      "sector_switches": {
+        "SMR": true,
+        "SMR_cc": true,
+        "biomass_to_liquid": true,
+        "electrobiofuels": true,
+        "hydrogen_fuel_cell": true,
+        "methanation": true,
+        "min_part_load_fischer_tropsch": 0.5,
+        "min_part_load_methanation": 0.3
+      },
+      "candidates_s4b2": {
+        "caps_table": "research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv",
+        "hydro_geothermal_cap": "national_potential",
+        "nuclear_cap": "none",
+        "nuclear_caps_table": "research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv",
+        "pipeline_cap_statuses": "announced_preconstruction"
+      },
+      "typhoon_premium": "off",
+      "fleet_s4b1": {
+        "include_construction": true,
+        "include_construction_no_start_year": true,
+        "remove_not_operating_gipt2026": true
+      },
+      "co2_vent": false,
+      "lng_expansion_capital_cost": 7018.0,
+      "lng_expansion_cost_sensitivity": 0.0
+    },
+    "snapshot_weightings": {
+      "snapshots": 56,
+      "sums_h": {
+        "objective": 8760.0,
+        "generators": 8760.0,
+        "stores": 8760.0
+      },
+      "unique_values": {
+        "objective": [
+          156.42857142857142
+        ],
+        "generators": [
+          156.42857142857142
+        ],
+        "stores": [
+          156.42857142857142
+        ]
+      },
+      "sha256": "aa913a15f41c26562ea5a13dd6775296b03d3df25dd5e7f9aafd675c2f049172",
+      "representative": {
+        "snapshots": 56,
+        "weight_hours_per_snapshot": 156.42857142857142,
+        "sum_hours": 8760.0,
+        "annual_caps_scaled": false,
+        "decision": "58",
+        "reference": "PyPSA-Eur v2025.07.0 scripts/prepare_network.py (average_every_nhours: snapshot_weightings = n.snapshot_weightings.resample(offset).sum(); segmentation: weightings sum 8760)"
+      }
+    }
+  },
+  "B13": {
+    "gate": "B13_IMPORTS_ONE_WAY",
+    "passed": true,
+    "checks": {
+      "import_generators": 36,
+      "all_sign_positive": true,
+      "all_p_min_pu_nonneg": true,
+      "import_links_or_lines": 0,
+      "pool_loads": 77,
+      "pool_loads_without_national_owner": [],
+      "pool_links_without_national_port": [],
+      "pool_stores_cyclic": true
+    }
+  },
+  "B14": {
+    "gate": "B14_TERMINAL_CAP_2_5X",
+    "passed": true,
+    "cap_factor": 2.5,
+    "expansion": "cap_factor_cost",
+    "terminals": [
+      {
+        "generator": "ID_Java-Bali1 0 LNG import",
+        "existing_mw": 12328.767123287671,
+        "proposed_mw": 0.0,
+        "p_nom_max_mw": 30821.91780821918,
+        "p_nom_opt_mw": 30821.917808284572,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "ID_Java-Bali1 2 LNG import",
+        "existing_mw": 456.62100456621005,
+        "proposed_mw": 0.0,
+        "p_nom_max_mw": 1141.552511415525,
+        "p_nom_opt_mw": 1141.5525115045132,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "ID_Maluku16 0 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 3500.7610350114155,
+        "p_nom_max_mw": 3500.7610350114155,
+        "p_nom_opt_mw": 3500.7610350492882,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "ID_Nusa-Tenggara12 0 LNG import",
+        "existing_mw": 532.7245053276256,
+        "proposed_mw": 0.0,
+        "p_nom_max_mw": 1331.811263319064,
+        "p_nom_opt_mw": 1331.8112633603942,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "ID_Sumatra3 0 LNG import",
+        "existing_mw": 4566.2100456621,
+        "proposed_mw": 0.0,
+        "p_nom_max_mw": 11415.52511415525,
+        "p_nom_opt_mw": 11415.525114238786,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "KH2 0 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 1674.2770167465753,
+        "p_nom_max_mw": 1674.2770167465753,
+        "p_nom_opt_mw": 1674.277016793683,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "MY_Peninsular2 1 LNG import",
+        "existing_mw": 11111.11111111872,
+        "proposed_mw": 0.0,
+        "p_nom_max_mw": 27777.7777777968,
+        "p_nom_opt_mw": 27777.77777787666,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "PH_Luzon5 0 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 2283.1050228344748,
+        "p_nom_max_mw": 2283.1050228344748,
+        "p_nom_opt_mw": 7.381101793625426e-05,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "PH_Luzon9 0 LNG import",
+        "existing_mw": 22374.42922375571,
+        "proposed_mw": 12176.560121769407,
+        "p_nom_max_mw": 55936.07305938927,
+        "p_nom_opt_mw": 22374.42922390585,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "SG2 0 LNG import",
+        "existing_mw": 16742.770167431507,
+        "proposed_mw": 7610.3500761073055,
+        "p_nom_max_mw": 41856.925418578765,
+        "p_nom_opt_mw": 41856.92541852177,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "TH2 3 LNG import",
+        "existing_mw": 28919.330289155252,
+        "proposed_mw": 16438.35616438356,
+        "p_nom_max_mw": 72298.32572288813,
+        "p_nom_opt_mw": 72298.32571541288,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "VN2 0 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 4566.2100456621,
+        "p_nom_max_mw": 4566.2100456621,
+        "p_nom_opt_mw": 4566.210045747832,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "VN2 2 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 2283.10502283105,
+        "p_nom_max_mw": 2283.10502283105,
+        "p_nom_opt_mw": 2283.105022873436,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "VN2 3 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 4566.210045658676,
+        "p_nom_max_mw": 4566.210045658676,
+        "p_nom_opt_mw": 4566.210045703446,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "VN2 5 LNG import",
+        "existing_mw": 6088.280060878996,
+        "proposed_mw": 22770.16742770548,
+        "p_nom_max_mw": 15220.700152197489,
+        "p_nom_opt_mw": 15220.70015224343,
+        "ratio_to_existing": 2.5,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      },
+      {
+        "generator": "VN2 6 LNG import",
+        "existing_mw": 0.0,
+        "proposed_mw": 5175.038051746576,
+        "p_nom_max_mw": 5175.038051746576,
+        "p_nom_opt_mw": 5175.038051793433,
+        "ratio_to_existing": null,
+        "limit_ok": true,
+        "within_max": true,
+        "h2_import_within_lng_cap": true,
+        "capital_cost_eur_per_mw_a": 7018.0
+      }
+    ]
+  },
+  "B15": {
+    "gate": "B15_DOMESTIC_PRODUCTION_CAPS",
+    "passed": true,
+    "hook_registered": true,
+    "solved": true,
+    "generators": 19,
+    "by_country": {
+      "BN": {
+        "cap_mwh": 109836738.5,
+        "annual_mwh": 27644425.943517055,
+        "generators": 1
+      },
+      "ID": {
+        "cap_mwh": 727577775.0,
+        "annual_mwh": 727577775.0005572,
+        "generators": 6
+      },
+      "MM": {
+        "cap_mwh": 184896645.225,
+        "annual_mwh": 184896645.22929364,
+        "generators": 1
+      },
+      "MY": {
+        "cap_mwh": 849525182.0,
+        "annual_mwh": 530109123.5747754,
+        "generators": 4
+      },
+      "PH": {
+        "cap_mwh": 43007970.675,
+        "annual_mwh": 43007970.673506275,
+        "generators": 1
+      },
+      "TH": {
+        "cap_mwh": 367177854.75,
+        "annual_mwh": 201045932.38342223,
+        "generators": 3
+      },
+      "TL": {
+        "cap_mwh": 61292792.97,
+        "annual_mwh": 2593494.551411324,
+        "generators": 1
+      },
+      "VN": {
+        "cap_mwh": 103624605.114,
+        "annual_mwh": 103624605.11454919,
+        "generators": 2
+      }
+    },
+    "short": []
+  },
+  "contract": {
+    "id": "RESEARCH_V5_SKELETON",
+    "status": "SKELETON_INHERITS_V4_NUMERICAL_BUDGETS_PENDING_USER_APPROVAL",
+    "result_label": "SMOKE_TEST_ONLY"
+  },
+  "A1_A2_S4B": {
+    "gate": "A1_A2_SOLVER_TOLERANCES",
+    "budgets": {
+      "basis": "solver_tolerances",
+      "factor": 10.0,
+      "feasibility_tol": 1e-06,
+      "optimality_tol": 1e-06,
+      "primal_relative": 9.999999999999999e-06,
+      "dual_normalized": 9.999999999999999e-06,
+      "absolute_floor": 0.001,
+      "gap": 1e-07,
+      "barconvtol": 1e-08,
+      "decision": "71 (option 1)",
+      "column_dual_sign_scale": "stationarity_scale"
+    },
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_violation_max": 0.04469413496553898,
+    "column_violation_max": 0.0,
+    "row_max_ratio_to_budget": 0.18905711115559645,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_normalized_max": 3.935917752241849e-06,
+    "stationarity_fail_count": 0,
+    "dual_sign_normalized_max": 1.6881505577214184e-05,
+    "dual_sign_fail_count": 1,
+    "dual_sign_fail_columns": 1,
+    "dual_sign_fail_rows": 0,
+    "dual_sign_v4_normalisation": {
+      "columns_max": 0.1971407418051132,
+      "columns_fail": 9800,
+      "note": "V4 error / max(1, |rc|), reported for comparison"
+    },
+    "at_factor_1": {
+      "row_fail_count": 0,
+      "column_fail_count": 0,
+      "stationarity_fail_count": 1,
+      "dual_sign_fail_count": 188
+    },
+    "worst_rows": [
+      {
+        "index": 982277,
+        "group": "Store-fix-e-lower",
+        "violation": 0.00018994245397519518,
+        "budget": 0.0010046829384739201,
+        "ratio": 0.18905711115559645
+      },
+      {
+        "index": 894700,
+        "group": "Link-ext-p-upper",
+        "violation": 0.00015337031566645595,
+        "budget": 0.001000001533837663,
+        "ratio": 0.1533700804216502
+      },
+      {
+        "index": 964825,
+        "group": "Link-ext-p-upper",
+        "violation": 0.00013482951674718055,
+        "budget": 0.001000001348429674,
+        "ratio": 0.1348293349393044
+      },
+      {
+        "index": 1249865,
+        "group": "Bus-nodal_balance",
+        "violation": 0.00013324292547023386,
+        "budget": 0.0010081529143174573,
+        "ratio": 0.13216539235066577
+      },
+      {
+        "index": 1035668,
+        "group": "Store-ext-e-upper",
+        "violation": 0.00011461997780409794,
+        "budget": 0.0010014578150190018,
+        "ratio": 0.11445312631758046
+      },
+      {
+        "index": 1249876,
+        "group": "Bus-nodal_balance",
+        "violation": 0.00011503384439126574,
+        "budget": 0.0010081527478278014,
+        "ratio": 0.11410358662327845
+      },
+      {
+        "index": 982209,
+        "group": "Store-fix-e-lower",
+        "violation": 0.0001910080243833212,
+        "budget": 0.001714548275788,
+        "ratio": 0.11140428477905331
+      },
+      {
+        "index": 982205,
+        "group": "Store-fix-e-lower",
+        "violation": 0.00019095961468367818,
+        "budget": 0.001820556119114,
+        "ratio": 0.10489081477840488
+      },
+      {
+        "index": 907205,
+        "group": "Link-ext-p-upper",
+        "violation": 7.864083850717392e-05,
+        "budget": 0.0010000007864516705,
+        "ratio": 0.07864077666000376
+      },
+      {
+        "index": 1175891,
+        "group": "Bus-nodal_balance",
+        "violation": 8.787289966605272e-05,
+        "budget": 0.0012694353800746232,
+        "ratio": 0.06922203449291538
+      },
+      {
+        "index": 952075,
+        "group": "Link-ext-p-upper",
+        "violation": 6.432595312703047e-05,
+        "budget": 0.0010000006433940377,
+        "ratio": 0.0643259117401224
+      },
+      {
+        "index": 1175880,
+        "group": "Bus-nodal_balance",
+        "violation": 6.043697903024281e-05,
+        "budget": 0.001269434680147957,
+        "ratio": 0.04760936499954348
+      }
+    ],
+    "worst_columns": [],
+    "worst_stationarity": [
+      {
+        "index": 122142,
+        "group": "Line-s",
+        "normalized": 3.935917752241849e-06
+      },
+      {
+        "index": 124209,
+        "group": "Line-s",
+        "normalized": 1.0839199387157496e-07
+      },
+      {
+        "index": 124123,
+        "group": "Line-s",
+        "normalized": 8.368188309766963e-08
+      },
+      {
+        "index": 124811,
+        "group": "Line-s",
+        "normalized": 7.478295147930636e-08
+      },
+      {
+        "index": 121449,
+        "group": "Line-s",
+        "normalized": 7.094898525023779e-08
+      },
+      {
+        "index": 122825,
+        "group": "Line-s",
+        "normalized": 6.506683971245944e-08
+      },
+      {
+        "index": 124213,
+        "group": "Line-s",
+        "normalized": 5.4999963414763944e-08
+      },
+      {
+        "index": 122747,
+        "group": "Line-s",
+        "normalized": 5.4635612713810714e-08
+      },
+      {
+        "index": 124127,
+        "group": "Line-s",
+        "normalized": 4.528983992600657e-08
+      },
+      {
+        "index": 124815,
+        "group": "Line-s",
+        "normalized": 4.0684011104379575e-08
+      },
+      {
+        "index": 122137,
+        "group": "Line-s",
+        "normalized": 3.9491430190406764e-08
+      },
+      {
+        "index": 120761,
+        "group": "Line-s",
+        "normalized": 3.755889124577329e-08
+      }
+    ],
+    "worst_dual_sign_rows": [
+      {
+        "index": 579364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.631248031847147e-11,
+        "multiplier": -4.631248031847147e-11
+      },
+      {
+        "index": 324364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630799700017424e-11,
+        "multiplier": -4.630799700017424e-11
+      },
+      {
+        "index": 279739,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630654612628287e-11,
+        "multiplier": -4.630654612628287e-11
+      },
+      {
+        "index": 375364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.63061002791866e-11,
+        "multiplier": -4.63061002791866e-11
+      },
+      {
+        "index": 273364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.6305898411054083e-11,
+        "multiplier": -4.6305898411054083e-11
+      },
+      {
+        "index": 330739,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630217362515971e-11,
+        "multiplier": -4.630217362515971e-11
+      },
+      {
+        "index": 585739,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630171215053432e-11,
+        "multiplier": -4.630171215053432e-11
+      },
+      {
+        "index": 528364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630096131337364e-11,
+        "multiplier": -4.630096131337364e-11
+      },
+      {
+        "index": 477364,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.630007589455749e-11,
+        "multiplier": -4.630007589455749e-11
+      },
+      {
+        "index": 598489,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.629997555116882e-11,
+        "multiplier": -4.629997555116882e-11
+      },
+      {
+        "index": 368989,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.629794468202711e-11,
+        "multiplier": -4.629794468202711e-11
+      },
+      {
+        "index": 292489,
+        "group": "Link-ext-p-lower",
+        "normalized": 4.629779278990189e-11,
+        "multiplier": -4.629779278990189e-11
+      }
+    ],
+    "worst_dual_sign_columns": [
+      {
+        "index": 208792,
+        "group": "Link-p",
+        "normalized": 1.6881505577214184e-05,
+        "reduced_cost": -0.1534363314207006
+      },
+      {
+        "index": 483640,
+        "group": "Link-p",
+        "normalized": 8.460430185655124e-06,
+        "reduced_cost": -0.07380914200726654
+      },
+      {
+        "index": 490184,
+        "group": "Link-p",
+        "normalized": 7.756752174610616e-06,
+        "reduced_cost": -0.06766771972845045
+      },
+      {
+        "index": 215336,
+        "group": "Link-p",
+        "normalized": 7.602643056305124e-06,
+        "reduced_cost": -0.06632172202508814
+      },
+      {
+        "index": 470552,
+        "group": "Link-p",
+        "normalized": 7.289524984302874e-06,
+        "reduced_cost": -0.06358956453643999
+      },
+      {
+        "index": 248224,
+        "group": "Link-p",
+        "normalized": 5.623327685605592e-06,
+        "reduced_cost": 0.19183742877657353
+      },
+      {
+        "index": 195872,
+        "group": "Link-p",
+        "normalized": 5.591596195546477e-06,
+        "reduced_cost": 0.19069273781571888
+      },
+      {
+        "index": 130893,
+        "group": "Link-p",
+        "normalized": 5.518654547612533e-06,
+        "reduced_cost": 0.13347577835321153
+      },
+      {
+        "index": 136976,
+        "group": "Link-p",
+        "normalized": 5.457542713093767e-06,
+        "reduced_cost": 0.1971407418051132
+      },
+      {
+        "index": 254768,
+        "group": "Link-p",
+        "normalized": 5.441217001278867e-06,
+        "reduced_cost": 0.18933270893324033
+      },
+      {
+        "index": 202416,
+        "group": "Link-p",
+        "normalized": 5.420131079902596e-06,
+        "reduced_cost": 0.18859780924983302
+      },
+      {
+        "index": 196333,
+        "group": "Link-p",
+        "normalized": 5.4177418667241165e-06,
+        "reduced_cost": 0.13107226844064973
+      }
+    ],
+    "row_fails_by_group": {},
+    "dual_sign_row_fails_by_group": {},
+    "column_fails_by_group": {},
+    "stationarity_fails_by_group": {},
+    "dual_sign_column_fails_by_group": {
+      "Link-p": 1
+    },
+    "criteria": {
+      "primal_rows_within_budget": true,
+      "primal_columns_within_budget": true,
+      "dual_stationarity": true,
+      "dual_sign": false,
+      "relative_gap": true,
+      "complementarity": true
+    },
+    "relative_gap": 2.72742470715476e-10,
+    "complementarity_over_scale": 8.401266992076171e-10,
+    "passed": false,
+    "scale": {
+      "num_col": 604645,
+      "num_row": 1348617,
+      "nnz": 2984665
+    },
+    "special_references": {
+      "net_zero_rows": {
+        "research_country_co2_limit-BN": 1644785.578614285,
+        "research_country_co2_limit-ID": 672916821.2505777,
+        "research_country_co2_limit-KH": 31223976.190965075,
+        "research_country_co2_limit-LA": 20521104.536584117,
+        "research_country_co2_limit-MM": 36626158.14481715,
+        "research_country_co2_limit-MY": 101569076.70895453,
+        "research_country_co2_limit-PH": 174323499.3683014,
+        "research_country_co2_limit-SG": 30021971.21151828,
+        "research_country_co2_limit-TH": 206067046.19385114,
+        "research_country_co2_limit-TL": 163132.42162159653,
+        "research_country_co2_limit-VN": 367884805.9482589,
+        "research_bunker_co2_limit": 4.92125884699947e-05
+      },
+      "pool_rows": 17976,
+      "pool_cols": 5992,
+      "pool_row_groups": {
+        "Store-fix-e-lower": 5992,
+        "Store-fix-e-upper": 5992,
+        "Store-energy_balance": 5992
+      }
+    }
+  },
+  "A3_S4B": {
+    "gate": "A3_PHYSICS_SOLVER_TOLERANCES",
+    "passed": true,
+    "checks": 387,
+    "failed": [],
+    "diagnostic_expected_failures": [],
+    "largest_ratio_checks": [
+      {
+        "check": "STORE_ENERGY_LOWER",
+        "residual": 0.003734556969448022,
+        "ratio": 0.18905711115559645,
+        "status": "PASS"
+      },
+      {
+        "check": "Link_DISPATCH_UPPER",
+        "residual": 0.00018591635671327822,
+        "ratio": 0.15337008043196482,
+        "status": "PASS"
+      },
+      {
+        "check": "BUS_BALANCES",
+        "residual": 0.00020907391444779932,
+        "ratio": 0.13110543721314136,
+        "status": "PASS"
+      },
+      {
+        "check": "STORE_ENERGY_UPPER",
+        "residual": 0.00020834803581237793,
+        "ratio": 0.11453642570247913,
+        "status": "PASS"
+      },
+      {
+        "check": "Link_DISPATCH_LOWER",
+        "residual": 0.00013278721235110424,
+        "ratio": 0.031256966889008204,
+        "status": "PASS"
+      },
+      {
+        "check": "STORAGEUNIT_STATE_EQUATIONS_CYCLIC_AND_INITIAL",
+        "residual": 7.554251351393759e-05,
+        "ratio": 0.02096860047148952,
+        "status": "PASS"
+      },
+      {
+        "check": "STORE_STATE_EQUATIONS_CYCLIC_AND_INITIAL",
+        "residual": 0.0002312883734703064,
+        "ratio": 0.006935036409001114,
+        "status": "PASS"
+      },
+      {
+        "check": "Generator_DISPATCH_UPPER",
+        "residual": 0.00012045293169649085,
+        "ratio": 0.0067888453933083945,
+        "status": "PASS"
+      },
+      {
+        "check": "IMPORT_ANNUAL:TH2 1 gas production",
+        "residual": 0.00038214160667848773,
+        "ratio": 0.0014580188059573197,
+        "status": "PASS"
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:LA",
+        "residual": 0.010079312734887935,
+        "ratio": 4.91165745993081e-05,
+        "status": "PASS"
+      },
+      {
+        "check": "Generator_NOMINAL_UPPER",
+        "residual": 8.89881448529195e-08,
+        "ratio": 2.5874443867263725e-05,
+        "status": "PASS"
+      },
+      {
+        "check": "COUNTRY_CO2_CAP:KH",
+        "residual": 0.0031426620262209326,
+        "ratio": 1.0064867914748063e-05,
+        "status": "PASS"
+      }
+    ],
+    "budgets": {
+      "basis": "solver_tolerances",
+      "factor": 10.0,
+      "feasibility_tol": 1e-06,
+      "optimality_tol": 1e-06,
+      "primal_relative": 9.999999999999999e-06,
+      "dual_normalized": 9.999999999999999e-06,
+      "absolute_floor": 0.001,
+      "gap": 1e-07,
+      "barconvtol": 1e-08,
+      "decision": "71 (option 1)",
+      "column_dual_sign_scale": "stationarity_scale"
+    }
+  },
+  "A5_S4B": {
+    "gate": "A5_FOM_ONCE_SOLVER_TOLERANCES",
+    "passed": true,
+    "reconciliation": {
+      "capital": 484664801894.36786,
+      "variable": 202827651919.29886,
+      "known_fixed_once": 10806157242.20073,
+      "actual": 698298611056.0613
+    },
+    "ratio": 2.7759994528577292e-08
+  },
+  "B1_S4B": {
+    "gate": "B1_COUNTRY_NET_ZERO_SOLVER_TOLERANCES",
+    "passed": true,
+    "countries": {
+      "BN": {
+        "final_level_tco2": -0.0005248215077244822,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 1644785.578614285,
+        "tolerance_t": 16.44885578614285,
+        "ratio_to_budget": 0.0,
+        "within_cap": true
+      },
+      "ID": {
+        "final_level_tco2": 0.04469413496553898,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 672916821.2505777,
+        "tolerance_t": 6729.169212505776,
+        "ratio_to_budget": 6.6418503613310075e-06,
+        "within_cap": true
+      },
+      "KH": {
+        "final_level_tco2": 0.0031426620262209326,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 31223976.190965075,
+        "tolerance_t": 312.2407619096507,
+        "ratio_to_budget": 1.0064867914748063e-05,
+        "within_cap": true
+      },
+      "LA": {
+        "final_level_tco2": 0.010079312734887935,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 20521104.536584117,
+        "tolerance_t": 205.21204536584116,
+        "ratio_to_budget": 4.91165745993081e-05,
+        "within_cap": true
+      },
+      "MM": {
+        "final_level_tco2": -0.005042905220761895,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 36626158.14481715,
+        "tolerance_t": 366.26258144817143,
+        "ratio_to_budget": 0.0,
+        "within_cap": true
+      },
+      "MY": {
+        "final_level_tco2": 0.004602621134836227,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 101569076.70895453,
+        "tolerance_t": 1015.6917670895451,
+        "ratio_to_budget": 4.531513677643556e-06,
+        "within_cap": true
+      },
+      "PH": {
+        "final_level_tco2": 0.015278329723514616,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 174323499.3683014,
+        "tolerance_t": 1743.2359936830137,
+        "ratio_to_budget": 8.764349622701053e-06,
+        "within_cap": true
+      },
+      "SG": {
+        "final_level_tco2": -0.0005691095975635108,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 30021971.21151828,
+        "tolerance_t": 300.2207121151828,
+        "ratio_to_budget": 0.0,
+        "within_cap": true
+      },
+      "TH": {
+        "final_level_tco2": 0.008391526062041521,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 206067046.19385114,
+        "tolerance_t": 2060.6714619385116,
+        "ratio_to_budget": 4.072228987995718e-06,
+        "within_cap": true
+      },
+      "TL": {
+        "final_level_tco2": -1.057294184647617e-05,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 163132.42162159653,
+        "tolerance_t": 1.632324216215965,
+        "ratio_to_budget": 0.0,
+        "within_cap": true
+      },
+      "VN": {
+        "final_level_tco2": 0.011533440498169512,
+        "cap_tco2": 0.0,
+        "gross_co2_flow_t": 367884805.9482589,
+        "tolerance_t": 3678.8490594825885,
+        "ratio_to_budget": 3.1350676017655454e-06,
+        "within_cap": true
+      }
+    },
+    "every_tonne_booked_once": true,
+    "budgets": {
+      "basis": "solver_tolerances",
+      "factor": 10.0,
+      "feasibility_tol": 1e-06,
+      "optimality_tol": 1e-06,
+      "primal_relative": 9.999999999999999e-06,
+      "dual_normalized": 9.999999999999999e-06,
+      "absolute_floor": 0.001,
+      "gap": 1e-07,
+      "barconvtol": 1e-08,
+      "decision": "71 (option 1)",
+      "column_dual_sign_scale": "stationarity_scale"
+    }
+  },
+  "B3_S4B": {
+    "gate": "B3_BIOMASS_WITHIN_POTENTIAL_SOLVER_TOLERANCES",
+    "passed": true,
+    "stores": 107,
+    "failing": [],
+    "budgets": {
+      "basis": "solver_tolerances",
+      "factor": 10.0,
+      "feasibility_tol": 1e-06,
+      "optimality_tol": 1e-06,
+      "primal_relative": 9.999999999999999e-06,
+      "dual_normalized": 9.999999999999999e-06,
+      "absolute_floor": 0.001,
+      "gap": 1e-07,
+      "barconvtol": 1e-08,
+      "decision": "71 (option 1)",
+      "column_dual_sign_scale": "stationarity_scale"
+    }
+  },
+  "country_gross_co2_flow_t": {
+    "BN": 1644785.578614285,
+    "ID": 672916821.2505777,
+    "KH": 31223976.190965075,
+    "LA": 20521104.536584117,
+    "MM": 36626158.14481715,
+    "MY": 101569076.70895453,
+    "PH": 174323499.3683014,
+    "SG": 30021971.21151828,
+    "TH": 206067046.19385114,
+    "TL": 163132.42162159653,
+    "VN": 367884805.9482589
+  },
+  "acceptance_basis": "solver_tolerances",
+  "all_passed_barconvtol": false,
+  "all_passed_solver_tolerances": false,
+  "all_passed": false
+}

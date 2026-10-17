@@ -3,8 +3,10 @@
 The active layer (research.cost_layer.active) supplies every technology-data technology as an
 annualised wide table (see s2_0_cost_layer_v015.py). Two grade-C rows that technology-data lacks
 are appended from the D1 registry / AEO8 Appendix D: `nuclear SMR` (decision 46) and `geothermal`
-investment/FOM/VOM (decision 52). External fossil fuel prices are the D1 registry WEO 2025 NZE 2050
-values (EUR2020/MWh NCV), not the technology-data European fuel rows; lignite keeps the layer value.
+investment/FOM/VOM (decision 52). External fossil fuel prices are the D1 registry WEO 2025 2050
+values (EUR2020/MWh NCV) of the scenario research.fuels.price_scenario (S4C-0, decision 85: steps main,
+nze low-price sensitivity, cps optional; one scenario for gas, oil and coal), not the technology-data
+European fuel rows; lignite keeps the layer value (WEO Table 2.3 has no lignite price).
 Every row of the resulting table is tagged with its source layer in the returned ledger.
 """
 from __future__ import annotations
@@ -17,6 +19,9 @@ import pandas as pd
 
 AEO8_PDF_SHA = "48c2a81913ed785cb0e14a55e332ea7bc87f912f7fabfbc8c654e09b66b11c06"
 DISCOUNT = 0.07
+FUEL_CARRIERS = ("gas", "oil", "coal")
+# S4C-0 (decision 85): registry rows per WEO 2025 Table 2.3 scenario; the _main / _high_price suffixes are the D1 names (d1_fuel_prices.py)
+FUEL_PRICE_IDS = {"steps": "fuel_price_{c}_STEPS_2050_high_price", "nze": "fuel_price_{c}_NZE_2050_main", "cps": "fuel_price_{c}_CPS_2050_optional"}
 
 
 def annuity(n, r):
@@ -28,6 +33,28 @@ def registry_value(reg: pd.DataFrame, pid: str) -> float:
     if r["status"] == "DATA_PENDING":
         raise ValueError(f"registry value pending: {pid}")
     return float(r["value"])
+
+
+def fuel_price_scenario(cfg: dict) -> str:
+    """research.fuels.price_scenario (S4C-0, decision 85): steps (main) | nze (low-price sensitivity) | cps (optional)."""
+    s = str(((cfg.get("research") or {}).get("fuels") or {}).get("price_scenario", "")).lower()
+    if s not in FUEL_PRICE_IDS:
+        raise ValueError(f"research.fuels.price_scenario must be one of {sorted(FUEL_PRICE_IDS)}, got {s!r}")
+    return s
+
+
+def fuel_price_ids(cfg: dict) -> dict:
+    """{carrier: registry param_id} for gas, oil and coal, all from one WEO scenario (asserted)."""
+    s = fuel_price_scenario(cfg)
+    ids = {c: FUEL_PRICE_IDS[s].format(c=c) for c in FUEL_CARRIERS}
+    tags = {pid.split("_")[3] for pid in ids.values()}   # fuel_price_<carrier>_<SCENARIO>_2050_<tag>
+    if len(tags) != 1:
+        raise AssertionError(f"fuel price scenarios differ across gas / oil / coal: {ids}")
+    return ids
+
+
+def fuel_price(cfg: dict, reg: pd.DataFrame, carrier: str) -> float:
+    return registry_value(reg, fuel_price_ids(cfg)[carrier])
 
 
 def load_active_layer(repo: Path, cfg: dict):
@@ -48,8 +75,9 @@ def build_research_costs(repo: Path, cfg: dict, registry_csv: Path):
     ledger = {"layer": name, "layer_file": spec["file"], "prepared_file": spec["prepared_file"], "rows": {}, "overrides": []}
     for t in c.index:
         ledger["rows"][t] = name
-    # --- fuel prices: D1 registry (WEO 2025 NZE 2050 -> EUR2020/MWh NCV), decision D1-1 --------------
-    for carrier, pid in [("gas", "fuel_price_gas_NZE_2050_main"), ("oil", "fuel_price_oil_NZE_2050_main"), ("coal", "fuel_price_coal_NZE_2050_main")]:
+    # --- fuel prices: D1 registry (WEO 2025 2050 -> EUR2020/MWh NCV), decision D1-1; scenario per research.fuels.price_scenario (S4C-0, decision 85)
+    ledger["fuel_price_scenario"] = fuel_price_scenario(cfg)
+    for carrier, pid in fuel_price_ids(cfg).items():
         v = registry_value(reg, pid)
         ledger["overrides"].append(dict(technology=carrier, parameter="fuel", before=float(c.at[carrier, "fuel"]), after=v, source=pid, tier=reg.loc[pid, "tier"]))
         c.at[carrier, "fuel"] = v

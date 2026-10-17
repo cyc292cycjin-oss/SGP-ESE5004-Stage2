@@ -46,25 +46,30 @@ class AppliedInputTests(unittest.TestCase):
  def setUpClass(cls):
   cls.f=ROOT/'research_inputs/assembly_v1';cls.data=load_registry(cls.f);cls.base=reconstruct(cls.f/'sources')
  def test_prior133_values_unchanged_new19_have_sources(self):
+  # S4C-0 (decision 86 c): asserts the accepted state. 152 -> 153 at 0177f678 (UNSD OtherNEC alias recovery under GATE4-20261005-CONSOLIDATED-BASELINE-CHOICES),
+  # 153 -> 171 at 59d02392 (GATE4-20261006-FINAL-CLOSURE, HUMAN_ACCEPTED: 18 PENDING records accepted); the 133 values of 7c4b9dda stay unchanged.
   old=json.loads(subprocess.check_output(['git','show','7c4b9dda:research_inputs/assembly_v1/registry.json'],cwd=ROOT));accepted=lambda d:{r['InputID']:r for r in d['records'] if r['Year']==2050 and r['Kind']=='DEMAND' and r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED'}
-  before=accepted(old);after=accepted(self.data);self.assertEqual(len(before),133);self.assertEqual(len(after),152)
+  before=accepted(old);after=accepted(self.data);self.assertEqual(len(before),133);self.assertEqual(len(after),171)
   for k,r in before.items():self.assertEqual(r['Value'],after[k]['Value'])
-  self.assertEqual(len(derive(self.f)['records']),152)
+  self.assertEqual(len(derive(self.f)['records']),171)
  def test_thailand_four_items_exact_no_memo_posting(self):
   from decimal import Decimal as D
   selected=[r for r in self.base['selected_rows'] if r['Country']=='TH' and r['Account']=='RoadResidualFuel' and r['Commodity'] in ['Motor Gasoline','Gas Oil/ Diesel Oil','Biogasoline','Biodiesel']]
   self.assertEqual(len(selected),4);self.assertEqual(sum(D(r['MWh']) for r in selected),D('274632227.776'))
   self.assertEqual(len([x for x in self.base['resolved_blends'].values() if x['SourceRows'][0].startswith(json.loads((self.f/'sources/TH_ROAD_LOCAL_VINTAGE_APPLIED.json').read_text())['replacements'][0]['NewRawRow']['SourceSHA256'])]),2)
- def test_rail_parent_not_posted_and_ph_stays_blocked(self):
+ def test_rail_parent_not_posted_and_ph_accepted(self):
+  # S4C-0 (decision 86 c): GATE4-20261006-FINAL-CLOSURE (59d02392) accepted PH rail with the approved constant-2019 target method; the carrier-split parents stay unposted.
   records=self.data['records'];rail=[r for r in records if r['Year']==2050 and r['Account']=='RailNonElectric']
-  self.assertEqual({r['Country'] for r in rail if r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED'},{'ID','KH','MM','TH'})
-  self.assertTrue(all(r['AssemblyStatus']=='PENDING' for r in rail if r['Country']=='PH'))
+  self.assertEqual({r['Country'] for r in rail if r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED'},{'ID','KH','MM','PH','TH'})
+  self.assertTrue(all(r['AssemblyStatus']=='ASSEMBLY_V1_ACCEPTED' for r in rail if r['Country']=='PH'))
   parents=[r for r in records if r.get('Representation')=='APPROVED_CARRIER_SPLIT'];self.assertEqual(len(parents),5);self.assertTrue(all(r['Kind']=='ACCOUNTING' and not r['Required'] and r['Value'] is None for r in parents))
  def test_nec_source_rows_unique_and_retained(self):
+  # S4C-0 (decision 86 c): 15 -> 17 source rows at 0177f678 (two UNSD 1234 LPG rows recovered under GATE4-20261005-CONSOLIDATED-BASELINE-CHOICES, OtherNEC constant 2019).
   rows=[r for r in self.data['records'] if r['Year']==2050 and r['Kind']=='DEMAND' and r['Account'] in ['TransportNEC','OtherNEC']];ids=[x for r in rows for x in r['BaseSourceRows']]
-  self.assertEqual(len(ids),15);self.assertEqual(len(set(ids)),15);self.assertTrue(all(r['Value']==r['BaseValueMWh'] for r in rows))
- def test_coverage_and_ev_boundary_remain_guarded(self):
-  q=check(self.data['records'],2050,known_unallocated=self.data['known_unallocated_base_accounts']);self.assertFalse(q['NUMERIC_INPUT_READY']);self.assertEqual(q['known_positive_target_method_pending'],0)
+  self.assertEqual(len(ids),17);self.assertEqual(len(set(ids)),17);self.assertTrue(all(r['Value']==r['BaseValueMWh'] for r in rows))
+ def test_coverage_closed_and_ev_boundary_guarded(self):
+  # S4C-0 (decision 86 c): GATE4-20261006-FINAL-CLOSURE (59d02392) decision B lists the unreported accounts as HUMAN_COVERAGE_BOUNDARY, so the numeric input is ready.
+  q=check(self.data['records'],2050,known_unallocated=self.data['known_unallocated_base_accounts']);self.assertTrue(q['NUMERIC_INPUT_READY']);self.assertEqual(q['known_positive_target_method_pending'],0)
   self.assertTrue(all(r['Kind']=='BOUNDARY' and r['Value'] is None for r in self.data['records'] if r['Year']==2050 and r['Account']=='RoadEVFinalElectricity'))
  def test_zero_proof_uses_one_original_vintage(self):
   self.assertIn('immutable',self.base['zero_proof_vintage_scope']);old=json.loads(subprocess.check_output(['git','show','7c4b9dda:research_inputs/assembly_v1/registry.json'],cwd=ROOT));before={r['InputID']:r for r in old['records'] if r['Year']==2050 and r.get('Classification')=='SOURCE_SUPPORTED_NOT_APPLICABLE'}

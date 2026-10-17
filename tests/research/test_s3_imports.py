@@ -33,7 +33,8 @@ def test_import_price_table(registry):
     assert registry.loc["import_price_oil_non_fossil", "sensitivity_low"] != "" and registry.loc["import_price_base_hydrogen", "tier"] == "B"
     assert float(registry.loc["import_price_markup", "value"]) == 0.2 and registry.loc["import_carbon_treatment", "decision_ref"] == "64"
     f = pd.read_csv(IMP / "IMPORT_PRICES_FOSSIL_2050.csv").set_index("carrier")
-    assert float(f.loc["oil"].price_eur2020_per_mwh) == pytest.approx(11.6177349029) and float(f.loc["gas (LNG)"].price_eur2020_per_mwh) == pytest.approx(13.6739681303)
+    # S4C-0 (decision 85): the reference table lists the STEPS main prices
+    assert float(f.loc["oil"].price_eur2020_per_mwh) == pytest.approx(35.3179141049) and float(f.loc["gas (LNG)"].price_eur2020_per_mwh) == pytest.approx(27.0688756865)
 
 
 def built(sc):

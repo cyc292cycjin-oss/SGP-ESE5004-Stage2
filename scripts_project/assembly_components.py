@@ -97,7 +97,8 @@ def validate_hooks(n):
     # S1 adds the per-country net-zero hook and the existing cross-border FOM hook.
     allowed={'install_fragment_constraints','research_battery_inverter_capacity_equality','research_existing_assets','research_country_net_zero','research_cross_border_existing_fom',
              'research_co2_storage_cap','research_gap_diagnostic',  # S2: national storage cap; gap diagnostic replaces the hard net-zero limit (decisions 49, 53)
-             'research_new_hydro_inflow','research_nuclear_national_cap'}  # S4B-2 (decisions 78, 79): new-reservoir inflow tied to built capacity; nuclear plan caps (sensitivity)
+             'research_new_hydro_inflow','research_nuclear_national_cap',  # S4B-2 (decisions 78, 79): new-reservoir inflow tied to built capacity; nuclear plan caps (sensitivity)
+             'research_bunker_net_zero'}  # S4C-3 (decision 88): ASEAN international bunker account, net zero on its own
     if set(n.meta.get('required_constraint_hooks',[]))-allowed:raise ValueError('Unknown required physical hook')
     if n.meta.get('existing_unit_components'):
         if 'research_existing_assets' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Existing cost/resource hook lost')
@@ -150,3 +151,6 @@ def install_research_constraint_hooks(n,execution_context=None):
     if 'research_nuclear_national_cap' in hooks:
         from s4b_candidates import install_nuclear_national_cap
         install_nuclear_national_cap(n)
+    if 'research_bunker_net_zero' in hooks:
+        from s4c_layers import install_bunker_net_zero
+        install_bunker_net_zero(n)

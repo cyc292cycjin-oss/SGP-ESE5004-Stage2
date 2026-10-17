@@ -44,7 +44,7 @@ def test_production_caps(registry):
         assert float(prod.at[c, "cap_mwh_per_year"]) == pytest.approx(float(gas.at[c, "cap_mwh_per_year"]))
     assert float(prod.at["SG", "cap_mwh_per_year"]) == 0.0 and "exported" in prod.at["TL", "note"]
     assert registry.loc["gas_production_node_allocation", "value"] == "load_shares" and registry.loc["gas_production_node_allocation", "tier"] == "C"
-    assert float(registry.loc["gas_production_price_rule", "value"]) == pytest.approx(float(registry.loc["fuel_price_gas_NZE_2050_main", "value"]))
+    assert float(registry.loc["gas_production_price_rule", "value"]) == pytest.approx(float(registry.loc["fuel_price_gas_STEPS_2050_high_price", "value"]))   # S4C-0 (decision 85): STEPS main
     assert registry.loc["fuel_price_lng_regasification_adder", "status"] == "DATA_PENDING"
 
 

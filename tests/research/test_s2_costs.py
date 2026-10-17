@@ -1,4 +1,4 @@
-"""S2-1 cost table: active layer v0.15.0 (EUR2020), WEO 2025 NZE fuel prices (decision 33), AEO8 SMR/geothermal rows, FT unit handling."""
+"""S2-1 cost table: active layer v0.15.0 (EUR2020), WEO 2025 fuel prices (decision 33; STEPS main since S4C-0, decision 85), AEO8 SMR/geothermal rows, FT unit handling."""
 from __future__ import annotations
 
 import sys
@@ -25,14 +25,28 @@ def annuity(n, r):
     return r / (1.0 - 1.0 / (1.0 + r) ** n)
 
 
-def test_fuel_prices_are_weo_nze_not_layer(costs):
+def test_fuel_prices_are_weo_steps_not_layer(costs):
+    # S4C-0 (decision 85, modifies decision 33): main = WEO 2025 STEPS 2050 for gas, oil and coal
     c, ledger = costs
     reg = pd.read_csv(REG)
     for tech in ["gas", "oil", "coal"]:
-        want = float(reg.loc[reg.param_id == f"fuel_price_{tech}_NZE_2050_main", "value"].iloc[0])
+        want = float(reg.loc[reg.param_id == f"fuel_price_{tech}_STEPS_2050_high_price", "value"].iloc[0])
         assert c.at[tech, "fuel"] == pytest.approx(want, rel=1e-9)
-    assert {o["technology"] for o in ledger["overrides"]} == {"gas", "oil", "coal"}
+    assert {o["technology"] for o in ledger["overrides"]} == {"gas", "oil", "coal"} and ledger["fuel_price_scenario"] == "steps"
+    assert c.at["gas", "fuel"] == pytest.approx(27.069, abs=1e-3) and c.at["oil", "fuel"] == pytest.approx(35.318, abs=1e-3) and c.at["coal", "fuel"] == pytest.approx(8.861, abs=1e-3)
+
+
+def test_fuel_price_scenario_switch_nze_and_bad_value():
+    import copy
+    from phase4_static import config
+    from s2_costs import build_research_costs, fuel_price_ids
+    cfg = config(ROOT, "integrated"); low = copy.deepcopy(cfg); low["research"]["fuels"]["price_scenario"] = "nze"
+    c, ledger = build_research_costs(ROOT, low, REG)
     assert c.at["gas", "fuel"] == pytest.approx(13.674, abs=1e-3) and c.at["oil", "fuel"] == pytest.approx(11.618, abs=1e-3) and c.at["coal", "fuel"] == pytest.approx(5.169, abs=1e-3)
+    assert set(fuel_price_ids(low).values()) == {f"fuel_price_{t}_NZE_2050_main" for t in ["gas", "oil", "coal"]}
+    bad = copy.deepcopy(cfg); bad["research"]["fuels"]["price_scenario"] = "mixed"
+    with pytest.raises(ValueError):
+        fuel_price_ids(bad)
 
 
 def test_fischer_tropsch_new_unit(costs):

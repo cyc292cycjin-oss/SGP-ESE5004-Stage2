@@ -16,6 +16,9 @@ from __future__ import annotations
 import pandas as pd
 
 from d1_common import ASEAN, REG_DIR, ROOT, SRC_DIR, Registry, sha256, src_sha, write_csv, write_json
+from s2_costs import FUEL_PRICE_IDS
+
+MAIN_FUEL_SCENARIO = "steps"   # S4C-0 (decision 85): configs/research/baseline.yaml research.fuels.price_scenario (main)
 
 SCRIPT = "scripts_project/s3_1_gas_data.py"
 GEM = "GEM_GGIT_GAS_PIPELINES_ASEAN.csv"
@@ -102,14 +105,18 @@ def main():
             "technology-data v0.15.0 costs_2050 (EUR2020 layer, S2-0)", "CH4 (g) pipeline rows 88-91 of costs_2050_EUR2020.csv", sha256(ROOT / "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020.csv"), decision_ref="35")
     reg.add("gas_pipeline_cost_submarine", "New gas pipeline capacity, submarine: technology-data v0.15.0 CH4 (g) submarine pipeline (investment 125.49 EUR/MW/km, FOM 3 %, lifetime 30 a)", 125.492009886, "EUR2020/MW/km", "B",
             "technology-data v0.15.0 costs_2050 (EUR2020 layer, S2-0)", "CH4 (g) submarine pipeline rows 92-95", sha256(ROOT / "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020.csv"), decision_ref="35")
-    reg.add("gas_production_price_rule", "Domestic gas production is priced at the import price (WEO 2025 NZE 2050 Japan LNG, fuel_price_gas_NZE_2050_main) - decision 43", 13.6739681303, "EUR2020/MWh_NCV", "B", "S3 instruction S3-1.3; D1 registry", "fuel_price_gas_NZE_2050_main", caps_sha, decision_ref="43")
+    main_gas = FUEL_PRICE_IDS[MAIN_FUEL_SCENARIO].format(c="gas"); reg_df = pd.read_csv(REG_DIR / "fragments" / "fuel_prices.csv", dtype=str, keep_default_na=False).set_index("param_id")
+    main_gas_price = float(reg_df.loc[main_gas, "value"])
+    reg.add("gas_production_price_rule", f"Domestic gas production is priced at the import price (decision 43): WEO 2025 2050 Japan LNG of research.fuels.price_scenario; S4C-0 (decision 85) main = STEPS ({main_gas}); "
+            "NZE (fuel_price_gas_NZE_2050_main, 13.67, S3-S4B main) is the low-price sensitivity", main_gas_price, "EUR2020/MWh_NCV", "B", "S3 instruction S3-1.3; D1 registry; S4C instruction S4C-0 item 1", main_gas, caps_sha, decision_ref="43, 85")
     reg.add("gas_production_node_allocation", "Domestic gas production caps are allocated to the AC nodes of each country by electricity load share at build time (no field-level siting basis registered; GEM start locations lack coordinates in the batch-9 table)", "load_shares", "method", "C",
             "S3 instruction S3-1.3", "s3_layers.add_gas_network", caps_sha, decision_ref="43", sensitivity_low=None, sensitivity_high=None, status="REFERENCE_ONLY")
     for r in prod:
         reg.add(f"gas_production_cap_2050_{r['country']}", f"{r['country']} annual gas production cap = UNSD 2019 gross production ({r['basis']}); {r['note'] or 'no note'}; fugitive factor {r['fugitive_factor_id']}", r["cap_mwh_per_year"], "MWh_NCV/a", "B",
                 "D1 FOSSIL_PRODUCTION_CAPS_2050.csv (UNSD 2019)", "carrier gas", caps_sha, country=r["country"], decision_ref="43", status="REGISTERED" if r["cap_mwh_per_year"] > 0 else "SOURCE_ZERO")
-    reg.add("lng_import_price_rule", "LNG imports priced at the WEO 2025 NZE 2050 Japan LNG customs-border price (fuel_price_gas_NZE_2050_main); regasification adder fuel_price_lng_regasification_adder stays DATA_PENDING (adder = 0 in the build; LNG cost understated -> favours LNG over domestic production, pipelines and non-gas options)",
-            13.6739681303, "EUR2020/MWh_NCV", "B", "S3 instruction S3-1.4; D1 registry", "fuel_price_gas_NZE_2050_main", caps_sha, decision_ref="17,19")
+    reg.add("lng_import_price_rule", f"LNG imports priced at the WEO 2025 2050 Japan LNG customs-border price of research.fuels.price_scenario; S4C-0 (decision 85) main = STEPS ({main_gas}), NZE = low-price sensitivity; "
+            "regasification adder fuel_price_lng_regasification_adder stays DATA_PENDING (adder = 0 in the build; LNG cost understated -> favours LNG over domestic production, pipelines and non-gas options)",
+            main_gas_price, "EUR2020/MWh_NCV", "B", "S3 instruction S3-1.4; D1 registry; S4C instruction S4C-0 item 1", main_gas, caps_sha, decision_ref="17,19,85")
     reg.add("lng_terminal_expansion_cap_factor", "LNG regasification capacity per terminal node may expand to 2.5 x the existing (operating + under construction) capacity; proposed sites are candidates with p_nom_max = proposed capacity, zero existing. "
             "S3B R3 (decision 68): sensitivity only (research.s3.gas.lng_expansion = cap_factor); main = existing_only (lng_terminal_expansion_mode); the factor still sets the liquid-H2 terminal cap (S3-2)", 2.5, "ratio", "B",
             "D1 instruction / S3 instruction S3-1.4", "LNG_IMPORT_CAPS_BY_COUNTRY.csv cap_factor", sha256(ROOT / "research_inputs/lng_terminals_v5/LNG_IMPORT_CAPS_BY_COUNTRY.csv"), decision_ref="17,19,68", status="SENSITIVITY")
