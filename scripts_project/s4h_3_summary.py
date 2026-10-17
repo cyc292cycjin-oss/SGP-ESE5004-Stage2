@@ -44,6 +44,28 @@ def pair_detail(n, pair: str) -> dict:
     return dict(totals={k: round(v, 2) for k, v in tot.items()}, components=comps)
 
 
+def b16(run_dir: Path) -> dict:
+    """The B16_LEDGER gate as recorded in the run's V5_GATES.json (empty when absent)."""
+    p = run_dir / "V5_GATES.json"
+    if not p.exists():
+        return {}
+    def find(d):
+        if isinstance(d, dict):
+            if d.get("gate") == "B16_LEDGER":
+                return d
+            for v in d.values():
+                r = find(v)
+                if r:
+                    return r
+        elif isinstance(d, list):
+            for v in d:
+                r = find(v)
+                if r:
+                    return r
+        return {}
+    return find(json.loads(p.read_text()))
+
+
 def tolerance_flags(gates: dict) -> dict:
     return {t: dict(all_passed_solver_tolerances=g.get("all_passed_solver_tolerances"), all_passed_barconvtol=g.get("all_passed_barconvtol"),
                     acceptance_basis=g.get("acceptance_basis")) for t, g in (gates or {}).items()}
@@ -65,7 +87,6 @@ def main():
     s4g = json.loads((a.ref / "analysis/S4G3_SMOKE_SUMMARY.json").read_text())
     import pypsa
     from s4c_6_summary import solved_in
-    from s4d_ledger import ledger_gate
     logging.getLogger("pypsa").setLevel(logging.ERROR)
     res = dict(label=gen["label"], reference="S4G-3 smoke (results_project/s4g/s4g3/solves, code 3e64dca0)", runs=gen["runs"], gates=gen["gates"], vs_s4g=gen["s4c"],
                tolerance=tolerance_flags(gen["gates"]), tolerance_s4g=tolerance_flags(s4g.get("gates")), B5=gen.get("B5"), B6=gen.get("B6"), B6_s4g=s4g.get("B6"),
@@ -73,11 +94,10 @@ def main():
                lao={}, xb_flows={}, at_cap={}, focus={}, B16={})
     for t in RUNS:
         p, q = solved_in(a.run / "solves" / t), solved_in(a.ref / "solves" / t)
-        li = a.run / "solves" / t / "LEDGER_IDENTITY.json"
-        if li.exists():
-            g = ledger_gate(json.loads(li.read_text())); gq = a.ref / "solves" / t / "LEDGER_IDENTITY.json"
-            res["B16"][t] = dict(passed=g["passed"], relative_error=g["relative_error"], tolerance=g["tolerance"],
-                                 s4g_relative_error=(ledger_gate(json.loads(gq.read_text()))["relative_error"] if gq.exists() else None))
+        g, gq = b16(a.run / "solves" / t), b16(a.ref / "solves" / t)
+        if g:
+            res["B16"][t] = dict(passed=g.get("passed"), relative_error=g.get("relative_error"), tolerance=g.get("tolerance"), difference_eur=g.get("difference"),
+                                 s4g_relative_error=gq.get("relative_error"))
         if not p:
             continue
         n = pypsa.Network(str(p)); f = pypsa.Network(str(q)) if q else None
