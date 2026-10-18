@@ -8,8 +8,8 @@
 2. **结构：** 保留 PyPSA 0.30.3 的损耗结构，只把分段切线换成线性下界，求解时 `transmission_losses` = 0。代理模型减去损耗项后，与无损模型逐行相同（EXACT）。
 3. **冒烟（档案 A，56×3h）：** 三项都最优，求解器容差门槛全部通过，没有触发条件诊断。目标值相对 S4J −1.3 / −1.1 / −1.5 %，B16 ≤ 1.3e-10。
 4. **聚集消失：** S4J 中 16 条建在零损耗上限的线不再聚集。跨境交流送电 992 TWh（S4H 1,272，S4J 610），交流损耗 4.5 %；B6 为 50.42 bn EUR（S4J 49.61，S4H 53.31）。
-5. **部署包：** 代码 2d4aaac3，上传 237,121,367 B，S4J 包作废。串行预计 2.5–3.5 h，NZE 单运行悲观 138 min。
-6. **待处理：** 需要用户决定 1 项（串行预检下限余量只剩 0.9 GiB，§8）；发现但未处理 5 条（§7）；上云前清单见 §10。
+5. **部署包：** 按用户决定把串行预检内存下限提高到 40 GiB 后重新打包，代码 56d28358，上传 237,192,471 B；S4J 包与 S4K 第一次打包（2d4aaac3）作废。串行预计 2.5–3.5 h，NZE 单运行悲观 138 min。
+6. **待处理：** §8 的一项已由用户决定并实施，没有其他待决定事项；发现但未处理 5 条（§7）；上云前清单见 §10。
 
 ## 1. 执行概况
 
@@ -19,9 +19,11 @@
 | S4K-1 | 交流线性损耗代理（第 108 项） | e4d3c73a | 546 通过 |
 | S4K-2 | 静态复核（S4I 审查脚本重跑） | 5ab49257 | — |
 | S4K-3 | 冒烟三项（档案 A） | 1ea39a22 | — |
-| S4K-4 准备 | S4K 版部署包脚本（**S4K 最终代码提交**） | 2d4aaac3 | — |
+| S4K-4 准备 | S4K 版部署包脚本（**S4K 最终模型代码提交**，四个网络在此构建） | 2d4aaac3 | — |
 | S4K-4 | 部署网络重建、打包、资源估算 §20、部署步骤 | 8591b274 | `tests/research` 529、整个 `tests/` 546 通过 |
-| S4K-5 | 上云前清单、报告与交付 | 本交付提交（哈希见 PR #35） | — |
+| S4K-5 | 上云前清单、报告与交付 | d608dfad | — |
+| §8 第 1 项（用户决定） | 串行预检内存下限 36 → 40 GiB（**部署包代码提交**） | 56d28358 | 重新打包后 `tests/research` 529、整个 `tests/` 546 通过 |
+| 重新打包与交付更新 | 部署包、报告、资源估算、部署步骤、台账 | 本交付提交（哈希见 PR #35） | — |
 
 - **停止条件：** 五个都没有触发。
   - PyPSA 0.30.3 的损耗结构与指令描述一致（§2.1）；
@@ -282,18 +284,20 @@ VN→ID 74.7、VN→MY 58.7、VN→BN 12.2、MM→ID 8.7。不互联另有 SG→
 - α = 0.5 是主算假设；上界 α = 1.0 与下界 `ac_losses=none` 已登记为第二批敏感性，没有求解。
 - 代理不区分线路实际回路数：存量线与候选线用同一参考负载。
 
-## 6. 云端部署包（S4K-4，代码提交 2d4aaac3，提交 8591b274）
+## 6. 云端部署包（S4K-4：网络构建 2d4aaac3，提交 8591b274；重新打包的部署包代码 56d28358）
 
 - **部署包脚本：** `research/06_scope_redesign/p1_step4k_20261018/cloud_package/`，由 S4J 版改为 S4K 版。
   - `make_package.sh`：网络构建之后只允许改动 `s4k_3/4/5_*.py` 与 `tests/`；第二批 14 项；写明 S4J 包作废。
-  - `run_365x24h.sh`、`preflight.sh`：只改说明文字与引用章节。运行方式、上限与检查都不变。
+  - `run_365x24h.sh`、`preflight.sh`：只改说明文字与引用章节，运行方式与检查不变。
+  - **用户决定后（§8 第 1 项）：** `preflight.sh` 的串行内存下限 36 → 40 GiB（提交 56d28358）；两通道 72 GiB 与推荐 48 / 96 GiB 不变。
 - **网络：** 在 S4K 最终代码提交 2d4aaac3 上重建四个网络（2920×3h + 365×24h），工作树干净，单次约 1 min / 0.7 GB。一体化、不互联、NZE 与 S4K-3 冒烟网络逐组件一致（`COMPARE_*: {}`，VERIFIED）。
-- **包：** `work/p1_step4k_20261018/cloud_package_dist/`，代码 `code_2d4aaac3.tar.gz`，共 15 个文件，上传 237,121,367 B。清单 `supersedes` 写明 S4J 部署包（bcfb2d0a）作废。
+- **包：** `work/p1_step4k_20261018/cloud_package_dist/`，代码 `code_56d28358.tar.gz`，共 15 个文件，上传 237,192,471 B。清单 `supersedes` 写明 S4J 部署包（bcfb2d0a）作废。
+- **重新打包（56d28358）：** `preflight.sh` 不是构建输入，四个网络仍为 2d4aaac3 上的构建（`make_package.sh` 已核对其后没有改动构建输入）。与第一次打包逐文件比较：四个网络、构建回执、环境文件与 `run_365x24h.sh` 的 SHA256 相同；只有 `COMMIT`、`DATA_CONFIG_MANIFEST.json`、`preflight.sh` 与代码快照不同。第一次打包（代码 2d4aaac3，上传 237,121,367 B）改名保留为 `cloud_package_dist_2d4aaac3_superseded/`，不使用。
 - **首批运行：** 一体化 STEPS、不互联 STEPS、一体化 NZE，档案 A，串行；导出分国账本与节点价格。不互联诊断只在不互联主算非最优时运行。
 - **第二批敏感性（只登记，不打包、不运行）：** 沿用 S4J 的十二项，加入 `network.ac_loss_reference_loading=1.0`（上界）与 `network.ac_losses=none`（下界），共 14 项。α = 1.0 构建过一次核对：只有 λ 列不同，恰为主算的 2 倍（1.55–27.3 %）。
 - **资源：** 见 `CLOUD_RESOURCE_ESTIMATE.md` §20 与本报告 §10.2。
 - **部署步骤：** `CLOUD_DEPLOY_STEPS.md` 已改为 S4K 版，写明 S4J 部署包作废；实例目录为 `/root/autodl-tmp/s4k_cloud/`。
-- **收尾检查（VERIFIED，`evidence/s4k_4/FINAL_CHECKS.txt`）：**
+- **收尾检查（VERIFIED，`evidence/s4k_4/FINAL_CHECKS.txt`；重新打包后再跑一次，结果相同，`evidence/s4k_5_repack/FINAL_CHECKS.txt`）：**
   - `tests/research` 529 通过，整个 `tests/` 546 通过；
   - 部署包普通文件中没有许可特征串；
   - 代码包内命中 10 个文件，与 S4E 的命中集合相同，没有新增；
@@ -307,17 +311,17 @@ VN→ID 74.7、VN→MY 58.7、VN→BN 12.2、MM→ID 8.7。不互联另有 SG→
 | 2 | λ 最大的几条线来自聚类后相距很远的节点对：MM–TH 一条 1,106 km（λ 13.7 %），LA–TH 最大 9.9 %，ID–MY 最大 7.4 %。这么长的交流线现实中多为直流或分段建设 | MM、TH、LA、ID、MY；MM–TH 跨境交流损耗 6.7 % | 否 | 正式结果后分析（聚类拓扑，C 级局限） |
 | 3 | 到单条扩建上限（存量 + 20 GW）的交流线由 S4J 的 2 条增至 6 条（一体化 1、100、108、109、111、S4H2 MY–TH），S4H 为 10 条；单条上限（第 96 项）重新成为约束 | TH、MY、ID、VN 国内与 MY–TH 走廊 | 否 | 正式结果后分析；`network.max_extension=apg_plans` 已登记为第二批 |
 | 4 | NZE 冒烟 barrier 迭代 142 → 182 次、求解 +31 %；365×24h 外推悲观 138 min，TimeLimit 余量 1.27 倍（S4J 1.66） | — | 否（三项最优） | 正式运行时观察 |
-| 5 | 单运行峰值内存上限估计 35.1 GiB，串行预检下限 36 GiB 只剩 0.9 GiB 余量（S4J 2.0）；`preflight.sh` 的下限不在第 108 项范围内，未改 | — | 否（推荐 48 GiB 仍有 13 GiB 余量） | **§8 第 1 项** |
+| 5 | 单运行峰值内存上限估计 35.1 GiB，串行预检下限 36 GiB 只剩 0.9 GiB 余量（S4J 2.0）；`preflight.sh` 的下限不在第 108 项范围内，未改 | — | 否（推荐 48 GiB 仍有 13 GiB 余量） | **已处理**：用户决定提高到 40 GiB（56d28358，§8） |
 
 S4J 报告 §11 的发现中，第 3、9 条已由第 108 项处理；其余照旧登记。
 
 ## 8. 需要用户决定的事项
 
-按指令，S4K 完成后的模型状态就是首批正式运行的版本，除非用户另行决定。下面一项**不影响**首批运行能否进行。
+按指令，S4K 完成后的模型状态就是首批正式运行的版本，除非用户另行决定。
 
-1. **串行预检的内存下限（§7 第 5 条）：** 外推的单运行峰值上限 35.1 GiB，离下限 36 GiB 只差 0.9 GiB。可选做法（PROPOSED）：
-   - 维持 36 GiB（现状）；实例按推荐 ≥ 48 GiB 选择时没有影响；
-   - 把串行下限提高到 40 GiB（`preflight.sh` 一行，需重新打包）。
+1. **串行预检的内存下限（§7 第 5 条）——已决定（用户 2026-10-18）：** 提高到 40 GiB。已改 `preflight.sh`（提交 56d28358）并重新打包（§6、§10.1）；外推的单运行峰值上限 35.1 GiB，余量 4.9 GiB。
+
+现在没有待用户决定的事项；首批正式运行的授权见 §10。
 
 本步不需要决定、已记录的事项：
 - 首批正式运行的授权与上云前信息：见 §10；
@@ -339,16 +343,16 @@ S4J 报告 §11 的发现中，第 3、9 条已由第 108 项处理；其余照�
 
 ### 10.1 部署包
 
-- **位置：** `work/p1_step4k_20261018/cloud_package_dist/`（不进 git）。S4J（bcfb2d0a）、S4H（6eead675）、S4G（ed6af79c）与 S4F（7e09744d）部署包都已作废，不使用。
-- **代码提交：** 2d4aaac34ef4db779a1ac5a4d40f3029b65dbafb（`code_2d4aaac3.tar.gz`）。
-- **规模：** 共 15 个文件，上传总量 **237,121,367 B**（226.1 MiB）。
+- **位置：** `work/p1_step4k_20261018/cloud_package_dist/`（不进 git）。S4K 第一次打包（2d4aaac3，保留为 `cloud_package_dist_2d4aaac3_superseded/`）、S4J（bcfb2d0a）、S4H（6eead675）、S4G（ed6af79c）与 S4F（7e09744d）部署包都已作废，不使用。
+- **代码提交：** 56d283580799c510b617c70b6e3292ba224e4ae0（`code_56d28358.tar.gz`）；四个网络在 2d4aaac3 上构建，其后没有改动构建输入。
+- **规模：** 共 15 个文件，上传总量 **237,192,471 B**（226.2 MiB）。
 - **校验：** 上传后在实例上运行 `sha256sum -c SHA256SUMS`。
 
 | 文件 | SHA256 |
 |---|---|
-| `COMMIT` | `261393f7bd90cf2cf3440965fad99435cfec1da8ae9e9d110f5dd4e4db26d87f` |
-| `DATA_CONFIG_MANIFEST.json` | `64315b955969906daa904125f118c8086cd56b31b55b4bc1e6d76ee91e681f66` |
-| `code_2d4aaac3.tar.gz` | `b7cebfec8d56ad4c315203235efe23ad600afa232d89899d95289afce0541acd` |
+| `COMMIT` | `102c67ab059e33a7e2fd5bcbd71fd8d7622ba6cc22339118680a0c0f9e2fda6e` |
+| `DATA_CONFIG_MANIFEST.json` | `9db763c7c25dae33264611e009ba001ab970ede46ef47b816c4e0b71762fa4a4` |
+| `code_56d28358.tar.gz` | `5e503b67190c8e3308a6034af635923b31153f857ca3263c1a8f54b563410aed` |
 | `conda_explicit_linux64.txt` | `62f2935b6677194a298b44d12cbb1cc0a85d1566cd4e28aea55136fd86dc3e0f` |
 | `environment_pypsa-earth.yml` | `f2d28554d08b48bda83037b14ebc1d201b550283e1c36dc4b2657d31f0fe67a3` |
 | `networks/disconnected_365_24h_unsolved.nc` | `39bca6e9f8d4f1802ce6028b27d444250f9c7fcd96d45168133b48e890ec6c51` |
@@ -359,19 +363,19 @@ S4J 报告 §11 的发现中，第 3、9 条已由第 108 项处理；其余照�
 | `networks/integrated_BUILD_RECEIPT.json` | `8385fffc61d62c3b42dc54741ddffbd24f330add507f15e6726dc076778df5f9` |
 | `networks/integrated_nze_365_24h_unsolved.nc` | `04dd38d02cb4e0bb1f9e5af4d4382a57057025a5833ad704c07bd59ca078688f` |
 | `networks/integrated_nze_BUILD_RECEIPT.json` | `dc46142daa655a728fa3408e1a7dc000b40be3c56f3407a6ec174830e8b0113b` |
-| `preflight.sh` | `3d85eaefd0d32bc6cd6945fc612bc14e68cb9133a7b73f3620aca65a45c30260` |
+| `preflight.sh` | `aec8b3bd018c80535b2ab84119c0df914c87bdfb039c8891e4f9bc51d5cb2472` |
 | `run_365x24h.sh` | `c30d018443debf3c359b8373dbfbf775202bcdc4772fd6f24f09646a366c9561` |
-| `PACKAGE_MANIFEST.json` | `279fea1414ee888b1a5be010b1c39f8e2996c7cef9bbeee2c7e9819ec1d41425` |
+| `PACKAGE_MANIFEST.json` | `42fd7a89ff973637f1137519bb34146f70d50cfec126697e0ecb19e7431c7fa5` |
 
 ### 10.2 实例规格（下限 / 推荐；AutoDL 按内存与 CPU 核数选机型）
 
 | 运行方式 | 内存（下限 / 推荐） | vCPU | 数据盘（`/root/autodl-tmp` 可用） | 预计墙钟（不含诊断；含诊断） |
 |---|---|---|---|---|
-| **串行**（首批推荐） | 36 GB / ≥ 48 GB | ≥ 8 | ≥ 35 GB | 2.5–3.5 h（悲观 5.1 h）；含诊断 3.8–5.3 h（悲观 7.7 h） |
+| **串行**（首批推荐） | 40 GB / ≥ 48 GB | ≥ 8 | ≥ 35 GB | 2.5–3.5 h（悲观 5.1 h）；含诊断 3.8–5.3 h（悲观 7.7 h） |
 | 两通道 | 72 GB / ≥ 96 GB | ≥ 16 | ≥ 45 GB | 2.1–2.8 h（竞争 +10–20 %；悲观 4.1 h）；含诊断大致相同 |
 
 - **单运行墙钟（INFERENCE，`CLOUD_RESOURCE_ESTIMATE.md` §20）：** 一体化 47–65 min（悲观 95）、不互联 38–52 min（悲观 74）、NZE 66–94 min（悲观 138）、不互联诊断（只在需要时）约 74–104 min（悲观 153）。
-- **单运行峰值内存：** 中值 / 上限为 25.1 / 35.1 GiB。串行下限 36 GiB 只余 0.9 GiB（§8 第 1 项），建议按推荐 ≥ 48 GiB 选择。
+- **单运行峰值内存：** 中值 / 上限为 25.1 / 35.1 GiB。串行下限已按用户决定提高到 40 GiB（余量 4.9 GiB）；推荐 ≥ 48 GiB。
 - **运行参数：** 每运行 8 线程，Gurobi TimeLimit 10,500 s，墙钟上限 3 h。主算余量 1.27–3.7 倍，诊断悲观情形 1.15 倍。
 - **三通道已撤下：** 学术 WLS 许可同时最多 2 个会话。
 
@@ -380,12 +384,12 @@ S4J 报告 §11 的发现中，第 3、9 条已由第 108 项处理；其余照�
 1. **实例访问方式：** 由用户自己经 SSH 或 JupyterLab 登录实例并执行各步骤。Claude Code 不连接云端，也不需要、不接收登录密码或密钥。用户只需确定运行方式（serial / lanes2）与实例规格，并写入授权原文。
 2. **许可文件的放置路径：** 例如 `/root/.gurobi/gurobi.lic`（权限 600）。运行时只通过 `GRB_LICENSE_FILE` 引用，Claude Code 不读取、不复制、不输出其内容。WLS 许可需要实例能 HTTPS 出站访问 Gurobi 令牌服务器。
 3. **结果目录：** 下载后在本机存放的位置，建议 `work/p1_step4k_20261018/cloud_results/`。
-4. **§8 第 1 项是否在首批之前处理：** 不作新决定时，首批按当前部署包运行（指令：S4K 完成后的模型状态即为首批正式运行的版本）。
+4. **§8 第 1 项：** 已决定并实施（串行下限 40 GiB）；首批按当前部署包（56d28358）运行。
 5. **首次正式运行的授权原文：** 见 10.4。
 
 ### 10.4 首次正式运行的授权原文模板
 
-> 我授权在 AutoDL 实例（规格：＿＿＿；区域：＿＿＿）上，用部署包 `cloud_package_dist`（代码提交 2d4aaac34ef4db779a1ac5a4d40f3029b65dbafb，`SHA256SUMS` 已核对）执行 S4K 首批 365×24h 正式运行（S4J、S4H、S4G、S4F 部署包已作废，不使用）：一体化 STEPS、不互联 STEPS、一体化 NZE，以及仅在不互联主算非最优时自动运行的不互联诊断。
+> 我授权在 AutoDL 实例（规格：＿＿＿；区域：＿＿＿）上，用部署包 `cloud_package_dist`（代码提交 56d283580799c510b617c70b6e3292ba224e4ae0，`SHA256SUMS` 已核对）执行 S4K 首批 365×24h 正式运行（S4K 第一次打包 2d4aaac3 与 S4J、S4H、S4G、S4F 部署包已作废，不使用）：一体化 STEPS、不互联 STEPS、一体化 NZE，以及仅在不互联主算非最优时自动运行的不互联诊断。
 > 求解档案 A（`--solver-profile formal_barrier`），运行方式 ＿＿＿（serial / lanes2）。每运行 Gurobi TimeLimit 10,500 s，墙钟上限 3 h；不重试、不改参数、不 warm start。
 > 许可文件位于 ＿＿＿，只通过 `GRB_LICENSE_FILE` 引用。结果打包下载后带回本机审阅。
 > 第二批敏感性与联盟研究不在本次授权范围内。

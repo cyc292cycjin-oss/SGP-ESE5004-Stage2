@@ -611,6 +611,7 @@
   - 部署包重建到 2d4aaac3，四个网络与冒烟网络逐组件一致；上传 237,121,367 B；S4J 部署包作废。
   - 365×24h 单运行 47–65 / 38–52 / 66–94 min（NZE 悲观 138），串行 2.5–3.5 h；峰值上限 35.1 GiB，预检下限未改。
   - 第二批敏感性 14 项只登记（加 `ac_loss_reference_loading=1.0`、`ac_losses=none`）。
-- **S4K-5：** 上云前清单（报告 §10），格式同 S4J，填入 2d4aaac3。
-- **待用户决定：** 1 项（S4K 报告 §8）：串行预检内存下限 36 GiB 的余量只剩 0.9 GiB，是否提高到 40 GiB。另需上云前信息与授权。
+- **S4K-5：** 上云前清单（报告 §10），格式同 S4J（重新打包后填入 56d28358）。
+- **用户决定（2026-10-18，S4K 报告 §8 第 1 项）：** 串行预检内存下限 36 → 40 GiB。已改 `preflight.sh`（提交 56d28358）并重新打包：代码 56d28358，上传 237,192,471 B；网络与回执与第一次打包逐字节相同；第一次打包（2d4aaac3）作废，保留为 `cloud_package_dist_2d4aaac3_superseded/`。授权模板改填 56d28358。
+- **待用户决定：** 无；另需上云前信息与授权（报告 §10）。
 - **交付：** `research/06_scope_redesign/p1_step4k_20261018/`，内容为 S4K_REPORT.md、S4K_EVIDENCE.json、S4K_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §20、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4k_20261018/`；测试 `tests/research` 529 通过、整个 `tests/` 546 通过。
