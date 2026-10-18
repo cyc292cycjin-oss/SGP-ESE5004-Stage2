@@ -24,8 +24,8 @@
 |---|---|---|---|---|
 | C0 | 核对与记录 | 完成 | 2026-10-19 00:48 | 指令 SHA256 一致；本机部署包 `sha256sum -c SHA256SUMS` 15 个 OK，`COMMIT` = 56d28358…；授权原文已记录 |
 | C1 | 连接与实例核对 | 完成 | 2026-10-19 01:02 | 第一次尝试两把密钥都被拒（约 01:00，已停下报告）；用户把 WSL `~/.ssh/id_ed25519` 的公钥加入实例后，用该密钥免密登录成功。实例：Intel Xeon Silver 4214R @ 2.40GHz；容器 cgroup 限额 **12 核**（cfs 1,200,000 / 100,000 µs）、**90.0 GiB 内存**（96,636,764,160 B）；`/root/autodl-tmp` 50 GB 可用；系统盘 30 GB；Ubuntu 22.04.5 LTS，内核 5.4.0-162；时区 Asia/Shanghai（= SGT）。容器内 `nproc` = 48、`/proc/meminfo` 440 GB 为宿主机值（见发现第 1 条）。工具：`/root/miniconda3`（conda 24.4.0，不在 PATH）、`rsync` 有；`tmux`、`/usr/bin/time`、系统 `python3` 缺（部署脚本不用系统 `python3`）。均高于下限（内存 ≥ 40 GB、核数 ≥ 8、数据盘 ≥ 35 GB） |
-| C2 | 上传 | 待做 | — | |
-| C3 | 环境 | 待做 | — | |
+| C2 | 上传 | 完成 | 2026-10-19 01:04 | `rsync` 到 `/root/autodl-tmp/s4k_cloud/`：17 个文件、237,200,055 B，56 s（约 4.3 MB/s），第一次即成功；实例上 `sha256sum -c SHA256SUMS` **15 个 OK**，`COMMIT` = 56d283580799c510b617c70b6e3292ba224e4ae0 |
+| C3 | 环境 | 进行中 | 2026-10-19 01:04 起 | `apt-get install tmux time` 完成（tmux 3.2a、GNU time 1.9，`/usr/bin/time` 已有）；`source /etc/network_turbo` 后 `conda env create -n pypsa-earth -f environment_pypsa-earth.yml` 在实例后台运行（nohup，日志 `/root/autodl-tmp/l23_c3_conda.log`） |
 | C4 | 许可 | 待做 | — | |
 | C5 | 预检 | 待做 | — | |
 | C6 | 启动 | 待做 | — | |
