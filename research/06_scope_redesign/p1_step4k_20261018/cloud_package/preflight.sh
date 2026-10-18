@@ -52,7 +52,8 @@ fi
 echo "== resources"
 cores=$(nproc); mem=$(awk '/MemTotal/ {printf "%.0f", $2/1048576}' /proc/meminfo); disk=$(df -Pk "$HERE" | awk 'NR==2 {printf "%.0f", $4/1048576}')
 # CLOUD_RESOURCE_ESTIMATE.md section 19: lower bound / recommended per mode (one run at a time / two lanes)
-case "$MODE" in serial) need_c=8; need_m=36; need_d=35; rec_m=48;; lanes2) need_c=16; need_m=72; need_d=45; rec_m=96;; esac
+# serial memory minimum 40 GiB (user decision 2026-10-18 on S4K report section 8 item 1: the 365x24h peak upper estimate is 35.1 GiB, 36 GiB left 0.9 GiB)
+case "$MODE" in serial) need_c=8; need_m=40; need_d=35; rec_m=48;; lanes2) need_c=16; need_m=72; need_d=45; rec_m=96;; esac
 echo "cores $cores (need >= $need_c), memory ${mem} GiB (need >= $need_m), free disk ${disk} GiB (need >= $need_d) for mode $MODE"
 [ "$cores" -ge $need_c ] && [ "$mem" -ge $need_m ] && [ "$disk" -ge $need_d ] || { echo "RESOURCE CHECK FAILED"; ok=0; }
 [ "$mem" -ge $rec_m ] || echo "WARNING: memory below the recommended ${rec_m} GiB for mode $MODE (upper peak estimate leaves little margin; not a failure)"
