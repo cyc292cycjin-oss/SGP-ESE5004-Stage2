@@ -206,7 +206,9 @@ def main(a):
         from assembly_components import install_research_constraint_hooks
         from phase4_static import config
         cfg = config(a.repo, a.scenario)
-        t0 = time.time(); m = n.optimize.create_model(); install_research_constraint_hooks(n)
+        tl = int((n.meta.get("research_transmission_losses") or {}).get("ac_transmission_losses", 0))   # S4J-2 (decision 105 a): PyPSA-Eur solving.options.transmission_losses = 2
+        t0 = time.time(); m = n.optimize.create_model(transmission_losses=tl); install_research_constraint_hooks(n)
+        run["transmission_losses"] = dict(ac_tangents=tl, loss_variables=("Line-loss" in m.variables), network=(n.meta.get("research_transmission_losses") or {}).get("mode", "none"))
         hooks = sorted(k for k in m.constraints if k.startswith("research_") or k.startswith("Research"))
         SV = cfg["research"].get("solver", {})
         profile = a.solver_profile or SV.get("profile")

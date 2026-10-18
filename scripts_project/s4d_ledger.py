@@ -181,7 +181,7 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
     add_rows = []; missing = set()
     for (pair, comp, subj, car), v in xb.groupby(["pair", "component", "subject", "carrier"]).eur.sum().items():
         a, b = pair[3:].split("|")
-        sh = shares.get(comp)
+        sh = shares.get(comp) or (shares.get(comp[: -len("-reversed")]) if comp.endswith("-reversed") else None)   # S4J-2: a reversed lossy link uses its forward link's shares
         if sh is None or set(sh) != {a, b}:
             missing.add(comp); sh = {a: 0.5, b: 0.5}
         s2 = "xb_share_infrastructure_cost" if subj in ("capex_new", "fom_existing", "variable_cost") else "xb_share_congestion_rent"
