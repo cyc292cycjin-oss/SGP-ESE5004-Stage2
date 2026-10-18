@@ -372,7 +372,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     lv = set_transmission_s2(n, R["transmission"])
     n.meta["transmission_limit"] = jsonable(lv)
     max_ext = apply_max_extension(n, cfg, registry, repo)   # S4F-1 (decision 96): PyPSA-Eur individual line / DC-link extension limit (lines.max_extension = 20000 MW, increment); apg_plans = sensitivity
-    dc_conv = apply_dc_converter_rule(n)   # S4J-3 (decision 105 b): one-way DC links bidirectional; converter-station B2B follows its DC link at no cost (before the lossy split)
+    dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
     losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
