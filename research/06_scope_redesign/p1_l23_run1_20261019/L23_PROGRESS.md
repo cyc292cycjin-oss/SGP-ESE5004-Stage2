@@ -26,8 +26,8 @@
 | C1 | 连接与实例核对 | 完成 | 2026-10-19 01:02 | 第一次尝试两把密钥都被拒（约 01:00，已停下报告）；用户把 WSL `~/.ssh/id_ed25519` 的公钥加入实例后，用该密钥免密登录成功。实例：Intel Xeon Silver 4214R @ 2.40GHz；容器 cgroup 限额 **12 核**（cfs 1,200,000 / 100,000 µs）、**90.0 GiB 内存**（96,636,764,160 B）；`/root/autodl-tmp` 50 GB 可用；系统盘 30 GB；Ubuntu 22.04.5 LTS，内核 5.4.0-162；时区 Asia/Shanghai（= SGT）。容器内 `nproc` = 48、`/proc/meminfo` 440 GB 为宿主机值（见发现第 1 条）。工具：`/root/miniconda3`（conda 24.4.0，不在 PATH）、`rsync` 有；`tmux`、`/usr/bin/time`、系统 `python3` 缺（部署脚本不用系统 `python3`）。均高于下限（内存 ≥ 40 GB、核数 ≥ 8、数据盘 ≥ 35 GB） |
 | C2 | 上传 | 完成 | 2026-10-19 01:04 | `rsync` 到 `/root/autodl-tmp/s4k_cloud/`：17 个文件、237,200,055 B，56 s（约 4.3 MB/s），第一次即成功；实例上 `sha256sum -c SHA256SUMS` **15 个 OK**，`COMMIT` = 56d283580799c510b617c70b6e3292ba224e4ae0 |
 | C3 | 环境 | 完成 | 2026-10-19 01:04–01:53 | `apt-get install tmux time` 完成（tmux 3.2a、GNU time 1.9）；`source /etc/network_turbo` 后 `conda env create -n pypsa-earth -f environment_pypsa-earth.yml`（实例后台 nohup，日志 `/root/autodl-tmp/l23_c3_conda.log`），01:04:30–01:52:43，退出码 0，环境 3.3 GB；下载期间 conda.anaconda.org 有读超时、`pillow` 一个包约 17 KB/s，conda 自动重试后完成。`$PY` = `/root/miniconda3/envs/pypsa-earth/bin/python`；版本与部署包清单**全部一致**：python 3.11.13、pypsa 0.30.3、linopy 0.5.5、gurobipy 12.0.3、numpy 1.26.4、pandas 2.3.1、xarray 2025.1.2、scipy 1.15.2、netCDF4 1.7.2 |
-| C4 | 许可 | 待做 | — | |
-| C5 | 预检 | 待做 | — | |
+| C4 | 许可 | 完成 | 2026-10-19 01:54 | 本机许可文件经 `scp` 直接传到实例 `/root/.gurobi/gurobi.lic`（目录 700、文件 600、属主 root、308 字节）；两端哈希一致（未显示哈希值）；全程未读取、打印或复制到其他位置 |
+| C5 | 预检 | 完成 | 2026-10-19 01:54:31–01:54:38 | `PY=… GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash preflight.sh serial formal_barrier`：SHA256 全部 OK；代码解包到 `./repo`（56d28358）；四个网络在；档案 `formal_barrier`（Method 2、Crossover 0、BarConvTol 1e-8、BarHomogeneous 1、Threads 8、Seed 123、AggFill 0、PreDual 0、BARDENSETHRESH 200）；版本一致；GNU time 有；许可被 Gurobi 接受（输出已屏蔽）；资源 48 / 440 GiB / 49 GiB（容器内为宿主机值，见发现第 1 条）；最后一行 **`PREFLIGHT OK`**。预检占用的 WLS 令牌至少保留 5 分钟：最早 01:59:38 启动 |
 | C6 | 启动 | 待做 | — | |
 | C7 | 监督 | 待做 | — | |
 | C8 | 回收 | 待做 | — | |
