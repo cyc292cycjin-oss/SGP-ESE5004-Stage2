@@ -22,7 +22,7 @@
 | S4J-1 | 非工业电力负荷（第 104 项） | 完成 | 见提交记录 | `s2_layers.add_demand_layer` 的 Astar 段加开关 `research.demand.nonindustrial_electricity: table_sectors \| astar_residual`；基础负荷 = 需求表中居民 + 商业 + 农业及其他 + 交通的电力（交通电力行在代码中没有单独负荷，原方法扣减后未补回；工业电力在 `pypsa_eur_2050` 下按路线单独建模，`bas_fixed` 时并入），Astar 只给小时形状与节点分配；东盟 1,079.4 → 1,032.4 TWh，VN 30.0 → 197.2 TWh（= S4I 方案 (b)），与方案 (b) 的差只在交通电力（SG 4.75、MY 1.06、ID 0.77、TH 0.55、PH 0.26 TWh）；`astar_residual` 构建与 S4H 逐组件相同，主算只改 96 个 Astar 负荷；整个 `tests/` 534 通过 |
 | S4J-2 | 输送损耗（第 105 项 a） | 完成 | 见提交记录 | 新模块 `s4j_layers.py`（`apply_transmission_losses`，开关 `research.network.transmission_losses: pypsa_eur \| none`），构建时在单条扩建上限之后施加；直流效率 0.98 × 0.977^(L/1000)（2.1–4.8 %），H₂ / 气管道压缩耗电 0.018 / 0.01 MWh_el/(MWh·1000 km) 接送端电力母线，CO₂ 无损；双向链路拆为正向 + `-reversed`（321 条：直流 12、H₂ 148、气 161），单向的 TH–MY 直流与 5 条现有气管道保留方向；反向容量 = 正向（钩子 `research_lossy_bidirectional_sync`，等价于 PyPSA-Eur `Link-bidirectional_sync`，`solve_network.py` 不在库内）；交流线损由 `s2_solve.py` 按网络元数据传 `transmission_losses=2`（PyPSA 0.30.3 源码逐行断言）；静态校验的跨境集合比较排除反向复制；账本对反向链路沿用正向长度份额；`none` 构建与 S4J-1 逐组件相同；56 时段建模检查：线损变量 8,288、同步 321 行，LP 675,693 列 / 1,517,932 行；整个 `tests/` 537 通过 |
 | S4J-3 | TH–MY 直流与换流器（第 105 项 b） | 完成 | 见提交记录 | `s4j_layers.apply_dc_converter_rule`（单条上限之后、损耗拆分之前；两种损耗口径都施加）：Khlong Ngae–Gurun 单向 → 双向（有损时拆为正向 + `-reversed`，无损对照 `p_min_pu` = −1）；"DC 母线只连 1 条直流 + 1 台 B2B"的换流站结构（TH21 0、MY_Peninsular22 0）B2B 改为可扩建、零资本成本，B2B 容量 − 2,000 = 直流容量 − 300（钩子 `research_b2b_follows_dc`），上限 22,000 MW；增量形式保留现有 2,000 MW（两个 DC 母线上还有发电候选，只能经 B2B 接入交流网）；PH_Visayas10 0（2 条直流 + 1 台 B2B）结构不同只报告；其余直流均已双向；不互联构建与 S4J-2 相同；建模检查 B2B 2 行、同步 322 行；整个 `tests/` 539 通过 |
-| S4J-4 | 云端脚本与部署文档（第 106 项 a、b） | 未开始 | — | |
+| S4J-4 | 云端脚本与部署文档（第 106 项 a、b） | 完成 | 见提交记录 | 部署包脚本复制为 `p1_step4j_20261018/cloud_package/`：`run_365x24h.sh` 撤下 `lanes3`（拒绝并说明原因），`lanes2` 启动前与通道内衔接前各等 330 秒（`LICENCE_GAP`），首批推荐 `serial`；`preflight.sh` 检查 `/usr/bin/time -v`，缺失为失败项并提示 `apt-get install -y time`，只接受 `serial` / `lanes2`；`make_package.sh` 改为 S4J（允许后续改动 `s4j_5/6/7_*`、`tests/`；第二批 12 项；S4H 包作废）；空跑测试通过；`CLOUD_DEPLOY_STEPS.md` 改为 S4J 版，`CLOUD_RESOURCE_ESTIMATE.md` 加 §18（三通道作废、许可 2 会话、令牌 ≥ 5 分钟） |
 | S4J-5 | 静态复核 | 未开始 | — | |
 | S4J-6 | 冒烟 | 未开始 | — | |
 | S4J-7 | 部署包与上云前清单 | 未开始 | — | |
@@ -34,11 +34,12 @@
 | 4b15d7b8 | S4J-0：S4I §5 答复登记 |
 | 34de92c9 | S4J-1：非工业电力负荷按需求表部门 |
 | 8c4bf2ae | S4J-2：输送损耗 |
-| （S4J-3 提交） | S4J-3：TH–MY 直流双向、换流站 B2B 随直流扩建 |
+| 8cbf33d2 | S4J-3：TH–MY 直流双向、换流站 B2B 随直流扩建 |
+| （S4J-4 提交） | S4J-4：云端脚本与部署文档 |
 
 ## 续行点
 
-S4J-3 完成。下一步 S4J-4：`run_365x24h.sh` 撤下 `lanes3`、`lanes2` 加 ≥ 5 分钟间隔；`preflight.sh` 检查 `/usr/bin/time`；部署文档同步（S4H 版脚本复制到 `p1_step4j_20261018/cloud_package/`）。
+S4J-4 完成。下一步 S4J-5：在 S4J 的四个网络（一体化、不互联、NZE、不互联诊断；2920×3h 与 365×24h）上重跑 `s4i_static_audit.py`、`s4i_followups.py`，核对 A 节无新增问题、损耗端口、TH–MY 双向、NZE 只差燃料价、不互联移除全部跨境组件（新数目）。
 
 ## 对 S4I 报告 §5 的答复（用户已确认 2026-10-18 19:44 SGT，指令原文摘要）
 
