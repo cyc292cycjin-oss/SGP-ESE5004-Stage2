@@ -34,25 +34,35 @@ def main():
     import pandas as pd
     reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
     pick = lambda ks: {k: dict(value=reg.at[k, "value"], unit=reg.at[k, "unit"], tier=reg.at[k, "tier"], status=reg.at[k, "status"]) for k in ks if k in reg.index}
-    smoke = jl(R / "s4j6/analysis/S4J6_SMOKE_SUMMARY.json"); ex = jl(R / "s4j7/EXTRAPOLATION_S4J7.json"); man = jl(a.dist / "PACKAGE_MANIFEST.json")
+    # supplement 01 (decision 107): S4J-3 rewritten (s4j3b), the S4J-6 smoke re-run on the full S4J network (s4j6b); s4j3 / s4j6 / diagnostics = history
+    smoke = jl(R / "s4j6b/analysis/S4J6_SMOKE_SUMMARY.json"); detail = jl(R / "s4j6b/analysis/S4J6_DETAIL.json")
+    ex = jl(R / "s4j7/EXTRAPOLATION_S4J7.json"); man = jl(a.dist / "PACKAGE_MANIFEST.json")
     ne = pd.read_csv(ROOT / "research_inputs/demand_v5/NONINDUSTRIAL_ELECTRICITY_S4J1.csv") if (ROOT / "research_inputs/demand_v5/NONINDUSTRIAL_ELECTRICITY_S4J1.csv").exists() else None
     ev = dict(
         instruction=dict(file="work/p1_step4j_20261018/S4J_CLAUDE_CODE_INSTRUCTION.md", sha256="c20957448c69128c05eaf4e271bcca7f98eecc7ccd3121cd37f3581daff3348f", verified=True),
         git=dict(branch=git("branch", "--show-current"), head=git("rev-parse", "HEAD"), base="09ffb727114be437abf078a5393d0a2cb3ea403e (PR #33 head)",
                  pr="https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/34 (draft)", log=git("log", "--oneline", "09ffb727..HEAD").splitlines()),
-        stops=[], downloads=[],
+        supplement01=dict(file="work/p1_step4j_20261018/S4J_SUPPLEMENT_01.md", sha256="188743eb4c139d40453f2d0a6f6a12b09daffdb84b5da4826b7273f4389fac55", verified=True,
+                          decision=107, a="S4J-3 rewritten (s4j3b)", b="passed: full S4J network, profile A, integrated optimal and all_passed_solver_tolerances (s4j6b)",
+                          c="not executed ((b) passed); profile A unchanged"),
+        stops=[dict(stop="S4J_STOP_01_SMOKE_SUBOPTIMAL.md", first_smoke=lines(R / "s4j6/STATUS.txt"), diagnostic_1_no_losses=lines(R / "s4j6_diag_noloss/STATUS.txt"),
+                    diagnostic_2_s4h_plus_old_s4j3=lines(R / "s4j6_diag_s4j3only/STATUS.txt"), resolution="supplement 01 (decision 107)")], downloads=[],
         s4j0={k: v for k, v in pick([x for x in reg.index if x.startswith("s4j_answer_") or x.startswith("s4j_registered_") or x == "s4j_scope_rule"]).items()},
         s4j1=dict(registry=pick(["s4j1_nonindustrial_electricity_switch", "s4j1_base_load_sectors", "s4j1_explicit_electricity_inventory", "s4j1_transport_electricity_row"]),
                   table=(ne.round(6).to_dict(orient="records") if ne is not None else None), status=lines(R / "s4j1/STATUS.txt")),
         s4j2=dict(registry=pick(["s4j2_transmission_losses_switch", "s4j2_ac_transmission_losses", "s4j2_link_losses", "s4j2_line_loss_approximation"]),
                   losses={k: v for k, v in jl(C / "LOSSES_S4J2.json").items() if k != "sources"}, sources=jl(C / "LOSSES_S4J2.json").get("sources"), status=lines(R / "s4j2/STATUS.txt")),
-        s4j3=dict(registry=pick(["s4j3_dc_bidirectional", "s4j3_b2b_follows_dc"]), converters=jl(C / "DC_CONVERTERS_S4J3.json"), status=lines(R / "s4j3/STATUS.txt")),
+        s4j3=dict(registry=pick(["s4j3_th_my_hvdc_switch", "s4j3_dc_bidirectional", "s4j3_b2b_fixed_at_dc_limit"]), converters=jl(C / "DC_CONVERTERS_S4J3.json"),
+                  status=lines(R / "s4j3b/STATUS.txt"), review=jl(R / "s4j3b/review/S4J5_REVIEW.json").get("th_my_dc"), status_first_version=lines(R / "s4j3/STATUS.txt")),
         s4j4=dict(script_checks=lines(ROOT / "research/06_scope_redesign/p1_step4j_20261018/evidence/s4j_4/SCRIPT_CHECKS.txt")),
         s4j5=dict(review=jl(R / "s4j5/review/S4J5_REVIEW.json"), status=lines(R / "s4j5/STATUS.txt")),
         s4j6=dict(runs=smoke.get("runs"), vs_s4h=smoke.get("vs_s4h"), tolerance=smoke.get("tolerance"), lp_vs_s4h=smoke.get("lp_vs_s4h"), b5_passed=(smoke.get("B5") or {}).get("passed"),
                   b6=dict(passed=(smoke.get("B6") or {}).get("passed"), difference=(smoke.get("B6") or {}).get("difference"), s4h_difference=(smoke.get("B6_s4h") or {}).get("difference")),
                   B16=smoke.get("B16"), focus=smoke.get("focus"), th_my=smoke.get("th_my"), at_cap=smoke.get("at_cap"), transport=smoke.get("transport"), capacity=smoke.get("capacity"),
-                  disconnected_objective_vs_s4h=smoke.get("disconnected_objective_vs_s4h"), status=lines(R / "s4j6/STATUS.txt"),
+                  disconnected_objective_vs_s4h=smoke.get("disconnected_objective_vs_s4h"), status=lines(R / "s4j6b/STATUS.txt"),
+                  th_my_corridor=detail.get("th_my"), ledger_th_my_vs_s4h=detail.get("ledger_th_my"),
+                  ac_loss_zero_loss_limit={t: dict(ac_tangents=v.get("ac_tangents"), **{k: x for k, x in (v.get("s4j") or {}).items() if k != "cross_border_lines"})
+                                           for t, v in (detail.get("loss_kink") or {}).items()},
                   ledgers={t: dict(relative_error=v.get("relative_error"), totals_bn_eur=v.get("totals_bn_eur")) for t, v in (smoke.get("ledgers") or {}).items() if v}),
         s4j7=dict(status=lines(R / "s4j7/STATUS.txt"),
                   extrapolation={k: {kk: vv for kk, vv in v.items() if kk in ("barrier_iterations", "barrier_seconds", "wall_seconds", "peak_rss_gib", "extrapolation")} for k, v in (ex.get("runs") or {}).items()},
