@@ -28,8 +28,8 @@
 | C3 | 环境 | 完成 | 2026-10-19 01:04–01:53 | `apt-get install tmux time` 完成（tmux 3.2a、GNU time 1.9）；`source /etc/network_turbo` 后 `conda env create -n pypsa-earth -f environment_pypsa-earth.yml`（实例后台 nohup，日志 `/root/autodl-tmp/l23_c3_conda.log`），01:04:30–01:52:43，退出码 0，环境 3.3 GB；下载期间 conda.anaconda.org 有读超时、`pillow` 一个包约 17 KB/s，conda 自动重试后完成。`$PY` = `/root/miniconda3/envs/pypsa-earth/bin/python`；版本与部署包清单**全部一致**：python 3.11.13、pypsa 0.30.3、linopy 0.5.5、gurobipy 12.0.3、numpy 1.26.4、pandas 2.3.1、xarray 2025.1.2、scipy 1.15.2、netCDF4 1.7.2 |
 | C4 | 许可 | 完成 | 2026-10-19 01:54 | 本机许可文件经 `scp` 直接传到实例 `/root/.gurobi/gurobi.lic`（目录 700、文件 600、属主 root、308 字节）；两端哈希一致（未显示哈希值）；全程未读取、打印或复制到其他位置 |
 | C5 | 预检 | 完成 | 2026-10-19 01:54:31–01:54:38 | `PY=… GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash preflight.sh serial formal_barrier`：SHA256 全部 OK；代码解包到 `./repo`（56d28358）；四个网络在；档案 `formal_barrier`（Method 2、Crossover 0、BarConvTol 1e-8、BarHomogeneous 1、Threads 8、Seed 123、AggFill 0、PreDual 0、BARDENSETHRESH 200）；版本一致；GNU time 有；许可被 Gurobi 接受（输出已屏蔽）；资源 48 / 440 GiB / 49 GiB（容器内为宿主机值，见发现第 1 条）；最后一行 **`PREFLIGHT OK`**。预检占用的 WLS 令牌至少保留 5 分钟：最早 01:59:38 启动 |
-| C6 | 启动 | 待做 | — | |
-| C7 | 监督 | 待做 | — | |
+| C6 | 启动 | 完成 | **2026-10-19 02:00:30** | 预检结束（01:54:38）后 5 分 52 秒；启动前确认本机无任何求解或 Gurobi 进程。tmux 会话 `s4k`：`bash /root/autodl-tmp/l23_launch.sh`（`cd /root/autodl-tmp/s4k_cloud`；`PY=/root/miniconda3/envs/pypsa-earth/bin/python GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth "<授权原文>"`）。授权原文按 `S4K_REPORT.md` §10.4 模板填写：规格 RTX 3080 Ti × 1，12 核 Xeon Silver 4214R，90 GB 内存，数据盘 50 GB；区域 西北 B 区 144 机；运行方式 serial；许可 `/root/.gurobi/gurobi.lic`；授权人 程宇晨；时间 2026-10-19 02:00（SGT）。运行目录 `runs/20261018T180030Z_5623/`；`STATUS.txt` 首行 `START:2026-10-18T18:00:30Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier commit:56d28358…` |
+| C7 | 监督 | 进行中 | 02:00:30 起 | 每 12 分钟一次（`/home/jin/l23_watch.sh`，只读）：`STATUS.txt`、`MONITOR_*.csv` 末行、容器 cgroup 内存（`MONITOR` 的 `mem_available_gib` 是宿主机值，见发现第 2 条）与磁盘。预计（§20）：一体化 47–65 min（悲观 95）、不互联 38–52（74）、NZE 66–94（138）、诊断 74–104（153） |
 | C8 | 回收 | 待做 | — | |
 | C9 | 首轮分析 | 待做 | — | |
 
@@ -39,8 +39,9 @@
 
 ## 续行点
 
-C1 完成，进行 C2 上传。连接方式：WSL `ssh` + `~/.ssh/id_ed25519`（`/home/jin/l23_ssh.sh`，主机与端口只经调用命令行的环境变量 `L23_HOST`、`L23_PORT` 传入，不写入任何文件）。若正式运行已启动而本会话中断：先读本文件，再查实例上 `runs/<时间戳>/STATUS.txt`。
+**正式运行已于 2026-10-19 02:00:30 SGT 在实例 tmux 会话 `s4k` 中启动**，运行目录 `/root/autodl-tmp/s4k_cloud/runs/20261018T180030Z_5623/`。若本会话中断：先读本文件，再查该目录的 `STATUS.txt`（出现 `DONE` 即进入 C8）；只观察、不干预。连接方式：WSL `ssh` + `~/.ssh/id_ed25519`（`/home/jin/l23_ssh.sh`，主机与端口只经调用命令行的环境变量 `L23_HOST`、`L23_PORT` 传入，不写入任何文件）。若正式运行已启动而本会话中断：先读本文件，再查实例上 `runs/<时间戳>/STATUS.txt`。
 
 ## 发现但未处理
 
 1. `preflight.sh` 用 `nproc` 与 `/proc/meminfo` 判断 CPU 与内存；AutoDL 容器内这两个值是宿主机的（48 线程、440 GB），不是容器配额（12 核、90 GiB）。本实例配额本身高于下限，所以不影响本次；若将来实例配额低于下限，预检仍会通过。建议时点：下一次修改部署脚本时改为读 cgroup 限额（未修改）。
+2. `run_365x24h.sh` 的 `MONITOR_<运行>.csv` 中 `mem_available_gib` 取自 `/proc/meminfo`，在容器内是宿主机值（约 420 GB），不反映 90 GiB 配额。监督时另读 cgroup `memory.usage_in_bytes` / `memory.limit_in_bytes` 判断可用内存。建议时点同第 1 条（未修改）。
