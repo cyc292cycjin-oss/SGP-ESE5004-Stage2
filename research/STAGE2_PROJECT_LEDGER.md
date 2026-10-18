@@ -544,6 +544,24 @@
 - **用户决定（2026-10-18）：** §7 两项维持现状——MY–SG 保持直流候选，参考候选不扩到节点对；首批正式运行用当前 S4H 部署包（6eead675），上云前信息由用户另行提供。
 - **交付：** `research/06_scope_redesign/p1_step4h_20261017/`，内容为 S4H_REPORT.md、S4H_EVIDENCE.json、S4H_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §17、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4h_20261017/`；测试 `tests/research` 514 通过、整个 `tests/` 531 通过。
 
+## S4I 第 103 项：上云前静态审查（只查不改）— 2026-10-18
+
+- **补记说明：** 本条由 S4K-0 补记（2026-10-18；S4J 报告 §11 第 10 条），S4I 交付时没有写台账。
+- **范围：**
+  - 指令 `S4I_CLAUDE_CODE_INSTRUCTION.md`（SHA256 5a220e7a…3507c）与续行文件 `S4I_RESUME_01.md`（6edcbb96…2424）。
+  - 审查对象：S4H 部署包（代码 6eead675），`sha256sum -c SHA256SUMS` 15 个文件全部 OK。
+  - 分支 `codex/s4i-preflight-audit-20261018`（自 PR #32 的 1545067b），draft PR #33。
+  - 没有修改模型代码、配置、数据、网络或 SHA 定点；没有求解、下载或连接云端。
+- **A 节（四个网络的表面错误扫描）：** 时间、成本、效率、拓扑、松弛、单位、净零、情景差异都未发现错误。阻塞项 K1：VN 非工业电力负荷只有 30.0 TWh（需求表 2050 为 197.2 TWh）。
+- **B 节：** 跨境输送没有任何损耗（U1）；TH–MY 直流单向，并受两端固定 2,000 MW B2B 限制（U2）。
+- **C 节：** `SOLVER_NOTES.md`：一律用 Gurobi 档案 A；基尔霍夫系数跨度 2,034；右端项最大 6.1e8（R9）。
+- **许可与脚本：** 阻塞项 K2：`lanes3` 必然超过学术 WLS 的 2 个会话；U3：预检不检查 `/usr/bin/time`。
+- **D 节（INFERENCE）：** 383 个连通联盟；365×24h 串行 235–332 h，两通道 146–216 h；2920×3h 串行 139–297 天。
+- **登记：** R1–R11。
+- **提交：** 6c88856f、9be3abc1、74315bf0、21ffe8e3，交付 09ffb727（PR #33 最新）。
+- **用户决定（2026-10-18 19:44 SGT）：** K1 → 第 104 项；U1、U2 → 第 105 项；K2、U3 → 第 106 项 a、b；R1–R11 → 第 106 项 c；联盟算力估算 → 第 106 项 d（均在 S4J 实施）。
+- **交付：** `research/06_scope_redesign/p1_step4i_20261018/`，内容为 S4I_REPORT.md、SOLVER_NOTES.md、S4I_EVIDENCE.json、S4I_PROGRESS.md、evidence/{static,followups,lp,coalition}/；审查脚本 `s4i_static_audit.py`、`s4i_followups.py`、`s4i_lp_ranges.py`、`s4i_coalition_estimate.py`。
+
 ## S4J 第 104–107 项：非工业电力负荷、输送损耗、TH–MY 直流与换流器、S4I 其余事项、冒烟、云端部署包与上云前清单 — 2026-10-18
 
 - **范围：**
