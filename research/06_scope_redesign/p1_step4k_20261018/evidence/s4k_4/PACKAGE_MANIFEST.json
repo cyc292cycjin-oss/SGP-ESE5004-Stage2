@@ -1,0 +1,207 @@
+{
+ "commit": "2d4aaac34ef4db779a1ac5a4d40f3029b65dbafb",
+ "files": [
+  {
+   "path": "COMMIT",
+   "sha256": "261393f7bd90cf2cf3440965fad99435cfec1da8ae9e9d110f5dd4e4db26d87f",
+   "bytes": 41
+  },
+  {
+   "path": "DATA_CONFIG_MANIFEST.json",
+   "sha256": "64315b955969906daa904125f118c8086cd56b31b55b4bc1e6d76ee91e681f66",
+   "bytes": 137109
+  },
+  {
+   "path": "code_2d4aaac3.tar.gz",
+   "sha256": "b7cebfec8d56ad4c315203235efe23ad600afa232d89899d95289afce0541acd",
+   "bytes": 118531225
+  },
+  {
+   "path": "conda_explicit_linux64.txt",
+   "sha256": "62f2935b6677194a298b44d12cbb1cc0a85d1566cd4e28aea55136fd86dc3e0f",
+   "bytes": 44787
+  },
+  {
+   "path": "environment_pypsa-earth.yml",
+   "sha256": "f2d28554d08b48bda83037b14ebc1d201b550283e1c36dc4b2657d31f0fe67a3",
+   "bytes": 11450
+  },
+  {
+   "path": "networks/disconnected_365_24h_unsolved.nc",
+   "sha256": "39bca6e9f8d4f1802ce6028b27d444250f9c7fcd96d45168133b48e890ec6c51",
+   "bytes": 27825210
+  },
+  {
+   "path": "networks/disconnected_BUILD_RECEIPT.json",
+   "sha256": "b2ca903d554d7d1ec95cb639d6de68e28035f7e459068d1f00d759fd711acd77",
+   "bytes": 1380011
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_365_24h_unsolved.nc",
+   "sha256": "1e9dfa1cb5ae985cee47d4427974024deb0820c04d083004dc3a2b1db4842a44",
+   "bytes": 28083074
+  },
+  {
+   "path": "networks/disconnected_gap_diagnostic_BUILD_RECEIPT.json",
+   "sha256": "4ae1d0cfd54e279392fcc29ed9d7d99ccf4be2fd9d15a8d7900c59d3ea3c9ec4",
+   "bytes": 1386364
+  },
+  {
+   "path": "networks/integrated_365_24h_unsolved.nc",
+   "sha256": "d3a9837ecb5beafc8033bd1bc9ad4d3b70746718e0bbce1ae2df014b9f13359c",
+   "bytes": 28470602
+  },
+  {
+   "path": "networks/integrated_BUILD_RECEIPT.json",
+   "sha256": "8385fffc61d62c3b42dc54741ddffbd24f330add507f15e6726dc076778df5f9",
+   "bytes": 1380607
+  },
+  {
+   "path": "networks/integrated_nze_365_24h_unsolved.nc",
+   "sha256": "04dd38d02cb4e0bb1f9e5af4d4382a57057025a5833ad704c07bd59ca078688f",
+   "bytes": 28470514
+  },
+  {
+   "path": "networks/integrated_nze_BUILD_RECEIPT.json",
+   "sha256": "dc46142daa655a728fa3408e1a7dc000b40be3c56f3407a6ec174830e8b0113b",
+   "bytes": 1380593
+  },
+  {
+   "path": "preflight.sh",
+   "sha256": "3d85eaefd0d32bc6cd6945fc612bc14e68cb9133a7b73f3620aca65a45c30260",
+   "bytes": 4399
+  },
+  {
+   "path": "run_365x24h.sh",
+   "sha256": "c30d018443debf3c359b8373dbfbf775202bcdc4772fd6f24f09646a366c9561",
+   "bytes": 13892
+  }
+ ],
+ "upload_total_bytes_excluding_this_manifest": 237121367,
+ "environment": {
+  "python": "3.11.13",
+  "pypsa": "0.30.3",
+  "linopy": "0.5.5",
+  "gurobipy": "12.0.3",
+  "numpy": "1.26.4",
+  "pandas": "2.3.1",
+  "xarray": "2025.1.2",
+  "scipy": "1.15.2",
+  "netCDF4": "1.7.2"
+ },
+ "run": {
+  "script": "run_365x24h.sh",
+  "runs": [
+   "integrated (STEPS)",
+   "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+   "integrated_nze (NZE fuel prices)",
+   "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+  ],
+  "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+  "modes": [
+   "serial (recommended for the first batch)",
+   "lanes2 (330 s licence gaps at start and inside a lane)"
+  ],
+  "withdrawn_modes": [
+   "lanes3: the academic WLS licence allows at most 2 concurrent sessions, tokens kept >= 5 min (S4I K2, decision 106 a)"
+  ],
+  "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+  "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+  "scaling": "on",
+  "exports_per_run": [
+   "SOLVE_RECEIPT.json",
+   "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+   "COUNTRY_COST_LEDGER.csv",
+   "COUNTRY_COST_LEDGER_DETAIL.csv",
+   "LEDGER_IDENTITY.json",
+   "NODAL_PRICES.csv",
+   "CO2_FLOWS.json",
+   "BUNKER_ACCOUNT.json",
+   "solved network"
+  ],
+  "threads_per_run": 8,
+  "wall_clock_cap_h": 3,
+  "gurobi_time_limit_s": 10500,
+  "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+ },
+ "first_batch_runs": [
+  "integrated (STEPS)",
+  "disconnected (STEPS)",
+  "integrated_nze (NZE fuel prices)",
+  "disconnected_gap (conditional)"
+ ],
+ "second_batch_sensitivities_registered_not_packaged": [
+  {
+   "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+   "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+   "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+   "override": "co2.ship_distance=route_factor",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "Lao transit: nearest existing sea port and / or truck",
+   "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+   "override": "s3.gas.lng_expansion=uncapped_cost",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+   "override": "network.max_extension=apg_plans",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+   "override": "corridors.optional_sg_vn_kh=on",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "author electrical parameters of the 19 readjusted cross-border AC lines and APG17 (decisions 98, 101 b comparison)",
+   "override": "network.readjust_impedance=author",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "LA-VN grid stock of the author (1 MW split over lines 59 / 60 / 63 / 64; decision 100 comparison)",
+   "override": "network.la_vn_stock=author",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "zero-capacity AC candidates with num_parallel 1.286 of template line 43 (former convention; decision 101 a comparison)",
+   "override": "corridors.candidate_num_parallel=template43",
+   "scenarios": "integrated"
+  },
+  {
+   "name": "non-industrial electricity as Astar residual (former method; decision 104 comparison)",
+   "override": "demand.nonindustrial_electricity=astar_residual",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "no transmission losses (S4H state; decision 105 a comparison)",
+   "override": "network.transmission_losses=none",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "AC loss proxy at the full allowed loading of one circuit (alpha 1.0; upper bound; decision 108)",
+   "override": "network.ac_loss_reference_loading=1.0",
+   "scenarios": "integrated and disconnected"
+  },
+  {
+   "name": "AC lines lossless, DC and pipeline losses kept (lower bound; decision 108)",
+   "override": "network.ac_losses=none",
+   "scenarios": "integrated and disconnected"
+  }
+ ],
+ "supersedes": "the S4J package (code bcfb2d0a) is void (S4K, decision 108); the S4H (6eead675), S4G (ed6af79c) and S4F (7e09744d) packages were voided earlier",
+ "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+}
