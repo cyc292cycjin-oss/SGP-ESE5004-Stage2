@@ -1,0 +1,3908 @@
+{
+ "label": "SMOKE_TEST_ONLY (56x3h 2013-01-01..01-07, representative weights 8760/56; decision 47) - wind / solar scale cannot be judged from 56 snapshots",
+ "reference": "S4H-3 smoke (results_project/s4h/s4h3/solves, code 1887d975)",
+ "runs": [
+  {
+   "run": "integrated",
+   "termination": "optimal",
+   "objective_eur": 656829137273.933,
+   "num_col": 675747,
+   "num_row": 1518047,
+   "nnz": 3445617,
+   "barrier_iterations": 94,
+   "barrier_seconds": 159.88,
+   "solve_seconds": 179.50812435150146,
+   "peak_rss_gib_receipt": 4.060771942138672,
+   "matrix_min": 0.0002,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  },
+  {
+   "run": "disconnected",
+   "termination": "optimal",
+   "objective_eur": 706441942732.5577,
+   "num_col": 652097,
+   "num_row": 1457529,
+   "nnz": 3269175,
+   "barrier_iterations": 136,
+   "barrier_seconds": 185.44,
+   "solve_seconds": 202.87822246551514,
+   "peak_rss_gib_receipt": 3.623645782470703,
+   "matrix_min": 0.0002,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  },
+  {
+   "run": "integrated_nze",
+   "termination": "optimal",
+   "objective_eur": 556298836547.0875,
+   "num_col": 675747,
+   "num_row": 1518047,
+   "nnz": 3445617,
+   "barrier_iterations": 142,
+   "barrier_seconds": 238.04,
+   "solve_seconds": 256.3879323005676,
+   "peak_rss_gib_receipt": 4.047000885009766,
+   "matrix_min": 0.0002,
+   "matrix_max": 200.0,
+   "solver_profile": "formal_barrier",
+   "kvl": true
+  }
+ ],
+ "gates": {
+  "integrated": {
+   "run": "integrated",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": true,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": true,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.030750397094030133,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 6.400098100777456e-10,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 4.147503783161814e-07
+   },
+   "A1_A2_failed_criteria": [
+    "dual_sign"
+   ],
+   "A3_failed": [],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  },
+  "disconnected": {
+   "run": "disconnected",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": false,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.032582588689490606,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 2.792297776554044e-09,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 4.0423370187826966e-07
+   },
+   "A1_A2_failed_criteria": [
+    "primal_rows_within_budget",
+    "dual_sign"
+   ],
+   "A3_failed": [
+    {
+     "check": "COUNTRY_CO2_CAP:MM",
+     "residual": 0.0016226068109972402
+    }
+   ],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  },
+  "integrated_nze": {
+   "run": "integrated_nze",
+   "acceptance_basis": "solver_tolerances",
+   "all_passed_barconvtol": false,
+   "all_passed_solver_tolerances": true,
+   "A1_A2": false,
+   "A3": false,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "B1": false,
+   "B2": true,
+   "B3": true,
+   "B8": true,
+   "B11": true,
+   "B12": true,
+   "B13": true,
+   "B14": true,
+   "B15": true,
+   "A1_A2_S4B": true,
+   "A3_S4B": true,
+   "A5_S4B": true,
+   "B1_S4B": true,
+   "B3_S4B": true,
+   "A1_A2_S4B_detail": {
+    "row_fail_count": 0,
+    "column_fail_count": 0,
+    "row_max_ratio_to_budget": 0.015291672364851662,
+    "column_max_ratio_to_budget": 0.0,
+    "stationarity_fail_count": 0,
+    "stationarity_normalized_max": 2.2031100162144666e-09,
+    "dual_sign_fail_count": 0,
+    "dual_sign_normalized_max": 7.910307856610753e-07
+   },
+   "A1_A2_failed_criteria": [
+    "primal_rows_within_budget",
+    "dual_sign"
+   ],
+   "A3_failed": [
+    {
+     "check": "COUNTRY_CO2_CAP:ID",
+     "residual": 0.003234021831303835
+    },
+    {
+     "check": "COUNTRY_CO2_CAP:VN",
+     "residual": 0.0010072110453620553
+    }
+   ],
+   "A3_S4B_failed": [],
+   "B1_failed_countries": [],
+   "B3_S4B_failing": []
+  }
+ },
+ "vs_s4h": {
+  "integrated": {
+   "objective": 639881452621.7074,
+   "objective_change_eur": 16947684652.225586,
+   "objective_change_rel": 0.026485663215878388
+  },
+  "disconnected": {
+   "objective": 693191116147.2216,
+   "objective_change_eur": 13250826585.336182,
+   "objective_change_rel": 0.0191156901418251
+  },
+  "integrated_nze": {
+   "objective": 539724152725.6391,
+   "objective_change_eur": 16574683821.448425,
+   "objective_change_rel": 0.030709546233469977
+  }
+ },
+ "tolerance": {
+  "integrated": {
+   "all_passed_solver_tolerances": true,
+   "all_passed_barconvtol": false,
+   "acceptance_basis": "solver_tolerances"
+  },
+  "disconnected": {
+   "all_passed_solver_tolerances": true,
+   "all_passed_barconvtol": false,
+   "acceptance_basis": "solver_tolerances"
+  },
+  "integrated_nze": {
+   "all_passed_solver_tolerances": true,
+   "all_passed_barconvtol": false,
+   "acceptance_basis": "solver_tolerances"
+  }
+ },
+ "B5": {
+  "gate": "B5_SINGLE_SWITCH_AND_DISCONNECTED_ZERO",
+  "config_differences": [
+   "research.cross_border.H2",
+   "research.cross_border.co2",
+   "research.cross_border.electricity",
+   "research.cross_border.gas",
+   "research.scenario"
+  ],
+  "differences_within_switch_set": true,
+  "disconnected_cross_border_components": 0,
+  "disconnected_cross_border_capacity_mw": 0.0,
+  "disconnected_cross_border_abs_flow_mw": 0.0,
+  "integrated_cross_border_components": 354,
+  "integrated_cross_border_capacity_mw": 1136352.432725503,
+  "passed": true
+ },
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 656829137273.933,
+   "disconnected": 706441942732.5577
+  },
+  "difference": 49612805458.624756,
+  "relative": 0.07022913343270587,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant"
+ },
+ "B6_s4h": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 639881452621.7074,
+   "disconnected": 693191116147.2216
+  },
+  "difference": 53309663525.51416,
+  "relative": 0.07690471254422732,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant"
+ },
+ "co2": {
+  "integrated": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "MM->ID": {
+     "mt": 7.8092,
+     "freight_meur": 121.006
+    },
+    "VN->ID": {
+     "mt": 79.2523,
+     "freight_meur": 1148.559
+    },
+    "VN->BN": {
+     "mt": 28.4316,
+     "freight_meur": 406.093
+    },
+    "VN->MY": {
+     "mt": 58.695,
+     "freight_meur": 849.957
+    }
+   },
+   "sequestered_mt": {
+    "BN": 29.4223,
+    "ID": 799.8325,
+    "KH": 1.7,
+    "MY": 295.2316,
+    "PH": 105.6075,
+    "TH": 320.48,
+    "TL": 0.5877,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.9951802672266634e-07,
+     "net_t_0_to_1": 0.00013026123444996411,
+     "abs_t": 0.00013141912988527807
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.3105100071823778e-08,
+     "net_t_0_to_1": 4.535705256177744e-06,
+     "abs_t": 4.535705256177744e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.99472057450013e-08,
+     "net_t_0_to_1": -4.3500211625326706e-05,
+     "abs_t": 4.750322864773369e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 9.437034338879826e-08,
+     "net_t_0_to_1": -0.0001066031365911463,
+     "abs_t": 0.000132689071458747
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.896776056698316e-08,
+     "net_t_0_to_1": -2.3488105204761426e-05,
+     "abs_t": 2.3488105204761426e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 5.027136869754676e-08,
+     "net_t_0_to_1": -5.281958586772946e-05,
+     "abs_t": 5.325073588806976e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.2068418524114878e-08,
+     "net_t_0_to_1": 6.848547617713537e-07,
+     "abs_t": 8.058926768663174e-07
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.0950065577346597e-08,
+     "net_t_0_to_1": 8.970322974364343e-07,
+     "abs_t": 9.868181991847488e-07
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 4.1052683377050786e-08,
+     "net_t_0_to_1": 2.163189417463346e-05,
+     "abs_t": 2.163189417463346e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.656991372418323e-08,
+     "net_t_0_to_1": 1.1248828242498817e-05,
+     "abs_t": 1.1248828242498817e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.719682676608002e-08,
+     "net_t_0_to_1": -8.644630254306119e-05,
+     "abs_t": 9.486182290764049e-05
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 7.043648264966805e-08,
+     "net_t_0_to_1": -4.319291860313011e-05,
+     "abs_t": 5.133698932666854e-05
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 3646.905168512416,
+     "net_t_0_to_1": -31300860.17406457,
+     "abs_t": 31300860.17406457
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.3883182283882134e-08,
+     "net_t_0_to_1": 9.651835960769262e-06,
+     "abs_t": 9.651835960769262e-06
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.43884587559137e-08,
+     "net_t_0_to_1": -7.603159312029384e-05,
+     "abs_t": 7.603159312029384e-05
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 8.582731107313948e-08,
+     "net_t_0_to_1": 0.0003041805457399914,
+     "abs_t": 0.00032834040727626067
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1382.1134830492226,
+     "net_t_0_to_1": 11920807.663704433,
+     "abs_t": 11920807.663704433
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.9432654187055985e-08,
+     "net_t_0_to_1": -5.364271085281143e-05,
+     "abs_t": 5.703434136357267e-05
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.601201621935101e-08,
+     "net_t_0_to_1": -0.0001234669821686346,
+     "abs_t": 0.0001234669821686346
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.86587799919003e-08,
+     "net_t_0_to_1": -5.1475139913671704e-05,
+     "abs_t": 5.5134197091669534e-05
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1127.2726588502778,
+     "net_t_0_to_1": 9874908.527924102,
+     "abs_t": 9874908.527924102
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.289892637205786e-08,
+     "net_t_0_to_1": 0.00016327141231777838,
+     "abs_t": 0.00016327141231777838
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 6.786368792642501e-08,
+     "net_t_0_to_1": 0.000147796842130581,
+     "abs_t": 0.000147796842130581
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 4.1043608061520404e-07,
+     "net_t_0_to_1": 0.0034400666941780825,
+     "abs_t": 0.0034400666941780825
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 486.11534750627465,
+     "net_t_0_to_1": 4258370.410688666,
+     "abs_t": 4258370.410688666
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 424.31159190583753,
+     "net_t_0_to_1": 3716969.5285539934,
+     "abs_t": 3716969.5285539934
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 199.47512584362508,
+     "net_t_0_to_1": -474129.77491703536,
+     "abs_t": 1640916.756669221
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 7.279607224580533e-08,
+     "net_t_0_to_1": -0.0003059695759373893,
+     "abs_t": 0.00032637284791137426
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.2537383054715376e-07,
+     "net_t_0_to_1": 0.0009464483145606509,
+     "abs_t": 0.0009464483145606509
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75057958725412,
+     "net_t_0_to_1": 873815.0772659045,
+     "abs_t": 873815.0772659045
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 4.5310475076300016e-08,
+     "net_t_0_to_1": -0.00015063227477983546,
+     "abs_t": 0.00015063227477983546
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 4.443523122769831e-08,
+     "net_t_0_to_1": -0.00014392703589822186,
+     "abs_t": 0.00014405270275356336
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.4955412852994,
+     "net_t_0_to_1": 2518460.8944089254,
+     "abs_t": 2518460.8944089254
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.6241949774796046e-06,
+     "net_t_0_to_1": 0.014018496471277567,
+     "abs_t": 0.014018496471277567
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2356.513526107066,
+     "net_t_0_to_1": 20643058.421266705,
+     "abs_t": 20643058.421266705
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.82612143077614e-08,
+     "net_t_0_to_1": -0.00019327976498882324,
+     "abs_t": 0.00019327976498882324
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2235.512336245159,
+     "net_t_0_to_1": -19583088.133994285,
+     "abs_t": 19583088.133994285
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 127.33309829337168,
+     "net_t_0_to_1": 1115437.948481239,
+     "abs_t": 1115437.948481239
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.149639215710049e-08,
+     "net_t_0_to_1": 9.487976691999421e-05,
+     "abs_t": 9.487976691999421e-05
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.4761710494020844e-07,
+     "net_t_0_to_1": -0.0012678407814218403,
+     "abs_t": 0.0012678407814218403
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 9.394211597853121e-08,
+     "net_t_0_to_1": -0.0004250958963529333,
+     "abs_t": 0.0004250958963529333
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 6.928296423942273e-08,
+     "net_t_0_to_1": -0.00019953251480585004,
+     "abs_t": 0.000310098427430562
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 137.03182196896404,
+     "net_t_0_to_1": 1200398.7783107217,
+     "abs_t": 1200398.7783107217
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.094936794413721e-08,
+     "net_t_0_to_1": -0.00010114908741600482,
+     "abs_t": 0.0001633936015211381
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.52718351107377,
+     "net_t_0_to_1": 784258.1138821958,
+     "abs_t": 784258.1138821958
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.88166372729106,
+     "net_t_0_to_1": 463243.3403988183,
+     "abs_t": 463243.3403988183
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 6.360779593081632e-08,
+     "net_t_0_to_1": 0.00033114583116581025,
+     "abs_t": 0.00033114583116581025
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.6718008977924962e-08,
+     "net_t_0_to_1": 0.00010215158856627268,
+     "abs_t": 0.00010215158856627268
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 779.1042766227578,
+     "net_t_0_to_1": 6824953.43282287,
+     "abs_t": 6824953.43282287
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.1616263294084081e-08,
+     "net_t_0_to_1": 2.065299340102577e-05,
+     "abs_t": 2.415527197574975e-05
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4230760621729,
+     "net_t_0_to_1": 6354705.656646792,
+     "abs_t": 6354705.656646792
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01243541202206,
+     "net_t_0_to_1": 622069.5852355869,
+     "abs_t": 622069.5852355869
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 8.664820491617095e-08,
+     "net_t_0_to_1": -0.00042484268885809766,
+     "abs_t": 0.00042484268885809766
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 1.0781756910873615e-07,
+     "net_t_0_to_1": -0.00038337031567317695,
+     "abs_t": 0.00038337031567317695
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 8.431044808110865e-09,
+     "net_t_0_to_1": 4.316615565171866e-06,
+     "abs_t": 4.316615565171866e-06
+    }
+   }
+  },
+  "disconnected": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "KH->TH": {
+     "mt": 25.9041,
+     "freight_meur": 329.994
+    },
+    "MM->ID": {
+     "mt": 49.0087,
+     "freight_meur": 766.232
+    },
+    "SG->ID": {
+     "mt": 84.0737,
+     "freight_meur": 970.388
+    },
+    "VN->ID": {
+     "mt": 62.85,
+     "freight_meur": 910.848
+    },
+    "VN->TH": {
+     "mt": 2.3248,
+     "freight_meur": 30.537
+    },
+    "VN->BN": {
+     "mt": 17.1969,
+     "freight_meur": 245.627
+    },
+    "VN->MY": {
+     "mt": 57.9786,
+     "freight_meur": 839.583
+    }
+   },
+   "sequestered_mt": {
+    "BN": 19.6559,
+    "ID": 748.2809,
+    "KH": 1.7,
+    "MY": 275.4578,
+    "PH": 163.2689,
+    "TH": 320.48,
+    "TL": 0.5187,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {}
+  },
+  "integrated_nze": {
+   "extra_asean_mt": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "transit_mt": {
+    "LA": 0.0
+   },
+   "transit_freight_meur": {
+    "LA": 0.0
+   },
+   "shipping": {
+    "MM->ID": {
+     "mt": 7.8,
+     "freight_meur": 120.846
+    },
+    "VN->ID": {
+     "mt": 83.0227,
+     "freight_meur": 1203.2
+    },
+    "VN->BN": {
+     "mt": 28.728,
+     "freight_meur": 410.327
+    },
+    "VN->MY": {
+     "mt": 58.695,
+     "freight_meur": 849.957
+    }
+   },
+   "sequestered_mt": {
+    "BN": 29.7237,
+    "ID": 813.9139,
+    "KH": 1.7,
+    "MY": 294.9811,
+    "PH": 108.6278,
+    "TH": 320.48,
+    "TL": 0.6077,
+    "VN": 236.0
+   },
+   "cross_border_pipeline": {
+    "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+     "from_country": "BN",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.448121794306838e-07,
+     "net_t_0_to_1": 0.00022676853249404449,
+     "abs_t": 0.00022676853249404449
+    },
+    "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.9919341834435576e-08,
+     "net_t_0_to_1": -7.087129730361186e-08,
+     "abs_t": 6.383645742898135e-07
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.603446548222748e-08,
+     "net_t_0_to_1": 1.0357804294077478e-05,
+     "abs_t": 1.0399867593923295e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 6.005443484686668e-08,
+     "net_t_0_to_1": 3.217232991861242e-05,
+     "abs_t": 3.244078766426629e-05
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.34443502887919e-08,
+     "net_t_0_to_1": 3.5027199656581993e-07,
+     "abs_t": 2.128375927250736e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.6482914757500746e-08,
+     "net_t_0_to_1": -4.804725771238216e-07,
+     "abs_t": 4.388054026200042e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.907387366102031e-08,
+     "net_t_0_to_1": 8.230157943483111e-07,
+     "abs_t": 9.27372778625321e-07
+    },
+    "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 1.8309117488021635e-08,
+     "net_t_0_to_1": 4.164861482494124e-06,
+     "abs_t": 4.164861482494124e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 3.139376774474944e-08,
+     "net_t_0_to_1": -1.2960093248160833e-06,
+     "abs_t": 1.32688587862493e-06
+    },
+    "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.8563893175044543e-08,
+     "net_t_0_to_1": 2.6758615688621535e-08,
+     "abs_t": 4.415976268221585e-07
+    },
+    "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.419420429367826e-08,
+     "net_t_0_to_1": -3.307977564439915e-05,
+     "abs_t": 4.1134987507360094e-05
+    },
+    "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+     "from_country": "ID",
+     "to_country": "TL",
+     "capacity_opt_t_per_h": 5.017711527428385e-08,
+     "net_t_0_to_1": -2.039683875614356e-05,
+     "abs_t": 2.039683875614356e-05
+    },
+    "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+     "from_country": "ID",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 4159.45620314593,
+     "net_t_0_to_1": -34465570.7965537,
+     "abs_t": 34465570.7965537
+    },
+    "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+     "from_country": "ID",
+     "to_country": "MY",
+     "capacity_opt_t_per_h": 2.029535758211956e-08,
+     "net_t_0_to_1": -9.18244304747785e-06,
+     "abs_t": 9.18244304747785e-06
+    },
+    "CO2 pipeline KH2 0 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.367554228479895e-08,
+     "net_t_0_to_1": -3.630731991413345e-05,
+     "abs_t": 3.6451950664909174e-05
+    },
+    "CO2 pipeline KH2 1 -> LA2 4": {
+     "from_country": "KH",
+     "to_country": "LA",
+     "capacity_opt_t_per_h": 6.149017743994372e-08,
+     "net_t_0_to_1": 0.00017909519747715444,
+     "abs_t": 0.00022627699572969631
+    },
+    "CO2 pipeline KH2 1 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1414.1783306391562,
+     "net_t_0_to_1": 12196680.060651217,
+     "abs_t": 12196680.060651217
+    },
+    "CO2 pipeline KH2 1 -> VN2 4": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.001364796738613e-08,
+     "net_t_0_to_1": -3.1353239452017116e-05,
+     "abs_t": 3.378741201869211e-05
+    },
+    "CO2 pipeline KH2 1 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 4.010317823610486e-08,
+     "net_t_0_to_1": -7.096890409247836e-05,
+     "abs_t": 7.31218046917277e-05
+    },
+    "CO2 pipeline KH2 1 -> VN2 7": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 2.9659592886608154e-08,
+     "net_t_0_to_1": -3.5603711262414455e-05,
+     "abs_t": 3.762200288123827e-05
+    },
+    "CO2 pipeline KH2 2 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1127.2726633495847,
+     "net_t_0_to_1": 9874908.53190248,
+     "abs_t": 9874908.53190248
+    },
+    "CO2 pipeline KH2 3 -> VN2 0": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.297639242172259e-08,
+     "net_t_0_to_1": 0.00011044386122071605,
+     "abs_t": 0.00011044386122071605
+    },
+    "CO2 pipeline KH2 3 -> VN2 5": {
+     "from_country": "KH",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 4.9092762650671233e-08,
+     "net_t_0_to_1": 0.00010481654169569075,
+     "abs_t": 0.00010481654169569075
+    },
+    "CO2 pipeline KH2 4 -> TH2 1": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.2589964796443322e-07,
+     "net_t_0_to_1": 0.0018450662139202116,
+     "abs_t": 0.0018450662139202116
+    },
+    "CO2 pipeline KH2 4 -> TH2 3": {
+     "from_country": "KH",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 486.11534370192874,
+     "net_t_0_to_1": 4258370.409824338,
+     "abs_t": 4258370.409824338
+    },
+    "CO2 pipeline LA2 0 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 438.13403325239005,
+     "net_t_0_to_1": 3838054.1329606366,
+     "abs_t": 3838054.1329606366
+    },
+    "CO2 pipeline LA2 0 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 200.87142459521456,
+     "net_t_0_to_1": -468252.6224383478,
+     "abs_t": 1648000.108785769
+    },
+    "CO2 pipeline LA2 0 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 5.355109385790702e-08,
+     "net_t_0_to_1": -0.00020113461699782013,
+     "abs_t": 0.00024112757855115286
+    },
+    "CO2 pipeline LA2 1 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 9.74110633898971e-08,
+     "net_t_0_to_1": 0.0007251656191598683,
+     "abs_t": 0.0007251656191598683
+    },
+    "CO2 pipeline LA2 1 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 99.75057961896827,
+     "net_t_0_to_1": 873815.0773405061,
+     "abs_t": 873815.0773405061
+    },
+    "CO2 pipeline LA2 1 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.3586610993101704e-08,
+     "net_t_0_to_1": -8.50506436316639e-05,
+     "abs_t": 9.50684208022095e-05
+    },
+    "CO2 pipeline LA2 1 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.325526982969643e-08,
+     "net_t_0_to_1": -8.255607705806762e-05,
+     "abs_t": 9.310401290784512e-05
+    },
+    "CO2 pipeline LA2 2 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 287.49553642895535,
+     "net_t_0_to_1": 2518460.898176938,
+     "abs_t": 2518460.898176938
+    },
+    "CO2 pipeline LA2 2 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.1730402067468694e-06,
+     "net_t_0_to_1": 0.010102328612219422,
+     "abs_t": 0.010102328612219422
+    },
+    "CO2 pipeline LA2 3 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1971.5547849660124,
+     "net_t_0_to_1": 17270819.91473115,
+     "abs_t": 17270819.91473115
+    },
+    "CO2 pipeline LA2 3 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.112139863240746e-08,
+     "net_t_0_to_1": -0.0001455520013314943,
+     "abs_t": 0.0001455520013314943
+    },
+    "CO2 pipeline LA2 3 -> VN2 3": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1850.55361032625,
+     "net_t_0_to_1": -16210849.627197325,
+     "abs_t": 16210849.627197325
+    },
+    "CO2 pipeline LA2 4 -> TH2 1": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 127.33309921595293,
+     "net_t_0_to_1": 1115437.9489368994,
+     "abs_t": 1115437.9489368994
+    },
+    "CO2 pipeline LA2 4 -> TH2 2": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.7747312620332358e-08,
+     "net_t_0_to_1": 7.13540328094891e-05,
+     "abs_t": 7.13540328094891e-05
+    },
+    "CO2 pipeline LA2 4 -> VN2 2": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 1.557599265340785e-07,
+     "net_t_0_to_1": -0.0007269841291222438,
+     "abs_t": 0.0007400396591757037
+    },
+    "CO2 pipeline LA2 4 -> VN2 7": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 6.023755236967223e-08,
+     "net_t_0_to_1": -0.0002259666409776684,
+     "abs_t": 0.00022704123932671219
+    },
+    "CO2 pipeline LA2 5 -> MM2 13": {
+     "from_country": "LA",
+     "to_country": "MM",
+     "capacity_opt_t_per_h": 5.5091611809335805e-08,
+     "net_t_0_to_1": -0.0001644401573061514,
+     "abs_t": 0.00025941185565684255
+    },
+    "CO2 pipeline LA2 5 -> TH2 4": {
+     "from_country": "LA",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 137.0318240290807,
+     "net_t_0_to_1": 1200398.7777416955,
+     "abs_t": 1200398.7777416955
+    },
+    "CO2 pipeline LA2 5 -> VN2 1": {
+     "from_country": "LA",
+     "to_country": "VN",
+     "capacity_opt_t_per_h": 3.8642877235014004e-08,
+     "net_t_0_to_1": -5.4037071542104216e-05,
+     "abs_t": 0.0001264806523829901
+    },
+    "CO2 pipeline MM2 10 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 89.52718186188818,
+     "net_t_0_to_1": 784258.1126864753,
+     "abs_t": 784258.1126864753
+    },
+    "CO2 pipeline MM2 13 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 52.881659919511044,
+     "net_t_0_to_1": 463243.34066741425,
+     "abs_t": 463243.34066741425
+    },
+    "CO2 pipeline MM2 4 -> TH2 2": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 5.220462569659389e-08,
+     "net_t_0_to_1": 0.0002308838169639095,
+     "abs_t": 0.00023148208239282035
+    },
+    "CO2 pipeline MM2 4 -> TH2 3": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 2.3082979426896617e-08,
+     "net_t_0_to_1": 8.321229675645669e-05,
+     "abs_t": 8.321229675645669e-05
+    },
+    "CO2 pipeline MM2 4 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 829.507938123396,
+     "net_t_0_to_1": 7266489.534261056,
+     "abs_t": 7266489.534261056
+    },
+    "CO2 pipeline MM2 4 -> TH2 5": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 1.0056669622081639e-08,
+     "net_t_0_to_1": 2.1091017272907563e-05,
+     "abs_t": 2.161275252978753e-05
+    },
+    "CO2 pipeline MM2 6 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 725.4230174547387,
+     "net_t_0_to_1": 6354705.6616778,
+     "abs_t": 6354705.6616778
+    },
+    "CO2 pipeline MM2 7 -> TH2 4": {
+     "from_country": "MM",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 71.01250685670807,
+     "net_t_0_to_1": 622069.5830559193,
+     "abs_t": 622069.5830559193
+    },
+    "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+     "from_country": "MY",
+     "to_country": "TH",
+     "capacity_opt_t_per_h": 6.08290245176369e-08,
+     "net_t_0_to_1": -0.00026443095874507044,
+     "abs_t": 0.00026443095874507044
+    },
+    "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+     "from_country": "MY",
+     "to_country": "SG",
+     "capacity_opt_t_per_h": 6.861412409621095e-08,
+     "net_t_0_to_1": -0.00018481841675794947,
+     "abs_t": 0.00018552293281125432
+    },
+    "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+     "from_country": "MY",
+     "to_country": "PH",
+     "capacity_opt_t_per_h": 7.030904086860023e-09,
+     "net_t_0_to_1": -4.480699430751714e-06,
+     "abs_t": 4.480699430751714e-06
+    }
+   }
+  }
+ },
+ "ledgers": {
+  "integrated": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 94.8733,
+    "ASEAN_POOL": -0.0,
+    "BN": 0.0476,
+    "ID": 207.8753,
+    "KH": 5.146,
+    "LA": -1.2689,
+    "MM": 7.6638,
+    "MY": 68.847,
+    "PH": 23.9635,
+    "SG": 20.094,
+    "TH": 83.929,
+    "TL": -0.3205,
+    "VN": 145.9792
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 94.8733,
+    "ASEAN_POOL": -0.0,
+    "BN": 0.0476,
+    "ID": 207.9132,
+    "KH": 5.4453,
+    "LA": -1.1528,
+    "MM": 7.67,
+    "MY": 68.7919,
+    "PH": 23.9635,
+    "SG": 20.1079,
+    "TH": 83.4222,
+    "TL": -0.3205,
+    "VN": 146.0676
+   },
+   "relative_error": 5.26897366954681e-12,
+   "pool_surplus_eur": -3.6676025390625
+  },
+  "disconnected": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 92.5085,
+    "ASEAN_POOL": -0.0,
+    "BN": 1.0223,
+    "ID": 214.7734,
+    "KH": 7.3483,
+    "LA": 2.0083,
+    "MM": 8.9543,
+    "MY": 72.5458,
+    "PH": 25.8196,
+    "SG": 22.3262,
+    "TH": 89.5282,
+    "TL": 0.1244,
+    "VN": 169.4826
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 92.5085,
+    "ASEAN_POOL": -0.0,
+    "BN": 1.0223,
+    "ID": 214.7734,
+    "KH": 7.3483,
+    "LA": 2.0083,
+    "MM": 8.9543,
+    "MY": 72.5458,
+    "PH": 25.8196,
+    "SG": 22.3262,
+    "TH": 89.5282,
+    "TL": 0.1244,
+    "VN": 169.4826
+   },
+   "relative_error": 1.2048543786576656e-11,
+   "pool_surplus_eur": -8.724525451660156
+  },
+  "integrated_nze": {
+   "totals_bn_eur": {
+    "ASEAN_BUNKER": 94.9375,
+    "ASEAN_POOL": -0.0,
+    "BN": -1.4447,
+    "ID": 179.5395,
+    "KH": 4.183,
+    "LA": -1.2964,
+    "MM": 4.2733,
+    "MY": 51.6358,
+    "PH": 13.7146,
+    "SG": 13.8747,
+    "TH": 60.3102,
+    "TL": -1.1354,
+    "VN": 137.7068
+   },
+   "totals_length_split_bn_eur": {
+    "ASEAN_BUNKER": 94.9375,
+    "ASEAN_POOL": -0.0,
+    "BN": -1.4447,
+    "ID": 179.5744,
+    "KH": 4.4672,
+    "LA": -1.181,
+    "MM": 4.2787,
+    "MY": 51.5805,
+    "PH": 13.7146,
+    "SG": 13.8918,
+    "TH": 59.8183,
+    "TL": -1.1354,
+    "VN": 137.797
+   },
+   "relative_error": 5.122662961153409e-12,
+   "pool_surplus_eur": -2.8709716796875
+  }
+ },
+ "disconnected_minus_integrated_bn_eur": {
+  "ASEAN_BUNKER": -2.3648,
+  "ASEAN_POOL": 0.0,
+  "BN": 0.9747,
+  "ID": 6.8981,
+  "KH": 2.2023,
+  "LA": 3.2772,
+  "MM": 1.2905,
+  "MY": 3.6988,
+  "PH": 1.8561,
+  "SG": 2.2322,
+  "TH": 5.5992,
+  "TL": 0.4449,
+  "VN": 23.5034
+ },
+ "B16": {
+  "integrated": {
+   "passed": true,
+   "relative_error": 5.26897366954681e-12,
+   "tolerance": 1e-06,
+   "difference_eur": 3.4608154296875,
+   "s4h_relative_error": 1.4131874853264396e-11
+  },
+  "disconnected": {
+   "passed": true,
+   "relative_error": 1.2048543786576656e-11,
+   "tolerance": 1e-06,
+   "difference_eur": 8.5115966796875,
+   "s4h_relative_error": 3.4297055326731473e-12
+  },
+  "integrated_nze": {
+   "passed": true,
+   "relative_error": 5.122662961153409e-12,
+   "tolerance": 1e-06,
+   "difference_eur": 2.8497314453125,
+   "s4h_relative_error": 6.284405998871789e-12
+  }
+ },
+ "transport": {
+  "integrated": {
+   "s4j": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 1682.3028,
+      "loss_twh": 77.6267,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.04614309132716043,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 159.2655,
+      "loss_twh": 5.1567,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.03237808509304737,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 64.9949,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.3507,
+      "loss_share": 0.0,
+      "compression_share": 0.0053955630406215364
+     },
+     "gas pipeline": {
+      "sent_twh": 7325.0141,
+      "loss_twh": 0.0,
+      "compression_el_twh": 30.7922,
+      "loss_share": 0.0,
+      "compression_share": 0.00420370910536891
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.8023,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "ID-MY": {
+     "AC": {
+      "sent_twh": 130.9951,
+      "loss_twh": 2.8377,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.021662602630797015,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 26.362,
+      "loss_twh": 0.7858,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.029807116737078795,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 3.4329,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0177,
+      "loss_share": 0.0,
+      "compression_share": 0.0051611674336203665
+     },
+     "gas pipeline": {
+      "sent_twh": 725.483,
+      "loss_twh": 0.0,
+      "compression_el_twh": 2.8586,
+      "loss_share": 0.0,
+      "compression_share": 0.003940309897897182
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-VN": {
+     "AC": {
+      "sent_twh": 61.6862,
+      "loss_twh": 0.7879,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.012772064000176761,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 13.5846,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0595,
+      "loss_share": 0.0,
+      "compression_share": 0.0043798299337060925
+     },
+     "gas pipeline": {
+      "sent_twh": 91.834,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.2291,
+      "loss_share": 0.0,
+      "compression_share": 0.0024946159203347758
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-LA": {
+     "AC": {
+      "sent_twh": 15.1233,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 6.0616154348332355e-09,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.005211520655456815
+     },
+     "gas pipeline": {
+      "sent_twh": 4.3986,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0127,
+      "loss_share": 0.0,
+      "compression_share": 0.002895289253031563
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-TH": {
+     "AC": {
+      "sent_twh": 60.647,
+      "loss_twh": 0.7922,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.013062822586645815,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 16.5113,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1385,
+      "loss_share": 0.0,
+      "compression_share": 0.008390798082308278
+     },
+     "gas pipeline": {
+      "sent_twh": 484.905,
+      "loss_twh": 0.0,
+      "compression_el_twh": 1.7761,
+      "loss_share": 0.0,
+      "compression_share": 0.0036628234083197456
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.0541,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-TH": {
+     "AC": {
+      "sent_twh": 102.2768,
+      "loss_twh": 0.6201,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.006063399913432407,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 20.0199,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1005,
+      "loss_share": 0.0,
+      "compression_share": 0.0050176807591564565
+     },
+     "gas pipeline": {
+      "sent_twh": 307.9898,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.93,
+      "loss_share": 0.0,
+      "compression_share": 0.003019519018282356
+     },
+     "CO2 pipeline": {
+      "sent_twh": 30.0681,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-VN": {
+     "AC": {
+      "sent_twh": 126.6409,
+      "loss_twh": 2.7749,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.02191176447834586,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 19.7891,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1192,
+      "loss_share": 0.0,
+      "compression_share": 0.006025435732740789
+     },
+     "gas pipeline": {
+      "sent_twh": 306.149,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.9132,
+      "loss_share": 0.0,
+      "compression_share": 0.002982936338735186
+     },
+     "CO2 pipeline": {
+      "sent_twh": 21.224,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "MY-TH": {
+     "AC": {
+      "sent_twh": 26.2104,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 2.4218993923625218e-11,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 21.5355,
+      "loss_twh": 0.4957,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.023019064323927314,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.004956427854289473
+     },
+     "gas pipeline": {
+      "sent_twh": 42.0107,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1157,
+      "loss_share": 0.0,
+      "compression_share": 0.0027535710294439015
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-SG": {
+     "AC": {
+      "sent_twh": 16.9453,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 1.495926994690581e-12,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.02544318643541153,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0043216617270807
+     },
+     "gas pipeline": {
+      "sent_twh": 317.1305,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.7614,
+      "loss_share": 0.0,
+      "compression_share": 0.0024009231817114997
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MM-TH": {
+     "AC": {
+      "sent_twh": 54.9218,
+      "loss_twh": 0.1783,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.003246204664067274,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2851,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0027,
+      "loss_share": 0.0,
+      "compression_share": 0.009317897104233587
+     },
+     "gas pipeline": {
+      "sent_twh": 158.2834,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.5259,
+      "loss_share": 0.0,
+      "compression_share": 0.003322728560372109
+     },
+     "CO2 pipeline": {
+      "sent_twh": 15.0492,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-MM": {
+     "AC": {
+      "sent_twh": 7.2769,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 8.720609397301709e-09,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0107,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0001,
+      "loss_share": 0.0,
+      "compression_share": 0.006384365344176555
+     },
+     "gas pipeline": {
+      "sent_twh": 0.9636,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0034,
+      "loss_share": 0.0,
+      "compression_share": 0.0035468696356536406
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "BN-MY": {
+     "AC": {
+      "sent_twh": 6.4981,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 4.445819053958678e-09,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0011285072871177833
+     },
+     "gas pipeline": {
+      "sent_twh": 102.5011,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0643,
+      "loss_share": 0.0,
+      "compression_share": 0.000626948492843213
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-TL": {
+     "AC": {
+      "sent_twh": 1.0332,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 5.071577630802271e-08,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.004615726664968197
+     },
+     "gas pipeline": {
+      "sent_twh": 58.8779,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.151,
+      "loss_share": 0.0,
+      "compression_share": 0.002564292591649
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-PH": {
+     "DC": {
+      "sent_twh": 8.4012,
+      "loss_twh": 0.3296,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.039227760879224104,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 2.159,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0331,
+      "loss_share": 0.0,
+      "compression_share": 0.015337209800559498
+     },
+     "gas pipeline": {
+      "sent_twh": 384.2605,
+      "loss_twh": 0.0,
+      "compression_el_twh": 3.2742,
+      "loss_share": 0.0,
+      "compression_share": 0.008520672111421941
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-SG": {
+     "DC": {
+      "sent_twh": 37.8056,
+      "loss_twh": 0.7958,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.021048545929435166,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2404,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0002,
+      "loss_share": 0.0,
+      "compression_share": 0.0008302657967663049
+     },
+     "gas pipeline": {
+      "sent_twh": 6.2932,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0029,
+      "loss_share": 0.0,
+      "compression_share": 0.00046125882999803095
+     },
+     "CO2 pipeline": {
+      "sent_twh": 31.3009,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   },
+   "s4h": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 2824.6393,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 449.4231,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 40.9203,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 7494.866,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.0288,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "ID-MY": {
+     "AC": {
+      "sent_twh": 252.5841,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 97.3172,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 841.6413,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-VN": {
+     "AC": {
+      "sent_twh": 122.7854,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 9.7308,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 135.1393,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "KH-LA": {
+     "AC": {
+      "sent_twh": 25.3836,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 0.4437,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-TH": {
+     "AC": {
+      "sent_twh": 114.5606,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 18.5605,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 127.3143,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 25.7081,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-TH": {
+     "AC": {
+      "sent_twh": 170.5671,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 20.1416,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 182.1633,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 27.7543,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-VN": {
+     "AC": {
+      "sent_twh": 258.974,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 20.1416,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 176.1935,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 18.0997,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "MY-TH": {
+     "AC": {
+      "sent_twh": 86.9539,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 7.4206,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 161.3326,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-SG": {
+     "AC": {
+      "sent_twh": 115.7713,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 11.9716,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 273.4022,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MM-TH": {
+     "AC": {
+      "sent_twh": 99.4642,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.3492,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 256.3325,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 14.2478,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-MM": {
+     "AC": {
+      "sent_twh": 12.3338,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 0.1543,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "BN-MY": {
+     "AC": {
+      "sent_twh": 11.8746,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 102.7387,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-TL": {
+     "AC": {
+      "sent_twh": 0.9847,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     },
+     "gas pipeline": {
+      "sent_twh": 58.6785,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-PH": {
+     "DC": {
+      "sent_twh": 22.7709,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 385.2224,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-SG": {
+     "DC": {
+      "sent_twh": 50.7787,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2404,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 34.7575,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 36.3652,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   }
+  },
+  "disconnected": {
+   "s4j": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 1559.4992,
+      "loss_twh": 56.9335,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.03650753337717468,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 146.4365,
+      "loss_twh": 4.6862,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.03200192423042715,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 181.0056,
+      "loss_twh": 0.0,
+      "compression_el_twh": 1.0222,
+      "loss_share": 0.0,
+      "compression_share": 0.0056472402309287574
+     },
+     "gas pipeline": {
+      "sent_twh": 5321.4047,
+      "loss_twh": 0.0,
+      "compression_el_twh": 24.5049,
+      "loss_share": 0.0,
+      "compression_share": 0.004604963105933123
+     },
+     "CO2 pipeline": {
+      "sent_twh": 57.2871,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   },
+   "s4h": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 2451.8044,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 284.505,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 174.074,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 6233.8414,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 69.7237,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   }
+  },
+  "integrated_nze": {
+   "s4j": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 1678.4777,
+      "loss_twh": 78.2256,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.04660505765943185,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 145.7405,
+      "loss_twh": 4.6989,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.03224159002465958,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 62.1869,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.3268,
+      "loss_share": 0.0,
+      "compression_share": 0.0052552995601515265
+     },
+     "gas pipeline": {
+      "sent_twh": 7350.5006,
+      "loss_twh": 0.0,
+      "compression_el_twh": 30.7682,
+      "loss_share": 0.0,
+      "compression_share": 0.004185870110017782
+     },
+     "CO2 pipeline": {
+      "sent_twh": 25.333,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "ID-MY": {
+     "AC": {
+      "sent_twh": 127.9504,
+      "loss_twh": 2.6125,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.020417708524903547,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 25.6924,
+      "loss_twh": 0.7658,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.029807116737078834,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.5356,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0031,
+      "loss_share": 0.0,
+      "compression_share": 0.005807540541554211
+     },
+     "gas pipeline": {
+      "sent_twh": 716.2485,
+      "loss_twh": 0.0,
+      "compression_el_twh": 2.7525,
+      "loss_share": 0.0,
+      "compression_share": 0.00384299767895428
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-VN": {
+     "AC": {
+      "sent_twh": 60.2981,
+      "loss_twh": 0.6333,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.010502420516386998,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 19.6017,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0859,
+      "loss_share": 0.0,
+      "compression_share": 0.004380828258448936
+     },
+     "gas pipeline": {
+      "sent_twh": 94.3437,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.2325,
+      "loss_share": 0.0,
+      "compression_share": 0.0024646926993472174
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-LA": {
+     "AC": {
+      "sent_twh": 14.4894,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 6.723383016978026e-09,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 1.5446,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.008,
+      "loss_share": 0.0,
+      "compression_share": 0.0052115206554568146
+     },
+     "gas pipeline": {
+      "sent_twh": 2.6282,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0076,
+      "loss_share": 0.0,
+      "compression_share": 0.0028952892530315637
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-TH": {
+     "AC": {
+      "sent_twh": 58.154,
+      "loss_twh": 0.7554,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.012989236000926885,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 16.9834,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1389,
+      "loss_share": 0.0,
+      "compression_share": 0.008180511166866451
+     },
+     "gas pipeline": {
+      "sent_twh": 483.903,
+      "loss_twh": 0.0,
+      "compression_el_twh": 1.7718,
+      "loss_share": 0.0,
+      "compression_share": 0.0036615311738765416
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.33,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-TH": {
+     "AC": {
+      "sent_twh": 102.1774,
+      "loss_twh": 0.7494,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.007333878136375961,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 19.8139,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0998,
+      "loss_share": 0.0,
+      "compression_share": 0.0050373000369109775
+     },
+     "gas pipeline": {
+      "sent_twh": 303.0338,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.9121,
+      "loss_share": 0.0,
+      "compression_share": 0.0030100596769404553
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.817,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-VN": {
+     "AC": {
+      "sent_twh": 128.6527,
+      "loss_twh": 3.119,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.024243510925354452,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 21.102,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1246,
+      "loss_share": 0.0,
+      "compression_share": 0.00590396689255604
+     },
+     "gas pipeline": {
+      "sent_twh": 304.7228,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.9092,
+      "loss_share": 0.0,
+      "compression_share": 0.0029835457975712757
+     },
+     "CO2 pipeline": {
+      "sent_twh": 17.8588,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "MY-TH": {
+     "AC": {
+      "sent_twh": 25.3334,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 1.2963654704464667e-10,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 21.7778,
+      "loss_twh": 0.5013,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.02301906432392729,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.004956427854289473
+     },
+     "gas pipeline": {
+      "sent_twh": 47.9093,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1319,
+      "loss_share": 0.0,
+      "compression_share": 0.002753571027097229
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-SG": {
+     "AC": {
+      "sent_twh": 19.9863,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 8.196937652365035e-13,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0043216617270806995
+     },
+     "gas pipeline": {
+      "sent_twh": 301.6873,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.7243,
+      "loss_share": 0.0,
+      "compression_share": 0.0024009231817115
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MM-TH": {
+     "AC": {
+      "sent_twh": 55.0824,
+      "loss_twh": 0.1699,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0030836572964207994,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2918,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0028,
+      "loss_share": 0.0,
+      "compression_share": 0.009675184167980447
+     },
+     "gas pipeline": {
+      "sent_twh": 161.2242,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.535,
+      "loss_share": 0.0,
+      "compression_share": 0.003318549315520864
+     },
+     "CO2 pipeline": {
+      "sent_twh": 15.4908,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-MM": {
+     "AC": {
+      "sent_twh": 7.3242,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 1.0531516838085425e-08,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0107,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0001,
+      "loss_share": 0.0,
+      "compression_share": 0.006384365344176553
+     },
+     "gas pipeline": {
+      "sent_twh": 3.4317,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0122,
+      "loss_share": 0.0,
+      "compression_share": 0.003546869635653641
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "BN-MY": {
+     "AC": {
+      "sent_twh": 6.4893,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 5.306559021728379e-09,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0011285072871177833
+     },
+     "gas pipeline": {
+      "sent_twh": 102.469,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0642,
+      "loss_share": 0.0,
+      "compression_share": 0.0006269484928432129
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-TL": {
+     "AC": {
+      "sent_twh": 1.0395,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 7.457028236977991e-08,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.004615726664968199
+     },
+     "gas pipeline": {
+      "sent_twh": 59.2273,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.1519,
+      "loss_share": 0.0,
+      "compression_share": 0.0025642925916489986
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-PH": {
+     "DC": {
+      "sent_twh": 7.4488,
+      "loss_twh": 0.2922,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.039227760879224076,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2766,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0042,
+      "loss_share": 0.0,
+      "compression_share": 0.015337209800559496
+     },
+     "gas pipeline": {
+      "sent_twh": 379.3845,
+      "loss_twh": 0.0,
+      "compression_el_twh": 3.2326,
+      "loss_share": 0.0,
+      "compression_share": 0.008520672111421941
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-SG": {
+     "DC": {
+      "sent_twh": 38.5335,
+      "loss_twh": 0.8111,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.02104854592943517,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2404,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0002,
+      "loss_share": 0.0,
+      "compression_share": 0.0008302657967663048
+     },
+     "gas pipeline": {
+      "sent_twh": 6.9482,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0032,
+      "loss_share": 0.0,
+      "compression_share": 0.00046125881134046945
+     },
+     "CO2 pipeline": {
+      "sent_twh": 34.4656,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   },
+   "s4h": {
+    "domestic": {
+     "AC": {
+      "sent_twh": 2810.1741,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 442.7843,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 35.8914,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 7383.6104,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.3195,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "ID-MY": {
+     "AC": {
+      "sent_twh": 252.6663,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 92.6971,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 821.497,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-VN": {
+     "AC": {
+      "sent_twh": 122.2876,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 9.0062,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 127.2114,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.1017,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "KH-LA": {
+     "AC": {
+      "sent_twh": 25.402,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 0.6286,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "KH-TH": {
+     "AC": {
+      "sent_twh": 114.5033,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 23.2119,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 120.4366,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 26.1976,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-TH": {
+     "AC": {
+      "sent_twh": 169.6258,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 20.0911,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 186.4845,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 23.0677,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-VN": {
+     "AC": {
+      "sent_twh": 259.8097,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 20.0911,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 180.9184,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 13.2705,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "MY-TH": {
+     "AC": {
+      "sent_twh": 85.7886,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 7.5574,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 157.5381,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-SG": {
+     "AC": {
+      "sent_twh": 116.026,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "DC": {
+      "sent_twh": 11.5092,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     },
+     "gas pipeline": {
+      "sent_twh": 273.3979,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MM-TH": {
+     "AC": {
+      "sent_twh": 99.2178,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.3492,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 271.7404,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 14.7994,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    },
+    "LA-MM": {
+     "AC": {
+      "sent_twh": 12.3786,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "BN-MY": {
+     "AC": {
+      "sent_twh": 11.8849,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 102.775,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-TL": {
+     "AC": {
+      "sent_twh": 0.6268,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     },
+     "gas pipeline": {
+      "sent_twh": 59.8606,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "MY-PH": {
+     "DC": {
+      "sent_twh": 23.3555,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 370.1277,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 0.0,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": null,
+      "compression_share": null
+     }
+    },
+    "ID-SG": {
+     "DC": {
+      "sent_twh": 50.7545,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "H2 pipeline": {
+      "sent_twh": 0.2404,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "gas pipeline": {
+      "sent_twh": 34.9911,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     },
+     "CO2 pipeline": {
+      "sent_twh": 36.4079,
+      "loss_twh": 0.0,
+      "compression_el_twh": 0.0,
+      "loss_share": 0.0,
+      "compression_share": 0.0
+     }
+    }
+   }
+  }
+ },
+ "capacity": {
+  "integrated": {
+   "s4j": {
+    "BN-MY": {
+     "ac_gw": 1.407,
+     "dc_gw": 0.0
+    },
+    "ID-MY": {
+     "ac_gw": 33.459,
+     "dc_gw": 8.048
+    },
+    "ID-SG": {
+     "ac_gw": 0.0,
+     "dc_gw": 5.375
+    },
+    "ID-TL": {
+     "ac_gw": 0.32,
+     "dc_gw": 0.0
+    },
+    "KH-LA": {
+     "ac_gw": 5.158,
+     "dc_gw": 0.0
+    },
+    "KH-TH": {
+     "ac_gw": 18.965,
+     "dc_gw": 0.0
+    },
+    "KH-VN": {
+     "ac_gw": 24.78,
+     "dc_gw": 0.0
+    },
+    "LA-MM": {
+     "ac_gw": 2.022,
+     "dc_gw": 0.0
+    },
+    "LA-TH": {
+     "ac_gw": 33.846,
+     "dc_gw": 0.0
+    },
+    "LA-VN": {
+     "ac_gw": 46.926,
+     "dc_gw": 0.0
+    },
+    "MM-TH": {
+     "ac_gw": 13.717,
+     "dc_gw": 0.0
+    },
+    "MY-PH": {
+     "ac_gw": 0.0,
+     "dc_gw": 1.241
+    },
+    "MY-SG": {
+     "ac_gw": 5.131,
+     "dc_gw": 0.0
+    },
+    "MY-TH": {
+     "ac_gw": 5.234,
+     "dc_gw": 9.333
+    }
+   },
+   "s4h": {
+    "BN-MY": {
+     "ac_gw": 2.391,
+     "dc_gw": 0.0
+    },
+    "ID-MY": {
+     "ac_gw": 62.651,
+     "dc_gw": 14.273
+    },
+    "ID-SG": {
+     "ac_gw": 0.0,
+     "dc_gw": 6.389
+    },
+    "ID-TL": {
+     "ac_gw": 0.284,
+     "dc_gw": 0.0
+    },
+    "KH-LA": {
+     "ac_gw": 8.035,
+     "dc_gw": 0.0
+    },
+    "KH-TH": {
+     "ac_gw": 30.968,
+     "dc_gw": 0.0
+    },
+    "KH-VN": {
+     "ac_gw": 34.348,
+     "dc_gw": 0.0
+    },
+    "LA-MM": {
+     "ac_gw": 4.59,
+     "dc_gw": 0.0
+    },
+    "LA-TH": {
+     "ac_gw": 54.088,
+     "dc_gw": 0.0
+    },
+    "LA-VN": {
+     "ac_gw": 81.368,
+     "dc_gw": 0.0
+    },
+    "MM-TH": {
+     "ac_gw": 24.083,
+     "dc_gw": 0.0
+    },
+    "MY-PH": {
+     "ac_gw": 0.0,
+     "dc_gw": 3.237
+    },
+    "MY-SG": {
+     "ac_gw": 20.525,
+     "dc_gw": 1.665
+    },
+    "MY-TH": {
+     "ac_gw": 20.938,
+     "dc_gw": 2.0
+    }
+   }
+  },
+  "disconnected": {
+   "s4j": {},
+   "s4h": {}
+  },
+  "integrated_nze": {
+   "s4j": {
+    "BN-MY": {
+     "ac_gw": 1.408,
+     "dc_gw": 0.0
+    },
+    "ID-MY": {
+     "ac_gw": 32.569,
+     "dc_gw": 7.51
+    },
+    "ID-SG": {
+     "ac_gw": 0.0,
+     "dc_gw": 5.388
+    },
+    "ID-TL": {
+     "ac_gw": 0.348,
+     "dc_gw": 0.0
+    },
+    "KH-LA": {
+     "ac_gw": 4.875,
+     "dc_gw": 0.0
+    },
+    "KH-TH": {
+     "ac_gw": 18.992,
+     "dc_gw": 0.0
+    },
+    "KH-VN": {
+     "ac_gw": 23.543,
+     "dc_gw": 0.0
+    },
+    "LA-MM": {
+     "ac_gw": 2.012,
+     "dc_gw": 0.0
+    },
+    "LA-TH": {
+     "ac_gw": 33.779,
+     "dc_gw": 0.0
+    },
+    "LA-VN": {
+     "ac_gw": 47.631,
+     "dc_gw": 0.0
+    },
+    "MM-TH": {
+     "ac_gw": 13.752,
+     "dc_gw": 0.0
+    },
+    "MY-PH": {
+     "ac_gw": 0.0,
+     "dc_gw": 1.122
+    },
+    "MY-SG": {
+     "ac_gw": 5.131,
+     "dc_gw": 0.0
+    },
+    "MY-TH": {
+     "ac_gw": 5.234,
+     "dc_gw": 9.543
+    }
+   },
+   "s4h": {
+    "BN-MY": {
+     "ac_gw": 2.387,
+     "dc_gw": 0.0
+    },
+    "ID-MY": {
+     "ac_gw": 62.94,
+     "dc_gw": 13.429
+    },
+    "ID-SG": {
+     "ac_gw": 0.0,
+     "dc_gw": 6.389
+    },
+    "ID-TL": {
+     "ac_gw": 0.194,
+     "dc_gw": 0.0
+    },
+    "KH-LA": {
+     "ac_gw": 8.081,
+     "dc_gw": 0.0
+    },
+    "KH-TH": {
+     "ac_gw": 31.034,
+     "dc_gw": 0.0
+    },
+    "KH-VN": {
+     "ac_gw": 34.393,
+     "dc_gw": 0.0
+    },
+    "LA-MM": {
+     "ac_gw": 4.612,
+     "dc_gw": 0.0
+    },
+    "LA-TH": {
+     "ac_gw": 53.805,
+     "dc_gw": 0.0
+    },
+    "LA-VN": {
+     "ac_gw": 81.747,
+     "dc_gw": 0.0
+    },
+    "MM-TH": {
+     "ac_gw": 23.944,
+     "dc_gw": 0.0
+    },
+    "MY-PH": {
+     "ac_gw": 0.0,
+     "dc_gw": 3.315
+    },
+    "MY-SG": {
+     "ac_gw": 20.525,
+     "dc_gw": 1.645
+    },
+    "MY-TH": {
+     "ac_gw": 20.938,
+     "dc_gw": 2.0
+    }
+   }
+  }
+ },
+ "at_cap": {
+  "integrated": {
+   "s4j": [
+    "Line:1",
+    "Line:100"
+   ],
+   "s4h": [
+    "Line:1",
+    "Line:100",
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:92",
+    "Line:95",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "added": [],
+   "removed": [
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:92",
+    "Line:95",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ]
+  },
+  "disconnected": {
+   "s4j": [
+    "Line:1",
+    "Line:100"
+   ],
+   "s4h": [
+    "Line:1",
+    "Line:100",
+    "Line:107",
+    "Line:13",
+    "Line:22",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "added": [],
+   "removed": [
+    "Line:107",
+    "Line:13",
+    "Line:22",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ]
+  },
+  "integrated_nze": {
+   "s4j": [
+    "Line:1",
+    "Line:100"
+   ],
+   "s4h": [
+    "Line:1",
+    "Line:100",
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:92",
+    "Line:95",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ],
+   "added": [],
+   "removed": [
+    "Line:105",
+    "Line:108",
+    "Line:109",
+    "Line:92",
+    "Line:95",
+    "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+    "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+    "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+   ]
+  }
+ },
+ "focus": {
+  "VN": {
+   "integrated_bn_eur": 145.9792,
+   "disconnected_bn_eur": 169.4826,
+   "disconnected_minus_integrated": 23.5034,
+   "s4h_integrated_bn_eur": 126.0724,
+   "s4h_disconnected_bn_eur": 149.3171,
+   "s4h_disconnected_minus_integrated": 23.2447
+  },
+  "ID": {
+   "integrated_bn_eur": 207.8753,
+   "disconnected_bn_eur": 214.7734,
+   "disconnected_minus_integrated": 6.8981,
+   "s4h_integrated_bn_eur": 204.8594,
+   "s4h_disconnected_bn_eur": 214.0173,
+   "s4h_disconnected_minus_integrated": 9.1579
+  },
+  "SG": {
+   "integrated_bn_eur": 20.094,
+   "disconnected_bn_eur": 22.3262,
+   "disconnected_minus_integrated": 2.2322,
+   "s4h_integrated_bn_eur": 24.3858,
+   "s4h_disconnected_bn_eur": 26.5703,
+   "s4h_disconnected_minus_integrated": 2.1845
+  },
+  "MY": {
+   "integrated_bn_eur": 68.847,
+   "disconnected_bn_eur": 72.5458,
+   "disconnected_minus_integrated": 3.6988,
+   "s4h_integrated_bn_eur": 70.9479,
+   "s4h_disconnected_bn_eur": 76.0107,
+   "s4h_disconnected_minus_integrated": 5.0628
+  },
+  "PH": {
+   "integrated_bn_eur": 23.9635,
+   "disconnected_bn_eur": 25.8196,
+   "disconnected_minus_integrated": 1.8561,
+   "s4h_integrated_bn_eur": 26.3119,
+   "s4h_disconnected_bn_eur": 27.5901,
+   "s4h_disconnected_minus_integrated": 1.2782
+  },
+  "MM": {
+   "integrated_bn_eur": 7.6638,
+   "disconnected_bn_eur": 8.9543,
+   "disconnected_minus_integrated": 1.2905,
+   "s4h_integrated_bn_eur": 9.461,
+   "s4h_disconnected_bn_eur": 10.4005,
+   "s4h_disconnected_minus_integrated": 0.9395
+  },
+  "TH": {
+   "integrated_bn_eur": 83.929,
+   "disconnected_bn_eur": 89.5282,
+   "disconnected_minus_integrated": 5.5992,
+   "s4h_integrated_bn_eur": 79.6101,
+   "s4h_disconnected_bn_eur": 85.6617,
+   "s4h_disconnected_minus_integrated": 6.0516
+  },
+  "LA": {
+   "integrated_bn_eur": -1.2689,
+   "disconnected_bn_eur": 2.0083,
+   "disconnected_minus_integrated": 3.2772,
+   "s4h_integrated_bn_eur": -0.3359,
+   "s4h_disconnected_bn_eur": 2.1618,
+   "s4h_disconnected_minus_integrated": 2.4977
+  },
+  "KH": {
+   "integrated_bn_eur": 5.146,
+   "disconnected_bn_eur": 7.3483,
+   "disconnected_minus_integrated": 2.2023,
+   "s4h_integrated_bn_eur": 4.7794,
+   "s4h_disconnected_bn_eur": 6.8709,
+   "s4h_disconnected_minus_integrated": 2.0915
+  },
+  "BN": {
+   "integrated_bn_eur": 0.0476,
+   "disconnected_bn_eur": 1.0223,
+   "disconnected_minus_integrated": 0.9747,
+   "s4h_integrated_bn_eur": 0.6272,
+   "s4h_disconnected_bn_eur": 1.4995,
+   "s4h_disconnected_minus_integrated": 0.8723
+  },
+  "TL": {
+   "integrated_bn_eur": -0.3205,
+   "disconnected_bn_eur": 0.1244,
+   "disconnected_minus_integrated": 0.4449,
+   "s4h_integrated_bn_eur": -0.1798,
+   "s4h_disconnected_bn_eur": 0.1306,
+   "s4h_disconnected_minus_integrated": 0.3104
+  }
+ },
+ "lp_vs_s4h": {
+  "integrated": {
+   "num_col": {
+    "s4j": 675747,
+    "s4h": 649105,
+    "change_rel": 0.041044207023517076
+   },
+   "num_row": {
+    "s4j": 1518047,
+    "s4h": 1439886,
+    "change_rel": 0.054282769608149595
+   },
+   "nnz": {
+    "s4j": 3445617,
+    "s4h": 3229822,
+    "change_rel": 0.06681327949342108
+   },
+   "barrier_iterations": {
+    "s4j": 94,
+    "s4h": 123,
+    "change_rel": -0.2357723577235772
+   },
+   "barrier_seconds": {
+    "s4j": 159.88,
+    "s4h": 171.45,
+    "change_rel": -0.06748323126275879
+   },
+   "solve_seconds": {
+    "s4j": 179.50812435150146,
+    "s4h": 186.36032700538635,
+    "change_rel": -0.03676856959843622
+   },
+   "peak_rss_gib_receipt": {
+    "s4j": 4.060771942138672,
+    "s4h": 3.9121055603027344,
+    "change_rel": 0.03800162841833776
+   }
+  },
+  "disconnected": {
+   "num_col": {
+    "s4j": 652097,
+    "s4h": 635539,
+    "change_rel": 0.026053475868514697
+   },
+   "num_row": {
+    "s4j": 1457529,
+    "s4h": 1409957,
+    "change_rel": 0.03374003604365239
+   },
+   "nnz": {
+    "s4j": 3269175,
+    "s4h": 3137621,
+    "change_rel": 0.0419279447708949
+   },
+   "barrier_iterations": {
+    "s4j": 136,
+    "s4h": 150,
+    "change_rel": -0.09333333333333338
+   },
+   "barrier_seconds": {
+    "s4j": 185.44,
+    "s4h": 172.59,
+    "change_rel": 0.07445390810591568
+   },
+   "solve_seconds": {
+    "s4j": 202.87822246551514,
+    "s4h": 186.64204788208008,
+    "change_rel": 0.08699097961941038
+   },
+   "peak_rss_gib_receipt": {
+    "s4j": 3.623645782470703,
+    "s4h": 3.534229278564453,
+    "change_rel": 0.02530014236726874
+   }
+  },
+  "integrated_nze": {
+   "num_col": {
+    "s4j": 675747,
+    "s4h": 649105,
+    "change_rel": 0.041044207023517076
+   },
+   "num_row": {
+    "s4j": 1518047,
+    "s4h": 1439886,
+    "change_rel": 0.054282769608149595
+   },
+   "nnz": {
+    "s4j": 3445617,
+    "s4h": 3229822,
+    "change_rel": 0.06681327949342108
+   },
+   "barrier_iterations": {
+    "s4j": 142,
+    "s4h": 120,
+    "change_rel": 0.18333333333333335
+   },
+   "barrier_seconds": {
+    "s4j": 238.04,
+    "s4h": 168.88,
+    "change_rel": 0.40952155376598776
+   },
+   "solve_seconds": {
+    "s4j": 256.3879323005676,
+    "s4h": 182.99194645881653,
+    "change_rel": 0.401088612160696
+   },
+   "peak_rss_gib_receipt": {
+    "s4j": 4.047000885009766,
+    "s4h": 3.945392608642578,
+    "change_rel": 0.025753654058308317
+   }
+  }
+ },
+ "th_my": {
+  "integrated": {
+   "p_nom_opt_mw": 9333.247420903537,
+   "th_to_my_twh": 19.20764285047129,
+   "my_to_th_twh": 2.327838607940316,
+   "b2b_p_nom_opt_mw": {
+    "convert_412_577": 20300.0,
+    "convert_599_890": 20300.0
+   },
+   "s4h_th_to_my_twh": 7.420599498060606
+  },
+  "integrated_nze": {
+   "p_nom_opt_mw": 9543.406003239588,
+   "th_to_my_twh": 20.080339429760294,
+   "my_to_th_twh": 1.6974204084974602,
+   "b2b_p_nom_opt_mw": {
+    "convert_412_577": 20300.0,
+    "convert_599_890": 20300.0
+   },
+   "s4h_th_to_my_twh": 7.557387394289957
+  }
+ },
+ "disconnected_objective_vs_s4h": {
+  "s4j": 706441942732.5577,
+  "s4h": 693191116147.2216,
+  "relative": 0.0191156901418251
+ }
+}

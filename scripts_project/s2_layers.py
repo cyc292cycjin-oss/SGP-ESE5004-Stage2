@@ -21,6 +21,19 @@ HOURS = 8760.0
 S2_OWNER_KIND = "S2_DEMAND_TABLE"
 TFEC_SECTORS = ["Industry", "Transport", "Residential", "Commercial", "AgricultureOthers"]
 LAND_TRANSPORT_ACCOUNTS = {"RoadResidualFuel", "TransportNEC", "TransportEmbeddedFuelParent"}
+# S4J-1 (decision 104): demand-table electricity sectors that no other demand of the model represents. Residential / commercial electricity (incl. building
+# cooling, not modelled separately) and agriculture-and-others electricity have no explicit load; the transport electricity row (rail, existing electric road)
+# is not modelled either (the explicit EV / FCEV loads convert the non-electric land-transport fuel rows only). Industry electricity is explicit in the route
+# mode (pypsa_eur_2050) and joins the base load only in the bas_fixed comparison mode.
+TABLE_BASE_SECTORS = ("Residential", "Commercial", "AgricultureOthers", "Transport")
+
+
+def nonindustrial_electricity_mode(cfg) -> str:
+    """research.demand.nonindustrial_electricity: table_sectors (main, decision 104) | astar_residual (former method; default when absent)."""
+    v = str((cfg["research"].get("demand") or {}).get("nonindustrial_electricity", "astar_residual")).lower()
+    if v not in ("table_sectors", "astar_residual"):
+        raise ValueError("Unknown research.demand.nonindustrial_electricity " + v)
+    return v
 FUEL_EF_KEYS = {"coal": "coal", "oil": "oil", "gas": "gas", "unclassified_fuel": "oil"}  # technology-data CO2 intensity rows
 # IEA, Defining energy access: 2020 methodology, Table 2 "Cookstove efficiencies by type and region"
 COOKSTOVE_BASIC_FUELWOOD = {"ID": 0.08, "TH": 0.16}      # other ASEAN countries: "Other Southeast Asia" 0.08
@@ -494,6 +507,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     # R1 (decision 55): industrial carrier structure. pypsa_eur_2050 = 2050 process routes (scripts_project/s2b_industry.py);
     # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
     carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = demand_table_key(cfg)
+    ne_mode = nonindustrial_electricity_mode(cfg)   # S4J-1 (decision 104): Astar base-load total
     if carrier_mode not in ("pypsa_eur_2050", "bas_fixed"):
         raise ValueError("Unknown research.s2.industry.carrier_mode " + carrier_mode)
     # S3-0 (decision 61): ratio source. jrc_idees_2021 = PyPSA-Eur v2025.07.0 ratios reproduced from JRC-IDEES-2021 for all sub-sectors (s3_0_industry.py, main);
@@ -812,7 +826,9 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                          extra={"energy_recovery": "not modelled (R2: emissions only)"})
                 loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="domestic end-of-life plastics burned (What a Waste 3.0 x IPCC Table 2.4)", carrier="plastic waste",
                                   source_row=f"feedstock_plastics_burned_co2_2050_{c}", annual_mwh=plastics * s, bus=pb))
-        # ---- Astar deduction: transport electricity already explicit ------------------------------------------
+        # ---- Astar base load. S4J-1 (decision 104) table_sectors: annual total = demand-table electricity of the sectors not modelled separately
+        #      (TABLE_BASE_SECTORS; + Industry in bas_fixed), Astar only gives the hourly shape and the node split (every Astar load of the country is
+        #      scaled by the same factor). astar_residual (former method): Astar minus the explicit industry / transport electricity --------------------
         te = float(d[(d.sector == "Transport") & (d.carrier == "electricity")].v.sum())
         ie = float(d[(d.sector == "Industry") & (d.carrier == "electricity")].v.sum()) if carrier_mode == "pypsa_eur_2050" else 0.0   # R1: industry electricity is explicit in the route mode
         astar_c = [l for l in n.loads.index if n.loads.at[l, "account"] == "Astar" and n.loads.at[l, "country"] == c]
@@ -822,21 +838,35 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ded_total = te + ie
         parts = [p for p, v in [("transport electricity (rail/road, embedded in Astar)", te), ("industry electricity (AEO8 BAS share embedded in Astar; replaced by the 2050 route electricity)", ie)] if v > 0]
         explicit = dict(ev_mwh=E_land * ev_share * oil_to_el, fcev_h2_mwh=E_land * fc_share * oil_to_h2, industry_electricity_mwh=ind_car.get("electricity", 0.0), industry_hydrogen_mwh=ind_car.get("hydrogen", 0.0))
-        if ded_total > 0 and astar_total > 0:
+        if ne_mode == "table_sectors":
+            el = d[d.carrier == "electricity"]
+            base_sectors = list(TABLE_BASE_SECTORS) + ([] if carrier_mode == "pypsa_eur_2050" else ["Industry"])
+            by_sector = {s: float(el[el.sector == s].v.sum()) for s in base_sectors}
+            target = float(sum(by_sector.values()))
+            if astar_total <= 0 and target > 0:
+                raise ValueError("No Astar shape for the table-sector electricity of " + c)
+            factor = target / astar_total if astar_total > 0 else 1.0
+            for l in astar_c:
+                if l in pset:
+                    n.loads_t.p_set[l] = pset[l] * factor
+            deductions.append(dict(country=c, mode="table_sectors", deducted="replaced: annual total = demand-table electricity of " + " + ".join(base_sectors) + " (Astar = hourly shape)",
+                                   deducted_mwh=astar_total - target, deducted_transport_mwh=0.0, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=target,
+                                   factor=factor, base_sectors_mwh=by_sector, added_explicit=explicit))
+        elif ded_total > 0 and astar_total > 0:
             factor = 1.0 - ded_total / astar_total
             if factor < 0:
                 raise ValueError("Deducted electricity exceeds Astar for " + c)
             for l in astar_c:
                 if l in pset:
                     n.loads_t.p_set[l] = pset[l] * factor
-            deductions.append(dict(country=c, deducted=" + ".join(parts), deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total * factor, factor=factor,
+            deductions.append(dict(country=c, mode="astar_residual", deducted=" + ".join(parts), deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total * factor, factor=factor,
                                    added_explicit=explicit))
         else:
-            deductions.append(dict(country=c, deducted="none", deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total, factor=1.0, added_explicit=explicit))
+            deductions.append(dict(country=c, mode="astar_residual", deducted="none", deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total, factor=1.0, added_explicit=explicit))
     ledger = dict(loads=loads, deductions=deductions, deferred=deferred, parameters=dict(ev_share=ev_share, fcev_share=fc_share, ice_share=ice_share, oil_to_electricity=oil_to_el, oil_to_hydrogen=oil_to_h2,
                   bev_charge_efficiency=bev_eff, bev_availability=bev_avail, agriculture_electric_share=ag_el_share, agriculture_efficiency_gain=ag_gain, hvc_primary_fraction=hvc_primary,
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
-                  cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
+                  cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, nonindustrial_electricity=ne_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
                   industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,
                                 hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger),
                   feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))

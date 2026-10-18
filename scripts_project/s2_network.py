@@ -37,6 +37,7 @@ from s4e_layers import add_corridor_dc_links, add_domestic_candidates, apply_lao
 from s4f_layers import apply_lao_vn_store, apply_max_extension, apply_th_my_stock, extend_optional_corridors
 from s4g_layers import apply_lao_th_store, apply_readjust_impedance
 from s4h_layers import apply_candidate_num_parallel, apply_la_vn_stock
+from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -146,10 +147,11 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
         if len(df) and not set(df.carrier[df.border_class == "maritime_trade"]) <= MARITIME_TRADE_CARRIERS:   # S4D-2 (decision 92): only shipping is trade
             raise ValueError("maritime_trade on a network carrier: " + typ)
     sw = R["cross_border"]; xb = {}
-    for key, sel in [("electricity", (n.lines.border_class == "cross_border").sum() + ((n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")).sum()),
-                     ("H2", ((n.links.border_class == "cross_border") & (n.links.carrier == "H2 pipeline")).sum()),
-                     ("gas", ((n.links.border_class == "cross_border") & (n.links.carrier == "gas pipeline")).sum()),
-                     ("co2", ((n.links.border_class == "cross_border") & (n.links.carrier == "CO2 pipeline")).sum())]:
+    fwd = ~n.links["reversed"].astype(bool) if "reversed" in n.links else pd.Series(True, index=n.links.index)   # S4J-2: '<x>-reversed' copies are not corridors
+    for key, sel in [("electricity", (n.lines.border_class == "cross_border").sum() + ((n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & fwd).sum()),
+                     ("H2", ((n.links.border_class == "cross_border") & (n.links.carrier == "H2 pipeline") & fwd).sum()),
+                     ("gas", ((n.links.border_class == "cross_border") & (n.links.carrier == "gas pipeline") & fwd).sum()),
+                     ("co2", ((n.links.border_class == "cross_border") & (n.links.carrier == "CO2 pipeline") & fwd).sum())]:
         xb[key] = int(sel)
         if not sw[key] and xb[key]:
             raise ValueError("Cross-border " + key + " components present although the switch is off")
@@ -158,9 +160,12 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
     if sw["electricity"]:
         expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()
                           if members is None or {str(r.country_from), str(r.country_to)} <= members}
-        actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity")]}
+        actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & fwd]}
         if actual != expected_edges:
             raise ValueError("Cross-border electricity set differs from the corridor table")
+        rev_xb = n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & ~fwd]
+        if any(x[: -len("-reversed")] not in n.links.index for x in rev_xb):
+            raise ValueError("reversed cross-border link without its forward link")
     if members is not None:
         for typ in ("Line", "Link"):
             d = n.df(typ); d = d[d.border_class == "cross_border"]
@@ -367,6 +372,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     lv = set_transmission_s2(n, R["transmission"])
     n.meta["transmission_limit"] = jsonable(lv)
     max_ext = apply_max_extension(n, cfg, registry, repo)   # S4F-1 (decision 96): PyPSA-Eur individual line / DC-link extension limit (lines.max_extension = 20000 MW, increment); apg_plans = sensitivity
+    dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
+    losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
@@ -396,12 +403,13 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                   lao_vn_store={k: v for k, v in lao_vn.items() if k != "table"}),
                                   s4g_layers=dict(readjust_impedance={k: v for k, v in readjust.items() if k != "rows"}, lao_th_store={k: v for k, v in lao_th.items() if k != "table"}),
                                   s4h_layers=dict(la_vn_stock={k: v for k, v in la_vn_stock.items() if k != "rows"}, candidate_num_parallel={k: v for k, v in cand_np.items() if k != "rows"}),
+                                  s4j_layers=dict(transmission_losses=losses, dc_converters=dc_conv),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
-                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel"]:
+                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

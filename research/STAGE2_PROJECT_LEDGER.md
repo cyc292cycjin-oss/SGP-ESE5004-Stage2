@@ -543,3 +543,30 @@
   - 另需上云前信息与授权。
 - **用户决定（2026-10-18）：** §7 两项维持现状——MY–SG 保持直流候选，参考候选不扩到节点对；首批正式运行用当前 S4H 部署包（6eead675），上云前信息由用户另行提供。
 - **交付：** `research/06_scope_redesign/p1_step4h_20261017/`，内容为 S4H_REPORT.md、S4H_EVIDENCE.json、S4H_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §17、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4h_20261017/`；测试 `tests/research` 514 通过、整个 `tests/` 531 通过。
+
+## S4J 第 104–107 项：非工业电力负荷、输送损耗、TH–MY 直流与换流器、S4I 其余事项、冒烟、云端部署包与上云前清单 — 2026-10-18
+
+- **范围：**
+  - 指令 `S4J_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 c2095744…f348f）与补充 `S4J_SUPPLEMENT_01.md`（188743eb…fac55，第 107 项），都已核对；只实现第 104–107 项，其他发现只记录。
+  - 分支 `codex/s4j-demand-losses-20261018`（自 S4I 09ffb727），draft PR #34 叠在 #33 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载；档案 A 参数未改，没有重试。
+- **S4J-0：** 登记 S4I §5 答复（K1 → 104，U1 / U2 → 105，K2 / U3 → 106 a、b，R1–R11 → 106 c，联盟算力估算 → 106 d；`s4j_0`）。
+- **S4J-1（104）：** 基础负荷 = 需求表居民 + 商业 + 农业及其他 + 交通电力，Astar 只给形状（开关 `research.demand.nonindustrial_electricity`：table_sectors | astar_residual）；东盟 1,079.4 → 1,032.4 TWh，VN 30.0 → 197.2 TWh。
+- **S4J-2（105 a）：** PyPSA-Eur 输送损耗（开关 `research.network.transmission_losses`：pypsa_eur | none）：交流线损 2 条切线（PyPSA 0.30.3 `define_loss_constraints`）、直流 0.98 × 0.977^(L/1000)、H₂ / 气压缩耗电 0.018 / 0.01、双向链路拆分 + 反向容量同步（322 对）、CO₂ 无损。
+- **S4J-3（105 b）→ 补充 01 (a)（107）：** TH–MY 直流双向；旧写法（零成本 B2B 变量 + 联动等式）使冒烟非最优，改为两台 B2B 双向、不可扩建、固定 20,300 MW（开关 `research.network.th_my_hvdc`：bidirectional_fixed_b2b | s4h）。
+- **S4J-4（106 a、b）：** 撤下 `lanes3`，`lanes2` 加 330 秒许可间隔，预检检查 `/usr/bin/time`，首批推荐串行。
+- **S4J-5：** S4I 审查脚本重跑，差异全部可归因，无新增问题。
+- **S4J-6：**
+  - 首次冒烟一体化 SUBOPTIMAL，停止（`S4J_STOP_01_SMOKE_SUBOPTIMAL.md`）；用户授权两次诊断：关闭损耗仍 SUBOPTIMAL；S4H + 旧 S4J-3 最优但门槛不过。
+  - 补充 01 (b)：完整 S4J 网络三项全部最优，求解器容差门槛全部通过（(c) 未执行）；目标值相对 S4H +2.65 / +1.91 / +3.07 %，LP +4.1 % 列、+6.7 % 非零元；B6 49.61 bn EUR（7.0 %）；B16 ≤ 1.2e-11；跨境电力损耗 1.48 %。
+  - TH–MY 直流 9.3 GW（TH→MY 19.2、MY→TH 2.3 TWh）；交流候选线 20 → 5 GW，额定正好等于交流线损切线的零损耗上限。
+- **S4J-7：**
+  - 部署包重建到 bcfb2d0a，四个网络与冒烟网络逐组件一致；上传 236,518,964 B；S4H 部署包作废。
+  - 365×24h 单运行 37–51 / 41–57 / 52–72 min（悲观 105），串行 2.2–3.0 h；预检下限 36 / 72 GiB 不变。
+  - 第二批敏感性 12 项只登记（加 `astar_residual`、`transmission_losses=none`）。
+- **待用户决定：** 3 项（S4J 报告 §12）：
+  - 交流线损近似与候选线电阻（零损耗上限效应）；
+  - 不互联中两台 TH–MY B2B 是否也移除；
+  - `th_my_hvdc=s4h` 是否加入第二批敏感性。
+  - 另需上云前信息与授权（报告 §10，授权模板填入 bcfb2d0a）。
+- **交付：** `research/06_scope_redesign/p1_step4j_20261018/`，内容为 S4J_REPORT.md、S4J_EVIDENCE.json、S4J_PROGRESS.md、S4J_STOP_01_SMOKE_SUBOPTIMAL.md、CLOUD_RESOURCE_ESTIMATE.md §18–§19、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4j_20261018/`；测试 `tests/research` 523 通过、整个 `tests/` 540 通过。

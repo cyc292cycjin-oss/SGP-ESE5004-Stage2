@@ -1,0 +1,326 @@
+{
+ "network": "../results_project/s4j/s4j2/builds/integrated/integrated_2920_3h_unsolved.nc",
+ "sources": {
+  "pypsa_eur": {
+   "sha256_config": "bfbe9160db09c3e960b97173bc755492b7638e0f4a5081ffaa1dddd4635da787",
+   "sha256_psn": "612c4a0c4ef35cb855f1bf30c3fa1c69c7fdeedef35e54ce1566969f3cb1d0cd",
+   "lines": [
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 747,
+     "text": "transmission_efficiency:"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 749,
+     "text": "- DC"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 750,
+     "text": "- H2 pipeline"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 751,
+     "text": "- gas pipeline"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 754,
+     "text": "efficiency_static: 0.98"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 755,
+     "text": "efficiency_per_1000km: 0.977"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 757,
+     "text": "efficiency_per_1000km: 1 # 0.982"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 758,
+     "text": "compression_per_1000km: 0.018"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 760,
+     "text": "efficiency_per_1000km: 1 #0.977"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 761,
+     "text": "compression_per_1000km: 0.01"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 763,
+     "text": "efficiency_static: 0.97"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+     "line": 1001,
+     "text": "transmission_losses: 2"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5727,
+     "text": "def lossy_bidirectional_links(n, carrier, efficiencies={}):"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5748,
+     "text": "n.links.loc[carrier_i, \"p_min_pu\"] = 0"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5757,
+     "text": "rev_links[\"capital_cost\"] = 0"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5758,
+     "text": "rev_links[\"length\"] = 0"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5760,
+     "text": "rev_links.index = rev_links.index.map(lambda x: x + \"-reversed\")"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5769,
+     "text": "n.links.loc[carrier_i, \"bus2\"] = n.links.loc[carrier_i, \"bus0\"].map("
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 5773,
+     "text": "-compression_per_1000km * n.links.loc[carrier_i, \"length_original\"] / 1e3"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 6445,
+     "text": "for k, v in options[\"transmission_efficiency\"].items():"
+    },
+    {
+     "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+     "line": 6447,
+     "text": "lossy_bidirectional_links(n, k, v)"
+    }
+   ]
+  },
+  "pypsa": {
+   "version": "0.30.3",
+   "lines": [
+    {
+     "file": "optimize.py",
+     "line": 207,
+     "text": "transmission_losses: int = 0,"
+    },
+    {
+     "file": "optimize.py",
+     "line": 260,
+     "text": "define_loss_variables(n, sns, c)"
+    },
+    {
+     "file": "optimize.py",
+     "line": 305,
+     "text": "define_loss_constraints(n, sns, c, transmission_losses)"
+    },
+    {
+     "file": "optimize.py",
+     "line": 458,
+     "text": "n.lines_t.p0 += losses / 2"
+    },
+    {
+     "file": "optimize.py",
+     "line": 459,
+     "text": "n.lines_t.p1 += losses / 2"
+    },
+    {
+     "file": "constraints.py",
+     "line": 556,
+     "text": "if transmission_losses:"
+    },
+    {
+     "file": "constraints.py",
+     "line": 559,
+     "text": "[\"Line\", \"loss\", \"bus0\", -0.5],"
+    },
+    {
+     "file": "constraints.py",
+     "line": 560,
+     "text": "[\"Line\", \"loss\", \"bus1\", -0.5],"
+    },
+    {
+     "file": "constraints.py",
+     "line": 932,
+     "text": "def define_loss_constraints("
+    },
+    {
+     "file": "constraints.py",
+     "line": 947,
+     "text": "if not isfinite(s_nom_max).all():"
+    },
+    {
+     "file": "constraints.py",
+     "line": 956,
+     "text": "upper_limit = r_pu_eff * (s_max_pu * s_nom_max) ** 2"
+    },
+    {
+     "file": "constraints.py",
+     "line": 964,
+     "text": "p_k = k / tangents * s_max_pu * s_nom_max"
+    },
+    {
+     "file": "variables.py",
+     "line": 155,
+     "text": "n.model.add_variables(0, coords=coords, name=f\"{c}-loss\", mask=active)"
+    }
+   ]
+  }
+ },
+ "meta": {
+  "ac_transmission_losses": 2,
+  "carriers": {
+   "DC": {
+    "bidirectional_split": 12,
+    "compression_per_1000km": 0.0,
+    "efficiency_max": 0.9789514540705648,
+    "efficiency_min": 0.9522639286428988,
+    "efficiency_per_1000km": 0.977,
+    "efficiency_static": 0.98,
+    "links": 13,
+    "one_way_kept": [
+     "Khlong Ngae \u2013 Gurun"
+    ]
+   },
+   "H2 pipeline": {
+    "bidirectional_split": 148,
+    "compression_links": 296,
+    "compression_per_1000km": 0.018,
+    "efficiency2_max": -0.000830265796766305,
+    "efficiency2_min": -0.0221852973071679,
+    "efficiency_max": 1.0,
+    "efficiency_min": 1.0,
+    "efficiency_per_1000km": 1.0,
+    "efficiency_static": 1.0,
+    "links": 148,
+    "one_way_kept": []
+   },
+   "gas pipeline": {
+    "bidirectional_split": 161,
+    "compression_links": 327,
+    "compression_per_1000km": 0.01,
+    "efficiency2_max": -0.00046125877598128057,
+    "efficiency2_min": -0.02299191286171988,
+    "efficiency_max": 1.0,
+    "efficiency_min": 1.0,
+    "efficiency_per_1000km": 1.0,
+    "efficiency_static": 1.0,
+    "links": 166,
+    "one_way_kept": [
+     "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+     "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+     "gas pipeline existing Yadana Gas Pipeline 1",
+     "gas pipeline existing Yetagun Gas Pipeline",
+     "gas pipeline existing Zawtika Gas Pipeline"
+    ]
+   }
+  },
+  "mode": "pypsa_eur",
+  "reversed_extendable": 321,
+  "reversed_links": 321,
+  "sources": "PyPSA-Eur v2025.07.0 config.default.yaml 747-763, 1001; prepare_sector_network.py 5727-5774 (lossy_bidirectional_links), 6445-6447; solve_network.py add_lossy_bidirectional_link_constraints not in the repository (same meaning: reverse p_nom = forward p_nom)"
+ },
+ "model_check": {
+  "network": "../results_project/s4j/s4j2/builds/integrated/integrated_2920_3h_unsolved.nc",
+  "snapshots": 56,
+  "ac_tangents": 2,
+  "loss_variables": 8288,
+  "loss_constraints": [
+   {
+    "constraint": "Line-loss_upper",
+    "rows": 8288,
+    "coeff_abs_min": 1.0,
+    "coeff_abs_max": 1.0,
+    "rhs_abs_max": 819972.6027840017
+   },
+   {
+    "constraint": "Line-loss_tangents-1--1",
+    "rows": 8288,
+    "coeff_abs_min": 0.08010094871758315,
+    "coeff_abs_max": 58.48174900392281,
+    "rhs_abs_max": 204993.15069600043
+   },
+   {
+    "constraint": "Line-loss_tangents-1-1",
+    "rows": 8288,
+    "coeff_abs_min": 0.08010094871758315,
+    "coeff_abs_max": 58.48174900392281,
+    "rhs_abs_max": 204993.15069600043
+   },
+   {
+    "constraint": "Line-loss_tangents-2--1",
+    "rows": 8288,
+    "coeff_abs_min": 0.1602018974351663,
+    "coeff_abs_max": 116.96349800784562,
+    "rhs_abs_max": 819972.6027840017
+   },
+   {
+    "constraint": "Line-loss_tangents-2-1",
+    "rows": 8288,
+    "coeff_abs_min": 0.1602018974351663,
+    "coeff_abs_max": 116.96349800784562,
+    "rhs_abs_max": 819972.6027840017
+   }
+  ],
+  "sync_rows": 321,
+  "lines": 148,
+  "reversed_extendable": 321,
+  "num_col": 675693,
+  "num_row": 1517932,
+  "seconds": 12.857079029083252
+ },
+ "links": {
+  "DC|forward": 12,
+  "DC|one-way": 1,
+  "DC|reversed": 12,
+  "H2 pipeline|forward": 148,
+  "H2 pipeline|reversed": 148,
+  "gas pipeline|forward": 161,
+  "gas pipeline|one-way": 5,
+  "gas pipeline|reversed": 161
+ },
+ "dc_loss_share": {
+  "min": 0.02104854592943517,
+  "max": 0.04773607135710123
+ },
+ "compression": {
+  "H2 pipeline": {
+   "min": -0.0221852973071679,
+   "max": -0.000830265796766305
+  },
+  "gas pipeline": {
+   "min": -0.02299191286171988,
+   "max": -0.00046125877598128057
+  }
+ },
+ "lines": {
+  "candidates": 46,
+  "r_pu_eff_min": 2.0505175622270303e-06,
+  "r_pu_eff_max": 0.00417101126909085,
+  "zero_loss_below_mw_min": 3500.0,
+  "zero_loss_below_mw_max": 12992.17016507537,
+  "loss_share_at_tangent_1": {
+   "candidates_median": 0.5516985526144798,
+   "candidates_max": 1.6087865940051196,
+   "stock_median": 0.7604322796959012,
+   "stock_max": 29.240874501961404
+  },
+  "exact_loss_per_100km_at_one_circuit_median": 0.024695398093179412
+ }
+}

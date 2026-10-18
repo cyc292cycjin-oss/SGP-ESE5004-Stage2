@@ -1,0 +1,25 @@
+SYNTAX_OK:run_365x24h.sh
+SYNTAX_OK:preflight.sh
+SYNTAX_OK:make_package.sh
+== lanes3 run
+REFUSED: --mode lanes3 is withdrawn (S4I K2, decision 106 a): it needs 3 Gurobi sessions at the same time, the academic WLS licence allows at most 2 and keeps each token >= 5 min. Use --mode serial (recommended) or --mode lanes2.
+exit:2
+== lanes3 preflight
+mode lanes3 is withdrawn (academic WLS licence: at most 2 concurrent sessions); use serial (recommended) or lanes2
+exit:2
+== lanes2 dry
+DRY-RUN: would wait 330 s (start (token of the preflight licence check))
+DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/discon
+DRY-RUN: disconnected_gap would run only if the disconnected main ends non-optimal
+DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/integr
+DRY-RUN: would wait 330 s (before integrated_nze in the lane)
+DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/integr
+DRY-RUN done (no solve, no export)
+exit:0
+== serial dry
+0
+(waits in serial: count above should be 0)
+== time tool present here
+GNU time OK on this machine
+== preflight tools branch with a missing time (simulated by PATH-independent check: grep of the message)
+46:else echo "MISSING /usr/bin/time (GNU time with -v): run_365x24h.sh would fail every run within seconds. Install: apt-get install -y time"; ok=0; fi

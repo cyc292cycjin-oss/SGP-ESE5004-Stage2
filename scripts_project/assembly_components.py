@@ -99,7 +99,8 @@ def validate_hooks(n):
              'research_co2_storage_cap','research_gap_diagnostic',  # S2: national storage cap; gap diagnostic replaces the hard net-zero limit (decisions 49, 53)
              'research_new_hydro_inflow','research_nuclear_national_cap',  # S4B-2 (decisions 78, 79): new-reservoir inflow tied to built capacity; nuclear plan caps (sensitivity)
              'research_bunker_net_zero',  # S4C-3 (decision 88): ASEAN international bunker account, net zero on its own
-             'research_apg_corridor_cap'}  # S4F-1 (decision 96): APG / AIMS plan caps per project group (apg_plans sensitivity)
+             'research_apg_corridor_cap',  # S4F-1 (decision 96): APG / AIMS plan caps per project group (apg_plans sensitivity)
+             'research_lossy_bidirectional_sync'}  # S4J-2 (decision 105 a): reverse capacity = forward capacity of the split lossy links (PyPSA-Eur Link-bidirectional_sync); the S4J-3 hook research_b2b_follows_dc is withdrawn (decision 107 a)
     if set(n.meta.get('required_constraint_hooks',[]))-allowed:raise ValueError('Unknown required physical hook')
     if n.meta.get('existing_unit_components'):
         if 'research_existing_assets' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Existing cost/resource hook lost')
@@ -158,3 +159,6 @@ def install_research_constraint_hooks(n,execution_context=None):
     if 'research_apg_corridor_cap' in hooks:
         from s4f_layers import install_apg_corridor_cap
         install_apg_corridor_cap(n)
+    if 'research_lossy_bidirectional_sync' in hooks:
+        from s4j_layers import install_lossy_bidirectional_sync
+        install_lossy_bidirectional_sync(n)

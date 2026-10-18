@@ -1,0 +1,5521 @@
+{
+ "instruction": {
+  "file": "work/p1_step4j_20261018/S4J_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "c20957448c69128c05eaf4e271bcca7f98eecc7ccd3121cd37f3581daff3348f",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4j-demand-losses-20261018",
+  "head": "3e683112ac149529ca784fc4892132da0a08cfc3",
+  "base": "09ffb727114be437abf078a5393d0a2cb3ea403e (PR #33 head)",
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/34 (draft)",
+  "log": [
+   "3e683112 S4J-7: deployment networks rebuilt at bcfb2d0a, cloud package, resource estimate section 19, deployment steps",
+   "bcfb2d0a S4J-7 preparation: evidence collector points at the rewritten S4J-3 (s4j3b) and the passed smoke (s4j6b)",
+   "c0ba016a S4J supplement 01 (b) passed and S4J-6 smoke done: the three runs optimal under profile A",
+   "4937ba13 S4J supplement 01 (a): S4J-3 rewritten - TH-MY DC bidirectional, converter B2B fixed at the DC limit (decision 107)",
+   "0b3c2d0b S4J-6 diagnostic 2: S4H + S4J-3 optimal but the solver-tolerance gates fail",
+   "c6c5040b S4J-6 diagnostic 1: integrated smoke without transmission losses still SUBOPTIMAL",
+   "aa4455e9 S4J-6 STOP report: lossy bidirectional sync of the local pypsa-asean solve_network.py verified",
+   "7b5e7ce4 S4J-6 STOP: integrated smoke SUBOPTIMAL (stop condition), evidence and stop report",
+   "ad81a01e S4J-5: static review of the four S4J networks (S4I audit re-run, no new error)",
+   "66473e9a S4J-4: cloud scripts and deploy documents (decision 106 a, b; S4I K2, U3)",
+   "8cbf33d2 S4J-3: TH-MY DC bidirectional, converter-station B2B follows its DC link (decision 105 b, S4I U2)",
+   "8c4bf2ae S4J-2: transmission losses as PyPSA-Eur v2025.07.0 (decision 105 a, S4I U1)",
+   "34de92c9 S4J-1: non-industrial electricity from the demand-table sectors (decision 104, S4I K1)",
+   "4b15d7b8 S4J-0: answers to S4I section 5 registered (registry fragment s4j_0)"
+  ]
+ },
+ "supplement01": {
+  "file": "work/p1_step4j_20261018/S4J_SUPPLEMENT_01.md",
+  "sha256": "188743eb4c139d40453f2d0a6f6a12b09daffdb84b5da4826b7273f4389fac55",
+  "verified": true,
+  "decision": 107,
+  "a": "S4J-3 rewritten (s4j3b)",
+  "b": "passed: full S4J network, profile A, integrated optimal and all_passed_solver_tolerances (s4j6b)",
+  "c": "not executed ((b) passed); profile A unchanged"
+ },
+ "stops": [
+  {
+   "stop": "S4J_STOP_01_SMOKE_SUBOPTIMAL.md",
+   "first_smoke": [
+    "START:2026-10-18T12:34:59Z commit:ad81a01e dirty:0 profile:formal_barrier",
+    "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c126:\tMaximum resident set size (kbytes): 682532",
+    "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"eb56:\tMaximum resident set size (kbytes): 711964",
+    "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"17d9:\tMaximum resident set size (kbytes): 716620",
+    "RUN_integrated:suboptimal:285s:\tMaximum resident set size (kbytes): 4199588",
+    "STOP_LOSS_integrated:suboptimal",
+    "DONE:2026-10-18T12:42:23Z"
+   ],
+   "diagnostic_1_no_losses": [
+    "START:2026-10-18T12:51:38Z commit:aa4455e9 dirty:0 profile:formal_barrier override:network.transmission_losses=none",
+    "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"0c4b:\tMaximum resident set size (kbytes): 711244",
+    "RUN_integrated:suboptimal:345s:\tMaximum resident set size (kbytes): 4152836",
+    "DONE:2026-10-18T12:58:22Z"
+   ],
+   "diagnostic_2_s4h_plus_old_s4j3": [
+    "START:2026-10-18T13:02:27Z commit:c6c5040b dirty:0 profile:formal_barrier override:demand.nonindustrial_electricity=astar_residual,network.transmission_losses=none",
+    "NOTE: a first start at 13:02:01Z was stopped during the network build (wrong authorisation text in the run script), before any solve",
+    "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"a220:\tMaximum resident set size (kbytes): 712196",
+    "RUN_integrated:optimal:255s:\tMaximum resident set size (kbytes): 4161652",
+    "DONE:2026-10-18T13:07:33Z"
+   ],
+   "resolution": "supplement 01 (decision 107)"
+  }
+ ],
+ "downloads": [],
+ "s4j0": {
+  "s4j_answer_coalition_estimate": {
+   "value": "basis_item_14",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_answer_k1_nonindustrial": {
+   "value": "table_sectors",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_answer_k2_licence": {
+   "value": "drop_lanes3;lanes2_5min_gaps;serial_first",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_answer_u1_losses": {
+   "value": "pypsa_eur",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_answer_u2_th_my_dc": {
+   "value": "bidirectional;b2b_follows_link",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_answer_u3_gnu_time": {
+   "value": "preflight_checks_time",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r1": {
+   "value": "before_delivery_cleanup",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r10": {
+   "value": "sensitivity",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r11": {
+   "value": "after_first_results",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r2": {
+   "value": "after_first_results",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r3": {
+   "value": "before_delivery_cleanup",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r4": {
+   "value": "before_delivery_cleanup",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r5": {
+   "value": "before_delivery_cleanup",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r6": {
+   "value": "sensitivity",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r7": {
+   "value": "sensitivity",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r8": {
+   "value": "method_note_before_delivery",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_registered_r9": {
+   "value": "after_first_results_rhs_range",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4j_scope_rule": {
+   "value": "only_104_106",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  }
+ },
+ "s4j1": {
+  "registry": {
+   "s4j1_nonindustrial_electricity_switch": {
+    "value": "table_sectors|astar_residual",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j1_base_load_sectors": {
+    "value": "1032376359.6",
+    "unit": "MWh",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j1_explicit_electricity_inventory": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j1_transport_electricity_row": {
+    "value": "7393422.686",
+    "unit": "MWh",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "table": [
+   {
+    "country": "BN",
+    "residential_twh": 0.700467,
+    "commercial_twh": 2.472,
+    "agriculture_others_twh": 0.0,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 3.172467,
+    "base_2019_twh": 3.196954,
+    "multiple_vs_2019": 0.992341,
+    "industry_electricity_table_twh": 1.209271,
+    "astar_2050_twh": 10.270178,
+    "factor_on_astar": 0.308901,
+    "former_astar_residual_twh": 9.060908,
+    "former_multiple_vs_2019": 2.834231,
+    "change_twh": -5.88844,
+    "network_table_sectors_twh": 3.172467,
+    "s4i_a5_scheme_b_twh": 3.172467,
+    "minus_s4i_scheme_b_twh": 0.0
+   },
+   {
+    "country": "ID",
+    "residential_twh": 117.52036,
+    "commercial_twh": 180.783483,
+    "agriculture_others_twh": 2.031662,
+    "transport_twh": 0.765668,
+    "base_load_2050_twh": 301.101172,
+    "base_2019_twh": 169.769,
+    "multiple_vs_2019": 1.773593,
+    "industry_electricity_table_twh": 320.608648,
+    "astar_2050_twh": 678.586595,
+    "factor_on_astar": 0.443718,
+    "former_astar_residual_twh": 357.21228,
+    "former_multiple_vs_2019": 2.104108,
+    "change_twh": -56.111108,
+    "network_table_sectors_twh": 301.101172,
+    "s4i_a5_scheme_b_twh": 300.335504,
+    "minus_s4i_scheme_b_twh": 0.765668
+   },
+   {
+    "country": "KH",
+    "residential_twh": 4.942194,
+    "commercial_twh": 12.435265,
+    "agriculture_others_twh": 0.0,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 17.377459,
+    "base_2019_twh": 6.8078,
+    "multiple_vs_2019": 2.552581,
+    "industry_electricity_table_twh": 15.908457,
+    "astar_2050_twh": 26.794852,
+    "factor_on_astar": 0.648537,
+    "former_astar_residual_twh": 10.886395,
+    "former_multiple_vs_2019": 1.599106,
+    "change_twh": 6.491064,
+    "network_table_sectors_twh": 17.377459,
+    "s4i_a5_scheme_b_twh": 17.377459,
+    "minus_s4i_scheme_b_twh": -0.0
+   },
+   {
+    "country": "LA",
+    "residential_twh": 1.878313,
+    "commercial_twh": 2.815087,
+    "agriculture_others_twh": 0.228568,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 4.921968,
+    "base_2019_twh": 3.49647,
+    "multiple_vs_2019": 1.407696,
+    "industry_electricity_table_twh": 8.815278,
+    "astar_2050_twh": 17.341278,
+    "factor_on_astar": 0.28383,
+    "former_astar_residual_twh": 8.526,
+    "former_multiple_vs_2019": 2.438459,
+    "change_twh": -3.604032,
+    "network_table_sectors_twh": 4.921968,
+    "s4i_a5_scheme_b_twh": 4.921968,
+    "minus_s4i_scheme_b_twh": 0.0
+   },
+   {
+    "country": "MM",
+    "residential_twh": 5.257745,
+    "commercial_twh": 3.591048,
+    "agriculture_others_twh": 5.662721,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 14.511515,
+    "base_2019_twh": 13.12753,
+    "multiple_vs_2019": 1.105426,
+    "industry_electricity_table_twh": 11.694262,
+    "astar_2050_twh": 49.116916,
+    "factor_on_astar": 0.295448,
+    "former_astar_residual_twh": 37.422654,
+    "former_multiple_vs_2019": 2.8507,
+    "change_twh": -22.911139,
+    "network_table_sectors_twh": 14.511515,
+    "s4i_a5_scheme_b_twh": 14.511515,
+    "minus_s4i_scheme_b_twh": 0.0
+   },
+   {
+    "country": "MY",
+    "residential_twh": 28.632137,
+    "commercial_twh": 108.159033,
+    "agriculture_others_twh": 1.835095,
+    "transport_twh": 1.063337,
+    "base_load_2050_twh": 139.689602,
+    "base_2019_twh": 80.229564,
+    "multiple_vs_2019": 1.741124,
+    "industry_electricity_table_twh": 230.211662,
+    "astar_2050_twh": 417.285228,
+    "factor_on_astar": 0.334758,
+    "former_astar_residual_twh": 186.010228,
+    "former_multiple_vs_2019": 2.318475,
+    "change_twh": -46.320626,
+    "network_table_sectors_twh": 139.689602,
+    "s4i_a5_scheme_b_twh": 138.626265,
+    "minus_s4i_scheme_b_twh": 1.063337
+   },
+   {
+    "country": "PH",
+    "residential_twh": 30.693327,
+    "commercial_twh": 64.234143,
+    "agriculture_others_twh": 8.542111,
+    "transport_twh": 0.261828,
+    "base_load_2050_twh": 103.731408,
+    "base_2019_twh": 58.9242,
+    "multiple_vs_2019": 1.760421,
+    "industry_electricity_table_twh": 91.612685,
+    "astar_2050_twh": 229.055184,
+    "factor_on_astar": 0.452866,
+    "former_astar_residual_twh": 137.180671,
+    "former_multiple_vs_2019": 2.328087,
+    "change_twh": -33.449263,
+    "network_table_sectors_twh": 103.731408,
+    "s4i_a5_scheme_b_twh": 103.46958,
+    "minus_s4i_scheme_b_twh": 0.261828
+   },
+   {
+    "country": "SG",
+    "residential_twh": 4.923469,
+    "commercial_twh": 31.077726,
+    "agriculture_others_twh": 0.482101,
+    "transport_twh": 4.749302,
+    "base_load_2050_twh": 41.232598,
+    "base_2019_twh": 30.2663,
+    "multiple_vs_2019": 1.362327,
+    "industry_electricity_table_twh": 44.497761,
+    "astar_2050_twh": 136.011268,
+    "factor_on_astar": 0.303156,
+    "former_astar_residual_twh": 86.764205,
+    "former_multiple_vs_2019": 2.866693,
+    "change_twh": -45.531607,
+    "network_table_sectors_twh": 41.232598,
+    "s4i_a5_scheme_b_twh": 36.483296,
+    "minus_s4i_scheme_b_twh": 4.749302
+   },
+   {
+    "country": "TH",
+    "residential_twh": 51.5951,
+    "commercial_twh": 129.851336,
+    "agriculture_others_twh": 26.576444,
+    "transport_twh": 0.553288,
+    "base_load_2050_twh": 208.576168,
+    "base_2019_twh": 107.072,
+    "multiple_vs_2019": 1.947999,
+    "industry_electricity_table_twh": 292.039829,
+    "astar_2050_twh": 507.906651,
+    "factor_on_astar": 0.410658,
+    "former_astar_residual_twh": 215.313534,
+    "former_multiple_vs_2019": 2.010923,
+    "change_twh": -6.737365,
+    "network_table_sectors_twh": 208.576168,
+    "s4i_a5_scheme_b_twh": 208.02288,
+    "minus_s4i_scheme_b_twh": 0.553288
+   },
+   {
+    "country": "TL",
+    "residential_twh": 0.141742,
+    "commercial_twh": 0.242241,
+    "agriculture_others_twh": 0.518672,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 0.902655,
+    "base_2019_twh": 0.384247,
+    "multiple_vs_2019": 2.349152,
+    "industry_electricity_table_twh": 0.0,
+    "astar_2050_twh": 1.010279,
+    "factor_on_astar": 0.893471,
+    "former_astar_residual_twh": 1.010279,
+    "former_multiple_vs_2019": 2.629243,
+    "change_twh": -0.107624,
+    "network_table_sectors_twh": 0.902655,
+    "s4i_a5_scheme_b_twh": 0.902655,
+    "minus_s4i_scheme_b_twh": -0.0
+   },
+   {
+    "country": "VN",
+    "residential_twh": 97.410795,
+    "commercial_twh": 71.18886,
+    "agriculture_others_twh": 28.559693,
+    "transport_twh": 0.0,
+    "base_load_2050_twh": 197.159347,
+    "base_2019_twh": 95.114778,
+    "multiple_vs_2019": 2.072857,
+    "industry_electricity_table_twh": 514.415192,
+    "astar_2050_twh": 544.38185,
+    "factor_on_astar": 0.362171,
+    "former_astar_residual_twh": 29.966658,
+    "former_multiple_vs_2019": 0.315058,
+    "change_twh": 167.192689,
+    "network_table_sectors_twh": 197.159347,
+    "s4i_a5_scheme_b_twh": 197.159347,
+    "minus_s4i_scheme_b_twh": 0.0
+   },
+   {
+    "country": "ASEAN",
+    "residential_twh": 343.69565,
+    "commercial_twh": 606.85022,
+    "agriculture_others_twh": 74.437067,
+    "transport_twh": 7.393423,
+    "base_load_2050_twh": 1032.37636,
+    "base_2019_twh": 568.388843,
+    "multiple_vs_2019": 1.816321,
+    "industry_electricity_table_twh": 1531.013044,
+    "astar_2050_twh": 2617.760279,
+    "factor_on_astar": 0.394374,
+    "former_astar_residual_twh": 1079.353812,
+    "former_multiple_vs_2019": 1.898971,
+    "change_twh": -46.977452,
+    "network_table_sectors_twh": 1032.37636,
+    "s4i_a5_scheme_b_twh": 1024.982936,
+    "minus_s4i_scheme_b_twh": 7.393424
+   }
+  ],
+  "status": [
+   "START:2026-10-18T11:54:20Z commit:4b15d7b8",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1ab5:\tMaximum resident set size (kbytes): 711172",
+   "BUILD_integrated_former:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6336:\tMaximum resident set size (kbytes): 711544",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"f664:\tMaximum resident set size (kbytes): 708784",
+   "COMPARE_former_vs_s4h:{}",
+   "COMPARE_main_vs_former:{\"Load_t\": [\"p_set\"]}",
+   "COMPARE_disconnected_vs_s4h:{\"Load_t\": [\"p_set\"]}",
+   "LOADS_CHANGED:{\"n\": 96, \"accounts\": [\"Astar\"]}",
+   "LOAD_TOTAL_TWH:{\"main\": 1032.376359597955, \"former\": 1079.353811841943, \"s4h\": 1079.353811841943}",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "1 failed, 2 passed, 1 warning in 2.25s",
+   "FULL_TESTS:1 failed, 533 passed, 934 warnings in 86.92s (0:01:26)",
+   "DONE:2026-10-18T11:58:40Z"
+  ]
+ },
+ "s4j2": {
+  "registry": {
+   "s4j2_transmission_losses_switch": {
+    "value": "pypsa_eur|none",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j2_ac_transmission_losses": {
+    "value": "2",
+    "unit": "tangents",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j2_link_losses": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j2_line_loss_approximation": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "losses": {
+   "network": "../results_project/s4j/s4j2/builds/integrated/integrated_2920_3h_unsolved.nc",
+   "meta": {
+    "ac_transmission_losses": 2,
+    "carriers": {
+     "DC": {
+      "bidirectional_split": 12,
+      "compression_per_1000km": 0.0,
+      "efficiency_max": 0.9789514540705648,
+      "efficiency_min": 0.9522639286428988,
+      "efficiency_per_1000km": 0.977,
+      "efficiency_static": 0.98,
+      "links": 13,
+      "one_way_kept": [
+       "Khlong Ngae – Gurun"
+      ]
+     },
+     "H2 pipeline": {
+      "bidirectional_split": 148,
+      "compression_links": 296,
+      "compression_per_1000km": 0.018,
+      "efficiency2_max": -0.000830265796766305,
+      "efficiency2_min": -0.0221852973071679,
+      "efficiency_max": 1.0,
+      "efficiency_min": 1.0,
+      "efficiency_per_1000km": 1.0,
+      "efficiency_static": 1.0,
+      "links": 148,
+      "one_way_kept": []
+     },
+     "gas pipeline": {
+      "bidirectional_split": 161,
+      "compression_links": 327,
+      "compression_per_1000km": 0.01,
+      "efficiency2_max": -0.00046125877598128057,
+      "efficiency2_min": -0.02299191286171988,
+      "efficiency_max": 1.0,
+      "efficiency_min": 1.0,
+      "efficiency_per_1000km": 1.0,
+      "efficiency_static": 1.0,
+      "links": 166,
+      "one_way_kept": [
+       "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+       "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+       "gas pipeline existing Yadana Gas Pipeline 1",
+       "gas pipeline existing Yetagun Gas Pipeline",
+       "gas pipeline existing Zawtika Gas Pipeline"
+      ]
+     }
+    },
+    "mode": "pypsa_eur",
+    "reversed_extendable": 321,
+    "reversed_links": 321,
+    "sources": "PyPSA-Eur v2025.07.0 config.default.yaml 747-763, 1001; prepare_sector_network.py 5727-5774 (lossy_bidirectional_links), 6445-6447; solve_network.py add_lossy_bidirectional_link_constraints not in the repository (same meaning: reverse p_nom = forward p_nom)"
+   },
+   "model_check": {
+    "network": "../results_project/s4j/s4j2/builds/integrated/integrated_2920_3h_unsolved.nc",
+    "snapshots": 56,
+    "ac_tangents": 2,
+    "loss_variables": 8288,
+    "loss_constraints": [
+     {
+      "constraint": "Line-loss_upper",
+      "rows": 8288,
+      "coeff_abs_min": 1.0,
+      "coeff_abs_max": 1.0,
+      "rhs_abs_max": 819972.6027840017
+     },
+     {
+      "constraint": "Line-loss_tangents-1--1",
+      "rows": 8288,
+      "coeff_abs_min": 0.08010094871758315,
+      "coeff_abs_max": 58.48174900392281,
+      "rhs_abs_max": 204993.15069600043
+     },
+     {
+      "constraint": "Line-loss_tangents-1-1",
+      "rows": 8288,
+      "coeff_abs_min": 0.08010094871758315,
+      "coeff_abs_max": 58.48174900392281,
+      "rhs_abs_max": 204993.15069600043
+     },
+     {
+      "constraint": "Line-loss_tangents-2--1",
+      "rows": 8288,
+      "coeff_abs_min": 0.1602018974351663,
+      "coeff_abs_max": 116.96349800784562,
+      "rhs_abs_max": 819972.6027840017
+     },
+     {
+      "constraint": "Line-loss_tangents-2-1",
+      "rows": 8288,
+      "coeff_abs_min": 0.1602018974351663,
+      "coeff_abs_max": 116.96349800784562,
+      "rhs_abs_max": 819972.6027840017
+     }
+    ],
+    "sync_rows": 321,
+    "lines": 148,
+    "reversed_extendable": 321,
+    "num_col": 675693,
+    "num_row": 1517932,
+    "seconds": 12.857079029083252
+   },
+   "links": {
+    "DC|forward": 12,
+    "DC|one-way": 1,
+    "DC|reversed": 12,
+    "H2 pipeline|forward": 148,
+    "H2 pipeline|reversed": 148,
+    "gas pipeline|forward": 161,
+    "gas pipeline|one-way": 5,
+    "gas pipeline|reversed": 161
+   },
+   "dc_loss_share": {
+    "min": 0.02104854592943517,
+    "max": 0.04773607135710123
+   },
+   "compression": {
+    "H2 pipeline": {
+     "min": -0.0221852973071679,
+     "max": -0.000830265796766305
+    },
+    "gas pipeline": {
+     "min": -0.02299191286171988,
+     "max": -0.00046125877598128057
+    }
+   },
+   "lines": {
+    "candidates": 46,
+    "r_pu_eff_min": 2.0505175622270303e-06,
+    "r_pu_eff_max": 0.00417101126909085,
+    "zero_loss_below_mw_min": 3500.0,
+    "zero_loss_below_mw_max": 12992.17016507537,
+    "loss_share_at_tangent_1": {
+     "candidates_median": 0.5516985526144798,
+     "candidates_max": 1.6087865940051196,
+     "stock_median": 0.7604322796959012,
+     "stock_max": 29.240874501961404
+    },
+    "exact_loss_per_100km_at_one_circuit_median": 0.024695398093179412
+   }
+  },
+  "sources": {
+   "pypsa_eur": {
+    "sha256_config": "bfbe9160db09c3e960b97173bc755492b7638e0f4a5081ffaa1dddd4635da787",
+    "sha256_psn": "612c4a0c4ef35cb855f1bf30c3fa1c69c7fdeedef35e54ce1566969f3cb1d0cd",
+    "lines": [
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 747,
+      "text": "transmission_efficiency:"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 749,
+      "text": "- DC"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 750,
+      "text": "- H2 pipeline"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 751,
+      "text": "- gas pipeline"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 754,
+      "text": "efficiency_static: 0.98"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 755,
+      "text": "efficiency_per_1000km: 0.977"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 757,
+      "text": "efficiency_per_1000km: 1 # 0.982"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 758,
+      "text": "compression_per_1000km: 0.018"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 760,
+      "text": "efficiency_per_1000km: 1 #0.977"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 761,
+      "text": "compression_per_1000km: 0.01"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 763,
+      "text": "efficiency_static: 0.97"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_config.default.yaml",
+      "line": 1001,
+      "text": "transmission_losses: 2"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5727,
+      "text": "def lossy_bidirectional_links(n, carrier, efficiencies={}):"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5748,
+      "text": "n.links.loc[carrier_i, \"p_min_pu\"] = 0"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5757,
+      "text": "rev_links[\"capital_cost\"] = 0"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5758,
+      "text": "rev_links[\"length\"] = 0"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5760,
+      "text": "rev_links.index = rev_links.index.map(lambda x: x + \"-reversed\")"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5769,
+      "text": "n.links.loc[carrier_i, \"bus2\"] = n.links.loc[carrier_i, \"bus0\"].map("
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 5773,
+      "text": "-compression_per_1000km * n.links.loc[carrier_i, \"length_original\"] / 1e3"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 6445,
+      "text": "for k, v in options[\"transmission_efficiency\"].items():"
+     },
+     {
+      "file": "pypsa_eur_v2025.07.0_prepare_sector_network.py",
+      "line": 6447,
+      "text": "lossy_bidirectional_links(n, k, v)"
+     }
+    ]
+   },
+   "pypsa": {
+    "version": "0.30.3",
+    "lines": [
+     {
+      "file": "optimize.py",
+      "line": 207,
+      "text": "transmission_losses: int = 0,"
+     },
+     {
+      "file": "optimize.py",
+      "line": 260,
+      "text": "define_loss_variables(n, sns, c)"
+     },
+     {
+      "file": "optimize.py",
+      "line": 305,
+      "text": "define_loss_constraints(n, sns, c, transmission_losses)"
+     },
+     {
+      "file": "optimize.py",
+      "line": 458,
+      "text": "n.lines_t.p0 += losses / 2"
+     },
+     {
+      "file": "optimize.py",
+      "line": 459,
+      "text": "n.lines_t.p1 += losses / 2"
+     },
+     {
+      "file": "constraints.py",
+      "line": 556,
+      "text": "if transmission_losses:"
+     },
+     {
+      "file": "constraints.py",
+      "line": 559,
+      "text": "[\"Line\", \"loss\", \"bus0\", -0.5],"
+     },
+     {
+      "file": "constraints.py",
+      "line": 560,
+      "text": "[\"Line\", \"loss\", \"bus1\", -0.5],"
+     },
+     {
+      "file": "constraints.py",
+      "line": 932,
+      "text": "def define_loss_constraints("
+     },
+     {
+      "file": "constraints.py",
+      "line": 947,
+      "text": "if not isfinite(s_nom_max).all():"
+     },
+     {
+      "file": "constraints.py",
+      "line": 956,
+      "text": "upper_limit = r_pu_eff * (s_max_pu * s_nom_max) ** 2"
+     },
+     {
+      "file": "constraints.py",
+      "line": 964,
+      "text": "p_k = k / tangents * s_max_pu * s_nom_max"
+     },
+     {
+      "file": "variables.py",
+      "line": 155,
+      "text": "n.model.add_variables(0, coords=coords, name=f\"{c}-loss\", mask=active)"
+     }
+    ]
+   }
+  },
+  "status": [
+   "START:2026-10-18T12:06:33Z commit:34de92c9 dirty:5",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"8307:\tMaximum resident set size (kbytes): 716800",
+   "BUILD_integrated_noloss:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"072a:\tMaximum resident set size (kbytes): 711900",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"e729:\tMaximum resident set size (kbytes): 712476",
+   "COMPARE_noloss_vs_s4j1:{}",
+   "COMPARE_main_vs_noloss:{\"Link\": {\"only_a\": 321, \"only_b\": 0}}",
+   "COMPARE_disconnected_vs_s4j1:{\"Link\": {\"only_a\": 206, \"only_b\": 0}}",
+   "AttributeError: 'bool' object has no attribute 'astype'",
+   "DATA:1",
+   "Traceback (most recent call last):",
+   "    raise ValueError(f\"loss parameters differ from the rule: {list(bad.link)[:5]}\")",
+   "ValueError: loss parameters differ from the rule: ['Khlong Ngae – Gurun', '100000087-1_0+1', '1006176982-1_0+1', '151018428-1_0+2', '100000092-1_0+1']",
+   "missing fragment /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/registry_v5/fragments/s4j_2.csv; run scripts_project/d1_s4j_2.py first",
+   "1 failed, 5 passed, 1 warning in 3.09s",
+   "FULL_TESTS:1 failed, 536 passed, 934 warnings in 84.17s (0:01:24)",
+   "DONE:2026-10-18T12:10:47Z",
+   "RERUN_AFTER_CHECK_FIX:2026-10-18T12:11:21Z (check script bugs: DC efficiency2 default 1 compared; missing 'reversed' column in the count helper)",
+   "LINK_COUNTS:{\"integrated\": {\"DC\": {\"total\": 25, \"reversed\": 12, \"cross_border\": 9}, \"H2 pipeline\": {\"total\": 296, \"reversed\": 148, \"cross_border\": 110}, \"gas pipeline\": {\"total\": 327, \"reversed\": 161, \"cross_border\": 117}, \"CO2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}}, \"integrated_noloss\": {\"DC\": {\"total\": 13, \"reversed\": 0, \"cross_border\": 5}, \"H2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}, \"gas pipeline\": {\"total\": 166, \"reversed\": 0, \"cross_border\": 61}, \"CO2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}}, \"disconnected\": {\"DC\": {\"total\": 16, \"reversed\": 8, \"cross_border\": 0}, \"H2 pipeline\": {\"total\": 186, \"reversed\": 93, \"cross_border\": 0}, \"gas pipeline\": {\"total\": 210, \"reversed\": 105, \"cross_border\": 0}, \"CO2 pipeline\": {\"total\": 93, \"reversed\": 0, \"cross_border\": 0}}}",
+   "META:{\"ac_transmission_losses\": 2, \"mode\": \"pypsa_eur\", \"reversed_extendable\": 321, \"reversed_links\": 321, \"sources\": \"PyPSA-Eur v2025.07.0 config.default.yaml 747-763, 1001; prepare_sector_network.py 5727-5774 (lossy_bidirectional_links), 6445-6447; solve_network.py add_lossy_bidirectional_link_constraints not in the repository (same meaning: reverse p_nom = forward p_nom)\"}",
+   "ONE_WAY_KEPT:{\"DC\": [\"Khlong Ngae \\u2013 Gurun\"], \"H2 pipeline\": [], \"gas pipeline\": [\"gas pipeline existing Gresik-Batam-Singapore Gas Pipeline\", \"gas pipeline existing West Natuna Transportation System Gas Pipeline\", \"gas pipeline existing Yadana Gas Pipeline 1\", \"gas pipeline existing Yetagun Gas Pipeline\", \"gas pipeline existing Zawtika Gas Pipeline\"]}",
+   "DATA:1",
+   "Traceback (most recent call last):",
+   "    raise TypeError(f'keys must be str, int, float, bool or None, '",
+   "TypeError: keys must be str, int, float, bool or None, not tuple",
+   "missing fragment /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/registry_v5/fragments/s4j_2.csv; run scripts_project/d1_s4j_2.py first",
+   "1 failed, 5 passed, 1 warning in 3.00s",
+   "FULL_TESTS:1 failed, 536 passed, 934 warnings in 84.32s (0:01:24)",
+   "DONE2:2026-10-18T12:13:10Z",
+   "RERUN2_AFTER_CHECK_FIX:2026-10-18T12:13:20Z (second re-run: JSON keys of the link groups)",
+   "LINK_COUNTS:{\"integrated\": {\"DC\": {\"total\": 25, \"reversed\": 12, \"cross_border\": 9}, \"H2 pipeline\": {\"total\": 296, \"reversed\": 148, \"cross_border\": 110}, \"gas pipeline\": {\"total\": 327, \"reversed\": 161, \"cross_border\": 117}, \"CO2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}}, \"integrated_noloss\": {\"DC\": {\"total\": 13, \"reversed\": 0, \"cross_border\": 5}, \"H2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}, \"gas pipeline\": {\"total\": 166, \"reversed\": 0, \"cross_border\": 61}, \"CO2 pipeline\": {\"total\": 148, \"reversed\": 0, \"cross_border\": 55}}, \"disconnected\": {\"DC\": {\"total\": 16, \"reversed\": 8, \"cross_border\": 0}, \"H2 pipeline\": {\"total\": 186, \"reversed\": 93, \"cross_border\": 0}, \"gas pipeline\": {\"total\": 210, \"reversed\": 105, \"cross_border\": 0}, \"CO2 pipeline\": {\"total\": 93, \"reversed\": 0, \"cross_border\": 0}}}",
+   "META:{\"ac_transmission_losses\": 2, \"mode\": \"pypsa_eur\", \"reversed_extendable\": 321, \"reversed_links\": 321, \"sources\": \"PyPSA-Eur v2025.07.0 config.default.yaml 747-763, 1001; prepare_sector_network.py 5727-5774 (lossy_bidirectional_links), 6445-6447; solve_network.py add_lossy_bidirectional_link_constraints not in the repository (same meaning: reverse p_nom = forward p_nom)\"}",
+   "ONE_WAY_KEPT:{\"DC\": [\"Khlong Ngae \\u2013 Gurun\"], \"H2 pipeline\": [], \"gas pipeline\": [\"gas pipeline existing Gresik-Batam-Singapore Gas Pipeline\", \"gas pipeline existing West Natuna Transportation System Gas Pipeline\", \"gas pipeline existing Yadana Gas Pipeline 1\", \"gas pipeline existing Yetagun Gas Pipeline\", \"gas pipeline existing Zawtika Gas Pipeline\"]}",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "6 passed, 1 warning in 2.85s",
+   "FULL_TESTS:537 passed, 934 warnings in 82.50s (0:01:22)",
+   "DONE2:2026-10-18T12:15:06Z"
+  ]
+ },
+ "s4j3": {
+  "registry": {
+   "s4j3_th_my_hvdc_switch": {
+    "value": "bidirectional_fixed_b2b|s4h",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j3_dc_bidirectional": {
+    "value": "bidirectional",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4j3_b2b_fixed_at_dc_limit": {
+    "value": "table",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "converters": {
+   "network": "../results_project/s4j/s4j3b/builds/integrated/integrated_2920_3h_unsolved.nc",
+   "noloss": "../results_project/s4j/s4j3b/builds/integrated_noloss/integrated_2920_3h_unsolved.nc",
+   "meta": {
+    "mode": "bidirectional_fixed_b2b",
+    "one_way_made_bidirectional": [
+     "Khlong Ngae – Gurun"
+    ],
+    "pairs": [
+     {
+      "b2b": "convert_599_890",
+      "b2b_capital_cost": 15752.80403402494,
+      "b2b_extendable": false,
+      "b2b_p_nom_after": 20300.0,
+      "b2b_p_nom_before": 2000.0,
+      "dc_bus": "MY_Peninsular22 0",
+      "dc_link": "Khlong Ngae – Gurun",
+      "dc_p_nom": 300.0,
+      "dc_p_nom_max": 20300.0
+     },
+     {
+      "b2b": "convert_412_577",
+      "b2b_capital_cost": 15752.80403402494,
+      "b2b_extendable": false,
+      "b2b_p_nom_after": 20300.0,
+      "b2b_p_nom_before": 2000.0,
+      "dc_bus": "TH21 0",
+      "dc_link": "Khlong Ngae – Gurun",
+      "dc_p_nom": 300.0,
+      "dc_p_nom_max": 20300.0
+     }
+    ],
+    "reported": [
+     {
+      "b2b": [
+       "convert_935_1501"
+      ],
+      "dc_bus": "PH_Visayas10 0",
+      "dc_links": [
+       "1006176982-1_0+1",
+       "151018428-1_0+2"
+      ],
+      "reason": "structure differs from a converter station (one DC link + one B2B)"
+     }
+    ]
+   },
+   "model": {
+    "b2b_rows": 0,
+    "sync_rows": 322,
+    "num_col": 675750,
+    "num_row": 1518047
+   },
+   "supplement_sha256": "188743eb4c139d40453f2d0a6f6a12b09daffdb84b5da4826b7273f4389fac55"
+  },
+  "status": [
+   "START:2026-10-18T13:35:48Z commit:0b3c2d0b dirty:5",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9757:\tMaximum resident set size (kbytes): 686496:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1fd7:\tMaximum resident set size (kbytes): 712352:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c7b7:\tMaximum resident set size (kbytes): 716568:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"2a9c:\tMaximum resident set size (kbytes): 684476:daily=1",
+   "BUILD_integrated_noloss:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"d57e:\tMaximum resident set size (kbytes): 711888:daily=0",
+   "BUILD_integrated_s4hmode:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"a7bb:\tMaximum resident set size (kbytes): 681980:daily=0",
+   "COMPARE_s4hmode_vs_s4j2:{}",
+   "COMPARE_disconnected_vs_s4j2:{}",
+   "COMPARE_main_vs_s4j3old:{\"Link\": {\"capital_cost\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_extendable\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_max\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_min\": [\"convert_412_577\", \"convert_599_890\"]}}",
+   "COMPARE_noloss_vs_s4j3old_noloss:{\"Link\": {\"capital_cost\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_extendable\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_max\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_min\": [\"convert_412_577\", \"convert_599_890\"]}}",
+   "META:{\"dc_converters\": {\"mode\": \"bidirectional_fixed_b2b\", \"one_way_made_bidirectional\": [\"Khlong Ngae \\u2013 Gurun\"], \"pairs\": [{\"b2b\": \"convert_599_890\", \"b2b_capital_cost\": 15752.80403402494, \"b2b_extendable\": false, \"b2b_p_nom_after\": 20300.0, \"b2b_p_nom_before\": 2000.0, \"dc_bus\": \"MY_Peninsular22 0\", \"dc_link\": \"Khlong Ngae \\u2013 Gurun\", \"dc_p_nom\": 300.0, \"dc_p_nom_max\": 20300.0}, {\"b2b\": \"convert_412_577\", \"b2b_capital_cost\": 15752.80403402494, \"b2b_extendable\": false, \"b2b_p_nom_after\": 20300.0, \"b2b_p_nom_before\": 2000.0, \"dc_bus\": \"TH21 0\", \"dc_link\": \"Khlong Ngae \\u2013 Gurun\", \"dc_p_nom\": 300.0, \"dc_p_nom_max\": 20300.0}], \"reported\": [{\"b2b\": [\"convert_935_1501\"], \"dc_bus\": \"PH_Visayas10 0\", \"dc_links\": [\"1006176982-1_0+1\", \"151018428-1_0+2\"], \"reason\": \"structure differs from a converter station (one DC link + one B2B)\"}]}, \"hooks\": [\"research_lossy_bidirectional_sync\"]}",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "AUDIT_STATIC:0",
+   "AUDIT_FOLLOWUPS:0",
+   "REVIEW:0",
+   "9 passed, 1 warning in 4.66s",
+   "FULL_TESTS:540 passed, 934 warnings in 95.07s (0:01:35)",
+   "DONE:2026-10-18T13:45:05Z"
+  ],
+  "review": {
+   "integrated": {
+    "forward": true,
+    "reversed": true,
+    "b2b": {
+     "convert_412_577": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_599_890": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_935_1501": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     }
+    },
+    "hooks": [
+     "research_lossy_bidirectional_sync"
+    ]
+   },
+   "disconnected": {
+    "forward": false,
+    "reversed": false,
+    "b2b": {
+     "convert_412_577": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_599_890": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_935_1501": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     }
+    },
+    "hooks": [
+     "research_lossy_bidirectional_sync"
+    ]
+   },
+   "integrated_nze": {
+    "forward": true,
+    "reversed": true,
+    "b2b": {
+     "convert_412_577": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_599_890": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_935_1501": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     }
+    },
+    "hooks": [
+     "research_lossy_bidirectional_sync"
+    ]
+   },
+   "disconnected_gap": {
+    "forward": false,
+    "reversed": false,
+    "b2b": {
+     "convert_412_577": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_599_890": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     },
+     "convert_935_1501": {
+      "extendable": false,
+      "capital_cost": 15752.80403402494,
+      "p_nom_min": 0.0,
+      "p_nom_max": Infinity
+     }
+    },
+    "hooks": [
+     "research_lossy_bidirectional_sync"
+    ]
+   }
+  },
+  "status_first_version": [
+   "START:2026-10-18T12:17:36Z commit:8c4bf2ae dirty:3",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c126:\tMaximum resident set size (kbytes): 717036",
+   "BUILD_integrated_noloss:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"0c4b:\tMaximum resident set size (kbytes): 711972",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"eb56:\tMaximum resident set size (kbytes): 712452",
+   "COMPARE_main_vs_s4j2:{\"Link\": {\"only_a\": [\"Khlong Ngae \\u2013 Gurun-reversed\"], \"only_b\": []}}",
+   "COMPARE_noloss_vs_s4j2noloss:{\"Link\": {\"capital_cost\": [\"convert_412_577\", \"convert_599_890\"], \"p_min_pu\": [\"Khlong Ngae \\u2013 Gurun\"], \"p_nom_extendable\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_max\": [\"convert_412_577\", \"convert_599_890\"], \"p_nom_min\": [\"convert_412_577\", \"convert_599_890\"]}}",
+   "COMPARE_disconnected_vs_s4j2:{}",
+   "DATA:0",
+   "DATA_PENDING: 51",
+   "8 passed, 1 warning in 3.93s",
+   "FULL_TESTS:539 passed, 934 warnings in 83.78s (0:01:23)",
+   "DONE:2026-10-18T12:22:05Z"
+  ]
+ },
+ "s4j4": {
+  "script_checks": [
+   "SYNTAX_OK:run_365x24h.sh",
+   "SYNTAX_OK:preflight.sh",
+   "SYNTAX_OK:make_package.sh",
+   "== lanes3 run",
+   "REFUSED: --mode lanes3 is withdrawn (S4I K2, decision 106 a): it needs 3 Gurobi sessions at the same time, the academic WLS licence allows at most 2 and keeps each token >= 5 min. Use --mode serial (recommended) or --mode lanes2.",
+   "exit:2",
+   "== lanes3 preflight",
+   "mode lanes3 is withdrawn (academic WLS licence: at most 2 concurrent sessions); use serial (recommended) or lanes2",
+   "exit:2",
+   "== lanes2 dry",
+   "DRY-RUN: would wait 330 s (start (token of the preflight licence check))",
+   "DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/discon",
+   "DRY-RUN: disconnected_gap would run only if the disconnected main ends non-optimal",
+   "DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/integr",
+   "DRY-RUN: would wait 330 s (before integrated_nze in the lane)",
+   "DRY-RUN: python /tmp/s4j4_pkgtest/repo/scripts_project/s2_solve.py --repo /tmp/s4j4_pkgtest/repo --network /tmp/s4j4_pkgtest/networks/integr",
+   "DRY-RUN done (no solve, no export)",
+   "exit:0",
+   "== serial dry",
+   "0",
+   "(waits in serial: count above should be 0)",
+   "== time tool present here",
+   "GNU time OK on this machine",
+   "== preflight tools branch with a missing time (simulated by PATH-independent check: grep of the message)",
+   "46:else echo \"MISSING /usr/bin/time (GNU time with -v): run_365x24h.sh would fail every run within seconds. Install: apt-get install -y time\"; ok=0; fi"
+  ]
+ },
+ "s4j5": {
+  "review": {
+   "audit_diff_rows": 726,
+   "audit_diff_by_section": [
+    {
+     "network": "all",
+     "section": "A10_scenario_differences",
+     "rows": 15
+    },
+    {
+     "network": "disconnected",
+     "section": "A4_topology",
+     "rows": 8
+    },
+    {
+     "network": "disconnected",
+     "section": "A5_demand",
+     "rows": 143
+    },
+    {
+     "network": "disconnected",
+     "section": "A7_slack",
+     "rows": 1
+    },
+    {
+     "network": "disconnected",
+     "section": "A9_carbon",
+     "rows": 1
+    },
+    {
+     "network": "disconnected",
+     "section": "B_transmission",
+     "rows": 30
+    },
+    {
+     "network": "disconnected",
+     "section": "components",
+     "rows": 1
+    },
+    {
+     "network": "disconnected_gap",
+     "section": "A4_topology",
+     "rows": 8
+    },
+    {
+     "network": "disconnected_gap",
+     "section": "A5_demand",
+     "rows": 143
+    },
+    {
+     "network": "disconnected_gap",
+     "section": "A7_slack",
+     "rows": 1
+    },
+    {
+     "network": "disconnected_gap",
+     "section": "A9_carbon",
+     "rows": 1
+    },
+    {
+     "network": "disconnected_gap",
+     "section": "components",
+     "rows": 1
+    },
+    {
+     "network": "integrated",
+     "section": "A2_costs",
+     "rows": 1
+    },
+    {
+     "network": "integrated",
+     "section": "A4_topology",
+     "rows": 22
+    },
+    {
+     "network": "integrated",
+     "section": "A5_demand",
+     "rows": 143
+    },
+    {
+     "network": "integrated",
+     "section": "A7_slack",
+     "rows": 1
+    },
+    {
+     "network": "integrated",
+     "section": "A9_carbon",
+     "rows": 1
+    },
+    {
+     "network": "integrated",
+     "section": "B_transmission",
+     "rows": 35
+    },
+    {
+     "network": "integrated",
+     "section": "components",
+     "rows": 1
+    },
+    {
+     "network": "integrated_nze",
+     "section": "A2_costs",
+     "rows": 1
+    },
+    {
+     "network": "integrated_nze",
+     "section": "A4_topology",
+     "rows": 22
+    },
+    {
+     "network": "integrated_nze",
+     "section": "A5_demand",
+     "rows": 143
+    },
+    {
+     "network": "integrated_nze",
+     "section": "A7_slack",
+     "rows": 1
+    },
+    {
+     "network": "integrated_nze",
+     "section": "A9_carbon",
+     "rows": 1
+    },
+    {
+     "network": "integrated_nze",
+     "section": "components",
+     "rows": 1
+    }
+   ],
+   "demand": {
+    "integrated": {
+     "total_twh": 11576.57938550959,
+     "by_carrier_twh": {
+      "agriculture machinery electric": 57.68789142255849,
+      "biomass final energy": 1234.6543371522623,
+      "clean cooking useful": 29.58652176807603,
+      "coal feedstock": 19.707150838895995,
+      "coal final energy": 69.79306421179001,
+      "electricity": 1032.376359597955,
+      "gas feedstock": 841.23318300905,
+      "gas final energy": 1066.3843603746334,
+      "industry ammonia": 57.713824019681994,
+      "industry electricity": 3968.9178056648893,
+      "industry heat": 129.52211851761328,
+      "industry hydrogen": 74.014041491871,
+      "industry methanol": 5.8956213162848,
+      "land transport EV": 811.062934184345,
+      "oil feedstock": 474.3205641409949,
+      "oil final energy": 1162.8462123911063,
+      "shipping methanol": 540.8633954075827
+     }
+    },
+    "disconnected": {
+     "total_twh": 11576.57938550959,
+     "by_carrier_twh": {
+      "agriculture machinery electric": 57.68789142255849,
+      "biomass final energy": 1234.6543371522623,
+      "clean cooking useful": 29.58652176807603,
+      "coal feedstock": 19.707150838895995,
+      "coal final energy": 69.79306421179001,
+      "electricity": 1032.376359597955,
+      "gas feedstock": 841.23318300905,
+      "gas final energy": 1066.3843603746334,
+      "industry ammonia": 57.713824019681994,
+      "industry electricity": 3968.9178056648893,
+      "industry heat": 129.52211851761328,
+      "industry hydrogen": 74.014041491871,
+      "industry methanol": 5.8956213162848,
+      "land transport EV": 811.062934184345,
+      "oil feedstock": 474.3205641409949,
+      "oil final energy": 1162.8462123911063,
+      "shipping methanol": 540.8633954075827
+     }
+    },
+    "integrated_nze": {
+     "total_twh": 11576.57938550959,
+     "by_carrier_twh": {
+      "agriculture machinery electric": 57.68789142255849,
+      "biomass final energy": 1234.6543371522623,
+      "clean cooking useful": 29.58652176807603,
+      "coal feedstock": 19.707150838895995,
+      "coal final energy": 69.79306421179001,
+      "electricity": 1032.376359597955,
+      "gas feedstock": 841.23318300905,
+      "gas final energy": 1066.3843603746334,
+      "industry ammonia": 57.713824019681994,
+      "industry electricity": 3968.9178056648893,
+      "industry heat": 129.52211851761328,
+      "industry hydrogen": 74.014041491871,
+      "industry methanol": 5.8956213162848,
+      "land transport EV": 811.062934184345,
+      "oil feedstock": 474.3205641409949,
+      "oil final energy": 1162.8462123911063,
+      "shipping methanol": 540.8633954075827
+     }
+    },
+    "disconnected_gap": {
+     "total_twh": 11576.57938550959,
+     "by_carrier_twh": {
+      "agriculture machinery electric": 57.68789142255849,
+      "biomass final energy": 1234.6543371522623,
+      "clean cooking useful": 29.58652176807603,
+      "coal feedstock": 19.707150838895995,
+      "coal final energy": 69.79306421179001,
+      "electricity": 1032.376359597955,
+      "gas feedstock": 841.23318300905,
+      "gas final energy": 1066.3843603746334,
+      "industry ammonia": 57.713824019681994,
+      "industry electricity": 3968.9178056648893,
+      "industry heat": 129.52211851761328,
+      "industry hydrogen": 74.014041491871,
+      "industry methanol": 5.8956213162848,
+      "land transport EV": 811.062934184345,
+      "oil feedstock": 474.3205641409949,
+      "oil final energy": 1162.8462123911063,
+      "shipping methanol": 540.8633954075827
+     }
+    }
+   },
+   "demand_change_vs_s4i_twh": {
+    "integrated": -46.9774522439875,
+    "disconnected": -46.9774522439875,
+    "integrated_nze": -46.9774522439875,
+    "disconnected_gap": -46.9774522439875
+   },
+   "losses": {
+    "integrated": {
+     "DC": {
+      "links": 26,
+      "reversed": 13,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.02104854592943517,
+      "loss_share_max": 0.04773607135710123
+     },
+     "H2 pipeline": {
+      "links": 296,
+      "reversed": 148,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "gas pipeline": {
+      "links": 327,
+      "reversed": 161,
+      "one_way": 5,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "CO2 pipeline": {
+      "links": 148,
+      "lossless": true,
+      "bidirectional": true,
+      "reversed": 0
+     }
+    },
+    "disconnected": {
+     "DC": {
+      "links": 16,
+      "reversed": 8,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.025725479420158348,
+      "loss_share_max": 0.04773607135710123
+     },
+     "H2 pipeline": {
+      "links": 186,
+      "reversed": 93,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "gas pipeline": {
+      "links": 210,
+      "reversed": 105,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "CO2 pipeline": {
+      "links": 93,
+      "lossless": true,
+      "bidirectional": true,
+      "reversed": 0
+     }
+    },
+    "integrated_nze": {
+     "DC": {
+      "links": 26,
+      "reversed": 13,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.02104854592943517,
+      "loss_share_max": 0.04773607135710123
+     },
+     "H2 pipeline": {
+      "links": 296,
+      "reversed": 148,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "gas pipeline": {
+      "links": 327,
+      "reversed": 161,
+      "one_way": 5,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "CO2 pipeline": {
+      "links": 148,
+      "lossless": true,
+      "bidirectional": true,
+      "reversed": 0
+     }
+    },
+    "disconnected_gap": {
+     "DC": {
+      "links": 16,
+      "reversed": 8,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.025725479420158348,
+      "loss_share_max": 0.04773607135710123
+     },
+     "H2 pipeline": {
+      "links": 186,
+      "reversed": 93,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "gas pipeline": {
+      "links": 210,
+      "reversed": 105,
+      "one_way": 0,
+      "p_min_pu_zero": true,
+      "efficiency_rule": true,
+      "compression_rule": true,
+      "compression_bus_is_electricity": true,
+      "reverse_pairs_ok": true,
+      "loss_share_min": 0.0,
+      "loss_share_max": 0.0
+     },
+     "CO2 pipeline": {
+      "links": 93,
+      "lossless": true,
+      "bidirectional": true,
+      "reversed": 0
+     }
+    }
+   },
+   "th_my_dc": {
+    "integrated": {
+     "forward": true,
+     "reversed": true,
+     "b2b": {
+      "convert_412_577": {
+       "extendable": true,
+       "capital_cost": 0.0,
+       "p_nom_min": 2000.0,
+       "p_nom_max": 22000.0
+      },
+      "convert_599_890": {
+       "extendable": true,
+       "capital_cost": 0.0,
+       "p_nom_min": 2000.0,
+       "p_nom_max": 22000.0
+      },
+      "convert_935_1501": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      }
+     },
+     "hooks": [
+      "research_b2b_follows_dc",
+      "research_lossy_bidirectional_sync"
+     ]
+    },
+    "disconnected": {
+     "forward": false,
+     "reversed": false,
+     "b2b": {
+      "convert_412_577": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      },
+      "convert_599_890": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      },
+      "convert_935_1501": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      }
+     },
+     "hooks": [
+      "research_lossy_bidirectional_sync"
+     ]
+    },
+    "integrated_nze": {
+     "forward": true,
+     "reversed": true,
+     "b2b": {
+      "convert_412_577": {
+       "extendable": true,
+       "capital_cost": 0.0,
+       "p_nom_min": 2000.0,
+       "p_nom_max": 22000.0
+      },
+      "convert_599_890": {
+       "extendable": true,
+       "capital_cost": 0.0,
+       "p_nom_min": 2000.0,
+       "p_nom_max": 22000.0
+      },
+      "convert_935_1501": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      }
+     },
+     "hooks": [
+      "research_b2b_follows_dc",
+      "research_lossy_bidirectional_sync"
+     ]
+    },
+    "disconnected_gap": {
+     "forward": false,
+     "reversed": false,
+     "b2b": {
+      "convert_412_577": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      },
+      "convert_599_890": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      },
+      "convert_935_1501": {
+       "extendable": false,
+       "capital_cost": 15752.80403402494,
+       "p_nom_min": 0.0,
+       "p_nom_max": Infinity
+      }
+     },
+     "hooks": [
+      "research_lossy_bidirectional_sync"
+     ]
+    }
+   },
+   "cross_border_components": {
+    "integrated": {
+     "lines": 62,
+     "links": 292,
+     "links_forward": 176
+    },
+    "disconnected": {
+     "lines": 0,
+     "links": 0,
+     "links_forward": 0
+    },
+    "integrated_nze": {
+     "lines": 62,
+     "links": 292,
+     "links_forward": 176
+    },
+    "disconnected_gap": {
+     "lines": 0,
+     "links": 0,
+     "links_forward": 0
+    }
+   },
+   "integrated_vs_nze_static": {
+    "Generator": {
+     "marginal_cost": 136,
+     "source_identity": 200
+    },
+    "Link": {
+     "source_identity": 500
+    }
+   }
+  },
+  "status": [
+   "START:2026-10-18T12:27:09Z commit:66473e9a dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c126:\tMaximum resident set size (kbytes): 687632:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"eb56:\tMaximum resident set size (kbytes): 712296:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"17d9:\tMaximum resident set size (kbytes): 716552:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"d1d2:\tMaximum resident set size (kbytes): 706372:daily=1",
+   "AUDIT_STATIC:1:\tMaximum resident set size (kbytes): 118020",
+   "Traceback (most recent call last):",
+   "FileNotFoundError: [Errno 2] No such file or directory: 'results_project/s4j/s4j5/networks/integrated_BUILD_RECEIPT.json'",
+   "AUDIT_FOLLOWUPS:1:\tMaximum resident set size (kbytes): 267928",
+   "Traceback (most recent call last):",
+   "FileNotFoundError: [Errno 2] No such file or directory: 'results_project/s4j/s4j5/networks/integrated_BUILD_RECEIPT.json'",
+   "DONE:2026-10-18T12:31:09Z",
+   "AUDIT_RERUN:2026-10-18T12:31:29Z (build receipts copied with the package names)",
+   "AUDIT_STATIC:0:\tMaximum resident set size (kbytes): 641932",
+   "AUDIT_FOLLOWUPS:0:\tMaximum resident set size (kbytes): 450812",
+   "REVIEW:0",
+   "DONE2:2026-10-18T12:32:59Z"
+  ]
+ },
+ "s4j6": {
+  "runs": [
+   {
+    "run": "integrated",
+    "termination": "optimal",
+    "objective_eur": 656829137273.933,
+    "num_col": 675747,
+    "num_row": 1518047,
+    "nnz": 3445617,
+    "barrier_iterations": 94,
+    "barrier_seconds": 159.88,
+    "solve_seconds": 179.50812435150146,
+    "peak_rss_gib_receipt": 4.060771942138672,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "disconnected",
+    "termination": "optimal",
+    "objective_eur": 706441942732.5577,
+    "num_col": 652097,
+    "num_row": 1457529,
+    "nnz": 3269175,
+    "barrier_iterations": 136,
+    "barrier_seconds": 185.44,
+    "solve_seconds": 202.87822246551514,
+    "peak_rss_gib_receipt": 3.623645782470703,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   },
+   {
+    "run": "integrated_nze",
+    "termination": "optimal",
+    "objective_eur": 556298836547.0875,
+    "num_col": 675747,
+    "num_row": 1518047,
+    "nnz": 3445617,
+    "barrier_iterations": 142,
+    "barrier_seconds": 238.04,
+    "solve_seconds": 256.3879323005676,
+    "peak_rss_gib_receipt": 4.047000885009766,
+    "matrix_min": 0.0002,
+    "matrix_max": 200.0,
+    "solver_profile": "formal_barrier",
+    "kvl": true
+   }
+  ],
+  "vs_s4h": {
+   "integrated": {
+    "objective": 639881452621.7074,
+    "objective_change_eur": 16947684652.225586,
+    "objective_change_rel": 0.026485663215878388
+   },
+   "disconnected": {
+    "objective": 693191116147.2216,
+    "objective_change_eur": 13250826585.336182,
+    "objective_change_rel": 0.0191156901418251
+   },
+   "integrated_nze": {
+    "objective": 539724152725.6391,
+    "objective_change_eur": 16574683821.448425,
+    "objective_change_rel": 0.030709546233469977
+   }
+  },
+  "tolerance": {
+   "integrated": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   },
+   "disconnected": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   },
+   "integrated_nze": {
+    "all_passed_solver_tolerances": true,
+    "all_passed_barconvtol": false,
+    "acceptance_basis": "solver_tolerances"
+   }
+  },
+  "lp_vs_s4h": {
+   "integrated": {
+    "num_col": {
+     "s4j": 675747,
+     "s4h": 649105,
+     "change_rel": 0.041044207023517076
+    },
+    "num_row": {
+     "s4j": 1518047,
+     "s4h": 1439886,
+     "change_rel": 0.054282769608149595
+    },
+    "nnz": {
+     "s4j": 3445617,
+     "s4h": 3229822,
+     "change_rel": 0.06681327949342108
+    },
+    "barrier_iterations": {
+     "s4j": 94,
+     "s4h": 123,
+     "change_rel": -0.2357723577235772
+    },
+    "barrier_seconds": {
+     "s4j": 159.88,
+     "s4h": 171.45,
+     "change_rel": -0.06748323126275879
+    },
+    "solve_seconds": {
+     "s4j": 179.50812435150146,
+     "s4h": 186.36032700538635,
+     "change_rel": -0.03676856959843622
+    },
+    "peak_rss_gib_receipt": {
+     "s4j": 4.060771942138672,
+     "s4h": 3.9121055603027344,
+     "change_rel": 0.03800162841833776
+    }
+   },
+   "disconnected": {
+    "num_col": {
+     "s4j": 652097,
+     "s4h": 635539,
+     "change_rel": 0.026053475868514697
+    },
+    "num_row": {
+     "s4j": 1457529,
+     "s4h": 1409957,
+     "change_rel": 0.03374003604365239
+    },
+    "nnz": {
+     "s4j": 3269175,
+     "s4h": 3137621,
+     "change_rel": 0.0419279447708949
+    },
+    "barrier_iterations": {
+     "s4j": 136,
+     "s4h": 150,
+     "change_rel": -0.09333333333333338
+    },
+    "barrier_seconds": {
+     "s4j": 185.44,
+     "s4h": 172.59,
+     "change_rel": 0.07445390810591568
+    },
+    "solve_seconds": {
+     "s4j": 202.87822246551514,
+     "s4h": 186.64204788208008,
+     "change_rel": 0.08699097961941038
+    },
+    "peak_rss_gib_receipt": {
+     "s4j": 3.623645782470703,
+     "s4h": 3.534229278564453,
+     "change_rel": 0.02530014236726874
+    }
+   },
+   "integrated_nze": {
+    "num_col": {
+     "s4j": 675747,
+     "s4h": 649105,
+     "change_rel": 0.041044207023517076
+    },
+    "num_row": {
+     "s4j": 1518047,
+     "s4h": 1439886,
+     "change_rel": 0.054282769608149595
+    },
+    "nnz": {
+     "s4j": 3445617,
+     "s4h": 3229822,
+     "change_rel": 0.06681327949342108
+    },
+    "barrier_iterations": {
+     "s4j": 142,
+     "s4h": 120,
+     "change_rel": 0.18333333333333335
+    },
+    "barrier_seconds": {
+     "s4j": 238.04,
+     "s4h": 168.88,
+     "change_rel": 0.40952155376598776
+    },
+    "solve_seconds": {
+     "s4j": 256.3879323005676,
+     "s4h": 182.99194645881653,
+     "change_rel": 0.401088612160696
+    },
+    "peak_rss_gib_receipt": {
+     "s4j": 4.047000885009766,
+     "s4h": 3.945392608642578,
+     "change_rel": 0.025753654058308317
+    }
+   }
+  },
+  "b5_passed": true,
+  "b6": {
+   "passed": true,
+   "difference": 49612805458.624756,
+   "s4h_difference": 53309663525.51416
+  },
+  "B16": {
+   "integrated": {
+    "passed": true,
+    "relative_error": 5.26897366954681e-12,
+    "tolerance": 1e-06,
+    "difference_eur": 3.4608154296875,
+    "s4h_relative_error": 1.4131874853264396e-11
+   },
+   "disconnected": {
+    "passed": true,
+    "relative_error": 1.2048543786576656e-11,
+    "tolerance": 1e-06,
+    "difference_eur": 8.5115966796875,
+    "s4h_relative_error": 3.4297055326731473e-12
+   },
+   "integrated_nze": {
+    "passed": true,
+    "relative_error": 5.122662961153409e-12,
+    "tolerance": 1e-06,
+    "difference_eur": 2.8497314453125,
+    "s4h_relative_error": 6.284405998871789e-12
+   }
+  },
+  "focus": {
+   "VN": {
+    "integrated_bn_eur": 145.9792,
+    "disconnected_bn_eur": 169.4826,
+    "disconnected_minus_integrated": 23.5034,
+    "s4h_integrated_bn_eur": 126.0724,
+    "s4h_disconnected_bn_eur": 149.3171,
+    "s4h_disconnected_minus_integrated": 23.2447
+   },
+   "ID": {
+    "integrated_bn_eur": 207.8753,
+    "disconnected_bn_eur": 214.7734,
+    "disconnected_minus_integrated": 6.8981,
+    "s4h_integrated_bn_eur": 204.8594,
+    "s4h_disconnected_bn_eur": 214.0173,
+    "s4h_disconnected_minus_integrated": 9.1579
+   },
+   "SG": {
+    "integrated_bn_eur": 20.094,
+    "disconnected_bn_eur": 22.3262,
+    "disconnected_minus_integrated": 2.2322,
+    "s4h_integrated_bn_eur": 24.3858,
+    "s4h_disconnected_bn_eur": 26.5703,
+    "s4h_disconnected_minus_integrated": 2.1845
+   },
+   "MY": {
+    "integrated_bn_eur": 68.847,
+    "disconnected_bn_eur": 72.5458,
+    "disconnected_minus_integrated": 3.6988,
+    "s4h_integrated_bn_eur": 70.9479,
+    "s4h_disconnected_bn_eur": 76.0107,
+    "s4h_disconnected_minus_integrated": 5.0628
+   },
+   "PH": {
+    "integrated_bn_eur": 23.9635,
+    "disconnected_bn_eur": 25.8196,
+    "disconnected_minus_integrated": 1.8561,
+    "s4h_integrated_bn_eur": 26.3119,
+    "s4h_disconnected_bn_eur": 27.5901,
+    "s4h_disconnected_minus_integrated": 1.2782
+   },
+   "MM": {
+    "integrated_bn_eur": 7.6638,
+    "disconnected_bn_eur": 8.9543,
+    "disconnected_minus_integrated": 1.2905,
+    "s4h_integrated_bn_eur": 9.461,
+    "s4h_disconnected_bn_eur": 10.4005,
+    "s4h_disconnected_minus_integrated": 0.9395
+   },
+   "TH": {
+    "integrated_bn_eur": 83.929,
+    "disconnected_bn_eur": 89.5282,
+    "disconnected_minus_integrated": 5.5992,
+    "s4h_integrated_bn_eur": 79.6101,
+    "s4h_disconnected_bn_eur": 85.6617,
+    "s4h_disconnected_minus_integrated": 6.0516
+   },
+   "LA": {
+    "integrated_bn_eur": -1.2689,
+    "disconnected_bn_eur": 2.0083,
+    "disconnected_minus_integrated": 3.2772,
+    "s4h_integrated_bn_eur": -0.3359,
+    "s4h_disconnected_bn_eur": 2.1618,
+    "s4h_disconnected_minus_integrated": 2.4977
+   },
+   "KH": {
+    "integrated_bn_eur": 5.146,
+    "disconnected_bn_eur": 7.3483,
+    "disconnected_minus_integrated": 2.2023,
+    "s4h_integrated_bn_eur": 4.7794,
+    "s4h_disconnected_bn_eur": 6.8709,
+    "s4h_disconnected_minus_integrated": 2.0915
+   },
+   "BN": {
+    "integrated_bn_eur": 0.0476,
+    "disconnected_bn_eur": 1.0223,
+    "disconnected_minus_integrated": 0.9747,
+    "s4h_integrated_bn_eur": 0.6272,
+    "s4h_disconnected_bn_eur": 1.4995,
+    "s4h_disconnected_minus_integrated": 0.8723
+   },
+   "TL": {
+    "integrated_bn_eur": -0.3205,
+    "disconnected_bn_eur": 0.1244,
+    "disconnected_minus_integrated": 0.4449,
+    "s4h_integrated_bn_eur": -0.1798,
+    "s4h_disconnected_bn_eur": 0.1306,
+    "s4h_disconnected_minus_integrated": 0.3104
+   }
+  },
+  "th_my": {
+   "integrated": {
+    "p_nom_opt_mw": 9333.247420903537,
+    "th_to_my_twh": 19.20764285047129,
+    "my_to_th_twh": 2.327838607940316,
+    "b2b_p_nom_opt_mw": {
+     "convert_412_577": 20300.0,
+     "convert_599_890": 20300.0
+    },
+    "s4h_th_to_my_twh": 7.420599498060606
+   },
+   "integrated_nze": {
+    "p_nom_opt_mw": 9543.406003239588,
+    "th_to_my_twh": 20.080339429760294,
+    "my_to_th_twh": 1.6974204084974602,
+    "b2b_p_nom_opt_mw": {
+     "convert_412_577": 20300.0,
+     "convert_599_890": 20300.0
+    },
+    "s4h_th_to_my_twh": 7.557387394289957
+   }
+  },
+  "at_cap": {
+   "integrated": {
+    "s4j": [
+     "Line:1",
+     "Line:100"
+    ],
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [],
+    "removed": [
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ]
+   },
+   "disconnected": {
+    "s4j": [
+     "Line:1",
+     "Line:100"
+    ],
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [],
+    "removed": [
+     "Line:107",
+     "Line:13",
+     "Line:22",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ]
+   },
+   "integrated_nze": {
+    "s4j": [
+     "Line:1",
+     "Line:100"
+    ],
+    "s4h": [
+     "Line:1",
+     "Line:100",
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ],
+    "added": [],
+    "removed": [
+     "Line:105",
+     "Line:108",
+     "Line:109",
+     "Line:92",
+     "Line:95",
+     "Line:S4E1 ID_Kalimantan4 9 - MY_Sarawak4 0",
+     "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+     "Link:APG18a ID_Java-Bali1 1 - ID_Kalimantan4 12 DC"
+    ]
+   }
+  },
+  "transport": {
+   "integrated": {
+    "s4j": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 1682.3028,
+       "loss_twh": 77.6267,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.04614309132716043,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 159.2655,
+       "loss_twh": 5.1567,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.03237808509304737,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 64.9949,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.3507,
+       "loss_share": 0.0,
+       "compression_share": 0.0053955630406215364
+      },
+      "gas pipeline": {
+       "sent_twh": 7325.0141,
+       "loss_twh": 0.0,
+       "compression_el_twh": 30.7922,
+       "loss_share": 0.0,
+       "compression_share": 0.00420370910536891
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.8023,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "ID-MY": {
+      "AC": {
+       "sent_twh": 130.9951,
+       "loss_twh": 2.8377,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.021662602630797015,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 26.362,
+       "loss_twh": 0.7858,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.029807116737078795,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 3.4329,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0177,
+       "loss_share": 0.0,
+       "compression_share": 0.0051611674336203665
+      },
+      "gas pipeline": {
+       "sent_twh": 725.483,
+       "loss_twh": 0.0,
+       "compression_el_twh": 2.8586,
+       "loss_share": 0.0,
+       "compression_share": 0.003940309897897182
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-VN": {
+      "AC": {
+       "sent_twh": 61.6862,
+       "loss_twh": 0.7879,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.012772064000176761,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 13.5846,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0595,
+       "loss_share": 0.0,
+       "compression_share": 0.0043798299337060925
+      },
+      "gas pipeline": {
+       "sent_twh": 91.834,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.2291,
+       "loss_share": 0.0,
+       "compression_share": 0.0024946159203347758
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-LA": {
+      "AC": {
+       "sent_twh": 15.1233,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 6.0616154348332355e-09,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.005211520655456815
+      },
+      "gas pipeline": {
+       "sent_twh": 4.3986,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0127,
+       "loss_share": 0.0,
+       "compression_share": 0.002895289253031563
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-TH": {
+      "AC": {
+       "sent_twh": 60.647,
+       "loss_twh": 0.7922,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.013062822586645815,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 16.5113,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1385,
+       "loss_share": 0.0,
+       "compression_share": 0.008390798082308278
+      },
+      "gas pipeline": {
+       "sent_twh": 484.905,
+       "loss_twh": 0.0,
+       "compression_el_twh": 1.7761,
+       "loss_share": 0.0,
+       "compression_share": 0.0036628234083197456
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.0541,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-TH": {
+      "AC": {
+       "sent_twh": 102.2768,
+       "loss_twh": 0.6201,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.006063399913432407,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 20.0199,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1005,
+       "loss_share": 0.0,
+       "compression_share": 0.0050176807591564565
+      },
+      "gas pipeline": {
+       "sent_twh": 307.9898,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.93,
+       "loss_share": 0.0,
+       "compression_share": 0.003019519018282356
+      },
+      "CO2 pipeline": {
+       "sent_twh": 30.0681,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-VN": {
+      "AC": {
+       "sent_twh": 126.6409,
+       "loss_twh": 2.7749,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.02191176447834586,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 19.7891,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1192,
+       "loss_share": 0.0,
+       "compression_share": 0.006025435732740789
+      },
+      "gas pipeline": {
+       "sent_twh": 306.149,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.9132,
+       "loss_share": 0.0,
+       "compression_share": 0.002982936338735186
+      },
+      "CO2 pipeline": {
+       "sent_twh": 21.224,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "MY-TH": {
+      "AC": {
+       "sent_twh": 26.2104,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 2.4218993923625218e-11,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 21.5355,
+       "loss_twh": 0.4957,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.023019064323927314,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.004956427854289473
+      },
+      "gas pipeline": {
+       "sent_twh": 42.0107,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1157,
+       "loss_share": 0.0,
+       "compression_share": 0.0027535710294439015
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-SG": {
+      "AC": {
+       "sent_twh": 16.9453,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 1.495926994690581e-12,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.02544318643541153,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0043216617270807
+      },
+      "gas pipeline": {
+       "sent_twh": 317.1305,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.7614,
+       "loss_share": 0.0,
+       "compression_share": 0.0024009231817114997
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MM-TH": {
+      "AC": {
+       "sent_twh": 54.9218,
+       "loss_twh": 0.1783,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.003246204664067274,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2851,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0027,
+       "loss_share": 0.0,
+       "compression_share": 0.009317897104233587
+      },
+      "gas pipeline": {
+       "sent_twh": 158.2834,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.5259,
+       "loss_share": 0.0,
+       "compression_share": 0.003322728560372109
+      },
+      "CO2 pipeline": {
+       "sent_twh": 15.0492,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-MM": {
+      "AC": {
+       "sent_twh": 7.2769,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 8.720609397301709e-09,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0107,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0001,
+       "loss_share": 0.0,
+       "compression_share": 0.006384365344176555
+      },
+      "gas pipeline": {
+       "sent_twh": 0.9636,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0034,
+       "loss_share": 0.0,
+       "compression_share": 0.0035468696356536406
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "BN-MY": {
+      "AC": {
+       "sent_twh": 6.4981,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 4.445819053958678e-09,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0011285072871177833
+      },
+      "gas pipeline": {
+       "sent_twh": 102.5011,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0643,
+       "loss_share": 0.0,
+       "compression_share": 0.000626948492843213
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-TL": {
+      "AC": {
+       "sent_twh": 1.0332,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 5.071577630802271e-08,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.004615726664968197
+      },
+      "gas pipeline": {
+       "sent_twh": 58.8779,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.151,
+       "loss_share": 0.0,
+       "compression_share": 0.002564292591649
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-PH": {
+      "DC": {
+       "sent_twh": 8.4012,
+       "loss_twh": 0.3296,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.039227760879224104,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 2.159,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0331,
+       "loss_share": 0.0,
+       "compression_share": 0.015337209800559498
+      },
+      "gas pipeline": {
+       "sent_twh": 384.2605,
+       "loss_twh": 0.0,
+       "compression_el_twh": 3.2742,
+       "loss_share": 0.0,
+       "compression_share": 0.008520672111421941
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-SG": {
+      "DC": {
+       "sent_twh": 37.8056,
+       "loss_twh": 0.7958,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.021048545929435166,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2404,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0002,
+       "loss_share": 0.0,
+       "compression_share": 0.0008302657967663049
+      },
+      "gas pipeline": {
+       "sent_twh": 6.2932,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0029,
+       "loss_share": 0.0,
+       "compression_share": 0.00046125882999803095
+      },
+      "CO2 pipeline": {
+       "sent_twh": 31.3009,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    },
+    "s4h": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 2824.6393,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 449.4231,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 40.9203,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 7494.866,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.0288,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "ID-MY": {
+      "AC": {
+       "sent_twh": 252.5841,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 97.3172,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 841.6413,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-VN": {
+      "AC": {
+       "sent_twh": 122.7854,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 9.7308,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 135.1393,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "KH-LA": {
+      "AC": {
+       "sent_twh": 25.3836,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 0.4437,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-TH": {
+      "AC": {
+       "sent_twh": 114.5606,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 18.5605,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 127.3143,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 25.7081,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-TH": {
+      "AC": {
+       "sent_twh": 170.5671,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 20.1416,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 182.1633,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 27.7543,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-VN": {
+      "AC": {
+       "sent_twh": 258.974,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 20.1416,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 176.1935,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 18.0997,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "MY-TH": {
+      "AC": {
+       "sent_twh": 86.9539,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 7.4206,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 161.3326,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-SG": {
+      "AC": {
+       "sent_twh": 115.7713,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 11.9716,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 273.4022,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MM-TH": {
+      "AC": {
+       "sent_twh": 99.4642,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.3492,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 256.3325,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 14.2478,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-MM": {
+      "AC": {
+       "sent_twh": 12.3338,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 0.1543,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "BN-MY": {
+      "AC": {
+       "sent_twh": 11.8746,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 102.7387,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-TL": {
+      "AC": {
+       "sent_twh": 0.9847,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      },
+      "gas pipeline": {
+       "sent_twh": 58.6785,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-PH": {
+      "DC": {
+       "sent_twh": 22.7709,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 385.2224,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-SG": {
+      "DC": {
+       "sent_twh": 50.7787,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2404,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 34.7575,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 36.3652,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "s4j": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 1559.4992,
+       "loss_twh": 56.9335,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.03650753337717468,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 146.4365,
+       "loss_twh": 4.6862,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.03200192423042715,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 181.0056,
+       "loss_twh": 0.0,
+       "compression_el_twh": 1.0222,
+       "loss_share": 0.0,
+       "compression_share": 0.0056472402309287574
+      },
+      "gas pipeline": {
+       "sent_twh": 5321.4047,
+       "loss_twh": 0.0,
+       "compression_el_twh": 24.5049,
+       "loss_share": 0.0,
+       "compression_share": 0.004604963105933123
+      },
+      "CO2 pipeline": {
+       "sent_twh": 57.2871,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    },
+    "s4h": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 2451.8044,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 284.505,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 174.074,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 6233.8414,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 69.7237,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "s4j": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 1678.4777,
+       "loss_twh": 78.2256,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.04660505765943185,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 145.7405,
+       "loss_twh": 4.6989,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.03224159002465958,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 62.1869,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.3268,
+       "loss_share": 0.0,
+       "compression_share": 0.0052552995601515265
+      },
+      "gas pipeline": {
+       "sent_twh": 7350.5006,
+       "loss_twh": 0.0,
+       "compression_el_twh": 30.7682,
+       "loss_share": 0.0,
+       "compression_share": 0.004185870110017782
+      },
+      "CO2 pipeline": {
+       "sent_twh": 25.333,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "ID-MY": {
+      "AC": {
+       "sent_twh": 127.9504,
+       "loss_twh": 2.6125,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.020417708524903547,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 25.6924,
+       "loss_twh": 0.7658,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.029807116737078834,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.5356,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0031,
+       "loss_share": 0.0,
+       "compression_share": 0.005807540541554211
+      },
+      "gas pipeline": {
+       "sent_twh": 716.2485,
+       "loss_twh": 0.0,
+       "compression_el_twh": 2.7525,
+       "loss_share": 0.0,
+       "compression_share": 0.00384299767895428
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-VN": {
+      "AC": {
+       "sent_twh": 60.2981,
+       "loss_twh": 0.6333,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.010502420516386998,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 19.6017,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0859,
+       "loss_share": 0.0,
+       "compression_share": 0.004380828258448936
+      },
+      "gas pipeline": {
+       "sent_twh": 94.3437,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.2325,
+       "loss_share": 0.0,
+       "compression_share": 0.0024646926993472174
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-LA": {
+      "AC": {
+       "sent_twh": 14.4894,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 6.723383016978026e-09,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 1.5446,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.008,
+       "loss_share": 0.0,
+       "compression_share": 0.0052115206554568146
+      },
+      "gas pipeline": {
+       "sent_twh": 2.6282,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0076,
+       "loss_share": 0.0,
+       "compression_share": 0.0028952892530315637
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-TH": {
+      "AC": {
+       "sent_twh": 58.154,
+       "loss_twh": 0.7554,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.012989236000926885,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 16.9834,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1389,
+       "loss_share": 0.0,
+       "compression_share": 0.008180511166866451
+      },
+      "gas pipeline": {
+       "sent_twh": 483.903,
+       "loss_twh": 0.0,
+       "compression_el_twh": 1.7718,
+       "loss_share": 0.0,
+       "compression_share": 0.0036615311738765416
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.33,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-TH": {
+      "AC": {
+       "sent_twh": 102.1774,
+       "loss_twh": 0.7494,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.007333878136375961,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 19.8139,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0998,
+       "loss_share": 0.0,
+       "compression_share": 0.0050373000369109775
+      },
+      "gas pipeline": {
+       "sent_twh": 303.0338,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.9121,
+       "loss_share": 0.0,
+       "compression_share": 0.0030100596769404553
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.817,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-VN": {
+      "AC": {
+       "sent_twh": 128.6527,
+       "loss_twh": 3.119,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.024243510925354452,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 21.102,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1246,
+       "loss_share": 0.0,
+       "compression_share": 0.00590396689255604
+      },
+      "gas pipeline": {
+       "sent_twh": 304.7228,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.9092,
+       "loss_share": 0.0,
+       "compression_share": 0.0029835457975712757
+      },
+      "CO2 pipeline": {
+       "sent_twh": 17.8588,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "MY-TH": {
+      "AC": {
+       "sent_twh": 25.3334,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 1.2963654704464667e-10,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 21.7778,
+       "loss_twh": 0.5013,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.02301906432392729,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.004956427854289473
+      },
+      "gas pipeline": {
+       "sent_twh": 47.9093,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1319,
+       "loss_share": 0.0,
+       "compression_share": 0.002753571027097229
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-SG": {
+      "AC": {
+       "sent_twh": 19.9863,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 8.196937652365035e-13,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0043216617270806995
+      },
+      "gas pipeline": {
+       "sent_twh": 301.6873,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.7243,
+       "loss_share": 0.0,
+       "compression_share": 0.0024009231817115
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MM-TH": {
+      "AC": {
+       "sent_twh": 55.0824,
+       "loss_twh": 0.1699,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0030836572964207994,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2918,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0028,
+       "loss_share": 0.0,
+       "compression_share": 0.009675184167980447
+      },
+      "gas pipeline": {
+       "sent_twh": 161.2242,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.535,
+       "loss_share": 0.0,
+       "compression_share": 0.003318549315520864
+      },
+      "CO2 pipeline": {
+       "sent_twh": 15.4908,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-MM": {
+      "AC": {
+       "sent_twh": 7.3242,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 1.0531516838085425e-08,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0107,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0001,
+       "loss_share": 0.0,
+       "compression_share": 0.006384365344176553
+      },
+      "gas pipeline": {
+       "sent_twh": 3.4317,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0122,
+       "loss_share": 0.0,
+       "compression_share": 0.003546869635653641
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "BN-MY": {
+      "AC": {
+       "sent_twh": 6.4893,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 5.306559021728379e-09,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0011285072871177833
+      },
+      "gas pipeline": {
+       "sent_twh": 102.469,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0642,
+       "loss_share": 0.0,
+       "compression_share": 0.0006269484928432129
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-TL": {
+      "AC": {
+       "sent_twh": 1.0395,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 7.457028236977991e-08,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.004615726664968199
+      },
+      "gas pipeline": {
+       "sent_twh": 59.2273,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.1519,
+       "loss_share": 0.0,
+       "compression_share": 0.0025642925916489986
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-PH": {
+      "DC": {
+       "sent_twh": 7.4488,
+       "loss_twh": 0.2922,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.039227760879224076,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2766,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0042,
+       "loss_share": 0.0,
+       "compression_share": 0.015337209800559496
+      },
+      "gas pipeline": {
+       "sent_twh": 379.3845,
+       "loss_twh": 0.0,
+       "compression_el_twh": 3.2326,
+       "loss_share": 0.0,
+       "compression_share": 0.008520672111421941
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-SG": {
+      "DC": {
+       "sent_twh": 38.5335,
+       "loss_twh": 0.8111,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.02104854592943517,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2404,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0002,
+       "loss_share": 0.0,
+       "compression_share": 0.0008302657967663048
+      },
+      "gas pipeline": {
+       "sent_twh": 6.9482,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0032,
+       "loss_share": 0.0,
+       "compression_share": 0.00046125881134046945
+      },
+      "CO2 pipeline": {
+       "sent_twh": 34.4656,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    },
+    "s4h": {
+     "domestic": {
+      "AC": {
+       "sent_twh": 2810.1741,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 442.7843,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 35.8914,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 7383.6104,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.3195,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "ID-MY": {
+      "AC": {
+       "sent_twh": 252.6663,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 92.6971,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 821.497,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-VN": {
+      "AC": {
+       "sent_twh": 122.2876,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 9.0062,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 127.2114,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.1017,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "KH-LA": {
+      "AC": {
+       "sent_twh": 25.402,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 0.6286,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "KH-TH": {
+      "AC": {
+       "sent_twh": 114.5033,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 23.2119,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 120.4366,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 26.1976,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-TH": {
+      "AC": {
+       "sent_twh": 169.6258,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 20.0911,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 186.4845,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 23.0677,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-VN": {
+      "AC": {
+       "sent_twh": 259.8097,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 20.0911,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 180.9184,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 13.2705,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "MY-TH": {
+      "AC": {
+       "sent_twh": 85.7886,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 7.5574,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 157.5381,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-SG": {
+      "AC": {
+       "sent_twh": 116.026,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "DC": {
+       "sent_twh": 11.5092,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      },
+      "gas pipeline": {
+       "sent_twh": 273.3979,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MM-TH": {
+      "AC": {
+       "sent_twh": 99.2178,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.3492,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 271.7404,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 14.7994,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     },
+     "LA-MM": {
+      "AC": {
+       "sent_twh": 12.3786,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "BN-MY": {
+      "AC": {
+       "sent_twh": 11.8849,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 102.775,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-TL": {
+      "AC": {
+       "sent_twh": 0.6268,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      },
+      "gas pipeline": {
+       "sent_twh": 59.8606,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "MY-PH": {
+      "DC": {
+       "sent_twh": 23.3555,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 370.1277,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 0.0,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": null,
+       "compression_share": null
+      }
+     },
+     "ID-SG": {
+      "DC": {
+       "sent_twh": 50.7545,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "H2 pipeline": {
+       "sent_twh": 0.2404,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "gas pipeline": {
+       "sent_twh": 34.9911,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      },
+      "CO2 pipeline": {
+       "sent_twh": 36.4079,
+       "loss_twh": 0.0,
+       "compression_el_twh": 0.0,
+       "loss_share": 0.0,
+       "compression_share": 0.0
+      }
+     }
+    }
+   }
+  },
+  "capacity": {
+   "integrated": {
+    "s4j": {
+     "BN-MY": {
+      "ac_gw": 1.407,
+      "dc_gw": 0.0
+     },
+     "ID-MY": {
+      "ac_gw": 33.459,
+      "dc_gw": 8.048
+     },
+     "ID-SG": {
+      "ac_gw": 0.0,
+      "dc_gw": 5.375
+     },
+     "ID-TL": {
+      "ac_gw": 0.32,
+      "dc_gw": 0.0
+     },
+     "KH-LA": {
+      "ac_gw": 5.158,
+      "dc_gw": 0.0
+     },
+     "KH-TH": {
+      "ac_gw": 18.965,
+      "dc_gw": 0.0
+     },
+     "KH-VN": {
+      "ac_gw": 24.78,
+      "dc_gw": 0.0
+     },
+     "LA-MM": {
+      "ac_gw": 2.022,
+      "dc_gw": 0.0
+     },
+     "LA-TH": {
+      "ac_gw": 33.846,
+      "dc_gw": 0.0
+     },
+     "LA-VN": {
+      "ac_gw": 46.926,
+      "dc_gw": 0.0
+     },
+     "MM-TH": {
+      "ac_gw": 13.717,
+      "dc_gw": 0.0
+     },
+     "MY-PH": {
+      "ac_gw": 0.0,
+      "dc_gw": 1.241
+     },
+     "MY-SG": {
+      "ac_gw": 5.131,
+      "dc_gw": 0.0
+     },
+     "MY-TH": {
+      "ac_gw": 5.234,
+      "dc_gw": 9.333
+     }
+    },
+    "s4h": {
+     "BN-MY": {
+      "ac_gw": 2.391,
+      "dc_gw": 0.0
+     },
+     "ID-MY": {
+      "ac_gw": 62.651,
+      "dc_gw": 14.273
+     },
+     "ID-SG": {
+      "ac_gw": 0.0,
+      "dc_gw": 6.389
+     },
+     "ID-TL": {
+      "ac_gw": 0.284,
+      "dc_gw": 0.0
+     },
+     "KH-LA": {
+      "ac_gw": 8.035,
+      "dc_gw": 0.0
+     },
+     "KH-TH": {
+      "ac_gw": 30.968,
+      "dc_gw": 0.0
+     },
+     "KH-VN": {
+      "ac_gw": 34.348,
+      "dc_gw": 0.0
+     },
+     "LA-MM": {
+      "ac_gw": 4.59,
+      "dc_gw": 0.0
+     },
+     "LA-TH": {
+      "ac_gw": 54.088,
+      "dc_gw": 0.0
+     },
+     "LA-VN": {
+      "ac_gw": 81.368,
+      "dc_gw": 0.0
+     },
+     "MM-TH": {
+      "ac_gw": 24.083,
+      "dc_gw": 0.0
+     },
+     "MY-PH": {
+      "ac_gw": 0.0,
+      "dc_gw": 3.237
+     },
+     "MY-SG": {
+      "ac_gw": 20.525,
+      "dc_gw": 1.665
+     },
+     "MY-TH": {
+      "ac_gw": 20.938,
+      "dc_gw": 2.0
+     }
+    }
+   },
+   "disconnected": {
+    "s4j": {},
+    "s4h": {}
+   },
+   "integrated_nze": {
+    "s4j": {
+     "BN-MY": {
+      "ac_gw": 1.408,
+      "dc_gw": 0.0
+     },
+     "ID-MY": {
+      "ac_gw": 32.569,
+      "dc_gw": 7.51
+     },
+     "ID-SG": {
+      "ac_gw": 0.0,
+      "dc_gw": 5.388
+     },
+     "ID-TL": {
+      "ac_gw": 0.348,
+      "dc_gw": 0.0
+     },
+     "KH-LA": {
+      "ac_gw": 4.875,
+      "dc_gw": 0.0
+     },
+     "KH-TH": {
+      "ac_gw": 18.992,
+      "dc_gw": 0.0
+     },
+     "KH-VN": {
+      "ac_gw": 23.543,
+      "dc_gw": 0.0
+     },
+     "LA-MM": {
+      "ac_gw": 2.012,
+      "dc_gw": 0.0
+     },
+     "LA-TH": {
+      "ac_gw": 33.779,
+      "dc_gw": 0.0
+     },
+     "LA-VN": {
+      "ac_gw": 47.631,
+      "dc_gw": 0.0
+     },
+     "MM-TH": {
+      "ac_gw": 13.752,
+      "dc_gw": 0.0
+     },
+     "MY-PH": {
+      "ac_gw": 0.0,
+      "dc_gw": 1.122
+     },
+     "MY-SG": {
+      "ac_gw": 5.131,
+      "dc_gw": 0.0
+     },
+     "MY-TH": {
+      "ac_gw": 5.234,
+      "dc_gw": 9.543
+     }
+    },
+    "s4h": {
+     "BN-MY": {
+      "ac_gw": 2.387,
+      "dc_gw": 0.0
+     },
+     "ID-MY": {
+      "ac_gw": 62.94,
+      "dc_gw": 13.429
+     },
+     "ID-SG": {
+      "ac_gw": 0.0,
+      "dc_gw": 6.389
+     },
+     "ID-TL": {
+      "ac_gw": 0.194,
+      "dc_gw": 0.0
+     },
+     "KH-LA": {
+      "ac_gw": 8.081,
+      "dc_gw": 0.0
+     },
+     "KH-TH": {
+      "ac_gw": 31.034,
+      "dc_gw": 0.0
+     },
+     "KH-VN": {
+      "ac_gw": 34.393,
+      "dc_gw": 0.0
+     },
+     "LA-MM": {
+      "ac_gw": 4.612,
+      "dc_gw": 0.0
+     },
+     "LA-TH": {
+      "ac_gw": 53.805,
+      "dc_gw": 0.0
+     },
+     "LA-VN": {
+      "ac_gw": 81.747,
+      "dc_gw": 0.0
+     },
+     "MM-TH": {
+      "ac_gw": 23.944,
+      "dc_gw": 0.0
+     },
+     "MY-PH": {
+      "ac_gw": 0.0,
+      "dc_gw": 3.315
+     },
+     "MY-SG": {
+      "ac_gw": 20.525,
+      "dc_gw": 1.645
+     },
+     "MY-TH": {
+      "ac_gw": 20.938,
+      "dc_gw": 2.0
+     }
+    }
+   }
+  },
+  "disconnected_objective_vs_s4h": {
+   "s4j": 706441942732.5577,
+   "s4h": 693191116147.2216,
+   "relative": 0.0191156901418251
+  },
+  "status": [
+   "START:2026-10-18T13:46:02Z commit:4937ba13 dirty:0 profile:formal_barrier",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9757:\tMaximum resident set size (kbytes): 716728",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1fd7:\tMaximum resident set size (kbytes): 679480",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c7b7:\tMaximum resident set size (kbytes): 716772",
+   "RUN_integrated:optimal:240s:\tMaximum resident set size (kbytes): 4256944",
+   "GATE_integrated:termination=optimal:all_passed_solver_tolerances=True",
+   "B_PASSED_integrated -> disconnected and integrated_nze (S4J-6)",
+   "RUN_disconnected:optimal:256s:\tMaximum resident set size (kbytes): 3798880",
+   "GATE_disconnected:termination=optimal:all_passed_solver_tolerances=True",
+   "RUN_integrated_nze:optimal:315s:\tMaximum resident set size (kbytes): 4242640",
+   "GATE_integrated_nze:termination=optimal:all_passed_solver_tolerances=True",
+   "DONE:2026-10-18T14:02:14Z",
+   "SUMMARY:0"
+  ],
+  "th_my_corridor": {
+   "integrated": {
+    "s4j": [
+     {
+      "component": "Line:91",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 80.0,
+      "capacity_opt_mw": 234.48757437420304,
+      "capacity_max_mw": 20080.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 0.7075216781617062,
+      "my_to_th_twh": 0.46661741784166244,
+      "loss_twh": 1.579781690682783e-10,
+      "max_abs_flow_mw": 164.1413019514671
+     },
+     {
+      "component": "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 0.0,
+      "capacity_opt_mw": 5000.000000690892,
+      "capacity_max_mw": 20000.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 15.086549480928364,
+      "my_to_th_twh": 9.949725895638682,
+      "loss_twh": 4.768118689517969e-10,
+      "max_abs_flow_mw": 3500.000000266904
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun",
+      "carrier": "DC",
+      "bus0": "TH21 0",
+      "bus1": "MY_Peninsular22 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 9333.247420903537,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 0.9769809356760727,
+      "th_to_my_twh": 19.20764285047129,
+      "my_to_th_twh": 0.0,
+      "loss_twh": 0.4421419662860211,
+      "max_abs_flow_mw": 9333.247420906695
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun-reversed",
+      "carrier": "DC",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "TH21 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 9333.247420903537,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 0.9769809356760727,
+      "th_to_my_twh": 0.0,
+      "my_to_th_twh": 2.327838607940316,
+      "loss_twh": 0.05358466665189961,
+      "max_abs_flow_mw": 3084.9910938157045
+     },
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 20300.0,
+      "capacity_opt_mw": 20300.0,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 2.274253937835295,
+      "backward_twh": 19.20764284728779,
+      "max_abs_flow_mw": 9333.247420932057
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 20300.0,
+      "capacity_opt_mw": 20300.0,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 18.765500880180166,
+      "backward_twh": 2.3278386042658323,
+      "max_abs_flow_mw": 9118.404798169788
+     }
+    ],
+    "s4h": [
+     {
+      "component": "Line:91",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 80.0,
+      "capacity_opt_mw": 937.9502968440669,
+      "capacity_max_mw": 20080.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 2.9188641178089396,
+      "my_to_th_twh": 0.9763797772751416,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 656.5652077555781
+     },
+     {
+      "component": "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 0.0,
+      "capacity_opt_mw": 19999.999999997868,
+      "capacity_max_mw": 20000.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 62.23920665702404,
+      "my_to_th_twh": 20.81943532855626,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 13999.999999995267
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun",
+      "carrier": "DC",
+      "bus0": "TH21 0",
+      "bus1": "MY_Peninsular22 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 1999.999999960485,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 1.0,
+      "th_to_my_twh": 7.420599498060606,
+      "my_to_th_twh": 0.0,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 1999.9999999581166
+     },
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 1.2711661026644702e-11,
+      "backward_twh": 7.420599497857852,
+      "max_abs_flow_mw": 1999.9999999540291
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 7.420599498341143,
+      "backward_twh": 0.0,
+      "max_abs_flow_mw": 1999.999999966803
+     }
+    ]
+   },
+   "disconnected": {
+    "s4j": [
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 3.957812062448542e-09,
+      "backward_twh": 8.805042820573101e-12,
+      "max_abs_flow_mw": 1.195534036924073e-05
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 4.10282266005067e-10,
+      "backward_twh": 1.6706167116353754e-13,
+      "max_abs_flow_mw": 1.0847770681721158e-07
+     }
+    ],
+    "s4h": [
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 1.4258804865059053e-08,
+      "backward_twh": 0.0,
+      "max_abs_flow_mw": 3.5105813140035025e-05
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 1.503437560229161e-09,
+      "backward_twh": 0.0,
+      "max_abs_flow_mw": 3.8738699004170485e-07
+     }
+    ]
+   },
+   "integrated_nze": {
+    "s4j": [
+     {
+      "component": "Line:91",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 80.0,
+      "capacity_opt_mw": 234.48757427174664,
+      "capacity_max_mw": 20080.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 0.7350553337535369,
+      "my_to_th_twh": 0.3997961215889104,
+      "loss_twh": 1.6793992203480355e-09,
+      "max_abs_flow_mw": 164.1413019425902
+     },
+     {
+      "component": "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 0.0,
+      "capacity_opt_mw": 5000.000000221502,
+      "capacity_max_mw": 20000.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 15.673652138413376,
+      "my_to_th_twh": 8.524889281563217,
+      "loss_twh": 1.6047342281361968e-09,
+      "max_abs_flow_mw": 3500.00000007762
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun",
+      "carrier": "DC",
+      "bus0": "TH21 0",
+      "bus1": "MY_Peninsular22 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 9543.406003239588,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 0.9769809356760727,
+      "th_to_my_twh": 20.080339429760294,
+      "my_to_th_twh": 0.0,
+      "loss_twh": 0.4622306249799458,
+      "max_abs_flow_mw": 9543.406003238093
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun-reversed",
+      "carrier": "DC",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "TH21 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 9543.406003239588,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 0.9769809356760727,
+      "th_to_my_twh": 0.0,
+      "my_to_th_twh": 1.6974204084974602,
+      "loss_twh": 0.03907302956795004,
+      "max_abs_flow_mw": 2652.6294073990557
+     },
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 20300.0,
+      "capacity_opt_mw": 20300.0,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 1.6583473325929152,
+      "backward_twh": 20.08033938566675,
+      "max_abs_flow_mw": 9543.406003714661
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 20300.0,
+      "capacity_opt_mw": 20300.0,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 19.618108755067915,
+      "backward_twh": 1.6974203610202991,
+      "max_abs_flow_mw": 9323.725726576235
+     }
+    ],
+    "s4h": [
+     {
+      "component": "Line:91",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 80.0,
+      "capacity_opt_mw": 937.9502968348182,
+      "capacity_max_mw": 20080.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 2.998204186514343,
+      "my_to_th_twh": 0.8448391039716238,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 656.5652077556556
+     },
+     {
+      "component": "Line:S4H2 MY_Peninsular2 0 - TH2 0",
+      "carrier": "AC",
+      "bus0": "MY_Peninsular2 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 0.0,
+      "capacity_opt_mw": 19999.99999999814,
+      "capacity_max_mw": 20000.0,
+      "s_max_pu": 0.7,
+      "th_to_my_twh": 63.93098220156184,
+      "my_to_th_twh": 18.01458151587267,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 13999.999999996922
+     },
+     {
+      "component": "Link:Khlong Ngae – Gurun",
+      "carrier": "DC",
+      "bus0": "TH21 0",
+      "bus1": "MY_Peninsular22 0",
+      "capacity_initial_mw": 300.0,
+      "capacity_opt_mw": 1999.999999964272,
+      "capacity_max_mw": 20300.0,
+      "p_min_pu": 0.0,
+      "efficiency": 1.0,
+      "th_to_my_twh": 7.557387394289957,
+      "my_to_th_twh": 0.0,
+      "loss_twh": 0.0,
+      "max_abs_flow_mw": 1999.9999999668962
+     },
+     {
+      "component": "Link:convert_412_577",
+      "carrier": "B2B",
+      "bus0": "TH21 0",
+      "bus1": "TH2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 9.56633471105306e-12,
+      "backward_twh": 7.557387394118482,
+      "max_abs_flow_mw": 1999.9999999633446
+     },
+     {
+      "component": "Link:convert_599_890",
+      "carrier": "B2B",
+      "bus0": "MY_Peninsular22 0",
+      "bus1": "MY_Peninsular2 0",
+      "capacity_initial_mw": 2000.0,
+      "capacity_opt_mw": 2000.0,
+      "capacity_max_mw": 2000.0,
+      "p_min_pu": -1.0,
+      "efficiency": 1.0,
+      "forward_twh": 7.557387394511203,
+      "backward_twh": 0.0,
+      "max_abs_flow_mw": 1999.9999999749384
+     }
+    ]
+   }
+  },
+  "ledger_th_my_vs_s4h": {
+   "integrated": {
+    "TH": {
+     "capex_new": {
+      "s4j": 60.6671,
+      "s4h": 61.574,
+      "change": -0.9068
+     },
+     "co2_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": -0.0
+     },
+     "co2_storage_service": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "co2_transit_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_rail_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "fom_existing": {
+      "s4j": 0.8367,
+      "s4h": 0.8367,
+      "change": 0.0
+     },
+     "liquid_pool_ammonia": {
+      "s4j": -1.3386,
+      "s4h": -2.2859,
+      "change": 0.9473
+     },
+     "liquid_pool_methanol": {
+      "s4j": -9.007,
+      "s4h": -13.1212,
+      "change": 4.1142
+     },
+     "liquid_pool_oil": {
+      "s4j": 15.5311,
+      "s4h": 15.5112,
+      "change": 0.0199
+     },
+     "liquid_pool_oil non-fossil": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "network_trade_AC": {
+      "s4j": 1.3058,
+      "s4h": 2.0053,
+      "change": -0.6995
+     },
+     "network_trade_CO2 pipeline": {
+      "s4j": -2.36,
+      "s4h": -2.2459,
+      "change": -0.1141
+     },
+     "network_trade_DC": {
+      "s4j": -0.4644,
+      "s4h": -0.4998,
+      "change": 0.0355
+     },
+     "network_trade_H2 pipeline": {
+      "s4j": 0.9805,
+      "s4h": -2.4869,
+      "change": 3.4674
+     },
+     "network_trade_gas pipeline": {
+      "s4j": -11.5326,
+      "s4h": -9.1922,
+      "change": -2.3404
+     },
+     "total": {
+      "s4j": 83.929,
+      "s4h": 79.6101,
+      "change": 4.3188
+     },
+     "total_length_split": {
+      "s4j": 83.4222,
+      "s4h": 79.261,
+      "change": 4.1612
+     },
+     "variable_cost": {
+      "s4j": 30.6562,
+      "s4h": 30.4797,
+      "change": 0.1764
+     },
+     "xb_share_congestion_rent": {
+      "s4j": -2.6904,
+      "s4h": -2.5693,
+      "change": -0.1211
+     },
+     "xb_share_infrastructure_cost": {
+      "s4j": 1.3445,
+      "s4h": 1.6045,
+      "change": -0.26
+     }
+    },
+    "MY": {
+     "capex_new": {
+      "s4j": 36.8355,
+      "s4h": 38.3981,
+      "change": -1.5626
+     },
+     "co2_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": -0.0
+     },
+     "co2_storage_service": {
+      "s4j": -1.7609,
+      "s4h": -1.7905,
+      "change": 0.0296
+     },
+     "co2_transit_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_rail_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "fom_existing": {
+      "s4j": 1.1674,
+      "s4h": 1.1674,
+      "change": 0.0
+     },
+     "liquid_pool_ammonia": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "liquid_pool_methanol": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "liquid_pool_oil": {
+      "s4j": 3.5968,
+      "s4h": 3.5968,
+      "change": 0.0
+     },
+     "liquid_pool_oil non-fossil": {
+      "s4j": -11.3816,
+      "s4h": -11.9325,
+      "change": 0.5509
+     },
+     "network_trade_AC": {
+      "s4j": 3.6556,
+      "s4h": 2.1027,
+      "change": 1.553
+     },
+     "network_trade_CO2 pipeline": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "network_trade_DC": {
+      "s4j": 0.3474,
+      "s4h": 3.6871,
+      "change": -3.3396
+     },
+     "network_trade_H2 pipeline": {
+      "s4j": 0.025,
+      "s4h": -0.0,
+      "change": 0.025
+     },
+     "network_trade_gas pipeline": {
+      "s4j": 4.2606,
+      "s4h": 3.7649,
+      "change": 0.4957
+     },
+     "total": {
+      "s4j": 68.847,
+      "s4h": 70.9479,
+      "change": -2.1009
+     },
+     "total_length_split": {
+      "s4j": 68.7919,
+      "s4h": 70.7676,
+      "change": -1.9758
+     },
+     "variable_cost": {
+      "s4j": 32.743,
+      "s4h": 32.6459,
+      "change": 0.0971
+     },
+     "xb_share_congestion_rent": {
+      "s4j": -2.0635,
+      "s4h": -2.9398,
+      "change": 0.8762
+     },
+     "xb_share_infrastructure_cost": {
+      "s4j": 1.4216,
+      "s4h": 2.2478,
+      "change": -0.8262
+     }
+    }
+   },
+   "disconnected": {
+    "TH": {
+     "capex_new": {
+      "s4j": 52.8005,
+      "s4h": 63.0597,
+      "change": -10.2592
+     },
+     "co2_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": -0.0
+     },
+     "co2_storage_service": {
+      "s4j": -0.8852,
+      "s4h": -0.7007,
+      "change": -0.1845
+     },
+     "co2_transit_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_rail_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "fom_existing": {
+      "s4j": 0.8367,
+      "s4h": 0.8367,
+      "change": 0.0
+     },
+     "liquid_pool_ammonia": {
+      "s4j": 2.0075,
+      "s4h": -0.4176,
+      "change": 2.425
+     },
+     "liquid_pool_methanol": {
+      "s4j": -8.0222,
+      "s4h": -22.3536,
+      "change": 14.3313
+     },
+     "liquid_pool_oil": {
+      "s4j": 15.5039,
+      "s4h": 15.5041,
+      "change": -0.0002
+     },
+     "liquid_pool_oil non-fossil": {
+      "s4j": -1.9457,
+      "s4h": -0.0,
+      "change": -1.9457
+     },
+     "total": {
+      "s4j": 89.5282,
+      "s4h": 85.6617,
+      "change": 3.8665
+     },
+     "total_length_split": {
+      "s4j": 89.5282,
+      "s4h": 85.6617,
+      "change": 3.8665
+     },
+     "variable_cost": {
+      "s4j": 29.2327,
+      "s4h": 29.7329,
+      "change": -0.5003
+     }
+    },
+    "MY": {
+     "capex_new": {
+      "s4j": 39.9239,
+      "s4h": 43.0056,
+      "change": -3.0817
+     },
+     "co2_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": -0.0
+     },
+     "co2_storage_service": {
+      "s4j": -1.7394,
+      "s4h": -1.6423,
+      "change": -0.0971
+     },
+     "co2_transit_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_rail_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "co2_transit_ship_freight": {
+      "s4j": 0.0,
+      "s4h": 0.0,
+      "change": 0.0
+     },
+     "fom_existing": {
+      "s4j": 1.1674,
+      "s4h": 1.1674,
+      "change": 0.0
+     },
+     "liquid_pool_ammonia": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "liquid_pool_methanol": {
+      "s4j": -0.0,
+      "s4h": -0.0,
+      "change": 0.0
+     },
+     "liquid_pool_oil": {
+      "s4j": 3.5968,
+      "s4h": 3.5968,
+      "change": -0.0
+     },
+     "liquid_pool_oil non-fossil": {
+      "s4j": -3.2104,
+      "s4h": -3.356,
+      "change": 0.1456
+     },
+     "total": {
+      "s4j": 72.5458,
+      "s4h": 76.0107,
+      "change": -3.4649
+     },
+     "total_length_split": {
+      "s4j": 72.5458,
+      "s4h": 76.0107,
+      "change": -3.4649
+     },
+     "variable_cost": {
+      "s4j": 32.8074,
+      "s4h": 33.2392,
+      "change": -0.4317
+     }
+    }
+   }
+  },
+  "ac_loss_zero_loss_limit": {
+   "integrated": {
+    "ac_tangents": 2,
+    "cross_border": {
+     "lines": 62,
+     "built": 62,
+     "flow_at_limit": 7,
+     "rating_at_limit": 7,
+     "above_limit": 9,
+     "built_and_rating_at_limit": 7,
+     "new_capacity_gw": 188.397,
+     "new_capacity_rating_at_limit_gw": 34.606,
+     "slope_above_limit_median": 1.2832638970432346,
+     "slope_above_limit_max": 58.48174900392281
+    },
+    "domestic": {
+     "lines": 86,
+     "built": 61,
+     "flow_at_limit": 10,
+     "rating_at_limit": 9,
+     "above_limit": 16,
+     "built_and_rating_at_limit": 9,
+     "new_capacity_gw": 197.229,
+     "new_capacity_rating_at_limit_gw": 27.476,
+     "slope_above_limit_median": 0.9397418529917574,
+     "slope_above_limit_max": 27.142472761341722
+    }
+   },
+   "disconnected": {
+    "ac_tangents": 2,
+    "domestic": {
+     "lines": 86,
+     "built": 57,
+     "flow_at_limit": 10,
+     "rating_at_limit": 10,
+     "above_limit": 14,
+     "built_and_rating_at_limit": 10,
+     "new_capacity_gw": 156.218,
+     "new_capacity_rating_at_limit_gw": 32.497,
+     "slope_above_limit_median": 0.9397418529917574,
+     "slope_above_limit_max": 27.142472761341722
+    }
+   },
+   "integrated_nze": {
+    "ac_tangents": 2,
+    "cross_border": {
+     "lines": 62,
+     "built": 62,
+     "flow_at_limit": 7,
+     "rating_at_limit": 7,
+     "above_limit": 9,
+     "built_and_rating_at_limit": 7,
+     "new_capacity_gw": 186.705,
+     "new_capacity_rating_at_limit_gw": 34.606,
+     "slope_above_limit_median": 1.2832638970432346,
+     "slope_above_limit_max": 58.48174900392281
+    },
+    "domestic": {
+     "lines": 86,
+     "built": 61,
+     "flow_at_limit": 9,
+     "rating_at_limit": 8,
+     "above_limit": 17,
+     "built_and_rating_at_limit": 8,
+     "new_capacity_gw": 194.902,
+     "new_capacity_rating_at_limit_gw": 23.104,
+     "slope_above_limit_median": 0.9397418529917574,
+     "slope_above_limit_max": 27.142472761341722
+    }
+   }
+  },
+  "ledgers": {
+   "integrated": {
+    "relative_error": 5.26897366954681e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 94.8733,
+     "ASEAN_POOL": -0.0,
+     "BN": 0.0476,
+     "ID": 207.8753,
+     "KH": 5.146,
+     "LA": -1.2689,
+     "MM": 7.6638,
+     "MY": 68.847,
+     "PH": 23.9635,
+     "SG": 20.094,
+     "TH": 83.929,
+     "TL": -0.3205,
+     "VN": 145.9792
+    }
+   },
+   "disconnected": {
+    "relative_error": 1.2048543786576656e-11,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 92.5085,
+     "ASEAN_POOL": -0.0,
+     "BN": 1.0223,
+     "ID": 214.7734,
+     "KH": 7.3483,
+     "LA": 2.0083,
+     "MM": 8.9543,
+     "MY": 72.5458,
+     "PH": 25.8196,
+     "SG": 22.3262,
+     "TH": 89.5282,
+     "TL": 0.1244,
+     "VN": 169.4826
+    }
+   },
+   "integrated_nze": {
+    "relative_error": 5.122662961153409e-12,
+    "totals_bn_eur": {
+     "ASEAN_BUNKER": 94.9375,
+     "ASEAN_POOL": -0.0,
+     "BN": -1.4447,
+     "ID": 179.5395,
+     "KH": 4.183,
+     "LA": -1.2964,
+     "MM": 4.2733,
+     "MY": 51.6358,
+     "PH": 13.7146,
+     "SG": 13.8747,
+     "TH": 60.3102,
+     "TL": -1.1354,
+     "VN": 137.7068
+    }
+   }
+  }
+ },
+ "s4j7": {
+  "status": [
+   "START:2026-10-18T14:11:51Z commit:bcfb2d0a dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9757:\tMaximum resident set size (kbytes): 687108:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:02.51:daily=1",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"1fd7:\tMaximum resident set size (kbytes): 683212:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:01.60:daily=1",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"c7b7:\tMaximum resident set size (kbytes): 716536:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:02.53:daily=1",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"2a9c:\tMaximum resident set size (kbytes): 713480:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:04.79:daily=1",
+   "COMPARE_integrated_vs_smoke:{}",
+   "COMPARE_disconnected_vs_smoke:{}",
+   "COMPARE_integrated_nze_vs_smoke:{}",
+   "PACKAGE:0",
+   "DONE:2026-10-18T14:16:36Z"
+  ],
+  "extrapolation": {
+   "integrated": {
+    "barrier_iterations": 94,
+    "barrier_seconds": 159.88,
+    "wall_seconds": 240,
+    "peak_rss_gib": 4.060771942138672,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       1828.6493176675465,
+       2660.42730037705
+      ],
+      "barrier_s_with_1_5x_iterations": 3990.6409505655747,
+      "non_solve_s": 394.27740378039226,
+      "wall_s": [
+       2222.9267214479387,
+       3054.7047041574424,
+       4384.918354345967
+      ],
+      "peak_rss_gib": [
+       24.260388551439558,
+       33.96454397201538
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       27299.042293361483,
+       60198.597918413834
+      ],
+      "barrier_s_with_1_5x_iterations": 90297.89687762075,
+      "non_solve_s": 3154.219230243138,
+      "wall_s": [
+       30453.261523604622,
+       63352.81714865697,
+       93452.11610786388
+      ],
+      "peak_rss_gib": [
+       191.28310841151648,
+       267.79635177612306
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "disconnected": {
+    "barrier_iterations": 136,
+    "barrier_seconds": 185.44,
+    "wall_seconds": 256,
+    "peak_rss_gib": 3.623645782470703,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       2120.9953056559284,
+       3085.749553301978
+      ],
+      "barrier_s_with_1_5x_iterations": 4628.624329952967,
+      "non_solve_s": 346.24015714441026,
+      "wall_s": [
+       2467.2354628003386,
+       3431.989710446388,
+       4974.864487097378
+      ],
+      "peak_rss_gib": [
+       21.411262689317976,
+       29.975767765045163
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       31663.33752114682,
+       69822.54189386203
+      ],
+      "barrier_s_with_1_5x_iterations": 104733.81284079305,
+      "non_solve_s": 2769.921257155282,
+      "wall_s": [
+       34433.2587783021,
+       72592.4631510173,
+       107503.73409794833
+      ],
+      "peak_rss_gib": [
+       168.49010151454382,
+       235.88614212036134
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   },
+   "integrated_nze": {
+    "barrier_iterations": 142,
+    "barrier_seconds": 238.04,
+    "wall_seconds": 315,
+    "peak_rss_gib": 4.047000885009766,
+    "extrapolation": {
+     "365x24h": {
+      "snapshot_ratio": 6.517857142857143,
+      "barrier_s": [
+       2722.6149835975903,
+       3961.021482247642
+      ],
+      "barrier_s_with_1_5x_iterations": 5941.532223371463,
+      "non_solve_s": 382.02508411237176,
+      "wall_s": [
+       3104.640067709962,
+       4343.0465663600135,
+       6323.557307483835
+      ],
+      "peak_rss_gib": [
+       24.17063076836722,
+       33.83888307571411
+      ],
+      "within_time_limit": {
+       "low": true,
+       "high": true,
+       "high_1_5x_iterations": true
+      }
+     },
+     "2920x3h": {
+      "snapshot_ratio": 52.142857142857146,
+      "barrier_s": [
+       40644.63364718393,
+       89627.68481673273
+      ],
+      "barrier_s_with_1_5x_iterations": 134441.5272250991,
+      "non_solve_s": 3056.200672898974,
+      "wall_s": [
+       43700.834320082904,
+       92683.8854896317,
+       137497.72789799806
+      ],
+      "peak_rss_gib": [
+       190.5650461469378,
+       266.7910646057129
+      ],
+      "within_time_limit": {
+       "low": false,
+       "high": false,
+       "high_1_5x_iterations": false
+      }
+     }
+    }
+   }
+  },
+  "package": {
+   "commit": "bcfb2d0accf487d402676c70c932d8259e9411bf",
+   "upload_total_bytes": 236518964,
+   "files": 15,
+   "run": {
+    "script": "run_365x24h.sh",
+    "runs": [
+     "integrated (STEPS)",
+     "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
+     "integrated_nze (NZE fuel prices)",
+     "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"
+    ],
+    "example": "GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth '<user authorisation>'",
+    "modes": [
+     "serial (recommended for the first batch)",
+     "lanes2 (330 s licence gaps at start and inside a lane)"
+    ],
+    "withdrawn_modes": [
+     "lanes3: the academic WLS licence allows at most 2 concurrent sessions, tokens kept >= 5 min (S4I K2, decision 106 a)"
+    ],
+    "solver_profile": "REQUIRED --solver-profile, no default; user-confirmed cloud profile A: formal_barrier",
+    "kirchhoff_row_normalisation": "on (research.solver.scaling.kirchhoff_row_normalisation)",
+    "scaling": "on",
+    "exports_per_run": [
+     "SOLVE_RECEIPT.json",
+     "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)",
+     "COUNTRY_COST_LEDGER.csv",
+     "COUNTRY_COST_LEDGER_DETAIL.csv",
+     "LEDGER_IDENTITY.json",
+     "NODAL_PRICES.csv",
+     "CO2_FLOWS.json",
+     "BUNKER_ACCOUNT.json",
+     "solved network"
+    ],
+    "threads_per_run": 8,
+    "wall_clock_cap_h": 3,
+    "gurobi_time_limit_s": 10500,
+    "licence": "GRB_LICENSE_FILE supplied by the user on the instance"
+   },
+   "second_batch_sensitivities": [
+    {
+     "name": "extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)",
+     "override": "co2.extra_asean_cost_scale=0.5 | 1.5",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",
+     "override": "s2.co2.sequestration_cost_eur_per_t=16.0535",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "CO2 shipping distance: single route factor 1.091 instead of the pair-specific sea path",
+     "override": "co2.ship_distance=route_factor",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "Lao transit: nearest existing sea port and / or truck",
+     "override": "co2.lao_transit_destination=existing_port ; co2.lao_transit_mode=truck",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "LNG terminal expansion without cap, cost only (7,018 EUR/MW/a)",
+     "override": "s3.gas.lng_expansion=uncapped_cost",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "APG / AIMS plan caps per project group on top of the PyPSA-Eur limit (conservative, decision 96)",
+     "override": "network.max_extension=apg_plans",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "SG-VN and SG-KH DC candidates (APG other initiatives, decision 97 d)",
+     "override": "corridors.optional_sg_vn_kh=on",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "author electrical parameters of the 19 readjusted cross-border AC lines and APG17 (decisions 98, 101 b comparison)",
+     "override": "network.readjust_impedance=author",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "LA-VN grid stock of the author (1 MW split over lines 59 / 60 / 63 / 64; decision 100 comparison)",
+     "override": "network.la_vn_stock=author",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "zero-capacity AC candidates with num_parallel 1.286 of template line 43 (former convention; decision 101 a comparison)",
+     "override": "corridors.candidate_num_parallel=template43",
+     "scenarios": "integrated"
+    },
+    {
+     "name": "non-industrial electricity as Astar residual (former method; decision 104 comparison)",
+     "override": "demand.nonindustrial_electricity=astar_residual",
+     "scenarios": "integrated and disconnected"
+    },
+    {
+     "name": "no transmission losses (S4H state; decision 105 a comparison)",
+     "override": "network.transmission_losses=none",
+     "scenarios": "integrated and disconnected"
+    }
+   ],
+   "supersedes": "the S4H package (code 6eead675) is void (S4J, decisions 104-106); the S4G (ed6af79c) and S4F (7e09744d) packages were voided earlier",
+   "coalition_run_rule": "decision 95 f: a coalition run non-optimal with profile A is re-run once with profile C (barrier_numericfocus2); still non-optimal -> UNVERIFIED; coalition scope decided after delivery with item 14 (decision 97 f)"
+  }
+ },
+ "resources": {
+  "cloud": false,
+  "formal_solves": false,
+  "downloads": "none (S4J needs no download)"
+ },
+ "tests": "tests/research: 523 passed, 927 warnings in 88.72s (0:01:28); full tests/: 540 passed, 934 warnings in 86.06s (0:01:26) . Licence scan of the package: no licence value (tarball hits = the S4E set: parameter-name lists, presence booleans, scrub keyword lists)."
+}
