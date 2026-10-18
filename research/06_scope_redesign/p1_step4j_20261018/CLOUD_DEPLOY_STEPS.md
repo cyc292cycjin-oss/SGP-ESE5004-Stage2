@@ -8,11 +8,11 @@
 
 与 S4H 版（`p1_step4h_20261017/CLOUD_DEPLOY_STEPS.md`）的区别：
 
-- **S4H 部署包作废（S4J，第 104–106 项）：** 上云只用本文件对应的 S4J 部署包（`work/p1_step4j_20261018/cloud_package_dist/`）。S4G、S4F 部署包此前已作废。若实例上已有旧包，请删除后再上传。
+- **S4H 部署包作废（S4J，第 104–107 项）：** 上云只用本文件对应的 S4J 部署包（`work/p1_step4j_20261018/cloud_package_dist/`）。S4G、S4F 部署包此前已作废。若实例上已有旧包，请删除后再上传。
 - **代码快照与四个网络更新到 S4J 最终代码提交。** 在 S4H 主算设置之上，加入：
   - **非工业电力负荷（第 104 项）：** 各国基础负荷改为需求表中居民、商业、农业及其他、交通的电力之和，Astar 只给小时形状；
   - **输送损耗（第 105 项 a）：** 按 PyPSA-Eur v2025.07.0 缺省值：交流线损 `transmission_losses: 2`；直流 0.98 × 0.977^(L/1000)；H₂ / 气管道压缩耗电；双向链路拆为正、反两条；
-  - **TH–MY 直流（第 105 项 b）：** 改为双向；两端换流器随直流扩建、不另计成本。
+  - **TH–MY 直流（第 105 项 b、第 107 项）：** 直流改为双向（有损拆分）；两端两台 B2B 换流器双向、不可扩建，容量固定为直流扩建上限 20,300 MW，不另计成本（开关 `research.network.th_my_hvdc: bidirectional_fixed_b2b`）。
 - **许可与运行方式（第 106 项 a、b）：**
   - 学术 WLS 许可同时最多 2 个会话；Gurobi 环境关闭后，令牌至少保留 5 分钟。每个运行占 1 个会话，预检的许可检查也占 1 个。
   - **三通道（`lanes3`）已撤下**，脚本会拒绝并说明原因。**首批推荐串行（`serial`）。**
@@ -43,8 +43,8 @@
 ## 1. 选择与创建实例
 
 1. 登录 AutoDL 控制台，进入「算力市场」。本任务只用 CPU 和内存（LP barrier 不用 GPU）。AutoDL 按 GPU 机型出售，CPU 核数与内存随 GPU 数量配给，所以按**内存与 CPU 核数**选择（数值见 `CLOUD_RESOURCE_ESTIMATE.md` §19）：
-   - **串行（首批推荐）**（一体化 → 不互联主算（→ 诊断）→ 一体化 NZE）：内存下限 36 GB、推荐 ≥ 48 GB，CPU ≥ 8 核；预计墙钟见 `CLOUD_RESOURCE_ESTIMATE.md` §19 与 S4J 报告 §10.2；
-   - 两通道（[一体化 → 330 秒 → NZE] ‖ [不互联主算（→ 330 秒 → 诊断）]，启动前另等 330 秒）：内存下限 72 GB、推荐 ≥ 96 GB，CPU ≥ 16 核；
+   - **串行（首批推荐）**（一体化 → 不互联主算（→ 诊断）→ 一体化 NZE）：内存下限 36 GB、推荐 ≥ 48 GB，CPU ≥ 8 核；预计墙钟 2.2–3.0 h（悲观 4.4 h），若触发不互联诊断 3.4–4.8 h（悲观 6.9 h）；
+   - 两通道（[一体化 → 330 秒 → NZE] ‖ [不互联主算（→ 330 秒 → 诊断）]，启动前另等 330 秒）：内存下限 72 GB、推荐 ≥ 96 GB，CPU ≥ 16 核；预计墙钟 1.7–2.2 h（内存带宽竞争再加 10–20 %；悲观 3.2 h），含诊断 2.1–2.9 h（悲观 4.1 h）；
    - 三通道已撤下：学术 WLS 许可同时最多 2 个会话，三通道必有一个运行因许可被拒；
    - 预检低于下限即失败，低于推荐值只给警告。「无卡模式」只配很少的 CPU 与内存，**只用于上传、装环境和下载结果，不能用于求解**。
 2. 镜像选 **Miniconda / Ubuntu 22.04**（基础镜像即可）。
@@ -129,7 +129,7 @@ PY=$PY GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash run_365x24h.sh --solver-pr
 
 ## 10. 第二批敏感性（只登记，不打包、不运行）
 
-按 S4J 指令 S4J-7（沿用 S4H 的十项，并加入第 104、105 项的对照 `demand.nonindustrial_electricity=astar_residual`、`network.transmission_losses=none`）。在首批云端运行经用户审阅之后另行授权；需在本机按下列覆盖项重建网络，再另行打包。十二项都已在本机构建中核对过结构，但没有求解。S4J 新做的构建核对：`astar_residual` 在 S4J-1 单独构建一次（与 S4H 网络逐组件相同）；`transmission_losses=none` 在 S4J-2、S4J-3 各单独构建一次。S4J 的损耗与 TH–MY 直流规则同样作用于这些敏感性（损耗对照项除外）：
+按 S4J 指令 S4J-7（沿用 S4H 的十项，并加入第 104、105 项的对照 `demand.nonindustrial_electricity=astar_residual`、`network.transmission_losses=none`）。在首批云端运行经用户审阅之后另行授权；需在本机按下列覆盖项重建网络，再另行打包。十二项都已在本机构建中核对过结构，但没有求解。S4J 新做的构建核对：`astar_residual` 在 S4J-1 单独构建一次（与 S4H 网络逐组件相同）；`transmission_losses=none` 在 S4J-2、S4J-3 与补充 01 (a) 各单独构建一次。S4J 的损耗与 TH–MY 直流规则同样作用于这些敏感性（损耗对照项除外）：
 
 | 敏感性 | 构建覆盖项（`s2_network.py --override`） | 情景 | 说明 |
 |---|---|---|---|
@@ -144,7 +144,7 @@ PY=$PY GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash run_365x24h.sh --solver-pr
 | LA–VN 作者存量（对照） | `network.la_vn_stock=author` | 一体化 | 第 100 项的对照：作者 1 MW 按长度分摊到线路 59 / 60 / 63 / 64（S4G 状态） |
 | 候选线原回路数约定（对照） | `corridors.candidate_num_parallel=template43` | 一体化 | 第 101 a 项的对照：零容量交流候选线沿用模板线 43 的 `num_parallel` 1.286 |
 | 非工业电力按 Astar 残差（对照） | `demand.nonindustrial_electricity=astar_residual` | 一体化、不互联 | 第 104 项的对照：Astar 减去比率法工业电力与交通电力（S4H 状态） |
-| 不计输送损耗（对照） | `network.transmission_losses=none` | 一体化、不互联 | 第 105 a 项的对照：无交流线损、直流效率 1、管道无压缩耗电、不拆分链路（TH–MY 直流仍为双向、`p_min_pu` = −1） |
+| 不计输送损耗（对照） | `network.transmission_losses=none` | 一体化、不互联 | 第 105 a 项的对照：无交流线损、直流效率 1、管道无压缩耗电、不拆分链路（TH–MY 直流仍为双向、`p_min_pu` = −1，两台 B2B 仍固定 20,300 MW） |
 
 用户确定后，敏感性网络的构建命令示例：`python scripts_project/s2_network.py --scenario integrated --output <dir> --override network.max_extension=apg_plans`。B12 门槛会按记录的覆盖项复核配置哈希。
 
