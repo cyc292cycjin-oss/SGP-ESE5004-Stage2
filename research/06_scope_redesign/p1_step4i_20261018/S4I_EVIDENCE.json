@@ -1,0 +1,60 @@
+{
+ "step": "S4I",
+ "item": 103,
+ "date": "2026-10-18",
+ "role": "independent static pre-cloud audit, read only; no solve, no download, no cloud",
+ "instruction": {"file": "S4I_CLAUDE_CODE_INSTRUCTION.md", "sha256": "5a220e7a276e37370aa255954702764169d6aa30f8ca82971b3b1d4205b3507c", "verified": true},
+ "resume": {"file": "S4I_RESUME_01.md", "sha256": "6edcbb96fd653e76c0ba31a674c08271e0cdfcbcd9aee19d6dfdd3d4dfcd2424", "verified": true},
+ "object": {
+  "package": "work/p1_step4h_20261017/cloud_package_dist",
+  "code_commit": "6eead6753508472a5839035043adea590eabaded",
+  "sha256sums_check": "15/15 OK",
+  "networks_sha256": {
+   "integrated_365_24h_unsolved.nc": "bfb725b7f8801a785774a4af1b5f680869f9f7de074cae2f476fe1f2128aeec9",
+   "disconnected_365_24h_unsolved.nc": "9ef4dc54b2d8affaa0cfa172435a832263dc2fffd291ee7955fd4bd639dd915b",
+   "integrated_nze_365_24h_unsolved.nc": "6822e497ac11bd570853c10f04abc93b912b612cfd635cd6f0e707886d44abb3",
+   "disconnected_gap_diagnostic_365_24h_unsolved.nc": "891f44b0002865a13c556da778bfa43870896af791dce7e601934791807e0004"
+  },
+  "branch_base": "1545067b93ef04d7e26609b9510680cd1c6343cc (PR #32 head; 6eead675..1545067b deliverables only)"
+ },
+ "branch": "codex/s4i-preflight-audit-20261018",
+ "commits": {"pre_interruption": "6c88856f", "a_followups_b2_b4": "9be3abc1", "c": "74315bf0", "d": "21ffe8e3"},
+ "scripts": ["scripts_project/s4i_static_audit.py", "scripts_project/s4i_followups.py", "scripts_project/s4i_lp_ranges.py", "scripts_project/s4i_coalition_estimate.py"],
+ "evidence_files": {
+  "static": "evidence/static/S4I_STATIC_AUDIT.json (+ A2/A5/A6/A9/B CSV per network)",
+  "followups": "evidence/followups/S4I_FOLLOWUPS.json, A5_astar_residual.csv, B2_cross_border_losses_by_component.csv",
+  "lp": "evidence/lp/C_LP_RANGES_{integrated,disconnected}_365_24h_unsolved_56.json",
+  "coalition": "evidence/coalition/D_COALITION_ESTIMATE.json"
+ },
+ "compute": {"static_audit_s": 72, "static_audit_peak_gib": 0.62, "followups_s": 6.5, "followups_peak_gib": 0.43, "lp_build_s_each": 20, "lp_build_peak_gib": 1.58, "solves": 0},
+ "summary": {"blocking": 2, "decide_before_cloud": 3, "register": 11},
+ "findings": {
+  "blocking": [
+   {"id": "K1", "title": "VN non-industry electricity load 30.0 TWh (Astar 544.4 minus table industry 514.4; factor 0.055)", "grade": "VERIFIED",
+    "evidence": "evidence/followups/A5_astar_residual.csv; integrated_BUILD_RECEIPT.json demand_s2.deductions; scripts_project/s2_layers.py 816-833",
+    "numbers": {"table_non_industry_2050_twh": 197.2, "table_non_industry_2019_twh": 95.1, "residual_over_2019": 0.32, "other_countries_residual_over_2019": [1.6, 3.2], "alt_proportional_twh": 150.8, "vn_electric_load_twh": 1086.0, "understatement_twh": [121, 167]}},
+   {"id": "K2", "title": "licence concurrency: lanes3 needs 3 WLS sessions (limit 2); lanes2 hand-over and preflight within 5 min can exceed", "grade": "INFERENCE from scripts + licence terms stated in the instruction",
+    "evidence": "run_365x24h.sh 126-139; preflight.sh 41; scripts_project has no direct gurobipy env (linopy opens one per solve)"}
+  ],
+  "decide_before_cloud": [
+   {"id": "U1", "title": "no transmission losses (AC transmission_losses 0 vs 2; DC efficiency 1 vs 0.98x0.977^L; no H2 / gas compression)", "grade": "VERIFIED values / INFERENCE impact",
+    "evidence": "evidence/followups/S4I_FOLLOWUPS.json B2, B4; B2_cross_border_losses_by_component.csv",
+    "numbers": {"ac_full_load_loss_per_100km": 0.0247, "ac_pair_length_weighted": {"MM-TH": 0.165, "ID-MY": 0.116, "LA-TH": 0.106, "KH-TH": 0.099, "LA-VN": 0.096, "BN-MY": 0.016}, "dc": [0.021, 0.039], "h2_compression": [0.0008, 0.020], "gas_compression": [0.0005, 0.011]}},
+   {"id": "U2", "title": "TH-MY DC Khlong Ngae - Gurun one-way (p_min_pu 0) and limited by fixed 2,000 MW B2B converters at both DC buses", "grade": "VERIFIED", "evidence": "S4I_FOLLOWUPS.json B4.dc_link_ends_on_dc_buses"},
+   {"id": "U3", "title": "/usr/bin/time required by run_365x24h.sh line 100, not checked by preflight.sh", "grade": "VERIFIED (script) / environment-dependent"}
+  ],
+  "register": ["R1 128 single-attachment fuel buses", "R2 10 parallel stock+candidate pairs, both extendable", "R3 94 identical biomass-to-methanol links", "R4 zero-cap candidates with stale parameters (61 hydro pumping, 86 PHS 0.75, 71 ror, geothermal 1.0)", "R5 38 zero domestic-shipping methanol loads, 3 zero offwind-dc", "R6 existing onwind CF 0.009-0.12 vs Ember 0.24-0.36 (~3.5 TWh/a)", "R7 nuclear p_max_pu 1.0", "R8 territorial feedstock (218) and fugitive (19) links are design exceptions", "R9 rhs max 6.1e8 after scaling", "R10 distribution grid efficiency 1.0 vs 0.97", "R11 existing gas pipelines one-way and priced at real length"]
+ },
+ "not_found": ["A1", "A2", "A7", "A8", "A9", "A10", "B3"],
+ "section_results": {
+  "A2_cost_rederivation_ratio": 1.0,
+  "A5_total_demand_twh": 11623.557,
+  "A9_links_checked": 7262,
+  "A9_emission_ports": 2674,
+  "A10_removed_cross_border": {"AC": 62, "DC": 5, "H2": 55, "gas": 61, "CO2": 55, "total": 238},
+  "A10_nze_marginal_cost_diffs": 136,
+  "C_kvl": {"integrated_global": 2034.1, "integrated_row_max": 676.1, "disconnected_global": 111.7, "disconnected_row_max": 28.2},
+  "C_lp_after_scaling_integrated": {"shape": [1439886, 649105], "nnz": 3245792, "matrix": [0.000242, 32.0], "objective": [0.24, 1096313.1], "bounds": [0.493, 74006.6], "rhs": [0.000199, 608144624.5]},
+  "D_coalitions": {"connected_ge2": 383, "365x24h_serial_h": [235, 332, 485], "365x24h_two_lanes_h": [146, 216, 308], "2920x3h_serial_days": [139, 297, 441], "2920x3h_two_lanes_days": [77, 179, 266]}
+ }
+}
