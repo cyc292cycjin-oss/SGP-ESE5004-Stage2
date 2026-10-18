@@ -17,6 +17,16 @@ S4J-2 (decision 105 a): research.network.transmission_losses = pypsa_eur (main) 
     'Link-bidirectional_sync'); solve_network.py is not in the repository - implemented with the same meaning.
   * Same rule for domestic and cross-border, both scenarios, stock and candidates. Applied after the cross-border switches and the individual
     extension limit (the reverse copy inherits p_nom, p_nom_min, p_nom_max).
+S4J-3 (decision 105 b, S4I U2): apply_dc_converter_rule, before apply_transmission_losses, both loss modes.
+  * One-way DC links (p_min_pu >= 0; only TH-MY Khlong Ngae - Gurun) become bidirectional (p_min_pu = -1; with pypsa_eur losses then split into a
+    lossy forward / reverse pair).
+  * Converter-station structure: a DC bus with exactly one DC link and exactly one B2B link. Its B2B converter (fixed 2,000 MW in the frozen base)
+    becomes extendable at no capital cost (the DC link cost includes the converter pair, decision-50 cost layer) and follows the DC link: B2B p_nom -
+    B2B p_nom_existing = DC p_nom - DC p_nom_existing (hook research_b2b_follows_dc), p_nom_min = existing, p_nom_max = existing + the DC link's
+    extension room; bidirectional like the DC link, lossless (PyPSA-Eur applies no transmission efficiency to B2B). The increment form keeps the
+    existing 2,000 MW: the DC buses also carry generation candidates (TH21 0: CCGT / OCGT / FT; MY_Peninsular22 0: offshore wind, CCGT / OCGT / FT)
+    whose only path to the AC grid is the B2B.
+  * DC buses with another structure (e.g. PH_Visayas10 0: two DC links + one B2B) or without a DC link (disconnected scenario) are reported, not changed.
 """
 from __future__ import annotations
 
@@ -29,7 +39,52 @@ LOSS_EFFICIENCY = {   # PyPSA-Eur v2025.07.0 config.default.yaml sector.transmis
 }
 AC_TRANSMISSION_LOSSES = 2   # PyPSA-Eur v2025.07.0 config.default.yaml solving.options.transmission_losses (line 1001)
 SYNC_HOOK = "research_lossy_bidirectional_sync"
+B2B_HOOK = "research_b2b_follows_dc"
 REV = "-reversed"
+
+
+def apply_dc_converter_rule(n) -> dict:
+    """S4J-3 (decision 105 b): see the module docstring. Call after apply_max_extension and before apply_transmission_losses."""
+    if "reversed" in n.links and n.links.reversed.astype(bool).any():
+        raise ValueError("the DC converter rule must run before the lossy split")
+    dc = n.links[n.links.carrier == "DC"]; b2b = n.links[n.links.carrier == "B2B"]
+    oneway = list(dc.index[dc.p_min_pu >= 0])
+    n.links.loc[oneway, "p_min_pu"] = -1.0
+    pairs, reported = [], []
+    for bus in sorted(n.buses.index[n.buses.carrier == "DC"]):
+        dcl = [k for k in dc.index if bus in (dc.at[k, "bus0"], dc.at[k, "bus1"])]
+        bb = [k for k in b2b.index if bus in (b2b.at[k, "bus0"], b2b.at[k, "bus1"])]
+        if not bb:
+            continue
+        if len(dcl) == 1 and len(bb) == 1:
+            k, c = dcl[0], bb[0]
+            if not bool(n.links.at[k, "p_nom_extendable"]):
+                raise ValueError(f"DC link {k} not extendable")
+            room = float(n.links.at[k, "p_nom_max"]) - float(n.links.at[k, "p_nom"])
+            p0 = float(n.links.at[c, "p_nom"])
+            pairs.append(dict(dc_bus=bus, dc_link=k, b2b=c, b2b_p_nom_existing=p0, dc_p_nom_existing=float(n.links.at[k, "p_nom"]), b2b_p_nom_max=p0 + room,
+                              b2b_capital_cost_before=float(n.links.at[c, "capital_cost"]), b2b_extendable_before=bool(n.links.at[c, "p_nom_extendable"])))
+            n.links.loc[c, ["p_nom_extendable", "capital_cost", "p_nom_min", "p_nom_max", "p_min_pu"]] = [True, 0.0, p0, p0 + room, -1.0]
+        else:
+            reported.append(dict(dc_bus=bus, dc_links=dcl, b2b=bb, reason=("no DC link at the bus (removed by the cross-border switch)" if not dcl
+                                                                            else "structure differs from a converter station (one DC link + one B2B)")))
+    if pairs:
+        n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {B2B_HOOK})
+    led = dict(one_way_made_bidirectional=oneway, pairs=pairs, reported=reported)
+    n.meta["research_dc_converters"] = led
+    return led
+
+
+def install_b2b_follows_dc(n) -> int:
+    """research_b2b_follows_dc hook: B2B p_nom - B2B existing = DC link p_nom - DC existing for every converter-station pair."""
+    if getattr(n, "_research_b2b_model", None) is n.model:
+        raise ValueError("B2B follows DC hook already installed")
+    m = n.model; pn = m["Link-p_nom"]; pairs = (n.meta.get("research_dc_converters") or {}).get("pairs", [])
+    for i, p in enumerate(pairs):
+        m.add_constraints(pn.sel({"Link-ext": p["b2b"]}) - pn.sel({"Link-ext": p["dc_link"]}) == float(p["b2b_p_nom_existing"]) - float(p["dc_p_nom_existing"]),
+                          name=f"{B2B_HOOK}-{i}")
+    n._research_b2b_model = m
+    return len(pairs)
 
 
 def transmission_losses_mode(cfg) -> str:
