@@ -588,3 +588,29 @@
   - `th_my_hvdc=s4h` 是否加入第二批敏感性。
   - 另需上云前信息与授权（报告 §10，授权模板填入 bcfb2d0a）。
 - **交付：** `research/06_scope_redesign/p1_step4j_20261018/`，内容为 S4J_REPORT.md、S4J_EVIDENCE.json、S4J_PROGRESS.md、S4J_STOP_01_SMOKE_SUBOPTIMAL.md、CLOUD_RESOURCE_ESTIMATE.md §18–§19、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4j_20261018/`；测试 `tests/research` 523 通过、整个 `tests/` 540 通过。
+- **用户决定（2026-10-18，S4K 指令 S4K-0）：** §12 第 1 项 → 第 108 项（交流线性损耗代理）；第 2 项：不互联中两台 B2B 维持 S4H 状态；第 3 项：`th_my_hvdc=s4h` 只保留开关、不列入第二批。
+
+## S4K 第 108 项：交流线损改用线性损耗代理、冒烟、云端部署包与上云前清单 — 2026-10-18
+
+- **范围：**
+  - 指令 `S4K_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 a803f165…25d5，已核对）；只实现第 108 项，其他发现只记录。
+  - 分支 `codex/s4k-ac-loss-proxy-20261018`（自 S4J 36b8195b），draft PR #35 叠在 #34 上；每个子步骤提交。
+  - 无云端操作，无 365×24h / 2920×3h 求解，无下载；档案 A 参数未改，没有重试；没有触发停止条件。
+- **S4K-0：** 登记第 108 项与 S4J §12 第 2、3 项的处理（`s4k_0`）；本台账补记 S4I 条目。
+- **S4K-1（108）：**
+  - 开关 `research.network.ac_losses`：linear_proxy | pypsa_tangent（S4J 状态）| none；`ac_loss_reference_loading` 0.5（敏感性 1.0）。
+  - 损耗 ≥ λ × |潮流|、≤ λ × 允许负载，两端各计一半；λ = √3 × α × s_max_pu × i_nom × r × L / v_nom（一回线，按线型），148 条线 0.77–13.7 %，中位 3.5 %；100 km 核对 1.235 % / 2.470 %。
+  - 保留 PyPSA 0.30.3 损耗结构，只把切线换成线性下界，求解 `transmission_losses` = 0；建模核对：代理模型减去损耗项与无损模型逐行相同（EXACT）。
+  - 登记为对 PyPSA-Eur 的偏离（理由：候选线扩建幅度远超常见情形、回路数随潮流增加时损耗约与潮流成正比、迭代更新电阻对联盟研究不可行）。
+- **S4K-2：** S4I 审查脚本重跑，只多新钩子与 λ 列，无新增问题。
+- **S4K-3：** 冒烟三项都最优，求解器容差门槛全部通过（未触发条件诊断）。
+  - 目标值相对 S4J −1.30 / −1.10 / −1.52 %；B6 50.42 bn EUR（S4J 49.61，S4H 53.31）；B16 ≤ 1.3e-10。
+  - S4J 的 16 条零损耗上限线不再聚集；跨境交流送电 992 TWh（S4H 1,272，S4J 610），交流损耗 4.5 %。
+  - 差额（不互联 − 一体化）TH 6.11、LA 2.77、KH 1.89、VN 24.80、MY 4.09、MM 0.72 bn EUR。
+- **S4K-4：**
+  - 部署包重建到 2d4aaac3，四个网络与冒烟网络逐组件一致；上传 237,121,367 B；S4J 部署包作废。
+  - 365×24h 单运行 47–65 / 38–52 / 66–94 min（NZE 悲观 138），串行 2.5–3.5 h；峰值上限 35.1 GiB，预检下限未改。
+  - 第二批敏感性 14 项只登记（加 `ac_loss_reference_loading=1.0`、`ac_losses=none`）。
+- **S4K-5：** 上云前清单（报告 §10），格式同 S4J，填入 2d4aaac3。
+- **待用户决定：** 1 项（S4K 报告 §8）：串行预检内存下限 36 GiB 的余量只剩 0.9 GiB，是否提高到 40 GiB。另需上云前信息与授权。
+- **交付：** `research/06_scope_redesign/p1_step4k_20261018/`，内容为 S4K_REPORT.md、S4K_EVIDENCE.json、S4K_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §20、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4k_20261018/`；测试 `tests/research` 529 通过、整个 `tests/` 546 通过。
