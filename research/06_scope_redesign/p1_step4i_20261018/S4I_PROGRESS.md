@@ -19,9 +19,9 @@
 | B3 长度系数与海底份额 | 已完成（交流线、DC、H₂、CO₂ = 1.25；成本 = PyPSA-Eur 公式，比值 1.0） | `B3` | 本次 |
 | B4 其他设置 | 已完成（TH–MY 直流单向且受 2,000 MW B2B 限制；线损选项 0 vs 2） | `B4` | 本次 |
 | C 求解注意事项 | 已完成（基尔霍夫跨度、截断网络 LP 系数统计、`SOLVER_NOTES.md`） | `C_kvl_span`；`evidence/lp/C_LP_RANGES_*_56.json`；`SOLVER_NOTES.md` | 本次 |
-| D 联盟算力 | 部分（383 个连通联盟已核实；估算未开始） | `D_coalitions` | — |
+| D 联盟算力 | 已完成（383 个连通联盟；串行 / 两通道 × 两种分辨率） | `D_coalitions`；`evidence/coalition/D_COALITION_ESTIMATE.json` | 本次 |
 | 报告与交付 | 未开始 | — | — |
 
-**恢复点：** D（`s4i_coalition_estimate.py`）→ 报告（`S4I_REPORT.md`、`S4I_EVIDENCE.json`）→ draft PR。A3/A5/A6 补证据与 B2–B4 由同一脚本 `s4i_followups.py` 一次写出，故合并为一次提交。
+**恢复点：** 报告（`S4I_REPORT.md`、`S4I_EVIDENCE.json`）→ draft PR。A3/A5/A6 补证据与 B2–B4 由同一脚本 `s4i_followups.py` 一次写出，故合并为一次提交。
 
 **说明：** 中断前在临时目录写的辅助脚本（水电明细、越南电力扣减）已随临时目录清空；其结论只在会话中出现过，现以正式脚本 `scripts_project/s4i_followups.py` 重算并写入证据文件。
