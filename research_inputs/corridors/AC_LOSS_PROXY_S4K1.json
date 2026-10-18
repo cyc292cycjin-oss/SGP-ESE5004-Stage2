@@ -1,0 +1,588 @@
+{
+ "network": "../results_project/s4k/s4k1/builds/integrated/integrated_2920_3h_unsolved.nc",
+ "tangent_network": "../results_project/s4k/s4k1/builds/integrated_tangent/integrated_2920_3h_unsolved.nc",
+ "sources": {
+  "pypsa": "0.30.3",
+  "lines": [
+   {
+    "file": "variables.py",
+    "line": 146,
+    "text": "def define_loss_variables(n: Network, sns: Sequence, c: str) -> None:"
+   },
+   {
+    "file": "variables.py",
+    "line": 155,
+    "text": "n.model.add_variables(0, coords=coords, name=f\"{c}-loss\", mask=active)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 72,
+    "text": "if c in n.passive_branch_components and transmission_losses:"
+   },
+   {
+    "file": "constraints.py",
+    "line": 74,
+    "text": "dispatch_lower = (1, dispatch_lower), (-1, loss)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 75,
+    "text": "dispatch_upper = (1, dispatch_upper), (1, loss)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 117,
+    "text": "if c in n.passive_branch_components and transmission_losses:"
+   },
+   {
+    "file": "constraints.py",
+    "line": 119,
+    "text": "lhs_lower += ((-1, loss),)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 120,
+    "text": "lhs_upper += ((1, loss),)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 556,
+    "text": "if transmission_losses:"
+   },
+   {
+    "file": "constraints.py",
+    "line": 559,
+    "text": "[\"Line\", \"loss\", \"bus0\", -0.5],"
+   },
+   {
+    "file": "constraints.py",
+    "line": 560,
+    "text": "[\"Line\", \"loss\", \"bus1\", -0.5],"
+   },
+   {
+    "file": "constraints.py",
+    "line": 619,
+    "text": "def define_kirchhoff_voltage_constraints(n: Network, sns: pd.Index) -> None:"
+   },
+   {
+    "file": "constraints.py",
+    "line": 632,
+    "text": "s = pd.concat({c: m[f\"{c}-s\"].to_pandas() for c in comps}, axis=1, names=names)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 932,
+    "text": "def define_loss_constraints("
+   },
+   {
+    "file": "constraints.py",
+    "line": 961,
+    "text": "n.model.add_constraints(loss <= upper_limit, name=f\"{c}-loss_upper\", mask=active)"
+   },
+   {
+    "file": "constraints.py",
+    "line": 964,
+    "text": "p_k = k / tangents * s_max_pu * s_nom_max"
+   },
+   {
+    "file": "optimize.py",
+    "line": 258,
+    "text": "if transmission_losses:"
+   },
+   {
+    "file": "optimize.py",
+    "line": 260,
+    "text": "define_loss_variables(n, sns, c)"
+   },
+   {
+    "file": "optimize.py",
+    "line": 279,
+    "text": "meshed_buses = get_strongly_meshed_buses(n)"
+   },
+   {
+    "file": "optimize.py",
+    "line": 303,
+    "text": "if transmission_losses:"
+   },
+   {
+    "file": "optimize.py",
+    "line": 305,
+    "text": "define_loss_constraints(n, sns, c, transmission_losses)"
+   },
+   {
+    "file": "optimize.py",
+    "line": 456,
+    "text": "if \"Line-loss\" in n.model.variables:"
+   },
+   {
+    "file": "optimize.py",
+    "line": 458,
+    "text": "n.lines_t.p0 += losses / 2"
+   },
+   {
+    "file": "optimize.py",
+    "line": 459,
+    "text": "n.lines_t.p1 += losses / 2"
+   }
+  ]
+ },
+ "meta": {
+  "alpha": 0.5,
+  "by_border": {
+   "cross_border": {
+    "lines": 62,
+    "max": 0.13659423585066202,
+    "median": 0.04496200676071853,
+    "min": 0.0077485882272482105
+   },
+   "domestic": {
+    "lines": 86,
+    "max": 0.07778571156877764,
+    "median": 0.030244142553738588,
+    "min": 0.014838445493144361
+   }
+  },
+  "configured": "linear_proxy",
+  "formula": "lambda = sqrt(3) * alpha * s_max_pu * i_nom * r_per_length * length / v_nom (one circuit, by line type)",
+  "hook": "research_ac_loss_proxy",
+  "lambda_max": 0.13659423585066202,
+  "lambda_median": 0.03502343482055935,
+  "lambda_min": 0.0077485882272482105,
+  "lines": 148,
+  "mode": "linear_proxy",
+  "reference_check": {
+   "0.5": {
+    "expected": 0.012,
+    "lambda_100km": 0.012347699046589704,
+    "relative_difference": 0.02897492054914208,
+    "within": true
+   },
+   "1.0": {
+    "expected": 0.025,
+    "lambda_100km": 0.02469539809317941,
+    "relative_difference": -0.012184076272823696,
+    "within": true
+   }
+  },
+  "solver_transmission_losses": 0,
+  "transmission_losses": "pypsa_eur"
+ },
+ "reference_check": {
+  "0.5": {
+   "lambda_100km": 0.012347699046589704,
+   "expected": 0.012,
+   "relative_difference": 0.02897492054914208,
+   "within": true
+  },
+  "1.0": {
+   "lambda_100km": 0.02469539809317941,
+   "expected": 0.025,
+   "relative_difference": -0.012184076272823696,
+   "within": true
+  }
+ },
+ "lambda_alpha_0_5": {
+  "all": {
+   "lines": 148,
+   "min": 0.0077485882272482105,
+   "median": 0.03502343482055935,
+   "max": 0.13659423585066202
+  },
+  "by_border": {
+   "cross_border": {
+    "lines": 62,
+    "min": 0.0077485882272482105,
+    "median": 0.04496200676071853,
+    "max": 0.13659423585066202
+   },
+   "domestic": {
+    "lines": 86,
+    "min": 0.014838445493144361,
+    "median": 0.030244142553738588,
+    "max": 0.07778571156877764
+   }
+  },
+  "by_pair": {
+   "BN-MY": {
+    "lines": 1,
+    "min": 0.0077485882272482105,
+    "median": 0.0077485882272482105,
+    "max": 0.0077485882272482105
+   },
+   "ID-MY": {
+    "lines": 10,
+    "min": 0.02614246790802828,
+    "median": 0.054380117915693985,
+    "max": 0.07370811187525574
+   },
+   "ID-TL": {
+    "lines": 1,
+    "min": 0.031639478082722355,
+    "median": 0.031639478082722355,
+    "max": 0.031639478082722355
+   },
+   "KH-LA": {
+    "lines": 2,
+    "min": 0.03559541498949177,
+    "median": 0.03567276297929729,
+    "max": 0.03575011096910282
+   },
+   "KH-TH": {
+    "lines": 4,
+    "min": 0.043041435162505144,
+    "median": 0.045637391788045864,
+    "max": 0.05932608832751653
+   },
+   "KH-VN": {
+    "lines": 6,
+    "min": 0.029087757945299313,
+    "median": 0.03609593207455422,
+    "max": 0.04998367307960563
+   },
+   "LA-MM": {
+    "lines": 2,
+    "min": 0.04378973021894669,
+    "median": 0.04379267427220031,
+    "max": 0.04379561832545393
+   },
+   "LA-TH": {
+    "lines": 16,
+    "min": 0.03393515308590848,
+    "median": 0.04525557479871974,
+    "max": 0.09864044844814306
+   },
+   "LA-VN": {
+    "lines": 9,
+    "min": 0.028508911201556505,
+    "median": 0.048190730096656705,
+    "max": 0.06360613764672716
+   },
+   "MM-TH": {
+    "lines": 8,
+    "min": 0.03603005090530105,
+    "median": 0.06880951425996908,
+    "max": 0.13659423585066202
+   },
+   "MY-SG": {
+    "lines": 1,
+    "min": 0.02964583593318164,
+    "median": 0.02964583593318164,
+    "max": 0.02964583593318164
+   },
+   "MY-TH": {
+    "lines": 2,
+    "min": 0.03384585520872601,
+    "median": 0.03392303731472825,
+    "max": 0.03400021942073049
+   }
+  },
+  "by_country_domestic": {
+   "ID": {
+    "lines": 33,
+    "min": 0.014838445493144361,
+    "median": 0.033691259997688655,
+    "max": 0.06677355122994462
+   },
+   "KH": {
+    "lines": 7,
+    "min": 0.019089342398543888,
+    "median": 0.027310583758860748,
+    "max": 0.03779396258113755
+   },
+   "LA": {
+    "lines": 5,
+    "min": 0.015340189649647937,
+    "median": 0.02479564660791607,
+    "max": 0.05622516572593181
+   },
+   "MM": {
+    "lines": 21,
+    "min": 0.01673490714612983,
+    "median": 0.023980256555452203,
+    "max": 0.03265617170169635
+   },
+   "MY": {
+    "lines": 5,
+    "min": 0.030508583749793233,
+    "median": 0.03746110799333862,
+    "max": 0.04444636296325967
+   },
+   "PH": {
+    "lines": 2,
+    "min": 0.029548302912534782,
+    "median": 0.03166856457686397,
+    "max": 0.033788826241193164
+   },
+   "TH": {
+    "lines": 6,
+    "min": 0.025696851423202362,
+    "median": 0.0578465256489146,
+    "max": 0.07778571156877764
+   },
+   "VN": {
+    "lines": 7,
+    "min": 0.026085071415804406,
+    "median": 0.03213377753612607,
+    "max": 0.07123235350372062
+   }
+  }
+ },
+ "lambda_alpha_1_0": {
+  "lines": 148,
+  "min": 0.015497176454496421,
+  "median": 0.0700468696411187,
+  "max": 0.27318847170132404
+ },
+ "length_ratio": {
+  "all": {
+   "lines": 148,
+   "min": 1.243744657446198,
+   "median": 1.2499999999999998,
+   "max": 1.2517964981192953
+  },
+  "stock": {
+   "lines": 102,
+   "min": 1.2499999999999931,
+   "median": 1.25,
+   "max": 1.2500000000000093
+  },
+  "candidates": {
+   "lines": 46,
+   "min": 1.243744657446198,
+   "median": 1.2491433645794006,
+   "max": 1.2517964981192953
+  }
+ },
+ "tangent_vs_proxy": {
+  "stock": {
+   "500": {
+    "lines": 102,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 102,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.05188267713183294
+   },
+   "1000": {
+    "lines": 102,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 102,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.10376535426366588
+   },
+   "2000": {
+    "lines": 102,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 102,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.20753070852733177
+   },
+   "3500": {
+    "lines": 102,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 102,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.36317873992283056
+   },
+   "5000": {
+    "lines": 102,
+    "s4j_tangent_median": 0.39237340846550023,
+    "s4j_tangent_zero_lines": 15,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.5188267713183294
+   },
+   "7000": {
+    "lines": 102,
+    "s4j_tangent_median": 0.7223151657000111,
+    "s4j_tangent_zero_lines": 4,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 0.7263574798456611
+   },
+   "10000": {
+    "lines": 102,
+    "s4j_tangent_median": 0.9663265465294363,
+    "s4j_tangent_zero_lines": 1,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 1.0376535426366589
+   },
+   "14000": {
+    "lines": 102,
+    "s4j_tangent_median": 1.4446303314000222,
+    "s4j_tangent_zero_lines": 0,
+    "proxy_alpha_0_5_median": 0.0323347391158147,
+    "proxy_alpha_1_0_median": 0.0646694782316294,
+    "fixed_circuit_quadratic_median": 1.4527149596913222
+   }
+  },
+  "candidates": {
+   "500": {
+    "lines": 46,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 46,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.03940703947246284
+   },
+   "1000": {
+    "lines": 46,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 46,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.07881407894492568
+   },
+   "2000": {
+    "lines": 46,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 46,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.15762815788985135
+   },
+   "3500": {
+    "lines": 46,
+    "s4j_tangent_median": 0.0,
+    "s4j_tangent_zero_lines": 46,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.2758492763072399
+   },
+   "5000": {
+    "lines": 46,
+    "s4j_tangent_median": 0.3310191315686879,
+    "s4j_tangent_zero_lines": 0,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.39407039472462835
+   },
+   "7000": {
+    "lines": 46,
+    "s4j_tangent_median": 0.5516985526144798,
+    "s4j_tangent_zero_lines": 0,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.5516985526144798
+   },
+   "10000": {
+    "lines": 46,
+    "s4j_tangent_median": 0.7172081183988236,
+    "s4j_tangent_zero_lines": 0,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 0.7881407894492567
+   },
+   "14000": {
+    "lines": 46,
+    "s4j_tangent_median": 1.1033971052289595,
+    "s4j_tangent_zero_lines": 0,
+    "proxy_alpha_0_5_median": 0.04684203765440583,
+    "proxy_alpha_1_0_median": 0.09368407530881166,
+    "fixed_circuit_quadratic_median": 1.1033971052289595
+   }
+  }
+ },
+ "model_check": {
+  "network": "../results_project/s4k/s4k1/builds/integrated/integrated_2920_3h_unsolved.nc",
+  "snapshots": 56,
+  "solver_transmission_losses": 0,
+  "loss_variables": 8288,
+  "lines": 148,
+  "num_col": {
+   "O": 667462,
+   "P": 675750
+  },
+  "num_row": {
+   "O": 1476607,
+   "P": 1501471
+  },
+  "compare": {
+   "Line-ext-s_nom-lower": {
+    "rows": 148,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 0,
+    "loss_coefficients": []
+   },
+   "Line-ext-s_nom-upper": {
+    "rows": 148,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 0,
+    "loss_coefficients": []
+   },
+   "Line-ext-s-lower": {
+    "rows": 8288,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 8288,
+    "loss_coefficients": [
+     -1.0
+    ]
+   },
+   "Line-ext-s-upper": {
+    "rows": 8288,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 8288,
+    "loss_coefficients": [
+     1.0
+    ]
+   },
+   "Bus-nodal_balance": {
+    "rows": 148064,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 0,
+    "loss_coefficients": []
+   },
+   "Bus-meshed-nodal_balance": {
+    "rows": 15120,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 16576,
+    "loss_coefficients": [
+     -0.5
+    ]
+   },
+   "Kirchhoff-Voltage-Law": {
+    "rows": 3976,
+    "minus_loss_terms_equal": true,
+    "loss_terms": 0,
+    "loss_coefficients": []
+   }
+  },
+  "proxy_rows": {
+   "Line-loss_proxy-pos": {
+    "rows": 8288,
+    "coeff_abs_min": 0.0077485882272482105,
+    "coeff_abs_max": 1.0
+   },
+   "Line-loss_proxy-neg": {
+    "rows": 8288,
+    "coeff_abs_min": 0.0077485882272482105,
+    "coeff_abs_max": 1.0
+   },
+   "Line-ext-loss_upper": {
+    "rows": 8288,
+    "coeff_abs_min": 0.005424011759073747,
+    "coeff_abs_max": 1.0
+   }
+  },
+  "seconds": 28.488317489624023,
+  "hook": {
+   "hook": "research_ac_loss_proxy",
+   "loss_variables": 8288,
+   "rebuilt": [
+    "Bus-nodal_balance",
+    "Bus-meshed-nodal_balance",
+    "Line-ext-s-lower",
+    "Line-ext-s-upper"
+   ],
+   "added": [
+    "Line-loss_proxy-pos",
+    "Line-loss_proxy-neg",
+    "Line-ext-loss_upper"
+   ]
+  }
+ }
+}

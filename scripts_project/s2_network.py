@@ -38,6 +38,7 @@ from s4f_layers import apply_lao_vn_store, apply_max_extension, apply_th_my_stoc
 from s4g_layers import apply_lao_th_store, apply_readjust_impedance
 from s4h_layers import apply_candidate_num_parallel, apply_la_vn_stock
 from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
+from s4k_layers import apply_ac_losses
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -374,6 +375,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     max_ext = apply_max_extension(n, cfg, registry, repo)   # S4F-1 (decision 96): PyPSA-Eur individual line / DC-link extension limit (lines.max_extension = 20000 MW, increment); apg_plans = sensitivity
     dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
     losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
+    ac_losses = apply_ac_losses(n, cfg, losses)   # S4K-1 (decision 108): research.network.ac_losses - AC linear loss proxy (per-line lambda, hook research_ac_loss_proxy) | pypsa_tangent (S4J) | none
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
@@ -404,12 +406,13 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4g_layers=dict(readjust_impedance={k: v for k, v in readjust.items() if k != "rows"}, lao_th_store={k: v for k, v in lao_th.items() if k != "table"}),
                                   s4h_layers=dict(la_vn_stock={k: v for k, v in la_vn_stock.items() if k != "rows"}, candidate_num_parallel={k: v for k, v in cand_np.items() if k != "rows"}),
                                   s4j_layers=dict(transmission_losses=losses, dc_converters=dc_conv),
+                                  s4k_layers=dict(ac_losses=ac_losses),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
-                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters"]:
+                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters", "research_ac_losses"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
