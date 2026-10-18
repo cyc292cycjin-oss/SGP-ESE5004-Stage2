@@ -68,6 +68,8 @@
 3. **改求解参数（项目规则要求用户决定）：**
    - 用档案 C（`barrier_numericfocus2`）跑同一网络；
    - 或按 PyPSA-Eur 缺省 `gurobi-default` 把 BarConvTol 设为 1e-5。
-4. **按 PyPSA-Eur 对管道的处理再核对：** 确认 PyPSA-Eur 是否对管道拆分后同时送电另有约束，例如 `solve_network.py` 中的约束。该文件不在库内，需要下载，需另行授权。
+4. **（已核实，不需要下载）PyPSA 系求解脚本对拆分链路的处理：**
+   - 本机 pypsa-asean 的 `scripts/solve_network.py`（SHA256 f3a35522…bbb56bbb）第 1038–1088 行的 `add_lossy_bidirectional_link_constraints`，只加"反向 `p_nom` = 正向 `p_nom`"一条约束（`Link-bidirectional_sync`），与本模型钩子 `research_lossy_bidirectional_sync` 等价；
+   - 该脚本没有限制正反向同时送电的约束。所以同时送电的退化在 PyPSA-Eur / PyPSA-Earth 的同一做法中同样存在，它们靠更宽松的收敛精度（`gurobi-default` BarConvTol 1e-5）或 crossover 处理（INFERENCE）。
 
 在用户决定之前，S4J-6 与 S4J-7 都暂停；S4J-0 至 S4J-5 的提交不受影响。
