@@ -674,3 +674,20 @@
 - **回收：** 轻量包 2.08 MB 已下载核对、无许可串；完整结果包 158.9 MB（SHA256 cb4927da…7480）留在实例数据盘；许可 18:56:27 删除，已告知关机。
 - **交付：** `research/06_scope_redesign/p1_step4n_20261019/`（`S4N_REPORT.md`、`S4N_EVIDENCE.json`、`S4N_PROGRESS.md`、指令与补充、`ENV_LOCK_LOCAL.txt`、`evidence/`、`scripts/`、试点轻量包），S4O-1 入库（f28772e6，许可串与登录信息模式扫描无命中）；镜像 `work/p1_step4n_20261019/`。
 - **用户决定：** 第 118 项（S4M §9 第 2–5 项）、第 119 项（16:37 SGT）、第 120 项（19:40 SGT：以 `pypsa_eur_default` 作生产档案，键名大写、`Threads 8` 两处适配；每次运行验收 = optimal + 第 119 项 (a)(b)(c)）——注册表片段 `s4o_0`（S4O-1 补登）。后续由 S4O 指令承接。
+
+## S4O 第 120 项：生产档案定稿与本机标定复核（S4O-3 停止）— 2026-10-19
+
+- **范围：** 指令 `S4O_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 b5f4d099…af6aa，已核对）；授权 S4O-1 至 S4O-5 本机部分（含 3 次本机 56×3h），S4O-6 云端未授权。分支 `codex/s4o-production-20261019`（自 #39 头 46135c52）。本机求解 1 次（56×3h），无重试；云端无动作。
+- **S4O-1：** 标定分支推送，draft PR #39；S4N 交付物入库（f28772e6）；注册表第 118–120 项、台账 S4N 条目（46135c52）。
+- **S4O-2：** `pypsa_eur_default` 定稿（键名大写、`Threads 8`，其余原样）并设为缺省档案，档案 A 不改；`s2_solve.py` 拒绝只差大小写的档案键名；C1 并入运行流水线 `scripts_project/s4o_c1_precision.py`（验收 = optimal + (a)(b)(c)，门槛作数值信息；本批参照与重评）；测试 543 通过；S4O 版 `run_365x24h.sh` / `preflight.sh` 脚本测试 50/50、探针 9/9（d5b4eb96、18f55488）。
+- **S4O-3（停止）：** 一体化 STEPS（定稿档案，Threads 8）optimal，58 次迭代 / 78 s；目标与 S4M-2 档案 A 相对差 **2.13e-5 > 1e-5**（第 107 项标准不通过）；C1 (a) 不通过（−0.018 bn，相对 2.79e-5），(b)(c) 通过。按 S4O-3 第 4 点在不互联求解启动前停止；不互联、NZE 未运行。只读对照：S4N C2（threads 32）目标差 6.2e-6，补算 C1 三次全过——同一 BarConvTol 1e-5 下结果随线程路径落在标准两侧（INFERENCE）。
+- **未做：** S4O-4（打包脚本已写未运行）、S4O-5、S4O-6。
+- **待用户决定（S4O 报告 §7）：** 生产档案处理（保留并调整标准 / 收紧 BarConvTol / 回到档案 A / 其他）；是否补做 2 次未执行的本机运行；S4O-4 / S4O-5 是否继续。
+- **交付：** `research/06_scope_redesign/p1_step4o_20261019/`（`S4O_REPORT.md`、`S4O_EVIDENCE.json`、`S4O_PROGRESS.md`、`cloud_package/`、`evidence/`）；镜像 `work/p1_step4o_20261019/`。
+- **补充 01（2026-10-19，第 121 项，用户决定）：** 生产档案回到档案 A（`formal_barrier`），`pypsa_eur_default` 保留为非生产档案；不补做 S4O-3 的两次运行；第 107 项与第 119 项 (a) 标准不放宽（注册表片段 `s4o_1`）。
+  - **S4O-2′（87e28e3b）：** 缺省档案改回 A；部署脚本缺省运行"不互联 + NZE"、TimeLimit / 墙钟 21,600 / 22,500 s、试点一体化作 C1 参照（`PILOT_INTEGRATED` / `PILOT_PRECISION`，副本重评，`PILOT_CONSISTENCY.json`）；`tests/research` 544 通过，脚本测试 59/59、探针 9/9。
+  - **S4O-3′（本机 1 次 56×3h，已授权）：** S4O 版 `run_365x24h.sh` 端到端（档案 A，自动 C1）optimal，目标与 S4M-2 相对差 0.0，C1 写入 `EXPORTS.json`，分级与等价核对一致；B12 按构造不通过（配置哈希）。
+  - **S4O-4（126110ff）：** 部署包重建，`networks/` 13 个文件与 f50c8850 包逐一相同；`PACKAGE_DELTA.json` 上传 124.3 MB；预检、干跑、许可扫描、脚本测试通过；包在 `work/p1_step4o_20261019/cloud_package_dist/`（不进 git）。
+  - **S4O-5：** `CLOUD_RESOURCE_ESTIMATE.md` §23：2920×3h 72.1 M 行、峰值 106–165 GiB、8470Q 上单运行约 15–35 h、2 卡、数据盘 ≥ 100 GB；更正 S4M §22.5 的 365×24h 导出高估。
+  - **S4O-6 云端整批未授权，停下等待。**
+- **S4O-6（2026-10-20，用户授权；补充 02 无人值守）：** 实例为 D58 在西北 B 区 F73 机上的克隆（Xeon Platinum 8481C，25 核 / 92 GiB；数据盘空 → 整包上传、试点参照从本机轻量包上传）；探针 r = 0.836；档案 A、TimeLimit / 墙钟 21,600 / 22,500 s、串行。**不互联 STEPS、不互联诊断、一体化 NZE 均 SUBOPTIMAL**（不互联两次在第 124–126 次迭代无提示重启后停滞；NZE 停滞），不重试；C1 (a)(b)(c) 三个运行全过（本批参照 = 本批不互联 − 试点一体化），运行验收（第 120 项）False。**B6 = 69.243 bn EUR**（L23 68.970），**NZE − 一体化 = −90.491 bn**（L23 −90.462）；试点与本批网络、档案一致。回收：整批完整包 461.0 MB（SHA256 c37f8d93…ccef）、轻量包、两个单运行包均核对；试点完整包只在原 D58 数据盘（未下载）。许可 03:43:29 删除，可关机。自动决定 D1–D13（报告 §11.8）；待用户决定：SUBOPTIMAL 运行的用途、试点完整包下载、2920×3h 安排（报告 §11.10）。

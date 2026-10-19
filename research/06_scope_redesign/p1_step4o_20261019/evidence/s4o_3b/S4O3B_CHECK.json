@@ -1,0 +1,94 @@
+{
+ "run": "/home/jin/s4o_local/pkg_e2e/runs/20261019T133528Z_584",
+ "termination": "optimal",
+ "solver_profile": "formal_barrier",
+ "solver_parameters": {
+  "Method": 2,
+  "Crossover": 0,
+  "BarConvTol": 1e-08,
+  "BarHomogeneous": 1,
+  "Threads": 8,
+  "Seed": 123,
+  "AggFill": 0,
+  "PreDual": 0,
+  "GURO_PAR_BARDENSETHRESH": 200,
+  "TimeLimit": 1750.0
+ },
+ "input_network": {
+  "path": "/home/jin/s4o_local/pkg_e2e/networks/integrated_365_24h_unsolved.nc",
+  "sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+  "snapshots": 56,
+  "truncated_to": 56,
+  "horizon_scaling": {
+   "method": "representative_weights_sum_8760",
+   "snapshots": 56,
+   "weight_hours_per_snapshot": 156.42857142857142,
+   "horizon_fraction": 1.0,
+   "scaled_stores": [],
+   "annual_caps_scaled": false
+  }
+ },
+ "objective": 648381181410.4515,
+ "s4m2_objective": 648381181410.4515,
+ "objective_rel_diff": 0.0,
+ "c1_in_exports_solve_and_export": true,
+ "grade": {
+  "grade": "layer1_plus_nodal_price_settlement",
+  "a": true,
+  "b": true,
+  "c": true,
+  "price_settled_results": "usable"
+ },
+ "acceptance": {
+  "optimal": true,
+  "a": true,
+  "b": true,
+  "c": true,
+  "accepted": true,
+  "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+ },
+ "reference_grade_s4o2_equivalence": {
+  "grade": "layer1_plus_nodal_price_settlement",
+  "a": true,
+  "b": true,
+  "c": true,
+  "price_settled_results": "usable"
+ },
+ "grade_equal": true,
+ "info_vs_s4o2_equivalence": {
+  "a_diff_bn": [
+   -1.221533203125e-08,
+   -1.221533203125e-08
+  ],
+  "b_country_max_abs_diff_bn": 0.0,
+  "c_country_max_abs_diff_bn": 0.0
+ },
+ "gates_information": {
+  "all_passed_solver_tolerances": false,
+  "all_passed_barconvtol": false,
+  "failing": [
+   "A1_A2",
+   "A3",
+   "B1",
+   "B12",
+   "B3"
+  ],
+  "failing_excl_B12": [
+   "A1_A2",
+   "A3",
+   "B1",
+   "B3"
+  ],
+  "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+ },
+ "interior_solution": true,
+ "peak_rss_gib": 4.1103973388671875,
+ "solve_seconds": 310.6289224624634,
+ "accepted": {
+  "optimal": true,
+  "objective_le_1e9": true,
+  "c1_in_exports": true,
+  "grade_equal": true,
+  "all": true
+ }
+}

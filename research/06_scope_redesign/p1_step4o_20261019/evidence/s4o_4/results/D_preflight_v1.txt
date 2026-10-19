@@ -1,0 +1,10 @@
+== tools
+/usr/bin/time (GNU time, -v) present
+setsid (util-linux) present: each solve gets its own process group (wall-clock kill of the whole group)
+== resources (container cgroup quota; host values only as fallback)
+container CPU cores 8 [cgroup v1 cpu.cfs_quota_us/cpu.cfs_period_us (800000/100000)]; host nproc 16
+container memory 40 GiB [cgroup v1 memory.limit_in_bytes]; host MemTotal 11 GiB
+cores 8 (need >= 8), memory 40 GiB (need >= 40), free disk 895 GiB (need >= 35) for mode serial
+WARNING: memory below the recommended 48 GiB for mode serial (upper peak estimate leaves little margin; not a failure)
+PREFLIGHT OK
+exit 0
