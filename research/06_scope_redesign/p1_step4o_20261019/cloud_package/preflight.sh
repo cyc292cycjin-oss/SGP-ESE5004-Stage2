@@ -1,6 +1,6 @@
 #!/bin/bash
-# S4O cloud package preflight (S4O-4, decision 120): the S4M preflight with (i) the profile section checking the given profile OR the packaged default
-# (research.solver.profile = pypsa_eur_default) and its parameter names with the s2_solve.py key-name check, (ii) a new section c1: the C1 step
+# S4O cloud package preflight (S4O-4, decisions 120 / 121): the S4M preflight with (i) the profile section checking the given profile OR the packaged default
+# (research.solver.profile = formal_barrier since decision 121) and its parameter names with the s2_solve.py key-name check, (ii) a new section c1: the C1 step
 # scripts (scripts_project/s4o_c1_precision.py, l23_violation_analysis.py) are in the code snapshot and import without the licence.
 # S4M cloud package preflight (S4M-3): the S4L preflight unchanged (container cgroup quota, setsid check); the resource bounds refer to CLOUD_RESOURCE_ESTIMATE.md sections 20-22.
 # S4L cloud package preflight (S4L-3, decision 112 c; successor of the S4K preflight of package code 56d28358 - not yet packaged). On the cloud
@@ -47,7 +47,7 @@ if sec networks; then
 fi
 if sec profile; then
   echo "== solver profile"
-  [ -n "$PROFILE" ] || echo "no profile given: run_365x24h.sh uses the packaged default research.solver.profile (decision 120: pypsa_eur_default)"
+  [ -n "$PROFILE" ] || echo "no profile given: run_365x24h.sh uses the packaged default research.solver.profile (decision 121: formal_barrier, profile A)"
   ( cd repo && "$PY" - "$PROFILE" <<'P' ) || ok=0
 import sys, yaml
 sys.path.insert(0, "scripts_project")

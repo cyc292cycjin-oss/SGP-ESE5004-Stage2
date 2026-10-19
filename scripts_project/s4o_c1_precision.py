@@ -394,7 +394,8 @@ def regrade(sd: Path, ref: dict) -> dict:
     res = json.loads((sd / "PRECISION.json").read_text())
     if res.get("computable", True):
         hist = res.setdefault("grade_history", [])
-        hist.append(dict(reference_source=(res.get("reference") or {}).get("source"), grade=res["grade"]["grade"], accepted=res["acceptance"]["accepted"]))
+        hist.append(dict(reference_source=(res.get("reference") or {}).get("source") or res.get("l23_reference_note"), grade=(res.get("grade") or {}).get("grade"),
+                         accepted=(res.get("acceptance") or {}).get("accepted")))   # S4O supplement 01: also the S4N pilot's PILOT_PRECISION.json (no acceptance / reference keys)
         apply_reference(res, ref)
     else:
         res["reference"] = dict(source=ref["source"], differences_bn=ref["differences_bn"])

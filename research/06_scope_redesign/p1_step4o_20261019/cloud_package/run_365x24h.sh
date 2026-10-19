@@ -1,7 +1,18 @@
 #!/bin/bash
+# S4O supplement 01 (decision 121) changes on top of the S4O-2 script below:
+#   * default profile back to profile A formal_barrier (decision 121; pypsa_eur_default stays selectable as a registered non-production profile);
+#   * default runs = disconnected,integrated_nze: the integrated STEPS result is the S4N pilot (same network, same profile A, optimal) and is NOT
+#     re-run; integrated stays selectable with --runs;
+#   * TimeLimit / wall-clock defaults 21,600 / 22,500 s (set before the runs: the pilot used ~80 % of 14,400 s incl. one restart; L23 NZE timed out);
+#   * PILOT_INTEGRATED=<folder with the pilot's COUNTRY_COST_LEDGER.csv and SOLVE_RECEIPT.json> and PILOT_PRECISION=<the pilot's PILOT_PRECISION.json>:
+#     when this batch has no integrated run, the C1 country reference after the disconnected run = this batch's disconnected - pilot integrated
+#     (BATCH_REFERENCE.json), the pilot's C1 is re-graded on a COPY (export/pilot_integrated/PRECISION.json, grade_history kept; the pilot files are
+#     not changed) and PILOT_CONSISTENCY.json records whether the pilot's input network SHA256 equals networks/integrated_365_24h_unsolved.nc of
+#     this package and whether its profile / parameters equal this batch's profile (STATUS line PILOT_CONSISTENCY);
+#   * TRUNCATE=<N> (local end-to-end check only, S4O-3'): every solve and C1 step with --truncate N and the label SMOKE_TEST_ONLY.
 # S4O cloud package run script (S4O-2 / S4O-4, decision 120): the S4M script with
-#   * the PRODUCTION profile pypsa_eur_default as the default of --solver-profile (decision 120; before: required, no default); the profile is
-#     recorded in STATUS; profile A (formal_barrier) and the other registered profiles stay selectable;
+#   * the profile pypsa_eur_default as the default of --solver-profile (decision 120; before: required, no default; REPLACED by decision 121, see
+#     above); the profile is recorded in STATUS; the other registered profiles stay selectable;
 #   * the C1 precision step of decision 119 after every solve (Python only, GRB_LICENSE_FILE removed from its environment, no solver call):
 #     l23_violation_analysis.py -> VIOLATIONS.json, then scripts_project/s4o_c1_precision.py run -> PRECISION.json / PRECISION.md, both registered
 #     in EXPORTS.json and copied to export/<run>/; STATUS line PRECISION_<run>:<grade>:accepted=<bool>:abc=<a><b><c>:ref=<L23|batch>.
@@ -32,22 +43,22 @@
 # PREPARED ONLY - run on the cloud instance after the user has authorised the run (CLAUDE.md: every optimisation needs a separate explicit
 # authorisation).
 #
-#   GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh [--solver-profile pypsa_eur_default] --mode serial|lanes2 [--runs ...] [--auth "text"] [--dry-run]
+#   GRB_LICENSE_FILE=/path/to/gurobi.lic PILOT_INTEGRATED=<dir> PILOT_PRECISION=<file> bash run_365x24h.sh [--solver-profile formal_barrier] --mode serial|lanes2 [--runs ...] [--auth "text"] [--dry-run]
 #
-# Run parameters (S4M-3, decision 116; environment variables, defaults scaled from the L23 measurements, CLOUD_RESOURCE_ESTIMATE.md section 21-22): WALL_CAP_S (15300 s = 4.25 h), GRACE_S (30 s between TERM and KILL),
-# GUROBI_TIME_LIMIT_S (14400 s = 4 h), MONITOR_S (60), CGROUP_ROOT (/sys/fs/cgroup). The user may override both caps in the launch command (e.g. after the speed probe).
-# S4O: RUN_GAP_S (330 s, serial mode), C1_STEP (on | off; off only for script tests without the research code).
+# Run parameters (environment variables): WALL_CAP_S (22500 s = 6.25 h; decision 121, before 15300), GRACE_S (30 s between TERM and KILL),
+# GUROBI_TIME_LIMIT_S (21600 s = 6 h; decision 121, before 14400), MONITOR_S (60), CGROUP_ROOT (/sys/fs/cgroup). The user may override both caps in the launch command.
+# S4O: RUN_GAP_S (330 s, serial mode), C1_STEP (on | off; off only for script tests without the research code), PILOT_INTEGRATED / PILOT_PRECISION, TRUNCATE.
 #
 # Licence (S4I K2, decision 106 a): the academic WLS licence allows at most 2 concurrent sessions and keeps every token for at least 5 minutes after
 # the Gurobi environment is closed. Each s2_solve.py opens one environment; the preflight licence check opens one too. Hence: serial (recommended)
 # never needs more than 2 tokens; lanes2 waits LICENCE_GAP_S (330 s) before starting (the preflight token) and again inside a lane before its next
 # run (the token of the run just finished); lanes3 is withdrawn (it always needs 3 sessions) and is refused.
 #
-# --solver-profile defaults to pypsa_eur_default (S4O, decision 120: the production profile; until S4N it was REQUIRED without default and the first
-#   batch / the S4N pilot used A: formal_barrier). Allowed values = research.solver.profiles in configs/research/baseline.yaml:
-#   pypsa_eur_default | formal_barrier | crossover_diagnostic | barrier_numericfocus2 | formal_barrier_crossover (abandoned, record only).
+# --solver-profile defaults to formal_barrier (profile A; decision 121; until S4N it was REQUIRED without default, decision 120 made pypsa_eur_default
+#   the default for a short time). Allowed values = research.solver.profiles in configs/research/baseline.yaml:
+#   formal_barrier | pypsa_eur_default (non-production) | crossover_diagnostic | barrier_numericfocus2 | formal_barrier_crossover (abandoned, record only).
 #
-# Runs (default integrated,disconnected,integrated_nze):
+# Runs (default disconnected,integrated_nze - decision 121; integrated selectable):
 #   integrated        integrated main, WEO 2025 STEPS fuel prices;
 #   disconnected      disconnected main (STEPS, extra-ASEAN CO2 storage on) - expected feasible;
 #   integrated_nze    integrated sensitivity with WEO 2025 NZE fuel prices (research.fuels.price_scenario = nze);
@@ -71,7 +82,7 @@
 # * the licence file is only referenced through GRB_LICENSE_FILE (never copied, printed or packaged).
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MODE=serial; DRY=0; AUTH=""; RUNS="integrated,disconnected,integrated_nze"; PROFILE=""; PROFILE_SRC="--solver-profile"
+MODE=serial; DRY=0; AUTH=""; RUNS="disconnected,integrated_nze"; PROFILE=""; PROFILE_SRC="--solver-profile"   # decision 121: the integrated result is the S4N pilot
 while [ $# -gt 0 ]; do
   case "$1" in
     --mode) MODE="$2"; shift 2;;
@@ -82,7 +93,7 @@ while [ $# -gt 0 ]; do
     *) echo "unknown argument $1"; exit 2;;
   esac
 done
-[ -n "$PROFILE" ] || { PROFILE=pypsa_eur_default; PROFILE_SRC="default (decision 120)"; }
+[ -n "$PROFILE" ] || { PROFILE=formal_barrier; PROFILE_SRC="default (decision 121)"; }
 case "$PROFILE" in pypsa_eur_default|formal_barrier|crossover_diagnostic|barrier_numericfocus2|formal_barrier_crossover) ;; *) echo "REFUSED: unknown solver profile $PROFILE"; exit 2;; esac
 case "$MODE" in
   serial|lanes2) ;;
@@ -90,8 +101,11 @@ case "$MODE" in
   *) echo "--mode serial|lanes2"; exit 2;;
 esac
 LICENCE_GAP_S=330   # >= 5 min: a closed environment keeps its WLS token for at least 5 minutes
-WALL_CAP_S="${WALL_CAP_S:-15300}"; GRACE_S="${GRACE_S:-30}"; GUROBI_TIME_LIMIT_S="${GUROBI_TIME_LIMIT_S:-14400}"; MONITOR_S="${MONITOR_S:-60}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"
+WALL_CAP_S="${WALL_CAP_S:-22500}"; GRACE_S="${GRACE_S:-30}"; GUROBI_TIME_LIMIT_S="${GUROBI_TIME_LIMIT_S:-21600}"; MONITOR_S="${MONITOR_S:-60}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"   # decision 121 defaults
 RUN_GAP_S="${RUN_GAP_S:-330}"; C1_STEP="${C1_STEP:-on}"   # S4O: >= 5 min between adjacent solves (serial); C1 precision step after every solve
+TRUNCATE="${TRUNCATE:-}"; PILOT_INTEGRATED="${PILOT_INTEGRATED:-}"; PILOT_PRECISION="${PILOT_PRECISION:-}"   # S4O supplement 01
+[ -z "$TRUNCATE" ] || [ "$TRUNCATE" -gt 0 ] 2>/dev/null || { echo "TRUNCATE must be a positive number of snapshots"; exit 2; }
+TRUNC=(); [ -n "$TRUNCATE" ] && TRUNC=(--truncate "$TRUNCATE")
 for r in ${RUNS//,/ }; do case "$r" in integrated|disconnected|integrated_nze|disconnected_gap) ;; *) echo "unknown run $r"; exit 2;; esac; done
 want() { [ -f "${RUN:-/nonexistent}/STOP" ] && return 1; case ",$RUNS," in *",$1,"*) return 0;; *) return 1;; esac; }   # S4O: no run after a STOP
 : "${GRB_LICENSE_FILE:?set GRB_LICENSE_FILE to the licence path provided by the user}"
@@ -105,7 +119,7 @@ RUN="$HERE/runs/$(date -u +%Y%m%dT%H%M%SZ)_$$"; EXP="$RUN/export"
 mkdir -p "$(dirname "$RUN")" && mkdir "$RUN" && mkdir "$EXP" || { echo "run folder $RUN exists or cannot be created"; exit 2; }
 ST="$RUN/STATUS.txt"
 export PYTHONHASHSEED=0
-echo "START:$(date -u +%Y-%m-%dT%H:%M:%SZ) mode:$MODE runs:$RUNS solver_profile:$PROFILE commit:$(cat "$HERE/COMMIT" 2>/dev/null) wall_cap_s:$WALL_CAP_S time_limit_s:$GUROBI_TIME_LIMIT_S profile_source:${PROFILE_SRC// /_} run_gap_s:$RUN_GAP_S c1_step:$C1_STEP" >> "$ST"
+echo "START:$(date -u +%Y-%m-%dT%H:%M:%SZ) mode:$MODE runs:$RUNS solver_profile:$PROFILE commit:$(cat "$HERE/COMMIT" 2>/dev/null) wall_cap_s:$WALL_CAP_S time_limit_s:$GUROBI_TIME_LIMIT_S profile_source:${PROFILE_SRC// /_} run_gap_s:$RUN_GAP_S c1_step:$C1_STEP truncate:${TRUNCATE:-none} pilot_integrated:$([ -n "$PILOT_INTEGRATED" ] && echo given || echo none)" >> "$ST"
 SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'   # licence-line filter (written so that the file itself holds no licence keyword)
 
 # ---- container cgroup memory (v2: memory.max / memory.current; v1: memory/memory.limit_in_bytes / memory.usage_in_bytes); "" when unlimited or absent
@@ -125,7 +139,7 @@ echo "CGROUP_MEMORY_LIMIT_GIB:$(l=$(cg_mem_limit_b); [ -n "$l" ] && awk -v b="$l
 net_of() { case "$1" in integrated) echo "$NETS/integrated_365_24h_unsolved.nc";; disconnected) echo "$NETS/disconnected_365_24h_unsolved.nc";;
                          integrated_nze) echo "$NETS/integrated_nze_365_24h_unsolved.nc";; disconnected_gap) echo "$NETS/disconnected_gap_diagnostic_365_24h_unsolved.nc";; esac; }
 scen_of() { case "$1" in integrated|integrated_nze) echo integrated;; *) echo disconnected;; esac; }
-label_of() { case "$1" in disconnected_gap) echo GAP_DIAGNOSTIC;; *) echo FORMAL_TRIAL_365X24H;; esac; }
+label_of() { case "$1" in disconnected_gap) echo GAP_DIAGNOSTIC;; *) [ -n "$TRUNCATE" ] && echo SMOKE_TEST_ONLY || echo FORMAL_TRIAL_365X24H;; esac; }   # truncated horizons are smoke tests (s2_solve.py)
 
 group_pids() { pgrep -g "$1" 2>/dev/null; }   # every process of the solve's process group (time, python, children)
 group_alive() { [ -n "$(group_pids "$1")" ]; }
@@ -170,8 +184,8 @@ precision() {   # $1 run tag $2 solve dir $3 network $4 scenario $5 label - deci
   local tag=$1 dir=$2 net=$3 sc=$4 label=$5 ref=()
   [ "$C1_STEP" = on ] || { echo "PRECISION_$tag:skipped(C1_STEP=$C1_STEP)" >> "$ST"; return 0; }
   [ -f "$RUN/BATCH_REFERENCE.json" ] && ref=(--reference "$RUN/BATCH_REFERENCE.json")
-  local va=("$PY" "$REPO/scripts_project/l23_violation_analysis.py" --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "$label" --out "$dir/VIOLATIONS.json")
-  local c1=("$PY" "$REPO/scripts_project/s4o_c1_precision.py" run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "$label" --violations "$dir/VIOLATIONS.json" ${ref[@]+"${ref[@]}"})
+  local va=("$PY" "$REPO/scripts_project/l23_violation_analysis.py" --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "$label" --out "$dir/VIOLATIONS.json" ${TRUNC[@]+"${TRUNC[@]}"})
+  local c1=("$PY" "$REPO/scripts_project/s4o_c1_precision.py" run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "$label" --violations "$dir/VIOLATIONS.json" ${ref[@]+"${ref[@]}"} ${TRUNC[@]+"${TRUNC[@]}"})
   if [ $DRY = 1 ]; then echo "DRY-RUN: C1 ${va[*]} ; ${c1[*]}" >> "$ST"; return 0; fi
   local t0; t0=$(date +%s)
   if [ -f "$dir/solution/X.npy" ]; then
@@ -182,18 +196,48 @@ precision() {   # $1 run tag $2 solve dir $3 network $4 scenario $5 label - deci
   echo "PRECISION_$tag:$( [ -f "$dir/PRECISION.json" ] && c1_summary "$dir/PRECISION.json" || echo missing):exit=$rc:$(( $(date +%s) - t0 ))s:$(grep -h 'Maximum resident' "$dir/c1_precision.err" "$dir/c1_violations.err" 2>/dev/null | awk '{printf "%.1fGiB ", $NF/1048576}')" >> "$ST"
 }
 
-batch_regrade() {   # S4O: once both STEPS runs have ledgers -> BATCH_REFERENCE.json (this batch's disconnected - integrated) and re-grade every finished run
-  [ $DRY = 1 ] && { echo "DRY-RUN: batch reference + re-grade once integrated and disconnected have ledgers" >> "$ST"; return 0; }
+pilot_consistency() {   # S4O supplement 01: the pilot's input network SHA256 and profile / parameters against this package and batch -> PILOT_CONSISTENCY.json
+  "$PY" - "$PILOT_INTEGRATED/SOLVE_RECEIPT.json" "$NETS/integrated_365_24h_unsolved.nc" "$REPO/configs/research/baseline.yaml" "$PROFILE" "$RUN/PILOT_CONSISTENCY.json" <<'P' 2>&1 | tail -1
+import hashlib, json, sys, yaml
+rec_p, net_p, cfg_p, prof, out = sys.argv[1:6]
+rec = json.load(open(rec_p)); h = hashlib.sha256()
+with open(net_p, "rb") as f:
+    for b in iter(lambda: f.read(1 << 20), b""):
+        h.update(b)
+P = yaml.safe_load(open(cfg_p))["research"]["solver"]["profiles"][prof]
+used = {k: v for k, v in (rec.get("solver_parameters") or {}).items() if k != "TimeLimit"}
+res = dict(pilot_receipt=rec_p, pilot_input_network_sha256=(rec.get("input_network") or {}).get("sha256"), package_network_sha256=h.hexdigest(),
+           network_same=(rec.get("input_network") or {}).get("sha256") == h.hexdigest(), pilot_profile=rec.get("solver_profile"), batch_profile=prof,
+           pilot_parameters_excl_TimeLimit=used, batch_profile_parameters=P, profile_same=(rec.get("solver_profile") == prof and used == P),
+           pilot_termination=rec.get("termination_condition"), pilot_objective=rec.get("objective"),
+           note="decision 121: B6 = this batch's disconnected - S4N pilot integrated; both must use the same integrated network file and profile")
+json.dump(res, open(out, "w"), indent=1)
+print(f"network_same={res['network_same']}:profile_same={res['profile_same']}:pilot={res['pilot_termination']}")
+P
+}
+
+batch_regrade() {   # S4O: once integrated (this batch, or the S4N pilot given by PILOT_INTEGRATED - decision 121) and disconnected have ledgers ->
+                    # BATCH_REFERENCE.json (disconnected - integrated) and re-grade every finished run (+ a copy of the pilot's C1)
+  [ $DRY = 1 ] && { echo "DRY-RUN: batch reference + re-grade once integrated (this batch or PILOT_INTEGRATED) and disconnected have ledgers" >> "$ST"; return 0; }
   [ "$C1_STEP" = on ] || return 0
-  [ -f "$RUN/integrated/COUNTRY_COST_LEDGER.csv" ] && [ -f "$RUN/disconnected/COUNTRY_COST_LEDGER.csv" ] || return 0
+  local idir="" isrc=""
+  if [ -f "$RUN/integrated/COUNTRY_COST_LEDGER.csv" ]; then idir="$RUN/integrated"; isrc="this_batch"
+  elif [ -n "$PILOT_INTEGRATED" ] && [ -f "$PILOT_INTEGRATED/COUNTRY_COST_LEDGER.csv" ]; then idir="$PILOT_INTEGRATED"; isrc="s4n_pilot"; fi
+  [ -n "$idir" ] && [ -f "$RUN/disconnected/COUNTRY_COST_LEDGER.csv" ] || return 0
   if [ ! -f "$RUN/BATCH_REFERENCE.json" ]; then
-    env -u GRB_LICENSE_FILE "$PY" "$REPO/scripts_project/s4o_c1_precision.py" reference --integrated "$RUN/integrated" --disconnected "$RUN/disconnected" --out "$RUN/BATCH_REFERENCE.json" > "$RUN/c1_reference.log" 2>&1 \
-      && echo "BATCH_REFERENCE:$(date -u +%Y-%m-%dT%H:%M:%SZ):integrated=$(cat "$RUN/integrated/.cond" 2>/dev/null):disconnected=$(cat "$RUN/disconnected/.cond" 2>/dev/null)" >> "$ST" \
+    env -u GRB_LICENSE_FILE "$PY" "$REPO/scripts_project/s4o_c1_precision.py" reference --integrated "$idir" --disconnected "$RUN/disconnected" --out "$RUN/BATCH_REFERENCE.json" > "$RUN/c1_reference.log" 2>&1 \
+      && echo "BATCH_REFERENCE:$(date -u +%Y-%m-%dT%H:%M:%SZ):integrated_source=$isrc:integrated=$(cat "$idir/.cond" 2>/dev/null || echo pilot):disconnected=$(cat "$RUN/disconnected/.cond" 2>/dev/null)" >> "$ST" \
       || { echo "BATCH_REFERENCE:failed" >> "$ST"; return 0; }
     cp "$RUN/BATCH_REFERENCE.json" "$EXP/"
+    if [ "$isrc" = s4n_pilot ]; then
+      echo "PILOT_CONSISTENCY:$(pilot_consistency)" >> "$ST"; cp "$RUN/PILOT_CONSISTENCY.json" "$EXP/" 2>/dev/null
+      if [ -n "$PILOT_PRECISION" ] && [ -f "$PILOT_PRECISION" ]; then   # re-grade a COPY of the pilot's C1; the pilot files stay unchanged
+        mkdir -p "$RUN/pilot_integrated"; cp "$PILOT_PRECISION" "$RUN/pilot_integrated/PRECISION.json"
+      else echo "PILOT_PRECISION:not_given_or_missing (pilot C1 not re-graded)" >> "$ST"; fi
+    fi
   fi
   local t
-  for t in integrated disconnected integrated_nze disconnected_gap; do
+  for t in integrated pilot_integrated disconnected integrated_nze disconnected_gap; do
     [ -f "$RUN/$t/PRECISION.json" ] || continue
     c1_summary "$RUN/$t/PRECISION.json" | grep -q ':ref=batch' && continue
     env -u GRB_LICENSE_FILE "$PY" "$REPO/scripts_project/s4o_c1_precision.py" regrade --solve-dir "$RUN/$t" --reference "$RUN/BATCH_REFERENCE.json" > "$RUN/$t/c1_regrade.log" 2>&1; local rc=$?
@@ -213,7 +257,7 @@ solve() {   # $1 run tag; prints the termination condition as the last line
   local tag=$1 dir="$RUN/$1" net sc label; net=$(net_of "$1"); sc=$(scen_of "$1"); label=$(label_of "$1")
   mkdir -p "$dir"
   local cmd=("$PY" "$REPO/scripts_project/s2_solve.py" --repo "$REPO" --network "$net" --scenario "$sc" --output "$dir"
-             --label "$label" --authorization "$AUTH; run $tag" --solver gurobi --solver-profile "$PROFILE" --scaling on --time-limit "$GUROBI_TIME_LIMIT_S" --costs-table "$NETS/${1}_costs_active_research.csv")
+             --label "$label" --authorization "$AUTH; run $tag" --solver gurobi --solver-profile "$PROFILE" --scaling on --time-limit "$GUROBI_TIME_LIMIT_S" --costs-table "$NETS/${1}_costs_active_research.csv" ${TRUNC[@]+"${TRUNC[@]}"})
   gap_wait "$tag"
   if [ $DRY = 1 ]; then echo "DRY-RUN: ${cmd[*]}" | tee -a "$ST" >/dev/null; precision "$tag" "$dir" "$net" "$sc" "$label"; date +%s > "$RUN/.last_solve_end"; echo dry; return 0; fi
   # own session + process group for the solve: the group id equals the pid of /usr/bin/time (setsid does not fork when the caller is not a group leader)

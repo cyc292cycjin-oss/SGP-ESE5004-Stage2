@@ -1,4 +1,6 @@
 #!/bin/bash
+# S4O (supplement 01, decision 121): only the suggested caps changed - base TimeLimit 21,600 s (was 14,400), wall = TimeLimit + 900 s; the probe still
+# solves with profile A, its local reference. Under decision 121 the probe runs only when the instance CPU differs from the 8470Q.
 # S4M speed probe (S4M-3 point 3, decision 116): ONE 56x3h solve of the packaged integrated STEPS probe network with profile A (formal_barrier) on the
 # instance, 30 min stop-loss, no retry; then the Gurobi seconds per work unit and per barrier iteration are compared with the SAME run made locally
 # (S4M-2 smoke, PROBE_REFERENCE.json in the package) -> speed ratio of the instance and the suggested TimeLimit / wall-clock cap for the pilot.
@@ -52,8 +54,8 @@ r = res.get("speed_ratio_instance_over_local_work_units")
 if r:
     # L23 (section 21): on a 0.23-0.30 x instance the integrated 365x24h run needed 1.7-3.1 h; scale the 4 h / 4.25 h defaults with the measured ratio relative to 0.25
     scale = max(1.0, 0.25 / r)
-    res["suggested_gurobi_time_limit_s"] = int(round(14400 * scale / 300.0) * 300); res["suggested_wall_cap_s"] = res["suggested_gurobi_time_limit_s"] + 900
-    res["suggestion_note"] = "defaults 14,400 / 15,300 s hold for an instance at least as fast as 0.25 x local (L23 instance 0.23-0.30); slower instances scale the caps by 0.25 / ratio"
+    res["suggested_gurobi_time_limit_s"] = int(round(21600 * scale / 300.0) * 300); res["suggested_wall_cap_s"] = res["suggested_gurobi_time_limit_s"] + 900   # S4O supplement 01 (decision 121): base 21,600 s (was 14,400)
+    res["suggestion_note"] = "defaults 21,600 / 22,500 s (decision 121) hold for an instance at least as fast as 0.25 x local (L23 instance 0.23-0.30); slower instances scale the caps by 0.25 / ratio"
 (out / "SPEED_PROBE.json").write_text(json.dumps(res, indent=1))
 print("SPEED_PROBE:", json.dumps({k: v for k, v in res.items() if k != "reference"}))
 P

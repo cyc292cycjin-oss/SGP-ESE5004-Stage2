@@ -1,4 +1,5 @@
-"""S4O-2 (decision 120): production solver profile pypsa_eur_default (key names, Threads 8, interior-point gate path) and the C1 precision step of the
+"""S4O-2 (decision 120) / S4O supplement 01 (decision 121): solver profiles - production profile A formal_barrier (decision 121), the registered
+non-production profile pypsa_eur_default (key names, Threads 8), key-name recognition, interior-point gate path - and the C1 precision step of the
 run pipeline (decision 119 (a)(b)(c)) on a toy LP; no Gurobi, no licence."""
 from __future__ import annotations
 
@@ -21,9 +22,9 @@ SV = CFG["research"]["solver"]
 SRC = ROOT / "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml"
 
 
-def test_production_profile_is_pypsa_eur_default_with_two_adaptations():
+def test_production_profile_A_and_registered_pypsa_eur_default():
     P = SV["profiles"]["pypsa_eur_default"]
-    assert SV["profile"] == "pypsa_eur_default"
+    assert SV["profile"] == "formal_barrier"   # decision 121: production back to profile A; pypsa_eur_default kept as a registered non-production profile
     assert P == {"Threads": 8, "Method": 2, "Crossover": 0, "BarConvTol": 1e-5, "Seed": 123, "AggFill": 0, "PreDual": 0, "GURO_PAR_BARDENSETHRESH": 200}
     src = yaml.safe_load(SRC.read_text())["solving"]["solver_options"]["gurobi-default"]   # PyPSA-Eur v2025.07.0 lines 1056-1064
     assert {k.lower(): v for k, v in src.items() if k != "threads"} == {k.lower(): v for k, v in P.items() if k != "Threads"} and src["threads"] == 32
@@ -31,6 +32,8 @@ def test_production_profile_is_pypsa_eur_default_with_two_adaptations():
     assert A == {"Method": 2, "Crossover": 0, "BarConvTol": 1e-8, "BarHomogeneous": 1, "Threads": 8, "Seed": 123, "AggFill": 0, "PreDual": 0, "GURO_PAR_BARDENSETHRESH": 200}
     reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
     assert reg.at["s4o_decision_120_production_profile", "decision_ref"] == "107,119,120" and "Threads 8" in reg.at["s4o_decision_120_production_profile", "description"]
+    r121 = reg.loc["s4o_decision_121_production_profile_A"]
+    assert r121["value"] == "formal_barrier" and "121" in r121["decision_ref"] and "0.01 bn" in r121["description"]
 
 
 def test_profile_key_names_recognised():
@@ -116,6 +119,24 @@ def test_c1_pipeline_reference_regrade_exports(tmp_path):
     ex = json.loads((sd / "EXPORTS.json").read_text())
     assert set(ex) >= {"DUALS_INDEX.csv", "PRECISION.json", "PRECISION.md"} and ex["PRECISION.json"]["sha256"] == C1.sha(sd / "PRECISION.json")
     assert "验收" in (sd / "PRECISION.md").read_text(encoding="utf-8")
+
+
+PILOT = ROOT / "research/06_scope_redesign/p1_step4n_20261019/cloud_results/20261019T072454Z_5125/unpacked/s4n_pilot_light_20261019T072454Z_5125"
+
+
+@pytest.mark.skipif(not (PILOT / "PILOT_PRECISION.json").exists(), reason="S4N pilot light package not archived")
+def test_c1_regrade_pilot_copy_with_batch_disconnected(tmp_path):
+    """decision 121: reference = this batch's disconnected - S4N pilot integrated; the pilot's C1 (S4N tool format) is re-graded on a COPY."""
+    src = PILOT / "PILOT_PRECISION.json"; before = C1.sha(src)
+    ld = pd.read_csv(PILOT / "export_integrated/COUNTRY_COST_LEDGER.csv", index_col=0); ld["total"] = ld["total"] + 2e9   # synthetic disconnected: +2 bn each
+    (tmp_path / "d").mkdir(); ld.to_csv(tmp_path / "d/COUNTRY_COST_LEDGER.csv")
+    ref = C1.reference_from_ledgers(PILOT / "export_integrated", tmp_path / "d")
+    assert ref["differences_bn"]["VN"] == pytest.approx(2.0) and ref["differences_bn"]["ASEAN"] == pytest.approx(2.0 * sum(str(k).startswith("ASEAN") for k in ld.index))
+    cp = tmp_path / "pilot"; cp.mkdir(); (cp / "PRECISION.json").write_bytes(src.read_bytes())
+    res = C1.regrade(cp, ref)
+    assert res["grade_history"][0]["grade"] == "layer1_plus_nodal_price_settlement" and res["reference"]["source"].startswith("this batch")
+    assert res["acceptance"]["optimal"] and res["acceptance"]["accepted"]   # pilot optimal, (a)(b)(c) pass with the +2 bn tolerances (0.02 bn per country)
+    assert C1.sha(src) == before and (cp / "EXPORTS.json").exists()
 
 
 def test_c1_not_computable_without_solution(tmp_path):

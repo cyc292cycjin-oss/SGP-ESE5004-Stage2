@@ -1,0 +1,45 @@
+"""S4O supplement 01 data: registry fragment s4o_1 - decision 121 (confirmed 2026-10-19 ~21:45 SGT): production profile back to profile A, no extra
+S4O-3 runs, standards not relaxed, batch plan of S4O-6 (disconnected STEPS + integrated NZE against the S4N pilot integrated run).
+
+    python scripts_project/s4o_1_data.py
+"""
+from __future__ import annotations
+
+from d1_common import REG_DIR, ROOT, Registry, sha256
+
+SCRIPT = "scripts_project/s4o_1_data.py"
+SUP_SHA = "f723c544946142ca5e896a56652f95e4fcb3eba586bed21d9cce5ce6e8c7a7a4"
+SRC = "S4O supplement 01 v1 2026-10-19 21:45 SGT (user decision 121 confirmed with the supplement)"
+LOC = "work/p1_step4o_20261019/S4O_SUPPLEMENT_01.md"
+S4O = "research/06_scope_redesign/p1_step4o_20261019/S4O_REPORT.md"
+
+
+def main():
+    reg = Registry(SCRIPT)
+    reg.add("s4o_decision_121_production_profile_A", "Decision 121 (replaces decision 120 point (2)): the production solver profile is profile A formal_barrier (Method 2, Crossover 0, "
+            "BarConvTol 1e-8, BarHomogeneous 1, Threads 8, Seed 123, AggFill 0, PreDual 0, GURO_PAR_BARDENSETHRESH 200) again, for the 365x24h batch, the 2920x3h formal "
+            "runs and the coalition runs. Reason: with BarConvTol 1e-5 (pypsa_eur_default) the returned primal / dual gap lands around 3e-5 (S4O-3 56x3h integrated, "
+            "Threads 8: 2.79e-5; objective 2.13e-5 from profile A, decision-107 standard 1e-5 not passed; C1 (a) -0.018 bn), i.e. about 0.015-0.02 bn EUR on this model - "
+            "the same order as the 0.01 bn decision unit of decisions 107 / 119 (a), too little margin - and the result depends on the thread path (S4N C2, threads 32: "
+            "7.8e-6). pypsa_eur_default stays registered as a non-production profile for later calibration; the other S4O-2 results are kept (key-name check, "
+            "interior-point path function, C1 pipeline, RUN_GAP_S)", "formal_barrier", "flag", "B", SRC, LOC, SUP_SHA, decision_ref="107,119,120,121", status="REGISTERED")
+    reg.add("s4o_decision_121_standards_kept", "Decision 121: the decision-107 standard (objective <= 1e-5, B16 <= 1e-6, country difference change <= max(1 %, 0.01 bn)) and "
+            "decision 119 (a) (|primal - dual| <= 0.01 bn and <= 1e-5) are NOT relaxed - they come from the precision the research question needs (0.01 bn) and do not "
+            "follow solver results; the two S4O-3 runs not started (disconnected, NZE with pypsa_eur_default) are not made up (the 'not passed' verdict stands)",
+            "standards_unchanged;no_extra_runs", "flag", "B", SRC, LOC, SUP_SHA, decision_ref="107,119,121", status="REGISTERED")
+    reg.add("s4o_decision_121_batch_plan", "Decision 121 (S4O-6 adjustment, cloud still needs a separate authorisation): the 365x24h batch runs only disconnected STEPS and "
+            "integrated NZE (profile A; the disconnected gap diagnostic only if the disconnected main is non-optimal); the integrated STEPS run is not repeated - the S4N "
+            "pilot (same network, same profile A, optimal, adopted under decisions 119 / 120) is the integrated result; B6 = this batch's disconnected - pilot integrated "
+            "(network SHA256 and profile parameters of both checked in the report); TimeLimit / wall-clock defaults 21,600 / 22,500 s, set BEFORE the runs (the pilot used "
+            "about 80 % of 14,400 s including one restart; the L23 NZE run hit its time limit); C1 (b)(c) country reference after the disconnected run = this batch's "
+            "disconnected - pilot integrated difference, the pilot re-graded with grade_history kept", "disconnected,integrated_nze;21600/22500", "flag", "B", SRC, LOC,
+            SUP_SHA, decision_ref="112,116,119,121", status="REGISTERED")
+    reg.add("s4o_question_source_s4o", "S4O supplement 01: decision 121 answers the S4O report section 7 items 1-4 (production profile, the two S4O-3 runs not made, "
+            "continuation of S4O-4 / S4O-5, default profile on the branch)", "S4O_REPORT.md", "flag", "B", "S4O report section 7 (PR #40)", S4O, sha256(ROOT / S4O),
+            decision_ref="121", status="REFERENCE_ONLY")
+    reg.write(REG_DIR / "fragments" / "s4o_1.csv")
+    print("registry fragment s4o_1 written:", len(reg.rows), "rows")
+
+
+if __name__ == "__main__":
+    main()
