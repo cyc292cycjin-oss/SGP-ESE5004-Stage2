@@ -83,7 +83,7 @@ check "D: cgroup v1 unlimited (quota -1, limit 2^63) falls back to the host valu
 check "D: tools section finds GNU time and setsid" "grep -q '/usr/bin/time (GNU time, -v) present' '$OUT/D_preflight_v2.txt' && grep -q 'setsid (util-linux) present' '$OUT/D_preflight_v2.txt'"
 # ---------------------------------------------------------------- E: preflight full-file syntax and the licence section is untouched by the test (not run)
 check "E: both scripts pass bash -n" "bash -n '$PKG/run_365x24h.sh' && bash -n '$PKG/preflight.sh'"
-check "E: scripts hold no licence keyword outside the scrub pattern lines" "! grep -iE 'wlsaccess|wlssecret|licenseid' '$PKG/run_365x24h.sh' '$PKG/preflight.sh' >/dev/null"
+check "E: scripts hold no licence keyword outside the scrub pattern lines" "! grep -iE 'wls(access|secret)|license[i]d' '$PKG/run_365x24h.sh' '$PKG/preflight.sh' >/dev/null"
 echo "SUMMARY: pass=$pass fail=$fail (temp $T)" >> "$RES"
 cat "$RES"
 rm -rf "$T"
