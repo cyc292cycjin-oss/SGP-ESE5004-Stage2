@@ -1,0 +1,3525 @@
+{
+ "instruction": {
+  "file": "work/p1_step4l_20261019/S4L_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "03508400f675304cd0bdfd40ccbd0c61005644e7b2a122dffbe2048e6a5d529b",
+  "verified": true
+ },
+ "git": {
+  "branch": "codex/s4l-numerics-20261019",
+  "head": "182078395b6cbd7f79a83a0dae54c639fd30c770",
+  "base": "efb37fc20ef1a0b185215c553ba9a61bc871830d (L23 head, PR #36)",
+  "log": [
+   "18207839 S4L-1 builds with the corrected rule at 2983d951 (clean tree): BN / SG / VN pools kept (binding), MY and TL small pools removed, surviving components identical to S4K-3; first-rule build evidence moved to evidence/s4l_1/first_rule_infeasible; infeasibility cause diagnosis (read-only) in evidence/s4l_2",
+   "2983d951 S4L-1 guard refined: the fixed demand a pool bus must cover counts only the biomass final-energy buses behind it (BN / SG / VN binding with zero slack; MY and TL small pools deletable), inventory and registry regenerated",
+   "6a2ddff9 S4L-2 results: 56x3h diagnostic matrix, 8 runs serial (S4K network + A: both optimal and bit-identical to S4K-3; S4K network + crossover: barrier identical, crossover push completes, simplex cleanup ends infeasible_or_unbounded, 0.38-0.54 x barrier time; first-rule cleaned network: infeasible under A and crossover - BN and SG pools equal their fixed biomass demand), evidence, summary flags B12-only failures",
+   "381e39b8 S4L-1 correction after the S4L-2 matrix: finite pools below the energy threshold are kept when the fixed biomass demand of their bus needs them (BN and SG pools equal the fixed demand exactly: the first cleaned networks were infeasible), post-cleanup pool-balance assertion, registry s4l1_pool_fixed_demand_guard, inventory regenerated, tests",
+   "547bb8ac S4L-3: deployment scripts corrected in p1_step4l_20261019/cloud_package (run_365x24h.sh: setsid process group per solve, group kill at the wall-clock cap, wait before export, pre-/post-solve receipt check, cgroup memory in the monitor, formal_barrier_crossover allowed; preflight.sh: container cgroup v1/v2 CPU and memory quota, setsid check), local tests with a solver test double (28/28), CLOUD_RESOURCE_ESTIMATE.md section 21 (L23 calibration, instance selection), S4L make_package.sh prepared (not run); gate B12 accepts override value on; S4L-2 summary flags B12-only failures",
+   "6e45bc1f S4L-1 builds: integrated and disconnected networks with research.numerics.dust_cleanup=on at aa9559fe (clean tree), component comparison with the S4K-3 networks (surviving components identical), build receipts and inventories as evidence",
+   "aa9559fe S4L-2 preparation: solver profile formal_barrier_crossover (profile A + Gurobi Crossover default -1, added only), registry fragment s4l_2 with the comparison standard fixed before the runs, matrix runner and summary scripts, progress",
+   "57008244 S4L-1: near-zero (dust) inventory and cleanup layer s4l_layers.py (switch research.numerics.dust_cleanup off|on, thresholds 1 GWh / 1 MW), inventory on the S4K-3 networks with L23 usage, registry fragment s4l_1, tests",
+   "d6203004 S4L-0: registry fragment s4l_0 (decision 112 a/b: L23 runs SCREENING_UNVERIFIED, recovered NZE outputs accepted), ledger L23 entry, progress file"
+  ]
+ },
+ "stops": [
+  "NOT_OPTIMAL_s4k_X_integrated:infeasible_or_unbounded (recorded, no retry)",
+  "NOT_OPTIMAL_s4k_X_disconnected:infeasible_or_unbounded (recorded, no retry)",
+  "NOT_OPTIMAL_s4l_A_integrated:infeasible_or_unbounded (recorded, no retry)",
+  "NOT_OPTIMAL_s4l_A_disconnected:infeasible_or_unbounded (recorded, no retry)",
+  "NOT_OPTIMAL_s4l_X_integrated:infeasible_or_unbounded (recorded, no retry)",
+  "NOT_OPTIMAL_s4l_X_disconnected:infeasible_or_unbounded (recorded, no retry)"
+ ],
+ "downloads": [],
+ "s4l0": {
+  "s4l_l23_ledger_entry": {
+   "value": "added",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4l_l23_nze_late_outputs_accepted": {
+   "value": "78a6ea15d369788f93c5fe20294e21fefd168db50d908ebad25f231c2001c33b",
+   "unit": "sha256",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4l_l23_runs_screening_unverified": {
+   "value": "SCREENING_UNVERIFIED",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4l_question_source_l23": {
+   "value": "L23_RUN1_REPORT.md",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  },
+  "s4l_scope_rule": {
+   "value": "112c;113_1;113_2",
+   "unit": "flag",
+   "tier": "B",
+   "status": "REFERENCE_ONLY"
+  }
+ },
+ "s4l1": {
+  "registry": {
+   "s4l1_dust_capacity_threshold": {
+    "value": "1",
+    "unit": "MW",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_dust_cleanup_switch": {
+    "value": "off",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_dust_delete_rule": {
+    "value": "delete",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_dust_energy_threshold": {
+    "value": "1000",
+    "unit": "MWh/a",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_dust_keep_rule": {
+    "value": "keep",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_dust_merge_rule": {
+    "value": "merge",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l1_pool_fixed_demand_guard": {
+    "value": "keep_if_needed",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "thresholds": {
+   "energy_mwh": 1000.0,
+   "capacity_mw": 1.0
+  },
+  "pypsa_eur": {
+   "config": "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml",
+   "renewable_clip_p_max_pu": {
+    "value": 0.01,
+    "lines": [
+     200,
+     218,
+     237,
+     259,
+     276,
+     292
+    ],
+    "note": "applied in this model by S4A (research.renewable.clip_p_max_pu)"
+   },
+   "solving_clip_p_max_pu": {
+    "value": 0.01,
+    "line": 988
+   },
+   "hydro_clip_min_inflow_mw": {
+    "value": 1.0,
+    "line": 300,
+    "adopted_as": "dust_capacity_mw"
+   },
+   "existing_threshold_capacity_mw": {
+    "value": 10.0,
+    "line": 469,
+    "adopted": false,
+    "note": "existing stock is not touched"
+   },
+   "co2_sequestration_min_size_mt": {
+    "value": 3.0,
+    "line": 700,
+    "adopted": false
+   },
+   "energy_threshold": "no PyPSA-Eur equivalent: project choice 1 GWh/a (S4L-1 point 2)"
+  },
+  "inventory": {
+   "integrated": {
+    "network_sha256": "467361f17ccf80306cf700d2fae6c42e5b9b3b76430bba5465b2dc67dc870194",
+    "components": {
+     "Load": 2064,
+     "Line": 148,
+     "LineType": 35,
+     "StorageUnit": 280,
+     "Carrier": 135,
+     "Link": 7584,
+     "Generator": 1995,
+     "Bus": 2914,
+     "Store": 530,
+     "TransformerType": 14
+    },
+    "clip_p_max_pu_applied": 0.01,
+    "summary": {
+     "rows": 818,
+     "by_class_action": [
+      {
+       "dust_class": "all_zero_load",
+       "action": "delete",
+       "count": 38,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "all_zero_profile_generator",
+       "action": "delete",
+       "count": 3,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "biomass_pool_below_energy",
+       "action": "delete",
+       "count": 2,
+       "capacity_mw": 0.0,
+       "energy_mwh": 1456.299473283
+      },
+      {
+       "dust_class": "identical_parallel_link",
+       "action": "merge",
+       "count": 86,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "identical_parallel_link",
+       "action": "merge_keep",
+       "count": 8,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "kept_extra_asean_co2_store",
+       "action": "keep",
+       "count": 11,
+       "capacity_mw": 0.0,
+       "energy_mwh": Infinity
+      },
+      {
+       "dust_class": "kept_fixed_generator_below_capacity",
+       "action": "keep",
+       "count": 11,
+       "capacity_mw": 5.032791364404965,
+       "energy_mwh": 44087.25235218749
+      },
+      {
+       "dust_class": "kept_pool_fixed_demand_binding",
+       "action": "keep",
+       "count": 5,
+       "capacity_mw": 0.0,
+       "energy_mwh": 1380.3050548075921
+      },
+      {
+       "dust_class": "kept_zero_capacity_extendable_link",
+       "action": "keep",
+       "count": 100,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "renewable_potential_below_capacity",
+       "action": "delete",
+       "count": 3,
+       "capacity_mw": 0.5756115864233844,
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "dust_class": "single_attachment_fuel_bus",
+       "action": "delete",
+       "count": 128,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "single_attachment_fuel_bus_component",
+       "action": "delete",
+       "count": 128,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "zero_upper_candidate",
+       "action": "delete",
+       "count": 295,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      }
+     ],
+     "removed_or_merged": {
+      "count": 683,
+      "by_country": [
+       {
+        "country": "BN",
+        "count": 7,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "ID",
+        "count": 234,
+        "capacity_mw": 0.5756115864233844,
+        "energy_mwh": 601.1897667906217
+       },
+       {
+        "country": "KH",
+        "count": 37,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "LA",
+        "count": 35,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "MM",
+        "count": 154,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "MY",
+        "count": 62,
+        "capacity_mw": 0.0,
+        "energy_mwh": 792.390024464
+       },
+       {
+        "country": "PH",
+        "count": 32,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "SG",
+        "count": 9,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "TH",
+        "count": 57,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "TL",
+        "count": 10,
+        "capacity_mw": 0.0,
+        "energy_mwh": 663.909448819
+       },
+       {
+        "country": "VN",
+        "count": 46,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       }
+      ],
+      "by_country_class": {
+       "BN": {
+        "all_zero_load": 1,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 1,
+        "single_attachment_fuel_bus_component": 1,
+        "zero_upper_candidate": 4
+       },
+       "ID": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 38,
+        "renewable_potential_below_capacity": 3,
+        "single_attachment_fuel_bus": 35,
+        "single_attachment_fuel_bus_component": 35,
+        "zero_upper_candidate": 123
+       },
+       "KH": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 4,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 8,
+        "single_attachment_fuel_bus_component": 8,
+        "zero_upper_candidate": 17
+       },
+       "LA": {
+        "all_zero_load": 6,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 5,
+        "single_attachment_fuel_bus_component": 5,
+        "zero_upper_candidate": 14
+       },
+       "MM": {
+        "all_zero_load": 17,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 16,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 32,
+        "single_attachment_fuel_bus_component": 32,
+        "zero_upper_candidate": 57
+       },
+       "MY": {
+        "all_zero_load": 7,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 1,
+        "identical_parallel_link": 6,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 13,
+        "single_attachment_fuel_bus_component": 13,
+        "zero_upper_candidate": 21
+       },
+       "PH": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 10,
+        "single_attachment_fuel_bus_component": 10,
+        "zero_upper_candidate": 6
+       },
+       "SG": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 2,
+        "single_attachment_fuel_bus_component": 2,
+        "zero_upper_candidate": 4
+       },
+       "TH": {
+        "all_zero_load": 6,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 12,
+        "single_attachment_fuel_bus_component": 12,
+        "zero_upper_candidate": 22
+       },
+       "TL": {
+        "all_zero_load": 1,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 1,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 2,
+        "single_attachment_fuel_bus_component": 2,
+        "zero_upper_candidate": 4
+       },
+       "VN": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 7,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 8,
+        "single_attachment_fuel_bus_component": 8,
+        "zero_upper_candidate": 23
+       }
+      },
+      "energy_mwh": 2057.4892400736217,
+      "capacity_mw_finite": 0.5756115864233843,
+      "unbounded": 382
+     },
+     "kept_listed": {
+      "kept_zero_capacity_extendable_link": 100,
+      "kept_extra_asean_co2_store": 11,
+      "kept_fixed_generator_below_capacity": 11,
+      "kept_pool_fixed_demand_binding": 5
+     }
+    },
+    "pools_below_threshold": [
+     {
+      "name": "MY biomass maize_residues",
+      "country": "MY",
+      "energy_mwh": 792.390024464,
+      "note": "finite pool 792.390 MWh/a < 1000; category maize_residues; bus pools 247024816.8 MWh, fixed demand 127387574.1 MWh, slack after deletion 119636450.3 MWh"
+     },
+     {
+      "name": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "energy_mwh": 663.909448819,
+      "note": "finite pool 663.909 MWh/a < 1000; category wood_processing_residues; bus pools 594009.9 MWh, fixed demand 0.0 MWh, slack after deletion 593346.0 MWh"
+     }
+    ],
+    "renewable_below_capacity": [
+     {
+      "name": "ID_Kalimantan4 5 offwind-dc-2025",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.003430324113360577,
+      "energy_mwh": 2.0320598953870337
+     },
+     {
+      "name": "ID_Nusa-Tenggara13 0 offwind-dc-2025 c2",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.22655368838199125,
+      "energy_mwh": 591.5037747131723
+     },
+     {
+      "name": "ID_Sulawesi0 1 offwind-dc-2025",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.34562757392803256,
+      "energy_mwh": 7.653932182062279
+     }
+    ],
+    "single_attachment_kept": [],
+    "merged_groups": 8
+   },
+   "disconnected": {
+    "network_sha256": "682d451bec9c9ffff7cbfbfb7452826f32235db406960aa83cfd948fc81e1b29",
+    "components": {
+     "Load": 2064,
+     "Line": 86,
+     "LineType": 35,
+     "StorageUnit": 280,
+     "Carrier": 135,
+     "Link": 7292,
+     "Generator": 1995,
+     "Bus": 2914,
+     "Store": 530,
+     "TransformerType": 14
+    },
+    "clip_p_max_pu_applied": 0.01,
+    "summary": {
+     "rows": 818,
+     "by_class_action": [
+      {
+       "dust_class": "all_zero_load",
+       "action": "delete",
+       "count": 38,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "all_zero_profile_generator",
+       "action": "delete",
+       "count": 3,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "biomass_pool_below_energy",
+       "action": "delete",
+       "count": 2,
+       "capacity_mw": 0.0,
+       "energy_mwh": 1456.299473283
+      },
+      {
+       "dust_class": "identical_parallel_link",
+       "action": "merge",
+       "count": 86,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "identical_parallel_link",
+       "action": "merge_keep",
+       "count": 8,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "kept_extra_asean_co2_store",
+       "action": "keep",
+       "count": 11,
+       "capacity_mw": 0.0,
+       "energy_mwh": Infinity
+      },
+      {
+       "dust_class": "kept_fixed_generator_below_capacity",
+       "action": "keep",
+       "count": 11,
+       "capacity_mw": 5.032791364404965,
+       "energy_mwh": 44087.25235218749
+      },
+      {
+       "dust_class": "kept_pool_fixed_demand_binding",
+       "action": "keep",
+       "count": 5,
+       "capacity_mw": 0.0,
+       "energy_mwh": 1380.3050548075921
+      },
+      {
+       "dust_class": "kept_zero_capacity_extendable_link",
+       "action": "keep",
+       "count": 100,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "renewable_potential_below_capacity",
+       "action": "delete",
+       "count": 3,
+       "capacity_mw": 0.5756115864233844,
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "dust_class": "single_attachment_fuel_bus",
+       "action": "delete",
+       "count": 128,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "single_attachment_fuel_bus_component",
+       "action": "delete",
+       "count": 128,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "dust_class": "zero_upper_candidate",
+       "action": "delete",
+       "count": 295,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      }
+     ],
+     "removed_or_merged": {
+      "count": 683,
+      "by_country": [
+       {
+        "country": "BN",
+        "count": 7,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "ID",
+        "count": 234,
+        "capacity_mw": 0.5756115864233844,
+        "energy_mwh": 601.1897667906217
+       },
+       {
+        "country": "KH",
+        "count": 37,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "LA",
+        "count": 35,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "MM",
+        "count": 154,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "MY",
+        "count": 62,
+        "capacity_mw": 0.0,
+        "energy_mwh": 792.390024464
+       },
+       {
+        "country": "PH",
+        "count": 32,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "SG",
+        "count": 9,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "TH",
+        "count": 57,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       },
+       {
+        "country": "TL",
+        "count": 10,
+        "capacity_mw": 0.0,
+        "energy_mwh": 663.909448819
+       },
+       {
+        "country": "VN",
+        "count": 46,
+        "capacity_mw": 0.0,
+        "energy_mwh": 0.0
+       }
+      ],
+      "by_country_class": {
+       "BN": {
+        "all_zero_load": 1,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 1,
+        "single_attachment_fuel_bus_component": 1,
+        "zero_upper_candidate": 4
+       },
+       "ID": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 38,
+        "renewable_potential_below_capacity": 3,
+        "single_attachment_fuel_bus": 35,
+        "single_attachment_fuel_bus_component": 35,
+        "zero_upper_candidate": 123
+       },
+       "KH": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 4,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 8,
+        "single_attachment_fuel_bus_component": 8,
+        "zero_upper_candidate": 17
+       },
+       "LA": {
+        "all_zero_load": 6,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 5,
+        "single_attachment_fuel_bus_component": 5,
+        "zero_upper_candidate": 14
+       },
+       "MM": {
+        "all_zero_load": 17,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 16,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 32,
+        "single_attachment_fuel_bus_component": 32,
+        "zero_upper_candidate": 57
+       },
+       "MY": {
+        "all_zero_load": 7,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 1,
+        "identical_parallel_link": 6,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 13,
+        "single_attachment_fuel_bus_component": 13,
+        "zero_upper_candidate": 21
+       },
+       "PH": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 10,
+        "single_attachment_fuel_bus_component": 10,
+        "zero_upper_candidate": 6
+       },
+       "SG": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 1,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 2,
+        "single_attachment_fuel_bus_component": 2,
+        "zero_upper_candidate": 4
+       },
+       "TH": {
+        "all_zero_load": 6,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 5,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 12,
+        "single_attachment_fuel_bus_component": 12,
+        "zero_upper_candidate": 22
+       },
+       "TL": {
+        "all_zero_load": 1,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 1,
+        "identical_parallel_link": 0,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 2,
+        "single_attachment_fuel_bus_component": 2,
+        "zero_upper_candidate": 4
+       },
+       "VN": {
+        "all_zero_load": 0,
+        "all_zero_profile_generator": 0,
+        "biomass_pool_below_energy": 0,
+        "identical_parallel_link": 7,
+        "renewable_potential_below_capacity": 0,
+        "single_attachment_fuel_bus": 8,
+        "single_attachment_fuel_bus_component": 8,
+        "zero_upper_candidate": 23
+       }
+      },
+      "energy_mwh": 2057.4892400736217,
+      "capacity_mw_finite": 0.5756115864233843,
+      "unbounded": 382
+     },
+     "kept_listed": {
+      "kept_zero_capacity_extendable_link": 100,
+      "kept_extra_asean_co2_store": 11,
+      "kept_fixed_generator_below_capacity": 11,
+      "kept_pool_fixed_demand_binding": 5
+     }
+    },
+    "pools_below_threshold": [
+     {
+      "name": "MY biomass maize_residues",
+      "country": "MY",
+      "energy_mwh": 792.390024464,
+      "note": "finite pool 792.390 MWh/a < 1000; category maize_residues; bus pools 247024816.8 MWh, fixed demand 127387574.1 MWh, slack after deletion 119636450.3 MWh"
+     },
+     {
+      "name": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "energy_mwh": 663.909448819,
+      "note": "finite pool 663.909 MWh/a < 1000; category wood_processing_residues; bus pools 594009.9 MWh, fixed demand 0.0 MWh, slack after deletion 593346.0 MWh"
+     }
+    ],
+    "renewable_below_capacity": [
+     {
+      "name": "ID_Kalimantan4 5 offwind-dc-2025",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.003430324113360577,
+      "energy_mwh": 2.0320598953870337
+     },
+     {
+      "name": "ID_Nusa-Tenggara13 0 offwind-dc-2025 c2",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.22655368838199125,
+      "energy_mwh": 591.5037747131723
+     },
+     {
+      "name": "ID_Sulawesi0 1 offwind-dc-2025",
+      "country": "ID",
+      "carrier": "offwind-dc",
+      "capacity_mw": 0.34562757392803256,
+      "energy_mwh": 7.653932182062279
+     }
+    ],
+    "single_attachment_kept": [],
+    "merged_groups": 8
+   }
+  },
+  "l23_usage": {
+   "integrated": {
+    "biomass_pools": [
+     {
+      "store": "MY biomass maize_residues",
+      "country": "MY",
+      "e_nom_mwh": 792.390024464,
+      "used_mwh": 793.2937951597631,
+      "min_level_mwh": -0.9037706957631679,
+      "final_level_mwh": -0.9037706957631679,
+      "share_used": 1.0011405629397903
+     },
+     {
+      "store": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "e_nom_mwh": 663.909448819,
+      "used_mwh": 665.72025694212,
+      "min_level_mwh": -1.8108081231200899,
+      "final_level_mwh": -1.8108081231200899,
+      "share_used": 1.002727492621684
+     }
+    ],
+    "extra_asean_stores": [
+     {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "country": "BN",
+      "e_nom_opt_t": 4.151732475426743,
+      "final_level_t": 4.151826685100203,
+      "max_level_t": 4.151826685100203
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "country": "ID",
+      "e_nom_opt_t": 95.39178570154156,
+      "final_level_t": 95.44109549346634,
+      "max_level_t": 95.44109549346634
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "country": "KH",
+      "e_nom_opt_t": 18.023574024578565,
+      "final_level_t": 18.036082472414243,
+      "max_level_t": 18.036082472414243
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "country": "LA",
+      "e_nom_opt_t": 9.072946729644384,
+      "final_level_t": 9.094657025689338,
+      "max_level_t": 9.094657025689338
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "country": "MM",
+      "e_nom_opt_t": 29.919875795473356,
+      "final_level_t": 29.935639212172067,
+      "max_level_t": 29.935639212172067
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "country": "MY",
+      "e_nom_opt_t": 16.518575771642887,
+      "final_level_t": 16.528927120978143,
+      "max_level_t": 16.528927120978143
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "country": "PH",
+      "e_nom_opt_t": 10.8446407013139,
+      "final_level_t": 10.859501976268223,
+      "max_level_t": 10.859501976268223
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "country": "SG",
+      "e_nom_opt_t": 4.323125320539214,
+      "final_level_t": 4.3234849717862165,
+      "max_level_t": 4.3234849717862165
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "country": "TH",
+      "e_nom_opt_t": 7.975141198044169,
+      "final_level_t": 7.992025055912845,
+      "max_level_t": 7.992025055912845
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "country": "TL",
+      "e_nom_opt_t": 4.933553531603934,
+      "final_level_t": 4.939995580307027,
+      "max_level_t": 4.939995580307027
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "country": "VN",
+      "e_nom_opt_t": 39.592527767453596,
+      "final_level_t": 39.61019308991956,
+      "max_level_t": 39.61019308991956
+     }
+    ],
+    "ft_links": {
+     "by_country": [
+      {
+       "country": "BN",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 2.4572535434909177e-06,
+       "input_twh": 1.760057743638754e-06
+      },
+      {
+       "country": "ID",
+       "links": 39,
+       "built": 0,
+       "p_nom_opt_mw": 7.728768329789909e-05,
+       "input_twh": 0.0001271514950164128
+      },
+      {
+       "country": "KH",
+       "links": 5,
+       "built": 0,
+       "p_nom_opt_mw": 7.523587089113895e-06,
+       "input_twh": 3.844906093692407e-05
+      },
+      {
+       "country": "LA",
+       "links": 6,
+       "built": 0,
+       "p_nom_opt_mw": 8.875392738483904e-05,
+       "input_twh": 9.988640735275113e-05
+      },
+      {
+       "country": "MM",
+       "links": 17,
+       "built": 0,
+       "p_nom_opt_mw": 0.0001072924711870249,
+       "input_twh": 6.0559593646321446e-05
+      },
+      {
+       "country": "MY",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.00023566127871508136,
+       "input_twh": 2.4558844342382186e-05
+      },
+      {
+       "country": "PH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 7.728588242326788e-05,
+       "input_twh": 2.3048988206734545e-05
+      },
+      {
+       "country": "SG",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 1.8246609878224587e-06,
+       "input_twh": 1.7875815827865153e-06
+      },
+      {
+       "country": "TH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 2.5829366510115558e-05,
+       "input_twh": 4.369944784342282e-05
+      },
+      {
+       "country": "TL",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 2.255883981505696e-05,
+       "input_twh": 3.0505856699310244e-06
+      },
+      {
+       "country": "VN",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0002897470947945729,
+       "input_twh": 6.615472085494548e-05
+      }
+     ],
+     "total_links": 100,
+     "built_links_gt_1mw": 0,
+     "near_zero_links_lt_1mw": 100,
+     "p_nom_opt_min_max": [
+      3.0623577633192913e-07,
+      0.00024371786065635446
+     ]
+    },
+    "dead_end_fuel_generators": {
+     "count": 124,
+     "dispatch_mwh_total": 0.0,
+     "max_abs_p_mw": 0.0,
+     "p_nom_opt_max": -0.0
+    },
+    "zero_upper_candidates_p_nom_opt_max": 0.0,
+    "all_zero_loads_in_network": 38,
+    "objective": 516146310314.3289,
+    "label": "FORMAL_TRIAL_365X24H"
+   },
+   "disconnected": {
+    "biomass_pools": [
+     {
+      "store": "MY biomass maize_residues",
+      "country": "MY",
+      "e_nom_mwh": 792.390024464,
+      "used_mwh": 792.375746848927,
+      "min_level_mwh": 0.01427761507309883,
+      "final_level_mwh": 0.01427761507309883,
+      "share_used": 0.9999819815815038
+     },
+     {
+      "store": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "e_nom_mwh": 663.909448819,
+      "used_mwh": 663.9169571919849,
+      "min_level_mwh": -0.007508372984899297,
+      "final_level_mwh": -0.007508372984899297,
+      "share_used": 1.0000113093329193
+     }
+    ],
+    "extra_asean_stores": [
+     {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "country": "BN",
+      "e_nom_opt_t": 18.121836775830428,
+      "final_level_t": 18.085120467164845,
+      "max_level_t": 18.085120467164845
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "country": "ID",
+      "e_nom_opt_t": 191.60864015049225,
+      "final_level_t": 191.59788065849798,
+      "max_level_t": 191.59788065849798
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "country": "KH",
+      "e_nom_opt_t": 56.635442410770054,
+      "final_level_t": 56.6210261057292,
+      "max_level_t": 56.6210261057292
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "country": "LA",
+      "e_nom_opt_t": 72.74754660129592,
+      "final_level_t": 72.73265956362052,
+      "max_level_t": 72.73265956362052
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "country": "MM",
+      "e_nom_opt_t": 127.81726852693603,
+      "final_level_t": 127.80514579317706,
+      "max_level_t": 127.80514579317706
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "country": "MY",
+      "e_nom_opt_t": 56.070903814148956,
+      "final_level_t": 56.05529290285373,
+      "max_level_t": 56.05529290285373
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "country": "PH",
+      "e_nom_opt_t": 48.60531638583005,
+      "final_level_t": 48.588995441565594,
+      "max_level_t": 48.588995441565594
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "country": "SG",
+      "e_nom_opt_t": 39.74470483210873,
+      "final_level_t": 39.681953176950586,
+      "max_level_t": 39.681953176950586
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "country": "TH",
+      "e_nom_opt_t": 38.23122580316755,
+      "final_level_t": 38.21455696861231,
+      "max_level_t": 38.21455696861231
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "country": "TL",
+      "e_nom_opt_t": 17.78090940383586,
+      "final_level_t": 17.763084849574575,
+      "max_level_t": 17.763084849574575
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "country": "VN",
+      "e_nom_opt_t": 154.16391703995833,
+      "final_level_t": 154.15176435532763,
+      "max_level_t": 154.15176435532763
+     }
+    ],
+    "ft_links": {
+     "by_country": [
+      {
+       "country": "BN",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.0008903049696850418,
+       "input_twh": 5.777921833796427e-06
+      },
+      {
+       "country": "ID",
+       "links": 39,
+       "built": 0,
+       "p_nom_opt_mw": 0.024218738877238254,
+       "input_twh": 0.0001501744330879301
+      },
+      {
+       "country": "KH",
+       "links": 5,
+       "built": 0,
+       "p_nom_opt_mw": 0.004407794975431055,
+       "input_twh": 2.804991088807583e-05
+      },
+      {
+       "country": "LA",
+       "links": 6,
+       "built": 0,
+       "p_nom_opt_mw": 0.004811931598413544,
+       "input_twh": 3.0319558470742777e-05
+      },
+      {
+       "country": "MM",
+       "links": 17,
+       "built": 0,
+       "p_nom_opt_mw": 0.017189102552258997,
+       "input_twh": 0.00010891592513979413
+      },
+      {
+       "country": "MY",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0060635823037293295,
+       "input_twh": 3.805794969237732e-05
+      },
+      {
+       "country": "PH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 0.006412980957544235,
+       "input_twh": 4.211471989967712e-05
+      },
+      {
+       "country": "SG",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.00015307262287417598,
+       "input_twh": 9.632025242317467e-07
+      },
+      {
+       "country": "TH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 0.005312537803503426,
+       "input_twh": 3.407873780530089e-05
+      },
+      {
+       "country": "TL",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.0009311871904286198,
+       "input_twh": 6.06325427046977e-06
+      },
+      {
+       "country": "VN",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0011427917326780838,
+       "input_twh": 6.822816759813577e-06
+      }
+     ],
+     "total_links": 100,
+     "built_links_gt_1mw": 0,
+     "near_zero_links_lt_1mw": 100,
+     "p_nom_opt_min_max": [
+      0.0001174310472212237,
+      0.0011812074946240898
+     ]
+    },
+    "dead_end_fuel_generators": {
+     "count": 124,
+     "dispatch_mwh_total": 0.0,
+     "max_abs_p_mw": 0.0,
+     "p_nom_opt_max": -0.0
+    },
+    "zero_upper_candidates_p_nom_opt_max": 0.0,
+    "all_zero_loads_in_network": 38,
+    "objective": 585115945488.6481,
+    "label": "FORMAL_TRIAL_365X24H"
+   }
+  },
+  "impact": {
+   "integrated": {
+    "mode": "on",
+    "thresholds": {
+     "capacity_mw": 1.0,
+     "energy_mwh": 1000.0
+    },
+    "removed": {
+     "by_class_country": [
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "LA",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 17,
+       "country": "MM",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 7,
+       "country": "MY",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "TH",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "TL",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "MY",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "PH",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "SG",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "MY",
+       "dust_class": "biomass_pool_below_energy",
+       "energy_mwh": 792.390024464
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "TL",
+       "dust_class": "biomass_pool_below_energy",
+       "energy_mwh": 663.909448819
+      },
+      {
+       "capacity_mw": 0.5756115864233844,
+       "count": 3,
+       "country": "ID",
+       "dust_class": "renewable_potential_below_capacity",
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 35,
+       "country": "ID",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "KH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 5,
+       "country": "LA",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 32,
+       "country": "MM",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 13,
+       "country": "MY",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "PH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "SG",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 12,
+       "country": "TH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "TL",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "VN",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 35,
+       "country": "ID",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "KH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 5,
+       "country": "LA",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 32,
+       "country": "MM",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 13,
+       "country": "MY",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "PH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "SG",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 12,
+       "country": "TH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "TL",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "VN",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "BN",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 123,
+       "country": "ID",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 17,
+       "country": "KH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 14,
+       "country": "LA",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 57,
+       "country": "MM",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 21,
+       "country": "MY",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "PH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "SG",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 22,
+       "country": "TH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "TL",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 23,
+       "country": "VN",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      }
+     ],
+     "by_component": {
+      "Bus": 128,
+      "Generator": 278,
+      "Link": 4,
+      "Load": 38,
+      "StorageUnit": 147,
+      "Store": 2
+     },
+     "by_country": [
+      {
+       "capacity_mw": 0.0,
+       "count": 7,
+       "country": "BN",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.5756115864233844,
+       "count": 196,
+       "country": "ID",
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 33,
+       "country": "KH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 30,
+       "country": "LA",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 138,
+       "country": "MM",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 56,
+       "country": "MY",
+       "energy_mwh": 792.390024464
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 27,
+       "country": "PH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 9,
+       "country": "SG",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 52,
+       "country": "TH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "TL",
+       "energy_mwh": 663.909448819
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 39,
+       "country": "VN",
+       "energy_mwh": 0.0
+      }
+     ],
+     "capacity_mw_total_finite": 0.5756115864233843,
+     "count": 597,
+     "energy_mwh_total": 2057.4892400736217,
+     "unbounded_capacity_components": 296
+    },
+    "merged_links_removed": 86,
+    "removed_required_structure": 292,
+    "components_s4k": {
+     "StorageUnit": 280,
+     "Link": 7584,
+     "Store": 530,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1995,
+     "Bus": 2914,
+     "Load": 2064,
+     "Carrier": 135,
+     "Line": 148
+    },
+    "components_s4l": {
+     "StorageUnit": 133,
+     "Link": 7494,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 148
+    },
+    "differences": {},
+    "meta_keys_differ": [
+     "research_dust_cleanup",
+     "s4l_layers"
+    ]
+   },
+   "disconnected": {
+    "mode": "on",
+    "thresholds": {
+     "capacity_mw": 1.0,
+     "energy_mwh": 1000.0
+    },
+    "removed": {
+     "by_class_country": [
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "LA",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 17,
+       "country": "MM",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 7,
+       "country": "MY",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "TH",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "TL",
+       "dust_class": "all_zero_load",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "MY",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "PH",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "SG",
+       "dust_class": "all_zero_profile_generator",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "MY",
+       "dust_class": "biomass_pool_below_energy",
+       "energy_mwh": 792.390024464
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "TL",
+       "dust_class": "biomass_pool_below_energy",
+       "energy_mwh": 663.909448819
+      },
+      {
+       "capacity_mw": 0.5756115864233844,
+       "count": 3,
+       "country": "ID",
+       "dust_class": "renewable_potential_below_capacity",
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 35,
+       "country": "ID",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "KH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 5,
+       "country": "LA",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 32,
+       "country": "MM",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 13,
+       "country": "MY",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "PH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "SG",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 12,
+       "country": "TH",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "TL",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "VN",
+       "dust_class": "single_attachment_fuel_bus",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 1,
+       "country": "BN",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 35,
+       "country": "ID",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "KH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 5,
+       "country": "LA",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 32,
+       "country": "MM",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 13,
+       "country": "MY",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "PH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "SG",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 12,
+       "country": "TH",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 2,
+       "country": "TL",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 8,
+       "country": "VN",
+       "dust_class": "single_attachment_fuel_bus_component",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "BN",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 123,
+       "country": "ID",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 17,
+       "country": "KH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 14,
+       "country": "LA",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 57,
+       "country": "MM",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 21,
+       "country": "MY",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 6,
+       "country": "PH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "SG",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 22,
+       "country": "TH",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 4,
+       "country": "TL",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 23,
+       "country": "VN",
+       "dust_class": "zero_upper_candidate",
+       "energy_mwh": 0.0
+      }
+     ],
+     "by_component": {
+      "Bus": 128,
+      "Generator": 278,
+      "Link": 4,
+      "Load": 38,
+      "StorageUnit": 147,
+      "Store": 2
+     },
+     "by_country": [
+      {
+       "capacity_mw": 0.0,
+       "count": 7,
+       "country": "BN",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.5756115864233844,
+       "count": 196,
+       "country": "ID",
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 33,
+       "country": "KH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 30,
+       "country": "LA",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 138,
+       "country": "MM",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 56,
+       "country": "MY",
+       "energy_mwh": 792.390024464
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 27,
+       "country": "PH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 9,
+       "country": "SG",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 52,
+       "country": "TH",
+       "energy_mwh": 0.0
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 10,
+       "country": "TL",
+       "energy_mwh": 663.909448819
+      },
+      {
+       "capacity_mw": 0.0,
+       "count": 39,
+       "country": "VN",
+       "energy_mwh": 0.0
+      }
+     ],
+     "capacity_mw_total_finite": 0.5756115864233843,
+     "count": 597,
+     "energy_mwh_total": 2057.4892400736217,
+     "unbounded_capacity_components": 296
+    },
+    "merged_links_removed": 86,
+    "removed_required_structure": 292,
+    "components_s4k": {
+     "StorageUnit": 280,
+     "Link": 7292,
+     "Store": 530,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1995,
+     "Bus": 2914,
+     "Load": 2064,
+     "Carrier": 135,
+     "Line": 86
+    },
+    "components_s4l": {
+     "StorageUnit": 133,
+     "Link": 7202,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 86
+    },
+    "differences": {},
+    "meta_keys_differ": [
+     "research_dust_cleanup",
+     "s4l_layers"
+    ]
+   }
+  },
+  "builds": [
+   "START:2026-10-19T03:14:55Z commit:2983d951 dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"43c5afa00c03ad22cb380053:\tMaximum resident set size (kbytes): 739792:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:09.11",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"9423b986b5a7152da6b982d3:\tMaximum resident set size (kbytes): 736060:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:58.83",
+   "COMPARE:0",
+   "integrated s4k {'Bus': 2914, 'Generator': 1995, 'Link': 7584, 'Load': 2064, 'Store': 530, 'StorageUnit': 280} s4l {'Bus': 2786, 'Generator': 1717, 'Link': 7494, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} diff []",
+   "disconnected s4k {'Bus': 2914, 'Generator': 1995, 'Link': 7292, 'Load': 2064, 'Store': 530, 'StorageUnit': 280} s4l {'Bus': 2786, 'Generator': 1717, 'Link': 7202, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} diff []",
+   "DONE:2026-10-19T03:17:07Z"
+  ],
+  "build_receipts": {
+   "integrated": {
+    "code_sha": "2983d9512a549ceb90b8ea30b1962af0502fd4b5",
+    "research_config_sha256": "fad0d1dfdda515dac36d686de29358025ccf85157239a39015fda88147071f1f",
+    "network": "43c5afa00c03ad22cb380053559473ff75e54d60adfe4c3379050349b1d9356a"
+   },
+   "disconnected": {
+    "code_sha": "2983d9512a549ceb90b8ea30b1962af0502fd4b5",
+    "research_config_sha256": "df8f485d0fb6769e9aad0097a8d7cf9c4fb83480c45e97b1bfee31229bb65ba2",
+    "network": "9423b986b5a7152da6b982d3d22b4ba2f9a891d409e34f43295e8f069c08c17c"
+   }
+  }
+ },
+ "s4l2": {
+  "registry": {
+   "s4l2_comparison_standard": {
+    "value": "obj_1e-5;B16_1e-6;country_max(1pct,0.01bn)",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l2_diagnostic_matrix": {
+    "value": "8_runs",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l2_profile_formal_barrier_crossover": {
+    "value": "Crossover=-1",
+    "unit": "gurobi_parameter",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l2_pypsa_eur_crossover_reference": {
+    "value": "crossover_0_in_pypsa_eur",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "standard": {
+   "reference": "s4k_A",
+   "objective_rel_tol": 1e-05,
+   "b16_tol": 1e-06,
+   "country_pct": 0.01,
+   "country_floor_bn_eur": 0.01,
+   "source": "S4L instruction S4L-2 point 4; registry s4l2_comparison_standard; fixed before any run"
+  },
+  "profiles": {
+   "A": "formal_barrier",
+   "X": "formal_barrier_crossover"
+  },
+  "status": [
+   "START:2026-10-19T02:35:21Z commit:aa9559fe dirty:0",
+   "RUN_s4k_A_integrated:optimal:300s:tol=False:\tMaximum resident set size (kbytes): 4412688",
+   "RUN_s4k_A_disconnected:optimal:240s:tol=False:\tMaximum resident set size (kbytes): 3973740",
+   "RUN_s4k_X_integrated:infeasible_or_unbounded:375s:tol=none:\tMaximum resident set size (kbytes): 4391596",
+   "NOT_OPTIMAL_s4k_X_integrated:infeasible_or_unbounded (recorded, no retry)",
+   "RUN_s4k_X_disconnected:infeasible_or_unbounded:270s:tol=none:\tMaximum resident set size (kbytes): 3974660",
+   "NOT_OPTIMAL_s4k_X_disconnected:infeasible_or_unbounded (recorded, no retry)",
+   "RUN_s4l_A_integrated:infeasible_or_unbounded:166s:tol=none:\tMaximum resident set size (kbytes): 4294304",
+   "NOT_OPTIMAL_s4l_A_integrated:infeasible_or_unbounded (recorded, no retry)",
+   "RUN_s4l_A_disconnected:infeasible_or_unbounded:150s:tol=none:\tMaximum resident set size (kbytes): 3883188",
+   "NOT_OPTIMAL_s4l_A_disconnected:infeasible_or_unbounded (recorded, no retry)",
+   "RUN_s4l_X_integrated:infeasible_or_unbounded:165s:tol=none:\tMaximum resident set size (kbytes): 4302336",
+   "NOT_OPTIMAL_s4l_X_integrated:infeasible_or_unbounded (recorded, no retry)",
+   "RUN_s4l_X_disconnected:infeasible_or_unbounded:150s:tol=none:\tMaximum resident set size (kbytes): 3875752",
+   "NOT_OPTIMAL_s4l_X_disconnected:infeasible_or_unbounded (recorded, no retry)",
+   "DONE:2026-10-19T03:05:37Z",
+   "SUMMARY:0"
+  ],
+  "runs": {
+   "s4k_A_integrated": {
+    "termination": "optimal",
+    "objective": 648262253996.0322,
+    "solve_seconds": 234.1129949092865,
+    "barrier_iterations": 124,
+    "barrier_seconds": 213.96,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": null,
+    "crossover_over_barrier": null,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": false,
+    "A1_A2_gate": "A1_A2_INTERIOR_POINT",
+    "A1_A2": false,
+    "A1_A2_S4B": true,
+    "A3_S4B": true,
+    "B2": true,
+    "B14": true,
+    "B15": true,
+    "B16": true,
+    "B16_relative_error": 1.0528071208534028e-12,
+    "num_col": 675747,
+    "num_row": 1501471,
+    "nnz": 3420753,
+    "peak_rss_gib": 4.209178924560547,
+    "result_line": "Optimal objective 6.45375526e+11",
+    "gurobi_warnings": 0
+   },
+   "s4k_A_disconnected": {
+    "termination": "optimal",
+    "objective": 698679222969.732,
+    "solve_seconds": 182.6929907798767,
+    "barrier_iterations": 117,
+    "barrier_seconds": 164.73,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": null,
+    "crossover_over_barrier": null,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": false,
+    "A1_A2_gate": "A1_A2_INTERIOR_POINT",
+    "A1_A2": false,
+    "A1_A2_S4B": true,
+    "A3_S4B": true,
+    "B2": true,
+    "B14": true,
+    "B15": true,
+    "B16": true,
+    "B16_relative_error": 6.640948271516023e-13,
+    "num_col": 652097,
+    "num_row": 1447897,
+    "nnz": 3254727,
+    "peak_rss_gib": 3.7904319763183594,
+    "result_line": "Optimal objective 6.95623114e+11",
+    "gurobi_warnings": 0
+   },
+   "s4k_X_integrated": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 340.65983629226685,
+    "barrier_iterations": 124,
+    "barrier_seconds": 215.14,
+    "crossover_present": true,
+    "crossover_plus_simplex_seconds": 115.41,
+    "crossover_over_barrier": 0.536,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 675747,
+    "num_row": 1501471,
+    "nnz": 3420753,
+    "peak_rss_gib": null,
+    "result_line": "Infeasible or unbounded model",
+    "gurobi_warnings": 1
+   },
+   "s4k_X_disconnected": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 235.85876655578613,
+    "barrier_iterations": 117,
+    "barrier_seconds": 163.92,
+    "crossover_present": true,
+    "crossover_plus_simplex_seconds": 62.27,
+    "crossover_over_barrier": 0.38,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 652097,
+    "num_row": 1447897,
+    "nnz": 3254727,
+    "peak_rss_gib": null,
+    "result_line": "Infeasible or unbounded model",
+    "gurobi_warnings": 1
+   },
+   "s4l_A_integrated": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 133.77189540863037,
+    "barrier_iterations": 78,
+    "barrier_seconds": 122.12,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": null,
+    "crossover_over_barrier": null,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 629144,
+    "num_row": 1393079,
+    "nnz": 3209723,
+    "peak_rss_gib": null,
+    "result_line": null,
+    "gurobi_warnings": 0
+   },
+   "s4l_A_disconnected": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 117.60219502449036,
+    "barrier_iterations": 88,
+    "barrier_seconds": 108.64,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": null,
+    "crossover_over_barrier": null,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 605494,
+    "num_row": 1339505,
+    "nnz": 3043697,
+    "peak_rss_gib": null,
+    "result_line": null,
+    "gurobi_warnings": 0
+   },
+   "s4l_X_integrated": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 130.52311182022095,
+    "barrier_iterations": 78,
+    "barrier_seconds": 120.8,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": 0.04,
+    "crossover_over_barrier": 0.0,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 629144,
+    "num_row": 1393079,
+    "nnz": 3209723,
+    "peak_rss_gib": null,
+    "result_line": "Infeasible or unbounded model",
+    "gurobi_warnings": 0
+   },
+   "s4l_X_disconnected": {
+    "termination": "infeasible_or_unbounded",
+    "objective": null,
+    "solve_seconds": 121.22744703292847,
+    "barrier_iterations": 88,
+    "barrier_seconds": 111.59,
+    "crossover_present": false,
+    "crossover_plus_simplex_seconds": 0.04,
+    "crossover_over_barrier": 0.0,
+    "solved_with": null,
+    "extra_simplex_iterations": null,
+    "all_passed_solver_tolerances": null,
+    "A1_A2_gate": null,
+    "A1_A2": null,
+    "A1_A2_S4B": null,
+    "A3_S4B": null,
+    "B2": null,
+    "B14": null,
+    "B15": null,
+    "B16": null,
+    "B16_relative_error": null,
+    "num_col": 605494,
+    "num_row": 1339505,
+    "nnz": 3043697,
+    "peak_rss_gib": null,
+    "result_line": "Infeasible or unbounded model",
+    "gurobi_warnings": 0
+   }
+  },
+  "combinations": {
+   "s4k_A": {
+    "network": "s4k",
+    "profile": "formal_barrier",
+    "terminations": {
+     "integrated": "optimal",
+     "disconnected": "optimal"
+    },
+    "all_passed_solver_tolerances": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "objective": {
+     "integrated": 648262253996.0322,
+     "disconnected": 698679222969.732
+    },
+    "objective_rel_diff_vs_ref": {
+     "integrated": 0.0,
+     "disconnected": 0.0
+    },
+    "objective_within": "reference",
+    "B6_bn_eur": 50.41696897369983,
+    "B6_relative": 0.0777724889316298,
+    "b16_relative_error": {
+     "integrated": 1.0528071208534028e-12,
+     "disconnected": 6.640948271516023e-13
+    },
+    "b16_within": {
+     "integrated": true,
+     "disconnected": true
+    },
+    "country_difference_bn_eur": {
+     "BN": 0.8359785240132128,
+     "ID": 7.017298194077085,
+     "KH": 1.8862388352076502,
+     "LA": 2.768559085779077,
+     "MM": 0.7210324403271997,
+     "MY": 4.085801898307807,
+     "PH": 1.753580838452077,
+     "SG": 2.0189029104779586,
+     "TH": 6.107849019115491,
+     "TL": 0.368010509663204,
+     "VN": 24.802157430973807,
+     "ASEAN_BUNKER": -1.9484407138412223
+    },
+    "country_change_vs_ref_bn_eur": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 0.0,
+     "LA": 0.0,
+     "MM": 0.0,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 0.0,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 0.0,
+     "ASEAN_BUNKER": 0.0
+    },
+    "country_tolerance_bn_eur": {
+     "BN": 0.01,
+     "ID": 0.07017298194077086,
+     "KH": 0.018862388352076504,
+     "LA": 0.02768559085779077,
+     "MM": 0.01,
+     "MY": 0.040858018983078066,
+     "PH": 0.01753580838452077,
+     "SG": 0.020189029104779585,
+     "TH": 0.06107849019115492,
+     "TL": 0.01,
+     "VN": 0.24802157430973806,
+     "ASEAN_BUNKER": 0.019484407138412225
+    },
+    "country_within": {
+     "BN": true,
+     "ID": true,
+     "KH": true,
+     "LA": true,
+     "MM": true,
+     "MY": true,
+     "PH": true,
+     "SG": true,
+     "TH": true,
+     "TL": true,
+     "VN": true,
+     "ASEAN_BUNKER": true
+    },
+    "countries_exceeding": [],
+    "crossover": {
+     "integrated": {
+      "present": false,
+      "seconds": null,
+      "over_barrier": null,
+      "solved_with": null,
+      "above_5x_barrier": false
+     },
+     "disconnected": {
+      "present": false,
+      "seconds": null,
+      "over_barrier": null,
+      "solved_with": null,
+      "above_5x_barrier": false
+     }
+    },
+    "all_within": true
+   },
+   "s4k_X": {
+    "network": "s4k",
+    "profile": "formal_barrier_crossover",
+    "terminations": {
+     "integrated": "infeasible_or_unbounded",
+     "disconnected": "infeasible_or_unbounded"
+    },
+    "all_passed_solver_tolerances": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_rel_diff_vs_ref": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "B6_bn_eur": null,
+    "B6_relative": null,
+    "b16_relative_error": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "b16_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "country_difference_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_change_vs_ref_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_tolerance_bn_eur": {
+     "BN": 0.01,
+     "ID": 0.07017298194077086,
+     "KH": 0.018862388352076504,
+     "LA": 0.02768559085779077,
+     "MM": 0.01,
+     "MY": 0.040858018983078066,
+     "PH": 0.01753580838452077,
+     "SG": 0.020189029104779585,
+     "TH": 0.06107849019115492,
+     "TL": 0.01,
+     "VN": 0.24802157430973806,
+     "ASEAN_BUNKER": 0.019484407138412225
+    },
+    "country_within": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "countries_exceeding": [],
+    "crossover": {
+     "integrated": {
+      "present": true,
+      "seconds": 115.41,
+      "over_barrier": 0.536,
+      "solved_with": null,
+      "above_5x_barrier": false
+     },
+     "disconnected": {
+      "present": true,
+      "seconds": 62.27,
+      "over_barrier": 0.38,
+      "solved_with": null,
+      "above_5x_barrier": false
+     }
+    },
+    "all_within": false
+   },
+   "s4l_A": {
+    "network": "s4l",
+    "profile": "formal_barrier",
+    "terminations": {
+     "integrated": "infeasible_or_unbounded",
+     "disconnected": "infeasible_or_unbounded"
+    },
+    "all_passed_solver_tolerances": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_rel_diff_vs_ref": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "B6_bn_eur": null,
+    "B6_relative": null,
+    "b16_relative_error": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "b16_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "country_difference_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_change_vs_ref_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_tolerance_bn_eur": {
+     "BN": 0.01,
+     "ID": 0.07017298194077086,
+     "KH": 0.018862388352076504,
+     "LA": 0.02768559085779077,
+     "MM": 0.01,
+     "MY": 0.040858018983078066,
+     "PH": 0.01753580838452077,
+     "SG": 0.020189029104779585,
+     "TH": 0.06107849019115492,
+     "TL": 0.01,
+     "VN": 0.24802157430973806,
+     "ASEAN_BUNKER": 0.019484407138412225
+    },
+    "country_within": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "countries_exceeding": [],
+    "crossover": {
+     "integrated": {
+      "present": false,
+      "seconds": null,
+      "over_barrier": null,
+      "solved_with": null,
+      "above_5x_barrier": false
+     },
+     "disconnected": {
+      "present": false,
+      "seconds": null,
+      "over_barrier": null,
+      "solved_with": null,
+      "above_5x_barrier": false
+     }
+    },
+    "all_within": false
+   },
+   "s4l_X": {
+    "network": "s4l",
+    "profile": "formal_barrier_crossover",
+    "terminations": {
+     "integrated": "infeasible_or_unbounded",
+     "disconnected": "infeasible_or_unbounded"
+    },
+    "all_passed_solver_tolerances": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_rel_diff_vs_ref": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "objective_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "B6_bn_eur": null,
+    "B6_relative": null,
+    "b16_relative_error": {
+     "integrated": null,
+     "disconnected": null
+    },
+    "b16_within": {
+     "integrated": false,
+     "disconnected": false
+    },
+    "country_difference_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_change_vs_ref_bn_eur": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "country_tolerance_bn_eur": {
+     "BN": 0.01,
+     "ID": 0.07017298194077086,
+     "KH": 0.018862388352076504,
+     "LA": 0.02768559085779077,
+     "MM": 0.01,
+     "MY": 0.040858018983078066,
+     "PH": 0.01753580838452077,
+     "SG": 0.020189029104779585,
+     "TH": 0.06107849019115492,
+     "TL": 0.01,
+     "VN": 0.24802157430973806,
+     "ASEAN_BUNKER": 0.019484407138412225
+    },
+    "country_within": {
+     "BN": null,
+     "ID": null,
+     "KH": null,
+     "LA": null,
+     "MM": null,
+     "MY": null,
+     "PH": null,
+     "SG": null,
+     "TH": null,
+     "TL": null,
+     "VN": null,
+     "ASEAN_BUNKER": null
+    },
+    "countries_exceeding": [],
+    "crossover": {
+     "integrated": {
+      "present": false,
+      "seconds": 0.04,
+      "over_barrier": 0.0,
+      "solved_with": null,
+      "above_5x_barrier": false
+     },
+     "disconnected": {
+      "present": false,
+      "seconds": 0.04,
+      "over_barrier": 0.0,
+      "solved_with": null,
+      "above_5x_barrier": false
+     }
+    },
+    "all_within": false
+   }
+  },
+  "lp_size": {
+   "integrated": {
+    "num_col": {
+     "s4k": 675747,
+     "s4l": 629144,
+     "change_rel": -0.06896516003770647
+    },
+    "num_row": {
+     "s4k": 1501471,
+     "s4l": 1393079,
+     "change_rel": -0.07219053847859869
+    },
+    "nnz": {
+     "s4k": 3420753,
+     "s4l": 3209723,
+     "change_rel": -0.06169109549856422
+    }
+   },
+   "disconnected": {
+    "num_col": {
+     "s4k": 652097,
+     "s4l": 605494,
+     "change_rel": -0.07146636159957798
+    },
+    "num_row": {
+     "s4k": 1447897,
+     "s4l": 1339505,
+     "change_rel": -0.07486167869675808
+    },
+    "nnz": {
+     "s4k": 3254727,
+     "s4l": 3043697,
+     "change_rel": -0.06483800331026224
+    }
+   }
+  },
+  "repeat_vs_s4k3": {
+   "integrated": {
+    "s4k3_objective": 648262253996.0322,
+    "matrix_objective": 648262253996.0322,
+    "rel_diff": 0.0,
+    "s4k3_barrier_iterations": 124,
+    "matrix_barrier_iterations": 124,
+    "s4k3_termination": "optimal",
+    "matrix_termination": "optimal",
+    "s4k3_all_passed_solver_tolerances": true,
+    "matrix_all_passed_solver_tolerances": false,
+    "s4k3_solve_seconds": 234.72885251045227,
+    "matrix_solve_seconds": 234.1129949092865
+   },
+   "disconnected": {
+    "s4k3_objective": 698679222969.732,
+    "matrix_objective": 698679222969.732,
+    "rel_diff": 0.0,
+    "s4k3_barrier_iterations": 117,
+    "matrix_barrier_iterations": 117,
+    "s4k3_termination": "optimal",
+    "matrix_termination": "optimal",
+    "s4k3_all_passed_solver_tolerances": true,
+    "matrix_all_passed_solver_tolerances": false,
+    "s4k3_solve_seconds": 180.1774833202362,
+    "matrix_solve_seconds": 182.6929907798767
+   }
+  },
+  "price_differences": {
+   "s4k_X_integrated": {},
+   "s4k_X_disconnected": {},
+   "s4l_A_integrated": {},
+   "s4l_A_disconnected": {},
+   "s4l_X_integrated": {},
+   "s4l_X_disconnected": {}
+  },
+  "prices_by_country": {
+   "s4k_A_integrated": {
+    "AC|BN": {
+     "carrier": "AC",
+     "country": "BN",
+     "buses": 1,
+     "mean_of_bus_means": 56.7272,
+     "p10": 56.7272,
+     "p50": 56.7272,
+     "p90": 56.7272,
+     "max_bus_mean": 56.7272,
+     "max_bus_max": 134.741,
+     "min_bus_min": 0.0127613
+    },
+    "AC|ID": {
+     "carrier": "AC",
+     "country": "ID",
+     "buses": 39,
+     "mean_of_bus_means": 71.62760000000002,
+     "p10": 51.08582,
+     "p50": 72.0459,
+     "p90": 91.64636,
+     "max_bus_mean": 99.3461,
+     "max_bus_max": 646.842,
+     "min_bus_min": -0.969158
+    },
+    "AC|KH": {
+     "carrier": "AC",
+     "country": "KH",
+     "buses": 5,
+     "mean_of_bus_means": 61.13834000000001,
+     "p10": 55.634879999999995,
+     "p50": 61.71,
+     "p90": 66.46108000000001,
+     "max_bus_mean": 69.0096,
+     "max_bus_max": 229.28,
+     "min_bus_min": 0.0148479
+    },
+    "AC|LA": {
+     "carrier": "AC",
+     "country": "LA",
+     "buses": 6,
+     "mean_of_bus_means": 66.79681666666666,
+     "p10": 57.10915,
+     "p50": 66.87635,
+     "p90": 76.40495,
+     "max_bus_mean": 79.3649,
+     "max_bus_max": 221.224,
+     "min_bus_min": -5.57161
+    },
+    "AC|MM": {
+     "carrier": "AC",
+     "country": "MM",
+     "buses": 17,
+     "mean_of_bus_means": 87.58378235294117,
+     "p10": 84.7835,
+     "p50": 86.7177,
+     "p90": 92.67768,
+     "max_bus_mean": 94.3624,
+     "max_bus_max": 287.943,
+     "min_bus_min": 0.01
+    },
+    "AC|MY": {
+     "carrier": "AC",
+     "country": "MY",
+     "buses": 7,
+     "mean_of_bus_means": 68.15778571428572,
+     "p10": 55.150220000000004,
+     "p50": 55.8116,
+     "p90": 97.38574,
+     "max_bus_mean": 97.7215,
+     "max_bus_max": 178.657,
+     "min_bus_min": 0.0126628
+    },
+    "AC|PH": {
+     "carrier": "AC",
+     "country": "PH",
+     "buses": 5,
+     "mean_of_bus_means": 59.33582,
+     "p10": 54.16436,
+     "p50": 57.1672,
+     "p90": 65.69858,
+     "max_bus_mean": 67.2179,
+     "max_bus_max": 198.445,
+     "min_bus_min": 0.015
+    },
+    "AC|SG": {
+     "carrier": "AC",
+     "country": "SG",
+     "buses": 1,
+     "mean_of_bus_means": 102.175,
+     "p10": 102.175,
+     "p50": 102.175,
+     "p90": 102.175,
+     "max_bus_mean": 102.175,
+     "max_bus_max": 165.897,
+     "min_bus_min": 0.017453
+    },
+    "AC|TH": {
+     "carrier": "AC",
+     "country": "TH",
+     "buses": 6,
+     "mean_of_bus_means": 80.27498333333334,
+     "p10": 67.21465,
+     "p50": 83.92245,
+     "p90": 89.68785,
+     "max_bus_mean": 91.684,
+     "max_bus_max": 233.875,
+     "min_bus_min": 0.01
+    },
+    "AC|TL": {
+     "carrier": "AC",
+     "country": "TL",
+     "buses": 1,
+     "mean_of_bus_means": 79.1888,
+     "p10": 79.1888,
+     "p50": 79.1888,
+     "p90": 79.1888,
+     "max_bus_mean": 79.1888,
+     "max_bus_max": 229.272,
+     "min_bus_min": 0.01
+    },
+    "AC|VN": {
+     "carrier": "AC",
+     "country": "VN",
+     "buses": 8,
+     "mean_of_bus_means": 64.52414999999999,
+     "p10": 53.49188,
+     "p50": 58.61395,
+     "p90": 82.82213,
+     "max_bus_mean": 84.3664,
+     "max_bus_max": 287.009,
+     "min_bus_min": -0.0358462
+    },
+    "H2|BN": {
+     "carrier": "H2",
+     "country": "BN",
+     "buses": 1,
+     "mean_of_bus_means": 75.403,
+     "p10": 75.403,
+     "p50": 75.403,
+     "p90": 75.403,
+     "max_bus_mean": 75.403,
+     "max_bus_max": 87.4613,
+     "min_bus_min": 57.8195
+    },
+    "H2|ID": {
+     "carrier": "H2",
+     "country": "ID",
+     "buses": 39,
+     "mean_of_bus_means": 78.20942051282053,
+     "p10": 75.51277999999999,
+     "p50": 77.5062,
+     "p90": 81.52786,
+     "max_bus_mean": 82.181,
+     "max_bus_max": 230.123,
+     "min_bus_min": 51.546
+    },
+    "H2|KH": {
+     "carrier": "H2",
+     "country": "KH",
+     "buses": 5,
+     "mean_of_bus_means": 80.61956,
+     "p10": 80.15226000000001,
+     "p50": 80.5509,
+     "p90": 81.15910000000001,
+     "max_bus_mean": 81.3241,
+     "max_bus_max": 117.897,
+     "min_bus_min": 48.5775
+    },
+    "H2|LA": {
+     "carrier": "H2",
+     "country": "LA",
+     "buses": 6,
+     "mean_of_bus_means": 81.83030000000001,
+     "p10": 81.1412,
+     "p50": 81.71709999999999,
+     "p90": 82.6326,
+     "max_bus_mean": 82.841,
+     "max_bus_max": 119.91,
+     "min_bus_min": 48.45
+    },
+    "H2|MM": {
+     "carrier": "H2",
+     "country": "MM",
+     "buses": 17,
+     "mean_of_bus_means": 84.50262941176472,
+     "p10": 83.27938,
+     "p50": 84.4763,
+     "p90": 86.19322,
+     "max_bus_mean": 87.0221,
+     "max_bus_max": 123.202,
+     "min_bus_min": 54.2319
+    },
+    "H2|MY": {
+     "carrier": "H2",
+     "country": "MY",
+     "buses": 8,
+     "mean_of_bus_means": 79.3399,
+     "p10": 75.4368,
+     "p50": 75.76920000000001,
+     "p90": 85.04678999999999,
+     "max_bus_mean": 97.6631,
+     "max_bus_max": 105.873,
+     "min_bus_min": 54.2395
+    },
+    "H2|PH": {
+     "carrier": "H2",
+     "country": "PH",
+     "buses": 7,
+     "mean_of_bus_means": 75.73622857142858,
+     "p10": 71.84786,
+     "p50": 72.4922,
+     "p90": 82.01496000000002,
+     "max_bus_mean": 94.9098,
+     "max_bus_max": 97.6668,
+     "min_bus_min": 51.644
+    },
+    "H2|SG": {
+     "carrier": "H2",
+     "country": "SG",
+     "buses": 1,
+     "mean_of_bus_means": 79.381,
+     "p10": 79.381,
+     "p50": 79.381,
+     "p90": 79.381,
+     "max_bus_mean": 79.381,
+     "max_bus_max": 101.87,
+     "min_bus_min": 54.5462
+    },
+    "H2|TH": {
+     "carrier": "H2",
+     "country": "TH",
+     "buses": 7,
+     "mean_of_bus_means": 83.20038571428572,
+     "p10": 79.5544,
+     "p50": 80.4658,
+     "p90": 89.08088000000001,
+     "max_bus_mean": 100.988,
+     "max_bus_max": 118.161,
+     "min_bus_min": 48.5777
+    },
+    "H2|TL": {
+     "carrier": "H2",
+     "country": "TL",
+     "buses": 1,
+     "mean_of_bus_means": 74.7067,
+     "p10": 74.7067,
+     "p50": 74.7067,
+     "p90": 74.7067,
+     "max_bus_mean": 74.7067,
+     "max_bus_max": 91.7247,
+     "min_bus_min": 65.7328
+    },
+    "H2|VN": {
+     "carrier": "H2",
+     "country": "VN",
+     "buses": 8,
+     "mean_of_bus_means": 81.734625,
+     "p10": 80.46648,
+     "p50": 81.3312,
+     "p90": 83.48993999999999,
+     "max_bus_mean": 84.2948,
+     "max_bus_max": 121.614,
+     "min_bus_min": 47.8181
+    }
+   },
+   "s4k_A_disconnected": {
+    "AC|BN": {
+     "carrier": "AC",
+     "country": "BN",
+     "buses": 1,
+     "mean_of_bus_means": 84.8378,
+     "p10": 84.8378,
+     "p50": 84.8378,
+     "p90": 84.8378,
+     "max_bus_mean": 84.8378,
+     "max_bus_max": 120.73,
+     "min_bus_min": 0.01
+    },
+    "AC|ID": {
+     "carrier": "AC",
+     "country": "ID",
+     "buses": 39,
+     "mean_of_bus_means": 73.6218564102564,
+     "p10": 51.31834,
+     "p50": 70.1667,
+     "p90": 99.68288000000001,
+     "max_bus_mean": 104.105,
+     "max_bus_max": 646.842,
+     "min_bus_min": -3.8031
+    },
+    "AC|KH": {
+     "carrier": "AC",
+     "country": "KH",
+     "buses": 5,
+     "mean_of_bus_means": 65.64594,
+     "p10": 63.53304,
+     "p50": 66.7844,
+     "p90": 67.03,
+     "max_bus_mean": 67.0624,
+     "max_bus_max": 591.401,
+     "min_bus_min": 0.01
+    },
+    "AC|LA": {
+     "carrier": "AC",
+     "country": "LA",
+     "buses": 6,
+     "mean_of_bus_means": 49.78581666666667,
+     "p10": 43.7706,
+     "p50": 51.636849999999995,
+     "p90": 53.95,
+     "max_bus_mean": 54.2018,
+     "max_bus_max": 172.629,
+     "min_bus_min": 0.013853
+    },
+    "AC|MM": {
+     "carrier": "AC",
+     "country": "MM",
+     "buses": 17,
+     "mean_of_bus_means": 84.92328823529412,
+     "p10": 81.4281,
+     "p50": 84.1786,
+     "p90": 89.33042,
+     "max_bus_mean": 91.3474,
+     "max_bus_max": 202.367,
+     "min_bus_min": 0.01
+    },
+    "AC|MY": {
+     "carrier": "AC",
+     "country": "MY",
+     "buses": 7,
+     "mean_of_bus_means": 95.45598571428572,
+     "p10": 89.84246,
+     "p50": 94.5448,
+     "p90": 103.5376,
+     "max_bus_mean": 103.723,
+     "max_bus_max": 190.194,
+     "min_bus_min": 0.01
+    },
+    "AC|PH": {
+     "carrier": "AC",
+     "country": "PH",
+     "buses": 5,
+     "mean_of_bus_means": 58.760760000000005,
+     "p10": 57.34522,
+     "p50": 57.6708,
+     "p90": 61.03588,
+     "max_bus_mean": 62.5002,
+     "max_bus_max": 206.307,
+     "min_bus_min": 0.015
+    },
+    "AC|SG": {
+     "carrier": "AC",
+     "country": "SG",
+     "buses": 1,
+     "mean_of_bus_means": 94.2395,
+     "p10": 94.2395,
+     "p50": 94.2395,
+     "p90": 94.2395,
+     "max_bus_mean": 94.2395,
+     "max_bus_max": 177.603,
+     "min_bus_min": 72.0254
+    },
+    "AC|TH": {
+     "carrier": "AC",
+     "country": "TH",
+     "buses": 6,
+     "mean_of_bus_means": 70.15756666666668,
+     "p10": 62.9756,
+     "p50": 72.49745,
+     "p90": 74.99965,
+     "max_bus_mean": 75.1402,
+     "max_bus_max": 600.371,
+     "min_bus_min": 0.0138227
+    },
+    "AC|TL": {
+     "carrier": "AC",
+     "country": "TL",
+     "buses": 1,
+     "mean_of_bus_means": 77.1318,
+     "p10": 77.1318,
+     "p50": 77.1318,
+     "p90": 77.1318,
+     "max_bus_mean": 77.1318,
+     "max_bus_max": 236.536,
+     "min_bus_min": 0.01
+    },
+    "AC|VN": {
+     "carrier": "AC",
+     "country": "VN",
+     "buses": 8,
+     "mean_of_bus_means": 85.465075,
+     "p10": 71.21399000000001,
+     "p50": 83.42595,
+     "p90": 101.474,
+     "max_bus_mean": 101.474,
+     "max_bus_max": 646.842,
+     "min_bus_min": 0.0149924
+    },
+    "H2|BN": {
+     "carrier": "H2",
+     "country": "BN",
+     "buses": 1,
+     "mean_of_bus_means": 64.7818,
+     "p10": 64.7818,
+     "p50": 64.7818,
+     "p90": 64.7818,
+     "max_bus_mean": 64.7818,
+     "max_bus_max": 82.1017,
+     "min_bus_min": 50.5249
+    },
+    "H2|ID": {
+     "carrier": "H2",
+     "country": "ID",
+     "buses": 39,
+     "mean_of_bus_means": 85.9899794871795,
+     "p10": 80.34954,
+     "p50": 84.9937,
+     "p90": 92.36546,
+     "max_bus_mean": 94.0379,
+     "max_bus_max": 310.59,
+     "min_bus_min": 32.6507
+    },
+    "H2|KH": {
+     "carrier": "H2",
+     "country": "KH",
+     "buses": 5,
+     "mean_of_bus_means": 79.57346,
+     "p10": 79.22019999999999,
+     "p50": 79.6006,
+     "p90": 79.88648,
+     "max_bus_mean": 79.9826,
+     "max_bus_max": 211.287,
+     "min_bus_min": 50.0128
+    },
+    "H2|LA": {
+     "carrier": "H2",
+     "country": "LA",
+     "buses": 6,
+     "mean_of_bus_means": 84.48831666666666,
+     "p10": 82.85650000000001,
+     "p50": 84.8419,
+     "p90": 85.76655,
+     "max_bus_mean": 86.0055,
+     "max_bus_max": 224.949,
+     "min_bus_min": 48.9621
+    },
+    "H2|MM": {
+     "carrier": "H2",
+     "country": "MM",
+     "buses": 17,
+     "mean_of_bus_means": 81.36698823529412,
+     "p10": 79.47088,
+     "p50": 81.1481,
+     "p90": 83.33438,
+     "max_bus_mean": 84.1284,
+     "max_bus_max": 129.967,
+     "min_bus_min": 65.2504
+    },
+    "H2|MY": {
+     "carrier": "H2",
+     "country": "MY",
+     "buses": 8,
+     "mean_of_bus_means": 83.19630000000001,
+     "p10": 79.28345,
+     "p50": 80.6084,
+     "p90": 88.63671,
+     "max_bus_mean": 97.579,
+     "max_bus_max": 99.3282,
+     "min_bus_min": 68.4694
+    },
+    "H2|PH": {
+     "carrier": "H2",
+     "country": "PH",
+     "buses": 7,
+     "mean_of_bus_means": 71.3527142857143,
+     "p10": 67.30262,
+     "p50": 68.3318,
+     "p90": 77.86652000000001,
+     "max_bus_mean": 91.6844,
+     "max_bus_max": 96.4498,
+     "min_bus_min": 51.7684
+    },
+    "H2|SG": {
+     "carrier": "H2",
+     "country": "SG",
+     "buses": 1,
+     "mean_of_bus_means": 71.2413,
+     "p10": 71.2413,
+     "p50": 71.2413,
+     "p90": 71.2413,
+     "max_bus_mean": 71.2413,
+     "max_bus_max": 105.023,
+     "min_bus_min": 60.4024
+    },
+    "H2|TH": {
+     "carrier": "H2",
+     "country": "TH",
+     "buses": 7,
+     "mean_of_bus_means": 71.82344285714285,
+     "p10": 67.15602,
+     "p50": 69.2974,
+     "p90": 78.16056,
+     "max_bus_mean": 89.6562,
+     "max_bus_max": 147.598,
+     "min_bus_min": 54.3226
+    },
+    "H2|TL": {
+     "carrier": "H2",
+     "country": "TL",
+     "buses": 1,
+     "mean_of_bus_means": 66.0672,
+     "p10": 66.0672,
+     "p50": 66.0672,
+     "p90": 66.0672,
+     "max_bus_mean": 66.0672,
+     "max_bus_max": 82.5265,
+     "min_bus_min": 54.791
+    },
+    "H2|VN": {
+     "carrier": "H2",
+     "country": "VN",
+     "buses": 8,
+     "mean_of_bus_means": 95.1467125,
+     "p10": 93.75978,
+     "p50": 94.8135,
+     "p90": 96.73009,
+     "max_bus_mean": 97.5878,
+     "max_bus_max": 174.825,
+     "min_bus_min": 70.593
+    }
+   },
+   "s4k_X_integrated": {},
+   "s4k_X_disconnected": {},
+   "s4l_A_integrated": {},
+   "s4l_A_disconnected": {},
+   "s4l_X_integrated": {},
+   "s4l_X_disconnected": {}
+  }
+ },
+ "s4l3": {
+  "scripts": {
+   "run_365x24h.sh": {
+    "sha256": "dad839553e4d45f710a09e4a41a40eb390b56f218ebd9bf1f09e495f54852011"
+   },
+   "preflight.sh": {
+    "sha256": "b4af09f15ee3f3014085abcff36d8c27aa9ef8b306f4d6365b13c2c669cb1ee4"
+   },
+   "make_package.sh": {
+    "sha256": "34ded603062dfd7d8db7bc38b91fc4c203f31502aa7993dc27446ac49182ce8a"
+   }
+  },
+  "s4k_scripts": {
+   "run_365x24h.sh": {
+    "sha256": "c30d018443debf3c359b8373dbfbf775202bcdc4772fd6f24f09646a366c9561"
+   },
+   "preflight.sh": {
+    "sha256": "aec8b3bd018c80535b2ab84119c0df914c87bdfb039c8891e4f9bc51d5cb2472"
+   }
+  },
+  "test_results": [
+   "temp dir /home/jin/tmp/s4l3_test_xc8H (set TMPDIR to a disk with >= 35 GiB free: the preflight disk check runs there)",
+   "PASS: A: kill line written at the cap",
+   "PASS: A: receipt recognised as pre-solve",
+   "PASS: A: run marked killed_pre_solve",
+   "PASS: A: no solver process of the group survived (python test double)",
+   "PASS: A: no grandchild (sleep 600) survived",
+   "PASS: A: export folder holds the pre-solve receipt",
+   "PASS: A: DONE after the kill and the results tarball exists",
+   "PASS: A: whole script finished within 90 s (cap 20 s + grace + export)",
+   "PASS: A: monitor has the cgroup columns and a limit of 90.00 GiB",
+   "PASS: A: cgroup memory limit line in STATUS",
+   "PASS: B: new profile formal_barrier_crossover accepted",
+   "PASS: B: receipts recognised as post-solve",
+   "PASS: B: both runs optimal from the receipt",
+   "PASS: B: no kill line",
+   "PASS: B: exported post-solve receipt",
+   "PASS: B: no solver process survived",
+   "PASS: C: lanes3 refused",
+   "PASS: C: unknown profile refused",
+   "PASS: C: missing profile refused",
+   "PASS: C: dry run lists the three solve commands with --time-limit 10500 and exits 0",
+   "PASS: C: production defaults in START line (wall cap 10800 s)",
+   "PASS: D: cgroup v2 quota read (12 cores, 90 GiB) and PREFLIGHT OK",
+   "PASS: D: cgroup v1 quota read (8 cores, 40 GiB) and PREFLIGHT OK with the recommended-memory warning",
+   "PASS: D: cgroup v2 unlimited falls back to the host values and says so",
+   "PASS: D: cgroup v1 unlimited (quota -1, limit 2^63) falls back to the host values",
+   "PASS: D: tools section finds GNU time and setsid",
+   "PASS: E: both scripts pass bash -n",
+   "PASS: E: scripts hold no licence keyword outside the scrub pattern lines",
+   "SUMMARY: pass=28 fail=0 (temp /home/jin/tmp/s4l3_test_xc8H)"
+  ],
+  "package_rebuilt": false,
+  "cloud": false
+ },
+ "resources": {
+  "cloud": false,
+  "formal_solves": false,
+  "downloads": "none (S4L needs no download)",
+  "local_solves": "8 x 56x3h (S4L-2, authorised), stop-loss 30 min each, serial"
+ },
+ "tests": "tests/research: 534 passed, 0 skipped (91 s) at 18207839; S4L-3 script tests 28/28"
+}

@@ -1,0 +1,272 @@
+# S4L 报告：近零量清理、crossover 复测与部署脚本修正（第 112、113 项，本机）
+
+**分支** `codex/s4l-numerics-20261019`，自 L23 分支 `codex/l23-run1-20261019` 最新提交 efb37fc2 开出（已核实 = 远端头；PR #35 之后有 L23 的 PR #36，按指令以 L23 最新提交为准）；**draft PR** [cyc292cycjin-oss/SGP-ESE5004-Stage2#37](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/37)，叠在 #36 上。指令 `S4L_CLAUDE_CODE_INSTRUCTION.md`（SHA256 03508400…529b）已核对。证据等级：VERIFIED（实际数组或回执）、EXACT（逐项核验）、INFERENCE（机理解释 / 估计）、PROPOSED（未执行）。
+
+## 摘要
+
+1. **S4L-0：** L23 四个运行在注册表与总台账标为 `SCREENING_UNVERIFIED`，另行回收的 NZE 输出（78a6ea15…c33b）接受为本批 NZE 结果；台账补记 L23 条目。
+2. **S4L-1：** 近零量清单 818 行（两个情景相同）：删除 597（零上限候选 295、单侧燃料母线 128 及其 128 个死端组件、全零负荷 38、全零出力 3、小容量 offwind 3、生物质池 2）、合并 86 条 `biomass-to-methanol`；保留只记录 127（FT 链路 100、东盟外 CO₂ 储存 11、塑料废弃物固定源 11、**5 个被固定需求锁定的生物质池**）。阈值 1 MW（PyPSA-Eur `clip_min_inflow` 1.0 MW）/ 1 GWh（项目自定）。
+3. **S4L-2 的发现与停止条件：** 第一版清理规则删除了 SG、BN 的 5 个小生物质池，而 **BN、SG、VN 的固体生物质池总量恰好等于其固定的生物质终端需求（零余量）**，清理后网络在档案 A 与 crossover 档案下都不可行（4 个运行，`Infeasible model`）。这触发了"清理会删除有经济意义的组件"的停止条件：规则已修正（固定需求守护）并重建网络（静态校验通过、池平衡余量 ≥ 0），**未再求解**（8 个授权运行已用完）。
+4. **S4L-2 参照与 crossover：** "S4K 网络 + 档案 A" 两个运行与 S4K-3 逐位相同（目标值、124 / 117 次迭代、B16 1e-12）；`all_passed_solver_tolerances` 为 False 仅因 B12 配置哈希（S4K 网络在 S4L 配置下必然如此）。**crossover 档案（Gurobi `Crossover` 缺省 −1）在 S4K 网络的两个情景上都失败**：barrier 与档案 A 逐位相同，crossover 推进完成后单纯形清理阶段报 `Infeasible or unbounded`（Markowitz 容差收紧；对偶不可行量 1.6e5 / 2.8e7）；crossover 用时为 barrier 的 0.38–0.54 倍，没有调参。
+5. **S4L-3：** S4L 版 `run_365x24h.sh`（`setsid` 进程组终止、等待退出再导出、回执版本核对、cgroup 内存监控）与 `preflight.sh`（容器 cgroup v1/v2 配额）在 `p1_step4l_20261019/cloud_package/`，本机测试 28/28 通过；`CLOUD_RESOURCE_ESTIMATE.md` §21（L23 校正与选机建议）；不重建部署包。
+6. **需要用户决定（§9）：** 是否授权清理后（修正规则）网络的 4 个 56×3h 运行以完成矩阵；crossover 档案不建议作为正式档案；第二批方案建议。发现但未处理 10 条（§7）。
+
+## 1. 执行概况
+
+- **范围：** 第 112 项 a、b（S4L-0 登记）、c（S4L-3 部署脚本）与第 113 项 (1)（S4L-1 近零量清理）、(2)（S4L-2 crossover 复测）。其他发现只记录（§7）。
+- **资源：** 没有上云、没有下载、没有 365×24h 求解；档案 A 参数未改，新档案只新增；本机求解 **8 次**（S4L-2，56×3h，用户授权的 8 个），单次墙钟 ≤ 375 s、峰值 RSS ≤ 4.21 GiB，全部串行，没有重试；网络构建 6 次（S4L-1 两个情景各 3 次：第一版规则、修正规则、修正规则干净树，各约 1 min / 0.7 GB），其余为只读分析。许可只经 `GRB_LICENSE_FILE` 只读引用。
+- **停止条件：** 触发一条——"清理会删除有经济意义的组件"（§4.3）；处理：规则修正、重建、停止求解、报告。
+- **提交（每个子步骤一次）：** d6203004（S4L-0）、57008244（S4L-1 代码与清单）、aa9559fe（S4L-2 准备：档案、标准、脚本）、6e45bc1f（S4L-1 第一版构建证据）、547bb8ac（S4L-3）、381e39b8（S4L-1 固定需求守护）、6a2ddff9（S4L-2 结果证据）、2983d951（守护口径修正）、18207839（修正规则的构建证据）、见 PR #37 最新提交（报告与交付）。
+- **测试：** `tests/research` 534 通过、0 跳过（91 s，提交 18207839 后）。
+- **S4L-2 事先固定的比较标准（运行前写入注册表 `s4l2_comparison_standard` 与进度文件，提交 aa9559fe 早于矩阵启动 02:35:21 UTC）：** 参照 = "S4K 网络 + 档案 A"；目标相对差 ≤ 1e-5；B16 ≤ 1e-6；每国"不互联 − 一体化"差额的变化 ≤ max(该国差额的 1 %, 0.01 bn EUR)。看到结果后没有修改。
+
+## 2. S4L-0 登记（第 112 项 a、b；提交 d6203004）
+
+- 注册表片段 `s4l_0`（5 行，`scripts_project/s4l_0_data.py`）：
+  - `s4l_l23_runs_screening_unverified`：L23 首批四个运行标为 **`SCREENING_UNVERIFIED`**；可用的是原始侧总量（目标值、B6 = 68.97 bn EUR、NZE − 一体化 = −90.46 bn EUR）；依赖节点电价的分国结算（拥堵租金、跨境结算、按科目分解）与小国差额（PH 0.01、BN 0.11、TL 0.12 bn EUR）不用于结论。
+  - `s4l_l23_nze_late_outputs_accepted`：接受另行回收的 `nze_late_outputs_20261018T180030Z_5623.tar.gz`（21 个文件，74,285,069 B，SHA256 78a6ea15…c33b；与结果包 39b9c9dd…ae7f 分开存放，不进 git）为本批 NZE 结果，来源为墙钟终止后 `s2_solve.py` 继续写出的求解后文件（L23 报告 §1.3）。
+  - `s4l_l23_ledger_entry`、`s4l_scope_rule`、`s4l_question_source_l23`。
+- 总台账 `research/STAGE2_PROJECT_LEDGER.md` 补记 **L23 条目**（L23 交付未写台账），含上述标签与 NZE 来源说明。
+
+## 3. S4L-1 近零量清单、阈值与清理（第 113 项 (1)；提交 57008244、6e45bc1f、381e39b8、2983d951、18207839）
+
+### 3.1 清单（在 S4K-3 构建的一体化与不互联网络上；VERIFIED，`research_inputs/numerics/DUST_INVENTORY_S4L1_{integrated,disconnected}.csv`，两个情景相同，各 818 行；修正规则后的版本）
+
+| 类别 | 处理 | 数量 | 内容 | 来源 |
+|---|---|---|---|---|
+| 生物质池（`research_role = FINITE_RESOURCE`）年能量 < 1 GWh，且所在母线的池总量减去它后仍 ≥ 该母线的固定生物质需求 | 删除 | 2（1,456 MWh/a） | MY 玉米残余 792 MWh、TL 木材加工残余 664 MWh | L23 违反分析 |
+| 生物质池 < 1 GWh 但被固定需求锁定（删除会使固定需求不可行） | **保留** | 5 | SG 木薯残余 **0.47 MWh**、SG 椰子残余 473、BN 甘蔗残余 71、BN 玉米残余 82、BN 木薯残余 753 MWh（§4.3、§7 第 1 条） | S4L-2 发现 |
+| 零上限候选（可扩建、`p_nom = 0`、`p_nom_max = 0`） | 删除 | 295 | 地热 74、`ror_new` 71、`offwind-dc` 6（机组）；可抽水 hydro 61（`efficiency_store` 1、`p_min_pu` −1）、PHS 86（效率 0.75）（StorageUnit） | S4I R4 |
+| 可再生潜力容量 < 1 MW（0 < 上限 < 1 MW） | 删除 | 3（0.58 MW，601 MWh/a） | ID 的 3 个 `offwind-dc`（0.0034、0.227、0.346 MW） | 阈值 |
+| 全零出力曲线机组 | 删除 | 3 | MY_Peninsular22 0、PH_Visayas10 0、SG2 0 的 `offwind-dc`（上限也为 0） | S4I R5 |
+| 全零负荷 | 删除 | 38 | `shipping domestic methanol`（BN、LA、MM、MY、TH、TL 的节点，`p_set` 恒为 0；需求归属元数据同步删除） | S4I R5 |
+| 单侧燃料母线及其唯一连接 | 删除 | 128 + 128 | 褐煤 92、煤 32 母线各带一台无上限供给机组（124 台，边际成本 = 燃料价，没有任何消费者，流量结构性为 0）；油 4（换流站辅助节点 MY_Peninsular22 0、PH_Luzon9 0、PH_Visayas10 0、TH21 0，唯一连接是 `oil pool <node>` 链路的输入端，流量结构性为 0，链路一并删除） | S4I R1 |
+| 完全相同的并联链路 | 合并 | 86（保留 8） | `biomass-to-methanol` 97 条 → 11 条（每国一条；BN、SG、TL 本来各只有一条）；静态属性逐列相同、无时间序列、`p_nom = p_nom_min = 0`、可扩建、无 twin；合并后 `p_nom_max` = N × ∞ = ∞，容量与成本等价 | S4I R3 |
+| **保留，只记录** | 保留 | 100 | Fischer-Tropsch 链路：`p_nom = 0` 但可扩建、无上限、有资本成本（经济候选） | L23 违反分析（近零容量链路上下限） |
+| **保留，只记录** | 保留 | 11 | 各国 `co2 sequestered extra-ASEAN`（无上限出口选项，第 89 项） | L23 违反分析（储存年末水平） |
+| **保留，只记录** | 保留 | 11 | `plastic waste source` 固定机组 0.06–0.99 MW（外生数据，不是候选；合计 5.03 MW、44 GWh/a） | 阈值（§7 第 4 条） |
+
+**逐国（删除 + 合并，两个情景相同；修正规则后）：**
+
+| 国家 | 合计 | 零上限候选 | 单侧燃料母线（+机组/链路） | 并联链路合并 | 生物质池 | 全零负荷 | 其他 | 删除的能量（MWh/a） |
+|---|---|---|---|---|---|---|---|---|
+| BN | 7 | 4 | 1 (+1) | 0 | 0（3 个锁定保留） | 1 | | 0 |
+| ID | 234 | 123 | 35 (+35) | 38 | 0 | 0 | 3 小容量 offwind | 601 |
+| KH | 37 | 17 | 8 (+8) | 4 | 0 | 0 | | 0 |
+| LA | 35 | 14 | 5 (+5) | 5 | 0 | 6 | | 0 |
+| MM | 154 | 57 | 32 (+32) | 16 | 0 | 17 | | 0 |
+| MY | 62 | 21 | 13 (+13) | 6 | 1 | 7 | 1 全零出力 | 792 |
+| PH | 32 | 6 | 10 (+10) | 5 | 0 | 0 | 1 全零出力 | 0 |
+| SG | 9 | 4 | 2 (+2) | 0 | 0（2 个锁定保留） | 0 | 1 全零出力 | 0 |
+| TH | 57 | 22 | 12 (+12) | 5 | 0 | 6 | | 0 |
+| TL | 10 | 4 | 2 (+2) | 0 | 1 | 1 | | 664 |
+| VN | 46 | 23 | 8 (+8) | 7 | 0 | 0 | | 0 |
+| **合计** | **683** | **295** | **128 (+128)** | **86** | **2** | **38** | **6** | **2,057** |
+
+删除的能量合计 2.06 GWh/a（东盟生物质潜力的 1e-6 量级；MY、TL 的池余量分别为 119.6 TWh 与 0.59 TWh，删除后固定需求仍有余量）、有限容量合计 0.58 MW；无上限的 124 台死端燃料供给机组与 4 条死端链路在任何解中流量都是 0（L23 两个运行中实际出力 0.0，VERIFIED）。**各国被删除的只有结构性为零或 < 1 GWh 且不被固定需求依赖的对象，不改变任何国家的可用资源与成本（第 8 条检查见 §8）。**
+
+### 3.2 阈值与依据（B 级口径，注册表片段 `s4l_1`，`scripts_project/s4l_1_data.py`）
+
+| 阈值 | 值 | 依据 |
+|---|---|---|
+| `research.numerics.dust_capacity_mw` | **1 MW** | 采用 PyPSA-Eur v2025.07.0 `renewable.hydro.clip_min_inflow: 1.0`（`config.default.yaml` 第 300 行：入流低于 1 MW 置零）；`existing_capacities.threshold_capacity: 10`（第 469 行，`add_existing_baseyear` 丢弃 < 10 MW 的存量机组）**不采用**——本步不动存量；`renewable.*.clip_p_max_pu: 1e-2`（第 200、218、237、259、276、292 行）本模型已由 S4A 施加（`research.renewable.clip_p_max_pu` = 0.01，VERIFIED 元数据），`solving.options.clip_p_max_pu: 1e-2`（第 988 行）裁剪的是出力曲线不是组件 |
+| `research.numerics.dust_energy_mwh` | **1,000 MWh/a（1 GWh）** | 项目自定：PyPSA-Eur 对生物质潜力没有能量下限（`sector.regional_co2_sequestration_potential.min_size: 3` Mt 是封存场址的下限，第 700 行，不对应）；1 GWh/a 约 0.1 MW-年，低于任何转换候选会为之建设的规模，也是 L23 中违反比例最大的池（SG 木薯 0.47 MWh：违反 0.91 MWh = 预算的 902 倍）所在的量级 |
+| 固定需求守护（S4L-2 后新增，`s4l1_pool_fixed_demand_guard`） | 池母线的池总量 − 待删池 ≥ 该母线下游 `biomass` 载体母线上的固定负荷 | 否则保留并记为 `kept_pool_fixed_demand_binding`；清理后再断言每个池母线余量 ≥ 0 |
+| 零上限候选 | `p_nom_max = 0` 视为 < 1 MW | S4I R4 |
+
+### 3.3 清理规则与实现（`scripts_project/s4l_layers.py`，钩入 `s2_network.py` 构建末尾——所有加组件的层之后、静态校验之前）
+
+- **开关：** `research.numerics.dust_cleanup: off`（缺省，S4K 状态，即 L23 首批的模型）| `on`（主算候选）。每次构建都写出清单 `<scenario>_DUST_INVENTORY_S4L1.csv`（`off` 时只列不改），回执与元数据 `research_dust_cleanup` 记录模式、阈值、各类数量、删除明细与清理前后的池平衡（`pool_balance_before/after`）。
+- **删除：** §3.1 的"删除"类；按名字索引的元数据同步修剪（`store_power_rules`、`research_biomass.stores`、`demand_owners` / `demand_identity`、`research_new_hydro_inflow_tie`、`research_nuclear_caps`）；`static_validate_s2` 的每节点必需候选检查（`REQUIRED_PER_NODE`：地热、ror、hydro、PHS 等）跳过清理记录的 `removed_required_structure` 三元组（292 个）。
+- **合并：** 静态属性逐列相同、无时间序列、`p_nom = p_nom_min = 0`、可扩建、无 twin 的链路组，保留排序后的第一个名字，`p_nom_max` 乘以组内数量（∞ 保持 ∞）。
+- **不删除：** 有经济意义的候选（FT 链路、东盟外 CO₂ 储存）、固定外生源、被固定需求锁定的池、唯一连接为零效率端口的燃料母线（本网络没有这种情况）。
+- **覆盖值解析：** `--override numerics.dust_cleanup=on`——YAML 1.1 把 `on`/`off` 读成布尔，`s2_network.py` 与 `v5_gates.gate_b12_hash` 的布尔覆盖解析补了 `on`（原只认 `1/true/yes`；此前的覆盖键都不是布尔，不受影响）。
+- **测试：** `tests/research/test_s4l_1.py`（玩具网络：各类对象的识别、`on`/`off`、合并的容量等价、元数据修剪、必需候选记录、固定需求守护的三种余量情形；以及对实际构建的断言）。
+
+### 3.4 影响（VERIFIED，`research_inputs/numerics/DUST_IMPACT_S4L1.json`；修正规则的清理后网络在 2983d951 干净树上构建，`results_project/s4l/s4l1/builds/`）
+
+| 组件 | S4K-3 一体化 | 清理后 | 变化 | S4K-3 不互联 | 清理后 | 变化 |
+|---|---|---|---|---|---|---|
+| Bus | 2,914 | 2,786 | −128 | 2,914 | 2,786 | −128 |
+| Generator | 1,995 | 1,717 | −278 | 1,995 | 1,717 | −278 |
+| Link | 7,584 | 7,494 | −90 | 7,292 | 7,202 | −90 |
+| Load | 2,064 | 2,026 | −38 | 2,064 | 2,026 | −38 |
+| Store | 530 | 528 | −2 | 530 | 528 | −2 |
+| StorageUnit | 280 | 133 | −147 | 280 | 133 | −147 |
+| Line | 148 | 148 | 0 | 86 | 86 | 0 |
+
+- 存留组件的全部静态列与时间序列逐项相同（EXACT：`surviving_identical`，无差异列；元数据只多 `research_dust_cleanup` 与 `s4l_layers`）。
+- 两个情景的静态校验都通过（`S2_SCENARIO_BUILT_STATIC_PASS`）；清理后每个池母线的余量 ≥ 0（BN、SG、VN 为 0，锁定；其余 0.59–399 TWh）。
+- **LP 规模（56×3h，第一版规则的网络，比修正规则的网络少 5 个池 = 少 5 × 56 行；S4L-2 回执）：** 一体化 675,747 列 / 1,501,471 行 / 3.42 M 非零元 → 629,144 / 1,393,079 / 3.21 M（**−6.9 % / −7.2 % / −6.2 %**）；不互联 652,097 / 1,447,897 / 3.25 M → 605,494 / 1,339,505 / 3.04 M（−7.1 % / −7.5 % / −6.5 %）。
+
+### 3.5 这些对象在 L23 首批结果中的使用情况（VERIFIED，`DUST_S4L1.json` → `l23`，读取 L23 求解后网络）
+
+| 对象 | 一体化 STEPS | 不互联 STEPS | 说明 |
+|---|---|---|---|
+| 7 个 < 1 GWh 的生物质池 | 全部被"透支"：使用量比池容量多 0.9 MWh，年末水平 −0.90 … −0.91 MWh（TL −1.81） | 年末 −0.024 MWh（MY +0.014） | 即 L23 §6.3 的 `Store-fix-e-lower` 违反。SG、BN 的池被固定需求锁定（§7 第 1 条）：这些残差是零余量平衡在内点解中的表现，不是"没有意义的小量"；清理后 MY、TL 的两个池不再存在，SG、BN 的 5 个仍在 |
+| 11 个东盟外 CO₂ 储存 | 年末水平 4–95 **t**（ID 95、VN 40、MM 30 t） | 18–192 t | 一年里几乎没有使用（CO₂ 流向表 `extra_asean_mt` 为 0.0），年末的几十吨是内点解的数值噪声，也是 `Store-ext-e-upper` 违反所在；作为无上限出口选项保留 |
+| 100 条 FT 链路 | `p_nom_opt` 3e-7 … 2.4e-4 MW，没有一条 > 1 MW | 1.2e-4 … 1.2e-3 MW | 近零容量来自内点解，不是"零上限"；它们是经济候选，保留；`Link-ext-p-*` 违反落在这里 |
+| 124 台死端燃料供给机组 | 出力恒为 0.0，`p_nom_opt` 0 | 同 | 删除不改变任何解 |
+| 295 个零上限候选 | `p_nom_opt` 0 | 同 | 同上 |
+| 38 个全零负荷 | 在网络中（0） | 同 | 同上 |
+
+## 4. S4L-2 crossover 复测（第 113 项 (2)；提交 aa9559fe、6a2ddff9）
+
+### 4.1 新档案 `formal_barrier_crossover`（只新增，档案 A 未改；注册表 `s4l2_profile_formal_barrier_crossover`）
+
+| 参数 | 档案 A `formal_barrier` | `formal_barrier_crossover` | 说明 |
+|---|---|---|---|
+| Method | 2 | 2 | barrier |
+| **Crossover** | **0**（关） | **−1**（Gurobi 缺省：自动） | Gurobi 参数 `Crossover`，缺省 −1 = 自动选择 crossover 策略得到基解；旧档案 `crossover_diagnostic` 用 1（先推对偶）。PyPSA-Eur v2025.07.0 `gurobi-default` 为 crossover 0（第 1056–1064 行），所以本档案是为核验目的的偏离（注册表 `s4l2_pypsa_eur_crossover_reference`） |
+| BarConvTol / BarHomogeneous | 1e-8 / 1 | 1e-8 / 1 | |
+| Threads / Seed / AggFill / PreDual / BARDENSETHRESH | 8 / 123 / 0 / 0 / 200 | 同 | |
+| 缩放、基尔霍夫行归一化 | on / on | on / on | `s2_solve.py --scaling on`，配置 `kirchhoff_row_normalisation` |
+| 门槛 | 内点口径 A1_A2（`gate_a1_a2_interior`） | 基解口径 A1_A2（`gate_a1_a2_kkt`） | `s2_solve.py` 按 `Crossover == 0` 判断；第 71 项的求解器容差门槛（`*_S4B`）两者都算 |
+
+### 4.2 矩阵结果（56×3h，本机，串行，02:35–03:05 UTC；`results_project/s4l/s4l2/`，证据 `evidence/s4l_2/`；VERIFIED）
+
+| 运行 | 网络 | 档案 | 终止 | 目标值（EUR） | barrier 迭代 / 秒 | crossover + 单纯形（秒，÷ barrier） | 求解 s / 墙钟 s | 峰值 RSS | 求解器容差门槛 | B16 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| s4k_A_integrated | S4K-3 | A | **optimal** | 648,262,253,996.03 | 124 / 214.0 | — | 234.1 / 300 | 4.21 GiB | 通过（仅 B12 不通过，见下） | 1.1e-12 |
+| s4k_A_disconnected | S4K-3 | A | **optimal** | 698,679,222,969.73 | 117 / 164.7 | — | 182.7 / 240 | 3.79 GiB | 通过（仅 B12） | 6.6e-13 |
+| s4k_X_integrated | S4K-3 | crossover | **infeasible_or_unbounded** | —（无解返回） | 124 / 215.1（与 A 逐位相同，`Optimal objective 6.45375526e+11`） | 115.4（0.54） | 340.7 / 375 | 4.19 GiB | 未计算 | — |
+| s4k_X_disconnected | S4K-3 | crossover | **infeasible_or_unbounded** | — | 117 / 163.9（与 A 相同） | 62.3（0.38） | 235.9 / 270 | 3.79 GiB | 未计算 | — |
+| s4l_A_integrated | 清理后（第一版规则） | A | **infeasible**（`Infeasible model`，barrier 78 次后判定） | — | 78 / 122.1 | — | 133.8 / 166 | 4.10 GiB | 未计算 | — |
+| s4l_A_disconnected | 同 | A | **infeasible** | — | 88 / 108.6 | — | 117.6 / 150 | 3.70 GiB | 未计算 | — |
+| s4l_X_integrated | 同 | crossover | **infeasible** | — | 78 / 120.8 | 0（未进入 crossover） | 130.5 / 165 | 4.10 GiB | 未计算 | — |
+| s4l_X_disconnected | 同 | crossover | **infeasible** | — | 88 / 111.6 | 0 | 121.2 / 150 | 3.70 GiB | 未计算 | — |
+
+- **B12：** 两个参照运行的 `all_passed_solver_tolerances` = False，唯一不通过的门槛是 B12（配置哈希一致性）：S4K-3 网络元数据里的 `research_config_sha256` 是 S4K 配置的哈希，S4L 在 `baseline.yaml` 新增 `numerics` 块与 `formal_barrier_crossover` 档案后当前配置哈希变化，B12 对旧网络必然不通过。这是配置版本标识，不是求解器容差；第 71 项集合中其余 15 个门槛全部通过（`failed_gates_excluding_B12` 为空）。清理后网络（在 S4L 配置下构建）的 B12 通过（已核实）。
+- **crossover 失败的形态（`evidence/s4l_2/s4k_X_*/GUROBI_LOG_SCRUBBED.txt`，VERIFIED）：** barrier 用与档案 A 相同的 124 / 117 次迭代到 `Optimal objective`；`Crossover log`：对偶推进（274k DPushes）完成、`Warning: Markowitz tolerance tightened to 0.5`、原始推进完成（`Push phase complete: Pinf 1.0e-05 / 4.4e-05, Dinf 1.6e+05 / 2.8e+07`）；随后的单纯形清理在约 150 次迭代内以 `Infeasible or unbounded model` 结束（一体化 185,118 次迭代合计、330.6 s；不互联 188,710 次、226.2 s）。Gurobi 没有返回解，`s2_solve.py` 按既定逻辑写 `INFEASIBILITY_DIAGNOSIS.json` 并停止，不计算门槛与账本。**没有调参**（指令第 5 点）。INFERENCE：LP 可行有界（档案 A 最优），失败是推进后基的数值问题（Markowitz 警告、推进后对偶不可行量巨大），与 S4I R9 登记的系数跨度（右端项最大 6.1e8、跨度 3e12）有关；crossover 用时 0.38–0.54 × barrier，低于 5 倍。
+- **清理后网络不可行的原因（VERIFIED，`evidence/s4l_2/INFEASIBILITY_CAUSE_s4l_first_rule_integrated.txt`，只读诊断）：** BN 的固体生物质池总量 115,935.8 MWh = BN 固定生物质终端需求 115,935.8 MWh；SG 31,510.2 = 31,510.2；VN 125,772,566.2 = 125,772,566.2（零余量，`pool_balance` 标 binding）。第一版规则删除了 BN 的 3 个池（907 MWh）与 SG 的 2 个池（473 MWh），固定需求无法满足；barrier（`BarHomogeneous 1`）在 78 / 88 次迭代判定不可行。其他国家的池余量 0.59–399 TWh。
+
+### 4.3 按事先固定标准的判定
+
+| 组合 | 可判定？ | 目标相对差（一体化 / 不互联） | B16 | 分国差额变化超出的国家 | 结论 |
+|---|---|---|---|---|---|
+| S4K + A（参照） | — | 0 / 0（与 S4K-3 逐位相同） | 1.1e-12 / 6.6e-13 | — | 参照成立；B6 50.42 bn EUR，差额 VN 24.80、ID 7.02、TH 6.11、MY 4.09、LA 2.77、SG 2.02、KH 1.89、PH 1.75、BN 0.84、MM 0.72、TL 0.37、燃料舱 −1.95 bn EUR（与 S4K-3 相同） |
+| S4K + crossover | 否 | 无解 | — | — | crossover 失败（§4.2），不可判定；如实记录 |
+| 清理后（第一版）+ A | 否 | 不可行 | — | — | 清理删除了有经济意义的池 → **停止条件触发**；规则已修正并重建（§3），未求解 |
+| 清理后（第一版）+ crossover | 否 | 不可行 | — | — | 同上 |
+
+**停止条件的处理：** 指令停止条件第 1 条（"清理会删除有经济意义的组件"）成立。处理：(a) 修正规则——池母线的池总量减去待删池后必须仍 ≥ 该母线的固定生物质需求，否则保留（§3.2）；清理后断言每个池母线余量 ≥ 0；(b) 在干净树上重建两个情景（静态校验通过，BN / SG / VN 余量 0、其余为正）；(c) **没有再求解**：8 个授权运行已用完，修正后网络的 4 个运行（档案 A 与 crossover 各两个情景）需要新的授权（§9 第 1 项）。标准本身没有改动。
+
+### 4.4 节点电价与分国账本（只有两个参照运行有解；VERIFIED，`evidence/s4l_2/analysis/S4L2_PRICES_BY_COUNTRY.csv`、`S4L2_LEDGER_DIFF.csv`）
+
+| 国家 | 一体化交流母线年均价（母线均值的平均 / 中位 / p90，EUR/MWh） | 不互联 |
+|---|---|---|
+| BN | 56.7 / 56.7 / 56.7 | 84.8 |
+| ID | 71.6 / 72.1 / 91.7 | 73.6 / 70.2 / 99.7 |
+| KH | 61.1 / 61.7 / 66.5 | 65.7 / 66.8 / 67.0 |
+| LA | 66.8 / 66.9 / 76.4 | 49.8 / 51.6 / 54.0 |
+| MM | 87.6 / 86.7 / 92.7 | 84.9 / 84.2 / 89.3 |
+| MY | 68.2 / 55.8 / 97.4 | 95.5 / 94.5 / 103.5 |
+| PH | 59.3 / 57.2 / 65.7 | 58.8 / 57.7 / 61.0 |
+| SG | 102.2 | 94.2 |
+| TH | 80.3 / 83.9 / 89.7 | 70.2 / 72.5 / 75.0 |
+| TL | 79.2 | 77.1 |
+| VN | 64.5 / 58.6 / 82.8 | 85.5 / 83.4 / 101.5 |
+
+与其他组合的价格差异无法给出（无解）。分国账本差额见 §4.3 参照行；`S4L2_LEDGER_DIFF.csv` 中其余组合为空。
+
+### 4.5 复跑一致性（"S4K 网络 + 档案 A" 与 S4K-3；VERIFIED，`S4L2_MATRIX_SUMMARY.json` → `repeat_vs_s4k3`）
+
+| 情景 | S4K-3 目标值 | 本次 | 相对差 | 迭代 | 求解 s | 门槛集合差异 |
+|---|---|---|---|---|---|---|
+| 一体化 | 648,262,253,996.0322 | 648,262,253,996.0322 | 0 | 124 / 124 | 234.7 / 234.1 | 仅 B12（配置哈希） |
+| 不互联 | 698,679,222,969.7320 | 698,679,222,969.7320 | 0 | 117 / 117 | 180.2 / 182.7 | 仅 B12 |
+
+Gurobi 日志逐行比较：除 presolve / ordering 的秒数外，迭代轨迹逐位相同（`Seed 123`、8 线程，本机负载不同也未改变路径）。
+
+## 5. S4L-3 部署脚本修正（第 112 项 c；提交 547bb8ac；`research/06_scope_redesign/p1_step4l_20261019/cloud_package/`，S4K 目录与 56d28358 部署包未动，**不重建部署包**）
+
+### 5.1 `run_365x24h.sh`（L23 发现第 2、3 条）
+
+| 改动 | 实现 | 对应 |
+|---|---|---|
+| 墙钟上限按进程组终止 | 每个求解用 `setsid` 启动（`exec setsid /usr/bin/time -v python s2_solve.py …`，调用方不是组长时 `setsid` 不 fork，`$!` 即会话 / 进程组首进程）；到上限后 `kill -TERM -- -<pgid>`，宽限 `GRACE_S`（30 s）后 `kill -KILL -- -<pgid>` | S4L-3 第 1 点 |
+| 终止后等待求解进程退出再导出 | `wait` 后再用 `pgrep -g <pgid>` 等整个组退出（最多 120 s，超时再 KILL 并记 `GROUP_SURVIVED`），然后才导出、打包 | 同上 |
+| 导出前核对回执版本 | `RECEIPT_<run>:post_solve|pre_solve|missing`（看 `termination_condition` 与 `finished_epoch`）；被终止且回执为求解前版本时 `RUN_<run>:killed_pre_solve`，不再误记 `none` | 同上 |
+| 监控 | RSS 按进程组求和（`pgrep -g`）；新增列 `cgroup_mem_used_gib`、`cgroup_mem_limit_gib`（v2 `memory.current` / `memory.max`，v1 `memory.usage_in_bytes` / `memory.limit_in_bytes`），宿主机 `MemAvailable` 另列；STATUS 首部写 `CGROUP_MEMORY_LIMIT_GIB` | 第 2 点（发现第 2 条） |
+| 档案 | `--solver-profile` 接受 `formal_barrier_crossover` | S4L-2 |
+| 测试钩子 | `WALL_CAP_S`（10,800）、`GRACE_S`（30）、`GUROBI_TIME_LIMIT_S`（10,500）、`MONITOR_S`（60）、`CGROUP_ROOT`（`/sys/fs/cgroup`）可用环境变量覆盖，缺省为生产值；`setsid` 缺失时拒绝启动 | 第 4 点 |
+
+### 5.2 `preflight.sh`（L23 发现第 1 条）
+
+- CPU 与内存按**容器 cgroup 配额**：v2 `cpu.max`（`<quota> <period>` 或 `max`）与 `memory.max`；v1 `cpu/cpu.cfs_quota_us` / `cpu.cfs_period_us`（−1 = 无限）与 `memory/memory.limit_in_bytes`（2^63 量级 = 无限）；无限额时回退 `nproc` / `MemTotal` 并在输出中写明来源；宿主机值另行打印。
+- 新增 `setsid` 检查；`PREFLIGHT_ONLY` 可只跑部分节（测试用）；`CGROUP_ROOT` 可覆盖。
+- 下限不变（串行 8 核 / 40 GiB / 35 GB，两通道 16 / 72 / 45）；§21 建议内存按单运行 20 GiB 规划，但 40 GiB 下限是用户决定，未改。
+
+### 5.3 本机测试（第 4 点；`evidence/s4l_3/test_s4l3_scripts.sh`，结果 `evidence/s4l_3/results/TEST_RESULTS.txt`，**28/28 通过**，VERIFIED；不用 Gurobi、不连云端、不用真许可文件）
+
+| 组 | 做法 | 核验 |
+|---|---|---|
+| A 终止路径 | 假求解器 `fake_s2_solve.py`（写求解前回执、再起一个 `sleep 600` 孙进程、睡 120 s 后才写求解后回执），`WALL_CAP_S=20`、`GRACE_S=5`、假 cgroup v2 树（12 核 / 90 GiB） | 20 s 到上限后整个进程组（time → python → sleep）被终止，无存活进程；`RECEIPT_integrated:pre_solve`、`RUN_integrated:killed_pre_solve`；导出目录含求解前回执；`DONE` 与结果包正常；整段 < 90 s；监控 CSV 有 cgroup 列且限额 90.00 GiB |
+| B 正常路径 | 假求解器 3 s 完成，两个运行，档案 `formal_barrier_crossover` | 回执判为 `post_solve`，`RUN_*:optimal`，无 KILL 行，无存活进程 |
+| C 拒绝与空跑 | `lanes3`、未知档案、缺档案；`--dry-run` | 三者退出码 2 并写明原因；空跑列出 3 条求解命令（`--time-limit 10500`），START 行 `wall_cap_s:10800` |
+| D 预检资源 | 假 cgroup v2（12 核 / 90 GiB）、v1（8 核 / 40 GiB）、v2 无限额、v1 无限额（quota −1、limit 2^63） | 分别读出 12 / 90、8 / 40（并给出低于推荐 48 GiB 的警告）、两种无限额回退宿主机值并写明；`tools` 节找到 GNU time 与 setsid |
+| E 静态 | `bash -n`；脚本中无许可关键词 | 通过 |
+
+注：测试的临时目录需在空闲 ≥ 35 GB 的磁盘（`TMPDIR`），否则预检的磁盘检查会按设计失败（第一次在 `/tmp` 上就是这样）。
+
+### 5.4 `CLOUD_RESOURCE_ESTIMATE.md` §21（第 3 点；复制到 S4L 目录后追加）
+
+- L23 实测对照 §20：墙钟为估计上沿的 1.7–1.9 倍（诊断 0.37）；峰值 RSS 13.8–15.3 GiB = 中值的 0.61；实例速度相对本机 0.23–0.30（按 Gurobi work unit）；每次 barrier 迭代 14.9–43.4 s；迭代数由收敛行为决定（不互联跳开后 326 次）。
+- 同类实例校正估计（INFERENCE）：一体化 / NZE 1.7–3.1 h、不互联 0.6–1.5 h、诊断 0.5–0.8 h；串行 4.0–7.7 h；现行 TimeLimit 10,500 s 与墙钟 3 h 在上沿不够（§9 第 3 项）。
+- "选机建议"6 条：求解只用 CPU、GPU 无关；比较 CPU 代际 / 主频 / 内存带宽而非核数；内存按单运行 20 GiB 规划；用新预检读容器配额；上正式运行前做一次 56 时段速度探针（PROPOSED）；TimeLimit / 墙钟按速度系数放大或换更快 CPU。
+- crossover 在 365×24h 上的用时没有实测；56×3h 上为 barrier 的 0.38–0.54 倍，但以失败告终（§4.2）。
+
+### 5.5 其他
+
+- `make_package.sh` 复制为 S4L 版（ALLOW 正则加入 `s4l_*` 汇总 / 证据脚本），**未运行**；环境文件原样复制。部署包在用户决定第二批方案后再建。
+- `CLOUD_DEPLOY_STEPS.md` 未改（第二批方案确定后随包更新）。
+
+## 6. 注册表登记汇总
+
+| 片段 | 行 | 内容 |
+|---|---|---|
+| `s4l_0` | 5 | 第 112 项 a、b 的登记、台账补记、范围规则、问题来源 |
+| `s4l_1` | 7 | 开关、能量阈值、容量阈值（PyPSA-Eur 行号）、固定需求守护、删除规则、合并规则、保留规则 |
+| `s4l_2` | 4 | 新档案、诊断矩阵、事先固定的比较标准、PyPSA-Eur crossover 缺省的对照 |
+
+## 7. 发现但未处理（只记录，未修改）
+
+| # | 现象 | 涉及国家与量级 | 影响 | 建议时点 |
+|---|---|---|---|---|
+| 1 | **BN、SG、VN 的固体生物质池总量恰好等于固定的生物质终端需求（零余量）**：BN 115,935.8 MWh、SG 31,510.2 MWh、VN 125.77 TWh；其他国家余量 0.59–399 TWh。INFERENCE：D1 生物质潜力层对这三国取了"潜力 = 现有消费"的下限。后果：这三国的生物质平衡是紧的（任何转换候选都没有余量），L23 的 `Store-fix-e-lower` 违反（SG 木薯池 902 倍预算）就是这种零余量平衡在内点解中的残差；清理不能消除它。第 8 条：三国在生物质上没有任何自由度，其他国家有——这是数据层面的既有差异，不是本步引入 | BN、SG、VN | 影响这三国的生物质影子价格（L23 §7 第 5 条：不互联中 VN、BN、SG 固体生物质影子价格全年恒为 3,185–3,328 EUR/MWh，正是零余量的对偶表现）与近零残差 | 用户决定：是否给这三国一个小的余量或进口 / 跨境生物质选项（数据层决定，不在本步） |
+| 2 | **crossover（Gurobi 缺省 −1）在本 LP 上失败**（§4.2）：推进完成后单纯形清理报 `Infeasible or unbounded`；`crossover_diagnostic`（Crossover 1）在 S4C-5 时的表现见该报告。没有调参 | 全部 | 无法用缺省 crossover 得到基解与收敛的对偶解 | 用户决定（§9 第 2 项） |
+| 3 | **B12 对旧网络在新配置下必然不通过**：`research_config_sha256` 是构建时的配置哈希；每次增加配置键（本步 `numerics`、新档案）后，旧网络的 B12 都会失败，`all_passed_solver_tolerances` 随之为 False。本步在汇总中另给 `failed_gates_excluding_B12` | — | 解读门槛时要分开看 | 交付前（可让 B12 只比较"开关集合"或记录配置版本） |
+| 4 | 11 台 `plastic waste source` 固定机组 p_nom 0.06–0.99 MW（外生数据，合计 5.03 MW、44 GWh/a），低于 1 MW 但不是候选，未删除 | KH、MM、MY、PH | 无 | 无 |
+| 5 | 4 个只有 `oil pool <node>` 链路一端相连的节点油母线（换流站辅助节点，无负荷）：S4I R1 把它们计入 128 个单侧燃料母线；清理把母线与链路一起删除（流量结构性为 0） | MY、PH、TH | 无 | 无 |
+| 6 | 东盟外 CO₂ 储存在 L23 中几乎未用（年末 4–192 t），但保留为无上限出口选项；它们在 barrier 解中会继续产生 `Store-ext-e-upper` 的近零残差 | 全部 | 近零残差（原始侧影响 ≤ 1e-7） | 正式结果后分析：若长期不用，可考虑关闭（第 89 项的敏感性） |
+| 7 | 第一版清理规则的两个网络（`results_project/s4l/s4l1_first_rule_infeasible/`，不进 git）保留作记录；其 S4L-2 运行证据在 `evidence/s4l_2/s4l_*` | — | 无 | 无 |
+| 8 | `gate_b12_hash` 与 `s2_network.py` 的布尔覆盖值解析原本都不接受 `on`（YAML 1.1 把 `on`/`off` 读成布尔）；两处已补（此前的覆盖键都不是布尔） | — | 无 | 已处理（记录） |
+| 9 | 清理后 LP 行数约 −7 %（56×3h）；对 365×24h 求解时间与收敛的影响未测（修正规则网络未求解） | — | 未知 | §9 第 1 项的运行 |
+| 10 | 56×3h 上 S4K 网络的两个档案 A 运行与 S4K-3 逐位相同，说明本机复跑可作为确定性基准；云端实例（不同 CPU）不保证逐位相同（L23 一体化 144 次 vs 冒烟 124 次是规模不同所致，不是同一问题） | — | 无 | 无 |
+
+## 8. 工作原则第 8 条检查（是否系统性地把成本推给或减轻某些国家）
+
+| 决定 | 检查 |
+|---|---|
+| 近零量清理（S4L-1，修正规则） | 删除的对象在任何解中流量为零或 < 1 GWh/a 且不被固定需求依赖（§3.1、§3.5）；各国删除的能量 0–792 MWh/a（占其生物质潜力 ≤ 1e-3，MY 3e-6、TL 1e-3）；合并链路成本与容量等价；没有国家失去可用资源或候选。第一版规则曾使 BN、SG 不可行（已纠正，未进入任何结果）。S4L-2 对分国差额的核验未能完成（§4.3），采用前需 §9 第 1 项的运行 |
+| crossover 档案（S4L-2） | 只改求解器的终止方式，不改模型；本步没有得到任何解，对各国无影响 |
+| 部署脚本（S4L-3） | 与模型无关 |
+| L23 标签（S4L-0） | 对四个运行同等适用；不用于结论的是所有国家的价格结算科目，不是某些国家 |
+| 发现第 1 条（三国零余量） | 既有数据特征，本步未改；记录供用户决定 |
+
+## 9. 需要用户决定的事项
+
+1. **是否采用清理（`research.numerics.dust_cleanup: on`），以及是否授权完成矩阵：** 修正规则的清理后网络已构建、静态校验与池平衡通过，但**未求解**。建议：授权 **4 个** 56×3h 运行（清理后网络 × {档案 A, `formal_barrier_crossover`} × {一体化, 不互联}，30 分钟止损，不重试，标准不变），通过后再决定第二批是否用清理后网络；若不授权，第二批维持 S4K 状态（`off`）。本报告不替用户决定。
+2. **crossover 档案的用途：** 缺省 crossover（−1）在 S4K 网络两个情景上都失败，**不建议作为正式档案**；作为核验档案也不能在不调参的情况下给出基解。可选：(a) 放弃 crossover，正式档案仍为 A（原始侧结论可用，对偶侧按 L23 的口径标注）；(b) 另行授权一个带参数变化的 crossover 变体（例如 `Crossover 1`/`2`、`NumericFocus`、或先缩放再 crossover）作为新的档案——这是新的决定，不在本步范围；(c) 先看第 1 项中清理后网络上的 crossover 结果再定。
+3. **第二批云端方案建议（PROPOSED）：** 档案 A；网络按第 1 项的结果决定；用 S4L 版脚本（`cloud_package/`，须重建部署包）；同类实例时 TimeLimit / 墙钟按 §21 放大（例如 4 h / 4.25 h，`GUROBI_TIME_LIMIT_S` / `WALL_CAP_S`）或换更快的 CPU；串行；上正式运行前做一次 56 时段速度探针（PROPOSED，未实现）；内存按单运行 20 GiB 规划，预检下限 40 GiB 不动。另请一并决定发现第 1 条（BN、SG、VN 零余量）的处理，因为它决定了这三国生物质相关残差与影子价格的解读。
+
+## 10. 证据与文件
+
+| 位置 | 内容 |
+|---|---|
+| `research/06_scope_redesign/p1_step4l_20261019/` | 本报告、`S4L_EVIDENCE.json`、`S4L_PROGRESS.md`、指令与 SHA 文件、`CLOUD_RESOURCE_ESTIMATE.md`（§21）、`cloud_package/`（S4L 版脚本，未打包）、`evidence/s4l_1/`（两版构建的 STATUS、回执、清单、比较）、`evidence/s4l_2/`（运行脚本、STATUS、8 个运行的回执 / 门槛 / 账本 / 日志尾、不可行原因诊断、矩阵汇总与表）、`evidence/s4l_3/`（测试脚本、假求解器、测试结果） |
+| `research_inputs/numerics/` | `DUST_INVENTORY_S4L1_{integrated,disconnected}.csv`、`DUST_S4L1.json`（阈值、依据、清单汇总、池平衡、L23 使用情况）、`DUST_IMPACT_S4L1.json`（清理前后逐组件比较） |
+| `research_inputs/registry_v5/fragments/s4l_{0,1,2}.csv` | 注册表片段（已汇入 `DATA_REGISTRY.csv`） |
+| `scripts_project/` | `s4l_layers.py`、`s4l_0_data.py`、`s4l_1_data.py`、`s4l_2_data.py`、`s4l_2_summary.py`、`s4l_4_collect_evidence.py`；改动 `s2_network.py`、`s2_solve.py`、`d1_registry.py`、`v5/v5_gates.py`、`configs/research/baseline.yaml` |
+| `results_project/s4l/`（不进 git） | `s4l1/builds/`（修正规则的清理后网络）、`s4l1_first_rule_infeasible/`（第一版）、`s4l2/solves/`（8 个运行的完整输出） |
+| 镜像 | `D:\ResearchWorkspaces\ASEAN\work\p1_step4l_20261019\` |

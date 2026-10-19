@@ -629,3 +629,16 @@
 - **发现但未处理 12 条（报告 §7）：** 含 `preflight.sh` 与监控读宿主机资源（第 1、2 条）、3 h 墙钟上限没有终止 Python 孙进程（第 3 条）——第 112 项 c 交 S4L-3 处理。
 - **费用：** 开机到 `DONE` 8 h 20 min，约 ¥9.00；实例许可文件已删除；关机由用户在控制台操作。
 - **交付：** `research/06_scope_redesign/p1_l23_run1_20261019/`（报告、证据 JSON、进度、`evidence/c9`、`evidence/c9_summary`）；结果包与 NZE 回收包在 `work/p1_step4k_20261018/cloud_results/`（不进 git）。
+
+## S4L 第 112、113 项：近零量清理、crossover 复测、部署脚本修正、L23 标签 — 2026-10-19
+
+- **范围：** 指令 `S4L_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 03508400…529b，已核对）；第 112 项 a、b、c 与第 113 项 (1)、(2)；其他发现只记录。分支 `codex/s4l-numerics-20261019`（自 L23 efb37fc2），draft PR #37 叠在 #36 上；每个子步骤提交。
+- **资源：** 无云端操作、无下载、无 365×24h 求解；本机 56×3h 求解 8 次（用户授权的 8 个，串行，单次 ≤ 375 s、≤ 4.2 GiB，不重试）；档案 A 未改，新档案只新增。触发停止条件一条（清理删除了有经济意义的组件），处理：规则修正、重建、停止求解、报告。
+- **S4L-0（112 a、b）：** 注册表 `s4l_0`：L23 四个运行 `SCREENING_UNVERIFIED`（可用原始侧总量；价格结算科目与小国差额不用于结论）；接受 `nze_late_outputs_…tar.gz`（78a6ea15…c33b）为本批 NZE 结果；本台账补记 L23 条目。
+- **S4L-1（113 (1)）：** `scripts_project/s4l_layers.py`，开关 `research.numerics.dust_cleanup: off`（缺省，S4K 状态）| `on`（主算候选）；阈值 `dust_capacity_mw` 1（PyPSA-Eur `renewable.hydro.clip_min_inflow` 1.0 MW，配置第 300 行）、`dust_energy_mwh` 1000（项目自定）。清单 818 行（两个情景相同）：删除 597（零上限候选 295、单侧燃料母线 128 + 死端组件 128、全零负荷 38、全零出力 3、小容量 offwind 3、生物质池 2 共 1,456 MWh）、合并 86（`biomass-to-methanol` 97 → 11）、保留只记录 127（FT 链路 100、东盟外 CO₂ 储存 11、塑料废弃物固定源 11、被固定需求锁定的池 5）。清理后 LP 行数约 −7 %（56×3h）。存留组件逐列相同。
+  - **发现（§7 第 1 条）：** BN、SG、VN 的固体生物质池总量恰好等于固定生物质终端需求（115,935.8 / 31,510.2 MWh / 125.77 TWh，零余量）；第一版规则删除了 SG、BN 的 5 个小池使两个情景不可行；规则加固定需求守护（`s4l1_pool_fixed_demand_guard`），清理后断言池余量 ≥ 0；修正规则的网络已重建（2983d951），**未求解**。
+- **S4L-2（113 (2)）：** 新档案 `formal_barrier_crossover` = 档案 A + Gurobi `Crossover` 缺省 −1（注册表 `s4l_2`，含事先固定的比较标准：目标相对差 ≤ 1e-5、B16 ≤ 1e-6、分国差额变化 ≤ max(1 %, 0.01 bn EUR)）。矩阵 8 个运行：S4K 网络 + A 两个情景最优且与 S4K-3 逐位相同（目标值 648,262,253,996.03 / 698,679,222,969.73，124 / 117 次迭代；`all_passed_solver_tolerances` 仅因 B12 配置哈希为 False）；S4K 网络 + crossover：barrier 与 A 相同，crossover 推进完成后单纯形清理报 `Infeasible or unbounded`（Markowitz 容差收紧，Dinf 1.6e5 / 2.8e7），crossover 用时 0.38–0.54 × barrier，无解返回，不调参；第一版清理网络 4 个运行不可行（原因同上）。标准未改；清理后网络的判定未完成。
+- **S4L-3（112 c）：** `p1_step4l_20261019/cloud_package/`：`run_365x24h.sh`（`setsid` 进程组、组终止 + 宽限 + KILL、等待组退出再导出、`RECEIPT_<run>:post_solve|pre_solve`、`killed_pre_solve`、cgroup 内存监控、接受新档案、测试用环境变量）、`preflight.sh`（容器 cgroup v1/v2 CPU 与内存配额、`setsid` 检查）；本机测试 28/28（假求解器、假 cgroup，不用 Gurobi）。`CLOUD_RESOURCE_ESTIMATE.md` §21：L23 校正（实例速度 0.23–0.30、每次迭代 15–43 s、RSS 为中值 0.61；同类实例校正估计 1.7–3.1 h / 0.6–1.5 h）与选机建议 6 条。`make_package.sh` S4L 版准备、未运行；部署包未重建。
+- **其他：** `v5_gates.gate_b12_hash` 与 `s2_network.py` 布尔覆盖值接受 `on`；S4L-2 汇总另给 `failed_gates_excluding_B12`。
+- **待用户决定（报告 §9）：** 是否授权清理后（修正规则）网络的 4 个 56×3h 运行并据此决定是否采用清理；crossover 档案不建议作为正式档案（可放弃，或另行授权带参数变化的变体，或先看清理后网络上的结果）；第二批云端方案（档案 A、S4L 版脚本重建部署包、TimeLimit / 墙钟按 §21 放大或换更快 CPU、速度探针）；BN / SG / VN 零余量的处理。
+- **交付：** `research/06_scope_redesign/p1_step4l_20261019/`（`S4L_REPORT.md`、`S4L_EVIDENCE.json`、`S4L_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md`、`cloud_package/`、`evidence/s4l_{1,2,3}/`）；`research_inputs/numerics/`；注册表片段 `s4l_{0,1,2}`；镜像 `work/p1_step4l_20261019/`。测试 `tests/research` 534 通过、0 跳过。
