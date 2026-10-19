@@ -11,7 +11,10 @@ near-zero objects without economic meaning are removed here, the ones with econo
 extra-ASEAN CO2 export stores) are kept and only listed.
 
 Classes (inventory; action = delete unless stated):
-  biomass_pool_below_energy        Store research_role FINITE_RESOURCE with e_nom < dust_energy_mwh (SG / BN / TL / MY pools of 0.5-800 MWh);
+  biomass_pool_below_energy        Store research_role FINITE_RESOURCE with e_nom < dust_energy_mwh (SG / BN / TL / MY pools of 0.5-800 MWh) - ONLY while the
+                                   pools of the same bus keep covering the fixed demand fed from that bus (S4L-2 finding: in BN, SG and VN the solid biomass pools
+                                   equal the fixed biomass final demand exactly, so deleting any pool there makes the model infeasible; such pools are kept and
+                                   listed as kept_pool_fixed_demand_binding);
   renewable_potential_below_capacity   extendable renewable Generator with p_nom = 0 and p_nom_max < dust_capacity_mw (incl. the zero caps);
   renewable_potential_below_energy     extendable renewable Generator with p_nom_max >= threshold but p_nom_max x sum(p_max_pu w) < dust_energy_mwh;
   all_zero_profile_generator       Generator with p_max_pu identically 0 and p_nom = 0 (S4I R5: 3 offwind-dc);
@@ -105,6 +108,29 @@ def _node_of(n, bus: str) -> str:
     return loc if loc in geo else str(bus)
 
 
+def pool_fixed_demand(n, bus: str) -> float:
+    """Yearly fixed demand (MWh) that the finite pools on `bus` have to cover: Loads on the bus itself plus Loads on every bus fed by a Link
+    leaving `bus` (the S2 '... biomass meter' and '... biomass CC' links into the '<node> ... biomass final' buses). Conservative: a downstream
+    bus with another supplier is still counted in full."""
+    w = n.snapshot_weightings.generators
+    ann = n.get_switchable_as_dense("Load", "p_set").mul(w, axis=0).sum()
+    down = set(n.links.bus1[n.links.bus0 == bus].astype(str)) | {bus}
+    return float(ann[n.loads.index[n.loads.bus.isin(down)]].sum()) if len(n.loads) else 0.0
+
+
+def pool_balance(n) -> list:
+    """Per finite-pool bus: pools, total energy, fixed demand fed from the bus, slack (negative = structurally infeasible), binding flag."""
+    st = n.stores
+    if "research_role" not in st:
+        return []
+    out = []
+    for bus, grp in st[st.research_role == "FINITE_RESOURCE"].groupby("bus"):
+        total = float(grp.e_nom.sum()); dem = pool_fixed_demand(n, str(bus))
+        out.append(dict(bus=str(bus), country=str(grp.country.iloc[0]), pools=int(len(grp)), pool_total_mwh=total, fixed_demand_mwh=dem, slack_mwh=total - dem,
+                        binding=bool(abs(total - dem) <= 1e-3 * max(dem, 1.0))))
+    return out
+
+
 def identical_link_groups(n) -> list:
     """Groups of links with identical static attributes (every column except the name), no time series, p_nom = p_nom_min = 0, extendable,
     no twin relation. Returns [(kept name, [other members])]."""
@@ -140,10 +166,19 @@ def dust_inventory(n, thr: dict) -> pd.DataFrame:
                          capacity_mw=capacity_mw, energy_mwh=energy_mwh, bound=bound, note=note))
     st = n.stores
     if "research_role" in st:
-        for name, z in st[st.research_role == "FINITE_RESOURCE"].iterrows():
-            if float(z.e_nom) < e_thr:
-                add("Store", name, "biomass_pool_below_energy", "delete", z.country, z.carrier, z.bus, energy_mwh=float(z.e_nom), bound="e_nom",
-                    note=f"finite pool {float(z.e_nom):.3f} MWh/a < {e_thr:g}; category {z.get('s2_category', '')}")
+        pools = st[st.research_role == "FINITE_RESOURCE"]
+        for bus, grp in pools.groupby("bus"):   # fixed-demand guard (S4L-2 finding): the pools of a bus must keep covering the fixed demand they feed
+            total = float(grp.e_nom.sum()); dem = pool_fixed_demand(n, str(bus)); remaining = total
+            for name, z in grp.sort_values("e_nom").iterrows():
+                if float(z.e_nom) >= e_thr:
+                    continue
+                if remaining - float(z.e_nom) >= dem - 1e-6:
+                    remaining -= float(z.e_nom)
+                    add("Store", name, "biomass_pool_below_energy", "delete", z.country, z.carrier, z.bus, energy_mwh=float(z.e_nom), bound="e_nom",
+                        note=f"finite pool {float(z.e_nom):.3f} MWh/a < {e_thr:g}; category {z.get('s2_category', '')}; bus pools {total:.1f} MWh, fixed demand {dem:.1f} MWh, slack after deletion {remaining - dem:.1f} MWh")
+                else:
+                    add("Store", name, "kept_pool_fixed_demand_binding", "keep", z.country, z.carrier, z.bus, energy_mwh=float(z.e_nom), bound="e_nom",
+                        note=f"finite pool {float(z.e_nom):.3f} MWh/a < {e_thr:g} but needed: bus pools {total:.1f} MWh vs fixed demand {dem:.1f} MWh (slack {total - dem:.1f} MWh); deleting it would make the fixed demand infeasible (S4L-2 s4l_A runs)")
     stx = st[(st.e_nom_extendable) & (st.e_nom == 0) & (st.e_nom_max < e_thr)]
     for name, z in stx.iterrows():
         add("Store", name, "zero_upper_candidate", "delete", z.get("country", ""), z.carrier, z.bus, energy_mwh=float(z.e_nom_max), bound="e_nom_max")
@@ -241,7 +276,7 @@ def apply_dust_cleanup(n, cfg) -> dict:
     T = dust_inventory(n, thr)
     led = dict(mode=mode, thresholds=thr, pypsa_eur=PYPSA_EUR_REFS, components_before=before,
                inventory=dict(rows=int(len(T)), by_class_action={f"{k[0]}|{k[1]}": int(v) for k, v in T.groupby(["dust_class", "action"]).size().items()}),
-               table=T)
+               pool_balance_before=pool_balance(n), table=T)
     n.meta["research_dust_cleanup"] = {k: v for k, v in led.items() if k != "table"}
     if mode != "on":
         led.update(removed={}, merged=[], removed_required_structure=[], components_after=before)
@@ -268,6 +303,9 @@ def apply_dust_cleanup(n, cfg) -> dict:
     if buses:
         n.mremove("Bus", buses)
     _drop_meta_names(n, names_all)
+    short = [b for b in pool_balance(n) if b["slack_mwh"] < -1e-6]   # structural check after the deletions (S4L-2 s4l_A finding): no pool bus may fall below its fixed demand
+    if short:
+        raise ValueError("dust cleanup would leave finite pools below their fixed demand: " + str(short[:3]))
     merged = []
     for keep, members in identical_link_groups(n):
         N = 1 + len(members); cap = float(n.links.at[keep, "p_nom_max"])
@@ -281,6 +319,7 @@ def apply_dust_cleanup(n, cfg) -> dict:
                             by_class_country=by_cc.to_dict("records"), by_country=by_c.to_dict("records"),
                             energy_mwh_total=float(rem.energy.sum()), capacity_mw_total_finite=float(rem.capacity_finite.sum()),
                             unbounded_capacity_components=int((~np.isfinite(dele.capacity_mw.astype(float))).sum())),
-               merged=merged, merged_links_removed=int(sum(len(m["members"]) for m in merged)), removed_required_structure=removed_struct, components_after=after)
+               merged=merged, merged_links_removed=int(sum(len(m["members"]) for m in merged)), removed_required_structure=removed_struct, components_after=after,
+               pool_balance_after=pool_balance(n))
     n.meta["research_dust_cleanup"] = {k: v for k, v in led.items() if k != "table"}
     return led

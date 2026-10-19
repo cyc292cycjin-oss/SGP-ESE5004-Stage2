@@ -20,7 +20,7 @@ B = ROOT / "results_project/s4l/s4l1/builds/integrated/integrated_2920_3h_unsolv
 K = ROOT / "results_project/s4k/s4k3/builds/integrated/integrated_2920_3h_unsolved.nc"
 
 
-def toy():
+def toy(biomass_demand_mw: float = 300.0):   # 300 MW x 12 h = 3,600 MWh fixed biomass demand vs pools 100 + 5,000: slack 1,500 -> the tiny pool is deletable
     import pypsa
     n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=4, freq="3h")); n.snapshot_weightings.loc[:, :] = 3.0
     buses = (("b0", "AC", "XX"), ("b1", "AC", "XX"), ("solid biomass XX", "solid biomass", "XX"), ("b0 coal", "coal", "XX"), ("b1 coal", "coal", "XX"),
@@ -47,6 +47,9 @@ def toy():
     n.storage_units["country"] = "XX"
     n.add("Load", "b0 load", bus="b0", carrier="electricity", p_set=100.0)
     n.add("Load", "b1 zero load", bus="b1", carrier="shipping methanol", p_set=0.0)
+    n.add("Bus", "b0 biomass final", carrier="biomass final energy"); n.buses.loc["b0 biomass final", "country"] = "XX"
+    n.add("Link", "b0 biomass meter", bus0="solid biomass XX", bus1="b0 biomass final", carrier="biomass meter", p_nom_extendable=True, p_nom_max=np.inf, efficiency=1.0)
+    n.add("Load", "b0 biomass load", bus="b0 biomass final", carrier="biomass final energy", p_set=biomass_demand_mw)   # x 12 h = fixed demand
     n.loads["country"] = "XX"; n.loads["sector"] = "Transport"
     for name in ("b0 b2m", "b1 b2m", "b0 b2m other cost"):
         n.add("Link", name, bus0="solid biomass XX", bus1="ASEAN methanol", carrier="biomass-to-methanol", p_nom_extendable=True, p_nom_max=np.inf, capital_cost=(10.0 if "other" not in name else 11.0), efficiency=0.65)
@@ -105,18 +108,34 @@ def test_apply_on_and_off():
     assert led["mode"] == "on"
     assert "XX biomass tiny" not in n.stores.index and "XX biomass big" in n.stores.index and "co2 sequestered extra-ASEAN XX" in n.stores.index
     assert set(n.generators.index) == {"b0 solar", "b0 plastic", "b0 gas"}
-    assert set(n.storage_units.index) == {"b1 PHS"} and set(n.loads.index) == {"b0 load"}
+    assert set(n.storage_units.index) == {"b1 PHS"} and set(n.loads.index) == {"b0 load", "b0 biomass load"}
     assert "b0 coal" not in n.buses.index and "b1 coal" not in n.buses.index and "b0 oil" in n.buses.index and "b0 oil meter" in n.links.index
-    assert set(n.links.index) == {"b0 b2m", "b0 b2m other cost", "b0 FT", "b0 oil meter"} and np.isinf(n.links.at["b0 b2m", "p_nom_max"])
+    assert set(n.links.index) == {"b0 b2m", "b0 b2m other cost", "b0 FT", "b0 oil meter", "b0 biomass meter"} and np.isinf(n.links.at["b0 b2m", "p_nom_max"])
     assert n.meta["store_power_rules"] == {"XX biomass big": "discharge_only"} and n.meta["research_biomass"]["stores"] == {"XX biomass big": 5000.0}
     assert n.meta["demand_owners"] == {"b0 load": "o1"} and n.meta["research_new_hydro_inflow_tie"] == []
     assert sorted(map(tuple, led["removed_required_structure"])) == [("Generator", "geothermal", "b0"), ("Generator", "onwind", "b1"), ("Generator", "solar", "b0"), ("StorageUnit", "hydro", "b0")]
     assert led["removed"]["count"] == 11 and led["merged"] ==[dict(kept="b0 b2m", members=["b1 b2m"], p_nom_max=np.inf, carrier="biomass-to-methanol")]
     assert "b1 onwind zero" not in n.generators_t.p_max_pu.columns and "b1 zero load" not in n.loads_t.p_set.columns
-    assert n.meta["research_dust_cleanup"]["components_after"]["Bus"] == 7
+    assert n.meta["research_dust_cleanup"]["components_after"]["Bus"] == 8
+    assert led["pool_balance_after"] == [dict(bus="solid biomass XX", country="XX", pools=1, pool_total_mwh=5000.0, fixed_demand_mwh=3600.0, slack_mwh=1400.0, binding=False)]
     # finite p_nom_max groups: the kept link gets N x p_nom_max
     n = toy(); n.links.loc[["b0 b2m", "b1 b2m"], "p_nom_max"] = 20.0
     apply_dust_cleanup(n, cfg_on()); assert n.links.at["b0 b2m", "p_nom_max"] == 40.0
+
+
+def test_pool_fixed_demand_guard():
+    """S4L-2 finding (BN / SG): pools that the fixed biomass demand needs are kept even below the energy threshold."""
+    from s4l_layers import pool_balance, pool_fixed_demand
+    n = toy(biomass_demand_mw=425.0)   # 5,100 MWh demand = pools 100 + 5,000 exactly (binding, as BN / SG / VN in the real network)
+    assert pool_fixed_demand(n, "solid biomass XX") == 5100.0 and pool_balance(n)[0]["binding"] is True
+    T = dust_inventory(n, thresholds(CFG)).set_index("name")
+    assert T.at["XX biomass tiny", "dust_class"] == "kept_pool_fixed_demand_binding" and T.at["XX biomass tiny", "action"] == "keep"
+    led = apply_dust_cleanup(n, cfg_on())
+    assert "XX biomass tiny" in n.stores.index and led["pool_balance_after"][0]["slack_mwh"] == 0.0 and led["removed"]["count"] == 10
+    n = toy(biomass_demand_mw=420.0)   # 5,040 MWh: slack 60 < 100 -> still kept
+    assert dust_inventory(n, thresholds(CFG)).set_index("name").at["XX biomass tiny", "action"] == "keep"
+    n = toy(biomass_demand_mw=416.0)   # 4,992 MWh: slack 108 >= 100 -> deleted
+    assert dust_inventory(n, thresholds(CFG)).set_index("name").at["XX biomass tiny", "action"] == "delete"
 
 
 @pytest.mark.skipif(not (B.exists() and K.exists()), reason="S4L-1 / S4K-3 builds not present")

@@ -92,8 +92,10 @@ def inventory(a):
         p = Path(a.s4k) / sc / f"{sc}_2920_3h_unsolved.nc"
         n = net(p); T = dust_inventory(n, thr)
         T.to_csv(out / f"DUST_INVENTORY_S4L1_{sc}.csv", index=False)
+        from s4l_layers import pool_balance
         res["scenarios"][sc] = dict(network=str(p), sha256=sha256(p), components={c.name: int(len(c.df)) for c in n.iterate_components()},
-                                    clip_p_max_pu_applied=(n.meta.get("research_renewable") or {}).get("clip_p_max_pu"), summary=summarise(T),
+                                    clip_p_max_pu_applied=(n.meta.get("research_renewable") or {}).get("clip_p_max_pu"), summary=summarise(T), pool_balance=pool_balance(n),
+                                    pools_kept_binding=T[T.dust_class == "kept_pool_fixed_demand_binding"][["name", "country", "energy_mwh", "note"]].to_dict("records"),
                                     pools_below_threshold=T[T.dust_class == "biomass_pool_below_energy"][["name", "country", "energy_mwh", "note"]].to_dict("records"),
                                     renewable_below_capacity=T[T.dust_class == "renewable_potential_below_capacity"][["name", "country", "carrier", "capacity_mw", "energy_mwh"]].to_dict("records"),
                                     single_attachment_kept=T[T.dust_class == "single_attachment_fuel_bus_kept"][["name", "country", "carrier", "note"]].to_dict("records"),
@@ -119,7 +121,13 @@ def inventory(a):
             "adopted (existing stock untouched here); renewable clip_p_max_pu 1e-2 (lines 200-292, applied by S4A) and solving.options.clip_p_max_pu 1e-2 (line 988) "
             "clip profiles, not components", DEFAULT_CAPACITY_MW, "MW", "B", "PyPSA-Eur v2025.07.0 config.default.yaml lines 200, 218, 237, 259, 276, 292, 300, 469, 700, 988",
             PE, pe_sha, decision_ref="113", status="REFERENCE_ONLY")
-    reg.add("s4l1_dust_delete_rule", "S4L-1 point 3: removed when dust_cleanup = on - near-zero finite pools; renewable potentials below the capacity / energy threshold; "
+    reg.add("s4l1_pool_fixed_demand_guard", "S4L-1 rule added after the S4L-2 matrix (s4l_A runs infeasible): a finite pool below the energy threshold is removed only "
+            "while the pools of its bus keep covering the fixed demand fed from that bus (Loads on the bus and on the buses of the links leaving it, e.g. the "
+            "'<node> ... biomass final' buses behind the meter / CC links); otherwise it is kept and listed as kept_pool_fixed_demand_binding. Finding: in BN, SG and VN "
+            "the solid biomass pools equal the fixed biomass final demand exactly (BN 115,935.8 MWh, SG 31,510.2 MWh, VN 125,772,566.2 MWh; zero slack), so every "
+            "pool there is needed; the cleanup asserts after the deletions that no pool bus is below its fixed demand", "keep_if_needed", "flag", "B", SRC, LOC,
+            INSTRUCTION_SHA, decision_ref="113", status="REFERENCE_ONLY")
+    reg.add("s4l1_dust_delete_rule", "S4L-1 point 3: removed when dust_cleanup = on - near-zero finite pools (subject to the fixed-demand guard s4l1_pool_fixed_demand_guard); renewable potentials below the capacity / energy threshold; "
             "all-zero-profile generators (S4I R5); zero-upper candidates and their legacy parameters (S4I R4: pumpable hydro efficiency_store 1, PHS 0.75, ror without "
             "profile, zero-cap geothermal); all-zero loads (S4I R5); single-attachment fuel buses with their dead-end supply generator or flow-less link port (S4I R1); "
             "metadata keyed by name (store_power_rules, research_biomass.stores, demand_owners / demand_identity, research_new_hydro_inflow_tie) pruned; the "
