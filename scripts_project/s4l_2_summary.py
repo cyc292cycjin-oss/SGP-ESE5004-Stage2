@@ -101,7 +101,7 @@ def prices(d: Path) -> dict:
     if not p.exists():
         return {}
     t = pd.read_csv(p); out = {}
-    for car in ("AC", "H2"):
+    for car in ("AC", "H2", "solid biomass", "biogas", "gas"):   # S4L-5: solid-biomass (pool bus) shadow prices by country
         s = t[t.carrier == car]
         if not len(s):
             continue
@@ -121,23 +121,27 @@ def bus_means(d: Path, car: str) -> pd.Series:
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--run", type=Path, required=True); ap.add_argument("--s4k3", type=Path, required=True)
+    ap.add_argument("--extra", action="append", default=[], help="S4L-5: extra network arm as name=<solves dir> holding <name>_<A|X>_<scenario> run folders (e.g. bio98=results_project/s4l/s4l5/solves)")
     a = ap.parse_args()
     out = a.run / "analysis"; out.mkdir(parents=True, exist_ok=True)
     runs = {}; ledg = {}; pr = {}
-    for net in NETS:
-        for p in PROFS:
-            for sc in SCEN:
-                tag = f"{net}_{p}_{sc}"; d = a.run / "solves" / tag
-                runs[tag] = run_row(d, tag); ledg[tag] = ledger_totals(d); pr[tag] = prices(d)
+    extra = {}
+    for e in a.extra:
+        name, d = e.split("=", 1); extra[name] = Path(d)
+    combos = [(net, p) for net in NETS for p in PROFS] + [(name, p) for name in extra for p in PROFS if any((extra[name] / f"{name}_{p}_{sc}").exists() for sc in SCEN)]
+    solves_of = lambda net: (extra[net] if net in extra else a.run / "solves")
+    for net, p in combos:
+        for sc in SCEN:
+            tag = f"{net}_{p}_{sc}"; d = solves_of(net) / tag
+            runs[tag] = run_row(d, tag); ledg[tag] = ledger_totals(d); pr[tag] = prices(d)
     R = pd.DataFrame(runs).T; R.to_csv(out / "S4L2_RUNS.csv")
     res = dict(standard=STANDARD, profiles=PROFILE, runs=runs, status=[x for x in (a.run / "STATUS.txt").read_text().splitlines() if "PROJ" not in x] if (a.run / "STATUS.txt").exists() else [],
                combinations={}, ledger_differences={}, prices_by_country={}, price_differences={}, lp_size={}, repeat_vs_s4k3={})
     # ledger differences (disconnected - integrated) per combination, bn EUR
     diffs = {}
-    for net in NETS:
-        for p in PROFS:
-            li, ld = ledg[f"{net}_{p}_integrated"], ledg[f"{net}_{p}_disconnected"]
-            diffs[f"{net}_{p}"] = (ld - li) if len(li) and len(ld) else pd.Series(np.nan, index=list(ENTITIES))
+    for net, p in combos:
+        li, ld = ledg[f"{net}_{p}_integrated"], ledg[f"{net}_{p}_disconnected"]
+        diffs[f"{net}_{p}"] = (ld - li) if len(li) and len(ld) else pd.Series(np.nan, index=list(ENTITIES))
     D = pd.DataFrame(diffs); D.index.name = "entity"; D.to_csv(out / "S4L2_LEDGER_DIFF.csv", float_format="%.6f")
     ref = diffs["s4k_A"]
     for combo, dd in diffs.items():
@@ -149,7 +153,7 @@ def main():
         chg = {c: (float(dd.get(c)) - float(ref.get(c))) if (pd.notna(dd.get(c)) and pd.notna(ref.get(c))) else None for c in ENTITIES}
         cpass = {c: (abs(chg[c]) <= tol[c]) if chg[c] is not None else None for c in ENTITIES}
         res["combinations"][combo] = dict(
-            network=combo.split("_")[0], profile=PROFILE[combo.split("_")[1]], terminations={sc: runs[f"{combo}_{sc}"]["termination"] for sc in SCEN},
+            network=combo.rsplit("_", 1)[0], profile=PROFILE[combo.rsplit("_", 1)[1]], terminations={sc: runs[f"{combo}_{sc}"]["termination"] for sc in SCEN},
             all_passed_solver_tolerances={sc: runs[f"{combo}_{sc}"]["all_passed_solver_tolerances"] for sc in SCEN},
             objective={sc: runs[f"{combo}_{sc}"]["objective"] for sc in SCEN}, objective_rel_diff_vs_ref=obj,
             objective_within=({sc: (v is not None and v <= STANDARD["objective_rel_tol"]) for sc, v in obj.items()} if combo != "s4k_A" else "reference"),
@@ -172,14 +176,13 @@ def main():
         for k, v in pv.items():
             rowsP.append(dict(run=tag, **v))
     pd.DataFrame(rowsP).to_csv(out / "S4L2_PRICES_BY_COUNTRY.csv", index=False)
-    for net in NETS:
-        for p in PROFS:
-            for sc in SCEN:
-                tag = f"{net}_{p}_{sc}"; refd = a.run / "solves" / f"s4k_A_{sc}"; d = a.run / "solves" / tag
+    for net, p in combos:
+        for sc in SCEN:
+                tag = f"{net}_{p}_{sc}"; refd = a.run / "solves" / f"s4k_A_{sc}"; d = solves_of(net) / tag
                 if tag == f"s4k_A_{sc}":
                     continue
                 pdiff = {}
-                for car in ("AC", "H2"):
+                for car in ("AC", "H2", "solid biomass", "gas"):
                     x, y = bus_means(d, car), bus_means(refd, car)
                     cc = x.index.intersection(y.index)
                     if not len(cc):
