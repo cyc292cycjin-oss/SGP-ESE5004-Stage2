@@ -69,8 +69,12 @@ def cfg_on():
     c = copy.deepcopy(CFG); c["research"]["numerics"]["dust_cleanup"] = "on"; return c
 
 
+def cfg_off():
+    c = copy.deepcopy(CFG); c["research"]["numerics"]["dust_cleanup"] = "off"; return c
+
+
 def test_switch_and_thresholds():
-    assert dust_mode(CFG) == "off" and thresholds(CFG) == dict(energy_mwh=DEFAULT_ENERGY_MWH, capacity_mw=DEFAULT_CAPACITY_MW)
+    assert dust_mode(CFG) == "on" and thresholds(CFG) == dict(energy_mwh=DEFAULT_ENERGY_MWH, capacity_mw=DEFAULT_CAPACITY_MW)   # main since the user decision 2026-10-19
     c = copy.deepcopy(CFG); del c["research"]["numerics"]
     assert dust_mode(c) == "off" and thresholds(c)["energy_mwh"] == 1000.0
     c = cfg_on(); assert dust_mode(c) == "on"
@@ -102,7 +106,7 @@ def test_inventory_classes():
 
 def test_apply_on_and_off():
     n = toy(); before = {c.name: len(c.df) for c in n.iterate_components()}
-    led = apply_dust_cleanup(n, CFG)
+    led = apply_dust_cleanup(n, cfg_off())
     assert led["mode"] == "off" and {c.name: len(c.df) for c in n.iterate_components()} == before and n.meta["research_dust_cleanup"]["inventory"]["rows"] == len(led["table"])
     n = toy(); led = apply_dust_cleanup(n, cfg_on())
     assert led["mode"] == "on"
