@@ -1,0 +1,235 @@
+{
+ "schema": "s4o-evidence-v1",
+ "instruction": {
+  "file": "S4O_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "b5f4d099f2afe2e4e4d93cd2dee94ce42857b3a26f62d2622657d78b068af6aa",
+  "expected": "b5f4d099f2afe2e4e4d93cd2dee94ce42857b3a26f62d2622657d78b068af6aa"
+ },
+ "authorisation": "S4O-1 .. S4O-5 local parts incl. 3 local 56x3h runs (S4O-3); S4O-6 cloud not authorised",
+ "s4o_1": {
+  "pr": "https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/39",
+  "calibration_branch": "codex/s4n-calibration-20261019",
+  "commits": [
+   "7c4f97fe",
+   "f28772e6",
+   "46135c52"
+  ],
+  "s4n_archive_files": 170,
+  "registry_rows": [
+   "s4n_decision_118_s4m_open_items",
+   "s4n_decision_119_precision_over_label",
+   "s4o_decision_120_production_profile",
+   "s4o_question_source_s4n"
+  ],
+  "s4o_branch": "codex/s4o-production-20261019",
+  "s4o_branch_base": "46135c52"
+ },
+ "s4o_2": {
+  "commits": [
+   "d5b4eb96",
+   "18f55488"
+  ],
+  "profile": {
+   "Threads": 8,
+   "Method": 2,
+   "Crossover": 0,
+   "BarConvTol": 1e-05,
+   "Seed": 123,
+   "AggFill": 0,
+   "PreDual": 0,
+   "GURO_PAR_BARDENSETHRESH": 200
+  },
+  "default_profile": "pypsa_eur_default",
+  "tests": {
+   "test_s4o_2": 7,
+   "tests_research_passed": 543
+  },
+  "script_tests": {
+   "run_preflight": "50/50",
+   "probe": "9/9"
+  },
+  "c1_equivalence_on_s4n1": {
+   "max_abs_country_diff_bn": 0.0,
+   "grade_same": true,
+   "seconds": 22,
+   "peak_rss_gib": 1.7
+  }
+ },
+ "s4o_3": {
+  "runs_made": 1,
+  "runs_not_started": [
+   "s4o_disconnected",
+   "s4o_integrated_nze"
+  ],
+  "stop": "S4O-3 point 4: decision-107 objective standard not passed (2.13e-5 > 1e-5); runner ended in the 5-min gap before the disconnected solve",
+  "integrated": {
+   "termination": "optimal",
+   "objective": 648395012280.1625,
+   "receipt_profile": "pypsa_eur_default",
+   "parameters": {
+    "Threads": 8,
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-05,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
+    "TimeLimit": 1750.0
+   },
+   "barrier": {
+    "iterations": 58,
+    "seconds": 78.44,
+    "work_units": 120.84
+   },
+   "solve_seconds": 172.87712264060974,
+   "peak_rss_gib": 4.0941925048828125,
+   "objective_rel_diff_vs_profile_A": 2.1331386701956114e-05,
+   "b16": 2.3874949341220715e-08,
+   "kkt_relative_gap": 2.7870480394910266e-05,
+   "c1_grade": {
+    "grade": "not_layer1",
+    "a": false,
+    "b": true,
+    "c": true,
+    "price_settled_results": "provisional"
+   },
+   "c1_acceptance": {
+    "optimal": true,
+    "a": false,
+    "b": true,
+    "c": true,
+    "accepted": false,
+    "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+   },
+   "c1_a": {
+    "diff_bn": -0.018071080477905274,
+    "relative": 2.7870480394910266e-05
+   },
+   "gates_information": {
+    "all_passed_solver_tolerances": false,
+    "all_passed_barconvtol": false,
+    "failing": [
+     "A1_A2",
+     "A1_A2_S4B",
+     "B12"
+    ],
+    "failing_excl_B12": [
+     "A1_A2",
+     "A1_A2_S4B"
+    ],
+    "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+   },
+   "interior_solution": true
+  },
+  "standard_decision_107": {
+   "objective": "not passed",
+   "b16": "passed",
+   "country_differences": "not evaluated (disconnected not run)"
+  },
+  "info_s4n_c2_c1": {
+   "cal_integrated": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a_relative": 7.8423551753934e-06,
+    "a_diff_bn": -0.00508486711315918
+   },
+   "cal_disconnected": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a_relative": 6.0049733242898855e-06,
+    "a_diff_bn": -0.004197371451538086
+   },
+   "cal_integrated_nze": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a_relative": 5.514700196898743e-06,
+    "a_diff_bn": -0.003021846873901367
+   }
+  },
+  "info_s4n_c2_integrated": {
+   "objective_rel_diff_vs_A": 6.214458465036765e-06,
+   "iterations": 65,
+   "kkt_relative_gap": 7.8423551753934e-06
+  }
+ },
+ "not_done": {
+  "s4o_4": "not entered (stop condition); make_package.sh / package_checks.py / preflight in-place update written during the S4O-3 run, not run (syntax checked only)",
+  "s4o_5": "not done (stop)",
+  "s4o_6": "not authorised"
+ },
+ "files": {
+  "evidence/s4o_2/PILOT_PRECISION_S4N1_old_tool.json": "7f3271b060e5c085b30e5d16bac6577ff6c82383ef73b8801ccc587fd745c410",
+  "evidence/s4o_2/PRECISION_S4N1_new_module.json": "25c0f7b73b169f5d0654f0dda362da348c326d5400c7e78ea24517eb02bfafd0",
+  "evidence/s4o_3/S4O3_INTEGRATED_INFO.json": "b80e5c3b0a80eb09b93336e1dfae3218a0bb64be213e67a341692faab942f12d",
+  "evidence/s4o_3/STATUS.txt": "371cdc2f90f4412a812821806f52dc7fd9897e4bae9273b11cfa06e5575b41d5",
+  "evidence/s4o_3/s4n_c2_c1/cal_disconnected_PRECISION.json": "f87cf8cce33913a51f52115a14b8188fd4814598dc4436ab3f5511c7c17b658f",
+  "evidence/s4o_3/s4n_c2_c1/cal_disconnected_PRECISION.md": "9e99646c18beee10b1fb11e9aeeb3ab2138c57594fa70b97682a7c794d46ce8d",
+  "evidence/s4o_3/s4n_c2_c1/cal_disconnected_PRECISION_regraded.json": "9d85988fbbcfabe27631f5fda1700a9196d2e562f108025e88e9e95740cb1bfd",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_PRECISION.json": "a13b104751e444baa0664be0ac598675f6c3447203954f7583b29dcd137ad31a",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_PRECISION.md": "b53d927795055000344636dba7d0cd8eb06dc00e794b1a39d3dac409df31e6ee",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_PRECISION_regraded.json": "37a8ab0f0bdbb37a4c47d73412e8005cce6f9e386dcb68b8a03b5438a5fbf809",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_nze_PRECISION.json": "9d25d7ede4025aa95b54eff433e8401593b553297f120944729c59312c7f5b85",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_nze_PRECISION.md": "1f708701be31649da96be68154ec1802697f7dfae50f5e36ab730e942e6ca5f8",
+  "evidence/s4o_3/s4n_c2_c1/cal_integrated_nze_PRECISION_regraded.json": "36bca9bdce95c3662951ecad8c74af0c9b77684c87483dde7a004de5b2f93f27",
+  "evidence/s4o_3/s4o_integrated/COUNTRY_COST_LEDGER.csv": "75bb06de28ac909f347784aded445eb95a0d0ca39b1dc3434492573277a773cd",
+  "evidence/s4o_3/s4o_integrated/EXPORTS.json": "45f39b3e3631a8061d7912c02eb398bbc2679e8ccab6b7ae8dac291241a6ec63",
+  "evidence/s4o_3/s4o_integrated/GUROBI_LOG_SCRUBBED.txt": "33d7d9d58ab4d2307e4929aea817e45ed1bca971497bd3f3fe242423cb2bef57",
+  "evidence/s4o_3/s4o_integrated/INTERIOR_CHECKS.json": "81e1df6f24a4bd1897b58fecc52dd2246c43c794590cb9c2f2fc1415411f6d56",
+  "evidence/s4o_3/s4o_integrated/LEDGER_IDENTITY.json": "56fca1ea50a081930a93a6f801bb5601ace20e5f8c12d9912c44acc1c9a822c5",
+  "evidence/s4o_3/s4o_integrated/PRECISION.json": "91b9adbc56df5e59c4aa6a0c82664b28cba825cd37b51c5177bc9deadfa90c20",
+  "evidence/s4o_3/s4o_integrated/PRECISION.md": "fc4d7625b93758decd69d55ccc4bd88ec8321faa44ec4523b7dbd73b276afefa",
+  "evidence/s4o_3/s4o_integrated/SOLVE_RECEIPT.json": "70e5ba994a71eaef20464e21f1529dfb715b9086b0090cbe39524a03b1f493a6",
+  "evidence/s4o_3/s4o_integrated/V5_GATES.json": "afe1c12158454e72d81ba9cfd14b3fa603208232436c1736af0b41cf72060562",
+  "evidence/s4o_3/s4o_integrated/VIOLATIONS.json": "535292ecc1122d878a8825cfb70b6233fb5d0ae92dfd82f545ae6ecbe0ddf7ea",
+  "evidence/s4o_3/s4o_integrated/c1_time.txt": "451fb659076e04ccadfe1439522d567624683a1126369dd29a0ec5761e8b7ba6",
+  "evidence/s4o_3/s4o_integrated/c1_va_time.txt": "ebaeadcb449da39dc081a0f18a54f4b7ef99f7b732fc0d816c0b18d4187eaf8a",
+  "evidence/s4o_3/s4o_integrated/kkt_summary.json": "14932b0fa5dd007e74815ce37593dfa482f2575f3d0f4e33897b6914461a11d0",
+  "evidence/s4o_3/s4o_integrated/solve_log_scrubbed.txt": "fcd35534db0a99a44366ad249e0995f97b1bf565a6d55c8c80edf05b6151e446",
+  "evidence/s4o_3/s4o_integrated/solve_time.txt": "d85ae8191c41fc6317905e17b41bd481a814dddcb569902a9427f0f75edd263a",
+  "evidence/s4o_4/fake_s2_solve.py": "3250b0f7e72b02eb8a4836d9e7e7080482dfa1447e41d67564067e87d2d1b806",
+  "evidence/s4o_4/fake_s4o_c1_precision.py": "3e2e0f445a76f1f1b4d963d4442acedc41f9235637ba964cfad0d6b5341e698b",
+  "evidence/s4o_4/results/A_MONITOR_integrated.csv": "c29bd4e5ebf2786a89dbc920f6bde68530bbe853d1c7a775e9efc1c0a82f0d16",
+  "evidence/s4o_4/results/A_STATUS.txt": "0c54f5108610384f380c3f9b4a2f2271953eb18ce778eddabc0b72d12f47b9ba",
+  "evidence/s4o_4/results/A_stdout.txt": "0c54f5108610384f380c3f9b4a2f2271953eb18ce778eddabc0b72d12f47b9ba",
+  "evidence/s4o_4/results/B_STATUS.txt": "c4f5e45e10bdefd5d98a91aa8843bc9b933d7ecfbb0f6c400512a965dfcc049d",
+  "evidence/s4o_4/results/B_stdout.txt": "c4f5e45e10bdefd5d98a91aa8843bc9b933d7ecfbb0f6c400512a965dfcc049d",
+  "evidence/s4o_4/results/C_badprofile.txt": "37449ed2a68e894ad811c39f00ca076a1e559b31ba876296ab02193d5fc8a23a",
+  "evidence/s4o_4/results/C_dryrun.txt": "41872793263bbad781b05e73391d2fb5ac2d25fbb95dde8283a12d8e749e0bbe",
+  "evidence/s4o_4/results/C_lanes3.txt": "68879ffdd7ed96667668918ff92accd7ef7cdd3586cc1ca6b81d202b612fc4e2",
+  "evidence/s4o_4/results/D_preflight_v1.txt": "37e227f20bf727f78c513666a7c5689134be8500008f73f1551ac35a703b316f",
+  "evidence/s4o_4/results/D_preflight_v1max.txt": "558a6ddb9a1e86c160628557da44e88d10e80425a76580420c069bb128c5da84",
+  "evidence/s4o_4/results/D_preflight_v2.txt": "f82cd260ddaeb9ac33d505098a6ddb0075b431744a9195e712fb030b33fa246e",
+  "evidence/s4o_4/results/D_preflight_v2max.txt": "558a6ddb9a1e86c160628557da44e88d10e80425a76580420c069bb128c5da84",
+  "evidence/s4o_4/results/F_STATUS.txt": "6540667ba5a8b3614073f9ff8c8e937333bf17a39a30d963d5d1aea213ed11b0",
+  "evidence/s4o_4/results/F_stdout.txt": "6540667ba5a8b3614073f9ff8c8e937333bf17a39a30d963d5d1aea213ed11b0",
+  "evidence/s4o_4/results/G_STATUS.txt": "36688ecaa9367191cf3fca7a7e48222c560e4f0f1e23657aea28b90f0203fe7d",
+  "evidence/s4o_4/results/G_stdout.txt": "36688ecaa9367191cf3fca7a7e48222c560e4f0f1e23657aea28b90f0203fe7d",
+  "evidence/s4o_4/results/H_preflight_A.txt": "522a83a17074edb8fa607a32d261b6df69b257286c2209dc40770f47c3af0384",
+  "evidence/s4o_4/results/H_preflight_bad.txt": "05400a8b481c338307a863e50b2c709ac89be13341c786068735f74de54c34d0",
+  "evidence/s4o_4/results/H_preflight_default.txt": "8881174bbf3db8456e7ad089e10da2fc45a89ec55705cde2963942140f5008ec",
+  "evidence/s4o_4/results/TEST_RESULTS.txt": "2bcfcbd6efa422aeb3cae857bf60c143045445db6b99c8b74c44517bbb91276b",
+  "evidence/s4o_4/results/TEST_RESULTS_probe.txt": "37a5b38556e542196dfed5c08b26f527465fe08b0e8951f439e223d0edfacb88",
+  "evidence/s4o_4/results/probe_A_SPEED_PROBE.json": "292fdb43b69f5f028d43869317f8f9c34aa0fe545ec09b6f884e7bee0049c44f",
+  "evidence/s4o_4/results/probe_A_STATUS.txt": "ea00fa1bf4634e4676b7c9b502f432026181c33f750c7bc3c30c8ae75b475735",
+  "evidence/s4o_4/results/probe_A_stdout.txt": "6fd4c43155db330447186e148bfeb5f51eb40b1d4823ba55e9f794294abcf0b5",
+  "evidence/s4o_4/results/probe_B_SPEED_PROBE.json": "2c432978b1eebbfee7fbbab7a40397deb532caab5290d6f0b9b3ec4103a7cbad",
+  "evidence/s4o_4/results/probe_B_stdout.txt": "f23eabe108495a999e75ccadcb2b953ebc8fffca042a56a622baab7282dc9cc6",
+  "evidence/s4o_4/results/probe_C_stdout.txt": "95abd134524fd394bb91477e4e2bb52e894f34694c0d412edb26c8e115f4c7bd",
+  "evidence/s4o_4/results_probe_stdout.txt": "37a5b38556e542196dfed5c08b26f527465fe08b0e8951f439e223d0edfacb88",
+  "evidence/s4o_4/results_stdout.txt": "2bcfcbd6efa422aeb3cae857bf60c143045445db6b99c8b74c44517bbb91276b",
+  "evidence/s4o_4/test_s4o4_scripts.sh": "9d1ccd108d66d394dcce754628c9d55927b2d046b270b6a94a4249f8e9a23250",
+  "evidence/scripts/s4o_1_registry.sh": "cefb73875becf8bc63302cce2e765f6cc299a97a7a9773c88b6bbcc42c81203b",
+  "evidence/scripts/s4o_1_stage_s4n.sh": "3b1a92dc603db30720bab32997724b08b5b10c4dd2bafc156286c684585de930",
+  "evidence/scripts/s4o_2_c1_equiv.sh": "0db2961111514dc2268f48f31ee7659a28d303e695f8932351efd063e609952c",
+  "evidence/scripts/s4o_2_tests.sh": "242a95bf14f4ad72515b8d00be4c45b27eef7158b92db09d29763e381bb104b2",
+  "evidence/scripts/s4o_3_after_stop.sh": "389af0ea736a728948bfa77d4fbc98184591091f7fb688203d78c1452afe7841",
+  "evidence/scripts/s4o_3_compare.sh": "9537948aee0b30175634fc60291fa8e28039f231699b30048ab70c98e36ec00f",
+  "evidence/scripts/s4o_3_evidence.sh": "d3ee66f79fcdab6f73c0446e700ead3d98a5a7302451ec574c64699a6ed0fa1f",
+  "evidence/scripts/s4o_3_readonly_info.sh": "f167497c23f15a2221af6dc1e2283129a899e4382e16744ced11783a63948861",
+  "evidence/scripts/s4o_3_run.sh": "7b79dba7641d43c03e2a58448ce82e6a6bd3bfd536449184426f417b37d13864",
+  "evidence/scripts/s4o_4_checks_dry.sh": "9e7d2860cfac2ba12cb3f0acd028811fac4c3b0c027d9562f9b2ad7ab1693d80",
+  "evidence/scripts/s4o_4_script_tests.sh": "3f89ab438bc17e0d7b9ca6f56cc2feaf76d943bf96335c3b15f05f6f8c662455",
+  "evidence/scripts/s4o_7_finalise.sh": "a62dbfb6996a81e86bfe33b3ead4dea5b38efe9356bd54bebf87407a4df6d992",
+  "evidence/scripts/s4o_collect_evidence.py": "0335f06a1552b7aeceed7afa780cbb5f4cc47241a28efe8304a6d10f11743d50",
+  "evidence/scripts/s4o_scan.sh": "499173a1f0e800463d5c3a7964fc59801bc1524013b011521a06079507684dc1",
+  "evidence/scripts/s4o_syntax.sh": "1a26d104529a8f94a66773833c81df70080482a70b924a8b59a0cef0699f37ee"
+ }
+}

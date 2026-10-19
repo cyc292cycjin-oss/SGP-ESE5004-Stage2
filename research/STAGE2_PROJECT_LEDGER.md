@@ -674,3 +674,13 @@
 - **回收：** 轻量包 2.08 MB 已下载核对、无许可串；完整结果包 158.9 MB（SHA256 cb4927da…7480）留在实例数据盘；许可 18:56:27 删除，已告知关机。
 - **交付：** `research/06_scope_redesign/p1_step4n_20261019/`（`S4N_REPORT.md`、`S4N_EVIDENCE.json`、`S4N_PROGRESS.md`、指令与补充、`ENV_LOCK_LOCAL.txt`、`evidence/`、`scripts/`、试点轻量包），S4O-1 入库（f28772e6，许可串与登录信息模式扫描无命中）；镜像 `work/p1_step4n_20261019/`。
 - **用户决定：** 第 118 项（S4M §9 第 2–5 项）、第 119 项（16:37 SGT）、第 120 项（19:40 SGT：以 `pypsa_eur_default` 作生产档案，键名大写、`Threads 8` 两处适配；每次运行验收 = optimal + 第 119 项 (a)(b)(c)）——注册表片段 `s4o_0`（S4O-1 补登）。后续由 S4O 指令承接。
+
+## S4O 第 120 项：生产档案定稿与本机标定复核（S4O-3 停止）— 2026-10-19
+
+- **范围：** 指令 `S4O_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 b5f4d099…af6aa，已核对）；授权 S4O-1 至 S4O-5 本机部分（含 3 次本机 56×3h），S4O-6 云端未授权。分支 `codex/s4o-production-20261019`（自 #39 头 46135c52）。本机求解 1 次（56×3h），无重试；云端无动作。
+- **S4O-1：** 标定分支推送，draft PR #39；S4N 交付物入库（f28772e6）；注册表第 118–120 项、台账 S4N 条目（46135c52）。
+- **S4O-2：** `pypsa_eur_default` 定稿（键名大写、`Threads 8`，其余原样）并设为缺省档案，档案 A 不改；`s2_solve.py` 拒绝只差大小写的档案键名；C1 并入运行流水线 `scripts_project/s4o_c1_precision.py`（验收 = optimal + (a)(b)(c)，门槛作数值信息；本批参照与重评）；测试 543 通过；S4O 版 `run_365x24h.sh` / `preflight.sh` 脚本测试 50/50、探针 9/9（d5b4eb96、18f55488）。
+- **S4O-3（停止）：** 一体化 STEPS（定稿档案，Threads 8）optimal，58 次迭代 / 78 s；目标与 S4M-2 档案 A 相对差 **2.13e-5 > 1e-5**（第 107 项标准不通过）；C1 (a) 不通过（−0.018 bn，相对 2.79e-5），(b)(c) 通过。按 S4O-3 第 4 点在不互联求解启动前停止；不互联、NZE 未运行。只读对照：S4N C2（threads 32）目标差 6.2e-6，补算 C1 三次全过——同一 BarConvTol 1e-5 下结果随线程路径落在标准两侧（INFERENCE）。
+- **未做：** S4O-4（打包脚本已写未运行）、S4O-5、S4O-6。
+- **待用户决定（S4O 报告 §7）：** 生产档案处理（保留并调整标准 / 收紧 BarConvTol / 回到档案 A / 其他）；是否补做 2 次未执行的本机运行；S4O-4 / S4O-5 是否继续。
+- **交付：** `research/06_scope_redesign/p1_step4o_20261019/`（`S4O_REPORT.md`、`S4O_EVIDENCE.json`、`S4O_PROGRESS.md`、`cloud_package/`、`evidence/`）；镜像 `work/p1_step4o_20261019/`。

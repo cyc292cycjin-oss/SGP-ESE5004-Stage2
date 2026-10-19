@@ -1,0 +1,855 @@
+{
+ "solve_dir": "/home/jin/s4o_tmp/c2_c1/cal_integrated_nze",
+ "scenario": "integrated",
+ "label": "SMOKE_TEST_ONLY",
+ "termination": "optimal",
+ "objective": 547962131395.837,
+ "objective_lp": 545075403861.0509,
+ "solver_profile": "pypsa_eur_default",
+ "solver_parameters": {
+  "threads": 32,
+  "method": 2,
+  "crossover": 0,
+  "BarConvTol": 1e-05,
+  "Seed": 123,
+  "AggFill": 0,
+  "PreDual": 0,
+  "GURO_PAR_BARDENSETHRESH": 200,
+  "TimeLimit": 1750.0
+ },
+ "method_note": "returned solution = solution/X.npy, Pi.npy, RC.npy (what Gurobi returned); no solver call; the solve results are unchanged",
+ "computable": true,
+ "a_total_cost": {
+  "log_iterations": 65,
+  "last_iteration": {
+   "iteration": 64,
+   "primal_objective": 545075404000.0,
+   "dual_objective": 545071703000.0,
+   "primal_residual": 0.0949,
+   "dual_residual": 5.74e-05,
+   "complementarity": 4.51,
+   "seconds": 91,
+   "difference_eur": -3701000.0,
+   "difference_bn": -0.003701,
+   "relative_difference": 6.789886266818233e-06
+  },
+  "returned_iteration_by_log": {
+   "iteration": 64,
+   "primal_objective": 545075404000.0,
+   "dual_objective": 545071703000.0,
+   "primal_residual": 0.0949,
+   "dual_residual": 5.74e-05,
+   "complementarity": 4.51,
+   "seconds": 91,
+   "difference_eur": -3701000.0,
+   "difference_bn": -0.003701,
+   "relative_difference": 6.789886266818233e-06,
+   "match_relative": 2.5491720172188876e-10,
+   "tied_iterations": [
+    64
+   ]
+  },
+  "restart": null,
+  "best_before_first_stall": {
+   "iteration": 57,
+   "primal_objective": 545091153000.0,
+   "dual_objective": 545061848000.0,
+   "primal_residual": 0.00194,
+   "dual_residual": 0.000185,
+   "complementarity": 35.6,
+   "seconds": 82,
+   "difference_eur": -29305000.0,
+   "difference_bn": -0.029305,
+   "relative_difference": 5.376165039317745e-05
+  },
+  "second_round_min_primal_residual": null,
+  "kkt_summary_returned_arrays": {
+   "primal_objective": 547962131395.7808,
+   "dual_objective_numeric": 547959109548.9069,
+   "absolute_gap": 3021846.873901367,
+   "relative_gap": 5.514700196898743e-06,
+   "complementarity_l1": 3034279.4051720644,
+   "row_violation_max": 0.42099212238099426,
+   "stationarity_max_original": 0.002311952203866152,
+   "dual_sign_error_max_original": 1471.0367773892597,
+   "source": "original units via frozen D/R"
+  },
+  "returned_difference_eur": -3021846.873901367,
+  "returned_difference_bn": -0.003021846873901367,
+  "returned_relative": 5.514700196898743e-06,
+  "basis": "v5/kkt_summary.json (returned arrays)",
+  "passed": true,
+  "log_check_passed": true
+ },
+ "b_primal_violations": {
+  "rows_violated": 184487,
+  "rows_over_budget": 4,
+  "row_violation_max": 0.42099212238099426,
+  "row_max_ratio": 6.176259174848265,
+  "first_order_cost_eur_all_rows": 4355.549726718231,
+  "budget_note": "rows over budget: decision-71 budgets with profile A's BarConvTol as in the L23 section 6 method (count only, not a criterion)",
+  "consistency_with_l23_script": {
+   "rows_over_budget": 4,
+   "first_order_cost_eur": 4355.549726718231,
+   "equal": true
+  },
+  "first_order_cost_eur_by_country_all_rows": {
+   "-": 0.4101562780727166,
+   "BN": 61.65103531053672,
+   "ID": 613.505464088494,
+   "KH": 33.972865582653675,
+   "LA": 38.089073718828175,
+   "MM": 569.2846056440793,
+   "MY": 61.67362967301613,
+   "PH": 38.52455660134993,
+   "SG": 8.183381395369846,
+   "TH": 78.41047675287999,
+   "TL": 11.609579162979767,
+   "VN": 64.72182294207335,
+   "ASEAN": 2775.5130795678847
+  },
+  "country_check": {
+   "BN": {
+    "first_order_cost_bn": 6.165103531053673e-08,
+    "threshold_bn": 0.01,
+    "passed": true
+   },
+   "ID": {
+    "first_order_cost_bn": 6.13505464088494e-07,
+    "threshold_bn": 0.07016647324048127,
+    "passed": true
+   },
+   "KH": {
+    "first_order_cost_bn": 3.397286558265368e-08,
+    "threshold_bn": 0.018824070096347827,
+    "passed": true
+   },
+   "LA": {
+    "first_order_cost_bn": 3.8089073718828176e-08,
+    "threshold_bn": 0.027598142124221993,
+    "passed": true
+   },
+   "MM": {
+    "first_order_cost_bn": 5.692846056440794e-07,
+    "threshold_bn": 0.01,
+    "passed": true
+   },
+   "MY": {
+    "first_order_cost_bn": 6.167362967301613e-08,
+    "threshold_bn": 0.04082635175007324,
+    "passed": true
+   },
+   "PH": {
+    "first_order_cost_bn": 3.852455660134993e-08,
+    "threshold_bn": 0.01778192924503849,
+    "passed": true
+   },
+   "SG": {
+    "first_order_cost_bn": 8.183381395369845e-09,
+    "threshold_bn": 0.020215820706416778,
+    "passed": true
+   },
+   "TH": {
+    "first_order_cost_bn": 7.841047675287999e-08,
+    "threshold_bn": 0.061546288103788455,
+    "passed": true
+   },
+   "TL": {
+    "first_order_cost_bn": 1.1609579162979766e-08,
+    "threshold_bn": 0.01,
+    "passed": true
+   },
+   "VN": {
+    "first_order_cost_bn": 6.472182294207334e-08,
+    "threshold_bn": 0.2495567245730942,
+    "passed": true
+   },
+   "ASEAN": {
+    "first_order_cost_bn": 2.775513079567885e-06,
+    "threshold_bn": 0.01989413750413224,
+    "passed": true
+   }
+  },
+  "unattributed_eur": 0.4101562780727166,
+  "families_top": [
+   {
+    "family": "Bus-nodal_balance",
+    "rows_over_budget": 2,
+    "max_violation": 0.006258007878936267,
+    "max_ratio_to_budget": 6.176259174848265,
+    "first_order_cost_eur": 781.0820897391039,
+    "countries_over_budget": {
+     "MM": 2
+    },
+    "top_row": {
+     "index": 1269583,
+     "family": "Bus-nodal_balance",
+     "country": "MM",
+     "snapshot": "2013-01-05T15:00:00.000000000",
+     "coords": {
+      "Bus": "MM2 13 H2"
+     },
+     "violation": 0.006258007878936267,
+     "rhs": 1.2249522179435637,
+     "relative_to_rhs": 0.005108777132092664,
+     "relative_to_reference": 0.004728035631848704,
+     "budget": 0.001013235957522785,
+     "ratio_to_budget": 6.176259174848265,
+     "dual": 13977.297682943772,
+     "first_order_cost_eur": 87.47003902609976
+    }
+   },
+   {
+    "family": "Link-ext-p-lower",
+    "rows_over_budget": 2,
+    "max_violation": 0.006070209573509272,
+    "max_ratio_to_budget": 6.069841121432422,
+    "first_order_cost_eur": 313.19002332640423,
+    "countries_over_budget": {
+     "MM": 2
+    },
+    "top_row": {
+     "index": 494258,
+     "family": "Link-ext-p-lower",
+     "country": "MM",
+     "snapshot": "2013-01-05T15:00:00.000000000",
+     "coords": {
+      "Link-ext": "MM2 13 FT"
+     },
+     "violation": 0.006070209573509272,
+     "rhs": -0.0,
+     "relative_to_rhs": NaN,
+     "relative_to_reference": 1.0,
+     "budget": 0.0010000607020957352,
+     "ratio_to_budget": 6.069841121432422,
+     "dual": 12007.461257448234,
+     "first_order_cost_eur": 72.88780627850396
+    }
+   },
+   {
+    "family": "Link-ext-p-upper",
+    "rows_over_budget": 0,
+    "max_violation": 0.0008408651463275626,
+    "max_ratio_to_budget": 0.8408575033088987,
+    "first_order_cost_eur": 70.0495035275321,
+    "countries_over_budget": {},
+    "top_row": {
+     "index": 1007008,
+     "family": "Link-ext-p-upper",
+     "country": "MM",
+     "snapshot": "2013-01-07T09:00:00.000000000",
+     "coords": {
+      "Link-ext": "MM2 13 FT"
+     },
+     "violation": 0.0008408651463275626,
+     "rhs": -0.0,
+     "relative_to_rhs": NaN,
+     "relative_to_reference": 0.9250896781122893,
+     "budget": 0.0010000090895527884,
+     "ratio_to_budget": 0.8408575033088987,
+     "dual": -6517.42488851521,
+     "first_order_cost_eur": 5.480275432560241
+    }
+   },
+   {
+    "family": "Bus-meshed-nodal_balance",
+    "rows_over_budget": 0,
+    "max_violation": 0.03063178369848174,
+    "max_ratio_to_budget": 0.4075456312181131,
+    "first_order_cost_eur": 3105.1254080952876,
+    "countries_over_budget": {},
+    "top_row": {
+     "index": 1342093,
+     "family": "Bus-meshed-nodal_balance",
+     "country": "ID",
+     "snapshot": "2013-01-04T09:00:00.000000000",
+     "coords": {
+      "Bus-meshed": "ID_Kalimantan4 11 H2"
+     },
+     "violation": 0.0017222368419904655,
+     "rhs": 12.266321804754078,
+     "relative_to_rhs": 0.0001404036898268049,
+     "relative_to_reference": 5.338820972749554e-06,
+     "budget": 0.004225874871588911,
+     "ratio_to_budget": 0.4075456312181131,
+     "dual": 10484.902817056014,
+     "first_order_cost_eur": 18.057485916223484
+    }
+   },
+   {
+    "family": "Store-energy_balance",
+    "rows_over_budget": 0,
+    "max_violation": 4.778057336807251e-05,
+    "max_ratio_to_budget": 0.0008204605514815903,
+    "first_order_cost_eur": 0.49857465233095727,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "Kirchhoff-Voltage-Law",
+    "rows_over_budget": 0,
+    "max_violation": 0.001094822189770639,
+    "max_ratio_to_budget": 0.00011176265348916273,
+    "first_order_cost_eur": 0.4101562619633614,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "research_country_co2_limit-ID",
+    "rows_over_budget": 0,
+    "max_violation": 0.42099212238099426,
+    "max_ratio_to_budget": 6.712530709660729e-05,
+    "first_order_cost_eur": 63.93382942099959,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "StorageUnit-energy_balance",
+    "rows_over_budget": 0,
+    "max_violation": 7.64206051826477e-05,
+    "max_ratio_to_budget": 6.334679168119563e-05,
+    "first_order_cost_eur": 0.12668483177365014,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "research_country_co2_limit-TH",
+    "rows_over_budget": 0,
+    "max_violation": 0.1049154942156747,
+    "max_ratio_to_budget": 4.818595029536181e-05,
+    "first_order_cost_eur": 16.823645773623255,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "research_country_co2_limit-VN",
+    "rows_over_budget": 0,
+    "max_violation": 0.02379052125615999,
+    "max_ratio_to_budget": 6.212609811211176e-06,
+    "first_order_cost_eur": 4.290252353482554,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "Generator-fix-p-upper",
+    "rows_over_budget": 0,
+    "max_violation": 4.945832188241184e-09,
+    "max_ratio_to_budget": 4.0209388116137515e-07,
+    "first_order_cost_eur": 4.6631918528707245e-05,
+    "countries_over_budget": {},
+    "top_row": null
+   },
+   {
+    "family": "Generator-fix-p-lower",
+    "rows_over_budget": 0,
+    "max_violation": 4.627509042620659e-09,
+    "max_ratio_to_budget": 2.7606113382680615e-07,
+    "first_order_cost_eur": 0.01951195286368798,
+    "countries_over_budget": {},
+    "top_row": null
+   }
+  ],
+  "biomass_pools_BN_SG_VN": {
+   "rows_over_budget_total": 4,
+   "rows_over_budget_on_BN_SG_VN_pools": 0,
+   "share_of_rows_over_budget": 0.0,
+   "rows_over_budget_on_any_pool": 0,
+   "max_ratio_row_is_BN_SG_VN_pool": false,
+   "top10_rows_on_BN_SG_VN_pools": 0,
+   "first_order_cost_share_of_BN_SG_VN_pool_rows": 0.0,
+   "dominant": false,
+   "dominance_rule": "dominant = the largest-ratio row is a BN / SG / VN pool row AND >= 50 % of the over-budget rows are such rows",
+   "top10": [
+    {
+     "family": "Bus-nodal_balance",
+     "country": "MM",
+     "coords": {
+      "Bus": "MM2 13 H2",
+      "snapshot": "2013-01-05T15:00:00.000000000"
+     },
+     "violation": 0.006258007878936267,
+     "ratio_to_budget": 6.176259174848265,
+     "biomass_pool": false
+    },
+    {
+     "family": "Link-ext-p-lower",
+     "country": "MM",
+     "coords": {
+      "snapshot": "2013-01-05T15:00:00.000000000",
+      "Link-ext": "MM2 13 FT"
+     },
+     "violation": 0.006070209573509272,
+     "ratio_to_budget": 6.069841121432422,
+     "biomass_pool": false
+    },
+    {
+     "family": "Bus-nodal_balance",
+     "country": "MM",
+     "coords": {
+      "Bus": "MM2 13 H2",
+      "snapshot": "2013-01-03T06:00:00.000000000"
+     },
+     "violation": 0.0011581138747309705,
+     "ratio_to_budget": 1.1416997582972872,
+     "biomass_pool": false
+    },
+    {
+     "family": "Link-ext-p-lower",
+     "country": "MM",
+     "coords": {
+      "snapshot": "2013-01-03T06:00:00.000000000",
+      "Link-ext": "MM2 13 FT"
+     },
+     "violation": 0.0011132421142161899,
+     "ratio_to_budget": 1.1132297212741045,
+     "biomass_pool": false
+    }
+   ]
+  },
+  "passed": true
+ },
+ "c_prices": {
+  "b16": {
+   "relative_error": 1.0300062256137308e-08,
+   "tolerance": 1e-06,
+   "passed_gate": true,
+   "ledger_identity": 1.0300062256137308e-08,
+   "passed": true
+  },
+  "formulas": {
+   "stationarity": "S_c = sum_j |(c_j - a_j' pi - rc_j) x_j|",
+   "row_complementarity": "R_c = sum_i |pi_i| (slack on the multiplier's bound)+, inequality rows",
+   "column_complementarity": "K_c = sum_j |rc_j| (x_j - bound)+; free-column dual-sign error |rc_j x_j| separately (KS_c)",
+   "attribution": "rows / columns by the component's bus country; cross-border components counted fully for both countries",
+   "label": "INFERENCE: first-order estimate of the effect of the KKT residuals on country settlements (EUR)"
+  },
+  "totals_eur": {
+   "stationarity": 9337.408910822583,
+   "row_complementarity": 2930225.6483181026,
+   "column_complementarity": 99698.20712724257,
+   "column_dual_sign_error": 49038.73253986104,
+   "row_dual_sign_rows": 55
+  },
+  "by_country_raw_eur": {
+   "stationarity": {
+    "BN": 15.487407689209757,
+    "ID": 4283.74421094149,
+    "KH": 125.14394168874605,
+    "LA": 59.62437014998611,
+    "MM": 114.50444733636508,
+    "MY": 831.2132870422083,
+    "PH": 832.9563653245867,
+    "SG": 181.3338740159313,
+    "TH": 733.5496065305804,
+    "TL": 3.444217245727925,
+    "VN": 1117.4902424556053,
+    "ASEAN": 104.1276644391221,
+    "ID|MY": 226.7755252978955,
+    "KH|VN": 51.442653319884684,
+    "KH|LA": 10.768270093160673,
+    "KH|TH": 83.56016746072794,
+    "LA|TH": 48.79909331565086,
+    "LA|VN": 108.23757957983855,
+    "MY|TH": 75.1335754319999,
+    "MY|SG": 41.988304367140266,
+    "MM|TH": 27.52734068242577,
+    "LA|MM": 2.2920081874370526,
+    "BN|MY": 7.673877886393501,
+    "ID|TL": 1.6935905284821509,
+    "MY|PH": 21.407108253048474,
+    "ID|SG": 107.63765505893258,
+    "ASEAN|BN": 2.2346850637736376e-05,
+    "ASEAN|ID": 48.405736058370614,
+    "ASEAN|KH": 1.7268936035653897,
+    "ASEAN|LA": 0.0009954651383270226,
+    "ASEAN|MM": 7.937985364029033e-05,
+    "ASEAN|MY": 0.0016609126746694142,
+    "ASEAN|PH": 42.666633886456175,
+    "ASEAN|SG": 1.0088227472310084e-05,
+    "ASEAN|TH": 9.827525359270892,
+    "ASEAN|TL": 1.1215460135186536e-05,
+    "ASEAN|VN": 1.2961472611099645,
+    "BN|ID": 0.00011924047212476268,
+    "BN|KH": 5.193422113657893e-05,
+    "BN|PH": 2.322870512084997e-05,
+    "BN|TH": 9.711539421646516e-06,
+    "BN|TL": 4.414270132839221e-06,
+    "BN|VN": 1.1742519916504242,
+    "ID|KH": 0.00012371410870106638,
+    "ID|PH": 0.00012152610900548391,
+    "ID|TH": 8.671944361446894e-05,
+    "ID|VN": 7.506911224016919,
+    "KH|MY": 8.378327421252185e-05,
+    "KH|PH": 2.4036415449304175e-05,
+    "KH|TL": 9.608167841150483e-06,
+    "BN|MM": 4.2476411997988105e-05,
+    "ID|MM": 1.69772403845934,
+    "KH|MM": 9.654153123910698e-06,
+    "MM|MY": 0.00125696454650407,
+    "MM|PH": 2.5719033893527584e-05,
+    "MM|TL": 2.0497828788167958e-05,
+    "MM|VN": 1.0283847625085793e-05,
+    "MY|TL": 1.6910981204857703e-05,
+    "MY|VN": 5.545589050940208,
+    "PH|TH": 1.7091818634518348e-05,
+    "PH|TL": 1.42682906742188e-05,
+    "PH|VN": 0.00012207579840295012,
+    "BN|SG": 7.70165485999215e-06,
+    "KH|SG": 2.4217477406070456e-06,
+    "PH|SG": 5.241799572554341e-06,
+    "SG|TH": 6.0562104659382075e-06,
+    "SG|TL": 4.006004422661302e-06,
+    "SG|VN": 2.6782674668884704e-06,
+    "TH|TL": 5.531870760656119e-06,
+    "TH|VN": 5.82220971269196e-05,
+    "TL|VN": 1.999018272996239e-05,
+    "BN|LA": 6.244821252754264e-06,
+    "ID|LA": 4.148519434232744e-06,
+    "LA|MY": 9.391000030419857e-06,
+    "LA|PH": 5.3154796633168435e-06,
+    "LA|TL": 3.8082201014864847e-06
+   },
+   "row_complementarity": {
+    "-": 52797.76832616138,
+    "BN": 32056.336631495637,
+    "ID": 957089.3105961884,
+    "KH": 115472.02275635138,
+    "LA": 107162.36545901178,
+    "MM": 352667.7923581005,
+    "MY": 228313.7196630398,
+    "PH": 177574.21855767112,
+    "SG": 18312.409456513087,
+    "TH": 140789.56477934276,
+    "TL": 18725.376490409068,
+    "VN": 197878.35481909732,
+    "ASEAN": 3379.3871993438606,
+    "ID|MY": 65968.90217811351,
+    "KH|VN": 30034.562859719266,
+    "KH|LA": 8093.6572719301685,
+    "KH|TH": 22890.332482019192,
+    "LA|TH": 56420.10489367894,
+    "LA|VN": 43514.93784990541,
+    "MY|TH": 12987.336040629694,
+    "MY|SG": 7040.193092864728,
+    "MM|TH": 38139.12511299366,
+    "LA|MM": 5524.113081500894,
+    "BN|MY": 7114.758315151815,
+    "ID|TL": 11516.909284087576,
+    "MY|PH": 8633.384185954399,
+    "ID|SG": 6688.878297585733,
+    "ASEAN|BN": 1284.5892227947065,
+    "ASEAN|ID": 45438.3179346296,
+    "ASEAN|KH": 6080.499592264929,
+    "ASEAN|LA": 6425.990905994508,
+    "ASEAN|MM": 16225.584412364058,
+    "ASEAN|MY": 8145.845826288397,
+    "ASEAN|PH": 8421.276750831295,
+    "ASEAN|SG": 1357.591045232364,
+    "ASEAN|TH": 7004.216877192122,
+    "ASEAN|TL": 1286.3823480250724,
+    "ASEAN|VN": 9673.014580429175,
+    "BN|ID": 10055.270717972591,
+    "BN|KH": 783.1497598935836,
+    "BN|PH": 1876.4263492181503,
+    "BN|TH": 988.1963050395201,
+    "BN|TL": 441.07253677404816,
+    "BN|VN": 2759.5338109906506,
+    "ID|KH": 6891.136620122307,
+    "ID|PH": 10302.624972354355,
+    "ID|TH": 9333.443929077315,
+    "ID|VN": 9203.674233363134,
+    "KH|MY": 1944.0115048406526,
+    "KH|PH": 1528.468790084002,
+    "KH|TL": 598.0018936542093,
+    "BN|MM": 1492.7235287364829,
+    "ID|MM": 1815.3801218033182,
+    "KH|MM": 1119.235640336061,
+    "MM|MY": 2230.6324442869854,
+    "MM|PH": 1217.392116355018,
+    "MM|TL": 1196.0203345860702,
+    "MM|VN": 1062.5747324581953,
+    "MY|TL": 1650.8538998873146,
+    "MY|VN": 4472.915844708582,
+    "PH|TH": 2018.3509612644777,
+    "PH|TL": 1361.5721771848637,
+    "PH|VN": 3131.8427564761037,
+    "BN|SG": 268.80483843238846,
+    "KH|SG": 180.33788237473047,
+    "PH|SG": 225.65756222857885,
+    "SG|TH": 243.0852487424693,
+    "SG|TL": 185.2493731557742,
+    "SG|VN": 190.23225069812236,
+    "TH|TL": 780.262802231155,
+    "TH|VN": 2477.4635814933354,
+    "TL|VN": 1694.015169846741,
+    "BN|LA": 1294.5799607297245,
+    "ID|LA": 919.1282144847763,
+    "LA|MY": 1992.7188527246615,
+    "LA|PH": 1107.6926179685895,
+    "LA|TL": 1062.782446606645
+   },
+   "column_complementarity": {
+    "ID": 24523.37133572285,
+    "KH": 5134.114178182234,
+    "LA": 5499.663565465121,
+    "MM": 13717.33647914116,
+    "MY": 4702.949956405752,
+    "PH": 2776.9128793457876,
+    "TH": 4776.988799360996,
+    "VN": 7467.2719513994725,
+    "ID|MY": 5391.981776261719,
+    "KH|VN": 3101.4779827983302,
+    "KH|LA": 1030.626118644728,
+    "KH|TH": 2162.9918909404178,
+    "LA|TH": 7629.917796784079,
+    "LA|VN": 4844.379349315814,
+    "MY|TH": 752.0053785278723,
+    "MY|SG": 514.9918729776629,
+    "MM|TH": 3997.037258397625,
+    "LA|MM": 780.9835316501591,
+    "BN|MY": 519.2239184635623,
+    "ID|TL": 373.9811074571906
+   },
+   "column_dual_sign_error": {
+    "BN": 31.140580071674687,
+    "ID": 3556.6775227669496,
+    "KH": 679.8074491523895,
+    "LA": 424.9457354634074,
+    "MM": 936.6160611957847,
+    "MY": 1547.9008413596,
+    "PH": 334.88438610550804,
+    "SG": 31.519264935756638,
+    "TH": 6447.279506247299,
+    "TL": 34.028780437191934,
+    "VN": 9960.078268688587,
+    "ASEAN": 31.968191999068253,
+    "ID|MY": 3558.134735223849,
+    "KH|VN": 443.079464407607,
+    "KH|LA": 110.45832917732513,
+    "KH|TH": 628.8731916536183,
+    "LA|TH": 872.2552448672095,
+    "LA|VN": 2118.697745269882,
+    "MY|TH": 86.15083054617074,
+    "MY|SG": 457.54824754542847,
+    "MM|TH": 231.22419539971523,
+    "LA|MM": 44.0795807845634,
+    "BN|MY": 29.724417528033836,
+    "ID|TL": 1.2543114564480644,
+    "ASEAN|BN": 124.60801172486299,
+    "ASEAN|ID": 6947.813432240763,
+    "ASEAN|KH": 1103.463841413738,
+    "ASEAN|LA": 1021.7097982760667,
+    "ASEAN|MM": 1513.7636715059007,
+    "ASEAN|MY": 1280.5565390941924,
+    "ASEAN|PH": 2082.058388967274,
+    "ASEAN|SG": 90.95549848905834,
+    "ASEAN|TH": 1116.3985545819994,
+    "ASEAN|TL": 96.07918175129002,
+    "ASEAN|VN": 1062.9987395328162
+   }
+  },
+  "country_check": {
+   "BN": {
+    "stationarity_bn": 2.4335824866200374e-08,
+    "row_complementarity_bn": 6.041544197722929e-05,
+    "S_plus_R_bn": 6.0439777802095485e-05,
+    "column_complementarity_bn": 5.192239184635623e-07,
+    "column_dual_sign_bn": 1.854730093245715e-07,
+    "all_terms_bn": 6.114447472988363e-05,
+    "threshold_bn": 0.01,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "ID": {
+    "stationarity_bn": 4.6774618084963e-06,
+    "row_complementarity_bn": 0.0011352229770997828,
+    "S_plus_R_bn": 0.0011399004389082792,
+    "column_complementarity_bn": 3.0289334219441765e-05,
+    "column_dual_sign_bn": 1.406388000168801e-05,
+    "all_terms_bn": 0.0011842536531294088,
+    "threshold_bn": 0.07016647324048127,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "KH": {
+    "stationarity_bn": 2.726422313181729e-07,
+    "row_complementarity_bn": 0.0001956154170535905,
+    "S_plus_R_bn": 0.00019588805928490868,
+    "column_complementarity_bn": 1.1429210170565711e-05,
+    "column_dual_sign_bn": 2.9656822758046783e-06,
+    "all_terms_bn": 0.00021028295173127908,
+    "threshold_bn": 0.018824070096347827,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "LA": {
+    "stationarity_bn": 2.2972234569925204e-07,
+    "row_complementarity_bn": 0.00023351807155453608,
+    "S_plus_R_bn": 0.00023374779390023534,
+    "column_complementarity_bn": 1.9785570361859902e-05,
+    "column_dual_sign_bn": 4.592146433838454e-06,
+    "all_terms_bn": 0.00025812551069593373,
+    "threshold_bn": 0.027598142124221993,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "MM": {
+    "stationarity_bn": 1.4602296522036284e-07,
+    "row_complementarity_bn": 0.00042269057388352125,
+    "S_plus_R_bn": 0.00042283659684874166,
+    "column_complementarity_bn": 1.8495357269188946e-05,
+    "column_dual_sign_bn": 2.725683508885964e-06,
+    "all_terms_bn": 0.00044405763762681656,
+    "threshold_bn": 0.01,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "MY": {
+    "stationarity_bn": 1.2097402952921025e-06,
+    "row_complementarity_bn": 0.0003504952718484905,
+    "S_plus_R_bn": 0.00035170501214378257,
+    "column_complementarity_bn": 1.188115290263657e-05,
+    "column_dual_sign_bn": 6.960015611297274e-06,
+    "all_terms_bn": 0.0003705461806577164,
+    "threshold_bn": 0.04082635175007324,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "PH": {
+    "stationarity_bn": 8.97030465967542e-07,
+    "row_complementarity_bn": 0.00021739890779759097,
+    "S_plus_R_bn": 0.00021829593826355853,
+    "column_complementarity_bn": 2.7769128793457875e-06,
+    "column_dual_sign_bn": 2.4169427750727817e-06,
+    "all_terms_bn": 0.0002234897939179771,
+    "threshold_bn": 0.01778192924503849,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "SG": {
+    "stationarity_bn": 3.309598716359162e-07,
+    "row_complementarity_bn": 3.4692439047827987e-05,
+    "S_plus_R_bn": 3.502339891946391e-05,
+    "column_complementarity_bn": 5.149918729776629e-07,
+    "column_dual_sign_bn": 5.800230109702434e-07,
+    "all_terms_bn": 3.611841380341181e-05,
+    "threshold_bn": 0.020215820706416778,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "TH": {
+    "stationarity_bn": 9.78397492113636e-07,
+    "row_complementarity_bn": 0.00029407148301370463,
+    "S_plus_R_bn": 0.0002950498805058183,
+    "column_complementarity_bn": 1.931894112401099e-05,
+    "column_dual_sign_bn": 9.382181523296012e-06,
+    "all_terms_bn": 0.0003237510031531253,
+    "threshold_bn": 0.061546288103788455,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "TL": {
+    "stationarity_bn": 5.1379180254868654e-09,
+    "row_complementarity_bn": 4.049849875644853e-05,
+    "S_plus_R_bn": 4.050363667447402e-05,
+    "column_complementarity_bn": 3.739811074571906e-07,
+    "column_dual_sign_bn": 1.3136227364493e-07,
+    "all_terms_bn": 4.100898005557615e-05,
+    "threshold_bn": 0.01,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "VN": {
+    "stationarity_bn": 1.2926935881332393e-06,
+    "row_complementarity_bn": 0.00030609312248918607,
+    "S_plus_R_bn": 0.0003073858160773193,
+    "column_complementarity_bn": 1.5413129283513616e-05,
+    "column_dual_sign_bn": 1.3584854217898894e-05,
+    "all_terms_bn": 0.0003363837995787319,
+    "threshold_bn": 0.2495567245730942,
+    "passed": true,
+    "passed_all_terms": true
+   },
+   "ASEAN": {
+    "stationarity_bn": 2.0805338001610002e-07,
+    "row_complementarity_bn": 0.00011472269669539008,
+    "S_plus_R_bn": 0.00011493075007540618,
+    "column_complementarity_bn": 0.0,
+    "column_dual_sign_bn": 1.647237384957703e-05,
+    "all_terms_bn": 0.0001314031239249832,
+    "threshold_bn": 0.01989413750413224,
+    "passed": true,
+    "passed_all_terms": true
+   }
+  },
+  "unattributed_eur": {
+   "stationarity": 0.0,
+   "row_complementarity": 52797.76832616138,
+   "column_complementarity": 0.0,
+   "column_dual_sign_error": 0.0
+  },
+  "passed_kkt": true,
+  "passed_kkt_all_terms": true,
+  "passed": true
+ },
+ "gates_information": {
+  "all_passed_solver_tolerances": false,
+  "all_passed_barconvtol": false,
+  "failing": [
+   "A1_A2",
+   "A1_A2_S4B",
+   "A3",
+   "A3_S4B",
+   "B1",
+   "B12"
+  ],
+  "failing_excl_B12": [
+   "A1_A2",
+   "A1_A2_S4B",
+   "A3",
+   "A3_S4B",
+   "B1"
+  ],
+  "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+ },
+ "reference": {
+  "source": "this batch: disconnected - integrated ledger difference (/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4n/s4n_c2/solves/cal_disconnected minus /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4n/s4n_c2/solves/cal_integrated, COUNTRY_COST_LEDGER.csv total)",
+  "differences_bn": {
+   "BN": 0.8387022609988699,
+   "ID": 7.016647324048126,
+   "KH": 1.8824070096347827,
+   "LA": 2.7598142124221994,
+   "MM": 0.7266226573927355,
+   "MY": 4.082635175007324,
+   "PH": 1.778192924503849,
+   "SG": 2.021582070641678,
+   "TH": 6.154628810378846,
+   "TL": 0.369828889856913,
+   "VN": 24.95567245730942,
+   "ASEAN": -1.9894137504132237
+  }
+ },
+ "grade": {
+  "grade": "layer1_plus_nodal_price_settlement",
+  "a": true,
+  "b": true,
+  "c": true,
+  "price_settled_results": "usable"
+ },
+ "acceptance": {
+  "optimal": true,
+  "a": true,
+  "b": true,
+  "c": true,
+  "accepted": true,
+  "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+ },
+ "seconds": 14.809287071228027,
+ "grade_history": [
+  {
+   "reference_source": "L23 365x24h ledger difference disconnected - integrated (research/06_scope_redesign/p1_l23_run1_20261019, L23_C9_SUMMARY.json ledger_difference.total_bn_eur; SCREENING_UNVERIFIED runs, decision 112 a) - used until the batch has both STEPS runs",
+   "grade": "layer1_plus_nodal_price_settlement",
+   "accepted": true
+  }
+ ]
+}

@@ -1,0 +1,49 @@
+"""S4O: light evidence JSON of the S4O report (read only; files of the step folder and the local S4O-3 results).
+
+    python s4o_collect_evidence.py <repo root> <out json>
+"""
+import hashlib, json, sys
+from pathlib import Path
+
+R = Path(sys.argv[1]); out = Path(sys.argv[2])
+D = R / "research/06_scope_redesign/p1_step4o_20261019"; E = D / "evidence"
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def jl(p):
+    return json.loads(Path(p).read_text()) if Path(p).exists() else None
+
+
+s3 = E / "s4o_3/s4o_integrated"; prec = jl(s3 / "PRECISION.json") or {}; info = jl(E / "s4o_3/S4O3_INTEGRATED_INFO.json") or {}
+c2 = {t: (jl(E / f"s4o_3/s4n_c2_c1/{t}_PRECISION_regraded.json") or {}) for t in ("cal_integrated", "cal_disconnected", "cal_integrated_nze")}
+res = dict(
+    schema="s4o-evidence-v1", instruction=dict(file="S4O_CLAUDE_CODE_INSTRUCTION.md", sha256=sha(D / "S4O_CLAUDE_CODE_INSTRUCTION.md"), expected="b5f4d099f2afe2e4e4d93cd2dee94ce42857b3a26f62d2622657d78b068af6aa"),
+    authorisation="S4O-1 .. S4O-5 local parts incl. 3 local 56x3h runs (S4O-3); S4O-6 cloud not authorised",
+    s4o_1=dict(pr="https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/39", calibration_branch="codex/s4n-calibration-20261019", commits=["7c4f97fe", "f28772e6", "46135c52"],
+               s4n_archive_files=170, registry_rows=["s4n_decision_118_s4m_open_items", "s4n_decision_119_precision_over_label", "s4o_decision_120_production_profile", "s4o_question_source_s4n"],
+               s4o_branch="codex/s4o-production-20261019", s4o_branch_base="46135c52"),
+    s4o_2=dict(commits=["d5b4eb96", "18f55488"], profile=dict(Threads=8, Method=2, Crossover=0, BarConvTol=1e-5, Seed=123, AggFill=0, PreDual=0, GURO_PAR_BARDENSETHRESH=200),
+               default_profile="pypsa_eur_default", tests=dict(test_s4o_2=7, tests_research_passed=543), script_tests=dict(run_preflight="50/50", probe="9/9"),
+               c1_equivalence_on_s4n1=dict(max_abs_country_diff_bn=0.0, grade_same=True, seconds=22, peak_rss_gib=1.7)),
+    s4o_3=dict(runs_made=1, runs_not_started=["s4o_disconnected", "s4o_integrated_nze"], stop="S4O-3 point 4: decision-107 objective standard not passed (2.13e-5 > 1e-5); runner ended in the 5-min gap before the disconnected solve",
+               integrated=dict(termination=prec.get("termination"), objective=prec.get("objective"), receipt_profile=prec.get("solver_profile"), parameters=prec.get("solver_parameters"),
+                               barrier=dict(iterations=(info.get("s4o") or {}).get("iterations"), seconds=(info.get("s4o") or {}).get("barrier_seconds"), work_units=(info.get("s4o") or {}).get("work_units")),
+                               solve_seconds=(info.get("s4o") or {}).get("solve_seconds"), peak_rss_gib=(info.get("s4o") or {}).get("peak_rss_gib"),
+                               objective_rel_diff_vs_profile_A=(info.get("s4o") or {}).get("objective_rel_diff_vs_A"), b16=(info.get("s4o") or {}).get("b16"),
+                               kkt_relative_gap=(info.get("s4o") or {}).get("kkt_relative_gap"), c1_grade=prec.get("grade"), c1_acceptance=prec.get("acceptance"),
+                               c1_a=dict(diff_bn=(prec.get("a_total_cost") or {}).get("returned_difference_bn"), relative=(prec.get("a_total_cost") or {}).get("returned_relative")),
+                               gates_information=prec.get("gates_information"), interior_solution=(jl(s3 / "INTERIOR_CHECKS.json") or {}).get("interior_solution")),
+               standard_decision_107=dict(objective="not passed", b16="passed", country_differences="not evaluated (disconnected not run)"),
+               info_s4n_c2_c1={t: dict(grade=(v.get("grade") or {}).get("grade"), a_relative=(v.get("a_total_cost") or {}).get("returned_relative"),
+                                       a_diff_bn=(v.get("a_total_cost") or {}).get("returned_difference_bn")) for t, v in c2.items()},
+               info_s4n_c2_integrated=dict(objective_rel_diff_vs_A=(info.get("s4n_c2") or {}).get("objective_rel_diff_vs_A"), iterations=(info.get("s4n_c2") or {}).get("iterations"),
+                                           kkt_relative_gap=(info.get("s4n_c2") or {}).get("kkt_relative_gap"))),
+    not_done=dict(s4o_4="not entered (stop condition); make_package.sh / package_checks.py / preflight in-place update written during the S4O-3 run, not run (syntax checked only)",
+                  s4o_5="not done (stop)", s4o_6="not authorised"),
+    files={str(p.relative_to(D)): sha(p) for p in sorted(E.rglob("*")) if p.is_file() and "__pycache__" not in p.parts},
+)
+out.write_text(json.dumps(res, indent=1, default=str))
+print("evidence written:", out, len(res["files"]), "files")

@@ -124,6 +124,15 @@ H="$T/H"; mkdir -p "$H/repo"; cp "$PKG/preflight.sh" "$H/"; ( cd "$ROOT" && git 
 check "H: default profile pypsa_eur_default found, key names accepted, interior-point gate path, C1 scripts present and importable" "grep -q '^pypsa_eur_default (default).*interior-point gate path: True' '$OUT/H_preflight_default.txt' && grep -q 's4o_c1_precision imports' '$OUT/H_preflight_default.txt' && grep -q 'PREFLIGHT OK' '$OUT/H_preflight_default.txt'"
 check "H: explicit profile A accepted" "grep -q '^formal_barrier (given)' '$OUT/H_preflight_A.txt' && grep -q 'PREFLIGHT OK' '$OUT/H_preflight_A.txt'"
 check "H: unknown profile fails the preflight" "grep -q 'UNKNOWN PROFILE nope' '$OUT/H_preflight_bad.txt' && grep -q 'PREFLIGHT FAILED' '$OUT/H_preflight_bad.txt'"
+# ---------------------------------------------------------------- I: in-place package update (PACKAGE_DELTA.json): preflight unpacks code_<COMMIT8> and moves the old ./repo aside
+I="$T/I"; mkdir -p "$I/repo" "$I/src_old/scripts_project" "$I/src_new/scripts_project"; cp "$PKG/preflight.sh" "$I/"
+echo old > "$I/repo/OLD_CODE_MARKER"; echo old > "$I/src_old/scripts_project/OLD"; echo new > "$I/src_new/scripts_project/NEW"
+( cd "$I/src_old" && tar czf ../code_f50c8850.tar.gz . ); ( cd "$I/src_new" && tar czf ../code_1234abcd.tar.gz . ); rm -rf "$I/src_old" "$I/src_new"
+echo "1234abcd00000000000000000000000000000000" > "$I/COMMIT"; ( cd "$I" && sha256sum code_1234abcd.tar.gz COMMIT > SHA256SUMS )
+( cd "$I" && PREFLIGHT_ONLY=sha PY="$PY" bash preflight.sh serial > "$OUT/I_preflight_1.txt" 2>&1 ); echo "exit $?" >> "$OUT/I_preflight_1.txt"
+( cd "$I" && PREFLIGHT_ONLY=sha PY="$PY" bash preflight.sh serial > "$OUT/I_preflight_2.txt" 2>&1 ); echo "exit $?" >> "$OUT/I_preflight_2.txt"
+check "I: old ./repo (no marker) moved aside, not deleted; the new code unpacked from code_<COMMIT8> only; marker written" "ls -d '$I'/repo_prev_unknown_* >/dev/null 2>&1 && test -f \$(ls -d '$I'/repo_prev_unknown_* | head -1)/OLD_CODE_MARKER && test -f '$I/repo/scripts_project/NEW' && ! test -e '$I/repo/scripts_project/OLD' && [ \"\$(cat '$I/repo/.package_commit')\" = \"\$(cat '$I/COMMIT')\" ] && grep -q 'PREFLIGHT OK' '$OUT/I_preflight_1.txt'"
+check "I: second preflight keeps the matching ./repo" "grep -q './repo is the unpacked code of commit 1234abcd' '$OUT/I_preflight_2.txt' && [ \$(ls -d '$I'/repo_prev_* | wc -l) -eq 1 ] && grep -q 'PREFLIGHT OK' '$OUT/I_preflight_2.txt'"
 echo "SUMMARY: pass=$pass fail=$fail (temp $T)" >> "$RES"
 cat "$RES"
 rm -rf "$T"

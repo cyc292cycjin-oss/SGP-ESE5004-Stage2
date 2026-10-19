@@ -28,7 +28,16 @@ case "$MODE" in
 esac
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }
-  if [ ! -d repo ]; then mkdir repo && tar xzf code_*.tar.gz -C repo && echo "code unpacked to ./repo (commit $(cat COMMIT))"; fi
+  # S4O (package updated in place from the f50c8850 package, PACKAGE_DELTA.json): unpack exactly code_<COMMIT8>.tar.gz; an existing ./repo of another
+  # commit (or without the marker, e.g. the f50c8850 unpack) is moved aside to repo_prev_<commit8 or unknown>_<utc> - nothing is deleted
+  C8=$(cut -c1-8 COMMIT)
+  if [ -d repo ] && [ "$(cat repo/.package_commit 2>/dev/null)" != "$(cat COMMIT)" ]; then
+    old=$(cut -c1-8 repo/.package_commit 2>/dev/null || true); mv repo "repo_prev_${old:-unknown}_$(date -u +%Y%m%dT%H%M%SZ)" && echo "older ./repo moved aside (not deleted): repo_prev_${old:-unknown}_*"
+  fi
+  if [ ! -d repo ]; then
+    if [ -f "code_${C8}.tar.gz" ]; then mkdir repo && tar xzf "code_${C8}.tar.gz" -C repo && cat COMMIT > repo/.package_commit && echo "code unpacked to ./repo (commit $(cat COMMIT))"
+    else echo "code_${C8}.tar.gz MISSING"; ok=0; fi
+  else echo "./repo is the unpacked code of commit $(cat repo/.package_commit)"; fi
 fi
 if sec networks; then
   echo "== networks"
