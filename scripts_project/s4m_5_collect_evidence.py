@@ -71,8 +71,29 @@ def main():
                   uploaded=False),
         s4m4=dict(resource_check=dict(wsl_memtotal_kb=11214484, wsl_memavailable_kb=10419128, wsl_swap_kb=4194304, nproc=16, wslconfig="memory=11GB swap=4GB", windows_physical_bytes=16890519552, disk_free_gb=dict(root=900, d=340)),
                   condition="MemTotal >= 24 GiB and MemAvailable >= 20 GiB and disk >= 20 GB", met=False, local_pilot_run=False, note="pilot deferred to the cloud under a separate authorisation; .wslconfig untouched"),
-        resources=dict(cloud=False, formal_solves=False, downloads="none", local_solves="3 x 56x3h smoke (S4M-2, authorised), stop-loss 30 min each, serial; no pilot"),
+        resources=dict(cloud=False, formal_solves=False, downloads="none", local_solves="3 x 56x3h smoke (S4M-2, authorised) + 1 x 56x3h integrated re-run (supplement 01 S4M-S2, authorised), stop-loss 30 min each, serial; no pilot"),
         tests=a.tests)
+    # supplement 01 (allocation-output completeness): checklist before / after, the authorised re-run, dual reconstruction cross-check, cost breakdown, disk estimate
+    rr = R / "s4ms2/solves/s4m_A_integrated_rerun"; rec = jl(rr / "SOLVE_RECEIPT.json"); s2 = jl(R / "s4m2/solves/s4m_A_integrated/SOLVE_RECEIPT.json"); bd = jl(rr / "COMPONENT_COST_BREAKDOWN_SUMMARY.json")
+    before = jl(R / "s4ms2/checklist/S4M_S1_CHECKLIST_before.json"); after = jl(R / "s4ms2/checklist/S4M_S1_CHECKLIST_after.json")
+    ev["supplement_01"] = dict(
+        instruction=dict(file="work/p1_step4m_20261019/S4M_SUPPLEMENT_01.md", sha256="8743abd0de60aa171b7cd1bf5672e682879b218a9218ee6876098134adba7d1e", verified=True),
+        checklist_before={k: v.get("status") for k, v in (before.get("items") or {}).items()}, checklist_after={k: v.get("status") for k, v in (after.get("items") or {}).items()},
+        checklist_after_detail={k: {kk: vv for kk, vv in v.items() if kk in ("status", "where", "note")} for k, v in (after.get("items") or {}).items()},
+        rerun=dict(folder=str(rr.relative_to(ROOT)), termination=rec.get("termination_condition"), objective=rec.get("objective"), objective_s4m2=s2.get("objective"),
+                   objective_rel_diff=(abs(float(rec["objective"]) - float(s2["objective"])) / abs(float(s2["objective"])) if (rec.get("objective") and s2.get("objective")) else None),
+                   solve_seconds=rec.get("solve_seconds"), solve_seconds_s4m2=s2.get("solve_seconds"), gates={k: v for k, v in (rec.get("gates") or {}).items() if isinstance(v, bool)},
+                   all_passed_solver_tolerances=jl(rr / "V5_GATES.json").get("all_passed_solver_tolerances"), all_passed_solver_tolerances_s4m2=jl(R / "s4m2/solves/s4m_A_integrated/V5_GATES.json").get("all_passed_solver_tolerances"),
+                   status=lines(R / "s4ms2/STATUS.txt"), exports=rec.get("exports"), duals=rec.get("duals")),
+        cost_breakdown={k: bd.get(k) for k in ("extendable", "matched", "matched_share", "by_rule", "composite_rules", "unmatched_by_carrier", "table_fixed_inconsistent", "offwind_distance_table", "tolerance")},
+        disk_estimate=jl(D / "evidence/s4m_s2/EXPORT_DISK_ESTIMATE.json"),
+        modified_files=dict(export_only=True, files=["scripts_project/s2_solve.py (assign_all_duals=True, s4m_duals.write_duals, --costs-table, EXPORTS.json)", "scripts_project/s4m_duals.py (new)", "scripts_project/s4m_cost_breakdown.py (new)",
+                                                    "scripts_project/s4m_s1_check.py (new)", "tests/research/test_s4m_duals.py (new)", "tests/research/test_s4m_cost_breakdown.py (new)",
+                                                    "cloud_package/run_365x24h.sh (--costs-table, export list)", "cloud_package/make_package.sh (costs tables per tag)"],
+                            constraints_objective_network_changed=False, commits=["b15ea69c", "8aa2fea0", "f50c8850"]),
+        pythonhashseed_finding="offline dual reconstruction needs PYTHONHASHSEED=0: the strongly-meshed bus order (pypsa get_strongly_meshed_buses -> value_counts) depends on the str hash seed; s4m_duals.py refuses other seeds and refuses to write when the cross-check is not exact")
+    a.out.write_text(json.dumps(ev, indent=1, default=str, ensure_ascii=False))
+    print("supplement block added")
     a.out.write_text(json.dumps(ev, indent=1, default=str, ensure_ascii=False))
     print("written", a.out, a.out.stat().st_size, "bytes")
 

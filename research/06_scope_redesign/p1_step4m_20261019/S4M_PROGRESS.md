@@ -30,18 +30,23 @@
 | S4M-1 | 主算设置（`dust_cleanup: on`、`biomass_overflow_cap_share: 0.98`）与四个网络构建、S4I 复核、比值与余量核对 | 完成 | 921e050b（配置）；构建在 921e050b 干净树 | `baseline.yaml` `biomass_overflow_cap_share` 1.0 → 0.98（`dust_cleanup` 自 S4L-6 为 on）。四个网络（2920×3h + 365×24h）静态校验通过（`results_project/s4m/s4m1/`，各约 1 min / 0.71 GB）；S4I 审查（static + followups）重跑，`s4k_2_review.py` 对 S4K-2 网络逐项比较：差异 413 行（A10 情景差异 57、每个网络 A1 3 / A3 6 / A4 60 / A5 10 / A9 4 / components 6）全部是清理与 0.98 上限的预期结果（组件数、单侧母线、重复链路、全零负荷、BN/SG/VN 生物质需求与气需求）；交流线损代理不变（λ 全线、公式一致、求解 `transmission_losses` 0）；NZE 与一体化只差燃料价格；不互联跨境组件 0。**发现：** 0.98 上限给 BN、SG 带来的 2 % 余量使它们的小池不再被固定需求锁定，清理把 7 个 < 1 GWh 的池全部删除（S4L 修正规则只保证余量 ≥ 0）：清理后 BN 余量 1,412 MWh（需求 / 剩余池 = 0.9877）、SG 157 MWh（0.9949）、VN 2,515,451 MWh（0.9800）；指令期望的 0.980 只在 VN 成立（见报告发现与决定事项） |
 | S4M-2 | 本机冒烟 ×3（56×3h，档案 A） | 完成（三项最优、门槛全通过） | 结果不进 git；证据 `evidence/s4m_2/` | 一体化 648,381,181,410.45 EUR（141 次迭代，235 s，4.10 GiB）、不互联 698,979,557,971.29（151 次，197 s）、NZE（330 s 墙钟）；`all_passed_solver_tolerances` 全 True；LP 行 1,393,079 / 1,339,505（比 S4K 少 7.2 % / 7.5 %）。与 S4K-3 参照、S4L-5 诊断的对比与生物质影子价格见报告 |
 | 补充 01 | 分摊输出完整性（只改导出） | 代码与重跑完成；报告节待写 | b15ea69c + 本次 | S4M-S1 清单在 S4M-2 一体化冒烟上核对（之前：1b/1c/1d 缺、3 部分）；S4M-S2 只改导出：`s2_solve.py` `assign_all_duals=True` + `s4m_duals.write_duals`（逐约束对偶 `DUALS_BY_CONSTRAINT.nc` + `DUALS_INDEX.csv`，维度名加约束前缀，因为 `m.dual` 在本模型上抛 MergeError）、`--costs-table` → `COMPONENT_COST_BREAKDOWN.csv` + `_SUMMARY.json`、`EXPORTS.json`（字节与 SHA）；一次一体化冒烟重跑（`results_project/s4m/s4ms2/solves/s4m_A_integrated_rerun`，已授权）最优、门槛通过、目标值与 S4M-2 相对差 0.0；重跑时对偶导出失败（修前代码走 `m.dual`），对偶文件由 `s4m_duals.py` 从 `solution/Pi.npy` + `lp/clabels.npy` 离线重建（需 PYTHONHASHSEED=0，见"发现"），与 `buses_t.marginal_price` 交叉核对精确（相对差 0.0，2,516 + 270 条母线；LP 行 1,393,079 = 重建模型行）；清单之后：1a–1d、2、4 已保存，3 部分（86.6 % 组件精确匹配成本表行，其余为复合资本成本）；新增导出磁盘外推：365×24h 单次 3.2 GB（`evidence/s4m_s2/EXPORT_DISK_ESTIMATE.json`） |
-| S4M-3 | 部署包重建（S4L 版脚本）、TimeLimit / 墙钟参数化（14,400 / 15,300）、`speed_probe.sh`、敏感性清单 +2、资源估算与部署步骤更新 | 待开始 | | |
+| S4M-3 | 部署包重建（S4L 版脚本）、TimeLimit / 墙钟参数化（14,400 / 15,300）、`speed_probe.sh`、敏感性清单 +2、资源估算与部署步骤更新 | 完成 | b15ea69c（脚本）；包在 f50c8850 干净树上生成 | 四个网络在 f50c8850 重建，2920×3h 与 365×24h 共 8 个文件与 S4M-1 构建（921e050b）SHA256 逐一相同；`make_package.sh` → `work/p1_step4m_20261019/cloud_package_dist/`（22 个文件，260,720,379 B，`code_f50c8850.tar.gz`、探针网络 + `PROBE_REFERENCE.json`、每情景成本表）；`SHA256SUMS` 全部 OK、预检分节（sha / networks / profile / versions / tools）OK、`run_365x24h.sh --dry-run` OK（缺省 14,400 / 15,300 s）、许可特征串扫描无命中；本机脚本测试 30/30、探针测试 9/9；敏感性 16 项（+ 清理关、上限 1.0）；S4K 包 56d28358 作废。`CLOUD_RESOURCE_ESTIMATE.md` §22、`CLOUD_DEPLOY_STEPS.md` 填好 |
 | S4M-4 | 本机资源核对与条件性试点 | 核对完成；**试点不执行（条件不满足）** | | 见上表 |
-| S4M-5 | 报告与证据 | 待开始 | | |
+| S4M-5 | 报告与证据 | 进行中 | | `S4M_REPORT.md`、`S4M_EVIDENCE.json`（`s4m_5_collect_evidence.py`，含补充 01 块）、台账、镜像 |
 
 ## 提交记录（分支 `codex/s4m-mainline-pilot-20261019`）
 
 | 提交 | 内容 |
 |---|---|
+| 921e050b | S4M-0 / S4M-1：注册表片段 `s4m_0`、`biomass_overflow_cap_share` 0.98、进度文件（资源核对）、汇总与链式脚本 |
+| b15ea69c | 补充 01 导出代码第一版（`assign_all_duals`、`--costs-table`、`EXPORTS.json`、清单脚本）、S4M 部署脚本（缺省 14,400 / 15,300、`speed_probe.sh`、成本表入包）、脚本测试、部署步骤与资源估算草稿、证据收集脚本 |
+| 8aa2fea0 | 逐约束对偶导出 `s4m_duals.py`（运行内 + 离线重建，PYTHONHASHSEED=0、交叉核对精确才写文件）、导出磁盘估算、单元测试 |
+| f50c8850 | 成本拆分复合规则（海上风电接入、海底系数、碳捕集、电制生物燃料、反向孪生）→ 清单第 3 项"已保存"；单元测试 |
+| （本次） | §22、部署步骤、报告、证据、台账、进度 |
 
 ## 续行点
 
-补充 01 代码、重跑与离线对偶重建已完成并提交。下一步：S4M-3 打包（`/home/jin/s4m3_pack.sh`：在最终代码提交的干净树上重建四个网络 → SHA 对照 S4M-1 构建 → `make_package.sh` → 本机检查，`results_project/s4m/s4m3/STATUS.txt`）→ `CLOUD_RESOURCE_ESTIMATE.md` §22 → `CLOUD_DEPLOY_STEPS.md` 占位符 → S4M-5 报告与证据 → 推送、draft PR。
+S4M-0 至 S4M-4 与补充 01 全部完成；包在 f50c8850 生成（`results_project/s4m/s4m3/STATUS.txt`，证据 `evidence/s4m_3/PACKAGE_STATUS.txt`）。S4M-5：报告 → `S4M_EVIDENCE.json` → 台账 → 镜像到 `D:\ResearchWorkspaces\ASEAN\work\p1_step4m_20261019\` → 提交、推送、draft PR（叠在 #37 上）→ 停止等待审阅。
 
 ## 发现但未处理（执行中随时记录，交付时写入报告）
 
