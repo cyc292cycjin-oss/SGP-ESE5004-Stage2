@@ -1,10 +1,11 @@
 #!/bin/bash
-# S4O cloud package builder (S4O-4, decision 120): the S4M builder on the S4O final commit with
+# S4O cloud package builder (S4O-4, decisions 120 / 121; since supplement 01 the scripts default to profile A, runs disconnected + NZE, 21,600 / 22,500 s):
+# the S4M builder on the S4O final commit with
 #   * the SAME four networks as the S4M package f50c8850 (copied from the S4M-1 builds, never rebuilt): the build-input check accepts only changes
 #     that cannot alter the built networks (package_checks.py build-inputs: path rule for summary / C1 scripts and tests, s2_solve.py = solve driver
 #     not imported by the build, baseline.yaml differing only under research.solver, registry rows only added) and, after packing, every file under
 #     networks/ must have the SHA256 of the reference package (package_checks.py compare-networks -> NETWORKS_VS_REFERENCE.json; exit 1 otherwise);
-#   * the S4O scripts (run_365x24h.sh with the default profile pypsa_eur_default and the C1 step, preflight.sh with the profile / C1 sections);
+#   * the S4O scripts (run_365x24h.sh with the C1 step and the decision-121 defaults, preflight.sh with the profile / C1 sections, speed_probe.sh);
 #   * PACKAGE_DELTA.json against the reference package (changed / added / removed / unchanged; the cloud update uploads only changed + added).
 #   bash research/06_scope_redesign/p1_step4o_20261019/cloud_package/make_package.sh <builds_dir> <dist_dir> <smoke_solves_dir> <reference_dist_dir>
 # reference_dist_dir: the S4M package folder (work/p1_step4m_20261019/cloud_package_dist, COMMIT f50c8850) with its SHA256SUMS.
@@ -119,31 +120,32 @@ total = sum(r["bytes"] for r in rows) + os.path.getsize(os.path.join(dist, "SHA2
 json.dump(dict(commit=commit, files=rows, upload_total_bytes_excluding_this_manifest=total,
                environment=dict(python="3.11.13", pypsa="0.30.3", linopy="0.5.5", gurobipy="12.0.3", numpy="1.26.4", pandas="2.3.1", xarray="2025.1.2", scipy="1.15.2", netCDF4="1.7.2"),
                main_settings=dict(dust_cleanup="on (decision 114; corrected rule, S4L-1)", biomass_overflow_cap_share="0.98 (decision 115)",
-                                  solver_profile="pypsa_eur_default (decision 120: PyPSA-Eur v2025.07.0 gurobi-default, capitalised keys, Threads 8; profile A formal_barrier kept as the verification reference; the speed probe stays on profile A, its local reference)"),
+                                  solver_profile="formal_barrier (profile A; decision 121 replaces decision 120 point (2): pypsa_eur_default is a registered non-production profile; the speed probe also uses profile A, its local reference)"),
                acceptance=dict(rule="decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c) (C1 step after every solve, PRECISION.json); project solver-tolerance gates = numerical information",
-                               tolerance_reference="L23 365x24h country differences until both STEPS runs of the batch have ledgers, then the batch's own (BATCH_REFERENCE.json, re-grading)",
+                               tolerance_reference="L23 365x24h country differences until the batch has a disconnected run and an integrated result (decision 121: the S4N pilot via PILOT_INTEGRATED), then disconnected - integrated (BATCH_REFERENCE.json) and re-grading incl. a copy of the pilot's C1 (PILOT_PRECISION)",
                                stop_rule="integrated non-optimal AND C1 (a)(b)(c) not passed -> no further run; any other non-optimal run: C1 and export as usual, no retry, batch continues"),
                reference_package=dict(commit=ref_commit, networks="identical files (NETWORKS_VS_REFERENCE.json)", delta="PACKAGE_DELTA.json (upload only changed + added files)",
                                       build_input_changes="BUILD_INPUT_CHANGES_<scenario>.json (why the code changes since the build cannot alter the networks)"),
                run=dict(script="run_365x24h.sh", runs=["integrated (STEPS)", "disconnected (STEPS, extra-ASEAN CO2 storage on, CO2 shipping and Lao transit kept)",
                                                       "integrated_nze (NZE fuel prices)", "disconnected_gap (GAP_DIAGNOSTIC; only if the disconnected main ends non-optimal)"],
-                        example="GRB_LICENSE_FILE=/path/to/gurobi.lic bash run_365x24h.sh --mode serial --auth '<user authorisation>'   (profile: default pypsa_eur_default)",
-                        pilot="done in S4N (integrated STEPS 365x24h, profile A, optimal); S4O-6 runs the batch: integrated -> disconnected -> NZE (-> gap diagnostic only if the disconnected main is non-optimal), serial, >= 5 min apart",
+                        example="GRB_LICENSE_FILE=/path/to/gurobi.lic PILOT_INTEGRATED=<pilot integrated folder> PILOT_PRECISION=<pilot PILOT_PRECISION.json> bash run_365x24h.sh --mode serial --auth '<user authorisation>'   (defaults: profile formal_barrier, runs disconnected,integrated_nze, 21,600 / 22,500 s)",
+                        pilot="done in S4N (integrated STEPS 365x24h, profile A, optimal, adopted under decisions 119 / 120); decision 121: the integrated run is NOT repeated, the batch runs disconnected -> NZE (-> gap diagnostic only if the disconnected main is non-optimal), serial, >= 5 min apart; B6 = this batch's disconnected - pilot integrated (PILOT_CONSISTENCY.json: same network SHA256 and profile parameters)",
                         c1_step="after every solve: l23_violation_analysis.py -> VIOLATIONS.json, s4o_c1_precision.py run -> PRECISION.json / PRECISION.md (Python only, GRB_LICENSE_FILE removed); ~9 GiB / ~3 min on 365x24h (S4N measurement)",
                         run_gap_s_default=330,
                         modes=["serial (recommended)", "lanes2 (330 s licence gaps at start and inside a lane)"],
                         withdrawn_modes=["lanes3: the academic WLS licence allows at most 2 concurrent sessions, tokens kept >= 5 min (S4I K2, decision 106 a)"],
-                        solver_profile="--solver-profile optional, default pypsa_eur_default (decision 120); formal_barrier (profile A) selectable as the verification reference",
+                        solver_profile="--solver-profile optional, default formal_barrier (profile A, decision 121); pypsa_eur_default selectable as a registered non-production profile",
+                        default_runs="disconnected,integrated_nze (decision 121); integrated selectable with --runs",
                         kirchhoff_row_normalisation="on (research.solver.scaling.kirchhoff_row_normalisation)", scaling="on",
                         exports_per_run=["SOLVE_RECEIPT.json", "V5_GATES.json (incl. B1_BUNKERS, B16_LEDGER)", "COUNTRY_COST_LEDGER.csv", "COUNTRY_COST_LEDGER_DETAIL.csv",
                                          "LEDGER_IDENTITY.json", "NODAL_PRICES.csv", "CO2_FLOWS.json", "BUNKER_ACCOUNT.json", "solved network", "MONITOR_<run>.csv (process-group RSS, cgroup memory)",
                                          "DUALS_BY_CONSTRAINT.nc, DUALS_INDEX.csv, COMPONENT_COST_BREAKDOWN.csv (S4M supplement 01)", "PRECISION.json / PRECISION.md / VIOLATIONS.json (C1, S4O)",
                                          "EXPORTS.json (sizes and SHA256 incl. the C1 files)"],
-                        threads_per_run=8, wall_clock_cap_s_default=15300, gurobi_time_limit_s_default=14400,
-                        run_parameters="GUROBI_TIME_LIMIT_S / WALL_CAP_S / GRACE_S / MONITOR_S environment variables (S4M-3 point 2); scale after the speed probe",
+                        threads_per_run=8, wall_clock_cap_s_default=22500, gurobi_time_limit_s_default=21600,
+                        run_parameters="GUROBI_TIME_LIMIT_S / WALL_CAP_S / GRACE_S / MONITOR_S / RUN_GAP_S environment variables; defaults 21,600 / 22,500 s set before the runs (decision 121: the pilot used ~80 % of 14,400 s incl. one restart, L23 NZE timed out); the speed probe only when the CPU differs from the 8470Q",
                         kill_behaviour="setsid process group per solve, TERM then KILL after GRACE_S, export only after the group has exited, receipt version check (S4L-3)",
                         licence="GRB_LICENSE_FILE supplied by the user on the instance"),
-               first_batch_runs=["integrated (STEPS) pilot first", "disconnected (STEPS)", "integrated_nze (NZE fuel prices)", "disconnected_gap (conditional)"],
+               first_batch_runs=["integrated (STEPS): the S4N pilot (not repeated, decision 121)", "disconnected (STEPS)", "integrated_nze (NZE fuel prices)", "disconnected_gap (conditional)"],
                second_batch_sensitivities_registered_not_packaged=[
                    dict(name="extra-ASEAN CO2 storage price -50 % / +50 % (of 54.70 EUR2020/t)", override="co2.extra_asean_cost_scale=0.5 | 1.5", scenarios="integrated and disconnected"),
                    dict(name="unified ZEP 2011 storage cost 16.05 EUR/t for every geological storage (national, intra-ASEAN receivers, extra-ASEAN 40.75)",

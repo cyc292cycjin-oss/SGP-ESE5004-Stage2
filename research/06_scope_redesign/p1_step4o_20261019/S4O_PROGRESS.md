@@ -20,6 +20,15 @@
 | S4O-6 | 云端整批 | **未授权** | | 等待用户提供实例与授权原文 |
 | S4O-7 | 报告 | 停止报告完成 | 21:30 | `S4O_REPORT.md`、`S4O_EVIDENCE.json`、台账 S4O 条目；提交 **a1ff1e6a**，分支已推送，draft PR [#40](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/40)（base = #39 分支） |
 
+## 补充 01（第 121 项）
+
+用户原文（约 21:45 SGT）："补充指令：请阅读并执行 …S4O_SUPPLEMENT_01.md，先核对 SHA256 应为 f723c544946142ca5e896a56652f95e4fcb3eba586bed21d9cce5ce6e8c7a7a4，不一致就停下报告。第 121 项已确认：生产档案回到档案 A；本补充中的 1 次本机 56×3h 运行已授权；云端（S4O-6）仍未授权，本机部分完成后停下报告。所有说明用中文输出。"——SHA256 核对一致（与 `S4O_SUPPLEMENT_01_SHA256.txt` 相同）。
+
+| 步 | 内容 | 状态 | 时间（SGT） | 提交 / 说明 |
+|---|---|---|---|---|
+| S4O-2′ | 缺省档案改回 A、脚本参数、测试 | **完成** | 约 21:10–21:34 | 配置缺省 `formal_barrier`（注释写明第 121 项与理由），`pypsa_eur_default` 注明非生产；注册表片段 `s4o_1`（第 121 项 3 行 + 问题来源，注册表 1,962 行）；`run_365x24h.sh` 缺省档案 A、缺省运行 `disconnected,integrated_nze`、TimeLimit / 墙钟 21,600 / 22,500 s、`PILOT_INTEGRATED` / `PILOT_PRECISION`（以试点一体化作参照、在副本上重评试点 C1、`PILOT_CONSISTENCY.json`）、`TRUNCATE` 钩子；`speed_probe.sh` 建议值基数 21,600 s；`s4o_c1_precision.regrade` 兼容 S4N 试点格式；测试：`test_s4o_2.py` 8 项、`tests/research` **544 passed**，部署脚本测试 **59/59**、探针 **9/9**——提交 **87e28e3b** |
+| S4O-3′ | 本机 56×3h 端到端验证（1 次，已授权） | **完成，验收全部通过** | 21:35:28–21:42:04 | `/home/jin/s4o_3b_e2e.sh 87e28e3b`：本机类包目录（代码 = 87e28e3b 的 git archive；`networks/integrated_365_24h_unsolved.nc` → S4M-1 2920×3h 构建（`513f56a6…`）的符号链接；`TRUNCATE=56`）+ S4O 版 `run_365x24h.sh`（不传档案 → 缺省 `formal_barrier`，回执确认；TimeLimit 1,750 s、墙钟 1,800 s；一次）。预检（profile / c1 / versions / tools）OK。**optimal**，141 次迭代 / 217.03 s / 407.73 WU，求解 310.6 s，墙钟 362 s，峰值 4.11 GiB，`interior_solution` True；目标 648,381,181,410.4515，与 S4M-2 **相对差 0.0**（≤ 1e-9）；流水线自动 C1（33 s、1.7 GiB）：layer1 + 电价结算，验收 True，`PRECISION.json/.md`、`VIOLATIONS.json` 在求解与导出目录的 `EXPORTS.json` 中（SHA256 一致）；分级与 S4O-2 等价核对相同，(a) 差值、(b)(c) 分国数值差 0.0。门槛：S4B 口径全通过，`all_passed_solver_tolerances` 仅因 B12（配置哈希，按构造）为 False。许可扫描无命中。证据 `evidence/s4o_3b/` |
+
 ## 发现但未处理
 
 见 `S4O_REPORT.md` §8。
