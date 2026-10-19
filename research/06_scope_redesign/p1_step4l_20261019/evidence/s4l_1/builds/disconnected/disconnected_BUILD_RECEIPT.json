@@ -5,13 +5,13 @@
   "s2_status": "S2_SECTOR_COUPLED_SMOKE",
   "network": {
     "file": "results_project/s4l/s4l1/builds/disconnected/disconnected_2920_3h_unsolved.nc",
-    "sha256": "45e802d0bcbbd67b534ecaab55bf16f748e31fe2fa4446d1704590a76eb2b5f4",
-    "bytes": 55321062,
+    "sha256": "9423b986b5a7152da6b982d3d22b4ba2f9a891d409e34f43295e8f069c08c17c",
+    "bytes": 55337188,
     "snapshots": 2920,
     "components": {
       "StorageUnit": 133,
       "Link": 7202,
-      "Store": 523,
+      "Store": 528,
       "TransformerType": 14,
       "LineType": 35,
       "Generator": 1717,
@@ -32,7 +32,7 @@
     },
     "registry": {
       "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/registry_v5/DATA_REGISTRY.csv",
-      "sha256": "4eb252fd1962ab64ed657e4a509077d9b89ab92152c1b734e74d28b17fed153f"
+      "sha256": "2e031f126cae3e86cb37db16cfccd0ba34c6c7dcd8fa9e6e69a5feab811ef33b"
     },
     "demand_table": {
       "path": "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv",
@@ -34160,8 +34160,8 @@
         "TL",
         "VN"
       ],
-      "biomass_stores": 100,
-      "biomass_potential_twh": 2120.7192309934626,
+      "biomass_stores": 105,
+      "biomass_potential_twh": 2120.7206112985177,
       "co2_pipelines": 93,
       "capture_links": 579
     },
@@ -39680,8 +39680,8 @@
       {
         "carrier": "solid biomass",
         "country": "BN",
-        "count": 4,
-        "e_nom_mw_or_mwh": 115028.95248794,
+        "count": 7,
+        "e_nom_mw_or_mwh": 115935.82841735019,
         "e_nom_extendable": 0
       },
       {
@@ -39729,8 +39729,8 @@
       {
         "carrier": "solid biomass",
         "country": "SG",
-        "count": 2,
-        "e_nom_mw_or_mwh": 31036.81776382,
+        "count": 4,
+        "e_nom_mw_or_mwh": 31510.246889217393,
         "e_nom_extendable": 0
       },
       {
@@ -42268,9 +42268,9 @@
     "Link.trade_class": 6644,
     "Link.landing_node": 6656,
     "Link.via_coastal_node": 7154,
-    "Store.asset_role": 327,
-    "Store.source_component": 327,
-    "Store.price_qualification": 327,
+    "Store.asset_role": 332,
+    "Store.source_component": 332,
+    "Store.price_qualification": 332,
     "Store.country": 293,
     "Store.research_role": 293,
     "Store.s2_category": 423,
@@ -42293,12 +42293,12 @@
     "Generator.s1_candidate_status": 1475,
     "Generator.cost_qualification": 1612
   },
-  "code_sha": "aa9559fe352c8928428685076d4b5eaaca30048c",
+  "code_sha": "2983d9512a549ceb90b8ea30b1962af0502fd4b5",
   "environment": {
     "python": "3.11.13",
     "pypsa": "0.30.3"
   },
-  "build_seconds": 52.35725665092468,
+  "build_seconds": 57.09790539741516,
   "solver_runs": 0,
   "dust_cleanup": {
     "components_after": {
@@ -42308,7 +42308,7 @@
       "Link": 7202,
       "Load": 2026,
       "StorageUnit": 133,
-      "Store": 523
+      "Store": 528
     },
     "components_before": {
       "Bus": 2914,
@@ -42323,11 +42323,12 @@
       "by_class_action": {
         "all_zero_load|delete": 38,
         "all_zero_profile_generator|delete": 3,
-        "biomass_pool_below_energy|delete": 7,
+        "biomass_pool_below_energy|delete": 2,
         "identical_parallel_link|merge": 86,
         "identical_parallel_link|merge_keep": 8,
         "kept_extra_asean_co2_store|keep": 11,
         "kept_fixed_generator_below_capacity|keep": 11,
+        "kept_pool_fixed_demand_binding|keep": 5,
         "kept_zero_capacity_extendable_link|keep": 100,
         "renewable_potential_below_capacity|delete": 3,
         "single_attachment_fuel_bus_component|delete": 128,
@@ -42482,6 +42483,388 @@
     ],
     "merged_links_removed": 86,
     "mode": "on",
+    "pool_balance_after": [
+      {
+        "binding": false,
+        "bus": "biogas BN",
+        "country": "BN",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 119195.486905,
+        "pools": 1,
+        "slack_mwh": 119195.486905
+      },
+      {
+        "binding": false,
+        "bus": "biogas ID",
+        "country": "ID",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 57166223.4699,
+        "pools": 2,
+        "slack_mwh": 57166223.4699
+      },
+      {
+        "binding": false,
+        "bus": "biogas KH",
+        "country": "KH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 2832791.2673657,
+        "pools": 2,
+        "slack_mwh": 2832791.2673657
+      },
+      {
+        "binding": false,
+        "bus": "biogas MM",
+        "country": "MM",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 7540870.51296,
+        "pools": 1,
+        "slack_mwh": 7540870.51296
+      },
+      {
+        "binding": false,
+        "bus": "biogas MY",
+        "country": "MY",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 20813526.57934,
+        "pools": 2,
+        "slack_mwh": 20813526.57934
+      },
+      {
+        "binding": false,
+        "bus": "biogas PH",
+        "country": "PH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 11074624.3717982,
+        "pools": 2,
+        "slack_mwh": 11074624.3717982
+      },
+      {
+        "binding": false,
+        "bus": "biogas SG",
+        "country": "SG",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 211958.016606,
+        "pools": 1,
+        "slack_mwh": 211958.016606
+      },
+      {
+        "binding": false,
+        "bus": "biogas TH",
+        "country": "TH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 17409936.204069998,
+        "pools": 2,
+        "slack_mwh": 17409936.204069998
+      },
+      {
+        "binding": false,
+        "bus": "biogas TL",
+        "country": "TL",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 143858.959227,
+        "pools": 1,
+        "slack_mwh": 143858.959227
+      },
+      {
+        "binding": false,
+        "bus": "biogas VN",
+        "country": "VN",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 12593746.3381,
+        "pools": 1,
+        "slack_mwh": 12593746.3381
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass BN",
+        "country": "BN",
+        "fixed_demand_mwh": 115935.82841735019,
+        "pool_total_mwh": 115935.82841735019,
+        "pools": 7,
+        "slack_mwh": 0.0
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass ID",
+        "country": "ID",
+        "fixed_demand_mwh": 577448130.7701,
+        "pool_total_mwh": 976748687.8837999,
+        "pools": 11,
+        "slack_mwh": 399300557.1136999
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass KH",
+        "country": "KH",
+        "fixed_demand_mwh": 10732896.9758,
+        "pool_total_mwh": 49348607.720556,
+        "pools": 11,
+        "slack_mwh": 38615710.744756
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass LA",
+        "country": "LA",
+        "fixed_demand_mwh": 5008149.786660002,
+        "pool_total_mwh": 26351298.84452,
+        "pools": 6,
+        "slack_mwh": 21343149.05786
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass MM",
+        "country": "MM",
+        "fixed_demand_mwh": 28134119.6208,
+        "pool_total_mwh": 104030364.057363,
+        "pools": 7,
+        "slack_mwh": 75896244.436563
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass MY",
+        "country": "MY",
+        "fixed_demand_mwh": 127387574.10768501,
+        "pool_total_mwh": 247024024.445376,
+        "pools": 10,
+        "slack_mwh": 119636450.337691
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass PH",
+        "country": "PH",
+        "fixed_demand_mwh": 75017782.77963081,
+        "pool_total_mwh": 141377755.67691702,
+        "pools": 11,
+        "slack_mwh": 66359972.89728621
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass SG",
+        "country": "SG",
+        "fixed_demand_mwh": 31510.2468892173,
+        "pool_total_mwh": 31510.246889217393,
+        "pools": 4,
+        "slack_mwh": 9.458744898438454e-11
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass TH",
+        "country": "TH",
+        "fixed_demand_mwh": 285005670.88299996,
+        "pool_total_mwh": 319419783.27866,
+        "pools": 11,
+        "slack_mwh": 34414112.39566004
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass TL",
+        "country": "TL",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 593345.9564671,
+        "pools": 5,
+        "slack_mwh": 593345.9564671
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass VN",
+        "country": "VN",
+        "fixed_demand_mwh": 125772566.15328002,
+        "pool_total_mwh": 125772566.15327999,
+        "pools": 7,
+        "slack_mwh": -2.9802322387695312e-08
+      }
+    ],
+    "pool_balance_before": [
+      {
+        "binding": false,
+        "bus": "biogas BN",
+        "country": "BN",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 119195.486905,
+        "pools": 1,
+        "slack_mwh": 119195.486905
+      },
+      {
+        "binding": false,
+        "bus": "biogas ID",
+        "country": "ID",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 57166223.4699,
+        "pools": 2,
+        "slack_mwh": 57166223.4699
+      },
+      {
+        "binding": false,
+        "bus": "biogas KH",
+        "country": "KH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 2832791.2673657,
+        "pools": 2,
+        "slack_mwh": 2832791.2673657
+      },
+      {
+        "binding": false,
+        "bus": "biogas MM",
+        "country": "MM",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 7540870.51296,
+        "pools": 1,
+        "slack_mwh": 7540870.51296
+      },
+      {
+        "binding": false,
+        "bus": "biogas MY",
+        "country": "MY",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 20813526.57934,
+        "pools": 2,
+        "slack_mwh": 20813526.57934
+      },
+      {
+        "binding": false,
+        "bus": "biogas PH",
+        "country": "PH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 11074624.3717982,
+        "pools": 2,
+        "slack_mwh": 11074624.3717982
+      },
+      {
+        "binding": false,
+        "bus": "biogas SG",
+        "country": "SG",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 211958.016606,
+        "pools": 1,
+        "slack_mwh": 211958.016606
+      },
+      {
+        "binding": false,
+        "bus": "biogas TH",
+        "country": "TH",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 17409936.204069998,
+        "pools": 2,
+        "slack_mwh": 17409936.204069998
+      },
+      {
+        "binding": false,
+        "bus": "biogas TL",
+        "country": "TL",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 143858.959227,
+        "pools": 1,
+        "slack_mwh": 143858.959227
+      },
+      {
+        "binding": false,
+        "bus": "biogas VN",
+        "country": "VN",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 12593746.3381,
+        "pools": 1,
+        "slack_mwh": 12593746.3381
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass BN",
+        "country": "BN",
+        "fixed_demand_mwh": 115935.82841735019,
+        "pool_total_mwh": 115935.82841735019,
+        "pools": 7,
+        "slack_mwh": 0.0
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass ID",
+        "country": "ID",
+        "fixed_demand_mwh": 577448130.7701,
+        "pool_total_mwh": 976748687.8837999,
+        "pools": 11,
+        "slack_mwh": 399300557.1136999
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass KH",
+        "country": "KH",
+        "fixed_demand_mwh": 10732896.9758,
+        "pool_total_mwh": 49348607.720556,
+        "pools": 11,
+        "slack_mwh": 38615710.744756
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass LA",
+        "country": "LA",
+        "fixed_demand_mwh": 5008149.786660002,
+        "pool_total_mwh": 26351298.84452,
+        "pools": 6,
+        "slack_mwh": 21343149.05786
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass MM",
+        "country": "MM",
+        "fixed_demand_mwh": 28134119.6208,
+        "pool_total_mwh": 104030364.057363,
+        "pools": 7,
+        "slack_mwh": 75896244.436563
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass MY",
+        "country": "MY",
+        "fixed_demand_mwh": 127387574.10768501,
+        "pool_total_mwh": 247024816.83540046,
+        "pools": 11,
+        "slack_mwh": 119637242.72771545
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass PH",
+        "country": "PH",
+        "fixed_demand_mwh": 75017782.77963081,
+        "pool_total_mwh": 141377755.67691702,
+        "pools": 11,
+        "slack_mwh": 66359972.89728621
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass SG",
+        "country": "SG",
+        "fixed_demand_mwh": 31510.2468892173,
+        "pool_total_mwh": 31510.246889217393,
+        "pools": 4,
+        "slack_mwh": 9.458744898438454e-11
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass TH",
+        "country": "TH",
+        "fixed_demand_mwh": 285005670.88299996,
+        "pool_total_mwh": 319419783.27866,
+        "pools": 11,
+        "slack_mwh": 34414112.39566004
+      },
+      {
+        "binding": false,
+        "bus": "solid biomass TL",
+        "country": "TL",
+        "fixed_demand_mwh": 0.0,
+        "pool_total_mwh": 594009.865915919,
+        "pools": 6,
+        "slack_mwh": 594009.865915919
+      },
+      {
+        "binding": true,
+        "bus": "solid biomass VN",
+        "country": "VN",
+        "fixed_demand_mwh": 125772566.15328002,
+        "pool_total_mwh": 125772566.15327999,
+        "pools": 7,
+        "slack_mwh": -2.9802322387695312e-08
+      }
+    ],
     "pypsa_eur": {
       "co2_sequestration_min_size_mt": {
         "adopted": false,
@@ -42585,24 +42968,10 @@
         },
         {
           "capacity_mw": 0.0,
-          "count": 3,
-          "country": "BN",
-          "dust_class": "biomass_pool_below_energy",
-          "energy_mwh": 906.8759294102
-        },
-        {
-          "capacity_mw": 0.0,
           "count": 1,
           "country": "MY",
           "dust_class": "biomass_pool_below_energy",
           "energy_mwh": 792.390024464
-        },
-        {
-          "capacity_mw": 0.0,
-          "count": 2,
-          "country": "SG",
-          "dust_class": "biomass_pool_below_energy",
-          "energy_mwh": 473.429125397392
         },
         {
           "capacity_mw": 0.0,
@@ -42856,14 +43225,14 @@
         "Link": 4,
         "Load": 38,
         "StorageUnit": 147,
-        "Store": 7
+        "Store": 2
       },
       "by_country": [
         {
           "capacity_mw": 0.0,
-          "count": 10,
+          "count": 7,
           "country": "BN",
-          "energy_mwh": 906.8759294102
+          "energy_mwh": 0.0
         },
         {
           "capacity_mw": 0.5756115864233844,
@@ -42903,9 +43272,9 @@
         },
         {
           "capacity_mw": 0.0,
-          "count": 11,
+          "count": 9,
           "country": "SG",
-          "energy_mwh": 473.429125397392
+          "energy_mwh": 0.0
         },
         {
           "capacity_mw": 0.0,
@@ -42926,10 +43295,10 @@
           "energy_mwh": 0.0
         }
       ],
-      "capacity_mw_total_finite": 0.5756115864233844,
-      "count": 602,
-      "energy_mwh_total": 3437.794294881214,
-      "unbounded_capacity_components": 301
+      "capacity_mw_total_finite": 0.5756115864233843,
+      "count": 597,
+      "energy_mwh_total": 2057.4892400736217,
+      "unbounded_capacity_components": 296
     },
     "removed_required_structure": [
       [

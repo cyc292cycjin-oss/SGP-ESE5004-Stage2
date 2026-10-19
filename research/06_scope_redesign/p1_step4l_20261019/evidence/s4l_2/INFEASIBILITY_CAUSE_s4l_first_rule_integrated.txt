@@ -1,52 +1,63 @@
-Traceback (most recent call last):
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 211, in _acquire_with_cache_info
-    file = self._cache[self._key]
-           ~~~~~~~~~~~^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/lru_cache.py", line 56, in __getitem__
-    value = self._cache[key]
-            ~~~~~~~~~~~^^^^^
-KeyError: [<class 'netCDF4._netCDF4.Dataset'>, ('/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4l/s4l1_first_rule_infeasible/builds/integrated/integrated_2920_3h_unsolved.nc',), 'r', (('clobber', True), ('diskless', False), ('format', 'NETCDF4'), ('persist', False)), '08c13406-6e1e-4509-8b32-ac7ab82012ef']
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/mnt/c/Users/20122/AppData/Local/Temp/claude/D--ResearchWorkspaces/b259c2d5-0dc5-4b44-8298-2fadb675d3fe/scratchpad/diag_infeasible.py", line 7, in <module>
-    k = pypsa.Network(sys.argv[1]); l = pypsa.Network(sys.argv[2]); sc = sys.argv[3]
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/components.py", line 404, in __init__
-    self.import_from_netcdf(import_name)
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/io.py", line 764, in import_from_netcdf
-    with ImporterNetCDF(path=path) as importer:
-         ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/io.py", line 356, in __init__
-    self.ds = xr.open_dataset(path)
-              ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/api.py", line 686, in open_dataset
-    backend_ds = backend.open_dataset(
-                 ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 666, in open_dataset
-    store = NetCDF4DataStore.open(
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 452, in open
-    return cls(manager, group=group, mode=mode, lock=lock, autoclose=autoclose)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 393, in __init__
-    self.format = self.ds.data_model
-                  ^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 461, in ds
-    return self._acquire()
-           ^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 455, in _acquire
-    with self._manager.acquire_context(needs_lock) as root:
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/contextlib.py", line 137, in __enter__
-    return next(self.gen)
-           ^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 199, in acquire_context
-    file, cached = self._acquire_with_cache_info(needs_lock)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 217, in _acquire_with_cache_info
-    file = self._opener(*self._args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "src/netCDF4/_netCDF4.pyx", line 2521, in netCDF4._netCDF4.Dataset.__init__
-  File "src/netCDF4/_netCDF4.pyx", line 2158, in netCDF4._netCDF4._ensure_nc_success
-FileNotFoundError: [Errno 2] No such file or directory: '/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4l/s4l1_first_rule_infeasible/builds/integrated/integrated_2920_3h_unsolved.nc'
+== S4K integrated: loaded buses without any supplier: 0 []
+         biomass_fixed_demand_mwh  solid_pool_mwh  biogas_pool_mwh  pools
+country                                                                  
+BN                       115935.8        115935.8         119195.5      8
+ID                    577448130.8     976748687.9       57166223.5     13
+KH                     10732897.0      49348607.7        2832791.3     13
+LA                      5008149.8      26351298.8              0.0      6
+MM                     28134119.6     104030364.1        7540870.5      8
+MY                    127387574.1     247024816.8       20813526.6     13
+PH                     75017782.8     141377755.7       11074624.4     13
+SG                        31510.2         31510.2         211958.0      5
+TH                    285005670.9     319419783.3       17409936.2     13
+TL                            0.0        594009.9         143859.0      7
+VN                    125772566.2     125772566.2       12593746.3      8
+biomass load carriers: {'biomass final energy': 159} buses: ['biomass final energy']
+== S4L integrated: loaded buses without any supplier: 0 []
+         biomass_fixed_demand_mwh  solid_pool_mwh  biogas_pool_mwh  pools
+country                                                                  
+BN                       115935.8        115029.0         119195.5      5
+ID                    577448130.8     976748687.9       57166223.5     13
+KH                     10732897.0      49348607.7        2832791.3     13
+LA                      5008149.8      26351298.8              0.0      6
+MM                     28134119.6     104030364.1        7540870.5      8
+MY                    127387574.1     247024024.4       20813526.6     12
+PH                     75017782.8     141377755.7       11074624.4     13
+SG                        31510.2         31036.8         211958.0      3
+TH                    285005670.9     319419783.3       17409936.2     13
+TL                            0.0        593346.0         143859.0      6
+VN                    125772566.2     125772566.2       12593746.3      8
+biomass load carriers: {'biomass final energy': 159} buses: ['biomass final energy']
+SG SG2 0 agriculture biomass final load MWh/a: 31510.2 suppliers: ['SG2 0 agriculture biomass meter']
+    link SG2 0 agriculture biomass meter solid biomass SG -> SG2 0 agriculture biomass final p_nom 0.0 ext True eff 1.0 cap 0.0
+    bus0 suppliers: ['SG biomass other_crop_residues', 'SG biomass wood_processing_residues']
+BN BN4 0 industry biomass final load MWh/a: 115935.8 suppliers: ['BN4 0 industry biomass CC', 'BN4 0 industry biomass meter']
+    link BN4 0 industry biomass CC solid biomass BN -> BN4 0 industry biomass final p_nom 0.0 ext True eff 1.0 cap 64064.76750234019
+    bus0 suppliers: ['BN biomass coconut_residues', 'BN biomass other_crop_residues', 'BN biomass rice_residues', 'BN biomass wood_processing_residues']
+    link BN4 0 industry biomass meter solid biomass BN -> BN4 0 industry biomass final p_nom 0.0 ext True eff 1.0 cap 0.0
+    bus0 suppliers: ['BN biomass coconut_residues', 'BN biomass other_crop_residues', 'BN biomass rice_residues', 'BN biomass wood_processing_residues']
+MY MY_Peninsular2 0 agriculture biomass final load MWh/a: 32852.6 suppliers: ['MY_Peninsular2 0 agriculture biomass meter']
+    link MY_Peninsular2 0 agriculture biomass meter solid biomass MY -> MY_Peninsular2 0 agriculture biomass final p_nom 0.0 ext True eff 1.0 cap 0.0
+    bus0 suppliers: ['MY biomass cassava_residues', 'MY biomass coconut_residues', 'MY biomass oil_palm_efb', 'MY biomass oil_palm_fibre', 'MY biomass oil_palm_pks', 'MY biomass oil_palm_trunk', 'MY biomass other_crop_residues', 'MY biomass rice_residues']
+MY MY_Peninsular2 0 industry biomass final load MWh/a: 36942282.6 suppliers: ['MY_Peninsular2 0 industry biomass CC', 'MY_Peninsular2 0 industry biomass meter']
+    link MY_Peninsular2 0 industry biomass CC solid biomass MY -> MY_Peninsular2 0 industry biomass final p_nom 0.0 ext True eff 1.0 cap 64064.76750234019
+    bus0 suppliers: ['MY biomass cassava_residues', 'MY biomass coconut_residues', 'MY biomass oil_palm_efb', 'MY biomass oil_palm_fibre', 'MY biomass oil_palm_pks', 'MY biomass oil_palm_trunk', 'MY biomass other_crop_residues', 'MY biomass rice_residues']
+    link MY_Peninsular2 0 industry biomass meter solid biomass MY -> MY_Peninsular2 0 industry biomass final p_nom 0.0 ext True eff 1.0 cap 0.0
+    bus0 suppliers: ['MY biomass cassava_residues', 'MY biomass coconut_residues', 'MY biomass oil_palm_efb', 'MY biomass oil_palm_fibre', 'MY biomass oil_palm_pks', 'MY biomass oil_palm_trunk', 'MY biomass other_crop_residues', 'MY biomass rice_residues']
+MY MY_Peninsular2 1 agriculture biomass final load MWh/a: 61085.8 suppliers: ['MY_Peninsular2 1 agriculture biomass meter']
+    link MY_Peninsular2 1 agriculture biomass meter solid biomass MY -> MY_Peninsular2 1 agriculture biomass final p_nom 0.0 ext True eff 1.0 cap 0.0
+    bus0 suppliers: ['MY biomass cassava_residues', 'MY biomass coconut_residues', 'MY biomass oil_palm_efb', 'MY biomass oil_palm_fibre', 'MY biomass oil_palm_pks', 'MY biomass oil_palm_trunk', 'MY biomass other_crop_residues', 'MY biomass rice_residues']
+== INFEASIBILITY_DIAGNOSIS structural (S4L run):
+       biomass_pool_mwh electricity_demand_mwh renewable_potential_mwh storage_cap_t can_store_or_export_co2 net_zero_structurally_possible
+ASEAN               0.0                    0.0                     0.0           0.0                   False                           True
+BN        234224.439393         5051330.672981         11637381.373401   371586000.0                    True                           True
+ID      1033914911.3537       459590425.890992       9161797804.579473  1025500000.0                    True                           True
+KH      52181398.987922         44357977.09173         868087539.46961     1700000.0                    True                           True
+LA       26351298.84452        11082523.233062        448085981.078359           0.0                    True                           True
+MM     111571234.570323        33351123.048113       1775064636.270947           0.0                    True                           True
+MY     267837551.024716       310824277.177999         879261546.39882  2575460000.0                    True                           True
+PH     152452380.048715       192997003.350363       2392070883.672199   446000000.0                    True                           True
+SG         242994.83437        48875283.218249          8233993.019376           0.0                    True                           True
+TH      336829719.48273       447993180.644864       3305222639.406387   320480000.0                    True                           True
+TL        737204.915694         1797752.823183         24326748.756223     5000000.0                    True                           True
+VN      138366312.49138        271068171.32802       4065944233.325834   236000000.0                    True                           True

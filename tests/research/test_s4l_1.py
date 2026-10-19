@@ -144,8 +144,11 @@ def test_build():
     n = pypsa.Network(str(B)); k = pypsa.Network(str(K))
     led = n.meta["research_dust_cleanup"]
     assert led["mode"] == "on" and led["thresholds"] == dict(energy_mwh=1000.0, capacity_mw=1.0)
-    assert len(n.buses) == len(k.buses) - 128 and len(n.loads) == len(k.loads) - 38
+    assert len(n.buses) == len(k.buses) - 128 and len(n.loads) == len(k.loads) - 38 and len(n.stores) == len(k.stores) - 2
     assert int((n.links.carrier == "biomass-to-methanol").sum()) == 11
-    assert not (n.stores[n.stores.research_role == "FINITE_RESOURCE"].e_nom < 1000.0).any()
+    small = n.stores[(n.stores.research_role == "FINITE_RESOURCE") & (n.stores.e_nom < 1000.0)]
+    assert sorted(small.index) == ["BN biomass cassava_residues", "BN biomass maize_residues", "BN biomass sugarcane_residues", "SG biomass cassava_residues", "SG biomass coconut_residues"]   # kept: fixed demand binding
+    bal = {b["country"]: b for b in led["pool_balance_after"] if b["bus"].startswith("solid biomass")}
+    assert all(b["slack_mwh"] >= -1e-6 for b in bal.values()) and bal["BN"]["binding"] and bal["SG"]["binding"] and bal["VN"]["binding"] and not bal["MY"]["binding"]
     assert set(n.meta["demand_owners"]) == set(n.loads.index)
     ft = n.links[n.links.carrier == "Fischer-Tropsch"]; assert len(ft) == int((k.links.carrier == "Fischer-Tropsch").sum())
