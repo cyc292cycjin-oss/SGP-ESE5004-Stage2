@@ -615,3 +615,17 @@
 - **用户决定（2026-10-18，S4K 报告 §8 第 1 项）：** 串行预检内存下限 36 → 40 GiB。已改 `preflight.sh`（提交 56d28358）并重新打包：代码 56d28358，上传 237,192,471 B；网络与回执与第一次打包逐字节相同；第一次打包（2d4aaac3）作废，保留为 `cloud_package_dist_2d4aaac3_superseded/`。授权模板改填 56d28358。
 - **待用户决定：** 无；另需上云前信息与授权（报告 §10）。
 - **交付：** `research/06_scope_redesign/p1_step4k_20261018/`，内容为 S4K_REPORT.md、S4K_EVIDENCE.json、S4K_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §20、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4k_20261018/`；测试 `tests/research` 529 通过、整个 `tests/` 546 通过。
+
+## L23 首批云端正式运行（365×24h 日分辨率筛选，部署包代码 56d28358）— 2026-10-19
+
+- **范围：** 指令 `L23_RUN1_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 2c6d9dca…90d2，已核对）；AutoDL 西北 B 区 144 机（12 核 Xeon Silver 4214R，90 GiB），S4K 部署包（代码 56d28358），档案 A（`formal_barrier`），串行，每运行 TimeLimit 10,500 s、墙钟上限 3 h，不重试、不改参数。分支 `codex/l23-run1-20261019`（自 S4K ca5eb801），draft PR #36 叠在 #35 上。本条目由 S4L-0 补记（L23 交付未写台账；S4L 注册表片段 `s4l_0`）。
+- **结果（VERIFIED，`L23_RUN1_REPORT.md`）：** 整批 7 h 00 min；一体化 STEPS SUBOPTIMAL（6,722 s）、不互联 STEPS SUBOPTIMAL（5,297 s）、不互联诊断 SUBOPTIMAL（2,311 s）、一体化 NZE 到 Gurobi TimeLimit 后被墙钟上限标记终止（10,814 s）。四个运行 `all_passed_solver_tolerances` 都是 False；B2、B14、B15（无容差）因 1e-8 量级超出而不通过。
+  - B6 = 68.97 bn EUR（不互联比一体化高 11.8 %）；NZE 比一体化低 90.46 bn EUR（−17.5 %）；B16 账本恒等式四个运行都通过（4.7e-9–2.9e-7）。
+  - 分国差额（不互联 − 一体化，bn EUR）：VN 51.32、TH 7.51、MY 3.21、LA 2.74、KH 2.43、MM 1.13、SG 0.93、ID 0.67、TL 0.12、BN 0.11、PH 0.01，燃料舱 −1.22；方向与 S4K 冒烟全同。
+  - 原始违反集中在储能水平上下限（SG / BN / TL 的小生物质池、各国东盟外 CO₂ 储存年末水平）、近零容量 FT 链路与 H₂ 母线平衡；一阶影响 ≤ 4e-7（INFERENCE）；对偶侧未量化。
+- **标签（第 112 项 a，S4L-0 登记）：** 四个运行标为 **`SCREENING_UNVERIFIED`**。可用的是原始侧总量（目标值、B6、NZE 差值）；依赖节点电价的分国结算（拥堵租金、跨境结算、按科目分解）与小国差额（PH、BN、TL）不用于结论。
+- **NZE 来源（第 112 项 b）：** 接受另行回收的 `nze_late_outputs_20261018T180030Z_5623.tar.gz`（21 个文件，74,285,069 B，SHA256 78a6ea15…c33b；存于 `work/p1_step4k_20261018/cloud_results/20261018T180030Z_5623/nze_late/`，不进 git，与结果包 39b9c9dd…ae7f 分开存放）为本批 NZE 结果；来源为墙钟终止后 `s2_solve.py` 继续写出的求解后文件（报告 §1.3）。
+- **实测校正（供 S4L-3 用）：** 实例速度相对本机 0.23–0.30（按 Gurobi work unit）；每次 barrier 迭代 14.9–43.4 s；峰值 RSS 13.8–15.3 GiB（约为 §20 中值的 60 %）；一体化、不互联、NZE 墙钟为 §20 估计上沿的 1.7–1.9 倍。
+- **发现但未处理 12 条（报告 §7）：** 含 `preflight.sh` 与监控读宿主机资源（第 1、2 条）、3 h 墙钟上限没有终止 Python 孙进程（第 3 条）——第 112 项 c 交 S4L-3 处理。
+- **费用：** 开机到 `DONE` 8 h 20 min，约 ¥9.00；实例许可文件已删除；关机由用户在控制台操作。
+- **交付：** `research/06_scope_redesign/p1_l23_run1_20261019/`（报告、证据 JSON、进度、`evidence/c9`、`evidence/c9_summary`）；结果包与 NZE 回收包在 `work/p1_step4k_20261018/cloud_results/`（不进 git）。
