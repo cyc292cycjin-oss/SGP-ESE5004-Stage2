@@ -114,7 +114,10 @@ def pool_fixed_demand(n, bus: str) -> float:
     bus with another supplier is still counted in full."""
     w = n.snapshot_weightings.generators
     ann = n.get_switchable_as_dense("Load", "p_set").mul(w, axis=0).sum()
-    down = set(n.links.bus1[n.links.bus0 == bus].astype(str)) | {bus}
+    bc = n.buses.carrier.astype(str)
+    # only the biomass final-energy buses behind the pool bus (carrier containing 'biomass'); the conversion links to electricity / oil / heat /
+    # methanol buses are optional routes whose demand is served by many carriers and must not be counted against the pools
+    down = {b for b in n.links.bus1[n.links.bus0 == bus].astype(str) if "biomass" in bc.get(b, "")} | {bus}
     return float(ann[n.loads.index[n.loads.bus.isin(down)]].sum()) if len(n.loads) else 0.0
 
 

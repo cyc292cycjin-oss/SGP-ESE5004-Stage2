@@ -140,7 +140,7 @@ def inventory(a):
             "(unbounded, capital cost), the uncapped extra-ASEAN CO2 export stores (decision 89), fixed sources below 1 MW (plastic waste: exogenous data), and "
             "single-attachment fuel buses whose only attachment is a zero-efficiency link port", "keep", "flag", "B", SRC, LOC, INSTRUCTION_SHA, decision_ref="113", status="REFERENCE_ONLY")
     reg.write(REG_DIR / "fragments" / "s4l_1.csv")
-    print("registry fragment s4l_1 written: 6 rows;", out / "DUST_S4L1.json")
+    print("registry fragment s4l_1 written:", len(reg.rows), "rows;", out / "DUST_S4L1.json")
 
 
 def compare(a):
