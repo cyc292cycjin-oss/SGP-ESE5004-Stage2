@@ -66,4 +66,4 @@ def test_b12_s3b_rebuilt():
     from v5.v5_gates import gate_b12_hash
     n = pypsa.Network(str(S3B_R4)); cfg = config(ROOT, "integrated")
     b12 = gate_b12_hash(n, cfg)   # the R4 network predates the S3B R1 research.demand.growth_method key: only the config-hash check is expected to differ
-    assert all(v for k, v in b12["checks"].items() if k != "research_config_sha256_matches") and cfg["research"]["solver"]["profile"] == "formal_barrier" and cfg["research"]["solver"]["profiles"]["formal_barrier"]["Crossover"] == 0
+    assert all(v for k, v in b12["checks"].items() if k != "research_config_sha256_matches") and cfg["research"]["solver"]["profile"] == "pypsa_eur_default" and cfg["research"]["solver"]["profiles"]["formal_barrier"]["Crossover"] == 0   # S4O-2 (decision 120): default profile changed

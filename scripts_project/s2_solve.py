@@ -35,6 +35,28 @@ def set_representative_weights(n):
     return dict(method="representative_weights_sum_8760", snapshots=N, weight_hours_per_snapshot=w, horizon_fraction=1.0, scaled_stores=[], annual_caps_scaled=False)
 
 
+GUROBI_KEYS = ("Method", "Crossover", "Threads", "BarConvTol", "BarHomogeneous", "Seed", "AggFill", "PreDual", "NumericFocus", "GURO_PAR_BARDENSETHRESH",
+               "FeasibilityTol", "OptimalityTol", "TimeLimit")
+
+
+def profile_parameters(profiles: dict, profile: str, time_limit: float) -> dict:
+    """S4O-2 (decision 120): the Gurobi parameters of research.solver.profiles.<profile> + TimeLimit. Gurobi reads parameter names case-insensitively,
+    but this script reads "Crossover" / "BarConvTol" by their exact names (gate path, cleanup thresholds): a key that equals a known parameter only up
+    to case (S4N finding 10: lowercase crossover / threads / method copied from PyPSA-Eur) is refused instead of silently taking the wrong gate path."""
+    params = dict(profiles[profile])
+    canon = {k.lower(): k for k in GUROBI_KEYS}
+    bad = {k: canon[k.lower()] for k in params if k.lower() in canon and k != canon[k.lower()]}
+    if bad:
+        raise ValueError(f"solver profile {profile}: parameter names must use the code convention {bad} (Gurobi is case-insensitive, s2_solve.py is not)")
+    params["TimeLimit"] = float(time_limit)
+    return params
+
+
+def interior_solution(solver: str, params: dict) -> bool:
+    """S3B R4.4: Gurobi barrier without crossover (Crossover 0) -> interior-point gate path (gate_a1_a2_interior); otherwise the basic-solution KKT gate."""
+    return solver == "gurobi" and int(params.get("Crossover", 1)) == 0
+
+
 def scale_to_horizon(n):
     """S2 (superseded by set_representative_weights in R4): annual quantities -> truncated horizon (fraction of 8760 h)."""
     frac = float(n.snapshot_weightings.generators.sum() / 8760.0)
@@ -244,7 +266,7 @@ def main(a):
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
         save(out / "SOLVE_RECEIPT.json", run)
         if a.solver == "gurobi" and profile:   # S3B R4 (decision 69): research.solver.profiles (PyPSA-Eur v2025.07.0 gurobi-default lines 1056-1064 as basis)
-            params = dict(SV["profiles"][profile]); params["TimeLimit"] = float(a.time_limit)
+            params = profile_parameters(SV["profiles"], profile, a.time_limit)
             run["parameter_source"] = f"decision 69: research.solver.profiles.{profile} (PyPSA-Eur gurobi-default basis; differences registered) + TimeLimit (stop-loss)"
         elif a.solver == "gurobi":   # decision 65: PyPSA-Eur numeric-robust style; license via GRB_LICENSE_FILE (read-only, never copied or logged)
             params = dict(Method=2, NumericFocus=3, BarHomogeneous=1, Crossover=1, Threads=8, TimeLimit=float(a.time_limit))
@@ -314,7 +336,7 @@ def main(a):
                 exports[f] = dict(bytes=(out / f).stat().st_size, sha256=sha(out / f))
         save(out / "EXPORTS.json", exports); run["exports"] = exports
         contract = load_contract(); gates = {}
-        interior = a.solver == "gurobi" and int(params.get("Crossover", 1)) == 0
+        interior = interior_solution(a.solver, params)
         try:
             if interior:   # S3B R4.4: interior-point criteria tied to BarConvTol
                 from v5.v5_gates import gate_a1_a2_interior

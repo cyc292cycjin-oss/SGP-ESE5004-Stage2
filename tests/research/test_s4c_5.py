@@ -50,4 +50,4 @@ def test_profiles_and_switch():
     S = CFG["research"]["solver"]
     C = S["profiles"]["barrier_numericfocus2"]; A = S["profiles"]["formal_barrier"]
     assert C["NumericFocus"] == 2 and {k: v for k, v in C.items() if k != "NumericFocus"} == A
-    assert S["profile"] == "formal_barrier" and S["scaling"]["kirchhoff_row_normalisation"] is True
+    assert S["profile"] == "pypsa_eur_default" and S["scaling"]["kirchhoff_row_normalisation"] is True   # S4O-2 (decision 120): production default; profile A kept as the reference
