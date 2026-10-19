@@ -660,3 +660,4 @@
 - **待用户决定（报告 §9）：** BN / SG 比值处理；云端探针与试点授权（实例、TimeLimit）；对偶与成本拆分口径；是否保留 `assign_all_duals`；PR 合并顺序。
 - **交付：** `research/06_scope_redesign/p1_step4m_20261019/`（`S4M_REPORT.md`、`S4M_EVIDENCE.json`、`S4M_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md`、`CLOUD_DEPLOY_STEPS.md`、`cloud_package/`、`evidence/s4m_{1,2,3,s2}/`）；镜像 `work/p1_step4m_20261019/`。
 - **补记（2026-10-19 约 13:50 SGT，报告交付后）：** 用户决定接受 BN / SG 清理后比值现状（0.9877 / 0.9949，余量 > 0），第二批照 f50c8850 的部署包运行；规则、网络、部署包不改（报告 §9 第 1 项已决定）。云端连接与运行仍待另行授权。
+- **补记 2（2026-10-19，注册表第 118 项，用户决定）：** 报告 §9 第 2 项——上云由后续 S4N 指令在新会话执行，本会话不做云端动作；第 3 项——对偶与成本拆分口径接受（对偶文件存原始 LP 行对偶，`marginal_price` 按 PyPSA 约定除以时段权重）；第 4 项——保留 `assign_all_duals=True`（部署包 f50c8850 现状）；第 5 项——#37、#38 保持 draft、暂不合并。§9 五项至此全部有决定；S4M 会话结束。第 118 项的注册表行本会话未新增（如需登记由 S4N 处理）。
