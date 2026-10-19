@@ -121,6 +121,7 @@ research:
       formal_barrier: {Method: 2, Crossover: 0, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
       crossover_diagnostic: {Method: 2, Crossover: 1, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}
       barrier_numericfocus2: {Method: 2, Crossover: 0, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200, NumericFocus: 2}   # S4C-5 (decision 84) C
+      formal_barrier_crossover: {Method: 2, Crossover: -1, BarConvTol: 1.0e-8, BarHomogeneous: 1, Threads: 8, Seed: 123, AggFill: 0, PreDual: 0, GURO_PAR_BARDENSETHRESH: 200}   # S4L-2 (decision 113 (2)): profile A with the Gurobi parameter Crossover at its default -1 (automatic: crossover to a basic solution after the barrier; 0 = off as in profile A; 1 = dual push first as in crossover_diagnostic). Profile A unchanged; added only. Gates: with Crossover != 0 s2_solve.py uses the basic-solution KKT gate (gate_a1_a2_kkt) instead of the interior criteria
     scaling:                             # (a), (b) of decision 69 (S3B R4) and (c) Kirchhoff row normalisation (S4C-5, decision 84)
       enabled: true
       objective_constants_out: true      # (a) constant-only objective columns removed from the LP, added back after the solve
