@@ -284,13 +284,9 @@ def main(a):
         for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]:
             np.save(sol_dir / (k + ".npy"), v)
         run["solution"] = {k: dict(count=int(len(v)), sha256=sha(sol_dir / (k + ".npy"))) for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]}
-        try:   # S4M supplement 01 (S4M-S2): every constraint dual by constraint name (linopy m.dual after the unscaling) - static capacity bounds, research hooks, loss proxy rows
-            Dd = m.dual
-            Dd.to_netcdf(out / "DUALS_BY_CONSTRAINT.nc")
-            idx = pd.DataFrame([dict(constraint=k, dims="|".join(map(str, Dd[k].dims)), size=int(Dd[k].size), nan=int(np.isnan(np.asarray(Dd[k].values, dtype=float)).sum()),
-                                     is_research=bool(k.lower().startswith("research") or "loss_proxy" in k or "loss_upper" in k)) for k in Dd.data_vars])
-            idx.to_csv(out / "DUALS_INDEX.csv", index=False)
-            run["duals"] = dict(run.get("duals", {}), file="DUALS_BY_CONSTRAINT.nc", constraints=int(len(idx)), research_constraints=int(idx.is_research.sum()), values=int(idx["size"].sum()), nan_values=int(idx["nan"].sum()))
+        try:   # S4M supplement 01 (S4M-S2): every constraint dual by constraint name (per-constraint con.dual after the unscaling, dims prefixed per constraint) - static capacity bounds, research hooks, loss proxy rows
+            from s4m_duals import write_duals
+            run["duals"] = dict(run.get("duals", {}), **write_duals(m, out))
         except Exception as e:
             run["duals"] = dict(run.get("duals", {}), export_error=str(e)[:300])
         from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
