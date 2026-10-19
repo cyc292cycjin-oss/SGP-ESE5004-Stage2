@@ -162,7 +162,7 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
         for k in parts[:-1]:d=d[k]
         if parts[-1] not in d and key not in ('cross_border.coalition','co2.extra_asean_cost_scale'):raise KeyError('override of an unknown config key: '+key)  # S4D-4: same list as s2_network.NEW_OVERRIDE_KEYS
         old=d.get(parts[-1])
-        if isinstance(old,bool):d[parts[-1]]=val.lower() in ('1','true','yes')
+        if isinstance(old,bool):d[parts[-1]]=val.lower() in ('1','true','yes','on')  # S4L-1: 'on' accepted (YAML 1.1 reads on / off as booleans, e.g. numerics.dust_cleanup); same rule as s2_network.py
         elif old is None or isinstance(old,(list,dict)):import yaml;d[parts[-1]]=yaml.safe_load(val)  # S4D-4: list / null keys (cross_border.coalition), same rule as s2_network.py
         else:d[parts[-1]]=type(old)(val)
     if 'config_overrides' in n.meta.get('research_config',{}):R['config_overrides']=overrides  # S3 builds carry the key (possibly empty); S1/S2 networks do not
