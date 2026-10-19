@@ -18,7 +18,7 @@
 | S4O-4 | 部署包更新 | **未进入**（停止条件） | | 运行期间写好的 `make_package.sh`（S4O 版）、`package_checks.py`、`preflight.sh` 就地更新处理、测试用例 I：未运行，只做语法检查；只读核对：f50c8850 包网络来自 `results_project/s4m/s4m3/builds`（构建提交 f50c8850），对 18f55488 的变更分类全部可接受 |
 | S4O-5 | 资源估算修订 | **未做**（停止） | | |
 | S4O-6 | 云端整批 | **未授权** | | 等待用户提供实例与授权原文 |
-| S4O-7 | 报告 | 停止报告完成 | 21:30 | `S4O_REPORT.md`、`S4O_EVIDENCE.json` |
+| S4O-7 | 报告 | 停止报告完成 | 21:30 | `S4O_REPORT.md`、`S4O_EVIDENCE.json`、台账 S4O 条目；提交 **a1ff1e6a**，分支已推送，draft PR [#40](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/40)（base = #39 分支） |
 
 ## 发现但未处理
 
