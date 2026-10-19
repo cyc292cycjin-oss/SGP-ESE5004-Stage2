@@ -77,12 +77,14 @@ def run_row(d: Path, tag: str) -> dict:
                B2=gp("B2"), B14=gp("B14"), B15=gp("B15"), B16=gp("B16_LEDGER"), B16_relative_error=(g.get("B16_LEDGER") or {}).get("relative_error"),
                A1_A2_relative_gap=((g.get("A1_A2") or {}).get("relative_gap") if isinstance(g.get("A1_A2"), dict) else None))
     row.update({k: v for k, v in lg.items() if k != "warnings"}); row["gurobi_warnings"] = len(lg["warnings"])
-    failed = sorted(k for k, v in g.items() if isinstance(v, dict) and v.get("passed") is False)
-    row["failed_gates"] = failed
+    from s4b_acceptance import S4B_MAIN_SET   # the gate set behind all_passed_solver_tolerances (decision 71)
+    failed_all = sorted(k for k, v in g.items() if isinstance(v, dict) and v.get("passed") is False)
+    failed = [k for k in S4B_MAIN_SET if isinstance(g.get(k), dict) and g[k].get("passed") is False]
+    row["failed_gates_all_bases"] = failed_all; row["failed_gates_solver_tolerance_set"] = failed
     # B12 compares the network's research_config_sha256 (frozen at build time) with the CURRENT config hash: the S4K-3 networks were built before
     # the S4L config additions (research.numerics, the formal_barrier_crossover profile), so B12 fails for them by construction (not a solver matter)
-    row["failed_gates_excluding_B12"] = [k for k in failed if k not in ("B12",)]
-    row["all_passed_solver_tolerances_excl_B12"] = (g.get("all_passed_solver_tolerances") is True) or (g.get("all_passed_solver_tolerances") is False and failed == ["B12"]) if g else None
+    row["failed_gates_excluding_B12"] = [k for k in failed if k != "B12"]
+    row["all_passed_solver_tolerances_excl_B12"] = (len(row["failed_gates_excluding_B12"]) == 0) if g else None
     return row
 
 

@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 211, in _acquire_with_cache_info
+    file = self._cache[self._key]
+           ~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/lru_cache.py", line 56, in __getitem__
+    value = self._cache[key]
+            ~~~~~~~~~~~^^^^^
+KeyError: [<class 'netCDF4._netCDF4.Dataset'>, ('/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4l/s4l1_first_rule_infeasible/builds/integrated/integrated_2920_3h_unsolved.nc',), 'r', (('clobber', True), ('diskless', False), ('format', 'NETCDF4'), ('persist', False)), '08c13406-6e1e-4509-8b32-ac7ab82012ef']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/20122/AppData/Local/Temp/claude/D--ResearchWorkspaces/b259c2d5-0dc5-4b44-8298-2fadb675d3fe/scratchpad/diag_infeasible.py", line 7, in <module>
+    k = pypsa.Network(sys.argv[1]); l = pypsa.Network(sys.argv[2]); sc = sys.argv[3]
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/components.py", line 404, in __init__
+    self.import_from_netcdf(import_name)
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/io.py", line 764, in import_from_netcdf
+    with ImporterNetCDF(path=path) as importer:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/io.py", line 356, in __init__
+    self.ds = xr.open_dataset(path)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/api.py", line 686, in open_dataset
+    backend_ds = backend.open_dataset(
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 666, in open_dataset
+    store = NetCDF4DataStore.open(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 452, in open
+    return cls(manager, group=group, mode=mode, lock=lock, autoclose=autoclose)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 393, in __init__
+    self.format = self.ds.data_model
+                  ^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 461, in ds
+    return self._acquire()
+           ^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/netCDF4_.py", line 455, in _acquire
+    with self._manager.acquire_context(needs_lock) as root:
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 199, in acquire_context
+    file, cached = self._acquire_with_cache_info(needs_lock)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/xarray/backends/file_manager.py", line 217, in _acquire_with_cache_info
+    file = self._opener(*self._args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/netCDF4/_netCDF4.pyx", line 2521, in netCDF4._netCDF4.Dataset.__init__
+  File "src/netCDF4/_netCDF4.pyx", line 2158, in netCDF4._netCDF4._ensure_nc_success
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4l/s4l1_first_rule_infeasible/builds/integrated/integrated_2920_3h_unsolved.nc'
