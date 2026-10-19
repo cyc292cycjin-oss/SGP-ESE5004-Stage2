@@ -74,6 +74,15 @@ def main():
         s4l3=dict(scripts={f: dict(sha256=__import__("hashlib").sha256((D / "cloud_package" / f).read_bytes()).hexdigest()) for f in ("run_365x24h.sh", "preflight.sh", "make_package.sh") if (D / "cloud_package" / f).exists()},
                   s4k_scripts={f: dict(sha256=__import__("hashlib").sha256((ROOT / "research/06_scope_redesign/p1_step4k_20261018/cloud_package" / f).read_bytes()).hexdigest()) for f in ("run_365x24h.sh", "preflight.sh") if (ROOT / "research/06_scope_redesign/p1_step4k_20261018/cloud_package" / f).exists()},
                   test_results=lines(D / "evidence/s4l_3/results/TEST_RESULTS.txt"), package_rebuilt=False, cloud=False),
+        s4l6=dict(registry=pick([x for x in reg.index if x.startswith("s4l6_")]), builds=lines(R / "s4l6/STATUS.txt"), package=lines(D / "evidence/s4l_6/PACKAGE_STATUS.txt"),
+                  build_receipts={sc: {k: jl(R / f"s4l6/builds/{sc}/{nm}_BUILD_RECEIPT.json").get(k) for k in ("code_sha", "research_config_sha256", "status")}
+                                  | dict(network=(jl(R / f"s4l6/builds/{sc}/{nm}_BUILD_RECEIPT.json").get("network") or {}).get("sha256"),
+                                         daily=(jl(R / f"s4l6/builds/{sc}/{nm}_BUILD_RECEIPT.json").get("daily_network") or {}).get("sha256"),
+                                         dust=(lambda d: {k: d.get(k) for k in ("mode", "merged_links_removed")} | dict(removed=(d.get("removed") or {}).get("count")))(jl(R / f"s4l6/builds/{sc}/{nm}_BUILD_RECEIPT.json").get("dust_cleanup") or {}))
+                                  for sc, nm in (("integrated", "integrated"), ("disconnected", "disconnected"), ("integrated_nze", "integrated"), ("disconnected_gap", "disconnected_gap_diagnostic"))},
+                  compare_vs_s4l1={sc: {k: v.get(k) for k in ("components_s4k", "components_s4l", "differences", "meta_keys_differ")} for sc, v in (jl(R / "s4l6/DUST_IMPACT_S4L1.json") or {}).items()},
+                  manifest={k: v for k, v in (jl(D / "evidence/s4l_6/PACKAGE_MANIFEST.json") or {}).items() if k in ("commit", "upload_total_bytes_excluding_this_manifest", "run", "supersedes")},
+                  manifest_files=len((jl(D / "evidence/s4l_6/PACKAGE_MANIFEST.json") or {}).get("files", [])), uploaded=False),
         resources=dict(cloud=False, formal_solves=False, downloads="none (S4L needs no download)",
                        local_solves="8 x 56x3h (S4L-2, authorised) + 4 x 56x3h (S4L-2 continuation, corrected cleanup rule, authorised 2026-10-19) + 2 x 56x3h (S4L-5 diagnostic, authorised 2026-10-19); stop-loss 30 min each, serial"),
         tests=a.tests)

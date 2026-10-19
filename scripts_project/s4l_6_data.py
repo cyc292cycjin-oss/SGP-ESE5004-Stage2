@@ -27,13 +27,14 @@ def main():
             "baseline.yaml only as the record of those runs and is not to be used", "formal_barrier", "flag", "B", SRC, CFG, cfg_sha, decision_ref="113", status="REGISTERED")
     reg.add("s4l6_decision_biomass_zero_slack_kept", "User decision 2026-10-19 (S4L report section 9 item 4 / section 10): the zero slack of the BN / SG / VN solid-biomass balances "
             "(decision-36 rule capping the fixed biomass demand at the potential) is kept as is; research.s2.industry.biomass_overflow_cap_share stays 1.0 (main); the 98 % diagnostic "
-            "network and its two runs remain diagnostic only; the solid-biomass shadow prices of these three countries are not used for conclusions", "1.0", "share", "B", SRC, LOC,
-            rep_sha, decision_ref="36,55,113", status="REGISTERED")
-    reg.add("s4l6_package_s4l", "S4L deployment package (S4L-6): four 365x24h networks (integrated STEPS, disconnected STEPS, integrated NZE, disconnected gap diagnostic) built with "
-            "dust_cleanup on (corrected rule) at the final code commit, packaged with the S4L run / preflight scripts (process-group wall-clock kill, receipt check, cgroup quota); "
-            "solver profile for the run: formal_barrier; TimeLimit / wall-clock cap default 10,500 / 10,800 s (GUROBI_TIME_LIMIT_S / WALL_CAP_S overridable per "
-            "CLOUD_RESOURCE_ESTIMATE.md section 21 - instance choice and cap scaling remain the user's second-batch decision); supersedes the S4K package 56d28358; NOT uploaded, no cloud "
-            "action" + (f"; package code {a.package_commit}" if a.package_commit else ""), (a.package_commit or "prepared"), "commit", "B", SRC, LOC, rep_sha, decision_ref="113", status="REFERENCE_ONLY")
+            "network and its two runs remain diagnostic only; the solid-biomass shadow prices of these three countries are not used for conclusions. SUPERSEDED the same day by "
+            "decision 115 (S4M instruction 12:20 SGT): main biomass_overflow_cap_share 0.98, 1.0 as a second-batch sensitivity", "1.0", "share", "B", SRC, LOC,
+            rep_sha, decision_ref="36,55,113,115", status="REFERENCE_ONLY")
+    reg.add("s4l6_package_s4l", "S4L-6: the four deployment networks (integrated STEPS, disconnected STEPS, integrated NZE, disconnected gap diagnostic; 2920x3h + 365x24h) were "
+            "built with dust_cleanup on (corrected rule) at commit 1655e623 (results_project/s4l/s4l6, static validation passed, integrated / disconnected identical to the S4L-1 "
+            "builds component by component, tests/research 534 passed) but NOT packaged: the S4M instruction (decision 115, biomass_overflow_cap_share 0.98) changes the main "
+            "setting again and rebuilds the package in S4M-3 with the S4L scripts; the S4K package 56d28358 stays the last packaged one until S4M-3"
+            + (f"; package code {a.package_commit}" if a.package_commit else ""), (a.package_commit or "built_not_packaged_superseded_by_S4M"), "flag", "B", SRC, LOC, rep_sha, decision_ref="113,116", status="REFERENCE_ONLY")
     reg.write(REG_DIR / "fragments" / "s4l_6.csv")
     print("registry fragment s4l_6 written:", len(reg.rows), "rows")
 

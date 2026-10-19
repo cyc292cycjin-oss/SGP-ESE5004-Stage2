@@ -344,6 +344,14 @@ Gurobi 日志逐行比较：除 presolve / ordering 的秒数外，迭代轨迹�
 - **第 8 条检查：** 诊断只改三国的 2 % 生物质需求，其他国家的输入不变；结果显示 PH 与燃料舱也受影响（二阶），所以若采用任何余量方案，都要按全体国家重新核验分摊，不能只看三国。
 - **本节结果未并入主算**：`biomass_overflow_cap_share` 缺省 1.0，S4K / 清理后网络与部署包都未改；决定事项见 §9 第 4 项。
 
+## 12. 用户决定后的实施（S4L-6，2026-10-19）
+
+用户决定（约 12:00 SGT）："采用清理：第二批主算用 `research.numerics.dust_cleanup: on`（修正规则），档案 A；crossover 档案放弃；生物质零余量维持现状。"
+
+- **实施（提交 1655e623）：** `baseline.yaml` 缺省 `dust_cleanup: off → on`；`formal_barrier_crossover` 保留在配置中但注释标"已放弃，只作 S4L-2 记录，不得使用"；`biomass_overflow_cap_share` 维持 1.0；注册表片段 `s4l_6`（`s4l6_decision_dust_cleanup_on`、`s4l6_decision_profile_a`、`s4l6_decision_biomass_zero_slack_kept`、`s4l6_package_s4l`）；`test_s4l_1.py` 的缺省断言改为 on；`tests/research` 534 通过。
+- **部署网络（VERIFIED，`results_project/s4l/s4l6/`，证据 `evidence/s4l_6/`）：** 在 1655e623 干净树上构建一体化 STEPS、不互联 STEPS、一体化 NZE、不互联诊断（2920×3h + 365×24h，各约 1 min / 0.74 GB）：静态校验通过；`dust on`，各删除 597、合并 86；一体化 / 不互联 2920×3h 网络与 S4L-1 的修正规则构建逐组件相同；NZE 与一体化组件数相同（只差燃料价格）；诊断网络比不互联多 205 台缺口松弛机组。
+- **未打包：** 打包前收到 S4M 指令（12:20 SGT）——第 115 项把 `biomass_overflow_cap_share` 主算改为 0.98，并在 S4M-3 以 S4L 版脚本重建部署包。因此 S4L-6 的网络只作为"缺省 on 可构建"的记录，S4K 部署包（56d28358）在 S4M-3 之前仍是最后一个打包版本。零余量"维持现状"的决定同日被第 115 项取代（注册表行标 SUPERSEDED）。
+
 ## 11. 证据与文件
 
 | 位置 | 内容 |

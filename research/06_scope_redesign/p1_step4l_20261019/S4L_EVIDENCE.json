@@ -6,9 +6,11 @@
  },
  "git": {
   "branch": "codex/s4l-numerics-20261019",
-  "head": "666e511693b3055027af159617dbb39682210c2d",
+  "head": "1655e6231fcb9a91be1a76e606697ee8fdbb877f",
   "base": "efb37fc20ef1a0b185215c553ba9a61bc871830d (L23 head, PR #36)",
   "log": [
+   "1655e623 S4L-6 (user decision 2026-10-19): research.numerics.dust_cleanup default off -> on (corrected rule; second-batch main), profile A stays formal, formal_barrier_crossover marked abandoned (kept as the S4L-2 record), biomass zero slack kept (cap share 1.0); registry fragment s4l_6; tests",
+   "68610f05 S4L-2 continuation and S4L-5 (user-authorised 2026-10-19): corrected cleanup network 4 runs (profile A optimal, standard fully met: objective rel diff 7e-8, B16 1e-12, country differences unchanged; crossover fails again), 98 % biomass-cap diagnostic (2 runs optimal, +1.8e-4 / +4.3e-4 objective, PH and bunker exceed the standard, binding-country biomass shadow prices 159-309 -> 57-81 EUR/MWh), B12 recheck with the build config, report sections 4 and 10, evidence, ledger addendum, progress",
    "666e5116 S4L-5 (user-authorised diagnostic): switch research.s2.industry.biomass_overflow_cap_share (1.0 main | 0.98 diagnostic: binding countries capped at 98 % of the potential, remainder to methane by the decision-36 rule), per-country solid-biomass potential / demand / ratio table (BN, SG, VN binding because the rule caps demand at the potential), registry fragment s4l_5, summary extended (extra network arm, solid-biomass shadow prices)",
    "6f56551e S4L-4: report, evidence JSON, progress, ledger S4L entry (stop condition on the first cleanup rule recorded; corrected network built but unsolved pending user authorisation)",
    "18207839 S4L-1 builds with the corrected rule at 2983d951 (clean tree): BN / SG / VN pools kept (binding), MY and TL small pools removed, surviving components identical to S4K-3; first-rule build evidence moved to evidence/s4l_1/first_rule_infeasible; infeasibility cause diagnosis (read-only) in evidence/s4l_2",
@@ -9477,11 +9479,167 @@
   "package_rebuilt": false,
   "cloud": false
  },
+ "s4l6": {
+  "registry": {
+   "s4l6_decision_biomass_zero_slack_kept": {
+    "value": "1.0",
+    "unit": "share",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   },
+   "s4l6_decision_dust_cleanup_on": {
+    "value": "on",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REGISTERED"
+   },
+   "s4l6_decision_profile_a": {
+    "value": "formal_barrier",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REGISTERED"
+   },
+   "s4l6_package_s4l": {
+    "value": "built_not_packaged_superseded_by_S4M",
+    "unit": "flag",
+    "tier": "B",
+    "status": "REFERENCE_ONLY"
+   }
+  },
+  "builds": [
+   "START:2026-10-19T04:14:19Z commit:1655e623 dirty:0",
+   "BUILD_integrated:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"6f756ab102d811b69c603aed:\tMaximum resident set size (kbytes): 739688:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:00.24",
+   "BUILD_disconnected:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"217e9e9a495d073bc3b859ad:\tMaximum resident set size (kbytes): 736332:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:00.12",
+   "BUILD_integrated_nze:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"70d4741231f60dd30903bcd0:\tMaximum resident set size (kbytes): 740292:\tElapsed (wall clock) time (h:mm:ss or m:ss): 1:00.60",
+   "BUILD_disconnected_gap:0:{\"status\": \"S2_SCENARIO_BUILT_STATIC_PASS\", \"network\": \"d911c5299cce9a11fd29f10d:\tMaximum resident set size (kbytes): 737400:\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:59.64",
+   "COMPARE_VS_S4L1:0",
+   "integrated s4k {'Bus': 2786, 'Generator': 1717, 'Link': 7494, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} s4l {'Bus': 2786, 'Generator': 1717, 'Link': 7494, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} diff []",
+   "disconnected s4k {'Bus': 2786, 'Generator': 1717, 'Link': 7202, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} s4l {'Bus': 2786, 'Generator': 1717, 'Link': 7202, 'Load': 2026, 'Store': 528, 'StorageUnit': 133} diff []",
+   "RECEIPT disconnected S2_SCENARIO_BUILT_STATIC_PASS code 1655e623 cfg 561a16f6 dust on removed 597 merged 86 daily 365 components {'StorageUnit': 133, 'Link': 7202, 'Store': 528, 'Generator': 1717, 'Bus': 2786, 'Load': 2026}",
+   "RECEIPT disconnected_gap S2_SCENARIO_BUILT_STATIC_PASS code 1655e623 cfg 561a16f6 dust on removed 597 merged 86 daily 365 components {'StorageUnit': 133, 'Link': 7202, 'Store': 528, 'Generator': 1922, 'Bus': 2786, 'Load': 2026}",
+   "RECEIPT integrated S2_SCENARIO_BUILT_STATIC_PASS code 1655e623 cfg 6f283c8a dust on removed 597 merged 86 daily 365 components {'StorageUnit': 133, 'Link': 7494, 'Store': 528, 'Generator': 1717, 'Bus': 2786, 'Load': 2026}",
+   "RECEIPT integrated_nze S2_SCENARIO_BUILT_STATIC_PASS code 1655e623 cfg 2fbb9446 dust on removed 597 merged 86 daily 365 components {'StorageUnit': 133, 'Link': 7494, 'Store': 528, 'Generator': 1717, 'Bus': 2786, 'Load': 2026}",
+   "TESTS:0:534 passed, 927 warnings in 82.02s (0:01:22)",
+   "DONE:2026-10-19T04:19:46Z"
+  ],
+  "package": [],
+  "build_receipts": {
+   "integrated": {
+    "code_sha": "1655e6231fcb9a91be1a76e606697ee8fdbb877f",
+    "research_config_sha256": "6f283c8ac53896f7cd7b56539a76b3eb819540e1ea258babf4708a0757aeb7ab",
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "network": "6f756ab102d811b69c603aeddf22abcd8b6796ca3b8827b2a4ea407874688023",
+    "daily": "5202c4d9e3429d46b31f6052b6286d036dfab310a93725b05b07cde333d43fc8",
+    "dust": {
+     "mode": "on",
+     "merged_links_removed": 86,
+     "removed": 597
+    }
+   },
+   "disconnected": {
+    "code_sha": "1655e6231fcb9a91be1a76e606697ee8fdbb877f",
+    "research_config_sha256": "561a16f6dd05379a0656dbbbf5a4101d60188e4c8b786a9b493b42f2afc48553",
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "network": "217e9e9a495d073bc3b859adda17c3b4c8a7cc5fb2274f2d15df36410fbb268a",
+    "daily": "cc019428d2461ed0df05b5b5d77a42afc4994b86b8903f681fb74993843af6b8",
+    "dust": {
+     "mode": "on",
+     "merged_links_removed": 86,
+     "removed": 597
+    }
+   },
+   "integrated_nze": {
+    "code_sha": "1655e6231fcb9a91be1a76e606697ee8fdbb877f",
+    "research_config_sha256": "2fbb94469eeef07a5aa4baaeb85e82d20720269ee9173f29868a9b584da17898",
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "network": "70d4741231f60dd30903bcd0ebd9eb990bafa82f42a5d9a83a13901ea498ff8f",
+    "daily": "5bb1df1ef8834b5bc1d6c85a3f184f22e7b7d2ee49b6d770b57ff445e0869e03",
+    "dust": {
+     "mode": "on",
+     "merged_links_removed": 86,
+     "removed": 597
+    }
+   },
+   "disconnected_gap": {
+    "code_sha": "1655e6231fcb9a91be1a76e606697ee8fdbb877f",
+    "research_config_sha256": "561a16f6dd05379a0656dbbbf5a4101d60188e4c8b786a9b493b42f2afc48553",
+    "status": "S2_SCENARIO_BUILT_STATIC_PASS",
+    "network": "d911c5299cce9a11fd29f10d3829e93fa359fc6f31ba39c33946a7c68790523c",
+    "daily": "ca470ba4c93d66dcdadc3f7f0d4129eb7b21dc8d400cf2ac0894a3a7636aa11f",
+    "dust": {
+     "mode": "on",
+     "merged_links_removed": 86,
+     "removed": 597
+    }
+   }
+  },
+  "compare_vs_s4l1": {
+   "integrated": {
+    "components_s4k": {
+     "StorageUnit": 133,
+     "Link": 7494,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 148
+    },
+    "components_s4l": {
+     "StorageUnit": 133,
+     "Link": 7494,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 148
+    },
+    "differences": {},
+    "meta_keys_differ": []
+   },
+   "disconnected": {
+    "components_s4k": {
+     "StorageUnit": 133,
+     "Link": 7202,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 86
+    },
+    "components_s4l": {
+     "StorageUnit": 133,
+     "Link": 7202,
+     "Store": 528,
+     "TransformerType": 14,
+     "LineType": 35,
+     "Generator": 1717,
+     "Bus": 2786,
+     "Load": 2026,
+     "Carrier": 135,
+     "Line": 86
+    },
+    "differences": {},
+    "meta_keys_differ": []
+   }
+  },
+  "manifest": {},
+  "manifest_files": 0,
+  "uploaded": false
+ },
  "resources": {
   "cloud": false,
   "formal_solves": false,
   "downloads": "none (S4L needs no download)",
   "local_solves": "8 x 56x3h (S4L-2, authorised) + 4 x 56x3h (S4L-2 continuation, corrected cleanup rule, authorised 2026-10-19) + 2 x 56x3h (S4L-5 diagnostic, authorised 2026-10-19); stop-loss 30 min each, serial"
  },
- "tests": "tests/research: 534 passed, 0 skipped (91 s at 18207839; 93 s at 666e5116 after the S4L-5 code); S4L-3 script tests 28/28 (rerun after the keyword fix)"
+ "tests": "tests/research: 534 passed (82 s at 1655e623 with dust_cleanup on by default); S4L-3 script tests 28/28"
 }
