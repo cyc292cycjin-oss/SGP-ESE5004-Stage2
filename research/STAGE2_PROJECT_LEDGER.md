@@ -659,3 +659,4 @@
 - **S4M-4：** WSL `MemTotal` 10.7 GiB（物理 15.7 GiB）不满足 ≥ 24 GiB → 本机试点未执行；`.wslconfig` 未改。
 - **待用户决定（报告 §9）：** BN / SG 比值处理；云端探针与试点授权（实例、TimeLimit）；对偶与成本拆分口径；是否保留 `assign_all_duals`；PR 合并顺序。
 - **交付：** `research/06_scope_redesign/p1_step4m_20261019/`（`S4M_REPORT.md`、`S4M_EVIDENCE.json`、`S4M_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md`、`CLOUD_DEPLOY_STEPS.md`、`cloud_package/`、`evidence/s4m_{1,2,3,s2}/`）；镜像 `work/p1_step4m_20261019/`。
+- **补记（2026-10-19 约 13:50 SGT，报告交付后）：** 用户决定接受 BN / SG 清理后比值现状（0.9877 / 0.9949，余量 > 0），第二批照 f50c8850 的部署包运行；规则、网络、部署包不改（报告 §9 第 1 项已决定）。云端连接与运行仍待另行授权。
