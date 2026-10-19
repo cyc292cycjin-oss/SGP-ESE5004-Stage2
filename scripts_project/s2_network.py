@@ -39,6 +39,7 @@ from s4g_layers import apply_lao_th_store, apply_readjust_impedance
 from s4h_layers import apply_candidate_num_parallel, apply_la_vn_stock
 from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
+from s4l_layers import apply_dust_cleanup
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -189,6 +190,7 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
                 return g
         return b
     b2b = n.links[n.links.carrier == "B2B"]; coupled = set(b2b.bus0) | set(b2b.bus1)
+    dust_removed = {tuple(x) for x in (n.meta.get("research_dust_cleanup") or {}).get("removed_required_structure", [])}   # S4L-1: zero-upper candidates removed by the dust cleanup (recorded per type, carrier, node)
     missing = []
     for typ, carriers in REQUIRED_PER_NODE.items():
         df = n.df(typ)
@@ -196,6 +198,8 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
             ports = set(df.bus[df.carrier == carrier]) if typ != "Link" else set(df.bus1[df.carrier == carrier]) | set(df.bus0[df.carrier == carrier])
             present = {node_of_bus(b) for b in ports}
             for node in geo.index:
+                if (typ, carrier, node) in dust_removed:
+                    continue
                 if node not in present and carrier not in ("solar", "onwind") and node not in coupled:
                     if carrier == "nuclear SMR" and geo.at[node, "country"] not in set(R["nuclear"]["smr"]["allowed_countries"]):
                         continue
@@ -275,7 +279,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
             raise KeyError(f"override of an unknown config key: {key}")
         old = d.get(parts[-1])
         if isinstance(old, bool):
-            d[parts[-1]] = val.lower() in ("1", "true", "yes")
+            d[parts[-1]] = val.lower() in ("1", "true", "yes", "on")   # S4L-1: 'on' accepted (YAML 1.1 reads on / off as booleans, e.g. numerics.dust_cleanup)
         elif old is None or isinstance(old, (list, dict)):   # S4D-4: list / null / new keys (cross_border.coalition); same rule in v5_gates.gate_b12_hash
             import yaml
             d[parts[-1]] = yaml.safe_load(val)
@@ -381,6 +385,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
     fuel_prices = check_fuel_prices(n, cfg, registry, cost_ledger)   # S4C-0 (decision 85): one WEO scenario for gas / oil / coal, network prices = registry values (asserted)
     finance = apply_wacc_mode(n, costs, cfg, repo)   # S4C-0 (decision 90): uniform (main) | country_specific (implemented only)
+    dust = apply_dust_cleanup(n, cfg)   # S4L-1 (decision 113 (1)): research.numerics.dust_cleanup off (default) | on - near-zero inventory always, cleanup when on (last layer: after every component-adding layer)
     if gap_diagnostic:
         add_gap_slack(n, S2["gap_diagnostic"], nodes)
     n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
@@ -407,12 +412,14 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4h_layers=dict(la_vn_stock={k: v for k, v in la_vn_stock.items() if k != "rows"}, candidate_num_parallel={k: v for k, v in cand_np.items() if k != "rows"}),
                                   s4j_layers=dict(transmission_losses=losses, dc_converters=dc_conv),
                                   s4k_layers=dict(ac_losses=ac_losses),
+                                  s4l_layers=dict(dust_cleanup={k: v for k, v in dust.items() if k != "table"}),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
-                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters", "research_ac_losses"]:
+                "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters", "research_ac_losses",
+                "research_dust_cleanup"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
@@ -439,6 +446,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                    static_validation=static, inventory=inventory, candidates=dict(nuclear=len(nuclear), sites=len(sites), extendable=extendable), optional_string_normalisation=normalise,
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
     pd.DataFrame(demand["loads"]).to_csv(output / f"{scenario}{suffix}_S2_DEMAND_OWNERSHIP.csv", index=False)
+    dust["table"].to_csv(output / f"{scenario}{suffix}_DUST_INVENTORY_S4L1.csv", index=False)   # S4L-1: near-zero inventory of this build (before the cleanup when on)
+    receipt["dust_cleanup"] = jsonable({k: v for k, v in dust.items() if k != "table"})
     pd.DataFrame(geo["units"]).to_csv(output / f"{scenario}{suffix}_GEOTHERMAL_UNITS.csv", index=False)
     if daily:   # S4B-6: the gap diagnostic also gets its daily network (cloud run of the disconnected diagnostic)
         d, ledger = to_daily(n); dpath = output / f"{scenario}{suffix}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)

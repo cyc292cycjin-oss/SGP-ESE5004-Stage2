@@ -1,0 +1,1356 @@
+{
+ "thresholds": {
+  "energy_mwh": 1000.0,
+  "capacity_mw": 1.0
+ },
+ "pypsa_eur": {
+  "config": "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml",
+  "renewable_clip_p_max_pu": {
+   "value": 0.01,
+   "lines": [
+    200,
+    218,
+    237,
+    259,
+    276,
+    292
+   ],
+   "note": "applied in this model by S4A (research.renewable.clip_p_max_pu)"
+  },
+  "solving_clip_p_max_pu": {
+   "value": 0.01,
+   "line": 988
+  },
+  "hydro_clip_min_inflow_mw": {
+   "value": 1.0,
+   "line": 300,
+   "adopted_as": "dust_capacity_mw"
+  },
+  "existing_threshold_capacity_mw": {
+   "value": 10.0,
+   "line": 469,
+   "adopted": false,
+   "note": "existing stock is not touched"
+  },
+  "co2_sequestration_min_size_mt": {
+   "value": 3.0,
+   "line": 700,
+   "adopted": false
+  },
+  "energy_threshold": "no PyPSA-Eur equivalent: project choice 1 GWh/a (S4L-1 point 2)"
+ },
+ "scenarios": {
+  "integrated": {
+   "network": "../results_project/s4k/s4k3/builds/integrated/integrated_2920_3h_unsolved.nc",
+   "sha256": "467361f17ccf80306cf700d2fae6c42e5b9b3b76430bba5465b2dc67dc870194",
+   "components": {
+    "Carrier": 135,
+    "TransformerType": 14,
+    "Line": 148,
+    "LineType": 35,
+    "Link": 7584,
+    "Load": 2064,
+    "StorageUnit": 280,
+    "Store": 530,
+    "Bus": 2914,
+    "Generator": 1995
+   },
+   "clip_p_max_pu_applied": 0.01,
+   "summary": {
+    "rows": 818,
+    "by_class_action": [
+     {
+      "dust_class": "all_zero_load",
+      "action": "delete",
+      "count": 38,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "all_zero_profile_generator",
+      "action": "delete",
+      "count": 3,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "biomass_pool_below_energy",
+      "action": "delete",
+      "count": 7,
+      "capacity_mw": 0.0,
+      "energy_mwh": 2836.604528090592
+     },
+     {
+      "dust_class": "identical_parallel_link",
+      "action": "merge",
+      "count": 86,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "identical_parallel_link",
+      "action": "merge_keep",
+      "count": 8,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "kept_extra_asean_co2_store",
+      "action": "keep",
+      "count": 11,
+      "capacity_mw": 0.0,
+      "energy_mwh": Infinity
+     },
+     {
+      "dust_class": "kept_fixed_generator_below_capacity",
+      "action": "keep",
+      "count": 11,
+      "capacity_mw": 5.032791364404965,
+      "energy_mwh": 44087.25235218749
+     },
+     {
+      "dust_class": "kept_zero_capacity_extendable_link",
+      "action": "keep",
+      "count": 100,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "renewable_potential_below_capacity",
+      "action": "delete",
+      "count": 3,
+      "capacity_mw": 0.5756115864233844,
+      "energy_mwh": 601.1897667906217
+     },
+     {
+      "dust_class": "single_attachment_fuel_bus",
+      "action": "delete",
+      "count": 128,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "single_attachment_fuel_bus_component",
+      "action": "delete",
+      "count": 128,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "zero_upper_candidate",
+      "action": "delete",
+      "count": 295,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     }
+    ],
+    "removed_or_merged": {
+     "count": 688,
+     "by_country": [
+      {
+       "country": "BN",
+       "count": 10,
+       "capacity_mw": 0.0,
+       "energy_mwh": 906.8759294102
+      },
+      {
+       "country": "ID",
+       "count": 234,
+       "capacity_mw": 0.5756115864233844,
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "country": "KH",
+       "count": 37,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "LA",
+       "count": 35,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "MM",
+       "count": 154,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "MY",
+       "count": 62,
+       "capacity_mw": 0.0,
+       "energy_mwh": 792.390024464
+      },
+      {
+       "country": "PH",
+       "count": 32,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "SG",
+       "count": 11,
+       "capacity_mw": 0.0,
+       "energy_mwh": 473.429125397392
+      },
+      {
+       "country": "TH",
+       "count": 57,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "TL",
+       "count": 10,
+       "capacity_mw": 0.0,
+       "energy_mwh": 663.909448819
+      },
+      {
+       "country": "VN",
+       "count": 46,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      }
+     ],
+     "by_country_class": {
+      "BN": {
+       "all_zero_load": 1,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 3,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 1,
+       "single_attachment_fuel_bus_component": 1,
+       "zero_upper_candidate": 4
+      },
+      "ID": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 38,
+       "renewable_potential_below_capacity": 3,
+       "single_attachment_fuel_bus": 35,
+       "single_attachment_fuel_bus_component": 35,
+       "zero_upper_candidate": 123
+      },
+      "KH": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 4,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 8,
+       "single_attachment_fuel_bus_component": 8,
+       "zero_upper_candidate": 17
+      },
+      "LA": {
+       "all_zero_load": 6,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 5,
+       "single_attachment_fuel_bus_component": 5,
+       "zero_upper_candidate": 14
+      },
+      "MM": {
+       "all_zero_load": 17,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 16,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 32,
+       "single_attachment_fuel_bus_component": 32,
+       "zero_upper_candidate": 57
+      },
+      "MY": {
+       "all_zero_load": 7,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 1,
+       "identical_parallel_link": 6,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 13,
+       "single_attachment_fuel_bus_component": 13,
+       "zero_upper_candidate": 21
+      },
+      "PH": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 10,
+       "single_attachment_fuel_bus_component": 10,
+       "zero_upper_candidate": 6
+      },
+      "SG": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 2,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 2,
+       "single_attachment_fuel_bus_component": 2,
+       "zero_upper_candidate": 4
+      },
+      "TH": {
+       "all_zero_load": 6,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 12,
+       "single_attachment_fuel_bus_component": 12,
+       "zero_upper_candidate": 22
+      },
+      "TL": {
+       "all_zero_load": 1,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 1,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 2,
+       "single_attachment_fuel_bus_component": 2,
+       "zero_upper_candidate": 4
+      },
+      "VN": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 7,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 8,
+       "single_attachment_fuel_bus_component": 8,
+       "zero_upper_candidate": 23
+      }
+     },
+     "energy_mwh": 3437.7942948812142,
+     "capacity_mw_finite": 0.5756115864233844,
+     "unbounded": 387
+    },
+    "kept_listed": {
+     "kept_zero_capacity_extendable_link": 100,
+     "kept_extra_asean_co2_store": 11,
+     "kept_fixed_generator_below_capacity": 11
+    }
+   },
+   "pools_below_threshold": [
+    {
+     "name": "BN biomass cassava_residues",
+     "country": "BN",
+     "energy_mwh": 753.36548992,
+     "note": "finite pool 753.365 MWh/a < 1000; category cassava_residues"
+    },
+    {
+     "name": "BN biomass maize_residues",
+     "country": "BN",
+     "energy_mwh": 82.0556119114,
+     "note": "finite pool 82.056 MWh/a < 1000; category maize_residues"
+    },
+    {
+     "name": "BN biomass sugarcane_residues",
+     "country": "BN",
+     "energy_mwh": 71.4548275788,
+     "note": "finite pool 71.455 MWh/a < 1000; category sugarcane_residues"
+    },
+    {
+     "name": "MY biomass maize_residues",
+     "country": "MY",
+     "energy_mwh": 792.390024464,
+     "note": "finite pool 792.390 MWh/a < 1000; category maize_residues"
+    },
+    {
+     "name": "SG biomass cassava_residues",
+     "country": "SG",
+     "energy_mwh": 0.468293847392,
+     "note": "finite pool 0.468 MWh/a < 1000; category cassava_residues"
+    },
+    {
+     "name": "SG biomass coconut_residues",
+     "country": "SG",
+     "energy_mwh": 472.96083155,
+     "note": "finite pool 472.961 MWh/a < 1000; category coconut_residues"
+    },
+    {
+     "name": "TL biomass wood_processing_residues",
+     "country": "TL",
+     "energy_mwh": 663.909448819,
+     "note": "finite pool 663.909 MWh/a < 1000; category wood_processing_residues"
+    }
+   ],
+   "renewable_below_capacity": [
+    {
+     "name": "ID_Kalimantan4 5 offwind-dc-2025",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.003430324113360577,
+     "energy_mwh": 2.0320598953870337
+    },
+    {
+     "name": "ID_Nusa-Tenggara13 0 offwind-dc-2025 c2",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.22655368838199125,
+     "energy_mwh": 591.5037747131723
+    },
+    {
+     "name": "ID_Sulawesi0 1 offwind-dc-2025",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.34562757392803256,
+     "energy_mwh": 7.653932182062279
+    }
+   ],
+   "single_attachment_kept": [],
+   "merged_groups": [
+    {
+     "name": "ID_Java-Bali1 0 biomass-to-methanol",
+     "country": "ID",
+     "note": "group of 39 identical links (S4I R3): kept with p_nom_max x 39"
+    },
+    {
+     "name": "KH2 0 biomass-to-methanol",
+     "country": "KH",
+     "note": "group of 5 identical links (S4I R3): kept with p_nom_max x 5"
+    },
+    {
+     "name": "LA2 0 biomass-to-methanol",
+     "country": "LA",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "MM2 0 biomass-to-methanol",
+     "country": "MM",
+     "note": "group of 17 identical links (S4I R3): kept with p_nom_max x 17"
+    },
+    {
+     "name": "MY_Peninsular2 0 biomass-to-methanol",
+     "country": "MY",
+     "note": "group of 7 identical links (S4I R3): kept with p_nom_max x 7"
+    },
+    {
+     "name": "PH5 0 biomass-to-methanol",
+     "country": "PH",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "TH2 0 biomass-to-methanol",
+     "country": "TH",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "VN2 0 biomass-to-methanol",
+     "country": "VN",
+     "note": "group of 8 identical links (S4I R3): kept with p_nom_max x 8"
+    }
+   ]
+  },
+  "disconnected": {
+   "network": "../results_project/s4k/s4k3/builds/disconnected/disconnected_2920_3h_unsolved.nc",
+   "sha256": "682d451bec9c9ffff7cbfbfb7452826f32235db406960aa83cfd948fc81e1b29",
+   "components": {
+    "Carrier": 135,
+    "TransformerType": 14,
+    "Line": 86,
+    "LineType": 35,
+    "Link": 7292,
+    "Load": 2064,
+    "StorageUnit": 280,
+    "Store": 530,
+    "Bus": 2914,
+    "Generator": 1995
+   },
+   "clip_p_max_pu_applied": 0.01,
+   "summary": {
+    "rows": 818,
+    "by_class_action": [
+     {
+      "dust_class": "all_zero_load",
+      "action": "delete",
+      "count": 38,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "all_zero_profile_generator",
+      "action": "delete",
+      "count": 3,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "biomass_pool_below_energy",
+      "action": "delete",
+      "count": 7,
+      "capacity_mw": 0.0,
+      "energy_mwh": 2836.604528090592
+     },
+     {
+      "dust_class": "identical_parallel_link",
+      "action": "merge",
+      "count": 86,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "identical_parallel_link",
+      "action": "merge_keep",
+      "count": 8,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "kept_extra_asean_co2_store",
+      "action": "keep",
+      "count": 11,
+      "capacity_mw": 0.0,
+      "energy_mwh": Infinity
+     },
+     {
+      "dust_class": "kept_fixed_generator_below_capacity",
+      "action": "keep",
+      "count": 11,
+      "capacity_mw": 5.032791364404965,
+      "energy_mwh": 44087.25235218749
+     },
+     {
+      "dust_class": "kept_zero_capacity_extendable_link",
+      "action": "keep",
+      "count": 100,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "renewable_potential_below_capacity",
+      "action": "delete",
+      "count": 3,
+      "capacity_mw": 0.5756115864233844,
+      "energy_mwh": 601.1897667906217
+     },
+     {
+      "dust_class": "single_attachment_fuel_bus",
+      "action": "delete",
+      "count": 128,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "single_attachment_fuel_bus_component",
+      "action": "delete",
+      "count": 128,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     },
+     {
+      "dust_class": "zero_upper_candidate",
+      "action": "delete",
+      "count": 295,
+      "capacity_mw": 0.0,
+      "energy_mwh": 0.0
+     }
+    ],
+    "removed_or_merged": {
+     "count": 688,
+     "by_country": [
+      {
+       "country": "BN",
+       "count": 10,
+       "capacity_mw": 0.0,
+       "energy_mwh": 906.8759294102
+      },
+      {
+       "country": "ID",
+       "count": 234,
+       "capacity_mw": 0.5756115864233844,
+       "energy_mwh": 601.1897667906217
+      },
+      {
+       "country": "KH",
+       "count": 37,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "LA",
+       "count": 35,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "MM",
+       "count": 154,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "MY",
+       "count": 62,
+       "capacity_mw": 0.0,
+       "energy_mwh": 792.390024464
+      },
+      {
+       "country": "PH",
+       "count": 32,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "SG",
+       "count": 11,
+       "capacity_mw": 0.0,
+       "energy_mwh": 473.429125397392
+      },
+      {
+       "country": "TH",
+       "count": 57,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      },
+      {
+       "country": "TL",
+       "count": 10,
+       "capacity_mw": 0.0,
+       "energy_mwh": 663.909448819
+      },
+      {
+       "country": "VN",
+       "count": 46,
+       "capacity_mw": 0.0,
+       "energy_mwh": 0.0
+      }
+     ],
+     "by_country_class": {
+      "BN": {
+       "all_zero_load": 1,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 3,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 1,
+       "single_attachment_fuel_bus_component": 1,
+       "zero_upper_candidate": 4
+      },
+      "ID": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 38,
+       "renewable_potential_below_capacity": 3,
+       "single_attachment_fuel_bus": 35,
+       "single_attachment_fuel_bus_component": 35,
+       "zero_upper_candidate": 123
+      },
+      "KH": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 4,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 8,
+       "single_attachment_fuel_bus_component": 8,
+       "zero_upper_candidate": 17
+      },
+      "LA": {
+       "all_zero_load": 6,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 5,
+       "single_attachment_fuel_bus_component": 5,
+       "zero_upper_candidate": 14
+      },
+      "MM": {
+       "all_zero_load": 17,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 16,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 32,
+       "single_attachment_fuel_bus_component": 32,
+       "zero_upper_candidate": 57
+      },
+      "MY": {
+       "all_zero_load": 7,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 1,
+       "identical_parallel_link": 6,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 13,
+       "single_attachment_fuel_bus_component": 13,
+       "zero_upper_candidate": 21
+      },
+      "PH": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 10,
+       "single_attachment_fuel_bus_component": 10,
+       "zero_upper_candidate": 6
+      },
+      "SG": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 1,
+       "biomass_pool_below_energy": 2,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 2,
+       "single_attachment_fuel_bus_component": 2,
+       "zero_upper_candidate": 4
+      },
+      "TH": {
+       "all_zero_load": 6,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 5,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 12,
+       "single_attachment_fuel_bus_component": 12,
+       "zero_upper_candidate": 22
+      },
+      "TL": {
+       "all_zero_load": 1,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 1,
+       "identical_parallel_link": 0,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 2,
+       "single_attachment_fuel_bus_component": 2,
+       "zero_upper_candidate": 4
+      },
+      "VN": {
+       "all_zero_load": 0,
+       "all_zero_profile_generator": 0,
+       "biomass_pool_below_energy": 0,
+       "identical_parallel_link": 7,
+       "renewable_potential_below_capacity": 0,
+       "single_attachment_fuel_bus": 8,
+       "single_attachment_fuel_bus_component": 8,
+       "zero_upper_candidate": 23
+      }
+     },
+     "energy_mwh": 3437.7942948812142,
+     "capacity_mw_finite": 0.5756115864233844,
+     "unbounded": 387
+    },
+    "kept_listed": {
+     "kept_zero_capacity_extendable_link": 100,
+     "kept_extra_asean_co2_store": 11,
+     "kept_fixed_generator_below_capacity": 11
+    }
+   },
+   "pools_below_threshold": [
+    {
+     "name": "BN biomass cassava_residues",
+     "country": "BN",
+     "energy_mwh": 753.36548992,
+     "note": "finite pool 753.365 MWh/a < 1000; category cassava_residues"
+    },
+    {
+     "name": "BN biomass maize_residues",
+     "country": "BN",
+     "energy_mwh": 82.0556119114,
+     "note": "finite pool 82.056 MWh/a < 1000; category maize_residues"
+    },
+    {
+     "name": "BN biomass sugarcane_residues",
+     "country": "BN",
+     "energy_mwh": 71.4548275788,
+     "note": "finite pool 71.455 MWh/a < 1000; category sugarcane_residues"
+    },
+    {
+     "name": "MY biomass maize_residues",
+     "country": "MY",
+     "energy_mwh": 792.390024464,
+     "note": "finite pool 792.390 MWh/a < 1000; category maize_residues"
+    },
+    {
+     "name": "SG biomass cassava_residues",
+     "country": "SG",
+     "energy_mwh": 0.468293847392,
+     "note": "finite pool 0.468 MWh/a < 1000; category cassava_residues"
+    },
+    {
+     "name": "SG biomass coconut_residues",
+     "country": "SG",
+     "energy_mwh": 472.96083155,
+     "note": "finite pool 472.961 MWh/a < 1000; category coconut_residues"
+    },
+    {
+     "name": "TL biomass wood_processing_residues",
+     "country": "TL",
+     "energy_mwh": 663.909448819,
+     "note": "finite pool 663.909 MWh/a < 1000; category wood_processing_residues"
+    }
+   ],
+   "renewable_below_capacity": [
+    {
+     "name": "ID_Kalimantan4 5 offwind-dc-2025",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.003430324113360577,
+     "energy_mwh": 2.0320598953870337
+    },
+    {
+     "name": "ID_Nusa-Tenggara13 0 offwind-dc-2025 c2",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.22655368838199125,
+     "energy_mwh": 591.5037747131723
+    },
+    {
+     "name": "ID_Sulawesi0 1 offwind-dc-2025",
+     "country": "ID",
+     "carrier": "offwind-dc",
+     "capacity_mw": 0.34562757392803256,
+     "energy_mwh": 7.653932182062279
+    }
+   ],
+   "single_attachment_kept": [],
+   "merged_groups": [
+    {
+     "name": "ID_Java-Bali1 0 biomass-to-methanol",
+     "country": "ID",
+     "note": "group of 39 identical links (S4I R3): kept with p_nom_max x 39"
+    },
+    {
+     "name": "KH2 0 biomass-to-methanol",
+     "country": "KH",
+     "note": "group of 5 identical links (S4I R3): kept with p_nom_max x 5"
+    },
+    {
+     "name": "LA2 0 biomass-to-methanol",
+     "country": "LA",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "MM2 0 biomass-to-methanol",
+     "country": "MM",
+     "note": "group of 17 identical links (S4I R3): kept with p_nom_max x 17"
+    },
+    {
+     "name": "MY_Peninsular2 0 biomass-to-methanol",
+     "country": "MY",
+     "note": "group of 7 identical links (S4I R3): kept with p_nom_max x 7"
+    },
+    {
+     "name": "PH5 0 biomass-to-methanol",
+     "country": "PH",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "TH2 0 biomass-to-methanol",
+     "country": "TH",
+     "note": "group of 6 identical links (S4I R3): kept with p_nom_max x 6"
+    },
+    {
+     "name": "VN2 0 biomass-to-methanol",
+     "country": "VN",
+     "note": "group of 8 identical links (S4I R3): kept with p_nom_max x 8"
+    }
+   ]
+  }
+ },
+ "l23": {
+  "integrated": {
+   "network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_step4k_20261018/cloud_results/20261018T180030Z_5623/unpacked/export/integrated/integrated_FORMAL_TRIAL_365X24H_solved.nc",
+   "sha256": "02026473c10b4af2b45b3e8e4aa3cd5bbeb2f5635b77cb07993f28151ba9f387",
+   "usage": {
+    "biomass_pools": [
+     {
+      "store": "BN biomass cassava_residues",
+      "country": "BN",
+      "e_nom_mwh": 753.36548992,
+      "used_mwh": 754.2747959587194,
+      "min_level_mwh": -0.9093060387194347,
+      "final_level_mwh": -0.9093060387194347,
+      "share_used": 1.0012069918928939
+     },
+     {
+      "store": "BN biomass maize_residues",
+      "country": "BN",
+      "e_nom_mwh": 82.0556119114,
+      "used_mwh": 82.9647983610473,
+      "min_level_mwh": -0.9091864496472922,
+      "final_level_mwh": -0.9091864496472922,
+      "share_used": 1.0110801251549864
+     },
+     {
+      "store": "BN biomass sugarcane_residues",
+      "country": "BN",
+      "e_nom_mwh": 71.4548275788,
+      "used_mwh": 72.3641698341851,
+      "min_level_mwh": -0.9093422553850959,
+      "final_level_mwh": -0.9093422553850959,
+      "share_used": 1.0127261136328722
+     },
+     {
+      "store": "MY biomass maize_residues",
+      "country": "MY",
+      "e_nom_mwh": 792.390024464,
+      "used_mwh": 793.2937951597631,
+      "min_level_mwh": -0.9037706957631679,
+      "final_level_mwh": -0.9037706957631679,
+      "share_used": 1.0011405629397903
+     },
+     {
+      "store": "SG biomass cassava_residues",
+      "country": "SG",
+      "e_nom_mwh": 0.468293847392,
+      "used_mwh": 1.3786418482068192,
+      "min_level_mwh": -0.9103480008148193,
+      "final_level_mwh": -0.9103480008148193,
+      "share_used": 2.943967459501521
+     },
+     {
+      "store": "SG biomass coconut_residues",
+      "country": "SG",
+      "e_nom_mwh": 472.96083155,
+      "used_mwh": 473.8706842981557,
+      "min_level_mwh": -0.9098527481556637,
+      "final_level_mwh": -0.9098527481556637,
+      "share_used": 1.0019237380507258
+     },
+     {
+      "store": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "e_nom_mwh": 663.909448819,
+      "used_mwh": 665.72025694212,
+      "min_level_mwh": -1.8108081231200899,
+      "final_level_mwh": -1.8108081231200899,
+      "share_used": 1.002727492621684
+     }
+    ],
+    "extra_asean_stores": [
+     {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "country": "BN",
+      "e_nom_opt_t": 4.151732475426743,
+      "final_level_t": 4.151826685100203,
+      "max_level_t": 4.151826685100203
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "country": "ID",
+      "e_nom_opt_t": 95.39178570154156,
+      "final_level_t": 95.44109549346634,
+      "max_level_t": 95.44109549346634
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "country": "KH",
+      "e_nom_opt_t": 18.023574024578565,
+      "final_level_t": 18.036082472414243,
+      "max_level_t": 18.036082472414243
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "country": "LA",
+      "e_nom_opt_t": 9.072946729644384,
+      "final_level_t": 9.094657025689338,
+      "max_level_t": 9.094657025689338
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "country": "MM",
+      "e_nom_opt_t": 29.919875795473356,
+      "final_level_t": 29.935639212172067,
+      "max_level_t": 29.935639212172067
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "country": "MY",
+      "e_nom_opt_t": 16.518575771642887,
+      "final_level_t": 16.528927120978143,
+      "max_level_t": 16.528927120978143
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "country": "PH",
+      "e_nom_opt_t": 10.8446407013139,
+      "final_level_t": 10.859501976268223,
+      "max_level_t": 10.859501976268223
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "country": "SG",
+      "e_nom_opt_t": 4.323125320539214,
+      "final_level_t": 4.3234849717862165,
+      "max_level_t": 4.3234849717862165
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "country": "TH",
+      "e_nom_opt_t": 7.975141198044169,
+      "final_level_t": 7.992025055912845,
+      "max_level_t": 7.992025055912845
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "country": "TL",
+      "e_nom_opt_t": 4.933553531603934,
+      "final_level_t": 4.939995580307027,
+      "max_level_t": 4.939995580307027
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "country": "VN",
+      "e_nom_opt_t": 39.592527767453596,
+      "final_level_t": 39.61019308991956,
+      "max_level_t": 39.61019308991956
+     }
+    ],
+    "ft_links": {
+     "by_country": [
+      {
+       "country": "BN",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 2.4572535434909177e-06,
+       "input_twh": 1.760057743638754e-06
+      },
+      {
+       "country": "ID",
+       "links": 39,
+       "built": 0,
+       "p_nom_opt_mw": 7.728768329789909e-05,
+       "input_twh": 0.0001271514950164128
+      },
+      {
+       "country": "KH",
+       "links": 5,
+       "built": 0,
+       "p_nom_opt_mw": 7.523587089113895e-06,
+       "input_twh": 3.844906093692407e-05
+      },
+      {
+       "country": "LA",
+       "links": 6,
+       "built": 0,
+       "p_nom_opt_mw": 8.875392738483904e-05,
+       "input_twh": 9.988640735275113e-05
+      },
+      {
+       "country": "MM",
+       "links": 17,
+       "built": 0,
+       "p_nom_opt_mw": 0.0001072924711870249,
+       "input_twh": 6.0559593646321446e-05
+      },
+      {
+       "country": "MY",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.00023566127871508136,
+       "input_twh": 2.4558844342382186e-05
+      },
+      {
+       "country": "PH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 7.728588242326788e-05,
+       "input_twh": 2.3048988206734545e-05
+      },
+      {
+       "country": "SG",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 1.8246609878224587e-06,
+       "input_twh": 1.7875815827865153e-06
+      },
+      {
+       "country": "TH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 2.5829366510115558e-05,
+       "input_twh": 4.369944784342282e-05
+      },
+      {
+       "country": "TL",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 2.255883981505696e-05,
+       "input_twh": 3.0505856699310244e-06
+      },
+      {
+       "country": "VN",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0002897470947945729,
+       "input_twh": 6.615472085494548e-05
+      }
+     ],
+     "total_links": 100,
+     "built_links_gt_1mw": 0,
+     "near_zero_links_lt_1mw": 100,
+     "p_nom_opt_min_max": [
+      3.0623577633192913e-07,
+      0.00024371786065635446
+     ]
+    },
+    "dead_end_fuel_generators": {
+     "count": 124,
+     "dispatch_mwh_total": 0.0,
+     "max_abs_p_mw": 0.0,
+     "p_nom_opt_max": -0.0
+    },
+    "zero_upper_candidates_p_nom_opt_max": 0.0,
+    "all_zero_loads_in_network": 38,
+    "objective": 516146310314.3289,
+    "label": "FORMAL_TRIAL_365X24H"
+   }
+  },
+  "disconnected": {
+   "network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_step4k_20261018/cloud_results/20261018T180030Z_5623/unpacked/export/disconnected/disconnected_FORMAL_TRIAL_365X24H_solved.nc",
+   "sha256": "e19bb9e94b0dee8c4b4e3401ce2f9faa34934036bf958ce9eb064481335a545a",
+   "usage": {
+    "biomass_pools": [
+     {
+      "store": "BN biomass cassava_residues",
+      "country": "BN",
+      "e_nom_mwh": 753.36548992,
+      "used_mwh": 753.3891756172493,
+      "min_level_mwh": -0.023685697249339714,
+      "final_level_mwh": -0.023685697249339714,
+      "share_used": 1.000031439849006
+     },
+     {
+      "store": "BN biomass maize_residues",
+      "country": "BN",
+      "e_nom_mwh": 82.0556119114,
+      "used_mwh": 82.07929588385416,
+      "min_level_mwh": -0.023683972454156436,
+      "final_level_mwh": -0.023683972454156436,
+      "share_used": 1.0002886331830627
+     },
+     {
+      "store": "BN biomass sugarcane_residues",
+      "country": "BN",
+      "e_nom_mwh": 71.4548275788,
+      "used_mwh": 71.47851184882394,
+      "min_level_mwh": -0.023684270023936506,
+      "final_level_mwh": -0.023684270023936506,
+      "share_used": 1.000331457941002
+     },
+     {
+      "store": "MY biomass maize_residues",
+      "country": "MY",
+      "e_nom_mwh": 792.390024464,
+      "used_mwh": 792.375746848927,
+      "min_level_mwh": 0.01427761507309883,
+      "final_level_mwh": 0.01427761507309883,
+      "share_used": 0.9999819815815038
+     },
+     {
+      "store": "SG biomass cassava_residues",
+      "country": "SG",
+      "e_nom_mwh": 0.468293847392,
+      "used_mwh": 0.49198085900742006,
+      "min_level_mwh": -0.023687011615420084,
+      "final_level_mwh": -0.023687011615420084,
+      "share_used": 1.050581513610176
+     },
+     {
+      "store": "SG biomass coconut_residues",
+      "country": "SG",
+      "e_nom_mwh": 472.96083155,
+      "used_mwh": 472.98451201810667,
+      "min_level_mwh": -0.023680468106619973,
+      "final_level_mwh": -0.023680468106619973,
+      "share_used": 1.0000500685607072
+     },
+     {
+      "store": "TL biomass wood_processing_residues",
+      "country": "TL",
+      "e_nom_mwh": 663.909448819,
+      "used_mwh": 663.9169571919849,
+      "min_level_mwh": -0.007508372984899297,
+      "final_level_mwh": -0.007508372984899297,
+      "share_used": 1.0000113093329193
+     }
+    ],
+    "extra_asean_stores": [
+     {
+      "store": "co2 sequestered extra-ASEAN BN",
+      "country": "BN",
+      "e_nom_opt_t": 18.121836775830428,
+      "final_level_t": 18.085120467164845,
+      "max_level_t": 18.085120467164845
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN ID",
+      "country": "ID",
+      "e_nom_opt_t": 191.60864015049225,
+      "final_level_t": 191.59788065849798,
+      "max_level_t": 191.59788065849798
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN KH",
+      "country": "KH",
+      "e_nom_opt_t": 56.635442410770054,
+      "final_level_t": 56.6210261057292,
+      "max_level_t": 56.6210261057292
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN LA",
+      "country": "LA",
+      "e_nom_opt_t": 72.74754660129592,
+      "final_level_t": 72.73265956362052,
+      "max_level_t": 72.73265956362052
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MM",
+      "country": "MM",
+      "e_nom_opt_t": 127.81726852693603,
+      "final_level_t": 127.80514579317706,
+      "max_level_t": 127.80514579317706
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN MY",
+      "country": "MY",
+      "e_nom_opt_t": 56.070903814148956,
+      "final_level_t": 56.05529290285373,
+      "max_level_t": 56.05529290285373
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN PH",
+      "country": "PH",
+      "e_nom_opt_t": 48.60531638583005,
+      "final_level_t": 48.588995441565594,
+      "max_level_t": 48.588995441565594
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN SG",
+      "country": "SG",
+      "e_nom_opt_t": 39.74470483210873,
+      "final_level_t": 39.681953176950586,
+      "max_level_t": 39.681953176950586
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TH",
+      "country": "TH",
+      "e_nom_opt_t": 38.23122580316755,
+      "final_level_t": 38.21455696861231,
+      "max_level_t": 38.21455696861231
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN TL",
+      "country": "TL",
+      "e_nom_opt_t": 17.78090940383586,
+      "final_level_t": 17.763084849574575,
+      "max_level_t": 17.763084849574575
+     },
+     {
+      "store": "co2 sequestered extra-ASEAN VN",
+      "country": "VN",
+      "e_nom_opt_t": 154.16391703995833,
+      "final_level_t": 154.15176435532763,
+      "max_level_t": 154.15176435532763
+     }
+    ],
+    "ft_links": {
+     "by_country": [
+      {
+       "country": "BN",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.0008903049696850418,
+       "input_twh": 5.777921833796427e-06
+      },
+      {
+       "country": "ID",
+       "links": 39,
+       "built": 0,
+       "p_nom_opt_mw": 0.024218738877238254,
+       "input_twh": 0.0001501744330879301
+      },
+      {
+       "country": "KH",
+       "links": 5,
+       "built": 0,
+       "p_nom_opt_mw": 0.004407794975431055,
+       "input_twh": 2.804991088807583e-05
+      },
+      {
+       "country": "LA",
+       "links": 6,
+       "built": 0,
+       "p_nom_opt_mw": 0.004811931598413544,
+       "input_twh": 3.0319558470742777e-05
+      },
+      {
+       "country": "MM",
+       "links": 17,
+       "built": 0,
+       "p_nom_opt_mw": 0.017189102552258997,
+       "input_twh": 0.00010891592513979413
+      },
+      {
+       "country": "MY",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0060635823037293295,
+       "input_twh": 3.805794969237732e-05
+      },
+      {
+       "country": "PH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 0.006412980957544235,
+       "input_twh": 4.211471989967712e-05
+      },
+      {
+       "country": "SG",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.00015307262287417598,
+       "input_twh": 9.632025242317467e-07
+      },
+      {
+       "country": "TH",
+       "links": 7,
+       "built": 0,
+       "p_nom_opt_mw": 0.005312537803503426,
+       "input_twh": 3.407873780530089e-05
+      },
+      {
+       "country": "TL",
+       "links": 1,
+       "built": 0,
+       "p_nom_opt_mw": 0.0009311871904286198,
+       "input_twh": 6.06325427046977e-06
+      },
+      {
+       "country": "VN",
+       "links": 8,
+       "built": 0,
+       "p_nom_opt_mw": 0.0011427917326780838,
+       "input_twh": 6.822816759813577e-06
+      }
+     ],
+     "total_links": 100,
+     "built_links_gt_1mw": 0,
+     "near_zero_links_lt_1mw": 100,
+     "p_nom_opt_min_max": [
+      0.0001174310472212237,
+      0.0011812074946240898
+     ]
+    },
+    "dead_end_fuel_generators": {
+     "count": 124,
+     "dispatch_mwh_total": 0.0,
+     "max_abs_p_mw": 0.0,
+     "p_nom_opt_max": -0.0
+    },
+    "zero_upper_candidates_p_nom_opt_max": 0.0,
+    "all_zero_loads_in_network": 38,
+    "objective": 585115945488.6481,
+    "label": "FORMAL_TRIAL_365X24H"
+   }
+  }
+ }
+}
