@@ -211,6 +211,9 @@ def main(a):
         run["transmission_losses"] = dict(ac_tangents=tl, loss_variables=("Line-loss" in m.variables), network=(n.meta.get("research_transmission_losses") or {}).get("mode", "none"),
                                           ac_losses=(n.meta.get("research_ac_losses") or {}).get("mode", "pypsa_tangent" if tl else "none"),   # S4K-1 (decision 108)
                                           ac_loss_proxy=n.meta.get("research_ac_loss_proxy_model"))
+        run["dust_cleanup"] = {k: v for k, v in (n.meta.get("research_dust_cleanup") or {}).items() if k in ("mode", "thresholds", "components_before", "components_after", "merged_links_removed")}   # S4L-1 (decision 113 (1))
+        if isinstance((n.meta.get("research_dust_cleanup") or {}).get("removed"), dict):
+            run["dust_cleanup"]["removed_count"] = (n.meta["research_dust_cleanup"]["removed"] or {}).get("count")
         hooks = sorted(k for k in m.constraints if k.startswith("research_") or k.startswith("Research"))
         SV = cfg["research"].get("solver", {})
         profile = a.solver_profile or SV.get("profile")

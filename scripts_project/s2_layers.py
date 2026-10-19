@@ -508,6 +508,10 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
     carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = demand_table_key(cfg)
     ne_mode = nonindustrial_electricity_mode(cfg)   # S4J-1 (decision 104): Astar base-load total
+    # S4L-5 (user-authorised diagnostic, 2026-10-19): cap share of the decision-36 overflow rule; 1.0 = main (cap = potential), 0.98 = diagnostic network only
+    ov_cap_share = float(I.get("biomass_overflow_cap_share", 1.0)); ov_binding_ratio = float(I.get("biomass_overflow_binding_ratio", 0.999))
+    if not 0.0 < ov_cap_share <= 1.0:
+        raise ValueError("research.s2.industry.biomass_overflow_cap_share must be in (0, 1]")
     if carrier_mode not in ("pypsa_eur_2050", "bas_fixed"):
         raise ValueError("Unknown research.s2.industry.carrier_mode " + carrier_mode)
     # S3-0 (decision 61): ratio source. jrc_idees_2021 = PyPSA-Eur v2025.07.0 ratios reproduced from JRC-IDEES-2021 for all sub-sectors (s3_0_industry.py, main);
@@ -680,11 +684,15 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ag_rows = d[(d.sector == "AgricultureOthers") & (d.carrier == "biomass")]
         ag_bio = float(ag_rows.v.sum())
         pot_c = float(n.stores[(n.stores.bus == f"solid biomass {c}") & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
-        overflow = max(0.0, ind_car.get("biomass", 0.0) + ag_bio - pot_c)
+        bio_before = ind_car.get("biomass", 0.0) + ag_bio
+        ov_binding = bool(pot_c > 0 and bio_before >= ov_binding_ratio * pot_c)   # the decision-36 rule binds: fixed biomass demand at or above the potential (BN, SG, VN)
+        cap_c = ov_cap_share * pot_c if (ov_binding and ov_cap_share < 1.0) else pot_c   # S4L-5 diagnostic: 0.98 x potential for the binding countries, same rule for the remainder
+        overflow = max(0.0, bio_before - cap_c)
         ov_ind = min(overflow, ind_car.get("biomass", 0.0)); ov_ag = min(overflow - ov_ind, ag_bio)
         ind_car["biomass"] = ind_car.get("biomass", 0.0) - ov_ind
         overflow_ledger[c] = dict(solid_biomass_potential_mwh=pot_c, industry_biomass_before_mwh=ind_car.get("biomass", 0.0) + ov_ind, agriculture_biomass_before_mwh=ag_bio,
-                                  overflow_industry_to_gas_mwh=ov_ind, overflow_agriculture_to_gas_mwh=ov_ag, mode=carrier_mode)
+                                  overflow_industry_to_gas_mwh=ov_ind, overflow_agriculture_to_gas_mwh=ov_ag, mode=carrier_mode,
+                                  cap_share=ov_cap_share, binding=ov_binding, cap_mwh=cap_c, fixed_biomass_after_mwh=bio_before - overflow)
         hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
         for node, s in sh.items():
             if s <= 0:

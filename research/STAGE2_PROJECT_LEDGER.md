@@ -615,3 +615,35 @@
 - **用户决定（2026-10-18，S4K 报告 §8 第 1 项）：** 串行预检内存下限 36 → 40 GiB。已改 `preflight.sh`（提交 56d28358）并重新打包：代码 56d28358，上传 237,192,471 B；网络与回执与第一次打包逐字节相同；第一次打包（2d4aaac3）作废，保留为 `cloud_package_dist_2d4aaac3_superseded/`。授权模板改填 56d28358。
 - **待用户决定：** 无；另需上云前信息与授权（报告 §10）。
 - **交付：** `research/06_scope_redesign/p1_step4k_20261018/`，内容为 S4K_REPORT.md、S4K_EVIDENCE.json、S4K_PROGRESS.md、CLOUD_RESOURCE_ESTIMATE.md §20、CLOUD_DEPLOY_STEPS.md、cloud_package/、evidence/。镜像与审阅 ZIP 在 `work/p1_step4k_20261018/`；测试 `tests/research` 529 通过、整个 `tests/` 546 通过。
+
+## L23 首批云端正式运行（365×24h 日分辨率筛选，部署包代码 56d28358）— 2026-10-19
+
+- **范围：** 指令 `L23_RUN1_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 2c6d9dca…90d2，已核对）；AutoDL 西北 B 区 144 机（12 核 Xeon Silver 4214R，90 GiB），S4K 部署包（代码 56d28358），档案 A（`formal_barrier`），串行，每运行 TimeLimit 10,500 s、墙钟上限 3 h，不重试、不改参数。分支 `codex/l23-run1-20261019`（自 S4K ca5eb801），draft PR #36 叠在 #35 上。本条目由 S4L-0 补记（L23 交付未写台账；S4L 注册表片段 `s4l_0`）。
+- **结果（VERIFIED，`L23_RUN1_REPORT.md`）：** 整批 7 h 00 min；一体化 STEPS SUBOPTIMAL（6,722 s）、不互联 STEPS SUBOPTIMAL（5,297 s）、不互联诊断 SUBOPTIMAL（2,311 s）、一体化 NZE 到 Gurobi TimeLimit 后被墙钟上限标记终止（10,814 s）。四个运行 `all_passed_solver_tolerances` 都是 False；B2、B14、B15（无容差）因 1e-8 量级超出而不通过。
+  - B6 = 68.97 bn EUR（不互联比一体化高 11.8 %）；NZE 比一体化低 90.46 bn EUR（−17.5 %）；B16 账本恒等式四个运行都通过（4.7e-9–2.9e-7）。
+  - 分国差额（不互联 − 一体化，bn EUR）：VN 51.32、TH 7.51、MY 3.21、LA 2.74、KH 2.43、MM 1.13、SG 0.93、ID 0.67、TL 0.12、BN 0.11、PH 0.01，燃料舱 −1.22；方向与 S4K 冒烟全同。
+  - 原始违反集中在储能水平上下限（SG / BN / TL 的小生物质池、各国东盟外 CO₂ 储存年末水平）、近零容量 FT 链路与 H₂ 母线平衡；一阶影响 ≤ 4e-7（INFERENCE）；对偶侧未量化。
+- **标签（第 112 项 a，S4L-0 登记）：** 四个运行标为 **`SCREENING_UNVERIFIED`**。可用的是原始侧总量（目标值、B6、NZE 差值）；依赖节点电价的分国结算（拥堵租金、跨境结算、按科目分解）与小国差额（PH、BN、TL）不用于结论。
+- **NZE 来源（第 112 项 b）：** 接受另行回收的 `nze_late_outputs_20261018T180030Z_5623.tar.gz`（21 个文件，74,285,069 B，SHA256 78a6ea15…c33b；存于 `work/p1_step4k_20261018/cloud_results/20261018T180030Z_5623/nze_late/`，不进 git，与结果包 39b9c9dd…ae7f 分开存放）为本批 NZE 结果；来源为墙钟终止后 `s2_solve.py` 继续写出的求解后文件（报告 §1.3）。
+- **实测校正（供 S4L-3 用）：** 实例速度相对本机 0.23–0.30（按 Gurobi work unit）；每次 barrier 迭代 14.9–43.4 s；峰值 RSS 13.8–15.3 GiB（约为 §20 中值的 60 %）；一体化、不互联、NZE 墙钟为 §20 估计上沿的 1.7–1.9 倍。
+- **发现但未处理 12 条（报告 §7）：** 含 `preflight.sh` 与监控读宿主机资源（第 1、2 条）、3 h 墙钟上限没有终止 Python 孙进程（第 3 条）——第 112 项 c 交 S4L-3 处理。
+- **费用：** 开机到 `DONE` 8 h 20 min，约 ¥9.00；实例许可文件已删除；关机由用户在控制台操作。
+- **交付：** `research/06_scope_redesign/p1_l23_run1_20261019/`（报告、证据 JSON、进度、`evidence/c9`、`evidence/c9_summary`）；结果包与 NZE 回收包在 `work/p1_step4k_20261018/cloud_results/`（不进 git）。
+
+## S4L 第 112、113 项：近零量清理、crossover 复测、部署脚本修正、L23 标签 — 2026-10-19
+
+- **范围：** 指令 `S4L_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 03508400…529b，已核对）；第 112 项 a、b、c 与第 113 项 (1)、(2)；其他发现只记录。分支 `codex/s4l-numerics-20261019`（自 L23 efb37fc2），draft PR #37 叠在 #36 上；每个子步骤提交。
+- **资源：** 无云端操作、无下载、无 365×24h 求解；本机 56×3h 求解 8 次（用户授权的 8 个，串行，单次 ≤ 375 s、≤ 4.2 GiB，不重试）；档案 A 未改，新档案只新增。触发停止条件一条（清理删除了有经济意义的组件），处理：规则修正、重建、停止求解、报告。
+- **S4L-0（112 a、b）：** 注册表 `s4l_0`：L23 四个运行 `SCREENING_UNVERIFIED`（可用原始侧总量；价格结算科目与小国差额不用于结论）；接受 `nze_late_outputs_…tar.gz`（78a6ea15…c33b）为本批 NZE 结果；本台账补记 L23 条目。
+- **S4L-1（113 (1)）：** `scripts_project/s4l_layers.py`，开关 `research.numerics.dust_cleanup: off`（缺省，S4K 状态）| `on`（主算候选）；阈值 `dust_capacity_mw` 1（PyPSA-Eur `renewable.hydro.clip_min_inflow` 1.0 MW，配置第 300 行）、`dust_energy_mwh` 1000（项目自定）。清单 818 行（两个情景相同）：删除 597（零上限候选 295、单侧燃料母线 128 + 死端组件 128、全零负荷 38、全零出力 3、小容量 offwind 3、生物质池 2 共 1,456 MWh）、合并 86（`biomass-to-methanol` 97 → 11）、保留只记录 127（FT 链路 100、东盟外 CO₂ 储存 11、塑料废弃物固定源 11、被固定需求锁定的池 5）。清理后 LP 行数约 −7 %（56×3h）。存留组件逐列相同。
+  - **发现（§7 第 1 条）：** BN、SG、VN 的固体生物质池总量恰好等于固定生物质终端需求（115,935.8 / 31,510.2 MWh / 125.77 TWh，零余量）；第一版规则删除了 SG、BN 的 5 个小池使两个情景不可行；规则加固定需求守护（`s4l1_pool_fixed_demand_guard`），清理后断言池余量 ≥ 0；修正规则的网络已重建（2983d951），**未求解**。
+- **S4L-2（113 (2)）：** 新档案 `formal_barrier_crossover` = 档案 A + Gurobi `Crossover` 缺省 −1（注册表 `s4l_2`，含事先固定的比较标准：目标相对差 ≤ 1e-5、B16 ≤ 1e-6、分国差额变化 ≤ max(1 %, 0.01 bn EUR)）。矩阵 8 个运行：S4K 网络 + A 两个情景最优且与 S4K-3 逐位相同（目标值 648,262,253,996.03 / 698,679,222,969.73，124 / 117 次迭代；`all_passed_solver_tolerances` 仅因 B12 配置哈希为 False）；S4K 网络 + crossover：barrier 与 A 相同，crossover 推进完成后单纯形清理报 `Infeasible or unbounded`（Markowitz 容差收紧，Dinf 1.6e5 / 2.8e7），crossover 用时 0.38–0.54 × barrier，无解返回，不调参；第一版清理网络 4 个运行不可行（原因同上）。标准未改；清理后网络的判定未完成。
+- **S4L-3（112 c）：** `p1_step4l_20261019/cloud_package/`：`run_365x24h.sh`（`setsid` 进程组、组终止 + 宽限 + KILL、等待组退出再导出、`RECEIPT_<run>:post_solve|pre_solve`、`killed_pre_solve`、cgroup 内存监控、接受新档案、测试用环境变量）、`preflight.sh`（容器 cgroup v1/v2 CPU 与内存配额、`setsid` 检查）；本机测试 28/28（假求解器、假 cgroup，不用 Gurobi）。`CLOUD_RESOURCE_ESTIMATE.md` §21：L23 校正（实例速度 0.23–0.30、每次迭代 15–43 s、RSS 为中值 0.61；同类实例校正估计 1.7–3.1 h / 0.6–1.5 h）与选机建议 6 条。`make_package.sh` S4L 版准备、未运行；部署包未重建。
+- **其他：** `v5_gates.gate_b12_hash` 与 `s2_network.py` 布尔覆盖值接受 `on`；S4L-2 汇总另给 `failed_gates_excluding_B12`。
+- **待用户决定（报告 §9）：** 是否授权清理后（修正规则）网络的 4 个 56×3h 运行并据此决定是否采用清理；crossover 档案不建议作为正式档案（可放弃，或另行授权带参数变化的变体，或先看清理后网络上的结果）；第二批云端方案（档案 A、S4L 版脚本重建部署包、TimeLimit / 墙钟按 §21 放大或换更快 CPU、速度探针）；BN / SG / VN 零余量的处理。
+- **交付：** `research/06_scope_redesign/p1_step4l_20261019/`（`S4L_REPORT.md`、`S4L_EVIDENCE.json`、`S4L_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md`、`cloud_package/`、`evidence/s4l_{1,2,3}/`）；`research_inputs/numerics/`；注册表片段 `s4l_{0,1,2}`；镜像 `work/p1_step4l_20261019/`。测试 `tests/research` 534 通过、0 跳过。
+- **补记（2026-10-19，用户在 S4L 报告交付后追加授权）：**
+  - **S4L-2 续：** 修正规则（固定需求守护）的清理后网络 4 个 56×3h 运行（`results_project/s4l/s4l2b/`）：档案 A 一体化 / 不互联最优（136 / 138 次迭代），目标值相对参照 7.3e-8 / 6.8e-8、B16 ≤ 8e-12、分国差额变化全为 0.0000 bn、交流电价逐母线相同——事先固定的标准全部满足；LP 行数 −7.1 % / −7.4 %；目标值比参照高 4.7e4 EUR（删除的 MY / TL 小池在参照中被使用）。crossover 档案两个情景仍 `infeasible_or_unbounded`（同失败形态）。零余量三国的生物质影子价格在两次最优解之间不同（对偶不唯一）。
+  - **S4L-5（只作诊断，未并入主算）：** 各国固体生物质潜力 / 固定终端需求表——BN、SG、VN 比值 1.000，来源为第 36 项 / R1.6 规则（第 55 项 R1 内）把超出潜力的固定生物质需求改由甲烷供给（规则前为潜力的 5.05 / 599 / 2.85 倍）。新开关 `research.s2.industry.biomass_overflow_cap_share` 1.0（主算）| 0.98（诊断）：三国需求设为潜力的 98 %，2 % 按同一规则改气，只改 6 个负荷。档案 A 两个情景最优、门槛全通过：目标 +1.8e-4 / +4.3e-4（+0.12 / +0.30 bn EUR），B6 50.60 bn（参照 50.42）；分国差额变化 PH +0.021、燃料舱 −0.037 bn 超出标准（实质变化），VN +0.156 在容差内；三国生物质影子价格 159–309 → 57–81 EUR/MWh（不互联 155–280 → 68–76），其余国家不变。报告 §10，决定事项 §9 第 4 项。
+  - **本机求解合计 14 次**（8 + 4 + 2，56×3h，串行，无重试）；测试 `tests/research` 534 通过（S4L-5 代码后）。
+- **补记 2（2026-10-19，S4L-6）：** 用户决定（约 12:00 SGT）采用清理、档案 A、放弃 crossover、零余量维持现状 → `dust_cleanup` 缺省改 on（1655e623），注册表 `s4l_6`；4 个部署网络在 1655e623 构建通过（与 S4L-1 逐组件相同），**未打包**：S4M 指令（12:20 SGT，第 115 项 cap_share 0.98）接手打包；S4K 部署包 56d28358 仍是最后打包版本。
