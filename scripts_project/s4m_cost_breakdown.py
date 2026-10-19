@@ -4,15 +4,24 @@ For every extendable component (Generator / Link / Store / StorageUnit / Line) t
 S4C-0 decision 90), the row's investment, FOM (% of investment per year), lifetime, discount rate, the annuity factor r / (1 - (1 + r)^-n) (PyPSA-Eur
 calculate_annuity), the annualised fixed cost (annuity + FOM / 100) x investment, the component's capital_cost in the network and the ratio between the two.
 A component reconstructs exactly (|ratio - 1| <= 1e-6) when its capital_cost is the plain row value; the known scalings of the S2 / S3 layers are tried next
-(x efficiency, x length, x efficiency x length, x 1e3 kW -> MW); composite costs (e.g. capture variants, offshore connection cost per node, the decision-89 /
-95 CO2 storage prices, decision-96 corridor costs) are reported with the ratio and the formula hint, not forced. Existing (non-extendable) assets keep their
-FOM constants in existing_annual_fixed_om_eur (hook research_existing_assets) and are listed separately.
+(x efficiency, x length, x efficiency x length, x 1e3 kW -> MW); then the composite formulas of the layers, rebuilt from the cost rows and the component's
+own attributes (length, underwater_fraction = corridor subsea share, efficiency, efficiency3 = captured CO2 per MWh input, capture_cost_row) or the
+offshore-wind connection-distance table referenced in the network meta (research_cost_layer_s4c1.offwind_distance_table, SHA256 checked):
+  * offwind-ac / -dc: offwind + <car>-station + line_length_factor x (distance x <car>-connection-submarine + landfall x <car>-connection-underground) (S4C-1)
+  * AC lines, H2 / CO2 / gas pipelines: length x ((1 - s) x onshore row + s x submarine row); DC links: the same + HVDC inverter pair; zero-cost reversed twins
+  * CCGT CC: CCGT fixed x CCGT efficiency + capture fixed x efficiency3; biomass EOP CC: biomass EOP fixed x efficiency + biomass CHP capture fixed x efficiency3;
+    industry biomass boiler CC: solid biomass boiler steam fixed x efficiency + capture fixed x efficiency3; industry biomass CC: capture fixed x efficiency3
+  * electrobiofuels: BtL fixed x BtL efficiency + BtL "C stored" x Fischer-Tropsch fixed x Fischer-Tropsch efficiency (S4B-0, PyPSA-Eur)
+Every term of a composite is written to composite_terms (JSON) so the split can be re-done from the row values. Parameter-priced components (decision-89 /
+95 CO2 storage prices, S3 terminals) are listed with their rule. Existing (non-extendable) assets keep their FOM constants in existing_annual_fixed_om_eur
+(hook research_existing_assets) and are listed separately.
 
-    python scripts_project/s4m_cost_breakdown.py --network <solved or unsolved nc> --costs <costs_active_research.csv> --out <dir>
+    python scripts_project/s4m_cost_breakdown.py --network <solved or unsolved nc> --costs <costs_active_research.csv> --out <dir> [--repo <repo root>]
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -22,6 +31,8 @@ import pandas as pd
 
 COMPONENTS = (("Generator", "p"), ("Link", "p"), ("Store", "e"), ("StorageUnit", "p"), ("Line", "s"))
 TOL = 1e-6
+PIPELINE_ROWS = {"H2 pipeline": ("H2 (g) pipeline", "H2 (g) submarine pipeline"), "CO2 pipeline": ("CO2 pipeline", "CO2 submarine pipeline"),
+                 "gas pipeline": ("CH4 (g) pipeline", "CH4 (g) submarine pipeline")}   # s4c_layers.PIPELINE_ROWS
 # rows the layers actually priced from where research_finance.rates_by_carrier names a different (or no) row (S2 / S3 / S4C layers; checked on the S4M-1 network)
 ALT_ROWS = {"Link:industry biomass boiler": "solid biomass boiler steam", "Link:industry biomass boiler CC": "solid biomass boiler steam", "Line:AC": "HVAC overhead"}
 # parameter-priced components (a registered unit price, not an investment / FOM / lifetime composition): decision 89 / 95 CO2 storage service prices, S3-1 LNG
@@ -40,9 +51,106 @@ def annuity(r: float, n: float) -> float:
     return float(r / (1.0 - (1.0 + r) ** (-n))) if (r and n and r > 0 and n > 0) else (1.0 / n if n else np.nan)
 
 
-def breakdown(n, costs: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+def _fx(costs: pd.DataFrame, row: str) -> float:
+    return float(costs.at[row, "fixed"]) if (row in costs.index and "fixed" in costs.columns) else np.nan
+
+
+def _par(costs: pd.DataFrame, row: str, col: str) -> float:
+    return float(costs.at[row, col]) if (row in costs.index and col in costs.columns) else np.nan
+
+
+def _class_of(name: str) -> int:
+    """Resource class of an S4A class generator: '<name> c<k>' -> k, else 0 (s4c_layers._class_of)."""
+    head, _, tail = str(name).rpartition(" c")
+    return int(tail) if head and tail.isdigit() else 0
+
+
+def _capture_row(z, costs: pd.DataFrame, default: str) -> str:
+    """The capture cost row of a CC link: the longest cost-row name the capture_cost_row attribute starts with, else the layer default."""
+    v = str(z.get("capture_cost_row", "") or "") if "capture_cost_row" in z else ""
+    for r in sorted((str(x) for x in costs.index), key=len, reverse=True):
+        if v and v.startswith(r):
+            return r
+    return default
+
+
+def _boiler_or_chp_capture(costs: pd.DataFrame) -> str:
+    return "biomass boiler capture" if np.isfinite(_fx(costs, "biomass boiler capture")) else "biomass CHP capture"
+
+
+def load_offwind_table(n, repo) -> tuple[pd.DataFrame | None, dict]:
+    """The S4C-1 offshore connection-distance table referenced in the network meta, resolved under the repo and SHA256-checked."""
+    info = ((n.meta.get("research_cost_layer_s4c1") or {}).get("offwind_distance_table") or {})
+    if not info:
+        return None, dict(status="not_referenced", reason="no research_cost_layer_s4c1.offwind_distance_table in the network meta")
+    if repo is None:
+        return None, dict(status="not_resolved", reason="no repo path given", file=info.get("file"))
+    p = Path(repo) / str(info["file"])
+    if not p.exists():
+        return None, dict(status="missing", file=str(info["file"]))
+    sha = hashlib.sha256(p.read_bytes()).hexdigest()
+    if sha != info.get("sha256"):
+        return None, dict(status="sha_mismatch", file=str(info["file"]), expected=info.get("sha256"), actual=sha)
+    t = pd.read_csv(p).set_index(["tech", "node", "cls"])
+    return t, dict(status="ok", file=str(info["file"]), sha256=sha, rows=int(len(t)))
+
+
+def composite(comp: str, car: str, name: str, z, cc: float, costs: pd.DataFrame, offwind) -> tuple[float, dict, str]:
+    """(reconstructed value, terms, rule) of the layer formulas for the composite capital costs; (nan, {}, '') when no formula applies."""
+    L = float(z.get("length", np.nan)) if "length" in z else np.nan
+    s = float(z.get("underwater_fraction", 0.0) or 0.0) if "underwater_fraction" in z else 0.0
+    e3 = float(z.get("efficiency3", np.nan)) if "efficiency3" in z else np.nan
+    if comp == "Generator" and car in ("offwind-ac", "offwind-dc"):
+        if offwind is None:
+            return np.nan, {}, "offwind_connection_table_unavailable"
+        k = (car, str(z.bus), _class_of(name))
+        if k not in offwind.index:
+            return np.nan, dict(node=k[1], cls=k[2]), "offwind_connection_node_class_missing"
+        d = offwind.loc[k]; llf = float(d.line_length_factor); dist = float(d.average_distance_km); land = float(d.landfall_km)
+        terms = {"offwind": _fx(costs, "offwind"), f"{car}-station": _fx(costs, f"{car}-station"),
+                 f"{car}-connection-submarine x line_length_factor x distance_km": llf * dist * _fx(costs, f"{car}-connection-submarine"),
+                 f"{car}-connection-underground x line_length_factor x landfall_km": llf * land * _fx(costs, f"{car}-connection-underground")}
+        return float(sum(terms.values())), dict(terms, line_length_factor=llf, distance_km=dist, landfall_km=land, cls=k[2]), "offwind_connection"
+    if comp == "Line" and car == "AC":
+        terms = {"HVAC overhead x length x (1 - s)": L * (1 - s) * _fx(costs, "HVAC overhead"), "HVAC submarine x length x s": L * s * _fx(costs, "HVAC submarine")}
+        return float(sum(terms.values())), dict(terms, length_km=L, subsea_share=s), "length_x_subsea_mix"
+    if comp == "Link" and car == "DC":
+        twin = str(z.get("twin_of", "") or "") if "twin_of" in z else ""
+        if cc == 0.0 and (twin or str(name).endswith("-reversed")):
+            return 0.0, dict(twin_of=twin or str(name)[: -len("-reversed")]), "zero_cost_reversed_twin"
+        terms = {"HVDC overhead x length x (1 - s)": L * (1 - s) * _fx(costs, "HVDC overhead"), "HVDC submarine x length x s": L * s * _fx(costs, "HVDC submarine"),
+                 "HVDC inverter pair": _fx(costs, "HVDC inverter pair")}
+        return float(sum(terms.values())), dict(terms, length_km=L, subsea_share=s), "length_x_subsea_mix_plus_inverter_pair"
+    if comp == "Link" and car in PIPELINE_ROWS:
+        on, sub = PIPELINE_ROWS[car]
+        terms = {f"{on} x length x (1 - s)": L * (1 - s) * _fx(costs, on), f"{sub} x length x s": L * s * _fx(costs, sub)}
+        return float(sum(terms.values())), dict(terms, length_km=L, subsea_share=s), "length_x_subsea_mix"
+    if comp == "Link" and car == "CCGT CC":
+        cap = _capture_row(z, costs, "biomass CHP capture")
+        terms = {"CCGT x CCGT efficiency": _fx(costs, "CCGT") * _par(costs, "CCGT", "efficiency"), f"{cap} x efficiency3 (t CO2 captured per MWh fuel)": _fx(costs, cap) * e3}
+        return float(sum(terms.values())), dict(terms, capture_row=cap, efficiency3=e3), "base_x_efficiency_plus_capture_x_co2"
+    if comp == "Link" and car == "biomass EOP CC":
+        terms = {"biomass EOP x biomass EOP efficiency": _fx(costs, "biomass EOP") * _par(costs, "biomass EOP", "efficiency"), "biomass CHP capture x efficiency3": _fx(costs, "biomass CHP capture") * e3}
+        return float(sum(terms.values())), dict(terms, capture_row="biomass CHP capture", efficiency3=e3), "base_x_efficiency_plus_capture_x_co2"
+    if comp == "Link" and car == "industry biomass boiler CC":
+        cap = _capture_row(z, costs, _boiler_or_chp_capture(costs)); eff = float(z.get("efficiency", np.nan))
+        terms = {"solid biomass boiler steam x efficiency": _fx(costs, "solid biomass boiler steam") * eff, f"{cap} x efficiency3": _fx(costs, cap) * e3}
+        return float(sum(terms.values())), dict(terms, capture_row=cap, efficiency=eff, efficiency3=e3), "base_x_efficiency_plus_capture_x_co2"
+    if comp == "Link" and car == "industry biomass CC":
+        cap = _boiler_or_chp_capture(costs)
+        terms = {f"{cap} x efficiency3": _fx(costs, cap) * e3}
+        return float(sum(terms.values())), dict(terms, capture_row=cap, efficiency3=e3), "capture_x_co2"
+    if comp == "Link" and car == "electrobiofuels":
+        terms = {"BtL x BtL efficiency": _fx(costs, "BtL") * _par(costs, "BtL", "efficiency"),
+                 "BtL C stored x Fischer-Tropsch x Fischer-Tropsch efficiency": _par(costs, "BtL", "C stored") * _fx(costs, "Fischer-Tropsch") * _par(costs, "Fischer-Tropsch", "efficiency")}
+        return float(sum(terms.values())), dict(terms), "btl_plus_scaled_fischer_tropsch"
+    return np.nan, {}, ""
+
+
+def breakdown(n, costs: pd.DataFrame, repo=None) -> tuple[pd.DataFrame, dict]:
     rb = (n.meta.get("research_finance") or {}).get("rates_by_carrier") or {}
     uniform = (n.meta.get("research_finance") or {}).get("uniform_rate") or (n.meta.get("research_finance") or {}).get("rate")
+    offwind, offwind_info = load_offwind_table(n, repo)
     rows = []
     for comp, nom in COMPONENTS:
         d = n.df(comp)
@@ -58,6 +166,7 @@ def breakdown(n, costs: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
             if key in PARAMETER_PRICED:
                 rec.update(match=True, match_rule="parameter_price", note="registered unit price (EUR per unit-year), no investment / FOM / lifetime composition - see DATA_REGISTRY (decisions 89, 95; S3-1 LNG terminal; S3-2 H2 import)")
                 rows.append(rec); continue
+            cc = float(z.capital_cost); hit = ""; fixed = np.nan
             if row and row in costs.index:
                 c = costs.loc[row]
                 inv, fom, life = float(c.get("investment", np.nan)), float(c.get("FOM", np.nan)), float(c.get("lifetime", np.nan))
@@ -65,7 +174,6 @@ def breakdown(n, costs: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                 ann = annuity(rr, life); fixed = (ann + (0.0 if np.isnan(fom) else fom / 100.0)) * inv if np.isfinite(inv) else np.nan
                 rec.update(investment=inv, fom_pct=fom, lifetime_row=life, annuity_factor=ann, fixed_reconstructed=fixed, fixed_table=float(c.get("fixed", np.nan)),
                            table_fixed_consistent=(abs(fixed / float(c["fixed"]) - 1.0) <= TOL) if (np.isfinite(fixed) and float(c.get("fixed", 0) or 0) != 0) else None)
-                cc = float(z.capital_cost)
                 if np.isfinite(fixed) and fixed != 0:
                     ratio = cc / fixed; rec["ratio_capital_cost_over_fixed"] = ratio
                     cands = dict(plain=1.0)
@@ -81,14 +189,20 @@ def breakdown(n, costs: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                     if comp == "Line" and np.isfinite(L) and L > 0:
                         cands["length"] = L
                     cands["x1000"] = 1000.0
-                    hit = [k for k, f in cands.items() if abs(ratio / f - 1.0) <= TOL]
-                    rec.update(match=bool(hit), match_rule=(hit[0] if hit else ""), scaling_implied=ratio, residual_eur=(cc - fixed if not hit else 0.0),
-                               ratio_per_km=((ratio / L) if (np.isfinite(L) and L > 0) else np.nan))
-                else:
-                    rec.update(match=(cc == 0.0), match_rule=("zero" if cc == 0.0 else ""))
+                    hits = [k for k, f in cands.items() if abs(ratio / f - 1.0) <= TOL]
+                    hit = hits[0] if hits else ""
+                    rec.update(scaling_implied=ratio, ratio_per_km=((ratio / L) if (np.isfinite(L) and L > 0) else np.nan))
             else:
-                rec.update(match=(float(z.capital_cost) == 0.0), match_rule=("zero_cost_no_row" if float(z.capital_cost) == 0.0 else ""),
-                           note=("no cost row in research_finance.rates_by_carrier (import generator / parameter-priced store)" if not row else f"cost row {row} not in the table"))
+                rec["note"] = "no cost row in research_finance.rates_by_carrier (import generator / parameter-priced store)" if not row else f"cost row {row} not in the table"
+            if not hit:   # the layer composites (offshore connection, subsea mix, capture variants, electrobiofuels, reversed twins)
+                val, terms, rule = composite(comp, car, name, z, cc, costs, offwind)
+                if rule:
+                    rec.update(composite_rule=rule, composite_terms=json.dumps(terms, default=float), composite_reconstructed=val)
+                    if (np.isfinite(val) and val != 0 and abs(cc / val - 1.0) <= TOL) or (val == 0.0 and cc == 0.0):
+                        hit = "composite:" + rule
+            if not hit and cc == 0.0:
+                hit = "zero" if (row and row in costs.index) else "zero_cost_no_row"
+            rec.update(match=bool(hit), match_rule=hit, residual_eur=(0.0 if hit else (cc - (fixed if np.isfinite(fixed) else 0.0))))
             rows.append(rec)
     T = pd.DataFrame(rows)
     fix = {}
@@ -104,19 +218,36 @@ def breakdown(n, costs: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                 unmatched_by_carrier=({f"{k[0]}:{k[1]}": int(v) for k, v in T[~T.match.fillna(False)].groupby(["component", "carrier"]).size().items()} if len(T) else {}),
                 no_cost_row_by_carrier=({f"{k[0]}:{k[1]}": int(v) for k, v in T[T.cost_row.isna()].groupby(["component", "carrier"]).size().items()} if len(T) else {}),
                 table_fixed_inconsistent=int((T.table_fixed_consistent == False).sum()) if "table_fixed_consistent" in T else 0,   # noqa: E712
+                composite_rules=({k: int(v) for k, v in T[T.match_rule.fillna("").str.startswith("composite:")].composite_rule.value_counts().items()} if ("composite_rule" in T and len(T)) else {}),
+                offwind_distance_table=offwind_info, tolerance=TOL,
                 existing_assets_fom=fix, discount_rate_mode=(n.meta.get("research_finance") or {}).get("mode"), uniform_rate=uniform)
     return T, summ
 
 
+def write_breakdown(n, costs: pd.DataFrame, out: Path, repo=None) -> dict:
+    """COMPONENT_COST_BREAKDOWN.csv + _SUMMARY.json under out; EXPORTS.json / SOLVE_RECEIPT.json there are updated when present (bytes, SHA256)."""
+    T, summ = breakdown(n, costs, repo=repo)
+    T.to_csv(out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g")
+    (out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json").write_text(json.dumps(summ, indent=1, default=str))
+    if (out / "EXPORTS.json").exists():
+        ex = json.loads((out / "EXPORTS.json").read_text())
+        for f in ("COMPONENT_COST_BREAKDOWN.csv", "COMPONENT_COST_BREAKDOWN_SUMMARY.json"):
+            ex[f] = dict(bytes=(out / f).stat().st_size, sha256=hashlib.sha256((out / f).read_bytes()).hexdigest())
+        (out / "EXPORTS.json").write_text(json.dumps(ex, indent=2))
+        if (out / "SOLVE_RECEIPT.json").exists():
+            rec = json.loads((out / "SOLVE_RECEIPT.json").read_text()); rec["exports"] = ex; rec["cost_breakdown"] = summ
+            (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec, indent=2, ensure_ascii=False, default=str) + "\n")
+    return summ
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--network", type=Path, required=True); ap.add_argument("--costs", type=Path, required=True); ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--repo", type=Path, default=Path(__file__).resolve().parent.parent, help="repo root for the offshore connection-distance table referenced in the network meta")
     a = ap.parse_args(); a.out.mkdir(parents=True, exist_ok=True)
     import pypsa
     logging.getLogger("pypsa").setLevel(logging.ERROR)
     n = pypsa.Network(str(a.network)); costs = pd.read_csv(a.costs, index_col=0)
-    T, summ = breakdown(n, costs)
-    T.to_csv(a.out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g")
-    (a.out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json").write_text(json.dumps(summ, indent=1, default=str))
+    summ = write_breakdown(n, costs, a.out, repo=a.repo)
     print(json.dumps(summ, indent=1, default=str))
 
 

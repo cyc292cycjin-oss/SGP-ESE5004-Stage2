@@ -306,7 +306,7 @@ def main(a):
             import shutil
             shutil.copy(a.costs_table, out / "costs_active_research.csv")
             from s4m_cost_breakdown import breakdown
-            T_bd, bd = breakdown(n, pd.read_csv(a.costs_table, index_col=0))
+            T_bd, bd = breakdown(n, pd.read_csv(a.costs_table, index_col=0), repo=a.repo)   # repo: the S4C-1 offshore connection-distance table referenced in the network meta
             T_bd.to_csv(out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g"); save(out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json", bd)
             run["cost_breakdown"] = {k: v for k, v in bd.items() if k not in ("existing_assets_fom",)}
         for f in ("DUALS_BY_CONSTRAINT.nc", "DUALS_INDEX.csv", "COMPONENT_COST_BREAKDOWN.csv", "COMPONENT_COST_BREAKDOWN_SUMMARY.json", "costs_active_research.csv"):
