@@ -166,7 +166,10 @@ def main():
                            max_violation=float(g.rv.max()), max_ratio_to_budget=float(g.ratio.max()), sum_violation=float(g.rv.sum()),
                            first_order_cost_eur=float(g.cost.sum()),
                            countries_over_budget=(R[(R.family == f) & (R.ratio_to_budget > 1)].country.value_counts().to_dict() if len(R) else {}),
-                           top=top.to_dict(orient="records"))
+                           top=top.to_dict(orient="records"),
+                           top_by_violation=(R[R.family == f].sort_values("violation", ascending=False).head(3).to_dict(orient="records") if len(R) else []),
+                           top_by_cost=(R[R.family == f].sort_values("first_order_cost_eur", ascending=False).head(3).to_dict(orient="records") if len(R) else []),
+                           snapshots_over_budget=(R[(R.family == f) & (R.ratio_to_budget > 1)].snapshot.str[:10].value_counts().head(5).to_dict() if len(R) else {}))
     fam = dict(sorted(fam.items(), key=lambda kv: -kv[1]["max_ratio_to_budget"]))
     by_country = {}
     if len(R):
