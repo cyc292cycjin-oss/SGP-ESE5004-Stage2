@@ -24,7 +24,7 @@
 | 云端 / 下载 | 无 |
 | 许可 | 只经 `GRB_LICENSE_FILE` 只读引用；日志与证据按许可特征串过滤（`GUROBI_LOG_SCRUBBED.txt`、`solve_log_scrubbed.txt`）；部署包扫描无命中 |
 | 档案 A | 未改（`formal_barrier`：Method 2、Crossover 0、BarConvTol 1e-8、BarHomogeneous 1、Threads 8、Seed 123） |
-| 测试 | `tests/research/test_s4m_duals.py`、`test_s4m_cost_breakdown.py` 新增并通过；脚本测试 30/30、探针 9/9；全量 `tests/research`：1 failed, 535 passed, 927 warnings in 83.15s (0:01:23)（§11） |
+| 测试 | `tests/research/test_s4m_duals.py`、`test_s4m_cost_breakdown.py` 新增并通过；脚本测试 30/30、探针 9/9；全量 `tests/research`：536 passed, 927 warnings in 81.06s (0:01:21)（§11） |
 
 ## 2. S4M-0 登记（第 114–116 项；921e050b）
 

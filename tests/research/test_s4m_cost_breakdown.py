@@ -32,7 +32,7 @@ def _network(tmp_path):
     from s4m_cost_breakdown import annuity
     n.add("Generator", "N1 onwind-2025", bus="N1", carrier="onwind", p_nom_extendable=True, capital_cost=(annuity(0.07, 25.0) + 0.01) * 600.0)
     n.add("Generator", "N1 offwind-ac-2025 c1", bus="N1", carrier="offwind-ac", p_nom_extendable=True, capital_cost=100.0 + 10.0 + 1.25 * (8.0 * 2.0 + 20.0 * 1.0))
-    n.add("Line", "L1", bus0="N1", bus1="N2", length=100.0, s_nom_extendable=True, x=1.0, r=0.1, capital_cost=100.0 * (0.7 * 3.0 + 0.3 * 7.0))
+    n.add("Line", "L1", bus0="N1", bus1="N2", carrier="AC", length=100.0, s_nom_extendable=True, x=1.0, r=0.1, capital_cost=100.0 * (0.7 * 3.0 + 0.3 * 7.0))   # carrier as in the research network (PyPSA default is empty)
     n.lines["underwater_fraction"] = 0.3
     n.add("Link", "D1", bus0="N1", bus1="N2", carrier="DC", length=50.0, p_nom_extendable=True, capital_cost=50.0 * (0.5 * 4.0 + 0.5 * 9.0) + 50.0)
     n.add("Link", "D1-reversed", bus0="N2", bus1="N1", carrier="DC", length=0.0, p_nom_extendable=True, capital_cost=0.0)
