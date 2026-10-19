@@ -538,7 +538,506 @@
    "data_disk_gb": ">=100",
    "price": "DATA_PENDING"
   },
-  "s4o_6": "not authorised; stopped after the local part"
+  "s4o_6": "see s4o_6 below"
+ },
+ "s4o_6": {
+  "supplement_02": {
+   "file": "S4O_SUPPLEMENT_02.md",
+   "sha256": "1898d3f79798eff99ddddccda32c7f0bc57ec669c25dabcd4c4bfb1bdbcb7d97",
+   "expected": "1898d3f79798eff99ddddccda32c7f0bc57ec669c25dabcd4c4bfb1bdbcb7d97",
+   "mode": "unattended, decision rules"
+  },
+  "instance": {
+   "cpu": "Intel Xeon Platinum 8481C",
+   "cgroup_cores": 25,
+   "cgroup_memory_bytes": 98784247808,
+   "data_disk": "50 GB, empty (clone without data disk)",
+   "host_port": "not recorded (command line only)"
+  },
+  "upload": {
+   "bytes": 264363290,
+   "seconds": 7192,
+   "sha256sums": "26 OK",
+   "commit": "126110ff"
+  },
+  "licence": {
+   "uploaded": "2026-10-20 00:10:26",
+   "deleted": "2026-10-20 03:43:29",
+   "verified_absent": true
+  },
+  "preflight": "OK",
+  "probe": {
+   "r_work_units": 0.8356,
+   "r_iterations": 0.9082,
+   "objective_rel_diff": -2.5e-12,
+   "time_limit_s": 21600,
+   "wall_cap_s": 22500
+  },
+  "batch": {
+   "runs": {
+    "disconnected": {
+     "present": true,
+     "termination": "suboptimal",
+     "objective": 585495017158.94,
+     "objective_lp": 582438908553.9412,
+     "profile": "formal_barrier",
+     "parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-08,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 21600.0
+     },
+     "lp": {
+      "num_row": 8671148,
+      "num_col": 3896653,
+      "nnz": 19874213
+     },
+     "solve_seconds": 2426.797996044159,
+     "peak_rss_gib": 12.935718536376953,
+     "log": {
+      "barrier": {
+       "iterations": 287,
+       "seconds": 2201.57,
+       "work_units": 2177.96
+      },
+      "restarts": [
+       {
+        "iteration": 126,
+        "seconds": 1003,
+        "primal_residual": 176000000000.0,
+        "before": 3.68,
+        "min_before": 0.306,
+        "min_iteration": 111
+       }
+      ],
+      "last": {
+       "iteration": 287,
+       "primal_objective": 582438789000.0,
+       "dual_objective": 582444754000.0,
+       "primal_residual": 9.0,
+       "seconds": 2202
+      }
+     },
+     "input_network_sha256": "b411223e85c7b0eec53dbafe1bb7e5b2378247281b38cdd4025c8aeef0aab403",
+     "c1": {
+      "grade": {
+       "grade": "layer1_plus_nodal_price_settlement",
+       "a": true,
+       "b": true,
+       "c": true,
+       "price_settled_results": "usable"
+      },
+      "acceptance": {
+       "optimal": false,
+       "a": true,
+       "b": true,
+       "c": true,
+       "accepted": false,
+       "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+      },
+      "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/s4o_cloud/runs/20261019T162951Z_6896/disconnec",
+      "a_diff_bn": 0.0007615008577880859,
+      "a_relative": 1.3006103134461428e-06,
+      "b_rows_over_budget": 821,
+      "b_first_order_cost_eur": 29802.20590955242,
+      "b_row_max_ratio": 12.176606150240683,
+      "b_worst": [
+       "ID",
+       0.0005750578611922096
+      ],
+      "c_b16": 6.451861796672047e-07,
+      "c_worst": [
+       "ID",
+       0.12174947678213865
+      ],
+      "biomass_dominant": false
+     },
+     "gates": {
+      "all_passed_solver_tolerances": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B14",
+       "B15",
+       "B3",
+       "B3_S4B"
+      ]
+     }
+    },
+    "disconnected_gap": {
+     "present": true,
+     "termination": "suboptimal",
+     "objective": 585497545941.4175,
+     "objective_lp": 582441437336.4187,
+     "profile": "formal_barrier",
+     "parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-08,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 21600.0
+     },
+     "lp": {
+      "num_row": 8821003,
+      "num_col": 3971694,
+      "nnz": 20173729
+     },
+     "solve_seconds": 2147.261147260666,
+     "peak_rss_gib": 13.215766906738281,
+     "log": {
+      "barrier": {
+       "iterations": 245,
+       "seconds": 1919.55,
+       "work_units": 1866.56
+      },
+      "restarts": [
+       {
+        "iteration": 124,
+        "seconds": 1013,
+        "primal_residual": 177000000000.0,
+        "before": 3.61,
+        "min_before": 2.08,
+        "min_iteration": 103
+       }
+      ],
+      "last": {
+       "iteration": 245,
+       "primal_objective": 582439452000.0,
+       "dual_objective": 582438541000.0,
+       "primal_residual": 24.0,
+       "seconds": 1920
+      }
+     },
+     "input_network_sha256": "c4a5d8ffb6ff9856533555d4e813cc502d8ddb63c8bb958f6677dbe122f0ad3a",
+     "c1": {
+      "grade": {
+       "grade": "layer1_plus_nodal_price_settlement",
+       "a": true,
+       "b": true,
+       "c": true,
+       "price_settled_results": "usable"
+      },
+      "acceptance": {
+       "optimal": false,
+       "a": true,
+       "b": true,
+       "c": true,
+       "accepted": false,
+       "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+      },
+      "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/s4o_cloud/runs/20261019T162951Z_6896/disconnec",
+      "a_diff_bn": -0.003916974442504883,
+      "a_relative": 6.689992929360296e-06,
+      "b_rows_over_budget": 5,
+      "b_first_order_cost_eur": 5171.049245260197,
+      "b_row_max_ratio": 7.442696069793247,
+      "b_worst": [
+       "ID",
+       0.0001610836041196568
+      ],
+      "c_b16": 2.816415350591477e-07,
+      "c_worst": [
+       "ID",
+       0.21999216527625423
+      ],
+      "biomass_dominant": false
+     },
+     "gates": {
+      "all_passed_solver_tolerances": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B12",
+       "B14",
+       "B15",
+       "B3",
+       "B3_S4B"
+      ]
+     }
+    },
+    "integrated_nze": {
+     "present": true,
+     "termination": "suboptimal",
+     "objective": 425761150197.1771,
+     "objective_lp": 422874422662.39105,
+     "profile": "formal_barrier",
+     "parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-08,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 21600.0
+     },
+     "lp": {
+      "num_row": 9017345,
+      "num_col": 4048847,
+      "nnz": 20952716
+     },
+     "solve_seconds": 5476.398085594177,
+     "peak_rss_gib": 15.187828063964844,
+     "log": {
+      "barrier": {
+       "iterations": 216,
+       "seconds": 5238.26,
+       "work_units": 3638.01
+      },
+      "restarts": [],
+      "last": {
+       "iteration": 216,
+       "primal_objective": 422874418000.0,
+       "dual_objective": 422874284000.0,
+       "primal_residual": 4.4,
+       "seconds": 5238
+      }
+     },
+     "input_network_sha256": "71503e0bfbe6a8006d31db6c934e49e7280ca616a51058a8c5f621d2d08dfd5a",
+     "c1": {
+      "grade": {
+       "grade": "layer1_plus_nodal_price_settlement",
+       "a": true,
+       "b": true,
+       "c": true,
+       "price_settled_results": "usable"
+      },
+      "acceptance": {
+       "optimal": false,
+       "a": true,
+       "b": true,
+       "c": true,
+       "accepted": false,
+       "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+      },
+      "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/s4o_cloud/runs/20261019T162951Z_6896/disconnec",
+      "a_diff_bn": -0.00013543097644042967,
+      "a_relative": 3.180914378348211e-07,
+      "b_rows_over_budget": 3499,
+      "b_first_order_cost_eur": 66699.04371075996,
+      "b_row_max_ratio": 26.286363632564715,
+      "b_worst": [
+       "ID",
+       0.0015430212369123423
+      ],
+      "c_b16": 1.90573875984556e-09,
+      "c_worst": [
+       "ID",
+       0.007005116227695773
+      ],
+      "biomass_dominant": false
+     },
+     "gates": {
+      "all_passed_solver_tolerances": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B14",
+       "B15",
+       "B2",
+       "B3",
+       "B3_S4B"
+      ]
+     }
+    }
+   },
+   "pilot_integrated": {
+    "objective": 516252148340.3703,
+    "termination": "optimal",
+    "profile": "formal_barrier",
+    "input_network_sha256": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+    "c1_grade": {
+     "grade": "layer1_plus_nodal_price_settlement",
+     "a": true,
+     "b": true,
+     "c": true,
+     "price_settled_results": "usable"
+    }
+   },
+   "pilot_consistency": {
+    "pilot_receipt": "/root/autodl-tmp/s4n_pilot/integrated/SOLVE_RECEIPT.json",
+    "pilot_input_network_sha256": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+    "package_network_sha256": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+    "network_same": true,
+    "pilot_profile": "formal_barrier",
+    "batch_profile": "formal_barrier",
+    "pilot_parameters_excl_TimeLimit": {
+     "Method": 2,
+     "Crossover": 0,
+     "BarConvTol": 1e-08,
+     "BarHomogeneous": 1,
+     "Threads": 8,
+     "Seed": 123,
+     "AggFill": 0,
+     "PreDual": 0,
+     "GURO_PAR_BARDENSETHRESH": 200
+    },
+    "batch_profile_parameters": {
+     "Method": 2,
+     "Crossover": 0,
+     "BarConvTol": 1e-08,
+     "BarHomogeneous": 1,
+     "Threads": 8,
+     "Seed": 123,
+     "AggFill": 0,
+     "PreDual": 0,
+     "GURO_PAR_BARDENSETHRESH": 200
+    },
+    "profile_same": true,
+    "pilot_termination": "optimal",
+    "pilot_objective": 516252148340.3703,
+    "note": "decision 121: B6 = this batch's disconnected - S4N pilot integrated; both must use the same integrated network file and profile"
+   },
+   "batch_reference": {
+    "source": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/s4o_cloud/runs/20261019T162951Z_6896/disconnected minus /root/autodl-tmp/s4n_pilot/integrated, COUNTRY_COST_LEDGER.csv total)",
+    "differences_bn": {
+     "BN": 0.11430089050197804,
+     "ID": 0.6692317957547913,
+     "KH": 2.4262791808964046,
+     "LA": 2.738428639566804,
+     "MM": 1.131092670080616,
+     "MY": 3.2055781997075576,
+     "PH": 0.009826161863357543,
+     "SG": 0.9324369196257706,
+     "TH": 7.513142946953667,
+     "TL": 0.123404200309724,
+     "VN": 51.59497924065488,
+     "ASEAN": -1.2158320274395222
+    }
+   },
+   "B6": {
+    "definition": "this batch's disconnected STEPS (S4O-6) - S4N pilot integrated STEPS (decision 121)",
+    "eur": 69242868818.56964,
+    "bn": 69.24286881856965,
+    "relative": 0.13412606425206994,
+    "disconnected_termination": "suboptimal",
+    "l23_bn": 68.96963517431915,
+    "l23_disconnected_objective": 585115945488.6481,
+    "l23_integrated_objective": 516146310314.3289
+   },
+   "country_difference_bn": {
+    "ASEAN_BUNKER": {
+     "s4o": -1.2155,
+     "l23": -1.2188
+    },
+    "ASEAN_POOL": {
+     "s4o": -0.0004,
+     "l23": -0.0002
+    },
+    "BN": {
+     "s4o": 0.1143,
+     "l23": 0.1143
+    },
+    "ID": {
+     "s4o": 0.6692,
+     "l23": 0.6693
+    },
+    "KH": {
+     "s4o": 2.4263,
+     "l23": 2.4261
+    },
+    "LA": {
+     "s4o": 2.7384,
+     "l23": 2.7403
+    },
+    "MM": {
+     "s4o": 1.1311,
+     "l23": 1.1328
+    },
+    "MY": {
+     "s4o": 3.2056,
+     "l23": 3.2101
+    },
+    "PH": {
+     "s4o": 0.0098,
+     "l23": 0.0099
+    },
+    "SG": {
+     "s4o": 0.9324,
+     "l23": 0.9319
+    },
+    "TH": {
+     "s4o": 7.5131,
+     "l23": 7.5101
+    },
+    "TL": {
+     "s4o": 0.1234,
+     "l23": 0.1237
+    },
+    "VN": {
+     "s4o": 51.595,
+     "l23": 51.3202
+    }
+   },
+   "NZE_minus_integrated": {
+    "definition": "this batch's integrated NZE - S4N pilot integrated STEPS",
+    "eur": -90490998143.19318,
+    "bn": -90.49099814319318,
+    "relative": -0.17528449699260434,
+    "nze_termination": "suboptimal",
+    "l23_bn": -90.46157000953876,
+    "by_country_bn": {
+     "ASEAN_BUNKER": -11.2408,
+     "ASEAN_POOL": 0.0,
+     "BN": -0.2947,
+     "ID": -28.4188,
+     "KH": 0.7429,
+     "LA": 0.6207,
+     "MM": 0.2787,
+     "MY": -17.0225,
+     "PH": -4.0415,
+     "SG": -5.985,
+     "TH": -11.9593,
+     "TL": -0.2267,
+     "VN": -12.9439
+    }
+   }
+  },
+  "recovery": {
+   "full_batch": {
+    "bytes": 461001705,
+    "sha256": "c37f8d938176850d3cbd316907030e07eadb6a71eef0491d6f3f82e9fd47ccef"
+   },
+   "light": {
+    "bytes": 5782612,
+    "sha256": "f8cffc10d4ac503727c62625384820f56d331678397ce16f1b09743de264caca"
+   },
+   "per_run": {
+    "disconnected": 150455004,
+    "disconnected_gap": 151427801
+   },
+   "pilot_full": "not on this instance (original D58 data disk only)"
+  },
+  "automatic_decisions": "D1-D13 (S4O_PROGRESS.md, report section 11.8)",
+  "final_scan": {
+   "host_hits": 0,
+   "port_standalone_hits": 0,
+   "port_inside_longer_numbers_files": 20,
+   "licence_string_hits": 0
+  }
  },
  "files": {
   "evidence/s4o_2/PILOT_PRECISION_S4N1_old_tool.json": "7f3271b060e5c085b30e5d16bac6577ff6c82383ef73b8801ccc587fd745c410",
@@ -639,6 +1138,120 @@
   "evidence/s4o_4p/make_package_log.txt": "4084ca9fda6b0e282fe07e84a33fed034ca5029a1ccaefcb82a0db78c5cd68f8",
   "evidence/s4o_4p/preflight_local_sections.txt": "cf55c5ce5ee4f3e56457a497fd20c34b10dad36fb54263125b055850406423eb",
   "evidence/s4o_4p/run_dry_run.txt": "b75ab7a54ec953f4c3f008a86176e7b5845bbee9ac02bc915f9ff8865704288e",
+  "evidence/s4o_6/BUNDLE_LISTING.txt": "f0c57536eb974aa00bf875e6039d04bfb53ae01e59e0da595c39af8f865a4a85",
+  "evidence/s4o_6/S4O6_BATCH_SUMMARY.json": "b16ecf637a3c9b10696f4c3a7e903009827ba2c56d9758ee4feef28af5c1a58f",
+  "evidence/s4o_6/S4O6_BATCH_SUMMARY.md": "034d122643fdaa2da4dec6c13e937a09201df12af3a954b065a9a2702c177a26",
+  "evidence/s4o_6/WATCH_LOG.txt": "176baf9c3cb6fe540e3ea716cc1efc4e28be978b3eaa3ee3b71dd201a175a08e",
+  "evidence/s4o_6/full_disconnected_20261019T162951Z_6896.tar.gz.sha256": "99a8e50e31948cbeb4346b3da4b76d49b3d14a6ef3073431ba9565f2f80ca432",
+  "evidence/s4o_6/full_disconnected_gap_20261019T162951Z_6896.tar.gz.sha256": "b6443988ae54a927abf8da30618e170c78cc210e7efbeb4c98403841e338a53b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/BATCH_REFERENCE.json": "9ef4d13124c62fb6165c915a36591087b60bee8eb5b4c0e79b89711c6e2f717a",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/EXPORT_FILE_SIZES.txt": "94243feb5a36c1145f786fc62f42077cd4c9745dcd98e9dab8bf5ce9d1809736",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/MONITOR_disconnected.csv": "dad24b7a17de5792ff7e38d292573bce8ff4df9205392171786deffa64e014d1",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/MONITOR_disconnected_gap.csv": "f70d2fb52ce7105213a75994b587096b9488ef6a70c4501d3a9fda1c7c699c10",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/MONITOR_integrated_nze.csv": "59b216ffae05fc125d248a26316ecfda392db76b69832628f32eb13bba99e7b3",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/PILOT_CONSISTENCY.json": "3c7928934a2b9fbada7968cef5cf452116ceff1f61b233525c3c34b005a257a9",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/STATUS.txt": "240fbf27e7acc32bf007eff112be2af963d55ffcffb82064631deb5a5ded854e",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/STATUS_run.txt": "697dc8f391ab2cfd958736acd2153e488d4a32cd39bab11092d74fa8b8a8fde6",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/batch_console_scrubbed.txt": "697dc8f391ab2cfd958736acd2153e488d4a32cd39bab11092d74fa8b8a8fde6",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/BUNKER_ACCOUNT.json": "b9602bf1485e0a949be94bc0cbda41dfba77cf8b00c8e0122cf670ccb144667f",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/CAPACITY_BY_TECH_COUNTRY.json": "2a0a7b7102e95f9895f4c287a8dc941dbd8ab36fd8388e48707d6b3ccad6267b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/CO2_FLOWS.json": "421bca81bab39236f1c11b215a88401bc8a1990607c5e99447666ed1c780948e",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/COMPONENT_COST_BREAKDOWN_SUMMARY.json": "e15309a7ad6a5501007aa82572ae17464b7dc2976549f4ef4cec698e9846c1dc",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/COUNTRY_COST_LEDGER.csv": "cf2a777639589c2ff2dc82e5c7db72ba2771b296f10c0606fda6b28988edbc34",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/COUNTRY_COST_LEDGER_DETAIL.csv": "b82348dc4b0e52f4af56afc7dde16fa87ba1cb07a7239d2c062e0a804c48ceaa",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/DUALS_INDEX.csv": "083a4207e0a25b3b9ee23339bd588cd2ea3b83a93db11f095c97406cc8cf1e4d",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/EXPORTS.json": "5b4f1a86599b6a4412374447030a7271ce23b77fedd84e737e11360f8931fd3d",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/GUROBI_LOG_SCRUBBED.txt": "aacca1e26be168420a0d821cf46a68d34f9d7f0d048419615e83a4d9c80043b2",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/INTERIOR_CHECKS.json": "77296b8f1b6e0d46c7ef7d2591acc5f38942a197d42acf680cca3ef1c3293100",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/LEDGER_IDENTITY.json": "3a4654c44ef921412f1d84bac4f85f7ffad5a1315ab67a45ee4da7a908f98333",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/LOG_TAIL_NONOPTIMAL.txt": "13934af1899434be00558b0265adb79fc92a649b5d5eddb5379b8b35eac8679b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/MATH_PROBLEM.json": "a9c1cd1938c8c2f1f70ee0c00cc2b2b6bbe891d59f734dcee4ea74c71ed95f70",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/MONITOR_disconnected.csv": "dad24b7a17de5792ff7e38d292573bce8ff4df9205392171786deffa64e014d1",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/PRECISION.json": "6f3c35c29e4d61aeadaeecbf88d0fafdda3d3c94f5d3b7bc2de1e090d6b38096",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/PRECISION.md": "1fa9077b32010e6eb88cd3d323bdea1ebd666f2bf8d1ef74b6755427e4536591",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/RESOURCE.jsonl": "ff46427f210bd50e64bf2e11a1f5cf8ae79927f4c0d6c3cb9b06fa9e2e0636c5",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/SOLVE_RECEIPT.json": "f8a770624c9bc004a88c815c7583911ce4dd2c6567cc5e92b6c17dbabfb08a25",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/STDERR_TAIL_NONOPTIMAL.txt": "d94c91b6eb138df93b86627f2fd86e0d07b6ab629bb164d0a0b16967ad362492",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/V5_GATES.json": "6061a4b5c7f6d4aa7dd120083b69f39bbb0caf52263d7afea12bb641f620a188",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/VIOLATIONS.json": "ebfaaeae373016b098198debd37abdc3785042f3604e8cd6a6721e8918cf6741",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/costs_active_research.csv": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/cross_border_flows.csv": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/kkt_summary.json": "e4581a54e6614f187a3a0a056d634a16e5bda61fcf2c17b38169373bd9b9b141",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/solve_log_scrubbed.txt": "da6a3c6d393b82b6febadbb54f640078176edb90bb87c741dc64afb2427c28b2",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected/solve_time.txt": "b6a06adf195f7984206d4ab62634b01da9930413629a835f2d949b3e000f715c",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/BUNKER_ACCOUNT.json": "20a4beee080cdcd99d12310f120ba52dd620c5a5fa776ef6b3fd0342201d9417",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/CAPACITY_BY_TECH_COUNTRY.json": "dacb34e17e6ae779d796c3913a58daf7ecc5453c2f411e4fb860c9ca87caa030",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/CO2_FLOWS.json": "4fd5556dd5f3e1f3f6a1f42fc83b8099ce9e866a2b718b317ec899b51dbd8a1d",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/COMPONENT_COST_BREAKDOWN_SUMMARY.json": "ba52a7258cfb54d5dc9837d392c44fa87f30894804e5f58b4d214f05dbe59595",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/COUNTRY_COST_LEDGER.csv": "58acfff10dad34b91593349e7ddc4e0a7a375878777b649cc18fbd780517f7ae",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/COUNTRY_COST_LEDGER_DETAIL.csv": "a4c2436456072a8900281bf93d0c59b822f4bfa224219f0c3be902c529e7a67c",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/DUALS_INDEX.csv": "b3ef0b624638c1de09bf28d7a6272b12690bc8acfd3f9d225826f934d0880051",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/EXPORTS.json": "b4924e9feedc006236f2d471b0b4e0dd0cd8510aa3c8308b299bf95e417886d8",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/GAP_TABLE.json": "33872baf2a008e5b4910a41c98800230717e52214d26b7843de34ae0ec4d6012",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/GUROBI_LOG_SCRUBBED.txt": "e9700ee4d6e02277e13b44da2a4587f9a19773e03dec72dfc2be2bbe8c49f8ca",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/INTERIOR_CHECKS.json": "7a5f8993e76ff3c85403efac9bab3212b2d206a0c4fe159c8ac1cc5899c77591",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/LEDGER_IDENTITY.json": "6e2ce1cd3beb34f14a492e533c013076fc3cd221c8156997d75503afcc9f7aa3",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/LOG_TAIL_NONOPTIMAL.txt": "64767ad4027f3c993645390533f6d1ae3f4356cc31ee38b7cf01d72694db724e",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/MATH_PROBLEM.json": "4a1c611f14fb038ae799d8f1ee1717b5eba22a59ea64e381320ffd3f4646510c",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/MONITOR_disconnected_gap.csv": "f70d2fb52ce7105213a75994b587096b9488ef6a70c4501d3a9fda1c7c699c10",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/PRECISION.json": "f7e2609636dce6401d55da68573f0f15c9cc633db64a1806bf4b9307db41a62b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/PRECISION.md": "16dc31265ffaaca1b01246977dc7c28f542e22322d2e4bc6b4301a095b322023",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/RESOURCE.jsonl": "81aff99b6dcf014b93f698ab883c66b62ab00f682d3fa218449a8b07e18cb423",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/SOLVE_RECEIPT.json": "1fff1d349f377b71785730c724fdb2d1d1cb289c9b03df5fac383fd225841b64",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/STDERR_TAIL_NONOPTIMAL.txt": "62e62ad075b76c583722cc8b25e36b4ce7624b455aa8507640fd1a179a23aa10",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/V5_GATES.json": "4f23f8c5e94672cc0a42a7b7daed9986847d883aae40ae43567f22d9fa076d46",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/VIOLATIONS.json": "99e1381aa7f108a0fc1638559b58afa2dd477898317a627ccf74648b4b952a1f",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/costs_active_research.csv": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/cross_border_flows.csv": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/kkt_summary.json": "6550d8d0f0dc033f0130352a226c7f026fcc1f9bb3ef4a38d0b61f50c30ac838",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/solve_log_scrubbed.txt": "262bbb0b83624924ae4c3ea337caf7ddee3b8472254753219d3ee77ea6447f31",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/disconnected_gap/solve_time.txt": "bfcc60aec06c66d515e8fab0b5494bc88bea3c14ac8189b08673d6493c61d5d9",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/BUNKER_ACCOUNT.json": "66e7bd01482aad45c92beaee75bb66b1ce3f76ed7e4c391c81886e2fcdbdf21d",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/CAPACITY_BY_TECH_COUNTRY.json": "2fc55a609ac45c7fb9b5e6acae2160b38ccb51045720cc93a0da7d1ba32fc755",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/CO2_FLOWS.json": "70ac7225bb2d2d83b917ccfa83d1976bda7454df942f3b91606df458014f7efc",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/COMPONENT_COST_BREAKDOWN_SUMMARY.json": "de238b7382dda624c09d616a3d8c3fa7b2c0f2b8b164ff7e5f2fb94397c987c0",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/COUNTRY_COST_LEDGER.csv": "78b16d5a25f6c1deceaadd148b4b8593bd59226b920eb22666f23949f2546c5f",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/COUNTRY_COST_LEDGER_DETAIL.csv": "269674d8a6cb20c48a3ee46b48c9fcd3d8412dae0c7ada68782dd2c35647212c",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/DUALS_INDEX.csv": "a9be3c5cf0ac74a472f0d5c9330f139c52c27829c60a385cdddd6ae7246d315a",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/EXPORTS.json": "22946cc86a05678f009005a3b2ddeb924f12ff9823d2378a68506405d91c6b5d",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/GUROBI_LOG_SCRUBBED.txt": "04af31aba69918c283f7b72b2d5349725db3674d1e6e45778e4b982175c0f265",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/INTERIOR_CHECKS.json": "4a647d678ec83aa024718763dd5f048ca835b880da392c66cb48305e37c7a927",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/LEDGER_IDENTITY.json": "7e8d982333c43b1bf8b0ccb3af0d90b75afb0ebd625ff2454a53a86219ba0c78",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/LOG_TAIL_NONOPTIMAL.txt": "85f1cc9343c1e01ad6fd1db3df98779cf519472c62a6301282e7f7ccaab263ec",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/MATH_PROBLEM.json": "79d8df7dd0b17c098c7e141b7de691466d86d7c723355275c6df02c42a216549",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/MONITOR_integrated_nze.csv": "59b216ffae05fc125d248a26316ecfda392db76b69832628f32eb13bba99e7b3",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/PRECISION.json": "0d980c6ace2ee8fd1728e235088ad61ee6f05032305e05225f6bb10295a5bede",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/PRECISION.md": "421ff9f2a03e21d80972e8eec22b05ccceb712dc09b7aa51cff6ff47a636c77b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/RESOURCE.jsonl": "cb61442ab68a149ae5bea2687c039d644e06c0eb70625c546df23ca725585413",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/SOLVE_RECEIPT.json": "d49b143d26e57e3770aea1ac4544913f8ce0b8ebbda2dac5ec88ab33b6b77be7",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/STDERR_TAIL_NONOPTIMAL.txt": "54b0d65117814768fa462344b28f752e1e562a327860532f7c1164d5675f50bf",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/V5_GATES.json": "6b44f137fa5df291f3d6fa550ca381bb6e03478ec22d42b147fed5f6e7221643",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/VIOLATIONS.json": "170032e29c0162b01b30f197b7da11e804c62aa4392b7c6912fd0eb656ef1880",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/costs_active_research.csv": "39f1365578492d9fd1bdd82804dd8cc85fb76824bc07e5dbccc7a982489021ff",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/cross_border_flows.csv": "c95b838b1b2080537b5b2b7dfa8c8313122dcd99574e4fde010f36aa0ddb2927",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/kkt_summary.json": "af74c3ec7871c869112de6a2e9b7045eea8b3e3e5d0c29c424b577fd98d591ec",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/solve_log_scrubbed.txt": "e2cddfee772f0a0f3b2d37e72f2e45e2f96a126d851ef5f0372c18485e933252",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/integrated_nze/solve_time.txt": "9989f558a4d1b5f3ae01e2af476db2b8453e352127b480287c17a13a31c3c48a",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/pilot_integrated/EXPORTS.json": "6d4b3e3ce966f0d97d34678593216ca4f2e7a1d576e80dfaa1e9276392481867",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/pilot_integrated/PRECISION.json": "6b981d538418884a27da45ab91b447abb9558b365a1ac5d8241de1cf1e1d79e3",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/pilot_integrated/PRECISION.md": "985e749ee336ecea634a33df5fb9d2566faec7df04d58463d88607ee873d1cc3",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/GUROBI_LOG_SCRUBBED.txt": "b277b9ca8e6f42d2d0412a4b74ba55e298c325bc470ebca081ab0458c1e05c0b",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/SOLVE_RECEIPT.json": "6630d187b724f2d6aaa458f832003598b4bc800b53238e3cbe298cb7940880b5",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/SPEED_PROBE.json": "665032e14bd636e45acec91cacad02246a4fd329d3dc9620adbec2bf2565174a",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/STATUS.txt": "5e9c9c22ec8edc6592ec7a999aa0e950916117ca296eea587c4294bc81251154",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/V5_GATES.json": "5ca019f9c71738b3af7961299cbecde2f4676090e1a73d93beacc8b3adf4c4fe",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/probe/solve_log_scrubbed.txt": "c400f1812627c4598e9d9e5c512261798653cf246b44a1084c4f6083fdce25a6",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/s4o_batch_launch.txt": "bee556b078d31b341b16a0a0319698b068d8d6b38473d2def0f1572c74a1ca24",
+  "evidence/s4o_6/light_unpacked/s4o_batch_light_20261019T162951Z_6896/s4o_preflight.log": "c85ebc9721b3b59c52cc5e509ea1521b61504a721f613ac3a628959ca13e880f",
+  "evidence/s4o_6/results_20261019T162951Z_6896.tar.gz.sha256": "a808e11a1c3b0b238d17a4f92bce7c3e91e5c5ef155f8efea366774aab44ff3c",
+  "evidence/s4o_6/s4o_batch_light_20261019T162951Z_6896.tar.gz": "f8cffc10d4ac503727c62625384820f56d331678397ce16f1b09743de264caca",
+  "evidence/s4o_6/s4o_batch_light_20261019T162951Z_6896.tar.gz.sha256": "c44045fab702d87e751882f21e17a25c3e9398be647f6e27b7d5629ae21f130e",
+  "evidence/s4o_6/top/BATCH_REFERENCE.json": "9ef4d13124c62fb6165c915a36591087b60bee8eb5b4c0e79b89711c6e2f717a",
+  "evidence/s4o_6/top/PILOT_CONSISTENCY.json": "3c7928934a2b9fbada7968cef5cf452116ceff1f61b233525c3c34b005a257a9",
+  "evidence/s4o_6/top/STATUS.txt": "240fbf27e7acc32bf007eff112be2af963d55ffcffb82064631deb5a5ded854e",
+  "evidence/s4o_6/top/pilot_integrated/EXPORTS.json": "6d4b3e3ce966f0d97d34678593216ca4f2e7a1d576e80dfaa1e9276392481867",
+  "evidence/s4o_6/top/pilot_integrated/PRECISION.json": "6b981d538418884a27da45ab91b447abb9558b365a1ac5d8241de1cf1e1d79e3",
+  "evidence/s4o_6/top/pilot_integrated/PRECISION.md": "985e749ee336ecea634a33df5fb9d2566faec7df04d58463d88607ee873d1cc3",
   "evidence/scripts/s4o5_calc.py": "fc2eb8f31772ad6a4ec9f8e4c0209d0d1b62b9f9630f9cdf21ad1e62d35f4f81",
   "evidence/scripts/s4o_1_registry.sh": "cefb73875becf8bc63302cce2e765f6cc299a97a7a9773c88b6bbcc42c81203b",
   "evidence/scripts/s4o_1_stage_s4n.sh": "3b1a92dc603db30720bab32997724b08b5b10c4dd2bafc156286c684585de930",
@@ -654,13 +1267,35 @@
   "evidence/scripts/s4o_4_checks_dry.sh": "9e7d2860cfac2ba12cb3f0acd028811fac4c3b0c027d9562f9b2ad7ab1693d80",
   "evidence/scripts/s4o_4_package.sh": "ffeaa82fd4c2b23f78c06bfd1dbb30d83f75ebcdcf03216a8f4e7851a10c5d30",
   "evidence/scripts/s4o_4_script_tests.sh": "8be2348868424df83f9f83eba1a6976787247f76124926bb720ab515a3c00ada",
+  "evidence/scripts/s4o_6_evidence.sh": "6d8450a8c665a8224c02d5d891910a3c60cb0b236fe547ec87b66de3cc49bcb9",
+  "evidence/scripts/s4o_6_finalise.sh": "e78ddf54c144c194b0d9fc3eb6ff6b153225092c760ccfb1541237f702664066",
+  "evidence/scripts/s4o_6_summary.py": "f39b14704d4d3531c1e14d56759262a60ff2fd8950329aeb99c011739539be1c",
+  "evidence/scripts/s4o_6_summary.sh": "7a82283fc40f7de55e24d16174e6338e198a0799ec0b09fbb8f3f671b552ad3c",
+  "evidence/scripts/s4o_6_unpack.sh": "0eaa2358407213dff669b7e6f2b8896927e9032e7fc5e2861fe3cf80ce93d6b9",
   "evidence/scripts/s4o_7_finalise.sh": "a62dbfb6996a81e86bfe33b3ead4dea5b38efe9356bd54bebf87407a4df6d992",
-  "evidence/scripts/s4o_collect_evidence.py": "cbfbcf9a6fb358e61fafdb5aea2cd43474019c1b5316a14dce1d975c52cc2cc2",
+  "evidence/scripts/s4o_c1.sh": "5c62c9eb6c4fe8a552ca0d8c2e7959d5cd55df479bd846cdae8e707c776ecf0a",
+  "evidence/scripts/s4o_c2.sh": "4a8682f26cfb87e49e0ea852ebf0fa0226675134b67bf24041278230ccd23709",
+  "evidence/scripts/s4o_c4.sh": "d77fd746b9bacc9ac468730d7d1070ade33f87d25f79ef7930eb5ba551255386",
+  "evidence/scripts/s4o_c5.sh": "dd6e9a9dae74a93ae8c0eb2ae7c38abba352d5aa5c4fdc8db9339e5db7d0f161",
+  "evidence/scripts/s4o_collect_evidence.py": "cab98d55f58d7ab1f0f93cb75ec569449aacdf35419ad788d8ef795f58edcf8a",
+  "evidence/scripts/s4o_del_lic.sh": "ac2a1322e823ff09c0d40fb80e82a109c00cf605452cbcef795e0abfa624e4fc",
+  "evidence/scripts/s4o_get.sh": "fa104de692516a9a3b346c7f44af402614bbc7cd86590563c957f398432324d9",
+  "evidence/scripts/s4o_get_runs.sh": "940cab1c6554c196031c36a3b84914a4404e914ca284f28cd1331b7d017d009b",
+  "evidence/scripts/s4o_launch_batch.sh": "5ec7972f45fc478b4ec87d8f0b62fa52dc41103604565857af67eb29f6151e81",
+  "evidence/scripts/s4o_probe.sh": "89f0f48e0de014b344be2496a855a1dc794256ac5dc05a0a7661dec279ca58f8",
+  "evidence/scripts/s4o_r_check.sh": "119790648f7bd00ed0734590f5642f75ff4e39715713af7df84b54e1a3d2364e",
+  "evidence/scripts/s4o_r_post.sh": "2c56c0cadccc8b90895846e348c41e352b6d62fd7b0e8e19ef24148641a07ea6",
+  "evidence/scripts/s4o_r_restart.sh": "37f600b250e602f3a2508456de5556fd699b9ef96ff537f516b20548d3ce9c91",
+  "evidence/scripts/s4o_r_runpack.sh": "ae9969bbc78d33c3130c712d9951e953a013b0366704213796052ca2780b46a6",
+  "evidence/scripts/s4o_r_watch.sh": "752fedde7ad4f5a890ac436dc712ad297bdec37d2196937fb0c49f31a5378cce",
   "evidence/scripts/s4o_s1_commit_3b.sh": "9d26ca386f857c69fec3d2dc1668274d80c3db1956dcd6d3c12ab55857b8878e",
   "evidence/scripts/s4o_s1_commit_code.sh": "78fbfc219c530fd6a54a57378d0c2486b8792d78231808f18b33ea82a4838990",
   "evidence/scripts/s4o_s1_finalise.sh": "83e5c60e98d28060056ecaa22467797952e45c1b72844fdcdad017be0fb90f04",
   "evidence/scripts/s4o_s1_registry.sh": "21ac8b70d998cbfdc296ca44639abce2ff726902678cf62fcc88d53ef72c87ac",
   "evidence/scripts/s4o_scan.sh": "499173a1f0e800463d5c3a7964fc59801bc1524013b011521a06079507684dc1",
-  "evidence/scripts/s4o_syntax.sh": "1a26d104529a8f94a66773833c81df70080482a70b924a8b59a0cef0699f37ee"
+  "evidence/scripts/s4o_scan_split.sh": "2dcfb5a8d460566aa32f118e7f2eedd79cba48d6a52de3e8039134f7d94d8ec4",
+  "evidence/scripts/s4o_ssh.sh": "a57654dd1c947e1410885a0b1ae390a96b88a50a6316c6cc91e795bb2e14060f",
+  "evidence/scripts/s4o_syntax.sh": "1a26d104529a8f94a66773833c81df70080482a70b924a8b59a0cef0699f37ee",
+  "evidence/scripts/s4o_watch.sh": "63c18345553f8830449f88a43034d56ca2f4af57f083bc5718ab4e6cfc78a946"
  }
 }

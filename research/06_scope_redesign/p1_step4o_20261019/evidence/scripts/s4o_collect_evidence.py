@@ -54,7 +54,20 @@ res = dict(
                    dry_run_solves=2, licence_scan="no hit (30 files)", script_tests_on_packaged_scripts="59/59, 9/9"),
         s4o_5=dict(file="CLOUD_RESOURCE_ESTIMATE.md section 23", rows_2920=72.06e6, memory_gib=dict(affine=106, proportional=121, superlinear_1_15=165), hours_per_run_8470Q="15-35 (9-70)",
                    cards=2, data_disk_gb=">=100", price="DATA_PENDING"),
-        s4o_6="not authorised; stopped after the local part"),
+        s4o_6="see s4o_6 below"),
+    s4o_6=dict(
+        supplement_02=dict(file="S4O_SUPPLEMENT_02.md", sha256=sha(D / "S4O_SUPPLEMENT_02.md") if (D / "S4O_SUPPLEMENT_02.md").exists() else None,
+                           expected="1898d3f79798eff99ddddccda32c7f0bc57ec669c25dabcd4c4bfb1bdbcb7d97", mode="unattended, decision rules"),
+        instance=dict(cpu="Intel Xeon Platinum 8481C", cgroup_cores=25, cgroup_memory_bytes=98784247808, data_disk="50 GB, empty (clone without data disk)",
+                      host_port="not recorded (command line only)"),
+        upload=dict(bytes=264363290, seconds=7192, sha256sums="26 OK", commit="126110ff"), licence=dict(uploaded="2026-10-20 00:10:26", deleted="2026-10-20 03:43:29", verified_absent=True),
+        preflight="OK", probe=dict(r_work_units=0.8356, r_iterations=0.9082, objective_rel_diff=-2.5e-12, time_limit_s=21600, wall_cap_s=22500),
+        batch=jl(E / "s4o_6/S4O6_BATCH_SUMMARY.json"),
+        recovery=dict(full_batch=dict(bytes=461001705, sha256="c37f8d938176850d3cbd316907030e07eadb6a71eef0491d6f3f82e9fd47ccef"),
+                      light=dict(bytes=5782612, sha256="f8cffc10d4ac503727c62625384820f56d331678397ce16f1b09743de264caca"),
+                      per_run=dict(disconnected=150455004, disconnected_gap=151427801), pilot_full="not on this instance (original D58 data disk only)"),
+        automatic_decisions="D1-D13 (S4O_PROGRESS.md, report section 11.8)",
+        final_scan=dict(host_hits=0, port_standalone_hits=0, port_inside_longer_numbers_files=20, licence_string_hits=0)),
     files={str(p.relative_to(D)): sha(p) for p in sorted(E.rglob("*")) if p.is_file() and "__pycache__" not in p.parts},
 )
 out.write_text(json.dumps(res, indent=1, default=str))
