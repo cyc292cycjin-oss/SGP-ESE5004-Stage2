@@ -150,10 +150,395 @@
    "kkt_relative_gap": 7.8423551753934e-06
   }
  },
- "not_done": {
+ "not_done_at_the_s4o3_stop": {
   "s4o_4": "not entered (stop condition); make_package.sh / package_checks.py / preflight in-place update written during the S4O-3 run, not run (syntax checked only)",
   "s4o_5": "not done (stop)",
   "s4o_6": "not authorised"
+ },
+ "supplement_01": {
+  "file": "S4O_SUPPLEMENT_01.md",
+  "sha256": "f723c544946142ca5e896a56652f95e4fcb3eba586bed21d9cce5ce6e8c7a7a4",
+  "expected": "f723c544946142ca5e896a56652f95e4fcb3eba586bed21d9cce5ce6e8c7a7a4",
+  "decision": 121,
+  "s4o_2b": {
+   "commit": "87e28e3b",
+   "default_profile": "formal_barrier",
+   "registry_fragment": "s4o_1",
+   "tests_research_passed": 544,
+   "test_s4o_2": 8,
+   "script_tests": "59/59",
+   "probe_tests": "9/9",
+   "run_defaults": {
+    "runs": "disconnected,integrated_nze",
+    "gurobi_time_limit_s": 21600,
+    "wall_cap_s": 22500,
+    "pilot_reference": "PILOT_INTEGRATED / PILOT_PRECISION"
+   }
+  },
+  "s4o_3b": {
+   "run": "/home/jin/s4o_local/pkg_e2e/runs/20261019T133528Z_584",
+   "termination": "optimal",
+   "solver_profile": "formal_barrier",
+   "solver_parameters": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-08,
+    "BarHomogeneous": 1,
+    "Threads": 8,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
+    "TimeLimit": 1750.0
+   },
+   "input_network": {
+    "path": "/home/jin/s4o_local/pkg_e2e/networks/integrated_365_24h_unsolved.nc",
+    "sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+    "snapshots": 56,
+    "truncated_to": 56,
+    "horizon_scaling": {
+     "method": "representative_weights_sum_8760",
+     "snapshots": 56,
+     "weight_hours_per_snapshot": 156.42857142857142,
+     "horizon_fraction": 1.0,
+     "scaled_stores": [],
+     "annual_caps_scaled": false
+    }
+   },
+   "objective": 648381181410.4515,
+   "s4m2_objective": 648381181410.4515,
+   "objective_rel_diff": 0.0,
+   "c1_in_exports_solve_and_export": true,
+   "grade": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "price_settled_results": "usable"
+   },
+   "acceptance": {
+    "optimal": true,
+    "a": true,
+    "b": true,
+    "c": true,
+    "accepted": true,
+    "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+   },
+   "reference_grade_s4o2_equivalence": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "price_settled_results": "usable"
+   },
+   "grade_equal": true,
+   "info_vs_s4o2_equivalence": {
+    "a_diff_bn": [
+     -1.221533203125e-08,
+     -1.221533203125e-08
+    ],
+    "b_country_max_abs_diff_bn": 0.0,
+    "c_country_max_abs_diff_bn": 0.0
+   },
+   "gates_information": {
+    "all_passed_solver_tolerances": false,
+    "all_passed_barconvtol": false,
+    "failing": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B12",
+     "B3"
+    ],
+    "failing_excl_B12": [
+     "A1_A2",
+     "A3",
+     "B1",
+     "B3"
+    ],
+    "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+   },
+   "interior_solution": true,
+   "peak_rss_gib": 4.1103973388671875,
+   "solve_seconds": 310.6289224624634,
+   "accepted": {
+    "optimal": true,
+    "objective_le_1e9": true,
+    "c1_in_exports": true,
+    "grade_equal": true,
+    "all": true
+   }
+  },
+  "s4o_4": {
+   "commit": "126110ff",
+   "networks_vs_f50c8850": {
+    "reference": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_step4m_20261019/cloud_package_dist/SHA256SUMS",
+    "files": [
+     {
+      "path": "networks/disconnected_365_24h_unsolved.nc",
+      "new": "b411223e85c7b0eec53dbafe1bb7e5b2378247281b38cdd4025c8aeef0aab403",
+      "reference": "b411223e85c7b0eec53dbafe1bb7e5b2378247281b38cdd4025c8aeef0aab403",
+      "same": true
+     },
+     {
+      "path": "networks/disconnected_BUILD_RECEIPT.json",
+      "new": "62895c06c1311ee88cceeb3939424ce6679179b928c88bab494bcd6bad86262e",
+      "reference": "62895c06c1311ee88cceeb3939424ce6679179b928c88bab494bcd6bad86262e",
+      "same": true
+     },
+     {
+      "path": "networks/disconnected_costs_active_research.csv",
+      "new": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "reference": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "same": true
+     },
+     {
+      "path": "networks/disconnected_gap_costs_active_research.csv",
+      "new": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "reference": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "same": true
+     },
+     {
+      "path": "networks/disconnected_gap_diagnostic_365_24h_unsolved.nc",
+      "new": "c4a5d8ffb6ff9856533555d4e813cc502d8ddb63c8bb958f6677dbe122f0ad3a",
+      "reference": "c4a5d8ffb6ff9856533555d4e813cc502d8ddb63c8bb958f6677dbe122f0ad3a",
+      "same": true
+     },
+     {
+      "path": "networks/disconnected_gap_diagnostic_BUILD_RECEIPT.json",
+      "new": "c0be4ca608ce50638c69e0eaf067d3b460499456245e4fa31bc92ec020379675",
+      "reference": "c0be4ca608ce50638c69e0eaf067d3b460499456245e4fa31bc92ec020379675",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_365_24h_unsolved.nc",
+      "new": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+      "reference": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_56_3h_probe_unsolved.nc",
+      "new": "21b079cba9f629949f004336227eab7f762055a9bc9a2dd713ab3593175eb021",
+      "reference": "21b079cba9f629949f004336227eab7f762055a9bc9a2dd713ab3593175eb021",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_BUILD_RECEIPT.json",
+      "new": "ac4511dcaafb35cb1ff6cda9086ae2f51419cea2b07a78ea3058df77f28061eb",
+      "reference": "ac4511dcaafb35cb1ff6cda9086ae2f51419cea2b07a78ea3058df77f28061eb",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_costs_active_research.csv",
+      "new": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "reference": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_nze_365_24h_unsolved.nc",
+      "new": "71503e0bfbe6a8006d31db6c934e49e7280ca616a51058a8c5f621d2d08dfd5a",
+      "reference": "71503e0bfbe6a8006d31db6c934e49e7280ca616a51058a8c5f621d2d08dfd5a",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_nze_BUILD_RECEIPT.json",
+      "new": "2fec0aca5ec75d908f65fb3cdaf14f860b39df9dd7f992d4d23299b3dfa9ed79",
+      "reference": "2fec0aca5ec75d908f65fb3cdaf14f860b39df9dd7f992d4d23299b3dfa9ed79",
+      "same": true
+     },
+     {
+      "path": "networks/integrated_nze_costs_active_research.csv",
+      "new": "39f1365578492d9fd1bdd82804dd8cc85fb76824bc07e5dbccc7a982489021ff",
+      "reference": "39f1365578492d9fd1bdd82804dd8cc85fb76824bc07e5dbccc7a982489021ff",
+      "same": true
+     }
+    ],
+    "all_same": true
+   },
+   "delta": {
+    "changed": [
+     {
+      "path": "COMMIT",
+      "bytes": 41,
+      "sha256": "0b1314cb27a1e87de5e6ba0b2a0b2712122cd6f0bf8343b553aec3f615d1eef5",
+      "reference_sha256": "8c0a6ce041669f4c4c047e5bdc052f28870ca25447e3531aece9660515f9d8a4"
+     },
+     {
+      "path": "DATA_CONFIG_MANIFEST.json",
+      "bytes": 326330,
+      "sha256": "0a24f980738545a0cd5fad046eb4f0e074769cfac56a2c9cf35d977845559cad",
+      "reference_sha256": "74a94468fe934447a1502ae15753f5371c0b249216cab0104326a17a6d2f6c72"
+     },
+     {
+      "path": "preflight.sh",
+      "bytes": 10149,
+      "sha256": "71e95ffa4ec68cf32ed3b6f7ad82b3c8d1e078fafaa46ea2e2c8a6c7da400d46",
+      "reference_sha256": "a2e4de90745499ab6e5de1b447792656106f6d9aba4da4155dec8d593ae1ed92"
+     },
+     {
+      "path": "run_365x24h.sh",
+      "bytes": 30120,
+      "sha256": "58d97ec59a3d02d67dbe2588746673c90c44f56d4854f247fadd46c9c02b951c",
+      "reference_sha256": "98dfc08fe5a4a95a9586d11be32429ba62ee66215794d315c49dfa8fa9a68a59"
+     },
+     {
+      "path": "speed_probe.sh",
+      "bytes": 6073,
+      "sha256": "03dda15919c77f0dbd5a7ad55d0aeae83034ea8aedd1e15a9e08aaeb28bc13dc",
+      "reference_sha256": "03adb381846b7f738230800ed2a6602a18e12502fc14c47fc13b954638e62193"
+     }
+    ],
+    "added": [
+     {
+      "path": "BUILD_INPUT_CHANGES_disconnected.json",
+      "bytes": 1920,
+      "sha256": "112c3646e8caa08ff730e418c0a2abdb365f00b8b86c11e90ec32a4a9d8dec68"
+     },
+     {
+      "path": "BUILD_INPUT_CHANGES_disconnected_gap.json",
+      "bytes": 1920,
+      "sha256": "112c3646e8caa08ff730e418c0a2abdb365f00b8b86c11e90ec32a4a9d8dec68"
+     },
+     {
+      "path": "BUILD_INPUT_CHANGES_integrated.json",
+      "bytes": 1920,
+      "sha256": "112c3646e8caa08ff730e418c0a2abdb365f00b8b86c11e90ec32a4a9d8dec68"
+     },
+     {
+      "path": "BUILD_INPUT_CHANGES_integrated_nze.json",
+      "bytes": 1920,
+      "sha256": "112c3646e8caa08ff730e418c0a2abdb365f00b8b86c11e90ec32a4a9d8dec68"
+     },
+     {
+      "path": "code_126110ff.tar.gz",
+      "bytes": 123860003,
+      "sha256": "6d0d6cb52a077fa8b9bf3756311f94e4e69784cfec41890aed65dbae31746dfe"
+     }
+    ],
+    "removed": [
+     "code_f50c8850.tar.gz"
+    ],
+    "upload": {
+     "files": [
+      "COMMIT",
+      "DATA_CONFIG_MANIFEST.json",
+      "preflight.sh",
+      "run_365x24h.sh",
+      "speed_probe.sh",
+      "BUILD_INPUT_CHANGES_disconnected.json",
+      "BUILD_INPUT_CHANGES_disconnected_gap.json",
+      "BUILD_INPUT_CHANGES_integrated.json",
+      "BUILD_INPUT_CHANGES_integrated_nze.json",
+      "code_126110ff.tar.gz",
+      "SHA256SUMS",
+      "PACKAGE_MANIFEST.json",
+      "PACKAGE_DELTA.json"
+     ],
+     "bytes": 124256269,
+     "note": "upload the listed files with ONE rsync stream into the existing package folder (no parallel streams, never interrupt a --partial transfer); the files under 'removed' stay on the instance (no deletion; they are not in the new SHA256SUMS); then the full sha256sum -c SHA256SUMS (every file) and COMMIT; preflight.sh unpacks code_<COMMIT8>.tar.gz and moves an older ./repo aside (repo_prev_<commit8>) instead of reusing it"
+    },
+    "unchanged_bytes": 140097844
+   },
+   "build_input_changes": {
+    "build_commit": "f50c8850a556bdf3b0504d0367325a5f5fb551aa",
+    "head": "126110ffca2bffdc70442936ed742e95c47798e8",
+    "allowed_by_path": [
+     "scripts_project/s4m_5_collect_evidence.py",
+     "scripts_project/s4o_0_data.py",
+     "scripts_project/s4o_1_data.py",
+     "scripts_project/s4o_c1_precision.py"
+    ],
+    "solve_driver": [
+     "scripts_project/s2_solve.py"
+    ],
+    "config_solver_only": [
+     "configs/research/baseline.yaml"
+    ],
+    "registry_additive": [
+     "research_inputs/registry_v5/D1_EVIDENCE.json",
+     "research_inputs/registry_v5/DATA_REGISTRY.csv",
+     "research_inputs/registry_v5/fragments/s4o_0.csv",
+     "research_inputs/registry_v5/fragments/s4o_1.csv",
+     "scripts_project/d1_registry.py"
+    ],
+    "refused": [],
+    "build_modules_checked": [
+     "assembly_components",
+     "asset_survival",
+     "build_research_assets",
+     "build_research_network",
+     "carbon_architecture",
+     "carrier_architecture",
+     "closeout_gate5_metadata",
+     "country_carbon",
+     "d1_common",
+     "daily_resolution",
+     "execute_gate5_lossless",
+     "finish_gate5_lossless",
+     "gate5_cloud_resources",
+     "gate5_resources",
+     "gate6_execution_context",
+     "gate6_result",
+     "integrate_surviving_assets",
+     "inventory_audit",
+     "inventory_audit_3h",
+     "lossless_gate5_lifecycle",
+     "network_checks",
+     "phase4_static",
+     "precision_handoff",
+     "price_basis",
+     "run_gate5_validation",
+     "run_gate6_baseline",
+     "run_gate6_no_solver_tests",
+     "s1_candidates",
+     "s2_costs",
+     "s2_layers",
+     "s2_network",
+     "s3_layers",
+     "s4a_fleet",
+     "s4a_layers",
+     "s4b_candidates",
+     "s4b_layers",
+     "s4c_layers",
+     "s4d_layers",
+     "s4e_layers",
+     "s4f_layers",
+     "s4g_layers",
+     "s4h_layers",
+     "s4j_layers",
+     "s4k_layers",
+     "s4l_layers",
+     "scenario_network",
+     "sector_adapter",
+     "selected_closure",
+     "test_gate5_lossless_integration",
+     "test_gate6_authorization_flow",
+     "test_gate6_baseline_3h",
+     "test_lossless_export",
+     "validation_dynamics",
+     "validation_temporal"
+    ]
+   },
+   "sha256sums_ok": "26/26",
+   "preflight": "OK (sha, networks, profile, c1, versions, tools)",
+   "dry_run_solves": 2,
+   "licence_scan": "no hit (30 files)",
+   "script_tests_on_packaged_scripts": "59/59, 9/9"
+  },
+  "s4o_5": {
+   "file": "CLOUD_RESOURCE_ESTIMATE.md section 23",
+   "rows_2920": 72060000.0,
+   "memory_gib": {
+    "affine": 106,
+    "proportional": 121,
+    "superlinear_1_15": 165
+   },
+   "hours_per_run_8470Q": "15-35 (9-70)",
+   "cards": 2,
+   "data_disk_gb": ">=100",
+   "price": "DATA_PENDING"
+  },
+  "s4o_6": "not authorised; stopped after the local part"
  },
  "files": {
   "evidence/s4o_2/PILOT_PRECISION_S4N1_old_tool.json": "7f3271b060e5c085b30e5d16bac6577ff6c82383ef73b8801ccc587fd745c410",
@@ -184,38 +569,77 @@
   "evidence/s4o_3/s4o_integrated/kkt_summary.json": "14932b0fa5dd007e74815ce37593dfa482f2575f3d0f4e33897b6914461a11d0",
   "evidence/s4o_3/s4o_integrated/solve_log_scrubbed.txt": "fcd35534db0a99a44366ad249e0995f97b1bf565a6d55c8c80edf05b6151e446",
   "evidence/s4o_3/s4o_integrated/solve_time.txt": "d85ae8191c41fc6317905e17b41bd481a814dddcb569902a9427f0f75edd263a",
+  "evidence/s4o_3b/MONITOR_integrated.csv": "a91b584e54dec023107b96f63bef3dc2fae3068c11468a066922b59eaca6a211",
+  "evidence/s4o_3b/S4O3B_CHECK.json": "a30820c37ea66b7e857f064b73b1be1798b706cc7d82ec38dad7988d9a81fb5d",
+  "evidence/s4o_3b/STATUS.txt": "6770b5215ad7faaaaa28270a01b388f22f790bd2b07e9f3cae65acf4925b6710",
+  "evidence/s4o_3b/integrated/COUNTRY_COST_LEDGER.csv": "a030e93614f0bc1335f6aa8c44cddd941f0bcbcdd315b675832042a89db83230",
+  "evidence/s4o_3b/integrated/EXPORTS.json": "a4f0e473523d52ba59fc433833431acb0fcea472dc7385095e77343cf5e153d1",
+  "evidence/s4o_3b/integrated/GUROBI_LOG_SCRUBBED.txt": "094c5bd1c29806dcfe52417eed6b4d2ac3c1f3f7999d6bb84c23bee4afe453b1",
+  "evidence/s4o_3b/integrated/INTERIOR_CHECKS.json": "18f07b9b4b89be98666968707f9016d1c6aafa725198cb0be33853e9d56b1a86",
+  "evidence/s4o_3b/integrated/LEDGER_IDENTITY.json": "4438b886ae6faee236245071a8c611b3dcdea2487d1a3f19e96e624b029fd9b2",
+  "evidence/s4o_3b/integrated/PRECISION.json": "8f345791fb45e0e97a10dbcc53992b69c34a47b8f875e7663de452bf0cdb8267",
+  "evidence/s4o_3b/integrated/PRECISION.md": "ea9de699d562a0263a4279c9f12b15a9d081ede22ba34a500a6feadb140e8b84",
+  "evidence/s4o_3b/integrated/SOLVE_RECEIPT.json": "f1855e52459fd1839e2f47e9c2b71ddfcd8a8c9dfc7c3163a0a323d11c9a5b27",
+  "evidence/s4o_3b/integrated/V5_GATES.json": "2f8feaa41f81d70787ca40adf999ac51f5911263edb639b5518f73cb5d7e5af3",
+  "evidence/s4o_3b/integrated/VIOLATIONS.json": "29405f495a15cc5cc80c223703ca36ba965930830280fa35fd859fc261e12945",
+  "evidence/s4o_3b/integrated/c1_time.txt": "651c85bdbc4febc6908666ffff039740825f3de8e12d3d6d02bb107498d704be",
+  "evidence/s4o_3b/integrated/solve_log_scrubbed.txt": "f76a6e2d405d68bd22c652b307d5106e5ddc2d81fc24e07a992f2d16025e929a",
+  "evidence/s4o_3b/integrated/solve_time.txt": "c9be5a2425b008d276380aef8ec158c7f3ab5641192b2f81ca94af4ee773389a",
   "evidence/s4o_4/fake_s2_solve.py": "3250b0f7e72b02eb8a4836d9e7e7080482dfa1447e41d67564067e87d2d1b806",
+  "evidence/s4o_4/fake_s2_solve_probe.py": "fedada31cb79e6d942eb62c00468d29ccd6a3357985d7827a487632cc55ad33d",
   "evidence/s4o_4/fake_s4o_c1_precision.py": "3e2e0f445a76f1f1b4d963d4442acedc41f9235637ba964cfad0d6b5341e698b",
-  "evidence/s4o_4/results/A_MONITOR_integrated.csv": "c29bd4e5ebf2786a89dbc920f6bde68530bbe853d1c7a775e9efc1c0a82f0d16",
-  "evidence/s4o_4/results/A_STATUS.txt": "0c54f5108610384f380c3f9b4a2f2271953eb18ce778eddabc0b72d12f47b9ba",
-  "evidence/s4o_4/results/A_stdout.txt": "0c54f5108610384f380c3f9b4a2f2271953eb18ce778eddabc0b72d12f47b9ba",
-  "evidence/s4o_4/results/B_STATUS.txt": "c4f5e45e10bdefd5d98a91aa8843bc9b933d7ecfbb0f6c400512a965dfcc049d",
-  "evidence/s4o_4/results/B_stdout.txt": "c4f5e45e10bdefd5d98a91aa8843bc9b933d7ecfbb0f6c400512a965dfcc049d",
+  "evidence/s4o_4/results/A_MONITOR_integrated.csv": "1539d9996c4f0675614fe5cc46bbe73b7e82e8ad8f9dbd272293c064bcf3a941",
+  "evidence/s4o_4/results/A_STATUS.txt": "d9e828830b800b9b8d1168d508670ea0a94beab0eb152bbbd629b551ad3d94b4",
+  "evidence/s4o_4/results/A_stdout.txt": "d9e828830b800b9b8d1168d508670ea0a94beab0eb152bbbd629b551ad3d94b4",
+  "evidence/s4o_4/results/B_STATUS.txt": "745d5e89bc3273bc680855f3cbfe8c444a5ccec727f15cfddc9dd037e1893199",
+  "evidence/s4o_4/results/B_stdout.txt": "745d5e89bc3273bc680855f3cbfe8c444a5ccec727f15cfddc9dd037e1893199",
   "evidence/s4o_4/results/C_badprofile.txt": "37449ed2a68e894ad811c39f00ca076a1e559b31ba876296ab02193d5fc8a23a",
-  "evidence/s4o_4/results/C_dryrun.txt": "41872793263bbad781b05e73391d2fb5ac2d25fbb95dde8283a12d8e749e0bbe",
+  "evidence/s4o_4/results/C_dryrun.txt": "3f9050030e3c55e1eebac9bfde4921a0fe0e29a6453ebd2fe1024dc331e49cbb",
   "evidence/s4o_4/results/C_lanes3.txt": "68879ffdd7ed96667668918ff92accd7ef7cdd3586cc1ca6b81d202b612fc4e2",
-  "evidence/s4o_4/results/D_preflight_v1.txt": "37e227f20bf727f78c513666a7c5689134be8500008f73f1551ac35a703b316f",
-  "evidence/s4o_4/results/D_preflight_v1max.txt": "558a6ddb9a1e86c160628557da44e88d10e80425a76580420c069bb128c5da84",
-  "evidence/s4o_4/results/D_preflight_v2.txt": "f82cd260ddaeb9ac33d505098a6ddb0075b431744a9195e712fb030b33fa246e",
-  "evidence/s4o_4/results/D_preflight_v2max.txt": "558a6ddb9a1e86c160628557da44e88d10e80425a76580420c069bb128c5da84",
-  "evidence/s4o_4/results/F_STATUS.txt": "6540667ba5a8b3614073f9ff8c8e937333bf17a39a30d963d5d1aea213ed11b0",
-  "evidence/s4o_4/results/F_stdout.txt": "6540667ba5a8b3614073f9ff8c8e937333bf17a39a30d963d5d1aea213ed11b0",
-  "evidence/s4o_4/results/G_STATUS.txt": "36688ecaa9367191cf3fca7a7e48222c560e4f0f1e23657aea28b90f0203fe7d",
-  "evidence/s4o_4/results/G_stdout.txt": "36688ecaa9367191cf3fca7a7e48222c560e4f0f1e23657aea28b90f0203fe7d",
+  "evidence/s4o_4/results/D_preflight_v1.txt": "143108eb6fcbccf9b7e58a4baa67464fdeaed824351196f741fa1f5689077935",
+  "evidence/s4o_4/results/D_preflight_v1max.txt": "2eea09ee8b4da846333fca03ae0ae385729160a13f9080c1fdeb12725d1b15fc",
+  "evidence/s4o_4/results/D_preflight_v2.txt": "cf3d3b223c53cbe9a6c3f67bbd872386949107606f6b0baec822aaf182e9cdd1",
+  "evidence/s4o_4/results/D_preflight_v2max.txt": "2eea09ee8b4da846333fca03ae0ae385729160a13f9080c1fdeb12725d1b15fc",
+  "evidence/s4o_4/results/F_STATUS.txt": "d330d5bc2e9d0826a0e9c757490eceb86722aaa2dc9f2a56f6f03fff95aa3f85",
+  "evidence/s4o_4/results/F_stdout.txt": "d330d5bc2e9d0826a0e9c757490eceb86722aaa2dc9f2a56f6f03fff95aa3f85",
+  "evidence/s4o_4/results/G_STATUS.txt": "c72aad28a2bb246b734fff8779697c43ab9035d6425180c1dce6291d89ef96c7",
+  "evidence/s4o_4/results/G_stdout.txt": "c72aad28a2bb246b734fff8779697c43ab9035d6425180c1dce6291d89ef96c7",
   "evidence/s4o_4/results/H_preflight_A.txt": "522a83a17074edb8fa607a32d261b6df69b257286c2209dc40770f47c3af0384",
   "evidence/s4o_4/results/H_preflight_bad.txt": "05400a8b481c338307a863e50b2c709ac89be13341c786068735f74de54c34d0",
-  "evidence/s4o_4/results/H_preflight_default.txt": "8881174bbf3db8456e7ad089e10da2fc45a89ec55705cde2963942140f5008ec",
-  "evidence/s4o_4/results/TEST_RESULTS.txt": "2bcfcbd6efa422aeb3cae857bf60c143045445db6b99c8b74c44517bbb91276b",
-  "evidence/s4o_4/results/TEST_RESULTS_probe.txt": "37a5b38556e542196dfed5c08b26f527465fe08b0e8951f439e223d0edfacb88",
-  "evidence/s4o_4/results/probe_A_SPEED_PROBE.json": "292fdb43b69f5f028d43869317f8f9c34aa0fe545ec09b6f884e7bee0049c44f",
-  "evidence/s4o_4/results/probe_A_STATUS.txt": "ea00fa1bf4634e4676b7c9b502f432026181c33f750c7bc3c30c8ae75b475735",
-  "evidence/s4o_4/results/probe_A_stdout.txt": "6fd4c43155db330447186e148bfeb5f51eb40b1d4823ba55e9f794294abcf0b5",
-  "evidence/s4o_4/results/probe_B_SPEED_PROBE.json": "2c432978b1eebbfee7fbbab7a40397deb532caab5290d6f0b9b3ec4103a7cbad",
-  "evidence/s4o_4/results/probe_B_stdout.txt": "f23eabe108495a999e75ccadcb2b953ebc8fffca042a56a622baab7282dc9cc6",
+  "evidence/s4o_4/results/H_preflight_default.txt": "e6cda95f956abc0fa1a8a31c18d754d3a7ac71a9305da182ec9445254a6fe91e",
+  "evidence/s4o_4/results/I_preflight_1.txt": "13d9043a5e15bf8e57793727918230306df530ab942bf5247874f217f8f34b00",
+  "evidence/s4o_4/results/I_preflight_2.txt": "6653dee677b61a99a3850c9cce6c4cce6556af453c4a3738963390f7791f977f",
+  "evidence/s4o_4/results/K_STATUS.txt": "e86610601ee617a62f115b3a154e855adcc89ace1805d8a4fd766a9ae35b9f69",
+  "evidence/s4o_4/results/K_stdout.txt": "e86610601ee617a62f115b3a154e855adcc89ace1805d8a4fd766a9ae35b9f69",
+  "evidence/s4o_4/results/L_STATUS.txt": "3d41f00e235b0773c1dd87e5985d5861ad26e5d46171715628198e88150b578b",
+  "evidence/s4o_4/results/L_stdout.txt": "3d41f00e235b0773c1dd87e5985d5861ad26e5d46171715628198e88150b578b",
+  "evidence/s4o_4/results/M_bad.txt": "b60cb08fbd9fadd5c99526f9714416f9fa2678c98f55c036d98ccbf24d2022c2",
+  "evidence/s4o_4/results/M_dryrun.txt": "e9c8f82efe37bb715d5bf80e38b8a622b1cea12090fd2faded43ccf22da4e9f8",
+  "evidence/s4o_4/results/TEST_RESULTS.txt": "45aa9f9163fee97ccdfd2d8ee2a8bdcb621cfc569c574b768d9c4942ef9ea502",
+  "evidence/s4o_4/results/TEST_RESULTS_probe.txt": "61e759dd0407601c7abdae4fd74b2937fcb0a2b867a04ad8e463befd38ecab0c",
+  "evidence/s4o_4/results/probe_A_SPEED_PROBE.json": "14a510809fe46d2fff99ce690fa9be05c56d64769b800ce5018d2defaea15b22",
+  "evidence/s4o_4/results/probe_A_STATUS.txt": "4dc57fd99d2d33258dcb08b724d828e9eaeed79eabab008c025970256e322b2e",
+  "evidence/s4o_4/results/probe_A_stdout.txt": "d71b495d3d33fbab4e43070e33b7e25f9fef31d0d51e124da2db5ff90829b4c7",
+  "evidence/s4o_4/results/probe_B_SPEED_PROBE.json": "679194d77fdc1c436adc7a00f2b42bedd733a6c9ecbe8bca5f850ff646fda404",
+  "evidence/s4o_4/results/probe_B_stdout.txt": "a0ae91c7de38614222175ab259afb31d67128ce9342f13bd48a37780ebe92904",
   "evidence/s4o_4/results/probe_C_stdout.txt": "95abd134524fd394bb91477e4e2bb52e894f34694c0d412edb26c8e115f4c7bd",
-  "evidence/s4o_4/results_probe_stdout.txt": "37a5b38556e542196dfed5c08b26f527465fe08b0e8951f439e223d0edfacb88",
-  "evidence/s4o_4/results_stdout.txt": "2bcfcbd6efa422aeb3cae857bf60c143045445db6b99c8b74c44517bbb91276b",
-  "evidence/s4o_4/test_s4o4_scripts.sh": "9d1ccd108d66d394dcce754628c9d55927b2d046b270b6a94a4249f8e9a23250",
+  "evidence/s4o_4/results_probe_stdout.txt": "61e759dd0407601c7abdae4fd74b2937fcb0a2b867a04ad8e463befd38ecab0c",
+  "evidence/s4o_4/results_stdout.txt": "45aa9f9163fee97ccdfd2d8ee2a8bdcb621cfc569c574b768d9c4942ef9ea502",
+  "evidence/s4o_4/test_s4o4_probe.sh": "72258b9536994c78a1be8756f92a6bc866c40efff66cf6b76861bd33df5b1e7c",
+  "evidence/s4o_4/test_s4o4_scripts.sh": "75b6d24ed94fb88d2147d4455339f9f1ccb5f15d5ba6a3635d2edaad88c7819d",
+  "evidence/s4o_4p/BUILD_INPUT_CHANGES_integrated.json": "112c3646e8caa08ff730e418c0a2abdb365f00b8b86c11e90ec32a4a9d8dec68",
+  "evidence/s4o_4p/COMMIT": "0b1314cb27a1e87de5e6ba0b2a0b2712122cd6f0bf8343b553aec3f615d1eef5",
+  "evidence/s4o_4p/DATA_CONFIG_MANIFEST.json": "0a24f980738545a0cd5fad046eb4f0e074769cfac56a2c9cf35d977845559cad",
+  "evidence/s4o_4p/NETWORKS_VS_REFERENCE.json": "1d50e4d2d8638a73cb39ef42954ae1f4691eabfb0e412902b95e7c9305dbbd16",
+  "evidence/s4o_4p/PACKAGE_DELTA.json": "3246e9bc16453ffcd3d221c0fcd92240a629f2fcf5ecd20d965116bda6e81d65",
+  "evidence/s4o_4p/PACKAGE_MANIFEST.json": "221ce72dbface6637f2d95aa734a1a8f0d626e596263aa96e2a15bfe810e8f51",
+  "evidence/s4o_4p/PROBE_REFERENCE.json": "15f6a5392098f84cf63900e7226f118308e762f2316c9cb8638a0ffbf425d3f7",
+  "evidence/s4o_4p/SHA256SUMS": "7ef8219d7f37c53ea8b48e030ed02e9cb0f26237c85c16bde6d7ae9dd68db6e8",
+  "evidence/s4o_4p/make_package_err.txt": "5c89153c33c2922ece3bf88f7353bcb69bdad41aa2d5a2c24dc03e47579776e6",
+  "evidence/s4o_4p/make_package_log.txt": "4084ca9fda6b0e282fe07e84a33fed034ca5029a1ccaefcb82a0db78c5cd68f8",
+  "evidence/s4o_4p/preflight_local_sections.txt": "cf55c5ce5ee4f3e56457a497fd20c34b10dad36fb54263125b055850406423eb",
+  "evidence/s4o_4p/run_dry_run.txt": "b75ab7a54ec953f4c3f008a86176e7b5845bbee9ac02bc915f9ff8865704288e",
+  "evidence/scripts/s4o5_calc.py": "fc2eb8f31772ad6a4ec9f8e4c0209d0d1b62b9f9630f9cdf21ad1e62d35f4f81",
   "evidence/scripts/s4o_1_registry.sh": "cefb73875becf8bc63302cce2e765f6cc299a97a7a9773c88b6bbcc42c81203b",
   "evidence/scripts/s4o_1_stage_s4n.sh": "3b1a92dc603db30720bab32997724b08b5b10c4dd2bafc156286c684585de930",
   "evidence/scripts/s4o_2_c1_equiv.sh": "0db2961111514dc2268f48f31ee7659a28d303e695f8932351efd063e609952c",
@@ -225,10 +649,17 @@
   "evidence/scripts/s4o_3_evidence.sh": "d3ee66f79fcdab6f73c0446e700ead3d98a5a7302451ec574c64699a6ed0fa1f",
   "evidence/scripts/s4o_3_readonly_info.sh": "f167497c23f15a2221af6dc1e2283129a899e4382e16744ced11783a63948861",
   "evidence/scripts/s4o_3_run.sh": "7b79dba7641d43c03e2a58448ce82e6a6bd3bfd536449184426f417b37d13864",
+  "evidence/scripts/s4o_3b_check.sh": "f121d86ab5921c28a9fa7967d942b3145aaa0f8c42578a91322accdac43f84d5",
+  "evidence/scripts/s4o_3b_e2e.sh": "124ea2899e421a2191ebeac0ae55827a1a7af9c45055c9be27c3e131ecd0ed9d",
   "evidence/scripts/s4o_4_checks_dry.sh": "9e7d2860cfac2ba12cb3f0acd028811fac4c3b0c027d9562f9b2ad7ab1693d80",
-  "evidence/scripts/s4o_4_script_tests.sh": "3f89ab438bc17e0d7b9ca6f56cc2feaf76d943bf96335c3b15f05f6f8c662455",
+  "evidence/scripts/s4o_4_package.sh": "ffeaa82fd4c2b23f78c06bfd1dbb30d83f75ebcdcf03216a8f4e7851a10c5d30",
+  "evidence/scripts/s4o_4_script_tests.sh": "8be2348868424df83f9f83eba1a6976787247f76124926bb720ab515a3c00ada",
   "evidence/scripts/s4o_7_finalise.sh": "a62dbfb6996a81e86bfe33b3ead4dea5b38efe9356bd54bebf87407a4df6d992",
-  "evidence/scripts/s4o_collect_evidence.py": "0335f06a1552b7aeceed7afa780cbb5f4cc47241a28efe8304a6d10f11743d50",
+  "evidence/scripts/s4o_collect_evidence.py": "cbfbcf9a6fb358e61fafdb5aea2cd43474019c1b5316a14dce1d975c52cc2cc2",
+  "evidence/scripts/s4o_s1_commit_3b.sh": "9d26ca386f857c69fec3d2dc1668274d80c3db1956dcd6d3c12ab55857b8878e",
+  "evidence/scripts/s4o_s1_commit_code.sh": "78fbfc219c530fd6a54a57378d0c2486b8792d78231808f18b33ea82a4838990",
+  "evidence/scripts/s4o_s1_finalise.sh": "83e5c60e98d28060056ecaa22467797952e45c1b72844fdcdad017be0fb90f04",
+  "evidence/scripts/s4o_s1_registry.sh": "21ac8b70d998cbfdc296ca44639abce2ff726902678cf62fcc88d53ef72c87ac",
   "evidence/scripts/s4o_scan.sh": "499173a1f0e800463d5c3a7964fc59801bc1524013b011521a06079507684dc1",
   "evidence/scripts/s4o_syntax.sh": "1a26d104529a8f94a66773833c81df70080482a70b924a8b59a0cef0699f37ee"
  }

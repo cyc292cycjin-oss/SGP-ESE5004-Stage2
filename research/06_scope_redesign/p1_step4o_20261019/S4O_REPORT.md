@@ -1,6 +1,14 @@
-# S4O 报告：生产档案定稿与本机标定复核——S4O-3 触发停止条件（2026-10-19）
+# S4O 报告：生产档案、运行流水线与部署包——S4O-3 停止后按补充 01（第 121 项）回到档案 A，本机部分完成（2026-10-19）
 
-## 摘要
+## 摘要（补充 01 后）
+
+1. **第 121 项执行：** 生产档案回到档案 A（`formal_barrier`），`pypsa_eur_default` 保留为已登记的非生产档案；键名识别、内点路径函数、C1 流水线、`RUN_GAP_S` 全部保留；注册表片段 `s4o_1`；`tests/research` 544 通过，部署脚本测试 59/59、探针 9/9（87e28e3b）。
+2. **S4O-3′ 端到端验证通过：** 用 S4O 版 `run_365x24h.sh`（56×3h，缺省档案 A，自动 C1）跑一次一体化：optimal，目标与 S4M-2 **相对差 0.0**，C1 自动执行并写入 `EXPORTS.json`，分级 layer1 + 电价结算，与 S4O-2 等价核对一致（126110ff）。
+3. **S4O-4 部署包：** 在 126110ff 上重建，`networks/` 13 个文件与 f50c8850 包 **逐一相同**；缺省档案 A、缺省运行"不互联 + NZE"、TimeLimit / 墙钟 21,600 / 22,500 s、试点一体化作 C1 参照；`PACKAGE_DELTA.json`：只需上传 124.3 MB（10 个变化或新增文件 + 清单）；预检、干跑、许可扫描、脚本测试全部通过。
+4. **S4O-5：** 2920×3h 外推：72.1 M 行；峰值 106–165 GiB（线性至超线性 1.15）；8470Q 上单运行约 15–35 h；建议 2 卡（240 GiB）、数据盘 ≥ 100 GB；单价待查（DATA_PENDING）。S4M §22.5 的 365×24h 导出高估已更正（应按时段比 6.52 而非小时比 156.4）。
+5. **停下等待云端授权（S4O-6）。** 原 S4O-3 停止报告保留在下方 §1–§9；补充 01 的详细结果见 §10。
+
+## 摘要（S4O-3 停止时，原文保留）
 
 1. **S4O-1 完成：** 标定分支推送、draft PR [#39](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/39)（叠在 #38 上）；S4N 交付物入库（f28772e6，扫描无许可串、无登录信息）；注册表补登第 118、119、120 项、台账 S4N 条目（46135c52）；S4O 分支 `codex/s4o-production-20261019` 自 46135c52 开出。
 2. **S4O-2 完成：** `pypsa_eur_default` 定稿（键名大写、`Threads 8`，其余原样）并设为缺省档案，档案 A 不改；`s2_solve.py` 拒绝只差大小写的键名；C1 并入运行流水线（`s4o_c1_precision.py`，与 S4N 工具在 S4N-1 上分国数值差 0.0）；测试 543 通过；部署运行脚本并入 C1，脚本测试 50/50、探针 9/9（d5b4eb96、18f55488）。
@@ -99,3 +107,89 @@
 | `evidence/scripts/` | 本次全部辅助脚本（不含主机、端口、密码） |
 | `cloud_package/` | S4O 版部署脚本（`run_365x24h.sh`、`preflight.sh` 已测；`make_package.sh`、`package_checks.py` 未运行） |
 | 本机结果（不进 git） | `results_project/s4o/s4o3/` |
+
+> 注：上表为 S4O-3 停止时的状态；补充 01 之后 `evidence/s4o_4/` 的结果为 59/59、9/9（含用例 I–M），`make_package.sh`、`package_checks.py` 已在 S4O-4 运行，见 §10。
+
+## 10. 补充 01（第 121 项）：回到档案 A、端到端验证、部署包与资源估算
+
+### 10.1 指令与授权
+
+- `S4O_SUPPLEMENT_01.md` v1，SHA256 `f723c544…a7a4`，与 `S4O_SUPPLEMENT_01_SHA256.txt` 及用户消息一致（VERIFIED）。
+- 用户消息（原文见 `S4O_PROGRESS.md`）：第 121 项已确认，生产档案回到档案 A；本补充中 1 次本机 56×3h 运行已授权；云端（S4O-6）仍未授权，本机部分完成后停下报告。
+- 第 121 项另定：不补做 S4O-3 未运行的两次；不放宽第 107 项与第 119 项 (a) 的标准。
+- 求解：本机 56×3h **1 次**（S4O-3′，21:35:29–21:41 SGT），无重试；云端无动作。本机上一次 Gurobi 结束于 20:57:18（间隔 > 5 分钟）。
+
+### 10.2 S4O-2′ 配置与测试（87e28e3b；VERIFIED）
+
+| 项 | 内容 |
+|---|---|
+| 配置 | `research.solver.profile: formal_barrier`；注释写明第 121 项及理由：1e-5 容差的落点约为 3e-5，约合 0.015–0.02 bn，与 0.01 bn 判定单位同量级，余量不足；结果受线程路径影响。`pypsa_eur_default` 注明为非生产档案（参数不变） |
+| 注册表 | 片段 `s4o_1`（`scripts_project/s4o_1_data.py`）：`s4o_decision_121_production_profile_A`、`s4o_decision_121_standards_kept`、`s4o_decision_121_batch_plan`、`s4o_question_source_s4o`；注册表 1,962 行 |
+| 保留 | 键名识别 `profile_parameters()`、内点路径 `interior_solution()`、C1 流水线 `s4o_c1_precision.py`、`RUN_GAP_S` |
+| 部署脚本 | `run_365x24h.sh`：缺省档案 A；缺省运行 `disconnected,integrated_nze`（一体化可用 `--runs` 选）；TimeLimit / 墙钟缺省 21,600 / 22,500 s；`PILOT_INTEGRATED` / `PILOT_PRECISION`：本批无一体化时，不互联完成后以"本批不互联 − 试点一体化"作 C1 分国参照（`BATCH_REFERENCE.json`），在**副本**上重评试点 C1（保留 `grade_history`，试点原文件不改），并写 `PILOT_CONSISTENCY.json`（试点输入网络 SHA256 是否等于本包 `integrated_365_24h_unsolved.nc`、档案与参数是否一致）；`TRUNCATE` 钩子（仅本机端到端验证用）。`speed_probe.sh` 建议值基数改为 21,600 s。`preflight.sh` 提示改为档案 A |
+| C1 模块 | `regrade` 兼容 S4N 试点的 `PILOT_PRECISION.json`（无 `acceptance` / `reference` 字段） |
+| 测试 | `test_s4o_2.py` 8 项（新增：用真实试点 `PILOT_PRECISION.json` 在副本上重评）；`test_s4c_5.py`、`test_s3_gates.py` 的缺省档案断言改回 `formal_barrier`；`tests/research` **544 passed**；部署脚本测试 **59/59**（新增用例 K：无一体化、试点参照、试点一致性、副本重评；L：试点网络不同时报告 `network_same=False`；M：`TRUNCATE` 干跑），探针测试 **9/9**（期望值 21,600 / 22,500 与 27,000 / 27,900 s） |
+
+### 10.3 S4O-3′ 本机端到端验证（VERIFIED；`evidence/s4o_3b/`）
+
+运行方式：本机类包目录（代码 = 87e28e3b 的 `git archive`；`networks/integrated_365_24h_unsolved.nc` 为 S4M-1 一体化 2920×3h 构建（SHA256 `513f56a6…`）的符号链接；构建成本表），**S4O 版 `run_365x24h.sh`**，`TRUNCATE=56`，不传档案（取缺省），`--runs integrated`，TimeLimit 1,750 s / 墙钟 1,800 s（30 分钟止损），一次。预检（profile、c1、versions、tools）OK。
+
+| 验收项（补充 01） | 结果 |
+|---|---|
+| optimal | **是**（141 次迭代 / 217.03 s / 407.73 WU；求解 310.6 s；墙钟 362 s；峰值 4.11 GiB；回执档案 `formal_barrier`，`interior_solution` True） |
+| 目标与 S4M-2（648,381,181,410.4515 EUR）相对差 ≤ 1e-9 | **0.0**（目标 648,381,181,410.4515） |
+| C1 在运行中自动执行并写入 `EXPORTS.json` | **是**：`PRECISION_integrated:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=L23`（33 s、1.7 GiB）；`PRECISION.json/.md`、`VIOLATIONS.json` 在求解目录与导出目录的 `EXPORTS.json` 中，SHA256 与文件一致 |
+| (a)(b)(c) 分级与 S4O-2 等价核对一致 | **是**：同为 layer1 + 电价结算；(a) 差值 −1.2e-8 bn 相同，(b)(c) 分国数值最大差 0.0 |
+
+- 项目门槛（数值信息）：S4B 口径（A1_A2_S4B、A3_S4B、A5_S4B、B1_S4B、B3_S4B）全通过；`all_passed_solver_tolerances` False **只因 B12**（`research_config_sha256` 与构建时不同：构建后配置新增了 `pypsa_eur_default` 档案，B12 对整个 research 配置取哈希，按构造不通过；S4N-1 用 f50c8850 包代码时配置未变，B12 通过）；BarConvTol 口径 A1_A2 / A3 / B1 / B3 不通过，与 S4M-2 的已知状态相同。
+- 结果包 `results_20261019T133528Z_584.tar.gz` 生成，导出 66 MB；许可扫描无命中。
+
+### 10.4 S4O-4 部署包（126110ff；VERIFIED；`evidence/s4o_4p/`，包在 `work/p1_step4o_20261019/cloud_package_dist/`，不进 git）
+
+| 项 | 结果 |
+|---|---|
+| 提交 / 代码 | `COMMIT` 126110ff（`code_126110ff.tar.gz`，123.9 MB） |
+| 网络来源 | `results_project/s4m/s4m3/builds`（f50c8850 重建）；构建输入变更分类（`BUILD_INPUT_CHANGES_<情景>.json`）：按路径 4 个（`s4m_5_collect_evidence.py`、`s4o_0_data.py`、`s4o_1_data.py`、`s4o_c1_precision.py`）、求解驱动 `s2_solve.py`（构建模块不导入）、`baseline.yaml` 只在 `research.solver` 下不同、注册表只增行；拒绝 0 |
+| **网络与 f50c8850 包** | `networks/` 下 13 个文件（四个 365×24h 网络、探针网络、构建回执、成本表）**SHA256 逐一相同**（`NETWORKS_VS_REFERENCE.json`） |
+| 缺省值 | 档案 `formal_barrier`；运行 `disconnected,integrated_nze`；TimeLimit / 墙钟 21,600 / 22,500 s；`serial`；C1 后处理在包内 |
+| `PACKAGE_DELTA.json` | 变化 5（`COMMIT`、`DATA_CONFIG_MANIFEST.json`、`preflight.sh`、`run_365x24h.sh`、`speed_probe.sh`）；新增 5（4 个 `BUILD_INPUT_CHANGES_*.json`、`code_126110ff.tar.gz`）；去掉 1（`code_f50c8850.tar.gz`，实例上不删，不在新 `SHA256SUMS` 内）；未变 16 个 140.1 MB；**上传 124.3 MB**（按 0.16 MB/s 约 13 分钟） |
+| 检查 | `SHA256SUMS` 26/26 OK；预检（sha、networks、profile、c1、versions、tools）OK（代码解包到 `./repo` 并写 `.package_commit`）；干跑列出 2 个求解（不互联、NZE）与各自 C1；许可串扫描 30 个文件无命中；包内脚本重跑脚本测试 59/59、探针 9/9 |
+| 就地更新 | 实例上已有 f50c8850 包时：单路上传 `PACKAGE_DELTA.json` 的 `upload` 列表 → 完整 `sha256sum -c SHA256SUMS` → 核对 `COMMIT`；`preflight.sh` 按 `COMMIT` 解包 `code_126110ff.tar.gz`，旧 `./repo` 改名为 `repo_prev_unknown_<时间>` 保留（用例 I 已测） |
+
+### 10.5 S4O-5 资源估算（只读；`CLOUD_RESOURCE_ESTIMATE.md` §23）
+
+- 实测点：56×3h 1.39 M 行 / 4.1 GiB；365×24h 9.02 M 行 / 15.1 GiB，档案 A 408 次迭代、barrier 11,470 s（含一次重启）；结果包 158.9 MB。
+- 2920×3h（INFERENCE）：72.1 M 行 / 32.3 M 列 / 168 M 非零；峰值内存 106 GiB（线性仿射）/ 121 GiB（等比）/ 165 GiB（超线性 1.15），规划 ≥ 160 GiB；8470Q 上每次迭代 225–419 s，单运行中间情形 15–35 h（150–600 次迭代时 9–70 h），TimeLimit 建议 ≥ 48 h；每运行磁盘约 15 GB、结果包约 1.3 GB。
+- 选机：AutoDL 按卡分配，8470Q / 8481C 机单卡 25 核 / 120 GiB → 2920×3h 用 **2 卡**、数据盘 ≥ 100 GB；365×24h 整批 1 卡（约 2.5–6.5 h）。费用 = 卡数 × 卡时单价 × 时长，单价 DATA_PENDING。
+- 更正 S4M §22.5：365×24h 列应按时段比 6.52 放大（原按小时比 156.4，高估约 20–40 倍）。
+
+### 10.6 S4O-6 的准备状态（未授权，未执行）
+
+- 按补充 01：只跑不互联 STEPS、一体化 NZE（诊断仅在不互联非最优时）；B6 = 本批不互联 − 试点一体化；报告中核对两者网络 SHA256 与档案参数（`PILOT_CONSISTENCY.json` 自动生成）。
+- 启动时需要：`PILOT_INTEGRATED` 指向试点一体化结果目录（D58 或其克隆上为 `/root/autodl-tmp/s4m_cloud/runs/20261019T072454Z_5125/integrated/`；否则用本机试点轻量包的 `export_integrated/` 上传），`PILOT_PRECISION` 指向试点 `PILOT_PRECISION.json`（D58 上 S4N 后处理目录 `/root/autodl-tmp/s4n_tools/`，或轻量包内）。
+- 其余按原 S4O-6：只读核对；按 `PACKAGE_DELTA.json` 单路上传；许可按授权原文处理；预检；探针仅在 CPU 与 8470Q 不同时运行；回收轻量包与完整包（D58 或克隆时含试点完整包 `cb4927da…`）；删除许可。
+
+### 10.7 发现但未处理（补充 01 新增）
+
+| # | 现象 | 影响 | 建议时点 |
+|---|---|---|---|
+| 8 | 整批每个运行的 B12 都会按构造不通过：网络在 f50c8850 构建，之后 research 配置新增了 `pypsa_eur_default`（B12 哈希整个 research 配置，含 `solver.profiles`）；若为让 B12 通过而重建网络，网络 SHA256 会变，与 S4O-4 的"与 f50c8850 逐一相同"冲突 | 门槛标签（数值信息，第 120 项） | 报告整批时注明 |
+| 9 | 代码包 `code_126110ff.tar.gz` 123.9 MB，是上传量的主体（`git archive` 含 `research/` 下全部交付物与证据）；只打包运行所需目录可减到数 MB | 上传时间（0.16 MB/s 时约 13 分钟） | 下次打包时由用户决定 |
+| 10 | 第 95 项 f 的联盟运行回退规则（档案 A 非最优 → 档案 C 重跑一次）在第 121 项后又与生产档案一致；原发现第 5 条随之消解 | 无 | — |
+
+### 10.8 需要用户决定的事项
+
+1. **S4O-6 云端整批的授权：** 实例（D58 或其克隆，或其他西北 B 区 8470Q / 8481C 机）、许可处理授权原文、以及是否按 §10.6 的方式提供试点一体化目录。
+2. 代码包是否瘦身（发现第 9 条），不影响本次包的使用。
+
+### 10.9 补充 01 的证据与文件
+
+| 位置 | 内容 |
+|---|---|
+| `S4O_SUPPLEMENT_01.md`、`S4O_SUPPLEMENT_01_SHA256.txt` | 补充指令 |
+| `evidence/s4o_3b/` | S4O-3′：`STATUS.txt`、`MONITOR_integrated.csv`、导出的回执 / 门槛 / 日志 / 账本 / `PRECISION` / `VIOLATIONS` / `EXPORTS.json`、`S4O3B_CHECK.json`（验收） |
+| `evidence/s4o_4/` | 部署脚本测试与结果（59/59、9/9） |
+| `evidence/s4o_4p/` | 部署包：`COMMIT`、`SHA256SUMS`、`PACKAGE_MANIFEST.json`、`PACKAGE_DELTA.json`、`NETWORKS_VS_REFERENCE.json`、`DATA_CONFIG_MANIFEST.json`、`PROBE_REFERENCE.json`、`BUILD_INPUT_CHANGES_integrated.json`、打包日志、预检与干跑输出 |
+| `CLOUD_RESOURCE_ESTIMATE.md` §23 | S4O-5 |
+| `work/p1_step4o_20261019/cloud_package_dist/` | 部署包（264.4 MB，不进 git） |
+| 本机结果（不进 git） | `/home/jin/s4o_local/pkg_e2e/runs/20261019T133528Z_584/` |

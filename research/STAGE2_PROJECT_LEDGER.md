@@ -684,3 +684,9 @@
 - **未做：** S4O-4（打包脚本已写未运行）、S4O-5、S4O-6。
 - **待用户决定（S4O 报告 §7）：** 生产档案处理（保留并调整标准 / 收紧 BarConvTol / 回到档案 A / 其他）；是否补做 2 次未执行的本机运行；S4O-4 / S4O-5 是否继续。
 - **交付：** `research/06_scope_redesign/p1_step4o_20261019/`（`S4O_REPORT.md`、`S4O_EVIDENCE.json`、`S4O_PROGRESS.md`、`cloud_package/`、`evidence/`）；镜像 `work/p1_step4o_20261019/`。
+- **补充 01（2026-10-19，第 121 项，用户决定）：** 生产档案回到档案 A（`formal_barrier`），`pypsa_eur_default` 保留为非生产档案；不补做 S4O-3 的两次运行；第 107 项与第 119 项 (a) 标准不放宽（注册表片段 `s4o_1`）。
+  - **S4O-2′（87e28e3b）：** 缺省档案改回 A；部署脚本缺省运行"不互联 + NZE"、TimeLimit / 墙钟 21,600 / 22,500 s、试点一体化作 C1 参照（`PILOT_INTEGRATED` / `PILOT_PRECISION`，副本重评，`PILOT_CONSISTENCY.json`）；`tests/research` 544 通过，脚本测试 59/59、探针 9/9。
+  - **S4O-3′（本机 1 次 56×3h，已授权）：** S4O 版 `run_365x24h.sh` 端到端（档案 A，自动 C1）optimal，目标与 S4M-2 相对差 0.0，C1 写入 `EXPORTS.json`，分级与等价核对一致；B12 按构造不通过（配置哈希）。
+  - **S4O-4（126110ff）：** 部署包重建，`networks/` 13 个文件与 f50c8850 包逐一相同；`PACKAGE_DELTA.json` 上传 124.3 MB；预检、干跑、许可扫描、脚本测试通过；包在 `work/p1_step4o_20261019/cloud_package_dist/`（不进 git）。
+  - **S4O-5：** `CLOUD_RESOURCE_ESTIMATE.md` §23：2920×3h 72.1 M 行、峰值 106–165 GiB、8470Q 上单运行约 15–35 h、2 卡、数据盘 ≥ 100 GB；更正 S4M §22.5 的 365×24h 导出高估。
+  - **S4O-6 云端整批未授权，停下等待。**

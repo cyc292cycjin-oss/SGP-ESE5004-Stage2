@@ -41,8 +41,20 @@ res = dict(
                                        a_diff_bn=(v.get("a_total_cost") or {}).get("returned_difference_bn")) for t, v in c2.items()},
                info_s4n_c2_integrated=dict(objective_rel_diff_vs_A=(info.get("s4n_c2") or {}).get("objective_rel_diff_vs_A"), iterations=(info.get("s4n_c2") or {}).get("iterations"),
                                            kkt_relative_gap=(info.get("s4n_c2") or {}).get("kkt_relative_gap"))),
-    not_done=dict(s4o_4="not entered (stop condition); make_package.sh / package_checks.py / preflight in-place update written during the S4O-3 run, not run (syntax checked only)",
-                  s4o_5="not done (stop)", s4o_6="not authorised"),
+    not_done_at_the_s4o3_stop=dict(s4o_4="not entered (stop condition); make_package.sh / package_checks.py / preflight in-place update written during the S4O-3 run, not run (syntax checked only)",
+                                   s4o_5="not done (stop)", s4o_6="not authorised"),
+    supplement_01=dict(
+        file="S4O_SUPPLEMENT_01.md", sha256=sha(D / "S4O_SUPPLEMENT_01.md"), expected="f723c544946142ca5e896a56652f95e4fcb3eba586bed21d9cce5ce6e8c7a7a4", decision=121,
+        s4o_2b=dict(commit="87e28e3b", default_profile="formal_barrier", registry_fragment="s4o_1", tests_research_passed=544, test_s4o_2=8, script_tests="59/59", probe_tests="9/9",
+                    run_defaults=dict(runs="disconnected,integrated_nze", gurobi_time_limit_s=21600, wall_cap_s=22500, pilot_reference="PILOT_INTEGRATED / PILOT_PRECISION")),
+        s4o_3b=jl(E / "s4o_3b/S4O3B_CHECK.json"),
+        s4o_4=dict(commit="126110ff", networks_vs_f50c8850=jl(E / "s4o_4p/NETWORKS_VS_REFERENCE.json"),
+                   delta={k: v for k, v in (jl(E / "s4o_4p/PACKAGE_DELTA.json") or {}).items() if k in ("changed", "added", "removed", "upload", "unchanged_bytes")},
+                   build_input_changes=jl(E / "s4o_4p/BUILD_INPUT_CHANGES_integrated.json"), sha256sums_ok="26/26", preflight="OK (sha, networks, profile, c1, versions, tools)",
+                   dry_run_solves=2, licence_scan="no hit (30 files)", script_tests_on_packaged_scripts="59/59, 9/9"),
+        s4o_5=dict(file="CLOUD_RESOURCE_ESTIMATE.md section 23", rows_2920=72.06e6, memory_gib=dict(affine=106, proportional=121, superlinear_1_15=165), hours_per_run_8470Q="15-35 (9-70)",
+                   cards=2, data_disk_gb=">=100", price="DATA_PENDING"),
+        s4o_6="not authorised; stopped after the local part"),
     files={str(p.relative_to(D)): sha(p) for p in sorted(E.rglob("*")) if p.is_file() and "__pycache__" not in p.parts},
 )
 out.write_text(json.dumps(res, indent=1, default=str))
