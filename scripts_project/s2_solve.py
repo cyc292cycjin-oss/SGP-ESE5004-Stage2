@@ -262,7 +262,8 @@ def main(a):
             if kvl_led:
                 from s3b_scaling import unscale_kvl_duals
                 unscale_kvl_duals(m, kvl_led)
-            n.optimize.assign_solution(); n.optimize.assign_duals(); n.optimize.post_processing()
+            n.optimize.assign_solution(); n.optimize.assign_duals(assign_all_duals=True); n.optimize.post_processing()   # S4M supplement 01: every snapshot-indexed constraint dual into the network (*_t.mu_upper / mu_lower); static bounds and research hooks -> DUALS_BY_CONSTRAINT.nc below
+            run["duals"] = dict(assign_all_duals=True, note="PyPSA assign_duals maps snapshot-indexed duals to <component>_t.mu_<spec> and GlobalConstraints to mu (none in this model); the static capacity-bound duals (scarcity rents) and the research hook duals are only in DUALS_BY_CONSTRAINT.nc")
             if const_led:
                 n.objective = float(m.objective.value) + const_led["total_eur"]   # total-cost definition unchanged (constants added back)
         run.update(status=status, termination_condition=condition, solve_seconds=time.time() - t1)
@@ -283,6 +284,11 @@ def main(a):
         for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]:
             np.save(sol_dir / (k + ".npy"), v)
         run["solution"] = {k: dict(count=int(len(v)), sha256=sha(sol_dir / (k + ".npy"))) for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]}
+        try:   # S4M supplement 01 (S4M-S2): every constraint dual by constraint name (per-constraint con.dual after the unscaling, dims prefixed per constraint) - static capacity bounds, research hooks, loss proxy rows
+            from s4m_duals import write_duals
+            run["duals"] = dict(run.get("duals", {}), **write_duals(m, out))
+        except Exception as e:
+            run["duals"] = dict(run.get("duals", {}), export_error=str(e)[:300])
         from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
                                  gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows,
                                  gate_b13_imports_one_way, gate_b14_terminal_caps, gate_b15_domestic_production_caps)
@@ -295,6 +301,18 @@ def main(a):
         flows = co2_flows(n); save(out / "CO2_FLOWS.json", flows)
         caps = {typ: n.df(typ).groupby(["carrier", "country"])[nom + "_opt"].sum().reset_index().to_dict("records") for typ, nom in [("Generator", "p_nom"), ("Link", "p_nom"), ("StorageUnit", "p_nom"), ("Store", "e_nom")] if "country" in n.df(typ)}
         save(out / "CAPACITY_BY_TECH_COUNTRY.json", caps)
+        exports = {}   # S4M supplement 01: cost table copy + per-component capital-cost breakdown (read only), sizes and SHA256 of the new exports in the receipt
+        if a.costs_table and Path(a.costs_table).exists():
+            import shutil
+            shutil.copy(a.costs_table, out / "costs_active_research.csv")
+            from s4m_cost_breakdown import breakdown
+            T_bd, bd = breakdown(n, pd.read_csv(a.costs_table, index_col=0), repo=a.repo)   # repo: the S4C-1 offshore connection-distance table referenced in the network meta
+            T_bd.to_csv(out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g"); save(out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json", bd)
+            run["cost_breakdown"] = {k: v for k, v in bd.items() if k not in ("existing_assets_fom",)}
+        for f in ("DUALS_BY_CONSTRAINT.nc", "DUALS_INDEX.csv", "COMPONENT_COST_BREAKDOWN.csv", "COMPONENT_COST_BREAKDOWN_SUMMARY.json", "costs_active_research.csv"):
+            if (out / f).exists():
+                exports[f] = dict(bytes=(out / f).stat().st_size, sha256=sha(out / f))
+        save(out / "EXPORTS.json", exports); run["exports"] = exports
         contract = load_contract(); gates = {}
         interior = a.solver == "gurobi" and int(params.get("Crossover", 1)) == 0
         try:
@@ -371,5 +389,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--network", type=Path, required=True); p.add_argument("--scenario", required=True); p.add_argument("--output", type=Path, required=True)
     p.add_argument("--solver-profile", default=None, help="research.solver.profiles key (S3B R4); default research.solver.profile"); p.add_argument("--scaling", choices=["on", "off"], default=None, help="S3B R4 scaling override; default research.solver.scaling.enabled")
     p.add_argument("--kvl-norm", choices=["on", "off"], default=None, help="S4C-5 Kirchhoff row normalisation override; default research.solver.scaling.kirchhoff_row_normalisation (with scaling on)")
+    p.add_argument("--costs-table", type=Path, default=None, help="S4M supplement 01: the build costs_active_research.csv - copied to the output and used for COMPONENT_COST_BREAKDOWN.csv (export only)")
     p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     sys.exit(main(p.parse_args()))
