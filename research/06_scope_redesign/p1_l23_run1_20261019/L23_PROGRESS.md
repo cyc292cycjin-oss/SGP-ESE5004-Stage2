@@ -29,7 +29,7 @@
 | C4 | 许可 | 完成 | 2026-10-19 01:54 | 本机许可文件经 `scp` 直接传到实例 `/root/.gurobi/gurobi.lic`（目录 700、文件 600、属主 root、308 字节）；两端哈希一致（未显示哈希值）；全程未读取、打印或复制到其他位置 |
 | C5 | 预检 | 完成 | 2026-10-19 01:54:31–01:54:38 | `PY=… GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash preflight.sh serial formal_barrier`：SHA256 全部 OK；代码解包到 `./repo`（56d28358）；四个网络在；档案 `formal_barrier`（Method 2、Crossover 0、BarConvTol 1e-8、BarHomogeneous 1、Threads 8、Seed 123、AggFill 0、PreDual 0、BARDENSETHRESH 200）；版本一致；GNU time 有；许可被 Gurobi 接受（输出已屏蔽）；资源 48 / 440 GiB / 49 GiB（容器内为宿主机值，见发现第 1 条）；最后一行 **`PREFLIGHT OK`**。预检占用的 WLS 令牌至少保留 5 分钟：最早 01:59:38 启动 |
 | C6 | 启动 | 完成 | **2026-10-19 02:00:30** | 预检结束（01:54:38）后 5 分 52 秒；启动前确认本机无任何求解或 Gurobi 进程。tmux 会话 `s4k`：`bash /root/autodl-tmp/l23_launch.sh`（`cd /root/autodl-tmp/s4k_cloud`；`PY=/root/miniconda3/envs/pypsa-earth/bin/python GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth "<授权原文>"`）。授权原文按 `S4K_REPORT.md` §10.4 模板填写：规格 RTX 3080 Ti × 1，12 核 Xeon Silver 4214R，90 GB 内存，数据盘 50 GB；区域 西北 B 区 144 机；运行方式 serial；许可 `/root/.gurobi/gurobi.lic`；授权人 程宇晨；时间 2026-10-19 02:00（SGT）。运行目录 `runs/20261018T180030Z_5623/`；`STATUS.txt` 首行 `START:2026-10-18T18:00:30Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier commit:56d28358…` |
-| C7 | 监督 | 进行中 | 02:00:30 起 | 每 12 分钟一次（`/home/jin/l23_watch.sh`，只读）：`STATUS.txt`、`MONITOR_*.csv` 末行、容器 cgroup 内存（`MONITOR` 的 `mem_available_gib` 是宿主机值，见发现第 2 条）与磁盘。预计（§20）：一体化 47–65 min（悲观 95）、不互联 38–52（74）、NZE 66–94（138）、诊断 74–104（153） |
+| C7 | 监督 | 完成 | 02:00:30–09:08:23 | 整批 `DONE` 于 2026-10-19 09:00:38 SGT（运行 7 h 00 min）：一体化 SUBOPTIMAL（6,722 s）、不互联 SUBOPTIMAL（5,297 s）、不互联诊断 SUBOPTIMAL（2,311 s）、NZE 到 Gurobi TimeLimit 后被墙钟上限标记终止（10,814 s，`STATUS` 记为 `none`）。不重试、不干预。原记录：每 12 分钟一次（`/home/jin/l23_watch.sh`，只读）：`STATUS.txt`、`MONITOR_*.csv` 末行、容器 cgroup 内存（`MONITOR` 的 `mem_available_gib` 是宿主机值，见发现第 2 条）与磁盘。预计（§20）：一体化 47–65 min（悲观 95）、不互联 38–52（74）、NZE 66–94（138）、诊断 74–104（153） |
 | C8 | 回收 | 待做 | — | |
 | C9 | 首轮分析 | 待做 | — | |
 
@@ -68,10 +68,17 @@
 | 07:43:19 | NZE / 102 min | 14.2 GiB | 20.7 GiB | 45 GB | 133：4.2279802e11 / 4.2279781e11，6.93 / 1.6e-4 / 0.08 … 5,832 s | 接近收敛 |
 | 07:55:24 | NZE / 114 min | 14.2 GiB | 20.7 GiB | 45 GB | **152：1.15576e12 / 7.98533e11，原始不可行 5.9e6、对偶 11.7、互补 3.0e5** … 6,572 s | **迭代跳开**（与不互联第 178 次同类） |
 | 08:07:27 | NZE / 127 min | 14.2 GiB | 20.7 GiB | 45 GB | 176：4.45262e11 / 4.36123e11，1.45e5 / 0.31 / 6.7e3 … 7,348 s | 回落中；距 TimeLimit 10,500 s 约 52 min，可能触及（标注） |
+| 08:20:04 | NZE / 139 min | 14.2 GiB | 20.7 GiB | 44 GB | 196：4.240836e11 / 4.237529e11，7.8e3 / 2.1e-2 / 375 … 8,057 s | 已超悲观 138 min（标注） |
+| 08:32:09 | NZE / 151 min | 14.2 GiB | 26.4 GiB | 44 GB | 212：4.228391e11 / 4.228192e11，250 / 4.5e-4 / 10.8 … 8,761 s | 容器内存多出约 5.6 GiB 为同时进行的早期违反分析（nice 19，3 个 CPU） |
+| 08:44:14 | NZE / 163 min | 14.2 GiB | 20.7 GiB | 44 GB | 227：4.2280578e11 / 4.2280118e11，63.0 / 7.2e-5 / 2.0 … 9,486 s | |
+| 08:56:19 | NZE / 175 min | 14.2 GiB | 20.7 GiB | 44 GB | 242：4.22798888e11 / 4.22798188e11，18.1 / 1.1e-4 / 0.28 … 10,239 s | 即将到 TimeLimit |
+| 09:08:23 | `STATUS.txt`：**`KILLED_3H_integrated_nze:2026-10-19T01:00:23Z`**、`RUN_integrated_nze:none:10814s`、**`DONE:2026-10-19T01:00:38Z`**（结果包 `results_20261018T180030Z_5623.tar.gz`，216,618,533 B） | — | 7.0 GiB | 44 GB | NZE 最后：**247：4.22798768e11 / 4.22798152e11，原始不可行 16.2、对偶 2.45e-5、互补 0.25 … 10,488 s → Gurobi "Time limit reached"（10,500.91 s）** | **NZE 到 Gurobi TimeLimit，随后被 3 h 墙钟上限标记终止**；监督结束（`WATCH_EXIT:DONE`）。墙钟上限的终止没有终止实际求解进程，见发现第 3 条 |
 
 ## 续行点
 
-**正式运行已于 2026-10-19 02:00:30 SGT 在实例 tmux 会话 `s4k` 中启动**，运行目录 `/root/autodl-tmp/s4k_cloud/runs/20261018T180030Z_5623/`。若本会话中断：先读本文件，再查该目录的 `STATUS.txt`（出现 `DONE` 即进入 C8）；只观察、不干预。连接方式：WSL `ssh` + `~/.ssh/id_ed25519`（`/home/jin/l23_ssh.sh`，主机与端口只经调用命令行的环境变量 `L23_HOST`、`L23_PORT` 传入，不写入任何文件）。若正式运行已启动而本会话中断：先读本文件，再查实例上 `runs/<时间戳>/STATUS.txt`。
+**2026-10-19 09:10 SGT：整批已 `DONE`，实例上没有求解进程。** 下一步：C9 违反分析在实例上对四个运行统一补跑（只读、不调用求解器、`GRB_LICENSE_FILE` 取消）→ C8 下载结果包与 NZE 未入包的输出、核对 SHA256、扫描许可 → 删除实例许可文件 → 写完报告 → 提醒用户关机。
+
+原记录：**正式运行已于 2026-10-19 02:00:30 SGT 在实例 tmux 会话 `s4k` 中启动**，运行目录 `/root/autodl-tmp/s4k_cloud/runs/20261018T180030Z_5623/`。若本会话中断：先读本文件，再查该目录的 `STATUS.txt`（出现 `DONE` 即进入 C8）；只观察、不干预。连接方式：WSL `ssh` + `~/.ssh/id_ed25519`（`/home/jin/l23_ssh.sh`，主机与端口只经调用命令行的环境变量 `L23_HOST`、`L23_PORT` 传入，不写入任何文件）。若正式运行已启动而本会话中断：先读本文件，再查实例上 `runs/<时间戳>/STATUS.txt`。
 
 ## 用户中途指示
 
@@ -87,3 +94,4 @@
 
 1. `preflight.sh` 用 `nproc` 与 `/proc/meminfo` 判断 CPU 与内存；AutoDL 容器内这两个值是宿主机的（48 线程、440 GB），不是容器配额（12 核、90 GiB）。本实例配额本身高于下限，所以不影响本次；若将来实例配额低于下限，预检仍会通过。建议时点：下一次修改部署脚本时改为读 cgroup 限额（未修改）。
 2. `run_365x24h.sh` 的 `MONITOR_<运行>.csv` 中 `mem_available_gib` 取自 `/proc/meminfo`，在容器内是宿主机值（约 420 GB），不反映 90 GiB 配额。监督时另读 cgroup `memory.usage_in_bytes` / `memory.limit_in_bytes` 判断可用内存。建议时点同第 1 条（未修改）。
+3. **3 h 墙钟上限没有终止实际求解进程，NZE 的完整输出不在结果包内。** VERIFIED（实例文件时间，SGT）：NZE 约 06:00:13 开始；Gurobi 在 10,500.91 s 到 TimeLimit（"Time limit reached"，第 247 次迭代）；脚本在 09:00:23 写 `KILLED_3H_integrated_nze`，随即读回执（此时回执还是求解前版本，无 `termination_condition`，故 `STATUS` 记 `none`），09:00:23 导出 `export/integrated_nze/`（只有求解前回执 51,405 B、日志尾、MONITOR 等 8 个文件，`solve_time.txt` 为空），09:00:37 打包、09:00:38 写 `DONE`。但 `s2_solve.py` 进程未被终止，继续写出：`solve.err` 09:00:52（linopy "Termination condition: time_limit"）、`solution/X.npy`、`Pi.npy`、`RC.npy` 09:01:54、求解后网络 09:02:22、`V5_GATES.json` 与最终 `SOLVE_RECEIPT.json`（102,713 B，`termination_condition` = `time_limit`，目标 425,684,740,304.79）09:03:01、`solve.log` 末行 09:03:02。`/usr/bin/time` 的资源摘要没有写出（`solve.err` 停在 09:00:52），说明被终止的是 `time` 一层。INFERENCE：`solve()` 中 `pkill -P $pid` 只作用于 `$pid` 的直接子进程（子 shell → `/usr/bin/time`），作为孙进程的 Python 被重新挂到 init 下继续运行。影响：①墙钟上限实际超出约 2 分 40 秒（后处理，未再调用 Gurobi 优化）；②结果包中 NZE 只有求解前回执，没有门槛、账本、求解后网络。NZE 的这些文件仍在实例运行目录 `integrated_nze/` 中，按脚本导出清单另行打包下载（C8，标注"未进入结果包"）。未修改脚本；建议时点：下一次修改部署脚本时改为按进程组终止（PROPOSED）。
