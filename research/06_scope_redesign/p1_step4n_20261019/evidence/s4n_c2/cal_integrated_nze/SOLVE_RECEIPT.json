@@ -1,0 +1,3070 @@
+{
+  "label": "SMOKE_TEST_ONLY",
+  "scenario": "integrated",
+  "authorization": "S4N supplement 02 C2 (decision 119; user 2026-10-19): profile calibration pypsa_eur_default (PyPSA-Eur v2025.07.0 gurobi-default), 56x3h on the S4M-1 networks, one run per scenario, stop-loss 30 min, no retry; run cal_integrated_nze",
+  "solver": "gurobi",
+  "started_epoch": 1792408459.3898227,
+  "optimize_calls": 1,
+  "retry": false,
+  "stage": "S2",
+  "transmission_losses": {
+    "ac_tangents": 0,
+    "loss_variables": true,
+    "network": "pypsa_eur",
+    "ac_losses": "linear_proxy",
+    "ac_loss_proxy": {
+      "hook": "research_ac_loss_proxy",
+      "loss_variables": 8288,
+      "rebuilt": [
+        "Bus-nodal_balance",
+        "Bus-meshed-nodal_balance",
+        "Line-ext-s-lower",
+        "Line-ext-s-upper"
+      ],
+      "added": [
+        "Line-loss_proxy-pos",
+        "Line-loss_proxy-neg",
+        "Line-ext-loss_upper"
+      ]
+    }
+  },
+  "dust_cleanup": {
+    "components_after": {
+      "Bus": 2786,
+      "Generator": 1717,
+      "Line": 148,
+      "Link": 7494,
+      "Load": 2026,
+      "StorageUnit": 133,
+      "Store": 523
+    },
+    "components_before": {
+      "Bus": 2914,
+      "Generator": 1995,
+      "Line": 148,
+      "Link": 7584,
+      "Load": 2064,
+      "StorageUnit": 280,
+      "Store": 530
+    },
+    "merged_links_removed": 86,
+    "mode": "on",
+    "thresholds": {
+      "capacity_mw": 1.0,
+      "energy_mwh": 1000.0
+    },
+    "removed_count": 602
+  },
+  "solver_profile": "pypsa_eur_default",
+  "scaling": {
+    "enabled": true,
+    "objective_constants": {
+      "columns": {
+        "objective_constant": {
+          "value": 7928850893.347024,
+          "objective_coefficient": -1.0,
+          "contribution_eur": -7928850893.347024
+        },
+        "Research_existing_FOM_constant": {
+          "value": 1.0,
+          "objective_coefficient": 10806157242.20073,
+          "contribution_eur": 10806157242.20073
+        },
+        "Research_existing_cross_border_FOM_constant": {
+          "value": 1.0,
+          "objective_coefficient": 9421185.932358457,
+          "contribution_eur": 9421185.932358457
+        }
+      },
+      "total_eur": 2886727534.7860637
+    },
+    "store_energy": {
+      "factor": 1000.0,
+      "stores": [
+        "BN biomass coconut_residues",
+        "BN biomass msw_organic_biogas",
+        "BN biomass other_crop_residues",
+        "BN biomass rice_residues",
+        "BN biomass wood_processing_residues",
+        "BN4 0 co2 stored",
+        "ID biomass cassava_residues",
+        "ID biomass coconut_residues",
+        "ID biomass maize_residues",
+        "ID biomass msw_organic_biogas",
+        "ID biomass oil_palm_efb",
+        "ID biomass oil_palm_fibre",
+        "ID biomass oil_palm_pks",
+        "ID biomass oil_palm_pome",
+        "ID biomass oil_palm_trunk",
+        "ID biomass other_crop_residues",
+        "ID biomass rice_residues",
+        "ID biomass sugarcane_residues",
+        "ID biomass wood_processing_residues",
+        "ID_Java-Bali1 0 co2 stored",
+        "ID_Java-Bali1 1 co2 stored",
+        "ID_Java-Bali1 2 co2 stored",
+        "ID_Kalimantan4 0 co2 stored",
+        "ID_Kalimantan4 1 co2 stored",
+        "ID_Kalimantan4 10 co2 stored",
+        "ID_Kalimantan4 11 co2 stored",
+        "ID_Kalimantan4 12 co2 stored",
+        "ID_Kalimantan4 13 co2 stored",
+        "ID_Kalimantan4 2 co2 stored",
+        "ID_Kalimantan4 3 co2 stored",
+        "ID_Kalimantan4 4 co2 stored",
+        "ID_Kalimantan4 5 co2 stored",
+        "ID_Kalimantan4 6 co2 stored",
+        "ID_Kalimantan4 7 co2 stored",
+        "ID_Kalimantan4 8 co2 stored",
+        "ID_Kalimantan4 9 co2 stored",
+        "ID_Maluku16 0 co2 stored",
+        "ID_Maluku17 0 co2 stored",
+        "ID_Maluku8 0 co2 stored",
+        "ID_Nusa-Tenggara12 0 co2 stored",
+        "ID_Nusa-Tenggara13 0 co2 stored",
+        "ID_Nusa-Tenggara14 0 co2 stored",
+        "ID_Nusa-Tenggara15 0 co2 stored",
+        "ID_Papua18 0 co2 stored",
+        "ID_Papua19 0 co2 stored",
+        "ID_Papua20 0 co2 stored",
+        "ID_Sulawesi0 0 co2 stored",
+        "ID_Sulawesi0 1 co2 stored",
+        "ID_Sulawesi0 2 co2 stored",
+        "ID_Sulawesi0 3 co2 stored",
+        "ID_Sulawesi0 4 co2 stored",
+        "ID_Sumatra2 0 co2 stored",
+        "ID_Sumatra3 0 co2 stored",
+        "ID_Sumatra3 1 co2 stored",
+        "ID_Sumatra3 2 co2 stored",
+        "ID_Sumatra3 3 co2 stored",
+        "ID_Sumatra3 4 co2 stored",
+        "ID_Sumatra3 5 co2 stored",
+        "KH biomass cassava_residues",
+        "KH biomass coconut_residues",
+        "KH biomass maize_residues",
+        "KH biomass msw_organic_biogas",
+        "KH biomass oil_palm_efb",
+        "KH biomass oil_palm_fibre",
+        "KH biomass oil_palm_pks",
+        "KH biomass oil_palm_pome",
+        "KH biomass oil_palm_trunk",
+        "KH biomass other_crop_residues",
+        "KH biomass rice_residues",
+        "KH biomass sugarcane_residues",
+        "KH biomass wood_processing_residues",
+        "KH2 0 co2 stored",
+        "KH2 1 co2 stored",
+        "KH2 2 co2 stored",
+        "KH2 3 co2 stored",
+        "KH2 4 co2 stored",
+        "LA biomass cassava_residues",
+        "LA biomass maize_residues",
+        "LA biomass other_crop_residues",
+        "LA biomass rice_residues",
+        "LA biomass sugarcane_residues",
+        "LA biomass wood_processing_residues",
+        "LA2 0 co2 stored",
+        "LA2 1 co2 stored",
+        "LA2 2 co2 stored",
+        "LA2 3 co2 stored",
+        "LA2 4 co2 stored",
+        "LA2 5 co2 stored",
+        "MM biomass cassava_residues",
+        "MM biomass coconut_residues",
+        "MM biomass maize_residues",
+        "MM biomass msw_organic_biogas",
+        "MM biomass other_crop_residues",
+        "MM biomass rice_residues",
+        "MM biomass sugarcane_residues",
+        "MM biomass wood_processing_residues",
+        "MM2 0 co2 stored",
+        "MM2 1 co2 stored",
+        "MM2 10 co2 stored",
+        "MM2 11 co2 stored",
+        "MM2 12 co2 stored",
+        "MM2 13 co2 stored",
+        "MM2 14 co2 stored",
+        "MM2 15 co2 stored",
+        "MM2 16 co2 stored",
+        "MM2 2 co2 stored",
+        "MM2 3 co2 stored",
+        "MM2 4 co2 stored",
+        "MM2 5 co2 stored",
+        "MM2 6 co2 stored",
+        "MM2 7 co2 stored",
+        "MM2 8 co2 stored",
+        "MM2 9 co2 stored",
+        "MY biomass cassava_residues",
+        "MY biomass coconut_residues",
+        "MY biomass msw_organic_biogas",
+        "MY biomass oil_palm_efb",
+        "MY biomass oil_palm_fibre",
+        "MY biomass oil_palm_pks",
+        "MY biomass oil_palm_pome",
+        "MY biomass oil_palm_trunk",
+        "MY biomass other_crop_residues",
+        "MY biomass rice_residues",
+        "MY biomass sugarcane_residues",
+        "MY biomass wood_processing_residues",
+        "MY_Peninsular2 0 co2 stored",
+        "MY_Peninsular2 1 co2 stored",
+        "MY_Sabah4 0 co2 stored",
+        "MY_Sabah4 1 co2 stored",
+        "MY_Sarawak4 0 co2 stored",
+        "MY_Sarawak4 1 co2 stored",
+        "MY_Sarawak4 2 co2 stored",
+        "PH biomass cassava_residues",
+        "PH biomass coconut_residues",
+        "PH biomass maize_residues",
+        "PH biomass msw_organic_biogas",
+        "PH biomass oil_palm_efb",
+        "PH biomass oil_palm_fibre",
+        "PH biomass oil_palm_pks",
+        "PH biomass oil_palm_pome",
+        "PH biomass oil_palm_trunk",
+        "PH biomass other_crop_residues",
+        "PH biomass rice_residues",
+        "PH biomass sugarcane_residues",
+        "PH biomass wood_processing_residues",
+        "PH5 0 co2 stored",
+        "PH_Luzon5 0 co2 stored",
+        "PH_Luzon9 0 co2 stored",
+        "PH_Mindanao6 0 co2 stored",
+        "PH_Mindanao6 1 co2 stored",
+        "PH_Visayas7 0 co2 stored",
+        "SG biomass msw_organic_biogas",
+        "SG biomass other_crop_residues",
+        "SG biomass wood_processing_residues",
+        "SG2 0 co2 stored",
+        "TH biomass cassava_residues",
+        "TH biomass coconut_residues",
+        "TH biomass maize_residues",
+        "TH biomass msw_organic_biogas",
+        "TH biomass oil_palm_efb",
+        "TH biomass oil_palm_fibre",
+        "TH biomass oil_palm_pks",
+        "TH biomass oil_palm_pome",
+        "TH biomass oil_palm_trunk",
+        "TH biomass other_crop_residues",
+        "TH biomass rice_residues",
+        "TH biomass sugarcane_residues",
+        "TH biomass wood_processing_residues",
+        "TH2 0 co2 stored",
+        "TH2 1 co2 stored",
+        "TH2 2 co2 stored",
+        "TH2 3 co2 stored",
+        "TH2 4 co2 stored",
+        "TH2 5 co2 stored",
+        "TL biomass cassava_residues",
+        "TL biomass coconut_residues",
+        "TL biomass maize_residues",
+        "TL biomass msw_organic_biogas",
+        "TL biomass other_crop_residues",
+        "TL biomass rice_residues",
+        "TL11 0 co2 stored",
+        "VN biomass cassava_residues",
+        "VN biomass coconut_residues",
+        "VN biomass maize_residues",
+        "VN biomass msw_organic_biogas",
+        "VN biomass other_crop_residues",
+        "VN biomass rice_residues",
+        "VN biomass sugarcane_residues",
+        "VN biomass wood_processing_residues",
+        "VN2 0 co2 stored",
+        "VN2 1 co2 stored",
+        "VN2 2 co2 stored",
+        "VN2 3 co2 stored",
+        "VN2 4 co2 stored",
+        "VN2 5 co2 stored",
+        "VN2 6 co2 stored",
+        "VN2 7 co2 stored",
+        "co2 sequestered BN",
+        "co2 sequestered ID",
+        "co2 sequestered KH",
+        "co2 sequestered MY",
+        "co2 sequestered PH",
+        "co2 sequestered TH",
+        "co2 sequestered TL",
+        "co2 sequestered VN",
+        "co2 sequestered extra-ASEAN BN",
+        "co2 sequestered extra-ASEAN ID",
+        "co2 sequestered extra-ASEAN KH",
+        "co2 sequestered extra-ASEAN LA",
+        "co2 sequestered extra-ASEAN MM",
+        "co2 sequestered extra-ASEAN MY",
+        "co2 sequestered extra-ASEAN PH",
+        "co2 sequestered extra-ASEAN SG",
+        "co2 sequestered extra-ASEAN TH",
+        "co2 sequestered extra-ASEAN TL",
+        "co2 sequestered extra-ASEAN VN"
+      ],
+      "extendable": [
+        "BN4 0 co2 stored",
+        "ID_Java-Bali1 0 co2 stored",
+        "ID_Java-Bali1 1 co2 stored",
+        "ID_Java-Bali1 2 co2 stored",
+        "ID_Kalimantan4 0 co2 stored",
+        "ID_Kalimantan4 1 co2 stored",
+        "ID_Kalimantan4 10 co2 stored",
+        "ID_Kalimantan4 11 co2 stored",
+        "ID_Kalimantan4 12 co2 stored",
+        "ID_Kalimantan4 13 co2 stored",
+        "ID_Kalimantan4 2 co2 stored",
+        "ID_Kalimantan4 3 co2 stored",
+        "ID_Kalimantan4 4 co2 stored",
+        "ID_Kalimantan4 5 co2 stored",
+        "ID_Kalimantan4 6 co2 stored",
+        "ID_Kalimantan4 7 co2 stored",
+        "ID_Kalimantan4 8 co2 stored",
+        "ID_Kalimantan4 9 co2 stored",
+        "ID_Maluku16 0 co2 stored",
+        "ID_Maluku17 0 co2 stored",
+        "ID_Maluku8 0 co2 stored",
+        "ID_Nusa-Tenggara12 0 co2 stored",
+        "ID_Nusa-Tenggara13 0 co2 stored",
+        "ID_Nusa-Tenggara14 0 co2 stored",
+        "ID_Nusa-Tenggara15 0 co2 stored",
+        "ID_Papua18 0 co2 stored",
+        "ID_Papua19 0 co2 stored",
+        "ID_Papua20 0 co2 stored",
+        "ID_Sulawesi0 0 co2 stored",
+        "ID_Sulawesi0 1 co2 stored",
+        "ID_Sulawesi0 2 co2 stored",
+        "ID_Sulawesi0 3 co2 stored",
+        "ID_Sulawesi0 4 co2 stored",
+        "ID_Sumatra2 0 co2 stored",
+        "ID_Sumatra3 0 co2 stored",
+        "ID_Sumatra3 1 co2 stored",
+        "ID_Sumatra3 2 co2 stored",
+        "ID_Sumatra3 3 co2 stored",
+        "ID_Sumatra3 4 co2 stored",
+        "ID_Sumatra3 5 co2 stored",
+        "KH2 0 co2 stored",
+        "KH2 1 co2 stored",
+        "KH2 2 co2 stored",
+        "KH2 3 co2 stored",
+        "KH2 4 co2 stored",
+        "LA2 0 co2 stored",
+        "LA2 1 co2 stored",
+        "LA2 2 co2 stored",
+        "LA2 3 co2 stored",
+        "LA2 4 co2 stored",
+        "LA2 5 co2 stored",
+        "MM2 0 co2 stored",
+        "MM2 1 co2 stored",
+        "MM2 10 co2 stored",
+        "MM2 11 co2 stored",
+        "MM2 12 co2 stored",
+        "MM2 13 co2 stored",
+        "MM2 14 co2 stored",
+        "MM2 15 co2 stored",
+        "MM2 16 co2 stored",
+        "MM2 2 co2 stored",
+        "MM2 3 co2 stored",
+        "MM2 4 co2 stored",
+        "MM2 5 co2 stored",
+        "MM2 6 co2 stored",
+        "MM2 7 co2 stored",
+        "MM2 8 co2 stored",
+        "MM2 9 co2 stored",
+        "MY_Peninsular2 0 co2 stored",
+        "MY_Peninsular2 1 co2 stored",
+        "MY_Sabah4 0 co2 stored",
+        "MY_Sabah4 1 co2 stored",
+        "MY_Sarawak4 0 co2 stored",
+        "MY_Sarawak4 1 co2 stored",
+        "MY_Sarawak4 2 co2 stored",
+        "PH5 0 co2 stored",
+        "PH_Luzon5 0 co2 stored",
+        "PH_Luzon9 0 co2 stored",
+        "PH_Mindanao6 0 co2 stored",
+        "PH_Mindanao6 1 co2 stored",
+        "PH_Visayas7 0 co2 stored",
+        "SG2 0 co2 stored",
+        "TH2 0 co2 stored",
+        "TH2 1 co2 stored",
+        "TH2 2 co2 stored",
+        "TH2 3 co2 stored",
+        "TH2 4 co2 stored",
+        "TH2 5 co2 stored",
+        "TL11 0 co2 stored",
+        "VN2 0 co2 stored",
+        "VN2 1 co2 stored",
+        "VN2 2 co2 stored",
+        "VN2 3 co2 stored",
+        "VN2 4 co2 stored",
+        "VN2 5 co2 stored",
+        "VN2 6 co2 stored",
+        "VN2 7 co2 stored",
+        "co2 sequestered BN",
+        "co2 sequestered ID",
+        "co2 sequestered KH",
+        "co2 sequestered MY",
+        "co2 sequestered PH",
+        "co2 sequestered TH",
+        "co2 sequestered TL",
+        "co2 sequestered VN",
+        "co2 sequestered extra-ASEAN BN",
+        "co2 sequestered extra-ASEAN ID",
+        "co2 sequestered extra-ASEAN KH",
+        "co2 sequestered extra-ASEAN LA",
+        "co2 sequestered extra-ASEAN MM",
+        "co2 sequestered extra-ASEAN MY",
+        "co2 sequestered extra-ASEAN PH",
+        "co2 sequestered extra-ASEAN SG",
+        "co2 sequestered extra-ASEAN TH",
+        "co2 sequestered extra-ASEAN TL",
+        "co2 sequestered extra-ASEAN VN"
+      ],
+      "scaled_columns": 12212,
+      "row_groups": {
+        "Store-ext-e_nom-lower": {
+          "rows": 116,
+          "dim": "Store-ext"
+        },
+        "Store-ext-e_nom-upper": {
+          "rows": 116,
+          "dim": "Store-ext"
+        },
+        "Store-fix-e-lower": {
+          "rows": 5600,
+          "dim": "Store-fix"
+        },
+        "Store-fix-e-upper": {
+          "rows": 5600,
+          "dim": "Store-fix"
+        },
+        "Store-ext-e-lower": {
+          "rows": 6496,
+          "dim": "Store-ext"
+        },
+        "Store-ext-e-upper": {
+          "rows": 6496,
+          "dim": "Store-ext"
+        },
+        "Store-energy_balance": {
+          "rows": 12096,
+          "dim": "Store"
+        },
+        "research_co2_storage_cap-BN": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-ID": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-KH": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-MY": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-PH": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-TH": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-TL": {
+          "rows": 1,
+          "dim": null
+        },
+        "research_co2_storage_cap-VN": {
+          "rows": 1,
+          "dim": null
+        }
+      },
+      "unscaled_rows_with_scaled_columns": {},
+      "objective_terms_scaled": 116,
+      "by_group": {
+        "biomass_pools": 100,
+        "sequestration": 19,
+        "capture_buffers": 97
+      }
+    },
+    "kirchhoff_row_normalisation": {
+      "applied": true,
+      "constraint": "Kirchhoff-Voltage-Law",
+      "rows": 3976,
+      "method": "row infinity norm: each KVL row divided by its largest |coefficient|; rhs 0 unchanged",
+      "coefficients_before": {
+        "min": 1.6814244010261647,
+        "max": 3420.2292406544975,
+        "ratio": 2034.1260889083976
+      },
+      "coefficients_after": {
+        "min": 0.0014790130651499535,
+        "max": 1.0,
+        "ratio": 676.1265492259952
+      },
+      "row_max_before": {
+        "min": 18.75402985261818,
+        "max": 3420.2292406544975,
+        "ratio": 182.37302955860508
+      },
+      "within_row_ratio_max": 676.1265492259951,
+      "within_row_ratio_median": 13.778573176095318,
+      "duals": "restored after the solve: pi = pi_normalised / row_max (unscale_kvl_duals)"
+    }
+  },
+  "input_network": {
+    "path": "results_project/s4m/s4m1/builds/integrated_nze/integrated_2920_3h_unsolved.nc",
+    "sha256": "6ee7b9ca60bee50f6352ffda324b4a84fb0f9c774bc69a5cb275624c69ee256d",
+    "snapshots": 56,
+    "truncated_to": 56,
+    "horizon_scaling": {
+      "method": "representative_weights_sum_8760",
+      "snapshots": 56,
+      "weight_hours_per_snapshot": 156.42857142857142,
+      "horizon_fraction": 1.0,
+      "scaled_stores": [],
+      "annual_caps_scaled": false
+    }
+  },
+  "lp": {
+    "num_col": 629144,
+    "num_row": 1393079,
+    "nnz": 3209723,
+    "build_seconds": 16.48698353767395,
+    "research_constraints": [
+      "ResearchBatteryNominal-0",
+      "ResearchBatteryNominal-1",
+      "ResearchBatteryNominal-10",
+      "ResearchBatteryNominal-100",
+      "ResearchBatteryNominal-101",
+      "ResearchBatteryNominal-102",
+      "ResearchBatteryNominal-103",
+      "ResearchBatteryNominal-104",
+      "ResearchBatteryNominal-105",
+      "ResearchBatteryNominal-106",
+      "ResearchBatteryNominal-107",
+      "ResearchBatteryNominal-108",
+      "ResearchBatteryNominal-109",
+      "ResearchBatteryNominal-11",
+      "ResearchBatteryNominal-110",
+      "ResearchBatteryNominal-111",
+      "ResearchBatteryNominal-112",
+      "ResearchBatteryNominal-113",
+      "ResearchBatteryNominal-114",
+      "ResearchBatteryNominal-115",
+      "ResearchBatteryNominal-116",
+      "ResearchBatteryNominal-117",
+      "ResearchBatteryNominal-118",
+      "ResearchBatteryNominal-119",
+      "ResearchBatteryNominal-12",
+      "ResearchBatteryNominal-120",
+      "ResearchBatteryNominal-121",
+      "ResearchBatteryNominal-122",
+      "ResearchBatteryNominal-123",
+      "ResearchBatteryNominal-124",
+      "ResearchBatteryNominal-125",
+      "ResearchBatteryNominal-126",
+      "ResearchBatteryNominal-127",
+      "ResearchBatteryNominal-128",
+      "ResearchBatteryNominal-129",
+      "ResearchBatteryNominal-13",
+      "ResearchBatteryNominal-130",
+      "ResearchBatteryNominal-131",
+      "ResearchBatteryNominal-132",
+      "ResearchBatteryNominal-133",
+      "ResearchBatteryNominal-134",
+      "ResearchBatteryNominal-135",
+      "ResearchBatteryNominal-136",
+      "ResearchBatteryNominal-137",
+      "ResearchBatteryNominal-138",
+      "ResearchBatteryNominal-139",
+      "ResearchBatteryNominal-14",
+      "ResearchBatteryNominal-140",
+      "ResearchBatteryNominal-141",
+      "ResearchBatteryNominal-142",
+      "ResearchBatteryNominal-143",
+      "ResearchBatteryNominal-144",
+      "ResearchBatteryNominal-145",
+      "ResearchBatteryNominal-146",
+      "ResearchBatteryNominal-147",
+      "ResearchBatteryNominal-148",
+      "ResearchBatteryNominal-149",
+      "ResearchBatteryNominal-15",
+      "ResearchBatteryNominal-150",
+      "ResearchBatteryNominal-151",
+      "ResearchBatteryNominal-152",
+      "ResearchBatteryNominal-153",
+      "ResearchBatteryNominal-154",
+      "ResearchBatteryNominal-155",
+      "ResearchBatteryNominal-156",
+      "ResearchBatteryNominal-157",
+      "ResearchBatteryNominal-158",
+      "ResearchBatteryNominal-159",
+      "ResearchBatteryNominal-16",
+      "ResearchBatteryNominal-160",
+      "ResearchBatteryNominal-161",
+      "ResearchBatteryNominal-162",
+      "ResearchBatteryNominal-163",
+      "ResearchBatteryNominal-164",
+      "ResearchBatteryNominal-165",
+      "ResearchBatteryNominal-166",
+      "ResearchBatteryNominal-167",
+      "ResearchBatteryNominal-168",
+      "ResearchBatteryNominal-169",
+      "ResearchBatteryNominal-17",
+      "ResearchBatteryNominal-170",
+      "ResearchBatteryNominal-171",
+      "ResearchBatteryNominal-172",
+      "ResearchBatteryNominal-173",
+      "ResearchBatteryNominal-174",
+      "ResearchBatteryNominal-175",
+      "ResearchBatteryNominal-176",
+      "ResearchBatteryNominal-177",
+      "ResearchBatteryNominal-178",
+      "ResearchBatteryNominal-179",
+      "ResearchBatteryNominal-18",
+      "ResearchBatteryNominal-180",
+      "ResearchBatteryNominal-181",
+      "ResearchBatteryNominal-182",
+      "ResearchBatteryNominal-183",
+      "ResearchBatteryNominal-184",
+      "ResearchBatteryNominal-185",
+      "ResearchBatteryNominal-186",
+      "ResearchBatteryNominal-187",
+      "ResearchBatteryNominal-188",
+      "ResearchBatteryNominal-189",
+      "ResearchBatteryNominal-19",
+      "ResearchBatteryNominal-190",
+      "ResearchBatteryNominal-191",
+      "ResearchBatteryNominal-192",
+      "ResearchBatteryNominal-193",
+      "ResearchBatteryNominal-194",
+      "ResearchBatteryNominal-195",
+      "ResearchBatteryNominal-2",
+      "ResearchBatteryNominal-20",
+      "ResearchBatteryNominal-21",
+      "ResearchBatteryNominal-22",
+      "ResearchBatteryNominal-23",
+      "ResearchBatteryNominal-24",
+      "ResearchBatteryNominal-25",
+      "ResearchBatteryNominal-26",
+      "ResearchBatteryNominal-27",
+      "ResearchBatteryNominal-28",
+      "ResearchBatteryNominal-29",
+      "ResearchBatteryNominal-3",
+      "ResearchBatteryNominal-30",
+      "ResearchBatteryNominal-31",
+      "ResearchBatteryNominal-32",
+      "ResearchBatteryNominal-33",
+      "ResearchBatteryNominal-34",
+      "ResearchBatteryNominal-35",
+      "ResearchBatteryNominal-36",
+      "ResearchBatteryNominal-37",
+      "ResearchBatteryNominal-38",
+      "ResearchBatteryNominal-39",
+      "ResearchBatteryNominal-4",
+      "ResearchBatteryNominal-40",
+      "ResearchBatteryNominal-41",
+      "ResearchBatteryNominal-42",
+      "ResearchBatteryNominal-43",
+      "ResearchBatteryNominal-44",
+      "ResearchBatteryNominal-45",
+      "ResearchBatteryNominal-46",
+      "ResearchBatteryNominal-47",
+      "ResearchBatteryNominal-48",
+      "ResearchBatteryNominal-49",
+      "ResearchBatteryNominal-5",
+      "ResearchBatteryNominal-50",
+      "ResearchBatteryNominal-51",
+      "ResearchBatteryNominal-52",
+      "ResearchBatteryNominal-53",
+      "ResearchBatteryNominal-54",
+      "ResearchBatteryNominal-55",
+      "ResearchBatteryNominal-56",
+      "ResearchBatteryNominal-57",
+      "ResearchBatteryNominal-58",
+      "ResearchBatteryNominal-59",
+      "ResearchBatteryNominal-6",
+      "ResearchBatteryNominal-60",
+      "ResearchBatteryNominal-61",
+      "ResearchBatteryNominal-62",
+      "ResearchBatteryNominal-63",
+      "ResearchBatteryNominal-64",
+      "ResearchBatteryNominal-65",
+      "ResearchBatteryNominal-66",
+      "ResearchBatteryNominal-67",
+      "ResearchBatteryNominal-68",
+      "ResearchBatteryNominal-69",
+      "ResearchBatteryNominal-7",
+      "ResearchBatteryNominal-70",
+      "ResearchBatteryNominal-71",
+      "ResearchBatteryNominal-72",
+      "ResearchBatteryNominal-73",
+      "ResearchBatteryNominal-74",
+      "ResearchBatteryNominal-75",
+      "ResearchBatteryNominal-76",
+      "ResearchBatteryNominal-77",
+      "ResearchBatteryNominal-78",
+      "ResearchBatteryNominal-79",
+      "ResearchBatteryNominal-8",
+      "ResearchBatteryNominal-80",
+      "ResearchBatteryNominal-81",
+      "ResearchBatteryNominal-82",
+      "ResearchBatteryNominal-83",
+      "ResearchBatteryNominal-84",
+      "ResearchBatteryNominal-85",
+      "ResearchBatteryNominal-86",
+      "ResearchBatteryNominal-87",
+      "ResearchBatteryNominal-88",
+      "ResearchBatteryNominal-89",
+      "ResearchBatteryNominal-9",
+      "ResearchBatteryNominal-90",
+      "ResearchBatteryNominal-91",
+      "ResearchBatteryNominal-92",
+      "ResearchBatteryNominal-93",
+      "ResearchBatteryNominal-94",
+      "ResearchBatteryNominal-95",
+      "ResearchBatteryNominal-96",
+      "ResearchBatteryNominal-97",
+      "ResearchBatteryNominal-98",
+      "ResearchBatteryNominal-99",
+      "ResearchImportAnnual-BN4 0 gas production",
+      "ResearchImportAnnual-ID_Java-Bali1 0 gas production",
+      "ResearchImportAnnual-ID_Java-Bali1 2 gas production",
+      "ResearchImportAnnual-ID_Kalimantan4 5 gas production",
+      "ResearchImportAnnual-ID_Kalimantan4 6 gas production",
+      "ResearchImportAnnual-ID_Sulawesi0 3 gas production",
+      "ResearchImportAnnual-ID_Sumatra3 1 gas production",
+      "ResearchImportAnnual-MM2 11 gas production",
+      "ResearchImportAnnual-MY_Peninsular2 0 gas production",
+      "ResearchImportAnnual-MY_Peninsular2 1 gas production",
+      "ResearchImportAnnual-MY_Sabah4 0 gas production",
+      "ResearchImportAnnual-MY_Sarawak4 0 gas production",
+      "ResearchImportAnnual-PH_Luzon5 0 gas production",
+      "ResearchImportAnnual-TH2 0 gas production",
+      "ResearchImportAnnual-TH2 1 gas production",
+      "ResearchImportAnnual-TH2 5 gas production",
+      "ResearchImportAnnual-TL11 0 gas production",
+      "ResearchImportAnnual-VN2 0 gas production",
+      "ResearchImportAnnual-VN2 4 gas production",
+      "ResearchStoreDirection-BN biomass coconut_residues",
+      "ResearchStoreDirection-BN biomass msw_organic_biogas",
+      "ResearchStoreDirection-BN biomass other_crop_residues",
+      "ResearchStoreDirection-BN biomass rice_residues",
+      "ResearchStoreDirection-BN biomass wood_processing_residues",
+      "ResearchStoreDirection-ID biomass cassava_residues",
+      "ResearchStoreDirection-ID biomass coconut_residues",
+      "ResearchStoreDirection-ID biomass maize_residues",
+      "ResearchStoreDirection-ID biomass msw_organic_biogas",
+      "ResearchStoreDirection-ID biomass oil_palm_efb",
+      "ResearchStoreDirection-ID biomass oil_palm_fibre",
+      "ResearchStoreDirection-ID biomass oil_palm_pks",
+      "ResearchStoreDirection-ID biomass oil_palm_pome",
+      "ResearchStoreDirection-ID biomass oil_palm_trunk",
+      "ResearchStoreDirection-ID biomass other_crop_residues",
+      "ResearchStoreDirection-ID biomass rice_residues",
+      "ResearchStoreDirection-ID biomass sugarcane_residues",
+      "ResearchStoreDirection-ID biomass wood_processing_residues",
+      "ResearchStoreDirection-KH biomass cassava_residues",
+      "ResearchStoreDirection-KH biomass coconut_residues",
+      "ResearchStoreDirection-KH biomass maize_residues",
+      "ResearchStoreDirection-KH biomass msw_organic_biogas",
+      "ResearchStoreDirection-KH biomass oil_palm_efb",
+      "ResearchStoreDirection-KH biomass oil_palm_fibre",
+      "ResearchStoreDirection-KH biomass oil_palm_pks",
+      "ResearchStoreDirection-KH biomass oil_palm_pome",
+      "ResearchStoreDirection-KH biomass oil_palm_trunk",
+      "ResearchStoreDirection-KH biomass other_crop_residues",
+      "ResearchStoreDirection-KH biomass rice_residues",
+      "ResearchStoreDirection-KH biomass sugarcane_residues",
+      "ResearchStoreDirection-KH biomass wood_processing_residues",
+      "ResearchStoreDirection-LA biomass cassava_residues",
+      "ResearchStoreDirection-LA biomass maize_residues",
+      "ResearchStoreDirection-LA biomass other_crop_residues",
+      "ResearchStoreDirection-LA biomass rice_residues",
+      "ResearchStoreDirection-LA biomass sugarcane_residues",
+      "ResearchStoreDirection-LA biomass wood_processing_residues",
+      "ResearchStoreDirection-MM biomass cassava_residues",
+      "ResearchStoreDirection-MM biomass coconut_residues",
+      "ResearchStoreDirection-MM biomass maize_residues",
+      "ResearchStoreDirection-MM biomass msw_organic_biogas",
+      "ResearchStoreDirection-MM biomass other_crop_residues",
+      "ResearchStoreDirection-MM biomass rice_residues",
+      "ResearchStoreDirection-MM biomass sugarcane_residues",
+      "ResearchStoreDirection-MM biomass wood_processing_residues",
+      "ResearchStoreDirection-MY biomass cassava_residues",
+      "ResearchStoreDirection-MY biomass coconut_residues",
+      "ResearchStoreDirection-MY biomass msw_organic_biogas",
+      "ResearchStoreDirection-MY biomass oil_palm_efb",
+      "ResearchStoreDirection-MY biomass oil_palm_fibre",
+      "ResearchStoreDirection-MY biomass oil_palm_pks",
+      "ResearchStoreDirection-MY biomass oil_palm_pome",
+      "ResearchStoreDirection-MY biomass oil_palm_trunk",
+      "ResearchStoreDirection-MY biomass other_crop_residues",
+      "ResearchStoreDirection-MY biomass rice_residues",
+      "ResearchStoreDirection-MY biomass sugarcane_residues",
+      "ResearchStoreDirection-MY biomass wood_processing_residues",
+      "ResearchStoreDirection-PH biomass cassava_residues",
+      "ResearchStoreDirection-PH biomass coconut_residues",
+      "ResearchStoreDirection-PH biomass maize_residues",
+      "ResearchStoreDirection-PH biomass msw_organic_biogas",
+      "ResearchStoreDirection-PH biomass oil_palm_efb",
+      "ResearchStoreDirection-PH biomass oil_palm_fibre",
+      "ResearchStoreDirection-PH biomass oil_palm_pks",
+      "ResearchStoreDirection-PH biomass oil_palm_pome",
+      "ResearchStoreDirection-PH biomass oil_palm_trunk",
+      "ResearchStoreDirection-PH biomass other_crop_residues",
+      "ResearchStoreDirection-PH biomass rice_residues",
+      "ResearchStoreDirection-PH biomass sugarcane_residues",
+      "ResearchStoreDirection-PH biomass wood_processing_residues",
+      "ResearchStoreDirection-SG biomass msw_organic_biogas",
+      "ResearchStoreDirection-SG biomass other_crop_residues",
+      "ResearchStoreDirection-SG biomass wood_processing_residues",
+      "ResearchStoreDirection-TH biomass cassava_residues",
+      "ResearchStoreDirection-TH biomass coconut_residues",
+      "ResearchStoreDirection-TH biomass maize_residues",
+      "ResearchStoreDirection-TH biomass msw_organic_biogas",
+      "ResearchStoreDirection-TH biomass oil_palm_efb",
+      "ResearchStoreDirection-TH biomass oil_palm_fibre",
+      "ResearchStoreDirection-TH biomass oil_palm_pks",
+      "ResearchStoreDirection-TH biomass oil_palm_pome",
+      "ResearchStoreDirection-TH biomass oil_palm_trunk",
+      "ResearchStoreDirection-TH biomass other_crop_residues",
+      "ResearchStoreDirection-TH biomass rice_residues",
+      "ResearchStoreDirection-TH biomass sugarcane_residues",
+      "ResearchStoreDirection-TH biomass wood_processing_residues",
+      "ResearchStoreDirection-TL biomass cassava_residues",
+      "ResearchStoreDirection-TL biomass coconut_residues",
+      "ResearchStoreDirection-TL biomass maize_residues",
+      "ResearchStoreDirection-TL biomass msw_organic_biogas",
+      "ResearchStoreDirection-TL biomass other_crop_residues",
+      "ResearchStoreDirection-TL biomass rice_residues",
+      "ResearchStoreDirection-VN biomass cassava_residues",
+      "ResearchStoreDirection-VN biomass coconut_residues",
+      "ResearchStoreDirection-VN biomass maize_residues",
+      "ResearchStoreDirection-VN biomass msw_organic_biogas",
+      "ResearchStoreDirection-VN biomass other_crop_residues",
+      "ResearchStoreDirection-VN biomass rice_residues",
+      "ResearchStoreDirection-VN biomass sugarcane_residues",
+      "ResearchStoreDirection-VN biomass wood_processing_residues",
+      "ResearchStoreDirection-co2 sequestered BN",
+      "ResearchStoreDirection-co2 sequestered ID",
+      "ResearchStoreDirection-co2 sequestered KH",
+      "ResearchStoreDirection-co2 sequestered MY",
+      "ResearchStoreDirection-co2 sequestered PH",
+      "ResearchStoreDirection-co2 sequestered TH",
+      "ResearchStoreDirection-co2 sequestered TL",
+      "ResearchStoreDirection-co2 sequestered VN",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN BN",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN ID",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN KH",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN LA",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN MM",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN MY",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN PH",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN SG",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN TH",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN TL",
+      "ResearchStoreDirection-co2 sequestered extra-ASEAN VN",
+      "research_bunker_co2_limit",
+      "research_co2_storage_cap-BN",
+      "research_co2_storage_cap-ID",
+      "research_co2_storage_cap-KH",
+      "research_co2_storage_cap-MY",
+      "research_co2_storage_cap-PH",
+      "research_co2_storage_cap-TH",
+      "research_co2_storage_cap-TL",
+      "research_co2_storage_cap-VN",
+      "research_country_co2_limit-BN",
+      "research_country_co2_limit-ID",
+      "research_country_co2_limit-KH",
+      "research_country_co2_limit-LA",
+      "research_country_co2_limit-MM",
+      "research_country_co2_limit-MY",
+      "research_country_co2_limit-PH",
+      "research_country_co2_limit-SG",
+      "research_country_co2_limit-TH",
+      "research_country_co2_limit-TL",
+      "research_country_co2_limit-VN",
+      "research_lossy_bidirectional_sync-0",
+      "research_lossy_bidirectional_sync-1",
+      "research_lossy_bidirectional_sync-10",
+      "research_lossy_bidirectional_sync-100",
+      "research_lossy_bidirectional_sync-101",
+      "research_lossy_bidirectional_sync-102",
+      "research_lossy_bidirectional_sync-103",
+      "research_lossy_bidirectional_sync-104",
+      "research_lossy_bidirectional_sync-105",
+      "research_lossy_bidirectional_sync-106",
+      "research_lossy_bidirectional_sync-107",
+      "research_lossy_bidirectional_sync-108",
+      "research_lossy_bidirectional_sync-109",
+      "research_lossy_bidirectional_sync-11",
+      "research_lossy_bidirectional_sync-110",
+      "research_lossy_bidirectional_sync-111",
+      "research_lossy_bidirectional_sync-112",
+      "research_lossy_bidirectional_sync-113",
+      "research_lossy_bidirectional_sync-114",
+      "research_lossy_bidirectional_sync-115",
+      "research_lossy_bidirectional_sync-116",
+      "research_lossy_bidirectional_sync-117",
+      "research_lossy_bidirectional_sync-118",
+      "research_lossy_bidirectional_sync-119",
+      "research_lossy_bidirectional_sync-12",
+      "research_lossy_bidirectional_sync-120",
+      "research_lossy_bidirectional_sync-121",
+      "research_lossy_bidirectional_sync-122",
+      "research_lossy_bidirectional_sync-123",
+      "research_lossy_bidirectional_sync-124",
+      "research_lossy_bidirectional_sync-125",
+      "research_lossy_bidirectional_sync-126",
+      "research_lossy_bidirectional_sync-127",
+      "research_lossy_bidirectional_sync-128",
+      "research_lossy_bidirectional_sync-129",
+      "research_lossy_bidirectional_sync-13",
+      "research_lossy_bidirectional_sync-130",
+      "research_lossy_bidirectional_sync-131",
+      "research_lossy_bidirectional_sync-132",
+      "research_lossy_bidirectional_sync-133",
+      "research_lossy_bidirectional_sync-134",
+      "research_lossy_bidirectional_sync-135",
+      "research_lossy_bidirectional_sync-136",
+      "research_lossy_bidirectional_sync-137",
+      "research_lossy_bidirectional_sync-138",
+      "research_lossy_bidirectional_sync-139",
+      "research_lossy_bidirectional_sync-14",
+      "research_lossy_bidirectional_sync-140",
+      "research_lossy_bidirectional_sync-141",
+      "research_lossy_bidirectional_sync-142",
+      "research_lossy_bidirectional_sync-143",
+      "research_lossy_bidirectional_sync-144",
+      "research_lossy_bidirectional_sync-145",
+      "research_lossy_bidirectional_sync-146",
+      "research_lossy_bidirectional_sync-147",
+      "research_lossy_bidirectional_sync-148",
+      "research_lossy_bidirectional_sync-149",
+      "research_lossy_bidirectional_sync-15",
+      "research_lossy_bidirectional_sync-150",
+      "research_lossy_bidirectional_sync-151",
+      "research_lossy_bidirectional_sync-152",
+      "research_lossy_bidirectional_sync-153",
+      "research_lossy_bidirectional_sync-154",
+      "research_lossy_bidirectional_sync-155",
+      "research_lossy_bidirectional_sync-156",
+      "research_lossy_bidirectional_sync-157",
+      "research_lossy_bidirectional_sync-158",
+      "research_lossy_bidirectional_sync-159",
+      "research_lossy_bidirectional_sync-16",
+      "research_lossy_bidirectional_sync-160",
+      "research_lossy_bidirectional_sync-161",
+      "research_lossy_bidirectional_sync-162",
+      "research_lossy_bidirectional_sync-163",
+      "research_lossy_bidirectional_sync-164",
+      "research_lossy_bidirectional_sync-165",
+      "research_lossy_bidirectional_sync-166",
+      "research_lossy_bidirectional_sync-167",
+      "research_lossy_bidirectional_sync-168",
+      "research_lossy_bidirectional_sync-169",
+      "research_lossy_bidirectional_sync-17",
+      "research_lossy_bidirectional_sync-170",
+      "research_lossy_bidirectional_sync-171",
+      "research_lossy_bidirectional_sync-172",
+      "research_lossy_bidirectional_sync-173",
+      "research_lossy_bidirectional_sync-174",
+      "research_lossy_bidirectional_sync-175",
+      "research_lossy_bidirectional_sync-176",
+      "research_lossy_bidirectional_sync-177",
+      "research_lossy_bidirectional_sync-178",
+      "research_lossy_bidirectional_sync-179",
+      "research_lossy_bidirectional_sync-18",
+      "research_lossy_bidirectional_sync-180",
+      "research_lossy_bidirectional_sync-181",
+      "research_lossy_bidirectional_sync-182",
+      "research_lossy_bidirectional_sync-183",
+      "research_lossy_bidirectional_sync-184",
+      "research_lossy_bidirectional_sync-185",
+      "research_lossy_bidirectional_sync-186",
+      "research_lossy_bidirectional_sync-187",
+      "research_lossy_bidirectional_sync-188",
+      "research_lossy_bidirectional_sync-189",
+      "research_lossy_bidirectional_sync-19",
+      "research_lossy_bidirectional_sync-190",
+      "research_lossy_bidirectional_sync-191",
+      "research_lossy_bidirectional_sync-192",
+      "research_lossy_bidirectional_sync-193",
+      "research_lossy_bidirectional_sync-194",
+      "research_lossy_bidirectional_sync-195",
+      "research_lossy_bidirectional_sync-196",
+      "research_lossy_bidirectional_sync-197",
+      "research_lossy_bidirectional_sync-198",
+      "research_lossy_bidirectional_sync-199",
+      "research_lossy_bidirectional_sync-2",
+      "research_lossy_bidirectional_sync-20",
+      "research_lossy_bidirectional_sync-200",
+      "research_lossy_bidirectional_sync-201",
+      "research_lossy_bidirectional_sync-202",
+      "research_lossy_bidirectional_sync-203",
+      "research_lossy_bidirectional_sync-204",
+      "research_lossy_bidirectional_sync-205",
+      "research_lossy_bidirectional_sync-206",
+      "research_lossy_bidirectional_sync-207",
+      "research_lossy_bidirectional_sync-208",
+      "research_lossy_bidirectional_sync-209",
+      "research_lossy_bidirectional_sync-21",
+      "research_lossy_bidirectional_sync-210",
+      "research_lossy_bidirectional_sync-211",
+      "research_lossy_bidirectional_sync-212",
+      "research_lossy_bidirectional_sync-213",
+      "research_lossy_bidirectional_sync-214",
+      "research_lossy_bidirectional_sync-215",
+      "research_lossy_bidirectional_sync-216",
+      "research_lossy_bidirectional_sync-217",
+      "research_lossy_bidirectional_sync-218",
+      "research_lossy_bidirectional_sync-219",
+      "research_lossy_bidirectional_sync-22",
+      "research_lossy_bidirectional_sync-220",
+      "research_lossy_bidirectional_sync-221",
+      "research_lossy_bidirectional_sync-222",
+      "research_lossy_bidirectional_sync-223",
+      "research_lossy_bidirectional_sync-224",
+      "research_lossy_bidirectional_sync-225",
+      "research_lossy_bidirectional_sync-226",
+      "research_lossy_bidirectional_sync-227",
+      "research_lossy_bidirectional_sync-228",
+      "research_lossy_bidirectional_sync-229",
+      "research_lossy_bidirectional_sync-23",
+      "research_lossy_bidirectional_sync-230",
+      "research_lossy_bidirectional_sync-231",
+      "research_lossy_bidirectional_sync-232",
+      "research_lossy_bidirectional_sync-233",
+      "research_lossy_bidirectional_sync-234",
+      "research_lossy_bidirectional_sync-235",
+      "research_lossy_bidirectional_sync-236",
+      "research_lossy_bidirectional_sync-237",
+      "research_lossy_bidirectional_sync-238",
+      "research_lossy_bidirectional_sync-239",
+      "research_lossy_bidirectional_sync-24",
+      "research_lossy_bidirectional_sync-240",
+      "research_lossy_bidirectional_sync-241",
+      "research_lossy_bidirectional_sync-242",
+      "research_lossy_bidirectional_sync-243",
+      "research_lossy_bidirectional_sync-244",
+      "research_lossy_bidirectional_sync-245",
+      "research_lossy_bidirectional_sync-246",
+      "research_lossy_bidirectional_sync-247",
+      "research_lossy_bidirectional_sync-248",
+      "research_lossy_bidirectional_sync-249",
+      "research_lossy_bidirectional_sync-25",
+      "research_lossy_bidirectional_sync-250",
+      "research_lossy_bidirectional_sync-251",
+      "research_lossy_bidirectional_sync-252",
+      "research_lossy_bidirectional_sync-253",
+      "research_lossy_bidirectional_sync-254",
+      "research_lossy_bidirectional_sync-255",
+      "research_lossy_bidirectional_sync-256",
+      "research_lossy_bidirectional_sync-257",
+      "research_lossy_bidirectional_sync-258",
+      "research_lossy_bidirectional_sync-259",
+      "research_lossy_bidirectional_sync-26",
+      "research_lossy_bidirectional_sync-260",
+      "research_lossy_bidirectional_sync-261",
+      "research_lossy_bidirectional_sync-262",
+      "research_lossy_bidirectional_sync-263",
+      "research_lossy_bidirectional_sync-264",
+      "research_lossy_bidirectional_sync-265",
+      "research_lossy_bidirectional_sync-266",
+      "research_lossy_bidirectional_sync-267",
+      "research_lossy_bidirectional_sync-268",
+      "research_lossy_bidirectional_sync-269",
+      "research_lossy_bidirectional_sync-27",
+      "research_lossy_bidirectional_sync-270",
+      "research_lossy_bidirectional_sync-271",
+      "research_lossy_bidirectional_sync-272",
+      "research_lossy_bidirectional_sync-273",
+      "research_lossy_bidirectional_sync-274",
+      "research_lossy_bidirectional_sync-275",
+      "research_lossy_bidirectional_sync-276",
+      "research_lossy_bidirectional_sync-277",
+      "research_lossy_bidirectional_sync-278",
+      "research_lossy_bidirectional_sync-279",
+      "research_lossy_bidirectional_sync-28",
+      "research_lossy_bidirectional_sync-280",
+      "research_lossy_bidirectional_sync-281",
+      "research_lossy_bidirectional_sync-282",
+      "research_lossy_bidirectional_sync-283",
+      "research_lossy_bidirectional_sync-284",
+      "research_lossy_bidirectional_sync-285",
+      "research_lossy_bidirectional_sync-286",
+      "research_lossy_bidirectional_sync-287",
+      "research_lossy_bidirectional_sync-288",
+      "research_lossy_bidirectional_sync-289",
+      "research_lossy_bidirectional_sync-29",
+      "research_lossy_bidirectional_sync-290",
+      "research_lossy_bidirectional_sync-291",
+      "research_lossy_bidirectional_sync-292",
+      "research_lossy_bidirectional_sync-293",
+      "research_lossy_bidirectional_sync-294",
+      "research_lossy_bidirectional_sync-295",
+      "research_lossy_bidirectional_sync-296",
+      "research_lossy_bidirectional_sync-297",
+      "research_lossy_bidirectional_sync-298",
+      "research_lossy_bidirectional_sync-299",
+      "research_lossy_bidirectional_sync-3",
+      "research_lossy_bidirectional_sync-30",
+      "research_lossy_bidirectional_sync-300",
+      "research_lossy_bidirectional_sync-301",
+      "research_lossy_bidirectional_sync-302",
+      "research_lossy_bidirectional_sync-303",
+      "research_lossy_bidirectional_sync-304",
+      "research_lossy_bidirectional_sync-305",
+      "research_lossy_bidirectional_sync-306",
+      "research_lossy_bidirectional_sync-307",
+      "research_lossy_bidirectional_sync-308",
+      "research_lossy_bidirectional_sync-309",
+      "research_lossy_bidirectional_sync-31",
+      "research_lossy_bidirectional_sync-310",
+      "research_lossy_bidirectional_sync-311",
+      "research_lossy_bidirectional_sync-312",
+      "research_lossy_bidirectional_sync-313",
+      "research_lossy_bidirectional_sync-314",
+      "research_lossy_bidirectional_sync-315",
+      "research_lossy_bidirectional_sync-316",
+      "research_lossy_bidirectional_sync-317",
+      "research_lossy_bidirectional_sync-318",
+      "research_lossy_bidirectional_sync-319",
+      "research_lossy_bidirectional_sync-32",
+      "research_lossy_bidirectional_sync-320",
+      "research_lossy_bidirectional_sync-321",
+      "research_lossy_bidirectional_sync-33",
+      "research_lossy_bidirectional_sync-34",
+      "research_lossy_bidirectional_sync-35",
+      "research_lossy_bidirectional_sync-36",
+      "research_lossy_bidirectional_sync-37",
+      "research_lossy_bidirectional_sync-38",
+      "research_lossy_bidirectional_sync-39",
+      "research_lossy_bidirectional_sync-4",
+      "research_lossy_bidirectional_sync-40",
+      "research_lossy_bidirectional_sync-41",
+      "research_lossy_bidirectional_sync-42",
+      "research_lossy_bidirectional_sync-43",
+      "research_lossy_bidirectional_sync-44",
+      "research_lossy_bidirectional_sync-45",
+      "research_lossy_bidirectional_sync-46",
+      "research_lossy_bidirectional_sync-47",
+      "research_lossy_bidirectional_sync-48",
+      "research_lossy_bidirectional_sync-49",
+      "research_lossy_bidirectional_sync-5",
+      "research_lossy_bidirectional_sync-50",
+      "research_lossy_bidirectional_sync-51",
+      "research_lossy_bidirectional_sync-52",
+      "research_lossy_bidirectional_sync-53",
+      "research_lossy_bidirectional_sync-54",
+      "research_lossy_bidirectional_sync-55",
+      "research_lossy_bidirectional_sync-56",
+      "research_lossy_bidirectional_sync-57",
+      "research_lossy_bidirectional_sync-58",
+      "research_lossy_bidirectional_sync-59",
+      "research_lossy_bidirectional_sync-6",
+      "research_lossy_bidirectional_sync-60",
+      "research_lossy_bidirectional_sync-61",
+      "research_lossy_bidirectional_sync-62",
+      "research_lossy_bidirectional_sync-63",
+      "research_lossy_bidirectional_sync-64",
+      "research_lossy_bidirectional_sync-65",
+      "research_lossy_bidirectional_sync-66",
+      "research_lossy_bidirectional_sync-67",
+      "research_lossy_bidirectional_sync-68",
+      "research_lossy_bidirectional_sync-69",
+      "research_lossy_bidirectional_sync-7",
+      "research_lossy_bidirectional_sync-70",
+      "research_lossy_bidirectional_sync-71",
+      "research_lossy_bidirectional_sync-72",
+      "research_lossy_bidirectional_sync-73",
+      "research_lossy_bidirectional_sync-74",
+      "research_lossy_bidirectional_sync-75",
+      "research_lossy_bidirectional_sync-76",
+      "research_lossy_bidirectional_sync-77",
+      "research_lossy_bidirectional_sync-78",
+      "research_lossy_bidirectional_sync-79",
+      "research_lossy_bidirectional_sync-8",
+      "research_lossy_bidirectional_sync-80",
+      "research_lossy_bidirectional_sync-81",
+      "research_lossy_bidirectional_sync-82",
+      "research_lossy_bidirectional_sync-83",
+      "research_lossy_bidirectional_sync-84",
+      "research_lossy_bidirectional_sync-85",
+      "research_lossy_bidirectional_sync-86",
+      "research_lossy_bidirectional_sync-87",
+      "research_lossy_bidirectional_sync-88",
+      "research_lossy_bidirectional_sync-89",
+      "research_lossy_bidirectional_sync-9",
+      "research_lossy_bidirectional_sync-90",
+      "research_lossy_bidirectional_sync-91",
+      "research_lossy_bidirectional_sync-92",
+      "research_lossy_bidirectional_sync-93",
+      "research_lossy_bidirectional_sync-94",
+      "research_lossy_bidirectional_sync-95",
+      "research_lossy_bidirectional_sync-96",
+      "research_lossy_bidirectional_sync-97",
+      "research_lossy_bidirectional_sync-98",
+      "research_lossy_bidirectional_sync-99",
+      "research_new_hydro_inflow-ID_Kalimantan4 0 hydro_new",
+      "research_new_hydro_inflow-ID_Kalimantan4 1 hydro_new",
+      "research_new_hydro_inflow-ID_Kalimantan4 10 hydro_new",
+      "research_new_hydro_inflow-ID_Kalimantan4 2 hydro_new",
+      "research_new_hydro_inflow-ID_Kalimantan4 9 hydro_new",
+      "research_new_hydro_inflow-ID_Sulawesi0 1 hydro_new",
+      "research_new_hydro_inflow-ID_Sulawesi0 3 hydro_new",
+      "research_new_hydro_inflow-ID_Sumatra3 0 hydro_new",
+      "research_new_hydro_inflow-ID_Sumatra3 2 hydro_new",
+      "research_new_hydro_inflow-ID_Sumatra3 5 hydro_new",
+      "research_new_hydro_inflow-KH2 2 hydro_new",
+      "research_new_hydro_inflow-KH2 3 hydro_new",
+      "research_new_hydro_inflow-KH2 4 hydro_new",
+      "research_new_hydro_inflow-LA2 1 hydro_new",
+      "research_new_hydro_inflow-LA2 3 hydro_new",
+      "research_new_hydro_inflow-LA2 4 hydro_new",
+      "research_new_hydro_inflow-LA2 5 hydro_new",
+      "research_new_hydro_inflow-MM2 0 hydro_new",
+      "research_new_hydro_inflow-MM2 10 hydro_new",
+      "research_new_hydro_inflow-MM2 13 hydro_new",
+      "research_new_hydro_inflow-MM2 15 hydro_new",
+      "research_new_hydro_inflow-MM2 3 hydro_new",
+      "research_new_hydro_inflow-MM2 4 hydro_new",
+      "research_new_hydro_inflow-MM2 5 hydro_new",
+      "research_new_hydro_inflow-MM2 6 hydro_new",
+      "research_new_hydro_inflow-MM2 7 hydro_new",
+      "research_new_hydro_inflow-MY_Peninsular2 0 hydro_new",
+      "research_new_hydro_inflow-MY_Sarawak4 0 hydro_new",
+      "research_new_hydro_inflow-PH5 0 hydro_new",
+      "research_new_hydro_inflow-PH_Luzon5 0 hydro_new",
+      "research_new_hydro_inflow-PH_Mindanao6 0 hydro_new",
+      "research_new_hydro_inflow-PH_Mindanao6 1 hydro_new",
+      "research_new_hydro_inflow-PH_Visayas7 0 hydro_new",
+      "research_new_hydro_inflow-VN2 1 hydro_new",
+      "research_new_hydro_inflow-VN2 5 hydro_new",
+      "research_new_hydro_inflow-VN2 7 hydro_new"
+    ]
+  },
+  "parameter_source": "decision 69: research.solver.profiles.pypsa_eur_default (PyPSA-Eur gurobi-default basis; differences registered) + TimeLimit (stop-loss)",
+  "solver_parameters": {
+    "threads": 32,
+    "method": 2,
+    "crossover": 0,
+    "BarConvTol": 1e-05,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
+    "TimeLimit": 1750.0
+  },
+  "duals": {
+    "assign_all_duals": true,
+    "note": "PyPSA assign_duals maps snapshot-indexed duals to <component>_t.mu_<spec> and GlobalConstraints to mu (none in this model); the static capacity-bound duals (scarcity rents) and the research hook duals are only in DUALS_BY_CONSTRAINT.nc",
+    "file": "DUALS_BY_CONSTRAINT.nc",
+    "index": "DUALS_INDEX.csv",
+    "source": "model",
+    "constraints": 756,
+    "research_constraints": 715,
+    "values": 1401085,
+    "nan_values": 8006,
+    "unassigned": []
+  },
+  "status": "ok",
+  "termination_condition": "optimal",
+  "solve_seconds": 183.08056545257568,
+  "gurobi_log_stats": {
+    "coefficient_statistics": {
+      "matrix": {
+        "min": 0.0002,
+        "max": 200.0,
+        "ratio": 1000000.0
+      },
+      "objective": {
+        "min": 2.0,
+        "max": 1000000.0,
+        "ratio": 500000.0
+      },
+      "bounds": {
+        "min": 0.8,
+        "max": 200000.0,
+        "ratio": 250000.0
+      },
+      "rhs": {
+        "min": 0.0002,
+        "max": 600000000.0,
+        "ratio": 3000000000000.0
+      }
+    },
+    "lines": {
+      "warning": [
+        "Warning: Thread count (32) is larger than processor count (16)"
+      ],
+      "crossover": [
+        "Crossover  0"
+      ],
+      "presolved": [
+        "Presolved: 438977 rows, 420915 columns, 1752379 nonzeros"
+      ],
+      "barrier": [
+        "Barrier solved model in 64 iterations and 90.63 seconds (96.80 work units)"
+      ],
+      "result": [
+        "Optimal objective 5.45075404e+11"
+      ]
+    },
+    "scrubbed_log": "GUROBI_LOG_SCRUBBED.txt",
+    "scrubbed_lines": 116
+  },
+  "objective": 547962131395.837,
+  "objective_lp": 545075403861.0509,
+  "solution": {
+    "X": {
+      "count": 629144,
+      "sha256": "db64b7cd55446d005501120c1a4bdc9e135f3becd5f7af27e84a6159cdb6747a"
+    },
+    "Pi": {
+      "count": 1393079,
+      "sha256": "2093e4c3322e70f4d64872a79404ecd0d7022627d5353ad7031944ed11016f28"
+    },
+    "RC": {
+      "count": 629144,
+      "sha256": "9c2251fcc2ea850905e1ee7ee89dd1459e57909e98bfcd2ede5d191572f7a7fb"
+    }
+  },
+  "cost_breakdown": {
+    "extendable": 9392,
+    "matched": 9392,
+    "matched_share": 1.0,
+    "by_rule": {
+      "zero_cost_no_row": 3703,
+      "plain": 2141,
+      "efficiency": 1658,
+      "length": 564,
+      "composite:offwind_connection": 399,
+      "composite:length_x_subsea_mix": 355,
+      "composite:base_x_efficiency_plus_capture_x_co2": 291,
+      "composite:btl_plus_scaled_fischer_tropsch": 97,
+      "composite:capture_x_co2": 94,
+      "parameter_price": 53,
+      "composite:length_x_subsea_mix_plus_inverter_pair": 13,
+      "composite:zero_cost_reversed_twin": 13,
+      "inverse_efficiency": 11
+    },
+    "unmatched_by_carrier": {},
+    "no_cost_row_by_carrier": {
+      "Generator:FT fuel import": 1,
+      "Generator:H2 import": 16,
+      "Generator:LNG import": 16,
+      "Generator:ammonia import": 1,
+      "Generator:coal": 68,
+      "Generator:gas production": 19,
+      "Generator:lignite": 8,
+      "Generator:methanol import": 1,
+      "Generator:oil import": 1,
+      "Link:BEV charger": 96,
+      "Link:CO2 export extra-ASEAN": 71,
+      "Link:CO2 sequestration": 73,
+      "Link:CO2 ship": 504,
+      "Link:CO2 transit export extra-ASEAN": 6,
+      "Link:CO2 transit rail": 6,
+      "Link:CO2 transit ship": 42,
+      "Link:battery discharger": 98,
+      "Link:biomass final-energy accounting": 159,
+      "Link:coal feedstock": 44,
+      "Link:coal final-energy accounting": 69,
+      "Link:cooking LPG": 190,
+      "Link:cooking electric": 95,
+      "Link:cooking gas": 95,
+      "Link:gas feedstock": 78,
+      "Link:gas final-energy accounting": 219,
+      "Link:gas production delivery": 19,
+      "Link:home battery discharger": 98,
+      "Link:industry methanol": 77,
+      "Link:oil feedstock": 192,
+      "Link:oil final-energy accounting": 902,
+      "Link:oil pool": 196,
+      "Link:process emissions": 97,
+      "Link:shipping methanol": 72,
+      "Link:waste incineration": 94,
+      "Store:ammonia store": 1,
+      "Store:co2 atmosphere": 11,
+      "Store:co2 bunkers": 1,
+      "Store:co2 sequestered": 8,
+      "Store:co2 sequestered extra-ASEAN": 11,
+      "Store:methanol store": 1
+    },
+    "table_fixed_inconsistent": 0,
+    "composite_rules": {
+      "offwind_connection": 399,
+      "length_x_subsea_mix": 355,
+      "base_x_efficiency_plus_capture_x_co2": 291,
+      "btl_plus_scaled_fischer_tropsch": 97,
+      "capture_x_co2": 94,
+      "length_x_subsea_mix_plus_inverter_pair": 13,
+      "zero_cost_reversed_twin": 13
+    },
+    "offwind_distance_table": {
+      "status": "ok",
+      "file": "research_inputs/renewable_v5/OFFWIND_CONNECTION_DISTANCE_S4C1.csv",
+      "sha256": "e58ee610c160b4ebbfe2d80d11bc2deb833fc62cc44131e7049cd8da40e5ec52",
+      "rows": 416
+    },
+    "tolerance": 1e-06,
+    "discount_rate_mode": "uniform",
+    "uniform_rate": null
+  },
+  "exports": {
+    "DUALS_BY_CONSTRAINT.nc": {
+      "bytes": 15259157,
+      "sha256": "6537e333b1842c843cb00ccc3ccc40d649fe9642e601bb4aa3c555758bc4e560"
+    },
+    "DUALS_INDEX.csv": {
+      "bytes": 38305,
+      "sha256": "b47a55a700f71e3363e47818f631c8acdb2ae73bd5914e7ae8ef207fb9586099"
+    },
+    "COMPONENT_COST_BREAKDOWN.csv": {
+      "bytes": 2674752,
+      "sha256": "c0adebf856514ff368bd30c191930135f5c6544107fb0f8144ccb0c27069db4a"
+    },
+    "COMPONENT_COST_BREAKDOWN_SUMMARY.json": {
+      "bytes": 3042,
+      "sha256": "de238b7382dda624c09d616a3d8c3fa7b2c0f2b8b164ff7e5f2fb94397c987c0"
+    },
+    "costs_active_research.csv": {
+      "bytes": 42252,
+      "sha256": "39f1365578492d9fd1bdd82804dd8cc85fb76824bc07e5dbccc7a982489021ff"
+    }
+  },
+  "gates": {
+    "A1_A2": false,
+    "A3": false,
+    "A5": true,
+    "A4": true,
+    "A6": true,
+    "B1": false,
+    "B1_BUNKERS": true,
+    "B2": true,
+    "B3": true,
+    "B8": true,
+    "B11": true,
+    "B12": false,
+    "B13": true,
+    "B14": true,
+    "B15": true,
+    "B16_LEDGER": true,
+    "A1_A2_S4B": false,
+    "A3_S4B": false,
+    "A5_S4B": true,
+    "B1_S4B": true,
+    "B3_S4B": true
+  },
+  "peak_rss_bytes": 6695321600,
+  "finished_epoch": 1792408686.488491,
+  "solved_network": "results_project/s4n/s4n_c2/solves/cal_integrated_nze/integrated_SMOKE_TEST_ONLY_solved.nc",
+  "decision": "SOLVED_SMOKE_TEST_ONLY",
+  "emissions_by_country": {
+    "BN": -0.0013322289799742038,
+    "ID": 0.4209385068458502,
+    "KH": -0.015845259916673626,
+    "LA": -0.08312523894147716,
+    "MM": -0.7368679729914014,
+    "MY": -0.11050079996138606,
+    "PH": -0.1089220643043518,
+    "SG": -0.019995592099702808,
+    "TH": 0.10489882824239682,
+    "TL": -0.43108277986150245,
+    "VN": 0.023636739159243803
+  },
+  "co2_flows": {
+    "sequestered_by_country": {
+      "BN": {
+        "final_level_t": 13228294.22722719,
+        "e_nom_max": 371586000.0
+      },
+      "ID": {
+        "final_level_t": 834092829.944545,
+        "e_nom_max": 1025500000.0
+      },
+      "KH": {
+        "final_level_t": 1699999.353813604,
+        "e_nom_max": 1700000.0
+      },
+      "MY": {
+        "final_level_t": 272229279.96341884,
+        "e_nom_max": 2575460000.0
+      },
+      "PH": {
+        "final_level_t": 125288682.50287592,
+        "e_nom_max": 446000000.0
+      },
+      "TH": {
+        "final_level_t": 320479706.24478346,
+        "e_nom_max": 320480000.0
+      },
+      "TL": {
+        "final_level_t": 506713.8470176741,
+        "e_nom_max": 5000000.0
+      },
+      "VN": {
+        "final_level_t": 235999989.1255462,
+        "e_nom_max": 236000000.0
+      }
+    },
+    "captured_by_carrier": {
+      "CCGT CC": 376496214.25870275,
+      "SMR CC": 138559987.47723332,
+      "biomass EOP CC": 110491984.66678278,
+      "process emissions CC": 615224467.8998585,
+      "DAC": 233298236.97639772,
+      "industry biomass CC": 393048511.8161787,
+      "industry biomass boiler CC": 60130444.79310076
+    },
+    "vented_by_country": {},
+    "cross_border_pipeline": {
+      "CO2 pipeline BN4 0 -> MY_Sarawak4 2": {
+        "from_country": "BN",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.03179394730819464,
+        "net_t_0_to_1": 17.963727430615293,
+        "abs_t": 17.963727430615293
+      },
+      "CO2 pipeline ID_Kalimantan4 0 -> MY_Sarawak4 0": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.0027124507975013652,
+        "net_t_0_to_1": 1.9030949369050478,
+        "abs_t": 1.9030949369050478
+      },
+      "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 0": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.007360377214373812,
+        "net_t_0_to_1": -16.445403468985052,
+        "abs_t": 19.739708027726806
+      },
+      "CO2 pipeline ID_Kalimantan4 1 -> MY_Sabah4 1": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.02124755957249532,
+        "net_t_0_to_1": -66.12733282022077,
+        "abs_t": 68.15962293152664
+      },
+      "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 0": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.0039039400560583032,
+        "net_t_0_to_1": -6.5831881466711835,
+        "abs_t": 8.538417154698102
+      },
+      "CO2 pipeline ID_Kalimantan4 1 -> MY_Sarawak4 2": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.007496997654034782,
+        "net_t_0_to_1": -15.644841762263392,
+        "abs_t": 20.912152557217457
+      },
+      "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 0": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.0025893608234921804,
+        "net_t_0_to_1": 1.7612787800773446,
+        "abs_t": 1.7612787800773446
+      },
+      "CO2 pipeline ID_Kalimantan4 10 -> MY_Sarawak4 1": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.0024500367379590355,
+        "net_t_0_to_1": 2.232082930300832,
+        "abs_t": 2.232082930300832
+      },
+      "CO2 pipeline ID_Kalimantan4 2 -> MY_Sarawak4 1": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.00429933703559417,
+        "net_t_0_to_1": 2.735899081762386,
+        "abs_t": 2.735899081762386
+      },
+      "CO2 pipeline ID_Kalimantan4 8 -> MY_Sarawak4 1": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.003910017742778282,
+        "net_t_0_to_1": 2.3849591558269223,
+        "abs_t": 2.3849591558269223
+      },
+      "CO2 pipeline ID_Kalimantan4 9 -> MY_Sarawak4 0": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.003979858409648958,
+        "net_t_0_to_1": -8.808908619531785,
+        "abs_t": 10.229835861041796
+      },
+      "CO2 pipeline ID_Nusa-Tenggara15 0 -> TL11 0": {
+        "from_country": "ID",
+        "to_country": "TL",
+        "capacity_opt_t_per_h": 0.006338841096868332,
+        "net_t_0_to_1": -1.8748357166664842,
+        "abs_t": 3.108344527196178
+      },
+      "CO2 pipeline ID_Sumatra2 0 -> SG2 0": {
+        "from_country": "ID",
+        "to_country": "SG",
+        "capacity_opt_t_per_h": 7772.908864781514,
+        "net_t_0_to_1": -62820817.10966751,
+        "abs_t": 62820817.10966751
+      },
+      "CO2 pipeline ID_Sumatra3 3 -> MY_Peninsular2 1": {
+        "from_country": "ID",
+        "to_country": "MY",
+        "capacity_opt_t_per_h": 0.002527130670989933,
+        "net_t_0_to_1": 5.360036150715771,
+        "abs_t": 5.379977983827971
+      },
+      "CO2 pipeline KH2 0 -> VN2 0": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.00764621194746807,
+        "net_t_0_to_1": -12.110421319345225,
+        "abs_t": 12.110421319345225
+      },
+      "CO2 pipeline KH2 1 -> LA2 4": {
+        "from_country": "KH",
+        "to_country": "LA",
+        "capacity_opt_t_per_h": 0.007613347825734158,
+        "net_t_0_to_1": 29.43120379026638,
+        "abs_t": 30.35475762408017
+      },
+      "CO2 pipeline KH2 1 -> TH2 1": {
+        "from_country": "KH",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 1236.5193070338382,
+        "net_t_0_to_1": 10831896.157428615,
+        "abs_t": 10831896.157428615
+      },
+      "CO2 pipeline KH2 1 -> VN2 4": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.004323670289729186,
+        "net_t_0_to_1": -3.824382608632488,
+        "abs_t": 9.723126700855417
+      },
+      "CO2 pipeline KH2 1 -> VN2 5": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.00604213221035226,
+        "net_t_0_to_1": -9.877938210265794,
+        "abs_t": 15.610977709771037
+      },
+      "CO2 pipeline KH2 1 -> VN2 7": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.004242900920257545,
+        "net_t_0_to_1": -3.7867412910794624,
+        "abs_t": 9.428568422756648
+      },
+      "CO2 pipeline KH2 2 -> TH2 3": {
+        "from_country": "KH",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 1275.8927593405317,
+        "net_t_0_to_1": 11176801.621867826,
+        "abs_t": 11176801.621867826
+      },
+      "CO2 pipeline KH2 3 -> VN2 0": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.0070136885921470325,
+        "net_t_0_to_1": 14.173535676714826,
+        "abs_t": 14.173535676714826
+      },
+      "CO2 pipeline KH2 3 -> VN2 5": {
+        "from_country": "KH",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.006544558255200147,
+        "net_t_0_to_1": 13.698466819124114,
+        "abs_t": 13.698466819124114
+      },
+      "CO2 pipeline KH2 4 -> TH2 1": {
+        "from_country": "KH",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.041427731945821805,
+        "net_t_0_to_1": 345.6908751470788,
+        "abs_t": 345.6908751470788
+      },
+      "CO2 pipeline KH2 4 -> TH2 3": {
+        "from_country": "KH",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 486.1247119664202,
+        "net_t_0_to_1": 4258433.015068924,
+        "abs_t": 4258433.015068924
+      },
+      "CO2 pipeline LA2 0 -> TH2 1": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 87.64463526338852,
+        "net_t_0_to_1": 767694.708014592,
+        "abs_t": 767694.708014592
+      },
+      "CO2 pipeline LA2 0 -> VN2 2": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.15267102602131444,
+        "net_t_0_to_1": -823.812798707486,
+        "abs_t": 823.812798707486
+      },
+      "CO2 pipeline LA2 0 -> VN2 3": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.007614464836420843,
+        "net_t_0_to_1": -35.17533009301186,
+        "abs_t": 35.17533009301186
+      },
+      "CO2 pipeline LA2 1 -> TH2 1": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.014854664606539574,
+        "net_t_0_to_1": 115.45235580106595,
+        "abs_t": 115.45235580106595
+      },
+      "CO2 pipeline LA2 1 -> TH2 4": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 99.73627157393348,
+        "net_t_0_to_1": 873671.5022861015,
+        "abs_t": 873671.5022861015
+      },
+      "CO2 pipeline LA2 1 -> VN2 1": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.004790302189467344,
+        "net_t_0_to_1": -16.029602119530953,
+        "abs_t": 16.029602119530953
+      },
+      "CO2 pipeline LA2 1 -> VN2 3": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.004606230180631068,
+        "net_t_0_to_1": -13.488675705440375,
+        "abs_t": 13.4912392229584
+      },
+      "CO2 pipeline LA2 2 -> TH2 1": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 287.3464385587774,
+        "net_t_0_to_1": 2517135.0441168128,
+        "abs_t": 2517135.0441168128
+      },
+      "CO2 pipeline LA2 2 -> TH2 4": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.15676585471778942,
+        "net_t_0_to_1": 1351.6070898619737,
+        "abs_t": 1351.6070898619737
+      },
+      "CO2 pipeline LA2 3 -> TH2 1": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 2105.308564665616,
+        "net_t_0_to_1": 18442474.59536924,
+        "abs_t": 18442474.59536924
+      },
+      "CO2 pipeline LA2 3 -> VN2 2": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.00417455801995289,
+        "net_t_0_to_1": -19.172429962674567,
+        "abs_t": 19.172429962674567
+      },
+      "CO2 pipeline LA2 3 -> VN2 3": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 1984.3109118176271,
+        "net_t_0_to_1": -17382534.60228595,
+        "abs_t": 17382534.60228595
+      },
+      "CO2 pipeline LA2 4 -> TH2 1": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 127.28923304751765,
+        "net_t_0_to_1": 1115030.9136265125,
+        "abs_t": 1115030.9136265125
+      },
+      "CO2 pipeline LA2 4 -> TH2 2": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.002282858404460985,
+        "net_t_0_to_1": 9.182356848476703,
+        "abs_t": 9.182356848476703
+      },
+      "CO2 pipeline LA2 4 -> VN2 2": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.02953824977857242,
+        "net_t_0_to_1": -92.00109401592897,
+        "abs_t": 178.89529877559323
+      },
+      "CO2 pipeline LA2 4 -> VN2 7": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.009588550044449685,
+        "net_t_0_to_1": -33.62584359400799,
+        "abs_t": 40.75154975842595
+      },
+      "CO2 pipeline LA2 5 -> MM2 13": {
+        "from_country": "LA",
+        "to_country": "MM",
+        "capacity_opt_t_per_h": 0.008410172753699131,
+        "net_t_0_to_1": -27.980654861774948,
+        "abs_t": 36.13817224759904
+      },
+      "CO2 pipeline LA2 5 -> TH2 4": {
+        "from_country": "LA",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 396.64955240670514,
+        "net_t_0_to_1": 3474633.223084745,
+        "abs_t": 3474633.223084745
+      },
+      "CO2 pipeline LA2 5 -> VN2 1": {
+        "from_country": "LA",
+        "to_country": "VN",
+        "capacity_opt_t_per_h": 0.005114397958662606,
+        "net_t_0_to_1": -9.765807700481435,
+        "abs_t": 16.02269415974844
+      },
+      "CO2 pipeline MM2 10 -> TH2 4": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 128.96750130664256,
+        "net_t_0_to_1": 1129697.8359512836,
+        "abs_t": 1129697.8359512836
+      },
+      "CO2 pipeline MM2 13 -> TH2 4": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 52.8832834698501,
+        "net_t_0_to_1": 463239.97445521405,
+        "abs_t": 463239.97445521405
+      },
+      "CO2 pipeline MM2 4 -> TH2 2": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.006815746614680339,
+        "net_t_0_to_1": 36.33795561601775,
+        "abs_t": 36.33795561601775
+      },
+      "CO2 pipeline MM2 4 -> TH2 3": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.0030659315138540444,
+        "net_t_0_to_1": 13.201143605969818,
+        "abs_t": 13.201143605969818
+      },
+      "CO2 pipeline MM2 4 -> TH2 4": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 834.7815415100279,
+        "net_t_0_to_1": 7312638.018256299,
+        "abs_t": 7312638.018256299
+      },
+      "CO2 pipeline MM2 4 -> TH2 5": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.001259412997655566,
+        "net_t_0_to_1": 2.5721664729600335,
+        "abs_t": 2.5952122728473457
+      },
+      "CO2 pipeline MM2 6 -> TH2 4": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 997.6290547664464,
+        "net_t_0_to_1": 8735217.419765048,
+        "abs_t": 8735217.419765048
+      },
+      "CO2 pipeline MM2 7 -> TH2 4": {
+        "from_country": "MM",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 71.09568016679141,
+        "net_t_0_to_1": 622565.6315268175,
+        "abs_t": 622565.6315268175
+      },
+      "CO2 pipeline MY_Peninsular2 0 -> TH2 0": {
+        "from_country": "MY",
+        "to_country": "TH",
+        "capacity_opt_t_per_h": 0.007943837350601678,
+        "net_t_0_to_1": -37.4080265606687,
+        "abs_t": 37.4080265606687
+      },
+      "CO2 pipeline MY_Peninsular2 1 -> SG2 0": {
+        "from_country": "MY",
+        "to_country": "SG",
+        "capacity_opt_t_per_h": 0.009692414400769313,
+        "net_t_0_to_1": -30.104947546328173,
+        "abs_t": 30.104947546328173
+      },
+      "CO2 pipeline MY_Sabah4 1 -> PH_Mindanao6 0": {
+        "from_country": "MY",
+        "to_country": "PH",
+        "capacity_opt_t_per_h": 0.0007329597559583103,
+        "net_t_0_to_1": 0.0907929946876354,
+        "abs_t": 0.10161483862005352
+      }
+    },
+    "dac_by_country": {
+      "BN": 764959.3286253518,
+      "ID": 2558720.5194874285,
+      "KH": 9472022.95999497,
+      "LA": 157.17313545372977,
+      "MM": 93.80035757553559,
+      "MY": 103.53087166627304,
+      "PH": 54681315.850326106,
+      "SG": 12063782.174042268,
+      "TH": 83.16311040653031,
+      "TL": 839.1145161039274,
+      "VN": 153756159.36193037
+    },
+    "extra_asean_by_country": {
+      "BN": {
+        "store": "co2 sequestered extra-ASEAN BN",
+        "exported_t": 13.146017116457582,
+        "e_nom_opt": 13.320427535920082,
+        "cost_eur": 719.066498912143,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "ID": {
+        "store": "co2 sequestered extra-ASEAN ID",
+        "exported_t": 231.89814664254715,
+        "e_nom_opt": 231.97931257675518,
+        "cost_eur": 12684.464574575633,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "KH": {
+        "store": "co2 sequestered extra-ASEAN KH",
+        "exported_t": 29.679858537333,
+        "e_nom_opt": 29.82419663820908,
+        "cost_eur": 1623.4416688785377,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "LA": {
+        "store": "co2 sequestered extra-ASEAN LA",
+        "exported_t": 25.456260783120754,
+        "e_nom_opt": 25.576563000514824,
+        "cost_eur": 1392.4175021647661,
+        "transit_t": 25.45641462349233,
+        "transit_freight_eur": 375.1993871519037
+      },
+      "MM": {
+        "store": "co2 sequestered extra-ASEAN MM",
+        "exported_t": 93.22730223952563,
+        "e_nom_opt": 93.30650134846003,
+        "cost_eur": 5099.387079032196,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "MY": {
+        "store": "co2 sequestered extra-ASEAN MY",
+        "exported_t": 48.730377080367965,
+        "e_nom_opt": 48.80206336744264,
+        "cost_eur": 2665.4751266055673,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "PH": {
+        "store": "co2 sequestered extra-ASEAN PH",
+        "exported_t": 45.415057723934844,
+        "e_nom_opt": 45.505027776002166,
+        "cost_eur": 2484.132362383729,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "SG": {
+        "store": "co2 sequestered extra-ASEAN SG",
+        "exported_t": 12.267692280411692,
+        "e_nom_opt": 12.449820565857765,
+        "cost_eur": 671.02350922423,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "TH": {
+        "store": "co2 sequestered extra-ASEAN TH",
+        "exported_t": 23.531400802212673,
+        "e_nom_opt": 23.67423181826622,
+        "cost_eur": 1287.1306829627051,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "TL": {
+        "store": "co2 sequestered extra-ASEAN TL",
+        "exported_t": 12.560185025672393,
+        "e_nom_opt": 12.723608863600262,
+        "cost_eur": 687.0224032184049,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      },
+      "VN": {
+        "store": "co2 sequestered extra-ASEAN VN",
+        "exported_t": 92.45805663950462,
+        "e_nom_opt": 92.5545761589982,
+        "cost_eur": 5057.310552316116,
+        "transit_t": 0,
+        "transit_freight_eur": 0
+      }
+    },
+    "intra_asean_shipping": {
+      "BN->ID": {
+        "t": 17.349056753523648,
+        "freight_eur": 239.80622533821352,
+        "links": [
+          "BN4 0 co2 ship to ID"
+        ]
+      },
+      "BN->KH": {
+        "t": 5.689855235639676,
+        "freight_eur": 88.64322564565357,
+        "links": [
+          "BN4 0 co2 ship to KH"
+        ]
+      },
+      "BN->MY": {
+        "t": 31.44030460572561,
+        "freight_eur": 369.8841129148553,
+        "links": [
+          "BN4 0 co2 ship to MY"
+        ]
+      },
+      "BN->PH": {
+        "t": 16.774231160886693,
+        "freight_eur": 248.12945764804763,
+        "links": [
+          "BN4 0 co2 ship to PH"
+        ]
+      },
+      "BN->TH": {
+        "t": 12.787674415668661,
+        "freight_eur": 204.76956258610602,
+        "links": [
+          "BN4 0 co2 ship to TH"
+        ]
+      },
+      "BN->TL": {
+        "t": 9.46513517529371,
+        "freight_eur": 181.92406429770048,
+        "links": [
+          "BN4 0 co2 ship to TL"
+        ]
+      },
+      "BN->VN": {
+        "t": 7.194588617284239,
+        "freight_eur": 102.76150048604973,
+        "links": [
+          "BN4 0 co2 ship to VN"
+        ]
+      },
+      "ID->BN": {
+        "t": 584.8257360105563,
+        "freight_eur": 9730.37018038234,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to BN",
+          "ID_Java-Bali1 1 co2 ship to BN",
+          "ID_Java-Bali1 2 co2 ship to BN",
+          "ID_Kalimantan4 1 co2 ship to BN",
+          "ID_Kalimantan4 11 co2 ship to BN",
+          "ID_Kalimantan4 12 co2 ship to BN",
+          "ID_Kalimantan4 13 co2 ship to BN",
+          "ID_Kalimantan4 2 co2 ship to BN",
+          "ID_Kalimantan4 3 co2 ship to BN",
+          "ID_Kalimantan4 4 co2 ship to BN",
+          "ID_Kalimantan4 5 co2 ship to BN",
+          "ID_Kalimantan4 6 co2 ship to BN",
+          "ID_Kalimantan4 7 co2 ship to BN",
+          "ID_Kalimantan4 8 co2 ship to BN",
+          "ID_Kalimantan4 9 co2 ship to BN",
+          "ID_Maluku16 0 co2 ship to BN",
+          "ID_Maluku17 0 co2 ship to BN",
+          "ID_Maluku8 0 co2 ship to BN",
+          "ID_Nusa-Tenggara12 0 co2 ship to BN",
+          "ID_Nusa-Tenggara13 0 co2 ship to BN",
+          "ID_Nusa-Tenggara14 0 co2 ship to BN",
+          "ID_Nusa-Tenggara15 0 co2 ship to BN",
+          "ID_Papua18 0 co2 ship to BN",
+          "ID_Papua19 0 co2 ship to BN",
+          "ID_Papua20 0 co2 ship to BN",
+          "ID_Sulawesi0 0 co2 ship to BN",
+          "ID_Sulawesi0 1 co2 ship to BN",
+          "ID_Sulawesi0 2 co2 ship to BN",
+          "ID_Sulawesi0 3 co2 ship to BN",
+          "ID_Sulawesi0 4 co2 ship to BN",
+          "ID_Sumatra2 0 co2 ship to BN",
+          "ID_Sumatra3 0 co2 ship to BN",
+          "ID_Sumatra3 1 co2 ship to BN",
+          "ID_Sumatra3 2 co2 ship to BN",
+          "ID_Sumatra3 3 co2 ship to BN",
+          "ID_Sumatra3 4 co2 ship to BN",
+          "ID_Sumatra3 5 co2 ship to BN"
+        ]
+      },
+      "ID->KH": {
+        "t": 187.44024770188855,
+        "freight_eur": 3510.5060448308227,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to KH",
+          "ID_Java-Bali1 1 co2 ship to KH",
+          "ID_Java-Bali1 2 co2 ship to KH",
+          "ID_Kalimantan4 1 co2 ship to KH",
+          "ID_Kalimantan4 11 co2 ship to KH",
+          "ID_Kalimantan4 12 co2 ship to KH",
+          "ID_Kalimantan4 13 co2 ship to KH",
+          "ID_Kalimantan4 2 co2 ship to KH",
+          "ID_Kalimantan4 3 co2 ship to KH",
+          "ID_Kalimantan4 4 co2 ship to KH",
+          "ID_Kalimantan4 5 co2 ship to KH",
+          "ID_Kalimantan4 6 co2 ship to KH",
+          "ID_Kalimantan4 7 co2 ship to KH",
+          "ID_Kalimantan4 8 co2 ship to KH",
+          "ID_Kalimantan4 9 co2 ship to KH",
+          "ID_Maluku16 0 co2 ship to KH",
+          "ID_Maluku17 0 co2 ship to KH",
+          "ID_Maluku8 0 co2 ship to KH",
+          "ID_Nusa-Tenggara12 0 co2 ship to KH",
+          "ID_Nusa-Tenggara13 0 co2 ship to KH",
+          "ID_Nusa-Tenggara14 0 co2 ship to KH",
+          "ID_Nusa-Tenggara15 0 co2 ship to KH",
+          "ID_Papua18 0 co2 ship to KH",
+          "ID_Papua19 0 co2 ship to KH",
+          "ID_Papua20 0 co2 ship to KH",
+          "ID_Sulawesi0 0 co2 ship to KH",
+          "ID_Sulawesi0 1 co2 ship to KH",
+          "ID_Sulawesi0 2 co2 ship to KH",
+          "ID_Sulawesi0 3 co2 ship to KH",
+          "ID_Sulawesi0 4 co2 ship to KH",
+          "ID_Sumatra2 0 co2 ship to KH",
+          "ID_Sumatra3 0 co2 ship to KH",
+          "ID_Sumatra3 1 co2 ship to KH",
+          "ID_Sumatra3 2 co2 ship to KH",
+          "ID_Sumatra3 3 co2 ship to KH",
+          "ID_Sumatra3 4 co2 ship to KH",
+          "ID_Sumatra3 5 co2 ship to KH"
+        ]
+      },
+      "ID->MY": {
+        "t": 912.5297132968366,
+        "freight_eur": 13271.532172744111,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to MY",
+          "ID_Java-Bali1 1 co2 ship to MY",
+          "ID_Java-Bali1 2 co2 ship to MY",
+          "ID_Kalimantan4 1 co2 ship to MY",
+          "ID_Kalimantan4 11 co2 ship to MY",
+          "ID_Kalimantan4 12 co2 ship to MY",
+          "ID_Kalimantan4 13 co2 ship to MY",
+          "ID_Kalimantan4 2 co2 ship to MY",
+          "ID_Kalimantan4 3 co2 ship to MY",
+          "ID_Kalimantan4 4 co2 ship to MY",
+          "ID_Kalimantan4 5 co2 ship to MY",
+          "ID_Kalimantan4 6 co2 ship to MY",
+          "ID_Kalimantan4 7 co2 ship to MY",
+          "ID_Kalimantan4 8 co2 ship to MY",
+          "ID_Kalimantan4 9 co2 ship to MY",
+          "ID_Maluku16 0 co2 ship to MY",
+          "ID_Maluku17 0 co2 ship to MY",
+          "ID_Maluku8 0 co2 ship to MY",
+          "ID_Nusa-Tenggara12 0 co2 ship to MY",
+          "ID_Nusa-Tenggara13 0 co2 ship to MY",
+          "ID_Nusa-Tenggara14 0 co2 ship to MY",
+          "ID_Nusa-Tenggara15 0 co2 ship to MY",
+          "ID_Papua18 0 co2 ship to MY",
+          "ID_Papua19 0 co2 ship to MY",
+          "ID_Papua20 0 co2 ship to MY",
+          "ID_Sulawesi0 0 co2 ship to MY",
+          "ID_Sulawesi0 1 co2 ship to MY",
+          "ID_Sulawesi0 2 co2 ship to MY",
+          "ID_Sulawesi0 3 co2 ship to MY",
+          "ID_Sulawesi0 4 co2 ship to MY",
+          "ID_Sumatra2 0 co2 ship to MY",
+          "ID_Sumatra3 0 co2 ship to MY",
+          "ID_Sumatra3 1 co2 ship to MY",
+          "ID_Sumatra3 2 co2 ship to MY",
+          "ID_Sumatra3 3 co2 ship to MY",
+          "ID_Sumatra3 4 co2 ship to MY",
+          "ID_Sumatra3 5 co2 ship to MY"
+        ]
+      },
+      "ID->PH": {
+        "t": 530.1837551769203,
+        "freight_eur": 8873.535594414825,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to PH",
+          "ID_Java-Bali1 1 co2 ship to PH",
+          "ID_Java-Bali1 2 co2 ship to PH",
+          "ID_Kalimantan4 1 co2 ship to PH",
+          "ID_Kalimantan4 11 co2 ship to PH",
+          "ID_Kalimantan4 12 co2 ship to PH",
+          "ID_Kalimantan4 13 co2 ship to PH",
+          "ID_Kalimantan4 2 co2 ship to PH",
+          "ID_Kalimantan4 3 co2 ship to PH",
+          "ID_Kalimantan4 4 co2 ship to PH",
+          "ID_Kalimantan4 5 co2 ship to PH",
+          "ID_Kalimantan4 6 co2 ship to PH",
+          "ID_Kalimantan4 7 co2 ship to PH",
+          "ID_Kalimantan4 8 co2 ship to PH",
+          "ID_Kalimantan4 9 co2 ship to PH",
+          "ID_Maluku16 0 co2 ship to PH",
+          "ID_Maluku17 0 co2 ship to PH",
+          "ID_Maluku8 0 co2 ship to PH",
+          "ID_Nusa-Tenggara12 0 co2 ship to PH",
+          "ID_Nusa-Tenggara13 0 co2 ship to PH",
+          "ID_Nusa-Tenggara14 0 co2 ship to PH",
+          "ID_Nusa-Tenggara15 0 co2 ship to PH",
+          "ID_Papua18 0 co2 ship to PH",
+          "ID_Papua19 0 co2 ship to PH",
+          "ID_Papua20 0 co2 ship to PH",
+          "ID_Sulawesi0 0 co2 ship to PH",
+          "ID_Sulawesi0 1 co2 ship to PH",
+          "ID_Sulawesi0 2 co2 ship to PH",
+          "ID_Sulawesi0 3 co2 ship to PH",
+          "ID_Sulawesi0 4 co2 ship to PH",
+          "ID_Sumatra2 0 co2 ship to PH",
+          "ID_Sumatra3 0 co2 ship to PH",
+          "ID_Sumatra3 1 co2 ship to PH",
+          "ID_Sumatra3 2 co2 ship to PH",
+          "ID_Sumatra3 3 co2 ship to PH",
+          "ID_Sumatra3 4 co2 ship to PH",
+          "ID_Sumatra3 5 co2 ship to PH"
+        ]
+      },
+      "ID->TH": {
+        "t": 405.83663746191286,
+        "freight_eur": 7471.6852720792795,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to TH",
+          "ID_Java-Bali1 1 co2 ship to TH",
+          "ID_Java-Bali1 2 co2 ship to TH",
+          "ID_Kalimantan4 1 co2 ship to TH",
+          "ID_Kalimantan4 11 co2 ship to TH",
+          "ID_Kalimantan4 12 co2 ship to TH",
+          "ID_Kalimantan4 13 co2 ship to TH",
+          "ID_Kalimantan4 2 co2 ship to TH",
+          "ID_Kalimantan4 3 co2 ship to TH",
+          "ID_Kalimantan4 4 co2 ship to TH",
+          "ID_Kalimantan4 5 co2 ship to TH",
+          "ID_Kalimantan4 6 co2 ship to TH",
+          "ID_Kalimantan4 7 co2 ship to TH",
+          "ID_Kalimantan4 8 co2 ship to TH",
+          "ID_Kalimantan4 9 co2 ship to TH",
+          "ID_Maluku16 0 co2 ship to TH",
+          "ID_Maluku17 0 co2 ship to TH",
+          "ID_Maluku8 0 co2 ship to TH",
+          "ID_Nusa-Tenggara12 0 co2 ship to TH",
+          "ID_Nusa-Tenggara13 0 co2 ship to TH",
+          "ID_Nusa-Tenggara14 0 co2 ship to TH",
+          "ID_Nusa-Tenggara15 0 co2 ship to TH",
+          "ID_Papua18 0 co2 ship to TH",
+          "ID_Papua19 0 co2 ship to TH",
+          "ID_Papua20 0 co2 ship to TH",
+          "ID_Sulawesi0 0 co2 ship to TH",
+          "ID_Sulawesi0 1 co2 ship to TH",
+          "ID_Sulawesi0 2 co2 ship to TH",
+          "ID_Sulawesi0 3 co2 ship to TH",
+          "ID_Sulawesi0 4 co2 ship to TH",
+          "ID_Sumatra2 0 co2 ship to TH",
+          "ID_Sumatra3 0 co2 ship to TH",
+          "ID_Sumatra3 1 co2 ship to TH",
+          "ID_Sumatra3 2 co2 ship to TH",
+          "ID_Sumatra3 3 co2 ship to TH",
+          "ID_Sumatra3 4 co2 ship to TH",
+          "ID_Sumatra3 5 co2 ship to TH"
+        ]
+      },
+      "ID->TL": {
+        "t": 425.81497718575673,
+        "freight_eur": 6840.728443847725,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to TL",
+          "ID_Java-Bali1 1 co2 ship to TL",
+          "ID_Java-Bali1 2 co2 ship to TL",
+          "ID_Kalimantan4 1 co2 ship to TL",
+          "ID_Kalimantan4 11 co2 ship to TL",
+          "ID_Kalimantan4 12 co2 ship to TL",
+          "ID_Kalimantan4 13 co2 ship to TL",
+          "ID_Kalimantan4 2 co2 ship to TL",
+          "ID_Kalimantan4 3 co2 ship to TL",
+          "ID_Kalimantan4 4 co2 ship to TL",
+          "ID_Kalimantan4 5 co2 ship to TL",
+          "ID_Kalimantan4 6 co2 ship to TL",
+          "ID_Kalimantan4 7 co2 ship to TL",
+          "ID_Kalimantan4 8 co2 ship to TL",
+          "ID_Kalimantan4 9 co2 ship to TL",
+          "ID_Maluku16 0 co2 ship to TL",
+          "ID_Maluku17 0 co2 ship to TL",
+          "ID_Maluku8 0 co2 ship to TL",
+          "ID_Nusa-Tenggara12 0 co2 ship to TL",
+          "ID_Nusa-Tenggara13 0 co2 ship to TL",
+          "ID_Nusa-Tenggara14 0 co2 ship to TL",
+          "ID_Nusa-Tenggara15 0 co2 ship to TL",
+          "ID_Papua18 0 co2 ship to TL",
+          "ID_Papua19 0 co2 ship to TL",
+          "ID_Papua20 0 co2 ship to TL",
+          "ID_Sulawesi0 0 co2 ship to TL",
+          "ID_Sulawesi0 1 co2 ship to TL",
+          "ID_Sulawesi0 2 co2 ship to TL",
+          "ID_Sulawesi0 3 co2 ship to TL",
+          "ID_Sulawesi0 4 co2 ship to TL",
+          "ID_Sumatra2 0 co2 ship to TL",
+          "ID_Sumatra3 0 co2 ship to TL",
+          "ID_Sumatra3 1 co2 ship to TL",
+          "ID_Sumatra3 2 co2 ship to TL",
+          "ID_Sumatra3 3 co2 ship to TL",
+          "ID_Sumatra3 4 co2 ship to TL",
+          "ID_Sumatra3 5 co2 ship to TL"
+        ]
+      },
+      "ID->VN": {
+        "t": 227.4118126253219,
+        "freight_eur": 4079.8450494202343,
+        "links": [
+          "ID_Java-Bali1 0 co2 ship to VN",
+          "ID_Java-Bali1 1 co2 ship to VN",
+          "ID_Java-Bali1 2 co2 ship to VN",
+          "ID_Kalimantan4 1 co2 ship to VN",
+          "ID_Kalimantan4 11 co2 ship to VN",
+          "ID_Kalimantan4 12 co2 ship to VN",
+          "ID_Kalimantan4 13 co2 ship to VN",
+          "ID_Kalimantan4 2 co2 ship to VN",
+          "ID_Kalimantan4 3 co2 ship to VN",
+          "ID_Kalimantan4 4 co2 ship to VN",
+          "ID_Kalimantan4 5 co2 ship to VN",
+          "ID_Kalimantan4 6 co2 ship to VN",
+          "ID_Kalimantan4 7 co2 ship to VN",
+          "ID_Kalimantan4 8 co2 ship to VN",
+          "ID_Kalimantan4 9 co2 ship to VN",
+          "ID_Maluku16 0 co2 ship to VN",
+          "ID_Maluku17 0 co2 ship to VN",
+          "ID_Maluku8 0 co2 ship to VN",
+          "ID_Nusa-Tenggara12 0 co2 ship to VN",
+          "ID_Nusa-Tenggara13 0 co2 ship to VN",
+          "ID_Nusa-Tenggara14 0 co2 ship to VN",
+          "ID_Nusa-Tenggara15 0 co2 ship to VN",
+          "ID_Papua18 0 co2 ship to VN",
+          "ID_Papua19 0 co2 ship to VN",
+          "ID_Papua20 0 co2 ship to VN",
+          "ID_Sulawesi0 0 co2 ship to VN",
+          "ID_Sulawesi0 1 co2 ship to VN",
+          "ID_Sulawesi0 2 co2 ship to VN",
+          "ID_Sulawesi0 3 co2 ship to VN",
+          "ID_Sulawesi0 4 co2 ship to VN",
+          "ID_Sumatra2 0 co2 ship to VN",
+          "ID_Sumatra3 0 co2 ship to VN",
+          "ID_Sumatra3 1 co2 ship to VN",
+          "ID_Sumatra3 2 co2 ship to VN",
+          "ID_Sumatra3 3 co2 ship to VN",
+          "ID_Sumatra3 4 co2 ship to VN",
+          "ID_Sumatra3 5 co2 ship to VN"
+        ]
+      },
+      "KH->BN": {
+        "t": 264.39956740051053,
+        "freight_eur": 4144.524736652168,
+        "links": [
+          "KH2 0 co2 ship to BN",
+          "KH2 2 co2 ship to BN"
+        ]
+      },
+      "KH->ID": {
+        "t": 450.9556133094839,
+        "freight_eur": 6620.233723594532,
+        "links": [
+          "KH2 0 co2 ship to ID",
+          "KH2 2 co2 ship to ID"
+        ]
+      },
+      "KH->MY": {
+        "t": 399.50399128599133,
+        "freight_eur": 6091.992813066145,
+        "links": [
+          "KH2 0 co2 ship to MY",
+          "KH2 2 co2 ship to MY"
+        ]
+      },
+      "KH->PH": {
+        "t": 94.09380126043821,
+        "freight_eur": 1686.161571420661,
+        "links": [
+          "KH2 0 co2 ship to PH",
+          "KH2 2 co2 ship to PH"
+        ]
+      },
+      "KH->TH": {
+        "t": 211.81066149290325,
+        "freight_eur": 2683.7977312012936,
+        "links": [
+          "KH2 0 co2 ship to TH",
+          "KH2 2 co2 ship to TH"
+        ]
+      },
+      "KH->TL": {
+        "t": 45.203145381010515,
+        "freight_eur": 994.8167180901899,
+        "links": [
+          "KH2 0 co2 ship to TL",
+          "KH2 2 co2 ship to TL"
+        ]
+      },
+      "KH->VN": {
+        "t": 26.811486518266335,
+        "freight_eur": 323.7507242381548,
+        "links": [
+          "KH2 0 co2 ship to VN",
+          "KH2 2 co2 ship to VN"
+        ]
+      },
+      "MM->BN": {
+        "t": 221.0439694470329,
+        "freight_eur": 4804.836756983559,
+        "links": [
+          "MM2 1 co2 ship to BN",
+          "MM2 11 co2 ship to BN",
+          "MM2 16 co2 ship to BN",
+          "MM2 3 co2 ship to BN",
+          "MM2 4 co2 ship to BN",
+          "MM2 9 co2 ship to BN"
+        ]
+      },
+      "MM->ID": {
+        "t": 8856506.540074784,
+        "freight_eur": 138535913.90095818,
+        "links": [
+          "MM2 1 co2 ship to ID",
+          "MM2 11 co2 ship to ID",
+          "MM2 16 co2 ship to ID",
+          "MM2 3 co2 ship to ID",
+          "MM2 4 co2 ship to ID",
+          "MM2 9 co2 ship to ID"
+        ]
+      },
+      "MM->KH": {
+        "t": 50.20079755658058,
+        "freight_eur": 1064.554283423966,
+        "links": [
+          "MM2 1 co2 ship to KH",
+          "MM2 11 co2 ship to KH",
+          "MM2 16 co2 ship to KH",
+          "MM2 3 co2 ship to KH",
+          "MM2 4 co2 ship to KH",
+          "MM2 9 co2 ship to KH"
+        ]
+      },
+      "MM->MY": {
+        "t": 6589.530181136546,
+        "freight_eur": 106013.7561824699,
+        "links": [
+          "MM2 1 co2 ship to MY",
+          "MM2 11 co2 ship to MY",
+          "MM2 16 co2 ship to MY",
+          "MM2 3 co2 ship to MY",
+          "MM2 4 co2 ship to MY",
+          "MM2 9 co2 ship to MY"
+        ]
+      },
+      "MM->PH": {
+        "t": 133.8752910551455,
+        "freight_eur": 3218.451602506952,
+        "links": [
+          "MM2 1 co2 ship to PH",
+          "MM2 11 co2 ship to PH",
+          "MM2 16 co2 ship to PH",
+          "MM2 3 co2 ship to PH",
+          "MM2 4 co2 ship to PH",
+          "MM2 9 co2 ship to PH"
+        ]
+      },
+      "MM->TH": {
+        "t": 150.80915084455364,
+        "freight_eur": 3100.471354506557,
+        "links": [
+          "MM2 1 co2 ship to TH",
+          "MM2 11 co2 ship to TH",
+          "MM2 16 co2 ship to TH",
+          "MM2 3 co2 ship to TH",
+          "MM2 4 co2 ship to TH",
+          "MM2 9 co2 ship to TH"
+        ]
+      },
+      "MM->TL": {
+        "t": 106.58382278259575,
+        "freight_eur": 2772.9862257141817,
+        "links": [
+          "MM2 1 co2 ship to TL",
+          "MM2 11 co2 ship to TL",
+          "MM2 16 co2 ship to TL",
+          "MM2 3 co2 ship to TL",
+          "MM2 4 co2 ship to TL",
+          "MM2 9 co2 ship to TL"
+        ]
+      },
+      "MM->VN": {
+        "t": 53.4962337226873,
+        "freight_eur": 1072.3850372900968,
+        "links": [
+          "MM2 1 co2 ship to VN",
+          "MM2 11 co2 ship to VN",
+          "MM2 16 co2 ship to VN",
+          "MM2 3 co2 ship to VN",
+          "MM2 4 co2 ship to VN",
+          "MM2 9 co2 ship to VN"
+        ]
+      },
+      "MY->BN": {
+        "t": 140.79231960890542,
+        "freight_eur": 1870.9241202202409,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to BN",
+          "MY_Peninsular2 1 co2 ship to BN",
+          "MY_Sabah4 0 co2 ship to BN",
+          "MY_Sabah4 1 co2 ship to BN",
+          "MY_Sarawak4 0 co2 ship to BN",
+          "MY_Sarawak4 1 co2 ship to BN",
+          "MY_Sarawak4 2 co2 ship to BN"
+        ]
+      },
+      "MY->ID": {
+        "t": 121.27186434042366,
+        "freight_eur": 1562.409531284719,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to ID",
+          "MY_Peninsular2 1 co2 ship to ID",
+          "MY_Sabah4 0 co2 ship to ID",
+          "MY_Sabah4 1 co2 ship to ID",
+          "MY_Sarawak4 0 co2 ship to ID",
+          "MY_Sarawak4 1 co2 ship to ID",
+          "MY_Sarawak4 2 co2 ship to ID"
+        ]
+      },
+      "MY->KH": {
+        "t": 39.028655470268276,
+        "freight_eur": 621.790891188196,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to KH",
+          "MY_Peninsular2 1 co2 ship to KH",
+          "MY_Sabah4 0 co2 ship to KH",
+          "MY_Sabah4 1 co2 ship to KH",
+          "MY_Sarawak4 0 co2 ship to KH",
+          "MY_Sarawak4 1 co2 ship to KH",
+          "MY_Sarawak4 2 co2 ship to KH"
+        ]
+      },
+      "MY->PH": {
+        "t": 104.67456974608612,
+        "freight_eur": 1633.9257895265387,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to PH",
+          "MY_Peninsular2 1 co2 ship to PH",
+          "MY_Sabah4 0 co2 ship to PH",
+          "MY_Sabah4 1 co2 ship to PH",
+          "MY_Sarawak4 0 co2 ship to PH",
+          "MY_Sarawak4 1 co2 ship to PH",
+          "MY_Sarawak4 2 co2 ship to PH"
+        ]
+      },
+      "MY->TH": {
+        "t": 86.1069917585918,
+        "freight_eur": 1375.7170489234447,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to TH",
+          "MY_Peninsular2 1 co2 ship to TH",
+          "MY_Sabah4 0 co2 ship to TH",
+          "MY_Sabah4 1 co2 ship to TH",
+          "MY_Sarawak4 0 co2 ship to TH",
+          "MY_Sarawak4 1 co2 ship to TH",
+          "MY_Sarawak4 2 co2 ship to TH"
+        ]
+      },
+      "MY->TL": {
+        "t": 65.77466656137958,
+        "freight_eur": 1264.9327943165397,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to TL",
+          "MY_Peninsular2 1 co2 ship to TL",
+          "MY_Sabah4 0 co2 ship to TL",
+          "MY_Sabah4 1 co2 ship to TL",
+          "MY_Sarawak4 0 co2 ship to TL",
+          "MY_Sarawak4 1 co2 ship to TL",
+          "MY_Sarawak4 2 co2 ship to TL"
+        ]
+      },
+      "MY->VN": {
+        "t": 46.832505143599164,
+        "freight_eur": 699.5035884840155,
+        "links": [
+          "MY_Peninsular2 0 co2 ship to VN",
+          "MY_Peninsular2 1 co2 ship to VN",
+          "MY_Sabah4 0 co2 ship to VN",
+          "MY_Sabah4 1 co2 ship to VN",
+          "MY_Sarawak4 0 co2 ship to VN",
+          "MY_Sarawak4 1 co2 ship to VN",
+          "MY_Sarawak4 2 co2 ship to VN"
+        ]
+      },
+      "PH->BN": {
+        "t": 103.96978951346428,
+        "freight_eur": 1626.601675830558,
+        "links": [
+          "PH5 0 co2 ship to BN",
+          "PH_Luzon5 0 co2 ship to BN",
+          "PH_Luzon9 0 co2 ship to BN",
+          "PH_Mindanao6 0 co2 ship to BN",
+          "PH_Mindanao6 1 co2 ship to BN",
+          "PH_Visayas7 0 co2 ship to BN"
+        ]
+      },
+      "PH->ID": {
+        "t": 89.2256530749041,
+        "freight_eur": 1347.6235994578776,
+        "links": [
+          "PH5 0 co2 ship to ID",
+          "PH_Luzon5 0 co2 ship to ID",
+          "PH_Luzon9 0 co2 ship to ID",
+          "PH_Mindanao6 0 co2 ship to ID",
+          "PH_Mindanao6 1 co2 ship to ID",
+          "PH_Visayas7 0 co2 ship to ID"
+        ]
+      },
+      "PH->KH": {
+        "t": 30.93537798192008,
+        "freight_eur": 580.0328838464295,
+        "links": [
+          "PH5 0 co2 ship to KH",
+          "PH_Luzon5 0 co2 ship to KH",
+          "PH_Luzon9 0 co2 ship to KH",
+          "PH_Mindanao6 0 co2 ship to KH",
+          "PH_Mindanao6 1 co2 ship to KH",
+          "PH_Visayas7 0 co2 ship to KH"
+        ]
+      },
+      "PH->MY": {
+        "t": 149.9941192321005,
+        "freight_eur": 2201.7353462509586,
+        "links": [
+          "PH5 0 co2 ship to MY",
+          "PH_Luzon5 0 co2 ship to MY",
+          "PH_Luzon9 0 co2 ship to MY",
+          "PH_Mindanao6 0 co2 ship to MY",
+          "PH_Mindanao6 1 co2 ship to MY",
+          "PH_Visayas7 0 co2 ship to MY"
+        ]
+      },
+      "PH->TH": {
+        "t": 62.643890654269796,
+        "freight_eur": 1212.2993689024595,
+        "links": [
+          "PH5 0 co2 ship to TH",
+          "PH_Luzon5 0 co2 ship to TH",
+          "PH_Luzon9 0 co2 ship to TH",
+          "PH_Mindanao6 0 co2 ship to TH",
+          "PH_Mindanao6 1 co2 ship to TH",
+          "PH_Visayas7 0 co2 ship to TH"
+        ]
+      },
+      "PH->TL": {
+        "t": 59.663105320196166,
+        "freight_eur": 1114.7451535296798,
+        "links": [
+          "PH5 0 co2 ship to TL",
+          "PH_Luzon5 0 co2 ship to TL",
+          "PH_Luzon9 0 co2 ship to TL",
+          "PH_Mindanao6 0 co2 ship to TL",
+          "PH_Mindanao6 1 co2 ship to TL",
+          "PH_Visayas7 0 co2 ship to TL"
+        ]
+      },
+      "PH->VN": {
+        "t": 38.127976540032364,
+        "freight_eur": 627.1506948251508,
+        "links": [
+          "PH5 0 co2 ship to VN",
+          "PH_Luzon5 0 co2 ship to VN",
+          "PH_Luzon9 0 co2 ship to VN",
+          "PH_Mindanao6 0 co2 ship to VN",
+          "PH_Mindanao6 1 co2 ship to VN",
+          "PH_Visayas7 0 co2 ship to VN"
+        ]
+      },
+      "SG->BN": {
+        "t": 20.016926485064147,
+        "freight_eur": 302.64244586179865,
+        "links": [
+          "SG2 0 co2 ship to BN"
+        ]
+      },
+      "SG->ID": {
+        "t": 21.273015625170004,
+        "freight_eur": 245.53537015837875,
+        "links": [
+          "SG2 0 co2 ship to ID"
+        ]
+      },
+      "SG->KH": {
+        "t": 6.293867838978195,
+        "freight_eur": 92.03821206914145,
+        "links": [
+          "SG2 0 co2 ship to KH"
+        ]
+      },
+      "SG->MY": {
+        "t": 35.56766665455487,
+        "freight_eur": 426.23044782657774,
+        "links": [
+          "SG2 0 co2 ship to MY"
+        ]
+      },
+      "SG->PH": {
+        "t": 13.622883070243082,
+        "freight_eur": 248.3922593352028,
+        "links": [
+          "SG2 0 co2 ship to PH"
+        ]
+      },
+      "SG->TH": {
+        "t": 15.73933709015562,
+        "freight_eur": 219.5535307107357,
+        "links": [
+          "SG2 0 co2 ship to TH"
+        ]
+      },
+      "SG->TL": {
+        "t": 10.411778677056365,
+        "freight_eur": 202.69724949901055,
+        "links": [
+          "SG2 0 co2 ship to TL"
+        ]
+      },
+      "SG->VN": {
+        "t": 6.9605606944914555,
+        "freight_eur": 100.7542085399893,
+        "links": [
+          "SG2 0 co2 ship to VN"
+        ]
+      },
+      "TH->BN": {
+        "t": 55.760951766429095,
+        "freight_eur": 919.6089923029298,
+        "links": [
+          "TH2 0 co2 ship to BN",
+          "TH2 3 co2 ship to BN",
+          "TH2 5 co2 ship to BN"
+        ]
+      },
+      "TH->ID": {
+        "t": 44.708554287616195,
+        "freight_eur": 659.6041079392569,
+        "links": [
+          "TH2 0 co2 ship to ID",
+          "TH2 3 co2 ship to ID",
+          "TH2 5 co2 ship to ID"
+        ]
+      },
+      "TH->KH": {
+        "t": 21.325021506979358,
+        "freight_eur": 270.91030942339654,
+        "links": [
+          "TH2 0 co2 ship to KH",
+          "TH2 3 co2 ship to KH",
+          "TH2 5 co2 ship to KH"
+        ]
+      },
+      "TH->MY": {
+        "t": 85.4313416625961,
+        "freight_eur": 1311.0421267449337,
+        "links": [
+          "TH2 0 co2 ship to MY",
+          "TH2 3 co2 ship to MY",
+          "TH2 5 co2 ship to MY"
+        ]
+      },
+      "TH->PH": {
+        "t": 38.866084888902805,
+        "freight_eur": 729.5524113307492,
+        "links": [
+          "TH2 0 co2 ship to PH",
+          "TH2 3 co2 ship to PH",
+          "TH2 5 co2 ship to PH"
+        ]
+      },
+      "TH->TL": {
+        "t": 28.350761385851428,
+        "freight_eur": 632.2308230828367,
+        "links": [
+          "TH2 0 co2 ship to TL",
+          "TH2 3 co2 ship to TL",
+          "TH2 5 co2 ship to TL"
+        ]
+      },
+      "TH->VN": {
+        "t": 21.78299068496239,
+        "freight_eur": 288.17402669229267,
+        "links": [
+          "TH2 0 co2 ship to VN",
+          "TH2 3 co2 ship to VN",
+          "TH2 5 co2 ship to VN"
+        ]
+      },
+      "TL->BN": {
+        "t": 13.48137608717677,
+        "freight_eur": 259.1179824358845,
+        "links": [
+          "TL11 0 co2 ship to BN"
+        ]
+      },
+      "TL->ID": {
+        "t": 19.910953730269863,
+        "freight_eur": 255.86582867574595,
+        "links": [
+          "TL11 0 co2 ship to ID"
+        ]
+      },
+      "TL->KH": {
+        "t": 4.746204665490801,
+        "freight_eur": 103.64262339099048,
+        "links": [
+          "TL11 0 co2 ship to KH"
+        ]
+      },
+      "TL->MY": {
+        "t": 22.257187985704878,
+        "freight_eur": 385.9601811592076,
+        "links": [
+          "TL11 0 co2 ship to MY"
+        ]
+      },
+      "TL->PH": {
+        "t": 14.506020925248823,
+        "freight_eur": 245.89198630007826,
+        "links": [
+          "TL11 0 co2 ship to PH"
+        ]
+      },
+      "TL->TH": {
+        "t": 9.643409512645302,
+        "freight_eur": 207.33789867944432,
+        "links": [
+          "TL11 0 co2 ship to TH"
+        ]
+      },
+      "TL->VN": {
+        "t": 5.768538740170268,
+        "freight_eur": 121.73294763541945,
+        "links": [
+          "TL11 0 co2 ship to VN"
+        ]
+      },
+      "VN->BN": {
+        "t": 12219604.105570348,
+        "freight_eur": 174540633.47833973,
+        "links": [
+          "VN2 0 co2 ship to BN",
+          "VN2 2 co2 ship to BN",
+          "VN2 3 co2 ship to BN",
+          "VN2 4 co2 ship to BN",
+          "VN2 5 co2 ship to BN",
+          "VN2 6 co2 ship to BN",
+          "VN2 7 co2 ship to BN"
+        ]
+      },
+      "VN->ID": {
+        "t": 78488206.99163081,
+        "freight_eur": 1137485795.6384926,
+        "links": [
+          "VN2 0 co2 ship to ID",
+          "VN2 2 co2 ship to ID",
+          "VN2 3 co2 ship to ID",
+          "VN2 4 co2 ship to ID",
+          "VN2 5 co2 ship to ID",
+          "VN2 6 co2 ship to ID",
+          "VN2 7 co2 ship to ID"
+        ]
+      },
+      "VN->KH": {
+        "t": 86.45516592027664,
+        "freight_eur": 1255.0394969597382,
+        "links": [
+          "VN2 0 co2 ship to KH",
+          "VN2 2 co2 ship to KH",
+          "VN2 3 co2 ship to KH",
+          "VN2 4 co2 ship to KH",
+          "VN2 5 co2 ship to KH",
+          "VN2 6 co2 ship to KH",
+          "VN2 7 co2 ship to KH"
+        ]
+      },
+      "VN->MY": {
+        "t": 58531166.576047264,
+        "freight_eur": 847586433.3668317,
+        "links": [
+          "VN2 0 co2 ship to MY",
+          "VN2 2 co2 ship to MY",
+          "VN2 3 co2 ship to MY",
+          "VN2 4 co2 ship to MY",
+          "VN2 5 co2 ship to MY",
+          "VN2 6 co2 ship to MY",
+          "VN2 7 co2 ship to MY"
+        ]
+      },
+      "VN->PH": {
+        "t": 1194.5172004198007,
+        "freight_eur": 19214.780486044074,
+        "links": [
+          "VN2 0 co2 ship to PH",
+          "VN2 2 co2 ship to PH",
+          "VN2 3 co2 ship to PH",
+          "VN2 4 co2 ship to PH",
+          "VN2 5 co2 ship to PH",
+          "VN2 6 co2 ship to PH",
+          "VN2 7 co2 ship to PH"
+        ]
+      },
+      "VN->TH": {
+        "t": 576.5149755973698,
+        "freight_eur": 8450.66893245341,
+        "links": [
+          "VN2 0 co2 ship to TH",
+          "VN2 2 co2 ship to TH",
+          "VN2 3 co2 ship to TH",
+          "VN2 4 co2 ship to TH",
+          "VN2 5 co2 ship to TH",
+          "VN2 6 co2 ship to TH",
+          "VN2 7 co2 ship to TH"
+        ]
+      },
+      "VN->TL": {
+        "t": 196.6990434189152,
+        "freight_eur": 4332.64904178161,
+        "links": [
+          "VN2 0 co2 ship to TL",
+          "VN2 2 co2 ship to TL",
+          "VN2 3 co2 ship to TL",
+          "VN2 4 co2 ship to TL",
+          "VN2 5 co2 ship to TL",
+          "VN2 6 co2 ship to TL",
+          "VN2 7 co2 ship to TL"
+        ]
+      },
+      "LA->BN": {
+        "t": 65.2110625250713,
+        "freight_eur": 2006.0604128757655,
+        "links": [
+          "LA2 0 co2 transit ship to BN",
+          "LA2 1 co2 transit ship to BN",
+          "LA2 2 co2 transit ship to BN",
+          "LA2 3 co2 transit ship to BN",
+          "LA2 4 co2 transit ship to BN",
+          "LA2 5 co2 transit ship to BN"
+        ]
+      },
+      "LA->ID": {
+        "t": 43.52530872985524,
+        "freight_eur": 1394.1861825582612,
+        "links": [
+          "LA2 0 co2 transit ship to ID",
+          "LA2 1 co2 transit ship to ID",
+          "LA2 2 co2 transit ship to ID",
+          "LA2 3 co2 transit ship to ID",
+          "LA2 4 co2 transit ship to ID",
+          "LA2 5 co2 transit ship to ID"
+        ]
+      },
+      "LA->KH": {
+        "t": 28.77567016797825,
+        "freight_eur": 902.3979931931511,
+        "links": [
+          "LA2 0 co2 transit ship to KH",
+          "LA2 1 co2 transit ship to KH",
+          "LA2 2 co2 transit ship to KH",
+          "LA2 3 co2 transit ship to KH",
+          "LA2 4 co2 transit ship to KH",
+          "LA2 5 co2 transit ship to KH"
+        ]
+      },
+      "LA->MY": {
+        "t": 99.44752459358008,
+        "freight_eur": 3075.6946076428612,
+        "links": [
+          "LA2 0 co2 transit ship to MY",
+          "LA2 1 co2 transit ship to MY",
+          "LA2 2 co2 transit ship to MY",
+          "LA2 3 co2 transit ship to MY",
+          "LA2 4 co2 transit ship to MY",
+          "LA2 5 co2 transit ship to MY"
+        ]
+      },
+      "LA->PH": {
+        "t": 55.53920470374732,
+        "freight_eur": 1713.6709755279717,
+        "links": [
+          "LA2 0 co2 transit ship to PH",
+          "LA2 1 co2 transit ship to PH",
+          "LA2 2 co2 transit ship to PH",
+          "LA2 3 co2 transit ship to PH",
+          "LA2 4 co2 transit ship to PH",
+          "LA2 5 co2 transit ship to PH"
+        ]
+      },
+      "LA->TH": {
+        "t": 48.69372448586505,
+        "freight_eur": 1537.642062844901,
+        "links": [
+          "LA2 0 co2 transit ship to TH",
+          "LA2 1 co2 transit ship to TH",
+          "LA2 2 co2 transit ship to TH",
+          "LA2 3 co2 transit ship to TH",
+          "LA2 4 co2 transit ship to TH",
+          "LA2 5 co2 transit ship to TH"
+        ]
+      },
+      "LA->TL": {
+        "t": 39.757611994108345,
+        "freight_eur": 1494.223103704375,
+        "links": [
+          "LA2 0 co2 transit ship to TL",
+          "LA2 1 co2 transit ship to TL",
+          "LA2 2 co2 transit ship to TL",
+          "LA2 3 co2 transit ship to TL",
+          "LA2 4 co2 transit ship to TL",
+          "LA2 5 co2 transit ship to TL"
+        ]
+      }
+    },
+    "lao_transit_vn_store": {
+      "LA2 0": {
+        "t": 13.551591934399038,
+        "freight_eur": 135.5606395973739,
+        "link": "LA2 0 co2 transit to VN store"
+      },
+      "LA2 1": {
+        "t": 8.441214377267833,
+        "freight_eur": 155.60450170911753,
+        "link": "LA2 1 co2 transit to VN store"
+      },
+      "LA2 2": {
+        "t": 8.12813677254863,
+        "freight_eur": 147.7492061830027,
+        "link": "LA2 2 co2 transit to VN store"
+      },
+      "LA2 3": {
+        "t": 12.703746434146035,
+        "freight_eur": 122.73978692278875,
+        "link": "LA2 3 co2 transit to VN store"
+      },
+      "LA2 4": {
+        "t": 11.900435491899998,
+        "freight_eur": 155.56487283721515,
+        "link": "LA2 4 co2 transit to VN store"
+      },
+      "LA2 5": {
+        "t": 6.556274664003441,
+        "freight_eur": 161.07980096496775,
+        "link": "LA2 5 co2 transit to VN store"
+      }
+    },
+    "lao_transit_th_store": {}
+  }
+}

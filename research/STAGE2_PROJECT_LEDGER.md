@@ -661,3 +661,16 @@
 - **交付：** `research/06_scope_redesign/p1_step4m_20261019/`（`S4M_REPORT.md`、`S4M_EVIDENCE.json`、`S4M_PROGRESS.md`、`CLOUD_RESOURCE_ESTIMATE.md`、`CLOUD_DEPLOY_STEPS.md`、`cloud_package/`、`evidence/s4m_{1,2,3,s2}/`）；镜像 `work/p1_step4m_20261019/`。
 - **补记（2026-10-19 约 13:50 SGT，报告交付后）：** 用户决定接受 BN / SG 清理后比值现状（0.9877 / 0.9949，余量 > 0），第二批照 f50c8850 的部署包运行；规则、网络、部署包不改（报告 §9 第 1 项已决定）。云端连接与运行仍待另行授权。
 - **补记 2（2026-10-19，注册表第 118 项，用户决定）：** 报告 §9 第 2 项——上云由后续 S4N 指令在新会话执行，本会话不做云端动作；第 3 项——对偶与成本拆分口径接受（对偶文件存原始 LP 行对偶，`marginal_price` 按 PyPSA 约定除以时段权重）；第 4 项——保留 `assign_all_duals=True`（部署包 f50c8850 现状）；第 5 项——#37、#38 保持 draft、暂不合并。§9 五项至此全部有决定；S4M 会话结束。第 118 项的注册表行本会话未新增（如需登记由 S4N 处理）。
+
+## S4N 第 118–119 项：运行内对偶导出验证、云端速度探针、一体化 365×24h 试点与求解档案标定 — 2026-10-19
+
+- **范围：** 指令 `S4N_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 78a6a86c…a39da）、补充 01（e5c6b0d6…d180）、补充 02（9ccd0bfa…0f3d，第 119 项），均已核对；分支 `codex/s4n-calibration-20261019`（自 #38 头 b3b3e5d2），提交 7c4f97fe（标定档案）；draft PR [#39](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/39) 叠在 #38 上（S4O-1 推送）。求解：本机 56×3h 档案 A 2 次、`pypsa_eur_default` 3 次；云端探针 1 次、试点 1 次；全部一次、无重试、无 warm start。
+- **S4N-1：** 部署包 f50c8850 本机 56×3h 运行内对偶导出：optimal，目标与 S4M-2 相对差 0.0，756 个约束与离线重建逐值相同，母线交叉核对 0.0；未改代码。
+- **实例：** AutoDL 西北 B 区 D58 机（L23 克隆），Xeon Platinum 8470Q，容器 25 核 / 120 GiB；环境 284 个包与本机逐一相同；部署包 22/22 SHA256 OK（中途多路 rsync 中断 `--partial` 覆盖一文件，单路 `--checksum` 重传修复）；预检 OK。
+- **速度探针：** r = 0.741（≥ 0.5），探针目标相对差 −2.5e-12；TimeLimit / 墙钟 14,400 / 15,300 s。
+- **试点（一体化 STEPS 365×24h，档案 A）：** **optimal**，408 次迭代、barrier 11,470 s、墙钟 3.3 h、峰值 15.1 GiB；第 156 次迭代无提示重启后第二轮收敛；目标 516,252,148,340.37 EUR；运行内对偶 76.7 MB，母线交叉核对 0.0；项目门槛 `all_passed_solver_tolerances` False（A1_A2_S4B 2,371 行超预算、A3_S4B、B3_S4B、B15）。
+- **第 119 项 C1：** (a) 原始 / 对偶差 6.4e4 EUR（1.24e-7）、(b) 分国一阶影响 ≤ 1.1e-5 bn、(c) B16 7.2e-9 与 KKT 残差影响 ≤ 6.7e-5 bn，全部通过 → 第一层 + 节点电价结算可用；BN / SG / VN 生物质池行不再主导。
+- **C2 档案标定：** `pypsa_eur_default`（PyPSA-Eur v2025.07.0 `gurobi-default` 第 1056–1064 行原样）三次 56×3h 全部 optimal，第 107 项标准全部通过（目标 ≤ 6.2e-6、B16 ≤ 1.0e-8、分国最大为容差 23 %），迭代约为档案 A 的 45 %；其解不通过 A1_A2_S4B / A3_S4B；小写 `crossover` 改变门槛路径识别（发现第 10 条）。
+- **回收：** 轻量包 2.08 MB 已下载核对、无许可串；完整结果包 158.9 MB（SHA256 cb4927da…7480）留在实例数据盘；许可 18:56:27 删除，已告知关机。
+- **交付：** `research/06_scope_redesign/p1_step4n_20261019/`（`S4N_REPORT.md`、`S4N_EVIDENCE.json`、`S4N_PROGRESS.md`、指令与补充、`ENV_LOCK_LOCAL.txt`、`evidence/`、`scripts/`、试点轻量包），S4O-1 入库（f28772e6，许可串与登录信息模式扫描无命中）；镜像 `work/p1_step4n_20261019/`。
+- **用户决定：** 第 118 项（S4M §9 第 2–5 项）、第 119 项（16:37 SGT）、第 120 项（19:40 SGT：以 `pypsa_eur_default` 作生产档案，键名大写、`Threads 8` 两处适配；每次运行验收 = optimal + 第 119 项 (a)(b)(c)）——注册表片段 `s4o_0`（S4O-1 补登）。后续由 S4O 指令承接。
