@@ -1,0 +1,1819 @@
+{
+ "step": "L23 first cloud batch 365x24h (C0-C9)",
+ "label": "FORMAL_TRIAL_365X24H",
+ "resolution": "DAILY_SCREENING_365X24H (allocation conclusions rest on 2920x3h)",
+ "instruction_sha256": "2c6d9dcad11a2e6e5ff9f25d0ec6a1ff1cd45213dfabce636987df5b54790d22",
+ "package_commit": "56d283580799c510b617c70b6e3292ba224e4ae0",
+ "instance": "AutoDL north-west B zone machine 144 (12 cores Xeon Silver 4214R, 90 GiB cgroup, data disk 50 GB)",
+ "solver_profile": "formal_barrier",
+ "mode": "serial",
+ "timeline_sgt": {
+  "container_start": "2026-10-19 00:40:26",
+  "preflight_ok": "01:54:38",
+  "launch": "02:00:30",
+  "killed_3h_nze": "09:00:23",
+  "done": "09:00:38",
+  "nze_process_last_write": "09:03:02",
+  "licence_removed": "09:34:34"
+ },
+ "cost": {
+  "power_on_to_done_h": 8.34,
+  "cny_per_h": 1.08,
+  "cny_power_on_to_done": 9.0,
+  "note": "billing continues until the user powers off in the AutoDL console"
+ },
+ "status_txt": [
+  "START:2026-10-18T18:00:30Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier commit:56d283580799c510b617c70b6e3292ba224e4ae0",
+  "RUN_integrated:suboptimal:6722s",
+  "RUN_disconnected:suboptimal:5297s",
+  "DISCONNECTED_MAIN_NON_OPTIMAL:suboptimal -> running disconnected_gap diagnostic",
+  "RUN_disconnected_gap:suboptimal:2311s",
+  "KILLED_3H_integrated_nze:2026-10-19T01:00:23Z",
+  "RUN_integrated_nze:none:10814s",
+  "DONE:2026-10-19T01:00:38Z export:/root/autodl-tmp/s4k_cloud/runs/20261018T180030Z_5623/results_20261018T180030Z_5623.tar.gz"
+ ],
+ "archives": {
+  "results_20261018T180030Z_5623.tar.gz": {
+   "bytes": 216618533,
+   "sha256": "39b9c9ddc5fee0cf4a63381b2bde98798e9f29ae7bcb19a34acc7a991015ae7f",
+   "local_check": "sha256sum -c OK",
+   "in_tarball": true
+  },
+  "nze_late_outputs_20261018T180030Z_5623.tar.gz": {
+   "bytes": 74285069,
+   "sha256": "78a6ea15d369788f93c5fe20294e21fefd168db50d908ebad25f231c2001c33b",
+   "local_check": "sha256sum -c OK",
+   "in_tarball": false,
+   "note": "NZE outputs written by s2_solve.py after the wall-clock kill marker and after the tarball was sealed (finding 3)"
+  }
+ },
+ "licence_scan": "no licence string in the unpacked results, nze_late, STATUS, MONITOR, evidence/c9",
+ "runs": {
+  "integrated": {
+   "termination": "suboptimal",
+   "objective_eur": 516146310314.3289,
+   "num_col": 4349757,
+   "num_row": 9719326,
+   "nnz": 22324062,
+   "barrier_iterations": 144,
+   "barrier_seconds": 6248.04,
+   "work_units": 2359.68,
+   "solve_seconds": 6443.264439344406,
+   "wall_seconds": 6722,
+   "build_seconds": 137.44146966934204,
+   "peak_rss_gib_receipt": 15.258480072021484,
+   "status_line": "suboptimal",
+   "killed_3h_utc": null
+  },
+  "disconnected": {
+   "termination": "suboptimal",
+   "objective_eur": 585115945488.6481,
+   "num_col": 4197563,
+   "num_row": 9373129,
+   "nnz": 21245559,
+   "barrier_iterations": 326,
+   "barrier_seconds": 4868.9,
+   "work_units": 2483.55,
+   "solve_seconds": 5052.185482501984,
+   "wall_seconds": 5297,
+   "build_seconds": 115.2023675441742,
+   "peak_rss_gib_receipt": 13.761581420898438,
+   "status_line": "suboptimal",
+   "killed_3h_utc": null
+  },
+  "disconnected_gap": {
+   "termination": "suboptimal",
+   "objective_eur": 585116302956.4907,
+   "num_col": 4272604,
+   "num_row": 9522984,
+   "nnz": 21545075,
+   "barrier_iterations": 117,
+   "barrier_seconds": 1863.81,
+   "work_units": 919.74,
+   "solve_seconds": 2051.6999101638794,
+   "wall_seconds": 2311,
+   "build_seconds": 124.5216155052185,
+   "peak_rss_gib_receipt": 13.991928100585938,
+   "status_line": "suboptimal",
+   "killed_3h_utc": null
+  },
+  "integrated_nze": {
+   "termination": "time_limit",
+   "objective_eur": 425684740304.79016,
+   "num_col": 4349757,
+   "num_row": 9719326,
+   "nnz": 22324062,
+   "barrier_iterations": 247,
+   "barrier_seconds": 10500.91,
+   "work_units": 4215.12,
+   "solve_seconds": 10695.2703602314,
+   "wall_seconds": 10814,
+   "build_seconds": 157.07380986213684,
+   "peak_rss_gib_receipt": 15.262351989746094,
+   "status_line": "none",
+   "killed_3h_utc": null
+  }
+ },
+ "cpu_speed": {
+  "integrated": {
+   "instance_s_per_wu": 2.64783360455655,
+   "local_s_per_wu": 0.6062466705918635,
+   "instance_speed_relative_to_local": 0.2289595046866231
+  },
+  "disconnected": {
+   "instance_s_per_wu": 1.9604598256527952,
+   "local_s_per_wu": 0.5838760466614185,
+   "instance_speed_relative_to_local": 0.29782607071124195
+  },
+  "integrated_nze": {
+   "instance_s_per_wu": 2.491248173242992,
+   "local_s_per_wu": 0.5754752886166337,
+   "instance_speed_relative_to_local": 0.2309987799679975
+  }
+ },
+ "gates": {
+  "integrated": {
+   "passed": {
+    "A1_A2": false,
+    "A3": false,
+    "A5": true,
+    "A4": true,
+    "A6": true,
+    "B1": false,
+    "B1_BUNKERS": true,
+    "B2": false,
+    "B3": false,
+    "B8": true,
+    "B11": true,
+    "B12": true,
+    "B13": true,
+    "B14": false,
+    "B15": false,
+    "B16_LEDGER": true,
+    "A1_A2_S4B": false,
+    "A3_S4B": false,
+    "A5_S4B": true,
+    "B1_S4B": true,
+    "B3_S4B": false
+   },
+   "all_passed_solver_tolerances": false,
+   "all_passed_barconvtol": false,
+   "failing_solver_tolerances": [
+    "A1_A2_S4B",
+    "A3_S4B",
+    "B2",
+    "B3_S4B",
+    "B14",
+    "B15"
+   ],
+   "failing_barconvtol": [
+    "A1_A2",
+    "A3",
+    "B1",
+    "B2",
+    "B3",
+    "B14",
+    "B15"
+   ],
+   "A1_A2_S4B": {
+    "row_fail_count": 11730,
+    "row_violation_max": 14.81561479144844,
+    "row_max_ratio_to_budget": 902.1354289725257,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 21355,
+    "stationarity_normalized_max": 0.0015790593471944239,
+    "dual_sign_fail_count": 70740,
+    "dual_sign_normalized_max": 0.3337798182161146,
+    "relative_gap": 7.950910598289056e-07,
+    "complementarity_over_scale": 1.72628240005404e-06
+   },
+   "B16": {
+    "relative_error": 4.651003443460862e-09,
+    "tolerance": 1e-06,
+    "difference": 2400.5982666015625
+   }
+  },
+  "disconnected": {
+   "passed": {
+    "A1_A2": false,
+    "A3": false,
+    "A5": true,
+    "A4": true,
+    "A6": true,
+    "B1": false,
+    "B1_BUNKERS": true,
+    "B2": true,
+    "B3": false,
+    "B8": true,
+    "B11": true,
+    "B12": true,
+    "B13": true,
+    "B14": true,
+    "B15": false,
+    "B16_LEDGER": true,
+    "A1_A2_S4B": false,
+    "A3_S4B": false,
+    "A5_S4B": true,
+    "B1_S4B": true,
+    "B3_S4B": false
+   },
+   "all_passed_solver_tolerances": false,
+   "all_passed_barconvtol": false,
+   "failing_solver_tolerances": [
+    "A1_A2_S4B",
+    "A3_S4B",
+    "B3_S4B",
+    "B15"
+   ],
+   "failing_barconvtol": [
+    "A1_A2",
+    "A3",
+    "B1",
+    "B3",
+    "B15"
+   ],
+   "A1_A2_S4B": {
+    "row_fail_count": 360,
+    "row_violation_max": 0.5061609501717612,
+    "row_max_ratio_to_budget": 23.576603830258993,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 56714,
+    "stationarity_normalized_max": 0.006648784360813442,
+    "dual_sign_fail_count": 83824,
+    "dual_sign_normalized_max": 0.06903597164658713,
+    "relative_gap": 1.3641232019307587e-06,
+    "complementarity_over_scale": 3.393574099555324e-06
+   },
+   "B16": {
+    "relative_error": 2.8900753649351843e-07,
+    "tolerance": 1e-06,
+    "difference": 169102.91796875
+   }
+  },
+  "disconnected_gap": {
+   "passed": {
+    "A1_A2": false,
+    "A3": false,
+    "A5": true,
+    "A4": true,
+    "A6": true,
+    "B1_BUNKERS": true,
+    "B2": true,
+    "B3": false,
+    "B8": true,
+    "B11": true,
+    "B12": true,
+    "B13": true,
+    "B14": false,
+    "B15": false,
+    "B16_LEDGER": true,
+    "A1_A2_S4B": false,
+    "A3_S4B": false,
+    "A5_S4B": true,
+    "B3_S4B": false
+   },
+   "all_passed_solver_tolerances": false,
+   "all_passed_barconvtol": false,
+   "failing_solver_tolerances": [
+    "A1_A2_S4B",
+    "A3_S4B",
+    "B3_S4B",
+    "B14",
+    "B15"
+   ],
+   "failing_barconvtol": [
+    "A1_A2",
+    "A3",
+    "B3",
+    "B14",
+    "B15"
+   ],
+   "A1_A2_S4B": {
+    "row_fail_count": 444,
+    "row_violation_max": 1.02576396401588,
+    "row_max_ratio_to_budget": 127.76640230532702,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 82103,
+    "stationarity_normalized_max": 0.0037431250545769557,
+    "dual_sign_fail_count": 67204,
+    "dual_sign_normalized_max": 0.060467599337966214,
+    "relative_gap": 3.258111181876528e-06,
+    "complementarity_over_scale": 4.140696483120299e-06
+   },
+   "B16": {
+    "relative_error": 1.070184934899094e-07,
+    "tolerance": 1e-06,
+    "difference": 62618.26525878906
+   }
+  },
+  "integrated_nze": {
+   "passed": {
+    "A1_A2": false,
+    "A3": false,
+    "A5": true,
+    "A4": true,
+    "A6": true,
+    "B1": false,
+    "B1_BUNKERS": true,
+    "B2": false,
+    "B3": false,
+    "B8": true,
+    "B11": true,
+    "B12": true,
+    "B13": true,
+    "B14": false,
+    "B15": false,
+    "B16_LEDGER": true,
+    "A1_A2_S4B": false,
+    "A3_S4B": false,
+    "A5_S4B": true,
+    "B1_S4B": true,
+    "B3_S4B": false
+   },
+   "all_passed_solver_tolerances": false,
+   "all_passed_barconvtol": false,
+   "failing_solver_tolerances": [
+    "A1_A2_S4B",
+    "A3_S4B",
+    "B2",
+    "B3_S4B",
+    "B14",
+    "B15"
+   ],
+   "failing_barconvtol": [
+    "A1_A2",
+    "A3",
+    "B1",
+    "B2",
+    "B3",
+    "B14",
+    "B15"
+   ],
+   "A1_A2_S4B": {
+    "row_fail_count": 6712,
+    "row_violation_max": 13.710718424408697,
+    "row_max_ratio_to_budget": 569.404664588742,
+    "column_fail_count": 0,
+    "stationarity_fail_count": 46968,
+    "stationarity_normalized_max": 0.0004128730075702282,
+    "dual_sign_fail_count": 62983,
+    "dual_sign_normalized_max": 0.08721924245571816,
+    "relative_gap": 5.600742416437063e-07,
+    "complementarity_over_scale": 1.0494103267857044e-06
+   },
+   "B16": {
+    "relative_error": 7.0709494968924956e-09,
+    "tolerance": 1e-06,
+    "difference": -3009.9953002929688
+   }
+  }
+ },
+ "B5_passed": true,
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 516146310314.3289,
+   "disconnected": 585115945488.6481
+  },
+  "difference": 68969635174.31915,
+  "relative": 0.11787345005052036,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant"
+ },
+ "nze_vs_integrated": {
+  "objective_difference_eur": -90461570009.53876,
+  "relative": -0.17526342473406115
+ },
+ "ledger_bn_eur": {
+  "integrated": {
+   "ASEAN_BUNKER": 77.6955,
+   "ASEAN_POOL": -0.0,
+   "BN": 0.7648,
+   "ID": 158.5777,
+   "KH": 2.7793,
+   "LA": -1.3841,
+   "MM": 2.7007,
+   "MY": 66.6307,
+   "PH": 22.4626,
+   "SG": 21.1129,
+   "TH": 54.3944,
+   "TL": -0.1151,
+   "VN": 110.5269
+  },
+  "disconnected": {
+   "ASEAN_BUNKER": 76.4767,
+   "ASEAN_POOL": -0.0002,
+   "BN": 0.8791,
+   "ID": 159.247,
+   "KH": 5.2053,
+   "LA": 1.3563,
+   "MM": 3.8335,
+   "MY": 69.8409,
+   "PH": 22.4725,
+   "SG": 22.0448,
+   "TH": 61.9045,
+   "TL": 0.0085,
+   "VN": 161.8471
+  },
+  "disconnected_minus_integrated": {
+   "ASEAN_BUNKER": -1.2188,
+   "ASEAN_POOL": -0.0002,
+   "BN": 0.1143,
+   "ID": 0.6693,
+   "KH": 2.4261,
+   "LA": 2.7403,
+   "MM": 1.1328,
+   "MY": 3.2101,
+   "PH": 0.0099,
+   "SG": 0.9319,
+   "TH": 7.5101,
+   "TL": 0.1237,
+   "VN": 51.3202
+  },
+  "main_subjects": {
+   "ASEAN_BUNKER": [
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": -1.2668
+    },
+    {
+     "subject": "liquid_pool_oil non-fossil",
+     "bn_eur": 0.048
+    }
+   ],
+   "ASEAN_POOL": [
+    {
+     "subject": "liquid_pool_oil",
+     "bn_eur": 2.3302
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": -2.3191
+    },
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": 0.0804
+    },
+    {
+     "subject": "capex_new",
+     "bn_eur": -0.0456
+    }
+   ],
+   "BN": [
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": -0.2359
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": 0.2004
+    },
+    {
+     "subject": "co2_storage_service",
+     "bn_eur": 0.0901
+    },
+    {
+     "subject": "capex_new",
+     "bn_eur": 0.0633
+    }
+   ],
+   "ID": [
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": 5.9371
+    },
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": -5.3791
+    },
+    {
+     "subject": "co2_storage_service",
+     "bn_eur": -2.7714
+    },
+    {
+     "subject": "network_trade_CO2 pipeline",
+     "bn_eur": 2.5006
+    }
+   ],
+   "KH": [
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": 8.9062
+    },
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": -6.9076
+    },
+    {
+     "subject": "network_trade_CO2 pipeline",
+     "bn_eur": -0.9685
+    },
+    {
+     "subject": "liquid_pool_ammonia",
+     "bn_eur": 0.8478
+    }
+   ],
+   "LA": [
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": -8.0246
+    },
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": 6.3251
+    },
+    {
+     "subject": "capex_new",
+     "bn_eur": 3.3328
+    },
+    {
+     "subject": "xb_share_congestion_rent",
+     "bn_eur": 2.7019
+    }
+   ],
+   "MM": [
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": 21.666
+    },
+    {
+     "subject": "capex_new",
+     "bn_eur": -21.2031
+    },
+    {
+     "subject": "liquid_pool_oil non-fossil",
+     "bn_eur": -5.8126
+    },
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": 5.0803
+    }
+   ],
+   "MY": [
+    {
+     "subject": "variable_cost",
+     "bn_eur": 15.0312
+    },
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": -10.1534
+    },
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": -9.1699
+    },
+    {
+     "subject": "capex_new",
+     "bn_eur": 8.6958
+    }
+   ],
+   "PH": [
+    {
+     "subject": "liquid_pool_oil non-fossil",
+     "bn_eur": -1.7902
+    },
+    {
+     "subject": "network_trade_DC",
+     "bn_eur": 1.3489
+    },
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": 1.0001
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": -0.6939
+    }
+   ],
+   "SG": [
+    {
+     "subject": "network_trade_CO2 pipeline",
+     "bn_eur": -2.6349
+    },
+    {
+     "subject": "co2_storage_service",
+     "bn_eur": 2.5292
+    },
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": 1.8025
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": -1.5098
+    }
+   ],
+   "TH": [
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": 14.1385
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": -13.5001
+    },
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": 12.213
+    },
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": -11.8722
+    }
+   ],
+   "TL": [
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": 1.7415
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": -1.6411
+    },
+    {
+     "subject": "liquid_pool_methanol",
+     "bn_eur": -0.5991
+    },
+    {
+     "subject": "network_trade_H2 pipeline",
+     "bn_eur": 0.5015
+    }
+   ],
+   "VN": [
+    {
+     "subject": "capex_new",
+     "bn_eur": 61.8025
+    },
+    {
+     "subject": "network_trade_AC",
+     "bn_eur": -29.0128
+    },
+    {
+     "subject": "variable_cost",
+     "bn_eur": 26.3137
+    },
+    {
+     "subject": "network_trade_gas pipeline",
+     "bn_eur": -7.2053
+    }
+   ]
+  },
+  "vs_s4k_smoke": {
+   "BN": {
+    "l23_bn_eur": 0.1143,
+    "s4k_smoke_bn_eur": 0.836,
+    "same_sign": true,
+    "rank_l23": 10,
+    "rank_s4k_smoke": 9
+   },
+   "ID": {
+    "l23_bn_eur": 0.6693,
+    "s4k_smoke_bn_eur": 7.0173,
+    "same_sign": true,
+    "rank_l23": 8,
+    "rank_s4k_smoke": 2
+   },
+   "KH": {
+    "l23_bn_eur": 2.4261,
+    "s4k_smoke_bn_eur": 1.8862,
+    "same_sign": true,
+    "rank_l23": 5,
+    "rank_s4k_smoke": 7
+   },
+   "LA": {
+    "l23_bn_eur": 2.7403,
+    "s4k_smoke_bn_eur": 2.7686,
+    "same_sign": true,
+    "rank_l23": 4,
+    "rank_s4k_smoke": 5
+   },
+   "MM": {
+    "l23_bn_eur": 1.1328,
+    "s4k_smoke_bn_eur": 0.721,
+    "same_sign": true,
+    "rank_l23": 6,
+    "rank_s4k_smoke": 10
+   },
+   "MY": {
+    "l23_bn_eur": 3.2101,
+    "s4k_smoke_bn_eur": 4.0858,
+    "same_sign": true,
+    "rank_l23": 3,
+    "rank_s4k_smoke": 4
+   },
+   "PH": {
+    "l23_bn_eur": 0.0099,
+    "s4k_smoke_bn_eur": 1.7536,
+    "same_sign": true,
+    "rank_l23": 11,
+    "rank_s4k_smoke": 8
+   },
+   "SG": {
+    "l23_bn_eur": 0.9319,
+    "s4k_smoke_bn_eur": 2.0189,
+    "same_sign": true,
+    "rank_l23": 7,
+    "rank_s4k_smoke": 6
+   },
+   "TH": {
+    "l23_bn_eur": 7.5101,
+    "s4k_smoke_bn_eur": 6.1078,
+    "same_sign": true,
+    "rank_l23": 2,
+    "rank_s4k_smoke": 3
+   },
+   "TL": {
+    "l23_bn_eur": 0.1237,
+    "s4k_smoke_bn_eur": 0.368,
+    "same_sign": true,
+    "rank_l23": 9,
+    "rank_s4k_smoke": 11
+   },
+   "VN": {
+    "l23_bn_eur": 51.3202,
+    "s4k_smoke_bn_eur": 24.8022,
+    "same_sign": true,
+    "rank_l23": 1,
+    "rank_s4k_smoke": 1
+   }
+  },
+  "rank_correlation": 0.6636363636363638,
+  "nze_minus_integrated": {
+   "ASEAN_BUNKER": -11.2543,
+   "ASEAN_POOL": 0.0,
+   "BN": -0.2915,
+   "ID": -28.4337,
+   "KH": 0.7434,
+   "LA": 0.6254,
+   "MM": 0.2883,
+   "MY": -17.0242,
+   "PH": -4.0394,
+   "SG": -5.9836,
+   "TH": -11.934,
+   "TL": -0.2241,
+   "VN": -12.934
+  }
+ },
+ "asean_by_group": {
+  "integrated": {
+   "PHS": {
+    "gw": 5.406,
+    "twh": 1.228
+   },
+   "battery (discharge)": {
+    "gw": 0.3,
+    "twh": 0.473
+   },
+   "coal": {
+    "gw": 113.763,
+    "twh": 16.662
+   },
+   "gas CCGT/OCGT": {
+    "gw": 198.831,
+    "twh": 945.523
+   },
+   "geothermal": {
+    "gw": 22.759,
+    "twh": 141.769
+   },
+   "hydro reservoir": {
+    "gw": 92.293,
+    "twh": 309.743
+   },
+   "nuclear": {
+    "gw": 0.0,
+    "twh": 0.0
+   },
+   "nuclear SMR": {
+    "gw": 0.0,
+    "twh": 0.0
+   },
+   "offwind": {
+    "gw": 3.771,
+    "twh": 11.288
+   },
+   "oil": {
+    "gw": 2.032,
+    "twh": 0.022
+   },
+   "onwind": {
+    "gw": 71.953,
+    "twh": 135.593
+   },
+   "ror": {
+    "gw": 16.486,
+    "twh": 58.455
+   },
+   "solar": {
+    "gw": 3817.364,
+    "twh": 5300.478
+   },
+   "solar rooftop": {
+    "gw": 495.735,
+    "twh": 687.738
+   }
+  },
+  "disconnected": {
+   "PHS": {
+    "gw": 5.406,
+    "twh": 1.184
+   },
+   "battery (discharge)": {
+    "gw": 1.431,
+    "twh": 2.139
+   },
+   "coal": {
+    "gw": 113.763,
+    "twh": 41.991
+   },
+   "gas CCGT/OCGT": {
+    "gw": 205.358,
+    "twh": 967.607
+   },
+   "geothermal": {
+    "gw": 22.804,
+    "twh": 140.677
+   },
+   "hydro reservoir": {
+    "gw": 93.777,
+    "twh": 314.786
+   },
+   "nuclear": {
+    "gw": 0.0,
+    "twh": 0.001
+   },
+   "nuclear SMR": {
+    "gw": 31.15,
+    "twh": 250.989
+   },
+   "offwind": {
+    "gw": 114.873,
+    "twh": 479.262
+   },
+   "oil": {
+    "gw": 2.032,
+    "twh": 0.073
+   },
+   "onwind": {
+    "gw": 107.27,
+    "twh": 189.366
+   },
+   "ror": {
+    "gw": 22.686,
+    "twh": 88.158
+   },
+   "solar": {
+    "gw": 3331.955,
+    "twh": 4630.512
+   },
+   "solar rooftop": {
+    "gw": 569.998,
+    "twh": 793.104
+   }
+  },
+  "integrated_nze": {
+   "PHS": {
+    "gw": 5.406,
+    "twh": 1.431
+   },
+   "battery (discharge)": {
+    "gw": 0.305,
+    "twh": 0.51
+   },
+   "coal": {
+    "gw": 113.763,
+    "twh": 16.76
+   },
+   "gas CCGT/OCGT": {
+    "gw": 215.918,
+    "twh": 1071.437
+   },
+   "geothermal": {
+    "gw": 22.266,
+    "twh": 138.282
+   },
+   "hydro reservoir": {
+    "gw": 85.458,
+    "twh": 281.243
+   },
+   "nuclear": {
+    "gw": 0.0,
+    "twh": 0.0
+   },
+   "nuclear SMR": {
+    "gw": 0.0,
+    "twh": 0.0
+   },
+   "offwind": {
+    "gw": 0.286,
+    "twh": 0.491
+   },
+   "oil": {
+    "gw": 2.032,
+    "twh": 0.949
+   },
+   "onwind": {
+    "gw": 36.437,
+    "twh": 75.224
+   },
+   "ror": {
+    "gw": 9.926,
+    "twh": 29.431
+   },
+   "solar": {
+    "gw": 3314.916,
+    "twh": 4581.094
+   },
+   "solar rooftop": {
+    "gw": 450.74,
+    "twh": 626.641
+   }
+  }
+ },
+ "cross_border_capacity_gw": {
+  "integrated": {
+   "BN-MY": {
+    "ac_gw": 0.981,
+    "dc_gw": 0.0
+   },
+   "ID-MY": {
+    "ac_gw": 20.413,
+    "dc_gw": 3.287
+   },
+   "ID-SG": {
+    "ac_gw": 0.0,
+    "dc_gw": 0.1
+   },
+   "ID-TL": {
+    "ac_gw": 0.334,
+    "dc_gw": 0.0
+   },
+   "KH-LA": {
+    "ac_gw": 3.794,
+    "dc_gw": 0.0
+   },
+   "KH-TH": {
+    "ac_gw": 22.937,
+    "dc_gw": 0.0
+   },
+   "KH-VN": {
+    "ac_gw": 51.828,
+    "dc_gw": 0.0
+   },
+   "LA-MM": {
+    "ac_gw": 7.832,
+    "dc_gw": 0.0
+   },
+   "LA-TH": {
+    "ac_gw": 78.842,
+    "dc_gw": 0.0
+   },
+   "LA-VN": {
+    "ac_gw": 112.06,
+    "dc_gw": 0.0
+   },
+   "MM-TH": {
+    "ac_gw": 38.538,
+    "dc_gw": 0.0
+   },
+   "MY-PH": {
+    "ac_gw": 0.0,
+    "dc_gw": 6.046
+   },
+   "MY-SG": {
+    "ac_gw": 1.063,
+    "dc_gw": 0.0
+   },
+   "MY-TH": {
+    "ac_gw": 20.938,
+    "dc_gw": 0.859
+   }
+  },
+  "disconnected": {},
+  "integrated_nze": {
+   "BN-MY": {
+    "ac_gw": 1.056,
+    "dc_gw": 0.0
+   },
+   "ID-MY": {
+    "ac_gw": 16.982,
+    "dc_gw": 3.995
+   },
+   "ID-SG": {
+    "ac_gw": 0.0,
+    "dc_gw": 0.15
+   },
+   "ID-TL": {
+    "ac_gw": 0.729,
+    "dc_gw": 0.0
+   },
+   "KH-LA": {
+    "ac_gw": 4.791,
+    "dc_gw": 0.0
+   },
+   "KH-TH": {
+    "ac_gw": 24.295,
+    "dc_gw": 0.0
+   },
+   "KH-VN": {
+    "ac_gw": 57.493,
+    "dc_gw": 0.0
+   },
+   "LA-MM": {
+    "ac_gw": 7.419,
+    "dc_gw": 0.0
+   },
+   "LA-TH": {
+    "ac_gw": 79.303,
+    "dc_gw": 0.0
+   },
+   "LA-VN": {
+    "ac_gw": 112.196,
+    "dc_gw": 0.0
+   },
+   "MM-TH": {
+    "ac_gw": 23.147,
+    "dc_gw": 0.0
+   },
+   "MY-PH": {
+    "ac_gw": 0.0,
+    "dc_gw": 4.5
+   },
+   "MY-SG": {
+    "ac_gw": 1.789,
+    "dc_gw": 0.0
+   },
+   "MY-TH": {
+    "ac_gw": 20.938,
+    "dc_gw": 0.624
+   }
+  }
+ },
+ "transport_totals": {
+  "integrated": {
+   "domestic": {
+    "AC": {
+     "sent_twh": 1947.2101,
+     "loss_twh": 73.5648,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.03777959039961841
+    },
+    "DC": {
+     "sent_twh": 165.6111,
+     "loss_twh": 5.3317,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.03219409810091232
+    },
+    "H2 pipeline": {
+     "sent_twh": 139.5831,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.6474
+    },
+    "gas pipeline": {
+     "sent_twh": 4354.0773,
+     "loss_twh": 0.0,
+     "compression_el_twh": 15.714
+    },
+    "CO2 pipeline": {
+     "sent_twh": 14.2613,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.0
+    },
+    "electricity": {
+     "sent_twh": 2112.8212,
+     "loss_twh": 78.8965,
+     "loss_share": 0.03734177790340234
+    },
+    "compression_total_twh": 16.3614
+   },
+   "cross_border": {
+    "AC": {
+     "sent_twh": 1457.7615000000003,
+     "loss_twh": 64.158,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.04401131460804802
+    },
+    "DC": {
+     "sent_twh": 71.30709999999999,
+     "loss_twh": 2.5020000000000002,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.035087670091758054
+    },
+    "H2 pipeline": {
+     "sent_twh": 121.02890000000002,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.7670000000000001
+    },
+    "gas pipeline": {
+     "sent_twh": 1352.7909999999997,
+     "loss_twh": 0.0,
+     "compression_el_twh": 4.4525000000000015
+    },
+    "CO2 pipeline": {
+     "sent_twh": 342.4481,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.0
+    },
+    "electricity": {
+     "sent_twh": 1529.0686000000003,
+     "loss_twh": 66.66,
+     "loss_share": 0.04359516636467454
+    },
+    "compression_total_twh": 5.219500000000002
+   }
+  },
+  "disconnected": {
+   "domestic": {
+    "AC": {
+     "sent_twh": 1293.7513,
+     "loss_twh": 52.8258,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.04083149520313526
+    },
+    "DC": {
+     "sent_twh": 182.5173,
+     "loss_twh": 5.9785,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.03275579903932394
+    },
+    "H2 pipeline": {
+     "sent_twh": 122.077,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.6983
+    },
+    "gas pipeline": {
+     "sent_twh": 4178.4239,
+     "loss_twh": 0.0,
+     "compression_el_twh": 20.012
+    },
+    "CO2 pipeline": {
+     "sent_twh": 9.6912,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.0
+    },
+    "electricity": {
+     "sent_twh": 1476.2685999999999,
+     "loss_twh": 58.8043,
+     "loss_share": 0.03983306289925831
+    },
+    "compression_total_twh": 20.7103
+   }
+  },
+  "integrated_nze": {
+   "domestic": {
+    "AC": {
+     "sent_twh": 1846.8661,
+     "loss_twh": 71.0797,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.03848665585447694
+    },
+    "DC": {
+     "sent_twh": 103.3105,
+     "loss_twh": 3.2271,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.031236902347776846
+    },
+    "H2 pipeline": {
+     "sent_twh": 69.9649,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.2753
+    },
+    "gas pipeline": {
+     "sent_twh": 5444.3925,
+     "loss_twh": 0.0,
+     "compression_el_twh": 20.1447
+    },
+    "CO2 pipeline": {
+     "sent_twh": 8.7171,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.0
+    },
+    "electricity": {
+     "sent_twh": 1950.1766,
+     "loss_twh": 74.30680000000001,
+     "loss_share": 0.038102600554226734
+    },
+    "compression_total_twh": 20.42
+   },
+   "cross_border": {
+    "AC": {
+     "sent_twh": 1493.3166999999999,
+     "loss_twh": 64.08779999999999,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.04291641551989608
+    },
+    "DC": {
+     "sent_twh": 59.1807,
+     "loss_twh": 2.0189,
+     "compression_el_twh": 0.0,
+     "loss_share": 0.03411416221842594
+    },
+    "H2 pipeline": {
+     "sent_twh": 115.37830000000001,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.6759
+    },
+    "gas pipeline": {
+     "sent_twh": 1879.1633,
+     "loss_twh": 0.0,
+     "compression_el_twh": 6.766699999999999
+    },
+    "CO2 pipeline": {
+     "sent_twh": 267.6233,
+     "loss_twh": 0.0,
+     "compression_el_twh": 0.0
+    },
+    "electricity": {
+     "sent_twh": 1552.4973999999997,
+     "loss_twh": 66.10669999999999,
+     "loss_share": 0.0425808764639477
+    },
+    "compression_total_twh": 7.442599999999999
+   }
+  }
+ },
+ "lines_at_single_cap": {
+  "integrated": [
+   "Line:109",
+   "Line:99",
+   "Line:S4H2 MY_Peninsular2 0 - TH2 0"
+  ],
+  "disconnected": [
+   "Line:107"
+  ],
+  "integrated_nze": [
+   "Line:109",
+   "Line:60",
+   "Line:99",
+   "Line:S4H2 MY_Peninsular2 0 - TH2 0"
+  ]
+ },
+ "long_lines": {
+  "integrated": [
+   {
+    "line": "S4E1 MM2 4 - TH2 5",
+    "pair": "MM-TH",
+    "length_km": 1106.2,
+    "ac_loss_lambda": 0.1366,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 5552.0,
+    "new_mw": 5552.0,
+    "at_s_nom_max": false,
+    "sent_twh": 21.7666,
+    "loss_twh": 2.7849,
+    "loss_share": 0.1279
+   },
+   {
+    "line": "62",
+    "pair": "LA-TH",
+    "length_km": 798.9,
+    "ac_loss_lambda": 0.0986,
+    "s_nom_mw": 203.3,
+    "s_nom_opt_mw": 581.2,
+    "new_mw": 377.9,
+    "at_s_nom_max": false,
+    "sent_twh": 1.37,
+    "loss_twh": 0.1313,
+    "loss_share": 0.0958
+   },
+   {
+    "line": "S4E1 MM2 4 - TH2 3",
+    "pair": "MM-TH",
+    "length_km": 646.7,
+    "ac_loss_lambda": 0.0799,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 4219.5,
+    "new_mw": 4219.5,
+    "at_s_nom_max": false,
+    "sent_twh": 15.0886,
+    "loss_twh": 1.161,
+    "loss_share": 0.0769
+   },
+   {
+    "line": "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 1",
+    "pair": "ID-MY",
+    "length_km": 596.9,
+    "ac_loss_lambda": 0.0737,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 1958.1,
+    "new_mw": 1958.1,
+    "at_s_nom_max": false,
+    "sent_twh": 6.5977,
+    "loss_twh": 0.4695,
+    "loss_share": 0.0712
+   },
+   {
+    "line": "S4E1 MM2 13 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 592.6,
+    "ac_loss_lambda": 0.0732,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2441.2,
+    "new_mw": 2441.2,
+    "at_s_nom_max": false,
+    "sent_twh": 7.3611,
+    "loss_twh": 0.5219,
+    "loss_share": 0.0709
+   },
+   {
+    "line": "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 0",
+    "pair": "ID-MY",
+    "length_km": 573.1,
+    "ac_loss_lambda": 0.0708,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2076.2,
+    "new_mw": 2076.2,
+    "at_s_nom_max": false,
+    "sent_twh": 6.1476,
+    "loss_twh": 0.4207,
+    "loss_share": 0.0684
+   },
+   {
+    "line": "S4E1 MM2 7 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 558.2,
+    "ac_loss_lambda": 0.0689,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 3694.0,
+    "new_mw": 3694.0,
+    "at_s_nom_max": false,
+    "sent_twh": 12.1367,
+    "loss_twh": 0.8129,
+    "loss_share": 0.067
+   },
+   {
+    "line": "S4E1 MM2 6 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 556.3,
+    "ac_loss_lambda": 0.0687,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 6288.3,
+    "new_mw": 6288.3,
+    "at_s_nom_max": false,
+    "sent_twh": 19.7818,
+    "loss_twh": 1.3175,
+    "loss_share": 0.0666
+   }
+  ],
+  "disconnected": [],
+  "integrated_nze": [
+   {
+    "line": "S4E1 MM2 4 - TH2 5",
+    "pair": "MM-TH",
+    "length_km": 1106.2,
+    "ac_loss_lambda": 0.1366,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 4527.2,
+    "new_mw": 4527.2,
+    "at_s_nom_max": false,
+    "sent_twh": 18.9327,
+    "loss_twh": 2.4214,
+    "loss_share": 0.1279
+   },
+   {
+    "line": "62",
+    "pair": "LA-TH",
+    "length_km": 798.9,
+    "ac_loss_lambda": 0.0986,
+    "s_nom_mw": 203.3,
+    "s_nom_opt_mw": 546.2,
+    "new_mw": 342.9,
+    "at_s_nom_max": false,
+    "sent_twh": 1.3409,
+    "loss_twh": 0.1268,
+    "loss_share": 0.0946
+   },
+   {
+    "line": "S4E1 MM2 4 - TH2 3",
+    "pair": "MM-TH",
+    "length_km": 646.7,
+    "ac_loss_lambda": 0.0799,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2366.1,
+    "new_mw": 2366.1,
+    "at_s_nom_max": false,
+    "sent_twh": 8.2227,
+    "loss_twh": 0.6323,
+    "loss_share": 0.0769
+   },
+   {
+    "line": "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 1",
+    "pair": "ID-MY",
+    "length_km": 596.9,
+    "ac_loss_lambda": 0.0737,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 1995.5,
+    "new_mw": 1995.5,
+    "at_s_nom_max": false,
+    "sent_twh": 7.2255,
+    "loss_twh": 0.5138,
+    "loss_share": 0.0711
+   },
+   {
+    "line": "S4E1 MM2 13 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 592.6,
+    "ac_loss_lambda": 0.0732,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2487.0,
+    "new_mw": 2487.0,
+    "at_s_nom_max": false,
+    "sent_twh": 8.1891,
+    "loss_twh": 0.5791,
+    "loss_share": 0.0707
+   },
+   {
+    "line": "S4E1 ID_Kalimantan4 10 - MY_Sarawak4 0",
+    "pair": "ID-MY",
+    "length_km": 573.1,
+    "ac_loss_lambda": 0.0708,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2196.1,
+    "new_mw": 2196.1,
+    "at_s_nom_max": false,
+    "sent_twh": 7.2083,
+    "loss_twh": 0.4928,
+    "loss_share": 0.0684
+   },
+   {
+    "line": "S4E1 MM2 7 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 558.2,
+    "ac_loss_lambda": 0.0689,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2507.0,
+    "new_mw": 2507.0,
+    "at_s_nom_max": false,
+    "sent_twh": 6.9679,
+    "loss_twh": 0.4661,
+    "loss_share": 0.0669
+   },
+   {
+    "line": "S4E1 MM2 6 - TH2 4",
+    "pair": "MM-TH",
+    "length_km": 556.3,
+    "ac_loss_lambda": 0.0687,
+    "s_nom_mw": 0.0,
+    "s_nom_opt_mw": 2529.7,
+    "new_mw": 2529.7,
+    "at_s_nom_max": false,
+    "sent_twh": 5.8553,
+    "loss_twh": 0.3903,
+    "loss_share": 0.0666
+   }
+  ]
+ },
+ "violations": {
+  "integrated": {
+   "label_check": {
+    "exported_rows": 9719326,
+    "model_rows": 9719326,
+    "rows_without_group": 0,
+    "columns_without_group": 0
+   },
+   "totals": {
+    "rows_violated": 1583100,
+    "rows_over_budget": 11730,
+    "row_violation_max": 14.81561479144844,
+    "row_max_ratio_to_budget": 902.1354289725257,
+    "first_order_cost_eur": 187692.10651712125,
+    "first_order_cost_over_budget_rows_eur": 14583.656462608356,
+    "columns_violated": 0,
+    "columns_over_budget": 0,
+    "column_violation_max": 0.0
+   },
+   "over_budget_by_family": {
+    "Store-fix-e-lower": 272,
+    "ResearchImportAnnual-TH2 1 gas production": 1,
+    "Store-ext-e-upper": 1431,
+    "Link-ext-p-upper": 1848,
+    "Link-ext-p-lower": 6376,
+    "Bus-nodal_balance": 132,
+    "Bus-meshed-nodal_balance": 1114,
+    "Store-energy_balance": 391,
+    "StorageUnit-ext-state_of_charge-upper": 28,
+    "Kirchhoff-Voltage-Law": 48,
+    "Store-fix-e-upper": 1,
+    "StorageUnit-energy_balance": 88
+   }
+  },
+  "disconnected": {
+   "label_check": {
+    "exported_rows": 9373129,
+    "model_rows": 9373129,
+    "rows_without_group": 0,
+    "columns_without_group": 0
+   },
+   "totals": {
+    "rows_violated": 1132968,
+    "rows_over_budget": 360,
+    "row_violation_max": 0.5061609501717612,
+    "row_max_ratio_to_budget": 23.576603830258993,
+    "first_order_cost_eur": 13664.853963953381,
+    "first_order_cost_over_budget_rows_eur": 1922.6984764331025,
+    "columns_violated": 0,
+    "columns_over_budget": 0,
+    "column_violation_max": 0.0
+   },
+   "over_budget_by_family": {
+    "Store-fix-e-lower": 22,
+    "Bus-nodal_balance": 298,
+    "Link-ext-p-upper": 24,
+    "Link-ext-p-lower": 16
+   }
+  },
+  "disconnected_gap": {
+   "label_check": {
+    "exported_rows": 9522984,
+    "model_rows": 9522984,
+    "rows_without_group": 0,
+    "columns_without_group": 0
+   },
+   "totals": {
+    "rows_violated": 1137715,
+    "rows_over_budget": 444,
+    "row_violation_max": 1.02576396401588,
+    "row_max_ratio_to_budget": 127.76640230532702,
+    "first_order_cost_eur": 26005.22438482472,
+    "first_order_cost_over_budget_rows_eur": 2208.980564802192,
+    "columns_violated": 0,
+    "columns_over_budget": 0,
+    "column_violation_max": 0.0
+   },
+   "over_budget_by_family": {
+    "Store-fix-e-lower": 87,
+    "Bus-nodal_balance": 146,
+    "Link-ext-p-upper": 14,
+    "Link-ext-p-lower": 21,
+    "Store-energy_balance": 176
+   }
+  },
+  "integrated_nze": {
+   "label_check": {
+    "exported_rows": 9719326,
+    "model_rows": 9719326,
+    "rows_without_group": 0,
+    "columns_without_group": 0
+   },
+   "totals": {
+    "rows_violated": 1610051,
+    "rows_over_budget": 6712,
+    "row_violation_max": 13.710718424408697,
+    "row_max_ratio_to_budget": 569.404664588742,
+    "first_order_cost_eur": 114992.16825657859,
+    "first_order_cost_over_budget_rows_eur": 8369.576652190919,
+    "columns_violated": 0,
+    "columns_over_budget": 0,
+    "column_violation_max": 0.0
+   },
+   "over_budget_by_family": {
+    "Store-fix-e-lower": 221,
+    "Link-ext-p-lower": 2501,
+    "Link-ext-p-upper": 1308,
+    "Bus-nodal_balance": 425,
+    "ResearchImportAnnual-TH2 1 gas production": 1,
+    "Store-ext-e-upper": 743,
+    "Bus-meshed-nodal_balance": 1092,
+    "Store-energy_balance": 391,
+    "Kirchhoff-Voltage-Law": 2,
+    "StorageUnit-ext-state_of_charge-upper": 26,
+    "StorageUnit-energy_balance": 2
+   }
+  }
+ },
+ "barrier": {
+  "integrated": {
+   "min_primal_residual": {
+    "it": 132,
+    "pr": 4.65,
+    "dr": 0.000643,
+    "cg": 0.166,
+    "po": 513259583000.0,
+    "do": 513259383000.0
+   },
+   "jumps": []
+  },
+  "disconnected": {
+   "min_primal_residual": {
+    "it": 123,
+    "pr": 0.121,
+    "dr": 0.000173,
+    "cg": 0.45,
+    "po": 582059839000.0,
+    "do": 582061646000.0
+   },
+   "jumps": [
+    {
+     "it": 125,
+     "primal_residual": 162000000000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 1338842975206.6116,
+     "po": 3249115280000000.0,
+     "do": -1.42119754e+16
+    },
+    {
+     "it": 131,
+     "primal_residual": 350000000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 2892561983.4710746,
+     "po": 41710878200000.0,
+     "do": 29192168200000.0
+    },
+    {
+     "it": 137,
+     "primal_residual": 5770000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 47685950.41322314,
+     "po": 2153066700000.0,
+     "do": 2053861300000.0
+    },
+    {
+     "it": 143,
+     "primal_residual": 1070000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 8842975.20661157,
+     "po": 967123224000.0,
+     "do": 1004754790000.0
+    },
+    {
+     "it": 149,
+     "primal_residual": 292000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 2413223.140495868,
+     "po": 704273063000.0,
+     "do": 755696063000.0
+    },
+    {
+     "it": 155,
+     "primal_residual": 114000.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 942148.7603305785,
+     "po": 633407430000.0,
+     "do": 654117284000.0
+    },
+    {
+     "it": 161,
+     "primal_residual": 55600.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 459504.13223140495,
+     "po": 608589247000.0,
+     "do": 621943085000.0
+    },
+    {
+     "it": 167,
+     "primal_residual": 33800.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 279338.8429752066,
+     "po": 598831621000.0,
+     "do": 609586271000.0
+    },
+    {
+     "it": 173,
+     "primal_residual": 24500.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 202479.3388429752,
+     "po": 594439804000.0,
+     "do": 603513988000.0
+    },
+    {
+     "it": 179,
+     "primal_residual": 17800.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 147107.43801652893,
+     "po": 591185165000.0,
+     "do": 599198777000.0
+    },
+    {
+     "it": 185,
+     "primal_residual": 9470.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 78264.46280991736,
+     "po": 587110770000.0,
+     "do": 593071158000.0
+    },
+    {
+     "it": 191,
+     "primal_residual": 4340.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 35867.76859504132,
+     "po": 584481351000.0,
+     "do": 587772806000.0
+    },
+    {
+     "it": 197,
+     "primal_residual": 2320.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 19173.553719008265,
+     "po": 583385546000.0,
+     "do": 585156564000.0
+    },
+    {
+     "it": 203,
+     "primal_residual": 794.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 6561.983471074381,
+     "po": 582538978000.0,
+     "do": 583412180000.0
+    },
+    {
+     "it": 209,
+     "primal_residual": 352.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 2909.090909090909,
+     "po": 582279065000.0,
+     "do": 582624100000.0
+    },
+    {
+     "it": 215,
+     "primal_residual": 168.0,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 1388.4297520661157,
+     "po": 582165694000.0,
+     "do": 582311250000.0
+    },
+    {
+     "it": 221,
+     "primal_residual": 69.9,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 577.6859504132232,
+     "po": 582103523000.0,
+     "do": 582173904000.0
+    },
+    {
+     "it": 227,
+     "primal_residual": 20.9,
+     "best_before": 0.121,
+     "best_at": 123,
+     "factor": 172.72727272727272,
+     "po": 582072328000.0,
+     "do": 582094831000.0
+    }
+   ]
+  },
+  "disconnected_gap": {
+   "min_primal_residual": {
+    "it": 101,
+    "pr": 0.596,
+    "dr": 0.000847,
+    "cg": 0.528,
+    "po": 582060194000.0,
+    "do": 582059131000.0
+   },
+   "jumps": []
+  },
+  "integrated_nze": {
+   "min_primal_residual": {
+    "it": 132,
+    "pr": 6.86,
+    "dr": 0.000191,
+    "cg": 0.0773,
+    "po": 422798015000.0,
+    "do": 422797814000.0
+   },
+   "first_jump": {
+    "it": 136,
+    "pr": 288000000000.0,
+    "previous_min": 6.86,
+    "po": 3579936420000000.0,
+    "do": -1.58844559e+16
+   },
+   "last20_ranges": {
+    "pr": [
+     16.2,
+     83.2
+    ],
+    "dr": [
+     1.64e-05,
+     0.000172
+    ],
+    "cg": [
+     0.248,
+     1.72
+    ]
+   }
+  }
+ },
+ "findings_not_handled": 12,
+ "user_decisions": [
+  "treatment of the four non-optimal runs",
+  "archive of the NZE outputs outside the tarball",
+  "timing of the run_365x24h.sh / preflight.sh fixes"
+ ]
+}

@@ -31,7 +31,7 @@
 | C6 | 启动 | 完成 | **2026-10-19 02:00:30** | 预检结束（01:54:38）后 5 分 52 秒；启动前确认本机无任何求解或 Gurobi 进程。tmux 会话 `s4k`：`bash /root/autodl-tmp/l23_launch.sh`（`cd /root/autodl-tmp/s4k_cloud`；`PY=/root/miniconda3/envs/pypsa-earth/bin/python GRB_LICENSE_FILE=/root/.gurobi/gurobi.lic bash run_365x24h.sh --solver-profile formal_barrier --mode serial --auth "<授权原文>"`）。授权原文按 `S4K_REPORT.md` §10.4 模板填写：规格 RTX 3080 Ti × 1，12 核 Xeon Silver 4214R，90 GB 内存，数据盘 50 GB；区域 西北 B 区 144 机；运行方式 serial；许可 `/root/.gurobi/gurobi.lic`；授权人 程宇晨；时间 2026-10-19 02:00（SGT）。运行目录 `runs/20261018T180030Z_5623/`；`STATUS.txt` 首行 `START:2026-10-18T18:00:30Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier commit:56d28358…` |
 | C7 | 监督 | 完成 | 02:00:30–09:08:23 | 整批 `DONE` 于 2026-10-19 09:00:38 SGT（运行 7 h 00 min）：一体化 SUBOPTIMAL（6,722 s）、不互联 SUBOPTIMAL（5,297 s）、不互联诊断 SUBOPTIMAL（2,311 s）、NZE 到 Gurobi TimeLimit 后被墙钟上限标记终止（10,814 s，`STATUS` 记为 `none`）。不重试、不干预。原记录：每 12 分钟一次（`/home/jin/l23_watch.sh`，只读）：`STATUS.txt`、`MONITOR_*.csv` 末行、容器 cgroup 内存（`MONITOR` 的 `mem_available_gib` 是宿主机值，见发现第 2 条）与磁盘。预计（§20）：一体化 47–65 min（悲观 95）、不互联 38–52（74）、NZE 66–94（138）、诊断 74–104（153） |
 | C8 | 回收 | 完成 | 2026-10-19 09:26–09:34:34 | 下载到 `p1_step4k_20261018/cloud_results/20261018T180030Z_5623/`：`results_20261018T180030Z_5623.tar.gz`（216,618,533 B，SHA256 `39b9c9dd…ae7f`）与 `.sha256`、`STATUS.txt`、4 个 `MONITOR_*.csv`；**本机 `sha256sum -c` OK**；解包 76 个文件、373 MB（`unpacked/export/`）。NZE 未入包的输出（发现第 3 条）：实例上按脚本导出清单与许可行过滤整理为 `nze_late_outputs_20261018T180030Z_5623.tar.gz`（21 个文件、74,285,069 B，SHA256 `78a6ea15…c33b`），下载到 `nze_late/`，**本机 SHA256 OK**，解包 21 个文件、127 MB；其中 `FILE_TIMES_SGT.txt` 为实例上 `integrated_nze/` 的文件时间。**许可特征串扫描（解包结果、`nze_late`、STATUS、MONITOR、`evidence/c9`）：无。** C9 违反分析的 5 个 JSON 与 `C9_STATUS.txt` 下载到 `evidence/c9/`。**09:34:34 删除实例许可文件 `/root/.gurobi/gurobi.lic`，确认已不存在**；删除前确认实例上没有求解或分析进程。实例上其余数据未删除。**开机到 `DONE`：** 容器 PID 1 启动 00:40:26 → `DONE` 09:00:38 = **8 h 20 min（8.34 h），估算 ¥9.00**（¥1.08/时）；到删除许可时 8.90 h、约 ¥9.61；关机前继续计费。**请用户到 AutoDL 控制台关机。** |
-| C9 | 首轮分析 | 进行中 | 09:14 起 | 违反分析：实例上对四个运行统一补跑（09:14:40–09:24:55，`nice -n 19`、3 个 CPU、`GRB_LICENSE_FILE` 取消；一体化 3 分 17 秒、不互联 1 分 44 秒、诊断 1 分 56 秒、NZE 3 分 12 秒，峰值 8.6–10.0 GB）；本机汇总脚本 `scripts_project/l23_c9_summary.py`（只读，不求解） |
+| C9 | 首轮分析 | 完成 | 09:14–09:50 | `L23_RUN1_REPORT.md`（摘要、§1–§10）与 `L23_RUN1_EVIDENCE.json`；本机汇总 `l23_c9_summary.py`（15 s、1.1 GB，只读）→ `evidence/c9_summary/`；证据收集 `l23_collect_evidence.py`；NZE 迭代轨迹 `evidence/c9/BARRIER_TRAJECTORY_integrated_nze.json`。要点：四个运行都非最优，`all_passed_solver_tolerances` 全 False；B6 68.97 bn（11.8 %）；NZE −90.46 bn（−17.5 %）；分国差额方向与 S4K 冒烟全同；发现但未处理 12 条，需要用户决定 3 项。原记录——违反分析：实例上对四个运行统一补跑（09:14:40–09:24:55，`nice -n 19`、3 个 CPU、`GRB_LICENSE_FILE` 取消；一体化 3 分 17 秒、不互联 1 分 44 秒、诊断 1 分 56 秒、NZE 3 分 12 秒，峰值 8.6–10.0 GB）；本机汇总脚本 `scripts_project/l23_c9_summary.py`（只读，不求解） |
 
 ## 监督记录（C7）
 
@@ -76,7 +76,7 @@
 
 ## 续行点
 
-**2026-10-19 09:35 SGT：C8 完成，实例许可文件已删除，实例不再需要（等待用户在 AutoDL 控制台关机）。** 下一步：本机运行 `l23_c9_summary.py` → 写完 `L23_RUN1_REPORT.md` 与 `L23_RUN1_EVIDENCE.json` → 提交、同步 PR #36 → 停止，等待审阅。不再连接实例。
+**L23 已完成（C0–C9），停止，等待审阅。** 实例许可文件已删除（09:34:34 SGT）；实例不再需要，**请用户到 AutoDL 控制台关机**。不再连接实例。
 
 原记录：**正式运行已于 2026-10-19 02:00:30 SGT 在实例 tmux 会话 `s4k` 中启动**，运行目录 `/root/autodl-tmp/s4k_cloud/runs/20261018T180030Z_5623/`。若本会话中断：先读本文件，再查该目录的 `STATUS.txt`（出现 `DONE` 即进入 C8）；只观察、不干预。连接方式：WSL `ssh` + `~/.ssh/id_ed25519`（`/home/jin/l23_ssh.sh`，主机与端口只经调用命令行的环境变量 `L23_HOST`、`L23_PORT` 传入，不写入任何文件）。若正式运行已启动而本会话中断：先读本文件，再查实例上 `runs/<时间戳>/STATUS.txt`。
 
