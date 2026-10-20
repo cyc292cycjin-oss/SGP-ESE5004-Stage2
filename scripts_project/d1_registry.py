@@ -21,7 +21,9 @@ FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production",
              "demand_shares", "biomass", "process_emissions", "cost_layer_v015",  # the last two are S2-0 (supplement 01)
              "industry_2050", "feedstock_territorial",  # S2 supplement 02 R1/R2 (scripts_project/s3_0_industry.py (ex s2b_industry.py), s2b_feedstock.py)
              "industry_sector_ratios", "corridors_apg",  # S3-0 (scripts_project/s3_0_industry_ratios.py, s3_0_corridors.py)
-             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline", "solver_r4", "industry_other_bucket", "lng_r3", "renewable_s4a", "fleet_s4a", "potentials_s4a", "s4b_0", "s4b_1", "s4b_2", "s4b_3", "s4b_4", "s4c_0", "s4c_1", "s4c_2", "s4c_3", "s4c_4", "s4d_0", "s4d_1", "s4d_2", "s4d_3", "s4d_6", "s4e_0", "s4e_1", "s4e_2", "s4f_0", "s4f_1", "s4f_2", "s4g_0", "s4g_1", "s4g_2", "s4h_0", "s4h_1", "s4h_2", "s4h_3", "s4j_0", "s4j_1", "s4j_2", "s4j_3", "s4k_0", "s4k_1", "s4l_0", "s4l_1", "s4l_2", "s4l_5", "s4l_6", "s4m_0", "s4o_0", "s4o_1"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py)
+             "gas_network", "imports", "ammonia_methanol", "shipping", "fuel_carbon", "import_price_decline", "solver_r4", "industry_other_bucket", "lng_r3", "renewable_s4a", "fleet_s4a", "potentials_s4a", "s4b_0", "s4b_1", "s4b_2", "s4b_3", "s4b_4", "s4c_0", "s4c_1", "s4c_2", "s4c_3", "s4c_4", "s4d_0", "s4d_1", "s4d_2", "s4d_3", "s4d_6", "s4e_0", "s4e_1", "s4e_2", "s4f_0", "s4f_1", "s4f_2", "s4g_0", "s4g_1", "s4g_2", "s4h_0", "s4h_1", "s4h_2", "s4h_3", "s4j_0", "s4j_1", "s4j_2", "s4j_3", "s4k_0", "s4k_1", "s4l_0", "s4l_1", "s4l_2", "s4l_5", "s4l_6", "s4m_0", "s4o_0", "s4o_1", "m080"]  # S3-1 .. S3-5, S3-7 (scripts_project/s3_*_data.py, s3_7_import_price_decline.py); m080 = M08-0 backfill (scripts_project/m080_data.py)
+# M08-0 (item 130): full replacement rows for existing param_ids, applied after the concatenation; the original fragments stay unchanged (history)
+CORRECTIONS = ["m080_corrections"]
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
@@ -137,7 +139,16 @@ def main():
     unit_rows(reg)
     # process_emission_rows(reg): the 55 D1 DATA_PENDING rows are superseded by scripts_project/s2_0_process_emissions.py (S2-0.3)
     frames.append(pd.DataFrame(reg.rows, columns=COLUMNS))
-    df = pd.concat(frames, ignore_index=True)[COLUMNS].sort_values("param_id").reset_index(drop=True)
+    df = pd.concat(frames, ignore_index=True)[COLUMNS]
+    corrected = []
+    for f in CORRECTIONS:
+        corr = pd.read_csv(REG_DIR / "fragments" / f"{f}.csv", dtype=str, keep_default_na=False)[COLUMNS]
+        missing = sorted(set(corr.param_id) - set(df.param_id))
+        if missing or corr.param_id.duplicated().any():
+            raise SystemExit(f"correction rows without a unique target in {f}: {missing[:10]}")
+        df = pd.concat([df[~df.param_id.isin(corr.param_id)], corr], ignore_index=True)
+        corrected += corr.param_id.tolist()
+    df = df.sort_values("param_id").reset_index(drop=True)
     problems = validate(df)
     if problems:
         raise SystemExit("registry validation failed: " + "; ".join(problems))
@@ -150,7 +161,8 @@ def main():
     write_csv(CLOSED_IN_S2B, REG_DIR / "DOWNLOAD_LIST_CLOSED_S2B.csv", list(CLOSED_IN_S2B[0].keys()))
     write_csv(CLOSED_IN_S3, REG_DIR / "DOWNLOAD_LIST_CLOSED_S3.csv", list(CLOSED_IN_S3[0].keys()))
     summary = dict(rows=int(len(df)), by_tier=df.tier.value_counts().to_dict(), by_status=df.status.value_counts().to_dict(),
-                   by_script=df.derivation_script.value_counts().to_dict(), data_pending=int(len(pending)))
+                   by_script=df.derivation_script.value_counts().to_dict(), data_pending=int(len(pending)),
+                   corrections=dict(files=CORRECTIONS, rows=len(corrected), param_ids=sorted(corrected)))
     outputs = {}
     for d in [REG_DIR, DEMAND_DIR, BIOMASS_DIR, COST_DIR, LNG_DIR]:
         for p in sorted(d.rglob("*")):
@@ -161,7 +173,7 @@ def main():
                     registry_sha256=sha256(out), summary=summary, outputs=outputs,
                     scripts={p: sha256(ROOT / p) for p in [f"scripts_project/d1_{s}.py" for s in ["common", "co2_storage", "fuel_prices", "lng_terminals", "fossil_production", "cost_layers", "demand_2050", "demand_shares", "biomass", "registry"]]
                              + ["scripts_project/s2_0_process_emissions.py", "scripts_project/s2_0_cost_layer_v015.py", "scripts_project/s2b_industry.py", "scripts_project/s2b_feedstock.py",
-                                "scripts_project/s3_0_industry_ratios.py", "scripts_project/s3_0_industry.py", "scripts_project/s3_0_corridors.py", "scripts_project/s3_1_gas_data.py", "scripts_project/s3_2_imports_data.py", "scripts_project/s3_3_ammonia_methanol_data.py", "scripts_project/s3_4_shipping_data.py", "scripts_project/s3_5_fuel_carbon_data.py", "scripts_project/s3_7_import_price_decline.py", "scripts_project/s3b_r4_solver_data.py"]},
+                                "scripts_project/s3_0_industry_ratios.py", "scripts_project/s3_0_industry.py", "scripts_project/s3_0_corridors.py", "scripts_project/s3_1_gas_data.py", "scripts_project/s3_2_imports_data.py", "scripts_project/s3_3_ammonia_methanol_data.py", "scripts_project/s3_4_shipping_data.py", "scripts_project/s3_5_fuel_carbon_data.py", "scripts_project/s3_7_import_price_decline.py", "scripts_project/s3b_r4_solver_data.py", "scripts_project/m080_data.py"]},
                     download_list=DOWNLOAD_LIST, closed_in_s2_0=CLOSED_IN_S2_0, closed_in_s2b=CLOSED_IN_S2B, closed_in_s3=CLOSED_IN_S3, solver_runs=0, network_builds=0)
     write_json(evidence, REG_DIR / "D1_EVIDENCE.json")
     print(out, summary)
