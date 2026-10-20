@@ -1,0 +1,61 @@
+temp dir /home/jin/s4q_tmp/s4o4_test_3inF (set TMPDIR to a disk with >= 35 GiB free: the preflight disk check runs there)
+PASS: A: kill line written at the cap
+PASS: A: receipt recognised as pre-solve
+PASS: A: run marked killed_pre_solve
+PASS: A: no solver process of the group survived (python test double)
+PASS: A: no grandchild (sleep 600) survived
+PASS: A: export folder holds the pre-solve receipt
+PASS: A: DONE after the kill and the results tarball exists
+PASS: A: whole script finished within 90 s (cap 20 s + grace + C1 + export)
+PASS: A: monitor has the cgroup columns and a limit of 90.00 GiB
+PASS: A: cgroup memory limit line in STATUS
+PASS: A: default profile formal_barrier (no --solver-profile given; decision 121)
+PASS: A: killed run still gets its C1 line (fake C1)
+PASS: A: killed pre-solve integrated with C1 passed (fake 111) -> no STOP
+PASS: B: explicit profile formal_barrier accepted and passed to the solver
+PASS: B: receipts recognised as post-solve
+PASS: B: all three runs optimal from the receipt
+PASS: B: no kill line
+PASS: B: C1 line per run, accepted, L23 reference for the first two
+PASS: B: batch reference built after the disconnected run, before NZE
+PASS: B: integrated and disconnected re-graded with the batch reference
+PASS: B: NZE C1 uses the batch reference directly (no re-grade needed)
+PASS: B: gap >= RUN_GAP_S before the 2nd and 3rd solve
+PASS: B: exported PRECISION.json / .md and EXPORTS.json listing them (re-graded copy in the export)
+PASS: B: S4M supplement exports still copied
+PASS: B: --costs-table points at networks/<tag>_costs_active_research.csv
+PASS: B: C1 runs without GRB_LICENSE_FILE in its environment and without the licence path in its arguments
+PASS: B: no solver process survived
+PASS: B: DONE and tarball
+PASS: C: lanes3 refused
+PASS: C: unknown profile refused
+PASS: C: dry run (decision 121 defaults) lists only disconnected and integrated_nze with profile formal_barrier and --time-limit 21600, exits 0
+PASS: C: dry run lists the C1 step for each run and the gap and batch reference
+PASS: C: production defaults in START line (wall cap 22500 s, TimeLimit 21600 s, gap 330 s, C1 on, no truncation)
+PASS: D: cgroup v2 quota read (12 cores, 90 GiB) and PREFLIGHT OK
+PASS: D: cgroup v1 quota read (8 cores, 40 GiB) and PREFLIGHT OK with the recommended-memory warning
+PASS: D: cgroup v2 unlimited falls back to the host values and says so
+PASS: D: cgroup v1 unlimited (quota -1, limit 2^63) falls back to the host values
+PASS: D: tools section finds GNU time and setsid
+PASS: E: both scripts pass bash -n
+PASS: E: scripts hold no licence keyword outside the scrub pattern lines
+PASS: F: real C1 reports the run without solution arrays as not computable
+PASS: F: integrated non-optimal + C1 failed -> STOP, no further solve
+PASS: F: still exported and packed (DONE)
+PASS: G: batch reference from the two fake ledgers = +1 bn per country, ASEAN = +2 bn (bunker + pool)
+PASS: G: integrated optimal + disconnected non-optimal: no STOP, the gap diagnostic runs, NZE runs
+PASS: G: real re-grade sets the batch reference on the earlier runs
+PASS: G: real C1 registers its outputs in EXPORTS.json
+PASS: H: default profile formal_barrier (decision 121) found, key names accepted, interior-point gate path, C1 scripts present and importable
+PASS: H: explicit profile A accepted
+PASS: H: unknown profile fails the preflight
+PASS: I: old ./repo (no marker) moved aside, not deleted; the new code unpacked from code_<COMMIT8> only; marker written
+PASS: I: second preflight keeps the matching ./repo
+PASS: K: default runs = disconnected + integrated_nze, no integrated solve, profile A
+PASS: K: batch reference from this batch's disconnected and the PILOT integrated (+3 bn per country), built before NZE
+PASS: K: pilot consistency recorded: same network SHA256 and same profile A parameters
+PASS: K: the pilot C1 (S4N format) re-graded on a COPY with the batch reference, grade_history kept, original unchanged
+PASS: K: NZE C1 directly with the batch reference; disconnected re-graded
+PASS: L: a pilot built on another network is reported (network_same=False); no pilot C1 given -> said so
+PASS: M: TRUNCATE=56 -> solve and C1 with --truncate 56 and the label SMOKE_TEST_ONLY; invalid value refused
+SUMMARY: pass=59 fail=0 (temp /home/jin/s4q_tmp/s4o4_test_3inF)
