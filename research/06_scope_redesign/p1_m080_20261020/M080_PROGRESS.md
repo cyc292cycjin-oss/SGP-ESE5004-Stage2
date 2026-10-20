@@ -12,8 +12,8 @@
 | M0 | 核对 SHA、开分支 / 工作树、建进度文件 | 完成 | — |
 | M1 | 补登缺口（§J 1–5） | 完成 | `4e1de488` |
 | M2 | 海上风机型与尾流核实 | 完成 | `995256ff` |
-| M3 | 状态与等级修正（§I 3、5、6、7） | 完成 | 本行 SHA 记于下一次提交 |
-| M4 | 状态值检查与注册表单元测试 | 未开始 | |
+| M3 | 状态与等级修正（§I 3、5、6、7） | 完成 | `880955b8` |
+| M4 | 状态值检查与注册表单元测试 | 完成 | 本行 SHA 记于下一次提交（只改本文件） |
 | M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 未开始 | |
 | M6 | 重跑数据清单 v2 与精简版 | 未开始 | |
 | M7 | 报告、台账、draft PR | 未开始 | |
@@ -39,6 +39,11 @@
 - 新增 2 行：`lng_gem_ggit_release_verified`（文件内写明 September 2025 release；S4R 下载为同一文件）、`cost_v0132_usage_built`（v0.13.2 使用情况汇总）。
 - 前后对比（`scripts/m080_registry_diff.py`，基准 `cefab870`）：1,962 → 2,052 行；新增 90、修改 32、删除 0；构建读取的数值无变化；状态 DATA_PENDING→REFERENCE_ONLY 4、REFERENCE_ONLY→REGISTERED 1、REGISTERED→REFERENCE_ONLY 9；等级 A→C 4。DATA_PENDING 51 → 47。测试 91 passed / 24 skipped。
 
+## M4 记录
+
+- 状态值的校验链：`scripts_project/d1_common.py` 第 52–53 行 `STATUSES`（固定 7 个值）→ `Registry.add` 遇未知状态报错 → `tests/research/test_d1_registry.py::test_registry_schema_and_tiers` 断言 `set(status) ⊆ STATUSES`。新增"历史 / 已被替代"状态必须改代码，因此不新增；凡属历史的行一律用 REFERENCE_ONLY，描述以"历史：已被 X 替代"开头（M3 已写入 6 行：`cost_layer_A_…`、`geothermal_existing_FOM`、`geothermal_existing_VOM`、`renewable_profile_variant`、`renewable_resource_classes`，以及 4 个廓线文件行注明"对照文件"）。
+- 注册表相关单元测试（27 个读注册表的测试文件，排除唯一的玩具求解用例）：91 passed / 24 skipped / 0 failed，与基线一致；24 个跳过均为"既有构建不在工作树"的设计跳过。
+
 ## 续行点
 
-M4：状态值检查（无文件改动，只记录）。
+M5：S4R 产出 v2（`REGISTRY_ROWS_PROPOSED_v2.csv`、`USER_DOWNLOAD_LIST` 修订）。
