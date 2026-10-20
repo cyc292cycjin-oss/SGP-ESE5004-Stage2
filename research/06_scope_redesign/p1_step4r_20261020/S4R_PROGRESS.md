@@ -31,3 +31,10 @@
 ## 续行点
 
 全部子步骤完成；待审阅。若需续行：先读 `S4R_PLAN.md` 摘要与 §11 两张清单，再按 `IMPLEMENTATION_PLAN.md` M08 顺序在新分支实施（需用户逐项决定）。
+
+## 收尾记录
+
+- 收尾提交 d0c299a9（方案、重评、核查表、实施计划、注册表行、来源、证据、进度）；draft PR #43：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/43（base `codex/s4p-country-audit-20261020`）。
+- 台账条目 `evidence/LEDGER_ENTRY_S4R.md` 追加到 `research/STAGE2_PROJECT_LEDGER.md`；PR 正文 `evidence/PR_BODY_S4R.md`。
+- `S4R_EVIDENCE.json` 的输出哈希在本记录与台账追加之前生成（`S4R_PROGRESS.md` 的哈希对应收尾前版本）。
+- 状态：全部交付完成，停止，等待审阅。
