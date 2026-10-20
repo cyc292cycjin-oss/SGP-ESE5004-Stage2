@@ -356,6 +356,30 @@ def p3_rows(reg: Registry):
             decision_ref="131; 126, 50", status="REFERENCE_ONLY")
 
 
+# ------------------------------------------------------------------------------------------------------------------------------
+# P4 (supplement 01 section 4): existing-fleet cost table version - record only, model unchanged
+# ------------------------------------------------------------------------------------------------------------------------------
+def p4_rows(reg: Registry, ev, fleet):
+    dl = json.loads((EVD / "M080S1_DOWNLOADS.json").read_text(encoding="utf-8"))
+    by = dl["technology_data_v0_15_0_by_year"]
+    eb = ev["electric_base_cost_layer"]
+    ccgt = fleet[(fleet.technology == "CCGT") & (fleet.existing_origin.str.startswith("electric_base"))]
+    eff = ", ".join(f"{y} {v['CCGT']['efficiency']}" for y, v in by.items())
+    reg.add("existing_fleet_cost_source_unification",
+            "统一性问题，M08 处理 (unification issue, handled in M08; M08-0 supplement 01 item 131, record only - model unchanged): the existing assets of the "
+            f"electric base (Assembly V1 model_cost_layer.json: {eb['by_prior_transformation'].get('TECHNOLOGY_DATA_V0_13_2_ALREADY_REBASED_EUR2020', 0)} of "
+            f"{eb['rows']} rows = author technology-data v0.13.2 costs, costs year 2030) keep that table for fixed O&M "
+            f"({eb['existing_annual_fixed_om_eur_in_network'] / 1e9:.2f} bn EUR/a objective constant) and efficiencies (inherited existing CCGT "
+            f"{ccgt.existing_eff_values.iloc[0] if len(ccgt) else 'n/a'}), while new builds use v0.15.0. Proposed direction (REGISTRY_ROWS_PROPOSED_v2 "
+            "existing_fleet_cost_rule): take the technology-data v0.15.0 values of the matching commissioning year (outputs costs_2020 ... costs_2050 are in "
+            f"the v0.15.0 tarball; CCGT efficiency by year: {eff}), so source and version are unified and older units keep their lower efficiency. "
+            "The inherited 0.57 equals v0.15.0 costs_2025 CCGT; its origin in the electric base is not traced (INFERENCE)",
+            "author_v0_13_2_costs_2030", "flag", "B", "m080_extract (assembly_v1 model_cost_layer.json, screening networks); technology-data v0.15.0 tarball outputs",
+            "evidence/M080_EXTRACT.json electric_base_cost_layer; M080_EXISTING_FLEET_COST_BASIS.csv; M080S1_DOWNLOADS.json technology_data_v0_15_0_by_year",
+            f"model_cost_layer.json:{eb['sha256']}|technology-data-v0.15.0:{dl['hicp']['technology_data_v0_15_0']['tarball_sha256']}|"
+            f"M080S1_DOWNLOADS.json:{sha256(EVD / 'M080S1_DOWNLOADS.json')}", decision_ref="131; 46, 50, 82", status="REFERENCE_ONLY")
+
+
 def corrections(ev):
     """Full replacement rows for existing param_ids (taken from the original fragments, so repeated runs give the same rows)."""
     frags = {}
@@ -450,6 +474,8 @@ def main():
         m3_rows(reg, ev, fleet)
     if "P3" in a.steps:
         p3_rows(reg)
+    if "P4" in a.steps:
+        p4_rows(reg, ev, fleet)
     reg.write(REG_DIR / "fragments" / "m080.csv")
     corr = [c for c in corrections(ev) if c["step"] in a.steps]
     write_csv(sorted((c["row"] for c in corr), key=lambda r: r["param_id"]), REG_DIR / "fragments" / "m080_corrections.csv", COLUMNS)

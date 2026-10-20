@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--repo", type=Path, required=True)
     ap.add_argument("--base", default="cefab870")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--name", default="M080_REGISTRY_DIFF", help="output file stem (supplement 01: M080S1_REGISTRY_DIFF*)")
     a = ap.parse_args()
     old_txt = subprocess.check_output(["git", "-C", str(a.repo), "show", f"{a.base}:{REG}"])
     old = pd.read_csv(io.BytesIO(old_txt), dtype=str, keep_default_na=False).set_index("param_id")
@@ -45,7 +46,7 @@ def main():
                              derivation_script=new.at[pid, "derivation_script"]))
     df = pd.DataFrame(rows)
     a.out.joinpath("evidence").mkdir(parents=True, exist_ok=True)
-    df.to_csv(a.out / "evidence/M080_REGISTRY_DIFF.csv", index=False)
+    df.to_csv(a.out / "evidence" / f"{a.name}.csv", index=False)
     mod = df[df.change == "modify"]
     value_changed = mod[mod.fields.str.contains("value")].param_id.tolist()
     build_read_value_changed = [p for p in value_changed if p.startswith(BUILD_READ_PREFIXES)]
@@ -56,7 +57,7 @@ def main():
                    status_changes=mod[mod.status_old != mod.status_new].groupby(["status_old", "status_new"]).size().rename("n").reset_index().to_dict(orient="records"),
                    tier_changes=mod[mod.tier_old != mod.tier_new][["param_id", "tier_old", "tier_new"]].to_dict(orient="records"),
                    by_tier_new=new.tier.value_counts().to_dict(), by_status_new=new.status.value_counts().to_dict())
-    (a.out / "evidence/M080_REGISTRY_DIFF.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    (a.out / "evidence" / f"{a.name}.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1, ensure_ascii=False))
     if build_read_value_changed:
         raise SystemExit(f"values read by the build changed: {build_read_value_changed}")

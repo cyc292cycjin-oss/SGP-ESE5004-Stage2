@@ -49,6 +49,26 @@ OFFSHORE_DESC = ("R2 (M08-0 v2: current state checked): offshore wind rules alig
                  "(registry renewable_offwind_profile_check_built); the 'NREL 5 MW, no wake' state applies to the author / fork profiles only")
 
 
+# M08-0 supplement 01 (item 131): one added rule row (section 4) and notes on rows whose inputs are now downloaded (section 3); values unchanged
+EXTRA_ROWS = [dict(
+    param_id="existing_fleet_cost_rule",
+    description=("M08-0 supplement 01 section 4: existing assets of the electric base (Assembly V1) priced and parameterised with technology-data v0.15.0 "
+                 "values of the matching commissioning year (outputs costs_2020, costs_2025, ... costs_2050 of the v0.15.0 release; e.g. CCGT efficiency "
+                 "0.56 / 0.57 / 0.60 for 2020 / 2025 / 2050), rebased to EUR2020 like the main layer - replaces the author technology-data v0.13.2 table "
+                 "(costs year 2030) so that source and version are unified while older units keep their lower efficiency; mapping of commissioning years "
+                 "before 2020 to costs_2020 to be fixed in M08"),
+    value="td_v0_15_0_by_commissioning_year", unit="rule", country="", tier="C",
+    source="PyPSA technology-data v0.15.0 outputs/costs_<year>.csv (tarball c4787c1d)", source_locator="M080_SUPPLEMENT_01.md section 4; registry existing_fleet_cost_source_unification",
+    decision_ref="131", status="PROPOSED", action="add")]
+EXTRA_SUPERSEDES = {"existing_fleet_cost_rule": ("existing_fleet_cost_source_unification",
+                                                 "electric-base existing-asset costs / efficiencies (Assembly V1 model_cost_layer.json) to be rebuilt in M08; model unchanged in M08-0")}
+NOTES = {
+    "industry_output_base_year": "M08-0 supplement 01: inputs now downloaded - cement base year = 2023 (USGS MYB 2023 T22, latest year in the source; SG / TL -> 0), crude steel = 2024 (worldsteel Steel Data Viewer; BN / KH / LA / TL -> 0); registry download_usgs_myb2023_cement_world_t22, download_worldsteel_crude_steel_2021_2025",
+    "demand_anchor_tl_rule": "M08-0 supplement 01: UN WPP 2024 primary file obtained (TL 2050 median 1,889,249.5; registry download_un_wpp2024_tl_population_2050)",
+    "cost_layer_deflator_hicp": "M08-0 supplement 01: technology-data v0.15.0 inflates with the EEA annual average rate of change (product 2021-2025 = 1.25733), not EU27 / EA20 indices; the Eurostat download (registry download_eurostat_hicp_aind_2016_2025, Sheet 6) has the same rates",
+}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--s4r", type=Path, required=True)
@@ -84,9 +104,22 @@ def main():
         r["registry_row_exists"] = "yes" if exists else "no"
         r["supersedes"] = sup
         r["m08_write_note"] = (HIST.format(pid=r["param_id"]) + ("; " + note if note else "")) if sup else note
+        if r["param_id"] in NOTES:
+            r["m08_write_note"] = (r["m08_write_note"] + "; " if r["m08_write_note"] else "") + NOTES[r["param_id"]]
+            ch.append("note added (M08-0 supplement 01)")
         r["v2_change"] = "; ".join(ch)
         out.append(r)
         log.append(dict(param_id=r["param_id"], action=r["action"], registry_row_exists=exists, supersedes=sup, changes=ch))
+    for x in EXTRA_ROWS:
+        r = dict(x)
+        exists = r["param_id"] in reg
+        sup, note = EXTRA_SUPERSEDES.get(r["param_id"], ("", ""))
+        r["registry_row_exists"] = "yes" if exists else "no"
+        r["supersedes"] = sup
+        r["m08_write_note"] = (HIST.format(pid=r["param_id"]) + ("; " + note if note else "")) if sup else note
+        r["v2_change"] = "row added by M08-0 supplement 01 (item 131)"
+        out.append(r)
+        log.append(dict(param_id=r["param_id"], action=r["action"], registry_row_exists=exists, supersedes=sup, changes=[r["v2_change"]]))
     dst = a.out / "REGISTRY_ROWS_PROPOSED_v2.csv"
     with open(dst, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=NEW_COLS, lineterminator="\n")

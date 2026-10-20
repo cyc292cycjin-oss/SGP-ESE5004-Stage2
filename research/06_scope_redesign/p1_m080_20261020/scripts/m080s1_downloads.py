@@ -132,6 +132,18 @@ def hicp():
                                              input_rates_2021_2025=td_rates, factor_2020_2025=td_factor))
 
 
+def td_by_year():
+    """Supplement 01 section 4 (record only): conventional-plant parameters of technology-data v0.15.0 by output year (tarball outputs/costs_<year>.csv)."""
+    techs = ["CCGT", "OCGT", "coal", "lignite", "oil", "nuclear", "biomass"]
+    out = {}
+    with tarfile.open(TD_TAR) as t:
+        for y in (2020, 2025, 2030, 2035, 2040, 2045, 2050):
+            df = pd.read_csv(io.BytesIO(t.extractfile(f"technology-data-0.15.0/outputs/costs_{y}.csv").read()))
+            sub = df[df.technology.isin(techs) & df.parameter.isin(["efficiency", "FOM", "lifetime"])]
+            out[str(y)] = sub.pivot_table(index="technology", columns="parameter", values="value", aggfunc="first").round(4).to_dict(orient="index")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
@@ -140,7 +152,7 @@ def main():
                files={k: dict(path=str(p), name=p.name, bytes=p.stat().st_size, sha256=sha(p)) for k, p in FILES.items()},
                not_registered={k: dict(sha256=sha(DL / k), note=v) for k, v in NOT_USED.items() if (DL / k).exists()},
                not_registered_elsewhere="mis-202606-cemen.xlsx (USGS Mineral Industry Surveys, US monthly) is in the user's Downloads folder, not in work/: wrong / not useful, not used",
-               cement=cement(), steel=steel(), population=population(), hicp=hicp())
+               cement=cement(), steel=steel(), population=population(), hicp=hicp(), technology_data_v0_15_0_by_year=td_by_year())
     (a.out / "evidence").mkdir(parents=True, exist_ok=True)
     (a.out / "evidence/M080S1_DOWNLOADS.json").write_text(json.dumps(out, indent=1, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     h = out["hicp"]
