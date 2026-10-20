@@ -727,3 +727,16 @@
 - **R7 补充：** VN 封存上限 236 → 106 Mt/a 后约 130 Mt/a 改走区域内船运（到 MY，+14–15 EUR/t，两情景各 +1.9–2.0 bn/a）；不互联情景 VN 船运升至约 225 Mt/a（约 2/3 封存量经海运）；若船运算互联则不互联 +5.5 bn/a。作面谈议题 (b) 依据。
 - **清单：** 面谈 9 项；用户待办 2 项（下载清单、注册表行 42 行）。影响合并区间放宽为 B6 ≈ 25–50 bn，VN 份额 55–70 %。
 - **交付：** 更新 `S4R_PLAN.md`、`DEMAND_ANCHOR_COMPARISON.*`、`POTENTIAL_COMPARISON.*`、`IMPLEMENTATION_PLAN.md`、`USER_DOWNLOAD_LIST.md`、`REGISTRY_ROWS_PROPOSED.csv`、`UNIFICATION_CHECKLIST.*`、`EXTERNAL_SOURCES_S4R.md`、`S4R_EVIDENCE.json`、`S4R_PROGRESS.md`；新建 `GATES_V6_NOTES.md`；提交见进度文件"收尾记录（补充 01）"。
+
+### M08-0（第 130 项：注册表补登与一致性修正）— 2026-10-20
+
+- **范围：** `M080_CLAUDE_CODE_INSTRUCTION.md`（SHA256 7e72998d…144e，核对一致）；分支 `codex/m08-0-registry-backfill-20261020`（自 S4R 头 cefab870，独立工作树），draft PR 叠在 #43 上。只改注册表与 `work/` 下清单 / 方案副本：未求解、未连云、未调用 Gurobi，未改配置、构建 / 求解脚本、网络与既有结果；构建读取的注册表数值无一改变（前后逐行对比）。原则：注册表登记筛查运行实际使用的值（S4O 云包 365×24h 未求解网络，构建 126110ff；一体化与不互联的风光 / LNG 上限相同）。
+- **补登（§J 1–5）：** 注册表 1,962 → 2,052 行（新增 90、修改 32、删除 0；SHA256 46e234d7 → 6950a15d）。风光分国候选上限 55 行（含屋顶光伏；筛查网络 `p_nom_max`，继承自作者论文网络）与土地类别 / 密度 / Copernicus LC100、GEBCO 2025、EEZ v11 文件 SHA256；构建实际读取的 calibrated_modern 廓线文件；屋顶光伏方法（作者代码：0.1 kW/m² × 建筑屋顶可用面积，Microsoft 建筑足迹，未复算）；Astar 形状来源；地热新建投资 3,596.6 EUR2020/kW 与 FOM / VOM（C，±30 %）；决定 72 下 LNG 分国上限 VN 278.67、ID 422.33、KH 14.67、PH 510.00、MY 243.33、SG 366.67、TH 633.33 TWh/a（原 2.5 × 存量行保留、加注）。
+- **海上风（VERIFIED）：** 筛查廓线海上风与 pypsa_eur 重建逐值相同（NREL 2020ATB 5.5 MW、尾流 0.8855）；注册表正确，S4R "NREL 5 MW、无尾流"的现状描述有误。M08-7 删去机型 / 尾流两项，只剩海上面积重算（60 m、漂浮、航道、DC 3 → 2 MW/km²），所需栅格均在本机（INFERENCE）。
+- **Astar（VERIFIED）：** 作者论文网络基础负荷 = GEGIS（GlobalEnergyGIS）2030 年国别曲线（PyPSA-Earth 数据包 `Asia.nc`，SSP2-RCP2.6，ERA5 2013），9 国形状与 GEGIS 成比例（相关 ≥ 0.99999），LA / TL 借用 KH / ID；GEGIS 开发者 / 论文本地未载明，未补填。
+- **v0.13.2：** 新建组件全部 v0.15.0（+ AEO8 SMR / 地热）；SMR 代理与存量寿命取 v0.13.2 但与 v0.15.0 同值；电力底座存量机组的成本与效率仍来自作者 v0.13.2 表（存量固定运维 108.1 亿 EUR/a，存量 CCGT 效率 0.57 对新建 0.60）——两版本混用，交 M08，未改模型。
+- **状态 / 等级：** natura → REGISTERED（Harvard Dataverse `wdpa_reclass.tif` V1.3，MD5 一致，CC0）；`cost_layer_A_*` → REFERENCE_ONLY（历史）；KH / TL 封存（含 OGCI 分项行）A → C，数值不变；航运栅格、存量地热、廓线变体 / 分级 / 文件等 12 行过时状态改正；DATA_PENDING 51 → 47。状态值不新增（`d1_common.STATUSES` 写在代码中、测试断言），历史行 = REFERENCE_ONLY + "历史：已被 X 替代"。GEM LNG 文件内写明 September 2025 release，注册表标注正确。
+- **注册表工具：** `scripts_project/m080_data.py` → `fragments/m080.csv`（新行）+ `fragments/m080_corrections.csv`（整行替换，原片段不动）；`d1_registry.py` 增加修正层；原被忽略、从未提交的 `fragments/s4c_0.csv` 强制入库（重拼与原注册表逐字节一致）。注册表相关测试 91 passed / 24 skipped（与基线相同）。开始时一次 `tests/research` 全量运行在约 25 s 后停止，其中玩具网络 HiGHS 用例很可能已执行（如实记录）。
+- **S4R 新版本与数据清单：** `REGISTRY_ROWS_PROPOSED_v2.csv`（7 行改 add、错位行对齐、9 行注明被替代旧行）、`USER_DOWNLOAD_LIST_v2.md`（删 A1）；数据清单 v2 与附件 B 精简版（主算输入 1,263 行，A 10.85 / B 61.28 / C 27.87 %；精简版 664 格全部可在 v2 详表中原文找到）。S4R 条目台账写"54 格标出"，按 S4R 规则复算为 64 格（MEET-D），台账旧条目不改。
+- **待审阅确认：** 屋顶光伏等级 B（方法有记录、输入不可本地复算）是否降 C；KH / TL 分项行沿用国家行区间；`d1_registry.py` 修正层；`s4c_0.csv` 入库。
+- **交付：** `research/06_scope_redesign/p1_m080_20261020/`（`M080_REPORT.md`、`REGISTRY_ROWS_PROPOSED_v2.csv`、`USER_DOWNLOAD_LIST_v2.md`、`M080_PROGRESS.md`、`scripts/`、`evidence/`）与 `research/06_scope_redesign/p1_meet_20261020/`（v1 原样、v2、精简版）；镜像 `work/p1_m080_20261020/`、`work/p1_meet_20261020/`；提交 4e1de488 → 995256ff → 880955b8 → dca14c83 → fc964ea2 → c98bf5d9 → 收尾提交。
