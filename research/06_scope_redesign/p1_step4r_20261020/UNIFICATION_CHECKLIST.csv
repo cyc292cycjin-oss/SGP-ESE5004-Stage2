@@ -1,0 +1,210 @@
+input_class,country,source,method,currency_price_year,data_grade,same_basis_as_other_countries,exception_and_reason,value_before,value_after_proposed,unit
+需求：终端能耗总量,BN,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,2.2,0.7,Mtoe
+需求：基础电力负荷,BN,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,3.2,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,BN,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,2.2,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,BN,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,0.6,0.4,Mt
+需求：粗钢产量 2050,BN,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,0.0,0.0,Mt
+潜力：光伏（地面）,BN,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,1.4,≥ 2（仅密度）；上限对照 ESMAP L1×5.1 = 3,GW
+潜力：屋顶光伏,BN,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,1.5,不变（标 C 级）,GW
+潜力：陆上风,BN,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,10.5,不变,GW
+潜力：海上风,BN,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,9.5,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,BN,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro nan / geo nan,不变,GW
+潜力：生物质,BN,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,0.1,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,BN,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,18.579,18.579,Gt
+LNG 接收站,BN,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,0.0,内生（项目口径对照 0.0）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,BN,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,BN,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,BN,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0468,per unit
+跨境候选通道,BN,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,BN,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,BN,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,ID,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,405.3,286.0,Mtoe
+需求：基础电力负荷,ID,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,301.1,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,ID,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,1801.0,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,ID,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,312.6,148.0,Mt
+需求：粗钢产量 2050,ID,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,28.3,13.4,Mt
+潜力：光伏（地面）,ID,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,859.0,≥ 952（仅密度）；上限对照 ESMAP L1×5.1 = 3016,GW
+潜力：屋顶光伏,ID,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,356.1,不变（标 C 级）,GW
+潜力：陆上风,ID,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,3950.4,不变,GW
+潜力：海上风,ID,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,2785.7,重算；对照 ESMAP 277,GW
+潜力：水电 / 地热,ID,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 6.222781592 / geo 22.421499998999998,不变,GW
+潜力：生物质,ID,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,976.7,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,ID,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,51.275,51.275,Gt
+LNG 接收站,ID,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,31.7,内生（项目口径对照 14.1）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,ID,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,ID,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,ID,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0707,per unit
+跨境候选通道,ID,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,ID,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,ID,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,KH,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,17.1,15.7,Mtoe
+需求：基础电力负荷,KH,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,17.4,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,KH,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,12.8,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,KH,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,41.7,14.1,Mt
+需求：粗钢产量 2050,KH,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,0.0,0.0,Mt
+潜力：光伏（地面）,KH,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,359.4,≥ 398（仅密度）；上限对照 ESMAP L1×5.1 = 695,GW
+潜力：屋顶光伏,KH,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,16.8,不变（标 C 级）,GW
+潜力：陆上风,KH,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,319.9,不变,GW
+潜力：海上风,KH,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,47.4,重算；对照 ESMAP 0,GW
+潜力：水电 / 地热,KH,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro nan / geo nan,不变,GW
+潜力：生物质,KH,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,49.3,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,KH,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,conservative rule: low case 0.09 Gt (structural traps) of the IJGGC 2014 preliminary assessment; high case 45 Gt as sensitivity,0.085,0.09,Gt
+LNG 接收站,KH,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,1.1,内生（项目口径对照 1.1）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,KH,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,KH,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,KH,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0905,per unit
+跨境候选通道,KH,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,KH,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,KH,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,LA,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,5.4,5.6,Mtoe
+需求：基础电力负荷,LA,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,4.9,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,LA,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,7.0,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,LA,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,17.7,9.7,Mt
+需求：粗钢产量 2050,LA,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,0.0,0.0,Mt
+潜力：光伏（地面）,LA,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,119.3,≥ 132（仅密度）；上限对照 ESMAP L1×5.1 = 429,GW
+潜力：屋顶光伏,LA,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,6.6,不变（标 C 级）,GW
+潜力：陆上风,LA,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,529.4,不变,GW
+潜力：海上风,LA,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,0.0,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,LA,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 6.526233943 / geo nan,不变,GW
+潜力：生物质,LA,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,26.4,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,LA,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,"ERIA: unknown (no analysis) -> 0, registered as UNASSESSED (not SOURCE_ZERO)",0.0,0.0,Gt
+LNG 接收站,LA,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,0.0,内生（项目口径对照 0.0）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,LA,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,LA,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,LA,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0764,per unit
+跨境候选通道,LA,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,LA,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,LA,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,MM,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,26.3,13.4,Mtoe
+需求：基础电力负荷,MM,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,14.5,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,MM,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,80.7,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,MM,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,12.9,8.7,Mt
+需求：粗钢产量 2050,MM,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,0.7,0.5,Mt
+潜力：光伏（地面）,MM,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,825.6,≥ 915（仅密度）；上限对照 ESMAP L1×5.1 = 1725,GW
+潜力：屋顶光伏,MM,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,28.3,不变（标 C 级）,GW
+潜力：陆上风,MM,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,1621.2,不变,GW
+潜力：海上风,MM,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,267.3,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,MM,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 3.8777764319999997 / geo nan,不变,GW
+潜力：生物质,MM,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,104.0,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,MM,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,"ERIA: unknown (no analysis) -> 0, registered as UNASSESSED (not SOURCE_ZERO)",0.0,0.0,Gt
+LNG 接收站,MM,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,0.0,内生（项目口径对照 0.0）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,MM,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,MM,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,MM,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.1102,per unit
+跨境候选通道,MM,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,MM,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,MM,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,MY,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,161.9,68.1,Mtoe
+需求：基础电力负荷,MY,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,139.7,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,MY,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,425.9,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,MY,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,56.6,32.5,Mt
+需求：粗钢产量 2050,MY,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,20.0,11.5,Mt
+潜力：光伏（地面）,MY,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,77.9,≥ 86（仅密度）；上限对照 ESMAP L1×5.1 = 428,GW
+潜力：屋顶光伏,MY,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,83.1,不变（标 C 级）,GW
+潜力：陆上风,MY,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,742.1,不变,GW
+潜力：海上风,MY,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,374.3,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,MY,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 2.371 / geo 0.229,不变,GW
+潜力：生物质,MY,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,247.0,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,MY,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,128.773,128.773,Gt
+LNG 接收站,MY,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,18.2,内生（项目口径对照 7.3）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,MY,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,MY,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,MY,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0441,per unit
+跨境候选通道,MY,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,MY,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,MY,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,PH,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,75.6,54.7,Mtoe
+需求：基础电力负荷,PH,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,103.7,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,PH,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,102.2,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,PH,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,107.0,62.8,Mt
+需求：粗钢产量 2050,PH,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,6.2,3.7,Mt
+潜力：光伏（地面）,PH,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,298.9,≥ 331（仅密度）；上限对照 ESMAP L1×5.1 = 696,GW
+潜力：屋顶光伏,PH,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,74.1,不变（标 C 级）,GW
+潜力：陆上风,PH,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,549.8,不变,GW
+潜力：海上风,PH,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,279.7,重算；对照 ESMAP 181,GW
+潜力：水电 / 地热,PH,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 8.814074219 / geo 3.124,不变,GW
+潜力：生物质,PH,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,141.4,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,PH,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,22.3,0.067,Gt
+LNG 接收站,PH,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,38.2,内生（项目口径对照 24.2）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,PH,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,PH,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,PH,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0454,per unit
+跨境候选通道,PH,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,PH,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,PH,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,SG,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,34.9,12.7,Mtoe
+需求：基础电力负荷,SG,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,41.2,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,SG,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,100.8,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,SG,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,0.0,0.0,Mt
+需求：粗钢产量 2050,SG,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,1.6,1.1,Mt
+潜力：光伏（地面）,SG,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,0.4,≥ 0（仅密度）；上限对照 ESMAP L1×5.1 = 2,GW
+潜力：屋顶光伏,SG,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,5.3,不变（标 C 级）,GW
+潜力：陆上风,SG,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,0.0,不变,GW
+潜力：海上风,SG,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,1.3,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,SG,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro nan / geo nan,不变,GW
+潜力：生物质,SG,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,0.0,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,SG,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,ERIA: no storage potential -> 0,0.0,0.0,Gt
+LNG 接收站,SG,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,27.5,内生（项目口径对照 16.0）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,SG,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,SG,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,SG,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0289,per unit
+跨境候选通道,SG,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,SG,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,SG,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,TH,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,270.9,135.5,Mtoe
+需求：基础电力负荷,TH,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,208.6,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,TH,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,472.7,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,TH,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,160.3,67.9,Mt
+需求：粗钢产量 2050,TH,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,14.4,6.8,Mt
+潜力：光伏（地面）,TH,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,1108.5,≥ 1229（仅密度）；上限对照 ESMAP L1×5.1 = 1962,GW
+潜力：屋顶光伏,TH,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,165.9,不变（标 C 级）,GW
+潜力：陆上风,TH,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,579.8,不变,GW
+潜力：海上风,TH,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,324.5,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,TH,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro nan / geo nan,不变,GW
+潜力：生物质,TH,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,319.4,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,TH,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,16.024,16.024,Gt
+LNG 接收站,TH,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,47.5,内生（项目口径对照 29.8）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,TH,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,TH,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,TH,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0525,per unit
+跨境候选通道,TH,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,TH,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,TH,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,TL,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,TL：AEO8 不覆盖 → KH/LA/MM 均值 × UN WPP 人口（规则登记）,0.4,1.0,Mtoe
+需求：基础电力负荷,TL,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,TL 同上,0.9,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,TL,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,0.0,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,TL,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,,0.0,0.0,Mt
+需求：粗钢产量 2050,TL,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,,0.0,0.0,Mt
+潜力：光伏（地面）,TL,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,9.6,≥ 11（仅密度）；上限对照 ESMAP L1×5.1 = 48,GW
+潜力：屋顶光伏,TL,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,0.6,不变（标 C 级）,GW
+潜力：陆上风,TL,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,36.8,不变,GW
+潜力：海上风,TL,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,1.9,重算；ESMAP 无行（< 7 m/s）,GW
+潜力：水电 / 地热,TL,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro nan / geo nan,不变,GW
+潜力：生物质,TL,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,0.6,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,TL,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,DATA_PENDING: no national assessment; Bayu-Undan 10 Mtpa project capacity (Santos) could be registered as a project-based annual cap (sensitivity); main = 0 until a total capacity source is found,0.25,0.0,Gt
+LNG 接收站,TL,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,0.0,内生（项目口径对照 0.0）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,TL,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,TL,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,TL,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,TL 无 Damodaran 行 → DATA_PENDING,0.07,DATA_PENDING,per unit
+跨境候选通道,TL,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,TL,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,TL,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
+需求：终端能耗总量,VN,现：UNSD 2019 × 桥接 × AEO8 BAS 增长 × ATS 相对因子（D1 / S3B R1 / R3）；拟：AEO8 ATS 人均（C.8）× 人口（D.1）,ratio 法 → 人均锚定,能量（无货币）,B,是（TL 例外）,,219.7,153.6,Mtoe
+需求：基础电力负荷,VN,现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础）,table_sectors → ATS 锚,—,B,是,,197.2,由 ATS 电力总量 − 工业路线电力反推（M08 计算）,TWh
+需求：工业能耗与路线,VN,现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4）,路线固定 → 有用热内生,—,C,是,,963.7,待 M08 重算（工业电力预计降至 ATS 工业电力份额水平）,TWh（工业电力）
+需求：水泥产量 2050,VN,现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限,R1.3 规则,—,C,是（VN 加国家上限）,VN：Decision 1266 ≤ 150 Mt,581.0,107.0,Mt
+需求：粗钢产量 2050,VN,现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt）,R1.3 规则,—,B/C,是（VN 加国家规划）,VN：Decision 261 65–70 Mt,80.3,70.0,Mt
+潜力：光伏（地面）,VN,现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照,统一参数重算（M08）,—,C,是,,411.3,≥ 456（仅密度）；上限对照 ESMAP L1×5.1 = 936,GW
+潜力：屋顶光伏,VN,现：作者电力底座 solar rooftop 候选（来源 S4A）；拟：不变，登记口径（PyPSA-Earth 无屋顶潜力，作者自定）,沿用,—,C,是,,122.3,不变（标 C 级）,GW
+潜力：陆上风,VN,现：PyPSA-Earth 布局 3 MW/km²，Copernicus 类（含林地），alpha 校准（PH/TH/VN 实测，其余均值）；拟：参数不变（与 PyPSA-Eur 同为 3 MW/km²），对照 Zhong 高/中,沿用,—,C,是（alpha 分国实测 vs 均值）,PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记）,576.7,不变,GW
+潜力：海上风,VN,"现：PyPSA-Earth 水深 ≤ 50 m、离岸 30 km 分 AC/DC、无航道排除、无漂浮、NREL 5 MW；拟：PyPSA-Eur 规则（60 m、漂浮 60–1,000 m、ship_threshold 400、2020ATB 5.5 MW、0.8855 尾流）+ 海上 alpha 校准（F9）",统一参数重算（M08）,—,C,是,ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低）,635.6,重算；对照 ESMAP 599,GW
+潜力：水电 / 地热,VN,S4B-2 国家潜力 − 存量（官方潜力 / GEM 管线）,沿用（第 78 项）,—,B/C,否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8）,逐国官方来源，无统一方法；登记为例外,hydro 6.088430210999999 / geo 0.045,不变,GW
+潜力：生物质,VN,FAOSTAT 2019–23 × IRENA RPR 收集系数（D1）；对照 IRENA 2022,沿用；溢出规则改 R4,原料价 USD2024 → EUR2020 × 0.73606,B/C,是,,125.8,不变（溢出改有用热）,TWh
+CO₂ 封存潜力,VN,现：ERIA 2024（ID/MY/BN/TH）、IEA 2021（VN/PH）、OGCI（KH/TL）、零（LA/MM/SG）；拟：ERIA 2024 P50 六国 + KH 文献低值 + TL/LA/MM 零（UNASSESSED）,统一 ERIA P50,—,A/B/C,是（拟）,,11.8,5.303,Gt
+LNG 接收站,VN,现：GEM 2025-08（existing ×2.5 + 拟建）；拟：GEM GGIT 2025-09，取消 2.5× 上限、按有出处成本内生扩建,统一来源，上限规则改,"码头成本 7,018（无价格年）→ 8,020 EUR2020/MW/a（Ulvestad 2012，2011 年价假定）",B/C,是,,20.9,内生（项目口径对照 29.9）,Mtpa
+区域外进口价（氢 / 氨 / 甲醇 / FT / 原油 / 煤）,VN,Neumann 2025 × 1.2（EUR2020）；WEO 2025 USD2024 × 0.73606,沿用,EUR2020,B,是,,105.75 / 116.78 / 145.16 / 150.11 / 35.32 / 8.86,不变（再气化加价 +1.26 EUR/MWh）,EUR/MWh
+技术成本,VN,technology-data v0.15.0 EUR2025 × 0.8332；SMR / 地热 AEO8 × 0.8772；拟：HICP 回算，核电同源,统一平减指数,EUR2020（残余 +4.8 % 待消除）,B/C,是（11 国同表）,,见 COST_CURRENCY_FIXES,见 R6,EUR
+WACC / 贴现率,VN,现：统一 0.07 实际；拟（敏感性）：IEA 观测站 / Damodaran + IMF 通胀,主算统一；敏感性分国,实际利率,B/C,是（主算）,,0.07,0.0455,per unit
+跨境候选通道,VN,CORRIDORS_S4H2（APG + 邻接补齐 + S4H-2）；每条 +20 GW（第 96 项，F3 已定）,沿用,线路成本 technology-data（EUR2025 → 2020）,B,是,,见 S4P 方面 2,不变,—
+核电 / SMR,VN,允许：大型核电 10 国（SG 除外）、SMR 11 国，无上限（F8 已定）；成本改同源（R6.3）,沿用允许条件；成本统一,EUR2020（同源比值）,C,否（SG 无大型核电）,SG：大型核电不允许（决定 38，面积 / 政策）,"SMR 8,421 / PWR 9,003 EUR/kW","PWR 9,003 / SMR 9,603 EUR/kW（td × AEO8 比值）",EUR/kW
+存量机组,VN,GEM GIPT 2026-09 + 冻结底座（S4A / S4B-1）；FOM 作者表（混合年份）,沿用；FOM 平减到 2020,EUR（2020 / 2023 / 2010-15 混合）→ EUR2020,B,是,,10.81 bn/a 合计,按年份平减（两情景相同）,EUR/a
