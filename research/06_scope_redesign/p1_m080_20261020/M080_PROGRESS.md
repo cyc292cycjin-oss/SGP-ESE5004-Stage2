@@ -28,8 +28,11 @@
 | P2 | GEGIS 原始文献核实；LA / TL 借用曲线登记为 C 级例外 | 完成 | `e18b2bc8` |
 | P3 | 登记 4 个新下载文件；核实 technology-data 的 HICP 口径 | 完成 | `4e1007bc` |
 | P4 | 存量机组成本表版本登记；`REGISTRY_ROWS_PROPOSED_v2.csv` 加一行规则 | 完成 | `1be5ce02` |
-| P5 | 清单 v3 与新精简版（旧精简版改名 `_v2`） | 完成 | 本行 SHA 记于下一次提交 |
-| P6 | 报告“补充 01”一节、台账注明、更新 PR #44 正文 | 未开始 | |
+| P5 | 清单 v3 与新精简版（旧精简版改名 `_v2`） | 完成 | `8e1a2a29` |
+| P6 | 报告“补充 01”一节、台账注明、更新 PR #44 正文 | 完成 | 本次收尾提交（SHA 见 PR #44 最新提交） |
+
+- 补充 01 结果摘要：注册表 2,052 → 2,057 行（`6d1b2c34…0fa4`，提交 `1be5ce02`）；相对 `880955b8` 新增 5、修改 14，数值无改动；测试每步 91 passed / 24 skipped。GEGIS 文献核实一致（Mattsson et al. 2021，doi:10.1016/j.esr.2020.100606）；HICP：technology-data v0.15.0 用 EEA 年变化率累乘 1.25733（非 EU27 / 欧元区）。清单 v3：`DATA_INVENTORY_v3.xlsx`（`6bc7347d…`）、`.md`（`e2aef870…`）；精简版 `DATA_INVENTORY_BRIEF.xlsx`（`ff83b641…`）、`.md`（`d92d5447…`）；旧精简版 `DATA_INVENTORY_BRIEF_v2.*`（`f05113f1…`、`5726550c…`）。一次只读外部查询：Crossref 元数据（DOI 核对）。
+- 续行点：补充 01 全部完成；停止，等待审阅。
 
 ## M0–M1 记录
 

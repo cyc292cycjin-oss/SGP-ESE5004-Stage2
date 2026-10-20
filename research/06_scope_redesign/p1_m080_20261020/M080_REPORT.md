@@ -143,3 +143,72 @@
 | 仓库 | `scripts_project/m080_data.py`、`scripts_project/d1_registry.py`、`research_inputs/registry_v5/{DATA_REGISTRY.csv, D1_EVIDENCE.json, DATA_PENDING_LIST.csv, fragments/m080.csv, fragments/m080_corrections.csv, fragments/s4c_0.csv}`；镜像 `research/06_scope_redesign/p1_m080_20261020/`、`research/06_scope_redesign/p1_meet_20261020/` |
 
 注册表：`cefab870` 1,962 行（`46e234d7…2e50`）→ `880955b8` 2,052 行（`6950a15d…8dd2`）。提交顺序：M1 `4e1de488` → M2 `995256ff` → M3 `880955b8` → M4 `dca14c83` → M5 `fc964ea2` → M6 `c98bf5d9` → M7 收尾（见进度文件）。
+
+## 10. 补充 01（第 131 项：审阅修正，2026-10-21）
+
+- 指令 `M080_SUPPLEMENT_01.md` SHA256 `a505908b…73b7` 与 `M080_SUPPLEMENT_01_SHA256.txt` 一致。同一分支、同一 PR #44；边界同 M08-0：只改注册表与 `work/` 下清单，未求解、未连云、未调用 Gurobi，未改配置、构建 / 求解脚本、网络与既有结果。为核对文献，对 Crossref 公开元数据接口做了一次只读查询（`api.crossref.org/works/10.1016/j.esr.2020.100606`），此外无外部访问。
+- 注册表 2,052 → 2,057 行（SHA256 `6950a15d` → `6d1b2c34…0fa4`，提交 `1be5ce02`）；相对 `880955b8` 新增 5 行、修改 14 行、删除 0 行，`value` 无改动，构建读取的数值无一改变（`evidence/M080S1_REGISTRY_DIFF.*`；相对 `cefab870` 的总计见 `M080S1_REGISTRY_DIFF_TOTAL.*`：新增 95、修改 32）。注册表相关测试每步后均为 91 passed / 24 skipped。
+
+### 10.1 新增与修改的行
+
+| 节 | param_id | 改动 |
+|---|---|---|
+| 1 屋顶光伏 | `renewable_cap_built_solar_rooftop_<CC>`（11）、`renewable_rooftop_method_built` | B → C；分国行敏感性 0.5×–1.5×；描述记录对照比值（不改数值）：ID 对 AEO8 194–655 GWp 为 0.54–1.84；MY 对 AEO8 34 GWp 为 2.45、对 MyRER 42 GW 为 1.98；VN 对 AEO8 370 GWp 为 0.33、对 PDP8 屋顶 48.2 GW 为 2.54；其余 8 国注册表无对照数 |
+| 2 GEGIS | `demand_astar_shape_source` | 来源、描述、定位补原始文献与出处（见 10.2） |
+| 2 例外 | `demand_astar_shape_substitution`（C） | 写明为例外规则：LA / TL 的本国 GEGIS 行删去，复制 KH / ID 逐时曲线、归一到均值 1，再乘 `load_options.scale`（LA 1,456.62、TL 47.35 MW）；`build_demand_profiles.py` 239–253（`5bacad70`） |
+| 3 下载文件 | `download_usgs_myb2023_cement_world_t22`、`download_worldsteel_crude_steel_2021_2025`、`download_un_wpp2024_tl_population_2050`、`download_eurostat_hicp_aind_2016_2025` | 新增，REFERENCE_ONLY，"M08 实施时使用"（见 10.4） |
+| 4 存量成本 | `existing_fleet_cost_source_unification` | 新增，REFERENCE_ONLY："统一性问题，M08 处理"；`REGISTRY_ROWS_PROPOSED_v2.csv` 增 `existing_fleet_cost_rule`（add，43 行） |
+
+### 10.2 GEGIS 核实结论（VERIFIED）
+
+- 出处：作者链的 PyPSA-Earth 文档——论文版代码 `5bacad70` 的 `doc/data_workflow.rst` 第 103 行、当前分支 `ce327bfa` 的 `doc/user-guide/data-workflow.md` 第 89 行与 `doc/tutorials/use-cases/3-demand-data.md` 第 53 行——说明需求曲线由 synde 从开源 Global-Energy GIS（GEGIS，`github.com/niclasmattsson/GlobalEnergyGIS`）提取，并把 GEGIS 链接到 DOI `10.1016/j.esr.2020.100606`。
+- 该 DOI 的 Crossref 元数据：Niclas Mattsson、Vilhelm Verendel、Fredrik Hedenus、Lina Reichenberg；*Energy Strategy Reviews* 第 33 卷，文章号 100606，2021 年 1 月；题名以 "An autopilot for energy models – Automatic generation of renewable supply curves, hourly capacity factors and hourly …" 开头（查询工具截断了全名，未凭记忆补全）。**与审阅端推测一致**（注意 DOI 字符串含 2020，卷年为 2021）。已登记，证据 `evidence/M080S1_GEGIS_CHECK.json`。
+
+### 10.3 HICP 核实结论（VERIFIED；与审阅端假设不同）
+
+- technology-data v0.15.0 源码（本机源码包 `v0.15.0.tar.gz`，SHA256 `c4787c1d…`，与注册表登记一致）`scripts/_helpers.py` 第 220 行：欧元取 **欧洲经济区（EEA）** 行，读取的是"年均变化率"（自带输入 `inputs/prc_hicp_aind__custom_20097956_spreadsheet.xlsx`，2026-02-13 提取），升通胀系数 = ∏(1 + r)，r 为 2021–2025 年 2.9、9.2、6.4、2.6、2.5 % → **1.25733（+25.7 %）**；配置 `eur_year: 2025`。v0.13.2 取的才是 EU27 行。
+- 用户下载文件中：EU27 与 EEA 在 2021–2025 年的年变化率完全相同，累乘都是 1.25733；EU27 指数比 132.86 / 105.76 = 1.25624（与 1.25733 差 0.09 %，来自指数与一位小数变化率的取整）；EEA 指数比 1.25602；EA20 指数比 1.2257、变化率累乘 1.22558。
+- 结论：审阅端"EU27 的 1.256 与 +25.7 % 一致"在数值上接近，但代码口径是 EEA 年变化率；S4R 拟增行 `cost_layer_deflator_hicp` 写的"欧元区"（EA）口径会差约 2.6 %（1.25733 / 1.22558）。M08-1 应按 EEA（= 此期间的 EU27）年变化率累乘回算；已写入下载行描述与拟增行注释。
+
+### 10.4 已登记的 4 个文件（REFERENCE_ONLY，M08 实施时使用）
+
+| 文件 | SHA256 | 内容（核对结果） | 用途 |
+|---|---|---|---|
+| `R1_demand/myb1-2023-cemen-ERT.xlsx` | `607779ae…` | USGS Minerals Yearbook 2023 水泥年表提前发布（2025-06-05 发布）；T22 世界水泥产量 2019–2023，千吨，e 估计、r 修订；2023：VN 106,952、ID 66,924、TH 42,740 e、PH 30,000 e、MY 23,191、KH 8,700 e、MM 8,500 e、LA 7,100 e、BN 324 e；SG、TL 不在表中 | 水泥基年 2023，11 国同一来源（SG、TL 按 0） |
+| `R1_demand/exp-2026-10-20_15_02_22.xlsx` | `87a72363…` | worldsteel Steel Data Viewer 导出，粗钢 2021–2025；文件未写单位，按 VN 2024 21,974 = WSIF 2025 的 22.0 Mt 推断为千吨（INFERENCE）；2024：VN 21,974、ID 18,642、MY 9,014、TH 4,918、PH 1,666、MM 500、SG 259；BN、KH、LA、TL 不在表中 | 钢铁基年 2024，11 国同一来源（四国按 0）；与 S4R 过渡数（ID 18.0 e、MY 8.8 e、PH 1.9 e、SG 0.766、MM 0.350 Mt）不同，已记录 |
+| `R1_demand/unpopulation_dataportal_20261020224306.csv` | `da788eea…` | UN WPP 2024（UN Population Division），Timor-Leste，中位方案，2050 年总人口 1,889,249.5 | TL 锚定规则人口，替代二手引述 |
+| `R6_costs/prc_hicp_aind$defaultview_spreadsheet.xlsx` | `e26bdad8…` | Eurostat prc_hicp_aind（2026-10-20 提取，数据 2026-02-06 更新）；Sheet 1 全项 HICP 年均指数 2016–2025，Sheet 6 年均变化率 | M08-1 回算（见 10.3） |
+
+- 未登记：`ESTAT_PRC_HICP_AIND$DEFAULTVIEW_1.0.xml.gz`（只有数据结构，无效，未使用）；`mis-202606-cemen.xlsx`（美国水泥月报，误下，未使用；该文件在用户 Downloads 目录，不在 work/ 下）；另有早前截图 `exp-2026-10-20_14_37_36.png` 不在补充指令的清单中，未登记。
+
+### 10.5 存量机组成本表版本（只登记，不改模型）
+
+- 注册表 `existing_fleet_cost_source_unification`：电力底座存量组件的成本与效率仍来自作者 technology-data v0.13.2 表（成本年 2030；存量固定运维 108.1 亿 EUR/a；继承的存量 CCGT 效率 0.57），新建为 v0.15.0——统一性问题，M08 处理。
+- 拟定方向（`REGISTRY_ROWS_PROPOSED_v2.csv` 新增 `existing_fleet_cost_rule`，C）：改用 technology-data v0.15.0 对应投运年份的数值。v0.15.0 源码包中有 `outputs/costs_2020 … costs_2050`；CCGT 效率 2020 / 2025 / 2030 / 2050 = 0.56 / 0.57 / 0.58 / 0.60（OCGT 0.40 / 0.405 / 0.41 / 0.43），可保留老机组效率较低的事实；2020 年以前投运的机组如何对应，留 M08 定。
+- 顺带：继承的存量 CCGT 效率 0.57 与 v0.15.0 `costs_2025` 相同，但它在电力底座中的确切出处仍未追到（本地 v0.13.2 副本只有 2030 / 2040 / 2050 年表），记为 INFERENCE。
+- 同时在拟增行中加注（只加注，不改数值）：`industry_output_base_year`（水泥 2023 USGS、钢 2024 worldsteel）、`demand_anchor_tl_rule`（UN WPP 文件已获取）、`cost_layer_deflator_hicp`（EEA 年变化率）。
+
+### 10.6 清单 v3 与精简版
+
+- `work/p1_meet_20261020/scripts/meet_data_inventory_v3.py` → `DATA_INVENTORY_v3.xlsx / .md`、新的 `DATA_INVENTORY_BRIEF.xlsx / .md`（旧精简版改名为 `DATA_INVENTORY_BRIEF_v2.*`；v1、v2 不动）。
+- 表 4：第 17、21、22、23 行改为"已获取（文件名），M08 实施"；水泥基年写 USGS 2023、钢铁基年写 worldsteel 2024；"过渡值"表述（含列名）全部删去。表 1：第 9 行屋顶光伏等级随注册表为 C（主算行 12：C 12）；第 2 行写明 GEGIS 文献与 LA / TL 例外；第 20 行修正方向补"存量机组改用 v0.15.0 对应年份"，回算口径由"欧元区"更正为 EEA 年变化率；第 4 行写明新基年来源。§I 增第 12 项（HICP 口径），§J 第 2、3 项更新，§K 为 v1 → v2 → v3 对比。精简版 664 格全部能在 v3 详表中原文找到（`evidence/M080S1_BRIEF_TRACE.json`）。
+
+### 10.7 统计的变化（实算，v2 → v3）
+
+| 项目 | v2 | v3 |
+|---|---|---|
+| 注册表行数 | 2,052 | 2,057 |
+| 等级 A / B / C | 263 / 1,301 / 488 | 267 / 1,290 / 500 |
+| REFERENCE_ONLY | 550 | 555 |
+| 主算输入行数 | 1,263 | 1,263 |
+| 主算输入 A / B / C | 10.85 / 61.28 / 27.87 % | 10.85 / 60.33 / 28.82 % |
+| 11 国同口径（核查表；表 1 现行 / 修正后） | 47.4 %；72.0 % / 68.0 % | 不变 |
+
+- 主算 C 级占比上升 0.95 个百分点，全部来自屋顶光伏 12 行由 B 改 C；新增的 5 行均为 REFERENCE_ONLY，不计入主算。
+
+### 10.8 第 7、8 节事项的更新
+
+- 第 7 节第 1 项（屋顶光伏等级）：已按补充 01 改为 C。第 3 项（`d1_registry.py` 修正层）：用户 2026-10-20 23:38 认可，已在台账注明。
+- 第 8 节"GEGIS 开发者 / 出版物未写明"：已解决（10.2）。"存量 CCGT 0.57 出处"：部分解决（与 v0.15.0 costs_2025 相同，INFERENCE）。其余未解决项不变。
+
+补充 01 提交：P1 `1a139be9` → P2 `e18b2bc8` → P3 `4e1007bc` → P4 `1be5ce02` → P5 `8e1a2a29` → P6 收尾（见进度文件）。
