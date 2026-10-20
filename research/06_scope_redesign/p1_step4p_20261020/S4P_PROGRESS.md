@@ -20,4 +20,4 @@
 
 ## 续行点
 
-**S4P 与补充 01 全部完成，停下等待审阅。** 分支 `codex/s4p-country-audit-20261020`，draft PR 叠在 #40（见报告 §11）。所有修正均为 PROPOSED，未实施；任何重跑需另行授权。
+**S4P 与补充 01 全部完成，停下等待审阅。** 分支 `codex/s4p-country-audit-20261020`（提交 373e6ef4 → f3d6de90 → 4d652ae7 → 收尾提交），draft PR #42 叠在 #40：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/42 。所有修正均为 PROPOSED，未实施；任何重跑需另行授权。矩阵判定计数：104 格，38 待核实，0 错误。
