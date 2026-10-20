@@ -66,7 +66,7 @@
 - 分支 `codex/m08-0-registry-backfill-20261020` 已推送；draft PR https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/44（base `codex/s4r-unification-plan-20261020`，即叠在 #43 上）；未合并、未 force-push。
 - 推送前保密扫描（本分支相对 `cefab870` 的全部新增行）：无主机、端口、密码、密钥或许可证内容。
 - 审阅 ZIP：`D:\ResearchWorkspaces\ASEAN\outputs\M080_REVIEW_20261020.zip`（`workspace_tools/New-WorkspaceDelivery.ps1` 打包；包内 `MANIFEST_SHA256_CRC32.csv` 逐成员列出 SHA256 与 CRC32）；ZIP 不入库。
-- 工作树 `/home/jin/wt_m080_20261020` 中另有 3 个被忽略、未提交的复制文件（`research_inputs/finance_v5/` 两个 CSV，仅供测试读取）；主检出未改动。
+- 工作树 `/home/jin/wt_m080_20261020` 中另有 2 个被忽略、未提交的复制文件（`research_inputs/finance_v5/` 两个 CSV，仅供测试读取）；主检出未改动。
 
 ## 续行点
 
