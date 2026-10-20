@@ -33,7 +33,7 @@ def main():
         if p.exists():
             inputs[f"p1_step4p_20261020/{name}"] = dict(bytes=p.stat().st_size, sha256=sha(p))
     outputs = {}
-    for name in ["S4R_PLAN.md", "GATES_V6.md", "GATES_V6_SHA256.txt", "GATES_RETRO_COMPARISON.csv", "GATES_RETRO_COMPARISON.md", "IMPLEMENTATION_PLAN.md", "UNIFICATION_CHECKLIST.csv", "UNIFICATION_CHECKLIST.md",
+    for name in ["S4R_PLAN.md", "GATES_V6.md", "GATES_V6_SHA256.txt", "GATES_V6_NOTES.md", "S4R_SUPPLEMENT_01.md", "GATES_RETRO_COMPARISON.csv", "GATES_RETRO_COMPARISON.md", "IMPLEMENTATION_PLAN.md", "UNIFICATION_CHECKLIST.csv", "UNIFICATION_CHECKLIST.md",
                  "DEMAND_ANCHOR_COMPARISON.csv", "POTENTIAL_COMPARISON.csv", "LNG_CAPACITY_COMPARISON.csv", "CO2_STORAGE_UNIFIED.csv", "COST_CURRENCY_FIXES.csv", "COUNTRY_WACC_SENSITIVITY_TABLE.csv",
                  "REGISTRY_ROWS_PROPOSED.csv", "USER_DOWNLOAD_LIST.md", "EXTERNAL_SOURCES_S4R.md", "S4R_PROGRESS.md"]:
         p = OUT / name

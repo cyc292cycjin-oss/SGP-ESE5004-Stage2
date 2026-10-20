@@ -1,6 +1,6 @@
 # R9 统一性核查表（每类输入 × 11 国；口径不同或有例外的格子见末表）
 
-- 共 209 格；标出的口径差 / 例外 54 格。
+- 共 209 格；标出的口径差 / 例外 64 格。
 
 ## 需求：终端能耗总量
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
@@ -20,77 +20,77 @@
 ## 需求：基础电力负荷
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
 |---|---|---|---|---|---|---|---|---|
-| BN | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 3.2 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| ID | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 301.1 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| KH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 17.4 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| LA | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 4.9 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| MM | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 14.5 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| MY | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 139.7 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| PH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 103.7 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| SG | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 41.2 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| TH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 208.6 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| TL | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 | TL 同上 | 0.9 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
-| VN | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟：AEO8 ATS 人均电力 × 人口（含工业电力，扣除路线电力后为基础） | — | B | 是 |  | 197.2 | 由 ATS 电力总量 − 工业路线电力反推（M08 计算） | TWh |
+| BN | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 3.2 | 3.4 | TWh |
+| ID | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 301.1 | 310.6 | TWh |
+| KH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 17.4 | 12.8 | TWh |
+| LA | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 4.9 | 9.0 | TWh |
+| MM | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 14.5 | 18.2 | TWh |
+| MY | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 139.7 | 117.0 | TWh |
+| PH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 103.7 | 104.0 | TWh |
+| SG | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 41.2 | 34.3 | TWh |
+| TH | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 208.6 | 170.0 | TWh |
+| TL | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 | TL 同上 | 0.9 | 2.3 | TWh |
+| VN | 现：Astar 形状 × 需求表非工业电力（第 104 项）；拟（补充 01）：AEO8 ATS 国家电力总量（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；工业电力内生、不锚定 | — | B | 是 |  | 197.2 | 184.2 | TWh |
 
 ## 需求：工业能耗与路线
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
 |---|---|---|---|---|---|---|---|---|
-| BN | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 2.2 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| ID | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 1801.0 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| KH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 12.8 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| LA | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 7.0 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| MM | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 80.7 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| MY | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 425.9 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| PH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 102.2 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| SG | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 100.8 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| TH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 472.7 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| TL | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 0.0 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
-| VN | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 963.7 | 待 M08 重算（工业电力预计降至 ATS 工业电力份额水平） | TWh（工业电力） |
+| BN | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 2.2 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| ID | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 1801.0 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| KH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 12.8 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| LA | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 7.0 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| MM | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 80.7 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| MY | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 425.9 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| PH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 102.2 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| SG | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 100.8 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| TH | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 472.7 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| TL | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 0.0 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
+| VN | 现：UNSD 2019 工业 × 乘数，pypsa_eur_2050 路线（JRC-IDEES 比率）；拟：物理产量按 R1.3 规则，其余能耗按 ATS 增长，载体由有用热分温度带内生选择（R1.4 / R4） | — | C | 是 |  | 963.7 | 内生，不锚定（补充 01 §2 (b)；待 M08 重算） | TWh（工业电力） |
 
 ## 需求：水泥产量 2050
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
 |---|---|---|---|---|---|---|---|---|
-| BN | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 0.6 | 0.4 | Mt |
-| ID | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 312.6 | 148.0 | Mt |
-| KH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 41.7 | 14.1 | Mt |
-| LA | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 17.7 | 9.7 | Mt |
-| MM | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 12.9 | 8.7 | Mt |
-| MY | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 56.6 | 32.5 | Mt |
-| PH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 107.0 | 62.8 | Mt |
-| SG | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 0.0 | 0.0 | Mt |
-| TH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 160.3 | 67.9 | Mt |
-| TL | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） |  | 0.0 | 0.0 | Mt |
-| VN | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟：USGS 2019 × √总GDP增长，人均 1.0 t 上限，国家规划上限 | — | C | 是（VN 加国家上限） | VN：Decision 1266 ≤ 150 Mt | 581.0 | 107.0 | Mt |
+| BN | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 0.6 | 0.4 | Mt |
+| ID | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS MCS 2025 | 312.6 | 107.5 | Mt |
+| KH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 41.7 | 13.6 | Mt |
+| LA | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 17.7 | 9.4 | Mt |
+| MM | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 12.9 | 8.5 | Mt |
+| MY | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 56.6 | 37.4 | Mt |
+| PH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 107.0 | 60.0 | Mt |
+| SG | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） |  | 0.0 | 0.0 | Mt |
+| TH | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） | 160.3 | 65.8 | Mt |
+| TL | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） |  | 0.0 | 0.0 | Mt |
+| VN | 现：EDGAR 2.A.1 熟料 / 0.52 / 0.656 × 乘数；拟（补充 01）：基年 2024（USGS）× 增长^ε（AEO8 总 GDP，ε = 0.5 假设 C 级，敏感性 0.3–0.8），取 min(人均 1.0 t × 人口, 国家规划上限)；规划只作上限 | — | C | 是（规划仅作上限；非 USGS 基年为过渡值） | VN：Decision 1266 ≤ 150 Mt 仅作上限（不绑定）；基年 USGS MCS 2025 | 581.0 | 107.0 | Mt |
 
 ## 需求：粗钢产量 2050
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
 |---|---|---|---|---|---|---|---|---|
-| BN | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 0.0 | 0.0 | Mt |
-| ID | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 28.3 | 13.4 | Mt |
-| KH | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 0.0 | 0.0 | Mt |
-| LA | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 0.0 | 0.0 | Mt |
-| MM | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 0.7 | 0.5 | Mt |
-| MY | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 20.0 | 11.5 | Mt |
-| PH | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 6.2 | 3.7 | Mt |
-| SG | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 1.6 | 1.1 | Mt |
-| TH | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 14.4 | 6.8 | Mt |
-| TL | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） |  | 0.0 | 0.0 | Mt |
-| VN | 现：worldsteel 2019 × 乘数；拟：worldsteel 2019 × √总GDP增长，人均 0.6 t 上限，国家规划（VN 70 Mt） | — | B/C | 是（VN 加国家规划） | VN：Decision 261 65–70 Mt | 80.3 | 70.0 | Mt |
+| BN | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 0.0 | 0.0 | Mt |
+| ID | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 28.3 | 29.8 | Mt |
+| KH | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 0.0 | 0.0 | Mt |
+| LA | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 0.0 | 0.0 | Mt |
+| MM | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） | 2019 值持平，worldsteel 2024 DATA_PENDING | 0.7 | 0.5 | Mt |
+| MY | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 20.0 | 14.3 | Mt |
+| PH | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 6.2 | 3.5 | Mt |
+| SG | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） | 2019 值持平，worldsteel 2024 DATA_PENDING | 1.6 | 1.0 | Mt |
+| TH | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 14.4 | 7.5 | Mt |
+| TL | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） |  | 0.0 | 0.0 | Mt |
+| VN | 现：worldsteel 2019 × 乘数；拟（补充 01）：基年 2024（worldsteel）× 增长^ε，取 min(人均 0.6 t × 人口, 国家规划上限)；规划只作上限 | — | B/C | 是（规划仅作上限） | VN：Decision 261 65–70 Mt 仅作上限（不绑定，作敏感性） | 80.3 | 40.7 | Mt |
 
 ## 潜力：光伏（地面）
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
 |---|---|---|---|---|---|---|---|---|
-| BN | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 1.4 | ≥ 2（仅密度）；上限对照 ESMAP L1×5.1 = 3 | GW |
-| ID | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 859.0 | ≥ 952（仅密度）；上限对照 ESMAP L1×5.1 = 3016 | GW |
-| KH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 359.4 | ≥ 398（仅密度）；上限对照 ESMAP L1×5.1 = 695 | GW |
-| LA | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 119.3 | ≥ 132（仅密度）；上限对照 ESMAP L1×5.1 = 429 | GW |
-| MM | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 825.6 | ≥ 915（仅密度）；上限对照 ESMAP L1×5.1 = 1725 | GW |
-| MY | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 77.9 | ≥ 86（仅密度）；上限对照 ESMAP L1×5.1 = 428 | GW |
-| PH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 298.9 | ≥ 331（仅密度）；上限对照 ESMAP L1×5.1 = 696 | GW |
-| SG | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 0.4 | ≥ 0（仅密度）；上限对照 ESMAP L1×5.1 = 2 | GW |
-| TH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 1108.5 | ≥ 1229（仅密度）；上限对照 ESMAP L1×5.1 = 1962 | GW |
-| TL | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 9.6 | ≥ 11（仅密度）；上限对照 ESMAP L1×5.1 = 48 | GW |
-| VN | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟：5.1 MW/km²（PyPSA-Eur）+ 加入开阔林 121–126，ESMAP L1 × 5.1 作上限对照 | — | C | 是 |  | 411.3 | ≥ 456（仅密度）；上限对照 ESMAP L1×5.1 = 936 | GW |
+| BN | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 1.4 | 2（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 3 | GW |
+| ID | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 859.0 | 952（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 3016 | GW |
+| KH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 359.4 | 398（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 695 | GW |
+| LA | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 119.3 | 132（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 429 | GW |
+| MM | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 825.6 | 915（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 1725 | GW |
+| MY | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 77.9 | 86（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 428 | GW |
+| PH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 298.9 | 331（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 696 | GW |
+| SG | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 0.4 | 0（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 2 | GW |
+| TH | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 1108.5 | 1229（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 1962 | GW |
+| TL | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 9.6 | 11（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 48 | GW |
+| VN | 现：PyPSA-Earth 布局（Copernicus 类 20/30/40/50/60/90/100，natura，4.6 MW/km²）；拟（主算，补充 01）：仅密度 5.1 MW/km²（PyPSA-Eur），土地类别与保护区排除不变（与 PyPSA-Eur 同型）；开阔林 121–126 作上界敏感性（触发规则见实施计划 §2.1） | — | C | 是 |  | 411.3 | 456（主算 × 1.109）；敏感性上界 ESMAP L1×5.1 = 936 | GW |
 
 ## 潜力：屋顶光伏
 | country | source | currency_price_year | data_grade | same_basis_as_other_countries | exception_and_reason | value_before | value_after_proposed | unit |
@@ -290,42 +290,52 @@
 ## 口径不同 / 有例外的格子
 | input_class | country | same_basis_as_other_countries | exception_and_reason |
 |---|---|---|---|
+| 需求：水泥产量 2050 | BN | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | BN | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | BN | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | BN | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | 核电 / SMR | BN | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | ID | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS MCS 2025 |
 | 潜力：陆上风 | ID | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | ID | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | ID | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | 核电 / SMR | ID | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | KH | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | KH | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | KH | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | KH | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | CO₂ 封存潜力 | KH | 是（拟） | conservative rule: low case 0.09 Gt (structural traps) of the IJGGC 2014 preliminary assessment; high case 45 Gt as sensitivity |
 | 核电 / SMR | KH | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | LA | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | LA | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | LA | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | LA | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | CO₂ 封存潜力 | LA | 是（拟） | ERIA: unknown (no analysis) -> 0, registered as UNASSESSED (not SOURCE_ZERO) |
 | 核电 / SMR | LA | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | MM | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
+| 需求：粗钢产量 2050 | MM | 是（规划仅作上限） | 2019 值持平，worldsteel 2024 DATA_PENDING |
 | 潜力：陆上风 | MM | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | MM | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | MM | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | CO₂ 封存潜力 | MM | 是（拟） | ERIA: unknown (no analysis) -> 0, registered as UNASSESSED (not SOURCE_ZERO) |
 | 核电 / SMR | MM | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | MY | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | MY | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | MY | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | MY | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | 核电 / SMR | MY | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | PH | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | PH | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | PH | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | PH | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | 核电 / SMR | PH | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：粗钢产量 2050 | SG | 是（规划仅作上限） | 2019 值持平，worldsteel 2024 DATA_PENDING |
 | 潜力：陆上风 | SG | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | SG | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | SG | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
 | CO₂ 封存潜力 | SG | 是（拟） | ERIA: no storage potential -> 0 |
 | 核电 / SMR | SG | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
+| 需求：水泥产量 2050 | TH | 是（规划仅作上限；非 USGS 基年为过渡值） | 基年 USGS 年鉴 DATA_PENDING，过渡值（国家统计 / EDGAR 2019 持平） |
 | 潜力：陆上风 | TH | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | TH | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | TH | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |
@@ -338,8 +348,8 @@
 | CO₂ 封存潜力 | TL | 是（拟） | DATA_PENDING: no national assessment; Bayu-Undan 10 Mtpa project capacity (Santos) could be registered as a project-based annual cap (sensitivity); main = 0 until a total capacity source is found |
 | WACC / 贴现率 | TL | 是（主算） | TL 无 Damodaran 行 → DATA_PENDING |
 | 核电 / SMR | TL | 否（SG 无大型核电） | SG：大型核电不允许（决定 38，面积 / 政策） |
-| 需求：水泥产量 2050 | VN | 是（VN 加国家上限） | VN：Decision 1266 ≤ 150 Mt |
-| 需求：粗钢产量 2050 | VN | 是（VN 加国家规划） | VN：Decision 261 65–70 Mt |
+| 需求：水泥产量 2050 | VN | 是（规划仅作上限；非 USGS 基年为过渡值） | VN：Decision 1266 ≤ 150 Mt 仅作上限（不绑定）；基年 USGS MCS 2025 |
+| 需求：粗钢产量 2050 | VN | 是（规划仅作上限） | VN：Decision 261 65–70 Mt 仅作上限（不绑定，作敏感性） |
 | 潜力：陆上风 | VN | 是（alpha 分国实测 vs 均值） | PH / TH / VN 用实测 alpha，其余 C 级均值（口径差，登记） |
 | 潜力：海上风 | VN | 是 | ESMAP 无行的 MY/TH/BN/MM/TL/SG：候选保留但预期不被选（CF 低） |
 | 潜力：水电 / 地热 | VN | 否（来源逐国不同：EBTKE、AEO8、ADB、MyRER、DOE、PDP8） | 逐国官方来源，无统一方法；登记为例外 |

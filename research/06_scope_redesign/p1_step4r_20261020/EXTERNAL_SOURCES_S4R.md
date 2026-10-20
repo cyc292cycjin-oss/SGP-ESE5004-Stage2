@@ -33,3 +33,22 @@
 | 29 | S4P / S4Q / S4O / S4N 报告与证据（本仓库） | 全部 | `work/p1_step4p_20261020/`、`work/p1_step4q_20261020/` 等 |
 
 DATA_PENDING 汇总：AEO8 D.15 价格年；7,018 EUR/MW/a 码头成本来源；30 EUR/t 封存价格年；TL 人口原文件；TL 封存潜力；KH 封存可复核来源（仅 2014 预评估）；海上风电观测容量因数（F9）；IEA / IGU / OIES 东南亚再气化费；Copernicus / WDPA / 航运栅格（需下载后重算）。
+
+## 补充 01（第 129 项）新增来源（2026-10-20）
+
+| # | 来源 | 用于 | 定位 |
+|---|---|---|---|
+| 30 | Bleischwitz, R. et al. (2018) Extrapolation or saturation – Revisiting growth patterns, development stages and decoupling, Global Environmental Change 48: 86–96 | R1.3 饱和证据（钢、水泥人均消费在约 US$12,000 GDP/人起饱和；起飞到饱和约 30 年以上） | https://discovery.ucl.ac.uk/id/eprint/10037759/ （摘要；全文未读） |
+| 31 | Pauliuk, S., Wang, T., Müller, D.B. (2013) Steel all over the world: Estimating in-use stocks of iron for 200 countries, Resources, Conservation and Recycling 71 | R1.3 钢存量饱和 13 ± 2 t/人 | 摘要（metabolismofcities 索引） |
+| 32 | van Ruijven, B.J. et al. (2016) Long-term model-based projections of energy use and CO2 emissions from the global steel and cement industries, RCR 112: 15–36 | R1.3 需求先快速增长后趋平（SSP2） | https://ideas.repec.org/a/eee/recore/v112y2016icp15-36.html （摘要；人均曲线参数未取得） |
+| 33 | Global Cement magazine, Defining the trend: cement consumption vs GDP | R1.3 水泥饱和水平（GDP/人 > US$25,000 时 ≤ 600 kg/人） | https://globalcement.com/magazine/articles/858-defining-the-trend-cement-consumption-vs-gdp （行业刊物，二手） |
+| 34 | worldsteel, World Steel in Figures 2012 / 2013（人均表观钢消费排名：韩国 1,114–1,157 kg、台湾 784–926 kg、日本 506 kg）经 AIST / SteelOrbis 转述 | R1.3 钢人均饱和假设的参照 | 二手引述 |
+| 35 | 中国水泥人均消费峰值约 1.7–1.8 t（2014）、2020 年 CN 1,620 / VN 911 / US 314 kg/人 | R1.3 水泥人均饱和假设的参照 | Statista、IndexBox 2021、biztimes（二手） |
+| 36 | World Bank WDI API：ER.LND.PTLD.ZS（陆地保护区占比，2025）、AG.LND.FRST.ZS（森林占比，2024），11 国 | R2 比值分解（保护区上界、林地量级） | https://api.worldbank.org/v2/country/.../indicator/ER.LND.PTLD.ZS?format=json （2026-10-20 读取，lastupdated 2026-10-08） |
+| 37 | USGS Mineral Commodity Summaries 2025, Cement, p.55 World Production and Capacity（2023 / 2024e：Indonesia 67,000 / 65,000；Vietnam 110,000 / 110,000 kt）；USGS Minerals Yearbook Cement 章世界表 DATA_PENDING（pubs.usgs.gov 四种章节 URL 均 404） | R1.3 水泥基年 2024 | https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-cement.pdf （本会话以 pypdf 解析） |
+| 38 | worldsteel, World Steel in Figures 2025, p.5 Top steel-producing countries（2024：VN 22.0、ID 18.0e、MY 8.8e、TH 4.9、PH 1.9e Mt）；Wikipedia 转引 worldsteel 年表作交叉核对（ID 18.6、MY 9.0、PH 1.8；差异登记） | R1.3 粗钢基年 2024 | 经 S4P `EXT_DEMAND_BENCHMARKS.md` §5a；https://en.wikipedia.org/wiki/List_of_countries_by_steel_production （二手） |
+| 39 | ACE AEO8 (2024) §3.1.3 p.61（居民电力 ATS 2022 29.0 → 2050 33.2 Mtoe）；Table C.2 ATS 电力 172.7 Mtoe（p.184）；Table C.3 ATS 部门 TFEC（p.182） | R1 (a) 基础负荷锚与部门增长代理 | 本机文本副本 |
+| 40 | pypsa-asean 作者数据缓存清单：`data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_...tif`（1.71 GB）、`data/natura/natura.tiff`（Harvard Dataverse doi:10.7910/DVN/XIV9BL，2020）、`data/gebco/GEBCO_2025_sub_ice.nc`、`data/eez/eez_v11.gpkg` | R2 下载清单分组（主算 / 敏感性） | `/home/jin/research/SGP_ESE5004_Stage2/pypsa-asean/data/`（2026-10-20 列目录） |
+| 41 | 注册表 `co2_ship_chain_fixed_cost`（11.42 EUR2020/t）、`co2_ship_chain_per_km_cost`（0.00295 EUR2020/(t km)）、`co2_extra_asean_storage_cost_unified`（54.70 EUR2020/t）；`research_inputs/co2_v5/CO2_SHIP_ROUTES_S4D2.csv`（VN → MY 海路 1,006–1,207 km） | R7 补充：VN 封存上限下调后的船运估算 | 库内注册表与路线表 |
+
+DATA_PENDING 新增：USGS 年鉴水泥世界表（TH / MY / PH / KH / LA / MM / BN 基年 2024）；worldsteel 2024 粗钢（SG、MM）；产量—GDP 弹性的点估计（文献只给饱和证据，登记为假设）；水泥 / 钢人均饱和水平的一手时间序列（只取得二手峰值）。

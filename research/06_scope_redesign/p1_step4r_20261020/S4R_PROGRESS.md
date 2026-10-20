@@ -38,3 +38,19 @@
 - 台账条目 `evidence/LEDGER_ENTRY_S4R.md` 追加到 `research/STAGE2_PROJECT_LEDGER.md`；PR 正文 `evidence/PR_BODY_S4R.md`。
 - `S4R_EVIDENCE.json` 的输出哈希在本记录与台账追加之前生成（`S4R_PROGRESS.md` 的哈希对应收尾前版本）。
 - 状态：全部交付完成，停止，等待审阅。
+
+## 补充 01（第 129 项，2026-10-20）
+
+- `S4R_SUPPLEMENT_01.md` SHA256 `c533c960…4984`，与 `S4R_SUPPLEMENT_01_SHA256.txt` 一致（核对后执行）。仍只读：未求解、未连云、未调用 Gurobi、未改生产代码与注册表。
+
+| 节 | 内容 | 状态 | 产出 |
+|---|---|---|---|
+| §1 | R1.3 产量规则 11 国同一（min(增长, 人均, 规划上限)；规划只作上限）；基年 2024（worldsteel WSIF 2025；USGS MCS 2025 ID / VN，其余 USGS 年鉴 DATA_PENDING 过渡值）；弹性 0.5 与饱和 1.0 / 0.6 登记为假设（C 级，敏感性 0.3–0.8、0.6–1.2 / 0.4–0.8） | 完成 | `scripts/s4r_r1_demand_anchor.py`、`DEMAND_ANCHOR_COMPARISON.csv/.md` §4、`S4R_PLAN.md` §2.3；VN 水泥 107.0、钢 40.7（原 70 撤销） |
+| §2 | 只锚活动量：基础负荷 = ATS 国家电力 × 建筑 + 农业份额（11 国 1,032 → 966 TWh，全部非负；居民校验 428 vs 386 TWh）；工业电力内生；交通服务量锚（模型 / 锚 1.1–3.2） | 完成 | 同上 §2–3；`IMPLEMENTATION_PLAN.md` M08-5 改写 |
+| §3 | R2 主算只改密度（× 1.109，不重算栅格）；开阔林转上界敏感性；比值分解（密度 6–18 %，保护区 ≤ 17–84 %，林地 + 其他 ≥ 33–71 %）；触发规则；下载清单分组（Copernicus / WDPA / GEBCO / EEZ 已在作者缓存，原第 1 项撤销；航运密度为主算必需 A1） | 完成 | `scripts/s4r_r2_potentials.py`、`POTENTIAL_COMPARISON.csv/.md`、`IMPLEMENTATION_PLAN.md` M08-7 与 §2.1、`USER_DOWNLOAD_LIST.md` |
+| §4 | 保持 k = 10；`GATES_V6.md` 未改（SHA256 不变） | 完成 | `GATES_V6_NOTES.md`（新建）；`S4R_PLAN.md` §9 |
+| §5 | VN 封存上限下调后的船运交互（130 Mt/a 改道，+1.9–2.0 bn/情景；不互联 VN 船运约 225 Mt/a；若船运算互联 +5.5 bn） | 完成 | `S4R_PLAN.md` §8；注册表行 `co2_storage_vn_shipping_interaction` |
+| §6 | 面谈清单合并为 9 项；用户待办精简为 2 项 | 完成 | `S4R_PLAN.md` §11.2–11.3 |
+| §7 | 交付文件更新、`REGISTRY_ROWS_PROPOSED.csv`（31 → 42 行）、`UNIFICATION_CHECKLIST`（209 格，64 标出）、`EXTERNAL_SOURCES_S4R.md`（+12 条）、`S4R_EVIDENCE.json` 重生成 | 完成 | 提交与 PR #43 正文更新见"收尾记录（补充 01）" |
+
+- 本机计算 < 5 分钟；检索：Bleischwitz 2018、Pauliuk 2013、van Ruijven 2016、Global Cement、worldsteel 人均表、USGS MCS 2025（pypdf 解析）、World Bank WDI API；USGS 年鉴章节四种 URL 404、worldsteel SSY 2024 PDF 404（登记 DATA_PENDING）。
