@@ -17,8 +17,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--meet", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--detail", default="DATA_INVENTORY_v2.xlsx", help="detail workbook (supplement 01: DATA_INVENTORY_v3.xlsx)")
+    ap.add_argument("--name", default="M080_BRIEF_TRACE")
     a = ap.parse_args()
-    bpath, vpath = a.meet / "DATA_INVENTORY_BRIEF.xlsx", a.meet / "DATA_INVENTORY_v2.xlsx"
+    bpath, vpath = a.meet / "DATA_INVENTORY_BRIEF.xlsx", a.meet / a.detail
     b, v = openpyxl.load_workbook(bpath), openpyxl.load_workbook(vpath)
     vtexts = {str(c) for ws in v.worksheets for row in ws.iter_rows(values_only=True) for c in row if c is not None}
     checked, missing, per_sheet = 0, [], {}
@@ -40,7 +42,7 @@ def main():
                detail_sha256=hashlib.sha256(vpath.read_bytes()).hexdigest(), cells_checked=checked, per_sheet=per_sheet,
                not_found_verbatim=len(missing), missing=missing[:50])
     a.out.joinpath("evidence").mkdir(parents=True, exist_ok=True)
-    (a.out / "evidence/M080_BRIEF_TRACE.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    (a.out / "evidence" / f"{a.name}.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in out.items() if k != "missing"}, indent=1, ensure_ascii=False))
     for m in missing[:20]:
         print("MISSING", m)
