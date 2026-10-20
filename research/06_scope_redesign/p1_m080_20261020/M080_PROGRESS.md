@@ -13,8 +13,8 @@
 | M1 | 补登缺口（§J 1–5） | 完成 | `4e1de488` |
 | M2 | 海上风机型与尾流核实 | 完成 | `995256ff` |
 | M3 | 状态与等级修正（§I 3、5、6、7） | 完成 | `880955b8` |
-| M4 | 状态值检查与注册表单元测试 | 完成 | 本行 SHA 记于下一次提交（只改本文件） |
-| M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 未开始 | |
+| M4 | 状态值检查与注册表单元测试 | 完成 | `dca14c83`（只改本文件） |
+| M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 完成 | 本行 SHA 记于下一次提交 |
 | M6 | 重跑数据清单 v2 与精简版 | 未开始 | |
 | M7 | 报告、台账、draft PR | 未开始 | |
 
@@ -44,6 +44,11 @@
 - 状态值的校验链：`scripts_project/d1_common.py` 第 52–53 行 `STATUSES`（固定 7 个值）→ `Registry.add` 遇未知状态报错 → `tests/research/test_d1_registry.py::test_registry_schema_and_tiers` 断言 `set(status) ⊆ STATUSES`。新增"历史 / 已被替代"状态必须改代码，因此不新增；凡属历史的行一律用 REFERENCE_ONLY，描述以"历史：已被 X 替代"开头（M3 已写入 6 行：`cost_layer_A_…`、`geothermal_existing_FOM`、`geothermal_existing_VOM`、`renewable_profile_variant`、`renewable_resource_classes`，以及 4 个廓线文件行注明"对照文件"）。
 - 注册表相关单元测试（27 个读注册表的测试文件，排除唯一的玩具求解用例）：91 passed / 24 skipped / 0 failed，与基线一致；24 个跳过均为"既有构建不在工作树"的设计跳过。
 
+## M5 记录
+
+- `scripts/m080_s4r_v2.py`（只读 S4R 原件 `REGISTRY_ROWS_PROPOSED.csv` SHA256 `258b75c3…dfd7c`）→ `REGISTRY_ROWS_PROPOSED_v2.csv`（42 行，SHA256 `6cd041eb…e936`；新增列 `registry_row_exists`、`supersedes`、`m08_write_note`、`v2_change`）：7 行改为 add（`industry_cement_2050_VN`、`renewable_capacity_per_sqkm_solar`、`renewable_landuse_rule_solar`、`lng_terminal_capacity_source`、`lng_terminal_cap_rule`、`biomass_overflow_rule`、`nuclear_cost_rule`）；9 行 modify 的同名行均存在；`lng_terminal_cap_rule` 按列名重新对齐（v1 只有 10 个字段，缺 `source_locator`）；9 行写明被替代的 param_id 并注明"M08 写入时把旧行标为历史"；`renewable_offshore_rule` 描述按第 2 项结论改写（机型 / 尾流已在主算）。`industry_cement_2050_VN` 的旧值 581 Mt 只在 `research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv`，注册表无同名行，照实保留。
+- `USER_DOWNLOAD_LIST_v2.md`：文首修订说明；删去 A1（航运密度已在 raw12，SHA256 一致，改列 §0）；B4 注明本地已有 OGCI PDF 但汇总表为图片、未能复核。原件 SHA256 `6b97f33c…3c2d` 不变。
+
 ## 续行点
 
-M5：S4R 产出 v2（`REGISTRY_ROWS_PROPOSED_v2.csv`、`USER_DOWNLOAD_LIST` 修订）。
+M6：用 `work/p1_meet_20261020/scripts/meet_data_inventory.py` 对补登后的注册表重跑 v2，并生成精简版。
