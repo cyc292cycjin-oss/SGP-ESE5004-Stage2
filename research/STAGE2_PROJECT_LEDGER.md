@@ -703,3 +703,27 @@
 - **补充 01：** 全部货币输入统一为 EUR2020，一个汇率（ECB 2020 年均 0.8772 EUR/USD）、美国 / EA20 GDP 平减均有注册；五处口径差合计对 B6 约 ±3 bn。建议报告货币 EUR2020，对外 1 EUR2020 = 1.1422 USD2020（如需 USD2024 再 × 1.1918）。NZE 按第 124 项降为低优先级。
 - **待用户决定（报告 §10）：** F1–F4 是否作敏感性先于 2920×3h（顺序 F3 → F1 → F2；任何求解需另行授权）；F10 封存潜力统一 ERIA；F11 登记不互联定义；F7 国别 WACC；报告货币与基年；本报告入库。
 - **交付：** `research/06_scope_redesign/p1_step4p_20261020/`（`S4P_REPORT.md`、`COUNTRY_AUDIT_MATRIX.csv/.md`、`PROPOSED_FIXES.md`、`S4P_EVIDENCE.json`、`EXTERNAL_SOURCES.md`、`A_*`、`ASPECT*`、`evidence/EXT_*`、`scripts/`）；镜像 `work/p1_step4p_20261020/`；网络提取表 `evidence/net/` 未入库（脚本可重生成）。
+
+## S4R 第 126、128 项：统一修正方案与门槛重设（只读，不实施、不求解）— 2026-10-20
+
+- **范围：** 指令 `S4R_CLAUDE_CODE_INSTRUCTION.md`（SHA256 f80da6fd…ceeb，与 `S4R_INSTRUCTION_SHA256.txt` 一致）；分支 `codex/s4r-unification-plan-20261020`（自 S4P 头 69b67a97，独立工作树），draft PR #43 叠在 #42 上。只读：未求解、未连云、未调用 Gurobi、未改生产代码 / 注册表 / 网络 / 结果；修正全部写成方案，待面谈后在 M08 实施。已定口径不再讨论：2920×3h 正式分辨率、F3 每线 +20 GW、F8 核电无上限、F7 主算 WACC 0.07、报告美元 / 模型欧元、NZE 舍弃、C1 分级验收。
+- **R1 需求（最重要）：** 同口径分解（`DEMAND_ANCHOR_COMPARISON.csv`）：固定电力负荷 = AEO8 ATS 电力的 0.8–4.2×（ID 4.1、MM 4.2、VN 2.5），其中工业路线电力占偏差约 2/3；模型 TFEC / ATS = 0.97–3.07（区域 1,220 vs ATS 746 / BAS 1,108 Mtoe）。推荐主锚 AEO8 ATS 人均 × 人口（TL 用 KH/LA/MM 均值 × UN WPP），对照 ERIA LCET-CN；工业物理产量 11 国同一规则（基年 USGS / worldsteel × √总 GDP 增长，人均饱和上限 1.0 / 0.6 t，国家规划上限）：VN 水泥 581 → 107 Mt、钢 80 → 70 Mt；"其他工业"改为分温度带有用热、载体内生（偏离 PyPSA-Eur 固定路线，理由登记）。
+- **R2 潜力：** 模型光伏上限 / ESMAP Level 1 × 5.1 MW/km² = 0.18–0.57（11 国全部 < 0.6，系统性）；可由密度 4.6 vs 5.1 与土地类别（全部林地排除）解释。推荐 11 国同一参数：密度 5.1 + 开阔林 121–126 + PyPSA-Eur 海上规则；精确上限需 Copernicus / WDPA 栅格重算（用户下载清单）。F9 海上观测 CF DATA_PENDING（alpha = 1.0 并标注）。
+- **R3 LNG：** 模型表与 GEM GGIT 2025-09 逐国一致；2025 年进口为运营容量的 12–55 %；7,018 EUR/MW/a 无来源无价格年（DATA_PENDING）→ 8,020 EUR2020/MW/a（Ulvestad 2012，已登记）；推荐取消 2.5× 上限按成本内生；再气化加价 1.26 EUR2020/MWh。
+- **R4 / R5：** PyPSA-Eur 无"需求 > 潜力"处理规则；溢出改为等量有用热分温度带由模型选载体，第 115 项 0.98 不再需要。封存统一 ERIA-GCCSI 2024 P50：VN 11.8 → 5.30 Gt（年上限 236 → 106 Mt）、PH 22.3 → 0.067、KH 0.09（IJGGC 2014 低值）、TL / LA / MM 零。
+- **R6 / R7：** HICP 回算消除 +4.8 % 残余；AEO8 价格年 DATA_PENDING（敏感性 × 0.86）；SMR = technology-data 核电 × AEO8 同表比值 1.067；报告货币 USD2020，1 EUR2020 = 1.1422 USD2020；分国实际 WACC 表（VN 4.6、ID 7.1、MY 4.4、TH 5.3、SG 2.9、KH 9.1、LA 7.6、MM 11.0 %，TL DATA_PENDING）只做表。不互联主定义 = 删除全部区域内跨境固定网络（含存量气管道），"保留存量不新建"作敏感性；船运类贸易是否算互联待定。
+- **R8 门槛：** `GATES_V6.md`（SHA256 5c0aa8b8…7f9）先于重评单独提交 d45955ea：判据只有 C1 (a)(b)(c) + 结构检查（网络 SHA256、配置子集哈希、结果完整性），其余为诊断且容差随档案；整份 B12 降为诊断。重评 20 个历史运行（只读导出指标）：有 PRECISION 的 10 次（S4N 试点、S4O-6 ×3、S4Q ×6）均 ACCEPTED_LAYER2（G2.2 pending）；L23 / S4M-2 / S4N-C2 不可计算。D2 对偶预算在内点解上约为 100 × BarConvTol，k = 10 使其仍超预算——按规则未改定义，提请决定。
+- **R9 / R10：** 统一性核查表 19 类 × 11 国 = 209 格，54 格标出口径差 / 例外。影响估算（INFERENCE）：R1–R6 合并后 B6 约 25–45 bn（从 69），VN 份额 55–70 %；分国 WACC 若采用再降 10–20 bn。`IMPLEMENTATION_PLAN.md`：M08-1…10 修改顺序、56×3h 冒烟标准、分支整合 #41 → #42 / S4R → M08；M10 第三批 7 次运行约 10–20 h。
+- **待用户决定 12 项、请示师哥 7 项：** 见 `S4R_PLAN.md` §11.2–11.3；用户下载清单 9 项；注册表拟新增 / 修改 31 行（`REGISTRY_ROWS_PROPOSED.csv`，未写入注册表）。
+- **交付：** `research/06_scope_redesign/p1_step4r_20261020/`（`S4R_PLAN.md`、`GATES_V6.md` + SHA256、`GATES_RETRO_COMPARISON.*`、`UNIFICATION_CHECKLIST.*`、六张对照表、`IMPLEMENTATION_PLAN.md`、`REGISTRY_ROWS_PROPOSED.csv`、`USER_DOWNLOAD_LIST.md`、`EXTERNAL_SOURCES_S4R.md`、`S4R_EVIDENCE.json`、`S4R_PROGRESS.md`、`scripts/`、`evidence/`）；提交 4fbddf28 → d45955ea → d0c299a9 → 收尾提交；镜像 `work/p1_step4r_20261020/`。
+
+### S4R 补充 01（第 129 项：审阅修正）— 2026-10-20
+
+- **范围：** `S4R_SUPPLEMENT_01.md`（SHA256 c533c960…4984，核对一致）；同一分支、同一 draft PR #43；仍只读（未求解、未连云、未调用 Gurobi、未改生产代码与注册表）。
+- **R1.3 产量：** 11 国严格同一规则 2050 = min(基年 × G^((2050−基年)/28 × ε), 人均饱和 × 人口, 国家规划上限)，规划只作上限；基年改为 2024（worldsteel WSIF 2025；USGS MCS 2025 仅列 ID / VN，其余 USGS 年鉴 DATA_PENDING，过渡值标注）；ε = 0.5 与饱和 1.0 / 0.6 t/人登记为假设（C 级，敏感性 0.3–0.8、0.6–1.2 / 0.4–0.8；文献只给饱和证据：Bleischwitz 2018、van Ruijven 2016、Pauliuk 2013）。VN 水泥 107.0 Mt（人均上限绑定）、钢 40.7 Mt（增长规则；原 70 Mt 把规划当下限，撤销）；11 国水泥 1,290 → 410、钢 152 → 97 Mt。
+- **R1 电力锚：** 只锚活动量——基础负荷 = ATS 国家电力（C.8 × D.1）× 归一化部门权重中的建筑 + 农业及其他份额（权重 = 2019 部门电力 × ATS 部门增长代理）；11 国 1,032 → 966 TWh（VN 184、ID 311、TH 170），全部非负；居民电力校验 428 vs AEO8 ATS 386 TWh（+11 %）；工业电力内生不锚定（M08-5 原"ATS 电力 − 路线电力"撤销）；交通锚服务量（模型交通终端能耗为 ATS 锚的 1.1–3.2×）。
+- **R2：** 主算只改光伏密度 4.6 → 5.1（上限 × 1.109，按比例缩放，不重算栅格）；开阔林 121–126 作上界敏感性，触发规则：修正后 365×24h 某国光伏上限绑定且影子价格 × 绑定容量 ≥ 1 bn 则升级。比值 0.18–0.57 的分解：密度参数占对数差 6–18 %，保护区口径上界 17–84 %，林地与其他判据 ≥ 33–71 %（世行 WDI 保护区 / 森林占比）——口径与 PyPSA-Eur 同型，非输入错误。作者缓存已有 Copernicus LC100 全球文件、natura（WDPA 2020 栅格）、GEBCO 2025、EEZ v11；下载清单分为主算必需（航运密度栅格 535 MB、USGS 年鉴水泥表、worldsteel 2024 SG / MM、UN WPP TL、Eurostat HICP）与仅敏感性。
+- **R8：** 保持 k = 10，`GATES_V6.md` 不改；新建 `GATES_V6_NOTES.md`：barrier 无 crossover 时 56×3h 优化成功运行的对偶符号误差 ≈ 40–240 × BarConvTol，365×24h 解约 1e-2 量级；D2 为诊断，不影响验收。
+- **R7 补充：** VN 封存上限 236 → 106 Mt/a 后约 130 Mt/a 改走区域内船运（到 MY，+14–15 EUR/t，两情景各 +1.9–2.0 bn/a）；不互联情景 VN 船运升至约 225 Mt/a（约 2/3 封存量经海运）；若船运算互联则不互联 +5.5 bn/a。作面谈议题 (b) 依据。
+- **清单：** 面谈 9 项；用户待办 2 项（下载清单、注册表行 42 行）。影响合并区间放宽为 B6 ≈ 25–50 bn，VN 份额 55–70 %。
+- **交付：** 更新 `S4R_PLAN.md`、`DEMAND_ANCHOR_COMPARISON.*`、`POTENTIAL_COMPARISON.*`、`IMPLEMENTATION_PLAN.md`、`USER_DOWNLOAD_LIST.md`、`REGISTRY_ROWS_PROPOSED.csv`、`UNIFICATION_CHECKLIST.*`、`EXTERNAL_SOURCES_S4R.md`、`S4R_EVIDENCE.json`、`S4R_PROGRESS.md`；新建 `GATES_V6_NOTES.md`；提交见进度文件"收尾记录（补充 01）"。
