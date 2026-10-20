@@ -186,7 +186,14 @@ for c in COUNTRIES:
 cell("ASEAN_BUNKER", ASPECTS[5], "不适用（生物质不跨境，决定 36）", "—", "—", "—", 0.0)
 cell("ASEAN_POOL", ASPECTS[5], "生物质→甲醇（biomass-to-methanol）进池 ≈ 0", "0", "—", "合理", 0.0)
 
-# ---- aspect 7: cost parameters
+# ---- aspect 7: cost parameters (incl. supplement 01: currency and price year)
+CURRENCY_NOTE = ("货币 / 价格年（补充 01，报告 §4.7.2）：全部货币输入统一为 EUR2020——technology-data v0.15.0 EUR2025 × 0.8332（EA20 GDP 平减，残余 +4.8 %：升通胀用 HICP、去通胀用 GDP 平减）；"
+                 "WEO 2025 燃料价 USD2024 × 0.8391（美国 GDP 平减）× 0.8772（ECB 2020 年均汇率）= 0.7361；Neumann 进口价 EUR2020 × 1.2；IEAGHG US$2004 × 1.169、Stolaroff USD2018 × 0.904；"
+                 "AEO8 SMR / 地热 kUSD × 0.8772 **无价格年、未平减**；PyPSA-Eur 常数（码头 7,018 EUR/MW/a、封存 30 EUR/t）无价格年；存量固定运维为作者表（2020，褐煤 2023，抽蓄 2010/15）未重新平减；贴现率 0.07 为实际利率，与不变价成本一致")
+WACC_VERDICT = {"VN": "待核实（WACC 7 % 实际对 VN 在区间内，中性；AEO8 SMR 未平减偏贵；+4.8 % 资本残余对不互联不利）", "ID": "待核实（WACC 中性；+4.8 % 资本残余）", "PH": "待核实（统一 7 % 对 PH 偏高端；alpha 0.91 不利）",
+                "MY": "待核实（统一 7 % 对 MY 偏高；SMR 未平减）", "TH": "待核实（统一 7 % 对 TH 偏高端；alpha 1.29 有利）", "SG": "待核实（统一 7 % 对 SG 偏高）",
+                "KH": "待核实（统一 7 % 对 KH 偏低：风险溢价 7.1 %，出口基地成本偏低）", "LA": "待核实（统一 7 % 对 LA 偏低：风险溢价 11.7 %）", "MM": "待核实（统一 7 % 对 MM 明显偏低：风险溢价 15.5 %，一体化出口基地投资 34 bn 偏便宜）",
+                "BN": "合理（量小）", "TL": "合理（量小；WACC 无公开估计）"}
 WACC = {"ID": "IEA 2024 名义税后：光伏 8.5–11 %、燃气 9–10 %、储能 9–11 %", "VN": "IEA 2024：光伏 8.5–10 %、燃气 10–10.5 %、海上风 10.5–12 %（2023）", "PH": "IEA 2024：光伏 7–8.5 %、燃气 8–9 %", "MY": "IEA 2024：光伏 6–7 %", "TH": "IEA 2024：光伏 6–8 %、燃气 9–11.5 %"}
 OFF = {r["country"]: r for r in S["aspect3_offwind"] if r["carrier"] == "offwind-dc"}
 ALPHA = {"BN": 1.046, "ID": 1.046, "KH": 1.046, "LA": 1.046, "MM": 1.046, "MY": 1.046, "PH": 0.910, "SG": 1.046, "TH": 1.294, "TL": 1.046, "VN": 0.995}
@@ -194,13 +201,14 @@ for c in COUNTRIES:
     o = OFF.get(c)
     phys = (f"折现率统一 0.07（实际）；技术成本统一（technology-data v0.15.0 2050 EUR2020；SMR AEO8 D.15 8,421 EUR/kW）；燃料价统一（STEPS 2050）；国别项只有：海上风电并网距离（offwind-dc 年化 {o['cc_mean']:,.0f} EUR/MW/a，区间 {o['cc_min']:,.0f}–{o['cc_max']:,.0f}）"
             if o else "折现率统一 0.07；技术与燃料成本统一；无海上风电候选") + f"；陆上风校准 alpha {ALPHA[c]}（PH / TH / VN 为 B 级实测，其余 C 级均值）；台风溢价关闭；cost_scaling 全 1.0"
-    cost = "无直接差额项；WACC 国别化会按资本密集度改变两情景成本（见 F7）"
+    phys = phys + "；" + CURRENCY_NOTE
+    cost = "无直接差额项；WACC 国别化按资本密集度改变两情景成本（F7）；货币口径差（F14）：+4.8 % 资本残余 → 该国 technology-data 投资差额 × 0.046；SMR 未平减 → SMR 投资 −11 %"
     extc = WACC.get(c, "IEA 资本成本观测站无该国数据（注册表 wacc_country_model_* DATA_PENDING）") + "；技术成本基准见 EXT_COST_BENCHMARKS.md"
-    verdict = "待核实（统一 WACC 对高资本成本国相对有利）" if c in ("VN", "ID", "PH", "KH", "LA", "MM") else ("待核实（TH alpha 1.29 对 TH 有利）" if c == "TH" else "合理")
-    mag = {"VN": 10.0, "ID": 2.0, "PH": 1.0, "TH": 1.0}.get(c, 0.2)
+    verdict = WACC_VERDICT.get(c, "合理")
+    mag = {"VN": 5.0, "ID": 1.0, "PH": 0.5, "TH": 1.0, "MY": 1.0, "MM": 3.0, "KH": 1.5, "LA": 0.5, "SG": 0.5}.get(c, 0.2)
     cell(c, ASPECTS[6], phys, cost, extc, verdict, mag)
-cell("ASEAN_BUNKER", ASPECTS[6], "池价格 = 节点对偶；燃料舱不承担投资", "—", "—", "合理", 0.0)
-cell("ASEAN_POOL", ASPECTS[6], "进口价：原油 35.3、FT 150.1、甲醇 145.2、氨 116.8 EUR/MWh；储罐 technology-data", "—", "Neumann 2025 × 1.2（B 级）；WEO 2025", "合理", 0.0)
+cell("ASEAN_BUNKER", ASPECTS[6], "池价格 = 节点对偶；燃料舱不承担投资；" + CURRENCY_NOTE, "—", "—", "合理", 0.0)
+cell("ASEAN_POOL", ASPECTS[6], "进口价：原油 35.3、FT 150.1、甲醇 145.2、氨 116.8 EUR/MWh（EUR2020，Neumann 2020 年价 × 1.2；WEO USD2024 × 0.7361）；储罐 technology-data EUR2025 × 0.8332", "—", "Neumann 2025 × 1.2（B 级）；WEO 2025", "合理", 0.0)
 
 # ---- aspect 8: settlement rules (from ASPECT8_B6_BY_RULE.csv)
 for c in COUNTRIES:
@@ -223,7 +231,8 @@ def main():
     with open(OUT / "COUNTRY_AUDIT_MATRIX.csv", "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
     md = ["# S4P 核查矩阵：13 个对象 × 8 个方面（只读；数字为 VERIFIED，量级为 INFERENCE）", "",
-          "每格五项：物理量；成本影响（一体化 / 不互联 / NZE 与差额，bn EUR，正 = 该国支出增加）；外部对照；判定（合理 / 待核实 / 错误）；对 B6 与该国差额的影响量级（bn，绝对值估计）。",
+          "每格五项：物理量；成本影响（一体化 / 不互联 / NZE 与差额，bn EUR2020，正 = 该国支出增加）；外部对照；判定（合理 / 待核实 / 错误）；对 B6 与该国差额的影响量级（bn，绝对值估计）。",
+          "补充 01：NZE 已按第 124 项降为低优先级——NZE 列只给已有数字，不深挖、不另提修正；方面 7 并入货币与价格年份核查（报告 §4.7.2，F14）。",
           f"B6 = {A['b6_detail_bn']:.3f} bn；分国差额：" + "，".join(f"{e} {d(e):+.3f}" for e in OBJECTS) + "。", ""]
     for o in OBJECTS:
         md.append(f"## {o}（差额 不互联−一体化 {d(o):+.3f} bn；NZE−一体化 {A['entities'][o]['nze_minus_int_bn']:+.3f} bn）")
