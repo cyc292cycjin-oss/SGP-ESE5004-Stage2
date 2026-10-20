@@ -14,8 +14,8 @@
 | M2 | 海上风机型与尾流核实 | 完成 | `995256ff` |
 | M3 | 状态与等级修正（§I 3、5、6、7） | 完成 | `880955b8` |
 | M4 | 状态值检查与注册表单元测试 | 完成 | `dca14c83`（只改本文件） |
-| M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 完成 | 本行 SHA 记于下一次提交 |
-| M6 | 重跑数据清单 v2 与精简版 | 未开始 | |
+| M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 完成 | `fc964ea2` |
+| M6 | 重跑数据清单 v2 与精简版 | 完成 | 本行 SHA 记于下一次提交 |
 | M7 | 报告、台账、draft PR | 未开始 | |
 
 ## M0–M1 记录
@@ -49,6 +49,13 @@
 - `scripts/m080_s4r_v2.py`（只读 S4R 原件 `REGISTRY_ROWS_PROPOSED.csv` SHA256 `258b75c3…dfd7c`）→ `REGISTRY_ROWS_PROPOSED_v2.csv`（42 行，SHA256 `6cd041eb…e936`；新增列 `registry_row_exists`、`supersedes`、`m08_write_note`、`v2_change`）：7 行改为 add（`industry_cement_2050_VN`、`renewable_capacity_per_sqkm_solar`、`renewable_landuse_rule_solar`、`lng_terminal_capacity_source`、`lng_terminal_cap_rule`、`biomass_overflow_rule`、`nuclear_cost_rule`）；9 行 modify 的同名行均存在；`lng_terminal_cap_rule` 按列名重新对齐（v1 只有 10 个字段，缺 `source_locator`）；9 行写明被替代的 param_id 并注明"M08 写入时把旧行标为历史"；`renewable_offshore_rule` 描述按第 2 项结论改写（机型 / 尾流已在主算）。`industry_cement_2050_VN` 的旧值 581 Mt 只在 `research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv`，注册表无同名行，照实保留。
 - `USER_DOWNLOAD_LIST_v2.md`：文首修订说明；删去 A1（航运密度已在 raw12，SHA256 一致，改列 §0）；B4 注明本地已有 OGCI PDF 但汇总表为图片、未能复核。原件 SHA256 `6b97f33c…3c2d` 不变。
 
+## M6 记录
+
+- v1 脚本复制为 `work/p1_meet_20261020/scripts/meet_data_inventory_v2.py`（v1 脚本与 v1 输出不动，哈希与 MEET-D 记录一致：xlsx `d0436436…`、md `4199354e…`、stats `5651c74f…`、脚本 `430b5185…`）。v2 改动：读 M08-0 提交 `880955b8` 的注册表（SHA256 `6950a15d…8dd2`）与 `REGISTRY_ROWS_PROPOSED_v2.csv`；分类规则补 M08-0 新行前缀（2,052 行全部归类）；表 1 中已补登 / 已修正项的文字更新（含更正 v1 的“PyPSA-Earth 无屋顶潜力方法”）；§I 改为“不一致项与 M08-0 处理结果”（11 项，含 M08-0 新发现 2 项）；§J 改为补登后的缺口（8 项）；新增 §K v1 → v2 对比；表 1 增加 5 列“附件 B”文字；表 3 / 表 4 中供附件 B 使用的列去掉内部步骤代号（记录位置列不变）。
+- 输出：`DATA_INVENTORY_v2.xlsx`（`d197b840…0205`）、`DATA_INVENTORY_v2.md`（`2324192e…10e7`）、`DATA_INVENTORY_BRIEF.xlsx`（`f05113f1…2583`）、`DATA_INVENTORY_BRIEF.md`（`5726550c…8499`）、`evidence/MEET_DATA_STATS_v2.json`（`71452708…f473`）；xlsx 内含时间戳，重跑哈希会变。
+- 实算：注册表 2,052 行，A 263 / B 1,301 / C 488；主算输入 1,263 行，A 10.85 % / B 61.28 % / C 27.87 %（v1 1,185 行：11.73 / 59.32 / 28.95 %）；11 国同口径占比不变（核查表 9/19 = 47.4 %；表 1 现行 18/25 = 72.0 %、修正后 17/25 = 68.0 %）。
+- 精简版核对（`scripts/m080_brief_trace.py` → `evidence/M080_BRIEF_TRACE.json`）：664 个数据格全部在 v2 详表中原文出现；自动检查无注册表 `param_id`、无 `xxx_*` 前缀。v2 中剩余的“注册表无记录”均为 S4R 拟增行或外部对照来源，照实保留。
+
 ## 续行点
 
-M6：用 `work/p1_meet_20261020/scripts/meet_data_inventory.py` 对补登后的注册表重跑 v2，并生成精简版。
+M7：`M080_REPORT.md`、台账 M08-0 条目、draft PR（叠在 #43 上）。
