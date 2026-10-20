@@ -40,6 +40,20 @@ AUTHOR_SHA = {"prepare_sector_network.py": "ade3014d041da647e78954bccce91ee07ced
 TECH_KEY = {"solar": "solar", "onwind": "onwind", "offwind-ac": "offwind_ac", "offwind-dc": "offwind_dc", "solar rooftop": "solar_rooftop"}
 MARK = "[M08-0 item 130]"
 STEPS: set[str] = set()   # set in main(); P1..P4 = M08-0 supplement 01 (item 131)
+# supplement 01 section 2: GEGIS original publication, verified (a) in the PyPSA-Earth docs of the author chain and (b) against the Crossref record of the DOI
+GEGIS_REF = ("Mattsson N., Verendel V., Hedenus F., Reichenberg L. (2021) 'An autopilot for energy models - Automatic generation of renewable supply "
+             "curves, hourly capacity factors and hourly ...' (title truncated here), Energy Strategy Reviews 33, 100606, doi:10.1016/j.esr.2020.100606")
+GEGIS_DOC_LOC = ("PyPSA-Earth docs cite GEGIS with doi:10.1016/j.esr.2020.100606: pypsa-asean @5bacad70 doc/data_workflow.rst 103 (author paper commit) and "
+                 "@ce327bfa doc/user-guide/data-workflow.md 89, doc/tutorials/use-cases/3-demand-data.md 53")
+GEGIS_DOC_SHA = ("data_workflow.rst@5bacad70:396c254f59a23783e012690fcfad31228a40fef684bd4ab426881c4f2a1ad5bd|"
+                 "data-workflow.md@ce327bfa:f29d770a83f9ca56943a071b9a2154921b11eb5686d57aef3834f53e95ee9a69|"
+                 "3-demand-data.md@ce327bfa:f41314540d0f443b6e28ef3b2f747bbf4b4b5283e5000823821483c008b160b2")
+GEGIS_CITE_NOTE = ("Original publication (M08-0 supplement 01, item 131; verified): the PyPSA-Earth documentation of the author chain names GEGIS "
+                   "(GlobalEnergyGIS, github.com/niclasmattsson/GlobalEnergyGIS; profiles extracted with the synde workflow, machine learning on temperature, "
+                   "population and GDP) and links doi:10.1016/j.esr.2020.100606; the Crossref record of that DOI (read 2026-10-21) gives Mattsson, Verendel, "
+                   "Hedenus, Reichenberg, Energy Strategy Reviews 33, article 100606, issued 2021-01, title beginning 'An autopilot for energy models - "
+                   "Automatic generation of renewable supply curves, hourly capacity factors and hourly ...' = the reviewer's citation (the DOI carries 2020, "
+                   "the volume is 2021)")
 # supplement 01 section 1: rooftop PV comparison figures already in the registry (record only, values not changed)
 ROOFTOP_REF = {"ID": [("AEO8 p.140 (potential_solar_rooftop_ID_aeo8)", 194000.0, 655000.0, "MWp")],
                "MY": [("AEO8 p.140 (potential_solar_rooftop_MY_aeo8)", 34000.0, 34000.0, "MWp"), ("SEDA MyRER 2021 rooftop (potential_solar_rooftop_MY_myrer)", 42000.0, 42000.0, "MW")],
@@ -177,17 +191,25 @@ def m1_rows(reg: Registry, ev, vre, lng):
             f"'Electricity demand', attributes: '{g.get('description')}', SSP {g.get('SSP scenario')}, RCP {g.get('RCP scenario')}, projection year "
             f"{g.get('projection year')}, ERA5 weather year {g.get('weather data year (ERA5)')}, {g.get('unit')}), allocated to the nodes by GDP / population; "
             f"check: national author base-load shape vs the GEGIS profile corr >= {min_corr:.6f} for the 9 countries with own profiles "
-            "(demand_astar_shape_gegis_check); LA / TL substituted (demand_astar_shape_substitution). The GEGIS developer / publication is not stated in "
-            "the local files (not filled in); the bundle is on sandbox.zenodo.org (not a permanent archive)",
+            "(demand_astar_shape_gegis_check); LA / TL substituted (demand_astar_shape_substitution). "
+            + (GEGIS_CITE_NOTE if "P2" in STEPS else "The GEGIS developer / publication is not stated in the local files (not filled in)")
+            + "; the bundle is on sandbox.zenodo.org (not a permanent archive)",
             "data/ssp2-2.6/2030/era5_2013/Asia.nc", "file", "B",
-            f"GlobalEnergyGIS projected electricity demand via the PyPSA-Earth data bundle bundle_data_earth ({bde['urls'].get('zenodo')})",
+            f"GlobalEnergyGIS projected electricity demand via the PyPSA-Earth data bundle bundle_data_earth ({bde['urls'].get('zenodo')})"
+            + ("; " + GEGIS_REF if "P2" in STEPS else ""),
             f"pypsa-asean/data/ssp2-2.6/2030/era5_2013/Asia.nc ({f['gegis_asia']['bytes']} B); author meta load_options ssp {lo['ssp']}, weather_year "
-            f"{lo['weather_year']}, prediction_year {lo['prediction_year']}", gsha, decision_ref=f"{DEC}; 104")
+            f"{lo['weather_year']}, prediction_year {lo['prediction_year']}" + ("; " + GEGIS_DOC_LOC if "P2" in STEPS else ""),
+            gsha + ("|" + GEGIS_DOC_SHA if "P2" in STEPS else ""), decision_ref=f"{DEC}; 104" + ("; 131" if "P2" in STEPS else ""))
     reg.add("demand_astar_shape_substitution",
-            f"Author load_options for countries with a zero GEGIS profile: substitute {lo['substitute']}, scale {lo['scale']} (LA uses the KH shape, TL the ID "
+            (("EXCEPTION (grade C, M08-0 supplement 01, item 131) to the GEGIS country-profile rule for the two countries whose GEGIS profile is zero - rule "
+              "(PyPSA-Earth build_demand_profiles.py 239-253 at 5bacad70): the own GEGIS rows of LA / TL are dropped, the hourly profile of KH (for LA) / "
+              "ID (for TL) is copied and normalised to mean 1 (shape only), then multiplied by load_options.scale (LA 1,456.62, TL 47.35 MW mean load); "
+              "under S4J-1 table_sectors only the shape is used, the annual total comes from the demand table. ") if "P2" in STEPS else "")
+            + f"Author load_options for countries with a zero GEGIS profile: substitute {lo['substitute']}, scale {lo['scale']} (LA uses the KH shape, TL the ID "
             f"shape; checked: LA vs KH corr {av['LA']['corr']:.4f}, TL vs ID corr {av['TL']['corr']:.6f}); author assumption, no source given",
             ";".join(f"{k}<-{v} x{lo['scale'][k]}" for k, v in lo["substitute"].items()), "flag", "C", "author paper network meta['load_options']",
-            "load_options.substitute / scale", gsha, decision_ref=f"{DEC}; 104")
+            "load_options.substitute / scale" + ("; build_demand_profiles.py 239-253 (5bacad70)" if "P2" in STEPS else ""),
+            gsha, decision_ref=f"{DEC}; 104" + ("; 131" if "P2" in STEPS else ""))
     reg.add("demand_astar_shape_gegis_check",
             "Correlation of the national author base-load shape (3 h) with the GEGIS Asia.nc country profile (3 h means), minimum over BN ID KH MM MY PH SG "
             "TH VN: " + ", ".join(f"{c} {av[c]['corr']:.7f}" for c in own) + "; scale-factor CV <= 1.2e-3 (shape identical up to a constant)",
