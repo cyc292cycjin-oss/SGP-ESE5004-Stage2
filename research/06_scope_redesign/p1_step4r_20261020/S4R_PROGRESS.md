@@ -57,7 +57,7 @@
 
 ## 收尾记录（补充 01）
 
-- 补充 01 提交 48ad097d（方案、对照表、实施计划、下载清单、注册表行、GATES_V6_NOTES、证据、进度）；收尾提交见下一行；draft PR #43 正文已更新：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/43
+- 补充 01 提交 48ad097d（方案、对照表、实施计划、下载清单、注册表行、GATES_V6_NOTES、证据、进度）；收尾提交 0cc4cca4（本行与 PR 正文的同步提交不再记录）；draft PR #43 正文已更新：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/43
 - 台账条目 `evidence/LEDGER_ENTRY_S4R_SUPP01.md` 追加到 `research/STAGE2_PROJECT_LEDGER.md`；PR 正文 `evidence/PR_BODY_S4R.md`。
 - `S4R_EVIDENCE.json` 的输出哈希在本记录与台账追加之前生成。
 - 状态：补充 01 全部完成，停止，等待审阅。

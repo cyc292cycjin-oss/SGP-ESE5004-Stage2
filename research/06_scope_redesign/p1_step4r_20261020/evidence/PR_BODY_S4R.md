@@ -8,7 +8,7 @@ Branch `codex/s4r-unification-plan-20261020` from the S4P head 69b67a97. No solv
 - d0c299a9 `S4R_PLAN.md`, gates retro-evaluation, unification checklist, implementation plan, registry rows, download list, sources, evidence, progress.
 - 50bd2f8d close-out (progress, ledger entry, PR body).
 - 48ad097d supplement 01 (decision 129): revised R1 / R2 / R8 / R7 items, `GATES_V6_NOTES.md`, updated tables and registry rows.
-- SUPP01_CLOSE_SHA supplement 01 close-out (progress record, ledger entry).
+- 0cc4cca4 supplement 01 close-out (progress record, ledger entry).
 
 ### Supplement 01 (decision 129) in brief
 - R1.3: one physical-output rule for 11 countries, 2050 = min(base 2024 x G^(years/28 x 0.5), per-capita saturation x population, national plan cap); plan caps never raise output (VN steel 70 -> 40.7 Mt, cement 107.0 Mt); base year 2024 (worldsteel WSIF 2025; USGS MCS 2025 for ID / VN, USGS Minerals Yearbook world table DATA_PENDING for the other nine, interim values flagged); elasticity 0.5 and saturation 1.0 / 0.6 t/cap registered as assumptions (grade C) with sensitivity ranges 0.3-0.8 and 0.6-1.2 / 0.4-0.8 (literature gives saturation evidence only: Bleischwitz 2018, van Ruijven 2016, Pauliuk 2013).
