@@ -11,8 +11,8 @@
 |---|---|---|---|
 | M0 | 核对 SHA、开分支 / 工作树、建进度文件 | 完成 | — |
 | M1 | 补登缺口（§J 1–5） | 完成 | `4e1de488` |
-| M2 | 海上风机型与尾流核实 | 完成 | 本行 SHA 记于下一次提交 |
-| M3 | 状态与等级修正（§I 3、5、6、7） | 未开始 | |
+| M2 | 海上风机型与尾流核实 | 完成 | `995256ff` |
+| M3 | 状态与等级修正（§I 3、5、6、7） | 完成 | 本行 SHA 记于下一次提交 |
 | M4 | 状态值检查与注册表单元测试 | 未开始 | |
 | M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 未开始 | |
 | M6 | 重跑数据清单 v2 与精简版 | 未开始 | |
@@ -33,6 +33,12 @@
 - 新增核实行 `renewable_offwind_profile_check_built`（REFERENCE_ONLY）；注册表 2,050 行；测试 91 passed / 24 skipped。
 - 对 M08-7（INFERENCE）：机型与尾流两项已在主算，无需改、无需为机型重建廓线；仍需海上面积重算（60 m、漂浮类、航道排除、DC 密度 3→2 MW/km²），航道栅格已在 raw12，不再是下载阻塞项。
 
+## M3 记录
+
+- 修正 32 行（整行替换，`fragments/m080_corrections.csv`）：natura → REGISTERED（补 Dataverse `wdpa_reclass.tif` V1.3、MD5 与本地一致、CC0）；`cost_layer_A_technology_data_v0_13_2_2050` → REFERENCE_ONLY（历史：已被 v0.15.0 替代）；SMR 代理 2 行注明构建读取且与 v0.15.0 同值；地热既有 6 行（FOM、CO₂ 强度 → REFERENCE_ONLY；VOM / 效率 / 投资 DATA_PENDING → REFERENCE_ONLY；寿命注明）；KH / TL 封存 4 行 A → C（分项行沿用国家合计行的 D1 区间）；`renewable_ship_density_raster` DATA_PENDING → REFERENCE_ONLY；`renewable_profile_variant`、`renewable_resource_classes`（历史：已被 S4B-3 行替代）与 4 个 pypsa_eur / fork 廓线文件行 → REFERENCE_ONLY；LNG 11 行加注（M1）。
+- 新增 2 行：`lng_gem_ggit_release_verified`（文件内写明 September 2025 release；S4R 下载为同一文件）、`cost_v0132_usage_built`（v0.13.2 使用情况汇总）。
+- 前后对比（`scripts/m080_registry_diff.py`，基准 `cefab870`）：1,962 → 2,052 行；新增 90、修改 32、删除 0；构建读取的数值无变化；状态 DATA_PENDING→REFERENCE_ONLY 4、REFERENCE_ONLY→REGISTERED 1、REGISTERED→REFERENCE_ONLY 9；等级 A→C 4。DATA_PENDING 51 → 47。测试 91 passed / 24 skipped。
+
 ## 续行点
 
-M3：状态 / 等级修正（`m080_data.py --steps M1 M2 M3`）。
+M4：状态值检查（无文件改动，只记录）。
