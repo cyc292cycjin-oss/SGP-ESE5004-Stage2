@@ -31,7 +31,7 @@
 | 步 | 内容 | 状态 | 时间（SGT） | 提交 / 说明 |
 |---|---|---|---|---|
 | S4Q-0 | 核对与背景、worktree | 完成 | 08:00–08:02 | SHA256 一致；worktree 与分支已建 |
-| S4Q-1 | 候选档案、测试、流水线开关 | 进行中 | 08:02– | ① `baseline.yaml` 新增 `formal_barrier_1e6`、`formal_barrier_1e6_t16`（注释：第 123 项、单因素、两种路径、非生产；缺省仍 `formal_barrier`）；② `run_365x24h.sh`：白名单 + `FIXED_RUNS`（缺省 off）；③ `tests/research/test_s4q_1.py` 4 项通过；`tests/research` 全套在 worktree 中 483 通过 / 2 失败 / 63 跳过——基线 0b681881 在全新 worktree 中同为 2 失败 / 63 跳过（479 通过），失败与跳过源于 worktree 不含被忽略的输入文件（如 `research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv`），与本次改动无关；483 = 479 + 4 |
+| S4Q-1 | 候选档案、测试、流水线开关 | **完成** | 08:02–08:40 | 代码提交 **84532e78**；脚本测试（在 84532e78 上，无 Gurobi、无许可）：S4O 原框架 **59/59**（`FIXED_RUNS` 缺省 off，S4O 行为不变；输出 `evidence/s4q_1/s4o4_rerun/`，S4O 证据未动），S4Q 用例 N1–N6 **8/8**（`evidence/s4q_1/results/`）；探针脚本未改，未重跑。① `baseline.yaml` 新增 `formal_barrier_1e6`、`formal_barrier_1e6_t16`（注释：第 123 项、单因素、两种路径、非生产；缺省仍 `formal_barrier`）；② `run_365x24h.sh`：白名单 + `FIXED_RUNS`（缺省 off）；③ `tests/research/test_s4q_1.py` 4 项通过；`tests/research` 全套在 worktree 中 483 通过 / 2 失败 / 63 跳过——基线 0b681881 在全新 worktree 中同为 2 失败 / 63 跳过（479 通过），失败与跳过源于 worktree 不含被忽略的输入文件（如 `research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv`），与本次改动无关；483 = 479 + 4 |
 | S4Q-2 | 6 次本机运行 | 未开始 | | |
 | S4Q-3 | 判定 | 未开始 | | |
 | S4Q-4 | 报告 | 未开始 | | |
