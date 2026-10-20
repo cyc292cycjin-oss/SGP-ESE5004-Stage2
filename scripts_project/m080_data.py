@@ -39,6 +39,11 @@ AUTHOR_SHA = {"prepare_sector_network.py": "ade3014d041da647e78954bccce91ee07ced
               "build_renewable_profiles.py": "c2a22a0de291a106c1cca0ed8f7e5695bdc82ca77772522793d5014addc17632"}
 TECH_KEY = {"solar": "solar", "onwind": "onwind", "offwind-ac": "offwind_ac", "offwind-dc": "offwind_dc", "solar rooftop": "solar_rooftop"}
 MARK = "[M08-0 item 130]"
+STEPS: set[str] = set()   # set in main(); P1..P4 = M08-0 supplement 01 (item 131)
+# supplement 01 section 1: rooftop PV comparison figures already in the registry (record only, values not changed)
+ROOFTOP_REF = {"ID": [("AEO8 p.140 (potential_solar_rooftop_ID_aeo8)", 194000.0, 655000.0, "MWp")],
+               "MY": [("AEO8 p.140 (potential_solar_rooftop_MY_aeo8)", 34000.0, 34000.0, "MWp"), ("SEDA MyRER 2021 rooftop (potential_solar_rooftop_MY_myrer)", 42000.0, 42000.0, "MW")],
+               "VN": [("AEO8 p.140 (potential_solar_rooftop_VN_aeo8)", 370000.0, 370000.0, "MWp"), ("PDP8 Decision 500/QD-TTg rooftop (potential_solar_rooftop_VN_pdp8_technical)", 48200.0, 48200.0, "MW")]}
 
 
 def load():
@@ -72,6 +77,15 @@ def m1_rows(reg: Registry, ev, vre, lng):
                         "(PyPSA-Earth prepare_sector_network.py add rooftop with use_building_size: p_nom_max = 0.1 kW/m2 x useful rooftop area; see "
                         "renewable_rooftop_method_built); availability profile = the node ground-PV c1 profile")
                 tier, loc = "B", f"generators carrier 'solar rooftop', bus country {c}, sum p_nom_max"
+                if "P1" in STEPS:   # supplement 01 section 1: not reproducible here (building inputs not local) -> grade C, +-50 %
+                    tier = "C"
+                    refs = ROOFTOP_REF.get(c)
+                    cmp_txt = ("; comparison (record only, value not changed): " + "; ".join(
+                        f"{src} {lo / 1e3:,.1f}" + (f"-{hi / 1e3:,.1f}" if hi != lo else "") + f" G{u[1:]} -> model / reference = "
+                        + (f"{v / hi:.2f}-{v / lo:.2f}" if hi != lo else f"{v / lo:.2f}") for src, lo, hi, u in refs)
+                           if refs else "; no official comparison figure in the registry for this country")
+                    desc += ("; grade C (M08-0 supplement 01, item 131): the Microsoft building footprints are not in the local cache, so the value cannot "
+                             "be reproduced here; sensitivity 0.5x-1.5x" + cmp_txt)
             else:
                 rule = rules[car]
                 desc = (f"{c} {car} candidate cap as built: sum of p_nom_max over {int(r.generators)} candidate generators ({int(r.nodes)} nodes, 3 resource classes, "
@@ -88,10 +102,12 @@ def m1_rows(reg: Registry, ev, vre, lng):
                 status = "SOURCE_ZERO"
                 desc += (" - zero: no candidate generator in the network for this country" if int(r.generators) == 0
                          else f" - zero: {int(r.generators)} candidate(s) with p_nom_max 0 (no eligible cells in the author layout)")
+            c_grade = tier == "C"
             reg.add(f"renewable_cap_built_{key}_{c}", desc, v, "MW", tier,
                     "S4O cloud package unsolved networks (365x24h, build 126110ff) <- electric_base_2050_unsolved.nc <- author paper network "
                     "elec_s_100_ec_lv2.0__3h_2025_0.071_DEC_0export.nc (results-asean-paper-v1)", loc, f"{nets}|{author}|{vcsv}", country=c,
-                    decision_ref=f"{DEC}; 70-75", status=status)
+                    sensitivity_low=v * 0.5 if c_grade else None, sensitivity_high=v * 1.5 if c_grade else None,
+                    decision_ref=f"{DEC}; 70-75" + ("; 131" if c_grade else ""), status=status)
     # land rules (author network meta renewable block = pypsa-asean config.default.yaml renewable block)
     meta_loc = "author paper network meta['renewable'][tech] (pypsa-asean config.default.yaml renewable block; PyPSA-Earth build_renewable_profiles.py 707-760)"
     for car in ("solar", "onwind", "offwind-ac", "offwind-dc"):
@@ -140,10 +156,13 @@ def m1_rows(reg: Registry, ev, vre, lng):
             f"{rc['kW_per_m2']} x useful rooftop area per node; useful area = Microsoft Global ML Building Footprints (download_global_buildings.py) footprint "
             f"area x install ratio by building size {rc['install_ratio']} (m2 thresholds; cluster_global_buildings.py, method of H. Obane, IEEJ); "
             "the building inputs and the per-node layout CSVs are not in the local cache, so the values cannot be recomputed here (inheritance verified, "
-            "upstream derivation not reproduced)", "building_size", "flag", "B",
+            "upstream derivation not reproduced)" + ("; grade C (M08-0 supplement 01, item 131): grade B needs script + input hashes and "
+                                                     "reproducibility, the building inputs are not available here; per-country rows carry 0.5x-1.5x"
+                                                     if "P1" in STEPS else ""),
+            "building_size", "flag", "C" if "P1" in STEPS else "B",
             "author paper network meta['sector']['solar_rooftop'] and author code", f"{AUTHOR_CODE}: prepare_sector_network.py 2862-2925; cluster_global_buildings.py 30-75",
             f"{author}|prepare_sector_network.py:{AUTHOR_SHA['prepare_sector_network.py']}|cluster_global_buildings.py:{AUTHOR_SHA['cluster_global_buildings.py']}",
-            decision_ref=DEC)
+            decision_ref=DEC + ("; 131" if "P1" in STEPS else ""))
     # 3. Astar base-load hourly shape
     lo = ev["author_load_options"]
     av = ev["astar_vs_gegis"]
@@ -342,8 +361,9 @@ def corrections(ev):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--steps", nargs="+", default=["M1", "M2", "M3"])
+    ap.add_argument("--steps", nargs="+", default=["M1", "M2", "M3", "P1", "P2", "P3", "P4"])
     a = ap.parse_args()
+    STEPS.update(a.steps)
     ev, vre, lng, fleet = load()
     reg = Registry(SCRIPT)
     if "M1" in a.steps:
