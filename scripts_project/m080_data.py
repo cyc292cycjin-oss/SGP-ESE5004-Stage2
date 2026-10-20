@@ -302,6 +302,60 @@ def m3_rows(reg: Registry, ev, fleet):
             status="REFERENCE_ONLY")
 
 
+# ------------------------------------------------------------------------------------------------------------------------------
+# P3 (supplement 01 section 3): the four user downloads for M08 (REFERENCE_ONLY, "M08 实施时使用")
+# ------------------------------------------------------------------------------------------------------------------------------
+def p3_rows(reg: Registry):
+    dl = json.loads((EVD / "M080S1_DOWNLOADS.json").read_text(encoding="utf-8"))
+    f = dl["files"]
+    esha = f"M080S1_DOWNLOADS.json:{sha256(EVD / 'M080S1_DOWNLOADS.json')}"
+    use = "M08 实施时使用 (for M08)"
+    c = dl["cement"]
+    c23 = ", ".join(f"{k} {v['2023']['kt']:,}{(' ' + v['2023']['flag']) if v['2023']['flag'] else ''}" for k, v in sorted(c["asean"].items()))
+    reg.add("download_usgs_myb2023_cement_world_t22",
+            f"{use}: cement base year 2023, one source for the 11 countries (S4R R1.3 / USER_DOWNLOAD_LIST A2). USGS Minerals Yearbook 2023, Cement - advance data "
+            f"release of the 2023 annual tables (Note sheet: posted June 5, 2025; T22 footnote: data available through November 18, 2024); Table 22 'Hydraulic "
+            f"cement: world production, by country or locality', 2019-2023, thousand metric tons, e = estimated, r = revised. ASEAN 2023 (kt): {c23}; "
+            f"{' and '.join(c['missing'])} are not in the table -> 0 (decision of supplement 01)",
+            f["cement"]["name"], "file", "A", "U.S. Geological Survey, National Minerals Information Center, Minerals Yearbook 2023 (Cement), advance release",
+            f"work/p1_s4r_downloads_20261020/R1_demand/{f['cement']['name']} sheet T22 ({f['cement']['bytes']} B)", f"{f['cement']['sha256']}|{esha}",
+            decision_ref="131; 126, 129", status="REFERENCE_ONLY")
+    s = dl["steel"]
+    s24 = ", ".join(f"{k} {v['2024']:,.0f}" for k, v in sorted(s["asean"].items()))
+    reg.add("download_worldsteel_crude_steel_2021_2025",
+            f"{use}: crude steel base year 2024, one source for the 11 countries (S4R R1.3 / USER_DOWNLOAD_LIST A3). worldsteel Steel Data Viewer export "
+            f"(sheet {s['sheet']}, '{s['title']}', 2021-2025; export 2026-10-20 15:02:22 per file name); the unit is not stated in the file - "
+            f"{s['unit_inferred']}. ASEAN 2024: {s24}; {', '.join(s['missing'])} are not in the table -> 0 (decision of supplement 01). Differs from the "
+            "transitional S4R figures (ID 18.0 e, MY 8.8 e, PH 1.9 e Mt from WSIF 2025; SG 0.766 / MM 0.350 Mt = 2019 held flat) - record only",
+            f["steel"]["name"], "file", "A", "World Steel Association (worldsteel), Steel Data Viewer, total production of crude steel",
+            f"work/p1_s4r_downloads_20261020/R1_demand/{f['steel']['name']} ({f['steel']['bytes']} B)", f"{f['steel']['sha256']}|{esha}",
+            decision_ref="131; 126, 129", status="REFERENCE_ONLY")
+    p = dl["population"]
+    reg.add("download_un_wpp2024_tl_population_2050",
+            f"{use}: Timor-Leste population for the TL anchoring rule (S4R demand_anchor_tl_rule; replaces the secondary quote; USER_DOWNLOAD_LIST A4). "
+            f"{p['source']} ({p['author']}), '{p['indicator']}', {p['location']}, {p['variant']} variant, {p['sex']}, {p['estimate_method']}, "
+            f"{p['year']}: {p['value']:,.1f} persons (file covers {p['years_in_file']})",
+            f["population"]["name"], "file", "A", f"United Nations Population Division, {p['source']}, UN Data Portal export",
+            f"work/p1_s4r_downloads_20261020/R1_demand/{f['population']['name']} ({f['population']['bytes']} B)", f"{f['population']['sha256']}|{esha}",
+            decision_ref="131; 126, 129", status="REFERENCE_ONLY")
+    h, td = dl["hicp"]["download"], dl["hicp"]["technology_data_v0_15_0"]
+    ix, rt = h["index"], h["rate_cumprod_2021_2025"]
+    reg.add("download_eurostat_hicp_aind_2016_2025",
+            f"{use}: M08-1 reverse of the technology-data v0.15.0 inflation adjustment (USER_DOWNLOAD_LIST A5). Eurostat prc_hicp_aind (extracted 20/10/2026, "
+            f"data last updated 06/02/2026): Sheet 1 all-items HICP annual average index 2016-2025 (EU27 2020 {ix['EU27']['2020']} / 2025 {ix['EU27']['2025']} "
+            f"= {h['index_ratio_2025_2020']['EU27']}; EA20 {h['index_ratio_2025_2020']['EA20']}; EEA {h['index_ratio_2025_2020']['EEA']}); Sheet 6 annual average "
+            f"rate of change. HICP CHECK (supplement 01): technology-data v0.15.0 scripts/_helpers.py line {td['row_to_use_line']} (tarball {td['tarball_sha256'][:8]}) "
+            "uses the European Economic Area (EEA) row - not EU27 (v0.13.2 used EU27) - of the annual average RATE of change in its own input "
+            f"{td['input_file']} and multiplies (1 + r) over 2021-2025: factor {td['factor_2020_2025']['EEA']} (+25.7 %, as in cost_layer_index_mismatch_note). "
+            f"In this download the EU27 and EEA rates 2021-2025 are identical ({', '.join(str(v) for v in h['rates_2021_2025']['EEA'].values())} %), so the "
+            f"rate product is {rt['EEA']} for both; the EU27 index ratio {h['index_ratio_2025_2020']['EU27']} differs by 0.09 % (rounding); EA20 gives "
+            f"{rt['EA20']}. For an exact reverse M08-1 should use the EEA (= EU27) rate product from Sheet 6",
+            f["hicp"]["name"], "file", "A", "Eurostat, HICP - annual data (average index and rate of change), prc_hicp_aind",
+            f"work/p1_s4r_downloads_20261020/R6_costs/{f['hicp']['name']} Sheets 1 and 6 ({f['hicp']['bytes']} B)",
+            f"{f['hicp']['sha256']}|technology-data-v0.15.0:{td['tarball_sha256']}|_helpers.py:{td['helpers_sha256']}|{esha}",
+            decision_ref="131; 126, 50", status="REFERENCE_ONLY")
+
+
 def corrections(ev):
     """Full replacement rows for existing param_ids (taken from the original fragments, so repeated runs give the same rows)."""
     frags = {}
@@ -394,6 +448,8 @@ def main():
         m2_rows(reg, ev)
     if "M3" in a.steps:
         m3_rows(reg, ev, fleet)
+    if "P3" in a.steps:
+        p3_rows(reg)
     reg.write(REG_DIR / "fragments" / "m080.csv")
     corr = [c for c in corrections(ev) if c["step"] in a.steps]
     write_csv(sorted((c["row"] for c in corr), key=lambda r: r["param_id"]), REG_DIR / "fragments" / "m080_corrections.csv", COLUMNS)
