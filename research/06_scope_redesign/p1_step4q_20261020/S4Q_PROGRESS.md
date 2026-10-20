@@ -34,9 +34,10 @@
 | S4Q-1 | 候选档案、测试、流水线开关 | **完成** | 08:02–08:11 | 代码提交 **84532e78**；脚本测试（在 84532e78 上，无 Gurobi、无许可）：S4O 原框架 **59/59**（`FIXED_RUNS` 缺省 off，S4O 行为不变；输出 `evidence/s4q_1/s4o4_rerun/`，S4O 证据未动），S4Q 用例 N1–N6 **8/8**（`evidence/s4q_1/results/`）；探针脚本未改，未重跑。① `baseline.yaml` 新增 `formal_barrier_1e6`、`formal_barrier_1e6_t16`（注释：第 123 项、单因素、两种路径、非生产；缺省仍 `formal_barrier`）；② `run_365x24h.sh`：白名单 + `FIXED_RUNS`（缺省 off）；③ `tests/research/test_s4q_1.py` 4 项通过；`tests/research` 全套在 worktree 中 483 通过 / 2 失败 / 63 跳过——基线 0b681881 在全新 worktree 中同为 2 失败 / 63 跳过（479 通过），失败与跳过源于 worktree 不含被忽略的输入文件（如 `research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv`），与本次改动无关；483 = 479 + 4 |
 | S4Q-1′ | 测试证据、推送、draft PR | **完成** | 08:11 | 证据提交 **21683239**（含文本文件权限改回 644）；分支已推送；draft PR [#41](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/41)（base = #40 的分支 `codex/s4o-production-20261019`） |
 | S4Q-2 | 6 次本机运行 | 进行中 | 08:12:49– | 类包目录 `/home/jin/s4q_local/pkg`（代码 21683239 的 `git archive`；三个网络 = S4M-1 构建的符号链接，SHA256 与 S4M-2 回执逐一相同：一体化 `513f56a6…`、不互联 `78fa40b7…`、NZE `6ee7b9ca…`；构建成本表）；预检（profile / c1 / versions / tools）两档案均 OK；本机启动前无求解进程，上一次本机 Gurobi 为 S4O-3′（10-19 21:41）。驱动 `/home/jin/s4q_2_run.sh`（`DRIVER_STATUS.txt`）。第 1 次调用 `formal_barrier_1e6`（Threads 8）：运行目录 `runs/20261020T001252Z_564`，08:12:52–08:41:44，**三次全部 optimal**——一体化 352 s（08:12:53 起；119 次迭代 / 337 WU；目标相对 A +4.3e-9）、不互联 312 s（间隔 334 s；142 次 / 339 WU；+2.5e-9）、NZE 367 s（间隔 330 s；138 次 / 393 WU；+4.8e-9）；流水线 C1 三次 abc=111（不互联后建本批参照并重评）；DONE，结果包已生成。第 2 次调用 `formal_barrier_1e6_t16`（Threads 16）：间隔 334 s，运行目录 `runs/20261020T004641Z_8849`，08:46:41–09:15:11，**三次全部 optimal**——一体化 317 s（112 次 / 272 WU；+3.4e-9）、不互联 316 s（间隔 330 s；149 次 / 313 WU；+2.9e-9）、NZE 376 s（间隔 331 s；147 次 / 368 WU；+4.0e-9）；流水线 C1 三次 abc=111。`DRIVER_DONE` 09:15:11，驱动退出 0，无残留进程；无重试、无停止、无超时。**状态：完成** |
-| S4Q-3 | 判定 | 未开始 | | |
-| S4Q-4 | 报告 | 未开始 | | |
+| S4Q-2′ | 证据 | **完成** | 09:17 | 提交 **29b87e48**（轻量证据 181 个文件 6.9 MB，许可串扫描无命中），已推送 |
+| S4Q-3 | 判定 | **完成：第一级通过** | 09:18–09:25 | `scripts/s4q_judge.py`（只读，65 s / 1.6 GiB）：C1 在影子目录用 S4M-2 参照重评（运行目录 `PRECISION.json` / `EXPORTS.json` 哈希不变）；`s4n_c2_compare.py` 两次；判据 1–4 在 T8、T16 两条路径上**全部通过**；提交 **0cfbc13b** |
+| S4Q-4 | 报告 | **完成** | 09:25– | `S4Q_REPORT.md`（含第二级方案 §8，PROPOSED）、`S4Q_EVIDENCE.json`、台账 S4Q 条目；报告提交 = 分支 `codex/s4q-tol-calibration-20261020` 的头提交（S4Q-4），已推送 |
 
 ## 续行点
 
-S4Q-2 进行中（驱动在后台）。若会话中断：先看 `/home/jin/s4q_local/DRIVER_STATUS.txt`——有 `DRIVER_DONE` 则直接做 S4Q-3（`research/06_scope_redesign/p1_step4q_20261020/scripts/s4q_judge.py`）；没有则核实是否仍有求解进程（`ps -eo cmd | grep -E '[s]2_solve'`），**不得重启或补跑**任何运行，按已完成的运行照实报告。
+全部步骤完成，停止等待审阅。6 次授权运行已用完；第二级（云端）未授权、未执行。
