@@ -10,8 +10,8 @@
 | 步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
 | M0 | 核对 SHA、开分支 / 工作树、建进度文件 | 完成 | — |
-| M1 | 补登缺口（§J 1–5） | 完成 | 见 M2 行（本行 SHA 记于下一次提交） |
-| M2 | 海上风机型与尾流核实 | 未开始 | |
+| M1 | 补登缺口（§J 1–5） | 完成 | `4e1de488` |
+| M2 | 海上风机型与尾流核实 | 完成 | 本行 SHA 记于下一次提交 |
 | M3 | 状态与等级修正（§I 3、5、6、7） | 未开始 | |
 | M4 | 状态值检查与注册表单元测试 | 未开始 | |
 | M5 | S4R 产出 v2（REGISTRY_ROWS_PROPOSED_v2、USER_DOWNLOAD_LIST） | 未开始 | |
@@ -27,6 +27,12 @@
 - 写入方式：`scripts_project/m080_data.py` → `fragments/m080.csv`（新行）+ `fragments/m080_corrections.csv`（对已有行的整行替换）；`d1_registry.py` 只增加片段名与"按 param_id 整行替换"的几行，原片段不动（保留为历史）。
 - M1 结果：新增 87 行（VRE 分国上限 55、土地规则 8、数据文件 3、廓线文件 2、屋顶光伏方法 1、Astar 3、地热 3、LNG 12）；LNG `lng_import_cap_*` 11 行只加注释；注册表 2,049 行；测试 91 passed / 24 skipped。
 
+## M2 记录
+
+- VERIFIED：筛查廓线 `profiles_calibrated_modern_c1/c3_3h.nc` 的 `offwind_ac` / `offwind_dc` 与 pypsa_eur 重建逐值相同（与 fork 最大差 0.776）；构建提交 `126110ff` 的 `s4a_profiles.py` 中 pypsa_eur 海上风 = `NREL_ReferenceTurbine_2020ATB_5.5MW`、`correction_factor 0.8855`。注册表（`renewable_profile_variant` 描述、`renewable_correction_factor_offwind_pypsa_eur`）正确；S4R 把"NREL 5 MW、无尾流"写为现状有误，在 M5 的 S4R 副本中改正。
+- 新增核实行 `renewable_offwind_profile_check_built`（REFERENCE_ONLY）；注册表 2,050 行；测试 91 passed / 24 skipped。
+- 对 M08-7（INFERENCE）：机型与尾流两项已在主算，无需改、无需为机型重建廓线；仍需海上面积重算（60 m、漂浮类、航道排除、DC 密度 3→2 MW/km²），航道栅格已在 raw12，不再是下载阻塞项。
+
 ## 续行点
 
-M2：海上风核实行（证据已在 `M080_EXTRACT.json`）；之后 M3 状态 / 等级修正（`m080_data.py --steps M1 M2 M3`）。
+M3：状态 / 等级修正（`m080_data.py --steps M1 M2 M3`）。
