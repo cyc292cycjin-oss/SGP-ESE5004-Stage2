@@ -7,7 +7,7 @@ Branch `codex/s4r-unification-plan-20261020` from the S4P head 69b67a97. No solv
 - d45955ea `GATES_V6.md` + SHA256 only (defined before any retro-evaluation).
 - d0c299a9 `S4R_PLAN.md`, gates retro-evaluation, unification checklist, implementation plan, registry rows, download list, sources, evidence, progress.
 - 50bd2f8d close-out (progress, ledger entry, PR body).
-- SUPP01_SHA supplement 01 (decision 129): revised R1 / R2 / R8 / R7 items, `GATES_V6_NOTES.md`, updated tables and registry rows.
+- 48ad097d supplement 01 (decision 129): revised R1 / R2 / R8 / R7 items, `GATES_V6_NOTES.md`, updated tables and registry rows.
 - SUPP01_CLOSE_SHA supplement 01 close-out (progress record, ledger entry).
 
 ### Supplement 01 (decision 129) in brief

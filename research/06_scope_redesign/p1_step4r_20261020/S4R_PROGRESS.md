@@ -54,3 +54,10 @@
 | §7 | 交付文件更新、`REGISTRY_ROWS_PROPOSED.csv`（31 → 42 行）、`UNIFICATION_CHECKLIST`（209 格，64 标出）、`EXTERNAL_SOURCES_S4R.md`（+12 条）、`S4R_EVIDENCE.json` 重生成 | 完成 | 提交与 PR #43 正文更新见"收尾记录（补充 01）" |
 
 - 本机计算 < 5 分钟；检索：Bleischwitz 2018、Pauliuk 2013、van Ruijven 2016、Global Cement、worldsteel 人均表、USGS MCS 2025（pypdf 解析）、World Bank WDI API；USGS 年鉴章节四种 URL 404、worldsteel SSY 2024 PDF 404（登记 DATA_PENDING）。
+
+## 收尾记录（补充 01）
+
+- 补充 01 提交 48ad097d（方案、对照表、实施计划、下载清单、注册表行、GATES_V6_NOTES、证据、进度）；收尾提交见下一行；draft PR #43 正文已更新：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/43
+- 台账条目 `evidence/LEDGER_ENTRY_S4R_SUPP01.md` 追加到 `research/STAGE2_PROJECT_LEDGER.md`；PR 正文 `evidence/PR_BODY_S4R.md`。
+- `S4R_EVIDENCE.json` 的输出哈希在本记录与台账追加之前生成。
+- 状态：补充 01 全部完成，停止，等待审阅。
