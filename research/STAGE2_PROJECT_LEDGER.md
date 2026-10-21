@@ -704,6 +704,15 @@
 - **待用户决定（报告 §10）：** F1–F4 是否作敏感性先于 2920×3h（顺序 F3 → F1 → F2；任何求解需另行授权）；F10 封存潜力统一 ERIA；F11 登记不互联定义；F7 国别 WACC；报告货币与基年；本报告入库。
 - **交付：** `research/06_scope_redesign/p1_step4p_20261020/`（`S4P_REPORT.md`、`COUNTRY_AUDIT_MATRIX.csv/.md`、`PROPOSED_FIXES.md`、`S4P_EVIDENCE.json`、`EXTERNAL_SOURCES.md`、`A_*`、`ASPECT*`、`evidence/EXT_*`、`scripts/`）；镜像 `work/p1_step4p_20261020/`；网络提取表 `evidence/net/` 未入库（脚本可重生成）。
 
+## S4Q 第 123 项：候选档案 BarConvTol 1e-6 第一级标定（本机 56×3h）— 2026-10-20
+
+- **范围：** 指令 `S4Q_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 c33f97e7…b75d，已核对）；授权本机 6 次 56×3h（候选 × 两种线程 × 三个情景），各 30 分钟止损、不重试，不连云。独立 worktree，分支 `codex/s4q-tol-calibration-20261020`（自 0b681881），draft PR #41 叠在 #40 上。本机求解恰 6 次，无重试；云端无动作。
+- **S4Q-1（84532e78、21683239）：** `baseline.yaml` 新增非生产候选档案 `formal_barrier_1e6`（档案 A 只改 BarConvTol 1e-6，Threads 8）与 `formal_barrier_1e6_t16`（另加 Threads 16）；缺省仍为 `formal_barrier`；`test_s4q_1.py` 逐键核对（4 项通过）。S4O 版 `run_365x24h.sh`：白名单加入两档案，新增 `FIXED_RUNS=on`（只跑所列运行，不触发停止规则与自动诊断；缺省 off）；脚本测试 S4O 原框架 59/59、S4Q 用例 8/8。
+- **S4Q-2（29b87e48）：** S4M-1 网络（SHA256 与 S4M-2 相同）`--truncate 56`、S4O 流水线（自动 C1）、TimeLimit 1,750 s；两条路径各一体化 / 不互联 / NZE，**6 次全部 optimal**，间隔均 ≥ 330 s。
+- **S4Q-3（0cfbc13b）：** 判据事先固定、未调整，**两条路径全部通过 → 第一级通过**：C1（S4M-2 分国参照，影子目录重评）六次 (a)(b)(c) 全过；目标相对档案 A +2.4e-9 至 +4.8e-9；B16 ≤ 4.7e-10；每国差额变化 ≤ 1.5e-5 bn；NZE 各实体 total 变化 ≤ 2.1e-4 bn；两路径之间目标相差 ≤ 9.2e-10。信息：WU 为档案 A 的 0.67–0.94；项目门槛 `A1_A2_S4B` 六次不通过（对偶符号误差约 1–2e-4 > 预算 1e-5，第 120 项下只作数值信息）。
+- **未做：** 第二级（云端 365×24h，一体化、不互联 × 两种路径，4 次）未授权；方案见报告 §8（PROPOSED：时长约 6–11 h、费用按单价 DATA_PENDING、与 S4P 重跑的合并方式、效率标准计算方法）。档案 A 与生产缺省不变。
+- **交付：** `research/06_scope_redesign/p1_step4q_20261020/`（`S4Q_REPORT.md`、`S4Q_EVIDENCE.json`、`S4Q_PROGRESS.md`、`scripts/`、`evidence/`）；镜像 `work/p1_step4q_20261020/`。
+
 ## S4R 第 126、128 项：统一修正方案与门槛重设（只读，不实施、不求解）— 2026-10-20
 
 - **范围：** 指令 `S4R_CLAUDE_CODE_INSTRUCTION.md`（SHA256 f80da6fd…ceeb，与 `S4R_INSTRUCTION_SHA256.txt` 一致）；分支 `codex/s4r-unification-plan-20261020`（自 S4P 头 69b67a97，独立工作树），draft PR #43 叠在 #42 上。只读：未求解、未连云、未调用 Gurobi、未改生产代码 / 注册表 / 网络 / 结果；修正全部写成方案，待面谈后在 M08 实施。已定口径不再讨论：2920×3h 正式分辨率、F3 每线 +20 GW、F8 核电无上限、F7 主算 WACC 0.07、报告美元 / 模型欧元、NZE 舍弃、C1 分级验收。
