@@ -15,7 +15,7 @@ NETS=$MAIN/results_project/m08b/builds_s01; SMOKE=$MAIN/results_project/m08b/smo
 V=$M/variants; ST=$M/STATUS.txt; REF=$SMOKE/BATCH_REFERENCE.json; FULL=$M/full_integrated; DIS=$M/full_disconnected
 LIC=/home/jin/gurobi.lic; TL=1750; WALL=1800; GAP=330; GRACE=60; N=56
 COUNTRIES=${COUNTRIES:-"BN ID KH LA MM MY PH SG TH TL VN"}
-AUTH="PENDING"
+AUTH="M12b section 2 (user authorisation in the session 2026-10-21 13:29Z = 21:29 SGT, cloud idle confirmed by the user): 11 leave-one-out runs, builds_s01 integrated 2920x3h variants, first 56 snapshots, profile A formal_barrier, TimeLimit 1750 s, stop-loss 30 min, gap >= 330 s, no retry, no parameter change"
 case "$AUTH" in PENDING*) echo "no user authorisation recorded in AUTH - not started"; exit 5;; esac
 cd $WT || exit 1
 log() { echo "$1:$(date -u +%Y-%m-%dT%H:%M:%SZ)${2:+:$2}" >> $ST; }
