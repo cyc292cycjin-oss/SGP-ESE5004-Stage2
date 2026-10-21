@@ -405,6 +405,19 @@ def test_proportional_rule_bases_d4(tmp_path):
     assert all(v["A_split_b6"]["loo_check"] == {} for v in r0["proportional"].values()) and r0["loo_check_source"] is None
 
 
+def test_weights_same_source_as_model_d5():
+    """Supplement 01 D5: main weights from the model's own sources - AEO8 D.1 population (TL UN WPP 2024 1,889,249.5), AEO8 D.2 GDP 2050 (the
+    file of the M08b industry growth, byte-identical; TL = mean KH / LA / MM GDP per capita x TL population); SSP2 for comparison."""
+    sw = M.socio_weights(ROOT)
+    assert sw["d2_sha256"] == "9189d8621fa332edc31608f1e55df3e55ce2d5a4dc7afd11e8cbf235ca1ce793"
+    pop, g = sw["population_aeo8_d1_m"], sw["gdp_aeo8_d2_musd2017ppp"]
+    assert set(M.COUNTRIES) <= set(pop) and set(M.COUNTRIES) <= set(g)
+    assert pop["VN"] == 107.0 and pop["ID"] == 317.2 and pop["TL"] == 1.8892495
+    assert g["VN"] == 4207772.0 and g["BN"] == 34750.0
+    assert abs(g["TL"] - np.mean([192464.0 / 20.3, 151898.0 / 9.8, 517199.0 / 59.9]) * 1.8892495) <= 1e-6
+    assert M.WEIGHTS_MAIN[:2] == ("population_aeo8_d1", "gdp_aeo8_d2") and set(M.WEIGHTS_COMPARISON) == {"population_ssp2", "gdp_ppp_ssp2"}
+
+
 def test_premise_failed_flag_d3(tmp_path):
     """Supplement 01 D3: a non-zero right-hand side without an owner (e.g. a future total cap on extra-ASEAN imports) sets owen_premise.passed
     False; the OWEN outputs are flagged premise_failed and not usable for the allocation even when the identity holds."""

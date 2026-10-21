@@ -386,24 +386,39 @@ def s4p_rules(res: dict) -> dict:
 SSP2_NAMES = {"Brunei Darussalam": "BN", "Cambodia": "KH", "Indonesia": "ID", "Laos": "LA", "Lao PDR": "LA", "Malaysia": "MY", "Myanmar": "MM", "Philippines": "PH",
               "Singapore": "SG", "Thailand": "TH", "Timor-Leste": "TL", "Viet Nam": "VN", "Vietnam": "VN"}
 TL_POP_2050_UN_WPP = 1.8892495   # million; registry download_un_wpp2024_tl_population_2050 (UN WPP 2024 medium variant, 1,889,249.5 persons)
+TL_PEERS = ("KH", "LA", "MM")    # M08b TL rule (m08b_demand.py): TL outside AEO8 -> simple mean of the KH / LA / MM per-capita values
+AEO8_D2_CSV = "research_inputs/demand_v5/sources/m08b/AEO8_TABLE_D2_REAL_GDP_PPP2017.csv"   # M08b source of the industry growth (same bytes)
+WEIGHTS_MAIN = ("population_aeo8_d1", "gdp_aeo8_d2", "electricity_fixed", "electricity_base")   # supplement 01 D5: same sources as the model
+WEIGHTS_COMPARISON = ("population_ssp2", "gdp_ppp_ssp2")
+
+
+def _num(v) -> float:
+    return float(str(v).replace(",", "").strip())
 
 
 def socio_weights(repo: Path) -> dict:
-    """2050 population and GDP by country: SSP2 (IIASA-WiC POP 2025, OECD ENV-Growth 2025 GDP|PPP; one source for the 11 countries) as the main
-    weights; AEO8 table D.1 population (+ TL from UN WPP 2024) as a comparison column."""
+    """2050 population and GDP by country (supplement 01 D5: one main source per variable, the one the model uses).
+    Main: population = AEO8 table D.1 2050 (TL: UN WPP 2024 median, the numbers of the demand anchoring, m08b_demand.py); GDP = AEO8 table D.2
+    real GDP PPP 2017 in 2050 (the table behind the industry growth of m08b_demand.py), TL = mean of the KH / LA / MM GDP per capita (D.2 / D.1)
+    x the TL population (the M08b TL rule for per-capita values). Comparison: SSP2 2050 (IIASA-WiC POP 2025, OECD ENV-Growth 2025 GDP|PPP)."""
     src = repo / "research_inputs/registry_v5/sources"
     s = pd.read_csv(src / "SSP2_2025_POP_GDP_ASEAN11.csv")
     s["c"] = s.region.map(SSP2_NAMES)
     pop = s[s.variable == "Population"].set_index("c")["2050"].astype(float).to_dict()
     gdp = s[s.variable == "GDP|PPP"].set_index("c")["2050"].astype(float).to_dict()
-    a = pd.read_csv(src / "AEO8_2050_BY_COUNTRY.csv")
-    a = a[(a.indicator == "Population") & (a.year == 2050)]
-    aeo = {SSP2_NAMES.get(r.country, r.country): float(str(r.value_as_printed).replace(",", "")) for r in a.itertuples()}
+    a = pd.read_csv(src / "AEO8_2050_BY_COUNTRY.csv", dtype=str)
+    a = a[(a.indicator == "Population") & (a.year == "2050") & (a.scenario == "all scenarios (constant)")]
+    aeo = {SSP2_NAMES[r.country]: _num(r.value_as_printed) for r in a.itertuples() if r.country in SSP2_NAMES}
     aeo["TL"] = TL_POP_2050_UN_WPP
-    return dict(population_ssp2_m=pop, gdp_ppp_ssp2_bn_usd2017=gdp, population_aeo8_d1_m=aeo,
-                sources=dict(population_ssp2=f"{src.name}/SSP2_2025_POP_GDP_ASEAN11.csv IIASA-WiC POP 2025 SSP2 2050",
-                             gdp=f"{src.name}/SSP2_2025_POP_GDP_ASEAN11.csv OECD ENV-Growth 2025 SSP2 GDP|PPP 2050 (billion USD2017)",
-                             population_aeo8=f"{src.name}/AEO8_2050_BY_COUNTRY.csv table D.1 2050; TL UN WPP 2024 (registry download_un_wpp2024_tl_population_2050)"))
+    d2 = pd.read_csv(repo / AEO8_D2_CSV, dtype=str)
+    g = {SSP2_NAMES[r.country]: _num(r.y2050) for r in d2.itertuples() if r.country in SSP2_NAMES}
+    g["TL"] = float(np.mean([g[p] / aeo[p] for p in TL_PEERS])) * aeo["TL"]
+    return dict(population_aeo8_d1_m=aeo, gdp_aeo8_d2_musd2017ppp=g, population_ssp2_m=pop, gdp_ppp_ssp2_bn_usd2017=gdp,
+                sources=dict(population_aeo8=f"{src.name}/AEO8_2050_BY_COUNTRY.csv table D.1 2050 (all scenarios); TL UN WPP 2024 median 1,889,249.5 (as m08b_demand.py)",
+                             gdp_aeo8=f"{AEO8_D2_CSV} table D.2 real GDP PPP 2017 (million USD) 2050; TL = mean({', '.join(TL_PEERS)}) GDP per capita x TL population (M08b TL rule)",
+                             population_ssp2=f"{src.name}/SSP2_2025_POP_GDP_ASEAN11.csv IIASA-WiC POP 2025 SSP2 2050 (comparison)",
+                             gdp_ssp2=f"{src.name}/SSP2_2025_POP_GDP_ASEAN11.csv OECD ENV-Growth 2025 SSP2 GDP|PPP 2050 (billion USD2017; comparison)"),
+                d2_sha256=sha(repo / AEO8_D2_CSV))
 
 
 def thresholds_bn(solve_dir: Path | None, reference: Path | None) -> tuple[dict, str]:
@@ -632,8 +647,9 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
     b6 = float(D["objective"] - I["objective"])
     sw = socio_weights(repo)
     le = I.get("load_energy_twh") or {}
-    w = dict(population_ssp2=sw["population_ssp2_m"], gdp_ppp_ssp2=sw["gdp_ppp_ssp2_bn_usd2017"], population_aeo8_d1=sw["population_aeo8_d1_m"],
-             electricity_base=_elec(le, BASE_ELEC), electricity_fixed=_elec(le, FIXED_ELEC))
+    w = dict(population_aeo8_d1=sw["population_aeo8_d1_m"], gdp_aeo8_d2=sw["gdp_aeo8_d2_musd2017ppp"], electricity_fixed=_elec(le, FIXED_ELEC),
+             electricity_base=_elec(le, BASE_ELEC), population_ssp2=sw["population_ssp2_m"], gdp_ppp_ssp2=sw["gdp_ppp_ssp2_bn_usd2017"])
+    assert tuple(w) == WEIGHTS_MAIN + WEIGHTS_COMPARISON
     tol_bn, tol_src = thresholds_bn(Path(int_dir), None)
     tol = {c: tol_bn[c] * 1e9 for c in COUNTRIES}
     lc, lc_src = _loo_marginals(loo_check)
@@ -683,7 +699,10 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
                    B="payment_i = s_i x (c(N) - phi_BUNKER - SHARED) of the integrated run; test (individual rationality): payment_i <= disconnected "
                      "allocation_i (+ the C1 (b) tolerance)"),
                loo_check_source=lc_src, tolerance_source=tol_src, owen_checks=owen_chk,
-               proportional=rules, socio_sources=sw["sources"], electricity_twh=dict(base=w["electricity_base"], fixed=w["electricity_fixed"]),
+               weights_main=list(WEIGHTS_MAIN), weights_comparison=list(WEIGHTS_COMPARISON),
+               weights_note="supplement 01 D5: population AEO8 D.1 (+ UN WPP 2024 TL), GDP AEO8 D.2 (TL by the M08b rule), electricity = the model's fixed / base "
+                            "loads (main); SSP2 2050 population and GDP for comparison",
+               proportional=rules, socio_sources=sw["sources"], d2_sha256=sw["d2_sha256"], electricity_twh=dict(base=w["electricity_base"], fixed=w["electricity_fixed"]),
                rule_budget_residual_eur=float(bal), fx_per_eur2020=fx,
                notes=["(A) splits B6 among the 11 countries by positive weights: with B6 > 0 no country gets a negative benefit; the bunker account (no "
                       "population / GDP / electricity) keeps its disconnected allocation (benefit 0) in (A) and its integrated allocation in (B)",
@@ -716,6 +735,7 @@ def markdown_benefit(r: dict) -> str:
     L += [f"| {p} | {bn(o['benefit_eur'][p])} | {bn(o['benefit_interval_eur'][p]['min'])} | {bn(o['benefit_interval_eur'][p]['max'])} |" for p in PLAYERS]
     ks = list(r["proportional"])
     pb = r["proportional_bases"]; oc = r["owen_checks"]
+    L += ["", f"- 权重（补充 01 D5）：主用 {', '.join(r['weights_main'])}；对照 {', '.join(r['weights_comparison'])}（表中排在后面）。"]
     mark = lambda v: "" if v is None else ("" if v else " ✗")   # noqa: E731
     L += ["", "## 比例规则 (A)：按比例分摊 B6（主讨论；检验 = 去一国边际贡献，补充 01 D4）", "", f"- {pb['A']}", f"- 去一国来源：{r['loo_check_source'] or '无（(A) 的检验不可计算）'}；容差：{r['tolerance_source']}。",
           f"- Owen（主值）去一国检查：" + ("；".join(f"{c} 余量 {bn(v['margin_eur'])} bn {'通过' if v['passed'] else '**未通过**'}" for c, v in oc["loo"].items()) or "无去一国运行"), "",
