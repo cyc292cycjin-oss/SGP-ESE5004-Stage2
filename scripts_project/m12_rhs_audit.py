@@ -77,9 +77,13 @@ FAMILY_NOTES = {
     "research_asean_co2_limit": "东盟整体 CO2 上限（主配置未启用）", "research_gap_co2_limit": "差额诊断 CO2 上限（带松弛；遍历全部 11 国）",
     "research_nuclear_national_cap": "国家核电上限", "research_apg_corridor_cap": "跨境项目组容量上限", "ResearchExistingResource": "存量资源组",
 }
+# Supplement 01 D3 (item 136): the pool surplus of the ASEAN pools' ownerless components (extra-ASEAN imports at fixed prices, pool tanks) stays a
+# separately reported residual (option a: KKT-residual size, no right-hand side). RULE: a total cap on extra-ASEAN imports (or any other row
+# whose right-hand side belongs to no player) must get an owner BEFORE the run - otherwise its rent falls into SHARED, the 12 players no longer
+# sum to c(N) and the audit sets owen_premise.passed = False (OWEN outputs flagged premise_failed, not usable for the allocation).
 PROPOSALS = {
-    "shared": "东盟池（ASEAN oil / oil non-fossil / methanol / ammonia）的无主组件：区域外进口（固定价格）与池储罐。提议 (a) 归入燃料舱参与者"
-              "（第 12 个参与者）；或 (b) 按各国在该池的净购买量比例分到国家；或 (c) 维持现状，残差单列（现行账本：池盈余为恒等式差项）。",
+    "shared": "右端项不属于任何参与者的行（例如区域外进口总量上限）：按补充 01 D3，必须在运行前确定归属（分到国家，或作为燃料舱参与者的一部分），"
+              "否则 Owen 前提不成立（owen_premise.passed = False，OWEN 输出标 premise_failed）。东盟池无主组件（无右端项）的池盈余维持残差单列（D3 方案 a）。",
     "unresolved": "右端项非零、但无法由组件母线 / 名称后缀 / 变量确定所有者的行：逐行列出，交审阅端决定。",
 }
 
@@ -499,6 +503,9 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
                                  coupling_families_nonhomogeneous=sorted({v["family"] for v in coupling.values() if not v["homogeneous"]}),
                                  coupling_families_homogeneous=sorted({v["family"] for v in coupling.values() if v["homogeneous"]})),
                solver_runs=0)
+    pc_ = res["owen_premise"]["nonzero_rhs_rows_by_class"]
+    res["owen_premise"].update(passed=bool(pc_["shared"] == 0 and pc_["unresolved"] == 0),
+                               rule="supplement 01 D3: passed = no non-zero right-hand side that is SHARED or unresolved (every right has an owner)")
     if dual_of is not None:
         const = objective_constants(n, O)
         tot = dict(dual_terms)
@@ -616,7 +623,12 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
                             within_threshold=({p: bool(abs(resid[p]) <= thr[p]) for p in PLAYERS} if resid is not None else None),
                             note="residual impact = market form - dual form - KVL transfer of the player (KKT residuals of the returned solution); "
                                  "compared with the C1 (b) per-country threshold as information; the deciding check is the identity")
-    out["usable_for_allocation"] = bool(ident["passed"] and (prec.get("c_passed") is not False))
+    pr = res.get("owen_premise") or {}
+    out["premise"] = dict(passed=pr.get("passed"), nonzero_rhs_rows_by_class=pr.get("nonzero_rhs_rows_by_class"), rule=pr.get("rule"),
+                          coupling_families_homogeneous=pr.get("coupling_families_homogeneous"), coupling_families_nonhomogeneous=pr.get("coupling_families_nonhomogeneous"),
+                          shared_or_unresolved_rows=res.get("shared_or_unresolved", [])[:20])
+    out["premise_failed"] = pr.get("passed") is False
+    out["usable_for_allocation"] = bool(ident["passed"] and (prec.get("c_passed") is not False) and not out["premise_failed"])
     return out
 
 
@@ -635,8 +647,12 @@ def write_owen(res: dict, out: Path) -> None:
         rows.append(r)
     pd.DataFrame(rows).set_index("player").to_csv(out / "OWEN.csv")
     idt = o["identity"]
-    L = ["# OWEN（M12：Owen 分摊主值 = 对偶形式 y′b；补充 01 D1；只读，未求解）", "",
-         f"- 运行：{o.get('tag')}；网络 `{o.get('network')}`（SHA256 `{str(o.get('network_sha256'))[:12]}…`）；对偶 `{o.get('duals')}`。",
+    L = ["# OWEN（M12：Owen 分摊主值 = 对偶形式 y′b；补充 01 D1；只读，未求解）", ""]
+    if o.get("premise_failed"):
+        L += [f"> **⚠ premise_failed：存在无主（SHARED）或无法归属的非零右端项（{o['premise']['nonzero_rhs_rows_by_class']}），Owen 前提不成立；"
+              "须先确定归属再运行（补充 01 D3），本分摊不可用。**", ""]
+    L += [f"- 运行：{o.get('tag')}；网络 `{o.get('network')}`（SHA256 `{str(o.get('network_sha256'))[:12]}…`）；对偶 `{o.get('duals')}`。",
+         f"- Owen 前提（右端项全部有主）：**{o['premise']['passed']}**。",
          f"- 恒等式（C1 (c) 对偶形式扩展）：11 国 + 燃料舱 = {bn(idt['players_sum'])} bn，目标值 {bn(idt.get('objective'))} bn，"
          f"相对误差 {idt.get('relative_error', float('nan')):.2e}（≤ 1e-6：**{idt['passed']}**）；共享 {bn(idt['shared'])} bn。",
          f"- C1 (c)（运行本身）：{c1['c1_c_passed']}；分摊可用：**{o['usable_for_allocation']}**。阈值来源：{c1['threshold_source']}。",

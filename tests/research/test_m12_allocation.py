@@ -364,6 +364,30 @@ def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
     assert all(o["interval_eur"][p]["min"] - 1e-3 <= ls[p] <= o["interval_eur"][p]["max"] + 1e-3 for p in M.PLAYERS)
 
 
+def _fake_audit(alloc: dict, shared_rows: int = 0) -> dict:
+    """minimal audit result (dual form + premise) for owen_summary."""
+    full = {p: float(alloc.get(p, 0.0)) for p in list(M.PLAYERS) + [M.SHARED]}
+    nz = dict(country=10, cross_border_pair=1, bunker=1, shared=shared_rows, unresolved=0, country_split_by_load=0)
+    return dict(tag="T", network="n.nc", network_sha256="0" * 64, shared_or_unresolved=[dict(constraint="import_cap", rows=shared_rows)] if shared_rows else [],
+                owen_premise=dict(nonzero_rhs_rows_by_class=nz, passed=shared_rows == 0, coupling_families_homogeneous=["Kirchhoff-Voltage-Law"],
+                                  coupling_families_nonhomogeneous=[]),
+                dual_form=dict(allocation_by_alpha={"0": full, "0.5": full, "1": full}, allocation_alpha_half=full, source="fake",
+                               interval={p: dict(min=full[p], max=full[p], width=0.0) for p in M.PLAYERS}, pair_values={}))
+
+
+def test_premise_failed_flag_d3(tmp_path):
+    """Supplement 01 D3: a non-zero right-hand side without an owner (e.g. a future total cap on extra-ASEAN imports) sets owen_premise.passed
+    False; the OWEN outputs are flagged premise_failed and not usable for the allocation even when the identity holds."""
+    import m12_rhs_audit as RA
+    a = {c: 1e9 for c in M.COUNTRIES} | {M.BUNKER: 2e9}
+    ok = RA.owen_summary(_fake_audit(a), None, None, 13e9)
+    assert ok["identity"]["passed"] and ok["premise"]["passed"] and not ok["premise_failed"] and ok["usable_for_allocation"]
+    res = _fake_audit(a, shared_rows=3); res["owen"] = RA.owen_summary(res, None, None, 13e9)
+    assert res["owen"]["premise_failed"] and not res["owen"]["usable_for_allocation"] and res["owen"]["identity"]["passed"]
+    RA.write_owen(res, tmp_path)
+    assert "premise_failed" in (tmp_path / "OWEN.md").read_text() and json.loads((tmp_path / "OWEN.json").read_text())["premise_failed"]
+
+
 def test_dual_length_split_by_component():
     """Supplement 01 D2: the dual form's pair values split by the components' in-country length shares (a "-reversed" link takes its twin's
     share; a pair value not attributable to a component is split 0.5)."""

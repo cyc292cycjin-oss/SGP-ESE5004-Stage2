@@ -24,7 +24,9 @@ the interior-point solution: the analytic centre of the optimal dual face is sym
 (investment) and congestion rent of a line are split with the same alpha, i.e. its NET rent is split.
 
 Owner codes used throughout: a country code ("VN"), a sorted pair for cross-border items ("KH|VN", first country gets alpha), "BUNKER", and
-"SHARED" for right-hand sides / assets that belong to no player (reported separately, never folded into a player silently).
+"SHARED" for right-hand sides / assets that belong to no player (reported separately, never folded into a player silently). Supplement 01 D3:
+the ASEAN pool surplus (ownerless pool components, no right-hand side) stays a separate residual; a future total cap on extra-ASEAN imports
+(any right-hand side without an owner) must be attributed BEFORE the run, else the audit flags the Owen premise as failed.
 
     PYTHONHASHSEED=0 python scripts_project/m12_allocation.py run --repo . --solved <dir>/<scenario>_solved.nc --scenario integrated --out <dir>
             [--solve-dir <dir>] [--label L] [--alpha 0.5]
