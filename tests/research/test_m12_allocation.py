@@ -248,6 +248,41 @@ def test_network_allocation_on_local_smoke(tmp_path):
         assert abs(v["ii_rent_to_importer_minus_same_proportion"] + v["iii_rent_to_exporter_minus_same_proportion"]) <= 1e-3
 
 
+def test_loo_rhs_compare_merges_nodal_families(tmp_path):
+    """C2: b(N - i) = b(N) on the remaining owners; a balance row that moves between the meshed and the plain nodal family is the same right."""
+    import m12_rhs_audit as RA
+    full = pd.DataFrame([("Bus-nodal_balance", "MY", 10.0, 4), ("Bus-meshed-nodal_balance", "MY", 5.0, 2), ("Generator-ext-p_nom-upper", "VN", 7.0, 1),
+                         ("Line-ext-s_nom-upper", "MY|VN", 3.0, 1), ("Generator-ext-p_nom-upper", "MY", 2.0, 1)], columns=["family", "owner", "rhs_sum", "rows"])
+    var = pd.DataFrame([("Bus-nodal_balance", "MY", 12.0, 5), ("Bus-meshed-nodal_balance", "MY", 3.0, 1), ("Generator-ext-p_nom-upper", "MY", 2.0, 1)], columns=full.columns)
+    full.to_csv(tmp_path / "f.csv", index=False); var.to_csv(tmp_path / "v.csv", index=False)
+    assert RA.loo_compare(tmp_path / "f.csv", tmp_path / "v.csv", ["VN"], tmp_path)["passed"]
+    var.loc[2, "rhs_sum"] = 2.5                                                              # a remaining country's potential changed
+    var.to_csv(tmp_path / "v.csv", index=False)
+    r = RA.loo_compare(tmp_path / "f.csv", tmp_path / "v.csv", ["VN"], tmp_path)
+    assert not r["passed"] and r["remaining_rights_changed_count"] == 1
+
+
+@pytest.mark.skipif(not (SMOKE / "lp" / "clabels.npy").exists() or os.environ.get("PYTHONHASHSEED") != "0",
+                    reason="local 56x3h smoke solve with exported arrays not present, or PYTHONHASHSEED != 0")
+def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
+    """C2 on the real LP structure (built, not solved): every non-zero right-hand side has an owner; the only coupling family is the homogeneous
+    KVL; the Owen dual form closes on the objective within the returned duality gap; market form - dual form = KVL transfer + KKT residuals."""
+    import m12_rhs_audit as RA
+    net = SMOKE.parents[3] / "s4m/s4m1/builds/integrated/integrated_2920_3h_unsolved.nc"
+    if not net.exists():
+        pytest.skip("smoke input network not present")
+    al = M.run(SMOKE / "integrated_SMOKE_TEST_ONLY_solved.nc", "integrated", tmp_path / "a", SMOKE, "TEST", ROOT, register=False)
+    r = RA.audit(ROOT, net, "integrated", tmp_path / "b", 56, None, SMOKE, tmp_path / "a" / "ALLOCATION.json", "TEST")
+    p = r["owen_premise"]
+    assert p["nonzero_rhs_rows_by_class"]["unresolved"] == 0 and p["nonzero_rhs_rows_by_class"]["shared"] == 0
+    assert p["coupling_families_nonhomogeneous"] == [] and p["coupling_families_homogeneous"] == ["Kirchhoff-Voltage-Law"]
+    d = r["dual_form"]
+    assert abs(d["dual_total_minus_objective_eur"]) <= 1e-4 * abs(d["objective"])
+    assert d["decomposition"]["check_max_abs_dev_eur"] <= 1e3
+    kv = d["kvl_loop_transfer_alpha_half"]
+    assert abs(sum(v for k, v in kv.items() if k in M.PLAYERS)) <= 1e6                         # loop transfers are zero-sum over the owners
+
+
 def test_scrb_and_proportional_sum_to_total():
     L, _ = toy(); cost = coalition_costs(L, 0.5); cN = cost[frozenset(P3)]
     marg = {i: cN - cost[frozenset(P3) - {i}] for i in P3}; alone = {i: cost[frozenset({i})] for i in P3}
