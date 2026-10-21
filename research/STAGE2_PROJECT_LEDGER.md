@@ -751,6 +751,16 @@
 - **补充 01（第 131 项，2026-10-21）：** `M080_SUPPLEMENT_01.md`（SHA256 a505908b…73b7，核对一致），同一分支 / PR #44，边界同 M08-0。注册表 2,052 → 2,057 行（6950a15d → 6d1b2c34；新增 5、修改 14，数值无改动）。屋顶光伏 12 行 B → C（0.5×–1.5×；记录与 AEO8 / PDP8 / MyRER 的比值 0.33–2.54）；GEGIS 原始文献核实为 Mattsson, Verendel, Hedenus, Reichenberg (2021) Energy Strategy Reviews 33, 100606（doi:10.1016/j.esr.2020.100606，作者链文档 + Crossref），LA / TL 借用曲线登记为 C 级例外；登记 4 个已获取文件（USGS 年鉴 2023 水泥 T22、worldsteel 粗钢 2021–2025、UN WPP 2024 TL 2050 = 1,889,249.5、Eurostat HICP），REFERENCE_ONLY；HICP 核实：technology-data v0.15.0 用欧洲经济区（EEA）年均变化率累乘（1.25733），不是 EU27 指数（1.25624）或欧元区（1.2256），M08-1 按此回算；存量机组成本表版本登记为"统一性问题，M08 处理"，拟增行加 `existing_fleet_cost_rule`（v0.15.0 对应投运年份；43 行）。清单 v3 与新精简版（旧版改名 `_v2`）：主算输入 A 10.85 / B 60.33 / C 28.82 %；表 4 第 17、21–23 行"已获取，M08 实施"，删去"过渡值"表述；精简版 664 格可在 v3 详表中原文找到。提交 1a139be9 → e18b2bc8 → 4e1007bc → 1be5ce02 → 8e1a2a29 → 收尾提交。
 - **交付：** `research/06_scope_redesign/p1_m080_20261020/`（`M080_REPORT.md`、`REGISTRY_ROWS_PROPOSED_v2.csv`、`USER_DOWNLOAD_LIST_v2.md`、`M080_PROGRESS.md`、`scripts/`、`evidence/`）与 `research/06_scope_redesign/p1_meet_20261020/`（v1 原样、v2、精简版）；镜像 `work/p1_m080_20261020/`、`work/p1_meet_20261020/`；提交 4e1de488 → 995256ff → 880955b8 → dca14c83 → fc964ea2 → c98bf5d9 → 收尾提交。
 
+### M11（无决策项号；用户 10-21 11:52 授权：D58 试点完整结果包下载，只下载不求解）— 2026-10-21
+
+- **编号与并入：** 本条原为 work 目录草稿 `work/p1_m11_d58_20261021/M11_LEDGER_ENTRY.md`（M11 按用户选择未改动 Git 检出）；M08b 第 1 节按指令并入。M11 没有对应的决策项号，用户 10-21 选择标"无项号"并按时间排序（M11 于 12:13 完成，早于 M08a 交付）。以下内容与草稿一致。
+- **范围：** `D58_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 88b2163d…b701，核对一致）；用户 10-21 约 12:00 授权：无卡模式开启 AutoDL 西北 B 区 D58 原实例，SSH 下载 S4N 试点完整结果包、检查并删除残留许可文件。未求解、未运行 Gurobi、未删除实例上任何文件；主机 / 端口 / 密码未写入任何文件。
+- **实例：** 密钥登录，主机密钥与 S4N 记录一致；无卡模式（`nvidia-smi -L` 无 GPU、`/dev/nvidia*` 0 个）；无求解 / 分析进程；数据盘仍在（S4O-6 克隆机没有的试点包在原机上）。
+- **下载：** `runs/20261019T072454Z_5125/results_20261019T072454Z_5125.tar.gz` 实例端 158,873,778 B、SHA256 cb4927da…7480 均一致；单路 scp 12:02:18–12:10:38 SGT，500 s，平均 0.318 MB/s（瞬时 0.16–0.68 MB/s；S4N 估计约 17 分钟）。
+- **本机校验（VERIFIED）：** SHA256 一致，`.sha256` 与实例端生成的副本逐字节相同；`tar tvzf` 清单与 `BUNDLE_LISTING.txt` 完全相同（27 个文件成员）；解包到 `full/`（27 个文件，256,608,061 B，大小逐个一致）；与轻量包 24 个同名文件逐字节相同；许可特征串（S4N 同一模式，文本及含二进制补充扫描）无命中。
+- **许可：** `/root/.gurobi/gurobi.lic` 不存在（S4N 10-19 18:56:27 已 `shred -u`；目录为空），本次无需删除；conda 包以外无其他许可类文件名。已告知用户可在 AutoDL 控制台关机。
+- **交付：** 结果包、`.sha256`、`full/`、`D58_DOWNLOAD_STATUS.txt` 在 `work/p1_step4n_20261019/cloud_results/20261019T072454Z_5125/`；`work/p1_m11_d58_20261021/`（`M11_PROGRESS.md`、草稿、`scripts/`、`evidence/d58_verify_log.txt`、`evidence/FULL_MEMBERS_SHA256.txt`）。结果包与 `full/` 未入库。
+
 ### M08a（第 129–133 项：实施修正（上），不求解）— 2026-10-21
 
 - **范围：** `M08A_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 19c00a1e…9476）与 `M08A_SUPPLEMENT_01.md`（e3471b65…ec24）均核对一致；分支 `codex/m08a-corrections-20261021`（M08-0 头 30d281b8 + 普通 merge S4Q 22f53c84，冲突仅台账），draft PR 叠在 #44 上。未求解、未调用 Gurobi、未连云，未改既有结果与已发布网络；网络重建与本机冒烟放在 M08b 之后。
