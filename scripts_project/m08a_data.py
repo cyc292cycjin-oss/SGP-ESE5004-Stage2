@@ -377,7 +377,49 @@ def a9(reg: Registry, cor: Corrections):
             1.1422 * fx_in - 1.0, "ratio", "B", "registry fx_usd_to_eur_2020; ECB 2020 annual average", "fx_usd_to_eur_2020 x 1.1422 - 1", cfg_sha, decision_ref="133", status="REFERENCE_ONLY")
 
 
-def main(steps=("a2", "a3", "a4", "a5", "a7", "a8", "a9")):
+# --- A6.1 (M08-7, decisions 129, 131): PV density; open-forest trigger; offshore alpha ----------------------------------------
+def a6(reg: Registry, cor: Corrections):
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    pe = ROOT / "research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml"
+    pe_sha = sha256(pe) if pe.exists() else cfg_sha
+    reg.add("renewable_capacity_per_sqkm_solar", "R2 / M08a A6.1 (decisions 129, 131): solar capacity density aligned to PyPSA-Eur v2025.07.0 (config.default.yaml line 270) - replaces "
+            "PyPSA-Earth 4.6; applied as p_nom_max x 5.1 / 4.6 = 1.1087 to every ground-mounted 'solar' candidate (11 countries, before the resource-class split; "
+            "research.renewable.solar_density; s4a_layers.apply_solar_density); rooftop / existing PV unchanged; no raster recomputation", 5.1, "MW/km2", "B",
+            "PyPSA-Eur v2025.07.0 config.default.yaml renewable.solar.capacity_per_sqkm", "line 270", pe_sha, decision_ref="126, 129, 131")
+    reg.add("renewable_landuse_rule_solar", "R2 (S4R supplement 01, decisions 129, 131): MAIN RUN keeps the current solar land classes (Copernicus LC100 [20, 30, 40, 50, 60, 90, 100]; all "
+            "forest [111-126], water [80] and protected areas (WDPA / natura) excluded) - same type as the PyPSA-Eur CORINE rule; only the capacity density changes (4.6 -> 5.1). Open "
+            "forest [121-126] is an UPPER-BOUND SENSITIVITY (variant s4r_openforest, not implemented in M08a); the model / ESMAP Level-1 ratio 0.18-0.57 decomposes into ~6-18 % density "
+            "and the rest basis differences (protected areas, forest and other criteria)", "copernicus_current_classes_main", "rule", "C",
+            "ESMAP / Solargis (2020) Ch.2 p.12-13; Copernicus LC100 v3 legend; PyPSA-Eur v2025.07.0 renewable.solar.corine; World Bank WDI", "POTENTIAL_COMPARISON.csv (S4R)", cfg_sha,
+            decision_ref="126, 129, 131")
+    reg.add("renewable_openforest_sensitivity_trigger", "R2 (S4R supplement 01): after the corrected 365x24h main runs, if a country solar cap binds in either scenario (p_nom_opt >= 0.999 x "
+            "p_nom_max) and shadow price x bound capacity >= 1 bn EUR2020/a, the open-forest variant s4r_openforest becomes a formal sensitivity run (both scenarios) in the third batch; "
+            "otherwise binding status and shadow prices are recorded in an appendix; shadow prices from the in-run dual export (decision 118), no re-solve", "rule", "flag", "C",
+            "IMPLEMENTATION_PLAN.md section 2.1", "section 2.1", cfg_sha, decision_ref="129")
+    reg.add("offwind_alpha_calibration_rule", "F9 / R2.5 / M08a A6.3: offshore capacity-factor calibration alpha kept at 1.0 (no observed offshore CF source for the region: VN has only "
+            "nearshore / intertidal projects, Bac Lieu / Tra Vinh; DATA_PENDING); S4B-3 onshore method (alpha on ERA5 100 m wind speed) to apply once a source exists; fallback = World "
+            "Bank Vietnam offshore wind roadmap 2021 net CF assumptions (page DATA_PENDING)", "DATA_PENDING", "rule", "C", "S4B-3 method; WB Offshore Wind Roadmap for Vietnam 2021",
+            "R2.5", cfg_sha, country="VN", decision_ref="126, 131", status="DATA_PENDING")
+    cor.supersede("renewable_density_built_solar", "renewable_capacity_per_sqkm_solar", "A6.1", "as-built 4.6 MW/km2 of the electric base; the main run scales p_nom_max by 5.1 / 4.6")
+    cor.supersede("renewable_landcover_codes_built_solar", "renewable_landuse_rule_solar", "A6.1", "same classes, now registered as the main-run rule with the open-forest sensitivity")
+
+
+# --- A10 (decisions 126, 129-133): remaining proposed rows of this step ------------------------------------------------------
+def a10(reg: Registry, cor: Corrections):
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    reg.add("co2_sequestration_cost_price_year", "R5 / R6.4: 30 EUR/t is the PyPSA-Eur v2025.07.0 config constant sector.co2_sequestration_cost (research.s2.co2.sequestration_cost_eur_per_t); "
+            "price year not stated -> DATA_PENDING, used as EUR2020; benchmarks GCCSI 2025 offshore US$5-31/t, ERIA 2022 US$12.9/t; +-50 % sensitivity unchanged",
+            "DATA_PENDING", "year", "C", "PyPSA-Eur v2025.07.0 config.default.yaml line 711; GCCSI (2025-12) Cost of CO2 Storage p.2, 6; ERIA (2022) Vol. II Table 2.12 p.21",
+            "R6.4", cfg_sha, decision_ref="126, 131", status="DATA_PENDING")
+    reg.add("co2_storage_vn_shipping_interaction", "R5 x R7 (S4R supplement 01 section 5, INFERENCE): with the VN annual storage cap 236 -> 106 Mt/a (ERIA P50 / 50; M08a A5) about 130 Mt/a "
+            "of the 365x24h VN sequestration has to re-route: intra-ASEAN shipping to MY (14.4-15.0 EUR2020/t chain + receiver storage 30) costs +14-15 EUR/t over own storage = "
+            "+1.9-2.0 bn/a in each scenario (upper bound before re-optimisation); disconnected VN shipping would rise to ~225 Mt/a; if maritime CO2 trade were removed "
+            "(disconnected.co2_shipping_intra_asean forbid, M08a A7) the disconnected case falls back to extra-ASEAN storage at 54.70 EUR/t (+5.5 bn/a); to be checked on the rebuilt "
+            "networks", 130, "MtCO2/a re-routed", "C", "S4P ASPECT5_CO2.csv; registry co2_ship_chain_fixed_cost, co2_ship_chain_per_km_cost, co2_extra_asean_storage_cost_unified",
+            "S4R_PLAN.md section 8", cfg_sha, country="VN", decision_ref="129, 92, 95, 132", status="REFERENCE_ONLY")
+
+
+def main(steps=("a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

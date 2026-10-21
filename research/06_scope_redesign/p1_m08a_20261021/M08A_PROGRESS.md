@@ -13,13 +13,14 @@
 | A3 | 存量机组按投运年取 v0.15.0 表（`m08a_layers.py`）；存量 FOM 10.806 → 10.050 bn/a，两情景相同；CCGT 0.56 / 0.57；测试 105 / 24 | 完成 | 4cc95598 |
 | A4 | LNG `capex_only`（16 台 p_nom_max = inf）、8,020.43、加价 1.26、液氢 × 1.2；测试 110 / 24 | 完成 | 04d686fe |
 | A5 | 封存统一表（VN 106.07、PH 1.344 Mt/a；年上限 = 潜力 / storage_years）；测试 114 / 24 | 完成 | 79b0f3e6 |
-| A6.1 | 地面光伏 p_nom_max × 5.1/4.6（分级前、11 国同一系数；屋顶 / 存量不变）；底座测试 3 passed | 完成 | 见 git log |
-| A6.2 | 海上风面积规则（60 m、漂浮式、航道 400、2 MW/km²）atlite 重算 | 待做 | |
+| A6.1 | 地面光伏 p_nom_max × 5.1/4.6（分级前、11 国同一系数；屋顶 / 存量不变）；底座测试 3 passed | 完成 | f1de7cb5 |
+| A6.2 | 海上风面积规则（60 m、漂浮式、航道 400、2 MW/km²）atlite 重算 | **待做（下一会话）** | |
 | A7 | 四个开关 + `m08a_variants.py`（确定性派生、回执 SHA256）；取证 5 个变体；测试 120 / 24 | 完成 | bf181b68 |
 | A8 | `v5/gates_v6.py`、子集哈希写入网络与回执、`solver.run_rules`、运行脚本 `m08a_run_batch.sh`；测试 130 / 24 | 完成 | 7e38c500 |
-| A9 | 账本美元列（明细 `usd2020*` 列 + 美元宽表）；发现输入汇率差 0.20 %；测试 133 / 24 | 完成 | 见 git log |
-| A10 | 注册表 | 待做 | |
-| 交付 | 报告、测试、台账、PR | 待做 | |
+| A9 | 账本美元列（明细 `usd2020*` 列 + 美元宽表）；发现输入汇率差 0.20 %；测试 133 / 24 | 完成 | 9fb4e584 |
+| A10（部分） | A6.1 注册表行（光伏密度、土地规则、开阔林触发、海上 alpha）+ co2_sequestration_cost_price_year、co2_storage_vn_shipping_interaction；注册表 2,111 行（`5b79654d…`），m08a 新行 50、修正 42；测试 136 / 24 | 完成 | 见 git log |
+| A10（余） | 海上规则行（A6.2 之后）；整步注册表差异表 | 待做 | |
+| 交付 | 全量测试、报告、台账、PR、审阅 ZIP | 待做 | |
 
 ## 代码探查要点（2026-10-21，供接续）
 
@@ -37,6 +38,33 @@
 - A6：光伏 p_nom_max 只在 `s4a_layers.apply_renewable_profiles` 拆分（c3）；乘系数放在其开头（:43 后），须在 dust（s4l，最后一层）之前；测试 test_s4a_profiles.py:59,75 会受影响。`s4a_profiles.py` 不算可用面积，复用作者 `potential`；现行海上规则只在作者链（AC 2 MW/km² ≤50 m ≤30 km；DC 3 MW/km² ≤50 m ≥30 km）。缓存：cutout `research_model/cutouts/asean_zenodo_20325289/cutout-2013-era5.nc`（7.35 GB）、GEBCO `pypsa-asean/data/gebco/GEBCO_2025_sub_ice.nc`、EEZ `pypsa-asean/data/eez/eez_v11.gpkg`、natura、航运 zip 535 MB（tif 9.8 GB）。本机 16 线程 / 10 GiB。估算 25–60 min、峰值 3–5 GiB、永久 <1 GB（推断）。漂浮式行 `offwind-float*` 在 costs_2050 1186-1197（有）。新载体要改的位置：s4a_layers:26、s4c_layers:72/240、s4c_1_offwind_distance:47、baseline cost_scaling、s4l_layers:51、s4b_layers:112、s4m_cost_breakdown:41/103 等；测试 test_s4a_profiles:27、test_s4c_1:53。
 - A10：`d1_registry.py` 片段列表 FRAGMENTS(:20-24)、修正 CORRECTIONS(:26)，整行替换、id 不得重复；"历史：已被 X 替代"追加在描述末尾。
 
-## 接续点
+## 接续点（2026-10-21，第一会话结束时；上下文约 60 % 以上，按指令请用户开新会话）
 
-A1–A5 已提交（77a9a07c、0e39df2e、4cc95598、04d686fe、79b0f3e6）。工具脚本：`/home/jin/m08a_tests.sh`（运行 `m08a_data.py` → `d1_registry.py` → 无求解测试子集；`REASSEMBLE=0` 跳过重拼）、`/home/jin/m08a_commit.sh`（镜像 work/ 并按 `/home/jin/m08a_msg.txt` 提交；被忽略文件列在 `/home/jin/m08a_force.txt`）。注册表新行在 `scripts_project/m08a_data.py`（每任务一个函数，`main(steps=...)` 需追加新任务名）。下一步：A7 → A8 → A9 → A6 → A10 → 报告、台账、PR。
+已完成并提交：0、A1–A5、A6.1、A7–A9、A10 部分（提交见上表；分支已推送 origin）。工具脚本（WSL）：
+- `/home/jin/m08a_tests.sh`：`m08a_data.py` → `d1_registry.py` → 无求解测试子集（读注册表的文件 + `tests/research/test_m08a_*.py`；排除两个 HiGHS 玩具求解用例）；`REASSEMBLE=0` 跳过重拼，`TAILN` 控制输出行数。
+- `/home/jin/m08a_commit.sh`：把 `work/p1_m08a_20261021/{M08A_*.md,evidence,scripts}` 镜像到 `research/06_scope_redesign/p1_m08a_20261021/`，`git add -A` + 强制加入 `/home/jin/m08a_force.txt` 所列被忽略路径，按 `/home/jin/m08a_msg.txt` 提交（消息末尾带 Co-Authored-By）。
+- 注册表新行：`scripts_project/m08a_data.py`（每任务一个函数；`main(steps=...)` 已含 a2–a10；新任务要追加函数名）；修正行用 `Corrections.supersede/modify`。
+
+### 下一会话要做
+
+1. **A6.2 海上风面积规则**（指令 A6 第 2 项；估算 25–60 min、峰值 3–5 GiB、永久 < 1 GB，未超原则 7 阈值，INFERENCE）：
+   - 先联网只读核对 PyPSA-Eur v2025.07.0 `scripts/determine_availability_matrix.py`（航道 `ship_threshold × 8760 × 6`、`min_depth` 写法）与 `build_ship_raster.py`；配置副本 `research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml` 第 201–260 行（AC / DC ≤ 60 m、30 km 分界、ship_threshold 400、excluder_resolution 200、2 MW/km²；漂浮 60–1,000 m、NREL_ReferenceTurbine_5MW_offshore、landfall 40 km）。
+   - 新脚本（建议 `scripts_project/m08a_offshore_profiles.py`）：节点海上区域沿用 `s4a_profiles.py`（Voronoi 裁到作者 offshore_shapes）；ExclusionContainer 加 Copernicus 80/200（invert）、natura、GEBCO 深度、航运密度栅格（`/mnt/d/ResearchWorkspaces/ASEAN/work/p2_data_intake/raw12/shipdensity_global.zip`，可用 /vsizip/ 免解压）、离岸距离缓冲；cutout `research_model/cutouts/asean_zenodo_20325289/cutout-2013-era5.nc`；输出新变体廓线（AC / DC / float × c3）、分级潜力表、离岸距离表（`s4c_1_offwind_distance.py` 同法）。
+   - 构建接入：新配置键（如 `renewable.offshore_rules: pypsa_eur_v2025_07 | author_pypsa_earth`）；`s4a_layers` 对海上 AC / DC 用新潜力替换（不再拆分底座值），新增 `offwind-float` 发电机与载体；成本 `s4c_layers.CARRIER_COST_ROWS` 与 `apply_cost_layer_s4c1`（offwind-float + float-station + submarine × 距离 + underground × landfall）；`cost_scaling` 加 offwind-float；载体列表 s4l_layers:51、s4b_layers:112、s4m_cost_breakdown:41/103、s4c_1_cost_audit:60、price_basis:129、build_research_assets:91、selected_closure:31、s4i_static_audit:28；测试 test_s4a_profiles:27、test_s4c_1:53；漂浮式成本行 costs_2050 `offwind-float*` 存在（1186–1197 行）。
+   - 注册表：`renewable_offshore_rule`（v2 行），被替代 `renewable_landcover_codes_built_offwind_ac/dc`、`renewable_density_built_offwind_dc`、`renewable_offshore_depth_rule` → REFERENCE_ONLY。
+2. **全量测试**：`tests/research` 全部文件（先 `grep -n "optimize(" tests/research/*.py`，只排除玩具求解用例并在报告中写明），写明通过数。
+3. **交付**：`M08A_REPORT.md`（开头 15 行以内摘要；逐项改动、配置键、测试、偏离与理由；注册表变化与未决项；开头醒目标出下列发现），`STAGE2_PROJECT_LEDGER.md` 追加 M08a 条目，draft PR（`gh pr create --repo cyc292cycjin-oss/SGP-ESE5004-Stage2 --base codex/m08-0-registry-backfill-20261020 --draft`，叠在 #44 上），审阅 ZIP（逐成员 SHA256 + CRC 清单）。注册表整步差异：`research/06_scope_redesign/p1_m080_20261020/scripts/m080_registry_diff.py`（基准 M08-0 头 `30d281b8`，注册表 `6d1b2c34…`）。
+
+### 已发现、须写入报告的事项
+
+1. **G2.2 子集**：按 GATES_V6 原列表实现，另加 `cost_layer`（整段）、`site_candidates`、`disconnected`、`coalition`（理由：这些键改变网络 / LP，原列表只有 `cost_layer.active`）；`GATES_V6.md` 未改，请用户确认。
+2. **汇率**：注册表 `fx_usd_to_eur_2020` = 0.8772286（倒数 1.13996）与报告汇率 1.1422（ECB 2020 年均）差 0.20 %；拟增行"= 1/fx_usd_to_eur_2020"的说法有误，已更正；输入汇率未改，待用户决定。
+3. **分国 WACC**：原 `apply_wacc_mode` 对缺 `country` 列的底座组件静默跳过（S4M-3 网络 1,864 个），已改为按母线国家确定；线路与跨境资产（两端均值）纳入。
+4. **S4R 重评脚本缺陷**：`s4r_r8_retro.py` 的 D7 用 `cap_t`、D9 用 `p_nom_opt`/`p_nom_max`，与门槛实际字段（B2 `final_level_t`/`horizon_limit_t`，B14 `p_nom_opt_mw`/`p_nom_max_mw`）不符，`GATES_RETRO_COMPARISON` 中 D7/D9 实际未算到；gates_v6 已用正确字段。
+5. **存量计数**：方案"24 条电力边"为走廊表原始计数；S4M-3 网络中 2025 年容量 > 0 的跨境电力边为 16 条交流线 + 1 条直流（Khlong Ngae–Gurun 300 MW）；气管道 6 条（3 个国家对）与方案一致。
+6. **b1 解释**：`forbid` 同时删除 `CO2 transit rail`（老挝经铁路进入 VN / TH 国家封存），理由是同一贸易的陆上段；请用户确认。
+7. **液氢码头上限**仍沿用 S3-2 规则（LNG 存量 × 2.5 或规划容量），A4 只取消 LNG 上限；GEM 中 3 个无容量数据的 LNG 节点仍不建候选。
+8. **验收字段**：`s4o_c1_precision.py` 的 `acceptance`（第 120 项规则）保留未改；V6 标签由 `gates_v6.py accept` 在 C1 之后产出（运行脚本已串接）。
+9. **派生文档行**：数据脚本按旧成本层写入注册表的货币文档行（如 `gas_pipeline_cost_onshore` 91.37）未重算；构建期价格直接取成本层，不受影响。
+10. **存量水电 VOM**：technology-data v0.15.0 无 hydro / ror VOM，按规则变为 0（原 0.53 / 0.44 EUR/MWh）；存量 FOM 合计 10.806 → 10.050 bn EUR2020/a。
+11. **SMR**：8,421 → 9,167 EUR2020/kW（+8.9 %）。
