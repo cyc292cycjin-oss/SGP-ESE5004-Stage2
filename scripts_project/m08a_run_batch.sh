@@ -9,12 +9,29 @@
 #     2920x3h formal runs with the profile of PROFILE_CHOICE.json (missing -> profile A), TimeLimit = run_rules.formal_time_limit_s (48 h);
 #     C1, GATES_V6 acceptance and formal-check (C1 (c) required for the allocation); a NOT_ACCEPTED run stops the batch (STOP_NOT_ACCEPTED).
 # NETS holds <scenario>_<365_24h|2920_3h>_unsolved.nc, <scenario>_BUILD_RECEIPT.json and <scenario>_costs_active_research.csv.
-# Test hooks: PY, SOLVE_CMD, VA_CMD, C1_CMD (default the repo scripts); DRY=1 prints the commands only.
+# M12 (item 133): after C1 every run gets its Owen allocation (m12_allocation.py run -> ALLOCATION.*, registered in the run's EXPORTS.json
+# BEFORE the GATES_V6 acceptance) and, when the exported arrays exist and M12_DUAL=1 (default), the Owen dual form with the KVL decomposition
+# (m12_rhs_audit.py audit -> m12_owen/, registered); once both scenarios of a profile have allocations (after the regrade): the batch's
+# benefit and proportional-rule comparison (OUT/M12_BENEFIT<suffix>/); leave-one-out runs in OUT/<full tag>_minus<CC>/ -> OUT/M12_LOO_<tag>/.
+# M12 supplement 01 D7 (item 136): level2 only - after the profile-A runs of both scenarios the leave-one-out variants of LOO_COUNTRIES
+# (default "VN TH LA") are generated in the cloud from NETS/integrated_365_24h_unsolved.nc with VAR_CMD (m08a_variants.py, PYTHONHASHSEED=0,
+# never --allow-stale-base) into OUT/variants/ (receipt + output SHA256 in STATUS) and solved ONCE each as integrated_A_minus<CC> with profile A
+# (costs table of the integrated base; GATES_V6 G2.1 against the variant receipt's output.sha256); batch_reference _A regrades them too.
+# The fourth batch (formal) has no leave-one-out runs.
+# M12 supplement 01 D9: formal runs are graded by C1 with a PROVISIONAL reference (env PROVISIONAL_REFERENCE, else the third batch's
+# OUT/BATCH_REFERENCE_A.json, else the L23 default - recorded as provisional); a provisional NOT_ACCEPTED stops the batch at once only when it
+# does not hinge on the reference (C1 (a) or a G2 check failed). After both runs: batch_reference "" (the batch's own per-country reference,
+# both runs regraded, grade_history kept), V6_ACCEPTANCE.json / FORMAL_DECISION.json copied to *_PROVISIONAL.json, final acceptance and
+# formal-check; a final NOT_ACCEPTED stops the batch before the M12 batch steps. The L23 default never decides a formal run.
+# Test hooks: PY, SOLVE_CMD, VA_CMD, C1_CMD, M12_CMD, M12A_CMD, VAR_CMD (default the repo scripts); DRY=1 prints the commands only.
 set -u
 : "${RUN_KIND:?level2 or formal}" "${REPO:?}" "${NETS:?}" "${OUT:?}"
 PY=${PY:-python}; SCENARIOS=${SCENARIOS:-"integrated disconnected"}; DRY=${DRY:-0}; AUTH=${AUTH:-"M08 batch (separate user authorisation required)"}
 SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD:-"$PY $REPO/scripts_project/l23_violation_analysis.py"}
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; G6="$PY $REPO/scripts_project/v5/gates_v6.py"
+M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}; M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; M12_DUAL=${M12_DUAL:-1}
+VAR_CMD=${VAR_CMD:-"$PY $REPO/scripts_project/m08a_variants.py"}; LOO_COUNTRIES=${LOO_COUNTRIES:-"VN TH LA"}
+C1_REF=""   # C1 run reference (formal: provisional reference, D9); empty = C1's default
 mkdir -p "$OUT"; ST="$OUT/STATUS.txt"; echo "START:$RUN_KIND:$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$ST"
 
 rule() {   # dotted key of research.solver.run_rules (gates_v6.run_rules: config over the registered defaults)
@@ -35,22 +52,56 @@ TL_FORMAL=$(rule formal_time_limit_s); CAND=$(rule profile_chain.candidate); REF
 TL_L2=${L2_TIME_LIMIT_S:-21600}   # level-2 runs keep the S4O limit (21,600 s; decision 123 plan)
 echo "RULES:formal_time_limit_s=$TL_FORMAL:candidate=$CAND:reference=$REF:fallback=$FALLBACK:level2_time_limit_s=$TL_L2" >> "$ST"
 
-one_run() {   # $1 tag $2 scenario $3 resolution $4 profile $5 time limit -> solve ONCE, violations, C1; never repeated
-  local tag=$1 sc=$2 res=$3 prof=$4 tl=$5 dir="$OUT/$1" net="$NETS/${2}_${3}_unsolved.nc"
+one_run() {   # $1 tag $2 scenario $3 resolution $4 profile $5 time limit [$6 network $7 costs table] -> solve ONCE, violations, C1; never repeated
+  local tag=$1 sc=$2 res=$3 prof=$4 tl=$5 dir="$OUT/$1" net=${6:-"$NETS/${2}_${3}_unsolved.nc"} costs=${7:-"$NETS/${2}_costs_active_research.csv"}
   mkdir -p "$dir"
   if [ -f "$dir/SOLVE_RECEIPT.json" ]; then echo "SKIP_EXISTING_$tag (no re-solve)" >> "$ST"; return 0; fi
   local s=($SOLVE_CMD --repo "$REPO" --network "$net" --scenario "$sc" --output "$dir" --label "M08_${RUN_KIND}_${tag}" --authorization "$AUTH; run $tag"
-           --solver gurobi --solver-profile "$prof" --scaling on --time-limit "$tl" --costs-table "$NETS/${sc}_costs_active_research.csv")
+           --solver gurobi --solver-profile "$prof" --scaling on --time-limit "$tl" --costs-table "$costs")
   if [ "$DRY" = 1 ]; then echo "DRY-RUN: ${s[*]}" >> "$ST"; return 0; fi
   ( cd "$REPO" && "${s[@]}" > "$dir/solve.log" 2> "$dir/solve.err" ); echo "SOLVE_$tag:exit=$?:profile=$prof:time_limit=$tl" >> "$ST"
   if [ -f "$dir/solution/X.npy" ]; then ( cd "$REPO" && $VA_CMD --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --out "$dir/VIOLATIONS.json" > "$dir/va.log" 2>&1 ); fi
-  ( cd "$REPO" && $C1_CMD run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --violations "$dir/VIOLATIONS.json" > "$dir/c1.log" 2>&1 )
+  ( cd "$REPO" && $C1_CMD run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --violations "$dir/VIOLATIONS.json" \
+      ${C1_REF:+--reference "$C1_REF"} > "$dir/c1.log" 2>&1 )
   echo "C1_$tag:exit=$?" >> "$ST"
+  m12_run "$tag" "$sc" "$net"
 }
 
-accept() {   # $1 tag $2 scenario -> GATES_V6 label (V6_ACCEPTANCE.json)
+m12_run() {   # $1 tag $2 scenario $3 unsolved network: M12 allocation (and the Owen dual form) after C1, registered before the acceptance
+  local dir="$OUT/$1"
+  ( cd "$REPO" && PYTHONHASHSEED=0 $M12_CMD run --repo "$REPO" --solve-dir "$dir" --scenario "$2" --label "M08_$1" --out "$dir" --register > "$dir/m12.log" 2>&1 )
+  echo "M12_$1:exit=$?" >> "$ST"
+  if [ "$M12_DUAL" = 1 ] && [ -f "$dir/solution/X.npy" ] && [ -f "$dir/ALLOCATION.json" ]; then
+    ( cd "$REPO" && PYTHONHASHSEED=0 $M12A_CMD audit --repo "$REPO" --network "$3" --scenario "$2" --solve-dir "$dir" --allocation "$dir/ALLOCATION.json" --tag "M08_$1" \
+        --out "$dir/m12_owen" --register-dir "$dir" > "$dir/m12_owen.log" 2>&1 )
+    echo "M12_OWEN_$1:exit=$?" >> "$ST"
+  fi
+}
+
+m12_batch() {   # $1 suffix of the run tags: benefit / proportional rules of the batch once both scenarios have allocations (after any regrade);
+  # runs AFTER m12_loo: the (A) basis of the proportional rules is tested against the batch's leave-one-out marginal contributions (supplement 01 D4)
+  [ "$DRY" = 1 ] && return 0
+  [ -f "$OUT/integrated$1/ALLOCATION.json" ] && [ -f "$OUT/disconnected$1/ALLOCATION.json" ] || { echo "M12_BENEFIT$1:missing allocations" >> "$ST"; return 0; }
+  local lc=(); [ -f "$OUT/M12_LOO_integrated$1/LOO_CHECK.json" ] && lc=(--loo-check "$OUT/M12_LOO_integrated$1/LOO_CHECK.json")
+  ( cd "$REPO" && $M12_CMD benefit --repo "$REPO" --integrated "$OUT/integrated$1" --disconnected "$OUT/disconnected$1" --out "$OUT/M12_BENEFIT$1" ${lc[@]+"${lc[@]}"} \
+      > "$OUT/M12_BENEFIT$1.log" 2>&1 )
+  echo "M12_BENEFIT$1:exit=$?:loo_check=${#lc[@]}" >> "$ST"
+}
+
+m12_loo() {   # $1 tag of the full integrated run: leave-one-out check once runs OUT/$1_minus<CC>/ exist (same resolution and profile)
+  [ "$DRY" = 1 ] && return 0
+  local args=() d c
+  for d in "$OUT/$1"_minus*; do [ -f "$d/SOLVE_RECEIPT.json" ] || continue; c=${d##*_minus}; args+=(--loo "${c:0:2}=$d"); done
+  [ ${#args[@]} -gt 0 ] || return 0
+  local sa="$OUT/disconnected${1#integrated}"
+  ( cd "$REPO" && $M12_CMD loo --full "$OUT/$1" "${args[@]}" --standalone "$sa" --out "$OUT/M12_LOO_$1" > "$OUT/M12_LOO_$1.log" 2>&1 )
+  echo "M12_LOO_$1:exit=$?:runs=$(( ${#args[@]} / 2 ))" >> "$ST"
+}
+
+accept() {   # $1 tag $2 scenario [$3 registered SHA256 of the input network: leave-one-out variants] -> GATES_V6 label (V6_ACCEPTANCE.json)
   local dir="$OUT/$1"; [ "$DRY" = 1 ] && { echo "DRY-RUN: accept $1" >> "$ST"; echo DRY; return 0; }
-  local lab; lab=$($G6 accept --solve-dir "$dir" --build-receipt "$NETS/${2}_BUILD_RECEIPT.json" --repo "$REPO" 2>> "$dir/v6.err" | tail -1)
+  local reg=(--build-receipt "$NETS/${2}_BUILD_RECEIPT.json"); [ -n "${3:-}" ] && reg=(--registered-sha256 "$3")
+  local lab; lab=$($G6 accept --solve-dir "$dir" "${reg[@]}" --repo "$REPO" 2>> "$dir/v6.err" | tail -1)
   echo "V6_$1:$lab" >> "$ST"; echo "$lab"
 }
 
@@ -58,16 +109,58 @@ batch_reference() {   # $1 suffix of the run tags: the batch's own per-country r
   [ "$DRY" = 1 ] && return 0
   [ -f "$OUT/integrated$1/COUNTRY_COST_LEDGER.csv" ] && [ -f "$OUT/disconnected$1/COUNTRY_COST_LEDGER.csv" ] || { echo "REFERENCE$1:missing ledgers (C1 keeps its default reference)" >> "$ST"; return 0; }
   $C1_CMD reference --integrated "$OUT/integrated$1" --disconnected "$OUT/disconnected$1" --out "$OUT/BATCH_REFERENCE$1.json" > /dev/null 2>> "$ST"
+  local d n=0
   for sc in $SCENARIOS; do $C1_CMD regrade --solve-dir "$OUT/$sc$1" --reference "$OUT/BATCH_REFERENCE$1.json" > /dev/null 2>> "$ST"; done
-  echo "REFERENCE$1:done" >> "$ST"
+  for d in "$OUT/integrated$1"_minus*; do   # leave-one-out runs of the batch (D7): same reference
+    [ -f "$d/PRECISION.json" ] || continue; $C1_CMD regrade --solve-dir "$d" --reference "$OUT/BATCH_REFERENCE$1.json" > /dev/null 2>> "$ST"; n=$((n + 1))
+  done
+  echo "REFERENCE$1:done:loo_regraded=$n" >> "$ST"
+}
+
+ref_independent() {   # $1 V6_ACCEPTANCE.json -> 1 when NOT_ACCEPTED does not hinge on the C1 (b) thresholds (C1 (a) or a G2 check failed; unreadable -> 1)
+  "$PY" -c "import json,sys; a=json.load(open(sys.argv[1])); print(int((not a['G1']['a']) or not all(a['G2'][k]['passed'] for k in ('G2_1', 'G2_2', 'G2_3'))))" "$1" 2>/dev/null || echo 1
+}
+
+variant_sha() {   # $1 variant receipt -> output.sha256
+  "$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['output']['sha256'])" "$1" 2>/dev/null
+}
+
+loo_runs() {   # $1 suffix (profile tag), $2 profile: leave-one-out variants of LOO_COUNTRIES generated from the 365x24h integrated base, solved ONCE each
+  case " $SCENARIOS " in *" integrated "*) ;; *) echo "LOO$1:skipped (no integrated scenario)" >> "$ST"; return 0;; esac
+  local base="$NETS/integrated_365_24h_unsolved.nc" V="$OUT/variants" c rc net sha act
+  mkdir -p "$V"
+  echo "LOO$1:countries=$LOO_COUNTRIES:base_sha256=$( [ -f "$base" ] && sha256sum "$base" | cut -c1-64)" >> "$ST"
+  for c in $LOO_COUNTRIES; do
+    rc="$V/integrated_minus${c}_365_24h_VARIANT_RECEIPT.json"; net="$V/integrated_minus${c}_365_24h_unsolved.nc"
+    if [ "$DRY" = 1 ]; then echo "DRY-RUN: PYTHONHASHSEED=0 $VAR_CMD --repo $REPO --base $base --out $V --set coalition.remove_countries=[$c]" >> "$ST"; continue; fi
+    if [ ! -f "$rc" ]; then
+      ( cd "$REPO" && PYTHONHASHSEED=0 $VAR_CMD --repo "$REPO" --base "$base" --out "$V" --set "coalition.remove_countries=[$c]" > "$V/variant_$c.log" 2>&1 )
+      echo "VARIANT_$c:exit=$?" >> "$ST"
+    fi
+    sha=$(variant_sha "$rc"); act=$( [ -f "$net" ] && sha256sum "$net" | cut -c1-64)
+    if [ -z "$sha" ] || [ "$sha" != "$act" ]; then echo "VARIANT_$c:FAILED (receipt sha256 ${sha:-missing} vs file ${act:-missing}); leave-one-out run skipped" >> "$ST"; continue; fi
+    echo "VARIANT_$c:sha256=$sha" >> "$ST"
+    one_run "integrated${1}_minus$c" integrated 365_24h "$2" "$TL_L2" "$net" "$NETS/integrated_costs_active_research.csv"
+  done
+}
+
+loo_accept() {   # $1 suffix: GATES_V6 acceptance of the leave-one-out runs (G2.1 against the variant receipt's output.sha256)
+  local d c
+  for d in "$OUT/integrated$1"_minus*; do
+    [ -d "$d" ] || continue; c=${d##*_minus}
+    accept "integrated$1_minus$c" integrated "$(variant_sha "$OUT/variants/integrated_minus${c}_365_24h_VARIANT_RECEIPT.json")" > /dev/null
+  done
 }
 
 case "$RUN_KIND" in
   level2)
     for sc in $SCENARIOS; do one_run "${sc}_A" "$sc" 365_24h "$REF" "$TL_L2"; done
+    loo_runs _A "$REF"   # D7: leave-one-out (third batch only), profile A, paired with integrated_A
     for sc in $SCENARIOS; do one_run "${sc}_CAND" "$sc" 365_24h "$CAND" "$TL_L2"; done
     batch_reference _A; batch_reference _CAND
+    m12_loo integrated_A; m12_loo integrated_CAND; m12_batch _A; m12_batch _CAND
     for sc in $SCENARIOS; do accept "${sc}_A" "$sc" > /dev/null; accept "${sc}_CAND" "$sc" > /dev/null; done
+    [ "$DRY" = 1 ] || loo_accept _A
     [ "$DRY" = 1 ] && { echo "DONE:dry" >> "$ST"; exit 0; }
     "$PY" - "$OUT" "$CAND" "$REF" $SCENARIOS > "$OUT/LEVEL2.json" <<'P'
 import json, sys
@@ -92,12 +185,35 @@ P
     if [ -f "$PC" ]; then PROF=$("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['profile'])" "$PC"); else PROF=$FALLBACK; echo "PROFILE_CHOICE:missing -> $FALLBACK" >> "$ST"; fi
     case "$PROF" in "$CAND"|"$REF") ;; *) echo "REFUSED_PROFILE:$PROF (only $CAND or $REF; the 1e-5 profile is never a fallback)" >> "$ST"; exit 3;; esac
     echo "FORMAL_PROFILE:$PROF" >> "$ST"
+    C1_REF=${PROVISIONAL_REFERENCE:-}; [ -z "$C1_REF" ] && [ -f "$OUT/BATCH_REFERENCE_A.json" ] && C1_REF="$OUT/BATCH_REFERENCE_A.json"
+    echo "PROVISIONAL_REFERENCE:${C1_REF:-L23 default (provisional only, never final)}" >> "$ST"
     for sc in $SCENARIOS; do
       one_run "$sc" "$sc" 2920_3h "$PROF" "$TL_FORMAL"
       lab=$(accept "$sc" "$sc")
       [ "$DRY" = 1 ] || $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
-      if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break; fi
+      if [ "$lab" = NOT_ACCEPTED ]; then
+        if [ "$(ref_independent "$OUT/$sc/V6_ACCEPTANCE.json")" = 1 ]; then
+          echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break
+        fi
+        echo "PROVISIONAL_NOT_ACCEPTED:$sc (C1 (b) under the provisional reference; decided after the batch reference)" >> "$ST"
+      fi
     done
+    if [ ! -f "$OUT/STOP_NOT_ACCEPTED" ] && [ "$DRY" != 1 ]; then   # D9: the batch's own reference, regrade, final acceptance
+      batch_reference ""
+      if [ -f "$OUT/BATCH_REFERENCE.json" ]; then
+        for sc in $SCENARIOS; do
+          [ -f "$OUT/$sc/V6_ACCEPTANCE.json" ] || continue
+          cp "$OUT/$sc/V6_ACCEPTANCE.json" "$OUT/$sc/V6_ACCEPTANCE_PROVISIONAL.json"; cp "$OUT/$sc/FORMAL_DECISION.json" "$OUT/$sc/FORMAL_DECISION_PROVISIONAL.json"
+          lab=$(accept "$sc" "$sc")
+          $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
+          echo "FINAL_$sc:$lab" >> "$ST"
+          if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (final, batch reference; no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; fi
+        done
+      else
+        echo "FINAL:provisional only (no batch reference: missing ledgers)" >> "$ST"
+      fi
+    fi
+    [ -f "$OUT/STOP_NOT_ACCEPTED" ] || { m12_loo integrated; m12_batch ""; }
     ;;
   *) echo "unknown RUN_KIND $RUN_KIND" >&2; exit 2;;
 esac
