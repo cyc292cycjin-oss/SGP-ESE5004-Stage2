@@ -14,11 +14,14 @@
 | A4 | LNG `capex_only`（16 台 p_nom_max = inf）、8,020.43、加价 1.26、液氢 × 1.2；测试 110 / 24 | 完成 | 04d686fe |
 | A5 | 封存统一表（VN 106.07、PH 1.344 Mt/a；年上限 = 潜力 / storage_years）；测试 114 / 24 | 完成 | 79b0f3e6 |
 | A6.1 | 地面光伏 p_nom_max × 5.1/4.6（分级前、11 国同一系数；屋顶 / 存量不变）；底座测试 3 passed | 完成 | f1de7cb5 |
-| A6.2 | 海上风面积规则（60 m、漂浮式、航道 400、2 MW/km²）atlite 重算 | **待做（下一会话）** | |
+| A6.2 | 海上风面积规则（PyPSA-Eur v2025.07.0：≤60 m、漂浮式 60–1,000 m、航道 400×8760×6、2 MW/km²、200 m、ESRI:54009）；`m08a_offshore_profiles.py` 全量 3 分 22 秒、峰值 2.65 GB；AC 1,783.2 / DC 2,714.3 / 漂浮 4,435.8 GW（as-built 1,672.9 / 3,054.3）；作者规则复算 1,673.3 / 3,052.2 GW；航道仅排除 57.2 MW；接入 `s4a_layers.apply_offshore_rules`、成本层、审计 / dust / 台风列表；测试 144 / 24 + 电力底座 4 passed | 完成 | 见 git log |
 | A7 | 四个开关 + `m08a_variants.py`（确定性派生、回执 SHA256）；取证 5 个变体；测试 120 / 24 | 完成 | bf181b68 |
 | A8 | `v5/gates_v6.py`、子集哈希写入网络与回执、`solver.run_rules`、运行脚本 `m08a_run_batch.sh`；测试 130 / 24 | 完成 | 7e38c500 |
 | A9 | 账本美元列（明细 `usd2020*` 列 + 美元宽表）；发现输入汇率差 0.20 %；测试 133 / 24 | 完成 | 9fb4e584 |
 | A10（部分） | A6.1 注册表行（光伏密度、土地规则、开阔林触发、海上 alpha）+ co2_sequestration_cost_price_year、co2_storage_vn_shipping_interaction；注册表 2,111 行（`5b79654d…`），m08a 新行 50、修正 42；测试 136 / 24 | 完成 | 见 git log |
+| S01-1 | 补充 01 第 1 点：`GATES_V6_NOTES.md` 第 6 节"实现说明：子集键清单"（30 键），测试子集键 = 说明表；NOTES SHA256 `d296ddcf…` → `cad04000…`；测试 137 / 24 | 完成 | 4c46f442 |
+| S01-3 | 补充 01 第 3 点：报告汇率 = 1 / `fx_usd_to_eur_2020` = 1.139954（`reporting.fx_per_eur2020: inverse_of_input`）；ECB 1.1422 作对照行；测试 138 / 24 | 完成 | 2a0a660b |
+| S01-2 | 补充 01 第 2 点 + §2：b1 范围确认；老挝过境通道保留并强制检查（`check_landlocked_transit`、`co2_sink_channels`）；**A5 遗留构建缺陷修正**（船运路线表 70 条 TL 路线，`apply_intra_asean_shipping` 精确相等检查会使重建失败）；取证 32 行全有出口；测试 140 / 24 | 完成 | adc0460e |
 | A10（余） | 海上规则行（A6.2 之后）；整步注册表差异表 | 待做 | |
 | 交付 | 全量测试、报告、台账、PR、审阅 ZIP | 待做 | |
 
@@ -68,3 +71,7 @@
 9. **派生文档行**：数据脚本按旧成本层写入注册表的货币文档行（如 `gas_pipeline_cost_onshore` 91.37）未重算；构建期价格直接取成本层，不受影响。
 10. **存量水电 VOM**：technology-data v0.15.0 无 hydro / ror VOM，按规则变为 0（原 0.53 / 0.44 EUR/MWh）；存量 FOM 合计 10.806 → 10.050 bn EUR2020/a。
 11. **SMR**：8,421 → 9,167 EUR2020/kW（+8.9 %）。
+12. **A5 遗留构建缺陷（已修）**：`CO2_SHIP_ROUTES_S4D2.csv` 有 70 条进入 TL 的路线；A5 后 TL 潜力 0 无国家储罐，`s4d_layers.apply_intra_asean_shipping` 的精确相等检查会让按现行配置的重建失败。改为丢弃并记录进入无储罐接收国的路线（`co2_ship_routes_receivers_rule`）。
+13. **直通总线（观察，未改）**：MY_Peninsular22 0、PH_Visayas10 0、TH21 0 的 `co2 stored` 总线只连 FT / SMR CC，无缓冲、管道或封存（`co2_passthrough_buses_note`）。
+14. **去掉越南 + b1**：老挝过境链路两端都在 LA，越南移出后仍保留（陆段经越南）；按内陆国过境权惯例理解，请用户确认。
+15. **补充 01 汇率**：补充写 1.13996，精确倒数 1/0.877228632573 = 1.139954；实现按精确倒数。

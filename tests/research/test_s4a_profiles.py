@@ -47,7 +47,7 @@ def test_apply_profiles_on_electric_base():
     from phase4_static import config
     from s4a_layers import apply_renewable_profiles
     cfg = config(ROOT, "integrated")
-    cfg["research"]["renewable"].update(profile_variant="pypsa_eur", resource_classes=1)   # the S4A variant tested explicitly (S4B-3 changed the main setting)
+    cfg["research"]["renewable"].update(profile_variant="pypsa_eur", resource_classes=1, offshore_rules="author_pypsa_earth")   # the S4A variant tested explicitly (S4B-3 changed the main setting; M08a A6.2 the offshore rule)
     n0 = pypsa.Network(str(EB)); base_pm = n0.generators_t.p_max_pu.copy(); base_pmax = n0.generators.p_nom_max.copy()
     sd = cfg["research"]["renewable"]["solar_density"]; k_solar = sd["target_mw_per_km2"] / sd["built_mw_per_km2"]   # M08a A6.1: ground PV x 5.1 / 4.6
     base_pmax = base_pmax.where(n0.generators.carrier != "solar", base_pmax * k_solar)
@@ -75,3 +75,25 @@ def test_apply_profiles_on_electric_base():
         for name in g.index[g.carrier == tech][:5]:
             parts = [name] + [k for k in n.generators.index if k.startswith(name + " c")]
             assert n.generators.loc[parts, "p_nom_max"].sum() == pytest.approx(float(base_pmax[name]), rel=1e-9)
+
+
+@pytest.mark.skipif(not EB.exists(), reason="electric base not available")
+def test_offshore_rules_on_electric_base():
+    """M08a A6.2: main configuration (calibrated_modern, 3 classes, offshore_rules pypsa_eur_v2025_07) on the electric base - every extendable
+    offwind-ac / -dc candidate replaced by the class table, offwind-float added, onshore / solar classes as before."""
+    import pypsa
+    from phase4_static import config
+    from s4a_layers import apply_renewable_profiles
+    cfg = config(ROOT, "integrated"); RN = cfg["research"]["renewable"]
+    t = pd.read_csv(ROOT / RN["offshore_dir"] / "OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv"); t = t[(t.classes == 3) & (t.potential_mw > 0)]
+    n0 = pypsa.Network(str(EB)); n = pypsa.Network(str(EB)); led = apply_renewable_profiles(n, cfg, ROOT)
+    g = n.generators
+    for tech in ("offwind-ac", "offwind-dc", "offwind-float"):
+        sel = g[(g.carrier == tech) & g.p_nom_extendable]
+        assert len(sel) == (t.tech == tech).sum() and sel.p_nom_max.sum() == pytest.approx(t[t.tech == tech].potential_mw.sum(), rel=1e-12)
+        assert set(sel.bus) <= set(n0.buses.index)
+    assert led["offshore"]["removed"]["offwind-ac"]["generators"] == int((n0.generators.carrier.eq("offwind-ac") & n0.generators.p_nom_extendable).sum())
+    assert g[g.carrier == "offwind existing"].p_nom.sum() == pytest.approx(n0.generators[n0.generators.carrier == "offwind existing"].p_nom.sum())
+    for tech in ("onwind", "solar"):   # not touched by the offshore rule
+        assert g[(g.carrier == tech) & g.p_nom_extendable].p_nom_max.sum() == pytest.approx(
+            n0.generators[(n0.generators.carrier == tech) & n0.generators.p_nom_extendable].p_nom_max.sum() * (5.1 / 4.6 if tech == "solar" else 1.0), rel=1e-9)

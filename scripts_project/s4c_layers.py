@@ -69,7 +69,7 @@ from s2_costs import annuity, fuel_price_ids, fuel_price_scenario, registry_valu
 # carrier of a new-build component -> cost-layer row whose lifetime / FOM / discount rate annualise its capital cost
 # (S4C-1 audit map; combined rows such as offwind turbine + connection use the main row for the WACC ratio)
 CARRIER_COST_ROWS = {
-    "onwind": "onwind", "offwind-ac": "offwind", "offwind-dc": "offwind", "solar": "solar-utility", "solar rooftop": "solar-rooftop",
+    "onwind": "onwind", "offwind-ac": "offwind", "offwind-dc": "offwind", "offwind-float": "offwind-float", "solar": "solar-utility", "solar rooftop": "solar-rooftop",
     "nuclear": "nuclear", "nuclear SMR": "nuclear SMR", "geothermal": "geothermal", "ror": "ror", "hydro": "hydro", "PHS": "PHS",
     "CCGT": "CCGT", "OCGT": "OCGT", "CCGT CC": "CCGT", "H2 Electrolysis": "electrolysis", "H2 Fuel Cell": "fuel cell", "H2 turbine": "OCGT",
     "OCGT methanol": "OCGT", "SMR": "SMR", "SMR CC": "SMR CC", "Fischer-Tropsch": "Fischer-Tropsch", "Sabatier": "methanation",
@@ -272,12 +272,16 @@ def apply_cost_layer_s4c1(n, costs: pd.DataFrame, cfg, repo) -> dict:
             n.df(comp).loc[sel, "capital_cost"] = v
         # 2. offshore wind with the connection cost per node x class
         RN = R.get("renewable") or {}
-        dp = Path(repo) / RN["offwind_distance_table"]
-        dist = pd.read_csv(dp).set_index(["tech", "node", "cls"])
-        led["offwind_distance_table"] = dict(file=str(RN["offwind_distance_table"]), sha256=hashlib.sha256(dp.read_bytes()).hexdigest())
+        from s4a_layers import offshore_distance_table, offshore_rule
+        rule = offshore_rule(RN)   # M08a A6.2: pypsa_eur_v2025_07 = class distances / landfall of the PyPSA-Eur area rules, floating carrier priced as well
+        dist, dp = offshore_distance_table(cfg, repo)
+        if rule == "pypsa_eur_v2025_07" and dist.average_distance_km.isna().any():
+            raise ValueError(f"{dp.name}: offshore rows without a connection distance")
+        cars = ("offwind-ac", "offwind-dc", "offwind-float") if rule == "pypsa_eur_v2025_07" else ("offwind-ac", "offwind-dc")
+        led["offwind_distance_table"] = dict(file=str(dp.relative_to(Path(repo))), sha256=hashlib.sha256(dp.read_bytes()).hexdigest(), rule=rule)
         g = n.generators; missing = []
-        for car in ("offwind-ac", "offwind-dc"):
-            base = _fixed(costs, "offwind") + _fixed(costs, f"{car}-station")
+        for car in cars:
+            base = _fixed(costs, "offwind-float" if car == "offwind-float" else "offwind") + _fixed(costs, f"{car}-station")
             sub, und = _fixed(costs, f"{car}-connection-submarine"), _fixed(costs, f"{car}-connection-underground")
             for name in g.index[(g.carrier == car) & g.p_nom_extendable]:
                 node = str(g.at[name, "bus"]); cls = _class_of(name)

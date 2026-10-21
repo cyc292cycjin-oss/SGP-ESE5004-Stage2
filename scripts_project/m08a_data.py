@@ -412,6 +412,64 @@ def a6(reg: Registry, cor: Corrections):
     cor.supersede("renewable_landcover_codes_built_solar", "renewable_landuse_rule_solar", "A6.1", "same classes, now registered as the main-run rule with the open-forest sensitivity")
 
 
+# --- A6.2 (M08-7, decisions 129, 131): offshore area rules of PyPSA-Eur v2025.07.0 ---------------------------------------------
+def a6_2(reg: Registry, cor: Corrections):
+    import json
+    d = ROOT / "research_inputs/renewable_v5/offshore_m08a"
+    lg = json.loads((d / "OFFSHORE_PROFILES_LOG_pypsa_eur_v2025_07.json").read_text())
+    cls = pd.read_csv(d / "OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv")
+    src = ROOT / "research_inputs/registry_v5/sources"
+    dam, shp = src / "pypsa_eur_v2025.07.0_determine_availability_matrix.py.txt", src / "pypsa_eur_v2025.07.0_build_ship_raster.py.txt"
+    pe = src / "pypsa_eur_v2025.07.0_config.default.yaml"
+    script = sha256(ROOT / "scripts_project/m08a_offshore_profiles.py")
+    gw = {t: sum(v.values()) / 1e3 for t, v in lg["potential_mw_by_country"].items()}
+    c3 = cls[cls.classes == 3]
+    cf = (c3.potential_mw * c3.cf_annual_weighted).groupby(c3.tech).sum() / c3.groupby("tech").potential_mw.sum()
+    reg.add("renewable_offshore_rule", "R2 / M08a A6.2 (M08-7, decisions 129, 131): offshore wind area rules aligned to PyPSA-Eur v2025.07.0 (research.renewable.offshore_rules = "
+            "pypsa_eur_v2025_07; scripts_project/m08a_offshore_profiles.py + s4a_layers.apply_offshore_rules): offwind-ac depth <= 60 m and <= 30 km from shore, offwind-dc "
+            "depth <= 60 m and >= 30 km (config lines 201-238), NEW carrier offwind-float 60-1,000 m with no shore-distance rule (lines 239-260; NREL_ReferenceTurbine_5MW_offshore "
+            "x 0.8855), 2 MW/km2 for all three, open sea only (CORINE [44, 255] -> Copernicus LC100 [80, 200] as in the author chain), natura excluded, shipping lanes excluded "
+            "where the World Bank density > ship_threshold 400 x 8760 x 6 (determine_availability_matrix.py 126-133), excluder resolution 200 m; exclusion semantics = "
+            "determine_availability_matrix.py 96-156, potential / layout / profile = build_renewable_profiles.py 170-173, 184, 247, 258-285; turbines of AC / DC unchanged "
+            f"(NREL 2020ATB 5.5 MW x 0.8855 since S4A). Result (11 countries): offwind-ac {gw['offwind-ac']:.1f} GW, offwind-dc {gw['offwind-dc']:.1f} GW, offwind-float "
+            f"{gw['offwind-float']:.1f} GW (as built: AC 1,672.9 / DC 3,054.3 GW at 2 / 3 MW/km2, depth <= 50 m); potential-weighted class CF AC {cf['offwind-ac']:.3f}, "
+            f"DC {cf['offwind-dc']:.3f}, float {cf['offwind-float']:.3f}. Registered adaptations: excluder / area CRS ESRI:54009 (author area_crs) instead of EPSG:3035 "
+            "(Europe-only), GEBCO 2025 instead of 2014, S4A node regions / 3 resource classes / S4C-1 distance method, ship raster read through /vsizip/",
+            "pypsa_eur_v2025.07.0", "flag", "B", "PyPSA-Eur v2025.07.0 config.default.yaml; scripts/determine_availability_matrix.py; scripts/build_renewable_profiles.py",
+            "config lines 201-260; determine_availability_matrix.py 96-156; build_renewable_profiles.py 170-304", sha256(pe), decision_ref="126, 129, 131")
+    reg.add("renewable_offshore_classes_m08a", f"M08a A6.2: offshore node x class table OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv ({len(cls)} rows: offwind-ac / -dc / -float x 1 and 3 "
+            "classes; potential_mw, potential_share, cf_annual_weighted, average_distance_km (cell centre -> node onshore region, layout-weighted), landfall_km 20 / 30 / 40, "
+            "line_length_factor 1.25); read by s4a_layers.apply_offshore_rules (p_nom_max) and s4c_layers.apply_cost_layer_s4c1 (connection cost); availability matrices "
+            f"AVAILABILITY_pypsa_eur_v2025_07.nc local (SHA256 {lg['outputs'].get('AVAILABILITY_pypsa_eur_v2025_07.nc', {}).get('sha256', '')[:16]}...)",
+            "research_inputs/renewable_v5/offshore_m08a/OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv", "file", "B", "scripts_project/m08a_offshore_profiles.py",
+            "OFFSHORE_PROFILES_LOG_pypsa_eur_v2025_07.json", sha256(d / "OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv"), decision_ref="129, 131")
+    for k in (1, 3):
+        f = d / f"profiles_offshore_pypsa_eur_v2025_07_c{k}_3h.nc"
+        reg.add(f"renewable_offshore_profile_file_c{k}", f"M08a A6.2: 3 h offshore profiles (offwind_ac / offwind_dc / offwind_float, bus '<node>|<class>') of the PyPSA-Eur "
+                f"v2025.07.0 area rules, {k} resource class(es); ERA5 2013 cutout, atlite {lg['atlite']}; x correction_factor 0.8855, clipped at 1 (clip_p_max_pu applied at build)",
+                str(f.relative_to(ROOT)), "file", "B", "scripts_project/m08a_offshore_profiles.py", "OFFSHORE_PROFILES_LOG_pypsa_eur_v2025_07.json", sha256(f), decision_ref="129, 131")
+    reg.add("offwind_landfall_length_float", "Landfall (underground) length of floating offshore wind (M08a A6.2)", 40.0, "km", "B", "PyPSA-Eur v2025.07.0 config.default.yaml",
+            "line 260 (renewable.offwind-float.landfall_length)", sha256(pe), decision_ref="129, 131")
+    reg.add("renewable_offshore_ship_lane_effect", f"M08a A6.2 finding (VERIFIED, no-ship-lane re-run): the PyPSA-Eur threshold 400 x 8760 x 6 = 21,024,000 AIS positions per 0.005 deg "
+            "cell (~400 per hour over the 6 data years) is above the densest ASEAN lanes (Singapore Strait 16.7 M, Malacca Strait 1.4 M, open South China Sea lane <= 10.7 M); cells "
+            "above it lie mostly in the East China Sea (13.1-29.4 N); the exclusion removes 42.7 MW offwind-ac (PH 38.6, VN 3.6, TH 0.5) and 14.5 MW offwind-float (PH), 0 offwind-dc. "
+            "Rule kept as in PyPSA-Eur; a lower ASEAN threshold would be a user decision (PROPOSED sensitivity, not implemented)", 57.2, "MW excluded", "B",
+            "World Bank (2021) Global Shipping Traffic Density; PyPSA-Eur v2025.07.0 determine_availability_matrix.py 126-133", "evidence/M08A_A6_2_OFFSHORE.json ship_lanes",
+            sha256(dam), decision_ref="129, 131", status="REFERENCE_ONLY")
+    reg.add("renewable_offshore_author_rule_check", "M08a A6.2 method validation (VERIFIED): the same script with the author PyPSA-Earth rules (Copernicus [80, 200], natura, depth <= 50 m, "
+            "shore 30 km, 2 / 3 MW/km2, no shipping lanes) gives offwind-ac 1,673.3 GW / offwind-dc 3,052.2 GW vs the as-built 1,672.9 / 3,054.3 GW (+0.02 % / -0.07 %); "
+            "node level median |rel| 0.8 % / 2.0 % (S4A split cells shared by two node regions by area share, this script by the eligible area inside each region; INFERENCE)",
+            -0.0007, "relative difference (DC total)", "B", "scripts_project/m08a_offshore_profiles.py --rules author", "evidence/M08A_A6_2_OFFSHORE.json author_rule_validation",
+            script, decision_ref="129, 131", status="REFERENCE_ONLY")
+    if cor.has("renewable_ship_density_raster"):
+        cor.modify("renewable_ship_density_raster", "A6.2", "used by the offshore rule (renewable_offshore_rule): clipped to the cutout extent through /vsizip/ (no extraction), "
+                   "shipdensity_asean_cutout_extent.tif local", status="REGISTERED")
+    for pid in ("renewable_density_built_offwind_ac", "renewable_density_built_offwind_dc", "renewable_landcover_codes_built_offwind_ac",
+                "renewable_landcover_codes_built_offwind_dc", "renewable_offshore_depth_rule"):
+        if cor.has(pid):
+            cor.supersede(pid, "renewable_offshore_rule", "A6.2", "as-built author rule (PyPSA-Earth chain) of the screening networks; the main build uses the PyPSA-Eur v2025.07.0 area rules")
+
+
 # --- A10 (decisions 126, 129-133): remaining proposed rows of this step ------------------------------------------------------
 def a10(reg: Registry, cor: Corrections):
     cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
@@ -458,7 +516,7 @@ def s01(reg: Registry, cor: Corrections):
             "evidence/M08A_B1_SINK_CHANNELS.json passthrough_buses", lay, decision_ref="132", status="REFERENCE_ONLY")
 
 
-def main(steps=("a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "s01")):
+def main(steps=("a2", "a3", "a4", "a5", "a6", "a6_2", "a7", "a8", "a9", "a10", "s01")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

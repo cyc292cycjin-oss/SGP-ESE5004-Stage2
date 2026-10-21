@@ -103,7 +103,7 @@ def structural_diagnosis_s2(n):
                 feed_co2 += e * float(z.efficiency2)
             if str(z.get("bus3", "")) == f"co2 atmosphere {c}":
                 feed_co2 += e * float(z.efficiency3)
-        ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"])) & g.p_nom_extendable]
+        ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc", "offwind-float"])) & g.p_nom_extendable]
         potential = float(sum((pmax[k] * w).sum() * min(float(z.p_nom_max), 1e9) for k, z in ren.iterrows()))
         pipes = [x for x in xb.index if c in (str(n.buses.at[xb.at[x, "bus0"], "country"]), str(n.buses.at[xb.at[x, "bus1"], "country"]))]
         pipes += [f"co2 sequestered extra-ASEAN {c}"] if f"co2 sequestered extra-ASEAN {c}" in n.stores.index else []   # S4C-4 (decision 89): uncapped export option

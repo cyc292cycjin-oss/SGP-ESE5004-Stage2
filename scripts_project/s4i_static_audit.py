@@ -25,8 +25,8 @@ ISO3 = dict(BRN="BN", IDN="ID", KHM="KH", LAO="LA", MMR="MM", MYS="MY", PHL="PH"
 # buses booked in tonnes CO2 (carbon = 1 t/t); every other bus carrier is energy
 CO2_BUS = {"co2 stored", "co2 atmosphere", "co2 sequestered", "co2 sequestered extra-ASEAN", "co2 bunkers", "process emissions", "plastic waste"}
 ATMO = {"co2 atmosphere", "co2 bunkers"}
-RENEWABLE = ["onwind", "offwind-ac", "offwind-dc", "solar", "solar rooftop", "ror", "onwind existing", "offwind existing", "solar existing", "ror existing"]
-CF_RANGE = {"onwind": (0.12, 0.45), "offwind-ac": (0.15, 0.55), "offwind-dc": (0.15, 0.55), "solar": (0.10, 0.25), "solar rooftop": (0.10, 0.25),
+RENEWABLE = ["onwind", "offwind-ac", "offwind-dc", "offwind-float", "solar", "solar rooftop", "ror", "onwind existing", "offwind existing", "solar existing", "ror existing"]
+CF_RANGE = {"onwind": (0.12, 0.45), "offwind-ac": (0.15, 0.55), "offwind-dc": (0.15, 0.55), "offwind-float": (0.15, 0.55), "solar": (0.10, 0.25), "solar rooftop": (0.10, 0.25),
             "ror": (0.15, 0.85), "onwind existing": (0.12, 0.45), "offwind existing": (0.15, 0.55), "solar existing": (0.10, 0.25), "ror existing": (0.15, 0.85)}
 SLACK_WORDS = ("slack", "gap", "shed", "backstop", "dummy", "lost load", "voll")
 # PyPSA 0.30.3 objective terms (pypsa/optimization/optimize.py define_objective) and what s4d_ledger.country_cost_ledger books
