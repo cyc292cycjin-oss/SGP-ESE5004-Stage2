@@ -57,6 +57,22 @@ class Corrections:
         r["param_id"] = pid
         self.rows[pid] = r
 
+    def modify(self, pid: str, step: str, note: str, **changes):
+        """In-place revision of an existing row (proposed action 'modify'): new values, description suffix ' | [M08a <step>] 修改：<note>'."""
+        if pid in self.rows:
+            raise ValueError(f"{pid} corrected twice")
+        r = self.base.loc[pid].to_dict()
+        r.update({k: ("" if v is None else str(v)) for k, v in changes.items()})
+        r["description"] = f"{r['description']} | [{STEP} {step}] 修改：{note}"
+        refs = [x.strip() for x in str(r.get("decision_ref", "")).replace(";", ",").split(",") if x.strip()]
+        r["decision_ref"] = ", ".join(refs + [x for x in ("131",) if x not in refs])
+        r["param_id"] = pid
+        r["derivation_script"] = SCRIPT
+        self.rows[pid] = r
+
+    def has(self, pid: str) -> bool:
+        return pid in self.base.index
+
     def value(self, pid: str) -> str:
         return self.base.loc[pid, "value"]
 
@@ -124,7 +140,47 @@ def a3(reg: Registry, cor: Corrections):
     cor.supersede("existing_fleet_cost_source_unification", "existing_fleet_cost_rule", "A3", "unification done in M08a A3")
 
 
-def main(steps=("a2", "a3")):
+# --- A4 (M08-3, decision 131): LNG uncapped at a sourced capex, regasification adder ---------------------------------
+USD2024_TO_EUR2020 = 0.73606   # registry: FRED A191RD3A086NBEA 2020/2024 x ECB 2020 FX (fuel prices, S4C-0)
+MWH_PER_MMBTU = 0.29307107
+
+
+def a4(reg: Registry, cor: Corrections):
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    lng_tab = ROOT / "research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv"
+    reg.add("lng_terminal_capacity_source", "R3.1 / M08-3 (decision 131): LNG receiving capacity source = GEM GGIT LNG Terminals (September 2025 release; import terminals; operating / "
+            "construction = existing lower bound, proposed = candidate sites); GIIGNL 2026 cross-check; Mtpa -> MW = x 13.3333 MWh/t / 8,760 h = 1,522.1 MW per Mtpa; table unchanged "
+            "(research_inputs/lng_terminals_v5/LNG_IMPORT_TERMINALS_GEM_2025.csv, registry lng_gem_ggit_release_verified)", "gem_ggit_2025_09", "flag", "B",
+            "GEM GGIT LNG Terminals 2025-09; GIIGNL Annual Report 2026", "LNG_CAPACITY_COMPARISON.csv (S4R)", sha256(lng_tab), decision_ref="126, 131")
+    reg.add("lng_terminal_cap_rule", "R3.3 / M08-3 (decision 131): option (a) - no capacity cap on LNG terminals: research.s3.gas.lng_expansion = capex_only, p_nom_max = inf at every "
+            "terminal node incl. proposed-only sites, expansion priced at lng_terminal_expansion_capex_main (proposed value label 'uncapped_at_capex'); option (b) GEM project cap "
+            "(operating + construction + proposed) not implemented; option (c) 2.5 x existing = lng_expansion cap_factor_cost (former main, decision 72) kept as sensitivity; "
+            "the liquid-H2 terminal cap keeps the S3-2 rule (2.5 x existing LNG or proposed capacity)", "capex_only", "rule", "C", "S4R_PLAN.md R3.3",
+            "configs/research/baseline.yaml research.s3.gas.lng_expansion; scripts_project/s3_layers.py add_gas_network", cfg_sha, decision_ref="126, 17, 72, 131")
+    reg.add("h2_terminal_capex_rule", "M08-3 (decision 131): liquid-H2 import terminal annuity = LNG terminal expansion cost x 1.2 (PyPSA-Eur import branch 5a87cedd lines 4560-4563 "
+            "relation kept) = 8,020.43 x 1.2 = 9,624.52 EUR2020/MW/a; follows the LNG cost sensitivity; config research.s3.imports.h2_terminal_capital_cost_rule = lng_x_factor "
+            "(former fixed 8,421.6 = 7,018 x 1.2)", 8020.43343542 * 1.2, "EUR2020/MW/a", "C", "PyPSA-Eur import branch 5a87cedd prepare_sector_network.py lines 4560-4563; Ulvestad & Overland (2012)",
+            "scripts_project/s3_layers.h2_terminal_capex", cfg_sha, decision_ref="131", sensitivity_low=8020.43343542 * 1.2 * 0.5, sensitivity_high=8020.43343542 * 1.2 * 1.5)
+    ul = cor.base.loc["lng_regas_capex_ref_ulvestad_overland_2012"]
+    cor.modify("lng_terminal_expansion_capex_main", "A4", "main value 7,018 -> 8,020.43 EUR2020/MW/a (Ulvestad & Overland 2012 converted, price year 2011 assumed; the 7,018 of the "
+               "PyPSA-Eur import branch has no source and no price year, DATA_PENDING); +-50 % sensitivity; config research.s3.gas.lng_expansion_capital_cost_eur_per_mw_a",
+               value="8020.43343542", unit="EUR2020/MW/a", tier="C", source="Ulvestad & Overland (2012) via registry lng_regas_capex_ref_ulvestad_overland_2012", source_locator="R3.2",
+               source_sha256=ul.source_sha256, sensitivity_low="4010.21671771", sensitivity_high="12030.6501531", status="REGISTERED")
+    lo, mid, hi = (u * USD2024_TO_EUR2020 / MWH_PER_MMBTU for u in (0.3, 0.5, 1.3))
+    cor.modify("fuel_price_lng_regasification_adder", "A4", f"value set: 0.5 USD2024/MMBtu x {USD2024_TO_EUR2020} / {MWH_PER_MMBTU} MWh per MMBtu = {mid:.4f} -> 1.26 EUR2020/MWh "
+               "(observed 0.3-1.3 USD/MMBtu: Japan ~0.5, India 0.75, Gate 0.35, China 0.7-1.3; Argus 2024, Hoegh / IGU 2017; a Southeast-Asia-specific IEA / IGU / OIES value stays "
+               "DATA_PENDING); added to the LNG import marginal cost (config research.s3.gas.lng_regasification_adder_eur_per_mwh)", value="1.26", unit="EUR2020/MWh", tier="C",
+               source="Argus Media 2024-09-13; Hoegh LNG / IGU 2017 (secondary)", source_locator="R3.4", source_sha256=cfg_sha,
+               sensitivity_low=f"{lo:.6g}", sensitivity_high=f"{hi:.6g}", status="REGISTERED")
+    cor.supersede("fuel_price_regasification_adder_s4c", "fuel_price_lng_regasification_adder", "A4", "adder 1.26 EUR2020/MWh in use since M08a",
+                  source_sha256=(cor.base.loc["fuel_price_regasification_adder_s4c", "source_sha256"] or cfg_sha))
+    for pid in ["lng_terminal_expansion_mode_s4b", "lng_import_cap_rule_built", "lng_import_cap_factor"] + \
+               [f"lng_import_cap_built_{c}" for c in ("BN", "KH", "ID", "LA", "MY", "MM", "PH", "SG", "TH", "TL", "VN")]:
+        if cor.has(pid):
+            cor.supersede(pid, "lng_terminal_cap_rule", "A4", "the 2.5 x cap is the option (c) sensitivity lng_expansion = cap_factor_cost")
+
+
+def main(steps=("a2", "a3", "a4")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

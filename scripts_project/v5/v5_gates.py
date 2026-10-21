@@ -322,7 +322,7 @@ def gate_b14_terminal_caps(n,cap_factor=2.5):
     for name,z in lng.iterrows():
         existing=float(z.p_nom);pmax=float(z.p_nom_max);opt=float(z.p_nom_opt) if 'p_nom_opt' in g else 0.;node=str(z.bus)[:-4]
         proposed=float(led.get(node,{}).get('proposed_mw',0.))
-        limit=float('inf') if mode=='uncapped_cost' else (existing if mode=='existing_only' else (cap_factor*existing if existing>0 else proposed))   # S4E-2 (95 e): uncapped_cost sensitivity has no cap
+        limit=float('inf') if mode in ('uncapped_cost','capex_only') else (existing if mode=='existing_only' else (cap_factor*existing if existing>0 else proposed))   # S4E-2 (95 e): uncapped_cost sensitivity has no cap
         limit_ok=pmax<=limit*(1+1e-9)+1e-6
         within=opt<=pmax*(1+1e-9)+1e-6
         _,h2_ok=h2_check(node,float(led.get(node,{}).get('h2_import_cap_mw',pmax)))

@@ -22,6 +22,28 @@ from s2_costs import cost, fuel_price, fuel_price_ids, fuel_price_scenario
 from s2_layers import add_bus, add_link, country_of, ensure_carrier
 
 HOURS = 8760.0
+# research.s3.gas.lng_expansion (S3B R3, S4B-0 decision 72, S4E-2 decision 95 e, M08a A4 decision 131)
+LNG_EXPANSION_MODES = ("existing_only", "cap_factor", "cap_factor_cost", "uncapped_cost", "capex_only")
+LNG_PRICED_MODES = ("cap_factor_cost", "uncapped_cost", "capex_only")
+LNG_UNCAPPED_MODES = ("uncapped_cost", "capex_only")   # p_nom_max = inf; capex_only (M08-3 main) and uncapped_cost (S4E-2 name) share the code path
+
+
+def lng_expansion_capex(G: dict) -> float:
+    """LNG terminal expansion annuity x (1 + sensitivity), EUR2020/MW/a (research.s3.gas)."""
+    return float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)) * (1.0 + float(G.get("lng_expansion_cost_sensitivity", 0.0)))
+
+
+def h2_terminal_capex(cfg: dict) -> tuple[float, str]:
+    """Liquid-H2 import terminal annuity (EUR2020/MW/a). M08a A4 (decision 131): rule lng_x_factor (main) = LNG terminal expansion cost
+    (incl. its sensitivity) x h2_terminal_lng_cost_factor 1.2 (PyPSA-Eur import-branch relation); fixed = h2_terminal_capital_cost_eur_per_mw_a (former 8,421.6)."""
+    I = cfg["research"]["s3"]["imports"]; G = cfg["research"]["s3"]["gas"]
+    rule = I.get("h2_terminal_capital_cost_rule", "fixed")
+    if rule == "lng_x_factor":
+        f = float(I.get("h2_terminal_lng_cost_factor", 1.2))
+        return lng_expansion_capex(G) * f, f"LNG terminal expansion cost x {f}"
+    if rule == "fixed":
+        return float(I.get("h2_terminal_capital_cost_eur_per_mw_a", 7018.0 * 1.2)), "research.s3.imports.h2_terminal_capital_cost_eur_per_mw_a"
+    raise ValueError("research.s3.imports.h2_terminal_capital_cost_rule must be lng_x_factor or fixed, got " + str(rule))
 
 
 def _haversine(x0, y0, x1, y1):
@@ -143,6 +165,14 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     led["pipelines"] = dict(candidates=added, connectivity_upgrades=upgrades, cost_rows=dict(onshore="CH4 (g) pipeline", submarine="CH4 (g) submarine pipeline", fixed_onshore=on, fixed_submarine=sub, lifetime=life),
                             existing_2025=stock, existing_pending=pending, note="existing links are one-way in the registered export direction (TTM bidirectional); candidates bidirectional")
     # 4. LNG terminals (decisions 17/19)
+    add_lng_terminals(n, cfg, repo, price, adder, led)
+    n.meta["research_gas_network"] = led
+    return led
+
+
+def add_lng_terminals(n, cfg, repo, price: float, adder: float, led: dict) -> dict:
+    """LNG import terminals per node (decisions 17/19, 68, 72, 95 e, 131); writes led['lng'] (M08a: split out of add_gas_network, behaviour unchanged)."""
+    G = cfg["research"]["s3"]["gas"]
     lng = pd.read_csv(repo / G["lng_terminals"], keep_default_na=False)
     lng["cap"] = pd.to_numeric(lng.capacity_mwh_per_year, errors="coerce").fillna(0.0)
     factor = float(G.get("lng_cap_factor", 2.5))
@@ -154,10 +184,13 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     # existing_only becomes a sensitivity.
     # S4E-2 (decision 95 e): uncapped_cost (registered sensitivity, not run) = no expansion cap at the terminal nodes (incl. proposed-only sites), the
     # expansion priced at the same 7,018 EUR/MW/a; the liquid-H2 cap keeps the rule cap.
+    # M08a A4 (M08-3, decision 131): capex_only (MAIN) = no capacity cap at any terminal node (p_nom_max = inf, incl. proposed-only sites; GEM GGIT
+    # 2025-09 capacities are the existing lower bound), expansion priced at lng_expansion_capital_cost_eur_per_mw_a = 8,020.43 EUR2020/MW/a (Ulvestad &
+    # Overland 2012 converted, registry lng_terminal_expansion_capex_main, +-50 % via lng_expansion_cost_sensitivity); same code path as uncapped_cost.
     expansion = str(G.get("lng_expansion", "cap_factor"))
-    if expansion not in ("existing_only", "cap_factor", "cap_factor_cost", "uncapped_cost"):
+    if expansion not in LNG_EXPANSION_MODES:
         raise ValueError("Unknown research.s3.gas.lng_expansion " + expansion)
-    capex = float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)) * (1.0 + float(G.get("lng_expansion_cost_sensitivity", 0.0))) if expansion in ("cap_factor_cost", "uncapped_cost") else 0.0
+    capex = lng_expansion_capex(G) if expansion in LNG_PRICED_MODES else 0.0
     ensure_carrier(n, "LNG import")
     terms = {}
     for node, g in lng.groupby("node"):
@@ -170,7 +203,7 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
         if p_rule <= 0:
             terms[node] = dict(existing_mw=0.0, proposed_mw=0.0, p_nom_max_mw=0.0, h2_import_cap_mw=0.0, units_missing_capacity=missing, skipped="no capacity data")
             continue
-        p_max = float("inf") if expansion == "uncapped_cost" else (p_rule if expansion in ("cap_factor", "cap_factor_cost") else existing)
+        p_max = float("inf") if expansion in LNG_UNCAPPED_MODES else (p_rule if expansion in ("cap_factor", "cap_factor_cost") else existing)
         c = country_of(n, node)
         if p_max <= 0:
             terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=0.0, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
@@ -181,12 +214,17 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
         n.generators.loc[name, ["country", "research_role"]] = [c, "EXTERNAL_SUPPLY"]
         terms[node] = dict(country=c, existing_mw=existing, proposed_mw=proposed, p_nom_max_mw=p_max, h2_import_cap_mw=p_rule, units_missing_capacity=missing, terminals=";".join(g.terminal),
                            expansion_capital_cost_eur_per_mw_a=capex)
-    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder, adder_status="DATA_PENDING (0 used)", cap_factor=factor, expansion=expansion, terminals=terms,
-                      expansion_capital_cost_eur_per_mw_a=capex, expansion_cost_base_eur_per_mw_a=float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0)),
-                      expansion_cost_sensitivity=float(G.get("lng_expansion_cost_sensitivity", 0.0)),
-                      expansion_cost_source=("PyPSA-Eur import branch 5a87cedd prepare_sector_network.py line 4561 terminal_capital_cost shipping-lch4 (grade C, +-50 %; decision 72)" if expansion == "cap_factor_cost" else "no capex"))
-    n.meta["research_gas_network"] = led
-    return led
+    base_cost = float(G.get("lng_expansion_capital_cost_eur_per_mw_a", 7018.0))
+    cost_src = ("no capex" if expansion not in LNG_PRICED_MODES else
+                "PyPSA-Eur import branch 5a87cedd prepare_sector_network.py line 4561 terminal_capital_cost shipping-lch4 (grade C, +-50 %; decision 72)" if base_cost == 7018.0 else
+                "Ulvestad & Overland (2012) converted, 8,020.43 EUR2020/MW/a (registry lng_terminal_expansion_capex_main, grade C, +-50 %; M08-3, decision 131)" if abs(base_cost - 8020.43343542) < 0.01 else
+                f"research.s3.gas.lng_expansion_capital_cost_eur_per_mw_a = {base_cost}")
+    led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder,
+                      adder_status=("registry fuel_price_lng_regasification_adder 1.26 EUR2020/MWh (M08-3, decision 131; grade C)" if adder else "0 (no regasification adder)"),
+                      cap_factor=factor, expansion=expansion, terminals=terms,
+                      expansion_capital_cost_eur_per_mw_a=capex, expansion_cost_base_eur_per_mw_a=base_cost,
+                      expansion_cost_sensitivity=float(G.get("lng_expansion_cost_sensitivity", 0.0)), expansion_cost_source=cost_src)
+    return led["lng"]
 
 
 def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
@@ -246,7 +284,7 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
         green[carrier] = dict(bus=bus_name, generator=f"{bus_name} import", price_applied=p, base=float(prices.at[carrier, "base_eur2020_per_mwh"]), esc=prices.at[carrier, "esc"])
     # 4. liquid hydrogen by ship at the LNG terminal nodes
     h2p = float(prices.at["hydrogen", "applied_eur2020_per_mwh"]) * f
-    term_cost = float(I.get("h2_terminal_capital_cost_eur_per_mw_a", 7018.0 * 1.2))
+    term_cost, term_rule = h2_terminal_capex(cfg)   # M08a A4: LNG x 1.2 (main) | fixed
     lng = n.generators[n.generators.carrier == "LNG import"]
     lng_terms = ((n.meta.get("research_gas_network") or {}).get("lng") or {}).get("terminals", {})
     h2 = {}
@@ -256,7 +294,7 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
             continue
         name = import_gen(f"{node} H2 import", f"{node} H2", "H2 import", h2p, country=country_of(n, node), p_nom_max=cap, capital_cost=term_cost)
         h2[node] = dict(generator=name, p_nom_max=cap, lng_generator=(f"{node} LNG import" if f"{node} LNG import" in lng.index else None))
-    green["hydrogen"] = dict(nodes=len(h2), price_applied=h2p, base=float(prices.at["hydrogen", "base_eur2020_per_mwh"]), terminal_capital_cost=term_cost, terminals=h2)
+    green["hydrogen"] = dict(nodes=len(h2), price_applied=h2p, base=float(prices.at["hydrogen", "base_eur2020_per_mwh"]), terminal_capital_cost=term_cost, terminal_capital_cost_rule=term_rule, terminals=h2)
     led["green"] = green
     n.meta["research_imports"] = led
     return led

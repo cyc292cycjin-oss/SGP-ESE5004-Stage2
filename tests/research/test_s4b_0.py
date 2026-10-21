@@ -23,7 +23,8 @@ def test_config_defaults():
     assert all(S[k] is True for k in ["hydrogen_fuel_cell", "SMR", "SMR_cc", "biomass_to_liquid"])
     assert R["s2"]["co2"]["vent"] is False and R["hydrogen"]["h2_turbine"] is True
     G = R["s3"]["gas"]
-    assert G["lng_expansion"] == "cap_factor_cost" and G["lng_expansion_capital_cost_eur_per_mw_a"] == 7018.0 and G["lng_expansion_cost_sensitivity"] == 0.0
+    # M08a A4 (decision 131): main capex_only at 8,020.43 (Ulvestad & Overland 2012); the decision-72 cap_factor_cost stays an option
+    assert G["lng_expansion"] == "capex_only" and G["lng_expansion_capital_cost_eur_per_mw_a"] == 8020.43343542 and G["lng_expansion_cost_sensitivity"] == 0.0
     I = R["solver"]["interior"]
     assert I["acceptance_basis"] == "solver_tolerances" and I["feasibility_tol"] == 1e-6 and I["optimality_tol"] == 1e-6 and I["solver_tol_factor"] == 10 and I["gap_factor"] == 10
     gd = R["s2"]["gap_diagnostic"]
@@ -40,7 +41,7 @@ def test_switch_table_cites_pypsa_eur_lines():
         assert lines[line - 1].strip() == f"{key}: {val}", (key, lines[line - 1])
         assert key in set(t.pypsa_eur_key)
     r = pd.read_csv(REG / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
-    assert r.loc["lng_terminal_expansion_capex_main", "value"] == "7018" and r.loc["lng_terminal_expansion_capex_main", "sensitivity_low"] == "3509"
+    assert r.loc["lng_terminal_expansion_capex_main", "value"] == "8020.43343542" and r.loc["lng_terminal_expansion_capex_main", "sensitivity_low"] == "4010.21671771"   # M08a A4 (former 7018 / 3509)
     assert r.loc["acceptance_tolerance_basis", "value"] == "solver_tolerances" and r.loc["industry_other_bucket_asean_own_2019", "status"] == "SENSITIVITY"
 
 

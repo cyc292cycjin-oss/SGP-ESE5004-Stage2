@@ -25,7 +25,7 @@ def test_registry_rows(registry):
     r = registry
     assert r.loc["fuel_price_scenario_main", "value"] == "steps" and "price taker" in r.loc["fuel_price_scenario_main", "description"]
     assert r.loc["lng_upstream_emissions_out_of_scope", "status"] == "REFERENCE_ONLY"
-    assert r.loc["fuel_price_lng_regasification_adder", "status"] == "DATA_PENDING"
+    assert r.loc["fuel_price_lng_regasification_adder", "status"] == "REGISTERED"   # M08a A4 (decision 131): 1.26 EUR2020/MWh (former DATA_PENDING)
     assert float(r.loc["btl_capital_cost_x_efficiency", "value"]) == pytest.approx(252723.449125 * 0.45, rel=1e-9)
     for pid in ["limitation_electricity_grid_connection", "limitation_pipeline_compression", "candidate_pipeline_statuses_confirmed", "tests_gate4_activation_accepted_state",
                 "download_declined_wdpa_full", "download_declined_dea_2026_xlsx", "synthetic_methane_cross_border_accounting_accepted", "acceptance_column_dual_sign_scale_confirmed",
