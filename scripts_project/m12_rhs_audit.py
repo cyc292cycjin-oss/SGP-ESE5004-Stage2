@@ -457,8 +457,12 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
             for k, v in src.items():
                 tot[k] = tot.get(k, 0.0) + v
         ph = fold(tot)
+        from m12_allocation import ALPHA_GRID, alpha_interval
+        pairs_ = {k: v for k, v in tot.items() if "|" in k}
         dual = dict(source=str(solve_dir or duals), rows_by_owner=dual_terms, columns_by_owner=rc_terms, columns=col_info, constants=const, missing_duals=missing_duals,
                     raw_by_owner=tot, allocation_alpha_half=ph, total=float(sum(tot.values())),
+                    allocation_by_alpha={f"{al:g}": fold(tot, al) for al in ALPHA_GRID}, pair_values=pairs_,
+                    interval=alpha_interval({k: v for k, v in tot.items() if "|" not in k}, pairs_),
                     note="Owen dual form: sum of multiplier x active bound by owner (+ column bounds, + objective constants by owner); pairs folded with alpha 0.5")
         if allocation is not None:
             A = json.loads(Path(allocation).read_text())
