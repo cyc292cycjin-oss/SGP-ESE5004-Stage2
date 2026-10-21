@@ -11,7 +11,7 @@ HERE=Path(__file__).resolve().parent
 import sys
 if str(HERE.parent) not in sys.path:sys.path.insert(0,str(HERE.parent))
 from v5.kkt_algebra import complete_kkt,require_contract
-from carrier_architecture import COUNTRIES,atmosphere_bus
+from carrier_architecture import COUNTRIES,atmosphere_bus,network_countries
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def load_contract():
@@ -83,7 +83,7 @@ def gate_b1_country_net_zero(n):
     from country_carbon import emission_report
     rep=emission_report(n);cfg=n.meta['research_carbon'];rows={}
     ok=True
-    for c in sorted(COUNTRIES):
+    for c in sorted(network_countries(n)):   # M08a A7
         cap=float(cfg['country_cap_tco2'][c]);level=rep['store_final_level'][c];tol=1e-3+1e-7*max(1.,abs(cap))
         within=level<=cap+tol if cfg['constraint_scope']=='per_country' else True
         rows[c]=dict(final_level_tco2=level,cap_tco2=cap,within_cap=bool(within),sum_of_ports_tco2=rep['by_country'].get(c,0.))

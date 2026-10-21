@@ -287,6 +287,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         else:
             d[parts[-1]] = type(old)(val)
     cfg["research"]["config_overrides"] = list(overrides or [])
+    from m08a_layers import non_default_variants
+    if non_default_variants(cfg["research"]):   # M08a A7: variants are derived from a built base network by one script only
+        raise ValueError(f"variant keys {non_default_variants(cfg['research'])} are applied by scripts_project/m08a_variants.py to a built base network, not by the build")
     bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution checked early (no config mutation; the demand layer gets demand_cfg)
     if R["scenario"] != scenario:
         raise ValueError("Scenario identity does not match the composed config")

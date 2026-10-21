@@ -1,6 +1,9 @@
 """M08a build layers (decisions 129-133; instruction M08A_CLAUDE_CODE_INSTRUCTION.md). Nothing here solves.
 
 A3  apply_existing_vintage_costs: existing stock priced with technology-data v0.15.0 of its commissioning year.
+A7  scenario / coalition variants of a built base network (applied only by scripts_project/m08a_variants.py):
+    apply_remove_countries (coalition.remove_countries), apply_stock_mode (cross_border.stock_mode),
+    apply_co2_shipping (disconnected.co2_shipping_intra_asean), finance.wacc_mode via s4c_layers.apply_wacc_mode.
 """
 from __future__ import annotations
 
@@ -138,4 +141,190 @@ def apply_existing_vintage_costs(n, cfg: dict, repo: Path) -> dict:
                                     table_years=sorted({y for ys in g.years for y in ys}))
     led["table"] = rows
     n.meta["research_existing_vintage_costs"] = {k: v for k, v in led.items() if k != "table"}
+    return led
+
+
+# =====================================================================================================================
+# A7 (decisions 132, 133): variants of a built base network. Defaults (no change): cross_border.stock_mode remove_all,
+# disconnected.co2_shipping_intra_asean allow, coalition.remove_countries [], finance.wacc_mode uniform.
+# =====================================================================================================================
+VARIANT_DEFAULTS = {"cross_border.stock_mode": "remove_all", "disconnected.co2_shipping_intra_asean": "allow",
+                    "coalition.remove_countries": [], "finance.wacc_mode": "uniform"}
+INTRA_ASEAN_CO2_CARRIERS = ("CO2 ship", "CO2 transit ship", "CO2 transit rail")   # deliveries into ANOTHER ASEAN country's national store (maritime_trade)
+EXTRA_ASEAN_CO2_CARRIERS = ("CO2 export extra-ASEAN", "CO2 transit export extra-ASEAN")   # kept by every variant
+PORT_COLUMNS = lambda df: [c for c in df.columns if c == "bus" or (c.startswith("bus") and c[3:].isdigit())]
+
+
+def variant_values(R: dict) -> dict:
+    """The four switch values of a research config (defaults where absent)."""
+    out = {}
+    for key, default in VARIANT_DEFAULTS.items():
+        d = R
+        for k in key.split("."):
+            d = d.get(k, {}) if isinstance(d, dict) else {}
+        out[key] = default if d in ({}, None) else d
+    out["coalition.remove_countries"] = sorted(out["coalition.remove_countries"] or [])
+    return out
+
+
+def non_default_variants(R: dict) -> dict:
+    v = variant_values(R)
+    return {k: x for k, x in v.items() if x != VARIANT_DEFAULTS[k]}
+
+
+def _component_tables(n):
+    return [(c.name, c.df) for c in n.iterate_components(["Generator", "Load", "Store", "StorageUnit", "Link", "Line", "Transformer", "ShuntImpedance"])]
+
+
+def apply_remove_countries(n, countries) -> dict:
+    """coalition.remove_countries (decision 132): the listed countries leave the network ENTIRELY - every bus with that country
+    (nodes, carrier buses, national atmosphere, national CO2 store, biomass pools ...), every component with a port on such a bus
+    (lines and links incl. its half of the cross-border lines, the liquid-pool access, CO2 shipping to / from it, LNG / H2 import
+    points located in it) and every component tagged with that country (e.g. its loads on the regional ASEAN buses). Components
+    of the regional pools that belong to no country (international bunker loads, ASEAN import generators) stay. The metadata used by
+    the solve hooks and ledgers is filtered the same way; n.meta['research_countries'] lists the remaining countries.
+    NOT the decision-91 cross_border.coalition switch (that keeps the country and only cuts corridors)."""
+    from carrier_architecture import COUNTRIES, network_countries
+    X = sorted(set(countries or []))
+    led = dict(removed_countries=X, removed={}, demand_removed_mwh=0.0)
+    if not X:
+        return led
+    if set(X) - set(COUNTRIES):
+        raise ValueError(f"unknown countries {sorted(set(X) - set(COUNTRIES))}")
+    remaining = sorted(network_countries(n) - set(X))
+    if not remaining:
+        raise ValueError("coalition.remove_countries would remove every country")
+    gone_bus = set(n.buses.index[n.buses.country.astype(str).isin(X)])
+    w = n.snapshot_weightings.generators
+    load = n.get_switchable_as_dense("Load", "p_set")
+    removed = {}
+    for typ, df in _component_tables(n):
+        if not len(df):
+            continue
+        hit = df[PORT_COLUMNS(df)].isin(gone_bus).any(axis=1)
+        if "country" in df:
+            hit |= df.country.astype(str).isin(X)
+        names = list(df.index[hit])
+        if typ == "Load" and names:
+            led["demand_removed_mwh"] = float(load[names].mul(w, axis=0).sum().sum())
+        if names:
+            n.mremove(typ, names)
+        removed[typ] = names
+    n.mremove("Bus", sorted(gone_bus))
+    removed["Bus"] = sorted(gone_bus)
+    led["removed"] = {k: len(v) for k, v in removed.items()}
+    gone = {(t, x) for t, v in removed.items() for x in v}
+    # --- metadata of the solve hooks and ledgers --------------------------------------------------------------------------
+    m = n.meta
+    if m.get("existing_unit_components"):
+        m["existing_unit_components"] = {u: z for u, z in m["existing_unit_components"].items() if (z["component_type"], z["component"]) not in gone}
+        tot, seen = 0.0, set()
+        for z in m["existing_unit_components"].values():
+            k = (z["component_type"], z["component"])
+            if k not in seen:
+                tot += float(n.df(k[0]).at[k[1], "existing_annual_fixed_om_eur"]); seen.add(k)
+        led["existing_fom_before_eur"], m["existing_annual_fixed_om_eur"] = float(m.get("existing_annual_fixed_om_eur", 0.0)), tot
+    if m.get("existing_cross_border_fom_ledger"):
+        keep = [r for r in m["existing_cross_border_fom_ledger"] if (r["component_type"], r["component"]) not in gone]
+        m["existing_cross_border_fom_ledger"] = keep; m["existing_cross_border_fom_eur"] = float(sum(r["annual_fom_eur"] for r in keep))
+    if m.get("existing_resource_groups"):
+        groups = {}
+        for g, e in m["existing_resource_groups"].items():
+            cands = [c for c in e.get("candidates", []) if (c["ComponentType"], c["Name"]) not in gone]
+            if cands:
+                groups[g] = dict(e, candidates=cands)
+        m["existing_resource_groups"] = groups
+    if m.get("battery_inverter_pairs"):
+        m["battery_inverter_pairs"] = [p for p in m["battery_inverter_pairs"] if p.get("charger") in n.links.index and p.get("discharger") in n.links.index]
+    for key, typ in (("store_power_rules", "Store"), ("external_annual_caps", "Generator"), ("demand_owners", "Load")):
+        if isinstance(m.get(key), dict):
+            m[key] = {k: v for k, v in m[key].items() if k in n.df(typ).index}
+    if isinstance(m.get("research_new_hydro_inflow_tie"), list):
+        m["research_new_hydro_inflow_tie"] = [x for x in m["research_new_hydro_inflow_tie"] if x in n.storage_units.index]
+    if isinstance(m.get("research_nuclear_caps"), dict):
+        m["research_nuclear_caps"] = {c: v for c, v in m["research_nuclear_caps"].items() if c not in X}
+    if isinstance(m.get("research_co2_storage"), dict):
+        cs = m["research_co2_storage"]
+        cs["caps_t_per_year"] = {c: v for c, v in cs.get("caps_t_per_year", {}).items() if c not in X}
+        if isinstance(cs.get("potentials_gt"), dict):
+            cs["potentials_gt"] = {c: v for c, v in cs["potentials_gt"].items() if c not in X}
+    m["research_countries"] = remaining
+    # --- invariants ----------------------------------------------------------------------------------------------------
+    for typ, df in _component_tables(n):
+        if len(df) and df[PORT_COLUMNS(df)].isin(gone_bus).any().any():
+            raise AssertionError(f"{typ} still references a removed bus")
+    if (n.buses.country.astype(str).isin(X)).any():
+        raise AssertionError("bus of a removed country left")
+    led["remaining_countries"] = remaining
+    return led
+
+
+def apply_stock_mode(n, mode: str) -> dict:
+    """cross_border.stock_mode (decision 132): remove_all (main) = the disconnected network as built (every ASEAN-internal cross-border fixed
+    network removed incl. the 2025 stock; nothing to do on a disconnected base); keep_stock_no_new (sensitivity, base = an INTEGRATED network):
+    the 2025 cross-border stock stays - AC lines with s_nom_min > 0, electricity links with p_nom_min > 0 and the existing gas pipelines
+    (gas_pipeline_kind existing_2025), each with its '-reversed' twin of the lossy split - pinned at its 2025 capacity (nominal = min = max,
+    the extendable flag kept so the objective treats the stock as in the base); every other cross-border line / link (candidates, H2 / CO2
+    pipelines, gas candidates) is removed; maritime trade and extra-ASEAN options unchanged; the existing cross-border FOM constant stays."""
+    led = dict(mode=mode)
+    xbm = lambda df: (df["border_class"] == "cross_border") if "border_class" in df else pd.Series(False, index=df.index)
+    if mode == "remove_all":
+        xb = int(xbm(n.lines).sum() + xbm(n.links).sum())
+        if xb:
+            raise ValueError("stock_mode remove_all applies to a disconnected base network (cross-border components present)")
+        return led
+    if mode != "keep_stock_no_new":
+        raise ValueError(f"cross_border.stock_mode must be remove_all or keep_stock_no_new, got {mode!r}")
+    L, K = n.lines, n.links
+    xl = L[xbm(L)]; xk = K[xbm(K)]
+    if not len(xl) and not len(xk):
+        raise ValueError("stock_mode keep_stock_no_new needs an integrated base network")
+    rev = xk["reversed"].astype(bool) if "reversed" in xk else pd.Series(False, index=xk.index)
+    kind = xk["gas_pipeline_kind"].astype(str) if "gas_pipeline_kind" in xk else pd.Series("", index=xk.index)
+    stock_lines = list(xl.index[xl.s_nom_min > 0])
+    stock_fwd = list(xk.index[~rev & ((xk.p_nom_min > 0) | (kind == "existing_2025"))])
+    twins = {f"{x}-reversed": x for x in stock_fwd if f"{x}-reversed" in xk.index}
+    keep_links = set(stock_fwd) | set(twins)
+    out_l = sorted(set(xl.index) - set(stock_lines)); out_k = sorted(set(xk.index) - keep_links)
+    n.mremove("Line", out_l); n.mremove("Link", out_k)
+    for x in stock_lines:
+        cap = float(n.lines.at[x, "s_nom_min"])
+        n.lines.loc[x, ["s_nom", "s_nom_min", "s_nom_max"]] = [cap, cap, cap]
+    for x in stock_fwd:
+        cap = float(n.links.at[x, "p_nom_min"]) if float(n.links.at[x, "p_nom_min"]) > 0 else float(n.links.at[x, "p_nom"])
+        n.links.loc[x, ["p_nom", "p_nom_min", "p_nom_max"]] = [cap, cap, cap]
+    for r, f in twins.items():
+        cap = float(n.links.at[f, "p_nom"])
+        n.links.loc[r, ["p_nom", "p_nom_min", "p_nom_max"]] = [cap, cap, cap]
+    by = lambda d: {str(k): int(v) for k, v in d.items()}
+    kept_k = n.links.loc[sorted(keep_links)]
+    led.update(kept_lines=len(stock_lines), kept_links_forward=len(stock_fwd), kept_reversed_twins=len(twins), removed_lines=len(out_l), removed_links=len(out_k),
+               kept_by_carrier=by(kept_k.carrier.value_counts()), kept_capacity_mw=dict(lines=float(n.lines.loc[stock_lines, "s_nom"].sum()),
+                                                                                       links=float(n.links.loc[stock_fwd, "p_nom"].sum())),
+               existing_cross_border_fom_eur=float(n.meta.get("existing_cross_border_fom_eur", 0.0)), stock_lines=stock_lines, stock_links=sorted(stock_fwd))
+    return led
+
+
+def apply_co2_shipping(n, mode: str) -> dict:
+    """disconnected.co2_shipping_intra_asean (b1, decision 132): allow (main) | forbid - in a disconnected network, every delivery of CO2 into
+    ANOTHER ASEAN country's national store is removed (carriers CO2 ship, CO2 transit ship and CO2 transit rail - the Lao rail leg into the
+    Vietnamese / Thai store is the land part of the same trade); exports to extra-ASEAN storage (CO2 export extra-ASEAN, CO2 transit export
+    extra-ASEAN) stay. Applies to disconnected networks only."""
+    led = dict(mode=mode)
+    if mode == "allow":
+        return led
+    if mode != "forbid":
+        raise ValueError(f"disconnected.co2_shipping_intra_asean must be allow or forbid, got {mode!r}")
+    if (n.meta.get("scenario") or (n.meta.get("research_config") or {}).get("scenario")) != "disconnected":
+        raise ValueError("co2_shipping_intra_asean forbid applies to disconnected networks only")
+    K = n.links
+    sel = K[K.carrier.isin(INTRA_ASEAN_CO2_CARRIERS)]
+    for x, z in sel.iterrows():
+        b1 = str(z.bus1)
+        if n.buses.at[b1, "carrier"] != "co2 sequestered" or str(n.buses.at[b1, "country"]) == str(z.country):
+            raise AssertionError(f"{x}: not a delivery into another country's national store")
+    n.mremove("Link", list(sel.index))
+    keep = K.index[K.carrier.isin(EXTRA_ASEAN_CO2_CARRIERS)] if len(K) else []
+    led.update(removed=int(len(sel)), removed_by_carrier={str(k): int(v) for k, v in sel.carrier.value_counts().items()},
+               extra_asean_links_kept=int(len(keep)))
     return led

@@ -256,7 +256,80 @@ def a5(reg: Registry, cor: Corrections):
                    status="REGISTERED", source_sha256=(cor.base.loc[f"co2_storage_potential_{c}", "source_sha256"] or tsha))
 
 
-def main(steps=("a2", "a3", "a4", "a5")):
+# --- A7 (M08-8 extension, decisions 132, 133): scenario / coalition / finance switches -------------------------------------
+WACC_TABLE = ROOT / "research_inputs/finance_v5/COUNTRY_WACC_REAL_M08A.csv"
+S4R_WACC = ROOT / "research/06_scope_redesign/p1_step4r_20261020/COUNTRY_WACC_SENSITIVITY_TABLE.csv"
+
+
+def wacc_table() -> pd.DataFrame:
+    s = pd.read_csv(S4R_WACC).set_index("country")
+    rows = []
+    for c in sorted(s.index):
+        r = s.loc[c]
+        if pd.notna(r.real_wacc_mid):
+            rows.append(dict(country=c, technology="model (real WACC, all new-build technologies of the country)", wacc_real=round(float(r.real_wacc_mid), 4), status="REGISTERED",
+                             tier="C", method=f"S4R one method: {r.method}; real = (1 + nominal) / (1 + IMF WEO Oct 2026 CPI 2028-2030) - 1",
+                             source="IEA Cost of Capital Observatory 2025; Damodaran 2026-01; IMF WEO Oct 2026 (S4R COUNTRY_WACC_SENSITIVITY_TABLE.csv real_wacc_mid)"))
+    tl = round(sum(x["wacc_real"] for x in rows if x["country"] in ("KH", "LA", "MM")) / 3, 6)
+    rows.append(dict(country="TL", technology="model (real WACC, all new-build technologies of the country)", wacc_real=tl, status="REGISTERED", tier="C",
+                     method="rule (decision 133): no IEA entry and no Damodaran CRP for TL -> mean of KH / LA / MM real WACC (registry wacc_country_tl_rule)",
+                     source="derived from the KH / LA / MM rows of this table"))
+    return pd.DataFrame(sorted(rows, key=lambda x: x["country"]))
+
+
+def a7(reg: Registry, cor: Corrections):
+    t = wacc_table()
+    WACC_TABLE.parent.mkdir(parents=True, exist_ok=True)
+    t.to_csv(WACC_TABLE, index=False)
+    wsha, ssha = sha256(WACC_TABLE), sha256(S4R_WACC)
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    var_sha = sha256(ROOT / "scripts_project/m08a_variants.py")
+    tl = float(t.set_index("country").at["TL", "wacc_real"])
+    reg.add("wacc_country_real_table", "R6.6 / F7 / M08a A7 (decision 133): real WACC by country, one method (IEA observatory 2024 solar midpoint or MY reference + Damodaran CRP difference; "
+            "deflated with IMF WEO Oct 2026 CPI 2028-2030 average) - research_inputs/finance_v5/COUNTRY_WACC_REAL_M08A.csv (S4R real_wacc_mid; TL by rule); used only by the "
+            "finance.wacc_mode country_specific variant", str(WACC_TABLE.relative_to(ROOT)), "file", "C", "IEA Cost of Capital Observatory 2025; Damodaran 2026-01; IMF WEO Oct 2026",
+            "COUNTRY_WACC_SENSITIVITY_TABLE.csv", wsha, decision_ref="126, 90, 111, 133")
+    reg.add("wacc_country_tl_rule", f"M08a A7 (decision 133): Timor-Leste has no IEA observatory entry and no Damodaran country risk premium -> real WACC = mean of KH / LA / MM = {tl:.4f} "
+            "(grade C rule, same family of frontier economies; sensitivity = the KH / MM values)", tl, "real rate", "C", "derived (KH 0.0905, LA 0.0764, MM 0.1102)",
+            "COUNTRY_WACC_REAL_M08A.csv row TL", wsha, country="TL", decision_ref="133", sensitivity_low=0.0764, sensitivity_high=0.1102)
+    reg.add("wacc_distributed_rule", "M08a A7 (decision 133): distributed technologies in finance.wacc_mode country_specific = cost rows whose technology-data discount rate is below the "
+            "uniform 0.07 (0.04: solar-rooftop and decentral rows) keep that household rate (research.finance.distributed_wacc_rule technology_data_fixed). Reason: technology-data / "
+            "PyPSA-Eur keep a separate decentral rate that does not derive from the system rate, and the IEA observatory WACC behind the country table covers utility-scale projects "
+            "(no country household rate source); sensitivity proportional = r_country x 0.04 / 0.07", "technology_data_fixed", "rule", "C",
+            "technology-data v0.15.0 costs (discount rate 0.04 rows); PyPSA-Eur prepare_costs", "configs/research/baseline.yaml research.finance.distributed_wacc_rule", cfg_sha, decision_ref="133")
+    reg.add("wacc_cross_border_rule", "M08a A7 (decision 133): assets spanning two countries (cross-border lines / links) are re-annualised with the mean real WACC of the two end countries; "
+            "Lines included (AC capital cost row HVAC overhead); existing stock (capital cost 0) unaffected", "mean_of_end_countries", "rule", "C", "project rule",
+            "scripts_project/s4c_layers.apply_wacc_mode", cfg_sha, decision_ref="133")
+    reg.add("disconnected_definition_main", "R7 / F11 / M08a A7 (decision 132): disconnected = all ASEAN-internal cross-border fixed networks removed, INCLUDING the 2025 stock (corridor "
+            "table: 24 electricity edges with 2025 capacity; in the built network after S4F-2 / S4H-1 corrections 16 AC lines + 1 DC link Khlong Ngae - Gurun 300 MW, i.e. 62 cross-border "
+            "lines and 292 cross-border links removed in total (S4M-3 integrated network, M08A_A7_VARIANTS.json); gas pipelines ID-SG 8,795 (2 pipelines), MM-TH 13,845 (3), MY-TH "
+            "11,244 MW (TTM)); regional liquid pools (oil, oil non-fossil, methanol, ammonia), CO2 shipping and every extra-ASEAN import kept identical in both scenarios; config "
+            "research.cross_border.stock_mode = remove_all (s2_network.py disconnected build)", "remove_all", "flag", "B",
+            "configs/research/disconnected.yaml; S4P section 4.1 network diff", "R7", cfg_sha, decision_ref="126, 8, 18, 132")
+    reg.add("disconnected_definition_sensitivity", "R7 / M08a A7 (decision 132): sensitivity 'keep 2025 stock, no new build' - cross_border.stock_mode = keep_stock_no_new, derived from the "
+            "INTEGRATED base by scripts_project/m08a_variants.py: AC lines with s_nom_min > 0, electricity links with p_nom_min > 0 and existing gas pipelines (with their lossy-split "
+            "reversed twins) pinned at the 2025 capacity (nominal = min = max; extendable flag kept so the objective treats the stock as in the base); all other cross-border lines / "
+            "links removed; pools / shipping / extra-ASEAN unchanged; existing cross-border FOM constant kept", "keep_stock_no_new", "flag", "C", "R7",
+            "scripts_project/m08a_layers.apply_stock_mode", var_sha, decision_ref="126, 132")
+    reg.add("scenario_switch_co2_shipping_intra_asean", "M08a A7 b1 (decision 132): disconnected.co2_shipping_intra_asean = allow (main: intra-ASEAN CO2 shipping kept in the disconnected "
+            "scenario, maritime trade, decision 92) | forbid (variant of a disconnected network: links CO2 ship, CO2 transit ship and CO2 transit rail into another ASEAN country's "
+            "national store removed - the Lao rail leg into the VN / TH store counts as the land part of that trade (implementer's reading, to confirm); CO2 export extra-ASEAN and "
+            "CO2 transit export extra-ASEAN kept)", "allow", "flag", "C", "M08A instruction A7 item 2", "scripts_project/m08a_layers.apply_co2_shipping", var_sha, decision_ref="92, 132")
+    reg.add("scenario_switch_remove_countries", "M08a A7 (decision 132): coalition.remove_countries = [] (main) | list of ISO2 - the countries leave the network ENTIRELY: buses, loads, "
+            "generators, storage and gas stores, storage potential, existing stock, every line / link with a port on their buses (their half of the cross-border lines, liquid-pool and "
+            "CO2-shipping access, extra-ASEAN import points located there) and components tagged with the country (its loads on the regional buses); international bunker demand "
+            "(regional, no country) kept; solve hooks iterate n.meta research_countries; NOT the decision-91 cross_border.coalition switch (that keeps the country in the pools)",
+            "[]", "flag", "C", "M08A instruction A7 item 3", "scripts_project/m08a_layers.apply_remove_countries", var_sha, decision_ref="91, 132")
+    reg.add("scenario_switch_wacc_mode", "M08a A7 (decision 133): finance.wacc_mode = uniform (main: 0.07, distributed technologies 0.04) | country_specific (variant of a built base: "
+            "new-build capital costs re-annualised with the real WACC of the asset's country, wacc_country_real_table; TL rule, distributed rule, cross-border rule)", "uniform", "flag", "C",
+            "M08A instruction A7 item 4", "scripts_project/s4c_layers.apply_wacc_mode via m08a_variants.py", var_sha, decision_ref="90, 133")
+    reg.add("scenario_variant_generation_rule", "M08a A7 (decisions 132, 133): every variant of the four switches is generated deterministically from a base network built by "
+            "s2_network.py with the current config, by one script (scripts_project/m08a_variants.py; fixed order remove_countries -> stock_mode -> co2_shipping -> wacc); the receipt "
+            "records input and output SHA256 so that the cloud can derive the variants from the uploaded base networks; the build refuses non-default variant keys",
+            "m08a_variants.py", "rule", "B", "M08A instruction A7", "scripts_project/m08a_variants.py", var_sha, decision_ref="132, 133")
+
+
+def main(steps=("a2", "a3", "a4", "a5", "a7")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

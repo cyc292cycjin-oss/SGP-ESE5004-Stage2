@@ -12,9 +12,9 @@
 | A2 | 核电同源（SMR 8,421 → 9,167 EUR/kW）、AEO8 价格年系数；新增 `m08a_data.py` 片段机制；测试 100 / 24 | 完成 | 0e39df2e |
 | A3 | 存量机组按投运年取 v0.15.0 表（`m08a_layers.py`）；存量 FOM 10.806 → 10.050 bn/a，两情景相同；CCGT 0.56 / 0.57；测试 105 / 24 | 完成 | 4cc95598 |
 | A4 | LNG `capex_only`（16 台 p_nom_max = inf）、8,020.43、加价 1.26、液氢 × 1.2；测试 110 / 24 | 完成 | 04d686fe |
-| A5 | 封存统一表（VN 106.07、PH 1.344 Mt/a；年上限 = 潜力 / storage_years）；测试 114 / 24 | 完成 | 见 git log |
+| A5 | 封存统一表（VN 106.07、PH 1.344 Mt/a；年上限 = 潜力 / storage_years）；测试 114 / 24 | 完成 | 79b0f3e6 |
 | A6 | 风光布局 | 待做 | |
-| A7 | 情景与联盟开关 | 待做 | |
+| A7 | 四个开关 + `m08a_variants.py`（确定性派生、回执 SHA256）；取证 5 个变体；测试 120 / 24 | 完成 | 见 git log |
 | A8 | 门槛 V6 与运行规则 | 待做 | |
 | A9 | 报告货币 | 待做 | |
 | A10 | 注册表 | 待做 | |
@@ -38,4 +38,4 @@
 
 ## 接续点
 
-A1 代码已写（`d1_common.py` HICP 函数、`s2_0_cost_layer_v015.py` 两变体、`s2_costs.layer_files`、`d1_cost_layers`、配置 `rebase_index`），已重新生成成本层；待：测试、注册表重拼、提交。
+A1–A5 已提交（77a9a07c、0e39df2e、4cc95598、04d686fe、79b0f3e6）。工具脚本：`/home/jin/m08a_tests.sh`（运行 `m08a_data.py` → `d1_registry.py` → 无求解测试子集；`REASSEMBLE=0` 跳过重拼）、`/home/jin/m08a_commit.sh`（镜像 work/ 并按 `/home/jin/m08a_msg.txt` 提交；被忽略文件列在 `/home/jin/m08a_force.txt`）。注册表新行在 `scripts_project/m08a_data.py`（每任务一个函数，`main(steps=...)` 需追加新任务名）。下一步：A7 → A8 → A9 → A6 → A10 → 报告、台账、PR。

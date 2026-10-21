@@ -1,0 +1,488 @@
+{
+ "note": "bases = S4M-3 builds (earlier config); mechanics only",
+ "runs": {
+  "country_wacc_from_integrated": {
+   "checks": {
+    "deterministic": true
+   },
+   "receipt": {
+    "base": {
+     "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/integrated/integrated_2920_3h_unsolved.nc",
+     "scenario": "integrated",
+     "sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+     "stale_config": true
+    },
+    "ledgers": {
+     "co2_shipping": {
+      "mode": "allow"
+     },
+     "coalition": {
+      "demand_removed_mwh": 0.0,
+      "removed": {},
+      "removed_countries": []
+     },
+     "finance": {
+      "by_country": {
+       "BN": 49,
+       "BN+MY": 4,
+       "ID": 2037,
+       "ID+MY": 44,
+       "ID+SG": 6,
+       "ID+TL": 4,
+       "KH": 254,
+       "KH+LA": 5,
+       "KH+TH": 16,
+       "KH+VN": 24,
+       "LA": 283,
+       "LA+MM": 5,
+       "LA+TH": 43,
+       "LA+VN": 36,
+       "MM": 840,
+       "MM+TH": 35,
+       "MY": 375,
+       "MY+PH": 4,
+       "MY+SG": 5,
+       "MY+TH": 7,
+       "PH": 329,
+       "SG": 43,
+       "TH": 305,
+       "TL": 48,
+       "VN": 415
+      },
+      "changed": 5216,
+      "costs_table": {
+       "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/integrated/costs_active_research.csv",
+       "sha256": "76cbfc6c6876100a9afcaf89d51e7b441c47ac4a72753fecf14e738995088ab5"
+      },
+      "country_wacc": {
+       "BN": 0.0468,
+       "ID": 0.0707,
+       "KH": 0.0905,
+       "LA": 0.0764,
+       "MM": 0.1102,
+       "MY": 0.0441,
+       "PH": 0.0454,
+       "SG": 0.0289,
+       "TH": 0.0525,
+       "TL": 0.092367,
+       "VN": 0.0455
+      },
+      "cross_border_rule": "mean of the two end countries",
+      "distributed_kept_at_cost_row_rate": 98,
+      "distributed_wacc_rule": "technology_data_fixed",
+      "mode": "country_specific",
+      "skipped_no_country": 0,
+      "skipped_no_country_examples": [],
+      "table": "research_inputs/finance_v5/COUNTRY_WACC_REAL_M08A.csv",
+      "uniform_discount_rate": 0.07
+     },
+     "stock_mode": {
+      "mode": "remove_all",
+      "note": "integrated network: not applicable"
+     }
+    },
+    "output": {
+     "bytes": 55995003,
+     "components": {
+      "Bus": 2786,
+      "Carrier": 135,
+      "Generator": 1717,
+      "Line": 148,
+      "LineType": 35,
+      "Link": 7494,
+      "Load": 2026,
+      "StorageUnit": 133,
+      "Store": 523,
+      "TransformerType": 14
+     },
+     "path": "/home/jin/m08a_scratch/country_wacc_from_integrated/integrated_wacccountry_2920_3h_unsolved.nc",
+     "scenario": "integrated",
+     "sha256": "6918ee60a6150425e5ee52f34ef8862e53ab3c09a54e991336b3d83b8318eb58"
+    },
+    "overrides": [
+     "finance.wacc_mode=country_specific"
+    ],
+    "research_config_sha256": "564b02636cdf1a3fce57e1f6c6714138413651ba0f7773301c4641b768991093",
+    "research_config_subset_sha256": null,
+    "script": "scripts_project/m08a_variants.py",
+    "sets": {
+     "finance.wacc_mode": "country_specific"
+    },
+    "solver_runs": 0,
+    "status": "M08A_VARIANT_BUILT"
+   }
+  },
+  "keep_stock_from_integrated": {
+   "checks": {
+    "deterministic": true
+   },
+   "receipt": {
+    "base": {
+     "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/integrated/integrated_2920_3h_unsolved.nc",
+     "scenario": "integrated",
+     "sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+     "stale_config": true
+    },
+    "ledgers": {
+     "co2_shipping": {
+      "mode": "allow"
+     },
+     "coalition": {
+      "demand_removed_mwh": 0.0,
+      "removed": {},
+      "removed_countries": []
+     },
+     "finance": {
+      "mode": "uniform"
+     },
+     "stock_mode": {
+      "existing_cross_border_fom_eur": 9421185.932358457,
+      "kept_by_carrier": {
+       "DC": 2,
+       "gas pipeline": 7
+      },
+      "kept_capacity_mw": {
+       "lines": 2570.0,
+       "links": 34183.740000000005
+      },
+      "kept_lines": 16,
+      "kept_links_forward": 7,
+      "kept_reversed_twins": 2,
+      "mode": "keep_stock_no_new",
+      "removed_lines": 46,
+      "removed_links": 283,
+      "stock_lines": [
+       "23",
+       "39",
+       "43",
+       "47",
+       "49",
+       "52",
+       "53",
+       "55",
+       "56",
+       "58",
+       "61",
+       "62",
+       "66",
+       "91",
+       "92",
+       "APG17_LA_MM"
+      ],
+      "stock_links": [
+       "Khlong Ngae \u2013 Gurun",
+       "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+       "gas pipeline existing Trans Thailand\u2013Malaysia Gas Pipeline (TTM)",
+       "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+       "gas pipeline existing Yadana Gas Pipeline 1",
+       "gas pipeline existing Yetagun Gas Pipeline",
+       "gas pipeline existing Zawtika Gas Pipeline"
+      ]
+     }
+    },
+    "output": {
+     "bytes": 55376444,
+     "components": {
+      "Bus": 2786,
+      "Carrier": 135,
+      "Generator": 1717,
+      "Line": 102,
+      "LineType": 35,
+      "Link": 7211,
+      "Load": 2026,
+      "StorageUnit": 133,
+      "Store": 523,
+      "TransformerType": 14
+     },
+     "path": "/home/jin/m08a_scratch/keep_stock_from_integrated/disconnected_keepstock_2920_3h_unsolved.nc",
+     "scenario": "disconnected",
+     "sha256": "45cd2cd5e55d728e0efc26865023763f29eebdfcca861662d8c3ef6134858efd"
+    },
+    "overrides": [
+     "cross_border.stock_mode=keep_stock_no_new"
+    ],
+    "research_config_sha256": "c85e119f6279c511ecfedbc4011701fe41cb5114202df7a3aaeda29be53a6334",
+    "research_config_subset_sha256": null,
+    "script": "scripts_project/m08a_variants.py",
+    "sets": {
+     "cross_border.stock_mode": "keep_stock_no_new"
+    },
+    "solver_runs": 0,
+    "status": "M08A_VARIANT_BUILT"
+   }
+  },
+  "minus_VN_from_disconnected": {
+   "checks": {
+    "bunker_loads_kept": 2,
+    "demand_base_twh": 11576.57938550959,
+    "demand_variant_twh": 9339.544538037393,
+    "demand_vn_twh": 2237.034847472196,
+    "deterministic": true,
+    "references_to_vn_buses": 0,
+    "remaining_equals_base_minus_vn": true,
+    "research_countries": [
+     "BN",
+     "ID",
+     "KH",
+     "LA",
+     "MM",
+     "MY",
+     "PH",
+     "SG",
+     "TH",
+     "TL"
+    ],
+    "vn_buses_left": 0
+   },
+   "receipt": {
+    "base": {
+     "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/disconnected/disconnected_2920_3h_unsolved.nc",
+     "scenario": "disconnected",
+     "sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+     "stale_config": true
+    },
+    "ledgers": {
+     "co2_shipping": {
+      "mode": "allow"
+     },
+     "coalition": {
+      "demand_removed_mwh": 2237034847.472196,
+      "existing_fom_before_eur": 10806157242.20073,
+      "remaining_countries": [
+       "BN",
+       "ID",
+       "KH",
+       "LA",
+       "MM",
+       "MY",
+       "PH",
+       "SG",
+       "TH",
+       "TL"
+      ],
+      "removed": {
+       "Bus": 244,
+       "Generator": 173,
+       "Line": 7,
+       "Link": 675,
+       "Load": 181,
+       "StorageUnit": 21,
+       "Store": 43
+      },
+      "removed_countries": [
+       "VN"
+      ]
+     },
+     "finance": {
+      "mode": "uniform"
+     },
+     "stock_mode": {
+      "mode": "remove_all"
+     }
+    },
+    "output": {
+     "bytes": 49940605,
+     "components": {
+      "Bus": 2542,
+      "Carrier": 135,
+      "Generator": 1544,
+      "Line": 79,
+      "LineType": 35,
+      "Link": 6527,
+      "Load": 1845,
+      "StorageUnit": 112,
+      "Store": 480,
+      "TransformerType": 14
+     },
+     "path": "/home/jin/m08a_scratch/minus_VN_from_disconnected/disconnected_minusVN_2920_3h_unsolved.nc",
+     "scenario": "disconnected",
+     "sha256": "b3911e44158fa9a4cd827760697bd9a9c176dca8da9f8a08fddc86137b2d33d2"
+    },
+    "overrides": [
+     "coalition.remove_countries=[\"VN\"]"
+    ],
+    "research_config_sha256": "ef6edca03ba82f9a23962c89ca6a1d2287d453196d31cd1d32426e3b012f2e7f",
+    "research_config_subset_sha256": null,
+    "script": "scripts_project/m08a_variants.py",
+    "sets": {
+     "coalition.remove_countries": [
+      "VN"
+     ]
+    },
+    "solver_runs": 0,
+    "status": "M08A_VARIANT_BUILT"
+   }
+  },
+  "minus_VN_from_integrated": {
+   "checks": {
+    "bunker_loads_kept": 2,
+    "demand_base_twh": 11576.57938550959,
+    "demand_variant_twh": 9339.544538037393,
+    "demand_vn_twh": 2237.034847472196,
+    "deterministic": true,
+    "references_to_vn_buses": 0,
+    "remaining_equals_base_minus_vn": true,
+    "research_countries": [
+     "BN",
+     "ID",
+     "KH",
+     "LA",
+     "MM",
+     "MY",
+     "PH",
+     "SG",
+     "TH",
+     "TL"
+    ],
+    "vn_buses_left": 0
+   },
+   "receipt": {
+    "base": {
+     "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/integrated/integrated_2920_3h_unsolved.nc",
+     "scenario": "integrated",
+     "sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+     "stale_config": true
+    },
+    "ledgers": {
+     "co2_shipping": {
+      "mode": "allow"
+     },
+     "coalition": {
+      "demand_removed_mwh": 2237034847.472196,
+      "existing_fom_before_eur": 10806157242.20073,
+      "remaining_countries": [
+       "BN",
+       "ID",
+       "KH",
+       "LA",
+       "MM",
+       "MY",
+       "PH",
+       "SG",
+       "TH",
+       "TL"
+      ],
+      "removed": {
+       "Bus": 244,
+       "Generator": 173,
+       "Line": 22,
+       "Link": 750,
+       "Load": 181,
+       "StorageUnit": 21,
+       "Store": 43
+      },
+      "removed_countries": [
+       "VN"
+      ]
+     },
+     "finance": {
+      "mode": "uniform"
+     },
+     "stock_mode": {
+      "mode": "remove_all",
+      "note": "integrated network: not applicable"
+     }
+    },
+    "output": {
+     "bytes": 50420127,
+     "components": {
+      "Bus": 2542,
+      "Carrier": 135,
+      "Generator": 1544,
+      "Line": 126,
+      "LineType": 35,
+      "Link": 6744,
+      "Load": 1845,
+      "StorageUnit": 112,
+      "Store": 480,
+      "TransformerType": 14
+     },
+     "path": "/home/jin/m08a_scratch/minus_VN_from_integrated/integrated_minusVN_2920_3h_unsolved.nc",
+     "scenario": "integrated",
+     "sha256": "96c43c481b1b259719efb05eb8170bdc90e379f6dd232bd20b731f5b88757246"
+    },
+    "overrides": [
+     "coalition.remove_countries=[\"VN\"]"
+    ],
+    "research_config_sha256": "3121341a978ffb09f8eff6c4af2b2bce67ab5a37c9164a6f8ae839e1dbcb4de4",
+    "research_config_subset_sha256": null,
+    "script": "scripts_project/m08a_variants.py",
+    "sets": {
+     "coalition.remove_countries": [
+      "VN"
+     ]
+    },
+    "solver_runs": 0,
+    "status": "M08A_VARIANT_BUILT"
+   }
+  },
+  "no_intra_co2_shipping_from_disconnected": {
+   "checks": {
+    "deterministic": true
+   },
+   "receipt": {
+    "base": {
+     "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/s4m/s4m3/builds/disconnected/disconnected_2920_3h_unsolved.nc",
+     "scenario": "disconnected",
+     "sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+     "stale_config": true
+    },
+    "ledgers": {
+     "co2_shipping": {
+      "extra_asean_links_kept": 77,
+      "mode": "forbid",
+      "removed": 552,
+      "removed_by_carrier": {
+       "CO2 ship": 504,
+       "CO2 transit rail": 6,
+       "CO2 transit ship": 42
+      }
+     },
+     "coalition": {
+      "demand_removed_mwh": 0.0,
+      "removed": {},
+      "removed_countries": []
+     },
+     "finance": {
+      "mode": "uniform"
+     },
+     "stock_mode": {
+      "mode": "remove_all"
+     }
+    },
+    "output": {
+     "bytes": 54135748,
+     "components": {
+      "Bus": 2786,
+      "Carrier": 135,
+      "Generator": 1717,
+      "Line": 86,
+      "LineType": 35,
+      "Link": 6650,
+      "Load": 2026,
+      "StorageUnit": 133,
+      "Store": 523,
+      "TransformerType": 14
+     },
+     "path": "/home/jin/m08a_scratch/no_intra_co2_shipping_from_disconnected/disconnected_noco2ship_2920_3h_unsolved.nc",
+     "scenario": "disconnected",
+     "sha256": "1f8c9292814cc2eaf6d1f0c762dd87cdc949644f2971c0d6b3a78d24dd13ae79"
+    },
+    "overrides": [
+     "disconnected.co2_shipping_intra_asean=forbid"
+    ],
+    "research_config_sha256": "809cb6c35402a9fa17afe79b099c4f6fedae0f758427564f25699b67ac050187",
+    "research_config_subset_sha256": null,
+    "script": "scripts_project/m08a_variants.py",
+    "sets": {
+     "disconnected.co2_shipping_intra_asean": "forbid"
+    },
+    "solver_runs": 0,
+    "status": "M08A_VARIANT_BUILT"
+   }
+  }
+ },
+ "schema": "m08a-a7-variants-evidence-v1",
+ "solver_runs": 0,
+ "stale_bases_allowed": true
+}

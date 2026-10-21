@@ -61,6 +61,7 @@ def test_wacc_country_specific_refuses_pending_and_rescales(tmp_path):
     n = _tiny(); led = apply_wacc_mode(n, costs, cfg, ROOT)
     assert led["mode"] == "uniform" and n.generators.at["pv", "capital_cost"] == 100.0
     cs = copy.deepcopy(cfg); cs["research"]["finance"]["wacc_mode"] = "country_specific"
+    cs["research"]["finance"]["country_wacc_table"] = "research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv"   # S4C-0 table (model rows DATA_PENDING); M08a main table COUNTRY_WACC_REAL_M08A.csv
     with pytest.raises(ValueError, match="no sourced WACC"):
         apply_wacc_mode(_tiny(), costs, cs, ROOT)
     syn = tmp_path / "wacc.csv"   # SYNTHETIC_TEST_ONLY table
