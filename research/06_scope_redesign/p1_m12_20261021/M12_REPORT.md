@@ -193,4 +193,5 @@
 - 代码：`scripts_project/m12_allocation.py`、`scripts_project/m12_rhs_audit.py`、`scripts_project/m08a_run_batch.sh`（C3）、`tests/research/test_m12_allocation.py`。
 - 文档与证据：`research/06_scope_redesign/p1_m12_20261021/`（镜像 `work/p1_m12_20261021/`）：本报告、`M12_PROGRESS.md`、指令及 SHA256、`evidence/c43/`（分摊、受益、S4P 对照）、`evidence/c2/`（审计、对偶形式、去一国）、`evidence/toy/`、`scripts/`（运行与证据脚本）、全量测试日志。
 - 测试：`tests/research` 全量 544 passed、64 skipped（worktree 中没有历史构建）、0 failed（头 dbb63113）。
-- 分支 `codex/m12-allocation-20261021`（自 M08a 头 820c2cae）；提交 493018ae → f573efae → c94c1cbc → dbb63113 → dd7d2efe → 收尾提交；draft PR：（创建后补）。
+- 分支 `codex/m12-allocation-20261021`（自 M08a 头 820c2cae）；提交 493018ae（C1 通用 + 玩具）→ f573efae（C1 网络 + C4.3）→ c94c1cbc（C2）→ dbb63113（C3）→ dd7d2efe（证据补充、全量测试）→ c863a941（报告、台账）→ 收尾提交（本节 PR 链接）；draft PR：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/46（base `codex/m08a-corrections-20261021`，叠在 #45 上）。
+- 审阅包：`work/p1_m12_20261021/M12_REVIEW.zip`（work 目录内全部文件 + `code/` 下 4 个仓库文件；逐成员 SHA256 / CRC32 清单 `M12_REVIEW_MANIFEST.csv`，ZIP 自身 SHA256 见 `M12_REVIEW_ZIP_SHA256.txt`；三者不入库）。
