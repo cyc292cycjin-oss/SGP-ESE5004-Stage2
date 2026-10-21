@@ -48,6 +48,8 @@ OUT_DIRS = {"eea_hicp_rate": COST_DIR / "technology_data_v0.15.0_EUR2020",
 OUT = OUT_DIRS[MAIN_INDEX]
 TD_HELPERS_SHA = "a386c21935cdd2541f38b0230529e6e01d6a00e0dc776521858d958cdfcb3786"   # technology-data v0.15.0 scripts/_helpers.py (tarball member, not copied)
 TD_HELPERS_LINE = 220                            # row_to_use = "European Economic Area ..." (prepare_inflation_rate)
+BY_YEAR_SRC = SRC / "technology_data_v0.15.0" / "outputs"   # costs_<year>.csv of the release (tarball members, SOURCES_SHA256.txt)
+BY_YEARS = (2020, 2025, 2030, 2035, 2040, 2045, 2050)      # technology-data v0.15.0 config.yaml years
 TAG = "v0.15.0"
 TAG_COMMIT = "07e43575c7996a988c60964d00772376ab9bd10c"
 TARBALL_SHA = "c4787c1d72b9ec9fae032d37f906a4d6c92d4adfe111c55680f59f62bb162ccb"  # github archive refs/tags/v0.15.0.tar.gz
@@ -179,6 +181,17 @@ def build_variant(index: str, raw: pd.DataFrame):
     wide.to_csv(wide_out, float_format="%.12g")
     cmp_df = comparison(raw, long)
     write_csv(cmp_df.to_dict("records"), out / "COMPARISON_v0.13.2_vs_v0.15.0_EUR2020.csv", list(cmp_df.columns))
+    # M08a A3 (decision 131, registry existing_fleet_cost_rule): the same rebase on every output year of the release, for the
+    # existing stock priced by commissioning year (prepared tables only; the 2050 table equals the main prepared table)
+    by_year = {}
+    (out / "by_year").mkdir(exist_ok=True)
+    for y in BY_YEARS:
+        src_y = BY_YEAR_SRC / f"costs_{y}.csv"
+        ry = pd.read_csv(src_y); ry["value"] = ry["value"].astype(float)
+        wy = wide_prepared(rebase(ry, rebase_factor(index)))
+        py = out / "by_year" / f"costs_{y}_EUR2020_prepared.csv"
+        wy.to_csv(py, float_format="%.12g")
+        by_year[str(y)] = dict(source=rel(src_y), source_sha256=sha256(src_y), prepared=rel(py), prepared_sha256=sha256(py))
     monetary_rows = long[long.monetary]
     manifest = dict(layer="technology_data_v0_15_0_2050_eur2020", rebase_index=index,
                     role=("main (decision 50; supersedes v0.13.2 main layer from D1); rebase index per M08-1 (decision 131)" if index == MAIN_INDEX
@@ -189,7 +202,7 @@ def build_variant(index: str, raw: pd.DataFrame):
                                          upstream_inflation_index=f"Eurostat HICP annual average rate of change (prc_hicp_aind), scripts/_helpers.py line {TD_HELPERS_LINE} row 'European Economic Area', adjust_for_inflation"),
                     rebase=rebase_manifest(index, monetary_rows),
                     files=dict(long=rel(long_out), long_sha256=sha256(long_out), prepared=rel(wide_out), prepared_sha256=sha256(wide_out),
-                               comparison=rel(out / "COMPARISON_v0.13.2_vs_v0.15.0_EUR2020.csv")),
+                               comparison=rel(out / "COMPARISON_v0.13.2_vs_v0.15.0_EUR2020.csv"), by_year=by_year),
                     prepared_table=dict(formula="fixed = (annuity(lifetime, discount rate) + FOM/100) x investment [EUR/MW]; marginal_cost = VOM + fuel/efficiency; per-kW units x 1e3",
                                         fill_values=FILL, source="pypsa-asean scripts/process_cost_data.prepare_costs; configs/config.default.yaml costs.fill_values"),
                     aeo8_overrides=False, smr_cost_source="see research.cost_layer.smr_cost_source", rows=int(len(long)))

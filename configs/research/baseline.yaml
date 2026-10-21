@@ -226,6 +226,8 @@ research:
     construction_no_start_year_table: research_inputs/fleet_v5/FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv
     remove_not_operating_gipt2026: true   # S4B-1 (decision 77): remove the 11 frozen-stock units (2,854 MW) that GIPT 2026-09 lists as cancelled / mothballed / retired / absent (data correction); false = keep (S1 frozen stock)
     removal_table: research_inputs/fleet_v5/FLEET_REMOVED_NOT_OPERATING_GIPT2026.csv
+    existing_cost_basis: td_v0_15_0_by_commissioning_year   # M08a A3 (decision 131, registry existing_fleet_cost_rule; scripts_project/m08a_layers.py): td_v0_15_0_by_commissioning_year (MAIN: every existing component - frozen base, GEM additions - gets FOM (FOM % x investment), VOM and, for the fuel Links CCGT / OCGT / coal / lignite / oil, the efficiency of the technology-data v0.15.0 table of its units' commissioning year (active cost layer rebase variant, by_year_dir); mixed-year components: capacity-weighted FOM / VOM, efficiency keeping the fuel-input capacity; geothermal keeps AEO8) | author_v0_13_2 (former: frozen-base author v0.13.2 table costs year 2030, GEM additions on the 2050 table; comparison)
+    existing_cost_year_rule: {step: 5, min: 2020, max: 2050, rounding: nearest}   # M08a A3: commissioning year -> nearest 5-year table, clipped to [2020, 2050]; units commissioned before 2020 use costs_2020 (registry existing_fleet_cost_year_rule)
   nuclear:                                # decision 38; siting table is a grade-C assumption
     evidence_grade: C
     large_pwr:
@@ -268,8 +270,8 @@ research:
         file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json
         prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv
         rebase_variants:                  # files per rebase_index (s2_costs.layer_files); the manifest's rebase.index must equal the selected value
-          eea_hicp_rate: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv}
-          ea20_gdp_deflator: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/costs_2050_EUR2020_prepared.csv}
+          eea_hicp_rate: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv, by_year_dir: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/by_year}
+          ea20_gdp_deflator: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/costs_2050_EUR2020_prepared.csv, by_year_dir: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year}   # by_year_dir: costs_<year>_EUR2020_prepared.csv of every v0.15.0 output year (M08a A3, existing stock)
         aeo8_overrides: false
       technology_data_v0_13_2_2050:       # sensitivity (D1 main layer)
         file: research_inputs/cost_layers_v5/LAYER_A_TECHNOLOGY_DATA_V0_13_2_2050.json

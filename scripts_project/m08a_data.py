@@ -89,7 +89,42 @@ def a2(reg: Registry, cor: Corrections):
         cor.supersede(pid, "nuclear_cost_rule", "A2", "kept for the former option smr_cost_source = aeo8_author_rule_2050")
 
 
-def main(steps=("a2",)):
+# --- A3 (decision 131): existing stock on technology-data v0.15.0 by commissioning year ----------------------------
+def a3(reg: Registry, cor: Corrections):
+    import json
+    ev = ROOT / "research/06_scope_redesign/p1_m08a_20261021/evidence/M08A_A3_EXISTING_VINTAGE.json"
+    e = json.loads(ev.read_text()) if ev.exists() else None
+    td = ROOT / "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/SOURCES_SHA256.txt"
+    src = f"technology-data v0.15.0 outputs/costs_<year>.csv (tarball c4787c1d; {td.name}:{sha256(td)})"
+    reg.add("existing_fleet_cost_rule", "M08-0 supplement 01 section 4 / M08a A3 (decision 131): existing assets (frozen electric base, GEM additions) priced and parameterised with "
+            "technology-data v0.15.0 of the matching commissioning year (outputs costs_2020 ... costs_2050, rebased to EUR2020 like the main layer - active rebase variant "
+            "by_year tables): FOM = FOM % x investment (EUR2020/MW_el/a), VOM (EUR2020/MWh_el) and, for the fuel Links CCGT / OCGT / coal / lignite / oil, efficiency; components "
+            "grouping units of different years: capacity-weighted FOM / VOM, efficiency = sum MW_el / sum(MW_el / eff) (keeps the fuel-input capacity); hydro / ror / PHS / VRE "
+            "efficiencies and profiles unchanged; geothermal keeps AEO8 D.15 (no technology-data investment / VOM); replaces the author technology-data v0.13.2 table "
+            "(costs year 2030) of the frozen base and the 2050 table of the GEM additions; config research.fleet.existing_cost_basis = td_v0_15_0_by_commissioning_year "
+            "(main) | author_v0_13_2 (former); implementation scripts_project/m08a_layers.apply_existing_vintage_costs",
+            "td_v0_15_0_by_commissioning_year", "rule", "C", src, "scripts_project/m08a_layers.py; configs/research/baseline.yaml research.fleet", sha256(td), decision_ref="131")
+    reg.add("existing_fleet_cost_year_rule", "M08a A3 (decision 131): commissioning year -> technology-data output year = nearest multiple of 5 (whole years cannot tie), "
+            "clipped to [2020, 2050]; units commissioned before 2020 use costs_2020 (no earlier table in v0.15.0); 2021-2022 -> 2020, 2023-2027 -> 2025, 2028-2032 -> 2030 ... "
+            "(project rule, grade C: the release has 5-year tables only)", "nearest_5y_2020_2050", "rule", "C", src, "scripts_project/m08a_layers.vintage_year", sha256(td), decision_ref="131")
+    reg.add("existing_fleet_geothermal_exception", "M08a A3 (decision 131): existing geothermal keeps the AEO8 Table D.15 'Geothermal average' FOM / VOM of decision 52 (technology-data "
+            "v0.15.0 geothermal has no investment and no VOM rows); listed in m08a_layers.VINTAGE_EXCEPTIONS", "aeo8_d15", "rule", "C", "AEO8 Table D.15; technology-data v0.15.0 costs_2050",
+            "scripts_project/m08a_layers.py VINTAGE_EXCEPTIONS", sha256(td), decision_ref="52, 131")
+    if e:
+        cc = e["by_scenario"]["integrated"]["by_carrier"]["CCGT existing"]
+        evs = sha256(ev)
+        reg.add("existing_fleet_ccgt_efficiency_check", f"M08a A3 check on the S4M-3 built networks (rule applied in memory, networks unchanged): existing CCGT efficiencies after the rule "
+                f"{cc['efficiency_after_values']} (technology-data v0.15.0 costs_2020 0.56, costs_2025 0.57, costs_2030 0.58; expected 0.56 / 0.57), capacity-weighted "
+                f"{cc['efficiency_after_mw_weighted']:.4f} (before {cc['efficiency_before_mw_weighted']:.4f}: frozen base 0.57 author v0.13.2, GEM additions 0.60)",
+                round(cc["efficiency_after_mw_weighted"], 6), "p.u.", "B", "M08A_A3_EXISTING_VINTAGE.json", "by_scenario.integrated.by_carrier['CCGT existing']", evs, decision_ref="131")
+        fi, fd = e["by_scenario"]["integrated"]["fom_after_eur"], e["by_scenario"]["disconnected"]["fom_after_eur"]
+        reg.add("existing_fleet_fom_after_rule", f"M08a A3 check: existing annual fixed O&M after the rule = {fi / 1e9:.4f} bn EUR2020/a in the integrated and {fd / 1e9:.4f} in the disconnected "
+                f"S4M-3 network (identical: the rule has no scenario input); before {e['by_scenario']['integrated']['fom_before_eur'] / 1e9:.4f} bn (author v0.13.2 + 2050 table)",
+                fi, "EUR2020/a", "B", "M08A_A3_EXISTING_VINTAGE.json", "by_scenario.*.fom_after_eur", evs, decision_ref="131")
+    cor.supersede("existing_fleet_cost_source_unification", "existing_fleet_cost_rule", "A3", "unification done in M08a A3")
+
+
+def main(steps=("a2", "a3")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)
