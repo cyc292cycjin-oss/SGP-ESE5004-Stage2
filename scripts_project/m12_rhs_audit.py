@@ -172,9 +172,10 @@ def load_split(n, O: Owners) -> dict:
 
 def objective_constants(n, O: Owners) -> dict:
     """objective constants by owner: existing fixed O&M moved out of the LP (existing_annual_fixed_om_eur of the components and the existing
-    cross-border FOM ledger) minus PyPSA's constant capital_cost x p_nom of the extendable components (the LP charges p_nom_opt)."""
+    cross-border FOM ledger) minus PyPSA's constant capital_cost x p_nom of the extendable components (the LP charges p_nom_opt).
+    pair_components: the same by "<type>:<component>" for the cross-border (pair-owned) components (length split, supplement 01 D2)."""
     from s4d_ledger import NOM
-    out = {}
+    out, comp = {}, {}
     for t, nom in NOM.items():
         d = n.df(t)
         if not len(d):
@@ -182,11 +183,43 @@ def objective_constants(n, O: Owners) -> dict:
         c = -(d[nom] * d.capital_cost).where(d[nom + "_extendable"], 0.0)
         if "existing_annual_fixed_om_eur" in d:
             c = c + pd.to_numeric(d.existing_annual_fixed_om_eur, errors="coerce").fillna(0.0)
-        for k, v in c.groupby(O.maps[t].reindex(d.index).fillna(UNRESOLVED)).sum().items():
+        ow = O.maps[t].reindex(d.index).fillna(UNRESOLVED)
+        for k, v in c.groupby(ow).sum().items():
             out[str(k)] = out.get(str(k), 0.0) + float(v)
+        for x in ow.index[ow.str.contains("|", regex=False)]:
+            if c[x] != 0:
+                comp[f"{t}:{x}"] = (str(ow[x]), comp.get(f"{t}:{x}", ("", 0.0))[1] + float(c[x]))
     for _, r in pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", [])).iterrows():
         k = str(O.maps[r.component_type][r.component]); out[k] = out.get(k, 0.0) + float(r.annual_fom_eur)
-    return dict(by_owner=out, total=float(sum(out.values())))
+        if "|" in k:
+            key = f"{r.component_type}:{r.component}"; comp[key] = (k, comp.get(key, ("", 0.0))[1] + float(r.annual_fom_eur))
+    return dict(by_owner=out, total=float(sum(out.values())), pair_components={k: dict(pair=p, eur=v) for k, (p, v) in sorted(comp.items())})
+
+
+def length_split(tot: dict, pair_comp: dict, shares: pd.DataFrame | None) -> dict:
+    """dual form split by in-country length (rule (v), sensitivity of supplement 01 D2): every cross-border component's value (y'b of its
+    pair rows + its objective constants) split with its length share (s4d_ledger.load_length_shares; component or its "-reversed" twin;
+    missing -> 0.5 as in the ledger); a pair's value not attributable to a component (column-bound terms) split 0.5."""
+    sh = {}
+    if shares is not None and len(shares):
+        for _, r in shares.iterrows():
+            sh[f"{r.component_type}:{r.component}"] = {str(r.country_a): float(r.share_a), str(r.country_b): float(r.share_b)}
+    raw = {k: v for k, v in tot.items() if "|" not in k}
+    done, detail = {}, {}
+    for key, v in pair_comp.items():
+        pr, a, b = v["pair"], *v["pair"].split("|")
+        s = sh.get(key) or (sh.get(key[: -len("-reversed")]) if key.endswith("-reversed") else None)
+        sa = float(s[a]) if s and set(s) == {a, b} else 0.5
+        raw[a] = raw.get(a, 0.0) + sa * v["eur"]; raw[b] = raw.get(b, 0.0) + (1 - sa) * v["eur"]
+        done[pr] = done.get(pr, 0.0) + v["eur"]
+        d = detail.setdefault(pr, dict(components=0, with_length_share=0, eur=0.0, first_country_eur=0.0))
+        d["components"] += 1; d["with_length_share"] += int(bool(s)); d["eur"] += v["eur"]; d["first_country_eur"] += sa * v["eur"]
+    for pr, v in tot.items():
+        if "|" in pr:
+            rest = v - done.get(pr, 0.0); a, b = pr.split("|")
+            raw[a] = raw.get(a, 0.0) + 0.5 * rest; raw[b] = raw.get(b, 0.0) + 0.5 * rest
+            detail.setdefault(pr, dict(components=0, with_length_share=0, eur=0.0, first_country_eur=0.0))["not_by_component_eur_split_half"] = rest
+    return dict(allocation=fold(raw), by_pair=detail)
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- duals
@@ -311,6 +344,7 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
     loads = load_split(n, O)
     fam_rows, owner_rows, shared_rows, coupling, missing_duals, nodal_special = [], [], [], {}, [], []
     dual_terms = {}
+    pair_rows = {}   # "<type>:<component>" -> y'b of its cross-border pair rows
     ctop = max(int(np.asarray(m.constraints[c].labels).max()) for c in m.constraints) + 1
     rown = np.zeros(ctop, dtype=np.int32); rfam = np.full(ctop, -1, dtype=np.int32); fams: dict = {}
     kvl = {}   # KVL loop transfer by owner of the line variables (needs the duals and the solved flows)
@@ -418,6 +452,14 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
             t_ = np.nan_to_num(np.asarray(y, dtype=float)[nz] * rs)
             for k, v in pd.Series(t_).groupby(ocs).sum().items():
                 add_dual(inv[int(k)], v)
+            pm = np.array([owner_class(inv[int(c)]) == "cross_border_pair" for c in ocs], dtype=bool)
+            cd = [i for i, dd in enumerate(lab.dims) if str(dd).split("-")[0] in COMP_TYPES]
+            if pm.any() and cd:   # cross-border rows by component (length split of the dual form, supplement 01 D2)
+                ct = str(lab.dims[cd[0]]).split("-")[0]
+                names = np.asarray(lab.coords[lab.dims[cd[0]]].values).astype(str)[np.nonzero(nz)[cd[0]]]
+                for (nm_, oc_), v_ in pd.DataFrame(dict(n=names[pm], o=ocs[pm], t=t_[pm])).groupby(["n", "o"]).t.sum().items():
+                    key = f"{ct}:{nm_}"
+                    pair_rows[key] = dict(pair=inv[int(oc_)], eur=pair_rows.get(key, {}).get("eur", 0.0) + float(v_))
         badc = [c for c in np.unique(ocs) if owner_class(inv[int(c)]) in ("shared", "unresolved")]
         if badc:
             mask = nz & np.isin(oc, badc)
@@ -465,10 +507,16 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
                 tot[k] = tot.get(k, 0.0) + v
         ph = fold(tot)
         pairs_ = {k: v for k, v in tot.items() if "|" in k}
+        pc = {k: dict(v) for k, v in pair_rows.items()}
+        for k, v in const["pair_components"].items():
+            pc[k] = dict(pair=v["pair"], eur=pc.get(k, {}).get("eur", 0.0) + v["eur"])
+        from s4d_ledger import load_length_shares
+        ls = length_split(tot, pc, load_length_shares())
         dual = dict(source=str(solve_dir or duals), rows_by_owner=dual_terms, columns_by_owner=rc_terms, columns=col_info, constants=const, missing_duals=missing_duals,
                     raw_by_owner=tot, allocation_alpha_half=ph, total=float(sum(tot.values())),
                     allocation_by_alpha={f"{al:g}": fold(tot, al) for al in ALPHA_GRID}, pair_values=pairs_,
                     interval=alpha_interval({k: v for k, v in tot.items() if "|" not in k}, pairs_),
+                    length_split=ls["allocation"], length_split_by_pair=ls["by_pair"], pair_components=pc,
                     note="Owen dual form: sum of multiplier x active bound by owner (+ column bounds, + objective constants by owner); pairs folded with alpha 0.5")
         A = json.loads(Path(allocation).read_text()) if allocation is not None else None
         if A is not None and not A.get("computable", True):
@@ -539,6 +587,8 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
                tag=res.get("tag"), network=res.get("network"), network_sha256=res.get("network_sha256"), duals=d.get("source"), alpha_main=0.5,
                alpha_definition="alpha = share of the FIRST country (alphabetical) of a cross-border pair (row values y'b of the pair rows and the pair's objective constants)",
                allocation_eur=by_a, interval_eur=d["interval"], pair_values_eur=d["pair_values"], fx_per_eur2020=fx["fx_per_eur2020"],
+               length_split_eur=d.get("length_split"), length_split_by_pair=d.get("length_split_by_pair"),
+               alpha_note="supplement 01 D2: main alpha 0.5 (interior-point centre, same-proportion rule); length split (rule (v)) as sensitivity; full [0, 1] interval",
                allocation_usd2020_alpha_half={p: main.get(p, 0.0) * fx["fx_per_eur2020"] for p in list(PLAYERS) + [SHARED]}, identity=ident)
     prec = precision_context(solve_dir) if solve_dir is not None else dict(available=False)
     resid, kvl, parts, diff, unexpl, method = None, None, {}, None, None, "no market-settlement allocation given"
@@ -578,7 +628,8 @@ def write_owen(res: dict, out: Path) -> None:
     rows = []
     for p in list(PLAYERS) + [SHARED]:
         r = dict(player=p, **{f"owen_dual_alpha_{k}_eur": v.get(p, 0.0) for k, v in al.items()})
-        r.update(owen_dual_alpha_0_5_usd2020=o["allocation_usd2020_alpha_half"].get(p), interval_min_eur=(it.get(p) or {}).get("min"), interval_max_eur=(it.get(p) or {}).get("max"),
+        r.update(owen_dual_alpha_0_5_usd2020=o["allocation_usd2020_alpha_half"].get(p), length_split_eur=(o.get("length_split_eur") or {}).get(p),
+                 interval_min_eur=(it.get(p) or {}).get("min"), interval_max_eur=(it.get(p) or {}).get("max"),
                  market_form_alpha_0_5_eur=mk.get(p), market_minus_dual_eur=(md.get("total_eur") or {}).get(p), kvl_transfer_eur=(md.get("kvl_loop_transfer_eur") or {}).get(p),
                  residual_eur=(md.get("residual_eur") or {}).get(p), c1_threshold_eur=c1["threshold_eur"].get(p))
         rows.append(r)
@@ -590,11 +641,11 @@ def write_owen(res: dict, out: Path) -> None:
          f"相对误差 {idt.get('relative_error', float('nan')):.2e}（≤ 1e-6：**{idt['passed']}**）；共享 {bn(idt['shared'])} bn。",
          f"- C1 (c)（运行本身）：{c1['c1_c_passed']}；分摊可用：**{o['usable_for_allocation']}**。阈值来源：{c1['threshold_source']}。",
          f"- 差额方法：{md.get('method', '—')}。", "",
-         "| 参与者 | **对偶形式 α 0.5** | α 0 | α 1 | 区间下限 | 区间上限 | USD2020 | 市场形式 α 0.5 | 市场 − 对偶 | 其中 KVL 转移 | 残差影响 | C1 (b) 阈值 |",
-         "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+         "| 参与者 | **对偶形式 α 0.5** | α 0 | α 1 | 按长度 | 区间下限 | 区间上限 | USD2020 | 市场形式 α 0.5 | 市场 − 对偶 | 其中 KVL 转移 | 残差影响 | C1 (b) 阈值 |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         p = r["player"]
-        L.append(f"| {p} | **{bn(r['owen_dual_alpha_0.5_eur'])}** | {bn(r['owen_dual_alpha_0_eur'])} | {bn(r['owen_dual_alpha_1_eur'])} | {bn(r['interval_min_eur'])} | "
+        L.append(f"| {p} | **{bn(r['owen_dual_alpha_0.5_eur'])}** | {bn(r['owen_dual_alpha_0_eur'])} | {bn(r['owen_dual_alpha_1_eur'])} | {bn(r['length_split_eur'])} | {bn(r['interval_min_eur'])} | "
                  f"{bn(r['interval_max_eur'])} | {bn(r['owen_dual_alpha_0_5_usd2020'])} | {bn(r['market_form_alpha_0_5_eur'])} | {bn(r['market_minus_dual_eur'])} | "
                  f"{bn(r['kvl_transfer_eur'])} | {bn(r['residual_eur'])} | {bn(r['c1_threshold_eur'])} |")
     L += ["", "区间：每条跨境线（国家对行的 y′b 与该对的目标常数）的 α 各自在 [0, 1] 内取值时该参与者分摊的范围；各国端点不能同时达到。"]

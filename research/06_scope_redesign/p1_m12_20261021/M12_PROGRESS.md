@@ -25,7 +25,7 @@
 | 步 | 内容（每步提交一次） | 状态 |
 |---|---|---|
 | S01-1 D1 | 对偶形式成为主值：`m12_rhs_audit.py audit` 输出 `OWEN.json/.csv/.md`（主值 = y′b，α 0 / 0.5 / 1、区间、按长度；市场形式并列；差额 = KVL 转移 + 残差：导出数组时分解为行互补 / 列互补 / 驻点，行对偶时 KVL 由潮流算、其余为残差）。C1 (c) 扩展：对偶恒等式 \|Σφ − c(N)\| / c(N) ≤ 1e-6 + 每个参与者的残差影响。`benefit` 主值改用对偶形式。报告写 2920×3h 估算（行数 72.1 M ≈ 365×24h 的 8 倍 → 本机比例 ≈ 5–6 min、≈ 64 GiB，INFERENCE；C1 本身已在云端为 2920×3h 各建一次模型，可考虑合并） | 完成（代码 + 测试；`loo` 也改用对偶形式主值；D1 玩具测试随本步提交；**新发现：** KVL 回路在去一国（物理）联盟中断开时，对偶形式可不在该博弈的核心内——玩具 {A, B} 超出 9.93，见报告补充 01；365×24h 证据在 S01-10 后统一重跑） |
-| S01-2 D2 | 对偶形式的按长度分摊：审计中按组件记录跨境对行（`Line-ext-s_nom-*`、`Link-ext-p_nom-*`）的 y·b，用 `s4d_ledger.load_length_shares()` 逐组件拆分 | 未开始 |
+| S01-2 D2 | 对偶形式的按长度分摊：审计中按组件记录跨境对行（`Line-ext-s_nom-*`、`Link-ext-p_nom-*`）的 y·b，用 `s4d_ledger.load_length_shares()` 逐组件拆分 | 完成（`length_split`：国家对行 y′b + 该组件目标常数，按组件长度份额拆分；"-reversed" 用孪生份额；缺份额 0.5；无法归到组件的对值 0.5；OWEN 输出"按长度"列；测试 2 项） |
 | S01-3 D3 | 代码文档写入规则（区域外进口若加总量上限，须先定归属再运行）；审计 `owen_premise.passed = (shared == 0 且 unresolved == 0)`，不通过时 OWEN 输出标 `premise_failed` | 未开始 |
 | S01-4 D4 | `benefit` 两种口径：(A) 按比例分 B6，用去一国边际贡献检查 s_i·B6 ≤ φ_i^disc − c′_adj(i)（= 规则支付 ≥ c′_adj(i)；只对有去一国运行的国家），同样检查 Owen；(B) 按比例分一体化总成本（11 国分 c(N) − φ_BUNKER − SHARED），检查个体理性 支付 ≤ φ_i^disc。主讨论 (A)。批级顺序改为先 `loo` 再 `benefit --loo-check` | 未开始 |
 | S01-5 D5 | 权重与模型同源：人口 AEO8 D.1 + TL UN WPP 2024（与 M08b `m08b_demand.py` 同一组数）；GDP = M08b 工业增长口径（AEO8 D.6 人均 GDP × D.1 人口；TL = KH / LA / MM 人均均值 × WPP）——实现前读 `git show codex/m08b-demand-20261021:scripts_project/m08b_demand.py` 取同一函数 / 数；电力两口径不变；SSP2 2050 改为对照 | 未开始 |

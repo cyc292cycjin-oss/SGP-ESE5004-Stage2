@@ -359,6 +359,22 @@ def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
     for p in M.PLAYERS:                                                                      # difference = KVL + residual (+ the decomposition's check deviation)
         assert abs(mm["total_eur"][p] - mm["kvl_loop_transfer_eur"].get(p, 0.0) - mm["residual_eur"][p] - mm["unexplained_eur"][p]) <= 1e-3
     assert o["identity"]["relative_error"] == abs(o["identity"]["players_sum"] - o["identity"]["objective"]) / abs(o["identity"]["objective"])
+    ls = o["length_split_eur"]                                                                # D2: length split keeps the total, inside the interval
+    assert abs(sum(ls[p] for p in M.PLAYERS) - sum(o["allocation_eur"]["0.5"][p] for p in M.PLAYERS)) <= 1e-6 * abs(o["identity"]["objective"])
+    assert all(o["interval_eur"][p]["min"] - 1e-3 <= ls[p] <= o["interval_eur"][p]["max"] + 1e-3 for p in M.PLAYERS)
+
+
+def test_dual_length_split_by_component():
+    """Supplement 01 D2: the dual form's pair values split by the components' in-country length shares (a "-reversed" link takes its twin's
+    share; a pair value not attributable to a component is split 0.5)."""
+    import m12_rhs_audit as RA
+    sh = pd.DataFrame([dict(component_type="Line", component="l1", country_a="VN", share_a=0.25, country_b="KH", share_b=0.75),
+                       dict(component_type="Link", component="k1", country_a="KH", share_a=0.6, country_b="VN", share_b=0.4)])
+    pc = {"Line:l1": dict(pair="KH|VN", eur=6.0), "Link:k1-reversed": dict(pair="KH|VN", eur=3.0), "Link:k2": dict(pair="KH|VN", eur=0.0)}
+    r = RA.length_split({"KH": 1.0, "VN": 2.0, "KH|VN": 10.0}, pc, sh)
+    assert abs(r["allocation"]["KH"] - (1.0 + 0.75 * 6 + 0.6 * 3 + 0.5 * 1.0)) <= 1e-12
+    assert abs(r["allocation"]["VN"] - (2.0 + 0.25 * 6 + 0.4 * 3 + 0.5 * 1.0)) <= 1e-12
+    assert r["by_pair"]["KH|VN"]["with_length_share"] == 2 and abs(r["by_pair"]["KH|VN"]["not_by_component_eur_split_half"] - 1.0) <= 1e-12
 
 
 def _fake_alloc(d: Path, alloc: dict, obj: float, width: float = 0.0, owen: dict | None = None, owen_width: float = 0.0):
