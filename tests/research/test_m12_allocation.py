@@ -418,6 +418,33 @@ def test_weights_same_source_as_model_d5():
     assert M.WEIGHTS_MAIN[:2] == ("population_aeo8_d1", "gdp_aeo8_d2") and set(M.WEIGHTS_COMPARISON) == {"population_ssp2", "gdp_ppp_ssp2"}
 
 
+def _fake_loo_runs(tmp_path, countries, obj_full=100e9, obj_minus=None):
+    """full run (ALLOCATION.json + OWEN.json + SOLVE_RECEIPT.json + ALLOCATION_LINES.csv) and leave-one-out receipts; disconnected allocation."""
+    a = {c: 8e9 for c in M.COUNTRIES} | {M.BUNKER: 12e9}
+    F = _fake_alloc(tmp_path / "full", a, obj_full, 0.0, a, 0.0)
+    rec = dict(objective=obj_full, solver_profile="formal_barrier", input_network=dict(snapshots=365), termination_condition="optimal")
+    (F / "SOLVE_RECEIPT.json").write_text(json.dumps(rec))
+    pd.DataFrame([dict(pair="LA|VN", fom_existing=4e6), dict(pair="LA|TH", fom_existing=2e6), dict(pair="KH|VN", fom_existing=1e6)]).to_csv(F / "ALLOCATION_LINES.csv", index=False)
+    runs = {}
+    for c in countries:
+        d = tmp_path / f"full_minus{c}"; d.mkdir()
+        (d / "SOLVE_RECEIPT.json").write_text(json.dumps(dict(rec, objective=(obj_minus or {}).get(c, obj_full - 7e9))))
+        runs[c] = d
+    S = _fake_alloc(tmp_path / "dis", {c: 9e9 for c in M.COUNTRIES} | {M.BUNKER: 11e9}, 110e9)
+    return F, runs, S
+
+
+def test_scrb_only_with_all_11_d6(tmp_path):
+    """Supplement 01 D6: no SCRB with the three leave-one-out runs of the third batch (VN, TH, LA); automatic with all 11, noted as proxied."""
+    F, runs, S = _fake_loo_runs(tmp_path, ("LA", "TH", "VN"))
+    r = M.loo(F, runs, tmp_path / "o3", None, S)
+    assert r["scrb"]["computed"] is False and r["scrb"]["runs"] == 3 and "all 11" in r["scrb"]["reason"]
+    assert "有 11 次时自动给出" in (tmp_path / "o3" / "LOO_CHECK.md").read_text()
+    F, runs, S = _fake_loo_runs(tmp_path / "x", M.COUNTRIES)
+    r = M.loo(F, runs, tmp_path / "o11", None, S)
+    assert r["scrb"]["computed"] and "proxy" in r["scrb"]["standalone_proxy"] and abs(sum(r["scrb"]["allocation_eur"].values()) - r["scrb"]["countries_cost_eur"]) <= 1e-3
+
+
 def test_premise_failed_flag_d3(tmp_path):
     """Supplement 01 D3: a non-zero right-hand side without an owner (e.g. a future total cap on extra-ASEAN imports) sets owen_premise.passed
     False; the OWEN outputs are flagged premise_failed and not usable for the allocation even when the identity holds."""

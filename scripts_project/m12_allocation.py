@@ -798,13 +798,18 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
                tolerance_source=tol_src, tolerance_bn=tol_bn,
                objective_full=float(F["objective"]), check=chk, all_11=bool(set(c_loo) == set(COUNTRIES)))
     sa_ok = standalone_dir is not None and (Path(standalone_dir) / "ALLOCATION.json").exists() and json.loads((Path(standalone_dir) / "ALLOCATION.json").read_text()).get("computable")
-    if res["all_11"] and sa_ok:
-        S = _alloc_json(standalone_dir)["allocation_eur"]["0.5"]
-        cN_c = float(F["objective"]) - phi[BUNKER] - phi[SHARED]
-        res["scrb"] = dict(standalone_proxy="disconnected-run allocation of the country", countries_cost_eur=cN_c,
+    if res["all_11"] and sa_ok:   # supplement 01 D6: optional comparison, automatic once all 11 runs exist
+        dS = _dual_alloc(standalone_dir, None)
+        S = dS["allocation"] if dS is not None else _alloc_json(standalone_dir)["allocation_eur"]["0.5"]
+        cN_c = float(F["objective"]) - phi[BUNKER] - phi.get(SHARED, 0.0)
+        res["scrb"] = dict(computed=True, standalone_proxy="disconnected-run allocation of the country (proxy, not a strict standalone run; supplement 01 D6)",
+                           countries_cost_eur=cN_c,
                            allocation_eur=scrb(cN_c, {c: S[c] for c in COUNTRIES}, {c: chk["countries"][c]["marginal_cost"] for c in COUNTRIES}))
     else:
-        res["scrb"] = dict(computed=False, reason="SCRB only with all 11 leave-one-out runs and a disconnected allocation (standalone proxy)")
+        res["scrb"] = dict(computed=False, runs=len(c_loo),
+                           reason=f"supplement 01 D6: SCRB not computed - {len(c_loo)} leave-one-out run(s), SCRB needs all 11 (third batch: VN, TH, LA only); "
+                                  "it is given automatically once all 11 runs and a disconnected allocation exist, with the standalone cost proxied by the "
+                                  "disconnected allocation")
     (out / "LOO_CHECK.json").write_text(json.dumps(res, indent=1, default=str))
     L = ["# LOO_CHECK（M12 C1 第 6 项：去一国检查；只读）", "", f"- 全体：`{full_dir}`；容差：{tol_src}。", f"- 分摊口径：{main_form}。",
          f"- 不可分成本 c(N) − Σ c′(i) = {bn(chk['indivisible_cost'])} bn（{chk['indivisible_cost_sign']}；仅含已有国家）。", "",
@@ -813,7 +818,9 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
         sp = v["same_profile_and_resolution"]
         L.append(f"| {c} | {bn(v['c_N_minus_i'])} | {bn(v['marginal_cost'])} | {bn(v['allocation'])} | {bn(v['margin'])} | {v['tolerance'] / 1e9:.4f} | {v['passed']} | "
                  f"{v['passed_at_interval_min']} | {sp['profile'] and sp['snapshots']} |")
-    L += ["", "SCRB：" + (json.dumps({k: round(v / 1e9, 3) for k, v in res["scrb"]["allocation_eur"].items()}) if "allocation_eur" in res["scrb"] else res["scrb"]["reason"])]
+    L += ["", "SCRB（可选对照，补充 01 D6）：" + (json.dumps({k: round(v / 1e9, 3) for k, v in res["scrb"]["allocation_eur"].items()}) + "（单独成本以不互联分摊代理）"
+                                               if res["scrb"].get("computed") else f"未计算——只有 {res['scrb']['runs']} 次去一国运行，SCRB 需要全部 11 次；"
+                                               "有 11 次时自动给出，单独成本以不互联分摊代理。")]
     (out / "LOO_CHECK.md").write_text("\n".join(L) + "\n")
     return res
 
