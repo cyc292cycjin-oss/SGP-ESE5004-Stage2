@@ -212,8 +212,11 @@ def test_s2_0_cost_layer_v015_rebase(registry):
     r = registry.set_index("param_id")
     d2025 = float(r.loc["deflator_ea20_gdp_2025", "value"])
     assert d2025 == pytest.approx(120.01983244779059, rel=1e-9)
-    factor = 100.0 / d2025
-    assert float(r.loc["conv_eur2025_to_eur2020", "value"]) == pytest.approx(factor, rel=1e-9)
+    factor_ea20 = 100.0 / d2025   # former S2-0 rebase, kept as the comparison variant (M08-1)
+    assert float(r.loc["conv_eur2025_to_eur2020", "value"]) == pytest.approx(factor_ea20, rel=1e-9)
+    assert r.loc["conv_eur2025_to_eur2020", "status"] == "REFERENCE_ONLY"
+    factor = float(r.loc["cost_layer_deflator_hicp", "value"])   # M08-1 (decision 131): EEA HICP rate of change, 1 / 1.25733
+    assert factor == pytest.approx(1 / 1.0290 / 1.0920 / 1.0640 / 1.0260 / 1.0250, rel=1e-12)
     assert float(r.loc["cost_C_onwind_investment", "value"]) == pytest.approx(1286.4669 * factor, rel=1e-6)
     assert float(r.loc["cost_C_electrolysis_investment", "value"]) == pytest.approx(1257.3346 * factor, rel=1e-6)
     assert r.loc["technology_data_v0_15_0_tag_commit", "value"] == "07e43575c7996a988c60964d00772376ab9bd10c"
@@ -221,7 +224,8 @@ def test_s2_0_cost_layer_v015_rebase(registry):
     mon = long[long.monetary]
     import numpy as np
     assert (mon.currency_year == 2020).all()
-    assert np.allclose(mon[mon.source_currency_year == 2025].conversion_factor, factor) and (mon.source_currency_year == 2025).sum() == 374
+    eur25 = mon[(mon.source_currency_year == 2025) & ~mon.unit.str.contains("USD")]
+    assert np.allclose(eur25.conversion_factor, factor) and (mon.source_currency_year == 2025).sum() == 374
     assert (mon[mon.source_currency_year == 2020].conversion_factor == 1.0).all()  # 'commodity' row already EUR2020
     assert (mon[mon.source_currency_year == 2019].conversion_factor > 1.0).all()  # 'pelletizing cost' row inflated 2019 -> 2020
     assert (long[~long.monetary].conversion_factor == 1.0).all()

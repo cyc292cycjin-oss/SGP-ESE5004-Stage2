@@ -57,13 +57,27 @@ def fuel_price(cfg: dict, reg: pd.DataFrame, carrier: str) -> float:
     return registry_value(reg, fuel_price_ids(cfg)[carrier])
 
 
+def layer_files(spec: dict) -> dict:
+    """M08-1 (decision 131): a layer with rebase_variants resolves file / prepared_file by its rebase_index
+    (eea_hicp_rate main | ea20_gdp_deflator comparison); other layers keep their own file / prepared_file."""
+    variants = spec.get("rebase_variants")
+    if not variants:
+        return dict(spec)
+    idx = spec.get("rebase_index")
+    if idx not in variants:
+        raise ValueError(f"rebase_index must be one of {sorted(variants)}, got {idx!r}")
+    return dict(spec, **variants[idx])
+
+
 def load_active_layer(repo: Path, cfg: dict):
     cl = cfg["research"]["cost_layer"]
     name = cl["active"]
-    spec = cl["layers"][name]
+    spec = layer_files(cl["layers"][name])
     if "prepared_file" not in spec:
         raise ValueError(f"cost layer {name} has no prepared (annualised) table; only layers with prepared_file can price the network")
     manifest = json.loads((repo / spec["file"]).read_text())
+    if spec.get("rebase_variants") and (manifest.get("rebase") or {}).get("index") != spec["rebase_index"]:
+        raise ValueError(f"layer manifest rebase index {(manifest.get('rebase') or {}).get('index')!r} differs from rebase_index {spec['rebase_index']!r}")
     wide = pd.read_csv(repo / spec["prepared_file"], index_col=0)
     return name, spec, manifest, wide
 
@@ -72,7 +86,8 @@ def build_research_costs(repo: Path, cfg: dict, registry_csv: Path):
     repo = Path(repo)
     name, spec, manifest, c = load_active_layer(repo, cfg)
     reg = pd.read_csv(registry_csv, dtype=str, keep_default_na=False).set_index("param_id")
-    ledger = {"layer": name, "layer_file": spec["file"], "prepared_file": spec["prepared_file"], "rows": {}, "overrides": []}
+    ledger = {"layer": name, "layer_file": spec["file"], "prepared_file": spec["prepared_file"], "rows": {}, "overrides": [],
+              "rebase_index": (manifest.get("rebase") or {}).get("index", "ea20_gdp_deflator")}
     for t in c.index:
         ledger["rows"][t] = name
     # --- fuel prices: D1 registry (WEO 2025 2050 -> EUR2020/MWh NCV), decision D1-1; scenario per research.fuels.price_scenario (S4C-0, decision 85)

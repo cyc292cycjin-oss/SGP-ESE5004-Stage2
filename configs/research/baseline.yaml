@@ -261,11 +261,15 @@ research:
     gas_network_repurposing: false        # upstream 0.8 CH4->H2 repurposing factor not applied
     hydrogen_colors: false
   cost_layer:                             # D1 (2026-10-15), decision 46 option A; S2-0 (decision 50): three registered layers, switchable here
-    active: technology_data_v0_15_0_2050_eur2020   # main run (decision 50): technology-data v0.15.0, year 2050, rebased EUR2025 -> EUR2020 (EA20 GDP deflator)
+    active: technology_data_v0_15_0_2050_eur2020   # main run (decision 50): technology-data v0.15.0, year 2050, rebased EUR2025 -> EUR2020 (index per rebase_index below, M08-1)
     layers:
       technology_data_v0_15_0_2050_eur2020:
+        rebase_index: eea_hicp_rate       # M08-1 (decision 131): eea_hicp_rate (MAIN: the index technology-data v0.15.0 used to inflate - Eurostat HICP annual average rate of change, European Economic Area row, chained 2021-2025 = 1.25733, technology-data scripts/_helpers.py line 220 and its own input file; removes the +4.8 % residual; files below) | ea20_gdp_deflator (former S2-0 main, comparison: ECB EA20 GDP deflator, files in rebase_variants); scripts_project/s2_0_cost_layer_v015.py writes both
         file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json
         prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv
+        rebase_variants:                  # files per rebase_index (s2_costs.layer_files); the manifest's rebase.index must equal the selected value
+          eea_hicp_rate: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020_prepared.csv}
+          ea20_gdp_deflator: {file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/LAYER_MANIFEST.json, prepared_file: research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/costs_2050_EUR2020_prepared.csv}
         aeo8_overrides: false
       technology_data_v0_13_2_2050:       # sensitivity (D1 main layer)
         file: research_inputs/cost_layers_v5/LAYER_A_TECHNOLOGY_DATA_V0_13_2_2050.json

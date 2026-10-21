@@ -264,9 +264,10 @@ def main():
 
 def load_cost_layer(config: dict):
     """S2 entry point: returns (name, dict) for the active layer from research.cost_layer in the config."""
+    from s2_costs import layer_files   # M08-1 (decision 131): rebase_index selects the variant files
     cl = config["research"]["cost_layer"]
     name = cl["active"]
-    spec = cl["layers"][name]
+    spec = layer_files(cl["layers"][name])
     path = Path(spec["file"])
     if not path.is_absolute():
         path = Path(__file__).resolve().parents[1] / path
