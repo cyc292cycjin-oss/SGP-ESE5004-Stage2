@@ -362,7 +362,22 @@ def a8(reg: Registry, cor: Corrections):
             172800.0, "s", "B", "M08A instruction A8 item 2", "configs/research/baseline.yaml research.solver.run_rules", sha256(runner), decision_ref="119, 128, 133")
 
 
-def main(steps=("a2", "a3", "a4", "a5", "a7", "a8")):
+# --- A9 (M08-10, decisions 125 (4), 133): report currency ---------------------------------------------------------------
+def a9(reg: Registry, cor: Corrections):
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    fx_in = float(cor.value("fx_usd_to_eur_2020"))
+    reg.add("report_currency_rule", "R6.5 / decision 125 (4) / M08a A9 (decision 133): report currency USD2020 with one rate 1 EUR2020 = 1.1422 USD2020 (ECB 2020 annual average euro "
+            "reference rate); the model, the LP and the ledger column 'eur' stay EUR2020; ledger exports add usd2020 / usd2020_length_split (COUNTRY_COST_LEDGER_DETAIL.csv) and "
+            "COUNTRY_COST_LEDGER_USD2020.csv (s2_solve.py via s4d_ledger.report_currency, config research.reporting); USD2024 only as an extra line via FRED deflator 1.1918. "
+            f"Correction of the proposed text: 1.1422 is NOT 1 / fx_usd_to_eur_2020 (that gives {1 / fx_in:.5f}; see fx_report_vs_input_rate_note)",
+            1.1422, "USD2020/EUR2020", "B", "ECB euro reference rates, 2020 annual average (USD 1.1422)", "configs/research/baseline.yaml research.reporting", cfg_sha, decision_ref="125, 126, 133")
+    reg.add("fx_report_vs_input_rate_note", f"M08a A9 finding: the input conversion row fx_usd_to_eur_2020 = {fx_in:.10g} EUR per USD (currency_converter 0.18.9 mean over calendar days) "
+            f"implies {1 / fx_in:.5f} USD per EUR, 0.20 % below the ECB 2020 annual average 1.1422 used for reporting; USD inputs converted to EUR2020 and reported back in USD2020 therefore "
+            f"carry a factor {1.1422 * fx_in:.5f} instead of 1; not changed in M08a (input rows unchanged; user decision whether to align the input rate)",
+            1.1422 * fx_in - 1.0, "ratio", "B", "registry fx_usd_to_eur_2020; ECB 2020 annual average", "fx_usd_to_eur_2020 x 1.1422 - 1", cfg_sha, decision_ref="133", status="REFERENCE_ONLY")
+
+
+def main(steps=("a2", "a3", "a4", "a5", "a7", "a8", "a9")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

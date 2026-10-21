@@ -237,6 +237,28 @@ def ledger_table(L: pd.DataFrame) -> pd.DataFrame:
     return t
 
 
+REPORT_CURRENCY_DEFAULT = dict(currency="USD2020", fx_per_eur2020=1.1422)   # M08a A9 (M08-10, decisions 125 (4), 133; registry report_currency_rule)
+
+
+def report_currency(cfg: dict | None) -> dict:
+    """research.reporting: report currency and its single rate (the model itself stays in EUR2020)."""
+    R = ((cfg or {}).get("research") or {}) if isinstance(cfg, dict) else {}
+    rep = dict(REPORT_CURRENCY_DEFAULT, **(R.get("reporting") or {}))
+    if rep["currency"] != "USD2020":
+        raise ValueError(f"research.reporting.currency must be USD2020, got {rep['currency']!r}")
+    return dict(currency=rep["currency"], fx_per_eur2020=float(rep["fx_per_eur2020"]))
+
+
+def ledger_detail_usd(L: pd.DataFrame, fx: float) -> pd.DataFrame:
+    """Long ledger with USD2020 columns next to the EUR2020 ones: usd2020 = eur x fx, usd2020_length_split = eur_length_split x fx."""
+    return L.assign(usd2020=L.eur * fx, usd2020_length_split=L.eur_length_split * fx)
+
+
+def ledger_table_usd(T: pd.DataFrame, fx: float) -> pd.DataFrame:
+    """The country x subject table converted to USD2020 (same columns as ledger_table, values x fx)."""
+    return T * fx
+
+
 def nodal_prices(n, freq: str = "D") -> pd.DataFrame:
     """One row per bus (node x carrier): node, carrier, country, snapshot-weighted mean / min / max of the dual price over the run, then one
     column per calendar day (freq 'D') with the snapshot-weighted mean of that day (weights = snapshot_weightings.objective). Units: EUR per

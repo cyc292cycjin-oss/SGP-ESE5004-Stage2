@@ -377,11 +377,15 @@ def main(a):
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
         gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
         try:   # S4D-3 (decision 91a): country cost ledger, nodal prices, identity gate B16_LEDGER (exported with the run)
-            from s4d_ledger import country_cost_ledger, ledger_gate, ledger_table, load_length_shares, nodal_prices
+            from s4d_ledger import (country_cost_ledger, ledger_detail_usd, ledger_gate, ledger_table, ledger_table_usd, load_length_shares, nodal_prices,
+                                    report_currency)
             led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
-            ledger_table(led_rows).to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f"); led_rows.to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
+            rep = report_currency(cfg)   # M08a A9: report columns USD2020 = EUR2020 x 1.1422; the model stays in EUR2020
+            T = ledger_table(led_rows); T.to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f")
+            ledger_table_usd(T, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_USD2020.csv", float_format="%.6f")
+            ledger_detail_usd(led_rows, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
             nodal_prices(n).to_csv(out / "NODAL_PRICES.csv", float_format="%.6g")
-            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag))
+            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag, report_currency=rep))
             gates["B16_LEDGER"] = ledger_gate(led_id)
         except Exception as e:
             gates["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
