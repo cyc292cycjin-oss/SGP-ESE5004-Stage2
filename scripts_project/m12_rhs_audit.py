@@ -305,7 +305,7 @@ def decompose(solve_dir: Path, rown: np.ndarray, rfam: np.ndarray, fams: dict, v
 
 
 def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: Path | None, solve_dir: Path | None, allocation: Path | None, tag: str,
-          solved: Path | None = None, register_dir: Path | None = None) -> dict:
+          solved: Path | None = None, register_dir: Path | None = None, precision: Path | None = None) -> dict:
     t0 = time.time()
     out.mkdir(parents=True, exist_ok=True)
     if os.environ.get("PYTHONHASHSEED") != "0":
@@ -545,7 +545,7 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
         res["dual_form"] = dual
         rec = json.loads((Path(solve_dir) / "SOLVE_RECEIPT.json").read_text()) if solve_dir is not None and (Path(solve_dir) / "SOLVE_RECEIPT.json").exists() else {}
         obj = A["objective"] if A is not None else rec.get("objective")
-        res["owen"] = owen_summary(res, A, solve_dir, None if obj is None else float(obj))
+        res["owen"] = owen_summary(res, A, solve_dir, None if obj is None else float(obj), precision)
     res["seconds"] = time.time() - t0
     res["peak_rss_gib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2
     (out / "RHS_AUDIT.json").write_text(json.dumps(res, indent=1, default=str))
@@ -563,17 +563,17 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- Owen outputs (main value)
-def reference_of(solve_dir: Path | None) -> tuple[dict, str]:
+def reference_of(precision: Path | None) -> tuple[dict, str]:
     """reference of the C1 (b)(c) per-entity thresholds: the run's PRECISION.json (after any regrade), else the L23 default."""
     from s4o_c1_precision import L23_REFERENCE
-    p = Path(solve_dir) / "PRECISION.json" if solve_dir is not None else None
+    p = Path(precision) if precision is not None else None
     ref = (json.loads(p.read_text()).get("reference") or {}) if p is not None and p.exists() else {}
     if ref.get("differences_bn"):
-        return ref, f"PRECISION.json of {solve_dir}: {str(ref.get('source', ''))[:120]}"
+        return ref, f"{p}: {str(ref.get('source', ''))[:120]}"
     return L23_REFERENCE, "L23 default reference (s4o_c1_precision.L23_REFERENCE)"
 
 
-def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: float | None) -> dict:
+def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: float | None, precision: Path | None = None) -> dict:
     """Owen allocation with the dual form y'b as the main value (supplement 01 D1). The market-settlement form (ALLOCATION.json, the current
     ledger) is reported next to it; market - dual = KVL loop transfer (zero-sum over the line owners) + residual (KKT residuals of the returned
     solution). C1 (c) extended to the dual form: identity sum_players phi = c(N) within 1e-6 (relative), and every player's residual impact
@@ -589,7 +589,8 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
         ident.update(difference=ps - objective, relative_error=rel, relative_error_incl_shared=abs(ps + sh - objective) / max(1.0, abs(objective)), passed=bool(rel <= DUAL_IDENTITY_TOL))
     else:
         ident.update(passed=None, note="objective unknown (no ALLOCATION.json / SOLVE_RECEIPT.json): identity not checked")
-    ref, ref_src = reference_of(solve_dir)
+    pp = Path(precision) if precision is not None else (Path(solve_dir) / "PRECISION.json" if solve_dir is not None else None)
+    ref, ref_src = reference_of(pp)
     thr = {p: threshold_bn(p if p in COUNTRIES else "ASEAN", ref) * 1e9 for p in PLAYERS}   # bunker: the ASEAN entity of C1 (bunker account)
     fx = (A or {}).get("report_currency") or _fx()
     out = dict(main_form="owen_dual_form", decision="supplement 01 D1 (item 136): main value = Owen dual form y'b; market-settlement form reported alongside",
@@ -599,7 +600,7 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
                length_split_eur=d.get("length_split"), length_split_by_pair=d.get("length_split_by_pair"),
                alpha_note="supplement 01 D2: main alpha 0.5 (interior-point centre, same-proportion rule); length split (rule (v)) as sensitivity; full [0, 1] interval",
                allocation_usd2020_alpha_half={p: main.get(p, 0.0) * fx["fx_per_eur2020"] for p in list(PLAYERS) + [SHARED]}, identity=ident)
-    prec = precision_context(solve_dir) if solve_dir is not None else dict(available=False)
+    prec = precision_context(solve_dir, precision) if (solve_dir is not None or precision is not None) else dict(available=False)
     resid, kvl, parts, diff, unexpl, method = None, None, {}, None, None, "no market-settlement allocation given"
     if A is not None:
         mk = A["allocation_eur"]["0.5"]; ks = list(PLAYERS) + [SHARED]
@@ -726,11 +727,12 @@ def main():
     a.add_argument("--duals", type=Path, default=None); a.add_argument("--solve-dir", type=Path, default=None); a.add_argument("--allocation", type=Path, default=None)
     a.add_argument("--tag", default=""); a.add_argument("--solved", type=Path, default=None, help="solved network: line flows for the KVL loop transfer (with --duals)")
     a.add_argument("--register-dir", type=Path, default=None, help="run dir whose EXPORTS.json gets the outputs")
+    a.add_argument("--precision", type=Path, default=None, help="PRECISION.json when it is not in the solve dir (older runs; rows-only duals)")
     lo = sub.add_parser("loo"); lo.add_argument("--full", type=Path, required=True); lo.add_argument("--variant", type=Path, required=True)
     lo.add_argument("--removed", nargs="+", required=True); lo.add_argument("--out", type=Path, required=True)
     x = ap.parse_args()
     if x.cmd == "audit":
-        res = audit(x.repo, x.network, x.scenario, x.out, x.truncate, x.duals, x.solve_dir, x.allocation, x.tag, x.solved, x.register_dir)
+        res = audit(x.repo, x.network, x.scenario, x.out, x.truncate, x.duals, x.solve_dir, x.allocation, x.tag, x.solved, x.register_dir, x.precision)
         print(json.dumps(dict(model=res["model"], owen_premise=res["owen_premise"], seconds=round(res["seconds"]), peak_rss_gib=round(res["peak_rss_gib"], 2),
                               market_minus_dual=(res.get("dual_form") or {}).get("market_minus_dual_eur")), default=str))
     else:

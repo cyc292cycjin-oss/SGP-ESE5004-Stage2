@@ -1,4 +1,4 @@
-"""M12: review ZIP of the work folder + the four repository files (code/), with a per-member SHA256 / CRC32 manifest.
+"""M12: review ZIP of the work folder + the repository files of M12 and its supplement 01 (code/), with a per-member SHA256 / CRC32 manifest.
 
     python m12_review_zip.py --work <work/p1_m12_20261021> --repo /home/jin/wt_m12_20261021 --head <sha>
 """
@@ -9,7 +9,9 @@ import zipfile
 import zlib
 from pathlib import Path
 
-CODE = ("scripts_project/m12_allocation.py", "scripts_project/m12_rhs_audit.py", "scripts_project/m08a_run_batch.sh", "tests/research/test_m12_allocation.py")
+CODE = ("scripts_project/m12_allocation.py", "scripts_project/m12_rhs_audit.py", "scripts_project/m08a_run_batch.sh", "tests/research/test_m12_allocation.py",
+        "tests/research/test_m08a_a8.py", "tests/research/fixtures/m08a_fake_pipeline.py",                      # supplement 01 (D7 / D9 runner tests)
+        "research_inputs/demand_v5/sources/m08b/AEO8_TABLE_D2_REAL_GDP_PPP2017.csv")                         # supplement 01 D5 (copy of the M08b source)
 SKIP = {"M12_REVIEW.zip", "M12_REVIEW_MANIFEST.csv", "M12_REVIEW_ZIP_SHA256.txt"}
 
 
