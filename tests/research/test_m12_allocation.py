@@ -283,6 +283,38 @@ def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
     assert abs(sum(v for k, v in kv.items() if k in M.PLAYERS)) <= 1e6                         # loop transfers are zero-sum over the owners
 
 
+def test_runner_hooks_after_c1_before_acceptance(tmp_path):
+    """C3: m08a_run_batch.sh (third / fourth batch runner) runs the M12 allocation after C1 and registers it in EXPORTS.json before the GATES_V6
+    acceptance; the batch benefit after the regrade; the leave-one-out hook once OUT/<tag>_minus<CC>/ exists. Synthetic stand-ins for the solve
+    (tests/research/fixtures/m08a_fake_pipeline.py) - no solver."""
+    import hashlib
+    import subprocess
+    fake = ROOT / "tests/research/fixtures/m08a_fake_pipeline.py"
+    nets = tmp_path / "nets"; nets.mkdir(); out = tmp_path / "out"
+    for sc in ("integrated", "disconnected"):
+        for res in ("365_24h", "2920_3h"):
+            (nets / f"{sc}_{res}_unsolved.nc").write_bytes(f"{sc}{res}".encode())
+        (nets / f"{sc}_costs_active_research.csv").write_text("technology\n")
+        (nets / f"{sc}_BUILD_RECEIPT.json").write_text(json.dumps(dict(network=dict(sha256=hashlib.sha256(f"{sc}2920_3h".encode()).hexdigest()),
+                                                                     daily_network=dict(sha256=hashlib.sha256(f"{sc}365_24h".encode()).hexdigest(), snapshots=365))))
+    (out / "integrated_A_minusVN").mkdir(parents=True); (out / "integrated_A_minusVN" / "SOLVE_RECEIPT.json").write_text(json.dumps(dict(objective=1.0)))
+    py = sys.executable
+    env = dict(os.environ, RUN_KIND="level2", REPO=str(ROOT), NETS=str(nets), OUT=str(out), PY=py, SOLVE_CMD=f"{py} {fake} solve", VA_CMD=f"{py} {fake} va",
+               C1_CMD=f"{py} {fake} c1", FAKE_OBJ_formal_barrier="1e11", FAKE_OBJ_formal_barrier_1e6_t16="100000000400")
+    p = subprocess.run(["bash", str(ROOT / "scripts_project/m08a_run_batch.sh")], env=env, capture_output=True, text=True, timeout=900)
+    assert p.returncode == 0, p.stderr[-800:]
+    st = (out / "STATUS.txt").read_text().splitlines()
+    pos = lambda s: next(i for i, x in enumerate(st) if x.startswith(s))   # noqa: E731
+    for tag in ("integrated_A", "disconnected_A", "integrated_CAND", "disconnected_CAND"):
+        assert pos(f"C1_{tag}:") < pos(f"M12_{tag}:exit=0") < pos(f"V6_{tag}:")
+        ex = json.loads((out / tag / "EXPORTS.json").read_text())
+        assert {"ALLOCATION.json", "ALLOCATION.md"} <= set(ex)                               # registered (fake runs: no solved network -> not computable)
+        assert json.loads((out / tag / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" if tag.endswith("CAND") else True
+    assert pos("REFERENCE_A:") < pos("M12_BENEFIT_A:exit=0") < pos("V6_integrated_A:")
+    assert json.loads((out / "M12_BENEFIT_A" / "BENEFIT.json").read_text())["computable"] is False
+    assert any(x.startswith("M12_LOO_integrated_A:exit=0:runs=1") for x in st)
+
+
 def test_scrb_and_proportional_sum_to_total():
     L, _ = toy(); cost = coalition_costs(L, 0.5); cN = cost[frozenset(P3)]
     marg = {i: cN - cost[frozenset(P3) - {i}] for i in P3}; alone = {i: cost[frozenset({i})] for i in P3}

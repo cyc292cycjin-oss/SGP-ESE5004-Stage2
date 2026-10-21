@@ -9,12 +9,17 @@
 #     2920x3h formal runs with the profile of PROFILE_CHOICE.json (missing -> profile A), TimeLimit = run_rules.formal_time_limit_s (48 h);
 #     C1, GATES_V6 acceptance and formal-check (C1 (c) required for the allocation); a NOT_ACCEPTED run stops the batch (STOP_NOT_ACCEPTED).
 # NETS holds <scenario>_<365_24h|2920_3h>_unsolved.nc, <scenario>_BUILD_RECEIPT.json and <scenario>_costs_active_research.csv.
-# Test hooks: PY, SOLVE_CMD, VA_CMD, C1_CMD (default the repo scripts); DRY=1 prints the commands only.
+# M12 (item 133): after C1 every run gets its Owen allocation (m12_allocation.py run -> ALLOCATION.*, registered in the run's EXPORTS.json
+# BEFORE the GATES_V6 acceptance) and, when the exported arrays exist and M12_DUAL=1 (default), the Owen dual form with the KVL decomposition
+# (m12_rhs_audit.py audit -> m12_owen/, registered); once both scenarios of a profile have allocations (after the regrade): the batch's
+# benefit and proportional-rule comparison (OUT/M12_BENEFIT<suffix>/); leave-one-out runs in OUT/<full tag>_minus<CC>/ -> OUT/M12_LOO_<tag>/.
+# Test hooks: PY, SOLVE_CMD, VA_CMD, C1_CMD, M12_CMD, M12A_CMD (default the repo scripts); DRY=1 prints the commands only.
 set -u
 : "${RUN_KIND:?level2 or formal}" "${REPO:?}" "${NETS:?}" "${OUT:?}"
 PY=${PY:-python}; SCENARIOS=${SCENARIOS:-"integrated disconnected"}; DRY=${DRY:-0}; AUTH=${AUTH:-"M08 batch (separate user authorisation required)"}
 SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD:-"$PY $REPO/scripts_project/l23_violation_analysis.py"}
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; G6="$PY $REPO/scripts_project/v5/gates_v6.py"
+M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}; M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; M12_DUAL=${M12_DUAL:-1}
 mkdir -p "$OUT"; ST="$OUT/STATUS.txt"; echo "START:$RUN_KIND:$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$ST"
 
 rule() {   # dotted key of research.solver.run_rules (gates_v6.run_rules: config over the registered defaults)
@@ -46,6 +51,35 @@ one_run() {   # $1 tag $2 scenario $3 resolution $4 profile $5 time limit -> sol
   if [ -f "$dir/solution/X.npy" ]; then ( cd "$REPO" && $VA_CMD --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --out "$dir/VIOLATIONS.json" > "$dir/va.log" 2>&1 ); fi
   ( cd "$REPO" && $C1_CMD run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --violations "$dir/VIOLATIONS.json" > "$dir/c1.log" 2>&1 )
   echo "C1_$tag:exit=$?" >> "$ST"
+  m12_run "$tag" "$sc" "$net"
+}
+
+m12_run() {   # $1 tag $2 scenario $3 unsolved network: M12 allocation (and the Owen dual form) after C1, registered before the acceptance
+  local dir="$OUT/$1"
+  ( cd "$REPO" && PYTHONHASHSEED=0 $M12_CMD run --repo "$REPO" --solve-dir "$dir" --scenario "$2" --label "M08_$1" --out "$dir" --register > "$dir/m12.log" 2>&1 )
+  echo "M12_$1:exit=$?" >> "$ST"
+  if [ "$M12_DUAL" = 1 ] && [ -f "$dir/solution/X.npy" ] && [ -f "$dir/ALLOCATION.json" ]; then
+    ( cd "$REPO" && PYTHONHASHSEED=0 $M12A_CMD audit --repo "$REPO" --network "$3" --scenario "$2" --solve-dir "$dir" --allocation "$dir/ALLOCATION.json" --tag "M08_$1" \
+        --out "$dir/m12_owen" --register-dir "$dir" > "$dir/m12_owen.log" 2>&1 )
+    echo "M12_OWEN_$1:exit=$?" >> "$ST"
+  fi
+}
+
+m12_batch() {   # $1 suffix of the run tags: benefit / proportional rules of the batch once both scenarios have allocations (after any regrade)
+  [ "$DRY" = 1 ] && return 0
+  [ -f "$OUT/integrated$1/ALLOCATION.json" ] && [ -f "$OUT/disconnected$1/ALLOCATION.json" ] || { echo "M12_BENEFIT$1:missing allocations" >> "$ST"; return 0; }
+  ( cd "$REPO" && $M12_CMD benefit --repo "$REPO" --integrated "$OUT/integrated$1" --disconnected "$OUT/disconnected$1" --out "$OUT/M12_BENEFIT$1" > "$OUT/M12_BENEFIT$1.log" 2>&1 )
+  echo "M12_BENEFIT$1:exit=$?" >> "$ST"
+}
+
+m12_loo() {   # $1 tag of the full integrated run: leave-one-out check once runs OUT/$1_minus<CC>/ exist (same resolution and profile)
+  [ "$DRY" = 1 ] && return 0
+  local args=() d c
+  for d in "$OUT/$1"_minus*; do [ -f "$d/SOLVE_RECEIPT.json" ] || continue; c=${d##*_minus}; args+=(--loo "${c:0:2}=$d"); done
+  [ ${#args[@]} -gt 0 ] || return 0
+  local sa="$OUT/disconnected${1#integrated}"
+  ( cd "$REPO" && $M12_CMD loo --full "$OUT/$1" "${args[@]}" --standalone "$sa" --out "$OUT/M12_LOO_$1" > "$OUT/M12_LOO_$1.log" 2>&1 )
+  echo "M12_LOO_$1:exit=$?:runs=$(( ${#args[@]} / 2 ))" >> "$ST"
 }
 
 accept() {   # $1 tag $2 scenario -> GATES_V6 label (V6_ACCEPTANCE.json)
@@ -67,6 +101,7 @@ case "$RUN_KIND" in
     for sc in $SCENARIOS; do one_run "${sc}_A" "$sc" 365_24h "$REF" "$TL_L2"; done
     for sc in $SCENARIOS; do one_run "${sc}_CAND" "$sc" 365_24h "$CAND" "$TL_L2"; done
     batch_reference _A; batch_reference _CAND
+    m12_batch _A; m12_batch _CAND; m12_loo integrated_A; m12_loo integrated_CAND
     for sc in $SCENARIOS; do accept "${sc}_A" "$sc" > /dev/null; accept "${sc}_CAND" "$sc" > /dev/null; done
     [ "$DRY" = 1 ] && { echo "DONE:dry" >> "$ST"; exit 0; }
     "$PY" - "$OUT" "$CAND" "$REF" $SCENARIOS > "$OUT/LEVEL2.json" <<'P'
@@ -98,6 +133,7 @@ P
       [ "$DRY" = 1 ] || $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
       if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break; fi
     done
+    [ -f "$OUT/STOP_NOT_ACCEPTED" ] || { m12_batch ""; m12_loo integrated; }
     ;;
   *) echo "unknown RUN_KIND $RUN_KIND" >&2; exit 2;;
 esac

@@ -570,11 +570,24 @@ def _elec(le: dict, carriers) -> dict:
     return {c: float(sum((le.get(c) or {}).get(k, 0.0) for k in carriers)) for c in COUNTRIES}
 
 
-def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path) -> dict:
+def _dual_alloc(run_dir: Path, override: Path | None) -> tuple[dict | None, str | None]:
+    """Owen dual form (m12_rhs_audit.py: y'b + constants, alpha 0.5) of a run when available: <run>/m12_owen/RHS_AUDIT.json or an explicit file."""
+    p = Path(override) if override is not None else Path(run_dir) / "m12_owen" / "RHS_AUDIT.json"
+    if not p.exists():
+        return None, None
+    d = (json.loads(p.read_text()).get("dual_form") or {})
+    return (d.get("allocation_alpha_half"), str(p)) if d.get("allocation_alpha_half") else (None, None)
+
+
+def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path | None = None, dis_dual: Path | None = None) -> dict:
     """C1 items 4 / 5: benefit = disconnected allocation - integrated allocation (alpha 0.5 and the alpha interval); proportional rules splitting
-    B6 = objective(disconnected) - objective(integrated) among the 11 countries (the bunker pays its disconnected allocation, benefit 0)."""
+    B6 = objective(disconnected) - objective(integrated) among the 11 countries (the bunker pays its disconnected allocation, benefit 0).
+    With the Owen dual forms of both runs the benefit is also given on y'b (KVL loop transfers removed)."""
     out.mkdir(parents=True, exist_ok=True)
     I, D = _alloc_json(int_dir), _alloc_json(dis_dir)
+    I["precision"] = precision_context(int_dir, None) if (Path(int_dir) / "PRECISION.json").exists() else I.get("precision")   # after any regrade
+    D["precision"] = precision_context(dis_dir, None) if (Path(dis_dir) / "PRECISION.json").exists() else D.get("precision")
+    dI, sI = _dual_alloc(int_dir, int_dual); dD, sD = _dual_alloc(dis_dir, dis_dual)
     fx = I["report_currency"]["fx_per_eur2020"]
     pI, pD = I["allocation_eur"]["0.5"], D["allocation_eur"]["0.5"]
     ben = {p: pD[p] - pI[p] for p in PLAYERS}
@@ -603,6 +616,10 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path) -> dict:
                          shared_change_eur=float(pD[SHARED] - pI[SHARED])),
                proportional=rules, socio_sources=sw["sources"], electricity_twh=dict(base=w["electricity_base"], fixed=w["electricity_fixed"]),
                rule_budget_residual_eur=float(bal), fx_per_eur2020=fx,
+               owen_dual_form=(dict(integrated=sI, disconnected=sD, benefit_eur={p: dD[p] - dI[p] for p in PLAYERS},
+                                    negative_benefit=[p for p in PLAYERS if dD[p] - dI[p] < 0],
+                                    market_minus_dual_benefit_eur={p: ben[p] - (dD[p] - dI[p]) for p in PLAYERS})
+                               if dI is not None and dD is not None else dict(available=False, integrated=sI, disconnected=sD)),
                notes=["proportional rules split B6 among the 11 countries by positive weights: with B6 > 0 no country can get a negative benefit under any of them; "
                       "the bunker account (no population / GDP / electricity) keeps its disconnected allocation (benefit 0), so the countries absorb its Owen benefit",
                       "rule_budget_residual_eur = sum of the rule payments + bunker - (integrated objective - integrated pool surplus) = change of the pool surplus"])
@@ -633,6 +650,13 @@ def markdown_benefit(r: dict) -> str:
           "比例规则与 Owen 受益符号不同的国家：" + "；".join(f"{k}：{', '.join(v['owen_sign_differs']) or '无'}" for k, v in r["proportional"].items()), ""]
     L += [f"- {x}" for x in r["notes"]]
     L += [f"- 预算残差 {r['rule_budget_residual_eur']:,.0f} EUR（池盈余变化）。", f"- 权重来源：{r['socio_sources']}"]
+    od = r.get("owen_dual_form") or {}
+    if od.get("benefit_eur"):
+        L += ["", "## Owen 对偶形式（y'b，已去除 KVL 回路转移）下的受益", "", f"- 来源：{od['integrated']}；{od['disconnected']}",
+              f"- 受益为负：**{', '.join(od['negative_benefit']) or '无'}**", "", "| 参与者 | 对偶形式受益 bn | 市场形式受益 bn | 差 bn |", "|---|---|---|---|"]
+        L += [f"| {p} | {bn(od['benefit_eur'][p])} | {bn(o['benefit_eur'][p])} | {bn(od['market_minus_dual_benefit_eur'][p])} |" for p in PLAYERS]
+    else:
+        L += ["", "- Owen 对偶形式：不可用（运行目录中没有 m12_owen/RHS_AUDIT.json），上表为市场结算形式。"]
     return "\n".join(L) + "\n"
 
 
@@ -664,7 +688,8 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
         v["interval_min_eur"] = F["interval_eur"][c]["min"]; v["passed_at_interval_min"] = bool(F["interval_eur"][c]["min"] - v["marginal_cost"] >= -v["tolerance"])
     res = dict(script=SCRIPT, full=str(full_dir), loo_runs={c: str(d) for c, d in loo_dirs.items()}, tolerance_source=tol_src, tolerance_bn=tol_bn,
                objective_full=float(F["objective"]), check=chk, all_11=bool(set(c_loo) == set(COUNTRIES)))
-    if res["all_11"] and standalone_dir is not None:
+    sa_ok = standalone_dir is not None and (Path(standalone_dir) / "ALLOCATION.json").exists() and json.loads((Path(standalone_dir) / "ALLOCATION.json").read_text()).get("computable")
+    if res["all_11"] and sa_ok:
         S = _alloc_json(standalone_dir)["allocation_eur"]["0.5"]
         cN_c = float(F["objective"]) - phi[BUNKER] - phi[SHARED]
         res["scrb"] = dict(standalone_proxy="disconnected-run allocation of the country", countries_cost_eur=cN_c,
@@ -693,6 +718,7 @@ def main():
     r.add_argument("--precision", type=Path, default=None, help="PRECISION.json when it is not in the solve dir (older runs)")
     b = sub.add_parser("benefit"); b.add_argument("--integrated", type=Path, required=True); b.add_argument("--disconnected", type=Path, required=True)
     b.add_argument("--out", type=Path, required=True); b.add_argument("--repo", type=Path, default=HERE.parent)
+    b.add_argument("--integrated-dual", type=Path, default=None); b.add_argument("--disconnected-dual", type=Path, default=None)
     o = sub.add_parser("loo"); o.add_argument("--full", type=Path, required=True); o.add_argument("--loo", action="append", default=[], help="CC=<run dir>")
     o.add_argument("--out", type=Path, required=True); o.add_argument("--reference", type=Path, default=None); o.add_argument("--standalone", type=Path, default=None)
     a = ap.parse_args()
@@ -702,12 +728,19 @@ def main():
             solved = next(iter(sorted(a.solve_dir.glob("*_solved.nc"))), None)
         res = run(solved, a.scenario, a.out or a.solve_dir, a.solve_dir, a.label, a.repo, a.register, a.precision)
         print(json.dumps(dict(computable=res.get("computable"), identity=res.get("identity"), checks=res.get("checks")), default=str))
-    elif a.cmd == "benefit":
-        res = benefit(a.integrated, a.disconnected, a.out, a.repo)
-        print(json.dumps(dict(b6_bn=res["b6_eur"] / 1e9, negative=res["owen"]["negative_benefit"]), default=str))
-    else:
-        res = loo(a.full, dict(s.split("=", 1) for s in a.loo), a.out, a.reference, a.standalone)
-        print(json.dumps(dict(all_passed=res["check"]["all_passed"], indivisible_sign=res["check"]["indivisible_cost_sign"]), default=str))
+    else:   # batch steps: inputs that are not computable give a short JSON instead of a traceback (the batch continues)
+        try:
+            if a.cmd == "benefit":
+                res = benefit(a.integrated, a.disconnected, a.out, a.repo, a.integrated_dual, a.disconnected_dual)
+                print(json.dumps(dict(b6_bn=res["b6_eur"] / 1e9, negative=res["owen"]["negative_benefit"]), default=str))
+            else:
+                res = loo(a.full, dict(s.split("=", 1) for s in a.loo), a.out, a.reference, a.standalone)
+                print(json.dumps(dict(all_passed=res["check"]["all_passed"], indivisible_sign=res["check"]["indivisible_cost_sign"]), default=str))
+        except (ValueError, FileNotFoundError, KeyError) as e:
+            a.out.mkdir(parents=True, exist_ok=True)
+            name = "BENEFIT.json" if a.cmd == "benefit" else "LOO_CHECK.json"
+            (a.out / name).write_text(json.dumps(dict(script=SCRIPT, computable=False, reason=f"{type(e).__name__}: {e}"), indent=1))
+            print(json.dumps(dict(computable=False, reason=str(e)[:200])))
 
 
 if __name__ == "__main__":

@@ -22,7 +22,8 @@ if [ "$STEP" = all ] || [ "$STEP" = dis ]; then
   echo "DIS:exit=$?"
 fi
 if [ "$STEP" = all ] || [ "$STEP" = ben ]; then
-  $PY scripts_project/m12_allocation.py benefit --repo "$REPO" --integrated "$OUT/s4n_integrated" --disconnected "$OUT/s4o_disconnected" --out "$OUT/benefit" > "$OUT/benefit.log" 2> "$OUT/benefit.err"
+  $PY scripts_project/m12_allocation.py benefit --repo "$REPO" --integrated "$OUT/s4n_integrated" --disconnected "$OUT/s4o_disconnected" --out "$OUT/benefit" \
+    --integrated-dual "$OUT/../c2/full_365x24h/RHS_AUDIT.json" --disconnected-dual "$OUT/../c2/disconnected_365x24h/RHS_AUDIT.json" > "$OUT/benefit.log" 2> "$OUT/benefit.err"
   echo "BEN:exit=$?"
 fi
 tail -3 "$OUT"/*.log

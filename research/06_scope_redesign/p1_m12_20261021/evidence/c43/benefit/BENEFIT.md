@@ -28,3 +28,23 @@
 - rule_budget_residual_eur = sum of the rule payments + bunker - (integrated objective - integrated pool surplus) = change of the pool surplus
 - 预算残差 374,034 EUR（池盈余变化）。
 - 权重来源：{'population_ssp2': 'sources/SSP2_2025_POP_GDP_ASEAN11.csv IIASA-WiC POP 2025 SSP2 2050', 'gdp': 'sources/SSP2_2025_POP_GDP_ASEAN11.csv OECD ENV-Growth 2025 SSP2 GDP|PPP 2050 (billion USD2017)', 'population_aeo8': 'sources/AEO8_2050_BY_COUNTRY.csv table D.1 2050; TL UN WPP 2024 (registry download_un_wpp2024_tl_population_2050)'}
+
+## Owen 对偶形式（y'b，已去除 KVL 回路转移）下的受益
+
+- 来源：/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m12_20261021/evidence/c43/../c2/full_365x24h/RHS_AUDIT.json；/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m12_20261021/evidence/c43/../c2/disconnected_365x24h/RHS_AUDIT.json
+- 受益为负：**BUNKER**
+
+| 参与者 | 对偶形式受益 bn | 市场形式受益 bn | 差 bn |
+|---|---|---|---|
+| BN | 0.114 | 0.114 | 0.000 |
+| ID | 0.636 | 0.669 | 0.033 |
+| KH | 2.420 | 2.426 | 0.006 |
+| LA | 2.482 | 2.738 | 0.257 |
+| MM | 1.173 | 1.131 | -0.042 |
+| MY | 3.239 | 3.206 | -0.034 |
+| PH | 0.010 | 0.010 | 0.000 |
+| SG | 0.932 | 0.932 | -0.000 |
+| TH | 7.477 | 7.513 | 0.036 |
+| TL | 0.123 | 0.123 | 0.000 |
+| VN | 51.852 | 51.595 | -0.257 |
+| BUNKER | -1.215 | -1.215 | 0.000 |
