@@ -375,6 +375,36 @@ def _fake_audit(alloc: dict, shared_rows: int = 0) -> dict:
                                interval={p: dict(min=full[p], max=full[p], width=0.0) for p in M.PLAYERS}, pair_values={}))
 
 
+def test_proportional_rule_bases_d4(tmp_path):
+    """Supplement 01 D4: (A) proportional split of B6 tested against the leave-one-out marginal contribution (benefit_i <= phi_i^disc - c'(i),
+    i.e. payment_i >= c'(i), D8-adjusted c' preferred); (B) proportional split of the integrated total among the 11 countries tested for
+    individual rationality (payment_i <= phi_i^disc)."""
+    u = 1e10
+    cI = {c: 10 * u for c in M.COUNTRIES} | {M.BUNKER: 5 * u}; cD = {c: 12 * u for c in M.COUNTRIES} | {"VN": 30 * u, M.BUNKER: 4 * u}
+    I = _fake_alloc(tmp_path / "i", cI, sum(cI.values()), 0.0, cI); D = _fake_alloc(tmp_path / "d", cD, sum(cD.values()), 0.0, cD)
+    lc = tmp_path / "LOO_CHECK.json"
+    lc.write_text(json.dumps(dict(check=dict(countries=dict(VN=dict(marginal_cost=29 * u, marginal_cost_adjusted=30 * u), LA=dict(marginal_cost=0.0))))))
+    r = M.benefit(I, D, tmp_path / "o", ROOT, loo_check=lc)
+    b6 = sum(cD.values()) - sum(cI.values())
+    assert r["loo_check_source"] == str(lc)
+    for k, v in r["proportional"].items():
+        A, B = v["A_split_b6"], v["B_split_total"]
+        assert abs(sum(A["benefit_eur"].values()) - b6) <= 1e-6 * u and set(A["loo_check"]) == {"LA", "VN"}
+        assert A["loo_check"]["VN"]["marginal_cost_eur"] == 30 * u and A["loo_check"]["VN"]["max_benefit_eur"] == 0.0   # adjusted c' used
+        assert "VN" in A["loo_violations"] and "LA" not in A["loo_violations"]                    # VN may get no benefit at all; LA up to 12
+        for c, x in A["loo_check"].items():
+            assert x["passed"] == (x["benefit_eur"] <= x["max_benefit_eur"] + x["tolerance_eur"])
+        assert abs(B["total_eur"] - (sum(cI.values()) - cI[M.BUNKER])) <= 1e-3 and abs(sum(B["payment_eur"].values()) - B["total_eur"]) <= 1e-3
+        for c, x in B["ir_check"].items():
+            assert x["passed"] == (x["payment_eur"] <= cD[c] + x["tolerance_eur"])
+    assert "ID" in r["proportional"]["population_aeo8_d1"]["B_split_total"]["ir_violations"]   # ID's population share of the total > its disconnected cost
+    assert r["owen_checks"]["loo"]["VN"]["passed"] is False and r["owen_checks"]["ir"]["VN"]["passed"]
+    md = (tmp_path / "o" / "BENEFIT.md").read_text()
+    assert "比例规则 (A)" in md and "比例规则 (B)" in md and "✗" in md
+    r0 = M.benefit(I, D, tmp_path / "o0", ROOT)                                                 # no leave-one-out check: (A) not testable
+    assert all(v["A_split_b6"]["loo_check"] == {} for v in r0["proportional"].values()) and r0["loo_check_source"] is None
+
+
 def test_premise_failed_flag_d3(tmp_path):
     """Supplement 01 D3: a non-zero right-hand side without an owner (e.g. a future total cap on extra-ASEAN imports) sets owen_premise.passed
     False; the OWEN outputs are flagged premise_failed and not usable for the allocation even when the identity holds."""

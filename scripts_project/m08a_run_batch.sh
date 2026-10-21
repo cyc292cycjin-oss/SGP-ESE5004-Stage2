@@ -65,11 +65,14 @@ m12_run() {   # $1 tag $2 scenario $3 unsolved network: M12 allocation (and the 
   fi
 }
 
-m12_batch() {   # $1 suffix of the run tags: benefit / proportional rules of the batch once both scenarios have allocations (after any regrade)
+m12_batch() {   # $1 suffix of the run tags: benefit / proportional rules of the batch once both scenarios have allocations (after any regrade);
+  # runs AFTER m12_loo: the (A) basis of the proportional rules is tested against the batch's leave-one-out marginal contributions (supplement 01 D4)
   [ "$DRY" = 1 ] && return 0
   [ -f "$OUT/integrated$1/ALLOCATION.json" ] && [ -f "$OUT/disconnected$1/ALLOCATION.json" ] || { echo "M12_BENEFIT$1:missing allocations" >> "$ST"; return 0; }
-  ( cd "$REPO" && $M12_CMD benefit --repo "$REPO" --integrated "$OUT/integrated$1" --disconnected "$OUT/disconnected$1" --out "$OUT/M12_BENEFIT$1" > "$OUT/M12_BENEFIT$1.log" 2>&1 )
-  echo "M12_BENEFIT$1:exit=$?" >> "$ST"
+  local lc=(); [ -f "$OUT/M12_LOO_integrated$1/LOO_CHECK.json" ] && lc=(--loo-check "$OUT/M12_LOO_integrated$1/LOO_CHECK.json")
+  ( cd "$REPO" && $M12_CMD benefit --repo "$REPO" --integrated "$OUT/integrated$1" --disconnected "$OUT/disconnected$1" --out "$OUT/M12_BENEFIT$1" ${lc[@]+"${lc[@]}"} \
+      > "$OUT/M12_BENEFIT$1.log" 2>&1 )
+  echo "M12_BENEFIT$1:exit=$?:loo_check=${#lc[@]}" >> "$ST"
 }
 
 m12_loo() {   # $1 tag of the full integrated run: leave-one-out check once runs OUT/$1_minus<CC>/ exist (same resolution and profile)
@@ -101,7 +104,7 @@ case "$RUN_KIND" in
     for sc in $SCENARIOS; do one_run "${sc}_A" "$sc" 365_24h "$REF" "$TL_L2"; done
     for sc in $SCENARIOS; do one_run "${sc}_CAND" "$sc" 365_24h "$CAND" "$TL_L2"; done
     batch_reference _A; batch_reference _CAND
-    m12_batch _A; m12_batch _CAND; m12_loo integrated_A; m12_loo integrated_CAND
+    m12_loo integrated_A; m12_loo integrated_CAND; m12_batch _A; m12_batch _CAND
     for sc in $SCENARIOS; do accept "${sc}_A" "$sc" > /dev/null; accept "${sc}_CAND" "$sc" > /dev/null; done
     [ "$DRY" = 1 ] && { echo "DONE:dry" >> "$ST"; exit 0; }
     "$PY" - "$OUT" "$CAND" "$REF" $SCENARIOS > "$OUT/LEVEL2.json" <<'P'
@@ -133,7 +136,7 @@ P
       [ "$DRY" = 1 ] || $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
       if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break; fi
     done
-    [ -f "$OUT/STOP_NOT_ACCEPTED" ] || { m12_batch ""; m12_loo integrated; }
+    [ -f "$OUT/STOP_NOT_ACCEPTED" ] || { m12_loo integrated; m12_batch ""; }
     ;;
   *) echo "unknown RUN_KIND $RUN_KIND" >&2; exit 2;;
 esac

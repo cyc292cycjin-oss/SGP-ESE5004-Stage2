@@ -594,7 +594,19 @@ def _dual_alloc(run_dir: Path, override: Path | None) -> dict | None:
     return None
 
 
-def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path | None = None, dis_dual: Path | None = None) -> dict:
+def _loo_marginals(loo_check: Path | None) -> tuple[dict, str | None]:
+    """c'(i) of the countries with a leave-one-out run, from LOO_CHECK.json (the D8-adjusted value when present)."""
+    if loo_check is None or not Path(loo_check).exists():
+        return {}, None
+    r = json.loads(Path(loo_check).read_text())
+    if r.get("computable") is False:
+        return {}, f"{loo_check} (not computable: {str(r.get('reason', ''))[:80]})"
+    cs = (r.get("check") or {}).get("countries") or {}
+    return ({c: dict(c_prime=float(v.get("marginal_cost_adjusted", v["marginal_cost"])), adjusted="marginal_cost_adjusted" in v) for c, v in cs.items()},
+            str(loo_check))
+
+
+def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path | None = None, dis_dual: Path | None = None, loo_check: Path | None = None) -> dict:
     """C1 items 4 / 5: benefit = disconnected allocation - integrated allocation (alpha 0.5 and the alpha interval); proportional rules splitting
     B6 = objective(disconnected) - objective(integrated) among the 11 countries (the bunker pays its disconnected allocation, benefit 0).
     Main value (supplement 01 D1): the Owen dual form y'b of both runs (m12_owen/OWEN.json); the market-settlement form (ALLOCATION.json, the
@@ -622,15 +634,31 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
     le = I.get("load_energy_twh") or {}
     w = dict(population_ssp2=sw["population_ssp2_m"], gdp_ppp_ssp2=sw["gdp_ppp_ssp2_bn_usd2017"], population_aeo8_d1=sw["population_aeo8_d1_m"],
              electricity_base=_elec(le, BASE_ELEC), electricity_fixed=_elec(le, FIXED_ELEC))
+    tol_bn, tol_src = thresholds_bn(Path(int_dir), None)
+    tol = {c: tol_bn[c] * 1e9 for c in COUNTRIES}
+    lc, lc_src = _loo_marginals(loo_check)
+    total_b = float(I["objective"] - pI[BUNKER] - pI.get(SHARED, 0.0))   # (B): the 11 countries share c(N) - bunker - pool residual
+    owen_chk = dict(loo={c: dict(payment_eur=pI[c], marginal_cost_eur=v["c_prime"], margin_eur=pI[c] - v["c_prime"], passed=bool(pI[c] - v["c_prime"] >= -tol[c]))
+                         for c, v in lc.items()},
+                    ir={c: dict(payment_eur=pI[c], disconnected_eur=pD[c], margin_eur=pD[c] - pI[c], passed=bool(pI[c] <= pD[c] + tol[c])) for c in COUNTRIES})
     rules = {}
     for k, wt in w.items():
         s = {c: float(wt.get(c, 0.0)) for c in COUNTRIES}
         share = proportional(b6, s)
         pay = {c: pD[c] - share[c] for c in COUNTRIES}
-        rules[k] = dict(weights=s, benefit_eur=share, payment_eur=pay, minus_owen_payment_eur={c: pay[c] - pI[c] for c in COUNTRIES},
-                        negative_benefit=[c for c in COUNTRIES if share[c] < 0],
-                        owen_sign_differs=[c for c in COUNTRIES if ben[c] != 0 and np.sign(share[c]) != np.sign(ben[c])])
-    bal = sum(rules["population_ssp2"]["payment_eur"].values()) + pD[BUNKER] - (I["objective"] - pI[SHARED])
+        la = {c: dict(benefit_eur=share[c], max_benefit_eur=pD[c] - v["c_prime"], payment_eur=pay[c], marginal_cost_eur=v["c_prime"], margin_eur=pay[c] - v["c_prime"],
+                      tolerance_eur=tol[c], passed=bool(pay[c] - v["c_prime"] >= -tol[c])) for c, v in lc.items()}
+        pb = proportional(total_b, s)
+        ir = {c: dict(payment_eur=pb[c], disconnected_eur=pD[c], benefit_eur=pD[c] - pb[c], tolerance_eur=tol[c], passed=bool(pb[c] <= pD[c] + tol[c])) for c in COUNTRIES}
+        rules[k] = dict(weights=s,
+                        A_split_b6=dict(benefit_eur=share, payment_eur=pay, minus_owen_payment_eur={c: pay[c] - pI[c] for c in COUNTRIES},
+                                        negative_benefit=[c for c in COUNTRIES if share[c] < 0],
+                                        owen_sign_differs=[c for c in COUNTRIES if ben[c] != 0 and np.sign(share[c]) != np.sign(ben[c])],
+                                        loo_check=la, loo_violations=[c for c, v in la.items() if not v["passed"]]),
+                        B_split_total=dict(total_eur=total_b, payment_eur=pb, benefit_eur={c: pD[c] - pb[c] for c in COUNTRIES},
+                                           minus_owen_payment_eur={c: pb[c] - pI[c] for c in COUNTRIES}, ir_check=ir,
+                                           ir_violations=[c for c, v in ir.items() if not v["passed"]]))
+    bal = sum(rules[next(iter(w))]["A_split_b6"]["payment_eur"].values()) + pD[BUNKER] - (I["objective"] - pI.get(SHARED, 0.0))
     res = dict(script=SCRIPT, integrated=str(int_dir), disconnected=str(dis_dir), b6_eur=b6, objective_integrated=I["objective"], objective_disconnected=D["objective"],
                networks=dict(integrated=I.get("solved_network"), integrated_sha256=I.get("solved_network_sha256"), disconnected=D.get("solved_network"),
                              disconnected_sha256=D.get("solved_network_sha256")),
@@ -646,18 +674,30 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
                market_form=dict(benefit_eur=mben, benefit_interval_eur=mrng, negative_benefit=[p for p in PLAYERS if mben[p] < 0],
                                 market_minus_main_benefit_eur={p: mben[p] - ben[p] for p in PLAYERS},
                                 note="market-settlement form (current ledger, ALLOCATION.json); differs from the dual form by the KVL loop transfers and KKT residuals"),
+               proportional_bases=dict(
+                   decision="supplement 01 D4 (item 136): (A) proportional split of B6 (main discussion), tested against the leave-one-out marginal "
+                            "contribution; (B) proportional split of the integrated total cost (Young et al.), tested for individual rationality",
+                   A="benefit_i = s_i x B6, payment_i = disconnected allocation_i - benefit_i; test: payment_i >= c'(i) (c'(i) = c(N) - c(N - i), D8 "
+                     "adjusted), i.e. benefit_i <= disconnected allocation_i - c'(i): otherwise the other players pay more than c(N - i). With B6 > 0 the "
+                     "benefit is never negative, so 'negative benefit' is not a test of (A). Only countries with a leave-one-out run.",
+                   B="payment_i = s_i x (c(N) - phi_BUNKER - SHARED) of the integrated run; test (individual rationality): payment_i <= disconnected "
+                     "allocation_i (+ the C1 (b) tolerance)"),
+               loo_check_source=lc_src, tolerance_source=tol_src, owen_checks=owen_chk,
                proportional=rules, socio_sources=sw["sources"], electricity_twh=dict(base=w["electricity_base"], fixed=w["electricity_fixed"]),
                rule_budget_residual_eur=float(bal), fx_per_eur2020=fx,
-               notes=["proportional rules split B6 among the 11 countries by positive weights: with B6 > 0 no country can get a negative benefit under any of them; "
-                      "the bunker account (no population / GDP / electricity) keeps its disconnected allocation (benefit 0), so the countries absorb its Owen benefit",
-                      "rule_budget_residual_eur = sum of the rule payments + bunker - (integrated objective - integrated pool surplus) = change of the pool surplus"])
+               notes=["(A) splits B6 among the 11 countries by positive weights: with B6 > 0 no country gets a negative benefit; the bunker account (no "
+                      "population / GDP / electricity) keeps its disconnected allocation (benefit 0) in (A) and its integrated allocation in (B)",
+                      "rule_budget_residual_eur = sum of the (A) payments of the first weight + bunker - (integrated objective - integrated pool residual) = change of the pool residual"])
     (out / "BENEFIT.json").write_text(json.dumps(res, indent=1, default=str))
     rows = []
     for p in PLAYERS:
         r = dict(player=p, owen_benefit_eur=ben[p], owen_benefit_min_eur=rng[p]["min"], owen_benefit_max_eur=rng[p]["max"], owen_benefit_usd2020=ben[p] * fx,
-                 market_form_benefit_eur=mben[p])
+                 market_form_benefit_eur=mben[p], loo_marginal_cost_eur=(lc.get(p) or {}).get("c_prime"))
         for k, v in rules.items():
-            r[f"{k}_benefit_eur"] = v["benefit_eur"].get(p, 0.0)
+            r[f"{k}_A_benefit_eur"] = v["A_split_b6"]["benefit_eur"].get(p, 0.0)
+            r[f"{k}_A_loo_passed"] = (v["A_split_b6"]["loo_check"].get(p) or {}).get("passed")
+            r[f"{k}_B_payment_eur"] = v["B_split_total"]["payment_eur"].get(p)
+            r[f"{k}_B_ir_passed"] = (v["B_split_total"]["ir_check"].get(p) or {}).get("passed")
         rows.append(r)
     pd.DataFrame(rows).set_index("player").to_csv(out / "BENEFIT.csv")
     (out / "BENEFIT.md").write_text(markdown_benefit(res))
@@ -672,12 +712,29 @@ def markdown_benefit(r: dict) -> str:
          f"- B6 = 不互联目标值 − 一体化目标值 = {bn(r['b6_eur'])} bn EUR2020。",
          f"- Owen 受益为负的参与者（α 0.5）：**{', '.join(o['negative_benefit']) or '无'}**；α 区间内可能为负：{', '.join(o['negative_somewhere_in_interval']) or '无'}。",
          f"- 燃料舱参与者：一体化 {r['bunker_player_present']['integrated']}，不互联 {r['bunker_player_present']['disconnected']}。", "",
-         "| 参与者 | Owen 受益 bn | 区间下限 | 区间上限 | 人口 SSP2 | GDP SSP2 | 人口 AEO8 | 基础电力 | 固定电力 |", "|---|---|---|---|---|---|---|---|---|"]
-    for p in PLAYERS:
-        L.append(f"| {p} | {bn(o['benefit_eur'][p])} | {bn(o['benefit_interval_eur'][p]['min'])} | {bn(o['benefit_interval_eur'][p]['max'])} | "
-                 + " | ".join(bn(r["proportional"][k]["benefit_eur"].get(p, 0.0)) for k in ("population_ssp2", "gdp_ppp_ssp2", "population_aeo8_d1", "electricity_base", "electricity_fixed")) + " |")
-    L += ["", "比例规则下受益为负的国家：" + "；".join(f"{k}：{', '.join(v['negative_benefit']) or '无'}" for k, v in r["proportional"].items()), "",
-          "比例规则与 Owen 受益符号不同的国家：" + "；".join(f"{k}：{', '.join(v['owen_sign_differs']) or '无'}" for k, v in r["proportional"].items()), ""]
+         "| 参与者 | Owen 受益 bn | 区间下限 | 区间上限 |", "|---|---|---|---|"]
+    L += [f"| {p} | {bn(o['benefit_eur'][p])} | {bn(o['benefit_interval_eur'][p]['min'])} | {bn(o['benefit_interval_eur'][p]['max'])} |" for p in PLAYERS]
+    ks = list(r["proportional"])
+    pb = r["proportional_bases"]; oc = r["owen_checks"]
+    mark = lambda v: "" if v is None else ("" if v else " ✗")   # noqa: E731
+    L += ["", "## 比例规则 (A)：按比例分摊 B6（主讨论；检验 = 去一国边际贡献，补充 01 D4）", "", f"- {pb['A']}", f"- 去一国来源：{r['loo_check_source'] or '无（(A) 的检验不可计算）'}；容差：{r['tolerance_source']}。",
+          f"- Owen（主值）去一国检查：" + ("；".join(f"{c} 余量 {bn(v['margin_eur'])} bn {'通过' if v['passed'] else '**未通过**'}" for c, v in oc["loo"].items()) or "无去一国运行"), "",
+          "| 国 | Owen 受益 | 受益上限 φ不互联 − c′ | " + " | ".join(ks) + " |", "|---|---|---|" + "---|" * len(ks)]
+    for c in COUNTRIES:
+        la = {k: r["proportional"][k]["A_split_b6"]["loo_check"].get(c) for k in ks}
+        cap = next((v["max_benefit_eur"] for v in la.values() if v), None)
+        L.append(f"| {c} | {bn(o['benefit_eur'][c])} | {bn(cap)} | " + " | ".join(bn(r["proportional"][k]["A_split_b6"]["benefit_eur"][c]) + mark((la[k] or {}).get("passed")) for k in ks) + " |")
+    L += ["", "（✗ = 规则给该国的好处超过其边际贡献，其余参与者合计支付超过 c(N − i)。）", "",
+          "(A) 去一国检查未通过：" + "；".join(f"{k}：{', '.join(r['proportional'][k]['A_split_b6']['loo_violations']) or '无'}" for k in ks),
+          "", "## 比例规则 (B)：按比例分摊一体化总成本（对照；检验 = 个体理性）", "", f"- {pb['B']}",
+          f"- 11 国分摊总额 = {bn(r['proportional'][ks[0]]['B_split_total']['total_eur'])} bn。Owen（主值）个体理性：" +
+          ("全部通过" if all(v["passed"] for v in oc["ir"].values()) else "未通过 " + ", ".join(c for c, v in oc["ir"].items() if not v["passed"])), "",
+          "| 国 | 不互联分摊 | Owen 支付 | " + " | ".join(ks) + " |", "|---|---|---|" + "---|" * len(ks)]
+    for c in COUNTRIES:
+        L.append(f"| {c} | {bn(o['allocation_disconnected_eur'][c])} | {bn(o['allocation_integrated_eur'][c])} | "
+                 + " | ".join(bn(r["proportional"][k]["B_split_total"]["payment_eur"][c]) + mark(r["proportional"][k]["B_split_total"]["ir_check"][c]["passed"]) for k in ks) + " |")
+    L += ["", "（✗ = 支付超过不互联分摊，违反个体理性。）", "",
+          "(B) 个体理性未通过：" + "；".join(f"{k}：{', '.join(r['proportional'][k]['B_split_total']['ir_violations']) or '无'}" for k in ks), ""]
     L += [f"- {x}" for x in r["notes"]]
     L += [f"- 预算残差 {r['rule_budget_residual_eur']:,.0f} EUR（池盈余变化）。", f"- 权重来源：{r['socio_sources']}"]
     m = r["market_form"]
@@ -751,6 +808,7 @@ def main():
     b = sub.add_parser("benefit"); b.add_argument("--integrated", type=Path, required=True); b.add_argument("--disconnected", type=Path, required=True)
     b.add_argument("--out", type=Path, required=True); b.add_argument("--repo", type=Path, default=HERE.parent)
     b.add_argument("--integrated-dual", type=Path, default=None); b.add_argument("--disconnected-dual", type=Path, default=None)
+    b.add_argument("--loo-check", type=Path, default=None, help="LOO_CHECK.json of the batch (D4 (A): rule benefits vs the leave-one-out marginal contributions)")
     o = sub.add_parser("loo"); o.add_argument("--full", type=Path, required=True); o.add_argument("--loo", action="append", default=[], help="CC=<run dir>")
     o.add_argument("--out", type=Path, required=True); o.add_argument("--reference", type=Path, default=None); o.add_argument("--standalone", type=Path, default=None)
     a = ap.parse_args()
@@ -763,7 +821,7 @@ def main():
     else:   # batch steps: inputs that are not computable give a short JSON instead of a traceback (the batch continues)
         try:
             if a.cmd == "benefit":
-                res = benefit(a.integrated, a.disconnected, a.out, a.repo, a.integrated_dual, a.disconnected_dual)
+                res = benefit(a.integrated, a.disconnected, a.out, a.repo, a.integrated_dual, a.disconnected_dual, a.loo_check)
                 print(json.dumps(dict(b6_bn=res["b6_eur"] / 1e9, negative=res["owen"]["negative_benefit"]), default=str))
             else:
                 res = loo(a.full, dict(s.split("=", 1) for s in a.loo), a.out, a.reference, a.standalone)
