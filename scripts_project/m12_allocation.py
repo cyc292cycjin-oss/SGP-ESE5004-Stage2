@@ -11,6 +11,11 @@ phi(S) = y*' b(S) <= max_y {y' b(S): y dual feasible} = c(S) (weak duality), phi
             + value at the nodal duals of the player's net purchases - net sales (every carrier, every bus)
             - sum over cross-border assets l touching i of  s_{l,i} x (rent_l - annuity_l),   s_{l,i} = alpha or 1 - alpha
 
+Main value (supplement 01 D1, item 136): the dual form y'b computed by m12_rhs_audit.py (m12_owen/OWEN.json; in the core by Owen's theorem).
+The market-settlement form above equals y'b only without coupling rows: the homogeneous KVL rows of loops with lines of several owners move value
+between them (loop transfer), so it is reported alongside, with market - dual = KVL transfer + residual. benefit / loo use the dual form when
+the runs have it.
+
 Premises (checked by m12_rhs_audit.py): every right-hand side belongs to a player; a cross-border line is two halves, each country owning its
 half (both halves have the full rating, so the line exists only if both countries take part); extra-ASEAN trade at fixed prices; the bunker
 demand belongs to no country and is the 12th player. Dual degeneracy: two half-rows with the same coefficients carry any split of the line's
@@ -570,28 +575,46 @@ def _elec(le: dict, carriers) -> dict:
     return {c: float(sum((le.get(c) or {}).get(k, 0.0) for k in carriers)) for c in COUNTRIES}
 
 
-def _dual_alloc(run_dir: Path, override: Path | None) -> tuple[dict | None, str | None]:
-    """Owen dual form (m12_rhs_audit.py: y'b + constants, alpha 0.5) of a run when available: <run>/m12_owen/RHS_AUDIT.json or an explicit file."""
-    p = Path(override) if override is not None else Path(run_dir) / "m12_owen" / "RHS_AUDIT.json"
-    if not p.exists():
-        return None, None
-    d = (json.loads(p.read_text()).get("dual_form") or {})
-    return (d.get("allocation_alpha_half"), str(p)) if d.get("allocation_alpha_half") else (None, None)
+def _dual_alloc(run_dir: Path, override: Path | None) -> dict | None:
+    """Owen dual form (m12_rhs_audit.py: y'b + constants) of a run when available: <run>/m12_owen/OWEN.json (main-value file, supplement 01 D1),
+    else <run>/m12_owen/RHS_AUDIT.json (dual_form block), or an explicit file of either kind. Returns allocation (alpha 0.5), interval, source."""
+    cands = [Path(override)] if override is not None else [Path(run_dir) / "m12_owen" / "OWEN.json", Path(run_dir) / "m12_owen" / "RHS_AUDIT.json"]
+    for p in cands:
+        if not p.exists():
+            continue
+        r = json.loads(p.read_text())
+        if r.get("main_form") == "owen_dual_form":
+            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=r.get("usable_for_allocation"),
+                        identity_passed=(r.get("identity") or {}).get("passed"), premise_passed=(r.get("premise") or {}).get("passed"))
+        d = r.get("dual_form") or {}
+        if d.get("allocation_alpha_half"):
+            return dict(allocation=d["allocation_alpha_half"], interval=d.get("interval"), source=str(p), usable=None, identity_passed=None, premise_passed=None)
+    return None
 
 
 def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path | None = None, dis_dual: Path | None = None) -> dict:
     """C1 items 4 / 5: benefit = disconnected allocation - integrated allocation (alpha 0.5 and the alpha interval); proportional rules splitting
     B6 = objective(disconnected) - objective(integrated) among the 11 countries (the bunker pays its disconnected allocation, benefit 0).
-    With the Owen dual forms of both runs the benefit is also given on y'b (KVL loop transfers removed)."""
+    Main value (supplement 01 D1): the Owen dual form y'b of both runs (m12_owen/OWEN.json); the market-settlement form (ALLOCATION.json, the
+    current ledger) is reported alongside. Without the dual forms of both runs the market form is the main value (flagged)."""
     out.mkdir(parents=True, exist_ok=True)
     I, D = _alloc_json(int_dir), _alloc_json(dis_dir)
     I["precision"] = precision_context(int_dir, None) if (Path(int_dir) / "PRECISION.json").exists() else I.get("precision")   # after any regrade
     D["precision"] = precision_context(dis_dir, None) if (Path(dis_dir) / "PRECISION.json").exists() else D.get("precision")
-    dI, sI = _dual_alloc(int_dir, int_dual); dD, sD = _dual_alloc(dis_dir, dis_dual)
+    dI, dD = _dual_alloc(int_dir, int_dual), _dual_alloc(dis_dir, dis_dual)
     fx = I["report_currency"]["fx_per_eur2020"]
-    pI, pD = I["allocation_eur"]["0.5"], D["allocation_eur"]["0.5"]
+    mI, mD = I["allocation_eur"]["0.5"], D["allocation_eur"]["0.5"]
+    mben = {p: mD[p] - mI[p] for p in PLAYERS}
+    mrng = {p: dict(min=D["interval_eur"][p]["min"] - I["interval_eur"][p]["max"], max=D["interval_eur"][p]["max"] - I["interval_eur"][p]["min"]) for p in PLAYERS}
+    dual = dI is not None and dD is not None
+    if dual:
+        pI, pD = dI["allocation"], dD["allocation"]
+        iI, iD = dI.get("interval") or I["interval_eur"], dD.get("interval") or D["interval_eur"]
+    else:
+        pI, pD, iI, iD = mI, mD, I["interval_eur"], D["interval_eur"]
+    main_form = "owen_dual_form" if dual else "market_settlement_form (dual form of both runs not available)"
     ben = {p: pD[p] - pI[p] for p in PLAYERS}
-    rng = {p: dict(min=D["interval_eur"][p]["min"] - I["interval_eur"][p]["max"], max=D["interval_eur"][p]["max"] - I["interval_eur"][p]["min"]) for p in PLAYERS}
+    rng = {p: dict(min=iD[p]["min"] - iI[p]["max"], max=iD[p]["max"] - iI[p]["min"]) for p in PLAYERS}
     b6 = float(D["objective"] - I["objective"])
     sw = socio_weights(repo)
     le = I.get("load_energy_twh") or {}
@@ -611,22 +634,26 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
                              disconnected_sha256=D.get("solved_network_sha256")),
                bunker_player_present=dict(integrated=I.get("bunker_player_present"), disconnected=D.get("bunker_player_present")),
                precision=dict(integrated=I.get("precision"), disconnected=D.get("precision")),
-               owen=dict(benefit_eur=ben, benefit_interval_eur=rng, negative_benefit=[p for p in PLAYERS if ben[p] < 0],
+               main_form=main_form,
+               owen=dict(form=main_form, sources=dict(integrated=(dI or {}).get("source"), disconnected=(dD or {}).get("source")),
+                         usable=dict(integrated=(dI or {}).get("usable"), disconnected=(dD or {}).get("usable")),
+                         allocation_integrated_eur=pI, allocation_disconnected_eur=pD,
+                         benefit_eur=ben, benefit_interval_eur=rng, negative_benefit=[p for p in PLAYERS if ben[p] < 0],
                          negative_somewhere_in_interval=[p for p in PLAYERS if rng[p]["min"] < 0], sum_players_eur=float(sum(ben.values())),
-                         shared_change_eur=float(pD[SHARED] - pI[SHARED])),
+                         shared_change_eur=float(pD.get(SHARED, 0.0) - pI.get(SHARED, 0.0))),
+               market_form=dict(benefit_eur=mben, benefit_interval_eur=mrng, negative_benefit=[p for p in PLAYERS if mben[p] < 0],
+                                market_minus_main_benefit_eur={p: mben[p] - ben[p] for p in PLAYERS},
+                                note="market-settlement form (current ledger, ALLOCATION.json); differs from the dual form by the KVL loop transfers and KKT residuals"),
                proportional=rules, socio_sources=sw["sources"], electricity_twh=dict(base=w["electricity_base"], fixed=w["electricity_fixed"]),
                rule_budget_residual_eur=float(bal), fx_per_eur2020=fx,
-               owen_dual_form=(dict(integrated=sI, disconnected=sD, benefit_eur={p: dD[p] - dI[p] for p in PLAYERS},
-                                    negative_benefit=[p for p in PLAYERS if dD[p] - dI[p] < 0],
-                                    market_minus_dual_benefit_eur={p: ben[p] - (dD[p] - dI[p]) for p in PLAYERS})
-                               if dI is not None and dD is not None else dict(available=False, integrated=sI, disconnected=sD)),
                notes=["proportional rules split B6 among the 11 countries by positive weights: with B6 > 0 no country can get a negative benefit under any of them; "
                       "the bunker account (no population / GDP / electricity) keeps its disconnected allocation (benefit 0), so the countries absorb its Owen benefit",
                       "rule_budget_residual_eur = sum of the rule payments + bunker - (integrated objective - integrated pool surplus) = change of the pool surplus"])
     (out / "BENEFIT.json").write_text(json.dumps(res, indent=1, default=str))
     rows = []
     for p in PLAYERS:
-        r = dict(player=p, owen_benefit_eur=ben[p], owen_benefit_min_eur=rng[p]["min"], owen_benefit_max_eur=rng[p]["max"], owen_benefit_usd2020=ben[p] * fx)
+        r = dict(player=p, owen_benefit_eur=ben[p], owen_benefit_min_eur=rng[p]["min"], owen_benefit_max_eur=rng[p]["max"], owen_benefit_usd2020=ben[p] * fx,
+                 market_form_benefit_eur=mben[p])
         for k, v in rules.items():
             r[f"{k}_benefit_eur"] = v["benefit_eur"].get(p, 0.0)
         rows.append(r)
@@ -639,6 +666,7 @@ def markdown_benefit(r: dict) -> str:
     o = r["owen"]
     L = ["# BENEFIT（M12 C1 第 4、5 项：受益检查与比例规则对照；只读）", "",
          f"- 一体化：`{r['integrated']}`；不互联：`{r['disconnected']}`。",
+         f"- 主值口径（补充 01 D1）：**{r['main_form']}**；来源 {o['sources']['integrated']}；{o['sources']['disconnected']}。",
          f"- B6 = 不互联目标值 − 一体化目标值 = {bn(r['b6_eur'])} bn EUR2020。",
          f"- Owen 受益为负的参与者（α 0.5）：**{', '.join(o['negative_benefit']) or '无'}**；α 区间内可能为负：{', '.join(o['negative_somewhere_in_interval']) or '无'}。",
          f"- 燃料舱参与者：一体化 {r['bunker_player_present']['integrated']}，不互联 {r['bunker_player_present']['disconnected']}。", "",
@@ -650,13 +678,10 @@ def markdown_benefit(r: dict) -> str:
           "比例规则与 Owen 受益符号不同的国家：" + "；".join(f"{k}：{', '.join(v['owen_sign_differs']) or '无'}" for k, v in r["proportional"].items()), ""]
     L += [f"- {x}" for x in r["notes"]]
     L += [f"- 预算残差 {r['rule_budget_residual_eur']:,.0f} EUR（池盈余变化）。", f"- 权重来源：{r['socio_sources']}"]
-    od = r.get("owen_dual_form") or {}
-    if od.get("benefit_eur"):
-        L += ["", "## Owen 对偶形式（y'b，已去除 KVL 回路转移）下的受益", "", f"- 来源：{od['integrated']}；{od['disconnected']}",
-              f"- 受益为负：**{', '.join(od['negative_benefit']) or '无'}**", "", "| 参与者 | 对偶形式受益 bn | 市场形式受益 bn | 差 bn |", "|---|---|---|---|"]
-        L += [f"| {p} | {bn(od['benefit_eur'][p])} | {bn(o['benefit_eur'][p])} | {bn(od['market_minus_dual_benefit_eur'][p])} |" for p in PLAYERS]
-    else:
-        L += ["", "- Owen 对偶形式：不可用（运行目录中没有 m12_owen/RHS_AUDIT.json），上表为市场结算形式。"]
+    m = r["market_form"]
+    L += ["", "## 并列：市场结算形式（现行账本）下的受益", "", f"- 受益为负：**{', '.join(m['negative_benefit']) or '无'}**", "",
+          "| 参与者 | 主值受益 bn | 市场形式受益 bn | 市场 − 主值 bn |", "|---|---|---|---|"]
+    L += [f"| {p} | {bn(o['benefit_eur'][p])} | {bn(m['benefit_eur'][p])} | {bn(m['market_minus_main_benefit_eur'][p])} |" for p in PLAYERS]
     return "\n".join(L) + "\n"
 
 
@@ -668,7 +693,9 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
     F = _alloc_json(full_dir)
     rf = json.loads((Path(full_dir) / "SOLVE_RECEIPT.json").read_text()) if (Path(full_dir) / "SOLVE_RECEIPT.json").exists() else {}
     tol_bn, tol_src = thresholds_bn(Path(full_dir), reference)
-    phi = F["allocation_eur"]["0.5"]
+    dF = _dual_alloc(full_dir, None)   # supplement 01 D1: the dual form is the main value when the run has it
+    phi, it_ = (dF["allocation"], dF.get("interval") or F["interval_eur"]) if dF is not None else (F["allocation_eur"]["0.5"], F["interval_eur"])
+    main_form = "owen_dual_form" if dF is not None else "market_settlement_form (no m12_owen/OWEN.json in the full run)"
     c_loo, same = {}, {}
     for c, d in sorted(loo_dirs.items()):
         r = json.loads((Path(d) / "SOLVE_RECEIPT.json").read_text())
@@ -685,8 +712,11 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
     chk = loo_check({p: phi[p] for p in COUNTRIES}, float(F["objective"]), c_loo, {c: v * 1e9 for c, v in tol_bn.items()})
     for c, v in chk["countries"].items():
         v["same_profile_and_resolution"] = same[c]; v["sunk_half_fom_of_removed_corridors_eur"] = sunk.get(c, 0.0)
-        v["interval_min_eur"] = F["interval_eur"][c]["min"]; v["passed_at_interval_min"] = bool(F["interval_eur"][c]["min"] - v["marginal_cost"] >= -v["tolerance"])
-    res = dict(script=SCRIPT, full=str(full_dir), loo_runs={c: str(d) for c, d in loo_dirs.items()}, tolerance_source=tol_src, tolerance_bn=tol_bn,
+        v["interval_min_eur"] = it_[c]["min"]; v["passed_at_interval_min"] = bool(it_[c]["min"] - v["marginal_cost"] >= -v["tolerance"])
+        v["market_form_allocation_eur"] = F["allocation_eur"]["0.5"][c]
+        v["market_form_passed"] = bool(F["allocation_eur"]["0.5"][c] - v["marginal_cost"] >= -v["tolerance"])
+    res = dict(script=SCRIPT, full=str(full_dir), main_form=main_form, owen_source=(dF or {}).get("source"), loo_runs={c: str(d) for c, d in loo_dirs.items()},
+               tolerance_source=tol_src, tolerance_bn=tol_bn,
                objective_full=float(F["objective"]), check=chk, all_11=bool(set(c_loo) == set(COUNTRIES)))
     sa_ok = standalone_dir is not None and (Path(standalone_dir) / "ALLOCATION.json").exists() and json.loads((Path(standalone_dir) / "ALLOCATION.json").read_text()).get("computable")
     if res["all_11"] and sa_ok:
@@ -697,7 +727,7 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
     else:
         res["scrb"] = dict(computed=False, reason="SCRB only with all 11 leave-one-out runs and a disconnected allocation (standalone proxy)")
     (out / "LOO_CHECK.json").write_text(json.dumps(res, indent=1, default=str))
-    L = ["# LOO_CHECK（M12 C1 第 6 项：去一国检查；只读）", "", f"- 全体：`{full_dir}`；容差：{tol_src}。",
+    L = ["# LOO_CHECK（M12 C1 第 6 项：去一国检查；只读）", "", f"- 全体：`{full_dir}`；容差：{tol_src}。", f"- 分摊口径：{main_form}。",
          f"- 不可分成本 c(N) − Σ c′(i) = {bn(chk['indivisible_cost'])} bn（{chk['indivisible_cost_sign']}；仅含已有国家）。", "",
          "| 国 | c(N − i) bn | c′(i) bn | Owen 分摊 bn | 余量 bn | 容差 bn | 通过 | 区间下限仍通过 | 同档案 / 分辨率 |", "|---|---|---|---|---|---|---|---|---|"]
     for c, v in chk["countries"].items():

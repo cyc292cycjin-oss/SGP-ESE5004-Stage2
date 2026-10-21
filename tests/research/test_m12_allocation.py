@@ -71,11 +71,17 @@ D = {"A": [3, 4, 5, 4], "B": [6, 5, 7, 6], "C": [4, 6, 5, 5]}
 AV = {"A": [0.9, 0.6, 0.3, 0.8], "B": [0.4, 0.7, 0.5, 0.3], "C": [0.2, 0.5, 0.9, 0.4]}
 CG = {"A": 10.0, "B": 14.0, "C": 12.0}; GMAX = {"A": 20.0, "B": 6.0, "C": 5.0}; PIMP = {"A": 9.0, "B": 8.0, "C": 11.0}
 CONST = {"A": 2.0, "B": 1.0, "C": 0.5, "A|C": 1.5}   # objective constants (existing FOM; sunk annuity of the existing A-C line)
+KVL_BC = 1.0                                          # capacity of the existing B-C line of the KVL loop
+BUNKER_PIMP, BUNKER_EFF, BUNKER_MCAP = 25.0, 0.9, 1.2  # bunker player: extra-regional fuel import price; A -> bunker metering link efficiency, capacity
+BUNKER_D = [1.0, 2.0, 1.5, 1.0]
 
 
-def toy(fmax_ab=2.0, duplicate_ab=False, shared_import_cap=None):
+def toy(fmax_ab=2.0, duplicate_ab=False, shared_import_cap=None, kvl=False, bunker=None):
     """3 nodes, 4 weighted snapshots: renewables with potential, fixed-price imports, extendable line A-B, lossy one-way link B->C
-    (efficiency 0.95), existing fixed line A-C (capacity 1, sunk constant)."""
+    (efficiency 0.95), existing fixed line A-C (capacity 1, sunk constant). kvl: + existing line B-C (capacity KVL_BC) and the loop row
+    f_AB + f_BC - f_AC = 0 per snapshot (unit reactances; homogeneous, lines of three owners: the KVL coupling of the model). bunker: + a 4th
+    player BUNKER with no resource - only a demand bunker[t] at its own bus, supplied by a fixed-price extra-regional fuel import
+    (BUNKER_PIMP) and from node A's market through a metering link (efficiency BUNKER_EFF, owned by A)."""
     L = LP(); T = range(4); ix = {}
     for i in P3:
         ix["G", i] = L.var(f"G_{i}", CG[i])
@@ -86,10 +92,18 @@ def toy(fmax_ab=2.0, duplicate_ab=False, shared_import_cap=None):
     for t in T:
         ix["f", "AB", t] = L.var(f"f_AB_{t}", 0.0, -np.inf, np.inf); ix["p", "BC", t] = L.var(f"p_BC_{t}", 0.05 * W[t])
         ix["f", "AC", t] = L.var(f"f_AC_{t}", 0.0, -np.inf, np.inf)
+        if kvl:
+            ix["f", "BC", t] = L.var(f"f_BC_{t}", 0.0, -np.inf, np.inf)
+        if bunker is not None:
+            ix["ub", t] = L.var(f"ub_{t}", BUNKER_PIMP * W[t]); ix["m", t] = L.var(f"m_{t}", 0.0)
     for i in P3:
         for t in T:
             inflow = {"A": {ix["f", "AB", t]: -1.0, ix["f", "AC", t]: -1.0}, "B": {ix["f", "AB", t]: 1.0, ix["p", "BC", t]: -1.0},
                       "C": {ix["p", "BC", t]: 0.95, ix["f", "AC", t]: 1.0}}[i]
+            if kvl:
+                inflow[ix["f", "BC", t]] = {"A": 0.0, "B": -1.0, "C": 1.0}[i]
+            if bunker is not None and i == "A":
+                inflow[ix["m", t]] = -1.0
             L.row({ix["g", i, t]: 1.0, ix["u", i, t]: 1.0, ix["v", i, t]: 1.0, **inflow}, D[i][t], D[i][t], i, f"bal_{i}_{t}")
             L.row({ix["g", i, t]: 1.0, ix["G", i]: -AV[i][t]}, -np.inf, 0.0, i, f"avail_{i}_{t}")
         L.row({ix["G", i]: 1.0}, -np.inf, GMAX[i], i, f"Gmax_{i}")
@@ -97,6 +111,12 @@ def toy(fmax_ab=2.0, duplicate_ab=False, shared_import_cap=None):
         L.row({ix["f", "AB", t]: 1.0, ix["F", "AB"]: -1.0}, -np.inf, 0.0, "A|B"); L.row({ix["f", "AB", t]: -1.0, ix["F", "AB"]: -1.0}, -np.inf, 0.0, "A|B")
         L.row({ix["p", "BC", t]: 1.0, ix["F", "BC"]: -1.0}, -np.inf, 0.0, "B|C")
         L.row({ix["f", "AC", t]: 1.0}, -np.inf, 1.0, "A|C"); L.row({ix["f", "AC", t]: -1.0}, -np.inf, 1.0, "A|C")
+        if kvl:
+            L.row({ix["f", "BC", t]: 1.0}, -np.inf, KVL_BC, "B|C"); L.row({ix["f", "BC", t]: -1.0}, -np.inf, KVL_BC, "B|C")
+            L.row({ix["f", "AB", t]: 1.0, ix["f", "BC", t]: 1.0, ix["f", "AC", t]: -1.0}, 0.0, 0.0, M.SHARED, f"kvl_{t}")   # homogeneous: no right
+        if bunker is not None:
+            L.row({ix["ub", t]: 1.0, ix["m", t]: BUNKER_EFF}, bunker[t], bunker[t], M.BUNKER, f"bal_BUNKER_{t}")
+            L.row({ix["m", t]: 1.0}, -np.inf, BUNKER_MCAP, "A", f"mcap_{t}")   # the metering link is A's asset (its capacity is A's right)
     if duplicate_ab:   # the two half-rights as two identical rows, one per country (dual degeneracy made explicit)
         L.row({ix["F", "AB"]: 1.0}, -np.inf, fmax_ab, "A", "Fmax_AB_halfA"); L.row({ix["F", "AB"]: 1.0}, -np.inf, fmax_ab, "B", "Fmax_AB_halfB")
     else:
@@ -138,8 +158,59 @@ def market_assets(L, ix, sol):
     rows.append(dict(asset="link_BC", owner="B|C", cost=2.0 * x[ix["F", "BC"]] + sum(0.05 * W[t] * x[ix["p", "BC", t]] for t in range(4)),
                      value=sum((0.95 * bal("C", t) - bal("B", t)) * x[ix["p", "BC", t]] for t in range(4))))
     rows.append(dict(asset="line_AC", owner="A|C", cost=0.0, value=sum((bal("C", t) - bal("A", t)) * x[ix["f", "AC", t]] for t in range(4))))
+    if ("f", "BC", 0) in ix:
+        rows.append(dict(asset="line_BC", owner="B|C", cost=0.0, value=sum((bal("C", t) - bal("B", t)) * x[ix["f", "BC", t]] for t in range(4))))
+    if ("ub", 0) in ix:
+        bb = lambda t: pi[rid[f"bal_BUNKER_{t}"]]   # noqa: E731
+        rows.append(dict(asset="bunker_import", owner=M.BUNKER, cost=sum(BUNKER_PIMP * W[t] * x[ix["ub", t]] for t in range(4)), value=sum(bb(t) * x[ix["ub", t]] for t in range(4))))
+        rows.append(dict(asset="bunker_meter", owner="A", cost=0.0, value=sum((BUNKER_EFF * bb(t) - bal("A", t)) * x[ix["m", t]] for t in range(4))))
+        rows.append(dict(asset="bunker_load", owner=M.BUNKER, cost=0.0, value=-sum(bb(t) * BUNKER_D[t] for t in range(4))))
     rows += [dict(asset=f"const_{k}", owner=k, cost=v, value=0.0) for k, v in CONST.items()]
     return pd.DataFrame(rows)
+
+
+def kvl_coalition_costs(L, alpha, physical):
+    """coalition costs of the KVL toy. Matrix game (Owen): the same LP with b(S) - the loop row stays and a line outside S keeps zero
+    capacity, so the loop forces zero flow on the remaining lines of the loop. Physical game (the leave-one-out variants): a line outside S is
+    removed, the loop is broken and its KVL row disappears (the remaining lines are radial)."""
+    kr = [k for k, r in enumerate(L.rows) if r[4].startswith("kvl_")]
+    out = {}
+    for S in M.coalitions(P3):
+        _, loS, hiS, _ = L.arrays(S)
+        if physical and not all(all(p in S for p in pr.split("|")) for pr in ("A|B", "B|C", "A|C")):
+            loS = loS.copy(); hiS = hiS.copy(); loS[kr] = -np.inf; hiS[kr] = np.inf
+        out[S] = L.solve(lo_override=loS, hi_override=hiS)["obj"] + sum(s * v for k, v in CONST.items() for p, s in M.shares(k, alpha).items() if p in S)
+    return out
+
+
+def test_toy_kvl_loop_dual_form_in_core_market_minus_dual_is_loop_transfer():
+    """Supplement 01 D1: a homogeneous loop row (KVL type) with lines of three owners. The dual form y'b is in the core of the matrix game
+    (Owen's theorem: coalitions = same LP with b(S)); the market-settlement form differs from it exactly by the loop transfer
+    sum_t pi_kvl,t x coefficient x flow of every line, folded to the owners (zero-sum). Caveat (documented, not a model change): in the PHYSICAL
+    game of the leave-one-out variants the loop of a coalition without one of its lines disappears; c_phys(S) <= c_matrix(S) and the dual form
+    can leave that core ({A, B} here) - the leave-one-out check against variant runs is therefore a real test, not implied by the theorem."""
+    L, ix = toy(kvl=True); sol = L.solve(); cN = sol["obj"] + sum(CONST.values())
+    phi, raw = owen(sol, 0.5)
+    assert abs(sum(phi[p] for p in P3) - cN) <= 1e-9 * cN and phi[M.SHARED] == 0.0           # the loop row has no right: y'b of it is 0
+    cm = kvl_coalition_costs(L, 0.5, physical=False)
+    assert abs(cm[frozenset(P3)] - cN) <= 1e-9 * cN
+    assert M.core_violations({p: phi[p] for p in P3}, cm, tol=1e-7) == []                     # matrix game: in the core (theorem)
+    st = M.settle(market_assets(L, ix, sol), 0.5, P3)
+    kr = [k for k, r in enumerate(L.rows) if r[4].startswith("kvl_")]
+    tr = {}
+    for t, k in enumerate(kr):
+        for name, own in (("AB", "A|B"), ("BC", "B|C"), ("AC", "A|C")):
+            tr[own] = tr.get(own, 0.0) + sol["pi"][k] * L.rows[k][0][ix["f", name, t]] * sol["x"][ix["f", name, t]]
+    trf = M.fold(tr, 0.5, P3)
+    assert max(abs(sol["pi"][k]) for k in kr) > 1e-3 and max(abs(trf[p]) for p in P3) > 1.0   # the loop binds: a real transfer
+    assert abs(sum(trf[p] for p in P3)) <= 1e-7 * cN                                          # zero-sum over the owners
+    for p in P3:
+        assert abs((st["allocation"][p] - phi[p]) - trf[p]) <= 1e-7 * cN                      # market - dual = loop transfer
+    assert M.core_violations({p: st["allocation"][p] for p in P3}, cm, tol=1e-7) == []        # the market form is in the matrix core here too
+    cp = kvl_coalition_costs(L, 0.5, physical=True)
+    assert all(cp[S] <= cm[S] + 1e-9 for S in cm) and abs(cp[frozenset(P3)] - cN) <= 1e-9 * cN
+    viol = M.core_violations({p: phi[p] for p in P3}, cp, tol=1e-7)
+    assert [v["coalition"] for v in viol] == [["A", "B"]]                                     # the caveat: dual form outside the physical core
 
 
 @pytest.mark.parametrize("alpha", [0.0, 0.5, 1.0])
@@ -281,6 +352,45 @@ def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
     assert d["decomposition"]["check_max_abs_dev_eur"] <= 1e3
     kv = d["kvl_loop_transfer_alpha_half"]
     assert abs(sum(v for k, v in kv.items() if k in M.PLAYERS)) <= 1e6                         # loop transfers are zero-sum over the owners
+    o = json.loads((tmp_path / "b" / "OWEN.json").read_text())                                 # supplement 01 D1: main value = dual form
+    assert o["main_form"] == "owen_dual_form" and o["allocation_eur"]["0.5"] == d["allocation_alpha_half"]
+    assert {"OWEN.csv", "OWEN.md"} <= {p.name for p in (tmp_path / "b").iterdir()}
+    mm = o["market_minus_dual"]
+    for p in M.PLAYERS:                                                                      # difference = KVL + residual (+ the decomposition's check deviation)
+        assert abs(mm["total_eur"][p] - mm["kvl_loop_transfer_eur"].get(p, 0.0) - mm["residual_eur"][p] - mm["unexplained_eur"][p]) <= 1e-3
+    assert o["identity"]["relative_error"] == abs(o["identity"]["players_sum"] - o["identity"]["objective"]) / abs(o["identity"]["objective"])
+
+
+def _fake_alloc(d: Path, alloc: dict, obj: float, width: float = 0.0, owen: dict | None = None, owen_width: float = 0.0):
+    """synthetic run dir: ALLOCATION.json (market form) and optionally m12_owen/OWEN.json (dual form); no network."""
+    d.mkdir(parents=True, exist_ok=True)
+    full = {p: float(alloc.get(p, 0.0)) for p in list(M.PLAYERS) + [M.SHARED]}
+    iv = lambda a, w: {p: dict(min=a[p] - w, max=a[p] + w, width=2 * w) for p in M.PLAYERS}   # noqa: E731
+    le = {c: {"electricity": 10.0 + i, "industry electricity": 2.0} for i, c in enumerate(M.COUNTRIES)}
+    (d / "ALLOCATION.json").write_text(json.dumps(dict(computable=True, objective=obj, allocation_eur={"0": full, "0.5": full, "1": full}, interval_eur=iv(full, width),
+                                                        report_currency=dict(fx_per_eur2020=1.139954), load_energy_twh=le, solved_network="fake", solved_network_sha256="0")))
+    if owen is not None:
+        fo = {p: float(owen.get(p, 0.0)) for p in list(M.PLAYERS) + [M.SHARED]}
+        (d / "m12_owen").mkdir(exist_ok=True)
+        (d / "m12_owen" / "OWEN.json").write_text(json.dumps(dict(main_form="owen_dual_form", allocation_eur={"0": fo, "0.5": fo, "1": fo}, interval_eur=iv(fo, owen_width),
+                                                                  usable_for_allocation=True, identity=dict(passed=True))))
+    return d
+
+
+def test_benefit_main_value_is_dual_form(tmp_path):
+    """Supplement 01 D1: the batch benefit uses the Owen dual form of both runs as the main value; the market form is reported alongside;
+    without the dual form of one run the market form is the main value (flagged)."""
+    cI = {c: 10.0 for c in M.COUNTRIES} | {M.BUNKER: 5.0}; cD = {c: 12.0 for c in M.COUNTRIES} | {M.BUNKER: 4.0}
+    oI = dict(cI, VN=9.0, LA=11.0)                                                           # dual form: a KVL transfer of 1 between VN and LA
+    I = _fake_alloc(tmp_path / "i", cI, sum(cI.values()), 0.5, oI, 0.1); D = _fake_alloc(tmp_path / "d", cD, sum(cD.values()), 0.0, cD, 0.0)
+    r = M.benefit(I, D, tmp_path / "o", ROOT)
+    assert r["main_form"] == "owen_dual_form"
+    assert r["owen"]["benefit_eur"]["VN"] == 3.0 and r["owen"]["benefit_eur"]["LA"] == 1.0 and r["owen"]["benefit_eur"][M.BUNKER] == -1.0
+    assert r["market_form"]["benefit_eur"]["VN"] == 2.0 and r["market_form"]["market_minus_main_benefit_eur"]["VN"] == -1.0
+    assert abs(r["owen"]["benefit_interval_eur"]["VN"]["min"] - 2.9) <= 1e-12                # the dual form's interval, not the market form's
+    (I / "m12_owen" / "OWEN.json").unlink()
+    r2 = M.benefit(I, D, tmp_path / "o2", ROOT)
+    assert r2["main_form"].startswith("market_settlement_form") and r2["owen"]["benefit_eur"]["VN"] == 2.0
 
 
 def test_runner_hooks_after_c1_before_acceptance(tmp_path):

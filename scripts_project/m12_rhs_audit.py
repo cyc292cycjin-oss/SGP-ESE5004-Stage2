@@ -11,6 +11,11 @@ Optional dual form (Owen 1975: phi_i = y' b_i + constants_i): with the run's dua
 lp/ + solution/{Pi,RC} (rows and column bounds) - the products multiplier x active bound are summed by owner and compared with the
 market-settlement allocation of m12_allocation.py. Nodal-balance right-hand sides (loads) are split by the loads' owners.
 
+Supplement 01 D1 (item 136): the dual form is the MAIN value of the Owen allocation (OWEN.json / .csv / .md): alpha 0 / 0.5 / 1, the per-player
+interval, the length split; the market-settlement form (current ledger) side by side, the difference split into the KVL loop transfer and the
+residual (exported arrays: row / column complementarity and stationarity by owner; rows-only duals: KVL from the solved line flows, the rest
+is the residual). C1 (c) extended to the dual form: |sum of the 12 players - c(N)| / c(N) <= 1e-6, with every player's residual impact.
+
     PYTHONHASHSEED=0 python scripts_project/m12_rhs_audit.py audit --repo . --network <unsolved nc> --scenario integrated --out <dir>
         [--truncate N] [--duals <DUALS_BY_CONSTRAINT.nc> | --solve-dir <dir with lp/ and solution/>] [--allocation <ALLOCATION.json>] [--tag T]
     python scripts_project/m12_rhs_audit.py loo --full <dir>/RHS_BY_FAMILY_OWNER.csv --variant <dir>/RHS_BY_FAMILY_OWNER.csv --removed VN --out <dir>
@@ -33,9 +38,11 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from m12_allocation import BUNKER, COUNTRIES, PLAYERS, SHARED, entity_code, fold, sha   # noqa: E402
+from m12_allocation import ALPHA_GRID, BUNKER, COUNTRIES, PLAYERS, SHARED, alpha_interval, bn, entity_code, fold, sha   # noqa: E402
 
 SCRIPT = "scripts_project/m12_rhs_audit.py"
+DUAL_IDENTITY_TOL = 1e-6   # C1 (c) extended to the dual form (supplement 01 D1): |sum of the players' y'b - c(N)| / c(N), as B16
+OWEN_FILES = ("OWEN.json", "OWEN.csv", "OWEN.md")
 COMP_TYPES = ("Bus", "Line", "Link", "Generator", "Store", "StorageUnit", "Load", "Transformer")
 NODAL = ("Bus-nodal_balance", "Bus-meshed-nodal_balance")
 UNRESOLVED = "-"
@@ -457,15 +464,16 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
             for k, v in src.items():
                 tot[k] = tot.get(k, 0.0) + v
         ph = fold(tot)
-        from m12_allocation import ALPHA_GRID, alpha_interval
         pairs_ = {k: v for k, v in tot.items() if "|" in k}
         dual = dict(source=str(solve_dir or duals), rows_by_owner=dual_terms, columns_by_owner=rc_terms, columns=col_info, constants=const, missing_duals=missing_duals,
                     raw_by_owner=tot, allocation_alpha_half=ph, total=float(sum(tot.values())),
                     allocation_by_alpha={f"{al:g}": fold(tot, al) for al in ALPHA_GRID}, pair_values=pairs_,
                     interval=alpha_interval({k: v for k, v in tot.items() if "|" not in k}, pairs_),
                     note="Owen dual form: sum of multiplier x active bound by owner (+ column bounds, + objective constants by owner); pairs folded with alpha 0.5")
-        if allocation is not None:
-            A = json.loads(Path(allocation).read_text())
+        A = json.loads(Path(allocation).read_text()) if allocation is not None else None
+        if A is not None and not A.get("computable", True):
+            A = None
+        if A is not None:
             mk = A["allocation_eur"]["0.5"]; raw_m = A["raw_by_owner_eur"]
             dual.update(market_form_allocation_alpha_half=mk, market_minus_dual_eur={p: float(mk[p] - ph.get(p, 0.0)) for p in list(PLAYERS) + [SHARED]},
                         market_minus_dual_pairs_eur={k: float(v - tot.get(k, 0.0)) for k, v in raw_m.items() if "|" in k},
@@ -478,16 +486,119 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
                 pr = dual["decomposition"]["predicted_market_minus_dual_alpha_half"]
                 dual["decomposition"]["check_max_abs_dev_eur"] = float(max(abs(dual["market_minus_dual_eur"][p] - pr.get(p, 0.0)) for p in PLAYERS))
         res["dual_form"] = dual
+        rec = json.loads((Path(solve_dir) / "SOLVE_RECEIPT.json").read_text()) if solve_dir is not None and (Path(solve_dir) / "SOLVE_RECEIPT.json").exists() else {}
+        obj = A["objective"] if A is not None else rec.get("objective")
+        res["owen"] = owen_summary(res, A, solve_dir, None if obj is None else float(obj))
     res["seconds"] = time.time() - t0
     res["peak_rss_gib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2
     (out / "RHS_AUDIT.json").write_text(json.dumps(res, indent=1, default=str))
+    if "owen" in res:
+        write_owen(res, out)
     if register_dir is not None:   # run pipeline: register the outputs in the run's EXPORTS.json (paths relative to the run dir)
         p = Path(register_dir) / "EXPORTS.json"; ex = json.loads(p.read_text()) if p.exists() else {}
-        for f in ("RHS_AUDIT.json", "RHS_FAMILIES.csv", "RHS_BY_FAMILY_OWNER.csv", "RHS_FAMILY_SUMMARY.csv"):
+        for f in ("RHS_AUDIT.json", "RHS_FAMILIES.csv", "RHS_BY_FAMILY_OWNER.csv", "RHS_FAMILY_SUMMARY.csv") + OWEN_FILES:
             q = out / f
+            if not q.exists():
+                continue
             ex[str(q.relative_to(register_dir))] = dict(bytes=q.stat().st_size, sha256=sha(q), source="m12_rhs_audit.py (M12 C2 / Owen dual form, item 133)")
         p.write_text(json.dumps(ex, indent=1))
     return res
+
+
+# ----------------------------------------------------------------------------------------------------------------------------- Owen outputs (main value)
+def reference_of(solve_dir: Path | None) -> tuple[dict, str]:
+    """reference of the C1 (b)(c) per-entity thresholds: the run's PRECISION.json (after any regrade), else the L23 default."""
+    from s4o_c1_precision import L23_REFERENCE
+    p = Path(solve_dir) / "PRECISION.json" if solve_dir is not None else None
+    ref = (json.loads(p.read_text()).get("reference") or {}) if p is not None and p.exists() else {}
+    if ref.get("differences_bn"):
+        return ref, f"PRECISION.json of {solve_dir}: {str(ref.get('source', ''))[:120]}"
+    return L23_REFERENCE, "L23 default reference (s4o_c1_precision.L23_REFERENCE)"
+
+
+def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: float | None) -> dict:
+    """Owen allocation with the dual form y'b as the main value (supplement 01 D1). The market-settlement form (ALLOCATION.json, the current
+    ledger) is reported next to it; market - dual = KVL loop transfer (zero-sum over the line owners) + residual (KKT residuals of the returned
+    solution). C1 (c) extended to the dual form: identity sum_players phi = c(N) within 1e-6 (relative), and every player's residual impact
+    against its C1 (b) per-country threshold (information)."""
+    from m12_allocation import _fx, precision_context
+    from s4o_c1_precision import threshold_bn
+    d = res["dual_form"]; by_a = d["allocation_by_alpha"]; main = by_a["0.5"]
+    ps = float(sum(main[p] for p in PLAYERS)); sh = float(main.get(SHARED, 0.0))
+    ident = dict(objective=objective, players_sum=ps, shared=sh, tolerance=DUAL_IDENTITY_TOL,
+                 note="C1 (c) extended to the dual form: sum of the 11 countries + BUNKER (y'b + column bounds + objective constants) = objective")
+    if objective is not None:
+        rel = abs(ps - objective) / max(1.0, abs(objective))
+        ident.update(difference=ps - objective, relative_error=rel, relative_error_incl_shared=abs(ps + sh - objective) / max(1.0, abs(objective)), passed=bool(rel <= DUAL_IDENTITY_TOL))
+    else:
+        ident.update(passed=None, note="objective unknown (no ALLOCATION.json / SOLVE_RECEIPT.json): identity not checked")
+    ref, ref_src = reference_of(solve_dir)
+    thr = {p: threshold_bn(p if p in COUNTRIES else "ASEAN", ref) * 1e9 for p in PLAYERS}   # bunker: the ASEAN entity of C1 (bunker account)
+    fx = (A or {}).get("report_currency") or _fx()
+    out = dict(main_form="owen_dual_form", decision="supplement 01 D1 (item 136): main value = Owen dual form y'b; market-settlement form reported alongside",
+               tag=res.get("tag"), network=res.get("network"), network_sha256=res.get("network_sha256"), duals=d.get("source"), alpha_main=0.5,
+               alpha_definition="alpha = share of the FIRST country (alphabetical) of a cross-border pair (row values y'b of the pair rows and the pair's objective constants)",
+               allocation_eur=by_a, interval_eur=d["interval"], pair_values_eur=d["pair_values"], fx_per_eur2020=fx["fx_per_eur2020"],
+               allocation_usd2020_alpha_half={p: main.get(p, 0.0) * fx["fx_per_eur2020"] for p in list(PLAYERS) + [SHARED]}, identity=ident)
+    prec = precision_context(solve_dir) if solve_dir is not None else dict(available=False)
+    resid, kvl, parts, diff, unexpl, method = None, None, {}, None, None, "no market-settlement allocation given"
+    if A is not None:
+        mk = A["allocation_eur"]["0.5"]; ks = list(PLAYERS) + [SHARED]
+        diff = {p: float(mk.get(p, 0.0) - main.get(p, 0.0)) for p in ks}
+        dec = d.get("decomposition")
+        if dec:
+            kvl = dec["kvl_alpha_half"]
+            parts = dict(row_complementarity_other_families=dec["rows_other_families_alpha_half"], column_complementarity=dec["column_complementarity_alpha_half"],
+                         stationarity=dec["stationarity_alpha_half"])
+            resid = {p: float(sum(v.get(p, 0.0) for v in parts.values())) for p in ks}
+            unexpl = {p: diff[p] - kvl.get(p, 0.0) - resid[p] for p in ks}
+            method = "exported arrays: exact decomposition by owner (KVL rows; other rows' complementarity; column complementarity; stationarity residual)"
+        elif d.get("kvl_loop_transfer_alpha_half"):
+            kvl = d["kvl_loop_transfer_alpha_half"]; resid = {p: diff[p] - kvl.get(p, 0.0) for p in ks}
+            method = "rows-only duals: KVL transfer from the solved line flows (p0; the loss proxy makes p0 differ slightly from the LP variable), residual = difference - KVL"
+        else:
+            resid = dict(diff); method = "rows-only duals without solved flows: KVL not separated (the residual includes the loop transfer)"
+        out["market_form"] = dict(allocation_alpha_half_eur=mk, interval_eur=A.get("interval_eur"), identity=A.get("identity"),
+                                  note="market-settlement form = current ledger (s4d_ledger): asset costs + net purchases at the nodal duals - net rent share")
+        out["market_minus_dual"] = dict(total_eur=diff, kvl_loop_transfer_eur=kvl, residual_eur=resid, residual_parts_eur=parts, unexplained_eur=unexpl, method=method)
+    out["c1_c_dual"] = dict(identity_passed=ident["passed"], c1_c_passed=prec.get("c_passed"), precision=prec, threshold_source=ref_src,
+                            threshold_eur=thr, residual_impact_eur=resid,
+                            within_threshold=({p: bool(abs(resid[p]) <= thr[p]) for p in PLAYERS} if resid is not None else None),
+                            note="residual impact = market form - dual form - KVL transfer of the player (KKT residuals of the returned solution); "
+                                 "compared with the C1 (b) per-country threshold as information; the deciding check is the identity")
+    out["usable_for_allocation"] = bool(ident["passed"] and (prec.get("c_passed") is not False))
+    return out
+
+
+def write_owen(res: dict, out: Path) -> None:
+    """OWEN.json / .csv / .md (main value of the Owen allocation)."""
+    o = res["owen"]; al = o["allocation_eur"]; it = o["interval_eur"]; md = o.get("market_minus_dual") or {}; mk = (o.get("market_form") or {}).get("allocation_alpha_half_eur") or {}
+    c1 = o["c1_c_dual"]
+    (out / "OWEN.json").write_text(json.dumps(dict(script=SCRIPT, **o), indent=1, default=str))
+    rows = []
+    for p in list(PLAYERS) + [SHARED]:
+        r = dict(player=p, **{f"owen_dual_alpha_{k}_eur": v.get(p, 0.0) for k, v in al.items()})
+        r.update(owen_dual_alpha_0_5_usd2020=o["allocation_usd2020_alpha_half"].get(p), interval_min_eur=(it.get(p) or {}).get("min"), interval_max_eur=(it.get(p) or {}).get("max"),
+                 market_form_alpha_0_5_eur=mk.get(p), market_minus_dual_eur=(md.get("total_eur") or {}).get(p), kvl_transfer_eur=(md.get("kvl_loop_transfer_eur") or {}).get(p),
+                 residual_eur=(md.get("residual_eur") or {}).get(p), c1_threshold_eur=c1["threshold_eur"].get(p))
+        rows.append(r)
+    pd.DataFrame(rows).set_index("player").to_csv(out / "OWEN.csv")
+    idt = o["identity"]
+    L = ["# OWEN（M12：Owen 分摊主值 = 对偶形式 y′b；补充 01 D1；只读，未求解）", "",
+         f"- 运行：{o.get('tag')}；网络 `{o.get('network')}`（SHA256 `{str(o.get('network_sha256'))[:12]}…`）；对偶 `{o.get('duals')}`。",
+         f"- 恒等式（C1 (c) 对偶形式扩展）：11 国 + 燃料舱 = {bn(idt['players_sum'])} bn，目标值 {bn(idt.get('objective'))} bn，"
+         f"相对误差 {idt.get('relative_error', float('nan')):.2e}（≤ 1e-6：**{idt['passed']}**）；共享 {bn(idt['shared'])} bn。",
+         f"- C1 (c)（运行本身）：{c1['c1_c_passed']}；分摊可用：**{o['usable_for_allocation']}**。阈值来源：{c1['threshold_source']}。",
+         f"- 差额方法：{md.get('method', '—')}。", "",
+         "| 参与者 | **对偶形式 α 0.5** | α 0 | α 1 | 区间下限 | 区间上限 | USD2020 | 市场形式 α 0.5 | 市场 − 对偶 | 其中 KVL 转移 | 残差影响 | C1 (b) 阈值 |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for r in rows:
+        p = r["player"]
+        L.append(f"| {p} | **{bn(r['owen_dual_alpha_0.5_eur'])}** | {bn(r['owen_dual_alpha_0_eur'])} | {bn(r['owen_dual_alpha_1_eur'])} | {bn(r['interval_min_eur'])} | "
+                 f"{bn(r['interval_max_eur'])} | {bn(r['owen_dual_alpha_0_5_usd2020'])} | {bn(r['market_form_alpha_0_5_eur'])} | {bn(r['market_minus_dual_eur'])} | "
+                 f"{bn(r['kvl_transfer_eur'])} | {bn(r['residual_eur'])} | {bn(r['c1_threshold_eur'])} |")
+    L += ["", "区间：每条跨境线（国家对行的 y′b 与该对的目标常数）的 α 各自在 [0, 1] 内取值时该参与者分摊的范围；各国端点不能同时达到。"]
+    (out / "OWEN.md").write_text("\n".join(L) + "\n")
 
 
 def loo_compare(full: Path, variant: Path, removed: list, out: Path) -> dict:
