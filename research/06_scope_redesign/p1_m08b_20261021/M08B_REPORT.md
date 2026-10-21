@@ -9,7 +9,7 @@
 5. **B3：** 注册表 2,121 → 2,184 行（`53b051c1…` → `97b27c87…`；拟增 16 行全部写入，另 14 行规则 / 数据行，16 行改为历史，7 行粗钢改值）；`tests/research` 550 passed / 64 skipped / 0 failed（5 个玩具求解排除）。
 6. **第 3 节（VERIFIED）：** 四个网络在干净提交 `ef01ceac` 上重建；B5、B8、B11 路线、B13、B16、G2.1、G2.2 与全部 M08b 静态检查通过；6 个变体两遍生成逐字节相同。
 7. **第 4 节冒烟（用户 10-21 授权；VERIFIED）：** 2920×3h 前 56 时段、档案 A、TimeLimit 1,750 s，一体化与不互联各 1 次：两次均 optimal（357 / 320 s 求解，峰值 4.5 / 4.1 GiB），GATES_V6 均 **ACCEPTED_LAYER2**，C1 (a)(b)(c) 全过，B6 = +10.05 bn EUR（冒烟口径，无科学含义），账本恒等式、无固定甲烷溢出、LNG 不受上限、报告与导出完整——**通过**。
-8. **补充 01（第 137 项，见 §8）：** 中温档拆为 A / B、居民 / 商业 / 农业燃料行锚定（**9 格取 0，醒目见 §8.3**）、`gates_v6.py` SHA 选择修正、各项登记；干净提交 `ec80668f` 上重建四网络，静态检查与变体两遍全过；**再次冒烟未执行，待用户授权**。
+8. **补充 01（第 137 项，见 §8）：** 中温档拆为 A / B、居民 / 商业 / 农业燃料行锚定（**9 格取 0，醒目见 §8.3**）、`gates_v6.py` SHA 选择修正、各项登记；干净提交 `ec80668f` 上重建四网络，静态检查与变体两遍全过；再次冒烟（用户 10-21 授权）两情景均 optimal、GATES_V6 均 ACCEPTED_LAYER2（SHA 由修正后的规则自动取 2920×3h 网络），B6 = +9.90 bn EUR（冒烟口径）——**通过**（§8.6）。
 
 > **请审阅端注意（醒目）：**
 > - **A. 氢供热无法表示。** technology-data v0.15.0 没有任何氢锅炉 / 氢直燃行；按第 133 项"只允许有条目的技术"，三档都不建氢供热。指令写">400 °C 只允许氢、甲烷、生物质"，两条规则在氢上冲突；现按第 133 项实现，待决定（选项：保持；或另立氢直燃行并登记来源）。
@@ -238,9 +238,9 @@ B11 完整性：缺 287 项（地热 / 径流水电要求每节点都有）；�
 
 **未入库（主检出 `results_project/m08b/`）：** `builds/`（四个网络 186.4 MB）、`variants/`（12 个变体网络）、`smoke/`（求解输出）、`trial1/`（试构建）。
 
-## 8. 补充 01（第 137 项）：审阅决定、中温档拆分、燃料行锚定、重建（再次冒烟待授权）
+## 8. 补充 01（第 137 项）：审阅决定、中温档拆分、燃料行锚定、重建与再次冒烟
 
-**范围：** `M08B_SUPPLEMENT_01.md` v1，SHA256 `7a4e532e2f79fc00581d56057b83c8c1f5ed2eb8faa44d8e8ebe63f65e08d538`，与 `M08B_SUPPLEMENT_01_SHA256.txt` 一致（2026-10-21 核对）。同一分支 `codex/m08b-demand-20261021` 与 worktree；未连云；未调用 Gurobi（单元测试照旧排除 5 个玩具求解）。提交：`c2df3c75`（D 项）→ `ec80668f`（第 1–3 节，数据链与注册表一并重生成，故合为一个提交）→ 第 4 节证据与本节（收尾提交）。
+**范围：** `M08B_SUPPLEMENT_01.md` v1，SHA256 `7a4e532e2f79fc00581d56057b83c8c1f5ed2eb8faa44d8e8ebe63f65e08d538`，与 `M08B_SUPPLEMENT_01_SHA256.txt` 一致（2026-10-21 核对）。同一分支 `codex/m08b-demand-20261021` 与 worktree；未连云。第 1–3 节与第 4.1 / 4.2 / 4.4 节未调用 Gurobi（单元测试照旧排除 5 个玩具求解）；第 4.3 节再次冒烟经用户 10-21 授权后执行（§8.6）。提交：`c2df3c75`（D 项）→ `ec80668f`（第 1–3 节，数据链与注册表一并重生成，故合为一个提交）→ `572d76fa` / `accc4474` / `6c960ca7`（第 4 节证据、本节、审阅 ZIP）→ 冒烟结果提交。
 
 **醒目：**
 - **燃料行锚定后 9 格取 0**（8 格为负值，1 格无 2019 燃料行）：BN 居民 / 商业，MY 居民 / 商业，SG 居民 / 商业 / 农业，TH 商业为负；TL 商业为正但无载体结构。负值合计 −63.30 TWh，即这 8 格的部门总量取电力锚后，国家 TFEC 比 ATS TFEC 锚高 63.30 TWh（§8.3）。按补充 01 §3.3 取 0 并登记，未用其他来源填补；是否接受交审阅端判断。
@@ -369,13 +369,35 @@ B11 完整性：缺 287 项（地热 / 径流水电要求每节点都有）；�
 
 位置：主检出 `results_project/m08b/builds_s01/<scenario>/`（不入库）；合计 189.9 MB；构建回执 `evidence/M08B_S01_{integrated,disconnected}_BUILD_RECEIPT.json`。
 
-### 8.6 再次冒烟（补充 01 §4.3）——**未执行，待用户授权**
+### 8.6 再次冒烟（补充 01 §4.3）——**通过**
 
-拟执行（与 §5 相同，只换网络与 SHA 选择）：`builds_s01` 的 2920×3h 网络截取前 56 时段，档案 A（`formal_barrier`），一体化与不互联各 1 次，TimeLimit 1,750 s（墙钟 1,800 s 止损），串行；之后 `l23_violation_analysis.py`、`s4o_c1_precision.py run`、本批参照与重评、`gates_v6.py accept --build-receipt`（用修正后的 SHA 选择，不再显式传 `--registered-sha256`）。通过标准同 §5：GATES_V6 = ACCEPTED_LAYER2、B6 > 0、账本恒等式、无固定甲烷溢出、LNG 不受上限、报告与导出完整；不通过只记录诊断，不重试、不改参数。执行前需确认：本机无其他 Gurobi 进程、距上次 Gurobi 会话 ≥ 5 分钟（上次为本日首轮冒烟）、云端无运行（须由用户确认）。
+**授权与前提：** 用户 2026-10-21 授权（"builds_s01 的 2920×3h 前 56 时段，档案 A，一体化与不互联各 1 次，TimeLimit 1,750 s"，并确认云端现在没有运行）。开始前（20:46 SGT）本机无 Gurobi / 求解进程，上次本机 Gurobi 会话（首轮冒烟）19:40 结束，间隔约 66 分钟。许可只经 `GRB_LICENSE_FILE` 供求解进程使用（未读取、未复制）；违反量分析、C1 与 GATES_V6 在无许可变量的环境中运行。
+
+**做法（`scripts/m08b_s01_smoke.sh`；在 `6c960ca7` 上运行，工作树干净，代码 / 配置 / 数据与构建提交 `ec80668f` 相同）：** 与 §5 相同——`s2_solve.py --truncate 56 --label SMOKE_TEST_ONLY --solver gurobi --solver-profile formal_barrier --scaling on --time-limit 1750`，独立进程组、墙钟 1,800 s 止损，串行，两次求解间隔 334 s；之后 `l23_violation_analysis.py`、`s4o_c1_precision.py run`、本批参照与重评。唯一不同：`gates_v6.py accept --build-receipt <builds_s01 构建回执>`，**不再显式传 `--registered-sha256`**——修正后的规则对截断 56 时段的运行自动取 2920×3h 网络 SHA（两情景均核对与构建回执中 2920×3h 网络 SHA 相等）。未重试、未改参数。
+
+| 项 | integrated | disconnected |
+|---|---|---|
+| 终止状态 | optimal | optimal |
+| 求解时间（Gurobi）/ 全程 | 333 s / 391 s | 333 s / 381 s |
+| 峰值内存 | 4.74 GiB | 4.38 GiB |
+| LP 规模（列 / 行） | 700,908 / 1,553,068 | 677,258 / 1,499,494 |
+| 目标值（EUR2020，56 时段年化权重） | 307.847 bn | 317.746 bn |
+| C1 分级 | layer1_plus_nodal_price_settlement，(a)(b)(c) 全过；(a) 相对 1.2e-11 | 同左；(a) 相对 1.6e-11 |
+| GATES_V6 标签 | **ACCEPTED_LAYER2** | **ACCEPTED_LAYER2** |
+| G2.1 / G2.2 / G2.3 | 通过（登记 SHA `bca20fc0…` 由 `--build-receipt` 取得，与输入网络相等；回读精确）/ 通过 / 通过 | 通过（`b401a687…`）/ 通过 / 通过 |
+| 诊断 D1–D13、D15、D16 | 全部在预算内（D2 对偶符号 7.8e-7，预算 1e-5） | 全部在预算内（D2 1.0e-6） |
+| 账本恒等式（V5_GATES B16_LEDGER） | 通过 | 通过 |
+| 固定甲烷溢出负荷 | 0 | 0 |
+| LNG 码头（16 台，p_nom_max = inf） | p_nom_opt 合计 133.8 GW，有限 | 175.6 GW，有限 |
+| 报告与导出文件 | 完整 | 完整 |
+
+**B6** = 317.746 − 307.847 = **+9.90 bn EUR（相对 3.22 %）> 0**。冒烟只有 56 个 3 小时时段按年化权重放大，数值没有科学含义；与首轮冒烟（327.0 / 337.1 bn，B6 +10.05 bn）相比，两情景目标值各降约 19 bn，与本补充减少居民 / 商业燃料需求方向一致（INFERENCE）。LP 比首轮多 16,363 列 / 35,067 行（两情景相同），主要来自每节点新增的中温 B 母线与 4 条链路，燃料行取 0 的格少了部分计量链路（INFERENCE）。
+
+**判定（`scripts_project/m08b_smoke_eval.py` → `evidence/smoke_s01/M08B_SMOKE_RESULT.json`）：** 第 4 节六项通过标准两次运行全部满足——**通过**。轻量证据在 `evidence/smoke_s01/`（回执、门槛、V6、C1、账本、导出清单；不含求解日志与 stdout / stderr），复制件许可特征串扫描无命中。完整求解输出在主检出 `results_project/m08b/smoke_s01/`（不入库）。
 
 ### 8.7 仍未解决的项（补充 01 之后）
 
-1. **再次冒烟**待授权（§8.6）。
+1. 再次冒烟已通过（§8.6）；正式运行仍需另行授权。
 2. **燃料锚定 9 格取 0**（§8.3）：国家 TFEC 比 ATS 锚多 63.30 TWh；是否接受、或改用其他口径（例如负值格按比例从电力锚中扣减），需审阅端决定。
 3. **200 °C 线性插值**可能低估中温 A（INFERENCE，§8.2）；0.1 / 0.3 敏感性需重生成表，未构建。
 4. **中温 B 未含固体生物质蒸汽锅炉**（补充 01 列表未列；DEA 覆盖到 300 °C）。
@@ -383,4 +405,4 @@ B11 完整性：缺 287 项（地热 / 径流水电要求每节点都有）；�
 6. 云端部署包留给 M09 / M10（S4O 包清单仍写 0.98，须按本分支头重新打包）。
 7. `s3_1_gas_data.py` 中燃气管道成本仍是旧层字面值；注册表经 `m08b_corrections.csv` 整行替换为现行值，重跑 s3_1 不影响装配结果（替换前先核对旧值）。
 
-**补充 01 文件：** 代码 `scripts_project/v5/gates_v6.py`、`m08b_heat_bands.py`、`s3_0_industry.py`、`s2_layers.py`、`m08b_demand.py`、`m08b_data.py`、`m08b_static.py`、`v5/v5_gates.py`、`configs/research/baseline.yaml`；测试 `test_m08b_s01.py`（新）、`test_m08b_heat.py`、`test_m08b_demand.py`；证据 `evidence/M08B_S01_*`、`BUILD_INPUT_CHANGES_M08B_S01.*`；脚本 `scripts/m08b_s01_*`、`m08b_tests.sh`、`m08b_variant_receipts.py`（加 `--variants / --tag`）；未入库 `results_project/m08b/{builds_s01,variants_s01,trial_s01}/`。审阅 ZIP `work/p1_m08b_20261021/M08B_S01_REVIEW.zip`（交付目录 + 补充 01 数据表与注册表片段 + 相对首轮头 58b8efdc 与 M08a 头 820c2cae 的代码差异；逐成员 SHA256 + CRC 清单 `M08B_S01_REVIEW_MANIFEST.csv`，ZIP 的 SHA256 见 `M08B_S01_REVIEW_ZIP_SHA256.txt`）；首轮 `M08B_REVIEW.zip` 不变。PR：[cyc292cycjin-oss/SGP-ESE5004-Stage2#47](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/47)（同一 draft PR，说明已更新）。
+**补充 01 文件：** 代码 `scripts_project/v5/gates_v6.py`、`m08b_heat_bands.py`、`s3_0_industry.py`、`s2_layers.py`、`m08b_demand.py`、`m08b_data.py`、`m08b_static.py`、`v5/v5_gates.py`、`configs/research/baseline.yaml`；测试 `test_m08b_s01.py`（新）、`test_m08b_heat.py`、`test_m08b_demand.py`；证据 `evidence/M08B_S01_*`、`BUILD_INPUT_CHANGES_M08B_S01.*`、`evidence/smoke_s01/`；脚本 `scripts/m08b_s01_*`、`m08b_tests.sh`、`m08b_variant_receipts.py`（加 `--variants / --tag`）；未入库 `results_project/m08b/{builds_s01,variants_s01,trial_s01,smoke_s01}/`。审阅 ZIP `work/p1_m08b_20261021/M08B_S01_REVIEW.zip`（交付目录 + 补充 01 数据表与注册表片段 + 相对首轮头 58b8efdc 与 M08a 头 820c2cae 的代码差异；逐成员 SHA256 + CRC 清单 `M08B_S01_REVIEW_MANIFEST.csv`，ZIP 的 SHA256 见 `M08B_S01_REVIEW_ZIP_SHA256.txt`）；首轮 `M08B_REVIEW.zip` 不变。PR：[cyc292cycjin-oss/SGP-ESE5004-Stage2#47](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/47)（同一 draft PR，说明已更新）。
