@@ -23,8 +23,9 @@
 | S01-2 | 中温档拆分 A（150–200 °C）/ B（200–400 °C）：JRC 分布无 200 °C 断点 → 150–400 区间按温度线性插值（A 份额 0.2，C 级，敏感性 ±50 % = 0.1–0.3）；中温 B 只允许燃气蒸汽锅炉 + 燃气直燃 + 固体燃料直燃（+CC），无电加热；映射表、注册表、测试、静态检查 | 完成（与 S01-3、S01-1 同一提交：数据链与注册表一并重生成） | 见下行 |
 | S01-3 | 居民 / 商业 / 农业燃料行锚到 ATS（部门 TFEC 锚 − 部门电力锚，按 2019 载体结构缩放）；负值取 0 并登记（9 格：8 负值 + TL 商业无 2019 燃料行） | 完成 | 同上 |
 | S01-1 | 第 1 节其余：A 氢供热局限登记、5 交通载体效率、6 其他桶柴油机、7 TL 绝对量（报告）、8 交通电力只计一次（保留）、9 B11 完整性停用、11 派生货币文档行重算（34 行）、12 温度分布 DATA_PENDING 补登、C 构建器名称；注册表 2,184 → 2,194 行（`4c59adb7…`），DATA_PENDING 46 → 47 | 完成 | 同上 |
-| S01-4 | 全量测试；干净提交上重建四网络（新目录 `results_project/m08b/builds_s01`）；全部静态检查、变体两遍、对比表（加居民 / 商业 / 农业燃料与中温 A / B 列）、网络 SHA | 待做 | |
-| S01-5 | 报告"补充 01"节、台账 M08b 条目注明、PR 更新；停下请用户授权再次冒烟 | 待做 | |
+| S01-4 | 全量测试（557 passed / 64 skipped / 0 failed）；干净提交 ec80668f 上重建四网络到 `results_project/m08b/builds_s01`（integrated bca20fc0… / 75704334…，disconnected b401a687… / 888a009b…，各约 73 s、0.78 GB）；全部静态检查通过（B11 完整性已停用）、6 个变体两遍逐字节相同、对比表 `BUILD_INPUT_CHANGES_M08B_S01.*`、网络 SHA `M08B_S01_NETWORK_FILES.csv` | 完成 | 网络在 ec80668f 上构建；证据随收尾提交 |
+| S01-5 | 报告 §8、台账 M08b 条目"补充 01"一条、审阅 ZIP `M08B_S01_REVIEW.zip`、PR 更新；停下请用户授权再次冒烟 | 完成（冒烟待授权） | 收尾提交 |
+| S01-6 | 再次冒烟（§4.3）：`builds_s01` 2920×3h 前 56 时段，档案 A，两情景各 1 次，TimeLimit 1,750 s，`gates_v6.py accept --build-receipt`（修正后的 SHA 选择） | **待用户授权** | |
 
 **探查要点（2026-10-21）：**
 - JRC-IDEES-2021 工作簿只有 `*_fec / *_ued / *_emi` 表，没有温度分布表；M08b 的"温度分布"即过程 → 温度档映射（蒸汽工艺 = 150–400 °C），没有 200 °C 断点 → 按补充 01 §2.1 线性插值。
@@ -55,7 +56,8 @@
 
 ## 接续点
 
-- 当前（2026-10-21 20:00）：第 1–5 节全部完成，按指令停止，等待审阅。冒烟脚本 `/home/jin/m08b_smoke.sh`（结果在主检出 `results_project/m08b/smoke/`），判定 `scripts_project/m08b_smoke_eval.py`，证据收集 `/home/jin/m08b_smoke_collect.sh`，审阅 ZIP `/home/jin/m08b_zip.py`。
+- **补充 01（2026-10-21 20:20）：** 第 1–3 节、第 4.1 / 4.2 / 4.4 节完成并提交；**停在第 4.3 节，等用户授权再次冒烟**。授权后：参照 `scripts/m08b_smoke.sh` 写 `m08b_s01_smoke.sh`（网络改为 `results_project/m08b/builds_s01`，输出 `results_project/m08b/smoke_s01`，`gates_v6.py accept --build-receipt <builds_s01/<s>/<s>_BUILD_RECEIPT.json>` 不再传 `--registered-sha256`），先查本机无 Gurobi 进程、距上次 Gurobi ≥ 5 分钟、用户确认云端无运行；判定沿用 `m08b_smoke_eval.py`；结果追加到报告 §8.6。补充 01 的运行脚本：`/home/jin/m08b_s01_{variants,static,collect}.sh`、`m08b_s01_tables.py`、`m08b_s01_zip.py`；构建 `OUTDIR=builds_s01 bash /home/jin/m08b_build.sh`。
+- 首轮（2026-10-21 20:00）：第 1–5 节全部完成，按指令停止，等待审阅。冒烟脚本 `/home/jin/m08b_smoke.sh`（结果在主检出 `results_project/m08b/smoke/`），判定 `scripts_project/m08b_smoke_eval.py`，证据收集 `/home/jin/m08b_smoke_collect.sh`，审阅 ZIP `/home/jin/m08b_zip.py`。
 - 报告草稿素材：`evidence/M08B_TEMPERATURE_BAND_MAP.md`（映射表）、`evidence/BUILD_INPUT_CHANGES_M08B.csv`（对比）、`evidence/M08B_NETWORK_FILES.csv`、`evidence/M08B_STATIC_CHECKS.json`；与 S4R 偏差：基础负荷 966.9 vs 965.9（+0.11 %）、交通 1,700.4 vs 1,698.4（+0.12 %），原因 C.3 工业 2022 取 ATS 面板 186。
 - 工具脚本（WSL）：`/home/jin/m08b_data.sh`（数据链 + 既有文件逐字节核对）、`/home/jin/m08b_registry.sh`、`/home/jin/m08b_tests.sh`（`FULL=1` 全量；5 个玩具求解用例始终排除）、`/home/jin/m08b_build.sh`（`OUTDIR`、`TAGS`）、`/home/jin/m08b_commit.sh`（镜像 + 提交，消息 `/home/jin/m08b_msg.txt`，强制加入 `/home/jin/m08b_force.txt`）。
 - 已知坑：`wsl bash -lc "..."` 中 `$VAR` 为空，变量一律放脚本文件；`set -e` 下 `[ ] && cmd` 末尾失败会退出脚本。
