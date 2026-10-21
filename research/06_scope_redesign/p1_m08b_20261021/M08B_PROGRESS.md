@@ -10,8 +10,8 @@
 | B1/B2 数据 | `m08b_demand.py`（锚表、ats_anchor 需求表、产量表）、`m08b_heat_bands.py`（JRC OIS 温度分布）、`s3_0_industry.py`（aeo8_ats_anchor 模式 + useful_heat_bands 变体）、`s2b_feedstock.py`、`s2_0_process_emissions.py`（33 行 ats_anchor）；旧模式表逐字节不变 | 完成 | 9ca5d341 |
 | B1/B2 构建 + B3 | `s2_layers`（demand_anchor_settings / physical_output_settings / biomass_overflow、HEAT_BAND_TECH 三档、热档负荷、溢出转有用热、锚值逐国核对 1e-9）、`s2_network`、载体登记、`v5_gates` B11 / B12、`baseline.yaml`；`m08b_data.py`（新增 30、修正 23；拟增 16 行全部落实）；注册表 2,121 → 2,184 行（97b27c87…）；测试 `tests/research` 550 passed / 64 skipped / 0 failed（5 个玩具求解排除） | 完成 | ef01ceac（已推送 origin） |
 | 3 | 在 ef01ceac（dirty 0）上重建：integrated 2920×3h cf189f39…（60.5 MiB）/ 365×24h d9fab9aa…（29.4 MiB）；disconnected af9f1881…（59.9 MiB）/ 7234216e…（28.8 MiB）；各 70 s、0.78 GB。变体 6 个 × 2 遍网络逐字节相同（回执只差 output.path）。静态：B5、B8、B11 路线、B13、B16、G2.1、G2.2、日均网络与全部 M08b 检查通过；B11 完整性（S1 旧检查）失败，S4M-3 旧网络同样失败（287 项相同）。对比表 `BUILD_INPUT_CHANGES_M08B.*` | 完成 | 见 git log |
-| 4 | 本机冒烟（须用户授权） | 未授权 | |
-| 5 | 交付 | 未开始 | |
+| 4 | 本机冒烟（用户 10-21 授权；云端无运行经用户确认）：两情景 optimal（357 / 320 s，4.5 / 4.1 GiB），GATES_V6 ACCEPTED_LAYER2 ×2，C1 (a)(b)(c) 全过，B6 = +10.05 bn，账本恒等、无甲烷溢出、LNG 不受上限、导出完整 → 通过（`evidence/M08B_SMOKE_RESULT.json`、`evidence/smoke/`） | 完成 | 冒烟在 7381e91d 上运行 |
+| 5 | 交付：`M08B_REPORT.md`、台账 M08b 条目、draft PR、审阅 ZIP | 完成 | 见 git log / PR |
 
 ## 设计决定（代码探查后，2026-10-21；写入报告，交审阅）
 
@@ -36,7 +36,7 @@
 
 ## 接续点
 
-- 当前（2026-10-21 19:30）：第 1–3 节完成并提交；**按指令在第 4 节前停下，等待用户授权本机冒烟**（2920×3h 前 56 时段，一体化 / 不互联各 1 次，档案 A formal_barrier，TimeLimit 1,750 s）。授权后：写冒烟脚本（参照 `research/06_scope_redesign/p1_step4q_20261020/evidence/scripts/s4q_2_run.sh` 与 M08a `m08a_run_batch.sh`），核对前提（本机无 Gurobi 进程、距上次 ≥ 5 min、云端无运行），运行并按第 4 节标准判定；然后写 `M08B_REPORT.md`、台账 M08b 条目、draft PR（`--base codex/m08a-corrections-20261021`，叠在 #45 上）。
+- 当前（2026-10-21 20:00）：第 1–5 节全部完成，按指令停止，等待审阅。冒烟脚本 `/home/jin/m08b_smoke.sh`（结果在主检出 `results_project/m08b/smoke/`），判定 `scripts_project/m08b_smoke_eval.py`，证据收集 `/home/jin/m08b_smoke_collect.sh`，审阅 ZIP `/home/jin/m08b_zip.py`。
 - 报告草稿素材：`evidence/M08B_TEMPERATURE_BAND_MAP.md`（映射表）、`evidence/BUILD_INPUT_CHANGES_M08B.csv`（对比）、`evidence/M08B_NETWORK_FILES.csv`、`evidence/M08B_STATIC_CHECKS.json`；与 S4R 偏差：基础负荷 966.9 vs 965.9（+0.11 %）、交通 1,700.4 vs 1,698.4（+0.12 %），原因 C.3 工业 2022 取 ATS 面板 186。
 - 工具脚本（WSL）：`/home/jin/m08b_data.sh`（数据链 + 既有文件逐字节核对）、`/home/jin/m08b_registry.sh`、`/home/jin/m08b_tests.sh`（`FULL=1` 全量；5 个玩具求解用例始终排除）、`/home/jin/m08b_build.sh`（`OUTDIR`、`TAGS`）、`/home/jin/m08b_commit.sh`（镜像 + 提交，消息 `/home/jin/m08b_msg.txt`，强制加入 `/home/jin/m08b_force.txt`）。
 - 已知坑：`wsl bash -lc "..."` 中 `$VAR` 为空，变量一律放脚本文件；`set -e` 下 `[ ] && cmd` 末尾失败会退出脚本。
