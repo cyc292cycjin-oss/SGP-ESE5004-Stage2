@@ -14,11 +14,13 @@ market-settlement allocation of m12_allocation.py. Nodal-balance right-hand side
 Supplement 01 D1 (item 136): the dual form is the MAIN value of the Owen allocation (OWEN.json / .csv / .md): alpha 0 / 0.5 / 1, the per-player
 interval, the length split; the market-settlement form (current ledger) side by side, the difference split into the KVL loop transfer and the
 residual (exported arrays: row / column complementarity and stationarity by owner; rows-only duals: KVL from the solved line flows, the rest
-is the residual). C1 (c) extended to the dual form: |sum of the 12 players - c(N)| / c(N) <= 1e-6, with every player's residual impact.
+is the residual). C1 (c) extended to the dual form; item 138 (M12b) puts its acceptance on the C1 scale: |sum of the 12 players - c(N)| <= 0.01 bn
+and every player's residual impact <= max(1 % of the player's reference difference, 0.01 bn) (was: relative 1e-6, residual information only).
 
     PYTHONHASHSEED=0 python scripts_project/m12_rhs_audit.py audit --repo . --network <unsolved nc> --scenario integrated --out <dir>
         [--truncate N] [--duals <DUALS_BY_CONSTRAINT.nc> | --solve-dir <dir with lp/ and solution/>] [--allocation <ALLOCATION.json>] [--tag T]
     python scripts_project/m12_rhs_audit.py loo --full <dir>/RHS_BY_FAMILY_OWNER.csv --variant <dir>/RHS_BY_FAMILY_OWNER.csv --removed VN --out <dir>
+    python scripts_project/m12_rhs_audit.py regrade --owen <OWEN.json> --out <json> [--precision <PRECISION.json>]   (item 138, input unchanged)
 """
 from __future__ import annotations
 
@@ -38,10 +40,10 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from m12_allocation import ALPHA_GRID, BUNKER, COUNTRIES, PLAYERS, SHARED, alpha_interval, bn, entity_code, fold, sha   # noqa: E402,F401
+from m12_allocation import (ALPHA_GRID, BUNKER, COUNTRIES, PLAYERS, SHARED, alpha_interval, bn, c1_thresholds_eur, dual_acceptance, entity_code,   # noqa: E402,F401
+                            fold, sha)
 
 SCRIPT = "scripts_project/m12_rhs_audit.py"
-DUAL_IDENTITY_TOL = 1e-6   # C1 (c) extended to the dual form (supplement 01 D1): |sum of the players' y'b - c(N)| / c(N), as B16
 OWEN_FILES = ("OWEN.json", "OWEN.csv", "OWEN.md")
 COMP_TYPES = ("Bus", "Line", "Link", "Generator", "Store", "StorageUnit", "Load", "Transformer")
 NODAL = ("Bus-nodal_balance", "Bus-meshed-nodal_balance")
@@ -576,22 +578,22 @@ def reference_of(precision: Path | None) -> tuple[dict, str]:
 def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: float | None, precision: Path | None = None) -> dict:
     """Owen allocation with the dual form y'b as the main value (supplement 01 D1). The market-settlement form (ALLOCATION.json, the current
     ledger) is reported next to it; market - dual = KVL loop transfer (zero-sum over the line owners) + residual (KKT residuals of the returned
-    solution). C1 (c) extended to the dual form: identity sum_players phi = c(N) within 1e-6 (relative), and every player's residual impact
-    against its C1 (b) per-country threshold (information)."""
+    solution). C1 (c) extended to the dual form, accepted on the C1 scale (item 138): identity |sum_players phi - c(N)| <= 0.01 bn and every
+    player's residual impact <= its C1 (b) per-country threshold."""
     from m12_allocation import _fx, precision_context
-    from s4o_c1_precision import threshold_bn
     d = res["dual_form"]; by_a = d["allocation_by_alpha"]; main = by_a["0.5"]
     ps = float(sum(main[p] for p in PLAYERS)); sh = float(main.get(SHARED, 0.0))
-    ident = dict(objective=objective, players_sum=ps, shared=sh, tolerance=DUAL_IDENTITY_TOL,
-                 note="C1 (c) extended to the dual form: sum of the 11 countries + BUNKER (y'b + column bounds + objective constants) = objective")
+    ident = dict(objective=objective, players_sum=ps, shared=sh,
+                 note="C1 (c) extended to the dual form: sum of the 11 countries + BUNKER (y'b + column bounds + objective constants) = objective; "
+                      "accepted within 0.01 bn (item 138), the relative error is information")
     if objective is not None:
         rel = abs(ps - objective) / max(1.0, abs(objective))
-        ident.update(difference=ps - objective, relative_error=rel, relative_error_incl_shared=abs(ps + sh - objective) / max(1.0, abs(objective)), passed=bool(rel <= DUAL_IDENTITY_TOL))
+        ident.update(difference=ps - objective, relative_error=rel, relative_error_incl_shared=abs(ps + sh - objective) / max(1.0, abs(objective)))
     else:
-        ident.update(passed=None, note="objective unknown (no ALLOCATION.json / SOLVE_RECEIPT.json): identity not checked")
+        ident.update(note="objective unknown (no ALLOCATION.json / SOLVE_RECEIPT.json): identity not checked")
     pp = Path(precision) if precision is not None else (Path(solve_dir) / "PRECISION.json" if solve_dir is not None else None)
     ref, ref_src = reference_of(pp)
-    thr = {p: threshold_bn(p if p in COUNTRIES else "ASEAN", ref) * 1e9 for p in PLAYERS}   # bunker: the ASEAN entity of C1 (bunker account)
+    thr = c1_thresholds_eur(ref)   # bunker: the ASEAN entity of C1 (bunker account)
     fx = (A or {}).get("report_currency") or _fx()
     out = dict(main_form="owen_dual_form", decision="supplement 01 D1 (item 136): main value = Owen dual form y'b; market-settlement form reported alongside",
                tag=res.get("tag"), network=res.get("network"), network_sha256=res.get("network_sha256"), duals=d.get("source"), alpha_main=0.5,
@@ -621,17 +623,19 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
         out["market_form"] = dict(allocation_alpha_half_eur=mk, interval_eur=A.get("interval_eur"), identity=A.get("identity"),
                                   note="market-settlement form = current ledger (s4d_ledger): asset costs + net purchases at the nodal duals - net rent share")
         out["market_minus_dual"] = dict(total_eur=diff, kvl_loop_transfer_eur=kvl, residual_eur=resid, residual_parts_eur=parts, unexplained_eur=unexpl, method=method)
-    out["c1_c_dual"] = dict(identity_passed=ident["passed"], c1_c_passed=prec.get("c_passed"), precision=prec, threshold_source=ref_src,
-                            threshold_eur=thr, residual_impact_eur=resid,
-                            within_threshold=({p: bool(abs(resid[p]) <= thr[p]) for p in PLAYERS} if resid is not None else None),
+    acc = dual_acceptance(ps, objective, resid, thr)
+    ident.update(passed=acc["identity_passed"], tolerance_eur=acc["identity_tolerance_eur"])
+    out["dual_acceptance"] = acc
+    out["c1_c_dual"] = dict(identity_passed=acc["identity_passed"], residual_passed=acc["residual_passed"], passed=acc["passed"], c1_c_passed=prec.get("c_passed"),
+                            precision=prec, threshold_source=ref_src, threshold_eur=thr, residual_impact_eur=resid, within_threshold=acc["residual_within"],
                             note="residual impact = market form - dual form - KVL transfer of the player (KKT residuals of the returned solution); "
-                                 "compared with the C1 (b) per-country threshold as information; the deciding check is the identity")
+                                 "item 138: deciding together with the identity (both on the C1 scale)")
     pr = res.get("owen_premise") or {}
     out["premise"] = dict(passed=pr.get("passed"), nonzero_rhs_rows_by_class=pr.get("nonzero_rhs_rows_by_class"), rule=pr.get("rule"),
                           coupling_families_homogeneous=pr.get("coupling_families_homogeneous"), coupling_families_nonhomogeneous=pr.get("coupling_families_nonhomogeneous"),
                           shared_or_unresolved_rows=res.get("shared_or_unresolved", [])[:20])
     out["premise_failed"] = pr.get("passed") is False
-    out["usable_for_allocation"] = bool(ident["passed"] and (prec.get("c_passed") is not False) and not out["premise_failed"])
+    out["usable_for_allocation"] = bool(acc["passed"] and (prec.get("c_passed") is not False) and not out["premise_failed"])
     bs = res.get("bunker_standalone") or {}
     if bs.get("computable"):   # D10: core condition of the bunker player against its strict standalone cost
         phb = float(main.get(BUNKER, 0.0)); hi = float((d["interval"].get(BUNKER) or {}).get("max", phb))
@@ -665,15 +669,17 @@ def write_owen(res: dict, out: Path) -> None:
                  residual_eur=(md.get("residual_eur") or {}).get(p), c1_threshold_eur=c1["threshold_eur"].get(p))
         rows.append(r)
     pd.DataFrame(rows).set_index("player").to_csv(out / "OWEN.csv")
-    idt = o["identity"]
+    idt = o["identity"]; acc = o.get("dual_acceptance") or {}
     L = ["# OWEN（M12：Owen 分摊主值 = 对偶形式 y′b；补充 01 D1；只读，未求解）", ""]
     if o.get("premise_failed"):
         L += [f"> **⚠ premise_failed：存在无主（SHARED）或无法归属的非零右端项（{o['premise']['nonzero_rhs_rows_by_class']}），Owen 前提不成立；"
               "须先确定归属再运行（补充 01 D3），本分摊不可用。**", ""]
     L += [f"- 运行：{o.get('tag')}；网络 `{o.get('network')}`（SHA256 `{str(o.get('network_sha256'))[:12]}…`）；对偶 `{o.get('duals')}`。",
          f"- Owen 前提（右端项全部有主）：**{o['premise']['passed']}**。",
-         f"- 恒等式（C1 (c) 对偶形式扩展）：11 国 + 燃料舱 = {bn(idt['players_sum'])} bn，目标值 {bn(idt.get('objective'))} bn，"
-         f"相对误差 {idt.get('relative_error', float('nan')):.2e}（≤ 1e-6：**{idt['passed']}**）；共享 {bn(idt['shared'])} bn。",
+         f"- 恒等式（C1 (c) 对偶形式扩展，第 138 项 C1 同口径）：11 国 + 燃料舱 = {bn(idt['players_sum'])} bn，目标值 {bn(idt.get('objective'))} bn，"
+         f"差 {bn(idt.get('difference'))} bn（|差| ≤ 0.01 bn：**{idt['passed']}**；相对误差 {idt.get('relative_error', float('nan')):.2e} 仅供参考）；共享 {bn(idt['shared'])} bn。",
+         f"- 残差影响 ≤ C1 (b) 阈值 max(差额 1 %, 0.01 bn)：**{acc.get('residual_passed')}**"
+         + (f"（未通过：{', '.join(acc['residual_failed'])}）" if acc.get("residual_failed") else "") + f"；对偶形式验收：**{acc.get('passed')}**。",
          f"- C1 (c)（运行本身）：{c1['c1_c_passed']}；分摊可用：**{o['usable_for_allocation']}**。阈值来源：{c1['threshold_source']}。",
          f"- 差额方法：{md.get('method', '—')}。", "",
          "| 参与者 | **对偶形式 α 0.5** | α 0 | α 1 | 按长度 | 区间下限 | 区间上限 | USD2020 | 市场形式 α 0.5 | 市场 − 对偶 | 其中 KVL 转移 | 残差影响 | C1 (b) 阈值 |",
@@ -693,6 +699,27 @@ def write_owen(res: dict, out: Path) -> None:
               for k, v in b["by_bus"].items()]
         L += [f"- {x}" for x in (b.get("notes") or [])]
     (out / "OWEN.md").write_text("\n".join(L) + "\n")
+
+
+def regrade_owen(owen: Path, out: Path, precision: Path | None = None) -> dict:
+    """item 138: re-grade an existing OWEN.json with the C1-scale dual acceptance (the input file is not changed). Thresholds from the given
+    PRECISION.json reference, else the ones stored in the file (c1_c_dual.threshold_eur, the reference the audit saw)."""
+    o = json.loads(Path(owen).read_text()); idt = o.get("identity") or {}; c1 = o.get("c1_c_dual") or {}
+    if precision is not None:
+        ref, src = reference_of(Path(precision)); thr = c1_thresholds_eur(ref)
+    else:
+        thr, src = {p: float(v) for p, v in (c1.get("threshold_eur") or {}).items() if p in PLAYERS}, f"stored in {owen}: {str(c1.get('threshold_source'))[:120]}"
+    acc = dual_acceptance(idt.get("players_sum"), idt.get("objective"), c1.get("residual_impact_eur"), thr)
+    prem_failed = bool(o.get("premise_failed"))
+    res = dict(script=SCRIPT, owen=str(owen), owen_sha256=sha(Path(owen)), tag=o.get("tag"), network=o.get("network"), threshold_source=src,
+               old=dict(rule="supplement 01 D1: |sum - c(N)| / c(N) <= 1e-6 (residual information only)", identity_relative_error=idt.get("relative_error"),
+                        identity_passed=idt.get("passed"), usable_for_allocation=o.get("usable_for_allocation")),
+               new=dict(acc, c1_c_passed=c1.get("c1_c_passed"), premise_failed=prem_failed,
+                        usable_for_allocation=bool(acc["passed"] and c1.get("c1_c_passed") is not False and not prem_failed)))
+    res["verdict_changed"] = res["old"]["usable_for_allocation"] != res["new"]["usable_for_allocation"]
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(json.dumps(res, indent=1, default=str))
+    return res
 
 
 def loo_compare(full: Path, variant: Path, removed: list, out: Path) -> dict:
@@ -730,11 +757,17 @@ def main():
     a.add_argument("--precision", type=Path, default=None, help="PRECISION.json when it is not in the solve dir (older runs; rows-only duals)")
     lo = sub.add_parser("loo"); lo.add_argument("--full", type=Path, required=True); lo.add_argument("--variant", type=Path, required=True)
     lo.add_argument("--removed", nargs="+", required=True); lo.add_argument("--out", type=Path, required=True)
+    g = sub.add_parser("regrade"); g.add_argument("--owen", type=Path, required=True); g.add_argument("--out", type=Path, required=True)
+    g.add_argument("--precision", type=Path, default=None, help="PRECISION.json whose reference sets the C1 (b) thresholds (default: the stored ones)")
     x = ap.parse_args()
     if x.cmd == "audit":
         res = audit(x.repo, x.network, x.scenario, x.out, x.truncate, x.duals, x.solve_dir, x.allocation, x.tag, x.solved, x.register_dir, x.precision)
         print(json.dumps(dict(model=res["model"], owen_premise=res["owen_premise"], seconds=round(res["seconds"]), peak_rss_gib=round(res["peak_rss_gib"], 2),
                               market_minus_dual=(res.get("dual_form") or {}).get("market_minus_dual_eur")), default=str))
+    elif x.cmd == "regrade":
+        res = regrade_owen(x.owen, x.out, x.precision)
+        print(json.dumps(dict(old=res["old"]["usable_for_allocation"], new=res["new"]["usable_for_allocation"], identity_passed=res["new"]["identity_passed"],
+                              residual_failed=res["new"]["residual_failed"])))
     else:
         res = loo_compare(x.full, x.variant, x.removed, x.out)
         print(json.dumps(dict(passed=res["passed"], left=res["rows_naming_removed_country_in_variant"], changed=res["remaining_rights_changed_count"])))

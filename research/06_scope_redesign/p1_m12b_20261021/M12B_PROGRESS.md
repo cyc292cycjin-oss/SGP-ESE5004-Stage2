@@ -8,7 +8,7 @@
 | 步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
 | 1.1 | 新分支 + 普通 merge M08b 补充 01 头 b018670c：冲突仅 `research/STAGE2_PROJECT_LEDGER.md`（M12 与 M08b 条目各自追加），双方保留（M12 在前、M08b 在后，只删冲突标记）；合并后 `configs/`、模型脚本与 ec80668f 相同（差异只有 `m12_allocation.py`、`m12_rhs_audit.py`、`m08a_run_batch.sh`） | 完成 | 见 git log |
-| 1.2 | 对偶形式验收阈值（第 138 项）改为 C1 同口径 + 单元测试 + 重评 S4O-6 与冒烟 | 进行中 | — |
+| 1.2 | 对偶形式验收阈值（第 138 项）改为 C1 同口径：`m12_allocation.dual_acceptance` / `c1_thresholds_eur`（恒等式 \|Σφ − c(N)\| ≤ 0.01 bn = C1 (a) 绝对标准；每个参与者残差影响 ≤ C1 (b) 阈值，燃料舱用 ASEAN 实体）；`owen_summary` 两项共同决定 `usable_for_allocation`；`_dual_alloc` 在重评（D9）后按当前参照复核；`m12_rhs_audit.py regrade`（不改输入）。测试 `test_dual_acceptance_c1_scale_item138`；`test_m12_allocation.py` + `test_m08a_a8.py` 34 passed。重评（`evidence/regrade_138/`）：S4O-6 不互联 false → **true**（差 +0.76 M EUR）；S4N 试点 true → true；56×3h 冒烟（S4M-1 网络）false → **false**（差 −18.07 M EUR > 0.01 bn） | 完成 | 见 git log |
 | 2.1 | 网络与档案：复用补充 01 再次冒烟的一体化运行（同一网络 bca20fc0…、档案 A、前 56 时段，已导出 lp/ 与 solution/）；11 个去一国变体由 `m08a_variants.py` 从同一 2920×3h 基础网络生成 | 待做 | — |
 | 2.2 | 11 次去一国求解（**须用户授权**），每次 C1 + GATES_V6 | 待授权 | — |
 | 3 | 检验：c′(i)、φᵢ（对偶形式）、市场形式、违反量、容差、KVL 回路数 | 待做 | — |
