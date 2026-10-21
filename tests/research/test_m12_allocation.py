@@ -445,6 +445,27 @@ def test_scrb_only_with_all_11_d6(tmp_path):
     assert r["scrb"]["computed"] and "proxy" in r["scrb"]["standalone_proxy"] and abs(sum(r["scrb"]["allocation_eur"].values()) - r["scrb"]["countries_cost_eur"]) <= 1e-3
 
 
+@pytest.mark.parametrize("alpha", [0.5, 0.2])
+def test_loo_addback_remaining_side_fom_d8(tmp_path, alpha):
+    """Supplement 01 D8: c(N - i) + the remaining side's share (alpha = first country's share of a sorted pair) of the existing FOM of the
+    corridors removed with i; the check uses the adjusted value, the raw one is kept."""
+    F, runs, S = _fake_loo_runs(tmp_path, ("LA", "TH", "VN"), obj_minus=dict(LA=95e9, TH=92e9, VN=92.0025e9))
+    r = M.loo(F, runs, tmp_path / "o", None, S, alpha=alpha)
+    want = dict(VN=alpha * 4e6 + alpha * 1e6,                 # LA|VN: LA (first) stays -> alpha; KH|VN: KH (first) stays -> alpha
+                LA=(1 - alpha) * 4e6 + (1 - alpha) * 2e6,     # LA|VN: VN (second) stays; LA|TH: TH (second) stays
+                TH=alpha * 2e6)                               # LA|TH: LA (first) stays
+    for c, v in r["check"]["countries"].items():
+        assert abs(v["addback_remaining_side_fom_eur"] - want[c]) <= 1e-6
+        assert v["c_N_minus_i_adjusted"] == v["c_N_minus_i_raw"] + v["addback_remaining_side_fom_eur"]
+        assert abs(v["marginal_cost_adjusted"] - (v["marginal_cost_raw"] - want[c])) <= 1e-3 and v["marginal_cost"] == v["marginal_cost_adjusted"]
+        assert v["passed"] == (v["allocation"] - v["marginal_cost_adjusted"] >= -v["tolerance"])
+    assert abs(r["check"]["indivisible_cost"] - r["check"]["indivisible_cost_raw"] - sum(want.values())) <= 1e-3
+    # VN: phi 8e9, raw c' = 7.9975e9 -> margin 2.5e6 under the raw value; the add-back lowers c' further (tolerance 0.51 bn either way)
+    assert r["check"]["countries"]["VN"]["passed"] and r["check"]["countries"]["VN"]["passed_raw"]
+    lc, _ = M._loo_marginals(tmp_path / "o" / "LOO_CHECK.json")
+    assert lc["VN"]["adjusted"] and lc["VN"]["c_prime"] == r["check"]["countries"]["VN"]["marginal_cost_adjusted"]
+
+
 def test_premise_failed_flag_d3(tmp_path):
     """Supplement 01 D3: a non-zero right-hand side without an owner (e.g. a future total cap on extra-ASEAN imports) sets owen_premise.passed
     False; the OWEN outputs are flagged premise_failed and not usable for the allocation even when the identity holds."""

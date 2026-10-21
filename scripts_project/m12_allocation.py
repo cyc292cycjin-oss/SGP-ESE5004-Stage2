@@ -765,9 +765,11 @@ def markdown_benefit(r: dict) -> str:
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- leave-one-out
-def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, standalone_dir: Path | None) -> dict:
+def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, standalone_dir: Path | None, alpha: float = ALPHA_MAIN) -> dict:
     """C1 item 6: c'(i) = c(N) - c(N - i) from runs of the same resolution and profile; phi_i >= c'(i) within the C1 (b) per-country threshold;
-    sign of the indivisible cost c(N) - sum c'(i); SCRB for comparison when all 11 runs are there (standalone cost = the disconnected allocation)."""
+    sign of the indivisible cost c(N) - sum c'(i); SCRB for comparison when all 11 runs are there (standalone cost = the disconnected allocation).
+    Supplement 01 D8: c(N - i) gets back the remaining side's share (alpha) of the existing FOM of the corridors removed with i; the check uses the
+    adjusted value, the raw one is reported."""
     out.mkdir(parents=True, exist_ok=True)
     F = _alloc_json(full_dir)
     rf = json.loads((Path(full_dir) / "SOLVE_RECEIPT.json").read_text()) if (Path(full_dir) / "SOLVE_RECEIPT.json").exists() else {}
@@ -785,14 +787,22 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
                        termination=r.get("termination_condition"), input_network=(r.get("input_network") or {}).get("path"),
                        input_network_sha256=(r.get("input_network") or {}).get("sha256"), c1_grade=pc_.get("grade"), c1_accepted=pc_.get("accepted"))
     lines = pd.read_csv(Path(full_dir) / "ALLOCATION_LINES.csv") if (Path(full_dir) / "ALLOCATION_LINES.csv").exists() else pd.DataFrame()
-    sunk = {}
-    for c in c_loo:   # the variant removes the corridors to c with their existing FOM: the other country's half of it is not in c(N - c)
-        if len(lines):
-            q = lines[lines.pair.str.split("|").apply(lambda x: c in x)]
-            sunk[c] = float((0.5 * q.fom_existing).sum())
-    chk = loo_check({p: phi[p] for p in COUNTRIES}, float(F["objective"]), c_loo, {c: v * 1e9 for c, v in tol_bn.items()})
+    addback = {}
+    for c in c_loo:   # D8: the variant removes the corridors to c with their existing FOM; the remaining side's share (alpha) of it is added back
+        q = lines[lines.pair.str.split("|").apply(lambda x: c in x)] if len(lines) else pd.DataFrame(columns=["pair", "fom_existing"])
+        other = np.where(q.pair.str.split("|").str[0].to_numpy() == c, 1.0 - alpha, alpha) if len(q) else np.zeros(0)
+        addback[c] = float((other * q.fom_existing.to_numpy(dtype=float)).sum()) if len(q) else 0.0
+    c_adj = {c: c_loo[c] + addback[c] for c in c_loo}
+    tol_e = {c: v * 1e9 for c, v in tol_bn.items()}
+    raw = loo_check({p: phi[p] for p in COUNTRIES}, float(F["objective"]), c_loo, tol_e)
+    chk = loo_check({p: phi[p] for p in COUNTRIES}, float(F["objective"]), c_adj, tol_e)   # the check uses the adjusted c(N - i)
+    chk.update(indivisible_cost_raw=raw["indivisible_cost"], indivisible_cost_sign_raw=raw["indivisible_cost_sign"], all_passed_raw=raw["all_passed"],
+               adjustment=f"supplement 01 D8: c(N - i) + the remaining side's share (alpha {alpha:g}) of the existing FOM of the corridors removed with i "
+                          "(ALLOCATION_LINES.csv fom_existing), so that c(N - i) has the Owen attribution; raw values kept")
     for c, v in chk["countries"].items():
-        v["same_profile_and_resolution"] = same[c]; v["sunk_half_fom_of_removed_corridors_eur"] = sunk.get(c, 0.0)
+        r_ = raw["countries"][c]
+        v.update(same_profile_and_resolution=same[c], c_N_minus_i_raw=c_loo[c], c_N_minus_i_adjusted=c_adj[c], addback_remaining_side_fom_eur=addback[c],
+                 marginal_cost_raw=r_["marginal_cost"], marginal_cost_adjusted=v["marginal_cost"], passed_raw=r_["passed"])
         v["interval_min_eur"] = it_[c]["min"]; v["passed_at_interval_min"] = bool(it_[c]["min"] - v["marginal_cost"] >= -v["tolerance"])
         v["market_form_allocation_eur"] = F["allocation_eur"]["0.5"][c]
         v["market_form_passed"] = bool(F["allocation_eur"]["0.5"][c] - v["marginal_cost"] >= -v["tolerance"])
@@ -814,12 +824,14 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
                                   "disconnected allocation")
     (out / "LOO_CHECK.json").write_text(json.dumps(res, indent=1, default=str))
     L = ["# LOO_CHECK（M12 C1 第 6 项：去一国检查；只读）", "", f"- 全体：`{full_dir}`；容差：{tol_src}。", f"- 分摊口径：{main_form}。",
-         f"- 不可分成本 c(N) − Σ c′(i) = {bn(chk['indivisible_cost'])} bn（{chk['indivisible_cost_sign']}；仅含已有国家）。", "",
-         "| 国 | c(N − i) bn | c′(i) bn | Owen 分摊 bn | 余量 bn | 容差 bn | 通过 | 区间下限仍通过 | 同档案 / 分辨率 |", "|---|---|---|---|---|---|---|---|---|"]
+         f"- c(N − i) 加回（补充 01 D8）：被移出走廊中剩余一方按 α = {alpha:g} 的存量固定运维；检查用加回值，原值并列。",
+         f"- 不可分成本 c(N) − Σ c′(i) = {bn(chk['indivisible_cost'])} bn（{chk['indivisible_cost_sign']}；原值 {bn(chk['indivisible_cost_raw'])} bn；仅含已有国家）。", "",
+         "| 国 | c(N − i) 原值 bn | 加回 M EUR | c′(i) 加回后 bn | Owen 分摊 bn | 余量 bn | 容差 bn | 通过 | 原值通过 | 区间下限仍通过 | 市场形式通过 | 同档案 / 分辨率 | C1 等级 |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for c, v in chk["countries"].items():
         sp = v["same_profile_and_resolution"]
-        L.append(f"| {c} | {bn(v['c_N_minus_i'])} | {bn(v['marginal_cost'])} | {bn(v['allocation'])} | {bn(v['margin'])} | {v['tolerance'] / 1e9:.4f} | {v['passed']} | "
-                 f"{v['passed_at_interval_min']} | {sp['profile'] and sp['snapshots']} |")
+        L.append(f"| {c} | {bn(v['c_N_minus_i_raw'])} | {v['addback_remaining_side_fom_eur'] / 1e6:.2f} | {bn(v['marginal_cost'])} | {bn(v['allocation'])} | {bn(v['margin'])} | "
+                 f"{v['tolerance'] / 1e9:.4f} | {v['passed']} | {v['passed_raw']} | {v['passed_at_interval_min']} | {v['market_form_passed']} | {sp['profile'] and sp['snapshots']} | {sp.get('c1_grade')} |")
     L += ["", "SCRB（可选对照，补充 01 D6）：" + (json.dumps({k: round(v / 1e9, 3) for k, v in res["scrb"]["allocation_eur"].items()}) + "（单独成本以不互联分摊代理）"
                                                if res["scrb"].get("computed") else f"未计算——只有 {res['scrb']['runs']} 次去一国运行，SCRB 需要全部 11 次；"
                                                "有 11 次时自动给出，单独成本以不互联分摊代理。")]
