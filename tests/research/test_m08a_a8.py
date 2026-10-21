@@ -51,12 +51,24 @@ def test_subset_hash_ignores_profiles_and_follows_switches(cfg):
         assert g6.config_subset_sha256(r) == h, path
     for path, val in [("cross_border.stock_mode", "keep_stock_no_new"), ("disconnected.co2_shipping_intra_asean", "forbid"), ("coalition.remove_countries", ["VN"]),
                       ("finance.wacc_mode", "country_specific"), ("cross_border.electricity", False), ("solver.interior.solver_tol_factor", 100),
-                      ("cost_layer.layers.technology_data_v0_15_0_2050_eur2020.rebase_index", "ea20_gdp_deflator"), ("s3.gas.lng_expansion", "cap_factor_cost")]:
+                      ("cost_layer.layers.technology_data_v0_15_0_2050_eur2020.rebase_index", "ea20_gdp_deflator"), ("s3.gas.lng_expansion", "cap_factor_cost"),
+                      ("cost_layer.smr_cost_source", "aeo8_author_rule_2050"), ("site_candidates.geothermal.p_nom_max", 1.0)]:
         r = copy.deepcopy(R); d = r
         for k in path.split(".")[:-1]:
             d = d[k]
         d[path.split(".")[-1]] = val
         assert g6.config_subset_sha256(r) != h, path
+
+
+def test_subset_keys_equal_notes_section_6():
+    """M08a supplement 01 item 1: the implemented key list equals GATES_V6_NOTES.md section 6 (26 keys of GATES_V6.md section 2 + 4)."""
+    notes = (ROOT / "research/06_scope_redesign/p1_step4r_20261020/GATES_V6_NOTES.md").read_text(encoding="utf-8")
+    sec = notes.split("## 6.", 1)[1]
+    rows = [ln for ln in sec.splitlines() if ln.startswith("| `GATES_V6.md`") or ln.startswith("| 按 G2.2")]
+    import re
+    listed = [re.findall(r"`([a-z0-9_.]+)`", r.split("|")[2]) for r in rows]
+    assert tuple(listed[0]) == g6.SUBSET_KEYS_GATES_V6 and len(listed[0]) == 26
+    assert [k for k in listed[1] if k in g6.SUBSET_KEYS_M08A_ADDITIONS] == list(g6.SUBSET_KEYS_M08A_ADDITIONS) and len(g6.SUBSET_KEYS) == 30
 
 
 def test_tolerance_diagnostics_d7_d9_d10():
