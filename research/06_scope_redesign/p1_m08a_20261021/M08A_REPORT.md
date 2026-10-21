@@ -160,7 +160,7 @@
 ## 6. 交付与提交
 
 - **工作目录：** `work/p1_m08a_20261021/`（本报告、`M08A_PROGRESS.md`、`evidence/`、`scripts/`），镜像到 `research/06_scope_redesign/p1_m08a_20261021/`。
-- **提交（本会话）：** `4c46f442`（补充 01 第 1 点）→ `2a0a660b`（第 3 点）→ `adc0460e`（第 2 点与 §2、A5 后续修正）→ `b6c4f338`（A6.2）→ `4af11d13`（A10 差异）→ 交付提交见 PR。
-- **PR：** 【待填】
-- **审阅 ZIP：** 【待填】
+- **提交：** 第一会话 `4247f21b` → `77a9a07c` → `0e39df2e` → `4cc95598` → `04d686fe` → `79b0f3e6` → `bf181b68` → `7e38c500` → `9fb4e584` → `f1de7cb5` → `37e18984`；本会话 `4c46f442`（补充 01 第 1 点）→ `2a0a660b`（第 3 点）→ `adc0460e`（第 2 点与 §2、A5 后续修正）→ `b6c4f338`（A6.2）→ `4af11d13`（A10 差异）→ `7e5f44f4`（交付）→ 本报告定稿提交（见 PR）。
+- **PR：** draft https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/45（base `codex/m08-0-registry-backfill-20261020`，即叠在 #44 上；仓库无 CI 检查）。
+- **审阅 ZIP：** `work/p1_m08a_20261021/M08A_REVIEW.zip`，逐成员 SHA256 与 CRC32 见 `M08A_REVIEW_MANIFEST.csv`（ZIP 本身的 SHA256 在 `M08A_REVIEW_ZIP_SHA256.txt`）。内容：本报告、进度、指令与补充及其 SHA256、`evidence/`、`scripts/`、`GATES_V6_NOTES.md`、海上风分级表与日志、相对 `30d281b8` 的代码 / 配置 / 测试差异补丁 `M08A_CODE_DIFF.patch`。
 - **台账：** `research/STAGE2_PROJECT_LEDGER.md` 追加 M08a 条目。
