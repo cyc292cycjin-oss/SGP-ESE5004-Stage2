@@ -380,7 +380,7 @@ def main(a):
             from s4d_ledger import (country_cost_ledger, ledger_detail_usd, ledger_gate, ledger_table, ledger_table_usd, load_length_shares, nodal_prices,
                                     report_currency)
             led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
-            rep = report_currency(cfg)   # M08a A9: report columns USD2020 = EUR2020 x 1.1422; the model stays in EUR2020
+            rep = report_currency(cfg)   # M08a A9 + supplement 01: report columns USD2020 = EUR2020 / fx_usd_to_eur_2020 (one rate both ways); the model stays in EUR2020
             T = ledger_table(led_rows); T.to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f")
             ledger_table_usd(T, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_USD2020.csv", float_format="%.6f")
             ledger_detail_usd(led_rows, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")

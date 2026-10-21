@@ -365,16 +365,22 @@ def a8(reg: Registry, cor: Corrections):
 # --- A9 (M08-10, decisions 125 (4), 133): report currency ---------------------------------------------------------------
 def a9(reg: Registry, cor: Corrections):
     cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
-    fx_in = float(cor.value("fx_usd_to_eur_2020"))
-    reg.add("report_currency_rule", "R6.5 / decision 125 (4) / M08a A9 (decision 133): report currency USD2020 with one rate 1 EUR2020 = 1.1422 USD2020 (ECB 2020 annual average euro "
-            "reference rate); the model, the LP and the ledger column 'eur' stay EUR2020; ledger exports add usd2020 / usd2020_length_split (COUNTRY_COST_LEDGER_DETAIL.csv) and "
-            "COUNTRY_COST_LEDGER_USD2020.csv (s2_solve.py via s4d_ledger.report_currency, config research.reporting); USD2024 only as an extra line via FRED deflator 1.1918. "
-            f"Correction of the proposed text: 1.1422 is NOT 1 / fx_usd_to_eur_2020 (that gives {1 / fx_in:.5f}; see fx_report_vs_input_rate_note)",
-            1.1422, "USD2020/EUR2020", "B", "ECB euro reference rates, 2020 annual average (USD 1.1422)", "configs/research/baseline.yaml research.reporting", cfg_sha, decision_ref="125, 126, 133")
-    reg.add("fx_report_vs_input_rate_note", f"M08a A9 finding: the input conversion row fx_usd_to_eur_2020 = {fx_in:.10g} EUR per USD (currency_converter 0.18.9 mean over calendar days) "
-            f"implies {1 / fx_in:.5f} USD per EUR, 0.20 % below the ECB 2020 annual average 1.1422 used for reporting; USD inputs converted to EUR2020 and reported back in USD2020 therefore "
-            f"carry a factor {1.1422 * fx_in:.5f} instead of 1; not changed in M08a (input rows unchanged; user decision whether to align the input rate)",
-            1.1422 * fx_in - 1.0, "ratio", "B", "registry fx_usd_to_eur_2020; ECB 2020 annual average", "fx_usd_to_eur_2020 x 1.1422 - 1", cfg_sha, decision_ref="133", status="REFERENCE_ONLY")
+    fx_in = float(cor.value("fx_usd_to_eur_2020")); src = cor.base.loc["fx_usd_to_eur_2020"]
+    reg.add("report_currency_rule", "R6.5 / decision 125 (4) / M08a A9 (decision 133) + M08a supplement 01 item 3 (one rate both ways): report currency USD2020 with ONE rate, "
+            f"the inverse of the input conversion row: 1 EUR2020 = 1 / fx_usd_to_eur_2020 = 1 / {fx_in:.12g} = {1 / fx_in:.6f} USD2020 (config research.reporting.fx_per_eur2020 = "
+            "inverse_of_input; s4d_ledger.report_currency computes it from the registry at export time), so a USD input converted to EUR2020 and reported back in USD2020 "
+            "returns its own value (otherwise USD-sourced prices such as fuels would carry a spurious 0.2 % offset); source and method = those of fx_usd_to_eur_2020; the ECB 2020 "
+            "annual average 1.1422 is a comparison value only (fx_report_ecb_2020_reference). The model, the LP and the ledger column 'eur' stay EUR2020; ledger exports add "
+            "usd2020 / usd2020_length_split (COUNTRY_COST_LEDGER_DETAIL.csv) and COUNTRY_COST_LEDGER_USD2020.csv (s2_solve.py); USD2024 only as an extra line via FRED deflator 1.1918. "
+            "Former A9 value (before supplement 01): 1.1422",
+            1.0 / fx_in, "USD2020/EUR2020", "B", src["source"], f"1 / fx_usd_to_eur_2020 ({src['source_locator']}); configs/research/baseline.yaml research.reporting",
+            src["source_sha256"], decision_ref="125, 126, 133")
+    reg.add("fx_report_ecb_2020_reference", f"M08a A9 / supplement 01 item 3: ECB 2020 annual average euro reference rate 1 EUR = 1.1422 USD - COMPARISON VALUE ONLY (not used): "
+            f"{1.1422 * fx_in - 1.0:+.3%} against the report rate 1 / fx_usd_to_eur_2020 = {1 / fx_in:.6f}; the input row is the currency_converter 0.18.9 mean over the 366 "
+            "calendar days of 2020 (non-trading days carried forward), the ECB figure the mean over trading days. Supersedes the A9 note fx_report_vs_input_rate_note "
+            "(the 0.2 % round-trip offset is removed by using one rate)",
+            1.1422, "USD2020/EUR2020", "B", "ECB euro reference rates, 2020 annual average (USD 1.1422)", "ECB statistical data warehouse, EXR.A.USD.EUR.SP00.A 2020",
+            cfg_sha, decision_ref="125, 133", status="REFERENCE_ONLY")
 
 
 # --- A6.1 (M08-7, decisions 129, 131): PV density; open-forest trigger; offshore alpha ----------------------------------------
