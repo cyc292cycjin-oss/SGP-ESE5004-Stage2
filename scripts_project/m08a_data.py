@@ -180,7 +180,83 @@ def a4(reg: Registry, cor: Corrections):
             cor.supersede(pid, "lng_terminal_cap_rule", "A4", "the 2.5 x cap is the option (c) sensitivity lng_expansion = cap_factor_cost")
 
 
-def main(steps=("a2", "a3", "a4")):
+# --- A5 (M08-4, decision 131): CO2 storage unified to ERIA-GCCSI 2024 P50 -------------------------------------------------
+CO2_TABLE = ROOT / "research_inputs/co2_v5/CO2_STORAGE_POTENTIAL_UNIFIED.csv"
+S4R_CO2 = ROOT / "research/06_scope_redesign/p1_step4r_20261020/CO2_STORAGE_UNIFIED.csv"
+ERIA_SRC = "ERIA / GCCSI (2024) Comprehensive CCUS Research Report, Ch.1"
+STORAGE_YEARS = 50.0
+
+
+def co2_table(cor: Corrections) -> pd.DataFrame:
+    """11-country table: BN / ID / MY / TH keep the registered ERIA component sums (source unchanged); VN, PH, KH, TL, LA, MM per the S4R unification."""
+    s = pd.read_csv(S4R_CO2).set_index("country")
+    rows = []
+    for c in sorted(s.index):
+        r = s.loc[c]
+        if c in ("BN", "ID", "MY", "TH"):
+            p = float(cor.value(f"co2_storage_potential_{c}"))   # ERIA P50 saline + net hydrocarbon (registered components)
+            lo, hi = p - r.eria_saline_p50_gt + r.eria_saline_p90_gt, p - r.eria_saline_p50_gt + r.eria_saline_p10_gt
+            st, loc, note = "ERIA_2024_P50", r.eria_locator, "registered ERIA component sum (unchanged); low / high = ERIA saline P90 / P10 + net hydrocarbon"
+        elif c == "VN":
+            p, lo, hi = float(r.unified_potential_gt), float(r.unified_low_gt), float(r.unified_high_gt)
+            st, loc, note = "ERIA_2024_P50", r.eria_locator, "saline P50 5 [P90 3, P10 9] Gt + hydrocarbon 0.3034 Gt; replaces IEA 2021 11.8 Gt"
+        elif c == "PH":
+            p = lo = hi = float(r.unified_potential_gt)
+            st, loc, note = "ERIA_2024_HYDROCARBON_ONLY", r.eria_locator, "no saline data in ERIA; Malampaya 67.2 Mt; replaces IEA 2021 22.3 Gt"
+        elif c == "KH":
+            p, lo, hi = 0.09, 0.09, 45.0
+            st, loc, note = "IJGGC_2014_LOW_CASE", "doi:10.1016/j.ijggc.2014.08.016", "ERIA: not covered; low case 90 Mt structural traps (main, grade C); 45 Gt hydrodynamic high case as sensitivity; replaces OGCI 0.085 Gt"
+        elif c == "TL":
+            p, lo, hi = 0.0, 0.0, 0.0
+            st, loc, note = "UNASSESSED_NO_NATIONAL_ASSESSMENT", "R5", "no national assessment; OGCI 0.25 Gt not re-checkable -> 0; Bayu-Undan CCS ~10 Mtpa (Santos / IFC) is a project-based annual-cap sensitivity, not represented"
+        elif c in ("LA", "MM"):
+            p, lo, hi = 0.0, 0.0, 0.0
+            st, loc, note = "UNASSESSED", "section 1.3.9 p.56", "ERIA: unknown, no analysis completed -> 0 (not SOURCE_ZERO)"
+        else:   # SG
+            p, lo, hi = 0.0, 0.0, 0.0
+            st, loc, note = "SOURCE_ZERO", "section 1.3.8 p.56", "ERIA: no storage potential"
+        rows.append(dict(country=c, potential_gt=round(p, 10), low_gt=round(lo, 10), high_gt=round(hi, 10), annual_cap_mt_at_50y=round(p * 1e3 / STORAGE_YEARS, 6), status=st,
+                         source=(ERIA_SRC if st.startswith("ERIA") else ("Int. J. Greenhouse Gas Control (2014)" if c == "KH" else ERIA_SRC)), locator=loc, note=note))
+    return pd.DataFrame(rows)
+
+
+def a5(reg: Registry, cor: Corrections):
+    t = co2_table(cor)
+    CO2_TABLE.parent.mkdir(parents=True, exist_ok=True)
+    t.to_csv(CO2_TABLE, index=False, float_format="%.10g")
+    tsha = sha256(CO2_TABLE)
+    reg.add("co2_storage_unified_table", "R5 / M08-4 (decision 131): national CO2 storage potentials unified to ERIA-GCCSI 2024 P50 (VN 5.30, PH 0.067, MY 128.8, ID 51.3, BN 18.6, "
+            "TH 16.0 Gt; KH 0.09 Gt IJGGC 2014 low case, grade C; TL / LA / MM 0 with LA / MM UNASSESSED; SG 0); annual injection cap = potential / research.s2.co2.storage_years (50); "
+            "config research.s2.co2.storage_potential_source = eria_gccsi_2024_unified (main) | registry_d1 (former co2_injection_cap_*), storage_potential_case p50 | low (ERIA P90) | "
+            "high (ERIA P10); build scripts_project/s2_layers.co2_storage_caps", str(CO2_TABLE.relative_to(ROOT)), "file", "B", f"{ERIA_SRC}; IJGGC (2014)",
+            "CO2_STORAGE_POTENTIAL_UNIFIED.csv; S4R CO2_STORAGE_UNIFIED.csv", tsha, decision_ref="126, 89, 131")
+    reg.add("co2_storage_potential_case_main", "M08-4 (decision 131): research.s2.co2.storage_potential_case main = p50 (ERIA P50); low = ERIA P90 + net hydrocarbon, high = ERIA P10 "
+            "(KH 45 Gt hydrodynamic case) as sensitivities", "p50", "flag", "B", ERIA_SRC, "storage_potential_case", tsha, decision_ref="131")
+    for r in t.itertuples():
+        reg.add(f"co2_injection_cap_unified_{r.country}", f"M08-4 (decision 131): annual CO2 injection cap {r.country} = unified potential {r.potential_gt:g} Gt / 50 years "
+                f"(status {r.status}); used by the build via the table (storage_years from the config)", r.potential_gt * 1e9 / STORAGE_YEARS, "tCO2/a",
+                "B" if r.country not in ("KH", "TL") else "C", f"{ERIA_SRC}" if r.country != "KH" else "IJGGC (2014)", "CO2_STORAGE_POTENTIAL_UNIFIED.csv", tsha,
+                country=r.country, decision_ref="28, 29, 30, 131", sensitivity_low=(r.low_gt * 1e9 / STORAGE_YEARS if r.country in ("KH", "TL") else None),
+                sensitivity_high=(r.high_gt * 1e9 / STORAGE_YEARS if r.country in ("KH", "TL") else None))
+        cor.supersede(f"co2_injection_cap_{r.country}", f"co2_injection_cap_unified_{r.country}", "A5", "D1 potential / 50; read only by storage_potential_source registry_d1")
+    tt = t.set_index("country")
+    mods = {"VN": ("B", "ERIA / GCCSI 2024 P50 (saline 5 [3-9] Gt Tables 1.17 / 1.15 p.47 + hydrocarbon 0.303 Gt); replaces IEA 2021 11.8 Gt (ADB 2013 theoretical)"),
+            "PH": ("B", "ERIA / GCCSI 2024 (no saline data; Malampaya 67.2 Mt Table 1.18 p.53); replaces IEA 2021 22.3 Gt (ADB 2013 theoretical)"),
+            "KH": ("C", "conservative rule = low case 90 Mt (structural traps) of the IJGGC 2014 preliminary assessment (45 Gt hydrodynamic high case = sensitivity); replaces OGCI 0.085 Gt (not re-checkable)"),
+            "TL": ("C", "no national assessment; OGCI 0.25 Gt not re-checkable -> 0 (UNASSESSED); Bayu-Undan CCS 10 Mtpa (Santos / IFC) = project-based annual-cap sensitivity, not represented")}
+    for c, (tier, note) in mods.items():
+        cor.modify(f"co2_storage_potential_{c}", "A5", note, value=f"{tt.at[c, 'potential_gt']:.10g}", tier=tier, sensitivity_low=f"{tt.at[c, 'low_gt']:.10g}",
+                   sensitivity_high=f"{tt.at[c, 'high_gt']:.10g}", status="REGISTERED", source=(ERIA_SRC if c in ("VN", "PH") else cor.base.loc[f"co2_storage_potential_{c}", "source"]),
+                   source_sha256=(cor.base.loc[f"co2_storage_potential_{c}", "source_sha256"] or tsha))
+    for c in ("LA", "MM"):
+        cor.modify(f"co2_storage_potential_unassessed_{c}", "A5", "ERIA 2024 section 1.3.9 p.56: unknown, no analysis completed -> 0, UNASSESSED (not SOURCE_ZERO)",
+                   value="0", tier="A", status="REGISTERED", source=ERIA_SRC, source_locator="section 1.3.9 p.56",
+                   source_sha256=(cor.base.loc[f"co2_storage_potential_unassessed_{c}", "source_sha256"] or tsha))
+        cor.modify(f"co2_storage_potential_{c}", "A5", "status SOURCE_ZERO -> REGISTERED 0 with the UNASSESSED label (ERIA: unknown, not a source zero; co2_storage_potential_unassessed_" + c + ")",
+                   status="REGISTERED", source_sha256=(cor.base.loc[f"co2_storage_potential_{c}", "source_sha256"] or tsha))
+
+
+def main(steps=("a2", "a3", "a4", "a5")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

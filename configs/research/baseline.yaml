@@ -333,7 +333,10 @@ research:
   s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
     status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
     co2:
-      storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50
+      storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50 (M08a A5: applied by the build to the unified table)
+      storage_potential_source: eria_gccsi_2024_unified   # M08a A5 (M08-4, decision 131; registry co2_storage_unified_table): eria_gccsi_2024_unified (MAIN: ERIA-GCCSI 2024 P50 - VN 5.30, PH 0.067, MY 128.8, ID 51.3, BN 18.6, TH 16.0 Gt; KH 0.09 Gt IJGGC 2014 low case; TL / LA / MM 0, LA / MM UNASSESSED; SG 0; cap = potential / storage_years, scripts_project/s2_layers.co2_storage_caps) | registry_d1 (former: D1 potentials incl. IEA 2021 VN 11.8 / PH 22.3, OGCI KH 0.085 / TL 0.25; registry co2_injection_cap_*)
+      storage_potential_table: research_inputs/co2_v5/CO2_STORAGE_POTENTIAL_UNIFIED.csv   # scripts_project/m08a_data.py a5
+      storage_potential_case: p50         # p50 (main) | low (ERIA P90 + net hydrocarbon) | high (ERIA P10; KH 45 Gt hydrodynamic case) - sensitivities
       sequestration_cost_eur_per_t: 30.0  # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
       vent: false                         # S4B-0 (decision 70): PyPSA-Eur v2025.07.0 co2_vent false (config line 679); former S2 value true (captured CO2 vented to the capturing country's atmosphere; no confirmed decision; every smoke so far vented 0) kept as sensitivity
       dac: true                           # decision 11; sensitivity switch

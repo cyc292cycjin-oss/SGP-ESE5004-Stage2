@@ -26,6 +26,39 @@ LAND_TRANSPORT_ACCOUNTS = {"RoadResidualFuel", "TransportNEC", "TransportEmbedde
 # is not modelled either (the explicit EV / FCEV loads convert the non-electric land-transport fuel rows only). Industry electricity is explicit in the route
 # mode (pypsa_eur_2050) and joins the base load only in the bas_fixed comparison mode.
 TABLE_BASE_SECTORS = ("Residential", "Commercial", "AgricultureOthers", "Transport")
+ROOT = Path(__file__).resolve().parents[1]
+CO2_STORAGE_CASES = {"p50": "potential_gt", "low": "low_gt", "high": "high_gt"}
+
+
+def co2_storage_caps(R: dict, registry: pd.DataFrame):
+    """National CO2 storage potential (Gt) and annual injection cap (t/a) per country (research.s2.co2):
+    storage_potential_source = eria_gccsi_2024_unified (M08a A5, decision 131, MAIN: table storage_potential_table, column of
+    storage_potential_case p50 | low (ERIA P90) | high (ERIA P10); cap = potential x 1e9 / storage_years) | registry_d1 (former:
+    registry co2_injection_cap_<ISO2>, i.e. the D1 potentials / 50, and co2_storage_potential_<ISO2>)."""
+    src = R.get("storage_potential_source", "registry_d1")
+    years = float(R["storage_years"])
+    if src == "registry_d1":
+        caps, pots = {}, {}
+        for c in sorted(COUNTRIES):
+            row = registry.loc[f"co2_injection_cap_{c}"]
+            caps[c] = float(row["value"]) if row["status"] != "DATA_PENDING" else 0.0
+            pots[c] = caps[c] * 50.0 / 1e9   # the D1 potential behind its /50 cap (co2_storage_potential_<ISO2> now holds the unified value)
+        return caps, pots, dict(source=src, case="d1", table=None)
+    if src != "eria_gccsi_2024_unified":
+        raise ValueError(f"research.s2.co2.storage_potential_source must be eria_gccsi_2024_unified or registry_d1, got {src!r}")
+    case = str(R.get("storage_potential_case", "p50"))
+    if case not in CO2_STORAGE_CASES:
+        raise ValueError(f"research.s2.co2.storage_potential_case must be one of {sorted(CO2_STORAGE_CASES)}, got {case!r}")
+    import hashlib
+    p = ROOT / R["storage_potential_table"]
+    t = pd.read_csv(p, keep_default_na=False).set_index("country")
+    if set(t.index) != set(COUNTRIES):
+        raise ValueError("CO2 storage table must list the 11 countries exactly")
+    col = CO2_STORAGE_CASES[case]
+    pots = {c: float(t.at[c, col]) if str(t.at[c, col]) != "" else float(t.at[c, "potential_gt"]) for c in sorted(COUNTRIES)}
+    caps = {c: pots[c] * 1e9 / years for c in sorted(COUNTRIES)}
+    return caps, pots, dict(source=src, case=case, table=str(R["storage_potential_table"]), table_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),
+                            status={c: str(t.at[c, "status"]) for c in sorted(COUNTRIES)}, rule="annual cap = potential / storage_years")
 
 
 def nonindustrial_electricity_mode(cfg) -> str:
@@ -259,13 +292,12 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
               lifetime=cost(costs, "CO2 storage tank", "lifetime"))
         n.stores.loc[b, ["country", "research_role"]] = [country_of(n, node), "CO2_BUFFER"]
         ledger["buffers"] += 1
-    # 2. permanent storage per country (decisions 20, 28-30)
+    # 2. permanent storage per country (decisions 20, 28-30; M08a A5, decision 131: unified ERIA-GCCSI 2024 P50 table, annual cap = potential / storage_years)
     seq_cost = float(R["sequestration_cost_eur_per_t"]); years = float(R["storage_years"])
-    caps = {}
+    caps, potentials, storage_info = co2_storage_caps(R, registry)
+    ledger["storage_potential"] = storage_info
     for c in sorted(COUNTRIES):
-        row = registry.loc[f"co2_injection_cap_{c}"]
-        cap = float(row["value"]) if row["status"] != "DATA_PENDING" else 0.0
-        caps[c] = cap
+        cap = caps[c]
         if cap <= 0:
             ledger["sequestration_countries"][c] = dict(cap_t_per_year=0.0, store=None, note="no storage potential (decision 30)")
             continue
@@ -279,9 +311,9 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
         for node in [x for x in nodes if country_of(n, x) == c]:
             links.append(add_link(n, f"{node} co2 sequestration", c, "CO2 sequestration", [f"{node} co2 stored", sb], [1.0], capital_cost=0.0,
                                   lifetime=years, role="PERMANENT_STORAGE"))
-        ledger["sequestration_countries"][c] = dict(cap_t_per_year=cap, store=sb, links=len(links), capital_cost_eur_per_t=seq_cost,
-                                                     potential_gt=float(registry.loc[f"co2_storage_potential_{c}", "value"]))
+        ledger["sequestration_countries"][c] = dict(cap_t_per_year=cap, store=sb, links=len(links), capital_cost_eur_per_t=seq_cost, potential_gt=potentials[c])
     n.meta["research_co2_storage"] = dict(caps_t_per_year=caps, storage_years=years, horizon_fraction=1.0, hook="research_co2_storage_cap",
+                                          potential_source=storage_info["source"], potential_case=storage_info["case"], potentials_gt=potentials,
                                           method="final-snapshot level of each national co2 sequestered Store <= cap x horizon_fraction; charge-only")
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"research_co2_storage_cap"})
     # 3. vents (captured CO2 may return to the capturing country's atmosphere)

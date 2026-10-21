@@ -78,9 +78,12 @@ def test_smr_cost_rows(registry):
 
 def test_co2_storage_values_and_caps(registry):
     r = registry.set_index("param_id")
-    for c, main in {"MY": 127 + 1.773, "ID": 49 + 2.275, "BN": 18 + 0.5793, "TH": 15 + 1.024, "PH": 22.3, "VN": 11.8, "KH": 0.085, "TL": 0.25, "LA": 0, "MM": 0, "SG": 0}.items():
+    # M08a A5 (decision 131): unified ERIA-GCCSI 2024 P50 (D1 values VN 11.8, PH 22.3, KH 0.085, TL 0.25 superseded; their /50 caps kept as REFERENCE_ONLY history)
+    d1 = {"MY": 127 + 1.773, "ID": 49 + 2.275, "BN": 18 + 0.5793, "TH": 15 + 1.024, "PH": 22.3, "VN": 11.8, "KH": 0.085, "TL": 0.25, "LA": 0, "MM": 0, "SG": 0}
+    for c, main in {"MY": 127 + 1.773, "ID": 49 + 2.275, "BN": 18 + 0.5793, "TH": 15 + 1.024, "PH": 0.0672, "VN": 5.3034, "KH": 0.09, "TL": 0, "LA": 0, "MM": 0, "SG": 0}.items():
         assert float(r.loc[f"co2_storage_potential_{c}", "value"]) == pytest.approx(main, abs=1e-9)
-        assert float(r.loc[f"co2_injection_cap_{c}", "value"]) == pytest.approx(main * 1e9 / 50, rel=1e-12)
+        assert float(r.loc[f"co2_injection_cap_unified_{c}", "value"]) == pytest.approx(main * 1e9 / 50, rel=1e-12)
+        assert float(r.loc[f"co2_injection_cap_{c}", "value"]) == pytest.approx(d1[c] * 1e9 / 50, rel=1e-12) and r.loc[f"co2_injection_cap_{c}", "status"] == "REFERENCE_ONLY"
     assert float(r.loc["co2_storage_potential_MY", "sensitivity_low"]) == 80.0
     assert float(r.loc["co2_storage_potential_ID", "sensitivity_high"]) == pytest.approx(77.275)
 
