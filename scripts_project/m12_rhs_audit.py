@@ -38,7 +38,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from m12_allocation import ALPHA_GRID, BUNKER, COUNTRIES, PLAYERS, SHARED, alpha_interval, bn, entity_code, fold, sha   # noqa: E402
+from m12_allocation import ALPHA_GRID, BUNKER, COUNTRIES, PLAYERS, SHARED, alpha_interval, bn, entity_code, fold, sha   # noqa: E402,F401
 
 SCRIPT = "scripts_project/m12_rhs_audit.py"
 DUAL_IDENTITY_TOL = 1e-6   # C1 (c) extended to the dual form (supplement 01 D1): |sum of the players' y'b - c(N)| / c(N), as B16
@@ -503,6 +503,8 @@ def audit(repo: Path, network: Path, scenario: str, out: Path, truncate, duals: 
                                  coupling_families_nonhomogeneous=sorted({v["family"] for v in coupling.values() if not v["homogeneous"]}),
                                  coupling_families_homogeneous=sorted({v["family"] for v in coupling.values() if v["homogeneous"]})),
                solver_runs=0)
+    from m12_allocation import bunker_standalone
+    res["bunker_standalone"] = bunker_standalone(n)   # supplement 01 D10 (arithmetic on the built network: same snapshots and weights as the LP)
     pc_ = res["owen_premise"]["nonzero_rhs_rows_by_class"]
     res["owen_premise"].update(passed=bool(pc_["shared"] == 0 and pc_["unresolved"] == 0),
                                rule="supplement 01 D3: passed = no non-zero right-hand side that is SHARED or unresolved (every right has an owner)")
@@ -629,6 +631,22 @@ def owen_summary(res: dict, A: dict | None, solve_dir: Path | None, objective: f
                           shared_or_unresolved_rows=res.get("shared_or_unresolved", [])[:20])
     out["premise_failed"] = pr.get("passed") is False
     out["usable_for_allocation"] = bool(ident["passed"] and (prec.get("c_passed") is not False) and not out["premise_failed"])
+    bs = res.get("bunker_standalone") or {}
+    if bs.get("computable"):   # D10: core condition of the bunker player against its strict standalone cost
+        phb = float(main.get(BUNKER, 0.0)); hi = float((d["interval"].get(BUNKER) or {}).get("max", phb))
+        out["bunker_standalone"] = dict(strict_standalone_cost_eur=bs["total_eur"], owen_dual_alpha_half_eur=phb, owen_dual_interval_max_eur=hi,
+                                        margin_eur=bs["total_eur"] - phb, passed=bool(phb <= bs["total_eur"] + thr[BUNKER]),
+                                        passed_at_interval_max=bool(hi <= bs["total_eur"] + thr[BUNKER]), tolerance_eur=thr[BUNKER],
+                                        by_bus={b: dict(energy_twh=v.get("energy_twh"), cost_eur=v.get("cost_eur"), chosen=v.get("chosen"),
+                                                        unit_cost_min=v.get("unit_cost_min"), unit_cost_max=v.get("unit_cost_max"),
+                                                        excluded=[e["meter"] for e in v.get("excluded", [])]) for b, v in bs["by_bus"].items()},
+                                        notes=bs.get("notes"), definition=bs.get("definition"),
+                                        interpretation="supplement 01 D10: the bunker has no resource and cannot opt out; the core condition is checked against its "
+                                                       "strict standalone cost (extra-ASEAN non-fossil imports only). A negative benefit (integrated - disconnected) "
+                                                       "is a pecuniary externality of the liquid-fuel pool prices on a pure price taker, not a breach of "
+                                                       "individual rationality.")
+    else:
+        out["bunker_standalone"] = dict(computable=False, reason=bs.get("reason", "not computed"))
     return out
 
 
@@ -665,6 +683,14 @@ def write_owen(res: dict, out: Path) -> None:
                  f"{bn(r['interval_max_eur'])} | {bn(r['owen_dual_alpha_0_5_usd2020'])} | {bn(r['market_form_alpha_0_5_eur'])} | {bn(r['market_minus_dual_eur'])} | "
                  f"{bn(r['kvl_transfer_eur'])} | {bn(r['residual_eur'])} | {bn(r['c1_threshold_eur'])} |")
     L += ["", "区间：每条跨境线（国家对行的 y′b 与该对的目标常数）的 α 各自在 [0, 1] 内取值时该参与者分摊的范围；各国端点不能同时达到。"]
+    b = o.get("bunker_standalone") or {}
+    if "strict_standalone_cost_eur" in b:
+        L += ["", "## 燃料舱参与者：严格单独成本（补充 01 D10）", "",
+              f"- 严格单独成本（只用区域外非化石进口经计量链路满足燃料舱负荷；纯算术）= **{bn(b['strict_standalone_cost_eur'])} bn**；"
+              f"Owen 对偶形式份额 {bn(b['owen_dual_alpha_half_eur'])} bn；余量 {bn(b['margin_eur'])} bn；份额 ≤ 单独成本：**{b['passed']}**。"]
+        L += [f"- {k}：{bn(v['cost_eur'])} bn，{v['energy_twh']:.2f} TWh，单位成本 {v['unit_cost_min']:.2f}–{v['unit_cost_max']:.2f} EUR/MWh，路线 {v['chosen']}；排除 {v['excluded']}"
+              for k, v in b["by_bus"].items()]
+        L += [f"- {x}" for x in (b.get("notes") or [])]
     (out / "OWEN.md").write_text("\n".join(L) + "\n")
 
 

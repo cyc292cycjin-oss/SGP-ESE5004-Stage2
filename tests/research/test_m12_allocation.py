@@ -232,6 +232,27 @@ def test_toy_owen_in_core_identity_and_market_form(alpha):
     assert loo["all_passed"]                                                             # core implies phi_i >= c(N) - c(N - i)
 
 
+def test_toy_bunker_player_within_strict_standalone_cost():
+    """Supplement 01 D10: a bunker-type player - no resource, only a demand at its own bus, supplied by an extra-regional fuel import or from A's
+    market through A's metering link - gets an Owen share <= its strict standalone cost (imports only), and the allocation of the 4 players is in
+    the core (15 coalitions); the market form equals the dual form (no coupling row)."""
+    P4 = P3 + (M.BUNKER,)
+    L, ix = toy(bunker=BUNKER_D); sol = L.solve(); cN = sol["obj"] + sum(CONST.values())
+    raw = dict(M.dual_form(sol["lo"], sol["hi"], sol["pi"], sol["own"])["total"])
+    for k, v in CONST.items():
+        raw[k] = raw.get(k, 0.0) + v
+    phi = M.fold(raw, 0.5, P4)
+    assert abs(sum(phi[p] for p in P4) - cN) <= 1e-9 * cN
+    cost = {S: L.solve(S)["obj"] + sum(s * v for k, v in CONST.items() for p, s in M.shares(k, 0.5).items() if p in S) for S in M.coalitions(P4)}
+    strict = sum(BUNKER_PIMP * W[t] * BUNKER_D[t] for t in range(4))
+    assert abs(cost[frozenset({M.BUNKER})] - strict) <= 1e-9 * strict                         # alone: imports only (the meter is A's right)
+    assert M.core_violations({p: phi[p] for p in P4}, cost, tol=1e-7) == []
+    assert 0.0 < phi[M.BUNKER] <= strict and strict - phi[M.BUNKER] > 1.0                      # integration lowers the bunker's cost here
+    assert max(sol["x"][ix["m", t]] for t in range(4)) > 0.0                                  # it does buy from A's market
+    st = M.settle(market_assets(L, ix, sol), 0.5, P4)
+    assert all(abs(st["allocation"][p] - phi[p]) <= 1e-7 * cN for p in P4)
+
+
 def test_toy_alpha_changes_no_total_and_interval():
     L, ix = toy(); sol = L.solve(); cN = sol["obj"] + sum(CONST.values())
     tot = [sum(owen(sol, a)[0][p] for p in P3) for a in np.linspace(0, 1, 11)]
@@ -359,6 +380,11 @@ def test_rhs_audit_and_dual_form_on_local_smoke(tmp_path):
     for p in M.PLAYERS:                                                                      # difference = KVL + residual (+ the decomposition's check deviation)
         assert abs(mm["total_eur"][p] - mm["kvl_loop_transfer_eur"].get(p, 0.0) - mm["residual_eur"][p] - mm["unexplained_eur"][p]) <= 1e-3
     assert o["identity"]["relative_error"] == abs(o["identity"]["players_sum"] - o["identity"]["objective"]) / abs(o["identity"]["objective"])
+    b = o["bunker_standalone"]                                                                # D10: strict standalone cost of the bunker
+    assert b["passed"] and b["owen_dual_alpha_half_eur"] <= b["strict_standalone_cost_eur"]
+    assert abs(sum(v["cost_eur"] for v in b["by_bus"].values()) - b["strict_standalone_cost_eur"]) <= 1e-3
+    av = [v for k, v in b["by_bus"].items() if "aviation" in k][0]
+    assert av["excluded"] == ["ASEAN aviation international oil meter"] and all("non-fossil" in c for c in av["chosen"])
     ls = o["length_split_eur"]                                                                # D2: length split keeps the total, inside the interval
     assert abs(sum(ls[p] for p in M.PLAYERS) - sum(o["allocation_eur"]["0.5"][p] for p in M.PLAYERS)) <= 1e-6 * abs(o["identity"]["objective"])
     assert all(o["interval_eur"][p]["min"] - 1e-3 <= ls[p] <= o["interval_eur"][p]["max"] + 1e-3 for p in M.PLAYERS)
@@ -519,6 +545,13 @@ def test_benefit_main_value_is_dual_form(tmp_path):
     assert r["owen"]["benefit_eur"]["VN"] == 3.0 and r["owen"]["benefit_eur"]["LA"] == 1.0 and r["owen"]["benefit_eur"][M.BUNKER] == -1.0
     assert r["market_form"]["benefit_eur"]["VN"] == 2.0 and r["market_form"]["market_minus_main_benefit_eur"]["VN"] == -1.0
     assert abs(r["owen"]["benefit_interval_eur"]["VN"]["min"] - 2.9) <= 1e-12                # the dual form's interval, not the market form's
+    assert r["bunker"]["negative"] and r["bunker"]["benefit_eur"] == -1.0 and r["bunker"]["strict_standalone_cost_eur"] is None   # D10: reported as it is
+    o = json.loads((I / "m12_owen" / "OWEN.json").read_text())
+    o["bunker_standalone"] = dict(strict_standalone_cost_eur=4.5, passed=True)
+    (I / "m12_owen" / "OWEN.json").write_text(json.dumps(o))
+    r1 = M.benefit(I, D, tmp_path / "o1", ROOT)
+    assert r1["bunker"]["integrated_within_standalone"] and r1["bunker"]["disconnected_within_standalone"] and "pecuniary externality" in r1["bunker"]["interpretation"]
+    assert "燃料舱参与者（补充 01 D10）" in (tmp_path / "o1" / "BENEFIT.md").read_text()
     (I / "m12_owen" / "OWEN.json").unlink()
     r2 = M.benefit(I, D, tmp_path / "o2", ROOT)
     assert r2["main_form"].startswith("market_settlement_form") and r2["owen"]["benefit_eur"]["VN"] == 2.0

@@ -278,6 +278,64 @@ def load_energy_twh(n) -> dict:
     return out
 
 
+def bunker_standalone(n) -> dict:
+    """Strict standalone cost of the bunker player (supplement 01 D10; arithmetic on the network, no solve): the bunker has no resource, so it
+    meets its loads with extra-ASEAN imports only - for every bunker load bus and snapshot the cheapest admissible route
+    import generator (on the pool) -> metering link -> bunker bus, unit cost = generator marginal cost / meter efficiency + meter marginal
+    cost (+ capital costs on the peak flow when the meter or the import is extendable with a capital cost). A meter that emits into the
+    bunker CO2 account (port to a BUNKER-entity bus with positive efficiency) is not admissible: the bunker net-zero row
+    (research_bunker_co2_limit) with no removal route into that account (checked) allows no fossil supply. Upper bound of c({BUNKER}) of the
+    matrix game (a feasible plan of the bunker alone)."""
+    from s4d_ledger import BUNKER as LB, POOL, bus_entities
+    ent = bus_entities(n); w = n.snapshot_weightings.objective
+    bb = set(ent.index[ent == LB])
+    co2b = {b for b in bb if "co2" in str(n.buses.at[b, "carrier"]).lower()}
+    lk = n.links
+    ports = [c[3:] for c in lk.columns if c.startswith("bus") and c[3:].isdigit() and c != "bus0"]
+    removal = []   # anything that can lower the bunker CO2 account: withdrawals from it or negative injections into it
+    for p in ports:
+        eff = lk["efficiency" if p == "1" else f"efficiency{p}"] if ("efficiency" if p == "1" else f"efficiency{p}") in lk else pd.Series(1.0, index=lk.index)
+        removal += list(lk.index[lk[f"bus{p}"].isin(co2b) & (eff < 0)])
+    removal += list(lk.index[lk.bus0.isin(co2b)]) + list(n.generators.index[n.generators.bus.isin(co2b)])
+    loads = n.loads[n.loads.bus.isin(bb - co2b)]
+    if not len(loads):
+        return dict(computable=False, reason="no bunker load in this network")
+    P = n.get_switchable_as_dense("Load", "p_set")[loads.index].T.groupby(loads.bus).sum().T
+    gmc = n.get_switchable_as_dense("Generator", "marginal_cost"); lmc = n.get_switchable_as_dense("Link", "marginal_cost")
+    imp = n.generators[n.generators.carrier.astype(str).str.contains("import") & n.generators.bus.map(ent).isin([POOL, LB])]
+    out, total, notes = {}, 0.0, []
+    for b in P.columns:
+        routes, excluded = {}, []
+        for m, r in lk[lk.bus1 == b].iterrows():
+            emits = [p for p in ports if p != "1" and str(r.get(f"bus{p}", "")) in co2b and float(r.get(f"efficiency{p}", 0.0) or 0.0) > 0]
+            if emits:
+                excluded.append(dict(meter=m, pool=r.bus0, reason="emits into the bunker CO2 account (fossil): excluded by the bunker net-zero"))
+                continue
+            for g, q in imp[imp.bus == r.bus0].iterrows():
+                unit = gmc[g] / float(r.efficiency) + lmc[m]
+                cap = (float(r.capital_cost) if r.p_nom_extendable else 0.0) + (float(q.capital_cost) / float(r.efficiency) if q.p_nom_extendable else 0.0)
+                lim = min(float(r.p_nom_max) if r.p_nom_extendable else float(r.p_nom), (float(q.p_nom_max) if q.p_nom_extendable else float(q.p_nom)) * float(r.efficiency))
+                routes[f"{g} -> {m}"] = dict(generator=g, meter=m, pool=r.bus0, carrier=str(q.carrier), unit_cost=unit, capital_cost_per_mw_delivered=cap, limit_mw=lim)
+        if not routes:
+            out[b] = dict(computable=False, excluded=excluded, reason="no admissible import route")
+            notes.append(f"{b}: no admissible import route"); total = np.nan; continue
+        U = pd.DataFrame({k: v["unit_cost"] for k, v in routes.items()})
+        best = U.idxmin(axis=1); unit = U.min(axis=1)
+        energy = P[b].mul(w)
+        cost_e = float((energy * unit).sum())
+        peak = float(P[b].max()); cap_cost = float(max(routes[k]["capital_cost_per_mw_delivered"] for k in best.unique()) * peak)
+        short = [k for k in best.unique() if routes[k]["limit_mw"] < peak]
+        if short:
+            notes.append(f"{b}: route capacity below the peak load for {short}")
+        out[b] = dict(computable=True, energy_twh=float(energy.sum() / 1e6), peak_mw=peak, routes=routes, chosen=sorted(best.unique()), excluded=excluded,
+                      unit_cost_min=float(unit.min()), unit_cost_max=float(unit.max()), energy_cost_eur=cost_e, capacity_cost_eur=cap_cost, cost_eur=cost_e + cap_cost)
+        total += cost_e + cap_cost
+    if removal:
+        notes.append(f"a removal route into the bunker CO2 account exists ({removal[:5]}): fossil supply would not be excluded by the net-zero alone")
+    return dict(computable=bool(np.isfinite(total)), total_eur=float(total), by_bus=out, bunker_co2_buses=sorted(co2b), removal_routes_into_bunker_co2=removal[:20],
+                notes=notes, definition="strict standalone cost of the bunker player: extra-ASEAN non-fossil imports through the metering links only (D10)")
+
+
 def allocation_from_network(n, length_shares: pd.DataFrame | None = None) -> dict:
     """Owen allocation (market-settlement form) of a solved network: ledger of s4d_ledger (rules of decision 91a), corridors split with alpha."""
     from s4d_ledger import country_cost_ledger
@@ -605,11 +663,22 @@ def _dual_alloc(run_dir: Path, override: Path | None) -> dict | None:
             usable = r.get("usable_for_allocation")
             if (Path(run_dir) / "PRECISION.json").exists():   # after a regrade (D9) the run's C1 (c) may differ from the one OWEN.json saw
                 usable = bool(ip and pp is not False and precision_context(Path(run_dir)).get("c_passed") is not False)
-            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=usable, identity_passed=ip, premise_passed=pp)
+            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=usable, identity_passed=ip, premise_passed=pp,
+                        bunker_standalone=r.get("bunker_standalone"))
         d = r.get("dual_form") or {}
         if d.get("allocation_alpha_half"):
             return dict(allocation=d["allocation_alpha_half"], interval=d.get("interval"), source=str(p), usable=None, identity_passed=None, premise_passed=None)
     return None
+
+
+def _bunker_block(ben: dict, pI: dict, pD: dict, bs: dict) -> dict:
+    """D10: the bunker player's benefit reported as it is, with the core check against its strict standalone cost (integrated OWEN.json)."""
+    sa = bs.get("strict_standalone_cost_eur")
+    return dict(benefit_eur=ben[BUNKER], negative=bool(ben[BUNKER] < 0), integrated_eur=pI[BUNKER], disconnected_eur=pD[BUNKER], strict_standalone_cost_eur=sa,
+                integrated_within_standalone=bs.get("passed"), disconnected_within_standalone=(bool(pD[BUNKER] <= sa) if sa is not None else None),
+                interpretation="supplement 01 D10: a negative bunker benefit is reported as it is - integration changes the liquid-fuel pool prices and the bunker, "
+                               "a pure price taker without resources that cannot opt out, bears that pecuniary externality; this is not a breach of individual "
+                               "rationality, whose test is the Owen share <= the strict standalone cost (extra-ASEAN non-fossil imports only)")
 
 
 def _loo_marginals(loo_check: Path | None) -> tuple[dict, str | None]:
@@ -701,6 +770,7 @@ def benefit(int_dir: Path, dis_dir: Path, out: Path, repo: Path, int_dual: Path 
                      "benefit is never negative, so 'negative benefit' is not a test of (A). Only countries with a leave-one-out run.",
                    B="payment_i = s_i x (c(N) - phi_BUNKER - SHARED) of the integrated run; test (individual rationality): payment_i <= disconnected "
                      "allocation_i (+ the C1 (b) tolerance)"),
+               bunker=_bunker_block(ben, pI, pD, (dI or {}).get("bunker_standalone") or {}),
                loo_check_source=lc_src, tolerance_source=tol_src, owen_checks=owen_chk,
                weights_main=list(WEIGHTS_MAIN), weights_comparison=list(WEIGHTS_COMPARISON),
                weights_note="supplement 01 D5: population AEO8 D.1 (+ UN WPP 2024 TL), GDP AEO8 D.2 (TL by the M08b rule), electricity = the model's fixed / base "
@@ -758,6 +828,12 @@ def markdown_benefit(r: dict) -> str:
                  + " | ".join(bn(r["proportional"][k]["B_split_total"]["payment_eur"][c]) + mark(r["proportional"][k]["B_split_total"]["ir_check"][c]["passed"]) for k in ks) + " |")
     L += ["", "（✗ = 支付超过不互联分摊，违反个体理性。）", "",
           "(B) 个体理性未通过：" + "；".join(f"{k}：{', '.join(r['proportional'][k]['B_split_total']['ir_violations']) or '无'}" for k in ks), ""]
+    bk = r["bunker"]
+    L += ["## 燃料舱参与者（补充 01 D10）", "",
+          f"- 受益 = 不互联 {bn(bk['disconnected_eur'])} − 一体化 {bn(bk['integrated_eur'])} = **{bn(bk['benefit_eur'])} bn**（{'为负，照实报告' if bk['negative'] else '非负'}）。",
+          f"- 严格单独成本（只用区域外非化石进口）：{bn(bk['strict_standalone_cost_eur'])} bn；一体化份额 ≤ 单独成本：**{bk['integrated_within_standalone']}**；"
+          f"不互联份额 ≤ 单独成本：{bk['disconnected_within_standalone']}。",
+          "- 解释：一体化改变液体燃料池价格，燃料舱作为没有资源、不能退出的纯价格接受者承担这一金钱外部性；不视为违反个体理性，个体理性的检验是 Owen 份额 ≤ 严格单独成本。", ""]
     L += [f"- {x}" for x in r["notes"]]
     L += [f"- 预算残差 {r['rule_budget_residual_eur']:,.0f} EUR（池盈余变化）。", f"- 权重来源：{r['socio_sources']}"]
     m = r["market_form"]
