@@ -7,6 +7,8 @@ are solved explicitly: the Owen allocation is in the core, the identity holds, a
 net purchases at the nodal duals - net rent share) equals the dual form y' b; every alpha in [0, 1] of the degenerate half-line rows is in the core."""
 from __future__ import annotations
 
+import json
+import os
 import sys
 from pathlib import Path
 
@@ -222,6 +224,28 @@ def test_toy_shared_rhs_breaks_attribution_until_assigned():
         cost[S] = L.solve(lo_override=loS, hi_override=hiS)["obj"] + sum(s * v for k, v in CONST.items() for p, s in M.shares(k, 0.5).items() if p in S)
     assert abs(sum(phi2[p] for p in P3) - cN) <= 1e-9 * cN
     assert M.core_violations({p: phi2[p] for p in P3}, cost, tol=1e-7) == []
+
+
+SMOKE = Path(os.environ.get("M12_SMOKE_DIR", str(ROOT / "results_project/s4o/s4o3/solves/s4o_integrated")))   # local 56x3h S4O-3 solve (git-ignored)
+
+
+@pytest.mark.skipif(not (SMOKE / "integrated_SMOKE_TEST_ONLY_solved.nc").exists(), reason="local 56x3h smoke solve (results_project, git-ignored) not present")
+def test_network_allocation_on_local_smoke(tmp_path):
+    """market-settlement form on a real solved network: B16 identity, alpha 0.5 = the current ledger entity by entity, corridor table = the
+    ledger's, totals independent of alpha, outputs registered in EXPORTS.json (copy of the run dir; the original is not touched)."""
+    res = M.run(SMOKE / "integrated_SMOKE_TEST_ONLY_solved.nc", "integrated", tmp_path, SMOKE, "TEST", ROOT, register=True)
+    assert res["computable"] and res["identity"]["passed"] and res["identity"]["relative_error_incl_shared"] <= 1e-9
+    assert res["checks"]["ledger_alpha_half_max_abs_dev_eur"] <= 1e-3 and res["checks"]["corridor_table_max_abs_dev_eur"] <= 1e-3
+    tot = [sum(v[p] for p in M.PLAYERS) for v in res["allocation_eur"].values()]
+    assert max(tot) - min(tot) <= 1e-6 * abs(res["objective"])
+    for p in M.PLAYERS:
+        it = res["interval_eur"][p]
+        assert it["min"] - 1e-3 <= res["allocation_eur"]["0"][p] <= it["max"] + 1e-3 and it["min"] - 1e-3 <= res["allocation_eur"]["1"][p] <= it["max"] + 1e-3
+    ex = json.loads((tmp_path / "EXPORTS.json").read_text())
+    assert {"ALLOCATION.json", "ALLOCATION.csv", "ALLOCATION.md", "ALLOCATION_LINES.csv"} <= set(ex)
+    assert res["s4p_rules"]["applicable"]
+    for c, v in res["s4p_rules"]["by_country_eur"].items():   # (ii) - its same-proportion counterpart = +/- half of the corridor infrastructure costs
+        assert abs(v["ii_rent_to_importer_minus_same_proportion"] + v["iii_rent_to_exporter_minus_same_proportion"]) <= 1e-3
 
 
 def test_scrb_and_proportional_sum_to_total():
