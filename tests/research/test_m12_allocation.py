@@ -517,10 +517,10 @@ def test_runner_hooks_after_c1_before_acceptance(tmp_path):
         (nets / f"{sc}_costs_active_research.csv").write_text("technology\n")
         (nets / f"{sc}_BUILD_RECEIPT.json").write_text(json.dumps(dict(network=dict(sha256=hashlib.sha256(f"{sc}2920_3h".encode()).hexdigest()),
                                                                      daily_network=dict(sha256=hashlib.sha256(f"{sc}365_24h".encode()).hexdigest(), snapshots=365))))
-    (out / "integrated_A_minusVN").mkdir(parents=True); (out / "integrated_A_minusVN" / "SOLVE_RECEIPT.json").write_text(json.dumps(dict(objective=1.0)))
     py = sys.executable
     env = dict(os.environ, RUN_KIND="level2", REPO=str(ROOT), NETS=str(nets), OUT=str(out), PY=py, SOLVE_CMD=f"{py} {fake} solve", VA_CMD=f"{py} {fake} va",
-               C1_CMD=f"{py} {fake} c1", FAKE_OBJ_formal_barrier="1e11", FAKE_OBJ_formal_barrier_1e6_t16="100000000400")
+               C1_CMD=f"{py} {fake} c1", VAR_CMD=f"{py} {fake} variants", FAKE_OBJ_formal_barrier="1e11", FAKE_OBJ_formal_barrier_1e6_t16="100000000400")
+    env.pop("PYTHONHASHSEED", None)                                                          # the runner sets it for the variant generation itself
     p = subprocess.run(["bash", str(ROOT / "scripts_project/m08a_run_batch.sh")], env=env, capture_output=True, text=True, timeout=900)
     assert p.returncode == 0, p.stderr[-800:]
     st = (out / "STATUS.txt").read_text().splitlines()
@@ -530,9 +530,24 @@ def test_runner_hooks_after_c1_before_acceptance(tmp_path):
         ex = json.loads((out / tag / "EXPORTS.json").read_text())
         assert {"ALLOCATION.json", "ALLOCATION.md"} <= set(ex)                               # registered (fake runs: no solved network -> not computable)
         assert json.loads((out / tag / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" if tag.endswith("CAND") else True
-    assert pos("REFERENCE_A:") < pos("M12_BENEFIT_A:exit=0") < pos("V6_integrated_A:")
+    assert pos("REFERENCE_A:") < pos("M12_LOO_integrated_A:exit=0:runs=3") < pos("M12_BENEFIT_A:exit=0:loo_check=2") < pos("V6_integrated_A:")
     assert json.loads((out / "M12_BENEFIT_A" / "BENEFIT.json").read_text())["computable"] is False
-    assert any(x.startswith("M12_LOO_integrated_A:exit=0:runs=1") for x in st)
+    # supplement 01 D7: variants generated in the run from the 365x24h integrated base (no stale switch), solved once each with profile A
+    calls = (out / "CALLS.txt").read_text().splitlines()
+    cpos = lambda s: calls.index(s)   # noqa: E731
+    assert cpos("solve disconnected_A formal_barrier 21600") < cpos("variant VN stale=False") < cpos("solve integrated_A_minusVN formal_barrier 21600") \
+        < cpos("solve integrated_A_minusLA formal_barrier 21600") < cpos("solve integrated_CAND formal_barrier_1e6_t16 21600")
+    assert "REFERENCE_A:done:loo_regraded=3" in st and all(f"regrade integrated_A_minus{c}" in calls for c in ("VN", "TH", "LA"))
+    for c in ("VN", "TH", "LA"):
+        rc = json.loads((out / "variants" / f"integrated_minus{c}_365_24h_VARIANT_RECEIPT.json").read_text())
+        net = out / "variants" / f"integrated_minus{c}_365_24h_unsolved.nc"
+        assert rc["output"]["sha256"] == hashlib.sha256(net.read_bytes()).hexdigest() and f"VARIANT_{c}:sha256={rc['output']['sha256']}" in st
+        r = json.loads((out / f"integrated_A_minus{c}" / "SOLVE_RECEIPT.json").read_text())
+        assert r["input_network"]["path"] == str(net) and r["costs_table"].endswith("integrated_costs_active_research.csv")
+        acc = json.loads((out / f"integrated_A_minus{c}" / "V6_ACCEPTANCE.json").read_text())
+        assert acc["label"] == "ACCEPTED_LAYER2" and acc["G2"]["G2_1"]["registered_sha256"] == rc["output"]["sha256"]
+        assert pos(f"M12_integrated_A_minus{c}:exit=0") < pos("REFERENCE_A:")
+    assert not any(x.startswith("solve integrated_CAND_minus") for x in calls)                # profile A only
 
 
 def test_scrb_and_proportional_sum_to_total():

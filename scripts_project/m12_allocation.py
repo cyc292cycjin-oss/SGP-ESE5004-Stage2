@@ -779,9 +779,11 @@ def loo(full_dir: Path, loo_dirs: dict, out: Path, reference: Path | None, stand
     for c, d in sorted(loo_dirs.items()):
         r = json.loads((Path(d) / "SOLVE_RECEIPT.json").read_text())
         c_loo[c] = float(r["objective"])
+        pc_ = precision_context(Path(d))
         same[c] = dict(profile=r.get("solver_profile") == rf.get("solver_profile"),
                        snapshots=(r.get("input_network") or {}).get("snapshots") == (rf.get("input_network") or {}).get("snapshots"),
-                       termination=r.get("termination_condition"))
+                       termination=r.get("termination_condition"), input_network=(r.get("input_network") or {}).get("path"),
+                       input_network_sha256=(r.get("input_network") or {}).get("sha256"), c1_grade=pc_.get("grade"), c1_accepted=pc_.get("accepted"))
     lines = pd.read_csv(Path(full_dir) / "ALLOCATION_LINES.csv") if (Path(full_dir) / "ALLOCATION_LINES.csv").exists() else pd.DataFrame()
     sunk = {}
     for c in c_loo:   # the variant removes the corridors to c with their existing FOM: the other country's half of it is not in c(N - c)

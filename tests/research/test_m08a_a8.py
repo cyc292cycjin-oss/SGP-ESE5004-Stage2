@@ -151,7 +151,7 @@ def _nets(tmp: Path):
 def _run(tmp, kind, env_extra):
     py = sys.executable
     env = dict(os.environ, RUN_KIND=kind, REPO=str(ROOT), NETS=str(tmp / "nets"), OUT=str(tmp / "out"), PY=py,
-               SOLVE_CMD=f"{py} {FAKE} solve", VA_CMD=f"{py} {FAKE} va", C1_CMD=f"{py} {FAKE} c1", **env_extra)
+               SOLVE_CMD=f"{py} {FAKE} solve", VA_CMD=f"{py} {FAKE} va", C1_CMD=f"{py} {FAKE} c1", VAR_CMD=f"{py} {FAKE} variants", **env_extra)
     return subprocess.run(["bash", str(ROOT / "scripts_project/m08a_run_batch.sh")], env=env, capture_output=True, text=True, timeout=600)
 
 
@@ -160,13 +160,15 @@ def test_runner_level2_then_formal(tmp_path):
     p = _run(tmp_path, "level2", {"FAKE_OBJ_formal_barrier": "1e11", "FAKE_OBJ_formal_barrier_1e6_t16": "100000000400"})
     assert p.returncode == 0, p.stderr[-800:]
     out = tmp_path / "out"
-    calls = (out / "CALLS.txt").read_text().splitlines()
-    assert sorted(calls) == sorted([f"solve {sc}_{t} {pr} 21600" for sc in ("integrated", "disconnected") for t, pr in (("A", "formal_barrier"), ("CAND", "formal_barrier_1e6_t16"))])
+    calls = [x for x in (out / "CALLS.txt").read_text().splitlines() if x.startswith("solve ")]
+    loo = [f"solve integrated_A_minus{c} formal_barrier 21600" for c in ("VN", "TH", "LA")]                    # M12 supplement 01 D7: third batch only
+    assert sorted(calls) == sorted([f"solve {sc}_{t} {pr} 21600" for sc in ("integrated", "disconnected") for t, pr in (("A", "formal_barrier"), ("CAND", "formal_barrier_1e6_t16"))] + loo)
     assert json.loads((out / "PROFILE_CHOICE.json").read_text())["profile"] == "formal_barrier_1e6_t16"      # rel diff 4e-9 <= 1e-5, C1 all passed
     assert json.loads((out / "integrated_CAND" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2"
+    n2 = len(calls)
     p = _run(tmp_path, "formal", {"FAKE_C1_integrated": "000"})                                                  # first formal run NOT_ACCEPTED -> stop
     assert p.returncode == 0, p.stderr[-800:]
-    calls = (out / "CALLS.txt").read_text().splitlines()[4:]
+    calls = [x for x in (out / "CALLS.txt").read_text().splitlines() if x.startswith("solve ")][n2:]
     assert calls == ["solve integrated formal_barrier_1e6_t16 172800.0"]                                         # once, 48 h, no retry, disconnected not started
     st = (out / "STATUS.txt").read_text()
     assert "STOP_NOT_ACCEPTED:integrated" in st and (out / "STOP_NOT_ACCEPTED").exists()
