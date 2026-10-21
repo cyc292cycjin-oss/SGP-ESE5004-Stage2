@@ -149,7 +149,7 @@
 ## 6. 交付
 
 - `work/p1_m12b_20261021/`，镜像到 `research/06_scope_redesign/p1_m12b_20261021/`：本报告、`M12B_PROGRESS.md`、指令及 SHA256、`evidence/`、`scripts/`（`m12b_loo.sh`、`m12b_prep.sh`、`m12b_loops.py`、`m12b_analysis.py`、`m12b_xb_lines.py`、`m12b_collect.sh` 等）。
-- 台账 `research/STAGE2_PROJECT_LEDGER.md` 新增 M12b 条目。draft PR 叠在 #46 上，提交与链接见 `M12B_PROGRESS.md`。
+- 台账 `research/STAGE2_PROJECT_LEDGER.md` 新增 M12b 条目（原文 `M12B_LEDGER_ENTRY.md`）。draft PR [#48](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/48)（base `codex/m12-allocation-20261021`，叠在 #46 上）；提交链 3cf5a940（合并）→ 1b3a0cf6（第 138 项）→ fcd19202（准备）→ 76b5411b（运行、检验、报告）→ 收尾提交。审阅 ZIP `M12B_REVIEW.zip`，含工作目录与 3 个仓库文件，SHA256 见 `M12B_REVIEW_ZIP_SHA256.txt`，逐成员清单见 `M12B_REVIEW_MANIFEST.csv`；ZIP 本身不入库。
 - 运行结果（`results_project/m12b/`）未入库：被 git 忽略，只提交轻量证据。
 
 完成后停止，等待审阅。

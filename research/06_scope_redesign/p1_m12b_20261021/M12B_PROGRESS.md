@@ -13,8 +13,10 @@
 | 2.2 | 11 次去一国求解（用户 2026-10-21 13:29Z 授权，云端无运行经用户确认；`scripts/m12b_loo.sh`，提交 fcd19202 dirty 0）：13:29–15:34Z 串行，间隔 332–333 s；10 次 optimal、SG suboptimal（内点停滞后返回，C1 (a) 0.0021 bn）；11 次 C1 (a)(b)(c) 全过、GATES_V6 ACCEPTED_LAYER2、右端项检查通过 | 完成 | 结果随下一提交 |
 | 3 | 检验（`scripts/m12b_analysis.py`，`evidence/M12B_RESULT.json`）：11 国违反量全为 0（φᵢ − c′(i) 最小 BN +0.002 bn），市场形式全部通过，不可分成本 +88.6 bn（11 国部分 +12.6 bn）；**事先登记的规则 → 维持现有建模** | 完成 | 同上 |
 | 4 | 备选方案评估（`evidence/M12B_ALTERNATIVE_ASSESSMENT.md`）：62 条跨境交流线 / 2,570 MW；约 8–10 个文件、120–200 行；四网络重建；对 PyPSA-Eur 结构性偏离；不实施 | 完成 | 同上 |
-| 5 | 报告 `M12B_REPORT.md`、台账 M12b 条目、draft PR（叠在 #46 上）、审阅 ZIP | 进行中 | — |
+| 5 | 报告 `M12B_REPORT.md`、台账 M12b 条目（`M12B_LEDGER_ENTRY.md` 原文追加到总台账末尾）、全量测试 579 passed / 65 skipped / 0 failed（fcd19202）、draft PR [#48](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/48)（base `codex/m12-allocation-20261021`，叠在 #46 上）、审阅 ZIP `M12B_REVIEW.zip`（`M12B_REVIEW_ZIP_SHA256.txt`、`M12B_REVIEW_MANIFEST.csv`） | 完成 | 3cf5a940 → 1b3a0cf6 → fcd19202 → 76b5411b → 收尾提交 |
 
 ## 接续点
 
-- 工具脚本（WSL）：`/home/jin/m12b_merge.sh`（第 1.1 步，已执行）、`/home/jin/m12b_commit.sh`（镜像 + 提交，消息 `/home/jin/m12b_msg.txt`）。
+- **全部完成（2026-10-21 23:45 SGT）：** 第 1–5 节完成，判定"维持现有建模"；按指令停止，等待审阅。
+- 运行结果：主检出 `results_project/m12b/`（`full_{integrated,disconnected}` 为对 M08b smoke_s01 的符号链接 + M12 输出；`variants/`；`integrated_minus<CC>/`；`LOO_CHECK/`；`STATUS.txt`）。
+- 工具脚本（WSL）：`/home/jin/m12b_merge.sh`（第 1.1 步，已执行）、`/home/jin/m12b_commit.sh`（镜像 + 提交，消息 `/home/jin/m12b_msg.txt`）、`/home/jin/m12b_tests.sh`（`FULL=1` 全量）、`/home/jin/m12b_loo.sh`（= `scripts/m12b_loo.sh`，已执行；已有回执的运行跳过，不重解）；其余在 `scripts/`。
