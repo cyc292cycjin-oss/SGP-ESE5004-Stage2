@@ -264,6 +264,12 @@ def main(a):
                                                                kirchhoff_row_normalisation=(_pub(kvl_led) if kvl_led else dict(applied=False)))
         run.update(input_network=dict(path=str(a.network), sha256=net_sha, snapshots=int(len(n.snapshots)), truncated_to=a.truncate, horizon_scaling=scaling),
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
+        try:   # M08a A8 (GATES_V6 G2.2): configuration-subset hash recorded at build vs re-derived from the current config files + the network's overrides
+            from v5.v5_gates import replay_research_config
+            from v5.gates_v6 import config_subset_sha256
+            run["config_subset"] = dict(network=n.meta.get("research_config_subset_sha256"), current=config_subset_sha256(replay_research_config(n, cfg)[0]))
+        except Exception as e:   # recorded; G2.2 then fails (no subset hash)
+            run["config_subset"] = dict(network=n.meta.get("research_config_subset_sha256"), current=None, error=str(e)[:200])
         save(out / "SOLVE_RECEIPT.json", run)
         if a.solver == "gurobi" and profile:   # S3B R4 (decision 69): research.solver.profiles (PyPSA-Eur v2025.07.0 gurobi-default lines 1056-1064 as basis)
             params = profile_parameters(SV["profiles"], profile, a.time_limit)

@@ -41,6 +41,7 @@ from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
 from m08a_layers import apply_existing_vintage_costs
+from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -396,7 +397,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         add_gap_slack(n, S2["gap_diagnostic"], nodes)
     n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
                                   scenario=scenario, solver_allowed=False, scientific_results_allowed=False, fullsc_network_complete=False, input_coverage_complete=False,
-                                  research_config=R, research_config_sha256=config_sha(R), fuel_bus_rename_map=rename_map, atmosphere_port_moves=moves, u4_zeroed_carriers=u4,
+                                  research_config=R, research_config_sha256=config_sha(R), research_config_subset_sha256=config_subset_sha256(R),   # M08a A8: GATES_V6 G2.2 subset hash
+                                  fuel_bus_rename_map=rename_map, atmosphere_port_moves=moves, u4_zeroed_carriers=u4,
                                   upstream_adapter=injected, upstream_add_hydrogen=h2, candidate_ledger=dict(nuclear=nuclear, sites=sites, extendable=extendable),
                                   cross_border_tags=tags, demand_binding=demand_astar, electric_base_sha256=ELECTRIC_BASE_SHA, physical_carbon_map=carbon,
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
@@ -447,7 +449,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                                                                                   ("readjust_impedance", readjust.get("table")),
                                                                                                                   ("la_vn_stock", la_vn_stock.get("table"))] if f}),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
-                   research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
+                   research_config_sha256=config_sha(R), research_config_subset_sha256=config_subset_sha256(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,
                    static_validation=static, inventory=inventory, candidates=dict(nuclear=len(nuclear), sites=len(sites), extendable=extendable), optional_string_normalisation=normalise,
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)

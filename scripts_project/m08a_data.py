@@ -329,7 +329,40 @@ def a7(reg: Registry, cor: Corrections):
             "m08a_variants.py", "rule", "B", "M08A instruction A7", "scripts_project/m08a_variants.py", var_sha, decision_ref="132, 133")
 
 
-def main(steps=("a2", "a3", "a4", "a5", "a7")):
+# --- A8 (M08-9, decisions 128, 133): GATES_V6 and the pre-registered run rules -----------------------------------------------
+def a8(reg: Registry, cor: Corrections):
+    gdef = ROOT / "research/06_scope_redesign/p1_step4r_20261020/GATES_V6.md"
+    notes = ROOT / "research/06_scope_redesign/p1_step4r_20261020/GATES_V6_NOTES.md"
+    g6 = ROOT / "scripts_project/v5/gates_v6.py"; runner = ROOT / "scripts_project/m08a_run_batch.sh"
+    cfg_sha = sha256(ROOT / "configs/research/baseline.yaml")
+    reg.add("gates_v6_contract", "R8 / decision 128 / M08a A8 (decision 133): GATES_V6.md (SHA256 5c0aa8b8...7f9, unchanged): criteria = C1 (a)(b)(c) + structural checks G2.1 network SHA256 "
+            "(+ A4 read-back), G2.2 configuration-subset hash (written into the network meta at build: research_config_subset_sha256; compared with the current config + the network's "
+            "overrides at solve time), G2.3 result completeness; all other gates diagnostics D0-D16 with absolute + relative budgets tied to FeasibilityTol / OptimalityTol / BarConvTol "
+            "(dual budget 10 x max(OptimalityTol, BarConvTol)); labels ACCEPTED_LAYER2 / ACCEPTED_LAYER1 / NOT_ACCEPTED; implementation scripts_project/v5/gates_v6.py; "
+            "config research.solver.acceptance = gates_v6", "see_file", "flag", "B", str(gdef.relative_to(ROOT)), "GATES_V6_SHA256.txt; scripts_project/v5/gates_v6.py",
+            sha256(gdef), decision_ref="128, 133")
+    reg.add("gates_v6_d2_budget_note", "R8 (S4R supplement 01 section 4): D2 dual budget multiplier k = 10 KEPT, GATES_V6.md unchanged; GATES_V6_NOTES.md records that barrier solutions "
+            "without crossover carry a normalised dual-sign error of ~40-240 x BarConvTol on the 56x3h OPTIMAL runs (S4M-2 at 1e-8, S4Q at 1e-6) and ~1e-2 on every 365x24h solution "
+            "regardless of BarConvTol (S4N pilot 8.6e-3, S4O-6 / L23 4e-2-3e-1); D2 is a diagnostic only, acceptance = G1 (C1) + G2; anomaly note when the D2 ratio exceeds 10 x the "
+            "group history (gates_v6.D2_HISTORY_MAX); a k = 100 variant would need a V6.1 definition", 10, "dimensionless", "B", "GATES_V6_NOTES.md; GATES_RETRO_COMPARISON.csv",
+            "GATES_V6_NOTES.md sections 2-4", sha256(notes), decision_ref="128, 129")
+    reg.add("gates_v6_g22_subset_m08a_additions", "M08a A8 (decision 133): implementation of G2.2 = the literal GATES_V6 key list PLUS cost_layer (whole section: rebase_index, layer files, "
+            "smr_cost_source, aeo8_price_year_factor - the list names cost_layer.active only), site_candidates and the new variant sections disconnected / coalition (decision 132), by "
+            "the G2.2 purpose 'configuration subset that decides the network and the LP'; excluded as in GATES_V6: solver.profile, solver.profiles, solver.acceptance, solver.run_rules; "
+            "GATES_V6.md unchanged - flagged for the user's confirmation", "cost_layer;site_candidates;disconnected;coalition", "list", "C", "scripts_project/v5/gates_v6.py SUBSET_KEYS_M08A_ADDITIONS",
+            "gates_v6.py", sha256(g6), decision_ref="128, 132, 133")
+    reg.add("run_rule_profile_chain", "M08a A8 (decision 133), registered BEFORE the third / fourth batches: formal-run profile chain - first the 365x24h level-2 runs (decision 127) of "
+            "formal_barrier_1e6_t16 vs profile A (formal_barrier) in every level-2 scenario: if C1 (a)(b)(c) all pass AND |objective - profile A| / |profile A| <= 1e-5 the formal runs "
+            "use formal_barrier_1e6_t16, otherwise profile A; the BarConvTol 1e-5 profile (pypsa_eur_default) is never a fallback (decision 121 evidence); research.solver.run_rules."
+            "profile_chain; gates_v6.select_formal_profile; runner scripts_project/m08a_run_batch.sh (RUN_KIND level2 -> PROFILE_CHOICE.json)", "formal_barrier_1e6_t16_else_formal_barrier",
+            "rule", "B", "M08A instruction A8 item 2", "configs/research/baseline.yaml research.solver.run_rules", cfg_sha, decision_ref="121, 123, 127, 133")
+    reg.add("run_rule_formal_2920", "M08a A8 (decision 133), registered BEFORE the runs: acceptance by GATES_V6; a formal 2920x3h run must pass C1 (c) to be used for the allocation "
+            "(the Owen allocation uses the duals; ACCEPTED_LAYER1 = total cost only); TimeLimit 48 h (172,800 s); a run that does not converge is graded by C1 as returned - no retry, "
+            "no parameter change; the runner stops the batch at the first NOT_ACCEPTED run (user decision); gates_v6.formal_run_decision; scripts_project/m08a_run_batch.sh RUN_KIND formal",
+            172800.0, "s", "B", "M08A instruction A8 item 2", "configs/research/baseline.yaml research.solver.run_rules", sha256(runner), decision_ref="119, 128, 133")
+
+
+def main(steps=("a2", "a3", "a4", "a5", "a7", "a8")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)
