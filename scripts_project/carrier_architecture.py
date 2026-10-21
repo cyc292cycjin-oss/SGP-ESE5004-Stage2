@@ -20,6 +20,13 @@ ATMOSPHERE_CARRIER='co2 atmosphere'
 LEGACY_ATMOSPHERE='ReportingCO2 atmosphere'
 
 
+def network_countries(n):
+    """M08a A7 (decision 132): countries of a network - n.meta['research_countries'] after a coalition.remove_countries variant
+    (scripts_project/m08a_variants.py), otherwise the 11."""
+    c = (getattr(n, 'meta', None) or {}).get('research_countries')
+    return set(c) if c else set(COUNTRIES)
+
+
 def atmosphere_bus(country):
     """National atmosphere accounting bus (S1-5). Emissions are attributed to the country of the emitter."""
     if country not in COUNTRIES:raise ValueError('Atmosphere bus requires an ASEAN country')

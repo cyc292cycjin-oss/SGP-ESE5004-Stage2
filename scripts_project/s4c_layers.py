@@ -69,7 +69,7 @@ from s2_costs import annuity, fuel_price_ids, fuel_price_scenario, registry_valu
 # carrier of a new-build component -> cost-layer row whose lifetime / FOM / discount rate annualise its capital cost
 # (S4C-1 audit map; combined rows such as offwind turbine + connection use the main row for the WACC ratio)
 CARRIER_COST_ROWS = {
-    "onwind": "onwind", "offwind-ac": "offwind", "offwind-dc": "offwind", "solar": "solar-utility", "solar rooftop": "solar-rooftop",
+    "onwind": "onwind", "offwind-ac": "offwind", "offwind-dc": "offwind", "offwind-float": "offwind-float", "solar": "solar-utility", "solar rooftop": "solar-rooftop",
     "nuclear": "nuclear", "nuclear SMR": "nuclear SMR", "geothermal": "geothermal", "ror": "ror", "hydro": "hydro", "PHS": "PHS",
     "CCGT": "CCGT", "OCGT": "OCGT", "CCGT CC": "CCGT", "H2 Electrolysis": "electrolysis", "H2 Fuel Cell": "fuel cell", "H2 turbine": "OCGT",
     "OCGT methanol": "OCGT", "SMR": "SMR", "SMR CC": "SMR CC", "Fischer-Tropsch": "Fischer-Tropsch", "Sabatier": "methanation",
@@ -143,18 +143,57 @@ def apply_wacc_mode(n, costs: pd.DataFrame, cfg, repo) -> dict:
     if missing:
         raise ValueError(f"wacc_mode country_specific: no sourced WACC for {missing} (DATA_PENDING: {pending}); no estimate is made - keep wacc_mode uniform")
     r_c = {r.country: float(r.wacc_real) for r in t.itertuples() if r.status != "DATA_PENDING"}
-    changed = []
-    for comp, attr in [("Generator", "p_nom_extendable"), ("Link", "p_nom_extendable"), ("StorageUnit", "p_nom_extendable"), ("Store", "e_nom_extendable")]:
+    # M08a A7 (decision 133): distributed technologies (cost rows whose discount rate is below the uniform rate: technology-data 0.04 for
+    # solar-rooftop and decentral rows) follow research.finance.distributed_wacc_rule - technology_data_fixed (main: keep the technology-data
+    # household rate, as PyPSA-Eur / technology-data keep a separate decentral rate independent of the system rate) | proportional
+    # (r_c x r0 / uniform); assets on two countries (cross-border lines / links) use the mean WACC of the two end countries; Lines included.
+    uni = float(F.get("uniform_discount_rate", 0.07)); drule = str(F.get("distributed_wacc_rule", "technology_data_fixed"))
+    if drule not in ("technology_data_fixed", "proportional"):
+        raise ValueError("research.finance.distributed_wacc_rule must be technology_data_fixed or proportional, got " + drule)
+    def end_countries(df, name):
+        out = []
+        for col in [c for c in df.columns if c == "bus" or (c.startswith("bus") and c[3:].isdigit())]:
+            b = df.at[name, col]
+            if b and b in n.buses.index and str(n.buses.at[b, "country"]) in r_c:
+                out.append(str(n.buses.at[b, "country"]))
+        return sorted(set(out))
+    changed = []; skipped_distributed = 0; skipped_no_country = []
+    for comp, attr in [("Generator", "p_nom_extendable"), ("Link", "p_nom_extendable"), ("StorageUnit", "p_nom_extendable"), ("Store", "e_nom_extendable"), ("Line", "s_nom_extendable")]:
         df = n.df(comp)
-        for name in df.index[df[attr] & (df.capital_cost > 0)]:
-            row = CARRIER_COST_ROWS.get(df.at[name, "carrier"]); c = str(df.at[name, "country"]) if "country" in df else ""
-            if not row or row not in costs.index or c not in r_c:
+        if not len(df):
+            continue
+        for name in df.index[df[attr].astype(bool) & (df.capital_cost > 0)]:
+            row = CARRIER_COST_ROWS.get(df.at[name, "carrier"]) if comp != "Line" else CARRIER_COST_ROWS.get("AC")
+            if not row or row not in costs.index:
                 continue
+            cross = comp in ("Line", "Link") and "border_class" in df and str(df.at[name, "border_class"]) == "cross_border"
+            if cross or comp == "Line":
+                cs = end_countries(df, name)
+                if not cs:
+                    continue
+                r_asset = float(np.mean([r_c[c] for c in cs])); c = "+".join(cs)
+            else:   # M08a A7: components inherited from the frozen base carry no country column -> the country of their buses
+                c = str(df.at[name, "country"]) if "country" in df else ""
+                if c not in r_c:
+                    cs = end_countries(df, name)
+                    if len(cs) != 1:
+                        skipped_no_country.append(name)
+                        continue
+                    c = cs[0]
+                r_asset = r_c[c]
             life, fom, r0 = float(costs.at[row, "lifetime"]), float(costs.at[row, "FOM"]) / 100.0, float(costs.at[row, "discount rate"])
-            f = (annuity(life, r_c[c]) + fom) / (annuity(life, r0) + fom)
+            distributed = r0 < uni - 1e-12
+            if distributed and drule == "technology_data_fixed":
+                skipped_distributed += 1
+                continue
+            r_new = r_asset * r0 / uni if distributed else r_asset
+            f = (annuity(life, r_new) + fom) / (annuity(life, r0) + fom)
             before = float(df.at[name, "capital_cost"]); n.df(comp).at[name, "capital_cost"] = before * f
-            changed.append(dict(component=comp, name=name, country=c, cost_row=row, factor=f))
-    led.update(country_wacc=r_c, changed=len(changed), by_country={c: int(sum(1 for x in changed if x["country"] == c)) for c in r_c})
+            changed.append(dict(component=comp, name=name, country=c, cost_row=row, factor=f, rate=r_new, distributed=distributed))
+    led.update(country_wacc=r_c, changed=len(changed), distributed_wacc_rule=drule, distributed_kept_at_cost_row_rate=skipped_distributed,
+               skipped_no_country=len(skipped_no_country), skipped_no_country_examples=skipped_no_country[:10],
+               cross_border_rule="mean of the two end countries", table=str(F["country_wacc_table"]),
+               by_country={c: int(sum(1 for x in changed if x["country"] == c)) for c in sorted({x["country"] for x in changed})})
     n.meta["research_finance"] = led
     return led
 
@@ -233,12 +272,16 @@ def apply_cost_layer_s4c1(n, costs: pd.DataFrame, cfg, repo) -> dict:
             n.df(comp).loc[sel, "capital_cost"] = v
         # 2. offshore wind with the connection cost per node x class
         RN = R.get("renewable") or {}
-        dp = Path(repo) / RN["offwind_distance_table"]
-        dist = pd.read_csv(dp).set_index(["tech", "node", "cls"])
-        led["offwind_distance_table"] = dict(file=str(RN["offwind_distance_table"]), sha256=hashlib.sha256(dp.read_bytes()).hexdigest())
+        from s4a_layers import offshore_distance_table, offshore_rule
+        rule = offshore_rule(RN)   # M08a A6.2: pypsa_eur_v2025_07 = class distances / landfall of the PyPSA-Eur area rules, floating carrier priced as well
+        dist, dp = offshore_distance_table(cfg, repo)
+        if rule == "pypsa_eur_v2025_07" and dist.average_distance_km.isna().any():
+            raise ValueError(f"{dp.name}: offshore rows without a connection distance")
+        cars = ("offwind-ac", "offwind-dc", "offwind-float") if rule == "pypsa_eur_v2025_07" else ("offwind-ac", "offwind-dc")
+        led["offwind_distance_table"] = dict(file=str(dp.relative_to(Path(repo))), sha256=hashlib.sha256(dp.read_bytes()).hexdigest(), rule=rule)
         g = n.generators; missing = []
-        for car in ("offwind-ac", "offwind-dc"):
-            base = _fixed(costs, "offwind") + _fixed(costs, f"{car}-station")
+        for car in cars:
+            base = _fixed(costs, "offwind-float" if car == "offwind-float" else "offwind") + _fixed(costs, f"{car}-station")
             sub, und = _fixed(costs, f"{car}-connection-submarine"), _fixed(costs, f"{car}-connection-underground")
             for name in g.index[(g.carrier == car) & g.p_nom_extendable]:
                 node = str(g.at[name, "bus"]); cls = _class_of(name)

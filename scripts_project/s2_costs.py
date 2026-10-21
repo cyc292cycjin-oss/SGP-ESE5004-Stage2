@@ -24,8 +24,26 @@ FUEL_CARRIERS = ("gas", "oil", "coal")
 FUEL_PRICE_IDS = {"steps": "fuel_price_{c}_STEPS_2050_high_price", "nze": "fuel_price_{c}_NZE_2050_main", "cps": "fuel_price_{c}_CPS_2050_optional"}
 
 
+D15_FILE = Path("research_inputs/cost_layers_v5/sources/AEO8_Table_D15_Cost_Summary.csv")   # AEO8 Appendix D Table D.15 (kUSD/MW, kUSD/MW/a, USD/MWh)
+
+
 def annuity(n, r):
     return r / (1.0 - 1.0 / (1.0 + r) ** n) if r > 0 else 1.0 / n
+
+
+def _sha(p: Path) -> str:
+    import hashlib
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def smr_ratios(d15_path: Path) -> dict:
+    """M08-2 (decision 131): AEO8 Table D.15 same-table ratios SMR / LWR (currency-year neutral) - investment 9,600 / 9,000,
+    FOM share of investment (110.0 / 9,600) / (75.3 / 9,000), VOM 2.2 / 5.1."""
+    t = pd.read_csv(d15_path).set_index("sub-technology")
+    s, l = t.loc["Nuclear SMR"], t.loc["Nuclear LWR"]
+    return dict(investment=float(s.capital_cost) / float(l.capital_cost),
+                fom_share=(float(s.FOM) / float(s.capital_cost)) / (float(l.FOM) / float(l.capital_cost)),
+                vom=float(s.VOM) / float(l.VOM))
 
 
 def registry_value(reg: pd.DataFrame, pid: str) -> float:
@@ -57,13 +75,27 @@ def fuel_price(cfg: dict, reg: pd.DataFrame, carrier: str) -> float:
     return registry_value(reg, fuel_price_ids(cfg)[carrier])
 
 
+def layer_files(spec: dict) -> dict:
+    """M08-1 (decision 131): a layer with rebase_variants resolves file / prepared_file by its rebase_index
+    (eea_hicp_rate main | ea20_gdp_deflator comparison); other layers keep their own file / prepared_file."""
+    variants = spec.get("rebase_variants")
+    if not variants:
+        return dict(spec)
+    idx = spec.get("rebase_index")
+    if idx not in variants:
+        raise ValueError(f"rebase_index must be one of {sorted(variants)}, got {idx!r}")
+    return dict(spec, **variants[idx])
+
+
 def load_active_layer(repo: Path, cfg: dict):
     cl = cfg["research"]["cost_layer"]
     name = cl["active"]
-    spec = cl["layers"][name]
+    spec = layer_files(cl["layers"][name])
     if "prepared_file" not in spec:
         raise ValueError(f"cost layer {name} has no prepared (annualised) table; only layers with prepared_file can price the network")
     manifest = json.loads((repo / spec["file"]).read_text())
+    if spec.get("rebase_variants") and (manifest.get("rebase") or {}).get("index") != spec["rebase_index"]:
+        raise ValueError(f"layer manifest rebase index {(manifest.get('rebase') or {}).get('index')!r} differs from rebase_index {spec['rebase_index']!r}")
     wide = pd.read_csv(repo / spec["prepared_file"], index_col=0)
     return name, spec, manifest, wide
 
@@ -72,7 +104,8 @@ def build_research_costs(repo: Path, cfg: dict, registry_csv: Path):
     repo = Path(repo)
     name, spec, manifest, c = load_active_layer(repo, cfg)
     reg = pd.read_csv(registry_csv, dtype=str, keep_default_na=False).set_index("param_id")
-    ledger = {"layer": name, "layer_file": spec["file"], "prepared_file": spec["prepared_file"], "rows": {}, "overrides": []}
+    ledger = {"layer": name, "layer_file": spec["file"], "prepared_file": spec["prepared_file"], "rows": {}, "overrides": [],
+              "rebase_index": (manifest.get("rebase") or {}).get("index", "ea20_gdp_deflator")}
     for t in c.index:
         ledger["rows"][t] = name
     # --- fuel prices: D1 registry (WEO 2025 2050 -> EUR2020/MWh NCV), decision D1-1; scenario per research.fuels.price_scenario (S4C-0, decision 85)
@@ -82,19 +115,37 @@ def build_research_costs(repo: Path, cfg: dict, registry_csv: Path):
         ledger["overrides"].append(dict(technology=carrier, parameter="fuel", before=float(c.at[carrier, "fuel"]), after=v, source=pid, tier=reg.loc[pid, "tier"]))
         c.at[carrier, "fuel"] = v
         c.at[carrier, "marginal_cost"] = v / float(c.at[carrier, "efficiency"]) if float(c.at[carrier, "efficiency"]) else v
-    # --- SMR (decision 46, grade C, AEO8 D.15 Nuclear SMR x ECB 2020 FX) ------------------------------
-    inv = registry_value(reg, "smr_investment") * 1e3  # EUR/kW -> EUR/MW
-    fom = registry_value(reg, "smr_FOM"); vom = registry_value(reg, "smr_VOM")
-    life = registry_value(reg, "smr_lifetime_proxy"); eff = registry_value(reg, "smr_efficiency_proxy")
+    cl = cfg["research"]["cost_layer"]
+    f_aeo8 = float(cl.get("aeo8_price_year_factor", 1.0))   # M08-2 (decision 131): AEO8 D.15 price year DATA_PENDING -> factor (main 1.0, sensitivity 0.86)
+    smr_source = cl.get("smr_cost_source", "aeo8_author_rule_2050")
     ufuel = float(c.at["uranium", "fuel"])
-    c.loc["nuclear SMR", ["investment", "FOM", "VOM", "lifetime", "efficiency", "fuel", "discount rate", "CO2 intensity"]] = [inv, fom, vom, life, eff, ufuel, DISCOUNT, 0.0]
-    c.at["nuclear SMR", "fixed"] = (annuity(life, DISCOUNT) + fom / 100.0) * inv
+    if smr_source == "td_nuclear_x_aeo8_ratio":
+        # --- SMR (M08-2, decision 131, registry nuclear_cost_rule): technology-data nuclear x AEO8 D.15 same-table ratios SMR / LWR
+        q = smr_ratios(repo / D15_FILE)
+        nuc = c.loc["nuclear"]
+        inv = float(nuc.investment) * q["investment"]; fom = float(nuc.FOM) * q["fom_share"]; vom = float(nuc.VOM) * q["vom"]
+        life = float(nuc.lifetime); eff = float(nuc.efficiency); rate = float(nuc["discount rate"])
+        ledger["rows"]["nuclear SMR"] = ("technology-data v0.15.0 nuclear x AEO8 Table D.15 ratios SMR / LWR (investment 9,600 / 9,000, FOM share (110.0 / 9,600) / (75.3 / 9,000), "
+                                         "VOM 2.2 / 5.1); lifetime, efficiency, discount rate = nuclear; fuel = layer uranium (registry nuclear_cost_rule, grade C)")
+        ledger["smr_rule"] = dict(source=smr_source, ratios=q, d15_file=str(D15_FILE), d15_sha256=_sha(repo / D15_FILE))
+    elif smr_source == "aeo8_author_rule_2050":
+        # --- SMR (former, decision 46, grade C, AEO8 D.15 Nuclear SMR x ECB 2020 FX x aeo8_price_year_factor) ------------------------
+        inv = registry_value(reg, "smr_investment") * 1e3 * f_aeo8  # EUR/kW -> EUR/MW
+        fom = registry_value(reg, "smr_FOM"); vom = registry_value(reg, "smr_VOM") * f_aeo8
+        life = registry_value(reg, "smr_lifetime_proxy"); eff = registry_value(reg, "smr_efficiency_proxy"); rate = DISCOUNT
+        ledger["rows"]["nuclear SMR"] = "AEO8 Table D.15 Nuclear SMR via D1 registry (grade C, +-30 %); lifetime/efficiency proxies = technology-data nuclear; fuel = layer uranium"
+        ledger["smr_rule"] = dict(source=smr_source, aeo8_price_year_factor=f_aeo8)
+    else:
+        raise ValueError(f"research.cost_layer.smr_cost_source must be td_nuclear_x_aeo8_ratio or aeo8_author_rule_2050, got {smr_source!r}")
+    c.loc["nuclear SMR", ["investment", "FOM", "VOM", "lifetime", "efficiency", "fuel", "discount rate", "CO2 intensity"]] = [inv, fom, vom, life, eff, ufuel, rate, 0.0]
+    c.at["nuclear SMR", "fixed"] = (annuity(life, rate) + fom / 100.0) * inv
     c.at["nuclear SMR", "marginal_cost"] = vom + ufuel / eff
-    ledger["rows"]["nuclear SMR"] = "AEO8 Table D.15 Nuclear SMR via D1 registry (grade C, +-30 %); lifetime/efficiency proxies = technology-data nuclear; fuel = layer uranium"
-    # --- geothermal (decision 52, grade C): AEO8 D.15 "Geothermal average" x FX, no decline (same rule as SMR)
+    # --- geothermal (decision 52, grade C): AEO8 D.15 "Geothermal average" x FX, no decline; M08-2: new-build investment x aeo8_price_year_factor
     fx = registry_value(reg, "fx_usd_to_eur_2020")
     geo_inv_kusd, geo_fom_kusd, geo_vom_usd = 4100.0, 19.5, 0.3  # AEO8 Table D.15 row "Geothermal average" (kUSD/MW, kUSD/MW/a, USD/MWh)
-    g_inv = geo_inv_kusd * fx * 1e3; g_fom = geo_fom_kusd / geo_inv_kusd * 100.0; g_vom = geo_vom_usd * fx
+    g_inv = geo_inv_kusd * fx * 1e3 * f_aeo8; g_fom = geo_fom_kusd / geo_inv_kusd * 100.0; g_vom = geo_vom_usd * fx
+    c.at["geothermal", "aeo8_price_year_factor"] = f_aeo8   # add_existing_geothermal divides it out: the existing-stock FOM constant keeps the unscaled basis
+    ledger["aeo8_price_year_factor"] = f_aeo8
     g_life = float(c.at["geothermal", "lifetime"]) if "geothermal" in c.index and np.isfinite(c.at["geothermal", "lifetime"]) else 30.0
     for k, v in [("investment", g_inv), ("FOM", g_fom), ("VOM", g_vom), ("lifetime", g_life), ("efficiency", 1.0), ("fuel", 0.0), ("discount rate", DISCOUNT)]:
         c.at["geothermal", k] = v

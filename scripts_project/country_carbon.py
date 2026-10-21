@@ -9,7 +9,7 @@ carrier-coefficient GlobalConstraint (upstream U4 double counting).
 from collections import defaultdict
 import numpy as np
 import pandas as pd
-from carrier_architecture import COUNTRIES,ATMOSPHERE_CARRIER,LEGACY_ATMOSPHERE,atmosphere_bus,finite
+from carrier_architecture import COUNTRIES,ATMOSPHERE_CARRIER,LEGACY_ATMOSPHERE,atmosphere_bus,finite,network_countries
 
 HOOK='research_country_net_zero'
 SCOPES=('per_country','asean_total')
@@ -114,10 +114,10 @@ def add_country_net_zero(n,sns):
     """extra_functionality hook: final-snapshot atmosphere level per country <= configured cap."""
     if getattr(n,'_research_country_net_zero_model',None) is n.model:raise ValueError('Country net-zero hook already installed')
     cfg=n.meta['research_carbon'];m=n.model;e=m['Store-e'];last=sns[-1]
-    stores=[atmosphere_bus(c) for c in sorted(COUNTRIES)]
+    stores=[atmosphere_bus(c) for c in sorted(network_countries(n))]   # M08a A7: countries present (coalition.remove_countries variants)
     if any(s not in n.stores.index for s in stores):raise ValueError('National atmosphere Store missing')
     if cfg['constraint_scope']=='per_country':
-        for ct in sorted(COUNTRIES):
+        for ct in sorted(network_countries(n)):
             m.add_constraints(e.sel(snapshot=last,Store=atmosphere_bus(ct))<=float(cfg['country_cap_tco2'][ct]),name='research_country_co2_limit-'+ct)
     elif cfg['constraint_scope']=='asean_total':
         expr=sum(e.sel(snapshot=last,Store=s) for s in stores)
@@ -131,8 +131,8 @@ def emission_report(n):
     for r in reg:
         flow=n.links_t['p'+r['port'][3:]][r['component']]  # PyPSA port flow; negative = delivered to the atmosphere bus
         tonnes=float((-flow*w).sum());rows.append(dict(r,annual_tco2=tonnes));by_country[r['country']]+=tonnes
-    store_level={c:float(n.stores_t.e[atmosphere_bus(c)].iloc[-1]) for c in sorted(COUNTRIES)}
-    recon={c:dict(sum_of_ports=by_country.get(c,0.),store_final_level=store_level[c],difference=by_country.get(c,0.)-store_level[c],cap=n.meta['research_carbon']['country_cap_tco2'][c]) for c in sorted(COUNTRIES)}
+    store_level={c:float(n.stores_t.e[atmosphere_bus(c)].iloc[-1]) for c in sorted(network_countries(n))}
+    recon={c:dict(sum_of_ports=by_country.get(c,0.),store_final_level=store_level[c],difference=by_country.get(c,0.)-store_level[c],cap=n.meta['research_carbon']['country_cap_tco2'][c]) for c in sorted(network_countries(n))}
     exactly_once=all(abs(v['difference'])<=1e-3+1e-7*max(abs(v['sum_of_ports']),abs(v['store_final_level'])) for v in recon.values())
     by_source=defaultdict(float)
     for r in rows:by_source[r['country']+'|'+r['carrier']]+=r['annual_tco2']

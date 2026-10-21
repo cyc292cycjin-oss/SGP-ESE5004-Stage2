@@ -16,7 +16,7 @@ R3 = ROOT / "results_project" / "s3b" / "r3"
 def test_config_registry_and_caps_table():
     from phase4_static import config
     G = config(ROOT, "integrated")["research"]["s3"]["gas"]
-    assert G["lng_expansion"] == "cap_factor_cost" and G["lng_cap_factor"] == 2.5   # S4B-0 (decision 72): the S3B R3 main existing_only became a sensitivity
+    assert G["lng_expansion"] == "capex_only" and G["lng_cap_factor"] == 2.5   # S4B-0 (decision 72): the S3B R3 main existing_only became a sensitivity; M08a A4 (decision 131): capex_only main, cap_factor_cost an option
     r = pd.read_csv(REG / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
     assert r.loc["lng_terminal_expansion_mode", "value"] == "existing_only" and r.loc["lng_terminal_expansion_mode", "status"] == "SENSITIVITY"
     assert r.loc["lng_terminal_expansion_mode_s4b", "value"] == "cap_factor_cost" and r.loc["lng_terminal_expansion_cap_factor", "status"] == "SENSITIVITY"

@@ -103,7 +103,7 @@ def structural_diagnosis_s2(n):
                 feed_co2 += e * float(z.efficiency2)
             if str(z.get("bus3", "")) == f"co2 atmosphere {c}":
                 feed_co2 += e * float(z.efficiency3)
-        ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"])) & g.p_nom_extendable]
+        ren = g[(g.carrier.isin(["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc", "offwind-float"])) & g.p_nom_extendable]
         potential = float(sum((pmax[k] * w).sum() * min(float(z.p_nom_max), 1e9) for k, z in ren.iterrows()))
         pipes = [x for x in xb.index if c in (str(n.buses.at[xb.at[x, "bus0"], "country"]), str(n.buses.at[xb.at[x, "bus1"], "country"]))]
         pipes += [f"co2 sequestered extra-ASEAN {c}"] if f"co2 sequestered extra-ASEAN {c}" in n.stores.index else []   # S4C-4 (decision 89): uncapped export option
@@ -264,6 +264,12 @@ def main(a):
                                                                kirchhoff_row_normalisation=(_pub(kvl_led) if kvl_led else dict(applied=False)))
         run.update(input_network=dict(path=str(a.network), sha256=net_sha, snapshots=int(len(n.snapshots)), truncated_to=a.truncate, horizon_scaling=scaling),
                    lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"], build_seconds=build_seconds, research_constraints=hooks))
+        try:   # M08a A8 (GATES_V6 G2.2): configuration-subset hash recorded at build vs re-derived from the current config files + the network's overrides
+            from v5.v5_gates import replay_research_config
+            from v5.gates_v6 import config_subset_sha256
+            run["config_subset"] = dict(network=n.meta.get("research_config_subset_sha256"), current=config_subset_sha256(replay_research_config(n, cfg)[0]))
+        except Exception as e:   # recorded; G2.2 then fails (no subset hash)
+            run["config_subset"] = dict(network=n.meta.get("research_config_subset_sha256"), current=None, error=str(e)[:200])
         save(out / "SOLVE_RECEIPT.json", run)
         if a.solver == "gurobi" and profile:   # S3B R4 (decision 69): research.solver.profiles (PyPSA-Eur v2025.07.0 gurobi-default lines 1056-1064 as basis)
             params = profile_parameters(SV["profiles"], profile, a.time_limit)
@@ -371,11 +377,15 @@ def main(a):
         gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
         gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
         try:   # S4D-3 (decision 91a): country cost ledger, nodal prices, identity gate B16_LEDGER (exported with the run)
-            from s4d_ledger import country_cost_ledger, ledger_gate, ledger_table, load_length_shares, nodal_prices
+            from s4d_ledger import (country_cost_ledger, ledger_detail_usd, ledger_gate, ledger_table, ledger_table_usd, load_length_shares, nodal_prices,
+                                    report_currency)
             led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
-            ledger_table(led_rows).to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f"); led_rows.to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
+            rep = report_currency(cfg)   # M08a A9 + supplement 01: report columns USD2020 = EUR2020 / fx_usd_to_eur_2020 (one rate both ways); the model stays in EUR2020
+            T = ledger_table(led_rows); T.to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f")
+            ledger_table_usd(T, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_USD2020.csv", float_format="%.6f")
+            ledger_detail_usd(led_rows, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
             nodal_prices(n).to_csv(out / "NODAL_PRICES.csv", float_format="%.6g")
-            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag))
+            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag, report_currency=rep))
             gates["B16_LEDGER"] = ledger_gate(led_id)
         except Exception as e:
             gates["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])

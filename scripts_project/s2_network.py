@@ -40,6 +40,8 @@ from s4h_layers import apply_candidate_num_parallel, apply_la_vn_stock
 from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
+from m08a_layers import apply_existing_vintage_costs
+from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
 
@@ -286,6 +288,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         else:
             d[parts[-1]] = type(old)(val)
     cfg["research"]["config_overrides"] = list(overrides or [])
+    from m08a_layers import non_default_variants
+    if non_default_variants(cfg["research"]):   # M08a A7: variants are derived from a built base network by one script only
+        raise ValueError(f"variant keys {non_default_variants(cfg['research'])} are applied by scripts_project/m08a_variants.py to a built base network, not by the build")
     bunker_mode(cfg)   # S4C-3 (decision 88): research.bunkers.attribution checked early (no config mutation; the demand layer gets demand_cfg)
     if R["scenario"] != scenario:
         raise ValueError("Scenario identity does not match the composed config")
@@ -338,6 +343,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
     fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
     fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
+    vintage = apply_existing_vintage_costs(n, cfg, repo)   # M08a A3 (decision 131): existing stock priced with technology-data v0.15.0 of its commissioning year (author_v0_13_2 = former)
+    fleet["vintage_costs"] = {k: v for k, v in vintage.items() if k != "table"}
     cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch
     hydro_inflow = apply_hydro_inflow_normalization(n, cfg, repo)   # S4C-2 (decision 83): national hydro inflow = Ember median x 1.1 by capacity share (main); new-build proxies from the corrected country stock
     # 4. S2 layers
@@ -390,7 +397,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         add_gap_slack(n, S2["gap_diagnostic"], nodes)
     n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
                                   scenario=scenario, solver_allowed=False, scientific_results_allowed=False, fullsc_network_complete=False, input_coverage_complete=False,
-                                  research_config=R, research_config_sha256=config_sha(R), fuel_bus_rename_map=rename_map, atmosphere_port_moves=moves, u4_zeroed_carriers=u4,
+                                  research_config=R, research_config_sha256=config_sha(R), research_config_subset_sha256=config_subset_sha256(R),   # M08a A8: GATES_V6 G2.2 subset hash
+                                  fuel_bus_rename_map=rename_map, atmosphere_port_moves=moves, u4_zeroed_carriers=u4,
                                   upstream_adapter=injected, upstream_add_hydrogen=h2, candidate_ledger=dict(nuclear=nuclear, sites=sites, extendable=extendable),
                                   cross_border_tags=tags, demand_binding=demand_astar, electric_base_sha256=ELECTRIC_BASE_SHA, physical_carbon_map=carbon,
                                   cost_layer=dict(active=cost_ledger["layer"], overrides=cost_ledger["overrides"], appended=["nuclear SMR", "geothermal"], file=str(costs_path.name)),
@@ -419,7 +427,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
                 "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters", "research_ac_losses",
-                "research_dust_cleanup"]:
+                "research_dust_cleanup", "research_existing_vintage_costs"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
@@ -441,7 +449,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                                                                                                   ("readjust_impedance", readjust.get("table")),
                                                                                                                   ("la_vn_stock", la_vn_stock.get("table"))] if f}),
                            "upstream_module": dict(path="scripts/prepare_sector_network.py", sha256=sha(repo / "scripts/prepare_sector_network.py"))},
-                   research_config_sha256=config_sha(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
+                   research_config_sha256=config_sha(R), research_config_subset_sha256=config_subset_sha256(R), cross_border=xb, transmission_limit=jsonable(lv), demand_astar=demand_astar, demand_s2=dict(loads=len(demand["loads"]), deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"], country_allocation=demand["country_allocation"]),
                    geothermal=geo, co2=co2, biomass={k: v for k, v in bio.items() if k != "stores"}, biomass_stores=bio["stores"], heat=heat, pipelines=pipelines, cost_layer=cost_ledger,
                    static_validation=static, inventory=inventory, candidates=dict(nuclear=len(nuclear), sites=len(sites), extendable=extendable), optional_string_normalisation=normalise,
                    code_sha=git_head(repo), environment=dict(python=platform.python_version(), pypsa=pypsa.__version__), build_seconds=time.time() - t0, solver_runs=0)
@@ -449,6 +457,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     dust["table"].to_csv(output / f"{scenario}{suffix}_DUST_INVENTORY_S4L1.csv", index=False)   # S4L-1: near-zero inventory of this build (before the cleanup when on)
     receipt["dust_cleanup"] = jsonable({k: v for k, v in dust.items() if k != "table"})
     pd.DataFrame(geo["units"]).to_csv(output / f"{scenario}{suffix}_GEOTHERMAL_UNITS.csv", index=False)
+    if vintage.get("table"):   # M08a A3: per existing component before / after (efficiency, FOM, marginal cost)
+        pd.DataFrame(vintage["table"]).assign(years=lambda d: d.years.map(lambda v: ";".join(map(str, v)))).to_csv(output / f"{scenario}{suffix}_EXISTING_VINTAGE_COSTS.csv", index=False)
     if daily:   # S4B-6: the gap diagnostic also gets its daily network (cloud run of the disconnected diagnostic)
         d, ledger = to_daily(n); dpath = output / f"{scenario}{suffix}_365_24h_unsolved.nc"; d.export_to_netcdf(dpath)
         dback = pypsa.Network(str(dpath)); compare_roundtrip(d, dback)

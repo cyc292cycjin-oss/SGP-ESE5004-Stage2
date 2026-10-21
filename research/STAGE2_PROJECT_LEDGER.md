@@ -704,6 +704,15 @@
 - **待用户决定（报告 §10）：** F1–F4 是否作敏感性先于 2920×3h（顺序 F3 → F1 → F2；任何求解需另行授权）；F10 封存潜力统一 ERIA；F11 登记不互联定义；F7 国别 WACC；报告货币与基年；本报告入库。
 - **交付：** `research/06_scope_redesign/p1_step4p_20261020/`（`S4P_REPORT.md`、`COUNTRY_AUDIT_MATRIX.csv/.md`、`PROPOSED_FIXES.md`、`S4P_EVIDENCE.json`、`EXTERNAL_SOURCES.md`、`A_*`、`ASPECT*`、`evidence/EXT_*`、`scripts/`）；镜像 `work/p1_step4p_20261020/`；网络提取表 `evidence/net/` 未入库（脚本可重生成）。
 
+## S4Q 第 123 项：候选档案 BarConvTol 1e-6 第一级标定（本机 56×3h）— 2026-10-20
+
+- **范围：** 指令 `S4Q_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 c33f97e7…b75d，已核对）；授权本机 6 次 56×3h（候选 × 两种线程 × 三个情景），各 30 分钟止损、不重试，不连云。独立 worktree，分支 `codex/s4q-tol-calibration-20261020`（自 0b681881），draft PR #41 叠在 #40 上。本机求解恰 6 次，无重试；云端无动作。
+- **S4Q-1（84532e78、21683239）：** `baseline.yaml` 新增非生产候选档案 `formal_barrier_1e6`（档案 A 只改 BarConvTol 1e-6，Threads 8）与 `formal_barrier_1e6_t16`（另加 Threads 16）；缺省仍为 `formal_barrier`；`test_s4q_1.py` 逐键核对（4 项通过）。S4O 版 `run_365x24h.sh`：白名单加入两档案，新增 `FIXED_RUNS=on`（只跑所列运行，不触发停止规则与自动诊断；缺省 off）；脚本测试 S4O 原框架 59/59、S4Q 用例 8/8。
+- **S4Q-2（29b87e48）：** S4M-1 网络（SHA256 与 S4M-2 相同）`--truncate 56`、S4O 流水线（自动 C1）、TimeLimit 1,750 s；两条路径各一体化 / 不互联 / NZE，**6 次全部 optimal**，间隔均 ≥ 330 s。
+- **S4Q-3（0cfbc13b）：** 判据事先固定、未调整，**两条路径全部通过 → 第一级通过**：C1（S4M-2 分国参照，影子目录重评）六次 (a)(b)(c) 全过；目标相对档案 A +2.4e-9 至 +4.8e-9；B16 ≤ 4.7e-10；每国差额变化 ≤ 1.5e-5 bn；NZE 各实体 total 变化 ≤ 2.1e-4 bn；两路径之间目标相差 ≤ 9.2e-10。信息：WU 为档案 A 的 0.67–0.94；项目门槛 `A1_A2_S4B` 六次不通过（对偶符号误差约 1–2e-4 > 预算 1e-5，第 120 项下只作数值信息）。
+- **未做：** 第二级（云端 365×24h，一体化、不互联 × 两种路径，4 次）未授权；方案见报告 §8（PROPOSED：时长约 6–11 h、费用按单价 DATA_PENDING、与 S4P 重跑的合并方式、效率标准计算方法）。档案 A 与生产缺省不变。
+- **交付：** `research/06_scope_redesign/p1_step4q_20261020/`（`S4Q_REPORT.md`、`S4Q_EVIDENCE.json`、`S4Q_PROGRESS.md`、`scripts/`、`evidence/`）；镜像 `work/p1_step4q_20261020/`。
+
 ## S4R 第 126、128 项：统一修正方案与门槛重设（只读，不实施、不求解）— 2026-10-20
 
 - **范围：** 指令 `S4R_CLAUDE_CODE_INSTRUCTION.md`（SHA256 f80da6fd…ceeb，与 `S4R_INSTRUCTION_SHA256.txt` 一致）；分支 `codex/s4r-unification-plan-20261020`（自 S4P 头 69b67a97，独立工作树），draft PR #43 叠在 #42 上。只读：未求解、未连云、未调用 Gurobi、未改生产代码 / 注册表 / 网络 / 结果；修正全部写成方案，待面谈后在 M08 实施。已定口径不再讨论：2920×3h 正式分辨率、F3 每线 +20 GW、F8 核电无上限、F7 主算 WACC 0.07、报告美元 / 模型欧元、NZE 舍弃、C1 分级验收。
@@ -741,3 +750,15 @@
 - **待审阅确认：** 屋顶光伏等级 B（方法有记录、输入不可本地复算）是否降 C；KH / TL 分项行沿用国家行区间；`d1_registry.py` 修正层；`s4c_0.csv` 入库。（补充 01：屋顶光伏已改 C，`d1_registry.py` 修正层已获认可。）
 - **补充 01（第 131 项，2026-10-21）：** `M080_SUPPLEMENT_01.md`（SHA256 a505908b…73b7，核对一致），同一分支 / PR #44，边界同 M08-0。注册表 2,052 → 2,057 行（6950a15d → 6d1b2c34；新增 5、修改 14，数值无改动）。屋顶光伏 12 行 B → C（0.5×–1.5×；记录与 AEO8 / PDP8 / MyRER 的比值 0.33–2.54）；GEGIS 原始文献核实为 Mattsson, Verendel, Hedenus, Reichenberg (2021) Energy Strategy Reviews 33, 100606（doi:10.1016/j.esr.2020.100606，作者链文档 + Crossref），LA / TL 借用曲线登记为 C 级例外；登记 4 个已获取文件（USGS 年鉴 2023 水泥 T22、worldsteel 粗钢 2021–2025、UN WPP 2024 TL 2050 = 1,889,249.5、Eurostat HICP），REFERENCE_ONLY；HICP 核实：technology-data v0.15.0 用欧洲经济区（EEA）年均变化率累乘（1.25733），不是 EU27 指数（1.25624）或欧元区（1.2256），M08-1 按此回算；存量机组成本表版本登记为"统一性问题，M08 处理"，拟增行加 `existing_fleet_cost_rule`（v0.15.0 对应投运年份；43 行）。清单 v3 与新精简版（旧版改名 `_v2`）：主算输入 A 10.85 / B 60.33 / C 28.82 %；表 4 第 17、21–23 行"已获取，M08 实施"，删去"过渡值"表述；精简版 664 格可在 v3 详表中原文找到。提交 1a139be9 → e18b2bc8 → 4e1007bc → 1be5ce02 → 8e1a2a29 → 收尾提交。
 - **交付：** `research/06_scope_redesign/p1_m080_20261020/`（`M080_REPORT.md`、`REGISTRY_ROWS_PROPOSED_v2.csv`、`USER_DOWNLOAD_LIST_v2.md`、`M080_PROGRESS.md`、`scripts/`、`evidence/`）与 `research/06_scope_redesign/p1_meet_20261020/`（v1 原样、v2、精简版）；镜像 `work/p1_m080_20261020/`、`work/p1_meet_20261020/`；提交 4e1de488 → 995256ff → 880955b8 → dca14c83 → fc964ea2 → c98bf5d9 → 收尾提交。
+
+### M08a（第 129–133 项：实施修正（上），不求解）— 2026-10-21
+
+- **范围：** `M08A_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 19c00a1e…9476）与 `M08A_SUPPLEMENT_01.md`（e3471b65…ec24）均核对一致；分支 `codex/m08a-corrections-20261021`（M08-0 头 30d281b8 + 普通 merge S4Q 22f53c84，冲突仅台账），draft PR 叠在 #44 上。未求解、未调用 Gurobi、未连云，未改既有结果与已发布网络；网络重建与本机冒烟放在 M08b 之后。
+- **成本与货币：** A1 technology-data 同口径回算（EEA HICP 逐年累乘 1.25733，+4.8 % 残差消失）；A2 SMR = 核电 × AEO8 同表比值（8,421 → 9,167 EUR2020/kW），AEO8 价格年系数键（主 1.0、敏感性 0.86）；A3 存量机组按投运年取 v0.15.0 表（存量 FOM 10.806 → 10.050 bn/a，两情景相同；CCGT 0.56 / 0.57）；A9 账本美元列，补充 01 改为单一汇率 1 / `fx_usd_to_eur_2020` = 1.139954（ECB 1.1422 作对照）。
+- **LNG 与封存：** A4 `capex_only`（16 台 `p_nom_max = inf`，8,020 EUR2020/MW/a，再气化 1.26 EUR2020/MWh，液氢 × 1.2）；A5 ERIA-GCCSI 2024 P50 统一表（VN 106.07、PH 1.344、KH 1.8 Mt/a，TL / LA / MM / SG 0）。A5 遗留缺陷已修：船运路线表 70 条 TL 路线会使重建中止，现丢弃并记录进入无储罐接收国的路线。
+- **风光：** A6.1 地面光伏 × 5.1 / 4.6；A6.2 PyPSA-Eur v2025.07.0 海上面积规则（≤ 60 m、漂浮 60–1,000 m、航道、2 MW/km²、200 m；新脚本 `m08a_offshore_profiles.py`，全量 3 分 22 秒）：AC 1,783 / DC 2,714 / 漂浮 4,436 GW（原 1,673 / 3,054）；作者规则复算 1,673.3 / 3,052.2 GW 验证方法；航道阈值 400 × 8760 × 6 在东盟只排除 57 MW（新加坡海峡 1,669 万 < 2,102 万），规则未改，交用户决定。
+- **情景与门槛：** A7 四开关确定性派生（`m08a_variants.py`；去掉一国整体移出、keep_stock、b1、分国 WACC）；补充 01：b1 含经老挝铁路段，老挝只保留通往本国区域外储罐的过境通道并强制检查，11 国在三种情形下都有封存出口。A8 `gates_v6.py` 与事先登记的运行规则（C1 (c)、档案选择链、48 h、不重试）；G2.2 子集 30 键写入 `GATES_V6_NOTES.md` 第 6 节（`GATES_V6.md` 未改）。
+- **注册表：** 2,057 → 2,121 行（6d1b2c34 → 53b051c1；新增 64、修改 188、改为历史 39、删除 0），DATA_PENDING 47 → 46；拟增 v2 本步 27 行全部写入，16 行属 M08b。
+- **测试：** `tests/research` 全量 533 passed、64 skipped（历史构建不在 worktree）、0 failed，排除 5 个玩具求解用例。**如实记录：** 子集中的 `test_s4o_2.py::test_c1_kkt_terms_toy_model`（scipy linprog / HiGHS 玩具 LP）在本步各次子集运行中执行过，未调 Gurobi；运行脚本已改为排除。
+- **待用户决定：** 东盟航道阈值敏感性；去掉越南时老挝过境是否保留；S4R 回溯表 D7 / D9 无效（第三批后按 `gates_v6.py` 重算）。
+- **交付：** `research/06_scope_redesign/p1_m08a_20261021/`（`M08A_REPORT.md`、`M08A_PROGRESS.md`、指令 / 补充及 SHA256、`evidence/`、`scripts/`）；镜像 `work/p1_m08a_20261021/`；提交 4247f21b → 77a9a07c → 0e39df2e → 4cc95598 → 04d686fe → 79b0f3e6 → bf181b68 → 7e38c500 → 9fb4e584 → f1de7cb5 → 37e18984 → 4c46f442 → 2a0a660b → adc0460e → b6c4f338 → 4af11d13 → 收尾提交。

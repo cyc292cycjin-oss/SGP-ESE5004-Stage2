@@ -109,9 +109,9 @@ def apply_typhoon_premium(n, cfg, repo):
     if col not in t:
         raise ValueError(f"typhoon_threshold_per_decade {th} not in the exposure table (0.5, 1, 2)")
     flagged = {(str(r["node"]), str(r["tech"])) for _, r in t.iterrows() if float(r[col]) >= 0.5}
-    g = n.generators; ext = g.p_nom_extendable & g.carrier.isin(["onwind", "offwind-ac", "offwind-dc"])
+    g = n.generators; ext = g.p_nom_extendable & g.carrier.isin(["onwind", "offwind-ac", "offwind-dc", "offwind-float"])   # offwind-float: M08a A6.2, exposure of the offwind-dc row of its node
     for name in g.index[ext]:
-        key = (str(g.at[name, "bus"]), str(g.at[name, "carrier"]))
+        key = (str(g.at[name, "bus"]), "offwind-dc" if g.at[name, "carrier"] == "offwind-float" else str(g.at[name, "carrier"]))
         if key in flagged:
             before = float(g.at[name, "capital_cost"]); n.generators.at[name, "capital_cost"] = before * (1.0 + pct / 100.0)
             led["applied"].append(dict(generator=name, node=key[0], tech=key[1], capital_cost_before=before, capital_cost_after=before * (1.0 + pct / 100.0)))

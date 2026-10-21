@@ -68,6 +68,54 @@ def ea20_deflator() -> dict:
         raise ValueError("EA20 deflator series incomplete")
     return out
 
+
+# M08-1 (decision 131): Eurostat HICP annual average rate of change as used by technology-data v0.15.0 itself
+# (scripts/_helpers.py prepare_inflation_rate, line 220: row "European Economic Area ..." for EUR, "United States" for USD;
+# adjust_for_inflation.get_factor: product of (1 + rate) over the years, missing years filled with the series mean).
+TD_V015_SRC_DIR = COST_DIR / "sources" / "technology_data_v0.15.0"
+HICP_TD_FILE = TD_V015_SRC_DIR / "prc_hicp_aind__custom_20097956_spreadsheet.xlsx"   # technology-data v0.15.0 inputs/ (tarball c4787c1d)
+HICP_DOWNLOAD_FILE = ROOT / "research_inputs" / "prices" / "sources" / "EUROSTAT_PRC_HICP_AIND_DEFAULTVIEW_2016_2025.xlsx"   # user download (cross-check)
+HICP_DOWNLOAD_ORIGINAL_NAME = "prc_hicp_aind$defaultview_spreadsheet.xlsx"
+HICP_EEA_ROW = "European Economic Area (EEA18-1995, EEA28-2004, EEA30-2007, EEA31-2013, EEA30-2020)"
+HICP_US_ROW = "United States"
+
+
+def hicp_rates(path: Path = HICP_TD_FILE, row: str = HICP_EEA_ROW) -> dict:
+    """year -> annual average rate of change / 100, read exactly as technology-data v0.15.0 prepare_inflation_rate
+    (Sheet 1, header row 9, ':' and 'd' are missing). Columns that are not years (flag columns) must be empty for the row."""
+    import pandas as pd
+    s = pd.read_excel(path, sheet_name="Sheet 1", index_col=0, na_values=[":", "d"], header=8).loc[row].dropna()
+    extra = [c for c in s.index if not str(c).isdigit()]
+    if extra:
+        raise ValueError(f"non-year columns with values in the HICP row {row!r}: {extra[:3]}")
+    return {int(c): float(v) / 100.0 for c, v in s.items()}
+
+
+def hicp_factor(rates: dict, ref_year: int, target_year: int) -> float:
+    """technology-data v0.15.0 adjust_for_inflation.get_factor(rates, ref_year, target_year): converts a value in
+    ref_year money to target_year money (product of 1 + rate, missing years filled with the series mean)."""
+    ref_year, target_year = int(ref_year), int(target_year)
+    if ref_year == target_year:
+        return 1.0
+    mean = sum(rates.values()) / len(rates)
+    lo, hi = sorted((ref_year, target_year))
+    f = 1.0
+    for y in range(lo + 1, hi + 1):
+        f *= 1.0 + rates.get(y, mean)
+    return f if ref_year < target_year else 1.0 / f
+
+
+def eurostat_download_rates(path: Path = HICP_DOWNLOAD_FILE, sheet: str = "Sheet 6", row: str = HICP_EEA_ROW) -> dict:
+    """year -> annual average rate of change / 100 from the Eurostat prc_hicp_aind default-view download (Sheet 6 = rates;
+    value / flag column pairs after the 'TIME' header row). Cross-check only."""
+    import openpyxl
+    ws = openpyxl.load_workbook(path, data_only=True)[sheet]   # not read_only: the file lacks sheet dimensions (read_only sees one row)
+    rows = list(ws.iter_rows(values_only=True))
+    hdr = next(r for r in rows if r and r[0] == "TIME")
+    years = [int(c) for c in hdr[1:] if c not in (None, "")]
+    r = next(r for r in rows if r and r[0] == row)
+    return {y: float(v) / 100.0 for y, v in zip(years, r[1:][::2]) if v not in (None, ":")}
+
 # --- Unit constants used across D1 (registered once by d1_registry.py) ---------------------
 # param_id: (value, unit, description, source, locator, tier)
 UNIT_CONSTANTS = {

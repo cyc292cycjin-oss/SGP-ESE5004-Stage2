@@ -11,7 +11,7 @@ HERE=Path(__file__).resolve().parent
 import sys
 if str(HERE.parent) not in sys.path:sys.path.insert(0,str(HERE.parent))
 from v5.kkt_algebra import complete_kkt,require_contract
-from carrier_architecture import COUNTRIES,atmosphere_bus
+from carrier_architecture import COUNTRIES,atmosphere_bus,network_countries
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def load_contract():
@@ -83,7 +83,7 @@ def gate_b1_country_net_zero(n):
     from country_carbon import emission_report
     rep=emission_report(n);cfg=n.meta['research_carbon'];rows={}
     ok=True
-    for c in sorted(COUNTRIES):
+    for c in sorted(network_countries(n)):   # M08a A7
         cap=float(cfg['country_cap_tco2'][c]);level=rep['store_final_level'][c];tol=1e-3+1e-7*max(1.,abs(cap))
         within=level<=cap+tol if cfg['constraint_scope']=='per_country' else True
         rows[c]=dict(final_level_tco2=level,cap_tco2=cap,within_cap=bool(within),sum_of_ports_tco2=rep['by_country'].get(c,0.))
@@ -154,7 +154,9 @@ def gate_b11_completeness(n,cfg):
     by=pd.Series([p['carrier'] for p in pending]).value_counts().to_dict() if pending else {}
     return dict(gate='B11_TECHNOLOGY_PATH_COMPLETENESS',passed=not missing,present_nodes_by_carrier=present,missing=missing[:50],missing_count=len(missing),data_pending_count=len(pending),data_pending_by_carrier=by,data_pending=pending,scope_note='only the technologies built in S1; biomass power, gas CCS, floating offshore, CO2/gas networks are later steps')
 
-def gate_b12_hash(n,cfg,network_path=None,receipt=None):
+def replay_research_config(n,cfg):
+    """The research config the network was built with, re-derived from the CURRENT config files + the --override list recorded in the
+    network (s2_network.py rule; also the M08a variant overrides). Shared by gate B12 (whole config) and GATES_V6 G2.2 (subset)."""
     import copy
     R=copy.deepcopy(cfg['research']);overrides=list(n.meta.get('research_config',{}).get('config_overrides',[]))
     for ov in overrides:  # S3-6: sensitivity builds record their --override list; the expected hash is the file config with the same overrides applied (s2_network.py)
@@ -166,6 +168,10 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
         elif old is None or isinstance(old,(list,dict)):import yaml;d[parts[-1]]=yaml.safe_load(val)  # S4D-4: list / null keys (cross_border.coalition), same rule as s2_network.py
         else:d[parts[-1]]=type(old)(val)
     if 'config_overrides' in n.meta.get('research_config',{}):R['config_overrides']=overrides  # S3 builds carry the key (possibly empty); S1/S2 networks do not
+    return R,overrides
+
+def gate_b12_hash(n,cfg,network_path=None,receipt=None):
+    R,overrides=replay_research_config(n,cfg)
     expected=config_sha(R);actual=n.meta.get('research_config_sha256')
     allowed_status={'INTERIM_S1_SKELETON',R.get('s2',{}).get('status')}
     checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_border',{}).get('switches')=={k:bool(v) for k,v in R['cross_border'].items()},skeleton_flag=n.meta.get('skeleton_status') in allowed_status)
@@ -322,7 +328,7 @@ def gate_b14_terminal_caps(n,cap_factor=2.5):
     for name,z in lng.iterrows():
         existing=float(z.p_nom);pmax=float(z.p_nom_max);opt=float(z.p_nom_opt) if 'p_nom_opt' in g else 0.;node=str(z.bus)[:-4]
         proposed=float(led.get(node,{}).get('proposed_mw',0.))
-        limit=float('inf') if mode=='uncapped_cost' else (existing if mode=='existing_only' else (cap_factor*existing if existing>0 else proposed))   # S4E-2 (95 e): uncapped_cost sensitivity has no cap
+        limit=float('inf') if mode in ('uncapped_cost','capex_only') else (existing if mode=='existing_only' else (cap_factor*existing if existing>0 else proposed))   # S4E-2 (95 e): uncapped_cost sensitivity has no cap
         limit_ok=pmax<=limit*(1+1e-9)+1e-6
         within=opt<=pmax*(1+1e-9)+1e-6
         _,h2_ok=h2_check(node,float(led.get(node,{}).get('h2_import_cap_mw',pmax)))

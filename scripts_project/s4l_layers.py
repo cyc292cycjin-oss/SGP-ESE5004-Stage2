@@ -48,7 +48,7 @@ DUST_MODES = ("on", "off")
 DEFAULT_ENERGY_MWH = 1000.0
 DEFAULT_CAPACITY_MW = 1.0
 FUEL_BUS_CARRIERS = ("coal", "lignite", "oil", "gas")
-RENEWABLE_CARRIERS = ("solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc", "ror", "ror_new", "geothermal", "hydro", "hydro_new", "PHS", "PHS_new")
+RENEWABLE_CARRIERS = ("solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc", "offwind-float", "ror", "ror_new", "geothermal", "hydro", "hydro_new", "PHS", "PHS_new")
 REQUIRED_STRUCTURE = {"Generator": ("nuclear SMR", "geothermal", "ror", "solar", "onwind"), "StorageUnit": ("hydro", "PHS")}   # build_research_network.REQUIRED_PER_NODE
 KEEP_CARRIERS = ("Fischer-Tropsch",)
 PYPSA_EUR_REFS = dict(config="research_inputs/registry_v5/sources/pypsa_eur_v2025.07.0_config.default.yaml",

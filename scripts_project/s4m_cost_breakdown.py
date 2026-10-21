@@ -40,6 +40,7 @@ ALT_ROWS = {"Link:industry biomass boiler": "solid biomass boiler steam", "Link:
 PARAMETER_PRICED = {"Store:co2 sequestered", "Store:co2 sequestered extra-ASEAN", "Store:ammonia store", "Store:methanol store", "Generator:LNG import", "Generator:H2 import"}
 COMPOSITE_HINT = {"Generator:offwind-ac": "offwind fixed + per-node connection (offwind-ac-station + distance x offwind-ac-connection; S4C-1 decision 82)",
                   "Generator:offwind-dc": "offwind fixed + per-node connection (S4C-1 decision 82)",
+                  "Generator:offwind-float": "offwind-float fixed + per-node connection (offwind-float-station + distance x offwind-float-connection; M08a A6.2)",
                   "Link:CCGT CC": "CCGT fixed + capture row x CO2 intensity x capture_fraction (S1 fragment)", "Link:biomass EOP CC": "biomass EOP fixed x efficiency + biomass CHP capture fixed x CO2 intensity x capture_fraction (S2-3)",
                   "Link:industry biomass CC": "cement capture fixed x CO2 intensity x capture_fraction (S2-5)", "Link:industry biomass boiler CC": "solid biomass boiler steam fixed x efficiency + biomass boiler capture fixed x CO2 intensity x capture_fraction (S2-5)",
                   "Link:H2 pipeline": "H2 (g) pipeline fixed x length x (1 + subsea share x factor) + compression (S2 R5 / S4C-1 subsea shares)", "Link:CO2 pipeline": "CO2 pipeline fixed x length x subsea factor (S2 R5 / S4C-1)",
@@ -91,7 +92,10 @@ def load_offwind_table(n, repo) -> tuple[pd.DataFrame | None, dict]:
     sha = hashlib.sha256(p.read_bytes()).hexdigest()
     if sha != info.get("sha256"):
         return None, dict(status="sha_mismatch", file=str(info["file"]), expected=info.get("sha256"), actual=sha)
-    t = pd.read_csv(p).set_index(["tech", "node", "cls"])
+    t = pd.read_csv(p)
+    if "classes" in t:   # M08a A6.2 class table (one block per resource-class count): the block of the network
+        t = t[t.classes == int((n.meta.get("research_renewable") or {}).get("resource_classes", 1))]
+    t = t.set_index(["tech", "node", "cls"])
     return t, dict(status="ok", file=str(info["file"]), sha256=sha, rows=int(len(t)))
 
 
@@ -100,14 +104,15 @@ def composite(comp: str, car: str, name: str, z, cc: float, costs: pd.DataFrame,
     L = float(z.get("length", np.nan)) if "length" in z else np.nan
     s = float(z.get("underwater_fraction", 0.0) or 0.0) if "underwater_fraction" in z else 0.0
     e3 = float(z.get("efficiency3", np.nan)) if "efficiency3" in z else np.nan
-    if comp == "Generator" and car in ("offwind-ac", "offwind-dc"):
+    if comp == "Generator" and car in ("offwind-ac", "offwind-dc", "offwind-float"):   # offwind-float: M08a A6.2
         if offwind is None:
             return np.nan, {}, "offwind_connection_table_unavailable"
         k = (car, str(z.bus), _class_of(name))
         if k not in offwind.index:
             return np.nan, dict(node=k[1], cls=k[2]), "offwind_connection_node_class_missing"
         d = offwind.loc[k]; llf = float(d.line_length_factor); dist = float(d.average_distance_km); land = float(d.landfall_km)
-        terms = {"offwind": _fx(costs, "offwind"), f"{car}-station": _fx(costs, f"{car}-station"),
+        turbine = "offwind-float" if car == "offwind-float" else "offwind"
+        terms = {turbine: _fx(costs, turbine), f"{car}-station": _fx(costs, f"{car}-station"),
                  f"{car}-connection-submarine x line_length_factor x distance_km": llf * dist * _fx(costs, f"{car}-connection-submarine"),
                  f"{car}-connection-underground x line_length_factor x landfall_km": llf * land * _fx(costs, f"{car}-connection-underground")}
         return float(sum(terms.values())), dict(terms, line_length_factor=llf, distance_km=dist, landfall_km=land, cls=k[2]), "offwind_connection"

@@ -1,4 +1,10 @@
 #!/bin/bash
+# S4Q-1 (decision 123) changes, defaults unchanged:
+#   * --solver-profile also accepts the two NON-production candidate profiles formal_barrier_1e6 (profile A with BarConvTol 1e-6, Threads 8) and
+#     formal_barrier_1e6_t16 (the same with Threads 16) - calibration only, the default stays formal_barrier;
+#   * FIXED_RUNS=on (default off): run exactly the runs named in --runs - neither the stop rule "integrated non-optimal and C1 failed" nor the
+#     automatic disconnected_gap diagnostic after a non-optimal disconnected main applies (STATUS lines NO_STOP_FIXED_RUNS_* / NO_GAP_DIAGNOSTIC_FIXED_RUNS_*).
+#     S4Q-2: all six authorised runs are completed before the verdict, and the diagnostic would be a seventh, unauthorised solve.
 # S4O supplement 01 (decision 121) changes on top of the S4O-2 script below:
 #   * default profile back to profile A formal_barrier (decision 121; pypsa_eur_default stays selectable as a registered non-production profile);
 #   * default runs = disconnected,integrated_nze: the integrated STEPS result is the S4N pilot (same network, same profile A, optimal) and is NOT
@@ -56,7 +62,8 @@
 #
 # --solver-profile defaults to formal_barrier (profile A; decision 121; until S4N it was REQUIRED without default, decision 120 made pypsa_eur_default
 #   the default for a short time). Allowed values = research.solver.profiles in configs/research/baseline.yaml:
-#   formal_barrier | pypsa_eur_default (non-production) | crossover_diagnostic | barrier_numericfocus2 | formal_barrier_crossover (abandoned, record only).
+#   formal_barrier | pypsa_eur_default (non-production) | crossover_diagnostic | barrier_numericfocus2 | formal_barrier_crossover (abandoned, record only)
+#   | formal_barrier_1e6 / formal_barrier_1e6_t16 (S4Q-1, decision 123: non-production candidates, calibration only).
 #
 # Runs (default disconnected,integrated_nze - decision 121; integrated selectable):
 #   integrated        integrated main, WEO 2025 STEPS fuel prices;
@@ -94,7 +101,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$PROFILE" ] || { PROFILE=formal_barrier; PROFILE_SRC="default (decision 121)"; }
-case "$PROFILE" in pypsa_eur_default|formal_barrier|crossover_diagnostic|barrier_numericfocus2|formal_barrier_crossover) ;; *) echo "REFUSED: unknown solver profile $PROFILE"; exit 2;; esac
+case "$PROFILE" in pypsa_eur_default|formal_barrier|crossover_diagnostic|barrier_numericfocus2|formal_barrier_crossover|formal_barrier_1e6|formal_barrier_1e6_t16) ;; *) echo "REFUSED: unknown solver profile $PROFILE"; exit 2;; esac
 case "$MODE" in
   serial|lanes2) ;;
   lanes3) echo "REFUSED: --mode lanes3 is withdrawn (S4I K2, decision 106 a): it needs 3 Gurobi sessions at the same time, the academic WLS licence allows at most 2 and keeps each token >= 5 min. Use --mode serial (recommended) or --mode lanes2."; exit 2;;
@@ -104,6 +111,8 @@ LICENCE_GAP_S=330   # >= 5 min: a closed environment keeps its WLS token for at 
 WALL_CAP_S="${WALL_CAP_S:-22500}"; GRACE_S="${GRACE_S:-30}"; GUROBI_TIME_LIMIT_S="${GUROBI_TIME_LIMIT_S:-21600}"; MONITOR_S="${MONITOR_S:-60}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"   # decision 121 defaults
 RUN_GAP_S="${RUN_GAP_S:-330}"; C1_STEP="${C1_STEP:-on}"   # S4O: >= 5 min between adjacent solves (serial); C1 precision step after every solve
 TRUNCATE="${TRUNCATE:-}"; PILOT_INTEGRATED="${PILOT_INTEGRATED:-}"; PILOT_PRECISION="${PILOT_PRECISION:-}"   # S4O supplement 01
+FIXED_RUNS="${FIXED_RUNS:-off}"   # S4Q-1: on = exactly the runs of --runs (no stop rule, no automatic disconnected_gap)
+case "$FIXED_RUNS" in on|off) ;; *) echo "FIXED_RUNS must be on or off"; exit 2;; esac
 [ -z "$TRUNCATE" ] || [ "$TRUNCATE" -gt 0 ] 2>/dev/null || { echo "TRUNCATE must be a positive number of snapshots"; exit 2; }
 TRUNC=(); [ -n "$TRUNCATE" ] && TRUNC=(--truncate "$TRUNCATE")
 for r in ${RUNS//,/ }; do case "$r" in integrated|disconnected|integrated_nze|disconnected_gap) ;; *) echo "unknown run $r"; exit 2;; esac; done
@@ -119,7 +128,7 @@ RUN="$HERE/runs/$(date -u +%Y%m%dT%H%M%SZ)_$$"; EXP="$RUN/export"
 mkdir -p "$(dirname "$RUN")" && mkdir "$RUN" && mkdir "$EXP" || { echo "run folder $RUN exists or cannot be created"; exit 2; }
 ST="$RUN/STATUS.txt"
 export PYTHONHASHSEED=0
-echo "START:$(date -u +%Y-%m-%dT%H:%M:%SZ) mode:$MODE runs:$RUNS solver_profile:$PROFILE commit:$(cat "$HERE/COMMIT" 2>/dev/null) wall_cap_s:$WALL_CAP_S time_limit_s:$GUROBI_TIME_LIMIT_S profile_source:${PROFILE_SRC// /_} run_gap_s:$RUN_GAP_S c1_step:$C1_STEP truncate:${TRUNCATE:-none} pilot_integrated:$([ -n "$PILOT_INTEGRATED" ] && echo given || echo none)" >> "$ST"
+echo "START:$(date -u +%Y-%m-%dT%H:%M:%SZ) mode:$MODE runs:$RUNS solver_profile:$PROFILE commit:$(cat "$HERE/COMMIT" 2>/dev/null) wall_cap_s:$WALL_CAP_S time_limit_s:$GUROBI_TIME_LIMIT_S profile_source:${PROFILE_SRC// /_} run_gap_s:$RUN_GAP_S c1_step:$C1_STEP truncate:${TRUNCATE:-none} pilot_integrated:$([ -n "$PILOT_INTEGRATED" ] && echo given || echo none) fixed_runs:$FIXED_RUNS" >> "$ST"
 SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'   # licence-line filter (written so that the file itself holds no licence keyword)
 
 # ---- container cgroup memory (v2: memory.max / memory.current; v1: memory/memory.limit_in_bytes / memory.usage_in_bytes); "" when unlimited or absent
@@ -314,7 +323,9 @@ licence_gap() {   # $1 reason; lanes2 only (serial never holds more than 2 token
 lane_integrated() {   # S4O stop rule: integrated non-optimal AND C1 (a)(b)(c) not passed -> STOP (no further run starts; no retry)
   want integrated || return 0
   local c; c=$(solve integrated | tail -1)
-  if [ "$c" != "optimal" ] && [ "$c" != "dry" ] && ! c1_abc integrated; then
+  if [ "$c" != "optimal" ] && [ "$c" != "dry" ] && ! c1_abc integrated && [ "$FIXED_RUNS" = on ]; then
+    echo "NO_STOP_FIXED_RUNS_INTEGRATED_NONOPTIMAL_C1_FAILED:$c:$(c1_summary "$RUN/integrated/PRECISION.json" 2>/dev/null):$(date -u +%Y-%m-%dT%H:%M:%SZ) - FIXED_RUNS=on: the remaining runs of --runs start (S4Q-2)" >> "$ST"
+  elif [ "$c" != "optimal" ] && [ "$c" != "dry" ] && ! c1_abc integrated; then
     echo "STOP_INTEGRATED_NONOPTIMAL_C1_FAILED:$c:$(c1_summary "$RUN/integrated/PRECISION.json" 2>/dev/null):$(date -u +%Y-%m-%dT%H:%M:%SZ) - no further run started (S4O stop condition)" >> "$ST"
     touch "$RUN/STOP"
   fi
@@ -325,6 +336,7 @@ lane_disconnected() {   # the diagnostic runs only when the disconnected main en
   local c="skipped"
   want disconnected && c=$(solve disconnected | tail -1)
   if want disconnected_gap; then licence_gap "before disconnected_gap in the lane"; solve disconnected_gap > /dev/null
+  elif [ "$c" != "optimal" ] && [ "$c" != "skipped" ] && [ "$c" != "dry" ] && [ "$FIXED_RUNS" = on ]; then echo "NO_GAP_DIAGNOSTIC_FIXED_RUNS_DISCONNECTED_NON_OPTIMAL:$c - FIXED_RUNS=on: disconnected_gap not started (not in --runs)" >> "$ST"
   elif [ "$c" != "optimal" ] && [ "$c" != "skipped" ] && [ "$c" != "dry" ]; then echo "DISCONNECTED_MAIN_NON_OPTIMAL:$c -> running disconnected_gap diagnostic" >> "$ST"; licence_gap "before disconnected_gap in the lane"; solve disconnected_gap > /dev/null
   elif [ "$c" = "dry" ]; then echo "DRY-RUN: disconnected_gap would run only if the disconnected main ends non-optimal" >> "$ST"; fi
 }

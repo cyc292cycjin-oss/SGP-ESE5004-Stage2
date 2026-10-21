@@ -35,3 +35,22 @@
 - 定义：`GATES_V6.md`（提交 d45955ea，SHA256 同上）。
 - 重评：`GATES_RETRO_COMPARISON.csv/.md`（`scripts/s4r_r8_retro.py`）。
 - 本说明：`GATES_V6_NOTES.md`（补充 01，2026-10-20）。
+
+## 6. 实现说明：子集键清单（M08a 补充 01 第 1 点，2026-10-21）
+
+**性质：** 本节是对 `GATES_V6.md` §2 G2.2 定义的**实现说明，不是修改定义**。G2.2 的本意是"影响网络与 LP 的配置子集未变"；§2 的键列表写于 M08a 之前，M08a 新增或细化的若干键同样改变网络 / LP，按该本意纳入。`GATES_V6.md` 不改，SHA256 仍为 `5c0aa8b8ed322b75a63879fccfc19559606a0ad743ecafee3addfcbfe04fd7f9`。
+
+**实现位置：** `scripts_project/v5/gates_v6.py`：`SUBSET_KEYS = SUBSET_KEYS_GATES_V6 + SUBSET_KEYS_M08A_ADDITIONS`；`config_subset(R)` 取每个点分键的值（缺失记 null），按键名排序后规范化 JSON，`config_subset_sha256` 求 SHA256；构建（`s2_network.py`）与变体脚本（`m08a_variants.py`）把它写入网络元数据 `research_config_subset_sha256`。
+
+**最终子集键（30 个，均指 `research` 下的键）：**
+
+| 来源 | 键 |
+|---|---|
+| `GATES_V6.md` §2 原列表（26 个，原样） | `scenario`、`cross_border`、`fuels.price_scenario`、`finance`、`sector`、`s3`、`renewable`、`fleet`、`nuclear`、`candidates`、`hydro`、`hydrogen`、`cost_layer.active`、`numerics`、`network`、`corridors`、`bunkers`、`co2`、`s2`、`cost_scaling`、`carbon`、`demand`、`transmission`、`existing_cross_border_electricity`、`solver.scaling`、`solver.interior` |
+| 按 G2.2 本意纳入（4 个，用户 2026-10-21 确认） | `cost_layer`（整段：各层的 `rebase_index` 与层文件、`smr_cost_source`、`aeo8_price_year_factor`、`electric_base_candidates`、`registry`；原列表只有 `cost_layer.active`，而 M08a A1 / A2 的口径键改变成本）、`site_candidates`（候选站点表，改变网络组件）、`disconnected`（b1 开关 `co2_shipping_intra_asean`，第 132 项）、`coalition`（"去掉一国" `remove_countries`，第 132 项） |
+
+`cost_layer` 整段纳入后，`cost_layer.active` 的值在子集中出现两次（作为独立键与作为整段的一部分），不影响哈希的确定性。
+
+**不纳入（与 `GATES_V6.md` §2 一致或同理）：** `solver.profile`、`solver.profiles`（档案与白名单的增减不改变网络 / LP，§2 明文排除）；`solver.acceptance`、`solver.run_rules`（验收规则与事先登记的运行规则，M08a A8，只决定判定与运行流程）；`reporting`（报告货币与汇率，M08a A9，只影响导出列）；`stage`、`skeleton_status`（状态标签）；`fuel_bus_naming`（命名约定，无脚本读取；网络本身由 G2.1 网络同一性覆盖）；`config_overrides`（其效果已体现在被覆盖键的值中）。
+
+**测试：** `tests/research/test_m08a_a8.py`：子集键与本节清单逐一相等；G2.2 对 `solver.profile(s)`、`solver.acceptance`、`solver.run_rules`、`stage` 不敏感，对四个情景开关、`site_candidates`、成本层口径键敏感；`tests/research/test_m08a_a9.py`：对 `reporting` 不敏感。M08a A6.2 新增的海上风键位于 `renewable` 段内，自动纳入。

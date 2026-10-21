@@ -1,0 +1,2210 @@
+{
+ "step": "S4Q",
+ "decision": "123",
+ "instruction": {
+  "file": "S4Q_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "c33f97e71dabd0a4cf159ddd636168c3cf6e3244ca8ad94deecb1d484504b75d"
+ },
+ "authorisation": "six local 56x3h runs (candidate BarConvTol 1e-6 x two thread paths x three scenarios), 30 min stop-loss each, no retry, no cloud (user, 2026-10-20)",
+ "profile_A": {
+  "Method": 2,
+  "Crossover": 0,
+  "BarConvTol": 1e-08,
+  "BarHomogeneous": 1,
+  "Threads": 8,
+  "Seed": 123,
+  "AggFill": 0,
+  "PreDual": 0,
+  "GURO_PAR_BARDENSETHRESH": 200
+ },
+ "production_default": "formal_barrier",
+ "candidate_key_check": {
+  "formal_barrier_1e6": {
+   "parameters": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 8,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200
+   },
+   "same_keys_same_order": true,
+   "differences": {
+    "BarConvTol": {
+     "profile_A": 1e-08,
+     "candidate": 1e-06
+    }
+   },
+   "equal_keys": [
+    "Method",
+    "Crossover",
+    "BarHomogeneous",
+    "Threads",
+    "Seed",
+    "AggFill",
+    "PreDual",
+    "GURO_PAR_BARDENSETHRESH"
+   ]
+  },
+  "formal_barrier_1e6_t16": {
+   "parameters": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 16,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200
+   },
+   "same_keys_same_order": true,
+   "differences": {
+    "BarConvTol": {
+     "profile_A": 1e-08,
+     "candidate": 1e-06
+    },
+    "Threads": {
+     "profile_A": 8,
+     "candidate": 16
+    }
+   },
+   "equal_keys": [
+    "Method",
+    "Crossover",
+    "BarHomogeneous",
+    "Seed",
+    "AggFill",
+    "PreDual",
+    "GURO_PAR_BARDENSETHRESH"
+   ]
+  }
+ },
+ "tests": {
+  "s4o_harness_rerun": {
+   "passed": 59,
+   "failed": 0,
+   "file": "evidence/s4q_1/s4o4_rerun/TEST_RESULTS.txt"
+  },
+  "s4q_cases": {
+   "passed": 8,
+   "failed": 0,
+   "file": "evidence/s4q_1/results/TEST_RESULTS_s4q1.txt"
+  }
+ },
+ "driver_status": [
+  "DRIVER_START:2026-10-20T00:12:49Z:commit=21683239",
+  "PREFLIGHT_formal_barrier_1e6:2026-10-20T00:12:52Z:1ok",
+  "INVOKE_formal_barrier_1e6:2026-10-20T00:12:52Z",
+  "END_formal_barrier_1e6:2026-10-20T00:41:44Z:exit=0:run=20261020T001252Z_564:RUN_integrated:optimal:352s RUN_disconnected:optimal:312s RUN_integrated_nze:optimal:367s ",
+  "PREFLIGHT_formal_barrier_1e6_t16:2026-10-20T00:41:46Z:1ok",
+  "GAP_BEFORE_formal_barrier_1e6_t16:2026-10-20T00:46:41Z:334s",
+  "INVOKE_formal_barrier_1e6_t16:2026-10-20T00:46:41Z",
+  "END_formal_barrier_1e6_t16:2026-10-20T01:15:11Z:exit=0:run=20261020T004641Z_8849:RUN_integrated:optimal:317s RUN_disconnected:optimal:316s RUN_integrated_nze:optimal:376s ",
+  "DRIVER_DONE:2026-10-20T01:15:11Z"
+ ],
+ "runs": {
+  "t8": {
+   "profile": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 8,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200
+   },
+   "run_folder": "20261020T001252Z_564",
+   "start": "START:2026-10-20T00:12:52Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier_1e6 commit:21683239a2082122d5c32fa4321d8f3377c28d09 wall_cap_s:1800 time_limit_s:1750 profile_source:--solver-profile run_gap_s:330 c1_step:on truncate:56 pilot_integrated:none fixed_runs:on",
+   "done": "DONE:2026-10-20T00:41:44Z export:/home/jin/s4q_local/pkg/runs/20261020T001252Z_564/results_20261020T001252Z_564.tar.gz",
+   "other_lines": [
+    "BATCH_REFERENCE:2026-10-20T00:29:59Z:integrated_source=this_batch:integrated=optimal:disconnected=optimal"
+   ],
+   "results_tarball_sha256": "854e9e79b787fe1e7539581b50fc0662ad650532dc5e6aaf228f462f6b4bfb87",
+   "runs": {
+    "integrated": {
+     "termination": "optimal",
+     "objective": 648381184222.3383,
+     "objective_lp": 645494456687.5522,
+     "solver_profile": "formal_barrier_1e6",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 302.8858790397644,
+     "peak_rss_gib": 4.106147766113281,
+     "input_network_sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_integrated:pid=585:pgid=585:2026-10-20T00:12:53Z",
+     "status_run": "RUN_integrated:optimal:352s",
+     "status_c1_pipeline": "PRECISION_integrated:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=L23:exit=0:34s:1.7GiB 1.7GiB ",
+     "status_regrade_pipeline": [
+      "REGRADE_integrated:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0"
+     ],
+     "status_gap": null,
+     "receipt_sha256": "a426173b63577d4e612ff0b3f7dcfe4c3a1fc01b9d4fe8ca3846a42dc66b4600"
+    },
+    "disconnected": {
+     "termination": "optimal",
+     "objective": 698979559682.4272,
+     "objective_lp": 695923451077.4285,
+     "solver_profile": "formal_barrier_1e6",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 264.19086360931396,
+     "peak_rss_gib": 3.7020645141601562,
+     "input_network_sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_disconnected:pid=3228:pgid=3228:2026-10-20T00:24:19Z",
+     "status_run": "RUN_disconnected:optimal:312s",
+     "status_c1_pipeline": "PRECISION_disconnected:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=L23:exit=0:29s:1.5GiB 1.5GiB ",
+     "status_regrade_pipeline": [
+      "REGRADE_disconnected:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0"
+     ],
+     "status_gap": "GAP_disconnected:334s:2026-10-20T00:24:18Z",
+     "receipt_sha256": "897e74d03cb872fdb3770babe5306260946a66fb92b6734aa0062ee912dfee4d"
+    },
+    "integrated_nze": {
+     "termination": "optimal",
+     "objective": 547960257786.0746,
+     "objective_lp": 545073530251.2885,
+     "solver_profile": "formal_barrier_1e6",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 8,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 316.21407747268677,
+     "peak_rss_gib": 4.103385925292969,
+     "input_network_sha256": "6ee7b9ca60bee50f6352ffda324b4a84fb0f9c774bc69a5cb275624c69ee256d",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_integrated_nze:pid=5551:pgid=5551:2026-10-20T00:35:01Z",
+     "status_run": "RUN_integrated_nze:optimal:367s",
+     "status_c1_pipeline": "PRECISION_integrated_nze:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0:34s:1.7GiB 1.7GiB ",
+     "status_regrade_pipeline": [],
+     "status_gap": "GAP_integrated_nze:330s:2026-10-20T00:35:00Z",
+     "receipt_sha256": "a78764570183716762ca7d6dbec58465f022f4fdb5cc56b725afd98e88d8bf67"
+    }
+   }
+  },
+  "t16": {
+   "profile": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 16,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200
+   },
+   "run_folder": "20261020T004641Z_8849",
+   "start": "START:2026-10-20T00:46:41Z mode:serial runs:integrated,disconnected,integrated_nze solver_profile:formal_barrier_1e6_t16 commit:21683239a2082122d5c32fa4321d8f3377c28d09 wall_cap_s:1800 time_limit_s:1750 profile_source:--solver-profile run_gap_s:330 c1_step:on truncate:56 pilot_integrated:none fixed_runs:on",
+   "done": "DONE:2026-10-20T01:15:11Z export:/home/jin/s4q_local/pkg/runs/20261020T004641Z_8849/results_20261020T004641Z_8849.tar.gz",
+   "other_lines": [
+    "BATCH_REFERENCE:2026-10-20T01:03:14Z:integrated_source=this_batch:integrated=optimal:disconnected=optimal"
+   ],
+   "results_tarball_sha256": "c5cebf8f72e0cc6151a124be4f23aa6b9f26c65314b379a2610d732a5b577f03",
+   "runs": {
+    "integrated": {
+     "termination": "optimal",
+     "objective": 648381183628.2552,
+     "objective_lp": 645494456093.4692,
+     "solver_profile": "formal_barrier_1e6_t16",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 16,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 266.24471616744995,
+     "peak_rss_gib": 6.201408386230469,
+     "input_network_sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_integrated:pid=8870:pgid=8870:2026-10-20T00:46:42Z",
+     "status_run": "RUN_integrated:optimal:317s",
+     "status_c1_pipeline": "PRECISION_integrated:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=L23:exit=0:34s:1.7GiB 1.7GiB ",
+     "status_regrade_pipeline": [
+      "REGRADE_integrated:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0"
+     ],
+     "status_gap": null,
+     "receipt_sha256": "8d3159007f1d5edf3ccaafea16953694d8ab4ccffc42c57aab6a4427756877c3"
+    },
+    "disconnected": {
+     "termination": "optimal",
+     "objective": 698979559990.2317,
+     "objective_lp": 695923451385.2329,
+     "solver_profile": "formal_barrier_1e6_t16",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 16,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 270.93310165405273,
+     "peak_rss_gib": 4.782859802246094,
+     "input_network_sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_disconnected:pid=10618:pgid=10618:2026-10-20T00:57:29Z",
+     "status_run": "RUN_disconnected:optimal:316s",
+     "status_c1_pipeline": "PRECISION_disconnected:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=L23:exit=0:29s:1.5GiB 1.5GiB ",
+     "status_regrade_pipeline": [
+      "REGRADE_disconnected:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0"
+     ],
+     "status_gap": "GAP_disconnected:330s:2026-10-20T00:57:28Z",
+     "receipt_sha256": "55f2bdde589576cb0f8955fe74f7c5733ad2bad5b7a4b35f04c39f264f53df0d"
+    },
+    "integrated_nze": {
+     "termination": "optimal",
+     "objective": 547960257359.3216,
+     "objective_lp": 545073529824.5355,
+     "solver_profile": "formal_barrier_1e6_t16",
+     "solver_parameters": {
+      "Method": 2,
+      "Crossover": 0,
+      "BarConvTol": 1e-06,
+      "BarHomogeneous": 1,
+      "Threads": 16,
+      "Seed": 123,
+      "AggFill": 0,
+      "PreDual": 0,
+      "GURO_PAR_BARDENSETHRESH": 200,
+      "TimeLimit": 1750.0
+     },
+     "solve_seconds": 326.16273975372314,
+     "peak_rss_gib": 6.233196258544922,
+     "input_network_sha256": "6ee7b9ca60bee50f6352ffda324b4a84fb0f9c774bc69a5cb275624c69ee256d",
+     "truncated_to": 56,
+     "status_solve": "SOLVE_integrated_nze:pid=12497:pgid=12497:2026-10-20T01:08:16Z",
+     "status_run": "RUN_integrated_nze:optimal:376s",
+     "status_c1_pipeline": "PRECISION_integrated_nze:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:exit=0:36s:1.7GiB 1.7GiB ",
+     "status_regrade_pipeline": [],
+     "status_gap": "GAP_integrated_nze:331s:2026-10-20T01:08:15Z",
+     "receipt_sha256": "05d26a9d8d81f6be281d44ab4e9fe91e2f227ce651561abcb154ca22d7346c11"
+    }
+   }
+  }
+ },
+ "verdict": {
+  "level1_passed": true,
+  "criteria": {
+   "t8": {
+    "c1_optimal_and_c1_abc": true,
+    "c2_objective_and_b16": true,
+    "c3_country_differences": true,
+    "c4_nze_entity_totals": true,
+    "path_passed": true
+   },
+   "t16": {
+    "c1_optimal_and_c1_abc": true,
+    "c2_objective_and_b16": true,
+    "c3_country_differences": true,
+    "c4_nze_entity_totals": true,
+    "path_passed": true
+   }
+  }
+ },
+ "judge": {
+  "file": "evidence/s4q_3/S4Q3_JUDGE.json",
+  "sha256": "8c9aabaaf1b088fad52f1edf34f249454f6eb8b397a7152ab8d4a444b53a3b0a"
+ },
+ "criteria_detail": {
+  "t8": {
+   "criterion_1": {
+    "integrated": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    },
+    "disconnected": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    },
+    "integrated_nze": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    }
+   },
+   "criterion_2": {
+    "integrated": {
+     "objective_rel_diff": 4.336780268232587e-09,
+     "objective_signed_rel_diff": 4.336780268232587e-09,
+     "objective_abs_diff_bn": 2.81188671875e-06,
+     "b16": 4.715607208736743e-10,
+     "passed": true
+    },
+    "disconnected": {
+     "objective_rel_diff": 2.4480468763243834e-09,
+     "objective_signed_rel_diff": 2.4480468763243834e-09,
+     "objective_abs_diff_bn": 1.711134765625e-06,
+     "b16": 5.445665239675456e-11,
+     "passed": true
+    },
+    "integrated_nze": {
+     "objective_rel_diff": 4.808489606489275e-09,
+     "objective_signed_rel_diff": 4.808489606489275e-09,
+     "objective_abs_diff_bn": 2.6348612060546875e-06,
+     "b16": 2.9980682764522e-11,
+     "passed": true
+    }
+   },
+   "criterion_3": {
+    "BN": {
+     "ref_diff_bn": 0.8382953856842449,
+     "cal_diff_bn": 0.8382967884944981,
+     "change_bn": 1.4028102531815634e-06,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "ID": {
+     "ref_diff_bn": 7.018974310178436,
+     "cal_diff_bn": 7.018966248963551,
+     "change_bn": -8.061214884946821e-06,
+     "tolerance_bn": 0.07018974310178436,
+     "within": true
+    },
+    "KH": {
+     "ref_diff_bn": 1.8815292358429634,
+     "cal_diff_bn": 1.8815314205188525,
+     "change_bn": 2.1846758890831097e-06,
+     "tolerance_bn": 0.018815292358429634,
+     "within": true
+    },
+    "LA": {
+     "ref_diff_bn": 2.760377029425801,
+     "cal_diff_bn": 2.760374879664662,
+     "change_bn": -2.14976113888099e-06,
+     "tolerance_bn": 0.02760377029425801,
+     "within": true
+    },
+    "MM": {
+     "ref_diff_bn": 0.7266793005322736,
+     "cal_diff_bn": 0.7266803280230558,
+     "change_bn": 1.0274907822349633e-06,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "MY": {
+     "ref_diff_bn": 4.083183372529305,
+     "cal_diff_bn": 4.08318397905056,
+     "change_bn": 6.065212545536269e-07,
+     "tolerance_bn": 0.04083183372529305,
+     "within": true
+    },
+    "PH": {
+     "ref_diff_bn": 1.7741226229225688,
+     "cal_diff_bn": 1.774131407195597,
+     "change_bn": 8.784273028084044e-06,
+     "tolerance_bn": 0.01774122622922569,
+     "within": true
+    },
+    "SG": {
+     "ref_diff_bn": 2.0212750484540045,
+     "cal_diff_bn": 2.021277009981514,
+     "change_bn": 1.9615275093087803e-06,
+     "tolerance_bn": 0.020212750484540045,
+     "within": true
+    },
+    "TH": {
+     "ref_diff_bn": 6.151625398392426,
+     "cal_diff_bn": 6.151636226004371,
+     "change_bn": 1.0827611944819182e-05,
+     "tolerance_bn": 0.06151625398392426,
+     "within": true
+    },
+    "TL": {
+     "ref_diff_bn": 0.369548014920337,
+     "cal_diff_bn": 0.369548890815881,
+     "change_bn": 8.758955439835958e-07,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "VN": {
+     "ref_diff_bn": 24.957918759241295,
+     "cal_diff_bn": 24.95791228432128,
+     "change_bn": -6.474920013488372e-06,
+     "tolerance_bn": 0.24957918759241296,
+     "within": true
+    },
+    "ASEAN_BUNKER": {
+     "ref_diff_bn": -1.9851519392217227,
+     "cal_diff_bn": -1.9851643467598024,
+     "change_bn": -1.2407538079628466e-05,
+     "tolerance_bn": 0.01985151939221723,
+     "within": true
+    }
+   },
+   "criterion_3_asean_pool_information": {
+    "ref_diff_bn": 2.1965385e-08,
+    "cal_diff_bn": 3.4383268e-07,
+    "change_bn": 3.21867295e-07,
+    "tolerance_bn": 0.01,
+    "within": true,
+    "note": "information (not in the decision-107 entity set)"
+   },
+   "criterion_4": {
+    "BN": {
+     "ref_total_bn": -1.21395105304212,
+     "cal_total_bn": -1.213950821554513,
+     "change_bn": 2.3148760708302518e-07,
+     "tolerance_bn": 0.012139510530421201,
+     "within": true
+    },
+    "ID": {
+     "ref_total_bn": 177.88224082105873,
+     "cal_total_bn": 177.88220348376012,
+     "change_bn": -3.733729860755375e-05,
+     "tolerance_bn": 1.7788224082105872,
+     "within": true
+    },
+    "KH": {
+     "ref_total_bn": 4.624718096491932,
+     "cal_total_bn": 4.624719024548563,
+     "change_bn": 9.280566306557603e-07,
+     "tolerance_bn": 0.046247180964919324,
+     "within": true
+    },
+    "LA": {
+     "ref_total_bn": -0.652424181443633,
+     "cal_total_bn": -0.652455416881495,
+     "change_bn": -3.1235437861987236e-05,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "MM": {
+     "ref_total_bn": 5.111880906388792,
+     "cal_total_bn": 5.111912294479896,
+     "change_bn": 3.138809110403429e-05,
+     "tolerance_bn": 0.05111880906388792,
+     "within": true
+    },
+    "MY": {
+     "ref_total_bn": 51.56812822233833,
+     "cal_total_bn": 51.56805828107513,
+     "change_bn": -6.994126319881389e-05,
+     "tolerance_bn": 0.5156812822233833,
+     "within": true
+    },
+    "PH": {
+     "ref_total_bn": 14.444837210273256,
+     "cal_total_bn": 14.44480798015659,
+     "change_bn": -2.9230116666667527e-05,
+     "tolerance_bn": 0.14444837210273256,
+     "within": true
+    },
+    "SG": {
+     "ref_total_bn": 13.987009153709348,
+     "cal_total_bn": 13.987003785817505,
+     "change_bn": -5.367891843022221e-06,
+     "tolerance_bn": 0.13987009153709348,
+     "within": true
+    },
+    "TH": {
+     "ref_total_bn": 57.74188865533228,
+     "cal_total_bn": 57.7420928956341,
+     "change_bn": 0.00020424030181942499,
+     "tolerance_bn": 0.5774188865533229,
+     "within": true
+    },
+    "TL": {
+     "ref_total_bn": -1.020984781644602,
+     "cal_total_bn": -1.020989524029672,
+     "change_bn": -4.742385069977928e-06,
+     "tolerance_bn": 0.010209847816446021,
+     "within": true
+    },
+    "VN": {
+     "ref_total_bn": 131.66147674618512,
+     "cal_total_bn": 131.66126442303764,
+     "change_bn": -0.00021232314747976488,
+     "tolerance_bn": 1.3166147674618511,
+     "within": true
+    },
+    "ASEAN_BUNKER": {
+     "ref_total_bn": 93.82543534782256,
+     "cal_total_bn": 93.8255913964589,
+     "change_bn": 0.00015604863634166577,
+     "tolerance_bn": 0.9382543534782256,
+     "within": true
+    },
+    "ASEAN_POOL": {
+     "ref_total_bn": 7.70866e-09,
+     "cal_total_bn": -1.6470356e-08,
+     "change_bn": -2.4179016e-08,
+     "tolerance_bn": 0.01,
+     "within": true
+    }
+   }
+  },
+  "t16": {
+   "criterion_1": {
+    "integrated": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    },
+    "disconnected": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    },
+    "integrated_nze": {
+     "termination": "optimal",
+     "optimal": true,
+     "a": true,
+     "b": true,
+     "c": true,
+     "passed": true
+    }
+   },
+   "criterion_2": {
+    "integrated": {
+     "objective_rel_diff": 3.420524530284297e-09,
+     "objective_signed_rel_diff": 3.420524530284297e-09,
+     "objective_abs_diff_bn": 2.2178037109375e-06,
+     "b16": 1.8019072474751203e-10,
+     "passed": true
+    },
+    "disconnected": {
+     "objective_rel_diff": 2.8884095115699893e-09,
+     "objective_signed_rel_diff": 2.8884095115699893e-09,
+     "objective_abs_diff_bn": 2.018939208984375e-06,
+     "b16": 1.326483793899077e-11,
+     "passed": true
+    },
+    "integrated_nze": {
+     "objective_rel_diff": 4.029686806461541e-09,
+     "objective_signed_rel_diff": 4.029686806461541e-09,
+     "objective_abs_diff_bn": 2.2081082153320313e-06,
+     "b16": 2.4918652345602393e-10,
+     "passed": true
+    }
+   },
+   "criterion_3": {
+    "BN": {
+     "ref_diff_bn": 0.8382953856842449,
+     "cal_diff_bn": 0.8382970358701249,
+     "change_bn": 1.6501858800532787e-06,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "ID": {
+     "ref_diff_bn": 7.018974310178436,
+     "cal_diff_bn": 7.018965030071769,
+     "change_bn": -9.28010666711998e-06,
+     "tolerance_bn": 0.07018974310178436,
+     "within": true
+    },
+    "KH": {
+     "ref_diff_bn": 1.8815292358429634,
+     "cal_diff_bn": 1.8815320456436133,
+     "change_bn": 2.8098006499277517e-06,
+     "tolerance_bn": 0.018815292358429634,
+     "within": true
+    },
+    "LA": {
+     "ref_diff_bn": 2.760377029425801,
+     "cal_diff_bn": 2.7603734223407033,
+     "change_bn": -3.6070850977232283e-06,
+     "tolerance_bn": 0.02760377029425801,
+     "within": true
+    },
+    "MM": {
+     "ref_diff_bn": 0.7266793005322736,
+     "cal_diff_bn": 0.7266816103346763,
+     "change_bn": 2.309802402677974e-06,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "MY": {
+     "ref_diff_bn": 4.083183372529305,
+     "cal_diff_bn": 4.08318424750459,
+     "change_bn": 8.749752851144876e-07,
+     "tolerance_bn": 0.04083183372529305,
+     "within": true
+    },
+    "PH": {
+     "ref_diff_bn": 1.7741226229225688,
+     "cal_diff_bn": 1.7741332365709432,
+     "change_bn": 1.0613648374402374e-05,
+     "tolerance_bn": 0.01774122622922569,
+     "within": true
+    },
+    "SG": {
+     "ref_diff_bn": 2.0212750484540045,
+     "cal_diff_bn": 2.021277342562101,
+     "change_bn": 2.2941080963789773e-06,
+     "tolerance_bn": 0.020212750484540045,
+     "within": true
+    },
+    "TH": {
+     "ref_diff_bn": 6.151625398392426,
+     "cal_diff_bn": 6.151639151915276,
+     "change_bn": 1.375352285037934e-05,
+     "tolerance_bn": 0.06151625398392426,
+     "within": true
+    },
+    "TL": {
+     "ref_diff_bn": 0.369548014920337,
+     "cal_diff_bn": 0.369549052491772,
+     "change_bn": 1.0375714349919463e-06,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "VN": {
+     "ref_diff_bn": 24.957918759241295,
+     "cal_diff_bn": 24.957911076532724,
+     "change_bn": -7.68270857065545e-06,
+     "tolerance_bn": 0.24957918759241296,
+     "within": true
+    },
+    "ASEAN_BUNKER": {
+     "ref_diff_bn": -1.9851519392217227,
+     "cal_diff_bn": -1.9851670159659847,
+     "change_bn": -1.5076744261932618e-05,
+     "tolerance_bn": 0.01985151939221723,
+     "within": true
+    }
+   },
+   "criterion_3_asean_pool_information": {
+    "ref_diff_bn": 2.1965385e-08,
+    "cal_diff_bn": 1.26116844e-07,
+    "change_bn": 1.0415145900000001e-07,
+    "tolerance_bn": 0.01,
+    "within": true,
+    "note": "information (not in the decision-107 entity set)"
+   },
+   "criterion_4": {
+    "BN": {
+     "ref_total_bn": -1.21395105304212,
+     "cal_total_bn": -1.213951012965338,
+     "change_bn": 4.007678211515042e-08,
+     "tolerance_bn": 0.012139510530421201,
+     "within": true
+    },
+    "ID": {
+     "ref_total_bn": 177.88224082105873,
+     "cal_total_bn": 177.88222828653383,
+     "change_bn": -1.2534524898910604e-05,
+     "tolerance_bn": 1.7788224082105872,
+     "within": true
+    },
+    "KH": {
+     "ref_total_bn": 4.624718096491932,
+     "cal_total_bn": 4.6247184953030045,
+     "change_bn": 3.988110721664384e-07,
+     "tolerance_bn": 0.046247180964919324,
+     "within": true
+    },
+    "LA": {
+     "ref_total_bn": -0.652424181443633,
+     "cal_total_bn": -0.652435251118878,
+     "change_bn": -1.1069675245001243e-05,
+     "tolerance_bn": 0.01,
+     "within": true
+    },
+    "MM": {
+     "ref_total_bn": 5.111880906388792,
+     "cal_total_bn": 5.111891838429557,
+     "change_bn": 1.0932040765077033e-05,
+     "tolerance_bn": 0.05111880906388792,
+     "within": true
+    },
+    "MY": {
+     "ref_total_bn": 51.56812822233833,
+     "cal_total_bn": 51.56810389829688,
+     "change_bn": -2.432404144769862e-05,
+     "tolerance_bn": 0.5156812822233833,
+     "within": true
+    },
+    "PH": {
+     "ref_total_bn": 14.444837210273256,
+     "cal_total_bn": 14.444826790039832,
+     "change_bn": -1.0420233424568437e-05,
+     "tolerance_bn": 0.14444837210273256,
+     "within": true
+    },
+    "SG": {
+     "ref_total_bn": 13.987009153709348,
+     "cal_total_bn": 13.98700717299215,
+     "change_bn": -1.980717197369586e-06,
+     "tolerance_bn": 0.13987009153709348,
+     "within": true
+    },
+    "TH": {
+     "ref_total_bn": 57.74188865533228,
+     "cal_total_bn": 57.741960150288804,
+     "change_bn": 7.149495652214455e-05,
+     "tolerance_bn": 0.5774188865533229,
+     "within": true
+    },
+    "TL": {
+     "ref_total_bn": -1.020984781644602,
+     "cal_total_bn": -1.020986439210686,
+     "change_bn": -1.6575660839457385e-06,
+     "tolerance_bn": 0.010209847816446021,
+     "within": true
+    },
+    "VN": {
+     "ref_total_bn": 131.66147674618512,
+     "cal_total_bn": 131.66140277468878,
+     "change_bn": -7.397149633447953e-05,
+     "tolerance_bn": 1.3166147674618511,
+     "within": true
+    },
+    "ASEAN_BUNKER": {
+     "ref_total_bn": 93.82543534782256,
+     "cal_total_bn": 93.82549051949927,
+     "change_bn": 5.5171676706322614e-05,
+     "tolerance_bn": 0.9382543534782256,
+     "within": true
+    },
+    "ASEAN_POOL": {
+     "ref_total_bn": 7.70866e-09,
+     "cal_total_bn": 1.36502319e-07,
+     "change_bn": 1.2879365900000002e-07,
+     "tolerance_bn": 0.01,
+     "within": true
+    }
+   }
+  }
+ },
+ "information": {
+  "efficiency": {
+   "t8": {
+    "integrated": {
+     "iterations": 119,
+     "barrier_seconds": 207.94,
+     "work_units": 336.99,
+     "solve_seconds": 302.8858790397644,
+     "peak_rss_gib": 4.106147766113281,
+     "ref_iterations": 141,
+     "ref_barrier_seconds": 218.87,
+     "ref_work_units": 407.73,
+     "ratio_iterations": 0.8439716312056738,
+     "ratio_barrier_seconds": 0.950061680449582,
+     "ratio_work_units": 0.8265028327569716,
+     "kkt_relative_gap": 4.635108877223336e-09,
+     "kkt_absolute_gap_eur": 3005.3173828125,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B"
+     ]
+    },
+    "disconnected": {
+     "iterations": 142,
+     "barrier_seconds": 177.95,
+     "work_units": 339.34,
+     "solve_seconds": 264.19086360931396,
+     "peak_rss_gib": 3.7020645141601562,
+     "ref_iterations": 151,
+     "ref_barrier_seconds": 182.83,
+     "ref_work_units": 362.44,
+     "ratio_iterations": 0.9403973509933775,
+     "ratio_barrier_seconds": 0.9733085379861072,
+     "ratio_work_units": 0.9362653128793731,
+     "kkt_relative_gap": 2.4118011167359576e-09,
+     "kkt_absolute_gap_eur": 1685.7996826171875,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B",
+      "A3_S4B"
+     ]
+    },
+    "integrated_nze": {
+     "iterations": 138,
+     "barrier_seconds": 219.78,
+     "work_units": 393.29,
+     "solve_seconds": 316.21407747268677,
+     "peak_rss_gib": 4.103385925292969,
+     "ref_iterations": 174,
+     "ref_barrier_seconds": 261.59,
+     "ref_work_units": 512.98,
+     "ratio_iterations": 0.7931034482758621,
+     "ratio_barrier_seconds": 0.8401697312588402,
+     "ratio_work_units": 0.7666770634332722,
+     "kkt_relative_gap": 5.314738433150589e-09,
+     "kkt_absolute_gap_eur": 2912.2654418945312,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B",
+      "A3_S4B"
+     ]
+    }
+   },
+   "t16": {
+    "integrated": {
+     "iterations": 112,
+     "barrier_seconds": 170.68,
+     "work_units": 272.02,
+     "solve_seconds": 266.24471616744995,
+     "peak_rss_gib": 6.201408386230469,
+     "ref_iterations": 141,
+     "ref_barrier_seconds": 218.87,
+     "ref_work_units": 407.73,
+     "ratio_iterations": 0.7943262411347518,
+     "ratio_barrier_seconds": 0.7798236396034176,
+     "ratio_work_units": 0.6671571873543766,
+     "kkt_relative_gap": 3.7065536512136085e-09,
+     "kkt_absolute_gap_eur": 2403.2596435546875,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B",
+      "A3_S4B"
+     ]
+    },
+    "disconnected": {
+     "iterations": 149,
+     "barrier_seconds": 182.86,
+     "work_units": 313.27,
+     "solve_seconds": 270.93310165405273,
+     "peak_rss_gib": 4.782859802246094,
+     "ref_iterations": 151,
+     "ref_barrier_seconds": 182.83,
+     "ref_work_units": 362.44,
+     "ratio_iterations": 0.9867549668874173,
+     "ratio_barrier_seconds": 1.0001640868566428,
+     "ratio_work_units": 0.8643361659860942,
+     "kkt_relative_gap": 3.047296614661241e-09,
+     "kkt_absolute_gap_eur": 2129.998046875,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B",
+      "A3_S4B",
+      "B2",
+      "B14"
+     ]
+    },
+    "integrated_nze": {
+     "iterations": 147,
+     "barrier_seconds": 226.76,
+     "work_units": 367.68,
+     "solve_seconds": 326.16273975372314,
+     "peak_rss_gib": 6.233196258544922,
+     "ref_iterations": 174,
+     "ref_barrier_seconds": 261.59,
+     "ref_work_units": 512.98,
+     "ratio_iterations": 0.8448275862068966,
+     "ratio_barrier_seconds": 0.8668527084368669,
+     "ratio_work_units": 0.7167530897890756,
+     "kkt_relative_gap": 4.343169166514697e-09,
+     "kkt_absolute_gap_eur": 2379.8840942382812,
+     "gates_all_passed_excl_B12": false,
+     "gates_failed_excl_B12": [
+      "A1_A2_S4B",
+      "A3_S4B"
+     ]
+    }
+   }
+  },
+  "c1_s4m2_reference": {
+   "t8": {
+    "integrated": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -3.0053173828125e-06,
+     "a_returned_relative": 4.635108877223336e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 119,
+     "a_log_relative": 4.647599940583223e-09,
+     "b_rows_over_budget": 0,
+     "b_first_order_cost_eur": 3994.6255884009406,
+     "b_worst_country": [
+      "MM",
+      0.00011042332255913105
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 4.715607208736743e-10,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      7.585825001590851e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "B1",
+       "B12",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "B1",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    },
+    "disconnected": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -1.6857996826171875e-06,
+     "a_returned_relative": 2.4118011167359576e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 141,
+     "a_log_relative": 1.4369396498466323e-09,
+     "b_rows_over_budget": 1,
+     "b_first_order_cost_eur": 2210.575695083108,
+     "b_worst_country": [
+      "MM",
+      3.803529710799975e-05
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 5.445665239675456e-11,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      4.117923556053412e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    },
+    "integrated_nze": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -2.912265441894531e-06,
+     "a_returned_relative": 5.314738433150589e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 138,
+     "a_log_relative": 3.6692297275928994e-09,
+     "b_rows_over_budget": 16,
+     "b_first_order_cost_eur": 6076.305521535441,
+     "b_worst_country": [
+      "MM",
+      0.0001704005211514257
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 2.9980682764522e-11,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      7.376668565186505e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    }
+   },
+   "t16": {
+    "integrated": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -2.4032596435546873e-06,
+     "a_returned_relative": 3.7065536512136085e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 112,
+     "a_log_relative": 3.0983999651888566e-09,
+     "b_rows_over_budget": 9,
+     "b_first_order_cost_eur": 5739.481324475036,
+     "b_worst_country": [
+      "MM",
+      0.00022984098453706332
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 1.8019072474751203e-10,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      7.008032387827524e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    },
+    "disconnected": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -2.129998046875e-06,
+     "a_returned_relative": 3.047296614661241e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 149,
+     "a_log_relative": 2.8738792996932647e-09,
+     "b_rows_over_budget": 1,
+     "b_first_order_cost_eur": 3237.488045449034,
+     "b_worst_country": [
+      "MM",
+      9.774003975709318e-05
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 1.326483793899077e-11,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      6.089216234308809e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B14",
+       "B2",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B14",
+       "B2",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    },
+    "integrated_nze": {
+     "available": true,
+     "computable": true,
+     "termination": "optimal",
+     "pipeline_grade": "layer1_plus_nodal_price_settlement",
+     "pipeline_abc": [
+      true,
+      true,
+      true
+     ],
+     "pipeline_reference": "this batch: disconnected - integrated ledger difference (/home/jin/s4q_local/pkg",
+     "grade": {
+      "grade": "layer1_plus_nodal_price_settlement",
+      "a": true,
+      "b": true,
+      "c": true,
+      "price_settled_results": "usable"
+     },
+     "acceptance": {
+      "optimal": true,
+      "a": true,
+      "b": true,
+      "c": true,
+      "accepted": true,
+      "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+     },
+     "a_returned_difference_bn": -2.3798840942382814e-06,
+     "a_returned_relative": 4.343169166514697e-09,
+     "a_basis": "v5/kkt_summary.json (returned arrays)",
+     "a_log_returned_iteration": 143,
+     "a_log_relative": 3.6692297275928994e-09,
+     "b_rows_over_budget": 7,
+     "b_first_order_cost_eur": 5952.449122701533,
+     "b_worst_country": [
+      "MM",
+      0.00017400169467753378
+     ],
+     "b_biomass_BN_SG_VN_dominant": false,
+     "c_b16": 2.4918652345602393e-10,
+     "c_worst_country_S_plus_R": [
+      "MM",
+      7.985191403387003e-05
+     ],
+     "gates_information": {
+      "all_passed_solver_tolerances": false,
+      "all_passed_barconvtol": false,
+      "failing": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B12",
+       "B3"
+      ],
+      "failing_excl_B12": [
+       "A1_A2",
+       "A1_A2_S4B",
+       "A3",
+       "A3_S4B",
+       "B1",
+       "B3"
+      ],
+      "note": "reported as numerical information, not as a go / no-go criterion (decision 120); B12 fails by construction for networks built before a config change"
+     }
+    }
+   }
+  },
+  "prices_co2_biomass": {
+   "t8": {
+    "integrated": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 7.291666666760695e-06,
+       "max_abs_diff": 0.00010000000000331966,
+       "max_bus": "VN2 5"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.0002199999999999136,
+       "max_abs_diff": 0.005000000000009663,
+       "max_bus": "TH21 0 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 3.1000000000105386e-05,
+       "max_abs_diff": 0.0006999999999983686,
+       "max_bus": "PH_Visayas10 0 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 0.00010000000000008991,
+       "max_abs_diff": 0.0009000000000014552,
+       "max_bus": "solid biomass SG"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 56.9219,
+       "cal": 56.922,
+       "diff": 9.999999999621423e-05
+      },
+      "SG": {
+       "ref": 80.8526,
+       "cal": 80.8535,
+       "diff": 0.0009000000000014552
+      },
+      "VN": {
+       "ref": 62.3662,
+       "cal": 62.3663,
+       "diff": 0.00010000000000331966
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -172.98344604165365,
+       "cal": -172.9834561689078,
+       "diff": -1.0127254142844322e-05
+      },
+      "ID": {
+       "ref": -149.04858085034022,
+       "cal": -149.04855453503387,
+       "diff": 2.6315306342894473e-05
+      },
+      "KH": {
+       "ref": -166.05229831176678,
+       "cal": -166.05231044067312,
+       "diff": -1.2128906348607416e-05
+      },
+      "LA": {
+       "ref": -160.50099143349897,
+       "cal": -160.50099895663027,
+       "diff": -7.523131301923058e-06
+      },
+      "MM": {
+       "ref": -153.29749107073852,
+       "cal": -153.29749227331214,
+       "diff": -1.2025736282339494e-06
+      },
+      "MY": {
+       "ref": -147.72229027452443,
+       "cal": -147.72227361481563,
+       "diff": 1.665970879116685e-05
+      },
+      "PH": {
+       "ref": -162.6284186923973,
+       "cal": -162.62841057945087,
+       "diff": 8.112946431992896e-06
+      },
+      "SG": {
+       "ref": -219.47351221970956,
+       "cal": -219.4735261955712,
+       "diff": -1.3975861634207831e-05
+      },
+      "TH": {
+       "ref": -161.41205467104834,
+       "cal": -161.41194707742935,
+       "diff": 0.00010759361899204123
+      },
+      "TL": {
+       "ref": -166.09156554252897,
+       "cal": -166.09155348096704,
+       "diff": 1.2061561932341647e-05
+      },
+      "VN": {
+       "ref": -181.15744142280656,
+       "cal": -181.15745837607977,
+       "diff": -1.695327321726836e-05
+      }
+     },
+     "co2_reference_source": "in-run / offline file of the identical reference LP (s4m_A_integrated_rerun)"
+    },
+    "disconnected": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 1.0416666667012464e-06,
+       "max_abs_diff": 0.00010000000000331966,
+       "max_bus": "ID_Sulawesi0 2"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.0002859999999998308,
+       "max_abs_diff": 0.008099999999998886,
+       "max_bus": "MY_Peninsular22 0 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 2.999999999957481e-06,
+       "max_abs_diff": 0.00019999999999953388,
+       "max_bus": "PH_Visayas10 0 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 6.363636363718425e-05,
+       "max_abs_diff": 0.0005000000000023874,
+       "max_bus": "solid biomass SG"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 70.9472,
+       "cal": 70.9474,
+       "diff": 0.0002000000000066393
+      },
+      "SG": {
+       "ref": 75.9284,
+       "cal": 75.9289,
+       "diff": 0.0005000000000023874
+      },
+      "VN": {
+       "ref": 68.1404,
+       "cal": 68.1404,
+       "diff": 0.0
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -200.70717456944888,
+       "cal": -200.7071736595164,
+       "diff": 9.099324813632848e-07
+      },
+      "ID": {
+       "ref": -126.10759592364005,
+       "cal": -126.10759720201581,
+       "diff": -1.2783757625811631e-06
+      },
+      "KH": {
+       "ref": -168.61927389217814,
+       "cal": -168.6192745449737,
+       "diff": -6.527955633828242e-07
+      },
+      "LA": {
+       "ref": -172.20893771766998,
+       "cal": -172.20893815865247,
+       "diff": -4.40982489635644e-07
+      },
+      "MM": {
+       "ref": -159.8163816787298,
+       "cal": -159.81638361326642,
+       "diff": -1.934536612679949e-06
+      },
+      "MY": {
+       "ref": -126.13565039778089,
+       "cal": -126.13565152289355,
+       "diff": -1.1251126608158302e-06
+      },
+      "PH": {
+       "ref": -166.93635011340365,
+       "cal": -166.93635082915173,
+       "diff": -7.157480865771504e-07
+      },
+      "SG": {
+       "ref": -221.53345261382236,
+       "cal": -221.53345270062465,
+       "diff": -8.680228802404599e-08
+      },
+      "TH": {
+       "ref": -163.81325348994127,
+       "cal": -163.81325372898445,
+       "diff": -2.3904317458800506e-07
+      },
+      "TL": {
+       "ref": -175.91714546915213,
+       "cal": -175.91713883178124,
+       "diff": 6.637370887574434e-06
+      },
+      "VN": {
+       "ref": -185.79039370735939,
+       "cal": -185.79039386028663,
+       "diff": -1.529272424249939e-07
+      }
+     },
+     "co2_reference_source": "solution/Pi.npy mapped by a model rebuild (read only)"
+    },
+    "integrated_nze": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 0.00021458333333401747,
+       "max_abs_diff": 0.0007000000000019213,
+       "max_bus": "PH_Luzon5 0"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.00024399999999999978,
+       "max_abs_diff": 0.0018000000000029104,
+       "max_bus": "TH21 0 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 0.00031200000000016105,
+       "max_abs_diff": 0.0007000000000019213,
+       "max_bus": "KH2 2 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 0.0003090909090895428,
+       "max_abs_diff": 0.0007999999999981355,
+       "max_bus": "solid biomass TH"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 56.3085,
+       "cal": 56.3078,
+       "diff": -0.0007000000000019213
+      },
+      "SG": {
+       "ref": 79.8852,
+       "cal": 79.8858,
+       "diff": 0.0006000000000057071
+      },
+      "VN": {
+       "ref": 61.6508,
+       "cal": 61.6507,
+       "diff": -9.999999999621423e-05
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -171.88908579534046,
+       "cal": -171.8891161890651,
+       "diff": -3.0393724642863162e-05
+      },
+      "ID": {
+       "ref": -151.86485671041618,
+       "cal": -151.86533823934317,
+       "diff": -0.0004815289269970435
+      },
+      "KH": {
+       "ref": -165.5677664973155,
+       "cal": -165.56785886709972,
+       "diff": -9.236978422677566e-05
+      },
+      "LA": {
+       "ref": -161.04332541757742,
+       "cal": -161.04376009236532,
+       "diff": -0.00043467478789693814
+      },
+      "MM": {
+       "ref": -153.8626799920377,
+       "cal": -153.86347133086036,
+       "diff": -0.0007913388226654661
+      },
+      "MY": {
+       "ref": -151.56650659504928,
+       "cal": -151.56727281016032,
+       "diff": -0.0007662151110423565
+      },
+      "PH": {
+       "ref": -163.79835027129488,
+       "cal": -163.7988509472731,
+       "diff": -0.0005006759782304471
+      },
+      "SG": {
+       "ref": -218.22754975931704,
+       "cal": -218.22750328500237,
+       "diff": 4.647431467219576e-05
+      },
+      "TH": {
+       "ref": -160.36639627200577,
+       "cal": -160.3646016785669,
+       "diff": 0.0017945934388592377
+      },
+      "TL": {
+       "ref": -168.86590543161526,
+       "cal": -168.86639360044322,
+       "diff": -0.00048816882795676975
+      },
+      "VN": {
+       "ref": -180.32291035625113,
+       "cal": -180.32280668484648,
+       "diff": 0.00010367140464495606
+      }
+     },
+     "co2_reference_source": "solution/Pi.npy mapped by a model rebuild (read only)"
+    }
+   },
+   "t16": {
+    "integrated": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 1.6666666666627823e-05,
+       "max_abs_diff": 0.00010000000000331966,
+       "max_bus": "PH_Visayas7 0"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.002003999999999593,
+       "max_abs_diff": 0.06949999999999079,
+       "max_bus": "PH_Visayas10 0 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 0.00018600000000006388,
+       "max_abs_diff": 0.01320000000000121,
+       "max_bus": "PH_Visayas10 0 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 0.00016363636363727417,
+       "max_abs_diff": 0.0014000000000038426,
+       "max_bus": "solid biomass SG"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 56.9219,
+       "cal": 56.9221,
+       "diff": 0.00019999999999953388
+      },
+      "SG": {
+       "ref": 80.8526,
+       "cal": 80.854,
+       "diff": 0.0014000000000038426
+      },
+      "VN": {
+       "ref": 62.3662,
+       "cal": 62.3663,
+       "diff": 0.00010000000000331966
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -172.98344604165365,
+       "cal": -172.98345770195138,
+       "diff": -1.1660297730031743e-05
+      },
+      "ID": {
+       "ref": -149.04858085034022,
+       "cal": -149.04855011241966,
+       "diff": 3.0737920553747244e-05
+      },
+      "KH": {
+       "ref": -166.05229831176678,
+       "cal": -166.0523131446476,
+       "diff": -1.4832880822268635e-05
+      },
+      "LA": {
+       "ref": -160.50099143349897,
+       "cal": -160.50100055317768,
+       "diff": -9.119678708202628e-06
+      },
+      "MM": {
+       "ref": -153.29749107073852,
+       "cal": -153.29749153681757,
+       "diff": -4.6607905801465677e-07
+      },
+      "MY": {
+       "ref": -147.72229027452443,
+       "cal": -147.72227177821463,
+       "diff": 1.8496309792226384e-05
+      },
+      "PH": {
+       "ref": -162.6284186923973,
+       "cal": -162.628409479595,
+       "diff": 9.2128022970428e-06
+      },
+      "SG": {
+       "ref": -219.47351221970956,
+       "cal": -219.47352855742423,
+       "diff": -1.6337714669134584e-05
+      },
+      "TH": {
+       "ref": -161.41205467104834,
+       "cal": -161.4119161509563,
+       "diff": 0.00013852009203674243
+      },
+      "TL": {
+       "ref": -166.09156554252897,
+       "cal": -166.09155164421858,
+       "diff": 1.3898310385229706e-05
+      },
+      "VN": {
+       "ref": -181.15744142280656,
+       "cal": -181.15746243784804,
+       "diff": -2.101504148299682e-05
+      }
+     },
+     "co2_reference_source": "in-run / offline file of the identical reference LP (s4m_A_integrated_rerun)"
+    },
+    "disconnected": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 1.0416666667012464e-06,
+       "max_abs_diff": 0.00010000000000331966,
+       "max_bus": "ID_Sulawesi0 2"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.0031920000000000923,
+       "max_abs_diff": 0.09120000000000061,
+       "max_bus": "LA2 5 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 6.500000000002615e-05,
+       "max_abs_diff": 0.006199999999999761,
+       "max_bus": "PH_Visayas10 0 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 7.272727272839512e-05,
+       "max_abs_diff": 0.0006000000000057071,
+       "max_bus": "solid biomass SG"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 70.9472,
+       "cal": 70.9474,
+       "diff": 0.0002000000000066393
+      },
+      "SG": {
+       "ref": 75.9284,
+       "cal": 75.929,
+       "diff": 0.0006000000000057071
+      },
+      "VN": {
+       "ref": 68.1404,
+       "cal": 68.1404,
+       "diff": 0.0
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -200.70717456944888,
+       "cal": -200.7071738524078,
+       "diff": 7.170410754042678e-07
+      },
+      "ID": {
+       "ref": -126.10759592364005,
+       "cal": -126.1075959571127,
+       "diff": -3.3472645100118825e-08
+      },
+      "KH": {
+       "ref": -168.61927389217814,
+       "cal": -168.61927389641792,
+       "diff": -4.239780082571087e-09
+      },
+      "LA": {
+       "ref": -172.20893771766998,
+       "cal": -172.20893802215204,
+       "diff": -3.0448205734501244e-07
+      },
+      "MM": {
+       "ref": -159.8163816787298,
+       "cal": -159.81638249418452,
+       "diff": -8.154547117555921e-07
+      },
+      "MY": {
+       "ref": -126.13565039778089,
+       "cal": -126.13565031721545,
+       "diff": 8.056544231749285e-08
+      },
+      "PH": {
+       "ref": -166.93635011340365,
+       "cal": -166.9363500083758,
+       "diff": 1.0502785130483971e-07
+      },
+      "SG": {
+       "ref": -221.53345261382236,
+       "cal": -221.5334526441239,
+       "diff": -3.030154971384036e-08
+      },
+      "TH": {
+       "ref": -163.81325348994127,
+       "cal": -163.8132535375772,
+       "diff": -4.763592187373433e-08
+      },
+      "TL": {
+       "ref": -175.91714546915213,
+       "cal": -175.91714059903953,
+       "diff": 4.870112604749011e-06
+      },
+      "VN": {
+       "ref": -185.79039370735939,
+       "cal": -185.79039379454846,
+       "diff": -8.718907906768436e-08
+      }
+     },
+     "co2_reference_source": "solution/Pi.npy mapped by a model rebuild (read only)"
+    },
+    "integrated_nze": {
+     "nodal_price_bus_mean_differences": {
+      "AC": {
+       "buses": 96,
+       "mean_abs_diff": 7.3958333333272e-05,
+       "max_abs_diff": 0.0002999999999957481,
+       "max_bus": "TH2 2"
+      },
+      "H2": {
+       "buses": 100,
+       "mean_abs_diff": 0.002606999999999715,
+       "max_abs_diff": 0.07699999999999818,
+       "max_bus": "PH_Visayas10 0 H2"
+      },
+      "gas": {
+       "buses": 100,
+       "mean_abs_diff": 0.0002600000000001046,
+       "max_abs_diff": 0.01249999999999929,
+       "max_bus": "PH_Visayas10 0 gas"
+      },
+      "solid biomass": {
+       "buses": 11,
+       "mean_abs_diff": 0.00018181818181840401,
+       "max_abs_diff": 0.001300000000000523,
+       "max_bus": "solid biomass SG"
+      }
+     },
+     "solid_biomass_shadow_price_eur_per_mwh": {
+      "BN": {
+       "ref": 56.3085,
+       "cal": 56.3084,
+       "diff": -0.00010000000000331966
+      },
+      "SG": {
+       "ref": 79.8852,
+       "cal": 79.8865,
+       "diff": 0.001300000000000523
+      },
+      "VN": {
+       "ref": 61.6508,
+       "cal": 61.6508,
+       "diff": 0.0
+      }
+     },
+     "country_co2_shadow_price_raw_dual": {
+      "BN": {
+       "ref": -171.88908579534046,
+       "cal": -171.88909667686085,
+       "diff": -1.0881520381644805e-05
+      },
+      "ID": {
+       "ref": -151.86485671041618,
+       "cal": -151.8650249712271,
+       "diff": -0.00016826081090925982
+      },
+      "KH": {
+       "ref": -165.5677664973155,
+       "cal": -165.56779955747217,
+       "diff": -3.3060156681585795e-05
+      },
+      "LA": {
+       "ref": -161.04332541757742,
+       "cal": -161.0434783187637,
+       "diff": -0.0001529011862828611
+      },
+      "MM": {
+       "ref": -153.8626799920377,
+       "cal": -153.86295688549185,
+       "diff": -0.00027689345415637945
+      },
+      "MY": {
+       "ref": -151.56650659504928,
+       "cal": -151.56677373669146,
+       "diff": -0.0002671416421833328
+      },
+      "PH": {
+       "ref": -163.79835027129488,
+       "cal": -163.79852609603375,
+       "diff": -0.00017582473887500782
+      },
+      "SG": {
+       "ref": -218.22754975931704,
+       "cal": -218.2275340143522,
+       "diff": 1.574496485545751e-05
+      },
+      "TH": {
+       "ref": -160.36639627200577,
+       "cal": -160.36577248520624,
+       "diff": 0.0006237867995366742
+      },
+      "TL": {
+       "ref": -168.86590543161526,
+       "cal": -168.86607954075708,
+       "diff": -0.00017410914182391934
+      },
+      "VN": {
+       "ref": -180.32291035625113,
+       "cal": -180.3228758174178,
+       "diff": 3.453883331872021e-05
+      }
+     },
+     "co2_reference_source": "solution/Pi.npy mapped by a model rebuild (read only)"
+    }
+   }
+  },
+  "B6_bn_eur": {
+   "t8": {
+    "ref": 50.59837656084094,
+    "cal": 50.59837546008899,
+    "change": -1.100751953125e-06
+   },
+   "t16": {
+    "ref": 50.59837656084094,
+    "cal": 50.59837636197644,
+    "change": -1.98864501953125e-07
+   }
+  },
+  "nze_minus_integrated_bn_eur": {
+   "t8": {
+    "ref": -100.42092625923816,
+    "cal": -100.42092643626367
+   },
+   "t16": {
+    "ref": -100.42092625923816,
+    "cal": -100.42092626893366
+   }
+  },
+  "between_paths": {
+   "objective": {
+    "integrated": {
+     "t8": 648381184222.3383,
+     "t16": 648381183628.2552,
+     "rel_diff_t16_vs_t8": -9.162557379482905e-10,
+     "abs_diff_bn": -5.940830078125e-07,
+     "vs_A_bn": {
+      "t8": 2.81188671875e-06,
+      "t16": 2.2178037109375e-06
+     }
+    },
+    "disconnected": {
+     "t8": 698979559682.4272,
+     "t16": 698979559990.2317,
+     "rel_diff_t16_vs_t8": 4.403626352456058e-10,
+     "abs_diff_bn": 3.07804443359375e-07,
+     "vs_A_bn": {
+      "t8": 1.711134765625e-06,
+      "t16": 2.018939208984375e-06
+     }
+    },
+    "integrated_nze": {
+     "t8": 547960257786.0746,
+     "t16": 547960257359.3216,
+     "rel_diff_t16_vs_t8": -7.788028000277336e-10,
+     "abs_diff_bn": -4.2675299072265624e-07,
+     "vs_A_bn": {
+      "t8": 2.6348612060546875e-06,
+      "t16": 2.2081082153320313e-06
+     }
+    }
+   },
+   "country_difference_t16_minus_t8_bn": {
+    "BN": {
+     "t8": 0.8382967884944981,
+     "t16": 0.8382970358701249,
+     "diff": 2.473756268717153e-07
+    },
+    "ID": {
+     "t8": 7.018966248963551,
+     "t16": 7.018965030071769,
+     "diff": -1.2188917821731593e-06
+    },
+    "KH": {
+     "t8": 1.8815314205188525,
+     "t16": 1.8815320456436133,
+     "diff": 6.25124760844642e-07
+    },
+    "LA": {
+     "t8": 2.760374879664662,
+     "t16": 2.7603734223407033,
+     "diff": -1.4573239588422382e-06
+    },
+    "MM": {
+     "t8": 0.7266803280230558,
+     "t16": 0.7266816103346763,
+     "diff": 1.2823116204430107e-06
+    },
+    "MY": {
+     "t8": 4.08318397905056,
+     "t16": 4.08318424750459,
+     "diff": 2.684540305608607e-07
+    },
+    "PH": {
+     "t8": 1.774131407195597,
+     "t16": 1.7741332365709432,
+     "diff": 1.8293753463183293e-06
+    },
+    "SG": {
+     "t8": 2.021277009981514,
+     "t16": 2.021277342562101,
+     "diff": 3.32580587070197e-07
+    },
+    "TH": {
+     "t8": 6.151636226004371,
+     "t16": 6.151639151915276,
+     "diff": 2.9259109055601584e-06
+    },
+    "TL": {
+     "t8": 0.369548890815881,
+     "t16": 0.369549052491772,
+     "diff": 1.6167589100835045e-07
+    },
+    "VN": {
+     "t8": 24.95791228432128,
+     "t16": 24.957911076532724,
+     "diff": -1.2077885571670777e-06
+    },
+    "ASEAN_BUNKER": {
+     "t8": -1.9851643467598024,
+     "t16": -1.9851670159659847,
+     "diff": -2.6692061823041513e-06
+    },
+    "ASEAN_POOL": {
+     "t8": 3.4383268e-07,
+     "t16": 1.26116844e-07,
+     "diff": -2.17715836e-07
+    }
+   },
+   "nze_entity_total_t16_minus_t8_bn": {
+    "BN": -1.9141082496787476e-07,
+    "ID": 2.4802773708643144e-05,
+    "KH": -5.292455584893219e-07,
+    "LA": 2.0165762616985994e-05,
+    "MM": -2.0456050338957255e-05,
+    "MY": 4.561722175111527e-05,
+    "PH": 1.880988324209909e-05,
+    "SG": 3.3871746456526353e-06,
+    "TH": -0.00013274534529728044,
+    "TL": 3.0848189860321895e-06,
+    "VN": 0.00013835165114528536,
+    "ASEAN_BUNKER": -0.00010087695963534316,
+    "ASEAN_POOL": 1.5297267500000001e-07
+   }
+  }
+ },
+ "consistency": {
+  "t8": {
+   "integrated": {
+    "network_sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   },
+   "disconnected": {
+    "network_sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   },
+   "integrated_nze": {
+    "network_sha256": "6ee7b9ca60bee50f6352ffda324b4a84fb0f9c774bc69a5cb275624c69ee256d",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   }
+  },
+  "t16": {
+   "integrated": {
+    "network_sha256": "513f56a65c7e7ad34c85e86fd41933cb362057a74ad51b5bd23878aaf61fdd53",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6_t16",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   },
+   "disconnected": {
+    "network_sha256": "78fa40b7f27616c4eeeecf9bac842ab7459ff22ae0e86417a53e54f6cb816907",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6_t16",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   },
+   "integrated_nze": {
+    "network_sha256": "6ee7b9ca60bee50f6352ffda324b4a84fb0f9c774bc69a5cb275624c69ee256d",
+    "same_network_as_S4M2": true,
+    "truncated_to": 56,
+    "s4m2_truncated_to": 56,
+    "solver_profile": "formal_barrier_1e6_t16",
+    "parameters_equal_profile": true,
+    "time_limit": 1750.0,
+    "s4m2_time_limit": 1750.0,
+    "retry": false,
+    "optimize_calls": 1
+   }
+  }
+ },
+ "labels": {
+  "VERIFIED": "receipts, logs, ledgers, C1 arrays",
+  "INFERENCE": "C1 (c) country effect of KKT residuals; mechanism explanations in the report",
+  "PROPOSED": "level-2 plan"
+ }
+}

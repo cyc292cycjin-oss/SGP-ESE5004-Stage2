@@ -25,7 +25,7 @@ def test_registry_rows(registry):
     r = registry
     assert r.loc["fuel_price_scenario_main", "value"] == "steps" and "price taker" in r.loc["fuel_price_scenario_main", "description"]
     assert r.loc["lng_upstream_emissions_out_of_scope", "status"] == "REFERENCE_ONLY"
-    assert r.loc["fuel_price_lng_regasification_adder", "status"] == "DATA_PENDING"
+    assert r.loc["fuel_price_lng_regasification_adder", "status"] == "REGISTERED"   # M08a A4 (decision 131): 1.26 EUR2020/MWh (former DATA_PENDING)
     assert float(r.loc["btl_capital_cost_x_efficiency", "value"]) == pytest.approx(252723.449125 * 0.45, rel=1e-9)
     for pid in ["limitation_electricity_grid_connection", "limitation_pipeline_compression", "candidate_pipeline_statuses_confirmed", "tests_gate4_activation_accepted_state",
                 "download_declined_wdpa_full", "download_declined_dea_2026_xlsx", "synthetic_methane_cross_border_accounting_accepted", "acceptance_column_dual_sign_scale_confirmed",
@@ -61,6 +61,7 @@ def test_wacc_country_specific_refuses_pending_and_rescales(tmp_path):
     n = _tiny(); led = apply_wacc_mode(n, costs, cfg, ROOT)
     assert led["mode"] == "uniform" and n.generators.at["pv", "capital_cost"] == 100.0
     cs = copy.deepcopy(cfg); cs["research"]["finance"]["wacc_mode"] = "country_specific"
+    cs["research"]["finance"]["country_wacc_table"] = "research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv"   # S4C-0 table (model rows DATA_PENDING); M08a main table COUNTRY_WACC_REAL_M08A.csv
     with pytest.raises(ValueError, match="no sourced WACC"):
         apply_wacc_mode(_tiny(), costs, cs, ROOT)
     syn = tmp_path / "wacc.csv"   # SYNTHETIC_TEST_ONLY table

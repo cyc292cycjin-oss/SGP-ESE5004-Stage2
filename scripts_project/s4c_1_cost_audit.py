@@ -32,7 +32,8 @@ def rules(n, c, cfg):
     ef_gas, ef_bio = p("gas", "CO2 intensity"), p("solid biomass", "CO2 intensity")
     cc = float(cfg["sector"]["cc_fraction"]); R = cfg["research"]
     cap_row = "biomass boiler capture" if "biomass boiler capture" in c.index and np.isfinite(c.at["biomass boiler capture", "fixed"]) else "biomass CHP capture"
-    dist = pd.read_csv(ROOT / R["renewable"]["offwind_distance_table"]).set_index(["tech", "node", "cls"])
+    from s4a_layers import offshore_distance_table
+    dist, _ = offshore_distance_table(cfg, ROOT)   # M08a A6.2: the class table of the active offshore rule
     sub = pd.read_csv(ROOT / R["corridors"]["subsea_table"]); col = {"zero": "share_zero", "geometric_all": "share_geometric_all", "landmass_nonland": "share_landmass_nonland"}[R["corridors"]["subsea_share"]]
     from s4c_layers import bus_location, _class_of
     stab = {(r.loc0, r.loc1): float(getattr(r, col)) for r in sub.itertuples()}
@@ -44,7 +45,7 @@ def rules(n, c, cfg):
     def offw(car):
         def fn(name, z):
             d = dist.loc[(car, str(z.bus), _class_of(name))]
-            return f("offwind") + f(f"{car}-station") + float(d.line_length_factor) * (float(d.average_distance_km) * f(f"{car}-connection-submarine") + float(d.landfall_km) * f(f"{car}-connection-underground"))
+            return f("offwind-float" if car == "offwind-float" else "offwind") + f(f"{car}-station") + float(d.line_length_factor) * (float(d.average_distance_km) * f(f"{car}-connection-submarine") + float(d.landfall_km) * f(f"{car}-connection-underground"))
         return fn
 
     def pipe(on, sb):
@@ -59,6 +60,7 @@ def rules(n, c, cfg):
         (G, "solar rooftop"): (lambda nm, z: f("solar-rooftop"), L, "solar-rooftop", S4C1, "50, 82"),
         (G, "offwind-ac"): (offw("offwind-ac"), L, "offwind + offwind-ac-station + 1.25 x (d x -connection-submarine + 20 km x -connection-underground)", S4C1 + "; PyPSA-Eur v2025.07.0 add_electricity.py 541, 555-576", "50, 82"),
         (G, "offwind-dc"): (offw("offwind-dc"), L, "offwind + offwind-dc-station + 1.25 x (d x -connection-submarine + 30 km x -connection-underground)", S4C1 + "; PyPSA-Eur v2025.07.0 add_electricity.py 541, 555-576", "50, 82"),
+        (G, "offwind-float"): (offw("offwind-float"), L, "offwind-float + offwind-float-station + 1.25 x (d x -connection-submarine + 40 km x -connection-underground)", S4C1 + "; M08a A6.2; PyPSA-Eur v2025.07.0 config lines 239-260", "129, 131"),
         (G, "nuclear"): (lambda nm, z: f("nuclear"), L, "nuclear", "s1_candidates.add_nuclear", "38, 50"),
         (G, "nuclear SMR"): (lambda nm, z: f("nuclear SMR"), "EXCEPTION_CONFIRMED", "nuclear SMR (appended AEO8 D.15 row)", "s2_costs.build_research_costs; s1_candidates.add_nuclear", "46"),
         (G, "geothermal"): (lambda nm, z: f("geothermal"), "EXCEPTION_CONFIRMED", "geothermal (appended AEO8 D.15 row)", "s2_costs.build_research_costs; s1_candidates.add_site_candidates", "46, 52"),
@@ -177,14 +179,15 @@ def main():
     from s4c_layers import _class_of
     from phase4_static import config
     cfg = config(ROOT, a.scenario); c = pd.read_csv(a.after / "costs_active_research.csv", index_col=0)
-    dist = pd.read_csv(ROOT / cfg["research"]["renewable"]["offwind_distance_table"]).set_index(["tech", "node", "cls"])
+    from s4a_layers import offshore_distance_table
+    dist, _ = offshore_distance_table(cfg, ROOT)
     ow = []
-    for name, z in n.generators[n.generators.carrier.isin(["offwind-ac", "offwind-dc"]) & n.generators.p_nom_extendable].iterrows():
-        car = z.carrier; d = dist.loc[(car, str(z.bus), _class_of(name))]
+    for name, z in n.generators[n.generators.carrier.isin(["offwind-ac", "offwind-dc", "offwind-float"]) & n.generators.p_nom_extendable].iterrows():
+        car = z.carrier; d = dist.loc[(car, str(z.bus), _class_of(name))]; turbine = "offwind-float" if car == "offwind-float" else "offwind"
         sub_c = float(d.line_length_factor) * float(d.average_distance_km) * float(c.at[f"{car}-connection-submarine", "fixed"])
         land_c = float(d.line_length_factor) * float(d.landfall_km) * float(c.at[f"{car}-connection-underground", "fixed"])
         ow.append(dict(generator=name, tech=car, node=str(z.bus), country=str(n.buses.at[z.bus, "country"]), cls=_class_of(name), p_nom_max_mw=float(z.p_nom_max), distance_km=float(d.average_distance_km),
-                       distance_basis=str(d.basis), turbine_eur_per_mw_a=float(c.at["offwind", "fixed"]), station_eur_per_mw_a=float(c.at[f"{car}-station", "fixed"]), submarine_eur_per_mw_a=sub_c,
+                       distance_basis=str(d.get("basis", "LAYOUT")), turbine_eur_per_mw_a=float(c.at[turbine, "fixed"]), station_eur_per_mw_a=float(c.at[f"{car}-station", "fixed"]), submarine_eur_per_mw_a=sub_c,
                        landfall_eur_per_mw_a=land_c, capital_cost=float(z.capital_cost), connection_share=(sub_c + land_c) / float(z.capital_cost)))
     owd = pd.DataFrame(ow); owd.to_csv(a.output / "OFFWIND_CONNECTION_COST_S4C1.csv", index=False)
     tab.to_csv(a.output / "COST_AUDIT_S4C1.csv", index=False); comp.to_csv(a.output / "COST_AUDIT_S4C1_COMPONENTS.csv", index=False)

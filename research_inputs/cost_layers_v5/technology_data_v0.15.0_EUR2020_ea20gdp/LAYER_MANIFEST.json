@@ -1,0 +1,108 @@
+{
+ "aeo8_overrides": false,
+ "files": {
+  "by_year": {
+   "2020": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2020_EUR2020_prepared.csv",
+    "prepared_sha256": "65144158defc615aa83bfef37674eceb527e1c17c2a69939a8b56c8c197339ea",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2020.csv",
+    "source_sha256": "2444af180b6f93786a75ad73f690b8f6238749c2a117105c13cbcd7da74a1a66"
+   },
+   "2025": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2025_EUR2020_prepared.csv",
+    "prepared_sha256": "c296c5c6d2f882c711cc4502c7e18283f9b40c1f5995af4ec97a1e52c8916188",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2025.csv",
+    "source_sha256": "a4492c081545352d575474898c58524a4d5502c119fedefac7afe94f53afb683"
+   },
+   "2030": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2030_EUR2020_prepared.csv",
+    "prepared_sha256": "632cb272ecf2d6d468e98607af95836f51395542272c8a09185cda628723bf09",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2030.csv",
+    "source_sha256": "6f97aa2164d5e28a81e104fd6ef7092f8cea637564374c19f08a5a5892383227"
+   },
+   "2035": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2035_EUR2020_prepared.csv",
+    "prepared_sha256": "47b4a9b5a2c8066c5be822b27082fb6986a8e2a4e0de18a38eecfc5da6e8b22a",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2035.csv",
+    "source_sha256": "fc8e1895d85d31fa792815fe5b1408bb2ffe7240c73bb5b72ed8beff517482c0"
+   },
+   "2040": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2040_EUR2020_prepared.csv",
+    "prepared_sha256": "483e73f1b83a6d00cd2f9787a308ae8f2088e05d0e4733eec287375bdbe46a97",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2040.csv",
+    "source_sha256": "3162c6fda814d3c7e12d7f8eacf0e73c74f5447b1fef3f73e4a81d8df89f96f9"
+   },
+   "2045": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2045_EUR2020_prepared.csv",
+    "prepared_sha256": "c65a3565eff892da8ce2a8c1a82736163b417067bd4d28ba1b2227b30350fea5",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2045.csv",
+    "source_sha256": "c4ac685e02b57d345ac6f955fda36979277f8c548121eb6d4ae988f01d496169"
+   },
+   "2050": {
+    "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/by_year/costs_2050_EUR2020_prepared.csv",
+    "prepared_sha256": "17b1b23037807745571c3cadee0b2c41989d08ecf985c371f94c5619017aba4e",
+    "source": "research_inputs/cost_layers_v5/sources/technology_data_v0.15.0/outputs/costs_2050.csv",
+    "source_sha256": "244c8f9ed3a5b8b0be5f3610c9cf27a8a5a27b09ed42afad13c53221c92992f6"
+   }
+  },
+  "comparison": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/COMPARISON_v0.13.2_vs_v0.15.0_EUR2020.csv",
+  "long": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/costs_2050_EUR2020.csv",
+  "long_sha256": "708daebadfc81680079e1f8794772e0ab945f33088b624ad6eb6499c06ef17e9",
+  "prepared": "research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020_ea20gdp/costs_2050_EUR2020_prepared.csv",
+  "prepared_sha256": "17b1b23037807745571c3cadee0b2c41989d08ecf985c371f94c5619017aba4e"
+ },
+ "layer": "technology_data_v0_15_0_2050_eur2020",
+ "prepared_table": {
+  "fill_values": {
+   "CO2 intensity": 0.0,
+   "FOM": 0.0,
+   "VOM": 0.0,
+   "discount rate": 0.07,
+   "efficiency": 1.0,
+   "fuel": 0.0,
+   "investment": 0.0,
+   "lifetime": 25.0
+  },
+  "formula": "fixed = (annuity(lifetime, discount rate) + FOM/100) x investment [EUR/MW]; marginal_cost = VOM + fuel/efficiency; per-kW units x 1e3",
+  "source": "pypsa-asean scripts/process_cost_data.prepare_costs; configs/config.default.yaml costs.fill_values"
+ },
+ "rebase": {
+  "deflator_file": "research_inputs/prices/sources/ECB_EA20_GDP_DEFLATOR.csv",
+  "deflator_series": "MNA.A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N",
+  "deflator_sha256": "77a6cea533abe6318da7482e90dc8429c38953221d9363a1ae3add2e327dcf4c",
+  "deflator_url": "https://data-api.ecb.europa.eu/service/data/MNA/A.N.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.IX.D.N?format=csvdata&startPeriod=1990&endPeriod=2025",
+  "factor_2019_to_2020": 1.0181126154701643,
+  "factor_2025_to_2020": 0.8331956307596134,
+  "index": "ea20_gdp_deflator",
+  "index_2019": 98.22096149336093,
+  "index_2020": 100.0,
+  "index_2025": 120.01983244779059,
+  "method": "EUR(currency_year) -> EUR2020 with the ECB EA20 GDP deflator, factor = index(2020)/index(currency_year); applied to every monetary row (USD rows included); non-monetary rows unchanged",
+  "monetary_rows": 376,
+  "monetary_rows_by_source_year": {
+   "2019.0": 1,
+   "2020.0": 1,
+   "2025.0": 374
+  },
+  "note": "technology-data inflated 2020->2025 with Eurostat HICP (about +25.7 %); dividing by the EA20 GDP deflator (+20.0 %) leaves about +4.8 % on unchanged source values",
+  "role": "comparison (former S2-0 main rebase, decision 50)",
+  "usd_rows": 5
+ },
+ "rebase_index": "ea20_gdp_deflator",
+ "role": "comparison variant (rebase_index ea20_gdp_deflator = former S2-0 rebase); not the main layer",
+ "rows": 1280,
+ "smr_cost_source": "see research.cost_layer.smr_cost_source",
+ "technology_data": {
+  "config_yaml_sha256": "c7a14f597cdeb6aabddc7773e1fec83bbd7c8a8d853503aa11a305ad4cc92280",
+  "costs_2050_csv": "research_inputs/cost_layers_v5/sources/costs_2050_v0.15.0.csv",
+  "costs_2050_sha256": "244c8f9ed3a5b8b0be5f3610c9cf27a8a5a27b09ed42afad13c53221c92992f6",
+  "eur_year": 2025,
+  "eur_year_locator": "config.yaml line 18 'eur_year: 2025'; docs/release_notes.rst v0.14.0 and v0.15.0 entries",
+  "release_asset": "https://github.com/PyPSA/technology-data/releases/download/v0.15.0/costs_2050.csv",
+  "release_notes_sha256": "0ace273464f09267abc33ed1a368d8076e13ef5fcd4ffeb28271648bf4ddfd9c",
+  "source_tarball_sha256": "c4787c1d72b9ec9fae032d37f906a4d6c92d4adfe111c55680f59f62bb162ccb",
+  "tag": "v0.15.0",
+  "tag_commit": "07e43575c7996a988c60964d00772376ab9bd10c",
+  "upstream_inflation_index": "Eurostat HICP annual average rate of change (prc_hicp_aind), scripts/_helpers.py line 220 row 'European Economic Area', adjust_for_inflation"
+ }
+}

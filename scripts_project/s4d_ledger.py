@@ -237,6 +237,49 @@ def ledger_table(L: pd.DataFrame) -> pd.DataFrame:
     return t
 
 
+REPORT_CURRENCY_DEFAULT = dict(currency="USD2020", fx_per_eur2020="inverse_of_input")   # M08a A9 + supplement 01 item 3 (decisions 125 (4), 133; registry report_currency_rule)
+FX_INPUT_ROW = "fx_usd_to_eur_2020"      # the single EUR-per-USD rate every USD input is converted with
+FX_ECB_2020_REFERENCE = 1.1422           # ECB 2020 annual average USD per EUR: comparison value only (registry fx_report_ecb_2020_reference)
+
+
+def input_fx_eur_per_usd(cfg: dict | None = None, registry_path: Path | None = None) -> float:
+    """Registry row fx_usd_to_eur_2020 (EUR2020 per USD2020) of the registry named by research.cost_layer.registry."""
+    R = ((cfg or {}).get("research") or {}) if isinstance(cfg, dict) else {}
+    p = Path(registry_path) if registry_path else ROOT / str((R.get("cost_layer") or {}).get("registry", "research_inputs/registry_v5/DATA_REGISTRY.csv"))
+    reg = pd.read_csv(p, dtype=str, keep_default_na=False).set_index("param_id")
+    return float(reg.loc[FX_INPUT_ROW, "value"])
+
+
+def report_currency(cfg: dict | None, registry_path: Path | None = None) -> dict:
+    """research.reporting: report currency and its single rate (the model itself stays in EUR2020). fx_per_eur2020 = inverse_of_input (MAIN,
+    supplement 01 item 3): 1 / fx_usd_to_eur_2020, so a USD input converted to EUR2020 and reported back in USD2020 returns its own value; a number
+    is accepted for comparison only and recorded with consistent_with_input = False unless it equals the inverse (rel. 1e-12)."""
+    R = ((cfg or {}).get("research") or {}) if isinstance(cfg, dict) else {}
+    rep = dict(REPORT_CURRENCY_DEFAULT, **(R.get("reporting") or {}))
+    if rep["currency"] != "USD2020":
+        raise ValueError(f"research.reporting.currency must be USD2020, got {rep['currency']!r}")
+    fx_in = input_fx_eur_per_usd(cfg, registry_path)
+    rule = rep["fx_per_eur2020"]
+    if rule == "inverse_of_input":
+        fx = 1.0 / fx_in
+    elif isinstance(rule, (int, float)) and not isinstance(rule, bool):
+        fx = float(rule)
+    else:
+        raise ValueError(f"research.reporting.fx_per_eur2020 must be inverse_of_input or a number, got {rule!r}")
+    return dict(currency=rep["currency"], fx_per_eur2020=fx, rule=str(rule), input_row=FX_INPUT_ROW, input_eur_per_usd=fx_in,
+                consistent_with_input=bool(abs(fx * fx_in - 1.0) <= 1e-12), ecb_2020_reference=FX_ECB_2020_REFERENCE)
+
+
+def ledger_detail_usd(L: pd.DataFrame, fx: float) -> pd.DataFrame:
+    """Long ledger with USD2020 columns next to the EUR2020 ones: usd2020 = eur x fx, usd2020_length_split = eur_length_split x fx."""
+    return L.assign(usd2020=L.eur * fx, usd2020_length_split=L.eur_length_split * fx)
+
+
+def ledger_table_usd(T: pd.DataFrame, fx: float) -> pd.DataFrame:
+    """The country x subject table converted to USD2020 (same columns as ledger_table, values x fx)."""
+    return T * fx
+
+
 def nodal_prices(n, freq: str = "D") -> pd.DataFrame:
     """One row per bus (node x carrier): node, carrier, country, snapshot-weighted mean / min / max of the dual price over the run, then one
     column per calendar day (freq 'D') with the snapshot-weighted mean of that day (weights = snapshot_weightings.objective). Units: EUR per
