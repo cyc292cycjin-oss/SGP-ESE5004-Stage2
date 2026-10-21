@@ -59,6 +59,43 @@ def test_cases_and_former_source(setup):
         co2_storage_caps(dict(R, storage_potential_case="p90"), reg)
 
 
+def test_ship_routes_to_receivers_without_store_dropped(tmp_path, monkeypatch):
+    """A5 follow-up: CO2_SHIP_ROUTES_S4D2.csv still lists 70 routes into TL (store gone with potential 0); the shipping layer drops the routes
+    into receivers without a national store (recorded) and still refuses a missing pair or an extra route into an existing store."""
+    import pypsa
+    from phase4_static import config
+    import s4d_layers
+    from s4d_layers import apply_intra_asean_shipping
+    monkeypatch.setattr(s4d_layers, "ROOT", tmp_path)   # the toy route / coastal tables live in tmp_path (ledger paths are relative to ROOT)
+    routes_real = pd.read_csv(ROOT / "research_inputs/co2_v5/CO2_SHIP_ROUTES_S4D2.csv")
+    assert (routes_real.receiver == "TL").sum() == 70
+    reg = pd.read_csv(REG, keep_default_na=False).set_index("param_id")
+    cfg = copy.deepcopy(config(ROOT, "disconnected"))
+    pd.DataFrame(dict(node=["A1", "B1", "C1"], coastal=[True, True, True])).to_csv(tmp_path / "coast.csv", index=False)
+    def run(rows):
+        pd.DataFrame(rows, columns=["origin", "receiver", "landing", "gc_km", "sea_km"]).to_csv(tmp_path / "routes.csv", index=False)
+        cfg["research"]["co2"].update(coastal_nodes_table="coast.csv", ship_routes_table="routes.csv")
+        n = pypsa.Network()
+        for node, c in (("A1", "ID"), ("B1", "TL"), ("C1", "VN")):
+            n.add("Bus", node); n.buses.loc[node, "country"] = c
+            n.add("Bus", f"{node} co2 stored", carrier="co2 stored"); n.buses.loc[f"{node} co2 stored", "country"] = c
+            n.add("Store", f"{node} co2 stored", bus=f"{node} co2 stored", e_nom_extendable=True); n.stores.loc[f"{node} co2 stored", "research_role"] = "CO2_BUFFER"
+        for c in ("ID", "VN"):   # TL has no national store (unified table: potential 0)
+            n.add("Bus", f"co2 sequestered {c}", carrier="co2 sequestered"); n.buses.loc[f"co2 sequestered {c}", "country"] = c
+            n.add("Store", f"co2 sequestered {c}", bus=f"co2 sequestered {c}", carrier="co2 sequestered", e_nom_extendable=True, e_nom_max=1e6)
+            n.stores.loc[f"co2 sequestered {c}", "country"] = c
+        return n, apply_intra_asean_shipping(n, cfg, reg)
+    ok = [("A1", "VN", "C1", 500, 600), ("A1", "TL", "B1", 400, 450), ("B1", "ID", "A1", 400, 450), ("B1", "VN", "C1", 300, 350),
+          ("C1", "ID", "A1", 500, 600), ("C1", "TL", "B1", 300, 350)]
+    n, led = run(ok)
+    assert led["links"] == 4 and led["dropped_routes_no_national_store"] == {"TL": 2} and led["receivers"] == ["ID", "VN"]
+    assert set(n.links.index) == {"A1 co2 ship to VN", "B1 co2 ship to ID", "B1 co2 ship to VN", "C1 co2 ship to ID"}
+    with pytest.raises(ValueError, match=r"missing \[\('B1', 'VN'\)\]"):
+        run([r for r in ok if r[:2] != ("B1", "VN")])
+    with pytest.raises(ValueError, match=r"extra \[\('D9', 'VN'\)\]"):
+        run(ok + [("D9", "VN", "C1", 100, 120)])
+
+
 def test_registry_rows(setup):
     _, r = setup
     assert r.loc["co2_storage_unified_table", "value"] == "research_inputs/co2_v5/CO2_STORAGE_POTENTIAL_UNIFIED.csv"

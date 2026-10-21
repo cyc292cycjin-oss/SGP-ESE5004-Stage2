@@ -29,10 +29,11 @@ def toy(scenario="integrated"):
         bus(f"co2 atmosphere {c}", "co2", c); bus(f"co2 sequestered extra-ASEAN {c}", "co2 sequestered extra-ASEAN", c)
         n.add("Load", f"{c}1 load", bus=f"{c}1", p_set=100.0); n.loads.loc[f"{c}1 load", "country"] = c
         n.add("Store", f"co2 atmosphere {c}", bus=f"co2 atmosphere {c}", e_nom_extendable=True, e_min_pu=-1)
+        n.add("Store", f"co2 sequestered extra-ASEAN {c}", bus=f"co2 sequestered extra-ASEAN {c}", carrier="co2 sequestered extra-ASEAN", e_nom_extendable=True)
         n.add("Link", f"{c}1 co2 export extra-ASEAN", bus0=f"{c}1 co2 stored", bus1=f"co2 sequestered extra-ASEAN {c}", carrier="CO2 export extra-ASEAN", p_nom_extendable=True)
     for c in ("ID", "MY"):
         bus(f"co2 sequestered {c}", "co2 sequestered", c)
-        n.add("Store", f"co2 sequestered {c}", bus=f"co2 sequestered {c}", e_nom_extendable=True, e_nom_max=1e6)
+        n.add("Store", f"co2 sequestered {c}", bus=f"co2 sequestered {c}", carrier="co2 sequestered", e_nom_extendable=True, e_nom_max=1e6)
     bus("ASEAN oil", "oil", "ASEAN"); bus("ASEAN ammonia", "ammonia", "ASEAN")
     for c in CC:
         n.add("Link", f"oil pool {c}1", bus0="ASEAN oil", bus1=f"{c}1 oil", carrier="oil pool", p_nom_extendable=True)
@@ -120,9 +121,62 @@ def test_co2_shipping_forbid():
     n = toy("disconnected"); led = apply_co2_shipping(n, "forbid")
     assert led["removed"] == 2 and not n.links.carrier.isin(["CO2 ship", "CO2 transit ship", "CO2 transit rail"]).any()
     assert (n.links.carrier == "CO2 export extra-ASEAN").sum() == 3
+    assert led["sink_channels_after"]["SG"]["sink_kinds"] == ["extra_asean"] and led["sink_channels_after"]["ID"]["sink_kinds"] == ["extra_asean"]
+    assert led["sink_channels_before"]["ID"]["sink_kinds"] == ["extra_asean", "national_other_asean"]
     with pytest.raises(ValueError):
         apply_co2_shipping(toy("integrated"), "forbid")
     assert apply_co2_shipping(toy("integrated"), "allow") == dict(mode="allow")
+
+
+def toy_b1(with_mm=False, transit=True, transit_to="co2 sequestered extra-ASEAN LA"):
+    """VN (coast, national store + extra-ASEAN), LA (landlocked: LA1 - LA2 pipeline; LA1 transit export extra-ASEAN, rail into the VN store,
+    LA2 transit ship into the VN store), optional MM whose only outlet is a CO2 ship into the VN store."""
+    n = pypsa.Network(); n.set_snapshots(range(2))
+    def bus(name, carrier, c):
+        n.add("Bus", name, carrier=carrier); n.buses.loc[name, "country"] = c
+    for b, c in (("VN1 co2 stored", "VN"), ("LA1 co2 stored", "LA"), ("LA2 co2 stored", "LA")) + ((("MM1 co2 stored", "MM"),) if with_mm else ()):
+        bus(b, "co2 stored", c); n.add("Store", b, bus=b, carrier="co2 stored", e_nom_extendable=True, e_cyclic=True)
+    bus("TL1 co2 stored", "co2 stored", "TL")   # pass-through bus (no store, no pipeline, no sink link): listed apart, not a node without sink
+    for c in ("VN", "LA"):
+        bus(f"co2 sequestered extra-ASEAN {c}", "co2 sequestered extra-ASEAN", c)
+        n.add("Store", f"co2 sequestered extra-ASEAN {c}", bus=f"co2 sequestered extra-ASEAN {c}", carrier="co2 sequestered extra-ASEAN", e_nom_extendable=True)
+    bus("co2 sequestered VN", "co2 sequestered", "VN")
+    n.add("Store", "co2 sequestered VN", bus="co2 sequestered VN", carrier="co2 sequestered", e_nom_extendable=True, e_nom_max=106e6)
+    links = [("VN1 co2 sequestration", "VN1 co2 stored", "co2 sequestered VN", "CO2 sequestration", "VN", 0.0),
+             ("VN1 co2 export extra-ASEAN", "VN1 co2 stored", "co2 sequestered extra-ASEAN VN", "CO2 export extra-ASEAN", "VN", 0.0),
+             ("CO2 pipeline LA1 -> LA2", "LA1 co2 stored", "LA2 co2 stored", "CO2 pipeline", "LA", 0.0),
+             ("LA1 co2 transit to VN store", "LA1 co2 stored", "co2 sequestered VN", "CO2 transit rail", "LA", 10.0),
+             ("LA2 co2 transit ship to VN", "LA2 co2 stored", "co2 sequestered VN", "CO2 transit ship", "LA", 25.0)]
+    if transit:
+        links.append(("LA1 co2 transit export extra-ASEAN", "LA1 co2 stored", transit_to, "CO2 transit export extra-ASEAN", "LA", 10.0033))
+    if with_mm:
+        links.append(("MM1 co2 ship to VN", "MM1 co2 stored", "co2 sequestered VN", "CO2 ship", "MM", 20.0))
+    for k, b0, b1, car, c, mc in links:
+        n.add("Link", k, bus0=b0, bus1=b1, carrier=car, p_nom_extendable=True, marginal_cost=mc, p_min_pu=-1.0 if car == "CO2 pipeline" else 0.0)
+        n.links.loc[k, "country"] = c
+    n.meta.update(scenario="disconnected")
+    return n
+
+
+def test_b1_landlocked_transit_kept_and_checked():
+    """Supplement 01 section 2: under b1 LA keeps ONLY its transit corridor to its own extra-ASEAN store; every country keeps a sink."""
+    n = toy_b1(); led = apply_co2_shipping(n, "forbid")
+    assert led["removed_by_carrier"] == {"CO2 transit rail": 1, "CO2 transit ship": 1}
+    assert "LA1 co2 transit export extra-ASEAN" in n.links.index and n.links.at["LA1 co2 transit export extra-ASEAN", "bus1"] == "co2 sequestered extra-ASEAN LA"
+    assert led["landlocked_transit"]["LA"] == dict(transit_links=1, store="co2 sequestered extra-ASEAN LA", land_leg_eur2020_per_t={"LA1 co2 transit export extra-ASEAN": 10.0033},
+                                                    links_into_other_national_stores=0)
+    after = led["sink_channels_after"]
+    assert after["LA"]["sink_kinds"] == ["extra_asean"] and after["LA"]["nodes_without_sink"] == []          # LA2 reaches the corridor through the pipeline
+    assert after["VN"]["sink_kinds"] == ["extra_asean", "national_own"] and after["VN"]["national_cap_t_per_year"] == 106e6
+    assert led["sink_channels_before"]["LA"]["sink_kinds"] == ["extra_asean", "national_other_asean"]
+    assert after["TL"] == dict(nodes=0, nodes_without_sink=[], passthrough_buses=["TL1 co2 stored"], sink_kinds=[], direct_links_by_carrier={},
+                               national_cap_t_per_year=0.0, process_emission_nodes=0)
+    with pytest.raises(ValueError, match="MM"):                               # a country whose only outlet was intra-ASEAN shipping: refused
+        apply_co2_shipping(toy_b1(with_mm=True), "forbid")
+    with pytest.raises(ValueError, match="LA"):                               # no transit corridor: LA would lose every outlet
+        apply_co2_shipping(toy_b1(transit=False), "forbid")
+    with pytest.raises(AssertionError):                                       # a transit link into another country's store is not a transit-only corridor
+        apply_co2_shipping(toy_b1(transit_to="co2 sequestered extra-ASEAN VN"), "forbid")
 
 
 def test_country_wacc_rules():

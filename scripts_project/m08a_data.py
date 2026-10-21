@@ -313,8 +313,10 @@ def a7(reg: Registry, cor: Corrections):
             "scripts_project/m08a_layers.apply_stock_mode", var_sha, decision_ref="126, 132")
     reg.add("scenario_switch_co2_shipping_intra_asean", "M08a A7 b1 (decision 132): disconnected.co2_shipping_intra_asean = allow (main: intra-ASEAN CO2 shipping kept in the disconnected "
             "scenario, maritime trade, decision 92) | forbid (variant of a disconnected network: links CO2 ship, CO2 transit ship and CO2 transit rail into another ASEAN country's "
-            "national store removed - the Lao rail leg into the VN / TH store counts as the land part of that trade (implementer's reading, to confirm); CO2 export extra-ASEAN and "
-            "CO2 transit export extra-ASEAN kept)", "allow", "flag", "C", "M08A instruction A7 item 2", "scripts_project/m08a_layers.apply_co2_shipping", var_sha, decision_ref="92, 132")
+            "national store removed - b1 = no cross-border CO2 transport inside ASEAN when not interconnected, incl. the Lao rail leg into the VN / TH store (scope confirmed by the "
+            "user 2026-10-21, M08a supplement 01 item 2); CO2 export extra-ASEAN and CO2 transit export extra-ASEAN kept - the landlocked LA keeps only its transit corridor to "
+            "extra-ASEAN storage, rule disconnected_b1_landlocked_transit_rule; every country must keep a permanent sink, checked by the variant script)", "allow", "flag", "C",
+            "M08A instruction A7 item 2; M08A_SUPPLEMENT_01.md items 1.2 and 2", "scripts_project/m08a_layers.apply_co2_shipping", var_sha, decision_ref="92, 132")
     reg.add("scenario_switch_remove_countries", "M08a A7 (decision 132): coalition.remove_countries = [] (main) | list of ISO2 - the countries leave the network ENTIRELY: buses, loads, "
             "generators, storage and gas stores, storage potential, existing stock, every line / link with a port on their buses (their half of the cross-border lines, liquid-pool and "
             "CO2-shipping access, extra-ASEAN import points located there) and components tagged with the country (its loads on the regional buses); international bunker demand "
@@ -425,7 +427,38 @@ def a10(reg: Registry, cor: Corrections):
             "S4R_PLAN.md section 8", cfg_sha, country="VN", decision_ref="129, 92, 95, 132", status="REFERENCE_ONLY")
 
 
-def main(steps=("a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10")):
+# --- supplement 01 section 2 (b1): landlocked transit corridor; A5 follow-up: ship routes into receivers without a national store ----------
+def s01(reg: Registry, cor: Corrections):
+    sup = ROOT / "research/06_scope_redesign/p1_m08a_20261021/M08A_SUPPLEMENT_01.md"
+    lay = sha256(ROOT / "scripts_project/m08a_layers.py")
+    ship = float(cor.value("co2_extra_asean_shipping_chain_4500km")) * float(cor.value("conv_usd2004_to_eur2020")) if cor.has("co2_extra_asean_shipping_chain_4500km") else float("nan")
+    legs = {k: float(cor.value(k)) for k in sorted(cor.base.index) if k.startswith("co2_lao_transit_land_cost_")}
+    reg.add("disconnected_b1_landlocked_transit_rule", "M08a supplement 01 section 2 (b1, decision 132): with disconnected.co2_shipping_intra_asean = forbid the landlocked LA keeps ONE "
+            "kind of outlet - the transit corridor to extra-ASEAN storage of decision 93 ('<node> co2 transit export extra-ASEAN', carrier CO2 transit export extra-ASEAN, one per "
+            "Lao buffered node, kept by every variant): cost = rail land leg to the nearest neighbouring coast on the link (registry co2_lao_transit_land_cost_<node>, "
+            f"{min(legs.values()):.2f}-{max(legs.values()):.2f} EUR2020/t incl. rail loading) + the extra-ASEAN unit cost on LA's own store 'co2 sequestered extra-ASEAN LA' "
+            f"(IEAGHG 2004 shipping chain at 4,500 km incl. liquefaction, harbour, buffer tanks and loading = {ship:.2f} + geological storage 30 = {ship + 30:.2f} EUR2020/t, "
+            "registry co2_extra_asean_storage_cost_unified) - the same basis as the coastal extra-ASEAN exports; the corridor ends only in LA's extra-ASEAN store, never in the VN / TH "
+            "national store buses (transit only, no storage in the neighbour). Enforced by m08a_layers.check_landlocked_transit (ValueError / AssertionError otherwise); every country "
+            "with a captured-CO2 buffer must still reach a permanent sink after b1 (m08a_layers.co2_sink_channels). Convention (INFERENCE, framing only): the right of access to the sea "
+            "and freedom of transit of land-locked States (UNCLOS Part X, Article 125; GATT 1994 Article V freedom of transit) - the transit state carries the goods, it does not "
+            "store them; the corridor is kept also when the transit state leaves the coalition (coalition.remove_countries [VN]: the link has both ends in LA)",
+            "transit_to_extra_asean_only", "flag", "C", "M08A_SUPPLEMENT_01.md section 2; S4D-1 decision 93; S4E-2 decision 95 a",
+            "scripts_project/m08a_layers.check_landlocked_transit; evidence/M08A_B1_SINK_CHANNELS.json", sha256(sup) if sup.exists() else lay, country="LA", decision_ref="93, 95, 132")
+    reg.add("co2_ship_routes_receivers_rule", "M08a (A5 follow-up): research.co2.ship_routes_table (CO2_SHIP_ROUTES_S4D2.csv, built for the D1 storage potentials) lists 70 routes "
+            "into TL, whose national store is gone since the unified table (potential 0); s4d_layers.apply_intra_asean_shipping now builds the routes into the receivers that have a "
+            "national store and drops (and records: ledger dropped_routes_no_national_store) the routes into receivers without one; a missing pair or an extra route into an existing "
+            "store is still an error. Without this the build stopped with 'ship route table does not match the network' under the A5 configuration. Rule of decision 92 unchanged "
+            "(every coastal buffered node -> every other country's national store)", "receivers_with_national_store", "flag", "B", "M08a A5 / decision 92",
+            "scripts_project/s4d_layers.apply_intra_asean_shipping", sha256(ROOT / "scripts_project/s4d_layers.py"), decision_ref="92, 131")
+    reg.add("co2_passthrough_buses_note", "M08a supplement 01 section 2 check (observation, model unchanged): three 'co2 stored' buses have no captured-CO2 buffer, no pipeline and no "
+            "sink link - MY_Peninsular22 0, PH_Visayas10 0, TH21 0 (S4M-3 disconnected build); only Fischer-Tropsch (CO2 input) and SMR CC (CO2 output) touch them, so CO2 captured "
+            "there by SMR CC must be used there by Fischer-Tropsch (INFERENCE: harmless for feasibility; the nodes are outside the captured-CO2 buffer set). Listed as pass-through "
+            "buses by m08a_layers.co2_sink_channels, not as nodes without sink", 3, "buses", "B", "S4M-3 disconnected build (results_project/s4m/s4m3)",
+            "evidence/M08A_B1_SINK_CHANNELS.json passthrough_buses", lay, decision_ref="132", status="REFERENCE_ONLY")
+
+
+def main(steps=("a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "s01")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

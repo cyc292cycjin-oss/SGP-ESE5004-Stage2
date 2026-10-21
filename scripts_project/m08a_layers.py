@@ -305,11 +305,99 @@ def apply_stock_mode(n, mode: str) -> dict:
     return led
 
 
+SINK_CARRIERS = ("co2 sequestered", "co2 sequestered extra-ASEAN")   # permanent CO2 sinks: national store (cap > 0), the country's extra-ASEAN store
+LANDLOCKED_COUNTRIES = ("LA",)                                       # = s4d_layers.LANDLOCKED
+LANDLOCKED_TRANSIT_CARRIER = "CO2 transit export extra-ASEAN"        # = s4d_layers.TRANSIT_LINK (decision 93)
+
+
+def co2_sink_channels(n) -> dict:
+    """Per country: the permanent CO2 sinks its captured-CO2 buses '<node> co2 stored' can reach through the links of the network (M08a
+    supplement 01 section 2, b1 check). A node reaches a sink directly (a usable link from its buffer into a sink bus: national store with a
+    cap > 0 - own country or, by maritime trade, another country - or the country's extra-ASEAN store) or through CO2 pipelines between
+    buffers (both directions when p_min_pu < 0). Usable link = p_nom > 0 or extendable with p_nom_max > 0. A 'co2 stored' bus with no Store,
+    no pipeline and no sink link is a pass-through bus (CO2 produced there must be used there, e.g. SMR CC -> Fischer-Tropsch at a node
+    without a captured-CO2 buffer) and is listed apart, not as a node without sink. Returns {country: dict(nodes, nodes_without_sink,
+    passthrough_buses, sink_kinds, direct_links_by_carrier, national_cap_t_per_year, process_emission_nodes)}."""
+    B, L, S = n.buses, n.links, n.stores
+    stored = list(B.index[B.carrier.astype(str) == "co2 stored"])
+    sink_cap = {}
+    for _, z in S[S.carrier.astype(str).isin(SINK_CARRIERS)].iterrows():
+        sink_cap[str(z.bus)] = float(z.e_nom_max) if bool(z.e_nom_extendable) else float(z.e_nom)
+    sinks = {b for b, v in sink_cap.items() if v > 0}
+    use = L[(L.p_nom > 0) | (L.p_nom_extendable.astype(bool) & (L.p_nom_max > 0))]
+    adj = {b: set() for b in stored}; direct = {b: [] for b in stored}
+    for k, z in use.iterrows():
+        b0, b1 = str(z.bus0), str(z.bus1)
+        if b0 in adj and b1 in adj:
+            adj[b0].add(b1)
+            if float(z.p_min_pu) < 0:
+                adj[b1].add(b0)
+        elif b0 in adj and b1 in sinks:
+            c0, c1 = str(B.at[b0, "country"]), str(B.at[b1, "country"])
+            kind = "extra_asean" if B.at[b1, "carrier"] == "co2 sequestered extra-ASEAN" else ("national_own" if c1 == c0 else "national_other_asean")
+            direct[b0].append((str(z.carrier), kind))
+    reach = {}
+    for b in stored:   # sink kinds reachable from b (BFS over the pipelines)
+        seen, stack, kinds = {b}, [b], set()
+        while stack:
+            u = stack.pop(); kinds |= {k for _, k in direct[u]}
+            for v in adj[u] - seen:
+                seen.add(v); stack.append(v)
+        reach[b] = kinds
+    pe = L[L.carrier.astype(str) == "process emissions"]
+    with_store = set(S.bus.astype(str)); piped = set().union(*adj.values()) | {b for b in stored if adj[b]}
+    passthrough = {b for b in stored if b not in with_store and b not in piped and not direct[b]}
+    out = {}
+    for c in sorted({str(B.at[b, "country"]) for b in stored}):
+        allb = [b for b in stored if str(B.at[b, "country"]) == c]
+        bs = [b for b in allb if b not in passthrough]
+        by = {}
+        for b in bs:
+            for car, _ in direct[b]:
+                by[car] = by.get(car, 0) + 1
+        nat = f"co2 sequestered {c}"
+        out[c] = dict(nodes=len(bs), nodes_without_sink=sorted(b[: -len(" co2 stored")] for b in bs if not reach[b]),
+                      passthrough_buses=sorted(b for b in allb if b in passthrough),
+                      sink_kinds=sorted(set().union(*[reach[b] for b in bs])), direct_links_by_carrier=dict(sorted(by.items())),
+                      national_cap_t_per_year=float(sink_cap.get(nat, 0.0)),
+                      process_emission_nodes=int((pe.country.astype(str) == c).sum()) if "country" in pe else 0)
+    return out
+
+
+def check_landlocked_transit(n, countries=LANDLOCKED_COUNTRIES) -> dict:
+    """Supplement 01 section 2 (b1): a landlocked country keeps ONLY a transit corridor to extra-ASEAN storage - its transit links end in its
+    OWN extra-ASEAN store 'co2 sequestered extra-ASEAN <c>' (rail land leg on the link; port loading, shipping and storage in the store's unit
+    cost, the same basis as the coastal extra-ASEAN chain) and no link of it ends in another country's national store. Raises otherwise."""
+    B, L = n.buses, n.links
+    led = {}
+    for c in countries:
+        if not (B.country.astype(str) == c).any():
+            continue
+        own = f"co2 sequestered extra-ASEAN {c}"
+        mine = L[L.country.astype(str) == c] if "country" in L else L.iloc[:0]
+        tr = mine[mine.carrier.astype(str) == LANDLOCKED_TRANSIT_CARRIER]
+        if (B.carrier.astype(str).eq("co2 stored") & B.country.astype(str).eq(c)).any() and not len(tr):
+            raise ValueError(f"{c}: no '{LANDLOCKED_TRANSIT_CARRIER}' link - the landlocked country would have no CO2 storage outlet under b1 "
+                             "(research.co2.landlocked_transit must be on)")
+        if (tr.bus1.astype(str) != own).any():
+            raise AssertionError(f"{c}: a transit export link does not end in {own}")
+        into_other = mine[mine.bus1.astype(str).map(lambda b: b in B.index and B.at[b, "carrier"] == "co2 sequestered" and str(B.at[b, "country"]) != c)]
+        if len(into_other):
+            raise AssertionError(f"{c}: links into another country's national store remain: {sorted(into_other.index)[:5]}")
+        led[c] = dict(transit_links=int(len(tr)), store=own, land_leg_eur2020_per_t={k: float(v) for k, v in tr.marginal_cost.sort_index().items()},
+                      links_into_other_national_stores=0)
+    return led
+
+
 def apply_co2_shipping(n, mode: str) -> dict:
-    """disconnected.co2_shipping_intra_asean (b1, decision 132): allow (main) | forbid - in a disconnected network, every delivery of CO2 into
-    ANOTHER ASEAN country's national store is removed (carriers CO2 ship, CO2 transit ship and CO2 transit rail - the Lao rail leg into the
-    Vietnamese / Thai store is the land part of the same trade); exports to extra-ASEAN storage (CO2 export extra-ASEAN, CO2 transit export
-    extra-ASEAN) stay. Applies to disconnected networks only."""
+    """disconnected.co2_shipping_intra_asean (b1, decision 132; scope confirmed by the user, M08a supplement 01 item 2): allow (main) | forbid -
+    in a disconnected network, every cross-border CO2 transport inside ASEAN is removed: every delivery of CO2 into ANOTHER ASEAN country's
+    national store (carriers CO2 ship, CO2 transit ship and CO2 transit rail - the Lao rail leg into the Vietnamese / Thai store is the land
+    part of the same trade). Exports to extra-ASEAN storage (CO2 export extra-ASEAN, CO2 transit export extra-ASEAN) stay; in particular the
+    landlocked country keeps its transit corridor to extra-ASEAN storage only (supplement 01 section 2: rail land leg + the extra-ASEAN chain of
+    the coastal exports, not connected to the VN / TH national stores; check_landlocked_transit). After the removal every country with a
+    captured-CO2 bus must still reach a permanent sink (co2_sink_channels; ValueError otherwise - the per-country net-zero LP would lose its
+    storage outlet). Applies to disconnected networks only."""
     led = dict(mode=mode)
     if mode == "allow":
         return led
@@ -323,8 +411,15 @@ def apply_co2_shipping(n, mode: str) -> dict:
         b1 = str(z.bus1)
         if n.buses.at[b1, "carrier"] != "co2 sequestered" or str(n.buses.at[b1, "country"]) == str(z.country):
             raise AssertionError(f"{x}: not a delivery into another country's national store")
+    before = co2_sink_channels(n)
     n.mremove("Link", list(sel.index))
     keep = K.index[K.carrier.isin(EXTRA_ASEAN_CO2_CARRIERS)] if len(K) else []
+    after = co2_sink_channels(n)
+    lost = sorted({c for c, v in after.items() if v["nodes"] and not v["sink_kinds"]} |
+                  {c for c, v in before.items() if v["sink_kinds"] and not after.get(c, {}).get("sink_kinds")})
+    if lost:
+        raise ValueError(f"b1 forbid leaves {lost} without any permanent CO2 sink (no national store with a cap, no extra-ASEAN export / transit)")
     led.update(removed=int(len(sel)), removed_by_carrier={str(k): int(v) for k, v in sel.carrier.value_counts().items()},
-               extra_asean_links_kept=int(len(keep)))
+               extra_asean_links_kept=int(len(keep)), landlocked_transit=check_landlocked_transit(n),
+               sink_channels_before=before, sink_channels_after=after)
     return led

@@ -173,8 +173,13 @@ def apply_intra_asean_shipping(n, cfg, registry: pd.DataFrame) -> dict:
     receivers = {str(c) for c in n.stores.country[n.stores.carrier == "co2 sequestered"]}
     have = set(zip(routes.origin, routes.receiver))
     need = {(o, j) for o in origins for j in receivers if str(n.buses.at[o, "country"]) != j}
-    if have != need:
-        raise ValueError(f"ship route table does not match the network: missing {sorted(need - have)[:5]}, extra {sorted(have - need)[:5]}")
+    # M08a (A5 follow-up): the table may list receivers that no longer have a national store (TL: potential 0 since the unified table of A5);
+    # their routes are dropped and recorded. Every other difference is still an error (missing pair, or an origin that is not a coastal buffer).
+    extra = have - need
+    if need - have or {(o, j) for o, j in extra if j in receivers}:
+        raise ValueError(f"ship route table does not match the network: missing {sorted(need - have)[:5]}, extra {sorted((o, j) for o, j in extra if j in receivers)[:5]}")
+    dropped = routes[[(o, j) in extra for o, j in zip(routes.origin, routes.receiver)]]
+    routes = routes[[(o, j) in need for o, j in zip(routes.origin, routes.receiver)]]
     by_pair = {}
     for _, r in routes.sort_values(["origin", "receiver"]).iterrows():
         i = str(n.buses.at[r.origin, "country"]); route_km = ship_route_km(r, dist_mode, factor, scale)
@@ -187,6 +192,7 @@ def apply_intra_asean_shipping(n, cfg, registry: pd.DataFrame) -> dict:
     led.update(links=int(len(routes)), distance=dist_mode, route_factor=rows["co2_ship_route_factor"], route_factor_scale=scale, fixed_eur2020_per_t=rows["co2_ship_chain_fixed_cost"],
                per_km_eur2020_per_t=rows["co2_ship_chain_per_km_cost"], routes_table=str(p.relative_to(ROOT)), routes_table_sha256=sha256(p),
                origins=len(origins), receivers=sorted(receivers),
+               dropped_routes_no_national_store={str(k): int(v) for k, v in dropped.receiver.value_counts().sort_index().items()},
                cost_range_by_pair={k: [round(min(v), 3), round(max(v), 3)] for k, v in sorted(by_pair.items())})
     n.meta["research_intra_asean_shipping"] = led
     return led
