@@ -79,6 +79,8 @@ CARRIER_COST_ROWS = {
     "battery": "battery storage", "home battery": "home battery storage", "H2 Store Tank": "hydrogen storage tank type 1 including compressor",
     "industry biomass boiler": "biomass boiler", "industry biomass boiler CC": "biomass boiler", "industry gas boiler": "gas boiler steam",
     "industry electric boiler": "electric boiler steam", "industry heat pump": "industrial heat pump high temperature",
+    "industry direct firing gas": "direct firing gas", "industry direct firing biomass": "direct firing solid fuels",   # M08b B2 high band (decision 133)
+    "industry direct firing biomass CC": "direct firing solid fuels",
     "industry biomass CC": "cement capture", "process emissions CC": "cement capture", "electricity distribution grid": "electricity distribution grid",
     "H2 pipeline": "H2 (g) pipeline", "CO2 pipeline": "CO2 pipeline", "gas pipeline": "CH4 (g) pipeline", "DC": "HVDC overhead", "AC": "HVAC overhead",
     "co2 stored": "CO2 storage tank", "LNG import": None, "H2 import": None, "co2 sequestered": None, "ammonia store": None, "methanol store": None,

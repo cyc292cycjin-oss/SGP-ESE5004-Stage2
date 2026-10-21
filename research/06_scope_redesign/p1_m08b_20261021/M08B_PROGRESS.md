@@ -7,9 +7,9 @@
 | 步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
 | 1 | 开分支 / worktree；M11 台账草稿并入总台账（用户选择：标"无项号"、按时间插在 M08a 前） | 完成 | 见 git log |
-| B1 | 需求锚定（活动量、基础负荷、交通服务量、工业物理产量） | 未开始 | |
-| B2 | 工业有用热三档与生物质溢出 | 未开始 | |
-| B3 | 注册表 16 行 + 新规则行；单元测试；`tests/research` 全量 | 未开始 | |
+| B1/B2 数据 | `m08b_demand.py`（锚表、ats_anchor 需求表、产量表）、`m08b_heat_bands.py`（JRC OIS 温度分布）、`s3_0_industry.py`（aeo8_ats_anchor 模式 + useful_heat_bands 变体）、`s2b_feedstock.py`、`s2_0_process_emissions.py`（33 行 ats_anchor）；旧模式表逐字节不变 | 完成 | 9ca5d341 |
+| B1/B2 构建 | `s2_layers`（demand_anchor_settings / physical_output_settings / biomass_overflow、三档热母线 HEAT_BAND_TECH、热档负荷、溢出转有用热、锚值逐国核对 1e-9）、`s2_network`（热档开关、需求账本入 meta、静态检查）、`s4c_layers` / `s4m_cost_breakdown` / `s2_solve` / `s3_7` 载体、`v5_gates` B11 / B12、`baseline.yaml` 新键；试构建 integrated 通过（69 s、0.79 GB） | 完成（待提交） | |
+| B3 | `m08b_data.py`（新增 30 行、修正 23 行；16 行拟增全部落实）；注册表 2,121 → 2,184 行（97b27c87…）；`test_m08b_demand.py`、`test_m08b_heat.py`；改 2 处旧主算断言（test_s3b_r1:23、test_s3b_r2:31）；子集 43 passed / 3 skipped | 全量测试运行中 | |
 | 3 | 重建四个网络、变体生成测试、静态检查、对比报告、网络 SHA256 | 未开始 | |
 | 4 | 本机冒烟（须用户授权） | 未授权 | |
 | 5 | 交付 | 未开始 | |
@@ -37,4 +37,6 @@
 
 ## 接续点
 
-- 当前：设计完成，开始 B1 数据脚本 `m08b_demand.py`。
+- 当前（2026-10-21 19:10）：B1/B2/B3 代码完成，全量测试运行中；之后提交，再按第 3 节在干净提交上重建（`/home/jin/m08b_build.sh`，输出主检出 `results_project/m08b/builds`），写 `m08b_static.py`（静态检查 + 对比 + SHA256）。
+- 工具脚本（WSL）：`/home/jin/m08b_data.sh`（数据链 + 既有文件逐字节核对）、`/home/jin/m08b_registry.sh`、`/home/jin/m08b_tests.sh`（`FULL=1` 全量；5 个玩具求解用例始终排除）、`/home/jin/m08b_build.sh`（`OUTDIR`、`TAGS`）、`/home/jin/m08b_commit.sh`（镜像 + 提交，消息 `/home/jin/m08b_msg.txt`，强制加入 `/home/jin/m08b_force.txt`）。
+- 已知坑：`wsl bash -lc "..."` 中 `$VAR` 为空，变量一律放脚本文件；`set -e` 下 `[ ] && cmd` 末尾失败会退出脚本。

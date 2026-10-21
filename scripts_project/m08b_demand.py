@@ -230,14 +230,14 @@ def main():
                             base_load_ratio_table_mwh=old_base, transport_ratio_table_mwh=old_tr,
                             base_load_nonnegative=bool(sum(el_anchor[s] for s in BASE_SECTORS) >= 0)))
     an = pd.DataFrame(anchors)
-    an.to_csv(ANCHORS, index=False, float_format="%.10g")
+    an.to_csv(ANCHORS, index=False, float_format="%.12g")
     new.to_csv(ANCHOR_TABLE, index=False)
     bases = output_bases()
-    pd.DataFrame(bases).to_csv(OUTPUT_BASE, index=False, float_format="%.10g")
+    pd.DataFrame(bases).to_csv(OUTPUT_BASE, index=False, float_format="%.12g")
     pd.DataFrame(PLAN).to_csv(PLAN_CAPS, index=False)
     pop = {r["country"]: r["population_2050_million"] for r in anchors}
     out = pd.DataFrame(physical_output(bases, pop, g))
-    out.to_csv(OUTPUT_2050, index=False, float_format="%.10g")
+    out.to_csv(OUTPUT_2050, index=False, float_format="%.12g")
     ten = an[an.country != "TL"]
     tot = dict(base_load_anchor_11_twh=float(an.base_load_anchor_mwh.sum() / 1e6), base_load_buildings_agri_11_twh=float(an.base_load_buildings_agri_mwh.sum() / 1e6),
                base_load_ratio_table_11_twh=float(an.base_load_ratio_table_mwh.sum() / 1e6), transport_anchor_11_twh=float(an.transport_anchor_mwh.sum() / 1e6),

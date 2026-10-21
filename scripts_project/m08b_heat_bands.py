@@ -85,7 +85,7 @@ def main():
     sh = shares(df)
     if not (abs(sh[[f"share_{u}" for u in USES]].sum(axis=1) - 1.0) < 1e-12).all():
         raise ValueError("band shares do not sum to 1")
-    sh.to_csv(OUT, index=False, float_format="%.10g")
+    sh.to_csv(OUT, index=False, float_format="%.12g")
     el = df[df.model_carrier == "electricity"]
     write_json(dict(script=SCRIPT, source=dict(file="JRC-IDEES-2021_Industry_EU27.xlsx", sheet=SHEET, year=YEAR, sha256=sha256(XLSX)), process_use=PROCESS_USE,
                     carrier_map=CARRIER, grade="C", rows=df.to_dict(orient="records"),

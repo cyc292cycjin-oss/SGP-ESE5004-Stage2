@@ -48,7 +48,7 @@ def summarise(n):
     st = n.stores
     seq = st[st.index.str.startswith("co2 sequestered")]
     out["co2_sequestered_mt_by_country"] = {s.split()[-1]: round(float(n.stores_t.e[s].iloc[-1]) / 1e6, 3) for s in seq.index}
-    cap_links = L[L.carrier.isin(["CCGT CC", "SMR CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC"])]
+    cap_links = L[L.carrier.isin(["CCGT CC", "SMR CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC", "industry direct firing biomass CC"])]
     out["co2_captured_mt_by_carrier"] = {}
     for car, d in cap_links.groupby("carrier"):
         col = "p3" if car in ("CCGT CC", "SMR CC", "biomass EOP CC") else ("p2" if car == "DAC" else "p3")

@@ -20,8 +20,10 @@ def test_growth_method_switch_and_tables():
     from s2_layers import demand_table_key
     cfg = config(ROOT, "integrated")
     D = cfg["research"]["demand"]
-    assert D["growth_method"] == "ratio" and demand_table_key(cfg) == "aeo8_ats_relative"
-    c2 = copy.deepcopy(cfg); c2["research"]["demand"]["growth_method"] = "level"
+    assert D["growth_method"] == "ats_anchor" and demand_table_key(cfg) == "aeo8_ats_anchor"   # M08b B1 (decision 134): new main; ratio / level stay selectable
+    c2 = copy.deepcopy(cfg); c2["research"]["demand"]["growth_method"] = "ratio"
+    assert demand_table_key(c2) == "aeo8_ats_relative"
+    c2["research"]["demand"]["growth_method"] = "level"
     assert demand_table_key(c2) == "aeo8_ats_relative_level"
     c2["research"]["demand"]["growth_method"] = "x"
     with pytest.raises(ValueError):

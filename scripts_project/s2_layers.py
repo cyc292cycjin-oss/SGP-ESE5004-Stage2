@@ -67,6 +67,49 @@ def nonindustrial_electricity_mode(cfg) -> str:
     if v not in ("table_sectors", "astar_residual"):
         raise ValueError("Unknown research.demand.nonindustrial_electricity " + v)
     return v
+
+
+def demand_anchor_settings(cfg) -> dict:
+    """M08b B1 (decision 134): growth_method ats_anchor = AEO8 ATS activity anchors written into one demand table (scripts_project/m08b_demand.py):
+    base electricity load (base_load_anchor ats_buildings_agri, read through nonindustrial_electricity table_sectors), transport fuel rows
+    (transport_anchor ats_service), industry incl. non-energy use (ATS industry multiplier). ratio / level keep the former tables ('table')."""
+    D = cfg["research"].get("demand") or {}
+    gm = str(D.get("growth_method", "ratio")); bl = str(D.get("base_load_anchor", "table")); ta = str(D.get("transport_anchor", "table"))
+    if gm == "ats_anchor":
+        if (bl, ta) != ("ats_buildings_agri", "ats_service"):
+            raise ValueError("growth_method ats_anchor needs base_load_anchor ats_buildings_agri and transport_anchor ats_service (anchors are in the ats_anchor table)")
+        if nonindustrial_electricity_mode(cfg) != "table_sectors":
+            raise ValueError("growth_method ats_anchor needs nonindustrial_electricity table_sectors (the base-load anchor is the table electricity of TABLE_BASE_SECTORS)")
+        if str(D.get("country_allocation", "aeo8_ats_relative")) != "aeo8_ats_relative":
+            raise ValueError("growth_method ats_anchor replaces the country allocation; keep country_allocation aeo8_ats_relative (the other allocations are ratio / level sensitivities)")
+    elif bl != "table" or ta != "table":
+        raise ValueError("base_load_anchor / transport_anchor other than 'table' need growth_method ats_anchor")
+    return dict(growth_method=gm, base_load_anchor=bl, transport_anchor=ta, anchor_table=D.get("anchor_table"))
+
+
+def physical_output_settings(cfg, repo: Path) -> dict:
+    """M08b B1 (decision 134): research.s2.industry.physical_output_rule. sqrt_gdp_capped = min(base x G^((2050 - base year)/28 x 0.5), saturation x
+    population, plan cap) in the ats_anchor industry tables (only with growth_method ats_anchor; the configured parameters must equal the ones the
+    tables were generated with); industry_multiplier = 2019 x industry multiplier (former rule, ratio / level tables)."""
+    I = cfg["research"]["s2"]["industry"]; gm = str((cfg["research"].get("demand") or {}).get("growth_method", "ratio"))
+    rule = str(I.get("physical_output_rule", "industry_multiplier"))
+    if rule == "industry_multiplier":
+        if gm == "ats_anchor":
+            raise ValueError("growth_method ats_anchor tables use physical_output_rule sqrt_gdp_capped")
+        return dict(rule=rule)
+    if rule != "sqrt_gdp_capped":
+        raise ValueError("Unknown research.s2.industry.physical_output_rule " + rule)
+    if gm != "ats_anchor":
+        raise ValueError("physical_output_rule sqrt_gdp_capped exists only in the ats_anchor tables (growth_method ats_anchor)")
+    ev = jload(Path(repo) / "research_inputs/demand_v5/DEMAND_ANCHOR_M08B_EVIDENCE.json")
+    cfg_par = dict(elasticity=float(I["physical_output_elasticity"]), saturation={k: float(v) for k, v in I["physical_output_percap_caps"].items()},
+                   base_year={k: int(v) for k, v in I["physical_output_base_year"].items()})
+    tab_par = dict(elasticity=float(ev["elasticity"]), saturation={k: float(v) for k, v in ev["saturation_t_per_cap"].items()}, base_year={k: int(v) for k, v in ev["base_year"].items()})
+    if cfg_par != tab_par:
+        raise ValueError(f"physical output parameters {cfg_par} differ from the generated tables {tab_par}: rerun scripts_project/m08b_demand.py and s3_0_industry.py")
+    return dict(rule=rule, parameters=cfg_par, plan_caps=str(I.get("physical_output_plan_caps", "")), table="research_inputs/demand_v5/INDUSTRY_OUTPUT_2050_M08B.csv")
+
+
 FUEL_EF_KEYS = {"coal": "coal", "oil": "oil", "gas": "gas", "unclassified_fuel": "oil"}  # technology-data CO2 intensity rows
 # IEA, Defining energy access: 2020 methodology, Table 2 "Cookstove efficiencies by type and region"
 COOKSTOVE_BASIC_FUELWOOD = {"ID": 0.08, "TH": 0.16}      # other ASEAN countries: "Other Southeast Asia" 0.08
@@ -454,30 +497,53 @@ def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction:
 
 
 # ----------------------------------------------------------------------------------------------
-# S2-5: industrial low-temperature heat bus per node
+# S2-5: industrial low-temperature heat bus per node; M08b B2 (decision 133): medium / high useful-heat bands
 # ----------------------------------------------------------------------------------------------
-def add_industrial_heat(n, costs, nodes, cc_fraction: float):
+# band -> (technology-data v0.15.0 row, link carrier, fuel); only rows that exist in technology-data v0.15.0 (decision 133). Temperature coverage
+# from the DEA industrial process heat catalogue: industrial heat pumps up to 150 C (302.b) -> low band only; electric boiler steam 1-16 bar, typically
+# 8 bar / 175 C; fuel steam boilers 125-300 C (not for firing / melting); direct firing 400-1,600 C. technology-data v0.15.0 has no electric direct
+# firing row -> no electric heating above 400 C; it has no hydrogen boiler or hydrogen direct firing row -> no hydrogen heating in any band.
+HEAT_BAND_BUS = {"low": ("industry heat", ""), "medium": ("industry heat medium", " medium"), "high": ("industry heat high", " high")}
+HEAT_BAND_TECH = {
+    "low": [("electric boiler steam", "industry electric boiler", "electricity"), ("industrial heat pump high temperature", "industry heat pump", "electricity"),
+            ("gas boiler steam", "industry gas boiler", "gas"), ("solid biomass boiler steam", "industry biomass boiler", "biomass"),
+            ("solid biomass boiler steam", "industry biomass boiler CC", "biomass")],
+    "medium": [("electric boiler steam", "industry electric boiler", "electricity"), ("gas boiler steam", "industry gas boiler", "gas"),
+               ("solid biomass boiler steam", "industry biomass boiler", "biomass"), ("solid biomass boiler steam", "industry biomass boiler CC", "biomass")],
+    "high": [("direct firing gas", "industry direct firing gas", "gas"), ("direct firing solid fuels", "industry direct firing biomass", "biomass"),
+             ("direct firing solid fuels", "industry direct firing biomass CC", "biomass")],
+}
+
+
+def add_industrial_heat(n, costs, nodes, cc_fraction: float, bands: bool = False):
     ef_gas = cost(costs, "gas", "CO2 intensity"); ef_bio = cost(costs, "solid biomass", "CO2 intensity"); cc = float(cc_fraction)
     cap_row = "biomass boiler capture" if "biomass boiler capture" in costs.index and np.isfinite(costs.at["biomass boiler capture", "fixed"]) else "biomass CHP capture"
     cap_fixed = cost(costs, cap_row, "fixed"); cap_el = cost(costs, cap_row, "electricity-input") + cost(costs, cap_row, "compression-electricity-input")
-    count = 0
-    for node in nodes:
-        c = country_of(n, node); hb = add_bus(n, f"{node} industry heat", "industry heat", c, node); atmo = atmosphere_bus(c); bio = f"solid biomass {c}"
-        for tech, carrier, ports, effs in [
-            ("electric boiler steam", "industry electric boiler", [node, hb], [cost(costs, "electric boiler steam", "efficiency")]),
-            ("industrial heat pump high temperature", "industry heat pump", [node, hb], [cost(costs, "industrial heat pump high temperature", "efficiency")]),
-            ("gas boiler steam", "industry gas boiler", [f"{node} gas", hb, atmo], [cost(costs, "gas boiler steam", "efficiency"), ef_gas]),
-            ("solid biomass boiler steam", "industry biomass boiler", [bio, hb], [cost(costs, "solid biomass boiler steam", "efficiency")])]:
-            eff = effs[0]
-            add_link(n, f"{node} {carrier}", c, carrier, ports, effs, capital_cost=cost(costs, tech, "fixed") * eff, marginal_cost=cost(costs, tech, "VOM") * eff,
-                     lifetime=cost(costs, tech, "lifetime"))
-            count += 1
-        eff = cost(costs, "solid biomass boiler steam", "efficiency")
-        add_link(n, f"{node} industry biomass boiler CC", c, "industry biomass boiler CC", [bio, hb, atmo, f"{node} co2 stored", node],
-                 [eff, -ef_bio * cc, ef_bio * cc, -cap_el * ef_bio * cc], capital_cost=cost(costs, "solid biomass boiler steam", "fixed") * eff + cap_fixed * ef_bio * cc,
-                 marginal_cost=cost(costs, "solid biomass boiler steam", "VOM") * eff, lifetime=cost(costs, "solid biomass boiler steam", "lifetime"), extra={"capture_cost_row": cap_row})
-        count += 1
-    return dict(buses=len(nodes), supply_links=count, options=["electric boiler", "high-temperature heat pump", "gas boiler", "biomass boiler", "biomass boiler CC"])
+    count = 0; mapping = []
+    for band in (("low", "medium", "high") if bands else ("low",)):
+        bus_carrier, sfx = HEAT_BAND_BUS[band]
+        for tech, carrier, fuel in HEAT_BAND_TECH[band]:
+            mapping.append(dict(band=band, technology_data_row=tech, link_carrier=carrier, input=fuel, efficiency=cost(costs, tech, "efficiency"),
+                                fixed_eur_per_mw_a=cost(costs, tech, "fixed"), vom_eur_per_mwh=cost(costs, tech, "VOM"), lifetime=cost(costs, tech, "lifetime"),
+                                capture=carrier.endswith(" CC")))
+        for node in nodes:
+            c = country_of(n, node); hb = add_bus(n, f"{node} {bus_carrier}", bus_carrier, c, node); atmo = atmosphere_bus(c); bio = f"solid biomass {c}"
+            for tech, carrier, fuel in HEAT_BAND_TECH[band]:
+                eff = cost(costs, tech, "efficiency"); name = f"{node} {carrier}{sfx}" if not carrier.endswith(" CC") else f"{node} {carrier[:-3]}{sfx} CC"
+                tag = {"heat_band": band} if bands else {}   # single-band networks stay as before M08b (no extra column)
+                if carrier.endswith(" CC"):   # biomass with capture: capture cost per t CO2 x EF x capture fraction (S2-5 rule, every band)
+                    add_link(n, name, c, carrier, [bio, hb, atmo, f"{node} co2 stored", node], [eff, -ef_bio * cc, ef_bio * cc, -cap_el * ef_bio * cc],
+                             capital_cost=cost(costs, tech, "fixed") * eff + cap_fixed * ef_bio * cc, marginal_cost=cost(costs, tech, "VOM") * eff,
+                             lifetime=cost(costs, tech, "lifetime"), extra={"capture_cost_row": cap_row, **tag})
+                else:
+                    ports, effs = {"electricity": ([node, hb], [eff]), "gas": ([f"{node} gas", hb, atmo], [eff, ef_gas]), "biomass": ([bio, hb], [eff])}[fuel]
+                    add_link(n, name, c, carrier, ports, effs, capital_cost=cost(costs, tech, "fixed") * eff, marginal_cost=cost(costs, tech, "VOM") * eff,
+                             lifetime=cost(costs, tech, "lifetime"), extra=tag or None)
+                count += 1
+    return dict(buses=len(nodes) * (3 if bands else 1), supply_links=count, bands=("low", "medium", "high") if bands else ("low",), technology_map=mapping,
+                options=["electric boiler", "high-temperature heat pump", "gas boiler", "biomass boiler", "biomass boiler CC"] + (["direct firing gas", "direct firing biomass", "direct firing biomass CC"] if bands else []),
+                excluded=("no electric heating in the high band: technology-data v0.15.0 has no electric direct firing / furnace row covering > 400 C; "
+                          "no hydrogen heating in any band: technology-data v0.15.0 has no hydrogen boiler / direct firing row (decision 133 rule)") if bands else "")
 
 
 # ----------------------------------------------------------------------------------------------
@@ -513,9 +579,23 @@ def _shares_for(shares, astar, country, sector):
     return s, (acc if (country, acc) in shares else ("IndustryFinalEnergy" if (country, "IndustryFinalEnergy") in shares else "Astar"))
 
 
+def biomass_overflow(industry_mwh: float, agriculture_mwh: float, potential_mwh: float, cap_share: float = 1.0, binding_ratio: float = 0.999):
+    """Fixed solid-biomass demand above the cap, taken from industry first, then agriculture (decision 36 split; biomass_overflow_rule keeps it).
+    The rule binds when the fixed demand is at or above binding_ratio x potential (BN, SG, VN before M08b); cap = cap_share x potential there
+    (S4L-5 / decision 115, methane mode only), else the potential. Returns (overflow_industry, overflow_agriculture, cap, binding)."""
+    before = industry_mwh + agriculture_mwh
+    binding = bool(potential_mwh > 0 and before >= binding_ratio * potential_mwh)
+    cap = cap_share * potential_mwh if (binding and cap_share < 1.0) else potential_mwh
+    overflow = max(0.0, before - cap)
+    ov_ind = min(overflow, industry_mwh)
+    return ov_ind, min(overflow - ov_ind, agriculture_mwh), cap, binding
+
+
 def demand_table_key(cfg):
     """Country allocation (decision 57) plus the growth method suffix (S3B R1, decision 66): ratio = main tables, level = *_level tables."""
     D = cfg["research"]["demand"]; key = str(D.get("country_allocation", "aeo8_ats_relative")); gm = str(D.get("growth_method", "ratio"))
+    if gm == "ats_anchor":   # M08b B1 (decision 134): one anchor table; demand_anchor_settings checks the companion switches
+        return "aeo8_ats_anchor"
     if gm not in ("ratio", "level"):
         raise ValueError("Unknown research.demand.growth_method " + gm)
     return key + ("_level" if gm == "level" else "")
@@ -541,6 +621,17 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     # bas_fixed = AEO8 BAS 2019 carrier shares x multiplier with the former 20 % low-temperature-heat assumption (comparison switch).
     carrier_mode = str(I.get("carrier_mode", "bas_fixed")); alloc_mode = demand_table_key(cfg)
     ne_mode = nonindustrial_electricity_mode(cfg)   # S4J-1 (decision 104): Astar base-load total
+    # M08b B2 (decision 133, registry biomass_overflow_rule): biomass_overflow_mode useful_heat = fixed solid biomass above the national potential becomes
+    # useful heat x efficiency in the band of its source (industry: medium / high by the source shares of the industry table, agriculture: low band);
+    # cap = potential (decision 115 withdrawn). methane = decision 36 rule with the S4L-5 / decision-115 cap share (historical: networks built before M08b).
+    ov_mode = str(I.get("biomass_overflow_mode", "methane"))
+    if ov_mode not in ("methane", "useful_heat"):
+        raise ValueError("Unknown research.s2.industry.biomass_overflow_mode " + ov_mode)
+    if ov_mode == "useful_heat" and "biomass_overflow_cap_share" in I:
+        raise ValueError("biomass_overflow_cap_share (decision 115) is withdrawn with biomass_overflow_mode useful_heat")
+    ov_heat_eff = float(I["biomass_overflow_useful_heat_efficiency"]) if ov_mode == "useful_heat" else None
+    anchors = demand_anchor_settings(cfg); output_rule = physical_output_settings(cfg, repo)   # M08b B1 (decision 134)
+    anchor_tab = pd.read_csv(repo / anchors["anchor_table"]).set_index("country") if anchors["growth_method"] == "ats_anchor" else None
     # S4L-5 (user-authorised diagnostic, 2026-10-19): cap share of the decision-36 overflow rule; 1.0 = main (cap = potential), 0.98 = diagnostic network only
     ov_cap_share = float(I.get("biomass_overflow_cap_share", 1.0)); ov_binding_ratio = float(I.get("biomass_overflow_binding_ratio", 0.999))
     if not 0.0 < ov_cap_share <= 1.0:
@@ -558,12 +649,17 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     # S4B-0 (S3B section 8 item 6): asean_own_2019 = the UNSD 2019 carrier composition of the ASEAN country's own other bucket, no conversion (tables
     # *_OTHER_ASEAN_OWN_2019.csv; implemented only, not run in the formal trial).
     other_bucket = str(((cfg["research"].get("s3") or {}).get("industry") or {}).get("other_bucket", "pypsa_eur_2050"))
-    if other_bucket not in ("pypsa_eur_2050", "idees_today", "asean_own_2019"):
+    if other_bucket not in ("pypsa_eur_2050", "idees_today", "asean_own_2019", "useful_heat_bands"):
         raise ValueError("Unknown research.s3.industry.other_bucket " + other_bucket)
     if other_bucket == "idees_today":
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_IDEES_TODAY.csv")
     elif other_bucket == "asean_own_2019":
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_ASEAN_OWN_2019.csv")
+    elif other_bucket == "useful_heat_bands":   # M08b B2 (decision 133): other-bucket fuels -> useful heat in three temperature bands
+        ind_path = ind_path.with_name(ind_path.stem + "_OTHER_USEFUL_HEAT_BANDS.csv")
+    heat_bands = bool(I.get("heat_bands"))
+    if (ov_mode == "useful_heat" or other_bucket == "useful_heat_bands") and not heat_bands:
+        raise ValueError("useful-heat demand (other_bucket useful_heat_bands / biomass_overflow_mode useful_heat) needs research.s2.industry.heat_bands")
     ind_summary = pd.read_csv(ind_path).set_index("country")
     # S3-0 interim handling of the ratio ammonia/methanol rows: convert_to_h2_and_gas = ammonia -> H2 + electricity (PyPSA-Eur ammonia:false route,
     # config MWh_H2_per_tNH3_electrolysis 5.93 / MWh_elec_per_tNH3_electrolysis 0.2473 per 5.166 MWh_NH3, lines 849/852/853), methanol -> methane +
@@ -574,7 +670,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         raise ValueError("Unknown research.s2.industry.ammonia_methanol_mode " + am_mode)
     NH3_H2, NH3_EL = 5.93 / 5.166, 0.2473 / 5.166
     MEOH_CH4, MEOH_EL = 10.25 / 5.528, 0.167 / 5.528
-    overflow_ledger, hydrogen_ledger, am_ledger = {}, {}, {}
+    overflow_ledger, hydrogen_ledger, am_ledger, anchor_checks = {}, {}, {}, []
     # R2 (decision 56): feedstock carbon. territorial = EDGAR 2.B+2.D on the process bus + domestic plastics burned (s2b_feedstock.py);
     # full_release = PyPSA-Eur default (all feedstock carbon released) as implemented in S2.
     fc_mode = str(I.get("feedstock_carbon_mode", "full_release"))
@@ -698,6 +794,10 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             ind_car = {"coal": float(m["pe_coal_mwh"]), "oil": float(m["pe_oil_mwh"]), "gas": float(m["pe_gas_mwh"]) - ov_summary, "biomass": float(m["pe_biomass_before_overflow_mwh"]),
                        "electricity": float(m["pe_electricity_mwh"]), "hydrogen": float(m["pe_hydrogen_mwh"]), "heat": float(m["pe_heat_mwh"]),
                        "ammonia": float(m["pe_ammonia_mwh"]) if "pe_ammonia_mwh" in m.index else 0.0, "methanol": float(m["pe_methanol_mwh"]) if "pe_methanol_mwh" in m.index else 0.0}
+            for band in ("medium", "high"):   # M08b B2: useful-heat bands of the other bucket (only in *_OTHER_USEFUL_HEAT_BANDS tables)
+                ind_car[f"heat_{band}"] = float(m[f"pe_heat_{band}_mwh"]) if f"pe_heat_{band}_mwh" in m.index else 0.0
+            ov_band = ({"medium": float(m["biomass_source_band_medium_share"]), "high": float(m["biomass_source_band_high_share"])}
+                       if "biomass_source_band_high_share" in m.index else {"medium": 1.0, "high": 0.0})   # source band of the fixed industrial biomass (grade C)
             if am_mode == "convert_to_h2_and_gas":
                 am_ledger[c] = dict(mode=am_mode, ammonia_mwh=ind_car["ammonia"], methanol_mwh=ind_car["methanol"], to_hydrogen_mwh=ind_car["ammonia"] * NH3_H2,
                                     to_gas_mwh=ind_car["methanol"] * MEOH_CH4, to_electricity_mwh=ind_car["ammonia"] * NH3_EL + ind_car["methanol"] * MEOH_EL)
@@ -713,30 +813,43 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             ind_car = {carrier: float(v) * (1 - s_lt) for carrier, v in ind.groupby("carrier").v.sum().items()}
             ind_car["heat"] = float(ind.v.sum()) * s_lt * boiler_eff; ind_car["electricity"] = 0.0; ind_car["hydrogen"] = 0.0
             src_ind = f"{c}:IndustryFinalEnergy"; heat_src = "IndustryFinalEnergy x low_temperature_heat_share x boiler_eff"
+            ov_band = {"medium": 1.0, "high": 0.0}
         # decision 36 / R1.6: fixed solid-biomass demand above the national main potential moves to methane at equal heat (industry first, then agriculture)
         ag_rows = d[(d.sector == "AgricultureOthers") & (d.carrier == "biomass")]
         ag_bio = float(ag_rows.v.sum())
         pot_c = float(n.stores[(n.stores.bus == f"solid biomass {c}") & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
         bio_before = ind_car.get("biomass", 0.0) + ag_bio
-        ov_binding = bool(pot_c > 0 and bio_before >= ov_binding_ratio * pot_c)   # the decision-36 rule binds: fixed biomass demand at or above the potential (BN, SG, VN)
-        cap_c = ov_cap_share * pot_c if (ov_binding and ov_cap_share < 1.0) else pot_c   # S4L-5 diagnostic: 0.98 x potential for the binding countries, same rule for the remainder
-        overflow = max(0.0, bio_before - cap_c)
-        ov_ind = min(overflow, ind_car.get("biomass", 0.0)); ov_ag = min(overflow - ov_ind, ag_bio)
+        ov_ind, ov_ag, cap_c, ov_binding = biomass_overflow(ind_car.get("biomass", 0.0), ag_bio, pot_c, ov_cap_share, ov_binding_ratio)
+        overflow = ov_ind + ov_ag
         ind_car["biomass"] = ind_car.get("biomass", 0.0) - ov_ind
+        to_gas = ov_mode == "methane"
         overflow_ledger[c] = dict(solid_biomass_potential_mwh=pot_c, industry_biomass_before_mwh=ind_car.get("biomass", 0.0) + ov_ind, agriculture_biomass_before_mwh=ag_bio,
-                                  overflow_industry_to_gas_mwh=ov_ind, overflow_agriculture_to_gas_mwh=ov_ag, mode=carrier_mode,
-                                  cap_share=ov_cap_share, binding=ov_binding, cap_mwh=cap_c, fixed_biomass_after_mwh=bio_before - overflow)
+                                  overflow_industry_to_gas_mwh=ov_ind if to_gas else 0.0, overflow_agriculture_to_gas_mwh=ov_ag if to_gas else 0.0, mode=carrier_mode,
+                                  cap_share=ov_cap_share, binding=ov_binding, cap_mwh=cap_c, fixed_biomass_after_mwh=bio_before - overflow, overflow_mode=ov_mode,
+                                  overflow_industry_mwh=ov_ind, overflow_agriculture_mwh=ov_ag,
+                                  useful_heat_mwh=({"medium": ov_ind * ov_heat_eff * ov_band["medium"], "high": ov_ind * ov_heat_eff * ov_band["high"], "low": ov_ag * ov_heat_eff}
+                                                   if not to_gas else None), useful_heat_efficiency=ov_heat_eff, source_band_shares=ov_band if not to_gas else None,
+                                  heat_bands_mwh={b: ind_car.get(f"heat_{b}", 0.0) for b in ("medium", "high")})
         hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
         for node, s in sh.items():
             if s <= 0:
                 continue
             if ind_car.get("heat", 0.0) * s > 0:
                 plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * s, heat_src, f"{node} industry heat demand")
+            for band in ("medium", "high"):   # M08b B2: other-bucket useful heat, carrier chosen by the model among the band's technology-data options
+                if ind_car.get(f"heat_{band}", 0.0) * s > 0:
+                    plain_load(node, c, "Industry", f"IndustryHeat{band.capitalize()}", f"industry heat {band}", f"{node} industry heat {band}", ind_car[f"heat_{band}"] * s,
+                               f"{src_ind}:heat_{band} (other bucket fuels x JRC-IDEES OIS band share x useful-heat efficiency)", f"{node} industry heat {band} demand")
             for carrier in ["coal", "oil", "gas", "biomass", "unclassified_fuel"]:
                 v = ind_car.get(carrier, 0.0)
                 if v * s > 0:
                     meter_load(node, c, "industry", carrier, v * s, f"{src_ind}:{carrier}", "IndustryFinalEnergy")
-            if ov_ind * s > 0:
+            if ov_ind * s > 0 and ov_mode == "useful_heat":   # M08b B2: industrial overflow -> useful heat in its source band (medium / high)
+                for band in ("medium", "high"):
+                    if ov_ind * ov_heat_eff * ov_band[band] * s > 0:
+                        plain_load(node, c, "Industry", "IndustryBiomassOverflowUsefulHeat", f"industry heat {band}", f"{node} industry heat {band}", ov_ind * ov_heat_eff * ov_band[band] * s,
+                                   f"{c}:IndustryBiomass above the solid-biomass potential x {ov_heat_eff} -> useful heat {band} (biomass_overflow_rule)", f"{node} industry overflow heat {band} demand")
+            elif ov_ind * s > 0:
                 meter_load(node, c, "industry overflow", "gas", ov_ind * s, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
             if ind_car.get("electricity", 0.0) * s > 0:
                 plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * s, f"{src_ind}:electricity", f"{node} industry electricity demand")
@@ -808,7 +921,10 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 elif carrier == "biomass":
                     if (v - ov_ag) * s > 0:
                         meter_load(node, c, "agriculture", "biomass", (v - ov_ag) * s, f"{c}:AgricultureFinalEnergy:biomass", "AgricultureFinalEnergy")
-                    if ov_ag * s > 0:
+                    if ov_ag * s > 0 and ov_mode == "useful_heat":   # M08b B2: agricultural overflow -> low-temperature useful heat
+                        plain_load(node, c, "AgricultureOthers", "AgricultureBiomassOverflowUsefulHeat", "industry heat", f"{node} industry heat", ov_ag * ov_heat_eff * s,
+                                   f"{c}:AgricultureFinalEnergy:biomass above the solid-biomass potential x {ov_heat_eff} -> useful heat low (biomass_overflow_rule)", f"{node} agriculture overflow heat demand")
+                    elif ov_ag * s > 0:
                         meter_load(node, c, "agriculture overflow", "gas", ov_ag * s, f"{c}:AgricultureFinalEnergy:biomass -> gas (above solid-biomass potential, decision 36)", "AgricultureBiomassOverflowToGas")
                 else:
                     meter_load(node, c, "agriculture", carrier, v * s, f"{c}:AgricultureFinalEnergy:{carrier}", "AgricultureFinalEnergy")
@@ -836,7 +952,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                  extra={"process_share": f_process, "end_of_life_release": eol_release, "feedstock_carbon_mode": "full_release"})
                 plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, f"{c}:NonEnergy:{carrier} x HVC primary {scale if carrier == 'oil' else 1.0}", f"{node} feedstock {carrier} demand")
         # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
-        pe_sfx = "_level" if alloc_mode.endswith("_level") else ""   # S3B R1: level growth method uses the level process-emission rows
+        pe_sfx = "_level" if alloc_mode.endswith("_level") else ("_ats_anchor" if alloc_mode == "aeo8_ats_anchor" else "")   # S3B R1 level rows; M08b B1 anchor rows
         proc = sum(float(reg.loc[f"process_emissions_{g}_2050{pe_sfx}_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
         fc_row = fc_table.loc[c] if c in fc_table.index else None
         proc_feed = float(fc_row["process_2B_2D_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
@@ -886,6 +1002,13 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             target = float(sum(by_sector.values()))
             if astar_total <= 0 and target > 0:
                 raise ValueError("No Astar shape for the table-sector electricity of " + c)
+            if anchor_tab is not None:   # M08b B1: the base load equals the AEO8 ATS anchor (buildings + agriculture + 2019 transport electricity)
+                want_bl = float(anchor_tab.at[c, "base_load_anchor_mwh"]); tr_tab = float(d[d.sector == "Transport"].v.sum()); want_tr = float(anchor_tab.at[c, "transport_anchor_mwh"])
+                for what, got, want in (("base load", target, want_bl), ("transport", tr_tab, want_tr)):
+                    if abs(got - want) > 1e-9 * max(1.0, abs(want)):
+                        raise ValueError(f"{c}: {what} {got} MWh differs from the ATS anchor {want} MWh")
+                anchor_checks.append(dict(country=c, base_load_mwh=target, base_load_anchor_mwh=want_bl, transport_table_mwh=tr_tab, transport_anchor_mwh=want_tr,
+                                          industry_multiplier=float(anchor_tab.at[c, "industry_multiplier"])))
             factor = target / astar_total if astar_total > 0 else 1.0
             for l in astar_c:
                 if l in pset:
@@ -909,7 +1032,9 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, nonindustrial_electricity=ne_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
                   industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,
-                                hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger),
+                                hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger, other_bucket=other_bucket, heat_bands=heat_bands, biomass_overflow_mode=ov_mode,
+                                physical_output=output_rule),
+                  anchors=dict(settings=anchors, checks=anchor_checks),
                   feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))
     return ledger
 
