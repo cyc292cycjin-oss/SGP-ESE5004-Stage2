@@ -59,6 +59,10 @@ def main():
         dp = pd.read_csv(pop_path); mult_pop = dp[dp.sector == "Industry"].groupby("country").multiplier_total.first().to_dict()
     lvl_path = DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv"   # S3B R1: level growth method (sensitivity)
     dl = pd.read_csv(lvl_path); mult_lvl = dl[dl.sector == "Industry"].groupby("country").multiplier_total.first().to_dict()
+    # M08b B1 (decision 134): growth_method ats_anchor - 2.A.1 (cement) follows the physical cement output of s3_0_industry.py (clinker per t cement
+    # unchanged), every other code the ATS industry multiplier of the anchor table (m08b_demand.py); run after s3_0_industry.py
+    da = pd.read_csv(DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv"); mult_anc = da[da.sector == "Industry"].groupby("country").multiplier_total.first().to_dict()
+    cem_anc = pd.read_csv(DEMAND_DIR / "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor.csv").set_index("country")
     prod = pd.read_csv(REG_DIR / "FOSSIL_PRODUCTION_CAPS_2050.csv")
     prod_mwh = {(r.country, r.carrier): float(r.cap_mwh_per_year) for r in prod.itertuples()}
     reg = Registry(SCRIPT)
@@ -71,8 +75,19 @@ def main():
             comp = "; ".join(f"{r.ipcc_code_2006_for_standard_report} {r.kt_CO2_2019:.3f} kt" for r in e[e.ipcc_code_2006_for_standard_report.isin(codes)].itertuples()) or "no EDGAR row (0)"
             status = "REGISTERED" if v19 > 0 else "SOURCE_ZERO"
             in_bus = g != "chemicals"
+            if g == "minerals":
+                v_cem = val(["2.A.1"]); c19 = float(cem_anc.at[c, "cement_2019_t"]); c50 = float(cem_anc.at[c, "cement_2050_t"])
+                v50_anc = v_cem * (c50 / c19 if c19 > 0 else 0.0) + (v19 - v_cem) * mult_anc[c]
+                anc_rule = f"2.A.1 {v_cem:.4g} t x cement 2050 / 2019 ({c50:.4g} / {c19:.4g} t, physical output rule) + other 2.A {v19 - v_cem:.4g} t x ATS industry multiplier {mult_anc[c]:.4f}"
+            else:
+                v50_anc = v19 * mult_anc[c]; anc_rule = f"2019 x ATS industry multiplier {mult_anc[c]:.4f}"
+            reg.add(f"process_emissions_{g}_2050_ats_anchor_{c}", f"{c} {g} process CO2 2050 with growth_method ats_anchor (M08b B1) = {anc_rule}"
+                    + ("" if in_bus else "; chemicals (2.B) are covered by the feedstock-carbon accounting and are not loaded on the process bus"),
+                    v50_anc, "tCO2/a", "B", "EDGAR 2025 x M08b ATS anchor (DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv, INDUSTRY_2050_SUMMARY_aeo8_ats_anchor.csv)",
+                    "process_emissions_*_2019 x anchor multipliers; s2_0_process_emissions.py", sha, country=c, decision_ref="134, 129, 10",
+                    status=("REGISTERED" if in_bus else "REFERENCE_ONLY") if v19 > 0 else "SOURCE_ZERO")
             proc_rows.append(dict(country=c, group=g, ipcc_codes="+".join(codes), tco2_2019=v19, industry_multiplier=mult[c], tco2_2050=v50,
-                                  tco2_2050_pop_sensitivity=(v19 * mult_pop[c]) if mult_pop else "", tco2_2050_level_sensitivity=v19 * mult_lvl[c], components=comp,
+                                  tco2_2050_pop_sensitivity=(v19 * mult_pop[c]) if mult_pop else "", tco2_2050_level_sensitivity=v19 * mult_lvl[c], tco2_2050_ats_anchor=v50_anc, components=comp,
                                   model_treatment="process emission bus (capturable by process CC)" if in_bus else "covered by feedstock-carbon accounting (not added to the process bus; method question)"))
             reg.add(f"process_emissions_{g}_2019_{c}", f"{c} {g} process CO2 2019 (EDGAR 2025 IPCC 2006 {'+'.join(codes)}: {comp})", v19, "tCO2/a", "B",
                     "EDGAR_2025_GHG IEA-EDGAR CO2 v4, sheet IPCC 2006, 2019; " + LICENCE, f"extraction {EXT} rows {c} {'/'.join(codes)}", sha, country=c,

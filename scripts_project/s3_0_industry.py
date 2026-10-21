@@ -17,6 +17,9 @@ Per country and allocation variant (R3 tables):
   * Low-temperature heat = the ratio "heat" rows (industrial low-temperature heat bus).
   * Biomass above the national potential -> methane (decision 36); coal retention listed.
 The former technology-data based steel/cement ratios (S2B) are written as the sensitivity file *_TD_SENSITIVITY.csv.
+M08b (decisions 133, 134): mode aeo8_ats_anchor (ATS activity anchors, m08b_demand.py) takes steel / cement 2050 tonnes from the physical output
+rule table; other-bucket variant useful_heat_bands (*_OTHER_USEFUL_HEAT_BANDS.csv) turns the other-bucket fuels into useful heat in four
+temperature bands (m08b_heat_bands.py; supplement 01: medium split at 200 C) and leaves the biomass overflow to the build (useful heat instead of methane).
 
     python scripts_project/s3_0_industry.py
 """
@@ -37,7 +40,16 @@ RATIOS = REG_DIR / "INDUSTRY_SECTOR_RATIOS_PYPSA_EUR_2050.csv"
 TODAY = REG_DIR / "INDUSTRY_SECTOR_RATIOS_TODAY_EU27_2019.csv"
 ALLOCATIONS = {"aeo8_ats_relative": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", "gdp": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv",
                "population": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv",
-               "aeo8_ats_relative_level": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv"}   # S3B R1: level growth method (sensitivity)
+               "aeo8_ats_relative_level": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv",   # S3B R1: level growth method (sensitivity)
+               "aeo8_ats_anchor": "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv"}   # M08b B1 (decision 134): AEO8 ATS activity anchors (m08b_demand.py)
+# M08b B1: modes whose steel / cement 2050 tonnes come from the physical output rule (min(growth, per-capita saturation, plan cap); m08b_demand.py)
+# instead of 2019 x industry multiplier
+OUTPUT_RULE_TABLES = {"aeo8_ats_anchor": DEMAND_DIR / "INDUSTRY_OUTPUT_2050_M08B.csv"}
+# M08b B2 (decision 133): other-bucket variant useful_heat_bands - fuels split by the JRC-IDEES-2021 OIS process shares (m08b_heat_bands.py) into
+# useful heat x HEAT_EFF by band (low on the existing industry heat bus) and mechanical fuel (kept); other-bucket electricity kept as electricity
+HEAT_BANDS = DEMAND_DIR / "INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv"
+HEAT_EFF = 0.90   # fuel -> useful heat (registry existing_boiler_efficiency; technology-data solid biomass boiler steam 0.90; biomass_overflow_rule)
+HEAT_BAND_USES = ("low", "medium_a", "medium_b", "high")   # supplement 01 section 2: medium split at 200 C into A (150-200 C) and B (200-400 C)
 CARRIERS = ["coal", "oil", "gas", "biomass", "electricity"]
 FUELS = ["coal", "oil", "gas", "biomass"]
 OUT_CARRIERS = ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat", "ammonia", "methanol"]
@@ -48,8 +60,8 @@ PE = dict(St_primary_fraction=0.3, DRI_fraction=1.0, MWh_CH4_per_tNH3_SMR=10.8, 
           MWh_H2_per_tCl=-0.9372, methanol_production_today=1.5, MWh_elec_per_tMeOH=0.167, MWh_CH4_per_tMeOH=10.25, HVC_production_today=52.0)
 OIS_TODAY = REG_DIR / "INDUSTRY_OIS_TODAY_CARRIERS_EU27_2019.csv"   # S3B R2 (decision 67): scripts_project/s3b_r2_ois_today.py
 OTHER_BUCKET_MODES = ["pypsa_eur_2050", "idees_today"]
-OTHER_BUCKET_SUFFIX = {"pypsa_eur_2050": "", "idees_today": "_OTHER_IDEES_TODAY", "asean_own_2019": "_OTHER_ASEAN_OWN_2019"}
-SUMMARY_MODES = OTHER_BUCKET_MODES + ["asean_own_2019"]   # S4B-0 (S3B section 8 item 6): UNSD 2019 own carrier composition of the other bucket (tables only; not in INDUSTRY_2050_OTHER_BUCKET.csv)
+OTHER_BUCKET_SUFFIX = {"pypsa_eur_2050": "", "idees_today": "_OTHER_IDEES_TODAY", "asean_own_2019": "_OTHER_ASEAN_OWN_2019", "useful_heat_bands": "_OTHER_USEFUL_HEAT_BANDS"}
+SUMMARY_MODES = OTHER_BUCKET_MODES + ["asean_own_2019", "useful_heat_bands"]   # S4B-0 (S3B section 8 item 6): UNSD 2019 own carrier composition of the other bucket (tables only; not in INDUSTRY_2050_OTHER_BUCKET.csv); M08b B2 useful heat bands
 RATIO_EVIDENCE = REG_DIR / "INDUSTRY_SECTOR_RATIOS_EVIDENCE.json"   # EU27 ammonia 2019 (USGS T12 via the reproduced PyPSA-Eur build_ammonia_production)
 # UNSD sub-sector -> PyPSA-Eur sectors (weights = EU27 2019 final energy of the mapped sectors unless stated). Grade C mapping.
 MAPPING = {
@@ -123,10 +135,15 @@ def main():
     s2b_path = DEMAND_DIR / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative_S2B_FROZEN.csv"   # S2B result frozen from commit 8d61bd37 (s2b_industry.py) -> comparison column
     s2b_summary = pd.read_csv(s2b_path).set_index("country").to_dict("index"); s2b_sha = sha256(s2b_path)
     outputs, gaps, other_rows, outputs_today = {}, [], [], {}
+    out_rule = {m: pd.read_csv(p).set_index("country") for m, p in OUTPUT_RULE_TABLES.items()}
+    hb = pd.read_csv(HEAT_BANDS).set_index("carrier"); hb_sha = sha256(HEAT_BANDS)
+    band_share = {car: {u: float(hb.at[car, f"share_{u}"]) for u in HEAT_BAND_USES + ("mechanical",)} for car in FUELS}
+    medium_a_fraction = float(hb.medium_a_fraction.iloc[0])   # 200 C split of the medium band (m08b_heat_bands.py; supplement 01 section 2)
     reg = Registry(SCRIPT)
     for mode, fname in ALLOCATIONS.items():
         dem = pd.read_csv(DEMAND_DIR / fname, keep_default_na=False)
         rows, summaries, tds = [], {ob: [] for ob in SUMMARY_MODES}, {ob: [] for ob in SUMMARY_MODES}
+        rule = out_rule.get(mode)
         summary, td_rows = summaries["pypsa_eur_2050"], tds["pypsa_eur_2050"]
         for c in ASEAN:
             d = dem[(dem.country == c) & (dem.sector == "Industry")]
@@ -189,7 +206,8 @@ def main():
                 steel_src = "no UNSD iron-and-steel row: 2019 energy = worldsteel activity x PyPSA-Eur Integrated steelworks / Electric arc ratios, taken from other (grade C)"
                 if crude > 0:
                     gaps.append(dict(mode=mode, country=c, item="no UNSD iron-and-steel row; 2019 steel energy derived (grade C)", carrier="all", mwh=sum(want_steel.values())))
-            prod50 = crude * mult; primary = PE["St_primary_fraction"] * prod50; dri = PE["DRI_fraction"] * primary; secondary = prod50 - primary
+            prod50 = crude * mult if rule is None else float(rule.at[c, "steel_2050_mt"]) * 1e6   # M08b: physical output rule (base 2024)
+            primary = PE["St_primary_fraction"] * prod50; dri = PE["DRI_fraction"] * primary; secondary = prod50 - primary
             steel50 = {oc: fut["DRI + Electric arc"][oc] * dri + fut["Electric arc"][oc] * secondary for oc in OUT_CARRIERS}
             # ---- cement (physical) --------------------------------------------------------------------------
             clk19 = clinker_kt[c] * 1e3 / EF_CLINKER; cem_t19 = clk19 / cf_ck
@@ -209,7 +227,7 @@ def main():
                 cem19 = take(sub19["other"], spread(fuel19, el19, sub19["other"]), "cement 2019 derived energy exceeds the other bucket"); nmm_rest19 = {car: 0.0 for car in CARRIERS}
                 if clk19 > 0:
                     gaps.append(dict(mode=mode, country=c, item="no UNSD NMM row; 2019 cement energy derived (grade C)", carrier="all", mwh=fuel19 + el19))
-            cem_t50 = cem_t19 * mult
+            cem_t50 = cem_t19 * mult if rule is None else float(rule.at[c, "cement_2050_mt"]) * 1e6   # M08b: physical output rule (base 2023)
             cement50 = {oc: fut["Cement"][oc] * cem_t50 for oc in OUT_CARRIERS}
             # ---- other sub-sectors: energy fallback with mapped ratios -----------------------------------------
             rest50 = {oc: 0.0 for oc in OUT_CARRIERS}; rest19 = {car: 0.0 for car in CARRIERS}; detail = []
@@ -231,6 +249,7 @@ def main():
             # UNSD sub-sectors mapped to "Other industrial sectors" (other, construction, mining and quarrying) keep the JRC-IDEES-2021 EU27 2019 carrier
             # structure of that sector (no process switch, efficiency factor 1); every other sub-sector, steel and cement unchanged.
             rest50_today = {oc: 0.0 for oc in OUT_CARRIERS}; other19 = {car: 0.0 for car in CARRIERS}
+            rest50_nonother = {oc: 0.0 for oc in OUT_CARRIERS}   # M08b B2: energy fallback outside the other bucket (PyPSA-Eur 2050 routes kept)
             other50 = {ob: {oc: 0.0 for oc in OUT_CARRIERS} for ob in OTHER_BUCKET_MODES}
             for s_ in subs:
                 src_bucket = sub19[s_] if s_ != "non-metallic minerals" else nmm_rest19
@@ -250,6 +269,7 @@ def main():
                     else:
                         for oc in OUT_CARRIERS:
                             rest50_today[oc] += e_main * m_["future_shares"][oc]
+                            rest50_nonother[oc] += e_main * m_["future_shares"][oc]
             # ---- S4B-0 (S3B section 8 item 6): other-bucket variant asean_own_2019 -------------------------------------------
             # UNSD sub-sectors of the other bucket keep the country's own UNSD 2019 carrier composition (coal/oil/gas/biomass/electricity) x industry multiplier,
             # no conversion and no efficiency factor; every other sub-sector, steel and cement unchanged.
@@ -267,6 +287,28 @@ def main():
                     else:
                         for oc in OUT_CARRIERS:
                             rest50_own[oc] += e_sub * share * mult * eff * m_["future_shares"][oc]
+            # ---- M08b B2 (decision 133): other-bucket variant useful_heat_bands ----------------------------------------------------------
+            # other-bucket fuels x multiplier split by the JRC-IDEES OIS process shares: heat uses -> useful heat x HEAT_EFF in four bands
+            # (low on the industry heat bus, medium A 150-200 C / medium B 200-400 C (supplement 01 section 2) / high on the band buses), diesel
+            # motors -> the fuel stays a final-energy demand; other-bucket electricity x multiplier stays electricity; every other sub-sector, steel
+            # and cement unchanged (PyPSA-Eur 2050 routes)
+            uh = {u: 0.0 for u in HEAT_BAND_USES}; mech = {car: 0.0 for car in FUELS}; heat_fuel = 0.0
+            for car in FUELS:
+                e50 = other19[car] * mult
+                for u in uh:
+                    uh[u] += e50 * band_share[car][u] * HEAT_EFF
+                    heat_fuel += e50 * band_share[car][u]
+                mech[car] += e50 * band_share[car]["mechanical"]
+            rest50_heat = dict(rest50_nonother)
+            rest50_heat["electricity"] += other19["electricity"] * mult
+            for car in FUELS:
+                rest50_heat[car] += mech[car]
+            rest50_heat["heat"] += uh["low"]
+            heat_extra = dict(other_fuel_2050_mwh=sum(other19[car] for car in FUELS) * mult, other_heat_fuel_2050_mwh=heat_fuel, useful_heat_efficiency=HEAT_EFF,
+                              **{f"other_heat_{u}_mwh": uh[u] for u in HEAT_BAND_USES},
+                              other_electricity_2050_mwh=other19["electricity"] * mult, **{f"other_mechanical_{car}_mwh": mech[car] for car in FUELS},
+                              **{f"pe_heat_{u}_mwh": uh[u] for u in HEAT_BAND_USES if u != "low"}, medium_a_fraction=medium_a_fraction,
+                              heat_bands_source=f"JRC-IDEES-2021 OIS 2019 ({HEAT_BANDS.name} {hb_sha[:12]})")
             e19_tot = sum(e19.values())
             other_rows.append(dict(mode=mode, country=c, industry_2019_mwh=e19_tot, other_2019_mwh=sum(other19.values()),
                                    other_share_of_industry_2019=(sum(other19.values()) / e19_tot if e19_tot else 0.0), industry_multiplier=mult,
@@ -274,10 +316,14 @@ def main():
                                    **{f"other_2050_{ob}_{oc}_mwh": other50[ob][oc] for ob in OTHER_BUCKET_MODES for oc in OUT_CARRIERS}))
             # ---- technology-data sensitivity (S2B method) for steel/cement, other sub-sectors as above ---------------
             td_steel = {oc: 0.0 for oc in OUT_CARRIERS}; td_steel["hydrogen"] = 1.7 * dri; td_steel["electricity"] = 0.322 * dri + EAF_EL_TD * (dri + secondary)
-            td_cement = {oc: 0.0 for oc in OUT_CARRIERS}; td_cement["gas"] = (ck_heat + ck_gas) * clk19 * mult; td_cement["electricity"] = (ck_el + cf_el / cf_ck) * clk19 * mult
+            td_cement = {oc: 0.0 for oc in OUT_CARRIERS}
+            if rule is None:
+                td_cement["gas"] = (ck_heat + ck_gas) * clk19 * mult; td_cement["electricity"] = (ck_el + cf_el / cf_ck) * clk19 * mult
+            else:   # M08b: clinker 2050 = cement 2050 (physical output rule) x clinker-input
+                clk50 = cem_t50 * cf_ck; td_cement["gas"] = (ck_heat + ck_gas) * clk50; td_cement["electricity"] = (ck_el + cf_el / cf_ck) * clk50
             s2b = s2b_summary.get(c, {})
-            for ob, rest in (("pypsa_eur_2050", rest50), ("idees_today", rest50_today), ("asean_own_2019", rest50_own)):
-                main_ob = ob == "pypsa_eur_2050"
+            for ob, rest in (("pypsa_eur_2050", rest50), ("idees_today", rest50_today), ("asean_own_2019", rest50_own), ("useful_heat_bands", rest50_heat)):
+                main_ob = ob == "pypsa_eur_2050"; heat_ob = ob == "useful_heat_bands"
                 pe = {oc: rest[oc] + steel50[oc] + cement50[oc] for oc in OUT_CARRIERS}
                 if pe["hydrogen"] < 0:   # chlorine H2 by-product (ratio -0.9372 MWh_H2/t Cl) exceeds the H2 uses: no net industrial H2 demand, by-product not credited (logged)
                     if main_ob:
@@ -286,7 +332,11 @@ def main():
                 bas = {car: e19[car] * mult for car in CARRIERS}
                 pot = float(solid_pot.get(c, 0.0)); overflow = max(0.0, pe["biomass"] + ag_bio_50 - pot)
                 ov_ind = min(overflow, pe["biomass"]); ov_ag = min(overflow - ov_ind, ag_bio_50)
-                pe_final = dict(pe); pe_final["biomass"] -= ov_ind; pe_final["gas"] += ov_ind
+                pe_final = dict(pe)
+                if heat_ob:   # M08b B2: the overflow becomes useful heat in the build (s2_layers biomass_overflow_mode useful_heat), not methane here
+                    ov_gas_ind = ov_gas_ag = 0.0
+                else:
+                    pe_final["biomass"] -= ov_ind; pe_final["gas"] += ov_ind; ov_gas_ind, ov_gas_ag = ov_ind, ov_ag
                 td = {oc: rest[oc] + td_steel[oc] + td_cement[oc] for oc in OUT_CARRIERS}
                 if main_ob:
                     for s_, dd19, dd50, src in [("iron and steel", steel19, steel50, steel_src), ("cement", cem19, cement50, nmm_src)]:
@@ -298,13 +348,21 @@ def main():
                                           clinker_2019_t=clk19, cement_2019_t=cem_t19, cement_2050_t=cem_t50, unsd_subsector_rows_present=";".join(present),
                                           **{f"bas_{car}_mwh": bas[car] for car in CARRIERS}, bas_hydrogen_mwh=0.0, bas_heat_mwh=0.0, bas_ammonia_mwh=0.0, bas_methanol_mwh=0.0,
                                           **{f"pe_{oc}_mwh": pe_final[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=pe["biomass"],
-                                          biomass_overflow_industry_to_gas_mwh=ov_ind, biomass_overflow_agriculture_to_gas_mwh=ov_ag, solid_biomass_potential_main_mwh=pot, agriculture_biomass_2050_mwh=ag_bio_50,
+                                          biomass_overflow_industry_to_gas_mwh=ov_gas_ind, biomass_overflow_agriculture_to_gas_mwh=ov_gas_ag, solid_biomass_potential_main_mwh=pot, agriculture_biomass_2050_mwh=ag_bio_50,
                                           coal_retained_2050_mwh=pe_final["coal"], coal_retained_in=({"pypsa_eur_2050": "mapped PyPSA-Eur ratios (coal/coke rows: none in 2050 except Integrated steelworks, not used)",
                                                                                                       "idees_today": "other bucket with the JRC-IDEES-2021 EU27 2019 carrier structure (solids, derived gases)",
-                                                                                                      "asean_own_2019": "other bucket with the country's own UNSD 2019 carrier composition (no conversion)"}[ob] if pe_final["coal"] > 0 else ""),
+                                                                                                      "asean_own_2019": "other bucket with the country's own UNSD 2019 carrier composition (no conversion)",
+                                                                                                      "useful_heat_bands": "other-bucket diesel / solid-fuel motors kept as fuel (mechanical use)"}[ob] if pe_final["coal"] > 0 else ""),
                                           **{f"s2b_td_{oc}_mwh": float(s2b.get(f"pe_{oc}_mwh", 0.0)) for oc in ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat"]},
                                           **{f"td_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, other_bucket=ob))
                 tds[ob].append(dict(country=c, **{f"pe_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=td["biomass"], biomass_overflow_industry_to_gas_mwh=0.0, biomass_overflow_agriculture_to_gas_mwh=0.0))
+                if heat_ob:   # band columns; fixed industrial biomass is cement kiln fuel (high band) or steam / drying use in the route sectors (medium band,
+                    # split at 200 C with the same fraction as the other bucket: supplement 01 section 2), grade C
+                    for row, bio in ((summaries[ob][-1], pe["biomass"]), (tds[ob][-1], td["biomass"])):
+                        hi = min(1.0, cement50["biomass"] / bio) if bio > 0 else 0.0; med = 1.0 - hi if bio > 0 else 0.0
+                        row.update(heat_extra, biomass_overflow_industry_mwh=ov_ind if row is summaries[ob][-1] else 0.0, biomass_overflow_agriculture_mwh=ov_ag if row is summaries[ob][-1] else 0.0,
+                                   biomass_source_band_medium_a_share=med * medium_a_fraction, biomass_source_band_medium_b_share=med * (1.0 - medium_a_fraction),
+                                   biomass_source_band_high_share=hi)
         outputs[mode] = summary
         write_csv(rows, DEMAND_DIR / f"INDUSTRY_2050_PYPSA_EUR_{mode}.csv", list(rows[0].keys()))
         write_csv(summary, DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}.csv", list(summary[0].keys()))
@@ -315,6 +373,9 @@ def main():
         sfx_own = OTHER_BUCKET_SUFFIX["asean_own_2019"]   # S4B-0: research.s3.industry.other_bucket = asean_own_2019 (implemented only)
         write_csv(summaries["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_own}.csv", list(summaries["asean_own_2019"][0].keys()))
         write_csv(tds["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_own}.csv", list(tds["asean_own_2019"][0].keys()))
+        sfx_uh = OTHER_BUCKET_SUFFIX["useful_heat_bands"]   # M08b B2: research.s3.industry.other_bucket = useful_heat_bands
+        write_csv(summaries["useful_heat_bands"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_uh}.csv", list(summaries["useful_heat_bands"][0].keys()))
+        write_csv(tds["useful_heat_bands"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_uh}.csv", list(tds["useful_heat_bands"][0].keys()))
     write_csv(gaps, DEMAND_DIR / "INDUSTRY_2050_GAPS.csv", ["mode", "country", "item", "carrier", "mwh"])
     write_csv(other_rows, DEMAND_DIR / "INDUSTRY_2050_OTHER_BUCKET.csv", list(other_rows[0].keys()))
     ob_cmp = []
@@ -383,7 +444,9 @@ def main():
                 country=r["country"], decision_ref="67", status="REFERENCE_ONLY" if r["other_2019_mwh"] > 0 else "SOURCE_ZERO")
     reg.write(REG_DIR / "fragments" / "industry_2050.csv")
     write_json(dict(script=SCRIPT, sources=dict(industry_cache=cache_sha, worldsteel=ws_sha, edgar=ed_sha, technology_data=td_sha, ratios=r_sha, today=t_sha, ois_today=ois_sha), parameters=PE,
-                    other_bucket=dict(subsectors=OTHER_BUCKET, ois_today_shares=ois_today, main="pypsa_eur_2050", sensitivity="idees_today", suffix=OTHER_BUCKET_SUFFIX["idees_today"]),
+                    other_bucket=dict(subsectors=OTHER_BUCKET, ois_today_shares=ois_today, main="pypsa_eur_2050", sensitivity="idees_today", suffix=OTHER_BUCKET_SUFFIX["idees_today"],
+                                      useful_heat_bands=dict(table=HEAT_BANDS.name, sha256=hb_sha, shares=band_share, efficiency=HEAT_EFF, suffix=OTHER_BUCKET_SUFFIX["useful_heat_bands"])),
+                    output_rule_tables={m: dict(table=p.name, sha256=sha256(p)) for m, p in OUTPUT_RULE_TABLES.items()},
                     eu27_chemicals_split_mwh=dict(basic=basic_fec_mwh, ammonia=nh3_mwh, chlorine=cl_mwh, methanol=meoh_mwh, hvc=hvc_mwh), gaps=gaps, summary_main=outputs["aeo8_ats_relative"]),
                DEMAND_DIR / "INDUSTRY_2050_EVIDENCE.json")
     s = pd.DataFrame(outputs["aeo8_ats_relative"]).set_index("country")

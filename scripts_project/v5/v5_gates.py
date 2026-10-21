@@ -187,6 +187,10 @@ def gate_b12_hash(n,cfg,network_path=None,receipt=None):
                      ammonia_methanol_mode=ind.get('ammonia_methanol_mode'),industry_ratio_source=ind.get('ratio_source'),config_overrides=overrides,
                      demand_growth_method=(n.meta.get('research_config',{}).get('demand',{}).get('growth_method') or 'level (key absent: built before S3B R1)'),
                      industry_other_bucket=((s3.get('industry') or {}).get('other_bucket') or 'pypsa_eur_2050 (key absent: built before S3B R2)'),
+                     demand_anchors=dict(base_load_anchor=n.meta.get('research_config',{}).get('demand',{}).get('base_load_anchor','table (key absent: built before M08b)'),   # M08b B1/B2
+                                         transport_anchor=n.meta.get('research_config',{}).get('demand',{}).get('transport_anchor','table (key absent: built before M08b)'),
+                                         physical_output_rule=ind.get('physical_output_rule','industry_multiplier (key absent: built before M08b)'),
+                                         heat_bands=bool(ind.get('heat_bands')),biomass_overflow_mode=ind.get('biomass_overflow_mode','methane (key absent: built before M08b)')),
                      lng_expansion=((s3.get('gas') or {}).get('lng_expansion') or 'cap_factor (key absent: built before S3B R3)'),
                      renewable_profile_variant=((n.meta.get('research_config',{}).get('renewable') or {}).get('profile_variant') or 'original (key absent: built before S4A-1)'),
                      renewable_resource_classes=((n.meta.get('research_config',{}).get('renewable') or {}).get('resource_classes') or 1),
@@ -276,7 +280,7 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
         if twin and twin in n.buses.index:
             s|=set(n.generators.index[n.generators.bus==twin])|set(n.links.index[(n.links.bus1==twin)&(n.links.efficiency>0)])|set(n.links.index[(n.links.bus0==twin)&(n.links.p_min_pu<0)])
         return s
-    carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','clean cooking useful':'clean cooking','oil':'oil (fossil pool + non-fossil pool: FT, BtL, imports)','gas':'gas (LNG, production, pipelines, biogas upgrading)','H2':'hydrogen','ammonia':'ammonia (Haber-Bosch, import)','methanol':'methanol (methanolisation, biomass-to-methanol, import)','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
+    carriers={'AC':'electricity','industry heat':'industrial low-temperature heat','industry heat medium':'industrial useful heat 150-400 C (M08b first round)','industry heat medium A':'industrial useful heat 150-200 C (M08b supplement 01)','industry heat medium B':'industrial useful heat 200-400 C (M08b supplement 01)','industry heat high':'industrial useful heat > 400 C (M08b)','clean cooking useful':'clean cooking','oil':'oil (fossil pool + non-fossil pool: FT, BtL, imports)','gas':'gas (LNG, production, pipelines, biogas upgrading)','H2':'hydrogen','ammonia':'ammonia (Haber-Bosch, import)','methanol':'methanol (methanolisation, biomass-to-methanol, import)','co2 stored':'captured CO2 handling','EV battery':'land transport EV'}
     for carrier,label in carriers.items():
         buses=n.buses.index[n.buses.carrier==('Li ion' if carrier=='EV battery' else carrier)]
         with_load=[b for b in buses if (node_of(b) in load_nodes or str(n.buses.at[b,'country'])=='ASEAN') and serves_demand(b)];aux=[b for b in buses if b not in with_load]  # S3-6: regional pools with loads are load-bearing

@@ -184,7 +184,7 @@ research:
   s3:                                    # step 3 layers (scripts_project/s3_layers.py)
     fuel_carbon_mode: origin_neutral     # S3-5 (decision 64): origin_neutral = non-fossil liquid fuels zero at combustion, carbon booked at synthesis in the producer country, imports zero | producer_credit = S2 behaviour (sensitivity)
     industry:                            # S3B R2 (decision 67)
-      other_bucket: pypsa_eur_2050       # pypsa_eur_2050 = UNSD other / construction / mining mapped to the PyPSA-Eur 'Other industrial sectors' 2050 ratios (main) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables) | asean_own_2019 = the country's own UNSD 2019 carrier composition, no conversion (S4B-0, S3B section 8 item 6; implemented only, not run; *_OTHER_ASEAN_OWN_2019 tables)
+      other_bucket: useful_heat_bands    # M08b B2 (decision 133, M08-6): useful_heat_bands = MAIN: the other-bucket fuels x multiplier split by the JRC-IDEES-2021 OIS 2019 process shares (m08b_heat_bands.py, grade C) into useful heat x 0.90 in three bands (low < 150 C on the industry heat bus, medium 150-400 C, high > 400 C; carrier chosen by the model among the technology-data v0.15.0 options of the band) and diesel motors (fuel kept); other-bucket electricity kept (*_OTHER_USEFUL_HEAT_BANDS tables) | pypsa_eur_2050 = former main (sensitivity) | idees_today = JRC-IDEES-2021 EU27 2019 carrier structure of that sector, no process switch (sensitivity; *_OTHER_IDEES_TODAY tables) | asean_own_2019 = the country's own UNSD 2019 carrier composition, no conversion (S4B-0, S3B section 8 item 6; implemented only, not run; *_OTHER_ASEAN_OWN_2019 tables)
     gas:                                 # S3-1 (decisions 15, 35, 43, 17, 19)
       existing_cross_border: research_inputs/gas_v5/GAS_PIPELINES_EXISTING_CROSS_BORDER_2025.csv   # GEM GGIT 2025-11 (batch 9), node pairs with basis; rows without capacity DATA_PENDING
       production_caps: research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050.csv   # UNSD 2019 gross production per country (D1), price = import price, fugitive factor S2-0
@@ -387,6 +387,7 @@ research:
         gdp: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_GDP_SENSITIVITY.csv
         population: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_POP_SENSITIVITY.csv
         aeo8_ats_relative_level: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_LEVEL_SENSITIVITY.csv   # S3B R1 growth_method level
+        aeo8_ats_anchor: research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv   # M08b B1 growth_method ats_anchor (scripts_project/m08b_demand.py)
       node_allocation: assembly_v1_allocation_shares_then_astar   # node shares per (country, account) from results_project/assembly_v1/final_allocation
       time_shape: flat_fuels_astar_shape_electricity
       international_bunkers: true         # decision 10; sensitivity switch
@@ -403,15 +404,31 @@ research:
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp_TD_SENSITIVITY.csv
         population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population_TD_SENSITIVITY.csv
         aeo8_ats_relative_level: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_level_TD_SENSITIVITY.csv
+        aeo8_ats_anchor: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_TD_SENSITIVITY.csv
       ammonia_methanol_mode: regional_buses   # S3-3 (decision 44): ammonia load on ASEAN ammonia, methanol via node use links on ASEAN methanol | convert_to_h2_and_gas = S3-0 interim (ammonia -> H2 + electricity, methanol -> methane + electricity)
       pypsa_eur_tables:                     # per country-allocation variant (research.demand.country_allocation)
         aeo8_ats_relative: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv
         gdp: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_gdp.csv
         population: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_population.csv
         aeo8_ats_relative_level: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative_level.csv
-      biomass_overflow_to_methane: true     # R1.6 / decision 36: fixed solid-biomass demand above the national potential is served by methane at equal heat
-      biomass_overflow_cap_share: 0.98      # S4M-1 (decision 115, 2026-10-19 12:12 SGT; scripts_project/s2_layers.py): 0.98 = MAIN: where the decision-36 rule binds (fixed biomass demand >= biomass_overflow_binding_ratio x potential, i.e. BN, SG, VN - demand exactly equal to the potential is a boundary case created by the rule, grade-C potential, 100 % yearly harvest unrealistic) the cap is 0.98 x potential and the extra 2 % moves to methane by the same rule (industry first, then agriculture) | 1.0 = cap = potential (S4K / L23 state; second-batch sensitivity). S4L-5 diagnostic (S4L report section 10): both scenarios optimal, all gates passed
-      biomass_overflow_binding_ratio: 0.999  # S4L-5: a country counts as binding when fixed biomass demand / potential >= this value
+        aeo8_ats_anchor: research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_anchor.csv   # M08b B1 (decision 134)
+      # M08b B1 (decisions 126, 129, 134; registry industry_output_rule_2050): physical output 2050 = min(base x G^((2050 - base year)/28 x elasticity),
+      # per-capita saturation x population 2050, national plan cap) for cement and crude steel, one rule for the 11 countries; plan values are caps only.
+      # G = AEO8 Table D.2 real GDP 2050 / 2022 (TL = mean KH / LA / MM). The tables are generated by m08b_demand.py; the build refuses parameters that
+      # differ from the generated tables (sensitivities: elasticity 0.3-0.8, saturation cement 0.6-1.2 / steel 0.4-0.8 t/cap -> regenerate the tables)
+      physical_output_rule: sqrt_gdp_capped   # sqrt_gdp_capped (main; growth_method ats_anchor) | industry_multiplier = 2019 x industry multiplier (former rule, ratio / level tables)
+      physical_output_elasticity: 0.5         # assumption, grade C (registry industry_output_elasticity)
+      physical_output_percap_caps: {cement: 1.0, steel: 0.6}   # t/cap/a, assumptions, grade C (registry industry_percap_saturation_*)
+      physical_output_base_year: {cement: 2023, steel: 2024}   # USGS MYB 2023 T22 (SG, TL 0); worldsteel 2024 (BN, KH, LA, TL 0) (registry industry_output_base_year)
+      physical_output_plan_caps: research_inputs/demand_v5/INDUSTRY_OUTPUT_PLAN_CAPS.csv   # VN steel 70 (Decision 261), cement 150 (Decision 1266): caps only
+      # M08b B2 (decision 133) + supplement 01 section 2 (decision 137): four useful-heat bands per node (s2_layers.HEAT_BAND_TECH; only technology-data v0.15.0
+      # rows; heat pumps low band only; electric boiler steam only up to medium A (about <= 200 C); medium B = gas steam boiler + gas / solid-fuel direct
+      # firing (300-400 C representative), no electric heating above 200 C; no hydrogen heating - v0.15.0 has no hydrogen boiler / direct firing row)
+      heat_bands: {low: "<150C", medium_a: "150-200C", medium_b: "200-400C", high: ">400C"}
+      heat_band_medium_a_fraction: 0.2       # supplement 01 section 2 (registry industry_heat_band_medium_split): share of the JRC-IDEES 150-400 C band below 200 C, linear in temperature (50 / 250), grade C; sensitivity 0.1-0.3 (+-50 %) -> regenerate the band tables (m08b_heat_bands.py, s3_0_industry.py); the build refuses a value that differs from the tables
+      biomass_overflow_mode: useful_heat     # M08b B2 (registry biomass_overflow_rule): fixed solid biomass above the national potential -> useful heat x 0.90 in the band of its source (industry medium A / B / high, agriculture low), cap = potential | methane = decision 36 rule with the decision-115 cap share 0.98 (historical, networks built before M08b; keys biomass_overflow_to_methane / biomass_overflow_cap_share removed)
+      biomass_overflow_useful_heat_efficiency: 0.90   # technology-data solid biomass boiler steam 0.90 (biomass_overflow_rule)
+      biomass_overflow_binding_ratio: 0.999  # S4L-5: a country counts as binding when fixed biomass demand / potential >= this value (ledger only in useful_heat mode)
       low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30
       existing_boiler_efficiency: 0.90    # fuel -> low-temperature heat conversion of the displaced fuel share (technology-data solid biomass boiler steam 0.90)
       feedstock_carbon_mode: territorial    # R2 (decision 56): territorial = EDGAR 2.B+2.D x multiplier on the process bus + domestic plastics burned (s2b_feedstock.py) | full_release = PyPSA-Eur default (sensitivity)
@@ -420,6 +437,7 @@ research:
         gdp: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_gdp.csv
         population: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_population.csv
         aeo8_ats_relative_level: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_relative_level.csv
+        aeo8_ats_anchor: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_anchor.csv   # M08b B1
       feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # full_release mode only: S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
       feedstock_end_of_life_release_fraction: 1.0   # full_release mode only: PyPSA-Eur default (HVC_environment_sequestration_fraction 0)
       hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
@@ -467,5 +485,8 @@ research:
     scope: electricity_only_astar         # step 2 (R8) reconnects the other sectors
     status: INTERIM_S1_SKELETON
     country_allocation: aeo8_ats_relative   # R3 (decision 57): aeo8_ats_relative (main) | gdp (former main, sensitivity) | population; selects the D1 demand table variant
-    growth_method: ratio                  # S3B R1 (decision 66): ratio = UNSD 2019 x bridge 2019-2022 x AEO8 BAS growth 2022-2050 (main) | level = AEO8 BAS 2050 absolute sector totals (former main, sensitivity; *_level tables)
+    growth_method: ats_anchor             # M08b B1 (decisions 126, 129, 134; M08-5): ats_anchor = MAIN: AEO8 ATS activity anchors (C.8 per capita x D.1 population, TL = mean KH / LA / MM x UN WPP 2024; sector weights = 2019 sector quantity x C.3 ATS growth), one table DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv (scripts_project/m08b_demand.py) | ratio = UNSD 2019 x bridge 2019-2022 x AEO8 BAS growth 2022-2050 (S3B R1, former main; BAS upper-bound sensitivity) | level = AEO8 BAS 2050 absolute sector totals (sensitivity; *_level tables)
+    base_load_anchor: ats_buildings_agri  # M08b B1 (registry demand_base_load_rule): base electricity load = ATS country electricity x share of residential + commercial + agriculture/others + 2019 transport electricity (11 countries 966.9 TWh) | table = ratio / level table electricity
+    transport_anchor: ats_service         # M08b B1 (registry demand_transport_anchor_rule): transport fuel rows = ATS transport anchor - transport electricity anchor, EV / FCEV / ICE shares and efficiencies per the current PyPSA-Eur 2050 registry rows | table
+    anchor_table: research_inputs/demand_v5/DEMAND_ANCHOR_AEO8_ATS.csv   # M08b B1: per-country anchors; the build checks the base load and transport totals against it (1e-9)
     nonindustrial_electricity: table_sectors   # S4J-1 (decision 104; scripts_project/s2_layers.py): table_sectors (main: per country the Astar base load is scaled to the 2050 demand-table electricity of the sectors not modelled separately - residential, commercial, agriculture and others, transport (rail / existing electric road); Astar gives only the hourly shape and the node split) | astar_residual (former method: Astar minus the ratio-method industry electricity and the transport electricity; comparison)
