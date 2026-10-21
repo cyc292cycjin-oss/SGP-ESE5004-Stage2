@@ -315,6 +315,6 @@
 ### S12. 交付
 
 - 代码与测试：见 S11 修改清单；证据 `evidence/s01/`（`toy/TOY_S01_EVIDENCE.json`、`smoke_56x3h/`、`s4n_pilot_365x24h/`、`s4o6_disconnected_365x24h/`、`benefit_pre_correction/`、全量测试日志、证据链日志 `S01_CHAIN.log`）与 `evidence/s01_m08b/`（`integrated_365x24h/`、`disconnected_365x24h/`、`minus_{VN,TH,LA}_365x24h/`、`loo_trunc24/`、`variant_receipts/`）；脚本 `scripts/m12_s01.sh`、`scripts/m12_s01_chain.sh`、`scripts/m12_s01_toy_evidence.py`、`scripts/m12_review_zip.py`（代码清单增加补充 01 改动的仓库文件）。
-- 分支 `codex/m12-allocation-20261021`：5a4acd84（S01-1 D1）→ 53934e31（D2）→ a5be10aa（D3）→ 8e458984（D4）→ d75913f3（D5）→ 51c362dc（D6）→ 7a03fcd5（D7）→ a54f1718（D8）→ 5eefb6c4（D9）→ 5fc8dadf（D10）→ 〔证据提交〕（S01-11 / S01-12 证据、审计 `--precision`）→ 收尾提交（报告交付节、审阅 ZIP 清单）；draft PR #46 正文已更新：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/46 。
+- 分支 `codex/m12-allocation-20261021`：5a4acd84（S01-1 D1）→ 53934e31（D2）→ a5be10aa（D3）→ 8e458984（D4）→ d75913f3（D5）→ 51c362dc（D6）→ 7a03fcd5（D7）→ a54f1718（D8）→ 5eefb6c4（D9）→ 5fc8dadf（D10）→ 157c3319（S01-11 / S01-12 证据、审计 `--precision`、报告与台账）→ 收尾提交（报告交付节、审阅 ZIP 清单）；draft PR #46 正文已更新：https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/46 。
 - 审阅包：`work/p1_m12_20261021/M12_REVIEW.zip`（work 目录全部文件 + `code/` 下 7 个仓库文件；逐成员 SHA256 / CRC32 清单 `M12_REVIEW_MANIFEST.csv`，ZIP 自身 SHA256 见 `M12_REVIEW_ZIP_SHA256.txt`；ZIP 不入库）。
 - 完成后停止，等待审阅。
