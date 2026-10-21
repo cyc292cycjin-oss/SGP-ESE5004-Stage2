@@ -208,7 +208,8 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
                     missing.append((typ, carrier, node))
     if missing:
         raise ValueError("Required candidate structure missing: " + str(missing[:6]))
-    s2_required = {"Store": ["co2 stored"], "Link": ["CCGT CC", "process emissions CC", "biomass EOP", "biomass EOP CC", "biogas upgrading", "BtL", "industry electric boiler", "industry heat pump", "industry gas boiler", "industry biomass boiler"] + (["DAC"] if S2["co2"]["dac"] else [])}
+    s2_required = {"Store": ["co2 stored"], "Link": ["CCGT CC", "process emissions CC", "biomass EOP", "biomass EOP CC", "biogas upgrading", "BtL", "industry electric boiler", "industry heat pump", "industry gas boiler", "industry biomass boiler"] + (["DAC"] if S2["co2"]["dac"] else [])
+                   + (["industry direct firing gas", "industry direct firing biomass"] if S2["industry"].get("heat_bands") else [])}   # M08b B2: high-band options at every node
     for typ, carriers in s2_required.items():
         df = n.df(typ)
         for carrier in carriers:
@@ -252,7 +253,7 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
     if (bio.e_nom_extendable).any() or any(n.meta["store_power_rules"].get(s) != "discharge_only" for s in bio.index):
         raise ValueError("Biomass pools must be fixed, discharge-only Stores")
     report["s2"] = dict(sequestration_countries=[c for c, v in caps.items() if v > 0], biomass_stores=int(len(bio)), biomass_potential_twh=float(bio.e_nom.sum() / 1e6),
-                        co2_pipelines=int((n.links.carrier == "CO2 pipeline").sum()), capture_links=int(n.links.carrier.isin(["CCGT CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC"]).sum()))
+                        co2_pipelines=int((n.links.carrier == "CO2 pipeline").sum()), capture_links=int(n.links.carrier.isin(["CCGT CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC", "industry direct firing biomass CC"]).sum()))
     report["status"] = "S2_STATIC_PASS"; report["solver_runs"] = 0
     return report
 
@@ -356,7 +357,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                      h2=h2_pipes, underwater_fraction_source="corridor table subsea_share (cross-border); 0 for domestic pairs (no data)",
                      table=(candidates.to_dict("records") if candidates is not None else None))
     bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
-    heat = add_industrial_heat(n, costs, nodes, cc)
+    heat = add_industrial_heat(n, costs, nodes, cc, bands=bool(S2["industry"].get("heat_bands")))   # M08b B2: low / medium / high useful-heat buses
     demand_astar = bind_astar(n, repo, allocation)
     from s2_layers import demand_table_key
     allocation_mode = demand_table_key(cfg)   # R3 (decision 57) + S3B R1 growth method suffix (decision 66)
@@ -364,7 +365,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     demand = add_demand_layer(n, costs, demand_cfg(cfg), repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
     demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
     n.meta["s2_demand_ledger"] = jsonable(dict(deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"],
-                                              totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()}))
+                                              totals_by_sector_mwh={str(k): float(v) for k, v in pd.DataFrame(demand["loads"]).groupby("sector").annual_mwh.sum().items()},
+                                              industry=demand["industry"], anchors=demand["anchors"]))   # M08b: overflow / heat bands / output rule and the ATS anchor checks
     # S3-1: gas network (domestic production, pipelines along the candidate topology incl. the 2025 cross-border stock, LNG terminals; unlimited external gas removed)
     gas_net = add_gas_network(n, costs, cfg, repo, registry, nodes, candidates) if (candidates is not None and "s3" in R and "gas" in R["s3"]) else None
     imports = add_imports(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "imports" in R["s3"]) else None   # S3-2: regional oil pool, green carrier imports, H2 at LNG terminals

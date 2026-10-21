@@ -1,0 +1,32 @@
+# OWEN（M12：Owen 分摊主值 = 对偶形式 y′b；补充 01 D1；只读，未求解）
+
+- 运行：M12B_integrated_minusTH；网络 `/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/m12b/variants/integrated_minusTH_2920_3h_unsolved.nc`（SHA256 `0e4870c81ed5…`）；对偶 `/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/m12b/integrated_minusTH`。
+- Owen 前提（右端项全部有主）：**True**。
+- 恒等式（C1 (c) 对偶形式扩展，第 138 项 C1 同口径）：11 国 + 燃料舱 = 274.756 bn，目标值 274.756 bn，差 -0.000 bn（|差| ≤ 0.01 bn：**True**；相对误差 3.66e-11 仅供参考）；共享 0.000 bn。
+- 残差影响 ≤ C1 (b) 阈值 max(差额 1 %, 0.01 bn)：**True**；对偶形式验收：**True**。
+- C1 (c)（运行本身）：True；分摊可用：**True**。阈值来源：/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/m12b/integrated_minusTH/PRECISION.json: this batch: disconnected - integrated ledger difference (/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/res。
+- 差额方法：exported arrays: exact decomposition by owner (KVL rows; other rows' complementarity; column complementarity; stationarity residual)。
+
+| 参与者 | **对偶形式 α 0.5** | α 0 | α 1 | 按长度 | 区间下限 | 区间上限 | USD2020 | 市场形式 α 0.5 | 市场 − 对偶 | 其中 KVL 转移 | 残差影响 | C1 (b) 阈值 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| BN | **0.331** | 0.331 | 0.331 | 0.331 | 0.331 | 0.331 | 0.378 | 0.331 | 0.000 | 0.000 | 0.000 | 0.010 |
+| ID | **82.066** | 82.068 | 82.064 | 82.066 | 82.064 | 82.068 | 93.551 | 82.058 | -0.008 | -0.008 | 0.000 | 0.010 |
+| KH | **4.544** | 4.547 | 4.542 | 4.545 | 4.542 | 4.547 | 5.180 | 4.558 | 0.013 | 0.013 | 0.000 | 0.010 |
+| LA | **0.662** | 0.661 | 0.664 | 0.662 | 0.661 | 0.664 | 0.755 | 0.714 | 0.051 | 0.051 | 0.000 | 0.014 |
+| MM | **2.880** | 2.879 | 2.880 | 2.880 | 2.879 | 2.880 | 3.283 | 2.880 | 0.000 | -0.000 | 0.000 | 0.010 |
+| MY | **20.948** | 20.949 | 20.947 | 20.946 | 20.944 | 20.953 | 23.880 | 20.956 | 0.008 | 0.008 | 0.000 | 0.010 |
+| PH | **17.974** | 17.974 | 17.974 | 17.974 | 17.974 | 17.974 | 20.490 | 17.974 | 0.000 | 0.000 | 0.000 | 0.010 |
+| SG | **7.323** | 7.320 | 7.325 | 7.325 | 7.320 | 7.325 | 8.348 | 7.323 | 0.000 | 0.000 | 0.000 | 0.020 |
+| TH | **0.000** | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.013 |
+| TL | **0.357** | 0.357 | 0.357 | 0.357 | 0.357 | 0.357 | 0.407 | 0.357 | 0.000 | 0.000 | 0.000 | 0.010 |
+| VN | **61.260** | 61.259 | 61.261 | 61.260 | 61.259 | 61.261 | 69.834 | 61.196 | -0.065 | -0.065 | 0.000 | 0.010 |
+| BUNKER | **76.410** | 76.410 | 76.410 | 76.410 | 76.410 | 76.410 | 87.104 | 76.410 | 0.000 | 0.000 | 0.000 | 0.021 |
+| SHARED | **0.000** | 0.000 | 0.000 | 0.000 | — | — | 0.000 | -0.000 | -0.000 | 0.000 | -0.000 | — |
+
+区间：每条跨境线（国家对行的 y′b 与该对的目标常数）的 α 各自在 [0, 1] 内取值时该参与者分摊的范围；各国端点不能同时达到。
+
+## 燃料舱参与者：严格单独成本（补充 01 D10）
+
+- 严格单独成本（只用区域外非化石进口经计量链路满足燃料舱负荷；纯算术）= **106.446 bn**；Owen 对偶形式份额 76.410 bn；余量 30.036 bn；份额 ≤ 单独成本：**True**。
+- ASEAN aviation international oil final：35.959 bn，239.55 TWh，单位成本 150.11–150.11 EUR/MWh，路线 ['ASEAN oil non-fossil import -> ASEAN aviation international oil meter non-fossil']；排除 ['ASEAN aviation international oil meter']
+- ASEAN shipping international methanol final：70.487 bn，485.59 TWh，单位成本 145.16–145.16 EUR/MWh，路线 ['ASEAN methanol import -> ASEAN shipping international methanol']；排除 []

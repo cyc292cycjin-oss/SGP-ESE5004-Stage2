@@ -504,6 +504,36 @@ def precision_context(solve_dir: Path | None, precision: Path | None = None) -> 
                 note="Owen allocation uses the duals: usable only when C1 (c) passed (registry run_rule_formal_2920: ACCEPTED_LAYER2 for formal runs)")
 
 
+DUAL_ACCEPTANCE_RULE = ("item 138 (M12b): the Owen dual form is accepted on the C1 scale - identity |sum of the 11 countries + BUNKER - c(N)| <= 0.01 bn "
+                        "(C1 (a) absolute standard) and every player's residual impact (market form - dual form - KVL transfer) <= max(1 % of the "
+                        "player's reference difference, 0.01 bn) (C1 (b) per-country threshold; BUNKER: the ASEAN entity); replaces the relative 1e-6 "
+                        "of supplement 01 D1")
+
+
+def c1_thresholds_eur(ref: dict) -> dict:
+    """C1 (b) per-player threshold in EUR, max(1 % of the player's reference difference, 0.01 bn); BUNKER takes the ASEAN entity (bunker account)."""
+    from s4o_c1_precision import threshold_bn
+    return {p: threshold_bn(p if p in COUNTRIES else "ASEAN", ref) * 1e9 for p in PLAYERS}
+
+
+def dual_acceptance(players_sum, objective, residual: dict | None, thr: dict) -> dict:
+    """item 138: acceptance of the Owen dual form on the C1 scale (DUAL_ACCEPTANCE_RULE). Without a residual (no market form given) only the
+    identity is checked (residual_checked False)."""
+    from s4o_c1_precision import STD
+    tol = STD["a_abs_bn"] * 1e9
+    out = dict(rule=DUAL_ACCEPTANCE_RULE, identity_tolerance_eur=tol, threshold_eur=dict(thr))
+    if players_sum is None or objective is None:
+        out.update(identity_difference_eur=None, identity_passed=None)
+    else:
+        d = float(players_sum) - float(objective)
+        out.update(identity_difference_eur=d, identity_passed=bool(abs(d) <= tol))
+    within = {p: bool(abs(float(residual.get(p) or 0.0)) <= thr[p]) for p in PLAYERS} if residual is not None else None
+    out.update(residual_checked=within is not None, residual_within=within, residual_failed=[p for p, v in (within or {}).items() if not v],
+               residual_passed=(all(within.values()) if within is not None else None))
+    out["passed"] = None if out["identity_passed"] is None else bool(out["identity_passed"] and out["residual_passed"] is not False)
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------------- run / outputs
 def update_exports(d: Path, names) -> dict:
     p = d / "EXPORTS.json"
@@ -659,12 +689,18 @@ def _dual_alloc(run_dir: Path, override: Path | None) -> dict | None:
             continue
         r = json.loads(p.read_text())
         if r.get("main_form") == "owen_dual_form":
-            ip, pp = (r.get("identity") or {}).get("passed"), (r.get("premise") or {}).get("passed")
+            idt, pp = r.get("identity") or {}, (r.get("premise") or {}).get("passed")
+            acc = r.get("dual_acceptance") or dict(passed=idt.get("passed"), identity_passed=idt.get("passed"))
             usable = r.get("usable_for_allocation")
-            if (Path(run_dir) / "PRECISION.json").exists():   # after a regrade (D9) the run's C1 (c) may differ from the one OWEN.json saw
-                usable = bool(ip and pp is not False and precision_context(Path(run_dir)).get("c_passed") is not False)
-            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=usable, identity_passed=ip, premise_passed=pp,
-                        bunker_standalone=r.get("bunker_standalone"))
+            pr = Path(run_dir) / "PRECISION.json"
+            if pr.exists():   # after a regrade (D9) the run's C1 (c) and reference may differ from the ones OWEN.json saw
+                if idt.get("players_sum") is not None and idt.get("objective") is not None:   # item 138: dual form re-checked with the current reference
+                    from m12_rhs_audit import reference_of
+                    acc = dual_acceptance(idt["players_sum"], idt["objective"], (r.get("c1_c_dual") or {}).get("residual_impact_eur"),
+                                          c1_thresholds_eur(reference_of(pr)[0]))
+                usable = bool(acc.get("passed") and pp is not False and precision_context(Path(run_dir)).get("c_passed") is not False)
+            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=usable, identity_passed=acc.get("identity_passed"),
+                        dual_acceptance_passed=acc.get("passed"), premise_passed=pp, bunker_standalone=r.get("bunker_standalone"))
         d = r.get("dual_form") or {}
         if d.get("allocation_alpha_half"):
             return dict(allocation=d["allocation_alpha_half"], interval=d.get("interval"), source=str(p), usable=None, identity_passed=None, premise_passed=None)

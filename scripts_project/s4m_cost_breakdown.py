@@ -141,6 +141,10 @@ def composite(comp: str, car: str, name: str, z, cc: float, costs: pd.DataFrame,
         cap = _capture_row(z, costs, _boiler_or_chp_capture(costs)); eff = float(z.get("efficiency", np.nan))
         terms = {"solid biomass boiler steam x efficiency": _fx(costs, "solid biomass boiler steam") * eff, f"{cap} x efficiency3": _fx(costs, cap) * e3}
         return float(sum(terms.values())), dict(terms, capture_row=cap, efficiency=eff, efficiency3=e3), "base_x_efficiency_plus_capture_x_co2"
+    if comp == "Link" and car == "industry direct firing biomass CC":   # M08b B2: high-band biomass with capture, same rule as the boiler CC
+        cap = _capture_row(z, costs, _boiler_or_chp_capture(costs)); eff = float(z.get("efficiency", np.nan))
+        terms = {"direct firing solid fuels x efficiency": _fx(costs, "direct firing solid fuels") * eff, f"{cap} x efficiency3": _fx(costs, cap) * e3}
+        return float(sum(terms.values())), dict(terms, capture_row=cap, efficiency=eff, efficiency3=e3), "base_x_efficiency_plus_capture_x_co2"
     if comp == "Link" and car == "industry biomass CC":
         cap = _boiler_or_chp_capture(costs)
         terms = {f"{cap} x efficiency3": _fx(costs, cap) * e3}

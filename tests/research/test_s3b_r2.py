@@ -28,7 +28,7 @@ def test_ois_today_carrier_structure():
 def test_other_bucket_tables_and_switch():
     from phase4_static import config
     cfg = config(ROOT, "integrated")
-    assert cfg["research"]["s3"]["industry"]["other_bucket"] == "pypsa_eur_2050"
+    assert cfg["research"]["s3"]["industry"]["other_bucket"] == "useful_heat_bands"   # M08b B2 (decision 133): new main; pypsa_eur_2050 / idees_today stay selectable
     for mode in ["aeo8_ats_relative", "gdp", "population", "aeo8_ats_relative_level"]:
         main = pd.read_csv(DEM / f"INDUSTRY_2050_SUMMARY_{mode}.csv").set_index("country")
         today = pd.read_csv(DEM / f"INDUSTRY_2050_SUMMARY_{mode}_OTHER_IDEES_TODAY.csv").set_index("country")

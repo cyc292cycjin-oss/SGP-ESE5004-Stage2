@@ -505,6 +505,47 @@ def test_premise_failed_flag_d3(tmp_path):
     assert "premise_failed" in (tmp_path / "OWEN.md").read_text() and json.loads((tmp_path / "OWEN.json").read_text())["premise_failed"]
 
 
+def test_dual_acceptance_c1_scale_item138(tmp_path):
+    """Item 138 (M12b): the dual form is accepted on the C1 scale - identity |sum - c(N)| <= 0.01 bn (absolute; the relative error is information)
+    and every player's residual impact <= max(1 % of its reference difference, 0.01 bn); after a regrade both are re-checked with the batch
+    reference; an existing OWEN.json is re-graded without being changed."""
+    import m12_rhs_audit as RA
+    ref = dict(source="test", differences_bn={c: 0.1 for c in M.COUNTRIES} | {"VN": 5.0, "ASEAN": 2.0})
+    thr = M.c1_thresholds_eur(ref)
+    assert thr["VN"] == 0.05e9 and thr["BN"] == 0.01e9 and thr[M.BUNKER] == 0.02e9            # 1 % of the difference, floor 0.01 bn; bunker = ASEAN
+    a = {c: 1e9 for c in M.COUNTRIES} | {M.BUNKER: 2e9}
+    ok = RA.owen_summary(_fake_audit(a), None, None, 13e9 - 9e6)                                # 0.009 bn off, relative 6.9e-4 (old rule: fail)
+    assert ok["identity"]["passed"] and ok["identity"]["relative_error"] > 1e-6 and ok["dual_acceptance"]["residual_checked"] is False and ok["usable_for_allocation"]
+    bad = RA.owen_summary(_fake_audit(a), None, None, 13e9 - 11e6)                              # 0.011 bn off
+    assert bad["identity"]["passed"] is False and not bad["usable_for_allocation"]
+    big = {c: 1e11 for c in M.COUNTRIES} | {M.BUNKER: 2e11}                                     # 0.02 bn off on 1.3e12, relative 1.5e-8 (old rule: pass)
+    assert RA.owen_summary(_fake_audit(big), None, None, 13e11 + 2e7)["identity"]["passed"] is False
+    prec = tmp_path / "PRECISION.json"; prec.write_text(json.dumps(dict(reference=ref, grade=dict(grade="A", c=True))))
+    mk = dict(a, VN=a["VN"] + 0.04e9, BN=a["BN"] + 0.02e9, ID=a["ID"] - 0.06e9)                  # residual = market - dual (no KVL split in this form)
+    r = RA.owen_summary(_fake_audit(a), dict(allocation_eur={"0.5": mk}, interval_eur={}, identity={}), None, 13e9, prec)
+    acc = r["dual_acceptance"]
+    assert acc["identity_passed"] and acc["residual_checked"] and acc["residual_failed"] == ["BN", "ID"] and acc["passed"] is False
+    assert r["c1_c_dual"]["within_threshold"]["VN"] and r["c1_c_dual"]["passed"] is False and not r["usable_for_allocation"]
+    res = _fake_audit(a); res["owen"] = r; RA.write_owen(res, tmp_path)
+    assert "未通过：BN, ID" in (tmp_path / "OWEN.md").read_text()
+    run = tmp_path / "run"; (run / "m12_owen").mkdir(parents=True)                              # regrade (D9): the batch reference decides
+    (run / "m12_owen" / "OWEN.json").write_text(json.dumps(r, default=str))
+    (run / "PRECISION.json").write_text(json.dumps(dict(reference=dict(source="batch", differences_bn={c: 10.0 for c in M.COUNTRIES} | {"ASEAN": 10.0}),
+                                                        grade=dict(grade="A", c=True))))
+    dd = M._dual_alloc(run, None)
+    assert dd["dual_acceptance_passed"] and dd["identity_passed"] and dd["usable"]
+    (run / "PRECISION.json").write_text(json.dumps(dict(reference=ref, grade=dict(grade="A", c=True))))
+    assert M._dual_alloc(run, None)["usable"] is False
+    old = tmp_path / "OWEN_old.json"                                                            # S4O-6-like file: 0.76 M EUR off, relative 1.3e-6
+    old.write_text(json.dumps(dict(tag="S", identity=dict(objective=585.495e9, players_sum=585.495e9 + 0.76e6, relative_error=1.3e-6, passed=False),
+                                   usable_for_allocation=False, premise_failed=False,
+                                   c1_c_dual=dict(c1_c_passed=True, threshold_eur=thr, residual_impact_eur={p: 0.0 for p in M.PLAYERS}))))
+    before = old.read_bytes()
+    g = RA.regrade_owen(old, tmp_path / "g.json")
+    assert g["new"]["usable_for_allocation"] and not g["old"]["usable_for_allocation"] and g["verdict_changed"] and old.read_bytes() == before
+    assert RA.regrade_owen(old, tmp_path / "g2.json", prec)["new"]["threshold_eur"]["VN"] == 0.05e9
+
+
 def test_dual_length_split_by_component():
     """Supplement 01 D2: the dual form's pair values split by the components' in-country length shares (a "-reversed" link takes its twin's
     share; a pair value not attributable to a component is split 0.5)."""

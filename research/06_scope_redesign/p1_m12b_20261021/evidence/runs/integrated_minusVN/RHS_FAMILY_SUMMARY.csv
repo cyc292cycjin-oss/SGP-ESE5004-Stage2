@@ -1,0 +1,53 @@
+family,constraints,rows,rhs_nonzero_rows,coupling_rows,rhs_nonzero_country,rhs_nonzero_cross_border_pair,rhs_nonzero_bunker,rhs_nonzero_shared,rhs_nonzero_unresolved,rhs_nonzero_country_split_by_load,meaning
+Bus-meshed-nodal_balance,1,15680,6272,0,6216,0,0,0,0,56.0,网状母线节点平衡（同上）
+Bus-nodal_balance,1,142856,93744,0,93632,0,112,0,0,0.0,节点平衡（市场行）；右端项 = 负荷（按负荷所属国拆分）
+Generator-ext-p-lower,1,84168,0,0,0,0,0,0,0,0.0,可扩建发电机出力下限（齐次）
+Generator-ext-p-upper,1,84168,0,0,0,0,0,0,0,0.0,可扩建发电机出力上限（齐次）
+Generator-ext-p_nom-lower,1,1503,8,0,8,0,0,0,0,0.0,可扩建发电机容量下限 p_nom_min（存量 / 规划下限）
+Generator-ext-p_nom-upper,1,1226,1226,0,1226,0,0,0,0,0.0,可扩建发电机容量上限 p_nom_max（资源潜力、进口码头上限）
+Generator-fix-p-lower,1,12992,9744,0,9744,0,0,0,0,0.0,不可扩建发电机出力下限 p_nom × p_min_pu
+Generator-fix-p-upper,1,12992,12539,0,12539,0,0,0,0,0.0,不可扩建发电机出力上限 p_nom × p_max_pu（存量容量 × 可用率）
+Kirchhoff-Voltage-Law,1,3192,0,1792,0,0,0,0,0,0.0,基尔霍夫电压定律回路约束（齐次，回路可跨国）
+Line-ext-loss_upper,1,7056,0,0,0,0,0,0,0,0.0,损耗上限（齐次）
+Line-ext-s-lower,1,7056,0,0,0,0,0,0,0,0.0,线路潮流下限（齐次）
+Line-ext-s-upper,1,7056,0,0,0,0,0,0,0,0.0,线路潮流上限（齐次）
+Line-ext-s_nom-lower,1,126,94,0,79,15,0,0,0,0.0,线路容量下限（存量）
+Line-ext-s_nom-upper,1,126,126,0,79,47,0,0,0,0.0,线路容量上限（走廊上限）
+Line-loss_proxy-neg,1,7056,0,0,0,0,0,0,0,0.0,交流损耗代理（齐次）
+Line-loss_proxy-pos,1,7056,0,0,0,0,0,0,0,0.0,交流损耗代理（齐次）
+Link-ext-p-lower,1,423024,0,0,0,0,0,0,0,0.0,链路流量下限（齐次）
+Link-ext-p-upper,1,423024,0,0,0,0,0,0,0,0.0,链路流量上限（齐次）
+Link-ext-p_nom-lower,1,7554,19,0,10,9,0,0,0,0.0,可扩建链路容量下限（存量 / 跨境存量）
+Link-ext-p_nom-upper,1,26,26,0,16,10,0,0,0,0.0,可扩建链路容量上限
+Link-fix-p-lower,1,8456,168,0,168,0,0,0,0,0.0,不可扩建链路流量下限 p_nom × p_min_pu
+Link-fix-p-upper,1,8456,8456,0,8456,0,0,0,0,0.0,不可扩建链路流量上限 p_nom × p_max_pu
+ResearchBatteryNominal,180,180,0,0,0,0,0,0,0,0.0,电池充放容量耦合（齐次）
+ResearchImportAnnual,17,17,17,0,17,0,0,0,0,0.0,国产气年产量上限（名为 Import，实为国内产量）
+ResearchStoreDirection,108,6048,0,0,0,0,0,0,0,0.0,Store 只充 / 只放（齐次）
+StorageUnit-energy_balance,1,6272,5432,0,5432,0,0,0,0,0.0,抽蓄 / 水库能量平衡；右端项 = 入流
+StorageUnit-ext-p_dispatch-lower,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-ext-p_dispatch-upper,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-ext-p_nom-lower,1,42,0,0,0,0,0,0,0,0.0,储能单元容量下限
+StorageUnit-ext-p_nom-upper,1,42,42,0,42,0,0,0,0,0.0,储能单元容量上限
+StorageUnit-ext-p_store-lower,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-ext-p_store-upper,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-ext-state_of_charge-lower,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-ext-state_of_charge-upper,1,2352,0,0,0,0,0,0,0,0.0,
+StorageUnit-fix-p_dispatch-lower,1,3920,0,0,0,0,0,0,0,0.0,
+StorageUnit-fix-p_dispatch-upper,1,3920,3920,0,3920,0,0,0,0,0.0,
+StorageUnit-fix-p_store-lower,1,3920,0,0,0,0,0,0,0,0.0,
+StorageUnit-fix-p_store-upper,1,3920,336,0,336,0,0,0,0,0.0,
+StorageUnit-fix-state_of_charge-lower,1,3920,0,0,0,0,0,0,0,0.0,
+StorageUnit-fix-state_of_charge-upper,1,3920,3920,0,3920,0,0,0,0,0.0,
+Store-energy_balance,1,26824,92,0,92,0,0,0,0,0.0,储能能量平衡；首时段右端项 = 非循环 Store 的 e_initial（生物质池等固定资源）
+Store-ext-e-lower,1,21672,0,0,0,0,0,0,0,0.0,储能水平下限（齐次）
+Store-ext-e-upper,1,21672,0,0,0,0,0,0,0,0.0,储能水平上限（齐次）
+Store-ext-e_nom-lower,1,387,0,0,0,0,0,0,0,0.0,储能容量下限
+Store-ext-e_nom-upper,1,6,6,0,6,0,0,0,0,0.0,储能容量上限（封存潜力等）
+Store-fix-e-lower,1,5152,0,0,0,0,0,0,0,0.0,不可扩建储能水平下限 e_nom × e_min_pu
+Store-fix-e-upper,1,5152,5152,0,5152,0,0,0,0,0.0,不可扩建储能水平上限 e_nom × e_max_pu
+research_bunker_co2_limit,1,1,0,0,0,0,0,0,0,0.0,燃料舱净零（东盟燃料舱账户）
+research_co2_storage_cap,6,6,6,0,6,0,0,0,0,0.0,国家年封存上限（接收国的封存能力，他国船运 CO2 也计入）
+research_country_co2_limit,10,10,0,0,0,0,0,0,0,0.0,国家净零（末时段国家大气 Store ≤ 上限）
+research_lossy_bidirectional_sync,278,278,0,0,0,0,0,0,0,0.0,有损双向链路正反向容量相等（齐次）
+research_new_hydro_inflow,33,1848,1848,0,1848,0,0,0,0,0.0,新建水电入流
