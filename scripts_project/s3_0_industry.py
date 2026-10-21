@@ -18,8 +18,8 @@ Per country and allocation variant (R3 tables):
   * Biomass above the national potential -> methane (decision 36); coal retention listed.
 The former technology-data based steel/cement ratios (S2B) are written as the sensitivity file *_TD_SENSITIVITY.csv.
 M08b (decisions 133, 134): mode aeo8_ats_anchor (ATS activity anchors, m08b_demand.py) takes steel / cement 2050 tonnes from the physical output
-rule table; other-bucket variant useful_heat_bands (*_OTHER_USEFUL_HEAT_BANDS.csv) turns the other-bucket fuels into useful heat in three
-temperature bands (m08b_heat_bands.py) and leaves the biomass overflow to the build (useful heat instead of methane).
+rule table; other-bucket variant useful_heat_bands (*_OTHER_USEFUL_HEAT_BANDS.csv) turns the other-bucket fuels into useful heat in four
+temperature bands (m08b_heat_bands.py; supplement 01: medium split at 200 C) and leaves the biomass overflow to the build (useful heat instead of methane).
 
     python scripts_project/s3_0_industry.py
 """
@@ -49,6 +49,7 @@ OUTPUT_RULE_TABLES = {"aeo8_ats_anchor": DEMAND_DIR / "INDUSTRY_OUTPUT_2050_M08B
 # useful heat x HEAT_EFF by band (low on the existing industry heat bus) and mechanical fuel (kept); other-bucket electricity kept as electricity
 HEAT_BANDS = DEMAND_DIR / "INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv"
 HEAT_EFF = 0.90   # fuel -> useful heat (registry existing_boiler_efficiency; technology-data solid biomass boiler steam 0.90; biomass_overflow_rule)
+HEAT_BAND_USES = ("low", "medium_a", "medium_b", "high")   # supplement 01 section 2: medium split at 200 C into A (150-200 C) and B (200-400 C)
 CARRIERS = ["coal", "oil", "gas", "biomass", "electricity"]
 FUELS = ["coal", "oil", "gas", "biomass"]
 OUT_CARRIERS = ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat", "ammonia", "methanol"]
@@ -136,7 +137,8 @@ def main():
     outputs, gaps, other_rows, outputs_today = {}, [], [], {}
     out_rule = {m: pd.read_csv(p).set_index("country") for m, p in OUTPUT_RULE_TABLES.items()}
     hb = pd.read_csv(HEAT_BANDS).set_index("carrier"); hb_sha = sha256(HEAT_BANDS)
-    band_share = {car: {u: float(hb.at[car, f"share_{u}"]) for u in ("low", "medium", "high", "mechanical")} for car in FUELS}
+    band_share = {car: {u: float(hb.at[car, f"share_{u}"]) for u in HEAT_BAND_USES + ("mechanical",)} for car in FUELS}
+    medium_a_fraction = float(hb.medium_a_fraction.iloc[0])   # 200 C split of the medium band (m08b_heat_bands.py; supplement 01 section 2)
     reg = Registry(SCRIPT)
     for mode, fname in ALLOCATIONS.items():
         dem = pd.read_csv(DEMAND_DIR / fname, keep_default_na=False)
@@ -286,10 +288,11 @@ def main():
                         for oc in OUT_CARRIERS:
                             rest50_own[oc] += e_sub * share * mult * eff * m_["future_shares"][oc]
             # ---- M08b B2 (decision 133): other-bucket variant useful_heat_bands ----------------------------------------------------------
-            # other-bucket fuels x multiplier split by the JRC-IDEES OIS process shares: heat uses -> useful heat x HEAT_EFF in three bands
-            # (low on the industry heat bus, medium / high on the new band buses), diesel motors -> the fuel stays a final-energy demand;
-            # other-bucket electricity x multiplier stays electricity; every other sub-sector, steel and cement unchanged (PyPSA-Eur 2050 routes)
-            uh = {u: 0.0 for u in ("low", "medium", "high")}; mech = {car: 0.0 for car in FUELS}; heat_fuel = 0.0
+            # other-bucket fuels x multiplier split by the JRC-IDEES OIS process shares: heat uses -> useful heat x HEAT_EFF in four bands
+            # (low on the industry heat bus, medium A 150-200 C / medium B 200-400 C (supplement 01 section 2) / high on the band buses), diesel
+            # motors -> the fuel stays a final-energy demand; other-bucket electricity x multiplier stays electricity; every other sub-sector, steel
+            # and cement unchanged (PyPSA-Eur 2050 routes)
+            uh = {u: 0.0 for u in HEAT_BAND_USES}; mech = {car: 0.0 for car in FUELS}; heat_fuel = 0.0
             for car in FUELS:
                 e50 = other19[car] * mult
                 for u in uh:
@@ -302,9 +305,10 @@ def main():
                 rest50_heat[car] += mech[car]
             rest50_heat["heat"] += uh["low"]
             heat_extra = dict(other_fuel_2050_mwh=sum(other19[car] for car in FUELS) * mult, other_heat_fuel_2050_mwh=heat_fuel, useful_heat_efficiency=HEAT_EFF,
-                              other_heat_low_mwh=uh["low"], other_heat_medium_mwh=uh["medium"], other_heat_high_mwh=uh["high"],
+                              **{f"other_heat_{u}_mwh": uh[u] for u in HEAT_BAND_USES},
                               other_electricity_2050_mwh=other19["electricity"] * mult, **{f"other_mechanical_{car}_mwh": mech[car] for car in FUELS},
-                              pe_heat_medium_mwh=uh["medium"], pe_heat_high_mwh=uh["high"], heat_bands_source=f"JRC-IDEES-2021 OIS 2019 ({HEAT_BANDS.name} {hb_sha[:12]})")
+                              **{f"pe_heat_{u}_mwh": uh[u] for u in HEAT_BAND_USES if u != "low"}, medium_a_fraction=medium_a_fraction,
+                              heat_bands_source=f"JRC-IDEES-2021 OIS 2019 ({HEAT_BANDS.name} {hb_sha[:12]})")
             e19_tot = sum(e19.values())
             other_rows.append(dict(mode=mode, country=c, industry_2019_mwh=e19_tot, other_2019_mwh=sum(other19.values()),
                                    other_share_of_industry_2019=(sum(other19.values()) / e19_tot if e19_tot else 0.0), industry_multiplier=mult,
@@ -352,11 +356,13 @@ def main():
                                           **{f"s2b_td_{oc}_mwh": float(s2b.get(f"pe_{oc}_mwh", 0.0)) for oc in ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat"]},
                                           **{f"td_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, other_bucket=ob))
                 tds[ob].append(dict(country=c, **{f"pe_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=td["biomass"], biomass_overflow_industry_to_gas_mwh=0.0, biomass_overflow_agriculture_to_gas_mwh=0.0))
-                if heat_ob:   # band columns; fixed industrial biomass is cement kiln fuel (high band) or steam / drying use in the route sectors (medium band), grade C
+                if heat_ob:   # band columns; fixed industrial biomass is cement kiln fuel (high band) or steam / drying use in the route sectors (medium band,
+                    # split at 200 C with the same fraction as the other bucket: supplement 01 section 2), grade C
                     for row, bio in ((summaries[ob][-1], pe["biomass"]), (tds[ob][-1], td["biomass"])):
-                        hi = min(1.0, cement50["biomass"] / bio) if bio > 0 else 0.0
+                        hi = min(1.0, cement50["biomass"] / bio) if bio > 0 else 0.0; med = 1.0 - hi if bio > 0 else 0.0
                         row.update(heat_extra, biomass_overflow_industry_mwh=ov_ind if row is summaries[ob][-1] else 0.0, biomass_overflow_agriculture_mwh=ov_ag if row is summaries[ob][-1] else 0.0,
-                                   biomass_source_band_medium_share=1.0 - hi if bio > 0 else 0.0, biomass_source_band_high_share=hi)
+                                   biomass_source_band_medium_a_share=med * medium_a_fraction, biomass_source_band_medium_b_share=med * (1.0 - medium_a_fraction),
+                                   biomass_source_band_high_share=hi)
         outputs[mode] = summary
         write_csv(rows, DEMAND_DIR / f"INDUSTRY_2050_PYPSA_EUR_{mode}.csv", list(rows[0].keys()))
         write_csv(summary, DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}.csv", list(summary[0].keys()))

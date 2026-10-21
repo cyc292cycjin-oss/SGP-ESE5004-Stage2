@@ -12,8 +12,13 @@ Only activity levels are anchored (S4R supplement 01 section 2); carrier structu
     transport sector total equals the anchor and the electricity part is not counted twice; EV / FCEV / ICE shares per the current method;
   * industry (incl. non-energy use) multiplier = industry anchor / 2019 industry: ammonia, methanol, HVC, the energy fallback, feedstock;
   * physical output (cement, crude steel): min(base x G^((2050 - base year) / 28 x elasticity), saturation x population 2050, plan cap)
-    with G = AEO8 Table D.2 real GDP 2050 / 2022 (TL = mean of KH / LA / MM); plan values only as caps.
-Residential / commercial / agriculture fuel rows and international bunkers stay as in the ratio table (not anchored).
+    with G = AEO8 Table D.2 real GDP 2050 / 2022 (TL = mean of KH / LA / MM); plan values only as caps;
+  * residential / commercial / agriculture fuel rows (supplement 01 section 3, decision 137): sector fuel = ATS sector TFEC anchor (ATS TFEC x the
+    same normalised TFEC weight as transport) - sector electricity anchor; the 2019 carrier structure of the sector's fuel rows (cooking LPG,
+    biomass, ...) is scaled proportionally (the ratio table has one multiplier per sector, so this is also its carrier structure); a negative
+    value is set to 0 and listed (country, sector, value), never filled from another source; a positive value without any 2019 fuel row (no
+    carrier structure) is also left at 0 and listed.
+International bunkers stay UNSD 2019 constants (decision 10; sector InternationalBunkers, not anchored).
 
     python scripts_project/m08b_demand.py
 """
@@ -49,6 +54,7 @@ WORLDSTEEL_XLSX = M08B_SRC / "exp-2026-10-20_15_02_22.xlsx"
 SECTORS = ["Industry", "Transport", "Residential", "Commercial", "AgricultureOthers"]
 C3_ITEM = {"Industry": "Industry", "Transport": "Transport", "Residential": "Residential", "Commercial": "Commercial", "AgricultureOthers": "Agriculture and Others"}
 BASE_SECTORS = ["Residential", "Commercial", "AgricultureOthers", "Transport"]   # S4J-1 TABLE_BASE_SECTORS (decision 104)
+FUEL_SECTORS = {"residential": "Residential", "commercial": "Commercial", "agriculture": "AgricultureOthers"}   # supplement 01 section 3: fuel rows anchored
 RES_ELEC_ATS_MTOE = (29.0, 33.2)   # AEO8 section 3.1.3 p.61: ATS residential electricity 2022 -> 2050 (Mtoe); the only sector electricity value printed
 TL_PEERS = ("KH", "LA", "MM")
 ELASTICITY, ELASTICITY_RANGE = 0.5, (0.3, 0.8)            # industry_output_elasticity (assumption, grade C)
@@ -187,10 +193,17 @@ def main():
         if tr_fuel_target < 0 or tr_fuel_base <= 0:
             raise ValueError(f"{c}: transport fuel anchor {tr_fuel_target} / 2019 base {tr_fuel_base} not usable")
         m_tr = tr_fuel_target / tr_fuel_base
+        fuel = {}   # supplement 01 section 3: sector fuel anchor = ATS sector TFEC anchor - sector electricity anchor; negative / no 2019 structure -> 0 (listed)
+        for key, s in FUEL_SECTORS.items():
+            tfa = A_tfec * w_t[s] / w_t_sum; raw = tfa - el_anchor[s]; fb = float(base[m & (dem.sector == s) & ~is_el].sum())
+            zeroed = "negative" if raw < 0 else ("no_2019_fuel_rows" if (raw > 0 and fb <= 0) else "")
+            used = 0.0 if zeroed else raw
+            fuel[s] = dict(key=key, tfec_anchor=tfa, raw=raw, used=used, base=fb, mult=(used / fb if fb > 0 else 0.0), zeroed=zeroed)
         rows_note = "126,129,134"
         for i in dem.index[m]:
             sec, car, b = dem.at[i, "sector"], dem.at[i, "carrier"], base[i]
             orig_blank = dem.at[i, "value_2050_mwh"] == ""
+            note = rows_note
             if sec in BASE_SECTORS and car == "electricity":
                 mult = el_anchor[sec] / el19[sec] if el19[sec] > 0 else 0.0   # = anchor x (row base / sector base 2019)
                 how = f"ats_anchor: base electricity load = AEO8 ATS electricity x normalised {sec} weight (2019 electricity x ATS sector growth), split by 2019 account share"
@@ -200,8 +213,12 @@ def main():
             elif sec in ("Industry", "NonEnergyUse"):
                 mult = m_ind
                 how = "ats_anchor: 2019 x ATS industry multiplier (industry anchor incl. non-energy use / 2019); steel and cement by the physical output rule in s3_0_industry.py"
+            elif sec in fuel:
+                f = fuel[sec]; mult = f["mult"]; note = rows_note + ",137"
+                how = (f"ats_anchor (supplement 01 section 3): {sec} fuel = ATS {sec} TFEC anchor - {sec} electricity anchor, x 2019 carrier share of the sector fuel rows"
+                       + (f"; anchor {f['raw']:.6g} MWh set to 0 ({f['zeroed']}; registry demand_sector_fuel_anchor_zeroed)" if f["zeroed"] else ""))
             else:
-                continue   # residential / commercial / agriculture fuels and international bunkers: ratio table unchanged (not anchored)
+                continue   # international bunkers: UNSD 2019 constants (decision 10), not anchored
             if orig_blank:
                 continue
             v = b * mult
@@ -211,7 +228,7 @@ def main():
             if str(dem.at[i, "in_existing_electricity_load"]).lower() == "true":
                 new.at[i, "existing_electricity_load_2050_mwh"] = repr(float(v))
             refs = [x.strip() for x in str(dem.at[i, "decision_ref"]).replace(";", ",").split(",") if x.strip()]
-            new.at[i, "decision_ref"] = ",".join(refs + [x for x in rows_note.split(",") if x not in refs])
+            new.at[i, "decision_ref"] = ",".join(refs + [x for x in note.split(",") if x not in refs])
         old_base = float(pd.to_numeric(dem[m & is_el & dem.sector.isin(BASE_SECTORS)].value_2050_mwh, errors="coerce").fillna(0).sum())
         old_tr = float(pd.to_numeric(dem[m & (dem.sector == "Transport")].value_2050_mwh, errors="coerce").fillna(0).sum())
         anchors.append(dict(country=c, population_2050_million=a8[c]["pop_2050_million"], population_source=a8[c]["pop_source"],
@@ -228,7 +245,11 @@ def main():
                             transport_anchor_mwh=tr_anchor, transport_fuel_anchor_mwh=tr_fuel_target, transport_fuel_multiplier=m_tr,
                             industry_anchor_mwh=ind_anchor, industry_multiplier=m_ind,
                             base_load_ratio_table_mwh=old_base, transport_ratio_table_mwh=old_tr,
-                            base_load_nonnegative=bool(sum(el_anchor[s] for s in BASE_SECTORS) >= 0)))
+                            base_load_nonnegative=bool(sum(el_anchor[s] for s in BASE_SECTORS) >= 0),
+                            **{k: v for f in fuel.values() for k, v in ((f"{f['key']}_tfec_anchor_mwh", f["tfec_anchor"]), (f"{f['key']}_fuel_anchor_raw_mwh", f["raw"]),
+                                                                        (f"{f['key']}_fuel_anchor_mwh", f["used"]), (f"{f['key']}_fuel_2019_mwh", f["base"]),
+                                                                        (f"{f['key']}_fuel_multiplier", f["mult"]), (f"{f['key']}_fuel_zeroed", f["zeroed"]),
+                                                                        (f"{f['key']}_fuel_ratio_table_mwh", float(pd.to_numeric(dem[m & (dem.sector == FUEL_SECTORS[f['key']]) & ~is_el].value_2050_mwh, errors="coerce").fillna(0).sum())))}))
     an = pd.DataFrame(anchors)
     an.to_csv(ANCHORS, index=False, float_format="%.12g")
     new.to_csv(ANCHOR_TABLE, index=False)
@@ -244,7 +265,11 @@ def main():
                transport_ratio_table_11_twh=float(an.transport_ratio_table_mwh.sum() / 1e6),
                residential_elec_10_twh=float(ten.residential_elec_anchor_mwh.sum() / 1e6), aeo8_ats_residential_elec_2050_twh=RES_ELEC_ATS_MTOE[1] * MWH_PER_MTOE / 1e6,
                ats_tfec_10_mtoe=float(ten.ats_tfec_2050_mwh.sum() / MWH_PER_MTOE), ats_elec_10_twh=float(ten.ats_elec_2050_mwh.sum() / 1e6),
-               cement_2050_11_mt=float(out.cement_2050_mt.sum()), steel_2050_11_mt=float(out.steel_2050_mt.sum()), all_base_loads_nonnegative=bool(an.base_load_nonnegative.all()))
+               cement_2050_11_mt=float(out.cement_2050_mt.sum()), steel_2050_11_mt=float(out.steel_2050_mt.sum()), all_base_loads_nonnegative=bool(an.base_load_nonnegative.all()),
+               **{f"{k}_fuel_anchor_11_twh": float(an[f"{k}_fuel_anchor_mwh"].sum() / 1e6) for k in FUEL_SECTORS},
+               **{f"{k}_fuel_ratio_table_11_twh": float(an[f"{k}_fuel_ratio_table_mwh"].sum() / 1e6) for k in FUEL_SECTORS},
+               fuel_anchor_zeroed=[dict(country=r.country, sector=FUEL_SECTORS[k], reason=r[f"{k}_fuel_zeroed"], anchor_mwh=float(r[f"{k}_fuel_anchor_raw_mwh"]))
+                                   for _, r in an.iterrows() for k in FUEL_SECTORS if r[f"{k}_fuel_zeroed"]])
     srcs = {p.name: sha256(p) for p in (RATIO_TABLE, SRC_DIR / AEO8_COUNTRY_CSV, SRC_DIR / AEO8_CSV, D2_CSV, WPP_CSV, USGS_XLSX, WORLDSTEEL_XLSX)}
     write_json(dict(script=SCRIPT, sources=srcs, c3_ats_mtoe=c3, sector_growth_electricity=g_el, sector_growth_tfec=g_tfec, residential_electricity_ats_mtoe=RES_ELEC_ATS_MTOE,
                     gdp_growth_2022_2050=g, tl_rule=f"per capita = mean({', '.join(TL_PEERS)}) ATS 2050; population UN WPP 2024 median 2050", elasticity=ELASTICITY,

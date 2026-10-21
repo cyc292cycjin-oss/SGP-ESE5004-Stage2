@@ -1,4 +1,4 @@
-"""M08b (decisions 126, 129, 131, 133, 134): registry rows of the demand anchoring / useful-heat step.
+"""M08b (decisions 126, 129, 131, 133, 134) and its supplement 01 (decision 137): registry rows of the demand anchoring / useful-heat step.
 
     python scripts_project/m08b_data.py      # after m08b_demand.py, m08b_heat_bands.py, s3_0_industry.py; then python scripts_project/d1_registry.py
 
@@ -98,10 +98,27 @@ def b1_demand(reg: Registry, cor: Corrections):
     reg.add("demand_anchor_family_main", "R1 (decisions 126, 129; M08b B1): activity-level anchor family for the 2050 demand = ACE AEO8 (2024) AMS Targets Scenario (ATS): per-capita "
             "TFEC and electricity by country (Table C.8 p.187) x population (Table D.1 p.188); sector split = regional ATS sector growth (Table C.3 ATS panel, 2022 -> 2050) x each "
             "country 2019 sector structure (D1 table base_2019_mwh), normalised; ONLY activity levels are anchored (base electricity load, transport fuel / service, industry incl. "
-            "non-energy use, physical output); industry electricity and all carrier structures endogenous; residential / commercial / agriculture fuel rows and international "
-            "bunkers keep the ratio table (not anchored); config research.demand.growth_method = ats_anchor (demand table DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv, "
-            "scripts_project/m08b_demand.py); ratio (BAS growth, upper bound) / level and the country_allocation variants stay as sensitivities",
-            "aeo8_ats", "flag", "B", ATS_SRC, "Tables C.3, C.8, D.1; DEMAND_ANCHOR_AEO8_ATS.csv", src, decision_ref="126, 129, 134")
+            "non-energy use, physical output, and - supplement 01 section 3 - the residential / commercial / agriculture fuel rows, demand_sector_fuel_anchor_rule); industry "
+            "electricity and all carrier structures endogenous; international bunkers stay UNSD 2019 constants (decision 10); config research.demand.growth_method = ats_anchor "
+            "(demand table DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv, scripts_project/m08b_demand.py); ratio (BAS growth, upper bound) / level and the "
+            "country_allocation variants stay as sensitivities",
+            "aeo8_ats", "flag", "B", ATS_SRC, "Tables C.3, C.8, D.1; DEMAND_ANCHOR_AEO8_ATS.csv", src, decision_ref="126, 129, 134, 137")
+    fu = {k: (tot[f"{k}_fuel_anchor_11_twh"], tot[f"{k}_fuel_ratio_table_11_twh"]) for k in ("residential", "commercial", "agriculture")}
+    reg.add("demand_sector_fuel_anchor_rule", "Supplement 01 section 3 (decision 137; M08b): residential / commercial / agriculture-and-others fuel demand 2050 by country = ATS sector "
+            "TFEC anchor (ATS country TFEC x the normalised TFEC weight of demand_transport_anchor_rule: 2019 sector TFEC x Table C.3 ATS sector growth) - the sector electricity "
+            "anchor of demand_base_load_rule; the fuel rows of the sector keep their 2019 carrier structure (cooking LPG, biomass, coal, ...; the ratio table has one multiplier per "
+            "sector) scaled to the anchor; a negative anchor is set to 0 and listed (demand_sector_fuel_anchor_zeroed), never filled from another source; 11 countries TWh "
+            + "; ".join(f"{k} {a:,.1f} (ratio table {b:,.1f})" for k, (a, b) in fu.items()) + "; the build checks every country and sector against the anchor (1e-9); "
+            "international bunkers unchanged (UNSD 2019, decision 10)", "tfec_minus_electricity", "rule", "B", ATS_SRC + "; D1 demand table (2019 sector structure)",
+            "DEMAND_ANCHOR_AEO8_ATS.csv *_fuel_anchor_mwh", src, decision_ref="134, 137")
+    zl = tot["fuel_anchor_zeroed"]
+    reg.add("demand_sector_fuel_anchor_zeroed", "Supplement 01 section 3 item 3: country-sector fuel anchors set to 0 (TWh, anchor before zeroing): "
+            + "; ".join(f"{z['country']} {z['sector']} {z['anchor_mwh'] / 1e6:+.3f} ({z['reason']})" for z in zl)
+            + f"; negative = the sector electricity anchor exceeds the sector TFEC anchor (together {-sum(z['anchor_mwh'] for z in zl if z['reason'] == 'negative') / 1e6:,.2f} TWh: the "
+            "sector total then equals the electricity anchor and the country TFEC exceeds the ATS TFEC anchor by that amount); no_2019_fuel_rows = positive anchor but the sector has no 2019 "
+            "fuel row to carry a carrier structure (left at 0, not allocated); mechanism (INFERENCE): residential TFEC falls in ATS (C.3 0.84 x, traditional biomass phase-out) while "
+            "residential electricity rises (1.14 x), and these countries have small 2019 fuel shares", f"{len(zl)} cells", "list", "C", ATS_SRC,
+            "DEMAND_ANCHOR_M08B_EVIDENCE.json totals.fuel_anchor_zeroed", src, decision_ref="137")
     cor.supersede("demand_country_allocation_mode", "demand_anchor_family_main", "B1", "134", "aeo8_ats_relative allocation kept as the ratio-table sensitivity")
     cor.supersede("demand_growth_method", "demand_anchor_family_main", "B1", "134", "ratio = BAS-growth upper-bound sensitivity, level = sensitivity")
     reg.add("demand_base_load_rule", "R1 (supplement 01 section 2 (a); M08b B1): base (non-industry) electricity load 2050 by country = AEO8 ATS country electricity (C.8 per capita x D.1 "
@@ -206,57 +223,170 @@ def b1_output(reg: Registry, cor: Corrections):
 
 
 # --- B2 (M08-6, decision 133): useful-heat bands and the biomass overflow ------------------------------------------------------
+TEMPERATURE_BASIS = {   # (band, technology-data row) -> temperature coverage (DEA industrial process heat catalogue; supplement 01 section 2)
+    ("low", "electric boiler steam"): "DEA 310.1 electric boiler steam: 1-16 bar, typically 8 bar / 175 C (covers < 150 C)",
+    ("medium_a", "electric boiler steam"): "DEA 310.1 electric boiler steam: 1-16 bar (16 bar saturated steam about 200 C), typically 8 bar / 175 C -> up to 200 C (medium A only)",
+    ("low", "industrial heat pump high temperature"): "DEA 302.b high-temperature heat pump up to 150 C (low band only, decision 133)",
+    ("low", "gas boiler steam"): "DEA 311.1c steam boiler: steam 125-300 C (up to 311 C at 100 bar); not for firing / melting",
+    ("medium_a", "gas boiler steam"): "DEA 311.1c steam boiler: steam 125-300 C (covers 150-200 C)",
+    ("medium_b", "gas boiler steam"): "DEA 311.1c steam boiler: steam 125-300 C (up to 311 C at 100 bar) -> covers the 200-300 C part of medium B",
+    ("low", "solid biomass boiler steam"): "DEA 311.1e steam boiler wood: steam 125-300 C; not for firing / melting",
+    ("medium_a", "solid biomass boiler steam"): "DEA 311.1e steam boiler wood: steam 125-300 C (covers 150-200 C)",
+    ("medium_b", "direct firing gas"): "300-400 C part of medium B: no technology-data steam row covers it; fuel combustion reaches the temperature -> the direct-firing gas row "
+                                       "(DEA 312.a, 400-1,600 C) is the cost representative (supplement 01 section 2, grade C)",
+    ("medium_b", "direct firing solid fuels"): "300-400 C part of medium B: direct-firing solid fuels row (DEA 312.b, coal / biomass multifuel burners) as the cost representative "
+                                               "(supplement 01 section 2, grade C)",
+    ("high", "direct firing gas"): "DEA 312.a direct firing natural gas: 400-800 C and > 800 C up to 1,600 C",
+    ("high", "direct firing solid fuels"): "DEA 312.b direct firing solid fuels (coal / biomass multifuel burners): high-temperature processes",
+}
+
+
 def b2_heat(reg: Registry, cor: Corrections):
-    hb = pd.read_csv(HEAT_BANDS).set_index("carrier"); hj = json.loads(HEAT_BANDS_JSON.read_text())
+    hb = pd.read_csv(HEAT_BANDS).set_index("carrier"); hj = json.loads(HEAT_BANDS_JSON.read_text()); ms = hj["medium_split"]; f_a = float(ms["medium_a_fraction"])
     src = f"bands:{sha256(HEAT_BANDS)}; idees:{hj['source']['sha256']}"
-    shares = "; ".join(f"{c} low {hb.at[c, 'share_low']:.3f} / medium {hb.at[c, 'share_medium']:.3f} / high {hb.at[c, 'share_high']:.3f} / mechanical {hb.at[c, 'share_mechanical']:.3f}" for c in hb.index)
-    reg.add("industry_route_mode_proposed", "R1.4 / R4 (decision 133; M08b B2): 'other industry' bucket (UNSD other / construction / mining -> PyPSA-Eur 'Other industrial sectors') and the "
-            "biomass overflow are converted to useful heat by temperature band (low < 150 C, medium 150-400 C, high > 400 C) served endogenously by the technology-data v0.15.0 "
-            "options of each band (industry_heat_band_technology_map); physical-output sectors and the other energy-fallback sub-sectors keep the PyPSA-Eur 2050 routes "
-            "(St_primary_fraction 0.3, DRI_fraction 1.0, HVC_primary_fraction 0.4); config research.s3.industry.other_bucket = useful_heat_bands (pypsa_eur_2050 = former main, sensitivity)",
+    shares = "; ".join(f"{c} low {hb.at[c, 'share_low']:.3f} / medium A {hb.at[c, 'share_medium_a']:.3f} / medium B {hb.at[c, 'share_medium_b']:.3f} / high {hb.at[c, 'share_high']:.3f} / "
+                       f"mechanical {hb.at[c, 'share_mechanical']:.3f}" for c in hb.index)
+    reg.add("industry_route_mode_proposed", "R1.4 / R4 (decision 133; M08b B2; supplement 01 decision 137): 'other industry' bucket (UNSD other / construction / mining -> PyPSA-Eur 'Other "
+            "industrial sectors') and the biomass overflow are converted to useful heat by temperature band (low < 150 C, medium A 150-200 C, medium B 200-400 C, high > 400 C) served "
+            "endogenously by the technology-data v0.15.0 options of each band (industry_heat_band_technology_map); physical-output sectors and the other energy-fallback sub-sectors keep the "
+            "PyPSA-Eur 2050 routes (St_primary_fraction 0.3, DRI_fraction 1.0, HVC_primary_fraction 0.4); config research.s3.industry.other_bucket = useful_heat_bands (pypsa_eur_2050 = "
+            "former main, sensitivity)",
             "useful_heat_bands", "flag", "C", "deviation from PyPSA-Eur (fixed 2050 carrier ratios) - reason: ASEAN industry base is coal / biomass heat, full-route electrification gave "
-            "industry electricity 1.7-4.2 x the external anchors", "S4R_PLAN.md R1.4; s3_0_industry.py useful_heat_bands", src, decision_ref="126, 133")
+            "industry electricity 1.7-4.2 x the external anchors", "S4R_PLAN.md R1.4; s3_0_industry.py useful_heat_bands", src, decision_ref="126, 133, 137")
     cor.supersede("industry_other_bucket_mode", "industry_route_mode_proposed", "B2", "133", "pypsa_eur_2050 kept as sensitivity")
-    reg.add("industry_other_bucket_heat_band_shares", "M08b B2: temperature-band split of the other-bucket fuels from JRC-IDEES-2021 EU27 'Other industrial sectors' 2019 final energy by "
-            "process (sheet OIS_fec; scripts_project/m08b_heat_bands.py): low = low-enthalpy heat, thermal / steam drying, thermal / steam process cooling; medium = steam processing; "
-            "high = thermal processing (fuel-fired process heating); mechanical = diesel motors (fuel kept as final energy); shares by ASEAN carrier: " + shares +
+    reg.add("industry_other_bucket_heat_band_shares", "M08b B2 + supplement 01 section 2: temperature-band split of the other-bucket fuels from JRC-IDEES-2021 EU27 'Other industrial "
+            "sectors' 2019 final energy by process (sheet OIS_fec; scripts_project/m08b_heat_bands.py): low = low-enthalpy heat, thermal / steam drying, thermal / steam process cooling; "
+            f"medium = steam processing, split at 200 C into medium A (x {f_a:g}) and medium B (x {1 - f_a:g}) (industry_heat_band_medium_split); high = thermal processing (fuel-fired "
+            "process heating); mechanical = diesel motors (fuel kept as final energy; industry_other_bucket_mechanical_fuel); shares by ASEAN carrier: " + shares +
             "; heat uses x 0.90 (existing_boiler_efficiency) = useful heat; other-bucket electricity kept as electricity (non-thermal; JRC thermal electricity is a small share); "
-            "process-to-band mapping is an assumption (grade C; DEA temperature levels)", "INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv", "file", "C",
-            "JRC-IDEES-2021 Industry EU27 (CC BY 4.0); DEA industrial process heat catalogue", "sheet OIS_fec, 2019", src, decision_ref="133")
+            "process-to-band mapping is an assumption (grade C; DEA temperature levels); EU27 distribution (ASEAN distribution DATA_PENDING, industry_heat_band_asean_distribution)",
+            "INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv", "file", "C", "JRC-IDEES-2021 Industry EU27 (CC BY 4.0); DEA industrial process heat catalogue", "sheet OIS_fec, 2019", src, decision_ref="133, 137")
+    reg.add("industry_heat_band_medium_split", "Supplement 01 section 2 (decision 137): the JRC-IDEES temperature split has no 200 C breakpoint (steam processing is one 150-400 C process), "
+            f"so the medium share is divided by linear interpolation in temperature inside 150-400 C: medium A (150-200 C) = (200 - 150) / (400 - 150) = {f_a:g} of the medium share, "
+            f"medium B (200-400 C) = {1 - f_a:g}; same fraction for every carrier and for the medium part of the fixed industrial biomass (overflow source band); ASSUMPTION grade C; "
+            f"sensitivity +-50 % of the 200 C breakpoint share = {ms['sensitivity'][0]:g}-{ms['sensitivity'][1]:g} (research.s2.industry.heat_band_medium_a_fraction; regenerate "
+            "the band tables, the build refuses a value that differs from them); note (INFERENCE): DEA quotes industrial steam typically 8 bar / 175 C, so a linear split may put less "
+            "of the steam use below 200 C than a temperature-resolved ASEAN distribution would", f_a, "fraction", "C", "linear interpolation (supplement 01 section 2); JRC-IDEES-2021 OIS",
+            "m08b_heat_bands.MEDIUM_A_FRACTION", src, sensitivity_low=ms["sensitivity"][0], sensitivity_high=ms["sensitivity"][1], decision_ref="137")
     rows = []
     for band, techs in HEAT_BAND_TECH.items():
         for tech, carrier, fuel in techs:
-            rows.append(dict(band=band, technology_data_row=tech, link_carrier=carrier, input=fuel, capture=carrier.endswith(" CC"),
-                             temperature_basis={"electric boiler steam": "DEA 310.1 electric boiler steam: 1-16 bar, typically 8 bar / 175 C (covers < 150 C and the lower part of 150-400 C)",
-                                                "industrial heat pump high temperature": "DEA 302.b high-temperature heat pump up to 150 C (low band only, decision 133)",
-                                                "gas boiler steam": "DEA 311.1c steam boiler: steam 125-300 C (up to 311 C at 100 bar); not for firing / melting",
-                                                "solid biomass boiler steam": "DEA 311.1e steam boiler wood: steam 125-300 C; not for firing / melting",
-                                                "direct firing gas": "DEA 312.a direct firing natural gas: 400-800 C and > 800 C up to 1,600 C",
-                                                "direct firing solid fuels": "DEA 312.b direct firing solid fuels (coal / biomass multifuel burners): high-temperature processes"}[tech]))
+            rows.append(dict(band=band, technology_data_row=tech, link_carrier=carrier, input=fuel, capture=carrier.endswith(" CC"), temperature_basis=TEMPERATURE_BASIS[(band, tech)]))
     write_csv(rows, TECH_MAP, list(rows[0].keys()))
-    reg.add("industry_heat_band_technology_map", "M08b B2 (decision 133): useful-heat band -> technology-data v0.15.0 rows (efficiency, investment, FOM, VOM, lifetime from the active cost layer; "
-            "biomass CC = same row + biomass boiler capture x CO2 x capture fraction): low = electric boiler steam (0.99), industrial heat pump high temperature (COP 3.2), gas boiler steam "
-            "(0.94), solid biomass boiler steam (0.90) +CC; medium = electric boiler steam, gas boiler steam, solid biomass boiler steam +CC (heat pumps low band only); high = direct firing "
-            "gas (1.0), direct firing solid fuels (biomass, 1.0) +CC; no electric heating in the high band (technology-data v0.15.0 has no electric direct-firing / furnace row covering "
-            "> 400 C, although the DEA 2026 catalogue lists electric direct firing 400-800 C); NO hydrogen heating in any band: technology-data v0.15.0 has no hydrogen boiler / direct "
-            "firing row - the instruction lists hydrogen for > 400 C, the technology-data rule excludes it (review item); table INDUSTRY_HEAT_BAND_TECHNOLOGY_MAP.csv; code s2_layers.HEAT_BAND_TECH",
+    reg.add("industry_heat_band_technology_map", "M08b B2 (decision 133) + supplement 01 section 2 (decision 137): useful-heat band -> technology-data v0.15.0 rows (efficiency, investment, "
+            "FOM, VOM, lifetime from the active cost layer; biomass CC = same row + biomass boiler capture x CO2 x capture fraction): low = electric boiler steam (0.99), industrial heat "
+            "pump high temperature (COP 3.2), gas boiler steam (0.94), solid biomass boiler steam (0.90) +CC; medium A (150-200 C) = electric boiler steam, gas boiler steam, solid biomass "
+            "boiler steam +CC; medium B (200-400 C) = gas boiler steam (to 300 C), direct firing gas (1.0) and direct firing solid fuels (biomass, 1.0) +CC as the 300-400 C representative "
+            "(fuel combustion reaches the temperature; grade C), NO electric heating (no technology-data row covers > 200 C: electric boiler steam about <= 200 C); high = direct firing gas, "
+            "direct firing solid fuels +CC, no electric heating (no electric direct-firing / furnace row in v0.15.0, although the DEA 2026 catalogue lists electric direct firing 400-800 C); "
+            "heat pumps low band only; NO hydrogen heating in any band (industry_heat_hydrogen_not_represented); table INDUSTRY_HEAT_BAND_TECHNOLOGY_MAP.csv; code s2_layers.HEAT_BAND_TECH",
             "INDUSTRY_HEAT_BAND_TECHNOLOGY_MAP.csv", "file", "C", "technology-data v0.15.0 (costs_2050); " + DEA_SRC, "s2_layers.HEAT_BAND_TECH",
-            f"map:{sha256(TECH_MAP)}", decision_ref="133")
-    reg.add("biomass_overflow_rule", "R4 (decision 133; M08b B2): fixed solid-biomass demand above the national potential (industry first, then agriculture) is converted to useful heat x 0.90 "
-            "(research.s2.industry.biomass_overflow_useful_heat_efficiency) in the band of its source: industry -> medium / high by the source shares of the fixed industrial biomass "
-            "(cement kiln fuel high, steam / drying use of the route sectors medium; INDUSTRY_2050_SUMMARY_*_OTHER_USEFUL_HEAT_BANDS.csv biomass_source_band_*), agriculture -> low; the "
-            "bands are served endogenously (electricity / methane / biomass boilers, heat pumps low only, direct firing high); cap = potential (decision 115 0.98 withdrawn); "
-            "replaces decision 36 (overflow -> fixed methane demand); biomass trade stays off (decision 36 trade part) with a cross-border biomass transport sensitivity at PyPSA-Eur "
-            "biomass_transport costs; config research.s2.industry.biomass_overflow_mode = useful_heat (methane = historical rule for networks built before M08b); main-run overflow "
-            "after M08b: SG agriculture only (0.18 TWh solid biomass)", "useful_heat_endogenous", "rule", "C",
+            f"map:{sha256(TECH_MAP)}", decision_ref="133, 137")
+    reg.add("biomass_overflow_rule", "R4 (decision 133; M08b B2; supplement 01): fixed solid-biomass demand above the national potential (industry first, then agriculture) is converted to "
+            "useful heat x 0.90 (research.s2.industry.biomass_overflow_useful_heat_efficiency) in the band of its source: industry -> medium A / medium B / high by the source shares of the "
+            "fixed industrial biomass (cement kiln fuel high, steam / drying use of the route sectors medium, split at 200 C by industry_heat_band_medium_split; "
+            "INDUSTRY_2050_SUMMARY_*_OTHER_USEFUL_HEAT_BANDS.csv biomass_source_band_*), agriculture -> low; the bands are served endogenously (industry_heat_band_technology_map); cap = "
+            "potential (decision 115 0.98 withdrawn); replaces decision 36 (overflow -> fixed methane demand); biomass trade stays off (decision 36 trade part) with a cross-border biomass "
+            "transport sensitivity at PyPSA-Eur biomass_transport costs; config research.s2.industry.biomass_overflow_mode = useful_heat (methane = historical rule for networks built "
+            "before M08b)", "useful_heat_endogenous", "rule", "C",
             "PyPSA-Eur v2025.07.0 (biomass_spatial true, biomass_transport false, solid_biomass_import disabled - no overflow rule upstream)", "R4; s2_layers.add_demand_layer", f"plan:{sha256(S4R_PLAN)}; map:{sha256(TECH_MAP)}",
-            decision_ref="126, 36, 115, 133")
+            decision_ref="126, 36, 115, 133, 137")
     for c in ["BN", "KH", "ID", "LA", "MY", "MM", "PH", "SG", "TH", "TL", "VN"]:
         cor.supersede(f"industry_biomass_overflow_to_gas_{c}", "biomass_overflow_rule", "B2", "133", "decision-36 overflow -> methane rule removed")
     cor.supersede("s4m_decision_115_biomass_cap_share", "biomass_overflow_rule", "B2", "133", "0.98 cap share no longer needed; key removed from the main config")
 
 
-def main(steps=("b1_demand", "b1_output", "b2_heat")):
+# --- supplement 01 (decision 137): review decisions on the M08b report section 6 ---------------------------------------------------------
+COST_DIR = ROOT / "research_inputs" / "cost_layers_v5"
+LAYER_NOW, LAYER_PRE_M08A = COST_DIR / "technology_data_v0.15.0_EUR2020", COST_DIR / "technology_data_v0.15.0_EUR2020_ea20gdp"   # M08a A1: the ea20gdp files = the former main layer
+
+
+def s3_3_param_id(tech: str, p: str) -> str:
+    """param_id of a technology-data row in scripts_project/s3_3_ammonia_methanol_data.py."""
+    return f"ammonia_methanol_td_{tech.replace(' ', '_').replace('(', '').replace(')', '').replace('.', '').lower()}_{p.replace(' ', '_').replace('-', '_')}"
+
+
+def s01_cost_doc_rows(cor: Corrections) -> list[dict]:
+    """Item 11 (M08a open item 9): registry rows that data scripts derived from the cost layer before M08a A1 (EA20 GDP-deflator rebase) still carry the
+    old file SHA256; currency values are recomputed from the active layer (EEA HICP rebase), non-currency values must be unchanged; every such row
+    gets the active file SHA256. Returns the change list."""
+    raw_now, raw_old = pd.read_csv(LAYER_NOW / "costs_2050_EUR2020.csv"), pd.read_csv(LAYER_PRE_M08A / "costs_2050_EUR2020.csv")
+    swap = {sha256(LAYER_PRE_M08A / f): (f, sha256(LAYER_NOW / f)) for f in ("costs_2050_EUR2020.csv", "costs_2050_EUR2020_prepared.csv")}
+    first = lambda t: {s3_3_param_id(r.technology, r.parameter): (r.technology, r.parameter, float(r.value)) for r in t.drop_duplicates(["technology", "parameter"]).itertuples()}
+    td_now, td_old = first(raw_now), first(raw_old)
+    pipes = {"gas_pipeline_cost_onshore": "CH4 (g) pipeline", "gas_pipeline_cost_submarine": "CH4 (g) submarine pipeline"}
+    val = lambda t, tech, p: float(t[(t.technology == tech) & (t.parameter == p)].value.iloc[0])
+    out = []
+    for pid, r in cor.base[cor.base.source_sha256.isin(list(swap))].sort_index().iterrows():
+        fname, new_sha = swap[r.source_sha256]; old_v = r.value; changes = dict(source_sha256=new_sha)
+        if pid in td_now:   # s3_3_ammonia_methanol_data.py rows
+            tech, p, v_now = td_now[pid]
+            if abs(float(old_v) - td_old[pid][2]) > 1e-9 * max(1.0, abs(td_old[pid][2])):
+                raise ValueError(f"{pid}: registry value {old_v} is not the pre-M08a layer value {td_old[pid][2]}")
+            changes["value"] = format(v_now, ".12g")
+            note = f"重算：technology-data v0.15.0 {tech} {p} 取现行成本层（M08a A1 EEA HICP 回算）{format(td_old[pid][2], '.6g')} → {format(v_now, '.6g')}"
+        elif pid in pipes:   # s3_1_gas_data.py: value typed from the layer file
+            v_old, v_now = val(raw_old, pipes[pid], "investment"), val(raw_now, pipes[pid], "investment")
+            if abs(float(old_v) - v_old) > 1e-9 * v_old:
+                raise ValueError(f"{pid}: registry value {old_v} is not the pre-M08a layer value {v_old}")
+            changes["value"] = format(v_now, ".12g")
+            changes["description"] = r.description.replace(f"investment {v_old:.2f} EUR/MW/km", f"investment {v_now:.2f} EUR/MW/km")
+            note = f"重算：{pipes[pid]} investment 取现行成本层（M08a A1 EEA HICP 回算）{v_old:.4f} → {v_now:.4f} EUR2020/MW/km（构建期价格一直取成本层，不受影响）"
+        else:   # flags / methods that only cite the layer file
+            note = "只更新来源文件 SHA256 为现行成本层（数值 / 标志不变）"
+        if "value" in changes and changes["value"] == r.value:
+            note = note.split("：")[0] + "：数值不变（非货币行），只更新来源文件 SHA256"
+        cor.modify(pid, "S01-11", "137", note + f"；文件 {fname}", **changes)
+        out.append(dict(param_id=pid, old_value=old_v, new_value=changes.get("value", old_v), old_sha256=r.source_sha256, new_sha256=new_sha))
+    return out
+
+
+def s01_items(reg: Registry, cor: Corrections):
+    an = pd.read_csv(ANCHORS).set_index("country"); summ = pd.read_csv(SUMMARY).set_index("country")
+    src = f"anchors:{sha256(ANCHORS)}; table:{sha256(ANCHOR_TABLE)}"
+    sup = ROOT / "research/06_scope_redesign/p1_m08b_20261021/M08B_SUPPLEMENT_01.md"; sup_sha = sha256(sup) if sup.exists() else ""
+    reg.add("industry_heat_hydrogen_not_represented", "Supplement 01 item A (decision 137): no hydrogen heating option in any useful-heat band - technology-data v0.15.0 has no "
+            "hydrogen boiler / hydrogen direct-firing row (decision 133: only rows with an entry); same as PyPSA-Eur (no hydrogen boiler); LIMITATION and direction of the bias: "
+            "hydrogen can still reach industrial heat indirectly as synthetic methane (methanation -> gas boilers / direct firing) with an extra conversion loss, so the role of "
+            "hydrogen in industrial heat may be UNDERESTIMATED; an extra cost row without a source would break the data rule", "not_represented", "flag", "C",
+            "technology-data v0.15.0 costs_2050; PyPSA-Eur v2025.07.0 (no H2 boiler)", "M08B_SUPPLEMENT_01.md section 1 item A", f"supplement:{sup_sha}", decision_ref="133, 137")
+    tr_el = float(an.transport_elec_anchor_mwh.sum()) / 1e6
+    reg.add("demand_transport_electricity_counted_once", "Supplement 01 item 8 (decision 137): the base load contains the 2050 transport electricity anchor (2019 rail / existing "
+            f"electric road electricity x ATS transport growth; 11 countries {tr_el:,.2f} TWh); the transport fuel rows carry (transport anchor - that electricity anchor) and the "
+            "land-transport EV / FCEV / ICE loads are derived only from the non-electricity land-transport rows (s2_layers.add_demand_layer, LAND_TRANSPORT_ACCOUNTS, carrier != "
+            "electricity), so the transport service anchor does NOT contain the existing transport electricity; it is counted once (base load) and kept there "
+            "(transport table total = anchor, checked per country)", "counted_once", "flag", "B", "M08b B1 tables", "DEMAND_ANCHOR_AEO8_ATS.csv transport_elec_anchor_mwh",
+            src, decision_ref="134, 137")
+    reg.add("demand_transport_carrier_efficiency_assumption", "Supplement 01 item 5 (decision 137): AEO8 prints no ATS carrier efficiencies by country, so the transport service "
+            "conversion uses the demand-table carrier structure (land transport oil-equivalent) x the current PyPSA-Eur v2025.07.0 2050 shares and efficiencies (registry "
+            "share_land_transport_* / share_transport_*_efficiency); kept, ASSUMPTION grade C (demand_transport_anchor_rule)", "table_structure_x_pypsa_eur_2050", "flag", "C",
+            ATS_SRC + "; PyPSA-Eur v2025.07.0", "M08B_SUPPLEMENT_01.md section 1 item 5", f"supplement:{sup_sha}", decision_ref="134, 137")
+    mech = {car: float(summ[f"other_mechanical_{car}_mwh"].sum()) / 1e6 for car in ("coal", "oil", "gas", "biomass")}
+    reg.add("industry_other_bucket_mechanical_fuel", "Supplement 01 item 6 (decision 137): the diesel-motor part of the other-industry bucket (JRC-IDEES OIS 'Diesel motors', "
+            f"construction / mining machinery) stays a fixed oil demand (11 countries {mech['oil']:,.1f} TWh oil, ID {float(summ.at['ID', 'other_mechanical_oil_mwh']) / 1e6:,.1f}); "
+            "synthetic fuels, biofuels and DAC can offset its emissions; electrification of it has no sourced rule (unlike agricultural machinery); kept, ASSUMPTION grade C "
+            "(flag row: no sourced range for a sensitivity)",
+            "fixed_oil", "flag", "C", "JRC-IDEES-2021 OIS (m08b_heat_bands.py)", "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv other_mechanical_oil_mwh",
+            f"summary:{sha256(SUMMARY)}", decision_ref="133, 137")
+    reg.add("gate_b11_completeness_retired", "Supplement 01 item 9 (decision 137): the S1-era B11 completeness check (v5_gates.gate_b11_completeness: every S1 technology at every "
+            "node) is retired for networks from S4A on: candidates are per resource site (geothermal / run-of-river only where a site exists), and the check failed identically on "
+            "the S4M-3 and the M08b networks (287 items, M08b report section 3.3); replaced by the B11 supply-route check (v5_gates.gate_b11_supply_routes, >= 2 supply routes for "
+            "every load-bearing terminal bus incl. the useful-heat bands), which s2_solve.py already runs as gate B11; s1_solve.py keeps the old check for S1 networks only",
+            "retired", "flag", "B", "M08b report section 3.3; scripts/m08b_b11_old.py", "M08B_SUPPLEMENT_01.md section 1 item 9", f"supplement:{sup_sha}", decision_ref="137")
+    reg.add("industry_heat_band_asean_distribution", "Supplement 01 item 12 (decision 137): the useful-heat temperature distribution of the other-industry bucket uses the EU27 "
+            "JRC-IDEES-2021 OIS process split (industry_other_bucket_heat_band_shares); an ASEAN-specific temperature distribution is not available -> DATA_PENDING; alternative: "
+            "calibrate the band shares to the industrial heat / electricity shares of the ERIA LCET-CN country chapters (RPR FY2024 No.12); EU27 kept (the M08b report listed this "
+            "item as DATA_PENDING, the registry row is added here)", None, "fraction", "C", "ERIA (2024) LCET-CN country chapters (candidate)", "M08B_SUPPLEMENT_01.md section 1 item 12",
+            f"supplement:{sup_sha}", decision_ref="133, 137", status="DATA_PENDING")
+    reg.add("network_builder_script", "Supplement 01 item C (decision 137): the research networks are built by scripts_project/s2_network.py (build_scenario_s2; one build writes the "
+            "2920x3h network and its exact daily-mean 365x24h network); scripts_project/build_research_network.py holds only the S1 static checks (REQUIRED_PER_NODE); the M08b "
+            "instruction section 3.1 named build_research_network.py - corrected here and in the M08b report", "scripts_project/s2_network.py", "flag", "B", "repository code",
+            "scripts_project/s2_network.py build_scenario_s2", f"supplement:{sup_sha}", decision_ref="137")
+    changes = pd.DataFrame(s01_cost_doc_rows(cor))
+    print("item 11 cost-layer documentation rows:"); print(changes.assign(old_sha256=changes.old_sha256.str[:12], new_sha256=changes.new_sha256.str[:12]).to_string(index=False))
+
+
+def main(steps=("b1_demand", "b1_output", "b2_heat", "s01_items")):
     reg = Registry(SCRIPT); cor = Corrections()
     for s in steps:
         globals()[s](reg, cor)

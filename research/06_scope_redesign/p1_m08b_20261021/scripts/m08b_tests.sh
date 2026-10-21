@@ -4,6 +4,8 @@
 set -u
 WT=/home/jin/wt_m08b_20261021
 PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
+# supplement 01: the JRC-IDEES workbook is an ignored input; point the band-split sensitivity test at the main checkout copy
+export M08B_IDEES_XLSX=${M08B_IDEES_XLSX:-/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/research_inputs/registry_v5/sources/jrc_idees_2021/EU27/JRC-IDEES-2021_Industry_EU27.xlsx}
 cd "$WT" || exit 1
 if [ "${FULL:-0}" = "1" ]; then FILES=tests/research; else FILES=${FILES:-$(ls tests/research/test_m08b_*.py)}; fi
 echo "solver calls in selected files:"; grep -rn -E 'optimize\(|\.solve\(|linprog' $FILES | cut -c1-140 || echo none

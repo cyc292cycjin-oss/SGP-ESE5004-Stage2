@@ -1,14 +1,16 @@
 """M08b section 3 (decisions 126, 129-134): static checks of the rebuilt networks and the comparison with the networks before the corrections (no solve).
 
-    python scripts_project/m08b_static.py --new <builds dir> --old <S4M-3 builds dir> --out <evidence dir>
+    python scripts_project/m08b_static.py --new <builds dir> --old <S4M-3 builds dir> --out <evidence dir> [--prev <M08b first-round builds dir> --tag S01]
 
-Static gates on both 2920x3h networks: B5 single switch, B8 demand conservation, B11 completeness and supply routes, B13 one-way imports, B16 identical
-import prices, G2 structure (G2.1 file SHA256 = build receipt + read-back, G2.2 config-subset hash = current config; G2.3 needs a solve). M08b checks:
-demand = ATS anchor by country (base load, transport, industry multiplier; ledger), no negative load, temperature-band map = s2_layers.HEAT_BAND_TECH
-(no electric / hydrogen input in the high band, heat pumps low only), no fixed methane overflow demand, fixed solid biomass <= national pool, LNG
-terminals uncapped (8,020.43 EUR/MW/a), VN storage cap 106.07 Mt/a, ground PV cap = previous x 5.1/4.6, offshore rule pypsa_eur_v2025_07 active;
-the 365x24h networks are the exact daily means (annual load energy equal). Writes M08B_STATIC_CHECKS.json, BUILD_INPUT_CHANGES_M08B.json / .csv,
-M08B_NETWORK_FILES.csv.
+Static gates on both 2920x3h networks: B5 single switch, B8 demand conservation, B11 supply routes, B13 one-way imports, B16 identical import prices,
+G2 structure (G2.1 file SHA256 = build receipt + read-back, G2.2 config-subset hash = current config; G2.3 needs a solve). The S1-era B11 completeness
+check (every S1 technology at every node) is retired (supplement 01 item 9, registry gate_b11_completeness_retired): candidates are per resource
+site since S4A; the supply-route check replaces it. M08b checks: demand = ATS anchor by country (base load, transport, industry multiplier,
+residential / commercial / agriculture fuel rows (supplement 01 section 3); ledger), no negative load, temperature-band map = s2_layers.HEAT_BAND_TECH
+(no electric / hydrogen input in medium B and the high band, electric boilers in low / medium A only, heat pumps low only), no fixed methane overflow
+demand, fixed solid biomass <= national pool, LNG terminals uncapped (8,020.43 EUR/MW/a), VN storage cap 106.07 Mt/a, ground PV cap = previous x
+5.1/4.6, offshore rule pypsa_eur_v2025_07 active; the 365x24h networks are the exact daily means (annual load energy equal). Writes
+M08B{_tag}_STATIC_CHECKS.json, BUILD_INPUT_CHANGES_M08B{_tag}.json / .csv, M08B{_tag}_NETWORK_FILES.csv.
 """
 from __future__ import annotations
 
@@ -30,7 +32,7 @@ if str(HERE) not in sys.path:
 from phase4_static import config   # noqa: E402
 from s2_layers import HEAT_BAND_BUS, HEAT_BAND_TECH   # noqa: E402
 from v5.gates_v6 import config_subset_sha256   # noqa: E402
-from v5.v5_gates import (gate_b5_single_switch, gate_b8_demand_consistency, gate_b11_completeness, gate_b11_supply_routes,   # noqa: E402
+from v5.v5_gates import (gate_b5_single_switch, gate_b8_demand_consistency, gate_b11_supply_routes,   # noqa: E402
                          gate_b13_imports_one_way, gate_b16_import_prices_identical)
 
 logging.getLogger("pypsa").setLevel(logging.ERROR)
@@ -38,6 +40,10 @@ COUNTRIES = ["BN", "KH", "ID", "LA", "MY", "MM", "PH", "SG", "TH", "TL", "VN"]
 SCEN = ["integrated", "disconnected"]
 FIXED_EL = ["electricity", "industry electricity", "agriculture machinery electric", "land transport EV"]   # S4R fixed electricity load definition
 PV_SCALE = 5.1 / 4.6
+FUEL_SECTORS = {"residential": "Residential", "commercial": "Commercial", "agriculture": "AgricultureOthers"}   # supplement 01 section 3
+B11_RETIRED = dict(retired=True, registry="gate_b11_completeness_retired",
+                   reason="supplement 01 item 9: S1-era check (every S1 technology at every node) is outdated since S4A (candidates per resource site; geothermal / "
+                          "run-of-river only where a site exists); it failed identically on the S4M-3 and M08b networks (287 items); replaced by the B11 supply-route check")
 
 
 def sha(p: Path) -> str:
@@ -78,7 +84,9 @@ def by_country(n) -> pd.DataFrame:
                          fixed_electricity_twh=float(lc[lc.carrier.isin(FIXED_EL)].mwh.sum()) / 1e6,
                          industry_electricity_twh=float(lc[lc.carrier == "industry electricity"].mwh.sum()) / 1e6,
                          industry_heat_low_twh=float(lc[lc.carrier == "industry heat"].mwh.sum()) / 1e6,
-                         industry_heat_medium_twh=float(lc[lc.carrier == "industry heat medium"].mwh.sum()) / 1e6,
+                         industry_heat_medium_twh=float(lc[lc.carrier == "industry heat medium"].mwh.sum()) / 1e6,       # M08b first round (150-400 C)
+                         industry_heat_medium_a_twh=float(lc[lc.carrier == "industry heat medium A"].mwh.sum()) / 1e6,   # supplement 01: 150-200 C
+                         industry_heat_medium_b_twh=float(lc[lc.carrier == "industry heat medium B"].mwh.sum()) / 1e6,   # supplement 01: 200-400 C
                          industry_heat_high_twh=float(lc[lc.carrier == "industry heat high"].mwh.sum()) / 1e6,
                          land_transport_ev_twh=float(lc[lc.carrier == "land transport EV"].mwh.sum()) / 1e6,
                          fixed_gas_twh=float(lc[lc.carrier == "gas final energy"].mwh.sum()) / 1e6,
@@ -98,8 +106,9 @@ def m08b_checks(n, cfg, repo: Path, n_old) -> dict:
         bl = float(L[(L.country == c) & (L.account == "Astar")].mwh.sum())
         rows.append(dict(country=c, base_load_mwh=bl, anchor_mwh=float(an.at[c, "base_load_anchor_mwh"]), rel=abs(bl / an.at[c, "base_load_anchor_mwh"] - 1)))
     chk = led.get("anchors", {}).get("checks", [])
-    out["demand_equals_anchor"] = dict(passed=bool(max(r["rel"] for r in rows) <= 1e-6 and len(chk) == 11 and all(abs(r["transport_table_mwh"] / r["transport_anchor_mwh"] - 1) <= 1e-6 for r in chk)),
-                                       base_load=rows, ledger_checks=chk, max_rel=max(r["rel"] for r in rows))
+    fuel_ok = all(abs(r[f"{k}_fuel_table_mwh"] - r[f"{k}_fuel_anchor_mwh"]) <= 1e-6 * max(1.0, abs(r[f"{k}_fuel_anchor_mwh"])) for r in chk for k in FUEL_SECTORS)
+    out["demand_equals_anchor"] = dict(passed=bool(max(r["rel"] for r in rows) <= 1e-6 and len(chk) == 11 and all(abs(r["transport_table_mwh"] / r["transport_anchor_mwh"] - 1) <= 1e-6 for r in chk)
+                                                   and fuel_ok), base_load=rows, ledger_checks=chk, max_rel=max(r["rel"] for r in rows), fuel_rows_equal_anchor=bool(fuel_ok))
     pset = n.get_switchable_as_dense("Load", "p_set")
     out["no_negative_loads"] = dict(passed=bool((pset.values >= -1e-9).all()), min_p_set=float(pset.values.min()))
     lk = n.links; band = {}
@@ -110,8 +119,10 @@ def m08b_checks(n, cfg, repo: Path, n_old) -> dict:
         in_car = sorted(set(n.buses.carrier.reindex(feed.bus0).fillna("?")))
         band[b] = dict(buses=len(buses), link_carriers=sorted(set(feed.carrier)), expected=sorted(want), input_bus_carriers=in_car,
                        per_node_links=(int(len(feed) / len(buses)) if len(buses) else 0))
-    ok = all(set(band[b]["link_carriers"]) == set(band[b]["expected"]) for b in band) and not ({"AC", "H2"} & set(band["high"]["input_bus_carriers"]))
+    ok = all(set(band[b]["link_carriers"]) == set(band[b]["expected"]) and band[b]["buses"] > 0 for b in band)
+    ok &= not any({"AC", "H2"} & set(band[b]["input_bus_carriers"]) for b in ("medium_b", "high"))   # no electric / hydrogen heating above 200 C
     ok &= [b for b in band if "industry heat pump" in band[b]["link_carriers"]] == ["low"]
+    ok &= [b for b in band if "industry electric boiler" in band[b]["link_carriers"]] == ["low", "medium_a"]
     out["temperature_band_map"] = dict(passed=bool(ok), bands=band)
     ovg = L[L.account.isin(["IndustryBiomassOverflowToGas", "AgricultureBiomassOverflowToGas"])]
     ovh = L[L.account.isin(["IndustryBiomassOverflowUsefulHeat", "AgricultureBiomassOverflowUsefulHeat"])]
@@ -157,30 +168,53 @@ def daily_equal(n3: pypsa.Network, n24: pypsa.Network) -> dict:
                 snapshots=dict(h3=int(len(n3.snapshots)), h24=int(len(n24.snapshots))))
 
 
+def table_fuels(repo: Path, table: str) -> pd.DataFrame:
+    """Residential / commercial / agriculture fuel rows (all non-electricity carriers, final energy) of a demand table, TWh by country."""
+    t = pd.read_csv(repo / table, keep_default_na=False); t["v"] = pd.to_numeric(t.value_2050_mwh, errors="coerce").fillna(0.0)
+    f = t[t.sector.isin(FUEL_SECTORS.values()) & (t.carrier != "electricity")]
+    out = f.pivot_table(index="country", columns="sector", values="v", aggfunc="sum").reindex(index=COUNTRIES, columns=list(FUEL_SECTORS.values())).fillna(0.0) / 1e6
+    out.columns = [f"{k}_fuel_twh" for k in FUEL_SECTORS]
+    return out
+
+
 def main():
     p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--new", type=Path, required=True)
     p.add_argument("--old", type=Path, required=True); p.add_argument("--out", type=Path, required=True)
-    a = p.parse_args(); repo = a.repo.resolve(); a.out.mkdir(parents=True, exist_ok=True)
+    p.add_argument("--prev", type=Path, help="M08b first-round builds (supplement 01 comparison columns *_m08b1)"); p.add_argument("--tag", default="")
+    a = p.parse_args(); repo = a.repo.resolve(); a.out.mkdir(parents=True, exist_ok=True); tag = f"_{a.tag}" if a.tag else ""
     cfgs = {s: config(repo, s) for s in SCEN}
     nets, olds, res, files, comp = {}, {}, {}, [], []
+    # residential / commercial / agriculture fuel rows (tables): ratio table (S4M-3 and the M08b first round, both unanchored) vs the ATS-anchor table
+    old_f = table_fuels(repo, "research_inputs/demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv")
+    new_f = table_fuels(repo, cfgs["integrated"]["research"]["s2"]["demand"]["tables_by_allocation"]["aeo8_ats_anchor"])
     for s in SCEN:
         f3 = a.new / s / f"{s}_2920_3h_unsolved.nc"; f24 = a.new / s / f"{s}_365_24h_unsolved.nc"
         receipt = json.loads((a.new / s / f"{s}_BUILD_RECEIPT.json").read_text()) if (a.new / s / f"{s}_BUILD_RECEIPT.json").exists() else {}
         n = pypsa.Network(f3); n24 = pypsa.Network(f24); o = pypsa.Network(a.old / s / f"{s}_2920_3h_unsolved.nc")
         nets[s], olds[s] = n, o
-        res[s] = dict(B8=gate_b8_demand_consistency(n), B11_completeness=gate_b11_completeness(n, cfgs[s]), B11_supply_routes=gate_b11_supply_routes(n, cfgs[s]),
+        res[s] = dict(B8=gate_b8_demand_consistency(n), B11_supply_routes=gate_b11_supply_routes(n, cfgs[s]),
                       B13=gate_b13_imports_one_way(n), G2=g2(n, f3, receipt, cfgs[s]), daily_mean_365x24h=daily_equal(n, n24), M08b=m08b_checks(n, cfgs[s], repo, o))
         for f in (f3, f24):
             files.append(dict(scenario=s, file=f.name, bytes=f.stat().st_size, mib=round(f.stat().st_size / 2**20, 2), sha256=sha(f), resolution="2920x3h" if "2920" in f.name else "365x24h",
                               snapshots=len(n.snapshots) if "2920" in f.name else len(n24.snapshots)))
         new_t, old_t = by_country(n), by_country(o)
+        prev_t = by_country(pypsa.Network(a.prev / s / f"{s}_2920_3h_unsolved.nc")) if a.prev else None
         for c in COUNTRIES:
             row = dict(scenario=s, country=c)
             for k in new_t.columns:
-                row[f"{k}_old"] = float(old_t.at[c, k]); row[f"{k}_new"] = float(new_t.at[c, k])
+                row[f"{k}_old"] = float(old_t.at[c, k])
+                if prev_t is not None:
+                    row[f"{k}_m08b1"] = float(prev_t.at[c, k])
+                row[f"{k}_new"] = float(new_t.at[c, k])
+            for k in old_f.columns:
+                row[f"{k}_old"] = float(old_f.at[c, k])
+                if prev_t is not None:
+                    row[f"{k}_m08b1"] = float(old_f.at[c, k])   # the first-round anchor table kept the ratio-table fuel rows (test_activity_equals_anchor)
+                row[f"{k}_new"] = float(new_f.at[c, k])
             comp.append(row)
     res["B5"] = gate_b5_single_switch(cfgs["integrated"], cfgs["disconnected"])
     res["B16"] = gate_b16_import_prices_identical(nets["integrated"], nets["disconnected"])
+    res["B11_completeness"] = B11_RETIRED
     # industry physical output (tables): ratio-table main (pre-M08b networks) vs the ATS-anchor rule
     old_i = pd.read_csv(repo / "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv").set_index("country")
     new_i = pd.read_csv(repo / "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv").set_index("country")
@@ -189,18 +223,21 @@ def main():
         r.update(cement_mt_old=float(old_i.at[c, "cement_2050_t"]) / 1e6, cement_mt_new=float(new_i.at[c, "cement_2050_t"]) / 1e6,
                  steel_mt_old=float(old_i.at[c, "crude_steel_2050_t"]) / 1e6, steel_mt_new=float(new_i.at[c, "crude_steel_2050_t"]) / 1e6)
     cdf = pd.DataFrame(comp)
-    cdf.to_csv(a.out / "BUILD_INPUT_CHANGES_M08B.csv", index=False, float_format="%.6f")
-    pd.DataFrame(files).to_csv(a.out / "M08B_NETWORK_FILES.csv", index=False)
+    cdf.to_csv(a.out / f"BUILD_INPUT_CHANGES_M08B{tag}.csv", index=False, float_format="%.6f")
+    pd.DataFrame(files).to_csv(a.out / f"M08B{tag}_NETWORK_FILES.csv", index=False)
     summary = {s: {k: (v.get("passed") if isinstance(v, dict) else v) for k, v in res[s].items() if k not in ("G2", "M08b")} | {f"G2.{k[3:]}": v["passed"] for k, v in res[s]["G2"].items()}
                | {f"M08b.{k}": v["passed"] for k, v in res[s]["M08b"].items() if isinstance(v, dict)} for s in SCEN}
-    summary["B5"] = res["B5"]["passed"]; summary["B16"] = res["B16"]["passed"]
+    summary["B5"] = res["B5"]["passed"]; summary["B16"] = res["B16"]["passed"]; summary["B11_completeness"] = "retired (supplement 01 item 9)"
     old_meta = {s: dict(network=str(a.old / s / f"{s}_2920_3h_unsolved.nc"), sha256=sha(a.old / s / f"{s}_2920_3h_unsolved.nc"),
                         research_config_sha256=olds[s].meta.get("research_config_sha256")) for s in SCEN}
-    (a.out / "M08B_STATIC_CHECKS.json").write_text(json.dumps(dict(script="scripts_project/m08b_static.py", summary=summary, results=res), indent=1, default=str, sort_keys=True))
+    prev_meta = {s: dict(network=str(a.prev / s / f"{s}_2920_3h_unsolved.nc"), sha256=sha(a.prev / s / f"{s}_2920_3h_unsolved.nc")) for s in SCEN} if a.prev else None
+    (a.out / f"M08B{tag}_STATIC_CHECKS.json").write_text(json.dumps(dict(script="scripts_project/m08b_static.py", summary=summary, results=res), indent=1, default=str, sort_keys=True))
     tot = cdf.groupby("scenario").sum(numeric_only=True)
-    (a.out / "BUILD_INPUT_CHANGES_M08B.json").write_text(json.dumps(dict(script="scripts_project/m08b_static.py", before=old_meta, after={s: dict(network=str(a.new / s)) for s in SCEN},
+    (a.out / f"BUILD_INPUT_CHANGES_M08B{tag}.json").write_text(json.dumps(dict(script="scripts_project/m08b_static.py", before=old_meta, m08b_first_round=prev_meta, after={s: dict(network=str(a.new / s)) for s in SCEN},
                                                                          definitions=dict(final_demand_twh="all loads of the country (energy carriers incl. useful heat, feedstock, H2, ammonia / methanol; bunkers in the regional pool excluded)",
                                                                                           base_electricity_twh="Astar loads (base / non-industry electricity)", fixed_electricity_twh="base + industry electricity + agriculture machinery electric + land transport EV (S4R definition)",
+                                                                                          industry_heat_medium_a_b_twh="other-bucket (+ overflow) useful heat loads of the 150-200 C / 200-400 C buses (supplement 01); *_medium_twh = M08b first-round 150-400 C bus",
+                                                                                          residential_commercial_agriculture_fuel_twh="final-energy fuel rows (all non-electricity carriers) of the demand table the network was built from: old / m08b1 = ratio table (not anchored), new = ATS anchor table (supplement 01 section 3, negative anchors set to 0)",
                                                                                           pv_cap_gw="sum of p_nom_max of the ground-mounted solar candidates", storage_cap_mt="annual national CO2 storage cap (co2 sequestered Store e_nom_max)",
                                                                                           cement_and_steel_mt="2050 physical output (old: ratio-table main INDUSTRY_2050_SUMMARY_aeo8_ats_relative.csv; new: ATS anchor + output rule)"),
                                                                          totals_11_countries=tot.to_dict(orient="index"), by_country=comp, files=files), indent=1, default=str))

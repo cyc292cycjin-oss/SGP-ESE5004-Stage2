@@ -11,7 +11,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts_project"))
-from m08b_demand import BASE_SECTORS, SECTORS, aeo8_country, c3_ats, gdp_growth, RES_ELEC_ATS_MTOE   # noqa: E402
+from m08b_demand import BASE_SECTORS, FUEL_SECTORS, SECTORS, aeo8_country, c3_ats, gdp_growth, RES_ELEC_ATS_MTOE   # noqa: E402
 from s2_layers import demand_anchor_settings, demand_table_key, physical_output_settings   # noqa: E402
 
 DEM = ROOT / "research_inputs" / "demand_v5"
@@ -26,7 +26,7 @@ def rel(a, b):
 
 @pytest.fixture(scope="module")
 def data():
-    an = pd.read_csv(DEM / "DEMAND_ANCHOR_AEO8_ATS.csv").set_index("country")
+    an = pd.read_csv(DEM / "DEMAND_ANCHOR_AEO8_ATS.csv", keep_default_na=False).set_index("country")   # *_fuel_zeroed: "" = anchored
     t = pd.read_csv(DEM / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", keep_default_na=False)
     t["v"] = pd.to_numeric(t.value_2050_mwh, errors="coerce").fillna(0.0); t["b"] = pd.to_numeric(t.base_2019_mwh, errors="coerce").fillna(0.0)
     ratio = pd.read_csv(DEM / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv", keep_default_na=False)
@@ -67,10 +67,45 @@ def test_activity_equals_anchor(data):
         t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}; t19["Industry"] += float(r[r.sector == "NonEnergyUse"].b.sum())
         wt = {s: t19[s] * g_t[s] for s in SECTORS}
         assert rel(an.at[c, "transport_anchor_mwh"], an.at[c, "ats_tfec_2050_mwh"] * wt["Transport"] / sum(wt.values())) <= TOL
-    # the anchor table is a row-for-row copy of the ratio table; rows that are not anchored keep their ratio-table values
+    # the anchor table is a row-for-row copy of the ratio table; rows that are not anchored (international bunkers, decision 10) keep their ratio-table values
     assert list(t.country + t.sector + t.carrier + t.account) == list(ratio.country + ratio.sector + ratio.carrier + ratio.account)
-    keep = ~(((t.carrier == "electricity") & t.sector.isin(BASE_SECTORS)) | t.sector.isin(["Transport", "Industry", "NonEnergyUse"]))
+    keep = ~(((t.carrier == "electricity") & t.sector.isin(BASE_SECTORS)) | t.sector.isin(["Transport", "Industry", "NonEnergyUse"] + list(FUEL_SECTORS.values())))
     assert keep.sum() > 0 and (t.loc[keep, "value_2050_mwh"].values == ratio.loc[keep, "value_2050_mwh"].values).all()
+    assert set(t.loc[keep, "sector"]) == {"InternationalBunkers"}
+
+
+def test_sector_fuel_anchor(data):
+    """supplement 01 section 3: residential / commercial / agriculture fuel = ATS sector TFEC anchor - sector electricity anchor (independent recomputation),
+    2019 carrier structure scaled; negative -> 0 and listed; no negative fuel row; totals = anchor except the zeroed cells."""
+    an, t, ratio, _, reg = data; c3 = c3_ats(); a8 = aeo8_country()
+    g_el = {s: c3[s][1] / c3[s][0] for s in SECTORS}; g_el["Residential"] = RES_ELEC_ATS_MTOE[1] / RES_ELEC_ATS_MTOE[0]
+    g_t = {s: c3[s][1] / c3[s][0] for s in SECTORS}
+    zeroed = []
+    for c in ASEAN:
+        r = ratio[ratio.country == c]; tc = t[t.country == c]
+        el19 = {s: float(r[(r.carrier == "electricity") & (r.sector == s)].b.sum()) for s in SECTORS}; w = {s: el19[s] * g_el[s] for s in SECTORS}
+        t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}; t19["Industry"] += float(r[r.sector == "NonEnergyUse"].b.sum()); wt = {s: t19[s] * g_t[s] for s in SECTORS}
+        A_el = a8[c]["elec_pc_kwh"] * a8[c]["pop_2050_million"] * 1e3; A_t = a8[c]["tfec_pc_kgoe"] * a8[c]["pop_2050_million"] * 1e3 * 11.63
+        for key, s in FUEL_SECTORS.items():
+            tfa = A_t * wt[s] / sum(wt.values()); ela = A_el * w[s] / sum(w.values()); raw = tfa - ela
+            assert rel(an.at[c, f"{key}_fuel_anchor_raw_mwh"], raw) <= TOL and rel(an.at[c, f"{key}_tfec_anchor_mwh"], tfa) <= TOL
+            rows = tc[(tc.sector == s) & (tc.carrier != "electricity") & (tc.value_2050_mwh != "")]
+            fuel = float(rows.v.sum()); el = float(tc[(tc.sector == s) & (tc.carrier == "electricity")].v.sum())
+            assert (rows.v >= 0).all()                                                        # no negative fuel row
+            b19 = float(rows.b.sum())
+            if raw < 0 or b19 <= 0:
+                assert fuel == 0 and an.at[c, f"{key}_fuel_anchor_mwh"] == 0 and an.at[c, f"{key}_fuel_zeroed"] in ("negative", "no_2019_fuel_rows")
+                assert (an.at[c, f"{key}_fuel_zeroed"] == "negative") == (raw < 0)
+                if raw != 0:
+                    zeroed.append((c, s))
+            else:
+                assert rel(fuel, raw) <= TOL and rel(fuel + el, tfa) <= TOL                   # sector total = ATS TFEC anchor
+                assert np.allclose(rows.v, rows.b * raw / b19, rtol=1e-9, atol=1e-6)            # 2019 carrier structure, one multiplier per sector
+    assert sorted(zeroed) == sorted([("BN", "Residential"), ("BN", "Commercial"), ("MY", "Residential"), ("MY", "Commercial"), ("SG", "Residential"),
+                                     ("SG", "Commercial"), ("SG", "AgricultureOthers"), ("TH", "Commercial"), ("TL", "Commercial")])
+    z = reg.loc["demand_sector_fuel_anchor_zeroed"]
+    assert z.status == "REGISTERED" and z.value == f"{len(zeroed)} cells" and all(f"{c} {s} " in z.description for c, s in zeroed)
+    assert reg.at["demand_sector_fuel_anchor_rule", "value"] == "tfec_minus_electricity" and "137" in reg.at["demand_anchor_family_main", "decision_ref"]
 
 
 def test_base_loads_nonnegative_and_total(data):

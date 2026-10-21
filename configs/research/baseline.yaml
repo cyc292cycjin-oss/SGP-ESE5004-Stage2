@@ -421,10 +421,12 @@ research:
       physical_output_percap_caps: {cement: 1.0, steel: 0.6}   # t/cap/a, assumptions, grade C (registry industry_percap_saturation_*)
       physical_output_base_year: {cement: 2023, steel: 2024}   # USGS MYB 2023 T22 (SG, TL 0); worldsteel 2024 (BN, KH, LA, TL 0) (registry industry_output_base_year)
       physical_output_plan_caps: research_inputs/demand_v5/INDUSTRY_OUTPUT_PLAN_CAPS.csv   # VN steel 70 (Decision 261), cement 150 (Decision 1266): caps only
-      # M08b B2 (decision 133): three useful-heat bands per node (s2_layers.HEAT_BAND_TECH; only technology-data v0.15.0 rows; heat pumps low band only;
-      # no electric heating above 400 C; no hydrogen heating - v0.15.0 has no hydrogen boiler / direct firing row)
-      heat_bands: {low: "<150C", medium: "150-400C", high: ">400C"}
-      biomass_overflow_mode: useful_heat     # M08b B2 (registry biomass_overflow_rule): fixed solid biomass above the national potential -> useful heat x 0.90 in the band of its source (industry medium / high, agriculture low), cap = potential | methane = decision 36 rule with the decision-115 cap share 0.98 (historical, networks built before M08b; keys biomass_overflow_to_methane / biomass_overflow_cap_share removed)
+      # M08b B2 (decision 133) + supplement 01 section 2 (decision 137): four useful-heat bands per node (s2_layers.HEAT_BAND_TECH; only technology-data v0.15.0
+      # rows; heat pumps low band only; electric boiler steam only up to medium A (about <= 200 C); medium B = gas steam boiler + gas / solid-fuel direct
+      # firing (300-400 C representative), no electric heating above 200 C; no hydrogen heating - v0.15.0 has no hydrogen boiler / direct firing row)
+      heat_bands: {low: "<150C", medium_a: "150-200C", medium_b: "200-400C", high: ">400C"}
+      heat_band_medium_a_fraction: 0.2       # supplement 01 section 2 (registry industry_heat_band_medium_split): share of the JRC-IDEES 150-400 C band below 200 C, linear in temperature (50 / 250), grade C; sensitivity 0.1-0.3 (+-50 %) -> regenerate the band tables (m08b_heat_bands.py, s3_0_industry.py); the build refuses a value that differs from the tables
+      biomass_overflow_mode: useful_heat     # M08b B2 (registry biomass_overflow_rule): fixed solid biomass above the national potential -> useful heat x 0.90 in the band of its source (industry medium A / B / high, agriculture low), cap = potential | methane = decision 36 rule with the decision-115 cap share 0.98 (historical, networks built before M08b; keys biomass_overflow_to_methane / biomass_overflow_cap_share removed)
       biomass_overflow_useful_heat_efficiency: 0.90   # technology-data solid biomass boiler steam 0.90 (biomass_overflow_rule)
       biomass_overflow_binding_ratio: 0.999  # S4L-5: a country counts as binding when fixed biomass demand / potential >= this value (ledger only in useful_heat mode)
       low_temperature_heat_share_of_fuels: 0.20   # bas_fixed only (dropped in pypsa_eur_2050: ratio heat row instead); grade C: heat = 2/3 of industrial energy x 30 % below 150 C; range 0.10-0.30

@@ -72,7 +72,8 @@ def nonindustrial_electricity_mode(cfg) -> str:
 def demand_anchor_settings(cfg) -> dict:
     """M08b B1 (decision 134): growth_method ats_anchor = AEO8 ATS activity anchors written into one demand table (scripts_project/m08b_demand.py):
     base electricity load (base_load_anchor ats_buildings_agri, read through nonindustrial_electricity table_sectors), transport fuel rows
-    (transport_anchor ats_service), industry incl. non-energy use (ATS industry multiplier). ratio / level keep the former tables ('table')."""
+    (transport_anchor ats_service), industry incl. non-energy use (ATS industry multiplier), residential / commercial / agriculture fuel rows (sector
+    TFEC anchor - sector electricity anchor, supplement 01 section 3). ratio / level keep the former tables ('table')."""
     D = cfg["research"].get("demand") or {}
     gm = str(D.get("growth_method", "ratio")); bl = str(D.get("base_load_anchor", "table")); ta = str(D.get("transport_anchor", "table"))
     if gm == "ats_anchor":
@@ -497,22 +498,46 @@ def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction:
 
 
 # ----------------------------------------------------------------------------------------------
-# S2-5: industrial low-temperature heat bus per node; M08b B2 (decision 133): medium / high useful-heat bands
+# S2-5: industrial low-temperature heat bus per node; M08b B2 (decision 133): useful-heat bands; supplement 01 (decision 137): medium split at 200 C
 # ----------------------------------------------------------------------------------------------
 # band -> (technology-data v0.15.0 row, link carrier, fuel); only rows that exist in technology-data v0.15.0 (decision 133). Temperature coverage
 # from the DEA industrial process heat catalogue: industrial heat pumps up to 150 C (302.b) -> low band only; electric boiler steam 1-16 bar, typically
-# 8 bar / 175 C; fuel steam boilers 125-300 C (not for firing / melting); direct firing 400-1,600 C. technology-data v0.15.0 has no electric direct
-# firing row -> no electric heating above 400 C; it has no hydrogen boiler or hydrogen direct firing row -> no hydrogen heating in any band.
-HEAT_BAND_BUS = {"low": ("industry heat", ""), "medium": ("industry heat medium", " medium"), "high": ("industry heat high", " high")}
+# 8 bar / 175 C (about <= 200 C) -> low and medium A (150-200 C) only; fuel steam boilers 125-300 C (not for firing / melting); direct firing
+# 400-1,600 C. Medium B (200-400 C): gas steam boiler up to 300 C plus gas / solid-fuel direct firing as the 300-400 C representative (fuel combustion
+# reaches the temperature; grade C), no electric heating (no covering row). technology-data v0.15.0 has no electric direct firing row -> no electric
+# heating above 200 C; it has no hydrogen boiler or hydrogen direct firing row -> no hydrogen heating in any band (hydrogen only indirectly through
+# synthetic methane, registry industry_heat_hydrogen_not_represented).
+HEAT_BANDS = ("low", "medium_a", "medium_b", "high")
+HEAT_BAND_BUS = {"low": ("industry heat", ""), "medium_a": ("industry heat medium A", " medium A"), "medium_b": ("industry heat medium B", " medium B"),
+                 "high": ("industry heat high", " high")}
+HEAT_BAND_ACCOUNT = {"medium_a": "IndustryHeatMediumA", "medium_b": "IndustryHeatMediumB", "high": "IndustryHeatHigh"}
 HEAT_BAND_TECH = {
     "low": [("electric boiler steam", "industry electric boiler", "electricity"), ("industrial heat pump high temperature", "industry heat pump", "electricity"),
             ("gas boiler steam", "industry gas boiler", "gas"), ("solid biomass boiler steam", "industry biomass boiler", "biomass"),
             ("solid biomass boiler steam", "industry biomass boiler CC", "biomass")],
-    "medium": [("electric boiler steam", "industry electric boiler", "electricity"), ("gas boiler steam", "industry gas boiler", "gas"),
-               ("solid biomass boiler steam", "industry biomass boiler", "biomass"), ("solid biomass boiler steam", "industry biomass boiler CC", "biomass")],
+    "medium_a": [("electric boiler steam", "industry electric boiler", "electricity"), ("gas boiler steam", "industry gas boiler", "gas"),
+                 ("solid biomass boiler steam", "industry biomass boiler", "biomass"), ("solid biomass boiler steam", "industry biomass boiler CC", "biomass")],
+    "medium_b": [("gas boiler steam", "industry gas boiler", "gas"), ("direct firing gas", "industry direct firing gas", "gas"),
+                 ("direct firing solid fuels", "industry direct firing biomass", "biomass"), ("direct firing solid fuels", "industry direct firing biomass CC", "biomass")],
     "high": [("direct firing gas", "industry direct firing gas", "gas"), ("direct firing solid fuels", "industry direct firing biomass", "biomass"),
              ("direct firing solid fuels", "industry direct firing biomass CC", "biomass")],
 }
+
+
+def heat_band_settings(cfg, repo: Path) -> dict | None:
+    """M08b supplement 01 section 2: research.s2.industry.heat_bands must name the four bands low / medium_a / medium_b / high, and
+    heat_band_medium_a_fraction (the 200 C split of the JRC-IDEES 150-400 C share) must equal the fraction the band tables were generated with
+    (INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv, m08b_heat_bands.py; a sensitivity regenerates the tables)."""
+    I = cfg["research"]["s2"]["industry"]; hb = I.get("heat_bands")
+    if not hb:
+        return None
+    if tuple(hb) != HEAT_BANDS:
+        raise ValueError(f"research.s2.industry.heat_bands must list {HEAT_BANDS} (supplement 01: medium split at 200 C), got {tuple(hb)}")
+    tab = pd.read_csv(Path(repo) / "research_inputs/demand_v5/INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv")
+    f_tab = float(tab.medium_a_fraction.iloc[0]); f_cfg = float(I["heat_band_medium_a_fraction"])
+    if f_cfg != f_tab:
+        raise ValueError(f"heat_band_medium_a_fraction {f_cfg} differs from the band tables ({f_tab}): rerun m08b_heat_bands.py and s3_0_industry.py")
+    return dict(bands={k: str(v) for k, v in hb.items()}, medium_a_fraction=f_cfg, table="research_inputs/demand_v5/INDUSTRY_HEAT_BANDS_JRC_IDEES_OIS.csv")
 
 
 def add_industrial_heat(n, costs, nodes, cc_fraction: float, bands: bool = False):
@@ -520,7 +545,7 @@ def add_industrial_heat(n, costs, nodes, cc_fraction: float, bands: bool = False
     cap_row = "biomass boiler capture" if "biomass boiler capture" in costs.index and np.isfinite(costs.at["biomass boiler capture", "fixed"]) else "biomass CHP capture"
     cap_fixed = cost(costs, cap_row, "fixed"); cap_el = cost(costs, cap_row, "electricity-input") + cost(costs, cap_row, "compression-electricity-input")
     count = 0; mapping = []
-    for band in (("low", "medium", "high") if bands else ("low",)):
+    for band in (HEAT_BANDS if bands else ("low",)):
         bus_carrier, sfx = HEAT_BAND_BUS[band]
         for tech, carrier, fuel in HEAT_BAND_TECH[band]:
             mapping.append(dict(band=band, technology_data_row=tech, link_carrier=carrier, input=fuel, efficiency=cost(costs, tech, "efficiency"),
@@ -540,9 +565,10 @@ def add_industrial_heat(n, costs, nodes, cc_fraction: float, bands: bool = False
                     add_link(n, name, c, carrier, ports, effs, capital_cost=cost(costs, tech, "fixed") * eff, marginal_cost=cost(costs, tech, "VOM") * eff,
                              lifetime=cost(costs, tech, "lifetime"), extra=tag or None)
                 count += 1
-    return dict(buses=len(nodes) * (3 if bands else 1), supply_links=count, bands=("low", "medium", "high") if bands else ("low",), technology_map=mapping,
+    return dict(buses=len(nodes) * (len(HEAT_BANDS) if bands else 1), supply_links=count, bands=HEAT_BANDS if bands else ("low",), technology_map=mapping,
                 options=["electric boiler", "high-temperature heat pump", "gas boiler", "biomass boiler", "biomass boiler CC"] + (["direct firing gas", "direct firing biomass", "direct firing biomass CC"] if bands else []),
-                excluded=("no electric heating in the high band: technology-data v0.15.0 has no electric direct firing / furnace row covering > 400 C; "
+                excluded=("no electric heating in medium B (200-400 C) and the high band: technology-data v0.15.0 has no electric heating row covering > 200 C "
+                          "(electric boiler steam about <= 200 C, no electric direct firing / furnace row); "
                           "no hydrogen heating in any band: technology-data v0.15.0 has no hydrogen boiler / direct firing row (decision 133 rule)") if bands else "")
 
 
@@ -655,11 +681,13 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_IDEES_TODAY.csv")
     elif other_bucket == "asean_own_2019":
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_ASEAN_OWN_2019.csv")
-    elif other_bucket == "useful_heat_bands":   # M08b B2 (decision 133): other-bucket fuels -> useful heat in three temperature bands
+    elif other_bucket == "useful_heat_bands":   # M08b B2 (decision 133): other-bucket fuels -> useful heat in four temperature bands (supplement 01)
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_USEFUL_HEAT_BANDS.csv")
-    heat_bands = bool(I.get("heat_bands"))
+    heat_cfg = heat_band_settings(cfg, repo); heat_bands = heat_cfg is not None
     if (ov_mode == "useful_heat" or other_bucket == "useful_heat_bands") and not heat_bands:
         raise ValueError("useful-heat demand (other_bucket useful_heat_bands / biomass_overflow_mode useful_heat) needs research.s2.industry.heat_bands")
+    f_med_a = heat_cfg["medium_a_fraction"] if heat_bands else 0.0
+    band_up = HEAT_BANDS[1:]   # bands above the low band (own buses): medium_a, medium_b, high
     ind_summary = pd.read_csv(ind_path).set_index("country")
     # S3-0 interim handling of the ratio ammonia/methanol rows: convert_to_h2_and_gas = ammonia -> H2 + electricity (PyPSA-Eur ammonia:false route,
     # config MWh_H2_per_tNH3_electrolysis 5.93 / MWh_elec_per_tNH3_electrolysis 0.2473 per 5.166 MWh_NH3, lines 849/852/853), methanol -> methane +
@@ -794,10 +822,10 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             ind_car = {"coal": float(m["pe_coal_mwh"]), "oil": float(m["pe_oil_mwh"]), "gas": float(m["pe_gas_mwh"]) - ov_summary, "biomass": float(m["pe_biomass_before_overflow_mwh"]),
                        "electricity": float(m["pe_electricity_mwh"]), "hydrogen": float(m["pe_hydrogen_mwh"]), "heat": float(m["pe_heat_mwh"]),
                        "ammonia": float(m["pe_ammonia_mwh"]) if "pe_ammonia_mwh" in m.index else 0.0, "methanol": float(m["pe_methanol_mwh"]) if "pe_methanol_mwh" in m.index else 0.0}
-            for band in ("medium", "high"):   # M08b B2: useful-heat bands of the other bucket (only in *_OTHER_USEFUL_HEAT_BANDS tables)
+            for band in band_up:   # M08b B2 / supplement 01: useful-heat bands of the other bucket (only in *_OTHER_USEFUL_HEAT_BANDS tables)
                 ind_car[f"heat_{band}"] = float(m[f"pe_heat_{band}_mwh"]) if f"pe_heat_{band}_mwh" in m.index else 0.0
-            ov_band = ({"medium": float(m["biomass_source_band_medium_share"]), "high": float(m["biomass_source_band_high_share"])}
-                       if "biomass_source_band_high_share" in m.index else {"medium": 1.0, "high": 0.0})   # source band of the fixed industrial biomass (grade C)
+            ov_band = ({b: float(m[f"biomass_source_band_{b}_share"]) for b in band_up}   # source band of the fixed industrial biomass (grade C)
+                       if "biomass_source_band_high_share" in m.index else {"medium_a": f_med_a, "medium_b": 1.0 - f_med_a, "high": 0.0})
             if am_mode == "convert_to_h2_and_gas":
                 am_ledger[c] = dict(mode=am_mode, ammonia_mwh=ind_car["ammonia"], methanol_mwh=ind_car["methanol"], to_hydrogen_mwh=ind_car["ammonia"] * NH3_H2,
                                     to_gas_mwh=ind_car["methanol"] * MEOH_CH4, to_electricity_mwh=ind_car["ammonia"] * NH3_EL + ind_car["methanol"] * MEOH_EL)
@@ -813,7 +841,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             ind_car = {carrier: float(v) * (1 - s_lt) for carrier, v in ind.groupby("carrier").v.sum().items()}
             ind_car["heat"] = float(ind.v.sum()) * s_lt * boiler_eff; ind_car["electricity"] = 0.0; ind_car["hydrogen"] = 0.0
             src_ind = f"{c}:IndustryFinalEnergy"; heat_src = "IndustryFinalEnergy x low_temperature_heat_share x boiler_eff"
-            ov_band = {"medium": 1.0, "high": 0.0}
+            ov_band = {"medium_a": f_med_a, "medium_b": 1.0 - f_med_a, "high": 0.0}
         # decision 36 / R1.6: fixed solid-biomass demand above the national main potential moves to methane at equal heat (industry first, then agriculture)
         ag_rows = d[(d.sector == "AgricultureOthers") & (d.carrier == "biomass")]
         ag_bio = float(ag_rows.v.sum())
@@ -827,28 +855,31 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                   overflow_industry_to_gas_mwh=ov_ind if to_gas else 0.0, overflow_agriculture_to_gas_mwh=ov_ag if to_gas else 0.0, mode=carrier_mode,
                                   cap_share=ov_cap_share, binding=ov_binding, cap_mwh=cap_c, fixed_biomass_after_mwh=bio_before - overflow, overflow_mode=ov_mode,
                                   overflow_industry_mwh=ov_ind, overflow_agriculture_mwh=ov_ag,
-                                  useful_heat_mwh=({"medium": ov_ind * ov_heat_eff * ov_band["medium"], "high": ov_ind * ov_heat_eff * ov_band["high"], "low": ov_ag * ov_heat_eff}
+                                  useful_heat_mwh=({**{b: ov_ind * ov_heat_eff * ov_band[b] for b in band_up}, "low": ov_ag * ov_heat_eff}
                                                    if not to_gas else None), useful_heat_efficiency=ov_heat_eff, source_band_shares=ov_band if not to_gas else None,
-                                  heat_bands_mwh={b: ind_car.get(f"heat_{b}", 0.0) for b in ("medium", "high")})
+                                  heat_bands_mwh={b: ind_car.get(f"heat_{b}", 0.0) for b in band_up})
         hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
         for node, s in sh.items():
             if s <= 0:
                 continue
             if ind_car.get("heat", 0.0) * s > 0:
                 plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * s, heat_src, f"{node} industry heat demand")
-            for band in ("medium", "high"):   # M08b B2: other-bucket useful heat, carrier chosen by the model among the band's technology-data options
+            for band in band_up:   # M08b B2: other-bucket useful heat, carrier chosen by the model among the band's technology-data options
+                bc = HEAT_BAND_BUS[band][0]
                 if ind_car.get(f"heat_{band}", 0.0) * s > 0:
-                    plain_load(node, c, "Industry", f"IndustryHeat{band.capitalize()}", f"industry heat {band}", f"{node} industry heat {band}", ind_car[f"heat_{band}"] * s,
-                               f"{src_ind}:heat_{band} (other bucket fuels x JRC-IDEES OIS band share x useful-heat efficiency)", f"{node} industry heat {band} demand")
+                    plain_load(node, c, "Industry", HEAT_BAND_ACCOUNT[band], bc, f"{node} {bc}", ind_car[f"heat_{band}"] * s,
+                               f"{src_ind}:heat_{band} (other bucket fuels x JRC-IDEES OIS band share x useful-heat efficiency)", f"{node} {bc} demand")
             for carrier in ["coal", "oil", "gas", "biomass", "unclassified_fuel"]:
                 v = ind_car.get(carrier, 0.0)
                 if v * s > 0:
                     meter_load(node, c, "industry", carrier, v * s, f"{src_ind}:{carrier}", "IndustryFinalEnergy")
-            if ov_ind * s > 0 and ov_mode == "useful_heat":   # M08b B2: industrial overflow -> useful heat in its source band (medium / high)
-                for band in ("medium", "high"):
+            if ov_ind * s > 0 and ov_mode == "useful_heat":   # M08b B2: industrial overflow -> useful heat in its source band (medium A / B / high)
+                for band in band_up:
+                    bc = HEAT_BAND_BUS[band][0]
                     if ov_ind * ov_heat_eff * ov_band[band] * s > 0:
-                        plain_load(node, c, "Industry", "IndustryBiomassOverflowUsefulHeat", f"industry heat {band}", f"{node} industry heat {band}", ov_ind * ov_heat_eff * ov_band[band] * s,
-                                   f"{c}:IndustryBiomass above the solid-biomass potential x {ov_heat_eff} -> useful heat {band} (biomass_overflow_rule)", f"{node} industry overflow heat {band} demand")
+                        plain_load(node, c, "Industry", "IndustryBiomassOverflowUsefulHeat", bc, f"{node} {bc}", ov_ind * ov_heat_eff * ov_band[band] * s,
+                                   f"{c}:IndustryBiomass above the solid-biomass potential x {ov_heat_eff} -> useful heat {band} (biomass_overflow_rule)",
+                                   f"{node} industry overflow {bc[len('industry '):]} demand")
             elif ov_ind * s > 0:
                 meter_load(node, c, "industry overflow", "gas", ov_ind * s, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
             if ind_car.get("electricity", 0.0) * s > 0:
@@ -1004,11 +1035,16 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 raise ValueError("No Astar shape for the table-sector electricity of " + c)
             if anchor_tab is not None:   # M08b B1: the base load equals the AEO8 ATS anchor (buildings + agriculture + 2019 transport electricity)
                 want_bl = float(anchor_tab.at[c, "base_load_anchor_mwh"]); tr_tab = float(d[d.sector == "Transport"].v.sum()); want_tr = float(anchor_tab.at[c, "transport_anchor_mwh"])
-                for what, got, want in (("base load", target, want_bl), ("transport", tr_tab, want_tr)):
+                fuel_chk = {}   # supplement 01 section 3: residential / commercial / agriculture fuel rows = sector fuel anchor (0 where the anchor was negative)
+                for key, sec in (("residential", "Residential"), ("commercial", "Commercial"), ("agriculture", "AgricultureOthers")):
+                    fuel_chk[f"{key}_fuel_table_mwh"] = float(d[(d.sector == sec) & (d.carrier != "electricity")].v.sum())
+                    fuel_chk[f"{key}_fuel_anchor_mwh"] = float(anchor_tab.at[c, f"{key}_fuel_anchor_mwh"])
+                for what, got, want in (("base load", target, want_bl), ("transport", tr_tab, want_tr),
+                                        *((f"{k} fuel", fuel_chk[f"{k}_fuel_table_mwh"], fuel_chk[f"{k}_fuel_anchor_mwh"]) for k in ("residential", "commercial", "agriculture"))):
                     if abs(got - want) > 1e-9 * max(1.0, abs(want)):
                         raise ValueError(f"{c}: {what} {got} MWh differs from the ATS anchor {want} MWh")
                 anchor_checks.append(dict(country=c, base_load_mwh=target, base_load_anchor_mwh=want_bl, transport_table_mwh=tr_tab, transport_anchor_mwh=want_tr,
-                                          industry_multiplier=float(anchor_tab.at[c, "industry_multiplier"])))
+                                          industry_multiplier=float(anchor_tab.at[c, "industry_multiplier"]), **fuel_chk))
             factor = target / astar_total if astar_total > 0 else 1.0
             for l in astar_c:
                 if l in pset:
@@ -1032,8 +1068,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, nonindustrial_electricity=ne_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
                   industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,
-                                hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger, other_bucket=other_bucket, heat_bands=heat_bands, biomass_overflow_mode=ov_mode,
-                                physical_output=output_rule),
+                                hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger, other_bucket=other_bucket, heat_bands=heat_bands, heat_band_settings=heat_cfg,
+                                biomass_overflow_mode=ov_mode, physical_output=output_rule),
                   anchors=dict(settings=anchors, checks=anchor_checks),
                   feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))
     return ledger
