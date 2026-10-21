@@ -49,6 +49,8 @@ def test_apply_profiles_on_electric_base():
     cfg = config(ROOT, "integrated")
     cfg["research"]["renewable"].update(profile_variant="pypsa_eur", resource_classes=1)   # the S4A variant tested explicitly (S4B-3 changed the main setting)
     n0 = pypsa.Network(str(EB)); base_pm = n0.generators_t.p_max_pu.copy(); base_pmax = n0.generators.p_nom_max.copy()
+    sd = cfg["research"]["renewable"]["solar_density"]; k_solar = sd["target_mw_per_km2"] / sd["built_mw_per_km2"]   # M08a A6.1: ground PV x 5.1 / 4.6
+    base_pmax = base_pmax.where(n0.generators.carrier != "solar", base_pmax * k_solar)
     # original: untouched
     c = copy.deepcopy(cfg); c["research"]["renewable"]["profile_variant"] = "original"
     n = pypsa.Network(str(EB)); led = apply_renewable_profiles(n, c, ROOT)
@@ -56,7 +58,7 @@ def test_apply_profiles_on_electric_base():
     # pypsa_eur, one class: series replaced, p_nom_max unchanged, solar rooftop follows solar
     n = pypsa.Network(str(EB)); led = apply_renewable_profiles(n, cfg, ROOT)
     assert led["summary"]["replaced"] >= 96 * 2 and led["summary"]["added"] == 0
-    assert n.generators.p_nom_max.equals(base_pmax)
+    assert np.allclose(n.generators.p_nom_max.replace(np.inf, 1e30), base_pmax.replace(np.inf, 1e30), rtol=1e-12, atol=0)
     g = n.generators; w = n.snapshot_weightings.generators
     sol = g.index[g.carrier == "solar"][0]; node = str(g.at[sol, "bus"])
     roof = [r for r in g.index[g.carrier == "solar rooftop"] if str(r).startswith(node + " solar rooftop")][0]   # rooftop sits on the node low-voltage bus

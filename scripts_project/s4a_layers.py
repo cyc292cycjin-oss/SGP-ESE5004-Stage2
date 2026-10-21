@@ -31,6 +31,24 @@ def _sha(p: Path) -> str:
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
+def apply_solar_density(n, RN: dict) -> dict:
+    """M08a A6.1 (M08-7, decisions 129, 131; registry renewable_capacity_per_sqkm_solar): research.renewable.solar_density - the
+    utility-PV candidate potentials of the electric base were computed by the author chain at 4.6 MW/km2 (PyPSA-Earth); the main run
+    uses the PyPSA-Eur v2025.07.0 density 5.1 MW/km2 on the SAME eligible land (land classes and protected-area exclusion unchanged),
+    i.e. p_nom_max x 5.1 / 4.6 = 1.1087 for every ground-mounted 'solar' candidate in the 11 countries, no raster recomputation;
+    rooftop PV ('solar rooftop') and existing PV ('solar existing') unchanged."""
+    sd = dict(RN.get("solar_density") or {})
+    built, target = float(sd.get("built_mw_per_km2", 4.6)), float(sd.get("target_mw_per_km2", sd.get("built_mw_per_km2", 4.6)))
+    scale = target / built
+    sel = n.generators.index[n.generators.carrier == "solar"]
+    before = float(n.generators.loc[sel, "p_nom_max"].replace(np.inf, np.nan).sum())
+    if scale != 1.0:
+        n.generators.loc[sel, "p_nom_max"] = n.generators.loc[sel, "p_nom_max"] * scale
+    after = float(n.generators.loc[sel, "p_nom_max"].replace(np.inf, np.nan).sum())
+    return dict(built_mw_per_km2=built, target_mw_per_km2=target, scale=scale, generators=int(len(sel)), p_nom_max_before_mw=before, p_nom_max_after_mw=after,
+                rule="ground-mounted solar p_nom_max x target / built density; land rules unchanged; rooftop and existing PV unchanged")
+
+
 def apply_renewable_profiles(n, cfg, repo: Path):
     RN = dict(cfg["research"].get("renewable") or {})
     variant = str(RN.get("profile_variant", "original")); ncls = int(RN.get("resource_classes", 1))
@@ -41,6 +59,7 @@ def apply_renewable_profiles(n, cfg, repo: Path):
     if ncls < 1:
         raise ValueError("research.renewable.resource_classes must be >= 1")
     led = dict(profile_variant=variant, resource_classes=ncls, clip_p_max_pu=clip, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
+    led["solar_density"] = apply_solar_density(n, RN)   # M08a A6 (M08-7, decisions 129, 131): before the class split, so every class keeps its share
     if variant == "original":
         n.meta["research_renewable"] = led
         return led
