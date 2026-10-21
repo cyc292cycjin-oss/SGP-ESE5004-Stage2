@@ -62,7 +62,8 @@ def test_fischer_tropsch_new_unit(costs):
 
 def test_smr_and_geothermal_rows(costs):
     c, ledger = costs
-    assert c.at["nuclear SMR", "investment"] == pytest.approx(8421394.8727, rel=1e-6) and c.at["nuclear SMR", "lifetime"] == 40
+    # M08-2 (decision 131): SMR = technology-data nuclear x AEO8 D.15 9,600 / 9,000 (former AEO8 x FX 8,421,394.87 EUR/MW is the option aeo8_author_rule_2050)
+    assert c.at["nuclear SMR", "investment"] == pytest.approx(c.at["nuclear", "investment"] * 9600 / 9000, rel=1e-12) and c.at["nuclear SMR", "lifetime"] == 40
     assert c.at["nuclear SMR", "fuel"] == pytest.approx(c.at["uranium", "fuel"]) and c.at["nuclear SMR", "efficiency"] == pytest.approx(0.326)
     assert c.at["geothermal", "investment"] == pytest.approx(4100e3 * 0.877229, rel=1e-4) and c.at["geothermal", "lifetime"] == 30
     assert c.at["geothermal", "FOM"] == pytest.approx(19.5 / 4100 * 100, rel=1e-6)

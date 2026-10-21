@@ -116,7 +116,8 @@ def add_existing_geothermal(n, costs, survival_json: Path, capacity_factor: floa
     bus_mapping = bus_mapping or {}
     units["node"] = [bus_mapping.get(str(b), {}).get("Node", str(b)) if isinstance(bus_mapping.get(str(b), {}), dict) else bus_mapping.get(str(b), str(b)) for b in units.OriginalMappedBus]
     live = units[units.in_service_2050]
-    fom_eur_per_mw_a = cost(costs, "geothermal", "FOM") / 100.0 * cost(costs, "geothermal", "investment")
+    f_aeo8 = float(costs.at["geothermal", "aeo8_price_year_factor"]) if "aeo8_price_year_factor" in costs and np.isfinite(costs.at["geothermal", "aeo8_price_year_factor"]) else 1.0
+    fom_eur_per_mw_a = cost(costs, "geothermal", "FOM") / 100.0 * cost(costs, "geothermal", "investment") / f_aeo8   # M08-2: the price-year factor acts on new build only
     vom = cost(costs, "geothermal", "VOM")
     ensure_carrier(n, "geothermal existing")
     added = []
