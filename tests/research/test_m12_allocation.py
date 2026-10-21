@@ -571,6 +571,51 @@ def test_runner_hooks_after_c1_before_acceptance(tmp_path):
     assert not any(x.startswith("solve integrated_CAND_minus") for x in calls)                # profile A only
 
 
+def _formal(tmp_path, env_extra, third_batch_reference=False):
+    import hashlib
+    import subprocess
+    fake = ROOT / "tests/research/fixtures/m08a_fake_pipeline.py"
+    nets = tmp_path / "nets"; nets.mkdir(parents=True); out = tmp_path / "out"; out.mkdir()
+    for sc in ("integrated", "disconnected"):
+        (nets / f"{sc}_2920_3h_unsolved.nc").write_bytes(f"{sc}2920_3h".encode()); (nets / f"{sc}_costs_active_research.csv").write_text("technology\n")
+        (nets / f"{sc}_BUILD_RECEIPT.json").write_text(json.dumps(dict(network=dict(sha256=hashlib.sha256(f"{sc}2920_3h".encode()).hexdigest()))))
+    if third_batch_reference:
+        (out / "BATCH_REFERENCE_A.json").write_text(json.dumps(dict(source="third batch A", differences_bn={})))
+    (tmp_path / "pc.json").write_text(json.dumps(dict(profile="formal_barrier")))
+    py = sys.executable
+    env = dict(os.environ, RUN_KIND="formal", REPO=str(ROOT), NETS=str(nets), OUT=str(out), PY=py, SOLVE_CMD=f"{py} {fake} solve", VA_CMD=f"{py} {fake} va",
+               C1_CMD=f"{py} {fake} c1", VAR_CMD=f"{py} {fake} variants", PROFILE_CHOICE=str(tmp_path / "pc.json"), **env_extra)
+    p = subprocess.run(["bash", str(ROOT / "scripts_project/m08a_run_batch.sh")], env=env, capture_output=True, text=True, timeout=900)
+    assert p.returncode == 0, p.stderr[-800:]
+    return out, (out / "STATUS.txt").read_text().splitlines(), (out / "CALLS.txt").read_text().splitlines()
+
+
+def test_formal_provisional_then_batch_reference_d9(tmp_path):
+    """Supplement 01 D9: formal C1 with a provisional reference (third batch BATCH_REFERENCE_A.json); a provisional NOT_ACCEPTED that hinges on
+    C1 (b) does not stop the batch; after both runs the batch's own reference, regrade of both runs (grade_history kept), provisional copies,
+    final acceptance; no leave-one-out runs in the fourth batch."""
+    out, st, calls = _formal(tmp_path / "a", dict(FAKE_C1_integrated="101", FAKE_C1_REGRADE_integrated="111"), third_batch_reference=True)
+    pos = lambda s: next(i for i, x in enumerate(st) if x.startswith(s))   # noqa: E731
+    assert st[pos("PROVISIONAL_REFERENCE:")] == f"PROVISIONAL_REFERENCE:{out / 'BATCH_REFERENCE_A.json'}"
+    assert [x for x in calls if x.startswith("solve ")] == ["solve integrated formal_barrier 172800.0", "solve disconnected formal_barrier 172800.0"]
+    assert pos("PROVISIONAL_NOT_ACCEPTED:integrated") < pos("SOLVE_disconnected") < pos("REFERENCE:done") < pos("FINAL_integrated:ACCEPTED_LAYER2") < pos("M12_BENEFIT:")
+    assert not (out / "STOP_NOT_ACCEPTED").exists() and not any(x.startswith("variant ") for x in calls)
+    assert json.loads((out / "integrated" / "V6_ACCEPTANCE_PROVISIONAL.json").read_text())["label"] == "NOT_ACCEPTED"
+    assert json.loads((out / "integrated" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2"
+    assert (out / "integrated" / "FORMAL_DECISION_PROVISIONAL.json").exists() and json.loads((out / "integrated" / "FORMAL_DECISION.json").read_text())["usable_for_allocation"]
+    P = json.loads((out / "integrated" / "PRECISION.json").read_text())
+    assert "BATCH_REFERENCE_A.json" in P["grade_history"][0]["reference_source"] and P["grade_history"][0]["flags"] == "101"
+    assert P["reference"]["source"].endswith(str(out / "BATCH_REFERENCE.json"))               # final thresholds: this batch's own reference
+    # final NOT_ACCEPTED after the regrade stops the batch before the M12 batch steps; env reference preferred; no reference -> L23 provisional only
+    (tmp_path / "ref.json").write_text("{}")
+    out, st, _ = _formal(tmp_path / "b", dict(PROVISIONAL_REFERENCE=str(tmp_path / "ref.json"), FAKE_C1_REGRADE_disconnected="100"), third_batch_reference=True)
+    assert f"PROVISIONAL_REFERENCE:{tmp_path / 'ref.json'}" in st and "FINAL_disconnected:NOT_ACCEPTED" in st and (out / "STOP_NOT_ACCEPTED").exists()
+    assert not any(x.startswith("M12_BENEFIT") for x in st)
+    out, st, calls = _formal(tmp_path / "c", dict(FAKE_C1_integrated="011"))                    # C1 (a) fails: reference-independent -> immediate stop
+    assert "PROVISIONAL_REFERENCE:L23 default (provisional only, never final)" in st and "STOP_NOT_ACCEPTED:integrated (no retry, no parameter change; user decision)" in st
+    assert [x for x in calls if x.startswith("solve ")] == ["solve integrated formal_barrier 172800.0"] and not any(x.startswith("REFERENCE") for x in st)
+
+
 def test_scrb_and_proportional_sum_to_total():
     L, _ = toy(); cost = coalition_costs(L, 0.5); cN = cost[frozenset(P3)]
     marg = {i: cN - cost[frozenset(P3) - {i}] for i in P3}; alone = {i: cost[frozenset({i})] for i in P3}

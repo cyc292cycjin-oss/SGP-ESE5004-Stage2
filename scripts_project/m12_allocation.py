@@ -601,8 +601,11 @@ def _dual_alloc(run_dir: Path, override: Path | None) -> dict | None:
             continue
         r = json.loads(p.read_text())
         if r.get("main_form") == "owen_dual_form":
-            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=r.get("usable_for_allocation"),
-                        identity_passed=(r.get("identity") or {}).get("passed"), premise_passed=(r.get("premise") or {}).get("passed"))
+            ip, pp = (r.get("identity") or {}).get("passed"), (r.get("premise") or {}).get("passed")
+            usable = r.get("usable_for_allocation")
+            if (Path(run_dir) / "PRECISION.json").exists():   # after a regrade (D9) the run's C1 (c) may differ from the one OWEN.json saw
+                usable = bool(ip and pp is not False and precision_context(Path(run_dir)).get("c_passed") is not False)
+            return dict(allocation=r["allocation_eur"]["0.5"], interval=r["interval_eur"], source=str(p), usable=usable, identity_passed=ip, premise_passed=pp)
         d = r.get("dual_form") or {}
         if d.get("allocation_alpha_half"):
             return dict(allocation=d["allocation_alpha_half"], interval=d.get("interval"), source=str(p), usable=None, identity_passed=None, premise_passed=None)

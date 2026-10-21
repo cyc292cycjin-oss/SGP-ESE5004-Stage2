@@ -18,6 +18,11 @@
 # never --allow-stale-base) into OUT/variants/ (receipt + output SHA256 in STATUS) and solved ONCE each as integrated_A_minus<CC> with profile A
 # (costs table of the integrated base; GATES_V6 G2.1 against the variant receipt's output.sha256); batch_reference _A regrades them too.
 # The fourth batch (formal) has no leave-one-out runs.
+# M12 supplement 01 D9: formal runs are graded by C1 with a PROVISIONAL reference (env PROVISIONAL_REFERENCE, else the third batch's
+# OUT/BATCH_REFERENCE_A.json, else the L23 default - recorded as provisional); a provisional NOT_ACCEPTED stops the batch at once only when it
+# does not hinge on the reference (C1 (a) or a G2 check failed). After both runs: batch_reference "" (the batch's own per-country reference,
+# both runs regraded, grade_history kept), V6_ACCEPTANCE.json / FORMAL_DECISION.json copied to *_PROVISIONAL.json, final acceptance and
+# formal-check; a final NOT_ACCEPTED stops the batch before the M12 batch steps. The L23 default never decides a formal run.
 # Test hooks: PY, SOLVE_CMD, VA_CMD, C1_CMD, M12_CMD, M12A_CMD, VAR_CMD (default the repo scripts); DRY=1 prints the commands only.
 set -u
 : "${RUN_KIND:?level2 or formal}" "${REPO:?}" "${NETS:?}" "${OUT:?}"
@@ -26,6 +31,7 @@ SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; G6="$PY $REPO/scripts_project/v5/gates_v6.py"
 M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}; M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; M12_DUAL=${M12_DUAL:-1}
 VAR_CMD=${VAR_CMD:-"$PY $REPO/scripts_project/m08a_variants.py"}; LOO_COUNTRIES=${LOO_COUNTRIES:-"VN TH LA"}
+C1_REF=""   # C1 run reference (formal: provisional reference, D9); empty = C1's default
 mkdir -p "$OUT"; ST="$OUT/STATUS.txt"; echo "START:$RUN_KIND:$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$ST"
 
 rule() {   # dotted key of research.solver.run_rules (gates_v6.run_rules: config over the registered defaults)
@@ -55,7 +61,8 @@ one_run() {   # $1 tag $2 scenario $3 resolution $4 profile $5 time limit [$6 ne
   if [ "$DRY" = 1 ]; then echo "DRY-RUN: ${s[*]}" >> "$ST"; return 0; fi
   ( cd "$REPO" && "${s[@]}" > "$dir/solve.log" 2> "$dir/solve.err" ); echo "SOLVE_$tag:exit=$?:profile=$prof:time_limit=$tl" >> "$ST"
   if [ -f "$dir/solution/X.npy" ]; then ( cd "$REPO" && $VA_CMD --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --out "$dir/VIOLATIONS.json" > "$dir/va.log" 2>&1 ); fi
-  ( cd "$REPO" && $C1_CMD run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --violations "$dir/VIOLATIONS.json" > "$dir/c1.log" 2>&1 )
+  ( cd "$REPO" && $C1_CMD run --repo "$REPO" --solve-dir "$dir" --network "$net" --scenario "$sc" --label "M08_$tag" --violations "$dir/VIOLATIONS.json" \
+      ${C1_REF:+--reference "$C1_REF"} > "$dir/c1.log" 2>&1 )
   echo "C1_$tag:exit=$?" >> "$ST"
   m12_run "$tag" "$sc" "$net"
 }
@@ -108,6 +115,10 @@ batch_reference() {   # $1 suffix of the run tags: the batch's own per-country r
     [ -f "$d/PRECISION.json" ] || continue; $C1_CMD regrade --solve-dir "$d" --reference "$OUT/BATCH_REFERENCE$1.json" > /dev/null 2>> "$ST"; n=$((n + 1))
   done
   echo "REFERENCE$1:done:loo_regraded=$n" >> "$ST"
+}
+
+ref_independent() {   # $1 V6_ACCEPTANCE.json -> 1 when NOT_ACCEPTED does not hinge on the C1 (b) thresholds (C1 (a) or a G2 check failed; unreadable -> 1)
+  "$PY" -c "import json,sys; a=json.load(open(sys.argv[1])); print(int((not a['G1']['a']) or not all(a['G2'][k]['passed'] for k in ('G2_1', 'G2_2', 'G2_3'))))" "$1" 2>/dev/null || echo 1
 }
 
 variant_sha() {   # $1 variant receipt -> output.sha256
@@ -174,12 +185,34 @@ P
     if [ -f "$PC" ]; then PROF=$("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['profile'])" "$PC"); else PROF=$FALLBACK; echo "PROFILE_CHOICE:missing -> $FALLBACK" >> "$ST"; fi
     case "$PROF" in "$CAND"|"$REF") ;; *) echo "REFUSED_PROFILE:$PROF (only $CAND or $REF; the 1e-5 profile is never a fallback)" >> "$ST"; exit 3;; esac
     echo "FORMAL_PROFILE:$PROF" >> "$ST"
+    C1_REF=${PROVISIONAL_REFERENCE:-}; [ -z "$C1_REF" ] && [ -f "$OUT/BATCH_REFERENCE_A.json" ] && C1_REF="$OUT/BATCH_REFERENCE_A.json"
+    echo "PROVISIONAL_REFERENCE:${C1_REF:-L23 default (provisional only, never final)}" >> "$ST"
     for sc in $SCENARIOS; do
       one_run "$sc" "$sc" 2920_3h "$PROF" "$TL_FORMAL"
       lab=$(accept "$sc" "$sc")
       [ "$DRY" = 1 ] || $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
-      if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break; fi
+      if [ "$lab" = NOT_ACCEPTED ]; then
+        if [ "$(ref_independent "$OUT/$sc/V6_ACCEPTANCE.json")" = 1 ]; then
+          echo "STOP_NOT_ACCEPTED:$sc (no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; break
+        fi
+        echo "PROVISIONAL_NOT_ACCEPTED:$sc (C1 (b) under the provisional reference; decided after the batch reference)" >> "$ST"
+      fi
     done
+    if [ ! -f "$OUT/STOP_NOT_ACCEPTED" ] && [ "$DRY" != 1 ]; then   # D9: the batch's own reference, regrade, final acceptance
+      batch_reference ""
+      if [ -f "$OUT/BATCH_REFERENCE.json" ]; then
+        for sc in $SCENARIOS; do
+          [ -f "$OUT/$sc/V6_ACCEPTANCE.json" ] || continue
+          cp "$OUT/$sc/V6_ACCEPTANCE.json" "$OUT/$sc/V6_ACCEPTANCE_PROVISIONAL.json"; cp "$OUT/$sc/FORMAL_DECISION.json" "$OUT/$sc/FORMAL_DECISION_PROVISIONAL.json"
+          lab=$(accept "$sc" "$sc")
+          $G6 formal-check --acceptance "$OUT/$sc/V6_ACCEPTANCE.json" --repo "$REPO" > "$OUT/$sc/FORMAL_DECISION.json"
+          echo "FINAL_$sc:$lab" >> "$ST"
+          if [ "$lab" = NOT_ACCEPTED ]; then echo "STOP_NOT_ACCEPTED:$sc (final, batch reference; no retry, no parameter change; user decision)" >> "$ST"; touch "$OUT/STOP_NOT_ACCEPTED"; fi
+        done
+      else
+        echo "FINAL:provisional only (no batch reference: missing ledgers)" >> "$ST"
+      fi
+    fi
     [ -f "$OUT/STOP_NOT_ACCEPTED" ] || { m12_loo integrated; m12_batch ""; }
     ;;
   *) echo "unknown RUN_KIND $RUN_KIND" >&2; exit 2;;
