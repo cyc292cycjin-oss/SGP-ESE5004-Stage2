@@ -130,7 +130,7 @@ def co2_flows(n):
     for name, z in n.stores[n.stores.carrier == "co2 sequestered"].iterrows():
         out["sequestered_by_country"][str(z.country)] = dict(final_level_t=float(n.stores_t.e[name].iloc[-1]), e_nom_max=float(z.e_nom_max))
     links = n.links
-    for carrier in ["CCGT CC", "SMR CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC"]:
+    for carrier in ["CCGT CC", "SMR CC", "biomass EOP CC", "process emissions CC", "DAC", "industry biomass CC", "industry biomass boiler CC", "industry direct firing biomass CC"]:
         sel = links[links.carrier == carrier]
         tot = 0.0
         for name, z in sel.iterrows():

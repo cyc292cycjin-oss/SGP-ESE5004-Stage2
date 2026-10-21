@@ -283,6 +283,19 @@ def formal_run_decision(acc: dict, rules: dict) -> dict:
                 rule=rules["on_non_convergence"])
 
 
+def registered_sha_from_build_receipt(build_receipt: dict | None, solve_receipt: dict | None) -> str | None:
+    """Registered network SHA256 for G2.1 from the BUILD_RECEIPT (M08b supplement 01 item D): the daily 365x24h network only for an untruncated
+    run on 365 snapshots; every truncated run (e.g. --truncate 56 or a 365-snapshot probe of the 2920x3h file) and every 2920x3h run -> the
+    2920x3h network of the receipt."""
+    br = build_receipt or {}
+    inp = (solve_receipt or {}).get("input_network") or {}
+    snaps = int(inp.get("snapshots") or 0)
+    daily = br.get("daily_network") or {}
+    if not inp.get("truncated_to") and snaps == 365 and daily.get("snapshots") == 365:
+        return daily.get("sha256")
+    return (br.get("network") or {}).get("sha256")
+
+
 def _config(repo: Path):
     import sys
     sys.path.insert(0, str(Path(repo) / "scripts_project"))
@@ -301,11 +314,7 @@ def main():
     if x.cmd == "accept":
         reg = x.registered_sha256
         if reg is None and x.build_receipt:
-            br = _jl(x.build_receipt) or {}
-            rec = _jl(x.solve_dir / "SOLVE_RECEIPT.json") or {}
-            snaps = int(((rec.get("input_network") or {}).get("snapshots")) or 0)
-            reg = ((br.get("daily_network") or {}).get("sha256") if snaps and snaps <= 365 and (br.get("daily_network") or {}).get("snapshots") == 365
-                   else (br.get("network") or {}).get("sha256"))
+            reg = registered_sha_from_build_receipt(_jl(x.build_receipt), _jl(x.solve_dir / "SOLVE_RECEIPT.json"))
         acc = acceptance_v6(x.solve_dir, reg)
         out = x.out or (x.solve_dir / "V6_ACCEPTANCE.json")
         out.write_text(json.dumps(acc, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
