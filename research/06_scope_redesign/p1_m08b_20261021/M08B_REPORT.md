@@ -227,7 +227,7 @@ B11 完整性：缺 287 项（地热 / 径流水电要求每节点都有）；�
 
 ## 7. 提交与文件
 
-**提交（分支 `codex/m08b-demand-20261021`，自 `820c2cae`）：** `349146be`（第 1 节，M11 条目）→ `9ca5d341`（B1/B2 数据表）→ `ef01ceac`（构建接入、注册表、测试；网络在此提交上构建）→ `7381e91d`（第 3 节静态检查与对比；冒烟在此提交上运行）→ 交付提交（报告、冒烟证据、台账）。draft PR 叠在 #45 上（链接见 PR 正文与进度文件）。
+**提交（分支 `codex/m08b-demand-20261021`，自 `820c2cae`）：** `349146be`（第 1 节，M11 条目）→ `9ca5d341`（B1/B2 数据表）→ `ef01ceac`（构建接入、注册表、测试；网络在此提交上构建）→ `7381e91d`（第 3 节静态检查与对比；冒烟在此提交上运行）→ `f0db44f2`（冒烟、报告、台账）→ 收尾提交（PR 链接、审阅 ZIP 清单）。draft PR：[cyc292cycjin-oss/SGP-ESE5004-Stage2#47](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/47)（base `codex/m08a-corrections-20261021`，叠在 #45 上）。
 
 **代码（`scripts_project/`）：** 新增 `m08b_demand.py`、`m08b_heat_bands.py`、`m08b_data.py`、`m08b_static.py`、`m08b_smoke_eval.py`；修改 `s2_layers.py`、`s2_network.py`、`s3_0_industry.py`、`s2b_feedstock.py`、`s2_0_process_emissions.py`、`d1_registry.py`、`s4c_layers.py`、`s4m_cost_breakdown.py`、`s2_solve.py`（捕集载体列表）、`s3_7_results_summary.py`、`v5/v5_gates.py`；`configs/research/baseline.yaml`；测试 `tests/research/test_m08b_demand.py`、`test_m08b_heat.py`，改 `test_s3b_r1.py`、`test_s3b_r2.py`。
 

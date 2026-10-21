@@ -11,7 +11,7 @@
 | B1/B2 构建 + B3 | `s2_layers`（demand_anchor_settings / physical_output_settings / biomass_overflow、HEAT_BAND_TECH 三档、热档负荷、溢出转有用热、锚值逐国核对 1e-9）、`s2_network`、载体登记、`v5_gates` B11 / B12、`baseline.yaml`；`m08b_data.py`（新增 30、修正 23；拟增 16 行全部落实）；注册表 2,121 → 2,184 行（97b27c87…）；测试 `tests/research` 550 passed / 64 skipped / 0 failed（5 个玩具求解排除） | 完成 | ef01ceac（已推送 origin） |
 | 3 | 在 ef01ceac（dirty 0）上重建：integrated 2920×3h cf189f39…（60.5 MiB）/ 365×24h d9fab9aa…（29.4 MiB）；disconnected af9f1881…（59.9 MiB）/ 7234216e…（28.8 MiB）；各 70 s、0.78 GB。变体 6 个 × 2 遍网络逐字节相同（回执只差 output.path）。静态：B5、B8、B11 路线、B13、B16、G2.1、G2.2、日均网络与全部 M08b 检查通过；B11 完整性（S1 旧检查）失败，S4M-3 旧网络同样失败（287 项相同）。对比表 `BUILD_INPUT_CHANGES_M08B.*` | 完成 | 见 git log |
 | 4 | 本机冒烟（用户 10-21 授权；云端无运行经用户确认）：两情景 optimal（357 / 320 s，4.5 / 4.1 GiB），GATES_V6 ACCEPTED_LAYER2 ×2，C1 (a)(b)(c) 全过，B6 = +10.05 bn，账本恒等、无甲烷溢出、LNG 不受上限、导出完整 → 通过（`evidence/M08B_SMOKE_RESULT.json`、`evidence/smoke/`） | 完成 | 冒烟在 7381e91d 上运行 |
-| 5 | 交付：`M08B_REPORT.md`、台账 M08b 条目、draft PR、审阅 ZIP | 完成 | 见 git log / PR |
+| 5 | 交付：`M08B_REPORT.md`、台账 M08b 条目、draft PR [#47](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/47)（base M08a 分支，叠在 #45 上）、审阅 ZIP | 完成 | f0db44f2 → 收尾提交 |
 
 ## 设计决定（代码探查后，2026-10-21；写入报告，交审阅）
 
