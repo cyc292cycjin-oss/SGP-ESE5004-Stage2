@@ -13,7 +13,7 @@
 | B6 可选 | 未做 | 时间盒已用尽。 |
 | 报告 | 完成 | `M10A_REPORT.md`（GO 有条件）、`M10A_EVIDENCE.json`；仓库镜像 `research/06_scope_redesign/p1_m10a_20261022/`，v4 清单 `p1_m10p_20261022/evidence/m10a_v4/`；证据提交与推送见下。 |
 
-提交链：`d71f599e`（M10P 补充 01 收尾）→ `03677123`（M10A B5：修复 + 测试 + RUN_PLAN v3）→ 证据提交（报告、证据、v4 清单；SHA 见下）。PR #49（draft，base `codex/m12b-loo-local-20261021`）随推送更新；未合并 main，未 force-push。
+提交链：`d71f599e`（M10P 补充 01 收尾）→ `03677123`（M10A B5：修复 + 测试 + RUN_PLAN v3）→ **`50efec7c`**（报告、证据、v4 清单、进度）。已推送：`d71f599e..50efec7c codex/m10-batch3-20261022 -> codex/m10-batch3-20261022`（origin = `cyc292cycjin-oss/SGP-ESE5004-Stage2`），PR #49（draft，base `codex/m12b-loo-local-20261021`）随之更新；未合并 main，未 force-push。仓库镜像里的本文件写于提交前（无此 SHA 行），以 work 侧本文件为准。
 
 本机计算合计约 66 min（三轮测试链 42 min、B3/B4 2 min、打包 1.7 min、变体复现 0.6 min、干跑 pre ~1 min、post 5.7 min、探测）；磁盘新增约 3 GB（`/home/jin/m10a_dry` 2.1 GB、`m10a_b3` 0.6 GB、`m10a_varcheck` 0.2 GB、v4 包 0.15 GB）。未连云、未上传、未调用 Gurobi、未求解模型网络。
 
