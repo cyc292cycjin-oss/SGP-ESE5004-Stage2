@@ -30,7 +30,7 @@
 | 子步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
 | S01-1 | 六项决定的代码与文档：静态检查 `research/` 运行时依赖；`run_batch3.sh` 配对排程（`SCHEDULE`）、分级停批（`stop-class`、`UNUSABLE`）、删 P1；`preflight.sh` 实例规格；`make_package.sh` 瘦身（不含 `research/`、不含 2920×3h 网络、上传按 36 / 100 / 318 KB/s）；测试；`RUN_PLAN.md` v2 | **完成**：静态检查（导入闭包 66 个模块）只有两处会打开 `research/` 文件，都在 Gate5/Gate6 旧流程、不在运行路径上（`evidence/s01/S01_STATIC_RESEARCH_RAW.json`）；`test_m10p_batch3.py` 17 项通过；全量 **600 passed、67 skipped、0 failed**（404.7 s，玩具 LP 照常运行；`evidence/M10P_FULL_TESTS_s01_code.log`）；瘦身代码归档试算 82.5 MB（原 153.8 MB） | 见下 |
-| S01-2 | 部署包 v3（瘦身）生成与清单 | 未开始 | |
+| S01-2 | 部署包 v3（瘦身）生成与清单 | 进行中：第一次在 `619d7b46` 上生成（95 s，24 个文件 148,587,312 B，代码归档 82,477,623 B、`research/` 文件 0 个；变体期望、网络、回执、成本表与 v2 逐字节相同）→ 发现 `RUN_PLAN.md` 第 6 节漏算两份构建回执（各 1.73 MB，v1 起即漏）→ 改正计划文字、重新提交后重建；该版改名为 `cloud_package_dist_v3a_619d7b46/` 保留（不上传） | |
 | S01-3 | 第二次干跑：解包与预检、7 个变体复现、R1–R11 构建到求解前退出、访问追踪（`research/`）、后处理批级汇总（M12b 冒烟） | 未开始 | |
 | S01-4 | 报告"补充 01"一节、台账、PR 更新、审阅 ZIP | 未开始 | |
 

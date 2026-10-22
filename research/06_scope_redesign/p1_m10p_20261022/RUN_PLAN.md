@@ -145,9 +145,9 @@
 
 ## 6. 部署包与上传量
 
-- 内容与每个文件的 SHA256：`PACKAGE_MANIFEST.json`、`SHA256SUMS`。约 145 MB：代码归档约 82 MB（不含 `research/`；含 `research_inputs/`、`data/` 等运行所需目录），两个网络 62.4 MB，其余（构建回执、成本表、脚本、环境锁定、清单、计划）不到 1 MB。
+- 内容与每个文件的 SHA256：`PACKAGE_MANIFEST.json`、`SHA256SUMS`。约 149 MB：代码归档约 82.5 MB（不含 `research/`；含 `research_inputs/`、`data/` 等运行所需目录），两个网络 62.4 MB，两份构建回执 3.5 MB，其余（成本表、脚本、环境锁定、清单、计划）约 0.3 MB。
 - **上传：** 单路上传（一个 rsync 流，不开并行流，不中断带 `--partial` 的传输），传后在实例上全量 `sha256sum -c SHA256SUMS`；失败的文件单独重传后再全量核对；全部通过后才放置许可。
-- **预计上传时间（KB = 1000 B）：** 36 KB/s（S4O-6 AutoDL 克隆机上行）约 1.1 h；100 KB/s 约 24 分钟；318 KB/s 约 8 分钟。准确字节数见 `PACKAGE_MANIFEST.json`。
+- **预计上传时间（KB = 1000 B）：** 36 KB/s（S4O-6 AutoDL 克隆机上行）约 1.15 h；100 KB/s 约 25 分钟；318 KB/s 约 8 分钟。准确字节数见 `PACKAGE_MANIFEST.json`。
 
 ## 7. 云端步骤（供执行指令参考；主机、端口、密码不写入任何文件）
 
