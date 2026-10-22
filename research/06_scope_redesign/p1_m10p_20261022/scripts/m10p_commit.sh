@@ -6,7 +6,7 @@ WT=/home/jin/wt_m10p_20261022; W=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m10p_20
 cd $WT || exit 1
 [ "$(git branch --show-current)" = codex/m10-batch3-20261022 ] || { echo "WRONG BRANCH"; exit 2; }
 mkdir -p $D
-rsync -a --delete --exclude cloud_package_dist/ --exclude '*.zip' --exclude dryrun_local/ --exclude __pycache__/ --exclude cloud_package/ "$W/" "$D/"
+rsync -a --delete --exclude 'cloud_package_dist*/' --exclude '*.zip' --exclude dryrun_local/ --exclude __pycache__/ --exclude cloud_package/ "$W/" "$D/"
 big=$(find $D -type f -size +5M | head -5); [ -z "$big" ] || { echo "REFUSED: files > 5 MB in $D: $big"; exit 3; }
 if grep -rIilE "license[i]d|registered[[:space:]]+to|wls(secret|accessid)" $D > /tmp/m10p_lic_hits.txt 2>/dev/null; then echo "REFUSED: licence-like strings in $(cat /tmp/m10p_lic_hits.txt)"; exit 4; fi
 git add -f $D

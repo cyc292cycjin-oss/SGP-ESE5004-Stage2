@@ -1,0 +1,106 @@
+{
+ "base": {
+  "path": "/home/jin/m10p_dry/pkg/networks/integrated_365_24h_unsolved.nc",
+  "scenario": "integrated",
+  "sha256": "75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e",
+  "stale_config": false
+ },
+ "ledgers": {
+  "co2_shipping": {
+   "mode": "allow"
+  },
+  "coalition": {
+   "demand_removed_mwh": 0.0,
+   "removed": {},
+   "removed_countries": []
+  },
+  "finance": {
+   "by_country": {
+    "BN": 63,
+    "BN+MY": 4,
+    "ID": 2581,
+    "ID+MY": 44,
+    "ID+SG": 6,
+    "ID+TL": 4,
+    "KH": 315,
+    "KH+LA": 5,
+    "KH+TH": 16,
+    "KH+VN": 24,
+    "LA": 349,
+    "LA+MM": 5,
+    "LA+TH": 43,
+    "LA+VN": 36,
+    "MM": 1044,
+    "MM+TH": 35,
+    "MY": 472,
+    "MY+PH": 4,
+    "MY+SG": 5,
+    "MY+TH": 7,
+    "PH": 412,
+    "SG": 57,
+    "TH": 378,
+    "TL": 62,
+    "VN": 523
+   },
+   "changed": 6494,
+   "costs_table": {
+    "path": "/home/jin/m10p_dry/pkg/networks/integrated_costs_active_research.csv",
+    "sha256": "7cee9c1a61c4d7b1fa6492d0ece4e0896a17fd2e3afdc47bb1228ec92bb4561b"
+   },
+   "country_wacc": {
+    "BN": 0.0468,
+    "ID": 0.0707,
+    "KH": 0.0905,
+    "LA": 0.0764,
+    "MM": 0.1102,
+    "MY": 0.0441,
+    "PH": 0.0454,
+    "SG": 0.0289,
+    "TH": 0.0525,
+    "TL": 0.092367,
+    "VN": 0.0455
+   },
+   "cross_border_rule": "mean of the two end countries",
+   "distributed_kept_at_cost_row_rate": 98,
+   "distributed_wacc_rule": "technology_data_fixed",
+   "mode": "country_specific",
+   "skipped_no_country": 0,
+   "skipped_no_country_examples": [],
+   "table": "research_inputs/finance_v5/COUNTRY_WACC_REAL_M08A.csv",
+   "uniform_discount_rate": 0.07
+  },
+  "stock_mode": {
+   "mode": "remove_all",
+   "note": "integrated network: not applicable"
+  }
+ },
+ "output": {
+  "bytes": 31527530,
+  "components": {
+   "Bus": 3099,
+   "Carrier": 142,
+   "Generator": 1928,
+   "Line": 148,
+   "LineType": 35,
+   "Link": 8544,
+   "Load": 2300,
+   "StorageUnit": 133,
+   "Store": 522,
+   "TransformerType": 14
+  },
+  "path": "/home/jin/m10p_dry/pkg/runs/batch3/variants/R10/integrated_wacccountry_365_24h_unsolved.nc",
+  "scenario": "integrated",
+  "sha256": "f2772bffc8ae0a57022454040d7d02d8786b17484bbc56e71962dbbca7dfb826"
+ },
+ "overrides": [
+  "finance.wacc_mode=country_specific"
+ ],
+ "research_config_sha256": "56ff0c5ebe56e070697c3132561564dbfe7793ded64fbae4138d6cb1bef38d7a",
+ "research_config_subset_sha256": "202920b573a70173cfe9dd5bc0608aa418c222b224faa32c59ce0ef659649b03",
+ "script": "scripts_project/m08a_variants.py",
+ "sets": {
+  "finance.wacc_mode": "country_specific"
+ },
+ "solver_runs": 0,
+ "status": "M08A_VARIANT_BUILT"
+}

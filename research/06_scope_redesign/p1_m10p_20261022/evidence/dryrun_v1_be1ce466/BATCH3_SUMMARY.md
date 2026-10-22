@@ -1,0 +1,46 @@
+# 第三批汇总（M10P 运行脚本自动生成；只读，未调用求解器）
+
+- 停批（C1 (a) 或 G2 不通过，第 138 项 D12）：无；安全停止：VARIANT_SHA256_R10:DIFFERENT:f2772bffc8ae0a57022454040d7d02d8786b17484bbc56e71962dbbca7dfb826:expected=3ac0493c32a0f4b07958112e5954cda1f579248fddaff7f2544f49acde8c8683:
+
+## 运行
+
+| 运行 | 作用 | 档案 | 状态 | 终止 | 目标 bn | 求解 s | 峰值 GiB | C1 abc | C1 参照 | 重评次数 | GATES_V6 | 临时标签 | Owen 可用 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| R1 | 本批参照（一体化）、Owen 分摊、c(N) | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R2 | 本批参照（不互联）、B6 | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R3 | 第二级容差验证，对 R1（第 127 项） | formal_barrier_1e6_t16 | not_started | — | — | — | — | — | — | — | — | — | None |
+| R4 | 第二级容差验证，对 R2（第 127 项） | formal_barrier_1e6_t16 | not_started | — | — | — | — | — | — | — | — | — | None |
+| R5 | 去 VN 复核（第 133、139 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R6 | 去 TH 复核（第 133、139 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R7 | 去 LA 复核（第 133、139 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R8 | 敏感性 b1：禁止区内 CO2 跨境运输（第 132 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R9 | 敏感性：不互联保留存量（第 132 项 2a） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R10 | 敏感性：分国 WACC，一体化（第 132 项第 5 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| R11 | 敏感性：分国 WACC，不互联（第 132 项第 5 项） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+| P1 | 2920×3h 探针：构建 + 预处理 + 迭代计时、峰值内存（选第四批机器） | formal_barrier | not_started | — | — | — | — | — | — | — | — | — | None |
+
+## B6（R2 − R1）
+
+- 不可计算（R1 或 R2 无目标值）
+
+## 敏感性差额（新 − 基准；两边都非 NOT_ACCEPTED 才可用）
+
+| 对比 | 内容 | 可用 | 目标差 bn | 相对 | 分国账本差 bn（11 国 + ASEAN） | Owen 对偶形式差 bn |
+|---|---|---|---|---|---|---|
+| R8 − R2 | b1：禁止区内 CO2 跨境运输（不互联） | False | 不可计算 | — | objective missing (run not finished or not solved) | — |
+| R9 − R2 | 不互联保留存量 | False | 不可计算 | — | objective missing (run not finished or not solved) | — |
+| R10 − R1 | 分国 WACC（一体化） | False | 不可计算 | — | objective missing (run not finished or not solved) | — |
+| R11 − R2 | 分国 WACC（不互联） | False | 不可计算 | — | objective missing (run not finished or not solved) | — |
+| R11 − R10 | 分国 WACC 下的 B6（信息项，不在事先登记的判定中） | False | 不可计算 | — | objective missing (run not finished or not solved) | — |
+
+## 第二级比较与第四批档案（事先登记规则 3）
+
+- 选择：**—**；理由：—
+
+## 去一国检查（R1 = c(N)，R5–R7）
+
+- 不可计算或未运行：无去一国结果
+
+## P1 探针（2920×3h）
+
+- 未运行
