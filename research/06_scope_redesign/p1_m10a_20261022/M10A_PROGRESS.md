@@ -26,7 +26,7 @@
 | D3 | 预检硬下限 64 GiB / 45 GB（核 25 不变）；`make_package.sh` 清单字符串；RUN_PLAN 第 5 节租用建议与硬下限分开；新测试 `test_preflight_resource_floor`（首轮在 tmpfs 上自跳过，加 `PREFLIGHT_DISK_PATH` 后单独通过） | 完成（`e0a89f8e`） |
 | 测试 | M10P 文件 32 passed / 1 skipped → 单补 2 passed；全量 **615 passed / 68 skipped / 0 failed**（`evidence/s01/TESTS_s01_*.log`） | 完成 |
 | D4 | v5 包：提交 `e0a89f8e`、24 文件、148,612,515 B、清单 `6fb28a77…5f63`、`SHA256SUMS` `f54f0d69…cf09`，固定文件与 v3 / v4 逐字节相同（v4 改名 `cloud_package_dist_v4_03677123/`）；干跑 pre 通过（`guards` 正反两例正确）；`BUILD_ONLY` R1–R11 全部 `BUILD_CHECK` 通过（1,133 s），与 M10P 第二次干跑逐运行相同（TimeLimit / 墙钟除外，`evidence/dryrun_v5/BUILD_VS_S01.json`）；`POST_ONLY` `DONE`（324 s），与 M12b 差 0.0 EUR | 完成 |
-| 报告 | `M10A_REPORT.md` "补充 01"一节（S1.1–S1.8）、`M10A_EVIDENCE.json` `supplement_01` 字段、仓库镜像、推送 | 完成（证据提交 SHA 见下） |
+| 报告 | `M10A_REPORT.md` "补充 01"一节（S1.1–S1.8）、`M10A_EVIDENCE.json` `supplement_01` 字段、仓库镜像、推送 | 完成：证据提交 **`1a08cf14`**，已推送 `9297c423..1a08cf14`（PR #49）；摘要行两处占位符的订正为后续小提交（SHA 见下） |
 
 本机计算约 49 min（测试 21 min、打包 1.8 min、干跑 pre 1 min / build 18.9 min / post 5.5 min）；磁盘新增约 11.5 GB（`/home/jin/m10a_dry_v5` 11 GB）。
 
