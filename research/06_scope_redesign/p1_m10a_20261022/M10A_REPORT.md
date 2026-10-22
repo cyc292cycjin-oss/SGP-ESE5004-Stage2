@@ -206,3 +206,118 @@ v3 保留为 `work/p1_m10p_20261022/cloud_package_dist_v3_e0527cec/`；v4 在 `c
 - 本机计算（含测试等待）：探测与 B3/B4 约 4 min；测试链一（修复前 15.5 min + 修复后 7 min + 全量 9.6 min）；测试链二（4 项 1 min + 全量 9.4 min）；测试链三（停批场景 2 次 3.4 min + 全量 9.9 min）；打包 1.7 min、变体复现 0.6 min、干跑 pre 约 1 min、干跑 post 5.7 min。合计约 66 分钟（超过 1 小时时间盒，`BUILD_ONLY` 干跑未做，第 5.3 节）。
 - 磁盘新增：`/home/jin/m10a_b3`（642 MB）、`/home/jin/m10a_varcheck`（202 MB）、`/home/jin/m10a_dry`（2.1 GB）、v4 包（149 MB）；`cloud_package_dist` v3 改名保留（`cloud_package_dist_v3_e0527cec/`）。本步临时脚本在 `/home/jin/m10a_*.sh`（副本见 `scripts/`）。
 - 证据：`work/p1_m10a_20261022/M10A_EVIDENCE.json`、`evidence/`（测试日志、B3/B4 原始输出、包比对、干跑）。
+
+---
+
+# 补充 01（第 145 项）：时限登记值变更、两项稳健性修改与最终干跑
+
+`M10A_SUPPLEMENT_01.md` v1，SHA256 `4abdff42ba335950994f4c2d75c3b8690242f562a83e408b3049dfee8409dd70`（与 `M10A_SUPPLEMENT_01_SHA256.txt` 一致）；用户 2026-10-22 启动消息"同意第 145 项"。规则同 M10A：未连云、未上传、未调用 Gurobi、未求解任何模型网络。原会话"是否补做 `BUILD_ONLY`"的问题作废，`BUILD_ONLY` 在本补充的最终包 v5 上做。
+
+**摘要：** D1–D3 实现并有测试（M10P 测试文件 33 项、全量 615 passed / 68 skipped 后单补 1 项，见 S1.4）；修复提交 `e0a89f8e`；v5 包：提交 `e0a89f8e`、24 个文件、148,612,515 B、清单 SHA256 `6fb28a77…5f63`、固定文件与 v3 / v4 逐字节相同；v5 完整干跑：预检（含 `guards`）通过、`BUILD_ONLY` R1–R11 与 M10P 第二次干跑逐运行相同（TimeLimit / 墙钟字段除外）、`POST_ONLY` 与 M12b 证据差 0.0 EUR【S01-DRY】。第 3.3 节分级停批表格与 `stop_class` 未改。本机计算约【S01-MIN】分钟（授权约 1 小时）。
+
+## S1.1 D1：365×24h 时限登记值 21,600 / 22,500 → 28,800 / 30,000 s
+
+改动前用 `grep -rnE "21,?600|22,?500"` 列出全部引用（`evidence/s01/S01_REFERENCES.txt` 为改后复核）：
+
+| 位置 | 旧值 | 新值 | 处理 |
+|---|---|---|---|
+| `cloud_package/run_batch3.sh:70`（现 :74）`R_WALL=22500; R_TL=21600` | 22,500 / 21,600 | **30,000 / 28,800** | 改；脚本对任何与登记值不同的 `WALL_CAP_S` / `GUROBI_TIME_LIMIT_S` / `LICENCE_GAP_S` 仍 `REFUSED`（`test_unregistered_limits_are_refused`） |
+| `run_batch3.sh:21` 头注释 | 21,600 / 22,500 | 28,800 / 30,000（注明旧值与第 145 项） | 改 |
+| `cloud_package/preflight.sh:65` `profile_parameters(…, 21600)` | 21,600 | 28,800 | 改（档案键名检查的 TimeLimit 参数） |
+| `tests/research/test_m10p_batch3.py:140` `float(c[3]) == 21600.0` | 21,600 | 28,800 | 改（11 次求解的登记 TimeLimit 断言） |
+| `tests/research/test_m10p_batch3.py:374` `--time-limit 21600`（POST_ONLY 演练的替身回执） | 21,600 | 28,800 | 改 |
+| `RUN_PLAN.md` 第 2 节表（11 行）、3.1 第 1 项、第 4 节最坏情况、第 10 节第 7 项 | 21,600 / 22,500；最坏 37.5 h | 28,800 / 30,000；最坏 50 h | 改（登记文字见下） |
+| `scripts_project/m08a_run_batch.sh:52`（`TL_L2` S4O 第二级）、`scripts_project/s4o_1_data.py:33,35`（S4O 数据表）、`tests/research/test_m12_allocation.py:633–634`、`tests/research/test_m08a_a8.py:164–165`（M08a 批次替身） | 21,600 / 22,500 | 不变 | 与 365×24h 第三批无关的历史值 |
+| `research/06_scope_redesign/{p1_m10p,p1_step4o,p1_step4q,p1_m10a}/*.md` | — | 不变 | 历史报告与指令 |
+
+`RUN_PLAN.md` v4 登记文字原文（3.1 第 1 项）："365×24h 每次 TimeLimit **28,800 s**、墙钟 **30,000 s**（M10A 补充 01 D1，第 145 项，2026-10-23 登记，变更时新网络在 365×24h 上无任何求解结果；v1–v3 为 21,600 / 22,500 s，理由见第 10 节第 7 项）。不重试，不改参数，不 warm start。" 第 10 节第 7 项记录理由（M10A B4 估计 4.0–4.9 h 超过原时限的 75 %；R1 停批风险、R5–R7 去一国核心证据、R10 敏感性；延长只在变慢时多花时间；最坏 6 × 30,000 s ≈ 50 h，加后处理与间隔约 52 h）与实现位置。两个档案相同，R1–R11 全部适用；求解档案、网络、成本表、验收阈值、停批分级未改。
+
+## S1.2 D2：违反分析与 C1 只重做一次
+
+- `run_batch3.sh` `post_run`：两步各封装为 `va_cmd` / `c1_cmd`（仍经 `step()`：超时、线程预算、`POSTPROC_ERROR` 记录）；退出码非 0 或超时 → `keep_failed` 把不完整输出（`VIOLATIONS.json` 或 `PRECISION.json/.md`，连同该步日志）改名 `*.failed<n>`（同一文件已有 `failed1` 时取 `failed2`，从不删除）→ 以相同环境与参数重做一次 → `POSTPROC_RETRY:<编号>:<步骤>:exit=<码>:<时刻> - retry succeeded | retry failed too; the registered rules apply`；重做仍失败时再次保留 `*.failed2`，使损坏的半成品不会被下一步当作输入读取，然后按现行规则（C1 不可计算 = C1 (a) 不通过：R1 / R2 停批、R3–R11 不可用）。不重跑求解；`stop_class`、阈值、3.3 表格未改；其他后处理步骤保持 M10A 做法。
+- `RUN_PLAN.md` 3.5 与第 10 节第 8 项记录。
+- 替身钩子：`FAKE_FAIL_ONCE_VA_<编号>` / `FAKE_FAIL_ONCE_C1_<编号>`（第一次写入非 JSON 的半成品并退出 1，第二次成功）、`FAKE_FAIL_VA_<编号>` / `FAKE_FAIL_C1_<编号>`（每次失败）。
+- 测试 `test_violation_analysis_and_c1_are_redone_once`（4 个参数化场景，全部通过）：
+
+| 场景 | 实际 |
+|---|---|
+| R2 违反分析第一次失败、重做成功 | `POSTPROC_RETRY:R2:violations:exit=0`，`VIOLATIONS.json.failed1` 内容为半成品、无 `failed2`，R2 `ACCEPTED_LAYER2`，不停批，`DONE` 退出 0，11 次求解各一次 |
+| R2 违反分析两次都失败 | `POSTPROC_RETRY:R2:violations:exit=1`，`failed1` 与 `failed2` 都保留、`VIOLATIONS.json` 不存在 → C1 不可计算 → `STOP_NOT_ACCEPTED:R2:c1a`，`HALTED` 退出 3，只有 R1、R2 求解 |
+| R6 C1 第一次失败、重做成功 | `POSTPROC_RETRY:R6:c1:exit=0`，`PRECISION.json.failed1` 保留，R6 `ACCEPTED_LAYER2`，无 `UNUSABLE`，`DONE` |
+| R6 C1 两次都失败 | `POSTPROC_RETRY:R6:c1:exit=1`，`PRECISION.json` 不存在 → `UNUSABLE:R6:c1a`，批次继续到 `DONE` 退出 0 |
+
+原有的"违反分析挂住"场景（`test_post_processing_timeout_never_blocks_the_schedule`）更新为：两次超时各记 `POSTPROC_ERROR … exit=124`，`POSTPROC_RETRY:R2:violations:exit=124`，之后按规则 `STOP_NOT_ACCEPTED:R2:c1a`。
+
+## S1.3 D3：预检资源硬下限
+
+- `preflight.sh`：`NEED_MEM_GIB` 92 → **64**、`NEED_DISK_GB` 60 → **45**、核数 25 不变；提示文字改为"hard floor … rental advice ~90 GB memory, ~80 GB data disk"；新增可选 `PREFLIGHT_DISK_PATH`（默认包目录；只在 `guards` 节作为运行覆盖打印），用于测试与特殊布局。`make_package.sh` 清单中的实例规格字符串同步。`RUN_PLAN.md` 第 5 节把"租用建议（≥ 25 核、内存约 90 GB 以上、数据盘约 80 GB）"与"预检硬下限（25 核 / 64 GiB / 45 GB）"分开写，第 10 节第 9 项记录。
+- 测试 `test_preflight_resource_floor`（合成 cgroup v2 配额）：25 核 / 70 GiB → `PREFLIGHT OK`（输出含 "cores >= 25, memory >= 64 GiB, free data disk >= 45 GB"）；25 核 / 60 GiB → `RESOURCE CHECK FAILED`；20 核 / 96 GiB → `RESOURCE CHECK FAILED` 并提示 "20 cores < 24"。首次全量运行时该测试因 pytest 临时目录在 WSL 的 tmpfs（5.4 GB）上而自跳过，加入 `PREFLIGHT_DISK_PATH` 后单独运行通过。
+
+## S1.4 测试
+
+| 运行 | 结果 | 日志 |
+|---|---|---|
+| `test_m10p_batch3.py`（D1–D3 改动后） | 32 passed / 1 skipped（跳过 = 资源阈值测试，tmpfs） | `evidence/s01/TESTS_s01_m10p.log` |
+| 全量 `tests/research`（同一工作树） | **615 passed / 68 skipped / 0 failed**（M10A 的 611 + 4 项新增通过；68 = 67 + 上述跳过） | `evidence/s01/TESTS_s01_full.log` |
+| `PREFLIGHT_DISK_PATH` 加入后单独运行 `test_preflight_resource_floor` + `test_preflight_guards…` | 2 passed | 同上日志末尾 |
+
+之后只改了 `preflight.sh` 的磁盘测量路径一行、`guards` 的打印列表与该测试本身；全量未再重跑（本机计算时间盒）。
+
+## S1.5 v5 包
+
+`make_package.sh` 在提交 `e0a89f8e` 的干净工作树上生成（105 s；构建输入检查 OK；7 个变体两遍逐字节相同）；v4 改名 `cloud_package_dist_v4_03677123/` 保留。
+
+| 项 | v4 | **v5** |
+|---|---|---|
+| 提交 | `03677123abf41c91b95d5bcdefa3bff9b25a05d9` | `e0a89f8e7abe7e91132135b241766464890283cb` |
+| 文件数 / 字节 | 24 / 148,603,385 | **24 / 148,612,515** |
+| `PACKAGE_MANIFEST.json` SHA256 | `2489f123…e15d` | `6fb28a77a57d9a8fcd9b58de96a27f4c0e23300cee7af416c15a47de723f5f63` |
+| `SHA256SUMS` SHA256 | `b151c90d…6050` | `f54f0d698acf59d1a291ab08db69ddb6975780448b92812297cf98dda490cf09` |
+| 代码归档 | `code_03677123.tar.gz` | `code_e0a89f8e.tar.gz` |
+| 与 v3 / v4 逐字节相同（VERIFIED，`evidence/package_v5/PACKAGE_V5_VS_V3_V4.json`） | — | 两个基础网络（`75704334…` / `888a009b…`）、两份构建回执（`52136599…` / `075d0207…`）、两份成本表（`7cee9c1a…`）、`EXPECTED_VARIANTS.json`（`d7ed165f…`）：全部相同 |
+| 相对 v4 变化的条目 | — | `run_batch3.sh`、`preflight.sh`、`RUN_PLAN.md`、`COMMIT`、`BUILD_INPUT_CHANGES.json`、代码归档；其余相同（`install_env.sh` 与 v4 相同） |
+
+## S1.6 v5 完整干跑
+
+在 `/home/jin/m10a_dry_v5/pkg`（v5 包副本，云端目录布局）上，证据在 `evidence/dryrun_v5/`：
+
+1. **预检（VERIFIED）：** `guards` 节干净 shell → `PREFLIGHT OK`；`POST_ONLY=1` 残留 → `PREFLIGHT FAILED`（反例）；`sha`（22 个文件 OK，代码解包 1,432 个文件、无 `research/`）、`networks`（`all_equal`，7 个变体期望）、`env`（284 / 284）、`profile`（两档案、Threads 8 / 16）、`code`、`tools`（含 `timeout`）全部通过；`resources` 节在本机如预期失败（16 核 / 11 GiB；输出已显示新硬下限 "cores >= 25, memory >= 64 GiB, free data disk >= 45 GB"）。
+2. **`BUILD_ONLY`（VERIFIED）：** R1–R11 各一次 `s2_solve.py --stop-before-solve`（LP 构建并导出、参数固定、求解器调用前退出），一条通道，`RUNNER_EXIT 0`，1,133 s；`START` 行 `time_limit_s=28800:wall_cap_s=30000:tmpdir=<包>/runs/batch3/tmp:post_timeout_s=1800`；11 个 `BUILD_CHECK` 全部通过（含"参数 = 登记档案 + TimeLimit"一项，即新 TimeLimit 已写入每个运行的求解参数回执）；`/tmp` 下 linopy 临时文件 0 个（`TMPDIR` 生效）。与 M10P 第二次干跑（v3，`work/p1_m10p_20261022/evidence/s01/dryrun/build_only/`）逐运行对比（`BUILD_VS_S01.json`，`all_equal_except_timelimit: true`）：
+
+| 运行 | LP 行 / 列 / 非零元（v5） | 维数 | 参数（除 TimeLimit） | TimeLimit v5 / v3 | 墙钟 v5 / v3 | 网络与登记 SHA256 | LP 数组字节 | 构建 s v5 / v3 | 峰值 GiB v5 / v3 | 通过 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R1 | 10,052,113 / 4,509,642 / 23,634,770 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 799,796,145（相同） | 165 / 146 | 10.11 / 10.12 | 是 |
+| R2 | 9,705,916 / 4,357,448 / 22,556,267 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 768,143,605（相同） | 68 / 70 | 10.06 / 9.89 | 是 |
+| R3 | 10,052,113 / 4,509,642 / 23,634,770 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 799,796,145（相同） | 135 / 116 | 10.12 / 10.12 | 是 |
+| R4 | 9,705,916 / 4,357,448 / 22,556,267 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 768,143,605（相同） | 66 / 72 | 9.99 / 9.80 | 是 |
+| R5 | 9,048,930 / 4,054,907 / 21,248,615 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 719,351,869（相同） | 72 / 72 | 10.00 / 10.08 | 是 |
+| R6 | 9,253,938 / 4,150,749 / 21,641,255 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 734,387,981（相同） | 78 / 77 | 10.06 / 9.99 | 是 |
+| R7 | 9,351,193 / 4,193,946 / 21,891,064 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 742,446,925（相同） | 81 / 85 | 10.09 / 10.03 | 是 |
+| R8 | 9,357,960 / 4,183,232 / 21,687,091 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 738,917,205（相同） | 57 / 57 | 7.70 / 7.61 | 是 |
+| R9 | 9,745,023 / 4,372,438 / 22,680,056 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 771,662,397（相同） | 78 / 71 | 9.94 / 9.92 | 是 |
+| R10 | 10,052,113 / 4,509,642 / 23,634,770 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 799,796,145（相同） | 115 / 126 | 10.17 / 10.14 | 是 |
+| R11 | 9,705,916 / 4,357,448 / 22,556,267 | 相同 | 相同 | 28,800 / 21,600 | 30,000 / 22,500 | 相同 | 768,143,605（相同） | 66 / 66 | 9.97 / 9.87 | 是 |
+
+   构建用时与峰值（`s2_solve.py` 采样器）只作信息；`/usr/bin/time` 的逐运行墙钟 64–172 s、峰值 8.2–10.7 GB（含 netCDF 读入）。
+3. **`POST_ONLY=1` 后处理演练（VERIFIED）：** R1 / R2 ← M08b 冒烟 s01，R5 / R6 / R7 ← M12b 去 VN / TH / LA（56×3h），`RUNNER_EXIT 0`，324 s；每运行 5 步 `exit=0`，无 `POSTPROC_ERROR` / `POSTPROC_RETRY`；临时判定 → 本批参照重评；去一国右端项检查 3/3、去一国检查 3/3 通过；B6 9.8985 bn；`PROFILE_CHOICE` formal_barrier（R3 / R4 缺）；`DONE`；与 M12b 证据表比较 `agree: true`，**最大差 0.0 EUR**（`post_smoke/POST_SMOKE_VS_M12B.json`）。
+
+## S1.7 M10 执行指令需要更新的值（在第 6 节基础上）
+
+| 项 | v4（M10A 报告第 6 节） | v5（本补充） |
+|---|---|---|
+| 包提交 `COMMIT` | `03677123abf41c91b95d5bcdefa3bff9b25a05d9` | **`e0a89f8e7abe7e91132135b241766464890283cb`** |
+| 文件数 / 字节 | 24 / 148,603,385 | **24 / 148,612,515** |
+| `PACKAGE_MANIFEST.json` SHA256 | `2489f123f1b85711af9823c98b9e464ed7c7e3afb717649d5eeee5481646e15d` | **`6fb28a77a57d9a8fcd9b58de96a27f4c0e23300cee7af416c15a47de723f5f63`** |
+| `SHA256SUMS` SHA256 | `b151c90d3f85a497945f7504d16ea2c3ffe5e8ef7b242e1b355bb5e38e9d6050` | **`f54f0d698acf59d1a291ab08db69ddb6975780448b92812297cf98dda490cf09`** |
+| 代码归档 | `code_03677123.tar.gz` | **`code_e0a89f8e.tar.gz`** |
+| 登记时限 / 墙钟 | 21,600 / 22,500 s | **28,800 / 30,000 s**（`WALL_CAP_S` / `GUROBI_TIME_LIMIT_S` 不得在环境中设成其他值） |
+| 预检硬下限 | 25 核 / 92 GiB / 60 GB | **25 核 / 64 GiB / 45 GB**（租用建议仍 ~90 GB 内存、~80 GB 数据盘；预检在装好环境之后做） |
+| 状态行 | `POSTPROC_ERROR` 只记录 | 新增 `POSTPROC_RETRY:<编号>:violations|c1:exit=…`：该步已自动重做一次；`exit=0` 无需处理，非 0 按规则（R1 / R2 停批、其他不可用），半成品在 `runs/batch3/<编号>/*.failed<n>` |
+| 预检 / 运行 / 补做命令 | 第 6 节 | 不变 |
+| 时长估计 | 正常 20–25 h | 正常 **20–25 h** 不变；最坏（每个运行到墙钟 8.33 h）**约 52 h**（原约 40 h） |
+
+## S1.8 本机计算与边界
+
+- 本机计算（含测试等待）约 **49 分钟**（授权约 1 小时）：M10P 测试文件 9.4 min + 全量 11.7 min + 单补测试 < 1 min；v5 打包 1.8 min；干跑 pre 约 1 min、`BUILD_ONLY` 18.9 min（1,133 s）、`POST_ONLY` 5.5 min（331 s）；提交与推送。磁盘新增：`/home/jin/m10a_dry_v5` 11 GB（11 个运行的 LP 数组 8.8 GB + 演练）、v5 包 149 MB、变体复现目录；合计约 11.5 GB（< 20 GB）。
+- 未连云、未上传、未调用 Gurobi、未求解任何模型网络（`BUILD_ONLY` 的 11 次 `s2_solve.py --stop-before-solve` 在求解器调用前退出，`optimize_calls=0`，`GRB_LICENSE_FILE` 指向不存在的文件；全量测试中的玩具 LP 按指令照常运行）。
+- 提交链：`9297c423`（M10A 收尾）→ `e0a89f8e`（补充 01 D1–D3：代码、测试、RUN_PLAN v4）→ 证据提交（本节所在提交，SHA 见 `M10A_PROGRESS.md`）；已推送（PR #49 随之更新），未合并 main，未 force-push。
