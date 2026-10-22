@@ -179,7 +179,7 @@
 - **未入库的本机产物：** 主检出 `results_project/m10p/`（重建网络 `builds/`、R1 测量 `measure_r1/`、打包变体 `package_variants*/`）；干跑目录 `/home/jin/m10p_dry/`（含 8.4 GB LP 数组）与 `/home/jin/m10p_dry_v1_be1ce466/`。均未删除。
 - **提交链：** `b46fc23d`（M10P-1）→ `692c2cce`（M10P-2 停止证据）→ `be1ce466`（M10P-3 代码与脚本）→ `915b919b`（M10P-4 第一版包证据）→ `eac6c3e0`（M10P-5a 变体路径修正）→ M10P-5 干跑证据 → M10P-6 报告、台账、PR（见进度文件）。
 - **台账：** `research/STAGE2_PROJECT_LEDGER.md` 末尾追加 M10P 条目（原文 `M10P_LEDGER_ENTRY.md`）。
-- **draft PR：** PR_LINK（base `codex/m12b-loo-local-20261021`，叠在 #48 上）。
+- **draft PR：** [cyc292cycjin-oss/SGP-ESE5004-Stage2#49](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/49)（base `codex/m12b-loo-local-20261021`，叠在 #48 上）。
 - **审阅 ZIP：** `M10P_REVIEW.zip`（work 目录不含部署包 + 本步改动的仓库代码与包脚本；逐成员 SHA256 + CRC32 清单 `M10P_REVIEW_MANIFEST.csv`，ZIP 的 SHA256 见 `M10P_REVIEW_ZIP_SHA256.txt`；ZIP 本身不入库）。
 
 完成后停止，等待审阅；审阅通过后由用户租卡。

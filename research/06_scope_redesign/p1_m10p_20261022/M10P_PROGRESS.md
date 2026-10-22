@@ -11,7 +11,7 @@
 | M10P-3 | 运行脚本 `run_batch3.sh`、求解前退出开关、批级汇总、测试 | **完成**：`s2_solve.py --stop-before-solve`；`scripts_project/m10_batch3_summary.py`（运行表唯一来源、基础网络 / 变体核对、干跑构建核对、P1 参数核对、第二级比较、B6 与敏感性差额、批级汇总、P1 计时解析）；`cloud_package/run_batch3.sh`（两会话、线程预算、许可间隔、临时→本批参照重评、D12 停批、安全停止、续跑、墙钟终止进程组、`BUILD_ONLY` / `POST_ONLY`）、`pack_results.sh`、`preflight.sh`、`make_package.sh`、`env/`（锁定、安装、核对）；测试 `test_m10p_batch3.py` 12 项通过（替身流水线，无求解器）；全量（加入前 11 项时）593 passed / 67 skipped / 0 failed；本机 R1 LP 构建测量（无求解）：159 s、峰值 10.15 GiB、LP 数组 0.80 GB；`RUN_PLAN.md` 初稿 | 见下 |
 | M10P-4 | `RUN_PLAN.md`、部署包（代码、网络、环境、预检、打包脚本、清单） | **完成**：`make_package.sh` 在 `be1ce466` 上生成 `cloud_package_dist/`（不入库）：23 个文件 283,718,369 B（代码 `code_be1ce466.tar.gz` 153,514,617 B；`ec80668f` 原网络三个 126.5 MB，SHA256 与登记值相同；构建回执与成本表）；构建输入检查通过（`ec80668f` 之后只改了 5 个不在 `s2_network.py` 导入闭包内的脚本）；7 个变体两遍逐字节相同 → `EXPECTED_VARIANTS.json`；`PACKAGE_MANIFEST.json` SHA256 `fb90a509…`、`SHA256SUMS` `83fdafa3…`（副本在 `evidence/package/`）；上传估计 36 KB/s 2.19 h、0.16 MB/s 0.49 h、4 MB/s 1 分钟 | 见下 |
 | M10P-5 | 本机干跑（变体复现、逐运行 LP 构建、后处理用 M12b 冒烟结果） | **完成**：第一版（包 `be1ce466`）第 0 阶段 R10 变体 SHA256 不同 → 安全停止 → 修正 `m08a_variants.py`（提交 `eac6c3e0`）→ 第二版包（`eac6c3e0`，23 个文件 283,737,685 B，清单 `f36a4b6c…`）：预检 OK；7 个变体三遍逐字节相同；R1–R11 `BUILD_ONLY` 全部 `BUILD_CHECK` 通过（1,129 s，峰值 7.8–10.2 GiB，LP 数组合计 8.4 GB），P1 参数核对通过；`POST_ONLY` 后处理演练（R1/R2/R5–R7 ← M12b 冒烟）全部 exit 0，临时判定 → 本批参照重评，去一国 3/3 通过，B6 9.8985 bn，与 M12b 证据差 0.0 EUR；全量测试 595 passed / 67 skipped / 0 failed（`eac6c3e0`） | 见下 |
-| M10P-6 | `M10P_REPORT.md`、台账条目、draft PR | 未开始 | — |
+| M10P-6 | `M10P_REPORT.md`、台账条目、draft PR | **完成**：报告第 1–9 节；台账条目追加到 `research/STAGE2_PROJECT_LEDGER.md`（`69f15506`）；分支推送，draft PR [#49](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/49)（base `codex/m12b-loo-local-20261021`）；审阅 ZIP `M10P_REVIEW.zip`（SHA256 见 `M10P_REVIEW_ZIP_SHA256.txt`，不入库） | 见下 |
 
 提交：M10P-1 `b46fc23d`。
 
@@ -19,4 +19,6 @@
 
 **用户决定（2026-10-22，会话中）：** A——部署包用 `ec80668f` 原构建（主检出 `results_project/m08b/builds_s01/`），本次重建作为"内容相同"的复核证据。
 
-**续跑点：** M10P-3。
+提交链：`b46fc23d`（M10P-1）→ `692c2cce`（M10P-2）→ `be1ce466`（M10P-3）→ `915b919b`（M10P-4，第一版包）→ `eac6c3e0`（M10P-5a 变体路径修正；第二版包的代码提交）→ `1e7e22f9`（M10P-5 干跑）→ `69f15506`（M10P-6 台账）→ 收尾提交（PR 链接、审阅 ZIP 清单）。
+
+**续跑点：** 全部完成，等待审阅；审阅通过后由用户租卡，按另一份执行指令上云。
