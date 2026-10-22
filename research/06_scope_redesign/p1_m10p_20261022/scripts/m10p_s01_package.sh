@@ -6,14 +6,15 @@ W=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m10p_20261022; WT=/home/jin/wt_m10p_20
 MAIN=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
 cd $WT || exit 1
 [ "$(git branch --show-current)" = codex/m10-batch3-20261022 ] || { echo "WRONG BRANCH"; exit 2; }
-V2=$W/cloud_package_dist_v2_eac6c3e0
-if [ -d $W/cloud_package_dist ] && [ ! -e $V2 ]; then
-  [ "$(cut -c1-8 $W/cloud_package_dist/COMMIT)" = eac6c3e0 ] || { echo "cloud_package_dist is not the v2 package"; exit 2; }
-  mv $W/cloud_package_dist $V2 && echo "v2 package renamed to $V2 (kept)"
+V2=$W/cloud_package_dist_v2_eac6c3e0; VARWORK=${VARWORK:-$MAIN/m10p/package_variants_s01}
+if [ -d $W/cloud_package_dist ]; then   # an earlier package folder is renamed after its commit (kept, never deleted)
+  c8=$(cut -c1-8 $W/cloud_package_dist/COMMIT); [ "$c8" = "$(git rev-parse HEAD | cut -c1-8)" ] && { echo "package of HEAD exists"; exit 2; }
+  case $c8 in eac6c3e0) dst=$V2;; 619d7b46) dst=$W/cloud_package_dist_v3a_619d7b46;; *) echo "unknown package $c8"; exit 2;; esac
+  [ ! -e $dst ] && mv $W/cloud_package_dist $dst && echo "package $c8 renamed to $dst (kept)"
 fi
 mkdir -p $E/package
 t0=$(date +%s)
-bash research/06_scope_redesign/p1_m10p_20261022/cloud_package/make_package.sh $MAIN/m08b/builds_s01 $W/cloud_package_dist $MAIN/m10p/package_variants_s01 > $E/MAKE_PACKAGE.log 2>&1
+bash research/06_scope_redesign/p1_m10p_20261022/cloud_package/make_package.sh $MAIN/m08b/builds_s01 $W/cloud_package_dist $VARWORK > $E/MAKE_PACKAGE.log 2>&1
 echo "MAKE_PACKAGE_EXIT $? $(( $(date +%s) - t0 ))s" | tee -a $E/MAKE_PACKAGE.log
 P=$W/cloud_package_dist
 cp $P/BUILD_INPUT_CHANGES.json $P/COMMIT $P/EXPECTED_VARIANTS.json $P/PACKAGE_MANIFEST.json $P/SHA256SUMS $P/VARIANT_REPRODUCIBILITY.json $E/package/
