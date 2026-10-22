@@ -283,12 +283,12 @@
 
 ### 10.8 交付
 
-- **提交链（补充 01）：** `619d7b46`（S01-1 代码、测试、`RUN_PLAN.md` v2、静态检查）→ `e0527cec`（S01-2a 计划第 6 节改正；v3 包的代码提交）→ `645349db`（S01-2 / S01-3 部署包与干跑证据）→ S01-4（本节、台账、PR、审阅 ZIP；见 `M10P_PROGRESS.md`）。
+- **提交链（补充 01）：** `619d7b46`（S01-1 代码、测试、`RUN_PLAN.md` v2、静态检查）→ `e0527cec`（S01-2a 计划第 6 节改正；v3 包的代码提交）→ `645349db`（S01-2 / S01-3 部署包与干跑证据）→ `b2829748`（S01-4 本节、台账、PR 说明）→ 收尾提交（审阅 ZIP 清单与 SHA256；见 `M10P_PROGRESS.md`）。
 - **证据：** `evidence/s01/`（静态检查、判定、追踪摘要与日志、两次打包证据、干跑证据、构建对比）；全量测试日志 `evidence/M10P_FULL_TESTS_s01_code.log`。
 - **脚本：** `scripts/m10p_s01_*`（静态检查、追踪器与自测、打包、干跑、判定、审阅 ZIP）。
 - **部署包（不入库）：** `work/p1_m10p_20261022/cloud_package_dist/`（v3，`e0527cec`）。
 - **台账：** `research/STAGE2_PROJECT_LEDGER.md` 末尾追加"M10P 补充 01"条目（原文 `M10P_S01_LEDGER_ENTRY.md`）。
 - **PR：** [cyc292cycjin-oss/SGP-ESE5004-Stage2#49](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/49) 推送并更新说明。
-- **审阅 ZIP：** `M10P_S01_REVIEW.zip`（清单 `M10P_S01_REVIEW_MANIFEST.csv`，SHA256 见 `M10P_S01_REVIEW_ZIP_SHA256.txt`；不入库）。
+- **审阅 ZIP：** `M10P_S01_REVIEW.zip`（自 `b2829748` 生成，418 个成员，845,305 B，SHA256 `77a2f6d9a3db67329216c9384de54bb8243c56cca869bb09f2665296ee062c2e`；逐成员 SHA256 + CRC32 清单 `M10P_S01_REVIEW_MANIFEST.csv`；不入库）。
 
 完成后停止，等待审阅；审阅通过后由用户租卡。
