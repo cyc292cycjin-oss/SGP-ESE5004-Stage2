@@ -1,16 +1,18 @@
-"""M10P (instruction sections 2-5; items 133, 138-141): run table and read-only helpers of the third-batch runner
+"""M10P (instruction sections 2-5; items 133, 138-141; supplement 01): run table, schedule and read-only helpers of the third-batch runner
 research/06_scope_redesign/p1_m10p_20261022/cloud_package/run_batch3.sh. Never calls a solver; reads solve results and never changes them
 (writes only its own JSON / Markdown outputs).
 
     python scripts_project/m10_batch3_summary.py runtable                       -> "RID|scenario|base|set|profile|costs" per run (the runner's table)
+    python scripts_project/m10_batch3_summary.py schedule                       -> "phase|lane A rids|lane B rids" per phase (comma-separated)
     python scripts_project/m10_batch3_summary.py base-check --nets <networks> --out <json>
     python scripts_project/m10_batch3_summary.py variants-expected --variants <OUT/variants> --out <EXPECTED_VARIANTS.json>
     python scripts_project/m10_batch3_summary.py variants-check --variants <OUT/variants> --expected <EXPECTED_VARIANTS.json> --rid R5
     python scripts_project/m10_batch3_summary.py build-check --dir <OUT/R1> --repo <code>   (dry run: LP built, parameters, paths)
-    python scripts_project/m10_batch3_summary.py param-check --dir <OUT/P1> --repo <code>   (dry run of P1: parameters only)
+    python scripts_project/m10_batch3_summary.py stop-class --dir <OUT/R5>      -> OUT/R5/STOP_CLASS.json; prints "<class> <action>" (graded stop rule)
     python scripts_project/m10_batch3_summary.py level2 --out-dir <OUT>         -> OUT/LEVEL2.json (input of gates_v6.py select-profile)
     python scripts_project/m10_batch3_summary.py summary --out-dir <OUT>        -> OUT/BATCH3_SUMMARY.json / .md (B6, sensitivity differences, ...)
-    python scripts_project/m10_batch3_summary.py p1 --dir <OUT/P1> --log <scrubbed Gurobi log> --out <P1_SUMMARY.json>
+    python scripts_project/m10_batch3_summary.py p1 --dir <probe dir> --log <scrubbed Gurobi log> --out <P1_SUMMARY.json>
+      (2920x3h probe parser; P1 left the third batch - supplement 01 item 3 - and is kept for the memory probe at the start of the fourth batch)
 """
 from __future__ import annotations
 
@@ -41,14 +43,17 @@ RUNS = {
     "R9": dict(scenario="disconnected", base="integrated_365_24h", set="cross_border.stock_mode=keep_stock_no_new", profile=A, costs="integrated", role="敏感性：不互联保留存量（第 132 项 2a）"),
     "R10": dict(scenario="integrated", base="integrated_365_24h", set="finance.wacc_mode=country_specific", profile=A, costs="integrated", role="敏感性：分国 WACC，一体化（第 132 项第 5 项）"),
     "R11": dict(scenario="disconnected", base="disconnected_365_24h", set="finance.wacc_mode=country_specific", profile=A, costs="disconnected", role="敏感性：分国 WACC，不互联（第 132 项第 5 项）"),
-    "P1": dict(scenario="integrated", base="integrated_2920_3h", set="", profile=A, costs="integrated", role="2920×3h 探针：构建 + 预处理 + 迭代计时、峰值内存（选第四批机器）"),
 }
+# Pre-registered order (RUN_PLAN.md section 3.2; supplement 01 item 1): per phase two lanes, each lane one run after the other; the lanes run side
+# by side when the largest Threads of lane A plus that of lane B fit the container cores (phase 2: T16 + A = 24 <= 25), otherwise as one lane
+# taking the runs of A and B in turn. R3 and R4 (Threads 16) share a lane, so two T16 sessions never run at the same time.
+SCHEDULE = [("1", ["R1"], ["R2"]), ("2", ["R3", "R4"], ["R5", "R6"]), ("3", ["R7", "R9", "R11"], ["R8", "R10"])]
+STOP_ALWAYS = ("R1", "R2")   # graded stop rule: no returned solution / C1 (a) failed stops the batch only for the batch reference runs
 LOO = {"R5": "VN", "R6": "TH", "R7": "LA"}
 SENSITIVITY = [("R8", "R2", "b1：禁止区内 CO2 跨境运输（不互联）"), ("R9", "R2", "不互联保留存量"), ("R10", "R1", "分国 WACC（一体化）"), ("R11", "R2", "分国 WACC（不互联）")]
 INFORMATION_PAIRS = [("R11", "R10", "分国 WACC 下的 B6（信息项，不在事先登记的判定中）")]
 LEVEL2 = {"integrated": ("R3", "R1"), "disconnected": ("R4", "R2")}
-BASE_RECEIPT = {"integrated_365_24h": ("integrated", "daily_network"), "disconnected_365_24h": ("disconnected", "daily_network"),
-                "integrated_2920_3h": ("integrated", "network")}
+BASE_RECEIPT = {"integrated_365_24h": ("integrated", "daily_network"), "disconnected_365_24h": ("disconnected", "daily_network")}
 
 
 def sha(p: Path) -> str:
@@ -138,24 +143,60 @@ def build_check(d: Path, repo: Path) -> dict:
     return res
 
 
-def param_check(d: Path, repo: Path) -> dict:
-    """P1 in the local dry run (instruction section 5.4: parameters only, the 2920x3h LP is not built locally): the registered profile passes the
-    s2_solve.py key-name check and takes the interior-point gate path, the network is the registered 2920x3h file, TimeLimit / wall clock are
-    the registered 3,600 s."""
-    import yaml
-    sys.path.insert(0, str(Path(repo) / "scripts_project"))
-    from s2_solve import interior_solution, profile_parameters
-    run = jl(d / "RUN.json") or {}
-    S = yaml.safe_load((Path(repo) / "configs/research/baseline.yaml").read_text())["research"]["solver"]
-    params = profile_parameters(S["profiles"], run.get("profile"), run.get("time_limit") or 0)
-    checks = dict(profile_known=run.get("profile") in S["profiles"], profile_is_A=run.get("profile") == A, interior_gate_path=interior_solution("gurobi", params),
-                  network_is_2920_3h=str(run.get("network", "")).endswith("integrated_2920_3h_unsolved.nc"),
-                  network_sha256_equal_registered=bool(run.get("network_sha256")) and run.get("network_sha256") == run.get("registered_sha256"),
-                  time_limit_registered=run.get("time_limit") == 3600.0, wall_cap_registered=run.get("wall_cap_s") == 3600,
-                  label=run.get("label") == "BATCH3_P1_PROBE_2920X3H", output_is_run_dir=Path(run.get("output", "")).resolve() == d.resolve())
-    res = dict(script=SCRIPT, rid=run.get("rid"), passed=all(checks.values()), checks=checks, parameters=params, threads=params.get("Threads"), solver_runs=0)
-    (d / "PARAM_CHECK.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+# --------------------------------------------------------------------------------------------- graded stop rule (supplement 01 item 2)
+def stop_class(d: Path) -> dict:
+    """Class of a run whose GATES_V6 label is not ACCEPTED_* (RUN_PLAN.md section 3.3; supplement 01 item 2):
+      g2             a G2 check failed: with a returned solution every G2 check; without one only the checks that need no solution - input network
+                     SHA256 = registered value, configuration subset hash (the pre-solve receipt holds both; a run ended before its receipt was
+                     written falls back to the runner's SHA256 in RUN.json and has no subset hash to check). V6_ACCEPTANCE.json missing or
+                     unreadable counts as g2;
+      nosol          no returned solution (solution/X.npy missing: wall-clock kill, solver failure, out of memory, no solution at the time limit);
+      c1a            solution returned, C1 (a) failed or C1 not computable;
+      ref_dependent  only C1 (b) / (c) failed (item 138 D12: no stop).
+    action: g2 -> stop (any run); nosol / c1a -> stop for R1, R2 (the batch reference would be missing), unusable for R3-R11 (recorded, the batch
+    goes on); otherwise none."""
+    rid = d.name; acc = jl(d / "V6_ACCEPTANCE.json"); run = jl(d / "RUN.json") or {}; rec = jl(d / "SOLVE_RECEIPT.json") or {}
+    sol = (d / "solution" / "X.npy").exists() and bool(rec.get("solution"))
+    failed, label = [], (acc or {}).get("label")
+    if acc is None:
+        cls, failed = "g2", ["V6_ACCEPTANCE.json missing or unreadable"]
+    elif label in ("ACCEPTED_LAYER1", "ACCEPTED_LAYER2"):
+        cls = "accepted"
+    else:
+        G2 = acc.get("G2") or {}
+        if sol:
+            failed = [k for k in ("G2_1", "G2_2", "G2_3") if not (G2.get(k) or {}).get("passed")]
+        else:
+            if (rec.get("input_network") or {}).get("sha256"):
+                sha_ok = bool((G2.get("G2_1") or {}).get("sha256_equal"))
+            else:
+                sha_ok = bool(run.get("network_sha256")) and run.get("network_sha256") == run.get("registered_sha256")
+            sub_ok = bool((G2.get("G2_2") or {}).get("passed")) if "config_subset" in rec else True
+            failed = [k for k, ok in (("G2_1_input_sha256", sha_ok), ("G2_2", sub_ok)) if not ok]
+        if failed:
+            cls = "g2"
+        elif not sol:
+            cls = "nosol"
+        elif not (acc.get("G1") or {}).get("a"):
+            cls = "c1a"
+        else:
+            cls = "ref_dependent"
+    if cls == "g2" or (cls in ("nosol", "c1a") and rid in STOP_ALWAYS):
+        action = "stop"
+    elif cls in ("nosol", "c1a"):
+        action = "unusable"
+    else:
+        action = "none"
+    res = dict(script=SCRIPT, rid=rid, label=label, solution_returned=sol, cls=cls, action=action, failed_checks=failed,
+               g2_checked=("all" if sol else "input only (no solution: network SHA256, configuration subset)"),
+               rule="supplement 01 item 2: G2 failed -> stop (any run); no solution / C1 (a) failed -> stop for R1, R2, unusable for R3-R11", solver_runs=0)
+    (d / "STOP_CLASS.json").write_text(json.dumps(res, indent=1) + "\n")
     return res
+
+
+def unusable_runs(out: Path) -> dict:
+    p = out / "UNUSABLE"
+    return dict(x.split()[:2] for x in p.read_text().splitlines() if len(x.split()) >= 2) if p.exists() else {}
 
 
 # --------------------------------------------------------------------------------------------- per-run state
@@ -173,8 +214,9 @@ def run_state(out: Path, rid: str) -> dict:
         state = "not_started"
     if rec.get("stop_before_solve"):
         state = "built_stopped_before_solve"
-    g = prec.get("grade") or {}; src = str((prec.get("reference") or {}).get("source") or "")
+    g = prec.get("grade") or {}; src = str((prec.get("reference") or {}).get("source") or ""); sc = jl(d / "STOP_CLASS.json")
     return dict(rid=rid, role=RUNS[rid]["role"], profile=RUNS[rid]["profile"], set=RUNS[rid]["set"], state=state, network=run.get("network"), network_sha256=run.get("network_sha256"),
+                stop_class=(dict(cls=sc.get("cls"), action=sc.get("action"), failed_checks=sc.get("failed_checks")) if sc else None),
                 termination=rec.get("termination_condition") or (Path(d / ".cond").read_text().strip() if (d / ".cond").exists() else None), objective=rec.get("objective"),
                 solve_seconds=rec.get("solve_seconds"), peak_rss_gib=(rec.get("peak_rss_bytes") or 0) / 2**30 or None,
                 c1=dict(grade=g.get("grade"), a=g.get("a"), b=g.get("b"), c=g.get("c"), reference=("batch" if src.startswith("this batch") else ("default" if src else None)),
@@ -208,9 +250,10 @@ def owen_main(d: Path) -> dict:
 
 
 def pair_difference(out: Path, new: str, base: str, title: str) -> dict:
-    """new - base: objective, country ledger totals, Owen dual-form allocation (alpha main); usable only when both runs are accepted."""
-    a, b = run_state(out, new), run_state(out, base)
-    res = dict(new=new, base=base, title=title, new_label=a["v6"], base_label=b["v6"],
+    """new - base: objective, country ledger totals, Owen dual-form allocation (alpha main); usable only when both runs are accepted (a run recorded
+    unusable by the graded stop rule is NOT_ACCEPTED)."""
+    a, b = run_state(out, new), run_state(out, base); un = unusable_runs(out)
+    res = dict(new=new, base=base, title=title, new_label=a["v6"], base_label=b["v6"], unusable=sorted(r for r in (new, base) if r in un),
                usable=bool(a["v6"] and b["v6"] and a["v6"] != "NOT_ACCEPTED" and b["v6"] != "NOT_ACCEPTED"))
     if a["objective"] is None or b["objective"] is None:
         return dict(res, computable=False, reason="objective missing (run not finished or not solved)")
@@ -248,10 +291,10 @@ def b6_gate(out: Path) -> dict | None:
 def summary(out: Path) -> dict:
     runs = {rid: run_state(out, rid) for rid in RUNS}
     loo = jl(out / "M12_LOO" / "LOO_CHECK.json"); ben = jl(out / "M12_BENEFIT" / "BENEFIT.json")
-    pc = jl(out / "PROFILE_CHOICE.json"); p1 = jl(out / "export" / "P1" / "P1_SUMMARY.json")
+    pc = jl(out / "PROFILE_CHOICE.json")
     stop = (out / "STOP").read_text().split() if (out / "STOP").exists() else []
     safe = (out / "STOP_SAFE").read_text().strip() if (out / "STOP_SAFE").exists() else None
-    res = dict(script=SCRIPT, out=str(out), runs=runs, B6=b6_gate(out),
+    res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=b6_gate(out),
                sensitivity=[pair_difference(out, *p) for p in SENSITIVITY], information=[pair_difference(out, *p) for p in INFORMATION_PAIRS],
                level2=jl(out / "LEVEL2.json"), profile_choice=pc,
                loo=(dict(computable=loo.get("computable", True), all_passed=(loo.get("check") or {}).get("all_passed"),
@@ -261,7 +304,7 @@ def summary(out: Path) -> dict:
                                     for c, v in ((loo.get("check") or {}).get("countries") or {}).items()}, reason=loo.get("reason")) if loo else None),
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"),
                              reason=ben.get("reason")) if ben else None),
-               p1=p1, stop_not_accepted=stop, stop_safe=safe, solver_runs=0)
+               stop_not_accepted=stop, stop_safe=safe, solver_runs=0)
     (out / "BATCH3_SUMMARY.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
     (out / "BATCH3_SUMMARY.md").write_text(markdown(res))
     return res
@@ -272,8 +315,10 @@ def _f(x, fmt="{:.4f}"):
 
 
 def markdown(r: dict) -> str:
+    un = ", ".join(f"{k}（{v}）" for k, v in r["unusable"].items())
     L = ["# 第三批汇总（M10P 运行脚本自动生成；只读，未调用求解器）", "",
-         f"- 停批（C1 (a) 或 G2 不通过，第 138 项 D12）：{', '.join(r['stop_not_accepted']) or '无'}；安全停止：{r['stop_safe'] or '无'}", "",
+         f"- 停批（分级停批规则，补充 01 第 2 项：任一运行 G2 不通过；R1、R2 无返回解或 C1 (a) 不通过）：{', '.join(r['stop_not_accepted']) or '无'}；安全停止：{r['stop_safe'] or '无'}",
+         f"- 记为不可用、继续其余运行（R3–R11 无返回解 nosol 或 C1 (a) 不通过 c1a）：{un or '无'}", "",
          "## 运行", "", "| 运行 | 作用 | 档案 | 状态 | 终止 | 目标 bn | 求解 s | 峰值 GiB | C1 abc | C1 参照 | 重评次数 | GATES_V6 | 临时标签 | Owen 可用 |",
          "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for rid, v in r["runs"].items():
@@ -304,18 +349,10 @@ def markdown(r: dict) -> str:
         L += [f"| {c} | {_f(v['margin_bn'])} | {_f(v['tolerance_bn'])} | {v['passed']} | {v['market_form_passed']} | {v['same_profile_and_resolution']} |" for c, v in lo["countries"].items()]
     else:
         L.append(f"- 不可计算或未运行：{(lo or {}).get('reason', '无去一国结果')}")
-    p1 = r["p1"]
-    L += ["", "## P1 探针（2920×3h）", ""]
-    if p1:
-        L += [f"- 结束方式：{p1.get('ended')}；LP 构建 {_f(p1.get('lp_build_seconds'), '{:.0f}')} s；预处理 {_f(p1.get('presolve_seconds'), '{:.1f}')} s；排序 {_f(p1.get('ordering_seconds'), '{:.1f}')} s；"
-              f"内点迭代 {p1.get('barrier_iterations_logged')} 次，每次 {_f(p1.get('seconds_per_iteration_median'), '{:.1f}')} s（中位数）；峰值 {_f(p1.get('peak_rss_gib_monitor'), '{:.1f}')} GiB（进程组）/ "
-              f"{_f(p1.get('peak_cgroup_gib_monitor'), '{:.1f}')} GiB（容器）"]
-    else:
-        L.append("- 未运行")
     return "\n".join(L) + "\n"
 
 
-# --------------------------------------------------------------------------------------------- P1 probe
+# --------------------------------------------------------------------------------------------- 2920x3h probe (fourth batch; supplement 01 item 3)
 ITER = re.compile(r"^\s*(\d+)\s+([-+]?\d\.\d+e[+-]\d+)\s+([-+]?\d\.\d+e[+-]\d+)\s+\S+\s+\S+\s+\S+\s+(\d+)s\s*$")
 
 
@@ -382,12 +419,12 @@ def p1_summary(d: Path, log: Path | None) -> dict:
 
 def main():
     ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("runtable")
+    sub.add_parser("runtable"); sub.add_parser("schedule")
     b = sub.add_parser("base-check"); b.add_argument("--nets", type=Path, required=True); b.add_argument("--out", type=Path, required=True)
     e = sub.add_parser("variants-expected"); e.add_argument("--variants", type=Path, required=True); e.add_argument("--out", type=Path, required=True)
     c = sub.add_parser("variants-check"); c.add_argument("--variants", type=Path, required=True); c.add_argument("--expected", type=Path, required=True); c.add_argument("--rid", required=True)
     k = sub.add_parser("build-check"); k.add_argument("--dir", type=Path, required=True); k.add_argument("--repo", type=Path, required=True)
-    q = sub.add_parser("param-check"); q.add_argument("--dir", type=Path, required=True); q.add_argument("--repo", type=Path, required=True)
+    q = sub.add_parser("stop-class"); q.add_argument("--dir", type=Path, required=True)
     for name in ("level2", "summary"):
         s = sub.add_parser(name); s.add_argument("--out-dir", type=Path, required=True)
     p = sub.add_parser("p1"); p.add_argument("--dir", type=Path, required=True); p.add_argument("--log", type=Path, default=None); p.add_argument("--out", type=Path, required=True)
@@ -395,6 +432,9 @@ def main():
     if a.cmd == "runtable":
         for rid, r in RUNS.items():
             print("|".join([rid, r["scenario"], r["base"], r["set"], r["profile"], r["costs"]]))
+    elif a.cmd == "schedule":
+        for phase, la, lb in SCHEDULE:
+            print("|".join([phase, ",".join(la), ",".join(lb)]))
     elif a.cmd == "base-check":
         r = base_check(a.nets); a.out.write_text(json.dumps(r, indent=1) + "\n")
         print("all_equal" if r["all_equal"] else "DIFFERENT:" + ",".join(k for k, v in r["networks"].items() if not v["equal"])); sys.exit(0 if r["all_equal"] else 1)
@@ -406,9 +446,8 @@ def main():
     elif a.cmd == "build-check":
         r = build_check(a.dir, a.repo)
         print(json.dumps(dict(passed=r["passed"], failed=[k for k, v in r["checks"].items() if not v], lp=r["lp"], peak_rss_gib=round(r["peak_rss_gib"], 2)), default=str)); sys.exit(0 if r["passed"] else 1)
-    elif a.cmd == "param-check":
-        r = param_check(a.dir, a.repo)
-        print(json.dumps(dict(passed=r["passed"], failed=[k for k, v in r["checks"].items() if not v], threads=r["threads"]))); sys.exit(0 if r["passed"] else 1)
+    elif a.cmd == "stop-class":
+        r = stop_class(a.dir); print(r["cls"], r["action"])
     elif a.cmd == "level2":
         r = level2(a.out_dir); (a.out_dir / "LEVEL2.json").write_text(json.dumps(r, indent=1) + "\n"); print(json.dumps({k: v["candidate"]["precision"] for k, v in r.items()}))
     elif a.cmd == "summary":

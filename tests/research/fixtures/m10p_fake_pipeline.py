@@ -3,7 +3,8 @@ m12_allocation.py, m12_rhs_audit.py and m08a_variants.py. No solver, no model. E
 
 solve: receipt consistent with the network file (GATES_V6 G2.1-G2.3 pass); --stop-before-solve writes the pre-solve receipt of a dry run
 (parameters = the registered profile of configs/research/baseline.yaml + TimeLimit); FAKE_SLEEP_<rid> / FAKE_SLEEP seconds of "solving";
-FAKE_OBJ_<rid> objective; FAKE_TERM_<rid> termination; FAKE_NOSOL_<rid>=1 -> pre-solve receipt only, exit 1. The call line records start / end
+FAKE_OBJ_<rid> objective; FAKE_TERM_<rid> termination; FAKE_NOSOL_<rid>=1 -> pre-solve receipt only, exit 1; FAKE_SUBSET_<rid>=differ -> the
+configuration subset hash of the receipt differs from the network's (GATES_V6 G2.2 fails: an input problem). The call line records start / end
 epoch, profile, TimeLimit and the GRB_LICENSE_FILE it saw. c1 run: PRECISION.json with the flags FAKE_C1_<rid> ("111" default; not computable
 without solution/X.npy), reference "this batch: ..." when --reference is given; regrade appends grade_history and takes FAKE_C1_REGRADE_<rid>."""
 import hashlib
@@ -50,7 +51,8 @@ def solve(argv):
     params = dict(yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())["research"]["solver"]["profiles"][prof], TimeLimit=tl)
     snaps = int(arg("--truncate", argv) or 0) or (365 if "365_24h" in net.name else 2920)
     rec = dict(input_network=dict(path=str(net), sha256=sha(net), snapshots=snaps, truncated_to=None), scenario=arg("--scenario", argv), solver_profile=prof,
-               solver_parameters=params, lp=dict(num_col=10, num_row=20, nnz=30, build_seconds=0.1), config_subset=dict(network="s" * 64, current="s" * 64),
+               solver_parameters=params, lp=dict(num_col=10, num_row=20, nnz=30, build_seconds=0.1),
+               config_subset=dict(network="s" * 64, current=("t" if os.environ.get(f"FAKE_SUBSET_{rid}") == "differ" else "s") * 64),
                optimize_calls=0, costs_table=arg("--costs-table", argv), label=arg("--label", argv))
     if "--stop-before-solve" in argv:
         (out / "lp").mkdir(exist_ok=True); (out / "lp" / "MATH_PROBLEM.json").write_text("{}")

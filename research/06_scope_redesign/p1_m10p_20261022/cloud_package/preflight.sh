@@ -3,22 +3,22 @@
 #   PY=<environment python> GRB_LICENSE_FILE=<licence path> bash preflight.sh
 # Sections (PREFLIGHT_ONLY = comma list to run a subset; default all):
 #   sha        SHA256SUMS of every package file; unpacks code_<COMMIT8>.tar.gz to ./repo (an older ./repo of another commit is moved aside, never deleted)
-#   networks   base networks against their build receipts (m10_batch3_summary.py base-check), EXPECTED_VARIANTS.json present (7 variants)
+#   networks   the two 365x24h base networks against their build receipts (m10_batch3_summary.py base-check), EXPECTED_VARIANTS.json present
+#              (7 variants)
 #   env        environment against env/ENV_LOCK.txt (env/env_check.py: key packages identical)
 #   profile    profiles formal_barrier and formal_barrier_1e6_t16: s2_solve.py key-name check, interior-point gate path, Threads 8 / 16
 #   code       the run / post-processing modules import without the licence (s2_solve, l23_violation_analysis, s4o_c1_precision, m12_allocation,
-#              m12_rhs_audit, m08a_variants, gates_v6, m10_batch3_summary); the run table has 12 runs
+#              m12_rhs_audit, m08a_variants, gates_v6, m10_batch3_summary); the run table has 11 runs, the schedule 3 phases
 #   tools      GNU time (-v) at /usr/bin/time, setsid, pgrep, tmux (warning only)
 #   licence    GRB_LICENSE_FILE readable and accepted by Gurobi - all output suppressed, nothing of the licence printed; this holds one WLS token for
 #              >= 5 min (run_batch3.sh waits 330 s before its first solve)
-#   resources  container cgroup quota (cores, memory) and free disk: two profile-A sessions need >= 16 cores, R3 | R4 side by side >= 32 cores
-#              (otherwise one after the other - reported, not a failure); memory >= 72 GiB (two 365x24h sessions ~15 GiB each + post-processing
-#              ~9 GiB; P1 2920x3h may need far more - that is what it measures); free disk >= 50 GiB, warning below 60 GiB (RUN_PLAN.md section 5:
-#              ~39 GiB expected - 11 run folders ~2.1 GiB each with the 0.8 GB LP arrays measured locally, P1 ~7 GiB, packs, environment)
+#   resources  container cgroup quota (cores, memory) and free disk against the instance specification (supplement 01 item 4): cores >= 25 (the
+#              phase-2 pairs R3 | R5 and R4 | R6 need Threads 16 + 8 = 24), memory >= 92 GiB, free data disk >= 60 GB (RUN_PLAN.md section 5:
+#              ~30 GiB expected - 11 run folders ~2.1 GiB each with the 0.8 GB LP arrays measured locally, one results pack, environment)
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
 PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-sha,networks,env,profile,code,tools,licence,resources}"
-NEED_CORES=16; NEED_CORES_T16_PAIR=32; NEED_MEM_GIB=72; NEED_DISK_GIB=50; REC_DISK_GIB=60
+NEED_CORES=25; NEED_CORES_PAIR=24; NEED_MEM_GIB=92; NEED_DISK_GB=60
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all $(wc -l < SHA256SUMS) files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }
@@ -65,8 +65,8 @@ if sec code; then
 import sys
 sys.path.insert(0, "scripts_project"); sys.path.insert(0, "scripts_project/v5")
 import s2_solve, l23_violation_analysis, s4o_c1_precision, m12_allocation, m12_rhs_audit, m08a_variants, gates_v6, m10_batch3_summary
-assert len(m10_batch3_summary.RUNS) == 12, "run table"
-print("modules import; run table", ", ".join(m10_batch3_summary.RUNS))
+assert len(m10_batch3_summary.RUNS) == 11 and len(m10_batch3_summary.SCHEDULE) == 3, "run table / schedule"
+print("modules import; run table", ", ".join(m10_batch3_summary.RUNS), "| schedule", "; ".join(f"{p}: {','.join(a)} | {','.join(b)}" for p, a, b in m10_batch3_summary.SCHEDULE))
 P
 fi
 if sec tools; then
@@ -97,12 +97,12 @@ if sec resources; then
   elif [ -r "$CGROUP_ROOT/memory/memory.limit_in_bytes" ]; then lim=$(cat "$CGROUP_ROOT/memory/memory.limit_in_bytes"); msrc="cgroup v1 memory.limit_in_bytes"; fi
   case "$lim" in ""|max) lim="";; *) [ "${#lim}" -ge 19 ] && lim="";; esac
   if [ -n "$lim" ]; then mem=$(( lim / 1073741824 )); else mem=$host_mem; msrc="no cgroup memory limit: host MemTotal"; fi
-  disk=$(df -Pk "$HERE" | awk 'NR==2 {printf "%.0f", $4/1048576}')
+  disk=$(df -Pk "$HERE" | awk 'NR==2 {printf "%d", $4*1024/1e9}'); disk_gib=$(df -Pk "$HERE" | awk 'NR==2 {printf "%.0f", $4/1048576}')
   echo "container CPU cores $cores [$csrc]; host nproc $host_cores"
-  echo "container memory $mem GiB [$msrc]; host MemTotal $host_mem GiB; free disk $disk GiB under $HERE"
-  echo "need: cores >= $NEED_CORES (two profile-A sessions), memory >= $NEED_MEM_GIB GiB, free disk >= $NEED_DISK_GIB GiB"
-  [ "$cores" -ge $NEED_CORES ] && [ "$mem" -ge $NEED_MEM_GIB ] && [ "$disk" -ge $NEED_DISK_GIB ] || { echo "RESOURCE CHECK FAILED"; ok=0; }
-  [ "$disk" -ge $REC_DISK_GIB ] || echo "WARNING: free disk below the recommended $REC_DISK_GIB GiB (expected use ~39 GiB; not a failure)"
-  [ "$cores" -ge $NEED_CORES_T16_PAIR ] && echo "R3 | R4 (Threads 16 + 16) will run side by side" || echo "NOTE: $cores cores < 32: R3 and R4 (Threads 16 each) will run one after the other (pre-registered rule)"
+  echo "container memory $mem GiB [$msrc]; host MemTotal $host_mem GiB; free disk $disk GB ($disk_gib GiB) under $HERE"
+  echo "need (instance specification, supplement 01 item 4): cores >= $NEED_CORES, memory >= $NEED_MEM_GIB GiB, free data disk >= $NEED_DISK_GB GB"
+  [ "$cores" -ge $NEED_CORES ] && [ "$mem" -ge $NEED_MEM_GIB ] && [ "$disk" -ge $NEED_DISK_GB ] || { echo "RESOURCE CHECK FAILED"; ok=0; }
+  [ "$cores" -ge $NEED_CORES_PAIR ] && echo "phase 2: R3 | R5 and R4 | R6 (Threads 16 + 8 = 24) will run side by side" \
+    || echo "NOTE: $cores cores < 24: the phase-2 pairs run one after the other (pre-registered fallback)"
 fi
 [ $ok = 1 ] && echo "PREFLIGHT OK" || { echo "PREFLIGHT FAILED"; exit 1; }

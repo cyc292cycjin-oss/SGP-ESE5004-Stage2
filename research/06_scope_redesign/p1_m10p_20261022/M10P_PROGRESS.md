@@ -21,4 +21,17 @@
 
 提交链：`b46fc23d`（M10P-1）→ `692c2cce`（M10P-2）→ `be1ce466`（M10P-3）→ `915b919b`（M10P-4，第一版包）→ `eac6c3e0`（M10P-5a 变体路径修正；第二版包的代码提交）→ `1e7e22f9`（M10P-5 干跑）→ `69f15506`（M10P-6 台账）→ 收尾提交（PR 链接、审阅 ZIP 清单）。
 
-**续跑点：** 全部完成，等待审阅；审阅通过后由用户租卡，按另一份执行指令上云。
+**续跑点（M10P v1）：** 全部完成，等待审阅；审阅通过后由用户租卡，按另一份执行指令上云。
+
+## 补充 01（第 142 项；`M10P_SUPPLEMENT_01.md` v1，SHA256 `49a4593dfa5c9714891f0275a76b6a38ba771efebe0d4a28997bc8d5f4279205`，与 `M10P_SUPPLEMENT_01_SHA256.txt` 一致，2026-10-22 核对）
+
+规则同 M10P：不连云，不上传，不调用 Gurobi（玩具 LP 测试允许）。
+
+| 子步 | 内容 | 状态 | 提交 |
+|---|---|---|---|
+| S01-1 | 六项决定的代码与文档：静态检查 `research/` 运行时依赖；`run_batch3.sh` 配对排程（`SCHEDULE`）、分级停批（`stop-class`、`UNUSABLE`）、删 P1；`preflight.sh` 实例规格；`make_package.sh` 瘦身（不含 `research/`、不含 2920×3h 网络、上传按 36 / 100 / 318 KB/s）；测试；`RUN_PLAN.md` v2 | **完成**：静态检查（导入闭包 66 个模块）只有两处会打开 `research/` 文件，都在 Gate5/Gate6 旧流程、不在运行路径上（`evidence/s01/S01_STATIC_RESEARCH_RAW.json`）；`test_m10p_batch3.py` 17 项通过；全量 **600 passed、67 skipped、0 failed**（404.7 s，玩具 LP 照常运行；`evidence/M10P_FULL_TESTS_s01_code.log`）；瘦身代码归档试算 82.5 MB（原 153.8 MB） | 见下 |
+| S01-2 | 部署包 v3（瘦身）生成与清单 | 未开始 | |
+| S01-3 | 第二次干跑：解包与预检、7 个变体复现、R1–R11 构建到求解前退出、访问追踪（`research/`）、后处理批级汇总（M12b 冒烟） | 未开始 | |
+| S01-4 | 报告"补充 01"一节、台账、PR 更新、审阅 ZIP | 未开始 | |
+
+**续跑点（补充 01）：** S01-2（`/home/jin/m10p_s01_package.sh`：v2 包改名为 `cloud_package_dist_v2_eac6c3e0/`，在 S01-1 提交上生成 v3 包）。
