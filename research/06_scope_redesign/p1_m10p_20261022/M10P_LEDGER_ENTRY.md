@@ -1,0 +1,10 @@
+### M10P（第 133、138–141 项：第三批上云准备——整合分支、运行清单、事先登记规则、部署包、本机干跑；不连云、不求解）— 2026-10-22
+
+- **范围：** `M10P_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 bd2461e7…bbd1，核对一致）。分支 `codex/m10-batch3-20261022`：自 M12b 头 1f46517d 开出（独立 worktree），draft PR 叠在 #48 上。未连云、未上传、未调用 Gurobi；玩具 LP 测试按指令照常运行。
+- **整合：** #45（M08a）、#47（M08b 含补充 01）、#46（M12 含补充 01）、#48（M12b）与 S4Q #41（`FIXED_RUNS`、两个 1e-6 档案）的全部提交都已在 M12b 头中，无需 merge。`tests/research` 全量 582 passed、67 skipped、0 failed（整合分支）；最终提交 TESTS_FINAL。
+- **网络（第 1.4 节停止条件触发）：** 在干净提交 b46fc23d 上重建四个网络，SHA256 全部与 ec80668f 构建不同。原因（VERIFIED）：数据逐项相同，唯一差别是元数据 `s2_layers.geothermal.bus_mapping_source.path` 记录了构建 worktree 的绝对路径（`s2_network.py:344`）。按指令停下报告；**用户 10-22 决定 A：部署包用 ec80668f 原构建**（365×24h 一体化 75704334…、不互联 888a009b…，P1 用 2920×3h 一体化 bca20fc0…）。
+- **运行清单与事先登记规则（`RUN_PLAN.md`）：** R1–R11 + P1，档案 A（R3、R4 为 1e-6 T16）；TimeLimit 21,600 s / 墙钟 22,500 s（P1 墙钟 3,600 s），不重试、不改参数、不 warm start；两会话只在 Threads 之和不超过容器核数时并行（25 核上 R3、R4 先后跑），通道内与阶段间 ≥ 330 s；C1 阈值用本批 R1/R2 参照，之前的运行临时判定后重评（`grade_history`）；只有 C1 (a) 或 G2 不通过才停批（D12）；对偶形式验收按第 138 项；第四批档案按 R3/R4 对 R1/R2 选择；规则未覆盖的情况安全停止。
+- **代码与脚本：** `s2_solve.py --stop-before-solve`；`m10_batch3_summary.py`（运行表、核对、第二级、B6、敏感性差额、汇总、P1 解析）；部署包脚本 `run_batch3.sh`（含 `BUILD_ONLY` / `POST_ONLY`、续跑）、`preflight.sh`、`pack_results.sh`（轻量 / 完整）、`make_package.sh`、`env/`（锁定清单、安装与核对；非克隆部署下载约 743 MB）；测试 `test_m10p_batch3.py` 12 项（替身流水线）。
+- **干跑：** DRYRUN_SUMMARY
+- **待用户决定：** DECISIONS_SUMMARY
+- **交付：** `research/06_scope_redesign/p1_m10p_20261022/`（`M10P_REPORT.md`、`RUN_PLAN.md`、`M10P_PROGRESS.md`、指令及 SHA256、`cloud_package/`、`evidence/`、`scripts/`）；镜像 `work/p1_m10p_20261022/`；部署包 `work/p1_m10p_20261022/cloud_package_dist/`（不入库）。
