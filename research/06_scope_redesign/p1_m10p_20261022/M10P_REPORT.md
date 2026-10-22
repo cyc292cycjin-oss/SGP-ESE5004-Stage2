@@ -8,6 +8,7 @@
 5. **部署包：** `cloud_package_dist/`（提交 `eac6c3e0`，23 个文件 283.7 MB，清单 `PACKAGE_MANIFEST.json` 逐文件 SHA256）；非克隆部署环境下载约 743 MB、预计 5–15 分钟；单路上传约 0.5–2.2 h。
 6. **干跑：** 第一版包发现分国 WACC 变体的 SHA256 随目录变化（`m08a_variants.py` 写入了成本表绝对路径）→ 修正后重建；第二版：预检 OK，7 个变体三遍逐字节相同，R1–R11 全部"构建完成、求解前退出"且核对通过，P1 参数核对通过，后处理演练与 M12b 证据差 0.0 EUR。
 7. **需你决定（第 8 节）：** 25 核上 R3 / R4 先后跑是否接受；无解运行是否停批（含敏感性）；P1 内存风险；实例规格；代码归档是否瘦身；两处路径依赖的处理。
+8. **补充 01（第 142 项，第 10 节）：** 第 8 节六项已由用户决定并落实；部署包 v3（`e0527cec`，148.6 MB，不含 `research/` 与 2920×3h 网络）通过第二次干跑。
 
 等级：整合核对、测试、SHA256、干跑结果为 VERIFIED（回执与文件比较）；时长、磁盘、内存（P1）与安装时间为 INFERENCE。
 
@@ -160,6 +161,8 @@
 
 ## 8. 仍需用户决定的事项
 
+> 本节各项已由 `M10P_SUPPLEMENT_01.md` 决定（第 1、2、3、5、6、7 项；第 4 项的两条固定通道沿用），落实情况见第 10 节。
+
 1. **R3、R4 的并行方式：** 25 核实例上两者先后跑，第 2 阶段另一会话空闲约 3–4 h。可选：(a) 维持（本计划）；(b) 租 ≥ 32 核实例，R3 | R4 并行；(c) 允许 R3 与第 3 阶段的档案 A 运行同时跑（16 + 8 ≤ 25），省约 3 h，但改变指令写定的顺序。
 2. **无返回解的运行是否停批：** 本计划按"C1 不可计算 = C1 (a) 不通过"停批，敏感性运行（R8–R11）也一样，会使其后运行与 P1 都不开始。是否对 R8–R11 改为"记录后继续"——须在看结果前决定。
 3. **P1：** TimeLimit = 墙钟 = 3,600 s，只作计时与内存探针；按本机 365×24h 构建峰值 10.1 GiB × 8 粗估，2920×3h 仅构建就约 80 GiB，在 92 GiB 容器上可能在构建或预处理阶段超限（P1 前已打包 R1–R11 结果）。是否接受，或 P1 改在更大内存的实例上单独跑。
@@ -181,5 +184,111 @@
 - **台账：** `research/STAGE2_PROJECT_LEDGER.md` 末尾追加 M10P 条目（原文 `M10P_LEDGER_ENTRY.md`）。
 - **draft PR：** [cyc292cycjin-oss/SGP-ESE5004-Stage2#49](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/49)（base `codex/m12b-loo-local-20261021`，叠在 #48 上）。
 - **审阅 ZIP：** `M10P_REVIEW.zip`（work 目录不含部署包 + 本步改动的仓库代码与包脚本；逐成员 SHA256 + CRC32 清单 `M10P_REVIEW_MANIFEST.csv`，ZIP 的 SHA256 见 `M10P_REVIEW_ZIP_SHA256.txt`；ZIP 本身不入库）。
+
+完成后停止，等待审阅；审阅通过后由用户租卡。
+
+---
+
+## 10. 补充 01（第 142 项）：第 8 节六项的决定与第二次干跑
+
+**摘要（2026-10-22；`M10P_SUPPLEMENT_01.md` v1，SHA256 `49a4593d…9205` 与 `M10P_SUPPLEMENT_01_SHA256.txt` 一致；未连云、未上传、未调用 Gurobi）**
+1. **六项决定全部落实**到 `run_batch3.sh`、`m10_batch3_summary.py`、`preflight.sh`、`make_package.sh` 与 `RUN_PLAN.md` v2：第 2 阶段 R3 | R5、R4 | R6 配对（16 + 8 = 24 核）；分级停批；P1 与 2920×3h 网络删除；实例规格进入预检；代码归档去掉 `research/`；路径问题按决定处理。
+2. **`research/` 运行时依赖：无。** 静态检查（导入闭包 66 个模块）只有两处会打开 `research/` 文件，都在不被调用的 Gate5 / Gate6 旧函数里；带访问追踪的干跑中预检、构建、后处理对 `research/` 的访问为 0（阳性对照 3）。无需保留任何 `research/` 文件。
+3. **部署包 v3（提交 `e0527cec`）：** 24 个文件 **148,587,335 B**（v2 为 283,737,685 B），`PACKAGE_MANIFEST.json` SHA256 `0fc6ab4f5a9281679738f45972affbc6410acab6b9d6c2a778fd255138e1bc32`。上传：36 KB/s 约 1.15 h、100 KB/s 约 25 分钟、318 KB/s 约 8 分钟。
+4. **第二次干跑全部通过：** 预检 OK；7 个变体与期望 SHA256 逐字节相同；R1–R11 构建到求解前退出，LP 维数、参数、网络 SHA256 与 LP 数组字节数逐运行与第一次干跑相同；后处理演练与 M12b 证据差 0.0 EUR。
+5. **测试：** `tests/research` 全量 **600 passed、67 skipped、0 failed**（新增 / 改写的运行脚本测试 17 项，含模拟失败）。
+6. **请审阅确认（10.7）：** 阶段之间等两条通道都结束的取舍；无返回解时 G2 只核对输入部分的解释；不可用的去一国运行不进入去一国检查。
+
+等级：测试、SHA256、干跑核对与访问追踪为 VERIFIED；时长、内存、磁盘与上传时间为 INFERENCE。
+
+### 10.1 决定与实现
+
+| 项 | 决定（补充 01） | 实现 | 验证 |
+|---|---|---|---|
+| 1 R3、R4 的线程 | R3 与 R5、R4 与 R6 同时跑（24 核），之后其余两两并行；只改顺序 | `m10_batch3_summary.py SCHEDULE`：第 1 阶段 [R1] \| [R2]；第 2 阶段 [R3 → R4] \| [R5 → R6]；第 3 阶段 [R7 → R9 → R11] \| [R8 → R10]。`run_batch3.sh phase()`：两条通道各自最大 Threads 之和 ≤ 容器核数时并行，否则合成一条通道轮流取运行。档案与参数不变 | 测试：25 核上 R3 / R5、R4 / R6 重叠，R3 与 R4 不重叠，任何时刻 ≤ 2 个会话且 ≤ 24 核；20 核时第 2 阶段为一条通道 R3 → R5 → R4 → R6 |
+| 2 无返回解的停批 | R1、R2 无解 / C1 (a) / G2 不过 → 停批；R3–R11 无解或 C1 (a) 不过 → 不可用、继续；任何 G2 不过 → 停批 | `m10_batch3_summary.py stop-class` → `STOP_CLASS.json`（`g2` / `nosol` / `c1a` / `ref_dependent`）；`run_batch3.sh stop_check()`：停批写 `STOP`，不可用写 `UNUSABLE`；不可用的 R5–R7 不进入去一国检查，敏感性差额标为不可用，R3 / R4 不可用 → 档案 A | 测试：R3、R5 无解与 R8 C1 (a) 失败 → 三个记为不可用、11 个运行都跑完、退出码 0；R2 C1 (a)、R6 无解且配置子集不符、R7 有解但 G2.2 不符 → 停批（另一通道正在跑的 R4 / R8 跑完并后处理）；`stop-class` 单元测试 12 种情况 |
+| 3 P1 内存 | P1 从第三批删除；第四批开始时 1 h 探针、超过可用内存 80 % 即止损 | 运行表、运行脚本、批级打包（不再有 `pre_p1`）、汇总中去掉 P1；2920×3h 网络不入包；`p1_summary` 解析函数保留供第四批；`RUN_PLAN.md` 第 9 节写明第四批做法 | 测试：运行表 11 个、无 P1 调用、只有 `final` 打包 |
+| 4 实例规格 | ≥ 25 核、内存 ≥ 92 GiB、数据盘 ≥ 60 GB；推荐 1 卡 8481C / 8470Q | `preflight.sh` 资源一节按此判定（核与内存取容器 cgroup 配额；磁盘按 GB = 10⁹ B）；清单 `run.instance` | 本机干跑：16 核 / 11 GiB 判为不满足（预期，仅作信息） |
+| 5 代码包瘦身 | 静态检查加干跑确认后剔除 `research/`；有依赖则保留并列出 | `make_package.sh`：按提交的跟踪文件清单打包，去掉顶层 `research/`，`RESEARCH_KEEP` 为空；打包后核对归档中 `research/` 文件数 = 保留数、文件数 = 清单数 | 10.2 |
+| 6 路径问题 | 接受 `m08a_variants.py` 的修正；`s2_network.py:344` 暂不修，登记为已知小项 | 代码未改；`RUN_PLAN.md` 第 1 节与清单 `networks.known_item` 登记 | 网络、回执与 v2 逐字节相同（10.3） |
+
+### 10.2 `research/` 运行时依赖（第 5 项）
+
+- **静态检查**（`scripts/m10p_s01_static_research.py`，`evidence/s01/S01_STATIC_RESEARCH_RAW.json`）：入口为云端会启动的 8 个模块（`s2_solve`、`l23_violation_analysis`、`s4o_c1_precision`、`m12_allocation`、`m12_rhs_audit`、`m08a_variants`、`v5/gates_v6`、`m10_batch3_summary`），导入闭包含函数内导入共 66 个模块。逐条归类（`evidence/s01/S01_RESEARCH_DEPENDENCY.json`）：
+  - 会真正打开 `research/` 文件的只有 2 处，都读 `research/04_model_assembly/final_validation/GATE5_RUN_HISTORY.json`：`gate5_resources.current_evidence()`（调用者都是 Gate5 工具与测试，不在闭包内）和 `run_gate6_baseline.make_lock()`（只被 Gate6 运行器自己的函数调用；闭包经 `gate6_execution_context` 只用到该模块的 `resource_admission()`）。
+  - 其余 7 处是写进输出的标签（C1 缺省参照来源、GATES_V6 定义文件名、`s1_solve` 参数来源）或模块说明。
+  - 配置中指向 `research/` 的值只在 `configs/research/gate6_baseline_3h.json`，只被 `run_gate6_baseline.py` 读取；包内 shell 脚本不引用仓库的 `research/`。
+- **访问追踪干跑**（`scripts/m10p_s01_trace/sitecustomize.py`，只记录、不改变行为）：每个 Python 进程记录对 `<包>/repo/research/` 的 open、listdir、scandir、glob、stat、lstat。阳性对照（目录不存在时故意访问）记录 3 次；预检、`BUILD_ONLY`、`POST_ONLY` 记录 **0 次**（`evidence/s01/S01_TRACE_SUMMARY.json`、`dryrun/trace/`）。
+- 追踪同时记录了包目录与环境以外的本机路径（信息项）：只有 matplotlib / dask / pip 的用户配置与缓存目录、环境前缀的上级目录、PyPSA 数据目录（库的通用行为，云端同样存在或可缺省），以及后处理演练按设计读取的 M12b / M08b 冒烟网络；没有 `/mnt/d` 或其他 worktree。
+- **结论（VERIFIED）：** 运行时不读取 `research/`；部署包代码归档不含 `research/`，无需保留任何文件。
+
+### 10.3 部署包 v3 与上传量
+
+- `make_package.sh` 在提交 `e0527cec` 上生成 `work/p1_m10p_20261022/cloud_package_dist/`（不入库；95 s）：
+
+| 内容 | 文件 | 字节 |
+|---|---|---|
+| 代码（不含 `research/`，1,432 个文件） | `code_e0527cec.tar.gz` | 82,477,631 |
+| 365×24h 一体化 / 不互联网络（与 v2 逐字节相同） | `networks/*_365_24h_unsolved.nc` | 31,524,926 + 30,857,960 |
+| 两份构建回执 | `networks/*_BUILD_RECEIPT.json` | 1,729,929 + 1,729,333 |
+| 两份成本表、脚本、环境锁定、计划、清单等 19 个文件 | — | 267,556 |
+| **合计 24 个文件** | | **148,587,335** |
+
+- `PACKAGE_MANIFEST.json`：SHA256 `0fc6ab4f5a9281679738f45972affbc6410acab6b9d6c2a778fd255138e1bc32`（8,758 B）；`SHA256SUMS`：SHA256 `6f74f40e90a9244c7afaaad032d8f2987f59f01393a89567f5f0a47f272a1ea1`（22 个文件）。副本在 `evidence/s01/package/`，摘要 `evidence/s01/PACKAGE_SUMMARY.txt`。
+- 7 个变体的期望 SHA256（`EXPECTED_VARIANTS.json`）、两个网络、构建回执与成本表都与 v2（`eac6c3e0`）逐字节相同；2920×3h 网络不再入包。
+- **最终上传量 148,587,335 B（约 148.6 MB），单路上传、传后全量 `sha256sum -c`（KB = 1000 B；INFERENCE）：**
+
+| 速率 | 时间 |
+|---|---|
+| 36 KB/s（S4O-6 AutoDL 克隆机上行） | 约 1.15 h（69 分钟） |
+| 100 KB/s | 约 25 分钟 |
+| 318 KB/s | 约 8 分钟 |
+
+  v2 包（283.7 MB）在 36 KB/s 下约 2.2 h。代码归档中剩下的大头是 `research_inputs/`（未压缩约 96.7 MB）与 `data/`（约 47.2 MB），不在本次授权范围内，未动。
+- 旧包均改名保留、不上传：`cloud_package_dist_v2_eac6c3e0/`（M10P v2）、`cloud_package_dist_v3a_619d7b46/`（见 10.6 第 1 项）。
+
+### 10.4 第二次干跑（补充 01 第 2 节；脚本 `scripts/m10p_s01_dryrun.sh`，证据 `evidence/s01/dryrun/`）
+
+全部在 WSL 中、移除 `GRB_LICENSE_FILE` 后运行；运行脚本的干跑模式把许可变量指向不存在的文件，求解调用 0 次；每个 Python 进程带访问追踪。
+
+- **解包与预检：** 部署包复制到 `/home/jin/m10p_dry_s01/pkg`；`preflight.sh`（不含许可一节）**PREFLIGHT OK**——22 个文件 SHA256 全对；代码解包到 `./repo`（`e0527cec`，1,432 个文件，无 `research/`）；两个基础网络 = 构建回执；`EXPECTED_VARIANTS.json` 7 条；环境 284 / 284 个包版本相同；两档案参数与 Threads 8 / 16 正确；模块无许可可导入，运行表 11 个、排程 3 个阶段。资源一节本机不满足规格（16 核、11 GiB），仅作信息。
+- **变体复现：** 运行脚本第 0 阶段生成的 7 个变体与期望 SHA256 逐字节相同（R5 `8a9c7136…` 至 R11 `85ade73c…`，同第 5.2 节表）。
+- **R1–R11 构建到求解前退出（`BUILD_ONLY=1`，1,111 s）：** 每个运行 `BUILD_CHECK.json` 全部通过；顺序按排程（干跑模式为单通道：R1、R2 → R3、R5、R4、R6 → R7–R11）。与第一次干跑（包 `eac6c3e0`，含 `research/`）逐运行比较（`evidence/s01/S01_DRYRUN_BUILDS_VS_FIRST.json`）：LP 行、列、非零元、求解参数、档案、输入网络 SHA256 全部相同，LP 数组字节数也逐运行相同（合计 8,410,585,627 B）；峰值 7.6–10.1 GiB。
+- **后处理演练（`POST_ONLY=1`，M12b 冒烟结果，320 s）：** 映射同第 5.4 节；全部 exit 0：R1、R2 临时判定 → 本批参照重评（ACCEPTED_LAYER2）；R5–R7 用本批参照、右端项检查通过；去一国 3 / 3 通过，B6 = 9.8985 bn；第二级因 R3 / R4 缺失 → 档案 A；批级汇总与 `final` 打包生成（轻量 2.3 MB、完整 140.7 MB）；不可用运行无。与 M12b 证据逐项对比（`dryrun/post_smoke/POST_SMOKE_VS_M12B.json`）：**最大差 0.0 EUR**，余量 VN 1.1734、TH 0.1866、LA 0.8933 bn。
+- **配对顺序与分级停批：** 按补充 01 第 2 节用模拟失败的单元测试验证（10.5），不调用 Gurobi。
+
+### 10.5 测试
+
+| 时点 | 结果 | 日志 |
+|---|---|---|
+| 补充 01 代码（`619d7b46` 的内容，提交前工作树） | **600 passed、67 skipped、0 failed**（404.7 s） | `evidence/M10P_FULL_TESTS_s01_code.log` |
+
+- 595 → 600：`test_m10p_batch3.py` 由 12 项改为 17 项（含 3 个参数化停批情形）。玩具 LP 测试照常运行（规则同 M10P），未调用 Gurobi。
+- 运行脚本测试（替身流水线，无求解器）：运行表与排程（每个运行一次、T16 只在一条通道、各阶段最大并发核数 16 / 24 / 16）；完整批次（配对重叠、通道顺序与间隔、阶段屏障、任何时刻 ≤ 2 个会话且 ≤ 24 核、临时判定→重评、续跑不重解）；20 核时单通道；分级停批（不可用继续 / R2 C1 (a) / R6 无解且输入不符 / R7 G2）；`stop-class` 12 种情况；墙钟终止（R1 无解 → 停批）；变体 SHA256 安全停止；`BUILD_ONLY` 顺序；`POST_ONLY`；未登记时限；打包许可扫描；P1 解析（保留）；第二级缺运行。
+
+### 10.6 偏离与说明
+
+1. **`RUN_PLAN.md` 漏算构建回执：** 第一次在 `619d7b46` 上生成的 v3 包（148,587,312 B）显示计划第 6 节写的"其余不到 1 MB"漏了两份构建回执（各 1.73 MB；v1 的"约 281 MB"同样漏算）。计划在包内，故改正文字（`e0527cec`）后重建；第一次生成的包改名为 `cloud_package_dist_v3a_619d7b46/` 保留，证据 `evidence/s01/package_v3a_619d7b46/`。两版代码与网络内容相同。
+2. **无返回解时的 G2：** G2.1 的回读与 G2.3 都需要解，无解时必然不过。按决定中"G2 不过（结构或输入问题）"的说明，无返回解的运行只核对不需要解的部分（输入网络 SHA256、配置子集哈希）；这两项不过才按 G2 停批（`RUN_PLAN.md` 3.3 第 3 项）。
+3. **验收不可读：** v1 中 GATES_V6 验收崩溃（无标签）时不会停批；现在验收或分类不可读按 G2 不通过停批（更保守）。
+4. **阶段屏障与通道：** 按"之后其余运行两两并行"的字面，第 3 阶段等第 2 阶段两条通道都结束才开始；各阶段两条通道各自依次推进、不严格成对等待（与 v1 第 3 阶段做法相同）。
+5. **预检核数门槛：** 按规格写为 ≥ 25 核（配对实际需要 24 核）；24 核的容器会判为不满足。
+6. **测试日志的提交点：** 全量测试在 `9bfe540a` 加上补充 01 的 6 个未提交改动上运行，随后原样提交为 `619d7b46`（其后只改了 `preflight.sh` 一行注释与文档）。
+
+### 10.7 请审阅确认的事项
+
+1. **阶段屏障（INFERENCE）：** 第 2 阶段由 R5 + R6（约 6 h）决定，R3 + R4（约 4 h）结束后通道 A 约 2 h 只用 8 核；若允许第 3 阶段的运行在任一通道空出时就开始（不等另一条通道），按历史时长约省 1 h。本计划未采用，按字面执行。
+2. 10.6 第 2 项对"无返回解时 G2"的解释，以及第 3 项"验收不可读即停批"。
+3. 记为不可用的 R5–R7 不作为 c(N − i) 进入去一国检查（`RUN_PLAN.md` 3.6 第 3 项）。
+
+### 10.8 交付
+
+- **提交链（补充 01）：** `619d7b46`（S01-1 代码、测试、`RUN_PLAN.md` v2、静态检查）→ `e0527cec`（S01-2a 计划第 6 节改正；v3 包的代码提交）→ `645349db`（S01-2 / S01-3 部署包与干跑证据）→ S01-4（本节、台账、PR、审阅 ZIP；见 `M10P_PROGRESS.md`）。
+- **证据：** `evidence/s01/`（静态检查、判定、追踪摘要与日志、两次打包证据、干跑证据、构建对比）；全量测试日志 `evidence/M10P_FULL_TESTS_s01_code.log`。
+- **脚本：** `scripts/m10p_s01_*`（静态检查、追踪器与自测、打包、干跑、判定、审阅 ZIP）。
+- **部署包（不入库）：** `work/p1_m10p_20261022/cloud_package_dist/`（v3，`e0527cec`）。
+- **台账：** `research/STAGE2_PROJECT_LEDGER.md` 末尾追加"M10P 补充 01"条目（原文 `M10P_S01_LEDGER_ENTRY.md`）。
+- **PR：** [cyc292cycjin-oss/SGP-ESE5004-Stage2#49](https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2/pull/49) 推送并更新说明。
+- **审阅 ZIP：** `M10P_S01_REVIEW.zip`（清单 `M10P_S01_REVIEW_MANIFEST.csv`，SHA256 见 `M10P_S01_REVIEW_ZIP_SHA256.txt`；不入库）。
 
 完成后停止，等待审阅；审阅通过后由用户租卡。
