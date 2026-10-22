@@ -18,8 +18,9 @@
 # [R8 -> R10] (A + A = 16 cores) -> batch post-processing -> final pack.
 #
 # PRE-REGISTERED RULES (RUN_PLAN.md section 3; registered before any result, not changed after results have been seen):
-#   * one solve per run: no retry, no parameter change, no warm start; TimeLimit 21,600 s and wall clock 22,500 s; the wall-clock kill ends the
-#     whole process group (TERM, GRACE_S, KILL);
+#   * one solve per run: no retry, no parameter change, no warm start; TimeLimit 28,800 s and wall clock 30,000 s (M10A supplement 01 D1, item
+#     145, registered before any new-network 365x24h result; 21,600 / 22,500 s before); the wall-clock kill ends the whole process group (TERM,
+#     GRACE_S, KILL);
 #   * at most two Gurobi sessions: per phase two lanes, each one run after the other; the lanes run side by side only when the largest Threads of
 #     the two lanes fit the container cores together, otherwise as one lane taking the runs of both in turn; >= 330 s from the end of a solve to
 #     the next start in the same lane, and from the latest solve end (and from the start of this runner: preflight licence check, tokens of an
@@ -55,6 +56,9 @@
 #     schedule (redo with POST_ONLY=1); missing C1 / GATES_V6 inputs still follow the rules (C1 not computable = C1 (a) failed);
 #   * TMPDIR = <run dir>/tmp (data disk): linopy writes the LP problem file of every solve to the temp dir;
 #   * a formal run (solve mode without ALLOW_UNREGISTERED) refuses every test hook; the no-solve modes refuse --auth.
+# M10A supplement 01 (item 145): D1 TimeLimit / wall clock 28,800 / 30,000 s; D2 the violation analysis and C1 steps are redone ONCE after a
+#   non-zero exit or timeout (same environment and parameters; the incomplete outputs are kept as *.failed<n>; STATUS line POSTPROC_RETRY); a
+#   second failure follows the registered rules (C1 not computable = C1 (a) failed); no solve is ever repeated, the classification is unchanged.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 AUTH=""
@@ -67,7 +71,7 @@ done
 REPO=${REPO:-$HERE/repo}; NETS=${NETS:-$HERE/networks}; OUT=${RUN_DIR:-$HERE/runs/batch3}; PY=${PY:-python}
 BUILD_ONLY=${BUILD_ONLY:-0}; DRY=${DRY:-0}; POST_ONLY=${POST_ONLY:-0}; TRUNCATE=${TRUNCATE:-}
 NOSOLVE=0; { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ]; } && NOSOLVE=1   # no Gurobi session: no licence, no gaps, one lane
-R_WALL=22500; R_TL=21600; R_GAP=330     # registered values (RUN_PLAN.md section 3)
+R_WALL=30000; R_TL=28800; R_GAP=330     # registered values (RUN_PLAN.md section 3; TimeLimit / wall clock 21,600 / 22,500 -> 28,800 / 30,000 s: M10A supplement 01 D1, item 145)
 WALL_CAP_S=${WALL_CAP_S:-$R_WALL}; GUROBI_TIME_LIMIT_S=${GUROBI_TIME_LIMIT_S:-$R_TL}
 LICENCE_GAP_S=${LICENCE_GAP_S:-$R_GAP}; GRACE_S=${GRACE_S:-30}; MONITOR_S=${MONITOR_S:-60}; CGROUP_ROOT=${CGROUP_ROOT:-/sys/fs/cgroup}
 # M10A (B5.5): test hooks present in the environment, recorded before the defaults below fill them in; FORMAL = solve mode without ALLOW_UNREGISTERED
@@ -162,6 +166,19 @@ aux_threads() {   # M10A (B5.3): thread budget of an auxiliary Python process = 
 aux_env() { local k; k=$(aux_threads); echo "OMP_NUM_THREADS=$k MKL_NUM_THREADS=$k OPENBLAS_NUM_THREADS=$k NUMEXPR_MAX_THREADS=$k"; }
 aux() {   # an auxiliary command: in $REPO, licence removed, thread budget, timeout (TERM, KILL 30 s later; the whole process group of the step)
   ( cd "$REPO" && exec env -u GRB_LICENSE_FILE $(aux_env) timeout -k 30 "$POST_TIMEOUT_S" "$@" )
+}
+keep_failed() {   # M10A supplement 01 D2: $1 run dir, then file names - the incomplete outputs of a failed step are kept as <name>.failed<n> (never deleted)
+  local d=$1 f n; shift
+  for f in "$@"; do [ -e "$d/$f" ] || continue; n=1; while [ -e "$d/$f.failed$n" ]; do n=$((n + 1)); done; mv "$d/$f" "$d/$f.failed$n"; done
+}
+va_cmd() {   # $1 rid $2 run dir $3 network $4 scenario $5 label -> exit code of the violation analysis step
+  step "$1" violations /usr/bin/time -v $VA_CMD --repo "$REPO" --solve-dir "$2" --network "$3" --scenario "$4" --label "$5" --out "$2/VIOLATIONS.json" \
+      ${TRUNC[@]+"${TRUNC[@]}"} > "$2/c1_violations.log" 2> "$2/c1_violations.err"
+}
+c1_cmd() {   # $1 rid $2 run dir $3 network $4 scenario $5 label, then the reference arguments -> exit code of the C1 step
+  local rid=$1 d=$2 net=$3 sc=$4 lab=$5; shift 5
+  step "$rid" c1 /usr/bin/time -v $C1_CMD run --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --violations "$d/VIOLATIONS.json" \
+      "$@" ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_precision.log" 2> "$d/c1_precision.err"
 }
 step() {   # $1 rid (or batch) $2 step name, then the command: aux + record; a non-zero exit (crash, timeout) is POSTPROC_ERROR and never changes the schedule
   local rid=$1 name=$2 rc t=$POST_TIMEOUT_S; shift 2; [ "$name" = pack ] && t=$PACK_TIMEOUT_S
@@ -376,18 +393,28 @@ post_run() {   # $1 rid
     export_run "$rid"; return 0
   fi
   [ -f "$d/.ended" ] || return 0
-  local net sc lab ref=(); net=$(jget "$d/RUN.json" network); sc=$(jget "$d/RUN.json" scenario); lab=$(jget "$d/RUN.json" label)
+  local net sc lab rc ref=(); net=$(jget "$d/RUN.json" network); sc=$(jget "$d/RUN.json" scenario); lab=$(jget "$d/RUN.json" label)
   [ -f "$OUT/BATCH_REFERENCE.json" ] && ref=(--reference "$OUT/BATCH_REFERENCE.json")
   # M10A: each step under step() = timeout + thread budget + POSTPROC_ERROR record; a crash or timeout here never stops the batch by itself
   # (VIOLATIONS.json / PRECISION.json missing -> C1 not computable -> the graded stop rule as registered; M12 / Owen / RHS outputs missing -> no effect on GATES_V6)
+  # M10A supplement 01 D2: the violation analysis and C1 are redone once after a failure (same environment and parameters); the incomplete outputs
+  # of every failed attempt are kept as *.failed<n> so that a broken file is never read as an input; a second failure follows the registered rules
   if [ -f "$d/solution/X.npy" ] && [ ! -f "$d/VIOLATIONS.json" ]; then
-    step "$rid" violations /usr/bin/time -v $VA_CMD --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --out "$d/VIOLATIONS.json" \
-        ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_violations.log" 2> "$d/c1_violations.err"; log "VIOLATIONS_$rid:exit=$?"
+    va_cmd "$rid" "$d" "$net" "$sc" "$lab"; rc=$?
+    if [ $rc != 0 ]; then
+      keep_failed "$d" VIOLATIONS.json c1_violations.log c1_violations.err
+      va_cmd "$rid" "$d" "$net" "$sc" "$lab"; rc=$?; log "POSTPROC_RETRY:$rid:violations:exit=$rc:$(now)$( [ $rc = 0 ] && echo " - retry succeeded" || echo " - retry failed too; the registered rules apply (C1 not computable)")"
+      [ $rc = 0 ] || keep_failed "$d" VIOLATIONS.json c1_violations.log c1_violations.err
+    fi
+    log "VIOLATIONS_$rid:exit=$rc"
   fi
   if [ ! -f "$d/PRECISION.json" ]; then
-    step "$rid" c1 /usr/bin/time -v $C1_CMD run --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --violations "$d/VIOLATIONS.json" \
-        ${ref[@]+"${ref[@]}"} ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_precision.log" 2> "$d/c1_precision.err"; local rc=$?
-    [ $rc = 0 ] || grep -viE "$SCRUB" "$d/c1_precision.err" | tail -40 > "$d/C1_ERR_TAIL.txt"
+    c1_cmd "$rid" "$d" "$net" "$sc" "$lab" ${ref[@]+"${ref[@]}"}; rc=$?
+    if [ $rc != 0 ]; then
+      keep_failed "$d" PRECISION.json PRECISION.md c1_precision.log c1_precision.err
+      c1_cmd "$rid" "$d" "$net" "$sc" "$lab" ${ref[@]+"${ref[@]}"}; rc=$?; log "POSTPROC_RETRY:$rid:c1:exit=$rc:$(now)$( [ $rc = 0 ] && echo " - retry succeeded" || echo " - retry failed too; the registered rules apply (C1 not computable)")"
+      [ $rc = 0 ] || { grep -viE "$SCRUB" "$d/c1_precision.err" 2>/dev/null | tail -40 > "$d/C1_ERR_TAIL.txt"; keep_failed "$d" PRECISION.json PRECISION.md c1_precision.log c1_precision.err; }
+    fi
     log "C1_$rid:exit=$rc:$( [ -f "$d/PRECISION.json" ] && c1_summary "$d/PRECISION.json" || echo missing):$( [ ${#ref[@]} -gt 0 ] && echo final || echo provisional)"
   fi
   if [ -f "$d/SOLVE_RECEIPT.json" ] && [ ! -f "$d/ALLOCATION.json" ]; then

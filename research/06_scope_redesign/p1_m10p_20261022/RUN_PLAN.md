@@ -1,7 +1,7 @@
 # 第三批运行计划（RUN_PLAN）——365×24h，单卡实例，两个 Gurobi 会话并行
 
-**版本：** M10P v3（M10A 上云前审查修复），2026-10-22。依据 `M10P_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `bd2461e7…bbd1`）第 2–4 节、第 133、138–141 项，`M10P_SUPPLEMENT_01.md`（SHA256 `49a4593d…9205`）第 1 节的六项决定（第 142 项），以及 `M10A_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `d7db9497…7f98a`）B5 的实现层修复（第 10 节）。
-**状态：** 只是准备。实际上云在用户租卡并授权后，按另一份执行指令进行；本文件第 3 节的规则在看到任何结果之前登记，之后不得修改。v1 → v2 的改动都来自补充 01 的决定；v2 → v3 只改实现（运行脚本的进程计数、后处理超时与线程预算、临时目录、测试开关防护），第 3 节一字未改，此时尚无任何第三批结果。
+**版本：** M10P v4（M10A 补充 01：时限登记值变更、两项稳健性修改），2026-10-23。依据 `M10P_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `bd2461e7…bbd1`）第 2–4 节、第 133、138–141 项，`M10P_SUPPLEMENT_01.md`（SHA256 `49a4593d…9205`）第 1 节的六项决定（第 142 项），`M10A_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `d7db9497…7f98a`）B5 的实现层修复（第 10 节第 1–6 项），以及 `M10A_SUPPLEMENT_01.md`（SHA256 `4abdff42…dd70`，第 145 项，用户 2026-10-22 同意）的三项决定 D1–D3（第 10 节第 7–9 项）。
+**状态：** 只是准备。实际上云在用户租卡并授权后，按另一份执行指令进行；本文件第 3 节的规则在看到任何结果之前登记，之后不得修改。v1 → v2 的改动都来自补充 01 的决定；v2 → v3 只改实现（运行脚本的进程计数、后处理超时与线程预算、临时目录、测试开关防护）；**v3 → v4 变更了第 3.1 节的 365×24h 时限登记值（21,600 / 22,500 → 28,800 / 30,000 s，第 10 节第 7 项记录理由），并在第 3.5 节加入违反分析与 C1 的一次重做（第 10 节第 8 项）、第 5 节改为预检硬下限（第 10 节第 9 项）——变更时新网络在 365×24h 上没有任何求解结果**，其余规则一字未改。
 **入口：** `run_batch3.sh`（运行与逐运行 / 批级后处理）、`preflight.sh`（预检）、`pack_results.sh`（结果打包）、`env/install_env.sh`（非克隆部署的环境安装）。运行表与排程的唯一来源是代码中的 `scripts_project/m10_batch3_summary.py` `RUNS` 与 `SCHEDULE`。
 
 ---
@@ -26,17 +26,17 @@
 
 | 编号 | 运行 | 网络（基础 / 变体 `--set`） | 求解情景 | 档案 | Threads | TimeLimit | 墙钟 | 成本表 | 作用 |
 |---|---|---|---|---|---|---|---|---|---|
-| R1 | 一体化 | 基础 `integrated_365_24h` | integrated | A | 8 | 21,600 | 22,500 | integrated | 本批参照、Owen 分摊、c(N) |
-| R2 | 不互联 | 基础 `disconnected_365_24h` | disconnected | A | 8 | 21,600 | 22,500 | disconnected | 本批参照、B6 |
-| R3 | 一体化 | 基础 `integrated_365_24h` | integrated | 1e-6 T16 | 16 | 21,600 | 22,500 | integrated | 第二级容差验证（第 127 项） |
-| R4 | 不互联 | 基础 `disconnected_365_24h` | disconnected | 1e-6 T16 | 16 | 21,600 | 22,500 | disconnected | 同上 |
-| R5 | 去 VN | `integrated_365_24h` + `coalition.remove_countries=[VN]` | integrated | A | 8 | 21,600 | 22,500 | integrated | 365×24h 去一国复核（第 133、139 项） |
-| R6 | 去 TH | 同上 `[TH]` | integrated | A | 8 | 21,600 | 22,500 | integrated | 同上 |
-| R7 | 去 LA | 同上 `[LA]` | integrated | A | 8 | 21,600 | 22,500 | integrated | 同上 |
-| R8 | 不互联 b1 | `disconnected_365_24h` + `disconnected.co2_shipping_intra_asean=forbid` | disconnected | A | 8 | 21,600 | 22,500 | disconnected | 敏感性（第 132 项） |
-| R9 | 不互联保留存量 | `integrated_365_24h` + `cross_border.stock_mode=keep_stock_no_new` | disconnected | A | 8 | 21,600 | 22,500 | integrated | 敏感性（第 132 项 2a） |
-| R10 | 分国 WACC 一体化 | `integrated_365_24h` + `finance.wacc_mode=country_specific` | integrated | A | 8 | 21,600 | 22,500 | integrated | 敏感性（第 132 项第 5 项） |
-| R11 | 分国 WACC 不互联 | `disconnected_365_24h` + `finance.wacc_mode=country_specific` | disconnected | A | 8 | 21,600 | 22,500 | disconnected | 同上 |
+| R1 | 一体化 | 基础 `integrated_365_24h` | integrated | A | 8 | 28,800 | 30,000 | integrated | 本批参照、Owen 分摊、c(N) |
+| R2 | 不互联 | 基础 `disconnected_365_24h` | disconnected | A | 8 | 28,800 | 30,000 | disconnected | 本批参照、B6 |
+| R3 | 一体化 | 基础 `integrated_365_24h` | integrated | 1e-6 T16 | 16 | 28,800 | 30,000 | integrated | 第二级容差验证（第 127 项） |
+| R4 | 不互联 | 基础 `disconnected_365_24h` | disconnected | 1e-6 T16 | 16 | 28,800 | 30,000 | disconnected | 同上 |
+| R5 | 去 VN | `integrated_365_24h` + `coalition.remove_countries=[VN]` | integrated | A | 8 | 28,800 | 30,000 | integrated | 365×24h 去一国复核（第 133、139 项） |
+| R6 | 去 TH | 同上 `[TH]` | integrated | A | 8 | 28,800 | 30,000 | integrated | 同上 |
+| R7 | 去 LA | 同上 `[LA]` | integrated | A | 8 | 28,800 | 30,000 | integrated | 同上 |
+| R8 | 不互联 b1 | `disconnected_365_24h` + `disconnected.co2_shipping_intra_asean=forbid` | disconnected | A | 8 | 28,800 | 30,000 | disconnected | 敏感性（第 132 项） |
+| R9 | 不互联保留存量 | `integrated_365_24h` + `cross_border.stock_mode=keep_stock_no_new` | disconnected | A | 8 | 28,800 | 30,000 | integrated | 敏感性（第 132 项 2a） |
+| R10 | 分国 WACC 一体化 | `integrated_365_24h` + `finance.wacc_mode=country_specific` | integrated | A | 8 | 28,800 | 30,000 | integrated | 敏感性（第 132 项第 5 项） |
+| R11 | 分国 WACC 不互联 | `disconnected_365_24h` + `finance.wacc_mode=country_specific` | disconnected | A | 8 | 28,800 | 30,000 | disconnected | 同上 |
 
 - 保留存量变体（R9）按 `m08a_variants.py` 的定义只能由一体化网络派生，得到不互联情景的网络；分国 WACC 变体用各自基础构建的成本表（`--costs`）。
 - 求解调用（每个运行一次）：`s2_solve.py --solver gurobi --solver-profile <档案> --scaling on --time-limit <TimeLimit> --costs-table <成本表> --label BATCH3_365X24H`；运行目录 `runs/batch3/<编号>/`，导出 `runs/batch3/export/<编号>/`，状态 `runs/batch3/STATUS.txt`。
@@ -46,7 +46,7 @@
 
 ### 3.1 时限与求解
 
-1. 365×24h 每次 TimeLimit 21,600 s、墙钟 22,500 s。不重试，不改参数，不 warm start。
+1. 365×24h 每次 TimeLimit **28,800 s**、墙钟 **30,000 s**（M10A 补充 01 D1，第 145 项，2026-10-23 登记，变更时新网络在 365×24h 上无任何求解结果；v1–v3 为 21,600 / 22,500 s，理由见第 10 节第 7 项）。不重试，不改参数，不 warm start。
 2. 墙钟到达时终止整个进程组（TERM，30 s 后 KILL），待进程组全部退出后再导出；回执不含终止条件的视为求解前回执（`killed_pre_solve` / `none`）。
 3. 脚本拒绝启动：时限、墙钟或许可间隔与本节登记值不同（只有测试和本机干跑可用 `ALLOW_UNREGISTERED=1`）。
 
@@ -95,6 +95,7 @@
 
 1. 违反量分析（`l23_violation_analysis.py` → `VIOLATIONS.json`；有解时）；
 2. C1（`s4o_c1_precision.py run`，参照见 3.3 第 2 项）→ `PRECISION.json / .md`；
+   - **第 1、2 步的一次重做（M10A 补充 01 D2，第 145 项）：** 退出码非 0 或超时时，把该步不完整的输出改名为 `*.failed<n>` 保留，立即以相同环境与参数重做**一次**（`STATUS.txt` 记 `POSTPROC_RETRY:<编号>:<步骤>:exit=…`）；重做仍失败则按 3.3 第 3 项处理（C1 不可计算 = C1 (a) 不通过）。不重跑求解，分类代码、阈值与 3.3 表格不变；其他后处理步骤只记录不停批（第 10 节第 2 项）。
 3. M12 分摊（`m12_allocation.py run --register`）与 Owen 对偶形式（`m12_rhs_audit.py audit`，导出数组存在时）：对偶形式为主值，市场形式并列，α 区间，燃料舱作为参与者；输出登记到 `EXPORTS.json`（在验收之前，使 G2.3 核对最终导出清单）；
 4. R5–R7：去一国右端项检查（`m12_rhs_audit.py loo`，对 R1 的右端项按族与所有者比较）；
 5. GATES_V6（`gates_v6.py accept`）→ `V6_ACCEPTANCE.json`；分级停批分类（3.3 第 3 项）→ `STOP_CLASS.json`；
@@ -132,12 +133,13 @@
 | **合计** | | **约 18–21 h** |
 
 - 与 v1（R3、R4 先后跑，第 3 阶段 7 个运行）相比，求解时间的下界约省 1 h；第 2 阶段通道 A 约有 2 h 只用 8 核（R5 + R6 比 R3 + R4 长），第 3 阶段要等第 2 阶段两条通道都结束才开始（INFERENCE）。
-- 最坏情况（每个运行都跑到墙钟 6.25 h）：三个阶段最长通道分别 1、2、3 个运行，6.25 × 6 = 37.5 h，加后处理与间隔约 40 h。
-- **M10A 复核（v3，INFERENCE）：** 上表按旧网络（S4M-3）估计。M08b 修正后的网络 365×24h 多 11.5 % 行、12.8 % 非零元；56×3h 同机同档案对比，新网络每次迭代耗时约 +10 %、迭代数相近（129–181 对 141）。按 S4N 3.3 h × 1.10–1.15（规模）× 1.1–1.3（两会话并行）估计 R1 墙钟 **4.0–4.9 h**，上限超过 TimeLimit 6 h 的 75 %（M10A 报告"需要用户决定"第 1 项）；R5–R7 同量级，R2 约 0.8–1.0 h。各阶段按此为 4.5–5.4 / 8.6–11 / 6.5–7.7 h，合计约 **20–25 h**（不改登记值）。每次后处理实测 / 外推合计约 6–8 分钟（第 5 节），低于上表的 0.3 h。
+- 最坏情况（v4：每个运行都跑到墙钟 30,000 s = 8.33 h）：三个阶段最长通道分别 1、2、3 个运行，8.33 × 6 = 50 h，加后处理与间隔约 52 h（v1–v3 按墙钟 6.25 h 为约 40 h）。正常情况下时限只在运行确实变慢时才多花时间，总时长不变（约 20–25 h，见下）。
+- **M10A 复核（v3，INFERENCE）：** 上表按旧网络（S4M-3）估计。M08b 修正后的网络 365×24h 多 11.5 % 行、12.8 % 非零元；56×3h 同机同档案对比，新网络每次迭代耗时约 +10 %、迭代数相近（129–181 对 141）。按 S4N 3.3 h × 1.10–1.15（规模）× 1.1–1.3（两会话并行）估计 R1 墙钟 **4.0–4.9 h**，上限超过原 TimeLimit 6 h 的 75 %（M10A 报告"需要用户决定"第 1 项 → 补充 01 D1 把时限改为 8 h，4.9 h 为其 61 %）；R5–R7 同量级，R2 约 0.8–1.0 h。各阶段按此为 4.5–5.4 / 8.6–11 / 6.5–7.7 h，合计约 **20–25 h**。每次后处理实测 / 外推合计约 6–8 分钟（第 5 节），低于上表的 0.3 h。
 
 ## 5. 资源与实例规格（补充 01 第 4 项）
 
-- **实例规格：** ≥ 25 核（第 2 阶段配对需 16 + 8 = 24 核）、内存 ≥ 92 GiB、数据盘可用 ≥ 60 GB；推荐 1 卡 8481C / 8470Q 一类机器。`preflight.sh` 按此检查（核与内存取容器 cgroup 配额，磁盘取包目录所在盘），不满足即 `PREFLIGHT FAILED`。
+- **租用建议（不变）：** ≥ 25 核（第 2 阶段配对需 16 + 8 = 24 核）、内存约 90 GB 以上、数据盘约 80 GB；推荐 1 卡 8481C / 8470Q 一类机器。
+- **预检硬下限（M10A 补充 01 D3，第 145 项）：** `preflight.sh` 只在核数 < 25、容器内存 < **64 GiB**（预计峰值约 34 GiB，约 2 倍余量）或包目录所在数据盘可用 < **45 GB**（预计用量约 30 GiB；预检在装好环境之后做）时 `PREFLIGHT FAILED`（核与内存取容器 cgroup 配额，磁盘取包目录所在盘）。v1–v3 的硬下限 92 GiB / 60 GB 与租用建议相同，而 AutoDL 标的内存与磁盘单位可能是 GB 而不是 GiB，实际够用的实例也可能卡在预检，所以把硬下限放宽到实际需要，租用建议与硬下限分开写。
 - **内存：** 两个 365×24h 会话各约 15 GiB（S4N 实测 15.1 GiB；T16 会话线程多，可能略高）+ 另一通道的后处理约 9 GiB，约 40 GiB；92 GiB 留有余量。本机实测 365×24h LP 构建峰值 10.15 GiB。
 - **后处理资源（M10A B3）：** 旧网络 365×24h 云端实测（S4N 试点，8470Q）违反分析 105 s / 9.3 GB、C1 72 s / 9.3 GB，均单线程（CPU 100 %）；本机实测 M12 分摊 6.5 s / 0.8 GB、GATES_V6 验收 < 1 s、单运行导出打包 7 s、Owen 对偶形式审计（`--duals` 模式）54 s / 8.1 GiB，新网络仅构建 65 s / 10.0 GiB（M12 S8）。外推到新网络云端（INFERENCE）：每次后处理约 6–8 分钟、峰值约 11 GiB；与另一通道的求解同时最多约 11 + 17 GiB，两会话同时约 34 GiB，远低于 92 GiB。运行脚本给每个后处理步骤 `POST_TIMEOUT_S`（默认 1,800 s，约为实测的 10 倍以上）与线程预算（容器核数减去正在运行的求解线程，至少 1）。
 - **磁盘：** 预计用量约 30 GiB（INFERENCE）：
@@ -183,3 +185,9 @@
 4. **F4（S2）临时目录与缓存：** `TMPDIR=runs/batch3/tmp`（求解的 LP 问题文件也落在此）；`install_env.sh` 的 `CONDA_PKGS_DIRS` / `TMPDIR` / `PIP_CACHE_DIR` 指向包目录（第 5 节）。
 5. **F7（S2）测试开关防护：** `preflight.sh` 新增 `guards` 节（默认第一节）；`run_batch3.sh` 正式运行（求解模式且无 `ALLOW_UNREGISTERED`）发现 `*_CMD` / `TRUNCATE` / `FAKE_*` 即 `REFUSED`，`BUILD_ONLY` / `POST_ONLY` / `DRY` 与 `--auth` 同时出现即 `REFUSED`；`STATUS.txt` 的 `START` 行记录 `tmpdir`、`post_timeout_s`、`allow_unregistered`、`hooks`。本机测试（`ALLOW_UNREGISTERED=1`）与干跑（无 `--auth`）用法不变。
 6. 工具要求增加 `timeout`（coreutils；`preflight.sh tools` 节检查）。
+
+v4（`M10A_SUPPLEMENT_01.md`，第 145 项，用户 2026-10-22 启动消息"同意第 145 项"；登记日期 2026-10-23；**变更时新网络在 365×24h 上没有任何求解结果**，不违反"看到结果后不改规则"）：
+
+7. **D1 时限登记值变更（第 3.1 节）：** 365×24h 每次 TimeLimit 21,600 → **28,800 s**（6 → 8 h），墙钟 22,500 → **30,000 s**（余量 900 → 1,200 s，约为 M10A F8 实测开销 500–560 s 的 2 倍）；适用于 R1–R11 全部运行，两个档案相同。**理由：** M10A B4 估计 R1、R5–R7、R10 的墙钟为 4.0–4.9 h，上限超过原时限的 75 %；R1 到时限没有可用解会停掉整批，R5–R7 是去一国检查的核心证据，R10 是敏感性。延长时限只在运行确实变慢时才多花时间，正常情况下总时长不变；最坏情况 6 × 30,000 s ≈ 50 h，加后处理与间隔约 52 h（第 4 节）。实现：`run_batch3.sh` 的登记常数 `R_TL` / `R_WALL`（脚本仍拒绝任何与登记值不同的时限 / 墙钟 / 许可间隔）、`preflight.sh` 档案检查的 TimeLimit 参数、测试、本文件第 2 节表与第 3.1 节；与 365×24h 第三批无关的历史值（S4O、M08a 的 21,600 / 22,500）不改。
+8. **D2 违反分析与 C1 只重做一次（第 3.5 节）：** 退出码非 0 或超时 → 不完整输出改名 `*.failed<n>` 保留 → 以相同环境与参数重做一次（`POSTPROC_RETRY`）→ 仍失败按 3.3 第 3 项"C1 不可计算 = C1 (a) 不通过"。不重跑求解，不改 `stop_class` / 阈值 / 3.3 表格；其他后处理步骤保持第 2 项做法。**理由：** 求解成功但后处理偶然失败（瞬时 I/O 或内存峰值）不应让 R1、R2 的一次失败停掉其余约 15 小时的运行；确定性错误重做后仍失败，结论不变。测试：R2 的违反分析"第一次失败、重做成功"（不停批）与"两次都失败"（按规则停批），R6 的 C1 同样两种（正常 / 不可用）。
+9. **D3 预检资源硬下限（第 5 节）：** 内存 92 → **64 GiB**，数据盘可用 60 → **45 GB**，核数 25 不变；租用建议仍为内存约 90 GB 以上、数据盘约 80 GB。测试：`test_preflight_resource_floor`（cgroup v2 配额 25 核 / 70 GiB 通过，60 GiB 或 20 核不通过）。

@@ -12,7 +12,8 @@ post-processed), resume without re-solving, safe stops (interrupted solve, base 
 kill of the process group (also when the solve ignores TERM), the local dry-run mode (no solver, licence tripwire), refusal of unregistered
 limits, of test hooks in a formal run and of --auth in the no-solve modes, the preflight guards, post-processing crashes and timeouts
 (POSTPROC_ERROR: the schedule goes on; C1 inputs missing follow the rules), the thread budget of the auxiliary steps (the solve environment
-unchanged except TMPDIR), licence scan of the pack. P1 left the batch (supplement 01 item 3).
+unchanged except TMPDIR), licence scan of the pack. P1 left the batch (supplement 01 item 3). M10A supplement 01 (item 145): TimeLimit / wall
+clock 28,800 / 30,000 s (D1), the violation analysis and C1 redone once after a failure (D2), preflight hard floor 25 cores / 64 GiB / 45 GB (D3).
 M10P_PKG_DIR=<folder with run_batch3.sh / pack_results.sh / preflight.sh> runs the same tests against another copy of the scripts (M10A: the v3
 package before the fixes)."""
 import hashlib
@@ -137,7 +138,7 @@ def test_full_batch_pairing_order_reference_and_resume(tmp_path):
     assert "STOP_SAFE" not in st                                                                                 # M10A: the second lane starts beside a running solve (busy() = 1, not 2)
     calls = _calls(tmp_path)
     assert sorted(c[1] for c in calls) == sorted(S.RUNS) and len(calls) == 11                                  # every run solved exactly once; no P1
-    assert all(c[2] == S.RUNS[c[1]]["profile"] for c in calls) and all(float(c[3]) == 21600.0 for c in calls)  # profiles, registered TimeLimit
+    assert all(c[2] == S.RUNS[c[1]]["profile"] for c in calls) and all(float(c[3]) == 28800.0 for c in calls)  # profiles, registered TimeLimit (M10A supplement 01 D1)
     assert all(c[6] == str(tmp_path / "lic") for c in calls)
     assert all(c[7] == "omp=None" and c[8] == f"tmp={out / 'tmp'}" for c in calls)                              # M10A: solve environment untouched except TMPDIR (data disk, run dir)
     assert _overlap(calls, "R1", "R2")                                                                          # phase 1: R1 | R2 (8 + 8)
@@ -371,7 +372,7 @@ def test_post_only_mode_post_processes_ended_runs_without_any_solve(tmp_path):
     vnet = next((tmp_path / "v").glob("*_unsolved.nc"))
     for rid, net, sc in (("R1", nets / "integrated_365_24h_unsolved.nc", "integrated"), ("R2", nets / "disconnected_365_24h_unsolved.nc", "disconnected"), ("R5", vnet, "integrated")):
         d = out / rid
-        subprocess.run(f + ["solve", "--output", str(d), "--network", str(net), "--solver-profile", "formal_barrier", "--time-limit", "21600", "--scenario", sc,
+        subprocess.run(f + ["solve", "--output", str(d), "--network", str(net), "--solver-profile", "formal_barrier", "--time-limit", "28800", "--scenario", sc,
                             "--label", "BATCH3_365X24H"], env=env, check=True)
         (d / "RUN.json").write_text(json.dumps(dict(rid=rid, scenario=sc, network=str(net), network_sha256=sha(net), registered_sha256=sha(net), label="BATCH3_365X24H")))
         (d / ".ended").write_text("x"); (d / ".cond").write_text("optimal\n")
@@ -420,11 +421,61 @@ def test_post_processing_timeout_never_blocks_the_schedule(tmp_path):
     assert json.loads((out / "R5" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" and not (out / "R5" / "ALLOCATION.json").exists()
     assert not [x for x in os.popen("ps -eo args").read().splitlines() if str(FAKE) in x and "m12" in x]   # the hung step's process group is gone
     pkg2 = _package(tmp_path / "b")
-    p = _run(tmp_path / "b", pkg2, {"POST_TIMEOUT_S": "3", "FAKE_HANG_VA_R2": "1", "FAKE_SLEEP_R1": "8"})
+    p = _run(tmp_path / "b", pkg2, {"POST_TIMEOUT_S": "3", "FAKE_HANG_VA_R2": "1", "FAKE_SLEEP_R1": "12"})
     out = tmp_path / "b" / "out"; st = (out / "STATUS.txt").read_text()
     assert p.returncode == 3, st[-3000:]
-    assert "POSTPROC_ERROR:R2:violations:exit=124:timeout_3s" in st and "STOP_NOT_ACCEPTED:R2:c1a" in st and "HALTED:" in st
+    assert st.count("POSTPROC_ERROR:R2:violations:exit=124:timeout_3s") == 2 and "POSTPROC_RETRY:R2:violations:exit=124" in st   # D2: redone once, timed out again
+    assert "STOP_NOT_ACCEPTED:R2:c1a" in st and "HALTED:" in st and len([x for x in _calls(tmp_path / "b", "va") if x[1] == "R2"]) == 2
     assert (out / "R1" / "V6_ACCEPTANCE.json").exists() and sorted(c[1] for c in _calls(tmp_path / "b")) == ["R1", "R2"]
+
+
+@pytest.mark.parametrize("rid,extra,retry_ok,code,expect", [
+    ("R2", {"FAKE_FAIL_ONCE_VA_R2": "1"}, True, 0, "accepted"),       # violation analysis of a batch reference run fails once -> redone, no stop
+    ("R2", {"FAKE_FAIL_VA_R2": "1"}, False, 3, "stop"),               # fails twice -> C1 not computable -> stop (rule 3.3)
+    ("R6", {"FAKE_FAIL_ONCE_C1_R6": "1"}, True, 0, "accepted"),       # C1 of R6 fails once -> redone, label normal
+    ("R6", {"FAKE_FAIL_C1_R6": "1"}, False, 0, "unusable"),           # fails twice -> unusable (R3-R11), the batch goes on
+])
+def test_violation_analysis_and_c1_are_redone_once(tmp_path, rid, extra, retry_ok, code, expect):
+    """M10A supplement 01 D2: the violation analysis and C1 steps are redone once after a non-zero exit (same environment); the incomplete output
+    of every failed attempt is kept as *.failed<n>; a second failure follows the registered rules; no solve is repeated."""
+    pkg = _package(tmp_path)
+    p = _run(tmp_path, pkg, dict(extra, FAKE_SLEEP_R1="5", FAKE_SLEEP_R2="5", FAKE_SLEEP_R6="4", FAKE_SLEEP_R4="8"))
+    out = tmp_path / "out"; st = (out / "STATUS.txt").read_text(); d = out / rid
+    assert p.returncode == code, st[-3000:]
+    step, kind, outputs = ("violations", "va", ["VIOLATIONS.json", "c1_violations.log", "c1_violations.err"]) if "VA" in next(iter(extra)) else ("c1", "c1", ["PRECISION.json", "PRECISION.md", "c1_precision.log", "c1_precision.err"])
+    calls = [x for x in _calls(tmp_path, kind) if x[1] == rid]
+    assert len(calls) == 2 and calls[0][2] == "fail", calls                                                          # exactly one retry
+    assert f"POSTPROC_RETRY:{rid}:{step}:exit={0 if retry_ok else 1}" in st and st.count(f"POSTPROC_ERROR:{rid}:{step}:exit=1") == (1 if retry_ok else 2)
+    assert (d / f"{outputs[0]}.failed1").read_text() == "{incomplete" and (d / f"{outputs[0]}.failed2").exists() is (not retry_ok)
+    assert len(_calls(tmp_path)) == (11 if code == 0 else 2)                                                      # no solve repeated
+    lab = json.loads((d / "V6_ACCEPTANCE.json").read_text())["label"]
+    if expect == "accepted":
+        assert lab == "ACCEPTED_LAYER2" and (d / outputs[0]).exists() and "STOP" not in st.replace("STOP_CLASS", "") and "UNUSABLE:" not in st and "DONE:" in st
+    elif expect == "stop":
+        assert lab == "NOT_ACCEPTED" and not (d / "VIOLATIONS.json").exists() and f"STOP_NOT_ACCEPTED:{rid}:c1a" in st and "HALTED:" in st
+    else:
+        assert lab == "NOT_ACCEPTED" and not (d / "PRECISION.json").exists() and f"UNUSABLE:{rid}:c1a" in st and "DONE:" in st
+    summ = json.loads((out / "BATCH3_SUMMARY.json").read_text())
+    assert [e["step"] for e in summ["postproc_errors"]] == [step] * (1 if retry_ok else 2)
+
+
+def test_preflight_resource_floor(tmp_path):
+    """M10A supplement 01 D3: the preflight hard floor is 25 cores / 64 GiB / 45 GB (was 92 GiB / 60 GB); cores and memory from a cgroup v2 quota."""
+    pkg = _package(tmp_path); cg = tmp_path / "cg"; cg.mkdir()
+    disk = next((p for p in (str(ROOT), "/") if shutil.disk_usage(p).free / 1e9 >= 45), None)   # tmp_path may be a small tmpfs: measure a real disk
+    if disk is None:
+        pytest.skip("no file system with >= 45 GB free")
+    def pre(cores, mem_gib):
+        (cg / "cpu.max").write_text(f"{cores * 100000} 100000\n"); (cg / "memory.max").write_text(f"{mem_gib * 2**30}\n")
+        return subprocess.run(["bash", str(pkg / "preflight.sh")], env=_clean_env({"PREFLIGHT_ONLY": "resources", "PY": sys.executable, "CGROUP_ROOT": str(cg), "PREFLIGHT_DISK_PATH": disk}),
+                              capture_output=True, text=True)
+    p = pre(25, 70)
+    assert p.returncode == 0 and "container CPU cores 25 [cgroup v2 cpu.max (2500000/100000)]" in p.stdout and "container memory 70 GiB [cgroup v2 memory.max]" in p.stdout
+    assert "cores >= 25, memory >= 64 GiB, free data disk >= 45 GB" in p.stdout and "PREFLIGHT OK" in p.stdout and "side by side" in p.stdout
+    p = pre(25, 60)
+    assert p.returncode == 1 and "RESOURCE CHECK FAILED" in p.stdout and "PREFLIGHT FAILED" in p.stdout
+    p = pre(20, 96)
+    assert p.returncode == 1 and "RESOURCE CHECK FAILED" in p.stdout and "20 cores < 24" in p.stdout
 
 
 def test_unregistered_limits_are_refused(tmp_path):

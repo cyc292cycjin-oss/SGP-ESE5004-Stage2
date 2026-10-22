@@ -136,7 +136,7 @@ json.dump(dict(commit=commit, created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", ti
                                          netCDF4="1.7.2", h5netcdf="1.6.4", dask="2025.7.0", pyomo="6.9.3", highspy="1.11.0")),
                run=dict(plan="RUN_PLAN.md", script="run_batch3.sh", preflight="preflight.sh", pack="pack_results.sh", runs={k: {x: v[x] for x in ("scenario", "base", "set", "profile")} for k, v in RUNS.items()},
                         schedule=[dict(phase=p, lane_a=a, lane_b=bb) for p, a, bb in SCHEDULE],
-                        instance=dict(cores=">= 25 (phase-2 pairs T16 + A = 24)", memory_gib=">= 92", data_disk_free_gb=">= 60", recommended="1 GPU 8481C / 8470Q class"),
+                        instance=dict(cores=">= 25 (phase-2 pairs T16 + A = 24)", memory_gib=">= 64 (preflight hard floor, M10A supplement 01 D3; rent ~90 GB)", data_disk_free_gb=">= 45 after the environment install (hard floor; rent ~80 GB)", recommended="1 GPU 8481C / 8470Q class"),
                         licence="GRB_LICENSE_FILE supplied by the user on the instance; never in the package"),
                never_included=["licence", "cutout", "LP / solution arrays", "variant networks (generated on the instance)", "results"]),
           open(os.path.join(dist, "PACKAGE_MANIFEST.json"), "w"), indent=1)

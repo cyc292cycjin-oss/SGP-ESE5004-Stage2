@@ -12,16 +12,17 @@
 #   tools      GNU time (-v) at /usr/bin/time, setsid, pgrep, tmux (warning only)
 #   licence    GRB_LICENSE_FILE readable and accepted by Gurobi - all output suppressed, nothing of the licence printed; this holds one WLS token for
 #              >= 5 min (run_batch3.sh waits 330 s before its first solve)
-#   resources  container cgroup quota (cores, memory) and free disk against the instance specification (supplement 01 item 4): cores >= 25 (the
-#              phase-2 pairs R3 | R5 and R4 | R6 need Threads 16 + 8 = 24), memory >= 92 GiB, free data disk >= 60 GB (RUN_PLAN.md section 5:
-#              ~30 GiB expected - 11 run folders ~2.1 GiB each with the 0.8 GB LP arrays measured locally, one results pack, environment)
+#   resources  container cgroup quota (cores, memory) and free disk against the HARD FLOOR of RUN_PLAN.md section 5 (M10A supplement 01 D3, item 145):
+#              cores >= 25 (the phase-2 pairs R3 | R5 and R4 | R6 need Threads 16 + 8 = 24), memory >= 64 GiB (expected peak ~34 GiB), free data
+#              disk >= 45 GB after the environment is installed (~30 GiB expected - 11 run folders ~2.1 GiB each with the 0.8 GB LP arrays measured
+#              locally, one results pack); the rental advice stays ~90 GB memory and ~80 GB data disk (AutoDL units may be GB, not GiB)
 #   guards     M10A (B5.5): none of the test hooks / dry-run switches of run_batch3.sh (ALLOW_UNREGISTERED, BUILD_ONLY, POST_ONLY, DRY, TRUNCATE,
 #              *_CMD stand-ins, FAKE_*, limit overrides) is set in this shell - left over, they would run the batch without the solver or with
 #              unregistered limits; operational overrides (RUN_DIR, CORES, REPO, NETS, CGROUP_ROOT, TMPDIR) are only printed
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
 PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"
-NEED_CORES=25; NEED_CORES_PAIR=24; NEED_MEM_GIB=92; NEED_DISK_GB=60
+NEED_CORES=25; NEED_CORES_PAIR=24; NEED_MEM_GIB=64; NEED_DISK_GB=45   # hard floor (M10A supplement 01 D3; 92 GiB / 60 GB before); rental advice ~90 GB / ~80 GB
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
   echo "== guards: test hooks / dry-run switches in this shell (M10A B5.5)"; bad=()
@@ -29,7 +30,7 @@ if sec guards; then
     [ -z "${!k:-}" ] || bad+=("$k")
   done
   if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi
-  for k in RUN_DIR CORES REPO NETS CGROUP_ROOT TMPDIR; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+  for k in RUN_DIR CORES REPO NETS CGROUP_ROOT TMPDIR PREFLIGHT_DISK_PATH; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
 fi
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all $(wc -l < SHA256SUMS) files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }
@@ -62,7 +63,7 @@ from s2_solve import interior_solution, profile_parameters
 S = yaml.safe_load(open("configs/research/baseline.yaml"))["research"]["solver"]
 bad = 0
 for p, threads in (("formal_barrier", 8), ("formal_barrier_1e6_t16", 16)):
-    par = profile_parameters(S["profiles"], p, 21600)   # refuses parameter names that differ from the code convention only by case
+    par = profile_parameters(S["profiles"], p, 28800)   # refuses parameter names that differ from the code convention only by case (TimeLimit = registered value, M10A supplement 01 D1)
     good = interior_solution("gurobi", par) and int(par.get("Threads", 0)) == threads
     bad += not good
     print(p, S["profiles"][p], "| interior-point gate path:", interior_solution("gurobi", par), "| Threads", par.get("Threads"), "OK" if good else "UNEXPECTED")
@@ -109,10 +110,11 @@ if sec resources; then
   elif [ -r "$CGROUP_ROOT/memory/memory.limit_in_bytes" ]; then lim=$(cat "$CGROUP_ROOT/memory/memory.limit_in_bytes"); msrc="cgroup v1 memory.limit_in_bytes"; fi
   case "$lim" in ""|max) lim="";; *) [ "${#lim}" -ge 19 ] && lim="";; esac
   if [ -n "$lim" ]; then mem=$(( lim / 1073741824 )); else mem=$host_mem; msrc="no cgroup memory limit: host MemTotal"; fi
-  disk=$(df -Pk "$HERE" | awk 'NR==2 {printf "%d", $4*1024/1e9}'); disk_gib=$(df -Pk "$HERE" | awk 'NR==2 {printf "%.0f", $4/1048576}')
+  DISK_PATH="${PREFLIGHT_DISK_PATH:-$HERE}"   # the data disk the runs go to (default: this package folder; override for tests / an unusual layout)
+  disk=$(df -Pk "$DISK_PATH" | awk 'NR==2 {printf "%d", $4*1024/1e9}'); disk_gib=$(df -Pk "$DISK_PATH" | awk 'NR==2 {printf "%.0f", $4/1048576}')
   echo "container CPU cores $cores [$csrc]; host nproc $host_cores"
-  echo "container memory $mem GiB [$msrc]; host MemTotal $host_mem GiB; free disk $disk GB ($disk_gib GiB) under $HERE"
-  echo "need (instance specification, supplement 01 item 4): cores >= $NEED_CORES, memory >= $NEED_MEM_GIB GiB, free data disk >= $NEED_DISK_GB GB"
+  echo "container memory $mem GiB [$msrc]; host MemTotal $host_mem GiB; free disk $disk GB ($disk_gib GiB) under $DISK_PATH"
+  echo "need (hard floor, RUN_PLAN.md section 5 / M10A supplement 01 D3): cores >= $NEED_CORES, memory >= $NEED_MEM_GIB GiB, free data disk >= $NEED_DISK_GB GB (rental advice: ~90 GB memory, ~80 GB data disk)"
   [ "$cores" -ge $NEED_CORES ] && [ "$mem" -ge $NEED_MEM_GIB ] && [ "$disk" -ge $NEED_DISK_GB ] || { echo "RESOURCE CHECK FAILED"; ok=0; }
   [ "$cores" -ge $NEED_CORES_PAIR ] && echo "phase 2: R3 | R5 and R4 | R6 (Threads 16 + 8 = 24) will run side by side" \
     || echo "NOTE: $cores cores < 24: the phase-2 pairs run one after the other (pre-registered fallback)"

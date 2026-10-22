@@ -11,7 +11,9 @@ regrade appends grade_history and takes FAKE_C1_REGRADE_<rid>.
 M10A fault drill hooks: FAKE_IGNORE_TERM_<rid>=1 (the solve ignores SIGTERM: only the KILL of the process group ends it); FAKE_HANG_VA_<rid>=1 /
 FAKE_HANG_M12_<rid>=1 (the step sleeps 120 s: timeout drill); FAKE_RAISE_M12_<rid>=1 (M12 run exits 1 without ALLOCATION.json);
 FAKE_RAISE_RHS_LOO_<rid>=1 (the leave-one-out RHS check of that run exits 1). The solve line also records the OMP_NUM_THREADS and TMPDIR it saw
-(omp= / tmp=), the va line its OMP_NUM_THREADS (thread budget of the auxiliary steps)."""
+(omp= / tmp=), the va line its OMP_NUM_THREADS (thread budget of the auxiliary steps).
+M10A supplement 01 D2 (retry drill): FAKE_FAIL_ONCE_VA_<rid>=1 / FAKE_FAIL_ONCE_C1_<rid>=1 - the first call of that step writes an incomplete
+output (not JSON) and exits 1, the second call succeeds (marker file in FAKE_OUT); FAKE_FAIL_VA_<rid>=1 / FAKE_FAIL_C1_<rid>=1 - every call fails."""
 import hashlib
 import json
 import os
@@ -106,10 +108,23 @@ def variants(argv):
     return 0
 
 
+def fail_now(step, rid, out_file):
+    """M10A supplement 01 D2 drill: True when this call of <step> for <rid> must fail (always, or only the first call); writes an incomplete output."""
+    if os.environ.get(f"FAKE_FAIL_{step}_{rid}") == "1":
+        Path(out_file).write_text("{incomplete"); call(f"{step.lower()} {rid} fail"); return True
+    if os.environ.get(f"FAKE_FAIL_ONCE_{step}_{rid}") == "1":
+        marker = Path(os.environ["FAKE_OUT"]) / f".failed_once_{step}_{rid}"
+        if not marker.exists():
+            marker.write_text("1"); Path(out_file).write_text("{incomplete"); call(f"{step.lower()} {rid} fail"); return True
+    return False
+
+
 def c1(argv):
     sub = argv[0]
     if sub == "run":
         d = Path(arg("--solve-dir", argv)); ref = arg("--reference", argv); viol = arg("--violations", argv)
+        if fail_now("C1", d.name, d / "PRECISION.json"):
+            return 1
         if not (d / "solution" / "X.npy").exists() or not (viol and Path(viol).exists()):
             (d / "PRECISION.json").write_text(json.dumps(dict(computable=False, missing=["solution" if not (d / "solution" / "X.npy").exists() else str(viol)],
                                                               reference=dict(source="L23 fake default"))))
@@ -171,6 +186,8 @@ def main():
     mode, argv = sys.argv[1], sys.argv[2:]
     if mode == "va":
         rid = Path(arg("--solve-dir", argv)).name
+        if fail_now("VA", rid, arg("--out", argv)):
+            return 1
         if os.environ.get(f"FAKE_HANG_VA_{rid}") == "1":
             call(f"va {rid} hang"); time.sleep(120)
         Path(arg("--out", argv)).write_text("{}"); call(f"va {rid} omp={os.environ.get('OMP_NUM_THREADS')}"); return 0
