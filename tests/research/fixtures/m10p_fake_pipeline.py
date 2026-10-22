@@ -6,10 +6,16 @@ solve: receipt consistent with the network file (GATES_V6 G2.1-G2.3 pass); --sto
 FAKE_OBJ_<rid> objective; FAKE_TERM_<rid> termination; FAKE_NOSOL_<rid>=1 -> pre-solve receipt only, exit 1; FAKE_SUBSET_<rid>=differ -> the
 configuration subset hash of the receipt differs from the network's (GATES_V6 G2.2 fails: an input problem). The call line records start / end
 epoch, profile, TimeLimit and the GRB_LICENSE_FILE it saw. c1 run: PRECISION.json with the flags FAKE_C1_<rid> ("111" default; not computable
-without solution/X.npy), reference "this batch: ..." when --reference is given; regrade appends grade_history and takes FAKE_C1_REGRADE_<rid>."""
+without solution/X.npy or without the --violations file, as the real s4o_c1_precision.py), reference "this batch: ..." when --reference is given;
+regrade appends grade_history and takes FAKE_C1_REGRADE_<rid>.
+M10A fault drill hooks: FAKE_IGNORE_TERM_<rid>=1 (the solve ignores SIGTERM: only the KILL of the process group ends it); FAKE_HANG_VA_<rid>=1 /
+FAKE_HANG_M12_<rid>=1 (the step sleeps 120 s: timeout drill); FAKE_RAISE_M12_<rid>=1 (M12 run exits 1 without ALLOCATION.json);
+FAKE_RAISE_RHS_LOO_<rid>=1 (the leave-one-out RHS check of that run exits 1). The solve line also records the OMP_NUM_THREADS and TMPDIR it saw
+(omp= / tmp=), the va line its OMP_NUM_THREADS (thread budget of the auxiliary steps)."""
 import hashlib
 import json
 import os
+import signal
 import sys
 import time
 from pathlib import Path
@@ -60,9 +66,12 @@ def solve(argv):
         (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec))
         call(f"build {rid} {prof} {tl} {os.environ.get('GRB_LICENSE_FILE')}"); return 0
     (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec))
+    seen = f"omp={os.environ.get('OMP_NUM_THREADS')} tmp={os.environ.get('TMPDIR')}"
+    if os.environ.get(f"FAKE_IGNORE_TERM_{rid}") == "1":
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
     time.sleep(float(os.environ.get(f"FAKE_SLEEP_{rid}", os.environ.get("FAKE_SLEEP", "0.2"))))
     if os.environ.get(f"FAKE_NOSOL_{rid}") == "1":
-        call(f"solve {rid} {prof} {tl} {t0:.2f} {time.time():.2f} {os.environ.get('GRB_LICENSE_FILE')} nosolution"); return 1
+        call(f"solve {rid} {prof} {tl} {t0:.2f} {time.time():.2f} {os.environ.get('GRB_LICENSE_FILE')} {seen} nosolution"); return 1
     (out / "solution").mkdir(exist_ok=True)
     for k, n in (("X", 10), ("Pi", 20), ("RC", 10)):
         np.save(out / "solution" / f"{k}.npy", np.zeros(n))
@@ -75,7 +84,7 @@ def solve(argv):
                objective=float(os.environ.get(f"FAKE_OBJ_{rid}", "3e11" if rec["scenario"] == "disconnected" else "2e11")), optimize_calls=1,
                finished_epoch=time.time(), solve_seconds=time.time() - t0, peak_rss_bytes=2**31, exports=json.loads((out / "EXPORTS.json").read_text()))
     (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec))
-    call(f"solve {rid} {prof} {tl} {t0:.2f} {time.time():.2f} {os.environ.get('GRB_LICENSE_FILE')}")
+    call(f"solve {rid} {prof} {tl} {t0:.2f} {time.time():.2f} {os.environ.get('GRB_LICENSE_FILE')} {seen}")
     return 0
 
 
@@ -100,9 +109,10 @@ def variants(argv):
 def c1(argv):
     sub = argv[0]
     if sub == "run":
-        d = Path(arg("--solve-dir", argv)); ref = arg("--reference", argv)
-        if not (d / "solution" / "X.npy").exists():
-            (d / "PRECISION.json").write_text(json.dumps(dict(computable=False, missing=["solution"], reference=dict(source="L23 fake default"))))
+        d = Path(arg("--solve-dir", argv)); ref = arg("--reference", argv); viol = arg("--violations", argv)
+        if not (d / "solution" / "X.npy").exists() or not (viol and Path(viol).exists()):
+            (d / "PRECISION.json").write_text(json.dumps(dict(computable=False, missing=["solution" if not (d / "solution" / "X.npy").exists() else str(viol)],
+                                                              reference=dict(source="L23 fake default"))))
         else:
             P = flags(os.environ.get(f"FAKE_C1_{d.name}", "111")); P.update(computable=True, reference=dict(source=(f"this batch: fake {ref}" if ref else "L23 fake default")))
             (d / "PRECISION.json").write_text(json.dumps(P))
@@ -122,7 +132,12 @@ def c1(argv):
 def m12(argv):
     sub = argv[0]
     if sub == "run":
-        d = Path(arg("--solve-dir", argv)); (d / "ALLOCATION.json").write_text(json.dumps(dict(computable=True))); register(d, "ALLOCATION.json"); call(f"m12 {d.name}")
+        d = Path(arg("--solve-dir", argv))
+        if os.environ.get(f"FAKE_HANG_M12_{d.name}") == "1":
+            call(f"m12 {d.name} hang"); time.sleep(120)
+        if os.environ.get(f"FAKE_RAISE_M12_{d.name}") == "1":
+            call(f"m12 {d.name} raise"); return 1
+        (d / "ALLOCATION.json").write_text(json.dumps(dict(computable=True))); register(d, "ALLOCATION.json"); call(f"m12 {d.name}")
     elif sub == "loo":
         o = Path(arg("--out", argv)); o.mkdir(parents=True, exist_ok=True)
         loo = [s.split("=", 1)[0] for i, s in enumerate(argv) if i > 0 and argv[i - 1] == "--loo"]
@@ -142,8 +157,11 @@ def m12a(argv):
         (o / "OWEN.json").write_text(json.dumps(dict(alpha_main=0.5, allocation_eur={"0.5": {"BN": 1e9, "VN": 2e9, "BUNKER": 3e9}}, usable_for_allocation=True)))
         (o / "RHS_BY_FAMILY_OWNER.csv").write_text("family,owner,rhs_sum,rows\n"); call(f"m12_owen {d.name}")
     elif sub == "loo":
+        rid = Path(arg("--variant", argv)).parent.parent.name
+        if os.environ.get(f"FAKE_RAISE_RHS_LOO_{rid}") == "1":
+            call(f"rhs_loo {rid} raise"); return 1
         o = Path(arg("--out", argv)); o.mkdir(parents=True, exist_ok=True); (o / "LOO_RHS_CHECK.json").write_text(json.dumps(dict(passed=True)))
-        call(f"rhs_loo {Path(arg('--variant', argv)).parent.parent.name} removed={arg('--removed', argv)}")
+        call(f"rhs_loo {rid} removed={arg('--removed', argv)}")
     elif sub == "regrade":
         Path(arg("--out", argv)).write_text(json.dumps(dict(new=dict(usable_for_allocation=True)))); call(f"owen_regrade {Path(arg('--owen', argv)).parent.parent.name}")
     return 0
@@ -152,7 +170,10 @@ def m12a(argv):
 def main():
     mode, argv = sys.argv[1], sys.argv[2:]
     if mode == "va":
-        Path(arg("--out", argv)).write_text("{}"); call(f"va {Path(arg('--solve-dir', argv)).name}"); return 0
+        rid = Path(arg("--solve-dir", argv)).name
+        if os.environ.get(f"FAKE_HANG_VA_{rid}") == "1":
+            call(f"va {rid} hang"); time.sleep(120)
+        Path(arg("--out", argv)).write_text("{}"); call(f"va {rid} omp={os.environ.get('OMP_NUM_THREADS')}"); return 0
     return dict(solve=solve, variants=variants, c1=c1, m12=m12, m12a=m12a)[mode](argv)
 
 

@@ -46,6 +46,15 @@
 # POST_ONLY=1: no solve at all (licence tripwire as above, no phase 0) - the post-processing of every ended run, batch reference and regrade,
 # level-2, batch post-processing, summary and packs; e.g. to redo the post-processing on the instance, or the local dry run on smoke results.
 # Test hooks: SOLVE_CMD, VA_CMD, C1_CMD, M12_CMD, M12A_CMD, VAR_CMD, G6_CMD, SUM_CMD, PACK_CMD, TRUNCATE (smoke tests only), DRY=1 (commands only).
+# M10A (pre-cloud review, 2026-10-22; the pre-registered rules are unchanged):
+#   * busy() counts the python s2_solve.py processes only - the GNU time wrapper line also holds "s2_solve.py", so one running solve was counted
+#     as 2 and the second lane stopped at its first start (STOP_SAFE:SOLVER_BUSY);
+#   * every post-processing / batch step runs under timeout (POST_TIMEOUT_S, default 1800 s; PACK_TIMEOUT_S 7200 s) with a thread budget
+#     (OMP / MKL / OPENBLAS / NUMEXPR = container cores minus the Threads of the solves running now, >= 1); the solve command and its environment
+#     are untouched except TMPDIR; a failed or timed-out step is logged as POSTPROC_ERROR (+ file POSTPROC_ERRORS) and never changes the
+#     schedule (redo with POST_ONLY=1); missing C1 / GATES_V6 inputs still follow the rules (C1 not computable = C1 (a) failed);
+#   * TMPDIR = <run dir>/tmp (data disk): linopy writes the LP problem file of every solve to the temp dir;
+#   * a formal run (solve mode without ALLOW_UNREGISTERED) refuses every test hook; the no-solve modes refuse --auth.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 AUTH=""
@@ -61,6 +70,9 @@ NOSOLVE=0; { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ]; } 
 R_WALL=22500; R_TL=21600; R_GAP=330     # registered values (RUN_PLAN.md section 3)
 WALL_CAP_S=${WALL_CAP_S:-$R_WALL}; GUROBI_TIME_LIMIT_S=${GUROBI_TIME_LIMIT_S:-$R_TL}
 LICENCE_GAP_S=${LICENCE_GAP_S:-$R_GAP}; GRACE_S=${GRACE_S:-30}; MONITOR_S=${MONITOR_S:-60}; CGROUP_ROOT=${CGROUP_ROOT:-/sys/fs/cgroup}
+# M10A (B5.5): test hooks present in the environment, recorded before the defaults below fill them in; FORMAL = solve mode without ALLOW_UNREGISTERED
+HOOKS_SET=$(for k in SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD TRUNCATE $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
+FORMAL=0; [ "$NOSOLVE" = 0 ] && [ "${ALLOW_UNREGISTERED:-0}" != 1 ] && FORMAL=1
 SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD:-"$PY $REPO/scripts_project/l23_violation_analysis.py"}
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}
 M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; VAR_CMD=${VAR_CMD:-"$PY $REPO/scripts_project/m08a_variants.py"}
@@ -74,6 +86,12 @@ if [ "${ALLOW_UNREGISTERED:-0}" != 1 ]; then
   done
   [ -z "$TRUNCATE" ] || { echo "REFUSED: TRUNCATE is for smoke tests only"; exit 2; }
 fi
+if [ "$FORMAL" = 1 ] && [ -n "$HOOKS_SET" ]; then   # M10A (B5.5): a stand-in or smoke switch left in the shell would run the batch without the solver
+  echo "REFUSED: ${HOOKS_SET%,} set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)"; exit 2
+fi
+if [ "$NOSOLVE" = 1 ] && [ -n "$AUTH" ]; then   # M10A (B5.5): BUILD_ONLY / POST_ONLY / DRY left in the shell would turn the authorised run into a no-solve run
+  echo "REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run"; exit 2
+fi
 if [ "$NOSOLVE" = 1 ]; then
   LIC=/nonexistent/m10p_dry_run_no_licence   # tripwire: any Gurobi environment would fail
   [ -n "$AUTH" ] || AUTH="M10P no-solve mode (build-only / post-only / dry)"
@@ -83,10 +101,12 @@ else
   LIC=$GRB_LICENSE_FILE
   [ -n "$AUTH" ] || { echo "REFUSED: --auth \"<user authorisation text>\" is required"; exit 2; }
 fi
-command -v setsid >/dev/null 2>&1 && [ -x /usr/bin/time ] || { echo "REFUSED: setsid (util-linux) and GNU time at /usr/bin/time are required"; exit 2; }
-mkdir -p "$OUT" "$OUT/export" || { echo "cannot create $OUT"; exit 2; }
+command -v setsid >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1 && [ -x /usr/bin/time ] || { echo "REFUSED: setsid (util-linux), timeout (coreutils) and GNU time at /usr/bin/time are required"; exit 2; }
+mkdir -p "$OUT" "$OUT/export" "$OUT/tmp" || { echo "cannot create $OUT"; exit 2; }
 ST="$OUT/STATUS.txt"; EXP="$OUT/export"; T_START=$(date +%s)
 export PYTHONHASHSEED=0
+export TMPDIR="$OUT/tmp"   # M10A (B5.4): temporary files (linopy LP problem file of each solve, Python tempfile) on the data disk inside the run dir, not /tmp (system disk)
+POST_TIMEOUT_S=${POST_TIMEOUT_S:-1800}; PACK_TIMEOUT_S=${PACK_TIMEOUT_S:-7200}   # M10A (B5.2): per post-processing step / per pack (B3: <= ~150 s per step at 365x24h)
 
 now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 log() { echo "$*" >> "$ST"; }
@@ -99,7 +119,9 @@ for k in sys.argv[2].split('.'):
     d=d.get(k) if isinstance(d, dict) else None
 print('' if d is None else d)" "$1" "$2" 2>/dev/null
 }
-busy() { ps -eo cmd | grep -cE '[s]2_solve.py'; }
+busy() {   # running s2_solve.py python processes; M10A: the GNU time / setsid / env wrapper lines hold the same text and are not counted
+  ps -eo args= | grep -E '[s]2_solve\.py' | grep -vcE '^(/usr/bin/)?time |^setsid |^env '
+}
 
 # ---- run table (single source: scripts_project/m10_batch3_summary.py RUNS)
 declare -A SC BASE SET PROF COSTS
@@ -132,8 +154,25 @@ detect_cores() {
 }
 NCORES=$(detect_cores)
 max_threads() { local m=0 r; for r in "$@"; do [ "${THREADS[${PROF[$r]}]}" -gt $m ] && m=${THREADS[${PROF[$r]}]}; done; echo $m; }
+aux_threads() {   # M10A (B5.3): thread budget of an auxiliary Python process = container cores minus the Threads of every solve running now (>= 1)
+  local used=0 d rid k
+  for d in "$OUT"/R*/; do d=${d%/}; rid=${d##*/}; [ -f "$d/.started" ] && [ ! -f "$d/.ended" ] && [ -n "${PROF[$rid]:-}" ] && used=$((used + ${THREADS[${PROF[$rid]}]})); done
+  k=$((NCORES - used)); [ $k -ge 1 ] || k=1; echo $k
+}
+aux_env() { local k; k=$(aux_threads); echo "OMP_NUM_THREADS=$k MKL_NUM_THREADS=$k OPENBLAS_NUM_THREADS=$k NUMEXPR_MAX_THREADS=$k"; }
+aux() {   # an auxiliary command: in $REPO, licence removed, thread budget, timeout (TERM, KILL 30 s later; the whole process group of the step)
+  ( cd "$REPO" && exec env -u GRB_LICENSE_FILE $(aux_env) timeout -k 30 "$POST_TIMEOUT_S" "$@" )
+}
+step() {   # $1 rid (or batch) $2 step name, then the command: aux + record; a non-zero exit (crash, timeout) is POSTPROC_ERROR and never changes the schedule
+  local rid=$1 name=$2 rc t=$POST_TIMEOUT_S; shift 2; [ "$name" = pack ] && t=$PACK_TIMEOUT_S
+  ( cd "$REPO" && exec env -u GRB_LICENSE_FILE $(aux_env) timeout -k 30 "$t" "$@" ); rc=$?
+  [ $rc = 0 ] || { echo "$rid $name exit=$rc $(now)" >> "$OUT/POSTPROC_ERRORS"
+    log "POSTPROC_ERROR:$rid:$name:exit=$rc$( { [ $rc = 124 ] || [ $rc = 137 ]; } && echo ":timeout_${t}s"):$(now) - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1); missing C1 / GATES_V6 inputs follow the rules"; }
+  return $rc
+}
 
-log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no)"
+log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
+[ "$FORMAL" = 0 ] && [ "$NOSOLVE" = 0 ] && log "NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=${HOOKS_SET%,}"
 [ -f "$OUT/.created" ] || now > "$OUT/.created"
 
 # ---- container cgroup memory (monitor)
@@ -192,18 +231,18 @@ prepare() {
     [ -s "$NETS/$f" ] || { safe_stop "MISSING_INPUT:networks/$f"; return 1; }
   done
   [ "$DRY" = 1 ] || [ "$(busy)" = 0 ] || { safe_stop "SOLVER_PROCESS_RUNNING_AT_START:$(busy) s2_solve processes (an earlier runner?)"; return 1; }
-  local bc; bc=$(cd "$REPO" && $SUM_CMD base-check --nets "$NETS" --out "$OUT/BASE_CHECK.json" 2>> "$OUT/prepare.err")
+  local bc; bc=$(aux $SUM_CMD base-check --nets "$NETS" --out "$OUT/BASE_CHECK.json" 2>> "$OUT/prepare.err")
   log "BASE_CHECK:$bc"; [ "$bc" = all_equal ] || { safe_stop "BASE_NETWORK_SHA256:$bc"; return 1; }
   mkdir -p "$OUT/variants"
   for rid in R5 R6 R7 R8 R9 R10 R11; do
     local V="$OUT/variants/$rid" costs=()
     if [ ! -f "$(ls "$V"/*_VARIANT_RECEIPT.json 2>/dev/null | head -1)" ]; then
       mkdir -p "$V"; [ "${SET[$rid]%%=*}" = finance.wacc_mode ] && costs=(--costs "$NETS/${COSTS[$rid]}_costs_active_research.csv")
-      ( cd "$REPO" && env -u GRB_LICENSE_FILE PYTHONHASHSEED=0 $VAR_CMD --repo "$REPO" --base "$(base_net "$rid")" --out "$V" --set "${SET[$rid]}" ${costs[@]+"${costs[@]}"} > "$V/variant.log" 2>&1 )
+      aux $VAR_CMD --repo "$REPO" --base "$(base_net "$rid")" --out "$V" --set "${SET[$rid]}" ${costs[@]+"${costs[@]}"} > "$V/variant.log" 2>&1
       log "VARIANT_$rid:generated:exit=$?:set=${SET[$rid]}"
     fi
     if [ -f "$HERE/EXPECTED_VARIANTS.json" ]; then
-      local vc; vc=$(cd "$REPO" && $SUM_CMD variants-check --variants "$OUT/variants" --expected "$HERE/EXPECTED_VARIANTS.json" --rid "$rid" 2>> "$OUT/prepare.err"); local rc=$?
+      local vc; vc=$(aux $SUM_CMD variants-check --variants "$OUT/variants" --expected "$HERE/EXPECTED_VARIANTS.json" --rid "$rid" 2>> "$OUT/prepare.err"); local rc=$?
       log "VARIANT_$rid:$vc"; [ $rc = 0 ] || { safe_stop "VARIANT_SHA256_$rid:$vc"; return 1; }
     else
       safe_stop "EXPECTED_VARIANTS.json missing in the package (variants cannot be compared with the local dry run)"; return 1
@@ -287,13 +326,13 @@ solve_run() {   # $1 rid, $2 .solve_end file of the previous run in the lane (ma
 accept() {   # $1 rid -> label (V6_ACCEPTANCE.json)
   local d="$OUT/$1" reg
   if [ -n "${SET[$1]}" ]; then reg=(--registered-sha256 "$(jget "$d/RUN.json" registered_sha256)"); else reg=(--build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json"); fi
-  local lab; lab=$(cd "$REPO" && env -u GRB_LICENSE_FILE $G6_CMD accept --solve-dir "$d" "${reg[@]}" --repo "$REPO" 2>> "$d/v6.err" | tail -1)
+  local lab; lab=$(aux $G6_CMD accept --solve-dir "$d" "${reg[@]}" --repo "$REPO" 2>> "$d/v6.err" | tail -1)
   echo "$lab" > "$d/.label"; echo "$lab"
 }
 stop_check() {   # $1 rid: graded stop rule (supplement 01 item 2; item 138 D12)
   local d="$OUT/$1" lab cls act; lab=$(cat "$d/.label" 2>/dev/null)
   case "$lab" in ACCEPTED_LAYER1|ACCEPTED_LAYER2) return 0;; esac   # NOT_ACCEPTED, or no label (acceptance failed) -> classified
-  read -r cls act < <(cd "$REPO" && $SUM_CMD stop-class --dir "$d" 2>> "$d/stop_class.err" | tail -1)
+  read -r cls act < <(aux $SUM_CMD stop-class --dir "$d" 2>> "$d/stop_class.err" | tail -1)
   [ -n "${act:-}" ] || { cls=unreadable; act=stop; }   # class not readable -> stop (as a failed G2 check)
   case "$act" in
     stop)
@@ -333,35 +372,37 @@ post_run() {   # $1 rid
   [ "$DRY" = 1 ] && return 0
   [ -f "$d/RUN.json" ] || return 0
   if [ "$BUILD_ONLY" = 1 ]; then
-    local bc; bc=$(cd "$REPO" && $SUM_CMD build-check --dir "$d" --repo "$REPO" 2>> "$d/build_check.err"); log "BUILD_CHECK_$rid:$bc"
+    local bc; bc=$(aux $SUM_CMD build-check --dir "$d" --repo "$REPO" 2>> "$d/build_check.err"); log "BUILD_CHECK_$rid:$bc"
     export_run "$rid"; return 0
   fi
   [ -f "$d/.ended" ] || return 0
   local net sc lab ref=(); net=$(jget "$d/RUN.json" network); sc=$(jget "$d/RUN.json" scenario); lab=$(jget "$d/RUN.json" label)
   [ -f "$OUT/BATCH_REFERENCE.json" ] && ref=(--reference "$OUT/BATCH_REFERENCE.json")
+  # M10A: each step under step() = timeout + thread budget + POSTPROC_ERROR record; a crash or timeout here never stops the batch by itself
+  # (VIOLATIONS.json / PRECISION.json missing -> C1 not computable -> the graded stop rule as registered; M12 / Owen / RHS outputs missing -> no effect on GATES_V6)
   if [ -f "$d/solution/X.npy" ] && [ ! -f "$d/VIOLATIONS.json" ]; then
-    ( cd "$REPO" && exec env -u GRB_LICENSE_FILE /usr/bin/time -v $VA_CMD --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --out "$d/VIOLATIONS.json" \
-        ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_violations.log" 2> "$d/c1_violations.err" ); log "VIOLATIONS_$rid:exit=$?"
+    step "$rid" violations /usr/bin/time -v $VA_CMD --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --out "$d/VIOLATIONS.json" \
+        ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_violations.log" 2> "$d/c1_violations.err"; log "VIOLATIONS_$rid:exit=$?"
   fi
   if [ ! -f "$d/PRECISION.json" ]; then
-    ( cd "$REPO" && exec env -u GRB_LICENSE_FILE /usr/bin/time -v $C1_CMD run --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --violations "$d/VIOLATIONS.json" \
-        ${ref[@]+"${ref[@]}"} ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_precision.log" 2> "$d/c1_precision.err" ); local rc=$?
+    step "$rid" c1 /usr/bin/time -v $C1_CMD run --repo "$REPO" --solve-dir "$d" --network "$net" --scenario "$sc" --label "$lab" --violations "$d/VIOLATIONS.json" \
+        ${ref[@]+"${ref[@]}"} ${TRUNC[@]+"${TRUNC[@]}"} > "$d/c1_precision.log" 2> "$d/c1_precision.err"; local rc=$?
     [ $rc = 0 ] || grep -viE "$SCRUB" "$d/c1_precision.err" | tail -40 > "$d/C1_ERR_TAIL.txt"
     log "C1_$rid:exit=$rc:$( [ -f "$d/PRECISION.json" ] && c1_summary "$d/PRECISION.json" || echo missing):$( [ ${#ref[@]} -gt 0 ] && echo final || echo provisional)"
   fi
   if [ -f "$d/SOLVE_RECEIPT.json" ] && [ ! -f "$d/ALLOCATION.json" ]; then
-    ( cd "$REPO" && exec env -u GRB_LICENSE_FILE PYTHONHASHSEED=0 $M12_CMD run --repo "$REPO" --solve-dir "$d" --scenario "$sc" --label "BATCH3_$rid" --out "$d" --register \
-        > "$d/m12.log" 2> "$d/m12.err" ); log "M12_$rid:exit=$?"
+    step "$rid" m12 $M12_CMD run --repo "$REPO" --solve-dir "$d" --scenario "$sc" --label "BATCH3_$rid" --out "$d" --register \
+        > "$d/m12.log" 2> "$d/m12.err"; log "M12_$rid:exit=$?"
   fi
   if [ -f "$d/solution/X.npy" ] && [ -f "$d/ALLOCATION.json" ] && [ ! -f "$d/m12_owen/OWEN.json" ]; then
-    ( cd "$REPO" && exec env -u GRB_LICENSE_FILE PYTHONHASHSEED=0 /usr/bin/time -v $M12A_CMD audit --repo "$REPO" --network "$net" --scenario "$sc" --solve-dir "$d" --allocation "$d/ALLOCATION.json" \
-        --tag "BATCH3_$rid" --out "$d/m12_owen" --register-dir "$d" ${TRUNC[@]+"${TRUNC[@]}"} > "$d/m12_owen.log" 2> "$d/m12_owen.err" ); log "M12_OWEN_$rid:exit=$?"
+    step "$rid" m12_owen /usr/bin/time -v $M12A_CMD audit --repo "$REPO" --network "$net" --scenario "$sc" --solve-dir "$d" --allocation "$d/ALLOCATION.json" \
+        --tag "BATCH3_$rid" --out "$d/m12_owen" --register-dir "$d" ${TRUNC[@]+"${TRUNC[@]}"} > "$d/m12_owen.log" 2> "$d/m12_owen.err"; log "M12_OWEN_$rid:exit=$?"
   fi
   case "$rid" in R5|R6|R7)
     if [ -f "$OUT/R1/m12_owen/RHS_BY_FAMILY_OWNER.csv" ] && [ -f "$d/m12_owen/RHS_BY_FAMILY_OWNER.csv" ] && [ ! -f "$d/m12_loo_rhs/LOO_RHS_CHECK.json" ]; then
       local cc; cc=$(echo "${SET[$rid]}" | sed -E 's/.*\[([A-Z]+)\].*/\1/')
-      ( cd "$REPO" && exec env -u GRB_LICENSE_FILE $M12A_CMD loo --full "$OUT/R1/m12_owen/RHS_BY_FAMILY_OWNER.csv" --variant "$d/m12_owen/RHS_BY_FAMILY_OWNER.csv" --removed "$cc" \
-          --out "$d/m12_loo_rhs" > "$d/m12_loo_rhs.log" 2>&1 ); log "RHS_CHECK_$rid:exit=$?:$(tail -1 "$d/m12_loo_rhs.log" 2>/dev/null)"
+      step "$rid" rhs_loo $M12A_CMD loo --full "$OUT/R1/m12_owen/RHS_BY_FAMILY_OWNER.csv" --variant "$d/m12_owen/RHS_BY_FAMILY_OWNER.csv" --removed "$cc" \
+          --out "$d/m12_loo_rhs" > "$d/m12_loo_rhs.log" 2>&1; log "RHS_CHECK_$rid:exit=$?:$(tail -1 "$d/m12_loo_rhs.log" 2>/dev/null)"
     fi;;
   esac
   log "V6_$rid:$(accept "$rid"):$( [ -f "$d/PRECISION.json" ] && c1_summary "$d/PRECISION.json" | sed 's/.*:ref=/ref=/')"
@@ -373,7 +414,7 @@ regrade_all() {
   [ "$DRY" = 1 ] || [ "$BUILD_ONLY" = 1 ] && return 0
   if [ ! -f "$OUT/BATCH_REFERENCE.json" ]; then
     if [ -f "$OUT/R1/COUNTRY_COST_LEDGER.csv" ] && [ -f "$OUT/R2/COUNTRY_COST_LEDGER.csv" ]; then
-      ( cd "$REPO" && env -u GRB_LICENSE_FILE $C1_CMD reference --integrated "$OUT/R1" --disconnected "$OUT/R2" --out "$OUT/BATCH_REFERENCE.json" > "$OUT/batch_reference.log" 2>&1 )
+      step batch reference $C1_CMD reference --integrated "$OUT/R1" --disconnected "$OUT/R2" --out "$OUT/BATCH_REFERENCE.json" > "$OUT/batch_reference.log" 2>&1
       log "BATCH_REFERENCE:exit=$?:$(now):R1=$(cat "$OUT/R1/.cond" 2>/dev/null):R2=$(cat "$OUT/R2/.cond" 2>/dev/null)"
     else
       log "BATCH_REFERENCE:not_available:R1/R2 ledgers missing - the runs keep the provisional default reference"; return 0
@@ -385,10 +426,10 @@ regrade_all() {
     d=${d%/}; rid=${d##*/}; [ -f "$d/PRECISION.json" ] || continue
     c1_summary "$d/PRECISION.json" | grep -q ':ref=batch$' && continue
     [ -f "$d/V6_ACCEPTANCE.json" ] && cp "$d/V6_ACCEPTANCE.json" "$d/V6_ACCEPTANCE_PROVISIONAL.json"
-    ( cd "$REPO" && env -u GRB_LICENSE_FILE $C1_CMD regrade --solve-dir "$d" --reference "$OUT/BATCH_REFERENCE.json" > "$d/c1_regrade.log" 2>&1 ); local rc=$?
+    step "$rid" c1_regrade $C1_CMD regrade --solve-dir "$d" --reference "$OUT/BATCH_REFERENCE.json" > "$d/c1_regrade.log" 2>&1; local rc=$?
     if [ -f "$d/m12_owen/OWEN.json" ]; then
-      ( cd "$REPO" && env -u GRB_LICENSE_FILE $M12A_CMD regrade --owen "$d/m12_owen/OWEN.json" --precision "$d/PRECISION.json" --out "$d/m12_owen/OWEN_REGRADE_BATCH_REFERENCE.json" \
-          > "$d/m12_owen_regrade.log" 2>&1 )
+      step "$rid" owen_regrade $M12A_CMD regrade --owen "$d/m12_owen/OWEN.json" --precision "$d/PRECISION.json" --out "$d/m12_owen/OWEN_REGRADE_BATCH_REFERENCE.json" \
+          > "$d/m12_owen_regrade.log" 2>&1
     fi
     log "REGRADE_$rid:exit=$rc:$(c1_summary "$d/PRECISION.json"):provisional=$(cat "$d/.label" 2>/dev/null):final=$(accept "$rid")"
     export_run "$rid"; stop_check "$rid"
@@ -420,8 +461,8 @@ phase() {   # $1 phase (SCHEDULE): lanes A and B side by side when their largest
 }
 level2_step() {
   [ "$DRY" = 1 ] || [ "$BUILD_ONLY" = 1 ] && return 0
-  ( cd "$REPO" && $SUM_CMD level2 --out-dir "$OUT" > "$OUT/level2.log" 2>&1 )
-  ( cd "$REPO" && $G6_CMD select-profile --level2 "$OUT/LEVEL2.json" --repo "$REPO" > "$OUT/PROFILE_CHOICE.json" 2> "$OUT/select_profile.err" )
+  aux $SUM_CMD level2 --out-dir "$OUT" > "$OUT/level2.log" 2>&1
+  aux $G6_CMD select-profile --level2 "$OUT/LEVEL2.json" --repo "$REPO" > "$OUT/PROFILE_CHOICE.json" 2> "$OUT/select_profile.err"
   log "PROFILE_CHOICE:$(jget "$OUT/PROFILE_CHOICE.json" profile):$(jget "$OUT/PROFILE_CHOICE.json" reason)"
 }
 batch_post() {   # instruction section 3.5: leave-one-out check, B6 / benefit and proportional rules, sensitivity differences, level-2 comparison, summary
@@ -433,25 +474,25 @@ batch_post() {   # instruction section 3.5: leave-one-out check, B6 / benefit an
       [ -f "$OUT/$rid/SOLVE_RECEIPT.json" ] && args+=(--loo "$(echo "${SET[$rid]}" | sed -E 's/.*\[([A-Z]+)\].*/\1/')=$OUT/$rid")
     done
     if [ ${#args[@]} -gt 0 ] && [ -f "$OUT/R1/SOLVE_RECEIPT.json" ]; then
-      ( cd "$REPO" && env -u GRB_LICENSE_FILE $M12_CMD loo --full "$OUT/R1" "${args[@]}" --standalone "$OUT/R2" --out "$OUT/M12_LOO" > "$OUT/M12_LOO.log" 2>&1 )
+      step batch m12_loo $M12_CMD loo --full "$OUT/R1" "${args[@]}" --standalone "$OUT/R2" --out "$OUT/M12_LOO" > "$OUT/M12_LOO.log" 2>&1
       log "M12_LOO:exit=$?:runs=$(( ${#args[@]} / 2 )):unusable_left_out=$(IFS=,; echo "${skip[*]:-none}"):$(tail -1 "$OUT/M12_LOO.log" 2>/dev/null)"
     else log "M12_LOO:not_computable:no usable leave-one-out run or no R1 result:unusable_left_out=$(IFS=,; echo "${skip[*]:-none}")"; fi
     local lc=(); [ -f "$OUT/M12_LOO/LOO_CHECK.json" ] && lc=(--loo-check "$OUT/M12_LOO/LOO_CHECK.json")
     if [ -f "$OUT/R1/ALLOCATION.json" ] && [ -f "$OUT/R2/ALLOCATION.json" ]; then
-      ( cd "$REPO" && env -u GRB_LICENSE_FILE $M12_CMD benefit --repo "$REPO" --integrated "$OUT/R1" --disconnected "$OUT/R2" --out "$OUT/M12_BENEFIT" ${lc[@]+"${lc[@]}"} > "$OUT/M12_BENEFIT.log" 2>&1 )
+      step batch m12_benefit $M12_CMD benefit --repo "$REPO" --integrated "$OUT/R1" --disconnected "$OUT/R2" --out "$OUT/M12_BENEFIT" ${lc[@]+"${lc[@]}"} > "$OUT/M12_BENEFIT.log" 2>&1
       log "M12_BENEFIT:exit=$?:loo_check=$([ ${#lc[@]} -gt 0 ] && echo yes || echo no):$(tail -1 "$OUT/M12_BENEFIT.log" 2>/dev/null)"
     else log "M12_BENEFIT:not_computable:R1 / R2 allocations missing"; fi
     level2_step
   fi
-  ( cd "$REPO" && $SUM_CMD summary --out-dir "$OUT" > "$OUT/summary.log" 2>&1 ); log "SUMMARY:exit=$?:$(tail -1 "$OUT/summary.log" | cut -c1-300)"
+  aux $SUM_CMD summary --out-dir "$OUT" > "$OUT/summary.log" 2>&1; log "SUMMARY:exit=$?:$(tail -1 "$OUT/summary.log" | cut -c1-300)"
   mkdir -p "$EXP/batch"
-  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json LEVEL2.json PROFILE_CHOICE.json BATCH3_SUMMARY.json BATCH3_SUMMARY.md STOP STOP_SAFE UNUSABLE; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
+  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json LEVEL2.json PROFILE_CHOICE.json BATCH3_SUMMARY.json BATCH3_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
   for f in M12_LOO M12_BENEFIT; do [ -d "$OUT/$f" ] && { mkdir -p "$EXP/batch/$f"; cp -r "$OUT/$f"/. "$EXP/batch/$f/"; }; done
 }
 pack() {   # $1 tag
   [ "$DRY" = 1 ] && return 0
   cp "$ST" "$EXP/batch/" 2>/dev/null
-  local r; r=$($PACK_CMD "$OUT" "$1" 2>&1 | tail -1); log "PACK_$1:$r"
+  local r; r=$(step batch pack $PACK_CMD "$OUT" "$1" 2>&1 | tail -1); log "PACK_$1:$r"
 }
 
 # ---- the batch

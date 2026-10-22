@@ -15,11 +15,22 @@
 #   resources  container cgroup quota (cores, memory) and free disk against the instance specification (supplement 01 item 4): cores >= 25 (the
 #              phase-2 pairs R3 | R5 and R4 | R6 need Threads 16 + 8 = 24), memory >= 92 GiB, free data disk >= 60 GB (RUN_PLAN.md section 5:
 #              ~30 GiB expected - 11 run folders ~2.1 GiB each with the 0.8 GB LP arrays measured locally, one results pack, environment)
+#   guards     M10A (B5.5): none of the test hooks / dry-run switches of run_batch3.sh (ALLOW_UNREGISTERED, BUILD_ONLY, POST_ONLY, DRY, TRUNCATE,
+#              *_CMD stand-ins, FAKE_*, limit overrides) is set in this shell - left over, they would run the batch without the solver or with
+#              unregistered limits; operational overrides (RUN_DIR, CORES, REPO, NETS, CGROUP_ROOT, TMPDIR) are only printed
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
-PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-sha,networks,env,profile,code,tools,licence,resources}"
+PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"
 NEED_CORES=25; NEED_CORES_PAIR=24; NEED_MEM_GIB=92; NEED_DISK_GB=60
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
+if sec guards; then
+  echo "== guards: test hooks / dry-run switches in this shell (M10A B5.5)"; bad=()
+  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S $(compgen -A variable | grep -E '^FAKE_'); do
+    [ -z "${!k:-}" ] || bad+=("$k")
+  done
+  if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi
+  for k in RUN_DIR CORES REPO NETS CGROUP_ROOT TMPDIR; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+fi
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all $(wc -l < SHA256SUMS) files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }
   C8=$(cut -c1-8 COMMIT)
@@ -74,6 +85,7 @@ if sec tools; then
   if [ -x /usr/bin/time ] && /usr/bin/time -v true > /dev/null 2>&1; then echo "/usr/bin/time (GNU time -v) present"; else echo "MISSING /usr/bin/time (apt-get install -y time)"; ok=0; fi
   if command -v setsid >/dev/null 2>&1 && setsid true >/dev/null 2>&1; then echo "setsid present"; else echo "MISSING setsid (apt-get install -y util-linux)"; ok=0; fi
   command -v pgrep >/dev/null 2>&1 && echo "pgrep present" || { echo "MISSING pgrep (apt-get install -y procps)"; ok=0; }
+  command -v timeout >/dev/null 2>&1 && timeout 5 true && echo "timeout present" || { echo "MISSING timeout (coreutils)"; ok=0; }
   command -v tmux >/dev/null 2>&1 && echo "tmux present" || echo "WARNING: tmux missing - run run_batch3.sh in a detached session (apt-get install -y tmux)"
 fi
 if sec licence; then

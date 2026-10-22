@@ -12,12 +12,16 @@
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ENVP=${1:-/root/autodl-tmp/envs/pypsa-earth}
+# M10A (B5.4): the conda package cache (~0.75 GB tarballs + ~3.3 GB extracted) and temporary files go to the package folder on the data disk, not to
+# the conda root / /tmp on the ~30 GB system disk (a cache on the same file system as the prefix is hard-linked, not copied)
+export CONDA_PKGS_DIRS="${CONDA_PKGS_DIRS:-$HERE/../conda_pkgs_cache}"; export TMPDIR="${TMPDIR:-$HERE/../tmp}"; export PIP_CACHE_DIR="${PIP_CACHE_DIR:-$TMPDIR/pip_cache}"
+mkdir -p "$CONDA_PKGS_DIRS" "$TMPDIR" "$PIP_CACHE_DIR"
 CONDA=${CONDA:-$(command -v conda || command -v mamba || echo /root/miniconda3/bin/conda)}
 [ -x "$CONDA" ] || { echo "REFUSED: conda not found (set CONDA=<path to conda>)"; exit 2; }
 [ -e "$ENVP" ] && { echo "REFUSED: $ENVP exists (never overwritten; choose another prefix)"; exit 2; }
 for f in conda_explicit_linux64.txt pip_only.txt ENV_LOCK.txt env_check.py; do [ -s "$HERE/$f" ] || { echo "REFUSED: $f missing"; exit 2; }; done
 LOG="$HERE/INSTALL_$(date -u +%Y%m%dT%H%M%SZ).log"; t0=$(date +%s)
-echo "INSTALL_START:$(date -u +%FT%TZ):prefix=$ENVP:conda=$("$CONDA" --version 2>&1)" | tee -a "$LOG"
+echo "INSTALL_START:$(date -u +%FT%TZ):prefix=$ENVP:conda=$("$CONDA" --version 2>&1):pkgs_dirs=$CONDA_PKGS_DIRS:tmpdir=$TMPDIR" | tee -a "$LOG"
 SPEC="$HERE/conda_explicit_linux64.txt"
 if [ -n "${CONDA_MIRROR:-}" ]; then SPEC="$HERE/.explicit_mirror.txt"; sed "s#https://conda.anaconda.org/#${CONDA_MIRROR%/}/#" "$HERE/conda_explicit_linux64.txt" > "$SPEC"; echo "CONDA_MIRROR:${CONDA_MIRROR}" | tee -a "$LOG"; fi
 "$CONDA" create -y -p "$ENVP" --file "$SPEC" >> "$LOG" 2>&1 || { echo "CONDA_CREATE_FAILED (see $LOG)"; exit 1; }

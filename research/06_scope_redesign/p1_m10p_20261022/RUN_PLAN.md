@@ -1,7 +1,7 @@
 # 第三批运行计划（RUN_PLAN）——365×24h，单卡实例，两个 Gurobi 会话并行
 
-**版本：** M10P v2（补充 01），2026-10-22。依据 `M10P_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `bd2461e7…bbd1`）第 2–4 节、第 133、138–141 项，以及 `M10P_SUPPLEMENT_01.md`（SHA256 `49a4593d…9205`）第 1 节的六项决定（第 142 项）。
-**状态：** 只是准备。实际上云在用户租卡并授权后，按另一份执行指令进行；本文件第 3 节的规则在看到任何结果之前登记，之后不得修改。v1 → v2 的改动都来自补充 01 的决定，此时尚无任何第三批结果。
+**版本：** M10P v3（M10A 上云前审查修复），2026-10-22。依据 `M10P_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `bd2461e7…bbd1`）第 2–4 节、第 133、138–141 项，`M10P_SUPPLEMENT_01.md`（SHA256 `49a4593d…9205`）第 1 节的六项决定（第 142 项），以及 `M10A_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `d7db9497…7f98a`）B5 的实现层修复（第 10 节）。
+**状态：** 只是准备。实际上云在用户租卡并授权后，按另一份执行指令进行；本文件第 3 节的规则在看到任何结果之前登记，之后不得修改。v1 → v2 的改动都来自补充 01 的决定；v2 → v3 只改实现（运行脚本的进程计数、后处理超时与线程预算、临时目录、测试开关防护），第 3 节一字未改，此时尚无任何第三批结果。
 **入口：** `run_batch3.sh`（运行与逐运行 / 批级后处理）、`preflight.sh`（预检）、`pack_results.sh`（结果打包）、`env/install_env.sh`（非克隆部署的环境安装）。运行表与排程的唯一来源是代码中的 `scripts_project/m10_batch3_summary.py` `RUNS` 与 `SCHEDULE`。
 
 ---
@@ -133,15 +133,18 @@
 
 - 与 v1（R3、R4 先后跑，第 3 阶段 7 个运行）相比，求解时间的下界约省 1 h；第 2 阶段通道 A 约有 2 h 只用 8 核（R5 + R6 比 R3 + R4 长），第 3 阶段要等第 2 阶段两条通道都结束才开始（INFERENCE）。
 - 最坏情况（每个运行都跑到墙钟 6.25 h）：三个阶段最长通道分别 1、2、3 个运行，6.25 × 6 = 37.5 h，加后处理与间隔约 40 h。
+- **M10A 复核（v3，INFERENCE）：** 上表按旧网络（S4M-3）估计。M08b 修正后的网络 365×24h 多 11.5 % 行、12.8 % 非零元；56×3h 同机同档案对比，新网络每次迭代耗时约 +10 %、迭代数相近（129–181 对 141）。按 S4N 3.3 h × 1.10–1.15（规模）× 1.1–1.3（两会话并行）估计 R1 墙钟 **4.0–4.9 h**，上限超过 TimeLimit 6 h 的 75 %（M10A 报告"需要用户决定"第 1 项）；R5–R7 同量级，R2 约 0.8–1.0 h。各阶段按此为 4.5–5.4 / 8.6–11 / 6.5–7.7 h，合计约 **20–25 h**（不改登记值）。每次后处理实测 / 外推合计约 6–8 分钟（第 5 节），低于上表的 0.3 h。
 
 ## 5. 资源与实例规格（补充 01 第 4 项）
 
 - **实例规格：** ≥ 25 核（第 2 阶段配对需 16 + 8 = 24 核）、内存 ≥ 92 GiB、数据盘可用 ≥ 60 GB；推荐 1 卡 8481C / 8470Q 一类机器。`preflight.sh` 按此检查（核与内存取容器 cgroup 配额，磁盘取包目录所在盘），不满足即 `PREFLIGHT FAILED`。
 - **内存：** 两个 365×24h 会话各约 15 GiB（S4N 实测 15.1 GiB；T16 会话线程多，可能略高）+ 另一通道的后处理约 9 GiB，约 40 GiB；92 GiB 留有余量。本机实测 365×24h LP 构建峰值 10.15 GiB。
+- **后处理资源（M10A B3）：** 旧网络 365×24h 云端实测（S4N 试点，8470Q）违反分析 105 s / 9.3 GB、C1 72 s / 9.3 GB，均单线程（CPU 100 %）；本机实测 M12 分摊 6.5 s / 0.8 GB、GATES_V6 验收 < 1 s、单运行导出打包 7 s、Owen 对偶形式审计（`--duals` 模式）54 s / 8.1 GiB，新网络仅构建 65 s / 10.0 GiB（M12 S8）。外推到新网络云端（INFERENCE）：每次后处理约 6–8 分钟、峰值约 11 GiB；与另一通道的求解同时最多约 11 + 17 GiB，两会话同时约 34 GiB，远低于 92 GiB。运行脚本给每个后处理步骤 `POST_TIMEOUT_S`（默认 1,800 s，约为实测的 10 倍以上）与线程预算（容器核数减去正在运行的求解线程，至少 1）。
 - **磁盘：** 预计用量约 30 GiB（INFERENCE）：
   - 每个 365×24h 运行目录约 1.8 GB——本机实测 R1 的 LP 数组 0.80 GB（`--stop-before-solve`，10,052,113 行 × 4,509,642 列，2,363 万非零元），其余按 56×3h 冒烟运行目录的行数比例（7.2 倍）估计——另加导出副本约 0.26 GB（S4N 实测）；11 个运行约 23 GB；
   - 结果打包（`final` 或 `halted`）约 1.8 GB；环境约 3.3 GiB + 包缓存约 0.75 GB；部署包与解包代码约 0.4 GB；变体 7 × 31 MB。
 - **环境：** `env/install_env.sh`：538 个 conda 包（下载 742.8 MB，`env/ENV_DOWNLOAD.json`）+ 2 个 PyPI 包，安装后约 3.3 GiB；预计 5–15 分钟（2–20 MB/s，含解压；INFERENCE）。按 S4N 补充 01：下载超过 2 GB 或耗时超过 30 分钟先停下报告。安装后 `env_check.py` 逐包核对，关键包（python 3.11.13、pypsa 0.30.3、linopy 0.5.5、xarray 2025.1.2、pandas 2.3.1、numpy 1.26.4、scipy 1.15.2、gurobipy 12.0.3、netCDF4 1.7.2、h5netcdf 1.6.4、dask 2025.7.0、pyomo 6.9.3、highspy 1.11.0）必须完全相同。
+- **系统盘与数据盘（M10A B5.4）：** `install_env.sh` 把 conda 包缓存（`CONDA_PKGS_DIRS`，约 0.75 GB 压缩包 + 约 3.3 GB 解压）、`TMPDIR` 与 pip 缓存放到包目录（`<包目录>/conda_pkgs_cache`、`<包目录>/tmp`），不占约 30 GB 的系统盘；`run_batch3.sh` 把 `TMPDIR` 设为 `runs/batch3/tmp`——linopy 0.5.5 在 `io_api=None` 时把每次求解的 LP 问题文件写入临时目录再由 Gurobi 读入（S4N 回执 solve_seconds 比 barrier 多 283 s 即此开销），365×24h 两会话并行约数 GB，落在数据盘。
 
 ## 6. 部署包与上传量
 
@@ -153,9 +156,9 @@
 
 1. 单路上传部署包 → 全量 `sha256sum -c SHA256SUMS`。
 2. `bash env/install_env.sh`（非克隆实例；克隆实例若已有同版本环境，可直接 `env/env_check.py` 核对）。
-3. 按授权方式放置许可 → `PY=<环境 python> GRB_LICENSE_FILE=<许可路径> bash preflight.sh` → `PREFLIGHT OK`。
-4. 在 tmux 中：`PY=<环境 python> GRB_LICENSE_FILE=<许可路径> bash run_batch3.sh --auth "<用户授权原文>"`；中断后用同一命令续跑。只重做后处理：`POST_ONLY=1 PY=<环境 python> bash run_batch3.sh`（不启动任何求解）。
-5. 监控 `runs/batch3/STATUS.txt` 与 `MONITOR_<编号>.csv`。
+3. 按授权方式放置许可 → **在将要运行批次的同一个 tmux shell 中** `PY=<环境 python> GRB_LICENSE_FILE=<许可路径> bash preflight.sh` → `PREFLIGHT OK`（v3 新增 `guards` 节：该 shell 中残留任何测试 / 干跑开关——`ALLOW_UNREGISTERED`、`BUILD_ONLY`、`POST_ONLY`、`DRY`、`TRUNCATE`、`*_CMD`、`FAKE_*`、时限覆盖——即 `PREFLIGHT FAILED`，先 `unset`）。
+4. 在 tmux 中：`PY=<环境 python> GRB_LICENSE_FILE=<许可路径> bash run_batch3.sh --auth "<用户授权原文>"`；中断后用同一命令续跑。只重做后处理：`POST_ONLY=1 PY=<环境 python> bash run_batch3.sh`（不启动任何求解；**不带 `--auth`**——v3 起无求解模式与 `--auth` 同时出现即拒绝启动，正式运行发现测试钩子也拒绝启动）。
+5. 监控 `runs/batch3/STATUS.txt` 与 `MONITOR_<编号>.csv`；`POSTPROC_ERROR:<编号>:<步骤>:exit=…` 行（与 `runs/batch3/POSTPROC_ERRORS`）表示某个后处理步骤异常或超时：调度不受影响，批次结束后用 `POST_ONLY=1` 补做即可；`STOP_NOT_ACCEPTED` / `STOP_SAFE` 才是停批。
 6. 下载：先轻量包 `results_light_*`（预计几十 MB），再完整包 `results_full_*`（预计约 1.8 GB：S4N 单个 365×24h 运行压缩后 159 MB × 11；各附 `.sha256`）；LP / 解数组留在实例数据盘（`export/batch/ARRAYS_MANIFEST.json`）。按 S4O-6 实测下行约 4 MB/s 约 8 分钟，0.3 MB/s 约 1.7 h（INFERENCE）。
 
 ## 8. 本计划中由准备端确定、请审阅确认的取值
@@ -169,3 +172,14 @@
 
 - P1 从第三批删除。2920×3h 的内存实测改到第四批开始时进行：第四批租用大内存机器，正式运行前用 1 小时作探针监控，**超过可用内存的 80 % 即止损**，再调整机器。具体做法写入第四批的执行指令。
 - 参考：本机 365×24h 构建峰值 10.15 GiB；2920×3h 的 LP 约为 365×24h 的 8 倍，仅构建粗估约 80 GiB（INFERENCE）。P1 的计时与内存解析函数（`m10_batch3_summary.py p1_summary`）保留供第四批使用。
+
+## 10. v3（M10A 上云前审查）的实现层改动——第 3 节规则不变
+
+来源：`work/p1_m10a_20261022/M10A_REPORT.md`（发现编号同报告）。每项都有替身流水线测试；修复前后第 3.3 节表格逐格行为对照见报告第 5 节。
+
+1. **F1（S1）`run_batch3.sh` `busy()`：** 原实现 `ps -eo cmd | grep -c '[s]2_solve.py'` 把 `/usr/bin/time` 包装进程与 python 进程各计一次，一个正在跑的求解计为 2，而第二条通道启动前要求 `< 2` → 正式运行第 1 阶段 R2 必然 `STOP_SAFE:SOLVER_BUSY_R2`，整批在 R1 之后停下等人（本机实证；替身测试的命令行原不含 `s2_solve.py`，从未覆盖）。现只计 python 进程（排除 `time` / `setsid` / `env` 包装行），替身求解器改以 `scripts_project/s2_solve.py` 同名包装启动，所有调度测试都经过这一检查。
+2. **F2（S2）后处理超时与异常记录：** 违反分析、C1、M12 分摊、Owen 对偶形式、去一国右端项检查、重评、批级去一国 / 受益 / 汇总 / 打包每步在 `timeout -k 30 $POST_TIMEOUT_S`（默认 1,800 s；打包 7,200 s）下运行；非零退出或超时记 `POSTPROC_ERROR:<编号>:<步骤>:exit=<码>` 与 `POSTPROC_ERRORS`，汇总 `BATCH3_SUMMARY.json/.md` 列出，调度不变，事后 `POST_ONLY=1` 补做。C1 输入缺失（违反分析异常或超时）仍按 3.3 第 3 项"C1 不可计算 = C1 (a) 不通过"分类；M12 / Owen / 右端项检查的输出不进入 G2.3（只核对已登记的导出），其异常不改变标签——与修复前相同，现在多了记录与超时保护。
+3. **F3（S2）线程预算：** 辅助 Python 进程（后处理、变体生成、核对、汇总、打包）带 `OMP_NUM_THREADS` / `MKL_NUM_THREADS` / `OPENBLAS_NUM_THREADS` / `NUMEXPR_MAX_THREADS` = 容器核数 − 当时正在运行的求解线程数（至少 1）；云实例 `nproc` 为宿主机 208 而配额 25 核。求解命令及其环境不变（测试核对求解进程看到的 `OMP_NUM_THREADS` 为空），唯一新增的是 `TMPDIR`（第 4 项）。
+4. **F4（S2）临时目录与缓存：** `TMPDIR=runs/batch3/tmp`（求解的 LP 问题文件也落在此）；`install_env.sh` 的 `CONDA_PKGS_DIRS` / `TMPDIR` / `PIP_CACHE_DIR` 指向包目录（第 5 节）。
+5. **F7（S2）测试开关防护：** `preflight.sh` 新增 `guards` 节（默认第一节）；`run_batch3.sh` 正式运行（求解模式且无 `ALLOW_UNREGISTERED`）发现 `*_CMD` / `TRUNCATE` / `FAKE_*` 即 `REFUSED`，`BUILD_ONLY` / `POST_ONLY` / `DRY` 与 `--auth` 同时出现即 `REFUSED`；`STATUS.txt` 的 `START` 行记录 `tmpdir`、`post_timeout_s`、`allow_unregistered`、`hooks`。本机测试（`ALLOW_UNREGISTERED=1`）与干跑（无 `--auth`）用法不变。
+6. 工具要求增加 `timeout`（coreutils；`preflight.sh tools` 节检查）。

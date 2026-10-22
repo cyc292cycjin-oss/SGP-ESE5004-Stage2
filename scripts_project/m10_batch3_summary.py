@@ -199,6 +199,18 @@ def unusable_runs(out: Path) -> dict:
     return dict(x.split()[:2] for x in p.read_text().splitlines() if len(x.split()) >= 2) if p.exists() else {}
 
 
+def postproc_errors(out: Path) -> list:
+    """M10A: post-processing steps that crashed or timed out (runner file POSTPROC_ERRORS: '<rid> <step> exit=<n> <utc>'); recorded only - the
+    schedule never changed because of them; redo with POST_ONLY=1. Missing C1 / GATES_V6 inputs are judged by the registered rules as before."""
+    p = out / "POSTPROC_ERRORS"
+    rows = []
+    for x in (p.read_text().splitlines() if p.exists() else []):
+        f = x.split()
+        if len(f) >= 3:
+            rows.append(dict(rid=f[0], step=f[1], exit=f[2].replace("exit=", ""), utc=(f[3] if len(f) > 3 else None)))
+    return rows
+
+
 # --------------------------------------------------------------------------------------------- per-run state
 def run_state(out: Path, rid: str) -> dict:
     d = out / rid; rec = jl(d / "SOLVE_RECEIPT.json") or {}; prec = jl(d / "PRECISION.json") or {}; acc = jl(d / "V6_ACCEPTANCE.json") or {}
@@ -224,7 +236,8 @@ def run_state(out: Path, rid: str) -> dict:
                 v6=acc.get("label"), v6_provisional=(prov or {}).get("label"),
                 g1=dict((k, (acc.get("G1") or {}).get(k)) for k in ("a", "b", "c")) if acc else None,
                 g2=dict((k, ((acc.get("G2") or {}).get(k) or {}).get("passed")) for k in ("G2_1", "G2_2", "G2_3")) if acc else None,
-                owen_usable=((oreg or {}).get("new") or {}).get("usable_for_allocation", owen.get("usable_for_allocation")) if owen else None)
+                owen_usable=((oreg or {}).get("new") or {}).get("usable_for_allocation", owen.get("usable_for_allocation")) if owen else None,
+                postproc_errors=[f"{e['step']}:exit={e['exit']}" for e in postproc_errors(out) if e["rid"] == rid])
 
 
 def ledger_totals(d: Path) -> dict:
@@ -304,7 +317,7 @@ def summary(out: Path) -> dict:
                                     for c, v in ((loo.get("check") or {}).get("countries") or {}).items()}, reason=loo.get("reason")) if loo else None),
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"),
                              reason=ben.get("reason")) if ben else None),
-               stop_not_accepted=stop, stop_safe=safe, solver_runs=0)
+               stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), solver_runs=0)
     (out / "BATCH3_SUMMARY.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
     (out / "BATCH3_SUMMARY.md").write_text(markdown(res))
     return res
@@ -316,9 +329,11 @@ def _f(x, fmt="{:.4f}"):
 
 def markdown(r: dict) -> str:
     un = ", ".join(f"{k}（{v}）" for k, v in r["unusable"].items())
+    pe = ", ".join("{} {} exit={}".format(e["rid"], e["step"], e["exit"]) for e in (r.get("postproc_errors") or []))
     L = ["# 第三批汇总（M10P 运行脚本自动生成；只读，未调用求解器）", "",
          f"- 停批（分级停批规则，补充 01 第 2 项：任一运行 G2 不通过；R1、R2 无返回解或 C1 (a) 不通过）：{', '.join(r['stop_not_accepted']) or '无'}；安全停止：{r['stop_safe'] or '无'}",
-         f"- 记为不可用、继续其余运行（R3–R11 无返回解 nosol 或 C1 (a) 不通过 c1a）：{un or '无'}", "",
+         f"- 记为不可用、继续其余运行（R3–R11 无返回解 nosol 或 C1 (a) 不通过 c1a）：{un or '无'}",
+         f"- 后处理步骤异常或超时（M10A；只记录，不改变调度；可用 `POST_ONLY=1` 补做）：{pe or '无'}", "",
          "## 运行", "", "| 运行 | 作用 | 档案 | 状态 | 终止 | 目标 bn | 求解 s | 峰值 GiB | C1 abc | C1 参照 | 重评次数 | GATES_V6 | 临时标签 | Owen 可用 |",
          "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for rid, v in r["runs"].items():
