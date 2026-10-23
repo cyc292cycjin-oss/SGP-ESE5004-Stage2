@@ -26,7 +26,7 @@ NEED_CORES=25; NEED_CORES_PAIR=24; NEED_MEM_GIB=64; NEED_DISK_GB=45   # hard flo
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
   echo "== guards: test hooks / dry-run switches in this shell (M10A B5.5)"; bad=()
-  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S $(compgen -A variable | grep -E '^FAKE_'); do
+  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD LEDGER_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S $(compgen -A variable | grep -E '^FAKE_'); do
     [ -z "${!k:-}" ] || bad+=("$k")
   done
   if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi

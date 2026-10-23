@@ -62,8 +62,8 @@ def solve(argv):
                solver_parameters=params, lp=dict(num_col=10, num_row=20, nnz=30, build_seconds=0.1),
                config_subset=dict(network="s" * 64, current=("t" if os.environ.get(f"FAKE_SUBSET_{rid}") == "differ" else "s") * 64),
                optimize_calls=0, costs_table=arg("--costs-table", argv), label=arg("--label", argv))
+    (out / "lp").mkdir(exist_ok=True); (out / "lp" / "MATH_PROBLEM.json").write_text("{}")   # the real s2_solve.py exports the LP arrays before any solve
     if "--stop-before-solve" in argv:
-        (out / "lp").mkdir(exist_ok=True); (out / "lp" / "MATH_PROBLEM.json").write_text("{}")
         rec.update(stop_before_solve=True, finished_epoch=time.time(), peak_rss_bytes=2**30)
         (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec))
         call(f"build {rid} {prof} {tl} {os.environ.get('GRB_LICENSE_FILE')}"); return 0
@@ -81,7 +81,8 @@ def solve(argv):
     (out / "COUNTRY_COST_LEDGER.csv").write_text(led)
     (out / f"{rec['scenario']}_{arg('--label', argv)}_solved.nc").write_bytes(b"solved")
     (out / "EXPORTS.json").write_text("{}"); register(out, "COUNTRY_COST_LEDGER.csv")
-    (out / "V5_GATES.json").write_text(json.dumps(dict(A4=dict(passed=True, status="EXACT_SEMANTIC_ROUNDTRIP"), B16_LEDGER=dict(passed=True, relative_error=1e-10))))
+    b16 = dict(gate="B16_LEDGER", passed=False, error="'59'") if os.environ.get(f"FAKE_B16_FAIL_{rid}") == "1" else dict(passed=True, relative_error=1e-10)   # M10R: the R9 defect (no relative_error -> G2.3 b16_computable false)
+    (out / "V5_GATES.json").write_text(json.dumps(dict(A4=dict(passed=True, status="EXACT_SEMANTIC_ROUNDTRIP"), B16_LEDGER=b16, acceptance_basis="barconvtol", all_passed_barconvtol=b16["passed"])))
     rec.update(solution=dict(X=dict(count=10), Pi=dict(count=20), RC=dict(count=10)), termination_condition=os.environ.get(f"FAKE_TERM_{rid}", "optimal"), status="ok",
                objective=float(os.environ.get(f"FAKE_OBJ_{rid}", "3e11" if rec["scenario"] == "disconnected" else "2e11")), optimize_calls=1,
                finished_epoch=time.time(), solve_seconds=time.time() - t0, peak_rss_bytes=2**31, exports=json.loads((out / "EXPORTS.json").read_text()))
@@ -182,6 +183,18 @@ def m12a(argv):
     return 0
 
 
+def ledger(argv):
+    """M10R stand-in of s4d_ledger_redo.py: the ledger files and V5_GATES.json (B16 passed) of --solve-dir rewritten into --into; FAKE_RAISE_LEDGER_<rid>=1 exits 1."""
+    src = Path(arg("--solve-dir", argv)); new = Path(arg("--into", argv)); rid = src.name; new.mkdir(parents=True, exist_ok=True)
+    if os.environ.get(f"FAKE_RAISE_LEDGER_{rid}") == "1":
+        call(f"ledger {rid} raise"); return 1
+    g = json.loads((src / "V5_GATES.json").read_text()); g["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=True, relative_error=1e-10); g["all_passed_barconvtol"] = True
+    (new / "V5_GATES.json").write_text(json.dumps(g)); (new / "COUNTRY_COST_LEDGER.csv").write_text((src / "COUNTRY_COST_LEDGER.csv").read_text())
+    (new / "LEDGER_IDENTITY.json").write_text(json.dumps(dict(identity=dict(relative_error=1e-10, difference=0.0))))
+    (new / "LEDGER_REDO.json").write_text(json.dumps(dict(b16_before=(json.loads((src / "V5_GATES.json").read_text()).get("B16_LEDGER")), b16_after=g["B16_LEDGER"], solver_runs=0)))
+    call(f"ledger {rid} {os.environ.get('GRB_LICENSE_FILE')}"); return 0
+
+
 def main():
     mode, argv = sys.argv[1], sys.argv[2:]
     if mode == "va":
@@ -191,7 +204,7 @@ def main():
         if os.environ.get(f"FAKE_HANG_VA_{rid}") == "1":
             call(f"va {rid} hang"); time.sleep(120)
         Path(arg("--out", argv)).write_text("{}"); call(f"va {rid} omp={os.environ.get('OMP_NUM_THREADS')}"); return 0
-    return dict(solve=solve, variants=variants, c1=c1, m12=m12, m12a=m12a)[mode](argv)
+    return dict(solve=solve, variants=variants, c1=c1, m12=m12, m12a=m12a, ledger=ledger)[mode](argv)
 
 
 if __name__ == "__main__":

@@ -59,28 +59,64 @@
 # M10A supplement 01 (item 145): D1 TimeLimit / wall clock 28,800 / 30,000 s; D2 the violation analysis and C1 steps are redone ONCE after a
 #   non-zero exit or timeout (same environment and parameters; the incomplete outputs are kept as *.failed<n>; STATUS line POSTPROC_RETRY); a
 #   second failure follows the registered rules (C1 not computable = C1 (a) failed); no solve is ever repeated, the classification is unchanged.
+# M10R (third-batch close-out, 2026-10-24; supplement S1 of RUN_PLAN.md section 11; the pre-registered rules are unchanged; the batch mode
+#   without these arguments behaves exactly as before):
+#   --only R11[,R..]            solve mode: ONLY the listed runs, which must never have started (an ended run is REFUSED: a solve is never repeated);
+#                              profile, TimeLimit, wall clock, licence gaps, variant generation / check, C1 reference (the batch's own
+#                              BATCH_REFERENCE.json, required), acceptance and the graded stop rule exactly as registered. A STOP written by OTHER
+#                              runs (e.g. R9 g2) is acknowledged in STATUS (ONLY_MODE) and does not block the selected runs; a G2 failure of a
+#                              selected run stops the selection as registered (STOP appended, exit 3), no solution / C1 (a) -> UNUSABLE, the next
+#                              selected run follows. No regrade, no level-2, no batch summary (the original BATCH3_SUMMARY is never rewritten);
+#                              the pack holds the selected runs only (results_*_only_<rids>_*). A STOP_SAFE present at the start is REFUSED.
+#                              Dry run of the selection: BUILD_ONLY=1 bash run_batch3.sh --only R11 (no --auth): variant + LP build of the selected
+#                              runs with --stop-before-solve, BUILD_CHECK.json, no solver call (the licence tripwire of the no-solve modes).
+#   --repost R9 --into <dir>    no-solve mode (no licence, no gaps; --auth refused): the whole post-processing of an ENDED run redone with the
+#                              current code into <dir>/R9 - inputs read only from the run folder (receipt, gates, solved network, duals; LP /
+#                              solution arrays linked, or --arrays <dir> when they were rebuilt with --stop-before-solve elsewhere): ledger redo
+#                              (LEDGER_CMD = s4d_ledger_redo.py), violation analysis (compared with the original: REPOST_CHECK.json), C1 with the
+#                              batch reference, M12, Owen dual form, leave-one-out RHS check (R5-R7), GATES_V6, graded classification (recorded in
+#                              STOP_CLASS.json only - never STOP / UNUSABLE), export and pack under <dir>. The original run folder, its label, the
+#                              batch STATUS / STOP / summary are not changed (STATUS, POSTPROC_ERRORS and tmp go to <dir>).
+#   --summary-s1 --into <dir> [--use R9=<dir>/R9 ...]   no-solve mode: the batch-level summary recomputed into <dir>/batch_s1/BATCH3_SUMMARY_S1.json
+#                              / .md (B6, sensitivity pairs R8 - R2, R9 - R2, R10 - R1, R11 - R2, information pair R11 - R10, leave-one-out, level 2)
+#                              with every --use run taken from its re-post-processed folder; the original BATCH3_SUMMARY.json / .md stay.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
-AUTH=""
+AUTH=""; ONLY_LIST=""; REPOST_RID=""; INTO=""; SUMMARY_S1=0; USE=(); ARRAYS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --auth) AUTH="$2"; shift 2;;
+    --only) ONLY_LIST="$2"; shift 2;;
+    --repost) REPOST_RID="$2"; shift 2;;
+    --into) INTO="$2"; shift 2;;
+    --summary-s1) SUMMARY_S1=1; shift;;
+    --use) USE+=("$2"); shift 2;;
+    --arrays) ARRAYS="$2"; shift 2;;
     *) echo "unknown argument $1"; exit 2;;
   esac
 done
 REPO=${REPO:-$HERE/repo}; NETS=${NETS:-$HERE/networks}; OUT=${RUN_DIR:-$HERE/runs/batch3}; PY=${PY:-python}
 BUILD_ONLY=${BUILD_ONLY:-0}; DRY=${DRY:-0}; POST_ONLY=${POST_ONLY:-0}; TRUNCATE=${TRUNCATE:-}
-NOSOLVE=0; { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ]; } && NOSOLVE=1   # no Gurobi session: no licence, no gaps, one lane
+ONLY_MODE=0; ONLY=(); [ -n "$ONLY_LIST" ] && { ONLY_MODE=1; IFS=, read -ra ONLY <<< "$ONLY_LIST"; }
+S1MODE=0; { [ -n "$REPOST_RID" ] || [ "$SUMMARY_S1" = 1 ]; } && S1MODE=1   # M10R: --repost / --summary-s1 never solve and never write into the run folder
+NOSOLVE=0; { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ] || [ "$S1MODE" = 1 ]; } && NOSOLVE=1   # no Gurobi session: no licence, no gaps, one lane
+if [ "$ONLY_MODE" = 1 ] && { [ "$POST_ONLY" = 1 ] || [ "$S1MODE" = 1 ]; }; then echo "REFUSED: --only is a solve mode of the selected runs (or its BUILD_ONLY / DRY dry run); not together with POST_ONLY / --repost / --summary-s1"; exit 2; fi
+if [ -n "$REPOST_RID" ] && [ "$SUMMARY_S1" = 1 ]; then echo "REFUSED: --repost and --summary-s1 are two steps (first the repost, then the summary with --use)"; exit 2; fi
+if [ "$S1MODE" = 1 ] && { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ]; }; then echo "REFUSED: --repost / --summary-s1 not together with BUILD_ONLY / POST_ONLY / DRY"; exit 2; fi
+if [ "$S1MODE" = 1 ] && [ -z "$INTO" ]; then echo "REFUSED: --repost / --summary-s1 need --into <new dir> (the original run folder is read only)"; exit 2; fi
+if [ ${#USE[@]} -gt 0 ] && [ "$SUMMARY_S1" != 1 ]; then echo "REFUSED: --use <rid>=<dir> belongs to --summary-s1"; exit 2; fi
+if [ -n "$ARRAYS" ] && [ -z "$REPOST_RID" ]; then echo "REFUSED: --arrays <dir> belongs to --repost"; exit 2; fi
 R_WALL=30000; R_TL=28800; R_GAP=330     # registered values (RUN_PLAN.md section 3; TimeLimit / wall clock 21,600 / 22,500 -> 28,800 / 30,000 s: M10A supplement 01 D1, item 145)
 WALL_CAP_S=${WALL_CAP_S:-$R_WALL}; GUROBI_TIME_LIMIT_S=${GUROBI_TIME_LIMIT_S:-$R_TL}
 LICENCE_GAP_S=${LICENCE_GAP_S:-$R_GAP}; GRACE_S=${GRACE_S:-30}; MONITOR_S=${MONITOR_S:-60}; CGROUP_ROOT=${CGROUP_ROOT:-/sys/fs/cgroup}
 # M10A (B5.5): test hooks present in the environment, recorded before the defaults below fill them in; FORMAL = solve mode without ALLOW_UNREGISTERED
-HOOKS_SET=$(for k in SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD TRUNCATE $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
+HOOKS_SET=$(for k in SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD VAR_CMD G6_CMD SUM_CMD PACK_CMD TRUNCATE LEDGER_CMD $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
 FORMAL=0; [ "$NOSOLVE" = 0 ] && [ "${ALLOW_UNREGISTERED:-0}" != 1 ] && FORMAL=1
 SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD:-"$PY $REPO/scripts_project/l23_violation_analysis.py"}
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}
 M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; VAR_CMD=${VAR_CMD:-"$PY $REPO/scripts_project/m08a_variants.py"}
 G6_CMD=${G6_CMD:-"$PY $REPO/scripts_project/v5/gates_v6.py"}; SUM_CMD=${SUM_CMD:-"$PY $REPO/scripts_project/m10_batch3_summary.py"}; PACK_CMD=${PACK_CMD:-"bash $HERE/pack_results.sh"}
+LEDGER_CMD=${LEDGER_CMD:-"$PY $REPO/scripts_project/s4d_ledger_redo.py"}   # M10R: ledger exports + B16 redone from the solved network (--repost)
 SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'   # licence-line filter (written so that this file holds no licence keyword)
 TRUNC=(); [ -n "$TRUNCATE" ] && TRUNC=(--truncate "$TRUNCATE")
 
@@ -106,15 +142,27 @@ else
   [ -n "$AUTH" ] || { echo "REFUSED: --auth \"<user authorisation text>\" is required"; exit 2; }
 fi
 command -v setsid >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1 && [ -x /usr/bin/time ] || { echo "REFUSED: setsid (util-linux), timeout (coreutils) and GNU time at /usr/bin/time are required"; exit 2; }
-mkdir -p "$OUT" "$OUT/export" "$OUT/tmp" || { echo "cannot create $OUT"; exit 2; }
-ST="$OUT/STATUS.txt"; EXP="$OUT/export"; T_START=$(date +%s)
+if [ "$S1MODE" = 1 ]; then   # M10R: --repost / --summary-s1 write only under --into (created after the refusal checks); the run folder must exist and is read only
+  [ -d "$OUT" ] || { echo "REFUSED: run folder $OUT missing (nothing to re-post-process)"; exit 2; }
+  ST="$INTO/STATUS.txt"; EXP="$INTO/export"; ERRF="$INTO/POSTPROC_ERRORS"; export TMPDIR="$INTO/tmp"
+else
+  mkdir -p "$OUT" "$OUT/export" "$OUT/tmp" || { echo "cannot create $OUT"; exit 2; }
+  ST="$OUT/STATUS.txt"; EXP="$OUT/export"; ERRF="$OUT/POSTPROC_ERRORS"
+  export TMPDIR="$OUT/tmp"   # M10A (B5.4): temporary files (linopy LP problem file of each solve, Python tempfile) on the data disk inside the run dir, not /tmp (system disk)
+fi
+T_START=$(date +%s)
 export PYTHONHASHSEED=0
-export TMPDIR="$OUT/tmp"   # M10A (B5.4): temporary files (linopy LP problem file of each solve, Python tempfile) on the data disk inside the run dir, not /tmp (system disk)
 POST_TIMEOUT_S=${POST_TIMEOUT_S:-1800}; PACK_TIMEOUT_S=${PACK_TIMEOUT_S:-7200}   # M10A (B5.2): per post-processing step / per pack (B3: <= ~150 s per step at 365x24h)
 
 now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 log() { echo "$*" >> "$ST"; }
-halted() { [ -f "$OUT/STOP" ] || [ -f "$OUT/STOP_SAFE" ]; }
+PRE_STOP=""; [ -f "$OUT/STOP" ] && PRE_STOP=$(cat "$OUT/STOP")   # M10R: the STOP lines present at the start (--only: acknowledged, not a stop of the selection)
+halted() {
+  [ -f "$OUT/STOP_SAFE" ] && return 0
+  [ -f "$OUT/STOP" ] || return 1
+  [ "$ONLY_MODE" = 1 ] || return 0
+  local l; while read -r l; do [ -n "$l" ] && ! grep -qxF -- "$l" <<< "$PRE_STOP" && return 0; done < "$OUT/STOP"; return 1   # --only: only a NEW STOP line halts
+}
 safe_stop() { echo "$1" >> "$OUT/STOP_SAFE"; log "STOP_SAFE:$1:$(now) - nothing else starts; waiting for the user"; }
 jget() {   # $1 json file, $2 dotted key -> value ("" when missing)
   "$PY" -c "import json,sys
@@ -183,14 +231,41 @@ c1_cmd() {   # $1 rid $2 run dir $3 network $4 scenario $5 label, then the refer
 step() {   # $1 rid (or batch) $2 step name, then the command: aux + record; a non-zero exit (crash, timeout) is POSTPROC_ERROR and never changes the schedule
   local rid=$1 name=$2 rc t=$POST_TIMEOUT_S; shift 2; [ "$name" = pack ] && t=$PACK_TIMEOUT_S
   ( cd "$REPO" && exec env -u GRB_LICENSE_FILE $(aux_env) timeout -k 30 "$t" "$@" ); rc=$?
-  [ $rc = 0 ] || { echo "$rid $name exit=$rc $(now)" >> "$OUT/POSTPROC_ERRORS"
+  [ $rc = 0 ] || { echo "$rid $name exit=$rc $(now)" >> "$ERRF"
     log "POSTPROC_ERROR:$rid:$name:exit=$rc$( { [ $rc = 124 ] || [ $rc = 137 ]; } && echo ":timeout_${t}s"):$(now) - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1); missing C1 / GATES_V6 inputs follow the rules"; }
   return $rc
 }
 
-log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
+# ---- M10R: refusals of the per-run modes, before anything is written
+MODE=batch
+if [ "$ONLY_MODE" = 1 ]; then
+  MODE="only(${ONLY[*]})"
+  for rid in "${ONLY[@]}"; do
+    [ -n "${SC[$rid]:-}" ] || { echo "REFUSED: --only $rid is not a run of the registered table"; exit 2; }
+    [ -f "$OUT/$rid/.ended" ] && { echo "REFUSED: --only $rid has ended ($(cat "$OUT/$rid/.cond" 2>/dev/null)) - a solve is never repeated (rule 3.1)"; exit 2; }
+  done
+  [ "$NOSOLVE" = 1 ] || [ -f "$OUT/BATCH_REFERENCE.json" ] || { echo "REFUSED: --only needs the batch C1 reference $OUT/BATCH_REFERENCE.json (R1 / R2 of this batch); the selected runs are graded with it"; exit 2; }
+  [ -f "$OUT/STOP_SAFE" ] && { echo "REFUSED: STOP_SAFE present ($(head -c 200 "$OUT/STOP_SAFE" | tr '\n' ' ')) - a safe stop is resolved by the user first, never overridden by --only"; exit 2; }
+fi
+if [ -n "$REPOST_RID" ]; then
+  MODE="repost($REPOST_RID)"; rid=$REPOST_RID
+  [ -n "${SC[$rid]:-}" ] || { echo "REFUSED: --repost $rid is not a run of the registered table"; exit 2; }
+  [ -f "$OUT/$rid/.ended" ] || { echo "REFUSED: --repost $rid has not ended (nothing to re-post-process; --only solves a run that never started)"; exit 2; }
+  [ -f "$OUT/$rid/RUN.json" ] && [ -f "$OUT/$rid/SOLVE_RECEIPT.json" ] || { echo "REFUSED: --repost $rid: RUN.json / SOLVE_RECEIPT.json missing"; exit 2; }
+  [ -e "$INTO/$rid" ] && { echo "REFUSED: $INTO/$rid exists - every repost goes to a new folder"; exit 2; }
+fi
+if [ "$SUMMARY_S1" = 1 ]; then
+  MODE=summary_s1
+  [ -e "$INTO/batch_s1" ] && { echo "REFUSED: $INTO/batch_s1 exists - every summary goes to a new folder"; exit 2; }
+  for u in ${USE[@]+"${USE[@]}"}; do
+    rid=${u%%=*}; d=${u#*=}
+    [ -n "${SC[$rid]:-}" ] && [ -f "$d/V6_ACCEPTANCE.json" ] && [ -f "$d/SOLVE_RECEIPT.json" ] || { echo "REFUSED: --use $u: not a registered run or no V6_ACCEPTANCE.json / SOLVE_RECEIPT.json in $d"; exit 2; }
+  done
+fi
+[ "$S1MODE" = 1 ] && { mkdir -p "$INTO/export" "$INTO/tmp" || { echo "cannot create $INTO"; exit 2; }; }
+log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):mode=$MODE:build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
 [ "$FORMAL" = 0 ] && [ "$NOSOLVE" = 0 ] && log "NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=${HOOKS_SET%,}"
-[ -f "$OUT/.created" ] || now > "$OUT/.created"
+[ "$S1MODE" = 1 ] || [ -f "$OUT/.created" ] || now > "$OUT/.created"
 
 # ---- container cgroup memory (monitor)
 cg_mem_limit_b() { local v=""
@@ -240,8 +315,8 @@ registered_of() {   # GATES_V6 G2.1 registered SHA256: variant receipt output.sh
 }
 
 # ---- phase 0: inputs, base networks against the build receipts, variants against the local dry run
-prepare() {
-  local f rid
+prepare() {   # M10R: optional rids = only these runs' variants (--only); default every variant run
+  local f rid rids=("$@"); [ ${#rids[@]} -gt 0 ] || rids=(R5 R6 R7 R8 R9 R10 R11)
   [ "$POST_ONLY" = 1 ] && { log "PREPARE:skipped (POST_ONLY: no solve, no variants needed)"; return 0; }
   for f in integrated_365_24h_unsolved.nc disconnected_365_24h_unsolved.nc integrated_BUILD_RECEIPT.json disconnected_BUILD_RECEIPT.json \
            integrated_costs_active_research.csv disconnected_costs_active_research.csv; do
@@ -251,7 +326,8 @@ prepare() {
   local bc; bc=$(aux $SUM_CMD base-check --nets "$NETS" --out "$OUT/BASE_CHECK.json" 2>> "$OUT/prepare.err")
   log "BASE_CHECK:$bc"; [ "$bc" = all_equal ] || { safe_stop "BASE_NETWORK_SHA256:$bc"; return 1; }
   mkdir -p "$OUT/variants"
-  for rid in R5 R6 R7 R8 R9 R10 R11; do
+  for rid in "${rids[@]}"; do
+    [ -n "${SET[$rid]}" ] || continue
     local V="$OUT/variants/$rid" costs=()
     if [ ! -f "$(ls "$V"/*_VARIANT_RECEIPT.json 2>/dev/null | head -1)" ]; then
       mkdir -p "$V"; [ "${SET[$rid]%%=*}" = finance.wacc_mode ] && costs=(--costs "$NETS/${COSTS[$rid]}_costs_active_research.csv")
@@ -340,14 +416,18 @@ solve_run() {   # $1 rid, $2 .solve_end file of the previous run in the lane (ma
 }
 
 # ---- post-processing of one run (instruction section 3.4); idempotent: every step skips an output that exists
-accept() {   # $1 rid -> label (V6_ACCEPTANCE.json)
-  local d="$OUT/$1" reg
+accept() {   # $1 rid [$2 run dir] -> label (V6_ACCEPTANCE.json)
+  local d="${2:-$OUT/$1}" reg
   if [ -n "${SET[$1]}" ]; then reg=(--registered-sha256 "$(jget "$d/RUN.json" registered_sha256)"); else reg=(--build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json"); fi
   local lab; lab=$(aux $G6_CMD accept --solve-dir "$d" "${reg[@]}" --repo "$REPO" 2>> "$d/v6.err" | tail -1)
   echo "$lab" > "$d/.label"; echo "$lab"
 }
-stop_check() {   # $1 rid: graded stop rule (supplement 01 item 2; item 138 D12)
-  local d="$OUT/$1" lab cls act; lab=$(cat "$d/.label" 2>/dev/null)
+stop_check() {   # $1 rid [$2 run dir]: graded stop rule (supplement 01 item 2; item 138 D12)
+  local d="${2:-$OUT/$1}" lab cls act; lab=$(cat "$d/.label" 2>/dev/null)
+  if [ -n "$REPOST_RID" ]; then   # M10R --repost: the classification is recorded (STOP_CLASS.json in the new folder) and never written to STOP / UNUSABLE
+    read -r cls act < <(aux $SUM_CMD stop-class --dir "$d" 2>> "$d/stop_class.err" | tail -1)
+    log "REPOST_CLASS:$1:label=${lab:-none}:class=${cls:-unreadable}:registered_action=${act:-stop} - recorded only; the batch STOP / UNUSABLE and the original label are not changed by a repost"; return 0
+  fi
   case "$lab" in ACCEPTED_LAYER1|ACCEPTED_LAYER2) return 0;; esac   # NOT_ACCEPTED, or no label (acceptance failed) -> classified
   read -r cls act < <(aux $SUM_CMD stop-class --dir "$d" 2>> "$d/stop_class.err" | tail -1)
   [ -n "${act:-}" ] || { cls=unreadable; act=stop; }   # class not readable -> stop (as a failed G2 check)
@@ -362,8 +442,8 @@ stop_check() {   # $1 rid: graded stop rule (supplement 01 item 2; item 138 D12)
       log "NOT_ACCEPTED_REFERENCE_DEPENDENT:$1:$(c1_summary "$d/PRECISION.json") - C1 (b) / (c) only: no stop (item 138 D12)";;
   esac
 }
-export_run() {   # $1 rid -> export/<rid>/ (scrubbed logs; no LP / solution arrays, no raw solver log)
-  local d="$OUT/$1" e="$EXP/$1" f; mkdir -p "$e"
+export_run() {   # $1 rid [$2 run dir] -> export/<rid>/ (scrubbed logs; no LP / solution arrays, no raw solver log)
+  local d="${2:-$OUT/$1}" e="$EXP/$1" f; mkdir -p "$e"
   for f in RUN.json SOLVE_RECEIPT.json V5_GATES.json INTERIOR_CHECKS.json BUNKER_ACCOUNT.json GUROBI_LOG_SCRUBBED.txt RESOURCE.jsonl CO2_FLOWS.json GAP_TABLE.json \
            EMISSIONS_BY_COUNTRY.json CAPACITY_BY_TECH_COUNTRY.json cross_border_flows.csv COUNTRY_COST_LEDGER.csv COUNTRY_COST_LEDGER_USD2020.csv COUNTRY_COST_LEDGER_DETAIL.csv \
            LEDGER_IDENTITY.json NODAL_PRICES.csv DUALS_BY_CONSTRAINT.nc DUALS_INDEX.csv COMPONENT_COST_BREAKDOWN.csv COMPONENT_COST_BREAKDOWN_SUMMARY.json costs_active_research.csv \
@@ -384,8 +464,8 @@ export_run() {   # $1 rid -> export/<rid>/ (scrubbed logs; no LP / solution arra
     tail -60 "$d/gurobi.linopy.log" 2>/dev/null | grep -viE "$SCRUB" > "$e/LOG_TAIL_NONOPTIMAL.txt"; tail -60 "$d/solve.err" 2>/dev/null | grep -viE "$SCRUB" > "$e/STDERR_TAIL_NONOPTIMAL.txt"
   fi
 }
-post_run() {   # $1 rid
-  local rid=$1 d="$OUT/$1"
+post_run() {   # $1 rid [$2 run dir (M10R --repost: the new folder)]
+  local rid=$1 d="${2:-$OUT/$1}"
   [ "$DRY" = 1 ] && return 0
   [ -f "$d/RUN.json" ] || return 0
   if [ "$BUILD_ONLY" = 1 ]; then
@@ -394,6 +474,11 @@ post_run() {   # $1 rid
   fi
   [ -f "$d/.ended" ] || return 0
   local net sc lab rc ref=(); net=$(jget "$d/RUN.json" network); sc=$(jget "$d/RUN.json" scenario); lab=$(jget "$d/RUN.json" label)
+  if [ ! -s "$net" ]; then   # M10R --repost on another machine: the RUN.json path of the instance is absent - the registered network of this package, same SHA256 only
+    local alt; alt=$(net_of "$rid")
+    if [ -n "$alt" ] && [ -s "$alt" ] && [ "$(sha256sum "$alt" | cut -c1-64)" = "$(jget "$d/RUN.json" network_sha256)" ]; then log "NETWORK_PATH_$rid:$net absent here; using $alt (same SHA256)"; net=$alt
+    else log "NETWORK_PATH_$rid:$net absent and no registered network with the same SHA256 here - violation analysis / C1 / Owen will not be computable"; fi
+  fi
   [ -f "$OUT/BATCH_REFERENCE.json" ] && ref=(--reference "$OUT/BATCH_REFERENCE.json")
   # M10A: each step under step() = timeout + thread budget + POSTPROC_ERROR record; a crash or timeout here never stops the batch by itself
   # (VIOLATIONS.json / PRECISION.json missing -> C1 not computable -> the graded stop rule as registered; M12 / Owen / RHS outputs missing -> no effect on GATES_V6)
@@ -432,8 +517,8 @@ post_run() {   # $1 rid
           --out "$d/m12_loo_rhs" > "$d/m12_loo_rhs.log" 2>&1; log "RHS_CHECK_$rid:exit=$?:$(tail -1 "$d/m12_loo_rhs.log" 2>/dev/null)"
     fi;;
   esac
-  log "V6_$rid:$(accept "$rid"):$( [ -f "$d/PRECISION.json" ] && c1_summary "$d/PRECISION.json" | sed 's/.*:ref=/ref=/')"
-  export_run "$rid"; stop_check "$rid"
+  log "V6_$rid:$(accept "$rid" "$d"):$( [ -f "$d/PRECISION.json" ] && c1_summary "$d/PRECISION.json" | sed 's/.*:ref=/ref=/')"
+  export_run "$rid" "$d"; stop_check "$rid" "$d"
 }
 
 # ---- batch reference and regrade (after phase 1; repeated after every phase: idempotent)
@@ -516,11 +601,66 @@ batch_post() {   # instruction section 3.5: leave-one-out check, B6 / benefit an
   for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json LEVEL2.json PROFILE_CHOICE.json BATCH3_SUMMARY.json BATCH3_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
   for f in M12_LOO M12_BENEFIT; do [ -d "$OUT/$f" ] && { mkdir -p "$EXP/batch/$f"; cp -r "$OUT/$f"/. "$EXP/batch/$f/"; }; done
 }
-pack() {   # $1 tag
+pack() {   # $1 tag [$2 export paths to pack (default export) $3 arrays manifest path $4 run ids of the manifest] - M10R: subsets for --only / --repost / --summary-s1
   [ "$DRY" = 1 ] && return 0
-  cp "$ST" "$EXP/batch/" 2>/dev/null
-  local r; r=$(step batch pack $PACK_CMD "$OUT" "$1" 2>&1 | tail -1); log "PACK_$1:$r"
+  local root=$OUT; [ "$S1MODE" = 1 ] && root=$INTO
+  [ -n "${2:-}" ] || cp "$ST" "$EXP/batch/" 2>/dev/null
+  local r; r=$(step batch pack $PACK_CMD "$root" "$1" ${2:+"$2"} ${3:+"$3"} ${4:+"$4"} 2>&1 | tail -1); log "PACK_$1:$r"
 }
+
+# ---- M10R per-run modes (supplement S1; RUN_PLAN.md section 11)
+only_main() {   # --only: the selected never-started runs in one lane with the registered gaps / limits / post-processing / graded stop; exit 3 on a new STOP
+  log "ONLY_MODE:$(now):runs=${ONLY[*]}:existing_stop=$(echo "$PRE_STOP" | paste -sd, -):existing_unusable=$(cut -d' ' -f1 "$OUT/UNUSABLE" 2>/dev/null | paste -sd, -) - the STOP of other runs is acknowledged and does not block the selected runs; rules 3.1-3.5 apply to them unchanged; no regrade, no level-2, no batch summary (BATCH3_SUMMARY unchanged: --summary-s1 writes the supplement)"
+  prepare "${ONLY[@]}" || { log "HALTED_ONLY:$(now):phase 0"; exit 3; }
+  phase_gap ONLY; halted && { log "HALTED_ONLY:$(now):halted during the gap"; exit 3; }
+  lane A "${ONLY[@]}"
+  local rid sub=""
+  for rid in "${ONLY[@]}"; do [ -d "$EXP/$rid" ] && { cp "$ST" "$EXP/$rid/ONLY_STATUS.txt"; sub="$sub export/$rid"; [ -d "$EXP/variants/$rid" ] && sub="$sub export/variants/$rid"; }; done
+  [ -n "$sub" ] && pack "only_$(IFS=_; echo "${ONLY[*]}")" "${sub# }" "export/${ONLY[0]}/ARRAYS_MANIFEST.json" "$(IFS=,; echo "${ONLY[*]}")"
+  UNU=$(cut -d' ' -f1 "$OUT/UNUSABLE" 2>/dev/null | paste -sd, -)
+  if halted; then log "HALTED_ONLY:$(now):$(cat "$OUT/STOP" "$OUT/STOP_SAFE" 2>/dev/null | tr '\n' ' ')- a selected run failed G2 or a safe stop (no retry, no parameter change); user decision:unusable=${UNU:-none}"; exit 3; fi
+  log "DONE_ONLY:$(now):runs=${ONLY[*]}:unusable=${UNU:-none}"; exit 0
+}
+repost_main() {   # --repost: the post-processing of an ended run redone into $INTO/<rid> with the current code; nothing of the original folder changes
+  local rid=$REPOST_RID src="$OUT/$rid" new="$INTO/$rid" arrays="${ARRAYS:-$OUT/$rid}" f nc
+  nc=$(ls "$src"/*_solved.nc 2>/dev/null | head -1); [ -n "$nc" ] || nc=$(ls "$OUT/export/$rid"/*_solved.nc 2>/dev/null | head -1)
+  [ -n "$nc" ] && [ -s "$nc" ] || { echo "REFUSED: no solved network (*_solved.nc) of $rid in $src or $OUT/export/$rid (the full results pack holds it)"; exit 2; }
+  [ -f "$arrays/lp/MATH_PROBLEM.json" ] && [ -f "$arrays/solution/X.npy" ] || { echo "REFUSED: LP / solution arrays of $rid missing under $arrays (lp/, solution/): rebuild lp/ with s2_solve.py --stop-before-solve on the registered network, fetch solution/ from the instance, pass --arrays <dir>"; exit 2; }
+  mkdir -p "$new/v5"
+  for f in RUN.json SOLVE_RECEIPT.json V5_GATES.json INTERIOR_CHECKS.json BUNKER_ACCOUNT.json GUROBI_LOG_SCRUBBED.txt RESOURCE.jsonl CO2_FLOWS.json EMISSIONS_BY_COUNTRY.json CAPACITY_BY_TECH_COUNTRY.json \
+           cross_border_flows.csv EXPORTS.json COMPONENT_COST_BREAKDOWN.csv COMPONENT_COST_BREAKDOWN_SUMMARY.json costs_active_research.csv DUALS_INDEX.csv .cond .exit .ended .started .solve_end; do
+    [ -f "$src/$f" ] && cp "$src/$f" "$new/"
+  done
+  [ -f "$src/v5/kkt_summary.json" ] && cp "$src/v5/kkt_summary.json" "$new/v5/"
+  ln -s "$nc" "$new/$(basename "$nc")"; [ -f "$src/DUALS_BY_CONSTRAINT.nc" ] && ln -s "$src/DUALS_BY_CONSTRAINT.nc" "$new/DUALS_BY_CONSTRAINT.nc"
+  ln -s "$arrays/lp" "$new/lp"; ln -s "$arrays/solution" "$new/solution"
+  "$PY" - "$new/REPOST.json" "$rid" "$src" "$new" "$arrays" "$(jget "$src/V6_ACCEPTANCE.json" label)" "$(cat "$REPO/.package_commit" 2>/dev/null || echo none)" "$(basename "$nc")" <<'P'
+import json, sys, time
+p, rid, src, new, arrays, lab, commit, nc = sys.argv[1:9]
+json.dump(dict(rid=rid, source_run_dir=src, repost_dir=new, arrays_dir=arrays, solved_network=nc, label_before=lab or None, code_commit=commit,
+               reason="post-hoc code defect fix (M10R, 2026-10-24): the post-processing is redone with the fixed code; the solve, its receipt, the original folder, its label and the batch STOP are unchanged",
+               written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), solver_runs=0), open(p, "w"), indent=1)
+P
+  log "REPOST_$rid:$(now):source=$src:into=$new:arrays=$arrays:label_before=$(jget "$src/V6_ACCEPTANCE.json" label):network=$(basename "$nc")"
+  step "$rid" ledger $LEDGER_CMD --solve-dir "$src" --into "$new" --repo "$REPO" > "$new/ledger_redo.log" 2> "$new/ledger_redo.err"; log "LEDGER_$rid:exit=$?:$(tail -1 "$new/ledger_redo.log" 2>/dev/null | cut -c1-300)"
+  post_run "$rid" "$new"
+  local rc; rc=$(aux $SUM_CMD repost-check --src "$src" --new "$new" 2>> "$new/repost_check.err" | tail -1); log "REPOST_CHECK_$rid:$rc"
+  pack "repost_$rid" "export/$rid$( [ -d "$EXP/variants/$rid" ] && echo " export/variants/$rid")" "export/$rid/ARRAYS_MANIFEST.json" "$rid"
+  log "DONE_REPOST:$(now):$rid:label_before=$(jget "$src/V6_ACCEPTANCE.json" label):label_after=$(cat "$new/.label" 2>/dev/null)"
+  exit 0
+}
+summary_s1_main() {   # --summary-s1: the batch-level summary into $INTO/batch_s1 with the --use runs taken from their re-post-processed folders
+  local args=() u; for u in ${USE[@]+"${USE[@]}"}; do args+=(--use "$u"); done
+  mkdir -p "$INTO/batch_s1"
+  aux $SUM_CMD summary --out-dir "$OUT" --into "$INTO/batch_s1" --name BATCH3_SUMMARY_S1 ${args[@]+"${args[@]}"} > "$INTO/batch_s1/summary.log" 2>&1; local rc=$?
+  log "SUMMARY_S1:exit=$rc:use=${USE[*]:-none}:$(tail -1 "$INTO/batch_s1/summary.log" | cut -c1-300)"
+  mkdir -p "$EXP/batch_s1"; cp "$INTO/batch_s1"/BATCH3_SUMMARY_S1.* "$EXP/batch_s1/" 2>/dev/null; cp "$ST" "$EXP/batch_s1/STATUS_S1.txt"
+  pack summary_s1 "export/batch_s1" "export/batch_s1/ARRAYS_MANIFEST.json" "-"
+  log "DONE_SUMMARY_S1:$(now):exit=$rc"; exit $rc
+}
+[ "$ONLY_MODE" = 1 ] && only_main
+[ -n "$REPOST_RID" ] && repost_main
+[ "$SUMMARY_S1" = 1 ] && summary_s1_main
 
 # ---- the batch
 prepare || { log "HALTED:$(now):phase 0"; batch_post summary; pack halted_phase0; exit 3; }

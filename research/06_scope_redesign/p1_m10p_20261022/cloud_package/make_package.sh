@@ -22,6 +22,19 @@ RESEARCH_KEEP=()   # research/ files needed at run time (supplement 01 item 5): 
 [ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "tracked changes not committed - commit first"; exit 1; }
 [ ! -e "$DIST" ] || { echo "dist folder $DIST exists - choose a new one (never overwrite a package)"; exit 1; }
 [ ! -e "$WORK" ] || { echo "work folder $WORK exists - choose a new one"; exit 1; }
+# M10R (RUN_PLAN.md 11.4): the post-processing drill of every network type must have run on THIS commit (DRILL_JSON = its DRILL_POSTPROC.json;
+# research/06_scope_redesign/p1_m10r_20261024/scripts/drill_postproc.sh); DRILL_SKIP=1 only with the reason recorded in the report
+DRILL_JSON=${DRILL_JSON:-}
+if [ "${DRILL_SKIP:-0}" != 1 ]; then
+  [ -n "$DRILL_JSON" ] && [ -f "$DRILL_JSON" ] || { echo "REFUSED: DRILL_JSON=<DRILL_POSTPROC.json of commit $C8> is required (RUN_PLAN.md 11.4: the drill of every network type runs before every package; DRILL_SKIP=1 only with a recorded reason)"; exit 1; }
+  "$PY" - "$DRILL_JSON" "$COMMIT" <<'P' || exit 1
+import json, sys
+d = json.load(open(sys.argv[1])); ok = bool(d.get("all_types_ran")) and d.get("code_commit") == sys.argv[2]
+print("drill:", "OK" if ok else "REFUSED (not complete or another commit)", d.get("code_commit"), len(d.get("types") or {}), "types; real", d.get("real_types"), "synthetic", d.get("synthetic_types"))
+sys.exit(0 if ok else 1)
+P
+fi
+export DRILL_JSON DRILL_SKIP=${DRILL_SKIP:-0}
 # 1. the registered network files (M08b supplement 01 section 8.5) and their receipts
 declare -A WANT=([integrated/integrated_365_24h_unsolved.nc]=75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e
                  [disconnected/disconnected_365_24h_unsolved.nc]=888a009b5f19eb34f7f1c24e36f7c8370617a9c405b1097a9caed0599cecbee4)
@@ -138,7 +151,11 @@ json.dump(dict(commit=commit, created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", ti
                         schedule=[dict(phase=p, lane_a=a, lane_b=bb) for p, a, bb in SCHEDULE],
                         instance=dict(cores=">= 25 (phase-2 pairs T16 + A = 24)", memory_gib=">= 64 (preflight hard floor, M10A supplement 01 D3; rent ~90 GB)", data_disk_free_gb=">= 45 after the environment install (hard floor; rent ~80 GB)", recommended="1 GPU 8481C / 8470Q class"),
                         licence="GRB_LICENSE_FILE supplied by the user on the instance; never in the package"),
-               never_included=["licence", "cutout", "LP / solution arrays", "variant networks (generated on the instance)", "results"]),
+               never_included=["licence", "cutout", "LP / solution arrays", "variant networks (generated on the instance)", "results"],
+               drill=(dict(file=os.environ.get("DRILL_JSON"), sha256=hashlib.sha256(open(os.environ["DRILL_JSON"], "rb").read()).hexdigest(),
+                           **{k: json.load(open(os.environ["DRILL_JSON"])).get(k) for k in ("code_commit", "all_types_ran", "real_types", "synthetic_types", "written_utc")})
+                      if os.environ.get("DRILL_JSON") and os.path.exists(os.environ["DRILL_JSON"]) else dict(skipped=True, reason="DRILL_SKIP=1 (see the report)")),
+               supplement_s1=dict(run_modes=["--only", "--repost --into", "--summary-s1 --into --use"], plan="RUN_PLAN.md section 11", ledger_fix="M10R: s4d_ledger / m12_rhs_audit keep-stock meta rows")),
           open(os.path.join(dist, "PACKAGE_MANIFEST.json"), "w"), indent=1)
 print("manifest:", len(rows), "files,", total, "bytes")
 P

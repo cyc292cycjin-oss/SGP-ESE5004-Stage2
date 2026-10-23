@@ -212,8 +212,9 @@ def postproc_errors(out: Path) -> list:
 
 
 # --------------------------------------------------------------------------------------------- per-run state
-def run_state(out: Path, rid: str) -> dict:
-    d = out / rid; rec = jl(d / "SOLVE_RECEIPT.json") or {}; prec = jl(d / "PRECISION.json") or {}; acc = jl(d / "V6_ACCEPTANCE.json") or {}
+def run_state(out: Path, rid: str, d: Path | None = None) -> dict:
+    """d: the run folder when it is not out/<rid> (M10R --summary-s1 --use: a re-post-processed folder of --repost)."""
+    d = Path(d) if d else out / rid; rec = jl(d / "SOLVE_RECEIPT.json") or {}; prec = jl(d / "PRECISION.json") or {}; acc = jl(d / "V6_ACCEPTANCE.json") or {}
     prov = jl(d / "V6_ACCEPTANCE_PROVISIONAL.json"); owen = jl(d / "m12_owen" / "OWEN.json") or {}; oreg = jl(d / "m12_owen" / "OWEN_REGRADE_BATCH_REFERENCE.json")
     run = jl(d / "RUN.json") or {}
     if (d / ".ended").exists():
@@ -262,16 +263,18 @@ def owen_main(d: Path) -> dict:
     return dict((o.get("allocation_eur") or {}).get(str(o.get("alpha_main", 0.5)), {})) if o else {}
 
 
-def pair_difference(out: Path, new: str, base: str, title: str) -> dict:
+def pair_difference(out: Path, new: str, base: str, title: str, dirs: dict | None = None) -> dict:
     """new - base: objective, country ledger totals, Owen dual-form allocation (alpha main); usable only when both runs are accepted (a run recorded
-    unusable by the graded stop rule is NOT_ACCEPTED)."""
-    a, b = run_state(out, new), run_state(out, base); un = unusable_runs(out)
+    unusable by the graded stop rule is NOT_ACCEPTED). dirs: {rid: folder} overrides of the run folders (M10R --summary-s1 --use)."""
+    dirs = dirs or {}; dn, db = dirs.get(new, out / new), dirs.get(base, out / base)
+    a, b = run_state(out, new, dn), run_state(out, base, db); un = unusable_runs(out)
     res = dict(new=new, base=base, title=title, new_label=a["v6"], base_label=b["v6"], unusable=sorted(r for r in (new, base) if r in un),
-               usable=bool(a["v6"] and b["v6"] and a["v6"] != "NOT_ACCEPTED" and b["v6"] != "NOT_ACCEPTED"))
+               usable=bool(a["v6"] and b["v6"] and a["v6"] != "NOT_ACCEPTED" and b["v6"] != "NOT_ACCEPTED"),
+               reposted=sorted(r for r in (new, base) if r in dirs))
     if a["objective"] is None or b["objective"] is None:
         return dict(res, computable=False, reason="objective missing (run not finished or not solved)")
-    la, lb = ledger_totals(out / new), ledger_totals(out / base)
-    oa, ob = owen_main(out / new), owen_main(out / base)
+    la, lb = ledger_totals(Path(dn)), ledger_totals(Path(db))
+    oa, ob = owen_main(Path(dn)), owen_main(Path(db))
     led = {c: bn(la.get(c, 0.0) - lb.get(c, 0.0)) for c in COUNTRIES + ("ASEAN",)} if (la and lb) else None
     ow = {p: bn(oa.get(p, 0.0) - ob.get(p, 0.0)) for p in COUNTRIES + ("BUNKER",)} if (oa and ob) else None
     return dict(res, computable=True, objective_difference_bn=bn(a["objective"] - b["objective"]), relative=(a["objective"] - b["objective"]) / abs(b["objective"]),
@@ -301,14 +304,18 @@ def b6_gate(out: Path) -> dict | None:
     return dict(g, b6_bn=bn(g["difference"]), runs=dict(integrated="R1", disconnected="R2"), labels=dict(R1=i["v6"], R2=d["v6"]))
 
 
-def summary(out: Path) -> dict:
-    runs = {rid: run_state(out, rid) for rid in RUNS}
+def summary(out: Path, use: dict | None = None, into: Path | None = None, name: str = "BATCH3_SUMMARY") -> dict:
+    """use: {rid: folder} - runs taken from a re-post-processed folder (M10R --repost); into / name: where the summary is written (the batch's
+    BATCH3_SUMMARY.json / .md in out are never rewritten by a supplement summary)."""
+    dirs = {k: Path(v) for k, v in (use or {}).items()}
+    runs = {rid: run_state(out, rid, dirs.get(rid)) for rid in RUNS}
     loo = jl(out / "M12_LOO" / "LOO_CHECK.json"); ben = jl(out / "M12_BENEFIT" / "BENEFIT.json")
     pc = jl(out / "PROFILE_CHOICE.json")
     stop = (out / "STOP").read_text().split() if (out / "STOP").exists() else []
     safe = (out / "STOP_SAFE").read_text().strip() if (out / "STOP_SAFE").exists() else None
-    res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=b6_gate(out),
-               sensitivity=[pair_difference(out, *p) for p in SENSITIVITY], information=[pair_difference(out, *p) for p in INFORMATION_PAIRS],
+    reposts = {rid: dict((jl(d / "REPOST.json") or {}), label_after=runs[rid]["v6"], folder=str(d), repost_check=jl(d / "REPOST_CHECK.json")) for rid, d in dirs.items()}
+    res = dict(script=SCRIPT, out=str(out), name=name, runs=runs, unusable=unusable_runs(out), B6=b6_gate(out),
+               sensitivity=[pair_difference(out, *p, dirs=dirs) for p in SENSITIVITY], information=[pair_difference(out, *p, dirs=dirs) for p in INFORMATION_PAIRS],
                level2=jl(out / "LEVEL2.json"), profile_choice=pc,
                loo=(dict(computable=loo.get("computable", True), all_passed=(loo.get("check") or {}).get("all_passed"),
                          indivisible_cost_sign=(loo.get("check") or {}).get("indivisible_cost_sign"),
@@ -317,9 +324,36 @@ def summary(out: Path) -> dict:
                                     for c, v in ((loo.get("check") or {}).get("countries") or {}).items()}, reason=loo.get("reason")) if loo else None),
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"),
                              reason=ben.get("reason")) if ben else None),
-               stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), solver_runs=0)
-    (out / "BATCH3_SUMMARY.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
-    (out / "BATCH3_SUMMARY.md").write_text(markdown(res))
+               stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), reposts=reposts, solver_runs=0)
+    dst = Path(into) if into else out
+    (dst / f"{name}.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+    (dst / f"{name}.md").write_text(markdown(res))
+    return res
+
+
+def _strip(o, drop=("seconds", "solve_dir", "network", "out", "written_utc", "script", "label", "repo", "path", "time", "utc", "source", "into")):
+    if isinstance(o, dict):
+        return {k: _strip(v, drop) for k, v in o.items() if k not in drop}
+    return [_strip(v, drop) for v in o] if isinstance(o, list) else o
+
+
+def repost_check(src: Path, new: Path) -> dict:
+    """M10R --repost consistency check: the violation analysis of the repost must equal the original (unchanged code), C1 (a) / (b) numbers must
+    equal the original PRECISION.json; B16 / C1 (c) / label before and after are recorded. Written to <new>/REPOST_CHECK.json."""
+    va_s, va_n = jl(src / "VIOLATIONS.json"), jl(new / "VIOLATIONS.json")
+    ps, pn = jl(src / "PRECISION.json") or {}, jl(new / "PRECISION.json") or {}
+
+    def ab(p):
+        a = p.get("a_total_cost") or {}; b = p.get("b_primal_violations") or {}
+        return dict(a=[a.get("returned_difference_bn"), a.get("returned_relative")], b={c: v.get("first_order_cost_bn") for c, v in (b.get("country_check") or {}).items()})
+    gs, gn = (jl(src / "V5_GATES.json") or {}).get("B16_LEDGER") or {}, (jl(new / "V5_GATES.json") or {}).get("B16_LEDGER") or {}
+    res = dict(script=SCRIPT, rid=new.name, source=str(src), repost=str(new),
+               violations_equal=bool(va_s is not None and va_n is not None and _strip(va_s) == _strip(va_n)), violations_present=[va_s is not None, va_n is not None],
+               c1_ab_equal=bool(ps and pn and ab(ps) == ab(pn)), c1_ab=dict(before=ab(ps), after=ab(pn)),
+               c1_c=dict(before=((ps.get("grade") or {}).get("c")), after=((pn.get("grade") or {}).get("c"))),
+               b16=dict(before=dict(passed=gs.get("passed"), relative_error=gs.get("relative_error"), error=gs.get("error")), after=dict(passed=gn.get("passed"), relative_error=gn.get("relative_error"), error=gn.get("error"))),
+               label_before=(jl(src / "V6_ACCEPTANCE.json") or {}).get("label"), label_after=(jl(new / "V6_ACCEPTANCE.json") or {}).get("label"), solver_runs=0)
+    (new / "REPOST_CHECK.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
     return res
 
 
@@ -330,8 +364,10 @@ def _f(x, fmt="{:.4f}"):
 def markdown(r: dict) -> str:
     un = ", ".join(f"{k}（{v}）" for k, v in r["unusable"].items())
     pe = ", ".join("{} {} exit={}".format(e["rid"], e["step"], e["exit"]) for e in (r.get("postproc_errors") or []))
-    L = ["# 第三批汇总（M10P 运行脚本自动生成；只读，未调用求解器）", "",
+    rp = "；".join(f"{k}（{v.get('label_before')} → {v.get('label_after')}，{v.get('folder')}）" for k, v in (r.get("reposts") or {}).items())
+    L = [f"# 第三批汇总{'（补做 S1：' + r['name'] + '）' if r.get('name', 'BATCH3_SUMMARY') != 'BATCH3_SUMMARY' else ''}（M10P 运行脚本自动生成；只读，未调用求解器）", "",
          f"- 停批（分级停批规则，补充 01 第 2 项：任一运行 G2 不通过；R1、R2 无返回解或 C1 (a) 不通过）：{', '.join(r['stop_not_accepted']) or '无'}；安全停止：{r['stop_safe'] or '无'}",
+         f"- 事后修复的代码缺陷、重做后处理的运行（M10R `--repost`；求解未重做）：{rp or '无'}",
          f"- 记为不可用、继续其余运行（R3–R11 无返回解 nosol 或 C1 (a) 不通过 c1a）：{un or '无'}",
          f"- 后处理步骤异常或超时（M10A；只记录，不改变调度；可用 `POST_ONLY=1` 补做）：{pe or '无'}", "",
          "## 运行", "", "| 运行 | 作用 | 档案 | 状态 | 终止 | 目标 bn | 求解 s | 峰值 GiB | C1 abc | C1 参照 | 重评次数 | GATES_V6 | 临时标签 | Owen 可用 |",
@@ -442,6 +478,10 @@ def main():
     q = sub.add_parser("stop-class"); q.add_argument("--dir", type=Path, required=True)
     for name in ("level2", "summary"):
         s = sub.add_parser(name); s.add_argument("--out-dir", type=Path, required=True)
+        if name == "summary":   # M10R --summary-s1: runs from re-post-processed folders, written elsewhere under another name
+            s.add_argument("--use", action="append", default=[], help="RID=<folder> (a --repost output) instead of <out-dir>/RID")
+            s.add_argument("--into", type=Path, default=None); s.add_argument("--name", default="BATCH3_SUMMARY")
+    rc = sub.add_parser("repost-check"); rc.add_argument("--src", type=Path, required=True); rc.add_argument("--new", type=Path, required=True)
     p = sub.add_parser("p1"); p.add_argument("--dir", type=Path, required=True); p.add_argument("--log", type=Path, default=None); p.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
     if a.cmd == "runtable":
@@ -466,7 +506,13 @@ def main():
     elif a.cmd == "level2":
         r = level2(a.out_dir); (a.out_dir / "LEVEL2.json").write_text(json.dumps(r, indent=1) + "\n"); print(json.dumps({k: v["candidate"]["precision"] for k, v in r.items()}))
     elif a.cmd == "summary":
-        r = summary(a.out_dir); print(json.dumps(dict(B6_bn=(r["B6"] or {}).get("b6_bn"), runs={k: v["state"] for k, v in r["runs"].items()}), default=str))
+        use = dict(u.split("=", 1) for u in a.use)
+        if any(k not in RUNS for k in use):
+            raise SystemExit(f"--use: unknown run id in {sorted(use)}")
+        r = summary(a.out_dir, use or None, a.into, a.name); print(json.dumps(dict(B6_bn=(r["B6"] or {}).get("b6_bn"), runs={k: v["state"] for k, v in r["runs"].items()}, reposts=sorted(use)), default=str))
+    elif a.cmd == "repost-check":
+        r = repost_check(a.src, a.new)
+        print(f"violations_equal={r['violations_equal']}:c1_ab_equal={r['c1_ab_equal']}:c1_c={r['c1_c']['before']}->{r['c1_c']['after']}:b16={r['b16']['before']['passed']}->{r['b16']['after']['passed']}:label={r['label_before']}->{r['label_after']}")
     else:
         r = p1_summary(a.dir, a.log); a.out.parent.mkdir(parents=True, exist_ok=True); a.out.write_text(json.dumps(r, indent=1, default=str) + "\n")
         print(json.dumps({k: r.get(k) for k in ("ended", "lp_build_seconds", "presolve_seconds", "barrier_iterations_logged", "seconds_per_iteration_median", "peak_rss_gib_monitor")}))
