@@ -78,7 +78,11 @@ def main():
         d[nom + "_opt"] = d[nom].astype(float)
         if "existing_annual_fixed_om_eur" in d:
             const += float(pd.to_numeric(d.existing_annual_fixed_om_eur, errors="coerce").fillna(0.0).sum())
-    zeros = lambda cols: pd.DataFrame(0.0, index=n.snapshots, columns=list(cols))
+    # PyPSA drops time series that equal the default (0) on export, so an all-zero "solution" would not survive the NetCDF round trip and the
+    # post-processing readers would miss the columns: flows / dispatch are a tiny constant EPS (1e-9 MW: every cost term is ~1e-4 EUR in total, far
+    # inside the 0.01 bn identity standard) and every bus dual is 1.0 EUR per unit (settlements EPS x 1.0 x weight: likewise negligible)
+    EPS = 1e-9
+    zeros = lambda cols: pd.DataFrame(EPS, index=n.snapshots, columns=list(cols))
     n.generators_t.p = zeros(n.generators.index); n.loads_t.p = zeros(n.loads.index); n.stores_t.p = zeros(n.stores.index); n.stores_t.e = zeros(n.stores.index)
     n.storage_units_t.p = zeros(n.storage_units.index); n.storage_units_t.p_dispatch = zeros(n.storage_units.index); n.storage_units_t.p_store = zeros(n.storage_units.index)
     n.storage_units_t.state_of_charge = zeros(n.storage_units.index); n.storage_units_t.spill = zeros(n.storage_units.index)
@@ -86,7 +90,7 @@ def main():
         d = n.df(t); pnl = n.pnl(t)
         for p in [c for c in d.columns if c.startswith("bus") and c[3:].isdigit()]:
             pnl["p" + p[3:]] = zeros(d.index)
-    n.buses_t.marginal_price = zeros(n.buses.index); n.buses_t.p = zeros(n.buses.index)
+    n.buses_t.marginal_price = pd.DataFrame(1.0, index=n.snapshots, columns=list(n.buses.index)); n.buses_t.p = zeros(n.buses.index)
     n.objective = const
     nc = out / f"{a.scenario}_{LABEL}_solved.nc"; n.export_to_netcdf(nc)
     back = pypsa.Network(str(nc)); compare_roundtrip(n, back)   # raises when the NetCDF round trip is not exact
@@ -99,7 +103,7 @@ def main():
     (out / "EXPORTS.json").write_text("{}")
     rec.update(termination_condition="synthetic", status="SYNTHETIC_TEST_ONLY", objective=const, objective_lp=0.0, optimize_calls=0, solve_seconds=0.0,
                solution={k: dict(count=int(len(v)), sha256=sha(sol / f"{k}.npy")) for k, v in arr.items()}, exports={}, solved_network=str(nc),
-               synthetic=dict(script=SCRIPT, note="drill only: no solver call; capacities nominal, flows 0, duals 0; objective = fixed-once constants"),
+               synthetic=dict(script=SCRIPT, note="drill only: no solver call; capacities nominal, flows 1e-9 MW, duals 1.0; objective = fixed-once constants"),
                decision="SYNTHETIC_DRILL_" + LABEL, finished_epoch=time.time())
     rec.pop("stop_before_solve", None)
     (out / "SOLVE_RECEIPT.json").write_text(json.dumps(rec, indent=1, default=str))
