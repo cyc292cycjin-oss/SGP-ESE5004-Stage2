@@ -20,7 +20,9 @@
 | B4.2 v6 打包 | 完成 | 包提交 `2a77f1b8` | `work/p1_m10p_20261022/cloud_package_dist`（24 文件 / 148,650,102 B，清单 `4113db64…`，SHA256SUMS `c2d77c49…`）；v5 改名 `cloud_package_dist_v5_e0a89f8e`；登记输入 7 项与 v5 逐字节相同 |
 | B4.1 全量测试 | 完成 | `2a77f1b8` | 631 passed / 67 skipped / 0 failed（`evidence/tests/TESTS_full.log`） |
 | B4.3 干跑 | 完成（BUILD_ONLY 批次除外） | | `pre` PREFLIGHT OK；`only R11` 构建与 v5 相同；`repost R9` 跑通（ACCEPTED_LAYER2，原目录不变）；**BUILD_ONLY（R1–R11）未做**：本机计算约 71 min，再做会触及 1.5 h 上限，待用户授权（`STEP=build bash /home/jin/m10r/dryrun.sh`） |
-| 报告 / 证据 / 推送 | 完成 | 见下 | `M10R_REPORT.md`、`M10R_EVIDENCE.json`；镜像到 `research/06_scope_redesign/p1_m10r_20261024/`，推送分支 |
+| 报告 / 证据 / 推送 | 完成 | `0d9c22a3`（已推送 origin） | `M10R_REPORT.md`、`M10R_EVIDENCE.json`；镜像到 `research/06_scope_redesign/p1_m10r_20261024/`；分支头 `0d9c22a3` |
+
+**本指令结束状态（2026-10-24 04:2x SGT）：** 全部子步骤完成，唯一未做的是批次模式 BUILD_ONLY 干跑（约 19 min 本机计算，触及 1.5 h 上限，待用户授权：`STEP=build bash /home/jin/m10r/dryrun.sh`，然后 `scripts/m10r_evidence.py` 重新生成证据 JSON 并补报告 4.3 节）。完整包续传（`m10dl`）仍在进行，未触碰。
 
 ## Gurobi 使用记录（本机）
 
