@@ -53,8 +53,10 @@ def main():
     from network_checks import compare_roundtrip
     from s2_solve import set_representative_weights
     out = a.out; out.mkdir(parents=True, exist_ok=True); t0 = time.time()
+    # the LP build uses the smoke label (s2_solve.py accepts a truncated horizon only as a smoke test / diagnostic); the synthetic marker is in the
+    # receipt (status SYNTHETIC_TEST_ONLY, synthetic=...), the network meta and SYNTHETIC.json
     cmd = [sys.executable, str(a.repo / "scripts_project/s2_solve.py"), "--repo", str(a.repo), "--network", str(a.network), "--scenario", a.scenario, "--output", str(out),
-           "--label", LABEL, "--authorization", "M10R drill: synthetic solution, LP build only, no solver call", "--solver", "gurobi", "--solver-profile", "formal_barrier",
+           "--label", "SMOKE_TEST_ONLY", "--authorization", "M10R drill: synthetic solution, LP build only, no solver call", "--solver", "gurobi", "--solver-profile", "formal_barrier",
            "--scaling", "on", "--time-limit", "1750", "--truncate", str(a.truncate), "--stop-before-solve"]
     if a.costs_table:
         cmd += ["--costs-table", str(a.costs_table)]

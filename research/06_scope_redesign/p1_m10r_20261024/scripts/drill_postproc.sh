@@ -28,7 +28,7 @@ run() { local name=$1 D=$2; shift 2; ( env -u GRB_LICENSE_FILE "$@" > "$D/$name.
 chain() {   # $1 type $2 source run dir $3 unsolved network $4 scenario $5 registered sha256 $6 kind (real | synthetic)
   local T=$1 SRC=$2 NET=$3 SC=$4 REG=$5 KIND=$6 D=$OUT/$1 f
   [ -e "$D" ] && { log "SKIP_$T" "exists"; return 0; }
-  mkdir -p "$D/v5"; : > "$D/STEPS.txt"; echo "$KIND" > "$D/SOURCE_KIND.txt"; echo "$SRC" > "$D/SOURCE_DIR.txt"
+  mkdir -p "$D/v5"; : > "$D/STEPS.txt"; echo "$KIND" > "$D/SOURCE_KIND.txt"; echo "$SRC" > "$D/SOURCE_DIR.txt"; echo "$HEAD" > "$D/CODE_COMMIT.txt"
   for f in SOLVE_RECEIPT.json V5_GATES.json INTERIOR_CHECKS.json BUNKER_ACCOUNT.json EXPORTS.json GUROBI_LOG_SCRUBBED.txt costs_active_research.csv COMPONENT_COST_BREAKDOWN.csv \
            COMPONENT_COST_BREAKDOWN_SUMMARY.json DUALS_INDEX.csv SYNTHETIC.json; do [ -f "$SRC/$f" ] && cp "$SRC/$f" "$D/"; done
   [ -f "$SRC/v5/kkt_summary.json" ] && cp "$SRC/v5/kkt_summary.json" "$D/v5/"
@@ -97,6 +97,7 @@ for d in sorted(p for p in out.iterdir() if p.is_dir() and not p.name.startswith
     kind = (d / "SOURCE_KIND.txt").read_text().strip() if (d / "SOURCE_KIND.txt").exists() else None
     need = ("ledger", "violations", "c1", "m12", "owen", "v6", "stop_class")
     types[d.name] = dict(source=kind, source_dir=(d / "SOURCE_DIR.txt").read_text().strip() if (d / "SOURCE_DIR.txt").exists() else None,
+                         code_commit=(d / "CODE_COMMIT.txt").read_text().strip() if (d / "CODE_COMMIT.txt").exists() else None,
                          steps={k: int(v) for k, v in steps.items()}, all_steps_ran=all(steps.get(k) == "0" for k in need),
                          termination=rec.get("termination_condition"), objective=rec.get("objective"),
                          b16=dict(computable=ident.get("relative_error") is not None, relative_error=ident.get("relative_error"), difference_eur=ident.get("difference"),
@@ -107,7 +108,7 @@ expected = ["integrated", "disconnected", "minusVN", "minusTH", "minusLA", "keep
 ok = all(t in types and types[t]["all_steps_ran"] and types[t]["b16"]["computable"] for t in expected)
 res = dict(script="research/06_scope_redesign/p1_m10r_20261024/scripts/drill_postproc.sh", code_commit=head, written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            expected_types=expected, types=types, real_types=[t for t, v in types.items() if v["source"] == "real"], synthetic_types=[t for t, v in types.items() if v["source"] == "synthetic"],
-           all_types_ran=bool(ok), solver_runs=0)
+           all_types_ran=bool(ok), types_at_other_commits={t: v["code_commit"] for t, v in types.items() if v.get("code_commit") not in (None, head)}, solver_runs=0)
 (out / "DRILL_POSTPROC.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
 print(json.dumps(dict(all_types_ran=ok, real=res["real_types"], synthetic=res["synthetic_types"], labels={t: v["label"] for t, v in types.items()})))
 P
