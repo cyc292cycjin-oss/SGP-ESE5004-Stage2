@@ -1,0 +1,22 @@
+== SHA256SUMS
+all 22 files OK
+code unpacked to ./repo (commit 2a77f1b8541f0f0f092d3ab01d1e225afb1e5cbb)
+== networks
+all_equal
+EXPECTED_VARIANTS.json: 7 variants (local dry-run SHA256; run_batch3.sh compares the variants it generates)
+== environment vs env/ENV_LOCK.txt
+{"key_all_equal": true, "key": {}, "counts": [284, 284], "only_lock": [], "only_instance": [], "n_version_differences": 0}
+== solver profiles
+formal_barrier {'Method': 2, 'Crossover': 0, 'BarConvTol': 1e-08, 'BarHomogeneous': 1, 'Threads': 8, 'Seed': 123, 'AggFill': 0, 'PreDual': 0, 'GURO_PAR_BARDENSETHRESH': 200} | interior-point gate path: True | Threads 8 OK
+formal_barrier_1e6_t16 {'Method': 2, 'Crossover': 0, 'BarConvTol': 1e-06, 'BarHomogeneous': 1, 'Threads': 16, 'Seed': 123, 'AggFill': 0, 'PreDual': 0, 'GURO_PAR_BARDENSETHRESH': 200} | interior-point gate path: True | Threads 16 OK
+default profile: formal_barrier | run_rules profile_chain: formal_barrier_1e6_t16 vs formal_barrier
+== code imports (no licence)
+modules import; run table R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11 | schedule 1: R1 | R2; 2: R3,R4 | R5,R6; 3: R7,R9,R11 | R8,R10
+== tools
+/usr/bin/time (GNU time -v) present
+setsid present
+pgrep present
+timeout present
+tmux present
+PREFLIGHT OK
+PREFLIGHT_EXIT 0
