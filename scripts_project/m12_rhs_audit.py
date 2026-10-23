@@ -195,11 +195,18 @@ def objective_constants(n, O: Owners) -> dict:
         for x in ow.index[ow.str.contains("|", regex=False)]:
             if c[x] != 0:
                 comp[f"{t}:{x}"] = (str(ow[x]), comp.get(f"{t}:{x}", ("", 0.0))[1] + float(c[x]))
-    for _, r in pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", [])).iterrows():
-        k = str(O.maps[r.component_type][r.component]); out[k] = out.get(k, 0.0) + float(r.annual_fom_eur)
+    led = pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", [])); absent = 0
+    for _, r in led.iterrows():   # M10R: as s4d_ledger.country_cost_ledger - rows of removed zero-capacity candidates (keep-stock variant) are skipped; absent with an amount -> error
+        t, name, eur = str(r.component_type), str(r.component), float(r.annual_fom_eur)
+        if t not in O.maps or name not in O.maps[t].index:
+            if eur != 0.0:
+                raise ValueError(f"existing cross-border FOM ledger row {t} {name} ({eur:.6g} EUR) refers to a component not in the network: the objective constant has no owner")
+            absent += 1; continue
+        k = str(O.maps[t][name]); out[k] = out.get(k, 0.0) + eur
         if "|" in k:
-            key = f"{r.component_type}:{r.component}"; comp[key] = (k, comp.get(key, ("", 0.0))[1] + float(r.annual_fom_eur))
-    return dict(by_owner=out, total=float(sum(out.values())), pair_components={k: dict(pair=p, eur=v) for k, (p, v) in sorted(comp.items())})
+            key = f"{t}:{name}"; comp[key] = (k, comp.get(key, ("", 0.0))[1] + eur)
+    return dict(by_owner=out, total=float(sum(out.values())), pair_components={k: dict(pair=p, eur=v) for k, (p, v) in sorted(comp.items())},
+                fom_ledger=dict(rows=int(len(led)), booked=int(len(led) - absent), absent_zero=absent))
 
 
 def length_split(tot: dict, pair_comp: dict, shares: pd.DataFrame | None) -> dict:
