@@ -3,7 +3,7 @@
 1. **缺陷机制（VERIFIED）：** 一体化构建把走廊表的全部 67 条走廊写入 `existing_cross_border_fom_ledger` meta，其中 50 条是零容量候选线路（`capacity_2025_mw = 0`、`annual_fom_eur = 0`，如 LA–VN 的线路 59）；保留存量变体删除这 46 条候选线路（及 283 条非存量链路）但不过滤 meta；`s4d_ledger.country_cost_ledger` 第 130 行与 `m12_rhs_audit.objective_constants` 第 199 行在检查金额之前就按 meta 行查归属表 → `KeyError: '59'` → B16 不可计算 → C1 (c)、M12、Owen 不可计算、G2.3 不过。归属表本身按网络实际设备建立（正确），错在 meta 行的无保护查找。
 2. **56×3h 复现（VERIFIED，授权求解 1/3）：** 从一体化 2920×3h 基础网络生成保留存量变体、取前 56 个时段以档案 A 求解（341 s，optimal，4.19 GiB），用 v5 代码后处理得到与云端 R9 **完全相同的失败链**（B16 `'59'`、C1 abc = 110、M12 退出码 1 同一 KeyError、Owen 跳过、GATES_V6 仅 `b16_computable` 不过 → NOT_ACCEPTED，分级 g2 停批）。
 3. **修复（提交 `40ecdf57`）：** meta 行的设备在网络中 → 按该设备的归属（两端国家的走廊实体，与一体化运行同一套半线 / 长度份额规则）入账；设备不在网络且金额为 0 → 跳过并计数；不在网络且金额非 0 → 明确报错（常数无主）。修复后 56×3h 保留存量：B16 相对误差 3.7e-12（差 1.19 EUR），C1 abc = 111，M12 恒等式通过，Owen 可用，**ACCEPTED_LAYER2**。
-4. **回归（VERIFIED）：** 56×3h 五个无缺陷数据集（M08b 冒烟 s01 一体化 / 不互联、M12b 去 VN / TH / LA）修复前后账本、B16、C1、M12、Owen、GATES_V6 的每个文件逐字节或逐数相同；365×24h：在 v5 包的两个基础网络与 7 个变体（与 `EXPECTED_VARIANTS.json` 逐字节相同）上核对，只有 R9 的 meta 有指向已删设备的行（50 行，全为 0 EUR），R1–R8、R10、R11 都不走修复的代码路径——9 个已接受运行的后处理结果**按构造不变**；365×24h 账本 / M12 / Owen 的实际重算需要求解后网络（完整包，本指令结束时下载 26 %）与 LP / 解数组（实例上），列为云端补做必做项。
+4. **回归（VERIFIED）：** 56×3h 五个无缺陷数据集（M08b 冒烟 s01 一体化 / 不互联、M12b 去 VN / TH / LA）修复前后账本、B16、C1、M12、Owen、GATES_V6 的每个文件逐字节或逐数相同；365×24h：在 v5 包的两个基础网络与 7 个变体（与 `EXPECTED_VARIANTS.json` 逐字节相同）上核对，只有 R9 的 meta 有指向已删设备的行（50 行，全为 0 EUR），R1–R8、R10、R11 都不走修复的代码路径；并且（用户补充授权后）在核对通过的完整包上用修复后代码对 R1–R8、R10 从求解后网络**实际重算**了账本、B16 与 M12 分摊：账本三表、`LEDGER_IDENTITY`、`V5_GATES`、`ALLOCATION` 三件与云端原结果逐字节 / 逐数相同，`NODAL_PRICES.csv` 按母线对齐后全部数值相同（只有行顺序不同）；365×24h 的 Owen 审计回归留到云端补做（需要实例上的数组）。
 5. **燃料舱 WACC（VERIFIED 数值 + INFERENCE 机制）：** R10 − R1 的 ASEAN 项 −4.753 bn 全部在燃料舱（甲醇燃料 −3.107、非化石油 −1.646 bn）；燃料舱没有任何资产，购买量在两次运行中完全相同（485.6 TWh 甲醇、239.6 TWh 非化石油），差额是池对偶价格下降（甲醇 −6.40、非化石油 −6.87 EUR/MWh）；区域池层面的设备（甲醇 / 氨储罐）无成本层行、不被重新年化，仍按统一 7 %。
 6. **云端补做的办法已登记（`RUN_PLAN.md` 第 11 节，在任何补做结果出现之前）：** `run_batch3.sh --only R11`（只求解从未启动的运行，承认但不受 R9 的 STOP 阻止，分级规则照旧）、`--repost R9 --into <新目录>`（不求解、不读许可、原目录不改）、`--summary-s1`；替身测试覆盖 R11 正常 / 无解 / G2 不过、拒绝已结束运行、重做不启动求解；全量测试 **631 passed / 67 skipped / 0 failed**（基线 615 / 68 + 16 个新增）。
 7. **演练（VERIFIED）：** 2 个基础网络 + 7 个变体的 9 种网络类型在 56×3h 上各跑一遍完整后处理链（账本 / B16、违反分析、C1、M12、Owen、GATES_V6、分类）：8 种用真实求解结果（含授权的第 2、3 次求解：分国 WACC 不互联 = R11 的类型、b1 不互联 = R8 的类型，均 optimal、ACCEPTED_LAYER2），分国 WACC 一体化用维数正确的合成解（只验证"跑通、不报错、恒等式可算"）；`DRILL_POSTPROC.json` 全部通过，打包脚本现在要求它对应包提交。
@@ -100,7 +100,27 @@
 - 保留存量修复后：B16 相对误差 3.7348e-12、差 +1.19 EUR；C1 (a) −1.09e-8 bn、(b)(c) 通过；M12 恒等式差 1.19 EUR、与账本表最大偏差 7.6e-6 EUR；Owen 对偶形式 `usable_for_allocation = true`；GATES_V6 G1 abc 全 true、G2.1–G2.3 全 true → ACCEPTED_LAYER2。分国账本总额（bn EUR）：ID 82.77、VN 62.27、TH 36.19、MY 21.34、PH 18.12、SG 9.23、KH 4.73、MM 3.17、LA 1.94、BN 0.48、TL 0.38、燃料舱 77.86、池 −0.000。
 - 修复前后对保留存量数据集：C1 (a)(b) 的每个数（返回解差额、分国一阶影响）相同（`REGRESS` 的 PRECISION 差异只在 (c) / b16 字段与验收标志）。
 
-**365×24h（第三批 9 个已接受运行）：** 轻量包不含求解后网络（`.nc` 按设计只在完整包），账本、B16、M12 分摊与 Owen 审计都需要它（Owen 审计还需要 LP / 解数组，只在实例上），本机无法重算。本指令结束时完整包下载到 1,449,525,248 / 1,744,049,251 B（83 %；`m10dl` 仍在续传，未触碰；下载完成后的核对、解包属于 M10 会话的续做）。能做的替代证据是**结构性的 VERIFIED 证明**：修复只改变"meta 行的设备不在网络中"这一分支，在实际的两个 365×24h 基础网络与 7 个变体上核对，除 R9 外没有任何网络走到这一分支（表 1.2），所以 R1–R8、R10 的账本、B16、C1、M12、Owen、GATES_V6 修复后逐位相同（同一输入、同一代码路径）。第三批轻量包中只用已有输入能做的步骤（C1 重评、Owen 重评、GATES_V6）不调用被修改的函数，未重跑。完整包就绪并核对后，账本 / B16 / M12 用 `s4d_ledger_redo.py` 与 `m12_allocation.py run` 即可在本机对 9 个运行重算并比较；Owen 审计需要数组，列为云端补做的必做项（第 8 节）。
+**365×24h（第三批 9 个已接受运行；VERIFIED）。** 两层证据：
+
+(i) **结构性证明：** 修复只改变"meta 行的设备不在网络中"这一分支；在实际的两个 365×24h 基础网络与 7 个变体上核对（表 1.2），除 R9 外没有任何网络走到这一分支，所以 R1–R8、R10 的后处理按构造不变。
+
+(ii) **实际重算（用户 2026-10-24 补充授权约 40 min 本机计算后完成；不调用 Gurobi）：** 完整包下载完成并核对通过（1,744,049,251 B，SHA256 `46f1afbc…` 一致，`FULL_VERIFY.json`：461 个文件、导出问题 0），对 R1–R8、R10 用修复后代码（`f0dc96dc` = `2a77f1b8` 的代码）从求解后 365×24h 网络重算账本、B16（`s4d_ledger_redo.py`）与 M12 分摊（`m12_allocation.py run`），输出到新目录（`/home/jin/m10r_365/<编号>/`；原包只读），再与轻量包的云端原结果（v5 代码）逐项比较（`compare_dirs.py`；证据 `evidence/regression_365x24h/`）。每运行账本 5–8 s、M12 4–5 s，峰值 0.8 GiB（日网络 365 个时段）。
+
+| 运行 | 账本三表（字节） | `LEDGER_IDENTITY`（逐数） | `V5_GATES` 含 B16（逐数） | B16 相对误差（修复前 = 修复后） | `ALLOCATION.json / .csv / _LINES.csv`（逐数 / 字节） | M12 恒等式差 EUR（= 池净额，与原值相同） | `NODAL_PRICES.csv` |
+|---|---|---|---|---|---|---|---|
+| R1 | 相同 | 相同 | 相同 | 1.265e-8 | 相同 | −3,160.62 | 对齐后相同 |
+| R2 | 相同 | 相同 | 相同 | 1.862e-7 | 相同 | −48,624.08 | 对齐后相同 |
+| R3 | 相同 | 相同 | 相同 | 1.491e-8 | 相同 | −3,725.30 | 对齐后相同 |
+| R4 | 相同 | 相同 | 相同 | 1.006e-7 | 相同 | +26,262.49 | 对齐后相同 |
+| R5 | 相同 | 相同 | 相同 | 8.527e-8 | 相同 | −17,265.73 | 对齐后相同 |
+| R6 | 相同 | 相同 | 相同 | 2.613e-9 | 相同 | −588.55 | 对齐后相同 |
+| R7 | 相同 | 相同 | 相同 | 1.765e-8 | 相同 | +4,436.35 | 对齐后相同 |
+| R8 | 相同 | 相同 | 相同 | 4.678e-8 | 相同 | −12,291.02 | 对齐后相同 |
+| R10 | 相同 | 相同 | 相同 | 8.205e-9 | 相同 | +1,952.86 | 对齐后相同 |
+
+- `NODAL_PRICES.csv` 的字节比较报告"不同"，原因只是**行顺序**：云端文件由求解进程内存中的网络写出（母线按求解时的列序），本机重做从 NetCDF 读回（导入后的列序）；按母线名对齐后 9 个运行的全部数值（每运行 1.04–1.14 百万个数）与文本列逐一相同、行集合相同（`NODAL_PRICES_ALIGNED_CHECK.json`）。
+- 求解后网络的 `objective` 与回执一致（`objective_equal = true`，9 / 9）；meta 账本：一体化类 67 行全部入账、`absent_zero = 0`；去一国类 52 / 36 / 38 行全部入账；不互联类 0 行。
+- `V6_ACCEPTANCE.json` 与 `m12_owen/` 不在本次授权范围（Owen 审计需要实例上的 LP / 解数组），比较中按预期缺失；**365×24h 的 Owen 对偶形式回归留到云端补做**（第 5 节第 5 步）。
 
 ### 2.4 燃料舱 WACC 的解释（只读核对，不判定）
 
@@ -217,7 +237,7 @@ R9 的标签变更在报告与台账中按以下格式登记，缺一不可：**
 | `--repost R9` 在 56×3h 保留存量结果上 | 求解 1 的结果以硬链接副本映射为 R9（smoke_s01 一体化 / 不互联映射为 R1 / R2，`BATCH_REFERENCE.json` 为 smoke_s01 参照；`TRUNCATE=56 ALLOW_UNREGISTERED=1`）：原 R9 目录逐文件（路径、字节、修改时间）**不变**；账本重做 B16 `'59'` → 3.7e-12；违反分析与原结果逐项相同；C1 `abc=111`（(a)(b) 的数值与原 PRECISION 相同，`c1_ab_equal`）；M12、Owen 退出 0；GATES_V6 **ACCEPTED_LAYER2**；`REPOST_CLASS:R9:label=ACCEPTED_LAYER2:class=accepted`（只记录）；`REPOST_CHECK_R9: violations_equal=True, c1_ab_equal=True, c1_c False→True, b16 False→True, label NOT_ACCEPTED→ACCEPTED_LAYER2`；包 `results_{light,full}_repost_R9_*`（442,881 / 28,492,638 B）；随后 `--summary-s1 --use R9=…/s1/R9`：`BATCH3_SUMMARY_S1.json`（B6 = 9.899 bn 即 smoke_s01 的 R2 − R1；R9 标签来自重做目录；原汇总不存在于该演示目录，不涉及） | 通过 |
 | 全类型演练 | 3.3 节（`DRILL_POSTPROC.json`，包提交 `2a77f1b8`） | 通过 |
 
-**本机计算用时（指令第 7 条，上限 1.5 h；VERIFIED 自各 STATUS 时间戳）：** 求解 1 含 v5 后处理 6.4 min；修复前 / 后回归 3.6 + 3.9 min；365×24h 变体生成与结构核对 1.5 min；单元与运行模式测试约 8 min；求解 2、3 含后处理 6.9 + 5.9 min（间隔 5 min 不计）；演练 8 + 1 + 1 min；全量测试 15.4 min；v6 打包 1.1 min；干跑预检 1 min、`--only` 2 min、`--repost` 2 min——合计约 **71 min**；磁盘新增约 6 GB（56×3h 三次求解与回归 / 演练目录，`results_project/m10r/` 与 `/home/jin/m10r_dry/`），低于 20 GB。BUILD_ONLY 批次干跑（约 19 min）会使合计达到约 90 min，故未做。
+**本机计算用时（指令第 7 条，上限 1.5 h；VERIFIED 自各 STATUS 时间戳）：** 求解 1 含 v5 后处理 6.4 min；修复前 / 后回归 3.6 + 3.9 min；365×24h 变体生成与结构核对 1.5 min；单元与运行模式测试约 8 min；求解 2、3 含后处理 6.9 + 5.9 min（间隔 5 min 不计）；演练 8 + 1 + 1 min；全量测试 15.4 min；v6 打包 1.1 min；干跑预检 1 min、`--only` 2 min、`--repost` 2 min——合计约 **71 min**；用户补充授权的 365×24h 回归（2.3 节 (ii)）实际约 2 min（9 个运行各 10–13 s），合计约 **73 min**；磁盘新增约 6 GB（56×3h 三次求解与回归 / 演练目录、`/home/jin/m10r_dry/`、`/home/jin/m10r_365/`），低于 20 GB。BUILD_ONLY 批次干跑（约 19 min）按用户决定不做。
 
 ## 5. 云端补做执行指令需要的值与步骤
 
@@ -230,7 +250,7 @@ R9 的标签变更在报告与台账中按以下格式登记，缺一不可：**
 | 2 | 放置许可（M10 方式）→ `PREFLIGHT_ONLY=licence` → `GRB_LICENSE_FILE=… PY=… bash run_batch3.sh --auth "<用户授权原文>" --only R11` | 是 | 不互联类求解 0.4–0.5 h（R2 1,793 s、R4 1,423 s、R8 1,478 s、R9 3,255 s 墙钟；R11 的分国 WACC 变体与 R2 同规模）+ 330 s 间隔 + 后处理 6–8 min ≈ **0.5–1.5 h**；单会话峰值约 17 GiB | 无解 → `UNUSABLE`（不重试）；G2 不过 → `STOP` 追加、退出码 3、报告用户；之后 `shred -u` 删除许可并 `ls` 核实 |
 | 3 | `PY=… bash run_batch3.sh --summary-s1 --into runs/batch3_s1 --use R9=runs/batch3_s1/R9` | 否 | < 1 min | `runs/batch3_s1/batch_s1/BATCH3_SUMMARY_S1.json / .md`；原汇总不改 |
 | 4 | 回收：`results_light_repost_R9_*`、`results_light_only_R11_*`、`results_light_summary_s1_*`（各几十 MB）先取；`results_full_*`（R9 重做约 160 MB、R11 约 160 MB）后取；按 M10 的单路 + `sha256sum -c` | 否 | 链路 0.05–0.2 MB/s：轻量包各 1–5 min，完整包各 15–60 min | `export/R9/ARRAYS_MANIFEST.json` / `export/R11/…` 列出数组 |
-| 5 | 本机补做 365×24h 的回归：完整包（原批）到齐并核对后，对 R1–R8、R10 用 `s4d_ledger_redo.py` + `m12_allocation.py run` 重算账本 / B16 / M12 并与轻量包逐项比较；Owen 审计的重算需要数组，若原实例还在，用 `--repost R1`…（每个约 10 min）在实例上做 | 否 | 本机每运行 2–3 min；实例每运行约 10 min | 列为必做项（2.3 节） |
+| 5 | 365×24h 的 Owen 对偶形式回归（账本 / B16 / M12 已在本机完成，2.3 节 (ii)）：若原实例还在，对 R1–R8、R10 用 `--repost <编号> --into runs/batch3_s1`（每个约 10 min，无需许可；输出含 `m12_owen/`），再与原 `export/<编号>/m12_owen/` 逐数比较（本机 `compare_dirs.py`） | 否 | 实例每运行约 10 min | 列为必做项 |
 
 **原实例不可用时的回退：** 任何 ≥ 25 核 / ≥ 64 GiB 的实例：上传 v6 → 环境安装（13.8 min 实测）→ `--only R11`（只依赖包）；R9 重做需要 `--arrays <dir>`：`lp/` 用 `s2_solve.py --stop-before-solve --network <包内一体化网络生成的 R9 变体> --scenario disconnected --solver gurobi --solver-profile formal_barrier --time-limit 28800 --costs-table networks/integrated_costs_active_research.csv` 重建（365×24h 约 70–150 s、10 GiB；M10P / M10A 已证明逐字节相同），`solution/`（X / Pi / RC，约 0.3 GB）从原实例数据盘取回，求解后网络与 `DUALS_BY_CONSTRAINT.nc` 从完整包解出放到 `runs/batch3/R9/`（或 `runs/batch3/export/R9/`），`RUN.json`、`SOLVE_RECEIPT.json`、`V5_GATES.json`、`EXPORTS.json` 从轻量包放到 `runs/batch3/R9/`，`BATCH_REFERENCE.json` 从轻量包 `batch/` 放到 `runs/batch3/`；`RUN.json` 中原实例的网络路径不存在时脚本自动改用包内同 SHA256 的登记网络（`NETWORK_PATH_R9` 行）。
 
@@ -255,14 +275,14 @@ R9 的标签变更在报告与台账中按以下格式登记，缺一不可：**
 3. **`m08a_variants.py` 的脚本哈希写入变体 meta：** 同一基础网络、同一配置生成的变体在脚本改动后 SHA256 改变（本次 `ffd7a691…` 对 M08b 的 `f9c9a873…`，数据全同）。已登记为已知项（与 `s2_network.py:344` 同类），不改。
 4. **替身测试的时序余量：** 停批场景需要另一条通道的运行在 `wait_gap` 的 5 s 轮询内先启动（`FAKE_SLEEP_R7=8`），与 M10A 的经验一致；记录在测试注释中。
 5. **Owen 审计常数的新诊断键** `fom_ledger` 会出现在 `RHS_AUDIT.json` / `OWEN.json` 中（计数，不是结果数）；比较工具需忽略它。
-6. **完整包续传：** 本指令期间 `m10dl` 续传到 1,449 MB / 1,744 MB（83 %；后段约 0.25 MB/s），本指令结束时未就绪；到齐并核对后，365×24h 的账本 / B16 / M12 可在本机用 `s4d_ledger_redo.py` + `m12_allocation.py run` 对 9 个运行重算并与轻量包逐项比较（每运行 2–3 min、约 9–10 GiB），Owen 审计需要实例上的数组（第 5 节第 5 步）。
+6. **完整包：** 本指令主体结束时下载 83 %；之后由 M10 的续做下载完成并核对通过（SHA256 `46f1afbc…`，`FULL_VERIFY.json` 461 文件、0 问题，解包到 `full/unpacked/`），用户补充授权后已用于 2.3 节 (ii) 的 365×24h 账本 / B16 / M12 回归；Owen 审计仍需实例上的数组（第 5 节第 5 步）。
 7. **演练脚本的两处自身问题（已修，`cddc3f95`、`2a77f1b8`）：** 合成解的 LP 构建必须用 `SMOKE_TEST_ONLY` 标签（`s2_solve.py` 的截断规则）；全为 0 的合成时间序列在 PyPSA NetCDF 导出时被丢弃，改为 1e-9 MW 流量 / 1.0 对偶。演练记录中 8 种真实类型的结果产生于 `ae7e3f6e`、合成类型产生于 `2a77f1b8`（两次提交之间后处理代码无改动，只改了合成解脚本），记录字段 `types_at_other_commits` 如实列出。
 8. **预检 `guards` 节的提示措辞**（M10 发现 5）仍在：`NOTE: CGROUP_ROOT=… (operational override)` 总会打印；未改。
 9. **干跑证据中的许可字样：** `evidence/dryrun_v6/PREFLIGHT.txt` 与各 `STATUS` 文件含预检 / 运行脚本自身的措辞（"no licence"、`licence_gap_s=`），不是许可内容；按结果包的扫描模式（`license[i]d|registered to|wls(secret|accessid)`）交付目录 0 处命中。
 
 **需要用户决定**
 
-1. **云端补做的执行与机器：** 按第 5 节在原实例（优先）或替代实例执行 `--repost R9` → `--only R11` → `--summary-s1`；是否同时在实例上对 R1–R8、R10 做 `--repost`（每个约 10 min，无需许可）以取得 365×24h 的修复前后逐项比较（2.3 节的必做项之一）。
+1. **云端补做的执行与机器：** 按第 5 节在原实例（优先）或替代实例执行 `--repost R9` → `--only R11` → `--summary-s1`；是否同时在实例上对 R1–R8、R10 做 `--repost`（每个约 10 min，无需许可）以补齐 365×24h 的 Owen 对偶形式回归（账本 / B16 / M12 已在本机逐项相同，2.3 节 (ii)）。
 2. **R9 新标签的登记：** 由 `--repost` 得到后，按 `RUN_PLAN.md` 11.3 的格式登记为"事后修复的代码缺陷"（原标签 NOT_ACCEPTED、原因、修复提交 `40ecdf57`、回归证据、新标签 + `REPOST_CHECK.json`）；请在看到云端结果后确认。
 3. **构建层清理的时机（发现 1、2）：** 是否在第四批指令之前做（会改变 EXPECTED_VARIANTS 与 G2.1 登记值），还是第四批之后。
-4. **批次模式 BUILD_ONLY 干跑（R1–R11）未做：** 本机计算在完成其余项目后已接近指令第 7 条的 1.5 小时上限（第 4.3 节的累计用时），该干跑约需 19 分钟、峰值 10 GiB（M10A 实测），按规则停下报告。命令已备好（`STEP=build bash work/p1_m10r_20261024/scripts/dryrun.sh`，输出 `evidence/dryrun_v6/build_only/` 与 `BUILD_VS_V5.json`，逐运行与 v5 干跑比较 LP 维数、参数、网络 SHA256、LP 数组字节数）；请决定是否授权约 20 分钟本机计算补做，或在云端 S1 之前由 `BUILD_ONLY=1 --only R11` 的构建（已做，与 v5 的 R11 相同）作为批次模式未变的证据之一。
+4. **批次模式 BUILD_ONLY 干跑（R1–R11）未做（用户 2026-10-24 决定不做）：** 本机计算在完成其余项目后已接近指令第 7 条的 1.5 小时上限，该干跑约需 19 分钟、峰值 10 GiB；用户改为授权约 40 分钟做 365×24h 账本 / B16 / M12 回归（2.3 节 (ii)，实际用时约 2 分钟）。批次模式未变的证据：全量测试中 25 个批次替身用例通过、`START` 行 `mode=batch`、`BUILD_ONLY=1 --only R11` 的构建与 v5 的 R11 相同；命令仍备好（`STEP=build bash work/p1_m10r_20261024/scripts/dryrun.sh`），需要时另行授权。

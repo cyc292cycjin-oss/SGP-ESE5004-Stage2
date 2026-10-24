@@ -103,8 +103,18 @@ def main():
               drill=jl(RES / "drill/DRILL_POSTPROC.json"), drill_status=status_lines(RES / "drill/DRILL_STATUS.txt"),
               wacc_fuel_bunker=dict(ledger_asean=dict(R1=ledger_asean("R1"), R10=ledger_asean("R10")), pool_prices=dict(R1=prices_asean("R1"), R10=prices_asean("R10")),
                                     variant_receipt_finance={k: v for k, v in ((jl(LIGHT / "variants/R10/integrated_wacccountry_365_24h_VARIANT_RECEIPT.json") or {}).get("ledgers", {}).get("finance") or {}).items() if k != "by_country"}),
-              full_pack=dict(dir=str(FULL), bytes_present=sum(p.stat().st_size for p in FULL.rglob("*") if p.is_file()), expected_bytes=1744049251,
-                             expected_sha256="46f1afbc87bea7e070d9ab8e950c22349ed3a30ae98e028ad7f29f437e2aa438", files=[p.name for p in FULL.iterdir()]),
+              full_pack=dict(dir=str(FULL), tar_bytes=((FULL / "results_full_halted_20261023T174135Z.tar.gz").stat().st_size if (FULL / "results_full_halted_20261023T174135Z.tar.gz").exists() else None),
+                             expected_bytes=1744049251, expected_sha256="46f1afbc87bea7e070d9ab8e950c22349ed3a30ae98e028ad7f29f437e2aa438",
+                             sha256_file=((FULL / "results_full_halted_20261023T174135Z.tar.gz.sha256").read_text().split()[0] if (FULL / "results_full_halted_20261023T174135Z.tar.gz.sha256").exists() else None),
+                             verify={k: v for k, v in (jl(FULL / "FULL_VERIFY.json") or {}).items() if k in ("full", "files", "bytes", "export_problems", "runs_with_exports")},
+                             files=[p.name for p in FULL.iterdir()]),
+              regression_365x24h=dict(dir="/home/jin/m10r_365", status=status_lines(Path("/home/jin/m10r_365/STATUS.txt")), nodal_prices_aligned=jl(Path("/home/jin/m10r_365/NODAL_PRICES_ALIGNED_CHECK.json")),
+                                      runs={rid: dict(compare={k: v for k, v in (jl(Path(f"/home/jin/m10r_365/{rid}/COMPARE_VS_LIGHT.json")) or {}).items() if k in ("all_equal",)}
+                                                     | dict(files={f: v["status"] for f, v in (jl(Path(f"/home/jin/m10r_365/{rid}/COMPARE_VS_LIGHT.json")) or {}).get("files", {}).items()}),
+                                            ledger_redo={k: v for k, v in (jl(Path(f"/home/jin/m10r_365/{rid}/LEDGER_REDO.json")) or {}).items() if k in ("b16_before", "b16_after", "objective", "seconds")},
+                                            fom_meta=((jl(Path(f"/home/jin/m10r_365/{rid}/LEDGER_IDENTITY.json")) or {}).get("diagnostics") or {}).get("existing_cross_border_fom_ledger"),
+                                            m12_identity=(jl(Path(f"/home/jin/m10r_365/{rid}/ALLOCATION.json")) or {}).get("identity"))
+                                            for rid in ("R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R10") if Path(f"/home/jin/m10r_365/{rid}").exists()}),
               written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), solver_runs_by_this_script=0)
     if a.tests and a.tests.exists():
         t = a.tests.read_text(errors="replace"); m = re.search(r"(\d+) passed(?:, (\d+) skipped)?", t)

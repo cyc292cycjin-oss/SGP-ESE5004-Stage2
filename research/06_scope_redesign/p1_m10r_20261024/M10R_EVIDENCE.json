@@ -7,9 +7,17 @@
  "worktree": {
   "path": "/home/jin/wt_m10p_20261022",
   "branch": "codex/m10-batch3-20261022",
-  "head": "2a77f1b8541f0f0f092d3ab01d1e225afb1e5cbb",
+  "head": "f0dc96dc40c51c17cb62d5c96c70165cf623794e",
   "start": "efef93bf9eab307cd1cfb432506787ee66a38667",
   "commits": [
+   {
+    "sha": "f0dc96dc40c51c17cb62d5c96c70165cf623794e",
+    "subject": "M10R progress: delivery commit 0d9c22a3 recorded; end state (BUILD_ONLY batch dry run pending the user authorisation)"
+   },
+   {
+    "sha": "0d9c22a36161938362f552422538835f915a2e61",
+    "subject": "M10R delivery (no cloud, no upload; 3 local 56x3h Gurobi solves authorised and used): report, evidence JSON, deliverable scripts and evidence copies, progress"
+   },
    {
     "sha": "2a77f1b8541f0f0f092d3ab01d1e225afb1e5cbb",
     "subject": "M10R B3.3 (no cloud, no upload, no solve): synthetic drill solution survives the NetCDF round trip - flows 1e-9 MW and duals 1.0 instead of zeros (PyPSA drops all-default series on export)"
@@ -1313,16 +1321,841 @@
  },
  "full_pack": {
   "dir": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m10_20261022/cloud_results/20261023T174135Z_halted/full",
-  "bytes_present": 1449285750,
+  "tar_bytes": 1744049251,
   "expected_bytes": 1744049251,
   "expected_sha256": "46f1afbc87bea7e070d9ab8e950c22349ed3a30ae98e028ad7f29f437e2aa438",
+  "sha256_file": "46f1afbc87bea7e070d9ab8e950c22349ed3a30ae98e028ad7f29f437e2aa438",
+  "verify": {
+   "full": true,
+   "files": 461,
+   "bytes": 2777283699,
+   "runs_with_exports": [
+    "R1",
+    "R10",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8",
+    "R9"
+   ],
+   "export_problems": 0
+  },
   "files": [
-   ".full_rsync.err",
    "FULL_DOWNLOAD.log",
-   "results_full_halted_20261023T174135Z.tar.gz"
+   "FULL_VERIFY.json",
+   "results_full_halted_20261023T174135Z.tar.gz",
+   "results_full_halted_20261023T174135Z.tar.gz.sha256",
+   "unpacked"
   ]
  },
- "written_utc": "2026-10-23T20:10:34Z",
+ "regression_365x24h": {
+  "dir": "/home/jin/m10r_365",
+  "status": [
+   "START:2026-10-24T01:56:16Z:head=f0dc96dc40c51c17cb62d5c96c70165cf623794e:dirty=0:rids=R1 R2 R3 R4 R5 R6 R7 R8 R10",
+   "RUN_R1:2026-10-24T01:56:16Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R1:2026-10-24T01:56:24Z:exit=0:8s:peak=0.82GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 1.2650817664917541e-08, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 1.2650817664917541e-08, \"difference\": -3160.6221618652344}, \"objective_equal\": tru",
+   "M12_R1:2026-10-24T01:56:28Z:exit=0:4s:peak=0.82GiB:{\"computable\": true, \"identity\": {\"objective\": 249835405550.90558, \"players_sum\": 249835402390.28342, \"shared\": 3160.510524749756, \"difference\": -3160.6221618652344, \"relative_error\": 1.26508176649175",
+   "COMPARE_R1:2026-10-24T01:56:29Z:exit=1:{\"label\": \"R1\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R2:2026-10-24T01:56:29Z:scenario=disconnected:nc=disconnected_BATCH3_365X24H_solved.nc",
+   "LEDGER_R2:2026-10-24T01:56:34Z:exit=0:5s:peak=0.80GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 1.8620246394753762e-07, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 1.8620246394753762e-07, \"difference\": -48624.077880859375}, \"objective_equal\": tru",
+   "M12_R2:2026-10-24T01:56:39Z:exit=0:5s:peak=0.81GiB:{\"computable\": true, \"identity\": {\"objective\": 261135523397.58063, \"players_sum\": 261135474773.50275, \"shared\": 48623.992736816406, \"difference\": -48624.077880859375, \"relative_error\": 1.8620246394753",
+   "COMPARE_R2:2026-10-24T01:56:40Z:exit=1:{\"label\": \"R2\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R3:2026-10-24T01:56:40Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R3:2026-10-24T01:56:46Z:exit=0:6s:peak=0.82GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 1.491100957790488e-08, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 1.491100957790488e-08, \"difference\": -3725.2987365722656}, \"objective_equal\": true,",
+   "M12_R3:2026-10-24T01:56:50Z:exit=0:4s:peak=0.82GiB:{\"computable\": true, \"identity\": {\"objective\": 249835446561.07053, \"players_sum\": 249835442835.7718, \"shared\": 3725.1864166259766, \"difference\": -3725.2987365722656, \"relative_error\": 1.49110095779048",
+   "COMPARE_R3:2026-10-24T01:56:51Z:exit=1:{\"label\": \"R3\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R4:2026-10-24T01:56:51Z:scenario=disconnected:nc=disconnected_BATCH3_365X24H_solved.nc",
+   "LEDGER_R4:2026-10-24T01:56:57Z:exit=0:6s:peak=0.80GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 1.0057043766334685e-07, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 1.0057043766334685e-07, \"difference\": 26262.490234375}, \"objective_equal\": true, \"",
+   "M12_R4:2026-10-24T01:57:01Z:exit=0:4s:peak=0.81GiB:{\"computable\": true, \"identity\": {\"objective\": 261135288306.9577, \"players_sum\": 261135314569.44794, \"shared\": -26262.56046295166, \"difference\": 26262.490234375, \"relative_error\": 1.0057043766334685e-",
+   "COMPARE_R4:2026-10-24T01:57:02Z:exit=1:{\"label\": \"R4\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R5:2026-10-24T01:57:02Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R5:2026-10-24T01:57:07Z:exit=0:5s:peak=0.77GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 8.526985345037307e-08, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 8.526985345037307e-08, \"difference\": -17265.734802246094}, \"objective_equal\": true,",
+   "M12_R5:2026-10-24T01:57:12Z:exit=0:5s:peak=0.77GiB:{\"computable\": true, \"identity\": {\"objective\": 202483458146.13983, \"players_sum\": 202483440880.40503, \"shared\": 17265.63794708252, \"difference\": -17265.734802246094, \"relative_error\": 8.52698534503730",
+   "COMPARE_R5:2026-10-24T01:57:12Z:exit=1:{\"label\": \"R5\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R6:2026-10-24T01:57:12Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R6:2026-10-24T01:57:18Z:exit=0:6s:peak=0.78GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 2.6127820295819478e-09, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 2.6127820295819478e-09, \"difference\": -588.5514221191406}, \"objective_equal\": true",
+   "M12_R6:2026-10-24T01:57:22Z:exit=0:4s:peak=0.78GiB:{\"computable\": true, \"identity\": {\"objective\": 225258523464.8565, \"players_sum\": 225258522876.30508, \"shared\": 588.640193939209, \"difference\": -588.5514221191406, \"relative_error\": 2.6127820295819478e",
+   "COMPARE_R6:2026-10-24T01:57:23Z:exit=1:{\"label\": \"R6\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R7:2026-10-24T01:57:23Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R7:2026-10-24T01:57:29Z:exit=0:6s:peak=0.79GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 1.765075694119095e-08, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 1.765075694119095e-08, \"difference\": 4436.3526611328125}, \"objective_equal\": true, ",
+   "M12_R7:2026-10-24T01:57:33Z:exit=0:4s:peak=0.79GiB:{\"computable\": true, \"identity\": {\"objective\": 251340646518.1021, \"players_sum\": 251340650954.45477, \"shared\": -4436.249549865723, \"difference\": 4436.3526611328125, \"relative_error\": 1.765075694119095",
+   "COMPARE_R7:2026-10-24T01:57:34Z:exit=1:{\"label\": \"R7\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R8:2026-10-24T01:57:34Z:scenario=disconnected:nc=disconnected_BATCH3_365X24H_solved.nc",
+   "LEDGER_R8:2026-10-24T01:57:39Z:exit=0:5s:peak=0.79GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 4.6781324435843064e-08, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 4.6781324435843064e-08, \"difference\": -12291.023040771484}, \"objective_equal\": tru",
+   "M12_R8:2026-10-24T01:57:44Z:exit=0:5s:peak=0.79GiB:{\"computable\": true, \"identity\": {\"objective\": 262733541407.69708, \"players_sum\": 262733529116.67407, \"shared\": 12290.90888595581, \"difference\": -12291.023010253906, \"relative_error\": 4.67813243196889",
+   "COMPARE_R8:2026-10-24T01:57:44Z:exit=1:{\"label\": \"R8\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION.",
+   "RUN_R10:2026-10-24T01:57:44Z:scenario=integrated:nc=integrated_BATCH3_365X24H_solved.nc",
+   "LEDGER_R10:2026-10-24T01:57:50Z:exit=0:6s:peak=0.82GiB:{\"b16_before\": {\"passed\": true, \"relative_error\": 8.204941404108455e-09, \"error\": null}, \"b16_after\": {\"passed\": true, \"relative_error\": 8.204941404108455e-09, \"difference\": 1952.8634643554688}, \"objective_equal\": true, ",
+   "M12_R10:2026-10-24T01:57:55Z:exit=0:5s:peak=0.82GiB:{\"computable\": true, \"identity\": {\"objective\": 238010653357.94022, \"players_sum\": 238010655310.80368, \"shared\": -1952.9573440551758, \"difference\": 1952.8634643554688, \"relative_error\": 8.2049414041084",
+   "COMPARE_R10:2026-10-24T01:57:55Z:exit=1:{\"label\": \"R10\", \"all_equal\": false, \"files\": {\"COUNTRY_COST_LEDGER.csv\": \"equal\", \"COUNTRY_COST_LEDGER_USD2020.csv\": \"equal\", \"COUNTRY_COST_LEDGER_DETAIL.csv\": \"equal\", \"NODAL_PRICES.csv\": \"DIFFERENT\", \"LEDGER_IDENTITY.json\": \"equal\", \"V5_GATES.json\": \"equal\", \"PRECISION.json\": \"equal\", \"ALLOCATION",
+   "DONE:2026-10-24T01:57:55Z"
+  ],
+  "nodal_prices_aligned": {
+   "note": "NODAL_PRICES.csv of the cloud export (written from the in-memory solved network) vs the local redo from the NetCDF: rows aligned by bus name",
+   "runs": {
+    "R1": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R2": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R3": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R4": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R5": {
+     "rows": 2831,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1041808,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R6": {
+     "rows": 2915,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1072720,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R7": {
+     "rows": 2932,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1078976,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R8": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    },
+    "R10": {
+     "rows": 3099,
+     "columns": 371,
+     "same_rows_columns_after_sort": true,
+     "numeric_cells": 1140432,
+     "cells_differ": 0,
+     "max_abs": 0.0,
+     "max_rel": 0.0,
+     "text_cells_differ": 0,
+     "same_row_set": true,
+     "row_order_equal": false,
+     "first_rows": {
+      "cloud": [
+       "ASEAN aviation international oil final",
+       "ASEAN shipping international methanol final",
+       "BN4 0 EV battery"
+      ],
+      "redo": [
+       "ASEAN ammonia",
+       "ASEAN aviation international oil final",
+       "ASEAN methanol"
+      ]
+     }
+    }
+   },
+   "all_values_identical": true
+  },
+  "runs": {
+   "R1": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 249835405550.90558,
+      "receipt": 249835405550.90558,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 1.2650817664917541e-08,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 1.2650817664917541e-08,
+      "difference": -3160.6221618652344
+     },
+     "seconds": 4.7
+    },
+    "fom_meta": {
+     "rows": 67,
+     "booked": 67,
+     "booked_eur": 8993064.8216948,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 249835405550.90558,
+     "players_sum": 249835402390.28342,
+     "shared": 3160.510524749756,
+     "difference": -3160.6221618652344,
+     "relative_error": 1.2650817664917541e-08,
+     "relative_error_incl_shared": 4.4682738435367196e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R2": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 261135523397.58063,
+      "receipt": 261135523397.58063,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 1.8620246394753762e-07,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 1.8620246394753762e-07,
+      "difference": -48624.077880859375
+     },
+     "seconds": 4.4
+    },
+    "fom_meta": {
+     "rows": 0,
+     "booked": 0,
+     "booked_eur": 0.0,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 261135523397.58063,
+     "players_sum": 261135474773.50275,
+     "shared": 48623.992736816406,
+     "difference": -48624.077880859375,
+     "relative_error": 1.8620246394753762e-07,
+     "relative_error_incl_shared": 3.2605308485401893e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R3": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 249835446561.07053,
+      "receipt": 249835446561.07053,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 1.491100957790488e-08,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 1.491100957790488e-08,
+      "difference": -3725.2987365722656
+     },
+     "seconds": 4.5
+    },
+    "fom_meta": {
+     "rows": 67,
+     "booked": 67,
+     "booked_eur": 8993064.8216948,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 249835446561.07053,
+     "players_sum": 249835442835.7718,
+     "shared": 3725.1864166259766,
+     "difference": -3725.2987365722656,
+     "relative_error": 1.491100957790488e-08,
+     "relative_error_incl_shared": 4.496367774244775e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R4": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 261135288306.9577,
+      "receipt": 261135288306.9577,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 1.0057043766334685e-07,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 1.0057043766334685e-07,
+      "difference": 26262.490234375
+     },
+     "seconds": 4.4
+    },
+    "fom_meta": {
+     "rows": 0,
+     "booked": 0,
+     "booked_eur": 0.0,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 261135288306.9577,
+     "players_sum": 261135314569.44794,
+     "shared": -26262.56046295166,
+     "difference": 26262.490234375,
+     "relative_error": 1.0057043766334685e-07,
+     "relative_error_incl_shared": 2.689063884122858e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R5": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 202483458146.13983,
+      "receipt": 202483458146.13983,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 8.526985345037307e-08,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 8.526985345037307e-08,
+      "difference": -17265.734802246094
+     },
+     "seconds": 4.1
+    },
+    "fom_meta": {
+     "rows": 52,
+     "booked": 52,
+     "booked_eur": 8644578.056818483,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 202483458146.13983,
+     "players_sum": 202483440880.40503,
+     "shared": 17265.63794708252,
+     "difference": -17265.734802246094,
+     "relative_error": 8.526985345037307e-08,
+     "relative_error_incl_shared": 4.783738575762595e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R6": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 225258523464.8565,
+      "receipt": 225258523464.8565,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 2.6127820295819478e-09,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 2.6127820295819478e-09,
+      "difference": -588.5514221191406
+     },
+     "seconds": 4.2
+    },
+    "fom_meta": {
+     "rows": 36,
+     "booked": 36,
+     "booked_eur": 2685010.4724930217,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 225258523464.8565,
+     "players_sum": 225258522876.30508,
+     "shared": 588.640193939209,
+     "difference": -588.5514221191406,
+     "relative_error": 2.6127820295819478e-09,
+     "relative_error_incl_shared": 3.941055521456228e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R7": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 251340646518.1021,
+      "receipt": 251340646518.1021,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 1.765075694119095e-08,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 1.765075694119095e-08,
+      "difference": 4436.3526611328125
+     },
+     "seconds": 4.4
+    },
+    "fom_meta": {
+     "rows": 38,
+     "booked": 38,
+     "booked_eur": 4952478.009483157,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 251340646518.1021,
+     "players_sum": 251340650954.45477,
+     "shared": -4436.249549865723,
+     "difference": 4436.3526611328125,
+     "relative_error": 1.765075694119095e-08,
+     "relative_error_incl_shared": 4.1027544853135465e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R8": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 262733541407.69708,
+      "receipt": 262733541407.69708,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 4.6781324435843064e-08,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 4.6781324435843064e-08,
+      "difference": -12291.023040771484
+     },
+     "seconds": 4.1
+    },
+    "fom_meta": {
+     "rows": 0,
+     "booked": 0,
+     "booked_eur": 0.0,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 262733541407.69708,
+     "players_sum": 262733529116.67407,
+     "shared": 12290.90888595581,
+     "difference": -12291.023010253906,
+     "relative_error": 4.678132431968896e-08,
+     "relative_error_incl_shared": 4.344163351811626e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   },
+   "R10": {
+    "compare": {
+     "all_equal": false,
+     "files": {
+      "COUNTRY_COST_LEDGER.csv": "equal",
+      "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+      "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+      "NODAL_PRICES.csv": "DIFFERENT",
+      "LEDGER_IDENTITY.json": "equal",
+      "V5_GATES.json": "equal",
+      "PRECISION.json": "equal",
+      "ALLOCATION.json": "equal",
+      "ALLOCATION.csv": "equal",
+      "ALLOCATION_LINES.csv": "equal",
+      "V6_ACCEPTANCE.json": "missing_in_B",
+      "m12_owen/OWEN.json": "missing_in_B",
+      "m12_owen/OWEN.csv": "missing_in_B",
+      "m12_owen/RHS_AUDIT.json": "missing_in_B",
+      "m12_owen/RHS_BY_FAMILY_OWNER.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILIES.csv": "missing_in_B",
+      "m12_owen/RHS_FAMILY_SUMMARY.csv": "missing_in_B"
+     }
+    },
+    "ledger_redo": {
+     "objective": {
+      "network": 238010653357.94022,
+      "receipt": 238010653357.94022,
+      "equal": true
+     },
+     "b16_before": {
+      "passed": true,
+      "relative_error": 8.204941404108455e-09,
+      "error": null
+     },
+     "b16_after": {
+      "passed": true,
+      "relative_error": 8.204941404108455e-09,
+      "difference": 1952.8634643554688
+     },
+     "seconds": 4.4
+    },
+    "fom_meta": {
+     "rows": 67,
+     "booked": 67,
+     "booked_eur": 8993064.8216948,
+     "absent_zero": 0,
+     "absent_zero_components": []
+    },
+    "m12_identity": {
+     "objective": 238010653357.94022,
+     "players_sum": 238010655310.80368,
+     "shared": -1952.9573440551758,
+     "difference": 1952.8634643554688,
+     "relative_error": 8.204941404108455e-09,
+     "relative_error_incl_shared": 3.9440280923613687e-13,
+     "tolerance": 1e-06,
+     "passed": true,
+     "note": "B16: sum of the 11 countries + BUNKER = objective (incl. the fixed-once constants); the ASEAN pool surplus (SHARED) is the difference term"
+    }
+   }
+  }
+ },
+ "written_utc": "2026-10-24T02:01:14Z",
  "solver_runs_by_this_script": 0,
  "tests": {
   "log": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_m10r_20261024/evidence/tests/TESTS_full.log",
