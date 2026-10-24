@@ -22,7 +22,7 @@
 | B4.3 干跑 | 完成（BUILD_ONLY 批次除外） | | `pre` PREFLIGHT OK；`only R11` 构建与 v5 相同；`repost R9` 跑通（ACCEPTED_LAYER2，原目录不变）；**BUILD_ONLY（R1–R11）未做**：本机计算约 71 min，再做会触及 1.5 h 上限，待用户授权（`STEP=build bash /home/jin/m10r/dryrun.sh`） |
 | 报告 / 证据 / 推送 | 完成 | `0d9c22a3`（已推送 origin） | `M10R_REPORT.md`、`M10R_EVIDENCE.json`；镜像到 `research/06_scope_redesign/p1_m10r_20261024/`；分支头 `0d9c22a3` |
 
-| 补充（用户 2026-10-24 授权约 40 min）：365×24h 回归 | 完成（约 2 min） | 见下 | 不做 BUILD_ONLY；完整包核对通过后对 R1–R8、R10 用 `s4d_ledger_redo.py` + `m12_allocation.py run` 重算：账本三表 / LEDGER_IDENTITY / V5_GATES / ALLOCATION 与云端逐项相同，NODAL_PRICES 对齐后相同（`evidence/regression_365x24h/`） |
+| 补充（用户 2026-10-24 授权约 40 min）：365×24h 回归 | 完成（约 2 min） | `e23956a8`（已推送 origin） | 不做 BUILD_ONLY；完整包核对通过后对 R1–R8、R10 用 `s4d_ledger_redo.py` + `m12_allocation.py run` 重算：账本三表 / LEDGER_IDENTITY / V5_GATES / ALLOCATION 与云端逐项相同，NODAL_PRICES 对齐后相同（`evidence/regression_365x24h/`） |
 
 **本指令结束状态（2026-10-24 04:2x SGT）：** 全部子步骤完成，唯一未做的是批次模式 BUILD_ONLY 干跑（约 19 min 本机计算，触及 1.5 h 上限，待用户授权：`STEP=build bash /home/jin/m10r/dryrun.sh`，然后 `scripts/m10r_evidence.py` 重新生成证据 JSON 并补报告 4.3 节）。完整包续传（`m10dl`）仍在进行，未触碰。
 
