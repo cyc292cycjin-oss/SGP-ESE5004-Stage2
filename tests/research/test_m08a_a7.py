@@ -221,3 +221,26 @@ def test_variant_script_deterministic(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):   # a base built with another config is refused
         m = pypsa.Network(str(base)); m.meta["research_config_sha256"] = "0" * 64; p = tmp_path / "stale.nc"; m.export_to_netcdf(p)
         derive(ROOT, p, tmp_path / "c", {"disconnected.co2_shipping_intra_asean": "forbid"})
+
+
+def test_wacc_variant_bytes_independent_of_the_folder(tmp_path, monkeypatch):
+    """M10P dry-run finding: the country-WACC variant wrote the absolute path of --costs into n.meta, so the same variant generated in another
+    folder (the unpacked cloud package) had another SHA256. Only the file name and its SHA256 are recorded now."""
+    from m08a_variants import derive
+    from phase4_static import config
+    from s2_costs import build_research_costs
+    from scenario_network import config_sha
+    monkeypatch.setenv("PYTHONHASHSEED", "0")
+    cfg = config(ROOT, "integrated"); costs, _ = build_research_costs(ROOT, cfg, ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv")
+    R = cfg["research"]; R["config_overrides"] = []
+    n = toy("integrated"); n.meta.update(research_config=json.loads(json.dumps(R, default=str)), research_config_sha256=config_sha(R))
+    shas = []
+    for folder in ("first", "second/deeper"):
+        d = tmp_path / folder; d.mkdir(parents=True)
+        base, ct = d / "integrated_365_24h_unsolved.nc", d / "integrated_costs_active_research.csv"
+        n.export_to_netcdf(base); costs.to_csv(ct)
+        r = derive(ROOT, base, d / "out", {"finance.wacc_mode": "country_specific"}, ct)
+        shas.append(r["output"]["sha256"])
+        led = pypsa.Network(r["output"]["path"]).meta["research_variant"]["ledgers"]["finance"]["costs_table"]
+        assert led == dict(file=ct.name, sha256=hashlib.sha256(ct.read_bytes()).hexdigest())
+    assert shas[0] == shas[1]

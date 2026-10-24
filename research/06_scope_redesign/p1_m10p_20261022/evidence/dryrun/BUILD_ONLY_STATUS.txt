@@ -1,0 +1,59 @@
+START:2026-10-22T03:09:18Z:commit=eac6c3e046d9de2f515fcf019badd1ea6d0ae922:repo_commit=eac6c3e046d9de2f515fcf019badd1ea6d0ae922:build_only=1:post_only=0:dry=0:cores=16:threads_A=8:threads_T16=16:time_limit_s=21600:wall_cap_s=22500:p1_wall_cap_s=3600:p1_time_limit_s=3600:licence_gap_s=330:truncate=none:resume=no
+BASE_CHECK:all_equal
+VARIANT_R5:generated:exit=0:set=coalition.remove_countries=[VN]
+VARIANT_R5:equal:8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:expected=8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:
+VARIANT_R6:generated:exit=0:set=coalition.remove_countries=[TH]
+VARIANT_R6:equal:90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:expected=90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:
+VARIANT_R7:generated:exit=0:set=coalition.remove_countries=[LA]
+VARIANT_R7:equal:29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:expected=29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:
+VARIANT_R8:generated:exit=0:set=disconnected.co2_shipping_intra_asean=forbid
+VARIANT_R8:equal:02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:expected=02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:
+VARIANT_R9:generated:exit=0:set=cross_border.stock_mode=keep_stock_no_new
+VARIANT_R9:equal:5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:expected=5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:
+VARIANT_R10:generated:exit=0:set=finance.wacc_mode=country_specific
+VARIANT_R10:equal:c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:expected=c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:
+VARIANT_R11:generated:exit=0:set=finance.wacc_mode=country_specific
+VARIANT_R11:equal:85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:expected=85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:
+PHASE_1:one_after_the_other:R1,R2:threads=16:cores=16:no_solve_mode:2026-10-22T03:09:47Z
+SOLVE_R1:pid=1735:pgid=1735:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e:2026-10-22T03:09:49Z
+RUN_R1:stopped_before_solve:exit=0:receipt=stopped_before_solve:151s:peak=10.14GiB
+BUILD_CHECK_R1:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 144.09096217155457}, "peak_rss_gib": 10.13}
+SOLVE_R2:pid=2116:pgid=2116:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=888a009b5f19eb34f7f1c24e36f7c8370617a9c405b1097a9caed0599cecbee4:2026-10-22T03:12:20Z
+RUN_R2:stopped_before_solve:exit=0:receipt=stopped_before_solve:81s:peak=10.04GiB
+BUILD_CHECK_R2:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 72.2712459564209}, "peak_rss_gib": 9.87}
+PHASE_2:one_after_the_other:R3,R4:threads=32:cores=16:no_solve_mode:2026-10-22T03:13:41Z
+SOLVE_R3:pid=2411:pgid=2411:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22500:network_sha256=75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e:2026-10-22T03:13:42Z
+RUN_R3:stopped_before_solve:exit=0:receipt=stopped_before_solve:141s:peak=10.13GiB
+BUILD_CHECK_R3:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 125.31531596183777}, "peak_rss_gib": 10.12}
+SOLVE_R4:pid=2749:pgid=2749:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22500:network_sha256=888a009b5f19eb34f7f1c24e36f7c8370617a9c405b1097a9caed0599cecbee4:2026-10-22T03:16:03Z
+RUN_R4:stopped_before_solve:exit=0:receipt=stopped_before_solve:76s:peak=10.05GiB
+BUILD_CHECK_R4:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 68.43920922279358}, "peak_rss_gib": 10.02}
+PHASE_3:one_lane:R5..R11:cores=16:no_solve_mode:2026-10-22T03:17:19Z
+SOLVE_R5:pid=2981:pgid=2981:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:2026-10-22T03:17:20Z
+RUN_R5:stopped_before_solve:exit=0:receipt=stopped_before_solve:81s:peak=10.09GiB
+BUILD_CHECK_R5:{"passed": true, "failed": [], "lp": {"num_row": 9048930, "num_col": 4054907, "nnz": 21248615, "build_seconds": 71.78391289710999}, "peak_rss_gib": 9.9}
+SOLVE_R6:pid=3209:pgid=3209:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:2026-10-22T03:18:41Z
+RUN_R6:stopped_before_solve:exit=0:receipt=stopped_before_solve:91s:peak=10.08GiB
+BUILD_CHECK_R6:{"passed": true, "failed": [], "lp": {"num_row": 9253938, "num_col": 4150749, "nnz": 21641255, "build_seconds": 82.51594233512878}, "peak_rss_gib": 10.01}
+SOLVE_R7:pid=3445:pgid=3445:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:2026-10-22T03:20:13Z
+RUN_R7:stopped_before_solve:exit=0:receipt=stopped_before_solve:96s:peak=10.12GiB
+BUILD_CHECK_R7:{"passed": true, "failed": [], "lp": {"num_row": 9351193, "num_col": 4193946, "nnz": 21891064, "build_seconds": 84.45420837402344}, "peak_rss_gib": 10.05}
+SOLVE_R8:pid=3682:pgid=3682:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:2026-10-22T03:21:49Z
+RUN_R8:stopped_before_solve:exit=0:receipt=stopped_before_solve:66s:peak=7.79GiB
+BUILD_CHECK_R8:{"passed": true, "failed": [], "lp": {"num_row": 9357960, "num_col": 4183232, "nnz": 21687091, "build_seconds": 58.05629348754883}, "peak_rss_gib": 7.57}
+SOLVE_R9:pid=3901:pgid=3901:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:2026-10-22T03:22:55Z
+RUN_R9:stopped_before_solve:exit=0:receipt=stopped_before_solve:82s:peak=9.92GiB
+BUILD_CHECK_R9:{"passed": true, "failed": [], "lp": {"num_row": 9745023, "num_col": 4372438, "nnz": 22680056, "build_seconds": 73.9987998008728}, "peak_rss_gib": 9.81}
+SOLVE_R10:pid=4165:pgid=4165:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:2026-10-22T03:24:17Z
+RUN_R10:stopped_before_solve:exit=0:receipt=stopped_before_solve:136s:peak=10.16GiB
+BUILD_CHECK_R10:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 123.42317080497742}, "peak_rss_gib": 10.14}
+SOLVE_R11:pid=4469:pgid=4469:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:2026-10-22T03:26:33Z
+RUN_R11:stopped_before_solve:exit=0:receipt=stopped_before_solve:82s:peak=10.07GiB
+BUILD_CHECK_R11:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 70.86041140556335}, "peak_rss_gib": 9.78}
+SUMMARY:exit=0:{"B6_bn": null, "runs": {"R1": "built_stopped_before_solve", "R2": "built_stopped_before_solve", "R3": "built_stopped_before_solve", "R4": "built_stopped_before_solve", "R5": "built_stopped_before_solve", "R6": "built_stopped_before_solve", "R7": "built_stopped_before_solve", "R8": "built_stopped_be
+PACK_pre_p1:PACKED:light=results_light_pre_p1_20261022T032754Z.tar.gz:136042B:sha256=57ccca36f7dc0b3f:full=results_full_pre_p1_20261022T032754Z.tar.gz:136042B:sha256=57ccca36f7dc0b3f
+DRY-RUN_P1:/home/jin/miniforge3/envs/pypsa-earth/bin/python /home/jin/m10p_dry/pkg/repo/scripts_project/s2_solve.py --repo /home/jin/m10p_dry/pkg/repo --network /home/jin/m10p_dry/pkg/networks/integrated_2920_3h_unsolved.nc --scenario integrated --output /home/jin/m10p_dry/pkg/runs/batch3/P1 --label BATCH3_P1_PROBE_2920X3H --authorization M10P no-solve mode (build-only / post-only / dry); run P1 --solver gurobi --solver-profile formal_barrier --scaling on --time-limit 3600 --costs-table /home/jin/m10p_dry/pkg/networks/integrated_costs_active_research.csv --stop-before-solve
+PARAM_CHECK_P1:{"passed": true, "failed": [], "threads": 8}
+SUMMARY:exit=0:{"B6_bn": null, "runs": {"R1": "built_stopped_before_solve", "R2": "built_stopped_before_solve", "R3": "built_stopped_before_solve", "R4": "built_stopped_before_solve", "R5": "built_stopped_before_solve", "R6": "built_stopped_before_solve", "R7": "built_stopped_before_solve", "R8": "built_stopped_be
+PACK_final:PACKED:light=results_light_final_20261022T032801Z.tar.gz:136532B:sha256=7fbce626f316cc76:full=results_full_final_20261022T032801Z.tar.gz:136532B:sha256=7fbce626f316cc76
+DONE:2026-10-22T03:28:07Z

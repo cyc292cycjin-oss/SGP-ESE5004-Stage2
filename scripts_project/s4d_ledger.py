@@ -126,8 +126,19 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
                         "CO2 transit rail": "co2_transit_rail_freight"}.get(car, "variable_cost")   # S4F-2 c (97 c): Lao rail transit into the VN store
                 add(own[t][name], subj, car, v)
     xb_led = pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", []))
+    # M10R (R9 defect, 2026-10-24): the meta ledger of an integrated build lists every corridor of the corridor table, the zero-capacity candidates
+    # (0 EUR) included; a variant may have removed such a component (keep_stock_no_new drops every non-stock cross-border line / link and keeps the
+    # meta). Rows of components in the network are booked to the component's owner (the corridor entity of its two end countries, as in the
+    # integrated run); an absent row with 0 EUR is skipped and counted; an absent row with a non-zero amount is an error (a constant without owner).
+    xb_booked, xb_absent = 0.0, []
     for _, r in xb_led.iterrows():
-        add(own[r.component_type][r.component], "fom_existing", n.df(r.component_type).at[r.component, "carrier"], float(r.annual_fom_eur))
+        t, c, eur = str(r.component_type), str(r.component), float(r.annual_fom_eur)
+        if c in own[t].index:
+            add(own[t][c], "fom_existing", n.df(t).at[c, "carrier"], eur); xb_booked += eur
+        elif eur != 0.0:
+            raise ValueError(f"existing cross-border FOM ledger row {t} {c} ({eur:.6g} EUR) refers to a component not in the network: the objective constant has no owner")
+        else:
+            xb_absent.append(f"{t}:{c}")
     # settlements at the dual of the port bus
     reowned = {}
     for t, (attr, sign) in ONE_PORT.items():
@@ -210,7 +221,9 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
     diag = dict(corridors={e: dict(costs=float(xb_cost.get(e, 0.0)), settlement=float(xb_rent.get(e, 0.0)), net=float(xb_net.get(e, 0.0))) for e in sorted(xb_net.index)},
                 length_shares_missing=sorted(missing) if length_shares is not None else "not_supplied",
                 pool=dict(net=pool, by_subject={k: float(v) for k, v in L[L.entity == POOL].groupby("subject").eur.sum().items()}),
-                one_port_owned_by_country_column=reowned)
+                one_port_owned_by_country_column=reowned,
+                existing_cross_border_fom_ledger=dict(rows=int(len(xb_led)), booked=int(len(xb_led) - len(xb_absent)), booked_eur=float(xb_booked),
+                                                      absent_zero=len(xb_absent), absent_zero_components=xb_absent[:60]))
     return out, identity, diag
 
 

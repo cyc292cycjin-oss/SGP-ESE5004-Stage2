@@ -1,0 +1,193 @@
+{
+ "G1": {
+  "a": false,
+  "b": false,
+  "c": false,
+  "computable": false,
+  "note": "PRECISION.json missing or not computable"
+ },
+ "G2": {
+  "G2_1": {
+   "input_network_sha256": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+   "note": null,
+   "passed": true,
+   "readback": "EXACT_SEMANTIC_ROUNDTRIP",
+   "registered_sha256": "4206ec5c5d88c3ae87a1cb3ac5f85837c4c0cb2bb761f4539984922c81b5fdcf",
+   "sha256_equal": true
+  },
+  "G2_2": {
+   "current_subset_sha256": null,
+   "network_subset_sha256": null,
+   "note": "network has no research_config_subset_sha256 (built before M08a A8)",
+   "passed": false
+  },
+  "G2_3": {
+   "checks": {
+    "b16_computable": true,
+    "exports_present_and_sha256_equal": true,
+    "receipt_fields": true,
+    "solution_dimensions_equal_lp": true
+   },
+   "missing_or_changed_exports": [],
+   "passed": true,
+   "solution_dimensions": {
+    "Pi": {
+     "count": 9017345,
+     "equal": true,
+     "lp": 9017345
+    },
+    "RC": {
+     "count": 4048847,
+     "equal": true,
+     "lp": 4048847
+    },
+    "X": {
+     "count": 4048847,
+     "equal": true,
+     "lp": 4048847
+    }
+   }
+  }
+ },
+ "definition": {
+  "file": "research/06_scope_redesign/p1_step4r_20261020/GATES_V6.md",
+  "notes": "GATES_V6_NOTES.md (k = 10 kept)",
+  "sha256": "5c0aa8b8ed322b75a63879fccfc19559606a0ad743ecafee3addfcbfe04fd7f9",
+  "subset_keys": [
+   "scenario",
+   "cross_border",
+   "fuels.price_scenario",
+   "finance",
+   "sector",
+   "s3",
+   "renewable",
+   "fleet",
+   "nuclear",
+   "candidates",
+   "hydro",
+   "hydrogen",
+   "cost_layer.active",
+   "numerics",
+   "network",
+   "corridors",
+   "bunkers",
+   "co2",
+   "s2",
+   "cost_scaling",
+   "carbon",
+   "demand",
+   "transmission",
+   "existing_cross_border_electricity",
+   "solver.scaling",
+   "solver.interior",
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ],
+  "subset_keys_m08a_additions": [
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ]
+ },
+ "diagnostics": {
+  "D0_solver_status": {
+   "retry": false,
+   "solve_seconds": 11753.859136343002,
+   "status": "ok",
+   "termination": "optimal",
+   "time_limit": 14400.0
+  },
+  "D10_domestic_gas_caps": {
+   "items": 8,
+   "within": true,
+   "worst_ratio": 0.9999899837834844
+  },
+  "D11_demand_conservation": {
+   "source": "B8",
+   "within": true
+  },
+  "D12_supply_routes": {
+   "source": "B11",
+   "within": true
+  },
+  "D13_imports_one_way": {
+   "source": "B13",
+   "within": true
+  },
+  "D14_scenario_pair": {
+   "note": "B5 / B6 need both scenarios (pair report)",
+   "within": null
+  },
+  "D15_interior_cleanup": {
+   "keys": [
+    "cleanup_thresholds",
+    "interior_solution",
+    "simultaneous_charge_discharge"
+   ],
+   "within": true
+  },
+  "D16_whole_config_hash": {
+   "source": "B12",
+   "within": true
+  },
+  "D1_primal": {
+   "fail_count": 2371,
+   "max_ratio": 279.00430490571694,
+   "within": false
+  },
+  "D2_dual": {
+   "anomaly": false,
+   "budget": 9.999999999999999e-06,
+   "dual_sign_max": 0.008649694563198545,
+   "eps_d": 1e-06,
+   "history_max_ratio": 33378.0,
+   "k": 10.0,
+   "max_ratio": 864.9694563198545,
+   "note": "diagnostic only (GATES_V6_NOTES): interior-point solutions without crossover exceed k = 10 routinely",
+   "stationarity_max": 0.0005842404130853325,
+   "within": false
+  },
+  "D3_gap_complementarity": {
+   "budget": 1e-07,
+   "complementarity_over_scale": 3.465121191453482e-07,
+   "relative_gap": 1.2429982193034622e-07,
+   "within": false
+  },
+  "D4_physics": {
+   "source": "A3_S4B",
+   "within": false
+  },
+  "D5_objective_reconciliation": {
+   "source": "A5_S4B",
+   "within": true
+  },
+  "D6_country_net_zero": {
+   "source": "B1_S4B",
+   "within": true
+  },
+  "D7_storage_caps": {
+   "items": 11,
+   "within": true,
+   "worst_ratio": 0.9999899996073934
+  },
+  "D8_biomass_pools": {
+   "source": "B3_S4B",
+   "within": false
+  },
+  "D9_terminal_caps": {
+   "expansion": "cap_factor_cost",
+   "items": 16,
+   "within": true,
+   "worst_ratio": 0.9999899746751544
+  }
+ },
+ "label": "NOT_ACCEPTED",
+ "profile": "formal_barrier",
+ "resolution": "365x24h",
+ "schema": "gates-v6-acceptance-v1",
+ "solve_dir": "/home/jin/m10a_b3/R1",
+ "solver_runs": 0
+}

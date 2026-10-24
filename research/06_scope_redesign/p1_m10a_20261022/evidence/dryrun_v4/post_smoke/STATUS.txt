@@ -1,0 +1,54 @@
+START:2026-10-22T09:53:18Z:commit=03677123abf41c91b95d5bcdefa3bff9b25a05d9:repo_commit=03677123abf41c91b95d5bcdefa3bff9b25a05d9:build_only=0:post_only=1:dry=0:cores=16:threads_A=8:threads_T16=16:time_limit_s=21600:wall_cap_s=22500:licence_gap_s=330:schedule=1[R1|R2],2[R3,R4|R5,R6],3[R7,R9,R11|R8,R10]:truncate=56:resume=no:tmpdir=/home/jin/m10a_dry/post_smoke/tmp:post_timeout_s=1800:allow_unregistered=1:hooks=TRUNCATE
+PREPARE:skipped (POST_ONLY: no solve, no variants needed)
+PHASE_1:one_lane:R1,R2:threads=16:cores=16:no_solve_mode:2026-10-22T09:53:18Z
+SKIP_ENDED_R1:optimal (ended before; never re-solved)
+VIOLATIONS_R1:exit=0
+C1_R1:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=default:provisional
+M12_R1:exit=0
+M12_OWEN_R1:exit=0
+V6_R1:ACCEPTED_LAYER2:ref=default
+SKIP_ENDED_R2:optimal (ended before; never re-solved)
+VIOLATIONS_R2:exit=0
+C1_R2:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=default:provisional
+M12_R2:exit=0
+M12_OWEN_R2:exit=0
+V6_R2:ACCEPTED_LAYER2:ref=default
+BATCH_REFERENCE:exit=0:2026-10-22T09:55:31Z:R1=optimal:R2=optimal
+REGRADE_R1:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+REGRADE_R2:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+PHASE_2:one_lane:R3,R5,R4,R6:threads=24:cores=16:no_solve_mode:2026-10-22T09:55:33Z
+POST_ONLY_R3:not solved - nothing to post-process
+SKIP_ENDED_R5:optimal (ended before; never re-solved)
+VIOLATIONS_R5:exit=0
+C1_R5:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:final
+M12_R5:exit=0
+M12_OWEN_R5:exit=0
+RHS_CHECK_R5:exit=0:{"passed": true, "left": 0, "changed": 0}
+V6_R5:ACCEPTED_LAYER2:ref=batch
+POST_ONLY_R4:not solved - nothing to post-process
+SKIP_ENDED_R6:optimal (ended before; never re-solved)
+VIOLATIONS_R6:exit=0
+C1_R6:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:final
+M12_R6:exit=0
+M12_OWEN_R6:exit=0
+RHS_CHECK_R6:exit=0:{"passed": true, "left": 0, "changed": 0}
+V6_R6:ACCEPTED_LAYER2:ref=batch
+PROFILE_CHOICE:formal_barrier:candidate failed in at least one level-2 scenario -> profile A
+PHASE_3:one_lane:R7,R8,R9,R10,R11:threads=16:cores=16:no_solve_mode:2026-10-22T09:57:38Z
+SKIP_ENDED_R7:optimal (ended before; never re-solved)
+VIOLATIONS_R7:exit=0
+C1_R7:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:final
+M12_R7:exit=0
+M12_OWEN_R7:exit=0
+RHS_CHECK_R7:exit=0:{"passed": true, "left": 0, "changed": 0}
+V6_R7:ACCEPTED_LAYER2:ref=batch
+POST_ONLY_R8:not solved - nothing to post-process
+POST_ONLY_R9:not solved - nothing to post-process
+POST_ONLY_R10:not solved - nothing to post-process
+POST_ONLY_R11:not solved - nothing to post-process
+M12_LOO:exit=0:runs=3:unusable_left_out=none:{"all_passed": true, "indivisible_sign": "positive"}
+M12_BENEFIT:exit=0:loo_check=yes:{"b6_bn": 9.89852589762738, "negative": []}
+PROFILE_CHOICE:formal_barrier:candidate failed in at least one level-2 scenario -> profile A
+SUMMARY:exit=0:{"B6_bn": 9.89852589762738, "runs": {"R1": "ended", "R2": "ended", "R3": "not_started", "R4": "not_started", "R5": "ended", "R6": "ended", "R7": "ended", "R8": "not_started", "R9": "not_started", "R10": "not_started", "R11": "not_started"}}
+PACK_final:PACKED:light=results_light_final_20261022T095849Z.tar.gz:2343280B:sha256=1d2aa3558438f392:full=results_full_final_20261022T095849Z.tar.gz:140671028B:sha256=4eae17f6b374edfb
+DONE:2026-10-22T09:58:57Z:unusable=none

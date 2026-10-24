@@ -1,0 +1,239 @@
+HEAD d71f599ebbdaf808f7c7d3d8b8099441b37b9446 dirty_tracked 7 2026-10-22T09:14:18Z mode=full
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 31%]
+........................................................................ [ 42%]
+......................s.....................F...........F.FF............ [ 53%]
+.s.s......................................................sssssssss..... [ 63%]
+.............sssss.........sss.ss..s.sss.s.s.......s..s...s.....ss....ss [ 74%]
+..s..ss....s..sss...s...ss.ss....s..s......s...s....s...s...s.....s..s.. [ 84%]
+..s.....s...s..s..s....s..s..s..s.....s....s............................ [ 95%]
+..............................                                           [100%]
+=================================== FAILURES ===================================
+_ test_graded_stop_rule_stops_on_reference_runs_and_g2[R1-extra0-nosol-solved0-R2] _
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-6/test_graded_stop_rule_stops_on0')
+rid = 'R1', extra = {'FAKE_NOSOL_R1': '1', 'FAKE_SLEEP_R2': '6'}, cls = 'nosol'
+solved = ['R1', 'R2'], running = 'R2'
+
+    @pytest.mark.parametrize("rid,extra,cls,solved,running", [
+        ("R1", {"FAKE_NOSOL_R1": "1", "FAKE_SLEEP_R2": "6"}, "nosol", ["R1", "R2"], "R2"),                              # M10A drill (b): batch reference run without a solution
+        ("R2", {"FAKE_C1_R2": "011"}, "c1a", ["R1", "R2"], None),                                                       # batch reference run: C1 (a)
+        ("R6", {"FAKE_NOSOL_R6": "1", "FAKE_SUBSET_R6": "differ", "FAKE_SLEEP_R4": "10"}, "g2", ["R1", "R2", "R3", "R4", "R5", "R6"], "R4"),   # input problem, no solution
+        ("R7", {"FAKE_SUBSET_R7": "differ", "FAKE_SLEEP_R7": "4", "FAKE_SLEEP_R8": "12"}, "g2", ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"], "R8"),   # G2 with a solution
+    ])
+    def test_graded_stop_rule_stops_on_reference_runs_and_g2(tmp_path, rid, extra, cls, solved, running):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, extra)
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 3, st[-3000:]
+>       assert sorted(c[1] for c in _calls(tmp_path)) == sorted(solved)                                                # no new solve after the stop
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ['R1'] == ['R1', 'R2']
+E         
+E         Right contains one more item: 'R2'
+E         Use -v to get more diff
+
+tests/research/test_m10p_batch3.py:255: AssertionError
+_______ test_post_processing_crash_is_recorded_and_the_schedule_goes_on ________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-6/test_post_processing_crash_is_0')
+
+    def test_post_processing_crash_is_recorded_and_the_schedule_goes_on(tmp_path):
+        """M10A drill (j): the M12 allocation of R2 and the leave-one-out RHS check of R7 raise -> POSTPROC_ERROR records, the batch runs to DONE
+        (exit 0); the labels of R2 / R7 are unchanged (GATES_V6 checks only the registered exports), the benefit step reports not computable."""
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"FAKE_RAISE_M12_R2": "1", "FAKE_RAISE_RHS_LOO_R7": "1"})
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 0, st[-3000:]
+        assert len(_calls(tmp_path)) == 11 and "DONE:" in st and "STOP" not in st.replace("STOP_CLASS", "")
+        assert "POSTPROC_ERROR:R2:m12:exit=1" in st and "POSTPROC_ERROR:R7:rhs_loo:exit=1" in st and "M12_BENEFIT:not_computable" in st
+        rows = (out / "POSTPROC_ERRORS").read_text().splitlines()
+        assert [r.split()[:3] for r in rows] == [["R2", "m12", "exit=1"], ["R7", "rhs_loo", "exit=1"]] and (out / "export" / "batch" / "POSTPROC_ERRORS").exists()
+        assert json.loads((out / "R2" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" and not (out / "R2" / "ALLOCATION.json").exists()
+        assert json.loads((out / "R7" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" and not (out / "R7" / "m12_loo_rhs" / "LOO_RHS_CHECK.json").exists()
+        summ = json.loads((out / "BATCH3_SUMMARY.json").read_text())
+        assert [(e["rid"], e["step"], e["exit"]) for e in summ["postproc_errors"]] == [("R2", "m12", "1"), ("R7", "rhs_loo", "1")]
+>       assert summ["runs"]["R2"]["postproc_errors"] == ["m12:exit=1"] and summ["runs"]["R1"]["postproc_errors"] == [] and summ["benefit"]["computable"] is False
+                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests/research/test_m10p_batch3.py:405: TypeError
+_____________________ test_unregistered_limits_are_refused _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-6/test_unregistered_limits_are_r0')
+
+    def test_unregistered_limits_are_refused(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "WALL_CAP_S": "100", "LICENCE_GAP_S": "330"})
+        assert p.returncode == 2 and "REFUSED: WALL_CAP_S=100" in p.stdout
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "LICENCE_GAP_S": "330"}, args=())
+>       assert p.returncode == 2 and "--auth" in p.stdout
+E       AssertionError: assert (2 == 2 and '--auth' in 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n')
+E        +  where 2 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-6/test_unregistered_limits_are_r0/pkg/run_batch3.sh'], retur...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').returncode
+E        +  and   'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n' = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-6/test_unregistered_limits_are_r0/pkg/run_batch3.sh'], retur...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').stdout
+
+tests/research/test_m10p_batch3.py:435: AssertionError
+______ test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth _______
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-6/test_formal_run_refuses_test_h0')
+
+    def test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth(tmp_path):
+        """M10A drill (m): a stand-in left in the shell is refused by a formal run (solve mode without ALLOW_UNREGISTERED); BUILD_ONLY / POST_ONLY
+        left in the shell are refused together with --auth; the test usage (ALLOW_UNREGISTERED=1) and the dry-run usage (no --auth) are unchanged."""
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "LICENCE_GAP_S": "330"})
+>       assert p.returncode == 2 and "REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD set - test hooks" in p.stdout and not (tmp_path / "out" / "STATUS.txt").exists()
+E       AssertionError: assert (2 == 2 and 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD set - test hooks' in 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n')
+E        +  where 2 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-6/test_formal_run_refuses_test_h0/pkg/run_batch3.sh', '--aut...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').returncode
+E        +  and   'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n' = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-6/test_formal_run_refuses_test_h0/pkg/run_batch3.sh', '--aut...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').stdout
+
+tests/research/test_m10p_batch3.py:443: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_gate4_activation.py::HydroAggregationTests::test_two_dedicated_hydro_inflows_sum_and_roundtrip
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/research/test_m08a_a1.py::test_td_inflation_rule_mirrored
+tests/research/test_m08a_a1.py::test_td_inflation_rule_mirrored
+tests/research/test_m08a_a1.py::test_download_cross_check_identical_rates
+tests/research/test_m08a_a1.py::test_download_cross_check_identical_rates
+  /home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/openpyxl/styles/stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
+    warn("Workbook contains no default style, apply openpyxl's default")
+
+tests/research/test_m08a_a2.py: 1 warning
+tests/research/test_m08a_a3.py: 1 warning
+tests/research/test_m08a_a4.py: 1 warning
+tests/research/test_m08a_a5.py: 2 warnings
+tests/research/test_m08a_a6.py: 1 warning
+tests/research/test_m08a_a7.py: 9 warnings
+tests/research/test_m08a_a8.py: 1 warning
+tests/research/test_m08a_a9.py: 3 warnings
+tests/research/test_m08b_demand.py: 1 warning
+tests/research/test_m08b_heat.py: 1 warning
+tests/research/test_phase4_static.py: 1 warning
+tests/research/test_s1_adapter_daily_v5.py: 1 warning
+tests/research/test_s2_costs.py: 2 warnings
+tests/research/test_s3b_r1.py: 1 warning
+tests/research/test_s3b_r2.py: 1 warning
+tests/research/test_s3b_r3.py: 1 warning
+tests/research/test_s3b_r4.py: 1 warning
+tests/research/test_s4a_fleet.py: 1 warning
+tests/research/test_s4a_profiles.py: 1 warning
+tests/research/test_s4b_0.py: 1 warning
+tests/research/test_s4b_1.py: 1 warning
+tests/research/test_s4b_2.py: 1 warning
+tests/research/test_s4b_3.py: 1 warning
+tests/research/test_s4b_4.py: 1 warning
+tests/research/test_s4c_0.py: 1 warning
+  /home/jin/wt_m10p_20261022/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_m08a_a2.py: 1 warning
+tests/research/test_m08a_a3.py: 1 warning
+tests/research/test_m08a_a4.py: 1 warning
+tests/research/test_m08a_a5.py: 2 warnings
+tests/research/test_m08a_a6.py: 1 warning
+tests/research/test_m08a_a7.py: 9 warnings
+tests/research/test_m08a_a8.py: 1 warning
+tests/research/test_m08a_a9.py: 3 warnings
+tests/research/test_m08b_demand.py: 1 warning
+tests/research/test_m08b_heat.py: 1 warning
+tests/research/test_phase4_static.py: 1 warning
+tests/research/test_s1_adapter_daily_v5.py: 1 warning
+tests/research/test_s2_costs.py: 2 warnings
+tests/research/test_s3b_r1.py: 1 warning
+tests/research/test_s3b_r2.py: 1 warning
+tests/research/test_s3b_r3.py: 1 warning
+tests/research/test_s3b_r4.py: 1 warning
+tests/research/test_s4a_fleet.py: 1 warning
+tests/research/test_s4a_profiles.py: 1 warning
+tests/research/test_s4b_0.py: 1 warning
+tests/research/test_s4b_1.py: 1 warning
+tests/research/test_s4b_2.py: 1 warning
+tests/research/test_s4b_3.py: 1 warning
+tests/research/test_s4b_4.py: 1 warning
+tests/research/test_s4c_0.py: 1 warning
+  /home/jin/wt_m10p_20261022/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+tests/research/test_validation_temporal.py: 284 warnings
+  /home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pypsa/components.py:929: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    cls_pnl[k][name] = pd.Series(data=v, index=self.snapshots, dtype=typ)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/research/test_m08b_heat.py:44: JRC-IDEES-2021 workbook not in this checkout (set M08B_IDEES_XLSX)
+SKIPPED [1] tests/research/test_m12_allocation.py:324: local 56x3h smoke solve (results_project, git-ignored) not present
+SKIPPED [1] tests/research/test_m12_allocation.py:357: local 56x3h smoke solve with exported arrays not present, or PYTHONHASHSEED != 0
+SKIPPED [1] tests/research/test_s1_built_networks.py:41: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:59: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:46: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:26: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:30: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:50: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:34: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:22: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s1_built_networks.py:54: S1 scenario networks not built
+SKIPPED [1] tests/research/test_s2_built_networks.py:30: S2 networks not built
+SKIPPED [1] tests/research/test_s2_built_networks.py:40: S2 networks not built
+SKIPPED [1] tests/research/test_s2_built_networks.py:57: S2 networks not built
+SKIPPED [1] tests/research/test_s2_built_networks.py:67: S2 networks not built
+SKIPPED [1] tests/research/test_s2_built_networks.py:81: S2 networks not built
+SKIPPED [1] tests/research/test_s2b_supplement02.py:127: S2B networks not built
+SKIPPED [1] tests/research/test_s2b_supplement02.py:142: S2B networks not built
+SKIPPED [1] tests/research/test_s3_ammonia_methanol.py:20: S3-3 networks not built
+SKIPPED [1] tests/research/test_s3_fuel_carbon.py:27: S3-5 origin_neutral network not built
+SKIPPED [1] tests/research/test_s3_fuel_carbon.py:57: S3-5 producer_credit network not built
+SKIPPED [1] tests/research/test_s3_gas_network.py:55: S3-1 networks not built
+SKIPPED [1] tests/research/test_s3_gates.py:29: S3-5 networks not built
+SKIPPED [1] tests/research/test_s3_gates.py:49: producer_credit network not built
+SKIPPED [1] tests/research/test_s3_gates.py:62: S3B R4 network not built
+SKIPPED [1] tests/research/test_s3_imports.py:44: S3-2 networks not built
+SKIPPED [1] tests/research/test_s3_shipping.py:31: S3-4 networks not built
+SKIPPED [1] tests/research/test_s3b_r3.py:35: S3B R3 networks not built
+SKIPPED [1] tests/research/test_s3b_r4.py:47: R4 runs not available
+SKIPPED [1] tests/research/test_s4a_fleet.py:53: S4A-2 build check network not present
+SKIPPED [1] tests/research/test_s4a_profiles.py:44: electric base not available
+SKIPPED [1] tests/research/test_s4a_profiles.py:80: electric base not available
+SKIPPED [1] tests/research/test_s4b_0.py:71: S4B-0 build not present
+SKIPPED [1] tests/research/test_s4b_0.py:86: S4B-0 gap build not present
+SKIPPED [1] tests/research/test_s4b_1.py:35: S4B-1 build not present
+SKIPPED [1] tests/research/test_s4b_2.py:38: S4B-2 build not present
+SKIPPED [1] tests/research/test_s4b_2.py:55: S4B-2 nuclear_plans build not present
+SKIPPED [1] tests/research/test_s4b_3.py:55: S4B-3 build not present
+SKIPPED [1] tests/research/test_s4b_4.py:36: S4B-4 builds not present
+SKIPPED [1] tests/research/test_s4b_5.py:12: S4B-5 builds not present
+SKIPPED [1] tests/research/test_s4b_5.py:30: S4B-5 summary not present
+SKIPPED [1] tests/research/test_s4c_0.py:81: S4C-0 build not present
+SKIPPED [1] tests/research/test_s4c_1.py:63: S4C-1 build not present
+SKIPPED [1] tests/research/test_s4c_1.py:85: comparison build not present
+SKIPPED [1] tests/research/test_s4c_2.py:32: S4C-2 build not present
+SKIPPED [1] tests/research/test_s4c_2.py:52: comparison build not present
+SKIPPED [1] tests/research/test_s4c_3.py:89: S4C-3 builds not present
+SKIPPED [1] tests/research/test_s4c_4.py:51: S4C-4 builds not present
+SKIPPED [1] tests/research/test_s4d_1.py:85: S4D-1 builds not present
+SKIPPED [1] tests/research/test_s4d_2.py:75: S4D-2 builds not present
+SKIPPED [1] tests/research/test_s4d_3.py:89: ledger trial not run
+SKIPPED [1] tests/research/test_s4d_4.py:71: S4D-4 builds not present
+SKIPPED [1] tests/research/test_s4d_6.py:51: S4D-6 sensitivity build not present
+SKIPPED [1] tests/research/test_s4e_1.py:89: S4E-1 builds not present
+SKIPPED [1] tests/research/test_s4e_2.py:58: S4E-2 builds not present
+SKIPPED [1] tests/research/test_s4f_1.py:84: S4F-1 builds not present
+SKIPPED [1] tests/research/test_s4f_2.py:102: S4F-2 builds not present
+SKIPPED [1] tests/research/test_s4g_1.py:58: S4G-1 builds not present
+SKIPPED [1] tests/research/test_s4g_2.py:41: S4G-2 builds not present
+SKIPPED [1] tests/research/test_s4h_1.py:45: S4H-1 builds not present
+SKIPPED [1] tests/research/test_s4h_2.py:68: S4H-2 builds not present
+SKIPPED [1] tests/research/test_s4j_1.py:43: S4J-1 build not present
+SKIPPED [1] tests/research/test_s4j_2.py:46: S4J-2 build not present
+SKIPPED [1] tests/research/test_s4j_3.py:44: S4J-3b builds not present
+SKIPPED [1] tests/research/test_s4k_1.py:113: S4K-1 build not present
+SKIPPED [1] tests/research/test_s4l_1.py:145: S4L-1 / S4K-3 builds not present
+FAILED tests/research/test_m10p_batch3.py::test_graded_stop_rule_stops_on_reference_runs_and_g2[R1-extra0-nosol-solved0-R2]
+FAILED tests/research/test_m10p_batch3.py::test_post_processing_crash_is_recorded_and_the_schedule_goes_on
+FAILED tests/research/test_m10p_batch3.py::test_unregistered_limits_are_refused
+FAILED tests/research/test_m10p_batch3.py::test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth
+4 failed, 607 passed, 67 skipped, 363 warnings in 575.44s (0:09:35)
+EXIT 1
+END 2026-10-22T09:23:55Z
+DONE

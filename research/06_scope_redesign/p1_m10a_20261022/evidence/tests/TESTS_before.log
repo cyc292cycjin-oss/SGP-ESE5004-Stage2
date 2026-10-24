@@ -1,0 +1,148 @@
+HEAD d71f599ebbdaf808f7c7d3d8b8099441b37b9446 dirty_tracked 6 2026-10-22T08:51:43Z mode=before
+=== before (v3 scripts): test_full_batch_pairing ===
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_full_batch_pairing_order_reference_and_resume ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-0/test_full_batch_pairing_order_0')
+
+    def test_full_batch_pairing_order_reference_and_resume(tmp_path):
+        pkg = _package(tmp_path)
+        sl = {f"FAKE_SLEEP_{r}": "5" for r in ("R1", "R2", "R3", "R5", "R7", "R8")}
+        p = _run(tmp_path, pkg, dict(sl, FAKE_SLEEP_R4="8", FAKE_SLEEP_R6="8", FAKE_OBJ_R3=str(2e11 * (1 + 5e-6)), FAKE_C1_R2="101", FAKE_C1_REGRADE_R2="111", FAKE_C1_R8="101"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, (p.stdout + p.stderr)[-1500:] + st[-3000:]
+E       AssertionError: .remove_countries=[LA]
+E         VARIANT_R7:equal:2f3cbb1d30f1362c605801c2e0e38fab682dcd0f52c83b36adb1ad5ccf2f757f:expected=2f3cbb1d30f1362c605801c2e0e38fab682dcd0f52c83b36adb1ad5ccf2f757f:
+E         VARIANT_R8:generated:exit=0:set=disconnected.co2_shipping_intra_asean=forbid
+E         VARIANT_R8:equal:d8a0d6c27755558824f300bb0903e8de6593ecb184dc7c31a2f1ffc9910338e7:expected=d8a0d6c27755558824f300bb0903e8de6593ecb184dc7c31a2f1ffc9910338e7:
+E         VARIANT_R9:generated:exit=0:set=cross_border.stock_mode=keep_stock_no_new
+E         VARIANT_R9:equal:b1efa8cfada8d777dece5956a549ddf2c94846a97b0f8c037ef066a757c8a609:expected=b1efa8cfada8d777dece5956a549ddf2c94846a97b0f8c037ef066a757c8a609:
+E         VARIANT_R10:generated:exit=0:set=finance.wacc_mode=country_specific
+E         VARIANT_R10:equal:4a610b3f4502c65133a03755a64241c299cbe021582407a949a0866bb1d567f6:expected=4a610b3f4502c65133a03755a64241c299cbe021582407a949a0866bb1d567f6:
+E         VARIANT_R11:generated:exit=0:set=finance.wacc_mode=country_specific
+E         VARIANT_R11:equal:83abc3d0ee4651665b2c975c515ceb959b67977335bc53087bf68b82438ecf9e:expected=83abc3d0ee4651665b2c975c515ceb959b67977335bc53087bf68b82438ecf9e:
+E         GAP_PHASE_1:2s:2026-10-22T08:51:47Z
+E         PHASE_1:two_lanes:A=R1:B=R2:threads=16:cores=25:2026-10-22T08:51:47Z
+E         SOLVE_R1:pid=832:pgid=832:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=34b57b1357d9dd8ee25390fafdf5e7c698004743b7a3453068dc110311303536:2026-10-22T08:51:48Z
+E         STOP_SAFE:SOLVER_BUSY_R2:2 s2_solve processes running (at most one other session):2026-10-22T08:51:49Z - nothing else starts; waiting for the user
+E         RUN_R1:optimal:exit=0:receipt=post_solve:6s:peak=0.04GiB
+E         VIOLATIONS_R1:exit=0
+E         C1_R1:exit=0:fake:accepted=True:abc=111:ref=default:provisional
+E         M12_R1:exit=0
+E         M12_OWEN_R1:exit=0
+E         V6_R1:ACCEPTED_LAYER2:ref=default
+E         BATCH_REFERENCE:not_available:R1/R2 ledgers missing - the runs keep the provisional default reference
+E         BATCH_REFERENCE:not_available:R1/R2 ledgers missing - the runs keep the provisional default reference
+E         PROFILE_CHOICE:formal_barrier:candidate failed in at least one level-2 scenario -> profile A
+E         BATCH_REFERENCE:not_available:R1/R2 ledgers missing - the runs keep the provisional default reference
+E         M12_LOO:not_computable:no usable leave-one-out run or no R1 result:unusable_left_out=none
+E         M12_BENEFIT:not_computable:R1 / R2 allocations missing
+E         PROFILE_CHOICE:formal_barrier:candidate failed in at least one level-2 scenario -> profile A
+E         SUMMARY:exit=0:{"B6_bn": null, "runs": {"R1": "ended", "R2": "prepared", "R3": "not_started", "R4": "not_started", "R5": "not_started", "R6": "not_started", "R7": "not_started", "R8": "not_started", "R9": "not_started", "R10": "not_started", "R11": "not_started"}}
+E         PACK_halted:PACKED:light=results_light_halted_20261022T085158Z.tar.gz:8184B:sha256=508fe007032fb651:full=results_full_halted_20261022T085158Z.tar.gz:8224B:sha256=e5a327b08ba19b09
+E         HALTED:2026-10-22T08:51:58Z:SOLVER_BUSY_R2:2 s2_solve processes running (at most one other session) - waiting for the user (no retry, no parameter change):unusable=none
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-0/test_full_batch_pairing_order_0/pkg/run_batch3.sh', '--auth', 'synthetic test'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_m10p_batch3.py:136: AssertionError
+=========================== short test summary info ============================
+FAILED tests/research/test_m10p_batch3.py::test_full_batch_pairing_order_reference_and_resume
+1 failed, 27 deselected in 14.03s
+EXIT 1
+=== before (v3 scripts): test_post_processing_crash_is_recorded ===
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_post_processing_crash_is_recorded_and_the_schedule_goes_on ________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-1/test_post_processing_crash_is_0')
+
+    def test_post_processing_crash_is_recorded_and_the_schedule_goes_on(tmp_path):
+        """M10A drill (j): the M12 allocation of R2 and the leave-one-out RHS check of R7 raise -> POSTPROC_ERROR records, the batch runs to DONE
+        (exit 0); the labels of R2 / R7 are unchanged (GATES_V6 checks only the registered exports), the benefit step reports not computable."""
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"FAKE_RAISE_M12_R2": "1", "FAKE_RAISE_RHS_LOO_R7": "1"})
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, st[-3000:]
+E       AssertionError: 53068dc110311303536:2026-10-22T08:52:02Z
+E         RUN_R1:optimal:exit=0:receipt=post_solve:1s:peak=0.04GiB
+E         VIOLATIONS_R1:exit=0
+E         C1_R1:exit=0:fake:accepted=True:abc=111:ref=default:provisional
+E         M12_R1:exit=0
+E         M12_OWEN_R1:exit=0
+E         V6_R1:ACCEPTED_LAYER2:ref=default
+E         SOLVE_R2:pid=1792:pgid=1792:profile=formal_barrier:threads=8:time_limit=21600:wall_cap=22500:network_sha256=f79a86ab415f0775642130ae67234ef6ecfdcfa74118759acd40d82dcf078901:2026-10-22T08:52:04Z
+E         RUN_R2:optimal:exit=0:receipt=post_solve:1s:peak=0.04GiB
+E         VIOLATIONS_R2:exit=0
+E         C1_R2:exit=0:fake:accepted=True:abc=111:ref=default:provisional
+E         M12_R2:exit=1
+E         V6_R2:ACCEPTED_LAYER2:ref=default
+E         BATCH_REFERENCE:exit=0:2026-10-22T08:52:04Z:R1=optimal:R2=optimal
+E         REGRADE_R1:exit=0:fake:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+E         REGRADE_R2:exit=0:fake:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+E         GAP_PHASE_2:1s:2026-10-22T08:52:05Z
+E         PHASE_2:two_lanes:A=R3,R4:B=R5,R6:threads=24:cores=25:2026-10-22T08:52:05Z
+E         SOLVE_R3:pid=2086:pgid=2086:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22500:network_sha256=34b57b1357d9dd8ee25390fafdf5e7c698004743b7a3453068dc110311303536:2026-10-22T08:52:06Z
+E         RUN_R3:optimal:exit=0:receipt=post_solve:1s:peak=0.04GiB
+E         VIOLATIONS_R3:exit=0
+E         C1_R3:exit=0:fake:accepted=True:abc=111:ref=batch:final
+E         M12_R3:exit=0
+E         M12_OWEN_R3:exit=0
+E         V6_R3:ACCEPTED_LAYER2:ref=batch
+E         GAP_R4:1s:2026-10-22T08:52:07Z
+E         STOP_SAFE:SOLVER_BUSY_R5:2 s2_solve processes running (at most one other session):2026-10-22T08:52:07Z - nothing else starts; waiting for the user
+E         SOLVE_R4:pid=2254:pgid=2254:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22500:network_sha256=f79a86ab415f0775642130ae67234ef6ecfdcfa74118759acd40d82dcf078901:2026-10-22T08:52:08Z
+E         RUN_R4:optimal:exit=0:receipt=post_solve:1s:peak=0.04GiB
+E         VIOLATIONS_R4:exit=0
+E         C1_R4:exit=0:fake:accepted=True:abc=111:ref=batch:final
+E         M12_R4:exit=0
+E         M12_OWEN_R4:exit=0
+E         V6_R4:ACCEPTED_LAYER2:ref=batch
+E         PROFILE_CHOICE:formal_barrier_1e6_t16:candidate passed C1 (a)(b)(c) and the 1e-5 objective criterion in every level-2 scenario
+E         M12_LOO:not_computable:no usable leave-one-out run or no R1 result:unusable_left_out=none
+E         M12_BENEFIT:not_computable:R1 / R2 allocations missing
+E         PROFILE_CHOICE:formal_barrier_1e6_t16:candidate passed C1 (a)(b)(c) and the 1e-5 objective criterion in every level-2 scenario
+E         SUMMARY:exit=0:{"B6_bn": 100.0, "runs": {"R1": "ended", "R2": "ended", "R3": "ended", "R4": "ended", "R5": "prepared", "R6": "not_started", "R7": "not_started", "R8": "not_started", "R9": "not_started", "R10": "not_started", "R11": "not_started"}}
+E         PACK_halted:PACKED:light=results_light_halted_20261022T085213Z.tar.gz:10989B:sha256=b5d3a3fb908bf87d:full=results_full_halted_20261022T085213Z.tar.gz:11129B:sha256=5f2ff9f5f6184468
+E         HALTED:2026-10-22T08:52:13Z:SOLVER_BUSY_R5:2 s2_solve processes running (at most one other session) - waiting for the user (no retry, no parameter change):unusable=none
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-1/test_post_processing_crash_is_0/pkg/run_batch3.sh', '--auth', 'synthetic test'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_m10p_batch3.py:396: AssertionError
+=========================== short test summary info ============================
+FAILED tests/research/test_m10p_batch3.py::test_post_processing_crash_is_recorded_and_the_schedule_goes_on
+1 failed, 27 deselected in 15.37s
+EXIT 1
+=== before (v3 scripts): test_solver_process_running ===
+.                                                                        [100%]
+1 passed, 27 deselected in 2.14s
+EXIT 0
+=== before (v3 scripts): test_formal_run_refuses ===
+EXIT 124
+=== before (v3 scripts): test_preflight_guards ===
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_preflight_guards_refuse_test_hooks_left_in_the_shell ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-4/test_preflight_guards_refuse_t0')
+
+    def test_preflight_guards_refuse_test_hooks_left_in_the_shell(tmp_path):
+        """M10A drill (m): preflight.sh section guards fails when a test hook / dry-run switch is set, passes in a clean shell; operational overrides are only noted."""
+        pkg = _package(tmp_path)
+        for k, v in (("ALLOW_UNREGISTERED", "1"), ("POST_ONLY", "1"), ("SOLVE_CMD", "python fake.py"), ("FAKE_SLEEP_R1", "3"), ("WALL_CAP_S", "100")):
+            p = subprocess.run(["bash", str(pkg / "preflight.sh")], env=_clean_env({"PREFLIGHT_ONLY": "guards", "PY": sys.executable, k: v}), capture_output=True, text=True)
+>           assert p.returncode == 1 and "PREFLIGHT FAILED" in p.stdout and f"unset before the formal run: {k}" in p.stdout, (k, p.stdout)
+E           AssertionError: ('ALLOW_UNREGISTERED', 'PREFLIGHT OK
+E             ')
+E           assert (0 == 1)
+E            +  where 0 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-4/test_preflight_guards_refuse_t0/pkg/preflight.sh'], returncode=0, stdout='PREFLIGHT OK\n', stderr='').returncode
+
+tests/research/test_m10p_batch3.py:457: AssertionError
+=========================== short test summary info ============================
+FAILED tests/research/test_m10p_batch3.py::test_preflight_guards_refuse_test_hooks_left_in_the_shell
+1 failed, 27 deselected in 1.20s
+EXIT 1
+END 2026-10-22T09:07:17Z
+DONE

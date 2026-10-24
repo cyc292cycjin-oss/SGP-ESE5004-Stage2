@@ -281,6 +281,10 @@ def main(a):
             params = dict(threads=4, log_file=str(out / "highs.log"), time_limit=float(a.time_limit), solver="ipm" if a.highs_ipm else "choose")
             run["parameter_source"] = "HiGHS defaults (smoke test / diagnostic only)"
         run["solver_parameters"] = params
+        if a.stop_before_solve:   # M10P (instruction section 5.3): local dry run - LP built and exported, parameters fixed, exit before any solver call
+            run.update(stop_before_solve=True, decision="STOPPED_BEFORE_SOLVE_" + a.label, peak_rss_bytes=sampler.peak, finished_epoch=time.time())
+            save(out / "SOLVE_RECEIPT.json", run)
+            print(json.dumps(dict(stop_before_solve=True, lp=run["lp"], solver_parameters=params, peak_rss_gib=round(sampler.peak / 2**30, 2)))); return 0
         t1 = time.time(); run["optimize_calls"] = 1; save(out / "SOLVE_RECEIPT.json", run)
         status, condition = m.solve(solver_name=a.solver, **params, log_fn=str(out / (a.solver + ".linopy.log")))   # = PyPSA solve_model without the assignment step
         if status == "ok":
@@ -423,4 +427,5 @@ if __name__ == "__main__":
     p.add_argument("--kvl-norm", choices=["on", "off"], default=None, help="S4C-5 Kirchhoff row normalisation override; default research.solver.scaling.kirchhoff_row_normalisation (with scaling on)")
     p.add_argument("--costs-table", type=Path, default=None, help="S4M supplement 01: the build costs_active_research.csv - copied to the output and used for COMPONENT_COST_BREAKDOWN.csv (export only)")
     p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
+    p.add_argument("--stop-before-solve", action="store_true", help="M10P dry run: build and export the LP, fix the solver parameters, write the receipt and exit before the solver is called")
     sys.exit(main(p.parse_args()))

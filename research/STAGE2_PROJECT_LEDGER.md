@@ -818,3 +818,28 @@
 - **判定（事先登记）：** 全部在容差内 → **维持现有建模**（跨境线路保留 KVL）。第三批照原计划只做 3 次去一国，作 365×24h 复核。
 - **备选方案（只评估）：** 跨境交流线 62 条（存量 2,570 MW）改为可控联络线：约 8–10 个文件、120–200 行代码，四个网络都要重建；相对 PyPSA-Eur 属结构性偏离（71 个回路中的 53 个受影响）。未实施。
 - **交付：** `research/06_scope_redesign/p1_m12b_20261021/`（`M12B_REPORT.md`、`M12B_PROGRESS.md`、指令及 SHA256、`evidence/`、`scripts/`）；镜像 `work/p1_m12b_20261021/`（含审阅 ZIP）。运行结果在 `results_project/m12b/`，未入库。
+
+### M10P（第 133、138–141 项：第三批上云准备——整合分支、运行清单、事先登记规则、部署包、本机干跑；不连云、不求解）— 2026-10-22
+
+- **范围：** `M10P_CLAUDE_CODE_INSTRUCTION.md` v1（SHA256 bd2461e7…bbd1，核对一致）。分支 `codex/m10-batch3-20261022`：自 M12b 头 1f46517d 开出（独立 worktree），draft PR 叠在 #48 上。未连云、未上传、未调用 Gurobi；玩具 LP 测试按指令照常运行。
+- **整合：** #45（M08a）、#47（M08b 含补充 01）、#46（M12 含补充 01）、#48（M12b）与 S4Q #41（`FIXED_RUNS`、两个 1e-6 档案）的全部提交都已在 M12b 头中，无需 merge。`tests/research` 全量 582 passed、67 skipped、0 failed（整合分支）；最终代码 eac6c3e0：595 passed、67 skipped、0 failed。
+- **网络（第 1.4 节停止条件触发）：** 在干净提交 b46fc23d 上重建四个网络，SHA256 全部与 ec80668f 构建不同。原因（VERIFIED）：数据逐项相同，唯一差别是元数据 `s2_layers.geothermal.bus_mapping_source.path` 记录了构建 worktree 的绝对路径（`s2_network.py:344`）。按指令停下报告；**用户 10-22 决定 A：部署包用 ec80668f 原构建**（365×24h 一体化 75704334…、不互联 888a009b…，P1 用 2920×3h 一体化 bca20fc0…）。
+- **运行清单与事先登记规则（`RUN_PLAN.md`）：** R1–R11 + P1，档案 A（R3、R4 为 1e-6 T16）；TimeLimit 21,600 s / 墙钟 22,500 s（P1 墙钟 3,600 s），不重试、不改参数、不 warm start；两会话只在 Threads 之和不超过容器核数时并行（25 核上 R3、R4 先后跑），通道内与阶段间 ≥ 330 s；C1 阈值用本批 R1/R2 参照，之前的运行临时判定后重评（`grade_history`）；只有 C1 (a) 或 G2 不通过才停批（D12）；对偶形式验收按第 138 项；第四批档案按 R3/R4 对 R1/R2 选择；规则未覆盖的情况安全停止。
+- **代码与脚本：** `s2_solve.py --stop-before-solve`；`m10_batch3_summary.py`（运行表、核对、第二级、B6、敏感性差额、汇总、P1 解析）；部署包脚本 `run_batch3.sh`（含 `BUILD_ONLY` / `POST_ONLY`、续跑）、`preflight.sh`、`pack_results.sh`（轻量 / 完整）、`make_package.sh`、`env/`（锁定清单、安装与核对；非克隆部署下载约 743 MB）；测试 `test_m10p_batch3.py` 12 项（替身流水线）。
+- **部署包（不入库）：** `work/p1_m10p_20261022/cloud_package_dist/`，提交 eac6c3e0，23 个文件 283.7 MB（代码 153.5 MB + 三个网络 126.5 MB），`PACKAGE_MANIFEST.json` f36a4b6c…；7 个变体的期望 SHA256（打包时两遍逐字节相同）；上传估计 0.5–2.2 h（0.16 MB/s–36 KB/s）。
+- **干跑（不调用 Gurobi）：** 第一版包 be1ce466 在第 0 阶段发现 R10 变体 SHA256 随目录变化（`m08a_variants.py` 把 `--costs` 绝对路径写入元数据）→ 安全停止 → 修正（只记文件名与 SHA256，补测试，eac6c3e0）、第一版包作废保留。第二版：预检 OK（环境 284/284 包相同）；7 个变体三遍逐字节相同；R1–R11 全部 LP 构建完成、求解前退出、核对通过（1,129 s，峰值 7.8–10.2 GiB，LP 数组每个 0.72–0.80 GB）；P1 参数核对通过；后处理演练（R1/R2/R5–R7 ← M12b 冒烟，`POST_ONLY`）全过：临时判定→本批参照重评、去一国 3/3、B6 9.8985 bn，与 M12b 证据差 0.0 EUR。
+- **时长与资源（INFERENCE）：** 25 核约 19–23 h（最坏约 47 h）；内存 ≥ 72 GiB（P1 2920×3h 构建粗估约 80 GiB，可能超限，P1 前已打包）；磁盘 ≥ 50 GiB（预计约 39 GiB）；非克隆部署环境下载约 743 MB、5–15 分钟。
+- **待用户决定：** 25 核上 R3/R4 先后跑（或租 ≥ 32 核 / 允许与第 3 阶段并行）；无解运行是否对敏感性运行也停批；P1 内存风险与机器；两条固定通道；实例规格；代码归档是否瘦身；`m08a_variants.py` 修正与 `s2_network.py:344` 路径依赖的处理。
+- **交付：** `research/06_scope_redesign/p1_m10p_20261022/`（`M10P_REPORT.md`、`RUN_PLAN.md`、`M10P_PROGRESS.md`、指令及 SHA256、`cloud_package/`、`evidence/`、`scripts/`）；镜像 `work/p1_m10p_20261022/`；部署包 `work/p1_m10p_20261022/cloud_package_dist/`（不入库）。
+
+### M10P 补充 01（第 142 项：报告第 8 节六项的决定与第二次干跑；不连云、不上传、不调用 Gurobi）— 2026-10-22
+
+- **范围：** `M10P_SUPPLEMENT_01.md` v1（SHA256 49a4593d…9205，核对一致）。分支 `codex/m10-batch3-20261022`（PR #49）。玩具 LP 测试照常运行（规则同 M10P）。
+- **用户决定与落实：** (1) 第 2 阶段 R3（T16）| R5、R4（T16）| R6 同时跑（16 + 8 = 24 核），之后 [R7 → R9 → R11] | [R8 → R10]；只改顺序，档案与参数不变；排程单一来源 `m10_batch3_summary.py SCHEDULE`。(2) 分级停批：任何运行 G2 不过 → 停批；R1、R2 无返回解或 C1 (a) 不过 → 停批；R3–R11 无返回解或 C1 (a) 不过 → 记为不可用、继续（`stop-class` → `STOP_CLASS.json`、`UNUSABLE`）；无返回解时 G2 只核对输入网络 SHA256 与配置子集。(3) P1 从第三批删除，2920×3h 网络不入包；第四批开始时 1 h 探针、超过可用内存 80 % 即止损。(4) 实例规格 ≥ 25 核、≥ 92 GiB、数据盘 ≥ 60 GB（进入预检）。(5) 代码归档去掉 `research/`。(6) 接受 `m08a_variants.py` 修正；`s2_network.py:344` 登记为已知小项，正式运行后再修。
+- **`research/` 运行时依赖（VERIFIED）：无。** 静态检查（导入闭包 66 个模块）只有两处会打开 `research/` 文件，都在不被调用的 Gate5 / Gate6 旧函数；带访问追踪的干跑中预检、构建、后处理访问 0 次（阳性对照 3 次）。
+- **部署包 v3（不入库）：** `work/p1_m10p_20261022/cloud_package_dist/`，提交 e0527cec，24 个文件 148,587,335 B（v2 为 283.7 MB），`PACKAGE_MANIFEST.json` 0fc6ab4f…；网络、回执、成本表与 7 个变体期望 SHA256 与 v2 逐字节相同。上传 36 / 100 / 318 KB/s 约 1.15 h / 25 分钟 / 8 分钟。第一次生成时发现 `RUN_PLAN.md` 漏算两份构建回执（各 1.73 MB）→ 改正后重建；旧包改名保留。
+- **第二次干跑：** 预检 OK；7 个变体逐字节复现；R1–R11 构建到求解前退出全部核对通过，LP 维数、参数、网络 SHA256 与 LP 数组字节数逐运行与第一次干跑相同；后处理演练（M12b 冒烟）去一国 3/3、B6 9.8985 bn，与 M12b 证据差 0.0 EUR。
+- **测试：** `tests/research` 600 passed、67 skipped、0 failed；`test_m10p_batch3.py` 17 项（配对重叠、单通道回落、不可用继续、R2 / G2 停批、`stop-class` 12 种情况）。
+- **时长（INFERENCE）：** 25 核约 18–21 h（最坏约 40 h）；磁盘约 30 GiB。
+- **请审阅确认：** 阶段之间等两条通道都结束（不等则约省 1 h）；无返回解时 G2 的解释与"验收不可读即停批"；不可用的 R5–R7 不进入去一国检查。
+- **提交：** 619d7b46（S01-1）→ e0527cec（S01-2a）→ 645349db（S01-2/3 证据）→ S01-4（报告第 10 节、台账、PR、审阅 ZIP）。交付 `research/06_scope_redesign/p1_m10p_20261022/`（`M10P_REPORT.md` 第 10 节、`RUN_PLAN.md` v2、`evidence/s01/`、`scripts/m10p_s01_*`）。

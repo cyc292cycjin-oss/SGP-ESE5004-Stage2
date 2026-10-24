@@ -120,7 +120,7 @@ def derive(repo: Path, base: Path, out: Path, sets: dict, costs_path: Path | Non
         costs_path = Path(costs_path) if costs_path else base.parent / "costs_active_research.csv"
         costs = pd.read_csv(costs_path, index_col=0)
         led["finance"] = {k: v for k, v in apply_wacc_mode(n, costs, cfg, repo).items() if k != "rates_by_carrier"}
-        led["finance"]["costs_table"] = dict(path=str(costs_path), sha256=sha(costs_path))
+        led["finance"]["costs_table"] = dict(file=costs_path.name, sha256=sha(costs_path))   # M10P: name + SHA256 only - an absolute path made the variant bytes depend on the folder
     else:
         led["finance"] = dict(mode="uniform")
     if out_scen != base_scen:   # keep_stock_no_new: the disconnected identity with the stock kept

@@ -1,0 +1,91 @@
+HEAD d71f599ebbdaf808f7c7d3d8b8099441b37b9446 dirty_tracked 7 2026-10-22T09:07:17Z mode=m10p
+.......F...........F.FF.....                                             [100%]
+=================================== FAILURES ===================================
+_ test_graded_stop_rule_stops_on_reference_runs_and_g2[R1-extra0-nosol-solved0-R2] _
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-5/test_graded_stop_rule_stops_on0')
+rid = 'R1', extra = {'FAKE_NOSOL_R1': '1', 'FAKE_SLEEP_R2': '6'}, cls = 'nosol'
+solved = ['R1', 'R2'], running = 'R2'
+
+    @pytest.mark.parametrize("rid,extra,cls,solved,running", [
+        ("R1", {"FAKE_NOSOL_R1": "1", "FAKE_SLEEP_R2": "6"}, "nosol", ["R1", "R2"], "R2"),                              # M10A drill (b): batch reference run without a solution
+        ("R2", {"FAKE_C1_R2": "011"}, "c1a", ["R1", "R2"], None),                                                       # batch reference run: C1 (a)
+        ("R6", {"FAKE_NOSOL_R6": "1", "FAKE_SUBSET_R6": "differ", "FAKE_SLEEP_R4": "10"}, "g2", ["R1", "R2", "R3", "R4", "R5", "R6"], "R4"),   # input problem, no solution
+        ("R7", {"FAKE_SUBSET_R7": "differ", "FAKE_SLEEP_R7": "4", "FAKE_SLEEP_R8": "12"}, "g2", ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"], "R8"),   # G2 with a solution
+    ])
+    def test_graded_stop_rule_stops_on_reference_runs_and_g2(tmp_path, rid, extra, cls, solved, running):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, extra)
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 3, st[-3000:]
+>       assert sorted(c[1] for c in _calls(tmp_path)) == sorted(solved)                                                # no new solve after the stop
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ['R1'] == ['R1', 'R2']
+E         
+E         Right contains one more item: 'R2'
+E         Use -v to get more diff
+
+tests/research/test_m10p_batch3.py:255: AssertionError
+_______ test_post_processing_crash_is_recorded_and_the_schedule_goes_on ________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-5/test_post_processing_crash_is_0')
+
+    def test_post_processing_crash_is_recorded_and_the_schedule_goes_on(tmp_path):
+        """M10A drill (j): the M12 allocation of R2 and the leave-one-out RHS check of R7 raise -> POSTPROC_ERROR records, the batch runs to DONE
+        (exit 0); the labels of R2 / R7 are unchanged (GATES_V6 checks only the registered exports), the benefit step reports not computable."""
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"FAKE_RAISE_M12_R2": "1", "FAKE_RAISE_RHS_LOO_R7": "1"})
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 0, st[-3000:]
+        assert len(_calls(tmp_path)) == 11 and "DONE:" in st and "STOP" not in st.replace("STOP_CLASS", "")
+        assert "POSTPROC_ERROR:R2:m12:exit=1" in st and "POSTPROC_ERROR:R7:rhs_loo:exit=1" in st and "M12_BENEFIT:not_computable" in st
+        rows = (out / "POSTPROC_ERRORS").read_text().splitlines()
+        assert [r.split()[:3] for r in rows] == [["R2", "m12", "exit=1"], ["R7", "rhs_loo", "exit=1"]] and (out / "export" / "batch" / "POSTPROC_ERRORS").exists()
+        assert json.loads((out / "R2" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" and not (out / "R2" / "ALLOCATION.json").exists()
+        assert json.loads((out / "R7" / "V6_ACCEPTANCE.json").read_text())["label"] == "ACCEPTED_LAYER2" and not (out / "R7" / "m12_loo_rhs" / "LOO_RHS_CHECK.json").exists()
+        summ = json.loads((out / "BATCH3_SUMMARY.json").read_text())
+        assert [(e["rid"], e["step"], e["exit"]) for e in summ["postproc_errors"]] == [("R2", "m12", "1"), ("R7", "rhs_loo", "1")]
+>       assert summ["runs"]["R2"]["postproc_errors"] == ["m12:exit=1"] and summ["runs"]["R1"]["postproc_errors"] == [] and summ["benefit"]["computable"] is False
+                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests/research/test_m10p_batch3.py:405: TypeError
+_____________________ test_unregistered_limits_are_refused _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-5/test_unregistered_limits_are_r0')
+
+    def test_unregistered_limits_are_refused(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "WALL_CAP_S": "100", "LICENCE_GAP_S": "330"})
+        assert p.returncode == 2 and "REFUSED: WALL_CAP_S=100" in p.stdout
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "LICENCE_GAP_S": "330"}, args=())
+>       assert p.returncode == 2 and "--auth" in p.stdout
+E       AssertionError: assert (2 == 2 and '--auth' in 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n')
+E        +  where 2 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-5/test_unregistered_limits_are_r0/pkg/run_batch3.sh'], retur...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').returncode
+E        +  and   'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n' = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-5/test_unregistered_limits_are_r0/pkg/run_batch3.sh'], retur...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').stdout
+
+tests/research/test_m10p_batch3.py:435: AssertionError
+______ test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth _______
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-5/test_formal_run_refuses_test_h0')
+
+    def test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth(tmp_path):
+        """M10A drill (m): a stand-in left in the shell is refused by a formal run (solve mode without ALLOW_UNREGISTERED); BUILD_ONLY / POST_ONLY
+        left in the shell are refused together with --auth; the test usage (ALLOW_UNREGISTERED=1) and the dry-run usage (no --auth) are unchanged."""
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, {"ALLOW_UNREGISTERED": "0", "LICENCE_GAP_S": "330"})
+>       assert p.returncode == 2 and "REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD set - test hooks" in p.stdout and not (tmp_path / "out" / "STATUS.txt").exists()
+E       AssertionError: assert (2 == 2 and 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD set - test hooks' in 'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n')
+E        +  where 2 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-5/test_formal_run_refuses_test_h0/pkg/run_batch3.sh', '--aut...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').returncode
+E        +  and   'REFUSED: SOLVE_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,VAR_CMD,FAKE_OUT,FAKE_SLEEP set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n' = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-5/test_formal_run_refuses_test_h0/pkg/run_batch3.sh', '--aut...e not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)\n', stderr='').stdout
+
+tests/research/test_m10p_batch3.py:443: AssertionError
+=========================== short test summary info ============================
+FAILED tests/research/test_m10p_batch3.py::test_graded_stop_rule_stops_on_reference_runs_and_g2[R1-extra0-nosol-solved0-R2]
+FAILED tests/research/test_m10p_batch3.py::test_post_processing_crash_is_recorded_and_the_schedule_goes_on
+FAILED tests/research/test_m10p_batch3.py::test_unregistered_limits_are_refused
+FAILED tests/research/test_m10p_batch3.py::test_formal_run_refuses_test_hooks_and_no_solve_modes_refuse_auth
+4 failed, 24 passed in 420.94s (0:07:00)
+EXIT 1
+END 2026-10-22T09:14:18Z
+DONE

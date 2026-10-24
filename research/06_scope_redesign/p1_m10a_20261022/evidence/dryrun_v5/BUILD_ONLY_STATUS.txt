@@ -1,0 +1,55 @@
+START:2026-10-22T16:19:32Z:commit=e0a89f8e7abe7e91132135b241766464890283cb:repo_commit=e0a89f8e7abe7e91132135b241766464890283cb:build_only=1:post_only=0:dry=0:cores=16:threads_A=8:threads_T16=16:time_limit_s=28800:wall_cap_s=30000:licence_gap_s=330:schedule=1[R1|R2],2[R3,R4|R5,R6],3[R7,R9,R11|R8,R10]:truncate=none:resume=no:tmpdir=/home/jin/m10a_dry_v5/pkg/runs/batch3/tmp:post_timeout_s=1800:allow_unregistered=0:hooks=
+BASE_CHECK:all_equal
+VARIANT_R5:generated:exit=0:set=coalition.remove_countries=[VN]
+VARIANT_R5:equal:8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:expected=8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:
+VARIANT_R6:generated:exit=0:set=coalition.remove_countries=[TH]
+VARIANT_R6:equal:90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:expected=90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:
+VARIANT_R7:generated:exit=0:set=coalition.remove_countries=[LA]
+VARIANT_R7:equal:29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:expected=29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:
+VARIANT_R8:generated:exit=0:set=disconnected.co2_shipping_intra_asean=forbid
+VARIANT_R8:equal:02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:expected=02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:
+VARIANT_R9:generated:exit=0:set=cross_border.stock_mode=keep_stock_no_new
+VARIANT_R9:equal:5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:expected=5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:
+VARIANT_R10:generated:exit=0:set=finance.wacc_mode=country_specific
+VARIANT_R10:equal:c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:expected=c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:
+VARIANT_R11:generated:exit=0:set=finance.wacc_mode=country_specific
+VARIANT_R11:equal:85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:expected=85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:
+PHASE_1:one_lane:R1,R2:threads=16:cores=16:no_solve_mode:2026-10-22T16:20:02Z
+SOLVE_R1:pid=2132:pgid=2132:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e:2026-10-22T16:20:03Z
+RUN_R1:stopped_before_solve:exit=0:receipt=stopped_before_solve:177s:peak=10.16GiB
+BUILD_CHECK_R1:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 164.77516055107117}, "peak_rss_gib": 10.11}
+SOLVE_R2:pid=2379:pgid=2379:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=888a009b5f19eb34f7f1c24e36f7c8370617a9c405b1097a9caed0599cecbee4:2026-10-22T16:23:00Z
+RUN_R2:stopped_before_solve:exit=0:receipt=stopped_before_solve:76s:peak=10.05GiB
+BUILD_CHECK_R2:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 68.38514423370361}, "peak_rss_gib": 10.06}
+PHASE_2:one_lane:R3,R5,R4,R6:threads=24:cores=16:no_solve_mode:2026-10-22T16:24:15Z
+SOLVE_R3:pid=2600:pgid=2600:profile=formal_barrier_1e6_t16:threads=16:time_limit=28800:wall_cap=30000:network_sha256=75704334dc11deeb06fc80f84ef197d65c3ac5bd658ab450e4ee1a93a3ccb19e:2026-10-22T16:24:16Z
+RUN_R3:stopped_before_solve:exit=0:receipt=stopped_before_solve:147s:peak=10.17GiB
+BUILD_CHECK_R3:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 134.70496726036072}, "peak_rss_gib": 10.12}
+SOLVE_R5:pid=2847:pgid=2847:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=8a9c71364d07951b80c6a5616a42afab345e9071eab4ac7d124a14476548e6f8:2026-10-22T16:26:43Z
+RUN_R5:stopped_before_solve:exit=0:receipt=stopped_before_solve:82s:peak=10.09GiB
+BUILD_CHECK_R5:{"passed": true, "failed": [], "lp": {"num_row": 9048930, "num_col": 4054907, "nnz": 21248615, "build_seconds": 72.24517846107483}, "peak_rss_gib": 10.0}
+SOLVE_R4:pid=3031:pgid=3031:profile=formal_barrier_1e6_t16:threads=16:time_limit=28800:wall_cap=30000:network_sha256=888a009b5f19eb34f7f1c24e36f7c8370617a9c405b1097a9caed0599cecbee4:2026-10-22T16:28:05Z
+RUN_R4:stopped_before_solve:exit=0:receipt=stopped_before_solve:76s:peak=10.03GiB
+BUILD_CHECK_R4:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 65.61463499069214}, "peak_rss_gib": 9.99}
+SOLVE_R6:pid=3216:pgid=3216:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=90b3d7fd74c1f44a1c4f3ab9648e448493edb6f217d7778337e3e7252e03fbc0:2026-10-22T16:29:21Z
+RUN_R6:stopped_before_solve:exit=0:receipt=stopped_before_solve:86s:peak=10.09GiB
+BUILD_CHECK_R6:{"passed": true, "failed": [], "lp": {"num_row": 9253938, "num_col": 4150749, "nnz": 21641255, "build_seconds": 78.4691698551178}, "peak_rss_gib": 10.06}
+PHASE_3:one_lane:R7,R8,R9,R10,R11:threads=16:cores=16:no_solve_mode:2026-10-22T16:30:47Z
+SOLVE_R7:pid=3414:pgid=3414:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=29858e7d93e86faa6662c2ac11e04911c063737f40291100e961158b40b96bee:2026-10-22T16:30:48Z
+RUN_R7:stopped_before_solve:exit=0:receipt=stopped_before_solve:91s:peak=10.14GiB
+BUILD_CHECK_R7:{"passed": true, "failed": [], "lp": {"num_row": 9351193, "num_col": 4193946, "nnz": 21891064, "build_seconds": 81.2829577922821}, "peak_rss_gib": 10.09}
+SOLVE_R8:pid=3608:pgid=3608:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=02292afe82694ebc4d0833a9e767798b460ac57ca4b62d53b79781da3b3cb19e:2026-10-22T16:32:19Z
+RUN_R8:stopped_before_solve:exit=0:receipt=stopped_before_solve:66s:peak=7.78GiB
+BUILD_CHECK_R8:{"passed": true, "failed": [], "lp": {"num_row": 9357960, "num_col": 4183232, "nnz": 21687091, "build_seconds": 57.39622902870178}, "peak_rss_gib": 7.7}
+SOLVE_R9:pid=3791:pgid=3791:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=5a54850e4c860984c5498956577d60ad0130fb6622621c30252c317728f3a5ce:2026-10-22T16:33:26Z
+RUN_R9:stopped_before_solve:exit=0:receipt=stopped_before_solve:87s:peak=9.99GiB
+BUILD_CHECK_R9:{"passed": true, "failed": [], "lp": {"num_row": 9745023, "num_col": 4372438, "nnz": 22680056, "build_seconds": 77.97929167747498}, "peak_rss_gib": 9.94}
+SOLVE_R10:pid=3984:pgid=3984:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=c3d86255d9f0fb551ebfba443c4fc467cdc51fff8eff859279cdf9351963f0e8:2026-10-22T16:34:52Z
+RUN_R10:stopped_before_solve:exit=0:receipt=stopped_before_solve:126s:peak=10.19GiB
+BUILD_CHECK_R10:{"passed": true, "failed": [], "lp": {"num_row": 10052113, "num_col": 4509642, "nnz": 23634770, "build_seconds": 115.02785754203796}, "peak_rss_gib": 10.17}
+SOLVE_R11:pid=4218:pgid=4218:profile=formal_barrier:threads=8:time_limit=28800:wall_cap=30000:network_sha256=85ade73c3096ebde1338c1afa05b73121223b0b468aa5cdbaf3d435f2852fe63:2026-10-22T16:36:59Z
+RUN_R11:stopped_before_solve:exit=0:receipt=stopped_before_solve:76s:peak=10.09GiB
+BUILD_CHECK_R11:{"passed": true, "failed": [], "lp": {"num_row": 9705916, "num_col": 4357448, "nnz": 22556267, "build_seconds": 65.66903901100159}, "peak_rss_gib": 9.97}
+SUMMARY:exit=0:{"B6_bn": null, "runs": {"R1": "built_stopped_before_solve", "R2": "built_stopped_before_solve", "R3": "built_stopped_before_solve", "R4": "built_stopped_before_solve", "R5": "built_stopped_before_solve", "R6": "built_stopped_before_solve", "R7": "built_stopped_before_solve", "R8": "built_stopped_be
+PACK_final:PACKED:light=results_light_final_20261022T163814Z.tar.gz:136210B:sha256=7c7bb3d8c10ebcff:full=results_full_final_20261022T163814Z.tar.gz:136210B:sha256=7c7bb3d8c10ebcff
+DONE:2026-10-22T16:38:22Z:unusable=none
