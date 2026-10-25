@@ -33,7 +33,8 @@ run() {   # $1 step $2 dir, then the command: GNU time -v -> STEPS.txt "step exi
   echo "$name $rc $(( $(date +%s) - t0 )) ${pk:-0}" >> "$D/STEPS.txt"; return $rc
 }
 chain() {   # $1 type $2 source run dir $3 unsolved network $4 scenario $5 registered sha256 $6 kind $7 N
-  local T=$1 SRC=$2 NET=$3 SC=$4 REG=$5 KIND=$6 N=$7 D=$OUT/$1 f
+  local T=$1 SRC=$2 NET=$3 SC=$4 REG=$5 KIND=$6 N=$7 f
+  local D=$OUT/$1
   [ -e "$D" ] && { log "SKIP_$T" "exists"; return 0; }
   mkdir -p "$D/v5"; : > "$D/STEPS.txt"; echo "$KIND" > "$D/SOURCE_KIND.txt"; echo "$SRC" > "$D/SOURCE_DIR.txt"; echo "$HEAD" > "$D/CODE_COMMIT.txt"; echo "$N" > "$D/SNAPSHOTS.txt"
   for f in SOLVE_RECEIPT.json V5_GATES.json INTERIOR_CHECKS.json BUNKER_ACCOUNT.json EXPORTS.json GUROBI_LOG_SCRUBBED.txt costs_active_research.csv COMPONENT_COST_BREAKDOWN.csv \
@@ -56,9 +57,10 @@ chain() {   # $1 type $2 source run dir $3 unsolved network $4 scenario $5 regis
   log "V6_$T" "$lab:$cls"
 }
 synth() {   # $1 type $2 base network $3 scenario $4 N -> synthetic solve dir, then the chain
-  local T=$1 NET=$2 SC=$3 N=$4 SD=$OUT/_synthetic/$T
+  local T=$1 NET=$2 SC=$3 N=$4
+  local SD=$OUT/_synthetic/$T   # separate statement: bash expands every word of one `local` before any assignment (set -u)
   if [ ! -f "$SD/SYNTHETIC.json" ]; then
-    mkdir -p "$SD"; local t0=$(date +%s)
+    mkdir -p "$SD"; local t0; t0=$(date +%s)
     ( env -u GRB_LICENSE_FILE /usr/bin/time -v "$PY" scripts_project/m10r_synthetic_solution.py --repo . --network "$NET" --scenario "$SC" --out "$SD" --truncate "$N" --costs-table "$B/$SC/costs_active_research.csv" > "$SD/synthetic.log" 2> "$SD/synthetic.err" )
     log "SYNTHETIC_$T" "exit=$?:$(( $(date +%s) - t0 ))s:peak_kb=$(grep -h 'Maximum resident' "$SD/synthetic.err" | awk '{print $NF}')"
   fi
