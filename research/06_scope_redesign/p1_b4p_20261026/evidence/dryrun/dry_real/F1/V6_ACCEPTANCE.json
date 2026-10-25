@@ -1,0 +1,189 @@
+{
+ "G1": {
+  "a": false,
+  "b": false,
+  "c": false,
+  "computable": false,
+  "note": "PRECISION.json missing or not computable"
+ },
+ "G2": {
+  "G2_1": {
+   "input_network_sha256": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab",
+   "note": null,
+   "passed": false,
+   "readback": null,
+   "registered_sha256": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab",
+   "sha256_equal": true
+  },
+  "G2_2": {
+   "current_subset_sha256": "8e904cad58305d5cb947a14b2ff5e74285caa638abc8abefe9ced49e2a06f05f",
+   "network_subset_sha256": "8e904cad58305d5cb947a14b2ff5e74285caa638abc8abefe9ced49e2a06f05f",
+   "note": null,
+   "passed": true
+  },
+  "G2_3": {
+   "checks": {
+    "b16_computable": false,
+    "exports_present_and_sha256_equal": true,
+    "receipt_fields": false,
+    "solution_dimensions_equal_lp": false
+   },
+   "missing_or_changed_exports": [],
+   "passed": false,
+   "solution_dimensions": {
+    "Pi": {
+     "count": null,
+     "equal": false,
+     "lp": 1553068
+    },
+    "RC": {
+     "count": null,
+     "equal": false,
+     "lp": 700908
+    },
+    "X": {
+     "count": null,
+     "equal": false,
+     "lp": 700908
+    }
+   }
+  }
+ },
+ "definition": {
+  "file": "research/06_scope_redesign/p1_step4r_20261020/GATES_V6.md",
+  "notes": "GATES_V6_NOTES.md (k = 10 kept)",
+  "sha256": "5c0aa8b8ed322b75a63879fccfc19559606a0ad743ecafee3addfcbfe04fd7f9",
+  "subset_keys": [
+   "scenario",
+   "cross_border",
+   "fuels.price_scenario",
+   "finance",
+   "sector",
+   "s3",
+   "renewable",
+   "fleet",
+   "nuclear",
+   "candidates",
+   "hydro",
+   "hydrogen",
+   "cost_layer.active",
+   "numerics",
+   "network",
+   "corridors",
+   "bunkers",
+   "co2",
+   "s2",
+   "cost_scaling",
+   "carbon",
+   "demand",
+   "transmission",
+   "existing_cross_border_electricity",
+   "solver.scaling",
+   "solver.interior",
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ],
+  "subset_keys_m08a_additions": [
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ]
+ },
+ "diagnostics": {
+  "D0_solver_status": {
+   "retry": false,
+   "solve_seconds": null,
+   "status": null,
+   "termination": null,
+   "time_limit": 1750.0
+  },
+  "D10_domestic_gas_caps": {
+   "items": 0,
+   "within": null,
+   "worst_ratio": null
+  },
+  "D11_demand_conservation": {
+   "source": "B8",
+   "within": null
+  },
+  "D12_supply_routes": {
+   "source": "B11",
+   "within": null
+  },
+  "D13_imports_one_way": {
+   "source": "B13",
+   "within": null
+  },
+  "D14_scenario_pair": {
+   "note": "B5 / B6 need both scenarios (pair report)",
+   "within": null
+  },
+  "D15_interior_cleanup": {
+   "keys": [],
+   "within": null
+  },
+  "D16_whole_config_hash": {
+   "source": "B12",
+   "within": null
+  },
+  "D1_primal": {
+   "fail_count": null,
+   "max_ratio": null,
+   "within": null
+  },
+  "D2_dual": {
+   "anomaly": false,
+   "budget": 9.999999999999999e-06,
+   "dual_sign_max": null,
+   "eps_d": 1e-06,
+   "history_max_ratio": 19.3,
+   "k": 10.0,
+   "max_ratio": null,
+   "note": "diagnostic only (GATES_V6_NOTES): interior-point solutions without crossover exceed k = 10 routinely",
+   "stationarity_max": null,
+   "within": null
+  },
+  "D3_gap_complementarity": {
+   "budget": 9.999999999999999e-06,
+   "complementarity_over_scale": null,
+   "relative_gap": null,
+   "within": null
+  },
+  "D4_physics": {
+   "source": "A3_S4B",
+   "within": null
+  },
+  "D5_objective_reconciliation": {
+   "source": "A5_S4B",
+   "within": null
+  },
+  "D6_country_net_zero": {
+   "source": "B1_S4B",
+   "within": null
+  },
+  "D7_storage_caps": {
+   "items": 0,
+   "within": null,
+   "worst_ratio": null
+  },
+  "D8_biomass_pools": {
+   "source": "B3_S4B",
+   "within": null
+  },
+  "D9_terminal_caps": {
+   "expansion": null,
+   "items": 0,
+   "within": null,
+   "worst_ratio": null
+  }
+ },
+ "label": "NOT_ACCEPTED",
+ "profile": "formal_barrier_1e6_t16",
+ "resolution": "56x3h",
+ "schema": "gates-v6-acceptance-v1",
+ "solve_dir": "/home/jin/b4p_dry/pkg/runs/dry_real/F1",
+ "solver_runs": 0
+}

@@ -1,0 +1,25 @@
+NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=SPLIT_CMD,TRUNCATE,FAKE_OUT,FAKE_SLEEP
+BASE_CHECK:all_equal:registered_values_not_enforced (ALLOW_UNREGISTERED=1)
+GAP_PHASE_1:5s:2026-10-25T21:46:39Z
+BUILD_F1:exit=0:30s:peak=2.18GiB:lp_bytes=94383392:2026-10-25T21:47:09Z
+GAP_F1:35s:2026-10-25T21:47:09Z
+SOLVE_F1:pid=214290:pgid=214290:profile=formal_barrier_1e6_t16:threads=16:time_limit=1750:wall_cap=1800:network_sha256=bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab:2026-10-25T21:47:10Z
+PROJECTION_F1:2026-10-25T21:47:15Z:{"ready": true, "exceeded": false, "seconds_per_iteration_11_20": 1.0, "projected_total_s": 456.0, "limit_s": 1400.0} - within the limit, no stop
+P1_PROBE:2026-10-25T21:47:24Z:{"parallel": false, "peak_gib": 0.04, "threshold_gib": 4.276, "covered_s": 10.0, "reason": "cores below minimum"}:decision=after_F1
+GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:51s:2026-10-25T21:47:30Z
+ASSIGN_F1:exit=0:peak=2.65GiB:post_errors=[]:2026-10-25T21:49:59Z
+RUN_F1:optimal:exit=0:receipt=post_solve:200s:2026-10-25T21:49:59Z
+POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:16Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)
+POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:32Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)
+POSTPROC_RETRY:F1:violations:exit=1:2026-10-25T21:50:32Z - retry failed too (C1 not computable)
+VIOLATIONS_F1:exit=1
+C1_F1:exit=0:not_computable:accepted=False:abc=000:ref=default:provisional
+POSTPROC_ERROR:F1:m12:exit=1:2026-10-25T21:50:35Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)
+M12_F1:exit=1
+V6_F1:NOT_ACCEPTED:ref=default
+UNUSABLE:F1:c1a:2026-10-25T21:50:35Z - C1 (a) failed (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision
+BATCH_REFERENCE:not_available:F1/F2 ledgers missing - the runs keep the provisional default reference
+M12_BENEFIT:not_computable:F1 / F2 allocations missing
+SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "ended", "F2": "not_started"}}
+PACK_halted:PACKED:light=results_light_halted_20261025T215035Z.tar.gz:243360B:sha256=af10d4dd53dee264:full=results_full_halted_20261025T215035Z.tar.gz:4377368B:sha256=d406efbe4f71c3b0
+HALTED:2026-10-25T21:50:36Z:F1 - waiting for the user (no retry, no parameter change):unusable=F1

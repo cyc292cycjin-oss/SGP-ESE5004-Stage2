@@ -1,0 +1,37 @@
+{
+  "script": "scripts_project/s2_solve.py",
+  "stage": "build",
+  "problem_file": "/home/jin/b4p_dry/pkg/runs/build_only/F1/split/problem.lp",
+  "problem_bytes": 94383392,
+  "problem_sha256": "09802a7669cd0e6fce86a23340a06d5daf860f1fd12cf62976d67107265bffe0",
+  "write_seconds": 8.06911015510559,
+  "solver_parameters": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 16,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
+    "TimeLimit": 259200.0
+  },
+  "solver_profile": "formal_barrier_1e6_t16",
+  "log_file": "/home/jin/b4p_dry/pkg/runs/build_only/F1/gurobi.linopy.log",
+  "labels": {
+    "vlabels": "lp/vlabels.npy",
+    "clabels": "lp/clabels.npy"
+  },
+  "lp": {
+    "num_col": 700908,
+    "num_row": 1553068,
+    "nnz": 3621898
+  },
+  "sense": "min",
+  "input_network_sha256": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab",
+  "label": "SMOKE_TEST_ONLY",
+  "scenario": "integrated",
+  "writer": "linopy 0.5.5 Model.to_file(io_api='lp') after constraints.sanitize_zeros / sanitize_infinities, as Model.solve(io_api=None)",
+  "next": "GRB_LICENSE_FILE=<licence> python scripts_project/b4_split_solve.py --run-dir <this folder>; then s2_solve.py ... --split-stage assign"
+}

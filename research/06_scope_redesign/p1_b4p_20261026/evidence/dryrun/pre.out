@@ -1,0 +1,39 @@
+repo files: 1444; research/ present: no
+== guards: test hooks / dry-run switches in this shell
+no test hook / dry-run switch set
+NOTE: CGROUP_ROOT=/sys/fs/cgroup (operational override; make sure it is intended)
+PREFLIGHT OK
+PREFLIGHT_GUARDS_EXIT 0
+== guards: test hooks / dry-run switches in this shell
+SET IN THIS SHELL - unset before the formal run: SPLIT_CMD
+NOTE: CGROUP_ROOT=/sys/fs/cgroup (operational override; make sure it is intended)
+PREFLIGHT FAILED
+PREFLIGHT_GUARDS_NEG_EXIT 1 (SPLIT_CMD left in the shell: must FAIL)
+== SHA256SUMS
+all 19 files OK
+code unpacked to ./repo (commit f806e3e799b9eaaa37706dcaf985c4cae3469ab9)
+== networks (full 2920x3h; registered SHA256)
+all_equal
+no 365x24h network in the package (as registered)
+== environment vs env/ENV_LOCK.txt
+{"key_all_equal": true, "key": {}, "counts": [284, 284], "only_lock": [], "only_instance": [], "n_version_differences": 0}
+== solver profile
+formal_barrier_1e6_t16 {'Method': 2, 'Crossover': 0, 'BarConvTol': 1e-06, 'BarHomogeneous': 1, 'Threads': 16, 'Seed': 123, 'AggFill': 0, 'PreDual': 0, 'GURO_PAR_BARDENSETHRESH': 200} | interior-point gate path: True | Threads 16 | TimeLimit 259200.0 OK
+== code imports (no licence)
+modules import; run table F1, F2 | thresholds memory 0.8 projection 0.8 P1 0.4 33 3600
+== tools
+/usr/bin/time (GNU time -v) present
+setsid present
+pgrep present
+timeout present
+tmux present
+PREFLIGHT OK
+PREFLIGHT_EXIT 0
+== resources (container cgroup quota; host values only as fallback)
+container CPU cores 16 [no cgroup CPU quota: host nproc]; host nproc 16
+container memory 11 GiB [no cgroup memory limit: host MemTotal]; anon in use now 0.0 GiB; host MemTotal 11 GiB; free disk 892 GB (831 GiB) under /home/jin/b4p_dry/pkg
+need (hard floor, RUN_PLAN_B4.md section 5): cores >= 25, memory >= 190 GiB, free data disk >= 45 GB
+RESOURCE CHECK FAILED
+NOTE: 16 cores < 33: F2 runs after F1 whatever the probe shows (pre-registered)
+PREFLIGHT FAILED
+PREFLIGHT_RESOURCES_EXIT 1 (local machine, information only: expected to fail)

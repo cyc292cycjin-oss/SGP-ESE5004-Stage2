@@ -1,0 +1,205 @@
+{
+ "PREFLIGHT_GUARDS.txt": {
+  "exit_lines": [
+   "PREFLIGHT_GUARDS_EXIT 0"
+  ],
+  "ok": true,
+  "failed": false,
+  "refused": 0
+ },
+ "PREFLIGHT_GUARDS_NEG.txt": {
+  "exit_lines": [
+   "PREFLIGHT_GUARDS_NEG_EXIT 1 (SPLIT_CMD left in the shell: must FAIL)"
+  ],
+  "ok": false,
+  "failed": true,
+  "refused": 0
+ },
+ "PREFLIGHT.txt": {
+  "exit_lines": [
+   "PREFLIGHT_EXIT 0"
+  ],
+  "ok": true,
+  "failed": false,
+  "refused": 0
+ },
+ "PREFLIGHT_RESOURCES_LOCAL.txt": {
+  "exit_lines": [
+   "PREFLIGHT_RESOURCES_EXIT 1 (local machine, information only: expected to fail)"
+  ],
+  "ok": false,
+  "failed": true,
+  "refused": 0
+ },
+ "GUARDS_REFUSAL.txt": {
+  "exit_lines": [
+   "EXIT 2 (must be 2 REFUSED)",
+   "EXIT 2 (must be 2 REFUSED: SOLVE_MODE)",
+   "EXIT 2 (must be 2 REFUSED: --auth with BUILD_ONLY)"
+  ],
+  "ok": false,
+  "failed": false,
+  "refused": 6
+ },
+ "build_only": {
+  "status_lines": 11,
+  "done": true,
+  "halted": false,
+  "stop_safe": [],
+  "runs": {
+   "F1": [
+    "BUILD_F1:exit=0:29s:peak=2.19GiB:lp_bytes=94383392:2026-10-25T21:44:23Z",
+    "RUN_F1:split_built:exit=0:29s",
+    "BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1553068, \"num_col\": 700908, \"nnz\": 3621898, \"build_seconds\": 18.000202178955078}, \"receipt_state"
+   ],
+   "F2": [
+    "BUILD_F2:exit=0:25s:peak=1.90GiB:lp_bytes=90630323:2026-10-25T21:44:48Z",
+    "RUN_F2:split_built:exit=0:25s",
+    "BUILD_CHECK_F2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1499494, \"num_col\": 677258, \"nnz\": 3455872, \"build_seconds\": 15.267560958862305}, \"receipt_state"
+   ]
+  },
+  "p1": [],
+  "projection": [],
+  "summary": [
+   "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"built_no_solve\", \"F2\": \"built_no_solve\"}}"
+  ],
+  "packs": [
+   "PACK_final:PACKED:light=results_light_final_20261025T214448Z.tar.gz:24115B:sha256=8cf97fd27d05d2ec:full=results_full_final_20261025T214448Z.tar.gz:24115B:sha256=8cf97fd27d05d2ec"
+  ],
+  "stops": [],
+  "postproc_errors": [],
+  "build_check": {
+   "F1": {
+    "passed": true,
+    "state": "split_built",
+    "lp": {
+     "num_row": 1553068,
+     "num_col": 700908,
+     "nnz": 3621898,
+     "build_seconds": 18.000202178955078
+    },
+    "peak_gib": 1.96
+   },
+   "F2": {
+    "passed": true,
+    "state": "split_built",
+    "lp": {
+     "num_row": 1499494,
+     "num_col": 677258,
+     "nnz": 3455872,
+     "build_seconds": 15.267560958862305
+    },
+    "peak_gib": 1.83
+   }
+  },
+  "receipts": {
+   "F1": {
+    "termination": null,
+    "objective": null,
+    "post_solve_errors": [],
+    "split_stage": "build"
+   },
+   "F2": {
+    "termination": null,
+    "objective": null,
+    "post_solve_errors": [],
+    "split_stage": "build"
+   }
+  }
+ },
+ "dry_real": {
+  "status_lines": 19,
+  "done": false,
+  "halted": true,
+  "stop_safe": [],
+  "runs": {
+   "F1": [
+    "GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:1s:2026-10-25T21:46:14Z",
+    "ASSIGN_F1:exit=1:peak=2.18GiB:post_errors=:2026-10-25T21:46:32Z",
+    "RUN_F1:none:exit=0:receipt=pre_solve:19s:2026-10-25T21:46:32Z",
+    "V6_F1:NOT_ACCEPTED:ref=default",
+    "UNUSABLE:F1:nosol:2026-10-25T21:46:33Z - no returned solution (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+   ],
+   "F2": []
+  },
+  "p1": [
+   "P1_PROBE:2026-10-25T21:46:18Z:{\"parallel\": false, \"peak_gib\": null, \"threshold_gib\": 4.276, \"covered_s\": 0.0, \"reason\": \"window not covered\"}:decision=after_F1"
+  ],
+  "projection": [],
+  "summary": [
+   "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"ended\", \"F2\": \"ended\"}}"
+  ],
+  "packs": [
+   "PACK_halted:PACKED:light=results_light_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb:full=results_full_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb"
+  ],
+  "stops": [
+   "UNUSABLE:F1:nosol:2026-10-25T21:46:33Z - no returned solution (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+  ],
+  "postproc_errors": [],
+  "labels": {
+   "F1": "NOT_ACCEPTED"
+  },
+  "receipts": {
+   "F1": {
+    "termination": null,
+    "objective": null,
+    "post_solve_errors": [],
+    "split_stage": null
+   },
+   "F2": {
+    "termination": "optimal",
+    "objective": 317745965908.25806,
+    "post_solve_errors": [],
+    "split_stage": null
+   }
+  }
+ },
+ "dry_synth": {
+  "status_lines": 26,
+  "done": false,
+  "halted": true,
+  "stop_safe": [],
+  "runs": {
+   "F1": [
+    "BUILD_F1:exit=0:30s:peak=2.18GiB:lp_bytes=94383392:2026-10-25T21:47:09Z",
+    "GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:51s:2026-10-25T21:47:30Z",
+    "ASSIGN_F1:exit=0:peak=2.65GiB:post_errors=[]:2026-10-25T21:49:59Z",
+    "RUN_F1:optimal:exit=0:receipt=post_solve:200s:2026-10-25T21:49:59Z",
+    "V6_F1:NOT_ACCEPTED:ref=default",
+    "UNUSABLE:F1:c1a:2026-10-25T21:50:35Z - C1 (a) failed (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+   ],
+   "F2": []
+  },
+  "p1": [
+   "P1_PROBE:2026-10-25T21:47:24Z:{\"parallel\": false, \"peak_gib\": 0.04, \"threshold_gib\": 4.276, \"covered_s\": 10.0, \"reason\": \"cores below minimum\"}:decision=after_F1"
+  ],
+  "projection": [
+   "PROJECTION_F1:2026-10-25T21:47:15Z:{\"ready\": true, \"exceeded\": false, \"seconds_per_iteration_11_20\": 1.0, \"projected_total_s\": 456.0, \"limit_s\": 1400.0} - withi"
+  ],
+  "summary": [
+   "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"ended\", \"F2\": \"not_started\"}}"
+  ],
+  "packs": [
+   "PACK_halted:PACKED:light=results_light_halted_20261025T215035Z.tar.gz:243360B:sha256=af10d4dd53dee264:full=results_full_halted_20261025T215035Z.tar.gz:4377368B:sha256=d406efbe4f71c3b0"
+  ],
+  "stops": [
+   "UNUSABLE:F1:c1a:2026-10-25T21:50:35Z - C1 (a) failed (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+  ],
+  "postproc_errors": [
+   "POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:16Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)",
+   "POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:32Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)",
+   "POSTPROC_ERROR:F1:m12:exit=1:2026-10-25T21:50:35Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)"
+  ],
+  "labels": {
+   "F1": "NOT_ACCEPTED"
+  },
+  "receipts": {
+   "F1": {
+    "termination": "optimal",
+    "objective": 202354532011.60175,
+    "post_solve_errors": [],
+    "split_stage": "assign"
+   }
+  }
+ }
+}

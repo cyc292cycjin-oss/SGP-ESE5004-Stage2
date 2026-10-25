@@ -1,0 +1,19 @@
+START:2026-10-25T21:46:08Z:commit=f806e3e799b9eaaa37706dcaf985c4cae3469ab9:repo_commit=f806e3e799b9eaaa37706dcaf985c4cae3469ab9:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:cores=25:quota_gib=10.69:threads_T16=16:time_limit_s=1750:wall_cap_s=1800:licence_gap_s=1:p1=10s/0.40/33cores:memory_stop=0.80:projection=0.80:post_mem_need_gib=100:remove_lp=1:truncate=56:resume=no:tmpdir=/home/jin/b4p_dry/pkg/runs/dry_real/tmp:post_timeout_s=1800:allow_unregistered=1:hooks=SPLIT_CMD,TRUNCATE,FAKE_OUT:into=none:arrays=none
+NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=SPLIT_CMD,TRUNCATE,FAKE_OUT
+BASE_CHECK:all_equal:registered_values_not_enforced (ALLOW_UNREGISTERED=1)
+GAP_PHASE_1:5s:2026-10-25T21:46:13Z
+GAP_F1:5s:2026-10-25T21:46:13Z
+SOLVE_F1:pid=213799:pgid=213799:profile=formal_barrier_1e6_t16:threads=16:time_limit=1750:wall_cap=1800:network_sha256=bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab:2026-10-25T21:46:14Z
+GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:1s:2026-10-25T21:46:14Z
+P1_PROBE:2026-10-25T21:46:18Z:{"parallel": false, "peak_gib": null, "threshold_gib": 4.276, "covered_s": 0.0, "reason": "window not covered"}:decision=after_F1
+ASSIGN_F1:exit=1:peak=2.18GiB:post_errors=:2026-10-25T21:46:32Z
+RUN_F1:none:exit=0:receipt=pre_solve:19s:2026-10-25T21:46:32Z
+C1_F1:exit=0:not_computable:accepted=False:abc=000:ref=default:provisional
+M12_F1:exit=0
+V6_F1:NOT_ACCEPTED:ref=default
+UNUSABLE:F1:nosol:2026-10-25T21:46:33Z - no returned solution (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision
+BATCH_REFERENCE:not_available:F1/F2 ledgers missing - the runs keep the provisional default reference
+M12_BENEFIT:not_computable:F1 / F2 allocations missing
+SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "ended", "F2": "ended"}}
+PACK_halted:PACKED:light=results_light_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb:full=results_full_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb
+HALTED:2026-10-25T21:46:34Z:F1 - waiting for the user (no retry, no parameter change):unusable=F1

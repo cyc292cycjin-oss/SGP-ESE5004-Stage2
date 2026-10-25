@@ -1,0 +1,3062 @@
+{
+ "step": "B4P",
+ "written_utc": "2026-10-25T21:51:29Z",
+ "instruction": {
+  "file": "B4P_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "995ff3447b4ae3ef1b9dc6fc0e029ee711fbb340475f3417deddf2eebc8378b2",
+  "registered": "995ff3447b4ae3ef1b9dc6fc0e029ee711fbb340475f3417deddf2eebc8378b2"
+ },
+ "git": {
+  "branch": "codex/b4-prep-20261026",
+  "head": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+  "base": "9f368407e1a0bb044b5c93cffc8651cde5a60250",
+  "commits": [
+   "f806e3e799b9eaaa37706dcaf985c4cae3469ab9 2026-10-26 05:34:17 +0800 B4P drill fix + helper scripts (no cloud, no upload, no solve): drill_b4.sh local-expansion order; the B4P WSL helper scripts mirrored",
+   "96eafa53e5aae2ecf82d0ac02a503a1cad31ecf8 2026-10-26 05:01:29 +0800 B4P A4 (no cloud, no upload; local Gurobi calls 3-8 of 8 used for the A1 measurements): fourth-batch runner, run plan, package builder v7, drill, tests",
+   "15482e3fd429819fa29fc35784cc99bf9a569aa9 2026-10-26 05:01:29 +0800 B4P A3.2 + A3.3 (no cloud, no upload, no solve): run_batch3.sh path arguments made absolute; install_env.sh per-channel conda mirrors",
+   "a9ccc129489040c206145e48dc261420cace551e 2026-10-26 05:01:29 +0800 B4P A2 supplement 2 + A3.1 (no cloud, no upload; local Gurobi calls 1-2 of 8 authorised): split-process solve and post-solve persistence"
+  ],
+  "dirty_tracked": 2
+ },
+ "builds": [
+  {
+   "scenario": "disconnected",
+   "snapshots": 112,
+   "lp_rows": 2986742,
+   "lp_cols": 1344218,
+   "lp_nnz": 6898949,
+   "build_seconds": 25.55897045135498,
+   "peak_rss_gib_receipt": 3.13787841796875,
+   "time": {
+    "max_rss_gib": 3.4739837646484375,
+    "wall_s": 28.79
+   },
+   "lp_array_bytes": 235835000
+  },
+  {
+   "scenario": "disconnected",
+   "snapshots": 182,
+   "lp_rows": 4845802,
+   "lp_cols": 2177918,
+   "lp_nnz": 11205523,
+   "build_seconds": 30.96751070022583,
+   "peak_rss_gib_receipt": 5.143451690673828,
+   "time": {
+    "max_rss_gib": 5.300876617431641,
+    "wall_s": 35.03
+   },
+   "lp_array_bytes": 382705624
+  },
+  {
+   "scenario": "disconnected",
+   "snapshots": 56,
+   "lp_rows": 1499494,
+   "lp_cols": 677258,
+   "lp_nnz": 3455872,
+   "build_seconds": 15.538861274719238,
+   "peak_rss_gib_receipt": 1.7428092956542969,
+   "time": {
+    "max_rss_gib": 1.9232063293457031,
+    "wall_s": 18.21
+   },
+   "lp_array_bytes": 118373416
+  },
+  {
+   "scenario": "integrated",
+   "snapshots": 112,
+   "lp_rows": 3093348,
+   "lp_cols": 1391164,
+   "lp_nnz": 7230343,
+   "build_seconds": 29.505502223968506,
+   "peak_rss_gib_receipt": 3.8152694702148438,
+   "time": {
+    "max_rss_gib": 3.9670677185058594,
+    "wall_s": 32.69
+   },
+   "lp_array_bytes": 245573688
+  },
+  {
+   "scenario": "integrated",
+   "snapshots": 182,
+   "lp_rows": 5018698,
+   "lp_cols": 2253984,
+   "lp_nnz": 11743627,
+   "build_seconds": 45.1668860912323,
+   "peak_rss_gib_receipt": 6.137596130371094,
+   "time": {
+    "max_rss_gib": 6.156314849853516,
+    "wall_s": 49.11
+   },
+   "lp_array_bytes": 398507432
+  },
+  {
+   "scenario": "integrated",
+   "snapshots": 56,
+   "lp_rows": 1553068,
+   "lp_cols": 700908,
+   "lp_nnz": 3621898,
+   "build_seconds": 18.825690507888794,
+   "peak_rss_gib_receipt": 2.066120147705078,
+   "time": {
+    "max_rss_gib": 2.1829910278320312,
+    "wall_s": 23.0
+   },
+   "lp_array_bytes": 123261608
+  }
+ ],
+ "builds_status": [
+  "START:2026-10-25T19:25:57Z:head=9f368407e1a0bb044b5c93cffc8651cde5a60250",
+  "BUILD_integrated_56:2026-10-25T19:26:20Z:exit=0:23s:peak_kb=2289032:lp_bytes=123263737:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 700908, \"num_row\": 1553068, \"nnz\": 3621898, \"build_seconds\": 18.825690507888794, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"Re",
+  "BUILD_disconnected_56:2026-10-25T19:26:38Z:exit=0:18s:peak_kb=2016628:lp_bytes=118375545:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 677258, \"num_row\": 1499494, \"nnz\": 3455872, \"build_seconds\": 15.538861274719238, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"Re",
+  "BUILD_integrated_112:2026-10-25T19:27:11Z:exit=0:33s:peak_kb=4159772:lp_bytes=245575825:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 1391164, \"num_row\": 3093348, \"nnz\": 7230343, \"build_seconds\": 29.505502223968506, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"R",
+  "BUILD_disconnected_112:2026-10-25T19:27:39Z:exit=0:28s:peak_kb=3642736:lp_bytes=235837137:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 1344218, \"num_row\": 2986742, \"nnz\": 6898949, \"build_seconds\": 25.55897045135498, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"Re",
+  "BUILD_integrated_182:2026-10-25T19:28:28Z:exit=0:49s:peak_kb=6455364:lp_bytes=398509572:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 2253984, \"num_row\": 5018698, \"nnz\": 11743627, \"build_seconds\": 45.1668860912323, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"Re",
+  "BUILD_disconnected_182:2026-10-25T19:29:04Z:exit=0:36s:peak_kb=5558372:lp_bytes=382707764:{\"stop_before_solve\": true, \"lp\": {\"num_col\": 2177918, \"num_row\": 4845802, \"nnz\": 11205523, \"build_seconds\": 30.96751070022583, \"research_constraints\": [\"ResearchBatteryNominal-0\", \"ResearchBatteryNominal-1\", \"ResearchBatteryNominal-10\", \"ResearchBatteryNominal-100\", \"ResearchBatteryNominal-101\", \"R",
+  "DECIDE_273:2026-10-25T19:29:04Z:integrated_182 peak 6455364 kB -> 273 not attempted (90 % rule)",
+  "DONE:2026-10-25T19:29:04Z",
+  "DONE"
+ ],
+ "gurobi_usage": {
+  "calls": [
+   {
+    "tag": "c1_int56_current_A",
+    "mode": "current",
+    "scenario": "integrated",
+    "snapshots": 56,
+    "profile": "formal_barrier",
+    "extra": "TL=1750 PROTECT=",
+    "call_start_utc": "2026-10-25T19:33:33Z",
+    "call_end_utc": "2026-10-25T19:40:20Z",
+    "gurobi_process": "s2_solve.py",
+    "gurobi_status": null,
+    "termination": "optimal",
+    "objective": 307847440010.6307,
+    "iterations": 129,
+    "work_units": 428.37,
+    "runtime_s": null,
+    "max_mem_used_gb": null,
+    "fingerprint": null,
+    "peak_rss_gib_gurobi_process": 4.737590789794922,
+    "call_number": 1,
+    "gap_from_previous_end_s": null,
+    "duration_s": 407.0
+   },
+   {
+    "tag": "c2_int56_split_A",
+    "mode": "split",
+    "scenario": "integrated",
+    "snapshots": 56,
+    "profile": "formal_barrier",
+    "extra": "TL=1750 PROTECT=",
+    "call_start_utc": "2026-10-25T19:58:37Z",
+    "call_end_utc": "2026-10-25T20:02:34Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": "OPTIMAL",
+    "termination": "optimal",
+    "objective": 305492907999.02893,
+    "iterations": 129,
+    "work_units": 429.4849693000215,
+    "runtime_s": 230.1313819885254,
+    "max_mem_used_gb": 3.609329152,
+    "fingerprint": "0xb609266f",
+    "peak_rss_gib_gurobi_process": 3.6208267211914062,
+    "call_number": 2,
+    "gap_from_previous_end_s": 1097.0,
+    "duration_s": 237.0
+   },
+   {
+    "tag": "c3_int112_current_T16",
+    "mode": "current",
+    "scenario": "integrated",
+    "snapshots": 112,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT=",
+    "call_start_utc": "2026-10-25T20:07:36Z",
+    "call_end_utc": "2026-10-25T20:10:40Z",
+    "gurobi_process": "s2_solve.py",
+    "gurobi_status": null,
+    "termination": null,
+    "objective": null,
+    "iterations": null,
+    "work_units": null,
+    "runtime_s": null,
+    "max_mem_used_gb": null,
+    "fingerprint": null,
+    "peak_rss_gib_gurobi_process": null,
+    "call_number": 3,
+    "gap_from_previous_end_s": 302.0,
+    "duration_s": 184.0
+   },
+   {
+    "tag": "c4_int224_probe25_T16",
+    "mode": "probe",
+    "scenario": "integrated",
+    "snapshots": 224,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT= PROBE_ITERS=25",
+    "call_start_utc": "2026-10-25T20:16:09Z",
+    "call_end_utc": "2026-10-25T20:16:56Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": null,
+    "termination": null,
+    "objective": null,
+    "iterations": null,
+    "work_units": null,
+    "runtime_s": null,
+    "max_mem_used_gb": null,
+    "fingerprint": "0xa5295c55",
+    "peak_rss_gib_gurobi_process": null,
+    "call_number": 4,
+    "gap_from_previous_end_s": 329.0,
+    "duration_s": 47.0
+   },
+   {
+    "tag": "c5_int140_probe25_T16_thr100",
+    "mode": "probe",
+    "scenario": "integrated",
+    "snapshots": 140,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT= PROBE_ITERS=25 MEASURE=GURO_PAR_BARDENSETHRESH=100",
+    "call_start_utc": "2026-10-25T20:22:00Z",
+    "call_end_utc": "2026-10-25T20:24:52Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": "ITERATION_LIMIT",
+    "termination": "iteration_limit",
+    "objective": null,
+    "iterations": 25,
+    "work_units": 116.21263717504856,
+    "runtime_s": 163.37308502197266,
+    "max_mem_used_gb": 7.754820656,
+    "fingerprint": "0xfbeac88b",
+    "peak_rss_gib_gurobi_process": 6.660312652587891,
+    "call_number": 5,
+    "gap_from_previous_end_s": 304.0,
+    "duration_s": 172.0
+   },
+   {
+    "tag": "c6_disc140_probe25_T16_thr100",
+    "mode": "probe",
+    "scenario": "disconnected",
+    "snapshots": 140,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT= PROBE_ITERS=25 MEASURE=GURO_PAR_BARDENSETHRESH=100",
+    "call_start_utc": "2026-10-25T20:29:55Z",
+    "call_end_utc": "2026-10-25T20:31:31Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": "ITERATION_LIMIT",
+    "termination": "iteration_limit",
+    "objective": null,
+    "iterations": 25,
+    "work_units": 65.83287519385097,
+    "runtime_s": 89.80490303039551,
+    "max_mem_used_gb": 6.695742712,
+    "fingerprint": "0xf90dd500",
+    "peak_rss_gib_gurobi_process": 5.811100006103516,
+    "call_number": 6,
+    "gap_from_previous_end_s": 303.0,
+    "duration_s": 96.0
+   },
+   {
+    "tag": "c7_int182_probe25_T16_thr100",
+    "mode": "probe",
+    "scenario": "integrated",
+    "snapshots": 182,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT= PROBE_ITERS=25 MEASURE=GURO_PAR_BARDENSETHRESH=100",
+    "call_start_utc": "2026-10-25T20:36:34Z",
+    "call_end_utc": "2026-10-25T20:40:26Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": "ITERATION_LIMIT",
+    "termination": "iteration_limit",
+    "objective": null,
+    "iterations": 25,
+    "work_units": 170.53652506513419,
+    "runtime_s": 225.54066586494446,
+    "max_mem_used_gb": 9.4355774,
+    "fingerprint": "0x74a06970",
+    "peak_rss_gib_gurobi_process": 7.761760711669922,
+    "call_number": 7,
+    "gap_from_previous_end_s": 303.0,
+    "duration_s": 232.0
+   },
+   {
+    "tag": "c8_disc182_probe25_T16_thr100",
+    "mode": "probe",
+    "scenario": "disconnected",
+    "snapshots": 182,
+    "profile": "formal_barrier_1e6_t16",
+    "extra": "TL=3300 PROTECT= PROBE_ITERS=25 MEASURE=GURO_PAR_BARDENSETHRESH=100",
+    "call_start_utc": "2026-10-25T20:45:27Z",
+    "call_end_utc": "2026-10-25T20:47:49Z",
+    "gurobi_process": "b4_split_solve.py",
+    "gurobi_status": "ITERATION_LIMIT",
+    "termination": "iteration_limit",
+    "objective": null,
+    "iterations": 25,
+    "work_units": 91.42428271358169,
+    "runtime_s": 130.566468000412,
+    "max_mem_used_gb": 9.238957096,
+    "fingerprint": "0x87bbf448",
+    "peak_rss_gib_gurobi_process": 7.679950714111328,
+    "call_number": 8,
+    "gap_from_previous_end_s": 301.0,
+    "duration_s": 142.0
+   }
+  ],
+  "count": 8,
+  "authorised": 8,
+  "calls_used_file": "8",
+  "refused_attempts": [
+   "REFUSED_c2_int56_split_A:2026-10-25T19:45:20Z:solver process appeared"
+  ],
+  "all_truncated": true,
+  "max_duration_s": 407.0,
+  "min_gap_s": 301.0
+ },
+ "compute_time": {
+  "rows": [
+   {
+    "item": "build integrated 56",
+    "seconds": 23
+   },
+   {
+    "item": "build disconnected 56",
+    "seconds": 18
+   },
+   {
+    "item": "build integrated 112",
+    "seconds": 33
+   },
+   {
+    "item": "build disconnected 112",
+    "seconds": 28
+   },
+   {
+    "item": "build integrated 182",
+    "seconds": 49
+   },
+   {
+    "item": "build disconnected 182",
+    "seconds": 36
+   },
+   {
+    "item": "c1_int56_current_A solve",
+    "seconds": 403.67
+   },
+   {
+    "item": "c2_int56_split_A p1",
+    "seconds": 29.67
+   },
+   {
+    "item": "c2_int56_split_A p2",
+    "seconds": 234.75
+   },
+   {
+    "item": "c2_int56_split_A p3",
+    "seconds": 151.88
+   },
+   {
+    "item": "c4_int224_probe25_T16 p1",
+    "seconds": 74.32
+   },
+   {
+    "item": "c5_int140_probe25_T16_thr100 p1",
+    "seconds": 50.66
+   },
+   {
+    "item": "c5_int140_probe25_T16_thr100 p2",
+    "seconds": 168.49
+   },
+   {
+    "item": "c5_int140_probe25_T16_thr100 p3",
+    "seconds": 29.11
+   },
+   {
+    "item": "c6_disc140_probe25_T16_thr100 p1",
+    "seconds": 42.35
+   },
+   {
+    "item": "c6_disc140_probe25_T16_thr100 p2",
+    "seconds": 94.53999999999999
+   },
+   {
+    "item": "c6_disc140_probe25_T16_thr100 p3",
+    "seconds": 24.89
+   },
+   {
+    "item": "c7_int182_probe25_T16_thr100 p1",
+    "seconds": 60.15
+   },
+   {
+    "item": "c7_int182_probe25_T16_thr100 p2",
+    "seconds": 232.25
+   },
+   {
+    "item": "c8_disc182_probe25_T16_thr100 p1",
+    "seconds": 53.12
+   },
+   {
+    "item": "c8_disc182_probe25_T16_thr100 p2",
+    "seconds": 136.91
+   },
+   {
+    "item": "p1only_int112_split_T16 p1",
+    "seconds": 48.77
+   },
+   {
+    "item": "tests TESTS_full",
+    "seconds": 1285.49
+   },
+   {
+    "item": "tests TESTS_new",
+    "seconds": 84.66
+   },
+   {
+    "item": "tests TESTS_new2",
+    "seconds": 370.91
+   },
+   {
+    "item": "drill_b4",
+    "seconds": 362
+   },
+   {
+    "item": "regress9",
+    "seconds": 547
+   },
+   {
+    "item": "dryrun TIME_build",
+    "seconds": 56.0
+   },
+   {
+    "item": "dryrun TIME_guards",
+    "seconds": 0.0
+   },
+   {
+    "item": "dryrun TIME_pre",
+    "seconds": 3.0
+   },
+   {
+    "item": "dryrun TIME_real",
+    "seconds": 0.0
+   },
+   {
+    "item": "dryrun TIME_synth",
+    "seconds": 0.0
+   },
+   {
+    "item": "package TIME",
+    "seconds": 11.0
+   },
+   {
+    "item": "c3_int112_current_T16 solve (terminated, 90 % rule)",
+    "seconds": 184
+   },
+   {
+    "item": "c4_int224_probe25_T16 p2 (terminated, 90 % rule)",
+    "seconds": 47
+   },
+   {
+    "item": "tests fork agent A3.2 / A3.3 (+ regression suites)",
+    "seconds": 895
+   },
+   {
+    "item": "tests early unit runs (split / batch4 helpers)",
+    "seconds": 120
+   }
+  ],
+  "total_seconds": 5988.59,
+  "total_hours": 1.6634972222222222,
+  "cap_hours": 5,
+  "note": "local compute = builds + solves (all three processes) + tests + drills + dry run + package; waiting gaps excluded"
+ },
+ "equivalence": {
+  "C1_newcode_vs_M08b_smoke": {
+   "label": "C1_newcode_vs_M08b_smoke",
+   "A": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/solves/c1_int56_current_A",
+   "B": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/m08b/smoke_s01/integrated",
+   "all_equal": false,
+   "items": {
+    "receipt_key_fields": "equal",
+    "gurobi_log": "equal",
+    "solution/X.npy": "equal",
+    "solution/Pi.npy": "equal",
+    "solution/RC.npy": "equal",
+    "lp/vlabels.npy": "equal",
+    "lp/clabels.npy": "equal",
+    "lp/cost.npy": "equal",
+    "lp/col_lower.npy": "equal",
+    "lp/col_upper.npy": "equal",
+    "lp/row_lower.npy": "equal",
+    "lp/row_upper.npy": "equal",
+    "lp/value.npy": "equal",
+    "lp/index.npy": "equal",
+    "lp/start.npy": "equal",
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "capacity_reduced_costs.csv": "equal",
+    "cross_border_flows.csv": "equal",
+    "nodal_prices_summary.csv": "equal",
+    "COMPONENT_COST_BREAKDOWN.csv": "equal",
+    "DUALS_INDEX.csv": "equal",
+    "costs_active_research.csv": "equal",
+    "V5_GATES.json": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "EMISSIONS_BY_COUNTRY.json": "equal",
+    "CO2_FLOWS.json": "equal",
+    "CAPACITY_BY_TECH_COUNTRY.json": "equal",
+    "INTERIOR_CHECKS.json": "equal",
+    "BUNKER_ACCOUNT.json": "equal",
+    "COMPONENT_COST_BREAKDOWN_SUMMARY.json": "equal",
+    "v5/kkt_summary.json": "equal",
+    "EXPORTS.json": "DIFFERENT",
+    "lp/MATH_PROBLEM.json": "equal",
+    "DUALS_BY_CONSTRAINT.nc": "equal",
+    "integrated_SMOKE_TEST_ONLY_solved.nc": "equal"
+   }
+  },
+  "C2_split_vs_C1_single_56_A": {
+   "label": "C2_split_vs_C1_single_56_A",
+   "A": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/solves/c2_int56_split_A",
+   "B": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/solves/c1_int56_current_A",
+   "all_equal": true,
+   "items": {
+    "receipt_key_fields": "equal",
+    "gurobi_log": "equal",
+    "solution/X.npy": "equal",
+    "solution/Pi.npy": "equal",
+    "solution/RC.npy": "equal",
+    "lp/vlabels.npy": "equal",
+    "lp/clabels.npy": "equal",
+    "lp/cost.npy": "equal",
+    "lp/col_lower.npy": "equal",
+    "lp/col_upper.npy": "equal",
+    "lp/row_lower.npy": "equal",
+    "lp/row_upper.npy": "equal",
+    "lp/value.npy": "equal",
+    "lp/index.npy": "equal",
+    "lp/start.npy": "equal",
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "capacity_reduced_costs.csv": "equal",
+    "cross_border_flows.csv": "equal",
+    "nodal_prices_summary.csv": "equal",
+    "COMPONENT_COST_BREAKDOWN.csv": "equal",
+    "DUALS_INDEX.csv": "equal",
+    "costs_active_research.csv": "equal",
+    "V5_GATES.json": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "EMISSIONS_BY_COUNTRY.json": "equal",
+    "CO2_FLOWS.json": "equal",
+    "CAPACITY_BY_TECH_COUNTRY.json": "equal",
+    "INTERIOR_CHECKS.json": "equal",
+    "BUNKER_ACCOUNT.json": "equal",
+    "COMPONENT_COST_BREAKDOWN_SUMMARY.json": "equal",
+    "v5/kkt_summary.json": "equal",
+    "EXPORTS.json": "equal",
+    "lp/MATH_PROBLEM.json": "equal",
+    "DUALS_BY_CONSTRAINT.nc": "equal",
+    "integrated_SMOKE_TEST_ONLY_solved.nc": "equal"
+   }
+  }
+ },
+ "a1": {
+  "data": "evidence/A1_DATA.json",
+  "extrapolation": {
+   "integrated": {
+    "lp_rows": {
+     "loglog_at_2920": 79403016.76439829,
+     "exponent": 0.9950744312644685,
+     "affine_at_2920": 80327387.99999999,
+     "affine": {
+      "c": 12788.000000000695,
+      "m": 27504.999999999996
+     },
+     "at_2920_low": 79403016.76439829,
+     "at_2920_high": 80327387.99999999,
+     "points": [
+      [
+       112,
+       3093348
+      ],
+      [
+       182,
+       5018698
+      ],
+      [
+       56,
+       1553068
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_cols": {
+     "loglog_at_2920": 35240456.09733139,
+     "exponent": 0.9908873638370118,
+     "affine_at_2920": 36002571.999999985,
+     "affine": {
+      "c": 10652.000000000391,
+      "m": 12325.999999999995
+     },
+     "at_2920_low": 35240456.09733139,
+     "at_2920_high": 36002571.999999985,
+     "points": [
+      [
+       112,
+       1391164
+      ],
+      [
+       182,
+       2253984
+      ],
+      [
+       56,
+       700908
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_nnz": {
+     "loglog_at_2920": 187318175.9351837,
+     "exponent": 0.9979651094013539,
+     "affine_at_2920": 188231673.01990628,
+     "affine": {
+      "c": 11753.74590164158,
+      "m": 64458.87646370022
+     },
+     "at_2920_low": 187318175.9351837,
+     "at_2920_high": 188231673.01990628,
+     "points": [
+      [
+       112,
+       7230343
+      ],
+      [
+       182,
+       11743627
+      ],
+      [
+       56,
+       3621898
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "build_peak_gib": {
+     "loglog_at_2920": 70.14428099818218,
+     "exponent": 0.8784105348923069,
+     "affine_at_2920": 92.47352613944915,
+     "affine": {
+      "c": 0.42436108823682406,
+      "m": 0.03152368666137408
+     },
+     "at_2920_low": 70.14428099818218,
+     "at_2920_high": 92.47352613944915,
+     "points": [
+      [
+       112,
+       3.9670677185058594
+      ],
+      [
+       182,
+       6.156314849853516
+      ],
+      [
+       56,
+       2.1829910278320312
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "build_seconds": {
+     "loglog_at_2920": 339.6148767747332,
+     "exponent": 0.7360516518443377,
+     "affine_at_2920": 618.9090300703494,
+     "affine": {
+      "c": 6.705853702592069,
+      "m": 0.20965862204375252
+     },
+     "at_2920_low": 339.6148767747332,
+     "at_2920_high": 618.9090300703494,
+     "points": [
+      [
+       112,
+       29.505502223968506
+      ],
+      [
+       182,
+       45.1668860912323
+      ],
+      [
+       56,
+       18.825690507888794
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_array_bytes": {
+     "loglog_at_2920": 6312011170.247447,
+     "exponent": 0.9954792777471286,
+     "affine_at_2920": 6379668248.3185,
+     "affine": {
+      "c": 922339.9344262494,
+      "m": 2184502.0234192032
+     },
+     "at_2920_low": 6312011170.247447,
+     "at_2920_high": 6379668248.3185,
+     "points": [
+      [
+       112,
+       245573688
+      ],
+      [
+       182,
+       398507432
+      ],
+      [
+       56,
+       123261608
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_nz_all_regimes": {
+     "loglog_at_2920": 349946624.01083004,
+     "exponent": 0.11454651959096367,
+     "affine_at_2920": -92686466.16541559,
+     "affine": {
+      "c": 287864912.2807019,
+      "m": -130325.8145363416
+     },
+     "at_2920_low": -92686466.16541559,
+     "at_2920_high": 349946624.01083004,
+     "points": [
+      [
+       56,
+       177900000.0
+      ],
+      [
+       112,
+       523600000.0
+      ],
+      [
+       140,
+       160400000.0
+      ],
+      [
+       182,
+       225700000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_ops_all_regimes": {
+     "loglog_at_2920": 181623389569325.4,
+     "exponent": 1.726130188354259,
+     "affine_at_2920": 23193838596491.227,
+     "affine": {
+      "c": -137132163742.69043,
+      "m": 7990058479.532164
+     },
+     "at_2920_low": 23193838596491.227,
+     "at_2920_high": 181623389569325.4,
+     "points": [
+      [
+       56,
+       164200000000.0
+      ],
+      [
+       112,
+       1148000000000.0
+      ],
+      [
+       140,
+       769400000000.0
+      ],
+      [
+       182,
+       1285000000000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_nz": {
+     "loglog_at_2920": 8366830091.353614,
+     "exponent": 1.301762605072288,
+     "affine_at_2920": 4482638095.238092,
+     "affine": {
+      "c": -57266666.66666638,
+      "m": 1554761.9047619035
+     },
+     "at_2920_low": 4482638095.238092,
+     "at_2920_high": 8366830091.353614,
+     "points": [
+      [
+       140,
+       160400000.0
+      ],
+      [
+       182,
+       225700000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_ops": {
+     "loglog_at_2920": 291876516705722.8,
+     "exponent": 1.9549270860196595,
+     "affine_at_2920": 34897209523809.484,
+     "affine": {
+      "c": -949266666666.6647,
+      "m": 12276190476.190462
+     },
+     "at_2920_low": 34897209523809.484,
+     "at_2920_high": 291876516705722.8,
+     "points": [
+      [
+       140,
+       769400000000.0
+      ],
+      [
+       182,
+       1285000000000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "aat_nz": {
+     "loglog_at_2920": 88496987.93315817,
+     "exponent": 0.8389278757319987,
+     "affine_at_2920": 119709571.42857143,
+     "affine": {
+      "c": 1241000.000000001,
+      "m": 40571.42857142857
+     },
+     "at_2920_low": 88496987.93315817,
+     "at_2920_high": 119709571.42857143,
+     "points": [
+      [
+       140,
+       6921000.0
+      ],
+      [
+       182,
+       8625000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "presolved_rows": {
+     "loglog_at_2920": 26941435.308557976,
+     "exponent": 1.0010947941061181,
+     "affine_at_2920": 26883810.666666646,
+     "affine": {
+      "c": -1602.6666666650456,
+      "m": 9207.333333333325
+     },
+     "at_2920_low": 26883810.666666646,
+     "at_2920_high": 26941435.308557976,
+     "points": [
+      [
+       140,
+       1287424
+      ],
+      [
+       182,
+       1674132
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "problem_bytes": {
+     "loglog_at_2920": 5425366616.852452,
+     "exponent": 1.0247745772823782,
+     "affine_at_2920": 5145684056.767858,
+     "affine": {
+      "c": -5134885.422169907,
+      "m": 1763979.0897911054
+     },
+     "at_2920_low": 5145684056.767858,
+     "at_2920_high": 5425366616.852452,
+     "points": [
+      [
+       56,
+       94383392
+      ],
+      [
+       112,
+       191647072
+      ],
+      [
+       140,
+       241432882
+      ],
+      [
+       182,
+       315835994
+      ],
+      [
+       224,
+       390507303
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "problem_write_seconds": {
+     "loglog_at_2920": 140.78729836669075,
+     "exponent": 0.7215244472121854,
+     "affine_at_2920": 251.8338269250734,
+     "affine": {
+      "c": 3.536518595128687,
+      "m": 0.08503332477052901
+     },
+     "at_2920_low": 140.78729836669075,
+     "at_2920_high": 251.8338269250734,
+     "points": [
+      [
+       56,
+       8.245461225509644
+      ],
+      [
+       112,
+       13.141204595565796
+      ],
+      [
+       140,
+       15.487941980361938
+      ],
+      [
+       182,
+       18.914885759353638
+      ],
+      [
+       224,
+       22.606893301010132
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "p2_peak_gib": {
+     "loglog_at_2920": 39.1782122615193,
+     "exponent": 0.5833217275953989,
+     "affine_at_2920": 79.56568418230339,
+     "affine": {
+      "c": 2.988819122314448,
+      "m": 0.02622495378766744
+     },
+     "at_2920_low": 39.1782122615193,
+     "at_2920_high": 79.56568418230339,
+     "points": [
+      [
+       140,
+       6.660312652587891
+      ],
+      [
+       182,
+       7.761760711669922
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "gurobi_max_mem_gb": {
+     "loglog_at_2920": 75.16114497806039,
+     "exponent": 0.7477112208649294,
+     "affine_at_2920": 119.0049099017143,
+     "affine": {
+      "c": 2.152298175999998,
+      "m": 0.04001801771428572
+     },
+     "at_2920_low": 75.16114497806039,
+     "at_2920_high": 119.0049099017143,
+     "points": [
+      [
+       140,
+       7.754820656
+      ],
+      [
+       182,
+       9.4355774
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "p1_peak_gib": {
+     "loglog_at_2920": 71.88142824839387,
+     "exponent": 0.8854303582994497,
+     "affine_at_2920": 92.3012913295201,
+     "affine": {
+      "c": 0.4326911782318694,
+      "m": 0.031461849366879534
+     },
+     "at_2920_low": 71.88142824839387,
+     "at_2920_high": 92.3012913295201,
+     "points": [
+      [
+       56,
+       2.1852073669433594
+      ],
+      [
+       112,
+       3.9633216857910156
+      ],
+      [
+       140,
+       4.847743988037109
+      ],
+      [
+       182,
+       6.156940460205078
+      ],
+      [
+       224,
+       7.474002838134766
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "read_seconds": {
+     "loglog_at_2920": 154.33577023960578,
+     "exponent": 1.1836056415760225,
+     "affine_at_2920": 106.34719133377071,
+     "affine": {
+      "c": -0.9059500694274872,
+      "m": 0.0367305278778076
+     },
+     "at_2920_low": 106.34719133377071,
+     "at_2920_high": 154.33577023960578,
+     "points": [
+      [
+       140,
+       4.236323833465576
+      ],
+      [
+       182,
+       5.779006004333496
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "presolve_ordering_seconds": {
+     "loglog_at_2920": 5650.750402663627,
+     "exponent": 1.5833045792620115,
+     "affine_at_2920": 1616.0980952380946,
+     "affine": {
+      "c": -33.006666666666646,
+      "m": 0.5647619047619046
+     },
+     "at_2920_low": 1616.0980952380946,
+     "at_2920_high": 5650.750402663627,
+     "points": [
+      [
+       140,
+       46.06
+      ],
+      [
+       182,
+       69.78
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "seconds_per_iter_11_20": {
+     "loglog_at_2920": 159.59337202491017,
+     "exponent": 1.182153861286508,
+     "affine_at_2920": 110.30476190476182,
+     "affine": {
+      "c": -0.9333333333333275,
+      "m": 0.038095238095238064
+     },
+     "at_2920_low": 110.30476190476182,
+     "at_2920_high": 159.59337202491017,
+     "points": [
+      [
+       140,
+       4.4
+      ],
+      [
+       182,
+       6.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "split_seconds_per_iter": {
+     "loglog_at_2920": 116.9765104676751,
+     "exponent": 1.0677534289257304,
+     "affine_at_2920": 102.26234285714281,
+     "affine": {
+      "c": -0.35479999999999806,
+      "m": 0.03514285714285713
+     },
+     "at_2920_low": 102.26234285714281,
+     "at_2920_high": 116.9765104676751,
+     "points": [
+      [
+       140,
+       4.5652
+      ],
+      [
+       182,
+       6.0412
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    }
+   },
+   "disconnected": {
+    "lp_rows": {
+     "loglog_at_2920": 76676325.37019473,
+     "exponent": 0.9951147834065285,
+     "affine_at_2920": 77561606.0,
+     "affine": {
+      "c": 12246.000000000686,
+      "m": 26558.0
+     },
+     "at_2920_low": 76676325.37019473,
+     "at_2920_high": 77561606.0,
+     "points": [
+      [
+       112,
+       2986742
+      ],
+      [
+       182,
+       4845802
+      ],
+      [
+       56,
+       1499494
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_cols": {
+     "loglog_at_2920": 34050718.3501992,
+     "exponent": 0.9908825409971556,
+     "affine_at_2920": 34787497.99999999,
+     "affine": {
+      "c": 10298.00000000032,
+      "m": 11909.999999999998
+     },
+     "at_2920_low": 34050718.3501992,
+     "at_2920_high": 34787497.99999999,
+     "points": [
+      [
+       112,
+       1344218
+      ],
+      [
+       182,
+       2177918
+      ],
+      [
+       56,
+       677258
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_nnz": {
+     "loglog_at_2920": 178742624.985693,
+     "exponent": 0.9979810785566026,
+     "affine_at_2920": 179608255.0199063,
+     "affine": {
+      "c": 11095.745901639988,
+      "m": 61505.876463700224
+     },
+     "at_2920_low": 178742624.985693,
+     "at_2920_high": 179608255.0199063,
+     "points": [
+      [
+       112,
+       6898949
+      ],
+      [
+       182,
+       11205523
+      ],
+      [
+       56,
+       3455872
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "build_peak_gib": {
+     "loglog_at_2920": 57.50919184938275,
+     "exponent": 0.8597126479363011,
+     "affine_at_2920": 78.63332541597528,
+     "affine": {
+      "c": 0.4419370870121193,
+      "m": 0.026777872715398342
+     },
+     "at_2920_low": 57.50919184938275,
+     "at_2920_high": 78.63332541597528,
+     "points": [
+      [
+       112,
+       3.4739837646484375
+      ],
+      [
+       182,
+       5.300876617431641
+      ],
+      [
+       56,
+       1.9232063293457031
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "build_seconds": {
+     "loglog_at_2920": 166.9426534761417,
+     "exponent": 0.5941526853175014,
+     "affine_at_2920": 362.0975156221232,
+     "affine": {
+      "c": 9.95204154780654,
+      "m": 0.12059776509394406
+     },
+     "at_2920_low": 166.9426534761417,
+     "at_2920_high": 362.0975156221232,
+     "points": [
+      [
+       112,
+       25.55897045135498
+      ],
+      [
+       182,
+       30.96751070022583
+      ],
+      [
+       56,
+       15.538861274719238
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "lp_array_bytes": {
+     "loglog_at_2920": 6061781683.568676,
+     "exponent": 0.9954830577104543,
+     "affine_at_2920": 6126711832.318499,
+     "affine": {
+      "c": 884643.934426234,
+      "m": 2097886.023419203
+     },
+     "at_2920_low": 6061781683.568676,
+     "at_2920_high": 6126711832.318499,
+     "points": [
+      [
+       112,
+       235835000
+      ],
+      [
+       182,
+       382705624
+      ],
+      [
+       56,
+       118373416
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_nz_all_regimes": {
+     "loglog_at_2920": 2948386005.7749887,
+     "exponent": 1.1544652423629258,
+     "affine_at_2920": 2158858095.2380953,
+     "affine": {
+      "c": -15846666.666666662,
+      "m": 744761.9047619047
+     },
+     "at_2920_low": 2158858095.2380953,
+     "at_2920_high": 2948386005.7749887,
+     "points": [
+      [
+       140,
+       88420000.0
+      ],
+      [
+       182,
+       119700000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_ops_all_regimes": {
+     "loglog_at_2920": 30711196998381.12,
+     "exponent": 1.6159465163264535,
+     "affine_at_2920": 8149699999999.99,
+     "affine": {
+      "c": -172299999999.99933,
+      "m": 2849999999.999996
+     },
+     "at_2920_low": 8149699999999.99,
+     "at_2920_high": 30711196998381.12,
+     "points": [
+      [
+       140,
+       226700000000.0
+      ],
+      [
+       182,
+       346400000000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_nz": {
+     "loglog_at_2920": 2948386005.7749887,
+     "exponent": 1.1544652423629258,
+     "affine_at_2920": 2158858095.2380953,
+     "affine": {
+      "c": -15846666.666666662,
+      "m": 744761.9047619047
+     },
+     "at_2920_low": 2158858095.2380953,
+     "at_2920_high": 2948386005.7749887,
+     "points": [
+      [
+       140,
+       88420000.0
+      ],
+      [
+       182,
+       119700000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "factor_ops": {
+     "loglog_at_2920": 30711196998381.12,
+     "exponent": 1.6159465163264535,
+     "affine_at_2920": 8149699999999.99,
+     "affine": {
+      "c": -172299999999.99933,
+      "m": 2849999999.999996
+     },
+     "at_2920_low": 8149699999999.99,
+     "at_2920_high": 30711196998381.12,
+     "points": [
+      [
+       140,
+       226700000000.0
+      ],
+      [
+       182,
+       346400000000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "aat_nz": {
+     "loglog_at_2920": 76249445.98166746,
+     "exponent": 0.8219908452691466,
+     "affine_at_2920": 106291809.52380942,
+     "affine": {
+      "c": 1241333.3333333407,
+      "m": 35976.19047619044
+     },
+     "at_2920_low": 76249445.98166746,
+     "at_2920_high": 106291809.52380942,
+     "points": [
+      [
+       140,
+       6278000.0
+      ],
+      [
+       182,
+       7789000.0
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "presolved_rows": {
+     "loglog_at_2920": 24897446.511041805,
+     "exponent": 1.0011849832615571,
+     "affine_at_2920": 24839810.666666657,
+     "affine": {
+      "c": -1602.666666666275,
+      "m": 8507.33333333333
+     },
+     "at_2920_low": 24839810.666666657,
+     "at_2920_high": 24897446.511041805,
+     "points": [
+      [
+       140,
+       1189424
+      ],
+      [
+       182,
+       1546732
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "problem_bytes": {
+     "loglog_at_2920": 5215389357.790133,
+     "exponent": 1.0250540644526804,
+     "affine_at_2920": 4964692941.90476,
+     "affine": {
+      "c": -6622353.333333163,
+      "m": 1702505.2380952374
+     },
+     "at_2920_low": 4964692941.90476,
+     "at_2920_high": 5215389357.790133,
+     "points": [
+      [
+       140,
+       231728380
+      ],
+      [
+       182,
+       303233600
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "problem_write_seconds": {
+     "loglog_at_2920": 206.4901531327667,
+     "exponent": 0.879060274514,
+     "affine_at_2920": 259.7421323798947,
+     "affine": {
+      "c": 1.9347225030263615,
+      "m": 0.08829020886194121
+     },
+     "at_2920_low": 206.4901531327667,
+     "at_2920_high": 259.7421323798947,
+     "points": [
+      [
+       140,
+       14.29535174369812
+      ],
+      [
+       182,
+       18.003540515899658
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "p2_peak_gib": {
+     "loglog_at_2920": 146.6813749207731,
+     "exponent": 1.0628095542442204,
+     "affine_at_2920": 129.51121829804916,
+     "affine": {
+      "c": -0.4184023539225217,
+      "m": 0.04449644542875742
+     },
+     "at_2920_low": 129.51121829804916,
+     "at_2920_high": 146.6813749207731,
+     "points": [
+      [
+       140,
+       5.811100006103516
+      ],
+      [
+       182,
+       7.679950714111328
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "gurobi_max_mem_gb": {
+     "loglog_at_2920": 278.4236937446691,
+     "exponent": 1.2271377857938526,
+     "affine_at_2920": 175.03231384342843,
+     "affine": {
+      "c": -1.7816385679999935,
+      "m": 0.06055272342857138
+     },
+     "at_2920_low": 175.03231384342843,
+     "at_2920_high": 278.4236937446691,
+     "points": [
+      [
+       140,
+       6.695742712
+      ],
+      [
+       182,
+       9.238957096
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "p1_peak_gib": {
+     "loglog_at_2920": 68.08082706957993,
+     "exponent": 0.9197795827177426,
+     "affine_at_2920": 79.40330777849462,
+     "affine": {
+      "c": 0.37588119506836476,
+      "m": 0.027064187186104885
+     },
+     "at_2920_low": 68.08082706957993,
+     "at_2920_high": 79.40330777849462,
+     "points": [
+      [
+       140,
+       4.164867401123047
+      ],
+      [
+       182,
+       5.301563262939453
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "read_seconds": {
+     "loglog_at_2920": 116.35033470019364,
+     "exponent": 1.101308749639971,
+     "affine_at_2920": 95.03407287597652,
+     "affine": {
+      "c": -0.47865104675292675,
+      "m": 0.03270983695983885
+     },
+     "at_2920_low": 95.03407287597652,
+     "at_2920_high": 116.35033470019364,
+     "points": [
+      [
+       140,
+       4.100726127624512
+      ],
+      [
+       182,
+       5.474539279937744
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "presolve_ordering_seconds": {
+     "loglog_at_2920": 5678.924418768208,
+     "exponent": 1.6469688193669152,
+     "affine_at_2920": 1402.9976190476184,
+     "affine": {
+      "c": -30.58333333333331,
+      "m": 0.4909523809523807
+     },
+     "at_2920_low": 1402.9976190476184,
+     "at_2920_high": 5678.924418768208,
+     "points": [
+      [
+       140,
+       38.15
+      ],
+      [
+       182,
+       58.769999999999996
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "seconds_per_iter_11_20": {
+     "loglog_at_2920": 111.09617160588412,
+     "exponent": 1.3393511786031702,
+     "affine_at_2920": 54.852380952380926,
+     "affine": {
+      "c": -0.7666666666666652,
+      "m": 0.01904761904761904
+     },
+     "at_2920_low": 54.852380952380926,
+     "at_2920_high": 111.09617160588412,
+     "points": [
+      [
+       140,
+       1.9
+      ],
+      [
+       182,
+       2.7
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    },
+    "split_seconds_per_iter": {
+     "loglog_at_2920": 57.706554839501706,
+     "exponent": 1.1160468649957764,
+     "affine_at_2920": 45.73641904761897,
+     "affine": {
+      "c": -0.2605333333333277,
+      "m": 0.015752380952380924
+     },
+     "at_2920_low": 45.73641904761897,
+     "at_2920_high": 57.706554839501706,
+     "points": [
+      [
+       140,
+       1.9448
+      ],
+      [
+       182,
+       2.6064
+      ]
+     ],
+     "note": "low = log-log power fit, high = affine fit (fixed overhead + per-snapshot part); the conservative (high) value is used for memory and time"
+    }
+   }
+  },
+  "summary": {
+   "method": "B4P A1.3 / A1.4: the F1 / F2 resource estimates at 2920 snapshots (median and range; VERIFIED vs INFERENCE), single-process vs split-process,\nand the candidate-configuration table (can run / parallel / hours / cost / risks). Reads evidence/A1_DATA.json and A1_EXTRAPOLATION.json\n(a1_analysis.py). Writes evidence/A1_SUMMARY.json (+ the markdown tables come from report_tables.py). Read only; every constant below is an\nassumption with its source. Usage: python a1_summary.py <evidence dir>\n\nModel (INFERENCE):\n  Factor NZ / Ops at 2920 from the dense-column-regime points (140 / 182 snapshots with the measurement threshold 100, i.e. the regime of the full\n  problem), three estimates each: affine (low), the cloud 365x24h anchor (R3 / R4: the same per-snapshot LP with 6486 / 6248 dense columns)\n  scaled 365 -> 2920 with the local 182 -> 365 exponent (central), and the local power law (high).\n  Process-2 memory = non-factor part (linear in N; local 140 / 182 RSS minus the factor memory Gurobi prints, and the cloud anchor R3 / R4 Gurobi\n  share minus its factor) + Factor NZ x 14 bytes (Gurobi's \"roughly X GB\" lines: 13.3-14.3 B per factor nonzero).\n  Seconds per iteration = (cloud T16 seconds per 1e12 factor ops, R3 integrated 3.86 / R4 disconnected 7.11 - the smaller factor runs less\n  efficiently; the disconnected rate at 2920 is taken between the two) x Factor Ops / 1e12 x CPU factor.\n",
+   "cpu": {
+    "8470Q": {
+     "factor": [
+      1.0,
+      1.0
+     ],
+     "note": "reference: third batch R1-R10 (AutoDL West-B 8470Q, 25 cores / 92 GiB); R3 / R4 are the T16 runs"
+    },
+    "8352V": {
+     "factor": [
+      1.15,
+      1.5
+     ],
+     "note": "Ice Lake-SP 2.1 GHz, DDR4; no measurement: 1.15-1.5 x slower than 8470Q assumed (barrier is memory-bandwidth bound; INFERENCE)"
+    },
+    "EPYC9754": {
+     "factor": [
+      1.0,
+      1.3
+     ],
+     "note": "Zen 4c: R11 on EPYC 9654 ran 10.3 s/it vs R2 10.5 s/it on 8470Q (same model, T8) = 0.98; 9754 has lower clocks and 128 cores/socket -> 1.0-1.3 x (INFERENCE)"
+    }
+   },
+   "iterations": {
+    "F1": [
+     253,
+     350,
+     465
+    ],
+    "F2": [
+     116,
+     170,
+     228
+    ]
+   },
+   "cloud_anchor": {
+    "integrated": {
+     "run": "R3",
+     "N": 365,
+     "factor_nz": 527800000.0,
+     "factor_ops": 4241000000000.0,
+     "factor_gb": 7.0,
+     "rss_gib": 22.78,
+     "python_gib": 10.15,
+     "rate_s_per_1e12": 3.86,
+     "dense_cols": 6486
+    },
+    "disconnected": {
+     "run": "R4",
+     "N": 365,
+     "factor_nz": 251100000.0,
+     "factor_ops": 1036000000000.0,
+     "factor_gb": 5.0,
+     "rss_gib": 19.29,
+     "python_gib": 9.5,
+     "rate_s_per_1e12": 7.11,
+     "dense_cols": 6248
+    }
+   },
+   "bytes_per_factor_nz": [
+    13.3,
+    14.3
+   ],
+   "overhead_hours": {
+    "p1_build_write": [
+     0.25,
+     0.5
+    ],
+    "p2_read": [
+     0.03,
+     0.05
+    ],
+    "p2_presolve_ordering": [
+     0.45,
+     1.6
+    ],
+    "p3_rebuild_assign_export": [
+     1.5,
+     3.0
+    ],
+    "postprocessing": [
+     0.5,
+     1.5
+    ],
+    "note": "per run; process 1 / 3 and the post-processing run outside the Gurobi TimeLimit; presolve + ordering inside it; scaled from 56-224 local measurements x 1.35 (slower cloud cores)"
+   },
+   "scenarios": {
+    "F1": {
+     "scenario": "integrated",
+     "dense_regime_points": [
+      {
+       "tag": "c5_int140_probe25_T16_thr100",
+       "N": 140,
+       "threshold": 100
+      },
+      {
+       "tag": "c7_int182_probe25_T16_thr100",
+       "N": 182,
+       "threshold": 100
+      }
+     ],
+     "factor_nz": {
+      "low": 4482638095.238092,
+      "central": 6682198220.175239,
+      "high": 8366830091.353614,
+      "exponents": {
+       "local_140_182": 1.301762605072288,
+       "local182_to_cloud365": 1.2207531745057252
+      }
+     },
+     "factor_ops": {
+      "low": 34897209523809.484,
+      "central": 150324759755514.28,
+      "high": 291876516705722.8,
+      "exponents": {
+       "local_140_182": 1.9549270860196595,
+       "local182_to_cloud365": 1.7158447865682027
+      }
+     },
+     "memory_gib": {
+      "split_process1_build": {
+       "low": 71.88142824839387,
+       "high": 92.3012913295201
+      },
+      "split_process2_gurobi": {
+       "low": 89.79696426079384,
+       "central": 124.34880066756267,
+       "high": 160.31464953284404,
+       "non_factor_gib": {
+        "local_affine": 34.272362970170526,
+        "cloud_anchor": 48.88593582153321,
+        "points": {
+         "140": 4.51827073097229,
+         "182": 4.967792987823486
+        }
+       },
+       "factor_gib": {
+        "low": 55.524601290623316,
+        "central": 82.7696512717108,
+        "high": 111.42871371131082
+       }
+      },
+      "split_process3_assign": {
+       "low": 79.06957107323326,
+       "high": 115.37661416190012,
+       "note": "process 3 = rebuild (as process 1) + the arrays and exports: 56-snapshot measurement 2.64 vs 2.19 GiB (x 1.2)"
+      },
+      "split_max": {
+       "low": 89.79696426079384,
+       "central": 124.34880066756267,
+       "high": 160.31464953284404
+      },
+      "single_process": {
+       "low": 161.67839250918772,
+       "central": 206.44016045651966,
+       "high": 252.61594086236414,
+       "note": "single process = Python model (process-1 peak stays resident) + the Gurobi part; C3 at 112 (sparse regime) exceeded 10.5 GiB where the split process 2 at 140 / 182 (dense regime) peaked at 6.7 / 7.8 GiB"
+      }
+     },
+     "seconds_per_1e12_ops_cloud_T16": 3.86,
+     "local_seconds_per_iter_11_20": {
+      "140": 4.4,
+      "182": 6.0
+     },
+     "per_cpu": {
+      "8470Q": {
+       "s_per_iter": {
+        "low": 134.7032287619046,
+        "central": 580.2535726562851,
+        "high": 1126.64335448409
+       },
+       "barrier_hours": {
+        "low": 9.466643576878294,
+        "central": 56.413541786027714,
+        "high": 145.52476662086164
+       },
+       "exceeds_72h_time_limit": {
+        "central": false,
+        "high": true
+       }
+      },
+      "8352V": {
+       "s_per_iter": {
+        "low": 154.90871307619028,
+        "central": 768.8359837695778,
+        "high": 1689.9650317261348
+       },
+       "barrier_hours": {
+        "low": 10.886640113410039,
+        "central": 74.74794286648674,
+        "high": 218.28714993129242
+       },
+       "exceeds_72h_time_limit": {
+        "central": true,
+        "high": true
+       }
+      },
+      "EPYC9754": {
+       "s_per_iter": {
+        "low": 134.7032287619046,
+        "central": 667.2916085547278,
+        "high": 1464.636360829317
+       },
+       "barrier_hours": {
+        "low": 9.466643576878294,
+        "central": 64.87557305393187,
+        "high": 189.18219660712012
+       },
+       "exceeds_72h_time_limit": {
+        "central": false,
+        "high": true
+       }
+      }
+     },
+     "iterations": [
+      253,
+      350,
+      465
+     ],
+     "disk_gb": {
+      "problem_file_gb": {
+       "low": 5.145684056767857,
+       "high": 5.425366616852452,
+       "removed_after_read": true
+      },
+      "lp_arrays_gb": {
+       "low": 6.312011170247447,
+       "high": 6.3796682483185
+      },
+      "solution_arrays_gb": 1.2186602559999995,
+      "duals_nc_gb": 0.616,
+      "solved_network_gb": 1.328,
+      "export_copy_gb": 2.08,
+      "note": "DUALS / solved network / export scaled x 8 from the 365x24h cloud exports (77 / 166 / 257 MB)",
+      "per_run_persistent_gb": 11.6223285043185,
+      "per_run_transient_gb": 5.425366616852452
+     },
+     "presolve_ordering_s": {
+      "low": 1616.0980952380946,
+      "high": 5650.750402663627
+     },
+     "read_s": {
+      "low": 106.34719133377071,
+      "high": 154.33577023960578
+     }
+    },
+    "F2": {
+     "scenario": "disconnected",
+     "dense_regime_points": [
+      {
+       "tag": "c6_disc140_probe25_T16_thr100",
+       "N": 140,
+       "threshold": 100
+      },
+      {
+       "tag": "c8_disc182_probe25_T16_thr100",
+       "N": 182,
+       "threshold": 100
+      }
+     ],
+     "factor_nz": {
+      "low": 2158858095.2380953,
+      "central": 2297729809.58721,
+      "high": 2948386005.7749887,
+      "exponents": {
+       "local_140_182": 1.1544652423629258,
+       "local182_to_cloud365": 1.0646250758322933
+      }
+     },
+     "factor_ops": {
+      "low": 8149699999999.99,
+      "central": 27357612307180.7,
+      "high": 30711196998381.12,
+      "exponents": {
+       "local_140_182": 1.6159465163264535,
+       "local182_to_cloud365": 1.574282137784903
+      }
+     },
+     "memory_gib": {
+      "split_process1_build": {
+       "low": 68.08082706957993,
+       "high": 79.40330777849462
+      },
+      "split_process2_gurobi": {
+       "low": 67.80798763255278,
+       "central": 103.71186840225312,
+       "high": 148.70091228675938,
+       "non_factor_gib": {
+        "local_affine": 109.43456451098125,
+        "cloud_anchor": 41.06709701538085,
+        "points": {
+         "140": 4.227851629257202,
+         "182": 5.817305564880371
+        }
+       },
+       "factor_gib": {
+        "low": 26.740890617171925,
+        "central": 28.461037639072067,
+        "high": 39.266347775778115
+       }
+      },
+      "split_process3_assign": {
+       "low": 74.88890977653793,
+       "high": 99.25413472311828,
+       "note": "process 3 = rebuild (as process 1) + the arrays and exports: 56-snapshot measurement 2.64 vs 2.19 GiB (x 1.2)"
+      },
+      "split_max": {
+       "low": 68.08082706957993,
+       "central": 103.71186840225312,
+       "high": 148.70091228675938
+      },
+      "single_process": {
+       "low": 135.88881470213272,
+       "central": 177.45393582629038,
+       "high": 228.104220065254,
+       "note": "single process = Python model (process-1 peak stays resident) + the Gurobi part; C3 at 112 (sparse regime) exceeded 10.5 GiB where the split process 2 at 140 / 182 (dense regime) peaked at 6.7 / 7.8 GiB"
+      }
+     },
+     "seconds_per_1e12_ops_cloud_T16": [
+      3.86,
+      7.11
+     ],
+     "local_seconds_per_iter_11_20": {
+      "140": 1.9,
+      "182": 2.7
+     },
+     "per_cpu": {
+      "8470Q": {
+       "s_per_iter": {
+        "low": 31.45784199999996,
+        "central": 150.05650350488617,
+        "high": 218.35661065848979
+       },
+       "barrier_hours": {
+        "low": 1.0136415755555543,
+        "central": 7.086001554397403,
+        "high": 13.82925200837102
+       },
+       "exceeds_72h_time_limit": {
+        "central": false,
+        "high": false
+       }
+      },
+      "8352V": {
+       "s_per_iter": {
+        "low": 36.17651829999995,
+        "central": 198.82486714397416,
+        "high": 327.5349159877347
+       },
+       "barrier_hours": {
+        "low": 1.1656878118888874,
+        "central": 9.388952059576559,
+        "high": 20.74387801255653
+       },
+       "exceeds_72h_time_limit": {
+        "central": false,
+        "high": false
+       }
+      },
+      "EPYC9754": {
+       "s_per_iter": {
+        "low": 31.45784199999996,
+        "central": 172.56497903061907,
+        "high": 283.86359385603674
+       },
+       "barrier_hours": {
+        "low": 1.0136415755555543,
+        "central": 8.148901787557012,
+        "high": 17.97802761088233
+       },
+       "exceeds_72h_time_limit": {
+        "central": false,
+        "high": false
+       }
+      }
+     },
+     "iterations": [
+      116,
+      170,
+      228
+     ],
+     "disk_gb": {
+      "problem_file_gb": {
+       "low": 4.964692941904761,
+       "high": 5.215389357790134,
+       "removed_after_read": true
+      },
+      "lp_arrays_gb": {
+       "low": 6.061781683568676,
+       "high": 6.126711832318499
+      },
+      "solution_arrays_gb": 1.177092816,
+      "duals_nc_gb": 0.616,
+      "solved_network_gb": 1.328,
+      "export_copy_gb": 2.08,
+      "note": "DUALS / solved network / export scaled x 8 from the 365x24h cloud exports (77 / 166 / 257 MB)",
+      "per_run_persistent_gb": 11.327804648318498,
+      "per_run_transient_gb": 5.215389357790134
+     },
+     "presolve_ordering_s": {
+      "low": 1402.9976190476184,
+      "high": 5678.924418768208
+     },
+     "read_s": {
+      "low": 95.03407287597652,
+      "high": 116.35033470019364
+     }
+    }
+   },
+   "disk_need_gb": {
+    "persistent_gb": 35.720133152637,
+    "transient_extra_gb": 5.425366616852452,
+    "with_lp_files_kept_gb": 46.36088912727958,
+    "note": "environment 3.3 GB + conda cache 0.75 + package 0.4; results packs (light + full) ~2 x export; LP problem files removed after the read (REMOVE_LP=1)"
+   },
+   "candidates": [
+    {
+     "id": "autodl_cpu_4x8352V",
+     "name": "AutoDL CPU 4 份（128 核 8352V / 240 GB）",
+     "cpu": "8352V",
+     "cores": 128,
+     "mem_gb": 240,
+     "disk_gb": null,
+     "price": 3.1,
+     "disk_note": "数据盘按租用配置（每份约 50 GB，需核实）",
+     "quota_gib": 223.52612461581444,
+     "limit_80_gib": 178.82089969265155,
+     "can_run_split": {
+      "central": true,
+      "high": true
+     },
+     "can_run_single": {
+      "central": false,
+      "high": false
+     },
+     "parallel_split": {
+      "central": false,
+      "high": false
+     },
+     "p1_probe_passes": {
+      "central": false,
+      "high": false
+     },
+     "hours_serial": {
+      "low": 17.512327925298926,
+      "central": 90.76895205957655,
+      "high": 106.04387801255653
+     },
+     "hours_parallel": {
+      "low": 14.981640113410037,
+      "central": 79.035,
+      "high": 81.975
+     },
+     "hours": {
+      "low": 17.512327925298926,
+      "central": 90.76895205957655,
+      "high": 106.04387801255653
+     },
+     "cost_cny": {
+      "low": 54.28821656842668,
+      "central": 281.3837513846873,
+      "high": 328.73602183892524
+     },
+     "f1_barrier_hours": {
+      "low": 10.886640113410039,
+      "central": 74.74794286648674,
+      "high": 218.28714993129242
+     },
+     "f2_barrier_hours": {
+      "low": 1.1656878118888874,
+      "central": 9.388952059576559,
+      "high": 20.74387801255653
+     },
+     "risks": [
+      "内存：单进程方式不可行",
+      "时间：F1 中值估计超过 72 h TimeLimit（早期测速会止损）",
+      "每次迭代耗时无该 CPU 实测（因子为假设）"
+     ]
+    },
+    {
+     "id": "autodl_vgpu48_4x8470Q",
+     "name": "AutoDL vGPU-48GB 4 卡（100 核 8470Q / 368 GB）",
+     "cpu": "8470Q",
+     "cores": 100,
+     "mem_gb": 368,
+     "disk_gb": null,
+     "price": 11.5,
+     "disk_note": "数据盘按租用配置（第三批同型 50 GB，可扩）",
+     "quota_gib": 342.7400577442488,
+     "limit_80_gib": 274.1920461953991,
+     "can_run_split": {
+      "central": true,
+      "high": true
+     },
+     "can_run_single": {
+      "central": true,
+      "high": true
+     },
+     "parallel_split": {
+      "central": true,
+      "high": false
+     },
+     "p1_probe_passes": {
+      "central": true,
+      "high": false
+     },
+     "hours_serial": {
+      "low": 15.940285152433848,
+      "central": 72.87954334042512,
+      "high": 99.12925200837101
+     },
+     "hours_parallel": {
+      "low": 13.561643576878293,
+      "central": 63.44854178602772,
+      "high": 81.975
+     },
+     "hours": {
+      "low": 13.561643576878293,
+      "central": 63.44854178602772,
+      "high": 81.975
+     },
+     "cost_cny": {
+      "low": 155.95890113410036,
+      "central": 729.6582305393188,
+      "high": 942.7125
+     },
+     "f1_barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 56.413541786027714,
+      "high": 145.52476662086164
+     },
+     "f2_barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 7.086001554397403,
+      "high": 13.82925200837102
+     },
+     "risks": [
+      "时间：F1 高值估计超过 72 h TimeLimit"
+     ]
+    },
+    {
+     "id": "autodl_4090D_4xEPYC9754",
+     "name": "AutoDL RTX 4090D 4 卡（72 核 EPYC 9754 / 240 GB / 数据盘 ≤ 60 GB）",
+     "cpu": "EPYC9754",
+     "cores": 72,
+     "mem_gb": 240,
+     "disk_gb": 60,
+     "price": 7.5,
+     "disk_note": "数据盘最多 60 GB（补充 1）",
+     "quota_gib": 223.52612461581444,
+     "limit_80_gib": 178.82089969265155,
+     "can_run_split": {
+      "central": true,
+      "high": true
+     },
+     "can_run_single": {
+      "central": false,
+      "high": false
+     },
+     "parallel_split": {
+      "central": false,
+      "high": false
+     },
+     "p1_probe_passes": {
+      "central": false,
+      "high": false
+     },
+     "hours_serial": {
+      "low": 15.940285152433848,
+      "central": 82.40447484148888,
+      "high": 103.27802761088232
+     },
+     "hours_parallel": {
+      "low": 13.561643576878293,
+      "central": 71.91057305393187,
+      "high": 81.975
+     },
+     "hours": {
+      "low": 15.940285152433848,
+      "central": 82.40447484148888,
+      "high": 103.27802761088232
+     },
+     "cost_cny": {
+      "low": 119.55213864325385,
+      "central": 618.0335613111665,
+      "high": 774.5852070816173
+     },
+     "f1_barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 64.87557305393187,
+      "high": 189.18219660712012
+     },
+     "f2_barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 8.148901787557012,
+      "high": 17.97802761088233
+     },
+     "risks": [
+      "内存：单进程方式不可行",
+      "时间：F1 高值估计超过 72 h TimeLimit",
+      "每次迭代耗时无该 CPU 实测（因子为假设）",
+      "数据盘 60 GB：需要 REMOVE_LP=1（持久用量约 36 GB + 瞬时 LP 文件 5.4 GB）"
+     ]
+    },
+    {
+     "id": "aliyun_r8i_256",
+     "name": "阿里云新加坡 r8i 256 GiB（约 32 vCPU）",
+     "cpu": "8470Q",
+     "cores": 32,
+     "mem_gb": 274.8672,
+     "disk_gb": null,
+     "price": null,
+     "disk_note": "云盘按需；单价以控制台为准",
+     "quota_gib": 256.0,
+     "limit_80_gib": 204.8,
+     "can_run_split": {
+      "central": true,
+      "high": true
+     },
+     "can_run_single": {
+      "central": false,
+      "high": false
+     },
+     "parallel_split": {
+      "central": false,
+      "high": false
+     },
+     "p1_probe_passes": {
+      "central": false,
+      "high": false
+     },
+     "hours_serial": {
+      "low": 15.940285152433848,
+      "central": 72.87954334042512,
+      "high": 99.12925200837101
+     },
+     "hours_parallel": {
+      "low": 13.561643576878293,
+      "central": 63.44854178602772,
+      "high": 81.975
+     },
+     "hours": {
+      "low": 15.940285152433848,
+      "central": 72.87954334042512,
+      "high": 99.12925200837101
+     },
+     "cost_cny": null,
+     "f1_barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 56.413541786027714,
+      "high": 145.52476662086164
+     },
+     "f2_barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 7.086001554397403,
+      "high": 13.82925200837102
+     },
+     "risks": [
+      "内存：单进程方式不可行",
+      "时间：F1 高值估计超过 72 h TimeLimit",
+      "核数 < 33：F2 必须等 F1"
+     ]
+    },
+    {
+     "id": "aliyun_r8i_512",
+     "name": "阿里云新加坡 r8i 512 GiB（约 64 vCPU）",
+     "cpu": "8470Q",
+     "cores": 64,
+     "mem_gb": 549.7344,
+     "disk_gb": null,
+     "price": null,
+     "disk_note": "云盘按需；单价以控制台为准",
+     "quota_gib": 512.0,
+     "limit_80_gib": 409.6,
+     "can_run_split": {
+      "central": true,
+      "high": true
+     },
+     "can_run_single": {
+      "central": true,
+      "high": true
+     },
+     "parallel_split": {
+      "central": true,
+      "high": true
+     },
+     "p1_probe_passes": {
+      "central": true,
+      "high": true
+     },
+     "hours_serial": {
+      "low": 15.940285152433848,
+      "central": 72.87954334042512,
+      "high": 99.12925200837101
+     },
+     "hours_parallel": {
+      "low": 13.561643576878293,
+      "central": 63.44854178602772,
+      "high": 81.975
+     },
+     "hours": {
+      "low": 13.561643576878293,
+      "central": 63.44854178602772,
+      "high": 81.975
+     },
+     "cost_cny": null,
+     "f1_barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 56.413541786027714,
+      "high": 145.52476662086164
+     },
+     "f2_barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 7.086001554397403,
+      "high": 13.82925200837102
+     },
+     "risks": [
+      "时间：F1 高值估计超过 72 h TimeLimit"
+     ]
+    }
+   ],
+   "recommendation": {
+    "order": "能跑且最稳（分进程高值仍在 80 % 配额内、CPU 有实测）→ 最省钱",
+    "ranked": [
+     "autodl_vgpu48_4x8470Q",
+     "aliyun_r8i_512",
+     "autodl_cpu_4x8352V",
+     "autodl_4090D_4xEPYC9754",
+     "aliyun_r8i_256"
+    ],
+    "note": "see B4P_REPORT.md section 2 for the reasoning; the user decides the machine"
+   }
+  }
+ },
+ "drill": {
+  "script": "research/06_scope_redesign/p1_b4p_20261026/scripts/drill_b4.sh",
+  "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+  "written_utc": "2026-10-25T21:41:58Z",
+  "expected_types": [
+   "integrated",
+   "disconnected"
+  ],
+  "types": {
+   "disconnected": {
+    "source": "real",
+    "snapshots": 56,
+    "source_dir": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/m08b/smoke_s01/disconnected",
+    "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+    "steps": {
+     "ledger": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.491
+     },
+     "violations": {
+      "exit": 0,
+      "seconds": 18,
+      "peak_gib": 2.039
+     },
+     "c1": {
+      "exit": 0,
+      "seconds": 15,
+      "peak_gib": 2.051
+     },
+     "m12": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.494
+     },
+     "owen": {
+      "exit": 0,
+      "seconds": 16,
+      "peak_gib": 1.905
+     },
+     "v6": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     },
+     "stop_class": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     }
+    },
+    "all_steps_ran": true,
+    "termination": "optimal",
+    "objective": 317745965908.25806,
+    "b16": {
+     "computable": true,
+     "relative_error": 2.4544992234069164e-12,
+     "difference_eur": 0.7799072265625
+    },
+    "c1": {
+     "a": true,
+     "b": true,
+     "c": true,
+     "grade": "layer1_plus_nodal_price_settlement"
+    },
+    "m12_identity_passed": true,
+    "owen_usable": true,
+    "label": "ACCEPTED_LAYER2",
+    "stop_class": "accepted"
+   },
+   "disconnected_182": {
+    "source": "synthetic",
+    "snapshots": 182,
+    "source_dir": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/drill/_synthetic/disconnected_182",
+    "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+    "steps": {
+     "ledger": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.591
+     },
+     "violations": {
+      "exit": 0,
+      "seconds": 42,
+      "peak_gib": 5.738
+     },
+     "c1": {
+      "exit": 0,
+      "seconds": 35,
+      "peak_gib": 5.776
+     },
+     "m12": {
+      "exit": 0,
+      "seconds": 4,
+      "peak_gib": 0.595
+     },
+     "owen": {
+      "exit": 0,
+      "seconds": 25,
+      "peak_gib": 5.303
+     },
+     "v6": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     },
+     "stop_class": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     }
+    },
+    "all_steps_ran": true,
+    "termination": "synthetic",
+    "objective": 10050341718.817923,
+    "b16": {
+     "computable": true,
+     "relative_error": 2.0119092093331716e-11,
+     "difference_eur": 0.20220375061035156
+    },
+    "c1": {
+     "a": false,
+     "b": true,
+     "c": true,
+     "grade": "not_layer1"
+    },
+    "m12_identity_passed": true,
+    "owen_usable": false,
+    "label": "NOT_ACCEPTED",
+    "stop_class": "c1a"
+   },
+   "integrated": {
+    "source": "real",
+    "snapshots": 56,
+    "source_dir": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/solves/c2_int56_split_A",
+    "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+    "steps": {
+     "ledger": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.494
+     },
+     "violations": {
+      "exit": 0,
+      "seconds": 20,
+      "peak_gib": 2.325
+     },
+     "c1": {
+      "exit": 0,
+      "seconds": 18,
+      "peak_gib": 2.338
+     },
+     "m12": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.498
+     },
+     "owen": {
+      "exit": 0,
+      "seconds": 19,
+      "peak_gib": 2.186
+     },
+     "v6": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     },
+     "stop_class": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     }
+    },
+    "all_steps_ran": true,
+    "termination": "optimal",
+    "objective": 307847440010.6307,
+    "b16": {
+     "computable": true,
+     "relative_error": 7.915305525635052e-12,
+     "difference_eur": 2.43670654296875
+    },
+    "c1": {
+     "a": true,
+     "b": true,
+     "c": true,
+     "grade": "layer1_plus_nodal_price_settlement"
+    },
+    "m12_identity_passed": true,
+    "owen_usable": true,
+    "label": "ACCEPTED_LAYER2",
+    "stop_class": "accepted"
+   },
+   "integrated_182": {
+    "source": "synthetic",
+    "snapshots": 182,
+    "source_dir": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/drill/_synthetic/integrated_182",
+    "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+    "steps": {
+     "ledger": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.6
+     },
+     "violations": {
+      "exit": 0,
+      "seconds": 55,
+      "peak_gib": 6.585
+     },
+     "c1": {
+      "exit": 0,
+      "seconds": 44,
+      "peak_gib": 6.655
+     },
+     "m12": {
+      "exit": 0,
+      "seconds": 3,
+      "peak_gib": 0.604
+     },
+     "owen": {
+      "exit": 0,
+      "seconds": 30,
+      "peak_gib": 6.136
+     },
+     "v6": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     },
+     "stop_class": {
+      "exit": 0,
+      "seconds": 0,
+      "peak_gib": 0.0
+     }
+    },
+    "all_steps_ran": true,
+    "termination": "synthetic",
+    "objective": 10059334783.639618,
+    "b16": {
+     "computable": true,
+     "relative_error": 2.0101105585949215e-11,
+     "difference_eur": 0.20220375061035156
+    },
+    "c1": {
+     "a": false,
+     "b": true,
+     "c": true,
+     "grade": "not_layer1"
+    },
+    "m12_identity_passed": true,
+    "owen_usable": false,
+    "label": "NOT_ACCEPTED",
+    "stop_class": "c1a"
+   }
+  },
+  "real_types": [
+   "disconnected",
+   "integrated"
+  ],
+  "synthetic_types": [
+   "disconnected_182",
+   "integrated_182"
+  ],
+  "all_types_ran": true,
+  "solver_runs": 0
+ },
+ "regression": {
+  "REGRESS_b1_disconnected": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_disconnected": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_integrated": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_keepstock": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_minusLA": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_minusTH": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_minusVN": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_wacc_disconnected": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  },
+  "REGRESS_wacc_integrated": {
+   "all_equal": true,
+   "files": {
+    "COUNTRY_COST_LEDGER.csv": "equal",
+    "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+    "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+    "NODAL_PRICES.csv": "equal",
+    "LEDGER_IDENTITY.json": "equal",
+    "V5_GATES.json": "equal",
+    "PRECISION.json": "equal",
+    "ALLOCATION.json": "equal",
+    "ALLOCATION.csv": "equal",
+    "ALLOCATION_LINES.csv": "equal",
+    "V6_ACCEPTANCE.json": "equal",
+    "m12_owen/OWEN.json": "equal",
+    "m12_owen/OWEN.csv": "equal",
+    "m12_owen/RHS_AUDIT.json": "equal",
+    "m12_owen/RHS_BY_FAMILY_OWNER.csv": "equal",
+    "m12_owen/RHS_FAMILIES.csv": "equal",
+    "m12_owen/RHS_FAMILY_SUMMARY.csv": "equal",
+    "STOP_CLASS.json": "equal"
+   }
+  }
+ },
+ "tests": {
+  "TESTS_full": [
+   "655 passed, 69 skipped, 363 warnings in 1285.49s (0:21:25)"
+  ],
+  "TESTS_new": [
+   "FAILED tests/research/test_b4p_batch4.py::test_post_solve_error_keeps_status_and_solution",
+   "8 failed, 18 passed in 84.66s (0:01:24)"
+  ],
+  "TESTS_new2": [
+   "3 failed, 23 passed in 370.91s (0:06:10)"
+  ]
+ },
+ "package": {
+  "dist": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_b4p_20261026/cloud_package_dist_b4",
+  "commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+  "files": 19,
+  "bytes": 213805295,
+  "manifest_sha256": "c0168cfe804a769b7ef03c22ef881e7077c34ce5de6bc69c336df75e37bd1a84",
+  "sha256sums_sha256": "b0a0ddf774f7240ff1ed4da1000d16f230df6ed1443febb661b73164b4da9b4f",
+  "networks": {
+   "networks/disconnected_2920_3h_unsolved.nc": "b401a68729524c885a8245962bc2a46706a1760c42ef40bdd9943e60a859bcc7",
+   "networks/integrated_2920_3h_unsolved.nc": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab"
+  },
+  "registered": {
+   "integrated_2920_3h_unsolved.nc": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab",
+   "disconnected_2920_3h_unsolved.nc": "b401a68729524c885a8245962bc2a46706a1760c42ef40bdd9943e60a859bcc7"
+  },
+  "networks_equal_registered": true,
+  "no_365x24h": true,
+  "drill": {
+   "file": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/b4p/drill/DRILL_B4.json",
+   "sha256": "e48b22823fccbdf52af27916442f0d3ac3881dc59ec9e278672d11bb1f53f1fe",
+   "code_commit": "f806e3e799b9eaaa37706dcaf985c4cae3469ab9",
+   "all_types_ran": true,
+   "real_types": [
+    "disconnected",
+    "integrated"
+   ],
+   "synthetic_types": [
+    "disconnected_182",
+    "integrated_182"
+   ],
+   "written_utc": "2026-10-25T21:41:58Z"
+  },
+  "code_archive": "code_f806e3e7.tar.gz",
+  "upload_hours": {
+   "36 KB/s": 1.65,
+   "100 KB/s": 0.59,
+   "318 KB/s": 0.19
+  }
+ },
+ "dryrun": {
+  "PREFLIGHT_GUARDS.txt": {
+   "exit_lines": [
+    "PREFLIGHT_GUARDS_EXIT 0"
+   ],
+   "ok": true,
+   "failed": false,
+   "refused": 0
+  },
+  "PREFLIGHT_GUARDS_NEG.txt": {
+   "exit_lines": [
+    "PREFLIGHT_GUARDS_NEG_EXIT 1 (SPLIT_CMD left in the shell: must FAIL)"
+   ],
+   "ok": false,
+   "failed": true,
+   "refused": 0
+  },
+  "PREFLIGHT.txt": {
+   "exit_lines": [
+    "PREFLIGHT_EXIT 0"
+   ],
+   "ok": true,
+   "failed": false,
+   "refused": 0
+  },
+  "PREFLIGHT_RESOURCES_LOCAL.txt": {
+   "exit_lines": [
+    "PREFLIGHT_RESOURCES_EXIT 1 (local machine, information only: expected to fail)"
+   ],
+   "ok": false,
+   "failed": true,
+   "refused": 0
+  },
+  "GUARDS_REFUSAL.txt": {
+   "exit_lines": [
+    "EXIT 2 (must be 2 REFUSED)",
+    "EXIT 2 (must be 2 REFUSED: SOLVE_MODE)",
+    "EXIT 2 (must be 2 REFUSED: --auth with BUILD_ONLY)"
+   ],
+   "ok": false,
+   "failed": false,
+   "refused": 6
+  },
+  "build_only": {
+   "status_lines": 11,
+   "done": true,
+   "halted": false,
+   "stop_safe": [],
+   "runs": {
+    "F1": [
+     "BUILD_F1:exit=0:29s:peak=2.19GiB:lp_bytes=94383392:2026-10-25T21:44:23Z",
+     "RUN_F1:split_built:exit=0:29s",
+     "BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1553068, \"num_col\": 700908, \"nnz\": 3621898, \"build_seconds\": 18.000202178955078}, \"receipt_state"
+    ],
+    "F2": [
+     "BUILD_F2:exit=0:25s:peak=1.90GiB:lp_bytes=90630323:2026-10-25T21:44:48Z",
+     "RUN_F2:split_built:exit=0:25s",
+     "BUILD_CHECK_F2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1499494, \"num_col\": 677258, \"nnz\": 3455872, \"build_seconds\": 15.267560958862305}, \"receipt_state"
+    ]
+   },
+   "p1": [],
+   "projection": [],
+   "summary": [
+    "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"built_no_solve\", \"F2\": \"built_no_solve\"}}"
+   ],
+   "packs": [
+    "PACK_final:PACKED:light=results_light_final_20261025T214448Z.tar.gz:24115B:sha256=8cf97fd27d05d2ec:full=results_full_final_20261025T214448Z.tar.gz:24115B:sha256=8cf97fd27d05d2ec"
+   ],
+   "stops": [],
+   "postproc_errors": [],
+   "build_check": {
+    "F1": {
+     "passed": true,
+     "state": "split_built",
+     "lp": {
+      "num_row": 1553068,
+      "num_col": 700908,
+      "nnz": 3621898,
+      "build_seconds": 18.000202178955078
+     },
+     "peak_gib": 1.96
+    },
+    "F2": {
+     "passed": true,
+     "state": "split_built",
+     "lp": {
+      "num_row": 1499494,
+      "num_col": 677258,
+      "nnz": 3455872,
+      "build_seconds": 15.267560958862305
+     },
+     "peak_gib": 1.83
+    }
+   },
+   "receipts": {
+    "F1": {
+     "termination": null,
+     "objective": null,
+     "post_solve_errors": [],
+     "split_stage": "build"
+    },
+    "F2": {
+     "termination": null,
+     "objective": null,
+     "post_solve_errors": [],
+     "split_stage": "build"
+    }
+   }
+  },
+  "dry_real": {
+   "status_lines": 19,
+   "done": false,
+   "halted": true,
+   "stop_safe": [],
+   "runs": {
+    "F1": [
+     "GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:1s:2026-10-25T21:46:14Z",
+     "ASSIGN_F1:exit=1:peak=2.18GiB:post_errors=:2026-10-25T21:46:32Z",
+     "RUN_F1:none:exit=0:receipt=pre_solve:19s:2026-10-25T21:46:32Z",
+     "V6_F1:NOT_ACCEPTED:ref=default",
+     "UNUSABLE:F1:nosol:2026-10-25T21:46:33Z - no returned solution (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+    ],
+    "F2": []
+   },
+   "p1": [
+    "P1_PROBE:2026-10-25T21:46:18Z:{\"parallel\": false, \"peak_gib\": null, \"threshold_gib\": 4.276, \"covered_s\": 0.0, \"reason\": \"window not covered\"}:decision=after_F1"
+   ],
+   "projection": [],
+   "summary": [
+    "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"ended\", \"F2\": \"ended\"}}"
+   ],
+   "packs": [
+    "PACK_halted:PACKED:light=results_light_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb:full=results_full_halted_20261025T214633Z.tar.gz:17480B:sha256=000ecb5fcd146ddb"
+   ],
+   "stops": [
+    "UNUSABLE:F1:nosol:2026-10-25T21:46:33Z - no returned solution (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+   ],
+   "postproc_errors": [],
+   "labels": {
+    "F1": "NOT_ACCEPTED"
+   },
+   "receipts": {
+    "F1": {
+     "termination": null,
+     "objective": null,
+     "post_solve_errors": [],
+     "split_stage": null
+    },
+    "F2": {
+     "termination": "optimal",
+     "objective": 317745965908.25806,
+     "post_solve_errors": [],
+     "split_stage": null
+    }
+   }
+  },
+  "dry_synth": {
+   "status_lines": 26,
+   "done": false,
+   "halted": true,
+   "stop_safe": [],
+   "runs": {
+    "F1": [
+     "BUILD_F1:exit=0:30s:peak=2.18GiB:lp_bytes=94383392:2026-10-25T21:47:09Z",
+     "GUROBI_F1:exit=0:killed=none:status=OPTIMAL:cond=optimal:iters=25:obj=200000000000.0:maxmem_gb=1.0:peak=0.05GiB:51s:2026-10-25T21:47:30Z",
+     "ASSIGN_F1:exit=0:peak=2.65GiB:post_errors=[]:2026-10-25T21:49:59Z",
+     "RUN_F1:optimal:exit=0:receipt=post_solve:200s:2026-10-25T21:49:59Z",
+     "V6_F1:NOT_ACCEPTED:ref=default",
+     "UNUSABLE:F1:c1a:2026-10-25T21:50:35Z - C1 (a) failed (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+    ],
+    "F2": []
+   },
+   "p1": [
+    "P1_PROBE:2026-10-25T21:47:24Z:{\"parallel\": false, \"peak_gib\": 0.04, \"threshold_gib\": 4.276, \"covered_s\": 10.0, \"reason\": \"cores below minimum\"}:decision=after_F1"
+   ],
+   "projection": [
+    "PROJECTION_F1:2026-10-25T21:47:15Z:{\"ready\": true, \"exceeded\": false, \"seconds_per_iteration_11_20\": 1.0, \"projected_total_s\": 456.0, \"limit_s\": 1400.0} - withi"
+   ],
+   "summary": [
+    "SUMMARY:exit=0:{\"B6_bn\": null, \"runs\": {\"F1\": \"ended\", \"F2\": \"not_started\"}}"
+   ],
+   "packs": [
+    "PACK_halted:PACKED:light=results_light_halted_20261025T215035Z.tar.gz:243360B:sha256=af10d4dd53dee264:full=results_full_halted_20261025T215035Z.tar.gz:4377368B:sha256=d406efbe4f71c3b0"
+   ],
+   "stops": [
+    "UNUSABLE:F1:c1a:2026-10-25T21:50:35Z - C1 (a) failed (RUN_PLAN_B4 3.5): recorded unusable; the batch stops (two runs only); user decision"
+   ],
+   "postproc_errors": [
+    "POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:16Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)",
+    "POSTPROC_ERROR:F1:violations:exit=1:2026-10-25T21:50:32Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)",
+    "POSTPROC_ERROR:F1:m12:exit=1:2026-10-25T21:50:35Z - recorded in POSTPROC_ERRORS; the schedule goes on (redo with POST_ONLY=1)"
+   ],
+   "labels": {
+    "F1": "NOT_ACCEPTED"
+   },
+   "receipts": {
+    "F1": {
+     "termination": "optimal",
+     "objective": 202354532011.60175,
+     "post_solve_errors": [],
+     "split_stage": "assign"
+    }
+   }
+  }
+ },
+ "solver_runs_in_this_script": 0
+}

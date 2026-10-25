@@ -1,0 +1,735 @@
+{
+ "method": "B4P A1.3 / A1.4: the F1 / F2 resource estimates at 2920 snapshots (median and range; VERIFIED vs INFERENCE), single-process vs split-process,\nand the candidate-configuration table (can run / parallel / hours / cost / risks). Reads evidence/A1_DATA.json and A1_EXTRAPOLATION.json\n(a1_analysis.py). Writes evidence/A1_SUMMARY.json (+ the markdown tables come from report_tables.py). Read only; every constant below is an\nassumption with its source. Usage: python a1_summary.py <evidence dir>\n\nModel (INFERENCE):\n  Factor NZ / Ops at 2920 from the dense-column-regime points (140 / 182 snapshots with the measurement threshold 100, i.e. the regime of the full\n  problem), three estimates each: affine (low), the cloud 365x24h anchor (R3 / R4: the same per-snapshot LP with 6486 / 6248 dense columns)\n  scaled 365 -> 2920 with the local 182 -> 365 exponent (central), and the local power law (high).\n  Process-2 memory = non-factor part (linear in N; local 140 / 182 RSS minus the factor memory Gurobi prints, and the cloud anchor R3 / R4 Gurobi\n  share minus its factor) + Factor NZ x 14 bytes (Gurobi's \"roughly X GB\" lines: 13.3-14.3 B per factor nonzero).\n  Seconds per iteration = (cloud T16 seconds per 1e12 factor ops, R3 integrated 3.86 / R4 disconnected 7.11 - the smaller factor runs less\n  efficiently; the disconnected rate at 2920 is taken between the two) x Factor Ops / 1e12 x CPU factor.\n",
+ "cpu": {
+  "8470Q": {
+   "factor": [
+    1.0,
+    1.0
+   ],
+   "note": "reference: third batch R1-R10 (AutoDL West-B 8470Q, 25 cores / 92 GiB); R3 / R4 are the T16 runs"
+  },
+  "8352V": {
+   "factor": [
+    1.15,
+    1.5
+   ],
+   "note": "Ice Lake-SP 2.1 GHz, DDR4; no measurement: 1.15-1.5 x slower than 8470Q assumed (barrier is memory-bandwidth bound; INFERENCE)"
+  },
+  "EPYC9754": {
+   "factor": [
+    1.0,
+    1.3
+   ],
+   "note": "Zen 4c: R11 on EPYC 9654 ran 10.3 s/it vs R2 10.5 s/it on 8470Q (same model, T8) = 0.98; 9754 has lower clocks and 128 cores/socket -> 1.0-1.3 x (INFERENCE)"
+  }
+ },
+ "iterations": {
+  "F1": [
+   253,
+   350,
+   465
+  ],
+  "F2": [
+   116,
+   170,
+   228
+  ]
+ },
+ "cloud_anchor": {
+  "integrated": {
+   "run": "R3",
+   "N": 365,
+   "factor_nz": 527800000.0,
+   "factor_ops": 4241000000000.0,
+   "factor_gb": 7.0,
+   "rss_gib": 22.78,
+   "python_gib": 10.15,
+   "rate_s_per_1e12": 3.86,
+   "dense_cols": 6486
+  },
+  "disconnected": {
+   "run": "R4",
+   "N": 365,
+   "factor_nz": 251100000.0,
+   "factor_ops": 1036000000000.0,
+   "factor_gb": 5.0,
+   "rss_gib": 19.29,
+   "python_gib": 9.5,
+   "rate_s_per_1e12": 7.11,
+   "dense_cols": 6248
+  }
+ },
+ "bytes_per_factor_nz": [
+  13.3,
+  14.3
+ ],
+ "overhead_hours": {
+  "p1_build_write": [
+   0.25,
+   0.5
+  ],
+  "p2_read": [
+   0.03,
+   0.05
+  ],
+  "p2_presolve_ordering": [
+   0.45,
+   1.6
+  ],
+  "p3_rebuild_assign_export": [
+   1.5,
+   3.0
+  ],
+  "postprocessing": [
+   0.5,
+   1.5
+  ],
+  "note": "per run; process 1 / 3 and the post-processing run outside the Gurobi TimeLimit; presolve + ordering inside it; scaled from 56-224 local measurements x 1.35 (slower cloud cores)"
+ },
+ "scenarios": {
+  "F1": {
+   "scenario": "integrated",
+   "dense_regime_points": [
+    {
+     "tag": "c5_int140_probe25_T16_thr100",
+     "N": 140,
+     "threshold": 100
+    },
+    {
+     "tag": "c7_int182_probe25_T16_thr100",
+     "N": 182,
+     "threshold": 100
+    }
+   ],
+   "factor_nz": {
+    "low": 4482638095.238092,
+    "central": 6682198220.175239,
+    "high": 8366830091.353614,
+    "exponents": {
+     "local_140_182": 1.301762605072288,
+     "local182_to_cloud365": 1.2207531745057252
+    }
+   },
+   "factor_ops": {
+    "low": 34897209523809.484,
+    "central": 150324759755514.28,
+    "high": 291876516705722.8,
+    "exponents": {
+     "local_140_182": 1.9549270860196595,
+     "local182_to_cloud365": 1.7158447865682027
+    }
+   },
+   "memory_gib": {
+    "split_process1_build": {
+     "low": 71.88142824839387,
+     "high": 92.3012913295201
+    },
+    "split_process2_gurobi": {
+     "low": 89.79696426079384,
+     "central": 124.34880066756267,
+     "high": 160.31464953284404,
+     "non_factor_gib": {
+      "local_affine": 34.272362970170526,
+      "cloud_anchor": 48.88593582153321,
+      "points": {
+       "140": 4.51827073097229,
+       "182": 4.967792987823486
+      }
+     },
+     "factor_gib": {
+      "low": 55.524601290623316,
+      "central": 82.7696512717108,
+      "high": 111.42871371131082
+     }
+    },
+    "split_process3_assign": {
+     "low": 79.06957107323326,
+     "high": 115.37661416190012,
+     "note": "process 3 = rebuild (as process 1) + the arrays and exports: 56-snapshot measurement 2.64 vs 2.19 GiB (x 1.2)"
+    },
+    "split_max": {
+     "low": 89.79696426079384,
+     "central": 124.34880066756267,
+     "high": 160.31464953284404
+    },
+    "single_process": {
+     "low": 161.67839250918772,
+     "central": 206.44016045651966,
+     "high": 252.61594086236414,
+     "note": "single process = Python model (process-1 peak stays resident) + the Gurobi part; C3 at 112 (sparse regime) exceeded 10.5 GiB where the split process 2 at 140 / 182 (dense regime) peaked at 6.7 / 7.8 GiB"
+    }
+   },
+   "seconds_per_1e12_ops_cloud_T16": 3.86,
+   "local_seconds_per_iter_11_20": {
+    "140": 4.4,
+    "182": 6.0
+   },
+   "per_cpu": {
+    "8470Q": {
+     "s_per_iter": {
+      "low": 134.7032287619046,
+      "central": 580.2535726562851,
+      "high": 1126.64335448409
+     },
+     "barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 56.413541786027714,
+      "high": 145.52476662086164
+     },
+     "exceeds_72h_time_limit": {
+      "central": false,
+      "high": true
+     }
+    },
+    "8352V": {
+     "s_per_iter": {
+      "low": 154.90871307619028,
+      "central": 768.8359837695778,
+      "high": 1689.9650317261348
+     },
+     "barrier_hours": {
+      "low": 10.886640113410039,
+      "central": 74.74794286648674,
+      "high": 218.28714993129242
+     },
+     "exceeds_72h_time_limit": {
+      "central": true,
+      "high": true
+     }
+    },
+    "EPYC9754": {
+     "s_per_iter": {
+      "low": 134.7032287619046,
+      "central": 667.2916085547278,
+      "high": 1464.636360829317
+     },
+     "barrier_hours": {
+      "low": 9.466643576878294,
+      "central": 64.87557305393187,
+      "high": 189.18219660712012
+     },
+     "exceeds_72h_time_limit": {
+      "central": false,
+      "high": true
+     }
+    }
+   },
+   "iterations": [
+    253,
+    350,
+    465
+   ],
+   "disk_gb": {
+    "problem_file_gb": {
+     "low": 5.145684056767857,
+     "high": 5.425366616852452,
+     "removed_after_read": true
+    },
+    "lp_arrays_gb": {
+     "low": 6.312011170247447,
+     "high": 6.3796682483185
+    },
+    "solution_arrays_gb": 1.2186602559999995,
+    "duals_nc_gb": 0.616,
+    "solved_network_gb": 1.328,
+    "export_copy_gb": 2.08,
+    "note": "DUALS / solved network / export scaled x 8 from the 365x24h cloud exports (77 / 166 / 257 MB)",
+    "per_run_persistent_gb": 11.6223285043185,
+    "per_run_transient_gb": 5.425366616852452
+   },
+   "presolve_ordering_s": {
+    "low": 1616.0980952380946,
+    "high": 5650.750402663627
+   },
+   "read_s": {
+    "low": 106.34719133377071,
+    "high": 154.33577023960578
+   }
+  },
+  "F2": {
+   "scenario": "disconnected",
+   "dense_regime_points": [
+    {
+     "tag": "c6_disc140_probe25_T16_thr100",
+     "N": 140,
+     "threshold": 100
+    },
+    {
+     "tag": "c8_disc182_probe25_T16_thr100",
+     "N": 182,
+     "threshold": 100
+    }
+   ],
+   "factor_nz": {
+    "low": 2158858095.2380953,
+    "central": 2297729809.58721,
+    "high": 2948386005.7749887,
+    "exponents": {
+     "local_140_182": 1.1544652423629258,
+     "local182_to_cloud365": 1.0646250758322933
+    }
+   },
+   "factor_ops": {
+    "low": 8149699999999.99,
+    "central": 27357612307180.7,
+    "high": 30711196998381.12,
+    "exponents": {
+     "local_140_182": 1.6159465163264535,
+     "local182_to_cloud365": 1.574282137784903
+    }
+   },
+   "memory_gib": {
+    "split_process1_build": {
+     "low": 68.08082706957993,
+     "high": 79.40330777849462
+    },
+    "split_process2_gurobi": {
+     "low": 67.80798763255278,
+     "central": 103.71186840225312,
+     "high": 148.70091228675938,
+     "non_factor_gib": {
+      "local_affine": 109.43456451098125,
+      "cloud_anchor": 41.06709701538085,
+      "points": {
+       "140": 4.227851629257202,
+       "182": 5.817305564880371
+      }
+     },
+     "factor_gib": {
+      "low": 26.740890617171925,
+      "central": 28.461037639072067,
+      "high": 39.266347775778115
+     }
+    },
+    "split_process3_assign": {
+     "low": 74.88890977653793,
+     "high": 99.25413472311828,
+     "note": "process 3 = rebuild (as process 1) + the arrays and exports: 56-snapshot measurement 2.64 vs 2.19 GiB (x 1.2)"
+    },
+    "split_max": {
+     "low": 68.08082706957993,
+     "central": 103.71186840225312,
+     "high": 148.70091228675938
+    },
+    "single_process": {
+     "low": 135.88881470213272,
+     "central": 177.45393582629038,
+     "high": 228.104220065254,
+     "note": "single process = Python model (process-1 peak stays resident) + the Gurobi part; C3 at 112 (sparse regime) exceeded 10.5 GiB where the split process 2 at 140 / 182 (dense regime) peaked at 6.7 / 7.8 GiB"
+    }
+   },
+   "seconds_per_1e12_ops_cloud_T16": [
+    3.86,
+    7.11
+   ],
+   "local_seconds_per_iter_11_20": {
+    "140": 1.9,
+    "182": 2.7
+   },
+   "per_cpu": {
+    "8470Q": {
+     "s_per_iter": {
+      "low": 31.45784199999996,
+      "central": 150.05650350488617,
+      "high": 218.35661065848979
+     },
+     "barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 7.086001554397403,
+      "high": 13.82925200837102
+     },
+     "exceeds_72h_time_limit": {
+      "central": false,
+      "high": false
+     }
+    },
+    "8352V": {
+     "s_per_iter": {
+      "low": 36.17651829999995,
+      "central": 198.82486714397416,
+      "high": 327.5349159877347
+     },
+     "barrier_hours": {
+      "low": 1.1656878118888874,
+      "central": 9.388952059576559,
+      "high": 20.74387801255653
+     },
+     "exceeds_72h_time_limit": {
+      "central": false,
+      "high": false
+     }
+    },
+    "EPYC9754": {
+     "s_per_iter": {
+      "low": 31.45784199999996,
+      "central": 172.56497903061907,
+      "high": 283.86359385603674
+     },
+     "barrier_hours": {
+      "low": 1.0136415755555543,
+      "central": 8.148901787557012,
+      "high": 17.97802761088233
+     },
+     "exceeds_72h_time_limit": {
+      "central": false,
+      "high": false
+     }
+    }
+   },
+   "iterations": [
+    116,
+    170,
+    228
+   ],
+   "disk_gb": {
+    "problem_file_gb": {
+     "low": 4.964692941904761,
+     "high": 5.215389357790134,
+     "removed_after_read": true
+    },
+    "lp_arrays_gb": {
+     "low": 6.061781683568676,
+     "high": 6.126711832318499
+    },
+    "solution_arrays_gb": 1.177092816,
+    "duals_nc_gb": 0.616,
+    "solved_network_gb": 1.328,
+    "export_copy_gb": 2.08,
+    "note": "DUALS / solved network / export scaled x 8 from the 365x24h cloud exports (77 / 166 / 257 MB)",
+    "per_run_persistent_gb": 11.327804648318498,
+    "per_run_transient_gb": 5.215389357790134
+   },
+   "presolve_ordering_s": {
+    "low": 1402.9976190476184,
+    "high": 5678.924418768208
+   },
+   "read_s": {
+    "low": 95.03407287597652,
+    "high": 116.35033470019364
+   }
+  }
+ },
+ "disk_need_gb": {
+  "persistent_gb": 35.720133152637,
+  "transient_extra_gb": 5.425366616852452,
+  "with_lp_files_kept_gb": 46.36088912727958,
+  "note": "environment 3.3 GB + conda cache 0.75 + package 0.4; results packs (light + full) ~2 x export; LP problem files removed after the read (REMOVE_LP=1)"
+ },
+ "candidates": [
+  {
+   "id": "autodl_cpu_4x8352V",
+   "name": "AutoDL CPU 4 \u4efd\uff08128 \u6838 8352V / 240 GB\uff09",
+   "cpu": "8352V",
+   "cores": 128,
+   "mem_gb": 240,
+   "disk_gb": null,
+   "price": 3.1,
+   "disk_note": "\u6570\u636e\u76d8\u6309\u79df\u7528\u914d\u7f6e\uff08\u6bcf\u4efd\u7ea6 50 GB\uff0c\u9700\u6838\u5b9e\uff09",
+   "quota_gib": 223.52612461581444,
+   "limit_80_gib": 178.82089969265155,
+   "can_run_split": {
+    "central": true,
+    "high": true
+   },
+   "can_run_single": {
+    "central": false,
+    "high": false
+   },
+   "parallel_split": {
+    "central": false,
+    "high": false
+   },
+   "p1_probe_passes": {
+    "central": false,
+    "high": false
+   },
+   "hours_serial": {
+    "low": 17.512327925298926,
+    "central": 90.76895205957655,
+    "high": 106.04387801255653
+   },
+   "hours_parallel": {
+    "low": 14.981640113410037,
+    "central": 79.035,
+    "high": 81.975
+   },
+   "hours": {
+    "low": 17.512327925298926,
+    "central": 90.76895205957655,
+    "high": 106.04387801255653
+   },
+   "cost_cny": {
+    "low": 54.28821656842668,
+    "central": 281.3837513846873,
+    "high": 328.73602183892524
+   },
+   "f1_barrier_hours": {
+    "low": 10.886640113410039,
+    "central": 74.74794286648674,
+    "high": 218.28714993129242
+   },
+   "f2_barrier_hours": {
+    "low": 1.1656878118888874,
+    "central": 9.388952059576559,
+    "high": 20.74387801255653
+   },
+   "risks": [
+    "\u5185\u5b58\uff1a\u5355\u8fdb\u7a0b\u65b9\u5f0f\u4e0d\u53ef\u884c",
+    "\u65f6\u95f4\uff1aF1 \u4e2d\u503c\u4f30\u8ba1\u8d85\u8fc7 72 h TimeLimit\uff08\u65e9\u671f\u6d4b\u901f\u4f1a\u6b62\u635f\uff09",
+    "\u6bcf\u6b21\u8fed\u4ee3\u8017\u65f6\u65e0\u8be5 CPU \u5b9e\u6d4b\uff08\u56e0\u5b50\u4e3a\u5047\u8bbe\uff09"
+   ]
+  },
+  {
+   "id": "autodl_vgpu48_4x8470Q",
+   "name": "AutoDL vGPU-48GB 4 \u5361\uff08100 \u6838 8470Q / 368 GB\uff09",
+   "cpu": "8470Q",
+   "cores": 100,
+   "mem_gb": 368,
+   "disk_gb": null,
+   "price": 11.5,
+   "disk_note": "\u6570\u636e\u76d8\u6309\u79df\u7528\u914d\u7f6e\uff08\u7b2c\u4e09\u6279\u540c\u578b 50 GB\uff0c\u53ef\u6269\uff09",
+   "quota_gib": 342.7400577442488,
+   "limit_80_gib": 274.1920461953991,
+   "can_run_split": {
+    "central": true,
+    "high": true
+   },
+   "can_run_single": {
+    "central": true,
+    "high": true
+   },
+   "parallel_split": {
+    "central": true,
+    "high": false
+   },
+   "p1_probe_passes": {
+    "central": true,
+    "high": false
+   },
+   "hours_serial": {
+    "low": 15.940285152433848,
+    "central": 72.87954334042512,
+    "high": 99.12925200837101
+   },
+   "hours_parallel": {
+    "low": 13.561643576878293,
+    "central": 63.44854178602772,
+    "high": 81.975
+   },
+   "hours": {
+    "low": 13.561643576878293,
+    "central": 63.44854178602772,
+    "high": 81.975
+   },
+   "cost_cny": {
+    "low": 155.95890113410036,
+    "central": 729.6582305393188,
+    "high": 942.7125
+   },
+   "f1_barrier_hours": {
+    "low": 9.466643576878294,
+    "central": 56.413541786027714,
+    "high": 145.52476662086164
+   },
+   "f2_barrier_hours": {
+    "low": 1.0136415755555543,
+    "central": 7.086001554397403,
+    "high": 13.82925200837102
+   },
+   "risks": [
+    "\u65f6\u95f4\uff1aF1 \u9ad8\u503c\u4f30\u8ba1\u8d85\u8fc7 72 h TimeLimit"
+   ]
+  },
+  {
+   "id": "autodl_4090D_4xEPYC9754",
+   "name": "AutoDL RTX 4090D 4 \u5361\uff0872 \u6838 EPYC 9754 / 240 GB / \u6570\u636e\u76d8 \u2264 60 GB\uff09",
+   "cpu": "EPYC9754",
+   "cores": 72,
+   "mem_gb": 240,
+   "disk_gb": 60,
+   "price": 7.5,
+   "disk_note": "\u6570\u636e\u76d8\u6700\u591a 60 GB\uff08\u8865\u5145 1\uff09",
+   "quota_gib": 223.52612461581444,
+   "limit_80_gib": 178.82089969265155,
+   "can_run_split": {
+    "central": true,
+    "high": true
+   },
+   "can_run_single": {
+    "central": false,
+    "high": false
+   },
+   "parallel_split": {
+    "central": false,
+    "high": false
+   },
+   "p1_probe_passes": {
+    "central": false,
+    "high": false
+   },
+   "hours_serial": {
+    "low": 15.940285152433848,
+    "central": 82.40447484148888,
+    "high": 103.27802761088232
+   },
+   "hours_parallel": {
+    "low": 13.561643576878293,
+    "central": 71.91057305393187,
+    "high": 81.975
+   },
+   "hours": {
+    "low": 15.940285152433848,
+    "central": 82.40447484148888,
+    "high": 103.27802761088232
+   },
+   "cost_cny": {
+    "low": 119.55213864325385,
+    "central": 618.0335613111665,
+    "high": 774.5852070816173
+   },
+   "f1_barrier_hours": {
+    "low": 9.466643576878294,
+    "central": 64.87557305393187,
+    "high": 189.18219660712012
+   },
+   "f2_barrier_hours": {
+    "low": 1.0136415755555543,
+    "central": 8.148901787557012,
+    "high": 17.97802761088233
+   },
+   "risks": [
+    "\u5185\u5b58\uff1a\u5355\u8fdb\u7a0b\u65b9\u5f0f\u4e0d\u53ef\u884c",
+    "\u65f6\u95f4\uff1aF1 \u9ad8\u503c\u4f30\u8ba1\u8d85\u8fc7 72 h TimeLimit",
+    "\u6bcf\u6b21\u8fed\u4ee3\u8017\u65f6\u65e0\u8be5 CPU \u5b9e\u6d4b\uff08\u56e0\u5b50\u4e3a\u5047\u8bbe\uff09",
+    "\u6570\u636e\u76d8 60 GB\uff1a\u9700\u8981 REMOVE_LP=1\uff08\u6301\u4e45\u7528\u91cf\u7ea6 36 GB + \u77ac\u65f6 LP \u6587\u4ef6 5.4 GB\uff09"
+   ]
+  },
+  {
+   "id": "aliyun_r8i_256",
+   "name": "\u963f\u91cc\u4e91\u65b0\u52a0\u5761 r8i 256 GiB\uff08\u7ea6 32 vCPU\uff09",
+   "cpu": "8470Q",
+   "cores": 32,
+   "mem_gb": 274.8672,
+   "disk_gb": null,
+   "price": null,
+   "disk_note": "\u4e91\u76d8\u6309\u9700\uff1b\u5355\u4ef7\u4ee5\u63a7\u5236\u53f0\u4e3a\u51c6",
+   "quota_gib": 256.0,
+   "limit_80_gib": 204.8,
+   "can_run_split": {
+    "central": true,
+    "high": true
+   },
+   "can_run_single": {
+    "central": false,
+    "high": false
+   },
+   "parallel_split": {
+    "central": false,
+    "high": false
+   },
+   "p1_probe_passes": {
+    "central": false,
+    "high": false
+   },
+   "hours_serial": {
+    "low": 15.940285152433848,
+    "central": 72.87954334042512,
+    "high": 99.12925200837101
+   },
+   "hours_parallel": {
+    "low": 13.561643576878293,
+    "central": 63.44854178602772,
+    "high": 81.975
+   },
+   "hours": {
+    "low": 15.940285152433848,
+    "central": 72.87954334042512,
+    "high": 99.12925200837101
+   },
+   "cost_cny": null,
+   "f1_barrier_hours": {
+    "low": 9.466643576878294,
+    "central": 56.413541786027714,
+    "high": 145.52476662086164
+   },
+   "f2_barrier_hours": {
+    "low": 1.0136415755555543,
+    "central": 7.086001554397403,
+    "high": 13.82925200837102
+   },
+   "risks": [
+    "\u5185\u5b58\uff1a\u5355\u8fdb\u7a0b\u65b9\u5f0f\u4e0d\u53ef\u884c",
+    "\u65f6\u95f4\uff1aF1 \u9ad8\u503c\u4f30\u8ba1\u8d85\u8fc7 72 h TimeLimit",
+    "\u6838\u6570 < 33\uff1aF2 \u5fc5\u987b\u7b49 F1"
+   ]
+  },
+  {
+   "id": "aliyun_r8i_512",
+   "name": "\u963f\u91cc\u4e91\u65b0\u52a0\u5761 r8i 512 GiB\uff08\u7ea6 64 vCPU\uff09",
+   "cpu": "8470Q",
+   "cores": 64,
+   "mem_gb": 549.7344,
+   "disk_gb": null,
+   "price": null,
+   "disk_note": "\u4e91\u76d8\u6309\u9700\uff1b\u5355\u4ef7\u4ee5\u63a7\u5236\u53f0\u4e3a\u51c6",
+   "quota_gib": 512.0,
+   "limit_80_gib": 409.6,
+   "can_run_split": {
+    "central": true,
+    "high": true
+   },
+   "can_run_single": {
+    "central": true,
+    "high": true
+   },
+   "parallel_split": {
+    "central": true,
+    "high": true
+   },
+   "p1_probe_passes": {
+    "central": true,
+    "high": true
+   },
+   "hours_serial": {
+    "low": 15.940285152433848,
+    "central": 72.87954334042512,
+    "high": 99.12925200837101
+   },
+   "hours_parallel": {
+    "low": 13.561643576878293,
+    "central": 63.44854178602772,
+    "high": 81.975
+   },
+   "hours": {
+    "low": 13.561643576878293,
+    "central": 63.44854178602772,
+    "high": 81.975
+   },
+   "cost_cny": null,
+   "f1_barrier_hours": {
+    "low": 9.466643576878294,
+    "central": 56.413541786027714,
+    "high": 145.52476662086164
+   },
+   "f2_barrier_hours": {
+    "low": 1.0136415755555543,
+    "central": 7.086001554397403,
+    "high": 13.82925200837102
+   },
+   "risks": [
+    "\u65f6\u95f4\uff1aF1 \u9ad8\u503c\u4f30\u8ba1\u8d85\u8fc7 72 h TimeLimit"
+   ]
+  }
+ ],
+ "recommendation": {
+  "order": "\u80fd\u8dd1\u4e14\u6700\u7a33\uff08\u5206\u8fdb\u7a0b\u9ad8\u503c\u4ecd\u5728 80 % \u914d\u989d\u5185\u3001CPU \u6709\u5b9e\u6d4b\uff09\u2192 \u6700\u7701\u94b1",
+  "ranked": [
+   "autodl_vgpu48_4x8470Q",
+   "aliyun_r8i_512",
+   "autodl_cpu_4x8352V",
+   "autodl_4090D_4xEPYC9754",
+   "aliyun_r8i_256"
+  ],
+  "note": "see B4P_REPORT.md section 2 for the reasoning; the user decides the machine"
+ }
+}

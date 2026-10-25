@@ -9,7 +9,7 @@ cd /home/jin/wt_b4p_20261026 || exit 1
 t0=$(date +%s)
 DIST=$W/cloud_package_dist_b4
 [ -e "$DIST" ] && { log ABORT "dist exists: $DIST"; exit 2; }
-DRILL_JSON=$R/drill/DRILL_B4.json PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python bash research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/make_package.sh "$R/m08b/builds_s01" "$DIST" > "$E/package/make_package.log" 2>&1; rc=$?
+DRILL_JSON=$R/b4p/drill/DRILL_B4.json PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python bash research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/make_package.sh "$R/m08b/builds_s01" "$DIST" > "$E/package/make_package.log" 2>&1; rc=$?
 log PACKAGE "exit=$rc:$(( $(date +%s) - t0 ))s:$(tail -3 "$E/package/make_package.log" | tr '\n' ' ' | cut -c1-300)"
 [ $rc = 0 ] || exit 1
 /home/jin/miniforge3/envs/pypsa-earth/bin/python - "$DIST" "$E/package/PACKAGE_SUMMARY.json" <<'P'

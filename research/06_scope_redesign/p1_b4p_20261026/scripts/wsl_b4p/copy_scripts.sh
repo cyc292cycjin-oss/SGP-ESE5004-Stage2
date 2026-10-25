@@ -7,4 +7,5 @@ for f in solve.sh solve3.sh chain_c2_c3.sh chain_c4_c8_v2.sh chain_v3.sh builds.
          regress5.sh tests_all.sh pipeline_a5.sh pipeline_pkg.sh dryrun_b4.sh local_logs.sh kill_c3.sh pause_chain2.sh stop_chain.sh setup_wt.sh netscheck.sh st.sh showfail.sh commit123.sh copy_scripts.sh; do
   [ -f "$S/$f" ] && cp "$S/$f" "$W/" && cp "$S/$f" "$R/"
 done
-grep -rIilE "wlsaccess|wlssecret|licenseid|registered to" "$W" "$R" && echo "LICENCE-LIKE STRING FOUND" || echo "scripts copied: $(ls "$R" | wc -l); no licence-like strings"
+P='wls(access|secret)|licen[cs]e[i]d|registered[[:space:]]+to|academic[[:space:]]+licen'   # character classes: this file must not match itself
+grep -rIilE "$P" "$W" "$R" && echo "LICENCE-LIKE STRING FOUND" || echo "scripts copied: $(ls "$R" | wc -l); no licence-like strings"

@@ -1,0 +1,177 @@
+HEAD 9f368407e1a0bb044b5c93cffc8651cde5a60250 dirty_tracked 3 2026-10-25T20:49:36Z mode=new
+.......F..FFFFFFF.........                                               [100%]
+=================================== FAILURES ===================================
+_ test_post_solve_exception_keeps_termination_status_and_solution_real_network _
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_post_solve_exception_keep0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x759cc83eb9d0>
+
+    @pytest.mark.skipif(not NET56.exists(), reason="M08b supplement-01 integrated 2920x3h build not present")
+    def test_post_solve_exception_keeps_termination_status_and_solution_real_network(tmp_path, monkeypatch):
+        """A3.1 stand-in drill on the real network (56 snapshots, split assign stage with SYNTHETIC zero arrays, no solver): a post-solve step that
+        raises (co2_flows injected) leaves the termination status, the objective and solution/X.npy in place, records post_solve_errors, exits 4;
+        b4_batch4.stop_class then does not classify the run as nosol (the label itself is not the point: a zero solution fails C1 / gates)."""
+        import subprocess
+        out = tmp_path / "F1"; monkeypatch.setenv("PYTHONHASHSEED", "0")
+        args = [sys.executable, str(ROOT / "scripts_project/s2_solve.py"), "--repo", str(ROOT), "--network", str(NET56), "--scenario", "integrated", "--output", str(out), "--label", "SMOKE_TEST_ONLY",
+                "--authorization", "B4P A3.1 stand-in test (no solver call)", "--solver", "gurobi", "--solver-profile", "formal_barrier_1e6_t16", "--scaling", "on", "--time-limit", "100", "--truncate", "56"]
+>       env = {k: v for k, v in os.environ.items() if k != "GRB_LICENSE_FILE"}; env["PYTHONHASHSEED"] = "0"
+                                ^^
+E       NameError: name 'os' is not defined
+
+tests/research/test_b4p_split.py:144: NameError
+____ test_serial_when_the_probe_fails_reference_regrade_summary_and_resume _____
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_serial_when_the_probe_fai0')
+
+    def test_serial_when_the_probe_fails_reference_regrade_summary_and_resume(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(CORES="25", FAKE_SLEEP_F1="6", FAKE_SLEEP_F2="2", FAKE_C1_F2="101", FAKE_C1_REGRADE_F2="111"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, (p.stdout + p.stderr)[-1500:] + st[-3000:]
+E       AssertionError: START:2026-10-25T20:49:38Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:cores=25:quota_gib=240:threads_T16=16:time_limit_s=1000:wall_cap_s=1200:licence_gap_s=1:p1=3s/0.40/33cores:memory_stop=0.80:projection=0.80:post_mem_need_gib=60:remove_lp=1:truncate=none:resume=no:tmpdir=/tmp/pytest-of-jin/pytest-8/test_serial_when_the_probe_fai0/out/tmp:post_timeout_s=10800:allow_unregistered=1:hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_C1_F2,FAKE_C1_REGRADE_F2,FAKE_OUT,FAKE_SLEEP,FAKE_SLEEP_F1,FAKE_SLEEP_F2:into=none:arrays=none
+E         NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_C1_F2,FAKE_C1_REGRADE_F2,FAKE_OUT,FAKE_SLEEP,FAKE_SLEEP_F1,FAKE_SLEEP_F2
+E         BASE_CHECK:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc
+E         STOP_SAFE:BASE_NETWORK_SHA256:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc:2026-10-25T20:49:38Z - nothing else starts; waiting for the user
+E         HALTED:2026-10-25T20:49:38Z:phase 0
+E         SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "not_started", "F2": "not_started"}}
+E         PACK_halted_phase0:PACKED:light=results_light_halted_phase0_20261025T204938Z.tar.gz:2567B:sha256=60d347af9f30707d:full=results_full_halted_phase0_20261025T204938Z.tar.gz:2567B:sha256=60d347af9f30707d
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-8/test_serial_when_the_probe_fai0/pkg/run_batch4.sh', '--auth', 'synthetic test'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_b4p_batch4.py:114: AssertionError
+_____________________ test_parallel_when_the_probe_passes ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_parallel_when_the_probe_p0')
+
+    def test_parallel_when_the_probe_passes(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(FAKE_SLEEP_F1="12", FAKE_SLEEP_F2="3"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, (p.stdout + p.stderr)[-1500:] + st[-3000:]
+E       AssertionError: START:2026-10-25T20:49:38Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:cores=72:quota_gib=240:threads_T16=16:time_limit_s=1000:wall_cap_s=1200:licence_gap_s=1:p1=3s/0.40/33cores:memory_stop=0.80:projection=0.80:post_mem_need_gib=60:remove_lp=1:truncate=none:resume=no:tmpdir=/tmp/pytest-of-jin/pytest-8/test_parallel_when_the_probe_p0/out/tmp:post_timeout_s=10800:allow_unregistered=1:hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_OUT,FAKE_SLEEP,FAKE_SLEEP_F1,FAKE_SLEEP_F2:into=none:arrays=none
+E         NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_OUT,FAKE_SLEEP,FAKE_SLEEP_F1,FAKE_SLEEP_F2
+E         BASE_CHECK:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc
+E         STOP_SAFE:BASE_NETWORK_SHA256:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc:2026-10-25T20:49:38Z - nothing else starts; waiting for the user
+E         HALTED:2026-10-25T20:49:38Z:phase 0
+E         SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "not_started", "F2": "not_started"}}
+E         PACK_halted_phase0:PACKED:light=results_light_halted_phase0_20261025T204938Z.tar.gz:2552B:sha256=bcaf5844bfb9579f:full=results_full_halted_phase0_20261025T204938Z.tar.gz:2552B:sha256=bcaf5844bfb9579f
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-8/test_parallel_when_the_probe_p0/pkg/run_batch4.sh', '--auth', 'synthetic test'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_b4p_batch4.py:136: AssertionError
+___________ test_memory_stop_kills_the_solve_and_nothing_else_starts ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_memory_stop_kills_the_sol0')
+
+    def test_memory_stop_kills_the_solve_and_nothing_else_starts(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(CORES="25", MEM_QUOTA_GIB="100", FAKE_SLEEP_F1="20", FAKE_MEM_SPIKE_F1=f"3:{int(90 * 2**30)}", FAKE_IGNORE_TERM_F1="1"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 3, st[-2000:]
+>       assert "MEMORY_STOP_F1:" in st and "STOP_SAFE:MEMORY:F1" in st and (out / "STOP_SAFE").exists() and "KILL9_F1" in st
+E       AssertionError: assert ('MEMORY_STOP_F1:' in 'START:2026-10-25T20:49:38Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:co...:2567B:sha256=68632f174a3be763:full=results_full_halted_phase0_20261025T204939Z.tar.gz:2567B:sha256=68632f174a3be763\n')
+
+tests/research/test_b4p_batch4.py:148: AssertionError
+_____________________________ test_projection_stop _____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_projection_stop0')
+
+    def test_projection_stop(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(CORES="25", FAKE_SLEEP_F1="15", FAKE_ITER_S_F1="10"))                   # 10 s x 450 + elapsed > 800 = 0.8 x 1000
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 3, st[-2000:]
+>       assert "PROJECTION_STOP_F1:" in st and "STOP_SAFE:PROJECTION:F1" in st and json.loads((out / "PROJECTION_F1.json").read_text())["exceeded"]
+E       AssertionError: assert ('PROJECTION_STOP_F1:' in 'START:2026-10-25T20:49:39Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:co...:2542B:sha256=43e56d606850461e:full=results_full_halted_phase0_20261025T204939Z.tar.gz:2542B:sha256=43e56d606850461e\n')
+
+tests/research/test_b4p_batch4.py:158: AssertionError
+__________ test_mem_limit_status_without_solution_is_nosol_and_stops ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_mem_limit_status_without_0')
+
+    def test_mem_limit_status_without_solution_is_nosol_and_stops(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(CORES="25", FAKE_GUROBI_STATUS_F1="MEM_LIMIT"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+        assert p.returncode == 3, st[-2000:]
+>       rec = json.loads((out / "F1" / "SOLVE_RECEIPT.json").read_text())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_b4p_batch4.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../miniforge3/envs/pypsa-earth/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-jin/pytest-8/test_mem_limit_status_without_0/out/F1/SOLVE_RECEIPT.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-jin/pytest-8/test_mem_limit_status_without_0/out/F1/SOLVE_RECEIPT.json'
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_______________ test_post_solve_error_keeps_status_and_solution ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_post_solve_error_keeps_st0')
+
+    def test_post_solve_error_keeps_status_and_solution(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(CORES="25", FAKE_POST_ERROR_F1="1"))
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, st[-2000:]
+E       AssertionError: START:2026-10-25T20:49:39Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=0:post_only=0:dry=0:cores=25:quota_gib=240:threads_T16=16:time_limit_s=1000:wall_cap_s=1200:licence_gap_s=1:p1=3s/0.40/33cores:memory_stop=0.80:projection=0.80:post_mem_need_gib=60:remove_lp=1:truncate=none:resume=no:tmpdir=/tmp/pytest-of-jin/pytest-8/test_post_solve_error_keeps_st0/out/tmp:post_timeout_s=10800:allow_unregistered=1:hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_OUT,FAKE_POST_ERROR_F1,FAKE_SLEEP:into=none:arrays=none
+E         NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_OUT,FAKE_POST_ERROR_F1,FAKE_SLEEP
+E         BASE_CHECK:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc
+E         STOP_SAFE:BASE_NETWORK_SHA256:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc:2026-10-25T20:49:39Z - nothing else starts; waiting for the user
+E         HALTED:2026-10-25T20:49:39Z:phase 0
+E         SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "not_started", "F2": "not_started"}}
+E         PACK_halted_phase0:PACKED:light=results_light_halted_phase0_20261025T204939Z.tar.gz:2548B:sha256=038baa0fa40b26bd:full=results_full_halted_phase0_20261025T204939Z.tar.gz:2548B:sha256=038baa0fa40b26bd
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-8/test_post_solve_error_keeps_st0/pkg/run_batch4.sh', '--auth', 'synthetic test'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_b4p_batch4.py:177: AssertionError
+___________________ test_build_only_dry_run_and_single_mode ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-8/test_build_only_dry_run_and_si0')
+
+    def test_build_only_dry_run_and_single_mode(tmp_path):
+        pkg = _package(tmp_path)
+        p = _run(tmp_path, pkg, dict(BUILD_ONLY="1"), args=())
+        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
+>       assert p.returncode == 0, st[-2000:]
+E       AssertionError: START:2026-10-25T20:49:39Z:commit=none:repo_commit=none:mode=batch:solve_mode=split:build_only=1:post_only=0:dry=0:cores=72:quota_gib=240:threads_T16=16:time_limit_s=1000:wall_cap_s=1200:licence_gap_s=1:p1=3s/0.40/33cores:memory_stop=0.80:projection=0.80:post_mem_need_gib=60:remove_lp=1:truncate=none:resume=no:tmpdir=/tmp/pytest-of-jin/pytest-8/test_build_only_dry_run_and_si0/out/tmp:post_timeout_s=10800:allow_unregistered=1:hooks=SOLVE_CMD,SPLIT_CMD,VA_CMD,C1_CMD,M12_CMD,M12A_CMD,FAKE_OUT,FAKE_SLEEP:into=none:arrays=none
+E         BASE_CHECK:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc
+E         STOP_SAFE:BASE_NETWORK_SHA256:DIFFERENT:integrated_2920_3h_unsolved.nc,disconnected_2920_3h_unsolved.nc:2026-10-25T20:49:39Z - nothing else starts; waiting for the user
+E         HALTED:2026-10-25T20:49:39Z:phase 0
+E         SUMMARY:exit=0:{"B6_bn": null, "runs": {"F1": "not_started", "F2": "not_started"}}
+E         PACK_halted_phase0:PACKED:light=results_light_halted_phase0_20261025T204939Z.tar.gz:2507B:sha256=f9df98bd95d15131:full=results_full_halted_phase0_20261025T204939Z.tar.gz:2507B:sha256=f9df98bd95d15131
+E         
+E       assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['bash', '/tmp/pytest-of-jin/pytest-8/test_build_only_dry_run_and_si0/pkg/run_batch4.sh'], returncode=3, stdout='', stderr='').returncode
+
+tests/research/test_b4p_batch4.py:190: AssertionError
+=========================== short test summary info ============================
+FAILED tests/research/test_b4p_split.py::test_post_solve_exception_keeps_termination_status_and_solution_real_network
+FAILED tests/research/test_b4p_batch4.py::test_serial_when_the_probe_fails_reference_regrade_summary_and_resume
+FAILED tests/research/test_b4p_batch4.py::test_parallel_when_the_probe_passes
+FAILED tests/research/test_b4p_batch4.py::test_memory_stop_kills_the_solve_and_nothing_else_starts
+FAILED tests/research/test_b4p_batch4.py::test_projection_stop - AssertionErr...
+FAILED tests/research/test_b4p_batch4.py::test_mem_limit_status_without_solution_is_nosol_and_stops
+FAILED tests/research/test_b4p_batch4.py::test_post_solve_error_keeps_status_and_solution
+FAILED tests/research/test_b4p_batch4.py::test_build_only_dry_run_and_single_mode
+8 failed, 18 passed in 84.66s (0:01:24)
+EXIT 1 2026-10-25T20:51:02Z
