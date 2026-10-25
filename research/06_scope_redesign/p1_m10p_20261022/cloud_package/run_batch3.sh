@@ -96,6 +96,16 @@ while [ $# -gt 0 ]; do
   esac
 done
 REPO=${REPO:-$HERE/repo}; NETS=${NETS:-$HERE/networks}; OUT=${RUN_DIR:-$HERE/runs/batch3}; PY=${PY:-python}
+abspath() {   # B4P A3.2 (M10S1 execution deviation): a --into / --use / --arrays path given relative to the CALLER's directory is resolved there, before
+  # any step runs under cd "$REPO" (the first S1 chain wrote a relative --into inside repo/ and stopped at the violation analysis). readlink -m
+  # (GNU and uutils coreutils) canonicalises a path whose folder does not exist yet; fallback: the caller's directory joined
+  local p=$1 r; case "$p" in /*) r=$p;; *) r=$PWD/$p;; esac
+  r=$(readlink -m -- "$r" 2>/dev/null); [ -n "$r" ] || { case "$p" in /*) r=$p;; *) r=$PWD/$p;; esac; }
+  printf '%s\n' "$r"
+}
+[ -z "$INTO" ] || INTO=$(abspath "$INTO")
+[ -z "$ARRAYS" ] || ARRAYS=$(abspath "$ARRAYS")
+for i in ${USE[@]+"${!USE[@]}"}; do u=${USE[$i]}; [ "$u" = "${u#*=}" ] || USE[$i]="${u%%=*}=$(abspath "${u#*=}")"; done
 BUILD_ONLY=${BUILD_ONLY:-0}; DRY=${DRY:-0}; POST_ONLY=${POST_ONLY:-0}; TRUNCATE=${TRUNCATE:-}
 ONLY_MODE=0; ONLY=(); [ -n "$ONLY_LIST" ] && { ONLY_MODE=1; IFS=, read -ra ONLY <<< "$ONLY_LIST"; }
 S1MODE=0; { [ -n "$REPOST_RID" ] || [ "$SUMMARY_S1" = 1 ]; } && S1MODE=1   # M10R: --repost / --summary-s1 never solve and never write into the run folder
@@ -263,7 +273,7 @@ if [ "$SUMMARY_S1" = 1 ]; then
   done
 fi
 [ "$S1MODE" = 1 ] && { mkdir -p "$INTO/export" "$INTO/tmp" || { echo "cannot create $INTO"; exit 2; }; }
-log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):mode=$MODE:build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
+log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):mode=$MODE:build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_A=${THREADS[formal_barrier]}:threads_T16=${THREADS[formal_barrier_1e6_t16]}:time_limit_s=$GUROBI_TIME_LIMIT_S:wall_cap_s=$WALL_CAP_S:licence_gap_s=$LICENCE_GAP_S:schedule=1[${LANE_A[1]}|${LANE_B[1]}],2[${LANE_A[2]}|${LANE_B[2]}],3[${LANE_A[3]}|${LANE_B[3]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}$([ "$S1MODE" = 1 ] && echo ":into=$INTO:arrays=${ARRAYS:-none}:use=$(IFS=,; echo "${USE[*]:-none}")")"
 [ "$FORMAL" = 0 ] && [ "$NOSOLVE" = 0 ] && log "NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=${HOOKS_SET%,}"
 [ "$S1MODE" = 1 ] || [ -f "$OUT/.created" ] || now > "$OUT/.created"
 
