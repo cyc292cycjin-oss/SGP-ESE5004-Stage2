@@ -206,12 +206,64 @@ def gurobi_log_stats(log_path, scrubbed_path):
     return stats
 
 
+def write_problem_file(m, fn):
+    """B4P (supplement 2) split solve, PROCESS 1: the LP problem file exactly as linopy 0.5.5 Model.solve(io_api=None) writes it before the solver
+    call (model.py: matrices cache cleared, constraints.sanitize_zeros / sanitize_infinities, io.to_file with io_api 'lp', integer label 'general',
+    slice_size 2,000,000, no explicit coordinate names). Variables are named x<label>, constraints c<label> (the label vectors are lp/vlabels.npy /
+    lp/clabels.npy of export_lp). Process 2 (b4_split_solve.py) reads this file; the single-process path reads the same bytes from a temp file."""
+    fn = Path(fn); fn.parent.mkdir(parents=True, exist_ok=True)
+    m.matrices.clean_cached_properties()
+    m.constraints.sanitize_zeros(); m.constraints.sanitize_infinities()
+    m.to_file(fn, io_api="lp", integer_label="general", slice_size=2_000_000, explicit_coordinate_names=False)
+    return fn
+
+
+def assign_split_result(m, split: dict, sp: Path):
+    """B4P split solve, PROCESS 3: what linopy Model.solve() does with the solver result after solve_problem_from_file (model.py): objective value,
+    status, termination condition, solver_model None, then the primal / dual values mapped onto every variable / constraint label (sol.loc[-1] =
+    NaN; a label absent from the solver model -> NaN via reindex). The arrays come from b4_split_solve.py in the order of lp/vlabels.npy / lp/clabels.npy."""
+    import xarray as xr
+    m.reset_solution()
+    status, condition = split["linopy_status"], split["termination_condition"]
+    m.objective._value = float(split["objective"]) if split.get("objective") is not None else float("nan")
+    m.status = status; m.termination_condition = condition; m.solver_model = None; m.solver_name = "gurobi"
+    if status != "ok":
+        return status, condition
+    vl = np.load(sp.parent / "lp" / "vlabels.npy"); cl = np.load(sp.parent / "lp" / "clabels.npy")
+    sol = pd.Series(np.load(sp / "X_raw.npy").astype(float), index=pd.Index(np.asarray(vl, dtype=np.int64))); sol.loc[-1] = np.nan
+    for name, var in m.variables.items():
+        idx = np.ravel(var.labels)
+        try:
+            vals = sol[idx].values.reshape(var.labels.shape)
+        except KeyError:
+            vals = sol.reindex(idx).values.reshape(var.labels.shape)
+        var.solution = xr.DataArray(vals, var.coords)
+    dual = pd.Series(np.load(sp / "Pi_raw.npy").astype(float), index=pd.Index(np.asarray(cl, dtype=np.int64)))
+    if not dual.empty:
+        dual.loc[-1] = np.nan
+        for name, con in m.constraints.items():
+            idx = np.ravel(con.labels)
+            try:
+                vals = dual[idx].values.reshape(con.labels.shape)
+            except KeyError:
+                vals = dual.reindex(idx).values.reshape(con.labels.shape)
+            con.dual = xr.DataArray(vals, con.labels.coords)
+    return status, condition
+
+
+def split_reduced_costs(sp: Path) -> dict:
+    """Split solve: the solver-native reduced costs keyed by linopy label (as s1_solve.reduced_costs from the gurobipy model; absent labels left out)."""
+    vl = np.load(sp.parent / "lp" / "vlabels.npy"); rc = np.load(sp / "RC_raw.npy")
+    return {int(l): float(v) for l, v in zip(vl, rc) if not np.isnan(v)}
+
+
 def main(a):
     import pypsa, logging
     logging.getLogger("pypsa").setLevel(logging.ERROR)
     out = Path(a.output); out.mkdir(parents=True, exist_ok=True)
     run = dict(label=a.label, scenario=a.scenario, authorization=a.authorization, solver=a.solver, started_epoch=time.time(), optimize_calls=0, retry=False, stage="S2")
     sampler = Sampler(out / "RESOURCE.jsonl"); sampler.start()
+    split_dir = out / "split"
     try:
         net_sha = sha(a.network); n = pypsa.Network(str(a.network))
         if n.meta.get("scenario") != a.scenario:
@@ -244,10 +296,16 @@ def main(a):
         if scaling_on and SV.get("scaling", {}).get("objective_constants_out", True):   # S3B R4 (a)
             from s3b_scaling import remove_objective_constants
             const_led = remove_objective_constants(m)
-        lp_meta, M = export_lp(m, out / "lp"); build_seconds = time.time() - t0
-        if const_led:   # exported LP is in original units without the constant columns; record the removed constants as the objective offset
-            lp_meta["offset"] = float(lp_meta.get("offset", 0.0)) + const_led["total_eur"]; lp_meta["offset_source"] = "S3B R4 (a): objective constant columns moved out of the LP"
-            save(out / "lp" / "MATH_PROBLEM.json", lp_meta)
+        if a.split_stage == "assign" and (out / "lp" / "MATH_PROBLEM.json").exists():   # B4P process 3: the LP arrays were exported by process 1 (same deterministic build); the label vectors are checked below
+            M = m.matrices; lp_meta = json.loads((out / "lp" / "MATH_PROBLEM.json").read_text()); build_seconds = time.time() - t0
+            for nm, vec in (("vlabels", M.vlabels), ("clabels", M.clabels)):
+                if not np.array_equal(np.asarray(vec, dtype=np.int64), np.load(out / "lp" / f"{nm}.npy")):
+                    raise ValueError(f"split assign: the rebuilt model's {nm} differ from lp/{nm}.npy of process 1 (build not reproduced)")
+        else:
+            lp_meta, M = export_lp(m, out / "lp"); build_seconds = time.time() - t0
+            if const_led:   # exported LP is in original units without the constant columns; record the removed constants as the objective offset
+                lp_meta["offset"] = float(lp_meta.get("offset", 0.0)) + const_led["total_eur"]; lp_meta["offset_source"] = "S3B R4 (a): objective constant columns moved out of the LP"
+                save(out / "lp" / "MATH_PROBLEM.json", lp_meta)
         if scaling_on and SV.get("scaling", {}).get("store_energy_units", True):   # S3B R4 (b)
             from s3b_scaling import select_stores, scale_store_energy
             groups = SV.get("scaling", {}).get("store_groups", ["biomass_pools", "sequestration", "capture_buffers"])
@@ -285,30 +343,87 @@ def main(a):
             run.update(stop_before_solve=True, decision="STOPPED_BEFORE_SOLVE_" + a.label, peak_rss_bytes=sampler.peak, finished_epoch=time.time())
             save(out / "SOLVE_RECEIPT.json", run)
             print(json.dumps(dict(stop_before_solve=True, lp=run["lp"], solver_parameters=params, peak_rss_gib=round(sampler.peak / 2**30, 2)))); return 0
-        t1 = time.time(); run["optimize_calls"] = 1; save(out / "SOLVE_RECEIPT.json", run)
-        status, condition = m.solve(solver_name=a.solver, **params, log_fn=str(out / (a.solver + ".linopy.log")))   # = PyPSA solve_model without the assignment step
-        if status == "ok":
-            if store_led:
-                from s3b_scaling import unscale_solution
-                unscale_solution(m, store_led)
-            if kvl_led:
-                from s3b_scaling import unscale_kvl_duals
-                unscale_kvl_duals(m, kvl_led)
-            n.optimize.assign_solution(); n.optimize.assign_duals(assign_all_duals=True); n.optimize.post_processing()   # S4M supplement 01: every snapshot-indexed constraint dual into the network (*_t.mu_upper / mu_lower); static bounds and research hooks -> DUALS_BY_CONSTRAINT.nc below
-            run["duals"] = dict(assign_all_duals=True, note="PyPSA assign_duals maps snapshot-indexed duals to <component>_t.mu_<spec> and GlobalConstraints to mu (none in this model); the static capacity-bound duals (scarcity rents) and the research hook duals are only in DUALS_BY_CONSTRAINT.nc")
-            if const_led:
-                n.objective = float(m.objective.value) + const_led["total_eur"]   # total-cost definition unchanged (constants added back)
-        run.update(status=status, termination_condition=condition, solve_seconds=time.time() - t1)
-        if a.solver == "gurobi":
-            run["gurobi_log_stats"] = gurobi_log_stats(out / (a.solver + ".linopy.log"), out / "GUROBI_LOG_SCRUBBED.txt")
-        if status != "ok":
-            diag = dict(status=status, condition=condition, structural=structural_diagnosis_s2(n),
-                        reading="countries with can_store_or_export_co2 == false and positive unavoidable CO2 cannot meet the per-country net-zero cap (decisions 49/53): no relaxation; see the GAP_DIAGNOSTIC run")
-            save(out / "INFEASIBILITY_DIAGNOSIS.json", diag); run["decision"] = "STOP_INFEASIBLE_OR_FAILED_NO_RELAXATION"; save(out / "SOLVE_RECEIPT.json", run)
-            print(json.dumps(dict(status=status, condition=condition))); return 2
+        if a.split_stage == "build":   # B4P process 1: the problem file + label vectors for b4_split_solve.py; no solver call in this process
+            if a.solver != "gurobi":
+                raise ValueError("the split solve is a Gurobi (gurobipy) path")
+            t2 = time.time(); fn = write_problem_file(m, split_dir / "problem.lp"); write_seconds = time.time() - t2
+            info = dict(script="scripts_project/s2_solve.py", stage="build", problem_file=str(fn), problem_bytes=fn.stat().st_size, problem_sha256=sha(fn), write_seconds=write_seconds,
+                        solver_parameters=params, solver_profile=profile, log_file=str(out / "gurobi.linopy.log"), labels=dict(vlabels="lp/vlabels.npy", clabels="lp/clabels.npy"),
+                        lp=dict(num_col=lp_meta["num_col"], num_row=lp_meta["num_row"], nnz=lp_meta["nnz"]), sense=str(m.sense), input_network_sha256=net_sha, label=a.label, scenario=a.scenario,
+                        writer="linopy 0.5.5 Model.to_file(io_api='lp') after constraints.sanitize_zeros / sanitize_infinities, as Model.solve(io_api=None)",
+                        next="GRB_LICENSE_FILE=<licence> python scripts_project/b4_split_solve.py --run-dir <this folder>; then s2_solve.py ... --split-stage assign")
+            save(split_dir / "SPLIT_BUILD.json", info)
+            run.update(split=dict(stage="build", problem_file=str(fn), problem_bytes=info["problem_bytes"], problem_sha256=info["problem_sha256"], write_seconds=write_seconds),
+                       decision="SPLIT_BUILT_" + a.label, peak_rss_bytes=sampler.peak, finished_epoch=time.time())
+            save(out / "SOLVE_RECEIPT.json", run)
+            print(json.dumps(dict(split_stage="build", lp=run["lp"], problem_bytes=info["problem_bytes"], write_seconds=round(write_seconds, 1), peak_rss_gib=round(sampler.peak / 2**30, 2)))); return 0
+        t1 = time.time()
+        if a.split_stage == "assign":   # B4P process 3: the result of b4_split_solve.py mapped onto the model (no solver call in this process)
+            split = json.loads((split_dir / "SPLIT_SOLVE.json").read_text())
+            if split.get("solver_parameters") != params:
+                raise ValueError(f"split assign: the solver parameters of process 2 {split.get('solver_parameters')} differ from this run's {params}")
+            if "termination_condition" not in split:
+                raise ValueError("split assign: process 2 ended without a termination condition (SPLIT_SOLVE.json: " + str((split.get("failure") or {}).get("error")) + ")")
+            run["optimize_calls"] = 1; run["split"] = dict(stage="assign", solve_process="scripts_project/b4_split_solve.py", **{k: split.get(k) for k in ("gurobi_status_code", "gurobi_status_name", "fingerprint", "bar_iter_count", "runtime_s", "work_units", "max_mem_used_gb", "mem_used_gb", "peak_rss_bytes", "solve_seconds", "sol_count", "protect_parameters", "problem_sha256_build")})
+            save(out / "SOLVE_RECEIPT.json", run)
+            status, condition = assign_split_result(m, split, split_dir); solve_seconds = float(split.get("solve_seconds") or 0.0)
+            rc_source = split_reduced_costs(split_dir) if status == "ok" else {}
+        else:
+            run["optimize_calls"] = 1; save(out / "SOLVE_RECEIPT.json", run)
+            status, condition = m.solve(solver_name=a.solver, **params, log_fn=str(out / (a.solver + ".linopy.log")))   # = PyPSA solve_model without the assignment step
+            solve_seconds = time.time() - t1; rc_source = None
+        return post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source, n=n, m=m, M=M, cfg=cfg, SV=SV, params=params, lp_meta=lp_meta,
+                          const_led=const_led, store_led=store_led, kvl_led=kvl_led, gap=gap, net_sha=net_sha)
+    except BaseException as e:   # build / solve failures (pre-solve): the receipt records the failure; post-solve failures never reach here (post_solve records them)
+        run.update(failure=dict(error=type(e).__name__, detail=str(e)[:2000], traceback=traceback.format_exc()[-4000:]), peak_rss_bytes=sampler.peak, finished_epoch=time.time()); save(out / "SOLVE_RECEIPT.json", run); raise
+    finally:
+        sampler.stop.set()
+
+
+def post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source, *, n, m, M, cfg, SV, params, lp_meta, const_led, store_led, kvl_led, gap, net_sha):
+    """B4P A3.1 (M10A F12 / M10R finding 2): the termination status, objective and solve seconds are written to the receipt FIRST, then the solution
+    and dual arrays, then every post-solve export / gate / ledger step one by one; a step that raises is recorded in the receipt's post_solve_errors
+    (step, error, traceback) and the next step runs - the termination status and the "solution returned" facts never change because of a post-solve
+    failure (G2.3 still checks the export completeness; --repost redoes the post-processing). The step order and every computation are those of the
+    single-process code before B4P (byte-identical outputs on the 56x3h regression sets). Exit 0 = every step ran; 4 = post-solve errors recorded."""
+    errors = []
+    def guard(name, fn):
+        try:
+            return fn()
+        except Exception as e:
+            errors.append(dict(step=name, error=type(e).__name__, detail=str(e)[:1000], traceback=traceback.format_exc()[-2000:]))
+            run["post_solve_errors"] = errors; save(out / "SOLVE_RECEIPT.json", run); return None
+    run.update(status=status, termination_condition=condition, solve_seconds=solve_seconds, solve_finished_epoch=time.time(), finished_epoch=time.time(), post_solve_complete=False,
+               decision=("SOLVED_" + a.label) if status == "ok" else "STOP_INFEASIBLE_OR_FAILED_NO_RELAXATION")
+    if a.solver == "gurobi":
+        run["gurobi_log_stats"] = guard("gurobi_log_stats", lambda: gurobi_log_stats(out / (a.solver + ".linopy.log"), out / "GUROBI_LOG_SCRUBBED.txt")) or dict(error="log stats failed")
+    save(out / "SOLVE_RECEIPT.json", run)   # A3.1: on disk before any post-solve step
+    if status != "ok":
+        diag = dict(status=status, condition=condition, structural=guard("structural_diagnosis", lambda: structural_diagnosis_s2(n)),
+                    reading="countries with can_store_or_export_co2 == false and positive unavoidable CO2 cannot meet the per-country net-zero cap (decisions 49/53): no relaxation; see the GAP_DIAGNOSTIC run")
+        save(out / "INFEASIBILITY_DIAGNOSIS.json", diag); run.update(peak_rss_bytes=sampler.peak, finished_epoch=time.time(), post_solve_complete=(not errors)); save(out / "SOLVE_RECEIPT.json", run)
+        print(json.dumps(dict(status=status, condition=condition))); return 2
+    if store_led:
+        from s3b_scaling import unscale_solution
+        guard("unscale_solution", lambda: unscale_solution(m, store_led))
+    if kvl_led:
+        from s3b_scaling import unscale_kvl_duals
+        guard("unscale_kvl_duals", lambda: unscale_kvl_duals(m, kvl_led))
+    def _assign():
+        n.optimize.assign_solution(); n.optimize.assign_duals(assign_all_duals=True); n.optimize.post_processing()   # S4M supplement 01: every snapshot-indexed constraint dual into the network (*_t.mu_upper / mu_lower); static bounds and research hooks -> DUALS_BY_CONSTRAINT.nc below
+        run["duals"] = dict(assign_all_duals=True, note="PyPSA assign_duals maps snapshot-indexed duals to <component>_t.mu_<spec> and GlobalConstraints to mu (none in this model); the static capacity-bound duals (scarcity rents) and the research hook duals are only in DUALS_BY_CONSTRAINT.nc")
+        if const_led:
+            n.objective = float(m.objective.value) + const_led["total_eur"]   # total-cost definition unchanged (constants added back)
+    guard("assign_solution", _assign)
+    def _objective():
         run["objective"] = float(n.objective); run["objective_lp"] = float(m.objective.value)
-        sol_dir = out / "solution"; sol_dir.mkdir(exist_ok=True)
-        X = np.asarray(M.sol, dtype="<f8"); Pi = np.asarray(M.dual, dtype="<f8"); rc_map = reduced_costs(m, a.solver)
+    guard("objective", _objective)
+    if "objective" not in run:   # assignment failed: the solver objective is still recorded (the LP value + constants)
+        run["objective_lp"] = float(m.objective.value); run["objective"] = run["objective_lp"] + (const_led["total_eur"] if const_led else 0.0)
+    sol_dir = out / "solution"; sol_dir.mkdir(exist_ok=True)
+    state = dict(X=None, Pi=None, rc_map=None)
+    def _arrays():
+        X = np.asarray(M.sol, dtype="<f8"); Pi = np.asarray(M.dual, dtype="<f8"); rc_map = reduced_costs(m, a.solver) if rc_source is None else dict(rc_source)
         if store_led:
             from s3b_scaling import unscale_reduced_costs
             rc_map = unscale_reduced_costs(rc_map, store_led)
@@ -316,109 +431,128 @@ def main(a):
         for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]:
             np.save(sol_dir / (k + ".npy"), v)
         run["solution"] = {k: dict(count=int(len(v)), sha256=sha(sol_dir / (k + ".npy"))) for k, v in [("X", X), ("Pi", Pi), ("RC", RC)]}
-        try:   # S4M supplement 01 (S4M-S2): every constraint dual by constraint name (per-constraint con.dual after the unscaling, dims prefixed per constraint) - static capacity bounds, research hooks, loss proxy rows
-            from s4m_duals import write_duals
-            run["duals"] = dict(run.get("duals", {}), **write_duals(m, out))
-        except Exception as e:
-            run["duals"] = dict(run.get("duals", {}), export_error=str(e)[:300])
-        from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
-                                 gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows,
-                                 gate_b13_imports_one_way, gate_b14_terminal_caps, gate_b15_domestic_production_caps)
-        from country_carbon import emission_report
-        n.meta["artifact_role"] = a.label + "_SOLVED"; n.meta["result_label"] = a.label
-        capacity_reduced_costs(n, m, rc_map).to_csv(out / "capacity_reduced_costs.csv", index=False)
-        prices, full = nodal_prices(n); prices.to_csv(out / "nodal_prices_summary.csv", index=False)
-        cross_border_flows(n).to_csv(out / "cross_border_flows.csv", index=False)
-        emis = emission_report(n); save(out / "EMISSIONS_BY_COUNTRY.json", emis)
-        flows = co2_flows(n); save(out / "CO2_FLOWS.json", flows)
+        state.update(X=X, Pi=Pi, rc_map=rc_map)
+    guard("solution_arrays", _arrays)
+    save(out / "SOLVE_RECEIPT.json", run)   # A3.1: the solution and dual arrays are on disk before the ledger / gates / exports
+    rc_map = state["rc_map"] if state["rc_map"] is not None else {}
+    try:   # S4M supplement 01 (S4M-S2): every constraint dual by constraint name (per-constraint con.dual after the unscaling, dims prefixed per constraint) - static capacity bounds, research hooks, loss proxy rows
+        from s4m_duals import write_duals
+        run["duals"] = dict(run.get("duals", {}), **write_duals(m, out))
+    except Exception as e:
+        run["duals"] = dict(run.get("duals", {}), export_error=str(e)[:300])
+    from v5.v5_gates import (load_contract, gate_a1_a2_kkt, gate_a3_a5_physics, gate_a4_readback, gate_a6_binding, gate_b1_country_net_zero, gate_b12_hash,
+                             gate_b2_storage_cap, gate_b3_biomass, gate_b8_demand_consistency, gate_b11_supply_routes, capacity_reduced_costs, nodal_prices, cross_border_flows,
+                             gate_b13_imports_one_way, gate_b14_terminal_caps, gate_b15_domestic_production_caps)
+    from country_carbon import emission_report
+    n.meta["artifact_role"] = a.label + "_SOLVED"; n.meta["result_label"] = a.label
+    guard("capacity_reduced_costs", lambda: capacity_reduced_costs(n, m, rc_map).to_csv(out / "capacity_reduced_costs.csv", index=False))
+    guard("nodal_prices_summary", lambda: nodal_prices(n)[0].to_csv(out / "nodal_prices_summary.csv", index=False))
+    guard("cross_border_flows", lambda: cross_border_flows(n).to_csv(out / "cross_border_flows.csv", index=False))
+    emis = guard("emissions", lambda: emission_report(n))
+    if emis is not None:
+        save(out / "EMISSIONS_BY_COUNTRY.json", emis)
+    flows = guard("co2_flows", lambda: co2_flows(n))
+    if flows is not None:
+        save(out / "CO2_FLOWS.json", flows)
+    def _caps():
         caps = {typ: n.df(typ).groupby(["carrier", "country"])[nom + "_opt"].sum().reset_index().to_dict("records") for typ, nom in [("Generator", "p_nom"), ("Link", "p_nom"), ("StorageUnit", "p_nom"), ("Store", "e_nom")] if "country" in n.df(typ)}
         save(out / "CAPACITY_BY_TECH_COUNTRY.json", caps)
-        exports = {}   # S4M supplement 01: cost table copy + per-component capital-cost breakdown (read only), sizes and SHA256 of the new exports in the receipt
-        if a.costs_table and Path(a.costs_table).exists():
-            import shutil
-            shutil.copy(a.costs_table, out / "costs_active_research.csv")
-            from s4m_cost_breakdown import breakdown
-            T_bd, bd = breakdown(n, pd.read_csv(a.costs_table, index_col=0), repo=a.repo)   # repo: the S4C-1 offshore connection-distance table referenced in the network meta
-            T_bd.to_csv(out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g"); save(out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json", bd)
-            run["cost_breakdown"] = {k: v for k, v in bd.items() if k not in ("existing_assets_fom",)}
-        for f in ("DUALS_BY_CONSTRAINT.nc", "DUALS_INDEX.csv", "COMPONENT_COST_BREAKDOWN.csv", "COMPONENT_COST_BREAKDOWN_SUMMARY.json", "costs_active_research.csv"):
-            if (out / f).exists():
-                exports[f] = dict(bytes=(out / f).stat().st_size, sha256=sha(out / f))
-        save(out / "EXPORTS.json", exports); run["exports"] = exports
-        contract = load_contract(); gates = {}
-        interior = interior_solution(a.solver, params)
-        try:
-            if interior:   # S3B R4.4: interior-point criteria tied to BarConvTol
-                from v5.v5_gates import gate_a1_a2_interior
-                I = SV.get("interior", {})
-                gates["A1_A2"] = gate_a1_a2_interior(out / "lp", sol_dir, out / "v5", contract, float(params["BarConvTol"]), float(I.get("gap_factor", 10)), float(I.get("dual_factor", 100)))
-            else:
-                gates["A1_A2"] = gate_a1_a2_kkt(out / "lp", sol_dir, out / "v5", contract)
-        except Exception as e:
-            gates["A1_A2"] = dict(gate="A1_A2_KKT_AND_BUDGETS", passed=False, error=str(e)[:500])
-        if a.solver == "gurobi":   # S3B R4.4: cleanup thresholds (reporting) and simultaneous charge/discharge
+    guard("capacity_by_tech_country", _caps)
+    exports = {}   # S4M supplement 01: cost table copy + per-component capital-cost breakdown (read only), sizes and SHA256 of the new exports in the receipt
+    def _breakdown():
+        import shutil
+        shutil.copy(a.costs_table, out / "costs_active_research.csv")
+        from s4m_cost_breakdown import breakdown
+        T_bd, bd = breakdown(n, pd.read_csv(a.costs_table, index_col=0), repo=a.repo)   # repo: the S4C-1 offshore connection-distance table referenced in the network meta
+        T_bd.to_csv(out / "COMPONENT_COST_BREAKDOWN.csv", index=False, float_format="%.10g"); save(out / "COMPONENT_COST_BREAKDOWN_SUMMARY.json", bd)
+        run["cost_breakdown"] = {k: v for k, v in bd.items() if k not in ("existing_assets_fom",)}
+    if a.costs_table and Path(a.costs_table).exists():
+        guard("cost_breakdown", _breakdown)
+    for f in ("DUALS_BY_CONSTRAINT.nc", "DUALS_INDEX.csv", "COMPONENT_COST_BREAKDOWN.csv", "COMPONENT_COST_BREAKDOWN_SUMMARY.json", "costs_active_research.csv"):
+        if (out / f).exists():
+            exports[f] = dict(bytes=(out / f).stat().st_size, sha256=sha(out / f))
+    save(out / "EXPORTS.json", exports); run["exports"] = exports
+    contract = load_contract(); gates = {}
+    interior = interior_solution(a.solver, params)
+    try:
+        if interior:   # S3B R4.4: interior-point criteria tied to BarConvTol
+            from v5.v5_gates import gate_a1_a2_interior
+            I = SV.get("interior", {})
+            gates["A1_A2"] = gate_a1_a2_interior(out / "lp", sol_dir, out / "v5", contract, float(params["BarConvTol"]), float(I.get("gap_factor", 10)), float(I.get("dual_factor", 100)))
+        else:
+            gates["A1_A2"] = gate_a1_a2_kkt(out / "lp", sol_dir, out / "v5", contract)
+    except Exception as e:
+        gates["A1_A2"] = dict(gate="A1_A2_KKT_AND_BUDGETS", passed=False, error=str(e)[:500])
+    if a.solver == "gurobi":   # S3B R4.4: cleanup thresholds (reporting) and simultaneous charge/discharge
+        def _interior():
             from s3b_interior import cleanup_thresholds, simultaneous_charge_discharge
             thr = cleanup_thresholds(n, float(params.get("BarConvTol", 1e-8)), float(SV.get("interior", {}).get("cleanup_factor", 10)))
             save(out / "INTERIOR_CHECKS.json", dict(cleanup_thresholds=thr, simultaneous_charge_discharge=simultaneous_charge_discharge(n, thr), interior_solution=interior))
-        known = {}
-        try:
-            if gap and "Research_gap_co2_slack" in m.variables:
-                sol = m.variables["Research_gap_co2_slack"].solution
-                known["gap_co2_slack_x_penalty_eur"] = float(sol.sum().item()) * float(n.meta["gap_diagnostic"]["penalty_eur_per_tco2"])
-            a3, a5 = gate_a3_a5_physics(n, known_terms=known, ignore_checks=("COUNTRY_CO2_CAP:",) if gap else ()); gates["A3"] = a3; gates["A5"] = a5
-        except Exception as e:
-            gates["A3"] = dict(gate="A3_PHYSICS", passed=False, error=str(e)[:500]); gates["A5"] = dict(gate="A5_FOM_ONCE", passed=False, error=str(e)[:500])
-        gates["A4"] = gate_a4_readback(n, out / (a.scenario + "_" + a.label + "_solved.nc"))
-        gates["A6"] = gate_a6_binding(run, lp_meta, net_sha)
-        if not gap:
-            gates["B1"] = gate_b1_country_net_zero(n)
-        if "research_bunker_net_zero" in n.meta.get("required_constraint_hooks", []):   # S4C-3 (decision 88): ASEAN bunker account, net zero on its own (also in the gap diagnostic)
+        guard("interior_checks", _interior)
+    known = {}
+    try:
+        if gap and "Research_gap_co2_slack" in m.variables:
+            sol = m.variables["Research_gap_co2_slack"].solution
+            known["gap_co2_slack_x_penalty_eur"] = float(sol.sum().item()) * float(n.meta["gap_diagnostic"]["penalty_eur_per_tco2"])
+        a3, a5 = gate_a3_a5_physics(n, known_terms=known, ignore_checks=("COUNTRY_CO2_CAP:",) if gap else ()); gates["A3"] = a3; gates["A5"] = a5
+    except Exception as e:
+        gates["A3"] = dict(gate="A3_PHYSICS", passed=False, error=str(e)[:500]); gates["A5"] = dict(gate="A5_FOM_ONCE", passed=False, error=str(e)[:500])
+    gates["A4"] = guard("a4_readback", lambda: gate_a4_readback(n, out / (a.scenario + "_" + a.label + "_solved.nc"))) or dict(gate="A4_NETCDF_READBACK", passed=False, error="export failed (post_solve_errors)", file=str(out / (a.scenario + "_" + a.label + "_solved.nc")))
+    gates["A6"] = guard("a6_binding", lambda: gate_a6_binding(run, lp_meta, net_sha)) or dict(gate="A6_SCALE_BINDING", passed=False, error="failed (post_solve_errors)")
+    def _gate(key, fn, name):
+        gates[key] = guard("gate_" + key, fn) or dict(gate=name, passed=False, error="failed (post_solve_errors)")
+    if not gap:
+        _gate("B1", lambda: gate_b1_country_net_zero(n), "B1_COUNTRY_NET_ZERO")
+    if "research_bunker_net_zero" in n.meta.get("required_constraint_hooks", []):   # S4C-3 (decision 88): ASEAN bunker account, net zero on its own (also in the gap diagnostic)
+        def _bunkers():
             from s4c_layers import bunker_account_report
             from s4b_acceptance import ABS_FLOOR
-            gates["B1_BUNKERS"] = bunker_account_report(n, float(SV.get("interior", {}).get("solver_tol_factor", 10)) * float(SV.get("interior", {}).get("feasibility_tol", 1e-6)), ABS_FLOOR)
-            save(out / "BUNKER_ACCOUNT.json", gates["B1_BUNKERS"])
-        gates["B2"] = gate_b2_storage_cap(n); gates["B3"] = gate_b3_biomass(n); gates["B8"] = gate_b8_demand_consistency(n)
-        gates["B11"] = gate_b11_supply_routes(n, cfg); gates["B12"] = gate_b12_hash(n, cfg)
-        gates["B13"] = gate_b13_imports_one_way(n); gates["B14"] = gate_b14_terminal_caps(n); gates["B15"] = gate_b15_domestic_production_caps(n)   # S3-6
-        try:   # S4D-3 (decision 91a): country cost ledger, nodal prices, identity gate B16_LEDGER (exported with the run)
-            from s4d_ledger import (country_cost_ledger, ledger_detail_usd, ledger_gate, ledger_table, ledger_table_usd, load_length_shares, nodal_prices,
-                                    report_currency)
-            led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
-            rep = report_currency(cfg)   # M08a A9 + supplement 01: report columns USD2020 = EUR2020 / fx_usd_to_eur_2020 (one rate both ways); the model stays in EUR2020
-            T = ledger_table(led_rows); T.to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f")
-            ledger_table_usd(T, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_USD2020.csv", float_format="%.6f")
-            ledger_detail_usd(led_rows, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
-            nodal_prices(n).to_csv(out / "NODAL_PRICES.csv", float_format="%.6g")
-            save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag, report_currency=rep))
-            gates["B16_LEDGER"] = ledger_gate(led_id)
+            rep = bunker_account_report(n, float(SV.get("interior", {}).get("solver_tol_factor", 10)) * float(SV.get("interior", {}).get("feasibility_tol", 1e-6)), ABS_FLOOR)
+            save(out / "BUNKER_ACCOUNT.json", rep); return rep
+        _gate("B1_BUNKERS", _bunkers, "B1_BUNKERS")
+    _gate("B2", lambda: gate_b2_storage_cap(n), "B2_STORAGE_CAP"); _gate("B3", lambda: gate_b3_biomass(n), "B3_BIOMASS"); _gate("B8", lambda: gate_b8_demand_consistency(n), "B8_DEMAND")
+    _gate("B11", lambda: gate_b11_supply_routes(n, cfg), "B11_SUPPLY_ROUTES"); _gate("B12", lambda: gate_b12_hash(n, cfg), "B12_HASH")
+    _gate("B13", lambda: gate_b13_imports_one_way(n), "B13_IMPORTS"); _gate("B14", lambda: gate_b14_terminal_caps(n), "B14_TERMINALS"); _gate("B15", lambda: gate_b15_domestic_production_caps(n), "B15_DOMESTIC")   # S3-6
+    try:   # S4D-3 (decision 91a): country cost ledger, nodal prices, identity gate B16_LEDGER (exported with the run)
+        from s4d_ledger import (country_cost_ledger, ledger_detail_usd, ledger_gate, ledger_table, ledger_table_usd, load_length_shares, nodal_prices,
+                                report_currency)
+        led_rows, led_id, led_diag = country_cost_ledger(n, load_length_shares(), extra_terms=(known if gap else None))
+        rep = report_currency(cfg)   # M08a A9 + supplement 01: report columns USD2020 = EUR2020 / fx_usd_to_eur_2020 (one rate both ways); the model stays in EUR2020
+        T = ledger_table(led_rows); T.to_csv(out / "COUNTRY_COST_LEDGER.csv", float_format="%.6f")
+        ledger_table_usd(T, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_USD2020.csv", float_format="%.6f")
+        ledger_detail_usd(led_rows, rep["fx_per_eur2020"]).to_csv(out / "COUNTRY_COST_LEDGER_DETAIL.csv", index=False, float_format="%.6f")
+        nodal_prices(n).to_csv(out / "NODAL_PRICES.csv", float_format="%.6g")
+        save(out / "LEDGER_IDENTITY.json", dict(identity=led_id, diagnostics=led_diag, report_currency=rep))
+        gates["B16_LEDGER"] = ledger_gate(led_id)
+    except Exception as e:
+        gates["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
+    gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
+    # S4B-0 (decision 71, option 1): budgets tied to Gurobi FeasibilityTol / OptimalityTol with row-activity relative terms (s4b_acceptance.py);
+    # the S3B gates above stay unchanged for comparison and both verdicts are recorded; research.solver.interior.acceptance_basis selects all_passed.
+    I = SV.get("interior", {}); basis = str(I.get("acceptance_basis", "barconvtol"))
+    if a.solver == "gurobi":
+        try:
+            from s4b_acceptance import evaluate as s4b_evaluate
+            gates.update(s4b_evaluate(n, out / "lp", sol_dir, out / "v5", I, float(params.get("BarConvTol", 1e-8)), m=m, gap=gap, known_terms=(known if gap else None)))
         except Exception as e:
-            gates["B16_LEDGER"] = dict(gate="B16_LEDGER", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
-        gates["contract"] = dict(id=contract["contract_id"], status=contract["status"], result_label=a.label)
-        # S4B-0 (decision 71, option 1): budgets tied to Gurobi FeasibilityTol / OptimalityTol with row-activity relative terms (s4b_acceptance.py);
-        # the S3B gates above stay unchanged for comparison and both verdicts are recorded; research.solver.interior.acceptance_basis selects all_passed.
-        I = SV.get("interior", {}); basis = str(I.get("acceptance_basis", "barconvtol"))
-        if a.solver == "gurobi":
-            try:
-                from s4b_acceptance import evaluate as s4b_evaluate
-                gates.update(s4b_evaluate(n, out / "lp", sol_dir, out / "v5", I, float(params.get("BarConvTol", 1e-8)), m=m, gap=gap, known_terms=(known if gap else None)))
-            except Exception as e:
-                gates["A1_A2_S4B"] = dict(gate="A1_A2_SOLVER_TOLERANCES", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
+            gates["A1_A2_S4B"] = dict(gate="A1_A2_SOLVER_TOLERANCES", passed=False, error=str(e)[:500], traceback=traceback.format_exc()[-1500:])
+    def _verdicts():
         from s4b_acceptance import all_passed as acceptance_all_passed
         gates["acceptance_basis"] = basis
         gates["all_passed_barconvtol"] = acceptance_all_passed(gates, "barconvtol"); gates["all_passed_solver_tolerances"] = acceptance_all_passed(gates, "solver_tolerances")
         gates["all_passed"] = gates["all_passed_" + basis] if basis in ("barconvtol", "solver_tolerances") else all(v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v)
-        save(out / "V5_GATES.json", gates)
-        if gap:
+    guard("acceptance_verdicts", _verdicts)
+    save(out / "V5_GATES.json", gates)
+    if gap:
+        def _gap():
             table = gap_table(n, m); save(out / "GAP_TABLE.json", dict(label="GAP_DIAGNOSTIC_NOT_FOR_INTERCONNECTION_VALUE", rows=table, penalties=n.meta["gap_diagnostic"]))
             run["gap_table"] = table
-        run.update(gates={k: v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v}, peak_rss_bytes=sampler.peak, finished_epoch=time.time(),
-                   solved_network=gates["A4"]["file"], decision="SOLVED_" + a.label, emissions_by_country=emis["by_country"], co2_flows=flows)
-        save(out / "SOLVE_RECEIPT.json", run)
-        print(json.dumps(dict(status=status, objective=run["objective"], gates=run["gates"], peak_rss_gib=round(sampler.peak / 2**30, 2)))); return 0
-    except BaseException as e:
-        run.update(failure=dict(error=type(e).__name__, detail=str(e)[:2000], traceback=traceback.format_exc()[-4000:]), peak_rss_bytes=sampler.peak, finished_epoch=time.time()); save(out / "SOLVE_RECEIPT.json", run); raise
-    finally:
-        sampler.stop.set()
+        guard("gap_table", _gap)
+    run.update(gates={k: v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v}, peak_rss_bytes=sampler.peak, finished_epoch=time.time(),
+               solved_network=gates["A4"].get("file"), emissions_by_country=(emis or {}).get("by_country"), co2_flows=flows, post_solve_errors=errors, post_solve_complete=(not errors))
+    save(out / "SOLVE_RECEIPT.json", run)
+    print(json.dumps(dict(status=status, objective=run["objective"], gates=run["gates"], peak_rss_gib=round(sampler.peak / 2**30, 2), post_solve_errors=[e["step"] for e in errors])))
+    return 0 if not errors else 4
 
 
 if __name__ == "__main__":
@@ -428,4 +562,5 @@ if __name__ == "__main__":
     p.add_argument("--costs-table", type=Path, default=None, help="S4M supplement 01: the build costs_active_research.csv - copied to the output and used for COMPONENT_COST_BREAKDOWN.csv (export only)")
     p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     p.add_argument("--stop-before-solve", action="store_true", help="M10P dry run: build and export the LP, fix the solver parameters, write the receipt and exit before the solver is called")
+    p.add_argument("--split-stage", choices=["build", "assign"], default=None, help="B4P split solve: build = process 1 (model, LP arrays, problem file split/problem.lp, no solver call); assign = process 3 (the result of b4_split_solve.py mapped back, then the post-processing)")
     sys.exit(main(p.parse_args()))
