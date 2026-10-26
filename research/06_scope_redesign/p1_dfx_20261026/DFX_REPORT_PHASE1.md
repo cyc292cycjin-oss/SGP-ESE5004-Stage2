@@ -49,7 +49,7 @@
 
 ## 5. F6 测试、运行计划与部署包 v8（提交 `5405e477`）
 
-- **`RUN_PLAN_DFX.md`（事先登记，早于任何 v2 求解）：** V1 / V2 365×24h，档案 `formal_barrier_1e6_t16`，TimeLimit 14,646 / 4,269 s（第三批 R3 / R4 实测 × 3），墙钟 + 1,200 s，间隔 ≥ 330 s，≥ 33 核才并行，V1 / V2 均为参照运行的分级停批，后处理（账本与 B16、B6 = V2 − V1、Owen 对偶形式、与第三批 R1 / R2 及一阶预测的对比），不做 LOO；规格下限 17 核 / 64 GiB / 45 GB，预计实例占用 3.5–6 h。
+- **`RUN_PLAN_DFX.md`（事先登记，早于任何 v2 求解）：** V1 / V2 365×24h，档案 `formal_barrier_1e6_t16`，TimeLimit 初版 14,646 / 4,269 s（第三批 R3 / R4 实测 × 3）——**用户 2026-10-27 修订为 V1 21,600 s / V2 10,800 s**（提交 `16b209e2`，仍早于任何 v2 365×24h 求解），墙钟 + 1,200 s，间隔 ≥ 330 s，≥ 33 核才并行，V1 / V2 均为参照运行的分级停批，后处理（账本与 B16、B6 = V2 − V1、Owen 对偶形式、与第三批的对比——**修订后主参照 R3 / R4（同档案 optimal），R1 / R2 并列**——及一阶预测的对比），不做 LOO；规格下限 17 核 / 64 GiB / 45 GB，预计实例占用 3.5–6 h（修订后最坏 11–12 h）。
 - **代码：** `scripts_project/dfx_batch.py`（运行表、登记时限、基础网络核对、分级、汇总）；`cloud_package_dfx/run_dfx.sh`（第三批 `run_batch3.sh` 派生）、`preflight_dfx.sh`、`make_package_dfx.sh`；`BATCH3_REFERENCE_VALUES.json`。
 - **替身测试：** `tests/research/test_dfx_runner.py` 14 个（串 / 并行通道、批参照 + 重评 + B6 + 对比 + 打包 + 续跑、分级停批三类、墙钟终止、三类安全停止、BUILD_ONLY 与许可陷阱、正式命令的 9 类拒绝、预检守卫与硬下限、分级分类单元、无结果汇总）全部通过。
 - **干跑（VERIFIED；`results_project/dfx_v3/dry_run_v8/DRY_RUN_DFX.json`）：** (1) 完整 365×24h BUILD_ONLY、登记路径：V1 LP 9,975,377 行 × 4,477,801 列、非零 23.46e6，构建 324 s，峰值 10.16 GiB；V2 9,629,180 × 4,325,607、22.38e6，159 s，9.96 GiB；BUILD_CHECK 两运行 passed（参数 = 档案 + 登记 TimeLimit、网络 SHA256 = 登记值、G2.2 子集相等、LP 已导出）；无求解器日志；许可变量指向不存在的文件；(2) 截短 56 + 测试开关：passed；(3) 正式命令在 `TRUNCATE` / `SOLVE_CMD` / `FAKE_*` / `GUROBI_TIME_LIMIT_S` / `WALL_CAP_S` / `LICENCE_GAP_S` 残留、`BUILD_ONLY` / `POST_ONLY` / `DRY` 与 `--auth` 同时出现、无许可文件、无 `--auth` 时全部 exit 2，未写任何 STATUS。

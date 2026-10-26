@@ -1,0 +1,11 @@
+truncate_left exit=2 :: REFUSED: TRUNCATE is for smoke tests only
+hook_left exit=2 :: REFUSED: SOLVE_CMD set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)
+fake_left exit=2 :: REFUSED: FAKE_SLEEP_V1 set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)
+time_limit_override exit=2 :: REFUSED: GUROBI_TIME_LIMIT_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with
+wall_override exit=2 :: REFUSED: WALL_CAP_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with ALLOW_UN
+gap_override exit=2 :: REFUSED: LICENCE_GAP_S=1 differs from the registered value 330 (RUN_PLAN_DFX.md 3.2)
+build_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run
+post_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run
+dry_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run
+no_licence_file exit=2 :: GRB_LICENSE_FILE is not readable
+no_auth exit=2 :: REFUSED: --auth "<user authorisation text>" is required

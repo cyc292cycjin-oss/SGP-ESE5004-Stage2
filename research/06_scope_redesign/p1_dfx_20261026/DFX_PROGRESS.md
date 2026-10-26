@@ -20,4 +20,6 @@
 | 阶段 2 | 完成 | `5405e477` | `hpc_package_dfx/`（PROPOSED）+ `DFX_REPORT_PHASE2.md` |
 | 阶段 3 | 完成 | `f73f5c06`、`17441b20`、`d9f8da84`、（P10 提交） | `PRE_AUTODL_CHECKLIST.md`：P1–P5、P7–P11 PASS，P6 PASS（有保留 R1：键名字面量只在 grep 模式 / 版本号误报，请用户确认）；`DFX_REPORT_PHASE3.md`；分支已推送（远端头 = 本地头）。R1 已由用户接受（2026-10-27）→ 检查单全部 PASS、可以租机。**已停下，等待用户租好 AutoDL、在会话中给出连接方式并说"授权阶段 4"** |
 
+| RUN_PLAN 修订（用户 2026-10-27） | 完成 | `16b209e2`（+ 证据提交） | TimeLimit V1 21,600 s / V2 10,800 s（墙钟 + 1,200 s）；第三批参照 R3 / R4 主、R1 / R2 并列；`dfx_batch.py` / `run_dfx.sh` / `preflight_dfx.sh` / 测试 / `BATCH3_REFERENCE_VALUES.json` 同步；DFX 测试 28 passed；第三次干跑 `dry_run_v8c/` + 包 v8 第三次构建（前两次保留为 `_superseded_5405e477` / `_superseded_f73f5c06`）；检查单 P1 / P5 / P8 / P11 更新。**仍停在阶段 4 之前，等"授权阶段 4"** |
+
 续跑说明：如本会话中断，从上表第一个"进行中 / 待做"步骤继续；已提交的内容以 git 历史为准；`results_project/dfx_v3/*/STATUS.txt` 记录各运行的进度。
