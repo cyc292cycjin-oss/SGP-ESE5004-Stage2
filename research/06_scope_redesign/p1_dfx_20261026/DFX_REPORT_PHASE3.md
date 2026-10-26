@@ -14,7 +14,7 @@
 |---|---|---|
 | P1 | PASS | `DFX_RULES.md` 提交 14:03:29Z < 构建 14:35:32Z…；`RUN_PLAN_DFX.md` 提交 14:57:38Z < 首次 v2 求解 14:58:19Z（余量 41 s，顺序正确） |
 | P2 | PASS | 四个 SHA256 = 登记值 = 包内 = `dfx_batch.REGISTERED_SHA`；等价测试 4 个网络通过 |
-| P3 | 【待填】 | 全量测试：【待填：N passed / M skipped / 0 failed；基线 655 / 69 + 新增 23 个（`test_dfx_demand.py` 11 + `test_dfx_runner.py` 12 函数，含参数化共 14 用例）】 |
+| P3 | PASS | **最终全量（`17441b20`）702 passed / 67 skipped / 0 failed（1,637 s）。** 第一次全量（`f73f5c06`）708 passed / 58 skipped / 3 failed——(1) 本分支 F0.3 测试范围（已改）；(2) B4P 替身测试负载下时序偶发（单独通过）；(3) S1 静态校验预存失败（基提交同样失败：M10R 的 `cross_border.stock_mode` 对旧 S1 网络 meta；本会话的 `results_project/s1` 链接使其运行，已去除 → 跳过，与基线 655 / 69 环境一致）。第二次全量（最终代码）结果见检查单 P3 |
 | P4 | PASS | 冒烟 2 × optimal，链路全 exit 0，GATES_V6 ACCEPTED_LAYER2 ×2 |
 | P5 | PASS | `SHA256SUMS` 20 / 20 OK；干跑完整 + 截短 passed；11 项拒绝 exit 2；包内只有 365×24h |
 | P6 | PASS（有保留） | 值 0 / 端口 0 / 主机名 0；键名字面量 6 处在已提交的 grep 模式（无值；工作树已改）；IP 正则 12 处版本号误报 |

@@ -3,6 +3,8 @@
 set -u
 MAIN=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3; W=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_dfx_20261026
 echo "== full suite result"; grep -E "passed|failed" $MAIN/tests/full.log | tail -2; grep -E "^(FAILED|ERROR)" $MAIN/tests/full.log | head -20
+D=/home/jin/wt_dfx_v3_20261026/research/06_scope_redesign/p1_dfx_20261026
+echo "== keep the first full-suite log"; [ -f $D/evidence/tests/full.log ] && [ ! -f $D/evidence/tests/full_first_f73f5c06.log ] && ( cd /home/jin/wt_dfx_v3_20261026 && git mv research/06_scope_redesign/p1_dfx_20261026/evidence/tests/full.log research/06_scope_redesign/p1_dfx_20261026/evidence/tests/full_first_f73f5c06.log && echo moved )
 echo "== collect evidence"; bash /home/jin/dfx3/collect_evidence.sh dry_run_v8b > /dev/null; ls /home/jin/wt_dfx_v3_20261026/research/06_scope_redesign/p1_dfx_20261026/evidence/
 echo "== evidence json"; /home/jin/miniforge3/envs/pypsa-earth/bin/python /home/jin/dfx3/make_evidence.py $W/cloud_package_dfx $MAIN/tests/full.log
 echo "== P6 rescan"; bash /home/jin/dfx3/p6_scan.sh | /home/jin/miniforge3/envs/pypsa-earth/bin/python -c "import json,sys; r=json.load(sys.stdin); print('clean', r['clean'], 'secret_values', r['n_secret_values']); [print(k, [(h[0], h[1], h[2]) for h in v['hits']], 'excluded', v['excluded']) for k, v in r['targets'].items()]; print('commits with hits:', r['commits'])"

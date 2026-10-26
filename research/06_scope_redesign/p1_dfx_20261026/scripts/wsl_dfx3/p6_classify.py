@@ -1,21 +1,24 @@
-"""DFX v3 P6: classify the pattern hits of the leak scan by sub-pattern (key name / ssh port / IPv4-like / host). For the environment lock files and
-the registry rows (public data, no licence content) the matched substrings are printed to show what matched; licence VALUES are never involved here."""
+"""DFX v3 P6: classify the pattern hits of the leak scan by sub-pattern (key name / ssh port / IPv4-like / host) for the files or commits given on the
+command line. The sub-patterns come from the pattern file outside the repository (lines name=regex); nothing of them is written here. For non-licence
+files (public environment locks, registry rows, reports) the matched substrings are printed to show what matched; for the key-name class only the count.
+    python p6_classify.py <file> | <commit>:<path> ..."""
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
-pats = {"keyname": r"WLSACCESSID|WLSSECRET|LICENSEID", "ssh_port": r"ssh +-p +[0-9]+", "ipv4_like": r"(^|[^0-9.])(([0-9]{1,3}\.){3}[0-9]{1,3})([^0-9.]|$)", "host": r"autodl\.com|seetacloud|region-[0-9]+\."}
 WT = "/home/jin/wt_dfx_v3_20261026"
-texts = {"pkg env/ENV_LOCK.txt": Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_dfx_20261026/cloud_package_dfx/env/ENV_LOCK.txt").read_text(errors="ignore"),
-         "pkg env/conda_explicit_linux64.txt": Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_dfx_20261026/cloud_package_dfx/env/conda_explicit_linux64.txt").read_text(errors="ignore"),
-         "commit 72083fde D1_EVIDENCE.json (diff)": subprocess.run(["git", "-C", WT, "show", "72083fde", "--", "research_inputs/registry_v5/D1_EVIDENCE.json"], capture_output=True, text=True, errors="ignore").stdout,
-         "commit 72083fde DATA_REGISTRY.csv (diff)": subprocess.run(["git", "-C", WT, "show", "72083fde", "--", "research_inputs/registry_v5/DATA_REGISTRY.csv"], capture_output=True, text=True, errors="ignore").stdout,
-         "commit 5405e477 hpc_preflight.sh (diff)": subprocess.run(["git", "-C", WT, "show", "5405e477", "--", "research/06_scope_redesign/p1_dfx_20261026/hpc_package_dfx/hpc_preflight.sh"], capture_output=True, text=True, errors="ignore").stdout,
-         "commit 5405e477 make_hpc_package.sh (diff)": subprocess.run(["git", "-C", WT, "show", "5405e477", "--", "research/06_scope_redesign/p1_dfx_20261026/hpc_package_dfx/make_hpc_package.sh"], capture_output=True, text=True, errors="ignore").stdout}
-for name, t in texts.items():
+PF = Path(os.environ.get("LEAK_PATTERN_FILE", "/home/jin/.dfx_leak_patterns"))
+pats = dict(line.split("=", 1) for line in PF.read_text().splitlines() if line and not line.startswith("#"))
+for arg in sys.argv[1:]:
+    if ":" in arg and not arg.startswith("/"):
+        commit, path = arg.split(":", 1); name = f"commit {commit} {Path(path).name} (diff)"
+        t = subprocess.run(["git", "-C", WT, "show", commit, "--", path], capture_output=True, text=True, errors="ignore").stdout
+    else:
+        name = arg; t = Path(arg).read_text(errors="ignore")
     for k, p in pats.items():
-        ms = [m.group(0) if k != "ipv4_like" else m.group(2) for m in re.finditer(p, t, re.I | re.M)]
+        ms = [m.group(0) for m in re.finditer(p, t, re.I | re.M)]
         if ms:
-            show = sorted(set(ms))[:12] if k != "keyname" else [f"{len(ms)} key-name literal(s) (grep pattern text, no value)"]
+            show = sorted(set(x.strip() for x in ms))[:12] if k != "key" else [f"{len(ms)} key-name literal(s) (no value)"]
             print(f"{name}: {k}: {len(ms)} -> {show}")

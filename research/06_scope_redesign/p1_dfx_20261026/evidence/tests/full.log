@@ -1,127 +1,14 @@
-.....................F.................................................. [  9%]
+........................................................................ [  9%]
 ........................................................................ [ 18%]
-....................................................F................... [ 28%]
+........................................................................ [ 28%]
 ........................................................................ [ 37%]
 ........................................................................ [ 46%]
 ....s................................................s....s............. [ 56%]
-...s.s.............................................................F.... [ 65%]
+...s.s......................................................sssssssss... [ 65%]
 ...............sssss.........sss.ss..s.sss.s.s.......s..s...s........... [ 74%]
 ss..s..ss....s..sss...s...ss.ss....s..s......s...s....s...s...s.....s..s [ 84%]
 ....s.....s...s..s..s....s..s..s..s.....s....s.......................... [ 93%]
 .................................................                        [100%]
-=================================== FAILURES ===================================
-_____________________ test_parallel_when_the_probe_passes ______________________
-
-tmp_path = PosixPath('/tmp/pytest-of-jin/pytest-3/test_parallel_when_the_probe_p0')
-
-    def test_parallel_when_the_probe_passes(tmp_path):
-        pkg = _package(tmp_path)
-        p = _run(tmp_path, pkg, dict(FAKE_SLEEP_F1="12", FAKE_SLEEP_F2="3"))
-        out = tmp_path / "out"; st = (out / "STATUS.txt").read_text()
-        assert p.returncode == 0, (p.stdout + p.stderr)[-1500:] + st[-3000:]
-        g = _calls(tmp_path); (a0, a1), (b0, b1) = _span(g, "F1"), _span(g, "F2")
->       assert a0 < b0 < a1 and "decision=parallel" in st and json.loads((out / "P1_DECISION.json").read_text())["parallel"] is True
-E       assert (1793032735.55 < 1793032729.96)
-
-tests/research/test_b4p_batch4.py:138: AssertionError
-________________ test_f0_changed_scripts_in_the_executed_lists _________________
-
-    def test_f0_changed_scripts_in_the_executed_lists():
-        """F0.3: every scripts_project file changed by DFX (base commit 55ab07c0 -> HEAD, plus uncommitted changes) is in the actual-execution lists of the
-        build, solve, post-processing, batch or data-chain runs (CODE_MAP_DATA.json executed_union)."""
-        data = json.loads((DFX / "CODE_MAP_DATA.json").read_text(encoding="utf-8"))
-        executed = set(data["executed_union"])
-        out = subprocess.run(["git", "diff", "--name-only", "55ab07c0", "--", "scripts_project"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
-        untracked = subprocess.run(["git", "ls-files", "--others", "--exclude-standard", "scripts_project"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
-        changed = sorted(set(out) | set(untracked))
-        assert changed, "no DFX change under scripts_project"
-        outside = [p for p in changed if p not in executed]
->       assert not outside, outside
-E       AssertionError: ['scripts_project/dfx_batch.py']
-E       assert not ['scripts_project/dfx_batch.py']
-
-tests/research/test_dfx_demand.py:319: AssertionError
-____________ BuiltNetworks.test_static_validation_passes_on_reload _____________
-
-self = <test_s1_built_networks.BuiltNetworks testMethod=test_static_validation_passes_on_reload>
-
-    def test_static_validation_passes_on_reload(self):
-        from build_research_network import static_validate_s1
-        for s,n in self.n.items():
->           r=static_validate_s1(n,self.cfg[s],self.corridors);self.assertEqual(r['status'],'S1_STATIC_PASS',s)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-tests/research/test_s1_built_networks.py:25: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-n = PyPSA Network
-Components:
- - Bus: 1005
- - Carrier: 61
- - Generator: 1247
- - GlobalConstraint: 1
- - Line: 105
- - Link: 1496
- - Load: 96
- - StorageUnit: 237
- - Store: 304
-Snapshots: 2920
-cfg = {'EXTERNAL_DATABASE': {'fn': '/data/davidef/git/pypsa-earth/resources/powerplants_osm2pm.csv', 'reliability_score': 5,...ansion': 1, ...}, 'base_network': {'min_voltage_rebase_voltage': 51000, 'min_voltage_substation_offshore': 51000}, ...}
-corridors =                  from  ...         status
-0    ID_Kalimantan4 8  ...  EXISTING_2025
-1               KH2 0  ...  EXISTI...ISTING_2025
-22  MY_Peninsular22 0  ...  EXISTING_2025
-23             TH21 0  ...  EXISTING_2025
-
-[24 rows x 14 columns]
-
-    def static_validate_s1(n,cfg,corridors,*,daily=False):
-        R=cfg['research'];report={}
-        expected=pd.date_range('2013-01-01','2013-12-31 21:00',freq='3h') if not daily else pd.date_range('2013-01-01','2013-12-31',freq='24h')
-        if not n.snapshots.equals(expected):raise ValueError('Research snapshot boundary changed')
-        if not np.all(n.snapshot_weightings.to_numpy()==(3 if not daily else 24)):raise ValueError('Physical weights changed')
-        geo=n.buses[n.buses.carrier.isin(['AC','DC'])]
-        if len(geo)!=100:raise ValueError('Incorrect geographical electric bus count')
-        if set(geo.country)!=set(COUNTRIES):raise ValueError('Geographical buses do not cover the 11 countries')
-        check_global_constraints(n);validate_hooks(n)
-        if n.meta.get('solver_allowed') is not False:raise ValueError('Solver guard missing')
-        if n.meta.get('skeleton_status')!='INTERIM_S1_SKELETON':raise ValueError('S1 interim status must be declared in metadata')
-        for name,table in [('loads',n.loads),('generators',n.generators),('stores',n.stores),('storage_units',n.storage_units),('links',n.links),('lines',n.lines),('transformers',n.transformers)]:
-            for col in [c for c in table if c=='bus' or c.startswith('bus') and c[3:].isdigit()]:
-                if any(b not in n.buses.index for b in table[col] if b):raise ValueError('Dangling '+name+' bus')
-        if any(' :: ' in b for b in n.buses.index):raise ValueError('Legacy bus naming survived the rename')
-        # demand: every Load owned exactly once; registry owners conserve their annual value
-        load=n.loads_t.p_set.reindex(columns=n.loads.index)
-        if load.isna().any().any() or not np.isfinite(load.values).all() or (load.values<0).any():raise ValueError('Invalid actual Load')
-        owners=n.meta['demand_owners']
-        if set(owners)!=set(n.loads.index):raise ValueError('Unexpected or unowned Load')
-        if len(set(owners.values()))!=len(owners):
-            # several Loads may share a registry InputID (one account spread over nodes); each Load name is unique
-            pass
-        kinds=n.loads.demand_owner_kind.value_counts().to_dict() if 'demand_owner_kind' in n.loads else {}
-        report['demand']=dict(loads=int(len(n.loads)),owner_kinds=kinds,annual_twh=float((load.sum(axis=1)*n.snapshot_weightings.generators).sum()/1e6),scope=R['demand']['scope'])
-        # carbon: 11 national atmospheres, every port booked once, U4
-        report['carbon']=validate_country_attribution(n)
-        if n.meta.get('research_carbon',{}).get('constraint_scope')!=R['carbon']['constraint_scope']:raise ValueError('Carbon constraint scope metadata differs from config')
-        if 'research_country_net_zero' not in n.meta.get('required_constraint_hooks',[]):raise ValueError('Country net-zero hook not registered')
-        # cross-border tags and switches
-        for typ in ['Line','Link']:
-            df=n.df(typ)
-            if len(df) and ('border_class' not in df or df.border_class.isna().any() or not df.border_class.isin(['domestic','cross_border']).all()):raise ValueError('Untagged '+typ)
-        sw=R['cross_border'];xb={}
-        for carrier_key,sel in [('electricity',(n.lines.border_class=='cross_border').sum()+((n.links.border_class=='cross_border')&(n.links.transport_carrier=='electricity')).sum()),('H2',((n.links.border_class=='cross_border')&(n.links.carrier=='H2 pipeline')).sum()),('gas',((n.links.border_class=='cross_border')&(n.links.carrier=='gas pipeline')).sum()),('co2',((n.links.border_class=='cross_border')&(n.links.carrier=='CO2 pipeline')).sum())]:
-            count=int(sel);xb[carrier_key]=count
-            if not sw[carrier_key] and count:raise ValueError('Cross-border '+carrier_key+' components present although the switch is off')
-        if sw['electricity']:
-            expected_edges={(r.component_type,str(r.component)) for _,r in corridors.iterrows()}
-            actual={('Line',x) for x in n.lines.index[n.lines.border_class=='cross_border']}|{('Link',x) for x in n.links.index[(n.links.border_class=='cross_border')&(n.links.transport_carrier=='electricity')]}
-            if actual!=expected_edges:raise ValueError('Cross-border electricity set differs from the corridor table')
-        report['cross_border']=dict(switches=sw,components=xb)
->       if n.meta.get('research_cross_border',{}).get('switches')!={k:bool(v) for k,v in sw.items()}:raise ValueError('Cross-border switch metadata differs from config')
-                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       ValueError: Cross-border switch metadata differs from config
-
-scripts_project/build_research_network.py:78: ValueError
 =============================== warnings summary ===============================
 scripts/_helpers.py:245: 1 warning
 tests/research/test_dfx_demand.py: 1 warning
@@ -137,7 +24,6 @@ tests/research/test_m08b_demand.py: 1 warning
 tests/research/test_m08b_heat.py: 1 warning
 tests/research/test_phase4_static.py: 1 warning
 tests/research/test_s1_adapter_daily_v5.py: 1 warning
-tests/research/test_s1_built_networks.py: 1 warning
 tests/research/test_s2_costs.py: 2 warnings
 tests/research/test_s3b_r1.py: 1 warning
 tests/research/test_s3b_r2.py: 1 warning
@@ -168,7 +54,6 @@ tests/research/test_m08b_demand.py: 1 warning
 tests/research/test_m08b_heat.py: 1 warning
 tests/research/test_phase4_static.py: 1 warning
 tests/research/test_s1_adapter_daily_v5.py: 1 warning
-tests/research/test_s1_built_networks.py: 1 warning
 tests/research/test_s2_costs.py: 2 warnings
 tests/research/test_s3b_r1.py: 1 warning
 tests/research/test_s3b_r2.py: 1 warning
@@ -225,8 +110,4 @@ tests/research/test_validation_temporal.py: 284 warnings
     cls_pnl[k][name] = pd.Series(data=v, index=self.snapshots, dtype=typ)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-FAILED tests/research/test_b4p_batch4.py::test_parallel_when_the_probe_passes
-FAILED tests/research/test_dfx_demand.py::test_f0_changed_scripts_in_the_executed_lists
-FAILED tests/research/test_s1_built_networks.py::BuiltNetworks::test_static_validation_passes_on_reload
-3 failed, 708 passed, 58 skipped, 1310 warnings in 1676.50s (0:27:56)
+702 passed, 67 skipped, 1308 warnings in 1637.34s (0:27:17)

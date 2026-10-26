@@ -1,0 +1,804 @@
+{
+ "script": "work/p1_dfx_20261026/scripts/wsl_dfx3/make_evidence.py",
+ "written_utc": "2026-10-26T17:40:41Z",
+ "instruction": {
+  "file": "DFX_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "b60da4c664c316c6bdbfe53f52908351a08b2eca94fdd7f7e735558f2685a6df",
+  "registered": "b60da4c664c316c6bdbfe53f52908351a08b2eca94fdd7f7e735558f2685a6df"
+ },
+ "branch": {
+  "name": "codex/dfx-v3-20261026",
+  "head": "17441b205b0613bce495e62008ff401a67875787",
+  "base": "55ab07c0",
+  "log": [
+   "17441b20 2026-10-27T01:10:07+08:00 DFX phase 3 (no cloud, no solve, no Gurobi): F0.3 test scoped to the F1-F4 commit (later F6 batch module documented in CODE_MAP section 14); phase 1-3 report drafts, checklist, evidence of the second dry run and package v8",
+   "f73f5c06 2026-10-27T00:27:48+08:00 DFX F6 fix + phase 1-3 drafts (no cloud, no solve, no Gurobi): dfx_batch.py no longer patches m10_batch3_summary at import; HPC draft scan patterns without key-name literals; reports, checklist, evidence",
+   "5405e477 2026-10-26T23:36:03+08:00 DFX F5.5 + F6 code + phase 2 draft (no cloud, no HPC; 2 local Gurobi calls = the authorised smoke): smoke optimal, DFX runner + batch module + package scripts + stand-in tests, HPC package draft",
+   "896828fd 2026-10-26T22:57:38+08:00 DFX F5.1-F5.4 (no cloud, no solve): v2 networks built at 72083fde, v1 / v2 structural equivalence, demand review, first-order prediction, RUN_PLAN_DFX registered before any v2 solve",
+   "72083fde 2026-10-26T22:34:06+08:00 DFX F1-F4 (no cloud, no solve, no build): RAS sector split with NEU outside the TFEC envelope, ammonia by USGS production, HVC scope, registry refresh",
+   "834a0f19 2026-10-26T22:03:29+08:00 DFX v3 section 0 + rules registered before any v2 build (no cloud, no solve): leftovers record, DFX_RULES.md, prototype numbers"
+  ],
+  "dirty": [
+   "M research/06_scope_redesign/p1_dfx_20261026/DFX_PROGRESS.md",
+   " M research/06_scope_redesign/p1_dfx_20261026/DFX_REPORT_PHASE1.md",
+   " M research/06_scope_redesign/p1_dfx_20261026/DFX_REPORT_PHASE3.md",
+   " M research/06_scope_redesign/p1_dfx_20261026/PRE_AUTODL_CHECKLIST.md",
+   " M research/06_scope_redesign/p1_dfx_20261026/evidence/leak_scan/P6_LEAK_SCAN.json",
+   "R  research/06_scope_redesign/p1_dfx_20261026/evidence/tests/full.log -> research/06_scope_redesign/p1_dfx_20261026/evidence/tests/full_first_f73f5c06.log"
+  ],
+  "worktree": "/home/jin/wt_dfx_v3_20261026"
+ },
+ "section0": {
+  "file": "SECTION0_LEFTOVERS.md",
+  "paused_branch": "codex/dfx-20261026 @ b0dbd52c (one commit, docs / scripts only)",
+  "paused_worktree": "/home/jin/wt_dfx_20261026 (clean, kept)",
+  "paused_gurobi_calls": 0,
+  "processes_found": 0,
+  "reused": false
+ },
+ "rules": {
+  "file": "DFX_RULES.md",
+  "sha256": "ab2cbfe3bbdf2a84b90dec4e69c6ed3bdf06dc0bd255d1969b32683706e197e0",
+  "commit": "834a0f19 2026-10-26T22:03:29+08:00",
+  "first_commit": "834a0f19 2026-10-26T22:03:29+08:00"
+ },
+ "run_plan": {
+  "file": "RUN_PLAN_DFX.md",
+  "sha256": "fff49c602d197458c7f80561de20d6cfe95c9ac98871844b0a7c8b0a1c98a93f",
+  "first_commit": "896828fd 2026-10-26T22:57:38+08:00"
+ },
+ "code_map": {
+  "files": [
+   "CODE_MAP.md",
+   "CODE_MAP_TABLE.csv",
+   "CODE_MAP_DATA.json"
+  ],
+  "sha256": {
+   "CODE_MAP.md": "9d60dc267d777cdeeef1a65547902ab4623fe203d456a0f2014bb84ad334be90",
+   "CODE_MAP_TABLE.csv": "b2f3552e68ea39e363509e1e28bd5945497aa523e1d077ada1efcfeee2630872",
+   "CODE_MAP_DATA.json": "3308d645016a55a98bf70da84454a1df41020af1a9b87ca199fa7d63de5af9d5"
+  },
+  "dynamic_counts": {
+   "build": 32,
+   "solve": 27,
+   "post": 32,
+   "variants": 2,
+   "data_chain": 13
+  }
+ },
+ "registry": {
+  "file": "research_inputs/registry_v5/DATA_REGISTRY.csv",
+  "sha256": "7516113e4d40142f6d48a73236976b2b4c15d31a5b64c310bfbd7a45fcc6c217",
+  "rows": 2280,
+  "old_sha256_prefix": "4c59adb7",
+  "old_rows": 2194,
+  "changelog": "REGISTRY_CHANGELOG_DFX.csv",
+  "map": "REGISTRY_NETWORK_INPUT_MAP.csv"
+ },
+ "builds": {
+  "v1_integrated": {
+   "network": {
+    "file": "integrated_2920_3h_unsolved.nc",
+    "sha256": "a56dbcb41ba86f9cd5342a0f7c386f7136b1021a2dc23bc85e02c8bd3ed808a4",
+    "bytes": 64106135,
+    "snapshots": 2920
+   },
+   "daily_network": {
+    "file": "integrated_365_24h_unsolved.nc",
+    "sha256": "3c79a3a909b9bf9c84cb7f14fce98a53f3cf390df3cf9b8faeb1d200e8cf79fd",
+    "bytes": 31524928,
+    "snapshots": 365
+   },
+   "code_sha": "55ab07c0e692135f7c09a213df8f7e750da2e082",
+   "build_seconds": 58.28589200973511
+  },
+  "v1_disconnected": {
+   "network": {
+    "file": "disconnected_2920_3h_unsolved.nc",
+    "sha256": "3e4f27985086b9258c39011daaca66f162135dc0b02e65477a5f53a679bc5a71",
+    "bytes": 63439169,
+    "snapshots": 2920
+   },
+   "daily_network": {
+    "file": "disconnected_365_24h_unsolved.nc",
+    "sha256": "33363917f555f463568da2bb74f2476ad1506f6af43e42cfed5db3b4db8724b8",
+    "bytes": 30857962,
+    "snapshots": 365
+   },
+   "code_sha": "55ab07c0e692135f7c09a213df8f7e750da2e082",
+   "build_seconds": 58.76281785964966
+  },
+  "v2_integrated": {
+   "network": {
+    "file": "integrated_2920_3h_unsolved.nc",
+    "sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "bytes": 63873447,
+    "snapshots": 2920
+   },
+   "daily_network": {
+    "file": "integrated_365_24h_unsolved.nc",
+    "sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2",
+    "bytes": 31292240,
+    "snapshots": 365
+   },
+   "code_sha": "72083fde6bffd89580869af6dd00885a8d76721f",
+   "build_seconds": 83.84369707107544
+  },
+  "v2_disconnected": {
+   "network": {
+    "file": "disconnected_2920_3h_unsolved.nc",
+    "sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "bytes": 63202193,
+    "snapshots": 2920
+   },
+   "daily_network": {
+    "file": "disconnected_365_24h_unsolved.nc",
+    "sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c",
+    "bytes": 30620986,
+    "snapshots": 365
+   },
+   "code_sha": "72083fde6bffd89580869af6dd00885a8d76721f",
+   "build_seconds": 75.66314935684204
+  }
+ },
+ "equivalence": {
+  "test": "tests/research/test_dfx_demand.py::test_f5_structural_equivalence",
+  "networks": 4,
+  "files": [
+   "EQUIVALENCE_disconnected_2920_3h.json",
+   "EQUIVALENCE_disconnected_365_24h.json",
+   "EQUIVALENCE_integrated_2920_3h.json",
+   "EQUIVALENCE_integrated_365_24h.json",
+   "V1_REBUILD_VS_REGISTERED.json"
+  ]
+ },
+ "review": {
+  "d1_checks": {
+   "v1": {
+    "totals_twh": {
+     "all_loads": 7147.643711312337,
+     "eleven_countries": 6422.5079564688585,
+     "asean_pool": 725.1357548434784,
+     "network_all_loads": 7147.643710309628,
+     "network_eleven": 6422.507955466151,
+     "by_sector": {
+      "AgricultureOthers": 297.892,
+      "Commercial": 568.599,
+      "Industry": 3515.635,
+      "InternationalBunkers": 725.136,
+      "NonEnergyUse": 679.462,
+      "Residential": 716.893,
+      "Transport": 644.028
+     },
+     "by_country": {
+      "ASEAN": 725.136,
+      "BN": 8.712,
+      "ID": 2671.424,
+      "KH": 96.423,
+      "LA": 36.475,
+      "MM": 109.407,
+      "MY": 647.867,
+      "PH": 427.257,
+      "SG": 112.697,
+      "TH": 1026.325,
+      "TL": 5.244,
+      "VN": 1280.676
+     }
+    },
+    "coverage_diff_twh": 1.0027088137576357e-06,
+    "industry_reconstruction_max_abs_diff_mwh": 86.74935549497604
+   },
+   "v2": {
+    "totals_twh": {
+     "all_loads": 7628.637393194987,
+     "eleven_countries": 6903.5016383515085,
+     "asean_pool": 725.1357548434784,
+     "network_all_loads": 7628.637391627449,
+     "network_eleven": 6903.501636783972,
+     "by_sector": {
+      "AgricultureOthers": 268.85,
+      "Commercial": 566.915,
+      "Industry": 3820.054,
+      "InternationalBunkers": 725.136,
+      "NonEnergyUse": 662.816,
+      "Residential": 585.647,
+      "Transport": 999.219
+     },
+     "by_country": {
+      "ASEAN": 725.136,
+      "BN": 11.84,
+      "ID": 2739.236,
+      "KH": 96.607,
+      "LA": 36.838,
+      "MM": 115.735,
+      "MY": 737.425,
+      "PH": 432.318,
+      "SG": 158.591,
+      "TH": 1277.696,
+      "TL": 5.513,
+      "VN": 1291.703
+     }
+    },
+    "coverage_diff_twh": 1.5675386748625897e-06,
+    "industry_reconstruction_max_abs_diff_mwh": 107.38284096121788
+   }
+  },
+  "diff": {
+   "sector": {
+    "AgricultureOthers": {
+     "twh_v1": 297.892,
+     "twh_v2": 268.85,
+     "diff_twh": -29.041
+    },
+    "Commercial": {
+     "twh_v1": 568.599,
+     "twh_v2": 566.915,
+     "diff_twh": -1.684
+    },
+    "Industry": {
+     "twh_v1": 3515.635,
+     "twh_v2": 3820.054,
+     "diff_twh": 304.419
+    },
+    "InternationalBunkers": {
+     "twh_v1": 725.136,
+     "twh_v2": 725.136,
+     "diff_twh": 0.0
+    },
+    "NonEnergyUse": {
+     "twh_v1": 679.462,
+     "twh_v2": 662.816,
+     "diff_twh": -16.646
+    },
+    "Residential": {
+     "twh_v1": 716.893,
+     "twh_v2": 585.647,
+     "diff_twh": -131.245
+    },
+    "Transport": {
+     "twh_v1": 644.028,
+     "twh_v2": 999.219,
+     "diff_twh": 355.191
+    }
+   },
+   "country": {
+    "ASEAN": {
+     "twh_v1": 725.136,
+     "twh_v2": 725.136,
+     "diff_twh": 0.0
+    },
+    "BN": {
+     "twh_v1": 8.712,
+     "twh_v2": 11.84,
+     "diff_twh": 3.129
+    },
+    "ID": {
+     "twh_v1": 2671.424,
+     "twh_v2": 2739.236,
+     "diff_twh": 67.812
+    },
+    "KH": {
+     "twh_v1": 96.423,
+     "twh_v2": 96.607,
+     "diff_twh": 0.183
+    },
+    "LA": {
+     "twh_v1": 36.475,
+     "twh_v2": 36.838,
+     "diff_twh": 0.362
+    },
+    "MM": {
+     "twh_v1": 109.407,
+     "twh_v2": 115.735,
+     "diff_twh": 6.328
+    },
+    "MY": {
+     "twh_v1": 647.867,
+     "twh_v2": 737.425,
+     "diff_twh": 89.558
+    },
+    "PH": {
+     "twh_v1": 427.257,
+     "twh_v2": 432.318,
+     "diff_twh": 5.061
+    },
+    "SG": {
+     "twh_v1": 112.697,
+     "twh_v2": 158.591,
+     "diff_twh": 45.894
+    },
+    "TH": {
+     "twh_v1": 1026.325,
+     "twh_v2": 1277.696,
+     "diff_twh": 251.371
+    },
+    "TL": {
+     "twh_v1": 5.244,
+     "twh_v2": 5.513,
+     "diff_twh": 0.269
+    },
+    "VN": {
+     "twh_v1": 1280.676,
+     "twh_v2": 1291.703,
+     "diff_twh": 11.027
+    }
+   },
+   "carrier": {
+    "agriculture machinery electric": {
+     "twh_v1": 48.171,
+     "twh_v2": 42.457,
+     "diff_twh": -5.714
+    },
+    "biomass final energy": {
+     "twh_v1": 275.856,
+     "twh_v2": 293.097,
+     "diff_twh": 17.241
+    },
+    "clean cooking useful": {
+     "twh_v1": 16.622,
+     "twh_v2": 9.929,
+     "diff_twh": -6.692
+    },
+    "coal feedstock": {
+     "twh_v1": 13.367,
+     "twh_v2": 13.94,
+     "diff_twh": 0.573
+    },
+    "coal final energy": {
+     "twh_v1": 48.734,
+     "twh_v2": 37.496,
+     "diff_twh": -11.238
+    },
+    "electricity": {
+     "twh_v1": 966.908,
+     "twh_v2": 966.908,
+     "diff_twh": 0.0
+    },
+    "gas feedstock": {
+     "twh_v1": 435.315,
+     "twh_v2": 291.945,
+     "diff_twh": -143.37
+    },
+    "gas final energy": {
+     "twh_v1": 285.142,
+     "twh_v2": 291.117,
+     "diff_twh": 5.975
+    },
+    "industry ammonia": {
+     "twh_v1": 31.849,
+     "twh_v2": 98.135,
+     "diff_twh": 66.287
+    },
+    "industry electricity": {
+     "twh_v1": 1081.908,
+     "twh_v2": 1166.604,
+     "diff_twh": 84.695
+    },
+    "industry heat": {
+     "twh_v1": 149.759,
+     "twh_v2": 161.3,
+     "diff_twh": 11.54
+    },
+    "industry heat high": {
+     "twh_v1": 899.952,
+     "twh_v2": 958.491,
+     "diff_twh": 58.539
+    },
+    "industry heat medium A": {
+     "twh_v1": 137.523,
+     "twh_v2": 146.16,
+     "diff_twh": 8.637
+    },
+    "industry heat medium B": {
+     "twh_v1": 550.09,
+     "twh_v2": 584.638,
+     "diff_twh": 34.548
+    },
+    "industry hydrogen": {
+     "twh_v1": 48.094,
+     "twh_v2": 47.931,
+     "diff_twh": -0.163
+    },
+    "industry methanol": {
+     "twh_v1": 3.253,
+     "twh_v2": 3.761,
+     "diff_twh": 0.507
+    },
+    "land transport EV": {
+     "twh_v1": 454.966,
+     "twh_v2": 715.964,
+     "diff_twh": 260.998
+    },
+    "oil feedstock": {
+     "twh_v1": 230.78,
+     "twh_v2": 356.93,
+     "diff_twh": 126.15
+    },
+    "oil final energy": {
+     "twh_v1": 946.403,
+     "twh_v2": 901.971,
+     "diff_twh": -44.432
+    },
+    "shipping methanol": {
+     "twh_v1": 522.952,
+     "twh_v2": 539.863,
+     "diff_twh": 16.912
+    }
+   },
+   "total": {
+    "twh_v1": 7147.64371131,
+    "twh_v2": 7628.637393197,
+    "diff_twh": 480.99368188700004
+   }
+  },
+  "bridge_closure": {
+   "start_twh": 8678.306,
+   "end_computed_twh": 6903.501638354158,
+   "model_loads_twh": 6903.5016383540005,
+   "residual_twh": 1.5734258340671659e-10,
+   "closed": true
+  },
+  "first_order": {
+   "main (R1 / R2)": {
+    "d_demand_twh": 480.99368188700004,
+    "d_demand_unpriced_twh": 0.0,
+    "d_cost_integrated_bn_eur": 19.449992534389033,
+    "d_cost_disconnected_bn_eur": 22.5096148739377,
+    "d_b6_bn_eur": 3.0596223395486675,
+    "d_b6_bn_usd": 3.487828724457861,
+    "predicted_b6_bn_eur": 14.359622339548668
+   },
+   "robustness (R3 / R4, optimal 1e-6)": {
+    "d_demand_twh": 480.99368188700004,
+    "d_demand_unpriced_twh": 0.0,
+    "d_cost_integrated_bn_eur": 19.449994514193573,
+    "d_cost_disconnected_bn_eur": 22.509650740414216,
+    "d_b6_bn_eur": 3.0596562262206426,
+    "d_b6_bn_usd": 3.487867353705126,
+    "predicted_b6_bn_eur": 14.359656226220643
+   }
+  },
+  "first_order_by_country": {
+   "BN": 0.028834175724582255,
+   "ID": -0.1809068073891573,
+   "KH": 0.004052772220480323,
+   "LA": -0.015952934336691864,
+   "MM": 0.010362359981103972,
+   "MY": 1.5522510435014292,
+   "PH": 0.017991534843959725,
+   "SG": 1.1498609784047313,
+   "TH": 0.11481160698871518,
+   "TL": 0.0023632861477342324,
+   "VN": 0.37595432346177327
+  }
+ },
+ "smoke": {
+  "runs": {
+   "integrated": {
+    "termination": "optimal",
+    "status": "ok",
+    "objective": 340661983874.5359,
+    "solve_seconds": 393.9050543308258,
+    "peak_rss_gib": 6.989501953125,
+    "snapshots": 56,
+    "truncated_to": 56,
+    "input_sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "profile": "formal_barrier_1e6_t16",
+    "parameters": {
+     "Method": 2,
+     "Crossover": 0,
+     "BarConvTol": 1e-06,
+     "BarHomogeneous": 1,
+     "Threads": 16,
+     "Seed": 123,
+     "AggFill": 0,
+     "PreDual": 0,
+     "GURO_PAR_BARDENSETHRESH": 200,
+     "TimeLimit": 3000.0
+    },
+    "bar_iter_count": null,
+    "work": null,
+    "v6_label": "ACCEPTED_LAYER2",
+    "v6_provisional": null,
+    "g1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "g2": {
+     "G2_1": true,
+     "G2_2": true,
+     "G2_3": true
+    },
+    "g2_1_registered": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "c1": {
+     "grade": "layer1_plus_nodal_price_settlement",
+     "a": true,
+     "b": true,
+     "c": true,
+     "reference": "this batch: disconnected - integrated ledger difference (/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/smoke_v2/disconnected minus /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/smoke_v2/integrated, COUNTRY_COST_LEDGER.csv total)",
+     "regrades": 1
+    },
+    "owen": {
+     "usable": true,
+     "premise_failed": false,
+     "alpha_main": 0.5,
+     "main_form": "owen_dual_form"
+    },
+    "stop_class": {
+     "cls": "accepted",
+     "action": "none"
+    },
+    "post_exits": {
+     "VIOLATIONS": "0",
+     "C1": "0",
+     "M12": "0",
+     "OWEN": "0",
+     "REGRADE": "0",
+     "OWEN_REGRADE": "0"
+    }
+   },
+   "disconnected": {
+    "termination": "optimal",
+    "status": "ok",
+    "objective": 352091303417.9458,
+    "solve_seconds": 494.82301926612854,
+    "peak_rss_gib": 5.5168304443359375,
+    "snapshots": 56,
+    "truncated_to": 56,
+    "input_sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "profile": "formal_barrier_1e6_t16",
+    "parameters": {
+     "Method": 2,
+     "Crossover": 0,
+     "BarConvTol": 1e-06,
+     "BarHomogeneous": 1,
+     "Threads": 16,
+     "Seed": 123,
+     "AggFill": 0,
+     "PreDual": 0,
+     "GURO_PAR_BARDENSETHRESH": 200,
+     "TimeLimit": 3000.0
+    },
+    "bar_iter_count": null,
+    "work": null,
+    "v6_label": "ACCEPTED_LAYER2",
+    "v6_provisional": null,
+    "g1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "g2": {
+     "G2_1": true,
+     "G2_2": true,
+     "G2_3": true
+    },
+    "g2_1_registered": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "c1": {
+     "grade": "layer1_plus_nodal_price_settlement",
+     "a": true,
+     "b": true,
+     "c": true,
+     "reference": "this batch: disconnected - integrated ledger difference (/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/smoke_v2/disconnected minus /home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/smoke_v2/integrated, COUNTRY_COST_LEDGER.csv total)",
+     "regrades": 1
+    },
+    "owen": {
+     "usable": true,
+     "premise_failed": false,
+     "alpha_main": 0.5,
+     "main_form": "owen_dual_form"
+    },
+    "stop_class": {
+     "cls": "accepted",
+     "action": "none"
+    },
+    "post_exits": {
+     "VIOLATIONS": "0",
+     "C1": "0",
+     "M12": "0",
+     "OWEN": "0",
+     "REGRADE": "0",
+     "OWEN_REGRADE": "0"
+    }
+   }
+  },
+  "gurobi_calls": [
+   {
+    "scenario": "integrated",
+    "start_utc": "2026-10-26T14:58:19Z"
+   },
+   {
+    "scenario": "disconnected",
+    "start_utc": "2026-10-26T15:14:12Z"
+   }
+  ],
+  "b6_56_snapshots_bn": 11.429319543409912,
+  "m12_benefit": {
+   "b6_bn": 11.429319543409912,
+   "computable": null
+  },
+  "batch_reference": true,
+  "all_optimal": true,
+  "all_accepted": true,
+  "chain_exit_zero": true
+ },
+ "dry_run": {
+  "code_commit": "5405e4772e02207f7438968b0301477e6bffc939",
+  "passed": true,
+  "build_check": {
+   "V1": {
+    "passed": true,
+    "failed": [],
+    "lp": {
+     "num_row": 9975377,
+     "num_col": 4477801,
+     "nnz": 23460944,
+     "build_seconds": 323.5014877319336
+    },
+    "peak_rss_gib": 10.16,
+    "snapshots": null,
+    "network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2"
+   },
+   "V2": {
+    "passed": true,
+    "failed": [],
+    "lp": {
+     "num_row": 9629180,
+     "num_col": 4325607,
+     "nnz": 22382441,
+     "build_seconds": 158.77395009994507
+    },
+    "peak_rss_gib": 9.96,
+    "snapshots": null,
+    "network_sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"
+   }
+  },
+  "build_check_truncated": {
+   "V1": {
+    "passed": true,
+    "failed": [],
+    "lp": {
+     "num_row": 1541222,
+     "num_col": 695950,
+     "nnz": 3612124,
+     "build_seconds": 29.557931900024414
+    },
+    "peak_rss_gib": 1.76,
+    "snapshots": null,
+    "network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2"
+   },
+   "V2": {
+    "passed": true,
+    "failed": [],
+    "lp": {
+     "num_row": 1487648,
+     "num_col": 672300,
+     "nnz": 3446098,
+     "build_seconds": 23.856581211090088
+    },
+    "peak_rss_gib": 1.6,
+    "snapshots": null,
+    "network_sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"
+   }
+  },
+  "refusals": [
+   "truncate_left exit=2 :: REFUSED: TRUNCATE is for smoke tests only",
+   "hook_left exit=2 :: REFUSED: SOLVE_CMD set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)",
+   "fake_left exit=2 :: REFUSED: FAKE_SLEEP_V1 set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)",
+   "time_limit_override exit=2 :: REFUSED: GUROBI_TIME_LIMIT_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with",
+   "wall_override exit=2 :: REFUSED: WALL_CAP_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with ALLOW_UN",
+   "gap_override exit=2 :: REFUSED: LICENCE_GAP_S=1 differs from the registered value 330 (RUN_PLAN_DFX.md 3.2)",
+   "build_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+   "post_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+   "dry_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+   "no_licence_file exit=2 :: GRB_LICENSE_FILE is not readable",
+   "no_auth exit=2 :: REFUSED: --auth \"<user authorisation text>\" is required"
+  ],
+  "refusals_all_exit_2": true,
+  "status_full": [
+   "START:2026-10-26T15:36:04Z:commit=5405e4772e02207f7438968b0301477e6bffc939:repo_commit=none:mode=batch:build_only=1:post_only=0:dry=0:cores=16:threads_T16=16:time_limit_s=V1=14646,V2=4269:wall_cap_s=V1=15846,V2=5469:licence_gap_s=330:parallel_min_cores=33:schedule=1[V1|V2]:truncate=none:resume=no:tmpdir=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/dry_run_v8/full/tmp:post_timeout_s=1800:allow_unregistered=0:hooks=",
+   "BASE_CHECK:all_equal",
+   "PHASE_1:one_lane:V1,V2:threads=32:cores=16:min_cores=33:no_solve_mode:2026-10-26T15:36:04Z",
+   "BUILD_CHECK_V1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 9975377, \"num_col\": 4477801, \"nnz\": 23460944, \"build_seconds\": 323.5014877319336}, \"peak_rss_gib\": 10.16}",
+   "BUILD_CHECK_V2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 9629180, \"num_col\": 4325607, \"nnz\": 22382441, \"build_seconds\": 158.77395009994507}, \"peak_rss_gib\": 9.96}",
+   "SUMMARY:exit=0:reference=batch3:{\"B6_bn\": null, \"runs\": {\"V1\": \"built_stopped_before_solve\", \"V2\": \"built_stopped_before_solve\"}, \"delta_b6_bn\": null}",
+   "PACK_final:PACKED:light=results_light_final_20261026T154444Z.tar.gz:33628B:sha256=9e1eb3751bffb2a9:full=results_full_final_20261026T154444Z.tar.gz:33628B:sha256=9e1eb3751bffb2a9",
+   "DONE:2026-10-26T15:44:46Z:unusable=none"
+  ],
+  "status_trunc": [
+   "START:2026-10-26T15:44:46Z:commit=5405e4772e02207f7438968b0301477e6bffc939:repo_commit=none:mode=batch:build_only=1:post_only=0:dry=0:cores=16:threads_T16=16:time_limit_s=V1=14646,V2=4269:wall_cap_s=V1=15846,V2=5469:licence_gap_s=330:parallel_min_cores=33:schedule=1[V1|V2]:truncate=56:resume=no:tmpdir=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/dry_run_v8/trunc/tmp:post_timeout_s=1800:allow_unregistered=1:hooks=TRUNCATE",
+   "BASE_CHECK:all_equal:receipts_only(ALLOW_UNREGISTERED)",
+   "PHASE_1:one_lane:V1,V2:threads=32:cores=16:min_cores=33:no_solve_mode:2026-10-26T15:44:47Z",
+   "BUILD_CHECK_V1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3612124, \"build_seconds\": 29.557931900024414}, \"peak_rss_gib\": 1.76}",
+   "BUILD_CHECK_V2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1487648, \"num_col\": 672300, \"nnz\": 3446098, \"build_seconds\": 23.856581211090088}, \"peak_rss_gib\": 1.6}",
+   "DONE:2026-10-26T15:45:55Z:unusable=none"
+  ],
+  "licence": "GRB_LICENSE_FILE tripwire = /nonexistent (no-solve modes); no Gurobi call",
+  "written_utc": "2026-10-26T15:45:55Z",
+  "solver_runs": 0
+ },
+ "tests": {
+  "subset.log": "131 passed, 4 skipped, 11 warnings in 10.52s",
+  "runner.log": "14 passed in 95.99s (0:01:35)"
+ },
+ "package_v8": {
+  "dir": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_dfx_20261026/cloud_package_dfx",
+  "commit": "f73f5c0695b9471a36184e14123e94ab978cb14b",
+  "files": 20,
+  "bytes": 148208763,
+  "sha256sums_sha256": "992327963ac913fcb62005ad3df68bd3775b9bfd999f88efd36ccd1b4d6a00fe",
+  "manifest_sha256": "5b65d06dcb22c5ea87514f6926f3189c8127e7066ad217d6aec6f6e85361318a",
+  "networks": {
+   "networks/disconnected_365_24h_unsolved.nc": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c",
+   "networks/integrated_365_24h_unsolved.nc": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2"
+  },
+  "run": {
+   "plan": "RUN_PLAN_DFX.md",
+   "script": "run_dfx.sh",
+   "preflight": "preflight_dfx.sh",
+   "pack": "pack_results.sh",
+   "reference_values": "BATCH3_REFERENCE_VALUES.json",
+   "runs": {
+    "V1": {
+     "scenario": "integrated",
+     "base": "integrated_365_24h",
+     "set": "",
+     "profile": "formal_barrier_1e6_t16",
+     "costs": "integrated"
+    },
+    "V2": {
+     "scenario": "disconnected",
+     "base": "disconnected_365_24h",
+     "set": "",
+     "profile": "formal_barrier_1e6_t16",
+     "costs": "disconnected"
+    }
+   },
+   "time_limit_s": {
+    "V1": 14646,
+    "V2": 4269
+   },
+   "wall_cap_s": {
+    "V1": 15846,
+    "V2": 5469
+   },
+   "licence_gap_s": 330,
+   "parallel_min_cores": 33,
+   "solve_mode": "single process (s2_solve.py, as the third batch)",
+   "licence": "GRB_LICENSE_FILE supplied by the user on the instance; never in the package"
+  },
+  "dry_run": {
+   "file": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/dry_run_v8b/DRY_RUN_DFX.json",
+   "sha256": "a36bcea677db3f407595e1b87e2bdb17f6e06c6cce607b387f7b847e2bc60bdc",
+   "code_commit": "f73f5c0695b9471a36184e14123e94ab978cb14b",
+   "passed": true,
+   "written_utc": "2026-10-26T16:37:04Z"
+  },
+  "upload_hours": {
+   "36 KB/s": 1.14,
+   "100 KB/s": 0.41,
+   "318 KB/s": 0.13
+  }
+ },
+ "local_gurobi_calls": {
+  "authorised": 2,
+  "used": 2,
+  "calls": [
+   {
+    "scenario": "integrated",
+    "start_utc": "2026-10-26T14:58:19Z"
+   },
+   {
+    "scenario": "disconnected",
+    "start_utc": "2026-10-26T15:14:12Z"
+   }
+  ],
+  "gap_s": 333,
+  "paused_session_calls": 0
+ },
+ "disk": {
+  "results_dfx_v3": "5439612228",
+  "worktree": "647472087"
+ }
+}

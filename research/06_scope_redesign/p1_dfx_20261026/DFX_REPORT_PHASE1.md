@@ -78,7 +78,9 @@
 
 ## 9. 全量测试（F6.1）
 
-见 `PRE_AUTODL_CHECKLIST.md` P3 与 `DFX_EVIDENCE.json` `tests.full_suite`（本报告写成时全量测试在后台运行；结果填入阶段 3）。
+- 第一次全量（`5405e477`，中止）：第三批 / B4P 替身测试 32 个失败——`dfx_batch.py` 首版在导入时改写了共享模块 `m10_batch3_summary` 的常数；修复（本模块内 `run_state`，不再触碰第三批模块）后，七个替身测试文件同进程重跑 76 passed / 1 skipped（`evidence/tests/affected.log`）。
+- 第二次全量（`f73f5c06`，`evidence/tests/full_first_f73f5c06.log`）：708 passed / 58 skipped / 3 failed：(1) 本分支 F0.3 测试把 F6 新增的 `dfx_batch.py` 也当作检查对象——已改为只检查 F1–F4 提交的改动并要求后续改动只能是 `CODE_MAP.md` 第 14 节登记的 F6 文件；(2) `test_b4p_batch4.py::test_parallel_when_the_probe_passes` 在全量负载下的时序偶发（单独与同进程重跑均通过，B4P 文件未改）；(3) `test_s1_built_networks.py` 的 S1 静态校验——预存失败：本会话 worktree 初始化把 `results_project/s1` 链接到主检出，使基线里跳过的 S1 测试运行，旧 S1 网络 meta 缺少 M10R 新增的 `cross_border.stock_mode`（基提交 `55ab07c0` 临时 worktree 同样失败；主检出旧配置通过）；去除该链接后与基线环境一致。
+- 最终全量（去除 s1 链接、F0.3 测试修正后）：见 `PRE_AUTODL_CHECKLIST.md` P3 与 `DFX_EVIDENCE.json` `tests.full_suite`。
 
 直接进入阶段 2（`DFX_REPORT_PHASE2.md`）。
 
