@@ -1,0 +1,195 @@
+{
+ "source": "third batch (M10P, 2026-10-23; light pack 20261023T174135Z_halted/export) + DFX first-order prediction (evidence/DFX_FIRST_ORDER.json, RUN_PLAN_DFX section 4)",
+ "written_utc": "2026-10-26T15:15:08Z",
+ "batch3": {
+  "runs": {
+   "integrated": "R1",
+   "disconnected": "R2"
+  },
+  "profile": {
+   "R1": "formal_barrier",
+   "R2": "formal_barrier",
+   "R3": "formal_barrier_1e6_t16",
+   "R4": "formal_barrier_1e6_t16"
+  },
+  "objective_eur": {
+   "R1": 249835405550.90558,
+   "R2": 261135523397.58063,
+   "R3": 249835446561.07053,
+   "R4": 261135288306.9577
+  },
+  "termination": {
+   "R1": "suboptimal",
+   "R2": "suboptimal",
+   "R3": "optimal",
+   "R4": "optimal"
+  },
+  "labels": {
+   "R1": "ACCEPTED_LAYER2",
+   "R2": "ACCEPTED_LAYER2",
+   "R3": "ACCEPTED_LAYER2",
+   "R4": "ACCEPTED_LAYER2"
+  },
+  "solve_seconds": {
+   "R1": 7220.687368154526,
+   "R2": 1595.4370846748352,
+   "R3": 4661.3440725803375,
+   "R4": 1227.1895990371704
+  },
+  "peak_rss_gib": {
+   "R1": 18.935768127441406,
+   "R2": 16.514423370361328,
+   "R3": 22.783218383789062,
+   "R4": 19.28872299194336
+  },
+  "b6_bn": 11.300117846675048,
+  "b6_eur": 11300117846.675049,
+  "b6_t16_bn": 11.299841745887177,
+  "owen_alpha_main": 0.5,
+  "owen_alpha_main_eur": {
+   "R1": {
+    "BN": 283382257.58218473,
+    "ID": 67149701742.11415,
+    "KH": 3593421070.2503657,
+    "LA": 253004554.09624448,
+    "MM": 1535321589.5785232,
+    "MY": 16219928867.959948,
+    "PH": 14851903670.08596,
+    "SG": 6057655381.175886,
+    "TH": 26374584208.29542,
+    "TL": 30513902.685473964,
+    "VN": 47964385103.16426,
+    "BUNKER": 65521407796.69061
+   },
+   "R2": {
+    "BN": 317733104.8183231,
+    "ID": 67416085772.177155,
+    "KH": 3831956636.3411574,
+    "LA": 1442799934.6052308,
+    "MM": 1796410746.1111913,
+    "MY": 17852035556.631462,
+    "PH": 15010526681.067528,
+    "SG": 9185705697.102566,
+    "TH": 27461757843.38498,
+    "TL": 143751524.91201708,
+    "VN": 51069067617.905266,
+    "BUNKER": 65606417562.09952
+   }
+  },
+  "owen_source": {
+   "R1": "export/R1/m12_owen/OWEN.json sha256 3245bf95260ce7271607aeb2d4e8dff18f5f61496d8540438da7a438626a9044",
+   "R2": "export/R2/m12_owen/OWEN.json sha256 2e01d3eed4ef620df15aa21dde03cd209795a0f0c37e4c7ce06549326dbb57bc"
+  },
+  "ledger_total_eur": {
+   "R1": {
+    "ASEAN_BUNKER": 65521407753.63126,
+    "ASEAN_POOL": 3160.510532,
+    "BN": 283382553.835447,
+    "ID": 67146258407.381836,
+    "KH": 3615773865.675169,
+    "LA": 217173558.740792,
+    "MM": 1595290313.277519,
+    "MY": 16223490476.620132,
+    "PH": 14851914845.973158,
+    "SG": 6057657911.062333,
+    "TH": 26310388480.732605,
+    "TL": 30515823.09034,
+    "VN": 47982148400.262825,
+    "ASEAN": 65521410914.14179
+   },
+   "R2": {
+    "ASEAN_BUNKER": 65606417629.923874,
+    "ASEAN_POOL": 48623.992741,
+    "BN": 317737870.568356,
+    "ID": 67416610375.41751,
+    "KH": 3832006495.433964,
+    "LA": 1442869131.435614,
+    "MM": 1796658333.715255,
+    "MY": 17852119951.716984,
+    "PH": 15010603556.530138,
+    "SG": 9185713563.997255,
+    "TH": 27461827779.838192,
+    "TL": 143762591.364042,
+    "VN": 51069147493.56158,
+    "ASEAN": 65606466253.91662
+   }
+  },
+  "summary_sha256": "32a42b4d2b071ec4560d2596ea11e8cec18dac2bf9da17eb8661f52ebbd33103",
+  "note": "R1 / R2 = profile formal_barrier (Threads 8, suboptimal, ACCEPTED_LAYER2); R3 / R4 = formal_barrier_1e6_t16 (Threads 16, optimal) - the DFX V1 / V2 profile; B6 differs by 0.0001 bn between the pairs"
+ },
+ "first_order": {
+  "method": "DMD dmd_d5_duals.py envelope method: annual load-weighted dual prices of the third-batch 365x24h runs x (v2 - v1) network loads; INFERENCE (large-change extrapolation)",
+  "delta_demand_twh": 480.99368188700004,
+  "delta_c_integrated_bn": 19.449992534389033,
+  "delta_c_disconnected_bn": 22.5096148739377,
+  "delta_b6_bn": 3.0596223395486675,
+  "delta_b6_bn_usd": 3.487828724457861,
+  "predicted_b6_bn": 14.359622339548668,
+  "robustness_r3_r4": {
+   "delta_b6_bn": 3.0596562262206426,
+   "predicted_b6_bn": 14.359656226220643
+  },
+  "by_country_bn": {
+   "BN": 0.028834175724582255,
+   "ID": -0.1809068073891573,
+   "KH": 0.004052772220480323,
+   "LA": -0.015952934336691864,
+   "MM": 0.010362359981103972,
+   "MY": 1.5522510435014292,
+   "PH": 0.017991534843959725,
+   "SG": 1.1498609784047313,
+   "TH": 0.11481160698871518,
+   "TL": 0.0023632861477342324,
+   "VN": 0.37595432346177327
+  },
+  "by_country_owen_share_bn": {
+   "BN": 0.1053335432668679,
+   "ID": 5.636338197556662,
+   "KH": -0.08876125509818107,
+   "LA": -0.01880413217050586,
+   "MM": 0.09392608682458035,
+   "MY": 4.198468671689318,
+   "PH": 0.042938309481793155,
+   "SG": 2.0438189085904512,
+   "TH": 7.080919928170976,
+   "TL": 0.009652986136203415,
+   "VN": 0.34616128994087364
+  },
+  "by_class": {
+   "F1 NEU multiplier (coal)": {
+    "d_demand_twh": 0.5730938349999981,
+    "d_b6_bn": 0.0
+   },
+   "F1 agriculture anchor (RAS)": {
+    "d_demand_twh": -29.041316053,
+    "d_b6_bn": -0.08232975148489595
+   },
+   "F1 buildings anchors (RAS)": {
+    "d_demand_twh": -132.928932094,
+    "d_b6_bn": -0.026422304574980737
+   },
+   "F1 industry multiplier (RAS)": {
+    "d_demand_twh": 238.13250190500003,
+    "d_b6_bn": 1.1728229143618965
+   },
+   "F1 transport anchor (RAS)": {
+    "d_demand_twh": 355.190879788,
+    "d_b6_bn": 2.1693102173936216
+   },
+   "F2 NEU gas (ammonia feedstock deduction)": {
+    "d_demand_twh": -143.36961622400003,
+    "d_b6_bn": -0.02125173657796383
+   },
+   "F2 ammonia (production rule)": {
+    "d_demand_twh": 66.286636006,
+    "d_b6_bn": -0.15250699956901742
+   },
+   "F3 NEU oil (HVC scope) + F1 multiplier": {
+    "d_demand_twh": 126.150434724,
+    "d_b6_bn": 0.0
+   }
+  },
+  "source_sha256": "7006b7e11dff325f93388e29baae4643065e1b70cd9bab6475f06dc78b59475b",
+  "note": "first-order extrapolation of a large change (INFERENCE); prices = 365x24h third-batch duals; dD from the v2 - v1 network loads"
+ }
+}

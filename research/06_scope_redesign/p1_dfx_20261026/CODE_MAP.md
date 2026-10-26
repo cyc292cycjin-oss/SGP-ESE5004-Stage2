@@ -537,3 +537,15 @@ D1、S2-0、S3、S3B、M08-0、M08a 阶段的基础表与注册表片段。输�
 - **F0.3 核对（测试 `tests/research/test_dfx_demand.py::test_f0_changed_scripts_in_the_executed_lists`）：** F1–F4 改动的 `scripts_project/` 文件——`m08b_demand.py`、`s3_0_industry.py`、`s2b_feedstock.py`、`s2_layers.py`、`d1_common.py`、`m08b_data.py`、`d1_registry.py`、新增 `dfx_data.py`——全部在构建 / 求解 / 后处理 / 批次 / 数据链的实际执行清单之内（`executed_union`）。重复实现的另一份（`d1_demand_2050.py` 的 NEU 与部门总量逻辑、`s2b_industry.py`、Gate2 `demand_*` 族）未改动，见第 3.3 节。
 - 第 7 节 B 区的 15 个仅静态可达的库模块、`s2b_industry.py` 与 `retired/` 下文件的归档整理，按指令 F0 第 4 条留到正式运行之后、论文代码公开之前另行处理，本次不动。
 
+
+## 14. F6 新增文件的归类（执行端补记，2026-10-26）
+
+| 文件 | 类别 | 说明 |
+|---|---|---|
+| `scripts_project/dfx_batch.py`（新） | 生产管线 / 批次与打包 | DFX 365×24h 筛查的运行表（V1 / V2）、登记时限、基础网络核对（回执 + 登记 SHA256 / 字节）、分级停批分类、批级汇总（B6 = V2 − V1，与第三批 R1 / R2 及一阶预测的对比）；导入 `m10_batch3_summary.py` 的只读辅助函数并替换其模块常数，不改第三批文件 |
+| `research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx/run_dfx.sh`（新） | 生产管线 / 批次与打包（包脚本） | 由第三批 `run_batch3.sh` 派生的 DFX 运行脚本：一个阶段两条通道，≥ 33 核才并行，每运行登记时限，V1 / V2 都是参照运行的分级停批；无变体 / 去一国 / 第二级比较 / S1 模式 |
+| `cloud_package_dfx/preflight_dfx.sh`、`make_package_dfx.sh`（新） | 包脚本 | 由 B4P `preflight.sh` / `make_package.sh` 派生：365×24h v2 网络、登记时限、硬下限 17 核 / 64 GiB / 45 GB；v8 包组装（要求本提交的干跑记录） |
+| `research/06_scope_redesign/p1_dfx_20261026/BATCH3_REFERENCE_VALUES.json`（新） | 包数据 | 第三批 R1 / R2（R3 / R4）目标值、B6、Owen α 主值分摊、账本总额 + 登记的一阶预测；供 `dfx_batch.py summary --reference` |
+| `tests/research/test_dfx_runner.py`（新） | 测试 | `run_dfx.sh` / `dfx_batch.py` / `preflight_dfx.sh` 的替身整链测试（14 个），复用第三批替身流水线 `tests/research/fixtures/m10p_fake_pipeline.py` |
+| `research/06_scope_redesign/p1_dfx_20261026/hpc_package_dfx/*`（新） | 阶段 2 草稿（PROPOSED） | NUS Atlas PBS 作业生成器、作业体、环境安装、预检、检查单、HPC 包组装；不在任何本机执行清单中 |
+| `scripts/wsl_dfx3/*`（镜像） | 一次性辅助脚本 | 本会话的 WSL 辅助脚本（提交、追踪、构建、复核链、冒烟、探针、干跑）；证据性质，不是入口 |
