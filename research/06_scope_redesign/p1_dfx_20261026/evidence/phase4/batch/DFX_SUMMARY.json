@@ -1,0 +1,306 @@
+{
+ "script": "scripts_project/dfx_batch.py",
+ "out": "/root/autodl-tmp/dfx_v8/runs/dfx",
+ "runs": {
+  "V1": {
+   "rid": "V1",
+   "role": "\u672c\u6279\u53c2\u7167\uff08\u4e00\u4f53\u5316\uff0cv2 \u9700\u6c42\uff09\u3001Owen \u5206\u644a",
+   "profile": "formal_barrier_1e6_t16",
+   "set": "",
+   "state": "ended",
+   "network": "/root/autodl-tmp/dfx_v8/networks/integrated_365_24h_unsolved.nc",
+   "network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 270785244510.473,
+   "solve_seconds": 5615.378115653992,
+   "peak_rss_gib": 22.28720474243164,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "V2": {
+   "rid": "V2",
+   "role": "\u672c\u6279\u53c2\u7167\uff08\u4e0d\u4e92\u8054\uff0cv2 \u9700\u6c42\uff09\u3001B6 = V2 \u2212 V1",
+   "profile": "formal_barrier_1e6_t16",
+   "set": "",
+   "state": "ended",
+   "network": "/root/autodl-tmp/dfx_v8/networks/disconnected_365_24h_unsolved.nc",
+   "network_sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 285400557542.6173,
+   "solve_seconds": 1168.240582227707,
+   "peak_rss_gib": 18.856670379638672,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  }
+ },
+ "unusable": {},
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 270785244510.473,
+   "disconnected": 285400557542.6173
+  },
+  "difference": 14615313032.144318,
+  "relative": 0.0512098264908326,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 14.615313032144318,
+  "runs": {
+   "integrated": "V1",
+   "disconnected": "V2"
+  },
+  "labels": {
+   "V1": "ACCEPTED_LAYER2",
+   "V2": "ACCEPTED_LAYER2"
+  }
+ },
+ "benefit": {
+  "computable": true,
+  "b6_bn": 14.615313032144318,
+  "negative_benefit": [
+   "BUNKER"
+  ],
+  "reason": null
+ },
+ "comparison": {
+  "reference_file": "third batch (M10P, 2026-10-23; light pack 20261023T174135Z_halted/export) + DFX first-order prediction (evidence/DFX_FIRST_ORDER.json, RUN_PLAN_DFX section 4); main reference R3 / R4 per the user amendment of 2026-10-27, R1 / R2 alongside",
+  "main_runs": {
+   "integrated": "R3",
+   "disconnected": "R4"
+  },
+  "alternative_runs": {
+   "integrated": "R1",
+   "disconnected": "R2"
+  },
+  "batch3_objective_eur": {
+   "R1": 249835405550.90558,
+   "R2": 261135523397.58063,
+   "R3": 249835446561.07053,
+   "R4": 261135288306.9577
+  },
+  "batch3_b6_bn": 11.299841745887177,
+  "batch3_b6_alternative_bn": 11.300117846675048,
+  "objective_difference_bn": {
+   "V1_minus_R3": 20.949797949402466,
+   "V2_minus_R4": 24.265269235659606,
+   "V1_minus_R1": 20.949838959567412,
+   "V2_minus_R2": 24.265034145036683
+  },
+  "first_order": {
+   "predicted_delta_b6_bn": 3.0596223395486675,
+   "predicted_b6_bn": 14.359464085435844,
+   "predicted_b6_alternative_bn": 14.359622339548668,
+   "delta_c_integrated_bn": 19.449992534389033,
+   "delta_c_disconnected_bn": 22.5096148739377,
+   "by_country_bn": {
+    "BN": 0.028834175724582255,
+    "ID": -0.1809068073891573,
+    "KH": 0.004052772220480323,
+    "LA": -0.015952934336691864,
+    "MM": 0.010362359981103972,
+    "MY": 1.5522510435014292,
+    "PH": 0.017991534843959725,
+    "SG": 1.1498609784047313,
+    "TH": 0.11481160698871518,
+    "TL": 0.0023632861477342324,
+    "VN": 0.37595432346177327
+   },
+   "note": "first-order extrapolation of a large change (INFERENCE); prices = 365x24h third-batch duals; dD from the v2 - v1 network loads"
+  },
+  "delta_b6_bn": 3.315471286257141,
+  "delta_b6_minus_first_order_bn": 0.2558489467084737,
+  "delta_b6_alternative_bn": 3.3151951854692694,
+  "owen_dual_form_alpha_main_bn": {
+   "V1": {
+    "BN": 0.39595199647464036,
+    "ID": 72.50420234163634,
+    "KH": 3.4541507692011675,
+    "LA": 0.13844633781827947,
+    "MM": 1.555117950364823,
+    "MY": 21.08225101694275,
+    "PH": 14.80404115498446,
+    "SG": 8.961880514618764,
+    "TH": 33.25739410075756,
+    "TL": 0.013324098910893992,
+    "VN": 48.26232764131122,
+    "BUNKER": 66.35596845003093
+   },
+   "V2": {
+    "BN": 0.4723026457707382,
+    "ID": 73.10622141365852,
+    "KH": 3.7128961556934024,
+    "LA": 1.3678348615571545,
+    "MM": 1.8603613302973343,
+    "MY": 23.995263998106342,
+    "PH": 14.951448917292819,
+    "SG": 12.804715331382683,
+    "TH": 35.02591646243685,
+    "TL": 0.1479019148720056,
+    "VN": 51.8354597413083,
+    "BUNKER": 66.11926890076508
+   }
+  },
+  "owen_difference_vs_batch3_bn": {
+   "V1_minus_R3": {
+    "BN": 0.11257008085097713,
+    "ID": 5.3544975951619795,
+    "KH": -0.13927156982834388,
+    "LA": -0.11455722068420193,
+    "MM": 0.019796123212892532,
+    "MY": 4.86231951141943,
+    "PH": -0.047863656821094516,
+    "SG": 2.9042250182901506,
+    "TH": 6.882801658383663,
+    "TL": -0.01718893756746781,
+    "VN": 0.2979530834709473,
+    "BUNKER": 0.8345559908242721
+   },
+   "V2_minus_R4": {
+    "BN": 0.15456746399258162,
+    "ID": 5.690001537779136,
+    "KH": -0.11908365948623514,
+    "LA": -0.07499222498904586,
+    "MM": 0.06389981667873192,
+    "MY": 6.1431420472202305,
+    "PH": -0.05914471670840645,
+    "SG": 3.618994047533348,
+    "TH": 7.564051383927677,
+    "TL": 0.004149644677522629,
+    "VN": 0.7663119987701721,
+    "BUNKER": 0.5130438067724991
+   },
+   "V1_minus_R1": {
+    "BN": 0.11256973889245564,
+    "ID": 5.354500599522186,
+    "KH": -0.13927030104919816,
+    "LA": -0.114558216277965,
+    "MM": 0.019796360786299705,
+    "MY": 4.862322148982801,
+    "PH": -0.04786251510149956,
+    "SG": 2.904225133442879,
+    "TH": 6.882809892462135,
+    "TL": -0.017189803774579973,
+    "VN": 0.2979425381469574,
+    "BUNKER": 0.8345606533403168
+   },
+   "V2_minus_R2": {
+    "BN": 0.15456954095241518,
+    "ID": 5.690135641481369,
+    "KH": -0.11906048064775515,
+    "LA": -0.0749650730480764,
+    "MM": 0.06395058418614293,
+    "MY": 6.14322844147488,
+    "PH": -0.059077763774709705,
+    "SG": 3.619009634280117,
+    "TH": 7.564158619051865,
+    "TL": 0.004150389959988535,
+    "VN": 0.7663921234030304,
+    "BUNKER": 0.5128513386655579
+   }
+  },
+  "ledger_difference_vs_batch3_bn": {
+   "V1_minus_R3": {
+    "BN": 0.11257047949664098,
+    "ID": 5.351931391551613,
+    "KH": -0.1497384520600319,
+    "LA": -0.101972092596045,
+    "MM": 0.029849845846720933,
+    "MY": 4.8648538951641,
+    "PH": -0.04786551121391869,
+    "SG": 2.9042244010383786,
+    "TH": 6.881720283197827,
+    "TL": -0.017189316007201,
+    "VN": 0.286858169366394,
+    "ASEAN": 0.8345548559247894
+   },
+   "V2_minus_R4": {
+    "BN": 0.15456996098089804,
+    "ID": 5.690146265078041,
+    "KH": -0.11906735360174894,
+    "LA": -0.07497343503849602,
+    "MM": 0.06397549159450412,
+    "MY": 6.143162675554733,
+    "PH": -0.05912095742099762,
+    "SG": 3.6189960835110933,
+    "TH": 7.564058046882171,
+    "TL": 0.004152501350178987,
+    "VN": 0.7663429360960617,
+    "ASEAN": 0.5130270209637451
+   },
+   "V1_minus_R1": {
+    "BN": 0.11257027821053099,
+    "ID": 5.351949985770584,
+    "KH": -0.14973780428055,
+    "LA": -0.101971424103499,
+    "MM": 0.029854672695307016,
+    "MY": 4.864859374890583,
+    "PH": -0.04786210970887375,
+    "SG": 2.9042248455957043,
+    "TH": 6.881729036571392,
+    "TL": -0.017190001619293998,
+    "VN": 0.2868520209817581,
+    "ASEAN": 0.8345600848698578
+   },
+   "V2_minus_R2": {
+    "BN": 0.15457703837988102,
+    "ID": 5.690006728402649,
+    "KH": -0.11904947590478182,
+    "LA": -0.07496948548142314,
+    "MM": 0.06394926342386699,
+    "MY": 6.143201773616642,
+    "PH": -0.05907509779893494,
+    "SG": 3.6190104002737904,
+    "TH": 7.564097392994724,
+    "TL": 0.004150164891633988,
+    "VN": 0.7663758070382919,
+    "ASEAN": 0.5127596355058288
+   }
+  }
+ },
+ "stop_not_accepted": [],
+ "stop_safe": null,
+ "postproc_errors": [],
+ "solver_runs": 0
+}

@@ -22,4 +22,6 @@
 
 | RUN_PLAN 修订（用户 2026-10-27） | 完成 | `16b209e2`（+ 证据提交） | TimeLimit V1 21,600 s / V2 10,800 s（墙钟 + 1,200 s）；第三批参照 R3 / R4 主、R1 / R2 并列；`dfx_batch.py` / `run_dfx.sh` / `preflight_dfx.sh` / 测试 / `BATCH3_REFERENCE_VALUES.json` 同步；DFX 测试 28 passed；第三次干跑 `dry_run_v8c/` + 包 v8 第三次构建（前两次保留为 `_superseded_5405e477` / `_superseded_f73f5c06`）；检查单 P1 / P5 / P8 / P11 更新。**仍停在阶段 4 之前，等"授权阶段 4"** |
 
+| 阶段 4（AutoDL 365×24h 筛查） | 完成 | （本提交） | 用户 2026-10-27 会话授权"授权阶段 4"（第三批同一实例 West-B，25 核 8470Q / 92 GB，数据盘 100 GB；连接方式只在会话中，不写入文件）+ 无人值守补充授权。模型在阶段 4 授权前由用户切换为 Opus 5.5（`/model claude-opus-5-5`，约 2026-10-27 03:45 SGT）。七个替身测试 76 passed / 1 skipped / 0 failed → 上传（20 / 20 SHA256 OK）→ 复用已有环境（ENV_EXACT_MATCH 284 / 284）→ 许可 scp → 预检 OK → 串行 V1 optimal（5,963 s，335 次）、V2 optimal（1,488 s，127 次），GATES_V6 均 ACCEPTED_LAYER2（本批参照重评），无停批；**B6 14.6153 bn EUR（16.6608 bn USD2020），ΔB6 +3.3155（一阶预测 +3.0596）**，燃料舱受益 −0.237；结果包下载并核对 SHA256，云端许可删除（`/root/.gurobi` 为空）；`DFX_REPORT_PHASE4.md`、`evidence/phase4/`；辅助脚本 `/home/jin/dfx4/`（镜像 `scripts/wsl_dfx4/`）；实例目录 `/root/autodl-tmp/dfx_v8`（第三批 / S1 文件不动）；关机见报告第 9 节。**停止，等待审阅** |
+
 续跑说明：如本会话中断，从上表第一个"进行中 / 待做"步骤继续；已提交的内容以 git 历史为准；`results_project/dfx_v3/*/STATUS.txt` 记录各运行的进度。

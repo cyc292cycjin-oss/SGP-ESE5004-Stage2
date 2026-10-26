@@ -1,0 +1,195 @@
+{
+ "G1": {
+  "a": true,
+  "a_bn": -0.00018814100506591797,
+  "a_relative": 6.947978476667189e-07,
+  "b": true,
+  "c": true,
+  "computable": true,
+  "reference": "L23 365x24h ledger difference disconnected - integrated (research/06_scope_redesign/p1_l23_run1_20261019, L23_C9_SUMMARY"
+ },
+ "G2": {
+  "G2_1": {
+   "input_network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2",
+   "note": null,
+   "passed": true,
+   "readback": "EXACT_SEMANTIC_ROUNDTRIP",
+   "registered_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2",
+   "sha256_equal": true
+  },
+  "G2_2": {
+   "current_subset_sha256": "6986b36c47e1a0a3cb0d4bb8f71bb5131ce0d3ce39d8bd599af4186f6c00f734",
+   "network_subset_sha256": "6986b36c47e1a0a3cb0d4bb8f71bb5131ce0d3ce39d8bd599af4186f6c00f734",
+   "note": null,
+   "passed": true
+  },
+  "G2_3": {
+   "checks": {
+    "b16_computable": true,
+    "exports_present_and_sha256_equal": true,
+    "receipt_fields": true,
+    "solution_dimensions_equal_lp": true
+   },
+   "missing_or_changed_exports": [],
+   "passed": true,
+   "solution_dimensions": {
+    "Pi": {
+     "count": 9975377,
+     "equal": true,
+     "lp": 9975377
+    },
+    "RC": {
+     "count": 4477801,
+     "equal": true,
+     "lp": 4477801
+    },
+    "X": {
+     "count": 4477801,
+     "equal": true,
+     "lp": 4477801
+    }
+   }
+  }
+ },
+ "definition": {
+  "file": "research/06_scope_redesign/p1_step4r_20261020/GATES_V6.md",
+  "notes": "GATES_V6_NOTES.md (k = 10 kept)",
+  "sha256": "5c0aa8b8ed322b75a63879fccfc19559606a0ad743ecafee3addfcbfe04fd7f9",
+  "subset_keys": [
+   "scenario",
+   "cross_border",
+   "fuels.price_scenario",
+   "finance",
+   "sector",
+   "s3",
+   "renewable",
+   "fleet",
+   "nuclear",
+   "candidates",
+   "hydro",
+   "hydrogen",
+   "cost_layer.active",
+   "numerics",
+   "network",
+   "corridors",
+   "bunkers",
+   "co2",
+   "s2",
+   "cost_scaling",
+   "carbon",
+   "demand",
+   "transmission",
+   "existing_cross_border_electricity",
+   "solver.scaling",
+   "solver.interior",
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ],
+  "subset_keys_m08a_additions": [
+   "cost_layer",
+   "site_candidates",
+   "disconnected",
+   "coalition"
+  ]
+ },
+ "diagnostics": {
+  "D0_solver_status": {
+   "retry": false,
+   "solve_seconds": 5615.378115653992,
+   "status": "ok",
+   "termination": "optimal",
+   "time_limit": 21600.0
+  },
+  "D10_domestic_gas_caps": {
+   "items": 8,
+   "within": true,
+   "worst_ratio": 0.9999900993109796
+  },
+  "D11_demand_conservation": {
+   "source": "B8",
+   "within": true
+  },
+  "D12_supply_routes": {
+   "source": "B11",
+   "within": true
+  },
+  "D13_imports_one_way": {
+   "source": "B13",
+   "within": true
+  },
+  "D14_scenario_pair": {
+   "note": "B5 / B6 need both scenarios (pair report)",
+   "within": null
+  },
+  "D15_interior_cleanup": {
+   "keys": [
+    "cleanup_thresholds",
+    "interior_solution",
+    "simultaneous_charge_discharge"
+   ],
+   "within": true
+  },
+  "D16_whole_config_hash": {
+   "source": "B12",
+   "within": true
+  },
+  "D1_primal": {
+   "fail_count": 12154,
+   "max_ratio": 81.44425626513726,
+   "within": false
+  },
+  "D2_dual": {
+   "anomaly": false,
+   "budget": 9.999999999999999e-06,
+   "dual_sign_max": 0.37251202867392563,
+   "eps_d": 1e-06,
+   "history_max_ratio": null,
+   "k": 10.0,
+   "max_ratio": 37251.20286739257,
+   "note": "diagnostic only (GATES_V6_NOTES): interior-point solutions without crossover exceed k = 10 routinely",
+   "stationarity_max": 0.0001390976751378765,
+   "within": false
+  },
+  "D3_gap_complementarity": {
+   "budget": 9.999999999999999e-06,
+   "complementarity_over_scale": 1.7243046302608711e-06,
+   "relative_gap": 6.947978476667189e-07,
+   "within": true
+  },
+  "D4_physics": {
+   "source": "A3_S4B",
+   "within": false
+  },
+  "D5_objective_reconciliation": {
+   "source": "A5_S4B",
+   "within": true
+  },
+  "D6_country_net_zero": {
+   "source": "B1_S4B",
+   "within": true
+  },
+  "D7_storage_caps": {
+   "items": 11,
+   "within": true,
+   "worst_ratio": 0.9999900662810354
+  },
+  "D8_biomass_pools": {
+   "source": "B3_S4B",
+   "within": false
+  },
+  "D9_terminal_caps": {
+   "expansion": "capex_only",
+   "items": 16,
+   "within": true,
+   "worst_ratio": 0.0
+  }
+ },
+ "label": "ACCEPTED_LAYER2",
+ "profile": "formal_barrier_1e6_t16",
+ "resolution": "365x24h",
+ "schema": "gates-v6-acceptance-v1",
+ "solve_dir": "/root/autodl-tmp/dfx_v8/runs/dfx/V1",
+ "solver_runs": 0
+}

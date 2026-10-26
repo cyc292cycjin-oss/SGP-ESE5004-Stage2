@@ -1,0 +1,162 @@
+{
+  "cleanup_thresholds": {
+    "rule": "tau_g = 10.0 x BarConvTol x max|x_g| (floor 1e-06)",
+    "barconvtol": 1e-06,
+    "factor": 10.0,
+    "groups": {
+      "Generator.p_nom_opt": {
+        "tau": 2.3998652037646893,
+        "max_abs": 239986.52037646895,
+        "nonzero": 1660,
+        "below": 1294,
+        "below_share_of_abs_sum": 7.625676712390255e-06
+      },
+      "Link.p_nom_opt": {
+        "tau": 0.554321160095,
+        "max_abs": 55432.1160095,
+        "nonzero": 7751,
+        "below": 4778,
+        "below_share_of_abs_sum": 6.09481843462033e-05
+      },
+      "Line.s_nom_opt": {
+        "tau": 0.542409732593652,
+        "max_abs": 54240.97325936521,
+        "nonzero": 86,
+        "below": 0,
+        "below_share_of_abs_sum": 0.0
+      },
+      "StorageUnit.p_nom_opt": {
+        "tau": 0.021420343987742042,
+        "max_abs": 2142.0343987742044,
+        "nonzero": 47,
+        "below": 41,
+        "below_share_of_abs_sum": 8.310111000915092e-05
+      },
+      "Store.e_nom_opt": {
+        "tau": 3686.046224590403,
+        "max_abs": 368604622.45904034,
+        "nonzero": 422,
+        "below": 401,
+        "below_share_of_abs_sum": 1.4063243395168695e-05
+      },
+      "Generator.p": {
+        "tau": 1.1651281288503825,
+        "max_abs": 116512.81288503826,
+        "nonzero": 674409,
+        "below": 460376,
+        "below_share_of_abs_sum": 1.6612382750477257e-05
+      },
+      "Link.p0": {
+        "tau": 0.554321160095,
+        "max_abs": 55432.1160095,
+        "nonzero": 2686788,
+        "below": 1752890,
+        "below_share_of_abs_sum": 4.6755486427244664e-05
+      },
+      "Line.p0": {
+        "tau": 0.1601479151644846,
+        "max_abs": 16014.79151644846,
+        "nonzero": 31390,
+        "below": 2840,
+        "below_share_of_abs_sum": 1.8998444818885286e-06
+      },
+      "StorageUnit.p_dispatch": {
+        "tau": 0.048819998798699596,
+        "max_abs": 4881.99987986996,
+        "nonzero": 48545,
+        "below": 19407,
+        "below_share_of_abs_sum": 9.601792127345125e-06
+      },
+      "StorageUnit.p_store": {
+        "tau": 0.003534137666225258,
+        "max_abs": 353.4137666225258,
+        "nonzero": 6570,
+        "below": 5032,
+        "below_share_of_abs_sum": 7.654441694538797e-05
+      },
+      "StorageUnit.state_of_charge": {
+        "tau": 0.3216899676893712,
+        "max_abs": 32168.996768937122,
+        "nonzero": 48545,
+        "below": 20864,
+        "below_share_of_abs_sum": 1.0563402510597527e-05
+      },
+      "Store.p": {
+        "tau": 0.45737150527498455,
+        "max_abs": 45737.15052749846,
+        "nonzero": 190530,
+        "below": 144830,
+        "below_share_of_abs_sum": 2.592827148785207e-06
+      },
+      "Store.e": {
+        "tau": 3686.046224610371,
+        "max_abs": 368604622.46103716,
+        "nonzero": 190530,
+        "below": 148425,
+        "below_share_of_abs_sum": 9.872484983306996e-06
+      }
+    }
+  },
+  "simultaneous_charge_discharge": {
+    "StorageUnit": {
+      "tau_mw": 0.048819998798699596,
+      "instances": 1154,
+      "max_simultaneous_mw": 11.242332987882802,
+      "energy_mwh": 189253.9343908045,
+      "by_carrier": {
+        "PHS": {
+          "instances": 0,
+          "max_mw": 0.0,
+          "energy_mwh": 0.0
+        },
+        "PHS existing": {
+          "instances": 1154,
+          "max_mw": 11.242332987882802,
+          "energy_mwh": 189253.9343908045
+        },
+        "hydro": {
+          "instances": 0,
+          "max_mw": 0.0,
+          "energy_mwh": 0.0
+        },
+        "hydro existing": {
+          "instances": 0,
+          "max_mw": 0.0,
+          "energy_mwh": 0.0
+        }
+      }
+    },
+    "battery": {
+      "pairs": 98,
+      "tau_mw": 0.554321160095,
+      "instances": 96,
+      "max_simultaneous_mw": 3.1023543437439765,
+      "energy_mwh": 5017.913324437412
+    },
+    "home battery": {
+      "pairs": 98,
+      "tau_mw": 0.554321160095,
+      "instances": 0,
+      "max_simultaneous_mw": 0.0,
+      "energy_mwh": 0.0
+    },
+    "Store_single_p": {
+      "carriers": {
+        "battery": 98,
+        "home battery": 98,
+        "H2 Store Tank": 97,
+        "co2 stored": 97,
+        "solid biomass": 85,
+        "biogas": 15,
+        "co2 atmosphere": 11,
+        "co2 sequestered extra-ASEAN": 11,
+        "co2 sequestered": 7,
+        "ammonia store": 1,
+        "methanol store": 1,
+        "co2 bunkers": 1
+      },
+      "note": "one p variable per Store: simultaneous charge and discharge is structurally impossible (H2 Store Tank, gas/ammonia/methanol/CO2 stores, battery energy stores behind charger/discharger links)"
+    }
+  },
+  "interior_solution": true
+}
