@@ -30,6 +30,11 @@ WORK_DIR = ROOT / "work" / "p1_step2_20261015"
 
 ASEAN = ["BN", "KH", "ID", "LA", "MY", "MM", "PH", "SG", "TH", "TL", "VN"]
 ASEAN10 = [c for c in ASEAN if c != "TL"]  # AEO8 regional totals exclude Timor-Leste
+# DFX F3 (DFX_RULES section 3; weak point 8): the non-energy-use oil accounts of the D1 demand table that are HVC (petrochemical) feedstock;
+# share_HVC_primary_fraction_2050 applies to these only. Every other NonEnergy:* oil account (bitumen, lubricants, paraffin waxes, petroleum coke,
+# gas oil, motor gasoline, fuel oil) and the coal / gas rows keep factor 1.0.
+HVC_FEEDSTOCK_ACCOUNTS = ("NonEnergy:Naphtha", "NonEnergy:Ethane", "NonEnergy:Liquefied petroleum gas (LPG)", "NonEnergy:Natural gas liquids")
+NEU_GAS_ACCOUNT = "NonEnergy:Natural gas (including LNG)"   # DFX F2.4: the NEU natural-gas account from which the ammonia feedstock gas is deducted
 ISO3 = {"BN": "BRN", "KH": "KHM", "ID": "IDN", "LA": "LAO", "MY": "MYS", "MM": "MMR",
         "PH": "PHL", "SG": "SGP", "TH": "THA", "TL": "TLS", "VN": "VNM"}
 ISO2_FROM_ISO3 = {v: k for k, v in ISO3.items()}

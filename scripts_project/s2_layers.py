@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from carrier_architecture import COUNTRIES, ATMOSPHERE_CARRIER, atmosphere_bus, finite
+from d1_common import HVC_FEEDSTOCK_ACCOUNTS
 from s2_costs import cost
 
 HOURS = 8760.0
@@ -964,10 +965,16 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         feed_pot = float(bound.at[c, "feedstock_carbon_potential_tco2"]) if c in bound.index else 0.0
         f_process = min(1.0, float(bound.at[c, "edgar_2B_chemicals_tco2"]) / feed_pot) if feed_pot > 0 else 0.0
         sh, _ = _shares_for(shares, astar_shares, c, "NonEnergyUse")
+        hvc_on = bool(I.get("hvc_recycling_applies_to_naphtha", True))
         for carrier, v in ne.groupby("carrier").v.sum().items():
             if v <= 0:
                 continue
-            scale = hvc_primary if (carrier == "oil" and I.get("hvc_recycling_applies_to_naphtha", True)) else 1.0
+            # DFX F3 (DFX_RULES section 3): share_HVC_primary_fraction_2050 scales the HVC feedstock accounts (naphtha, ethane, LPG, NGL) only; the other
+            # non-energy-use oil products (bitumen, lubricants, waxes, petroleum coke, ...) and the coal / gas rows keep factor 1.0 (one load per node and carrier)
+            v_hvc = float(ne[(ne.carrier == carrier) & ne.account.isin(HVC_FEEDSTOCK_ACCOUNTS)].v.sum()) if carrier == "oil" else 0.0
+            v_scaled = (v_hvc * hvc_primary + (v - v_hvc)) if (carrier == "oil" and hvc_on) else v
+            scale = v_scaled / v
+            src_neu = f"{c}:NonEnergy:{carrier}" + (f" (HVC feedstock {v_hvc:.6g} MWh x HVC primary {hvc_primary if hvc_on else 1.0} + other products {v - v_hvc:.6g} MWh x 1.0; DFX F3)" if carrier == "oil" else " x 1.0")
             for node, s in sh.items():
                 if s <= 0:
                     continue
@@ -981,7 +988,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                         add_link(n, link, c, f"{carrier} feedstock", [f"{node} {carrier}", fb, f"{node} process emissions", atmosphere_bus(c)],
                                  [1.0, f_process * ef[carrier], (1 - f_process) * eol_release * ef[carrier]], role="FEEDSTOCK_CARBON",
                                  extra={"process_share": f_process, "end_of_life_release": eol_release, "feedstock_carbon_mode": "full_release"})
-                plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, f"{c}:NonEnergy:{carrier} x HVC primary {scale if carrier == 'oil' else 1.0}", f"{node} feedstock {carrier} demand")
+                plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, src_neu, f"{node} feedstock {carrier} demand")
         # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
         pe_sfx = "_level" if alloc_mode.endswith("_level") else ("_ats_anchor" if alloc_mode == "aeo8_ats_anchor" else "")   # S3B R1 level rows; M08b B1 anchor rows
         proc = sum(float(reg.loc[f"process_emissions_{g}_2050{pe_sfx}_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
@@ -1065,6 +1072,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             deductions.append(dict(country=c, mode="astar_residual", deducted="none", deducted_mwh=ded_total, deducted_transport_mwh=te, deducted_industry_mwh=ie, astar_before_mwh=astar_total, astar_after_mwh=astar_total, factor=1.0, added_explicit=explicit))
     ledger = dict(loads=loads, deductions=deductions, deferred=deferred, parameters=dict(ev_share=ev_share, fcev_share=fc_share, ice_share=ice_share, oil_to_electricity=oil_to_el, oil_to_hydrogen=oil_to_h2,
                   bev_charge_efficiency=bev_eff, bev_availability=bev_avail, agriculture_electric_share=ag_el_share, agriculture_efficiency_gain=ag_gain, hvc_primary_fraction=hvc_primary,
+                  hvc_primary_scope=(list(HVC_FEEDSTOCK_ACCOUNTS) if I.get("hvc_recycling_applies_to_naphtha", True) else "none"),
                   feedstock_end_of_life_release=eol_release, industry_low_temperature_heat_share=(s_lt if carrier_mode == "bas_fixed" else "ratio heat row (R1)"), existing_boiler_efficiency=boiler_eff, cookstove_basic=COOKSTOVE_BASIC_FUELWOOD,
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, nonindustrial_electricity=ne_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
                   industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,

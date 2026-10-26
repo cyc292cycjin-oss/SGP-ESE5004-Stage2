@@ -1,5 +1,49 @@
 {
+ "ammonia": {
+  "base_year": 2019,
+  "elasticity": 0.5,
+  "elasticity_range": [
+   0.3,
+   0.8
+  ],
+  "feedstock_gas_account": "NonEnergy:Natural gas (including LNG)",
+  "feedstock_gas_mwh_per_t": 10.8,
+  "feedstock_gas_mwh_per_t_stoichiometric": 4.92,
+  "feedstock_gas_source": "PyPSA-Eur v2025.07.0 config.default.yaml line 850 MWh_CH4_per_tNH3_SMR (SMR route total natural gas: upper bound of the feedstock share; JRC-IDEES-2021 has no ammonia row)",
+  "mwh_nh3_per_t": "ratio table Ammonia column ammonia row (5.166, PyPSA-Eur MWh_NH3_per_tNH3), applied in s3_0_industry.py",
+  "production_2019_kt": {
+   "BN": 0.0,
+   "ID": 7407.142857142857,
+   "KH": 0.0,
+   "LA": 0.0,
+   "MM": 0.0,
+   "MY": 1457.142857142857,
+   "PH": 0.0,
+   "SG": 0.0,
+   "TH": 0.0,
+   "TL": 0.0,
+   "VN": 1396.428571428571
+  },
+  "production_2050_kt": {
+   "BN": 0.0,
+   "ID": 13491.139809133112,
+   "KH": 0.0,
+   "LA": 0.0,
+   "MM": 0.0,
+   "MY": 2598.1993537604358,
+   "PH": 0.0,
+   "SG": 0.0,
+   "TH": 0.0,
+   "TL": 0.0,
+   "VN": 2907.0446232968334
+  },
+  "rule": "DFX F2.1: 2050 production = USGS 2019 production (kt N x 17/14) x max(G, 1)^((2050 - 2019) / 28 x elasticity), no saturation, no plan cap; USGS-unlisted countries 0",
+  "source": "ammonia_production.csv",
+  "source_sha256": "c8414b7e89858b7813301b27d67279f46bbdfafcb7a262ad2218dbbcd07700b0",
+  "truncation": "floored at 0, truncated amount reported per country"
+ },
  "base_year": {
+  "ammonia": 2019,
   "cement": 2023,
   "steel": 2024
  },
@@ -43,11 +87,14 @@
   "TL": 2.3264504013917544,
   "VN": 3.760397508422925
  },
+ "neu": {
+  "rule": "DFX F1.2: NEU outside the TFEC envelope; 2050 = 2019 x industry multiplier (energy-use anchor / 2019 industry energy use)"
+ },
  "outputs": {
-  "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv": "064bdce02063083d9052ba01aa2816e07c9d2f48e8f24170a16378165bdee441",
-  "DEMAND_ANCHOR_AEO8_ATS.csv": "e61e5673a79b3d171437863021e9777a04b98947e9354e1b7dfbc876d54d32f1",
-  "INDUSTRY_OUTPUT_2050_M08B.csv": "a83a868f3026dc4812ffcbbded65ea297ba95a0002d195c9ba43ba6407945f69",
-  "INDUSTRY_OUTPUT_BASE_M08B.csv": "256f68c2691d965baa4128faa952e9cb8ddcdac1dd7bb3c21c5387a3571414b2",
+  "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv": "c39f2782429971406ed00977ee285036807debe72e4098829142318877455131",
+  "DEMAND_ANCHOR_AEO8_ATS.csv": "613f530eff100801b00780e458d9e42217b98dee32fa3cde46b3ec3e28455add",
+  "INDUSTRY_OUTPUT_2050_M08B.csv": "7dc308d138507562882a25ab7a0c294ca983d33f3ec06178d1c8c79372cd6a7c",
+  "INDUSTRY_OUTPUT_BASE_M08B.csv": "4483766fad62dda50944759fd6a4e6d67ec7a0c17150cc3b0c518548e98ddfca",
   "INDUSTRY_OUTPUT_PLAN_CAPS.csv": "d3cebc6e737526689274cc868ccfb7aeb782411e0d04c1ed832a4321135c1546"
  },
  "plan_caps": [
@@ -68,6 +115,53 @@
    "source": "Decision 261/QD-TTg (2026-02-09): 65-70 Mt crude steel 2050 (upper value as cap)"
   }
  ],
+ "ras": {
+  "column_error": 2.220446049250313e-16,
+  "column_targets_mwh": {
+   "AgricultureOthers": 323257082.09111494,
+   "Commercial": 586048810.6975609,
+   "Industry": 4500017653.570558,
+   "Residential": 613955896.9212543,
+   "Transport": 2653498781.769512
+  },
+  "column_targets_printed_mtoe": {
+   "AgricultureOthers": 27.8,
+   "Commercial": 50.4,
+   "Industry": 387.0,
+   "Residential": 52.8,
+   "Transport": 228.2
+  },
+  "countries": [
+   "BN",
+   "KH",
+   "ID",
+   "LA",
+   "MY",
+   "MM",
+   "PH",
+   "SG",
+   "TH",
+   "VN"
+  ],
+  "iterations": 11,
+  "k_scale": 0.9998239547038327,
+  "max_iterations": 1000,
+  "row_error": 3.425881800467323e-11,
+  "row_targets": "country ATS TFEC anchors (C.8 x D.1)",
+  "rule": "DFX_RULES section 1.3: RAS biproportional fitting, rows first then columns, zero seeds stay zero",
+  "sectors": [
+   "Industry",
+   "Transport",
+   "Residential",
+   "Commercial",
+   "AgricultureOthers"
+  ],
+  "seed": "D1 table base_2019_mwh by sector (energy use; NonEnergyUse excluded)",
+  "sum_column_targets_printed_mwh": 8678306000.0,
+  "sum_row_targets_mwh": 8676778225.05,
+  "tl": "outside AEO8: normalised weights (2019 sector energy use x C.3 ATS growth), NEU excluded; TL industry multiplier undefined -> NEU multiplier = KH / LA / MM mean",
+  "tolerance": 1e-10
+ },
  "residential_electricity_ats_mtoe": [
   29.0,
   33.2
@@ -106,85 +200,102 @@
   "AEO8_2050_BY_COUNTRY.csv": "875ef9465ac183b68594a5b3456c61df81d03574d868d0a2fd60505604ec27d6",
   "AEO8_TABLE_D2_REAL_GDP_PPP2017.csv": "9189d8621fa332edc31608f1e55df3e55ce2d5a4dc7afd11e8cbf235ca1ce793",
   "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv": "526a54bdbef49b2e04b8761555c7777ec9908d2a46d1dc6b602b273ad1c829c2",
+  "ammonia_production.csv": "c8414b7e89858b7813301b27d67279f46bbdfafcb7a262ad2218dbbcd07700b0",
   "exp-2026-10-20_15_02_22.xlsx": "87a72363dd2587b1fbf2611cdeabba2a7cf70b05949acad483e12642f5f9ccbe",
   "myb1-2023-cemen-ERT.xlsx": "607779aef2cfb024f61ffc059e622850e2845a1c797b6d4e1ca78a57d1064a02",
-  "unpopulation_dataportal_20261020224306.csv": "da788eea3f068839beca122c5b2025cfd50a80a606a0585265bf5eb3d876017c"
+  "unpopulation_dataportal_20261020224306.csv": "7d8988ec54c6d15431146e6eae864ebc2c73631428ab3c3385f66aadb851cb51"
  },
  "tl_rule": "per capita = mean(KH, LA, MM) ATS 2050; population UN WPP 2024 median 2050",
  "totals": {
   "aeo8_ats_residential_elec_2050_twh": 386.11600000000004,
-  "agriculture_fuel_anchor_11_twh": 281.57650698530216,
+  "agriculture_fuel_anchor_11_twh": 244.91661974425966,
   "agriculture_fuel_ratio_table_11_twh": 320.50245860303437,
   "all_base_loads_nonnegative": true,
+  "ammonia_2050_11_mt": 18.996383786190382,
+  "ammonia_feedstock_gas_deducted_11_twh": 196.99282623102732,
+  "ammonia_feedstock_gas_truncated_11_twh": 8.168118659828801,
   "ats_elec_10_twh": 2008.5695,
   "ats_tfec_10_mtoe": 746.068635,
   "base_load_anchor_11_twh": 966.9084251289165,
   "base_load_buildings_agri_11_twh": 961.6013000001974,
   "base_load_ratio_table_11_twh": 1032.376359597955,
   "cement_2050_11_mt": 416.8309439869439,
-  "commercial_fuel_anchor_11_twh": 154.43332198359212,
+  "commercial_fuel_anchor_11_twh": 155.50007731189532,
   "commercial_fuel_ratio_table_11_twh": 286.66509341071526,
   "fuel_anchor_zeroed": [
    {
-    "anchor_mwh": -704657.6902124574,
+    "anchor_mwh": -678048.442941563,
     "country": "BN",
     "reason": "negative",
     "sector": "Residential"
    },
    {
-    "anchor_mwh": -1469253.3533004979,
+    "anchor_mwh": -1035488.1095406471,
     "country": "BN",
     "reason": "negative",
     "sector": "Commercial"
    },
    {
-    "anchor_mwh": -12357515.529446468,
+    "anchor_mwh": -17293523.306779154,
     "country": "MY",
     "reason": "negative",
     "sector": "Residential"
    },
    {
-    "anchor_mwh": -22874930.945168957,
+    "anchor_mwh": -16220666.16090028,
     "country": "MY",
     "reason": "negative",
     "sector": "Commercial"
    },
    {
-    "anchor_mwh": -3798284.155563463,
+    "anchor_mwh": -3601539.3829437275,
     "country": "SG",
     "reason": "negative",
     "sector": "Residential"
    },
    {
-    "anchor_mwh": -11067341.629840648,
+    "anchor_mwh": -4175094.0788144544,
     "country": "SG",
     "reason": "negative",
     "sector": "Commercial"
    },
    {
-    "anchor_mwh": -123880.66346171289,
-    "country": "SG",
-    "reason": "negative",
-    "sector": "AgricultureOthers"
-   },
-   {
-    "anchor_mwh": -10907607.163517714,
+    "anchor_mwh": -61012.06237733364,
     "country": "TH",
     "reason": "negative",
-    "sector": "Commercial"
+    "sector": "Residential"
    },
    {
-    "anchor_mwh": 126934.21202706784,
+    "anchor_mwh": 185713.94314881804,
     "country": "TL",
     "reason": "no_2019_fuel_rows",
     "sector": "Commercial"
+   },
+   {
+    "anchor_mwh": -22084100.00132455,
+    "country": "VN",
+    "reason": "negative",
+    "sector": "Residential"
    }
   ],
+  "neu_2019_11_twh": 648.8341047176499,
+  "neu_2050_11_twh": 1010.2830371324815,
+  "ras_sector_anchor_10_AgricultureOthers_twh": 323.25708209111485,
+  "ras_sector_anchor_10_Commercial_twh": 586.0488106975608,
+  "ras_sector_anchor_10_Industry_twh": 4500.017653570558,
+  "ras_sector_anchor_10_Residential_twh": 613.9558969212543,
+  "ras_sector_anchor_10_Transport_twh": 2653.4987817695123,
   "residential_elec_10_twh": 428.2015087805864,
-  "residential_fuel_anchor_11_twh": 435.2678219221563,
+  "residential_fuel_anchor_11_twh": 230.1898100361416,
   "residential_fuel_ratio_table_11_twh": 673.7254240916845,
+  "sector_anchor_11_AgricultureOthers_twh": 325.45898410806063,
+  "sector_anchor_11_Commercial_twh": 586.676776405647,
+  "sector_anchor_11_Industry_twh": 4500.017653570558,
+  "sector_anchor_11_Residential_twh": 615.1082889763135,
+  "sector_anchor_11_Transport_twh": 2660.9860376888023,
   "steel_2050_11_mt": 97.77174649240604,
-  "transport_anchor_11_twh": 1700.444232570162,
+  "transport_anchor_10_twh": 2653.4987817695123,
+  "transport_anchor_11_twh": 2660.9860376888023,
   "transport_ratio_table_11_twh": 2990.9761580532686
  }
 }

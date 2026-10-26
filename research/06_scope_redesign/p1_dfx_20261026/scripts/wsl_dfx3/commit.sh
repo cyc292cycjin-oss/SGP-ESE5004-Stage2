@@ -10,6 +10,7 @@ cd "$WT" || exit 1
 mkdir -p research/06_scope_redesign/p1_dfx_20261026/scripts/wsl_dfx3
 cp /home/jin/dfx3/*.sh /home/jin/dfx3/*.py research/06_scope_redesign/p1_dfx_20261026/scripts/wsl_dfx3/ 2>/dev/null
 cp -r /home/jin/dfx3/trace research/06_scope_redesign/p1_dfx_20261026/scripts/wsl_dfx3/ 2>/dev/null
+rm -rf research/06_scope_redesign/p1_dfx_20261026/scripts/wsl_dfx3/trace/__pycache__ research/06_scope_redesign/p1_dfx_20261026/scripts/wsl_dfx3/__pycache__
 git add -A research/06_scope_redesign/p1_dfx_20261026 scripts_project configs tests "$@"
 if [ -f /home/jin/dfx3/force.txt ]; then
   while IFS= read -r f; do [ -n "$f" ] && for g in $f; do [ -e "$g" ] && git add -f "$g"; done; done < /home/jin/dfx3/force.txt

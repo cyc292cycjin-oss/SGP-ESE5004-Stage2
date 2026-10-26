@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from d1_common import ASEAN, DEMAND_DIR, REG_DIR, ROOT, SRC_DIR, Registry, read_csv, sha256, src_sha, write_csv, write_json
+from d1_common import ASEAN, DEMAND_DIR, HVC_FEEDSTOCK_ACCOUNTS, REG_DIR, ROOT, SRC_DIR, Registry, read_csv, sha256, src_sha, write_csv, write_json
 
 SCRIPT = "scripts_project/s2b_feedstock.py"
 EDGAR = "EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv"
@@ -97,11 +97,11 @@ def main():
             co2_proxy_low = msw50 * pl_lo * ((inc or 0.0) + (unc or 0.0) * ob_lo) * PLASTIC_DM * PLASTIC_C * PLASTIC_FOSSIL * CO2_PER_C
             co2_proxy_high = msw50 * pl_hi * ((inc or 0.0) + (unc or 0.0) * ob_hi) * PLASTIC_DM * PLASTIC_C * PLASTIC_FOSSIL * CO2_PER_C
             proc = (b2 + d2) * mult
-            ne = dem[(dem.country == c) & (dem.sector == "NonEnergyUse")]
+            ne = dem[(dem.country == c) & (dem.sector == "NonEnergyUse")].copy()
+            ne["v"] = pd.to_numeric(ne.value_2050_mwh, errors="coerce").fillna(0.0)
             full = 0.0
-            for car, v in ne.groupby("carrier").value_2050_mwh.sum().items():
-                vv = float(pd.to_numeric(v, errors="coerce") or 0.0) if not isinstance(v, (int, float)) else float(v)
-                full += vv * EF.get(car, 0.0) * (hvc_primary if car == "oil" else 1.0)
+            for r_ in ne.itertuples():   # DFX F3 (DFX_RULES section 3): the HVC primary fraction scales the HVC feedstock oil accounts only
+                full += float(r_.v) * EF.get(r_.carrier, 0.0) * (hvc_primary if (r_.carrier == "oil" and r_.account in HVC_FEEDSTOCK_ACCOUNTS) else 1.0)
             rows.append(dict(country=c, industry_multiplier=mult, edgar_2B_2019_t=b2, edgar_2D_2019_t=d2, process_2B_2D_2050_t=proc,
                              msw_2050_t=msw50, plastic_share=plastic if plastic is not None else "", incineration_share=inc if inc is not None else "",
                              uncollected_share=unc if unc is not None else "", open_burned_share_of_uncollected=ob if ob is not None else "",
@@ -153,7 +153,7 @@ def main():
                 r["plastics_burned_co2_2050_t"], "tCO2/a", "B", "What a Waste 3.0 x IPCC 2006 Vol.5 Table 2.4", "s2b_feedstock.py", f"{waw_sha}|{ipcc_sha}", country=c, decision_ref="56",
                 sensitivity_low=min(r["plastics_burned_co2_low_t"], r["plastics_burned_co2_proxy_low_t"]), sensitivity_high=max(r["plastics_burned_co2_high_t"], r["plastics_burned_co2_proxy_high_t"]),
                 status="REGISTERED" if r["plastics_burned_co2_2050_t"] > 0 else "SOURCE_ZERO")
-        reg.add(f"feedstock_full_release_2050_{c}", f"{c} full-release feedstock carbon 2050 (PyPSA-Eur default as implemented in S2: non-energy use x EF, oil x HVC primary {hvc_primary}); sensitivity mode", r["full_release_2050_t"], "tCO2/a", "C",
+        reg.add(f"feedstock_full_release_2050_{c}", f"{c} full-release feedstock carbon 2050 (PyPSA-Eur default as implemented in S2: non-energy use x EF, HVC feedstock oil accounts x HVC primary {hvc_primary} (DFX F3 scope: naphtha, ethane, LPG, NGL), other NEU products x 1.0); sensitivity mode", r["full_release_2050_t"], "tCO2/a", "C",
                 "derived (D1 demand table x technology-data CO2 intensities)", "s2b_feedstock.py", ed_sha, country=c, decision_ref="56", sensitivity_low=r["territorial_total_2050_t"], sensitivity_high=r["full_release_2050_t"], status="SENSITIVITY")
     reg.write(REG_DIR / "fragments" / "feedstock_territorial.csv")
     write_json(dict(script=SCRIPT, sources=dict(edgar=ed_sha, what_a_waste=waw_sha, ipcc_v5_ch2=ipcc_sha), constants=dict(plastic_dry_matter=PLASTIC_DM, plastic_carbon=PLASTIC_C, plastic_fossil=PLASTIC_FOSSIL, hvc_primary=hvc_primary, ef=EF),

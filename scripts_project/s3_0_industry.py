@@ -287,6 +287,20 @@ def main():
                     else:
                         for oc in OUT_CARRIERS:
                             rest50_own[oc] += e_sub * share * mult * eff * m_["future_shares"][oc]
+            # ---- DFX F2 (DFX_RULES section 2): ammonia by the physical output rule in the anchor mode ------------------------------------------------
+            # 2050 ammonia = USGS 2019 production x growth (INDUSTRY_OUTPUT_2050_M08B.csv ammonia_2050_mt, m08b_demand.py) x MWh_NH3/t (ratio table);
+            # the EU27 chemicals-weight share of the chemical sub-sector mapped to the 'Ammonia' sector no longer generates an ammonia load (dropped and
+            # recorded, not re-allocated); methanol, HVC, chlorine and the other chemical sectors keep their weights. Sensitivity modes unchanged.
+            nh3_rule_mwh, nh3_dropped_mwh, nh3_2050_t = None, 0.0, 0.0
+            if rule is not None and "ammonia_2050_mt" in rule.columns:
+                nh3_2050_t = float(rule.at[c, "ammonia_2050_mt"]) * 1e6
+                nh3_rule_mwh = nh3_2050_t * float(ratios.at["ammonia", "Ammonia"])
+                nh3_dropped_mwh = sum(dt["e2050"] * mp[(dt["subsector"], dt["pypsa"])]["future_shares"]["ammonia"] for dt in detail if dt["pypsa"] == "Ammonia")
+                for rest in (rest50, rest50_today, rest50_nonother, rest50_own):
+                    rest["ammonia"] = rest["ammonia"] - nh3_dropped_mwh + nh3_rule_mwh
+                for dt in detail:
+                    if dt["pypsa"] == "Ammonia":
+                        dt["dfx_dropped"] = True
             # ---- M08b B2 (decision 133): other-bucket variant useful_heat_bands ----------------------------------------------------------
             # other-bucket fuels x multiplier split by the JRC-IDEES OIS process shares: heat uses -> useful heat x HEAT_EFF in four bands
             # (low on the industry heat bus, medium A 150-200 C / medium B 200-400 C (supplement 01 section 2) / high on the band buses), diesel
@@ -343,7 +357,13 @@ def main():
                         for oc in OUT_CARRIERS:
                             rows.append(dict(country=c, subsector=s_, carrier=oc, mwh_2019=dd19.get(oc, 0.0), mwh_2050=dd50.get(oc, 0.0), method=src, ratio_source="PyPSA-Eur v2025.07.0 x JRC-IDEES-2021 EU27", tier="B"))
                     for dt in detail:
-                        rows.append(dict(country=c, subsector=dt["subsector"], carrier="all (see mapping shares)", mwh_2019=dt["e2019"], mwh_2050=dt["e2050"], method=f"energy fallback x efficiency factor {dt['eff']:.3f} via {dt['pypsa']}", ratio_source="PyPSA-Eur x JRC-IDEES-2021", tier="C"))
+                        rows.append(dict(country=c, subsector=dt["subsector"], carrier="all (see mapping shares)", mwh_2019=dt["e2019"], mwh_2050=(0.0 if dt.get("dfx_dropped") else dt["e2050"]),
+                                         method=f"energy fallback x efficiency factor {dt['eff']:.3f}" + (f" [DFX F2: EU27 ammonia share {dt['e2050']:.6g} MWh dropped, replaced by the production rule row]" if dt.get("dfx_dropped") else "") + f" via {dt['pypsa']}",
+                                         ratio_source="PyPSA-Eur x JRC-IDEES-2021", tier="C"))
+                    if nh3_rule_mwh is not None:
+                        rows.append(dict(country=c, subsector="ammonia (production rule)", carrier="ammonia", mwh_2019=0.0, mwh_2050=nh3_rule_mwh,
+                                         method=f"DFX F2: USGS 2019 production x growth rule = {nh3_2050_t:.6g} t NH3 x {float(ratios.at['ammonia', 'Ammonia']):.4g} MWh/t (m08b_demand.py INDUSTRY_OUTPUT_2050_M08B.csv)",
+                                         ratio_source="USGS MYB 2022 Nitrogen T12 x AEO8 D.2 growth", tier="C"))
                 summaries[ob].append(dict(country=c, industry_multiplier=mult, crude_steel_2019_t=crude, crude_steel_2050_t=prod50, primary_dri_2050_t=dri, secondary_eaf_2050_t=secondary,
                                           clinker_2019_t=clk19, cement_2019_t=cem_t19, cement_2050_t=cem_t50, unsd_subsector_rows_present=";".join(present),
                                           **{f"bas_{car}_mwh": bas[car] for car in CARRIERS}, bas_hydrogen_mwh=0.0, bas_heat_mwh=0.0, bas_ammonia_mwh=0.0, bas_methanol_mwh=0.0,
@@ -354,7 +374,9 @@ def main():
                                                                                                       "asean_own_2019": "other bucket with the country's own UNSD 2019 carrier composition (no conversion)",
                                                                                                       "useful_heat_bands": "other-bucket diesel / solid-fuel motors kept as fuel (mechanical use)"}[ob] if pe_final["coal"] > 0 else ""),
                                           **{f"s2b_td_{oc}_mwh": float(s2b.get(f"pe_{oc}_mwh", 0.0)) for oc in ["coal", "oil", "gas", "biomass", "electricity", "hydrogen", "heat"]},
-                                          **{f"td_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, other_bucket=ob))
+                                          **{f"td_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, other_bucket=ob,
+                                          ammonia_rule=("usgs_2019_x_growth_rule" if nh3_rule_mwh is not None else "eu27_chemicals_weight"), ammonia_2050_t=nh3_2050_t,
+                                          pe_ammonia_eu27_share_dropped_mwh=nh3_dropped_mwh))
                 tds[ob].append(dict(country=c, **{f"pe_{oc}_mwh": td[oc] for oc in OUT_CARRIERS}, pe_biomass_before_overflow_mwh=td["biomass"], biomass_overflow_industry_to_gas_mwh=0.0, biomass_overflow_agriculture_to_gas_mwh=0.0))
                 if heat_ob:   # band columns; fixed industrial biomass is cement kiln fuel (high band) or steam / drying use in the route sectors (medium band,
                     # split at 200 C with the same fraction as the other bucket: supplement 01 section 2), grade C
@@ -447,6 +469,8 @@ def main():
                     other_bucket=dict(subsectors=OTHER_BUCKET, ois_today_shares=ois_today, main="pypsa_eur_2050", sensitivity="idees_today", suffix=OTHER_BUCKET_SUFFIX["idees_today"],
                                       useful_heat_bands=dict(table=HEAT_BANDS.name, sha256=hb_sha, shares=band_share, efficiency=HEAT_EFF, suffix=OTHER_BUCKET_SUFFIX["useful_heat_bands"])),
                     output_rule_tables={m: dict(table=p.name, sha256=sha256(p)) for m, p in OUTPUT_RULE_TABLES.items()},
+                    dfx_ammonia=dict(rule="DFX F2 (anchor mode): ammonia load = INDUSTRY_OUTPUT_2050_M08B.csv ammonia_2050_mt x ratio-table MWh_NH3/t; the EU27 chemicals-weight Ammonia share is dropped",
+                                     mwh_nh3_per_t=float(ratios.at["ammonia", "Ammonia"]), modes=list(OUTPUT_RULE_TABLES)),
                     eu27_chemicals_split_mwh=dict(basic=basic_fec_mwh, ammonia=nh3_mwh, chlorine=cl_mwh, methanol=meoh_mwh, hvc=hvc_mwh), gaps=gaps, summary_main=outputs["aeo8_ats_relative"]),
                DEMAND_DIR / "INDUSTRY_2050_EVIDENCE.json")
     s = pd.DataFrame(outputs["aeo8_ats_relative"]).set_index("country")

@@ -419,7 +419,7 @@ research:
       physical_output_rule: sqrt_gdp_capped   # sqrt_gdp_capped (main; growth_method ats_anchor) | industry_multiplier = 2019 x industry multiplier (former rule, ratio / level tables)
       physical_output_elasticity: 0.5         # assumption, grade C (registry industry_output_elasticity)
       physical_output_percap_caps: {cement: 1.0, steel: 0.6}   # t/cap/a, assumptions, grade C (registry industry_percap_saturation_*)
-      physical_output_base_year: {cement: 2023, steel: 2024}   # USGS MYB 2023 T22 (SG, TL 0); worldsteel 2024 (BN, KH, LA, TL 0) (registry industry_output_base_year)
+      physical_output_base_year: {cement: 2023, steel: 2024, ammonia: 2019}   # USGS MYB 2023 T22 (SG, TL 0); worldsteel 2024 (BN, KH, LA, TL 0); ammonia USGS MYB 2022 Nitrogen T12 2019 (ID, MY, VN; others 0) - DFX F2: growth rule only, no saturation / plan cap (registry industry_output_base_year, industry_ammonia_output_rule)
       physical_output_plan_caps: research_inputs/demand_v5/INDUSTRY_OUTPUT_PLAN_CAPS.csv   # VN steel 70 (Decision 261), cement 150 (Decision 1266): caps only
       # M08b B2 (decision 133) + supplement 01 section 2 (decision 137): four useful-heat bands per node (s2_layers.HEAT_BAND_TECH; only technology-data v0.15.0
       # rows; heat pumps low band only; electric boiler steam only up to medium A (about <= 200 C); medium B = gas steam boiler + gas / solid-fuel direct
@@ -440,7 +440,7 @@ research:
         aeo8_ats_anchor: research_inputs/registry_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_aeo8_ats_anchor.csv   # M08b B1
       feedstock_process_share_source: edgar_2B_over_feedstock_carbon   # full_release mode only: S2-0 FEEDSTOCK_CARBON_BOUNDARY_2019.csv, capped at 1
       feedstock_end_of_life_release_fraction: 1.0   # full_release mode only: PyPSA-Eur default (HVC_environment_sequestration_fraction 0)
-      hvc_recycling_applies_to_naphtha: true        # HVC_primary_fraction 0.4 (D1 registry) reduces primary petrochemical feedstock; chemical recycling electricity added
+      hvc_recycling_applies_to_naphtha: true        # DFX F3 (registry hvc_primary_fraction_scope): true = share_HVC_primary_fraction_2050 (0.4) scales the HVC feedstock NEU oil accounts only (naphtha, ethane, LPG, NGL; d1_common.HVC_FEEDSTOCK_ACCOUNTS); bitumen, lubricants, waxes, petroleum coke and the other NEU products x 1.0 | false = no reduction of any NEU row
       steel_aluminium_routes: "steel: worldsteel 2019 + PyPSA-Eur St_primary_fraction 0.3 / DRI_fraction 1.0 (R1); aluminium: DATA_PENDING (no ASEAN production split)"
     gap_diagnostic:                       # decisions 49, 53: off in the main run; separate labelled run
       enabled: false

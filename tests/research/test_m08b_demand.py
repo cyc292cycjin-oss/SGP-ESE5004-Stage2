@@ -47,8 +47,9 @@ def test_country_totals_from_aeo8(data):
 
 
 def test_activity_equals_anchor(data):
-    """11 countries: base load, transport and industry (incl. non-energy use) of the ats_anchor table equal the anchors (<= 1e-6), and the anchors equal an
-    independent recomputation from the AEO8 sources and the 2019 bases of the ratio table."""
+    """11 countries: base load, transport and industry (energy use; DFX F1: non-energy use outside the TFEC envelope) of the ats_anchor table equal the
+    anchors (<= 1e-6), and the anchors equal an independent recomputation from the AEO8 sources and the 2019 bases of the ratio table (electricity by
+    the normalised weights; transport / industry = the RAS sector anchors, DFX F1; TL by the normalised weights without NEU)."""
     an, t, ratio, _, _ = data; c3 = c3_ats()
     g_el = {s: c3[s][1] / c3[s][0] for s in SECTORS}; g_el["Residential"] = RES_ELEC_ATS_MTOE[1] / RES_ELEC_ATS_MTOE[0]
     g_t = {s: c3[s][1] / c3[s][0] for s in SECTORS}
@@ -56,17 +57,22 @@ def test_activity_equals_anchor(data):
         m = t.country == c
         bl = float(t[m & (t.carrier == "electricity") & t.sector.isin(BASE_SECTORS)].v.sum())
         tr = float(t[m & (t.sector == "Transport")].v.sum())
-        ind = float(t[m & t.sector.isin(["Industry", "NonEnergyUse"])].v.sum())
+        ind = float(t[m & (t.sector == "Industry")].v.sum())
         assert rel(bl, an.at[c, "base_load_anchor_mwh"]) <= TOL
         assert rel(tr, an.at[c, "transport_anchor_mwh"]) <= TOL
         assert rel(ind, an.at[c, "industry_anchor_mwh"]) <= TOL
+        assert rel(an.at[c, "transport_anchor_mwh"], an.at[c, "ras_sector_anchor_Transport_mwh"]) <= TOL and rel(an.at[c, "industry_anchor_mwh"], an.at[c, "ras_sector_anchor_Industry_mwh"]) <= TOL
         r = ratio[ratio.country == c]
         el19 = {s: float(r[(r.carrier == "electricity") & (r.sector == s)].b.sum()) for s in SECTORS}
         w = {s: el19[s] * g_el[s] for s in SECTORS}
         assert rel(an.at[c, "base_load_anchor_mwh"], an.at[c, "ats_elec_2050_mwh"] * sum(w[s] for s in BASE_SECTORS) / sum(w.values())) <= TOL
-        t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}; t19["Industry"] += float(r[r.sector == "NonEnergyUse"].b.sum())
-        wt = {s: t19[s] * g_t[s] for s in SECTORS}
-        assert rel(an.at[c, "transport_anchor_mwh"], an.at[c, "ats_tfec_2050_mwh"] * wt["Transport"] / sum(wt.values())) <= TOL
+        t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}   # DFX F1.2: energy use only
+        if c == "TL":   # outside the RAS fit: normalised weights, NEU excluded
+            wt = {s: t19[s] * g_t[s] for s in SECTORS}
+            assert rel(an.at[c, "transport_anchor_mwh"], an.at[c, "ats_tfec_2050_mwh"] * wt["Transport"] / sum(wt.values())) <= TOL
+        assert rel(sum(an.at[c, f"ras_sector_anchor_{s}_mwh"] for s in SECTORS), an.at[c, "ats_tfec_2050_mwh"]) <= TOL   # row constraint (energy use)
+        neu = float(t[m & (t.sector == "NonEnergyUse")].v.sum())
+        assert rel(neu, an.at[c, "neu_2050_mwh"]) <= TOL and neu <= float(r[r.sector == "NonEnergyUse"].b.sum()) * an.at[c, "neu_multiplier"] * (1 + 1e-9)
     # the anchor table is a row-for-row copy of the ratio table; rows that are not anchored (international bunkers, decision 10) keep their ratio-table values
     assert list(t.country + t.sector + t.carrier + t.account) == list(ratio.country + ratio.sector + ratio.carrier + ratio.account)
     keep = ~(((t.carrier == "electricity") & t.sector.isin(BASE_SECTORS)) | t.sector.isin(["Transport", "Industry", "NonEnergyUse"] + list(FUEL_SECTORS.values())))
@@ -84,10 +90,11 @@ def test_sector_fuel_anchor(data):
     for c in ASEAN:
         r = ratio[ratio.country == c]; tc = t[t.country == c]
         el19 = {s: float(r[(r.carrier == "electricity") & (r.sector == s)].b.sum()) for s in SECTORS}; w = {s: el19[s] * g_el[s] for s in SECTORS}
-        t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}; t19["Industry"] += float(r[r.sector == "NonEnergyUse"].b.sum()); wt = {s: t19[s] * g_t[s] for s in SECTORS}
+        t19 = {s: float(r[r.sector == s].b.sum()) for s in SECTORS}; wt = {s: t19[s] * g_t[s] for s in SECTORS}   # DFX F1: energy use only (TL weights)
         A_el = a8[c]["elec_pc_kwh"] * a8[c]["pop_2050_million"] * 1e3; A_t = a8[c]["tfec_pc_kgoe"] * a8[c]["pop_2050_million"] * 1e3 * 11.63
         for key, s in FUEL_SECTORS.items():
-            tfa = A_t * wt[s] / sum(wt.values()); ela = A_el * w[s] / sum(w.values()); raw = tfa - ela
+            tfa = (A_t * wt[s] / sum(wt.values())) if c == "TL" else float(an.at[c, f"ras_sector_anchor_{s}_mwh"])   # DFX F1: RAS sector anchor (test_dfx_demand re-runs the fit)
+            ela = A_el * w[s] / sum(w.values()); raw = tfa - ela
             assert rel(an.at[c, f"{key}_fuel_anchor_raw_mwh"], raw) <= TOL and rel(an.at[c, f"{key}_tfec_anchor_mwh"], tfa) <= TOL
             rows = tc[(tc.sector == s) & (tc.carrier != "electricity") & (tc.value_2050_mwh != "")]
             fuel = float(rows.v.sum()); el = float(tc[(tc.sector == s) & (tc.carrier == "electricity")].v.sum())
@@ -102,7 +109,7 @@ def test_sector_fuel_anchor(data):
                 assert rel(fuel, raw) <= TOL and rel(fuel + el, tfa) <= TOL                   # sector total = ATS TFEC anchor
                 assert np.allclose(rows.v, rows.b * raw / b19, rtol=1e-9, atol=1e-6)            # 2019 carrier structure, one multiplier per sector
     assert sorted(zeroed) == sorted([("BN", "Residential"), ("BN", "Commercial"), ("MY", "Residential"), ("MY", "Commercial"), ("SG", "Residential"),
-                                     ("SG", "Commercial"), ("SG", "AgricultureOthers"), ("TH", "Commercial"), ("TL", "Commercial")])
+                                     ("SG", "Commercial"), ("TH", "Residential"), ("VN", "Residential"), ("TL", "Commercial")])   # DFX F1 (RAS): 8 negative + TL no rows
     z = reg.loc["demand_sector_fuel_anchor_zeroed"]
     assert z.status == "REGISTERED" and z.value == f"{len(zeroed)} cells" and all(f"{c} {s} " in z.description for c, s in zeroed)
     assert reg.at["demand_sector_fuel_anchor_rule", "value"] == "tfec_minus_electricity" and "137" in reg.at["demand_anchor_family_main", "decision_ref"]
@@ -114,7 +121,8 @@ def test_base_loads_nonnegative_and_total(data):
     assert (t[t.sector.isin(BASE_SECTORS) & (t.carrier == "electricity")].v >= 0).all()
     total = an.base_load_anchor_mwh.sum() / 1e6
     assert total == pytest.approx(966.9, abs=0.1)   # S4R supplement 01: 966 TWh (industry 2022 from the BAS panel 185.6; ATS panel 186 here)
-    assert (an.transport_fuel_multiplier > 0).all() and (an.industry_multiplier > 0).all()
+    assert (an.transport_fuel_multiplier > 0).all() and (an.drop("TL").industry_multiplier > 0).all()
+    assert an.at["TL", "industry_multiplier"] == 0 and an.at["TL", "neu_multiplier"] > 0   # DFX F1.2: TL has no 2019 industry energy use (NEU by the peer mean)
 
 
 def test_physical_output_rule(data):

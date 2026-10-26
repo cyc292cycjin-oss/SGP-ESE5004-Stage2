@@ -46,12 +46,12 @@ class Corrections:
 
     def __init__(self):
         import d1_registry
-        frames = [pd.read_csv(REG_DIR / "fragments" / f"{f}.csv", dtype=str, keep_default_na=False) for f in d1_registry.FRAGMENTS if not f.startswith("m08b")]
+        frames = [pd.read_csv(REG_DIR / "fragments" / f"{f}.csv", dtype=str, keep_default_na=False) for f in d1_registry.FRAGMENTS if not f.startswith(("m08b", "dfx"))]   # DFX: the later dfx fragments are built after this script
         u = Registry("scripts_project/d1_registry.py"); d1_registry.unit_rows(u)
         frames.append(pd.DataFrame(u.rows, columns=COLUMNS))
         df = pd.concat(frames, ignore_index=True)[COLUMNS]
         for f in d1_registry.CORRECTIONS:
-            if f.startswith("m08b"):
+            if f.startswith(("m08b", "dfx")):
                 continue
             corr = pd.read_csv(REG_DIR / "fragments" / f"{f}.csv", dtype=str, keep_default_na=False)[COLUMNS]
             df = pd.concat([df[~df.param_id.isin(corr.param_id)], corr], ignore_index=True)
