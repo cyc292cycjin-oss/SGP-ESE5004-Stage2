@@ -1,0 +1,95 @@
+{
+ "code_commit": "f73f5c0695b9471a36184e14123e94ab978cb14b",
+ "passed": true,
+ "build_check": {
+  "V1": {
+   "passed": true,
+   "failed": [],
+   "lp": {
+    "num_row": 9975377,
+    "num_col": 4477801,
+    "nnz": 23460944,
+    "build_seconds": 305.7352468967438
+   },
+   "peak_rss_gib": 9.5,
+   "snapshots": null,
+   "network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2"
+  },
+  "V2": {
+   "passed": true,
+   "failed": [],
+   "lp": {
+    "num_row": 9629180,
+    "num_col": 4325607,
+    "nnz": 22382441,
+    "build_seconds": 138.74753618240356
+   },
+   "peak_rss_gib": 9.57,
+   "snapshots": null,
+   "network_sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"
+  }
+ },
+ "build_check_truncated": {
+  "V1": {
+   "passed": true,
+   "failed": [],
+   "lp": {
+    "num_row": 1541222,
+    "num_col": 695950,
+    "nnz": 3612124,
+    "build_seconds": 32.12334370613098
+   },
+   "peak_rss_gib": 1.99,
+   "snapshots": null,
+   "network_sha256": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2"
+  },
+  "V2": {
+   "passed": true,
+   "failed": [],
+   "lp": {
+    "num_row": 1487648,
+    "num_col": 672300,
+    "nnz": 3446098,
+    "build_seconds": 23.12376880645752
+   },
+   "peak_rss_gib": 1.88,
+   "snapshots": null,
+   "network_sha256": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"
+  }
+ },
+ "refusals": [
+  "truncate_left exit=2 :: REFUSED: TRUNCATE is for smoke tests only",
+  "hook_left exit=2 :: REFUSED: SOLVE_CMD set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)",
+  "fake_left exit=2 :: REFUSED: FAKE_SLEEP_V1 set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)",
+  "time_limit_override exit=2 :: REFUSED: GUROBI_TIME_LIMIT_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with",
+  "wall_override exit=2 :: REFUSED: WALL_CAP_S is set - the TimeLimit / wall cap of every run are the registered values of dfx_batch.py (RUN_PLAN_DFX.md 3.1); overrides only with ALLOW_UN",
+  "gap_override exit=2 :: REFUSED: LICENCE_GAP_S=1 differs from the registered value 330 (RUN_PLAN_DFX.md 3.2)",
+  "build_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+  "post_only_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+  "dry_with_auth exit=2 :: REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY - the no-solve modes take no authorisation text; unset them for the formal run",
+  "no_licence_file exit=2 :: GRB_LICENSE_FILE is not readable",
+  "no_auth exit=2 :: REFUSED: --auth \"<user authorisation text>\" is required"
+ ],
+ "refusals_all_exit_2": true,
+ "status_full": [
+  "START:2026-10-26T16:27:48Z:commit=f73f5c0695b9471a36184e14123e94ab978cb14b:repo_commit=none:mode=batch:build_only=1:post_only=0:dry=0:cores=16:threads_T16=16:time_limit_s=V1=14646,V2=4269:wall_cap_s=V1=15846,V2=5469:licence_gap_s=330:parallel_min_cores=33:schedule=1[V1|V2]:truncate=none:resume=no:tmpdir=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/dry_run_v8b/full/tmp:post_timeout_s=1800:allow_unregistered=0:hooks=",
+  "BASE_CHECK:all_equal",
+  "PHASE_1:one_lane:V1,V2:threads=32:cores=16:min_cores=33:no_solve_mode:2026-10-26T16:27:49Z",
+  "BUILD_CHECK_V1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 9975377, \"num_col\": 4477801, \"nnz\": 23460944, \"build_seconds\": 305.7352468967438}, \"peak_rss_gib\": 9.5}",
+  "BUILD_CHECK_V2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 9629180, \"num_col\": 4325607, \"nnz\": 22382441, \"build_seconds\": 138.74753618240356}, \"peak_rss_gib\": 9.57}",
+  "SUMMARY:exit=0:reference=batch3:{\"B6_bn\": null, \"runs\": {\"V1\": \"built_stopped_before_solve\", \"V2\": \"built_stopped_before_solve\"}, \"delta_b6_bn\": null}",
+  "PACK_final:PACKED:light=results_light_final_20261026T163549Z.tar.gz:32896B:sha256=f88d283188f2ed69:full=results_full_final_20261026T163549Z.tar.gz:32896B:sha256=f88d283188f2ed69",
+  "DONE:2026-10-26T16:35:50Z:unusable=none"
+ ],
+ "status_trunc": [
+  "START:2026-10-26T16:35:51Z:commit=f73f5c0695b9471a36184e14123e94ab978cb14b:repo_commit=none:mode=batch:build_only=1:post_only=0:dry=0:cores=16:threads_T16=16:time_limit_s=V1=14646,V2=4269:wall_cap_s=V1=15846,V2=5469:licence_gap_s=330:parallel_min_cores=33:schedule=1[V1|V2]:truncate=56:resume=no:tmpdir=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/dry_run_v8b/trunc/tmp:post_timeout_s=1800:allow_unregistered=1:hooks=TRUNCATE",
+  "BASE_CHECK:all_equal:receipts_only(ALLOW_UNREGISTERED)",
+  "PHASE_1:one_lane:V1,V2:threads=32:cores=16:min_cores=33:no_solve_mode:2026-10-26T16:35:51Z",
+  "BUILD_CHECK_V1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3612124, \"build_seconds\": 32.12334370613098}, \"peak_rss_gib\": 1.99}",
+  "BUILD_CHECK_V2:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1487648, \"num_col\": 672300, \"nnz\": 3446098, \"build_seconds\": 23.12376880645752}, \"peak_rss_gib\": 1.88}",
+  "DONE:2026-10-26T16:37:04Z:unusable=none"
+ ],
+ "licence": "GRB_LICENSE_FILE tripwire = /nonexistent (no-solve modes); no Gurobi call",
+ "written_utc": "2026-10-26T16:37:04Z",
+ "solver_runs": 0
+}

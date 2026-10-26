@@ -311,12 +311,18 @@ def test_f0_changed_scripts_in_the_executed_lists():
     build, solve, post-processing, batch or data-chain runs (CODE_MAP_DATA.json executed_union)."""
     data = json.loads((DFX / "CODE_MAP_DATA.json").read_text(encoding="utf-8"))
     executed = set(data["executed_union"])
-    out = subprocess.run(["git", "diff", "--name-only", "55ab07c0", "--", "scripts_project"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
-    untracked = subprocess.run(["git", "ls-files", "--others", "--exclude-standard", "scripts_project"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
-    changed = sorted(set(out) | set(untracked))
-    assert changed, "no DFX change under scripts_project"
-    outside = [p for p in changed if p not in executed]
+    git = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+    f1_f4 = git("diff", "--name-only", "55ab07c0", "72083fde", "--", "scripts_project")   # the F1-F4 commit: the demand changes the F0.3 rule is about
+    assert f1_f4, "no F1-F4 change under scripts_project"
+    outside = [p for p in f1_f4 if p not in executed]
     assert not outside, outside
+    # later scripts_project changes of the branch (F6: the DFX batch module run as its own process by run_dfx.sh) are not demand changes; they must be
+    # the documented F6 files only (CODE_MAP.md section 14), never a change of a demand module outside the executed lists
+    later = sorted(set(git("diff", "--name-only", "72083fde", "--", "scripts_project")) | set(git("ls-files", "--others", "--exclude-standard", "scripts_project")))
+    f6 = {"scripts_project/dfx_batch.py"}
+    assert set(later) <= f6 | executed, [p for p in later if p not in f6 | executed]
+    code_map = (DFX / "CODE_MAP.md").read_text(encoding="utf-8")
+    assert all(Path(p).name in code_map for p in later), "a later scripts_project change is not documented in CODE_MAP.md"
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------
