@@ -6,7 +6,7 @@
 # results_project/dfx_v3/dry_run_v8/DRY_RUN_DFX.json (code_commit, passed, build_check per run) for make_package_dfx.sh.
 set -u
 WT=/home/jin/wt_dfx_v3_20261026; MAIN=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
-B=$MAIN/results_project/dfx_v3/builds_v2; D=$MAIN/results_project/dfx_v3/dry_run_v8; PKG=$WT/research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx
+B=$MAIN/results_project/dfx_v3/builds_v2; D=$MAIN/results_project/dfx_v3/${1:-dry_run_v8}; PKG=$WT/research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx
 n=$(ps -eo args= | grep -E '[s]2_solve\.py' | grep -vcE '^(/usr/bin/)?time |^setsid |^env '); [ "$n" = 0 ] || { echo "REAL SOLVE RUNNING ($n)"; exit 4; }
 mkdir -p $D/networks; cd $WT || exit 1
 for sc in integrated disconnected; do

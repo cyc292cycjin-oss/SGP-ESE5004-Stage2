@@ -1,0 +1,57 @@
+# DFX 阶段 3 报告：上 AutoDL 前最终检查（本机；未连云）
+
+**摘要**
+1. 检查单 `PRE_AUTODL_CHECKLIST.md`：P1、P2、P4、P5、P7、P8、P9、P11 PASS；P3（全量测试）与 P10（推送）结果见第 1 节；P6 为 **PASS（有保留）**——许可值、`ssh -p`、AutoDL 主机名命中 0，但提交 `5405e477` 的两个 HPC 草稿脚本的 grep 模式含三个许可**键名**字面量（无值；工作树已改写），另有 12 处 IP 正则对四段版本号的误报；请用户确认（第 4 节）。
+2. **租用 AutoDL 的规格下限：** 核数 ≥ 17（Threads 16 + 后处理 1）；容器内存 ≥ 64 GiB；装好环境后数据盘可用 ≥ 45 GB。并行（V1 ∥ V2）需 ≥ 33 核与 ≥ 64 GiB（两会话 42 + 后处理 11 ≈ 53 GiB）。**建议**第三批同型 AutoDL West-B 8470Q 25 核 / 92 GiB / ≥ 50 GB 数据盘（串行 V1 → V2）。
+3. **预计用时：** V1 1.4–2.7 h、V2 0.4–0.8 h（第三批 R3 / R4 实测 4,882 / 1,423 s 的 1.0–2.0 倍），两次后处理各约 6–8 min，间隔 330 s → 串行 2.5–4.0 h；加环境安装（直连约 14 min）与上传（148 MB，36–318 KB/s：0.13–1.14 h）→ **实例占用约 3.5–6 h**；止损前最坏 V1 4.4 h + V2 1.5 h。
+4. **费用：** 占用时长 × 控制台现行单价（以控制台为准）。参照 B4P 记录的三档单价：¥3.1/h（128 核 8352V / 240 GB）→ ¥11–19；¥7.5/h（72 核 EPYC 9754 / 240 GB）→ ¥26–45；¥11.5/h（100 核 8470Q / 368 GB）→ ¥40–69。第三批同型 25 核 / 92 GiB 实例的单价本报告未记录，以控制台为准。
+5. 本机 Gurobi 调用 2 / 2 已用完；本机计算约 2.4 h + 全量测试；磁盘新增约 4.4 GB；未下载任何数据；未连云、未连 HPC。
+6. **停止，等待用户租好 AutoDL 实例并在会话中明确说"授权阶段 4"。** 连接方式、许可传输均只在会话中进行，不写入任何文件。
+
+## 1. 检查单结果
+
+| # | 结果 | 要点 |
+|---|---|---|
+| P1 | PASS | `DFX_RULES.md` 提交 14:03:29Z < 构建 14:35:32Z…；`RUN_PLAN_DFX.md` 提交 14:57:38Z < 首次 v2 求解 14:58:19Z（余量 41 s，顺序正确） |
+| P2 | PASS | 四个 SHA256 = 登记值 = 包内 = `dfx_batch.REGISTERED_SHA`；等价测试 4 个网络通过 |
+| P3 | 【待填】 | 全量测试：【待填：N passed / M skipped / 0 failed；基线 655 / 69 + 新增 23 个（`test_dfx_demand.py` 11 + `test_dfx_runner.py` 12 函数，含参数化共 14 用例）】 |
+| P4 | PASS | 冒烟 2 × optimal，链路全 exit 0，GATES_V6 ACCEPTED_LAYER2 ×2 |
+| P5 | PASS | `SHA256SUMS` 20 / 20 OK；干跑完整 + 截短 passed；11 项拒绝 exit 2；包内只有 365×24h |
+| P6 | PASS（有保留） | 值 0 / 端口 0 / 主机名 0；键名字面量 6 处在已提交的 grep 模式（无值；工作树已改）；IP 正则 12 处版本号误报 |
+| P7 | PASS | 环境锁定 = 第三批同一文件；关键包 284 / 284 相同；镜像检查可用（含无效 URL 负例） |
+| P8 | PASS | 下限 17 核 / 64 GiB / 45 GB；并行峰值约 53 GiB；用时与费用见摘要 |
+| P9 | PASS | 许可文件 600 / jin / 可读（只 stat）；无 Gurobi 进程（测试结束后复核）；调用 2 次，间隔 333 s |
+| P10 | 【待填】 | 推送 `codex/dfx-v3-20261026`（无 force）；历史线性无合并；遗留未沿用 |
+| P11 | PASS | 清单 20 文件 148,208,096 B；单路上传 1.14 / 0.41 / 0.13 h；云端 8 步（RUN_PLAN 第 7 节） |
+
+## 2. 实例规格与估计（INFERENCE，依据第三批实测）
+
+| 量 | 值 | 依据 |
+|---|---|---|
+| 单会话峰值 | 一体化 22.78 GiB、不互联 19.29 GiB（T16，365×24h） | 第三批 R3 / R4 |
+| 后处理峰值 | 约 11 GiB（违反量 / C1 各约 9.3 GB，Owen 8.1 GiB） | 第三批 |
+| 并行两会话 + 后处理 | 42 + 11 ≈ 53 GiB → 下限 64 GiB（2 倍余量于单会话 34 GiB） | RUN_PLAN 5 |
+| 数据盘 | 运行目录 2 × 1.8 GB + 导出 / 包 1 GB + 环境 3.3 GiB + 包缓存 0.75 GB + 包 0.15 GB ≈ 8 GB → 下限 45 GB（第三批同值） | RUN_PLAN 5 |
+| 核数 | 串行 ≥ 17；并行 ≥ 33 | Threads 16 |
+| v2 LP 规模 | V1 9,975,377 行 × 4,477,801 列、非零 23.46e6；V2 9,629,180 × 4,325,607、22.38e6（本机干跑 BUILD_CHECK；构建峰值 10.16 / 9.96 GiB） | `evidence/dry_run/` |
+
+## 3. 本机运行记录（阶段 3）
+
+- 预检（包的 WSL 副本，`PY` = 本机环境）：`guards,sha,networks,env,profile,code,tools` → `PREFLIGHT OK`；`resources` 单独运行 → 本机 16 核 / 10 GiB 不满足下限（预期，实例侧检查）；`licence` 节未运行（它会调用 Gurobi，本机额度已用完）；负例 `TRUNCATE=56` 残留 → guards 失败。
+- 镜像检查：`bash env/install_env.sh --check-mirrors` → `DIRECT` ×3、`MIRROR_CHECK_DONE`；`CONDA_MIRROR_GUROBI=ftp://bad` → `MIRROR_URL_INVALID`。
+- 泄露扫描：`scripts/wsl_dfx3/p6_scan.sh`（模式只在运行时；`leak_scan.py` 不含任何键名 / 主机 / 端口字面量）→ `evidence/leak_scan/P6_LEAK_SCAN.json`；分类 `p6_classify.py`；基分支历史核查 `p6_history.sh`。
+- 进程复核（全量测试结束后）：【待填】。
+
+## 4. 需要用户在授权前确认的事项
+
+1. **没有其他会话正在使用 Gurobi WLS 许可**（云端两会话 + 本机 0；本机不再调用）。
+2. **实例规格满足下限**：≥ 17 核、≥ 64 GiB、数据盘可用 ≥ 45 GB（并行需 ≥ 33 核）；建议第三批同型 25 核 / 92 GiB。
+3. **连接方式只在会话中提供**（主机、端口、密码不写入任何文件）；许可由执行端经 `scp` 放到实例 `/root/.gurobi/gurobi.lic`（授权后）。
+4. **P6 有保留项 R1**：接受键名字面量（grep 模式、无值）留在本地历史并推送，或要求推送前重写提交（重做干跑与包）。
+5. `RUN_PLAN_DFX.md` 第 8 节的取值：TimeLimit = 3 × R3 / R4 实测、并行阈值 33 核、硬下限、B6 参照取 R1 / R2——看到结果前仍可由用户改动并登记；之后不得修改。
+6. AutoDL 单价与实例型号（费用估计以控制台为准）。
+7. （不阻塞阶段 4）阶段 2 草稿的 B1（HPC TimeLimit 登记）与 B2（第四批登记输入改为 v2）两项决定。
+
+## 5. 文件
+
+`PRE_AUTODL_CHECKLIST.md`、`DFX_REPORT_PHASE1.md`、`DFX_REPORT_PHASE2.md`、`DFX_EVIDENCE.json`、`evidence/`、包 `work/p1_dfx_20261026/cloud_package_dfx/`（勿改动；上传前再次 `sha256sum -c`）。

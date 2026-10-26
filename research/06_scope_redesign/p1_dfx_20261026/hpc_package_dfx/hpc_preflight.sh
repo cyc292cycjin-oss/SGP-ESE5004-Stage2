@@ -16,7 +16,7 @@ if [ -f "$LIC" ]; then
   [ "$mode" = 600 ] && [ "$owner" = "$USER_NAME" ] && echo "licence file present, owner $owner, mode $mode" || { echo "LICENCE FILE mode/owner wrong: $owner $mode (chmod 600, own file)"; ok=0; }
   case "$LIC" in "$HOME"/.gurobi/*) ;; *) echo "WARNING: the licence is expected at $HOME/.gurobi/gurobi.lic (never inside the package / scratch)";; esac
 else echo "LICENCE FILE MISSING at $LIC"; ok=0; fi
-grep -rIl --exclude-dir=repo --exclude-dir=runs -E "WLSACCESSID|WLSSECRET|LICENSEID" "$PKG" 2>/dev/null | grep -v hpc_preflight.sh && { echo "LICENCE-LIKE CONTENT INSIDE THE PACKAGE FOLDER - remove it"; ok=0; } || echo "no licence-like content in the package folder"
+grep -rIl --exclude-dir=repo --exclude-dir=runs -E "WLS(ACCESS[I]D|SECRE[T])|LICENSE[I]D=" "$PKG" 2>/dev/null && { echo "LICENCE-LIKE CONTENT INSIDE THE PACKAGE FOLDER - remove it"; ok=0; } || echo "no licence-like content in the package folder"   # pattern written so that this file itself does not match
 echo "== paths"
 [ -d "$SCRATCH" ] && echo "scratch $SCRATCH present" || { echo "scratch $SCRATCH missing (mkdir -p)"; ok=0; }
 [ -x "$PY" ] && echo "environment python $PY" || { echo "environment python missing: run hpc/hpc_install_env.sh"; ok=0; }

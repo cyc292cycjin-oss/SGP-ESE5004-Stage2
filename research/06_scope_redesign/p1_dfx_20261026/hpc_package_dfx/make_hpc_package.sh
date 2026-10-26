@@ -43,7 +43,7 @@ cp "$(dirname "$PKG4")/RUN_PLAN_B4.md" "$D/RUN_PLAN_DFX.md" "$DIST/"
 ( cd "$DIST" && bash hpc/make_pbs.sh pbs > pbs/MAKE_PBS.log )
 chmod 755 "$DIST"/*.sh "$DIST/env/install_env.sh" "$DIST/hpc"/*.sh
 ( cd "$DIST" && find . -type f ! -name SHA256SUMS ! -name HPC_PACKAGE_MANIFEST.json -printf '%P\n' | LC_ALL=C sort | xargs sha256sum > SHA256SUMS )
-grep -rIlE "WLSACCESSID|WLSSECRET|LICENSEID" "$DIST" --exclude=hpc_preflight.sh > /dev/null 2>&1 && { echo "LICENCE-LIKE CONTENT IN THE PACKAGE - refused"; exit 1; } || true
+grep -rIlE "WLS(ACCESS[I]D|SECRE[T])|LICENSE[I]D=" "$DIST" > /dev/null 2>&1 && { echo "LICENCE-LIKE CONTENT IN THE PACKAGE - refused"; exit 1; } || true   # pattern written so that the scripts themselves do not match
 "$PY" - "$DIST" "$COMMIT" "$B" "$C8" "$BUILD_COMMIT" <<'P'
 import hashlib, json, os, sys, time
 sys.path.insert(0, "scripts_project")

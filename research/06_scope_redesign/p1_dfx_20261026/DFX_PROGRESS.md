@@ -13,9 +13,11 @@
 | F1–F4 | 完成 | （本提交） | 代码：`m08b_demand.py`（RAS、NEU、氨产量、NEU 气扣除）、`s3_0_industry.py`（氨替换）、`s2_layers.py` / `s2b_feedstock.py` / `d1_common.py`（HVC 范围）、`dfx_data.py`（新）、`d1_registry.py`、`m08b_data.py`（更正基表排除 dfx 片段）、`configs/research/baseline.yaml`；数据链重跑；注册表 2,194 → 2,280 行；测试 `test_dfx_demand.py`（新）+ `test_m08b_demand.py` 改 3 处；子集 126 passed / 9 skipped |
 | F5.1–F5.4 构建 / 等价 / 复核 / 一阶预测 | 完成 | （本提交） | v2 四个网络在 `72083fde`（dirty 0）构建到 `results_project/dfx_v3/builds_v2/`（365×24h：一体化 `82928a4c…`、不互联 `5c75bfa0…`）；v1 同路径重建 = 登记网络（仅 meta 路径不同）；等价测试 4 个网络通过（差异只在负荷、过程排放源与随负荷增减的需求侧组件）；复核 `scripts/review/dfx_demand_review.py`：v1 7,147.6 → v2 7,628.6 TWh（+481.0），分解桥闭合残差 1.6e-10 TWh（修正 D1 表农业 gas 载体漏项 1.21 GWh 后）；一阶预测 ΔB6 +3.060 bn EUR（`DFX_FIRST_ORDER.md`）；`RUN_PLAN_DFX.md` 在任何 v2 求解前登记；子集 131 passed / 4 skipped |
 | F5.5 本机冒烟（2 次 Gurobi） | 完成 | （F6 提交） | `scripts/wsl_dfx3/smoke_v2.sh` 于提交 `896828fd`（dirty 0）：56 时段截短 v2 一体化 optimal（620 s，6.99 GiB，目标 3.4066e11）→ 间隔 333 s → 不互联 optimal（727 s，5.52 GiB，3.5209e11）；违反量 / C1 / M12 / Owen / 批参照 / 重评 / GATES_V6（均 ACCEPTED_LAYER2，登记 SHA = 2920×3h 网络）/ 分级（accepted）/ B6 全部 exit 0；`results_project/dfx_v3/smoke_v2/SMOKE_SUMMARY.json`。**本机 Gurobi 调用 2 / 2 已用完** |
-| F6 | 待做 | | |
-| 阶段 1 报告 | 待做 | | |
-| 阶段 2 | 待做 | | |
-| 阶段 3 | 待做 | | |
+| F6.2 运行计划 / 运行脚本 | 完成 | `896828fd`、`5405e477` | `RUN_PLAN_DFX.md`（896828fd）；`scripts_project/dfx_batch.py`、`cloud_package_dfx/run_dfx.sh` / `preflight_dfx.sh` / `make_package_dfx.sh`、`BATCH3_REFERENCE_VALUES.json`、`tests/research/test_dfx_runner.py`（14 passed） |
+| F6.3 包 v8 与干跑 | 完成（第二次构建） | （阶段 3 提交：证据） | 首次：干跑 `results_project/dfx_v3/dry_run_v8/`（完整 365×24h BUILD_ONLY：V1 LP 9.98M×4.48M，10.16 GiB；V2 9.63M×4.33M，9.96 GiB；截短 56；11 项拒绝 exit 2）与包（提交 5405e477，20 文件 148,208,096 B）→ 因 `dfx_batch.py` 导入副作用修复而重做：干跑 `dry_run_v8b/` + 包重建于修复提交（旧包保留为 `cloud_package_dfx_superseded_5405e477/`）；本机预检 guards/sha/networks/env/profile/code/tools OK（resources 本机失败属预期；licence 节未跑） |
+| F6.1 全量测试 | 见阶段 3 P3 | | 第一次全量测试 32 个失败（第三批 / B4P 替身测试；原因 `dfx_batch.py` 首版在导入时改写 `m10_batch3_summary` 常数）→ 修复后受影响测试文件同进程重跑 + 全量测试重跑；`results_project/dfx_v3/tests/{affected,full}.log` |
+| 阶段 1 报告 | 完成 | （阶段 3 提交） | `DFX_REPORT_PHASE1.md`（附录 A = `DFX_RULES.md` 原文）+ `DFX_EVIDENCE.json`；证据副本 `evidence/{smoke,dry_run,package,tests,leak_scan}` |
+| 阶段 2 | 完成 | `5405e477` | `hpc_package_dfx/`（PROPOSED）+ `DFX_REPORT_PHASE2.md` |
+| 阶段 3 | 进行中 | | `PRE_AUTODL_CHECKLIST.md` P1–P11 + `DFX_REPORT_PHASE3.md`；然后停下等"授权阶段 4" |
 
 续跑说明：如本会话中断，从上表第一个"进行中 / 待做"步骤继续；已提交的内容以 git 历史为准；`results_project/dfx_v3/*/STATUS.txt` 记录各运行的进度。

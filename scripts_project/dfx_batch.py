@@ -47,8 +47,37 @@ REGISTERED_SHA = {"integrated_365_24h_unsolved.nc": "82928a4c9151a6a176ac8c81bf5
 REGISTERED_BYTES = {"integrated_365_24h_unsolved.nc": 31292240, "disconnected_365_24h_unsolved.nc": 30620986}
 BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
 
-# the third-batch helpers read these module constants at call time: replace them with the DFX table (no LOO, no sensitivity, no level-2 pairs)
-m10.RUNS = RUNS; m10.SCHEDULE = SCHEDULE; m10.STOP_ALWAYS = STOP_ALWAYS; m10.LOO = {}; m10.SENSITIVITY = []; m10.INFORMATION_PAIRS = []; m10.LEVEL2 = {}
+# NOTE: the third-batch module is never modified (no monkeypatching of its RUNS / SCHEDULE: an earlier draft did so at import time and broke the
+# third-batch and fourth-batch stand-in tests collected in the same pytest process). Only its table-free helpers are imported; run_state is local.
+
+
+def run_state(out: Path, rid: str) -> dict:
+    """Per-run state (the third-batch run_state with the DFX table): receipt, C1, GATES_V6 (final + provisional), Owen usability, stop class."""
+    d = out / rid; rec = jl(d / "SOLVE_RECEIPT.json") or {}; prec = jl(d / "PRECISION.json") or {}; acc = jl(d / "V6_ACCEPTANCE.json") or {}
+    prov = jl(d / "V6_ACCEPTANCE_PROVISIONAL.json"); owen = jl(d / "m12_owen" / "OWEN.json") or {}; oreg = jl(d / "m12_owen" / "OWEN_REGRADE_BATCH_REFERENCE.json")
+    run = jl(d / "RUN.json") or {}
+    if (d / ".ended").exists():
+        state = "ended"
+    elif (d / ".started").exists():
+        state = "started_not_ended"
+    elif run:
+        state = "prepared"
+    else:
+        state = "not_started"
+    if rec.get("stop_before_solve"):
+        state = "built_stopped_before_solve"
+    g = prec.get("grade") or {}; src = str((prec.get("reference") or {}).get("source") or ""); sc = jl(d / "STOP_CLASS.json")
+    return dict(rid=rid, role=RUNS[rid]["role"], profile=RUNS[rid]["profile"], set=RUNS[rid]["set"], state=state, network=run.get("network"), network_sha256=run.get("network_sha256"),
+                stop_class=(dict(cls=sc.get("cls"), action=sc.get("action"), failed_checks=sc.get("failed_checks")) if sc else None),
+                termination=rec.get("termination_condition") or (Path(d / ".cond").read_text().strip() if (d / ".cond").exists() else None), objective=rec.get("objective"),
+                solve_seconds=rec.get("solve_seconds"), peak_rss_gib=(rec.get("peak_rss_bytes") or 0) / 2**30 or None,
+                c1=dict(grade=g.get("grade"), a=g.get("a"), b=g.get("b"), c=g.get("c"), reference=("batch" if src.startswith("this batch") else ("default" if src else None)),
+                        regrades=len(prec.get("grade_history") or [])) if prec else None,
+                v6=acc.get("label"), v6_provisional=(prov or {}).get("label"),
+                g1=dict((k, (acc.get("G1") or {}).get(k)) for k in ("a", "b", "c")) if acc else None,
+                g2=dict((k, ((acc.get("G2") or {}).get(k) or {}).get("passed")) for k in ("G2_1", "G2_2", "G2_3")) if acc else None,
+                owen_usable=((oreg or {}).get("new") or {}).get("usable_for_allocation", owen.get("usable_for_allocation")) if owen else None,
+                postproc_errors=[f"{e['step']}:exit={e['exit']}" for e in postproc_errors(out) if e["rid"] == rid])
 
 
 def base_check(nets: Path, registered: bool = True) -> dict:
@@ -109,7 +138,7 @@ def stop_class(d: Path) -> dict:
 
 def b6_gate(out: Path) -> dict | None:
     """B6 = V2 - V1 (gate_b6_cost of v5_gates, as the third batch's R2 - R1)."""
-    i, d = m10.run_state(out, "V1"), m10.run_state(out, "V2")
+    i, d = run_state(out, "V1"), run_state(out, "V2")
     if i["objective"] is None or d["objective"] is None:
         return None
     sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE / "v5"))
@@ -144,7 +173,7 @@ def comparison(out: Path, runs: dict, b6: dict | None, ref: dict | None) -> dict
 
 
 def summary(out: Path, reference: Path | None = None) -> dict:
-    runs = {rid: m10.run_state(out, rid) for rid in RUNS}
+    runs = {rid: run_state(out, rid) for rid in RUNS}
     ben = jl(out / "M12_BENEFIT" / "BENEFIT.json"); ref = jl(reference) if reference else None
     stop = (out / "STOP").read_text().split() if (out / "STOP").exists() else []
     safe = (out / "STOP_SAFE").read_text().strip() if (out / "STOP_SAFE").exists() else None
