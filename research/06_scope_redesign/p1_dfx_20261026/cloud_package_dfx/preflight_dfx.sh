@@ -7,7 +7,7 @@
 #   networks   the two 365x24h v2 networks against their build receipts AND the registered SHA256 / bytes (dfx_batch.py base-check); no 2920x3h file
 #   env        environment against env/ENV_LOCK.txt (env/env_check.py: key packages identical with the third-batch cloud environment)
 #   profile    profile formal_barrier_1e6_t16: s2_solve.py key-name check, interior-point gate path, Threads 16, BarConvTol 1e-6; TimeLimit = the
-#              registered per-run values (dfx_batch.py: V1 14,646 s, V2 4,269 s)
+#              registered per-run values (dfx_batch.py: V1 21,600 s, V2 10,800 s; user amendment 2026-10-27)
 #   code       the run / post-processing modules import without the licence (s2_solve, dfx_batch, m10_batch3_summary, l23_violation_analysis,
 #              s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6); the run table is V1, V2; the registered limits; s2_solve has post_solve
 #   tools      GNU time (-v) at /usr/bin/time, setsid, pgrep, timeout, tmux (warning only)
@@ -73,7 +73,7 @@ import sys
 sys.path.insert(0, "scripts_project"); sys.path.insert(0, "scripts_project/v5")
 import s2_solve, dfx_batch, m10_batch3_summary, l23_violation_analysis, s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6
 assert list(dfx_batch.RUNS) == ["V1", "V2"], "run table"
-assert dfx_batch.TIME_LIMIT_S == {"V1": 14646, "V2": 4269} and dfx_batch.WALL_MARGIN_S == 1200 and dfx_batch.LICENCE_GAP_S == 330 and dfx_batch.PARALLEL_MIN_CORES == 33, "registered limits"
+assert dfx_batch.TIME_LIMIT_S == {"V1": 21600, "V2": 10800} and dfx_batch.WALL_MARGIN_S == 1200 and dfx_batch.LICENCE_GAP_S == 330 and dfx_batch.PARALLEL_MIN_CORES == 33, "registered limits"
 assert dfx_batch.SCHEDULE == [("1", ["V1"], ["V2"])] and dfx_batch.STOP_ALWAYS == ("V1", "V2"), "schedule / stop rule"
 assert hasattr(s2_solve, "post_solve") and "--stop-before-solve" in open("scripts_project/s2_solve.py").read(), "post_solve / dry-run code"
 print("modules import; run table", ", ".join(dfx_batch.RUNS), "| limits", dfx_batch.TIME_LIMIT_S, "+", dfx_batch.WALL_MARGIN_S, "s wall margin | gap", dfx_batch.LICENCE_GAP_S, "s | parallel >=", dfx_batch.PARALLEL_MIN_CORES, "cores")

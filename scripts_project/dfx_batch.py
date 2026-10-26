@@ -36,8 +36,9 @@ RUNS = {
 }
 SCHEDULE = [("1", ["V1"], ["V2"])]
 STOP_ALWAYS = ("V1", "V2")   # both runs are the batch reference: G2 failed / no returned solution / C1 (a) failed -> STOP (RUN_PLAN_DFX 3.3)
-# Registered limits (RUN_PLAN_DFX.md section 3.1): TimeLimit = 3 x the third-batch R3 / R4 solve wall clock (4,882 / 1,423 s); wall cap = TimeLimit + 1,200 s
-TIME_LIMIT_S = {"V1": 14646, "V2": 4269}
+# Registered limits (RUN_PLAN_DFX.md section 3.1, user amendment 2026-10-27 before any v2 365x24h solve): TimeLimit V1 21,600 s (6 h), V2 10,800 s (3 h);
+# wall cap = TimeLimit + 1,200 s. (First registration: 3 x the third-batch R3 / R4 solve wall clock = 14,646 / 4,269 s.)
+TIME_LIMIT_S = {"V1": 21600, "V2": 10800}
 WALL_MARGIN_S = 1200
 LICENCE_GAP_S = 330
 PARALLEL_MIN_CORES = 33   # 2 x Threads 16 + 1 core for the post-processing of the lane that ends first (RUN_PLAN_DFX 3.2)
@@ -148,27 +149,40 @@ def b6_gate(out: Path) -> dict | None:
 
 
 def comparison(out: Path, runs: dict, b6: dict | None, ref: dict | None) -> dict | None:
-    """Description only (RUN_PLAN_DFX 3.4 items 5-6; never an acceptance criterion): V1 / V2 against the third-batch R1 / R2 (objective, B6,
-    Owen dual-form allocation at the main alpha) and the realised delta B6 against the registered first-order prediction."""
+    """Description only (RUN_PLAN_DFX 3.4 items 5-6; never an acceptance criterion). Main reference (user amendment 2026-10-27) = the third-batch
+    R3 / R4 (same profile formal_barrier_1e6_t16, optimal); R1 / R2 (profile formal_barrier, the values of the stage reports) listed alongside:
+    objective, B6, Owen dual-form allocation at the main alpha, ledger totals; and the realised delta B6 against the registered first-order prediction."""
     if not ref:
         return None
     r = ref.get("batch3") or {}; fo = ref.get("first_order") or {}
-    obj = {"V1": runs["V1"]["objective"], "V2": runs["V2"]["objective"]}
-    res = dict(reference_file=ref.get("source"), batch3_runs=dict(integrated="R1", disconnected="R2"), batch3_objective_eur=r.get("objective_eur"), batch3_b6_bn=r.get("b6_bn"),
-               objective_difference_bn=dict(V1_minus_R1=(bn(obj["V1"] - r["objective_eur"]["R1"]) if obj["V1"] is not None and r.get("objective_eur") else None),
-                                            V2_minus_R2=(bn(obj["V2"] - r["objective_eur"]["R2"]) if obj["V2"] is not None and r.get("objective_eur") else None)),
-               first_order=dict(predicted_delta_b6_bn=fo.get("delta_b6_bn"), predicted_b6_bn=fo.get("predicted_b6_bn"), delta_c_integrated_bn=fo.get("delta_c_integrated_bn"),
-                                delta_c_disconnected_bn=fo.get("delta_c_disconnected_bn"), by_country_bn=fo.get("by_country_bn"), note=fo.get("note")))
-    if b6 and r.get("b6_bn") is not None:
-        res["delta_b6_bn"] = b6["b6_bn"] - r["b6_bn"]
-        res["delta_b6_minus_first_order_bn"] = (res["delta_b6_bn"] - fo["delta_b6_bn"]) if fo.get("delta_b6_bn") is not None else None
+    obj = {"V1": runs["V1"]["objective"], "V2": runs["V2"]["objective"]}; oe = r.get("objective_eur") or {}
+    pairs = {"main": r.get("main_runs") or {}, "alternative": r.get("alternative_runs") or {}}
+    res = dict(reference_file=ref.get("source"), main_runs=pairs["main"], alternative_runs=pairs["alternative"], batch3_objective_eur=oe,
+               batch3_b6_bn=r.get("b6_bn"), batch3_b6_alternative_bn=r.get("b6_alternative_bn"), objective_difference_bn={},
+               first_order=dict(predicted_delta_b6_bn=fo.get("delta_b6_bn"), predicted_b6_bn=fo.get("predicted_b6_bn"), predicted_b6_alternative_bn=fo.get("predicted_b6_alternative_bn"),
+                                delta_c_integrated_bn=fo.get("delta_c_integrated_bn"), delta_c_disconnected_bn=fo.get("delta_c_disconnected_bn"), by_country_bn=fo.get("by_country_bn"), note=fo.get("note")))
+    for tag, pair in pairs.items():
+        for v, sc in (("V1", "integrated"), ("V2", "disconnected")):
+            b3 = pair.get(sc)
+            if b3 and obj[v] is not None and oe.get(b3) is not None:
+                res["objective_difference_bn"][f"{v}_minus_{b3}"] = bn(obj[v] - oe[b3])
+    if b6:
+        if r.get("b6_bn") is not None:
+            res["delta_b6_bn"] = b6["b6_bn"] - r["b6_bn"]
+            res["delta_b6_minus_first_order_bn"] = (res["delta_b6_bn"] - fo["delta_b6_bn"]) if fo.get("delta_b6_bn") is not None else None
+        if r.get("b6_alternative_bn") is not None:
+            res["delta_b6_alternative_bn"] = b6["b6_bn"] - r["b6_alternative_bn"]
     ow = {rid: owen_main(out / rid) for rid in RUNS}; ro = r.get("owen_alpha_main_eur") or {}
     res["owen_dual_form_alpha_main_bn"] = {rid: {p: bn(v.get(p, 0.0)) for p in COUNTRIES + ("BUNKER",)} for rid, v in ow.items() if v}
-    res["owen_difference_vs_batch3_bn"] = {rid: {p: bn(ow[rid].get(p, 0.0) - (ro.get(b3) or {}).get(p, 0.0)) for p in COUNTRIES + ("BUNKER",)}
-                                           for rid, b3 in (("V1", "R1"), ("V2", "R2")) if ow.get(rid) and ro.get(b3)}
     led = {rid: ledger_totals(out / rid) for rid in RUNS}; rl = r.get("ledger_total_eur") or {}
-    res["ledger_difference_vs_batch3_bn"] = {rid: {c: bn(led[rid].get(c, 0.0) - (rl.get(b3) or {}).get(c, 0.0)) for c in COUNTRIES + ("ASEAN",)}
-                                             for rid, b3 in (("V1", "R1"), ("V2", "R2")) if led.get(rid) and rl.get(b3)}
+    res["owen_difference_vs_batch3_bn"] = {}; res["ledger_difference_vs_batch3_bn"] = {}
+    for tag, pair in pairs.items():
+        for v, sc in (("V1", "integrated"), ("V2", "disconnected")):
+            b3 = pair.get(sc)
+            if b3 and ow.get(v) and ro.get(b3):
+                res["owen_difference_vs_batch3_bn"][f"{v}_minus_{b3}"] = {p: bn(ow[v].get(p, 0.0) - ro[b3].get(p, 0.0)) for p in COUNTRIES + ("BUNKER",)}
+            if b3 and led.get(v) and rl.get(b3):
+                res["ledger_difference_vs_batch3_bn"][f"{v}_minus_{b3}"] = {c: bn(led[v].get(c, 0.0) - rl[b3].get(c, 0.0)) for c in COUNTRIES + ("ASEAN",)}
     return res
 
 
@@ -207,13 +221,14 @@ def markdown(r: dict) -> str:
     if r["benefit"]:
         L.append(f"- M12 受益与比例规则对照：{'B6 ' + _f(r['benefit']['b6_bn']) + ' bn；负受益 ' + str(r['benefit']['negative_benefit']) if r['benefit']['computable'] else '不可计算：' + str(r['benefit']['reason'])}（`M12_BENEFIT/`）")
     c = r.get("comparison")
-    L += ["", "## 与第三批 R1 / R2 及一阶预测的对比（只描述，不作验收依据；RUN_PLAN_DFX 3.4 第 5–6 项）", ""]
+    L += ["", "## 与第三批及一阶预测的对比（只描述，不作验收依据；RUN_PLAN_DFX 3.4 第 5–6 项；主参照 R3 / R4 同档案 optimal，R1 / R2 并列）", ""]
     if c:
-        od = c["objective_difference_bn"]; fo = c["first_order"]
-        L += [f"- 第三批 B6（R2 − R1）{_f(c['batch3_b6_bn'])} bn；本批 B6 {_f((b6 or {}).get('b6_bn'))} bn；ΔB6 实际 {_f(c.get('delta_b6_bn'), '{:+.4f}')} bn，一阶预测 {_f(fo.get('predicted_delta_b6_bn'), '{:+.4f}')} bn，差 {_f(c.get('delta_b6_minus_first_order_bn'), '{:+.4f}')} bn",
-              f"- 目标值差：V1 − R1 {_f(od.get('V1_minus_R1'), '{:+.4f}')} bn（一阶 ΔC_一体化 {_f(fo.get('delta_c_integrated_bn'), '{:+.4f}')}）；V2 − R2 {_f(od.get('V2_minus_R2'), '{:+.4f}')} bn（一阶 ΔC_不互联 {_f(fo.get('delta_c_disconnected_bn'), '{:+.4f}')}）"]
-        for rid, row in (c.get("owen_difference_vs_batch3_bn") or {}).items():
-            L.append(f"- Owen 对偶形式（α 主值）分摊差 {rid} − 第三批：" + ", ".join(f"{p} {v:+.3f}" for p, v in row.items()))
+        od = c["objective_difference_bn"]; fo = c["first_order"]; m = c.get("main_runs") or {}; a = c.get("alternative_runs") or {}
+        L += [f"- 主参照 B6（{m.get('disconnected', '?')} − {m.get('integrated', '?')}）{_f(c['batch3_b6_bn'])} bn；本批 B6 {_f((b6 or {}).get('b6_bn'))} bn；ΔB6 实际 {_f(c.get('delta_b6_bn'), '{:+.4f}')} bn，一阶预测 {_f(fo.get('predicted_delta_b6_bn'), '{:+.4f}')} bn，差 {_f(c.get('delta_b6_minus_first_order_bn'), '{:+.4f}')} bn",
+              f"- 并列参照 B6（{a.get('disconnected', '?')} − {a.get('integrated', '?')}）{_f(c.get('batch3_b6_alternative_bn'))} bn；ΔB6 对其 {_f(c.get('delta_b6_alternative_bn'), '{:+.4f}')} bn",
+              "- 目标值差（bn）：" + "；".join(f"{k.replace('_minus_', ' − ')} {v:+.4f}" for k, v in od.items()) + f"（一阶 ΔC_一体化 {_f(fo.get('delta_c_integrated_bn'), '{:+.4f}')}，ΔC_不互联 {_f(fo.get('delta_c_disconnected_bn'), '{:+.4f}')}）"]
+        for key, row in (c.get("owen_difference_vs_batch3_bn") or {}).items():
+            L.append(f"- Owen 对偶形式（α 主值）分摊差 {key.replace('_minus_', ' − ')}：" + ", ".join(f"{p} {v:+.3f}" for p, v in row.items()))
         if fo.get("by_country_bn"):
             L.append("- 一阶预测的分国受益变化（bn EUR）：" + ", ".join(f"{p} {v:+.3f}" for p, v in fo["by_country_bn"].items()))
     else:

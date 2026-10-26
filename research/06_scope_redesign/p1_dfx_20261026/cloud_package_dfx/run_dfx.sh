@@ -12,9 +12,9 @@
 # T16, one phase [V1] | [V2]. No variant, no leave-one-out, no level-2 comparison (LOO is left to the 2920x3h formal runs).
 #
 # PRE-REGISTERED RULES (RUN_PLAN_DFX.md section 3; registered before any v2 solve, not changed after results have been seen):
-#   * one solve per run: no retry, no parameter change, no warm start; TimeLimit V1 14,646 s / V2 4,269 s (3 x the third-batch R3 / R4 solve wall
-#     clock 4,882 / 1,423 s) and wall-clock cap = TimeLimit + 1,200 s per run (dfx_batch.py limits); the wall-clock kill ends the whole process
-#     group (TERM, GRACE_S, KILL);
+#   * one solve per run: no retry, no parameter change, no warm start; TimeLimit V1 21,600 s / V2 10,800 s (user amendment 2026-10-27, registered
+#     before any v2 365x24h solve; first registration 3 x the third-batch R3 / R4 wall clock = 14,646 / 4,269 s) and wall-clock cap = TimeLimit +
+#     1,200 s per run (dfx_batch.py limits: single source); the wall-clock kill ends the whole process group (TERM, GRACE_S, KILL);
 #   * at most two Gurobi sessions: V1 and V2 side by side only when the container has >= 33 cores (2 x Threads 16 + 1 core for post-processing),
 #     otherwise one lane V1 -> V2; >= 330 s from the end of a solve to the next start in the lane, and from the latest solve end (and from the start
 #     of this runner: preflight licence check, tokens of an earlier runner) to the start of the phase (WLS tokens are kept >= 5 min);
@@ -32,8 +32,8 @@
 #     ended on resume, a solver process running at start, a base network whose SHA256 differs from the build receipt or the registered value,
 #     a 2920x3h file in the package, a missing input, more than one other solver process at a start;
 #   * batch post-processing (RUN_PLAN_DFX 3.4): B6 = V2 - V1 (gate_b6_cost), M12 benefit (V1 / V2 allocations), DFX_SUMMARY.json / .md with the
-#     comparison against the third-batch R1 / R2 and the registered first-order prediction (BATCH3_REFERENCE_VALUES.json of the package;
-#     description only, never an acceptance criterion), scrubbed exports, light / full packs.
+#     comparison against the third-batch R3 / R4 (same profile, optimal; main reference) and R1 / R2 (alongside) and the registered first-order
+#     prediction (BATCH3_REFERENCE_VALUES.json of the package; description only, never an acceptance criterion), scrubbed exports, light / full packs.
 #
 # Environment: PY (python of the environment), RUN_DIR, LICENCE_GAP_S (registered 330), GUROBI_TIME_LIMIT_S / WALL_CAP_S (override of EVERY run;
 # refused unless ALLOW_UNREGISTERED=1 - tests and the local dry run only), GRACE_S (30), MONITOR_S (60), CGROUP_ROOT (/sys/fs/cgroup),

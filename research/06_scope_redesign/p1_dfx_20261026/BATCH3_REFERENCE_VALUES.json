@@ -1,8 +1,12 @@
 {
- "source": "third batch (M10P, 2026-10-23; light pack 20261023T174135Z_halted/export) + DFX first-order prediction (evidence/DFX_FIRST_ORDER.json, RUN_PLAN_DFX section 4)",
- "written_utc": "2026-10-26T15:15:08Z",
+ "source": "third batch (M10P, 2026-10-23; light pack 20261023T174135Z_halted/export) + DFX first-order prediction (evidence/DFX_FIRST_ORDER.json, RUN_PLAN_DFX section 4); main reference R3 / R4 per the user amendment of 2026-10-27, R1 / R2 alongside",
+ "written_utc": "2026-10-26T19:18:08Z",
  "batch3": {
-  "runs": {
+  "main_runs": {
+   "integrated": "R3",
+   "disconnected": "R4"
+  },
+  "alternative_runs": {
    "integrated": "R1",
    "disconnected": "R2"
   },
@@ -42,9 +46,10 @@
    "R3": 22.783218383789062,
    "R4": 19.28872299194336
   },
-  "b6_bn": 11.300117846675048,
-  "b6_eur": 11300117846.675049,
-  "b6_t16_bn": 11.299841745887177,
+  "b6_bn": 11.299841745887177,
+  "b6_eur": 11299841745.887177,
+  "b6_alternative_bn": 11.300117846675048,
+  "b6_alternative_eur": 11300117846.675049,
   "owen_alpha_main": 0.5,
   "owen_alpha_main_eur": {
    "R1": {
@@ -74,11 +79,47 @@
     "TL": 143751524.91201708,
     "VN": 51069067617.905266,
     "BUNKER": 65606417562.09952
+   },
+   "R3": {
+    "BN": 283381915.62366325,
+    "ID": 67149704746.47436,
+    "KH": 3593422339.0295115,
+    "LA": 253003558.5024814,
+    "MM": 1535321827.1519303,
+    "MY": 16219931505.52332,
+    "PH": 14851904811.805555,
+    "SG": 6057655496.328614,
+    "TH": 26374592442.373894,
+    "TL": 30513036.4783618,
+    "VN": 47964374557.84027,
+    "BUNKER": 65521412459.20666
+   },
+   "R4": {
+    "BN": 317735181.77815664,
+    "ID": 67416219875.87939,
+    "KH": 3831979815.1796374,
+    "LA": 1442827086.5462003,
+    "MM": 1796461513.6186023,
+    "MY": 17852121950.886112,
+    "PH": 15010593634.001225,
+    "SG": 9185721283.849335,
+    "TH": 27461865078.509167,
+    "TL": 143752270.19448298,
+    "VN": 51069147742.538124,
+    "BUNKER": 65606225093.99258
    }
+  },
+  "owen_usable": {
+   "R1": true,
+   "R2": true,
+   "R3": true,
+   "R4": true
   },
   "owen_source": {
    "R1": "export/R1/m12_owen/OWEN.json sha256 3245bf95260ce7271607aeb2d4e8dff18f5f61496d8540438da7a438626a9044",
-   "R2": "export/R2/m12_owen/OWEN.json sha256 2e01d3eed4ef620df15aa21dde03cd209795a0f0c37e4c7ce06549326dbb57bc"
+   "R2": "export/R2/m12_owen/OWEN.json sha256 2e01d3eed4ef620df15aa21dde03cd209795a0f0c37e4c7ce06549326dbb57bc",
+   "R3": "export/R3/m12_owen/OWEN.json sha256 1249cd62278733e228fb5d75298eb92905a0fb8d022521d0336fcb8e19291c49",
+   "R4": "export/R4/m12_owen/OWEN.json sha256 08a4eaf573b93732d1ff43eb7f9d749d38cb92b161e72b282b9d9a1eab3bfd6b"
   },
   "ledger_total_eur": {
    "R1": {
@@ -112,10 +153,42 @@
     "TL": 143762591.364042,
     "VN": 51069147493.56158,
     "ASEAN": 65606466253.91662
+   },
+   "R3": {
+    "ASEAN_BUNKER": 65521412417.900444,
+    "ASEAN_POOL": 3725.186417,
+    "BN": 283382352.549337,
+    "ID": 67146277001.60081,
+    "KH": 3615774513.454651,
+    "LA": 217174227.233338,
+    "MM": 1595295140.126105,
+    "MY": 16223495956.346615,
+    "PH": 14851918247.478203,
+    "SG": 6057658355.619658,
+    "TH": 26310397234.10617,
+    "TL": 30515137.478247,
+    "VN": 47982142251.87819,
+    "ASEAN": 65521416143.08686
+   },
+   "R4": {
+    "ASEAN_BUNKER": 65606225131.019165,
+    "ASEAN_POOL": -26262.560463,
+    "BN": 317744947.967339,
+    "ID": 67416470838.74212,
+    "KH": 3832024373.130931,
+    "LA": 1442873080.992687,
+    "MM": 1796632105.544618,
+    "MY": 17852159049.778893,
+    "PH": 15010649416.1522,
+    "SG": 9185727880.759953,
+    "TH": 27461867125.950745,
+    "TL": 143760254.905497,
+    "VN": 51069180364.50381,
+    "ASEAN": 65606198868.4587
    }
   },
   "summary_sha256": "32a42b4d2b071ec4560d2596ea11e8cec18dac2bf9da17eb8661f52ebbd33103",
-  "note": "R1 / R2 = profile formal_barrier (Threads 8, suboptimal, ACCEPTED_LAYER2); R3 / R4 = formal_barrier_1e6_t16 (Threads 16, optimal) - the DFX V1 / V2 profile; B6 differs by 0.0001 bn between the pairs"
+  "note": "main R3 / R4 = formal_barrier_1e6_t16 (Threads 16, optimal, ACCEPTED_LAYER2) - the DFX V1 / V2 profile; alternative R1 / R2 = formal_barrier (Threads 8, suboptimal, ACCEPTED_LAYER2), the values used in the stage reports; B6 differs by 0.0003 bn between the pairs"
  },
  "first_order": {
   "method": "DMD dmd_d5_duals.py envelope method: annual load-weighted dual prices of the third-batch 365x24h runs x (v2 - v1) network loads; INFERENCE (large-change extrapolation)",
@@ -124,10 +197,12 @@
   "delta_c_disconnected_bn": 22.5096148739377,
   "delta_b6_bn": 3.0596223395486675,
   "delta_b6_bn_usd": 3.487828724457861,
-  "predicted_b6_bn": 14.359622339548668,
+  "predicted_b6_bn": 14.359464085435844,
+  "predicted_b6_alternative_bn": 14.359622339548668,
+  "prices": "R1 / R2 duals (main pair of the prediction); R3 / R4 duals give the same delta to 3 decimals (robustness)",
   "robustness_r3_r4": {
    "delta_b6_bn": 3.0596562262206426,
-   "predicted_b6_bn": 14.359656226220643
+   "predicted_b6_bn": 14.35949797210782
   },
   "by_country_bn": {
    "BN": 0.028834175724582255,

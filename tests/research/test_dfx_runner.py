@@ -86,7 +86,7 @@ def test_run_table_limits_and_schedule_are_the_registered_plan():
     assert list(D.RUNS) == ["V1", "V2"] and all(r["profile"] == D.T16 and r["set"] == "" and r["base"].endswith("365_24h") for r in D.RUNS.values())
     assert D.RUNS["V1"]["scenario"] == "integrated" and D.RUNS["V2"]["scenario"] == "disconnected" and D.RUNS["V1"]["costs"] == "integrated" and D.RUNS["V2"]["costs"] == "disconnected"
     assert D.SCHEDULE == [("1", ["V1"], ["V2"])] and D.STOP_ALWAYS == ("V1", "V2") and D.LABEL == "DFX_365X24H"
-    assert D.TIME_LIMIT_S == {"V1": 3 * 4882, "V2": 3 * 1423} and D.WALL_MARGIN_S == 1200 and D.LICENCE_GAP_S == 330 and D.PARALLEL_MIN_CORES == 33
+    assert D.TIME_LIMIT_S == {"V1": 21600, "V2": 10800} and D.WALL_MARGIN_S == 1200 and D.LICENCE_GAP_S == 330 and D.PARALLEL_MIN_CORES == 33   # user amendment 2026-10-27 (was 3 x 4,882 / 1,423)
     assert D.BUILD_COMMIT == "72083fde6bffd89580869af6dd00885a8d76721f" and len(D.BUILD_COMMIT) == 40
     assert D.REGISTERED_SHA == {"integrated_365_24h_unsolved.nc": "82928a4c9151a6a176ac8c81bf56bbe41867e16ba0d059ce2ad8c6e78e59f6b2",
                                 "disconnected_365_24h_unsolved.nc": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"}
@@ -94,13 +94,13 @@ def test_run_table_limits_and_schedule_are_the_registered_plan():
     thr = yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())["research"]["solver"]["profiles"][D.T16]["Threads"]
     assert thr == 16 and D.PARALLEL_MIN_CORES == 2 * thr + 1
     out = subprocess.run([sys.executable, str(ROOT / "scripts_project/dfx_batch.py"), "limits"], capture_output=True, text=True, check=True).stdout.split()
-    assert out == ["V1|14646|15846", "V2|4269|5469"]
+    assert out == ["V1|21600|22800", "V2|10800|12000"]
     out = subprocess.run([sys.executable, str(ROOT / "scripts_project/dfx_batch.py"), "runtable"], capture_output=True, text=True, check=True).stdout.split()
     assert out == ["V1|integrated|integrated_365_24h||formal_barrier_1e6_t16|integrated", "V2|disconnected|disconnected_365_24h||formal_barrier_1e6_t16|disconnected"]
     src = (PKG / "run_dfx.sh").read_text()
     assert "R_GAP=330; R_PAR_CORES=33" in src and "dfx_batch.py" in src and "--only" not in src.split("\n", 60)[0] and "m08a_variants" not in src
     plan = (PKG.parent / "RUN_PLAN_DFX.md").read_text()
-    assert all(s in plan for s in D.REGISTERED_SHA.values()) and "14,646" in plan and "4,269" in plan and "33" in plan
+    assert all(s in plan for s in D.REGISTERED_SHA.values()) and "21,600" in plan and "10,800" in plan and "33" in plan and "R3 / R4" in plan
     rec = ROOT / "results_project/dfx_v3/builds_v2"   # the real build receipts when present (main checkout; not in a worktree)
     for sc in ("integrated", "disconnected"):
         r = rec / sc / f"{sc}_BUILD_RECEIPT.json"
@@ -115,7 +115,7 @@ def test_serial_batch_reference_regrade_b6_summary_packs_and_resume(tmp_path):
     assert p.returncode == 0, st[-3000:] + p.stderr[-2000:]
     calls = _calls(tmp_path)
     assert [c[1] for c in calls] == ["V1", "V2"] and not _overlap(calls, "V1", "V2") and "PHASE_1:one_lane:V1,V2:threads=32:cores=25:min_cores=33" in st
-    assert all(c[2] == D.T16 and c[6] == str(tmp_path / "lic") for c in calls) and float(calls[0][3]) == 14646.0 and float(calls[1][3]) == 4269.0
+    assert all(c[2] == D.T16 and c[6] == str(tmp_path / "lic") for c in calls) and float(calls[0][3]) == 21600.0 and float(calls[1][3]) == 10800.0
     for rid in ("V1", "V2"):
         run = json.loads((out / rid / "RUN.json").read_text())
         assert run["registered_sha256"] == sha(pkg / "networks" / f"{run['base']}_unsolved.nc") == run["network_sha256"] and run["label"] == "DFX_365X24H" and run["wall_cap_s"] == run["time_limit"] + 1200
@@ -130,7 +130,9 @@ def test_serial_batch_reference_regrade_b6_summary_packs_and_resume(tmp_path):
     c = s["comparison"]; ref = json.loads((pkg / "BATCH3_REFERENCE_VALUES.json").read_text())
     assert c["batch3_b6_bn"] == ref["batch3"]["b6_bn"] and c["delta_b6_bn"] == pytest.approx(100.0 - ref["batch3"]["b6_bn"]) and c["first_order"]["predicted_delta_b6_bn"] == ref["first_order"]["delta_b6_bn"]
     assert c["delta_b6_minus_first_order_bn"] == pytest.approx(100.0 - ref["batch3"]["b6_bn"] - ref["first_order"]["delta_b6_bn"])
-    assert c["objective_difference_bn"]["V1_minus_R1"] == pytest.approx((2e11 - ref["batch3"]["objective_eur"]["R1"]) / 1e9)
+    assert c["main_runs"] == dict(integrated="R3", disconnected="R4") and c["alternative_runs"] == dict(integrated="R1", disconnected="R2")   # user amendment 2026-10-27
+    assert c["objective_difference_bn"]["V1_minus_R3"] == pytest.approx((2e11 - ref["batch3"]["objective_eur"]["R3"]) / 1e9)
+    assert c["objective_difference_bn"]["V2_minus_R2"] == pytest.approx((3e11 - ref["batch3"]["objective_eur"]["R2"]) / 1e9) and c["delta_b6_alternative_bn"] == pytest.approx(100.0 - ref["batch3"]["b6_alternative_bn"])
     md = (out / "DFX_SUMMARY.md").read_text(); assert "B6（V2 − V1）" in md and "一阶预测" in md and "100.0000 bn" in md
     assert len(list(out.glob("results_light_final_*.tar.gz"))) == 1 and len(list(out.glob("results_full_final_*.tar.gz"))) == 1 and "DONE:" in st
     assert (out / "export" / "batch" / "DFX_SUMMARY.md").exists() and (out / "export" / "batch" / "BATCH3_REFERENCE_VALUES.json").exists()
@@ -220,7 +222,7 @@ def test_build_only_dry_run_no_solver_and_licence_tripwire(tmp_path):
     assert p.returncode == 0, st[-2000:]
     builds = _calls(tmp_path, "build")
     assert [b[1] for b in builds] == ["V1", "V2"] and _calls(tmp_path) == [] and all(b[4] == "/nonexistent/dfx_dry_run_no_licence" for b in builds)
-    assert float(builds[0][3]) == 14646.0 and float(builds[1][3]) == 4269.0
+    assert float(builds[0][3]) == 21600.0 and float(builds[1][3]) == 10800.0
     for rid in D.RUNS:
         bc = json.loads((out / rid / "BUILD_CHECK.json").read_text()); assert bc["passed"], (rid, bc["checks"])
         assert "BUILD_CHECK_%s:" % rid in st and (out / "export" / rid / "BUILD_CHECK.json").exists()
