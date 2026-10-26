@@ -1,0 +1,22 @@
+step,item,twh,group,basis,grade
+0,AEO8 ATS 2050 TFEC as printed (C.3 total 746.2 Mtoe x 11.63; 10 AMS; excludes non-energy use and international transport),8678.306000,start,AEO8 C.3 PDF p.184,A
+1,"rounding: sum of C.8 per capita x D.1 population (10 AMS) - printed total = (k - 1) x C.3 total, k = 0.999823955 (DFX F1 column scaling)",-1.527775,baseline,DEMAND_ANCHOR_AEO8_ATS.csv; RAS k,VERIFIED
+2,TL added (mean KH/LA/MM per capita x UN WPP 2024),11.469516,baseline,demand_anchor_tl_rule (C),C
+3,NEU outside the TFEC envelope (DFX F1.2): the 11-country energy-use anchors = sum of the RAS sector anchors (no NEU carved out),0.000000,definition,demand_neu_outside_tfec,A
+4,road: RAS land-transport fuel anchor 2369.6 TWh oil-eq -> EV at the battery x 0.3021,-1653.625130,transport electrification efficiency,registry share_transport_*_efficiency (C),C
+5,domestic shipping 62.4 TWh oil-eq -> methanol x 0.40/0.46,-8.141662,transport fuel switch,shipping_methanol_conversion (B),C
+6,"negative residential / commercial / agriculture fuel anchors set to 0 (8 cells): sector = electricity anchor, above ATS",65.149472,anchoring artefact,demand_sector_fuel_anchor_zeroed (C),C
+7,TL commercial positive fuel anchor without 2019 carrier structure set to 0,-0.185714,anchoring artefact,demand_sector_fuel_anchor_zeroed (C),C
+8,clean cooking: residential / commercial biomass 124.1 TWh -> useful cooking energy x 0.08 (TH 0.16),-114.186028,useful-energy accounting (buildings),"cookstove_efficiency_* (registered, DFX F4)",C
+9,"agriculture: oil 198.1 TWh, half electrified at efficiency 0.3/0.7",-56.608797,agriculture machinery electrification,share_agriculture_machinery_* (C),C
+10,agriculture biomass 37.0 TWh: overflow above the solid-biomass potential -> useful heat x 0.90,0.000000,agriculture biomass overflow,biomass_overflow_rule (C),C
+11,steel: physical output rule instead of 2019 energy x multiplier (298.6 -> 185.7),-112.879744,industry: physical output rule,industry_output_rule_2050 (C),C
+12,cement: physical output rule instead of 2019 energy x multiplier (716.4 -> 360.8),-355.664166,industry: physical output rule,industry_output_rule_2050 (C),C
+13,"route sub-sectors (chemicals excl. the ammonia share, food, paper, ...): 2050/2019 specific-energy efficiency factors (688.2 -> 618.9)",-69.320145,industry: PyPSA-Eur efficiency factors,"industry_efficiency_factor_* (B), industry_subsector_mapping (C)",B
+14,ammonia (DFX F2): EU27 chemicals-weight ammonia share dropped (36.8) and replaced by USGS 2019 production x growth x 5.166 MWh/t (98.1),61.322187,industry: ammonia production rule,industry_ammonia_output_rule (C),C
+15,other bucket: heat-use fuels 2035.7 TWh -> useful heat x 0.90 (mechanical oil and electricity kept),-203.565105,industry: useful-heat accounting,industry_useful_heat_efficiency (C),C
+16,"industry biomass overflow: fixed biomass 256.1 -> 256.1 TWh, overflow -> useful heat x 0.90 (0.0)",-0.000132,industry biomass overflow,biomass_overflow_rule (C),C
+17,industry residual (2019 sub-sector split vs UNSD industry total; H2 by-product floor),0.143214,industry: residual,computed residual,VERIFIED
+18,"subtotal: model energy-use loads excl. NEU (6240.7); + NEU added as non-energy demand (2019 NEU x multiplier 1207.3, minus ammonia feedstock gas 197.0, DFX F2.4)",1010.283037,non-energy use: added,NEU rows of the anchor table,VERIFIED
+19,NEU oil: HVC feedstock accounts 579.1 TWh x HVC primary fraction 0.4 (DFX F3: naphtha / ethane / LPG / NGL only; non-HVC products 125.3 TWh x 1.0),-347.467390,non-energy use: recycling assumption,"share_HVC_primary_fraction_2050 (C), hvc_primary_fraction_scope",C
+20,"= model 11-country loads (network v2, 2920x3h = 365x24h)",0.000000,end,closure,VERIFIED

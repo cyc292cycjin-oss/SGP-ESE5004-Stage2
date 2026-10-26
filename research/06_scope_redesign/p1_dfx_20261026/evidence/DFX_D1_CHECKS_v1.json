@@ -1,0 +1,807 @@
+{
+ "tag": "v1",
+ "networks": {
+  "integrated_2920x3h": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/builds_v1/integrated/integrated_2920_3h_unsolved.nc",
+   "sha256": "a56dbcb41ba86f9cd5342a0f7c386f7136b1021a2dc23bc85e02c8bd3ed808a4",
+   "bytes": 64106135
+  },
+  "integrated_365x24h": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/builds_v1/integrated/integrated_365_24h_unsolved.nc",
+   "sha256": "3c79a3a909b9bf9c84cb7f14fce98a53f3cf390df3cf9b8faeb1d200e8cf79fd",
+   "bytes": 31524928
+  },
+  "disconnected_2920x3h": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/builds_v1/disconnected/disconnected_2920_3h_unsolved.nc",
+   "sha256": "3e4f27985086b9258c39011daaca66f162135dc0b02e65477a5f53a679bc5a71",
+   "bytes": 63439169
+  },
+  "disconnected_365x24h": {
+   "path": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/builds_v1/disconnected/disconnected_365_24h_unsolved.nc",
+   "sha256": "33363917f555f463568da2bb74f2476ad1506f6af43e42cfed5db3b4db8724b8",
+   "bytes": 30857962
+  }
+ },
+ "ledger_parameters": {
+  "agriculture_efficiency_gain": 2.3333333333333335,
+  "agriculture_electric_share": 0.5,
+  "bev_availability": 0.8,
+  "bev_charge_efficiency": 0.9,
+  "cookstove_basic": {
+   "ID": 0.08,
+   "TH": 0.16
+  },
+  "cookstove_basic_default": 0.08,
+  "cookstove_modern": 0.53,
+  "ev_share": 1.0,
+  "existing_boiler_efficiency": 0.9,
+  "fcev_share": 0.0,
+  "feedstock_end_of_life_release": 1.0,
+  "hvc_primary_fraction": 0.4,
+  "ice_share": 0.0,
+  "industry_carrier_mode": "pypsa_eur_2050",
+  "industry_low_temperature_heat_share": "ratio heat row (R1)",
+  "industry_table": "research_inputs/demand_v5/INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv",
+  "nonindustrial_electricity": "table_sectors",
+  "oil_to_electricity": 0.3021470201165633,
+  "oil_to_hydrogen": 0.535653101356531
+ },
+ "research_config_sha256": "884467a0fbefb0b66c9e68b9442e4f30395eaf14be5e0677cf17094b4a061304",
+ "consistency": {
+  "2920_vs_365_integrated": {
+   "loads_a": 2300,
+   "loads_b": 2300,
+   "only_in_a": 0,
+   "only_in_b": 0,
+   "max_abs_diff_mwh": 2.9802322387695312e-08,
+   "max_rel_diff": 4.424719957690452e-16,
+   "total_a_twh": 7147.643710309628,
+   "total_b_twh": 7147.643710309628
+  },
+  "integrated_vs_disconnected_2920": {
+   "loads_a": 2300,
+   "loads_b": 2300,
+   "only_in_a": 0,
+   "only_in_b": 0,
+   "max_abs_diff_mwh": 0.0,
+   "max_rel_diff": 0.0,
+   "total_a_twh": 7147.643710309628,
+   "total_b_twh": 7147.643710309628
+  },
+  "integrated_vs_disconnected_365": {
+   "loads_a": 2300,
+   "loads_b": 2300,
+   "only_in_a": 0,
+   "only_in_b": 0,
+   "max_abs_diff_mwh": 0.0,
+   "max_rel_diff": 0.0,
+   "total_a_twh": 7147.643710309628,
+   "total_b_twh": 7147.643710309628
+  }
+ },
+ "input_sha256": {
+  "DEMAND_ANCHOR_AEO8_ATS.csv": "e61e5673a79b3d171437863021e9777a04b98947e9354e1b7dfbc876d54d32f1",
+  "INDUSTRY_2050_PYPSA_EUR_aeo8_ats_anchor.csv": "e3fe9bf8ed63908fb482ae0c6b65f45b69492f3dfa0aced73694170be09e5d2b",
+  "INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv": "30fb961e352b299a2b2f72d05a561a475d337870b6aa7a1f9d954445deeacbea",
+  "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv": "817088bc368b7b44fe3f696df95e9bcbfe52836f08162d33d70d3110c3f59a7e",
+  "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv": "064bdce02063083d9052ba01aa2816e07c9d2f48e8f24170a16378165bdee441",
+  "INDUSTRY_OUTPUT_2050_M08B.csv": "a83a868f3026dc4812ffcbbded65ea297ba95a0002d195c9ba43ba6407945f69",
+  "INDUSTRY_2050_OTHER_BUCKET.csv": "dbaedf4c6bf547720e3b48b80ff33884a99a8d3b8f60c839a04472d0aa144f9c"
+ },
+ "industry_reconstruction": {
+  "BN": {
+   "industry electricity": {
+    "network_mwh": 292315.1672520001,
+    "reconstructed_mwh": 292315.2425640949,
+    "diff_mwh": -0.075312094821129
+   },
+   "industry heat": {
+    "network_mwh": 36253.9454483,
+    "reconstructed_mwh": 36253.91816486799,
+    "diff_mwh": 0.027283432013064157
+   },
+   "industry heat medium A": {
+    "network_mwh": 19974.195518,
+    "reconstructed_mwh": 19974.195518,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 79896.78207179997,
+    "reconstructed_mwh": 79896.7820718,
+    "diff_mwh": -2.9103830456733704e-11
+   },
+   "industry heat high": {
+    "network_mwh": 231078.15309499996,
+    "reconstructed_mwh": 231078.153095,
+    "diff_mwh": -2.9103830456733704e-11
+   },
+   "industry hydrogen": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry ammonia": {
+    "network_mwh": 47024.51039590001,
+    "reconstructed_mwh": 47024.5103959,
+    "diff_mwh": 1.4551915228366852e-11
+   },
+   "industry methanol": {
+    "network_mwh": 4803.67937123,
+    "reconstructed_mwh": 4803.67937123,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 254696.08269699995,
+    "reconstructed_mwh": 254696.04747708488,
+    "diff_mwh": 0.03521991506568156
+   },
+   "biomass final energy": {
+    "network_mwh": 73477.86435189999,
+    "reconstructed_mwh": 73477.8643519,
+    "diff_mwh": -1.4551915228366852e-11
+   },
+   "oil final energy": {
+    "network_mwh": 204029.87641199998,
+    "reconstructed_mwh": 204029.876412,
+    "diff_mwh": -2.9103830456733704e-11
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "ID": {
+   "industry electricity": {
+    "network_mwh": 260767862.112,
+    "reconstructed_mwh": 260767878.04536414,
+    "diff_mwh": -15.933364152908325
+   },
+   "industry heat": {
+    "network_mwh": 98286268.70359997,
+    "reconstructed_mwh": 98286262.93149306,
+    "diff_mwh": 5.772106915712357
+   },
+   "industry heat medium A": {
+    "network_mwh": 100553835.17899998,
+    "reconstructed_mwh": 100553835.179,
+    "diff_mwh": -2.9802322387695312e-08
+   },
+   "industry heat medium B": {
+    "network_mwh": 402215340.7159999,
+    "reconstructed_mwh": 402215340.716,
+    "diff_mwh": -1.1920928955078125e-07
+   },
+   "industry heat high": {
+    "network_mwh": 583624135.4979998,
+    "reconstructed_mwh": 583624135.498,
+    "diff_mwh": -2.384185791015625e-07
+   },
+   "industry hydrogen": {
+    "network_mwh": 15159620.576299997,
+    "reconstructed_mwh": 15159617.866531655,
+    "diff_mwh": 2.7097683418542147
+   },
+   "industry ammonia": {
+    "network_mwh": 9948475.745859995,
+    "reconstructed_mwh": 9948475.74586,
+    "diff_mwh": -3.725290298461914e-09
+   },
+   "industry methanol": {
+    "network_mwh": 1016263.3765499998,
+    "reconstructed_mwh": 1016263.37655,
+    "diff_mwh": -2.3283064365386963e-10
+   },
+   "gas final energy": {
+    "network_mwh": 78202757.13399999,
+    "reconstructed_mwh": 78202749.68280613,
+    "diff_mwh": 7.451193854212761
+   },
+   "biomass final energy": {
+    "network_mwh": 22386945.152099997,
+    "reconstructed_mwh": 22386945.1521,
+    "diff_mwh": -3.725290298461914e-09
+   },
+   "oil final energy": {
+    "network_mwh": 64693531.5451,
+    "reconstructed_mwh": 64693531.5451,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "KH": {
+   "industry electricity": {
+    "network_mwh": 11241608.1147,
+    "reconstructed_mwh": 11241608.114740001,
+    "diff_mwh": -4.00003045797348e-05
+   },
+   "industry heat": {
+    "network_mwh": 55072.32963809998,
+    "reconstructed_mwh": 55072.3296381,
+    "diff_mwh": -1.4551915228366852e-11
+   },
+   "industry heat medium A": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat high": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry hydrogen": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry ammonia": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 7578268.702010001,
+    "reconstructed_mwh": 7578268.70201,
+    "diff_mwh": 9.313225746154785e-10
+   },
+   "biomass final energy": {
+    "network_mwh": 2702683.4070999995,
+    "reconstructed_mwh": 2702683.4071,
+    "diff_mwh": -4.656612873077393e-10
+   },
+   "oil final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "LA": {
+   "industry electricity": {
+    "network_mwh": 7539899.037330002,
+    "reconstructed_mwh": 7539899.03733,
+    "diff_mwh": 1.862645149230957e-09
+   },
+   "industry heat": {
+    "network_mwh": 39625.896686600005,
+    "reconstructed_mwh": 39625.8966866,
+    "diff_mwh": 7.275957614183426e-12
+   },
+   "industry heat medium A": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat high": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry hydrogen": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry ammonia": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 5452750.857320001,
+    "reconstructed_mwh": 5452750.85732,
+    "diff_mwh": 9.313225746154785e-10
+   },
+   "biomass final energy": {
+    "network_mwh": 1944647.2333800006,
+    "reconstructed_mwh": 1944647.23338,
+    "diff_mwh": 4.656612873077393e-10
+   },
+   "oil final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "MM": {
+   "industry electricity": {
+    "network_mwh": 8581739.753570002,
+    "reconstructed_mwh": 8581740.930938225,
+    "diff_mwh": -1.1773682236671448
+   },
+   "industry heat": {
+    "network_mwh": 3710310.2742600003,
+    "reconstructed_mwh": 3710310.205793725,
+    "diff_mwh": 0.06846627546474338
+   },
+   "industry heat medium A": {
+    "network_mwh": 3599653.3705700007,
+    "reconstructed_mwh": 3599653.37057,
+    "diff_mwh": 9.313225746154785e-10
+   },
+   "industry heat medium B": {
+    "network_mwh": 14398613.482300002,
+    "reconstructed_mwh": 14398613.4823,
+    "diff_mwh": 1.862645149230957e-09
+   },
+   "industry heat high": {
+    "network_mwh": 8269123.045870001,
+    "reconstructed_mwh": 8269123.04587,
+    "diff_mwh": 1.862645149230957e-09
+   },
+   "industry hydrogen": {
+    "network_mwh": 343097.16351800004,
+    "reconstructed_mwh": 343097.1063345278,
+    "diff_mwh": 0.05718347226502374
+   },
+   "industry ammonia": {
+    "network_mwh": 209947.16164000003,
+    "reconstructed_mwh": 209947.16164,
+    "diff_mwh": 2.9103830456733704e-11
+   },
+   "industry methanol": {
+    "network_mwh": 21446.663472500004,
+    "reconstructed_mwh": 21446.6634725,
+    "diff_mwh": 3.637978807091713e-12
+   },
+   "gas final energy": {
+    "network_mwh": 7005152.95195,
+    "reconstructed_mwh": 7005152.79142686,
+    "diff_mwh": 0.1605231398716569
+   },
+   "biomass final energy": {
+    "network_mwh": 4065896.4636000004,
+    "reconstructed_mwh": 4065895.572410509,
+    "diff_mwh": 0.8911894913762808
+   },
+   "oil final energy": {
+    "network_mwh": 7301201.478730001,
+    "reconstructed_mwh": 7301201.47873,
+    "diff_mwh": 9.313225746154785e-10
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "MY": {
+   "industry electricity": {
+    "network_mwh": 105208167.77699998,
+    "reconstructed_mwh": 105208167.77675,
+    "diff_mwh": 0.0002499818801879883
+   },
+   "industry heat": {
+    "network_mwh": 10293466.3984,
+    "reconstructed_mwh": 10293466.3984196,
+    "diff_mwh": -1.960061490535736e-05
+   },
+   "industry heat medium A": {
+    "network_mwh": 6268377.504209997,
+    "reconstructed_mwh": 6268377.50421,
+    "diff_mwh": -2.7939677238464355e-09
+   },
+   "industry heat medium B": {
+    "network_mwh": 25073510.01679999,
+    "reconstructed_mwh": 25073510.0168,
+    "diff_mwh": -1.1175870895385742e-08
+   },
+   "industry heat high": {
+    "network_mwh": 72708514.19369999,
+    "reconstructed_mwh": 72708514.1937,
+    "diff_mwh": -1.4901161193847656e-08
+   },
+   "industry hydrogen": {
+    "network_mwh": 7467129.125119998,
+    "reconstructed_mwh": 7467129.12512,
+    "diff_mwh": -1.862645149230957e-09
+   },
+   "industry ammonia": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 23792443.107099995,
+    "reconstructed_mwh": 23792443.10712,
+    "diff_mwh": -2.000480890274048e-05
+   },
+   "biomass final energy": {
+    "network_mwh": 7615448.631119999,
+    "reconstructed_mwh": 7615448.63112,
+    "diff_mwh": -9.313225746154785e-10
+   },
+   "oil final energy": {
+    "network_mwh": 12756833.572799997,
+    "reconstructed_mwh": 12756833.5728,
+    "diff_mwh": -1.862645149230957e-09
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "PH": {
+   "industry electricity": {
+    "network_mwh": 60309232.40510002,
+    "reconstructed_mwh": 60309244.508949675,
+    "diff_mwh": -12.103849656879902
+   },
+   "industry heat": {
+    "network_mwh": 2811630.160670001,
+    "reconstructed_mwh": 2811643.968311333,
+    "diff_mwh": -13.807641332037747
+   },
+   "industry heat medium A": {
+    "network_mwh": 468897.22813700023,
+    "reconstructed_mwh": 468897.228137,
+    "diff_mwh": 2.3283064365386963e-10
+   },
+   "industry heat medium B": {
+    "network_mwh": 1875588.9125400004,
+    "reconstructed_mwh": 1875588.91254,
+    "diff_mwh": 4.656612873077393e-10
+   },
+   "industry heat high": {
+    "network_mwh": 5078518.965010003,
+    "reconstructed_mwh": 5078518.96501,
+    "diff_mwh": 2.7939677238464355e-09
+   },
+   "industry hydrogen": {
+    "network_mwh": 1491064.8012600006,
+    "reconstructed_mwh": 1491064.5285744625,
+    "diff_mwh": 0.272685538046062
+   },
+   "industry ammonia": {
+    "network_mwh": 1001123.6761600004,
+    "reconstructed_mwh": 1001123.67616,
+    "diff_mwh": 3.4924596548080444e-10
+   },
+   "industry methanol": {
+    "network_mwh": 102267.45819900002,
+    "reconstructed_mwh": 102267.458199,
+    "diff_mwh": 1.4551915228366852e-11
+   },
+   "gas final energy": {
+    "network_mwh": 32654273.464500006,
+    "reconstructed_mwh": 32654272.714684766,
+    "diff_mwh": 0.7498152405023575
+   },
+   "biomass final energy": {
+    "network_mwh": 42235262.166800015,
+    "reconstructed_mwh": 42235237.27791826,
+    "diff_mwh": 24.888881757855415
+   },
+   "oil final energy": {
+    "network_mwh": 4484065.598180002,
+    "reconstructed_mwh": 4484065.59818,
+    "diff_mwh": 1.862645149230957e-09
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "SG": {
+   "industry electricity": {
+    "network_mwh": 28459204.5586,
+    "reconstructed_mwh": 28459210.37787408,
+    "diff_mwh": -5.819274079054594
+   },
+   "industry heat": {
+    "network_mwh": 1585741.54734,
+    "reconstructed_mwh": 1585739.4391802377,
+    "diff_mwh": 2.108159762341529
+   },
+   "industry heat medium A": {
+    "network_mwh": 700788.97651,
+    "reconstructed_mwh": 700788.97651,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 2803155.90604,
+    "reconstructed_mwh": 2803155.90604,
+    "diff_mwh": 0.0
+   },
+   "industry heat high": {
+    "network_mwh": 8502384.19027,
+    "reconstructed_mwh": 8502384.19027,
+    "diff_mwh": 0.0
+   },
+   "industry hydrogen": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry ammonia": {
+    "network_mwh": 3633512.34569,
+    "reconstructed_mwh": 3633512.34569,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 371172.99368299986,
+    "reconstructed_mwh": 371172.993683,
+    "diff_mwh": -1.1641532182693481e-10
+   },
+   "gas final energy": {
+    "network_mwh": 3819514.1334,
+    "reconstructed_mwh": 3819511.411977378,
+    "diff_mwh": 2.7214226219803095
+   },
+   "biomass final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "oil final energy": {
+    "network_mwh": 1388844.7581000007,
+    "reconstructed_mwh": 1388844.7581,
+    "diff_mwh": 6.984919309616089e-10
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "TH": {
+   "industry electricity": {
+    "network_mwh": 205830755.97299996,
+    "reconstructed_mwh": 205830817.16731808,
+    "diff_mwh": -61.19431811571121
+   },
+   "industry heat": {
+    "network_mwh": 10736041.597899998,
+    "reconstructed_mwh": 10736076.76168659,
+    "diff_mwh": -35.16378659196198
+   },
+   "industry heat medium A": {
+    "network_mwh": 1103721.58588,
+    "reconstructed_mwh": 1103721.58588,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 4414886.343529999,
+    "reconstructed_mwh": 4414886.34353,
+    "diff_mwh": -9.313225746154785e-10
+   },
+   "industry heat high": {
+    "network_mwh": 12554678.848799998,
+    "reconstructed_mwh": 12554678.8488,
+    "diff_mwh": -1.862645149230957e-09
+   },
+   "industry hydrogen": {
+    "network_mwh": 3336611.1615899997,
+    "reconstructed_mwh": 3336608.6125598084,
+    "diff_mwh": 2.5490301912650466
+   },
+   "industry ammonia": {
+    "network_mwh": 9358538.874349998,
+    "reconstructed_mwh": 9358538.87435,
+    "diff_mwh": -1.862645149230957e-09
+   },
+   "industry methanol": {
+    "network_mwh": 955999.749005,
+    "reconstructed_mwh": 955999.749005,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 48269546.34899999,
+    "reconstructed_mwh": 48269539.28913475,
+    "diff_mwh": 7.059865243732929
+   },
+   "biomass final energy": {
+    "network_mwh": 127576804.25199999,
+    "reconstructed_mwh": 127576717.5026445,
+    "diff_mwh": 86.74935549497604
+   },
+   "oil final energy": {
+    "network_mwh": 9264611.9315,
+    "reconstructed_mwh": 9264611.9315,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "TL": {
+   "industry electricity": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium A": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry heat high": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry hydrogen": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry ammonia": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "gas final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "biomass final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "oil final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  },
+  "VN": {
+   "industry electricity": {
+    "network_mwh": 393677304.47,
+    "reconstructed_mwh": 393677317.8389413,
+    "diff_mwh": -13.368941247463226
+   },
+   "industry heat": {
+    "network_mwh": 22205016.283000004,
+    "reconstructed_mwh": 22205011.14158853,
+    "diff_mwh": 5.14141147211194
+   },
+   "industry heat medium A": {
+    "network_mwh": 24807335.0379,
+    "reconstructed_mwh": 24807335.0379,
+    "diff_mwh": 0.0
+   },
+   "industry heat medium B": {
+    "network_mwh": 99229340.15150002,
+    "reconstructed_mwh": 99229340.1515,
+    "diff_mwh": 1.4901161193847656e-08
+   },
+   "industry heat high": {
+    "network_mwh": 208983390.27200004,
+    "reconstructed_mwh": 208983390.272,
+    "diff_mwh": 2.9802322387695312e-08
+   },
+   "industry hydrogen": {
+    "network_mwh": 20296899.711400002,
+    "reconstructed_mwh": 20296897.62770857,
+    "diff_mwh": 2.08369143307209
+   },
+   "industry ammonia": {
+    "network_mwh": 7650060.31981,
+    "reconstructed_mwh": 7650060.31981,
+    "diff_mwh": 0.0
+   },
+   "industry methanol": {
+    "network_mwh": 781474.1001570001,
+    "reconstructed_mwh": 781474.100157,
+    "diff_mwh": 1.1641532182693481e-10
+   },
+   "gas final energy": {
+    "network_mwh": 74222326.7809,
+    "reconstructed_mwh": 74222321.05120496,
+    "diff_mwh": 5.729695037007332
+   },
+   "biomass final energy": {
+    "network_mwh": 22225796.1889,
+    "reconstructed_mwh": 22225795.774861086,
+    "diff_mwh": 0.41403891518712044
+   },
+   "oil final energy": {
+    "network_mwh": 1034026.52535,
+    "reconstructed_mwh": 1034026.52535,
+    "diff_mwh": 0.0
+   },
+   "coal final energy": {
+    "network_mwh": 0.0,
+    "reconstructed_mwh": 0.0,
+    "diff_mwh": 0.0
+   }
+  }
+ },
+ "totals_twh": {
+  "all_loads": 7147.643711312337,
+  "eleven_countries": 6422.5079564688585,
+  "asean_pool": 725.1357548434784,
+  "network_all_loads": 7147.643710309628,
+  "network_eleven": 6422.507955466151,
+  "by_sector": {
+   "AgricultureOthers": 297.892,
+   "Commercial": 568.599,
+   "Industry": 3515.635,
+   "InternationalBunkers": 725.136,
+   "NonEnergyUse": 679.462,
+   "Residential": 716.893,
+   "Transport": 644.028
+  },
+  "by_country": {
+   "ASEAN": 725.136,
+   "BN": 8.712,
+   "ID": 2671.424,
+   "KH": 96.423,
+   "LA": 36.475,
+   "MM": 109.407,
+   "MY": 647.867,
+   "PH": 427.257,
+   "SG": 112.697,
+   "TH": 1026.325,
+   "TL": 5.244,
+   "VN": 1280.676
+  }
+ },
+ "industry_reconstruction_max_abs_diff_mwh": 86.74935549497604,
+ "coverage_diff_twh": 1.0027088137576357e-06
+}

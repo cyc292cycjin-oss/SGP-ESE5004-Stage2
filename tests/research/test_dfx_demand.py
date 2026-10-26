@@ -322,7 +322,43 @@ def test_f0_changed_scripts_in_the_executed_lists():
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 # F5.2: structural equivalence v1 / v2 (networks present only)
 # ---------------------------------------------------------------------------------------------------------------------------------------------
-ALLOWED_META = {"s2_demand_ledger", "demand_owners", "demand_identity", "research_config_sha256", "dust_cleanup", "s2_build", "research_inputs", "registry_sha256", "build"}
+ALLOWED_META = {"s2_demand_ledger", "demand_owners", "demand_identity", "research_config", "research_config_sha256", "research_config_subset_sha256", "research_dust_cleanup",
+                "research_fuel_carbon", "s3_layers", "s4l_layers", "cross_border_tags"}   # ledgers of the demand-side components and the config hashes (ammonia base year added)
+DEMAND_SIDE = re.compile(r"^(?P<node>\S+ \d+) (?P<rest>(cooking (LPG|electric|gas)( non-fossil)?|clean cooking|(residential|commercial|agriculture|Residential|Commercial) \S+( meter| final| demand)?( non-fossil)?|"
+                         r"(Residential|Commercial) clean cooking demand|feedstock (oil|gas|coal)( final| demand)?|industry ammonia demand))$")
+
+
+def _load_group(name: str):
+    """(country, group) of a demand-side component name: the table group whose zero-status decides the component's presence."""
+    m = DEMAND_SIDE.match(name)
+    if not m:
+        return None
+    node, rest = m.group("node"), m.group("rest"); country = re.split(r"[\d_]", node)[0]
+    if rest.startswith("industry ammonia"):
+        return country, "ammonia"
+    if rest.startswith("feedstock"):
+        return country, "neu_" + rest.split()[1]
+    if "clean cooking" in rest or rest.startswith("cooking"):
+        return country, "cooking"
+    sec = rest.split()[0].lower()
+    return country, f"{sec}_fuel"
+
+
+def _zero_status(tag: str):
+    """Per (country, group): True when the group is zero in the demand tables of the tag (v1 = tables_v1 export of the rules commit, v2 = the worktree)."""
+    d = (RES / "tables_v1") if tag == "v1" else DEM
+    an = pd.read_csv(d / "DEMAND_ANCHOR_AEO8_ATS.csv", keep_default_na=False).set_index("country")
+    t = pd.read_csv(d / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", keep_default_na=False); t["v"] = pd.to_numeric(t.value_2050_mwh, errors="coerce").fillna(0.0)
+    s = pd.read_csv(d / "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv").set_index("country")
+    z = {}
+    for c in ASEAN:
+        z[(c, "ammonia")] = float(s.at[c, "pe_ammonia_mwh"]) <= 0
+        for key, sec in FUEL_SECTORS.items():
+            z[(c, f"{key}_fuel")] = float(t[(t.country == c) & (t.sector == sec) & (t.carrier != "electricity")].v.sum()) <= 0
+        z[(c, "cooking")] = float(t[(t.country == c) & t.sector.isin(["Residential", "Commercial"]) & (t.carrier == "biomass")].v.sum()) <= 0
+        for car in ("gas", "oil", "coal"):
+            z[(c, f"neu_{car}")] = float(t[(t.country == c) & (t.sector == "NonEnergyUse") & (t.carrier == car)].v.sum()) <= 0
+    return z
 
 
 def _diff_networks(a, b):
@@ -348,7 +384,7 @@ def _diff_networks(a, b):
             else:
                 ne = x.astype(str) != y.astype(str)
             if ne.any():
-                diffs.append((name, "value", (col, list(da.index[ne])[:20], int(ne.sum()))))
+                diffs.append((name, "value", (col, list(da.index[ne]), int(ne.sum()))))
         for attr, pa in ca.pnl.items():
             pb = b.pnl(name).get(attr)
             if pb is None or set(pa.columns) != set(pb.columns):
@@ -370,19 +406,52 @@ def test_f5_structural_equivalence(scenario, res):
     process-emission generators (EDGAR x the industry multiplier) and the demand-related meta keys."""
     a = _net(RES / "builds_v1" / scenario / f"{scenario}_{res}_unsolved.nc"); b = _net(RES / "builds_v2" / scenario / f"{scenario}_{res}_unsolved.nc")
     diffs = _diff_networks(a, b)
-    allowed, other = [], []
+    z1, z2 = _zero_status("v1"), _zero_status("v2")
+    allowed, other, index_rows = [], [], []
+
+    def presence_ok(name: str, in_v1: bool) -> str | None:
+        """A demand-side component present on one side only: its table group must be zero exactly on the other side."""
+        g = _load_group(name)
+        if g is None or g not in z1:
+            return None
+        if in_v1 and (not z1[g]) and z2[g]:
+            return f"{g[0]} {g[1]}: non-zero in v1, zero in v2 (component removed)"
+        if (not in_v1) and z1[g] and not z2[g]:
+            return f"{g[0]} {g[1]}: zero in v1, non-zero in v2 (component added)"
+        return None
     for d in diffs:
         name, kind, detail = d
         if name == "Generator" and kind == "value" and detail[0] == "p_nom" and all(i.endswith("process emissions source") for i in detail[1]) and detail[2] == len(detail[1]):
-            allowed.append(d)
-        else:
-            other.append(d)
+            allowed.append((name, kind, "p_nom of the process-emission sources = EDGAR x the industry multiplier (DFX F1 RAS multiplier)")); continue
+        if kind == "index" and name in ("Bus", "Link", "Generator"):
+            full = sorted(set(a.df(name).index) ^ set(b.df(name).index)); bad = []
+            for i in full:
+                in_v1 = i in a.df(name).index
+                if name == "Generator" and i.endswith("process emissions source"):
+                    why = "process-emission source removed: the country has no 2019 industry energy use (TL industry multiplier 0, DFX F1.2)" if in_v1 and i.startswith("TL") else None
+                else:
+                    why = presence_ok(i, in_v1)
+                (index_rows if why else bad).append((name, i, "v1" if in_v1 else "v2", why))
+            if bad:
+                other.append((name, "index", bad[:20]))
+            else:
+                allowed.append((name, kind, f"{len(full)} demand-side components present on one side only (load group zero on the other side)"))
+            continue
+        other.append(d)
     assert not other, other[:10]
-    # loads: same names, carriers and buses; p_set differs
-    assert set(a.loads.index) == set(b.loads.index) and (a.loads.sort_index().carrier == b.loads.sort_index().carrier).all() and (a.loads.sort_index().bus == b.loads.sort_index().bus).all()
-    assert not np.allclose(a.loads.sort_index().p_set.fillna(0).values, b.loads.sort_index().p_set.fillna(0).values)
+    # loads: present on one side only -> the table group is zero on the other side; common loads keep carrier and bus
+    common = sorted(set(a.loads.index) & set(b.loads.index)); la, lb = a.loads.loc[common], b.loads.loc[common]
+    assert (la.carrier == lb.carrier).all() and (la.bus == lb.bus).all()
+    bad_loads = []
+    for i in sorted(set(a.loads.index) ^ set(b.loads.index)):
+        why = presence_ok(i, i in a.loads.index)
+        (index_rows if why else bad_loads).append(("Load", i, "v1" if i in a.loads.index else "v2", why))
+    assert not bad_loads, bad_loads[:20]
+    assert not np.allclose(la.p_set.fillna(0).values, lb.p_set.fillna(0).values)
     meta_diff = {k for k in set(a.meta) | set(b.meta) if json.dumps(a.meta.get(k), sort_keys=True, default=str) != json.dumps(b.meta.get(k), sort_keys=True, default=str)}
     assert meta_diff <= ALLOWED_META, meta_diff - ALLOWED_META
     (RES / "equivalence").mkdir(exist_ok=True)
-    (RES / "equivalence" / f"EQUIVALENCE_{scenario}_{res}.json").write_text(json.dumps(dict(scenario=scenario, resolution=res, allowed=[list(map(str, d)) for d in allowed], other=[], meta_diff=sorted(meta_diff),
-                                                                                             loads=len(a.loads), loads_changed=int((~np.isclose(a.loads.sort_index().p_set.fillna(0).values, b.loads.sort_index().p_set.fillna(0).values)).sum())), indent=1), encoding="utf-8")
+    (RES / "equivalence" / f"EQUIVALENCE_{scenario}_{res}.json").write_text(json.dumps(dict(
+        scenario=scenario, resolution=res, allowed=[list(map(str, d)) for d in allowed], other=[], meta_diff=sorted(meta_diff),
+        components_present_on_one_side=[dict(component=c, name=n, only_in=s, reason=w) for c, n, s, w in index_rows],
+        loads_common=len(common), loads_v1=len(a.loads), loads_v2=len(b.loads), loads_changed=int((~np.isclose(la.p_set.fillna(0).values, lb.p_set.fillna(0).values)).sum())), indent=1), encoding="utf-8")

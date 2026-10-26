@@ -1,0 +1,244 @@
+{
+ "bridge": [
+  {
+   "step": 0,
+   "item": "AEO8 ATS 2050 TFEC as printed (C.3 total 746.2 Mtoe x 11.63; 10 AMS; excludes non-energy use and international transport)",
+   "twh": 8678.306,
+   "group": "start",
+   "basis": "AEO8 C.3 PDF p.184",
+   "grade": "A"
+  },
+  {
+   "step": 1,
+   "item": "rounding: sum of C.8 per capita x D.1 population (10 AMS) - printed total = (k - 1) x C.3 total, k = 0.999823955 (DFX F1 column scaling)",
+   "twh": -1.5277749500019127,
+   "group": "baseline",
+   "basis": "DEMAND_ANCHOR_AEO8_ATS.csv; RAS k",
+   "grade": "VERIFIED"
+  },
+  {
+   "step": 2,
+   "item": "TL added (mean KH/LA/MM per capita x UN WPP 2024)",
+   "twh": 11.4695156994,
+   "group": "baseline",
+   "basis": "demand_anchor_tl_rule (C)",
+   "grade": "C"
+  },
+  {
+   "step": 3,
+   "item": "NEU outside the TFEC envelope (DFX F1.2): the 11-country energy-use anchors = sum of the RAS sector anchors (no NEU carved out)",
+   "twh": 0.0,
+   "group": "definition",
+   "basis": "demand_neu_outside_tfec",
+   "grade": "A"
+  },
+  {
+   "step": 4,
+   "item": "road: RAS land-transport fuel anchor 2369.6 TWh oil-eq -> EV at the battery x 0.3021",
+   "twh": -1653.6251299502512,
+   "group": "transport electrification efficiency",
+   "basis": "registry share_transport_*_efficiency (C)",
+   "grade": "C"
+  },
+  {
+   "step": 5,
+   "item": "domestic shipping 62.4 TWh oil-eq -> methanol x 0.40/0.46",
+   "twh": -8.141662012819722,
+   "group": "transport fuel switch",
+   "basis": "shipping_methanol_conversion (B)",
+   "grade": "C"
+  },
+  {
+   "step": 6,
+   "item": "negative residential / commercial / agriculture fuel anchors set to 0 (8 cells): sector = electricity anchor, above ATS",
+   "twh": 65.1494715456093,
+   "group": "anchoring artefact",
+   "basis": "demand_sector_fuel_anchor_zeroed (C)",
+   "grade": "C"
+  },
+  {
+   "step": 7,
+   "item": "TL commercial positive fuel anchor without 2019 carrier structure set to 0",
+   "twh": -0.185713943149,
+   "group": "anchoring artefact",
+   "basis": "demand_sector_fuel_anchor_zeroed (C)",
+   "grade": "C"
+  },
+  {
+   "step": 8,
+   "item": "clean cooking: residential / commercial biomass 124.1 TWh -> useful cooking energy x 0.08 (TH 0.16)",
+   "twh": -114.1860278529438,
+   "group": "useful-energy accounting (buildings)",
+   "basis": "cookstove_efficiency_* (registered, DFX F4)",
+   "grade": "C"
+  },
+  {
+   "step": 9,
+   "item": "agriculture: oil 198.1 TWh, half electrified at efficiency 0.3/0.7",
+   "twh": -56.608796651038574,
+   "group": "agriculture machinery electrification",
+   "basis": "share_agriculture_machinery_* (C)",
+   "grade": "C"
+  },
+  {
+   "step": 10,
+   "item": "agriculture biomass 37.0 TWh: overflow above the solid-biomass potential -> useful heat x 0.90",
+   "twh": 2.077555905088957e-10,
+   "group": "agriculture biomass overflow",
+   "basis": "biomass_overflow_rule (C)",
+   "grade": "C"
+  },
+  {
+   "step": 11,
+   "item": "steel: physical output rule instead of 2019 energy x multiplier (298.6 -> 185.7)",
+   "twh": -112.87974374571141,
+   "group": "industry: physical output rule",
+   "basis": "industry_output_rule_2050 (C)",
+   "grade": "C"
+  },
+  {
+   "step": 12,
+   "item": "cement: physical output rule instead of 2019 energy x multiplier (716.4 -> 360.8)",
+   "twh": -355.6641657554157,
+   "group": "industry: physical output rule",
+   "basis": "industry_output_rule_2050 (C)",
+   "grade": "C"
+  },
+  {
+   "step": 13,
+   "item": "route sub-sectors (chemicals excl. the ammonia share, food, paper, ...): 2050/2019 specific-energy efficiency factors (688.2 -> 618.9)",
+   "twh": -69.3201446110861,
+   "group": "industry: PyPSA-Eur efficiency factors",
+   "basis": "industry_efficiency_factor_* (B), industry_subsector_mapping (C)",
+   "grade": "B"
+  },
+  {
+   "step": 14,
+   "item": "ammonia (DFX F2): EU27 chemicals-weight ammonia share dropped (36.8) and replaced by USGS 2019 production x growth x 5.166 MWh/t (98.1)",
+   "twh": 61.32218683708021,
+   "group": "industry: ammonia production rule",
+   "basis": "industry_ammonia_output_rule (C)",
+   "grade": "C"
+  },
+  {
+   "step": 15,
+   "item": "other bucket: heat-use fuels 2035.7 TWh -> useful heat x 0.90 (mechanical oil and electricity kept)",
+   "twh": -203.56510481191503,
+   "group": "industry: useful-heat accounting",
+   "basis": "industry_useful_heat_efficiency (C)",
+   "grade": "C"
+  },
+  {
+   "step": 16,
+   "item": "industry biomass overflow: fixed biomass 256.1 -> 256.1 TWh, overflow -> useful heat x 0.90 (0.0)",
+   "twh": -0.00013196955183047976,
+   "group": "industry biomass overflow",
+   "basis": "biomass_overflow_rule (C)",
+   "grade": "C"
+  },
+  {
+   "step": 17,
+   "item": "industry residual (2019 sub-sector split vs UNSD industry total; H2 by-product floor)",
+   "twh": 0.1432138607390243,
+   "group": "industry: residual",
+   "basis": "computed residual",
+   "grade": "VERIFIED"
+  },
+  {
+   "step": 18,
+   "item": "subtotal: model energy-use loads excl. NEU (6240.7); + NEU added as non-energy demand (2019 NEU x multiplier 1207.3, minus ammonia feedstock gas 197.0, DFX F2.4)",
+   "twh": 1010.2830371324817,
+   "group": "non-energy use: added",
+   "basis": "NEU rows of the anchor table",
+   "grade": "VERIFIED"
+  },
+  {
+   "step": 19,
+   "item": "NEU oil: HVC feedstock accounts 579.1 TWh x HVC primary fraction 0.4 (DFX F3: naphtha / ethane / LPG / NGL only; non-HVC products 125.3 TWh x 1.0)",
+   "twh": -347.46739046747683,
+   "group": "non-energy use: recycling assumption",
+   "basis": "share_HVC_primary_fraction_2050 (C), hvc_primary_fraction_scope",
+   "grade": "C"
+  },
+  {
+   "step": 20,
+   "item": "= model 11-country loads (network v2, 2920x3h = 365x24h)",
+   "twh": 0.0,
+   "group": "end",
+   "basis": "closure",
+   "grade": "VERIFIED"
+  }
+ ],
+ "closure": {
+  "start_twh": 8678.306,
+  "end_computed_twh": 6903.501638354158,
+  "model_loads_twh": 6903.5016383540005,
+  "residual_twh": 1.5734258340671659e-10,
+  "closed": true
+ },
+ "energy_use_subtotal_excl_neu_twh": 6240.685991689153,
+ "sector_anchor_twh": {
+  "Industry": 4500.01765357454,
+  "Transport": 2660.9860376885604,
+  "Residential": 615.1082889761591,
+  "Commercial": 586.676776405396,
+  "AgricultureOthers": 325.458984107934
+ },
+ "sector_check": {
+  "Industry": {
+   "anchor": 4500.01765357454,
+   "model": 3820.053763374
+  },
+  "Transport": {
+   "anchor": 2660.9860376885604,
+   "model": 999.219245725
+  },
+  "Residential": {
+   "anchor": 615.1082889761591,
+   "model": 585.647487804
+  },
+  "Commercial": {
+   "anchor": 586.676776405396,
+   "model": 566.9153073299999
+  },
+  "AgricultureOthers": {
+   "anchor": 325.458984107934,
+   "model": 268.85018745499997
+  }
+ },
+ "inputs": {
+  "e_land": 2369.589551978251,
+  "ev": 715.964422028,
+  "dship": 62.41940876081972,
+  "ship_methanol": 54.277746748,
+  "bio_buildings": 124.1152476659438,
+  "clean_cooking": 9.929219813,
+  "ag_oil": 198.13078828003856,
+  "neu_oil": 704.3978853570625,
+  "neu_oil_hvc": 579.1123174457947,
+  "industry_energy_anchor": 4500.017653569861,
+  "steel": [
+   298.629132911913,
+   185.7493891662016
+  ],
+  "cement": [
+   716.430465265897,
+   360.76629951048136
+  ],
+  "fallback": [
+   688.2010832182219,
+   582.067806804916
+  ],
+  "ammonia": [
+   36.8131318022198,
+   98.13531863930001
+  ],
+  "other_bucket": [
+   2035.6510481277098,
+   1832.0859433157948
+  ],
+  "ind_model": 3820.053763374,
+  "neu": 662.815646666,
+  "neu_gas_deducted": 196.99282623140002
+ }
+}

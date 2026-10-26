@@ -11,7 +11,8 @@
 | F0 代码地图 | 完成 | （F1–F4 提交） | 追踪：v1 重建 ×2（69 s / 0.78 GB 各）、`--stop-before-solve` 与 `--split-stage build`（56 时段）、56 时段后处理链（violations / C1 / M12 / Owen / 账本重做 / GATES_V6 / stop-class）、数据链 → `results_project/dfx_v3/f0_trace/modules.jsonl`；`CODE_MAP.md`、`CODE_MAP_TABLE.csv`、`CODE_MAP_DATA.json` |
 | DFX_RULES.md | 完成 | `834a0f19` | 在任何 v2 构建之前提交；`DFX_RULES_NUMBERS.json` = 原型数值 |
 | F1–F4 | 完成 | （本提交） | 代码：`m08b_demand.py`（RAS、NEU、氨产量、NEU 气扣除）、`s3_0_industry.py`（氨替换）、`s2_layers.py` / `s2b_feedstock.py` / `d1_common.py`（HVC 范围）、`dfx_data.py`（新）、`d1_registry.py`、`m08b_data.py`（更正基表排除 dfx 片段）、`configs/research/baseline.yaml`；数据链重跑；注册表 2,194 → 2,280 行；测试 `test_dfx_demand.py`（新）+ `test_m08b_demand.py` 改 3 处；子集 126 passed / 9 skipped |
-| F5 | 待做 | | |
+| F5.1–F5.4 构建 / 等价 / 复核 / 一阶预测 | 完成 | （本提交） | v2 四个网络在 `72083fde`（dirty 0）构建到 `results_project/dfx_v3/builds_v2/`（365×24h：一体化 `82928a4c…`、不互联 `5c75bfa0…`）；v1 同路径重建 = 登记网络（仅 meta 路径不同）；等价测试 4 个网络通过（差异只在负荷、过程排放源与随负荷增减的需求侧组件）；复核 `scripts/review/dfx_demand_review.py`：v1 7,147.6 → v2 7,628.6 TWh（+481.0），分解桥闭合残差 1.6e-10 TWh（修正 D1 表农业 gas 载体漏项 1.21 GWh 后）；一阶预测 ΔB6 +3.060 bn EUR（`DFX_FIRST_ORDER.md`）；`RUN_PLAN_DFX.md` 在任何 v2 求解前登记；子集 131 passed / 4 skipped |
+| F5.5 本机冒烟（2 次 Gurobi） | 待做 | | `scripts/wsl_dfx3/smoke_v2.sh`：56 时段截短 v2 一体化 + 不互联各一次，`formal_barrier_1e6_t16`，TimeLimit 3,000 s，间隔 ≥ 330 s，不重试 |
 | F6 | 待做 | | |
 | 阶段 1 报告 | 待做 | | |
 | 阶段 2 | 待做 | | |
