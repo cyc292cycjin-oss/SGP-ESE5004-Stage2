@@ -18,6 +18,6 @@
 | F6.1 全量测试 | 完成 | `17441b20` | **最终 702 passed / 67 skipped / 0 failed**（去除会话的 `results_project/s1` 链接、F0.3 测试范围修正后）。此前：第一次全量测试 32 个失败（第三批 / B4P 替身测试；原因 `dfx_batch.py` 首版在导入时改写 `m10_batch3_summary` 常数）→ 修复后受影响测试文件同进程重跑 + 全量测试重跑；`results_project/dfx_v3/tests/{affected,full}.log` |
 | 阶段 1 报告 | 完成 | （阶段 3 提交） | `DFX_REPORT_PHASE1.md`（附录 A = `DFX_RULES.md` 原文）+ `DFX_EVIDENCE.json`；证据副本 `evidence/{smoke,dry_run,package,tests,leak_scan}` |
 | 阶段 2 | 完成 | `5405e477` | `hpc_package_dfx/`（PROPOSED）+ `DFX_REPORT_PHASE2.md` |
-| 阶段 3 | 完成 | `f73f5c06`、`17441b20`、`d9f8da84`、（P10 提交） | `PRE_AUTODL_CHECKLIST.md`：P1–P5、P7–P11 PASS，P6 PASS（有保留 R1：键名字面量只在 grep 模式 / 版本号误报，请用户确认）；`DFX_REPORT_PHASE3.md`；分支已推送（远端头 = 本地头）。**已停下，等待用户租好 AutoDL 并在会话中说"授权阶段 4"** |
+| 阶段 3 | 完成 | `f73f5c06`、`17441b20`、`d9f8da84`、（P10 提交） | `PRE_AUTODL_CHECKLIST.md`：P1–P5、P7–P11 PASS，P6 PASS（有保留 R1：键名字面量只在 grep 模式 / 版本号误报，请用户确认）；`DFX_REPORT_PHASE3.md`；分支已推送（远端头 = 本地头）。R1 已由用户接受（2026-10-27）→ 检查单全部 PASS、可以租机。**已停下，等待用户租好 AutoDL、在会话中给出连接方式并说"授权阶段 4"** |
 
 续跑说明：如本会话中断，从上表第一个"进行中 / 待做"步骤继续；已提交的内容以 git 历史为准；`results_project/dfx_v3/*/STATUS.txt` 记录各运行的进度。
