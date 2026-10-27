@@ -6,6 +6,8 @@ Hooks (plus m10p's FAKE_SLEEP_<rid>, FAKE_OBJ_<rid>, FAKE_TERM_<rid>, FAKE_NOSOL
   FAKE_ITERS_<rid>          barrier iteration lines written to gurobi.linopy.log before "solving" (default 25), FAKE_ITER_S_<rid> log seconds each (default 1)
   FAKE_MEM_SPIKE_<rid>      "<after s>:<anon bytes>": after that many seconds the stand-in rewrites $CGROUP_ROOT/memory.stat (anon <bytes>) - memory-stop drill
   FAKE_POST_ERROR_<rid>=1   the assign stage records a post_solve_errors entry (termination status and solution kept; exit 4, as s2_solve.py)
+  FAKE_RSS_SPIKE_<rid>      "<after s>:<bytes>": after that many seconds the stand-in REALLY allocates and touches that many bytes (HPR: the process-group
+                            RSS memory measure of run_batch4.sh when no cgroup memory accounting is readable)
 """
 import json
 import os
@@ -104,11 +106,17 @@ def split_solve(argv):
     if os.environ.get(f"FAKE_IGNORE_TERM_{rid}") == "1":
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
     sleep = float(os.environ.get(f"FAKE_SLEEP_{rid}", os.environ.get("FAKE_SLEEP", "0.2"))); spike = os.environ.get(f"FAKE_MEM_SPIKE_{rid}")
+    rss_spike = os.environ.get(f"FAKE_RSS_SPIKE_{rid}"); keep = []
     t = 0.0
     while t < sleep:
         time.sleep(min(0.5, sleep - t)); t += 0.5
         if spike and t >= float(spike.split(":")[0]):
             root = Path(os.environ["CGROUP_ROOT"]); (root / "memory.stat").write_text(f"anon {int(spike.split(':')[1])}\nfile 0\n"); spike = None
+        if rss_spike and t >= float(rss_spike.split(":")[0]):
+            n = int(rss_spike.split(":")[1]); buf = bytearray(n)
+            for i in range(0, n, 4096):
+                buf[i] = 1   # touch every page so that the RSS really grows
+            keep.append(buf); rss_spike = None
     have = cond in ("optimal", "suboptimal")
     res.update(gurobi_status_code=code, gurobi_status_name=os.environ.get(f"FAKE_GUROBI_STATUS_{rid}", "OPTIMAL").replace("_NOSOL", ""), termination_condition=cond, linopy_status=lstat,
                runtime_s=sleep, work_units=1.0, bar_iter_count=iters, sol_count=(1 if have else 0), max_mem_used_gb=1.0, mem_used_gb=0.5, solution_available=have,

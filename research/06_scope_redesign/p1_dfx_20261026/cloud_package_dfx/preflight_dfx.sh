@@ -16,7 +16,7 @@
 #              RUN_PLAN_DFX.md section 5: cores >= NEED_CORES (17), memory >= NEED_MEM_GIB (64), free disk >= NEED_DISK_GB (45); >= 33 cores -> V1 | V2 in parallel
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
-PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"
+PY="${PY:-python}"; ok=1; USER_CGROUP_ROOT="${CGROUP_ROOT:-}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"   # HPR H3.5: remember whether the user set CGROUP_ROOT before defaulting it (the guards note used to fire on the default itself; DFX phase 4 finding 5)
 NEED_CORES=${NEED_CORES:-17}; NEED_MEM_GIB=${NEED_MEM_GIB:-64}; NEED_DISK_GB=${NEED_DISK_GB:-45}; PAR_CORES=33   # hard floor (RUN_PLAN_DFX section 5: third-batch T16 peaks 22.8 / 19.3 GiB + post-processing ~11 GiB, x2 margin; disk as the third batch)
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
@@ -25,7 +25,8 @@ if sec guards; then
     [ -z "${!k:-}" ] || bad+=("$k")
   done
   if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi
-  for k in RUN_DIR CORES REPO NETS CGROUP_ROOT TMPDIR PREFLIGHT_DISK_PATH; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+  for k in RUN_DIR CORES REPO NETS TMPDIR PREFLIGHT_DISK_PATH; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+  [ -z "$USER_CGROUP_ROOT" ] || echo "NOTE: CGROUP_ROOT=$USER_CGROUP_ROOT (operational override; make sure it is intended)"
 fi
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all $(wc -l < SHA256SUMS) files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }

@@ -83,9 +83,12 @@ def test_run_table_and_thresholds_are_the_registered_plan():
     assert B.RUNS["F1"]["scenario"] == "integrated" and B.RUNS["F2"]["scenario"] == "disconnected" and all(r["set"] == "" for r in B.RUNS.values())
     assert B.RUNS["F1"]["iterations_reference"] == 450 and B.RUNS["F2"]["iterations_reference"] == 250 and B.STOP_ALWAYS == ("F1", "F2")
     assert (B.MEMORY_STOP_FRACTION, B.PROJECTION_FRACTION, B.PROJECTION_AFTER_ITERATION, B.P1_THRESHOLD, B.P1_MIN_CORES, B.P1_WINDOW_S) == (0.80, 0.80, 20, 0.40, 33, 3600)
-    assert set(B.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"} and B.REGISTERED_BYTES["integrated_2920_3h_unsolved.nc"] == 64106133
+    # HPR (2026-10-27; user decisions B1 / B2, RUN_PLAN_HPC.md): the registered inputs are the v2 2920x3h networks (63,873,447 / 63,202,193 B, build 72083fde)
+    # and the TimeLimit is 864,000 s - the B4P values (64,106,133 B / ec80668f / 259,200 s) are superseded and kept in RUN_PLAN_B4.md
+    assert set(B.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"} and B.REGISTERED_BYTES["integrated_2920_3h_unsolved.nc"] == 63873447
+    assert B.REGISTERED_BYTES["disconnected_2920_3h_unsolved.nc"] == 63202193 and B.BUILD_COMMIT == "72083fde6bffd89580869af6dd00885a8d76721f"
     src = (PKG / "run_batch4.sh").read_text()
-    assert "R_TL=259200" in src and "R_GAP=330" in src and "R_MODE=split" in src and 'BUILD_ONLY / POST_ONLY / DRY / --repost' in src
+    assert f"R_TL={B.TIME_LIMIT_S}; R_WALL={B.WALL_CAP_S}; R_GAP={B.LICENCE_GAP_S}; R_MODE=split" in src and B.TIME_LIMIT_S == 864000 and 'BUILD_ONLY / POST_ONLY / DRY / --repost' in src
 
 
 def test_projection_p1_and_memstat_helpers(tmp_path):

@@ -9,7 +9,7 @@
 | 0 核对指令 SHA、读入材料、建分支 | 完成 | — | worktree 建于 `82c32c53`；被忽略的 `research_inputs/finance_v5/*.csv` 从 DFX worktree 复制；`results_project/assembly_v1` 链接到主检出 |
 | H1 现状复核 | 完成（表在报告中） | （本提交） | 两个 v2 2920×3h 网络 SHA256 / 字节 = B2；构建提交 `72083fde`；`run_batch4.sh` / `b4_batch4.py` / `RUN_PLAN_B4.md` 登记值逐项分类；阶段 2 草稿与 B1–B4 的不一致清单 |
 | H2 RUN_PLAN_HPC.md | 完成 | （本提交） | 在任何 HPC 操作与 H4 求解之前提交 |
-| H3 实现 + 替身测试 | 待做 | | |
+| H3 实现 + 替身测试 | 完成 | （本提交） | `run_batch4.sh --only` / `WAIT_START_OF` / `MEM_MEASURE` / cgroup 作业目录布局 / R_TL 864,000；`b4_batch4.py` B1–B2 登记值、`HPC_JOBS`、`hpc-plan`、参照对比；`preflight.sh` / `preflight_dfx.sh` CGROUP_ROOT 误报修正；`hpc_package_src/`（`make_pbs.sh`、`hpr_job.sh`、安装 / 登录预检 / 提交 / 状态 / 一致性 / 参照值）；`HPC_OPERATOR_GUIDE.md`；`evidence/H1_REVIEW.md`；`tests/research/test_hpr_two_jobs.py` 15 项 + B4P 10 项 + DFX / 第三批替身测试同进程 85 项通过（首轮 6 败已修：作业体 RUN_DIR 自赋值早于钩子检查、cgroup 作业目录须含作业号、mawk 双文件、一致性数值比较、测试编排 2 处） |
 | H4 本机演练（2 次 Gurobi） | 待做 | | |
 | H5 包 v9 + 操作手册 + 干跑 | 待做 | | |
 | H6 检查单 | 待做 | | |

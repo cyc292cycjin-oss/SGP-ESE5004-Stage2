@@ -11,7 +11,12 @@ batch, Threads 16). Never calls a solver; reads solve results and never changes 
     python scripts_project/b4_batch4.py projection --dir <OUT/F1> --time-limit 259200 --iterations 450 --out <json>   (early speed check, RUN_PLAN_B4 3.4)
     python scripts_project/b4_batch4.py p1 --monitor <MONITOR_F1.csv> --quota-gib 240 --cores 72 --out <json> [--threshold 0.40 --min-cores 33 --window-s 3600]
     python scripts_project/b4_batch4.py memstat [--cgroup-root /sys/fs/cgroup] [--out <json>]   -> anon memory (no file cache) / quota (RUN_PLAN_B4 3.3)
-    python scripts_project/b4_batch4.py summary --out-dir <OUT> [--batch3 <third-batch export dir with R1/, R2/>]  -> OUT/BATCH4_SUMMARY.json / .md
+    python scripts_project/b4_batch4.py summary --out-dir <OUT> [--batch3 <third-batch export dir with R1/, R2/>] [--reference-values <REFERENCE_VALUES.json>]  -> OUT/BATCH4_SUMMARY.json / .md
+    python scripts_project/b4_batch4.py hpc-plan                                -> the registered limits and PBS jobs of RUN_PLAN_HPC.md (make_pbs.sh, hpr_consistency.py)
+
+HPR (2026-10-27; RUN_PLAN_HPC.md; user decisions B1-B4): the fourth batch runs on the NUS Atlas cluster (PBS Pro) in TWO jobs (F1, F2) plus a
+batch-level job. Re-registered here: the v2 2920x3h networks of the DFX build 72083fde (B2), TimeLimit 864,000 s and the derived wall clock (B1),
+the PBS resources (B3); the split solve and the profile are unchanged (B4). The thresholds of RUN_PLAN_B4 section 3 are unchanged.
 """
 from __future__ import annotations
 
@@ -36,11 +41,52 @@ RUNS = {
     "F2": dict(scenario="disconnected", base="disconnected_2920_3h", set="", profile=T16, costs="disconnected", role="不互联 2920×3h：B6 = F2 − F1", iterations_reference=250),
 }
 STOP_ALWAYS = ("F1", "F2")   # both runs are the batch: no returned solution / C1 (a) failed -> recorded unusable AND the batch stops (instruction A4: "第四批只有两个运行")
-# Registered inputs (B4P instruction section 0; M08b supplement 01 builds, commit ec80668f)
-REGISTERED_SHA = {"integrated_2920_3h_unsolved.nc": "bca20fc08a149772074b620e1f587e86b0306c29e81d138fa67f4a9b9ae53cab",
-                  "disconnected_2920_3h_unsolved.nc": "b401a68729524c885a8245962bc2a46706a1760c42ef40bdd9943e60a859bcc7"}
-REGISTERED_BYTES = {"integrated_2920_3h_unsolved.nc": 64106133, "disconnected_2920_3h_unsolved.nc": 63439167}
-BUILD_COMMIT = "ec80668fbd14742565e189fa368fbee8b8f29242"
+# Registered inputs (HPR, user decision B2 of 2026-10-27; RUN_PLAN_HPC.md section 1): the v2 2920x3h networks of the DFX build, commit 72083fde.
+# Superseded (B4P instruction section 0, M08b supplement 01 builds ec80668f): bca20fc0... 64,106,133 B / b401a687... 63,439,167 B - kept in RUN_PLAN_B4.md.
+REGISTERED_SHA = {"integrated_2920_3h_unsolved.nc": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+                  "disconnected_2920_3h_unsolved.nc": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7"}
+REGISTERED_BYTES = {"integrated_2920_3h_unsolved.nc": 63873447, "disconnected_2920_3h_unsolved.nc": 63202193}
+BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
+# Registered limits (HPR, user decision B1; RUN_PLAN_HPC.md section 2) - run_batch4.sh carries the same values as R_TL / R_WALL / R_GAP (asserted equal by
+# tests/research/test_hpr_two_jobs.py and by preflight.sh); the other timeouts are the B4P values (RUN_PLAN_B4 3.1 / 3.6, unchanged).
+TIME_LIMIT_S = 864000               # 240 h, F1 = F2 (was 259,200 s in RUN_PLAN_B4)
+WALL_MARGIN_S = 7200                # B4P 3.1 item 2: 2 x 3,600 s for the LP read and the array write-out of process 2
+WALL_CAP_S = TIME_LIMIT_S + WALL_MARGIN_S   # 871,200 s
+LICENCE_GAP_S = 330
+WAIT_START_MAX_S = 7200             # RUN_PLAN_HPC 4: F2 waits at most this long for F1's Gurobi start marker (F1 process 1 <= 3,600 s + gap + preflight)
+BUILD_TIMEOUT_S = 3600; ASSIGN_TIMEOUT_S = 32400; POST_TIMEOUT_S = 10800; PACK_TIMEOUT_S = 7200; POST_MEM_NEED_GIB = 100
+POST_ESTIMATE_S = 3900              # per-run post-processing estimate (B4P 6.1: violations / C1 / Owen ~20 min each at 2920, M12 ~1 min)
+JOB_OVERHEAD_S = 1800               # job body: records, preflight sections, exports
+# Registered PBS jobs (HPR, user decision B3 + RUN_PLAN_HPC.md sections 2-3 and 9): the single source of make_pbs.sh and hpr_consistency.py
+HPC_JOBS = {
+    "F1": dict(name="hpr_f1", queue="parallel", ncpus=48, mem_gb=300, walltime="255:00:00", mode="formal", rid="F1", depends="", wait_start_of=""),
+    "F2": dict(name="hpr_f2", queue="parallel", ncpus=48, mem_gb=250, walltime="257:00:00", mode="formal", rid="F2", depends="after:F1", wait_start_of="F1"),
+    "batch": dict(name="hpr_batch", queue="parallel", ncpus=12, mem_gb=120, walltime="12:00:00", mode="batch", rid="batch", depends="afterany:F1:F2", wait_start_of=""),
+    "smoke56": dict(name="hpr_smoke56", queue="parallel", ncpus=17, mem_gb=32, walltime="04:00:00", mode="smoke56", rid="all", depends="", wait_start_of=""),
+    "build_only_f1": dict(name="hpr_build_only_f1", queue="parallel", ncpus=48, mem_gb=300, walltime="02:30:00", mode="build_only", rid="F1", depends="", wait_start_of=""),
+    "install": dict(name="hpr_install", queue="serial", ncpus=1, mem_gb=8, walltime="02:00:00", mode="install", rid="", depends="", wait_start_of=""),
+}
+SMOKE = dict(truncate=56, time_limit_s=3000, wall_cap_s=3600)   # the 56-snapshot smoke of the job bodies (RUN_PLAN_HPC 9; local H4 drill = the same)
+# Expected 56-snapshot smoke results of the v2 2920x3h networks (DFX F5.5 local smoke at commit 896828fd, profile T16, TimeLimit 3,000 s: objective with the
+# constant term, barrier iterations); the HPR H4 drill must reproduce them bitwise on this machine, the HPC smoke within a relative 1e-6 (RUN_PLAN_HPC 9)
+SMOKE_EXPECTED_OBJECTIVE = {"F1": 340661983874.5359, "F2": 352091303417.9458}
+SMOKE_EXPECTED_ITERATIONS = {"F1": 113, "F2": 139}
+QUEUE_LIMITS = dict(parallel=dict(mem_gb=540, ncpus_max=96, walltime_h=720, user_cores=96, user_jobs=8), serial=dict(mem_gb=15, ncpus_max=1, walltime_h=720))   # HPC_FACTS_20261026.md
+B4P_HIGH_PEAK_GIB = dict(F1=160, F2=149)   # B4P A1 high estimates of the Gurobi process (RUN_PLAN_B4 section 4); H-P4: mem >= 1.25 x
+
+
+def walltime_s(w: str) -> int:
+    h, m, s = (int(x) for x in w.split(":"))
+    return h * 3600 + m * 60 + s
+
+
+def walltime_components() -> dict:
+    """RUN_PLAN_HPC.md section 2: the terms of the PBS walltime of F1 / F2 and the registered (rounded-up) values."""
+    f1 = LICENCE_GAP_S + BUILD_TIMEOUT_S + WALL_CAP_S + ASSIGN_TIMEOUT_S + 2 * POST_ESTIMATE_S + JOB_OVERHEAD_S
+    return dict(terms=dict(runner_start_gap_s=LICENCE_GAP_S, process1_timeout_s=BUILD_TIMEOUT_S, process2_wall_cap_s=WALL_CAP_S, process3_timeout_s=ASSIGN_TIMEOUT_S,
+                           post_processing_x2_s=2 * POST_ESTIMATE_S, job_overhead_s=JOB_OVERHEAD_S, f2_wait_start_max_s=WAIT_START_MAX_S),
+                sum_f1_s=f1, sum_f2_s=f1 + WAIT_START_MAX_S, registered_f1_s=walltime_s(HPC_JOBS["F1"]["walltime"]), registered_f2_s=walltime_s(HPC_JOBS["F2"]["walltime"]),
+                projection_limit_s=PROJECTION_FRACTION * TIME_LIMIT_S)
 # Pre-registered stop thresholds (RUN_PLAN_B4.md section 3); the runner reads them from here (single source)
 MEMORY_STOP_FRACTION = 0.80         # cgroup anon memory > 80 % of the quota -> STOP_SAFE:MEMORY
 PROJECTION_FRACTION = 0.80          # projected total > 80 % of TimeLimit -> STOP_SAFE:PROJECTION
@@ -201,19 +247,27 @@ def p1_decision(monitor: Path, quota_gib: float, cores: int, threshold: float = 
 
 
 def memstat(cgroup_root: Path) -> dict:
-    """Container memory: anon (cgroup v2 memory.stat 'anon'; v1 memory/memory.stat 'rss') - the file cache is reclaimable and is NOT counted
-    (M10S1 lesson) - and the quota (memory.max / memory.limit_in_bytes; none when unlimited)."""
+    """Container memory: anon (cgroup v2 memory.stat 'anon'; v1 memory.stat 'total_rss' / 'rss') - the file cache is reclaimable and is NOT counted
+    (M10S1 lesson) - and the quota (memory.max / memory.limit_in_bytes; none when unlimited). Three layouts (HPR): a cgroup v2 directory
+    (memory.stat + memory.max; the root or a PBS job directory), a cgroup v1 JOB directory (memory.stat + memory.limit_in_bytes, as
+    /sys/fs/cgroup/memory/<job path> on PBS Pro) and the v1 root layout (memory/memory.stat + memory/memory.limit_in_bytes)."""
     anon = used = limit = None; src = None
     v2 = cgroup_root / "memory.stat"; v1 = cgroup_root / "memory" / "memory.stat"
-    for p, key, lim in ((v2, "anon", cgroup_root / "memory.max"), (v1, "rss", cgroup_root / "memory" / "memory.limit_in_bytes")):
+    layouts = ((v2, ("anon", "total_rss", "rss"), (cgroup_root / "memory.max", cgroup_root / "memory.limit_in_bytes"), (cgroup_root / "memory.current", cgroup_root / "memory.usage_in_bytes")),
+               (v1, ("total_rss", "rss"), (cgroup_root / "memory" / "memory.limit_in_bytes",), (cgroup_root / "memory" / "memory.usage_in_bytes",)))
+    for p, keys, lims, curs in layouts:
         if p.exists():
+            vals = {}
             for line in p.read_text().splitlines():
                 k, _, v = line.partition(" ")
-                if k == key:
-                    anon = int(v); src = str(p)
-            cur = cgroup_root / ("memory.current" if p is v2 else "memory/memory.usage_in_bytes")
-            used = int(cur.read_text().strip()) if cur.exists() else None
-            if lim.exists():
+                if k in keys and v.strip().isdigit():
+                    vals[k] = int(v)
+            for k in keys:
+                if k in vals:
+                    anon = vals[k]; src = f"{p}:{k}"; break
+            cur = next((c for c in curs if c.exists()), None); used = int(cur.read_text().strip()) if cur else None
+            lim = next((l for l in lims if l.exists()), None)
+            if lim:
                 t = lim.read_text().strip(); limit = None if t in ("max", "") or len(t) >= 19 else int(t)
             break
     frac = (anon / limit) if (anon is not None and limit) else None
@@ -274,7 +328,40 @@ def batch3_comparison(b3: Path | None, out: Path) -> dict | None:
     return dict(source=str(b3), runs=rows, b6_365x24h_bn=b6_3, b6_2920x3h_bn=b6_4, note="description only: the resolution effect (365x24h daily vs 2920x3h); no judgement, no threshold")
 
 
-def summary(out: Path, batch3: Path | None = None) -> dict:
+def reference_comparison(out: Path, ref_file: Path | None) -> dict | None:
+    """HPR (RUN_PLAN_HPC 7.4; description only, never a criterion): F1 / F2 beside the reference pairs of REFERENCE_VALUES.json - the third batch's
+    365x24h R3 / R4 (main) and R1 / R2 (alternative) and the DFX v2 365x24h V1 / V2 - as numbers only (objective, B6, Owen dual-form alpha-main
+    shares): objective differences, delta B6, Owen benefit differences per participant. The reference file holds values, never result files."""
+    if not ref_file or not Path(ref_file).exists():
+        return None
+    ref = jl(Path(ref_file)) or {}; f1, f2 = run_state(out, "F1"), run_state(out, "F2")
+    ow = {rid: owen_main(out / rid) for rid in RUNS}; parts = COUNTRIES + ("BUNKER",)
+    b6_bn = bn(f2["objective"] - f1["objective"]) if f1["objective"] is not None and f2["objective"] is not None else None
+    res = dict(reference_file=str(ref_file), source=ref.get("source"), b6_2920x3h_bn=b6_bn, objective_2920x3h_eur=dict(F1=f1["objective"], F2=f2["objective"]),
+               owen_dual_form_alpha_main_bn={rid: {p: bn(v.get(p, 0.0)) for p in parts} for rid, v in ow.items() if v}, pairs={},
+               note="description only: resolution (2920x3h vs 365x24h) and demand version (v2 vs v1) effects; no judgement, no threshold")
+    for key, pair in (ref.get("references") or {}).items():
+        i, d = pair.get("integrated") or {}, pair.get("disconnected") or {}
+        row = dict(label=pair.get("label"), runs=dict(integrated=i.get("rid"), disconnected=d.get("rid")), b6_bn=pair.get("b6_bn"), objective_eur=dict(integrated=i.get("objective_eur"), disconnected=d.get("objective_eur")),
+                   objective_difference_bn={}, delta_b6_bn=None, owen_benefit_difference_bn=None, owen_share_difference_bn={})
+        if f1["objective"] is not None and i.get("objective_eur") is not None:
+            row["objective_difference_bn"][f"F1_minus_{i.get('rid')}"] = bn(f1["objective"] - i["objective_eur"])
+        if f2["objective"] is not None and d.get("objective_eur") is not None:
+            row["objective_difference_bn"][f"F2_minus_{d.get('rid')}"] = bn(f2["objective"] - d["objective_eur"])
+        if b6_bn is not None and pair.get("b6_bn") is not None:
+            row["delta_b6_bn"] = b6_bn - pair["b6_bn"]
+        ri, rd = i.get("owen_alpha_main_eur") or {}, d.get("owen_alpha_main_eur") or {}
+        if ow.get("F1") and ri:
+            row["owen_share_difference_bn"][f"F1_minus_{i.get('rid')}"] = {p: bn(ow["F1"].get(p, 0.0) - ri.get(p, 0.0)) for p in parts}
+        if ow.get("F2") and rd:
+            row["owen_share_difference_bn"][f"F2_minus_{d.get('rid')}"] = {p: bn(ow["F2"].get(p, 0.0) - rd.get(p, 0.0)) for p in parts}
+        if ow.get("F1") and ow.get("F2") and ri and rd:
+            row["owen_benefit_difference_bn"] = {p: bn((ow["F2"].get(p, 0.0) - ow["F1"].get(p, 0.0)) - (rd.get(p, 0.0) - ri.get(p, 0.0))) for p in parts}
+        res["pairs"][key] = row
+    return res
+
+
+def summary(out: Path, batch3: Path | None = None, reference_values: Path | None = None) -> dict:
     runs = {rid: run_state(out, rid) for rid in RUNS}
     ben = jl(out / "M12_BENEFIT" / "BENEFIT.json")
     stop = (out / "STOP").read_text().split() if (out / "STOP").exists() else []
@@ -282,7 +369,8 @@ def summary(out: Path, batch3: Path | None = None) -> dict:
     p1 = jl(out / "P1_DECISION.json"); proj = {rid: jl(out / f"PROJECTION_{rid}.json") for rid in RUNS}
     res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=b6(out),
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"), reason=ben.get("reason")) if ben else None),
-               batch3_comparison=batch3_comparison(batch3, out), p1=p1, projection={k: ({x: v.get(x) for x in ("ready", "exceeded", "projected_total_s", "seconds_per_iteration_11_20")} if v else None) for k, v in proj.items()},
+               batch3_comparison=batch3_comparison(batch3, out), reference_comparison=reference_comparison(out, reference_values),
+               p1=p1, projection={k: ({x: v.get(x) for x in ("ready", "exceeded", "projected_total_s", "seconds_per_iteration_11_20")} if v else None) for k, v in proj.items()},
                stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), solver_runs=0, written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     (out / "BATCH4_SUMMARY.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
     (out / "BATCH4_SUMMARY.md").write_text(markdown(res))
@@ -326,6 +414,16 @@ def markdown(r: dict) -> str:
         L += [f"| {k} | {_f(v['objective_bn'])} | {v['termination'] or '—'} |" for k, v in c["runs"].items()]
     else:
         L.append("- 未提供第三批导出目录（--batch3），或 F1 / F2 未完成")
+    rc = r.get("reference_comparison")
+    L += ["", "## 与登记参照值的对比（REFERENCE_VALUES.json：第三批 365×24h R3 / R4 主、R1 / R2 并列；DFX v2 365×24h V1 / V2；只描述，不判定）", ""]
+    if rc:
+        L += [f"- 本批 B6（F2 − F1）：{_f(rc['b6_2920x3h_bn'])} bn EUR", "", "| 参照 | 运行 | 参照 B6 bn | ΔB6（本批 − 参照）bn | 目标值差 bn | Owen 受益差（本批受益 − 参照受益，bn）|", "|---|---|---|---|---|---|"]
+        for k, v in rc["pairs"].items():
+            od = ", ".join(f"{a} {b:+.4f}" for a, b in v["objective_difference_bn"].items()) or "—"
+            ob = ", ".join(f"{p} {x:+.3f}" for p, x in (v["owen_benefit_difference_bn"] or {}).items()) or "—"
+            L.append(f"| {v['label'] or k} | {v['runs']['integrated']} / {v['runs']['disconnected']} | {_f(v['b6_bn'])} | {_f(v['delta_b6_bn'], '{:+.4f}')} | {od} | {ob} |")
+    else:
+        L.append("- 未提供参照值文件（--reference-values），或 F1 / F2 未完成")
     return "\n".join(L) + "\n"
 
 
@@ -343,6 +441,8 @@ def main():
     p1.add_argument("--out", type=Path, required=True); p1.add_argument("--threshold", type=float, default=P1_THRESHOLD); p1.add_argument("--min-cores", type=int, default=P1_MIN_CORES); p1.add_argument("--window-s", type=int, default=P1_WINDOW_S)
     ms = sub.add_parser("memstat"); ms.add_argument("--cgroup-root", type=Path, default=Path("/sys/fs/cgroup")); ms.add_argument("--out", type=Path, default=None)
     s = sub.add_parser("summary"); s.add_argument("--out-dir", type=Path, required=True); s.add_argument("--batch3", type=Path, default=None)
+    s.add_argument("--reference-values", type=Path, default=None, help="HPR: REFERENCE_VALUES.json (third batch R3 / R4, R1 / R2; DFX V1 / V2) - description only")
+    sub.add_parser("hpc-plan")
     a = ap.parse_args()
     if a.cmd == "runtable":
         for rid, r in RUNS.items():
@@ -370,7 +470,15 @@ def main():
             a.out.write_text(json.dumps(r, indent=1) + "\n")
         print(json.dumps({k: r.get(k) for k in ("anon_gib", "limit_gib", "fraction", "stop")})); sys.exit(3 if r["stop"] else 0)
     elif a.cmd == "summary":
-        r = summary(a.out_dir, a.batch3); print(json.dumps(dict(B6_bn=(r["B6"] or {}).get("b6_bn"), runs={k: v["state"] for k, v in r["runs"].items()}), default=str))
+        r = summary(a.out_dir, a.batch3, a.reference_values); print(json.dumps(dict(B6_bn=(r["B6"] or {}).get("b6_bn"), runs={k: v["state"] for k, v in r["runs"].items()}), default=str))
+    elif a.cmd == "hpc-plan":   # HPR: machine-readable registration for make_pbs.sh / hpr_consistency.py (RUN_PLAN_HPC.md sections 2-3, 9)
+        print(f"LIMITS|{TIME_LIMIT_S}|{WALL_CAP_S}|{LICENCE_GAP_S}|{WAIT_START_MAX_S}|{BUILD_TIMEOUT_S}|{ASSIGN_TIMEOUT_S}|{POST_TIMEOUT_S}|{PACK_TIMEOUT_S}|{POST_MEM_NEED_GIB}")
+        print(f"SMOKE|{SMOKE['truncate']}|{SMOKE['time_limit_s']}|{SMOKE['wall_cap_s']}")
+        print(f"STOP|{MEMORY_STOP_FRACTION}|{PROJECTION_FRACTION}|{RUNS['F1']['iterations_reference']}|{RUNS['F2']['iterations_reference']}")
+        for key, j in HPC_JOBS.items():
+            print("|".join(["JOB", key, j["name"], j["queue"], str(j["ncpus"]), str(j["mem_gb"]), j["walltime"], j["mode"], j["rid"], j["depends"], j["wait_start_of"]]))
+        for k, v in REGISTERED_SHA.items():
+            print(f"NETWORK|{k}|{v}|{REGISTERED_BYTES[k]}|{BUILD_COMMIT}")
 
 
 if __name__ == "__main__":

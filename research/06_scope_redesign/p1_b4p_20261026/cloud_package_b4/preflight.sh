@@ -15,16 +15,17 @@
 #              RUN_PLAN_B4.md section 5: cores >= NEED_CORES, memory >= NEED_MEM_GIB, free disk >= NEED_DISK_GB (values registered from A1)
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
-PY="${PY:-python}"; ok=1; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"
-NEED_CORES=${NEED_CORES:-25}; NEED_MEM_GIB=${NEED_MEM_GIB:-190}; NEED_DISK_GB=${NEED_DISK_GB:-45}; R_TL=259200   # hard floor (RUN_PLAN_B4 section 5: F1 split process-2 high estimate 160 GiB / 0.80 = 200 -> 190 GiB rounded to the 240 GB class; disk ~36 GB persistent + 5.4 GB transient)
+PY="${PY:-python}"; ok=1; USER_CGROUP_ROOT="${CGROUP_ROOT:-}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"   # HPR H3.5: the default is set AFTER remembering whether the user set it (the guards note used to fire on the default itself)
+NEED_CORES=${NEED_CORES:-25}; NEED_MEM_GIB=${NEED_MEM_GIB:-190}; NEED_DISK_GB=${NEED_DISK_GB:-45}; R_TL=864000   # hard floor (RUN_PLAN_B4 section 5: F1 split process-2 high estimate 160 GiB / 0.80 = 200 -> 190 GiB rounded to the 240 GB class; disk ~36 GB persistent + 5.4 GB transient); R_TL = RUN_PLAN_HPC section 2 (B1; was 259,200), asserted against b4_batch4.py / run_batch4.sh in the code section
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
   echo "== guards: test hooks / dry-run switches in this shell"; bad=()
-  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD SPLIT_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD LEDGER_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S SOLVE_MODE P1_WINDOW_S P1_THRESHOLD P1_MIN_CORES MEMORY_STOP_FRACTION PROJECTION_FRACTION BUILD_TIMEOUT_S ASSIGN_TIMEOUT_S POST_MEM_NEED_GIB $(compgen -A variable | grep -E '^FAKE_'); do
+  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD SPLIT_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD LEDGER_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S SOLVE_MODE P1_WINDOW_S P1_THRESHOLD P1_MIN_CORES MEMORY_STOP_FRACTION PROJECTION_FRACTION BUILD_TIMEOUT_S ASSIGN_TIMEOUT_S POST_MEM_NEED_GIB WAIT_START_MAX_S $(compgen -A variable | grep -E '^FAKE_'); do
     [ -z "${!k:-}" ] || bad+=("$k")
   done
   if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi
-  for k in RUN_DIR CORES MEM_QUOTA_GIB REPO NETS CGROUP_ROOT TMPDIR PREFLIGHT_DISK_PATH REMOVE_LP BATCH3_EXPORT; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+  for k in RUN_DIR CORES MEM_QUOTA_GIB REPO NETS TMPDIR PREFLIGHT_DISK_PATH REMOVE_LP BATCH3_EXPORT MEM_MEASURE WAIT_START_OF; do [ -z "${!k:-}" ] || echo "NOTE: $k=${!k} (operational override; make sure it is intended)"; done
+  [ -z "$USER_CGROUP_ROOT" ] || echo "NOTE: CGROUP_ROOT=$USER_CGROUP_ROOT (operational override; make sure it is intended)"
 fi
 if sec sha; then
   echo "== SHA256SUMS"; sha256sum -c --quiet SHA256SUMS && echo "all $(wc -l < SHA256SUMS) files OK" || { echo "CHECKSUM MISMATCH"; ok=0; }
@@ -62,13 +63,20 @@ P
 fi
 if sec code; then
   echo "== code imports (no licence)"
-  ( cd repo && env -u GRB_LICENSE_FILE "$PY" - <<'P' ) || { echo "IMPORT FAILED"; ok=0; }
+  ( cd repo && env -u GRB_LICENSE_FILE "$PY" - "$R_TL" <<'P' ) || { echo "IMPORT FAILED"; ok=0; }
 import sys
 sys.path.insert(0, "scripts_project"); sys.path.insert(0, "scripts_project/v5")
 import s2_solve, b4_split_solve, b4_batch4, l23_violation_analysis, s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6
 assert list(b4_batch4.RUNS) == ["F1", "F2"], "run table"
 assert "--split-stage" in open("scripts_project/s2_solve.py").read() and hasattr(s2_solve, "post_solve") and hasattr(s2_solve, "assign_split_result"), "split / post_solve code"
-print("modules import; run table", ", ".join(b4_batch4.RUNS), "| thresholds memory", b4_batch4.MEMORY_STOP_FRACTION, "projection", b4_batch4.PROJECTION_FRACTION, "P1", b4_batch4.P1_THRESHOLD, b4_batch4.P1_MIN_CORES, b4_batch4.P1_WINDOW_S)
+# HPR (RUN_PLAN_HPC section 10): the registered limits of b4_batch4.py equal the R_* constants of run_batch4.sh next to this preflight and this preflight's R_TL
+import re
+src = open("../run_batch4.sh").read(); m = re.search(r"^R_TL=(\d+); R_WALL=(\d+); R_GAP=(\d+); R_MODE=(\w+)", src, re.M)
+assert m and (int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4)) == (b4_batch4.TIME_LIMIT_S, b4_batch4.WALL_CAP_S, b4_batch4.LICENCE_GAP_S, "split"), ("run_batch4.sh R_* differ from b4_batch4.py", m and m.groups())
+assert b4_batch4.TIME_LIMIT_S == int(sys.argv[1]), "preflight R_TL differs from b4_batch4.py TIME_LIMIT_S"
+assert b4_batch4.BUILD_COMMIT.startswith("72083fde") and set(b4_batch4.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"}, "registered networks"
+print("modules import; run table", ", ".join(b4_batch4.RUNS), "| thresholds memory", b4_batch4.MEMORY_STOP_FRACTION, "projection", b4_batch4.PROJECTION_FRACTION, "P1", b4_batch4.P1_THRESHOLD, b4_batch4.P1_MIN_CORES, b4_batch4.P1_WINDOW_S,
+      "| registered TimeLimit", b4_batch4.TIME_LIMIT_S, "wall cap", b4_batch4.WALL_CAP_S, "gap", b4_batch4.LICENCE_GAP_S, "= run_batch4.sh R_TL / R_WALL / R_GAP; build commit", b4_batch4.BUILD_COMMIT[:8])
 P
 fi
 if sec tools; then
@@ -97,12 +105,13 @@ if sec resources; then
   fi
   [ -n "$cores" ] || { cores=$host_cores; csrc="no cgroup CPU quota: host nproc"; }
   if [ -r "$CGROUP_ROOT/memory.max" ]; then lim=$(cat "$CGROUP_ROOT/memory.max"); msrc="cgroup v2 memory.max"
+  elif [ -r "$CGROUP_ROOT/memory.limit_in_bytes" ]; then lim=$(cat "$CGROUP_ROOT/memory.limit_in_bytes"); msrc="cgroup v1 job directory memory.limit_in_bytes"   # HPR: a PBS job cgroup directory given as CGROUP_ROOT
   elif [ -r "$CGROUP_ROOT/memory/memory.limit_in_bytes" ]; then lim=$(cat "$CGROUP_ROOT/memory/memory.limit_in_bytes"); msrc="cgroup v1 memory.limit_in_bytes"; fi
   case "$lim" in ""|max) lim="";; *) [ "${#lim}" -ge 19 ] && lim="";; esac
   if [ -n "$lim" ]; then mem=$(( lim / 1073741824 )); else mem=$host_mem; msrc="no cgroup memory limit: host MemTotal"; fi
   DISK_PATH="${PREFLIGHT_DISK_PATH:-$HERE}"
   disk=$(df -Pk "$DISK_PATH" | awk 'NR==2 {printf "%d", $4*1024/1e9}'); disk_gib=$(df -Pk "$DISK_PATH" | awk 'NR==2 {printf "%.0f", $4/1048576}')
-  anon=$(awk '$1 == "anon" {printf "%.1f", $2/1073741824}' "$CGROUP_ROOT/memory.stat" 2>/dev/null)
+  anon=""; for f in "$CGROUP_ROOT/memory.stat" "$CGROUP_ROOT/memory/memory.stat"; do [ -r "$f" ] && { anon=$(awk '$1 == "anon" {a=$2} $1 == "total_rss" {t=$2} $1 == "rss" {r=$2} END {v = (a != "") ? a : ((t != "") ? t : r); if (v != "") printf "%.1f", v/1073741824}' "$f"); break; }; done
   echo "container CPU cores $cores [$csrc]; host nproc $host_cores"
   echo "container memory $mem GiB [$msrc]; anon in use now ${anon:-?} GiB; host MemTotal $host_mem GiB; free disk $disk GB ($disk_gib GiB) under $DISK_PATH"
   echo "need (hard floor, RUN_PLAN_B4.md section 5): cores >= $NEED_CORES, memory >= $NEED_MEM_GIB GiB, free data disk >= $NEED_DISK_GB GB"
