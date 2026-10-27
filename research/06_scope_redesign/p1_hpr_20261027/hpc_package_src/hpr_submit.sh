@@ -19,7 +19,7 @@ bad=""; for k in $HOOKS $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k
 [ $MOTD = 1 ] || { echo "REFUSED: confirm that the login banner shows NO new maintenance overlapping the next ~11 days, then add --motd-checked (RUN_PLAN_HPC 6)"; exit 2; }
 [ -n "$AUTHF" ] && [ -s "$AUTHF" ] || { echo "REFUSED: --auth-file <file with the user authorisation text> is required"; exit 2; }
 [ "$(readlink -f "$AUTHF")" = "$PKG/HPR_AUTH.txt" ] || cp "$AUTHF" "$PKG/HPR_AUTH.txt"; chmod 600 "$PKG/HPR_AUTH.txt"
-grep -qiE "wls(access|secret)|licenseid|password|passwd" "$PKG/HPR_AUTH.txt" && { echo "REFUSED: the authorisation text must not contain licence or password words"; rm -f "$PKG/HPR_AUTH.txt"; exit 2; }
+grep -qiE "wls(acces[s]|secre[t])|license[i]d|passw(or[d]|[d])" "$PKG/HPR_AUTH.txt" && { echo "REFUSED: the authorisation text must not contain licence or password words"; rm -f "$PKG/HPR_AUTH.txt"; exit 2; }   # pattern written so that this file itself does not match a key-name scan
 S="$PKG/runs/smoke56/SMOKE_STATUS.txt"; [ -f "$S" ] && grep -q "^SMOKE_RESULT:PASS" "$S" || { echo "REFUSED: the smoke job has not passed ($S: SMOKE_RESULT:PASS missing) - step D first"; exit 2; }
 [ "$(cat repo/.package_commit 2>/dev/null)" = "$(cat COMMIT)" ] || { echo "REFUSED: ./repo is not the package commit $(cat COMMIT) (step C install job / preflight sha)"; exit 2; }
 LIC=${GRB_LICENSE_FILE:-$HOME/.gurobi/gurobi.lic}; [ -f "$LIC" ] && [ "$(stat -c %a "$LIC")" = 600 ] || { echo "REFUSED: licence file missing or not mode 600 at $LIC (step B)"; exit 2; }

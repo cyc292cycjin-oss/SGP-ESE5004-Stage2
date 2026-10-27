@@ -6,7 +6,9 @@ R=$MAIN/results_project/hpr; DIST=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20
 log() { echo "$1:$(date -u +%Y-%m-%dT%H:%M:%SZ)${2:+:$2}" | tee -a "$S"; }
 cd "$WT" || exit 1
 log START "commit=$(git rev-parse HEAD):dirty=$(git status --porcelain --untracked-files=no | wc -l)"
-$PY /home/jin/hpr/h4_compare.py "$R/h4/runs/smoke56" "$MAIN/results_project/dfx_v3/smoke_v2" "$R/h4/H4_DRILL.json" "$(git rev-parse HEAD)" > "$R/h4/H4_COMPARE.txt" 2>&1; rc=$?
+H4C=$(grep -m1 '^START:' "$R/h4/H4_DRILL_STATUS.txt" | sed 's/.*commit=\([0-9a-f]*\).*/\1/')   # the commit the drill ran at (not necessarily HEAD)
+log H4_COMMIT "$H4C"
+$PY /home/jin/hpr/h4_compare.py "$R/h4/runs/smoke56" "$MAIN/results_project/dfx_v3/smoke_v2" "$R/h4/H4_DRILL.json" "$H4C" > "$R/h4/H4_COMPARE.txt" 2>&1; rc=$?
 cat "$R/h4/H4_COMPARE.txt" | cut -c1-400; log H4_COMPARE "exit=$rc"
 [ $rc = 0 ] || { log ABORT "compare failed"; exit 2; }
 grep -q '"bitwise_equal_to_dfx_smoke": true' "$R/h4/H4_DRILL.json" || { log ABORT "H4 not bitwise equal - stop condition"; exit 3; }
