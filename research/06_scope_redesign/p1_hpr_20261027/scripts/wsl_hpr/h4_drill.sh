@@ -31,7 +31,8 @@ echo "$COMMIT" > "$PKG/COMMIT"
 mapfile -t FILES < <(git ls-tree -r --name-only "$COMMIT" | grep -v '^research/')
 git --literal-pathspecs archive --format=tar.gz -o "$PKG/code_${COMMIT:0:8}.tar.gz" "$COMMIT" -- "${FILES[@]}" || { log GIT_ARCHIVE_FAILED; exit 2; }
 ( cd "$PKG" && find . -type f ! -name SHA256SUMS -printf '%P\n' | LC_ALL=C sort | xargs sha256sum > SHA256SUMS )
-( cd "$PKG" && REPO=$WT PY=$PY bash hpc/make_pbs.sh pbs > pbs/MAKE_PBS.log 2>&1 ) || { log MAKE_PBS_FAILED; exit 2; }
+mkdir -p "$PKG/pbs"
+( cd "$PKG" && REPO=$WT PY=$PY bash hpc/make_pbs.sh pbs > pbs/MAKE_PBS.log 2>&1 ) || { log MAKE_PBS_FAILED; cat "$PKG/pbs/MAKE_PBS.log"; exit 2; }
 # the user authorisation text of the drill (instruction H4; no host, no account, no licence)
 echo "HPR H4 local drill (instruction f14cb018, 2026-10-27): two 56-snapshot smoke runs of the v2 2920x3h networks through the PBS job bodies as bash, TimeLimit 3000 s, wall cap 3600 s, no retry" > "$PKG/HPR_AUTH.txt"; chmod 600 "$PKG/HPR_AUTH.txt"
 log START "commit=$COMMIT:pkg=$PKG:runs=$RUNS:networks=builds_v2:truncate=56"
