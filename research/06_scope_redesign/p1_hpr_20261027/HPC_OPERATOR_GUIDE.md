@@ -18,7 +18,7 @@ A1 `[PowerShell]` 确认包完整（本机）：
 (Get-Content D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package\SHA256SUMS | Measure-Object -Line).Lines
 Get-Content D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package\COMMIT
 ```
-成功：第一个数 = 第二个数 + 1（`SHA256SUMS` 列出的全部文件再加清单 `HPC_PACKAGE_MANIFEST.json` 本身）；`COMMIT` 为 40 位提交号。
+成功：第一个数 = 第二个数 + 2（`SHA256SUMS` 列出的 36 个文件，再加 `SHA256SUMS` 本身与清单 `HPC_PACKAGE_MANIFEST.json`，即 38 / 36）；`COMMIT` 为 40 位提交号。
 
 A2 `[PowerShell]` 建目标目录并上传（包约 215 MB；1–10 MB/s 下 0.5–4 分钟；首次连接会问 host key 指纹，输入 yes；之后输入密码或用你已配置的密钥）。远端命令用**单引号**，`$USER` 由 atlas8 展开：
 ```powershell
@@ -35,7 +35,7 @@ ssh <你的用户名>@atlas8.nus.edu.sg
 ```bash
 cd /hpctmp/$USER/hpr && sha256sum -c SHA256SUMS | grep -vc ': OK$' ; echo "files=$(wc -l < SHA256SUMS)"
 chmod 755 *.sh hpc/*.sh pbs/*.pbs env/install_env.sh
-ls -l /usr/bin/time && /usr/bin/time -v true > /dev/null && command -v setsid pgrep timeout curl && echo TOOLS_OK ; echo "shell=$SHELL"
+ls -l /usr/bin/time && /usr/bin/time -v true > /dev/null 2>&1 && command -v setsid pgrep timeout curl && echo TOOLS_OK ; echo "shell=$SHELL"
 ```
 成功：第一行输出 `0`（没有不 OK 的文件），第二行 `files=36`；第三组打印 `TOOLS_OK` 与 `shell=/bin/bash`（或其他 shell：作业脚本已指定 `#PBS -S /bin/bash`，不受影响）。
 失败（第一行不是 0）：`sha256sum -c SHA256SUMS | grep -v ': OK$'` 看哪些文件失败，只重传这些文件（`[PowerShell] scp D:\...\hpc_package\<文件> <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/<文件>`），再做 A3。
@@ -92,7 +92,7 @@ C3 `[bash@atlas8]` 登录节点预检（1 分钟；不调用 Gurobi）：
 ```bash
 cd /hpctmp/$USER/hpr && bash hpc/hpr_preflight_login.sh > login_preflight.txt 2>&1 ; grep -E "licence file|files OK|PREFLIGHT OK|PREFLIGHT FAILED|HPR_PREFLIGHT_LOGIN" login_preflight.txt
 ```
-成功：打印 `licence file present, owner <你的用户名>, mode 600`、`all 36 files OK`、`PREFLIGHT OK`、`HPR_PREFLIGHT_LOGIN OK`（四行）。
+成功：输出**至少包含**这四行（还会有标题行与重复的 `all 36 files OK`）：`licence file present, owner <你的用户名>, mode 600`、`all 36 files OK`、`PREFLIGHT OK`、`HPR_PREFLIGHT_LOGIN OK`；且没有任何 `FAILED`。
 失败（出现 `FAILED`）：回传 `login_preflight.txt`。
 
 ## 步骤 D 冒烟作业（56 时段 F1 + F2 + 批级；预计 1–2 小时 + 排队；2 次 Gurobi 会话）

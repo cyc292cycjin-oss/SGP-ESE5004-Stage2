@@ -2,7 +2,7 @@
 
 **版本：** HPR v1，2026-10-27（SGT）。依据 `HPR_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `f14cb018…412d86`）与用户 2026-10-27 12:43 SGT 确认的 B1–B4，以及用户 2026-10-27 的补充（步骤 D2：全尺寸 BUILD_ONLY 测试作业）。
 **登记时间：** 本文件在任何 HPC 操作、任何本机 2920×3h v2 求解（H4 演练）之前提交（`1f62176f`，2026-10-27 13:19:34 SGT）；看到任何结果后第 2–7 节的规则与数值不再修改（修改只能作为新的、登记在前的计划修订）。
-**修订（2026-10-27，独立审查 H7 之后；第 2–7 节未改）：** §4 第 6 条措辞（本机许可文件不写路径）；§7 第 5 项补"停批情形下从未启动的运行视为已结束"的放行条件（审查 F-06）；§9 BUILD_ONLY 行补 D2 结果的判读规则（审查 F-16）；§11 作业日志位置更正为提交目录（审查 F-10）。
+**修订（2026-10-27，独立审查 H7 之后；第 2–7 节的数值与规则未改，只补说明）：** §4 第 6 条措辞（本机许可文件不写路径）；§5 第 1 项补 rss 模式下 cgroup 列为空的说明（审查 N-03）；§7 第 5 项补"停批情形下从未启动的运行视为落定"的放行条件（审查 F-06）；§9 BUILD_ONLY 行补 D2 结果的判读规则（审查 F-16）；§11 作业日志位置更正为提交目录（审查 F-10）。
 **与 `RUN_PLAN_B4.md`（B4P v1，2026-10-26）的关系：** 本文件只改写 B1–B4 涉及的登记值（输入网络、TimeLimit 与派生墙钟、资源配额）和因 PBS 两作业方式不再适用的机制（P1 探针）；`RUN_PLAN_B4.md` 第 3.3–3.8 节的规则（内存止损、早期测速、验收与停批、后处理、资源止损后的重开）全部沿用，并在下文逐条写明。模型、网络构建、成本表、求解档案参数、GATES_V6 / C1 阈值一律不改。
 **单一来源：** 代码中的登记常数——`scripts_project/b4_batch4.py`（`REGISTERED_SHA`、`REGISTERED_BYTES`、`BUILD_COMMIT`、`TIME_LIMIT_S`、`WALL_CAP_S`、`LICENCE_GAP_S`、`HPC_JOBS`、`MEMORY_STOP_FRACTION`、`PROJECTION_FRACTION`）与 `run_batch4.sh` 顶部的 `R_TL` / `R_WALL` / `R_GAP` / `R_MODE`；PBS 作业脚本由 `make_pbs.sh` 从 `b4_batch4.py hpc-plan` 生成；`hpr_consistency.py` 把本文件、作业脚本、运行器、预检中的值列表比对（检查单 H-P3）。
 
@@ -67,7 +67,7 @@
 1. **内存止损 → `STOP_SAFE:MEMORY:<编号>`：** 每 60 s 读本作业**实际可见**的内存计量，超过配额（第 3 节 `MEM_QUOTA_GIB`）的 **80 %**（`MEMORY_STOP_FRACTION`）→ 终止正在运行的 Gurobi 进程组，不再启动任何求解，报告用户。计量取法（`MEM_MEASURE=auto`，作业体与运行器记录实际取法）：
    - **首选：PBS 作业 cgroup 的匿名内存。** 作业体从 `/proc/self/cgroup` 解析本作业的 cgroup 路径（v2：`/sys/fs/cgroup/<path>/memory.stat` 的 `anon`；v1：`/sys/fs/cgroup/memory/<path>/memory.stat` 的 `total_rss`），把该目录作为 `CGROUP_ROOT` 传给运行器。不含可回收的文件缓存（第三批 S1 的教训）。不得把节点根 cgroup（含其他用户作业）当作本作业的计量——作业体核对路径非 `/`。
    - **不可见时：进程树 RSS 之和。** 作业 cgroup 的内存控制器不存在或不可读 → 运行器每 60 s 对进程 2 的进程组（`pgrep -g <pgid>`）求 `ps -o rss` 之和（`rss_gib_group`，与监控 CSV 同一列），对同一 80 % 线判定；STATUS 记 `mem_measure=rss`。
-   - 两种计量都在 `MONITOR_<编号>.csv` 中逐分钟记录（`rss_gib_group`、`cgroup_anon_gib`、`cgroup_mem_limit_gib`）。
+   - 两种计量都在 `MONITOR_<编号>.csv` 中逐分钟记录（`rss_gib_group`、`cgroup_anon_gib`、`cgroup_mem_limit_gib`）；**rss 模式下**（作业体未找到含本作业号的 cgroup）运行器不读任何 cgroup 文件，CSV 的两列 cgroup 值为空、STATUS 记 `cgroup_anon_source=none(rss_mode)`（审查 F-07 / N-03 的说明，2026-10-27；计量规则本身不变）。
 2. **早期测速 → `STOP_SAFE:PROJECTION:<编号>`：** 沿用 B4P 3.4：第 20 次 barrier 迭代记录后，第 11–20 次迭代平均耗时 × 参考迭代数（F1 **450**、F2 **250**）+ 已用时间（自进程 2 启动）> 0.80 × TimeLimit = **691,200 s** → 终止该进程组，报告用户；只在首次满 20 次迭代时判定一次。
 3. **墙钟：** 进程 2 到 871,200 s 终止整个进程组（TERM → 30 s → KILL）；回执不含终止条件的视为求解前回执（无返回解）。
 4. **求解结果先落盘（A3.1）：** 进程 2 返回后先写 `split/SPLIT_SOLVE.json`（终止状态、目标值、迭代、Work、MaxMemUsed）与原始解数组，进程 3 再映射、导出、记账、门控；进程 3 任一步异常记入回执 `post_solve_errors`，不改变终止状态与"有返回解"的判定。

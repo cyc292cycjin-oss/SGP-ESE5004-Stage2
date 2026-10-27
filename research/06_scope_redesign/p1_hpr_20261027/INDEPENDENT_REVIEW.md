@@ -174,4 +174,75 @@
 
 ## 4. 第二轮复核原文
 
-ROUND2_PLACEHOLDER
+## 独立审查 —— 第二轮复核（HPR H7；包 v9 重建版，提交 `9ff86cb6`）
+
+复核方式：只读。读了 `git log/diff 69b0b7d1..9ff86cb6`（含 `a4f0cd00`、`a955ab59`、`9ff86cb6` 三个提交的全部改动）、`INDEPENDENT_REVIEW.md` 第 3 节处理表、`PRE_HPC_CHECKLIST.md` 的 R3 / R4、重建后的包全部文本文件；对包做了 `sha256sum -c`、副本与来源逐字节 `cmp`（以包 `COMMIT` 所指提交 `git show` 的版本为基准，并对照当前工作树）、归档身份核对、泄露计数；重新抽取登记常数。未运行任何测试 / 脚本 / 求解，未读许可文件或扫描模式文件。
+
+**包的实际提交是 `9ff86cb6`（`COMMIT`、`code_9ff86cb6.tar.gz`、清单 `commit` 三者一致）**，与补充消息所述一致；相对 `a955ab59` 只有 `make_hpc_package.sh` 的路径规格修正与证据文件变化，包内脚本 / 文档与 `a955ab59` 版本逐字节相同（已逐一 `cmp` 确认）。
+
+### (a) 第一轮各条的复核结论
+
+| 编号 | 结论 | 依据 |
+|---|---|---|
+| F-01 | **已解决** | 手册 A2 第 25 行远端命令改单引号，`$USER` 交给 atlas8 展开；头部明确 PowerShell 行不用 `$USER` |
+| F-02 | **部分解决，引入新问题（见 N-01）** | A1 改为递归计数，但判据"第一个数 = 第二个数 + 1"仍差 1：包目录实有 38 个文件 = `SHA256SUMS` 36 行 + `SHA256SUMS` 自身 + `HPC_PACKAGE_MANIFEST.json`（`comm` 核对：恰好这两个文件不在清单内） |
+| F-03 | **已解决**（措辞小偏差，见 N-04） | C3 改为输出到文件后 `grep` 判据行 |
+| F-04 | **已解决** | `hpc/hpr_job.sh` 第 161 行在批级调用中从 `PBS_JOBS.txt` 取最后一条 `WLS_TOKEN_HTTP:`（`sed` 取第一个空格前的值，`302 (302 or 200 expected)` → `302`）写入 `SMOKE_STATUS.txt`；手册 D3 注明来源 |
+| F-05 | **已解决** | 手册 B2 远端路径改为 `.gurobi/gurobi.lic`（SCP / SFTP 两种协议下都相对家目录），给出 `-O` 回退；G2 拆为逐文件 `scp` 并给通配符失败的回退 |
+| F-06 | **已解决 + 新增替身测试** | `hpr_job.sh` 第 49–54 行：`.ended`，或 `STOP`/`STOP_SAFE` 存在且该运行无 `.started` 才放行，`.started` 无 `.ended` 仍 `not_ready`；按 F1 阶段 0 失败 / F1 停批→F2 `NOT_STARTED` / F2 `WAIT_START` 安全停止 / 节点故障四种情形逐一推演均正确；`RUN_PLAN_HPC.md` §7.5 与手册附录 2 同步；`test_batch_job_runs_when_the_other_run_never_started_after_a_stop` 覆盖正反两例 |
+| F-07 | **已解决 + 新增替身测试** | `run_batch4.sh` 第 165–172 行 `cg_*` 四个函数在 `MEM_MEASURE=rss` 时直接返回空（不再读 `CGROUP_ROOT` 下任何文件）；`aux_threads` 只计本运行；`other_solve_running` 在 `--only` 下恒假；`MEM_MEASURE` 在第 77 行先于所有调用定义，`set -u` 下安全；HPC 作业体总是显式传 `MEM_QUOTA_GIB`，配额来源不受影响。副作用：rss 模式下监控 CSV 的 cgroup 列为空（设计如此，但与 RUN_PLAN §5.1 的一句措辞不符，见 N-03） |
+| F-08 | **部分解决（待用户在 HPC 核实；可接受）** | 手册 A3 增加 `/usr/bin/time` / `setsid` / `pgrep` / `timeout` / `curl` 检查与"缺失即停下"的说明；C2 增加 `MISSING /usr/bin/time` 分支；运行器未做 `TIME_BIN` 可配置化（执行端说明理由，合理） |
+| F-09 | **部分解决（待用户确认 R4）** | 手册改 `<WSL 用户名>` 占位符、`RUN_PLAN_HPC.md` §4 去掉本机路径、清单 `h4_drill.file` 为文件名、`networks.source` 为相对描述；重建包中本机用户名路径只剩两份构建回执（7 + 7 处）。本轮新提交在交付目录另加了含本机路径的行（`INDEPENDENT_REVIEW.md` 1、`PRE_HPC_CHECKLIST.md` 1、`scripts/wsl_hpr/chain_h5c.sh` 8、`tests_full_rs.sh` 2；证据文件夹 125 行）——与既有 WSL 辅助脚本 / 证据同类，不入包 |
+| F-10 | **已解决** | `RUN_PLAN_HPC.md` §11 改为提交目录 `<作业名>.o<作业序号>`，与手册附录 3 一致 |
+| F-11 | **已解决（有残留）** | `hpr_submit.sh` 第 33–34 行：F1 `qsub` 成功后才 `mkdir runs/batch4`。残留：F2 或批级 `qsub` 失败后目录已存在，重跑仍被拒（需 `--resume` 或联系审阅端）——手册 E3 的"联系审阅端"分支已覆盖，可接受 |
+| F-12 | **已解决** | 手册 C2 增加半成品环境 `rm -rf ~/miniforge3/envs/pypsa-earth` 后重提 |
+| F-13 | **已解决** | `hpr_status.sh` 第 14–15 行先取 `lines` 再判空打印 `(none)` |
+| F-14 | **已解决** | 六个 `.pbs` 均含 `#PBS -S /bin/bash`（第 7 行）；手册 A3 顺带显示 `$SHELL`；`hpr_consistency.py` 的 `.pbs` 解析正则不受影响 |
+| F-15 | **已解决** | `preflight.sh` 第 43 / 49 行 `PREFLIGHT_TAG`；作业体传 `<作业键>_<运行>_<作业号>`；登录预检 / 安装作业不传 tag，单进程无竞争 |
+| F-16 | **已解决（文档）** | `RUN_PLAN_HPC.md` §9 与手册 D2-2 增加"峰值 100–150 GiB → 批级作业内存由审阅端提出、用户决定后再做 E"的判读规则 |
+| F-17 | **已解决（记录）** | `JOB_START` 记录 `omp_num_threads` 与 `shell` |
+| F-18 | **已解决** | 手册 D1 注明不要用英文单引号 |
+
+未发现任何一条修正改变求解命令、参数或输入：`git diff be5e49fd..9ff86cb6 -- . ':(exclude)research' ':(exclude)tests'` 为空；归档内 `b4_batch4.py` / `s2_solve.py` / `b4_split_solve.py` / `v5/gates_v6.py` / `configs/research/baseline.yaml` 与演练提交 `be5e49fd`、包提交 `9ff86cb6` 三者 SHA256 相同。
+
+### (b) 新发现（均非阻断）
+
+| 编号 | 分级 | 位置 | 问题 | 建议 |
+|---|---|---|---|---|
+| **N-01** | 非阻断（建议修正） | `HPC_OPERATOR_GUIDE.md` A1 第 21 行 | 判据"第一个数 = 第二个数 + 1"错误：包目录 38 个文件 = `SHA256SUMS` 36 行 + 2（`SHA256SUMS` 自身与 `HPC_PACKAGE_MANIFEST.json` 都不在清单内）。按现文用户会得到假失败（38 ≠ 37） | 改为"第一个数 = 第二个数 + 2（`SHA256SUMS` 与清单本身）"或直接写 `38 / 36` |
+| **N-02** | 非阻断（检查单待更新） | `PRE_HPC_CHECKLIST.md` H-P5、H-P14 | H-P5 的证据仍是"全量测试在 `69b0b7d1`，后续提交只改 `research/` 下文档 / 证据，代码未变"；但 `69b0b7d1..9ff86cb6` 改了 `tests/research/test_hpr_two_jobs.py`（+38 行）以及随包执行的 `run_batch4.sh` / `preflight.sh` / `hpr_job.sh` / `make_pbs.sh`。全量测试须以 `9ff86cb6`（或至少 `a4f0cd00` 之后）重跑并更新证据（执行端已在后台重跑，属待完成）。工作树当前有 11 个已跟踪证据文件未提交（`evidence/package/*`、`CONSISTENCY.json`、`HPR_LEAK_SCAN.json`），H-P14 "worktree 干净"尚未满足 | 全量测试通过后更新 H-P5 的提交号与计数；提交证据后再核 H-P14 |
+| **N-03** | 非阻断（措辞） | `RUN_PLAN_HPC.md` §5.1 末句 | "两种计量都在 `MONITOR_<编号>.csv` 中逐分钟记录（`rss_gib_group`、`cgroup_anon_gib`、`cgroup_mem_limit_gib`）"——F-07 修正后，`MEM_MEASURE=rss` 时 cgroup 两列按设计为空（作业体未找到作业 cgroup，根 cgroup 数值不代表本作业） | 补一句"rss 模式下 cgroup 列为空、`cgroup_anon_source=none(rss_mode)`"；不改数值 |
+| **N-04** | 非阻断（措辞） | 手册 C3 第 95 行 | `grep` 实际会打印约 6 行而非"四行"：`== licence file (existence, owner, mode only - never read)` 标题行也匹配 `licence file`，`all 36 files OK` 在登录脚本与内层 `preflight.sh` 各出现一次 | 改为"至少包含以下四行" |
+| **N-05** | 非阻断（美观） | 手册 A3 第 38 行 | `/usr/bin/time -v true > /dev/null` 只屏蔽了 `true` 的 stdout，GNU time 的 20 余行报告仍从 stderr 打到屏幕 | 加 `2>/dev/null`（`&&` 链的判定不变） |
+
+### 对保留项 R3 / R4 的评价
+
+- **R3（H4 演练提交 `be5e49fd` ≠ 包提交 `9ff86cb6`）：表述客观，不应升级为阻断。** 我独立核对：求解路径代码（归档中 `research/`、`tests/` 之外的全部文件）两提交间 `git diff` 为空；随包脚本确实改了 4 个文件（`run_batch4.sh` 17 行、`preflight.sh` 4 行、`hpr_job.sh` 13 行、`make_pbs.sh` 1 行）与 `tests/` 38 行；重建后的清单 `h4_drill` 已如实记录 `drilled_path_identical_to_package_commit: false`、`drilled_path_diff_stat`（含这 4 个文件与 tests）与 `path_diff_note`——`9ff86cb6` 的两段路径规格修正解决了 `a955ab59` 漏记的问题。不升级为阻断的理由：(1) 改动不触及求解命令、参数、输入与进程 1/2/3 的调用方式；(2) 改动点（批级放行、rss 模式不读 cgroup、`--only` 的后处理排队与线程预算、PBS `-S`、预检文件名、WLS 行）均有同提交的替身测试；(3) 更重要的是，HPC 冒烟作业（步骤 D）会以**真实 Gurobi** 在集群上端到端执行与正式作业完全相同的随包脚本，并且是步骤 E 的硬门槛（`hpr_submit.sh` 无 `SMOKE_RESULT:PASS` 即拒绝）。建议在 R3 中补上第 (3) 点，使接受理由完整；仍需用户确认。
+- **R4（两份构建回执保留本机用户名路径）：表述客观，不应升级为阻断。** 重建包中本机用户名路径只剩这两份回执（各 7 处），它们被 `base-check`（`network.sha256`、`code_sha`）与 `gates_v6 accept --build-receipt` 消费，改写确有破坏对应关系的风险；泄露内容仅为本机 Linux 用户名与目录结构，不含 HPC 账号 / 密码 / 许可。由用户确认即可。
+
+### (c) 重新抽取的登记常数核对
+
+**全部一致，与第一轮无差异。** 具体：`pbs/HPC_PLAN.txt`（LIMITS / SMOKE / STOP / 六个 JOB 行 / 两个 NETWORK 行）逐字与第一轮相同；六个 `.pbs` 的队列 / `select` / walltime / `export JOB_*` 行与第一轮相同，仅新增 `#PBS -S /bin/bash`（非登记值）；`run_batch4.sh` 第 74 行 `R_TL=864000; R_WALL=871200; R_GAP=330; R_MODE=split`、第 77 / 79 / 80 / 146 / 184 行缺省值不变；`preflight.sh` `R_TL=864000` 不变；`scripts_project/b4_batch4.py` 自 `69b0b7d1` 起未改（`69b0b7d1..9ff86cb6` 在 `research/` 之外只改了 `tests/research/test_hpr_two_jobs.py`）；`RUN_PLAN_HPC.md` 第 2 / 3 / 10 节表格行零改动（diff 中无任何表格数值行），改动只在版本说明、§4 第 6 条措辞、§7.5、§9 BUILD_ONLY 行判读规则、§11 日志位置；`hpr_job.sh` 冒烟常数 `TRUNCATE=56 … GUROBI_TIME_LIMIT_S=3000 WALL_CAP_S=3600` 不变。复算 918,000 / 925,200 / 917,130 / 924,330 / 691,200 / 240 / 200 均与第一轮相同。
+
+包完整性：`sha256sum -c` 36 / 36 OK；目录 38 个文件（36 + `SHA256SUMS` + 清单），无其他杂散文件；20 个随包副本与 `9ff86cb6` 所指来源逐字节相同，且与当前工作树相同；归档 1,564 条目、无 `research/`；包内文本文件无 CRLF。泄露计数（重建包）：许可键名 0、`KEY=` 行 0、`ssh -p` / `scp -P` 0、`用户@主机` 字面量 0、IPv4 10（仍为两份环境锁定文件的版本号）、本机用户名路径 14（两份回执，R4）；本轮三个提交的补丁新增行中键名 0、IPv4 0、端口 0、`用户@主机` 0。
+
+### (d) 结论
+
+- **阻断项：0。** 第一轮 18 条中 14 条已解决，4 条部分解决且理由成立（F-02 的新错误见 N-01；F-08 / F-09 / F-11 为待 HPC 核实、待用户确认或可接受的残留）。
+- 新发现 5 条，均非阻断：N-01（手册 A1 判据差 1，建议上传前改正并重建包）、N-02（H-P5 / H-P14 须以 `9ff86cb6` 重新落实，属待完成项）、N-03 / N-04 / N-05（措辞与美观）。
+- R3、R4 的表述客观，均不应升级为阻断；建议 R3 补写"HPC 冒烟作业是改动后随包脚本的真实 Gurobi 端到端验证且为步骤 E 硬门槛"这一接受理由。
+
+---
+
+### 执行端对第二轮的处理（2026-10-27）
+
+| 编号 | 处理 |
+|---|---|
+| N-01 | **已修**：手册 A1 判据改为"第一个数 = 第二个数 + 2（38 / 36）" |
+| N-02 | **已落实**：全量测试（`-rs`，含跳过原因）在审查修正之后的提交上重跑并写入检查单 H-P5（见 H-P5 的提交号与计数；其后的提交只改 `research/` 下文档与打包脚本，`git diff -- . ':!research'` 为空）；证据提交后 H-P14 以最终推送记录填写 |
+| N-03 | **已修**：`RUN_PLAN_HPC.md` §5 第 1 项补 rss 模式下 cgroup 列为空的说明（头部修订列表同步） |
+| N-04 | **已修**：手册 C3 改为"至少包含这四行，且无 FAILED" |
+| N-05 | **已修**：手册 A3 的 `/usr/bin/time -v true` 加 `2>/dev/null` |
+| R3 补写 | **已补**：检查单 R3 增加"HPC 冒烟作业以真实 Gurobi 端到端执行相同随包脚本，且为步骤 E 硬门槛"的接受理由 |
+
+第二轮结论：阻断 0；两轮共 23 条非阻断发现，21 条已修正或已落实，F-08 / F-14 / F-05(b) 待用户在 HPC 核实，F-09（R4）与 R3 待用户确认。手册 / 计划的本轮改动使包再次重建（终版提交见检查单头部），包内脚本未变。
