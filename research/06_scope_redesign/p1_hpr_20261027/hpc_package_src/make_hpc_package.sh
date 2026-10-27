@@ -35,16 +35,19 @@ P
   # runner / preflight / pack / env sources and the job body + PBS generator; other package sources (guide, plan, submit, status, consistency) may differ
   H4_PATH_DIFF=""
   if [ "$H4_COMMIT" != "$COMMIT" ]; then
-    DRILLED=(. ':(exclude)research' research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4 research/06_scope_redesign/p1_m10p_20261022/cloud_package
+    # two pathspecs, compared separately (a git ':(exclude)research' spec would also drop the explicitly listed research/ paths): (1) the archived code that runs
+    # on the cluster (everything outside research/; tests/ are archived but never executed there), (2) the shipped scripts of the drilled path
+    SHIPPED=(research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4 research/06_scope_redesign/p1_m10p_20261022/cloud_package
              research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_job.sh research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/make_pbs.sh)
-    if git diff --quiet "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}"; then echo "H4 drill commit $H4_COMMIT != package commit $COMMIT: the drilled execution path is identical (git diff empty on the archived code, runner, preflight, pack, env, job body, PBS generator) - accepted"
-    elif git diff --quiet "$H4_COMMIT" "$COMMIT" -- . ':(exclude)research' ':(exclude)tests' && [ "${H4_PATH_DIFF_OK:-0}" = 1 ] && [ -n "${H4_PATH_DIFF_NOTE:-}" ]; then
-      # the archived CODE that runs on the cluster (solve path: scripts_project, model, config; tests/ are archived but never executed there) is byte-identical;
-      # only shipped bash scripts of the drilled path changed - accepted only with an explicit note (recorded in the manifest with the diff stat); the stand-in
-      # tests of the package commit cover the changed scripts
-      H4_PATH_DIFF=$(git diff --stat "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}" | tr '\n' ';')
+    code_same=0; git diff --quiet "$H4_COMMIT" "$COMMIT" -- . ':(exclude)research' ':(exclude)tests' && code_same=1
+    scripts_same=0; git diff --quiet "$H4_COMMIT" "$COMMIT" -- "${SHIPPED[@]}" && scripts_same=1
+    if [ $code_same = 1 ] && [ $scripts_same = 1 ]; then echo "H4 drill commit $H4_COMMIT != package commit $COMMIT: the drilled execution path is identical (git diff empty on the archived code outside tests/ and on the runner, preflight, pack, env, job body, PBS generator) - accepted"
+    elif [ $code_same = 1 ] && [ "${H4_PATH_DIFF_OK:-0}" = 1 ] && [ -n "${H4_PATH_DIFF_NOTE:-}" ]; then
+      # the archived CODE (solve path: scripts_project, model, config) is byte-identical; only shipped bash scripts of the drilled path changed - accepted only with
+      # an explicit note (recorded in the manifest with the diff stat); the stand-in tests of the package commit cover the changed scripts
+      H4_PATH_DIFF=$( { git diff --stat "$H4_COMMIT" "$COMMIT" -- "${SHIPPED[@]}"; git diff --stat "$H4_COMMIT" "$COMMIT" -- tests; } | tr '\n' ';')
       echo "H4 drill commit $H4_COMMIT != package commit $COMMIT: the archived code is identical; shipped scripts of the drilled path differ (accepted with H4_PATH_DIFF_NOTE): $H4_PATH_DIFF"
-    else echo "REFUSED: the drilled execution path changed since the H4 drill commit $H4_COMMIT (set H4_PATH_DIFF_OK=1 H4_PATH_DIFF_NOTE=<why> only when the archived code outside tests/ is identical):"; git diff --stat "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}"; exit 1; fi
+    else echo "REFUSED: the drilled execution path changed since the H4 drill commit $H4_COMMIT (archived code identical: $code_same; set H4_PATH_DIFF_OK=1 H4_PATH_DIFF_NOTE=<why> only when it is):"; git diff --stat "$H4_COMMIT" "$COMMIT" -- . ':(exclude)research'; git diff --stat "$H4_COMMIT" "$COMMIT" -- "${SHIPPED[@]}"; exit 1; fi
   fi
 fi
 export H4_JSON H4_COMMIT H4_PATH_DIFF H4_PATH_DIFF_NOTE=${H4_PATH_DIFF_NOTE:-} H4_SKIP=${H4_SKIP:-0}
