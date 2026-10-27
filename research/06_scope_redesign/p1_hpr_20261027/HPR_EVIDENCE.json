@@ -1,6 +1,6 @@
 {
  "step": "HPR",
- "written_utc": "2026-10-27T09:12:53Z",
+ "written_utc": "2026-10-27T09:14:33Z",
  "instruction": {
   "file": "HPR_CLAUDE_CODE_INSTRUCTION.md",
   "sha256": "f14cb0183058e8a44920eb6e887bb528af35fc38861303af1118e17984412d86",
@@ -8,9 +8,10 @@
  },
  "git": {
   "branch": "codex/hpr-20261027",
-  "head": "8ed41d978d7fc9400954c5341696146859c2bf52",
+  "head": "b9863f52443a36d2718c278fd027748e43b8ac49",
   "base": "82c32c53c64047638989dee39b16135646ffcf1a",
   "commits": [
+   "b9863f52443a36d2718c278fd027748e43b8ac49 2026-10-27T17:12:53+08:00 HPR final (no HPC, no cloud, no solve, no Gurobi): HPR_REPORT.md (body + RUN_PLAN_HPC.md verbatim appendix) and HPR_EVIDENCE.json; checklist H-P1-H-P14 all PASS - H-P5 full suite 719 passed / 67 skipped / 0 failed on the final code commit 8ed41d97 (skip list identical to the a955ab59 run), H-P7 / H-P8 on the final package 8ed41d97 (36 files, 213,498,758 B; dry run with a real truncated build and 21 / 21 refusals incl. R21), H-P14 push record kept outside the repository; conclusion: ready for the HPC steps A-D2, step E only after 2026-11-02 17:00 SGT with the smoke PASS and the user decisions; reservations R1-R4 for the user; INDEPENDENT_REVIEW N-02 updated; progress file; final leak scan over the report and evidence (counts only); documents, evidence and helper-script mirror only - no code change",
    "8ed41d978d7fc9400954c5341696146859c2bf52 2026-10-27T16:39:36+08:00 HPR S-01 self-check after the independent review (no HPC, no cloud, no solve, no Gurobi): hpr_job.sh build_only mode refuses a run folder holding a previous build-only run (exit 2, nothing written) - the runner would skip the build on its receipt (.cond=build_only / split_built) and the job would repeat the old numbers with the LP already deleted (seen in the repeated local dry runs on the same dry-run folder: 2 s, BUILD_CHECK problem_file); the build-only stand-in test runs the job body a second time on the same folder (refused, records unchanged); the local dry run moves a previous build folder aside and adds refusal case R21; operator guide D2 rerun note; RUN_PLAN_HPC section 9 note (sections 2-7 values unchanged); finalize build takes the message file",
    "a6e119ddb02f9f6b19e218233256dc4d312ccabf 2026-10-27T16:22:47+08:00 HPR H7 round 2 (no HPC, no cloud, no solve, no Gurobi): second independent review of the rebuilt package - 0 blocking, 5 new non-blocking (N-01 guide A1 count, N-02 checklist H-P5 / H-P14 to be settled on the final commits, N-03 RUN_PLAN section 5 rss-mode wording, N-04 / N-05 guide wording) - all fixed; checklist R3 completed with the smoke-job argument, H-P12 / H-P13 filled; INDEPENDENT_REVIEW.md round 2 + handling; progress",
    "9ff86cb6445c860c32c2d8d95b09789b89a6848a 2026-10-27T15:56:33+08:00 HPR package builder: the drilled-path comparison against the H4 drill commit uses two separate pathspecs (archived code outside research/ and tests/; the shipped research/ scripts) - a single spec with ':(exclude)research' also dropped the explicitly listed research/ paths, so the recorded diff stat omitted the runner / job body changes",
@@ -22,9 +23,9 @@
    "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a 2026-10-27T13:19:34+08:00 HPR H1-H2 (no HPC, no cloud, no solve, no Gurobi): RUN_PLAN_HPC.md registered before any HPC operation and before the H4 local solves - fourth batch F1 / F2 on the v2 2920x3h networks (B2), TimeLimit 864,000 s (B1), PBS parallel 48 cores / 300 and 250 GB per job (B3), split solve with profile formal_barrier_1e6_t16 (B4), two-job method, licence gap F2 after F1 start + 330 s, memory stop by job cgroup or process-group RSS, test jobs (install, smoke 56, full-size BUILD_ONLY F1 per the user supplement); progress file"
   ],
   "merges": [],
-  "status_tracked": "M research/06_scope_redesign/p1_hpr_20261027/HPR_PROGRESS.md\n M research/06_scope_redesign/p1_hpr_20261027/INDEPENDENT_REVIEW.md\n M research/06_scope_redesign/p1_hpr_20261027/PRE_HPC_CHECKLIST.md\n M research/06_scope_redesign/p1_hpr_20261027/evidence/CONSISTENCY.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/BUILD_CHECK.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/BUILD_ONLY_STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/DRYRUN_STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/PBS_JOBS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/REFUSALS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/RUN.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/preflight_login.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/preflight_sha.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/leak_scan/HPR_LEAK_SCAN.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/COMMIT\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/HPC_PACKAGE_MANIFEST.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/SHA256SUMS\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_batch.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_build_only_f1.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_f1.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_f2.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_install.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_smoke56.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/tests/full_rs_commit.txt",
+  "status_tracked": "M research/06_scope_redesign/p1_hpr_20261027/HPR_REPORT.md\n M research/06_scope_redesign/p1_hpr_20261027/evidence/leak_scan/HPR_LEAK_SCAN.json",
   "remote_head": [
-   "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a"
+   "b9863f52443a36d2718c278fd027748e43b8ac49"
   ]
  },
  "run_plan": {
@@ -92,7 +93,23 @@
    "summary_line": "717 passed, 67 skipped, 1308 warnings in 1618.64s (0:26:58)",
    "failed": [],
    "sha256": "d794e735b1f9377d0795b6e062f223e27354e24f08e1880c9f9cac5389eda1a4"
-  }
+  },
+  "full_commit": "FULL_SUITE_COMMIT=69b0b7d1aa25b5bc203538ca3c14e2c9df132f4a dirty=0\nFULL_SUITE_EXIT=0 seconds=1620",
+  "full_rs_a955ab59": {
+   "file": "full_rs_a955ab59.log",
+   "summary_line": "719 passed, 67 skipped, 1308 warnings in 1599.74s (0:26:39)",
+   "failed": [],
+   "sha256": "18cbbfbba72e7d1ce16746ba237352c127644c42e0825838bd734736e2b6b0a7"
+  },
+  "full_rs_a955ab59_commit": "FULL_RS_COMMIT=a955ab59dd20dd84739eb150a63a8f9d6653dea7 dirty=17\nFULL_RS_EXIT=0 seconds=1601",
+  "full_rs_final": {
+   "file": "full_rs.log",
+   "summary_line": "719 passed, 67 skipped, 1308 warnings in 1649.72s (0:27:29)",
+   "failed": [],
+   "sha256": "a34cb7fc0ef7d391ae76dfb8bdedc0067e32714b230bf6f2d16ec95326e30e36"
+  },
+  "full_rs_final_commit": "FULL_RS_COMMIT=8ed41d978d7fc9400954c5341696146859c2bf52 dirty=20\nFULL_RS_EXIT=0 seconds=1651",
+  "full_rs_skips_identical": true
  },
  "h4_drill": {
   "script": "scripts/wsl_hpr/h4_compare.py",
@@ -602,7 +619,7 @@
   "clean": false,
   "n_secret_values": 2,
   "patterns_supplied": true,
-  "n_commits": 9,
+  "n_commits": 10,
   "targets": {
    "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package": {
     "files": 38,
@@ -614,7 +631,7 @@
     "excluded": []
    },
    "/home/jin/wt_hpr_20261027/research/06_scope_redesign/p1_hpr_20261027": {
-    "files": 156,
+    "files": 157,
     "n_hit_files": 0,
     "hits": [],
     "excluded": [
@@ -622,7 +639,7 @@
     ]
    },
    "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027": {
-    "files": 40,
+    "files": 196,
     "n_hit_files": 2,
     "hits": [
      "hpc_package/env/conda_explicit_linux64.txt",
@@ -633,7 +650,7 @@
     ]
    },
    "/home/jin/hpr": {
-    "files": 35,
+    "files": 36,
     "n_hit_files": 0,
     "hits": [],
     "excluded": []

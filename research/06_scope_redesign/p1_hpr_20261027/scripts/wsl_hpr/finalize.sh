@@ -48,7 +48,8 @@ print('LEAK_FINAL: secret_values', r['n_secret_values'], 'commits', r['n_commits
     c=$(grep -c "待填\|PLACEHOLDER" "$D/$f"); [ "$c" = 0 ] || log PLACEHOLDER_LEFT "$f:$c"
   done
   grep -q "PLACEHOLDER_LEFT" "$S" && { log ABORT "placeholders left - fix the documents first"; exit 3; }
-  bash /home/jin/hpr/commit.sh /home/jin/hpr/msg_final.txt 2>&1 | tail -4 | tee -a "$S"
+  MSG=${2:-/home/jin/hpr/msg_final.txt}
+  bash /home/jin/hpr/commit.sh "$MSG" 2>&1 | tail -4 | tee -a "$S"
   bash /home/jin/hpr/push.sh 2>&1 | tee -a "$S"
   bash /home/jin/hpr/sync_work.sh > "$R/sync_work.log" 2>&1; log SYNC "exit=$?:$(tail -1 "$R/sync_work.log")"
   log DONE "head=$(git rev-parse HEAD)"
