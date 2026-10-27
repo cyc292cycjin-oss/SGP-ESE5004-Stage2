@@ -1,6 +1,6 @@
 {
  "step": "HPR",
- "written_utc": "2026-10-27T09:14:33Z",
+ "written_utc": "2026-10-27T09:15:28Z",
  "instruction": {
   "file": "HPR_CLAUDE_CODE_INSTRUCTION.md",
   "sha256": "f14cb0183058e8a44920eb6e887bb528af35fc38861303af1118e17984412d86",
@@ -8,9 +8,10 @@
  },
  "git": {
   "branch": "codex/hpr-20261027",
-  "head": "b9863f52443a36d2718c278fd027748e43b8ac49",
+  "head": "687c0031a19e31181e3ed92f0bdd262598463340",
   "base": "82c32c53c64047638989dee39b16135646ffcf1a",
   "commits": [
+   "687c0031a19e31181e3ed92f0bdd262598463340 2026-10-27T17:14:34+08:00 HPR final touch-up (no HPC, no cloud, no solve, no Gurobi): HPR_EVIDENCE.json lists all three full-suite runs (full at 69b0b7d1, full_rs at a955ab59, full_rs at the final code commit 8ed41d97) and the HPR / B4P stand-in log; report section 8 disk figures measured (about 2.9 GB); documents, evidence and helper-script mirror only - no code change",
    "b9863f52443a36d2718c278fd027748e43b8ac49 2026-10-27T17:12:53+08:00 HPR final (no HPC, no cloud, no solve, no Gurobi): HPR_REPORT.md (body + RUN_PLAN_HPC.md verbatim appendix) and HPR_EVIDENCE.json; checklist H-P1-H-P14 all PASS - H-P5 full suite 719 passed / 67 skipped / 0 failed on the final code commit 8ed41d97 (skip list identical to the a955ab59 run), H-P7 / H-P8 on the final package 8ed41d97 (36 files, 213,498,758 B; dry run with a real truncated build and 21 / 21 refusals incl. R21), H-P14 push record kept outside the repository; conclusion: ready for the HPC steps A-D2, step E only after 2026-11-02 17:00 SGT with the smoke PASS and the user decisions; reservations R1-R4 for the user; INDEPENDENT_REVIEW N-02 updated; progress file; final leak scan over the report and evidence (counts only); documents, evidence and helper-script mirror only - no code change",
    "8ed41d978d7fc9400954c5341696146859c2bf52 2026-10-27T16:39:36+08:00 HPR S-01 self-check after the independent review (no HPC, no cloud, no solve, no Gurobi): hpr_job.sh build_only mode refuses a run folder holding a previous build-only run (exit 2, nothing written) - the runner would skip the build on its receipt (.cond=build_only / split_built) and the job would repeat the old numbers with the LP already deleted (seen in the repeated local dry runs on the same dry-run folder: 2 s, BUILD_CHECK problem_file); the build-only stand-in test runs the job body a second time on the same folder (refused, records unchanged); the local dry run moves a previous build folder aside and adds refusal case R21; operator guide D2 rerun note; RUN_PLAN_HPC section 9 note (sections 2-7 values unchanged); finalize build takes the message file",
    "a6e119ddb02f9f6b19e218233256dc4d312ccabf 2026-10-27T16:22:47+08:00 HPR H7 round 2 (no HPC, no cloud, no solve, no Gurobi): second independent review of the rebuilt package - 0 blocking, 5 new non-blocking (N-01 guide A1 count, N-02 checklist H-P5 / H-P14 to be settled on the final commits, N-03 RUN_PLAN section 5 rss-mode wording, N-04 / N-05 guide wording) - all fixed; checklist R3 completed with the smoke-job argument, H-P12 / H-P13 filled; INDEPENDENT_REVIEW.md round 2 + handling; progress",
@@ -23,9 +24,9 @@
    "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a 2026-10-27T13:19:34+08:00 HPR H1-H2 (no HPC, no cloud, no solve, no Gurobi): RUN_PLAN_HPC.md registered before any HPC operation and before the H4 local solves - fourth batch F1 / F2 on the v2 2920x3h networks (B2), TimeLimit 864,000 s (B1), PBS parallel 48 cores / 300 and 250 GB per job (B3), split solve with profile formal_barrier_1e6_t16 (B4), two-job method, licence gap F2 after F1 start + 330 s, memory stop by job cgroup or process-group RSS, test jobs (install, smoke 56, full-size BUILD_ONLY F1 per the user supplement); progress file"
   ],
   "merges": [],
-  "status_tracked": "M research/06_scope_redesign/p1_hpr_20261027/HPR_REPORT.md\n M research/06_scope_redesign/p1_hpr_20261027/evidence/leak_scan/HPR_LEAK_SCAN.json",
+  "status_tracked": "M research/06_scope_redesign/p1_hpr_20261027/evidence/leak_scan/HPR_LEAK_SCAN.json",
   "remote_head": [
-   "b9863f52443a36d2718c278fd027748e43b8ac49"
+   "687c0031a19e31181e3ed92f0bdd262598463340"
   ]
  },
  "run_plan": {
@@ -619,7 +620,7 @@
   "clean": false,
   "n_secret_values": 2,
   "patterns_supplied": true,
-  "n_commits": 10,
+  "n_commits": 11,
   "targets": {
    "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package": {
     "files": 38,
@@ -650,7 +651,7 @@
     ]
    },
    "/home/jin/hpr": {
-    "files": 36,
+    "files": 37,
     "n_hit_files": 0,
     "hits": [],
     "excluded": []

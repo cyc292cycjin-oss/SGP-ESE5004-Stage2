@@ -60,4 +60,4 @@ if res["leak_scan"]:
 if res["consistency"]:
     c = res["consistency"]; res["consistency"] = dict(all_consistent=c["all_consistent"], rows=len(c["rows"]), inconsistent=[r["item"] for r in c["rows"] if not r["consistent"]], walltime_components=c["walltime_components"])
 OUT.write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str) + "\n")
-print(json.dumps(dict(head=res["git"]["head"][:8], tests={k: (v or {}).get("summary_line") for k, v in res["tests"].items()}, h4=(h4 or {}).get("bitwise_equal_to_dfx_smoke"), package_files=res["package"]["files"], consistency=(res["consistency"] or {}).get("all_consistent"), leak_clean=(res["leak_scan"] or {}).get("clean")), ensure_ascii=False))
+print(json.dumps(dict(head=res["git"]["head"][:8], tests={k: (v.get("summary_line") if isinstance(v, dict) else v) for k, v in res["tests"].items()}, h4=(h4 or {}).get("bitwise_equal_to_dfx_smoke"), package_files=res["package"]["files"], consistency=(res["consistency"] or {}).get("all_consistent"), leak_clean=(res["leak_scan"] or {}).get("clean")), ensure_ascii=False))
