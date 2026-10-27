@@ -30,8 +30,8 @@ if [ -d runs/batch4 ]; then
   for d in runs/batch4/F1 runs/batch4/F2; do c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) echo "REFUSED: $d holds a dry-run leftover"; exit 2;; esac; done
 fi
 command -v qsub > /dev/null 2>&1 || { echo "REFUSED: qsub not found (login node?)"; exit 2; }
-mkdir -p runs/batch4
-F1=$(qsub pbs/hpr_f1.pbs) || { echo "qsub F1 failed"; exit 1; }
+F1=$(qsub pbs/hpr_f1.pbs) || { echo "qsub F1 failed - nothing submitted; fix the qsub error and run this command again"; exit 1; }
+mkdir -p runs/batch4   # created only after F1 is queued (review F-11: a failed first qsub must not block the retry)
 F2=$(qsub -W depend=after:"$F1" pbs/hpr_f2.pbs) || { echo "qsub F2 failed (F1 $F1 is queued - qdel $F1 if you do not want it alone)"; exit 1; }
 B=$(qsub -W depend=afterany:"$F1":"$F2" pbs/hpr_batch.pbs) || { echo "qsub batch failed (F1 $F1 / F2 $F2 are queued)"; exit 1; }
 echo "SUBMITTED:utc=$(date -u +%Y-%m-%dT%H:%M:%SZ):F1=$F1:F2=$F2:batch=$B:resume=$RESUME" | tee -a runs/batch4/SUBMITTED.txt

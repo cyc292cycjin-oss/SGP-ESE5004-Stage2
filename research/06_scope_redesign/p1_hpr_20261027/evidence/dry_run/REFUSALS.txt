@@ -1,0 +1,20 @@
+R01_runner_build_only_with_auth|exit=2|status=absent|REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY / --repost - the no-solve modes take no authorisation text 
+R02_runner_split_cmd_hook|exit=2|status=absent|REFUSED: SPLIT_CMD set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only) 
+R03_runner_truncate_formal|exit=2|status=absent|REFUSED: TRUNCATE is for smoke tests only 
+R04_runner_old_timelimit|exit=2|status=absent|REFUSED: GUROBI_TIME_LIMIT_S=259200 differs from the registered value 864000 (RUN_PLAN_B4.md section 3) 
+R05_runner_wall_cap|exit=2|status=absent|REFUSED: WALL_CAP_S=266400 differs from the registered value 871200 (RUN_PLAN_B4.md section 3) 
+R06_runner_single_mode|exit=2|status=absent|REFUSED: SOLVE_MODE=single differs from the registered value split (RUN_PLAN_B4.md section 3) 
+R07_runner_fake_hook|exit=2|status=absent|REFUSED: FAKE_SLEEP_F1 set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only) 
+R08_runner_post_only_with_only|exit=2|status=absent|REFUSED: --only is the solve mode of one run (or its BUILD_ONLY dry run); not together with POST_ONLY / DRY / --repost 
+R09_runner_no_auth|exit=2|status=absent|REFUSED: --auth "<user authorisation text>" is required 
+R10_job_formal_build_only_leftover|exit=2|status=absent|REFUSED: test hook / dry-run switch / runner override set in the job environment: BUILD_ONLY (every value comes from the job script and this body) 
+R11_job_formal_truncate_leftover|exit=2|status=absent|REFUSED: test hook / dry-run switch / runner override set in the job environment: TRUNCATE (every value comes from the job script and this body) 
+R12_job_formal_no_auth|exit=2|status=absent|REFUSED: the user authorisation text is missing (HPR_AUTH or /home/jin/hpr_dry/pkg/HPR_AUTH.txt) 
+R13_job_formal_no_licence|exit=2|status=absent|REFUSED: licence file missing or not mode 600 at /home/jin/hpr_dry/none (existence and mode checked only) 
+R14_job_formal_local_drill_switch|exit=2|status=absent|REFUSED: HPR_LOCAL_DRILL is a local-drill / test switch (not under a real PBS job) 
+R15_job_batch_not_ready|exit=2|status=absent|REFUSED: not_ready - /home/jin/hpr_dry/pkg/runs/batch4/F1 has not ended (the batch job runs after BOTH F1 and F2; depend=afterany) 
+R16_preflight_unregistered_network|exit=1|status=absent|PREFLIGHT FAILED
+R17_job_formal_unregistered_network|exit=1|status=absent|PREFLIGHT:formal:exit=1:sections=guards,sha,networks,env,profile,code,tools,resources:need_cores=48:need_mem_gib=270:PREFLIGHT FAILED PREFLIGHT_FAILED:formal - job ends, nothing started:utc=2026-10-27
+R18_submit_no_motd|exit=2|status=absent|REFUSED: confirm that the login banner shows NO new maintenance overlapping the next ~11 days, then add --motd-checked (RUN_PLAN_HPC 6)
+R19_submit_smoke_not_passed|exit=2|status=absent|REFUSED: the smoke job has not passed (/home/jin/hpr_dry/pkg/runs/smoke56/SMOKE_STATUS.txt: SMOKE_RESULT:PASS missing) - step D first
+R20_submit_hook_in_shell|exit=2|status=absent|REFUSED: unset before submitting: BUILD_ONLY

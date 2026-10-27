@@ -11,7 +11,8 @@ echo "== PBS jobs"; command -v qstat > /dev/null 2>&1 && qstat -u "${USER:-$(id 
 [ -f "$OUT/PBS_JOBS.txt" ] && { echo "== job records (last 8)"; tail -8 "$OUT/PBS_JOBS.txt" | cut -c1-220; }
 if [ -f "$OUT/STATUS.txt" ]; then
   echo "== STATUS.txt (last 12 lines)"; tail -12 "$OUT/STATUS.txt" | cut -c1-220
-  echo "== stop / error lines (contact the reviewer when any appears)"; grep -E "STOP_SAFE|STOP_NOT_ACCEPTED|UNUSABLE|HALTED|POSTPROC_ERROR|KILLED|MEMORY_STOP|PROJECTION_STOP|NOT_STARTED|WAIT_START.*STOP" "$OUT/STATUS.txt" | tail -8 || echo "(none)"
+  echo "== stop / error lines (contact the reviewer when any appears)"
+  lines=$(grep -E "STOP_SAFE|STOP_NOT_ACCEPTED|UNUSABLE|HALTED|POSTPROC_ERROR|KILLED|MEMORY_STOP|PROJECTION_STOP|NOT_STARTED|WAIT_START.*STOP" "$OUT/STATUS.txt" | tail -8); [ -n "$lines" ] && echo "$lines" | cut -c1-220 || echo "(none)"
 fi
 for rid in F1 F2; do
   d="$OUT/$rid"; [ -d "$d" ] || continue

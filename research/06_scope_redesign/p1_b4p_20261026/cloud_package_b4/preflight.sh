@@ -40,13 +40,13 @@ if sec sha; then
 fi
 if sec networks; then
   echo "== networks (full 2920x3h; registered SHA256)"
-  ( cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py base-check --nets "$HERE/networks" --out "$HERE/PREFLIGHT_BASE_CHECK.json" ) || { echo "BASE NETWORK SHA256 / BYTES DIFFER FROM THE BUILD RECEIPTS OR THE REGISTERED VALUES"; ok=0; }
+  ( cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py base-check --nets "$HERE/networks" --out "$HERE/PREFLIGHT_BASE_CHECK${PREFLIGHT_TAG:+_$PREFLIGHT_TAG}.json" ) || { echo "BASE NETWORK SHA256 / BYTES DIFFER FROM THE BUILD RECEIPTS OR THE REGISTERED VALUES"; ok=0; }   # PREFLIGHT_TAG (HPR): per-job file names when two jobs share the package folder
   for f in integrated_costs_active_research.csv disconnected_costs_active_research.csv; do [ -s "networks/$f" ] || { echo "networks/$f MISSING"; ok=0; }; done
   ls networks/*_365_24h_* > /dev/null 2>&1 && { echo "365x24h network found in the package (not part of the fourth batch)"; ok=0; } || echo "no 365x24h network in the package (as registered)"
 fi
 if sec env; then
   echo "== environment vs env/ENV_LOCK.txt"
-  "$PY" env/env_check.py env/ENV_LOCK.txt --out "$HERE/PREFLIGHT_ENV_CHECK.json" || { echo "KEY PACKAGES DIFFER (do not run the batch)"; ok=0; }
+  "$PY" env/env_check.py env/ENV_LOCK.txt --out "$HERE/PREFLIGHT_ENV_CHECK${PREFLIGHT_TAG:+_$PREFLIGHT_TAG}.json" || { echo "KEY PACKAGES DIFFER (do not run the batch)"; ok=0; }
 fi
 if sec profile; then
   echo "== solver profile"

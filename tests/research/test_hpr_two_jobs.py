@@ -297,6 +297,44 @@ def test_batch_job_after_an_unusable_run(tmp_path):
     assert "BATCH_REFERENCE:not_available" in st   # no F2 ledger: F1 keeps the provisional default reference, the summary and the halted pack are written
 
 
+def test_batch_job_runs_when_the_other_run_never_started_after_a_stop(tmp_path):
+    """Review F-06: F1 halts the batch (UNUSABLE + STOP) before F2 reached its Gurobi process -> F2's job records NOT_STARTED and writes no .ended; the
+    batch job must still summarise and pack as halted (not 'not_ready')."""
+    pkg = _job_pkg(tmp_path); out = pkg / "runs" / "batch4"
+    f = f"{sys.executable} {FAKE}"; w = tmp_path / "standin" / "scripts_project"
+    base = T._clean_env(dict(REPO=str(ROOT), PY=sys.executable, RUN_DIR=str(out), FAKE_OUT=str(out), ALLOW_UNREGISTERED="1", LICENCE_GAP_S="1", GRACE_S="1", MONITOR_S="1", CORES="25",
+                             MEM_QUOTA_GIB="240", CGROUP_ROOT=str(tmp_path / "cgroup"), GRB_LICENSE_FILE=str(tmp_path / "lic"), GUROBI_TIME_LIMIT_S="1000", WALL_CAP_S="1200",
+                             SOLVE_CMD=f"{sys.executable} {w / 's2_solve.py'}", SPLIT_CMD=f"{sys.executable} {w / 'b4_split_solve.py'}", VA_CMD=f"{f} va", C1_CMD=f"{f} c1", M12_CMD=f"{f} m12", M12A_CMD=f"{f} m12a", FAKE_SLEEP="0.2"))
+    p1 = subprocess.run(["bash", str(pkg / "run_batch4.sh"), "--only", "F1", "--auth", "x"], env=dict(base, FAKE_GUROBI_STATUS_F1="MEM_LIMIT"), capture_output=True, text=True, timeout=300)
+    st = (out / "STATUS.txt").read_text(); assert p1.returncode == 3 and "UNUSABLE:F1:nosol" in st and (out / "STOP").exists(), st[-1500:]
+    p2 = subprocess.run(["bash", str(pkg / "run_batch4.sh"), "--only", "F2", "--auth", "x"], env=dict(base, WAIT_START_OF="F1"), capture_output=True, text=True, timeout=300)
+    st = (out / "STATUS.txt").read_text(); assert p2.returncode == 3 and "NOT_STARTED_F2:halted before the start" in st and not (out / "F2" / ".started").exists() and not (out / "F2" / ".ended").exists(), st[-1500:]
+    env = _job_env(tmp_path, pkg, "batch", "batch", {"FAKE_OUT": str(out)}); env["HPR_RUN_ROOT"] = str(pkg)
+    for k in ("LICENCE_GAP_S", "GRACE_S", "MONITOR_S"):
+        env.pop(k, None)   # the batch body runs POST_ONLY without ALLOW_UNREGISTERED: only registered values are accepted (the stand-in gap settings are not needed here)
+    p3 = subprocess.run(["bash", str(pkg / "hpc" / "hpr_job.sh")], env=env, capture_output=True, text=True, timeout=300)
+    st = (out / "STATUS.txt").read_text()
+    assert p3.returncode == 3 and "not_ready" not in p3.stdout and "F2 never started (batch halted)" in p3.stdout, (p3.stdout[-800:], st[-1500:])
+    assert "HALTED:" in st and len(list(out.glob("results_light_halted_*.tar.gz"))) == 1 and (out / "BATCH4_SUMMARY.json").exists()
+    s = json.loads((out / "BATCH4_SUMMARY.json").read_text()); assert s["runs"]["F1"]["state"] == "ended" and s["runs"]["F2"]["state"] == "not_started" and s["stop_not_accepted"] == ["F1"]
+    # a started-not-ended run is never 'settled': not_ready
+    (out / "F2").mkdir(exist_ok=True); (out / "F2" / ".started").write_text("x\n")
+    p4 = subprocess.run(["bash", str(pkg / "hpc" / "hpr_job.sh")], env=env, capture_output=True, text=True, timeout=120); assert p4.returncode == 2 and "not_ready" in p4.stdout
+
+
+def test_only_mode_ignores_the_other_job_run_for_post_memory_and_threads(tmp_path):
+    """Review F-07: in --only mode the other run (another PBS job, its own cgroup) must not queue this job's post-processing nor shrink its thread
+    budget; with MEM_MEASURE=rss the cgroup files under CGROUP_ROOT (root / shared service cgroup) are not read at all."""
+    pkg = T._package(tmp_path); out = tmp_path / "out"; (out / "F2").mkdir(parents=True); (out / "F2" / ".started").write_text("x pid=1 pgid=1\n")   # F2 "running" in the other job
+    nodewide = tmp_path / "nodewide"; nodewide.mkdir(); (nodewide / "memory.stat").write_text(f"anon {230 * 2**30}\nfile 0\n"); (nodewide / "memory.max").write_text("max\n")   # a node-wide v2-looking root: 230 GiB in use
+    p = _only(tmp_path, pkg, "F1", dict(CORES="25", MEM_QUOTA_GIB="240", CGROUP_ROOT=str(nodewide), MEM_MEASURE="rss", FAKE_SLEEP_F1="2"))
+    st = _status(tmp_path)
+    assert p.returncode == 0, st[-2000:]
+    assert "POST_QUEUED" not in st and "mem_measure=rss/rss" in st and "cgroup_anon_source=none(rss_mode)" in st and "DONE_ONLY" in st
+    va = [x for x in (out / "CALLS.txt").read_text().splitlines() if x.startswith("va F1")]; assert va and va[0].endswith("omp=25"), va   # thread budget = all cores of this job (the other run does not count)
+    mon = (out / "MONITOR_F1.csv").read_text().splitlines(); assert len(mon) >= 2 and all(l.split(",")[4] == "" and l.split(",")[5] == "" for l in mon[1:]), mon[:3]   # cgroup columns empty in rss mode
+
+
 def test_job_cgroup_detection(tmp_path):
     pkg = _job_pkg(tmp_path); fs = tmp_path / "fs"   # PBS_JOBID=local.test in _job_env: only a cgroup path carrying the job id is the job's own
     v2 = fs / "pbs_jobs.service" / "jobid" / "local.test"; v2.mkdir(parents=True); (v2 / "memory.stat").write_text("anon 1024\nfile 0\n"); (v2 / "memory.max").write_text(str(32 * 2**30) + "\n")

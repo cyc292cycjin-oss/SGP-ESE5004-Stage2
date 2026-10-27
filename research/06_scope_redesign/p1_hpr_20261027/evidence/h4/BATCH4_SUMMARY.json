@@ -1,0 +1,388 @@
+{
+ "script": "scripts_project/b4_batch4.py",
+ "out": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/h4/runs/smoke56",
+ "runs": {
+  "F1": {
+   "rid": "F1",
+   "role": "\u4e00\u4f53\u5316 2920\u00d73h\uff1ac(N)\u3001Owen \u5206\u644a\u3001B6 \u57fa\u51c6",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/hpr_drill/pkg/networks/integrated_2920_3h_unsolved.nc",
+   "network_sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 340661983874.5359,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 113,
+   "solve_seconds": 206.96808624267578,
+   "peak_rss_gib": 2.0181121826171875,
+   "solve_peak_rss_gib": 5.8462677001953125,
+   "max_mem_used_gb": 5.947046576,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "F2": {
+   "rid": "F2",
+   "role": "\u4e0d\u4e92\u8054 2920\u00d73h\uff1aB6 = F2 \u2212 F1",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/hpr_drill/pkg/networks/disconnected_2920_3h_unsolved.nc",
+   "network_sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 352091303417.9458,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 139,
+   "solve_seconds": 214.56042671203613,
+   "peak_rss_gib": 1.8402519226074219,
+   "solve_peak_rss_gib": 4.437198638916016,
+   "max_mem_used_gb": 4.559633696,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  }
+ },
+ "unusable": {},
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 340661983874.5359,
+   "disconnected": 352091303417.9458
+  },
+  "difference": 11429319543.409912,
+  "relative": 0.03355032285498365,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 11.429319543409912,
+  "runs": {
+   "integrated": "F1",
+   "disconnected": "F2"
+  },
+  "labels": {
+   "F1": "ACCEPTED_LAYER2",
+   "F2": "ACCEPTED_LAYER2"
+  },
+  "usable": true,
+  "ledger_total_difference_bn": {
+   "BN": 0.18858432122800906,
+   "ID": 0.167647362274765,
+   "KH": 0.8169124882679172,
+   "LA": 1.522064761713702,
+   "MM": 0.4321018401800618,
+   "MY": 0.711793367302105,
+   "PH": 0.23959545498174287,
+   "SG": 2.6942259894598353,
+   "TH": 1.3811247902400512,
+   "TL": 0.02179295391670996,
+   "VN": 1.1699732935745621,
+   "ASEAN": 2.0835029202624815
+  },
+  "owen_dual_form_benefit_bn": {
+   "BN": 0.18858431830053474,
+   "ID": 0.15226733125968933,
+   "KH": 0.4816590447780485,
+   "LA": 1.4603755713448834,
+   "MM": 0.4666819359005466,
+   "MY": 0.727173238779457,
+   "PH": 0.2395954209887657,
+   "SG": 2.6942259855955792,
+   "TH": 2.0627890319474336,
+   "TL": 0.021792950554561555,
+   "VN": 0.8506714238034515,
+   "BUNKER": 2.083502847161484
+  }
+ },
+ "benefit": {
+  "computable": true,
+  "b6_bn": 11.429319543409912,
+  "negative_benefit": [],
+  "reason": null
+ },
+ "batch3_comparison": null,
+ "reference_comparison": {
+  "reference_file": "/home/jin/hpr_drill/pkg/REFERENCE_VALUES.json",
+  "source": "HPR make_reference_values.py: third batch (M10P 2026-10-23; BATCH3_REFERENCE_VALUES.json of the DFX package) and DFX phase 4 (cloud 365x24h v2 screening, 2026-10-27; DFX_PHASE4_RESULTS.json) - values only",
+  "b6_2920x3h_bn": 11.429319543409912,
+  "objective_2920x3h_eur": {
+   "F1": 340661983874.5359,
+   "F2": 352091303417.9458
+  },
+  "owen_dual_form_alpha_main_bn": {
+   "F1": {
+    "BN": 0.45032150752799677,
+    "ID": 91.1407385243457,
+    "KH": 4.294530851115228,
+    "LA": 0.39596858910092714,
+    "MM": 3.0030567551897493,
+    "MY": 26.786599625912192,
+    "PH": 18.10160881880278,
+    "SG": 10.21167933830179,
+    "TH": 46.361513002894796,
+    "TL": 0.37919932025294145,
+    "VN": 62.486038367227664,
+    "BUNKER": 77.05072856745981
+   },
+   "F2": {
+    "BN": 0.6389058258285315,
+    "ID": 91.29300585560537,
+    "KH": 4.7761898958932765,
+    "LA": 1.8563441604458106,
+    "MM": 3.4697386910902956,
+    "MY": 27.51377286469165,
+    "PH": 18.341204239791544,
+    "SG": 12.90590532389737,
+    "TH": 48.424302034842235,
+    "TL": 0.400992270807503,
+    "VN": 63.33670979103111,
+    "BUNKER": 79.1342314146213
+   }
+  },
+  "pairs": {
+   "batch3_main": {
+    "label": "\u7b2c\u4e09\u6279 365\u00d724h v1\uff0cR3 / R4\uff08\u540c\u6863\u6848 formal_barrier_1e6_t16\uff0coptimal\uff1b\u4e3b\u53c2\u7167\uff09",
+    "runs": {
+     "integrated": "R3",
+     "disconnected": "R4"
+    },
+    "b6_bn": 11.299841745887177,
+    "objective_eur": {
+     "integrated": 249835446561.07053,
+     "disconnected": 261135288306.9577
+    },
+    "objective_difference_bn": {
+     "F1_minus_R3": 90.82653731346537,
+     "F2_minus_R4": 90.9560151109881
+    },
+    "delta_b6_bn": 0.12947779752273547,
+    "owen_benefit_difference_bn": {
+     "BN": 0.15423105214604133,
+     "ID": -0.11424779814533996,
+     "KH": 0.24310156862792254,
+     "LA": 0.2705520433011646,
+     "MM": 0.2055422494338746,
+     "MY": -0.9050172065833358,
+     "PH": 0.08090659879309654,
+     "SG": -0.4338398019251413,
+     "TH": 0.9755163958121605,
+     "TL": -0.09144628316155963,
+     "VN": -2.2541017608944016,
+     "BUNKER": 1.9986902123755645
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_R3": {
+      "BN": 0.16693959190433352,
+      "ID": 23.99103377787133,
+      "KH": 0.7011085120857162,
+      "LA": 0.1429650305984457,
+      "MM": 1.467734928037819,
+      "MY": 10.566668120388874,
+      "PH": 3.249704006997225,
+      "SG": 4.154023841973176,
+      "TH": 19.986920560520904,
+      "TL": 0.34868628377457966,
+      "VN": 14.52166380938739,
+      "BUNKER": 11.52931610825315
+     },
+     "F2_minus_R4": {
+      "BN": 0.3211706440503749,
+      "ID": 23.87678597972599,
+      "KH": 0.9442100807136388,
+      "LA": 0.4135170738996103,
+      "MM": 1.6732771774716935,
+      "MY": 9.661650913805538,
+      "PH": 3.3306106057903215,
+      "SG": 3.720184040048035,
+      "TH": 20.962436956333065,
+      "TL": 0.25724000061302,
+      "VN": 12.267562048492989,
+      "BUNKER": 13.528006320628716
+     }
+    }
+   },
+   "batch3_alternative": {
+    "label": "\u7b2c\u4e09\u6279 365\u00d724h v1\uff0cR1 / R2\uff08\u6863\u6848 formal_barrier\uff0csuboptimal\uff1b\u5e76\u5217\uff09",
+    "runs": {
+     "integrated": "R1",
+     "disconnected": "R2"
+    },
+    "b6_bn": 11.300117846675048,
+    "objective_eur": {
+     "integrated": 249835405550.90558,
+     "disconnected": 261135523397.58063
+    },
+    "objective_difference_bn": {
+     "F1_minus_R1": 90.82657832363032,
+     "F2_minus_R2": 90.95578002036517
+    },
+    "delta_b6_bn": 0.1292016967348637,
+    "owen_benefit_difference_bn": {
+     "BN": 0.1542334710643964,
+     "ID": -0.11411669880331421,
+     "KH": 0.2431234786872568,
+     "LA": 0.2705801908358972,
+     "MM": 0.20559277936787843,
+     "MY": -0.9049334498920574,
+     "PH": 0.08097241000719833,
+     "SG": -0.43382433033110046,
+     "TH": 0.9756153968578758,
+     "TL": -0.09144467167198156,
+     "VN": -2.2540110909375533,
+     "BUNKER": 1.9984930817525788
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_R1": {
+      "BN": 0.16693924994581205,
+      "ID": 23.991036782231536,
+      "KH": 0.701109780864862,
+      "LA": 0.14296403500468263,
+      "MM": 1.467735165611226,
+      "MY": 10.566670757952245,
+      "PH": 3.24970514871682,
+      "SG": 4.154023957125904,
+      "TH": 19.986928794599375,
+      "TL": 0.34868541756746746,
+      "VN": 14.521653264063401,
+      "BUNKER": 11.529320770769196
+     },
+     "F2_minus_R2": {
+      "BN": 0.32117272101020844,
+      "ID": 23.87692008342822,
+      "KH": 0.9442332595521188,
+      "LA": 0.41354422584057976,
+      "MM": 1.6733279449791045,
+      "MY": 9.661737308060188,
+      "PH": 3.3306775587240183,
+      "SG": 3.7201996267948036,
+      "TH": 20.96254419145725,
+      "TL": 0.2572407458954859,
+      "VN": 12.267642173125846,
+      "BUNKER": 13.527813852521774
+     }
+    }
+   },
+   "dfx_v2_365x24h": {
+    "label": "DFX \u9636\u6bb5 4 365\u00d724h v2\uff0cV1 / V2\uff08\u540c\u6863\u6848\uff0coptimal\uff09",
+    "runs": {
+     "integrated": "V1",
+     "disconnected": "V2"
+    },
+    "b6_bn": 14.615313032144318,
+    "objective_eur": {
+     "integrated": 270785244510.473,
+     "disconnected": 285400557542.6173
+    },
+    "objective_difference_bn": {
+     "F1_minus_V1": 69.8767393640629,
+     "F2_minus_V2": 66.69074587532849
+    },
+    "delta_b6_bn": -3.1859934887344057,
+    "owen_benefit_difference_bn": {
+     "BN": 0.11223366900443685,
+     "ID": -0.44975174076249697,
+     "KH": 0.2229136582858138,
+     "LA": 0.23098704760600852,
+     "MM": 0.16143855596803522,
+     "MY": -2.185839742384136,
+     "PH": 0.09218765868040847,
+     "SG": -1.1486088311683387,
+     "TH": 0.2942666702681465,
+     "TL": -0.11278486540655006,
+     "VN": -2.7224606761936263,
+     "BUNKER": 2.3202023964273377
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_V1": {
+      "BN": 0.05436951105335641,
+      "ID": 18.63653618270935,
+      "KH": 0.8403800819140601,
+      "LA": 0.25752225128264766,
+      "MM": 1.4479388048249264,
+      "MY": 5.704348608969444,
+      "PH": 3.2975676638183193,
+      "SG": 1.2497988236830253,
+      "TH": 13.104118902137241,
+      "TL": 0.3658752213420475,
+      "VN": 14.223710725916442,
+      "BUNKER": 10.69476011742888
+     },
+     "F2_minus_V2": {
+      "BN": 0.16660318005779326,
+      "ID": 18.186784441946855,
+      "KH": 1.0632937401998739,
+      "LA": 0.48850929888865613,
+      "MM": 1.6093773607929616,
+      "MY": 3.518508866585308,
+      "PH": 3.389755322498728,
+      "SG": 0.10118999251468659,
+      "TH": 13.398385572405388,
+      "TL": 0.2530903559354974,
+      "VN": 11.501250049722817,
+      "BUNKER": 13.014962513856217
+     }
+    }
+   }
+  },
+  "note": "description only: resolution (2920x3h vs 365x24h) and demand version (v2 vs v1) effects; no judgement, no threshold"
+ },
+ "p1": null,
+ "projection": {
+  "F1": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 691.0,
+   "seconds_per_iteration_11_20": 1.4
+  },
+  "F2": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 312.0,
+   "seconds_per_iteration_11_20": 1.0
+  }
+ },
+ "stop_not_accepted": [],
+ "stop_safe": null,
+ "postproc_errors": [],
+ "solver_runs": 0,
+ "written_utc": "2026-10-27T06:54:30Z"
+}

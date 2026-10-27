@@ -1,7 +1,8 @@
 # HPC 正式运行计划（RUN_PLAN_HPC）——第四批 F1 / F2，2920×3h v2 网络，NUS Atlas（PBS Pro）两作业方式
 
 **版本：** HPR v1，2026-10-27（SGT）。依据 `HPR_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `f14cb018…412d86`）与用户 2026-10-27 12:43 SGT 确认的 B1–B4，以及用户 2026-10-27 的补充（步骤 D2：全尺寸 BUILD_ONLY 测试作业）。
-**登记时间：** 本文件在任何 HPC 操作、任何本机 2920×3h v2 求解（H4 演练）之前提交；看到任何结果后第 2–7 节的规则与数值不再修改（修改只能作为新的、登记在前的计划修订）。
+**登记时间：** 本文件在任何 HPC 操作、任何本机 2920×3h v2 求解（H4 演练）之前提交（`1f62176f`，2026-10-27 13:19:34 SGT）；看到任何结果后第 2–7 节的规则与数值不再修改（修改只能作为新的、登记在前的计划修订）。
+**修订（2026-10-27，独立审查 H7 之后；第 2–7 节未改）：** §4 第 6 条措辞（本机许可文件不写路径）；§7 第 5 项补"停批情形下从未启动的运行视为已结束"的放行条件（审查 F-06）；§9 BUILD_ONLY 行补 D2 结果的判读规则（审查 F-16）；§11 作业日志位置更正为提交目录（审查 F-10）。
 **与 `RUN_PLAN_B4.md`（B4P v1，2026-10-26）的关系：** 本文件只改写 B1–B4 涉及的登记值（输入网络、TimeLimit 与派生墙钟、资源配额）和因 PBS 两作业方式不再适用的机制（P1 探针）；`RUN_PLAN_B4.md` 第 3.3–3.8 节的规则（内存止损、早期测速、验收与停批、后处理、资源止损后的重开）全部沿用，并在下文逐条写明。模型、网络构建、成本表、求解档案参数、GATES_V6 / C1 阈值一律不改。
 **单一来源：** 代码中的登记常数——`scripts_project/b4_batch4.py`（`REGISTERED_SHA`、`REGISTERED_BYTES`、`BUILD_COMMIT`、`TIME_LIMIT_S`、`WALL_CAP_S`、`LICENCE_GAP_S`、`HPC_JOBS`、`MEMORY_STOP_FRACTION`、`PROJECTION_FRACTION`）与 `run_batch4.sh` 顶部的 `R_TL` / `R_WALL` / `R_GAP` / `R_MODE`；PBS 作业脚本由 `make_pbs.sh` 从 `b4_batch4.py hpc-plan` 生成；`hpr_consistency.py` 把本文件、作业脚本、运行器、预检中的值列表比对（检查单 H-P3）。
 
@@ -58,7 +59,7 @@
 - **F2 的第一次 Gurobi 会话必须在 F1 第一次会话开始 ≥ 330 s 之后。实现（两重）：** (a) `qsub -W depend=after:<F1>`：F2 只在 F1 开始执行后调度；(b) 运行器 `run_batch4.sh --only F2` 以 `WAIT_START_OF=F1` 运行：F2 的进程 1（构建，无许可）照常进行，进程 2 启动前等待共享运行目录中 `F1/.solve_start`（F1 进程 2 的启动时刻，由 F1 的运行器写出）存在且距今 ≥ `LICENCE_GAP_S` = 330 s；F1 已结束求解（`F1/.solve_end`）或 F1 未经 Gurobi 就结束（`F1/.ended`，如构建失败）也放行。等待超过 `WAIT_START_MAX_S` = 7,200 s 仍无 F1 的启动标记 → `STOP_SAFE:WAIT_START:F1`（F2 不求解，等用户）。
 - **正式作业（F1 / F2 / 批级）不运行预检的 `licence` 节**（那是一次 Gurobi 会话）；作业开头只检查许可文件存在与权限位 600。许可是否可用由步骤 D 的冒烟作业验证。
 - 每个运行器启动后首次 Gurobi 距运行器启动 ≥ 330 s（B4P 3.2 第 3 项，沿用）；每次启动前检查本节点上其他 `b4_split_solve.py` 进程不超过 1 个。
-- **F1 / F2 运行期间，本机与任何云端都不得启动 Gurobi 会话**（本机 `/home/jin/gurobi.lic` 与 HPC 上的 `~/.gurobi/gurobi.lic` 是同一 WLS 许可）。F2 结束后才空出 1 个会话；F1 结束后空出 2 个。
+- **F1 / F2 运行期间，本机与任何云端都不得启动 Gurobi 会话**（本机 WSL 的许可文件与 HPC 上的 `~/.gurobi/gurobi.lic` 是同一 WLS 许可）。F2 结束后才空出 1 个会话；F1 结束后空出 2 个。
 - 许可只经 `GRB_LICENSE_FILE=$HOME/.gurobi/gurobi.lic` 引用；绝不进入包、代码、作业脚本、日志、结果包；导出日志经 `licen[cs]e|registered to|wls(access|secret)|academic` 过滤；打包前检索许可特征串，命中即拒绝打包。
 
 ## 5. 止损与保护（B4P 3.3–3.4 沿用，计量方式按 PBS 写明）
@@ -86,7 +87,7 @@
 2. **分级与停批（B4P 3.5 沿用）：** `b4_batch4.py stop-class`：G2 不通过 → `STOP`；无返回解或 C1 (a) 不通过 → `UNUSABLE` 并 `STOP`（两个运行都是本批参照，没有"其余继续"）；只有 C1 (b)/(c) 不通过 → 不停。两作业方式下"停批 = 不再启动新的求解"体现在**共享运行目录**：F1 作业写出的 `STOP` / `STOP_SAFE` 会被尚未进入进程 2 的 F2 运行器看到并放弃启动（`NOT_STARTED_F2`）；已在求解的另一运行跑完并后处理。
 3. **逐运行后处理在各自作业内完成**（`run_batch4.sh --only <编号>` 的 `post_run`）：违反量分析 → C1（临时参照）→ M12 分摊（`--register`）→ Owen 对偶形式审计 → GATES_V6（`--build-receipt`）→ 分级 → 导出 `export/<编号>/`（清洗后的日志，无 LP / 解数组）。每步 `timeout 10,800 s`，违反分析与 C1 失败后重做一次（M10A D2）；异常记 `POSTPROC_ERROR`，调度不变。
 4. **批级作业**（`hpr_batch`，第 3 节；`POST_ONLY=1 bash run_batch4.sh`，无许可、无 `--auth`）在两作业都结束后：补做缺失的逐运行后处理步骤（幂等）→ `BATCH_REFERENCE.json` → C1 重评、Owen 重评、GATES_V6 终标签、分级 → **B6 = F2 − F1**（`gate_b6_cost`）与分国账本差 → **Owen 对偶形式分摊**（α 0.5 主值、α 区间、市场形式并列、燃料舱参与者；`m12_allocation.py benefit`）与受益、比例规则对照 → **与 365×24h v2 V1 / V2（DFX 阶段 4）及第三批 R3 / R4（R1 / R2 并列）的对比**（只描述，不判定；参照数值来自包内 `REFERENCE_VALUES.json`，不含任何结果文件原文）→ `BATCH4_SUMMARY.json / .md` → 导出 `export/batch/` → 结果包（light / full）。任一运行未验收：批级作业照常重评与汇总，结果包标记 `halted`，退出码 3。
-5. 两作业未全部结束时批级作业拒绝运行（`not_ready`，退出码 2）——依赖 `afterany` 保证正常情况下不会发生。
+5. 两作业未全部"落定"时批级作业拒绝运行（`not_ready`，退出码 2）——依赖 `afterany` 保证正常情况下不会发生。"落定" = 该运行已结束（`.ended`），**或**运行目录里有 `STOP` / `STOP_SAFE` 且该运行从未开始求解（无 `.started`，即因另一运行的停批而 `NOT_STARTED`）；此时批级作业照常重评、汇总并打出 `*_halted_*` 结果包（审查 F-06 的修订，2026-10-27）。已开始未结束的运行永远不算落定。
 
 ## 8. 结果回收
 
@@ -99,7 +100,7 @@
 |---|---|---|---|---|
 | **环境安装** `hpr_install` | `serial`，`ncpus=1:mem=8gb` | 02:00:00 | 计算节点上：Miniforge 到 `$HOME/miniforge3`（安装包由作业下载；受限时在登录节点 `curl -o` 下载后 `MINIFORGE_SH=` 传入）→ `env/install_env.sh`（第三批锁定 538 个 conda 包 + 2 个 PyPI 包，缓存在 `/hpctmp/<用户>/hpr/conda_pkgs_cache`）→ `env_check.py` → 解包代码到包目录 `./repo`（= `COMMIT`）→ 登录节点预检各节 | `INSTALL_STATUS.txt`：`ENV_CHECK:key_all_equal=true`、`REPO:<提交>`、`PREFLIGHT:exit=0` |
 | **冒烟** `hpr_smoke56`（步骤 D） | `parallel`，`ncpus=17:mem=32gb` | 04:00:00 | 作业体依次以 `JOB_MODE=smoke56` 运行 F1 体、F2 体、批级体（同一代码路径）：`TRUNCATE=56 ALLOW_UNREGISTERED=1 GUROBI_TIME_LIMIT_S=3000 WALL_CAP_S=3600`，标签 `SMOKE_TEST_ONLY`，运行目录 `runs/smoke56`；两次 Gurobi 会话串行（间隔 ≥ 330 s）；计算节点 `curl https://token.gurobi.com` 只记 HTTP 状态码 | `SMOKE_STATUS.txt`：两运行 optimal、ACCEPTED_LAYER2、后处理与批级 exit 0、`DONE`；目标值与本机 H4 演练值（一体化 340,661,983,874.5359 / 不互联 352,091,303,417.9458 EUR）相对偏差 ≤ 1e-6（跨机器只记录差异，不要求逐位） |
-| **全尺寸 BUILD_ONLY** `hpr_build_only_f1`（步骤 D2，用户 2026-10-27 补充） | `parallel`，`ncpus=48:mem=300gb` | 02:30:00（估计 70 min × 2：预检 5 min + 进程 1 ≤ 60 min + 写入测速与清理 5 min） | `BUILD_ONLY=1 bash run_batch4.sh --only F1`（无 `--auth`、无许可）：只跑进程 1——完整 2920×3h v2 一体化网络的构建、LP 数组导出、LP 文件写出；运行目录 `runs/build_only_f1`（与正式目录隔离）；记录峰值内存（GNU time）、LP 文件字节数、构建秒数（`lp.build_seconds`）与写出秒数（`split.write_seconds`）、`/hpctmp` 写入速度（LP 字节 / 写出秒数，另加 1 GiB `dd` 顺序写测速）、cgroup 可见性；结束后删除 LP 文件 `split/problem.lp`（数组 `lp/` 保留，约 6.4 GB，60 天后清除） | `BUILD_ONLY_STATUS.txt`：`BUILD_CHECK_F1 passed`、`LP_DELETED`；参考预期：峰值 72–92 GiB（B4P 外推）、LP 5.1–5.4 GB、≤ 3,600 s。**结果只用于核对估计，不改变第 2–3 节的登记值**；峰值 > 150 GiB 或构建 > 3,600 s（超时安全停止）→ 先报告审阅端再做步骤 E |
+| **全尺寸 BUILD_ONLY** `hpr_build_only_f1`（步骤 D2，用户 2026-10-27 补充） | `parallel`，`ncpus=48:mem=300gb` | 02:30:00（估计 70 min × 2：预检 5 min + 进程 1 ≤ 60 min + 写入测速与清理 5 min） | `BUILD_ONLY=1 bash run_batch4.sh --only F1`（无 `--auth`、无许可）：只跑进程 1——完整 2920×3h v2 一体化网络的构建、LP 数组导出、LP 文件写出；运行目录 `runs/build_only_f1`（与正式目录隔离）；记录峰值内存（GNU time）、LP 文件字节数、构建秒数（`lp.build_seconds`）与写出秒数（`split.write_seconds`）、`/hpctmp` 写入速度（LP 字节 / 写出秒数，另加 1 GiB `dd` 顺序写测速）、cgroup 可见性；结束后删除 LP 文件 `split/problem.lp`（数组 `lp/` 保留，约 6.4 GB，60 天后清除） | `BUILD_ONLY_STATUS.txt`：`BUILD_CHECK_F1 passed`、`LP_DELETED`；参考预期：峰值 72–92 GiB（B4P 外推）、LP 5.1–5.4 GB、≤ 3,600 s。**结果只用于核对估计，不改变第 2–3 节的登记值**；峰值 > 150 GiB 或构建 > 3,600 s（超时安全停止）→ 先报告审阅端再做步骤 E；峰值 100–150 GiB → 批级作业（120 GiB）补做后处理（重建 LP，峰值与进程 1 同量级）可能不够，由审阅端提出是否提高 `hpr_batch` 内存（登记值变更，用户决定）后再做步骤 E（审查 F-16） |
 
 - 三个测试作业都可在 2026-10-29 18:00 维护前完成，也可在 11-02 17:00 之后做（用户决定）。
 - 测试作业用到的 `TRUNCATE` / `ALLOW_UNREGISTERED` / `BUILD_ONLY` 只在对应作业体内导出；**正式作业（`JOB_MODE=formal`）在这些开关残留、`--auth` 缺失、运行目录含测试残留（`.cond` 为 `build_only` / 标签 `SMOKE_TEST_ONLY`）时拒绝**（退出码 2，不写 STATUS）；`run_batch4.sh` 自身的拒绝（测试钩子、未登记时限、`--auth` 与无求解模式并存）保持不变。
@@ -139,7 +140,7 @@
 | 运行目录 | 正式 `runs/batch4/`；冒烟 `runs/smoke56/`；BUILD_ONLY `runs/build_only_f1/`（均在包目录下） |
 | 结果包 | `runs/batch4/results_{light,full}_final_*.tar.gz`（+ `.sha256`） |
 | 许可 | `$HOME/.gurobi/gurobi.lic`，`chmod 600`，用户自行放置；只经 `GRB_LICENSE_FILE` 引用 |
-| 作业日志 | `/hpctmp/<用户>/hpr/pbs_logs/<作业名>.o<作业号>` |
+| 作业日志 | `/hpctmp/<用户>/hpr/<作业名>.o<作业序号>`（PBS 把 `-j oe` 的输出放回提交目录；作业脚本不设 `-o`） |
 
 ## 12. 由准备端确定、请审阅确认的取值（不在 B1–B4 内）
 

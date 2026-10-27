@@ -46,8 +46,12 @@ case "$JOB_MODE" in
       [ -f "$d/RUN.json" ] && grep -q '"label": "SMOKE_TEST_ONLY"' "$d/RUN.json" && { echo "REFUSED: $d holds a smoke leftover (label SMOKE_TEST_ONLY)"; exit 2; }
       [ -f "$d/RUN.json" ] && grep -Eq '"truncate": [0-9]' "$d/RUN.json" && { echo "REFUSED: $d holds a truncated run"; exit 2; }
     done;;
-  batch)
-    for rid in F1 F2; do [ -f "$RUN_DIR/$rid/.ended" ] || { echo "REFUSED: not_ready - $RUN_DIR/$rid has not ended (the batch job runs after BOTH F1 and F2; depend=afterany)"; exit 2; }; done;;
+  batch)   # both runs settled: ended, or never started because the batch was halted (STOP / STOP_SAFE in the shared RUN_DIR; review F-06) - a started-not-ended run is not settled
+    for rid in F1 F2; do
+      if [ -f "$RUN_DIR/$rid/.ended" ]; then continue; fi
+      if { [ -f "$RUN_DIR/STOP" ] || [ -f "$RUN_DIR/STOP_SAFE" ]; } && [ ! -f "$RUN_DIR/$rid/.started" ]; then echo "NOTE: $rid never started (batch halted) - the batch job summarises and packs as halted"; continue; fi
+      echo "REFUSED: not_ready - $RUN_DIR/$rid has not ended (the batch job runs after BOTH F1 and F2; depend=afterany)"; exit 2
+    done;;
   smoke56)
     case "$JOB_RID" in F1|F2|batch) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2 | batch)"; exit 2;; esac
     [ "$JOB_RID" = batch ] || [ -n "$AUTH" ] || { echo "REFUSED: the user authorisation text is missing (HPR_AUTH or $PKG/HPR_AUTH.txt)"; exit 2; };;
@@ -84,7 +88,7 @@ fi
 if [ "$CGV" != none ] && [ "$CGKEY" != nokey ]; then export CGROUP_ROOT="$CGDIR" MEM_MEASURE=cgroup; else export MEM_MEASURE=rss; fi   # RUN_PLAN_HPC 5: job cgroup anon memory, else the process-group RSS
 export CORES=${NCPUS:-${JOB_NCPUS:?}} MEM_QUOTA_GIB=${JOB_MEM_GB:?}
 CPU_MODEL=$(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}')
-rec "JOB_START:$JOB_KEY:$JOB_MODE:$JOB_RID:jobid=$JOBID:node=$(hostname):cpu=${CPU_MODEL:-?}:nproc=$(nproc):ncpus=$CORES:mem_gb=$MEM_QUOTA_GIB:walltime=${JOB_WALLTIME:-?}:queue=${JOB_QUEUE:-?}:pbs_o_workdir=$PKG:run_dir=$RUN_DIR:utc=$(now)"
+rec "JOB_START:$JOB_KEY:$JOB_MODE:$JOB_RID:jobid=$JOBID:node=$(hostname):cpu=${CPU_MODEL:-?}:nproc=$(nproc):ncpus=$CORES:mem_gb=$MEM_QUOTA_GIB:walltime=${JOB_WALLTIME:-?}:queue=${JOB_QUEUE:-?}:omp_num_threads=${OMP_NUM_THREADS:-unset}:shell=${SHELL:-?}:pbs_o_workdir=$PKG:run_dir=$RUN_DIR:utc=$(now)"
 rec "CGROUP:$JOB_KEY:version=$CGV:dir=${CGDIR:-none}:limit=${CGLIM:-none}:anon_key=$CGKEY:mem_measure=$MEM_MEASURE:cgroup_root=${CGROUP_ROOT:-default}:proc_self_cgroup=$(tr '\n' ';' < ${HPR_PROC_CGROUP_FILE:-/proc/self/cgroup} | cut -c1-300)"
 rec "DISK:$JOB_KEY:$(df -Pk "$RUNS_ROOT" | awk 'NR==2 {printf "free_gib=%.1f used_pct=%s", $4/1048576, $5}'):tmpdir_pbs=${TMPDIR:-unset}"
 # ---- the B4P preflight inside the job (no licence section: that would be a WLS session - RUN_PLAN_HPC 4); the guards section sees the job environment
@@ -94,7 +98,7 @@ case "$JOB_MODE" in batch) SECS=guards,sha,networks,env,code,tools,resources;; *
 [ -z "${HPR_LOCAL_DRILL:-}" ] || SECS=${SECS%,resources}   # the local machine never meets the HPC floor (recorded as skipped)
 [ -z "${HPR_TEST_STANDIN:-}" ] || SECS=${HPR_TEST_PREFLIGHT_SECTIONS:-tools}
 NEED_MEM=$(( MEM_QUOTA_GIB * 9 / 10 )); PF="$RUN_DIR/preflight_${JOB_KEY}_${JOB_RID:-x}_${JOBID}.txt"
-PREFLIGHT_ONLY=$SECS NEED_CORES=$CORES NEED_MEM_GIB=$NEED_MEM NEED_DISK_GB=45 PREFLIGHT_DISK_PATH="$RUNS_ROOT" PY="$PY" bash "$PKG/preflight.sh" > "$PF" 2>&1; rc=$?
+PREFLIGHT_ONLY=$SECS NEED_CORES=$CORES NEED_MEM_GIB=$NEED_MEM NEED_DISK_GB=45 PREFLIGHT_DISK_PATH="$RUNS_ROOT" PY="$PY" PREFLIGHT_TAG="${JOB_KEY}_${JOB_RID:-x}_${JOBID}" bash "$PKG/preflight.sh" > "$PF" 2>&1; rc=$?   # PREFLIGHT_TAG: own JSON names (F1 / F2 jobs share the package folder; review F-15)
 rec "PREFLIGHT:$JOB_KEY:exit=$rc:sections=$SECS:need_cores=$CORES:need_mem_gib=$NEED_MEM:$(tail -1 "$PF")"
 [ $rc = 0 ] || { rec "PREFLIGHT_FAILED:$JOB_KEY - job ends, nothing started:utc=$(now)"; exit 1; }
 # ---- the runner (RUN_PLAN_HPC 7): REPO / NETS / RUN_DIR / registered split mode / REMOVE_LP; the job cgroup or RSS memory measure
@@ -154,6 +158,7 @@ P
 fi
 if [ "$JOB_MODE" = smoke56 ] && [ "$JOB_RID" = batch ]; then   # RUN_PLAN_HPC 9: the smoke verdict
   S="$RUN_DIR/SMOKE_STATUS.txt"
+  w=$(grep -h '^WLS_TOKEN_HTTP:' "$J" | tail -1 | sed -E 's/^WLS_TOKEN_HTTP:([^ ]+).*/\1/'); [ -z "$w" ] || WLS=$w   # the token-server status was recorded by the F1 body (review F-04)
   "$PY" - "$RUN_DIR" "$PKG/repo" "$WLS" "$JOBID" > "$S" 2>&1 <<'P'
 import json, sys, time
 from pathlib import Path

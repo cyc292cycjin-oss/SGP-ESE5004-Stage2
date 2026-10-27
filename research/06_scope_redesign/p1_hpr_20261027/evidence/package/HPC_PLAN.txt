@@ -1,0 +1,11 @@
+LIMITS|864000|871200|330|7200|3600|32400|10800|7200|100
+SMOKE|56|3000|3600
+STOP|0.8|0.8|450|250
+JOB|F1|hpr_f1|parallel|48|300|255:00:00|formal|F1||
+JOB|F2|hpr_f2|parallel|48|250|257:00:00|formal|F2|after:F1|F1
+JOB|batch|hpr_batch|parallel|12|120|12:00:00|batch|batch|afterany:F1:F2|
+JOB|smoke56|hpr_smoke56|parallel|17|32|04:00:00|smoke56|all||
+JOB|build_only_f1|hpr_build_only_f1|parallel|48|300|02:30:00|build_only|F1||
+JOB|install|hpr_install|serial|1|8|02:00:00|install|||
+NETWORK|integrated_2920_3h_unsolved.nc|08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271|63873447|72083fde6bffd89580869af6dd00885a8d76721f
+NETWORK|disconnected_2920_3h_unsolved.nc|d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7|63202193|72083fde6bffd89580869af6dd00885a8d76721f

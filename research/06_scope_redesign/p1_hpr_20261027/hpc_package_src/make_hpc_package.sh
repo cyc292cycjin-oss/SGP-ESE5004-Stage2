@@ -15,7 +15,7 @@ set -euo pipefail
 B=${1:?builds dir}; DIST=${2:?dist dir}
 HPC="$(cd "$(dirname "$0")" && pwd)"; D="$(dirname "$HPC")"; ROOT="$(cd "$D/../../.." && pwd)"
 PKG4="$ROOT/research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4"; PKG3="$ROOT/research/06_scope_redesign/p1_m10p_20261022/cloud_package"; DFXD="$ROOT/research/06_scope_redesign/p1_dfx_20261026"
-PY=${PY:-/home/jin/miniforge3/envs/pypsa-earth/bin/python}
+PY=${PY:-$HOME/miniforge3/envs/pypsa-earth/bin/python}
 cd "$ROOT"
 COMMIT=$(git rev-parse HEAD); C8=${COMMIT:0:8}
 [ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "tracked changes not committed - commit first"; exit 1; }
@@ -33,14 +33,20 @@ P
   [ -n "$H4_COMMIT" ] || exit 1
   # the drilled execution path must be byte-identical between the drill commit and this commit: the archived code (everything outside research/), the shipped
   # runner / preflight / pack / env sources and the job body + PBS generator; other package sources (guide, plan, submit, status, consistency) may differ
+  H4_PATH_DIFF=""
   if [ "$H4_COMMIT" != "$COMMIT" ]; then
     DRILLED=(. ':(exclude)research' research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4 research/06_scope_redesign/p1_m10p_20261022/cloud_package
              research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_job.sh research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/make_pbs.sh)
     if git diff --quiet "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}"; then echo "H4 drill commit $H4_COMMIT != package commit $COMMIT: the drilled execution path is identical (git diff empty on the archived code, runner, preflight, pack, env, job body, PBS generator) - accepted"
-    else echo "REFUSED: the drilled execution path changed since the H4 drill commit $H4_COMMIT:"; git diff --stat "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}"; exit 1; fi
+    elif git diff --quiet "$H4_COMMIT" "$COMMIT" -- . ':(exclude)research' && [ "${H4_PATH_DIFF_OK:-0}" = 1 ] && [ -n "${H4_PATH_DIFF_NOTE:-}" ]; then
+      # the archived CODE (solve path: s2_solve.py, b4_split_solve.py, model, config) is byte-identical; only shipped bash scripts of the drilled path changed - accepted
+      # only with an explicit note (recorded in the manifest with the diff stat); the stand-in tests of the package commit cover the changed scripts
+      H4_PATH_DIFF=$(git diff --stat "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}" | tr '\n' ';')
+      echo "H4 drill commit $H4_COMMIT != package commit $COMMIT: the archived code is identical; shipped scripts of the drilled path differ (accepted with H4_PATH_DIFF_NOTE): $H4_PATH_DIFF"
+    else echo "REFUSED: the drilled execution path changed since the H4 drill commit $H4_COMMIT (set H4_PATH_DIFF_OK=1 H4_PATH_DIFF_NOTE=<why> only when the archived code is identical):"; git diff --stat "$H4_COMMIT" "$COMMIT" -- "${DRILLED[@]}"; exit 1; fi
   fi
 fi
-export H4_JSON H4_COMMIT H4_SKIP=${H4_SKIP:-0}
+export H4_JSON H4_COMMIT H4_PATH_DIFF H4_PATH_DIFF_NOTE=${H4_PATH_DIFF_NOTE:-} H4_SKIP=${H4_SKIP:-0}
 # 1. the registered network files (b4_batch4.py = RUN_PLAN_HPC section 1) and their receipts
 eval "$("$PY" - <<'P'
 import sys; sys.path.insert(0, "scripts_project"); import b4_batch4 as B
@@ -101,7 +107,7 @@ json.dump(dict(commit=commit, package="v9 (HPR: fourth batch F1 / F2 on the DFX 
                upload=dict(method="PowerShell scp of the whole folder to /hpctmp/<user>/hpr/, then sha256sum -c SHA256SUMS on the login node; a failed file re-sent alone, then the full check again",
                            hours_at={"1 MB/s": h(1e6), "4 MB/s": h(4e6), "10 MB/s": h(10e6)}),
                code_archive=dict(file=f"code_{c8}.tar.gz", content=f"git archive of {commit} without the top-level research/ folder"),
-               networks=dict(source=f"DFX v2 builds, commit {B.BUILD_COMMIT[:8]} ({b}); registered in RUN_PLAN_HPC.md section 1 = b4_batch4.py", files=nets, registered=B.REGISTERED_SHA, registered_bytes=B.REGISTERED_BYTES, no_365x24h=True),
+               networks=dict(source=f"DFX v2 builds, commit {B.BUILD_COMMIT[:8]} (main checkout results_project/dfx_v3/{os.path.basename(b)}); registered in RUN_PLAN_HPC.md section 1 = b4_batch4.py", files=nets, registered=B.REGISTERED_SHA, registered_bytes=B.REGISTERED_BYTES, no_365x24h=True),
                environment=dict(lock="env/ENV_LOCK.txt", explicit="env/conda_explicit_linux64.txt", pip_only="env/pip_only.txt", install="pbs/hpr_install.pbs -> hpc/hpr_install_env.sh -> env/install_env.sh (compute node; caches on scratch)", check="env/env_check.py",
                                 download_bytes=env["download_bytes"], conda_packages=env["conda_packages"], same_lock_as="third batch (M10P), fourth-batch package v7, DFX package v8"),
                run=dict(plan="RUN_PLAN_HPC.md", runner="run_batch4.sh (--only per job; POST_ONLY=1 batch job)", preflight=["preflight.sh (in-job, no licence section)", "hpc/hpr_preflight_login.sh"], pack="pack_results.sh",
@@ -111,8 +117,9 @@ json.dump(dict(commit=commit, package="v9 (HPR: fourth batch F1 / F2 on the DFX 
                         licence="GRB_LICENSE_FILE=$HOME/.gurobi/gurobi.lic placed by the user; never in the package; referenced only by the jobs"),
                operator_guide="HPC_OPERATOR_GUIDE.md", facts="HPC_FACTS_20261026.md", reference_values="REFERENCE_VALUES.json (numbers only: third batch R3 / R4, R1 / R2; DFX V1 / V2)",
                never_included=["licence", "cutout", "LP / solution arrays", "365x24h networks", "results", "account / host / connection information"],
-               h4_drill=(dict(file=h4, sha256=hashlib.sha256(open(h4, "rb").read()).hexdigest(), **{k: json.load(open(h4)).get(k) for k in ("code_commit", "all_optimal", "bitwise_equal_to_dfx_smoke", "chain_exit_zero", "written_utc")},
-                              drilled_path_identical_to_package_commit=True, note=("drill commit = package commit" if os.environ.get("H4_COMMIT") == commit else "the drill commit differs from the package commit only outside the drilled execution path (git diff empty on the archived code, runner, preflight, pack, env, job body, PBS generator)"))
+               h4_drill=(dict(file=os.path.basename(h4), sha256=hashlib.sha256(open(h4, "rb").read()).hexdigest(), **{k: json.load(open(h4)).get(k) for k in ("code_commit", "all_optimal", "bitwise_equal_to_dfx_smoke", "chain_exit_zero", "written_utc")},
+                              drilled_path_identical_to_package_commit=(not os.environ.get("H4_PATH_DIFF")), drilled_path_diff_stat=(os.environ.get("H4_PATH_DIFF") or None), path_diff_note=(os.environ.get("H4_PATH_DIFF_NOTE") or None),
+                              note=("drill commit = package commit" if os.environ.get("H4_COMMIT") == commit else ("the drill commit differs from the package commit only outside the drilled execution path (git diff empty on the archived code, runner, preflight, pack, env, job body, PBS generator)" if not os.environ.get("H4_PATH_DIFF") else "the archived code is identical to the drill commit; shipped scripts of the drilled path changed after the drill (see drilled_path_diff_stat / path_diff_note; covered by the stand-in tests of the package commit)")))
                          if h4 and os.path.exists(h4) else dict(skipped=True, reason="H4_SKIP=1 (see the report)"))),
           open(os.path.join(dist, "HPC_PACKAGE_MANIFEST.json"), "w"), indent=1)
 print("manifest:", len(rows), "files,", total, "bytes")

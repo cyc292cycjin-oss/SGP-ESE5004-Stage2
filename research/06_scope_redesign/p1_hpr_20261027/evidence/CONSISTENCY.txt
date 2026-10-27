@@ -1,0 +1,37 @@
+OK  TimeLimit s                                                                                           plan=864000  b4_batch4=864000  run_batch4=864000  preflight=864000  pbs_batch=864000  pbs_build_only_f1=864000  pbs_F1=864000  pbs_F2=864000  pbs_install=864000  pbs_smoke56=864000
+OK  process-2 wall cap s                                                                                  plan=871200  b4_batch4=871200  run_batch4=871200  pbs_batch=871200  pbs_build_only_f1=871200  pbs_F1=871200  pbs_F2=871200  pbs_install=871200  pbs_smoke56=871200
+OK  licence gap s                                                                                         plan=330  b4_batch4=330  run_batch4=330  pbs_batch=330  pbs_build_only_f1=330  pbs_F1=330  pbs_F2=330  pbs_install=330  pbs_smoke56=330
+OK  solve mode                                                                                            plan=split  run_batch4=split  hpr_job=split
+OK  wait-start max s                                                                                      plan=7200  b4_batch4=7200  run_batch4=7200
+OK  process-1 timeout s                                                                                   plan=3600  b4_batch4=3600  run_batch4=3600
+OK  process-3 timeout s                                                                                   plan=32400  b4_batch4=32400  run_batch4=32400
+OK  post step timeout s                                                                                   plan=10800  b4_batch4=10800  run_batch4=10800
+OK  pack timeout s                                                                                        plan=7200  b4_batch4=7200  run_batch4=7200
+OK  post memory need GiB                                                                                  plan=100  b4_batch4=100  run_batch4=100
+OK  memory stop fraction                                                                                  plan=0.80  b4_batch4=0.8  run_batch4=0.80
+OK  projection fraction                                                                                   plan=0.80  b4_batch4=0.8  run_batch4=0.80
+OK  iterations reference F1                                                                               plan=450  b4_batch4=450  run_batch4=450
+OK  iterations reference F2                                                                               plan=250  b4_batch4=250  run_batch4=250
+OK  F1: queue / ncpus / mem / walltime                                                                    plan=parallel/48/300/255:00:00  b4_batch4=parallel/48/300/255:00:00  pbs=parallel/48/300/255:00:00
+OK  F2: queue / ncpus / mem / walltime                                                                    plan=parallel/48/250/257:00:00  b4_batch4=parallel/48/250/257:00:00  pbs=parallel/48/250/257:00:00
+OK  batch: queue / ncpus / mem / walltime                                                                 plan=parallel/12/120/12:00:00  b4_batch4=parallel/12/120/12:00:00  pbs=parallel/12/120/12:00:00
+OK  smoke56: queue / ncpus / mem / walltime                                                               plan=parallel/17/32/04:00:00  b4_batch4=parallel/17/32/04:00:00  pbs=parallel/17/32/04:00:00
+OK  build_only_f1: queue / ncpus / mem / walltime                                                         plan=parallel/48/300/02:30:00  b4_batch4=parallel/48/300/02:30:00  pbs=parallel/48/300/02:30:00
+OK  install: queue / ncpus / mem / walltime                                                               plan=serial/1/8/02:00:00  b4_batch4=serial/1/8/02:00:00  pbs=serial/1/8/02:00:00
+OK  F1 walltime s                                                                                         plan=918000  b4_batch4=918000  pbs=918000
+OK  F2 walltime s                                                                                         plan=925200  b4_batch4=925200  pbs=925200
+OK  F2 wait_start_of                                                                                      plan=F1  b4_batch4=F1  pbs=F1
+OK  F2 dependency                                                                                         plan=after:F1  b4_batch4=after:F1  pbs=after:F1
+OK  batch dependency                                                                                      plan=afterany:F1:F2  b4_batch4=afterany:F1:F2  pbs=afterany:F1:F2
+OK  network SHA256 integrated                                                                             plan=08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271  b4_batch4=08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271
+OK  network bytes integrated                                                                              plan=63873447  b4_batch4=63873447
+OK  network SHA256 disconnected                                                                           plan=d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7  b4_batch4=d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7
+OK  network bytes disconnected                                                                            plan=63202193  b4_batch4=63202193
+OK  runner / preflight check the networks with b4_batch4.py base-check (= the registered SHA256 / bytes)  run_batch4=True  preflight=True  expected=True
+OK  build commit                                                                                          plan=72083fde6bffd89580869af6dd00885a8d76721f  b4_batch4=72083fde6bffd89580869af6dd00885a8d76721f  preflight_code_section=72083fde6bffd89580869af6dd00885a8d76721f
+OK  smoke TimeLimit / wall cap s                                                                          plan=3000/3600  b4_batch4=3000/3600  hpr_job=3000/3600
+OK  F1 walltime >= sum of terms                                                                           check=True  expected=True
+OK  F2 walltime >= sum of terms                                                                           check=True  expected=True
+OK  queue limits (parallel <= 540 GB, <= 96 cores, <= 720 h; F1 + F2 <= 96 cores)                         check=True  expected=True
+OK  memory >= 1.25 x B4P high estimate (F1 160, F2 149 GiB)                                               check=True  expected=True
+ALL_CONSISTENT

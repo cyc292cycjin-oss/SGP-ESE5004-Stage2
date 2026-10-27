@@ -2,7 +2,7 @@
 
 **使用方式：** 你在 Windows PowerShell 中、连着 NUS VPN、登录 `atlas8.nus.edu.sg` 后，按步骤 A → G 逐条复制执行。每一步写明命令、预计用时、成功时应看到什么、失败时把什么发回审阅端。
 **标注：** `[PowerShell]` 在你的 Windows 终端执行；`[bash@atlas8]` 在登录节点的 bash 中执行（`ssh` 登录后）。**不要在登录节点上跑任何求解或长时间计算**（交互进程 30 分钟 CPU 限制）。
-**占位符：** `<你的用户名>` = 你的 NUS HPC 账号；手册中不含任何真实账号、密码、主机连接串或许可内容。在 atlas8 的 bash 里可直接用 `$USER`。
+**占位符：** `<你的用户名>` = 你的 NUS HPC 账号；`<WSL 用户名>` = 你本机 WSL（Ubuntu）里的 Linux 用户名（`[PowerShell] wsl -d Ubuntu -- whoami` 可查）。手册中不含任何真实账号、密码、主机连接串或许可内容。**只在 atlas8 的 bash 行里**可直接用 `$USER`；`[PowerShell]` 行里没有 `$USER`（PowerShell 会把它展开成空），所以 PowerShell 命令一律写 `<你的用户名>`。
 **本机路径：** 包 `D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package`；结果回收到 `D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results`。
 **HPC 路径：** 包目录 `/hpctmp/<你的用户名>/hpr`（= `PBS_O_WORKDIR`，所有 `qsub` 都在这里执行）；许可 `~/.gurobi/gurobi.lic`。`/hpctmp` **60 天未改动的文件自动清除**——结果包生成后尽快回收（步骤 G）。
 **规则来源：** `RUN_PLAN_HPC.md`（包内副本）。正式运行 F1 / F2 **只在 2026-11-02 17:00（SGT）之后**提交；步骤 A–D、D2 可在 2026-10-29 18:00 维护开始前做，也可在 11-02 17:00 之后做，**由你决定**。F1 / F2 运行期间，本机与任何云端都不得启动 Gurobi 会话。
@@ -14,29 +14,32 @@
 
 A1 `[PowerShell]` 确认包完整（本机）：
 ```powershell
-Get-ChildItem D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package | Measure-Object | Select-Object Count
+(Get-ChildItem -Recurse -File D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package | Measure-Object).Count
+(Get-Content D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package\SHA256SUMS | Measure-Object -Line).Lines
 Get-Content D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package\COMMIT
 ```
-成功：文件数与 `HPC_PACKAGE_MANIFEST.json` 中的文件数一致（见 `HPR_REPORT.md` 包 v9 一节）；`COMMIT` 为 40 位提交号。
+成功：第一个数 = 第二个数 + 1（`SHA256SUMS` 列出的全部文件再加清单 `HPC_PACKAGE_MANIFEST.json` 本身）；`COMMIT` 为 40 位提交号。
 
-A2 `[PowerShell]` 建目标目录并上传（包约 215 MB；1–10 MB/s 下 0.5–4 分钟；首次连接会问 host key 指纹，输入 yes；之后输入密码或用你已配置的密钥）：
+A2 `[PowerShell]` 建目标目录并上传（包约 215 MB；1–10 MB/s 下 0.5–4 分钟；首次连接会问 host key 指纹，输入 yes；之后输入密码或用你已配置的密钥）。远端命令用**单引号**，`$USER` 由 atlas8 展开：
 ```powershell
-ssh <你的用户名>@atlas8.nus.edu.sg "mkdir -p /hpctmp/$USER && test ! -e /hpctmp/$USER/hpr && echo READY || echo 'hpr EXISTS - rename it first'"
+ssh <你的用户名>@atlas8.nus.edu.sg 'mkdir -p /hpctmp/$USER && test ! -e /hpctmp/$USER/hpr && echo READY || echo "hpr EXISTS - rename it first"'
 scp -r D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_package <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr
 ```
 成功：第一条打印 `READY`；第二条逐文件显示 100 %，无 `No such file` / `Permission denied`。
-失败：把 PowerShell 的完整输出复制发回。如果提示 `hpr EXISTS`：`[bash@atlas8] mv /hpctmp/$USER/hpr /hpctmp/$USER/hpr_old_$(date +%Y%m%d%H%M)` 后重做 A2。
+失败：把 PowerShell 的完整输出复制发回。如果提示 `hpr EXISTS`：`[bash@atlas8] mv /hpctmp/$USER/hpr /hpctmp/$USER/hpr_old_$(date +%Y%m%d%H%M)` 后重做 A2（不要把包复制进已存在的 `hpr/`，否则会多出一层 `hpr/hpc_package/`）。
 
-A3 `[PowerShell]` 登录，然后 `[bash@atlas8]` 核对 SHA256 并设执行权限（约 1 分钟）：
+A3 `[PowerShell]` 登录，然后 `[bash@atlas8]` 核对 SHA256、设执行权限、检查运行器依赖的工具（约 1 分钟）：
 ```powershell
 ssh <你的用户名>@atlas8.nus.edu.sg
 ```
 ```bash
 cd /hpctmp/$USER/hpr && sha256sum -c SHA256SUMS | grep -vc ': OK$' ; echo "files=$(wc -l < SHA256SUMS)"
 chmod 755 *.sh hpc/*.sh pbs/*.pbs env/install_env.sh
+ls -l /usr/bin/time && /usr/bin/time -v true > /dev/null && command -v setsid pgrep timeout curl && echo TOOLS_OK ; echo "shell=$SHELL"
 ```
-成功：第一行输出 `0`（没有不 OK 的文件），第二行 `files=<清单文件数>`。
+成功：第一行输出 `0`（没有不 OK 的文件），第二行 `files=36`；第三组打印 `TOOLS_OK` 与 `shell=/bin/bash`（或其他 shell：作业脚本已指定 `#PBS -S /bin/bash`，不受影响）。
 失败（第一行不是 0）：`sha256sum -c SHA256SUMS | grep -v ': OK$'` 看哪些文件失败，只重传这些文件（`[PowerShell] scp D:\...\hpc_package\<文件> <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/<文件>`），再做 A3。
+失败（没有 `TOOLS_OK`，例如 `/usr/bin/time` 不存在）：**停下**，把这一组命令的输出发回审阅端——运行器与预检硬性依赖 GNU time（`/usr/bin/time`）、`setsid`、`pgrep`、`timeout`，缺失时需要管理员安装 `time` 包或由审阅端提供替代路径的修订；登录节点与计算节点通常是同一镜像，冒烟作业（步骤 D）会在计算节点再查一次。
 
 ## 步骤 B 放置许可（预计 2 分钟；手册中没有任何查看许可内容的命令）
 
@@ -46,11 +49,11 @@ mkdir -p ~/.gurobi && chmod 700 ~/.gurobi && ls -ld ~/.gurobi
 ```
 成功：`drwx------ ... /home/svu/<你的用户名>/.gurobi`。
 
-B2 `[PowerShell]`（新开一个 PowerShell 窗口）从本机 WSL 路径把许可文件复制到 HPC（文件约 300 B；不显示内容）：
+B2 `[PowerShell]`（新开一个 PowerShell 窗口）从本机 WSL 路径把许可文件复制到 HPC（文件约 300 B；不显示内容）。远端路径写成相对家目录的 `.gurobi/gurobi.lic`（不用 `~`，Windows 的新版 scp 走 SFTP，`~` 展开不保证）：
 ```powershell
-scp \\wsl.localhost\Ubuntu\home\jin\gurobi.lic <你的用户名>@atlas8.nus.edu.sg:~/.gurobi/gurobi.lic
+scp \\wsl.localhost\Ubuntu\home\<WSL 用户名>\gurobi.lic <你的用户名>@atlas8.nus.edu.sg:.gurobi/gurobi.lic
 ```
-备选（如果 Windows 的 scp 不接受 UNC 路径）：`wsl -d Ubuntu -- scp /home/jin/gurobi.lic <你的用户名>@atlas8.nus.edu.sg:~/.gurobi/gurobi.lic`。
+备选（如果 Windows 的 scp 不接受 UNC 路径）：`wsl -d Ubuntu -- scp /home/<WSL 用户名>/gurobi.lic <你的用户名>@atlas8.nus.edu.sg:.gurobi/gurobi.lic`。两种都失败时加 `-O`（用旧的 scp 协议）再试一次。
 
 B3 `[bash@atlas8]` 设权限、只看属性（不看内容）：
 ```bash
@@ -80,19 +83,21 @@ INSTALL_END:exit=0:...
 ```
 失败：发回 `/hpctmp/$USER/hpr/INSTALL_STATUS.txt`、`/hpctmp/$USER/hpr/hpr_install.o<作业号>`、`install_env_*.log` 的最后 50 行（`tail -50`）。
 - 若 `MINIFORGE_DOWNLOAD_FAILED`（计算节点下不到 GitHub）：`[bash@atlas8]` 在登录节点只做下载（不解算、不安装，几十秒）：`curl -L -o /hpctmp/$USER/hpr/Miniforge3-Linux-x86_64.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh`，然后重做 C1。
+- 若 `ENV_INSTALL_FAILED` / `CONDA_CREATE_FAILED`，或作业因 walltime / 网络中断留下了半成品环境（再次提交会显示 `ENV:present` 却 `ENV_CHECK:key_all_equal=false`）：`[bash@atlas8] rm -rf ~/miniforge3/envs/pypsa-earth` 删掉半成品后重做 C1（只删这个环境目录；Miniforge 本体保留可复用）。
+- 若 `PREFLIGHT:exit=1` 且 `preflight_install_<作业号>.txt` 里有 `MISSING /usr/bin/time`（或 setsid / pgrep / timeout）：计算节点缺少运行器依赖的工具，**停下**发回该文件（见 A3 的说明）。
 - 若 `CONDA_CREATE_FAILED` 且日志显示频道不可达：计算节点访问 conda 频道受限。回退办法：请管理员开通到 `conda.anaconda.org` 的访问，或由审阅端提供 NUS 内部镜像地址后以 `qsub -v CONDA_MIRROR_CONDA_FORGE=<镜像>,CONDA_MIRROR_BIOCONDA=<镜像> pbs/hpr_install.pbs` 重提（gurobi 频道没有公共镜像，须直连）。登录节点不能用于 30 分钟以上的安装。
 - 若 `ENV_CHECK:key_all_equal=false`：**停下**，发回 `ENV_CHECK.json`；不得用不一致的环境运行。
 
 C3 `[bash@atlas8]` 登录节点预检（1 分钟；不调用 Gurobi）：
 ```bash
-cd /hpctmp/$USER/hpr && bash hpc/hpr_preflight_login.sh | tail -15
+cd /hpctmp/$USER/hpr && bash hpc/hpr_preflight_login.sh > login_preflight.txt 2>&1 ; grep -E "licence file|files OK|PREFLIGHT OK|PREFLIGHT FAILED|HPR_PREFLIGHT_LOGIN" login_preflight.txt
 ```
-成功：最后一行 `HPR_PREFLIGHT_LOGIN OK`；中间有 `licence file present, owner <你的用户名>, mode 600`、`all <N> files OK`、`PREFLIGHT OK`。
-失败：发回完整输出（`bash hpc/hpr_preflight_login.sh > login_preflight.txt 2>&1`，然后回传该文件）。
+成功：打印 `licence file present, owner <你的用户名>, mode 600`、`all 36 files OK`、`PREFLIGHT OK`、`HPR_PREFLIGHT_LOGIN OK`（四行）。
+失败（出现 `FAILED`）：回传 `login_preflight.txt`。
 
 ## 步骤 D 冒烟作业（56 时段 F1 + F2 + 批级；预计 1–2 小时 + 排队；2 次 Gurobi 会话）
 
-D1 `[bash@atlas8]` 写授权文件（把 `<你的授权原文>` 换成你的授权文字，一行；**不要写任何账号、主机或许可信息**）：
+D1 `[bash@atlas8]` 写授权文件（把 `<你的授权原文>` 换成你的授权文字，一行；**不要写任何账号、主机或许可信息；不要用英文单引号 `'`**，否则命令会断开——用中文引号或不加引号）：
 ```bash
 cd /hpctmp/$USER/hpr && printf '%s\n' '<你的授权原文>' > HPR_AUTH.txt && chmod 600 HPR_AUTH.txt && wc -c HPR_AUTH.txt
 ```
@@ -108,7 +113,7 @@ D3 `[bash@atlas8]` 等待并查看（作业结束后）：
 ```bash
 cat /hpctmp/$USER/hpr/runs/smoke56/SMOKE_STATUS.txt
 ```
-成功：含 `WLS_TOKEN_HTTP:302`（或 200）、`F1:termination=optimal:...:label=ACCEPTED_LAYER2:...:OK`、`F2:...:OK`、`POSTPROC_ERRORS:0`、`BATCH_DONE:True`、`HALTED:False`、**`SMOKE_RESULT:PASS`**。目标值与本机演练值的相对差 `relative_difference` 一般 ≤ 1e-9（跨机器允许到 1e-6）。
+成功：含 `WLS_TOKEN_HTTP:302`（或 200；该状态码由 F1 作业体记录在 `runs/smoke56/PBS_JOBS.txt`，批级作业体写入此文件）、`F1:termination=optimal:...:label=ACCEPTED_LAYER2:...:OK`、`F2:...:OK`、`POSTPROC_ERRORS:0`、`BATCH_DONE:True`、`HALTED:False`、**`SMOKE_RESULT:PASS`**。目标值与本机演练值的相对差 `relative_difference` 一般 ≤ 1e-9（跨机器允许到 1e-6）。
 失败（`SMOKE_RESULT:FAIL` 或文件不存在）：**不重试**。发回 `runs/smoke56/SMOKE_STATUS.txt`、`runs/smoke56/STATUS.txt`、`runs/smoke56/PBS_JOBS.txt`、`hpr_smoke56.o<作业号>`、`runs/smoke56/preflight_*.txt`。
 
 ## 步骤 D2 全尺寸 BUILD_ONLY 测试作业（用户 2026-10-27 补充；预计 1–1.5 小时 + 排队；不调用 Gurobi）
@@ -122,7 +127,7 @@ D2-2 `[bash@atlas8]` 作业结束后：
 cat /hpctmp/$USER/hpr/runs/build_only_f1/BUILD_ONLY_STATUS.txt
 ```
 成功：`RUNNER_EXIT:0`、`BUILD_CHECK_F1:{"passed": true, ...}`、`LP_DELETED:...`、`DONE`。参考预期：`PEAK_RSS_GIB` 72–92、`LP_FILE_BYTES` 约 5.1–5.4e9、`BUILD_SECONDS` + `WRITE_SECONDS` < 3,600。
-**无论成败，把 `BUILD_ONLY_STATUS.txt` 发回审阅端**（用于核对估计；它不改变登记值）。若 `PEAK_RSS_GIB` > 150、`RUNNER_EXIT` ≠ 0 或 `BUILD_CHECK_F1` 不是 passed：**先等审阅端回复再做步骤 E**。
+**无论成败，把 `BUILD_ONLY_STATUS.txt` 发回审阅端**（用于核对估计；它不改变登记值）。若 `PEAK_RSS_GIB` > 150、`RUNNER_EXIT` ≠ 0 或 `BUILD_CHECK_F1` 不是 passed：**先等审阅端回复再做步骤 E**。若 `PEAK_RSS_GIB` 在 100–150 之间：正式运行不受影响（F1 / F2 作业各有 300 / 250 GB），但批级作业（120 GB）若需要补做某个运行的后处理步骤（它们重建 LP，峰值与进程 1 同量级）可能不够——审阅端会据此决定是否提高批级作业内存（登记值变更，需你确认），同样等回复再做 E。
 注：此作业与正式运行使用不同目录（`runs/build_only_f1`），不影响步骤 E。
 
 ## 步骤 E 正式提交（只在 2026-11-02 17:00 SGT 之后、D 通过、且无新维护通知时；1 分钟）
@@ -171,12 +176,16 @@ ls -l /hpctmp/$USER/hpr/runs/batch4/results_*final*
 ```
 停批时文件名为 `*_halted_*`：同样回收，并联系审阅端。
 
-G2 `[PowerShell]` 下载到本机（full 包 5 GB 在 1–10 MB/s 下 10–80 分钟）：
+G2 `[PowerShell]` 下载到本机（full 包 5 GB 在 1–10 MB/s 下 10–80 分钟）。一条命令一个文件 / 一个通配符（Windows 的 scp 走 SFTP，不支持远端大括号展开）：
 ```powershell
 New-Item -ItemType Directory -Force D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results | Out-Null
 scp "<你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/results_*final*" D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
-scp "<你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/{STATUS.txt,PBS_JOBS.txt,BATCH4_SUMMARY.md,BATCH4_SUMMARY.json}" D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
+scp <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/STATUS.txt D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
+scp <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/PBS_JOBS.txt D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
+scp <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/BATCH4_SUMMARY.md D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
+scp <你的用户名>@atlas8.nus.edu.sg:/hpctmp/<你的用户名>/hpr/runs/batch4/BATCH4_SUMMARY.json D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\
 ```
+若 `results_*final*` 的通配符在你的 scp 下报 `No such file`：加 `-O` 再试，或在 `[bash@atlas8]` 用 `ls /hpctmp/$USER/hpr/runs/batch4/results_*final*` 看到确切文件名后逐个下载。
 G3 `[PowerShell]` 本机核对 SHA256（每个包一次；两行输出的哈希必须相同）：
 ```powershell
 Get-FileHash -Algorithm SHA256 D:\ResearchWorkspaces\ASEAN\work\p1_hpr_20261027\hpc_results\results_light_final_*.tar.gz | Select-Object -ExpandProperty Hash
@@ -201,7 +210,7 @@ G5 发给审阅端：G3 的核对结果（两对哈希）与 `hpc_results` 的�
 
 ## 附录 2 退出码与拒绝
 
-- 作业体 `hpc/hpr_job.sh`：`2` = 拒绝（测试开关残留、缺授权、运行目录有测试残留、许可文件缺失或权限非 600、批级作业在两运行结束前、模式错误）——什么都没启动，没有 `STATUS.txt`；`1` = 包内预检失败（`runs/<目录>/preflight_*.txt`）；`3` = 运行器停批 / 安全停止；`0` = 正常。
+- 作业体 `hpc/hpr_job.sh`：`2` = 拒绝（测试开关残留、缺授权、运行目录有测试残留、许可文件缺失或权限非 600、批级作业在某个运行尚未结束（且不是因停批而从未启动）之前、模式错误）——什么都没启动，没有 `STATUS.txt`；`1` = 包内预检失败（`runs/<目录>/preflight_*.txt`）；`3` = 运行器停批 / 安全停止（批级作业在停批情形下照常重评、汇总并打出 `*_halted_*` 结果包后以 3 退出）；`0` = 正常。
 - 运行器 `run_batch4.sh`：`2` = 拒绝（钩子、未登记的时限 / 墙钟 / 求解方式、`--auth` 与无求解模式并存）；`3` = `STOP` / `STOP_SAFE` / `HALTED`；`0` = `DONE` / `DONE_ONLY`。
 - `hpc/hpr_submit.sh`：`2` = 拒绝（什么都没提交）；`1` = `qsub` 失败（输出里写了哪些已提交）。
 
@@ -214,7 +223,7 @@ G5 发给审阅端：G3 的核对结果（两对哈希）与 `hpc_results` 的�
 | conda 环境 | `~/miniforge3/envs/pypsa-earth` |
 | 正式运行目录 / 结果包 | `/hpctmp/$USER/hpr/runs/batch4/` |
 | 冒烟 / BUILD_ONLY 目录 | `runs/smoke56/`、`runs/build_only_f1/` |
-| PBS 作业输出 | `/hpctmp/$USER/hpr/<作业名>.o<作业号>` |
+| PBS 作业输出 | `/hpctmp/$USER/hpr/<作业名>.o<作业序号>`（PBS 把 `-j oe` 的输出放回提交目录；序号 = 作业号中 `.` 前的数字） |
 | 授权文本 | `/hpctmp/$USER/hpr/HPR_AUTH.txt`（600） |
 | 许可 | `~/.gurobi/gurobi.lic`（600；只经 `GRB_LICENSE_FILE` 引用） |
 

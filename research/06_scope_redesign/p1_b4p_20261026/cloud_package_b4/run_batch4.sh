@@ -162,14 +162,16 @@ detect_cores() {
 NCORES=$(detect_cores)
 # cgroup files (HPR: three layouts - a cgroup v2 directory [memory.stat anon / memory.max], a cgroup v1 JOB directory [memory.stat total_rss / memory.limit_in_bytes,
 # as /sys/fs/cgroup/memory/<PBS job path>], the v1 root layout [memory/memory.stat rss / memory/memory.limit_in_bytes]); the file cache is never counted
-cg_mem_limit_b() { local v="" f
+# MEM_MEASURE=rss (HPR: the job body found no job cgroup): the cgroup files under CGROUP_ROOT are NOT this job's accounting (root or a shared service cgroup -
+# other jobs' memory) and are not read at all (review F-07); the monitor's cgroup columns stay empty and the quota comes from MEM_QUOTA_GIB
+cg_mem_limit_b() { local v="" f; [ "$MEM_MEASURE" = rss ] && { echo ""; return; }
   for f in "$CGROUP_ROOT/memory.max" "$CGROUP_ROOT/memory.limit_in_bytes" "$CGROUP_ROOT/memory/memory.limit_in_bytes"; do [ -r "$f" ] && { v=$(cat "$f"); break; }; done
   case "$v" in ""|max) echo "";; *) [ "${#v}" -ge 19 ] && echo "" || echo "$v";; esac; }
-cg_mem_used_b() { local f; for f in "$CGROUP_ROOT/memory.current" "$CGROUP_ROOT/memory.usage_in_bytes" "$CGROUP_ROOT/memory/memory.usage_in_bytes"; do [ -r "$f" ] && { cat "$f"; return; }; done; echo ""; }
-cg_anon_b() { local f
+cg_mem_used_b() { local f; [ "$MEM_MEASURE" = rss ] && { echo ""; return; }; for f in "$CGROUP_ROOT/memory.current" "$CGROUP_ROOT/memory.usage_in_bytes" "$CGROUP_ROOT/memory/memory.usage_in_bytes"; do [ -r "$f" ] && { cat "$f"; return; }; done; echo ""; }
+cg_anon_b() { local f; [ "$MEM_MEASURE" = rss ] && { echo ""; return; }
   if [ -r "$CGROUP_ROOT/memory.stat" ]; then f=$CGROUP_ROOT/memory.stat; elif [ -r "$CGROUP_ROOT/memory/memory.stat" ]; then f=$CGROUP_ROOT/memory/memory.stat; else echo ""; return; fi
   awk '$1 == "anon" {a=$2} $1 == "total_rss" {t=$2} $1 == "rss" {r=$2} END {if (a != "") print a; else if (t != "") print t; else if (r != "") print r}' "$f"; }
-cg_anon_source() { local f; if [ -r "$CGROUP_ROOT/memory.stat" ]; then f=$CGROUP_ROOT/memory.stat; elif [ -r "$CGROUP_ROOT/memory/memory.stat" ]; then f=$CGROUP_ROOT/memory/memory.stat; else echo none; return; fi
+cg_anon_source() { local f; [ "$MEM_MEASURE" = rss ] && { echo "none(rss_mode)"; return; }; if [ -r "$CGROUP_ROOT/memory.stat" ]; then f=$CGROUP_ROOT/memory.stat; elif [ -r "$CGROUP_ROOT/memory/memory.stat" ]; then f=$CGROUP_ROOT/memory/memory.stat; else echo none; return; fi
   echo "$f:$(awk '$1 == "anon" {a=1} $1 == "total_rss" {t=1} $1 == "rss" {r=1} END {if (a) print "anon"; else if (t) print "total_rss"; else if (r) print "rss"; else print "nokey"}' "$f")"; }
 group_rss_b() { local p r s=0; for p in $(pgrep -g "$1" 2>/dev/null); do r=$(ps -o rss= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$r" ] && s=$((s + r * 1024)); done; echo "$s"; }   # RSS sum of a process group in bytes (RUN_PLAN_HPC 5: the fallback measure)
 mem_measure_used() {   # HPR: which measure the memory stop uses in this environment (auto: cgroup anon when readable, else the process-group RSS)
@@ -180,11 +182,12 @@ detect_quota_gib() {
 }
 QUOTA_GIB=$(detect_quota_gib)
 MEMORY_STOP_FRACTION=${MEMORY_STOP_FRACTION:-0.80}; PROJECTION_FRACTION=${PROJECTION_FRACTION:-0.80}
-aux_threads() { local used=0 d rid k
-  for d in "$OUT"/F*/; do d=${d%/}; rid=${d##*/}; [ -f "$d/.started" ] && [ ! -f "$d/.ended" ] && [ -n "${PROF[$rid]:-}" ] && used=$((used + ${THREADS[${PROF[$rid]}]})); done
+aux_threads() { local used=0 d rid k   # --only (HPR, review F-07): only THIS run's solve counts - the other run lives in another job / cgroup with its own cores
+  for d in "$OUT"/F*/; do d=${d%/}; rid=${d##*/}; [ -z "$ONLY" ] || [ "$rid" = "$ONLY" ] || continue; [ -f "$d/.started" ] && [ ! -f "$d/.ended" ] && [ -n "${PROF[$rid]:-}" ] && used=$((used + ${THREADS[${PROF[$rid]}]})); done
   k=$((NCORES - used)); [ $k -ge 1 ] || k=1; echo $k; }
 aux_env() { local k; k=$(aux_threads); echo "OMP_NUM_THREADS=$k MKL_NUM_THREADS=$k OPENBLAS_NUM_THREADS=$k NUMEXPR_MAX_THREADS=$k"; }
-other_solve_running() { local d; for d in "$OUT"/F*/; do d=${d%/}; [ -f "$d/.started" ] && [ ! -f "$d/.ended" ] && return 0; done; return 1; }
+other_solve_running() { local d; [ -z "$ONLY" ] || return 1   # --only: the other run's solve is in another job (its own memory quota) - never a reason to queue this job's post-processing (review F-07)
+  for d in "$OUT"/F*/; do d=${d%/}; [ -f "$d/.started" ] && [ ! -f "$d/.ended" ] && return 0; done; return 1; }
 free_anon_gib() { local a; a=$(cg_anon_b); [ -n "$a" ] || { echo "$QUOTA_GIB"; return; }; awk -v q="$QUOTA_GIB" -v a="$a" 'BEGIN {printf "%.2f", q - a/1073741824}'; }
 wait_for_memory() {   # RUN_PLAN_B4 3.6: a post-processing step beside the other run's solve only with POST_MEM_NEED_GIB free anon memory; else queued until that solve ends
   local rid=$1 name=$2 w=0
