@@ -5,7 +5,7 @@
 ## 1. 第一轮：输入
 
 - 包 v9：`work/p1_hpr_20261027/hpc_package/`（提交 `69b0b7d1`，36 文件）。
-- 文档：`RUN_PLAN_HPC.md`（`1f62176f`）、`HPC_OPERATOR_GUIDE.md`、`PRE_HPC_CHECKLIST.md`（H-P13 / H-P14 待填）、`HPC_FACTS_20261026.md`。
+- 文档：`RUN_PLAN_HPC.md`（`1f62176f`）、`HPC_OPERATOR_GUIDE.md`、`PRE_HPC_CHECKLIST.md`（当时 H-P13 / H-P14 尚未填写）、`HPC_FACTS_20261026.md`。
 - 代码：`scripts_project/b4_batch4.py`、`b4_split_solve.py`、`s2_solve.py`、`research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/{run_batch4.sh,preflight.sh}`、`research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/`、`tests/research/test_hpr_two_jobs.py`。
 
 ## 2. 第一轮审查原文
@@ -245,4 +245,12 @@
 | N-05 | **已修**：手册 A3 的 `/usr/bin/time -v true` 加 `2>/dev/null` |
 | R3 补写 | **已补**：检查单 R3 增加"HPC 冒烟作业以真实 Gurobi 端到端执行相同随包脚本，且为步骤 E 硬门槛"的接受理由 |
 
-第二轮结论：阻断 0；两轮共 23 条非阻断发现，21 条已修正或已落实，F-08 / F-14 / F-05(b) 待用户在 HPC 核实，F-09（R4）与 R3 待用户确认。手册 / 计划的本轮改动使包再次重建（终版提交见检查单头部），包内脚本未变。
+第二轮结论：阻断 0；两轮共 23 条非阻断发现，21 条已修正或已落实，F-08 / F-14 / F-05(b) 待用户在 HPC 核实，F-09（R4）与 R3 待用户确认。手册 / 计划的本轮改动使包再次重建（`a6e119dd`），包内脚本未变。
+
+## 5. 审查后自查（执行端，2026-10-27；第二轮之后、最终提交之前）
+
+| 编号 | 级别 | 位置 | 发现 | 处理 |
+|---|---|---|---|---|
+| S-01 | 非阻断（已修） | `hpc_package_src/hpr_job.sh` 的 build_only 分支；本机干跑脚本 `dryrun.sh` | 收尾重建包的干跑记录（`evidence/dry_run/DRYRUN_STATUS.txt`）显示：同一干跑目录上第二次起运行 BUILD_ONLY 作业脚本时，运行器按上次回执（`.cond=build_only`）跳过构建（2 s），作业体仍 exit 0 并把旧数字写入 `BUILD_ONLY_STATUS.txt`，`BUILD_CHECK_F1` 因 LP 已被上次删除而 `problem_file` 不通过。在 HPC 上重跑步骤 D2 会得到一份看似成功的旧记录 | 作业体 build_only 分支在 `runs/build_only_f1` 已含上次运行（`F1/` 目录或 `BUILD_ONLY_STATUS.txt`）时拒绝（exit 2，不写任何文件，与其他拒绝同一口径）；替身测试 `test_job_body_build_only_records_metrics_and_deletes_the_lp` 增加同一目录的第二次调用（拒绝；`STATUS.txt` / `BUILD_ONLY_STATUS.txt` / `PBS_JOBS.txt` 不变）；干跑脚本先移走旧目录（终版包的 BUILD_ONLY 干跑因此是真实构建）并增加拒绝用例 R21；手册 D2 与附录 2、`RUN_PLAN_HPC.md` §9 末条与头部修订段补说明。formal / smoke56 / batch 分支、运行器与求解路径代码未动；包在该提交上重建（终版提交见检查单头部）；改动 3 行，未再送独立审查 |
+
+说明：S-01 发现于两轮审查之后，不计入上面的 23 条；它不改变任何登记值。

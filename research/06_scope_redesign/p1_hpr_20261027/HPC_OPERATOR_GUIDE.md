@@ -128,7 +128,10 @@ cat /hpctmp/$USER/hpr/runs/build_only_f1/BUILD_ONLY_STATUS.txt
 ```
 成功：`RUNNER_EXIT:0`、`BUILD_CHECK_F1:{"passed": true, ...}`、`LP_DELETED:...`、`DONE`。参考预期：`PEAK_RSS_GIB` 72–92、`LP_FILE_BYTES` 约 5.1–5.4e9、`BUILD_SECONDS` + `WRITE_SECONDS` < 3,600。
 **无论成败，把 `BUILD_ONLY_STATUS.txt` 发回审阅端**（用于核对估计；它不改变登记值）。若 `PEAK_RSS_GIB` > 150、`RUNNER_EXIT` ≠ 0 或 `BUILD_CHECK_F1` 不是 passed：**先等审阅端回复再做步骤 E**。若 `PEAK_RSS_GIB` 在 100–150 之间：正式运行不受影响（F1 / F2 作业各有 300 / 250 GB），但批级作业（120 GB）若需要补做某个运行的后处理步骤（它们重建 LP，峰值与进程 1 同量级）可能不够——审阅端会据此决定是否提高批级作业内存（登记值变更，需你确认），同样等回复再做 E。
-注：此作业与正式运行使用不同目录（`runs/build_only_f1`），不影响步骤 E。
+注：此作业与正式运行使用不同目录（`runs/build_only_f1`），不影响步骤 E。**若需重跑 D2**（只在审阅端要求时）：先把上次的目录移走，否则作业体拒绝（`REFUSED: ... holds a previous build-only run`，exit 2，不写任何文件）——因为运行器会按上次的回执跳过构建，记录会重复旧数字：
+```bash
+mv /hpctmp/$USER/hpr/runs/build_only_f1 /hpctmp/$USER/hpr/runs/build_only_f1_old && cd /hpctmp/$USER/hpr && qsub pbs/hpr_build_only_f1.pbs
+```
 
 ## 步骤 E 正式提交（只在 2026-11-02 17:00 SGT 之后、D 通过、且无新维护通知时；1 分钟）
 
@@ -210,7 +213,7 @@ G5 发给审阅端：G3 的核对结果（两对哈希）与 `hpc_results` 的�
 
 ## 附录 2 退出码与拒绝
 
-- 作业体 `hpc/hpr_job.sh`：`2` = 拒绝（测试开关残留、缺授权、运行目录有测试残留、许可文件缺失或权限非 600、批级作业在某个运行尚未结束（且不是因停批而从未启动）之前、模式错误）——什么都没启动，没有 `STATUS.txt`；`1` = 包内预检失败（`runs/<目录>/preflight_*.txt`）；`3` = 运行器停批 / 安全停止（批级作业在停批情形下照常重评、汇总并打出 `*_halted_*` 结果包后以 3 退出）；`0` = 正常。
+- 作业体 `hpc/hpr_job.sh`：`2` = 拒绝（测试开关残留、缺授权、运行目录有测试残留、许可文件缺失或权限非 600、批级作业在某个运行尚未结束（且不是因停批而从未启动）之前、BUILD_ONLY 作业体在 `runs/build_only_f1` 已含上次运行时、模式错误）——什么都没启动，没有 `STATUS.txt`；`1` = 包内预检失败（`runs/<目录>/preflight_*.txt`）；`3` = 运行器停批 / 安全停止（批级作业在停批情形下照常重评、汇总并打出 `*_halted_*` 结果包后以 3 退出）；`0` = 正常。
 - 运行器 `run_batch4.sh`：`2` = 拒绝（钩子、未登记的时限 / 墙钟 / 求解方式、`--auth` 与无求解模式并存）；`3` = `STOP` / `STOP_SAFE` / `HALTED`；`0` = `DONE` / `DONE_ONLY`。
 - `hpc/hpr_submit.sh`：`2` = 拒绝（什么都没提交）；`1` = `qsub` 失败（输出里写了哪些已提交）。
 

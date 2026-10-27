@@ -245,6 +245,11 @@ def test_job_body_build_only_records_metrics_and_deletes_the_lp(tmp_path):
     assert T._calls(tmp_path) == [] or not (tmp_path / "runs_fake" / "CALLS.txt").exists() or "gurobi" not in (tmp_path / "runs_fake" / "CALLS.txt").read_text()
     assert not (out / "F1" / "split" / "problem.lp").exists() and (out / "F1" / ".cond").read_text().strip() == "build_only" and json.loads((out / "F1" / "RUN.json").read_text())["truncate"] == 56
     assert "build_only=1" in st and "DONE_ONLY" in st and "only(F1)" in st
+    # S-01 (self-check after the review): a second build-only job on the same folder is refused before anything is written - the runner would skip the
+    # build on the receipt and the records would repeat the old numbers with the LP already deleted
+    p2 = subprocess.run(["bash", str(pkg / "hpc" / "hpr_job.sh")], env=_job_env(tmp_path, pkg, "build_only", "F1", {"JOB_NCPUS": "48", "JOB_MEM_GB": "300", "HPR_DRY_TRUNCATE": "56"}), capture_output=True, text=True, timeout=120)
+    assert p2.returncode == 2 and "holds a previous build-only run" in p2.stdout, p2.stdout[-800:] + p2.stderr[-800:]
+    assert (out / "BUILD_ONLY_STATUS.txt").read_text() == s and (out / "STATUS.txt").read_text() == st and (out / "PBS_JOBS.txt").read_text().count("JOB_START:") == 1
 
 
 def test_job_body_formal_refusals_and_batch_not_ready(tmp_path):

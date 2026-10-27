@@ -20,6 +20,9 @@ done
 log "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)"
 PY=$PY bash hpc/hpr_preflight_login.sh > "$O/preflight_login.txt" 2>&1; log "PREFLIGHT_LOGIN:exit=$?:$(tail -1 "$O/preflight_login.txt" | cut -c1-160) (licence file / PBS absent here: expected)"
 # 2. truncated-56 BUILD_ONLY through the generated job script as bash (simulated PBS variables; HPR_DRY_TRUNCATE=56 -> TRUNCATE=56 ALLOW_UNREGISTERED=1 BUILD_ONLY=1 run_batch4.sh --only F1)
+# a previous dry-run build folder is moved aside first: the job body refuses a folder holding a previous build-only run (S-01), and a fresh folder is the
+# only way the build (process 1) really runs again instead of being skipped on the old receipt
+[ -d "$O/runs/build_only_f1" ] && { prev="$O/runs/build_only_f1_superseded_$(date -u +%H%M%S)"; mv "$O/runs/build_only_f1" "$prev"; log "BUILD_ONLY_PREVIOUS_RUN_MOVED:$prev"; }
 t0=$(date +%s)
 ( export PBS_O_WORKDIR=$PKG PBS_JOBID=local.dryrun NCPUS=48 HPR_LOCAL_DRILL=1 HPR_RUN_ROOT=$O HPR_DRY_TRUNCATE=56 PY=$PY; bash pbs/hpr_build_only_f1.pbs > "$O/build_only_job.out" 2>&1 ); rc=$?
 log "BUILD_ONLY_56:exit=$rc:seconds=$(( $(date +%s) - t0 )):$(grep -h "^BUILD_CHECK_F1:" "$O/runs/build_only_f1/STATUS.txt" 2>/dev/null | cut -c1-200)"
@@ -59,6 +62,12 @@ st=absent; [ -f "$D/pkg_badnet/runs/batch4/STATUS.txt" ] && st=WRITTEN; echo "R1
 echo "auth" > "$D/auth.txt"
 ( cd "$PKG" && env -i HOME="$HOME" PATH="$PATH" USER="$USER" bash hpc/hpr_submit.sh --auth-file "$D/auth.txt" --motd-checked > "$R/R19.txt" 2>&1 ); echo "R19_submit_smoke_not_passed|exit=$?|status=absent|$(head -c 160 "$R/R19.txt")" | tee -a "$O/REFUSALS.txt"
 ( cd "$PKG" && env -i HOME="$HOME" PATH="$PATH" USER="$USER" BUILD_ONLY=1 bash hpc/hpr_submit.sh --auth-file "$D/auth.txt" --motd-checked > "$R/R20.txt" 2>&1 ); echo "R20_submit_hook_in_shell|exit=$?|status=absent|$(head -c 160 "$R/R20.txt")" | tee -a "$O/REFUSALS.txt"
+# S-01: the build-only job body on the folder that holds the build-only run of step 2 above - refused, records unchanged
+h0=$(sha256sum "$O/runs/build_only_f1/BUILD_ONLY_STATUS.txt" "$O/runs/build_only_f1/STATUS.txt" 2>/dev/null | cut -c1-16 | tr '\n' ' ')
+( export PBS_O_WORKDIR=$PKG PBS_JOBID=local.dryrun NCPUS=48 HPR_LOCAL_DRILL=1 HPR_RUN_ROOT=$O HPR_DRY_TRUNCATE=56 PY=$PY; bash pbs/hpr_build_only_f1.pbs > "$R/R21.txt" 2>&1 ); rc=$?
+h1=$(sha256sum "$O/runs/build_only_f1/BUILD_ONLY_STATUS.txt" "$O/runs/build_only_f1/STATUS.txt" 2>/dev/null | cut -c1-16 | tr '\n' ' ')
+st=unchanged; [ "$h0" = "$h1" ] || st=WRITTEN
+echo "R21_job_build_only_previous_run|exit=$rc|status=$st|$(grep -h REFUSED "$R/R21.txt" | head -c 200)" | tee -a "$O/REFUSALS.txt"
 rm -f "$PKG/HPR_AUTH.txt"
 log "REFUSALS:$(wc -l < "$O/REFUSALS.txt") cases:nonzero=$(grep -vc 'exit=0|' "$O/REFUSALS.txt"):status_written=$(grep -c 'status=WRITTEN' "$O/REFUSALS.txt")"
 log "DONE:$(date -u +%FT%TZ)"

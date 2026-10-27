@@ -2,7 +2,7 @@
 
 **版本：** HPR v1，2026-10-27（SGT）。依据 `HPR_CLAUDE_CODE_INSTRUCTION.md`（SHA256 `f14cb018…412d86`）与用户 2026-10-27 12:43 SGT 确认的 B1–B4，以及用户 2026-10-27 的补充（步骤 D2：全尺寸 BUILD_ONLY 测试作业）。
 **登记时间：** 本文件在任何 HPC 操作、任何本机 2920×3h v2 求解（H4 演练）之前提交（`1f62176f`，2026-10-27 13:19:34 SGT）；看到任何结果后第 2–7 节的规则与数值不再修改（修改只能作为新的、登记在前的计划修订）。
-**修订（2026-10-27，独立审查 H7 之后；第 2–7 节的数值与规则未改，只补说明）：** §4 第 6 条措辞（本机许可文件不写路径）；§5 第 1 项补 rss 模式下 cgroup 列为空的说明（审查 N-03）；§7 第 5 项补"停批情形下从未启动的运行视为落定"的放行条件（审查 F-06）；§9 BUILD_ONLY 行补 D2 结果的判读规则（审查 F-16）；§11 作业日志位置更正为提交目录（审查 F-10）。
+**修订（2026-10-27，独立审查 H7 之后；第 2–7 节的数值与规则未改，只补说明）：** §4 第 6 条措辞（本机许可文件不写路径）；§5 第 1 项补 rss 模式下 cgroup 列为空的说明（审查 N-03）；§7 第 5 项补"停批情形下从未启动的运行视为落定"的放行条件（审查 F-06）；§9 BUILD_ONLY 行补 D2 结果的判读规则（审查 F-16）；§11 作业日志位置更正为提交目录（审查 F-10）；§9 末条补 BUILD_ONLY 作业体对已含上次运行的目录的拒绝（审查后自查 S-01）。
 **与 `RUN_PLAN_B4.md`（B4P v1，2026-10-26）的关系：** 本文件只改写 B1–B4 涉及的登记值（输入网络、TimeLimit 与派生墙钟、资源配额）和因 PBS 两作业方式不再适用的机制（P1 探针）；`RUN_PLAN_B4.md` 第 3.3–3.8 节的规则（内存止损、早期测速、验收与停批、后处理、资源止损后的重开）全部沿用，并在下文逐条写明。模型、网络构建、成本表、求解档案参数、GATES_V6 / C1 阈值一律不改。
 **单一来源：** 代码中的登记常数——`scripts_project/b4_batch4.py`（`REGISTERED_SHA`、`REGISTERED_BYTES`、`BUILD_COMMIT`、`TIME_LIMIT_S`、`WALL_CAP_S`、`LICENCE_GAP_S`、`HPC_JOBS`、`MEMORY_STOP_FRACTION`、`PROJECTION_FRACTION`）与 `run_batch4.sh` 顶部的 `R_TL` / `R_WALL` / `R_GAP` / `R_MODE`；PBS 作业脚本由 `make_pbs.sh` 从 `b4_batch4.py hpc-plan` 生成；`hpr_consistency.py` 把本文件、作业脚本、运行器、预检中的值列表比对（检查单 H-P3）。
 
@@ -103,7 +103,7 @@
 | **全尺寸 BUILD_ONLY** `hpr_build_only_f1`（步骤 D2，用户 2026-10-27 补充） | `parallel`，`ncpus=48:mem=300gb` | 02:30:00（估计 70 min × 2：预检 5 min + 进程 1 ≤ 60 min + 写入测速与清理 5 min） | `BUILD_ONLY=1 bash run_batch4.sh --only F1`（无 `--auth`、无许可）：只跑进程 1——完整 2920×3h v2 一体化网络的构建、LP 数组导出、LP 文件写出；运行目录 `runs/build_only_f1`（与正式目录隔离）；记录峰值内存（GNU time）、LP 文件字节数、构建秒数（`lp.build_seconds`）与写出秒数（`split.write_seconds`）、`/hpctmp` 写入速度（LP 字节 / 写出秒数，另加 1 GiB `dd` 顺序写测速）、cgroup 可见性；结束后删除 LP 文件 `split/problem.lp`（数组 `lp/` 保留，约 6.4 GB，60 天后清除） | `BUILD_ONLY_STATUS.txt`：`BUILD_CHECK_F1 passed`、`LP_DELETED`；参考预期：峰值 72–92 GiB（B4P 外推）、LP 5.1–5.4 GB、≤ 3,600 s。**结果只用于核对估计，不改变第 2–3 节的登记值**；峰值 > 150 GiB 或构建 > 3,600 s（超时安全停止）→ 先报告审阅端再做步骤 E；峰值 100–150 GiB → 批级作业（120 GiB）补做后处理（重建 LP，峰值与进程 1 同量级）可能不够，由审阅端提出是否提高 `hpr_batch` 内存（登记值变更，用户决定）后再做步骤 E（审查 F-16） |
 
 - 三个测试作业都可在 2026-10-29 18:00 维护前完成，也可在 11-02 17:00 之后做（用户决定）。
-- 测试作业用到的 `TRUNCATE` / `ALLOW_UNREGISTERED` / `BUILD_ONLY` 只在对应作业体内导出；**正式作业（`JOB_MODE=formal`）在这些开关残留、`--auth` 缺失、运行目录含测试残留（`.cond` 为 `build_only` / 标签 `SMOKE_TEST_ONLY`）时拒绝**（退出码 2，不写 STATUS）；`run_batch4.sh` 自身的拒绝（测试钩子、未登记时限、`--auth` 与无求解模式并存）保持不变。
+- 测试作业用到的 `TRUNCATE` / `ALLOW_UNREGISTERED` / `BUILD_ONLY` 只在对应作业体内导出；**正式作业（`JOB_MODE=formal`）在这些开关残留、`--auth` 缺失、运行目录含测试残留（`.cond` 为 `build_only` / 标签 `SMOKE_TEST_ONLY`）时拒绝**（退出码 2，不写 STATUS）；`run_batch4.sh` 自身的拒绝（测试钩子、未登记时限、`--auth` 与无求解模式并存）保持不变。**BUILD_ONLY 作业体（`JOB_MODE=build_only`）在运行目录 `runs/build_only_f1` 已含上次运行时拒绝**（退出码 2，不写任何文件）：运行器会按上次的回执跳过构建，记录会重复旧数字；重跑 D2 须先把该目录移走（审查后自查 S-01，2026-10-27）。
 
 ## 10. 登记常数一览（检查单 H-P3 的比对清单）
 

@@ -11,7 +11,7 @@
 # <package>/HPR_AUTH.txt (written by hpr_submit.sh; solve modes only). Writes <runs>/PBS_JOBS.txt (node, CPU model, resources, cgroup path and
 # limit, memory measure, exit codes) and the mode's status file. Refusals (exit 2, nothing started, no STATUS.txt written): a test hook / dry-run
 # switch in the environment of a formal job, a missing authorisation, a run folder holding test leftovers (build_only / SMOKE_TEST_ONLY), a licence
-# file missing or not mode 600, a batch job before both runs ended (not_ready). Local drill: HPR_LOCAL_DRILL=1 (skips the token-server curl;
+# file missing or not mode 600, a batch job before both runs ended (not_ready), a build-only job on a folder holding a previous build-only run (S-01). Local drill: HPR_LOCAL_DRILL=1 (skips the token-server curl;
 # HPR_RUN_ROOT=<dir> puts runs/ elsewhere; HPR_DRY_TRUNCATE=56 for the truncated BUILD_ONLY dry run) - refused under a real PBS job.
 set -u
 JOB_MODE=${JOB_MODE:?formal|batch|smoke56|build_only}; JOB_RID=${JOB_RID:-}; JOB_KEY=${JOB_KEY:-$JOB_MODE}
@@ -56,7 +56,10 @@ case "$JOB_MODE" in
     case "$JOB_RID" in F1|F2|batch) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2 | batch)"; exit 2;; esac
     [ "$JOB_RID" = batch ] || [ -n "$AUTH" ] || { echo "REFUSED: the user authorisation text is missing (HPR_AUTH or $PKG/HPR_AUTH.txt)"; exit 2; };;
   build_only)
-    case "$JOB_RID" in F1|F2) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2)"; exit 2;; esac;;
+    case "$JOB_RID" in F1|F2) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2)"; exit 2;; esac
+    # a folder holding a previous build-only run (self-check S-01 after the review): the runner would skip the build on its receipt (.cond=build_only /
+    # split_built) and the records below would repeat the old numbers with the LP already deleted - the folder must be moved aside first
+    if [ -d "$RUN_DIR/$JOB_RID" ] || [ -f "$RUN_DIR/BUILD_ONLY_STATUS.txt" ]; then echo "REFUSED: $RUN_DIR holds a previous build-only run - move it aside first (mv runs/build_only_f1 runs/build_only_f1_<date>); nothing started"; exit 2; fi;;
 esac
 # ---- licence file: existence and mode only (never read); the formal / smoke solve modes need it, build_only and batch do not use it
 export GRB_LICENSE_FILE=${GRB_LICENSE_FILE:-$HOME/.gurobi/gurobi.lic}
