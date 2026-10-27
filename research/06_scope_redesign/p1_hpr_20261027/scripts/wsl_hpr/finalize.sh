@@ -37,6 +37,12 @@ print('MANIFEST', m['commit'], len(m['files']), 'files', m['upload_total_bytes_e
 fi
 if [ "$STEP" = final ]; then
   { cat /home/jin/hpr/report_body.md; echo; echo "---"; echo; echo "## 附录 A：\`RUN_PLAN_HPC.md\` 原文（提交 \`1f62176f\` 登记；H7 后的说明性修订见其头部）"; echo; sed 's/^#/##/' "$D/RUN_PLAN_HPC.md"; } > "$D/HPR_REPORT.md"
+  # the leak scan once more over the assembled report / evidence (counts only), then the evidence copies, then the evidence index
+  bash /home/jin/hpr/leak_scan.sh > "$R/leak_scan_run_final.log" 2>&1; log LEAK_SCAN_FINAL "exit=$?"
+  $PY -c "
+import json; r=json.load(open('$R/leak_scan/HPR_LEAK_SCAN.json'))
+print('LEAK_FINAL: secret_values', r['n_secret_values'], 'commits', r['n_commits'], '| targets:', {t.split('/')[-1]: (v['files'], [(h['file'], h['value_hits'], h['pattern_hits']) for h in v['hits']]) for t, v in r['targets'].items()}, '| commits with hits:', {k: v['files'] for k, v in r['commits'].items() if v['value_hits'] or v['pattern_hits']})" | tee -a "$S"
+  bash /home/jin/hpr/collect_evidence.sh > "$R/collect_evidence_final.log" 2>&1; log EVIDENCE_FINAL "exit=$?:$(tail -2 "$R/collect_evidence_final.log" | tr '\n' ' ')"
   $PY /home/jin/hpr/make_evidence_json.py "$WT" "$D/HPR_EVIDENCE.json" | tee -a "$S"
   for f in HPR_REPORT.md PRE_HPC_CHECKLIST.md INDEPENDENT_REVIEW.md HPC_OPERATOR_GUIDE.md RUN_PLAN_HPC.md HPR_PROGRESS.md; do
     c=$(grep -c "待填\|PLACEHOLDER" "$D/$f"); [ "$c" = 0 ] || log PLACEHOLDER_LEFT "$f:$c"
@@ -46,4 +52,8 @@ if [ "$STEP" = final ]; then
   bash /home/jin/hpr/push.sh 2>&1 | tee -a "$S"
   bash /home/jin/hpr/sync_work.sh > "$R/sync_work.log" 2>&1; log SYNC "exit=$?:$(tail -1 "$R/sync_work.log")"
   log DONE "head=$(git rev-parse HEAD)"
+  # the push record cannot be inside the commit it describes: keep it beside the deliverables outside the repository (checklist H-P14)
+  cp "$S" "$W/evidence/FINALIZE_STATUS.txt"
+  { echo "local_head=$(git rev-parse HEAD)"; echo "remote_head=$(git ls-remote --heads origin codex/hpr-20261027 | cut -f1)"; echo "merges_since_base=$(git log --merges --oneline 82c32c53..HEAD | wc -l)"; echo "tracked_changes=$(git status --porcelain --untracked-files=no | wc -l)"; git log --oneline 82c32c53..HEAD; } > "$W/evidence/FINAL_PUSH_RECORD.txt"
+  cat "$W/evidence/FINAL_PUSH_RECORD.txt" | head -4
 fi

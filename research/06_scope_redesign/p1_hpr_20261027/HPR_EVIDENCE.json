@@ -1,0 +1,663 @@
+{
+ "step": "HPR",
+ "written_utc": "2026-10-27T09:12:53Z",
+ "instruction": {
+  "file": "HPR_CLAUDE_CODE_INSTRUCTION.md",
+  "sha256": "f14cb0183058e8a44920eb6e887bb528af35fc38861303af1118e17984412d86",
+  "registered_sha256_file": "f14cb0183058e8a44920eb6e887bb528af35fc38861303af1118e17984412d86"
+ },
+ "git": {
+  "branch": "codex/hpr-20261027",
+  "head": "8ed41d978d7fc9400954c5341696146859c2bf52",
+  "base": "82c32c53c64047638989dee39b16135646ffcf1a",
+  "commits": [
+   "8ed41d978d7fc9400954c5341696146859c2bf52 2026-10-27T16:39:36+08:00 HPR S-01 self-check after the independent review (no HPC, no cloud, no solve, no Gurobi): hpr_job.sh build_only mode refuses a run folder holding a previous build-only run (exit 2, nothing written) - the runner would skip the build on its receipt (.cond=build_only / split_built) and the job would repeat the old numbers with the LP already deleted (seen in the repeated local dry runs on the same dry-run folder: 2 s, BUILD_CHECK problem_file); the build-only stand-in test runs the job body a second time on the same folder (refused, records unchanged); the local dry run moves a previous build folder aside and adds refusal case R21; operator guide D2 rerun note; RUN_PLAN_HPC section 9 note (sections 2-7 values unchanged); finalize build takes the message file",
+   "a6e119ddb02f9f6b19e218233256dc4d312ccabf 2026-10-27T16:22:47+08:00 HPR H7 round 2 (no HPC, no cloud, no solve, no Gurobi): second independent review of the rebuilt package - 0 blocking, 5 new non-blocking (N-01 guide A1 count, N-02 checklist H-P5 / H-P14 to be settled on the final commits, N-03 RUN_PLAN section 5 rss-mode wording, N-04 / N-05 guide wording) - all fixed; checklist R3 completed with the smoke-job argument, H-P12 / H-P13 filled; INDEPENDENT_REVIEW.md round 2 + handling; progress",
+   "9ff86cb6445c860c32c2d8d95b09789b89a6848a 2026-10-27T15:56:33+08:00 HPR package builder: the drilled-path comparison against the H4 drill commit uses two separate pathspecs (archived code outside research/ and tests/; the shipped research/ scripts) - a single spec with ':(exclude)research' also dropped the explicitly listed research/ paths, so the recorded diff stat omitted the runner / job body changes",
+   "a955ab59dd20dd84739eb150a63a8f9d6653dea7 2026-10-27T15:54:03+08:00 HPR package builder: the code-identity check against the H4 drill commit excludes tests/ (archived, never executed on the cluster) - the solve-path code (scripts_project, model, config) must still be byte-identical",
+   "a4f0cd009465fb2c55e00ee91be7d1ae9e8d206d 2026-10-27T15:53:26+08:00 HPR H7 round 1 fixes (no HPC, no cloud, no solve, no Gurobi): independent review found 0 blocking / 18 non-blocking items - fixed: hpr_job.sh batch gate accepts a run that never started after a halt (F-06), SMOKE_STATUS token-server status from PBS_JOBS.txt (F-04), OMP / SHELL recorded (F-17), per-job preflight JSON names (F-15); run_batch4.sh --only ignores the other job's run for the post-processing memory condition and thread budget and reads no cgroup file in rss mode (F-07); preflight.sh PREFLIGHT_TAG; make_pbs.sh #PBS -S /bin/bash (F-14); hpr_submit.sh mkdir after a successful qsub (F-11); hpr_status.sh (none) line (F-13); make_hpc_package.sh accepts drilled-path script changes only with a recorded note, manifest without local paths (F-09); operator guide A1 / A2 / A3 / B2 / C2 / C3 / D1 / D3 / D2-2 / G2 / appendix (F-01, F-02, F-03, F-05, F-08, F-09, F-12, F-16, F-18); RUN_PLAN_HPC.md sections 4 / 7.5 / 9 / 11 wording (sections 2-7 values unchanged); two new stand-in tests; INDEPENDENT_REVIEW.md round 1 + handling; checklist R3 / R4",
+   "69b0b7d1aa25b5bc203538ca3c14e2c9df132f4a 2026-10-27T15:03:03+08:00 HPR H5 (no HPC, no cloud, no solve, no Gurobi): hpr_submit.sh authorisation-text check written without key-name literals (the H-P8 scan of the package and of this tree then shows only the four-part version numbers of the third-batch environment lock files); package v9 rebuilt at this commit (the drilled execution path is byte-identical to the H4 drill commit be5e49fd), dry run, consistency, leak scan and the full test suite follow in evidence commits",
+   "86af83f3810d552d98dc959d2d269cc5ae3348da 2026-10-27T14:59:35+08:00 HPR H4 drill record and package-builder fixes (no HPC, no cloud; the 2 authorised local Gurobi calls were made by the H4 drill at be5e49fd): H4_DRILL evidence collector / comparison script (NaN-equal arrays, OWEN numbers vs paths, solved network data vs meta), make_hpc_package.sh takes HPC_FACTS_20261026.md from the HPR folder (copied from work/p1_dfx_20261026) and accepts a drill commit that differs from the package commit only outside the drilled execution path (archived code, runner, preflight, pack, env, job body, PBS generator byte-identical), HPC_FACTS copy, progress",
+   "be5e49fdc2a6989c30b136e6bfa150818663142e 2026-10-27T14:27:33+08:00 HPR H3 (no HPC, no cloud, no solve, no Gurobi): two-job method on the fourth-batch runner - run_batch4.sh --only <rid> (phase 0, the batch's solve_run / post_run, no P1 probe), WAIT_START_OF (F2's Gurobi process waits for F1's start + 330 s), MEM_MEASURE auto / rss (process-group RSS when no job cgroup accounting is readable), cgroup v1 job-directory layout, R_TL 864,000 / R_WALL 871,200 (B1); b4_batch4.py re-registered to the v2 2920x3h networks (B2), TIME_LIMIT_S / HPC_JOBS single source, hpc-plan, reference comparison; preflight.sh / preflight_dfx.sh CGROUP_ROOT false positive fixed (H3.5), registered-value assertions; HPC package sources (make_pbs.sh, hpr_job.sh, install job, login preflight, submit, status, consistency, reference values), operator guide, H1 review; stand-in tests test_hpr_two_jobs.py (two-job scenarios of H3.6), B4P test assertions updated to B1 / B2",
+   "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a 2026-10-27T13:19:34+08:00 HPR H1-H2 (no HPC, no cloud, no solve, no Gurobi): RUN_PLAN_HPC.md registered before any HPC operation and before the H4 local solves - fourth batch F1 / F2 on the v2 2920x3h networks (B2), TimeLimit 864,000 s (B1), PBS parallel 48 cores / 300 and 250 GB per job (B3), split solve with profile formal_barrier_1e6_t16 (B4), two-job method, licence gap F2 after F1 start + 330 s, memory stop by job cgroup or process-group RSS, test jobs (install, smoke 56, full-size BUILD_ONLY F1 per the user supplement); progress file"
+  ],
+  "merges": [],
+  "status_tracked": "M research/06_scope_redesign/p1_hpr_20261027/HPR_PROGRESS.md\n M research/06_scope_redesign/p1_hpr_20261027/INDEPENDENT_REVIEW.md\n M research/06_scope_redesign/p1_hpr_20261027/PRE_HPC_CHECKLIST.md\n M research/06_scope_redesign/p1_hpr_20261027/evidence/CONSISTENCY.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/BUILD_CHECK.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/BUILD_ONLY_STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/DRYRUN_STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/PBS_JOBS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/REFUSALS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/RUN.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/STATUS.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/preflight_login.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/dry_run/preflight_sha.txt\n M research/06_scope_redesign/p1_hpr_20261027/evidence/leak_scan/HPR_LEAK_SCAN.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/COMMIT\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/HPC_PACKAGE_MANIFEST.json\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/SHA256SUMS\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_batch.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_build_only_f1.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_f1.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_f2.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_install.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/package/hpr_smoke56.pbs\n M research/06_scope_redesign/p1_hpr_20261027/evidence/tests/full_rs_commit.txt",
+  "remote_head": [
+   "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a"
+  ]
+ },
+ "run_plan": {
+  "file": "RUN_PLAN_HPC.md",
+  "sha256": "1899f470f866d9a21f231e49b05b0017cd88aa4dc017d7e280cdbbbd9e9b6c72",
+  "commit": [
+   "1f62176f884b9f5cd06ce9fcf5efefe7b5da6b0a 2026-10-27T13:19:34+08:00"
+  ]
+ },
+ "networks": {
+  "script": "scripts_project/b4_batch4.py",
+  "networks": {
+   "integrated_2920_3h_unsolved.nc": {
+    "file": "/home/jin/hpr_drill/pkg/networks/integrated_2920_3h_unsolved.nc",
+    "bytes": 63873447,
+    "sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "receipt_sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "receipt_code_sha": "72083fde6bffd89580869af6dd00885a8d76721f",
+    "registered_sha256": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "registered_bytes": 63873447,
+    "receipt_equal": true,
+    "registered_equal": true,
+    "equal": true
+   },
+   "disconnected_2920_3h_unsolved.nc": {
+    "file": "/home/jin/hpr_drill/pkg/networks/disconnected_2920_3h_unsolved.nc",
+    "bytes": 63202193,
+    "sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "receipt_sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "receipt_code_sha": "72083fde6bffd89580869af6dd00885a8d76721f",
+    "registered_sha256": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "registered_bytes": 63202193,
+    "receipt_equal": true,
+    "registered_equal": true,
+    "equal": true
+   }
+  },
+  "all_equal": true,
+  "registered_checked": false,
+  "build_commit": "72083fde6bffd89580869af6dd00885a8d76721f",
+  "solver_runs": 0
+ },
+ "tests": {
+  "standin_first": {
+   "file": "standin.log",
+   "summary_line": "6 failed, 85 passed, 1 skipped in 1468.56s (0:24:28)",
+   "failed": [
+    "tests/research/test_hpr_two_jobs.py::test_make_pbs_and_consistency",
+    "tests/research/test_hpr_two_jobs.py::test_only_mode_equals_batch_mode_step_by_step",
+    "tests/research/test_hpr_two_jobs.py::test_job_body_smoke56_runs_f1_f2_batch_with_standins",
+    "tests/research/test_hpr_two_jobs.py::test_job_body_formal_refusals_and_batch_not_ready",
+    "tests/research/test_hpr_two_jobs.py::test_job_cgroup_detection",
+    "tests/research/test_hpr_two_jobs.py::test_preflight_cgroup_root_note_fixed_and_job_dir_resources"
+   ],
+   "sha256": "0d60ec3d4f562afdb40b4e120be0d4a180486bf19fb2a2d5f2f5eecf9d9a44ac"
+  },
+  "standin_hpr_b4p": {
+   "file": "hpr_b4p.log",
+   "summary_line": "27 passed in 335.88s (0:05:35)",
+   "failed": [],
+   "sha256": "1df1940a0069c2cf1e2a5399acbbbbb708b965d9ac2f89ed899289112e5ae787"
+  },
+  "full": {
+   "file": "full.log",
+   "summary_line": "717 passed, 67 skipped, 1308 warnings in 1618.64s (0:26:58)",
+   "failed": [],
+   "sha256": "d794e735b1f9377d0795b6e062f223e27354e24f08e1880c9f9cac5389eda1a4"
+  }
+ },
+ "h4_drill": {
+  "script": "scripts/wsl_hpr/h4_compare.py",
+  "code_commit": "be5e49fdc2a6989c30b136e6bfa150818663142e",
+  "drill_runs": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/h4/runs/smoke56",
+  "dfx_smoke": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/dfx_v3/smoke_v2",
+  "written_utc": "2026-10-27T06:59:59Z",
+  "runs": {
+   "F1": {
+    "dfx_dir": "integrated",
+    "optimal": true,
+    "objective": 340661983874.5359,
+    "dfx_objective": 340661983874.5359,
+    "split": {
+     "gurobi_status_name": "OPTIMAL",
+     "termination_condition": "optimal",
+     "bar_iter_count": 113,
+     "runtime_s": 202.18918991088867,
+     "work_units": 321.2938327896815,
+     "max_mem_used_gb": 5.947046576,
+     "fingerprint": "0x7a66397f",
+     "solve_seconds": 206.96808624267578
+    },
+    "log": {
+     "iterations": 113,
+     "seconds": 201.72,
+     "work": 320.56,
+     "gurobi_objective": "3.38307452e+11",
+     "fingerprint": "0x7a66397f"
+    },
+    "dfx_log": {
+     "iterations": 113,
+     "seconds": 370.93,
+     "work": 320.56,
+     "gurobi_objective": "3.38307452e+11",
+     "fingerprint": "0x7a66397f"
+    },
+    "label": "ACCEPTED_LAYER2",
+    "dfx_label": "ACCEPTED_LAYER2",
+    "items": {
+     "objective_receipt": "equal",
+     "termination": "equal",
+     "iterations": "equal",
+     "gurobi_objective_log": "equal",
+     "fingerprint": "equal",
+     "solver_parameters": "equal",
+     "input_sha256": "equal",
+     "v6_label": "equal",
+     "solution/X.npy": "equal",
+     "solution/Pi.npy": "equal",
+     "solution/RC.npy": "equal",
+     "lp/vlabels.npy": "equal",
+     "lp/clabels.npy": "equal",
+     "lp/cost.npy": "equal",
+     "lp/col_lower.npy": "equal",
+     "lp/col_upper.npy": "equal",
+     "lp/row_lower.npy": "equal",
+     "lp/row_upper.npy": "equal",
+     "lp/value.npy": "equal",
+     "lp/index.npy": "equal",
+     "lp/start.npy": "equal",
+     "COUNTRY_COST_LEDGER.csv": "equal",
+     "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+     "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+     "NODAL_PRICES.csv": "equal",
+     "cross_border_flows.csv": "equal",
+     "capacity_reduced_costs.csv": "equal",
+     "nodal_prices_summary.csv": "equal",
+     "COMPONENT_COST_BREAKDOWN.csv": "equal",
+     "DUALS_INDEX.csv": "equal",
+     "ALLOCATION.csv": "equal",
+     "ALLOCATION_LINES.csv": "equal",
+     "LEDGER_IDENTITY.json": "equal",
+     "EMISSIONS_BY_COUNTRY.json": "equal",
+     "CO2_FLOWS.json": "equal",
+     "CAPACITY_BY_TECH_COUNTRY.json": "equal",
+     "BUNKER_ACCOUNT.json": "equal",
+     "INTERIOR_CHECKS.json": "equal",
+     "COMPONENT_COST_BREAKDOWN_SUMMARY.json": "equal",
+     "lp/MATH_PROBLEM.json": "equal",
+     "DUALS_BY_CONSTRAINT.nc": "equal",
+     "m12_owen/OWEN.json": "equal_numbers_paths_differ",
+     "solved_network.nc": "equal_data_meta_differs"
+    },
+    "notes": {
+     "m12_owen/OWEN.json": [
+      "/c1_c_dual/precision/file",
+      "/c1_c_dual/threshold_source",
+      "/duals",
+      "/network",
+      "/tag"
+     ],
+     "solved_network.nc": [
+      "/s2_solve_authorization"
+     ]
+    },
+    "bitwise_core_equal": true,
+    "exports_equal_or_metadata_only": true,
+    "different": [
+     "m12_owen/OWEN.json",
+     "solved_network.nc"
+    ],
+    "post_exits": {
+     "BUILD_F1": "exit=0",
+     "GUROBI_F1": "exit=0",
+     "ASSIGN_F1": "exit=0",
+     "VIOLATIONS_F1": "exit=0",
+     "C1_F1": "exit=0",
+     "M12_F1": "exit=0",
+     "M12_OWEN_F1": "exit=0"
+    }
+   },
+   "F2": {
+    "dfx_dir": "disconnected",
+    "optimal": true,
+    "objective": 352091303417.9458,
+    "dfx_objective": 352091303417.9458,
+    "split": {
+     "gurobi_status_name": "OPTIMAL",
+     "termination_condition": "optimal",
+     "bar_iter_count": 139,
+     "runtime_s": 210.17161107063293,
+     "work_units": 373.5588539916613,
+     "max_mem_used_gb": 4.559633696,
+     "fingerprint": "0x32f39cf2",
+     "solve_seconds": 214.56042671203613
+    },
+    "log": {
+     "iterations": 139,
+     "seconds": 210.04,
+     "work": 372.91,
+     "gurobi_objective": "3.49575087e+11",
+     "fingerprint": "0x32f39cf2"
+    },
+    "dfx_log": {
+     "iterations": 139,
+     "seconds": 468.09,
+     "work": 372.91,
+     "gurobi_objective": "3.49575087e+11",
+     "fingerprint": "0x32f39cf2"
+    },
+    "label": "ACCEPTED_LAYER2",
+    "dfx_label": "ACCEPTED_LAYER2",
+    "items": {
+     "objective_receipt": "equal",
+     "termination": "equal",
+     "iterations": "equal",
+     "gurobi_objective_log": "equal",
+     "fingerprint": "equal",
+     "solver_parameters": "equal",
+     "input_sha256": "equal",
+     "v6_label": "equal",
+     "solution/X.npy": "equal",
+     "solution/Pi.npy": "equal",
+     "solution/RC.npy": "equal",
+     "lp/vlabels.npy": "equal",
+     "lp/clabels.npy": "equal",
+     "lp/cost.npy": "equal",
+     "lp/col_lower.npy": "equal",
+     "lp/col_upper.npy": "equal",
+     "lp/row_lower.npy": "equal",
+     "lp/row_upper.npy": "equal",
+     "lp/value.npy": "equal",
+     "lp/index.npy": "equal",
+     "lp/start.npy": "equal",
+     "COUNTRY_COST_LEDGER.csv": "equal",
+     "COUNTRY_COST_LEDGER_USD2020.csv": "equal",
+     "COUNTRY_COST_LEDGER_DETAIL.csv": "equal",
+     "NODAL_PRICES.csv": "equal",
+     "cross_border_flows.csv": "equal",
+     "capacity_reduced_costs.csv": "equal",
+     "nodal_prices_summary.csv": "equal",
+     "COMPONENT_COST_BREAKDOWN.csv": "equal",
+     "DUALS_INDEX.csv": "equal",
+     "ALLOCATION.csv": "equal",
+     "ALLOCATION_LINES.csv": "absent_both",
+     "LEDGER_IDENTITY.json": "equal",
+     "EMISSIONS_BY_COUNTRY.json": "equal",
+     "CO2_FLOWS.json": "equal",
+     "CAPACITY_BY_TECH_COUNTRY.json": "equal",
+     "BUNKER_ACCOUNT.json": "equal",
+     "INTERIOR_CHECKS.json": "equal",
+     "COMPONENT_COST_BREAKDOWN_SUMMARY.json": "equal",
+     "lp/MATH_PROBLEM.json": "equal",
+     "DUALS_BY_CONSTRAINT.nc": "equal",
+     "m12_owen/OWEN.json": "equal_numbers_paths_differ",
+     "solved_network.nc": "equal_data_meta_differs"
+    },
+    "notes": {
+     "m12_owen/OWEN.json": [
+      "/c1_c_dual/precision/file",
+      "/c1_c_dual/threshold_source",
+      "/duals",
+      "/network",
+      "/tag"
+     ],
+     "solved_network.nc": [
+      "/s2_solve_authorization"
+     ]
+    },
+    "bitwise_core_equal": true,
+    "exports_equal_or_metadata_only": true,
+    "different": [
+     "m12_owen/OWEN.json",
+     "solved_network.nc"
+    ],
+    "post_exits": {
+     "BUILD_F2": "exit=0",
+     "GUROBI_F2": "exit=0",
+     "ASSIGN_F2": "exit=0",
+     "VIOLATIONS_F2": "exit=0",
+     "C1_F2": "exit=0",
+     "M12_F2": "exit=0",
+     "M12_OWEN_F2": "exit=0"
+    }
+   }
+  },
+  "batch": {
+   "b6_bn": 11.429319543409912,
+   "dfx_smoke_b6_bn": 11.429319543409912,
+   "labels": {
+    "F1": "ACCEPTED_LAYER2",
+    "F2": "ACCEPTED_LAYER2"
+   },
+   "unusable": {},
+   "stop_safe": null,
+   "stop": [],
+   "reference_comparison_present": true,
+   "postproc_errors": [],
+   "packs": [
+    "results_full_final_20261027T065431Z.tar.gz",
+    "results_light_final_20261027T065431Z.tar.gz"
+   ],
+   "done": true,
+   "done_only": 2,
+   "status_lines": 49
+  },
+  "b6_equal_to_dfx_smoke": true,
+  "all_optimal": true,
+  "bitwise_equal_to_dfx_smoke": true,
+  "chain_exit_zero": true,
+  "job_exits": [
+   [
+    "smoke56",
+    "smoke56",
+    "F1",
+    "0"
+   ],
+   [
+    "smoke56",
+    "smoke56",
+    "F2",
+    "0"
+   ],
+   [
+    "smoke56",
+    "smoke56",
+    "batch",
+    "0"
+   ]
+  ],
+  "all_job_exits_zero": true,
+  "smoke_status": "SMOKE:jobid=local.h4drill:utc=2026-10-27T06:54:33Z\nWLS_TOKEN_HTTP:skipped\nF1:termination=optimal:objective=340661983874.5359:iterations=113:label=ACCEPTED_LAYER2:expected_objective=340661983874.5359:relative_difference=0.000e+00:gurobi_status=OPTIMAL:OK\nF2:termination=optimal:objective=352091303417.9458:iterations=139:label=ACCEPTED_LAYER2:expected_objective=352091303417.9458:relative_difference=0.000e+00:gurobi_status=OPTIMAL:OK\nPOSTPROC_ERRORS:0\nBATCH_DONE:True\nHALTED:False\nPACKS:2\nSMOKE_RESULT:PASS\n"
+ },
+ "h4_gurobi_calls": [
+  {
+   "rid": "F1",
+   "start_utc": "2026-10-27T06:35:07Z",
+   "end_utc": "2026-10-27T06:38:38Z",
+   "process_seconds": 241,
+   "gurobi_status": "OPTIMAL",
+   "termination": "optimal",
+   "iterations": 113,
+   "runtime_s": 202.18918991088867,
+   "max_mem_used_gb": 5.947046576,
+   "peak_rss_gib": 5.8462677001953125,
+   "objective_lp": 338307451862.93414,
+   "fingerprint": "0x7a66397f"
+  },
+  {
+   "rid": "F2",
+   "start_utc": "2026-10-27T06:47:53Z",
+   "end_utc": "2026-10-27T06:51:29Z",
+   "process_seconds": 241,
+   "gurobi_status": "OPTIMAL",
+   "termination": "optimal",
+   "iterations": 139,
+   "runtime_s": 210.17161107063293,
+   "max_mem_used_gb": 4.559633696,
+   "peak_rss_gib": 4.437198638916016,
+   "objective_lp": 349575087415.07935,
+   "fingerprint": "0x32f39cf2"
+  }
+ ],
+ "h4_status_sha256": "369aa2401396697e1a7c1beee5c5c540e61effed0cd7776294d92f3f195e0cc7",
+ "dry_run": {
+  "status": [
+   "START:2026-10-27T07:00:15Z:dist=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package:pkg=/home/jin/hpr_dry/pkg:commit=86af83f3810d552d98dc959d2d269cc5ae3348da",
+   "PREFLIGHT_guards:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_sha:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_networks:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_env:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_profile:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_code:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_tools:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_resources:exit=1:PREFLIGHT FAILED",
+   "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)",
+   "PREFLIGHT_LOGIN:exit=1:HPR_PREFLIGHT_LOGIN FAILED (licence file / PBS absent here: expected)",
+   "BUILD_ONLY_56:exit=0:seconds=32:BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 2.03}",
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T07:00:58Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.4 WRITE_SECONDS:8.0 (process 1 total 32 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.7 dd_1GiB_fsync=>1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 2.03}",
+   "LP_DELETED:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T07:00:58Z",
+   "NO_SOLVER_LOG:ok",
+   "REFUSALS:20 cases:nonzero=20:status_written=0",
+   "DONE:2026-10-27T07:01:00Z",
+   "START:2026-10-27T07:04:54Z:dist=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package:pkg=/home/jin/hpr_dry/pkg:commit=69b0b7d1aa25b5bc203538ca3c14e2c9df132f4a",
+   "PREFLIGHT_guards:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_sha:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_networks:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_env:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_profile:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_code:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_tools:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_resources:exit=1:PREFLIGHT FAILED",
+   "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)",
+   "PREFLIGHT_LOGIN:exit=1:HPR_PREFLIGHT_LOGIN FAILED (licence file / PBS absent here: expected)",
+   "BUILD_ONLY_56:exit=0:seconds=2:BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 2.03}",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T07:05:08Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.4 WRITE_SECONDS:8.0 (process 1 total 2 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.7 dd_1GiB_fsync=1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "not_present:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T07:05:08Z",
+   "NO_SOLVER_LOG:ok",
+   "REFUSALS:20 cases:nonzero=20:status_written=0",
+   "DONE:2026-10-27T07:05:09Z",
+   "START:2026-10-27T07:54:30Z:dist=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package:pkg=/home/jin/hpr_dry/pkg:commit=a955ab59dd20dd84739eb150a63a8f9d6653dea7",
+   "PREFLIGHT_guards:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_sha:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_networks:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_env:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_profile:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_code:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_tools:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_resources:exit=1:PREFLIGHT FAILED",
+   "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)",
+   "PREFLIGHT_LOGIN:exit=1:HPR_PREFLIGHT_LOGIN FAILED (licence file / PBS absent here: expected)",
+   "BUILD_ONLY_56:exit=0:seconds=2:BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 2.03}",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T07:54:43Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.4 WRITE_SECONDS:8.0 (process 1 total 2 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.7 dd_1GiB_fsync=>1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "not_present:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T07:54:43Z",
+   "NO_SOLVER_LOG:ok",
+   "REFUSALS:20 cases:nonzero=20:status_written=0",
+   "DONE:2026-10-27T07:54:45Z",
+   "START:2026-10-27T08:23:01Z:dist=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package:pkg=/home/jin/hpr_dry/pkg:commit=a6e119ddb02f9f6b19e218233256dc4d312ccabf",
+   "PREFLIGHT_guards:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_sha:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_networks:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_env:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_profile:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_code:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_tools:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_resources:exit=1:PREFLIGHT FAILED",
+   "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)",
+   "PREFLIGHT_LOGIN:exit=1:HPR_PREFLIGHT_LOGIN FAILED (licence file / PBS absent here: expected)",
+   "BUILD_ONLY_56:exit=0:seconds=2:BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 2.03}",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T08:23:14Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.4 WRITE_SECONDS:8.0 (process 1 total 2 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.7 dd_1GiB_fsync=1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": false, \"failed\": [\"problem_file\"], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.411456823349}, \"receipt_state\": \"split_built\", \"peak_rss_",
+   "not_present:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T08:23:14Z",
+   "NO_SOLVER_LOG:ok",
+   "REFUSALS:20 cases:nonzero=20:status_written=0",
+   "DONE:2026-10-27T08:23:16Z",
+   "START:2026-10-27T08:39:49Z:dist=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package:pkg=/home/jin/hpr_dry/pkg:commit=8ed41d978d7fc9400954c5341696146859c2bf52",
+   "PREFLIGHT_guards:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_sha:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_networks:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_env:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_profile:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_code:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_tools:exit=0:PREFLIGHT OK",
+   "PREFLIGHT_resources:exit=1:PREFLIGHT FAILED",
+   "PREFLIGHT_licence:not_run (a Gurobi call; the local budget is for the H4 drill only)",
+   "PREFLIGHT_LOGIN:exit=1:HPR_PREFLIGHT_LOGIN FAILED (licence file / PBS absent here: expected)",
+   "BUILD_ONLY_PREVIOUS_RUN_MOVED:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1_superseded_084000",
+   "BUILD_ONLY_56:exit=0:seconds=31:BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.149256229400635}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 1.98}",
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T08:40:31Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.1 WRITE_SECONDS:7.9 (process 1 total 31 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.9 dd_1GiB_fsync=>1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.149256229400635}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 1.98}",
+   "LP_DELETED:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T08:40:31Z",
+   "NO_SOLVER_LOG:ok",
+   "REFUSALS:21 cases:nonzero=21:status_written=0",
+   "DONE:2026-10-27T08:40:33Z"
+  ],
+  "refusals": [],
+  "all_nonzero": null,
+  "none_wrote_status": null,
+  "build_only_status": [
+   "BUILD_ONLY:F1:jobid=local.dryrun:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=48:mem_gb=300:cgroup=none:utc=2026-10-27T08:40:31Z",
+   "RUNNER_EXIT:0",
+   "PEAK_RSS_GIB:2.17 (GNU time of process 1; B4P estimate 72-92 GiB)",
+   "LP_FILE_BYTES:93726545 (B4P estimate 5.1-5.4 GB)",
+   "LP_ARRAYS_BYTES:122353241 (lp/ kept; purged by /hpctmp after 60 days)",
+   "BUILD_SECONDS:18.1 WRITE_SECONDS:7.9 (process 1 total 31 s incl. preflight; runner timeout 3,600 s)",
+   "LP_ROWS_COLS_NNZ:1541222 695950 3595156",
+   "SCRATCH_WRITE_MBPS:lp_write=11.9 dd_1GiB_fsync=>1024 (MB/s, 1e6 B)",
+   "BUILD_CHECK_F1:{\"passed\": true, \"failed\": [], \"lp\": {\"num_row\": 1541222, \"num_col\": 695950, \"nnz\": 3595156, \"build_seconds\": 18.149256229400635}, \"receipt_state\": \"split_built\", \"peak_rss_gib\": 1.98}",
+   "LP_DELETED:/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/hpr/dry_run_v9/runs/build_only_f1/F1/split/problem.lp",
+   "DONE:utc=2026-10-27T08:40:31Z"
+  ]
+ },
+ "package": {
+  "dist": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package",
+  "commit": "8ed41d978d7fc9400954c5341696146859c2bf52",
+  "files": 36,
+  "bytes": 213498758,
+  "sha256sums_sha256": "1866529e940a431260d662085e937553aa32b3c0b8140e61f495ebd1db3754eb",
+  "manifest_sha256": "31437affb59ec6ad1ef254df41d12814192742a94717a065709252d5f8ae6bb4",
+  "networks": {
+   "source": "DFX v2 builds, commit 72083fde (main checkout results_project/dfx_v3/builds_v2); registered in RUN_PLAN_HPC.md section 1 = b4_batch4.py",
+   "files": {
+    "networks/disconnected_2920_3h_unsolved.nc": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7",
+    "networks/integrated_2920_3h_unsolved.nc": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271"
+   },
+   "registered": {
+    "integrated_2920_3h_unsolved.nc": "08879f0bede119d77160cdb3f5f3c69dba302540b256b64efa4f16adbbefb271",
+    "disconnected_2920_3h_unsolved.nc": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7"
+   },
+   "registered_bytes": {
+    "integrated_2920_3h_unsolved.nc": 63873447,
+    "disconnected_2920_3h_unsolved.nc": 63202193
+   },
+   "no_365x24h": true
+  },
+  "jobs": [
+   "F1",
+   "F2",
+   "batch",
+   "smoke56",
+   "build_only_f1",
+   "install"
+  ]
+ },
+ "consistency": {
+  "all_consistent": true,
+  "rows": 36,
+  "inconsistent": [],
+  "walltime_components": {
+   "terms": {
+    "runner_start_gap_s": 330,
+    "process1_timeout_s": 3600,
+    "process2_wall_cap_s": 871200,
+    "process3_timeout_s": 32400,
+    "post_processing_x2_s": 7800,
+    "job_overhead_s": 1800,
+    "f2_wait_start_max_s": 7200
+   },
+   "sum_f1_s": 917130,
+   "sum_f2_s": 924330,
+   "registered_f1_s": 918000,
+   "registered_f2_s": 925200,
+   "projection_limit_s": 691200.0
+  }
+ },
+ "leak_scan": {
+  "clean": false,
+  "n_secret_values": 2,
+  "patterns_supplied": true,
+  "n_commits": 9,
+  "targets": {
+   "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027/hpc_package": {
+    "files": 38,
+    "n_hit_files": 2,
+    "hits": [
+     "env/conda_explicit_linux64.txt",
+     "env/ENV_LOCK.txt"
+    ],
+    "excluded": []
+   },
+   "/home/jin/wt_hpr_20261027/research/06_scope_redesign/p1_hpr_20261027": {
+    "files": 156,
+    "n_hit_files": 0,
+    "hits": [],
+    "excluded": [
+     "HPR_CLAUDE_CODE_INSTRUCTION.md"
+    ]
+   },
+   "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_hpr_20261027": {
+    "files": 40,
+    "n_hit_files": 2,
+    "hits": [
+     "hpc_package/env/conda_explicit_linux64.txt",
+     "hpc_package/env/ENV_LOCK.txt"
+    ],
+    "excluded": [
+     "HPR_CLAUDE_CODE_INSTRUCTION.md"
+    ]
+   },
+   "/home/jin/hpr": {
+    "files": 35,
+    "n_hit_files": 0,
+    "hits": [],
+    "excluded": []
+   }
+  },
+  "commits_with_hits": {
+   "69b0b7d1": {
+    "value_hits": 0,
+    "pattern_hits": 1,
+    "files": [
+     "research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_submit.sh"
+    ]
+   },
+   "be5e49fd": {
+    "value_hits": 0,
+    "pattern_hits": 1,
+    "files": [
+     "research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_submit.sh"
+    ]
+   }
+  }
+ },
+ "reference_values_sha256": "681fcc8a6c853f4a801a8449726af8ebdadca7440b7e6ad23ed8e2811d5030b7",
+ "operator_guide_sha256": "47238a227cd579ba8cc42a75e3262757ed8da009db43d628556bf6cec77c6d44",
+ "checklist_sha256": "9b22a12abf4b8b794b68b2e7432aa8584078ec5978e8bdf8a4e121b0ad817ef3",
+ "review_sha256": "d2c50d91ff6d3035934c02d2338d43c7fe48f5e8616830f9c9fe6b2624714f6a"
+}

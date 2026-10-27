@@ -239,7 +239,7 @@
 | 编号 | 处理 |
 |---|---|
 | N-01 | **已修**：手册 A1 判据改为"第一个数 = 第二个数 + 2（38 / 36）" |
-| N-02 | **已落实**：全量测试（`-rs`，含跳过原因）在审查修正之后的提交上重跑并写入检查单 H-P5（见 H-P5 的提交号与计数；其后的提交只改 `research/` 下文档与打包脚本，`git diff -- . ':!research'` 为空）；证据提交后 H-P14 以最终推送记录填写 |
+| N-02 | **已落实**：全量测试（`-rs`，含跳过原因）在审查修正之后的提交 `a955ab59` 上重跑（719 / 67 / 0），自查 S-01 之后又在最终代码提交 `8ed41d97` 上重跑（719 / 67 / 0，跳过清单逐行相同），写入检查单 H-P5；H-P14 以推送方式说明与仓库外的推送记录填写（记录不能写进它所描述的提交） |
 | N-03 | **已修**：`RUN_PLAN_HPC.md` §5 第 1 项补 rss 模式下 cgroup 列为空的说明（头部修订列表同步） |
 | N-04 | **已修**：手册 C3 改为"至少包含这四行，且无 FAILED" |
 | N-05 | **已修**：手册 A3 的 `/usr/bin/time -v true` 加 `2>/dev/null` |
@@ -251,6 +251,6 @@
 
 | 编号 | 级别 | 位置 | 发现 | 处理 |
 |---|---|---|---|---|
-| S-01 | 非阻断（已修） | `hpc_package_src/hpr_job.sh` 的 build_only 分支；本机干跑脚本 `dryrun.sh` | 收尾重建包的干跑记录（`evidence/dry_run/DRYRUN_STATUS.txt`）显示：同一干跑目录上第二次起运行 BUILD_ONLY 作业脚本时，运行器按上次回执（`.cond=build_only`）跳过构建（2 s），作业体仍 exit 0 并把旧数字写入 `BUILD_ONLY_STATUS.txt`，`BUILD_CHECK_F1` 因 LP 已被上次删除而 `problem_file` 不通过。在 HPC 上重跑步骤 D2 会得到一份看似成功的旧记录 | 作业体 build_only 分支在 `runs/build_only_f1` 已含上次运行（`F1/` 目录或 `BUILD_ONLY_STATUS.txt`）时拒绝（exit 2，不写任何文件，与其他拒绝同一口径）；替身测试 `test_job_body_build_only_records_metrics_and_deletes_the_lp` 增加同一目录的第二次调用（拒绝；`STATUS.txt` / `BUILD_ONLY_STATUS.txt` / `PBS_JOBS.txt` 不变）；干跑脚本先移走旧目录（终版包的 BUILD_ONLY 干跑因此是真实构建）并增加拒绝用例 R21；手册 D2 与附录 2、`RUN_PLAN_HPC.md` §9 末条与头部修订段补说明。formal / smoke56 / batch 分支、运行器与求解路径代码未动；包在该提交上重建（终版提交见检查单头部）；改动 3 行，未再送独立审查 |
+| S-01 | 非阻断（已修） | `hpc_package_src/hpr_job.sh` 的 build_only 分支；本机干跑脚本 `dryrun.sh` | 收尾重建包的干跑记录（`evidence/dry_run/DRYRUN_STATUS.txt`）显示：同一干跑目录上第二次起运行 BUILD_ONLY 作业脚本时，运行器按上次回执（`.cond=build_only`）跳过构建（2 s），作业体仍 exit 0 并把旧数字写入 `BUILD_ONLY_STATUS.txt`，`BUILD_CHECK_F1` 因 LP 已被上次删除而 `problem_file` 不通过。在 HPC 上重跑步骤 D2 会得到一份看似成功的旧记录 | 作业体 build_only 分支在 `runs/build_only_f1` 已含上次运行（`F1/` 目录或 `BUILD_ONLY_STATUS.txt`）时拒绝（exit 2，不写任何文件，与其他拒绝同一口径）；替身测试 `test_job_body_build_only_records_metrics_and_deletes_the_lp` 增加同一目录的第二次调用（拒绝；`STATUS.txt` / `BUILD_ONLY_STATUS.txt` / `PBS_JOBS.txt` 不变）；干跑脚本先移走旧目录（终版包的 BUILD_ONLY 干跑因此是真实构建）并增加拒绝用例 R21；手册 D2 与附录 2、`RUN_PLAN_HPC.md` §9 末条与头部修订段补说明。formal / smoke56 / batch 分支、运行器与求解路径代码未动；包在该提交上重建（终版提交见检查单头部）；改动 5 增 2 删（逻辑 1 行），未再送独立审查 |
 
 说明：S-01 发现于两轮审查之后，不计入上面的 23 条；它不改变任何登记值。
