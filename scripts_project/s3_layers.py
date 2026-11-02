@@ -20,6 +20,8 @@ import pandas as pd
 from carrier_architecture import atmosphere_bus
 from s2_costs import cost, fuel_price, fuel_price_ids, fuel_price_scenario
 from s2_layers import add_bus, add_link, country_of, ensure_carrier
+from carrier_architecture import COUNTRIES
+from v3_layers import LANDLOCKED, ensure_liquid_bus, liquid_bus, liquids_national, national_liquid_buses
 
 HOURS = 8760.0
 # research.s3.gas.lng_expansion (S3B R3, S4B-0 decision 72, S4E-2 decision 95 e, M08a A4 decision 131)
@@ -255,20 +257,28 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
         n.generators.loc[name, ["country", "research_role"]] = [country, "EXTERNAL_SUPPLY"]
         return name
 
-    # 1. oil regional pool
+    # 1. oil regional pool (V3, decision 161: one national bus per country, import at the coastal countries at the same world price, Lao oil through the rail transit)
     oil_price = fuel_price(cfg, registry, "oil")   # S4C-0 (decision 85): same WEO scenario as gas and coal
-    pool = pool_bus("ASEAN oil", "oil")
+    nat = liquids_national(cfg); nat_buses = national_liquid_buses(cfg)
+    pool = "national buses" if nat else pool_bus("ASEAN oil", "oil")
     ext = list(n.generators.index[(n.generators.carrier == "oil") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
     n.mremove("Generator", ext)
-    import_gen("ASEAN oil import", pool, "oil import", oil_price)
+    if nat:
+        for c in sorted(COUNTRIES):
+            b = ensure_liquid_bus(n, cfg, c, "oil")
+            if c not in LANDLOCKED:
+                import_gen(f"{c} oil import", b, "oil import", oil_price, country=c)
+    else:
+        import_gen("ASEAN oil import", pool, "oil import", oil_price)
     ensure_carrier(n, "oil pool")
     k = 0
     for b in n.buses.index[n.buses.carrier == "oil"]:
-        if b == pool or not b.endswith(" oil"):
+        if b == pool or b in nat_buses or not b.endswith(" oil"):
             continue
         node = b[:-4]
-        add_link(n, f"oil pool {node}", country_of(n, node) if node in n.buses.index else "ASEAN", "oil pool", [b, pool], [1.0], p_min_pu=-1.0, role="TRANSPORT",
-                 extra={"gas_pipeline_kind": "", "pool": "ASEAN oil"})
+        tgt = liquid_bus(cfg, country_of(n, node), "oil") if nat else pool
+        add_link(n, f"oil pool {node}", country_of(n, node) if node in n.buses.index else "ASEAN", "oil pool", [b, tgt], [1.0], p_min_pu=-1.0, role="TRANSPORT",
+                 extra={"gas_pipeline_kind": "", "pool": tgt})
         k += 1
     led["oil"] = dict(pool=pool, external_removed=len(ext), distribution_links=k, price=oil_price, price_registry_id=fuel_price_ids(cfg)["oil"], direction="bidirectional (node <-> pool)")
     # 2. coal / lignite unchanged (per node, S2 structure)
@@ -279,8 +289,14 @@ def add_imports(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
     for carrier, bus_name, bus_carrier, gcar in [("ammonia", "ASEAN ammonia", "ammonia", "ammonia import"), ("methanol", "ASEAN methanol", "methanol", "methanol import"),
                                                    ("oil non-fossil", "ASEAN oil non-fossil", "oil non-fossil", "FT fuel import")]:
         p = float(prices.at[carrier, "applied_eur2020_per_mwh"]) * f
-        pool_bus(bus_name, bus_carrier)
-        import_gen(f"{bus_name} import", bus_name, gcar, p)
+        if nat:   # V3 (D161-5 a): same world price at every coastal national bus
+            for c in sorted(COUNTRIES):
+                b = ensure_liquid_bus(n, cfg, c, bus_carrier)
+                if c not in LANDLOCKED:
+                    import_gen(f"{b} import", b, gcar, p, country=c)
+        else:
+            pool_bus(bus_name, bus_carrier)
+            import_gen(f"{bus_name} import", bus_name, gcar, p)
         green[carrier] = dict(bus=bus_name, generator=f"{bus_name} import", price_applied=p, base=float(prices.at[carrier, "base_eur2020_per_mwh"]), esc=prices.at[carrier, "esc"])
     # 4. liquid hydrogen by ship at the LNG terminal nodes
     h2p = float(prices.at["hydrogen", "applied_eur2020_per_mwh"]) * f
@@ -319,16 +335,18 @@ def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
     A = cfg["research"]["s3"]["ammonia_methanol"]
     meoh_per_h2, meoh_per_tco2, meoh_per_e = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"]), float(A["MWh_MeOH_per_MWh_e"])
     cracker_in = float(A["MWh_NH3_per_MWh_H2_cracker"]); min_pl = float(A["min_part_load_methanolisation"])
-    nh3 = add_bus(n, "ASEAN ammonia", "ammonia", "ASEAN", ""); meoh = add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
-    led = dict(buses=[nh3, meoh], components={})
+    pools = sorted(COUNTRIES) if liquids_national(cfg) else ["ASEAN"]   # V3 (decision 161): one ammonia and one methanol bus per country
+    led = dict(buses=[ensure_liquid_bus(n, cfg, c, k) for c in pools for k in ("ammonia", "methanol")], components={})
     # stores on the regional buses
     st_nh3 = "NH3 (l) storage tank incl. liquefaction"
     ensure_carrier(n, "ammonia store"); ensure_carrier(n, "methanol store")
-    n.add("Store", "ASEAN ammonia store", bus=nh3, carrier="ammonia store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, st_nh3, "fixed"), lifetime=cost(costs, st_nh3, "lifetime"))
-    n.add("Store", "ASEAN methanol store", bus=meoh, carrier="methanol store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, "General liquid hydrocarbon storage (product)", "fixed"),
-          lifetime=cost(costs, "General liquid hydrocarbon storage (product)", "lifetime"))
-    for s in ["ASEAN ammonia store", "ASEAN methanol store"]:
-        n.stores.loc[s, ["country", "research_role"]] = ["ASEAN", "REGIONAL_STORE"]
+    for c in pools:
+        nh3, meoh = liquid_bus(cfg, c, "ammonia"), liquid_bus(cfg, c, "methanol")
+        n.add("Store", f"{nh3} store", bus=nh3, carrier="ammonia store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, st_nh3, "fixed"), lifetime=cost(costs, st_nh3, "lifetime"))
+        n.add("Store", f"{meoh} store", bus=meoh, carrier="methanol store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, "General liquid hydrocarbon storage (product)", "fixed"),
+              lifetime=cost(costs, "General liquid hydrocarbon storage (product)", "lifetime"))
+        for s in (f"{nh3} store", f"{meoh} store"):
+            n.stores.loc[s, ["country", "research_role"]] = [c, "REGIONAL_STORE"]
     hb_el, hb_h2 = cost(costs, "Haber-Bosch", "electricity-input"), cost(costs, "Haber-Bosch", "hydrogen-input")
     hb_fixed, hb_vom, hb_life = cost(costs, "Haber-Bosch", "fixed"), cost(costs, "Haber-Bosch", "VOM"), cost(costs, "Haber-Bosch", "lifetime")
     cr_fixed, cr_life = cost(costs, "Ammonia cracker", "fixed"), cost(costs, "Ammonia cracker", "lifetime")
@@ -342,6 +360,7 @@ def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
         c = country_of(n, node); atmo = atmosphere_bus(c); h2 = f"{node} H2"; co2s = f"{node} co2 stored"
         if h2 not in n.buses.index:
             continue
+        nh3, meoh = liquid_bus(cfg, c, "ammonia"), liquid_bus(cfg, c, "methanol")
         add_link(n, f"{node} Haber-Bosch", c, "Haber-Bosch", [node, nh3, h2], [1.0 / hb_el, -hb_h2 / hb_el], capital_cost=hb_fixed / hb_el, marginal_cost=hb_vom / hb_el, lifetime=hb_life)
         counts["haber_bosch"] += 1
         add_link(n, f"{node} ammonia cracker", c, "ammonia cracker", [nh3, h2], [1.0 / cracker_in], capital_cost=cr_fixed / cracker_in, lifetime=cr_life)
@@ -403,15 +422,25 @@ def add_fuel_carbon_mode(n, costs, cfg, nodes):
     ef_oil, ef_meoh = cost(costs, "oil", "CO2 intensity"), cost(costs, "methanol", "CO2 intensity")
     A = cfg["research"]["s3"]["ammonia_methanol"]
     meoh_per_h2, meoh_per_tco2 = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"])
-    nf_pool = add_bus(n, "ASEAN oil non-fossil", "oil non-fossil", "ASEAN", "")
+    nat = liquids_national(cfg); nat_buses = national_liquid_buses(cfg)   # V3 (decision 161): one non-fossil oil bus and store per country
+    if nat:
+        ensure_carrier(n, "oil non-fossil store")
+        for c in sorted(COUNTRIES):
+            b = ensure_liquid_bus(n, cfg, c, "oil non-fossil")
+            n.add("Store", f"{b} store", bus=b, carrier="oil non-fossil store", e_nom_extendable=True, e_cyclic=True, capital_cost=cost(costs, "General liquid hydrocarbon storage (product)", "fixed"),
+                  lifetime=cost(costs, "General liquid hydrocarbon storage (product)", "lifetime"))
+            n.stores.loc[f"{b} store", ["country", "research_role"]] = [c, "REGIONAL_STORE"]
+    else:
+        add_bus(n, "ASEAN oil non-fossil", "oil non-fossil", "ASEAN", "")
     L = n.links
     led = dict(mode=mode, node_non_fossil_buses=0, twin_meters=0, producer_ports_added=0, credits_removed=0, consumer_ports_removed=0, notes=[])
     # node non-fossil oil buses with pool links (both modes: imported FT fuel needs a zero-EF path)
     ensure_carrier(n, "oil pool")
-    oil_nodes = [b[:-4] for b in n.buses.index if n.buses.at[b, "carrier"] == "oil" and b.endswith(" oil") and b != "ASEAN oil"]
+    oil_nodes = [b[:-4] for b in n.buses.index if n.buses.at[b, "carrier"] == "oil" and b.endswith(" oil") and b != "ASEAN oil" and b not in nat_buses]
     for node in oil_nodes:
         c = country_of(n, node)
         nb = add_bus(n, f"{node} oil non-fossil", "oil non-fossil", c, node)
+        nf_pool = liquid_bus(cfg, c, "oil non-fossil")
         add_link(n, f"oil non-fossil pool {node}", c, "oil pool", [nb, nf_pool], [1.0], p_min_pu=-1.0, role="TRANSPORT", extra={"pool": nf_pool})
         led["node_non_fossil_buses"] += 1
     # twin consumer meters from the node non-fossil bus (no atmosphere port)

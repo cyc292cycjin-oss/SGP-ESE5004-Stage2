@@ -191,7 +191,7 @@ def proportional(total: float, weights: dict) -> dict:
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- solved network
-DIRECT = ("capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight", "co2_transit_ship_freight", "co2_transit_rail_freight")
+DIRECT = ("capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight", "co2_transit_ship_freight", "co2_transit_rail_freight", "liquid_ship_freight", "liquid_transit_freight")
 XB_SUBJECTS = ("xb_share_infrastructure_cost", "xb_share_congestion_rent")
 BASE_ELEC = ("electricity",)
 FIXED_ELEC = ("electricity", "industry electricity", "land transport EV", "agriculture machinery electric")   # S4R R1 model_fixed_elec_total_twh
@@ -302,7 +302,13 @@ def bunker_standalone(n) -> dict:
         return dict(computable=False, reason="no bunker load in this network")
     P = n.get_switchable_as_dense("Load", "p_set")[loads.index].T.groupby(loads.bus).sum().T
     gmc = n.get_switchable_as_dense("Generator", "marginal_cost"); lmc = n.get_switchable_as_dense("Link", "marginal_cost")
-    imp = n.generators[n.generators.carrier.astype(str).str.contains("import") & n.generators.bus.map(ent).isin([POOL, LB])]
+    imp = n.generators[n.generators.carrier.astype(str).str.contains("import")]
+    upstream = {}   # V3 (decision 161): node liquid bus <- national bus <- Lao rail transit, unit adder of each step
+    for lnk, q in lk[lk.carrier.isin(["oil pool", "liquid transit rail"])].iterrows():
+        if str(q.carrier) == "oil pool":
+            upstream.setdefault(q.bus0, []).append((q.bus1, 0.0))
+        else:
+            upstream.setdefault(q.bus1, []).append((q.bus0, float(q.marginal_cost)))
     out, total, notes = {}, 0.0, []
     for b in P.columns:
         routes, excluded = {}, []
@@ -311,11 +317,17 @@ def bunker_standalone(n) -> dict:
             if emits:
                 excluded.append(dict(meter=m, pool=r.bus0, reason="emits into the bunker CO2 account (fossil): excluded by the bunker net-zero"))
                 continue
-            for g, q in imp[imp.bus == r.bus0].iterrows():
-                unit = gmc[g] / float(r.efficiency) + lmc[m]
+            reach = {r.bus0: 0.0}; todo = [r.bus0]
+            while todo:
+                x_ = todo.pop()
+                for y_, d_ in upstream.get(x_, []):
+                    if y_ not in reach:
+                        reach[y_] = reach[x_] + d_; todo.append(y_)
+            for g, q in imp[imp.bus.isin(list(reach))].iterrows():
+                unit = gmc[g] / float(r.efficiency) + lmc[m] + reach[q.bus]
                 cap = (float(r.capital_cost) if r.p_nom_extendable else 0.0) + (float(q.capital_cost) / float(r.efficiency) if q.p_nom_extendable else 0.0)
                 lim = min(float(r.p_nom_max) if r.p_nom_extendable else float(r.p_nom), (float(q.p_nom_max) if q.p_nom_extendable else float(q.p_nom)) * float(r.efficiency))
-                routes[f"{g} -> {m}"] = dict(generator=g, meter=m, pool=r.bus0, carrier=str(q.carrier), unit_cost=unit, capital_cost_per_mw_delivered=cap, limit_mw=lim)
+                routes[f"{g} -> {m}"] = dict(generator=g, meter=m, pool=q.bus, carrier=str(q.carrier), unit_cost=unit, capital_cost_per_mw_delivered=cap, limit_mw=lim)
         if not routes:
             out[b] = dict(computable=False, excluded=excluded, reason="no admissible import route")
             notes.append(f"{b}: no admissible import route"); total = np.nan; continue

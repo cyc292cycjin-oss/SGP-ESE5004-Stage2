@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from v3_layers import ensure_liquid_bus
 from carrier_architecture import COUNTRIES, ATMOSPHERE_CARRIER, atmosphere_bus, finite
 from d1_common import HVC_FEEDSTOCK_ACCOUNTS
 from s2_costs import cost
@@ -684,6 +685,16 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_ASEAN_OWN_2019.csv")
     elif other_bucket == "useful_heat_bands":   # M08b B2 (decision 133): other-bucket fuels -> useful heat in four temperature bands (supplement 01)
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_USEFUL_HEAT_BANDS.csv")
+    v3 = I.get("v3") or {}   # V3 (decisions 163, 164): sub-sector structure inside the v2 country totals, node allocation by facility
+    if v3.get("summary_table"):
+        ind_path = repo / v3["summary_table"]
+    car_shares, proc_shares = {}, {}
+    if v3.get("carrier_node_shares"):
+        t = pd.read_csv(repo / v3["carrier_node_shares"]); t = t[t.case == str(v3.get("case", "main"))]
+        for (c_, k_), g_ in t.groupby(["country", "carrier"]):
+            car_shares.setdefault(c_, {})[k_] = dict(zip(g_.node, g_.share))
+        for (c_, k_), g_ in pd.read_csv(repo / v3["process_node_shares"]).groupby(["country", "key"]):
+            proc_shares.setdefault(c_, {})[k_] = dict(zip(g_.node, g_.share))
     heat_cfg = heat_band_settings(cfg, repo); heat_bands = heat_cfg is not None
     if (ov_mode == "useful_heat" or other_bucket == "useful_heat_bands") and not heat_bands:
         raise ValueError("useful-heat demand (other_bucket useful_heat_bands / biomass_overflow_mode useful_heat) needs research.s2.industry.heat_bands")
@@ -802,11 +813,11 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 if s <= 0:
                     continue
                 if m_share > 0:
-                    add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+                    meoh_bus = ensure_liquid_bus(n, cfg, c, "methanol")   # V3 (decision 161): national bus | ASEAN pool
                     fb = add_bus(n, f"{node} shipping methanol final", "methanol final energy", c, node)
                     link = f"{node} shipping methanol"
                     if link not in n.links.index:
-                        add_link(n, link, c, "shipping methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, ef_meoh], role="CONVERSION",
+                        add_link(n, link, c, "shipping methanol", [meoh_bus, fb, atmosphere_bus(c)], [1.0, ef_meoh], role="CONVERSION",
                                  extra={"carbon_rule": "methanol carbon released at use in the consuming country (PyPSA-Eur shipping methanol link); origin-neutral split in S3-5"})
                     plain_load(node, c, "Transport", account, "shipping methanol", fb, v_oil * s * m_share * conv_m, f"{c}:{account}:oil x {m_share} x {conv_m:.4f}", f"{node} {sector} methanol")
                 if h_share > 0:
@@ -860,48 +871,52 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                                    if not to_gas else None), useful_heat_efficiency=ov_heat_eff, source_band_shares=ov_band if not to_gas else None,
                                   heat_bands_mwh={b: ind_car.get(f"heat_{b}", 0.0) for b in band_up})
         hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
-        for node, s in sh.items():
-            if s <= 0:
+        cs = car_shares.get(c)   # V3 (decision 164): {carrier: {node: share}}; v2 one share table for all carriers
+        for node in (sorted({x for d_ in cs.values() for x in d_}) if cs else list(sh)):
+            s = sh.get(node, 0.0)
+            if cs is None and s <= 0:
                 continue
-            if ind_car.get("heat", 0.0) * s > 0:
-                plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * s, heat_src, f"{node} industry heat demand")
+            S = (lambda k, node=node: cs.get(k, {}).get(node, 0.0)) if cs else (lambda k, s=s: s)
+            if ind_car.get("heat", 0.0) * S("heat") > 0:
+                plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * S("heat"), heat_src, f"{node} industry heat demand")
             for band in band_up:   # M08b B2: other-bucket useful heat, carrier chosen by the model among the band's technology-data options
                 bc = HEAT_BAND_BUS[band][0]
-                if ind_car.get(f"heat_{band}", 0.0) * s > 0:
-                    plain_load(node, c, "Industry", HEAT_BAND_ACCOUNT[band], bc, f"{node} {bc}", ind_car[f"heat_{band}"] * s,
+                if ind_car.get(f"heat_{band}", 0.0) * S(f"heat_{band}") > 0:
+                    plain_load(node, c, "Industry", HEAT_BAND_ACCOUNT[band], bc, f"{node} {bc}", ind_car[f"heat_{band}"] * S(f"heat_{band}"),
                                f"{src_ind}:heat_{band} (other bucket fuels x JRC-IDEES OIS band share x useful-heat efficiency)", f"{node} {bc} demand")
             for carrier in ["coal", "oil", "gas", "biomass", "unclassified_fuel"]:
                 v = ind_car.get(carrier, 0.0)
-                if v * s > 0:
-                    meter_load(node, c, "industry", carrier, v * s, f"{src_ind}:{carrier}", "IndustryFinalEnergy")
-            if ov_ind * s > 0 and ov_mode == "useful_heat":   # M08b B2: industrial overflow -> useful heat in its source band (medium A / B / high)
+                if v * S(carrier) > 0:
+                    meter_load(node, c, "industry", carrier, v * S(carrier), f"{src_ind}:{carrier}", "IndustryFinalEnergy")
+            s_ov = S("biomass")   # the overflow follows the fixed biomass
+            if ov_ind * s_ov > 0 and ov_mode == "useful_heat":   # M08b B2: industrial overflow -> useful heat in its source band (medium A / B / high)
                 for band in band_up:
                     bc = HEAT_BAND_BUS[band][0]
-                    if ov_ind * ov_heat_eff * ov_band[band] * s > 0:
-                        plain_load(node, c, "Industry", "IndustryBiomassOverflowUsefulHeat", bc, f"{node} {bc}", ov_ind * ov_heat_eff * ov_band[band] * s,
+                    if ov_ind * ov_heat_eff * ov_band[band] * s_ov > 0:
+                        plain_load(node, c, "Industry", "IndustryBiomassOverflowUsefulHeat", bc, f"{node} {bc}", ov_ind * ov_heat_eff * ov_band[band] * s_ov,
                                    f"{c}:IndustryBiomass above the solid-biomass potential x {ov_heat_eff} -> useful heat {band} (biomass_overflow_rule)",
                                    f"{node} industry overflow {bc[len('industry '):]} demand")
-            elif ov_ind * s > 0:
-                meter_load(node, c, "industry overflow", "gas", ov_ind * s, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
-            if ind_car.get("electricity", 0.0) * s > 0:
-                plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * s, f"{src_ind}:electricity", f"{node} industry electricity demand")
-            if ind_car.get("hydrogen", 0.0) * s > 0:
-                plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * s, f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
+            elif ov_ind * s_ov > 0:
+                meter_load(node, c, "industry overflow", "gas", ov_ind * s_ov, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
+            if ind_car.get("electricity", 0.0) * S("electricity") > 0:
+                plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * S("electricity"), f"{src_ind}:electricity", f"{node} industry electricity demand")
+            if ind_car.get("hydrogen", 0.0) * S("hydrogen") > 0:
+                plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * S("hydrogen"), f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
             # S3-3 (decision 44), regional_buses mode: ammonia load on the regional ammonia bus (no CO2); methanol through a node link that books the
             # methanol carbon in the consuming country's atmosphere (PyPSA-Eur industry methanol link, prepare_sector_network.py lines 4617-4626,
             # efficiency2 = 1 / MWh_MeOH_per_tCO2 = technology-data methanol CO2 intensity 0.2482 t/MWh); the regional buses are created here when the
             # import layer (S3-2) has not created them yet. S3-5 (origin-neutral) replaces the fossil EF by the fuel-origin split.
-            if ind_car.get("ammonia", 0.0) * s > 0:
-                add_bus(n, "ASEAN ammonia", "ammonia", "ASEAN", "")
-                plain_load(node, c, "Industry", "IndustryAmmonia", "industry ammonia", "ASEAN ammonia", ind_car["ammonia"] * s, f"{src_ind}:ammonia", f"{node} industry ammonia demand")
-            if ind_car.get("methanol", 0.0) * s > 0:
-                add_bus(n, "ASEAN methanol", "methanol", "ASEAN", "")
+            if ind_car.get("ammonia", 0.0) * S("ammonia") > 0:
+                nh3_bus = ensure_liquid_bus(n, cfg, c, "ammonia")
+                plain_load(node, c, "Industry", "IndustryAmmonia", "industry ammonia", nh3_bus, ind_car["ammonia"] * S("ammonia"), f"{src_ind}:ammonia", f"{node} industry ammonia demand")
+            if ind_car.get("methanol", 0.0) * S("methanol") > 0:
+                meoh_bus = ensure_liquid_bus(n, cfg, c, "methanol")
                 fb = add_bus(n, f"{node} industry methanol final", "methanol final energy", c, node)
                 link = f"{node} industry methanol use"
                 if link not in n.links.index:
-                    add_link(n, link, c, "industry methanol", ["ASEAN methanol", fb, atmosphere_bus(c)], [1.0, cost(costs, "methanol", "CO2 intensity")], role="CONVERSION",
+                    add_link(n, link, c, "industry methanol", [meoh_bus, fb, atmosphere_bus(c)], [1.0, cost(costs, "methanol", "CO2 intensity")], role="CONVERSION",
                              extra={"carbon_rule": "methanol carbon released at use (PyPSA-Eur industry methanol link); origin-neutral split in S3-5"})
-                plain_load(node, c, "Industry", "IndustryMethanol", "industry methanol", fb, ind_car["methanol"] * s, f"{src_ind}:methanol", f"{node} industry methanol demand")
+                plain_load(node, c, "Industry", "IndustryMethanol", "industry methanol", fb, ind_car["methanol"] * S("methanol"), f"{src_ind}:methanol", f"{node} industry methanol demand")
             # industrial biomass with capture (BECCS in industry): alternative route into the same biomass final bus
             fb = f"{node} industry biomass final"
             if fb in n.buses.index and f"{node} industry biomass CC" not in n.links.index:
@@ -965,6 +980,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         feed_pot = float(bound.at[c, "feedstock_carbon_potential_tco2"]) if c in bound.index else 0.0
         f_process = min(1.0, float(bound.at[c, "edgar_2B_chemicals_tco2"]) / feed_pot) if feed_pot > 0 else 0.0
         sh, _ = _shares_for(shares, astar_shares, c, "NonEnergyUse")
+        sh = proc_shares.get(c, {}).get("petrochem", sh)   # V3 (D164-5 a): non-energy use follows the refineries / petrochemicals
         hvc_on = bool(I.get("hvc_recycling_applies_to_naphtha", True))
         for carrier, v in ne.groupby("carrier").v.sum().items():
             if v <= 0:
@@ -999,14 +1015,23 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                    full_release_2050_t=(float(fc_row["full_release_2050_t"]) if fc_row is not None else None))
         sh, _ = _shares_for(shares, astar_shares, c, "ProcessEmissions")
         ensure_carrier(n, "process emissions")
-        for node, s in sh.items():
-            if (proc + proc_feed) * s <= 0:
+        ps = proc_shares.get(c)
+        if ps:   # V3 (D164-5 a): 2.A with the cement plants, 2.C with steel and non-ferrous metals, 2.B + 2.D with the petrochemical sites
+            part = {g_: (float(reg.loc[f"process_emissions_{g_}_2050{pe_sfx}_{c}", "value"]) if g_ in S2["co2"]["process_emissions_scope"] and reg.loc[f"process_emissions_{g_}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO") else 0.0) for g_ in ("minerals", "metals")}
+            pn = {}
+            for val, key in ((part["minerals"], "process_minerals"), (part["metals"], "process_metals"), (proc_feed, "petrochem")):
+                for x_, y_ in ps.get(key, sh).items():
+                    pn[x_] = pn.get(x_, 0.0) + val * y_
+        else:
+            pn = {x_: (proc + proc_feed) * y_ for x_, y_ in sh.items()}
+        for node, q_ in pn.items():
+            if q_ <= 0:
                 continue
             g = f"{node} process emissions source"
-            n.add("Generator", g, bus=f"{node} process emissions", carrier="process emissions", p_nom=(proc + proc_feed) * s / HOURS, p_nom_extendable=False, p_min_pu=1.0, p_max_pu=1.0, marginal_cost=0.0, capital_cost=0.0)
+            n.add("Generator", g, bus=f"{node} process emissions", carrier="process emissions", p_nom=q_ / HOURS, p_nom_extendable=False, p_min_pu=1.0, p_max_pu=1.0, marginal_cost=0.0, capital_cost=0.0)
             n.generators.loc[g, ["country", "research_role", "asset_role"]] = [c, "PROCESS_EMISSION_SOURCE", "exogenous_process_emission"]
             loads.append(dict(load=g, country=c, sector="ProcessEmissions", account="EDGAR 2.A+2.C x industry multiplier" + (" + 2.B+2.D (territorial feedstock carbon, R2)" if proc_feed > 0 else ""),
-                              carrier="process emissions", source_row=f"process_emissions_*_2050_{c}" + (f";feedstock_process_2B_2D_2050_{c}" if proc_feed > 0 else ""), annual_mwh=(proc + proc_feed) * s, bus=f"{node} process emissions"))
+                              carrier="process emissions", source_row=f"process_emissions_*_2050_{c}" + (f";feedstock_process_2B_2D_2050_{c}" if proc_feed > 0 else ""), annual_mwh=q_, bus=f"{node} process emissions"))
         # ---- domestic plastics burned (R2 b): exogenous release to the national atmosphere, no capture ---------------------
         if plastics > 0:
             ensure_carrier(n, "plastic waste"); ensure_carrier(n, "waste incineration")

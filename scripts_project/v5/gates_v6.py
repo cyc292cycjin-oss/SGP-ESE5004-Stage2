@@ -39,7 +39,7 @@ SUBSET_KEYS_GATES_V6 = ("scenario", "cross_border", "fuels.price_scenario", "fin
 # smr_cost_source, aeo8_price_year_factor - the literal list has cost_layer.active only), site_candidates, and the new variant sections
 # disconnected / coalition (decision 132). Excluded as in GATES_V6: solver.profile, solver.profiles, solver.acceptance, solver.run_rules,
 # stage / status labels, config_overrides (their effect is in the values).
-SUBSET_KEYS_M08A_ADDITIONS = ("cost_layer", "site_candidates", "disconnected", "coalition")
+SUBSET_KEYS_M08A_ADDITIONS = ("cost_layer", "site_candidates", "disconnected", "coalition", "liquids")   # liquids: V3 (decision 161), decides the network
 SUBSET_KEYS = SUBSET_KEYS_GATES_V6 + SUBSET_KEYS_M08A_ADDITIONS
 # D2 history (GATES_V6_NOTES section 2, VERIFIED maxima of the D2 ratio under the V6 budget) for the anomaly note of section 4
 D2_HISTORY_MAX = {("56x3h", 1e-8): 0.24, ("56x3h", 1e-6): 19.3, ("56x3h", 1e-5): 769.0, ("365x24h", 1e-8): 33378.0}

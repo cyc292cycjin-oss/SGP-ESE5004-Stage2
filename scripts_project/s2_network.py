@@ -41,6 +41,7 @@ from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
 from m08a_layers import apply_existing_vintage_costs
+from v3_layers import add_liquid_shipping, apply_ev_structure
 from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
@@ -373,12 +374,14 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     nh3_meoh = add_ammonia_methanol(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "ammonia_methanol" in R["s3"]) else None   # S3-3: Haber-Bosch, cracker, methanolisation, biomass-to-methanol, methanol OCGT, stores
     sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
+    ev = apply_ev_structure(n, cfg, repo, registry)   # V3 (decision 165): EV load shape, charger, battery store (flat = v2)
     bunkers = apply_bunker_attribution(n, costs, cfg, demand)   # S4C-3 (decision 88): asean_pool (main: regional bunker loads, separate net-zero bunker account) | bunkering_country | excluded
     extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off); S4D-1 (decision 93): coastal nodes only, Lao transit
     shipping = apply_intra_asean_shipping(n, cfg, registry)   # S4D-2 (decision 92): intra-ASEAN CO2 shipping into the receivers' national stores, maritime trade, both scenarios
     lao_shipping = apply_lao_transit_shipping(n, cfg, registry)   # S4E-2 (decision 95 c): Lao rail transit to the coast, then shipping into another country's national store
     lao_vn = apply_lao_vn_store(n, cfg, registry)   # S4F-2 c (decision 97 c): Lao rail transit to the Vietnamese coast, then the Vietnamese national store (trade)
     lao_th = apply_lao_th_store(n, cfg, registry)   # S4G-2 (decision 99 b): existing_port sensitivity only - Lao transit ending at a Thai port, then the Thai national store
+    liquids = add_liquid_shipping(n, cfg, registry)   # V3 (decision 161): ships between the national liquid buses, Lao rail transit (asean_pool = v2)
     cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
     # 5. network switches, transmission, carbon metadata
     tags = tag_cross_border(n)
@@ -423,13 +426,14 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                                   s4j_layers=dict(transmission_losses=losses, dc_converters=dc_conv),
                                   s4k_layers=dict(ac_losses=ac_losses),
                                   s4l_layers=dict(dust_cleanup={k: v for k, v in dust.items() if k != "table"}),
+                                  v3_layers=dict(liquids=liquids, ev=ev),
                                   interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
     for key in ["research_carbon", "research_cross_border", "existing_cross_border_fom_ledger", "existing_cross_border_fom_eur", "research_co2_storage", "research_biomass", "research_renewable", "research_fleet",
                 "research_sector_alignment", "research_fleet_removed", "existing_unit_removed_s4b1", "research_candidates_s4b2", "research_nuclear_caps", "research_typhoon_premium",
                 "research_fuel_prices", "research_finance", "research_cost_layer_s4c1", "research_hydro_inflow", "research_bunkers", "research_extra_asean_storage",
                 "research_intra_asean_shipping", "research_lao_transit_shipping", "research_max_extension", "research_apg_corridor_caps", "research_th_my_stock", "research_lao_vn_store",
                 "research_readjust_impedance", "research_lao_th_store", "research_la_vn_stock", "research_candidate_num_parallel", "research_transmission_losses", "research_dc_converters", "research_ac_losses",
-                "research_dust_cleanup", "research_existing_vintage_costs"]:
+                "research_dust_cleanup", "research_existing_vintage_costs", "research_liquids", "research_ev"]:
         if key in n.meta:
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})

@@ -81,6 +81,8 @@ def variant_name(base_scenario: str, sets: dict) -> str:
         tag.append("minus" + "".join(sets["coalition.remove_countries"]))
     if sets.get("finance.wacc_mode") == "country_specific":
         tag.append("wacccountry")
+    if sets.get("cross_border.stock_mode") == "no_new_xb":
+        return "no_new_xb"
     scen = "disconnected" if sets.get("cross_border.stock_mode") == "keep_stock_no_new" else base_scenario
     return scen + ("_" + "_".join(tag) if tag else "")
 
@@ -104,16 +106,17 @@ def derive(repo: Path, base: Path, out: Path, sets: dict, costs_path: Path | Non
     if stale and not allow_stale_base:
         raise SystemExit(f"base network {base.name} was built with another config (research_config_sha256 differs); rebuild it or pass --allow-stale-base for evidence")
     sets = {k: sets[k] for k in VARIANT_DEFAULTS if k in sets and sets[k] != VARIANT_DEFAULTS[k]}
-    out_scen = "disconnected" if sets.get("cross_border.stock_mode") == "keep_stock_no_new" else base_scen
-    if sets.get("cross_border.stock_mode") == "keep_stock_no_new" and base_scen != "integrated":
-        raise ValueError("cross_border.stock_mode keep_stock_no_new derives from an integrated base network")
+    stock = sets.get("cross_border.stock_mode")
+    out_scen = "disconnected" if stock == "keep_stock_no_new" else ("no_new_xb" if stock == "no_new_xb" else base_scen)
+    if stock in ("keep_stock_no_new", "no_new_xb") and base_scen != "integrated":
+        raise ValueError(f"cross_border.stock_mode {stock} derives from an integrated base network")
     var_ov = [f"{k}={json.dumps(v) if isinstance(v, list) else v}" for k, v in sets.items()]
     cfg = composed_config(repo, out_scen, base_ov + var_ov)
     R = cfg["research"]
     led = {}
     led["coalition"] = apply_remove_countries(n, sets.get("coalition.remove_countries", []))
     n.meta["scenario"] = out_scen
-    led["stock_mode"] = apply_stock_mode(n, sets.get("cross_border.stock_mode", "remove_all")) if out_scen == "disconnected" else dict(mode="remove_all", note="integrated network: not applicable")
+    led["stock_mode"] = apply_stock_mode(n, sets.get("cross_border.stock_mode", "remove_all")) if out_scen in ("disconnected", "no_new_xb") else dict(mode="remove_all", note="integrated network: not applicable")
     led["co2_shipping"] = apply_co2_shipping(n, sets.get("disconnected.co2_shipping_intra_asean", "allow"))
     if sets.get("finance.wacc_mode") == "country_specific":
         from s4c_layers import apply_wacc_mode

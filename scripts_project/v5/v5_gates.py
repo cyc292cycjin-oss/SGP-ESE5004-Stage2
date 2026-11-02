@@ -123,6 +123,15 @@ def gate_b5_single_switch(cfg_int,cfg_dis,n_dis_solved=None,n_int_solved=None):
         out.update(integrated_cross_border_components=int(len(xb_lines)+len(xb_links)),integrated_cross_border_capacity_mw=float(xb_lines.s_nom_opt.sum()+xb_links.p_nom_opt.sum()))
     out['passed']=bool(only_switch);return out
 
+def gate_b5_no_new_xb(n_int,n_ref):
+    """V3 (decision 160): every cross-border component of the reference is fixed stock of the integrated network with the same capacity; the two networks differ by the cross-border expansion only."""
+    rows=[]
+    for typ,nom in (('Line','s_nom'),('Link','p_nom')):
+        a=n_ref.df(typ);b=n_int.df(typ);x=a[a.border_class=='cross_border']
+        rows.append(dict(type=typ,components=int(len(x)),extendable=int(x[nom+'_extendable'].sum()),capacity=float(x[nom].sum()),not_in_integrated=sorted(set(x.index)-set(b.index))[:5],capacity_differs=[k for k in x.index if k in b.index and abs(float(x.at[k,nom])-float(b.at[k,nom+'_min' if float(b.at[k,nom+'_min'])>0 else nom]))>1e-6*max(1.,float(x.at[k,nom]))][:5]))
+    ok=all(r['extendable']==0 and not r['not_in_integrated'] and not r['capacity_differs'] for r in rows)
+    return dict(gate='B5_NO_NEW_XB',passed=bool(ok),rows=rows)
+
 def gate_b6_cost(obj_int,obj_dis,label_int='integrated',label_dis='disconnected'):
     ok=obj_int<=obj_dis*(1+1e-9)+1e-3
     return dict(gate='B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED',passed=bool(ok),objective={label_int:obj_int,label_dis:obj_dis},difference=obj_dis-obj_int,relative=(obj_dis-obj_int)/max(1.,abs(obj_dis)),note='objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant')
@@ -298,6 +307,10 @@ def gate_b11_supply_routes(n,cfg,min_routes=2):
 # ------------------------------------------------------------------ group B, S3 additions (S3-6)
 IMPORT_CARRIERS=('LNG import','oil import','ammonia import','methanol import','FT fuel import','H2 import','gas production')
 POOL_BUSES=('ASEAN oil','ASEAN oil non-fossil','ASEAN ammonia','ASEAN methanol')
+def pool_buses(n):
+    """Regional pools (v2) or national liquid buses (V3, decision 161: '<ISO2> <carrier>')."""
+    nat=[f'{c} {k}' for c in COUNTRIES for k in ('oil','oil non-fossil','ammonia','methanol')]
+    return [b for b in list(POOL_BUSES)+nat if b in n.buses.index]
 
 def gate_b13_imports_one_way(n):
     """B13: every extra-ASEAN supply is a one-way Generator (sign +1, p_min_pu >= 0); the regional pools carry only nationally owned loads and
@@ -305,7 +318,7 @@ def gate_b13_imports_one_way(n):
     g=n.generators;imp=g[g.carrier.isin([c for c in IMPORT_CARRIERS if c!='gas production'])]
     checks=dict(import_generators=int(len(imp)),all_sign_positive=bool((imp.sign>0).all()) if len(imp) else True,all_p_min_pu_nonneg=bool((imp.p_min_pu>=0).all()) if len(imp) else True,
                 import_links_or_lines=int(n.links.carrier.str.contains('import',case=False).sum()+n.lines.carrier.astype(str).str.contains('import',case=False).sum()))
-    pools=[b for b in POOL_BUSES if b in n.buses.index]
+    pools=pool_buses(n)
     foreign=[l for l in n.loads.index[n.loads.bus.isin(pools)] if ('country' not in n.loads) or str(n.loads.at[l,'country']) not in COUNTRIES]
     checks['pool_loads']=int(n.loads.bus.isin(pools).sum());checks['pool_loads_without_national_owner']=foreign[:10]
     L=n.links;port_cols=[c for c in L if c.startswith('bus') and c[3:].isdigit()];bad=[]

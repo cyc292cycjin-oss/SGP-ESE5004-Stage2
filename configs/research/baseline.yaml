@@ -221,7 +221,7 @@ research:
     H2: true
     gas: true                            # S3-1: gas pipelines along the unified corridors (candidates + 2025 stock from GEM); scenario files set all true / all false
     co2: false                           # CO2 network not built before step 2
-    stock_mode: remove_all               # M08a A7 (decision 132; registry disconnected_definition_main / _sensitivity): remove_all (MAIN: the disconnected scenario removes every ASEAN-internal cross-border fixed network incl. the 2025 stock - the s2_network.py disconnected build) | keep_stock_no_new (sensitivity: derived from the INTEGRATED base by scripts_project/m08a_variants.py - 2025 cross-border AC / DC electricity stock and existing gas pipelines kept, pinned at their 2025 capacity, all candidates removed). Variant keys are refused by the build
+    stock_mode: remove_all               # no_new_xb (V3 decision 160, set by configs/research/no_new_xb.yaml, derived from the integrated base: stock fixed, not extendable) | M08a A7 (decision 132; registry disconnected_definition_main / _sensitivity): remove_all (former MAIN: the disconnected scenario removes every ASEAN-internal cross-border fixed network incl. the 2025 stock - the s2_network.py disconnected build) | keep_stock_no_new (sensitivity: derived from the INTEGRATED base by scripts_project/m08a_variants.py - 2025 cross-border AC / DC electricity stock and existing gas pipelines kept, pinned at their 2025 capacity, all candidates removed). Variant keys are refused by the build
     # coalition (S4D-4, decision 91b): key absent = no effect (kept out of this file so that the switch metadata of every existing network stays
     # valid); set only by --override cross_border.coalition=[MY,SG] (list of ISO2 codes, integrated scenario): only cross-border corridors with both
     # ends in the list stay (all network carriers of decision 15: AC / DC electricity incl. the 2025 stock, H2, gas incl. the 2025 stock, CO2
@@ -340,8 +340,15 @@ research:
     optional_table_s4f2: research_inputs/corridors/OPTIONAL_CORRIDORS_S4F2.csv
     corridors_table_s4h2: research_inputs/corridors/CORRIDORS_S4H2.csv   # S4H-2 c (decision 101): CORRIDORS_S4F2.csv + one zero-capacity candidate at every adjacent node pair of the country pairs with AC stock and no AC candidate (KH-LA, LA-MM, LA-TH, MY-SG, MY-TH; decision-94 rule; scripts_project/s4h_2_data.py); used first when adjacency_completion = on
     candidate_num_parallel: one_circuit   # S4H-2 a (decision 101; scripts_project/s4h_layers.py): one_circuit (main: num_parallel = 1 of 'Al/St 240/40 4-bundle 380.0' for every zero-capacity AC candidate line, x / r / b by the line type; model convention - PyPSA-Eur has no zero-capacity AC candidates) | template43 (former convention: num_parallel 1.286 of template line 43, comparison)
+  liquids:                                # V3 (decision 161; scripts_project/v3_layers.py, V3_RULES.md section 3)
+    structure: national_ship              # national_ship (main: one bus per country and carrier at the hub node, ships between them) | asean_pool (v2, decision 44)
+    hubs_table: research_inputs/liquids_v3/LIQUID_HUB_NODES_V3.csv
+    routes_table: research_inputs/liquids_v3/LIQUID_SHIP_ROUTES_V3.csv
+    ship_cost_basis: td_tanker            # td_tanker (S-B, main: technology-data tanker rows, cargo loss) | ieaghg (S-A, upper-bound sensitivity)
+    ship_cost_scale: 1.0                  # +-50 % sensitivity
+    ship_capacity_factor: 10.0            # fixed bound = carrier ASEAN annual demand / 8760 x factor, not binding by construction (D161-10)
   bunkers:                                # S4C-3 (decision 88, modifying decision 10): international aviation and shipping bunkers (scripts_project/s4c_layers.apply_bunker_attribution)
-    attribution: asean_pool               # asean_pool (main: bunker demand on the regional liquid buses, not attributed to any country; fossil combustion in the separate 'co2 bunkers ASEAN' account, net zero on its own, no national removals transferred) | bunkering_country (former state, decision 10) | excluded (demand and emissions not bound; drives research.s2.demand.international_bunkers to false)
+    attribution: asean_account_nodal      # asean_account_nodal (V3 main, decision 162: loads at the port / airport nodes, same account and 12th player) | asean_pool (v2: bunker demand on the regional liquid buses, not attributed to any country; fossil combustion in the separate 'co2 bunkers ASEAN' account, net zero on its own, no national removals transferred) | bunkering_country (former state, decision 10) | excluded (demand and emissions not bound; drives research.s2.demand.international_bunkers to false)
   co2:                                    # S4C-4 (decision 89): extra-ASEAN CO2 storage option (scripts_project/s4c_layers.apply_extra_asean_storage; unit cost scripts_project/s4c_4_data.py)
     extra_asean_storage: "on"             # on (main: per country an uncapped export from the captured-CO2 buffers to an extra-ASEAN offshore sink at registry co2_extra_asean_storage_cost = 40.75 EUR2020/t, IEAGHG 2004 ship transport 4,500 km + ZEP 2011 offshore storage, grade C +-50 %; counts as storage of the capturing country, decision 20; both scenarios) | off (sensitivity: reproduces the infeasible disconnected case)
     extra_asean_export_nodes: coastal     # S4D-1 (decision 93; scripts_project/s4d_layers.py): coastal (main: export links only at the coastal nodes of coastal_nodes_table - onshore region touching the physical coast incl. internal / archipelagic waters, or a sea port / LNG record, converter nodes <= 5 km from the sea; user decision 2026-10-17; inland CO2 reaches the coast through domestic CO2 pipelines, decision 35) | all (S4C-4 behaviour)
@@ -393,10 +400,18 @@ research:
       international_bunkers: true         # decision 10; sensitivity switch
       shipping: deferred_to_S3            # domestic and international shipping fuel not bound in S2
       land_transport_shares: pypsa_eur_v2025.07.0   # D1 section 4 registry rows share_land_transport_*
-      bev_dsm: false                      # no ASEAN fleet data (number of cars) -> no DSM store; DATA_PENDING
+      bev_dsm: false                      # no ASEAN fleet data (number of cars) -> no DSM store; DATA_PENDING (v2 key, superseded by ev_structure)
+      ev_structure: smart                 # V3 (decision 165, D165-4): smart (E2, main: EV battery store, RAMP consumption + plug-in shapes, fleet proxy) | smart_v2g (E3) | uncontrolled (E4) | flat (v2)
+      ev_fleet_scale: 1.0                 # x 0.5 / x 2 sensitivity of the fleet proxy
+      ev_uncontrolled_delay_h: 3.0        # E4 only
       clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
       cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
     industry:
+      v3:                                   # V3 (decisions 163, 164): empty = v2 tables
+        summary_table: research_inputs/industry_v3/INDUSTRY_2050_SUMMARY_V3.csv   # _NF2023 / _NIUPPER tables = sensitivities
+        carrier_node_shares: research_inputs/industry_v3/INDUSTRY_CARRIER_NODE_SHARES_V3.csv
+        process_node_shares: research_inputs/industry_v3/PROCESS_NEU_NODE_SHARES_V3.csv
+        case: main                          # main | nf2023 | niupper (row selector of carrier_node_shares)
       carrier_mode: pypsa_eur_2050          # R1 (decision 55): pypsa_eur_2050 = 2050 process routes (s3_0_industry.py) | bas_fixed = AEO8 BAS 2019 carrier shares x multiplier (former main, comparison)
       ratio_source: jrc_idees_2021          # S3-0 (decision 61): jrc_idees_2021 = PyPSA-Eur v2025.07.0 sector ratios reproduced from JRC-IDEES-2021 for ALL sub-sectors incl. steel/cement (main) | technology_data_v015 = S2B steel/cement substitutes (sensitivity)
       technology_data_sensitivity_tables:   # ratio_source technology_data_v015

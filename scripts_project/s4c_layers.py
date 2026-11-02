@@ -426,7 +426,7 @@ def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
 
 
 # ---------------------------------------------------------------------------------------------------------------- S4C-3 (decision 88)
-BUNKER_MODES = ("asean_pool", "bunkering_country", "excluded")
+BUNKER_MODES = ("asean_account_nodal", "asean_pool", "bunkering_country", "excluded")   # V3 (decision 162): asean_account_nodal = bunker loads at the port / airport nodes, the separate account and the 12th player as in asean_pool
 BUNKER_ACCOUNTS = {"InternationalAviationBunker": "aviation", "InternationalShippingBunker": "shipping"}
 BUNKER_CO2_BUS = "co2 bunkers ASEAN"
 BUNKER_CO2_CARRIER = "co2 bunkers"
@@ -445,7 +445,7 @@ def bunker_mode(cfg) -> str:
     D = R["s2"]["demand"]
     if mode != "excluded" and not bool(D.get("international_bunkers", True)):
         raise ValueError(f"research.s2.demand.international_bunkers = false contradicts research.bunkers.attribution = {mode} (use excluded)")
-    if mode == "asean_pool" and str(R.get("s3", {}).get("fuel_carbon_mode", "origin_neutral")) != "origin_neutral":
+    if mode in ("asean_pool", "asean_account_nodal") and str(R.get("s3", {}).get("fuel_carbon_mode", "origin_neutral")) != "origin_neutral":
         raise ValueError("research.bunkers.attribution = asean_pool needs research.s3.fuel_carbon_mode = origin_neutral: under producer_credit the "
                          "bunker methanol would book its carbon in the bunker account while the capture credit stays in the producing country, "
                          "i.e. a transfer of national removals that decision 88 excludes")
@@ -507,6 +507,8 @@ def apply_bunker_attribution(n, costs: pd.DataFrame, cfg, demand: dict) -> dict:
         led["by_country"][str(c)] = {f"{BUNKER_ACCOUNTS[a]}_{car.replace(' ', '_')}_mwh": float(v) for (a, car), v in x.groupby(["account", "carrier"]).annual_mwh.sum().items()}
     if mode == "excluded" and len(src):
         raise ValueError("excluded: bunker loads were bound")
+    if mode == "asean_account_nodal":
+        return _apply_bunker_nodal(n, cfg, demand, src, led)
     if mode != "asean_pool":
         led["notes"].append("bunkering_country: loads on the nodes of the bunkering country; fossil kerosene in its atmosphere (decision 10)" if mode == "bunkering_country"
                             else "excluded: bunker demand and emissions not bound (rows in deferred)")
@@ -575,6 +577,48 @@ def apply_bunker_attribution(n, costs: pd.DataFrame, cfg, demand: dict) -> dict:
     led["hook"] = BUNKER_HOOK; led["row"] = BUNKER_ROW
     led["notes"].append("asean_pool: bunker account final level <= 0 on its own; only emission ports (fossil kerosene), so fossil bunker fuel is 0 in any feasible solution; "
                         "methanol shipping is zero at use (its carbon is booked at synthesis in the producing country, decision 64)")
+    n.meta["research_bunkers"] = led
+    return led
+
+
+def _apply_bunker_nodal(n, cfg, demand: dict, src: pd.DataFrame, led: dict) -> dict:
+    """V3 (decision 162): the node loads built by the demand layer stay at their nodes (Assembly port / airport size shares); their final buses get the tag ASEAN (entity
+    ASEAN_BUNKER: the 12th player buys at the node dual), the fossil kerosene meter books into 'co2 bunkers ASEAN', the methanol load gets its own final bus and a link
+    from the national methanol bus without carbon port."""
+    from s2_layers import S2_OWNER_KIND, add_bus, add_link
+    from v3_layers import liquid_bus
+    add_bus(n, BUNKER_CO2_BUS, BUNKER_CO2_CARRIER, "ASEAN", "")
+    n.add("Store", BUNKER_CO2_BUS, bus=BUNKER_CO2_BUS, carrier=BUNKER_CO2_CARRIER, e_nom_extendable=True, e_min_pu=-1.0, e_initial=0.0, e_cyclic=False, capital_cost=0.0, marginal_cost=0.0)
+    n.stores.loc[BUNKER_CO2_BUS, ["country", "research_role"]] = ["ASEAN", "BUNKER_ATMOSPHERE"]
+    for _, r in src.iterrows():
+        ld, c = r.load, r.country
+        if r.carrier == "oil":
+            bus = str(n.loads.at[ld, "bus"]); node = bus[: -len(" aviation international oil final")]; meter = f"{node} aviation international oil meter"
+            n.buses.at[bus, "country"] = "ASEAN"; n.links.at[meter, "bus2"] = BUNKER_CO2_BUS
+            n.links.at[meter, "carbon_rule"] = "fossil oil combustion booked in the ASEAN international bunker account (decision 88)"
+        elif r.carrier == "shipping methanol":
+            old = str(n.loads.at[ld, "bus"]); node = old[: -len(" shipping methanol final")]
+            bus = add_bus(n, f"{node} bunker shipping methanol final", "methanol final energy", "ASEAN", node)
+            add_link(n, f"{node} bunker shipping methanol", c, "shipping methanol", [liquid_bus(cfg, c, "methanol"), bus], [1.0], role="CONVERSION",
+                     extra={"carbon_rule": "methanol carbon booked at synthesis in the producing country (origin_neutral, decision 64); zero at use"})
+            n.loads.at[ld, "bus"] = bus
+            att = _attached(n, old)
+            if not any(t == "Load" for t, _, _ in att):
+                feeders = [x for t, x, _ in att if t == "Link"]
+                n.mremove("Link", feeders); n.remove("Bus", old); led["links_removed"] += len(feeders); led["buses_removed"] += 1
+        else:
+            raise ValueError(f"asean_account_nodal: no route for the bunker carrier {r.carrier}")
+        n.loads.at[ld, "country"] = "ASEAN"
+        n.meta["demand_owners"][ld] = f"S2:ASEAN:{r.sector}:{r.account}:{r.carrier}"
+        n.meta["demand_identity"][ld] = dict(carrier=r.carrier, sector=r.sector, account=r.account, country="ASEAN", owner_kind=S2_OWNER_KIND)
+        led["asean_loads"][ld] = dict(bus=bus, carrier=r.carrier, sector=r.sector, account=r.account, annual_mwh=float(r.annual_mwh), sources=[c])
+        led["loads_moved"] += 1
+    for row in demand["loads"]:
+        if row["load"] in led["asean_loads"]:
+            row["bus"] = led["asean_loads"][row["load"]]["bus"]
+    n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {BUNKER_HOOK})
+    led["account"] = validate_bunker_account(n); led["hook"] = BUNKER_HOOK; led["row"] = BUNKER_ROW
+    led["notes"].append("asean_account_nodal: bunker loads at the port / airport nodes (decision 162); account final level <= 0 on its own; the 12th player buys at the node dual")
     n.meta["research_bunkers"] = led
     return led
 

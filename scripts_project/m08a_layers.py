@@ -273,12 +273,12 @@ def apply_stock_mode(n, mode: str) -> dict:
         if xb:
             raise ValueError("stock_mode remove_all applies to a disconnected base network (cross-border components present)")
         return led
-    if mode != "keep_stock_no_new":
-        raise ValueError(f"cross_border.stock_mode must be remove_all or keep_stock_no_new, got {mode!r}")
+    if mode not in ("keep_stock_no_new", "no_new_xb"):
+        raise ValueError(f"cross_border.stock_mode must be remove_all, keep_stock_no_new or no_new_xb, got {mode!r}")
     L, K = n.lines, n.links
     xl = L[xbm(L)]; xk = K[xbm(K)]
     if not len(xl) and not len(xk):
-        raise ValueError("stock_mode keep_stock_no_new needs an integrated base network")
+        raise ValueError(f"stock_mode {mode} needs an integrated base network")
     rev = xk["reversed"].astype(bool) if "reversed" in xk else pd.Series(False, index=xk.index)
     kind = xk["gas_pipeline_kind"].astype(str) if "gas_pipeline_kind" in xk else pd.Series("", index=xk.index)
     stock_lines = list(xl.index[xl.s_nom_min > 0])
@@ -296,6 +296,9 @@ def apply_stock_mode(n, mode: str) -> dict:
     for r, f in twins.items():
         cap = float(n.links.at[f, "p_nom"])
         n.links.loc[r, ["p_nom", "p_nom_min", "p_nom_max"]] = [cap, cap, cap]
+    if mode == "no_new_xb":   # V3 (decision 160): the stock is fixed capacity, not an extendable component pinned by its bounds
+        n.lines.loc[stock_lines, "s_nom_extendable"] = False
+        n.links.loc[sorted(keep_links), "p_nom_extendable"] = False
     by = lambda d: {str(k): int(v) for k, v in d.items()}
     kept_k = n.links.loc[sorted(keep_links)]
     led.update(kept_lines=len(stock_lines), kept_links_forward=len(stock_fwd), kept_reversed_twins=len(twins), removed_lines=len(out_l), removed_links=len(out_k),
