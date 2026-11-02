@@ -10,6 +10,8 @@
 
 **补充 03 更新（2026-11-03）：** 专线改单向后网络全部重建，现行登记见 `RUN_PLAN_V3.md` 第 17 节，现行筛查包是 `work/p1_v3_20261102/screen_package_v3_oneway/`，`screen_package_v3/` 已作废。
 
+**补充 04 更新（2026-11-03）：** 第 179 项（专线只输送存量电站出力）后网络再次重建，现行登记见 `RUN_PLAN_V3.md` 第 19 节，现行筛查包是 `work/p1_v3_20261102/screen_package_v3_bound/`，`screen_package_v3/`、`screen_package_v3_oneway/` 已作废，保留不用。
+
 ## 1. 两边共用
 
 | 文件 | 来源 | 说明 |
