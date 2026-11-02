@@ -110,6 +110,41 @@ def test_smoke_eval_toy():
     assert slack_use(n)["Generator"]["components"] == 0
 
 
+def b13_toy(extra: dict | None = None):
+    """two national liquid buses, a node bus, an ordinary link and a ship; extra = one more link: dict(name, bus0, bus1, border_class)"""
+    import pypsa
+    n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=2, freq="3h"))
+    for b in ("ID methanol", "SG methanol", "ID1 0"):
+        n.add("Bus", b)
+    n.add("Link", "plant", bus0="ID1 0", bus1="ID methanol", p_nom=1.0, carrier="methanolisation")
+    n.add("Link", "ship", bus0="ID methanol", bus1="SG methanol", p_nom=1.0, carrier="methanol ship")
+    n.links["border_class"] = ["domestic", "maritime_trade"]
+    if extra:
+        n.add("Link", extra["name"], bus0=extra["bus0"], bus1=extra["bus1"], p_nom=1.0, carrier="toy")
+        n.links.loc[extra["name"], "border_class"] = extra["border_class"]
+    return n
+
+
+def test_b13_ship_between_national_buses_passes():
+    from v5.v5_gates import gate_b13_imports_one_way
+    g = gate_b13_imports_one_way(b13_toy())
+    assert g["passed"] and g["checks"]["pool_links_without_national_port"] == []
+
+
+def test_b13_counterexamples_still_fail():
+    from v5.v5_gates import gate_b13_imports_one_way
+    # a link between two national buses that is not a ship or transit link: nothing in the rule explains it
+    g = gate_b13_imports_one_way(b13_toy(dict(name="odd", bus0="ID methanol", bus1="SG methanol", border_class="domestic")))
+    assert not g["passed"] and g["checks"]["pool_links_without_national_port"] == ["odd"]
+    # the same with the column absent (a network from before V3)
+    n = b13_toy(dict(name="odd", bus0="ID methanol", bus1="SG methanol", border_class="domestic")); n.links = n.links.drop(columns="border_class")
+    assert not gate_b13_imports_one_way(n)["passed"]
+    # a ship with a port outside the model: the maritime tag does not excuse it, energy would leave the network
+    n = b13_toy(dict(name="leak", bus0="ID methanol", bus1="SG methanol", border_class="maritime_trade")); n.links.loc["leak", "bus1"] = "OUTSIDE methanol"
+    g = gate_b13_imports_one_way(n)
+    assert not g["passed"] and g["checks"]["pool_links_without_national_port"] == ["leak"]
+
+
 def test_no_new_xb_stock_mode_toy():
     import pypsa
     from m08a_layers import apply_stock_mode

@@ -324,7 +324,7 @@ def gate_b13_imports_one_way(n):
     L=n.links;port_cols=[c for c in L if c.startswith('bus') and c[3:].isdigit()];bad=[]
     for name,z in L[L[port_cols].isin(pools).any(axis=1)].iterrows():
         others=[z[c] for c in port_cols if z[c] and z[c] not in pools]
-        if not others or any(b not in n.buses.index for b in others):bad.append(name)
+        if (not others and z.get('border_class')!='maritime_trade') or any(b not in n.buses.index for b in others):bad.append(name)   # V3 (decision 161): a ship or transit link joins two national liquid buses
     checks['pool_links_without_national_port']=bad[:10]
     st=n.stores[n.stores.bus.isin(pools)];checks['pool_stores_cyclic']=bool(st.e_cyclic.all()) if len(st) else True
     passed=checks['all_sign_positive'] and checks['all_p_min_pu_nonneg'] and checks['import_links_or_lines']==0 and not foreign and not bad and checks['pool_stores_cyclic']

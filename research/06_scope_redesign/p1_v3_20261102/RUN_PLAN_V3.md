@@ -24,9 +24,13 @@
 | `research_inputs/registry_v5/DATA_REGISTRY.csv`（2,317 行） | `ef1d6cdd872485b54e04df8f598c829665cc4803fe7332699d4dd83911455295` |
 | `configs/research/baseline.yaml` | `9f854d27c08cafae7a3966618aeb7dd418ef1ff5fb7d1e797931284ee1df085e` |
 | `configs/research/no_new_xb.yaml` | `02a744d0fff558c63387b279a6b26630d95ee13ac6f7311a86b4cbeef17034c7` |
-| `V3_RULES.md`（构建之前提交） | `2681246cb6714a7e09b400e612595d65ca86370800ef9f732637c0638d3eb19d` |
+| `V3_RULES.md`（构建之前提交的版本，提交 `85095e7a`） | `2681246cb6714a7e09b400e612595d65ca86370800ef9f732637c0638d3eb19d` |
+| `V3_RULES.md`（补记第 8.1、8.2 节后，求解依据） | `a35f802e0abb62de916d6f9a4033a323fd30a597e33d9c8cf9199193e0eb42ca` |
+| `scripts_project/v5/v5_gates.py`（B13 判据修改后） | `53f897a0a9314a229465ffb28563f8bfb1e81692736da13be567e1876ef10e3d` |
 
-构建之后、求解之前只改了检查脚本（`v3_static.py`、新增 `v3_smoke_eval.py`、`tests/research/test_v3.py`），不进入网络，四个网络未重建。
+构建之后、求解之前只改了检查脚本（`v3_static.py`、新增 `v3_smoke_eval.py`、`tests/research/test_v3.py`）和 B13 判据（`v5/v5_gates.py`，见 `V3_RULES.md` 第 8.1 节），都不进入网络，四个网络未重建。
+
+`V3_RULES.md` 在构建后补记了第 8.1、8.2 节和第 9 节 `oil pool` 一行，都在任何 Gurobi 求解之前；补记只写判据修改、截短假象和结构差异的解释，没有改任何数值规则或阈值。
 
 ## 2. 规模（LP，预处理之前）
 
@@ -67,6 +71,10 @@ v2 对照：一体化 56 时段 695,950 × 1,541,222、非零 3,612,124；一体
 5. 无切负荷或松弛被使用：名称含 slack、shed、lost load、overflow 的发电机和链路零出力（静态检查：四个网络松弛发电机均为 0）。
 
 报告项（不是验收项）：全部 277 条船运与过境链路的容量对偶，高于 1e-6 EUR/MWh 的逐条列出，见 D161-10；内点解没有交叉，对偶不是精确零，列表同时给最大利用率以便判断上界是否绑定。
+
+**事先说明：两次冒烟的 B8 预期不通过。** 56 时段下 Transport 相对差 −4.1146e-05，超过 1e-6 门槛，是 EV 周型的截短假象，门槛不改（`V3_RULES.md` 第 8.2 节）。B8 不是上述验收项，是 GATES_V6 诊断项 D11，所以 `V5_GATES.json` 的 `all_passed` 也预期为 false。若 Transport 以外的部门超限，或相对差不等于这个值，不适用本说明，须另行报告。
+
+B13 在新判据下预期通过（`V3_RULES.md` 第 8.1 节）。
 
 任一条不通过、不可行、或非 optimal 且 (a)(b) 不通过：停下报告，不改规则、阈值、预测，不重试。
 
