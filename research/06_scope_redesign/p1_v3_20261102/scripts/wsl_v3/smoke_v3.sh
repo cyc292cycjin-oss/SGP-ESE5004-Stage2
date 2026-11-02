@@ -7,7 +7,9 @@ set -u
 WT=/home/jin/wt_v3_20261102; MAIN=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model
 PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
 export PYTHONHASHSEED=0
-NETS=$MAIN/results_project/v3/builds; RUN=$MAIN/results_project/v3/smoke; ST=$RUN/STATUS.txt
+# Second round, only under a new user authorisation: the first round (results_project/v3/smoke) never reached the token server from WSL and stays as it is. A bare TCP connect to the token server (no data, no licence)
+# now comes before every solve, so that a dead route refuses instead of spending a call on an 18-minute timeout.
+NETS=$MAIN/results_project/v3/builds; RUN=$MAIN/results_project/v3/smoke_r2; ST=$RUN/STATUS.txt
 EV=$WT/research/06_scope_redesign/p1_v3_20261102/evidence/smoke
 LIC=/home/jin/gurobi.lic; TL=3000; WALL=3600; GAP=330; GRACE=60; N=56; PROFILE=formal_barrier
 AUTH="V3 phase 3 item 4 (user confirmation WLS session free __CONFIRMED__): local 56-snapshot smoke on the v3 2920x3h networks, integrated + no_new_xb once each, profile formal_barrier, TimeLimit 3000 s, wall cap 3600 s, no retry"
@@ -17,7 +19,9 @@ mkdir -p $RUN; cd $WT || exit 1
 log() { echo "$1:$(date -u +%Y-%m-%dT%H:%M:%SZ)${2:+:$2}" >> $ST; }
 busy() { ps -eo args= | grep -E '[s]2_solve\.py|[g]urobi_cl|[b]4_split_solve\.py' | grep -vcE '^(/usr/bin/)?time |^setsid |^env '; }
 alive() { [ -n "$(pgrep -g "$1" 2>/dev/null)" ]; }
+token_route() { timeout 15 bash -c 'exec 3<>/dev/tcp/token.gurobi.com/443' 2>/dev/null; }
 [ -f "$LIC" ] || { log NO_LICENCE_FILE; exit 3; }   # existence only
+token_route || { log NO_TOKEN_ROUTE "token server not reachable from WSL - not started"; exit 6; }
 [ "$(busy)" = 0 ] || { log SOLVER_BUSY "$(busy) processes - not started"; exit 4; }
 [ "$(ps -eo args= | grep -c '[p]ytest')" = 0 ] || { log PYTEST_RUNNING "stand-in tests must not run during a real solve - not started"; exit 4; }
 D=$(git status --porcelain --untracked-files=no scripts_project configs research_inputs | wc -l); [ "$D" = 0 ] || { log DIRTY "$D tracked changes - not started"; exit 2; }
@@ -29,6 +33,7 @@ for sc in integrated no_new_xb; do
     last=$(cat $RUN/.last_solve_end); while [ $(( $(date +%s) - last )) -lt $GAP ]; do sleep 5; done; log GAP_$sc "$(( $(date +%s) - last ))s"
   fi
   [ "$(busy)" = 0 ] || { log SOLVER_BUSY_$sc "$(busy) processes - stop"; break; }
+  token_route || { log NO_TOKEN_ROUTE_$sc "token server not reachable from WSL - stop"; break; }
   cmd=("$PY" scripts_project/s2_solve.py --repo . --network "$net" --scenario $sc --output "$dir" --label SMOKE_TEST_ONLY --authorization "$AUTH; run $sc"
        --solver gurobi --solver-profile $PROFILE --scaling on --time-limit $TL --costs-table "$NETS/integrated/costs_active_research.csv" --truncate $N)
   ( exec setsid env GRB_LICENSE_FILE=$LIC /usr/bin/time -v "${cmd[@]}" > $dir/solve.log 2> $dir/solve.err ) &
