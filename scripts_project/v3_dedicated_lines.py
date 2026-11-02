@@ -19,10 +19,11 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts_project"))
-from v3_layers import DEDICATED_LENGTH_FACTOR, great_circle_km   # noqa: E402
+from v3_layers import DEDICATED_LENGTH_FACTOR, DEDICATED_STATUS_TABLE, great_circle_km   # noqa: E402
 
 OUT = ROOT / "research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv"
 OUT_ACE = ROOT / "research_inputs/corridors/APG_LA_TH_LINES_ACE2024.csv"
+OUT_STATUS = ROOT / DEDICATED_STATUS_TABLE
 ACE_SHA_FILE = "ACE2024_APG_Interconnections_Project_Profiles.pdf (raw8), no. 9 Thailand - Lao PDR, profile p.21-23"
 # every line of the profile is 115 kV HVAC with the agreement type Energy Exchange: the 955 MW of APG Table 1 are these seven lines, the 5,934.9 MW of generation-to-grid interconnections stand apart
 ACE_LINES = [("Tha Li - Ken Thao", 100.0, 2020), ("Nong Khai - Dongphosy", 100.0, 2007), ("Nong Khai - Thanalaeng", 100.0, 1968), ("Bueng Kan - Pakxan", 100.0, 2002), ("Nakhon Phanom - Thakhek", 180.0, 2010),
@@ -49,8 +50,25 @@ def nearest(x0: float, y0: float, nodes: pd.DataFrame) -> tuple[str, float]:
     return k, d[k]
 
 
+def status_table(units: dict) -> pd.DataFrame:
+    """Decision 180 (user decision 2026-11-03, V3_S5_STOP_NOTE.md): status of every stock unit of the plant nodes = GIPT 2026-09 Status by GEM unit id, the column gem_status comes from; the frozen stock does not carry that field in the build receipt."""
+    g = pd.read_csv(GIPT, low_memory=False).set_index("GEM unit/phase ID"); t = pd.read_csv(OUT); rows = []
+    for k, z in sorted(units.items()):
+        if z["node"] in set(t.plant_node):
+            i = k.replace("GEM:", "", 1)
+            if i not in g.index:
+                raise ValueError(f"{k}: not in GIPT 2026-09")
+            rows.append(dict(identity=k, gem_unit_id=i, plant_node=z["node"], capacity_mw=float(z["capacity_mw"]), gipt_status=str(g.at[i, "Status"]), gipt_plant=str(g.at[i, "Plant / Project name"]), gipt_capacity_mw=float(g.at[i, "Capacity (MW)"]), gipt_start_year=g.at[i, "Start year"], gem_status_in_receipt=z.get("gem_status") or ""))
+    return pd.DataFrame(rows)
+
+
 def main():
-    p = argparse.ArgumentParser(); p.add_argument("--network", type=Path, required=True); a = p.parse_args()
+    p = argparse.ArgumentParser(); p.add_argument("--network", type=Path, required=True); p.add_argument("--status-table", action="store_true", help="write only the status table of decision 180"); a = p.parse_args()
+    if a.status_table:
+        with nc.Dataset(a.network) as d:
+            s = status_table(json.loads(d.getncattr("meta"))["existing_unit_components"])
+        s.to_csv(OUT_STATUS, index=False, float_format="%.10g"); print(s.groupby(["gipt_status", "gem_status_in_receipt"], dropna=False).capacity_mw.agg(["count", "sum"]).to_string())
+        return
     with nc.Dataset(a.network) as d:
         units = json.loads(d.getncattr("meta"))["existing_unit_components"]
         bx = pd.Series(np.asarray(d["buses_i"][:]).astype(str)); x = np.asarray(d["buses_x"][:]); y = np.asarray(d["buses_y"][:]); cc = np.asarray(d["buses_country"][:]).astype(str); car = np.asarray(d["buses_carrier"][:]).astype(str)

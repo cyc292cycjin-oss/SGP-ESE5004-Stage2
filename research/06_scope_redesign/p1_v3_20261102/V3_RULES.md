@@ -101,14 +101,40 @@ AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GA
 **对审阅决定文字的三点补充（实施时发现，求解前写明）：**
 
 - **存量火电是 Link，不是 Generator。** 第 2.1 节只写了 Generator 与 StorageUnit，括号里却列了火电。LA 的存量火电是燃料 Link：`existing_survivor::LA2 5::Lignite::…`（Hongsa，`lignite existing`，`p_nom` 5,690.91 MW 是燃料口径，出力 1,878 MW）、`existing_survivor::LA2 4::coal existing::S4A`（`p_nom` 842.70 MW，出力 300 MW）。移动的是它们的 `bus1`（输出端），燃料端 `bus0` 与排放端不变；计入源链路 `p_nom` 时按 `p_nom × efficiency`。不这样做，Hongsa 就留在 n 上而专线接不到它，与第 2.1 节"火电"的文字相反。
-- **"存量"含在建机组。** `existing_survivor` 里有 GEM 状态为 construction 的机组（Luang Prabang、Pak Beng、Pak Lay 等，投运年 2030 前后）。审阅决定说以构建回执的存量标识为准，所以都移入。求解前的容量表（`RUN_PLAN_V3.md` 第 19.2 节）分列。
-- **存量风电同样移入。** `existing_survivor::LA2 1::onwind existing::S4B1`（350 MW）是存量 Generator，按同一判据移入。这是"全部存量发电"的字面结果，它不是电站专线合同的一部分，属下文"非合同存量也可出口"的简化。
+- **"存量"含在建机组（已被第 180 项取代，见第 2.5 节）。** `existing_survivor` 里有 GEM 状态为 construction 的机组（Luang Prabang、Pak Beng、Pak Lay 等，投运年 2030 前后）。审阅决定说以构建回执的存量标识为准，所以都移入。求解前的容量表（`RUN_PLAN_V3.md` 第 19.2 节）分列。
+- **存量风电同样移入（第 180 项后不再移入：它是在建机组，回到节点）。** `existing_survivor::LA2 1::onwind existing::S4B1`（350 MW）是存量 Generator，按同一判据移入。这是"全部存量发电"的字面结果，它不是电站专线合同的一部分，属下文"非合同存量也可出口"的简化。
 
 **源母线不是地理节点。** 它的 carrier 是 AC（审阅决定），但只是一个汇流点：`static_validate_s2` 的"100 个地理节点"和逐节点结构检查按 `role` 把它排除；`gate_b11_supply_routes` 不改，它没有负荷，按既有规则列为辅助节点；`struct_diff` 把机组移到本节点源母线列为 `moved_to_source_bus`，移到别处仍不通过。**阈值、判据都不改。**
 
 **记账：** 源母线 country = LA，新链路两端都在 LA，由 `s4d_ledger.owners` 归 LA，成本为 0，既不产生结算也不进跨境账；专线的走廊实体不变，只是 LA 一端的结算点从 n 改为源母线。记账代码未改。
 
 **静态检查：** `v3_layers.source_bus_problems`（构建时）和 `v3_static.source_check`（并入 `all_structural_passed`）核对：源母线上只有带标识的固定机组，没有抽水，没有负荷、Store、线路；出口只有一条源链路加该节点的专线；源链路无损、零成本、不可扩建、单向、domestic，容量等于出力上限合计；两情景逐条相同；完全隔离没有。
+
+### 2.5 第 180 项：源母线只放运营中机组（补充 05，2026-11-03，筛查前）
+
+**依据：** `V3_REVIEW_DECISIONS_SUPP04.md` 第 2 节；状态判据是用户的决定（`V3_S5_STOP_NOTE.md` 第 4 节，用户 2026-11-03 原话"用 GIPT Status 继续"）。
+
+**理由：** 第 160 项与第 175 (a) 项定的主算口径是"只计运营中，在建作敏感性"。在建机组在现实中多是新的出口电站，各自有新建的送出线和自己的购电合同，并不使用现有电站专线。在建机组连同各自的送出线，一并属于第 175 (a) 项的敏感性。
+
+**规则：**
+
+1. 源母线上只放状态为运营中（operating）的存量机组。在建及其他非运营状态的存量机组回到节点 n，参数不变，仍是两情景相同的存量发电，**发电存量口径不变**。
+2. 源链路 `p_nom` 按新的移入合计重算，其余属性同第 2.4 节。
+3. **状态判据：** GIPT 2026-09 的 `Status`，按 GEM 机组 ID 查表，表 `research_inputs/corridors/DEDICATED_STOCK_STATUS_V3.csv`（5 个源节点全部 65 台，由 `v3_dedicated_lines.py --status-table` 生成）。审阅决定写的是与状态表用同一字段 `gem_status`；这个字段取自同一列，但回执只给新加的机组写了它，冻结存量 43 台 11,028 MW 是空白的。已有 `gem_status` 的 22 台必须与查表结果一致，不一致构建报错。
+4. **构建报错（停止条件）：** 某台机组查不到状态；某节点运营中不含火电容量为 0。低于合同容量的节点只列出，不停。
+
+**混合组件要拆开（审阅决定未写到，实施时发现）：** 机队组件按节点和批次聚合，有 2 个组件同时含运营中和在建机组，只改母线做不到"只放运营中"：
+
+| 组件 | 合计（MW） | 运营中（上源母线） | 在建（留在节点） |
+|---|---:|---|---|
+| `existing_survivor::LA2 1::hydro existing::S4A` | 564 | Nam Ngum 4 240、Nam Sum 3 156、Nam Ngiep 3A 44，合计 440 | Nam Neun 1 124 |
+| `existing_survivor::LA2 5::ror existing::S4A` | 948 | Nam Beng 36 | Pak Beng 912 |
+
+做法（`split_stock_component`）：运营中部分成为新组件 `<原名> operating`，在建部分保留原名。容量、年固定运维费、水库来水按容量份额分，单位化序列（`p_max_pu`）照抄，其余属性相同，所以两部分合起来就是原组件；`existing_unit_components` 里运营中机组的 `component` 改指新组件，`node` 不变。这是规则 1 的直接结果，不改变存量、成本或来水的合计。所以审阅决定第 3 条"差异只应是在建机组的母线与源链路 `p_nom`"之外，多这两组拆分。
+
+**静态检查：** `source_bus_problems` 另核对两点：源母线上每台机组的状态都是运营中；节点上每台运营中机组都在源母线上。`struct_diff` 把拆分的两部分合回一个组件再比较，合不回原值仍不通过。
+
+**记账：** 账本和分摊代码不改。拆出的组件沿用 `country = LA`，年固定运维费之和不变。
 
 ## 3. 第 161 项：国家液体母线与船运
 
@@ -294,6 +320,7 @@ Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
 | Load | 工业负荷按节点重分配；`land transport EV` 改时序；燃料舱负荷回到节点 |
 | Generator（过程排放） | 节点重分配 |
 | Bus、Link（第 179 项，2026-11-03） | 增 5 条源母线 `LA2 n dedicated src`（carrier AC，不是地理节点）、5 条 `dedicated plant source` 链路；LA 专线节点的存量 Generator、StorageUnit、燃料 Link 的母线移到源母线（`moved_to_source_bus`），其余属性不变 |
+| Generator、StorageUnit（第 180 项，2026-11-03） | 只有运营中机组移到源母线；2 个混合组件拆成 `<原名> operating` 与原名两部分（`split_for_source_bus`），合计不变 |
 | Link（`oil pool`，2026-11-02 补记） | 增 4 条：`MY_Peninsular22 0`、`PH_Luzon9 0`、`PH_Visayas10 0`、`TH21 0`。这 4 个节点在 v2 只有非化石油母线（FT 产地），设施分配（第 164 项）把工业用油放到这里，才有了化石油母线和配送链路；核对后 `oil pool` 与 `oil non-fossil pool` 各 100 条，化石计量与孪生计量各 585 个，无缺口 |
 | 其他 | **不应有变化**（线路、发电、输电候选、成本、效率） |
 
@@ -308,7 +335,7 @@ Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
 5. 液体码头与船运无容量约束（固定上界不绑定）；国内液体配送加价取 0。
 6. MY–SG 天然气管道容量缺失（DATA_PENDING），主算不建。
 7. 365×24h 筛查看不到 EV 日内效应，筛查 B6 与 2920×3h 正式值的差距可能大于 v2。
-8. 电站专线（第 173 项）作为一般跨境容量建模。专线改为单向，只输送存量电站出力（第 2.3、2.4 节）。按聚类节点而不是按具体合同电站绑定，节点上非合同的存量电站也可经专线出口，是上界；不按购电合同份额限制。（本条按 `V3_REVIEW_DECISIONS_SUPP03.md` 第 2.1 节替换原句，原文见 `V3_LIMITATIONS_ITEM176.md`。）
+8. 电站专线（第 173 项）作为一般跨境容量建模。专线改为单向，只输送存量电站出力（第 2.3、2.4 节）。按聚类节点而不是按具体合同电站绑定，节点上非合同的存量电站也可经专线出口，是上界；不按购电合同份额限制。（本条按 `V3_REVIEW_DECISIONS_SUPP03.md` 第 2.1 节替换原句，原文见 `V3_LIMITATIONS_ITEM176.md`。）只绑定运营中机组；在建机组与其送出线一并属于第 175 (a) 项敏感性。`LA2 1` 的 350 MW 存量风电全年平均 `p_max_pu` 0.009，位置未核实，网络不改。
 
 已核实非问题：建筑电力小时形状来自 GEGIS 逐国曲线（相关系数 ≈ 1.0；LA、TL 借用 KH、ID，第 131 项），不是单一曲线套用。
 

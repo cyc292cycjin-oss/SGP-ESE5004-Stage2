@@ -12,7 +12,7 @@ git add -A scripts_project configs tests 2>/dev/null
 git add -f "$D"
 git add research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx/run_dfx.sh research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx/preflight_dfx.sh research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/run_batch4.sh research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/preflight.sh research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_job.sh research/06_scope_redesign/p1_step4r_20261020/GATES_V6_NOTES.md
 git add -u research_inputs/registry_v5
-git add -f research_inputs/industry_v3 research_inputs/transport_v3 research_inputs/liquids_v3 research_inputs/registry_v5/fragments/v3.csv research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv research_inputs/corridors/APG_LA_TH_LINES_ACE2024.csv 2>/dev/null || true
+git add -f research_inputs/industry_v3 research_inputs/transport_v3 research_inputs/liquids_v3 research_inputs/registry_v5/fragments/v3.csv research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv research_inputs/corridors/DEDICATED_STOCK_STATUS_V3.csv research_inputs/corridors/APG_LA_TH_LINES_ACE2024.csv 2>/dev/null || true
 [ -d "$D/evidence" ] && git add -f "$D/evidence"
 for f in $(git status --porcelain --ignored=matching research_inputs 2>/dev/null | awk '$1=="!!"{print $2}' | grep -E 'registry_v5/(DATA_REGISTRY|DATA_PENDING|D1_EVIDENCE)' || true); do git add -f "$f"; done
 git status --short | cut -c1-90 | head -${2:-24}

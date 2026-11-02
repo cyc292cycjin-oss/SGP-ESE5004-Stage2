@@ -10,6 +10,7 @@
     link LA -> other country each, in every scenario with the cross-border electricity switch on; empty key = v2 state;
   * bind_dedicated_sources (decision 179, supplement 04): the plant lines carry stock output only. Every plant node n gets a bus '<n> dedicated src' holding its stock (fixed Generators, StorageUnits, stock thermal Links
     moved with parameters unchanged), a lossless fixed one-way link to n (domestic, zero cost) and the start of its plant lines; loads, extendable units, storage and other lines stay on n.
+    Decision 180 (supplement 05): only operating units go to the source bus (GIPT 2026-09 Status by GEM unit id, table DEDICATED_STATUS_TABLE); the others stay on n with their parameters; a component with units of both kinds is split.
 """
 from __future__ import annotations
 
@@ -33,6 +34,8 @@ DEDICATED_SRC_SUFFIX = " dedicated src"
 DEDICATED_SRC_CARRIER = "dedicated plant source"
 DEDICATED_SRC_BUS_ROLE = "dedicated_plant_source"
 DEDICATED_SRC_LINK_ROLE = "dedicated_src_to_grid"
+DEDICATED_SPLIT_SUFFIX = " operating"
+DEDICATED_STATUS_TABLE = "research_inputs/corridors/DEDICATED_STOCK_STATUS_V3.csv"
 
 
 def liquids_cfg(cfg) -> dict:
@@ -93,21 +96,60 @@ def dedicated_source_buses(n) -> pd.Index:
     return n.buses.index[n.buses["role"].astype(str) == DEDICATED_SRC_BUS_ROLE] if "role" in n.buses else n.buses.index[:0]
 
 
-def dedicated_stock_at(n, node: str) -> dict:
-    """component type -> names of the stock generation of a node. The fixed Generators and StorageUnits on the node, and the fixed Links into it (the stock thermal units are fuel Links, p_nom in fuel terms),
-    must each carry an identity of existing_unit_components at that node, and the reverse: a fixed unit without identity, or an identity on another bus, is an error, not a silent choice."""
-    ident = {(z["component_type"], z["component"]) for z in n.meta["existing_unit_components"].values() if z["node"] == node}
-    out = {"Generator": sorted(n.generators.index[(n.generators.bus == node) & ~n.generators.p_nom_extendable.astype(bool)]),
-           "StorageUnit": sorted(n.storage_units.index[(n.storage_units.bus == node) & ~n.storage_units.p_nom_extendable.astype(bool)]),
-           "Link": sorted(n.links.index[(n.links.bus1 == node) & ~n.links.p_nom_extendable.astype(bool)])}
-    found = {(t, c) for t, v in out.items() for c in v}
+def dedicated_stock_at(n, node: str, status: dict) -> dict:
+    """The stock generation of a node by status. The fixed Generators and StorageUnits on the node, and the fixed Links into it (the stock thermal units are fuel Links, p_nom in fuel terms),
+    must each carry an identity of existing_unit_components at that node, and the reverse: a fixed unit without identity, or an identity on another bus, is an error, not a silent choice (decision 179).
+    Every identity needs a status, and one that already carries gem_status must agree with it (decision 180); the status is recorded on the identity. Returns moved (type -> components with operating units only),
+    split (components with units of both kinds, operating identities) and stayed (identities that stay on the node)."""
+    units = {k: z for k, z in n.meta["existing_unit_components"].items() if z["node"] == node}
+    moved = {"Generator": sorted(n.generators.index[(n.generators.bus == node) & ~n.generators.p_nom_extendable.astype(bool)]),
+             "StorageUnit": sorted(n.storage_units.index[(n.storage_units.bus == node) & ~n.storage_units.p_nom_extendable.astype(bool)]),
+             "Link": sorted(n.links.index[(n.links.bus1 == node) & ~n.links.p_nom_extendable.astype(bool)])}
+    found = {(t, c) for t, v in moved.items() for c in v}; ident = {(z["component_type"], z["component"]) for z in units.values()}
     if found != ident:
         raise ValueError(f"decision 179: stock of {node} differs from existing_unit_components: {sorted(found ^ ident)[:6]}")
-    return out
+    ops, rest = {}, {}
+    for k, z in units.items():
+        s = status.get(k)
+        if s is None:
+            raise ValueError(f"decision 180: no status for the stock unit {k} at {node}")
+        if z.get("gem_status") not in (None, s):
+            raise ValueError(f"decision 180: {k} has gem_status {z['gem_status']} and GIPT status {s}")
+        z["gipt_status_2026"] = str(s)
+        (ops if s == "operating" else rest).setdefault((z["component_type"], z["component"]), []).append(k)
+    split = []
+    for t, c in sorted(found):
+        if (t, c) in rest:
+            moved[t].remove(c)
+            if (t, c) in ops:
+                if t == "Link":
+                    raise ValueError(f"decision 180: fuel Link {c} holds units of both kinds")
+                split.append((t, c, sorted(ops[(t, c)])))
+    return dict(moved=moved, split=split, stayed=sorted(k for v in rest.values() for k in v))
 
 
-def bind_dedicated_sources(n, lines: list) -> list:
-    """Decision 179: see the module docstring and V3_RULES.md section 2.4. p_nom of the source link = sum of the output ceilings moved (Link: p_nom x efficiency, the output side). No stock on a plant node stops the build (review section 2.3)."""
+def split_stock_component(n, typ: str, name: str, ids: list) -> str:
+    """Decision 180: the operating units of a fleet component become '<name> operating', the rest keeps the name. Capacity, annual fixed O&M and hydro inflow go by capacity share, per-unit series are copied, every other attribute is the same:
+    the two parts together are the former component."""
+    units = n.meta["existing_unit_components"]; df = n.df(typ); new = name + DEDICATED_SPLIT_SUFFIX
+    mw = float(sum(units[k]["capacity_mw"] for k in ids)); total = float(df.at[name, "p_nom"]); share = mw / total
+    part = df.loc[[name]].copy(); part.index = pd.Index([new], name=df.index.name); part["p_nom"] = mw; df.loc[name, "p_nom"] = total - mw
+    if "existing_annual_fixed_om_eur" in df:
+        fom = float(df.at[name, "existing_annual_fixed_om_eur"]); part["existing_annual_fixed_om_eur"] = fom * share; df.loc[name, "existing_annual_fixed_om_eur"] = fom - fom * share
+    setattr(n, n.components[typ]["list_name"], pd.concat([df, part]))
+    for attr, frame in n.pnl(typ).items():
+        if name in frame.columns:
+            whole = frame[name].copy()
+            frame[new] = whole * share if attr == "inflow" else whole
+            if attr == "inflow":
+                frame[name] = whole - frame[new]
+    for k in ids:
+        units[k]["component"] = new
+    return new
+
+
+def bind_dedicated_sources(n, lines: list, status: dict) -> list:
+    """Decisions 179, 180: see the module docstring and V3_RULES.md section 2.4. p_nom of the source link = sum of the output ceilings moved (Link: p_nom x efficiency, the output side). A plant node without operating non-thermal stock stops the build (review section 2.3 of supplement 05)."""
     from s2_layers import add_bus, add_link
     if not lines:
         return []
@@ -115,16 +157,18 @@ def bind_dedicated_sources(n, lines: list) -> list:
         n.buses["role"] = ""
     rows = []
     for a in sorted({r["plant_node"] for r in lines}):
-        stock = dedicated_stock_at(n, a); src = a + DEDICATED_SRC_SUFFIX; c = str(n.buses.at[a, "country"]); by = {}
+        got = dedicated_stock_at(n, a, status); stock = got["moved"]; src = a + DEDICATED_SRC_SUFFIX; c = str(n.buses.at[a, "country"]); by = {}; clean = 0.0; split = []
+        for typ, comp, ids in got["split"]:
+            stock[typ].append(split_stock_component(n, typ, comp, ids)); split.append(dict(component=comp + DEDICATED_SPLIT_SUFFIX, rest=comp, units=ids, moved_mw=float(n.df(typ).at[stock[typ][-1], "p_nom"])))
         add_bus(n, src, str(n.buses.at[a, "carrier"]), c, a)
         n.buses.loc[src, ["x", "y", "v_nom", "unit", "role"]] = [n.buses.at[a, "x"], n.buses.at[a, "y"], n.buses.at[a, "v_nom"], n.buses.at[a, "unit"], DEDICATED_SRC_BUS_ROLE]
         for t, col, df in (("Generator", "bus", n.generators), ("StorageUnit", "bus", n.storage_units), ("Link", "bus1", n.links)):
             for name in stock[t]:
-                mw = float(df.at[name, "p_nom"]) * (float(df.at[name, "efficiency"]) if t == "Link" else 1.0); k = str(df.at[name, "carrier"]); by[k] = by.get(k, 0.0) + mw
+                mw = float(df.at[name, "p_nom"]) * (float(df.at[name, "efficiency"]) if t == "Link" else 1.0); k = str(df.at[name, "carrier"]); by[k] = by.get(k, 0.0) + mw; clean += mw if t != "Link" else 0.0
             df.loc[stock[t], col] = src
         total = float(sum(by.values()))
-        if not total > 0.0:
-            raise ValueError(f"decision 179: no stock generation on the plant node {a}")
+        if not clean > 0.0:
+            raise ValueError(f"decision 180: no operating non-thermal stock on the plant node {a}")
         name = f"{src} to grid"
         add_link(n, name, c, DEDICATED_SRC_CARRIER, [src, a], [1.0], role=DEDICATED_SRC_LINK_ROLE)
         n.links.loc[name, ["p_nom", "p_nom_min", "p_nom_max"]] = [total, total, total]
@@ -132,14 +176,14 @@ def bind_dedicated_sources(n, lines: list) -> list:
         n.links.loc[name, "border_class"] = "domestic"; n.links.loc[name, "transport_carrier"] = "electricity"; n.links.loc[name, "stock"] = ""
         plants = [r for r in lines if r["plant_node"] == a]
         n.links.loc[[r["link"] for r in plants], "bus0"] = src
-        rows.append(dict(node=a, bus=src, link=name, moved_mw=total, moved_mw_by_carrier={k: by[k] for k in sorted(by)}, moved_components={t: len(v) for t, v in stock.items()}, plant_lines=[r["link"] for r in plants], contract_mw=float(sum(r["contract_mw"] for r in plants))))
+        rows.append(dict(node=a, bus=src, link=name, moved_mw=total, moved_mw_by_carrier={k: by[k] for k in sorted(by)}, non_thermal_mw=clean, moved_components={t: len(v) for t, v in stock.items()}, split=split, stayed_units=got["stayed"], plant_lines=[r["link"] for r in plants], contract_mw=float(sum(r["contract_mw"] for r in plants))))
     n.buses["role"] = n.buses["role"].fillna("").astype(str)
     return rows
 
 
 def source_bus_problems(n) -> list:
     """Decision 179, structure of every plant source bus: only stock (fixed, with identity), no pumped input, one lossless free fixed domestic exit to its node sized to the output ceilings, every plant line of the node starts here, nothing else is attached."""
-    bad = []; ident = {(z["component_type"], z["component"]) for z in n.meta.get("existing_unit_components", {}).values()}; L = n.links
+    units = n.meta.get("existing_unit_components", {}); bad = []; ident = {(z["component_type"], z["component"]) for z in units.values()}; L = n.links
     ports = [c for c in L if c.startswith("bus") and c[3:].isdigit()]
     for s in dedicated_source_buses(n):
         z = n.buses.loc[s]; a = s[: -len(DEDICATED_SRC_SUFFIX)]; g = n.generators[n.generators.bus == s]; u = n.storage_units[n.storage_units.bus == s]; f = L[L.bus1 == s]; out = L[L.bus0 == s]
@@ -149,6 +193,11 @@ def source_bus_problems(n) -> list:
             bad.append(f"{s}: extendable unit")
         if any((t, x) not in ident for t, d in (("Generator", g), ("StorageUnit", u), ("Link", f)) for x in d.index):
             bad.append(f"{s}: unit without stock identity")
+        onbus = {(t, x) for t, d in (("Generator", g), ("StorageUnit", u), ("Link", f)) for x in d.index}   # decision 180
+        if any((z["component_type"], z["component"]) in onbus and z.get("gipt_status_2026") != "operating" for z in units.values()):
+            bad.append(f"{s}: unit that is not operating")
+        if any(z["node"] == a and z.get("gipt_status_2026") == "operating" and (z["component_type"], z["component"]) not in onbus for z in units.values()):
+            bad.append(f"{s}: operating unit of the node outside the source bus")
         if (u.efficiency_store > 0.0).any():
             bad.append(f"{s}: a storage unit takes power from the source bus")
         if (n.loads.bus == s).any() or (n.stores.bus == s).any() or (n.lines.bus0 == s).any() or (n.lines.bus1 == s).any() or any((L[c] == s).any() for c in ports if c not in ("bus0", "bus1")):
@@ -165,7 +214,7 @@ def source_bus_problems(n) -> list:
     return bad
 
 
-def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
+def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg, status=None) -> dict:
     """X1b: see the module docstring and V3_RULES.md section 2.3. After apply_ac_losses (efficiency = 1 - proxy lambda over the length). One way, LA -> other country: an IPP line carries the plant output and no back feed (supplement 03). The stock FOM rule of the corridors applies.
     Not added with the cross-border electricity switch off (fully disconnected network). p_nom_min = p_nom marks the stock for apply_stock_mode. Decision 179: the lines start at the plant source buses of bind_dedicated_sources."""
     from s2_layers import add_link
@@ -198,7 +247,10 @@ def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
         n.links.loc[name, "border_class"] = "cross_border"; n.links.loc[name, "transport_carrier"] = "electricity"; n.links.loc[name, "stock"] = DEDICATED_STOCK
         fom = (float(costs.at["HVAC overhead", "FOM"]) / 100.0 * float(costs.at["HVAC overhead", "investment"]) * km * mw) if existing_cfg["fom_on_existing"] else 0.0
         rows.append(dict(link=name, plant_node=a, landing_node=b, pair="-".join(sorted((ca, cb))), projects=sorted(g.project), contract_mw=mw, length_km=km, efficiency=eta, annual_fom_eur=fom))
-    sources = bind_dedicated_sources(n, rows)
+    if status is None:   # decision 180: GIPT 2026-09 Status by GEM unit id, written by scripts_project/v3_dedicated_lines.py --status-table
+        import hashlib
+        p = Path(repo) / DEDICATED_STATUS_TABLE; status = pd.read_csv(p).set_index("identity").gipt_status.to_dict(); led["status_table"] = dict(path=DEDICATED_STATUS_TABLE, sha256=hashlib.sha256(p.read_bytes()).hexdigest())
+    sources = bind_dedicated_sources(n, rows, status)
     n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool); n.links["stock"] = n.links["stock"].fillna("").astype(str)   # as s4j_layers: a mixed column does not export
     if rows:
         fl = list(n.meta.get("existing_cross_border_fom_ledger", [])) + [dict(component_type="Link", component=r["link"], capacity_2025_mw=r["contract_mw"], length_km=r["length_km"], annual_fom_eur=r["annual_fom_eur"], cost_rows=["HVAC overhead"]) for r in rows if r["annual_fom_eur"]]

@@ -20,7 +20,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from v3_layers import DEDICATED_CARRIER, DEDICATED_SRC_CARRIER, DEDICATED_SRC_SUFFIX, DEDICATED_STOCK, LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER, dedicated_source_buses, source_bus_problems   # noqa: E402
+from v3_layers import DEDICATED_CARRIER, DEDICATED_SPLIT_SUFFIX, DEDICATED_SRC_CARRIER, DEDICATED_SRC_SUFFIX, DEDICATED_STOCK, LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER, dedicated_source_buses, source_bus_problems   # noqa: E402
 
 COUNTRIES = ("BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN")
 ATTR = {"Generator": ["bus", "carrier", "p_nom", "p_nom_min", "p_nom_max", "p_nom_extendable", "marginal_cost", "capital_cost", "efficiency"],
@@ -49,10 +49,38 @@ def same(a: pd.Series, b: pd.Series) -> pd.Series:
     return pd.Series(np.isclose(a.astype(float), b.astype(float), rtol=1e-12, atol=1e-9, equal_nan=True), index=a.index)
 
 
+def split_parts(names) -> list:
+    return [k for k in names if str(k).endswith(DEDICATED_SPLIT_SUFFIX)]
+
+
+def merged(n, typ: str) -> pd.DataFrame:
+    """Decision 180: a fleet component split for the source bus counts as the one component it was (the operating part folded back into the rest)."""
+    d = n.df(typ); parts = split_parts(d.index) if typ in ("Generator", "StorageUnit") else []
+    if not parts:
+        return d
+    d = d.copy()
+    for k in parts:
+        d.at[k[: -len(DEDICATED_SPLIT_SUFFIX)], "p_nom"] += d.at[k, "p_nom"]
+    return d.drop(parts)
+
+
+def merged_series(frame: pd.DataFrame, attr: str) -> pd.DataFrame:
+    parts = split_parts(frame.columns)
+    if not parts:
+        return frame
+    f = frame.copy()
+    for k in parts:
+        if attr == "inflow":
+            f[k[: -len(DEDICATED_SPLIT_SUFFIX)]] += f[k]
+    return f.drop(columns=parts)
+
+
 def struct_diff(a, b, label_a="v2", label_b="v3") -> tuple[pd.DataFrame, list]:
     rows, bad = [], []
     for typ, cols in ATTR.items():
-        x, y = a.df(typ), b.df(typ)
+        x, y = merged(a, typ), merged(b, typ)
+        for k in split_parts(b.df(typ).index.difference(a.df(typ).index)):
+            rows.append(dict(type=typ, change="split_for_source_bus", carrier=str(b.df(typ).at[k, "carrier"]), count=1, example=str(k)))
         gone, new = x.index.difference(y.index), y.index.difference(x.index); both = x.index.intersection(y.index)
         for k, v in x.loc[gone].carrier.astype(str).value_counts().items():
             rows.append(dict(type=typ, change="removed", carrier=k, count=int(v), example=str(x.loc[gone][x.loc[gone].carrier == k].index[0])))
@@ -79,6 +107,7 @@ def struct_diff(a, b, label_a="v2", label_b="v3") -> tuple[pd.DataFrame, list]:
             frame_b = b.pnl(typ).get(attr)
             if frame_b is None or not len(frame_a.columns) or "Output" in str(a.df(typ).columns.name):
                 continue
+            frame_a, frame_b = merged_series(frame_a, attr), merged_series(frame_b, attr)
             cm = frame_a.columns.intersection(frame_b.columns)
             if len(cm):
                 d = (frame_a[cm] - frame_b[cm]).abs().max()
