@@ -6,6 +6,8 @@
 
 **补充 01 更新（2026-11-02）：** 两套运行器已能跑 `no_new_xb`，定义文件在 `batch_def/`，复制到包内命名为 `BATCH_DEF.json`，运行器自动读取；没有该文件时保持 v2 表。**X1b 会改变网络：下列 SHA256、字节数和定义文件的登记值在 X1b 之后都要重做。** flat 网络只用于本机对照，不进任何部署包。
 
+**补充 02 更新（2026-11-03）：** X1b 已实施，下面第 2、3 节的字节数和 SHA256 都是 X1b 之前的，已作废。现行登记值见 `RUN_PLAN_V3.md` 第 15.1 节和 `batch_def/`。AutoDL 筛查包改为 5 个网络，由 `screen_package/make_package_v3.sh` 打包，清单见 `V3_REPORT_SUPPLEMENT02.md`。HPC 的打包脚本和 v3 版 `RUN_PLAN_HPC.md` 仍未做，放到筛查之后。
+
 ## 1. 两边共用
 
 | 文件 | 来源 | 说明 |

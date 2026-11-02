@@ -50,6 +50,36 @@ AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GA
 - 实施前逐项核对这些电站在网络中是否为在运的 LA 机组及所在节点，结果写入下一份报告。
 - 影响：X1b 会改变网络，所有网络 SHA256、运行器登记值都要重做。本补充的冒烟和干跑都是 X1b 之前的结果。
 
+### 2.3 X1b 规则（第 172、173 项，B 级；补充 02 实施）
+
+**来源：** LA–TH 为 EPPO「Power purchased from Laos PDR」（页面日期 2016-03-29，存档快照 2026-06-11，SHA256 `680ed575…`），9 个项目、合同容量 5,427 MW；LA–VN 为 GEM 的 Xekaman 1、3，合计 572 MW（第 100 项已引用）。表 `research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv`，脚本 `scripts_project/v3_dedicated_lines.py`。
+
+**只计运营中：** 逐项核对 GEM GIPT 2026-09 的状态和网络的存量机组（`existing_unit_components`）。11 项全部 `operating`、全部在网络中，全部计入。EPPO 表是 2016 年状态，当时未投运的 Hongsa、Xayaburi、Xe Pian-Xe Namnoy、Nam Ngiep 1 在 GEM 中已投运（2015–2019）。
+
+**与 APG 不重复：** ACE 2024 项目档案第 9 章（第 21–23 页）列出的现有线路是七条 115 kV、协议类型 Energy Exchange 的线路，容量合计正好 955 MW（`research_inputs/corridors/APG_LA_TH_LINES_ACE2024.csv`）。同章另述"约 5,934.9 MW 发电并网（generation-to-grid）互联"，与这 955 MW 分列。所以 APG 的 955 MW 不含电站专线，不用扣除。
+
+**建模：**
+
+- 按"电站所在 LA 节点 + 着陆节点"合并（审阅决定允许），得 6 条专线，每条一对 forward / `-reversed` Link，双向，不可扩建，`p_nom` = 合同容量之和。
+- 着陆节点取距电站节点最近的 TH（或 VN）节点，长度 = 大圆距离 × 1.25（与模型线路同口径）。
+- 效率 = 1 − λ × 长度，λ 按第 108 项线损代理的 380 kV 4-bundle 线型、α 0.5 计算，每 km 1.2348e-4。
+- `border_class=cross_border`，`transport_carrier=electricity`，`stock=dedicated_plant_line`，`p_nom_min = p_nom`。`apply_stock_mode` 因此把它们当存量保留。
+- 一体化、`no_new_xb` 及完全隔离之外的所有情景相同。完全隔离网络不加。
+- 存量 FOM 规则照常适用：HVAC overhead 的 FOM% × 投资 × 长度 × 容量，6 条合计 15.87 M EUR/a，两情景相同，不影响 B6，计入完全隔离 − `no_new_xb`。
+
+| 专线 | 项目 | MW | km | 效率 |
+|---|---|---:|---:|---:|
+| LA2 1 – TH2 4 | Xayaburi | 1,220 | 400.5 | 0.9506 |
+| LA2 2 – TH2 1 | Nam Ngum 2、Nam Ngiep 1 | 866 | 351.9 | 0.9565 |
+| LA2 3 – TH2 1 | Theun-Hinboun、扩建、Nam Theun 2 | 1,388 | 278.7 | 0.9656 |
+| LA2 4 – TH2 1 | Houayho、Xe Pian-Xe Namnoy | 480 | 373.9 | 0.9538 |
+| LA2 5 – TH2 4 | Hongsa | 1,473 | 444.0 | 0.9452 |
+| LA2 4 – VN2 2 | Xekaman 1、3 | 572 | 230.9 | 0.9715 |
+
+**简化（写入局限）：** 专线不绑定电站，可双向，也可供节点上其他机组使用；合同容量低于或等于电站容量；着陆节点按最近节点取，不是实际落点（如 Xayaburi 实际走向 TH 东北部）；线损用代理线型，不是实际 230 / 500 kV 线路；专线损耗全部计在受端，线路代理是两端各半。
+
+**对照（不是来源）：** ACE 的 5,934.9 MW 比 EPPO 的 5,427 MW 高 507.9 MW，审阅决定以 EPPO 为唯一来源，这一差额未计入。
+
 ## 3. 第 161 项：国家液体母线与船运
 
 ### 3.1 母线

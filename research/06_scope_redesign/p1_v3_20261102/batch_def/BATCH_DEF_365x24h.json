@@ -1,17 +1,113 @@
 {
- "name": "V3 365x24h screening, AutoDL (decisions 160-165, X1 APG stock, before X1b): copy as BATCH_DEF.json next to run_dfx.sh",
- "note": "X1b changes the networks: the registered values below must be redone before the screening. TimeLimit and wall cap stay the DFX values of dfx_batch.py until RUN_PLAN of the screening registers others.",
- "runs": {
-  "V1": {"scenario": "integrated", "base": "integrated_365_24h", "set": "", "profile": "formal_barrier_1e6_t16", "costs": "integrated", "role": "一体化 v3、Owen 分摊"},
-  "V2": {"scenario": "no_new_xb", "base": "no_new_xb_365_24h", "set": "", "profile": "formal_barrier_1e6_t16", "costs": "integrated", "role": "no_new_xb v3、B6 = V2 − V1"}
- },
+ "note": "V3 365x24h screening after X1b (RUN_PLAN_SCREEN_V3.md); copied into the package as BATCH_DEF.json",
+ "build_commit": "4df45b569ff314e710a75ed70c4d1e381474844e",
  "registered_sha": {
-  "integrated_365_24h_unsolved.nc": "b484fd52c3ddf0fa7fe9f2e15825b3265bd0b731503c02298eb81047091805d4",
-  "no_new_xb_365_24h_unsolved.nc": "c6702cbf36488976f04d8862e1cb2171f80144b5caebae7ded09111bb53f63aa"
+  "integrated_365_24h_unsolved.nc": "9f746d25b3fdf9c1b17f796294e697042bf68f81c4e6bd26740bb0b012be38f4",
+  "no_new_xb_365_24h_unsolved.nc": "1e59074e290d41d6e5c6a2aa016d71a77d72a43ccab1a2c79e81546d76f70ef3",
+  "disconnected_365_24h_unsolved.nc": "7ac161088371c8c0347cc018f0af8ba2e09e7575ace74f51a95e2b5101adfcbd",
+  "bridge_160_162_365_24h_unsolved.nc": "a532b3da624cc906418e2a0a181ee6f5b360243cf2b9f319dfa04feccf0be777",
+  "bridge_160_164_365_24h_unsolved.nc": "9575664460e186b3143c43e390f494a2fe8d1cd67b556571b1a6d279c2c729b7"
  },
  "registered_bytes": {
-  "integrated_365_24h_unsolved.nc": 32929223,
-  "no_new_xb_365_24h_unsolved.nc": 32302786
+  "integrated_365_24h_unsolved.nc": 33376813,
+  "no_new_xb_365_24h_unsolved.nc": 32738062,
+  "disconnected_365_24h_unsolved.nc": 32260715,
+  "bridge_160_162_365_24h_unsolved.nc": 33165420,
+  "bridge_160_164_365_24h_unsolved.nc": 32519668
  },
- "build_commit": "85095e7a480151913b119219368525835d48fa5c"
+ "runs": {
+  "V1": {
+   "scenario": "integrated",
+   "base": "integrated_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "本批参照（v3 一体化）、Owen 分摊"
+  },
+  "V2": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "本批参照（v3 no_new_xb）、B6 = V2 − V1"
+  },
+  "V3": {
+   "scenario": "disconnected",
+   "base": "disconnected_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "disconnected",
+   "role": "存量与专线的价值 = V3 − V2（第 174 项）"
+  },
+  "V4": {
+   "scenario": "integrated",
+   "base": "bridge_160_162_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "修订桥：第 160–162 项"
+  },
+  "V5": {
+   "scenario": "integrated",
+   "base": "bridge_160_164_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "修订桥：第 160–164 项"
+  }
+ },
+ "schedule": [
+  [
+   "1",
+   [
+    "V1"
+   ],
+   [
+    "V2"
+   ]
+  ],
+  [
+   "2",
+   [
+    "V4"
+   ],
+   [
+    "V5"
+   ]
+  ],
+  [
+   "3",
+   [
+    "V3"
+   ],
+   []
+  ]
+ ],
+ "time_limit_s": {
+  "V1": 21600,
+  "V2": 21600,
+  "V3": 10800,
+  "V4": 21600,
+  "V5": 21600
+ },
+ "need_disk_gb": 90,
+ "bridge": {
+  "v2_integrated_objective_eur": 270785244510.0,
+  "v2_disconnected_objective_eur": 285400557543.0,
+  "steps": [
+   [
+    "V4",
+    "160-162"
+   ],
+   [
+    "V5",
+    "160-164"
+   ],
+   [
+    "V1",
+    "all"
+   ]
+  ]
+ }
 }

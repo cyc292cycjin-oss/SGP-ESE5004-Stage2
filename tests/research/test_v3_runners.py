@@ -30,7 +30,7 @@ def _v3_package(pkg: Path, res: str, definition: str, commit: str, five: bool = 
     else:
         for f in nets.glob("disconnected_*"):
             f.unlink()
-        keep = {"V1", "V2"}; d["runs"] = {k: v for k, v in d["runs"].items() if k in keep}
+        keep = list(d["runs"])[:2]; d["runs"] = {k: d["runs"][k] for k in keep}; d["registered_sha"] = {k: v for k, v in d["registered_sha"].items() if k in {d["runs"][r]["base"] + "_unsolved.nc" for r in keep}}
         d = {k: v for k, v in d.items() if k not in ("schedule", "time_limit_s", "bridge")}
     (pkg / "BATCH_DEF.json").write_text(json.dumps(d))
     base = nets / f"integrated_{res}_unsolved.nc"; net = nets / f"no_new_xb_{res}_unsolved.nc"; net.write_bytes(base.read_bytes() + b" no_new_xb")

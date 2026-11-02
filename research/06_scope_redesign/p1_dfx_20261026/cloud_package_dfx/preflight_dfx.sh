@@ -18,7 +18,8 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
 unset BATCH_DEF; if [ -f "$HERE/BATCH_DEF.json" ]; then export BATCH_DEF="$HERE/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package (scripts_project/batch_def.py); without it the v2 tables apply
 PY="${PY:-python}"; ok=1; USER_CGROUP_ROOT="${CGROUP_ROOT:-}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"   # HPR H3.5: remember whether the user set CGROUP_ROOT before defaulting it (the guards note used to fire on the default itself; DFX phase 4 finding 5)
-NEED_CORES=${NEED_CORES:-17}; NEED_MEM_GIB=${NEED_MEM_GIB:-64}; NEED_DISK_GB=${NEED_DISK_GB:-45}; PAR_CORES=33   # hard floor (RUN_PLAN_DFX section 5: third-batch T16 peaks 22.8 / 19.3 GiB + post-processing ~11 GiB, x2 margin; disk as the third batch)
+DEF_DISK=45; if [ -n "${BATCH_DEF:-}" ]; then DEF_DISK=$("$PY" -c "import json,sys; print(json.load(open(sys.argv[1])).get('need_disk_gb', 45))" "$BATCH_DEF"); fi   # V3 supplement 02: the definition may raise the disk floor (five runs)
+NEED_CORES=${NEED_CORES:-17}; NEED_MEM_GIB=${NEED_MEM_GIB:-64}; NEED_DISK_GB=${NEED_DISK_GB:-$DEF_DISK}; PAR_CORES=33   # hard floor (RUN_PLAN_DFX section 5: third-batch T16 peaks 22.8 / 19.3 GiB + post-processing ~11 GiB, x2 margin; disk as the third batch)
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
   echo "== guards: test hooks / dry-run switches in this shell"; bad=()
