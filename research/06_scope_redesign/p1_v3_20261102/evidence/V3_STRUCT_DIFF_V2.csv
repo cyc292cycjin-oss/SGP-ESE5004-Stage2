@@ -1,4 +1,5 @@
 type,change,carrier,count,example
+Generator,split_for_source_bus,ror existing,1,existing_survivor::LA2 5::ror existing::S4A operating
 Generator,removed,process emissions,17,ID_Kalimantan4 1 process emissions source
 Generator,removed,ammonia import,1,ASEAN ammonia import
 Generator,removed,methanol import,1,ASEAN methanol import
@@ -9,8 +10,7 @@ Generator,added,ammonia import,10,BN ammonia import
 Generator,added,methanol import,10,BN methanol import
 Generator,added,oil import,10,BN oil import
 Generator,added,FT fuel import,10,BN oil non-fossil import
-Generator,moved_to_source_bus:bus,ror existing,9,existing_survivor::LA2 4::Hydro::0d66b994afb2
-Generator,moved_to_source_bus:bus,onwind existing,1,existing_survivor::LA2 4::Hydro::0d66b994afb2
+Generator,moved_to_source_bus:bus,ror existing,4,existing_survivor::LA2 4::Hydro::0d66b994afb2
 Generator,attr:p_nom,process emissions,76,ID_Java-Bali1 0 process emissions source
 Link,removed,oil feedstock,110,ID_Java-Bali1 2 feedstock oil
 Link,removed,gas feedstock,45,ID_Java-Bali1 2 feedstock gas
@@ -34,7 +34,6 @@ Link,attr:bus0,OCGT methanol,97,BN4 0 shipping methanol
 Link,attr:bus0,industry methanol,77,BN4 0 shipping methanol
 Link,attr:bus0,shipping methanol,71,BN4 0 shipping methanol
 Link,moved_to_source_bus:bus1,lignite existing,1,existing_survivor::LA2 5::Lignite::3b26fcde74e2
-Link,moved_to_source_bus:bus1,coal existing,1,existing_survivor::LA2 5::Lignite::3b26fcde74e2
 Link,attr:bus1,oil pool,196,oil pool ID_Sumatra3 2
 Link,attr:bus1,Haber-Bosch,97,oil pool ID_Sumatra3 2
 Link,attr:bus1,methanolisation,97,oil pool ID_Sumatra3 2
@@ -48,7 +47,8 @@ Store,added,EV battery,96,BN4 0 EV battery store
 Store,added,ammonia store,11,BN ammonia store
 Store,added,methanol store,11,BN methanol store
 Store,added,oil non-fossil store,11,BN oil non-fossil store
-StorageUnit,moved_to_source_bus:bus,hydro existing,12,existing_survivor::LA2 4::Hydro::3022facee600
+StorageUnit,split_for_source_bus,hydro existing,1,existing_survivor::LA2 1::hydro existing::S4A operating
+StorageUnit,moved_to_source_bus:bus,hydro existing,7,existing_survivor::LA2 4::Hydro::3022facee600
 Load,removed,industry hydrogen,65,ID_Java-Bali1 1 industry hydrogen demand
 Load,removed,oil feedstock,55,ID_Java-Bali1 2 feedstock oil demand
 Load,removed,gas feedstock,45,ID_Java-Bali1 2 feedstock gas demand

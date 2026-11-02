@@ -49,10 +49,13 @@
 | 补充 04 报告 | 完成：`V3_REPORT_SUPPLEMENT04.md` | 本次提交 |
 | 审阅决定 `V3_REVIEW_DECISIONS_SUPP04.md` | 已收，补充 05：源母线只放运营中机组（第 180 项） | — |
 | 补充 05 第 1 条 | **停止**：43 台 11,028 MW 候选机组的 `gem_status` 空白，见 `V3_S5_STOP_NOTE.md`；未改代码、未构建、未求解 | 本次提交 |
+| 用户决定状态判据 | 原话"用 GIPT Status 继续"，判据取 GIPT 2026-09 `Status` | — |
+| 补充 05 代码、规则、测试 | 完成：只移运营中机组，2 个混合组件拆分，状态表，规则 `V3_RULES.md` 第 2.5 节 | `3cb20131` |
+| 补充 05 重建与登记 | 完成：7 个网络，静态与路径检查通过，逐组件比较通过，完全隔离逐字节相同；容量表与预测在 `RUN_PLAN_V3.md` 第 21 节 | 构建 `3cb20131`，登记本次提交 |
 
 ## 恢复点
 
-补充 05 停在第 1 条之前，等用户对 `V3_S5_STOP_NOTE.md` 第 4 节的决定。额度：本机 Gurobi 2 次，计算 1.5 小时，磁盘 15 GB。上一版包 `screen_package_v3_bound/` 保留不用。
+补充 05：运行 `bash /home/jin/v3/smoke_s5.sh --confirmed <确认时间>`（用户已答复，见 `RUN_PLAN_V3.md` 第 21.3 节），之后 `dry_s5.sh`、`pkg_s5.sh`、全量测试、`V3_REPORT_SUPPLEMENT05.md`。额度：本机 Gurobi 2 次，计算 1.5 小时，磁盘 15 GB。
 
 ## 计数
 
