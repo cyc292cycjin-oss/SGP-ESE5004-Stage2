@@ -4,6 +4,8 @@
 
 打包时以最终提交为准。网络文件取自 `results_project/v3/builds`（提交 `85095e7a` 构建），SHA256 见 `RUN_PLAN_V3.md` 第 1 节。
 
+**补充 01 更新（2026-11-02）：** 两套运行器已能跑 `no_new_xb`，定义文件在 `batch_def/`，复制到包内命名为 `BATCH_DEF.json`，运行器自动读取；没有该文件时保持 v2 表。**X1b 会改变网络：下列 SHA256、字节数和定义文件的登记值在 X1b 之后都要重做。** flat 网络只用于本机对照，不进任何部署包。
+
 ## 1. 两边共用
 
 | 文件 | 来源 | 说明 |
@@ -24,13 +26,14 @@
 | `networks/no_new_xb_365_24h_VARIANT_RECEIPT.json` | 2,392 | `5a84ffa4…` |
 | `networks/integrated_costs_active_research.csv`（两情景共用） | 42,518 | `7cee9c1a…` |
 
-运行脚本以 `p1_dfx_20261026/cloud_package_dfx/` 为底，**下面这些改动尚未做**，它们不属于本指令，须随筛查授权一起定：
+运行脚本：`p1_dfx_20261026/cloud_package_dfx/` 的 `run_dfx.sh`、`preflight_dfx.sh`（已支持 `BATCH_DEF.json`），加 `batch_def/BATCH_DEF_365x24h.json`。
 
-| 文件 | 要改的内容 |
+| 文件 | 状态 |
 |---|---|
-| `scripts_project/dfx_batch.py` | `RUNS` 的 V2 改为 `no_new_xb`（底网络 `no_new_xb_365_24h`，成本表 integrated）；`REGISTERED_SHA`、`REGISTERED_BYTES`、`BUILD_COMMIT`；`TIME_LIMIT_S`；网络核对对 `no_new_xb` 改读 `VARIANT_RECEIPT`；B6 的情景名 |
-| `run_dfx.sh`、`preflight_dfx.sh`、`make_package_dfx.sh` | 情景名、网络文件名、GATES_V6 对 `no_new_xb` 用 `--registered-sha256` |
-| `BATCH3_REFERENCE_VALUES.json` | 换成 v2 筛查（V1 / V2）或 v3 冒烟的参照值，由筛查的运行计划决定 |
+| `scripts_project/dfx_batch.py`、`scripts_project/batch_def.py`、`run_dfx.sh`、`preflight_dfx.sh` | **已改**：运行表、登记值、变体收据、GATES_V6 的登记方式、B6 情景名 |
+| `dfx_batch.py` 的 `TIME_LIMIT_S` | 未改，沿用 V1 21,600 s、V2 10,800 s，由筛查的运行计划定 |
+| `make_package_dfx.sh` | **未改**：内含 v2 的 SHA256、`BUILD_COMMIT` 和文件名，还要带上 `BATCH_DEF.json` 和变体收据；它的构建输入检查把 `v5/` 下的改动判为拒绝，也要处理 |
+| `BATCH3_REFERENCE_VALUES.json` | 未定：换成 v2 筛查（V1 / V2）或 v3 冒烟的参照值，由筛查的运行计划决定；没有这个文件时运行器跳过对比 |
 
 ## 3. HPC：2920×3h 正式运行（另行授权）
 
@@ -42,16 +45,16 @@
 | `networks/no_new_xb_2920_3h_VARIANT_RECEIPT.json` | 2,392 | `63165f9d…` |
 | `networks/integrated_costs_active_research.csv`（两情景共用） | 42,518 | `7cee9c1a…` |
 
-运行脚本以 `p1_hpr_20261027/hpc_package_src/` 和 `p1_b4p_20261026/cloud_package_b4/` 为底，**下面这些改动尚未做**：
+运行脚本：`p1_b4p_20261026/cloud_package_b4/` 的 `run_batch4.sh`、`preflight.sh`，`p1_hpr_20261027/hpc_package_src/` 的 HPC 脚本，加 `batch_def/BATCH_DEF_2920x3h.json`。
 
-| 文件 | 要改的内容 |
+| 文件 | 状态 |
 |---|---|
-| `scripts_project/b4_batch4.py` | `RUNS` 的 F2 改为 `no_new_xb`；`REGISTERED_SHA`、`REGISTERED_BYTES`、`BUILD_COMMIT`；TimeLimit 按 LP 规模 +4–5 % 复核 |
-| `run_batch4.sh`、`preflight.sh` | 情景名、网络文件名、`no_new_xb` 的收据读取、GATES_V6 的登记方式 |
-| `hpc/`（`hpr_job.sh`、`make_pbs.sh`、`hpr_install_env.sh`、`hpr_preflight_login.sh`、`hpr_submit.sh`、`hpr_status.sh`、`hpr_consistency.py`） | 情景名和 `RUN_PLAN_HPC.md` 中的 v2 登记值 |
-| `make_hpc_package.sh`、`make_reference_values.py` | 网络核对和参照值 |
-| `RUN_PLAN_HPC.md`、`HPC_OPERATOR_GUIDE.md`、`REFERENCE_VALUES.json` | 换成 v3 的登记内容；`HPC_FACTS_20261026.md` 原样带上 |
-| `pbs/` | 由 `make_pbs.sh` 重新生成 |
+| `scripts_project/b4_batch4.py`、`scripts_project/batch_def.py`、`run_batch4.sh`、`preflight.sh`、`hpr_job.sh` | **已改**：运行表、登记值、变体收据、GATES_V6 的登记方式、B6 情景名 |
+| `b4_batch4.py` 的 TimeLimit、迭代参照 | 未改，沿用 864,000 s、450 / 250；v3 LP 大约 4 %，由 v3 的 HPC 运行计划复核 |
+| `hpr_submit.sh`、`hpr_status.sh`、`hpr_preflight_login.sh`、`make_pbs.sh`、`hpr_consistency.py` | 脚本本身不含情景名的部分未动；`hpr_consistency.py` 比对 `RUN_PLAN_HPC.md` 与登记值，要等 v3 版运行计划写好才能通过 |
+| `make_hpc_package.sh`、`make_reference_values.py` | **未改**：同 AutoDL 的打包脚本 |
+| `RUN_PLAN_HPC.md`、`HPC_OPERATOR_GUIDE.md`、`REFERENCE_VALUES.json` | **未写 v3 版**，放到 X1b 之后；`HPC_FACTS_20261026.md` 原样带上 |
+| `pbs/` | 打包时由 `make_pbs.sh` 重新生成 |
 
 内存和时长的估计也要重算：2920×3h 的 v3 LP 比 v2 大约 4 %（外推，见 `RUN_PLAN_V3.md` 第 2 节）。
 

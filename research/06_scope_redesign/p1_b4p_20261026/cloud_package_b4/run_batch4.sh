@@ -48,6 +48,7 @@
 # PACK_CMD, LEDGER_CMD, TRUNCATE, DRY=1, FAKE_*; P1_WINDOW_S / P1_THRESHOLD / P1_MIN_CORES / MEMORY_STOP_FRACTION / PROJECTION_FRACTION overrides.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
+unset BATCH_DEF; if [ -f "$HERE/BATCH_DEF.json" ]; then export BATCH_DEF="$HERE/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package (scripts_project/batch_def.py); without it the v2 tables apply
 AUTH=""; REPOST_RID=""; INTO=""; ARRAYS=""; ONLY=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -252,14 +253,18 @@ print(f"{g.get('grade')}:accepted={a.get('accepted')}:abc={int(bool(g.get('a')))
 P
 }
 base_net() { echo "$NETS/${BASE[$1]}_unsolved.nc"; }
-base_scen() { echo "${BASE[$1]%%_*}"; }
-registered_of() { jget "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" network.sha256; }
+base_scen() { echo "${BASE[$1]%_*_*}"; }
+is_variant() { [ "${SC[$1]}" != "${COSTS[$1]}" ]; }   # V3: a network derived from the one of its cost scenario (no_new_xb from integrated), registered through its variant receipt
+registered_of() { if is_variant "$1"; then jget "$NETS/${BASE[$1]}_VARIANT_RECEIPT.json" output.sha256; else jget "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" network.sha256; fi; }
 
 # ---- phase 0: inputs, the two base networks against the build receipts and the registered SHA256
 prepare() {
-  local f
+  local f rid need=()
   [ "$POST_ONLY" = 1 ] && { log "PREPARE:skipped (POST_ONLY)"; return 0; }
-  for f in integrated_2920_3h_unsolved.nc disconnected_2920_3h_unsolved.nc integrated_BUILD_RECEIPT.json disconnected_BUILD_RECEIPT.json integrated_costs_active_research.csv disconnected_costs_active_research.csv; do
+  for rid in "${!SC[@]}"; do
+    need+=("${BASE[$rid]}_unsolved.nc" "${COSTS[$rid]}_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); fi
+  done
+  for f in "${need[@]}"; do
     [ -s "$NETS/$f" ] || { safe_stop "MISSING_INPUT:networks/$f"; return 1; }
   done
   [ "$DRY" = 1 ] || [ "$(busy)" = 0 ] || { safe_stop "SOLVER_PROCESS_RUNNING_AT_START:$(busy) solve processes (an earlier runner?)"; return 1; }
@@ -386,7 +391,10 @@ solve_run() {   # $1 rid: returns 1 when the batch must stop
 }
 
 # ---- post-processing of one run (as run_batch3.sh post_run; idempotent)
-accept() { local d="${2:-$OUT/$1}" lab; lab=$(aux $G6_CMD accept --solve-dir "$d" --build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" --repo "$REPO" 2>> "$d/v6.err" | tail -1); echo "$lab" > "$d/.label"; echo "$lab"; }
+accept() {
+  local d="${2:-$OUT/$1}" lab reg=(--build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json"); if is_variant "$1"; then reg=(--registered-sha256 "$(registered_of "$1")"); fi
+  lab=$(aux $G6_CMD accept --solve-dir "$d" "${reg[@]}" --repo "$REPO" 2>> "$d/v6.err" | tail -1); echo "$lab" > "$d/.label"; echo "$lab"
+}
 stop_check() {
   local d="${2:-$OUT/$1}" lab cls act; lab=$(cat "$d/.label" 2>/dev/null)
   if [ -n "$REPOST_RID" ]; then read -r cls act < <(aux $SUM_CMD stop-class --dir "$d" 2>> "$d/stop_class.err" | tail -1); log "REPOST_CLASS:$1:label=${lab:-none}:class=${cls:-unreadable}:registered_action=${act:-stop} - recorded only"; return 0; fi

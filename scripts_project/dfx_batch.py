@@ -25,6 +25,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import m10_batch3_summary as m10  # noqa: E402
 from m10_batch3_summary import COUNTRIES, bn, jl, ledger_totals, owen_main, postproc_errors, sha, unusable_runs  # noqa: E402
+from batch_def import input_receipt, load_def  # noqa: E402
 
 SCRIPT = "scripts_project/dfx_batch.py"
 T16 = "formal_barrier_1e6_t16"
@@ -47,6 +48,9 @@ REGISTERED_SHA = {"integrated_365_24h_unsolved.nc": "82928a4c9151a6a176ac8c81bf5
                   "disconnected_365_24h_unsolved.nc": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"}
 REGISTERED_BYTES = {"integrated_365_24h_unsolved.nc": 31292240, "disconnected_365_24h_unsolved.nc": 30620986}
 BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
+_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; limits and schedule stay
+if _DEF:
+    RUNS, REGISTERED_SHA, REGISTERED_BYTES, BUILD_COMMIT = _DEF["runs"], _DEF["registered_sha"], _DEF["registered_bytes"], _DEF["build_commit"]
 
 # NOTE: the third-batch module is never modified (no monkeypatching of its RUNS / SCHEDULE: an earlier draft did so at import time and broke the
 # third-batch and fourth-batch stand-in tests collected in the same pytest process). Only its table-free helpers are imported; run_state is local.
@@ -86,12 +90,12 @@ def base_check(nets: Path, registered: bool = True) -> dict:
     run - the registered SHA256 / bytes of RUN_PLAN_DFX.md section 1. registered=False (runner stand-in tests on synthetic files only, with
     ALLOW_UNREGISTERED=1) keeps the receipt checks and records the registered comparison as information."""
     rows = {}
-    for sc in ("integrated", "disconnected"):
-        f = nets / f"{sc}_365_24h_unsolved.nc"; rec = jl(nets / f"{sc}_BUILD_RECEIPT.json") or {}; daily = rec.get("daily_network") or {}
+    for run in RUNS.values():
+        f = nets / f"{run['base']}_unsolved.nc"; rc = input_receipt(nets, run, "daily_network", BUILD_COMMIT)
         have = sha(f) if f.exists() else None; size = f.stat().st_size if f.exists() else None
         reg_ok = bool(have) and have == REGISTERED_SHA[f.name] and size == REGISTERED_BYTES[f.name]
-        rec_ok = bool(have) and have == daily.get("sha256") and rec.get("code_sha") == BUILD_COMMIT and int(daily.get("snapshots") or 0) == 365
-        rows[f.name] = dict(file=str(f), bytes=size, sha256=have, receipt_sha256=daily.get("sha256"), receipt_snapshots=daily.get("snapshots"), receipt_code_sha=rec.get("code_sha"),
+        rec_ok = bool(have) and have == rc["sha256"] and rc["chain_ok"] and int(rc["snapshots"] or 0) == 365
+        rows[f.name] = dict(file=str(f), bytes=size, sha256=have, receipt_sha256=rc["sha256"], receipt_snapshots=rc["snapshots"], receipt_code_sha=rc["code_sha"],
                             registered_sha256=REGISTERED_SHA[f.name], registered_bytes=REGISTERED_BYTES[f.name], receipt_equal=rec_ok, registered_equal=reg_ok,
                             equal=rec_ok and (reg_ok or not registered))
     no_2920 = sorted(p.name for p in nets.glob("*_2920_3h_*"))
@@ -144,7 +148,7 @@ def b6_gate(out: Path) -> dict | None:
         return None
     sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE / "v5"))
     from v5_gates import gate_b6_cost
-    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), "integrated", "disconnected")
+    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), RUNS["V1"]["scenario"], RUNS["V2"]["scenario"])
     return dict(g, b6_bn=bn(g["difference"]), runs=dict(integrated="V1", disconnected="V2"), labels=dict(V1=i["v6"], V2=d["v6"]))
 
 

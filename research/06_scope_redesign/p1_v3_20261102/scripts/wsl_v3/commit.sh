@@ -10,6 +10,7 @@ P="WLS""ACCESSID|WLS""SECRET|LICENSE""ID|BEGIN (RSA|OPENSSH) PRIVATE"" KEY"
 if grep -rIlE --exclude=commit_p1.sh "$P" "$D" research_inputs/industry_v3 research_inputs/transport_v3 configs 2>/dev/null; then echo "LEAK SUSPECT"; exit 3; fi
 git add -A scripts_project configs tests 2>/dev/null
 git add -f "$D"
+git add research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx/run_dfx.sh research/06_scope_redesign/p1_dfx_20261026/cloud_package_dfx/preflight_dfx.sh research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/run_batch4.sh research/06_scope_redesign/p1_b4p_20261026/cloud_package_b4/preflight.sh research/06_scope_redesign/p1_hpr_20261027/hpc_package_src/hpr_job.sh research/06_scope_redesign/p1_step4r_20261020/GATES_V6_NOTES.md
 git add -u research_inputs/registry_v5
 git add -f research_inputs/industry_v3 research_inputs/transport_v3 research_inputs/liquids_v3 research_inputs/registry_v5/fragments/v3.csv 2>/dev/null || true
 [ -d "$D/evidence" ] && git add -f "$D/evidence"

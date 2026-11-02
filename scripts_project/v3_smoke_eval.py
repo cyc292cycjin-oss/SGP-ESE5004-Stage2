@@ -2,8 +2,9 @@
 
     PYTHONHASHSEED=0 python scripts_project/v3_smoke_eval.py --run <smoke dir with integrated/ no_new_xb/> --out <evidence dir> [--v2-run <v2 smoke dir>]
 
-Criteria, both runs: Gurobi optimal (or decision 119 (a)(b) from PRECISION.json), ledger identity B16_LEDGER; B6 = objective(no_new_xb) - objective(integrated) > 0, SG marine fuel has a
-source, no shedding or slack component in use. Reported in addition: capacity dual of every ship and transit link (review decision D161-10, non-zero = reported), national liquid
+Criteria, both runs: Gurobi optimal or decision 119 (a)(b) from PRECISION.json (instruction), C1 (a)(b)(c) with a GATES_V6 ACCEPTED label (review decision 4; termination status and the decision 120
+field stay numerical information), ledger identity B16_LEDGER; B6 = objective(no_new_xb) - objective(integrated) > 0, SG marine fuel has a source, no shedding or slack component in use. With the
+folders integrated_flat / no_new_xb_flat (supplement 01, control only, never an acceptance item): EV effect = flat - E2 on cost and on B6, and the cost difference to v2 left after it. Reported in addition: capacity dual of every ship and transit link (review decision D161-10, non-zero = reported), national liquid
 balances and duals, the integrated cross-border build, the Indonesian industry shares and, for the 56-snapshot level only, the v2 smoke objectives. Writes V3_SMOKE_RESULT.json,
 V3_SHIP_CAPACITY_DUALS.csv, V3_LIQUID_BALANCE.csv.
 """
@@ -27,6 +28,7 @@ from v5.v5_gates import gate_b5_no_new_xb, gate_b6_cost   # noqa: E402
 
 logging.getLogger("pypsa").setLevel(logging.ERROR)
 SCEN = ["integrated", "no_new_xb"]
+FLAT = {"integrated_flat": "integrated", "no_new_xb_flat": "no_new_xb"}
 COUNTRIES = ("BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN")
 DUAL_TOL = 1e-6   # EUR/MWh; interior-point duals without crossover are not exact zeros: everything above is listed
 SLACK_WORDS = ("slack", "shed", "lost load", "overflow")
@@ -128,9 +130,11 @@ def one(d: Path, sc: str) -> dict:
     out = dict(termination_condition=rec.get("termination_condition"), status=rec.get("status"), objective_eur=rec.get("objective"), solve_seconds=rec.get("solve_seconds"), peak_rss_gib=(rec.get("peak_rss_bytes") or 0) / 2**30,
                truncated_to=(rec.get("input_network") or {}).get("truncated_to"), label=rec.get("label"), profile=rec.get("solver_profile"), v6_label=v6.get("label"), c1=acc, c1_grade=(prec.get("grade") or {}).get("grade"),
                ledger_identity_passed=(v5.get("B16_LEDGER") or {}).get("passed"), ledger_relative_error=(v5.get("B16_LEDGER") or {}).get("relative_error"), v5_all_passed=v5.get("all_passed"),
-               v5_failed=sorted(k for k, v in v5.items() if isinstance(v, dict) and v.get("passed") is False))
+               v5_failed=sorted(k for k, v in v5.items() if isinstance(v, dict) and v.get("passed") is False),
+               b8_sectors_out=dict((k, r["rel"]) for k, r in ((v5.get("B8") or {}).get("sector_totals") or {}).items() if abs(r.get("rel") or 0.0) >= 1e-6))
     optimal = str(out["termination_condition"]) == "optimal"
     out["criterion_optimal_or_119ab"] = bool(optimal or (acc.get("a") and acc.get("b")))
+    out["criterion_c1_abc_and_gates_v6"] = bool(acc.get("a") and acc.get("b") and acc.get("c") and str(out["v6_label"]).startswith("ACCEPTED"))
     return out
 
 
@@ -138,13 +142,14 @@ def main():
     p = argparse.ArgumentParser(); p.add_argument("--run", type=Path, required=True); p.add_argument("--out", type=Path, required=True); p.add_argument("--v2-run", type=Path, default=None)
     a = p.parse_args()
     res = {sc: one(a.run / sc, sc) for sc in SCEN}; nets, duals, bal = {}, [], []
-    for sc in SCEN:
-        f = a.run / sc / f"{sc}_SMOKE_TEST_ONLY_solved.nc"
-        res[sc]["solved_network"] = f.exists()
+    res.update({k: one(a.run / k, sc) for k, sc in FLAT.items() if (a.run / k / "SOLVE_RECEIPT.json").exists()})
+    for rid in [k for k in (*SCEN, *FLAT) if k in res]:
+        sc = FLAT.get(rid, rid); f = a.run / rid / f"{sc}_SMOKE_TEST_ONLY_solved.nc"
+        res[rid]["solved_network"] = f.exists()
         if not f.exists():
             continue
-        n = nets[sc] = pypsa.Network(f)
-        d = ship_duals(n, sc); b = liquid_balance(n, sc); duals.append(d); bal.append(b)
+        n = nets[rid] = pypsa.Network(f)
+        sc = rid; d = ship_duals(n, sc); b = liquid_balance(n, sc); duals.append(d); bal.append(b)
         nz = d[d.mu_upper_max_abs.fillna(0.0) > DUAL_TOL]
         res[sc]["ship_capacity_duals"] = dict(links=int(len(d)), available=bool(d.mu_available.all()), above_tolerance=int(len(nz)), tolerance_eur_per_mwh=DUAL_TOL, max_abs_eur_per_mwh=float(d.mu_upper_max_abs.max()), max_utilisation=float(d.max_utilisation.max()))
         res[sc]["sg_marine_fuel"] = sg_marine(n, b); res[sc]["slack"] = slack_use(n); res[sc]["cross_border"] = xb_build(n); res[sc]["id_industry_shares"] = id_industry(n)
@@ -157,17 +162,25 @@ def main():
     oi, or_ = res["integrated"]["objective_eur"], res["no_new_xb"]["objective_eur"]
     v = (or_ - oi) if (oi is not None and or_ is not None) else None
     res["B6"] = dict(gate=gate_b6_cost(oi, or_, "integrated", "no_new_xb") if v is not None else dict(passed=False, note="objective missing"), b6_eur=v, b6_bn_eur=(v / 1e9 if v is not None else None), positive=bool(v is not None and v > 0))
-    if len(nets) == 2:
+    if "integrated" in nets and "no_new_xb" in nets:
         res["B5_NO_NEW_XB_solved"] = gate_b5_no_new_xb(nets["integrated"], nets["no_new_xb"])
+    o = None
     if a.v2_run:
         o = {sc: jl(a.v2_run / sc / "SOLVE_RECEIPT.json").get("objective") for sc in ("integrated", "disconnected")}
         res["v2_smoke_same_56_snapshots"] = dict(objective_eur=o, b6_bn_eur=(o["disconnected"] - o["integrated"]) / 1e9, note="profile formal_barrier_1e6_t16 and the fully separated reference: level comparison only, not the 365x24h figure of the prediction")
+    fi, fr = (res.get(k, {}).get("objective_eur") for k in FLAT)
+    if v is not None and fi is not None and fr is not None:
+        res["flat_control"] = dict(b6_flat_bn=(fr - fi) / 1e9, ev_effect_cost_bn=dict(integrated=(fi - oi) / 1e9, no_new_xb=(fr - or_) / 1e9), ev_effect_b6_bn=((fr - fi) - v) / 1e9,
+                                   note="EV effect = flat - E2; control runs only, not an acceptance item")
+        if o:
+            res["flat_control"].update(v3_e2_minus_v2_integrated_bn=(oi - o["integrated"]) / 1e9, v3_flat_minus_v2_integrated_bn=(fi - o["integrated"]) / 1e9, v3_flat_no_new_xb_minus_v2_disconnected_bn=(fr - o["disconnected"]) / 1e9,
+                                       note_v2="v3 flat - v2 integrated: what is left after the EV effect, mainly the industry carriers and the other changes; the v2 disconnected run is another reference scenario")
     sg = res["integrated"].get("sg_marine_fuel", {}).get("has_source"), res["no_new_xb"].get("sg_marine_fuel", {}).get("has_source")
-    res["criteria"] = dict(optimal_or_119ab=all(res[s]["criterion_optimal_or_119ab"] for s in SCEN), b16_ledger=all(bool(res[s]["ledger_identity_passed"]) for s in SCEN), b6_positive=res["B6"]["positive"],
+    res["criteria"] = dict(optimal_or_119ab=all(res[s]["criterion_optimal_or_119ab"] for s in SCEN), c1_abc_and_gates_v6=all(res[s]["criterion_c1_abc_and_gates_v6"] for s in SCEN), b16_ledger=all(bool(res[s]["ledger_identity_passed"]) for s in SCEN), b6_positive=res["B6"]["positive"],
                            sg_marine_fuel_has_source=all(bool(x) for x in sg), no_slack=all(bool(res[s].get("criterion_no_slack")) for s in SCEN))
     res["passed"] = all(res["criteria"].values())
     a.out.mkdir(parents=True, exist_ok=True); (a.out / "V3_SMOKE_RESULT.json").write_text(json.dumps(res, indent=1, default=str, sort_keys=True))
-    print(json.dumps(dict(criteria=res["criteria"], passed=res["passed"], B6_bn=res["B6"]["b6_bn_eur"], **{sc: dict(cond=res[sc]["termination_condition"], seconds=res[sc]["solve_seconds"], obj=res[sc]["objective_eur"], v6=res[sc]["v6_label"]) for sc in SCEN}), indent=1, default=str))
+    print(json.dumps(dict(criteria=res["criteria"], passed=res["passed"], B6_bn=res["B6"]["b6_bn_eur"], **{sc: dict(cond=res[sc]["termination_condition"], seconds=res[sc]["solve_seconds"], obj=res[sc]["objective_eur"], v6=res[sc]["v6_label"]) for sc in [k for k in (*SCEN, *FLAT) if k in res]}, flat_control=res.get("flat_control")), indent=1, default=str))
 
 
 if __name__ == "__main__":

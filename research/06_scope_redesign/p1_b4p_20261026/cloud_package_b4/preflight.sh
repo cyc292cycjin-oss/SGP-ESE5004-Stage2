@@ -15,6 +15,7 @@
 #              RUN_PLAN_B4.md section 5: cores >= NEED_CORES, memory >= NEED_MEM_GIB, free disk >= NEED_DISK_GB (values registered from A1)
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
+unset BATCH_DEF; if [ -f "$HERE/BATCH_DEF.json" ]; then export BATCH_DEF="$HERE/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package (scripts_project/batch_def.py); without it the v2 tables apply
 PY="${PY:-python}"; ok=1; USER_CGROUP_ROOT="${CGROUP_ROOT:-}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"   # HPR H3.5: the default is set AFTER remembering whether the user set it (the guards note used to fire on the default itself)
 NEED_CORES=${NEED_CORES:-25}; NEED_MEM_GIB=${NEED_MEM_GIB:-190}; NEED_DISK_GB=${NEED_DISK_GB:-45}; R_TL=864000   # hard floor (RUN_PLAN_B4 section 5: F1 split process-2 high estimate 160 GiB / 0.80 = 200 -> 190 GiB rounded to the 240 GB class; disk ~36 GB persistent + 5.4 GB transient); R_TL = RUN_PLAN_HPC section 2 (B1; was 259,200), asserted against b4_batch4.py / run_batch4.sh in the code section
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
@@ -41,7 +42,7 @@ fi
 if sec networks; then
   echo "== networks (full 2920x3h; registered SHA256)"
   ( cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py base-check --nets "$HERE/networks" --out "$HERE/PREFLIGHT_BASE_CHECK${PREFLIGHT_TAG:+_$PREFLIGHT_TAG}.json" ) || { echo "BASE NETWORK SHA256 / BYTES DIFFER FROM THE BUILD RECEIPTS OR THE REGISTERED VALUES"; ok=0; }   # PREFLIGHT_TAG (HPR): per-job file names when two jobs share the package folder
-  for f in integrated_costs_active_research.csv disconnected_costs_active_research.csv; do [ -s "networks/$f" ] || { echo "networks/$f MISSING"; ok=0; }; done
+  for c in $(cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py runtable | cut -d'|' -f6 | sort -u); do f=${c}_costs_active_research.csv; [ -s "networks/$f" ] || { echo "networks/$f MISSING"; ok=0; }; done
   ls networks/*_365_24h_* > /dev/null 2>&1 && { echo "365x24h network found in the package (not part of the fourth batch)"; ok=0; } || echo "no 365x24h network in the package (as registered)"
 fi
 if sec env; then
@@ -74,7 +75,9 @@ import re
 src = open("../run_batch4.sh").read(); m = re.search(r"^R_TL=(\d+); R_WALL=(\d+); R_GAP=(\d+); R_MODE=(\w+)", src, re.M)
 assert m and (int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4)) == (b4_batch4.TIME_LIMIT_S, b4_batch4.WALL_CAP_S, b4_batch4.LICENCE_GAP_S, "split"), ("run_batch4.sh R_* differ from b4_batch4.py", m and m.groups())
 assert b4_batch4.TIME_LIMIT_S == int(sys.argv[1]), "preflight R_TL differs from b4_batch4.py TIME_LIMIT_S"
-assert b4_batch4.BUILD_COMMIT.startswith("72083fde") and set(b4_batch4.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"}, "registered networks"
+import os
+assert "BATCH_DEF" in os.environ or (b4_batch4.BUILD_COMMIT.startswith("72083fde") and set(b4_batch4.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"}), "registered networks"
+assert set(b4_batch4.REGISTERED_SHA) == {r["base"] + "_unsolved.nc" for r in b4_batch4.RUNS.values()}, "registered networks = run table"
 print("modules import; run table", ", ".join(b4_batch4.RUNS), "| thresholds memory", b4_batch4.MEMORY_STOP_FRACTION, "projection", b4_batch4.PROJECTION_FRACTION, "P1", b4_batch4.P1_THRESHOLD, b4_batch4.P1_MIN_CORES, b4_batch4.P1_WINDOW_S,
       "| registered TimeLimit", b4_batch4.TIME_LIMIT_S, "wall cap", b4_batch4.WALL_CAP_S, "gap", b4_batch4.LICENCE_GAP_S, "= run_batch4.sh R_TL / R_WALL / R_GAP; build commit", b4_batch4.BUILD_COMMIT[:8])
 P

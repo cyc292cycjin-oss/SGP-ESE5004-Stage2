@@ -31,6 +31,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 from m10_batch3_summary import COUNTRIES, ITER, bn, jl, ledger_totals, owen_main, postproc_errors, sha, unusable_runs   # noqa: E402
+from batch_def import input_receipt, load_def   # noqa: E402
 
 SCRIPT = "scripts_project/b4_batch4.py"
 T16 = "formal_barrier_1e6_t16"
@@ -47,6 +48,9 @@ REGISTERED_SHA = {"integrated_2920_3h_unsolved.nc": "08879f0bede119d77160cdb3f5f
                   "disconnected_2920_3h_unsolved.nc": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7"}
 REGISTERED_BYTES = {"integrated_2920_3h_unsolved.nc": 63873447, "disconnected_2920_3h_unsolved.nc": 63202193}
 BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
+_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; limits stay
+if _DEF:
+    RUNS, REGISTERED_SHA, REGISTERED_BYTES, BUILD_COMMIT = _DEF["runs"], _DEF["registered_sha"], _DEF["registered_bytes"], _DEF["build_commit"]
 # Registered limits (HPR, user decision B1; RUN_PLAN_HPC.md section 2) - run_batch4.sh carries the same values as R_TL / R_WALL / R_GAP (asserted equal by
 # tests/research/test_hpr_two_jobs.py and by preflight.sh); the other timeouts are the B4P values (RUN_PLAN_B4 3.1 / 3.6, unchanged).
 TIME_LIMIT_S = 864000               # 240 h, F1 = F2 (was 259,200 s in RUN_PLAN_B4)
@@ -101,13 +105,13 @@ def base_check(nets: Path, registered: bool = True) -> dict:
     SHA256 / bytes of the B4P instruction. registered=False (--no-registered: the runner passes it only with ALLOW_UNREGISTERED=1, i.e. stand-in
     tests on synthetic network files) keeps the receipt checks and records the registered comparison as information."""
     rows = {}
-    for sc in ("integrated", "disconnected"):
-        f = nets / f"{sc}_2920_3h_unsolved.nc"; rec = jl(nets / f"{sc}_BUILD_RECEIPT.json") or {}
+    for run in RUNS.values():
+        f = nets / f"{run['base']}_unsolved.nc"; rc = input_receipt(nets, run, "network", BUILD_COMMIT)
         have = sha(f) if f.exists() else None
         reg_ok = bool(have) and have == REGISTERED_SHA[f.name] and f.exists() and f.stat().st_size == REGISTERED_BYTES[f.name]
-        rec_ok = bool(have) and have == (rec.get("network") or {}).get("sha256") and rec.get("code_sha") == BUILD_COMMIT
-        rows[f.name] = dict(file=str(f), bytes=(f.stat().st_size if f.exists() else None), sha256=have, receipt_sha256=(rec.get("network") or {}).get("sha256"),
-                            receipt_code_sha=rec.get("code_sha"), registered_sha256=REGISTERED_SHA[f.name], registered_bytes=REGISTERED_BYTES[f.name],
+        rec_ok = bool(have) and have == rc["sha256"] and rc["chain_ok"]
+        rows[f.name] = dict(file=str(f), bytes=(f.stat().st_size if f.exists() else None), sha256=have, receipt_sha256=rc["sha256"],
+                            receipt_code_sha=rc["code_sha"], registered_sha256=REGISTERED_SHA[f.name], registered_bytes=REGISTERED_BYTES[f.name],
                             receipt_equal=rec_ok, registered_equal=reg_ok, equal=rec_ok and (reg_ok or not registered))
     return dict(script=SCRIPT, networks=rows, all_equal=all(v["equal"] for v in rows.values()), registered_checked=registered, build_commit=BUILD_COMMIT, solver_runs=0)
 
@@ -305,7 +309,7 @@ def b6(out: Path) -> dict | None:
         return None
     sys.path.insert(0, str(HERE / "v5"))
     from v5_gates import gate_b6_cost
-    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), "integrated", "disconnected")
+    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), RUNS["F1"]["scenario"], RUNS["F2"]["scenario"])
     li, ld = ledger_totals(out / "F1"), ledger_totals(out / "F2"); oi, od = owen_main(out / "F1"), owen_main(out / "F2")
     return dict(g, b6_bn=bn(g["difference"]), relative=(float(d["objective"]) - float(i["objective"])) / abs(float(i["objective"])), runs=dict(integrated="F1", disconnected="F2"),
                 labels=dict(F1=i["v6"], F2=d["v6"]), usable=bool(i["v6"] and d["v6"] and i["v6"] != "NOT_ACCEPTED" and d["v6"] != "NOT_ACCEPTED"),

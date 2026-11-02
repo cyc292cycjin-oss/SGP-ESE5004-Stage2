@@ -16,6 +16,7 @@
 #              RUN_PLAN_DFX.md section 5: cores >= NEED_CORES (17), memory >= NEED_MEM_GIB (64), free disk >= NEED_DISK_GB (45); >= 33 cores -> V1 | V2 in parallel
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
+unset BATCH_DEF; if [ -f "$HERE/BATCH_DEF.json" ]; then export BATCH_DEF="$HERE/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package (scripts_project/batch_def.py); without it the v2 tables apply
 PY="${PY:-python}"; ok=1; USER_CGROUP_ROOT="${CGROUP_ROOT:-}"; CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup}"; ONLY="${PREFLIGHT_ONLY:-guards,sha,networks,env,profile,code,tools,licence,resources}"   # HPR H3.5: remember whether the user set CGROUP_ROOT before defaulting it (the guards note used to fire on the default itself; DFX phase 4 finding 5)
 NEED_CORES=${NEED_CORES:-17}; NEED_MEM_GIB=${NEED_MEM_GIB:-64}; NEED_DISK_GB=${NEED_DISK_GB:-45}; PAR_CORES=33   # hard floor (RUN_PLAN_DFX section 5: third-batch T16 peaks 22.8 / 19.3 GiB + post-processing ~11 GiB, x2 margin; disk as the third batch)
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
@@ -42,7 +43,7 @@ fi
 if sec networks; then
   echo "== networks (365x24h v2; build receipts + registered SHA256 / bytes)"
   ( cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/dfx_batch.py base-check --nets "$HERE/networks" --out "$HERE/PREFLIGHT_BASE_CHECK.json" ) || { echo "BASE NETWORK SHA256 / BYTES DIFFER FROM THE BUILD RECEIPTS OR THE REGISTERED VALUES (or a 2920x3h file is present)"; ok=0; }
-  for f in integrated_costs_active_research.csv disconnected_costs_active_research.csv; do [ -s "networks/$f" ] || { echo "networks/$f MISSING"; ok=0; }; done
+  for c in $(cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/dfx_batch.py runtable | cut -d'|' -f6 | sort -u); do f=${c}_costs_active_research.csv; [ -s "networks/$f" ] || { echo "networks/$f MISSING"; ok=0; }; done
   ls networks/*_2920_3h_* > /dev/null 2>&1 && { echo "2920x3h network found in the package (not part of the DFX 365x24h screening)"; ok=0; } || echo "no 2920x3h network in the package (as registered)"
 fi
 if sec env; then

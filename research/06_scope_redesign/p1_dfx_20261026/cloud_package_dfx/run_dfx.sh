@@ -48,6 +48,7 @@
 # is POSTPROC_ERROR and never changes the schedule; the violation analysis and C1 are redone ONCE after a failure (M10A supplement 01 D2).
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
+unset BATCH_DEF; if [ -f "$HERE/BATCH_DEF.json" ]; then export BATCH_DEF="$HERE/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package (scripts_project/batch_def.py); without it the v2 tables apply
 AUTH=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -221,19 +222,22 @@ P
 
 # ---- networks of the runs (base networks only; the file given to s2_solve is always the registered 365x24h daily network)
 base_net() { echo "$NETS/${BASE[$1]}_unsolved.nc"; }
-base_scen() { echo "${BASE[$1]%%_*}"; }
+base_scen() { echo "${BASE[$1]%_*_*}"; }
+is_variant() { [ "${SC[$1]}" != "${COSTS[$1]}" ]; }   # V3: a network derived from the one of its cost scenario (no_new_xb from integrated), registered through its variant receipt
 registered_of() {   # GATES_V6 G2.1 registered SHA256 = build receipt daily_network.sha256 (the 365x24h file; RUN_PLAN_DFX section 1). A TRUNCATE run
   # (smoke tests / truncated dry run only) still solves the same daily file truncated in memory: the dry-run build check compares the file SHA256;
   # a truncated SOLVE is never accepted (gates_v6.py takes the 2920x3h SHA256 for a truncated run) and never formal.
-  jget "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" daily_network.sha256
+  if is_variant "$1"; then jget "$NETS/${BASE[$1]}_VARIANT_RECEIPT.json" output.sha256; else jget "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" daily_network.sha256; fi
 }
 
 # ---- phase 0: inputs and the base networks against the build receipts and the registered values
 prepare() {
-  local f
+  local f rid need=()
   [ "$POST_ONLY" = 1 ] && { log "PREPARE:skipped (POST_ONLY: no solve)"; return 0; }
-  for f in integrated_365_24h_unsolved.nc disconnected_365_24h_unsolved.nc integrated_BUILD_RECEIPT.json disconnected_BUILD_RECEIPT.json \
-           integrated_costs_active_research.csv disconnected_costs_active_research.csv; do
+  for rid in "${!SC[@]}"; do
+    need+=("${BASE[$rid]}_unsolved.nc" "${COSTS[$rid]}_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); fi
+  done
+  for f in "${need[@]}"; do
     [ -s "$NETS/$f" ] || { safe_stop "MISSING_INPUT:networks/$f"; return 1; }
   done
   [ "$DRY" = 1 ] || [ "$(busy)" = 0 ] || { safe_stop "SOLVER_PROCESS_RUNNING_AT_START:$(busy) s2_solve processes (an earlier runner?)"; return 1; }
@@ -316,7 +320,8 @@ solve_run() {   # $1 rid, $2 .solve_end file of the previous run in the lane (ma
 
 # ---- post-processing of one run; idempotent: every step skips an output that exists
 accept() {   # $1 rid -> label (V6_ACCEPTANCE.json); the registered SHA256 comes from the build receipt (daily network for the untruncated 365x24h run)
-  local d="$OUT/$1" lab; lab=$(aux $G6_CMD accept --solve-dir "$d" --build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" --repo "$REPO" 2>> "$d/v6.err" | tail -1)
+  local d="$OUT/$1" lab reg=(--build-receipt "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json"); if is_variant "$1"; then reg=(--registered-sha256 "$(registered_of "$1")"); fi
+  lab=$(aux $G6_CMD accept --solve-dir "$d" "${reg[@]}" --repo "$REPO" 2>> "$d/v6.err" | tail -1)
   echo "$lab" > "$d/.label"; echo "$lab"
 }
 stop_check() {   # $1 rid: graded stop rule (RUN_PLAN_DFX 3.3; both runs are batch reference runs)

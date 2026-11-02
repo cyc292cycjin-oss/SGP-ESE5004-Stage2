@@ -54,3 +54,7 @@
 **不纳入（与 `GATES_V6.md` §2 一致或同理）：** `solver.profile`、`solver.profiles`（档案与白名单的增减不改变网络 / LP，§2 明文排除）；`solver.acceptance`、`solver.run_rules`（验收规则与事先登记的运行规则，M08a A8，只决定判定与运行流程）；`reporting`（报告货币与汇率，M08a A9，只影响导出列）；`stage`、`skeleton_status`（状态标签）；`fuel_bus_naming`（命名约定，无脚本读取；网络本身由 G2.1 网络同一性覆盖）；`config_overrides`（其效果已体现在被覆盖键的值中）。
 
 **测试：** `tests/research/test_m08a_a8.py`：子集键与本节清单逐一相等；G2.2 对 `solver.profile(s)`、`solver.acceptance`、`solver.run_rules`、`stage` 不敏感，对四个情景开关、`site_candidates`、成本层口径键敏感；`tests/research/test_m08a_a9.py`：对 `reporting` 不敏感。M08a A6.2 新增的海上风键位于 `renewable` 段内，自动纳入。
+
+## 附注（2026-11-02，V3）
+
+上文冻结正文不改。V3 第 161 项在 `scripts_project/v5/gates_v6.py` 的 `SUBSET_KEYS_M08A_ADDITIONS` 中增加 `liquids`，子集键由 30 个变为 31 个。原因：`research.liquids` 决定网络结构（国家液体母线、船运单价基准和固定上界），属于 G2.2 应比对的结构键，不是阈值。依据：`research/06_scope_redesign/p1_v3_20261102/V3_RULES.md` 第 8 节，`V3_REVIEW_DECISIONS_PHASE3.md` 第 6 项。

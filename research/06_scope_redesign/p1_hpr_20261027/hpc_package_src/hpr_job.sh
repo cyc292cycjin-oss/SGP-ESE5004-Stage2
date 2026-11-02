@@ -16,6 +16,7 @@
 set -u
 JOB_MODE=${JOB_MODE:?formal|batch|smoke56|build_only}; JOB_RID=${JOB_RID:-}; JOB_KEY=${JOB_KEY:-$JOB_MODE}
 PKG=${PBS_O_WORKDIR:?run under PBS (qsub) - or set PBS_O_WORKDIR for the local drill}; cd "$PKG" || exit 2
+unset BATCH_DEF; if [ -f "$PKG/BATCH_DEF.json" ]; then export BATCH_DEF="$PKG/BATCH_DEF.json"; fi   # V3 supplement 01: registered batch definition of this package; without it the v2 tables apply
 JOBID=${PBS_JOBID:-local}; PY=${PY:-$HOME/miniforge3/envs/pypsa-earth/bin/python}
 RUNS_ROOT=${HPR_RUN_ROOT:-$PKG}
 # local drill / stand-in switches (HPR_LOCAL_DRILL=1, HPR_RUN_ROOT, HPR_DRY_TRUNCATE, HPR_TEST_STANDIN=1): never under a real PBS job id (a real id is

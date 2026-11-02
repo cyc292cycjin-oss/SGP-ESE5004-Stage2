@@ -146,3 +146,100 @@ Gurobi 只有两次且不重试，所以先用 HiGHS 走一遍求解后的链路
 - 脚本的改动只有预检和输出目录，求解参数未动。
 
 结果记录（求解后追加，第 3、4、5 节未改）：两次都完成，五条验收通过，一体化 optimal，`no_new_xb` suboptimal 按 (a)(b) 通过。详见 `V3_REPORT_PHASE3.md` 第 4、5 节。第 4 节只预告了 B8 不通过，A1_A2、A1_A2_S4B、A3、B3 未预告，是我的遗漏，报告已照实列出。求解后只修正了 `v3_smoke_eval.py` 的对偶单位（除以时段权重），值都是 0，判断不变。
+
+## 10. 补充 01 登记（求解前）
+
+依据 `V3_REVIEW_DECISIONS_PHASE3.md` 和用户 2026-11-02 对 X1 的决定（`V3_RULES.md` 第 2.1、2.2 节）。第 3、4、5 节的原有内容不改，本节是补充。
+
+### 10.1 网络
+
+**E2 四个网络不变**，SHA256 和规模见第 1、2 节：X1 选定 APG existing，现网与其逐对一致，不重建。`evidence/X1_STOCK_TABLE_V3.csv` 8 对、合计 2,870 MW，`all_structural_passed = true`。
+
+**flat 对照网络**（新增，提交 `7faeb8fa`）：`s2_network.py --scenario integrated --override s2.demand.ev_structure=flat`，`no_new_xb` 由其派生。覆盖项记录在网络元数据中，B12 按同样的覆盖项重算配置哈希，配置文件未改。
+
+| 文件（`results_project/v3/builds_flat/`） | 字节 | SHA256 |
+|---|---:|---|
+| `integrated/integrated_2920_3h_unsolved.nc` | 64,654,842 | `11e95fa7de19a970ee015ad7ef5948b60a4c228c51791ed6f8888632612f763c` |
+| `no_new_xb/no_new_xb_2920_3h_unsolved.nc` | 64,026,199 | `0ded0b0fb07add41f94eb117eb858ffdf51803c9ecd197fd76e8000de19487bd` |
+| `integrated/integrated_365_24h_unsolved.nc` | 32,073,635 | `0c2efd42f797739984bd64c79b3e8d1a51624158e1d97ce6d1e2a800f9ec1496` |
+| `no_new_xb/no_new_xb_365_24h_unsolved.nc` | 31,444,992 | `5b8aff05d44471a390bc1e403fb4d93f6a4fa182c26c03bea9c23411534fe7d3` |
+
+| LP（56 时段） | 列 | 行 | 非零 |
+|---|---:|---:|---:|
+| 一体化 flat | 717,604 | 1,585,332 | 3,685,634 |
+| `no_new_xb` flat | 696,250 | 1,537,750 | 3,535,400 |
+
+flat 与 E2 的差异全部在 EV 层（`evidence/FLAT_VS_E2_DIFF.csv`，8 行，EV 层以外 0 行）：无 `EV battery`，`BEV charger` 回到 v2 的可扩建形式，`land transport EV` 恒定；全年 EV 能量相同（715.964 TWh）；B5 通过。
+
+### 10.2 运行清单
+
+脚本 `/home/jin/v3/smoke_s1.sh`，输出 `results_project/v3/smoke_s1`。档案 `formal_barrier_1e6_t16`（Threads 16，BarConvTol 1e-6；决定 3），前 56 时段，TimeLimit 3,000 s，墙钟止损 3,600 s，串行，间隔 ≥ 330 s，不重试、不改参数。额度 4 次。
+
+| 次序 | 运行 | 网络 | 作用 |
+|---|---|---|---|
+| 1 | `integrated` | E2 | 验收冒烟 |
+| 2 | `no_new_xb` | E2 | 验收冒烟 |
+| 3 | `integrated_flat` | flat | 对照，只报告 |
+| 4 | `no_new_xb_flat` | flat | 对照，只报告 |
+
+每次求解前做令牌通路的 TCP 检查；某次没有返回解则停止，后面的运行不启动，不消耗调用。调用前须用户确认 WLS 会话空闲、AnyConnect 已断开。
+
+### 10.3 验收（决定 4）
+
+标准同第 4 节，第 1 条的口径改为：**C1 (a)(b)(c) 全过且 GATES_V6 标签为 ACCEPTED**。终止状态和第 120 项的 `accepted` 字段作为数值信息照实报告。指令原来的"optimal 或 (a)(b)"仍一并报告。
+
+事先说明（上一轮只预告了 B8，这次写全）：
+
+- E2 两次 B8 预期不通过，只有 Transport，相对差 −4.1146e-05（`V3_RULES.md` 第 8.2 节）。flat 两次 EV 恒定，B8 预期通过。
+- A1_A2、A1_A2_S4B、A3、B3 可能不通过，这些是第 120 项所说的数值信息，v2 同档案的冒烟同样不通过，不进验收。
+
+### 10.4 EV 效应的定义与预测
+
+EV 效应 = flat − E2，总成本（一体化、`no_new_xb`）和 B6 各报一个数。v3 flat − v2 一体化是扣除 EV 效应后的剩余差额，主要归工业载体和其他改动（v2 冒烟同为 `formal_barrier_1e6_t16`，口径一致）。
+
+求解前预测（INFERENCE，依据 `V3_REPORT_PHASE3.md` 第 6 节的 56 时段结果）：
+
+| 项 | 预测 | 依据 |
+|---|---|---|
+| EV 效应，总成本 | 两情景都为正；一体化 5–10 bn | 上一轮 −11.46 bn 中，光伏增加和气电减少主要来自充电跟随光伏；工业载体的份额未知 |
+| EV 效应，B6 | 绝对值 < 1.5 bn，符号不定 | E2 两情景都有，效应大部分抵消 |
+| v3 flat − v2 一体化 | 负，绝对值 1–6 bn | 工业载体变化仍在 |
+
+## 11. 365×24h 补充预测（筛查前登记，决定 5）
+
+参考了上一轮 56 时段冒烟（`V3_REPORT_PHASE3.md`），不是独立于冒烟的预测。**以 X1b 完成后的网络为条件**。第 5 节的原有预测不改。
+
+| 项 | 预测 | 依据 |
+|---|---|---|
+| B6 | 为正；低于 v2 的 14.6153 bn，下降 1–4 bn | X1b 把 5,427 MW 专线计入 `no_new_xb` 存量，LA–TH 是冒烟里最紧的走廊；冒烟里 B6 的 +1.28 bn 不含 X1b，且含 E2 的日内效应 |
+| 总成本 | 一体化相对 v2 的变化明显小于 56 时段的 −11.46 bn，绝对值 < 6 bn | `to_daily` 抹掉日内形状，E2 的日内效应基本消失，工业载体效应保留 |
+| SG 船用燃料 | ≥ 95 % 船运，ID 为主、MY 次之，东盟外接近 0 | 冒烟 ID 约 94 %，MY 5–6 % |
+| 液体对偶价 | 甲醇分化 2–3 EUR/MWh，最高不在 SG | 冒烟最高是 PH，SG 居中 |
+| ID 受益 | Owen 主值在 −2 到 +0.5 bn 之间 | 冒烟 −0.83 bn；X1b 不直接涉及 ID |
+| LA 受益 | 明显低于 v2 筛查 | 存量和 X1b 都进入对照情景 |
+| 船运上界 | 不绑定，最大利用率 < 20 % | 冒烟最大 8.7 % |
+| 求解 | 两情景 `formal_barrier_1e6_t16` optimal | DFX v2 筛查同档案 optimal |
+
+筛查时按账目分解 ID 的差额（电力、液体买卖、燃料舱销售、运费），写入筛查报告（决定 2）。
+
+## 12. 本机与云端 Gurobi 的运行条件（决定 7）
+
+- 本机或 AutoDL 上的 Gurobi 只在 AnyConnect 断开时运行：AnyConnect 连着时 WSL 外连 TCP 全断，令牌取不到（第 8 节）。
+- `smoke_v3.sh`、`smoke_s1.sh` 的令牌预检保留。
+- 不与 HPC 上的求解同时进行（WLS 令牌共用）。
+
+## 13. 运行器（决定 8）
+
+`run_dfx.sh`（365×24h，AutoDL）和 `run_batch4.sh`（2920×3h，HPC）在包内有 `BATCH_DEF.json` 时读 v3 的运行表和登记值，没有时保持 v2 表；两者都已是 `formal_barrier_1e6_t16`。定义文件 `batch_def/BATCH_DEF_365x24h.json`、`batch_def/BATCH_DEF_2920x3h.json`。`no_new_xb` 通过变体收据登记：变体的底网络 SHA256 必须等于构建收据的网络，否则安全停止。**未打包、未上传。** X1b 之后定义文件的登记值要重做。
+
+干跑结果（真实网络，无求解器、无许可，`results_project/v3/dry_runners`）：
+
+| 运行器 | 内容 | 结果 |
+|---|---|---|
+| AutoDL `run_dfx.sh` | `BUILD_ONLY`，完整 365×24h，登记值严格校验 | V1、V2 的 `BUILD_CHECK` 全过；V1 10,367,385 行 × 4,688,404 列，V2 10,060,243 × 4,551,175，与第 2 节一致；峰值 10.08 GiB |
+| HPC `b4_batch4.py base-check` | 2920×3h 登记值和收据链 | 两个网络 `all_equal` |
+| HPC `run_batch4.sh` | `BUILD_ONLY`，截短 56 时段（2920×3h 本机放不下） | F1、F2 的 `BUILD_CHECK` 全过，`split_built` |
+
+HPC 这一项只走到分进程的第 1 步，且是 56 时段；2920×3h 全尺寸 LP 没有在本机构建过。
+
+测试：v2 运行器回归 43 项全过（`test_dfx_runner`、`test_b4p_batch4`、`test_b4p_paths`、`test_hpr_two_jobs`），v3 运行器 7 项全过（`tests/research/test_v3_runners.py`），含变体不是从登记网络派生、缺变体收据两种安全停止。
