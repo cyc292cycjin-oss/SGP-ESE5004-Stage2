@@ -20,7 +20,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from v3_layers import DEDICATED_CARRIER, DEDICATED_STOCK, LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER   # noqa: E402
+from v3_layers import DEDICATED_CARRIER, DEDICATED_SRC_CARRIER, DEDICATED_SRC_SUFFIX, DEDICATED_STOCK, LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER, dedicated_source_buses, source_bus_problems   # noqa: E402
 
 COUNTRIES = ("BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN")
 ATTR = {"Generator": ["bus", "carrier", "p_nom", "p_nom_min", "p_nom_max", "p_nom_extendable", "marginal_cost", "capital_cost", "efficiency"],
@@ -36,10 +36,10 @@ ALLOWED_CHANGED = {"Load": {"industry heat", "industry heat medium A", "industry
                    "Link": {"oil pool", "Haber-Bosch", "ammonia cracker", "methanolisation", "biomass-to-methanol", "OCGT methanol", "industry methanol", "shipping methanol", "BEV charger", "oil final-energy accounting"},
                    "Bus": {"oil final energy", "shipping methanol", "methanol final energy"}}
 # "oil pool" in Link: distribution links of the nodes that first get a fossil oil bus because the facility allocation places oil final demand there (decision 164; v2 had only their non-fossil bus)
-ALLOWED_NEW = {"Bus": {"oil", "oil non-fossil", "methanol", "ammonia", "methanol final energy", "coal final energy", "gas final energy", "biomass final energy", "oil final energy", "gas feedstock", "coal feedstock", "oil feedstock"},
+ALLOWED_NEW = {"Bus": {"AC", "oil", "oil non-fossil", "methanol", "ammonia", "methanol final energy", "coal final energy", "gas final energy", "biomass final energy", "oil final energy", "gas feedstock", "coal feedstock", "oil feedstock"},   # AC: the plant source buses of decision 179, listed one by one in source_check
                "Generator": {"oil import", "methanol import", "ammonia import", "FT fuel import", "process emissions"},
                "Store": {"ammonia store", "methanol store", "oil non-fossil store", "EV battery"},
-               "Link": {DEDICATED_CARRIER, "oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "oil pool", "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
+               "Link": {DEDICATED_CARRIER, DEDICATED_SRC_CARRIER, "oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "oil pool", "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
                "Load": ALLOWED_CHANGED["Load"]}
 
 
@@ -63,7 +63,14 @@ def struct_diff(a, b, label_a="v2", label_b="v3") -> tuple[pd.DataFrame, list]:
         for col in cols:
             if col not in x or col not in y:
                 continue
-            ch = both[~same(x.loc[both, col], y.loc[both, col]).to_numpy()]
+            xc, yc = x.loc[both, col], y.loc[both, col]
+            if col in ("bus", "bus1"):   # decision 179: a stock unit moved to the plant source bus of its node is reported, not a difference; any other change of bus still fails
+                home = lambda s: s.astype(str).str.replace(DEDICATED_SRC_SUFFIX + "$", "", regex=True)
+                hx, hy = home(xc), home(yc); mv = both[((hx == xc.astype(str)) & (hy != yc.astype(str))).to_numpy()]
+                for k, v in y.loc[mv].carrier.astype(str).value_counts().items():
+                    rows.append(dict(type=typ, change=f"moved_to_source_bus:{col}", carrier=k, count=int(v), example=str(mv[0])))
+                xc, yc = hx, hy
+            ch = both[~same(xc, yc).to_numpy()]
             for k, v in y.loc[ch].carrier.astype(str).value_counts().items() if len(ch) and "carrier" in y else []:
                 rows.append(dict(type=typ, change=f"attr:{col}", carrier=k, count=int(v), example=str(ch[0])))
                 if k not in ALLOWED_CHANGED.get(typ, set()):
@@ -134,13 +141,34 @@ def dedicated_links(n) -> pd.DataFrame:
 
 
 def dedicated_check(i, r, d=None) -> tuple[pd.DataFrame, bool]:
-    """X1b, supplement 03: the plant lines of integrated and no_new_xb, line by line (same buses, capacity, efficiency, not extendable); one way from a Lao node (no reverse link, p_min_pu 0); none in the disconnected network d."""
+    """X1b, supplement 03: the plant lines of integrated and no_new_xb, line by line (same buses, capacity, efficiency, not extendable); one way from a Lao plant source bus (decision 179; no reverse link, p_min_pu 0); none in the disconnected network d."""
     x, y = dedicated_links(i), dedicated_links(r)
     ok = bool(len(x) and x.equals(y) and not x.p_nom_extendable.astype(bool).any() and (x.border_class == "cross_border").all() and (x.transport_carrier == "electricity").all())
-    ok = bool(ok and (x.p_min_pu == 0.0).all() and x.bus0.str.startswith("LA").all() and not x.index.str.endswith("-reversed").any())
+    ok = bool(ok and (x.p_min_pu == 0.0).all() and x.bus0.str.startswith("LA").all() and x.bus0.isin(dedicated_source_buses(i)).all() and not x.index.str.endswith("-reversed").any())
     if d is not None:
         ok = bool(ok and not len(dedicated_links(d)))
     return x.rename_axis("link").reset_index(), ok
+
+
+def source_links(n) -> pd.DataFrame:
+    cols = ["bus0", "bus1", "carrier", "p_nom", "p_nom_min", "p_nom_max", "p_min_pu", "efficiency", "marginal_cost", "capital_cost", "p_nom_extendable", "border_class", "transport_carrier", "research_role"]
+    return n.links[n.links.carrier == DEDICATED_SRC_CARRIER][cols]
+
+
+def source_check(i, r, d=None) -> tuple[pd.DataFrame, bool, list]:
+    """Decision 179: source buses and source links of integrated and no_new_xb identical and structurally sound (v3_layers.source_bus_problems), one source per plant node, zero objective terms, none counted as cross-border; none in the disconnected network d."""
+    x, y = source_links(i), source_links(r); bad = source_bus_problems(i) + source_bus_problems(r)
+    nodes = {str(b)[: -len(DEDICATED_SRC_SUFFIX)] for b in dedicated_source_buses(i)}
+    plant = set(dedicated_links(i).bus0.str.replace(DEDICATED_SRC_SUFFIX + "$", "", regex=True))
+    if not len(x) or not x.equals(y) or list(dedicated_source_buses(i)) != list(dedicated_source_buses(r)):
+        bad.append("source links or buses differ between the scenarios")
+    if nodes != plant or len(nodes) != len(x):
+        bad.append(f"source buses {sorted(nodes)} against plant nodes {sorted(plant)}")
+    if (x.border_class == "cross_border").any():
+        bad.append("source link counted as cross-border")
+    if d is not None and (len(dedicated_source_buses(d)) or len(source_links(d))):
+        bad.append("source bus in the disconnected network")
+    return x.rename_axis("link").reset_index(), not bad, bad
 
 
 def demand_check(n) -> pd.Series:
@@ -188,6 +216,8 @@ def main():
     f1 = a.dir / "disconnected/disconnected_365_24h_unsolved.nc"; D1 = pypsa.Network(str(f1)) if f1.exists() else None
     dl, dok3 = dedicated_check(I3, R3); _, dok1 = dedicated_check(I1, R1, D1); dl.to_csv(a.out / "evidence/X1B_LINES_V3.csv", index=False)
     res["dedicated_lines"] = dict(passed=bool(dok3 and dok1), links=int(len(dl)), total_mw=float(dl.p_nom.sum()), disconnected_checked=D1 is not None)
+    sl, sok3, sbad3 = source_check(I3, R3); _, sok1, sbad1 = source_check(I1, R1, D1); sl.to_csv(a.out / "evidence/SOURCE_LINKS_V3.csv", index=False)
+    res["plant_sources"] = dict(passed=bool(sok3 and sok1), links=int(len(sl)), total_mw=float(sl.p_nom.sum()), problems=(sbad3 + sbad1)[:20])
     us = st[st.pair.str.contains("LA")].assign(apg_usable_mw=lambda x: x.no_new_xb_usable_mw - x.dedicated_mw); us.to_csv(a.out / "evidence/LA_EXPORT_USABLE_V3.csv", index=False)
     D, bad = struct_diff(V2, I3); (a.out / "evidence").mkdir(exist_ok=True); D.to_csv(a.out / "evidence/V3_STRUCT_DIFF_V2.csv", index=False)
     res["structure_vs_v2"] = dict(passed=not bad, unexpected=bad[:40], rows=int(len(D)))
@@ -205,9 +235,9 @@ def main():
     closure = float((dh - ov.reindex(dh.index).fillna(0.0) * eff).abs().max().max())
     res["demand_vs_table"] = dict(max_abs_gap_non_overflow_carriers_twh=dev, overflow_closure_max_twh=closure, passed=bool(dev <= 1e-6 and closure <= 1e-6), useful_heat_efficiency=eff,
                                   country_biomass_overflow_twh={k: float(v) for k, v in ov.integrated_2920.round(6).items() if abs(v) > 1e-6})
-    res["all_structural_passed"] = bool(res["stock_x1"]["passed"] and res["dedicated_lines"]["passed"] and res["gate_b5_no_new_xb"]["passed"] and res["gate_b5_no_new_xb_365"]["passed"] and res["scenario_difference_2920"]["passed"] and res["scenario_difference_365"]["passed"] and res["structure_vs_v2"]["passed"] and res["demand_vs_table"]["passed"] and all(res[k]["weights"] and res[k]["orphan_count"] == 0 for k in ("integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365")))
+    res["all_structural_passed"] = bool(res["stock_x1"]["passed"] and res["dedicated_lines"]["passed"] and res["plant_sources"]["passed"] and res["gate_b5_no_new_xb"]["passed"] and res["gate_b5_no_new_xb_365"]["passed"] and res["scenario_difference_2920"]["passed"] and res["scenario_difference_365"]["passed"] and res["structure_vs_v2"]["passed"] and res["demand_vs_table"]["passed"] and all(res[k]["weights"] and res[k]["orphan_count"] == 0 for k in ("integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365")))
     (a.out / "evidence/V3_STATIC_CHECK.json").write_text(json.dumps(res, indent=1, sort_keys=True, default=str) + "\n")
-    print(json.dumps({k: res[k] for k in ("stock_x1", "dedicated_lines", "gate_b5_no_new_xb", "scenario_difference_2920", "structure_vs_v2", "demand_vs_table", "all_structural_passed")}, indent=0, default=str)[:3000])
+    print(json.dumps({k: res[k] for k in ("stock_x1", "dedicated_lines", "plant_sources", "gate_b5_no_new_xb", "scenario_difference_2920", "structure_vs_v2", "demand_vs_table", "all_structural_passed")}, indent=0, default=str)[:3000])
     print(json.dumps(res["integrated_2920"], indent=0, default=str)[:1800])
 
 

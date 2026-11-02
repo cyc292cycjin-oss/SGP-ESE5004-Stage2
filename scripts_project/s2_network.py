@@ -41,7 +41,7 @@ from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
 from m08a_layers import apply_existing_vintage_costs
-from v3_layers import DEDICATED_CARRIER, add_dedicated_plant_lines, add_liquid_shipping, apply_ev_structure
+from v3_layers import DEDICATED_CARRIER, add_dedicated_plant_lines, add_liquid_shipping, apply_ev_structure, dedicated_source_buses, source_bus_problems
 from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
@@ -113,9 +113,11 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
         raise ValueError("Research snapshot boundary changed")
     if not np.all(n.snapshot_weightings.to_numpy() == (3 if not daily else 24)):
         raise ValueError("Physical weights changed")
-    geo = n.buses[n.buses.carrier.isin(["AC", "DC"])]
+    geo = n.buses[n.buses.carrier.isin(["AC", "DC"]) & ~n.buses.index.isin(dedicated_source_buses(n))]   # decision 179: the plant source buses are AC buses, not geographical nodes
     if len(geo) != 100 or set(geo.country) != set(COUNTRIES):
         raise ValueError("Geographical electric buses changed")
+    if source_bus_problems(n):
+        raise ValueError("Plant source buses: " + "; ".join(source_bus_problems(n)[:4]))
     check_global_constraints(n); validate_hooks(n)
     if n.meta.get("solver_allowed") is not False:
         raise ValueError("Solver guard missing")

@@ -26,7 +26,7 @@ from network_checks import assert_input_only,compare_roundtrip,normalise_optiona
 ELECTRIC_BASE_SHA='6772c6742b000368f9e7c5db2cd22ca798dec525be65131032eadf06e2b417f7'
 XB_FOM_HOOK='research_cross_border_existing_fom'
 EXTENDABLE_REQUIRED=('H2 turbine','H2 Fuel Cell','H2 Store Tank','battery','battery charger','home battery','home battery charger')
-TRANSPORT_CARRIERS={'AC':'electricity','DC':'electricity','B2B':'electricity','dedicated plant line':'electricity','H2 pipeline':'H2','gas pipeline':'gas','CO2 pipeline':'co2'}
+TRANSPORT_CARRIERS={'AC':'electricity','DC':'electricity','B2B':'electricity','dedicated plant line':'electricity','dedicated plant source':'electricity','H2 pipeline':'H2','gas pipeline':'gas','CO2 pipeline':'co2'}
 MARITIME_TRADE_CARRIERS={'CO2 ship','CO2 transit ship','CO2 transit rail','oil non-fossil ship','methanol ship','ammonia ship','liquid transit rail'}  # V3 (decision 161): liquid ships and the Lao rail transit; S4D-2 (decision 92): maritime trade between countries, kept in both scenarios like the liquid fuels (decisions 18, 44); not cross-border network; S4E-2 (95 c): Lao transit then ship; S4F-2 (97 c): Lao rail transit into the Vietnamese store (the trade class of decision 92, not network)
 SKELETON='INTERIM_S1_SKELETON'
 

@@ -7,7 +7,9 @@
     transit to the Vietnamese bus (decision 93 analogy). Carrier class maritime_trade: kept in every scenario;
   * apply_ev_structure: research.s2.demand.ev_structure = smart (main, E2) | smart_v2g (E3) | uncontrolled (E4) | flat (v2);
   * add_dedicated_plant_lines (X1b, decisions 172, 173; supplement 03): the Lao IPP export lines of research.network.dedicated_plant_lines_table, merged by plant node and landing node, one fixed lossy one-way
-    link LA -> other country each, in every scenario with the cross-border electricity switch on; empty key = v2 state.
+    link LA -> other country each, in every scenario with the cross-border electricity switch on; empty key = v2 state;
+  * bind_dedicated_sources (decision 179, supplement 04): the plant lines carry stock output only. Every plant node n gets a bus '<n> dedicated src' holding its stock (fixed Generators, StorageUnits, stock thermal Links
+    moved with parameters unchanged), a lossless fixed one-way link to n (domestic, zero cost) and the start of its plant lines; loads, extendable units, storage and other lines stay on n.
 """
 from __future__ import annotations
 
@@ -27,6 +29,10 @@ DEDICATED_CARRIER = "dedicated plant line"
 DEDICATED_STOCK = "dedicated_plant_line"
 DEDICATED_LENGTH_FACTOR = 1.25   # lines.length_factor of the electric base: LA2 3 - TH2 1 great circle 222.9 km, model line 278.66 km
 DEDICATED_LOSS_TYPE = ("Al/St 240/40 4-bundle 380.0", 380.0, 0.7)   # type, v_nom, s_max_pu of the cross-border AC lines: the loss proxy of decision 108 per km
+DEDICATED_SRC_SUFFIX = " dedicated src"
+DEDICATED_SRC_CARRIER = "dedicated plant source"
+DEDICATED_SRC_BUS_ROLE = "dedicated_plant_source"
+DEDICATED_SRC_LINK_ROLE = "dedicated_src_to_grid"
 
 
 def liquids_cfg(cfg) -> dict:
@@ -82,9 +88,86 @@ def great_circle_km(x0: float, y0: float, x1: float, y1: float) -> float:
     return float(2.0 * 6371.0 * np.arcsin(np.sqrt(np.sin(dp / 2.0) ** 2 + np.cos(p0) * np.cos(p1) * np.sin(dl / 2.0) ** 2)))
 
 
+def dedicated_source_buses(n) -> pd.Index:
+    """The plant source buses of decision 179 (AC carrier, but not geographical nodes): empty on a network without them."""
+    return n.buses.index[n.buses["role"].astype(str) == DEDICATED_SRC_BUS_ROLE] if "role" in n.buses else n.buses.index[:0]
+
+
+def dedicated_stock_at(n, node: str) -> dict:
+    """component type -> names of the stock generation of a node. The fixed Generators and StorageUnits on the node, and the fixed Links into it (the stock thermal units are fuel Links, p_nom in fuel terms),
+    must each carry an identity of existing_unit_components at that node, and the reverse: a fixed unit without identity, or an identity on another bus, is an error, not a silent choice."""
+    ident = {(z["component_type"], z["component"]) for z in n.meta["existing_unit_components"].values() if z["node"] == node}
+    out = {"Generator": sorted(n.generators.index[(n.generators.bus == node) & ~n.generators.p_nom_extendable.astype(bool)]),
+           "StorageUnit": sorted(n.storage_units.index[(n.storage_units.bus == node) & ~n.storage_units.p_nom_extendable.astype(bool)]),
+           "Link": sorted(n.links.index[(n.links.bus1 == node) & ~n.links.p_nom_extendable.astype(bool)])}
+    found = {(t, c) for t, v in out.items() for c in v}
+    if found != ident:
+        raise ValueError(f"decision 179: stock of {node} differs from existing_unit_components: {sorted(found ^ ident)[:6]}")
+    return out
+
+
+def bind_dedicated_sources(n, lines: list) -> list:
+    """Decision 179: see the module docstring and V3_RULES.md section 2.4. p_nom of the source link = sum of the output ceilings moved (Link: p_nom x efficiency, the output side). No stock on a plant node stops the build (review section 2.3)."""
+    from s2_layers import add_bus, add_link
+    if not lines:
+        return []
+    if "role" not in n.buses:
+        n.buses["role"] = ""
+    rows = []
+    for a in sorted({r["plant_node"] for r in lines}):
+        stock = dedicated_stock_at(n, a); src = a + DEDICATED_SRC_SUFFIX; c = str(n.buses.at[a, "country"]); by = {}
+        add_bus(n, src, str(n.buses.at[a, "carrier"]), c, a)
+        n.buses.loc[src, ["x", "y", "v_nom", "unit", "role"]] = [n.buses.at[a, "x"], n.buses.at[a, "y"], n.buses.at[a, "v_nom"], n.buses.at[a, "unit"], DEDICATED_SRC_BUS_ROLE]
+        for t, col, df in (("Generator", "bus", n.generators), ("StorageUnit", "bus", n.storage_units), ("Link", "bus1", n.links)):
+            for name in stock[t]:
+                mw = float(df.at[name, "p_nom"]) * (float(df.at[name, "efficiency"]) if t == "Link" else 1.0); k = str(df.at[name, "carrier"]); by[k] = by.get(k, 0.0) + mw
+            df.loc[stock[t], col] = src
+        total = float(sum(by.values()))
+        if not total > 0.0:
+            raise ValueError(f"decision 179: no stock generation on the plant node {a}")
+        name = f"{src} to grid"
+        add_link(n, name, c, DEDICATED_SRC_CARRIER, [src, a], [1.0], role=DEDICATED_SRC_LINK_ROLE)
+        n.links.loc[name, ["p_nom", "p_nom_min", "p_nom_max"]] = [total, total, total]
+        n.links.loc[name, "p_nom_extendable"] = False; n.links.loc[name, "reversed"] = False; n.links.loc[name, "asset_role"] = DEDICATED_SRC_LINK_ROLE
+        n.links.loc[name, "border_class"] = "domestic"; n.links.loc[name, "transport_carrier"] = "electricity"; n.links.loc[name, "stock"] = ""
+        plants = [r for r in lines if r["plant_node"] == a]
+        n.links.loc[[r["link"] for r in plants], "bus0"] = src
+        rows.append(dict(node=a, bus=src, link=name, moved_mw=total, moved_mw_by_carrier={k: by[k] for k in sorted(by)}, moved_components={t: len(v) for t, v in stock.items()}, plant_lines=[r["link"] for r in plants], contract_mw=float(sum(r["contract_mw"] for r in plants))))
+    n.buses["role"] = n.buses["role"].fillna("").astype(str)
+    return rows
+
+
+def source_bus_problems(n) -> list:
+    """Decision 179, structure of every plant source bus: only stock (fixed, with identity), no pumped input, one lossless free fixed domestic exit to its node sized to the output ceilings, every plant line of the node starts here, nothing else is attached."""
+    bad = []; ident = {(z["component_type"], z["component"]) for z in n.meta.get("existing_unit_components", {}).values()}; L = n.links
+    ports = [c for c in L if c.startswith("bus") and c[3:].isdigit()]
+    for s in dedicated_source_buses(n):
+        z = n.buses.loc[s]; a = s[: -len(DEDICATED_SRC_SUFFIX)]; g = n.generators[n.generators.bus == s]; u = n.storage_units[n.storage_units.bus == s]; f = L[L.bus1 == s]; out = L[L.bus0 == s]
+        if a not in n.buses.index or (str(z.country), str(z.carrier), float(z.x), float(z.y), str(z.location)) != (str(n.buses.at[a, "country"]), str(n.buses.at[a, "carrier"]), float(n.buses.at[a, "x"]), float(n.buses.at[a, "y"]), a):
+            bad.append(f"{s}: country, carrier, coordinates or location differ from the node")
+        if g.p_nom_extendable.astype(bool).any() or u.p_nom_extendable.astype(bool).any() or f.p_nom_extendable.astype(bool).any():
+            bad.append(f"{s}: extendable unit")
+        if any((t, x) not in ident for t, d in (("Generator", g), ("StorageUnit", u), ("Link", f)) for x in d.index):
+            bad.append(f"{s}: unit without stock identity")
+        if (u.efficiency_store > 0.0).any():
+            bad.append(f"{s}: a storage unit takes power from the source bus")
+        if (n.loads.bus == s).any() or (n.stores.bus == s).any() or (n.lines.bus0 == s).any() or (n.lines.bus1 == s).any() or any((L[c] == s).any() for c in ports if c not in ("bus0", "bus1")):
+            bad.append(f"{s}: load, store, line or further link port")
+        exit_ = out[out.carrier == DEDICATED_SRC_CARRIER]; plant = out[out.carrier == DEDICATED_CARRIER]
+        if len(exit_) != 1 or len(out) != len(exit_) + len(plant) or not len(plant) or set(L.index[(L.carrier == DEDICATED_CARRIER) & L.index.str.startswith(f"dedicated plant line {a} - ")]) != set(plant.index):
+            bad.append(f"{s}: exits are not one source link plus the plant lines of the node")
+            continue
+        k = exit_.iloc[0]; ceiling = float(g.p_nom.sum() + u.p_nom.sum() + (f.p_nom * f.efficiency).sum())
+        if str(k.bus1) != a or float(k.efficiency) != 1.0 or float(k.p_min_pu) != 0.0 or float(k.marginal_cost) != 0.0 or float(k.capital_cost) != 0.0 or bool(k.p_nom_extendable) or str(k.border_class) != "domestic" or str(k.research_role) != DEDICATED_SRC_LINK_ROLE:
+            bad.append(f"{s}: source link is not lossless, free, fixed, one-way, domestic")
+        if not ceiling > 0.0 or abs(float(k.p_nom) - ceiling) > 1e-6 * ceiling:
+            bad.append(f"{s}: source link {float(k.p_nom)} MW, output ceilings {ceiling} MW")
+    return bad
+
+
 def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
     """X1b: see the module docstring and V3_RULES.md section 2.3. After apply_ac_losses (efficiency = 1 - proxy lambda over the length). One way, LA -> other country: an IPP line carries the plant output and no back feed (supplement 03). The stock FOM rule of the corridors applies.
-    Not added with the cross-border electricity switch off (fully disconnected network). p_nom_min = p_nom marks the stock for apply_stock_mode."""
+    Not added with the cross-border electricity switch off (fully disconnected network). p_nom_min = p_nom marks the stock for apply_stock_mode. Decision 179: the lines start at the plant source buses of bind_dedicated_sources."""
     from s2_layers import add_link
     from s4d_layers import coalition_members
     from s4k_layers import ac_loss_mode, reference_loading, type_lambda_per_km
@@ -115,11 +198,12 @@ def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
         n.links.loc[name, "border_class"] = "cross_border"; n.links.loc[name, "transport_carrier"] = "electricity"; n.links.loc[name, "stock"] = DEDICATED_STOCK
         fom = (float(costs.at["HVAC overhead", "FOM"]) / 100.0 * float(costs.at["HVAC overhead", "investment"]) * km * mw) if existing_cfg["fom_on_existing"] else 0.0
         rows.append(dict(link=name, plant_node=a, landing_node=b, pair="-".join(sorted((ca, cb))), projects=sorted(g.project), contract_mw=mw, length_km=km, efficiency=eta, annual_fom_eur=fom))
+    sources = bind_dedicated_sources(n, rows)
     n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool); n.links["stock"] = n.links["stock"].fillna("").astype(str)   # as s4j_layers: a mixed column does not export
     if rows:
         fl = list(n.meta.get("existing_cross_border_fom_ledger", [])) + [dict(component_type="Link", component=r["link"], capacity_2025_mw=r["contract_mw"], length_km=r["length_km"], annual_fom_eur=r["annual_fom_eur"], cost_rows=["HVAC overhead"]) for r in rows if r["annual_fom_eur"]]
         n.meta["existing_cross_border_fom_ledger"] = fl; n.meta["existing_cross_border_fom_eur"] = float(sum(r["annual_fom_eur"] for r in fl))
-    led.update(links=len(rows), lines=rows, total_mw=float(sum(r["contract_mw"] for r in rows)), loss_per_km=lam_km, coalition_removed=gone, annual_fom_eur=float(sum(r["annual_fom_eur"] for r in rows)))
+    led.update(links=len(rows), lines=rows, total_mw=float(sum(r["contract_mw"] for r in rows)), loss_per_km=lam_km, coalition_removed=gone, annual_fom_eur=float(sum(r["annual_fom_eur"] for r in rows)), sources=sources)
     n.meta["research_dedicated_lines"] = led
     return led
 
