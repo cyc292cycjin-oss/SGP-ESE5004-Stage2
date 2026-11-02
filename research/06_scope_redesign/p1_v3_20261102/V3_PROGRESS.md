@@ -30,12 +30,12 @@
 | 补充 02 第 2.1 节 X1b | 完成：11 项全部运营且在网络中，全部计入；APG 955 MW 是七条 115 kV 线，不重复 | `f6d90e37`、`1ccd35e8`、`4df45b56` |
 | 补充 02 第 2.3 节第 1 项 重建 | 完成：7 个网络，静态检查全过，HiGHS 路径检查走通 | 构建 `4df45b56` |
 | 补充 02 第 2.2 节 规则与预测 | 完成，**第 176 项全文待用户提供** | 本次提交 |
-| 补充 02 第 2.3 节第 2 项 冒烟 | 用户 2026-11-03 确认空闲、已断开；第 176 项全文未到，先求解，全文待补 | 本次提交 |
+| 补充 02 第 2.3 节第 2 项 冒烟 | 完成：两次 optimal，验收通过，B6 12.42 bn；第 176 项全文未到，待补 | 求解 `9dc4c35e` |
 
 ## 恢复点
 
-补充 02：运行 `bash /home/jin/v3/smoke_s2.sh --confirmed <确认时间>`（输出 `results_project/v3/smoke_s2`），额度 Gurobi 0 / 2。之后筛查包（`screen_package/make_package_v3.sh`，先跑 `/home/jin/v3/dry_s2.sh`），最后写 `V3_REPORT_SUPPLEMENT02.md`。第 176 项全文收到后写入 `V3_RULES.md` 第 10 节。
+补充 02：冒烟完成（`results_project/v3/smoke_s2`），额度 Gurobi 2 / 2。接下来筛查包（`screen_package/make_package_v3.sh`，先跑 `/home/jin/v3/dry_s2.sh`），最后写 `V3_REPORT_SUPPLEMENT02.md`。第 176 项全文收到后写入 `V3_RULES.md` 第 10 节。
 
 ## 计数
 
-本机 Gurobi：阶段 3 第二轮 2 / 2；补充 01 为 4 / 4；补充 02 为 0 / 2。补充 02 新增上限：本机计算 4 小时，磁盘 30 GB；目前约 0.8 小时、4.2 GB。
+本机 Gurobi：阶段 3 第二轮 2 / 2；补充 01 为 4 / 4；补充 02 为 2 / 2。补充 02 新增上限：本机计算 4 小时，磁盘 30 GB；目前约 1.2 小时、7 GB。
