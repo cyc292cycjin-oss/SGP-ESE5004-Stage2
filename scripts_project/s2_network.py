@@ -41,7 +41,7 @@ from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
 from m08a_layers import apply_existing_vintage_costs
-from v3_layers import add_liquid_shipping, apply_ev_structure
+from v3_layers import add_dedicated_plant_lines, add_liquid_shipping, apply_ev_structure
 from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
@@ -392,6 +392,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
     losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
     ac_losses = apply_ac_losses(n, cfg, losses)   # S4K-1 (decision 108): research.network.ac_losses - AC linear loss proxy (per-line lambda, hook research_ac_loss_proxy) | pypsa_tangent (S4J) | none
+    dedicated = add_dedicated_plant_lines(n, cfg, repo, costs, R["existing_cross_border_electricity"])   # V3 X1b (decisions 172, 173): fixed Lao IPP export lines, not in the disconnected network
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)

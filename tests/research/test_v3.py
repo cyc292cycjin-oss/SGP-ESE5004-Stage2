@@ -135,6 +135,67 @@ def test_x1_stock_check_toy():
     assert not stock_check(net(True, 955.0), net(True, 0.0), apg)[1]   # a cross-border component of no_new_xb is extendable
 
 
+def test_x1b_table_and_the_apg_lines():
+    t = pd.read_csv(ROOT / "research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv")
+    assert len(t) == 11 and t.counted.all() and (t.gem_status == "operating").all()
+    assert t[t.other_country == "TH"].contract_mw.sum() == 5427.0 and t[t.other_country == "VN"].contract_mw.sum() == 572.0
+    assert t[t.eppo_section.fillna("").str.startswith("1")].contract_mw.sum() == 2111.0 and t[t.eppo_section.fillna("").str.startswith("2")].contract_mw.sum() == 3047.0
+    assert t.plant_node.str.startswith("LA").all() and (t.contract_mw <= t.gem_capacity_mw).all() and t[t.other_country == "VN"].landing_node.str.startswith("VN").all()
+    a = pd.read_csv(ROOT / "research_inputs/corridors/APG_LA_TH_LINES_ACE2024.csv")
+    assert a.line_capacity_mw.sum() == 955.0 and (a.agreement == "Energy Exchange").all() and (a.voltage_kv == 115).all()   # the APG stock holds no plant line: nothing to deduct
+
+
+def dedicated_toy(electricity=True):
+    import pypsa
+    from v3_layers import add_dedicated_plant_lines
+    t = pd.read_csv(ROOT / "research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv")
+    n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=2, freq="3h"))
+    for i, b in enumerate(sorted(set(t.plant_node) | set(t.landing_node))):
+        n.add("Bus", b, carrier="AC", x=100.0 + i, y=15.0 + 0.5 * i); n.buses.loc[b, "country"] = b[:2]
+    n.links["border_class"] = ""; n.links["transport_carrier"] = ""
+    n.meta["existing_unit_components"] = {f"GEM:{i}": dict(node=r.plant_node) for _, r in t.iterrows() for i in r.gem_unit_ids.split(";")}
+    n.meta["existing_cross_border_fom_eur"] = 5.0; n.meta["existing_cross_border_fom_ledger"] = [dict(component_type="Line", component="x", capacity_2025_mw=1.0, length_km=1.0, annual_fom_eur=5.0, cost_rows=[])]
+    cfg = dict(research=dict(network=dict(dedicated_plant_lines_table="research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv", ac_losses="linear_proxy", ac_loss_reference_loading=0.5, transmission_losses="pypsa_eur"), cross_border=dict(electricity=electricity, H2=electricity, gas=electricity, co2=electricity)))
+    costs = pd.DataFrame(dict(FOM=[2.0], investment=[500.0]), index=["HVAC overhead"])
+    return n, add_dedicated_plant_lines(n, cfg, ROOT, costs, dict(fom_on_existing=True))
+
+
+def test_x1b_layer_toy():
+    from v3_static import stock_by_pair
+    n, led = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str)
+    assert led["links"] == 6 and led["total_mw"] == 5999.0 and len(n.links) == 12 and not n.links.p_nom_extendable.any() and (n.links.border_class == "cross_border").all()
+    f = n.links.loc["dedicated plant line LA2 3 - TH2 1"]; r = n.links.loc["dedicated plant line LA2 3 - TH2 1-reversed"]
+    assert f.p_nom == r.p_nom == 1388.0 and f.p_nom_min == f.p_nom and f.bus0 == r.bus1 and f.efficiency == r.efficiency and f.stock == r.stock == "dedicated_plant_line" and r.reversed and not f.reversed
+    assert 0.0 < f.efficiency < 1.0 and 1.0 - f.efficiency == pytest.approx(led["loss_per_km"] * f.length) and led["loss_per_km"] * 100.0 == pytest.approx(0.012, rel=0.2)
+    p = stock_by_pair(n, "min"); assert p["LA-TH"] == 5427.0 and p["LA-VN"] == 572.0   # the twin counts once
+    assert n.meta["existing_cross_border_fom_eur"] == pytest.approx(5.0 + led["annual_fom_eur"]) and len(n.meta["existing_cross_border_fom_ledger"]) == 7
+
+
+def test_x1b_not_in_the_disconnected_network():
+    n, led = dedicated_toy(electricity=False)
+    assert led["links"] == 0 and not len(n.links)
+
+
+def test_x1b_stock_mode_keeps_the_lines_fixed():
+    from m08a_layers import apply_stock_mode
+    from v3_static import dedicated_check
+    n, _ = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str); base = n.copy(); base.links["stock"] = n.links["stock"]; base.meta = dict(n.meta)
+    led = apply_stock_mode(n, "no_new_xb")
+    assert led["kept_links_forward"] == 6 and led["kept_reversed_twins"] == 6 and led["removed_links"] == 0
+    t, ok = dedicated_check(base, n)
+    assert ok and len(t) == 6 and t.p_nom.sum() == 5999.0
+
+
+def test_x1b_stock_check_counts_the_lines():
+    from v3_static import stock_check
+    n, _ = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str)
+    d = pd.DataFrame(dict(counted=[True, True], other_country=["TH", "VN"], contract_mw=[5427.0, 572.0]))
+    apg = pd.DataFrame(dict(country_pair=["LA-TH"], apg_existing_mw=[0.0]))
+    t, ok = stock_check(n, n, apg, d)
+    assert ok and t.set_index("pair").dedicated_mw.to_dict() == {"LA-TH": 5427.0, "LA-VN": 572.0}
+    assert not stock_check(n, n, apg, d.assign(contract_mw=[5000.0, 572.0]))[1]
+
+
 def b13_toy(extra: dict | None = None):
     """two national liquid buses, a node bus, an ordinary link and a ship; extra = one more link: dict(name, bus0, bus1, border_class)"""
     import pypsa

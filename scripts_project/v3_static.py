@@ -20,7 +20,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from v3_layers import LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER   # noqa: E402
+from v3_layers import DEDICATED_CARRIER, DEDICATED_STOCK, LOAD_CARRIERS, SHIP_CARRIERS, TRANSIT_CARRIER   # noqa: E402
 
 COUNTRIES = ("BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN")
 ATTR = {"Generator": ["bus", "carrier", "p_nom", "p_nom_min", "p_nom_max", "p_nom_extendable", "marginal_cost", "capital_cost", "efficiency"],
@@ -39,7 +39,7 @@ ALLOWED_CHANGED = {"Load": {"industry heat", "industry heat medium A", "industry
 ALLOWED_NEW = {"Bus": {"oil", "oil non-fossil", "methanol", "ammonia", "methanol final energy", "coal final energy", "gas final energy", "biomass final energy", "oil final energy", "gas feedstock", "coal feedstock", "oil feedstock"},
                "Generator": {"oil import", "methanol import", "ammonia import", "FT fuel import", "process emissions"},
                "Store": {"ammonia store", "methanol store", "oil non-fossil store", "EV battery"},
-               "Link": {"oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "oil pool", "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
+               "Link": {DEDICATED_CARRIER, "oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "oil pool", "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
                "Load": ALLOWED_CHANGED["Load"]}
 
 
@@ -114,14 +114,33 @@ def stock_by_pair(n, bound: str, usable: bool = False) -> pd.Series:
     return pd.Series(rows).loc[lambda s: s > 0].sort_index()
 
 
-def stock_check(i, r, apg: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
-    """X1 (V3_RULES section 2.1): APG existing = integrated lower bound = fixed capacity of no_new_xb, pair by pair; no cross-border electricity component of no_new_xb is extendable."""
+def stock_check(i, r, apg: pd.DataFrame, dedicated: pd.DataFrame | None = None) -> tuple[pd.DataFrame, bool]:
+    """X1, X1b (V3_RULES sections 2.1, 2.2): APG existing + counted plant lines = integrated lower bound = fixed capacity of no_new_xb, pair by pair; no cross-border electricity component of no_new_xb is extendable."""
     a = apg[apg.apg_existing_mw.notna()].groupby("country_pair").apg_existing_mw.sum().sort_index()
-    t = pd.DataFrame(dict(apg_existing_mw=a, integrated_nom_min_mw=stock_by_pair(i, "min"), no_new_xb_fixed_mw=stock_by_pair(r, ""))).fillna(0.0).rename_axis("pair").reset_index()
+    d = pd.Series(dtype=float) if dedicated is None else dedicated[dedicated.counted.astype(bool)].assign(pair=lambda x: "LA-" + x.other_country).groupby("pair").contract_mw.sum()
+    t = pd.DataFrame(dict(apg_existing_mw=a, dedicated_mw=d, integrated_nom_min_mw=stock_by_pair(i, "min"), no_new_xb_fixed_mw=stock_by_pair(r, ""))).fillna(0.0).rename_axis("pair").reset_index()
     t["no_new_xb_usable_mw"] = t.pair.map(stock_by_pair(r, "", usable=True)).fillna(0.0)
-    ok = bool(((t.apg_existing_mw - t.integrated_nom_min_mw).abs().max() <= 0.01) and ((t.apg_existing_mw - t.no_new_xb_fixed_mw).abs().max() <= 0.01))
+    e = t.apg_existing_mw + t.dedicated_mw
+    ok = bool(((e - t.integrated_nom_min_mw).abs().max() <= 0.01) and ((e - t.no_new_xb_fixed_mw).abs().max() <= 0.01))
     ext = int(r.lines[r.lines.border_class == "cross_border"].s_nom_extendable.sum() + r.links[r.links.border_class == "cross_border"].p_nom_extendable.sum())
     return t, bool(ok and ext == 0)
+
+
+def dedicated_links(n) -> pd.DataFrame:
+    cols = ["bus0", "bus1", "carrier", "p_nom", "p_nom_min", "p_nom_max", "efficiency", "length_original", "p_nom_extendable", "border_class", "transport_carrier"]
+    if "stock" not in n.links:
+        return pd.DataFrame(columns=cols)
+    return n.links[n.links.stock.astype(str) == DEDICATED_STOCK][cols]
+
+
+def dedicated_check(i, r, d=None) -> tuple[pd.DataFrame, bool]:
+    """X1b: the plant lines of integrated and no_new_xb, line by line (same buses, capacity, efficiency, not extendable, forward = reverse capacity); none in the disconnected network d."""
+    x, y = dedicated_links(i), dedicated_links(r); fwd = x[~x.index.str.endswith("-reversed")]
+    ok = bool(len(x) and x.equals(y) and not x.p_nom_extendable.astype(bool).any() and (x.border_class == "cross_border").all() and (x.transport_carrier == "electricity").all() and len(x) == 2 * len(fwd))
+    ok = bool(ok and all(x.at[k + "-reversed", "p_nom"] == fwd.at[k, "p_nom"] and x.at[k + "-reversed", "bus0"] == fwd.at[k, "bus1"] for k in fwd.index))
+    if d is not None:
+        ok = bool(ok and not len(dedicated_links(d)))
+    return fwd.rename_axis("link").reset_index(), ok
 
 
 def demand_check(n) -> pd.Series:
@@ -163,8 +182,13 @@ def main():
     res["gate_b5_no_new_xb_365"] = gate_b5_no_new_xb(I1, R1)
     res["scenario_difference_2920"] = scenario_diff(I3, R3); res["scenario_difference_365"] = scenario_diff(I1, R1)
     apg = pd.read_csv(HERE.parent / "research_inputs/corridors/CORRIDOR_APG_CROSSCHECK_2024.csv")
-    st, ok3 = stock_check(I3, R3, apg); _, ok1 = stock_check(I1, R1, apg); (a.out / "evidence").mkdir(exist_ok=True); st.to_csv(a.out / "evidence/X1_STOCK_TABLE_V3.csv", index=False)
-    res["stock_x1"] = dict(passed=bool(ok3 and ok1), total_mw=float(st.apg_existing_mw.sum()), pairs=int(len(st)))
+    ded = pd.read_csv(HERE.parent / "research_inputs/corridors/DEDICATED_PLANT_LINES_V3.csv")
+    st, ok3 = stock_check(I3, R3, apg, ded); _, ok1 = stock_check(I1, R1, apg, ded); (a.out / "evidence").mkdir(exist_ok=True); st.to_csv(a.out / "evidence/X1_STOCK_TABLE_V3.csv", index=False)
+    res["stock_x1"] = dict(passed=bool(ok3 and ok1), total_mw=float(st.apg_existing_mw.sum()), dedicated_mw=float(st.dedicated_mw.sum()), pairs=int(len(st)))
+    f1 = a.dir / "disconnected/disconnected_365_24h_unsolved.nc"; D1 = pypsa.Network(str(f1)) if f1.exists() else None
+    dl, dok3 = dedicated_check(I3, R3); _, dok1 = dedicated_check(I1, R1, D1); dl.to_csv(a.out / "evidence/X1B_LINES_V3.csv", index=False)
+    res["dedicated_lines"] = dict(passed=bool(dok3 and dok1), links=int(len(dl)), total_mw=float(dl.p_nom.sum()), disconnected_checked=D1 is not None)
+    us = st[st.pair.str.contains("LA")].assign(apg_usable_mw=lambda x: x.no_new_xb_usable_mw - x.dedicated_mw); us.to_csv(a.out / "evidence/LA_EXPORT_USABLE_V3.csv", index=False)
     D, bad = struct_diff(V2, I3); (a.out / "evidence").mkdir(exist_ok=True); D.to_csv(a.out / "evidence/V3_STRUCT_DIFF_V2.csv", index=False)
     res["structure_vs_v2"] = dict(passed=not bad, unexpected=bad[:40], rows=int(len(D)))
     t = pd.read_csv(a.out / "DEMAND_BY_COUNTRY_SECTOR_CARRIER_v3.csv"); ti = t.groupby(["country", "carrier"]).twh.sum()
@@ -181,9 +205,9 @@ def main():
     closure = float((dh - ov.reindex(dh.index).fillna(0.0) * eff).abs().max().max())
     res["demand_vs_table"] = dict(max_abs_gap_non_overflow_carriers_twh=dev, overflow_closure_max_twh=closure, passed=bool(dev <= 1e-6 and closure <= 1e-6), useful_heat_efficiency=eff,
                                   country_biomass_overflow_twh={k: float(v) for k, v in ov.integrated_2920.round(6).items() if abs(v) > 1e-6})
-    res["all_structural_passed"] = bool(res["stock_x1"]["passed"] and res["gate_b5_no_new_xb"]["passed"] and res["gate_b5_no_new_xb_365"]["passed"] and res["scenario_difference_2920"]["passed"] and res["scenario_difference_365"]["passed"] and res["structure_vs_v2"]["passed"] and res["demand_vs_table"]["passed"] and all(res[k]["weights"] and res[k]["orphan_count"] == 0 for k in ("integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365")))
+    res["all_structural_passed"] = bool(res["stock_x1"]["passed"] and res["dedicated_lines"]["passed"] and res["gate_b5_no_new_xb"]["passed"] and res["gate_b5_no_new_xb_365"]["passed"] and res["scenario_difference_2920"]["passed"] and res["scenario_difference_365"]["passed"] and res["structure_vs_v2"]["passed"] and res["demand_vs_table"]["passed"] and all(res[k]["weights"] and res[k]["orphan_count"] == 0 for k in ("integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365")))
     (a.out / "evidence/V3_STATIC_CHECK.json").write_text(json.dumps(res, indent=1, sort_keys=True, default=str) + "\n")
-    print(json.dumps({k: res[k] for k in ("stock_x1", "gate_b5_no_new_xb", "scenario_difference_2920", "structure_vs_v2", "demand_vs_table", "all_structural_passed")}, indent=0, default=str)[:3000])
+    print(json.dumps({k: res[k] for k in ("stock_x1", "dedicated_lines", "gate_b5_no_new_xb", "scenario_difference_2920", "structure_vs_v2", "demand_vs_table", "all_structural_passed")}, indent=0, default=str)[:3000])
     print(json.dumps(res["integrated_2920"], indent=0, default=str)[:1800])
 
 

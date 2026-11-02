@@ -5,7 +5,9 @@
   * add_liquid_shipping: ship links between the coastal national buses (non-fossil oil, methanol, ammonia; fossil oil has the same import price everywhere), unit cost
     c(d) by research.liquids.ship_cost_basis = td_tanker (main) | ieaghg (upper-bound sensitivity) x ship_cost_scale, cargo loss eta(d), fixed non-binding capacity; Lao rail
     transit to the Vietnamese bus (decision 93 analogy). Carrier class maritime_trade: kept in every scenario;
-  * apply_ev_structure: research.s2.demand.ev_structure = smart (main, E2) | smart_v2g (E3) | uncontrolled (E4) | flat (v2).
+  * apply_ev_structure: research.s2.demand.ev_structure = smart (main, E2) | smart_v2g (E3) | uncontrolled (E4) | flat (v2);
+  * add_dedicated_plant_lines (X1b, decisions 172, 173): the Lao IPP export lines of research.network.dedicated_plant_lines_table, merged by plant node and landing node, one fixed lossy forward / '-reversed'
+    pair each, in every scenario with the cross-border electricity switch on; empty key = v2 state.
 """
 from __future__ import annotations
 
@@ -21,6 +23,10 @@ SHIP_CARRIERS = {"oil non-fossil": "oil non-fossil ship", "methanol": "methanol 
 LOAD_CARRIERS = {"oil": ("oil final energy", "oil feedstock"), "oil non-fossil": ("oil final energy", "oil feedstock"), "methanol": ("shipping methanol", "industry methanol"), "ammonia": ("industry ammonia",)}
 UNIT_KEY = {"oil": "oil", "oil non-fossil": "oil", "methanol": "methanol", "ammonia": "ammonia"}
 EV_MODES = ("flat", "smart", "smart_v2g", "uncontrolled")
+DEDICATED_CARRIER = "dedicated plant line"
+DEDICATED_STOCK = "dedicated_plant_line"
+DEDICATED_LENGTH_FACTOR = 1.25   # lines.length_factor of the electric base: LA2 3 - TH2 1 great circle 222.9 km, model line 278.66 km
+DEDICATED_LOSS_TYPE = ("Al/St 240/40 4-bundle 380.0", 380.0, 0.7)   # type, v_nom, s_max_pu of the cross-border AC lines: the loss proxy of decision 108 per km
 
 
 def liquids_cfg(cfg) -> dict:
@@ -69,6 +75,53 @@ def ship_unit(cfg, registry: pd.DataFrame, key: str, km: float) -> tuple[float, 
     if basis == "ieaghg":
         return (rv(f"liquid_ship_fixed_ieaghg_{key}") + rv(f"liquid_ship_ckm_ieaghg_{key}") * km) * scale, 1.0
     raise ValueError("Unknown research.liquids.ship_cost_basis " + basis)
+
+
+def great_circle_km(x0: float, y0: float, x1: float, y1: float) -> float:
+    p0, p1 = np.radians(y0), np.radians(y1); dl = np.radians(x1 - x0); dp = p1 - p0
+    return float(2.0 * 6371.0 * np.arcsin(np.sqrt(np.sin(dp / 2.0) ** 2 + np.cos(p0) * np.cos(p1) * np.sin(dl / 2.0) ** 2)))
+
+
+def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
+    """X1b: see the module docstring and V3_RULES.md section 2.2. After apply_ac_losses (the lossy split is done here: efficiency = 1 - proxy lambda over the length). The stock FOM rule of the corridors applies.
+    Not added with the cross-border electricity switch off (fully disconnected network). p_nom_min = p_nom marks the stock for apply_stock_mode."""
+    from s2_layers import add_link
+    from s4d_layers import coalition_members
+    from s4k_layers import ac_loss_mode, reference_loading, type_lambda_per_km
+    R = cfg["research"]; table = (R.get("network") or {}).get("dedicated_plant_lines_table"); led = dict(table=table, links=0)
+    if not table or not R["cross_border"]["electricity"]:
+        n.meta["research_dedicated_lines"] = led
+        return led
+    t = pd.read_csv(Path(repo) / table); t = t[t.counted.astype(bool)]; units = n.meta["existing_unit_components"]; members = coalition_members(R["cross_border"]); gone = []
+    for _, r in t.iterrows():
+        for i in str(r.gem_unit_ids).split(";"):
+            if units[f"GEM:{i}"]["node"] != r.plant_node:
+                raise ValueError(f"X1b: {r.project} unit {i} is not at {r.plant_node}")
+    ptype, v_nom, s_max = DEDICATED_LOSS_TYPE
+    lam_km = type_lambda_per_km(n, ptype, reference_loading(cfg), s_max, v_nom) if ac_loss_mode(cfg) == "linear_proxy" else 0.0
+    if "stock" not in n.links:
+        n.links["stock"] = ""
+    rows = []
+    for (a, b), g in t.groupby(["plant_node", "landing_node"], sort=True):
+        ca, cb = str(n.buses.at[a, "country"]), str(n.buses.at[b, "country"])
+        if members is not None and not {ca, cb} <= members:
+            gone.append(f"{a}-{b}")
+            continue
+        km = great_circle_km(float(n.buses.at[a, "x"]), float(n.buses.at[a, "y"]), float(n.buses.at[b, "x"]), float(n.buses.at[b, "y"])) * DEDICATED_LENGTH_FACTOR
+        mw = float(g.contract_mw.sum()); eta = 1.0 - lam_km * km; name = f"dedicated plant line {a} - {b}"
+        for x, f, to, co, rev in ((name, a, b, ca, False), (f"{name}-reversed", b, a, cb, True)):
+            add_link(n, x, co, DEDICATED_CARRIER, [f, to], [eta], role="EXISTING_CROSS_BORDER_STOCK", length=0.0 if rev else km, extra={"length_original": km})
+            n.links.loc[x, ["p_nom", "p_nom_min", "p_nom_max"]] = [mw, mw, mw]
+            n.links.loc[x, "p_nom_extendable"] = False; n.links.loc[x, "reversed"] = rev; n.links.loc[x, "asset_role"] = "existing_cross_border_stock"
+            n.links.loc[x, "border_class"] = "cross_border"; n.links.loc[x, "transport_carrier"] = "electricity"; n.links.loc[x, "stock"] = DEDICATED_STOCK
+        fom = (float(costs.at["HVAC overhead", "FOM"]) / 100.0 * float(costs.at["HVAC overhead", "investment"]) * km * mw) if existing_cfg["fom_on_existing"] else 0.0
+        rows.append(dict(link=name, plant_node=a, landing_node=b, pair="-".join(sorted((ca, cb))), projects=sorted(g.project), contract_mw=mw, length_km=km, efficiency=eta, annual_fom_eur=fom))
+    if rows:
+        fl = list(n.meta.get("existing_cross_border_fom_ledger", [])) + [dict(component_type="Link", component=r["link"], capacity_2025_mw=r["contract_mw"], length_km=r["length_km"], annual_fom_eur=r["annual_fom_eur"], cost_rows=["HVAC overhead"]) for r in rows if r["annual_fom_eur"]]
+        n.meta["existing_cross_border_fom_ledger"] = fl; n.meta["existing_cross_border_fom_eur"] = float(sum(r["annual_fom_eur"] for r in fl))
+    led.update(links=len(rows), lines=rows, total_mw=float(sum(r["contract_mw"] for r in rows)), loss_per_km=lam_km, coalition_removed=gone, annual_fom_eur=float(sum(r["annual_fom_eur"] for r in rows)))
+    n.meta["research_dedicated_lines"] = led
+    return led
 
 
 def add_liquid_shipping(n, cfg, registry: pd.DataFrame) -> dict:
