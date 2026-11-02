@@ -62,12 +62,12 @@ NOSOLVE=0; { [ "$BUILD_ONLY" = 1 ] || [ "$DRY" = 1 ] || [ "$POST_ONLY" = 1 ]; } 
 R_GAP=330; R_PAR_CORES=33     # registered values (RUN_PLAN_DFX.md 3.2); the per-run TimeLimit / wall cap come from dfx_batch.py limits
 LICENCE_GAP_S=${LICENCE_GAP_S:-$R_GAP}; GRACE_S=${GRACE_S:-30}; MONITOR_S=${MONITOR_S:-60}; CGROUP_ROOT=${CGROUP_ROOT:-/sys/fs/cgroup}
 # M10A (B5.5): test hooks present in the environment, recorded before the defaults below fill them in; FORMAL = solve mode without ALLOW_UNREGISTERED
-HOOKS_SET=$(for k in SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD TRUNCATE $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
+HOOKS_SET=$(for k in SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD SCREEN_CMD TRUNCATE $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
 FORMAL=0; [ "$NOSOLVE" = 0 ] && [ "${ALLOW_UNREGISTERED:-0}" != 1 ] && FORMAL=1
 SOLVE_CMD=${SOLVE_CMD:-"$PY $REPO/scripts_project/s2_solve.py"}; VA_CMD=${VA_CMD:-"$PY $REPO/scripts_project/l23_violation_analysis.py"}
 C1_CMD=${C1_CMD:-"$PY $REPO/scripts_project/s4o_c1_precision.py"}; M12_CMD=${M12_CMD:-"$PY $REPO/scripts_project/m12_allocation.py"}
 M12A_CMD=${M12A_CMD:-"$PY $REPO/scripts_project/m12_rhs_audit.py"}; G6_CMD=${G6_CMD:-"$PY $REPO/scripts_project/v5/gates_v6.py"}
-SUM_CMD=${SUM_CMD:-"$PY $REPO/scripts_project/dfx_batch.py"}; PACK_CMD=${PACK_CMD:-"bash $HERE/pack_results.sh"}
+SUM_CMD=${SUM_CMD:-"$PY $REPO/scripts_project/dfx_batch.py"}; PACK_CMD=${PACK_CMD:-"bash $HERE/pack_results.sh"}; SCREEN_CMD=${SCREEN_CMD:-"$PY $REPO/scripts_project/v3_screen_tables.py"}
 SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'   # licence-line filter (written so that this file holds no licence keyword)
 TRUNC=(); [ -n "$TRUNCATE" ] && TRUNC=(--truncate "$TRUNCATE")
 
@@ -119,13 +119,13 @@ declare -A SC BASE SET PROF COSTS TL WALL
 while IFS='|' read -r rid sc base set prof costs; do
   [ -n "$rid" ] || continue; SC[$rid]=$sc; BASE[$rid]=$base; SET[$rid]=$set; PROF[$rid]=$prof; COSTS[$rid]=$costs
 done < <(cd "$REPO" && $SUM_CMD runtable)
-[ "${#SC[@]}" = 2 ] || { echo "REFUSED: run table not readable from $REPO (got ${#SC[@]} runs; expected V1, V2)"; exit 2; }
+{ [ "${#SC[@]}" -ge 2 ] && [ -n "${SC[V1]:-}" ] && [ -n "${SC[V2]:-}" ]; } || { echo "REFUSED: run table not readable from $REPO (got ${#SC[@]} runs; expected V1, V2 and those of BATCH_DEF.json)"; exit 2; }
 for rid in "${!SET[@]}"; do [ -z "${SET[$rid]}" ] || { echo "REFUSED: run $rid has a variant set (${SET[$rid]}) - the DFX batch solves the base networks only"; exit 2; }; done
-declare -A LANE_A LANE_B
-while IFS='|' read -r ph la lb; do [ -n "$ph" ] && { LANE_A[$ph]=$la; LANE_B[$ph]=$lb; }; done < <(cd "$REPO" && $SUM_CMD schedule)
-[ "${#LANE_A[@]}" = 1 ] || { echo "REFUSED: schedule not readable from $REPO (got ${#LANE_A[@]} phases; expected 1)"; exit 2; }
+declare -A LANE_A LANE_B; PHASES=()
+while IFS='|' read -r ph la lb; do [ -n "$ph" ] && { LANE_A[$ph]=$la; LANE_B[$ph]=$lb; PHASES+=("$ph"); }; done < <(cd "$REPO" && $SUM_CMD schedule)
+[ "${#PHASES[@]}" -ge 1 ] || { echo "REFUSED: schedule not readable from $REPO (no phase)"; exit 2; }
 while IFS='|' read -r rid tl wall; do [ -n "$rid" ] && { TL[$rid]=$tl; WALL[$rid]=$wall; }; done < <(cd "$REPO" && $SUM_CMD limits)
-[ "${#TL[@]}" = 2 ] || { echo "REFUSED: registered limits not readable from $REPO (dfx_batch.py limits)"; exit 2; }
+[ "${#TL[@]}" = "${#SC[@]}" ] || { echo "REFUSED: registered limits not readable from $REPO (dfx_batch.py limits)"; exit 2; }
 if [ -n "${GUROBI_TIME_LIMIT_S:-}" ]; then for rid in "${!TL[@]}"; do TL[$rid]=$GUROBI_TIME_LIMIT_S; done; fi   # ALLOW_UNREGISTERED only (refused above otherwise)
 if [ -n "${WALL_CAP_S:-}" ]; then for rid in "${!WALL[@]}"; do WALL[$rid]=$WALL_CAP_S; done; fi
 threads_of() { "$PY" - "$REPO" "$1" <<'P' 2>/dev/null || echo 0
@@ -180,7 +180,7 @@ step() {   # $1 rid (or batch) $2 step name, then the command: aux + record; a n
   return $rc
 }
 
-log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):mode=batch:build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_T16=${THREADS[formal_barrier_1e6_t16]:-?}:time_limit_s=V1=${TL[V1]},V2=${TL[V2]}:wall_cap_s=V1=${WALL[V1]},V2=${WALL[V2]}:licence_gap_s=$LICENCE_GAP_S:parallel_min_cores=$R_PAR_CORES:schedule=1[${LANE_A[1]}|${LANE_B[1]}]:truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
+log "START:$(now):commit=$(cat "$HERE/COMMIT" 2>/dev/null || echo none):repo_commit=$(cat "$REPO/.package_commit" 2>/dev/null || echo none):mode=batch:build_only=$BUILD_ONLY:post_only=$POST_ONLY:dry=$DRY:cores=$NCORES:threads_T16=${THREADS[formal_barrier_1e6_t16]:-?}:time_limit_s=$(for r in $(printf '%s\n' "${!TL[@]}" | sort); do printf '%s=%s,' "$r" "${TL[$r]}"; done):wall_cap_s=$(for r in $(printf '%s\n' "${!WALL[@]}" | sort); do printf '%s=%s,' "$r" "${WALL[$r]}"; done):licence_gap_s=$LICENCE_GAP_S:parallel_min_cores=$R_PAR_CORES:schedule=$(for p in "${PHASES[@]}"; do printf '%s[%s|%s]' "$p" "${LANE_A[$p]}" "${LANE_B[$p]}"; done):truncate=${TRUNCATE:-none}:resume=$([ -f "$OUT/.created" ] && echo yes || echo no):tmpdir=$TMPDIR:post_timeout_s=$POST_TIMEOUT_S:allow_unregistered=${ALLOW_UNREGISTERED:-0}:hooks=${HOOKS_SET%,}"
 [ "$FORMAL" = 0 ] && [ "$NOSOLVE" = 0 ] && log "NOTE:ALLOW_UNREGISTERED=1 in solve mode - tests only; hooks=${HOOKS_SET%,}"
 [ -f "$OUT/.created" ] || now > "$OUT/.created"
 
@@ -235,7 +235,7 @@ prepare() {
   local f rid need=()
   [ "$POST_ONLY" = 1 ] && { log "PREPARE:skipped (POST_ONLY: no solve)"; return 0; }
   for rid in "${!SC[@]}"; do
-    need+=("${BASE[$rid]}_unsolved.nc" "${COSTS[$rid]}_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); fi
+    need+=("${BASE[$rid]}_unsolved.nc" "${COSTS[$rid]}_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); else need+=("$(base_scen "$rid")_BUILD_RECEIPT.json"); fi
   done
   for f in "${need[@]}"; do
     [ -s "$NETS/$f" ] || { safe_stop "MISSING_INPUT:networks/$f"; return 1; }
@@ -446,10 +446,10 @@ phase() {   # $1 phase (SCHEDULE): lanes A and B side by side only with >= R_PAR
   halted && return 0
   phase_gap "$1"; halted && return 0
   local la lb one=() i; IFS=, read -ra la <<< "${LANE_A[$1]}"; IFS=, read -ra lb <<< "${LANE_B[$1]}"
-  local thr=$(( $(max_threads "${la[@]}") + $(max_threads "${lb[@]}") ))
+  local thr=$(( $(max_threads "${la[@]}") + $(max_threads ${lb[@]+"${lb[@]}"}) ))
   if [ "$NOSOLVE" != 1 ] && [ "$NCORES" -ge "$R_PAR_CORES" ]; then
     log "PHASE_$1:two_lanes:A=${LANE_A[$1]}:B=${LANE_B[$1]}:threads=$thr:cores=$NCORES:min_cores=$R_PAR_CORES:$(now)"
-    lane A "${la[@]}" & local a=$!; sleep 2; lane B "${lb[@]}" & local b=$!; wait $a; wait $b
+    lane A "${la[@]}" & local a=$!; sleep 2; lane B ${lb[@]+"${lb[@]}"} & local b=$!; wait $a; wait $b
   else
     for ((i = 0; i < ${#la[@]} || i < ${#lb[@]}; i++)); do [ $i -lt ${#la[@]} ] && one+=("${la[$i]}"); [ $i -lt ${#lb[@]} ] && one+=("${lb[$i]}"); done
     log "PHASE_$1:one_lane:$(IFS=,; echo "${one[*]}"):threads=$thr:cores=$NCORES:min_cores=$R_PAR_CORES$( [ "$NOSOLVE" = 1 ] && echo ':no_solve_mode'):$(now)"
@@ -465,8 +465,11 @@ batch_post() {   # RUN_PLAN_DFX 3.4: B6 = V2 - V1 / M12 benefit, summary with th
   fi
   local ref=(); [ -f "$HERE/BATCH3_REFERENCE_VALUES.json" ] && ref=(--reference "$HERE/BATCH3_REFERENCE_VALUES.json")
   aux $SUM_CMD summary --out-dir "$OUT" ${ref[@]+"${ref[@]}"} > "$OUT/summary.log" 2>&1; log "SUMMARY:exit=$?:reference=$([ ${#ref[@]} -gt 0 ] && echo batch3 || echo none):$(tail -1 "$OUT/summary.log" | cut -c1-300)"
+  if [ -n "${BATCH_DEF:-}" ] && [ "$BUILD_ONLY" != 1 ] && [ "$DRY" != 1 ] && [ -f "$OUT/V1/COUNTRY_COST_LEDGER.csv" ] && [ -f "$OUT/V2/COUNTRY_COST_LEDGER.csv" ]; then   # V3 screening tables (RUN_PLAN_SCREEN_V3.md section 6)
+    step batch screen_tables $SCREEN_CMD --out-dir "$OUT" > "$OUT/screen_tables.log" 2>&1; log "SCREEN_TABLES:exit=$?:$(tail -1 "$OUT/screen_tables.log" 2>/dev/null | cut -c1-200)"
+  fi
   mkdir -p "$EXP/batch"
-  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json DFX_SUMMARY.json DFX_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
+  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json DFX_SUMMARY.json DFX_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS ID_LEDGER_DECOMPOSITION.csv VN_BIOMASS_BALANCE.json LA_EXPORT_UTILISATION.csv; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
   [ -d "$OUT/M12_BENEFIT" ] && { mkdir -p "$EXP/batch/M12_BENEFIT"; cp -r "$OUT/M12_BENEFIT"/. "$EXP/batch/M12_BENEFIT/"; }
   [ -f "$HERE/BATCH3_REFERENCE_VALUES.json" ] && cp "$HERE/BATCH3_REFERENCE_VALUES.json" "$EXP/batch/"
 }
@@ -478,8 +481,7 @@ pack() {   # $1 tag
 
 # ---- the batch
 prepare || { log "HALTED:$(now):phase 0"; batch_post summary; pack halted_phase0; exit 3; }
-phase 1
-regrade_all
+for ph in "${PHASES[@]}"; do phase "$ph"; regrade_all; done   # the batch reference exists after the phase of V1 and V2: the later runs use it from their first grading
 batch_post
 UNU=$(cut -d' ' -f1 "$OUT/UNUSABLE" 2>/dev/null | paste -sd, -)
 if halted; then

@@ -22,7 +22,7 @@ NEED_CORES=${NEED_CORES:-17}; NEED_MEM_GIB=${NEED_MEM_GIB:-64}; NEED_DISK_GB=${N
 sec() { case ",$ONLY," in *",$1,"*) return 0;; *) return 1;; esac; }
 if sec guards; then
   echo "== guards: test hooks / dry-run switches in this shell"; bad=()
-  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S $(compgen -A variable | grep -E '^FAKE_'); do
+  for k in ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD SCREEN_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S $(compgen -A variable | grep -E '^FAKE_'); do
     [ -z "${!k:-}" ] || bad+=("$k")
   done
   if [ ${#bad[@]} -gt 0 ]; then echo "SET IN THIS SHELL - unset before the formal run: ${bad[*]}"; ok=0; else echo "no test hook / dry-run switch set"; fi
@@ -74,9 +74,11 @@ if sec code; then
 import sys
 sys.path.insert(0, "scripts_project"); sys.path.insert(0, "scripts_project/v5")
 import s2_solve, dfx_batch, m10_batch3_summary, l23_violation_analysis, s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6
-assert list(dfx_batch.RUNS) == ["V1", "V2"], "run table"
-assert dfx_batch.TIME_LIMIT_S == {"V1": 21600, "V2": 10800} and dfx_batch.WALL_MARGIN_S == 1200 and dfx_batch.LICENCE_GAP_S == 330 and dfx_batch.PARALLEL_MIN_CORES == 33, "registered limits"
-assert dfx_batch.SCHEDULE == [("1", ["V1"], ["V2"])] and dfx_batch.STOP_ALWAYS == ("V1", "V2"), "schedule / stop rule"
+import batch_def
+D = batch_def.load_def() or {}   # V3 supplement 02: with a package definition the run table, limits and schedule are those of BATCH_DEF.json
+assert list(dfx_batch.RUNS) == (list(D["runs"]) if D else ["V1", "V2"]), "run table"
+assert dfx_batch.TIME_LIMIT_S == D.get("time_limit_s", {"V1": 21600, "V2": 10800}) and dfx_batch.WALL_MARGIN_S == 1200 and dfx_batch.LICENCE_GAP_S == 330 and dfx_batch.PARALLEL_MIN_CORES == 33, "registered limits"
+assert dfx_batch.SCHEDULE == [tuple(x) for x in D.get("schedule", [("1", ["V1"], ["V2"])])] and dfx_batch.STOP_ALWAYS == ("V1", "V2"), "schedule / stop rule"
 assert hasattr(s2_solve, "post_solve") and "--stop-before-solve" in open("scripts_project/s2_solve.py").read(), "post_solve / dry-run code"
 print("modules import; run table", ", ".join(dfx_batch.RUNS), "| limits", dfx_batch.TIME_LIMIT_S, "+", dfx_batch.WALL_MARGIN_S, "s wall margin | gap", dfx_batch.LICENCE_GAP_S, "s | parallel >=", dfx_batch.PARALLEL_MIN_CORES, "cores")
 P

@@ -116,6 +116,7 @@ def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
             n.links.loc[x, "border_class"] = "cross_border"; n.links.loc[x, "transport_carrier"] = "electricity"; n.links.loc[x, "stock"] = DEDICATED_STOCK
         fom = (float(costs.at["HVAC overhead", "FOM"]) / 100.0 * float(costs.at["HVAC overhead", "investment"]) * km * mw) if existing_cfg["fom_on_existing"] else 0.0
         rows.append(dict(link=name, plant_node=a, landing_node=b, pair="-".join(sorted((ca, cb))), projects=sorted(g.project), contract_mw=mw, length_km=km, efficiency=eta, annual_fom_eur=fom))
+    n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool); n.links["stock"] = n.links["stock"].fillna("").astype(str)   # as s4j_layers: a mixed column does not export
     if rows:
         fl = list(n.meta.get("existing_cross_border_fom_ledger", [])) + [dict(component_type="Link", component=r["link"], capacity_2025_mw=r["contract_mw"], length_km=r["length_km"], annual_fom_eur=r["annual_fom_eur"], cost_rows=["HVAC overhead"]) for r in rows if r["annual_fom_eur"]]
         n.meta["existing_cross_border_fom_ledger"] = fl; n.meta["existing_cross_border_fom_eur"] = float(sum(r["annual_fom_eur"] for r in fl))

@@ -48,9 +48,10 @@ REGISTERED_SHA = {"integrated_365_24h_unsolved.nc": "82928a4c9151a6a176ac8c81bf5
                   "disconnected_365_24h_unsolved.nc": "5c75bfa0e338fde4104deb41cdcaa72dddcf7b3782e6ad8ca1f4fb6c15cfbd5c"}
 REGISTERED_BYTES = {"integrated_365_24h_unsolved.nc": 31292240, "disconnected_365_24h_unsolved.nc": 30620986}
 BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
-_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; limits and schedule stay
+_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; V3 supplement 02: optionally its schedule and limits (five screening runs)
 if _DEF:
     RUNS, REGISTERED_SHA, REGISTERED_BYTES, BUILD_COMMIT = _DEF["runs"], _DEF["registered_sha"], _DEF["registered_bytes"], _DEF["build_commit"]
+    SCHEDULE = [tuple(x) for x in _DEF.get("schedule", SCHEDULE)]; TIME_LIMIT_S = _DEF.get("time_limit_s", TIME_LIMIT_S)
 
 # NOTE: the third-batch module is never modified (no monkeypatching of its RUNS / SCHEDULE: an earlier draft did so at import time and broke the
 # third-batch and fourth-batch stand-in tests collected in the same pytest process). Only its table-free helpers are imported; run_state is local.
@@ -198,10 +199,20 @@ def summary(out: Path, reference: Path | None = None) -> dict:
     b6 = b6_gate(out)
     res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=b6,
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"), reason=ben.get("reason")) if ben else None),
-               comparison=comparison(out, runs, b6, ref), stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), solver_runs=0)
+               comparison=comparison(out, runs, b6, ref), bridge=revision_bridge(runs), stop_not_accepted=stop, stop_safe=safe, postproc_errors=postproc_errors(out), solver_runs=0)
     (out / "DFX_SUMMARY.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
     (out / "DFX_SUMMARY.md").write_text(markdown(res))
     return res
+
+
+def revision_bridge(runs: dict) -> dict | None:
+    """V3 screening (RUN_PLAN_SCREEN_V3.md section 6, decision 174): v2 -> 160-162 -> 160-164 -> all on the integrated network, and the value of the stock = disconnected - no_new_xb. Description only."""
+    ref = (_DEF or {}).get("bridge")
+    if not ref:
+        return None
+    o = {k: bn(runs[k]["objective"]) if k in runs and runs[k]["objective"] is not None else None for k in RUNS}; steps = [("v2", bn(ref["v2_integrated_objective_eur"]))] + [(lab, o.get(k)) for k, lab in ref["steps"]]
+    d = [dict(step=f"{a[0]} -> {b[0]}", cost_change_bn=(b[1] - a[1]) if a[1] is not None and b[1] is not None else None) for a, b in zip(steps, steps[1:])]
+    return dict(objective_bn=dict(steps), steps=d, stock_value_bn=(o["V3"] - o["V2"]) if o.get("V3") is not None and o.get("V2") is not None else None, v2_b6_bn=bn(ref["v2_disconnected_objective_eur"] - ref["v2_integrated_objective_eur"]))
 
 
 def _f(x, fmt="{:.4f}"):
@@ -224,6 +235,10 @@ def markdown(r: dict) -> str:
                                           if b6 else "- 不可计算（V1 或 V2 无目标值）")]
     if r["benefit"]:
         L.append(f"- M12 受益与比例规则对照：{'B6 ' + _f(r['benefit']['b6_bn']) + ' bn；负受益 ' + str(r['benefit']['negative_benefit']) if r['benefit']['computable'] else '不可计算：' + str(r['benefit']['reason'])}（`M12_BENEFIT/`）")
+    br = r.get("bridge")
+    if br:
+        L += ["", "## 修订桥与存量价值（只描述）", "", "| 步骤 | 总成本变化 bn |", "|---|---:|"] + [f"| {x['step']} | {_f(x['cost_change_bn'], '{:+.4f}')} |" for x in br["steps"]]
+        L += ["", f"- 完全隔离 − `no_new_xb`（存量与专线的价值）：{_f(br['stock_value_bn'])} bn；v2 B6 {_f(br['v2_b6_bn'])} bn"]
     c = r.get("comparison")
     L += ["", "## 与第三批及一阶预测的对比（只描述，不作验收依据；RUN_PLAN_DFX 3.4 第 5–6 项；主参照 R3 / R4 同档案 optimal，R1 / R2 并列）", ""]
     if c:

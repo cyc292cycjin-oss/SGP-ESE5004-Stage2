@@ -160,9 +160,10 @@ def dedicated_toy(electricity=True):
     return n, add_dedicated_plant_lines(n, cfg, ROOT, costs, dict(fom_on_existing=True))
 
 
-def test_x1b_layer_toy():
+def test_x1b_layer_toy(tmp_path):
     from v3_static import stock_by_pair
     n, led = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str)
+    n.links["country"] = n.links["country"].astype(str); n.export_to_netcdf(tmp_path / "toy.nc")   # the build exports the network: no mixed column
     assert led["links"] == 6 and led["total_mw"] == 5999.0 and len(n.links) == 12 and not n.links.p_nom_extendable.any() and (n.links.border_class == "cross_border").all()
     f = n.links.loc["dedicated plant line LA2 3 - TH2 1"]; r = n.links.loc["dedicated plant line LA2 3 - TH2 1-reversed"]
     assert f.p_nom == r.p_nom == 1388.0 and f.p_nom_min == f.p_nom and f.bus0 == r.bus1 and f.efficiency == r.efficiency and f.stock == r.stock == "dedicated_plant_line" and r.reversed and not f.reversed
