@@ -308,6 +308,7 @@ v2 的"其他"桶占 74.7 %，APEC 把大部分能量归到食品、纺织、造
 
 - 本机 Gurobi：补充额度 4 / 4，没有重试，改参数 0 次。启动前用户确认 AnyConnect 已断开、WLS 会话可用；WSL 到令牌服务器的 TCP 预检在启动前和每次求解前都通过。
 - 本机计算累计约 3.9 小时 / 6 小时，`results_project/v3` 约 7.0 GB，磁盘累计约 7.1 GB / 40 GB。
+- 全量 `tests/research`（提交 `598e549e`，无求解同时运行）：730 通过、58 跳过、3 失败。3 项与上一轮相同，都与 v3 无关，见 `RUN_PLAN_V3.md` 第 6 节：`test_s4c_0.py` 两项（worktree 缺被 git 忽略的 WACC 表）、`test_s1_built_networks.py` 一项（基点 `0a20aefd` 已有）。
 - 未连 AutoDL 或 HPC，未打包、未上传。
 - **未做：** X1b；X1b 之后的网络重建、定义文件登记值、打包脚本、v3 版 `RUN_PLAN_HPC.md`；365×24h 筛查的运行计划。这些都要等新的授权。
 
