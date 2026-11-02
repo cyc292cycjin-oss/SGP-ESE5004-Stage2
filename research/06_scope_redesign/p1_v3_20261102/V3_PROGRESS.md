@@ -30,11 +30,11 @@
 | 补充 02 第 2.1 节 X1b | 完成：11 项全部运营且在网络中，全部计入；APG 955 MW 是七条 115 kV 线，不重复 | `f6d90e37`、`1ccd35e8`、`4df45b56` |
 | 补充 02 第 2.3 节第 1 项 重建 | 完成：7 个网络，静态检查全过，HiGHS 路径检查走通 | 构建 `4df45b56` |
 | 补充 02 第 2.2 节 规则与预测 | 完成，**第 176 项全文待用户提供** | 本次提交 |
-| 补充 02 第 2.3 节第 2 项 冒烟 | **等用户确认 WLS 会话空闲、AnyConnect 已断开** | — |
+| 补充 02 第 2.3 节第 2 项 冒烟 | 用户 2026-11-03 确认空闲、已断开；第 176 项全文未到，先求解，全文待补 | 本次提交 |
 
 ## 恢复点
 
-补充 02：运行 `bash /home/jin/v3/smoke_s2.sh --confirmed <确认时间>`（输出 `results_project/v3/smoke_s2`），额度 Gurobi 0 / 2。之后筛查包（`screen_package/make_package_v3.sh`，先跑 `/home/jin/v3/dry_s2.sh`），最后写 `V3_REPORT_SUPPLEMENT02.md`。第 176 项全文写入 `V3_RULES.md` 后才能求解。
+补充 02：运行 `bash /home/jin/v3/smoke_s2.sh --confirmed <确认时间>`（输出 `results_project/v3/smoke_s2`），额度 Gurobi 0 / 2。之后筛查包（`screen_package/make_package_v3.sh`，先跑 `/home/jin/v3/dry_s2.sh`），最后写 `V3_REPORT_SUPPLEMENT02.md`。第 176 项全文收到后写入 `V3_RULES.md` 第 10 节。
 
 ## 计数
 
