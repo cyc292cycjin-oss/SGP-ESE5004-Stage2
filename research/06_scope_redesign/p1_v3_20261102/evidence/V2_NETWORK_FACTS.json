@@ -1,0 +1,679 @@
+{
+ "snapshots": {
+  "n": 2920,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 21:00:00",
+  "tz": "None",
+  "weights": [
+   3.0
+  ]
+ },
+ "components": {
+  "StorageUnit": [
+   133,
+   133
+  ],
+  "Link": [
+   8458,
+   8166
+  ],
+  "Store": [
+   522,
+   522
+  ],
+  "TransformerType": [
+   14,
+   14
+  ],
+  "LineType": [
+   35,
+   35
+  ],
+  "Generator": [
+   1927,
+   1927
+  ],
+  "Bus": [
+   3063,
+   3063
+  ],
+  "Load": [
+   2241,
+   2241
+  ],
+  "Carrier": [
+   142,
+   142
+  ],
+  "Line": [
+   148,
+   86
+  ]
+ },
+ "bus_carriers": {
+  "oil final energy": 504,
+  "gas final energy": 191,
+  "biomass final energy": 159,
+  "methanol final energy": 149,
+  "oil non-fossil": 101,
+  "H2": 100,
+  "gas": 100,
+  "co2 stored": 100,
+  "low voltage": 98,
+  "battery": 98,
+  "home battery": 98,
+  "process emissions": 97,
+  "industry heat medium A": 97,
+  "industry heat medium B": 97,
+  "industry heat": 97,
+  "industry heat high": 97,
+  "oil": 97,
+  "oil feedstock": 96,
+  "Li ion": 96,
+  "AC": 96,
+  "plastic waste": 94,
+  "clean cooking useful": 73,
+  "gas feedstock": 70,
+  "coal": 68,
+  "coal final energy": 61,
+  "coal feedstock": 44,
+  "gas wellhead": 19,
+  "co2 sequestered extra-ASEAN": 11,
+  "biogas": 11,
+  "solid biomass": 11,
+  "co2 atmosphere": 11,
+  "lignite": 8,
+  "co2 sequestered": 7,
+  "DC": 4,
+  "methanol": 1,
+  "co2 bunkers": 1,
+  "ammonia": 1
+ },
+ "asean_buses": [
+  "ASEAN methanol",
+  "ASEAN ammonia",
+  "ASEAN oil",
+  "ASEAN oil non-fossil",
+  "co2 bunkers ASEAN",
+  "ASEAN aviation international oil final",
+  "ASEAN shipping international methanol final"
+ ],
+ "asean_attached": {
+  "ASEAN methanol": {
+   "Generator": {
+    "methanol import": 1
+   },
+   "Store": {
+    "methanol store": 1
+   },
+   "Link": {
+    "bus0:OCGT methanol": 97,
+    "bus0:industry methanol": 77,
+    "bus0:shipping methanol": 72,
+    "bus1:methanolisation": 97,
+    "bus1:biomass-to-methanol": 11
+   }
+  },
+  "ASEAN ammonia": {
+   "Generator": {
+    "ammonia import": 1
+   },
+   "Load": {
+    "industry ammonia": 54
+   },
+   "Store": {
+    "ammonia store": 1
+   },
+   "Link": {
+    "bus0:ammonia cracker": 97,
+    "bus1:Haber-Bosch": 97
+   }
+  },
+  "ASEAN oil": {
+   "Generator": {
+    "oil import": 1
+   },
+   "Link": {
+    "bus0:oil final-energy accounting": 1,
+    "bus1:oil pool": 96
+   }
+  },
+  "ASEAN oil non-fossil": {
+   "Generator": {
+    "FT fuel import": 1
+   },
+   "Link": {
+    "bus0:oil final-energy accounting": 1,
+    "bus1:oil pool": 100
+   }
+  },
+  "co2 bunkers ASEAN": {
+   "Store": {
+    "co2 bunkers": 1
+   },
+   "Link": {
+    "bus2:oil final-energy accounting": 1
+   }
+  },
+  "ASEAN aviation international oil final": {
+   "Load": {
+    "oil final energy": 1
+   },
+   "Link": {
+    "bus1:oil final-energy accounting": 2
+   }
+  },
+  "ASEAN shipping international methanol final": {
+   "Load": {
+    "shipping methanol": 1
+   },
+   "Link": {
+    "bus1:shipping methanol": 1
+   }
+  }
+ },
+ "oil_pool_links": {
+  "n": 196,
+  "sample": {
+   "bus0": "ID_Sumatra3 2 oil",
+   "bus1": "ASEAN oil",
+   "p_nom": "0.0",
+   "p_nom_extendable": "True",
+   "p_nom_max": "inf",
+   "p_min_pu": "-1.0",
+   "marginal_cost": "0.0",
+   "capital_cost": "0.0",
+   "efficiency": "1.0",
+   "border_class": "domestic"
+  }
+ },
+ "imports": {
+  "ASEAN oil import": {
+   "marginal": 35.3179141049,
+   "p_nom_ext": true,
+   "p_nom_max": Infinity
+  },
+  "ASEAN methanol import": {
+   "marginal": 145.1584,
+   "p_nom_ext": true,
+   "p_nom_max": Infinity
+  },
+  "ASEAN ammonia import": {
+   "marginal": 116.7793,
+   "p_nom_ext": true,
+   "p_nom_max": Infinity
+  },
+  "ASEAN oil non-fossil import": {
+   "marginal": 150.1093,
+   "p_nom_ext": true,
+   "p_nom_max": Infinity
+  }
+ },
+ "cross_border": {
+  "by_carrier": [
+   {
+    "type": "Line",
+    "carrier": "AC",
+    "n": 62
+   },
+   {
+    "type": "Link",
+    "carrier": "CO2 pipeline",
+    "n": 55
+   },
+   {
+    "type": "Link",
+    "carrier": "DC",
+    "n": 5
+   },
+   {
+    "type": "Link",
+    "carrier": "H2 pipeline",
+    "n": 55
+   },
+   {
+    "type": "Link",
+    "carrier": "gas pipeline",
+    "n": 61
+   }
+  ],
+  "stock": [
+   {
+    "type": "Line",
+    "carrier": "AC",
+    "n": 16,
+    "mw": 2570.0
+   },
+   {
+    "type": "Link",
+    "carrier": "DC",
+    "n": 1,
+    "mw": 300.0
+   },
+   {
+    "type": "Link",
+    "carrier": "gas pipeline",
+    "n": 6,
+    "mw": 33883.74
+   }
+  ],
+  "fom_eur": 8993064.8216948,
+  "rows_reversed": 116,
+  "stock_by_pair_mw": [
+   {
+    "pair": "ID-MY",
+    "carrier": "AC",
+    "nom": 230.0
+   },
+   {
+    "pair": "ID-SG",
+    "carrier": "gas pipeline",
+    "nom": 8794.7
+   },
+   {
+    "pair": "KH-LA",
+    "carrier": "AC",
+    "nom": 300.0
+   },
+   {
+    "pair": "KH-TH",
+    "carrier": "AC",
+    "nom": 250.0
+   },
+   {
+    "pair": "KH-VN",
+    "carrier": "AC",
+    "nom": 200.0
+   },
+   {
+    "pair": "LA-MM",
+    "carrier": "AC",
+    "nom": 30.0
+   },
+   {
+    "pair": "LA-TH",
+    "carrier": "AC",
+    "nom": 955.0
+   },
+   {
+    "pair": "MM-TH",
+    "carrier": "gas pipeline",
+    "nom": 13844.9
+   },
+   {
+    "pair": "MY-SG",
+    "carrier": "AC",
+    "nom": 525.0
+   },
+   {
+    "pair": "MY-TH",
+    "carrier": "AC",
+    "nom": 80.0
+   },
+   {
+    "pair": "MY-TH",
+    "carrier": "DC",
+    "nom": 300.0
+   },
+   {
+    "pair": "MY-TH",
+    "carrier": "gas pipeline",
+    "nom": 11244.2
+   }
+  ]
+ },
+ "maritime_trade": {
+  "CO2 ship": 434,
+  "CO2 transit ship": 36,
+  "CO2 transit rail": 6
+ },
+ "bev": {
+  "ev_loads": 96,
+  "ev_static_p_set_nonzero": 96,
+  "ev_in_loads_t": 0,
+  "ev_twh": 715.9644220295708,
+  "chargers": 96,
+  "charger_p_max_pu": [
+   0.8
+  ],
+  "charger_eff": [
+   0.9
+  ],
+  "charger_p_nom": 0.0,
+  "charger_ext": 96,
+  "charger_capital": [
+   0.0
+  ],
+  "ev_battery_stores": 0,
+  "ev_store_carriers": [
+   "H2 Store Tank",
+   "ammonia store",
+   "battery",
+   "biogas",
+   "co2 atmosphere",
+   "co2 bunkers",
+   "co2 sequestered",
+   "co2 sequestered extra-ASEAN",
+   "co2 stored",
+   "home battery",
+   "methanol store",
+   "solid biomass"
+  ],
+  "v2g_links": 0
+ },
+ "diurnal": {
+  "BN": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 9,
+   "load_min_hour_snapshot": 18,
+   "lon": 114.3891,
+   "nodes": 1
+  },
+  "ID": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 115.94232456098659,
+   "nodes": 39
+  },
+  "KH": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 104.28555176923078,
+   "nodes": 5
+  },
+  "LA": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 103.84702424450548,
+   "nodes": 6
+  },
+  "MM": {
+   "solar_peak_hour_snapshot": 6,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 95.92980319489335,
+   "nodes": 17
+  },
+  "MY": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 9,
+   "load_min_hour_snapshot": 18,
+   "lon": 111.23424784721094,
+   "nodes": 7
+  },
+  "PH": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 9,
+   "load_min_hour_snapshot": 15,
+   "lon": 122.96634084920633,
+   "nodes": 5
+  },
+  "SG": {
+   "solar_peak_hour_snapshot": 6,
+   "load_peak_hour_snapshot": 9,
+   "load_min_hour_snapshot": 18,
+   "lon": 103.806,
+   "nodes": 1
+  },
+  "TH": {
+   "solar_peak_hour_snapshot": 6,
+   "load_peak_hour_snapshot": 9,
+   "load_min_hour_snapshot": 21,
+   "lon": 100.8280171834374,
+   "nodes": 6
+  },
+  "TL": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 125.85202,
+   "nodes": 1
+  },
+  "VN": {
+   "solar_peak_hour_snapshot": 3,
+   "load_peak_hour_snapshot": 12,
+   "load_min_hour_snapshot": 18,
+   "lon": 106.57912538972803,
+   "nodes": 8
+  }
+ },
+ "nodes_by_country": {
+  "BN": 1,
+  "ID": 39,
+  "KH": 5,
+  "LA": 6,
+  "MM": 17,
+  "MY": 8,
+  "PH": 7,
+  "SG": 1,
+  "TH": 7,
+  "TL": 1,
+  "VN": 8
+ },
+ "nodes_ac_by_country": {
+  "BN": 1,
+  "ID": 39,
+  "KH": 5,
+  "LA": 6,
+  "MM": 17,
+  "MY": 7,
+  "PH": 5,
+  "SG": 1,
+  "TH": 6,
+  "TL": 1,
+  "VN": 8
+ },
+ "link_carriers": {
+  "oil final-energy accounting": 1008,
+  "CO2 ship": 434,
+  "gas pipeline": 327,
+  "H2 pipeline": 296,
+  "industry gas boiler": 291,
+  "oil pool": 196,
+  "industry direct firing biomass CC": 194,
+  "industry direct firing biomass": 194,
+  "industry direct firing gas": 194,
+  "industry biomass boiler CC": 194,
+  "industry electric boiler": 194,
+  "industry biomass boiler": 194,
+  "oil feedstock": 192,
+  "gas final-energy accounting": 191,
+  "biomass final-energy accounting": 159,
+  "CO2 pipeline": 148,
+  "cooking LPG": 146,
+  "OCGT": 100,
+  "SMR": 100,
+  "SMR CC": 100,
+  "Fischer-Tropsch": 100,
+  "CCGT": 100,
+  "battery discharger": 98,
+  "battery charger": 98,
+  "home battery charger": 98,
+  "home battery discharger": 98,
+  "electricity distribution grid": 98,
+  "industry heat pump": 97,
+  "H2 turbine": 97,
+  "Haber-Bosch": 97,
+  "ammonia cracker": 97,
+  "methanolisation": 97,
+  "H2 Fuel Cell": 97,
+  "OCGT methanol": 97,
+  "BtL": 97,
+  "biogas upgrading": 97,
+  "biomass EOP": 97,
+  "process emissions CC": 97,
+  "process emissions": 97,
+  "DAC": 97,
+  "CCGT CC": 97,
+  "Sabatier": 97,
+  "electrobiofuels": 97,
+  "H2 Electrolysis": 97,
+  "biomass EOP CC": 97,
+  "BEV charger": 96,
+  "waste incineration": 94,
+  "industry biomass CC": 94,
+  "industry methanol": 77,
+  "cooking electric": 73,
+  "cooking gas": 73,
+  "shipping methanol": 72,
+  "CO2 sequestration": 72,
+  "coal existing": 71,
+  "CO2 export extra-ASEAN": 71,
+  "gas feedstock": 70,
+  "coal final-energy accounting": 61,
+  "CCGT existing": 56,
+  "coal feedstock": 44,
+  "CO2 transit ship": 36,
+  "DC": 26,
+  "OCGT existing": 21,
+  "gas production delivery": 19,
+  "biomass-to-methanol": 11,
+  "lignite existing": 9,
+  "oil existing": 9,
+  "CO2 transit rail": 6,
+  "CO2 transit export extra-ASEAN": 6,
+  "B2B": 3
+ },
+ "store_carriers": {
+  "battery": 98,
+  "home battery": 98,
+  "H2 Store Tank": 97,
+  "co2 stored": 97,
+  "solid biomass": 85,
+  "biogas": 15,
+  "co2 atmosphere": 11,
+  "co2 sequestered extra-ASEAN": 11,
+  "co2 sequestered": 7,
+  "ammonia store": 1,
+  "methanol store": 1,
+  "co2 bunkers": 1
+ },
+ "load_carriers_twh": {
+  "agriculture machinery electric": 42.45659748857969,
+  "biomass final energy": 293.0971301730052,
+  "clean cooking useful": 9.929219813275504,
+  "coal feedstock": 13.939934996203663,
+  "coal final energy": 37.49593185494376,
+  "electricity": 966.9084251289165,
+  "gas feedstock": 291.9452167792155,
+  "gas final energy": 291.11743336702784,
+  "industry ammonia": 98.13531863929998,
+  "industry electricity": 1166.603392834513,
+  "industry heat": 161.29953781725038,
+  "industry heat high": 958.4905171183768,
+  "industry heat medium A": 146.15955693294026,
+  "industry heat medium B": 584.638227732533,
+  "industry hydrogen": 47.931384148528,
+  "industry methanol": 3.7605597663867694,
+  "land transport EV": 715.9644220295708,
+  "oil feedstock": 356.9304948895855,
+  "oil final energy": 901.9710071252802,
+  "shipping methanol": 539.8630829920173
+ },
+ "bunkers": {
+  "mode": "asean_pool",
+  "asean_loads": {
+   "ASEAN aviation international oil demand": {
+    "account": "InternationalAviationBunker",
+    "annual_mwh": 239550418.6,
+    "bus": "ASEAN aviation international oil final",
+    "carrier": "oil",
+    "sector": "aviation international",
+    "sources": [
+     "BN",
+     "ID",
+     "KH",
+     "LA",
+     "MM",
+     "MY",
+     "PH",
+     "SG",
+     "TH",
+     "TL",
+     "VN"
+    ]
+   },
+   "ASEAN shipping international methanol": {
+    "account": "InternationalShippingBunker",
+    "annual_mwh": 485585336.24347836,
+    "bus": "ASEAN shipping international methanol final",
+    "carrier": "shipping methanol",
+    "sector": "Transport",
+    "sources": [
+     "BN",
+     "ID",
+     "KH",
+     "LA",
+     "MM",
+     "MY",
+     "PH",
+     "SG",
+     "TH",
+     "TL",
+     "VN"
+    ]
+   }
+  },
+  "by_country": {
+   "BN": {
+    "aviation_oil_mwh": 1324653.75,
+    "shipping_shipping_methanol_mwh": 0.0
+   },
+   "ID": {
+    "aviation_oil_mwh": 11222127.000000002,
+    "shipping_shipping_methanol_mwh": 2266934.0869565215
+   },
+   "KH": {
+    "aviation_oil_mwh": 1907325.0,
+    "shipping_shipping_methanol_mwh": 0.0
+   },
+   "LA": {
+    "aviation_oil_mwh": 443449.9999999999,
+    "shipping_shipping_methanol_mwh": 0.0
+   },
+   "MM": {
+    "aviation_oil_mwh": 882000.0000000005,
+    "shipping_shipping_methanol_mwh": 10382.608695652178
+   },
+   "MY": {
+    "aviation_oil_mwh": 29654297.750000007,
+    "shipping_shipping_methanol_mwh": 4031380.382608696
+   },
+   "PH": {
+    "aviation_oil_mwh": 20087550.0,
+    "shipping_shipping_methanol_mwh": 557206.956521739
+   },
+   "SG": {
+    "aviation_oil_mwh": 103249495.1,
+    "shipping_shipping_methanol_mwh": 465514643.4782609
+   },
+   "TH": {
+    "aviation_oil_mwh": 55100500.0,
+    "shipping_shipping_methanol_mwh": 11419345.252173914
+   },
+   "TL": {
+    "aviation_oil_mwh": 35770.0,
+    "shipping_shipping_methanol_mwh": 0.0
+   },
+   "VN": {
+    "aviation_oil_mwh": 15643250.000000004,
+    "shipping_shipping_methanol_mwh": 1785443.4782608692
+   }
+  }
+ },
+ "hooks": [
+  "install_fragment_constraints",
+  "research_ac_loss_proxy",
+  "research_battery_inverter_capacity_equality",
+  "research_bunker_net_zero",
+  "research_co2_storage_cap",
+  "research_country_net_zero",
+  "research_cross_border_existing_fom",
+  "research_existing_assets",
+  "research_lossy_bidirectional_sync",
+  "research_new_hydro_inflow"
+ ]
+}
