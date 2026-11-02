@@ -88,6 +88,28 @@ def test_hubs_and_routes():
     assert (r.sea_km > 0).all() and "LA" not in set(r.origin) | set(r.destination)
 
 
+def test_smoke_eval_toy():
+    import pypsa
+    from v3_smoke_eval import liquid_balance, sg_marine, ship_duals, slack_use
+    n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=2, freq="3h")); n.snapshot_weightings.loc[:, :] = 4380.0
+    for b, c in (("ID methanol", "ID"), ("SG methanol", "SG"), ("SG2 0 shipping methanol", "ASEAN")):
+        n.add("Bus", b, carrier="methanol"); n.buses.loc[b, "country"] = c
+    n.add("Link", "ID ship", bus0="ID methanol", bus1="SG methanol", carrier="methanol ship", p_nom=100.0, efficiency=0.99)
+    n.add("Link", "SG feed", bus0="SG methanol", bus1="SG2 0 shipping methanol", carrier="shipping methanol link", p_nom=100.0)
+    n.add("Load", "SG marine", bus="SG2 0 shipping methanol", carrier="shipping methanol", p_set=10.0); n.loads["country"] = "ASEAN"
+    n.add("Generator", "SG methanol import", bus="SG methanol", carrier="methanol import", p_nom=1.0)
+    n.generators_t.p = pd.DataFrame({"SG methanol import": [1.0, 1.0]}, index=n.snapshots)
+    n.links_t.p0 = pd.DataFrame({"ID ship": [10.0, 10.0], "SG feed": [10.9, 10.9]}, index=n.snapshots)
+    n.links_t.p1 = pd.DataFrame({"ID ship": [-9.9, -9.9], "SG feed": [-10.9, -10.9]}, index=n.snapshots)
+    n.links_t["mu_upper"] = pd.DataFrame({"ID ship": [0.0, 0.5]}, index=n.snapshots)
+    d = ship_duals(n, "x").set_index("link"); b = liquid_balance(n, "x")
+    assert d.at["ID ship", "mu_upper_max_abs"] == 0.5 and d.at["ID ship", "max_utilisation"] == pytest.approx(0.1) and d.at["ID ship", "flow_twh"] == pytest.approx(0.0876)
+    assert b[(b.country == "ID") & (b.term == "ship out")].twh.sum() == pytest.approx(-0.0876)
+    s = sg_marine(n, b)
+    assert s["marine_load_twh"] == pytest.approx(0.0876) and s["ship_in_twh_by_origin"]["ID"] == pytest.approx(0.086724) and s["import_outside_asean_twh"] == pytest.approx(0.00876) and s["has_source"]
+    assert slack_use(n)["Generator"]["components"] == 0
+
+
 def test_no_new_xb_stock_mode_toy():
     import pypsa
     from m08a_layers import apply_stock_mode

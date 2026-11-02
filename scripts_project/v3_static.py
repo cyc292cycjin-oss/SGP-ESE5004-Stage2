@@ -35,10 +35,11 @@ ALLOWED_CHANGED = {"Load": {"industry heat", "industry heat medium A", "industry
                    "Generator": {"process emissions"},
                    "Link": {"oil pool", "Haber-Bosch", "ammonia cracker", "methanolisation", "biomass-to-methanol", "OCGT methanol", "industry methanol", "shipping methanol", "BEV charger", "oil final-energy accounting"},
                    "Bus": {"oil final energy", "shipping methanol", "methanol final energy"}}
+# "oil pool" in Link: distribution links of the nodes that first get a fossil oil bus because the facility allocation places oil final demand there (decision 164; v2 had only their non-fossil bus)
 ALLOWED_NEW = {"Bus": {"oil", "oil non-fossil", "methanol", "ammonia", "methanol final energy", "coal final energy", "gas final energy", "biomass final energy", "oil final energy", "gas feedstock", "coal feedstock", "oil feedstock"},
                "Generator": {"oil import", "methanol import", "ammonia import", "FT fuel import", "process emissions"},
                "Store": {"ammonia store", "methanol store", "oil non-fossil store", "EV battery"},
-               "Link": {"oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
+               "Link": {"oil non-fossil ship", "methanol ship", "ammonia ship", TRANSIT_CARRIER, "oil pool", "shipping methanol", "coal final-energy accounting", "gas final-energy accounting", "biomass final-energy accounting", "oil final-energy accounting", "gas feedstock", "coal feedstock", "oil feedstock", "industry methanol", "industry biomass CC"},
                "Load": ALLOWED_CHANGED["Load"]}
 
 
@@ -101,10 +102,11 @@ def scenario_diff(i, r) -> dict:
     return dict(passed=not bad, removed=removed, problems=bad[:20])
 
 
-def demand_check(n, table: pd.DataFrame) -> pd.DataFrame:
+def demand_check(n) -> pd.Series:
+    """annual TWh by country and carrier, all sectors (the network writes the final-energy sectors in lower case and the others as in the table; bunker loads carry the tag ASEAN and stay on the nodes of their country)"""
     w = n.snapshot_weightings.generators; p = n.get_switchable_as_dense("Load", "p_set").mul(w, axis=0).sum() / 1e6
-    l = n.loads.assign(twh=p.reindex(n.loads.index).fillna(0.0))
-    return l[l.sector.astype(str) == "Industry"].groupby(["country", "carrier"]).twh.sum()
+    tag = n.loads.country.astype(str); country = tag.where(tag != "ASEAN", n.loads.bus.astype(str).str[:2])
+    return n.loads.assign(twh=p.reindex(n.loads.index).fillna(0.0), country=country).groupby(["country", "carrier"]).twh.sum()
 
 
 def main():
@@ -140,13 +142,20 @@ def main():
     res["scenario_difference_2920"] = scenario_diff(I3, R3); res["scenario_difference_365"] = scenario_diff(I1, R1)
     D, bad = struct_diff(V2, I3); (a.out / "evidence").mkdir(exist_ok=True); D.to_csv(a.out / "evidence/V3_STRUCT_DIFF_V2.csv", index=False)
     res["structure_vs_v2"] = dict(passed=not bad, unexpected=bad[:40], rows=int(len(D)))
-    t = pd.read_csv(a.out / "DEMAND_BY_COUNTRY_SECTOR_CARRIER_v3.csv"); ti = t[t.sector == "Industry"].groupby(["country", "carrier"]).twh.sum()
-    rows = pd.DataFrame(dict(table=ti, integrated_2920=demand_check(I3, t), no_new_xb_2920=demand_check(R3, t), integrated_365=demand_check(I1, t), no_new_xb_365=demand_check(R1, t))).fillna(0.0).reset_index()
+    t = pd.read_csv(a.out / "DEMAND_BY_COUNTRY_SECTOR_CARRIER_v3.csv"); ti = t.groupby(["country", "carrier"]).twh.sum()
+    NET = ["integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365"]
+    rows = pd.DataFrame(dict(table=ti, integrated_2920=demand_check(I3), no_new_xb_2920=demand_check(R3), integrated_365=demand_check(I1), no_new_xb_365=demand_check(R1))).fillna(0.0).reset_index()
     rows.to_csv(a.out / "evidence/DEMAND_NETWORK_CHECK_V3.csv", index=False)
-    rel = rows[rows.carrier != "biomass final energy"].copy()
-    rel = rel[~rel.carrier.astype(str).str.startswith("industry heat")]; dev = float(((rel.integrated_2920 - rel.table).abs() / rel.table.clip(lower=1e-9)).max())
-    tot = rows.groupby("country")[["table", "integrated_2920"]].sum()
-    res["demand_vs_table"] = dict(max_rel_non_overflow_carriers=dev, passed=bool(dev <= 1e-9), country_gap_twh_overflow_to_useful_heat={k: float(v) for k, v in (tot.table - tot.integrated_2920).round(6).items() if abs(v) > 1e-6})
+    from phase4_static import config
+    eff = float(config(HERE.parent, "integrated")["research"]["s2"]["industry"]["biomass_overflow_useful_heat_efficiency"])
+    heat = rows.carrier.astype(str).str.startswith("industry heat"); bio = rows.carrier == "biomass final energy"
+    rel = rows[~heat & ~bio]; dev = float(max((rel[c] - rel.table).abs().max() for c in NET))   # TWh; the table is stored rounded to about 1e-9 TWh
+    # biomass above the national potential leaves the biomass load and returns as useful heat at the overflow efficiency (v2 rule, decision 133)
+    b = rows[bio].set_index("country"); ov = pd.DataFrame({c: b.table - b[c] for c in NET})
+    dh = rows[heat].groupby("country")[NET].sum().sub(rows[heat].groupby("country").table.sum(), axis=0)
+    closure = float((dh - ov.reindex(dh.index).fillna(0.0) * eff).abs().max().max())
+    res["demand_vs_table"] = dict(max_abs_gap_non_overflow_carriers_twh=dev, overflow_closure_max_twh=closure, passed=bool(dev <= 1e-6 and closure <= 1e-6), useful_heat_efficiency=eff,
+                                  country_biomass_overflow_twh={k: float(v) for k, v in ov.integrated_2920.round(6).items() if abs(v) > 1e-6})
     res["all_structural_passed"] = bool(res["gate_b5_no_new_xb"]["passed"] and res["gate_b5_no_new_xb_365"]["passed"] and res["scenario_difference_2920"]["passed"] and res["scenario_difference_365"]["passed"] and res["structure_vs_v2"]["passed"] and res["demand_vs_table"]["passed"] and all(res[k]["weights"] and res[k]["orphan_count"] == 0 for k in ("integrated_2920", "no_new_xb_2920", "integrated_365", "no_new_xb_365")))
     (a.out / "evidence/V3_STATIC_CHECK.json").write_text(json.dumps(res, indent=1, sort_keys=True, default=str) + "\n")
     print(json.dumps({k: res[k] for k in ("gate_b5_no_new_xb", "scenario_difference_2920", "structure_vs_v2", "demand_vs_table", "all_structural_passed")}, indent=0, default=str)[:3000])
