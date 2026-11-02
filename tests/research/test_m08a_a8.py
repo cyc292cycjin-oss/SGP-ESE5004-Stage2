@@ -68,7 +68,8 @@ def test_subset_keys_equal_notes_section_6():
     import re
     listed = [re.findall(r"`([a-z0-9_.]+)`", r.split("|")[2]) for r in rows]
     assert tuple(listed[0]) == g6.SUBSET_KEYS_GATES_V6 and len(listed[0]) == 26
-    assert [k for k in listed[1] if k in g6.SUBSET_KEYS_M08A_ADDITIONS] == list(g6.SUBSET_KEYS_M08A_ADDITIONS) and len(g6.SUBSET_KEYS) == 30
+    additions = [k for k in g6.SUBSET_KEYS_M08A_ADDITIONS if k != "liquids"]   # V3 (decision 161, V3_RULES.md section 8): one structural key after the frozen notes
+    assert [k for k in listed[1] if k in additions] == additions and len(g6.SUBSET_KEYS) == 31
 
 
 def test_tolerance_diagnostics_d7_d9_d10():

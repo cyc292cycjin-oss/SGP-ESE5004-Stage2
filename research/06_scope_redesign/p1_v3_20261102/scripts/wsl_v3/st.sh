@@ -1,8 +1,6 @@
 #!/bin/bash
-cd /home/jin/wt_v3_20261102
-ps -eo pid,etime,cmd | grep -E '[g]it |[c]ommit_p1' | cut -c1-120 | head
-git log --oneline -4 | cut -c1-100
-git status --short | wc -l
-git ls-remote origin refs/heads/codex/v3-20261102
-ls /mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/
-du -sh research/06_scope_redesign/p1_v3_20261102 research/06_scope_redesign/p1_v3_20261102/*
+M=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v3
+date -u +%H:%M:%S
+cut -c1-170 $M/path_check2/STATUS.txt 2>/dev/null | tail -24
+tail -3 $M/tests/full.txt 2>/dev/null | cut -c1-160
+ps -eo etimes,args | grep -E "[s]2_solve|[p]ytest " | grep -v "time -v\|timeout" | cut -c1-90 | head -3

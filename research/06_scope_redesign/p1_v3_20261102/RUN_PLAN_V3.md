@@ -98,7 +98,25 @@ LP 规模这一行在构建后已知：第 2 节显示实际 +3.9 %（行）、+
 
 ## 6. 求解前代码路径检查（不占 WLS 会话）
 
-Gurobi 只有两次且不重试，所以先用 HiGHS 走一遍求解后的链路：一体化截短前 8 个时段，`--solver highs --highs-ipm`，时限 1,800 s，输出 `results_project/v3/path_check/`。这一步只看账本、Owen 主体、导出等程序是否走通，不看经济结果，也不进入验收；8 时段不足以代表任何结论。若因此改代码，改动和对网络的影响都写入本文件，预测不改。
+Gurobi 只有两次且不重试，所以先用 HiGHS 走一遍求解后的链路：截短前 8 个时段，`--solver highs --highs-ipm`，时限 1,800 s。这一步只看账本、Owen 主体、导出等程序是否走通，不进入验收；8 时段的经济结果不作任何解读，预测不因此改动。
+
+| 轮次 | 代码 | 情景 | 结果 |
+|---|---|---|---|
+| 第一轮（`results_project/v3/path_check/`） | `19b6eaf4` | 一体化 | 程序走通；B8、B13 不通过，由此发现下述两项 |
+| 第二轮（`results_project/v3/path_check2/`） | `19b6eaf4` + B13 修改（与 `67c84596` 的 `v5_gates.py` 相同） | 一体化、`no_new_xb` | 求解、违反量、C1、M12、Owen、批次参照、GATES_V6、停批分类、效益、`v3_smoke_eval.py` 全部退出码 0 |
+
+第二轮的程序层面结果：两情景 B16 相对误差 4e-14 量级；B13 通过；B8 不通过（Transport +1.4977e-02，即 `V3_RULES.md` 第 8.2 节的 8 时段值）；`no_new_xb` 的 G2.1 网络 SHA256 一致、回读通过，解后 B5 通过；277 条链路的 `mu_upper` 都读得到。
+
+由此改动：B13 判据（`V3_RULES.md` 第 8.1 节）。B8 不改，只作说明（第 8.2 节）。四个网络未重建。
+
+既有测试：全部 `tests/research` 在路径检查运行期间跑过一次（45 项失败、677 项通过、58 项跳过）。替身运行器在有真实 `s2_solve.py` 进程时拒绝启动，所以这 45 项在无求解时重跑判定：42 项通过，余 3 项与 v3 无关。其中 4 项通过是因为测试期望值随 v3 更新：`test_s4c_3.py` 两项（主配置改为 `asean_account_nodal`，第 162 项）、`test_m08a_a8.py` 一项（`SUBSET_KEYS` 增加 `liquids`，`V3_RULES.md` 第 8 节）、`test_dfx_demand.py` 一项（DFX 阶段的文件清单不含 V3 新文件）。
+
+| 余下失败 | 原因 |
+|---|---|
+| `test_s4c_0.py` 两项 | worktree 缺被 git 忽略的 `research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv`，已知基线 |
+| `test_s1_built_networks.py::test_static_validation_passes_on_reload` | `static_validate_s1` 把 `stock_mode` 键算进开关比较；该键和这段代码在基点 `0a20aefd` 已有，v3 未改；这个 worktree 的 `results_project/s1` 有链接，测试才没有跳过 |
+
+冒烟运行期间不跑 pytest。
 
 ## 7. 资源记账
 

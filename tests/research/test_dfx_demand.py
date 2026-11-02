@@ -319,6 +319,7 @@ def test_f0_changed_scripts_in_the_executed_lists():
     # later scripts_project changes of the branch (F6: the DFX batch module run as its own process by run_dfx.sh) are not demand changes; they must be
     # the documented F6 files only (CODE_MAP.md section 14), never a change of a demand module outside the executed lists
     later = sorted(set(git("diff", "--name-only", "72083fde", "--", "scripts_project")) | set(git("ls-files", "--others", "--exclude-standard", "scripts_project")))
+    later = [p for p in later if not Path(p).name.startswith("v3_")]   # new files of the V3 step, documented in its own folder
     f6 = {"scripts_project/dfx_batch.py"}
     assert set(later) <= f6 | executed, [p for p in later if p not in f6 | executed]
     code_map = (DFX / "CODE_MAP.md").read_text(encoding="utf-8")

@@ -19,14 +19,14 @@ CFG = yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())
 
 def test_config_main_and_registry_key_position():
     R = CFG["research"]
-    assert R["bunkers"]["attribution"] == "asean_pool"
+    assert R["bunkers"]["attribution"] == "asean_account_nodal"   # V3 decision 162 (asean_pool until v2)
     assert R["cost_layer"]["registry"] == "research_inputs/registry_v5/DATA_REGISTRY.csv" and "registry" not in R["corridors"]
 
 
 def test_mode_switch_rules():
     from s4c_layers import demand_cfg
     c = copy.deepcopy(CFG)
-    assert bunker_mode(c) == "asean_pool" and demand_cfg(c) is c
+    assert bunker_mode(c) == "asean_account_nodal" and demand_cfg(c) is c
     c["research"]["bunkers"]["attribution"] = "excluded"; bunker_mode(c)
     assert c["research"]["s2"]["demand"]["international_bunkers"] is True   # the config itself is never mutated (gate B12 hash)
     assert demand_cfg(c)["research"]["s2"]["demand"]["international_bunkers"] is False   # the demand layer sees the S2 switch off
