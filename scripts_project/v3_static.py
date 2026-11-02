@@ -127,20 +127,20 @@ def stock_check(i, r, apg: pd.DataFrame, dedicated: pd.DataFrame | None = None) 
 
 
 def dedicated_links(n) -> pd.DataFrame:
-    cols = ["bus0", "bus1", "carrier", "p_nom", "p_nom_min", "p_nom_max", "efficiency", "length_original", "p_nom_extendable", "border_class", "transport_carrier"]
+    cols = ["bus0", "bus1", "carrier", "p_nom", "p_nom_min", "p_nom_max", "p_min_pu", "efficiency", "length_original", "p_nom_extendable", "border_class", "transport_carrier"]
     if "stock" not in n.links:
         return pd.DataFrame(columns=cols)
     return n.links[n.links.stock.astype(str) == DEDICATED_STOCK][cols]
 
 
 def dedicated_check(i, r, d=None) -> tuple[pd.DataFrame, bool]:
-    """X1b: the plant lines of integrated and no_new_xb, line by line (same buses, capacity, efficiency, not extendable, forward = reverse capacity); none in the disconnected network d."""
-    x, y = dedicated_links(i), dedicated_links(r); fwd = x[~x.index.str.endswith("-reversed")]
-    ok = bool(len(x) and x.equals(y) and not x.p_nom_extendable.astype(bool).any() and (x.border_class == "cross_border").all() and (x.transport_carrier == "electricity").all() and len(x) == 2 * len(fwd))
-    ok = bool(ok and all(x.at[k + "-reversed", "p_nom"] == fwd.at[k, "p_nom"] and x.at[k + "-reversed", "bus0"] == fwd.at[k, "bus1"] for k in fwd.index))
+    """X1b, supplement 03: the plant lines of integrated and no_new_xb, line by line (same buses, capacity, efficiency, not extendable); one way from a Lao node (no reverse link, p_min_pu 0); none in the disconnected network d."""
+    x, y = dedicated_links(i), dedicated_links(r)
+    ok = bool(len(x) and x.equals(y) and not x.p_nom_extendable.astype(bool).any() and (x.border_class == "cross_border").all() and (x.transport_carrier == "electricity").all())
+    ok = bool(ok and (x.p_min_pu == 0.0).all() and x.bus0.str.startswith("LA").all() and not x.index.str.endswith("-reversed").any())
     if d is not None:
         ok = bool(ok and not len(dedicated_links(d)))
-    return fwd.rename_axis("link").reset_index(), ok
+    return x.rename_axis("link").reset_index(), ok
 
 
 def demand_check(n) -> pd.Series:

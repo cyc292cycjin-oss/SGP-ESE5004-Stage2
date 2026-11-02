@@ -6,8 +6,8 @@
     c(d) by research.liquids.ship_cost_basis = td_tanker (main) | ieaghg (upper-bound sensitivity) x ship_cost_scale, cargo loss eta(d), fixed non-binding capacity; Lao rail
     transit to the Vietnamese bus (decision 93 analogy). Carrier class maritime_trade: kept in every scenario;
   * apply_ev_structure: research.s2.demand.ev_structure = smart (main, E2) | smart_v2g (E3) | uncontrolled (E4) | flat (v2);
-  * add_dedicated_plant_lines (X1b, decisions 172, 173): the Lao IPP export lines of research.network.dedicated_plant_lines_table, merged by plant node and landing node, one fixed lossy forward / '-reversed'
-    pair each, in every scenario with the cross-border electricity switch on; empty key = v2 state.
+  * add_dedicated_plant_lines (X1b, decisions 172, 173; supplement 03): the Lao IPP export lines of research.network.dedicated_plant_lines_table, merged by plant node and landing node, one fixed lossy one-way
+    link LA -> other country each, in every scenario with the cross-border electricity switch on; empty key = v2 state.
 """
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def great_circle_km(x0: float, y0: float, x1: float, y1: float) -> float:
 
 
 def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
-    """X1b: see the module docstring and V3_RULES.md section 2.2. After apply_ac_losses (the lossy split is done here: efficiency = 1 - proxy lambda over the length). The stock FOM rule of the corridors applies.
+    """X1b: see the module docstring and V3_RULES.md section 2.3. After apply_ac_losses (efficiency = 1 - proxy lambda over the length). One way, LA -> other country: an IPP line carries the plant output and no back feed (supplement 03). The stock FOM rule of the corridors applies.
     Not added with the cross-border electricity switch off (fully disconnected network). p_nom_min = p_nom marks the stock for apply_stock_mode."""
     from s2_layers import add_link
     from s4d_layers import coalition_members
@@ -109,11 +109,10 @@ def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg) -> dict:
             continue
         km = great_circle_km(float(n.buses.at[a, "x"]), float(n.buses.at[a, "y"]), float(n.buses.at[b, "x"]), float(n.buses.at[b, "y"])) * DEDICATED_LENGTH_FACTOR
         mw = float(g.contract_mw.sum()); eta = 1.0 - lam_km * km; name = f"dedicated plant line {a} - {b}"
-        for x, f, to, co, rev in ((name, a, b, ca, False), (f"{name}-reversed", b, a, cb, True)):
-            add_link(n, x, co, DEDICATED_CARRIER, [f, to], [eta], role="EXISTING_CROSS_BORDER_STOCK", length=0.0 if rev else km, extra={"length_original": km})
-            n.links.loc[x, ["p_nom", "p_nom_min", "p_nom_max"]] = [mw, mw, mw]
-            n.links.loc[x, "p_nom_extendable"] = False; n.links.loc[x, "reversed"] = rev; n.links.loc[x, "asset_role"] = "existing_cross_border_stock"
-            n.links.loc[x, "border_class"] = "cross_border"; n.links.loc[x, "transport_carrier"] = "electricity"; n.links.loc[x, "stock"] = DEDICATED_STOCK
+        add_link(n, name, ca, DEDICATED_CARRIER, [a, b], [eta], role="EXISTING_CROSS_BORDER_STOCK", length=km, extra={"length_original": km})
+        n.links.loc[name, ["p_nom", "p_nom_min", "p_nom_max"]] = [mw, mw, mw]
+        n.links.loc[name, "p_nom_extendable"] = False; n.links.loc[name, "reversed"] = False; n.links.loc[name, "asset_role"] = "existing_cross_border_stock"
+        n.links.loc[name, "border_class"] = "cross_border"; n.links.loc[name, "transport_carrier"] = "electricity"; n.links.loc[name, "stock"] = DEDICATED_STOCK
         fom = (float(costs.at["HVAC overhead", "FOM"]) / 100.0 * float(costs.at["HVAC overhead", "investment"]) * km * mw) if existing_cfg["fom_on_existing"] else 0.0
         rows.append(dict(link=name, plant_node=a, landing_node=b, pair="-".join(sorted((ca, cb))), projects=sorted(g.project), contract_mw=mw, length_km=km, efficiency=eta, annual_fom_eur=fom))
     n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool); n.links["stock"] = n.links["stock"].fillna("").astype(str)   # as s4j_layers: a mixed column does not export

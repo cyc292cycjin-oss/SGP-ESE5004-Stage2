@@ -164,11 +164,12 @@ def test_x1b_layer_toy(tmp_path):
     from v3_static import stock_by_pair
     n, led = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str)
     n.links["country"] = n.links["country"].astype(str); n.export_to_netcdf(tmp_path / "toy.nc")   # the build exports the network: no mixed column
-    assert led["links"] == 6 and led["total_mw"] == 5999.0 and len(n.links) == 12 and not n.links.p_nom_extendable.any() and (n.links.border_class == "cross_border").all()
-    f = n.links.loc["dedicated plant line LA2 3 - TH2 1"]; r = n.links.loc["dedicated plant line LA2 3 - TH2 1-reversed"]
-    assert f.p_nom == r.p_nom == 1388.0 and f.p_nom_min == f.p_nom and f.bus0 == r.bus1 and f.efficiency == r.efficiency and f.stock == r.stock == "dedicated_plant_line" and r.reversed and not f.reversed
+    assert led["links"] == 6 and led["total_mw"] == 5999.0 and len(n.links) == 6 and not n.links.p_nom_extendable.any() and (n.links.border_class == "cross_border").all()
+    f = n.links.loc["dedicated plant line LA2 3 - TH2 1"]
+    assert f.p_nom == 1388.0 and f.p_nom_min == f.p_nom and f.bus0 == "LA2 3" and f.bus1 == "TH2 1" and f.stock == "dedicated_plant_line" and not f.reversed and f.p_min_pu == 0.0   # one way, supplement 03
+    assert n.links.bus0.str.startswith("LA").all() and n.links.p_min_pu.eq(0.0).all()
     assert 0.0 < f.efficiency < 1.0 and 1.0 - f.efficiency == pytest.approx(led["loss_per_km"] * f.length) and led["loss_per_km"] * 100.0 == pytest.approx(0.012, rel=0.2)
-    p = stock_by_pair(n, "min"); assert p["LA-TH"] == 5427.0 and p["LA-VN"] == 572.0   # the twin counts once
+    p = stock_by_pair(n, "min"); assert p["LA-TH"] == 5427.0 and p["LA-VN"] == 572.0
     assert n.meta["existing_cross_border_fom_eur"] == pytest.approx(5.0 + led["annual_fom_eur"]) and len(n.meta["existing_cross_border_fom_ledger"]) == 7
 
 
@@ -182,9 +183,15 @@ def test_x1b_stock_mode_keeps_the_lines_fixed():
     from v3_static import dedicated_check
     n, _ = dedicated_toy(); n.lines["border_class"] = pd.Series(dtype=str); base = n.copy(); base.links["stock"] = n.links["stock"]; base.meta = dict(n.meta)
     led = apply_stock_mode(n, "no_new_xb")
-    assert led["kept_links_forward"] == 6 and led["kept_reversed_twins"] == 6 and led["removed_links"] == 0
+    assert led["kept_links_forward"] == 6 and led["kept_reversed_twins"] == 0 and led["removed_links"] == 0
     t, ok = dedicated_check(base, n)
     assert ok and len(t) == 6 and t.p_nom.sum() == 5999.0
+
+
+def test_x1b_check_refuses_a_reverse_link():
+    from v3_static import dedicated_check
+    n, _ = dedicated_toy(); r = n.copy(); r.links.loc[r.links.index[0], "p_min_pu"] = -1.0; r.links["stock"] = n.links["stock"]
+    assert dedicated_check(n, n)[1] and not dedicated_check(r, r)[1]
 
 
 def test_x1b_stock_check_counts_the_lines():
