@@ -47,7 +47,7 @@ def energy(n, df_t: pd.DataFrame, names) -> pd.Series:
 
 def ship_duals(n, sc: str) -> pd.DataFrame:
     L = n.links; x = L[L.carrier.isin(list(SHIP_CARRIERS.values()) + [TRANSIT_CARRIER])]
-    mu = n.links_t["mu_upper"].reindex(columns=x.index) if "mu_upper" in n.links_t else pd.DataFrame(index=n.snapshots, columns=x.index, dtype=float)
+    mu = n.links_t["mu_upper"].reindex(columns=x.index).div(n.snapshot_weightings.objective, axis=0) if "mu_upper" in n.links_t else pd.DataFrame(index=n.snapshots, columns=x.index, dtype=float)   # the stored dual carries the snapshot weight: per MWh here
     p0 = n.links_t.p0.reindex(columns=x.index).fillna(0.0)
     out = pd.DataFrame(dict(scenario=sc, carrier=x.carrier.astype(str), origin=x.bus0.astype(str), destination=x.bus1.astype(str), p_nom_mw=x.p_nom, flow_twh=energy(n, n.links_t.p0, x.index).reindex(x.index).fillna(0.0) / 1e6,
                             max_utilisation=(p0.max() / x.p_nom.replace(0.0, np.nan)), mu_upper_max_abs=mu.abs().max(), mu_available=mu.notna().any()))

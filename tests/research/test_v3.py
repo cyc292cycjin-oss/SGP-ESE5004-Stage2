@@ -101,7 +101,7 @@ def test_smoke_eval_toy():
     n.generators_t.p = pd.DataFrame({"SG methanol import": [1.0, 1.0]}, index=n.snapshots)
     n.links_t.p0 = pd.DataFrame({"ID ship": [10.0, 10.0], "SG feed": [10.9, 10.9]}, index=n.snapshots)
     n.links_t.p1 = pd.DataFrame({"ID ship": [-9.9, -9.9], "SG feed": [-10.9, -10.9]}, index=n.snapshots)
-    n.links_t["mu_upper"] = pd.DataFrame({"ID ship": [0.0, 0.5]}, index=n.snapshots)
+    n.links_t["mu_upper"] = pd.DataFrame({"ID ship": [0.0, 2190.0]}, index=n.snapshots)   # the stored dual carries the snapshot weight 4380
     d = ship_duals(n, "x").set_index("link"); b = liquid_balance(n, "x")
     assert d.at["ID ship", "mu_upper_max_abs"] == 0.5 and d.at["ID ship", "max_utilisation"] == pytest.approx(0.1) and d.at["ID ship", "flow_twh"] == pytest.approx(0.0876)
     assert b[(b.country == "ID") & (b.term == "ship out")].twh.sum() == pytest.approx(-0.0876)
