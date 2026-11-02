@@ -1,0 +1,168 @@
+# V3 规则（事先登记）
+
+- 依据：决策清单第 159–169 项；`V3_DESIGN.md`；审阅决定 `V3_REVIEW_DECISIONS_PHASE1.md`（SHA256 `5bc090fe0bcc9808dd973b10ab47209b135b0134ffae9dd10cc355a7ea99de9b`）。
+- 本文件提交后才构建 v3 网络；网络 SHA256 与方向性预测写入 `RUN_PLAN_V3.md` 提交后才求解。看到求解结果后不得修改规则、阈值或预测。
+- 参数全部进注册表片段 `research_inputs/registry_v5/fragments/v3.csv`（37 行）；注册表 v3 SHA256 `ef1d6cdd872485b54e04df8f598c829665cc4803fe7332699d4dd83911455295`，2,317 行。
+
+## 1. 不变项
+
+AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GATES_V6 / C1 验收阈值、2920×3h 正式分辨率、Owen 对偶价格分摊方法、第 35、89、93、96 项。
+
+## 2. 第 160 项：`no_new_xb`
+
+- 情景身份 `no_new_xb`（`configs/research/no_new_xb.yaml`），由已构建的一体化网络派生（`m08a_variants.py`，新模式 `no_new_xb`）。
+- 存量认定：AC `s_nom_min > 0`（16 条 2,570 MW）、电力链路 `p_nom_min > 0`（1 条 300 MW）、`gas_pipeline_kind = existing_2025`（6 条 33,883.7 MW），连同 `-reversed` 孪生。钉住容量，`*_nom_extendable=False`。其余跨境线路、链路全部删除。
+- MY–SG 气管无容量无管径：主算不建（D160-1 a）。
+- 海运（CO₂ 船、液体船、老挝过境）属 `maritime_trade`，三情景相同。
+- `B6 = Z(no_new_xb) − Z(integrated)`，两者都含存量 FOM。第 48 项扣除式废止（它从未进入代码）。
+- 完全隔离：`s2_network.py --scenario disconnected` 保留，不进运行计划。
+- 存量核查 `V3_XB_STOCK_CHECK.md` 只报告，网络不改；LA–TH 专线登记 `xb_stock_la_th_dedicated_lines = DATA_PENDING`。
+
+## 3. 第 161 项：国家液体母线与船运
+
+### 3.1 母线
+
+每国 `{c} oil`、`{c} oil non-fossil`、`{c} methanol`、`{c} ammonia`，`country=c`，`location` = 枢纽节点（`LIQUID_HUB_NODES_V3.csv`）：BN4 0、ID_Java-Bali1 0、KH2 0、LA2 2、MM2 1、MY_Peninsular2 1、PH_Luzon5 0、SG2 0、TH2 3、TL11 0、VN2 5。
+
+- 节点 oil、oil non-fossil 与国家母线之间沿用零成本双向链路（`oil pool`）。
+- 甲醇合成、生物甲醇、Haber-Bosch 输出直连本国母线；FT、BtL、electrobiofuels 输出到节点非化石母线（D161-6 a）。
+
+**有意偏离第 161 项之一（D161-4 a）：** 国内配送加价取 0。第 161 项写"先用统一加价代理"；外生消费下统一加价只增加常数，不改变国家间比较，所以不加。
+
+**有意偏离第 161 项之二（D161-7 a）：** 液态 CO₂ 不设国家母线，保持第 92、93 项结构。CO₂ 从未有东盟统一母线，第 161 项的实质（按距离、两情景都有）已满足，且 71 个沿海节点比国家母线更细。单价继续用 IEAGHG 2004。
+
+### 3.2 进口
+
+油、甲醇、氨、FT 在 10 个沿海国各设一台，价格同 v2 世界价（第 17 项），容量内生无上限（D161-5 a）。LA 无进口，经过境链路。
+
+### 3.3 船运
+
+- 载体：非化石油、甲醇、氨；10 个沿海国两两有向，270 条；化石油不建（各国进口同价）。
+- 单价 `c(d) = c_km × d`（S-B，主算），`η(d) = 1 − 4e-6 × d`（d 为 km）。
+
+| 载体 | `c_km` EUR2020/(MWh·km) | 来源 |
+|---|---|---|
+| 甲醇 | `liquid_ship_ckm_td_methanol` | technology-data `MeOH transport ship`（B 级） |
+| 非化石油 | `liquid_ship_ckm_td_oil` | technology-data `FT fuel transport ship`（B 级） |
+| 氨 | `liquid_ship_ckm_td_ammonia` | technology-data `NH3 (l) transport ship`（B 级） |
+
+- 年金 7 %；航速 15 节、年运营 8,000 h 为 C 级假设。原文献未能取得：Runge et al. 2020（SSRN 人机验证）、Cihlar et al. 2020（欧盟出版局 WAF 拦截），按 D161-2 用回退值。
+- 货损 η：IRENA 2022 p.44，回程约 1 % / 5,000 km，按往返 ×2（C 级）。
+- `research.liquids.ship_cost_scale` ±50 %；`ship_cost_basis = ieaghg` 是 S-A 上界敏感性（固定项 + 单程 km 项，η=1）。
+- 距离：`LIQUID_SHIP_ROUTES_V3.csv`，0.05° 网格最短水路（D161-3 a）。
+- 容量：`p_nom_extendable=False`，`p_nom = 该载体东盟年需求 ÷ 8,760 × 10`（D161-10 a）。**冒烟与筛查报告列出所有船运链路的容量对偶，非零即报告。**
+- `border_class = maritime_trade`，归出口国，货到按进口国母线对偶结算。三情景相同。
+
+### 3.4 老挝过境
+
+`LA <carrier>` ↔ `VN <carrier>` 一对有向链路（化石油只入），单价 `(co2_land_transport_rail_unit_cost × 411.7 km + co2_land_transport_rail_loading_cost) / 热值`，`trade_class = transit`（D161-9 a，第 93 项类比）。里程取枢纽 `LA2 2` 到 `VN2 3`。
+
+### 3.5 储罐
+
+每国 `{c} methanol store`、`{c} ammonia store`、`{c} oil non-fossil store`，成本行不变（后者用 `General liquid hydrocarbon storage (product)`）。非化石油储罐是新增组件（D161-8 a）。
+
+## 4. 第 162 项：燃料舱
+
+- 模式 `research.bunkers.attribution = asean_account_nodal`。国家总量不变；节点份额用 Assembly 港口、机场规模权重（航空 82 个节点、船用 48 个节点）（D162-1 a、D162-2 a）。
+- 航空：节点表计与非化石孪生保留，最终母线标 `ASEAN`，化石表计的大气端口改接 `co2 bunkers ASEAN`。
+- 船用：`{node} bunker shipping methanol final` 母线 + `{c} methanol` → 该母线链路，无碳端口。
+- 账户单独净零（`research_bunker_net_zero` 不变）。第 12 参与者按终端母线对偶买入。
+- `bunkering_country` 敏感性保留。
+- 推论（INFERENCE）：一国内节点分配不影响 LP 最优值。
+
+## 5. 第 163 项：工业子部门
+
+### 5.1 守恒
+
+`Other_v3(c) = T_v2(c) − Σ_s E_s(c)`（D163-6 a）。`T_v2` 是网络绑定的 `INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv` 之和（3,820.054 TWh）。锚表 4,500 TWh 不动。`DEMAND_BY_COUNTRY_SECTOR_CARRIER_v2.csv` 比绑定表高 1.55 MWh（SG）、0.02 MWh（BN），来自其细分拆分，测试以绑定表为基准。
+
+### 5.2 路线（D163-1）
+
+| 国家 | 路线 |
+|---|---|
+| VN | APEC 2022 份额替换 UNSD 份额（C 级；数据年 2022 对基年 2019，**年份不一致**）。在隔离副本中重跑 `s3_0_industry.py`，其余国家结果与 v2 一致 |
+| ID | **只对有色金属（镍、铝、氧化铝、铜）自下而上**；化工、造纸、食品维持 UNSD |
+| MY | 铝自下而上 |
+| 其余 | 维持 |
+
+**数据限制（待审阅端知悉）：** D163-1 的 MY 石化（GIS）算不出能量。GIS 只有炼厂产能，没有石化产量，炼油能耗也不在工业终端。按"余量留在其他"，MY 石化能量留在其他，GIS 炼厂只用于节点分配。
+
+### 5.3 镍（D163-2、D163-5）
+
+Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
+
+| 项 | 值 |
+|---|---|
+| 电 | (7,237 + 1,081) kWh/t 合金 ÷ 0.35 = **23.77 MWh/t Ni** |
+| 燃料 | 天然气 616 kg × 50 MJ/kg + 无烟煤 569 kg × 29 MJ/kg = 47.3 GJ/t 合金 ÷ 0.35 = **37.54 MWh/t Ni** |
+| 2050 载体 | 电保留；燃料（含还原剂）× 0.90 走 `industry heat high`，**33.79 MWh/t Ni** |
+
+- 采矿能耗不计入（留在 `mining`）。
+- 含镍量：USGS 2019 年 NPI 38.0 万 t + 镍铁 2.57 万 t + 镍锍 7.10 万 t。
+- 上界敏感性 26 MWh/t NPI（`NIUPPER` 表）。
+- 单列为有色金属。
+
+### 5.4 其余有色金属
+
+原铝、氧化铝、铜用 PyPSA-Eur 2050 比例表（`Aluminium - primary production`、`Alumina production`、`Other non-ferrous metals`）。MY 铝取亚太卷 2018 年 750 kt（估计）。
+
+### 5.5 产量与增长
+
+基年 2019（D163-3 a），增长 `G^((2050−基年)/28 × 0.5)`，与 v2 氨规则相同（脚本已断言）；2023 作敏感性（`NF2023` 表）。超量处理 D163-4 a，本次未触发。
+
+### 5.6 结果
+
+| 国家 | 总量 TWh | 新增显式 TWh | 其他占比 v2 → v3 |
+|---|---:|---:|---|
+| ID | 1,793.7 | 68.8 | 84.6 % → 80.8 % |
+| VN | 888.0 | — | 74.7 % → 18.3 % |
+| MY | 313.9 | 19.8 | 76.3 % → 70.0 % |
+| 其余 | 不变 | — | 不变 |
+
+## 6. 第 164 项：节点分配
+
+| 子部门 | 来源 | 权重 |
+|---|---|---|
+| 钢铁 | GEM 运营厂 | 粗钢产能 |
+| 水泥 | GEM 运营厂 | 熟料产能，缺失时水泥产能 × 0.656；纯粉磨国家（BN）用水泥产能 |
+| 镍、铝、氧化铝、铜 | USGS 卷表 2（ID 省级人工编码）；MY 铝 GIS | 含镍当量或产能 |
+| 炼油石化 | GIS（MY、VN、PH、MM、BN，只取运营）；USGS 卷表 2（ID 等权、TH 产能） | 产能 |
+| 其余与"其他" | DOSE 制造业产出 | ID、MY、PH 2019；TH、VN 2018（D164-3 a） |
+| KH、LA、MM、BN、SG、TL 的分散行业 | v2 规则 | 用电份额 |
+
+- 点入 `regions_onshore.geojson`，落外面取同国最近节点（D164-1 a）。
+- **省内按节点用电份额分摊（D164-4 b）：** 节点权重 = 用电份额 × 节点区域落在该省的面积比。
+- 编码：TH、VN 直连；ID 手工对照（DOSE 东加含北加、南苏含西苏）；PH `PH_PROVINCE_REGION_CROSSWALK.csv`。
+- 过程排放与非能源跟随设施（D164-5 a）：2.A 跟水泥；2.C 跟钢铁 + 有色（按 2050 能量加权）；2.B + 2.D 与非能源跟炼油石化；生活塑料焚烧保持 v2。
+- 氨负荷在国家母线，节点键只作命名，保持 v2。
+
+## 7. 第 165 项：EV
+
+- **结构（D165-4）：** E2 主算：`research.s2.demand.ev_structure = smart`。开关：`flat`（v2）、`smart_v2g`（E3）、`uncontrolled`（E4），后两者只实现不运行。
+- 负荷：`land transport EV` 接 EV 电池母线，形状 = 26 国平均 168 小时周型（2013，当地时钟，已还原夏令时）；D165-1 a。
+- 时区：MM +6:30；TH、VN、KH、LA +7；MY、SG、PH、BN +8；TL +9；ID 按节点所在省 +7 / +8 / +9（16 / 17 / 6 个节点）。
+- 对齐：2013 日历按当地星期（D165-3 a）；半小时线性插值；3 h 快照内平均；每节点年量等于 v2。
+- 车队代理：`N = EV 年量 / a × ev_fleet_scale`，`a = 12,000 km / 5,319 km/MWh = 2.256 MWh/辆·年`（C 级，无库内来源），`ev_fleet_scale` ×0.5 / ×2。东盟合计约 3.2 亿辆当量，对照 `transport_data.csv` 现有车辆 2.65 亿，量级一致。
+- Store：`e_nom = N × 0.05 MWh × 0.5`，`e_cyclic=True`，每日当地 7 时 `e_min_pu = 0.8`。
+- 充电桩：`p_nom = N × 0.011 MW`，不可扩建，效率 0.9，`p_max_pu` = `plugin` 周型（D165-2）。
+- E4：无 Store，负荷整体延后 3 小时（C 级，未运行）。
+- 分辨率：`to_daily` 抹掉日内形状，365×24h 筛查基本不反映本项。
+
+## 8. 账本与闸门
+
+- `ASEAN_POOL` 无行，B16 差异项 ≈ 0。新结算主题 `liquid_trade_<载体>`，运费主题 `liquid_ship_freight`、`liquid_transit_freight`（进 `DIRECT`）。
+- `bunker_standalone` 路线改为进口机组 → 国家母线 → 节点 → 表计。
+- 闸门改名与新判据：`POOL_BUSES` 改按载体匹配；新增 `gate_b5_no_new_xb`；`gate_b6_cost` 只换标签。**验收阈值不变。**
+- `gates_v6.SUBSET_KEYS` 增加 `liquids`（结构键，不是阈值）。
+
+## 9. 预期结构差异（v3 对 v2，测试逐类型列出）
+
+| 类型 | 变化 |
+|---|---|
+| Bus | 删 `ASEAN oil`、`ASEAN oil non-fossil`、`ASEAN methanol`、`ASEAN ammonia`、`ASEAN aviation international oil final`、`ASEAN shipping international methanol final`；增四类国家母线（44）、节点燃料舱终端 |
+| Generator | 删 4 台 `ASEAN * import`；增 `{c} * import`（40） |
+| Store | 删 2 个 ASEAN 储罐；增国家储罐（33）、EV 电池（96） |
+| Link | 增船运（270）、过境（7）、节点燃料舱表计；改 `oil pool`、Haber-Bosch、裂解、甲醇合成、生物甲醇、甲醇 OCGT、工业甲醇、船用甲醇、FT 输出链路的端口；`BEV charger` 改容量与 `p_max_pu` |
+| Load | 工业负荷按节点重分配；`land transport EV` 改时序；燃料舱负荷回到节点 |
+| Generator（过程排放） | 节点重分配 |
+| 其他 | **不应有变化**（线路、发电、输电候选、成本、效率） |

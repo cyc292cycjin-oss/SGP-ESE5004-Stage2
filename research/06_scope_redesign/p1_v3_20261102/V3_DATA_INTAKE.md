@@ -280,3 +280,44 @@ SHA256 全文与大小（`evidence/INTAKE_FILES_SHA256.csv` 同内容）。
 | `IRENA_Global_Trade_Hydrogen_2022.pdf` | [irena.org](https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2022/Apr/IRENA_Global_Trade_Hydrogen_2022.pdf)，2026-11-02 下载，HTTP 200 | 9,691,478 | `de6af56fe62a1223d431d770e77180ae27e66f19cb674eb96f594f8bdcac45e5` | 氢载体贸易（156 页）。氨船投资范围图 2.8、回程燃料"约每 5,000 km 1 % 货物"（p.44）；**不含甲醇**（p.9 明确排除含碳载体），没有吨公里单价表 |
 
 同时引用的已有文件：`research_inputs/renewable_v5/regions_onshore.geojson`、`research_inputs/co2_v5/{PORTS_ASEAN_TO_NODES_S4D1,CO2_SHIP_ROUTES_S4D2,COASTAL_NODES_S4D1_FINAL,LAO_TRANSIT_S4D1}.csv`、`research_inputs/cost_layers_v5/technology_data_v0.15.0_EUR2020/costs_2050_EUR2020.csv`、`work/p1_s4r_downloads_20261020/F2_lng/gem-download (1).zip`。
+
+## 12. 阶段 2 补记（2026-11-02）
+
+### 12.1 APEC 表两次独立读取（D163-1 附）
+
+用到的 APEC 数只有 VN，表在 PDF 第 161 页（书页 148），`p161_0_Image20.png`。
+
+| 项 | 结果 |
+|---|---|
+| 第一次读取 | 原图，读合计列 |
+| 第二次读取 | 裁剪工业部分放大 2 倍，读全部载体列 |
+| 合计列 | 两次完全一致 |
+| 子部门行合计 | 1,541.3 PJ，印刷工业合计 1,542 PJ |
+| 列合计 | 煤 687.7 / 687、油 152.3 / 152、气 41.0 / 41、其他可再生 215 / 214、电 447.2 / 448（读数 / 印刷） |
+| 行内合计 | 与印刷总计差 ≤ 1 PJ（四舍五入） |
+
+矩阵见 `research_inputs/industry_v3/APEC2022_VN_INDUSTRY_PJ.csv`。
+
+### 12.2 Wei et al. 2020（D163-2）
+
+MDPI 对 curl 返回 403，改用内置浏览器读取。
+
+| 项 | 值 |
+|---|---|
+| 文献 | Wei et al., Energies 13(21):5664，CC BY 3.0 |
+| PDF | 1,312,606 B，SHA256 `8695d6c485b6c9e17d3cb575c636250e8925035c9aa82aa80ff9e5e106640d36`（浏览器内取得字节后计算） |
+| 本地 PDF | **未能落盘**（浏览器下载未保存），只保留 SHA256 与表 8 摘录 `research_inputs/industry_v3/NICKEL_ENERGY_WEI2020.csv` |
+
+### 12.3 船速来源（D161-2）
+
+查 technology-data 条目所引原文献，均未取得：Runge et al. 2020（SSRN，人机验证页，未绕过）；Cihlar et al. 2020（欧盟出版局，Azure WAF 拦截）。按决定用 15 节 / 8,000 h（C 级）。
+
+### 12.4 其他输入
+
+| 文件 | 内容 |
+|---|---|
+| `pypsa-asean/data/temp_hard_coded/transport_data.csv` | PyPSA-Earth 各国车辆数，东盟合计约 2.65 亿，只作车队代理的量级对照 |
+| `research_inputs/corridors/CORRIDOR_APG_CROSSCHECK_2024.csv` | APG existing，存量核查基准 |
+| iScience 2025 SI Table S8、PNAS Nexus SI Table S4 | 存量核查对照 |
+
+USGS 亚太卷表 3 第一栏核对：列为氧化铝、铝土矿、原铝，MY 原铝 750 kt（估计），解决第 2 节"列位待核"。
