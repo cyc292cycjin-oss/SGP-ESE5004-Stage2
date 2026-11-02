@@ -18,6 +18,38 @@ AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GA
 - 完全隔离：`s2_network.py --scenario disconnected` 保留，不进运行计划。
 - 存量核查 `V3_XB_STOCK_CHECK.md` 只报告，网络不改；LA–TH 专线登记 `xb_stock_la_th_dedicated_lines = DATA_PENDING`。
 
+### 2.1 X1：跨境输电存量来源（2026-11-02 用户决定，B 级）
+
+审阅决定 X1 原要求以 S8 为唯一来源，但 S8 无逐行状态、口径无法确认（`V3_X1_STOP_NOTE.md`）。用户改定：**主算以 APG existing 为唯一来源**，只计运营中，在建不计。
+
+- 来源：ACE APG 表，`research_inputs/corridors/CORRIDOR_APG_CROSSCHECK_2024.csv` 的 `apg_existing_mw` 列（Table 1，2024 年口径，第 94 项 S4E-1 已用）。
+- 结果：现网已与该列逐对一致，**不换值，四个 E2 网络不重建**，SHA256 不变。
+- 两情景相同：一体化作 `s_nom_min` / `p_nom_min`，`no_new_xb` 作不可扩建的固定容量。
+
+| 国家对 | 旧值 = 新值（MW） | 可用容量（MW） |
+|---|---:|---:|
+| LA–TH（9 条） | 955 | 668.5 |
+| MY–SG | 525 | 367.5 |
+| MY–TH（AC 80 + DC 300） | 380 | 356 |
+| KH–LA | 300 | 210 |
+| KH–TH | 250 | 175 |
+| ID–MY（砂拉越–西加里曼丹） | 230 | 161 |
+| KH–VN | 200 | 140 |
+| LA–MM | 30 | 21 |
+| **合计** | **2,870** | |
+
+- 可用容量 = 线路 `s_nom` × `s_max_pu` 0.7 + 链路额定容量。`-reversed` 孪生链路是同一资产，只计一次。
+- 其余国家对（TH–MM、LA–VN、ID–SG、PH–MY、BN–MY、ID–MY 半岛–苏门答腊）APG 无 existing，存量为 0。
+- 检验：`v3_static.py` 的 `stock_check` 逐对核对 APG existing = 一体化下界 = `no_new_xb` 固定容量，且 `no_new_xb` 跨境全部不可扩建；结果 `evidence/X1_STOCK_TABLE_V3.csv`，已并入 `all_structural_passed`。
+
+### 2.2 待办 X1b：老挝对泰国电站专线（只登记，本补充不实施）
+
+用户 2026-11-02 决定，**筛查前必须完成**：
+
+- 以 EPPO「Power purchased from Lao PDR」清单为唯一来源（9 个项目，合同容量合计 5,427 MW，各项 COD 均在 2019 年及以前），作为 LA–TH 存量加入。
+- 实施前逐项核对这些电站在网络中是否为在运的 LA 机组及所在节点，结果写入下一份报告。
+- 影响：X1b 会改变网络，所有网络 SHA256、运行器登记值都要重做。本补充的冒烟和干跑都是 X1b 之前的结果。
+
 ## 3. 第 161 项：国家液体母线与船运
 
 ### 3.1 母线

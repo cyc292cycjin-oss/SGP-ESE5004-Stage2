@@ -110,6 +110,31 @@ def test_smoke_eval_toy():
     assert slack_use(n)["Generator"]["components"] == 0
 
 
+def test_x1_apg_existing_is_the_stock_source():
+    a = pd.read_csv(ROOT / "research_inputs/corridors/CORRIDOR_APG_CROSSCHECK_2024.csv")
+    s = a[a.apg_existing_mw.notna()].groupby("country_pair").apg_existing_mw.sum()
+    assert s.sum() == 2870.0 and s["LA-TH"] == 955.0 and s["MY-TH"] == 380.0 and "MM-TH" not in s and len(s) == 8
+
+
+def test_x1_stock_check_toy():
+    import pypsa
+    from v3_static import stock_check
+    def net(extendable, nom_min):
+        n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=2, freq="3h"))
+        for b, c in (("a", "LA"), ("b", "TH")):
+            n.add("Bus", b); n.buses.loc[b, "country"] = c
+        n.add("Line", "l", bus0="a", bus1="b", x=0.1, s_nom=955.0, s_nom_min=nom_min, s_nom_extendable=extendable); n.lines["border_class"] = "cross_border"
+        n.add("Link", "gas", bus0="a", bus1="b", p_nom=0.0); n.add("Link", "dc", bus0="a", bus1="b", p_nom=45.0, p_nom_min=45.0); n.add("Link", "dc-reversed", bus0="b", bus1="a", p_nom=45.0, p_nom_min=45.0)
+        n.links["border_class"] = "cross_border"; n.links["transport_carrier"] = ["gas", "electricity", "electricity"]; n.links["p_nom_extendable"] = False
+        return n
+    apg = pd.DataFrame(dict(country_pair=["LA-TH"], apg_existing_mw=[1000.0]))
+    t, ok = stock_check(net(True, 955.0), net(False, 0.0), apg)
+    assert ok and t.no_new_xb_fixed_mw.iloc[0] == 1000.0   # the -reversed twin of the DC link counts once
+    assert t.no_new_xb_usable_mw.iloc[0] == pytest.approx(955.0 + 45.0)   # s_max_pu of the toy line is 1
+    assert not stock_check(net(True, 900.0), net(False, 0.0), apg)[1]   # the integrated lower bound differs from the source
+    assert not stock_check(net(True, 955.0), net(True, 0.0), apg)[1]   # a cross-border component of no_new_xb is extendable
+
+
 def b13_toy(extra: dict | None = None):
     """two national liquid buses, a node bus, an ordinary link and a ship; extra = one more link: dict(name, bus0, bus1, border_class)"""
     import pypsa

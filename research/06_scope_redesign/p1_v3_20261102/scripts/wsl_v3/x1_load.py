@@ -14,10 +14,10 @@ for name, z in L.iterrows():
     cap = float(z.s_nom) * float(z.s_max_pu); f = n.lines_t.p0[name]
     mu = (n.lines_t["mu_upper"][name].abs() + n.lines_t["mu_lower"][name].abs()).div(w) if "mu_upper" in n.lines_t and name in n.lines_t["mu_upper"] else pd.Series(0.0, index=n.snapshots)
     rows.append(dict(pair="-".join(sorted((c[z.bus0], c[z.bus1]))), kind="AC", cap=cap, f=f, mu=mu))
-K = n.links[(n.links.border_class == "cross_border") & (n.links.transport_carrier.astype(str) == "electricity")] if "transport_carrier" in n.links else n.links.iloc[0:0]
+K = n.links[(n.links.border_class == "cross_border") & (n.links.transport_carrier.astype(str) == "electricity") & ~n.links.index.astype(str).str.endswith("-reversed")]   # the -reversed twin is the same asset: its flow and dual are added to the forward link
 for name, z in K.iterrows():
-    cap = float(z.p_nom); f = n.links_t.p0[name]
-    mu = (n.links_t["mu_upper"][name].abs() + n.links_t["mu_lower"][name].abs()).div(w)
+    cap = float(z.p_nom); t = name + "-reversed"; f = n.links_t.p0[name] - (n.links_t.p0[t] if t in n.links_t.p0 else 0.0)
+    mu = (n.links_t["mu_upper"][name].abs() + n.links_t["mu_lower"][name].abs() + (n.links_t["mu_upper"][t].abs() if t in n.links_t["mu_upper"] else 0.0)).div(w)
     rows.append(dict(pair="-".join(sorted((c[z.bus0], c[z.bus1]))), kind="DC", cap=cap, f=f, mu=mu))
 out = []
 for p, g in pd.DataFrame(rows).groupby("pair"):
