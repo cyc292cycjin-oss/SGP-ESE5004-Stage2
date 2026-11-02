@@ -41,7 +41,7 @@ from s4j_layers import apply_dc_converter_rule, apply_transmission_losses
 from s4k_layers import apply_ac_losses
 from s4l_layers import apply_dust_cleanup
 from m08a_layers import apply_existing_vintage_costs
-from v3_layers import add_dedicated_plant_lines, add_liquid_shipping, apply_ev_structure
+from v3_layers import DEDICATED_CARRIER, add_dedicated_plant_lines, add_liquid_shipping, apply_ev_structure
 from v5.gates_v6 import config_subset_sha256
 from s2_layers import (add_existing_geothermal, set_transmission_s2, add_co2_layer, add_biomass_layer, add_industrial_heat, add_demand_layer,
                        add_gap_slack, S2_OWNER_KIND, TFEC_SECTORS, pipeline_candidates, replace_h2_pipelines, add_apg_corridor_lines)
@@ -165,9 +165,12 @@ def static_validate_s2(n, cfg, corridors, demand_ledger, *, daily=False):
     if sw["electricity"]:
         expected_edges = {(r.component_type, str(r.component)) for _, r in corridors.iterrows()
                           if members is None or {str(r.country_from), str(r.country_to)} <= members}
-        actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & fwd]}
+        plant = n.links.carrier == DEDICATED_CARRIER   # V3 X1b: the plant lines are not corridor stock; they follow their own table
+        actual = {("Line", x) for x in n.lines.index[n.lines.border_class == "cross_border"]} | {("Link", x) for x in n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & fwd & ~plant]}
         if actual != expected_edges:
             raise ValueError("Cross-border electricity set differs from the corridor table")
+        if set(n.links.index[plant & fwd]) != {r["link"] for r in n.meta.get("research_dedicated_lines", {}).get("lines", [])}:
+            raise ValueError("Plant lines differ from their ledger")
         rev_xb = n.links.index[(n.links.border_class == "cross_border") & (n.links.transport_carrier == "electricity") & ~fwd]
         if any(x[: -len("-reversed")] not in n.links.index for x in rev_xb):
             raise ValueError("reversed cross-border link without its forward link")
