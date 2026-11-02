@@ -1,0 +1,680 @@
+{
+ "B5_NO_NEW_XB_solved": {
+  "gate": "B5_NO_NEW_XB",
+  "passed": true,
+  "rows": [
+   {
+    "capacity": 2570.0,
+    "capacity_differs": [],
+    "components": 16,
+    "extendable": 0,
+    "not_in_integrated": [],
+    "type": "Line"
+   },
+   {
+    "capacity": 45727.96200000001,
+    "capacity_differs": [],
+    "components": 9,
+    "extendable": 0,
+    "not_in_integrated": [],
+    "type": "Link"
+   }
+  ]
+ },
+ "B6": {
+  "b6_bn_eur": 12.709969084478821,
+  "b6_eur": 12709969084.47882,
+  "gate": {
+   "difference": 12709969084.47882,
+   "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+   "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+   "objective": {
+    "integrated": 329197487713.20886,
+    "no_new_xb": 341907456797.6877
+   },
+   "passed": true,
+   "relative": 0.03717371128293209
+  },
+  "positive": true
+ },
+ "criteria": {
+  "b16_ledger": true,
+  "b6_positive": true,
+  "c1_abc_and_gates_v6": true,
+  "no_slack": true,
+  "optimal_or_119ab": true,
+  "sg_marine_fuel_has_source": true
+ },
+ "flat_control": {
+  "b6_flat_bn": 13.153042895744202,
+  "ev_effect_b6_bn": 0.44307381126538087,
+  "ev_effect_cost_bn": {
+   "integrated": 10.27759232161853,
+   "no_new_xb": 10.720666132883911
+  },
+  "note": "EV effect = flat - E2; control runs only, not an acceptance item",
+  "note_v2": "v3 flat - v2 integrated: what is left after the EV effect, mainly the industry carriers and the other changes; the v2 disconnected run is another reference scenario",
+  "v3_e2_minus_v2_integrated_bn": -11.464496161327027,
+  "v3_flat_minus_v2_integrated_bn": -1.1869038397084961,
+  "v3_flat_no_new_xb_minus_v2_disconnected_bn": 0.5368195126257934
+ },
+ "integrated": {
+  "b8_sectors_out": {
+   "Transport": -4.114626763496165e-05
+  },
+  "c1": {
+   "a": true,
+   "accepted": true,
+   "b": true,
+   "c": true,
+   "optimal": true,
+   "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+  },
+  "c1_grade": "layer1_plus_nodal_price_settlement",
+  "criterion_c1_abc_and_gates_v6": true,
+  "criterion_no_slack": true,
+  "criterion_optimal_or_119ab": true,
+  "cross_border": {
+   "ac_added_gw": 192.7522031812111,
+   "ac_gw": 195.32220318121108,
+   "link_gw_by_carrier": {
+    "CO2 pipeline": 10.574041149151702,
+    "DC": 40.50866148156481,
+    "H2 pipeline": 9.704800470518474,
+    "gas pipeline": 166.59889359639203
+   }
+  },
+  "id_industry_shares": {
+   "Java-Bali": 0.5726622397578086,
+   "Kalimantan": 0.10628942533240045,
+   "Maluku": 0.0104797500808052,
+   "Nusa-Tenggara": 0.009708401890287493,
+   "Papua": 0.018369952706961765,
+   "Sulawesi": 0.08198829313601178,
+   "Sumatra": 0.20050193709572472
+  },
+  "label": "SMOKE_TEST_ONLY",
+  "ledger_identity_passed": true,
+  "ledger_relative_error": 1.718712686320412e-13,
+  "liquid_dual_annual_mean_eur_per_mwh": {
+   "ammonia": {
+    "BN": 93.09666535839483,
+    "ID": 94.2697872858392,
+    "KH": 93.17061533762886,
+    "LA": 91.11421636959471,
+    "MM": 93.49233951025953,
+    "MY": 94.06070705575573,
+    "PH": 91.70933244930715,
+    "SG": 93.91962742265453,
+    "TH": 92.87094767128337,
+    "TL": 93.30762675873248,
+    "VN": 93.1875341686789
+   },
+   "methanol": {
+    "BN": 111.93417664881933,
+    "ID": 111.02915646108457,
+    "KH": 111.51537346765372,
+    "LA": 111.29052902413734,
+    "MM": 112.50585183076166,
+    "MY": 111.4559210516815,
+    "PH": 113.01671743570436,
+    "SG": 111.56496797375887,
+    "TH": 111.25245046426735,
+    "TL": 111.7617031288011,
+    "VN": 111.80198941020171
+   },
+   "oil": {
+    "BN": 35.31791410492238,
+    "ID": 35.31791410492238,
+    "KH": 35.31791410492238,
+    "LA": 36.84544483100984,
+    "MM": 35.31791410492238,
+    "MY": 35.31791410492238,
+    "PH": 35.31791410492238,
+    "SG": 35.31791410492238,
+    "TH": 35.31791410492238,
+    "TL": 35.31791410492238,
+    "VN": 35.31791410492238
+   },
+   "oil non-fossil": {
+    "BN": 89.39355699007358,
+    "ID": 90.05862037770962,
+    "KH": 89.31751261458564,
+    "LA": 88.0348285623527,
+    "MM": 88.92011623795027,
+    "MY": 89.6891083111309,
+    "PH": 88.6047827113731,
+    "SG": 89.76891995726452,
+    "TH": 89.17259692624748,
+    "TL": 89.82080154128302,
+    "VN": 89.56235930922651
+   }
+  },
+  "objective_eur": 329197487713.20886,
+  "peak_rss_gib": 7.215610504150391,
+  "profile": "formal_barrier_1e6_t16",
+  "sg_marine_fuel": {
+   "has_source": true,
+   "import_outside_asean_twh": 1.1343365433848418e-08,
+   "local_production_twh": 2.2281616630116347e-08,
+   "marine_load_twh": 465.51464347826084,
+   "ship_in_twh_by_origin": {
+    "BN": 5.080387588360246e-07,
+    "ID": 437.0936355396717,
+    "KH": 1.0779604359530963e-06,
+    "MM": 2.8035355047536024e-07,
+    "MY": 30.016887251295884,
+    "PH": 1.5972504511088343e-07,
+    "TH": 1.2525224031854512e-06,
+    "TL": 2.9215847077313546e-07,
+    "VN": 6.490079721398176e-07
+   },
+   "ship_share": 0.9999999999280149,
+   "supplied_twh": 467.11052704435923
+  },
+  "ship_capacity_duals": {
+   "above_tolerance": 0,
+   "available": true,
+   "links": 277,
+   "max_abs_eur_per_mwh": 0.0,
+   "max_utilisation": 0.08464477288967075,
+   "tolerance_eur_per_mwh": 1e-06
+  },
+  "ship_flow_twh": {
+   "ammonia ship": 116.71086037458872,
+   "liquid transit rail": 8.901725731762525,
+   "methanol ship": 512.4163614484946,
+   "oil non-fossil ship": 135.7247845859064
+  },
+  "slack": {
+   "Generator": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   },
+   "Link": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   }
+  },
+  "solve_seconds": 185.38263511657715,
+  "solved_network": true,
+  "status": "ok",
+  "termination_condition": "optimal",
+  "truncated_to": 56,
+  "v5_all_passed": false,
+  "v5_failed": [
+   "A1_A2",
+   "A1_A2_S4B",
+   "A3",
+   "A3_S4B",
+   "B1",
+   "B3",
+   "B8"
+  ],
+  "v6_label": "ACCEPTED_LAYER2"
+ },
+ "integrated_flat": {
+  "b8_sectors_out": {},
+  "c1": {
+   "a": true,
+   "accepted": true,
+   "b": true,
+   "c": true,
+   "optimal": true,
+   "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+  },
+  "c1_grade": "layer1_plus_nodal_price_settlement",
+  "criterion_c1_abc_and_gates_v6": true,
+  "criterion_no_slack": true,
+  "criterion_optimal_or_119ab": true,
+  "cross_border": {
+   "ac_added_gw": 196.65867805818425,
+   "ac_gw": 199.22867805818424,
+   "link_gw_by_carrier": {
+    "CO2 pipeline": 11.465355283205204,
+    "DC": 40.53343614080093,
+    "H2 pipeline": 8.39699413246618,
+    "gas pipeline": 180.18206638608893
+   }
+  },
+  "id_industry_shares": {
+   "Java-Bali": 0.5726622397578086,
+   "Kalimantan": 0.10628942533240045,
+   "Maluku": 0.0104797500808052,
+   "Nusa-Tenggara": 0.009708401890287493,
+   "Papua": 0.018369952706961765,
+   "Sulawesi": 0.08198829313601178,
+   "Sumatra": 0.20050193709572472
+  },
+  "label": "SMOKE_TEST_ONLY",
+  "ledger_identity_passed": true,
+  "ledger_relative_error": 1.7925336603501816e-13,
+  "liquid_dual_annual_mean_eur_per_mwh": {
+   "ammonia": {
+    "BN": 92.56467054584232,
+    "ID": 93.73466331211924,
+    "KH": 92.39070804116686,
+    "LA": 90.53413114522188,
+    "MM": 92.85186236176075,
+    "MY": 93.26375764407355,
+    "PH": 91.17942266391398,
+    "SG": 93.1234164711174,
+    "TH": 92.07751144806859,
+    "TL": 92.76282733495995,
+    "VN": 92.55602072520614
+   },
+   "methanol": {
+    "BN": 114.74200530241023,
+    "ID": 113.82156065707458,
+    "KH": 114.69666982611413,
+    "LA": 114.14112557329106,
+    "MM": 114.910749651018,
+    "MY": 114.25675441497754,
+    "PH": 115.83948142619623,
+    "SG": 114.36795512641054,
+    "TH": 114.59420926098717,
+    "TL": 114.5569539131731,
+    "VN": 114.79667778723717
+   },
+   "oil": {
+    "BN": 35.31791410492238,
+    "ID": 35.31791410492238,
+    "KH": 35.31791410492238,
+    "LA": 36.845444494598404,
+    "MM": 35.31791410492238,
+    "MY": 35.31791410492238,
+    "PH": 35.31791410492238,
+    "SG": 35.31791410492238,
+    "TH": 35.31791410492238,
+    "TL": 35.31791410492238,
+    "VN": 35.31791410492238
+   },
+   "oil non-fossil": {
+    "BN": 89.79689877566011,
+    "ID": 90.46455407969313,
+    "KH": 89.72055800072772,
+    "LA": 88.43882814254277,
+    "MM": 89.32161245525903,
+    "MY": 90.09360152680642,
+    "PH": 89.0050504316009,
+    "SG": 90.17372421545386,
+    "TH": 89.5750773685422,
+    "TL": 90.22579348862128,
+    "VN": 89.96635884277062
+   }
+  },
+  "objective_eur": 339475080034.8274,
+  "peak_rss_gib": 7.159862518310547,
+  "profile": "formal_barrier_1e6_t16",
+  "sg_marine_fuel": {
+   "has_source": true,
+   "import_outside_asean_twh": 1.5699555991184004e-08,
+   "local_production_twh": 2.852650979412138e-08,
+   "marine_load_twh": 465.51464347826084,
+   "ship_in_twh_by_origin": {
+    "BN": 5.804558941340159e-07,
+    "ID": 438.72071543134695,
+    "KH": 7.527857527337079e-07,
+    "MM": 7.79457510698937e-07,
+    "MY": 28.38982092210157,
+    "PH": 1.5909734205981337e-07,
+    "TH": 7.441993563325205e-07,
+    "TL": 3.075454751235849e-07,
+    "VN": 5.9853413370024e-07
+   },
+   "ship_share": 0.9999999999053198,
+   "supplied_twh": 467.11054031975016
+  },
+  "ship_capacity_duals": {
+   "above_tolerance": 0,
+   "available": true,
+   "links": 277,
+   "max_abs_eur_per_mwh": 0.0,
+   "max_utilisation": 0.08381627973615442,
+   "tolerance_eur_per_mwh": 1e-06
+  },
+  "ship_flow_twh": {
+   "ammonia ship": 146.1738278027938,
+   "liquid transit rail": 8.40893461180936,
+   "methanol ship": 520.384870802834,
+   "oil non-fossil ship": 136.19965308377235
+  },
+  "slack": {
+   "Generator": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   },
+   "Link": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   }
+  },
+  "solve_seconds": 132.93379259109497,
+  "solved_network": true,
+  "status": "ok",
+  "termination_condition": "optimal",
+  "truncated_to": 56,
+  "v5_all_passed": false,
+  "v5_failed": [
+   "A1_A2",
+   "A1_A2_S4B",
+   "A3",
+   "B3"
+  ],
+  "v6_label": "ACCEPTED_LAYER2"
+ },
+ "no_new_xb": {
+  "b8_sectors_out": {
+   "Transport": -4.114626763496165e-05
+  },
+  "c1": {
+   "a": true,
+   "accepted": false,
+   "b": true,
+   "c": true,
+   "optimal": false,
+   "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+  },
+  "c1_grade": "layer1_plus_nodal_price_settlement",
+  "criterion_c1_abc_and_gates_v6": true,
+  "criterion_no_slack": true,
+  "criterion_optimal_or_119ab": true,
+  "cross_border": {
+   "ac_added_gw": 0.0,
+   "ac_gw": 2.57,
+   "link_gw_by_carrier": {
+    "DC": 0.6,
+    "gas pipeline": 45.127962
+   }
+  },
+  "id_industry_shares": {
+   "Java-Bali": 0.5726622397578086,
+   "Kalimantan": 0.10628942533240045,
+   "Maluku": 0.0104797500808052,
+   "Nusa-Tenggara": 0.009708401890287493,
+   "Papua": 0.018369952706961765,
+   "Sulawesi": 0.08198829313601178,
+   "Sumatra": 0.20050193709572472
+  },
+  "label": "SMOKE_TEST_ONLY",
+  "ledger_identity_passed": true,
+  "ledger_relative_error": 2.0332707458289093e-13,
+  "liquid_dual_annual_mean_eur_per_mwh": {
+   "ammonia": {
+    "BN": 93.17653622339014,
+    "ID": 94.35068829923681,
+    "KH": 92.9629720962437,
+    "LA": 89.49302386685203,
+    "MM": 93.6273179110051,
+    "MY": 93.89252252380875,
+    "PH": 91.78557330293766,
+    "SG": 93.75157891543286,
+    "TH": 92.71197315771701,
+    "TL": 93.39134356564773,
+    "VN": 93.0117248411528
+   },
+   "methanol": {
+    "BN": 118.8095117102822,
+    "ID": 117.94305900672745,
+    "KH": 118.10166779189653,
+    "LA": 117.31243100276876,
+    "MM": 119.48313648760782,
+    "MY": 118.39069407598711,
+    "PH": 119.77249186767868,
+    "SG": 118.50507357147663,
+    "TH": 117.82228697664763,
+    "TL": 118.62611361550327,
+    "VN": 118.41462030577647
+   },
+   "oil": {
+    "BN": 35.31791410492238,
+    "ID": 35.31791410492238,
+    "KH": 35.31791410492238,
+    "LA": 36.84544224472092,
+    "MM": 35.31791410492238,
+    "MY": 35.31791410492238,
+    "PH": 35.31791410492238,
+    "SG": 35.31791410492238,
+    "TH": 35.31791410492238,
+    "TL": 35.31791410492238,
+    "VN": 35.31791410492238
+   },
+   "oil non-fossil": {
+    "BN": 89.54465054466674,
+    "ID": 90.21068445411422,
+    "KH": 89.46849524980065,
+    "LA": 88.1861681166107,
+    "MM": 89.07051697244553,
+    "MY": 89.84063162702212,
+    "PH": 88.7547250948254,
+    "SG": 89.92055971570309,
+    "TH": 89.32336825948528,
+    "TL": 89.97241464230618,
+    "VN": 89.71369825752016
+   }
+  },
+  "objective_eur": 341907456797.6877,
+  "peak_rss_gib": 5.710674285888672,
+  "profile": "formal_barrier_1e6_t16",
+  "sg_marine_fuel": {
+   "has_source": true,
+   "import_outside_asean_twh": 1.1248379252914495e-07,
+   "local_production_twh": 1.1752907667021877e-07,
+   "marine_load_twh": 465.51464347826084,
+   "ship_in_twh_by_origin": {
+    "BN": 3.149642201078777e-06,
+    "ID": 440.3005639942949,
+    "KH": 3.408674179766757e-05,
+    "MM": 1.60791410643359e-06,
+    "MY": 24.36886867853693,
+    "PH": 9.407111133932822e-07,
+    "TH": 2.4410997894317292,
+    "TL": 1.854694724880629e-06,
+    "VN": 6.827870108146088e-06
+   },
+   "ship_share": 0.9999999995075837,
+   "supplied_twh": 467.11058115985054
+  },
+  "ship_capacity_duals": {
+   "above_tolerance": 0,
+   "available": true,
+   "links": 277,
+   "max_abs_eur_per_mwh": 0.0,
+   "max_utilisation": 0.08661801749916212,
+   "tolerance_eur_per_mwh": 1e-06
+  },
+  "ship_flow_twh": {
+   "ammonia ship": 150.99368847055126,
+   "liquid transit rail": 15.79609356330489,
+   "methanol ship": 492.2751198061837,
+   "oil non-fossil ship": 137.24823042481503
+  },
+  "slack": {
+   "Generator": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   },
+   "Link": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   }
+  },
+  "solve_seconds": 117.62208437919617,
+  "solved_network": true,
+  "status": "ok",
+  "termination_condition": "suboptimal",
+  "truncated_to": 56,
+  "v5_all_passed": false,
+  "v5_failed": [
+   "A1_A2",
+   "A1_A2_S4B",
+   "A3",
+   "B3",
+   "B8"
+  ],
+  "v6_label": "ACCEPTED_LAYER2"
+ },
+ "no_new_xb_flat": {
+  "b8_sectors_out": {},
+  "c1": {
+   "a": true,
+   "accepted": true,
+   "b": true,
+   "c": true,
+   "optimal": true,
+   "rule": "decision 120: run accepted = Gurobi optimal + decision 119 (a)(b)(c); project gates are numerical information"
+  },
+  "c1_grade": "layer1_plus_nodal_price_settlement",
+  "criterion_c1_abc_and_gates_v6": true,
+  "criterion_no_slack": true,
+  "criterion_optimal_or_119ab": true,
+  "cross_border": {
+   "ac_added_gw": 0.0,
+   "ac_gw": 2.57,
+   "link_gw_by_carrier": {
+    "DC": 0.6,
+    "gas pipeline": 45.127962
+   }
+  },
+  "id_industry_shares": {
+   "Java-Bali": 0.5726622397578086,
+   "Kalimantan": 0.10628942533240045,
+   "Maluku": 0.0104797500808052,
+   "Nusa-Tenggara": 0.009708401890287493,
+   "Papua": 0.018369952706961765,
+   "Sulawesi": 0.08198829313601178,
+   "Sumatra": 0.20050193709572472
+  },
+  "label": "SMOKE_TEST_ONLY",
+  "ledger_identity_passed": true,
+  "ledger_relative_error": 2.154926524286644e-13,
+  "liquid_dual_annual_mean_eur_per_mwh": {
+   "ammonia": {
+    "BN": 93.46046183701927,
+    "ID": 94.6361101940502,
+    "KH": 93.23977279758182,
+    "LA": 89.77798976567829,
+    "MM": 93.8340163693192,
+    "MY": 94.17662783748787,
+    "PH": 92.06842094580455,
+    "SG": 94.03551302407367,
+    "TH": 92.99205463911751,
+    "TL": 93.65622947461192,
+    "VN": 93.29669178822668
+   },
+   "methanol": {
+    "BN": 119.70477873606634,
+    "ID": 118.83088205805969,
+    "KH": 119.06203163943839,
+    "LA": 118.00223107404369,
+    "MM": 120.34190797842494,
+    "MY": 119.28119699179776,
+    "PH": 120.69561334428666,
+    "SG": 119.39626139856398,
+    "TH": 118.79817213754586,
+    "TL": 119.43405973354324,
+    "VN": 119.36887995694592
+   },
+   "oil": {
+    "BN": 35.31791410492238,
+    "ID": 35.31791410492238,
+    "KH": 35.31791410492238,
+    "LA": 36.84544434001758,
+    "MM": 35.31791410492238,
+    "MY": 35.31791410492238,
+    "PH": 35.31791410492238,
+    "SG": 35.31791410492238,
+    "TH": 35.31791410492238,
+    "TL": 35.31791410492238,
+    "VN": 35.31791410492238
+   },
+   "oil non-fossil": {
+    "BN": 89.69556748457141,
+    "ID": 90.36257153653833,
+    "KH": 89.61930045115069,
+    "LA": 88.33733082682592,
+    "MM": 89.19178637830785,
+    "MY": 89.96280633777813,
+    "PH": 88.90449151478758,
+    "SG": 90.04282842825744,
+    "TH": 89.44493415515532,
+    "TL": 90.12401973700833,
+    "VN": 89.86486138132668
+   }
+  },
+  "objective_eur": 352628122930.5716,
+  "peak_rss_gib": 6.041179656982422,
+  "profile": "formal_barrier_1e6_t16",
+  "sg_marine_fuel": {
+   "has_source": true,
+   "import_outside_asean_twh": 1.2798728251273924e-08,
+   "local_production_twh": 1.2602701672770106e-08,
+   "marine_load_twh": 465.51464347826084,
+   "ship_in_twh_by_origin": {
+    "BN": 5.908611105104343e-07,
+    "ID": 445.6729579967643,
+    "KH": 5.1431338656667795e-06,
+    "MM": 3.393293481059615e-07,
+    "MY": 19.725105447709,
+    "PH": 1.8164305454739937e-07,
+    "TH": 1.7124557151309834,
+    "TL": 3.6577099629173777e-07,
+    "VN": 1.128057302342952e-06
+   },
+   "ship_share": 0.99999999994562,
+   "supplied_twh": 467.1105269338014
+  },
+  "ship_capacity_duals": {
+   "above_tolerance": 0,
+   "available": true,
+   "links": 277,
+   "max_abs_eur_per_mwh": 0.0,
+   "max_utilisation": 0.08849124560084952,
+   "tolerance_eur_per_mwh": 1e-06
+  },
+  "ship_flow_twh": {
+   "ammonia ship": 147.12666243928416,
+   "liquid transit rail": 17.86503107435091,
+   "methanol ship": 482.07380132787495,
+   "oil non-fossil ship": 137.5705232920974
+  },
+  "slack": {
+   "Generator": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   },
+   "Link": {
+    "abs_twh": 0.0,
+    "carriers": [],
+    "components": 0
+   }
+  },
+  "solve_seconds": 120.42224597930908,
+  "solved_network": true,
+  "status": "ok",
+  "termination_condition": "optimal",
+  "truncated_to": 56,
+  "v5_all_passed": false,
+  "v5_failed": [
+   "A1_A2",
+   "A1_A2_S4B"
+  ],
+  "v6_label": "ACCEPTED_LAYER2"
+ },
+ "passed": true,
+ "v2_smoke_same_56_snapshots": {
+  "b6_bn_eur": 11.429319543409912,
+  "note": "profile formal_barrier_1e6_t16 and the fully separated reference: level comparison only, not the 365x24h figure of the prediction",
+  "objective_eur": {
+   "disconnected": 352091303417.9458,
+   "integrated": 340661983874.5359
+  }
+ }
+}
