@@ -95,3 +95,14 @@
 | 报告 | `V3_REPORT_EVDIAG.md` | 本次提交 |
 
 恢复点：补充 06 完成，等审阅端与用户在选项 A / B / C 中决定。计数：本机 Gurobi 0；没有求解；本机计算约 0.1 小时 / 1.5 小时；磁盘约 0.3 MB / 10 GB。
+
+## 补充 07：日聚合改为上游约定（`V3_REVIEW_DECISIONS_EVDIAG.md` 第 2 节，第 182 项选项 A）
+
+审阅决定没有 SHA256 登记文件，本机计算 `3db56b54…`，副本随第一次提交放进本目录。会话脚本 `/home/jin/v3d/`（镜像 `scripts/wsl_v3d/`），构建 `results_project/v3/builds_dmax`，证据 `evidence/dmax/`。
+
+| 步骤 | 状态 | 提交 |
+|---|---|---|
+| 2.1 第 1 条 规则 | `V3_RULES.md` 第 11 节，构建前提交 | 本次提交 |
+| 2.1 第 2 条 代码与测试 | `daily_resolution.py` 改好、`DailyStoreBounds` 4 项测试本地通过，未提交 | — |
+
+恢复点：规则已提交；下一步提交代码与测试，再在干净提交上构建（`build_s7.sh`）。计数：本机 Gurobi 0；没有求解；本机计算约 0.05 小时 / 2 小时；磁盘约 0 / 15 GB。
