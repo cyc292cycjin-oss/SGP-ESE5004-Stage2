@@ -14,8 +14,9 @@ if [ -f "$OUT/STATUS.txt" ]; then
   echo "== stop / error lines (contact the reviewer when any appears)"
   lines=$(grep -E "STOP_SAFE|STOP_NOT_ACCEPTED|UNUSABLE|HALTED|POSTPROC_ERROR|KILLED|MEMORY_STOP|PROJECTION_STOP|NOT_STARTED|WAIT_START.*STOP" "$OUT/STATUS.txt" | tail -8); [ -n "$lines" ] && echo "$lines" | cut -c1-220 || echo "(none)"
 fi
-for rid in F1 F2; do
-  d="$OUT/$rid"; [ -d "$d" ] || continue
+[ -d "$OUT/.gurobi_start_lock" ] && echo "== start lock held by: $(cat "$OUT/.gurobi_start_lock/owner" 2>/dev/null) (V3 HPC, RUN_PLAN_HPC_V3 4: normal for up to ~6 min before a Gurobi start; held for hours = contact the reviewer)"
+for d in "$OUT"/F*/; do   # v2 F1 / F2; V3 HPC F1-F4
+  d=${d%/}; rid=${d##*/}; [ -d "$d" ] || continue
   echo "== $rid"
   phase=not_started
   [ -f "$d/RUN.json" ] && phase=prepared; [ -f "$d/split/SPLIT_BUILD.json" ] && phase="process1_built"; [ -f "$d/.solve_start" ] && phase="process2_gurobi_running"

@@ -1,0 +1,87 @@
+{
+ "name": "V3 2920x3h formal batch on NUS Atlas (PBS Pro): F1 / F2 main, F3 / F4 EV fleet x0.5 (decisions 160-165, 172-173, 179, 180, 182, 186, 187; S-A shipping)",
+ "note": "Copied into the HPC package as BATCH_DEF.json (RUN_PLAN_HPC_V3.md). Networks of the build a1ef782b registered in RUN_PLAN_V3.md section 24.1. The limits and PBS walltimes are PROPOSED (RUN_PLAN_HPC_V3.md section 2): formal jobs refuse until the reviewer and the user register them (limits_status REGISTERED, a new package build).",
+ "runs": {
+  "F1": {
+   "scenario": "integrated",
+   "base": "integrated_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "一体化 v3 2920×3h（S-A）：c(N)、Owen 分摊、B6 基准",
+   "iterations_reference": 350,
+   "pair": "A"
+  },
+  "F2": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "no_new_xb v3 2920×3h（S-A）：B6 = F2 − F1",
+   "iterations_reference": 250,
+   "pair": "A"
+  },
+  "F3": {
+   "scenario": "integrated",
+   "base": "integrated_ev05_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "一体化，EV 车队代理 ×0.5（第 186 项）",
+   "iterations_reference": 350,
+   "pair": "B"
+  },
+  "F4": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_ev05_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "parent": "integrated_ev05",
+   "role": "no_new_xb，EV 车队代理 ×0.5：B6 = F4 − F3（第 186 项）",
+   "iterations_reference": 250,
+   "pair": "B"
+  }
+ },
+ "registered_sha": {
+  "integrated_2920_3h_unsolved.nc": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef",
+  "no_new_xb_2920_3h_unsolved.nc": "e2837e4ada978e0d05fc04108d7ceb99567e41c33b6837ab4447be74bdd918b7",
+  "integrated_ev05_2920_3h_unsolved.nc": "c4eb7c44a54175ba06d7d60d4926cb095fc0ec603eced4ff28aecd8493bcb063",
+  "no_new_xb_ev05_2920_3h_unsolved.nc": "0bbe235e08654f566afe8f94eb2299a9ed1a8bb1f791520f8206449e02c3bac7"
+ },
+ "registered_bytes": {
+  "integrated_2920_3h_unsolved.nc": 72050034,
+  "no_new_xb_2920_3h_unsolved.nc": 71411694,
+  "integrated_ev05_2920_3h_unsolved.nc": 72050068,
+  "no_new_xb_ev05_2920_3h_unsolved.nc": 71411730
+ },
+ "build_commit": "a1ef782b8c8f0b6cb0ef67b3fe66a7493865e9b7",
+ "limits_status": "PROPOSED",
+ "limits": {
+  "time_limit_s": 1296000,
+  "wall_margin_s": 7200,
+  "licence_gap_s": 330,
+  "wait_start_max_s": 7200,
+  "build_timeout_s": 7200,
+  "assign_timeout_s": 32400,
+  "post_timeout_s": 10800,
+  "pack_timeout_s": 7200
+ },
+ "hpc_jobs": {
+  "F1": {"name": "hpr3_f1", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "376:00:00", "mode": "formal", "rid": "F1", "depends": "", "wait_start_of": ""},
+  "F2": {"name": "hpr3_f2", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "378:00:00", "mode": "formal", "rid": "F2", "depends": "after:F1", "wait_start_of": "F1"},
+  "F3": {"name": "hpr3_f3", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "378:00:00", "mode": "formal", "rid": "F3", "depends": "afterany:F1", "wait_start_of": ""},
+  "F4": {"name": "hpr3_f4", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "378:00:00", "mode": "formal", "rid": "F4", "depends": "afterany:F2", "wait_start_of": ""},
+  "batch": {"name": "hpr3_batch", "queue": "parallel", "ncpus": 12, "mem_gb": 120, "walltime": "48:00:00", "mode": "batch", "rid": "batch", "depends": "afterany:F3:F4", "wait_start_of": ""},
+  "smoke56": {"name": "hpr3_smoke56", "queue": "parallel", "ncpus": 17, "mem_gb": 32, "walltime": "04:00:00", "mode": "smoke56", "rid": "all", "depends": "", "wait_start_of": ""},
+  "build_only_f1": {"name": "hpr3_build_only_f1", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "02:30:00", "mode": "build_only", "rid": "F1", "depends": "", "wait_start_of": ""},
+  "install": {"name": "hpr3_install", "queue": "serial", "ncpus": 1, "mem_gb": 8, "walltime": "02:00:00", "mode": "install", "rid": "", "depends": "", "wait_start_of": ""}
+ },
+ "high_peak_gib": {"F1": 208, "F2": 194, "F3": 208, "F4": 194},
+ "smoke_expected": {
+  "note": "local 56-snapshot smoke of F1 / F2 at a4607714 (RUN_PLAN_V3.md section 24.2, results_project/v3hpc/smoke_hpc): objective incl. the constant term, barrier iterations; the HPC smoke job compares within a relative 1e-6 (cross-machine)",
+  "objective": {"F1": 329705566422.23596, "F2": 342268691464.4567},
+  "iterations": {"F1": 80, "F2": 66}
+ }
+}

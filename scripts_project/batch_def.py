@@ -23,9 +23,17 @@ def _jl(p: Path) -> dict:
         return {}
 
 
+def build_stem(run: dict) -> str:
+    """<stem> of the build receipt <stem>_BUILD_RECEIPT.json of a run's network. A built network (scenario = cost scenario) has its own receipt under the name of its base (bridges;
+    V3 HPC F3 'integrated_ev05'); a variant uses the receipt of its parent build: 'parent' when the run names one (V3 HPC F4, derived from F3), else its cost scenario."""
+    if run["scenario"] == run["costs"]:
+        return run["base"].rsplit("_", 2)[0]
+    return run.get("parent") or run["costs"]
+
+
 def input_receipt(nets: Path, run: dict, key: str, build_commit: str) -> dict:
     """Receipt of a run's network. key: the entry of the build receipt (daily_network | network). chain_ok: the build receipt has the build commit and, for a variant, the variant was derived from that network."""
-    stem = run["base"].rsplit("_", 2)[0] if run["scenario"] == run["costs"] else run["costs"]   # a bridge network has its own build receipt under the name of its base, with the cost table of its scenario
+    stem = build_stem(run)   # a bridge network has its own build receipt under the name of its base, with the cost table of its scenario
     build = _jl(nets / f"{stem}_BUILD_RECEIPT.json"); net = build.get(key) or {}; ok = build.get("code_sha") == build_commit
     if run["scenario"] == run["costs"]:
         return dict(sha256=net.get("sha256"), snapshots=net.get("snapshots"), code_sha=build.get("code_sha"), chain_ok=ok)

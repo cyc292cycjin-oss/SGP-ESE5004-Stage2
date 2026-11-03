@@ -17,6 +17,11 @@ batch, Threads 16). Never calls a solver; reads solve results and never changes 
 HPR (2026-10-27; RUN_PLAN_HPC.md; user decisions B1-B4): the fourth batch runs on the NUS Atlas cluster (PBS Pro) in TWO jobs (F1, F2) plus a
 batch-level job. Re-registered here: the v2 2920x3h networks of the DFX build 72083fde (B2), TimeLimit 864,000 s and the derived wall clock (B1),
 the PBS resources (B3); the split solve and the profile are unchanged (B4). The thresholds of RUN_PLAN_B4 section 3 are unchanged.
+
+V3 HPC (2026-11-04; RUN_PLAN_HPC_V3.md; decisions 186, 187): with a package BATCH_DEF.json the table holds four runs in two pairs (F1 / F2 main, F3 / F4 EV fleet x0.5),
+each run its reference iterations ('iterations_reference'), a variant its parent build ('parent', F4 <- F3) and the definition the limits, PBS jobs and expected smoke values
+(limits_status PROPOSED until registered). B6 and the M12 benefit are computed per pair; 'runmeta' prints the per-run fields for run_batch4.sh. Without a definition every
+output is the v2 one.
 """
 from __future__ import annotations
 
@@ -48,9 +53,10 @@ REGISTERED_SHA = {"integrated_2920_3h_unsolved.nc": "08879f0bede119d77160cdb3f5f
                   "disconnected_2920_3h_unsolved.nc": "d90ca99220d448c894c43c071b7e38f8c74e0a101b72878a4bdd941c37b164e7"}
 REGISTERED_BYTES = {"integrated_2920_3h_unsolved.nc": 63873447, "disconnected_2920_3h_unsolved.nc": 63202193}
 BUILD_COMMIT = "72083fde6bffd89580869af6dd00885a8d76721f"
-_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; limits stay
+_DEF = load_def()   # V3 supplement 01: the package definition replaces the v2 table and registered inputs; limits stay unless the definition carries them (V3 HPC below)
 if _DEF:
     RUNS, REGISTERED_SHA, REGISTERED_BYTES, BUILD_COMMIT = _DEF["runs"], _DEF["registered_sha"], _DEF["registered_bytes"], _DEF["build_commit"]
+    STOP_ALWAYS = tuple(RUNS)   # V3 HPC (RUN_PLAN_HPC_V3.md 7): every run of the batch stops the batch on G2 / no solution / C1 (a), as F1 / F2 in v2
 # Registered limits (HPR, user decision B1; RUN_PLAN_HPC.md section 2) - run_batch4.sh carries the same values as R_TL / R_WALL / R_GAP (asserted equal by
 # tests/research/test_hpr_two_jobs.py and by preflight.sh); the other timeouts are the B4P values (RUN_PLAN_B4 3.1 / 3.6, unchanged).
 TIME_LIMIT_S = 864000               # 240 h, F1 = F2 (was 259,200 s in RUN_PLAN_B4)
@@ -77,6 +83,38 @@ SMOKE_EXPECTED_OBJECTIVE = {"F1": 340661983874.5359, "F2": 352091303417.9458}
 SMOKE_EXPECTED_ITERATIONS = {"F1": 113, "F2": 139}
 QUEUE_LIMITS = dict(parallel=dict(mem_gb=540, ncpus_max=96, walltime_h=720, user_cores=96, user_jobs=8), serial=dict(mem_gb=15, ncpus_max=1, walltime_h=720))   # HPC_FACTS_20261026.md
 B4P_HIGH_PEAK_GIB = dict(F1=160, F2=149)   # B4P A1 high estimates of the Gurobi process (RUN_PLAN_B4 section 4); H-P4: mem >= 1.25 x
+LIMITS_STATUS = "REGISTERED"        # the v2 values above are the registered HPR values (RUN_PLAN_HPC.md)
+# V3 HPC (RUN_PLAN_HPC_V3.md sections 2-3): a package definition may carry the limits, the PBS jobs, the expected smoke values and the high memory estimates;
+# its limits_status stays PROPOSED until the reviewer and the user decide (a formal job refuses PROPOSED limits: hpr_job.sh / hpr_submit.sh / run_batch4.sh)
+if _DEF and _DEF.get("limits"):
+    _L = _DEF["limits"]; LIMITS_STATUS = str(_DEF.get("limits_status", "PROPOSED"))
+    TIME_LIMIT_S = int(_L["time_limit_s"]); WALL_MARGIN_S = int(_L.get("wall_margin_s", WALL_MARGIN_S)); WALL_CAP_S = TIME_LIMIT_S + WALL_MARGIN_S
+    LICENCE_GAP_S = int(_L.get("licence_gap_s", LICENCE_GAP_S)); WAIT_START_MAX_S = int(_L.get("wait_start_max_s", WAIT_START_MAX_S))
+    BUILD_TIMEOUT_S = int(_L.get("build_timeout_s", BUILD_TIMEOUT_S)); ASSIGN_TIMEOUT_S = int(_L.get("assign_timeout_s", ASSIGN_TIMEOUT_S))
+    POST_TIMEOUT_S = int(_L.get("post_timeout_s", POST_TIMEOUT_S)); PACK_TIMEOUT_S = int(_L.get("pack_timeout_s", PACK_TIMEOUT_S))
+if _DEF and _DEF.get("hpc_jobs"):
+    HPC_JOBS = _DEF["hpc_jobs"]
+if _DEF and _DEF.get("smoke_expected"):
+    SMOKE_EXPECTED_OBJECTIVE = {k: float(v) for k, v in _DEF["smoke_expected"]["objective"].items()}; SMOKE_EXPECTED_ITERATIONS = dict(_DEF["smoke_expected"].get("iterations", {}))
+if _DEF and _DEF.get("high_peak_gib"):
+    B4P_HIGH_PEAK_GIB = {k: float(v) for k, v in _DEF["high_peak_gib"].items()}
+
+
+def pairs() -> dict:
+    """{pair: (integrated rid, reference rid)} in table order from the runs' 'pair' field (V3 HPC: A = F1 / F2, B = F3 / F4, RUN_PLAN_HPC_V3.md 1); without it one pair, F1 / F2.
+    B6 of a pair = objective(reference) - objective(integrated)."""
+    out = {}
+    for rid, r in RUNS.items():
+        out.setdefault(str(r.get("pair", "A")), []).append(rid)
+    for p, v in out.items():
+        if len(v) != 2 or RUNS[v[0]]["scenario"] != "integrated":
+            raise ValueError(f"pair {p}: {v} is not (integrated run, reference run)")
+    return {p: tuple(v) for p, v in out.items()}
+
+
+def benefit_dir(out: Path, pair: str) -> Path:
+    """M12 benefit folder of a pair: M12_BENEFIT for the first pair (the v2 name), M12_BENEFIT_<pair> for the others"""
+    return out / ("M12_BENEFIT" if pair == next(iter(pairs())) else f"M12_BENEFIT_{pair}")
 
 
 def walltime_s(w: str) -> int:
@@ -85,12 +123,15 @@ def walltime_s(w: str) -> int:
 
 
 def walltime_components() -> dict:
-    """RUN_PLAN_HPC.md section 2: the terms of the PBS walltime of F1 / F2 and the registered (rounded-up) values."""
+    """RUN_PLAN_HPC.md section 2: the terms of the PBS walltime of F1 / F2 and the registered (rounded-up) values. V3 HPC: every formal job but F1 may wait up to
+    WAIT_START_MAX_S for its Gurobi start (F2 for F1's start; F3 / F4 for the start lock and gap, RUN_PLAN_HPC_V3.md 4), so its sum carries that term too (per_job)."""
     f1 = LICENCE_GAP_S + BUILD_TIMEOUT_S + WALL_CAP_S + ASSIGN_TIMEOUT_S + 2 * POST_ESTIMATE_S + JOB_OVERHEAD_S
+    formal = [k for k, j in HPC_JOBS.items() if j["mode"] == "formal"]
+    per_job = {k: dict(sum_s=f1 + (0 if k == formal[0] else WAIT_START_MAX_S), registered_s=walltime_s(HPC_JOBS[k]["walltime"])) for k in formal}
     return dict(terms=dict(runner_start_gap_s=LICENCE_GAP_S, process1_timeout_s=BUILD_TIMEOUT_S, process2_wall_cap_s=WALL_CAP_S, process3_timeout_s=ASSIGN_TIMEOUT_S,
                            post_processing_x2_s=2 * POST_ESTIMATE_S, job_overhead_s=JOB_OVERHEAD_S, f2_wait_start_max_s=WAIT_START_MAX_S),
                 sum_f1_s=f1, sum_f2_s=f1 + WAIT_START_MAX_S, registered_f1_s=walltime_s(HPC_JOBS["F1"]["walltime"]), registered_f2_s=walltime_s(HPC_JOBS["F2"]["walltime"]),
-                projection_limit_s=PROJECTION_FRACTION * TIME_LIMIT_S)
+                per_job=per_job, projection_limit_s=PROJECTION_FRACTION * TIME_LIMIT_S)
 # Pre-registered stop thresholds (RUN_PLAN_B4.md section 3); the runner reads them from here (single source)
 MEMORY_STOP_FRACTION = 0.80         # cgroup anon memory > 80 % of the quota -> STOP_SAFE:MEMORY
 PROJECTION_FRACTION = 0.80          # projected total > 80 % of TimeLimit -> STOP_SAFE:PROJECTION
@@ -303,18 +344,33 @@ def run_state(out: Path, rid: str) -> dict:
                 postproc_errors=[f"{e['step']}:exit={e['exit']}" for e in postproc_errors(out) if e["rid"] == rid])
 
 
-def b6(out: Path) -> dict | None:
-    i, d = run_state(out, "F1"), run_state(out, "F2")
+def b6(out: Path, ri: str = "F1", rd: str = "F2") -> dict | None:
+    """B6 = objective(rd) - objective(ri) of one pair (default the first pair F1 / F2; V3 HPC: also F3 / F4)"""
+    i, d = run_state(out, ri), run_state(out, rd)
     if i["objective"] is None or d["objective"] is None:
         return None
     sys.path.insert(0, str(HERE / "v5"))
     from v5_gates import gate_b6_cost
-    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), RUNS["F1"]["scenario"], RUNS["F2"]["scenario"])
-    li, ld = ledger_totals(out / "F1"), ledger_totals(out / "F2"); oi, od = owen_main(out / "F1"), owen_main(out / "F2")
-    return dict(g, b6_bn=bn(g["difference"]), relative=(float(d["objective"]) - float(i["objective"])) / abs(float(i["objective"])), runs=dict(integrated="F1", disconnected="F2"),
-                labels=dict(F1=i["v6"], F2=d["v6"]), usable=bool(i["v6"] and d["v6"] and i["v6"] != "NOT_ACCEPTED" and d["v6"] != "NOT_ACCEPTED"),
+    g = gate_b6_cost(float(i["objective"]), float(d["objective"]), RUNS[ri]["scenario"], RUNS[rd]["scenario"])
+    li, ld = ledger_totals(out / ri), ledger_totals(out / rd); oi, od = owen_main(out / ri), owen_main(out / rd)
+    return dict(g, b6_bn=bn(g["difference"]), relative=(float(d["objective"]) - float(i["objective"])) / abs(float(i["objective"])), runs=dict(integrated=ri, disconnected=rd),
+                labels={ri: i["v6"], rd: d["v6"]}, usable=bool(i["v6"] and d["v6"] and i["v6"] != "NOT_ACCEPTED" and d["v6"] != "NOT_ACCEPTED"),
                 ledger_total_difference_bn=({c: bn(ld.get(c, 0.0) - li.get(c, 0.0)) for c in COUNTRIES + ("ASEAN",)} if (li and ld) else None),
                 owen_dual_form_benefit_bn=({p: bn(od.get(p, 0.0) - oi.get(p, 0.0)) for p in COUNTRIES + ("BUNKER",)} if (oi and od) else None))
+
+
+def pair_comparison(b: dict) -> dict | None:
+    """V3 HPC (decision 186, review S2-4; description only): the second pair (EV fleet x0.5, F3 / F4) against the first (F1 / F2): delta B6, the Owen dual-form benefit
+    per participant in both pairs and whether its sign is the same (the robustness judgement of the Owen signs waits for this)"""
+    ks = list(b)
+    if len(ks) < 2 or not b[ks[0]] or not b[ks[1]]:
+        return None
+    a, c = b[ks[0]], b[ks[1]]; oa, oc = a.get("owen_dual_form_benefit_bn") or {}, c.get("owen_dual_form_benefit_bn") or {}
+    sign = lambda x: (x > 0) - (x < 0)
+    return dict(pairs=ks[:2], b6_bn={ks[0]: a["b6_bn"], ks[1]: c["b6_bn"]}, delta_b6_bn=c["b6_bn"] - a["b6_bn"],
+                owen_benefit_bn={p: {ks[0]: oa.get(p), ks[1]: oc.get(p)} for p in sorted(set(oa) | set(oc))},
+                owen_sign_same={p: (sign(oa[p]) == sign(oc[p])) for p in oa if p in oc} if (oa and oc) else None,
+                note="description only (decision 186): no threshold; the Owen-sign robustness judgement is the reviewer's")
 
 
 def batch3_comparison(b3: Path | None, out: Path) -> dict | None:
@@ -371,7 +427,11 @@ def summary(out: Path, batch3: Path | None = None, reference_values: Path | None
     stop = (out / "STOP").read_text().split() if (out / "STOP").exists() else []
     safe = (out / "STOP_SAFE").read_text().strip() if (out / "STOP_SAFE").exists() else None
     p1 = jl(out / "P1_DECISION.json"); proj = {rid: jl(out / f"PROJECTION_{rid}.json") for rid in RUNS}
-    res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=b6(out),
+    pb = {p: b6(out, *rr) for p, rr in pairs().items()}   # V3 HPC: one B6 per pair (the first pair is "B6", as in v2)
+    bens = {p: jl(benefit_dir(out, p) / "BENEFIT.json") for p in pairs()}
+    benefit_of = lambda x: (dict(computable=x.get("computable", True), b6_bn=bn(x.get("b6_eur")), negative_benefit=(x.get("owen") or {}).get("negative_benefit"), reason=x.get("reason")) if x else None)
+    res = dict(script=SCRIPT, out=str(out), runs=runs, unusable=unusable_runs(out), B6=pb[next(iter(pb))], pairs={p: list(rr) for p, rr in pairs().items()}, B6_pairs=pb,
+               benefit_pairs={p: benefit_of(x) for p, x in bens.items()}, pair_comparison=pair_comparison(pb),
                benefit=(dict(computable=ben.get("computable", True), b6_bn=bn(ben.get("b6_eur")), negative_benefit=(ben.get("owen") or {}).get("negative_benefit"), reason=ben.get("reason")) if ben else None),
                batch3_comparison=batch3_comparison(batch3, out), reference_comparison=reference_comparison(out, reference_values),
                p1=p1, projection={k: ({x: v.get(x) for x in ("ready", "exceeded", "projected_total_s", "seconds_per_iteration_11_20")} if v else None) for k, v in proj.items()},
@@ -411,6 +471,22 @@ def markdown(r: dict) -> str:
         L.append("- 不可计算（F1 或 F2 无目标值）")
     if r["benefit"]:
         L.append(f"- M12 受益与比例规则对照：{'B6 ' + _f(r['benefit']['b6_bn']) + ' bn；负受益 ' + str(r['benefit']['negative_benefit']) if r['benefit']['computable'] else '不可计算：' + str(r['benefit']['reason'])}（`M12_BENEFIT/`）")
+    for p, rr in list((r.get("pairs") or {}).items())[1:]:   # V3 HPC: the further pairs (EV fleet x0.5: F3 / F4)
+        x = (r.get("B6_pairs") or {}).get(p); be = (r.get("benefit_pairs") or {}).get(p)
+        L += ["", f"## 第 {p} 对（{rr[1]} − {rr[0]}）", ""]
+        if x:
+            L.append(f"- B6 = {x['b6_bn']:.4f} bn EUR2020（相对 {x['relative']:+.3e}；门槛 `B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED`：{x['passed']}；标签 {rr[0]} {x['labels'][rr[0]]}，{rr[1]} {x['labels'][rr[1]]}；可用 {x['usable']}）")
+            if x.get("owen_dual_form_benefit_bn"):
+                L.append(f"- Owen 对偶形式受益（{rr[1]} 份额 − {rr[0]} 份额，α 主值，bn）：" + ", ".join(f"{k} {v:+.3f}" for k, v in x["owen_dual_form_benefit_bn"].items()))
+        else:
+            L.append(f"- 不可计算（{rr[0]} 或 {rr[1]} 无目标值）")
+        if be:
+            L.append(f"- M12 受益：{'B6 ' + _f(be['b6_bn']) + ' bn；负受益 ' + str(be['negative_benefit']) if be['computable'] else '不可计算：' + str(be['reason'])}（`M12_BENEFIT_{p}/`）")
+    pc = r.get("pair_comparison")
+    if pc:
+        ks = pc["pairs"]; same = pc.get("owen_sign_same") or {}
+        L += ["", f"## 两对比较（第 186 项：车队 ×0.5 对主值；只描述，不判定）", "",
+              f"- ΔB6（第 {ks[1]} 对 − 第 {ks[0]} 对）= {pc['delta_b6_bn']:+.4f} bn", f"- Owen 受益符号相同：{', '.join(k for k, v in same.items() if v) or '无'}；符号不同：{', '.join(k for k, v in same.items() if not v) or '无'}"]
     c = r.get("batch3_comparison")
     L += ["", "## 与第三批 365×24h 同名结果的对比（只描述，分辨率影响的证据；不判定）", ""]
     if c:
@@ -434,6 +510,7 @@ def markdown(r: dict) -> str:
 def main():
     ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("runtable")
+    sub.add_parser("runmeta")   # V3 HPC: "RID|iterations_reference|parent|pair" per run (run_batch4.sh; the runtable format stays the v2 one)
     b = sub.add_parser("base-check"); b.add_argument("--nets", type=Path, required=True); b.add_argument("--out", type=Path, required=True)
     b.add_argument("--no-registered", action="store_true", help="tests / stand-ins only: skip the registered SHA256 / bytes comparison (receipt checks kept)")
     k = sub.add_parser("build-check"); k.add_argument("--dir", type=Path, required=True); k.add_argument("--repo", type=Path, required=True)
@@ -451,6 +528,10 @@ def main():
     if a.cmd == "runtable":
         for rid, r in RUNS.items():
             print("|".join([rid, r["scenario"], r["base"], r["set"], r["profile"], r["costs"]]))
+    elif a.cmd == "runmeta":
+        pr = {rid: p for p, rr in pairs().items() for rid in rr}
+        for rid, r in RUNS.items():
+            print("|".join([rid, str(int(r.get("iterations_reference", 450))), str(r.get("parent", "")), pr[rid]]))
     elif a.cmd == "base-check":
         r = base_check(a.nets, registered=not a.no_registered); a.out.write_text(json.dumps(r, indent=1) + "\n")
         print("all_equal" if r["all_equal"] else "DIFFERENT:" + ",".join(k for k, v in r["networks"].items() if not v["equal"])); sys.exit(0 if r["all_equal"] else 1)
@@ -483,6 +564,11 @@ def main():
             print("|".join(["JOB", key, j["name"], j["queue"], str(j["ncpus"]), str(j["mem_gb"]), j["walltime"], j["mode"], j["rid"], j["depends"], j["wait_start_of"]]))
         for k, v in REGISTERED_SHA.items():
             print(f"NETWORK|{k}|{v}|{REGISTERED_BYTES[k]}|{BUILD_COMMIT}")
+        for rid, r in RUNS.items():   # V3 HPC: per-run reference iterations and the pairs; the limits status (PROPOSED until registered)
+            print(f"ITERS|{rid}|{int(r.get('iterations_reference', 450))}")
+        for p, rr in pairs().items():
+            print(f"PAIR|{p}|{rr[0]}|{rr[1]}")
+        print(f"STATUS|{LIMITS_STATUS}")
 
 
 if __name__ == "__main__":

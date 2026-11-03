@@ -13,6 +13,7 @@ if [ -n "${REPO:-}" ]; then :; elif [ -f "$PKG/repo/scripts_project/b4_batch4.py
 elif [ -f "$HERE/../../../../scripts_project/b4_batch4.py" ]; then REPO="$(cd "$HERE/../../../.." && pwd)"
 else echo "REPO not found (unpacked code ./repo or the repository root); set REPO=<path>"; exit 2; fi
 PY=${PY:-$HOME/miniforge3/envs/pypsa-earth/bin/python}; [ -x "$PY" ] || PY=$(command -v python3 || command -v python)
+unset BATCH_DEF; if [ -f "$PKG/BATCH_DEF.json" ]; then export BATCH_DEF="$PKG/BATCH_DEF.json"; fi   # V3 HPC: the jobs of the package definition (RUN_PLAN_HPC_V3.md 3); without it the v2 jobs
 mkdir -p "$OUT"
 PLAN=$(cd "$REPO" && "$PY" scripts_project/b4_batch4.py hpc-plan) || { echo "hpc-plan failed"; exit 2; }
 COMMIT=$(cat "$PKG/COMMIT" 2>/dev/null || git -C "$REPO" rev-parse HEAD 2>/dev/null || echo unknown)

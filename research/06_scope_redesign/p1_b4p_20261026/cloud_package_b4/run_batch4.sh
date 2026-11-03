@@ -25,6 +25,10 @@
 # HPR (2026-10-27; RUN_PLAN_HPC.md; user decisions B1-B4): R_TL = 864,000 s / R_WALL = 871,200 s (B1); the registered networks are the v2 2920x3h
 # networks of b4_batch4.py (B2); MEM_MEASURE=auto|cgroup|rss - the memory stop uses the cgroup anon memory of CGROUP_ROOT (a v2 directory, a v1 JOB
 # directory or the v1 root layout) and falls back to the RSS sum of the Gurobi process group when no cgroup memory accounting is readable (RUN_PLAN_HPC 5).
+# V3 HPC (2026-11-04; RUN_PLAN_HPC_V3.md; decisions 186, 187): with a BATCH_DEF.json of four runs (F1 / F2, F3 / F4 = EV fleet x0.5) each run is one PBS job (--only;
+# the one-machine batch mode refuses more than two runs); the limits come from b4_batch4.py hpc-plan (the definition's limits; PROPOSED limits refuse a formal run);
+# reference iterations, the parent build of a variant and the pairs from b4_batch4.py runmeta; every Gurobi start of the shared RUN_DIR goes through the start lock
+# (one start at a time, >= LICENCE_GAP_S after every other start and end, < 2 other Gurobi processes running); B6 / the M12 benefit per pair. Without a definition: v2.
 #
 # PRE-REGISTERED RULES (RUN_PLAN_B4.md section 3; registered before any 2920x3h result; single sources: this file's R_* constants and
 # scripts_project/b4_batch4.py thresholds):
@@ -73,11 +77,17 @@ if [ -n "$ARRAYS" ] && [ -z "$REPOST_RID" ]; then echo "REFUSED: --arrays <dir> 
 if [ -n "$ONLY" ] && { [ "$POST_ONLY" = 1 ] || [ "$S1MODE" = 1 ] || [ "$DRY" = 1 ]; }; then echo "REFUSED: --only is the solve mode of one run (or its BUILD_ONLY dry run); not together with POST_ONLY / DRY / --repost"; exit 2; fi
 # ---- registered values (RUN_PLAN_HPC.md section 2 = user decision B1 of 2026-10-27, superseding RUN_PLAN_B4 3.1; changed only by a registered plan change before any result)
 R_TL=864000; R_WALL=871200; R_GAP=330; R_MODE=split   # HPR B1: TimeLimit 240 h (was 259,200 s); wall clock = TimeLimit + 2 x 3,600 s (B4P 3.1 item 2: process 2 read + array write-out <= ~1 h at 2920); = b4_batch4.py TIME_LIMIT_S / WALL_CAP_S / LICENCE_GAP_S
+R_WMAX=7200; R_BUILD=3600; R_ASSIGN=32400; R_POST=10800; R_PACK=7200; R_STATUS=REGISTERED   # HPR / B4P defaults (RUN_PLAN_HPC 2) of WAIT_START_MAX_S, BUILD_ / ASSIGN_ / POST_ / PACK_TIMEOUT_S
+if [ -n "${BATCH_DEF:-}" ]; then   # V3 HPC (RUN_PLAN_HPC_V3.md 2): the limits come from b4_batch4.py (single source; it reads the definition's limits when present); PROPOSED limits refuse a formal run (below)
+  PLANL=$(cd "$REPO" && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py hpc-plan 2>/dev/null) || { echo "REFUSED: b4_batch4.py hpc-plan not readable from $REPO"; exit 2; }
+  IFS='|' read -r _ R_TL R_WALL R_GAP R_WMAX R_BUILD R_ASSIGN R_POST R_PACK _ <<< "$(echo "$PLANL" | grep '^LIMITS|')"; R_STATUS=$(echo "$PLANL" | grep '^STATUS|' | cut -d'|' -f2)
+  [ -n "$R_TL" ] && [ -n "$R_STATUS" ] || { echo "REFUSED: b4_batch4.py hpc-plan gave no LIMITS / STATUS line"; exit 2; }
+fi
 WALL_CAP_S=${WALL_CAP_S:-$R_WALL}; GUROBI_TIME_LIMIT_S=${GUROBI_TIME_LIMIT_S:-$R_TL}; LICENCE_GAP_S=${LICENCE_GAP_S:-$R_GAP}; SOLVE_MODE=${SOLVE_MODE:-$R_MODE}
 GRACE_S=${GRACE_S:-30}; MONITOR_S=${MONITOR_S:-60}; CGROUP_ROOT=${CGROUP_ROOT:-/sys/fs/cgroup}; REMOVE_LP=${REMOVE_LP:-1}
-MEM_MEASURE=${MEM_MEASURE:-auto}; WAIT_START_OF=${WAIT_START_OF:-}; WAIT_START_MAX_S=${WAIT_START_MAX_S:-7200}   # HPR (RUN_PLAN_HPC 4-5): memory measure auto|cgroup|rss; F2 waits for F1's Gurobi start + gap (at most WAIT_START_MAX_S)
+MEM_MEASURE=${MEM_MEASURE:-auto}; WAIT_START_OF=${WAIT_START_OF:-}; WAIT_START_MAX_S=${WAIT_START_MAX_S:-$R_WMAX}   # HPR (RUN_PLAN_HPC 4-5): memory measure auto|cgroup|rss; F2 waits for F1's Gurobi start + gap (at most WAIT_START_MAX_S)
 case "$MEM_MEASURE" in auto|cgroup|rss) ;; *) echo "REFUSED: MEM_MEASURE must be auto, cgroup or rss"; exit 2;; esac
-POST_TIMEOUT_S=${POST_TIMEOUT_S:-10800}; BUILD_TIMEOUT_S=${BUILD_TIMEOUT_S:-3600}; ASSIGN_TIMEOUT_S=${ASSIGN_TIMEOUT_S:-32400}; PACK_TIMEOUT_S=${PACK_TIMEOUT_S:-7200}   # RUN_PLAN_B4 3.1 / 3.6: 3 x the A1 estimates
+POST_TIMEOUT_S=${POST_TIMEOUT_S:-$R_POST}; BUILD_TIMEOUT_S=${BUILD_TIMEOUT_S:-$R_BUILD}; ASSIGN_TIMEOUT_S=${ASSIGN_TIMEOUT_S:-$R_ASSIGN}; PACK_TIMEOUT_S=${PACK_TIMEOUT_S:-$R_PACK}   # RUN_PLAN_B4 3.1 / 3.6: 3 x the A1 estimates
 POST_MEM_NEED_GIB=${POST_MEM_NEED_GIB:-100}   # RUN_PLAN_B4 3.6: a post-processing step rebuilds the LP model (process-1 peak ~72-92 GiB at 2920) -> 100 GiB free anon memory
 P1_WINDOW_S=${P1_WINDOW_S:-3600}; P1_THRESHOLD=${P1_THRESHOLD:-0.40}; P1_MIN_CORES=${P1_MIN_CORES:-33}
 HOOKS_SET=$(for k in SOLVE_CMD SPLIT_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD LEDGER_CMD TRUNCATE $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || printf '%s,' "$k"; done)
@@ -97,6 +107,7 @@ if [ "${ALLOW_UNREGISTERED:-0}" != 1 ]; then
 fi
 case "$SOLVE_MODE" in single|split) ;; *) echo "REFUSED: SOLVE_MODE must be single or split"; exit 2;; esac
 if [ "$FORMAL" = 1 ] && [ -n "$HOOKS_SET" ]; then echo "REFUSED: ${HOOKS_SET%,} set - test hooks are not allowed in a formal run (unset them; ALLOW_UNREGISTERED=1 is for tests and the local dry run only)"; exit 2; fi
+if [ "$FORMAL" = 1 ] && [ "$R_STATUS" != REGISTERED ]; then echo "REFUSED: the limits of BATCH_DEF.json are $R_STATUS (RUN_PLAN_HPC_V3.md section 2): a formal run needs the values registered by the reviewer and the user first"; exit 2; fi
 if [ "$NOSOLVE" = 1 ] && [ -n "$AUTH" ]; then echo "REFUSED: --auth together with BUILD_ONLY / POST_ONLY / DRY / --repost - the no-solve modes take no authorisation text"; exit 2; fi
 if [ "$NOSOLVE" = 1 ]; then
   LIC=/nonexistent/b4p_dry_run_no_licence
@@ -134,17 +145,22 @@ busy() {   # python processes only (M10A F1); --only (HPR): only the processes o
 gurobi_busy() { ps -eo args= | grep -E '[b]4_split_solve\.py' | grep -vcE '^(/usr/bin/)?time |^setsid |^env '; }
 
 # ---- run table (single source: scripts_project/b4_batch4.py RUNS)
-declare -A SC BASE SET PROF COSTS
+declare -A SC BASE SET PROF COSTS ITERS PARENT PAIR; RIDS=()
 while IFS='|' read -r rid sc base set prof costs; do
-  [ -n "$rid" ] || continue; SC[$rid]=$sc; BASE[$rid]=$base; SET[$rid]=$set; PROF[$rid]=$prof; COSTS[$rid]=$costs
+  [ -n "$rid" ] || continue; SC[$rid]=$sc; BASE[$rid]=$base; SET[$rid]=$set; PROF[$rid]=$prof; COSTS[$rid]=$costs; RIDS+=("$rid")
 done < <(cd "$REPO" && $SUM_CMD runtable)
-[ "${#SC[@]}" = 2 ] || { echo "REFUSED: run table not readable from $REPO (got ${#SC[@]} runs)"; exit 2; }
+[ "${#SC[@]}" -ge 2 ] || { echo "REFUSED: run table not readable from $REPO (got ${#SC[@]} runs)"; exit 2; }
+# V3 HPC (RUN_PLAN_HPC_V3.md 1): per-run reference iterations, the parent build of a variant (F4 <- F3) and the pair (B6 / benefit per pair); absent (v2 tables, stand-ins) -> the v2 defaults
+while IFS='|' read -r rid it par pr; do [ -n "$rid" ] || continue; ITERS[$rid]=$it; PARENT[$rid]=$par; PAIR[$rid]=$pr; done < <(cd "$REPO" && $SUM_CMD runmeta 2>/dev/null)
+PAIRS=(); for rid in "${RIDS[@]}"; do p=${PAIR[$rid]:-A}; case " ${PAIRS[*]} " in *" $p "*) ;; *) PAIRS+=("$p");; esac; done
+pair_runs() { local rid out=(); for rid in "${RIDS[@]}"; do [ "${PAIR[$rid]:-A}" = "$1" ] && out+=("$rid"); done; echo "${out[*]}"; }
+if [ "${#SC[@]}" -gt 2 ] && [ -z "$ONLY" ] && [ "$NOSOLVE" = 0 ]; then echo "REFUSED: ${#SC[@]} runs in the table - they run as one PBS job each (--only <rid>, RUN_PLAN_HPC_V3.md 4); the one-machine batch mode is for two runs"; exit 2; fi
 if [ -n "$ONLY" ]; then
   [ -n "${SC[$ONLY]:-}" ] || { echo "REFUSED: --only $ONLY is not a run of the registered table (${!SC[*]})"; exit 2; }
   [ -z "$WAIT_START_OF" ] || [ -n "${SC[$WAIT_START_OF]:-}" ] || { echo "REFUSED: WAIT_START_OF=$WAIT_START_OF is not a run of the registered table"; exit 2; }
   [ "$WAIT_START_OF" != "$ONLY" ] || { echo "REFUSED: WAIT_START_OF must name the OTHER run"; exit 2; }
 fi
-ITERS_REF() { case "$1" in F1) echo 450;; F2) echo 250;; *) echo 450;; esac; }   # RUN_PLAN_B4 3.4 reference iteration counts (third batch: integrated 253-465, disconnected 116-228)
+ITERS_REF() { [ -n "${ITERS[$1]:-}" ] && { echo "${ITERS[$1]}"; return; }; case "$1" in F1) echo 450;; F2) echo 250;; *) echo 450;; esac; }   # RUN_PLAN_B4 3.4 reference iteration counts (third batch: integrated 253-465, disconnected 116-228); V3 HPC: per run from b4_batch4.py runmeta (RUN_PLAN_HPC_V3 5)
 threads_of() { "$PY" - "$REPO" "$1" <<'P' 2>/dev/null || echo 0
 import sys, yaml
 from pathlib import Path
@@ -255,6 +271,7 @@ P
 base_net() { echo "$NETS/${BASE[$1]}_unsolved.nc"; }
 base_scen() { echo "${BASE[$1]%_*_*}"; }
 is_variant() { [ "${SC[$1]}" != "${COSTS[$1]}" ]; }   # V3: a network derived from the one of its cost scenario (no_new_xb from integrated), registered through its variant receipt
+stem_of() { if is_variant "$1"; then echo "${PARENT[$1]:-${COSTS[$1]}}"; else base_scen "$1"; fi; }   # the build receipt <stem>_BUILD_RECEIPT.json of a run (= batch_def.build_stem; V3 HPC F3 integrated_ev05, F4 parent integrated_ev05)
 registered_of() { if is_variant "$1"; then jget "$NETS/${BASE[$1]}_VARIANT_RECEIPT.json" output.sha256; else jget "$NETS/$(base_scen "$1")_BUILD_RECEIPT.json" network.sha256; fi; }
 
 # ---- phase 0: inputs, the two base networks against the build receipts and the registered SHA256
@@ -262,7 +279,7 @@ prepare() {
   local f rid need=()
   [ "$POST_ONLY" = 1 ] && { log "PREPARE:skipped (POST_ONLY)"; return 0; }
   for rid in "${!SC[@]}"; do
-    need+=("${BASE[$rid]}_unsolved.nc" "${COSTS[$rid]}_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); fi
+    need+=("${BASE[$rid]}_unsolved.nc" "$(stem_of "$rid")_BUILD_RECEIPT.json" "${COSTS[$rid]}_costs_active_research.csv"); if is_variant "$rid"; then need+=("${BASE[$rid]}_VARIANT_RECEIPT.json"); fi
   done
   for f in "${need[@]}"; do
     [ -s "$NETS/$f" ] || { safe_stop "MISSING_INPUT:networks/$f"; return 1; }
@@ -289,6 +306,35 @@ wait_other_start() {   # $1 rid. HPR (RUN_PLAN_HPC 4): with WAIT_START_OF=<other
     sleep 5; w=$((w + 5))
   done
 }
+START_LOCK="$OUT/.gurobi_start_lock"; LOCK_HELD=""
+num_or_empty() { case "$1" in ''|*[!0-9]*) echo "";; *) echo "$1";; esac; }
+start_lock_release() { [ -n "$LOCK_HELD" ] || return 0; rm -rf "$START_LOCK"; log "START_LOCK_RELEASED_$LOCK_HELD:$(now)"; LOCK_HELD=""; }
+start_lock_acquire() {   # $1 rid. V3 HPC (RUN_PLAN_HPC_V3.md 4): the Gurobi starts of all jobs sharing RUN_DIR are serialised by an atomic mkdir lock (one start at a time, also
+  # across nodes); under the lock this run waits until >= LICENCE_GAP_S after every other run's Gurobi start (.solve_start), every Gurobi end (.solve_end) and the runner
+  # start, and until fewer than 2 other Gurobi processes run (started, not ended); the lock is released right after this run's .solve_start is written. A lock left by a
+  # job killed inside that window is never broken automatically: after WAIT_START_MAX_S -> STOP_SAFE:START_LOCK (the user removes it after checking no runner holds it).
+  local rid=$1 w=0 last act d s e
+  [ "$NOSOLVE" = 0 ] || return 0
+  until mkdir "$START_LOCK" 2>/dev/null; do
+    halted && return 0
+    [ $w -lt "$WAIT_START_MAX_S" ] || { safe_stop "START_LOCK:$rid:$START_LOCK held for ${WAIT_START_MAX_S}s by $(cat "$START_LOCK/owner" 2>/dev/null || echo unknown) (RUN_PLAN_HPC_V3 4; remove it only when no runner of that run is alive)"; return 1; }
+    [ $w = 0 ] && log "START_LOCK_WAIT_$rid:held by $(cat "$START_LOCK/owner" 2>/dev/null || echo unknown):$(now)"
+    sleep 5; w=$((w + 5))
+  done
+  echo "$rid $(date +%s) $(hostname) $$" > "$START_LOCK/owner"; LOCK_HELD=$rid
+  while :; do
+    halted && { start_lock_release; return 0; }
+    last=$T_START; act=0
+    for d in "$OUT"/*/; do d=${d%/}; [ "${d##*/}" = "$rid" ] && continue
+      s=$(num_or_empty "$(cat "$d/.solve_start" 2>/dev/null)"); e=$(num_or_empty "$(cat "$d/.solve_end" 2>/dev/null)")
+      [ -n "$s" ] && [ "$s" -gt "$last" ] && last=$s; [ -n "$e" ] && [ "$e" -gt "$last" ] && last=$e
+      [ -n "$s" ] && [ -z "$e" ] && act=$((act + 1))
+    done
+    if [ $(( $(date +%s) - last )) -ge "$LICENCE_GAP_S" ] && [ "$act" -lt 2 ]; then log "START_LOCK_$rid:acquired:gap=$(( $(date +%s) - last ))s:other_gurobi_running=$act:waited=${w}s:$(now)"; return 0; fi
+    [ $w -lt "$WAIT_START_MAX_S" ] || { start_lock_release; safe_stop "START_LOCK:$rid:no start slot within ${WAIT_START_MAX_S}s (gap $(( $(date +%s) - last ))s, other Gurobi processes $act; RUN_PLAN_HPC_V3 4)"; return 1; }
+    sleep 5; w=$((w + 5))
+  done
+}
 latest_solve_end() { local last=$T_START m f; for f in "$OUT"/*/.solve_end; do [ -f "$f" ] || continue; m=$(cat "$f"); [ "$m" -gt "$last" ] && last=$m; done; echo "$last"; }
 write_run_json() {   # $1 rid $2 network $3 time limit $4 wall cap $5 label
   local d="$OUT/$1"
@@ -308,7 +354,7 @@ run_gurobi_process() {   # $1 rid $2 run dir $3 log $4 err, then the command: ow
   ( cd "$REPO" && exec setsid /usr/bin/time -v env GRB_LICENSE_FILE="$LIC" "$@" > "$lg" 2> "$er" ) &
   local pid=$! start; start=$(date +%s); sleep 1
   local pg; pg=$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' '); [ -n "$pg" ] || pg=$pid
-  echo "$(now) pid=$pid pgid=$pg" > "$d/.started"; date +%s > "$d/.solve_start"
+  echo "$(now) pid=$pid pgid=$pg" > "$d/.started"; date +%s > "$d/.solve_start"; start_lock_release   # V3 HPC: the start marker is written - the next job may take the start lock
   log "SOLVE_$rid:pid=$pid:pgid=$pg:profile=${PROF[$rid]}:threads=${THREADS[${PROF[$rid]}]}:time_limit=$GUROBI_TIME_LIMIT_S:wall_cap=$WALL_CAP_S:network_sha256=$(jget "$d/RUN.json" network_sha256):mem_measure=$(mem_measure_used):cgroup_anon_source=$(cg_anon_source):quota_gib=$QUOTA_GIB:stop_gib=$(awk -v q="$QUOTA_GIB" -v f="$MEMORY_STOP_FRACTION" 'BEGIN {printf "%.2f", q*f}'):$(now)"
   monitor "$pg" "$rid" "$d" "$MONITOR_S" & local m=$! KILLED_REASON=""; local checked=0 tick=0; MEM_LAST_MEASURE=""
   while kill -0 "$pid" 2>/dev/null; do
@@ -357,8 +403,9 @@ solve_run() {   # $1 rid: returns 1 when the batch must stop
     if [ "$BUILD_ONLY" = 1 ]; then echo build_only > "$d/.cond"; echo 0 > "$d/.exit"; now > "$d/.ended"; log "RUN_$rid:split_built:exit=0:$(( $(date +%s) - t0 ))s"; return 0; fi
     wait_gap "$(latest_solve_end)" "$rid"
     wait_other_start "$rid" || return 1
-    halted && { log "NOT_STARTED_$rid:batch halted during the gap"; return 1; }
-    [ "$(gurobi_busy)" -lt 2 ] || { safe_stop "SOLVER_BUSY_$rid:$(gurobi_busy) Gurobi processes running"; return 1; }
+    start_lock_acquire "$rid" || return 1
+    halted && { start_lock_release; log "NOT_STARTED_$rid:batch halted during the gap"; return 1; }
+    [ "$(gurobi_busy)" -lt 2 ] || { start_lock_release; safe_stop "SOLVER_BUSY_$rid:$(gurobi_busy) Gurobi processes running"; return 1; }
     local pargs=(--run-dir "$d"); [ "$REMOVE_LP" = 1 ] && pargs+=(--remove-lp)
     run_gurobi_process "$rid" "$d" "$d/p2.log" "$d/p2.err" $SPLIT_CMD "${pargs[@]}"; ex=$?
     local S="$d/split/SPLIT_SOLVE.json"
@@ -374,8 +421,9 @@ solve_run() {   # $1 rid: returns 1 when the batch must stop
     else
       wait_gap "$(latest_solve_end)" "$rid"
       wait_other_start "$rid" || return 1
-      halted && { log "NOT_STARTED_$rid:batch halted during the gap"; return 1; }
-      [ "$(busy)" -lt 2 ] || { safe_stop "SOLVER_BUSY_$rid:$(busy) solve processes running"; return 1; }
+      start_lock_acquire "$rid" || return 1
+      halted && { start_lock_release; log "NOT_STARTED_$rid:batch halted during the gap"; return 1; }
+      [ "$(busy)" -lt 2 ] || { start_lock_release; safe_stop "SOLVER_BUSY_$rid:$(busy) solve processes running"; return 1; }
       run_gurobi_process "$rid" "$d" "$d/solve.log" "$d/solve.err" "${cmd[@]}"; ex=$?
     fi
   fi
@@ -479,17 +527,22 @@ regrade_all() {
 }
 batch_post() {
   if [ "$BUILD_ONLY" != 1 ] && [ "$DRY" != 1 ] && [ "${1:-}" != summary ]; then
-    if [ -f "$OUT/F1/ALLOCATION.json" ] && [ -f "$OUT/F2/ALLOCATION.json" ]; then
-      step batch m12_benefit $M12_CMD benefit --repo "$REPO" --integrated "$OUT/F1" --disconnected "$OUT/F2" --out "$OUT/M12_BENEFIT" > "$OUT/M12_BENEFIT.log" 2>&1
-      log "M12_BENEFIT:exit=$?:$(tail -1 "$OUT/M12_BENEFIT.log" 2>/dev/null)"
-    else log "M12_BENEFIT:not_computable:F1 / F2 allocations missing"; fi
+    local p ri rd bd
+    for p in "${PAIRS[@]}"; do   # one benefit per pair (V3 HPC: A = F1 / F2 -> M12_BENEFIT, B = F3 / F4 -> M12_BENEFIT_B; v2: the one pair F1 / F2)
+      read -r ri rd <<< "$(pair_runs "$p")"; bd=M12_BENEFIT; [ "$p" = "${PAIRS[0]}" ] || bd=M12_BENEFIT_$p
+      if [ -f "$OUT/$ri/ALLOCATION.json" ] && [ -f "$OUT/$rd/ALLOCATION.json" ]; then
+        step batch m12_benefit $M12_CMD benefit --repo "$REPO" --integrated "$OUT/$ri" --disconnected "$OUT/$rd" --out "$OUT/$bd" > "$OUT/$bd.log" 2>&1
+        log "$bd:exit=$?:$(tail -1 "$OUT/$bd.log" 2>/dev/null)"
+      else log "$bd:not_computable:$ri / $rd allocations missing"; fi
+    done
   fi
   local b3=(); [ -n "${BATCH3_EXPORT:-}" ] && [ -d "${BATCH3_EXPORT}" ] && b3=(--batch3 "$BATCH3_EXPORT")
   [ -n "${REFERENCE_VALUES:-}" ] && [ -f "${REFERENCE_VALUES}" ] && b3+=(--reference-values "$REFERENCE_VALUES")   # HPR (RUN_PLAN_HPC 7.4): third batch / DFX reference VALUES (numbers only; description)
   aux $SUM_CMD summary --out-dir "$OUT" ${b3[@]+"${b3[@]}"} > "$OUT/summary.log" 2>&1; log "SUMMARY:exit=$?:$(tail -1 "$OUT/summary.log" | cut -c1-300)"
   mkdir -p "$EXP/batch"
-  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json BATCH4_SUMMARY.json BATCH4_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS P1_DECISION.json PROJECTION_F1.json PROJECTION_F2.json; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
-  [ -d "$OUT/M12_BENEFIT" ] && { mkdir -p "$EXP/batch/M12_BENEFIT"; cp -r "$OUT/M12_BENEFIT"/. "$EXP/batch/M12_BENEFIT/"; }
+  for f in STATUS.txt BASE_CHECK.json BATCH_REFERENCE.json BATCH4_SUMMARY.json BATCH4_SUMMARY.md STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS P1_DECISION.json; do [ -f "$OUT/$f" ] && cp "$OUT/$f" "$EXP/batch/"; done
+  for f in "$OUT"/PROJECTION_*.json "$OUT"/BASE_CHECK_*.json; do [ -f "$f" ] && cp "$f" "$EXP/batch/"; done
+  for f in "$OUT"/M12_BENEFIT "$OUT"/M12_BENEFIT_*; do [ -d "$f" ] && { mkdir -p "$EXP/batch/${f##*/}"; cp -r "$f"/. "$EXP/batch/${f##*/}/"; }; done
 }
 pack() { [ "$DRY" = 1 ] && return 0; local root=$OUT; [ "$S1MODE" = 1 ] && root=$INTO; [ -n "${2:-}" ] || cp "$ST" "$EXP/batch/" 2>/dev/null
   local r; r=$(step batch pack $PACK_CMD "$root" "$1" ${2:+"$2"} ${3:+"$3"} ${4:+"$4"} 2>&1 | tail -1); log "PACK_$1:$r"; }
@@ -528,9 +581,9 @@ fi
 prepare || { log "HALTED:$(now):phase 0"; batch_post summary; pack halted_phase0; exit 3; }
 wait_gap "$(latest_solve_end)" PHASE_1
 if ! halted; then
-  solve_run F1 & LANE_F1=$!
-  if [ "$NOSOLVE" = 1 ]; then   # no Gurobi process: one lane, F1 then F2 (BUILD_ONLY builds both; POST_ONLY post-processes both)
-    wait $LANE_F1; post_run F1; halted || { solve_run F2; post_run F2; }
+  solve_run "${RIDS[0]}" & LANE_F1=$!
+  if [ "$NOSOLVE" = 1 ]; then   # no Gurobi process: one lane in table order, F1 then F2 (BUILD_ONLY builds every run; POST_ONLY post-processes every run; V3 HPC: F1-F4)
+    wait $LANE_F1; post_run "${RIDS[0]}"; for rid in "${RIDS[@]:1}"; do halted || { solve_run "$rid"; post_run "$rid"; }; done
   else
     # P1 probe: wait until F1's Gurobi process has run P1_WINDOW_S (or ended), then decide (b4_batch4.py p1); F2 beside F1 only when the probe passes
     until [ -f "$OUT/F1/.solve_start" ] || ! kill -0 $LANE_F1 2>/dev/null; do sleep 5; done

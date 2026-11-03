@@ -13,6 +13,8 @@
 # switch in the environment of a formal job, a missing authorisation, a run folder holding test leftovers (build_only / SMOKE_TEST_ONLY), a licence
 # file missing or not mode 600, a batch job before both runs ended (not_ready), a build-only job on a folder holding a previous build-only run (S-01). Local drill: HPR_LOCAL_DRILL=1 (skips the token-server curl;
 # HPR_RUN_ROOT=<dir> puts runs/ elsewhere; HPR_DRY_TRUNCATE=56 for the truncated BUILD_ONLY dry run) - refused under a real PBS job.
+# V3 HPC (RUN_PLAN_HPC_V3.md): with a package BATCH_DEF.json the formal / build-only run ids are the runs of the definition (F1-F4), the batch job waits until every one
+# of them settled, and a formal job refuses while the definition's limits are PROPOSED (not yet registered by the reviewer and the user).
 set -u
 JOB_MODE=${JOB_MODE:?formal|batch|smoke56|build_only}; JOB_RID=${JOB_RID:-}; JOB_KEY=${JOB_KEY:-$JOB_MODE}
 PKG=${PBS_O_WORKDIR:?run under PBS (qsub) - or set PBS_O_WORKDIR for the local drill}; cd "$PKG" || exit 2
@@ -37,27 +39,33 @@ case "$JOB_MODE" in
 esac
 # ---- authorisation text (solve modes): environment, else <package>/HPR_AUTH.txt
 AUTH=${HPR_AUTH:-}; [ -n "$AUTH" ] || { [ -f "$PKG/HPR_AUTH.txt" ] && AUTH=$(cat "$PKG/HPR_AUTH.txt"); }
+# V3 HPC (RUN_PLAN_HPC_V3.md): the runs of the package definition (F1-F4) and the status of its limits; without a definition the v2 pair F1 / F2, limits registered
+DEF_RUNS="F1 F2"; DEF_STATUS=REGISTERED
+if [ -n "${BATCH_DEF:-}" ]; then
+  read -r DEF_STATUS DEF_RUNS < <("$PY" -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('limits_status', 'PROPOSED') if d.get('limits') else 'REGISTERED', ' '.join(d['runs']))" "$BATCH_DEF") || { echo "REFUSED: BATCH_DEF.json not readable"; exit 2; }
+fi
 case "$JOB_MODE" in
   formal)
-    case "$JOB_RID" in F1|F2) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2)"; exit 2;; esac
+    case " $DEF_RUNS " in *" $JOB_RID "*) ;; *) echo "REFUSED: JOB_RID=$JOB_RID ($DEF_RUNS)"; exit 2;; esac
     [ -n "$AUTH" ] || { echo "REFUSED: the user authorisation text is missing (HPR_AUTH or $PKG/HPR_AUTH.txt)"; exit 2; }
-    for d in "$RUN_DIR"/F1 "$RUN_DIR"/F2; do
+    [ "$DEF_STATUS" = REGISTERED ] || { echo "REFUSED: the limits of BATCH_DEF.json are $DEF_STATUS (RUN_PLAN_HPC_V3.md section 2) - the formal jobs wait for the registered values"; exit 2; }
+    for d in "$RUN_DIR"/F*; do
       [ -d "$d" ] || continue
       c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) echo "REFUSED: $d holds a dry-run leftover (.cond=$c) - the formal RUN_DIR must be fresh (runs/batch4)"; exit 2;; esac
       [ -f "$d/RUN.json" ] && grep -q '"label": "SMOKE_TEST_ONLY"' "$d/RUN.json" && { echo "REFUSED: $d holds a smoke leftover (label SMOKE_TEST_ONLY)"; exit 2; }
       [ -f "$d/RUN.json" ] && grep -Eq '"truncate": [0-9]' "$d/RUN.json" && { echo "REFUSED: $d holds a truncated run"; exit 2; }
     done;;
-  batch)   # both runs settled: ended, or never started because the batch was halted (STOP / STOP_SAFE in the shared RUN_DIR; review F-06) - a started-not-ended run is not settled
-    for rid in F1 F2; do
+  batch)   # every run settled: ended, or never started because the batch was halted (STOP / STOP_SAFE in the shared RUN_DIR; review F-06) - a started-not-ended run is not settled
+    for rid in $DEF_RUNS; do   # v2: F1 F2; V3 HPC: F1-F4 (the batch job depends on afterany:F3:F4, and F3 / F4 on F1 / F2)
       if [ -f "$RUN_DIR/$rid/.ended" ]; then continue; fi
       if { [ -f "$RUN_DIR/STOP" ] || [ -f "$RUN_DIR/STOP_SAFE" ]; } && [ ! -f "$RUN_DIR/$rid/.started" ]; then echo "NOTE: $rid never started (batch halted) - the batch job summarises and packs as halted"; continue; fi
-      echo "REFUSED: not_ready - $RUN_DIR/$rid has not ended (the batch job runs after BOTH F1 and F2; depend=afterany)"; exit 2
+      echo "REFUSED: not_ready - $RUN_DIR/$rid has not ended (the batch job runs after every run: $DEF_RUNS; depend=afterany)"; exit 2
     done;;
   smoke56)
     case "$JOB_RID" in F1|F2|batch) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2 | batch)"; exit 2;; esac
     [ "$JOB_RID" = batch ] || [ -n "$AUTH" ] || { echo "REFUSED: the user authorisation text is missing (HPR_AUTH or $PKG/HPR_AUTH.txt)"; exit 2; };;
   build_only)
-    case "$JOB_RID" in F1|F2) ;; *) echo "REFUSED: JOB_RID=$JOB_RID (F1 | F2)"; exit 2;; esac
+    case " $DEF_RUNS " in *" $JOB_RID "*) ;; *) echo "REFUSED: JOB_RID=$JOB_RID ($DEF_RUNS)"; exit 2;; esac
     # a folder holding a previous build-only run (self-check S-01 after the review): the runner would skip the build on its receipt (.cond=build_only /
     # split_built) and the records below would repeat the old numbers with the LP already deleted - the folder must be moved aside first
     if [ -d "$RUN_DIR/$JOB_RID" ] || [ -f "$RUN_DIR/BUILD_ONLY_STATUS.txt" ]; then echo "REFUSED: $RUN_DIR holds a previous build-only run - move it aside first (mv runs/build_only_f1 runs/build_only_f1_<date>); nothing started"; exit 2; fi;;

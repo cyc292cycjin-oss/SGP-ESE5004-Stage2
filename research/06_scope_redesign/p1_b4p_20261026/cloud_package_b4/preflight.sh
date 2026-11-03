@@ -8,7 +8,7 @@
 #   env        environment against env/ENV_LOCK.txt (env/env_check.py: key packages identical)
 #   profile    profile formal_barrier_1e6_t16: s2_solve.py key-name check, interior-point gate path, Threads 16; TimeLimit = registered value
 #   code       the run / post-processing modules import without the licence (s2_solve, b4_split_solve, b4_batch4, l23_violation_analysis,
-#              s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6); the run table has 2 runs; s2_solve has --split-stage
+#              s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6); the run table has 2 runs (V3 HPC: the runs of BATCH_DEF.json); s2_solve has --split-stage
 #   tools      GNU time (-v) at /usr/bin/time, setsid, pgrep, timeout, tmux (warning only)
 #   licence    GRB_LICENSE_FILE readable and accepted by Gurobi - output suppressed, nothing printed; holds one WLS token >= 5 min (330 s gap)
 #   resources  container cgroup quota (cores, memory), free data disk under this folder (PREFLIGHT_DISK_PATH override) against the HARD FLOOR of
@@ -39,6 +39,10 @@ if sec sha; then
     else echo "code_${C8}.tar.gz MISSING"; ok=0; fi
   else echo "./repo is the unpacked code of commit $(cat repo/.package_commit)"; fi
 fi
+if [ -n "${BATCH_DEF:-}" ] && [ -f repo/scripts_project/b4_batch4.py ]; then   # V3 HPC (RUN_PLAN_HPC_V3.md 2): the registered TimeLimit of the package definition (b4_batch4.py = single source)
+  R_TL=$(cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py hpc-plan 2>/dev/null | grep '^LIMITS|' | cut -d'|' -f2); [ -n "$R_TL" ] || { echo "b4_batch4.py hpc-plan not readable"; ok=0; R_TL=0; }
+  echo "== limits of the package definition: TimeLimit $R_TL s, status $(cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py hpc-plan 2>/dev/null | grep '^STATUS|' | cut -d'|' -f2) (PROPOSED = formal jobs refuse until registered)"
+fi
 if sec networks; then
   echo "== networks (full 2920x3h; registered SHA256)"
   ( cd repo && env -u GRB_LICENSE_FILE "$PY" scripts_project/b4_batch4.py base-check --nets "$HERE/networks" --out "$HERE/PREFLIGHT_BASE_CHECK${PREFLIGHT_TAG:+_$PREFLIGHT_TAG}.json" ) || { echo "BASE NETWORK SHA256 / BYTES DIFFER FROM THE BUILD RECEIPTS OR THE REGISTERED VALUES"; ok=0; }   # PREFLIGHT_TAG (HPR): per-job file names when two jobs share the package folder
@@ -68,14 +72,19 @@ if sec code; then
 import sys
 sys.path.insert(0, "scripts_project"); sys.path.insert(0, "scripts_project/v5")
 import s2_solve, b4_split_solve, b4_batch4, l23_violation_analysis, s4o_c1_precision, m12_allocation, m12_rhs_audit, gates_v6
-assert list(b4_batch4.RUNS) == ["F1", "F2"], "run table"
+import json, os
+want = list(json.load(open(os.environ["BATCH_DEF"], encoding="utf-8"))["runs"]) if "BATCH_DEF" in os.environ else ["F1", "F2"]   # V3 HPC: the four runs of the definition
+assert list(b4_batch4.RUNS) == want and len(want) >= 2, "run table"
 assert "--split-stage" in open("scripts_project/s2_solve.py").read() and hasattr(s2_solve, "post_solve") and hasattr(s2_solve, "assign_split_result"), "split / post_solve code"
-# HPR (RUN_PLAN_HPC section 10): the registered limits of b4_batch4.py equal the R_* constants of run_batch4.sh next to this preflight and this preflight's R_TL
+# HPR (RUN_PLAN_HPC section 10): the registered limits of b4_batch4.py equal the R_* constants of run_batch4.sh next to this preflight and this preflight's R_TL;
+# V3 HPC (RUN_PLAN_HPC_V3.md 2): with a definition the runner takes its limits from b4_batch4.py hpc-plan (single source) - the R_* line is the v2 fallback
 import re
 src = open("../run_batch4.sh").read(); m = re.search(r"^R_TL=(\d+); R_WALL=(\d+); R_GAP=(\d+); R_MODE=(\w+)", src, re.M)
-assert m and (int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4)) == (b4_batch4.TIME_LIMIT_S, b4_batch4.WALL_CAP_S, b4_batch4.LICENCE_GAP_S, "split"), ("run_batch4.sh R_* differ from b4_batch4.py", m and m.groups())
+if "BATCH_DEF" in os.environ:
+    assert "scripts_project/b4_batch4.py hpc-plan" in src and m and m.group(4) == "split", "run_batch4.sh does not read the limits from b4_batch4.py hpc-plan"
+else:
+    assert m and (int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4)) == (b4_batch4.TIME_LIMIT_S, b4_batch4.WALL_CAP_S, b4_batch4.LICENCE_GAP_S, "split"), ("run_batch4.sh R_* differ from b4_batch4.py", m and m.groups())
 assert b4_batch4.TIME_LIMIT_S == int(sys.argv[1]), "preflight R_TL differs from b4_batch4.py TIME_LIMIT_S"
-import os
 assert "BATCH_DEF" in os.environ or (b4_batch4.BUILD_COMMIT.startswith("72083fde") and set(b4_batch4.REGISTERED_SHA) == {"integrated_2920_3h_unsolved.nc", "disconnected_2920_3h_unsolved.nc"}), "registered networks"
 assert set(b4_batch4.REGISTERED_SHA) == {r["base"] + "_unsolved.nc" for r in b4_batch4.RUNS.values()}, "registered networks = run table"
 print("modules import; run table", ", ".join(b4_batch4.RUNS), "| thresholds memory", b4_batch4.MEMORY_STOP_FRACTION, "projection", b4_batch4.PROJECTION_FRACTION, "P1", b4_batch4.P1_THRESHOLD, b4_batch4.P1_MIN_CORES, b4_batch4.P1_WINDOW_S,
