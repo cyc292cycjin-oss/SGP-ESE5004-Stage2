@@ -1,0 +1,12 @@
+# V3 screening (ON the instance, read-only; instruction section 2 step 7): runner STATUS, monitor CSV (memory, last Gurobi line), Gurobi log tail (licence
+# lines filtered), processes, memory, disk
+O=/root/autodl-tmp/v3_screen/runs/dfx; S='license[i]d|registered[[:space:]]+to|wls(access|secret)|academic|licen[cs]e (file|key|id)'
+echo "== $(TZ=Asia/Singapore date '+%F %T') SGT"
+echo "== STATUS"; grep -viE "$S" $O/STATUS.txt 2>/dev/null | cut -c1-260 | tail -${1:-25}
+for r in V1 V2 V4 V5 V3; do [ -f $O/MONITOR_$r.csv ] && echo "== MONITOR_$r ($(($(wc -l < $O/MONITOR_$r.csv)-1)) rows): $(tail -1 $O/MONITOR_$r.csv | cut -c1-200)"; done
+L=$(ls -t $O/V*/gurobi.linopy.log 2>/dev/null | head -1)
+[ -n "$L" ] && { echo "== latest gurobi log: $L"; grep -viE "$S" "$L" | tail -${2:-5} | cut -c1-140; }
+echo "== processes"; ps -eo pid,etimes,rss,args | grep -E '[s]2_solve\.py|[r]un_dfx\.sh|[l]23_violation|[s]4o_c1|[m]12_allocation|[m]12_rhs_audit|[g]ates_v6|[p]ack_results|[v]3_screen_tables' | awk '{printf "%s %ss %.1fGiB ", $1, $2, $3/1048576; for (i=4;i<=NF && i<8;i++) printf "%s ", $i; print ""}' | cut -c1-170
+awk '$1=="anon" {printf "cgroup anon %.2f GiB\n", $2/1073741824}' /sys/fs/cgroup/memory.stat; df -h /root/autodl-tmp | tail -1
+for f in STOP STOP_SAFE UNUSABLE POSTPROC_ERRORS; do [ -f $O/$f ] && echo "!! $f: $(head -c 300 $O/$f | tr '\n' ' ')"; done
+ls $O/results_*.tar.gz* 2>/dev/null
