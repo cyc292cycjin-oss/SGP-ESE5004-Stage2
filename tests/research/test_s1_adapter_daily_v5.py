@@ -46,6 +46,66 @@ class Daily(unittest.TestCase):
         self.assertAlmostEqual(float(d.loads_t.p_set['l'].sum()*24),float(n.loads_t.p_set['l'].sum()*3),places=6);self.assertEqual(len(ledger),2);self.assertEqual(d.meta['temporal_resolution'],'365x24h')
         pd.testing.assert_frame_equal(n.generators,d.generators)
 
+class DailyStoreBounds(unittest.TestCase):
+    """V3 supplement 07 (decision 182): Store e_min_pu daily max, e_max_pu daily min (upstream average_every_nhours); every other series and every network without such bounds as before."""
+    @staticmethod
+    def _to_daily_before_182(n):   # the aggregation of to_daily at 2548123a without its input checks (every series the exact daily mean): the reference for "as before"
+        from fractions import Fraction as F;import copy
+        DAYS,PER_DAY=365,8
+        expected=pd.date_range('2013-01-01',periods=DAYS*PER_DAY,freq='3h',name='snapshot')
+        days=pd.DatetimeIndex(expected[::PER_DAY].values,name='snapshot')
+        frames={};ledger=[]
+        for c in n.iterate_components():
+            for attr,frame in c.pnl.items():
+                if not len(frame.columns):continue
+                result=np.empty((DAYS,len(frame.columns)),dtype='<f8')
+                for i,name in enumerate(frame.columns):result[:,i]=average(frame[name].to_numpy())
+                frames[c.name,attr]=pd.DataFrame(result,index=days,columns=frame.columns)
+        out=n.copy();out.meta=copy.deepcopy(n.meta)
+        out.set_snapshots(days)
+        out.snapshot_weightings.loc[:,['objective','generators','stores']]=24.
+        for (c,a),frame in frames.items():out.pnl(c)[a]=frame
+        out.meta.update(temporal_resolution='365x24h',temporal_reduction='S1 exact daily mean of frozen 2920x3h inputs (C02 arithmetic)',parent_resolution='2920x3h')
+        return out,ledger
+    @staticmethod
+    def _net(bounds):
+        n=pypsa.Network();n.set_snapshots(pd.date_range('2013-01-01',periods=2920,freq='3h',name='snapshot'));n.snapshot_weightings.loc[:,:]=3.
+        n.add('Bus','SG0',carrier='AC');n.add('Bus','SG0 EV battery',carrier='Li ion')
+        n.add('Load','l',bus='SG0',p_set=np.random.RandomState(1).rand(2920));n.add('Generator','g',bus='SG0',p_nom=5.,p_max_pu=np.random.RandomState(2).rand(2920))
+        n.add('Link','charger',bus0='SG0',bus1='SG0 EV battery',p_nom=1.,efficiency=.9,p_max_pu=.7+.1*np.random.RandomState(3).rand(2920))
+        n.add('Load','ev',bus='SG0 EV battery',p_set=.2*np.random.RandomState(4).rand(2920))
+        if bounds:   # as v3_layers.apply_ev_structure: 0.8 in the one 3 h slot of the local morning (UTC 00-03 for +6.5 / +7, 21-24 for +8 / +9), 0 otherwise
+            for k,slot in enumerate((0,7)):
+                e=np.zeros(2920);e[slot::8]=.8;n.add('Store',f'ev battery {k}',bus='SG0 EV battery',e_nom=1.,e_cyclic=True,e_min_pu=e)
+            n.add('Store','capped',bus='SG0 EV battery',e_nom=1.,e_max_pu=1.-.3*np.random.RandomState(5).rand(2920))
+        n.add('Store','plain',bus='SG0 EV battery',e_nom=2.,e_cyclic=True)
+        n.meta={'x':1};return n
+    def test_ev_morning_floor_is_the_daily_max(self):
+        n=self._net(True);d,ledger=to_daily(n)
+        lo=d.stores_t.e_min_pu;self.assertEqual(sorted(lo.columns),['ev battery 0','ev battery 1']);self.assertEqual(lo.shape,(365,2))
+        self.assertTrue((lo.to_numpy()==.8).all())   # 0.8 every day, not the mean 0.1
+        hi=n.stores_t.e_max_pu['capped'].to_numpy().reshape(365,8).min(axis=1);self.assertTrue(np.array_equal(d.stores_t.e_max_pu['capped'].to_numpy(),hi))
+        m={(r['component'],r['attribute']):r['method'] for r in ledger}
+        self.assertIn('daily max',m['Store','e_min_pu']);self.assertIn('daily min',m['Store','e_max_pu']);self.assertTrue(m['Load','p_set'].startswith('exact rational mean'))
+    def test_store_bounds_equal_upstream_average_every_nhours(self):
+        n=self._net(True);d,_=to_daily(n);up=sa.load_upstream(ROOT).average_every_nhours(n,'24h')
+        for a in ('e_min_pu','e_max_pu'):
+            self.assertTrue(np.array_equal(d.stores_t[a].to_numpy(),up.stores_t[a][d.stores_t[a].columns].to_numpy()),a)
+    def test_every_other_series_as_before(self):
+        n=self._net(True);d,_=to_daily(n);old,_=self._to_daily_before_182(n);seen=0
+        for c in n.iterate_components():
+            for attr,frame in c.pnl.items():
+                if not len(frame.columns) or (c.list_name=='stores' and attr in ('e_min_pu','e_max_pu')):continue
+                a,b=d.pnl(c.name)[attr].to_numpy(dtype='<f8'),old.pnl(c.name)[attr].to_numpy(dtype='<f8');seen+=1
+                self.assertTrue(np.array_equal(a.view('<u8'),b.view('<u8')),c.name+'.'+attr)
+        self.assertEqual(seen,3);self.assertEqual(d.meta,old.meta)
+        for c in n.iterate_components():pd.testing.assert_frame_equal(d.df(c.name),old.df(c.name),check_exact=True)
+    def test_network_without_store_bounds_byte_identical(self):
+        import tempfile
+        n=self._net(False);t=Path(tempfile.mkdtemp());d,_=to_daily(n);old,_=self._to_daily_before_182(n)
+        d.export_to_netcdf(t/'new.nc');old.export_to_netcdf(t/'old.nc')
+        self.assertEqual((t/'new.nc').read_bytes(),(t/'old.nc').read_bytes())
+
 class GatesB(unittest.TestCase):
     def test_b5_config_diff_only_switches(self):
         a={'research':{'scenario':'integrated','cross_border':{'electricity':True,'H2':True,'gas':True,'co2':True},'x':1}}
