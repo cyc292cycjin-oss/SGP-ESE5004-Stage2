@@ -14,7 +14,10 @@ if [ -f "$OUT/STATUS.txt" ]; then
   echo "== stop / error lines (contact the reviewer when any appears)"
   lines=$(grep -E "STOP_SAFE|STOP_NOT_ACCEPTED|UNUSABLE|HALTED|POSTPROC_ERROR|KILLED|MEMORY_STOP|PROJECTION_STOP|NOT_STARTED|WAIT_START.*STOP" "$OUT/STATUS.txt" | tail -8); [ -n "$lines" ] && echo "$lines" | cut -c1-220 || echo "(none)"
 fi
-[ -d "$OUT/.gurobi_start_lock" ] && echo "== start lock held by: $(cat "$OUT/.gurobi_start_lock/owner" 2>/dev/null) (V3 HPC, RUN_PLAN_HPC_V3 4: normal for up to ~6 min before a Gurobi start; held for hours = contact the reviewer)"
+{ [ -f "$OUT/STOP" ] || [ -f "$OUT/STOP_SAFE" ]; } && { echo "== STOP / STOP_SAFE files (the batch is halted - contact the reviewer)"; cat "$OUT/STOP" "$OUT/STOP_SAFE" 2>/dev/null | cut -c1-220; }
+WMAX=$(grep '^LIMITS|' pbs/HPC_PLAN.txt 2>/dev/null | cut -d'|' -f5); WMAX=${WMAX:-7200}
+# review item 6: a run holds the lock while it waits for its start slot (>= 330 s after every other Gurobi start / end, < 2 other Gurobi processes) - up to WAIT_START_MAX_S
+[ -d "$OUT/.gurobi_start_lock" ] && echo "== start lock held by: $(cat "$OUT/.gurobi_start_lock/owner" 2>/dev/null) (V3 HPC, RUN_PLAN_HPC_V3 4: normal while that run waits for its start slot, up to $WMAX s = $((WMAX / 3600)) h; the second field is the epoch second it was taken; held longer, or a STOP_SAFE:START_LOCK line = contact the reviewer)"
 for d in "$OUT"/F*/; do   # v2 F1 / F2; V3 HPC F1-F4
   d=${d%/}; rid=${d##*/}; [ -d "$d" ] || continue
   echo "== $rid"

@@ -1,6 +1,6 @@
 {
  "name": "V3 2920x3h formal batch on NUS Atlas (PBS Pro): F1 / F2 main, F3 / F4 EV fleet x0.5 (decisions 160-165, 172-173, 179, 180, 182, 186, 187; S-A shipping)",
- "note": "Copied into the HPC package as BATCH_DEF.json (RUN_PLAN_HPC_V3.md). Networks of the build a1ef782b registered in RUN_PLAN_V3.md section 24.1. The limits and PBS walltimes are PROPOSED (RUN_PLAN_HPC_V3.md section 2): formal jobs refuse until the reviewer and the user register them (limits_status REGISTERED, a new package build).",
+ "note": "Copied into the HPC package as BATCH_DEF.json (RUN_PLAN_HPC_V3.md). Networks of the build a1ef782b registered in RUN_PLAN_V3.md section 24.1. The limits and PBS walltimes were PROPOSED in V3 HPC v1 (TimeLimit 1,296,000 s, process-1 timeout 7,200 s, walltime 376 / 378 / 378 / 378 h) and were decided by the reviewer on the user's authorisation on 2026-11-04 (V3_HPC_UNATTENDED.md section 1; RUN_PLAN_HPC_V3.md section 14): REGISTERED.",
  "runs": {
   "F1": {
    "scenario": "integrated",
@@ -57,22 +57,22 @@
   "no_new_xb_ev05_2920_3h_unsolved.nc": 71411730
  },
  "build_commit": "a1ef782b8c8f0b6cb0ef67b3fe66a7493865e9b7",
- "limits_status": "PROPOSED",
+ "limits_status": "REGISTERED",
  "limits": {
-  "time_limit_s": 1296000,
+  "time_limit_s": 864000,
   "wall_margin_s": 7200,
   "licence_gap_s": 330,
   "wait_start_max_s": 7200,
-  "build_timeout_s": 7200,
+  "build_timeout_s": 5400,
   "assign_timeout_s": 32400,
   "post_timeout_s": 10800,
   "pack_timeout_s": 7200
  },
  "hpc_jobs": {
-  "F1": {"name": "hpr3_f1", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "376:00:00", "mode": "formal", "rid": "F1", "depends": "", "wait_start_of": ""},
-  "F2": {"name": "hpr3_f2", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "378:00:00", "mode": "formal", "rid": "F2", "depends": "after:F1", "wait_start_of": "F1"},
-  "F3": {"name": "hpr3_f3", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "378:00:00", "mode": "formal", "rid": "F3", "depends": "afterany:F1", "wait_start_of": ""},
-  "F4": {"name": "hpr3_f4", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "378:00:00", "mode": "formal", "rid": "F4", "depends": "afterany:F2", "wait_start_of": ""},
+  "F1": {"name": "hpr3_f1", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "260:00:00", "mode": "formal", "rid": "F1", "depends": "", "wait_start_of": ""},
+  "F2": {"name": "hpr3_f2", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "262:00:00", "mode": "formal", "rid": "F2", "depends": "after:F1", "wait_start_of": "F1"},
+  "F3": {"name": "hpr3_f3", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "260:00:00", "mode": "formal", "rid": "F3", "depends": "afterany:F1", "wait_start_of": ""},
+  "F4": {"name": "hpr3_f4", "queue": "parallel", "ncpus": 48, "mem_gb": 250, "walltime": "262:00:00", "mode": "formal", "rid": "F4", "depends": "afterany:F2", "wait_start_of": ""},
   "batch": {"name": "hpr3_batch", "queue": "parallel", "ncpus": 12, "mem_gb": 120, "walltime": "48:00:00", "mode": "batch", "rid": "batch", "depends": "afterany:F3:F4", "wait_start_of": ""},
   "smoke56": {"name": "hpr3_smoke56", "queue": "parallel", "ncpus": 17, "mem_gb": 32, "walltime": "04:00:00", "mode": "smoke56", "rid": "all", "depends": "", "wait_start_of": ""},
   "build_only_f1": {"name": "hpr3_build_only_f1", "queue": "parallel", "ncpus": 48, "mem_gb": 300, "walltime": "02:30:00", "mode": "build_only", "rid": "F1", "depends": "", "wait_start_of": ""},

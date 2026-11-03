@@ -124,13 +124,17 @@ def walltime_s(w: str) -> int:
 
 def walltime_components() -> dict:
     """RUN_PLAN_HPC.md section 2: the terms of the PBS walltime of F1 / F2 and the registered (rounded-up) values. V3 HPC: every formal job but F1 may wait up to
-    WAIT_START_MAX_S for its Gurobi start (F2 for F1's start; F3 / F4 for the start lock and gap, RUN_PLAN_HPC_V3.md 4), so its sum carries that term too (per_job)."""
+    WAIT_START_MAX_S for its Gurobi start (F2 for F1's start; F3 / F4 for the start lock and gap, RUN_PLAN_HPC_V3.md 4), so its sum carries that term too (per_job).
+    With a package definition (review item 6; RUN_PLAN_HPC_V3.md 14) a job with WAIT_START_OF (F2) counts both waits: up to WAIT_START_MAX_S for the other run's start,
+    then up to WAIT_START_MAX_S for the start lock; without a definition the registered v2 terms (F2 one wait) are kept."""
     f1 = LICENCE_GAP_S + BUILD_TIMEOUT_S + WALL_CAP_S + ASSIGN_TIMEOUT_S + 2 * POST_ESTIMATE_S + JOB_OVERHEAD_S
     formal = [k for k, j in HPC_JOBS.items() if j["mode"] == "formal"]
-    per_job = {k: dict(sum_s=f1 + (0 if k == formal[0] else WAIT_START_MAX_S), registered_s=walltime_s(HPC_JOBS[k]["walltime"])) for k in formal}
+    waits = {k: (0 if k == formal[0] else 1) + (1 if _DEF and HPC_JOBS[k].get("wait_start_of") else 0) for k in formal}
+    per_job = {k: dict(sum_s=f1 + waits[k] * WAIT_START_MAX_S, waits=waits[k], registered_s=walltime_s(HPC_JOBS[k]["walltime"]),
+                       margin_s=walltime_s(HPC_JOBS[k]["walltime"]) - f1 - waits[k] * WAIT_START_MAX_S) for k in formal}
     return dict(terms=dict(runner_start_gap_s=LICENCE_GAP_S, process1_timeout_s=BUILD_TIMEOUT_S, process2_wall_cap_s=WALL_CAP_S, process3_timeout_s=ASSIGN_TIMEOUT_S,
                            post_processing_x2_s=2 * POST_ESTIMATE_S, job_overhead_s=JOB_OVERHEAD_S, f2_wait_start_max_s=WAIT_START_MAX_S),
-                sum_f1_s=f1, sum_f2_s=f1 + WAIT_START_MAX_S, registered_f1_s=walltime_s(HPC_JOBS["F1"]["walltime"]), registered_f2_s=walltime_s(HPC_JOBS["F2"]["walltime"]),
+                sum_f1_s=f1, sum_f2_s=per_job["F2"]["sum_s"], registered_f1_s=walltime_s(HPC_JOBS["F1"]["walltime"]), registered_f2_s=walltime_s(HPC_JOBS["F2"]["walltime"]),
                 per_job=per_job, projection_limit_s=PROJECTION_FRACTION * TIME_LIMIT_S)
 # Pre-registered stop thresholds (RUN_PLAN_B4.md section 3); the runner reads them from here (single source)
 MEMORY_STOP_FRACTION = 0.80         # cgroup anon memory > 80 % of the quota -> STOP_SAFE:MEMORY

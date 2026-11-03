@@ -3,8 +3,9 @@
 - **指令：** `work/p1_v3_20261102/V3_HPC_PACKAGE_INSTRUCTION.md`，SHA256 `29dc0b0fafd0731e57cf85d054eaebc8a44ebaa10f4446dcfbbe0a8ba3b3ade1`，与同目录 `V3_HPC_PACKAGE_SHA256.txt` 一致（2026-11-04 00:25 SGT 核对）。
 - **开始条件（用户 2026-11-04 授权的补充）：** V27 主体已结束（`V3_REPORT_SUPPLEMENT07.md` 第 8 节已推送，头提交 `5e372e5d`），第 8.4 节由另一个会话补写，视为满足。为避免两个会话在同一分支提交，本次在新 worktree `/home/jin/wt_v3_hpc`、自 `5e372e5d` 开出的新分支 `codex/v3-hpc-20261104` 上工作；未进入 `/home/jin/wt_v3_20261102`、`/home/jin/v3s/`，未碰 `work/p1_v3_20261102/cloud_results/`。
 - **用户在本会话的决定：** (1) S-A 按登记定义 η = 1，原话"S-A 单价为全成本，已含船用燃料与运营费用，货损不再另计，避免重复计算"，核对时允许船运链路的 `marginal_cost` 与 `efficiency` 两个字段不同；(2) 网络元数据里的构建 worktree 路径在构建前登记为来源差异，并要求确认 HPC 预检与运行器不依赖它（第 2.2 节）；(3) 冒烟直接开始（WLS 空闲、AnyConnect 已断开）。
+- **无人值守补充授权：** `work/p1_v3_20261102/V3_HPC_UNATTENDED.md` v1，SHA256 `bd985bc9a7a30d247f03e1fa61048941d79d8870fb9b348a696449bcfe05f8df`，与同目录 `V3_HPC_UNATTENDED_SHA256.txt` 一致（2026-11-04 02:45 SGT 核对）。审阅端按用户授权代为决定原 PROPOSED 取值（第 5 节），并给出审查六条的处理意见（第 6.1 节）；授权不扩大到模型、网络、成本、求解档案、验收阈值、已登记的预测、Gurobi、HPC / 云 / VPN、上传、合并 main、force-push 与删除文件。
 - **证据等级：** VERIFIED（读了数组、回执、闸门文件）、EXACT（逐位或有理数核验）、INFERENCE（机制解释与外推）、PROPOSED（未执行、待决定）。
-- **不连 HPC、不连云、未上传。** 本机 Gurobi 2 / 2（登记的两次冒烟）。
+- **不连 HPC、不连云、不连 VPN、未上传。** 本机 Gurobi 2 / 2（登记的两次冒烟），无人值守阶段 0 次。
 
 ## 0. 摘要
 
@@ -12,8 +13,11 @@
 2. **四个网络（第 2 节）：** 构建 `a1ef782b`，逐元素核对全部符合构建前写定的预期：F1、F2 对登记网络只有 270 条船运链路的单价与效率不同（S-A 公式逐条吻合、η = 1）；F3、F4 对 F1、F2 只有 96 个 EV 电池容量与 96 个充电桩功率不同，逐位为 0.5 倍；F2 − F1、F4 − F3 与登记对的差异结构完全相同。新 SHA256：F1 `8b5fd663…`、F2 `e2837e4a…`、F3 `c4eb7c44…`、F4 `0bbe235e…`。
 3. **冒烟（第 3 节）：** 两次 optimal、C1 111、`ACCEPTED_LAYER2`；一体化 329.7056、`no_new_xb` 342.2687 bn，**B6 12.5631 bn**；S-A 使两情景总成本各增约 0.50 bn，B6 只变 −0.0034 bn（审查估计 ≤ 0.02 bn 成立）；12 个参与者的 Owen 受益符号不变。
 4. **预测（第 4 节）：** 在任何 HPC 求解之前登记（`RUN_PLAN_V3.md` 第 26 节），两个参照（56 时段冒烟、365×24h 重跑）并列并写明各自的结构失真。
-5. **PROPOSED（第 5 节，待审阅端与用户决定）：** TimeLimit **1,296,000 s（360 h）**、walltime F1 **376 h**、F2–F4 **378 h**、进程 1 超时 **7,200 s**、批级 walltime **48 h**；可选：F2、F4 内存 300 GB、进程 3 超时 43,200 s。
-6. **部署包（第 6–8 节）：** `work/p1_v3_20261102/hpc_package_v3/`，代码提交 `917c8b63`，46 个文件、373,676,643 B；一致性检查 53 行全部一致；干跑、预检与泄露扫描结果见第 8 节。PROPOSED 状态下正式作业与提交脚本都会拒绝。
+5. **登记的时限（第 5 节，审阅端按用户授权决定，2026-11-04）：** U = 263.7 h → **TimeLimit 864,000 s（240 h，被 240 h 上限截断）**、进程 2 墙钟 871,200 s、止损线 691,200 s；进程 1 超时 **5,400 s**；walltime **F1 260 h、F2 262 h、F3 260 h、F4 262 h**（每个作业余量 ≥ 2 h），批级 48 h；资源不变；`limits_status` **REGISTERED**。须知：T < U，止损约在 Atlas 每次迭代 1,840–1,860 s 时触发，低于 U 假设的 2,686 s（第 5.2 节）。
+6. **审查六条（第 6.1 节）：** 第 1 条空数组展开加保护，并新增 `hpr_submit.sh --dry-run`；第 2 条列为已知局限，不改求解路径；第 3 条前序检查与预检失败停批；第 4 条停批时 `POST_ONLY` 仍做后处理；第 5 条改注释；第 6 条锁的说明、`--resume` 遇锁拒绝、F2 的 walltime 计两个等待。
+7. **bash 4.2（第 8.2 节）：** 从 GNU 源码编译 bash 4.2 后实测：{{B42_SUMMARY}}
+8. **部署包（第 7–8 节）：** {{PKG_SUMMARY}}
+9. **终点：** {{END_SUMMARY}}
 
 ## 1. 规则与小修（指令第 1 节；提交 `a1ef782b`，构建前）
 
@@ -110,25 +114,38 @@
 | 求解时长（Atlas） | F1、F3 8–260 h（最可能 30–100 h）；F2、F4 1.5–40 h（最可能 5–20 h） |
 | 终止与内存 | F1、F3 optimal；F2、F4 optimal 或 suboptimal；C1 全过；进程 2 峰值 F1、F3 117–208 GiB，F2、F4 88–194 GiB |
 
-## 5. `RUN_PLAN_HPC_V3.md` 与 PROPOSED 取值（指令第 5 节）
+## 5. `RUN_PLAN_HPC_V3.md` 与登记的时限（指令第 5 节；无人值守授权第 1 节）
 
-**外推（INFERENCE，`RUN_PLAN_HPC_V3.md` 第 2.1 节）：** barrier 用时 = B4P 的 v2 每次迭代外推 × v3 / v2 在 365×24h 同机型的每次迭代比（1.30–1.49）× v3 迭代数（下端取 365×24h 实测，上端按 56 → 365 的增长外推到 2920）× CPU 因子（Atlas EPYC 7R13 对 8470Q，1.0 / 1.3 / 1.6，为假设）。结果：F1、F3 **7.8 / 73 / 261 h**（高高情形 347 h）；F2、F4 1.2 / 12.5 / 38 h。
+V3 HPC v1 提交时的取值是 PROPOSED（TimeLimit 1,296,000 s、walltime 376 / 378 / 378 / 378 h、进程 1 超时 7,200 s、批级 48 h；`RUN_PLAN_HPC_V3.md` 第 12 节保留作记录）。2026-11-04 审阅端按用户授权按下列规则决定，写入 `RUN_PLAN_HPC_V3.md` 新的第 14 节"审阅端按用户授权决定（2026-11-04）"并登记（定义文件 `limits_status: REGISTERED`），在任何 HPC 求解之前提交。
 
-| 项 | v2 登记值 | **PROPOSED** | 推导 |
-|---|---|---|---|
-| TimeLimit（F1–F4） | 864,000 s（240 h） | **1,296,000 s（360 h）** | 覆盖 F1 高值 261 h + 预求解约 2.5 h（余量约 37 %）与高高情形 347 h；v2 的 240 h 低于高值，高值情形会在约 20 次迭代后被早期测速止损 |
-| 进程 2 墙钟 | 871,200 s | 1,303,200 s | TimeLimit + 7,200 s（不改余量） |
-| 早期测速止损线 | 691,200 s | 1,036,800 s（288 h） | 0.80 × TimeLimit（规则不改） |
-| PBS walltime F1 | 255 h | **376 h** | 330 + 7,200 + 1,303,200 + 32,400 + 2 × 3,900 + 1,800 = 1,352,730 s，向上取整 |
-| PBS walltime F2、F3、F4 | 257 h | **378 h** | 再加等待启动的上限 7,200 s |
-| 进程 1 超时 | 3,600 s | **7,200 s** | D2 用了 2,382 s（66 %），v3 约大 5 % → 约 2,500 s；`/hpctmp` 写入 7–17 MB/s 会波动；按 B4P 的约 3 倍余量 |
-| 批级 walltime | 12 h | **48 h** | 四个运行的后处理补做上限 |
-| 可选：F2、F4 内存 | 250 GB | 300 GB | v3 进程 2 高值 194 GiB 离 200 GiB 止损线只有 3 %；包内保持指令的 250 GB |
-| 可选：进程 3 超时 | 32,400 s | 43,200 s | 按 D2 的单线程速度估计 5–7 h，余量 1.3–1.8 倍；包内保持 32,400 s |
+### 5.1 TimeLimit：T = max(72 h, min(240 h, 2 × U))，向上取整到 12 h
 
-**参考迭代数（本次登记，非 PROPOSED）：** F1、F3 350，F2、F4 250。方法：v2 规则"取同模型迭代数区间的上端"，v3 区间一体化 160–350、`no_new_xb` 111–250。在 TimeLimit 360 h 下，F1 只有每次迭代超过约 2,800 s（高值 2,687 s 之上）才止损。
+**U（F1 求解时长的外推上界，INFERENCE，每一项都取保守端）：** 单次迭代 = B4P 对 v2 F1 2920×3h 的高值 1,127 s（8470Q T16）× v3 / v2 单次迭代比的上端 1.49（365×24h 同档案、同机型实测 1.30–1.49）= 1,679 s；迭代数 = 一体化 56 时段 80–83、365×24h 146–186 次，按 56 → 365 的增长外推到 2920 的上端 350 次；CPU 因子取假设区间 1.0 / 1.3 / 1.6 的上端 1.6；barrier 1,679 × 350 × 1.6 = 940,240 s = 261.2 h，加预求解与排序的上端 2.5 h，**U = 263.7 h**。
 
-**整批时长：** F1、F2 并行，F3 接 F1、F4 接 F2，总时长约 max(F1 + F3, F2 + F4) + 排队：中值约 6–7 天，高值约 22 天，全部用满时限约 31 天（`/hpctmp` 60 天清除之内；每个运行结束后先下载其导出）。
+2 × U = 527 h → min(240, 527) = 240 h → **T = 864,000 s（240 h）**；进程 2 墙钟 871,200 s。
+
+### 5.2 早期测速止损
+
+0.80 × T = **691,200 s**（192 h）；参考迭代数取 U 所用的 350 次（F1、F3），F2、F4 保持 250 次。
+
+**须知（INFERENCE）：** 240 h 上限使 T < U。止损在第 20 次迭代判定（第 11–20 次平均 × 350 + 第 20 次的日志时间 > 691,200 s），等价于 Atlas 上每次迭代超过约 (691,200 − 预求解) / 370 ≈ **1,840–1,860 s**。这低于 U 假设的 2,686 s / 次，高于中值 1,056 s / 次。所以授权第 1 节第 2 条"只有实际单次迭代比 U 的假设慢很多时才会触发"在本取值下不完全成立：落在第 2.1 节高值区间上段（≥ 约 69 % 的 U 假设）的运行会在约 20 次迭代、约 10 小时后被止损，由用户决定以更长时限重开（新运行目录）。这是规则中 240 h 上限的直接结果，按授权不改，报告请审阅端知悉。
+
+### 5.3 其余取值
+
+| 项 | 登记值 | 推导 |
+|---|---|---|
+| 进程 1 超时 | **5,400 s** | D2 实测 2,382 s，v3 LP 约大 4 % → 约 2,500 s，余量约 2.2 倍 |
+| walltime 基础项 | 918,930 s | 330 + 5,400 + 871,200 + 32,400 + 2 × 3,900 + 1,800（v2 `RUN_PLAN_HPC.md` 第 2 节的构成） |
+| PBS walltime F1 | **260 h**（余量 17,070 s） | 无等待项：918,930 + 2 h → 257.3 h；"F3 同 F1" → 260 h |
+| PBS walltime F2 | **262 h**（余量 9,870 s） | 两个等待项（等 F1 启动 + 启动锁，审查第 6 条）：933,330 + 2 h → 261.3 h → 262 h |
+| PBS walltime F3 | **260 h**（余量 9,870 s） | 一个等待项（启动锁）：926,130 + 2 h → 259.3 h → 260 h |
+| PBS walltime F4 | **262 h**（余量 17,070 s） | 一个等待项：259.3 h；"F4 同 F2" → 262 h |
+| 批级 walltime | 48 h | 授权第 1 节未列，沿用原提议的保守值（四个运行的补做上限） |
+| 资源 | F1、F3 300 GB，F2、F4 250 GB，48 核；批级 120 GB / 12 核 | 授权第 1 节第 5 条（与原值相同；两项可选提议未采纳） |
+
+全部 ≤ Atlas `parallel` 上限 720 h；一致性检查逐作业核对"walltime ≥ 求和"与"余量 ≥ 7,200 s"（`HPC_CONSISTENCY.json`）。
+
+**整批时长：** F1、F2 并行，F3 接 F1、F4 接 F2，总时长约 max(F1 + F3, F2 + F4) + 排队：中值约 6–7 天；walltime 全部用满约 22 天（`/hpctmp` 60 天清除之内；每个运行结束后先下载其导出）。
 
 **作业链与许可（`RUN_PLAN_HPC_V3.md` 第 3–4 节）：** F1；F2 `after:F1` + `WAIT_START_OF=F1`（沿用 v2）；F3 `afterany:F1`；F4 `afterany:F2`；**一个批级作业 `afterany:F3:F4`**。任意时刻最多两个正式作业（96 核 = 每用户上限），所以 ≤ 2 个 Gurobi 会话；新增的**启动锁**（共享运行目录中的原子 `mkdir`，跨节点有效）把所有 Gurobi 启动串行化：锁内等到距其他运行的每次启动、任何结束与本运行器启动都 ≥ 330 s，且其他在跑的会话少于 2 个。批级作业只设一个的理由：F3、F4 在跑时每用户 96 核的上限会让"第 A 对"的批级作业排队到 F3 或 F4 结束，单设它几乎换不来时间。
 
@@ -142,13 +159,76 @@
 | `scripts_project/batch_def.py` | `build_stem`：变体可指定母网络（F4 ← F3） |
 | `run_batch4.sh` | 时限经 `hpc-plan` 读取（单一来源）；PROPOSED 时拒绝正式运行；参考迭代、母网络、对经 `runmeta` 读取；四个运行只能 `--only`；启动锁；受益按对；导出全部 `PROJECTION_*`、`M12_BENEFIT_*` |
 | `preflight.sh` | 有定义文件时 TimeLimit 取自 `b4_batch4.py`；`code` 节的运行表与时限断言按定义文件 |
-| `hpr_job.sh` | 运行编号取定义文件；批级作业等全部运行落定；PROPOSED 时拒绝正式作业 |
-| `hpr_submit.sh` | 按 `pbs/HPC_PLAN.txt` 的作业与依赖逐个提交（v2 生成的 qsub 命令不变）；PROPOSED 时拒绝 |
+| `hpr_job.sh` | 运行编号取定义文件；批级作业等全部运行落定；PROPOSED 时拒绝正式作业；`afterany` 前序检查与正式作业预检失败时停批（审查第 3 条） |
+| `hpr_submit.sh` | 按 `pbs/HPC_PLAN.txt` 的作业与依赖逐个提交（v2 生成的 qsub 命令不变）；PROPOSED 时拒绝；`--dry-run` 不提交演练；`--resume` 遇锁目录拒绝（审查第 1、6 条） |
 | `hpr_status.sh`、`make_pbs.sh`、`hpr_consistency.py` | 全部运行与启动锁；读包内定义文件；比对行按运行表生成（v2 计划仍 `ALL_CONSISTENT`） |
 | 新增 | `batch_def/BATCH_DEF_2920x3h_v3hpc.json`、`hpc_v3/make_hpc_package_v3.sh`、`hpc_v3/make_reference_values_v3.py`、`hpc_v3/REFERENCE_VALUES_V3.json`（只有数值） |
 
-**测试（VERIFIED）：** 新增 `tests/research/test_v3_hpc_runner.py` 8 项（定义文件 = 登记计划；有无定义文件的输出；F1 → F2 → F3 → F4 各一个作业再接批级作业，两对 B6、受益与比较；启动锁让两个同时启动相隔 ≥ 间隔；已有两个求解或锁残留 → `STOP_SAFE:START_LOCK`；PROPOSED 拒绝、四运行的单机批次拒绝、四运行 BUILD_ONLY；PBS 生成、对本计划的一致性、经替身 `qsub` 的依赖链；作业体拒绝）全部通过；原有运行器回归（`test_b4p_batch4`、`test_hpr_two_jobs`、`test_v3_runners`、`test_b4p_paths`、`test_dfx_runner`）54 项全部通过。全量测试见第 9 节。
+**测试（VERIFIED）：** `tests/research/test_v3_hpc_runner.py` 11 项（定义文件 = 登记计划与登记值；有无定义文件的输出与 walltime 构成；F1 → F2 → F3 → F4 各一个作业再接批级作业，两对 B6、受益与比较；启动锁让两个同时启动相隔 ≥ 间隔；已有两个求解或锁残留 → `STOP_SAFE:START_LOCK`；PROPOSED 拒绝、四运行的单机批次拒绝、四运行 BUILD_ONLY；PBS 生成、对本计划的一致性（含 4 行余量）、`--dry-run`、PROPOSED 拒绝、经替身 `qsub` 的依赖链、`--resume` 遇锁拒绝；冒烟作业体；作业体拒绝；前序未结束与预检失败停批；停批时 `POST_ONLY` 的后处理）全部通过；原有运行器回归 {{REG}}。bash 4.2 下的结果见第 8.2 节，全量测试见第 9 节。
+
+### 6.1 审查六条的处理（只读审查 `5e372e5d..1e7b503c`，2026-11-04 02:25 SGT；审阅端意见 02:24 与无人值守授权第 1、2 节）
+
+| 条 | 发现 | 处理 | 验证 |
+|---|---|---|---|
+| 1【阻断，若 Atlas bash < 4.4】 | `set -u` 下空数组展开报错（`run_batch4.sh` 的 `${PAIRS[*]}`、`hpr_submit.sh` 的 `"${W[@]}"`） | 改为 `${PAIRS[*]:-}`、`${W[@]+"${W[@]}"}`、`pair_runs` 的 `${out[*]:-}`；其余未加保护的展开逐一核对，都是构造上不会为空的数组（第 8.2 节清单）；新增 `hpr_submit.sh --dry-run`（只打印 qsub 命令，不写、不提交、不调用 qsub），操作指南第一步加 `bash --version` 与两次演练 | 本机编译 bash 4.2 实测（第 8.2 节） |
+| 2【非阻断】 | `.solve_start` 早于 `gp.Env()` 真正建立 WLS 会话，`.solve_end` 晚于退出最多约 5 s，实际间隔可能略小于 330 s | **列为已知局限，本次不改求解路径**（审阅端意见，`RUN_PLAN_HPC_V3.md` 第 4 节）。理由：同时只有 F1、F2 两个会话，不超过上限；F3、F4 开会话前还有约 40 分钟无许可的构建（进程 1），与前一个会话的间隔自然远大于 330 s | — |
+| 3【非阻断】 | 前序运行失败但没写 STOP（预检失败、`qdel`、被杀）时，F3 / F4（`afterany`）照常开跑 | 作业体：`afterany` 前序没有 `.ended` 且批次未停 → 写 `STOP_SAFE:PREDECESSOR_NOT_ENDED`，什么都不启动（退出码 3）；正式作业包内预检失败 → 写 `STOP_SAFE:PREFLIGHT_FAILED`；操作指南 (h) 写明撤销正式作业时同时撤销依赖它的作业 | 新测试；干跑第 8.1 节 |
+| 4【非阻断，v2 旧问题】 | `POST_ONLY` 在停批时跳过 `post_run` | `POST_ONLY` 对每个已结束运行都做后处理（停批时也做），再重评、汇总、打 `halted` 包 | 新测试 |
+| 5【非阻断】 | 无定义文件时也有启动锁与 `BASE_CHECK_F*.json`，注释"Without a definition: v2"不准 | 改注释，写明这两项在无定义文件时同样生效 | — |
+| 6【非阻断】 | 状态与指南写"几分钟"，但合法持锁可到 2 h；`--resume` 不查残留锁；F2 最坏可等两个 `WAIT_START_MAX_S` 而 walltime 只算一个 | `hpr_status.sh` 与指南改为"通常几分钟、合法最多 2 h"，并显示 `STOP` / `STOP_SAFE` 文件；`hpr_submit.sh --resume` 发现锁目录即拒绝；有定义文件时 `walltime_components` 给 F2 计两个等待项，F2 walltime 按此决定（262 h，余量 9,870 s）；锁残留的处置改为改名移开，不删除 | 新测试；一致性检查 |
 
 ## 7. 部署包与操作指南（指令第 6 节）
 
-（第 7、8 节在干跑与扫描后写定。）
+**包：** `work/p1_v3_20261102/hpc_package_v3/`，由 `hpc_v3/make_hpc_package_v3.sh` 在干净提交 **`1e7b503c9e3d470a96aa26e9e0e7a3d6e3c672b9`** 上打出（`COMMIT` = 新分支的提交，指令补充第 2 条）。`SHA256SUMS` 列 46 个文件，`SHA256SUMS` 自身 SHA256 `2ce8e5cdebef99f064ae1cad7bb38fd8cdc1433abe1ac75016818444be225d7a`；清单 `HPC_PACKAGE_MANIFEST.json` `a7a0a2c8…`；合计 373,689,593 B（含清单）。第一次在 `917c8b63` 上打出的包因作业体的一处输出文字（第 8 节）而改名为 `hpc_package_v3_superseded_917c8b63/` 保留，不再使用。
+
+| 类别 | 内容 |
+|---|---|
+| 代码 | `code_1e7b503c.tar.gz`（82,794,152 B；`git archive` 不含顶层 `research/`） |
+| 定义 | `BATCH_DEF.json`（= `batch_def/BATCH_DEF_2920x3h_v3hpc.json`，`a020af04…`；`limits_status: PROPOSED`） |
+| 网络与回执 | 四个 2920×3h 网络（第 2 节）、`integrated_BUILD_RECEIPT.json`、`integrated_ev05_BUILD_RECEIPT.json`、两个变体回执、`integrated_costs_active_research.csv`；**没有 365×24h 文件** |
+| 运行与作业 | `run_batch4.sh`、`preflight.sh`、`pack_results.sh`、`hpc/`（作业体、PBS 生成、安装、登录预检、提交、状态、一致性检查）、`pbs/`（8 个作业脚本 + `HPC_PLAN.txt`） |
+| 环境 | `env/`（第三批锁定，未改；HPC 上已有环境，预检 `env` 节 284 / 284 一致即复用） |
+| 文档与参照 | `RUN_PLAN_HPC_V3.md`、`HPC_OPERATOR_GUIDE_V3.md`、`RUN_PLAN_V3.md`、`V3_RULES.md`、`HPC_FACTS_20261026.md`、`REFERENCE_VALUES.json`（只有数值） |
+| 核对 | `HPC_CONSISTENCY.json` / `.txt`：53 行全部一致（`ALL_CONSISTENT`），否则打包脚本拒绝出包 |
+| 不进包 | 许可、cutout、LP 与解的数组、`results_project` 下的结果、`solve.log` / `solve.err`、账号与主机信息、365×24h 网络 |
+
+**上传时间估计（单路）：** 373.7 MB；1 MB/s 约 6 分钟，0.1 MB/s 约 1 小时（AutoDL 上传曾实测 0.058 MB/s，按此约 1.8 小时；NUS VPN 到 Atlas 的实际速度未测）。
+
+**操作指南 `HPC_OPERATOR_GUIDE_V3.md`：** 步骤 A（单路 `scp -r` 上传与 `sha256sum -c`）→ B（许可只核对属性）→ C（登录预检，环境复用）→ D（冒烟作业，期望值 = 本机冒烟）→ D2（可选 BUILD_ONLY）→ E（`hpr_submit.sh` 一条命令提交五个作业）→ F（监控）→ G（每个运行结束后先回收其导出；批级作业后回收结果包，单路下载、`Get-FileHash` 核对）→ H（出现 `STOP` / `STOP_SAFE` 时的处置，含启动锁残留）。**命令中没有尖括号占位符**：要替换的只有 `$HPC_USER`、`$WSL_USER`（PowerShell）与 `RID`（bash），都在上一行说明；atlas8 上用系统的 `$USER`。**前提写在开头：** 正式提交只用登记后重新打出的包。
+
+## 8. 干跑、预检与泄露扫描（指令第 6.3 条；无求解器、无许可）
+
+**干跑（VERIFIED，`/home/jin/v3h/dry_20261103T175805Z/DRY_RUN_HPC.txt`，对 `917c8b63` 的包）：** 包复制到新目录 → 预检 `guards,sha,networks,env,profile,code,tools`（`licence`、`resources` 除外）**`PREFLIGHT OK`**：46 个文件 SHA256 全部 OK；环境与锁定 284 / 284 一致；四个网络 `all_equal`；档案正确、TimeLimit 读到 1,296,000（PROPOSED）→ `BUILD_ONLY=1 TRUNCATE=56` 四个运行的进程 1 全部 `BUILD_CHECK passed`，LP 与第 21.1 节登记值相同（F1、F3 729,156 × 1,603,380、非零 3,715,722；F2、F4 707,802 × 1,555,798、非零 3,565,488；每个 31–36 s、峰值 2.0–2.3 GiB）→ 作业体 `JOB_MODE=build_only JOB_RID=F3`（本机演练开关）退出码 0、`BUILD_CHECK_F3 passed`、LP 文件已删 → 作业体 `JOB_MODE=formal JOB_RID=F1` **被拒绝**（退出码 2，`the limits of BATCH_DEF.json are PROPOSED`，什么都没启动）。
+
+**干跑中发现并修正的一处：** 作业体 BUILD_ONLY 记录里写死了 v2 的"runner timeout 3,600 s"与 B4P 估计值，v3 的进程 1 超时是 7,200 s（PROPOSED），用户读 D2 结果时会被误导；改为从 `b4_batch4.py hpc-plan` 读取（提交 `1e7b503c`），重新打包，并在新包上重做干跑（见下）。
+
+**新包 `1e7b503c` 的干跑：** DRY2_PLACEHOLDER
+
+**泄露扫描（VERIFIED，`evidence/hpc/leak/LEAK_SCAN_pre.json`、`LEAK_CLASSIFY_pre.txt`）：** 对象：分支 `p1_v3_20261102/` 全部 1,056 个文件、新包 48 个文件、`hpc_package_src/`、`cloud_package_b4/`、会话脚本目录，以及 `5e372e5d..HEAD` 的每个提交。特征：仓库外特征文件（键名、ssh、IP、主机名，运行时读取）与本机许可文件的值（只在内存中比较，从不打印）。**许可值命中 0；键名、ssh、主机名命中 0。** IP 形特征命中 30 处，逐条归类（只输出遮蔽片段）全部不是泄露：公共 DNS `1.1.1.1`（旧会话写下的连通性测试说明，`RUN_PLAN_V3.md` 第 8、9、14 节与两个旧脚本，早已在仓库中）、软件包四段式版本号（`env/` 锁文件，与 v2 包相同）、WSL 内核版本字符串（重新生成的 `D1_EVIDENCE.json`）。推送后再扫一次（第 11 节）。
+
+## 9. 资源记账与测试
+
+| 项 | 用量 / 上限 |
+|---|---|
+| 本机 Gurobi | **2 / 2**（两次冒烟，无重试；令牌预检通过） |
+| HPC、AutoDL | 未连接、未上传 |
+| 本机计算 | COMPUTE_PLACEHOLDER |
+| 磁盘新增 | DISK_PLACEHOLDER |
+
+**测试：** 新增 16 项（`test_v3_units.py` 8、`test_v3_hpc_runner.py` 8）全部通过，作业体文字修正后受影响的 3 项复跑通过；运行器回归 54 项全部通过；`tests/research` 全量：FULL_PLACEHOLDER。其中 `test_m12_allocation.py` 等含 scipy `linprog` / HiGHS 的玩具 LP（无模型网络、无 Gurobi），照实列出。
+
+## 10. 偏差、发现与未覆盖
+
+1. **审查 S3-4 的"现在一致"不准确：** 两份 `DIRECT` 清单相差 `co2_transit_rail_freight`；统一后只改变两个诊断量（第 1 节）。
+2. **我在构建前写的计数笔误：** 第 12.3 节"810 条"应为 270 条；集合与字段的规定不变，已更正并注明（第 2 节）。
+3. **核对脚本的效率问题：** 第一版 O(n²) 写法卡了 15 分钟，终止后改正重跑；不影响结果。
+4. **全尺寸 2920×3h LP 未在本机构建**（10 GiB 放不下）：规模由线性外推给出，同一方法对 v2 与 D2 实测逐位相同；HPC 上可用可选的 BUILD_ONLY 作业（步骤 D2）实测。
+5. **四运行链在 HPC 上的真实调度未演练：** 依赖链、启动锁、停批传播与批级汇总都用替身测试验证（第 6 节），HPC 冒烟作业只覆盖 F1、F2 两次真实会话。
+6. **PROPOSED 取值的外推依赖 CPU 因子假设**（Atlas EPYC 7R13 对 8470Q 1.0–1.6），没有 Atlas 上的求解测速；早期测速止损（20 次迭代）是兜底。
+7. **共用文件暂未复制到 `work/`：** 截至本报告，`work/p1_v3_20261102/V3_PROGRESS.md` 末尾仍是 V27 第一次开机的关机记录（早于本会话），第 8.4 节那次开机的关机记录尚未出现，所以按用户补充第 3 条，`RUN_PLAN_V3.md`、`V3_RULES.md`、`batch_def/BATCH_DEF_2920x3h.json` 的新版本只在分支上（第 11 节）。
+
+## 11. 提交、推送与复制
+
+COMMIT_PLACEHOLDER
+
+**停下：** 等审阅端审阅与用户决定 PROPOSED 取值（`RUN_PLAN_HPC_V3.md` 第 12 节）。不连 HPC、不连云、不上传。登记后的下一步：改定义文件 `limits_status`（必要时改数值）与计划第 2、3、10、12 节 → 重新打包与干跑 → 用户按操作指南执行。

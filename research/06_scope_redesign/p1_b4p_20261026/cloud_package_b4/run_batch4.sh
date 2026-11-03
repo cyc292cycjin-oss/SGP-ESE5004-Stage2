@@ -28,7 +28,10 @@
 # V3 HPC (2026-11-04; RUN_PLAN_HPC_V3.md; decisions 186, 187): with a BATCH_DEF.json of four runs (F1 / F2, F3 / F4 = EV fleet x0.5) each run is one PBS job (--only;
 # the one-machine batch mode refuses more than two runs); the limits come from b4_batch4.py hpc-plan (the definition's limits; PROPOSED limits refuse a formal run);
 # reference iterations, the parent build of a variant and the pairs from b4_batch4.py runmeta; every Gurobi start of the shared RUN_DIR goes through the start lock
-# (one start at a time, >= LICENCE_GAP_S after every other start and end, < 2 other Gurobi processes running); B6 / the M12 benefit per pair. Without a definition: v2.
+# (one start at a time, >= LICENCE_GAP_S after every other start and end, < 2 other Gurobi processes running); B6 / the M12 benefit per pair. Without a definition: the v2
+# tables and limits, with two V3 HPC additions that apply to every run (review item 5): the start lock (START_LOCK_* lines in STATUS.txt; a lock directory left behind
+# by a killed job gives STOP_SAFE:START_LOCK after WAIT_START_MAX_S) and the BASE_CHECK_<rid>.json files of --only in the export / batch pack. POST_ONLY post-processes
+# every ended run also when the batch is halted (review item 4).
 #
 # PRE-REGISTERED RULES (RUN_PLAN_B4.md section 3; registered before any 2920x3h result; single sources: this file's R_* constants and
 # scripts_project/b4_batch4.py thresholds):
@@ -152,8 +155,8 @@ done < <(cd "$REPO" && $SUM_CMD runtable)
 [ "${#SC[@]}" -ge 2 ] || { echo "REFUSED: run table not readable from $REPO (got ${#SC[@]} runs)"; exit 2; }
 # V3 HPC (RUN_PLAN_HPC_V3.md 1): per-run reference iterations, the parent build of a variant (F4 <- F3) and the pair (B6 / benefit per pair); absent (v2 tables, stand-ins) -> the v2 defaults
 while IFS='|' read -r rid it par pr; do [ -n "$rid" ] || continue; ITERS[$rid]=$it; PARENT[$rid]=$par; PAIR[$rid]=$pr; done < <(cd "$REPO" && $SUM_CMD runmeta 2>/dev/null)
-PAIRS=(); for rid in "${RIDS[@]}"; do p=${PAIR[$rid]:-A}; case " ${PAIRS[*]} " in *" $p "*) ;; *) PAIRS+=("$p");; esac; done
-pair_runs() { local rid out=(); for rid in "${RIDS[@]}"; do [ "${PAIR[$rid]:-A}" = "$1" ] && out+=("$rid"); done; echo "${out[*]}"; }
+PAIRS=(); for rid in "${RIDS[@]}"; do p=${PAIR[$rid]:-A}; case " ${PAIRS[*]:-} " in *" $p "*) ;; *) PAIRS+=("$p");; esac; done
+pair_runs() { local rid out=(); for rid in "${RIDS[@]}"; do [ "${PAIR[$rid]:-A}" = "$1" ] && out+=("$rid"); done; echo "${out[*]:-}"; }   # :- / +: empty arrays under set -u in bash < 4.4 (review item 1)
 if [ "${#SC[@]}" -gt 2 ] && [ -z "$ONLY" ] && [ "$NOSOLVE" = 0 ]; then echo "REFUSED: ${#SC[@]} runs in the table - they run as one PBS job each (--only <rid>, RUN_PLAN_HPC_V3.md 4); the one-machine batch mode is for two runs"; exit 2; fi
 if [ -n "$ONLY" ]; then
   [ -n "${SC[$ONLY]:-}" ] || { echo "REFUSED: --only $ONLY is not a run of the registered table (${!SC[*]})"; exit 2; }
@@ -580,9 +583,12 @@ fi
 # ---- the batch: F1, the P1 probe, F2 beside or after F1
 prepare || { log "HALTED:$(now):phase 0"; batch_post summary; pack halted_phase0; exit 3; }
 wait_gap "$(latest_solve_end)" PHASE_1
-if ! halted; then
+if [ "$POST_ONLY" = 1 ]; then   # review item 4 (V3 HPC): the post-processing of EVERY ended run, also when the batch is halted (a STOP / STOP_SAFE of one run must not leave the
+  # other ended runs without violations / C1 / Owen / acceptance); solve_run only logs here (SKIP_ENDED_<rid> or POST_ONLY_<rid>:not solved), post_run acts on ended runs only
+  for rid in "${RIDS[@]}"; do solve_run "$rid"; post_run "$rid"; done
+elif ! halted; then
   solve_run "${RIDS[0]}" & LANE_F1=$!
-  if [ "$NOSOLVE" = 1 ]; then   # no Gurobi process: one lane in table order, F1 then F2 (BUILD_ONLY builds every run; POST_ONLY post-processes every run; V3 HPC: F1-F4)
+  if [ "$NOSOLVE" = 1 ]; then   # no Gurobi process: one lane in table order, F1 then F2 (BUILD_ONLY / DRY: every run; V3 HPC: F1-F4; POST_ONLY above)
     wait $LANE_F1; post_run "${RIDS[0]}"; for rid in "${RIDS[@]:1}"; do halted || { solve_run "$rid"; post_run "$rid"; }; done
   else
     # P1 probe: wait until F1's Gurobi process has run P1_WINDOW_S (or ended), then decide (b4_batch4.py p1); F2 beside F1 only when the probe passes

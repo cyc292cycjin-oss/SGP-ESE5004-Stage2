@@ -14,7 +14,9 @@
 # file missing or not mode 600, a batch job before both runs ended (not_ready), a build-only job on a folder holding a previous build-only run (S-01). Local drill: HPR_LOCAL_DRILL=1 (skips the token-server curl;
 # HPR_RUN_ROOT=<dir> puts runs/ elsewhere; HPR_DRY_TRUNCATE=56 for the truncated BUILD_ONLY dry run) - refused under a real PBS job.
 # V3 HPC (RUN_PLAN_HPC_V3.md): with a package BATCH_DEF.json the formal / build-only run ids are the runs of the definition (F1-F4), the batch job waits until every one
-# of them settled, and a formal job refuses while the definition's limits are PROPOSED (not yet registered by the reviewer and the user).
+# of them settled, and a formal job refuses while the definition's limits are PROPOSED (not yet registered by the reviewer and the user). Review item 3: a formal job whose
+# afterany predecessor (JOB_DEPENDS: F3 <- F1, F4 <- F2) neither ended (<rid>/.ended) nor halted the batch writes STOP_SAFE:PREDECESSOR_NOT_ENDED and starts nothing (exit 3);
+# a formal job whose in-job preflight fails writes STOP_SAFE:PREFLIGHT_FAILED (exit 1), so that no later run of the batch starts behind it.
 set -u
 JOB_MODE=${JOB_MODE:?formal|batch|smoke56|build_only}; JOB_RID=${JOB_RID:-}; JOB_KEY=${JOB_KEY:-$JOB_MODE}
 PKG=${PBS_O_WORKDIR:?run under PBS (qsub) - or set PBS_O_WORKDIR for the local drill}; cd "$PKG" || exit 2
@@ -103,6 +105,18 @@ CPU_MODEL=$(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); prin
 rec "JOB_START:$JOB_KEY:$JOB_MODE:$JOB_RID:jobid=$JOBID:node=$(hostname):cpu=${CPU_MODEL:-?}:nproc=$(nproc):ncpus=$CORES:mem_gb=$MEM_QUOTA_GIB:walltime=${JOB_WALLTIME:-?}:queue=${JOB_QUEUE:-?}:omp_num_threads=${OMP_NUM_THREADS:-unset}:shell=${SHELL:-?}:pbs_o_workdir=$PKG:run_dir=$RUN_DIR:utc=$(now)"
 rec "CGROUP:$JOB_KEY:version=$CGV:dir=${CGDIR:-none}:limit=${CGLIM:-none}:anon_key=$CGKEY:mem_measure=$MEM_MEASURE:cgroup_root=${CGROUP_ROOT:-default}:proc_self_cgroup=$(tr '\n' ';' < ${HPR_PROC_CGROUP_FILE:-/proc/self/cgroup} | cut -c1-300)"
 rec "DISK:$JOB_KEY:$(df -Pk "$RUNS_ROOT" | awk 'NR==2 {printf "free_gib=%.1f used_pct=%s", $4/1048576, $5}'):tmpdir_pbs=${TMPDIR:-unset}"
+# ---- V3 HPC (review item 3): an afterany predecessor of a formal job (F3 <- F1, F4 <- F2; JOB_DEPENDS of the job script) must have ended (<rid>/.ended) or the batch be
+#      halted already; a predecessor whose job ended without either (job-body refusal, preflight failure, qdel, walltime kill) halts the batch here - nothing starts
+if [ "$JOB_MODE" = formal ]; then
+  case "${JOB_DEPENDS:-}" in afterany:*)
+    for p in $(echo "${JOB_DEPENDS#afterany:}" | tr ':' ' '); do
+      [ -f "$RUN_DIR/$p/.ended" ] || [ -f "$RUN_DIR/STOP" ] || [ -f "$RUN_DIR/STOP_SAFE" ] && continue
+      echo "PREDECESSOR_NOT_ENDED:$JOB_RID:$p has no .ended and the batch was not halted (its job ended without a run end: refusal, preflight failure, qdel or walltime) - $JOB_RID not started:job=$JOBID:$(now)" >> "$RUN_DIR/STOP_SAFE"
+      rec "STOP_SAFE:PREDECESSOR_NOT_ENDED:$JOB_KEY:$p - nothing started:utc=$(now)"; rec "JOB_END:$JOB_KEY:$JOB_MODE:$JOB_RID:exit=3:seconds=$(( $(date +%s) - T0 )):utc=$(now)"
+      echo "STOP_SAFE:PREDECESSOR_NOT_ENDED:$JOB_RID:$p (see $RUN_DIR/STOP_SAFE)"; exit 3
+    done;;
+  esac
+fi
 # ---- the B4P preflight inside the job (no licence section: that would be a WLS session - RUN_PLAN_HPC 4); the guards section sees the job environment
 #      (CGROUP_ROOT / MEM_MEASURE / CORES / MEM_QUOTA_GIB set by this body are listed as operational notes, not as hooks); the resources section is
 #      checked against this job's request (cores / 90 % of the memory / 45 GB scratch) and reads the job cgroup when it was found
@@ -112,7 +126,9 @@ case "$JOB_MODE" in batch) SECS=guards,sha,networks,env,code,tools,resources;; *
 NEED_MEM=$(( MEM_QUOTA_GIB * 9 / 10 )); PF="$RUN_DIR/preflight_${JOB_KEY}_${JOB_RID:-x}_${JOBID}.txt"
 PREFLIGHT_ONLY=$SECS NEED_CORES=$CORES NEED_MEM_GIB=$NEED_MEM NEED_DISK_GB=45 PREFLIGHT_DISK_PATH="$RUNS_ROOT" PY="$PY" PREFLIGHT_TAG="${JOB_KEY}_${JOB_RID:-x}_${JOBID}" bash "$PKG/preflight.sh" > "$PF" 2>&1; rc=$?   # PREFLIGHT_TAG: own JSON names (F1 / F2 jobs share the package folder; review F-15)
 rec "PREFLIGHT:$JOB_KEY:exit=$rc:sections=$SECS:need_cores=$CORES:need_mem_gib=$NEED_MEM:$(tail -1 "$PF")"
-[ $rc = 0 ] || { rec "PREFLIGHT_FAILED:$JOB_KEY - job ends, nothing started:utc=$(now)"; exit 1; }
+[ $rc = 0 ] || { rec "PREFLIGHT_FAILED:$JOB_KEY - job ends, nothing started:utc=$(now)"
+  [ "$JOB_MODE" = formal ] && echo "PREFLIGHT_FAILED:$JOB_RID:job=$JOBID:$(tail -1 "$PF" | cut -c1-160) - the batch halts, no later run starts (review item 3):$(now)" >> "$RUN_DIR/STOP_SAFE"
+  exit 1; }
 # ---- the runner (RUN_PLAN_HPC 7): REPO / NETS / RUN_DIR / registered split mode / REMOVE_LP; the job cgroup or RSS memory measure
 export REPO="$PKG/repo" NETS="$PKG/networks" RUN_DIR PY SOLVE_MODE=split REMOVE_LP=1 PYTHONHASHSEED=0
 [ -z "${JOB_WAIT_START_OF:-}" ] || export WAIT_START_OF="$JOB_WAIT_START_OF"

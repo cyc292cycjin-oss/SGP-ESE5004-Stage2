@@ -129,6 +129,8 @@ def main():
     wc = B.walltime_components()
     for k, v in wc["per_job"].items():
         row(f"{k} walltime >= sum of terms", dict(check=str(v["registered_s"] >= v["sum_s"]), expected="True"))
+        if v3:   # V3 HPC (RUN_PLAN_HPC_V3.md 14, decided 2026-11-04): every formal job keeps >= 2 h above the sum of its terms
+            row(f"{k} walltime margin >= 7,200 s", dict(check=str(v["margin_s"] >= 7200), expected="True"))
     two = sorted((B.HPC_JOBS[k]["ncpus"] for k in formal), reverse=True)[:2]   # at most two formal jobs at a time (v2: F1 + F2; V3: F1 / F3 and F2 / F4 chained)
     row("queue limits (parallel <= 540 GB, <= 96 cores, <= 720 h; two formal jobs together <= 96 cores)",
         dict(check=str(all(j["mem_gb"] <= B.QUEUE_LIMITS[j["queue"]]["mem_gb"] and j["ncpus"] <= B.QUEUE_LIMITS[j["queue"]]["ncpus_max"] and B.walltime_s(j["walltime"]) <= B.QUEUE_LIMITS[j["queue"]]["walltime_h"] * 3600 for j in B.HPC_JOBS.values())
