@@ -82,3 +82,16 @@
 收尾：两包单路回收，本机 SHA256 通过，类许可文件 0（全包 10,511 s）；`RECOVERED_OK` 17:34:07，看门狗 17:35:02 退出；许可 17:35:19 粉碎，`VERIFIED_ABSENT`。B6 14.3481 bn EUR（16.3561 bn USD），只有 BUNKER 负受益。报告 `V3_REPORT_SCREEN.md`，证据 `evidence/screen/`，脚本 `scripts/wsl_v3s/`；提交前泄露扫描：许可值、连接地址、端口、实例名命中 0。
 
 最终状态：筛查 DONE（5 / 5 optimal，ACCEPTED_LAYER2）；B6 14.3481 bn EUR；实例许可已删（2026-11-03 17:35:19 SGT，VERIFIED_ABSENT）；关机 2026-11-03 17:53:42 SGT，17:55:03 重新登录被拒，已停止；报告提交 `989da215`。
+
+## 补充 06：EV 储能时间聚合诊断（`V3_REVIEW_DECISIONS_SCREEN.md` 第 2 节，只读）
+
+会话脚本 `/home/jin/v3e/`（镜像 `scripts/wsl_v3e/`），证据 `evidence/evdiag/`。
+
+| 步骤 | 状态 | 提交 |
+|---|---|---|
+| 第 1–6 条诊断 | 完成：`to_daily` 把 EV 早晨下限 0.8 平均成每天 0.1（上游取最大值）；V1 把车队电池当跨日储能用满；V5 − V1 中 1.52–3.99 bn 来自这一放松；2920×3h 不受影响；PROPOSED 选项 A / B / C | 本次提交 |
+| 第 7 条 | `V3_RULES.md` 第 10 节第 8 条补入两点简化（来水按容量份额、拆开的水库不共用库容） | 本次提交 |
+| 第 8 条 | `work/` 下 `V3_DATA_INTAKE.md` 镜像换成分支版本 | — |
+| 报告 | `V3_REPORT_EVDIAG.md` | 本次提交 |
+
+恢复点：补充 06 完成，等审阅端与用户在选项 A / B / C 中决定。计数：本机 Gurobi 0；没有求解；本机计算约 0.1 小时 / 1.5 小时；磁盘约 0.3 MB / 10 GB。
