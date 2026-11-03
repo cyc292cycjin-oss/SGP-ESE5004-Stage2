@@ -156,10 +156,10 @@ P
   {
     echo "BUILD_ONLY:$JOB_RID:jobid=$JOBID:node=$(hostname):cpu=${CPU_MODEL:-?}:ncpus=$CORES:mem_gb=$MEM_QUOTA_GIB:cgroup=$CGV:utc=$(now)"
     echo "RUNNER_EXIT:$rc"
-    echo "PEAK_RSS_GIB:${peak:-?} (GNU time of process 1; B4P estimate 72-92 GiB)"
-    echo "LP_FILE_BYTES:$pbytes (B4P estimate 5.1-5.4 GB)"
+    echo "PEAK_RSS_GIB:${peak:-?} (GNU time of process 1; estimate: v2 B4P 72-92 GiB, V3 about 96 GiB - RUN_PLAN_HPC(_V3) section 9)"
+    echo "LP_FILE_BYTES:$pbytes (estimate: v2 5.1-5.4 GB, V3 about 5.5 GB)"
     echo "LP_ARRAYS_BYTES:${arrays:-?} (lp/ kept; purged by /hpctmp after 60 days)"
-    echo "BUILD_SECONDS:$bsec WRITE_SECONDS:$wsec (process 1 total $(( $(date +%s) - T0 )) s incl. preflight; runner timeout 3,600 s)"
+    echo "BUILD_SECONDS:$bsec WRITE_SECONDS:$wsec (process 1 total $(( $(date +%s) - T0 )) s incl. preflight; runner timeout $(cd "$PKG/repo" 2>/dev/null && "$PY" scripts_project/b4_batch4.py hpc-plan 2>/dev/null | grep '^LIMITS|' | cut -d'|' -f6 || echo '?') s)"
     echo "LP_ROWS_COLS_NNZ:$rows $cols $nnz"
     echo "SCRATCH_WRITE_MBPS:lp_write=$wspeed dd_1GiB_fsync=$dd_speed (MB/s, 1e6 B)"
     echo "$bc"
