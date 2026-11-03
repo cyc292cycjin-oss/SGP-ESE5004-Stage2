@@ -21,7 +21,7 @@ done
 cp $C/analysis/* $D/analysis/ 2>/dev/null
 cp $C/*.sha256 $D/
 cp /home/jin/v3r/upload.log $D/instance/UPLOAD.log
-for f in download.log mark_and_licence.txt r_record.txt shutdown.txt boot.txt; do [ -f $R/$f ] && cp $R/$f $D/instance/$f; done
+for f in download.log mark_and_licence.txt r_record.txt shutdown.txt boot.txt full_stop.txt watchdog_test.txt; do [ -f $R/$f ] && cp $R/$f $D/instance/$f; done
 for f in $R/LEAK_SCAN_*.json $R/LEAK_CLASSIFY_*.txt; do [ -f "$f" ] && cp "$f" $D/instance/; done
 [ -f $R/r_small.txt ] && awk -v d=$D/instance '/^@@FILE /{f=d "/" $2; next} /^@@END/{f=""} f!="" {print > f}' $R/r_small.txt
 mv $D/instance/STATUS.txt $D/instance/STATUS_FINAL.txt 2>/dev/null

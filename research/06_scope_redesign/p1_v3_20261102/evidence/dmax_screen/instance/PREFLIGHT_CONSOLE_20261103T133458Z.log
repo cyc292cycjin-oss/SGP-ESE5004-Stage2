@@ -1,0 +1,32 @@
+== guards: test hooks / dry-run switches in this shell
+no test hook / dry-run switch set
+== SHA256SUMS
+all 23 files OK
+./repo is the unpacked code of commit fbdf2c2e6f41f0f39af2b812810e0dac5824c37a
+== networks (365x24h v2; build receipts + registered SHA256 / bytes)
+all_equal
+no 2920x3h network in the package (as registered)
+== environment vs env/ENV_LOCK.txt
+{"key_all_equal": true, "key": {}, "counts": [284, 284], "only_lock": [], "only_instance": [], "n_version_differences": 0}
+== solver profile
+V1 formal_barrier_1e6_t16 | interior-point gate path: True | Threads 16 | BarConvTol 1e-06 | TimeLimit 21600.0 OK
+V2 formal_barrier_1e6_t16 | interior-point gate path: True | Threads 16 | BarConvTol 1e-06 | TimeLimit 21600.0 OK
+V3 formal_barrier_1e6_t16 | interior-point gate path: True | Threads 16 | BarConvTol 1e-06 | TimeLimit 10800.0 OK
+profile {'Method': 2, 'Crossover': 0, 'BarConvTol': 1e-06, 'BarHomogeneous': 1, 'Threads': 16, 'Seed': 123, 'AggFill': 0, 'PreDual': 0, 'GURO_PAR_BARDENSETHRESH': 200}
+== code imports (no licence)
+modules import; run table V1, V2, V3 | limits {'V1': 21600, 'V2': 21600, 'V3': 10800} + 1200 s wall margin | gap 330 s | parallel >= 33 cores
+== tools
+/usr/bin/time (GNU time -v) present
+setsid present
+pgrep present
+timeout present
+tmux present
+== licence (output suppressed)
+Gurobi accepts the licence (output suppressed); one WLS token is held >= 5 min (run_dfx.sh waits 330 s)
+== resources (container cgroup quota; host values only as fallback)
+container CPU cores 25 [cgroup v2 cpu.max (2500000/100000)]; host nproc 25
+container memory 62 GiB [cgroup v2 memory.max]; anon in use now 0.3 GiB; host MemTotal 504 GiB; free disk 48 GB (45 GiB) under /root/autodl-tmp/v3_screen_dmax
+need (hard floor, RUN_PLAN_DFX.md section 5): cores >= 16, memory >= 48 GiB, free data disk >= 40 GB
+NOTE: 25 cores < 33: V2 runs after V1 in one lane (pre-registered)
+PREFLIGHT OK
+PREFLIGHT_EXIT:0

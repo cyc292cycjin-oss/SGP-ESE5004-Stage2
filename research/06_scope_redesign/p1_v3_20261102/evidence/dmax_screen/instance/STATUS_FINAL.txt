@@ -1,0 +1,36 @@
+START:2026-11-03T13:35:19Z:commit=fbdf2c2e6f41f0f39af2b812810e0dac5824c37a:repo_commit=fbdf2c2e6f41f0f39af2b812810e0dac5824c37a:mode=batch:build_only=0:post_only=0:dry=0:cores=25:threads_T16=16:time_limit_s=V1=21600,V2=21600,V3=10800,:wall_cap_s=V1=22800,V2=22800,V3=12000,:licence_gap_s=330:parallel_min_cores=33:schedule=1[V1|V2]2[V3|]:truncate=none:resume=no:tmpdir=/root/autodl-tmp/v3_screen_dmax/runs/dfx/tmp:post_timeout_s=1800:allow_unregistered=0:hooks=
+BASE_CHECK:all_equal
+GAP_PHASE_1:330s:2026-11-03T13:40:49Z
+PHASE_1:one_lane:V1,V2:threads=32:cores=25:min_cores=33:2026-11-03T13:40:49Z
+SOLVE_V1:pid=5796:pgid=5796:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22800:network_sha256=a0273602016003fc4318cdd993b69716772c700cd2f9d079059fabcdde099c8b:2026-11-03T13:40:50Z
+RUN_V1:optimal:exit=0:receipt=post_solve:4485s:peak=24.91GiB
+VIOLATIONS_V1:exit=0
+C1_V1:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=default:provisional
+M12_V1:exit=0
+M12_OWEN_V1:exit=0
+V6_V1:ACCEPTED_LAYER2:ref=default
+GAP_V2:330s:2026-11-03T15:01:04Z
+SOLVE_V2:pid=13377:pgid=13377:profile=formal_barrier_1e6_t16:threads=16:time_limit=21600:wall_cap=22800:network_sha256=f9f4057b9972b2d7c8ab8b574c2d90c306000ae44eb2697ad80a6c0dc3554861:2026-11-03T15:01:05Z
+RUN_V2:optimal:exit=0:receipt=post_solve:1877s:peak=21.28GiB
+VIOLATIONS_V2:exit=0
+C1_V2:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=default:provisional
+M12_V2:exit=0
+M12_OWEN_V2:exit=0
+V6_V2:ACCEPTED_LAYER2:ref=default
+BATCH_REFERENCE:exit=0:2026-11-03T15:36:29Z:V1=optimal:V2=optimal
+REGRADE_V1:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+REGRADE_V2:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:provisional=ACCEPTED_LAYER2:final=ACCEPTED_LAYER2
+GAP_PHASE_2:331s:2026-11-03T15:37:52Z
+PHASE_2:one_lane:V3:threads=16:cores=25:min_cores=33:2026-11-03T15:37:52Z
+SOLVE_V3:pid=17407:pgid=17407:profile=formal_barrier_1e6_t16:threads=16:time_limit=10800:wall_cap=12000:network_sha256=f889c3ba1dee0ce48dc9c5d6aa165b3dd2a436bc16a92230616a091436d89974:2026-11-03T15:37:53Z
+RUN_V3:optimal:exit=0:receipt=post_solve:1433s:peak=20.04GiB
+VIOLATIONS_V3:exit=0
+C1_V3:exit=0:layer1_plus_nodal_price_settlement:accepted=True:abc=111:ref=batch:final
+M12_V3:exit=0
+M12_OWEN_V3:exit=0
+V6_V3:ACCEPTED_LAYER2:ref=batch
+M12_BENEFIT:exit=0:{"b6_bn": 14.57384703771466, "negative": ["BUNKER"]}
+SUMMARY:exit=0:reference=none:{"B6_bn": 14.57384703771466, "runs": {"V1": "ended", "V2": "ended", "V3": "ended"}, "delta_b6_bn": null}
+SCREEN_TABLES:exit=0:{"id_difference_bn": 0.5945780933060831, "la_rows": 11, "solver_runs": 0}
+PACK_final:PACKED:light=results_light_final_20261103T160537Z.tar.gz:5894899B:sha256=b7dee0a112259a15:full=results_full_final_20261103T160537Z.tar.gz:529983823B:sha256=6ee18339a4622eb6
+DONE:2026-11-03T16:06:08Z:unusable=none

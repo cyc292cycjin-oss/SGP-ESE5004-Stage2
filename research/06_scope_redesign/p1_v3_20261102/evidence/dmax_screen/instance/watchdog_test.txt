@@ -1,0 +1,50 @@
+== 1 live state (must be NOT_TERMINAL)
+CHECK:terminal=none:busy=1:decision=NOT_TERMINAL:shutdown=/usr/bin/shutdown:shred=/usr/bin/shred:licence=present
+== 2 forged terminal states (--dry-run)
+-- done_nomark: exit=0
+2026-11-03 21:35:44 SGT TRIGGER:terminal=DONE:quiet >= 3 s:waiting up to 3 s for <T>/done_nomark/RECOVERED_OK
+2026-11-03 21:35:47 SGT NO_MARK:after 3 s
+2026-11-03 21:35:47 SGT DRY_RUN:would shred -u /root/.gurobi/gurobi.lic; would write <T>/done_nomark/WATCHDOG_SHUTDOWN.txt (terminal DONE); would shut
+2026-11-03 21:35:47 SGT DRY_RUN_END:licence present, nothing changed
+   PASS
+-- halted_nomark: exit=0
+2026-11-03 21:35:50 SGT TRIGGER:terminal=HALTED:quiet >= 3 s:waiting up to 3 s for <T>/halted_nomark/RECOVERED_OK
+2026-11-03 21:35:53 SGT NO_MARK:after 3 s
+2026-11-03 21:35:53 SGT DRY_RUN:would shred -u /root/.gurobi/gurobi.lic; would write <T>/halted_nomark/WATCHDOG_SHUTDOWN.txt (terminal HALTED); would 
+2026-11-03 21:35:53 SGT DRY_RUN_END:licence present, nothing changed
+   PASS
+-- stopsafe_file: exit=0
+2026-11-03 21:35:56 SGT TRIGGER:terminal=STOP_SAFE:quiet >= 3 s:waiting up to 3 s for <T>/stopsafe_file/RECOVERED_OK
+2026-11-03 21:35:59 SGT NO_MARK:after 3 s
+2026-11-03 21:35:59 SGT DRY_RUN:would shred -u /root/.gurobi/gurobi.lic; would write <T>/stopsafe_file/WATCHDOG_SHUTDOWN.txt (terminal STOP_SAFE); wou
+2026-11-03 21:35:59 SGT DRY_RUN_END:licence present, nothing changed
+   PASS
+-- stop_file: exit=0
+2026-11-03 21:36:02 SGT TRIGGER:terminal=STOP:quiet >= 3 s:waiting up to 3 s for <T>/stop_file/RECOVERED_OK
+2026-11-03 21:36:05 SGT NO_MARK:after 3 s
+2026-11-03 21:36:05 SGT DRY_RUN:would shred -u /root/.gurobi/gurobi.lic; would write <T>/stop_file/WATCHDOG_SHUTDOWN.txt (terminal STOP); would shutdo
+2026-11-03 21:36:05 SGT DRY_RUN_END:licence present, nothing changed
+   PASS
+-- runner_gone: exit=0
+2026-11-03 21:36:08 SGT TRIGGER:terminal=RUNNER_GONE:quiet >= 3 s:waiting up to 3 s for <T>/runner_gone/RECOVERED_OK
+2026-11-03 21:36:11 SGT NO_MARK:after 3 s
+2026-11-03 21:36:11 SGT DRY_RUN:would shred -u /root/.gurobi/gurobi.lic; would write <T>/runner_gone/WATCHDOG_SHUTDOWN.txt (terminal RUNNER_GONE); wou
+2026-11-03 21:36:11 SGT DRY_RUN_END:licence present, nothing changed
+   PASS
+-- mark_first: exit=0
+2026-11-03 21:36:14 SGT TRIGGER:terminal=DONE:quiet >= 3 s:waiting up to 3 s for <T>/mark_first/RECOVERED_OK
+2026-11-03 21:36:14 SGT MARK_FOUND:<T>/mark_first/RECOVERED_OK:watchdog exits, the local session finishes
+   PASS
+-- mark_late: exit=0
+2026-11-03 21:36:17 SGT TRIGGER:terminal=DONE:quiet >= 3 s:waiting up to 8 s for <T>/mark_late/RECOVERED_OK
+2026-11-03 21:36:19 SGT MARK_FOUND:<T>/mark_late/RECOVERED_OK:watchdog exits, the local session finishes
+   PASS
+== 3 forged terminal state with the real process pattern: the live runner must block the trigger for the whole 10 s
+exit=124 (124 = still waiting)
+trigger lines: 0
+== 4 nothing touched
+licence stat unchanged
+STATUS size 483 -> 483 (the runner may append); WATCHDOG_SHUTDOWN.txt in the package folder: 0; RECOVERED_OK: 0
+RESULT:live=PASS:forged_fails=0:busy_blocks=PASS
+WD_TESTS_ALL_PASS
+SSH_EXIT:0
