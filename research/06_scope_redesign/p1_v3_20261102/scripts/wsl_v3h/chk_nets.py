@@ -72,9 +72,10 @@ def compare(old: Path, new: Path) -> dict:
         info = dict(dims=list(a.dims), attrs_equal=repr(sorted(a.attrs.items())) == repr(sorted(b.attrs.items())))
         if dim and dim in o.variables and dim in n.variables and dim != v:
             io, inn = [str(x) for x in o[dim].values], [str(x) for x in n[dim].values]
-            common = [x for x in io if x in set(inn)]
+            so, sn = set(io), set(inn)
+            common = [x for x in io if x in sn]
             if io != inn:
-                res["index_changes"][dim] = dict(removed=[x for x in io if x not in set(inn)], added=[x for x in inn if x not in set(io)], order_same=[x for x in io if x in set(inn)] == [x for x in inn if x in set(io)])
+                res["index_changes"][dim] = dict(removed=[x for x in io if x not in sn], added=[x for x in inn if x not in so], order_same=common == [x for x in inn if x in so])
             if common:
                 ao = a.sel({dim: common}).values if io != common else a.values
                 bo = b.sel({dim: common}).values if inn != common else b.values

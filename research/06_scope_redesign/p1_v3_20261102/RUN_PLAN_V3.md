@@ -730,3 +730,61 @@ HPC 这一项只走到分进程的第 1 步，且是 56 时段；2920×3h 全尺
 | Owen 受益（对偶形式，α 0.5） | 12 个参与者的符号与第一次筛查相同：BN、ID、KH、LA、MM、MY、PH、SG、TH、TL、VN 为正，BUNKER 为负；若有翻号，最可能是受益最小的 PH（+0.058）、BN（+0.063） | B6 的变化估计 0.1–0.2 bn 量级，分到单个参与者的变化通常小于 0.1 bn |
 | EV 电池跨日转移 | 每个日末 96 个电池高于 0.8 下限的电量之和 ≤ 1.587 TWh（核对容差 1e-3 MWh）；每个电池每个日末电量 ≥ 0.8 × `e_nom`（容差 1e-6）；全年跨日正变化之和（各电池合计）由 154.7 TWh 降到 10–60 TWh | 前两条是约束，必须成立，不成立即模型或核对有误；第三条：带宽缩为 0.222 倍，按第一批约 22 次"带宽循环"折算约 34 TWh，小带宽可能循环更勤 |
 | 求解 | 三次都返回解；V1、V3 optimal；V2 optimal 或 suboptimal（后者按 C1 与 GATES_V6 判定）；失败闸门都在 `RUN_PLAN_SCREEN_V3.md` 第 8 节的预告内 | 第一批五次都是 optimal；LP 只改上下界 |
+
+## 24. HPC 打包（台账 V14）：F1–F4 网络登记与本机冒烟（第 186、187 项；任何 F1–F4 求解之前提交）
+
+依据：`V3_HPC_PACKAGE_INSTRUCTION.md`（SHA256 `29dc0b0f…`）第 2、3 节；规则 `V3_RULES.md` 第 12 节（`a1ef782b`，构建前提交）。第 3–23 节原有内容不改。
+
+### 24.1 网络（构建提交 `a1ef782b8c8f0b6cb0ef67b3fe66a7493865e9b7`）
+
+worktree `/home/jin/wt_v3_hpc`（分支 `codex/v3-hpc-20261104`），`PYTHONHASHSEED=0`，脚本 `scripts/wsl_v3h/build_f.sh`，输出主检出 `results_project/v3hpc/builds/`（`sa/` = F1、F2；`sa_ev05/` = F3、F4，`--override s2.demand.ev_fleet_scale=0.5`）。每个构建根另有 365×24h 文件，只供静态检查，**不进入任何部署包**。
+
+| 运行 | 文件 | 字节 | SHA256 |
+|---|---|---:|---|
+| F1 一体化（S-A） | `sa/integrated/integrated_2920_3h_unsolved.nc` | 72,050,034 | `8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef` |
+| F2 `no_new_xb`（S-A） | `sa/no_new_xb/no_new_xb_2920_3h_unsolved.nc` | 71,411,694 | `e2837e4ada978e0d05fc04108d7ceb99567e41c33b6837ab4447be74bdd918b7` |
+| F3 一体化（S-A，车队 ×0.5） | `sa_ev05/integrated/integrated_2920_3h_unsolved.nc` | 72,050,068 | `c4eb7c44a54175ba06d7d60d4926cb095fc0ec603eced4ff28aecd8493bcb063` |
+| F4 `no_new_xb`（S-A，车队 ×0.5） | `sa_ev05/no_new_xb/no_new_xb_2920_3h_unsolved.nc` | 71,411,730 | `0bbe235e08654f566afe8f94eb2299a9ed1a8bb1f791520f8206449e02c3bac7` |
+
+部署包内的文件名：F1 `integrated_2920_3h_unsolved.nc`、F2 `no_new_xb_2920_3h_unsolved.nc`、F3 `integrated_ev05_2920_3h_unsolved.nc`、F4 `no_new_xb_ev05_2920_3h_unsolved.nc`（回执同样改名：`integrated_ev05_BUILD_RECEIPT.json`、`no_new_xb_ev05_2920_3h_VARIANT_RECEIPT.json`；文件内容与 SHA256 不变）。F4 的字节数与第 21.1 节 `b262f6aa…` 碰巧相同，内容不同。
+
+**核对（`V3_RULES.md` 第 12.3 节的预期，VERIFIED，`evidence/hpc/F_REBUILD_CHECK.json`，脚本 `chk_f.py` / `chk_nets.py`，全部通过）：**
+
+| 比较 | 结果 |
+|---|---|
+| F1 对 `1bddacb7…` | 只有 `links_marginal_cost`、`links_efficiency` 不同，不同的组件恰为全部 270 条船运链路（三载体各 90 条）；新单价与 S-A 公式的最大相对偏差 0.0，η 全为 1。元数据只有第 12.3 节所列各键；构建路径所指文件 SHA256 不变 |
+| F2 对 `b262f6aa…` | 同上；`research_variant.base.sha256` = 新 F1 |
+| F3 对 F1 | 只有 96 个 EV 电池 `e_nom` 与 96 个充电桩 `p_nom`，逐位等于 F1 × 0.5（电池合计 7.934 → 3.967 TWh，充电桩 3,490.9 → 1,745.4 GW）；`fleet_scale` 1.0 → 0.5 |
+| F4 对 F2 | 同上；`research_variant.base.sha256` = F3；覆盖记录 = F2 的记录 + `s2.demand.ev_fleet_scale=0.5` |
+| F2 − F1、F4 − F3 | 差异结构与登记对完全相同：删除 46 条 AC 线、283 条链路（H2 管 110、气管 110、CO₂ 管 55、DC 8），共同组件上只有存量 AC 线的 `s_nom_extendable`、`s_nom_max`（16 条）与存量链路的 `p_nom_extendable`、`p_nom_max`（9 条），时序无差异 |
+| 静态检查 `v3_static.py` | 两个构建根 `all_structural_passed = true`（需求对表、存量、专线、源母线、`no_new_xb` 闸门 B5、两分辨率情景差、对 v2 结构） |
+
+**两处核对口径的说明（核对之后写明）：** (1) 第 12.3 节构建前写的"810 条（各 270 条）"是我的计数笔误，第 3.3 节登记的是 270 条（90 条有向航线 × 3 载体）；核对按"全部船运链路"这一集合判定，集合与字段都符合规则，计数已在第 12.3 节更正。(2) F4 的覆盖记录同时带有派生变体自己记下的 `cross_border.stock_mode=no_new_xb`（F2 本来就有），第 12.3 节允许的键不变，只是核对脚本第一版没有预计到这个值，改为"母网络记录 + 车队覆盖项"后通过。两处都不是规则外差异，网络未重建。
+
+**LP 规模（2920×3h，按时段数线性外推，本机放不下全尺寸 LP）：** 方法与第 2 节相同，用第 21.1 节的 56 与 365 两点（F1–F4 与登记网络结构相同，只改了数值，LP 维数不变）。同一方法对 v2 一体化给出 35,748,446 列 × 79,714,102 行，与 D2 在 Atlas 上的实测**逐位相同**，非零多估 0.56 %。
+
+| 网络 | 列 | 行 | 非零（外推；按 v2 的偏差约再低 0.5 %） |
+|---|---:|---:|---:|
+| F1、F3 一体化 | 37,480,004 | 82,955,300 | ≈ 194,010,000（≈ 1.93 亿） |
+| F2、F4 `no_new_xb` | 36,384,650 | 80,501,958 | ≈ 186,210,000（≈ 1.85 亿） |
+| 对 D2（v2 F1）的比值 | +4.84 % | +4.07 % | ≈ +3.4 % |
+
+### 24.2 本机冒烟（指令第 3 节）
+
+- 用户 2026-11-04 原话："冒烟直接开始， WLS 空闲、AnyConnect已经断开。" 脚本仍在启动前与每次求解前做到令牌服务器的 TCP 预检，不通就不启动。
+- 脚本 `scripts/wsl_v3h/smoke_h.sh`（与补充 05 的 `smoke_s5.sh` 同一路径与设置，只换网络），输出 `results_project/v3hpc/smoke_hpc`。F1、F2 的前 56 时段，档案 `formal_barrier_1e6_t16`，TimeLimit 3,000 s，墙钟止损 3,600 s，串行，间隔 ≥ 330 s，不重试、不改参数。额度 2 次。
+- 验收同第 21.3 节：C1 (a)(b)(c) 全过且 GATES_V6 ACCEPTED，B16，B6 为正，SG 有来源，无松弛。停止条件：冒烟不可行或 C1 不过（指令第 8 节）。闸门预告（并集规则）：A1_A2、A1_A2_S4B、A3、A3_S4B、B1（判据见 `V3_RULES.md` 第 8.3 节）、B3、B8（只有 Transport，相对差 −4.1146e-05）。
+- 对照：补充 05 冒烟（S-B，第 22 节）：一体化 329.1998、`no_new_xb` 341.7664 bn，B6 12.5665 bn。
+
+### 24.3 S-A 影响的事先估计（INFERENCE，冒烟之前写定；`evidence/hpc/SA_EFFECT_PRE_SMOKE.json`）
+
+以补充 05 冒烟的 S-B 解（56 时段，权重 8,760 / 56，即年化）的船运流量为固定点：
+
+| 项 | 一体化 | `no_new_xb` |
+|---|---:|---:|
+| 运费 S-B / S-A（同一流量，bn） | 0.138 / 1.064 | 0.154 / 1.098 |
+| 不再计的货损价值（目的地母线价，bn） | 0.343 | 0.364 |
+| 一阶总成本变化（bn） | +0.583 | +0.580 |
+| 结构上界（S-B 解改为按 η_B 少运、产地少产仍可行，除求解容差外，bn） | +0.922 | +0.939 |
+
+预期：两次都 optimal 或 C1 与 GATES_V6 通过；一体化 329.20 + (0.3 到 0.92) ≈ 329.5–330.1 bn，`no_new_xb` 341.77 + (0.3 到 0.94) ≈ 342.1–342.7 bn；B6 = 12.5665 ± 0.05 bn（一阶 −0.003 bn，审查估计 ≤ 0.02 bn）；船运容量对偶仍全部为 0、最大利用率 < 10 %。
