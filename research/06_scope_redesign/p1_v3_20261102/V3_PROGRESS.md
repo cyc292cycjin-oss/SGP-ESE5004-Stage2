@@ -108,4 +108,11 @@
 | 2.1 第 5 条 预测 | `RUN_PLAN_V3.md` 第 23.3 节，在 HiGHS 路径检查之前提交 | 本次提交 |
 | 2.1 第 6 条 定义文件、计划 | `batch_def/BATCH_DEF_365x24h_dmax.json`；`RUN_PLAN_SCREEN_V3.md` 第 10 节；打包脚本 `screen_package/make_package_v3_dmax.sh` | 本次提交 |
 
-恢复点：登记与预测已提交；下一步 HiGHS 日分辨率路径检查（`pathcheck7.sh` → `chk_pc7.py`），再干跑（`dry_s7.sh`）、打包（`pkg_s7.sh`）。计数：本机 Gurobi 0；没有求解；本机计算约 0.05 小时 / 2 小时；磁盘约 0 / 15 GB。
+| 推送 | 远端头 `fbdf2c2e`（预测在路径检查之前上远端） | — |
+| 2.1 第 4 条 HiGHS 路径检查 | 新 V1、V2、V3 截短 8 天，全链路走通：三次 optimal；EV 下限全部成立、约一半电池·日压在 0.8；B16、Owen 恒等式 1e-13 量级，未归属 0；一体化按 365×24h 登记值重评 `ACCEPTED_LAYER2`（按回执比 2920×3h 时 G2.1 不过，调用方式所致）；B8 只有 Transport +1.8362e-03（截短假象，可精确推出） | 本次提交 |
+
+| 2.1 第 6 条 干跑与部署包 | 干跑 `BASE_CHECK:all_equal`，V1–V3 `BUILD_CHECK` 通过，LP 规模与第 21.1 节相同；包 `screen_package_v3_dmax/` 23 文件 185,237,457 B，`SHA256SUMS` `cce1444c…`、清单 `4a46fba9…`，代码 `fbdf2c2e`；预检（`licence`、`resources` 除外）通过；未上传 | 包在 `fbdf2c2e` 上打出 |
+| 全量测试 | 提交 `fbdf2c2e`：758 通过、58 跳过、3 失败（与 v3 无关，同之前；多出的 6 项是本补充新增） | 本次提交 |
+| 2.1 第 7 条 报告本机部分 | `V3_REPORT_SUPPLEMENT07.md` 第 0–7、9 节；第 8 节留给云端结果 | 本次提交 |
+
+恢复点：**补充 07 本机部分完成，停下等用户开机并授权**（审阅决定第 2.2 节：开机、在会话中给出连接方式并写"授权 V3 重跑"，同时确认 WLS 空闲、AnyConnect 已断开）。授权后：包 `work/p1_v3_20261102/screen_package_v3_dmax/`，实例新目录 `/root/autodl-tmp/v3_screen_dmax/`（上一批 `/root/autodl-tmp/v3_screen/` 不动），3 次运行 V1 → V2 → V3，其余按 `V3_SCREEN_AUTODL_INSTRUCTION.md` 第 2 节与 `V3_SCREEN_UNATTENDED.md` 全部条款；环境 `env_check` 284 / 284 一致则复用。回收后本机计算完整修订桥（第一批 V4 271.2321、V5 268.7261 bn 与新 V1），补写报告第 8 节。计数：本机 Gurobi 0；本机计算约 1.0 小时 / 2 小时；磁盘约 3.2 GB / 15 GB。计数：本机 Gurobi 0；没有求解；本机计算约 0.05 小时 / 2 小时；磁盘约 0 / 15 GB。
