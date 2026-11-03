@@ -11,7 +11,7 @@
 - **请审阅端看三点：** ① `LA2 5` 不含火电 1,476 MW，只比合同 1,473 MW 高 3 MW，全部是非合同电站；② 专线全年利用率的结构上界从约 50 % 降到约 **40 %**；③ 有 2 个组件同时含运营中和在建机组，不拆开就做不到"只放运营中"，所以逐组件差异比审阅决定预期的多这一类，见第 1、3 节。
 - 56 时段预测 8 项，6 项符合，**2 项低于下限**：LA 净出口（+5.23，下限 +5.5）、专线流量（4.76，下限 5.0）。预测原文未改。
 - 中途停过一次：43 台机组在回执里没有状态字段，触发停止条件，你决定用 GIPT `Status`。
-- **这一轮只跑了相关测试，没有跑全量，** 原因见第 10 节。
+- 全量 `tests/research` 是你看到报告后授权补跑的：752 通过、58 跳过、3 失败，3 项与之前相同，都与 v3 无关。本机计算因此超出 1.5 小时上限约 0.1 小时，见第 10 节。
 
 ## 1. 规则改动
 
@@ -239,9 +239,9 @@
 ## 10. 资源与测试
 
 - 本机 Gurobi：本补充 2 / 2，没有重试，没有改参数。
-- 本机计算新增约 1.15 小时 / 1.5 小时，磁盘新增约 9.2 GB / 15 GB。
-- **测试：** 提交 `55253dd7` 上跑了 16 个与改动相关的测试文件（第 179、180 项、账本、运行器、机队、变体等），152 通过、6 跳过、0 失败，新增 7 项第 180 项测试都在内。
-- **没有跑全量 `tests/research`：** 全量约 28 分钟，加上会到约 1.6 小时，超过本补充 1.5 小时的上限，指令也没有要求。最后一次全量是提交 `04c1eabf` 的 745 通过、58 跳过、3 失败。此后改动的代码是 `v3_layers.py`、`v3_static.py`、`v3_dedicated_lines.py`，都在这次跑的范围内；要补跑全量，需要约 28 分钟的额度。
+- 本机计算新增约 1.6 小时，**超出 1.5 小时上限约 0.1 小时**，磁盘新增约 9.2 GB / 15 GB。超出的部分是用户看到初版报告后授权的全量测试（用户原话"补跑全量测试"）；不算这次，本补充用了约 1.15 小时。
+- **测试：** 提交 `55253dd7` 上跑了 16 个与改动相关的测试文件，152 通过、6 跳过、0 失败。
+- **全量 `tests/research`：** 提交 `93e2e8be`（代码与 `55253dd7` 相同，只多了文档），752 通过、58 跳过、3 失败，用时 28 分钟。3 项与之前相同，都与 v3 无关（`RUN_PLAN_V3.md` 第 6 节）。通过数比 `04c1eabf` 的 745 多 7，是新增的第 180 项测试。
 - 未连 AutoDL 或 HPC，未上传。
 
 证据：`evidence/smoke_s5/`、`evidence/MOVED_STOCK_STATUS_V3.csv`、`evidence/MOVED_STOCK_STATUS_BY_NODE_V3.csv`、`evidence/SOURCE_CAPACITY_OP_V3.csv`、`evidence/SOURCE_CAPACITY_OP_V3.json`、`evidence/SOURCE_LINE_BOUND_OP_V3.json`、`evidence/SOURCE_LINKS_V3.csv`、`evidence/SOURCE_BALANCE_OP_SMOKE.json`、`evidence/OP_VS_BOUND_DIFF.csv`、`evidence/OP_VS_BOUND_DIFF.json`、`evidence/LEDGER_CHECK_180.json`、`evidence/LEDGER_CHECK_180_SMOKE.json`、`evidence/V3_STATIC_CHECK.json`、`evidence/DRY_RUN_SCREEN.json`。数据表 `research_inputs/corridors/DEDICATED_STOCK_STATUS_V3.csv`。
