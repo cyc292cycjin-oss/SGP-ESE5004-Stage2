@@ -345,7 +345,7 @@ research:
     structure: national_ship              # national_ship (main: one bus per country and carrier at the hub node, ships between them) | asean_pool (v2, decision 44)
     hubs_table: research_inputs/liquids_v3/LIQUID_HUB_NODES_V3.csv
     routes_table: research_inputs/liquids_v3/LIQUID_SHIP_ROUTES_V3.csv
-    ship_cost_basis: td_tanker            # td_tanker (S-B, main: technology-data tanker rows, cargo loss) | ieaghg (S-A, upper-bound sensitivity)
+    ship_cost_basis: ieaghg               # ieaghg (S-A, main from decision 187, formal 2920x3h runs: IEAGHG full chain cost, cargo loss not counted separately, eta 1) | td_tanker (S-B, lower-bound sensitivity: technology-data tanker rows, cargo loss; main of the 365x24h screening, which is not rebuilt)
     ship_cost_scale: 1.0                  # +-50 % sensitivity
     ship_capacity_factor: 10.0            # fixed bound = carrier ASEAN annual demand / 8760 x factor, not binding by construction (D161-10)
   bunkers:                                # S4C-3 (decision 88, modifying decision 10): international aviation and shipping bunkers (scripts_project/s4c_layers.apply_bunker_attribution)

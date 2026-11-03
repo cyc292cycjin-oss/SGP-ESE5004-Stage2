@@ -82,6 +82,8 @@ AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GA
 
 **对照（不是来源）：** ACE 的 5,934.9 MW 比 EPPO 的 5,427 MW 高 507.9 MW，审阅决定以 EPPO 为唯一来源，这一差额未计入。
 
+**账本按长度拆分（独立审查 S3-3，2026-11-04 补记，只是说明）：** 6 条专线不在任何 `XB_LENGTH_SHARES_*.csv` 中。`s4d_ledger.country_cost_ledger` 对没有长度份额的走廊组件取两国各 0.5（列在 `LEDGER_IDENTITY.json` 的 `diagnostics.length_shares_missing`）。所以主值 α 0.5 不受影响，"按长度"敏感性对专线也等于 0.5（LA–TH 专线的老挝段与泰国段长度未拆分）。代码不改。
+
 ### 2.4 第 179 项：专线只输送存量电站出力（补充 04，2026-11-03，筛查前）
 
 **依据：** `V3_REVIEW_DECISIONS_SUPP03.md` 第 2 节。**理由：** 专线是电站接到邻国电网的放射线。对照情景的定义是"没有新增跨境输电"，让新建风光接入专线，等于新建了跨境输电能力，与定义不符。本次修改是为了让对照情景的定义自洽，不是因为 B6 的数值。
@@ -156,7 +158,7 @@ AEO8 国家 × 部门总量与 v2 需求修复、成本表、求解档案 A、GA
 ### 3.3 船运
 
 - 载体：非化石油、甲醇、氨；10 个沿海国两两有向，270 条；化石油不建（各国进口同价）。
-- 单价 `c(d) = c_km × d`（S-B，主算），`η(d) = 1 − 4e-6 × d`（d 为 km）。
+- 单价 `c(d) = c_km × d`（S-B，主算），`η(d) = 1 − 4e-6 × d`（d 为 km）。**第 187 项（2026-11-04）后，2920×3h 正式运行的主值改为 S-A，S-B 为下界敏感性；365×24h 筛查保持 S-B，见第 12.1 节。** 本节下文原文不改。
 
 | 载体 | `c_km` EUR2020/(MWh·km) | 来源 |
 |---|---|---|
@@ -309,6 +311,15 @@ Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
 - 这是截短假象，不是需求错误：全年网络逐部门闭合，`DEMAND_NETWORK_CHECK_V3.csv` 四个网络逐国逐载体闭合。冒烟中 EV 年当量需求比表低约 0.05 TWh（1,255.8 TWh × 4.1146e-05，Transport 部门中只有 EV 负荷随时间变化）。
 - 只在预期之内：冒烟的 B8 若有 Transport 以外的部门超限，或 Transport 相对差不等于 −4.1146e-05，就不属于本条解释，须另行报告。
 
+### 8.3 B1 国家净零闸门的判据（独立审查 Q-1，2026-11-04 补记，只是说明，阈值不改）
+
+读 `scripts_project/v5/v5_gates.py` 的 `gate_b1_country_net_zero`（VERIFIED）：
+
+- 对每个国家 c（`per_country`）：通过 ⇔ 本国大气 Store 末时段水平 ≤ `cap_c` + tol，tol = 1e-3 + 1e-7 × max(1, |cap_c|)（tCO₂）。净零下 `cap_c` = 0，tol = 1.0001e-3 t，即**约 1 kg**。
+- 另需：每吨排放只记一次（`every_tonne_booked_once`）、进口与生产机组载体的 CO₂ 强度为 0（U4）、燃料端口都是本国大气端口。
+- 为什么总是"不通过"：内点法不做交叉（档案 `formal_barrier_1e6_t16`，Crossover 0）返回的解只满足 FeasibilityTol 量级的相对可行性。各国大气 Store 的年度端口流量为 1e7–1e9 t 量级，相对 1e-9 的残差就是 0.01–1 t，远大于 1 kg 的绝对容差。五次筛查的末值 0.005–1.3 t（审查 Q-1），正是这一量级。约束本身（`research_country_co2_limit-<c>`）在 LP 中成立到求解容差；B1 不通过不表示超排。
+- 处理：B1 在 GATES_V6 中是数值信息（第 120 项），不进验收标签；`B1_S4B`（按求解容差给预算的版本）是判定依据。**阈值不改**，报告中照实列出，引用本节，不再逐次解释。
+
 ## 9. 预期结构差异（v3 对 v2，测试逐类型列出）
 
 | 类型 | 变化 |
@@ -331,10 +342,10 @@ Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
 1. ID 官方统计（HEESI）无工业子部门，只对有色金属自下而上，"其他"仍占 ID 工业约三分之二；镍产量 2019→2023 增三倍，2023 基年作敏感性。
 2. VN 子部门用 APEC 2022，与 2019 基年不一致；套用 PyPSA-Eur 2050 载体比例后，VN 工业固定生物质 181.4 TWh 约为 APEC 2022 VN 工业生物质的 3 倍，VN 固定生物质需求 197.6 TWh 超过可持续潜力 125.8 TWh，超出 71.9 TWh 按第 133 项规则改为有用热；属欧洲载体结构套用到东盟的局限。
 3. 设施分布按 2024–2026 存量外推到 2050 的 3–4 倍增长。
-4. EV 曲线为欧洲乘用车（RAMP），东盟两三轮车比例高、电池小；车队代理 C 级，可能高估 EV 灵活性；flat 与车队 ×0.5 敏感性在 2920×3h 正式运行后做。
+4. EV 曲线为欧洲乘用车（RAMP），东盟两三轮车比例高、电池小；车队代理 C 级，可能高估 EV 灵活性；flat 与车队 ×0.5 敏感性在 2920×3h 正式运行后做。（第 186 项后，2026-11-04：车队 ×0.5 的一体化与 `no_new_xb` 作为 F3、F4 并入正式批次，紧接 F1、F2；Owen 符号的稳健性判断等 F3、F4 到位后再下；flat 仍在之后。见第 12.2 节。）
 5. 液体码头与船运无容量约束（固定上界不绑定）；国内液体配送加价取 0。
 6. MY–SG 天然气管道容量缺失（DATA_PENDING），主算不建。
-7. 365×24h 筛查看不到 EV 日内效应，筛查 B6 与 2920×3h 正式值的差距可能大于 v2。
+7. 365×24h 筛查看不到 EV 日内效应，筛查 B6 与 2920×3h 正式值的差距可能大于 v2。（第 186 项按独立审查 S2-1 补写，2026-11-04，筛查之后，只是局限说明：）日分辨率没有任何日内平衡，不只是 EV：日均光伏像基荷一样可靠，筛查解中固定电池、家用电池、氢罐容量为 0，新建可调机组（OCGT、CCGT、氢透平、燃料电池）几乎为 0（第一批 V1 全部为 0，光伏占发电 91 %；V2 只有新建 CCGT 17.8 GW）。所以筛查的装机结构、节点电价、跨境流量与 B6 量级都不作为正式 2920×3h 结果的合理性参照；**筛查只用于 B6 符号、账本与分摊程序的检验**。2920×3h 的预测同时参考 56 时段冒烟与 365×24h 筛查，区间放宽并写明两者的结构差异（`RUN_PLAN_V3.md` 新的一节）。第 185 项第二层敏感性不用日分辨率，改用保留昼夜的分辨率，首批正式运行测出机时后再定。简报与论文方法说明同此。
 8. 电站专线（第 173 项）作为一般跨境容量建模。专线改为单向，只输送存量电站出力（第 2.3、2.4 节）。按聚类节点而不是按具体合同电站绑定，节点上非合同的存量电站也可经专线出口，是上界；不按购电合同份额限制。（本条按 `V3_REVIEW_DECISIONS_SUPP03.md` 第 2.1 节替换原句，原文见 `V3_LIMITATIONS_ITEM176.md`。）只绑定运营中机组；在建机组与其送出线一并属于第 175 (a) 项敏感性。`LA2 1` 的 350 MW 存量风电全年平均 `p_max_pu` 0.009，位置未核实，网络不改。为只放运营中机组而拆开的 2 个混合组件（第 2.5 节）有两点简化：来水按容量份额分配是近似；拆开的水库（`LA2 1` 的 `hydro existing::S4A`）成为两个组件后不再共用库容。（这两点按 `V3_REVIEW_DECISIONS_SUPP05.md` 补入，2026-11-03 筛查之后写入，只是局限说明。）
 
 已核实非问题：建筑电力小时形状来自 GEGIS 逐国曲线（相关系数 ≈ 1.0；LA、TL 借用 KH、ID，第 131 项），不是单一曲线套用。
@@ -375,3 +386,44 @@ Wei et al. 2020 表 8 Case 3-FeNi（RKEF，35 % Ni），换算成终端能源：
 - 构建回执、派生回执（`*_BUILD_RECEIPT.json`、`*_VARIANT_RECEIPT.json`）记录代码提交与网络 SHA256，随构建提交变化，不属于网络。
 
 **测试（`tests/research/test_s1_adapter_daily_v5.py`，类 `DailyStoreBounds`）：** EV 型电池（每天一个 3 小时时段为 0.8）的日下限为 0.8，`e_max_pu` 取日最小；两项与上游 `average_every_nhours` 的结果逐值相同；其余全部时变序列、静态表、元数据与修改前的聚合逐位相同；没有时变储能边界的网络，新旧聚合导出的 netCDF 逐字节相同。
+
+## 12. 第 186、187 项：2920×3h 正式运行的四个网络（HPC 打包，2026-11-04，F1–F4 构建前）
+
+**依据：** `V3_HPC_PACKAGE_INSTRUCTION.md`（台账 V14，SHA256 `29dc0b0fafd0731e57cf85d054eaebc8a44ebaa10f4446dcfbbe0a8ba3b3ade1`，与 `V3_HPC_PACKAGE_SHA256.txt` 一致）第 1、2 节；审阅决定 `work/p1_v3_review_20261103/V3_REVIEW_DECISIONS_INDEP.md`（决策清单第 186、187 项，用户已确认）；用户 2026-11-04 在本会话中对 S-A 效率与构建路径的两项答复（原话见下）。**性质：** 筛查之后、任何 2920×3h 求解之前的规则；已登记的预测与阈值不改。
+
+### 12.1 第 187 项：液体船运单价主值改为 S-A
+
+- 2920×3h 正式运行 F1–F4：`research.liquids.ship_cost_basis = ieaghg`（S-A，IEAGHG 2004 口径；`configs/research/baseline.yaml`）。单价 `c(d) = 固定项 + c_km × d`，**η = 1**，即第 3.3 节早已登记的 S-A 定义；开关已存在，网络构建代码不改。
+- η = 1 的理由，用户 2026-11-04 原话："按登记定义 η=1：S-A 单价为全成本，已含船用燃料与运营费用，货损不再另计，避免重复计算。"
+- S-B（`td_tanker`：technology-data 船行，`η = 1 − 4e-6 × d`）保留为**下界敏感性**开关，本批不运行；`ship_cost_scale` ±50 % 不变。
+- 注册表（审查 S3-2）：`liquid_ship_ckm_td_{methanol,oil,ammonia}` 等级 B → C（推导用到 C 级的航速、年运营小时与公式），描述改为"下界敏感性"；S-A 六行描述改为"主值"。生成脚本 `scripts_project/v3_data.py`，**数值一行不改**；`DATA_REGISTRY.csv` 2,321 行，SHA256 `40be9b2d…` → `93dbeb43…`。网络元数据只记注册表路径，不记其哈希，所以等级改动不进入网络。
+- **筛查不重建，保持 S-B。** 第一次筛查的五个 365×24h 网络与第 182 项后的三个网络都是 S-B 构建。**筛查（S-B）与正式（S-A）的口径差**：正式运行的船运液体每 MWh 多付运费（1,000 km 甲醇约 0.12 → 1.46 EUR/MWh）且不计货损；两情景都付，审查估计对 B6 的影响 ≤ 0.02 bn。简报与论文写明这一口径差；筛查与正式的 B6 比较以分辨率差异为主，这一口径差另列。
+- 主值改动后，若用当前代码对筛查结果重评 GATES_V6，G2.2 / B12 的配置哈希会与筛查网络不一致（筛查网络按 S-B 构建）；筛查结果以其构建提交的配置为准，不重评。
+
+### 12.2 第 186 项：EV 车队代理 ×0.5 并入正式批次
+
+- F3 = 一体化、F4 = `no_new_xb`，`research.s2.demand.ev_fleet_scale = 0.5`（第 7 节已有的开关；构建用 `--override s2.demand.ev_fleet_scale=0.5`，覆盖项记入网络元数据 `research_config.config_overrides`，B12 / G2.2 按同样的覆盖项重算配置哈希）；其余同 F1、F2（含 S-A）。F4 由 F3 经 `m08a_variants.py --set cross_border.stock_mode=no_new_xb` 派生。
+- 缩放只作用于车队代理的规模 N：96 个 EV 电池的 `e_nom` 与 96 个充电桩的 `p_nom` 各乘 0.5；负荷时序、充电桩可用率序列、早晨下限（标幺 0.8）不变。
+- 次序：F1、F2 之后紧接 F3、F4；Owen 受益符号的稳健性判断等 F3、F4 到位后再下（审查 S2-4）；flat 留到之后。
+
+### 12.3 重建与核对的预期（构建前写定；任一项不符即停下报告）
+
+构建在新 worktree `/home/jin/wt_v3_hpc`（分支 `codex/v3-hpc-20261104`）、本节提交之后的干净提交上进行，`PYTHONHASHSEED=0`，步骤同补充 07（`s2_network.py --scenario integrated`，`no_new_xb` 由 `m08a_variants.py` 派生）。比较用逐元素脚本（全部 netCDF 变量按位比较，差异落到具体组件；元数据解析后逐个叶键比较）。
+
+| 比较 | 允许的差异（其余全部变量、组件、时序、全局属性、元数据键逐位相同） |
+|---|---|
+| F1 对登记的一体化 `1bddacb7…` | 变量只有 `links_marginal_cost`、`links_efficiency`，且只在 810 条船运链路（`oil non-fossil ship`、`methanol ship`、`ammonia ship` 各 270 条）上；新值逐条等于 S-A 公式（注册表 `liquid_ship_fixed_ieaghg_<k>` + `liquid_ship_ckm_ieaghg_<k>` × `route_km`）且 η 恰为 1。元数据只有：`research_config.liquids.ship_cost_basis`（`td_tanker` → `ieaghg`）、`research_config_sha256`、`research_config_subset_sha256`、`research_liquids` 与 `v3_layers.liquids` 的 `ship_cost_basis`、`cost_range_eur_per_mwh`、`efficiency_range`，以及 `s2_layers.geothermal.bus_mapping_source.path` |
+| F2 对登记的 `no_new_xb` `b262f6aa…` | 同上一行，另加 `research_variant.base.sha256`（必须等于新 F1 的 SHA256） |
+| F3 对 F1 | 变量只有 `stores_e_nom`（只在 96 个 EV 电池）与 `links_p_nom`（只在 96 个 `BEV charger`），新值逐位等于 F1 值 × 0.5。元数据只有：`research_config.s2.demand.ev_fleet_scale`（1.0 → 0.5）、`research_config.config_overrides`（`s2.demand.ev_fleet_scale=0.5`）、`research_config_sha256`、`research_config_subset_sha256`、`research_ev` 与 `v3_layers.ev` 的 `fleet_scale`、`fleet_equivalent_vehicles`、`battery_mwh_total`、`charger_mw_total` |
+| F4 对 F2 | 同上一行，另加 `research_variant.base.sha256`（必须等于 F3 的 SHA256） |
+| F2 对 F1、F4 对 F3 | 差异结构与登记对（`b262f6aa…` 对 `1bddacb7…`）完全相同：删除与新增的组件、不同的变量及其组件、不同的元数据键都相同；与审查维度 4 一致：删除 46 条 AC 线（全部 `cross_border`）与 283 条链路（H2 管 110、气管 110、CO₂ 管 55、DC 8），共同组件上只有 16 条存量 AC 线的 `s_nom_extendable`、`s_nom_max` 与 9 条存量链路的 `p_nom_extendable`、`p_nom_max` 不同，时序与全局约束无差异 |
+
+- **构建路径（用户 2026-11-04 决定登记为来源差异）：** `s2_layers.geothermal.bus_mapping_source.path` 记录构建 worktree 下集成合同文件的绝对路径（`s2_network.py:350`），由 `/home/jin/wt_v3_20261102/…` 变为 `/home/jin/wt_v3_hpc/…`，所指文件的 SHA256（同一键的 `sha256`）不变。它只是来源记录：`scripts_project` 中没有任何代码读它；HPC 预检与运行器只比对网络文件 SHA256、字节数与构建回执、登记值（`b4_batch4.base_check`、`gates_v6.g2_1`），G2.2 只比配置子集哈希。在 `5e372e5d` 上于新 worktree 的试构建（配置未改）与 `1bddacb7…` 相比，全部变量逐位相同，元数据只有这一个键不同（`results_project/v3hpc/evidence/TRIAL_5E372E5D_VS_REGISTERED.json`）。
+- 所以 F1、F2 的 SHA256 不会等于登记值；新的 SHA256、字节数与 LP 规模登记到 `RUN_PLAN_V3.md` 新的一节后才求解。静态检查 `v3_static.py` 须 `all_structural_passed = true`。
+
+### 12.4 同批小修（审查 S2-5、S3-1、S3-3、S3-4、Q-1；不改结果）
+
+- `add_demand_layer` 的 v3 载体节点份额：某载体有工业需求而没有份额键（或份额和为 0）时**报错**，不再静默为 0（`s2_layers.check_carrier_share_keys`；现网 11 国所有有需求的载体都有份额键，审查 probe2 已核，所以现网不变，由 F1–F4 构建复核）。
+- 四个玩具网络单元测试：`tests/research/test_v3_units.py`（`apply_ev_structure` 的四个时区、年能量、充电桩与电池规模含 ×0.5；`_apply_bunker_nodal` 的终端母线国家标签、CO₂ 端口改接与链路所有者；`add_liquid_shipping` 的 270 + 7 条、容量上界、化石油只入 LA、S-A / S-B 单价与效率；载体份额缺键报错）。
+- `DIRECT` 主题清单（S3-4）改为单一来源 `s4d_ledger.DIRECT_SUBJECTS`，`m12_allocation.DIRECT` 引用它。实施时发现两处原本**并不一致**：`s4d_ledger` 的清单缺 `co2_transit_rail_freight`（同一模块的运费映射会产生这一主题），`m12_allocation` 的有。统一后只影响 `LEDGER_IDENTITY.json` 的两个诊断量 `difference_sources.direct_costs_minus_objective` 与 `settlement_sum`（有老挝铁路 CO₂ 运费时相差这笔运费）；B16 恒等式、账本各行、Owen 分摊都不变，闸门不读这两个量。
+- S3-1：`batch_def/BATCH_DEF_2920x3h.json` 的名称与注记改写（登记值不变；正式运行改用新的定义文件，见 `RUN_PLAN_HPC_V3.md`）。S3-3 见第 2.3 节末，Q-1 见第 8.3 节。

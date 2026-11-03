@@ -191,7 +191,7 @@ def proportional(total: float, weights: dict) -> dict:
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- solved network
-DIRECT = ("capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight", "co2_transit_ship_freight", "co2_transit_rail_freight", "liquid_ship_freight", "liquid_transit_freight")
+from s4d_ledger import DIRECT_SUBJECTS as DIRECT   # noqa: E402 - single source with the ledger identity (V3 independent review S3-4)
 XB_SUBJECTS = ("xb_share_infrastructure_cost", "xb_share_congestion_rent")
 BASE_ELEC = ("electricity",)
 FIXED_ELEC = ("electricity", "industry electricity", "land transport EV", "agriculture machinery electric")   # S4R R1 model_fixed_elec_total_twh

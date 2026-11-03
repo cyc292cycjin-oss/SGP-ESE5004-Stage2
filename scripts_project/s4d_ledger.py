@@ -33,6 +33,12 @@ ROOT = Path(__file__).resolve().parents[1]
 ONE_PORT = {"Generator": ("p", -1.0), "Store": ("p", -1.0), "StorageUnit": ("p", -1.0), "Load": ("p", 1.0)}   # withdrawal = sign x p
 FLOW = {"Generator": "p", "Link": "p0", "Store": "p", "StorageUnit": "p_dispatch"}   # flows that carry marginal_cost (gate A5)
 NOM = {"Generator": "p_nom", "Link": "p_nom", "Line": "s_nom", "StorageUnit": "p_nom", "Store": "e_nom"}
+# freight subjects of the transport carriers (marginal cost x flow); every other variable cost is "variable_cost"
+FREIGHT_SUBJECTS = {"CO2 ship": "co2_ship_freight", "CO2 transit export extra-ASEAN": "co2_transit_freight", "CO2 transit ship": "co2_transit_ship_freight", "CO2 transit rail": "co2_transit_rail_freight",
+                    "oil non-fossil ship": "liquid_ship_freight", "methanol ship": "liquid_ship_freight", "ammonia ship": "liquid_ship_freight", "liquid transit rail": "liquid_transit_freight"}
+# the direct-cost subjects (asset costs of the owner; everything else is a settlement): single source of the identity diagnostic below and of
+# m12_allocation.DIRECT (V3 independent review S3-4; co2_transit_rail_freight was missing here and present there)
+DIRECT_SUBJECTS = ("capex_new", "fom_existing", "variable_cost") + tuple(dict.fromkeys(FREIGHT_SUBJECTS.values()))
 
 
 def bus_entities(n) -> pd.Series:
@@ -124,8 +130,7 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
             var = (flow * mc).mul(w, axis=0).sum()
             for name, v in var[var != 0].items():
                 car = str(d.at[name, "carrier"])
-                subj = {"CO2 ship": "co2_ship_freight", "CO2 transit export extra-ASEAN": "co2_transit_freight", "CO2 transit ship": "co2_transit_ship_freight",
-                        "CO2 transit rail": "co2_transit_rail_freight", "oil non-fossil ship": "liquid_ship_freight", "methanol ship": "liquid_ship_freight", "ammonia ship": "liquid_ship_freight", "liquid transit rail": "liquid_transit_freight"}.get(car, "variable_cost")   # S4F-2 c (97 c): Lao rail transit into the VN store
+                subj = FREIGHT_SUBJECTS.get(car, "variable_cost")   # S4F-2 c (97 c): Lao rail transit into the VN store
                 add(own[t][name], subj, car, v)
     xb_led = pd.DataFrame(n.meta.get("existing_cross_border_fom_ledger", []))
     # M10R (R9 defect, 2026-10-24): the meta ledger of an integrated build lists every corridor of the corridor table, the zero-capacity candidates
@@ -210,7 +215,7 @@ def country_cost_ledger(n, length_shares: pd.DataFrame | None = None, extra_term
     s_main = float(tot.loc[countries, "eur"].sum()) + side("eur")
     s_len = float(tot.loc[countries, "eur_length_split"].sum()) + side("eur_length_split")
     pool = float(tot.at[POOL, "eur"]) if POOL in tot.index else 0.0
-    DIRECT = ["capex_new", "fom_existing", "variable_cost", "co2_ship_freight", "co2_transit_freight", "co2_transit_ship_freight", "liquid_ship_freight", "liquid_transit_freight"] + list(extra_terms or {})
+    DIRECT = list(DIRECT_SUBJECTS) + list(extra_terms or {})
     direct = float(L[L.subject.isin(DIRECT)].eur.sum())
     settle = float(L[~L.subject.isin(DIRECT)].eur.sum())
     xb_net = xb.groupby("pair").eur.sum()

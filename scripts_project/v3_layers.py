@@ -3,7 +3,7 @@
   * national liquid buses: research.liquids.structure = national_ship (main: '<ISO2> oil', '<ISO2> oil non-fossil', '<ISO2> methanol', '<ISO2> ammonia', located at the hub
     node of research.liquids.hubs_table) | asean_pool (v2: one regional bus per carrier, decision 44);
   * add_liquid_shipping: ship links between the coastal national buses (non-fossil oil, methanol, ammonia; fossil oil has the same import price everywhere), unit cost
-    c(d) by research.liquids.ship_cost_basis = td_tanker (main) | ieaghg (upper-bound sensitivity) x ship_cost_scale, cargo loss eta(d), fixed non-binding capacity; Lao rail
+    c(d) by research.liquids.ship_cost_basis = ieaghg (main from decision 187: full chain cost, eta 1) | td_tanker (lower-bound sensitivity, cargo loss eta(d); main of the screening) x ship_cost_scale, fixed non-binding capacity; Lao rail
     transit to the Vietnamese bus (decision 93 analogy). Carrier class maritime_trade: kept in every scenario;
   * apply_ev_structure: research.s2.demand.ev_structure = smart (main, E2) | smart_v2g (E3) | uncontrolled (E4) | flat (v2);
   * add_dedicated_plant_lines (X1b, decisions 172, 173; supplement 03): the Lao IPP export lines of research.network.dedicated_plant_lines_table, merged by plant node and landing node, one fixed lossy one-way
@@ -77,7 +77,8 @@ def _annual(n, carriers) -> float:
 
 
 def ship_unit(cfg, registry: pd.DataFrame, key: str, km: float) -> tuple[float, float]:
-    """(EUR2020/MWh delivered at the link input, efficiency) of a sea route: S-B c_km x d, eta = 1 - loss x d | S-A fixed + c_km x d, eta = 1."""
+    """(EUR2020/MWh delivered at the link input, efficiency) of a sea route: S-B c_km x d, eta = 1 - loss x d | S-A fixed + c_km x d, eta = 1 (full chain cost: the cargo
+    burnt as fuel is inside the IEAGHG cost and not counted again, decision 187)."""
     L = liquids_cfg(cfg); basis = str(L.get("ship_cost_basis", "td_tanker")); scale = float(L.get("ship_cost_scale", 1.0)); rv = lambda p: float(registry.loc[p, "value"])
     if basis == "td_tanker":
         return rv(f"liquid_ship_ckm_td_{key}") * km * scale, 1.0 - rv("liquid_ship_cargo_loss_per_km") * km

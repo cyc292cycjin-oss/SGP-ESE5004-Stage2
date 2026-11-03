@@ -629,6 +629,20 @@ def demand_table_key(cfg):
     return key + ("_level" if gm == "level" else "")
 
 
+INDUSTRY_SHARE_CARRIERS = ("heat", "coal", "oil", "gas", "biomass", "unclassified_fuel", "electricity", "hydrogen", "ammonia", "methanol")   # the carriers add_demand_layer places with S(k)
+
+
+def check_carrier_share_keys(country: str, ind_car: dict, cs: dict, overflow_industry_mwh: float, bands=()) -> None:
+    """V3 carrier node shares (decision 164; independent review S2-5): every industry carrier with demand needs node shares with a positive sum - a missing
+    key made S(k) return 0 at every node and dropped that demand silently. The industrial biomass overflow follows the biomass shares."""
+    need = [k for k in INDUSTRY_SHARE_CARRIERS + tuple(f"heat_{b}" for b in bands) if float(ind_car.get(k, 0.0) or 0.0) > 0]
+    if overflow_industry_mwh > 0 and "biomass" not in need:
+        need.append("biomass")
+    missing = [k for k in need if not sum(float(v) for v in (cs.get(k) or {}).values()) > 0]
+    if missing:
+        raise ValueError(f"V3 carrier node shares: {country} has industry demand without node shares for {missing} (research.s2.industry.v3.carrier_node_shares)")
+
+
 def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_csv: Path, boundary_csv: Path, allocation_dir: Path, nodes, cc_fraction: float):
     S2 = cfg["research"]["s2"]; D = S2["demand"]; I = S2["industry"]
     dem = pd.read_csv(demand_csv, keep_default_na=False)
@@ -872,6 +886,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                                   heat_bands_mwh={b: ind_car.get(f"heat_{b}", 0.0) for b in band_up})
         hydrogen_ledger[c] = ind_car.get("hydrogen", 0.0)
         cs = car_shares.get(c)   # V3 (decision 164): {carrier: {node: share}}; v2 one share table for all carriers
+        if cs:
+            check_carrier_share_keys(c, ind_car, cs, ov_ind, band_up)
         for node in (sorted({x for d_ in cs.values() for x in d_}) if cs else list(sh)):
             s = sh.get(node, 0.0)
             if cs is None and s <= 0:
