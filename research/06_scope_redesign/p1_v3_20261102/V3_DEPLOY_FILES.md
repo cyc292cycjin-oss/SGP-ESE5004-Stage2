@@ -14,6 +14,8 @@
 
 **补充 05 更新（2026-11-03）：** 第 180 项（源母线只放运营中机组）后网络再次重建，现行登记见 `RUN_PLAN_V3.md` 第 21 节，现行筛查包是 `work/p1_v3_20261102/screen_package_v3_op/`，`screen_package_v3/`、`screen_package_v3_oneway/`、`screen_package_v3_bound/` 已作废，保留不用。
 
+**补充 07 更新（2026-11-03，筛查之后）：** 第 182 项（365×24h 日聚合对 Store 的 `e_min_pu` 取日最大）后重建：2920×3h 两个网络与修订桥两个网络逐字节不变，365×24h 一体化、`no_new_xb`、完全隔离三个网络改变（只有 96 个 EV 电池的日下限），现行登记见 `RUN_PLAN_V3.md` 第 23 节。重跑包 `work/p1_v3_20261102/screen_package_v3_dmax/` 只含这 3 个网络（定义文件 `batch_def/BATCH_DEF_365x24h_dmax.json`，打包脚本 `screen_package/make_package_v3_dmax.sh`）；`screen_package_v3_op/` 是第一次筛查实际上传的包，保留不用。HPC 包：`daily_resolution.py` 在构建路径上，打包时构建提交应取 `7aec953e` 或之后，2920×3h 网络的 SHA256 不变（`1bddacb7…`、`b262f6aa…`）。
+
 ## 1. 两边共用
 
 | 文件 | 来源 | 说明 |

@@ -1,0 +1,74 @@
+{
+ "note": "V3 365x24h screening rerun after decision 182 (supplement 07, daily max of the Store e_min_pu): V1 -> V2 -> V3 (RUN_PLAN_SCREEN_V3.md section 10); copied into the package as BATCH_DEF.json",
+ "build_commit": "7aec953e7d306d09dab05918d04138a355b647ec",
+ "registered_sha": {
+  "integrated_365_24h_unsolved.nc": "a0273602016003fc4318cdd993b69716772c700cd2f9d079059fabcdde099c8b",
+  "no_new_xb_365_24h_unsolved.nc": "f9f4057b9972b2d7c8ab8b574c2d90c306000ae44eb2697ad80a6c0dc3554861",
+  "disconnected_365_24h_unsolved.nc": "f889c3ba1dee0ce48dc9c5d6aa165b3dd2a436bc16a92230616a091436d89974"
+ },
+ "registered_bytes": {
+  "integrated_365_24h_unsolved.nc": 33541263,
+  "no_new_xb_365_24h_unsolved.nc": 32902923,
+  "disconnected_365_24h_unsolved.nc": 32260715
+ },
+ "runs": {
+  "V1": {
+   "scenario": "integrated",
+   "base": "integrated_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "本批参照（v3 一体化）、Owen 分摊"
+  },
+  "V2": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "本批参照（v3 no_new_xb）、B6 = V2 − V1"
+  },
+  "V3": {
+   "scenario": "disconnected",
+   "base": "disconnected_365_24h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "disconnected",
+   "role": "存量与专线的价值 = V3 − V2（第 174 项）"
+  }
+ },
+ "schedule": [
+  [
+   "1",
+   [
+    "V1"
+   ],
+   [
+    "V2"
+   ]
+  ],
+  [
+   "2",
+   [
+    "V3"
+   ],
+   []
+  ]
+ ],
+ "time_limit_s": {
+  "V1": 21600,
+  "V2": 21600,
+  "V3": 10800
+ },
+ "need_disk_gb": 90,
+ "bridge": {
+  "v2_integrated_objective_eur": 270785244510.0,
+  "v2_disconnected_objective_eur": 285400557543.0,
+  "steps": [
+   [
+    "V1",
+    "all"
+   ]
+  ]
+ }
+}

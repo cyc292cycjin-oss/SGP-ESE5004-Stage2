@@ -70,6 +70,29 @@ def test_autodl_runner_five_screening_runs(tmp_path):
     assert s["B6"]["runs"] == dict(integrated="V1", disconnected="V2") and len(s["runs"]) == 5 and [x["step"] for x in s["bridge"]["steps"]] == ["v2 -> 160-162", "160-162 -> 160-164", "160-164 -> all"] and s["bridge"]["stock_value_bn"] is not None
 
 
+def test_rerun_definition_of_decision_182_is_the_registered_plan():
+    """V3 supplement 07: the three-run rerun (V1 -> V2 -> V3) on the networks rebuilt with the daily max of the Store e_min_pu; registered in RUN_PLAN_V3.md section 23, planned in RUN_PLAN_SCREEN_V3.md section 10"""
+    plan = (D3 / "RUN_PLAN_V3.md").read_text(encoding="utf-8"); screen = (D3 / "RUN_PLAN_SCREEN_V3.md").read_text(encoding="utf-8")
+    d = json.loads((D3 / "batch_def/BATCH_DEF_365x24h_dmax.json").read_text(encoding="utf-8")); first = json.loads((D3 / "batch_def/BATCH_DEF_365x24h.json").read_text(encoding="utf-8"))
+    assert list(d["runs"]) == ["V1", "V2", "V3"] and all(d["runs"][k] == first["runs"][k] for k in d["runs"])
+    assert set(d["registered_sha"]) == set(d["registered_bytes"]) == {r["base"] + "_unsolved.nc" for r in d["runs"].values()}
+    assert all(v in plan for v in d["registered_sha"].values()) and all(f"{v:,}" in plan for v in d["registered_bytes"].values()) and d["build_commit"] in plan
+    assert not set(d["registered_sha"].values()) & set(first["registered_sha"].values())   # the three networks changed with decision 182, the bridges did not enter
+    assert [x[1:] for x in d["schedule"]] == [[["V1"], ["V2"]], [["V3"], []]] and d["time_limit_s"] == {"V1": 21600, "V2": 21600, "V3": 10800} and d["need_disk_gb"] == 90
+    assert d["bridge"]["steps"] == [["V1", "all"]] and d["bridge"]["v2_integrated_objective_eur"] == first["bridge"]["v2_integrated_objective_eur"] and "BATCH_DEF_365x24h_dmax.json" in screen
+
+
+def test_autodl_runner_three_rerun_runs(tmp_path):
+    pkg = TD._package(tmp_path); _v3_package(pkg, "365_24h", "BATCH_DEF_365x24h_dmax.json", TD.D.BUILD_COMMIT, five=True)
+    r = TD._run(tmp_path, pkg, dict(FAKE_OBJ_V2="3e11", SCREEN_CMD=f"{sys.executable} -c pass"))
+    assert r.returncode == 0, r.stdout + r.stderr
+    st = TD._status(tmp_path); out = tmp_path / "out"
+    assert "BASE_CHECK:all_equal" in st and "MISSING_INPUT" not in st and "SCREEN_TABLES:exit=0" in st and "DONE" in st and not (out / "STOP").exists()
+    assert [c[1] for c in TD._calls(tmp_path)] == ["V1", "V2", "V3"]   # one lane below 33 cores
+    s = json.loads((out / "DFX_SUMMARY.json").read_text())
+    assert s["B6"]["runs"] == dict(integrated="V1", disconnected="V2") and len(s["runs"]) == 3 and [x["step"] for x in s["bridge"]["steps"]] == ["v2 -> all"] and s["bridge"]["stock_value_bn"] is not None
+
+
 def test_autodl_runner_stops_without_a_bridge_receipt(tmp_path):
     pkg = TD._package(tmp_path); _v3_package(pkg, "365_24h", "BATCH_DEF_365x24h.json", TD.D.BUILD_COMMIT, five=True); (pkg / "networks/bridge_160_164_BUILD_RECEIPT.json").unlink()
     TD._run(tmp_path, pkg); assert "MISSING_INPUT:networks/bridge_160_164_BUILD_RECEIPT.json" in TD._status(tmp_path) and not TD._calls(tmp_path)
