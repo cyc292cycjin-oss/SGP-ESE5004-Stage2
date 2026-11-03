@@ -1,0 +1,3454 @@
+{
+ "I365": {
+  "weights": {
+   "objective": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "generators": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "stores": [
+    24.0,
+    24.0,
+    8760.0
+   ]
+  },
+  "n_snapshots": 365,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 00:00:00",
+  "meta_keys": [
+   "apg_corridor_additions",
+   "approved_coupling_paths",
+   "approved_global_constraints",
+   "artifact_role",
+   "asset_qualification",
+   "asset_role",
+   "asset_time_boundary",
+   "atmosphere_port_moves",
+   "atmosphere_role",
+   "battery_inverter_pairs",
+   "candidate_ledger",
+   "component_price_qualification",
+   "cost_layer",
+   "cross_border_tags",
+   "demand_binding",
+   "demand_identity",
+   "demand_owners",
+   "electric_base_sha256",
+   "existing_annual_fixed_om_eur",
+   "existing_carbon_components",
+   "existing_cost_boundary",
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_resource_groups",
+   "existing_stock_boundary",
+   "existing_unit_components",
+   "existing_unit_removed_s4b1",
+   "external_annual_caps",
+   "fuel_bus_rename_map",
+   "fullsc_network_complete",
+   "gate3_fragment",
+   "historical_stock_qualification",
+   "hydro_group_qualification",
+   "input_coverage_complete",
+   "input_only_extraction",
+   "interim_notice",
+   "inventory_qualification_refresh",
+   "model_price_year",
+   "parent_resolution",
+   "physical_carbon_map",
+   "price_layer_sha256",
+   "price_method",
+   "qualification_dimensions",
+   "reference_source_is_solved",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_ammonia_methanol",
+   "research_biomass",
+   "research_bunkers",
+   "research_candidate_num_parallel",
+   "research_candidates_s4b2",
+   "research_carbon",
+   "research_co2_storage",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cost_layer_s4c1",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_ev",
+   "research_existing_vintage_costs",
+   "research_extra_asean_storage",
+   "research_finance",
+   "research_fleet",
+   "research_fleet_removed",
+   "research_fuel_carbon",
+   "research_fuel_prices",
+   "research_gas_network",
+   "research_hydro_inflow",
+   "research_imports",
+   "research_intra_asean_shipping",
+   "research_la_vn_stock",
+   "research_lao_th_store",
+   "research_lao_transit_shipping",
+   "research_lao_vn_store",
+   "research_liquids",
+   "research_max_extension",
+   "research_new_hydro_inflow_tie",
+   "research_readjust_impedance",
+   "research_renewable",
+   "research_sector_alignment",
+   "research_th_my_stock",
+   "research_transmission_losses",
+   "research_typhoon_premium",
+   "resource_occupancy_status",
+   "s2_demand_ledger",
+   "s2_layers",
+   "s3_layers",
+   "s4a_layers",
+   "s4b_layers",
+   "s4c_layers",
+   "s4d_layers",
+   "s4e_corridor_dc_additions",
+   "s4e_domestic_additions",
+   "s4e_layers",
+   "s4f_layers",
+   "s4g_layers",
+   "s4h_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "scientific_results_allowed",
+   "selected_cost_decision",
+   "skeleton_status",
+   "solver_allowed",
+   "source_is_solved",
+   "stage",
+   "stock_boundary_decision",
+   "stock_uncertainty",
+   "store_power_rules",
+   "target_year",
+   "temporal_reduction",
+   "temporal_resolution",
+   "transmission_limit",
+   "u4_zeroed_carriers",
+   "unresolved_existing_asset_ages",
+   "unresolved_existing_assets_outside_v1",
+   "upstream_adapter",
+   "upstream_add_hydrogen",
+   "v3_layers",
+   "weather_year"
+  ],
+  "hooks": [
+   "install_fragment_constraints",
+   "research_ac_loss_proxy",
+   "research_battery_inverter_capacity_equality",
+   "research_bunker_net_zero",
+   "research_co2_storage_cap",
+   "research_country_net_zero",
+   "research_cross_border_existing_fom",
+   "research_existing_assets",
+   "research_lossy_bidirectional_sync",
+   "research_new_hydro_inflow"
+  ],
+  "scenario": "integrated",
+  "xb": {
+   "H2": true,
+   "co2": true,
+   "electricity": true,
+   "gas": true,
+   "stock_mode": true
+  },
+  "global_constraints": {},
+  "counts": {
+   "Store": 649,
+   "Load": 2188,
+   "StorageUnit": 134,
+   "TransformerType": 14,
+   "Carrier": 150,
+   "Line": 148,
+   "Generator": 1946,
+   "Link": 8774,
+   "LineType": 35,
+   "Bus": 3115
+  },
+  "objective_constant_like": {
+   "xb_fom_eur": 24863188.024001557,
+   "ev": {
+    "battery_mwh_total": 7933780.751615183,
+    "charger_mw_total": 3490863.5307106804,
+    "fleet_equivalent_vehicles": 317351230.0646073,
+    "fleet_scale": 1.0,
+    "loads": 96,
+    "mode": "smart",
+    "mwh_per_vehicle_year": 2.2560631697687534,
+    "stores": 96,
+    "v2g_links": 0
+   },
+   "liquids_caps": {
+    "ammonia": 112026.61945125557,
+    "methanol": 620957.0986485742,
+    "oil": 1432369.2657956788,
+    "oil non-fossil": 1432369.2657956788
+   }
+  },
+  "xb_lines": {
+   "n": 62,
+   "ext": 62,
+   "s_nom_sum": 2570.0,
+   "s_nom_min_sum": 2570.0,
+   "s_nom_max_sum": 1242570.0,
+   "stock_rows": 16,
+   "stock_s_nom_eq_min": 16,
+   "capital_cost_range": [
+    2785.2486706941213,
+    49099.12653374358
+   ],
+   "s_max_pu": [
+    0.7
+   ]
+  },
+  "xb_links_by_carrier": {
+   "CO2 pipeline": {
+    "n": 55,
+    "ext": 55,
+    "p_nom_sum": 0.0,
+    "p_nom_min_sum": 0.0,
+    "stock_rows": 0,
+    "stock_p_nom_eq_min": 0,
+    "capital_cost_nonzero": 55,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   },
+   "DC": {
+    "n": 10,
+    "ext": 10,
+    "p_nom_sum": 600.0,
+    "p_nom_min_sum": 600.0,
+    "stock_rows": 2,
+    "stock_p_nom_eq_min": 2,
+    "capital_cost_nonzero": 5,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9607722391207759,
+     0.9789514540705648
+    ]
+   },
+   "H2 pipeline": {
+    "n": 110,
+    "ext": 110,
+    "p_nom_sum": 0.0,
+    "p_nom_min_sum": 0.0,
+    "stock_rows": 0,
+    "stock_p_nom_eq_min": 0,
+    "capital_cost_nonzero": 55,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   },
+   "dedicated plant line": {
+    "n": 6,
+    "ext": 0,
+    "p_nom_sum": 5999.0,
+    "p_nom_min_sum": 5999.0,
+    "stock_rows": 6,
+    "stock_p_nom_eq_min": 6,
+    "capital_cost_nonzero": 0,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9451813268223357,
+     0.9714910887984437
+    ]
+   },
+   "gas pipeline": {
+    "n": 117,
+    "ext": 117,
+    "p_nom_sum": 45127.96200000001,
+    "p_nom_min_sum": 45127.96200000001,
+    "stock_rows": 7,
+    "stock_p_nom_eq_min": 7,
+    "capital_cost_nonzero": 61,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "ext_with_nominal_Generator": {
+   "n": 9,
+   "nominal_sum": 103120.24353118379,
+   "capex_x_nominal": 827069049.0861593,
+   "carriers": {
+    "LNG import": 9
+   }
+  },
+  "ext_with_nominal_Link": {
+   "n": 19,
+   "nominal_sum": 78114.52199999998,
+   "capex_x_nominal": 1567750724.5570216,
+   "carriers": {
+    "DC": 12,
+    "gas pipeline": 7
+   }
+  },
+  "ext_with_nominal_Line": {
+   "n": 102,
+   "nominal_sum": 384527.62298540963,
+   "capex_x_nominal": 5309982998.394673,
+   "carriers": {
+    "AC": 102
+   }
+  },
+  "ext_with_nominal_Store": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ext_with_nominal_StorageUnit": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ev_stores": {
+   "n": 96,
+   "e_nom_sum_twh": 7.933780751615181,
+   "cyclic": 96,
+   "e_min_pu_cols": 96
+  },
+  "ev_e_min_pu": {
+   "values": [
+    0.8
+   ],
+   "per_store_count_08": [
+    365
+   ]
+  },
+  "bev_charger": {
+   "n": 96,
+   "ext": 0,
+   "p_nom_sum_gw": 3490.8635307106797,
+   "eff": [
+    0.9
+   ],
+   "p_max_pu_ts": 96,
+   "p_max_pu_mean": 0.7755691697256216
+  },
+  "ev_load": {
+   "n": 96,
+   "twh": 715.9644220295705,
+   "ts_cols": 96,
+   "min_over_mean": 0.8709672329239738,
+   "max_over_mean": 1.03610512699175
+  },
+  "storage_units": {
+   "PHS": {
+    "n": 11,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 11,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 11
+   },
+   "PHS existing": {
+    "n": 7,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 0,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 7
+   },
+   "hydro": {
+    "n": 36,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 36,
+    "max_hours": [
+     4.963531669865643,
+     7.145293862815886
+    ],
+    "cyclic": 36
+   },
+   "hydro existing": {
+    "n": 80,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 0,
+    "max_hours": [
+     4.797004991680532,
+     77.38888888888889
+    ],
+    "cyclic": 80
+   }
+  },
+  "stores_cyclic_by_carrier": {
+   "EV battery": {
+    "n": 96,
+    "cyclic": 96,
+    "e_min_pu_neg": 0
+   },
+   "H2 Store Tank": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "ammonia store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "biogas": {
+    "n": 15,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 atmosphere": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 11
+   },
+   "co2 bunkers": {
+    "n": 1,
+    "cyclic": 0,
+    "e_min_pu_neg": 1
+   },
+   "co2 sequestered": {
+    "n": 7,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 sequestered extra-ASEAN": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 stored": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "home battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "methanol store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "oil non-fossil store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "solid biomass": {
+    "n": 85,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   }
+  },
+  "load_twh_by_carrier": {
+   "industry electricity": 1271.2054425204133,
+   "electricity": 966.9084251289165,
+   "oil final energy": 897.8249819474291,
+   "industry heat high": 781.8817908028506,
+   "land transport EV": 715.9644220295706,
+   "industry heat medium B": 558.8441992602615,
+   "shipping methanol": 539.8630829920172,
+   "biomass final energy": 380.37082807647124,
+   "oil feedstock": 356.9304948895855,
+   "gas final energy": 302.2271620221928,
+   "gas feedstock": 291.94521677921546,
+   "industry heat": 163.97533669535557,
+   "industry heat medium A": 139.71104981478834,
+   "industry ammonia": 98.1353186392999,
+   "industry hydrogen": 47.746636245228,
+   "agriculture machinery electric": 42.45659748857969,
+   "coal final energy": 37.49593185494376,
+   "coal feedstock": 13.939934996203657,
+   "clean cooking useful": 9.929219813275504,
+   "industry methanol": 4.095335424133767
+  },
+  "load_twh_total": 7621.451407420733,
+  "load_ts_cols_by_carrier": {
+   "electricity": 96,
+   "land transport EV": 96
+  },
+  "dedicated": {
+   "dedicated plant line LA2 1 - TH2 4": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1220.0,
+    "efficiency": 0.9505503453431805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 2 - TH2 1": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 866.0,
+    "efficiency": 0.9565491476135805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 3 - TH2 1": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 1388.0,
+    "efficiency": 0.9655920790772882,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - TH2 1": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 480.0,
+    "efficiency": 0.9538298223272168,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - VN2 2": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "VN2 2",
+    "p_nom": 572.0,
+    "efficiency": 0.9714910887984437,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 5 - TH2 4": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1473.0,
+    "efficiency": 0.9451813268223357,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   }
+  },
+  "source_links": {
+   "LA2 1 dedicated src to grid": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "LA2 1",
+    "p_nom": 2519.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 2 dedicated src to grid": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "LA2 2",
+    "p_nom": 2159.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 3 dedicated src to grid": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "LA2 3",
+    "p_nom": 1570.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 4 dedicated src to grid": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "LA2 4",
+    "p_nom": 2071.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 5 dedicated src to grid": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "LA2 5",
+    "p_nom": 3354.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   }
+  },
+  "slack_gens": {}
+ },
+ "R365": {
+  "weights": {
+   "objective": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "generators": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "stores": [
+    24.0,
+    24.0,
+    8760.0
+   ]
+  },
+  "n_snapshots": 365,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 00:00:00",
+  "meta_keys": [
+   "apg_corridor_additions",
+   "approved_coupling_paths",
+   "approved_global_constraints",
+   "artifact_role",
+   "asset_qualification",
+   "asset_role",
+   "asset_time_boundary",
+   "atmosphere_port_moves",
+   "atmosphere_role",
+   "battery_inverter_pairs",
+   "candidate_ledger",
+   "component_price_qualification",
+   "cost_layer",
+   "cross_border_tags",
+   "demand_binding",
+   "demand_identity",
+   "demand_owners",
+   "electric_base_sha256",
+   "existing_annual_fixed_om_eur",
+   "existing_carbon_components",
+   "existing_cost_boundary",
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_resource_groups",
+   "existing_stock_boundary",
+   "existing_unit_components",
+   "existing_unit_removed_s4b1",
+   "external_annual_caps",
+   "fuel_bus_rename_map",
+   "fullsc_network_complete",
+   "gate3_fragment",
+   "historical_stock_qualification",
+   "hydro_group_qualification",
+   "input_coverage_complete",
+   "input_only_extraction",
+   "interim_notice",
+   "inventory_qualification_refresh",
+   "model_price_year",
+   "parent_resolution",
+   "physical_carbon_map",
+   "price_layer_sha256",
+   "price_method",
+   "qualification_dimensions",
+   "reference_source_is_solved",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_ammonia_methanol",
+   "research_biomass",
+   "research_bunkers",
+   "research_candidate_num_parallel",
+   "research_candidates_s4b2",
+   "research_carbon",
+   "research_co2_storage",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cost_layer_s4c1",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_ev",
+   "research_existing_vintage_costs",
+   "research_extra_asean_storage",
+   "research_finance",
+   "research_fleet",
+   "research_fleet_removed",
+   "research_fuel_carbon",
+   "research_fuel_prices",
+   "research_gas_network",
+   "research_hydro_inflow",
+   "research_imports",
+   "research_intra_asean_shipping",
+   "research_la_vn_stock",
+   "research_lao_th_store",
+   "research_lao_transit_shipping",
+   "research_lao_vn_store",
+   "research_liquids",
+   "research_max_extension",
+   "research_new_hydro_inflow_tie",
+   "research_readjust_impedance",
+   "research_renewable",
+   "research_sector_alignment",
+   "research_th_my_stock",
+   "research_transmission_losses",
+   "research_typhoon_premium",
+   "research_variant",
+   "resource_occupancy_status",
+   "s2_demand_ledger",
+   "s2_layers",
+   "s3_layers",
+   "s4a_layers",
+   "s4b_layers",
+   "s4c_layers",
+   "s4d_layers",
+   "s4e_corridor_dc_additions",
+   "s4e_domestic_additions",
+   "s4e_layers",
+   "s4f_layers",
+   "s4g_layers",
+   "s4h_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "scientific_results_allowed",
+   "selected_cost_decision",
+   "skeleton_status",
+   "solver_allowed",
+   "source_is_solved",
+   "stage",
+   "stock_boundary_decision",
+   "stock_uncertainty",
+   "store_power_rules",
+   "target_year",
+   "temporal_reduction",
+   "temporal_resolution",
+   "transmission_limit",
+   "u4_zeroed_carriers",
+   "unresolved_existing_asset_ages",
+   "unresolved_existing_assets_outside_v1",
+   "upstream_adapter",
+   "upstream_add_hydrogen",
+   "v3_layers",
+   "weather_year"
+  ],
+  "hooks": [
+   "install_fragment_constraints",
+   "research_ac_loss_proxy",
+   "research_battery_inverter_capacity_equality",
+   "research_bunker_net_zero",
+   "research_co2_storage_cap",
+   "research_country_net_zero",
+   "research_cross_border_existing_fom",
+   "research_existing_assets",
+   "research_lossy_bidirectional_sync",
+   "research_new_hydro_inflow"
+  ],
+  "scenario": "no_new_xb",
+  "xb": {
+   "electricity": true,
+   "H2": true,
+   "gas": true,
+   "co2": true,
+   "stock_mode": true
+  },
+  "global_constraints": {},
+  "counts": {
+   "Store": 649,
+   "Load": 2188,
+   "StorageUnit": 134,
+   "TransformerType": 14,
+   "Carrier": 150,
+   "Line": 102,
+   "Generator": 1946,
+   "Link": 8491,
+   "LineType": 35,
+   "Bus": 3115
+  },
+  "objective_constant_like": {
+   "xb_fom_eur": 24863188.024001557,
+   "ev": {
+    "battery_mwh_total": 7933780.751615183,
+    "charger_mw_total": 3490863.5307106804,
+    "fleet_equivalent_vehicles": 317351230.0646073,
+    "fleet_scale": 1.0,
+    "loads": 96,
+    "mode": "smart",
+    "mwh_per_vehicle_year": 2.2560631697687534,
+    "stores": 96,
+    "v2g_links": 0
+   },
+   "liquids_caps": {
+    "ammonia": 112026.61945125557,
+    "methanol": 620957.0986485742,
+    "oil": 1432369.2657956788,
+    "oil non-fossil": 1432369.2657956788
+   }
+  },
+  "xb_lines": {
+   "n": 16,
+   "ext": 0,
+   "s_nom_sum": 2570.0,
+   "s_nom_min_sum": 2570.0,
+   "s_nom_max_sum": 2570.0,
+   "stock_rows": 16,
+   "stock_s_nom_eq_min": 16,
+   "capital_cost_range": [
+    10455.66453844058,
+    35456.546387474176
+   ],
+   "s_max_pu": [
+    0.7
+   ]
+  },
+  "xb_links_by_carrier": {
+   "DC": {
+    "n": 2,
+    "ext": 0,
+    "p_nom_sum": 600.0,
+    "p_nom_min_sum": 600.0,
+    "stock_rows": 2,
+    "stock_p_nom_eq_min": 2,
+    "capital_cost_nonzero": 1,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9769809356760727,
+     0.9769809356760727
+    ]
+   },
+   "dedicated plant line": {
+    "n": 6,
+    "ext": 0,
+    "p_nom_sum": 5999.0,
+    "p_nom_min_sum": 5999.0,
+    "stock_rows": 6,
+    "stock_p_nom_eq_min": 6,
+    "capital_cost_nonzero": 0,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9451813268223357,
+     0.9714910887984437
+    ]
+   },
+   "gas pipeline": {
+    "n": 7,
+    "ext": 0,
+    "p_nom_sum": 45127.96200000001,
+    "p_nom_min_sum": 45127.96200000001,
+    "stock_rows": 7,
+    "stock_p_nom_eq_min": 7,
+    "capital_cost_nonzero": 6,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "ext_with_nominal_Generator": {
+   "n": 9,
+   "nominal_sum": 103120.24353118379,
+   "capex_x_nominal": 827069049.0861593,
+   "carriers": {
+    "LNG import": 9
+   }
+  },
+  "ext_with_nominal_Link": {
+   "n": 10,
+   "nominal_sum": 32386.560000000005,
+   "capex_x_nominal": 1438684989.4727335,
+   "carriers": {
+    "DC": 10
+   }
+  },
+  "ext_with_nominal_Line": {
+   "n": 86,
+   "nominal_sum": 381957.62298540963,
+   "capex_x_nominal": 5268371677.39258,
+   "carriers": {
+    "AC": 86
+   }
+  },
+  "ext_with_nominal_Store": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ext_with_nominal_StorageUnit": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ev_stores": {
+   "n": 96,
+   "e_nom_sum_twh": 7.933780751615181,
+   "cyclic": 96,
+   "e_min_pu_cols": 96
+  },
+  "ev_e_min_pu": {
+   "values": [
+    0.8
+   ],
+   "per_store_count_08": [
+    365
+   ]
+  },
+  "bev_charger": {
+   "n": 96,
+   "ext": 0,
+   "p_nom_sum_gw": 3490.8635307106797,
+   "eff": [
+    0.9
+   ],
+   "p_max_pu_ts": 96,
+   "p_max_pu_mean": 0.7755691697256216
+  },
+  "ev_load": {
+   "n": 96,
+   "twh": 715.9644220295705,
+   "ts_cols": 96,
+   "min_over_mean": 0.8709672329239738,
+   "max_over_mean": 1.03610512699175
+  },
+  "storage_units": {
+   "PHS": {
+    "n": 11,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 11,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 11
+   },
+   "PHS existing": {
+    "n": 7,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 0,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 7
+   },
+   "hydro": {
+    "n": 36,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 36,
+    "max_hours": [
+     4.963531669865643,
+     7.145293862815886
+    ],
+    "cyclic": 36
+   },
+   "hydro existing": {
+    "n": 80,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 0,
+    "max_hours": [
+     4.797004991680532,
+     77.38888888888889
+    ],
+    "cyclic": 80
+   }
+  },
+  "stores_cyclic_by_carrier": {
+   "EV battery": {
+    "n": 96,
+    "cyclic": 96,
+    "e_min_pu_neg": 0
+   },
+   "H2 Store Tank": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "ammonia store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "biogas": {
+    "n": 15,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 atmosphere": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 11
+   },
+   "co2 bunkers": {
+    "n": 1,
+    "cyclic": 0,
+    "e_min_pu_neg": 1
+   },
+   "co2 sequestered": {
+    "n": 7,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 sequestered extra-ASEAN": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 stored": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "home battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "methanol store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "oil non-fossil store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "solid biomass": {
+    "n": 85,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   }
+  },
+  "load_twh_by_carrier": {
+   "industry electricity": 1271.2054425204133,
+   "electricity": 966.9084251289165,
+   "oil final energy": 897.8249819474291,
+   "industry heat high": 781.8817908028506,
+   "land transport EV": 715.9644220295706,
+   "industry heat medium B": 558.8441992602615,
+   "shipping methanol": 539.8630829920172,
+   "biomass final energy": 380.37082807647124,
+   "oil feedstock": 356.9304948895855,
+   "gas final energy": 302.2271620221928,
+   "gas feedstock": 291.94521677921546,
+   "industry heat": 163.97533669535557,
+   "industry heat medium A": 139.71104981478834,
+   "industry ammonia": 98.1353186392999,
+   "industry hydrogen": 47.746636245228,
+   "agriculture machinery electric": 42.45659748857969,
+   "coal final energy": 37.49593185494376,
+   "coal feedstock": 13.939934996203657,
+   "clean cooking useful": 9.929219813275504,
+   "industry methanol": 4.095335424133767
+  },
+  "load_twh_total": 7621.451407420733,
+  "load_ts_cols_by_carrier": {
+   "electricity": 96,
+   "land transport EV": 96
+  },
+  "dedicated": {
+   "dedicated plant line LA2 1 - TH2 4": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1220.0,
+    "efficiency": 0.9505503453431805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 2 - TH2 1": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 866.0,
+    "efficiency": 0.9565491476135805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 3 - TH2 1": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 1388.0,
+    "efficiency": 0.9655920790772882,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - TH2 1": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 480.0,
+    "efficiency": 0.9538298223272168,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - VN2 2": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "VN2 2",
+    "p_nom": 572.0,
+    "efficiency": 0.9714910887984437,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 5 - TH2 4": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1473.0,
+    "efficiency": 0.9451813268223357,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   }
+  },
+  "source_links": {
+   "LA2 1 dedicated src to grid": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "LA2 1",
+    "p_nom": 2519.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 2 dedicated src to grid": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "LA2 2",
+    "p_nom": 2159.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 3 dedicated src to grid": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "LA2 3",
+    "p_nom": 1570.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 4 dedicated src to grid": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "LA2 4",
+    "p_nom": 2071.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 5 dedicated src to grid": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "LA2 5",
+    "p_nom": 3354.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   }
+  },
+  "slack_gens": {}
+ },
+ "D365": {
+  "weights": {
+   "objective": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "generators": [
+    24.0,
+    24.0,
+    8760.0
+   ],
+   "stores": [
+    24.0,
+    24.0,
+    8760.0
+   ]
+  },
+  "n_snapshots": 365,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 00:00:00",
+  "meta_keys": [
+   "apg_corridor_additions",
+   "approved_coupling_paths",
+   "approved_global_constraints",
+   "artifact_role",
+   "asset_qualification",
+   "asset_role",
+   "asset_time_boundary",
+   "atmosphere_port_moves",
+   "atmosphere_role",
+   "battery_inverter_pairs",
+   "candidate_ledger",
+   "component_price_qualification",
+   "cost_layer",
+   "cross_border_tags",
+   "demand_binding",
+   "demand_identity",
+   "demand_owners",
+   "electric_base_sha256",
+   "existing_annual_fixed_om_eur",
+   "existing_carbon_components",
+   "existing_cost_boundary",
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_resource_groups",
+   "existing_stock_boundary",
+   "existing_unit_components",
+   "existing_unit_removed_s4b1",
+   "external_annual_caps",
+   "fuel_bus_rename_map",
+   "fullsc_network_complete",
+   "gate3_fragment",
+   "historical_stock_qualification",
+   "hydro_group_qualification",
+   "input_coverage_complete",
+   "input_only_extraction",
+   "interim_notice",
+   "inventory_qualification_refresh",
+   "model_price_year",
+   "parent_resolution",
+   "physical_carbon_map",
+   "price_layer_sha256",
+   "price_method",
+   "qualification_dimensions",
+   "reference_source_is_solved",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_ammonia_methanol",
+   "research_biomass",
+   "research_bunkers",
+   "research_candidate_num_parallel",
+   "research_candidates_s4b2",
+   "research_carbon",
+   "research_co2_storage",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cost_layer_s4c1",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_ev",
+   "research_existing_vintage_costs",
+   "research_extra_asean_storage",
+   "research_finance",
+   "research_fleet",
+   "research_fleet_removed",
+   "research_fuel_carbon",
+   "research_fuel_prices",
+   "research_gas_network",
+   "research_hydro_inflow",
+   "research_imports",
+   "research_intra_asean_shipping",
+   "research_la_vn_stock",
+   "research_lao_th_store",
+   "research_lao_transit_shipping",
+   "research_lao_vn_store",
+   "research_liquids",
+   "research_max_extension",
+   "research_new_hydro_inflow_tie",
+   "research_readjust_impedance",
+   "research_renewable",
+   "research_sector_alignment",
+   "research_th_my_stock",
+   "research_transmission_losses",
+   "research_typhoon_premium",
+   "resource_occupancy_status",
+   "s2_demand_ledger",
+   "s2_layers",
+   "s3_layers",
+   "s4a_layers",
+   "s4b_layers",
+   "s4c_layers",
+   "s4d_layers",
+   "s4e_corridor_dc_additions",
+   "s4e_domestic_additions",
+   "s4e_layers",
+   "s4f_layers",
+   "s4g_layers",
+   "s4h_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "scientific_results_allowed",
+   "selected_cost_decision",
+   "skeleton_status",
+   "solver_allowed",
+   "source_is_solved",
+   "stage",
+   "stock_boundary_decision",
+   "stock_uncertainty",
+   "store_power_rules",
+   "target_year",
+   "temporal_reduction",
+   "temporal_resolution",
+   "transmission_limit",
+   "u4_zeroed_carriers",
+   "unresolved_existing_asset_ages",
+   "unresolved_existing_assets_outside_v1",
+   "upstream_adapter",
+   "upstream_add_hydrogen",
+   "v3_layers",
+   "weather_year"
+  ],
+  "hooks": [
+   "install_fragment_constraints",
+   "research_ac_loss_proxy",
+   "research_battery_inverter_capacity_equality",
+   "research_bunker_net_zero",
+   "research_co2_storage_cap",
+   "research_country_net_zero",
+   "research_existing_assets",
+   "research_lossy_bidirectional_sync",
+   "research_new_hydro_inflow"
+  ],
+  "scenario": "disconnected",
+  "xb": {
+   "H2": false,
+   "co2": false,
+   "electricity": false,
+   "gas": false,
+   "stock_mode": true
+  },
+  "global_constraints": {},
+  "counts": {
+   "Store": 649,
+   "Load": 2188,
+   "StorageUnit": 133,
+   "TransformerType": 14,
+   "Carrier": 148,
+   "Line": 86,
+   "Generator": 1945,
+   "Link": 8471,
+   "LineType": 35,
+   "Bus": 3110
+  },
+  "objective_constant_like": {
+   "xb_fom_eur": 0.0,
+   "ev": {
+    "battery_mwh_total": 7933780.751615183,
+    "charger_mw_total": 3490863.5307106804,
+    "fleet_equivalent_vehicles": 317351230.0646073,
+    "fleet_scale": 1.0,
+    "loads": 96,
+    "mode": "smart",
+    "mwh_per_vehicle_year": 2.2560631697687534,
+    "stores": 96,
+    "v2g_links": 0
+   },
+   "liquids_caps": {
+    "ammonia": 112026.61945125557,
+    "methanol": 620957.0986485742,
+    "oil": 1432369.2657956788,
+    "oil non-fossil": 1432369.2657956788
+   }
+  },
+  "xb_lines": {
+   "n": 0,
+   "ext": 0,
+   "s_nom_sum": 0.0,
+   "s_nom_min_sum": 0.0,
+   "s_nom_max_sum": 0.0,
+   "stock_rows": 0,
+   "stock_s_nom_eq_min": 0,
+   "capital_cost_range": null,
+   "s_max_pu": null
+  },
+  "xb_links_by_carrier": {},
+  "ext_with_nominal_Generator": {
+   "n": 9,
+   "nominal_sum": 103120.24353118379,
+   "capex_x_nominal": 827069049.0861593,
+   "carriers": {
+    "LNG import": 9
+   }
+  },
+  "ext_with_nominal_Link": {
+   "n": 10,
+   "nominal_sum": 32386.560000000005,
+   "capex_x_nominal": 1438684989.4727335,
+   "carriers": {
+    "DC": 10
+   }
+  },
+  "ext_with_nominal_Line": {
+   "n": 86,
+   "nominal_sum": 381957.62298540963,
+   "capex_x_nominal": 5268371677.39258,
+   "carriers": {
+    "AC": 86
+   }
+  },
+  "ext_with_nominal_Store": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ext_with_nominal_StorageUnit": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ev_stores": {
+   "n": 96,
+   "e_nom_sum_twh": 7.933780751615181,
+   "cyclic": 96,
+   "e_min_pu_cols": 96
+  },
+  "ev_e_min_pu": {
+   "values": [
+    0.8
+   ],
+   "per_store_count_08": [
+    365
+   ]
+  },
+  "bev_charger": {
+   "n": 96,
+   "ext": 0,
+   "p_nom_sum_gw": 3490.8635307106797,
+   "eff": [
+    0.9
+   ],
+   "p_max_pu_ts": 96,
+   "p_max_pu_mean": 0.7755691697256216
+  },
+  "ev_load": {
+   "n": 96,
+   "twh": 715.9644220295705,
+   "ts_cols": 96,
+   "min_over_mean": 0.8709672329239738,
+   "max_over_mean": 1.03610512699175
+  },
+  "storage_units": {
+   "PHS": {
+    "n": 11,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 11,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 11
+   },
+   "PHS existing": {
+    "n": 7,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 0,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 7
+   },
+   "hydro": {
+    "n": 36,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 36,
+    "max_hours": [
+     4.963531669865643,
+     7.145293862815886
+    ],
+    "cyclic": 36
+   },
+   "hydro existing": {
+    "n": 79,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 0,
+    "max_hours": [
+     4.797004991680532,
+     77.38888888888889
+    ],
+    "cyclic": 79
+   }
+  },
+  "stores_cyclic_by_carrier": {
+   "EV battery": {
+    "n": 96,
+    "cyclic": 96,
+    "e_min_pu_neg": 0
+   },
+   "H2 Store Tank": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "ammonia store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "biogas": {
+    "n": 15,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 atmosphere": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 11
+   },
+   "co2 bunkers": {
+    "n": 1,
+    "cyclic": 0,
+    "e_min_pu_neg": 1
+   },
+   "co2 sequestered": {
+    "n": 7,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 sequestered extra-ASEAN": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 stored": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "home battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "methanol store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "oil non-fossil store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "solid biomass": {
+    "n": 85,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   }
+  },
+  "load_twh_by_carrier": {
+   "industry electricity": 1271.2054425204133,
+   "electricity": 966.9084251289165,
+   "oil final energy": 897.8249819474291,
+   "industry heat high": 781.8817908028506,
+   "land transport EV": 715.9644220295706,
+   "industry heat medium B": 558.8441992602615,
+   "shipping methanol": 539.8630829920172,
+   "biomass final energy": 380.37082807647124,
+   "oil feedstock": 356.9304948895855,
+   "gas final energy": 302.2271620221928,
+   "gas feedstock": 291.94521677921546,
+   "industry heat": 163.97533669535557,
+   "industry heat medium A": 139.71104981478834,
+   "industry ammonia": 98.1353186392999,
+   "industry hydrogen": 47.746636245228,
+   "agriculture machinery electric": 42.45659748857969,
+   "coal final energy": 37.49593185494376,
+   "coal feedstock": 13.939934996203657,
+   "clean cooking useful": 9.929219813275504,
+   "industry methanol": 4.095335424133767
+  },
+  "load_twh_total": 7621.451407420733,
+  "load_ts_cols_by_carrier": {
+   "electricity": 96,
+   "land transport EV": 96
+  },
+  "source_links": {},
+  "slack_gens": {}
+ },
+ "I2920": {
+  "weights": {
+   "objective": [
+    3.0,
+    3.0,
+    8760.0
+   ],
+   "generators": [
+    3.0,
+    3.0,
+    8760.0
+   ],
+   "stores": [
+    3.0,
+    3.0,
+    8760.0
+   ]
+  },
+  "n_snapshots": 2920,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 21:00:00",
+  "meta_keys": [
+   "apg_corridor_additions",
+   "approved_coupling_paths",
+   "approved_global_constraints",
+   "artifact_role",
+   "asset_qualification",
+   "asset_role",
+   "asset_time_boundary",
+   "atmosphere_port_moves",
+   "atmosphere_role",
+   "battery_inverter_pairs",
+   "candidate_ledger",
+   "component_price_qualification",
+   "cost_layer",
+   "cross_border_tags",
+   "demand_binding",
+   "demand_identity",
+   "demand_owners",
+   "electric_base_sha256",
+   "existing_annual_fixed_om_eur",
+   "existing_carbon_components",
+   "existing_cost_boundary",
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_resource_groups",
+   "existing_stock_boundary",
+   "existing_unit_components",
+   "existing_unit_removed_s4b1",
+   "external_annual_caps",
+   "fuel_bus_rename_map",
+   "fullsc_network_complete",
+   "gate3_fragment",
+   "historical_stock_qualification",
+   "hydro_group_qualification",
+   "input_coverage_complete",
+   "input_only_extraction",
+   "interim_notice",
+   "inventory_qualification_refresh",
+   "model_price_year",
+   "physical_carbon_map",
+   "price_layer_sha256",
+   "price_method",
+   "qualification_dimensions",
+   "reference_source_is_solved",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_ammonia_methanol",
+   "research_biomass",
+   "research_bunkers",
+   "research_candidate_num_parallel",
+   "research_candidates_s4b2",
+   "research_carbon",
+   "research_co2_storage",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cost_layer_s4c1",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_ev",
+   "research_existing_vintage_costs",
+   "research_extra_asean_storage",
+   "research_finance",
+   "research_fleet",
+   "research_fleet_removed",
+   "research_fuel_carbon",
+   "research_fuel_prices",
+   "research_gas_network",
+   "research_hydro_inflow",
+   "research_imports",
+   "research_intra_asean_shipping",
+   "research_la_vn_stock",
+   "research_lao_th_store",
+   "research_lao_transit_shipping",
+   "research_lao_vn_store",
+   "research_liquids",
+   "research_max_extension",
+   "research_new_hydro_inflow_tie",
+   "research_readjust_impedance",
+   "research_renewable",
+   "research_sector_alignment",
+   "research_th_my_stock",
+   "research_transmission_losses",
+   "research_typhoon_premium",
+   "resource_occupancy_status",
+   "s2_demand_ledger",
+   "s2_layers",
+   "s3_layers",
+   "s4a_layers",
+   "s4b_layers",
+   "s4c_layers",
+   "s4d_layers",
+   "s4e_corridor_dc_additions",
+   "s4e_domestic_additions",
+   "s4e_layers",
+   "s4f_layers",
+   "s4g_layers",
+   "s4h_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "scientific_results_allowed",
+   "selected_cost_decision",
+   "skeleton_status",
+   "solver_allowed",
+   "source_is_solved",
+   "stage",
+   "stock_boundary_decision",
+   "stock_uncertainty",
+   "store_power_rules",
+   "target_year",
+   "transmission_limit",
+   "u4_zeroed_carriers",
+   "unresolved_existing_asset_ages",
+   "unresolved_existing_assets_outside_v1",
+   "upstream_adapter",
+   "upstream_add_hydrogen",
+   "v3_layers",
+   "weather_year"
+  ],
+  "hooks": [
+   "install_fragment_constraints",
+   "research_ac_loss_proxy",
+   "research_battery_inverter_capacity_equality",
+   "research_bunker_net_zero",
+   "research_co2_storage_cap",
+   "research_country_net_zero",
+   "research_cross_border_existing_fom",
+   "research_existing_assets",
+   "research_lossy_bidirectional_sync",
+   "research_new_hydro_inflow"
+  ],
+  "scenario": "integrated",
+  "xb": {
+   "H2": true,
+   "co2": true,
+   "electricity": true,
+   "gas": true,
+   "stock_mode": true
+  },
+  "global_constraints": {},
+  "counts": {
+   "Store": 649,
+   "Load": 2188,
+   "StorageUnit": 134,
+   "TransformerType": 14,
+   "Carrier": 150,
+   "Line": 148,
+   "Generator": 1946,
+   "Link": 8774,
+   "LineType": 35,
+   "Bus": 3115
+  },
+  "objective_constant_like": {
+   "xb_fom_eur": 24863188.024001557,
+   "ev": {
+    "battery_mwh_total": 7933780.751615183,
+    "charger_mw_total": 3490863.5307106804,
+    "fleet_equivalent_vehicles": 317351230.0646073,
+    "fleet_scale": 1.0,
+    "loads": 96,
+    "mode": "smart",
+    "mwh_per_vehicle_year": 2.2560631697687534,
+    "stores": 96,
+    "v2g_links": 0
+   },
+   "liquids_caps": {
+    "ammonia": 112026.61945125557,
+    "methanol": 620957.0986485742,
+    "oil": 1432369.2657956788,
+    "oil non-fossil": 1432369.2657956788
+   }
+  },
+  "xb_lines": {
+   "n": 62,
+   "ext": 62,
+   "s_nom_sum": 2570.0,
+   "s_nom_min_sum": 2570.0,
+   "s_nom_max_sum": 1242570.0,
+   "stock_rows": 16,
+   "stock_s_nom_eq_min": 16,
+   "capital_cost_range": [
+    2785.2486706941213,
+    49099.12653374358
+   ],
+   "s_max_pu": [
+    0.7
+   ]
+  },
+  "xb_links_by_carrier": {
+   "CO2 pipeline": {
+    "n": 55,
+    "ext": 55,
+    "p_nom_sum": 0.0,
+    "p_nom_min_sum": 0.0,
+    "stock_rows": 0,
+    "stock_p_nom_eq_min": 0,
+    "capital_cost_nonzero": 55,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   },
+   "DC": {
+    "n": 10,
+    "ext": 10,
+    "p_nom_sum": 600.0,
+    "p_nom_min_sum": 600.0,
+    "stock_rows": 2,
+    "stock_p_nom_eq_min": 2,
+    "capital_cost_nonzero": 5,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9607722391207759,
+     0.9789514540705648
+    ]
+   },
+   "H2 pipeline": {
+    "n": 110,
+    "ext": 110,
+    "p_nom_sum": 0.0,
+    "p_nom_min_sum": 0.0,
+    "stock_rows": 0,
+    "stock_p_nom_eq_min": 0,
+    "capital_cost_nonzero": 55,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   },
+   "dedicated plant line": {
+    "n": 6,
+    "ext": 0,
+    "p_nom_sum": 5999.0,
+    "p_nom_min_sum": 5999.0,
+    "stock_rows": 6,
+    "stock_p_nom_eq_min": 6,
+    "capital_cost_nonzero": 0,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9451813268223357,
+     0.9714910887984437
+    ]
+   },
+   "gas pipeline": {
+    "n": 117,
+    "ext": 117,
+    "p_nom_sum": 45127.96200000001,
+    "p_nom_min_sum": 45127.96200000001,
+    "stock_rows": 7,
+    "stock_p_nom_eq_min": 7,
+    "capital_cost_nonzero": 61,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "ext_with_nominal_Generator": {
+   "n": 9,
+   "nominal_sum": 103120.24353118379,
+   "capex_x_nominal": 827069049.0861593,
+   "carriers": {
+    "LNG import": 9
+   }
+  },
+  "ext_with_nominal_Link": {
+   "n": 19,
+   "nominal_sum": 78114.52199999998,
+   "capex_x_nominal": 1567750724.5570216,
+   "carriers": {
+    "DC": 12,
+    "gas pipeline": 7
+   }
+  },
+  "ext_with_nominal_Line": {
+   "n": 102,
+   "nominal_sum": 384527.62298540963,
+   "capex_x_nominal": 5309982998.394673,
+   "carriers": {
+    "AC": 102
+   }
+  },
+  "ext_with_nominal_Store": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ext_with_nominal_StorageUnit": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ev_stores": {
+   "n": 96,
+   "e_nom_sum_twh": 7.933780751615181,
+   "cyclic": 96,
+   "e_min_pu_cols": 96
+  },
+  "ev_e_min_pu": {
+   "values": [
+    0.0,
+    0.8
+   ],
+   "per_store_count_08": [
+    365
+   ]
+  },
+  "bev_charger": {
+   "n": 96,
+   "ext": 0,
+   "p_nom_sum_gw": 3490.8635307106797,
+   "eff": [
+    0.9
+   ],
+   "p_max_pu_ts": 96,
+   "p_max_pu_mean": 0.7755691697256214
+  },
+  "ev_load": {
+   "n": 96,
+   "twh": 715.9644220295705,
+   "ts_cols": 96,
+   "min_over_mean": 0.11550490788048817,
+   "max_over_mean": 2.056062065619182
+  },
+  "storage_units": {
+   "PHS": {
+    "n": 11,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 11,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 11
+   },
+   "PHS existing": {
+    "n": 7,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 0,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 7
+   },
+   "hydro": {
+    "n": 36,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 36,
+    "max_hours": [
+     4.963531669865643,
+     7.145293862815886
+    ],
+    "cyclic": 36
+   },
+   "hydro existing": {
+    "n": 80,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 0,
+    "max_hours": [
+     4.797004991680532,
+     77.38888888888889
+    ],
+    "cyclic": 80
+   }
+  },
+  "stores_cyclic_by_carrier": {
+   "EV battery": {
+    "n": 96,
+    "cyclic": 96,
+    "e_min_pu_neg": 0
+   },
+   "H2 Store Tank": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "ammonia store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "biogas": {
+    "n": 15,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 atmosphere": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 11
+   },
+   "co2 bunkers": {
+    "n": 1,
+    "cyclic": 0,
+    "e_min_pu_neg": 1
+   },
+   "co2 sequestered": {
+    "n": 7,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 sequestered extra-ASEAN": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 stored": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "home battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "methanol store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "oil non-fossil store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "solid biomass": {
+    "n": 85,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   }
+  },
+  "load_twh_by_carrier": {
+   "industry electricity": 1271.205442520413,
+   "electricity": 966.9084251289165,
+   "oil final energy": 897.8249819474291,
+   "industry heat high": 781.8817908028506,
+   "land transport EV": 715.9644220295706,
+   "industry heat medium B": 558.8441992602615,
+   "shipping methanol": 539.8630829920172,
+   "biomass final energy": 380.37082807647124,
+   "oil feedstock": 356.93049488958553,
+   "gas final energy": 302.2271620221928,
+   "gas feedstock": 291.94521677921546,
+   "industry heat": 163.97533669535554,
+   "industry heat medium A": 139.71104981478834,
+   "industry ammonia": 98.1353186392999,
+   "industry hydrogen": 47.746636245228,
+   "agriculture machinery electric": 42.45659748857969,
+   "coal final energy": 37.49593185494376,
+   "coal feedstock": 13.939934996203657,
+   "clean cooking useful": 9.929219813275504,
+   "industry methanol": 4.095335424133767
+  },
+  "load_twh_total": 7621.451407420733,
+  "load_ts_cols_by_carrier": {
+   "electricity": 96,
+   "land transport EV": 96
+  },
+  "dedicated": {
+   "dedicated plant line LA2 1 - TH2 4": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1220.0,
+    "efficiency": 0.9505503453431805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 2 - TH2 1": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 866.0,
+    "efficiency": 0.9565491476135805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 3 - TH2 1": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 1388.0,
+    "efficiency": 0.9655920790772882,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - TH2 1": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 480.0,
+    "efficiency": 0.9538298223272168,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - VN2 2": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "VN2 2",
+    "p_nom": 572.0,
+    "efficiency": 0.9714910887984437,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 5 - TH2 4": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1473.0,
+    "efficiency": 0.9451813268223357,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   }
+  },
+  "source_links": {
+   "LA2 1 dedicated src to grid": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "LA2 1",
+    "p_nom": 2519.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 2 dedicated src to grid": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "LA2 2",
+    "p_nom": 2159.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 3 dedicated src to grid": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "LA2 3",
+    "p_nom": 1570.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 4 dedicated src to grid": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "LA2 4",
+    "p_nom": 2071.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 5 dedicated src to grid": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "LA2 5",
+    "p_nom": 3354.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   }
+  },
+  "slack_gens": {}
+ },
+ "R2920": {
+  "weights": {
+   "objective": [
+    3.0,
+    3.0,
+    8760.0
+   ],
+   "generators": [
+    3.0,
+    3.0,
+    8760.0
+   ],
+   "stores": [
+    3.0,
+    3.0,
+    8760.0
+   ]
+  },
+  "n_snapshots": 2920,
+  "first": "2013-01-01 00:00:00",
+  "last": "2013-12-31 21:00:00",
+  "meta_keys": [
+   "apg_corridor_additions",
+   "approved_coupling_paths",
+   "approved_global_constraints",
+   "artifact_role",
+   "asset_qualification",
+   "asset_role",
+   "asset_time_boundary",
+   "atmosphere_port_moves",
+   "atmosphere_role",
+   "battery_inverter_pairs",
+   "candidate_ledger",
+   "component_price_qualification",
+   "cost_layer",
+   "cross_border_tags",
+   "demand_binding",
+   "demand_identity",
+   "demand_owners",
+   "electric_base_sha256",
+   "existing_annual_fixed_om_eur",
+   "existing_carbon_components",
+   "existing_cost_boundary",
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_resource_groups",
+   "existing_stock_boundary",
+   "existing_unit_components",
+   "existing_unit_removed_s4b1",
+   "external_annual_caps",
+   "fuel_bus_rename_map",
+   "fullsc_network_complete",
+   "gate3_fragment",
+   "historical_stock_qualification",
+   "hydro_group_qualification",
+   "input_coverage_complete",
+   "input_only_extraction",
+   "interim_notice",
+   "inventory_qualification_refresh",
+   "model_price_year",
+   "physical_carbon_map",
+   "price_layer_sha256",
+   "price_method",
+   "qualification_dimensions",
+   "reference_source_is_solved",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_ammonia_methanol",
+   "research_biomass",
+   "research_bunkers",
+   "research_candidate_num_parallel",
+   "research_candidates_s4b2",
+   "research_carbon",
+   "research_co2_storage",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cost_layer_s4c1",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_ev",
+   "research_existing_vintage_costs",
+   "research_extra_asean_storage",
+   "research_finance",
+   "research_fleet",
+   "research_fleet_removed",
+   "research_fuel_carbon",
+   "research_fuel_prices",
+   "research_gas_network",
+   "research_hydro_inflow",
+   "research_imports",
+   "research_intra_asean_shipping",
+   "research_la_vn_stock",
+   "research_lao_th_store",
+   "research_lao_transit_shipping",
+   "research_lao_vn_store",
+   "research_liquids",
+   "research_max_extension",
+   "research_new_hydro_inflow_tie",
+   "research_readjust_impedance",
+   "research_renewable",
+   "research_sector_alignment",
+   "research_th_my_stock",
+   "research_transmission_losses",
+   "research_typhoon_premium",
+   "research_variant",
+   "resource_occupancy_status",
+   "s2_demand_ledger",
+   "s2_layers",
+   "s3_layers",
+   "s4a_layers",
+   "s4b_layers",
+   "s4c_layers",
+   "s4d_layers",
+   "s4e_corridor_dc_additions",
+   "s4e_domestic_additions",
+   "s4e_layers",
+   "s4f_layers",
+   "s4g_layers",
+   "s4h_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "scientific_results_allowed",
+   "selected_cost_decision",
+   "skeleton_status",
+   "solver_allowed",
+   "source_is_solved",
+   "stage",
+   "stock_boundary_decision",
+   "stock_uncertainty",
+   "store_power_rules",
+   "target_year",
+   "transmission_limit",
+   "u4_zeroed_carriers",
+   "unresolved_existing_asset_ages",
+   "unresolved_existing_assets_outside_v1",
+   "upstream_adapter",
+   "upstream_add_hydrogen",
+   "v3_layers",
+   "weather_year"
+  ],
+  "hooks": [
+   "install_fragment_constraints",
+   "research_ac_loss_proxy",
+   "research_battery_inverter_capacity_equality",
+   "research_bunker_net_zero",
+   "research_co2_storage_cap",
+   "research_country_net_zero",
+   "research_cross_border_existing_fom",
+   "research_existing_assets",
+   "research_lossy_bidirectional_sync",
+   "research_new_hydro_inflow"
+  ],
+  "scenario": "no_new_xb",
+  "xb": {
+   "electricity": true,
+   "H2": true,
+   "gas": true,
+   "co2": true,
+   "stock_mode": true
+  },
+  "global_constraints": {},
+  "counts": {
+   "Store": 649,
+   "Load": 2188,
+   "StorageUnit": 134,
+   "TransformerType": 14,
+   "Carrier": 150,
+   "Line": 102,
+   "Generator": 1946,
+   "Link": 8491,
+   "LineType": 35,
+   "Bus": 3115
+  },
+  "objective_constant_like": {
+   "xb_fom_eur": 24863188.024001557,
+   "ev": {
+    "battery_mwh_total": 7933780.751615183,
+    "charger_mw_total": 3490863.5307106804,
+    "fleet_equivalent_vehicles": 317351230.0646073,
+    "fleet_scale": 1.0,
+    "loads": 96,
+    "mode": "smart",
+    "mwh_per_vehicle_year": 2.2560631697687534,
+    "stores": 96,
+    "v2g_links": 0
+   },
+   "liquids_caps": {
+    "ammonia": 112026.61945125557,
+    "methanol": 620957.0986485742,
+    "oil": 1432369.2657956788,
+    "oil non-fossil": 1432369.2657956788
+   }
+  },
+  "xb_lines": {
+   "n": 16,
+   "ext": 0,
+   "s_nom_sum": 2570.0,
+   "s_nom_min_sum": 2570.0,
+   "s_nom_max_sum": 2570.0,
+   "stock_rows": 16,
+   "stock_s_nom_eq_min": 16,
+   "capital_cost_range": [
+    10455.66453844058,
+    35456.546387474176
+   ],
+   "s_max_pu": [
+    0.7
+   ]
+  },
+  "xb_links_by_carrier": {
+   "DC": {
+    "n": 2,
+    "ext": 0,
+    "p_nom_sum": 600.0,
+    "p_nom_min_sum": 600.0,
+    "stock_rows": 2,
+    "stock_p_nom_eq_min": 2,
+    "capital_cost_nonzero": 1,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9769809356760727,
+     0.9769809356760727
+    ]
+   },
+   "dedicated plant line": {
+    "n": 6,
+    "ext": 0,
+    "p_nom_sum": 5999.0,
+    "p_nom_min_sum": 5999.0,
+    "stock_rows": 6,
+    "stock_p_nom_eq_min": 6,
+    "capital_cost_nonzero": 0,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     0.9451813268223357,
+     0.9714910887984437
+    ]
+   },
+   "gas pipeline": {
+    "n": 7,
+    "ext": 0,
+    "p_nom_sum": 45127.96200000001,
+    "p_nom_min_sum": 45127.96200000001,
+    "stock_rows": 7,
+    "stock_p_nom_eq_min": 7,
+    "capital_cost_nonzero": 6,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_range": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "ext_with_nominal_Generator": {
+   "n": 9,
+   "nominal_sum": 103120.24353118379,
+   "capex_x_nominal": 827069049.0861593,
+   "carriers": {
+    "LNG import": 9
+   }
+  },
+  "ext_with_nominal_Link": {
+   "n": 10,
+   "nominal_sum": 32386.560000000005,
+   "capex_x_nominal": 1438684989.4727335,
+   "carriers": {
+    "DC": 10
+   }
+  },
+  "ext_with_nominal_Line": {
+   "n": 86,
+   "nominal_sum": 381957.62298540963,
+   "capex_x_nominal": 5268371677.39258,
+   "carriers": {
+    "AC": 86
+   }
+  },
+  "ext_with_nominal_Store": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ext_with_nominal_StorageUnit": {
+   "n": 0,
+   "nominal_sum": 0.0,
+   "capex_x_nominal": 0.0,
+   "carriers": {}
+  },
+  "ev_stores": {
+   "n": 96,
+   "e_nom_sum_twh": 7.933780751615181,
+   "cyclic": 96,
+   "e_min_pu_cols": 96
+  },
+  "ev_e_min_pu": {
+   "values": [
+    0.0,
+    0.8
+   ],
+   "per_store_count_08": [
+    365
+   ]
+  },
+  "bev_charger": {
+   "n": 96,
+   "ext": 0,
+   "p_nom_sum_gw": 3490.8635307106797,
+   "eff": [
+    0.9
+   ],
+   "p_max_pu_ts": 96,
+   "p_max_pu_mean": 0.7755691697256214
+  },
+  "ev_load": {
+   "n": 96,
+   "twh": 715.9644220295705,
+   "ts_cols": 96,
+   "min_over_mean": 0.11550490788048817,
+   "max_over_mean": 2.056062065619182
+  },
+  "storage_units": {
+   "PHS": {
+    "n": 11,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 11,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 11
+   },
+   "PHS existing": {
+    "n": 7,
+    "p_min_pu": [
+     -1.0
+    ],
+    "eff_store": [
+     0.866
+    ],
+    "ext": 0,
+    "max_hours": [
+     6.0,
+     6.0
+    ],
+    "cyclic": 7
+   },
+   "hydro": {
+    "n": 36,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 36,
+    "max_hours": [
+     4.963531669865643,
+     7.145293862815886
+    ],
+    "cyclic": 36
+   },
+   "hydro existing": {
+    "n": 80,
+    "p_min_pu": [
+     0.0
+    ],
+    "eff_store": [
+     0.0
+    ],
+    "ext": 0,
+    "max_hours": [
+     4.797004991680532,
+     77.38888888888889
+    ],
+    "cyclic": 80
+   }
+  },
+  "stores_cyclic_by_carrier": {
+   "EV battery": {
+    "n": 96,
+    "cyclic": 96,
+    "e_min_pu_neg": 0
+   },
+   "H2 Store Tank": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "ammonia store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "biogas": {
+    "n": 15,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 atmosphere": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 11
+   },
+   "co2 bunkers": {
+    "n": 1,
+    "cyclic": 0,
+    "e_min_pu_neg": 1
+   },
+   "co2 sequestered": {
+    "n": 7,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 sequestered extra-ASEAN": {
+    "n": 11,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   },
+   "co2 stored": {
+    "n": 97,
+    "cyclic": 97,
+    "e_min_pu_neg": 0
+   },
+   "home battery": {
+    "n": 98,
+    "cyclic": 98,
+    "e_min_pu_neg": 0
+   },
+   "methanol store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "oil non-fossil store": {
+    "n": 11,
+    "cyclic": 11,
+    "e_min_pu_neg": 0
+   },
+   "solid biomass": {
+    "n": 85,
+    "cyclic": 0,
+    "e_min_pu_neg": 0
+   }
+  },
+  "load_twh_by_carrier": {
+   "industry electricity": 1271.205442520413,
+   "electricity": 966.9084251289165,
+   "oil final energy": 897.8249819474291,
+   "industry heat high": 781.8817908028506,
+   "land transport EV": 715.9644220295706,
+   "industry heat medium B": 558.8441992602615,
+   "shipping methanol": 539.8630829920172,
+   "biomass final energy": 380.37082807647124,
+   "oil feedstock": 356.93049488958553,
+   "gas final energy": 302.2271620221928,
+   "gas feedstock": 291.94521677921546,
+   "industry heat": 163.97533669535554,
+   "industry heat medium A": 139.71104981478834,
+   "industry ammonia": 98.1353186392999,
+   "industry hydrogen": 47.746636245228,
+   "agriculture machinery electric": 42.45659748857969,
+   "coal final energy": 37.49593185494376,
+   "coal feedstock": 13.939934996203657,
+   "clean cooking useful": 9.929219813275504,
+   "industry methanol": 4.095335424133767
+  },
+  "load_twh_total": 7621.451407420733,
+  "load_ts_cols_by_carrier": {
+   "electricity": 96,
+   "land transport EV": 96
+  },
+  "dedicated": {
+   "dedicated plant line LA2 1 - TH2 4": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1220.0,
+    "efficiency": 0.9505503453431805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 2 - TH2 1": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 866.0,
+    "efficiency": 0.9565491476135805,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 3 - TH2 1": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 1388.0,
+    "efficiency": 0.9655920790772882,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - TH2 1": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "TH2 1",
+    "p_nom": 480.0,
+    "efficiency": 0.9538298223272168,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 4 - VN2 2": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "VN2 2",
+    "p_nom": 572.0,
+    "efficiency": 0.9714910887984437,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   },
+   "dedicated plant line LA2 5 - TH2 4": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "TH2 4",
+    "p_nom": 1473.0,
+    "efficiency": 0.9451813268223357,
+    "p_min_pu": 0.0,
+    "p_nom_extendable": false,
+    "border_class": "cross_border"
+   }
+  },
+  "source_links": {
+   "LA2 1 dedicated src to grid": {
+    "bus0": "LA2 1 dedicated src",
+    "bus1": "LA2 1",
+    "p_nom": 2519.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 2 dedicated src to grid": {
+    "bus0": "LA2 2 dedicated src",
+    "bus1": "LA2 2",
+    "p_nom": 2159.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 3 dedicated src to grid": {
+    "bus0": "LA2 3 dedicated src",
+    "bus1": "LA2 3",
+    "p_nom": 1570.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 4 dedicated src to grid": {
+    "bus0": "LA2 4 dedicated src",
+    "bus1": "LA2 4",
+    "p_nom": 2071.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   },
+   "LA2 5 dedicated src to grid": {
+    "bus0": "LA2 5 dedicated src",
+    "bus1": "LA2 5",
+    "p_nom": 3354.0,
+    "efficiency": 1.0,
+    "p_min_pu": 0.0,
+    "marginal_cost": 0.0,
+    "capital_cost": 0.0
+   }
+  },
+  "slack_gens": {}
+ },
+ "diff_I365_R365": {
+  "Store": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Load": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "StorageUnit": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "TransformerType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Carrier": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Line": {
+   "removed": 46,
+   "added": 0,
+   "removed_by_carrier": {
+    "AC": 46
+   },
+   "removed_border_class": {
+    "cross_border": 46
+   },
+   "changed_columns": {
+    "s_nom_extendable": {
+     "n": 16,
+     "examples": [
+      "23",
+      "39",
+      "43",
+      "47"
+     ],
+     "border_class": {
+      "cross_border": 16
+     },
+     "carriers": {
+      "AC": 16
+     }
+    },
+    "s_nom_max": {
+     "n": 16,
+     "examples": [
+      "23",
+      "39",
+      "43",
+      "47"
+     ],
+     "border_class": {
+      "cross_border": 16
+     },
+     "carriers": {
+      "AC": 16
+     }
+    }
+   },
+   "time_series": {}
+  },
+  "Generator": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Link": {
+   "removed": 283,
+   "added": 0,
+   "removed_by_carrier": {
+    "H2 pipeline": 110,
+    "gas pipeline": 110,
+    "CO2 pipeline": 55,
+    "DC": 8
+   },
+   "removed_border_class": {
+    "cross_border": 283
+   },
+   "changed_columns": {
+    "p_nom_extendable": {
+     "n": 9,
+     "examples": [
+      "Khlong Ngae \u2013 Gurun",
+      "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+      "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+      "gas pipeline existing Trans Thailand\u2013Malaysia Gas Pipeline (TTM)"
+     ],
+     "border_class": {
+      "cross_border": 9
+     },
+     "carriers": {
+      "gas pipeline": 7,
+      "DC": 2
+     }
+    },
+    "p_nom_max": {
+     "n": 9,
+     "examples": [
+      "Khlong Ngae \u2013 Gurun",
+      "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+      "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+      "gas pipeline existing Trans Thailand\u2013Malaysia Gas Pipeline (TTM)"
+     ],
+     "border_class": {
+      "cross_border": 9
+     },
+     "carriers": {
+      "gas pipeline": 7,
+      "DC": 2
+     }
+    }
+   },
+   "time_series": {}
+  },
+  "LineType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Bus": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "meta_keys_only_a": [],
+  "meta_keys_only_b": [
+   "research_variant"
+  ],
+  "meta_differing": [
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cross_border",
+   "scenario"
+  ],
+  "global_constraints": {
+   "only_a": [],
+   "only_b": [],
+   "changed": []
+  }
+ },
+ "diff_I2920_R2920": {
+  "Store": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Load": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "StorageUnit": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "TransformerType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Carrier": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Line": {
+   "removed": 46,
+   "added": 0,
+   "removed_by_carrier": {
+    "AC": 46
+   },
+   "removed_border_class": {
+    "cross_border": 46
+   },
+   "changed_columns": {
+    "s_nom_extendable": {
+     "n": 16,
+     "examples": [
+      "23",
+      "39",
+      "43",
+      "47"
+     ],
+     "border_class": {
+      "cross_border": 16
+     },
+     "carriers": {
+      "AC": 16
+     }
+    },
+    "s_nom_max": {
+     "n": 16,
+     "examples": [
+      "23",
+      "39",
+      "43",
+      "47"
+     ],
+     "border_class": {
+      "cross_border": 16
+     },
+     "carriers": {
+      "AC": 16
+     }
+    }
+   },
+   "time_series": {}
+  },
+  "Generator": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Link": {
+   "removed": 283,
+   "added": 0,
+   "removed_by_carrier": {
+    "H2 pipeline": 110,
+    "gas pipeline": 110,
+    "CO2 pipeline": 55,
+    "DC": 8
+   },
+   "removed_border_class": {
+    "cross_border": 283
+   },
+   "changed_columns": {
+    "p_nom_extendable": {
+     "n": 9,
+     "examples": [
+      "Khlong Ngae \u2013 Gurun",
+      "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+      "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+      "gas pipeline existing Trans Thailand\u2013Malaysia Gas Pipeline (TTM)"
+     ],
+     "border_class": {
+      "cross_border": 9
+     },
+     "carriers": {
+      "gas pipeline": 7,
+      "DC": 2
+     }
+    },
+    "p_nom_max": {
+     "n": 9,
+     "examples": [
+      "Khlong Ngae \u2013 Gurun",
+      "gas pipeline existing Gresik-Batam-Singapore Gas Pipeline",
+      "gas pipeline existing West Natuna Transportation System Gas Pipeline",
+      "gas pipeline existing Trans Thailand\u2013Malaysia Gas Pipeline (TTM)"
+     ],
+     "border_class": {
+      "cross_border": 9
+     },
+     "carriers": {
+      "gas pipeline": 7,
+      "DC": 2
+     }
+    }
+   },
+   "time_series": {}
+  },
+  "LineType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Bus": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "meta_keys_only_a": [],
+  "meta_keys_only_b": [
+   "research_variant"
+  ],
+  "meta_differing": [
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cross_border",
+   "scenario"
+  ],
+  "global_constraints": {
+   "only_a": [],
+   "only_b": [],
+   "changed": []
+  }
+ },
+ "diff_I365_D365": {
+  "Store": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Load": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "StorageUnit": {
+   "removed": 1,
+   "added": 0,
+   "removed_by_carrier": {
+    "hydro existing": 1
+   },
+   "changed_columns": {
+    "bus": {
+     "n": 7,
+     "examples": [
+      "existing_survivor::LA2 4::Hydro::3022facee600",
+      "existing_survivor::LA2 3::Hydro::88cb7a2a95c2",
+      "existing_survivor::LA2 1::Hydro::9973cb7f1d28",
+      "existing_survivor::LA2 2::Hydro::3c3734e2f61b"
+     ],
+     "border_class": null,
+     "carriers": {
+      "hydro existing": 7
+     }
+    },
+    "p_nom": {
+     "n": 1,
+     "examples": [
+      "existing_survivor::LA2 1::hydro existing::S4A"
+     ],
+     "border_class": null,
+     "carriers": {
+      "hydro existing": 1
+     }
+    },
+    "existing_annual_fixed_om_eur": {
+     "n": 1,
+     "examples": [
+      "existing_survivor::LA2 1::hydro existing::S4A"
+     ],
+     "border_class": null,
+     "carriers": {
+      "hydro existing": 1
+     }
+    }
+   },
+   "time_series": {
+    "inflow": {
+     "changed": {
+      "n": 1,
+      "examples": [
+       "existing_survivor::LA2 1::hydro existing::S4A"
+      ]
+     },
+     "only_in_a": {
+      "n": 1,
+      "examples": [
+       "existing_survivor::LA2 1::hydro existing::S4A operating"
+      ]
+     }
+    }
+   }
+  },
+  "TransformerType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Carrier": {
+   "removed": 2,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Line": {
+   "removed": 62,
+   "added": 0,
+   "removed_by_carrier": {
+    "AC": 62
+   },
+   "removed_border_class": {
+    "cross_border": 62
+   },
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Generator": {
+   "removed": 1,
+   "added": 0,
+   "removed_by_carrier": {
+    "ror existing": 1
+   },
+   "changed_columns": {
+    "bus": {
+     "n": 4,
+     "examples": [
+      "existing_survivor::LA2 4::Hydro::0d66b994afb2",
+      "existing_survivor::GEM:G100000602431",
+      "existing_survivor::LA2 2::Hydro::cc3dfd083c77",
+      "existing_survivor::GEM:G100000602432"
+     ],
+     "border_class": null,
+     "carriers": {
+      "ror existing": 4
+     }
+    },
+    "p_nom": {
+     "n": 1,
+     "examples": [
+      "existing_survivor::LA2 5::ror existing::S4A"
+     ],
+     "border_class": null,
+     "carriers": {
+      "ror existing": 1
+     }
+    },
+    "existing_annual_fixed_om_eur": {
+     "n": 1,
+     "examples": [
+      "existing_survivor::LA2 5::ror existing::S4A"
+     ],
+     "border_class": null,
+     "carriers": {
+      "ror existing": 1
+     }
+    }
+   },
+   "time_series": {
+    "p_max_pu": {
+     "only_in_a": {
+      "n": 1,
+      "examples": [
+       "existing_survivor::LA2 5::ror existing::S4A operating"
+      ]
+     }
+    }
+   }
+  },
+  "Link": {
+   "removed": 303,
+   "added": 0,
+   "removed_by_carrier": {
+    "gas pipeline": 117,
+    "H2 pipeline": 110,
+    "CO2 pipeline": 55,
+    "DC": 10,
+    "dedicated plant line": 6,
+    "dedicated plant source": 5
+   },
+   "removed_border_class": {
+    "cross_border": 298,
+    "domestic": 5
+   },
+   "changed_columns": {
+    "bus1": {
+     "n": 1,
+     "examples": [
+      "existing_survivor::LA2 5::Lignite::3b26fcde74e2"
+     ],
+     "border_class": {
+      "domestic": 1
+     },
+     "carriers": {
+      "lignite existing": 1
+     }
+    },
+    "p_nom": {
+     "n": 2,
+     "examples": [
+      "convert_412_577",
+      "convert_599_890"
+     ],
+     "border_class": {
+      "domestic": 2
+     },
+     "carriers": {
+      "B2B": 2
+     }
+    }
+   },
+   "time_series": {}
+  },
+  "LineType": {
+   "removed": 0,
+   "added": 0,
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "Bus": {
+   "removed": 5,
+   "added": 0,
+   "removed_by_carrier": {
+    "AC": 5
+   },
+   "changed_columns": {},
+   "time_series": {}
+  },
+  "meta_keys_only_a": [],
+  "meta_keys_only_b": [],
+  "meta_differing": [
+   "existing_cross_border_fom_eur",
+   "existing_cross_border_fom_ledger",
+   "existing_unit_components",
+   "required_constraint_hooks",
+   "research_ac_losses",
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_cross_border",
+   "research_dc_converters",
+   "research_dedicated_lines",
+   "research_dust_cleanup",
+   "research_max_extension",
+   "research_transmission_losses",
+   "s4f_layers",
+   "s4j_layers",
+   "s4k_layers",
+   "s4l_layers",
+   "scenario",
+   "transmission_limit"
+  ],
+  "global_constraints": {
+   "only_a": [],
+   "only_b": [],
+   "changed": []
+  }
+ }
+}
