@@ -115,4 +115,26 @@
 | 全量测试 | 提交 `fbdf2c2e`：758 通过、58 跳过、3 失败（与 v3 无关，同之前；多出的 6 项是本补充新增） | 本次提交 |
 | 2.1 第 7 条 报告本机部分 | `V3_REPORT_SUPPLEMENT07.md` 第 0–7、9 节；第 8 节留给云端结果 | 本次提交 |
 
-恢复点：**补充 07 本机部分完成，停下等用户开机并授权**（审阅决定第 2.2 节：开机、在会话中给出连接方式并写"授权 V3 重跑"，同时确认 WLS 空闲、AnyConnect 已断开）。授权后：包 `work/p1_v3_20261102/screen_package_v3_dmax/`，实例新目录 `/root/autodl-tmp/v3_screen_dmax/`（上一批 `/root/autodl-tmp/v3_screen/` 不动），3 次运行 V1 → V2 → V3，其余按 `V3_SCREEN_AUTODL_INSTRUCTION.md` 第 2 节与 `V3_SCREEN_UNATTENDED.md` 全部条款；环境 `env_check` 284 / 284 一致则复用。回收后本机计算完整修订桥（第一批 V4 271.2321、V5 268.7261 bn 与新 V1），补写报告第 8 节。计数：本机 Gurobi 0；本机计算约 1.0 小时 / 2 小时；磁盘约 3.2 GB / 15 GB。计数：本机 Gurobi 0；没有求解；本机计算约 0.05 小时 / 2 小时；磁盘约 0 / 15 GB。
+恢复点：**补充 07 本机部分完成，停下等用户开机并授权**（审阅决定第 2.2 节：开机、在会话中给出连接方式并写"授权 V3 重跑"，同时确认 WLS 空闲、AnyConnect 已断开）。授权后：包 `work/p1_v3_20261102/screen_package_v3_dmax/`，实例新目录 `/root/autodl-tmp/v3_screen_dmax/`（上一批 `/root/autodl-tmp/v3_screen/` 不动），3 次运行 V1 → V2 → V3，其余按 `V3_SCREEN_AUTODL_INSTRUCTION.md` 第 2 节与 `V3_SCREEN_UNATTENDED.md` 全部条款；环境 `env_check` 284 / 284 一致则复用。回收后本机计算完整修订桥（第一批 V4 271.2321、V5 268.7261 bn 与新 V1），补写报告第 8 节。计数：本机 Gurobi 0；本机计算约 1.0 小时 / 2 小时；磁盘约 3.2 GB / 15 GB。
+
+### 补充 07 云端重跑（用户 2026-11-03 授权"授权 V3 重跑"，无人值守沿用 `V3_SCREEN_UNATTENDED.md` 全部条款）
+
+交接要点：第一台实例数据盘 50 GB < 90 GB，只读检查后停下、未改动；用户把本次下限改为 16 核 / 48 GiB / 40 GB（`RUN_PLAN_SCREEN_V3.md` 第 10 节，`6b1a1225`），换用第二台实例（25 核 8470Q / 62 GB / 数据盘 50 GB）。本机脚本 `/home/jin/v3r/`（由 `/home/jin/v3s/` 复制、改路径；镜像 `scripts/wsl_v3r/`），主机与端口只经 `wsl env V3S_HOST=.. V3S_PORT=..` 传入；只读状态 `bash /home/jin/v3r/run.sh /home/jin/v3r/r_status.sh`。实例上：包与运行目录 `/root/autodl-tmp/v3_screen_dmax`（运行目录 `runs/dfx`），运行器 tmux `v3s`，看门狗 tmux `v3wd`（`/root/autodl-tmp/v3_watchdog_dmax`），环境 `/root/autodl-tmp/envs/pypsa-earth`。会话中断后先只读查看，不重启运行。
+
+| 步骤（SGT） | 状态 |
+|---|---|
+| 20:29 只读检查 | 25 核、62.0 GiB、数据盘可用 53 GB，满足本次下限；无许可、无残留进程 |
+| 20:29–21:23 单路上传 | 3,217 s，0.058 MB/s，rsync 退出码 0；实例上 `sha256sum -c` 23 个文件 OK，COMMIT `fbdf2c2e`，代码解包；apt 装 tmux、GNU time |
+| 21:23–21:34 环境 | 直连安装 611 s，284 / 284 与锁定一致（`ENV_EXACT_MATCH: True`） |
+| 21:34:48 许可 | `scp` 到 `/root/.gurobi/gurobi.lic`，600，308 B；授权文本 216 B |
+| 21:34:58 预检 | 全部各节 `PREFLIGHT OK`，下限按本次 16 核 / 48 GiB / 40 GB；实测 25 核 / 62 GiB / 48 GB；guard 变量 0 个 |
+| 21:35:19 启动 | `run_dfx.sh --auth`，`BASE_CHECK:all_equal`，单通道 V1 → V2 → V3 |
+| 21:36:39 看门狗 | 测试全过后布防（tmux `v3wd`），条件同第一次筛查（终态 + 安静 15 分钟后等 4 小时 `RECOVERED_OK`，非终态 15 分钟无进程记 RUNNER_GONE） |
+| 21:40:50–22:56 V1 一体化 | optimal；目标 266.2728 bn（Gurobi 263.9024）；求解 4,119 s，进程 4,485 s，峰值 24.91 GiB；C1 abc 111（暂按默认参照），GATES_V6 `ACCEPTED_LAYER2` |
+| 23:01:05–23:32 V2 `no_new_xb` | optimal；目标 280.8466 bn（Gurobi 278.3055）；求解 1,556 s，进程 1,877 s，峰值 21.28 GiB；批参照写出后 V1、V2 重评都是 C1 abc 111、`ACCEPTED_LAYER2` |
+| 23:37:53–00:02 V3 完全隔离 | optimal；Gurobi 279.5344 bn（barrier 111 次，989 s）；进程 1,433 s，峰值 20.04 GiB；C1 abc 111（本批参照），`ACCEPTED_LAYER2` |
+| 11-04 00:06:08 批次 `DONE` | 没有不可用运行；B6 14.5738 bn，负受益只有 BUNKER；轻包 5,894,899 B、全包 529,983,823 B（`final_20261103T160537Z`） |
+| 00:07 起 回收 | 单路：轻包 103 s、SHA256 通过、解包 138 个文件；全包约 48–100 KB/s，预计 3 小时 |
+| 轻包分析 | V1 266.2728、V2 280.8466、V3 282.0506 bn（+2.68 / +2.90 / +2.96）；B6 14.5738（+0.2258）；V3 − V2 1.2039；V5 − V1 2.4533（第一批 5.1295）；修订桥合计 −4.5125；Owen 符号全同，只有 BUNKER −0.117；失败闸门全在预告内 |
+| 用户指示（11-04 00:11 前后） | 用轻包写第 8 节并提交推送；现在删许可；停止全包下载并记字节数；关机核实；之后无卡模式开机续传全包、补第 8.4 节、再关机 |
+| 00:12:09 删除许可 | `shred -u`，`VERIFIED_ABSENT`，`/root/.gurobi` 为空，按路径搜索无其他类许可文件 |计数：本机 Gurobi 0；没有求解；本机计算约 0.05 小时 / 2 小时；磁盘约 0 / 15 GB。

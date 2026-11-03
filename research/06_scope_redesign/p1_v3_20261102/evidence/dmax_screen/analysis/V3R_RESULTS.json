@@ -1,0 +1,468 @@
+{
+ "script": "scripts/wsl_v3r/v3r_analysis.py",
+ "fx_usd_per_eur": 1.139954,
+ "runs": {
+  "V1": {
+   "network": "integrated",
+   "scenario": "integrated",
+   "termination": "optimal",
+   "objective_eur": 266272775892.55725,
+   "objective_lp_eur": 263902373757.75317,
+   "solve_seconds": 4118.716310501099,
+   "peak_gib": 24.907394409179688,
+   "time_limit": 21600.0,
+   "network_sha256": "a0273602016003fc4318cdd993b69716772c700cd2f9d079059fabcdde099c8b",
+   "sha_equal_registered": true,
+   "barrier_iterations": 163,
+   "barrier_seconds": 3984.96,
+   "final_line": "Optimal objective",
+   "restart_mentions": 0,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/v3_screen_dmax/runs/dfx/V2 minus /root/autodl-tmp/v3_screen_dmax/runs/dfx/V1, COUNTRY_COST_LEDGER.csv total)"
+   },
+   "decision120_accepted": true,
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "failed_gates": [
+    "A1_A2",
+    "A1_A2_S4B",
+    "A3",
+    "B1",
+    "B15",
+    "B3"
+   ],
+   "failed_not_announced": [],
+   "b8_passed": true,
+   "owen_usable": true
+  },
+  "V2": {
+   "network": "no_new_xb",
+   "scenario": "no_new_xb",
+   "termination": "optimal",
+   "objective_eur": 280846622930.2719,
+   "objective_lp_eur": 278305543739.3815,
+   "solve_seconds": 1555.9939305782318,
+   "peak_gib": 21.27978515625,
+   "time_limit": 21600.0,
+   "network_sha256": "f9f4057b9972b2d7c8ab8b574c2d90c306000ae44eb2697ad80a6c0dc3554861",
+   "sha_equal_registered": true,
+   "barrier_iterations": 111,
+   "barrier_seconds": 1429.38,
+   "final_line": "Optimal objective",
+   "restart_mentions": 0,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/v3_screen_dmax/runs/dfx/V2 minus /root/autodl-tmp/v3_screen_dmax/runs/dfx/V1, COUNTRY_COST_LEDGER.csv total)"
+   },
+   "decision120_accepted": true,
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "failed_gates": [
+    "A1_A2",
+    "A1_A2_S4B",
+    "A3",
+    "B1",
+    "B3"
+   ],
+   "failed_not_announced": [],
+   "b8_passed": true,
+   "owen_usable": true
+  },
+  "V3": {
+   "network": "disconnected",
+   "scenario": "disconnected",
+   "termination": "optimal",
+   "objective_eur": 282050565982.57947,
+   "objective_lp_eur": 279534349979.713,
+   "solve_seconds": 1111.8001947402954,
+   "peak_gib": 20.042850494384766,
+   "time_limit": 10800.0,
+   "network_sha256": "f889c3ba1dee0ce48dc9c5d6aa165b3dd2a436bc16a92230616a091436d89974",
+   "sha_equal_registered": true,
+   "barrier_iterations": 111,
+   "barrier_seconds": 988.84,
+   "final_line": "Optimal objective",
+   "restart_mentions": 0,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "this batch: disconnected - integrated ledger difference (/root/autodl-tmp/v3_screen_dmax/runs/dfx/V2 minus /root/autodl-tmp/v3_screen_dmax/runs/dfx/V1, COUNTRY_COST_LEDGER.csv total)"
+   },
+   "decision120_accepted": true,
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": null,
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "failed_gates": [
+    "A1_A2",
+    "A1_A2_S4B",
+    "A3",
+    "B1"
+   ],
+   "failed_not_announced": [],
+   "b8_passed": true,
+   "owen_usable": true
+  }
+ },
+ "summary_b6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 266272775892.55725,
+   "no_new_xb": 280846622930.2719
+  },
+  "difference": 14573847037.71466,
+  "relative": 0.051892548629053764,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 14.57384703771466,
+  "runs": {
+   "integrated": "V1",
+   "disconnected": "V2"
+  },
+  "labels": {
+   "V1": "ACCEPTED_LAYER2",
+   "V2": "ACCEPTED_LAYER2"
+  }
+ },
+ "summary_bridge": {
+  "objective_bn": {
+   "v2": 270.78524451,
+   "all": 266.27277589255726
+  },
+  "steps": [
+   {
+    "step": "v2 -> all",
+    "cost_change_bn": -4.512468617442721
+   }
+  ],
+  "stock_value_bn": 1.2039430523075794,
+  "v2_b6_bn": 14.615313033
+ },
+ "summary_stop": {
+  "stop": [],
+  "stop_safe": null,
+  "postproc_errors": [],
+  "unusable": {}
+ },
+ "old_new": {
+  "objective_bn": {
+   "V1": {
+    "first": 263.59663367485115,
+    "rerun": 266.27277589255726,
+    "change": 2.676142217706116
+   },
+   "V2": {
+    "first": 277.94471021022315,
+    "rerun": 280.8466229302719,
+    "change": 2.901912720048767
+   },
+   "V3": {
+    "first": 279.0894731921561,
+    "rerun": 282.0505659825795,
+    "change": 2.96109279042334
+   }
+  },
+  "b6_bn": {
+   "first": 14.348076535372009,
+   "rerun": 14.57384703771466,
+   "change": 0.22577050234265136,
+   "rerun_usd2020": 16.613515226030977
+  },
+  "v3_minus_v2_bn": {
+   "first": 1.1447629819329834,
+   "rerun": 1.203943052307556,
+   "change": 0.059180070374572756
+  }
+ },
+ "bridge": {
+  "objective_bn": {
+   "v2 (DFX V1)": 270.785244510473,
+   "V4 (160-162, first screening)": 271.2320688446826,
+   "V5 (160-164, first screening)": 268.7260987755422,
+   "V1 (all, rerun)": 266.27277589255726
+  },
+  "step_bn": {
+   "v2 (DFX V1) -> V4 (160-162, first screening)": 0.4468243342095947,
+   "V4 (160-162, first screening) -> V5 (160-164, first screening)": -2.505970069140411,
+   "V5 (160-164, first screening) -> V1 (all, rerun)": -2.4533228829849243
+  },
+  "total_v2_to_v3_bn": -4.512468617915741,
+  "total_first_screening_bn": -7.188610835621857,
+  "v5_minus_v1_bn": {
+   "first": 5.12946510069104,
+   "rerun": 2.4533228829849243
+  }
+ },
+ "owen_table": [
+  {
+   "player": "BN",
+   "V1_share_bn": 0.3976567657728478,
+   "V2_share_bn": 0.46359122158914,
+   "benefit_bn": 0.06593445581629216,
+   "interval_bn": [
+    0.06593445576433253,
+    0.06593445586825186
+   ],
+   "first_benefit_bn": 0.06274222661715347,
+   "change_bn": 0.0031922291991386964,
+   "sign_same": true
+  },
+  {
+   "player": "ID",
+   "V1_share_bn": 72.33490675549542,
+   "V2_share_bn": 72.92164992392699,
+   "benefit_bn": 0.5867431684315644,
+   "interval_bn": [
+    0.55241203049852,
+    0.6210743063645935
+   ],
+   "first_benefit_bn": 0.5587849818905944,
+   "change_bn": 0.02795818654096993,
+   "sign_same": true
+  },
+  {
+   "player": "KH",
+   "V1_share_bn": 3.3089304572553235,
+   "V2_share_bn": 3.5024032255944353,
+   "benefit_bn": 0.1934727683391118,
+   "interval_bn": [
+    0.15638118865092754,
+    0.23056434802729558
+   ],
+   "first_benefit_bn": 0.19709924565956594,
+   "change_bn": -0.0036264773204541245,
+   "sign_same": true
+  },
+  {
+   "player": "LA",
+   "V1_share_bn": 0.10626247567850401,
+   "V2_share_bn": 0.8816724164859804,
+   "benefit_bn": 0.7754099408074764,
+   "interval_bn": [
+    0.5833271638969686,
+    0.9674927177179841
+   ],
+   "first_benefit_bn": 0.7808760841147682,
+   "change_bn": -0.005466143307291782,
+   "sign_same": true
+  },
+  {
+   "player": "MM",
+   "V1_share_bn": 1.6019915741939756,
+   "V2_share_bn": 1.846685842001295,
+   "benefit_bn": 0.2446942678073194,
+   "interval_bn": [
+    0.20195198527652597,
+    0.28743655033811283
+   ],
+   "first_benefit_bn": 0.20047546687832093,
+   "change_bn": 0.044218800928998464,
+   "sign_same": true
+  },
+  {
+   "player": "MY",
+   "V1_share_bn": 20.838954107153253,
+   "V2_share_bn": 24.01485864968394,
+   "benefit_bn": 3.1759045425306893,
+   "interval_bn": [
+    2.878930673750141,
+    3.472878411311226
+   ],
+   "first_benefit_bn": 3.139335433252197,
+   "change_bn": 0.03656910927849211,
+   "sign_same": true
+  },
+  {
+   "player": "PH",
+   "V1_share_bn": 14.501159557785593,
+   "V2_share_bn": 14.562789024389895,
+   "benefit_bn": 0.06162946660430145,
+   "interval_bn": [
+    0.061629466542715075,
+    0.061629466665885924
+   ],
+   "first_benefit_bn": 0.05791491941665268,
+   "change_bn": 0.00371454718764877,
+   "sign_same": true
+  },
+  {
+   "player": "SG",
+   "V1_share_bn": 8.845884927664859,
+   "V2_share_bn": 12.765631373717582,
+   "benefit_bn": 3.919746446052725,
+   "interval_bn": [
+    3.900429388091831,
+    3.9390635040136184
+   ],
+   "first_benefit_bn": 3.844674900915117,
+   "change_bn": 0.07507154513760783,
+   "sign_same": true
+  },
+  {
+   "player": "TH",
+   "V1_share_bn": 32.68557442551041,
+   "V2_share_bn": 33.69907413536763,
+   "benefit_bn": 1.0134997098572196,
+   "interval_bn": [
+    0.5583150632018318,
+    1.4686843565126038
+   ],
+   "first_benefit_bn": 1.0968247745615234,
+   "change_bn": -0.08332506470430379,
+   "sign_same": true
+  },
+  {
+   "player": "TL",
+   "V1_share_bn": -0.022060853984029093,
+   "V2_share_bn": 0.1296048220971619,
+   "benefit_bn": 0.15166567608119097,
+   "interval_bn": [
+    0.1516656759877806,
+    0.15166567617460133
+   ],
+   "first_benefit_bn": 0.13742103680429768,
+   "change_bn": 0.01424463927689329,
+   "sign_same": true
+  },
+  {
+   "player": "VN",
+   "V1_share_bn": 45.075752776672076,
+   "V2_share_bn": 49.577453585857,
+   "benefit_bn": 4.501700809184929,
+   "interval_bn": [
+    4.464755150624588,
+    4.538646467745292
+   ],
+   "first_benefit_bn": 4.481914393398003,
+   "change_bn": 0.019786415786926526,
+   "sign_same": true
+  },
+  {
+   "player": "BUNKER",
+   "V1_share_bn": 66.59775989341077,
+   "V2_share_bn": 66.48120710256921,
+   "benefit_bn": -0.11655279084155273,
+   "interval_bn": [
+    -0.11655279084155273,
+    -0.11655279084155273
+   ],
+   "first_benefit_bn": -0.20997231127443694,
+   "change_bn": 0.0934195204328842,
+   "sign_same": true
+  }
+ ],
+ "owen_usable": {
+  "integrated": true,
+  "disconnected": true
+ },
+ "negative_benefit": [
+  "BUNKER"
+ ],
+ "negative_in_interval": [
+  "BUNKER"
+ ],
+ "owen_sum_bn": 14.573848460671266,
+ "screen_tables": {
+  "ID_LEDGER_DECOMPOSITION.csv": true,
+  "VN_BIOMASS_BALANCE.json": true,
+  "LA_EXPORT_UTILISATION.csv": true
+ },
+ "predictions": [
+  {
+   "item": "V1 objective 265.1-267.6 bn (structural floor 263.5966)",
+   "actual": 266.27277589255726,
+   "met": true
+  },
+  {
+   "item": "V1 most likely 266.7-267.1 bn",
+   "actual": 266.27277589255726,
+   "met": false
+  },
+  {
+   "item": "V5 - V1 positive 1.14-3.61 bn",
+   "actual": 2.4533228829849243,
+   "met": true
+  },
+  {
+   "item": "V5 - V1 most likely 1.6-2.1 bn",
+   "actual": 2.4533228829849243,
+   "met": false
+  },
+  {
+   "item": "B6 positive 14.25-14.80 bn",
+   "actual": 14.57384703771466,
+   "met": true
+  },
+  {
+   "item": "B6 change -0.10 to +0.45 bn",
+   "actual": 0.22577050234265136,
+   "met": true
+  },
+  {
+   "item": "B6 rise more likely",
+   "actual": 0.22577050234265136,
+   "met": true
+  },
+  {
+   "item": "V2 objective 279.3-282.4 bn",
+   "actual": 280.8466229302719,
+   "met": true
+  },
+  {
+   "item": "V3 - V2 positive 1.05-1.60 bn",
+   "actual": 1.203943052307556,
+   "met": true
+  },
+  {
+   "item": "V3 - V2 rise more likely",
+   "actual": 0.059180070374572756,
+   "met": true
+  },
+  {
+   "item": "bridge v2 -> v3 total -3.2 to -5.7 bn",
+   "actual": -4.512468617915741,
+   "met": true
+  },
+  {
+   "item": "bridge total most likely -3.7 to -4.1 bn",
+   "actual": -4.512468617915741,
+   "met": false
+  },
+  {
+   "item": "Owen signs as the first screening (11 countries +, BUNKER -)",
+   "actual": [],
+   "met": true
+  },
+  {
+   "item": "structural: new objectives not below the first screening",
+   "actual": {
+    "V1": 2.676142217706116,
+    "V2": 2.901912720048767,
+    "V3": 2.96109279042334
+   },
+   "met": true
+  }
+ ]
+}

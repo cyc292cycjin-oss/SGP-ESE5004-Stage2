@@ -1,0 +1,162 @@
+{
+ "script": "scripts_project/dfx_batch.py",
+ "out": "/root/autodl-tmp/v3_screen_dmax/runs/dfx",
+ "runs": {
+  "V1": {
+   "rid": "V1",
+   "role": "\u672c\u6279\u53c2\u7167\uff08v3 \u4e00\u4f53\u5316\uff09\u3001Owen \u5206\u644a",
+   "profile": "formal_barrier_1e6_t16",
+   "set": "",
+   "state": "ended",
+   "network": "/root/autodl-tmp/v3_screen_dmax/networks/integrated_365_24h_unsolved.nc",
+   "network_sha256": "a0273602016003fc4318cdd993b69716772c700cd2f9d079059fabcdde099c8b",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 266272775892.55725,
+   "solve_seconds": 4118.716310501099,
+   "peak_rss_gib": 24.907394409179688,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "V2": {
+   "rid": "V2",
+   "role": "\u672c\u6279\u53c2\u7167\uff08v3 no_new_xb\uff09\u3001B6 = V2 \u2212 V1",
+   "profile": "formal_barrier_1e6_t16",
+   "set": "",
+   "state": "ended",
+   "network": "/root/autodl-tmp/v3_screen_dmax/networks/no_new_xb_365_24h_unsolved.nc",
+   "network_sha256": "f9f4057b9972b2d7c8ab8b574c2d90c306000ae44eb2697ad80a6c0dc3554861",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 280846622930.2719,
+   "solve_seconds": 1555.9939305782318,
+   "peak_rss_gib": 21.27978515625,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "V3": {
+   "rid": "V3",
+   "role": "\u5b58\u91cf\u4e0e\u4e13\u7ebf\u7684\u4ef7\u503c = V3 \u2212 V2\uff08\u7b2c 174 \u9879\uff09",
+   "profile": "formal_barrier_1e6_t16",
+   "set": "",
+   "state": "ended",
+   "network": "/root/autodl-tmp/v3_screen_dmax/networks/disconnected_365_24h_unsolved.nc",
+   "network_sha256": "f889c3ba1dee0ce48dc9c5d6aa165b3dd2a436bc16a92230616a091436d89974",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 282050565982.57947,
+   "solve_seconds": 1111.8001947402954,
+   "peak_rss_gib": 18.764972686767578,
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 0
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": null,
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  }
+ },
+ "unusable": {},
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 266272775892.55725,
+   "no_new_xb": 280846622930.2719
+  },
+  "difference": 14573847037.71466,
+  "relative": 0.051892548629053764,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 14.57384703771466,
+  "runs": {
+   "integrated": "V1",
+   "disconnected": "V2"
+  },
+  "labels": {
+   "V1": "ACCEPTED_LAYER2",
+   "V2": "ACCEPTED_LAYER2"
+  }
+ },
+ "benefit": {
+  "computable": true,
+  "b6_bn": 14.57384703771466,
+  "negative_benefit": [
+   "BUNKER"
+  ],
+  "reason": null
+ },
+ "comparison": null,
+ "bridge": {
+  "objective_bn": {
+   "v2": 270.78524451,
+   "all": 266.27277589255726
+  },
+  "steps": [
+   {
+    "step": "v2 -> all",
+    "cost_change_bn": -4.512468617442721
+   }
+  ],
+  "stock_value_bn": 1.2039430523075794,
+  "v2_b6_bn": 14.615313033
+ },
+ "stop_not_accepted": [],
+ "stop_safe": null,
+ "postproc_errors": [],
+ "solver_runs": 0
+}
