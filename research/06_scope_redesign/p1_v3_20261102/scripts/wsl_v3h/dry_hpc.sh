@@ -4,6 +4,7 @@
 # -> the job body in build_only mode for F3 (local drill switches, HPR_DRY_TRUNCATE=56) -> the job body refusing a formal job while the limits are PROPOSED.
 # usage: dry_hpc.sh <package dir> ; writes /home/jin/v3h/dry_<stamp>/ (never reused) and DRY_RUN_HPC.txt there
 set -u
+echo "REFUSED: superseded by dry_hpc2.sh (2026-11-04): its last step runs a clean formal job body, which on a REGISTERED package would start a real build and solve"; exit 2
 SRC=${1:?package dir}; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
 D=/home/jin/v3h/dry_$(date -u +%Y%m%dT%H%M%SZ); [ ! -e "$D" ] || exit 2; mkdir -p "$D"; R=$D/DRY_RUN_HPC.txt
 [ "$(ps -eo args= | grep -cE '[s]2_solve\.py|[b]4_split_solve\.py|[p]ytest')" = 0 ] || { echo "REFUSED: a solve or pytest is running"; exit 4; }

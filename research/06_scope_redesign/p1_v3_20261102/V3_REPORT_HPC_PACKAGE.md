@@ -15,9 +15,9 @@
 4. **预测（第 4 节）：** 在任何 HPC 求解之前登记（`RUN_PLAN_V3.md` 第 26 节），两个参照（56 时段冒烟、365×24h 重跑）并列并写明各自的结构失真。
 5. **登记的时限（第 5 节，审阅端按用户授权决定，2026-11-04）：** U = 263.7 h → **TimeLimit 864,000 s（240 h，被 240 h 上限截断）**、进程 2 墙钟 871,200 s、止损线 691,200 s；进程 1 超时 **5,400 s**；walltime **F1 260 h、F2 262 h、F3 260 h、F4 262 h**（每个作业余量 ≥ 2 h），批级 48 h；资源不变；`limits_status` **REGISTERED**。须知：T < U，止损约在 Atlas 每次迭代 1,840–1,860 s 时触发，低于 U 假设的 2,686 s（第 5.2 节）。
 6. **审查六条（第 6.1 节）：** 第 1 条空数组展开加保护，并新增 `hpr_submit.sh --dry-run`；第 2 条列为已知局限，不改求解路径；第 3 条前序检查与预检失败停批；第 4 条停批时 `POST_ONLY` 仍做后处理；第 5 条改注释；第 6 条锁的说明、`--resume` 遇锁拒绝、F2 的 walltime 计两个等待。
-7. **bash 4.2（第 8.2 节）：** 从 GNU 源码编译 bash 4.2 后实测：{{B42_SUMMARY}}
-8. **部署包（第 7–8 节）：** {{PKG_SUMMARY}}
-9. **终点：** {{END_SUMMARY}}
+7. **bash 4.2（第 8.2 节）：** 从 GNU 源码编译 bash 4.2 后实测：替身测试 38 项全过；包上的干跑（预检、四运行 BUILD_ONLY、作业体、`hpr_submit.sh --dry-run`）与 bash 5 结果相同；18 个脚本 `bash -n` 全过，4.3 及以上才有的写法命中 0。Atlas 的实际版本由用户在登录节点确认（指南清单 (c)）。
+8. **部署包（第 7–8 节）：** `work/p1_v3_20261102/hpc_package_v3/`，COMMIT `7d22dda1`，46 个文件（含清单共 48 个、373,712,296 B），`SHA256SUMS` 的 SHA256 `63d682bb…`；一致性检查 57 行全部一致；旧包两份改名保留。
+9. **终点：** 包、操作指南、报告定稿并提交推送；剩下的只有用户连 VPN 上传与提交作业（指南开头的清单）。全量测试只有与基线同一根因的失败（第 9 节）。
 
 ## 1. 规则与小修（指令第 1 节；提交 `a1ef782b`，构建前）
 
@@ -164,7 +164,7 @@ V3 HPC v1 提交时的取值是 PROPOSED（TimeLimit 1,296,000 s、walltime 376 
 | `hpr_status.sh`、`make_pbs.sh`、`hpr_consistency.py` | 全部运行与启动锁；读包内定义文件；比对行按运行表生成（v2 计划仍 `ALL_CONSISTENT`） |
 | 新增 | `batch_def/BATCH_DEF_2920x3h_v3hpc.json`、`hpc_v3/make_hpc_package_v3.sh`、`hpc_v3/make_reference_values_v3.py`、`hpc_v3/REFERENCE_VALUES_V3.json`（只有数值） |
 
-**测试（VERIFIED）：** `tests/research/test_v3_hpc_runner.py` 11 项（定义文件 = 登记计划与登记值；有无定义文件的输出与 walltime 构成；F1 → F2 → F3 → F4 各一个作业再接批级作业，两对 B6、受益与比较；启动锁让两个同时启动相隔 ≥ 间隔；已有两个求解或锁残留 → `STOP_SAFE:START_LOCK`；PROPOSED 拒绝、四运行的单机批次拒绝、四运行 BUILD_ONLY；PBS 生成、对本计划的一致性（含 4 行余量）、`--dry-run`、PROPOSED 拒绝、经替身 `qsub` 的依赖链、`--resume` 遇锁拒绝；冒烟作业体；作业体拒绝；前序未结束与预检失败停批；停批时 `POST_ONLY` 的后处理）全部通过；原有运行器回归 {{REG}}。bash 4.2 下的结果见第 8.2 节，全量测试见第 9 节。
+**测试（VERIFIED）：** `tests/research/test_v3_hpc_runner.py` 11 项（定义文件 = 登记计划与登记值；有无定义文件的输出与 walltime 构成；F1 → F2 → F3 → F4 各一个作业再接批级作业，两对 B6、受益与比较；启动锁让两个同时启动相隔 ≥ 间隔；已有两个求解或锁残留 → `STOP_SAFE:START_LOCK`；PROPOSED 拒绝、四运行的单机批次拒绝、四运行 BUILD_ONLY；PBS 生成、对本计划的一致性（含 4 行余量）、`--dry-run`、PROPOSED 拒绝、经替身 `qsub` 的依赖链、`--resume` 遇锁拒绝；冒烟作业体；作业体拒绝；前序未结束与预检失败停批；停批时 `POST_ONLY` 的后处理）全部通过；原有运行器回归（`test_b4p_batch4`、`test_hpr_two_jobs`、`test_v3_runners`、`test_b4p_paths`、`test_dfx_runner`）54 项全部通过，`test_b4p_split.py` 8 项另跑通过。bash 4.2 下的结果见第 8.2 节，全量测试见第 9 节。
 
 ### 6.1 审查六条的处理（只读审查 `5e372e5d..1e7b503c`，2026-11-04 02:25 SGT；审阅端意见 02:24 与无人值守授权第 1、2 节）
 
@@ -179,43 +179,72 @@ V3 HPC v1 提交时的取值是 PROPOSED（TimeLimit 1,296,000 s、walltime 376 
 
 ## 7. 部署包与操作指南（指令第 6 节）
 
-**包：** `work/p1_v3_20261102/hpc_package_v3/`，由 `hpc_v3/make_hpc_package_v3.sh` 在干净提交 **`1e7b503c9e3d470a96aa26e9e0e7a3d6e3c672b9`** 上打出（`COMMIT` = 新分支的提交，指令补充第 2 条）。`SHA256SUMS` 列 46 个文件，`SHA256SUMS` 自身 SHA256 `2ce8e5cdebef99f064ae1cad7bb38fd8cdc1433abe1ac75016818444be225d7a`；清单 `HPC_PACKAGE_MANIFEST.json` `a7a0a2c8…`；合计 373,689,593 B（含清单）。第一次在 `917c8b63` 上打出的包因作业体的一处输出文字（第 8 节）而改名为 `hpc_package_v3_superseded_917c8b63/` 保留，不再使用。
+**包：** `work/p1_v3_20261102/hpc_package_v3/`，由 `hpc_v3/make_hpc_package_v3.sh` 在干净提交 **`7d22dda112a3c18ed57e8c061d95e51915980417`** 上打出（dirty 0；`COMMIT` = 新分支的提交，指令补充第 2 条）。`SHA256SUMS` 列 46 个文件，`SHA256SUMS` 自身 SHA256 **`63d682bbe743ce220bec747aede81d6423d3afd1cac53b7ffdbc2345e970345c`**；清单 `HPC_PACKAGE_MANIFEST.json` `af9f91bc…`；共 48 个文件、373,712,296 B（含 `SHA256SUMS` 与清单）。旧包都改名保留、不再使用：`hpc_package_v3_superseded_1e7b503c/`（PROPOSED 取值，审查前）与 `hpc_package_v3_superseded_917c8b63/`（作业体文字修正前）。
 
 | 类别 | 内容 |
 |---|---|
-| 代码 | `code_1e7b503c.tar.gz`（82,794,152 B；`git archive` 不含顶层 `research/`） |
-| 定义 | `BATCH_DEF.json`（= `batch_def/BATCH_DEF_2920x3h_v3hpc.json`，`a020af04…`；`limits_status: PROPOSED`） |
+| 代码 | `code_7d22dda1.tar.gz`（82,796,517 B，`3c8c0af9…`；`git archive` 不含顶层 `research/`） |
+| 定义 | `BATCH_DEF.json`（= `batch_def/BATCH_DEF_2920x3h_v3hpc.json`，`59c68214…`；**`limits_status: REGISTERED`**，TimeLimit 864,000 s，进程 1 超时 5,400 s） |
 | 网络与回执 | 四个 2920×3h 网络（第 2 节）、`integrated_BUILD_RECEIPT.json`、`integrated_ev05_BUILD_RECEIPT.json`、两个变体回执、`integrated_costs_active_research.csv`；**没有 365×24h 文件** |
-| 运行与作业 | `run_batch4.sh`、`preflight.sh`、`pack_results.sh`、`hpc/`（作业体、PBS 生成、安装、登录预检、提交、状态、一致性检查）、`pbs/`（8 个作业脚本 + `HPC_PLAN.txt`） |
+| 运行与作业 | `run_batch4.sh`、`preflight.sh`、`pack_results.sh`、`hpc/`（作业体、PBS 生成、安装、登录预检、提交（含 `--dry-run`）、状态、一致性检查）、`pbs/`（8 个作业脚本：walltime F1 / F2 / F3 / F4 = `260:00:00` / `262:00:00` / `260:00:00` / `262:00:00`，批级 `48:00:00`；`HPC_PLAN.txt`、`MAKE_PBS.log`） |
 | 环境 | `env/`（第三批锁定，未改；HPC 上已有环境，预检 `env` 节 284 / 284 一致即复用） |
-| 文档与参照 | `RUN_PLAN_HPC_V3.md`、`HPC_OPERATOR_GUIDE_V3.md`、`RUN_PLAN_V3.md`、`V3_RULES.md`、`HPC_FACTS_20261026.md`、`REFERENCE_VALUES.json`（只有数值） |
-| 核对 | `HPC_CONSISTENCY.json` / `.txt`：53 行全部一致（`ALL_CONSISTENT`），否则打包脚本拒绝出包 |
+| 文档与参照 | `RUN_PLAN_HPC_V3.md`（含第 14 节）、`HPC_OPERATOR_GUIDE_V3.md`（含开头的操作清单）、`RUN_PLAN_V3.md`、`V3_RULES.md`、`HPC_FACTS_20261026.md`、`REFERENCE_VALUES.json`（只有数值） |
+| 核对 | `HPC_CONSISTENCY.json` / `.txt`：**57 行全部一致**（`ALL_CONSISTENT`；比原来多 4 行"walltime 余量 ≥ 7,200 s"），否则打包脚本拒绝出包 |
 | 不进包 | 许可、cutout、LP 与解的数组、`results_project` 下的结果、`solve.log` / `solve.err`、账号与主机信息、365×24h 网络 |
 
-**上传时间估计（单路）：** 373.7 MB；1 MB/s 约 6 分钟，0.1 MB/s 约 1 小时（AutoDL 上传曾实测 0.058 MB/s，按此约 1.8 小时；NUS VPN 到 Atlas 的实际速度未测）。
+**上传时间估计（单路）：** 373.7 MB；1 MB/s 约 6 分钟，0.1 MB/s 约 1 小时；按 AutoDL 上传曾实测的 0.058 MB/s 约 1.8 小时。NUS VPN 到 Atlas 的实际速度未测。
 
-**操作指南 `HPC_OPERATOR_GUIDE_V3.md`：** 步骤 A（单路 `scp -r` 上传与 `sha256sum -c`）→ B（许可只核对属性）→ C（登录预检，环境复用）→ D（冒烟作业，期望值 = 本机冒烟）→ D2（可选 BUILD_ONLY）→ E（`hpr_submit.sh` 一条命令提交五个作业）→ F（监控）→ G（每个运行结束后先回收其导出；批级作业后回收结果包，单路下载、`Get-FileHash` 核对）→ H（出现 `STOP` / `STOP_SAFE` 时的处置，含启动锁残留）。**命令中没有尖括号占位符**：要替换的只有 `$HPC_USER`、`$WSL_USER`（PowerShell）与 `RID`（bash），都在上一行说明；atlas8 上用系统的 `$USER`。**前提写在开头：** 正式提交只用登记后重新打出的包。
+**操作指南 `HPC_OPERATOR_GUIDE_V3.md`：** 开头一页"用户上 HPC 操作清单"(a)–(i)：(a) 连 VPN 前确认本机没有 Gurobi 进程、两个 Claude Code 会话都已停下；(b) 连 AnyConnect 后 WSL 外连会断，上传、下载一律用 Windows PowerShell 的 `ssh` / `scp`，写出完整命令与本机路径；(c) 登录节点 `bash --version` 与两次不提交演练（上传后一次、冒烟通过后正式提交前一次），写出期望输出与停下条件；(d) 单路上传与 `sha256sum -c`；(e) 登录预检与冒烟作业；(f) 一条命令按顺序提交 F1、F2、F3、F4 与批级作业，另附逐条手工提交的完整命令（作业号用大写变量、从上一条 `qsub` 的输出取得）；(g) `qstat -u $USER`、`qstat -f F1_ID | grep -E "comment|estimated|job_state|exec_host"`；(h) 撤销作业时连同依赖它的作业一起撤销（依赖关系与 `qdel` 顺序）；(i) 结果下载与 `/hpctmp` 60 天自动清理。随后是详细步骤 A（上传）→ B（许可只核对属性）→ C（登录预检）→ D（冒烟）→ D2（可选 BUILD_ONLY）→ E（提交）→ F（监控）→ G（回收）→ H（停批处置，锁残留改名移开、不删除）。**命令中没有尖括号占位符**（逐个代码块检查）；要替换的值只有 `$HPC_USER`、`$WSL_USER`、作业号 `F1_ID` 等与运行编号 `RID`，都在上一行说明从哪里取得。
 
-## 8. 干跑、预检与泄露扫描（指令第 6.3 条；无求解器、无许可）
+## 8. 干跑、bash 4.2 实测、静态检查与泄露扫描（指令第 6.3 条；无求解器、无许可）
 
-**干跑（VERIFIED，`/home/jin/v3h/dry_20261103T175805Z/DRY_RUN_HPC.txt`，对 `917c8b63` 的包）：** 包复制到新目录 → 预检 `guards,sha,networks,env,profile,code,tools`（`licence`、`resources` 除外）**`PREFLIGHT OK`**：46 个文件 SHA256 全部 OK；环境与锁定 284 / 284 一致；四个网络 `all_equal`；档案正确、TimeLimit 读到 1,296,000（PROPOSED）→ `BUILD_ONLY=1 TRUNCATE=56` 四个运行的进程 1 全部 `BUILD_CHECK passed`，LP 与第 21.1 节登记值相同（F1、F3 729,156 × 1,603,380、非零 3,715,722；F2、F4 707,802 × 1,555,798、非零 3,565,488；每个 31–36 s、峰值 2.0–2.3 GiB）→ 作业体 `JOB_MODE=build_only JOB_RID=F3`（本机演练开关）退出码 0、`BUILD_CHECK_F3 passed`、LP 文件已删 → 作业体 `JOB_MODE=formal JOB_RID=F1` **被拒绝**（退出码 2，`the limits of BATCH_DEF.json are PROPOSED`，什么都没启动）。
+### 8.1 干跑（VERIFIED，`evidence/hpc/dry/`）
 
-**干跑中发现并修正的一处：** 作业体 BUILD_ONLY 记录里写死了 v2 的"runner timeout 3,600 s"与 B4P 估计值，v3 的进程 1 超时是 7,200 s（PROPOSED），用户读 D2 结果时会被误导；改为从 `b4_batch4.py hpc-plan` 读取（提交 `1e7b503c`），重新打包，并在新包上重做干跑（见下）。
+在新包 `7d22dda1` 上用新的干跑脚本 `dry_hpc2.sh` 各做一次，分别用 bash 5.3.9 与本机编译的 bash 4.2.0（第 8.2 节；`PATH` 垫片让包内每一处嵌套的 `bash` 也用同一版本）。两次结果相同：
 
-**新包 `1e7b503c` 的干跑：** DRY2_PLACEHOLDER
+| 步骤 | bash 5 | bash 4.2 |
+|---|---|---|
+| 预检 `guards,sha,networks,env,profile,code,tools`（`licence`、`resources` 除外） | `PREFLIGHT OK`：46 个文件 SHA256 全部 OK；环境 284 / 284；四个网络 `all_equal`；档案正确；TimeLimit 864,000、状态 REGISTERED | 同左 |
+| `BUILD_ONLY=1 TRUNCATE=56` 四个运行的进程 1 | 全部 `BUILD_CHECK passed`，129 s；LP 与登记值相同（F1、F3 729,156 × 1,603,380、非零 3,715,722；F2、F4 707,802 × 1,555,798、非零 3,565,488） | 同左，135 s |
+| 作业体 `JOB_MODE=build_only JOB_RID=F3`（本机演练开关） | 退出码 0、`BUILD_CHECK_F3 passed`，记录里的超时读到 5,400 s | 同左 |
+| 正式作业体 F1，环境里带测试开关 `BUILD_ONLY=1` | **拒绝**（退出码 2），什么都没启动 | 同左 |
+| 正式作业体 F3，`JOB_DEPENDS=afterany:F1`，F1 没有结束（审查第 3 条） | 退出码 3、`STOP_SAFE:PREDECESSOR_NOT_ENDED:F3:F1`，没有运行预检、没有启动运行 | 同左 |
+| `hpr_submit.sh --dry-run`（本机没有 qsub、没有授权文件、冒烟未过） | 5 行 `DRY-RUN: qsub ...` 依赖链正确，3 条 NOTE（授权、冒烟、qsub），`DRY_RUN_OK`，没有写任何文件 | 同左 |
 
-**泄露扫描（VERIFIED，`evidence/hpc/leak/LEAK_SCAN_pre.json`、`LEAK_CLASSIFY_pre.txt`）：** 对象：分支 `p1_v3_20261102/` 全部 1,056 个文件、新包 48 个文件、`hpc_package_src/`、`cloud_package_b4/`、会话脚本目录，以及 `5e372e5d..HEAD` 的每个提交。特征：仓库外特征文件（键名、ssh、IP、主机名，运行时读取）与本机许可文件的值（只在内存中比较，从不打印）。**许可值命中 0；键名、ssh、主机名命中 0。** IP 形特征命中 30 处，逐条归类（只输出遮蔽片段）全部不是泄露：公共 DNS `1.1.1.1`（旧会话写下的连通性测试说明，`RUN_PLAN_V3.md` 第 8、9、14 节与两个旧脚本，早已在仓库中）、软件包四段式版本号（`env/` 锁文件，与 v2 包相同）、WSL 内核版本字符串（重新生成的 `D1_EVIDENCE.json`）。推送后再扫一次（第 11 节）。
+两次的所有输出中都没有 `unbound`、`syntax error`、`command not found`。
+
+**干跑脚本的一处隐患（发现并处理）：** 原干跑脚本 `dry_hpc.sh` 的最后一步运行一个"干净的"正式作业体，用来确认它在 PROPOSED 下被拒绝。包改为 REGISTERED 后，这一步会真正启动构建与求解。新脚本 `dry_hpc2.sh` 改用两条一定什么都不启动的路径（带测试开关的拒绝、前序检查的停批）；旧脚本开头加了拒绝运行（退出码 2），没有删除。历史：`917c8b63` 包的干跑见 `evidence/hpc/dry/DRY_RUN_HPC_917c8b63_bash5.txt`；`1e7b503c` 包在审查后被取代，没有单独干跑。
+
+### 8.2 bash 4.2 实测（VERIFIED）
+
+- **编译：** 从 GNU 官方源码 `bash-4.2.tar.gz`（SHA256 `a27a1179ec9c0830c65c6aa5d7dab60f7ce1a2a608618570f96bfa72e95ab3d8`）在本机编译，不安装，成品 `/home/jin/v3h/bash42/src/bash`，`GNU bash, version 4.2.0(2)-release`。第一次编译失败：当前 gcc 默认 C23，`mkbuiltins.c` 的旧式声明报错；加 `CC="gcc -std=gnu89"` 后成功。
+- **行为确认：** `set -u` 下 `"${a[@]}"` 对空数组报 `unbound variable`；`${a[@]+"${a[@]}"}`、`${a[*]:-}` 安全。
+- **替身测试（`PATH` 垫片，已核实测试子进程与嵌套调用都解析到 4.2，`evidence/hpc/tests/BASH42_SHIM_CHECK.txt`）：** `test_v3_hpc_runner.py`、`test_hpr_two_jobs.py`、`test_b4p_batch4.py` 共 **38 项全部通过**（`STANDIN_TESTS_bash42.txt`），覆盖 `run_batch4.sh` 的 `--only`、`POST_ONLY`（含停批）、`BUILD_ONLY` 与单机批次，作业体各模式，`make_pbs.sh`，`hpr_submit.sh` 的 `--dry-run`、经替身 `qsub` 的依赖链与 `--resume` 遇锁拒绝。
+- **包上的干跑：** 第 8.1 节，与 bash 5 相同。
+- **静态检查（`evidence/hpc/dry/BASH42_STATIC_7d22dda1.txt`）：** 包内 18 个脚本与作业脚本在 bash 4.2 下 `bash -n` 全部通过；4.3 / 4.4 / 5 才有的写法（`declare -n` / `local -n`、`wait -n` / `-p` / `-f`、`mapfile -d`、负数组下标、`${var@Q}` 等、`EPOCHSECONDS`、`BASH_ARGV0`、`inherit_errexit`、`[[ -v a[i] ]]`、`test -R`）命中 0。没有 `:-` 或 `+` 保护的数组展开逐条核对：`ORDER`（先检查 ≥ 3）、`RIDS`（运行表先检查 ≥ 2）、`need`、`cmd`、`pargs`、`reg`（构造时就有元素）、`PAIRS`（≥ 1）、`bad[*]`（只在个数 > 0 时展开）、`"${RIDS[@]:1}"`（四运行 BUILD_ONLY 已在 4.2 下跑过），其余都已有 `+` 保护。
+- **Atlas 登录节点的 bash 版本未知**（本次不连 HPC），所以操作指南清单 (c) 让用户先看 `bash --version`，并在提交前做两次不提交演练，写明期望输出与停下条件。
+
+### 8.3 泄露扫描（VERIFIED，`evidence/hpc/leak/`）
+
+**方法：** 特征来自仓库外的特征文件（键名、ssh、IP、主机名，运行时读取，不写进扫描脚本），加上本机许可文件的值（只在内存中比较，从不打印）；命中只输出遮蔽片段（前 3 个字符、长度、字符类）。对象：分支 `p1_v3_20261102/` 全部文件、新包 48 个文件、`hpc_package_src/`、`cloud_package_b4/`、会话脚本目录 `/home/jin/v3h`（排除各次干跑目录与下载的 bash 4.2 源码，后者是第三方源码，不进包、不提交），以及 `5e372e5d..HEAD` 的每个提交。
+
+- **提交前（`pre`，`1e7b503c` 包）：** 许可值 0；键名、ssh、主机名 0；IP 形 30 处，全部归类为非泄露：公共 DNS 地址（旧会话的连通性测试说明）、软件包四段式版本号（`env/` 锁文件，与 v2 包相同）、WSL 内核版本字符串（`D1_EVIDENCE.json`）。
+- **提交前（`pre2`，`7d22dda1` 包与本报告）：** 许可值 0；键名、ssh、主机名 0；IP 形命中的类别与 `pre` 相同，新增的只有引用这些类别的文字（进度文件中"IP 形 30 处"一句、上一次分类记录里的遮蔽片段），都不是泄露。**实际命中 0。**
+- **推送后（`post`）：** 见第 11 节。
 
 ## 9. 资源记账与测试
 
 | 项 | 用量 / 上限 |
 |---|---|
-| 本机 Gurobi | **2 / 2**（两次冒烟，无重试；令牌预检通过） |
-| HPC、AutoDL | 未连接、未上传 |
-| 本机计算 | COMPUTE_PLACEHOLDER |
-| 磁盘新增 | DISK_PLACEHOLDER |
+| 本机 Gurobi | **2 / 2**（两次冒烟，无重试；无人值守阶段 0 次） |
+| HPC、AutoDL、VPN | 未连接、未上传 |
+| 本机计算 | 约 **3.5 小时 / 4 小时**（各步墙钟累计、保守计；无人值守阶段约 0.6 小时：两次运行器测试、回归 9 分钟、bash 4.2 测试 7.5 分钟、另两个测试文件 4 分钟、打包、两次干跑 6.5 分钟、诊断） |
+| 磁盘新增 | 约 **7.1 GB / 40 GB**（会话目录 `/home/jin/v3h` 4.1 GB，含 bash 4.2 源码与编译、各次干跑；`results_project/v3hpc` 1.1 GB；`work/` 下三份包 1.1 GB；worktree 0.75 GB） |
 
-**测试：** 新增 16 项（`test_v3_units.py` 8、`test_v3_hpc_runner.py` 8）全部通过，作业体文字修正后受影响的 3 项复跑通过；运行器回归 54 项全部通过；`tests/research` 全量：FULL_PLACEHOLDER。其中 `test_m12_allocation.py` 等含 scipy `linprog` / HiGHS 的玩具 LP（无模型网络、无 Gurobi），照实列出。
+**测试（VERIFIED）：**
+- **全量 `tests/research`（提交 `1e7b503c`，没有其他求解或测试同时运行，1,946 s）：831 通过、4 失败、0 跳过**（`evidence/hpc/tests/FULL_SUITE_1e7b503c.txt`）。`test_s1_built_networks.py::test_static_validation_passes_on_reload` 是已知基线。`test_s3_gates.py` 的 `test_static_b_gates`、`test_b12_with_override`、`test_b12_s3b_rebuilt` 与它同一根因：基点 `5e372e5d` 的配置已有 `cross_border.stock_mode`，旧的 S3-5 网络没有这个键，B12 的 `switch_metadata_matches` 为 False（`S3_GATES_B12_DIAGNOSIS.txt`）；`scripts_project/v5`、`phase4_static.py` 与该测试自基点未改；本 worktree 链接了 `results_project/s3_5`，所以这三项不再像以前的 worktree 那样跳过。以前的"3 项已知失败"中的 `test_s4c_0.py` 两项本次通过（WACC 表可达）。按授权第 2 节"其他情况：最保守、可逆"，判为与基线同类、不指向本次改动，不改闸门代码。其中含 scipy `linprog` / HiGHS 的玩具 LP（无模型网络、无 Gurobi），照实列出。
+- **`1e7b503c` 之后的改动**（运行器、作业体、提交与状态脚本、一致性检查、`b4_batch4.py` 的 `walltime_components`、定义文件、计划、测试）：读取这些文件的测试文件全部重跑（检索 `tests/research` 得到 5 个文件 + 新测试文件）。bash 5：`test_v3_hpc_runner.py` 11 项、运行器回归（`test_b4p_batch4`、`test_hpr_two_jobs`、`test_v3_runners`、`test_b4p_paths`、`test_dfx_runner`）54 项、`test_b4p_split.py` 与 `test_v3_runners.py` 19 项，全部通过；bash 4.2：38 项全部通过。
+- **没有在最终提交上再跑一次全量：** 授权第 2 节只在出现新失败时要求重跑全量，本次没有新失败；改动涉及的代码都由上述测试覆盖；再跑一次约 0.55 小时，会使本机计算超过指令的 4 小时上限（约 3.5 + 0.55 h）。所以不再跑，记录在此。
 
 ## 10. 偏差、发现与未覆盖
 
@@ -223,12 +252,31 @@ V3 HPC v1 提交时的取值是 PROPOSED（TimeLimit 1,296,000 s、walltime 376 
 2. **我在构建前写的计数笔误：** 第 12.3 节"810 条"应为 270 条；集合与字段的规定不变，已更正并注明（第 2 节）。
 3. **核对脚本的效率问题：** 第一版 O(n²) 写法卡了 15 分钟，终止后改正重跑；不影响结果。
 4. **全尺寸 2920×3h LP 未在本机构建**（10 GiB 放不下）：规模由线性外推给出，同一方法对 v2 与 D2 实测逐位相同；HPC 上可用可选的 BUILD_ONLY 作业（步骤 D2）实测。
-5. **四运行链在 HPC 上的真实调度未演练：** 依赖链、启动锁、停批传播与批级汇总都用替身测试验证（第 6 节），HPC 冒烟作业只覆盖 F1、F2 两次真实会话。
-6. **PROPOSED 取值的外推依赖 CPU 因子假设**（Atlas EPYC 7R13 对 8470Q 1.0–1.6），没有 Atlas 上的求解测速；早期测速止损（20 次迭代）是兜底。
-7. **共用文件暂未复制到 `work/`：** 截至本报告，`work/p1_v3_20261102/V3_PROGRESS.md` 末尾仍是 V27 第一次开机的关机记录（早于本会话），第 8.4 节那次开机的关机记录尚未出现，所以按用户补充第 3 条，`RUN_PLAN_V3.md`、`V3_RULES.md`、`batch_def/BATCH_DEF_2920x3h.json` 的新版本只在分支上（第 11 节）。
+5. **四运行链在 HPC 上的真实调度未演练：** 依赖链、启动锁、停批传播、前序检查与批级汇总都用替身测试验证；HPC 冒烟作业只覆盖 F1、F2 两次真实会话。
+6. **T < U（第 5.2 节）：** 240 h 上限使高值区间上段（Atlas 每次迭代 ≥ 约 1,850 s）的 F1、F3 会被早期测速止损；按授权不改，请审阅端知悉。外推本身依赖 CPU 因子假设（1.0–1.6），没有 Atlas 上的求解测速。
+7. **`test_s3_gates.py` 三项失败**（第 9 节）：与已知基线同一根因，不在本次改动范围。
+8. **旧干跑脚本的隐患**（第 8.1 节）：已加拒绝运行，改用 `dry_hpc2.sh`。
+9. **审查第 2 条是已知局限**（第 6.1 节），求解路径未改。
+10. **干跑中由被测代码删除的文件：** BUILD_ONLY 作业体按设计删除它自己刚写出的 LP 文件（`LP_DELETED`，干跑目录中的临时文件，这是包在 HPC 上节省磁盘的登记行为）；我写的脚本没有删除任何文件（旧包、旧脚本都是改名或加拒绝）。
+11. **Atlas 登录节点的 bash 版本未知：** 本机 bash 4.2 实测全过；指南让用户先看版本并做两次演练。
 
 ## 11. 提交、推送与复制
 
-COMMIT_PLACEHOLDER
+**分支：** `codex/v3-hpc-20261104`（自 `5e372e5d`；独立 worktree `/home/jin/wt_v3_hpc`；不改 main、不 force-push、不合并；指令没有要求开 PR，本次没有开）。
 
-**停下：** 等审阅端审阅与用户决定 PROPOSED 取值（`RUN_PLAN_HPC_V3.md` 第 12 节）。不连 HPC、不连云、不上传。登记后的下一步：改定义文件 `limits_status`（必要时改数值）与计划第 2、3、10、12 节 → 重新打包与干跑 → 用户按操作指南执行。
+| 提交 | 内容 |
+|---|---|
+| `a1ef782b` | 规则与小修；四个网络的构建提交 |
+| `a4607714` | 四个网络的登记与冒烟计划（冒烟之前推送） |
+| `917c8b63` | 冒烟记录、预测、`RUN_PLAN_HPC_V3.md`、四运行的运行器 |
+| `1e7b503c` | 作业体 BUILD_ONLY 文字修正 |
+| **`7d22dda1`** | 登记的时限（第 5 节）、审查第 1、3–6 条、`--dry-run`、测试；**部署包的 `COMMIT`** |
+| 本报告所在的提交 | 报告、指南定稿、证据、会话脚本；提交号与推送结果写在 `V3_HPC_PROGRESS.md` 最后一行（报告不能写自己的提交号） |
+
+`7d22dda1` 之后只改 `research/` 下的文档、证据与会话脚本，包内代码不变（包内文档是 `7d22dda1` 的版本；之后对指南和计划都没有改动）。
+
+**复制到 `work/p1_v3_20261102/`：** 本会话新建的文件：`V3_HPC_PROGRESS.md`、`RUN_PLAN_HPC_V3.md`、`HPC_OPERATOR_GUIDE_V3.md`、`V3_REPORT_HPC_PACKAGE.md`、`batch_def/BATCH_DEF_2920x3h_v3hpc.json`、`hpc_v3/`、`evidence/hpc/`、`scripts/wsl_v3h/`。共用文件 `RUN_PLAN_V3.md`、`V3_RULES.md`、`batch_def/BATCH_DEF_2920x3h.json`：复制前读了 `V3_PROGRESS.md` 末尾，确认 V27 会话的关机记录（第二次关机 02:12:51 SGT，02:14:08 重新登录被拒，已核实停止；"补充 07 全部完成"）；并核对 `work/` 中这三个文件与基点 `5e372e5d` 逐字节相同（V27 没有改它们，SHA256 前 12 位 `76872ca32999` / `08accba45c02` / `0376bc1563b4`），所以覆盖它们不会丢失 V27 的内容，旧内容在 git `5e372e5d` 中。
+
+**推送与推送后的泄露扫描：** 见 `V3_HPC_PROGRESS.md` 最后一行。
+
+**终点：** 部署包、操作指南、报告定稿并提交推送。剩下的只有用户的步骤：按 `HPC_OPERATOR_GUIDE_V3.md` 开头的清单，连 VPN、单路上传、`sha256sum -c`、登录预检、冒烟、两次不提交演练，再提交 F1–F4 与批级作业。不连 HPC、不连云、不连 VPN、不上传。

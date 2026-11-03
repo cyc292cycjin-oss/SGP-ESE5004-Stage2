@@ -6,7 +6,7 @@
 set -u
 PF=/home/jin/.dfx_leak_patterns; [ -r "$PF" ] || { echo "pattern file missing"; exit 2; }
 LEAK_PATTERNS="$(grep -v "^#" "$PF" | cut -d= -f2- | paste -sd "|" -)"; [ ${#LEAK_PATTERNS} -gt 8 ] || { echo "empty patterns - refused"; exit 2; }; export LEAK_PATTERNS
-export LEAK_EXCLUDE="V3_CLAUDE_CODE_INSTRUCTION\\.md$|wsl_v3/commit_p1\\.sh$|/dry_[0-9TZ]+/"
+export LEAK_EXCLUDE="V3_CLAUDE_CODE_INSTRUCTION\\.md$|wsl_v3/commit_p1\\.sh$|/dry_[0-9TZ]+/|/v3h/bash42/"   # bash42/: the downloaded GNU bash 4.2 source and build (third party, never shipped or committed)
 export LEAK_WT=/home/jin/wt_v3_hpc LEAK_BASE=5e372e5d
 O=/home/jin/v3h/LEAK_SCAN_${1:-pre}.json
 /home/jin/miniforge3/envs/pypsa-earth/bin/python /home/jin/v3h/leak_scan_v3.py $O \

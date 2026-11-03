@@ -1,0 +1,9 @@
+DRY-RUN NOTE: --auth-file FILE (the user authorisation text) is required (step D1 writes HPR_AUTH.txt) - a real submission would be refused
+DRY-RUN NOTE: the smoke job has not passed (/home/jin/v3h/dry_20261103T191419Z/pkg/runs/smoke56/SMOKE_STATUS.txt: SMOKE_RESULT:PASS missing) - step D first - a real submission would be refused
+DRY-RUN NOTE: qsub not found (login node?) - a real submission would be refused
+DRY-RUN: qsub pbs/hpr3_f1.pbs
+DRY-RUN: qsub -W depend=after:F1_JOBID pbs/hpr3_f2.pbs
+DRY-RUN: qsub -W depend=afterany:F1_JOBID pbs/hpr3_f3.pbs
+DRY-RUN: qsub -W depend=afterany:F2_JOBID pbs/hpr3_f4.pbs
+DRY-RUN: qsub -W depend=afterany:F3_JOBID:F4_JOBID pbs/hpr3_batch.pbs
+DRY_RUN_OK: nothing submitted (bash 5.3.9(1)-release; 5 jobs; 3 check(s) above would refuse a real submission)
