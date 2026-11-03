@@ -80,3 +80,5 @@
 批次 `DONE` 2026-11-03 14:33:07 SGT，没有不可用运行；5 次都是 `ACCEPTED_LAYER2`（本批参照）。结果包 `final_20261103T063207Z`：轻包 10,168,466 B，全包 898,948,855 B。
 
 收尾：两包单路回收，本机 SHA256 通过，类许可文件 0（全包 10,511 s）；`RECOVERED_OK` 17:34:07，看门狗 17:35:02 退出；许可 17:35:19 粉碎，`VERIFIED_ABSENT`。B6 14.3481 bn EUR（16.3561 bn USD），只有 BUNKER 负受益。报告 `V3_REPORT_SCREEN.md`，证据 `evidence/screen/`，脚本 `scripts/wsl_v3s/`；提交前泄露扫描：许可值、连接地址、端口、实例名命中 0。
+
+最终状态：筛查 DONE（5 / 5 optimal，ACCEPTED_LAYER2）；B6 14.3481 bn EUR；实例许可已删（2026-11-03 17:35:19 SGT，VERIFIED_ABSENT）；关机 2026-11-03 17:53:42 SGT，17:55:03 重新登录被拒，已停止；报告提交 `989da215`。
