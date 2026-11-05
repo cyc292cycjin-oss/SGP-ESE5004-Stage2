@@ -1,0 +1,13 @@
+check,rows,result,unmatched,max_abs_dev_mwh,note
+SDMX capsule records = I1 committed,2752,True,,,
+D1 rows S0 = I1 committed BASE2019_SDMX_D1_ROWS.csv S0,385,True,0,0,
+D1 rows S1 = I1 committed BASE2019_SDMX_D1_ROWS.csv S1,385,True,0,0,
+D1 rows S2 = I1 committed BASE2019_SDMX_D1_ROWS.csv S2,385,True,0,0,
+D1 rows S3 = I1 committed BASE2019_SDMX_D1_ROWS.csv S3,385,True,0,0,
+D1 rows S4 = I1 committed BASE2019_SDMX_D1_ROWS.csv S4,385,True,0,0,
+D1 row ID NonEnergyUse coal 'NonEnergy:Coke-oven coke': S5p - I1 S5 = 791 kt x (28.20 - 20.1947) / 3.6 (decision 210 item 1; outside T_v2),1,True,,6.98491931e-10,delta 1758942.306 MWh
+"D1 rows S5 = I1 committed BASE2019_SDMX_D1_ROWS.csv S5 (I2 S5p, every row except the ID NEU coke row)",384,True,0,0,
+scratch d1_base_S0.csv byte-identical to I1 scratch d1_base_S0.csv,,True,,,sha256 08298e6ba4f3f6bd
+I1 code gate gate.G1_reconstruct_equals_repository,,True,,,"273 accounts, values and statuses string-exact"
+I1 code gate gate.G2_d1_base_equals_repository,,True,,,375 rows; unmatched 0; string-exact after d1_common.fmt (the repository writer)
+I1 code gate gate.G3_generalised_blend_reproduces,,True,,,"375 rows, max |diff| 0.000e+00 MWh"
