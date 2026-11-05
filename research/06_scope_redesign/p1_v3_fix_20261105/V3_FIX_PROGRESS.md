@@ -25,8 +25,16 @@
 | 5 | 5.1 窗口复核（2 次）、5.2 回归（2 次，SMOKE_RESULT:PASS） | 完成 | — |
 | 6 | 计划第 15 节、v3.1 指南（部署包 COMMIT） | 完成 | `d3b9a3bc` |
 | 7 | 正式包、网络核对、干跑 bash 5 / 4.2、静态检查、全量 @d3b9a3bc（856 / 4 基线） | 完成 | — |
-| 8 | 报告、证据、台账、镜像提交、推送、扫描、复制、最终行 | 进行中 | |
+| 8 | 报告、证据、台账、镜像提交、推送 | 完成（推送核对一致） | `7faefbe5` |
+| 9 | 推送后泄露扫描（许可值 0；特征命中都是键名文字 / 版本号 / 分类记录，实际命中 0）、复制到 `work/p1_v3_20261102/`（覆盖前核对未被他人改动）、审阅 ZIP、`V3_HPC_PROGRESS.md` 最后一行 | 完成 | 本行所在提交 |
+
+## 交付
+
+- 报告 `V3_REPORT_FIX.md`（同时复制到 `work/p1_v3_20261102/`）；证据 `V3_FIX_EVIDENCE.json`、`evidence/`；脚本 `scripts/`。
+- v3.1 包 `work/p1_v3_20261102/hpc_package_v3_1/`：COMMIT `d3b9a3bc`，`SHA256SUMS` 的 SHA256 `b82163615e13797139cb9353851791a9cff5ad3109335bda30c81a2ba44be1ee`。
+- 审阅 ZIP `work/p1_v3_fix_20261105_REVIEW.zip`（154 个成员 + 清单，SHA256 `49b692b26d679966c900157dce904af069e562aa499117d5c9685f2ada16be7c`；成员清单 `work/p1_v3_fix_20261105_REVIEW_MANIFEST.csv`，逐成员 SHA256 与 CRC32）。
+- 最终状态：`work/p1_v3_20261102/V3_HPC_PROGRESS.md` 最后一行——可以上 HPC。
 
 ## 恢复点
 
-收尾：`scripts/commit_mirror.sh scripts/msg_step5.txt research/06_scope_redesign/p1_v3_20261102/hpc_v31/fullsize_presolve.sh` → 推送 → `scripts/scan_fix.sh post` → `V3_HPC_PROGRESS.md` 最后一行（仓库与 work 两份）→ 提交推送 → 复制到 `work/p1_v3_20261102/` → 审阅 ZIP。
+全部完成，已停止。下一步由用户按 `HPC_OPERATOR_GUIDE_V3.md`（v3.1）开头的清单上 HPC；不连 HPC、云、VPN，未上传。
