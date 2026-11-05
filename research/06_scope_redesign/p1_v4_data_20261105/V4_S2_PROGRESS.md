@@ -17,4 +17,6 @@
 
 更正（写入报告第 0 节第 11 条）：S1 对水泥修正 (ii) 的 2050 年影响写作 +3.79 TWh，是多乘了一次 v3 缩放系数的解析近似；临时副本重跑为 +3.97 TWh。
 
-续做起点：无。S2 完成后推送，等待审阅端审阅；后续须另有指令。
+续做起点：无。S2 完成，等待审阅端审阅；后续须另有指令。
+
+最终状态（2026-11-06）：报告提交 `b9f8e6208beab25b6352d8ee009bb7cd982eebfd`（S2-E）已推送，`origin/codex/v4-data-20261105` 与本地一致；审阅 ZIP `work/p1_v4_data_20261105/V4_S2_REVIEW_b9f8e620.zip`（139 个成员 = 交付目录 138 个文件 + 台账，SHA256 `88015cb5ffd58e624d6142edf03f70fc1607c06f837ab5c57e5e6cbc4bda0810`，成员清单 `evidence/REVIEW_ZIP_MANIFEST_b9f8e620.txt`）；交付目录与工作目录 138 个文件逐一一致（`DATA_REGISTRY_V4_DOWNLOADS.csv` 在工作目录为 CRLF，仓库按 `.gitattributes` 存为 LF，S1 时已如此）；分支自 `b94d245f` 起只改了交付目录与台账；本行与清单所在的收尾提交见 `git log` 头。求解器 0 次，本机计算约 5 分钟，新增磁盘约 0.1 GB（临时副本 99 MB、审阅 ZIP 1.06 MB），未触发停止条件；未开 PR。
