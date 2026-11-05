@@ -12,6 +12,7 @@
 | W12-3 | 蔗渣两端热值 | 完成（`scripts/w12_bagasse.py`，表 `tables/W12_3_*.csv`；s3_0 未改动副本 4 个输出逐字节复现） | 6dc598c6 |
 | W12-4 | UNdata 导出缺品种（覆盖缺口） | 完成（`scripts/w12_sdmx.py`、`w12_coverage.py`、`w12_coverage_chain.py`；SDMX 11 个原始响应 `sdmx/`，登记 `DATA_REGISTRY_W12_SDMX.csv`；表 `tables/W12_4_*.csv`） | 0728ca4c |
 | W12-5 | 同类排查 | 完成（`scripts/w12_scan.py`，表 `tables/W12_5_*.csv`，疑点清单 `W12_5_SUSPECTS.csv` 11 条） | 178d2802 |
-| W12-6 | 报告、证据、审阅包 | 报告 `REPORT.md`、`EVIDENCE.json`（1,355 项）、`MISSING_DATA.csv`、`LEDGER_ENTRY_DRAFT.md` 本提交；审阅包在报告提交之后生成 | 本提交 |
+| W12-6 | 报告、证据、审阅包 | 报告 `REPORT.md`、`EVIDENCE.json`（1,355 项）、`MISSING_DATA.csv`、`LEDGER_ENTRY_DRAFT.md` | 95dbaca4 |
+| 收尾 | 审阅包 `REVIEW_95dbaca4.zip`（92 个成员，381,735 B，SHA256 `e9cea1da…4d18`，testzip OK；zip 不入库，清单 `evidence/REVIEW_ZIP_MANIFEST_95dbaca4.txt` 入库）；本进度最终行 | 收尾提交 |
 
-续做点：生成 `REVIEW_<报告提交前 8 位>.zip` 与清单，收尾提交并推送。
+**最终状态（2026-11-06 SGT）：W12 全部完成，只读，求解器 0 次，已推送 `codex/v4-w07-w12-20261106`，未建 PR；等待审阅端审阅。未改共享台账（草稿见 `LEDGER_ENTRY_DRAFT.md`）。**
