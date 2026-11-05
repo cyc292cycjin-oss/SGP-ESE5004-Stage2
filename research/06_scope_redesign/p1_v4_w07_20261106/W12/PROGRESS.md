@@ -9,9 +9,9 @@
 |---|---|---|---|
 | W12-1 | 天然气产量上限（毛产量 vs 商品气） | 完成（`scripts/w12_gas.py`，表 `tables/W12_1_*.csv`） | 2fe21e8d |
 | W12-2 | 铁路非电燃料重复加载 | 完成（`scripts/w12_rail.py`、`w12_rail_b6.py`，表 `tables/W12_2_*.csv`；临时副本 `/home/jin/v4w07_w12/chain` 未改动时 8 个输出逐字节复现） | a8744e95 |
-| W12-3 | 蔗渣两端热值 | 完成（`scripts/w12_bagasse.py`，表 `tables/W12_3_*.csv`；s3_0 未改动副本 4 个输出逐字节复现） | 本提交 |
-| W12-4 | UNdata 导出缺品种（覆盖缺口） | 进行中 | |
-| W12-5 | 同类排查 | 待做 | |
+| W12-3 | 蔗渣两端热值 | 完成（`scripts/w12_bagasse.py`，表 `tables/W12_3_*.csv`；s3_0 未改动副本 4 个输出逐字节复现） | 6dc598c6 |
+| W12-4 | UNdata 导出缺品种（覆盖缺口） | 完成（`scripts/w12_sdmx.py`、`w12_coverage.py`、`w12_coverage_chain.py`；SDMX 11 个原始响应 `sdmx/`，登记 `DATA_REGISTRY_W12_SDMX.csv`；表 `tables/W12_4_*.csv`） | 本提交 |
+| W12-5 | 同类排查 | 进行中 | |
 | W12-6 | 报告、证据、审阅包 | 待做 | |
 
-续做点：W12-4。
+续做点：W12-5。
