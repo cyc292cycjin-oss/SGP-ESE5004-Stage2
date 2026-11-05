@@ -1,21 +1,6 @@
-V3 DIAG (decision 194): full-year 2920x3h INF_OR_UNBD traced to the zero-slack bunker net-zero row
+V3 DIAG (decision 194): delivery record (report section 14, progress DONE)
 
-Local diagnosis on the frozen package commit 7d22dda1 (presolve or IIS only; no model, network,
-config, input, profile, threshold or prediction change; no HPC / cloud / VPN):
-
-- control C0 (F1 first 56 snapshots, runner TRUNCATE): ITERATION_LIMIT; the diagnosis entry point
-  writes a problem.lp byte-identical to s2_solve.py --truncate 56 (CONTROL_EQUIVALENCE.txt)
-- calendar-month windows (TRUNCATE weighting): every 31-day month and February INF_OR_UNBD, every
-  30-day month passes presolve; same January days pass at 240 snapshots and fail at 248; weeks and
-  native-weight (3 h) week / month pass -> the verdict depends on the window weight, not on a day
-- presolve sensitivity on F1_M01: DualReductions=0, Aggregate=0, Presolve=1 pass; NumericFocus=3 fails
-- IIS on F1_M02: 30-minute limit reached, no IIS
-- group deletion filter on in-memory LP copies: only research_bunker_co2_limit is necessary; dropping
-  it, relaxing its RHS by 1 t, or replacing it by meter flows fixed at 0 makes presolve pass
-  (F1_M02, F1_M01, F2_M02)
-- F3 / F4: the same bunker structure (static, no solve)
-
-Gurobi 35 / 40 calls, 3,433 s. Report V3_DIAG_REPORT.md; fix, HPC diagnostic job and presolve gate
-are PROPOSED only (reviewer and Fable review, decision 194).
+Records the pushed evidence commit 26b7845c in V3_DIAG_REPORT.md section 14 and V3_DIAG_PROGRESS.md.
+No other change.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

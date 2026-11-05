@@ -17,6 +17,6 @@
 | 4 全年累计约束 | 完成（分支未触发） | 两种口径右端项相同；全年本机内存不够，给出 HPC 诊断作业建议（PROPOSED） |
 | 5 F2 / F3 / F4 | 完成 | F2 是同一原因（VERIFIED）；F3、F4 的 bunker 结构与 F1 相同（静态检查） |
 | 6–8 解释、修正方案、闸门 | 完成 | 见报告第 8–10 节，均为 PROPOSED |
-| 报告、提交、推送 | 进行中 | `V3_DIAG_REPORT.md`、`V3_DIAG_EVIDENCE.json` |
+| 报告、提交、推送 | 完成 | 证据提交 `26b7845cb9826d3f0ce78734be47e7f8049580dd` 已推送到 origin `codex/v3-diag-20261105`（含台账条目）；收尾提交只更新本文件和报告第 14 节 |
 
-续接点：把本文件夹镜像到 worktree 的 `research/06_scope_redesign/p1_v3_diag_20261105/`，追加台账条目，提交，推送 `codex/v3-diag-20261105`，然后停止，等待审阅端与 Fable 审查。
+**状态：DONE，已停止。** 等待审阅端与 Fable 审查（第 194 项）。未创建 PR。Gurobi 剩余 5 次未用。

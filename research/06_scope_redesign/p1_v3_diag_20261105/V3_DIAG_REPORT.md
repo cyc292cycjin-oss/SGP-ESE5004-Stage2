@@ -257,3 +257,8 @@ m.add_constraints(m["Link-p"].sel(Link=meters) == 0.0, name=BUNKER_ROW)
 1. 是否采用方案 1（第 9 节）。如果采用：改代码、新部署包，并另行授权一次 56×3h 回归。
 2. 是否提交第 6 节的 HPC 诊断作业，在全年 F1、F2 上验证同一机制。
 3. 是否建立第 10 节的两类闸门。
+
+## 14. 提交
+
+- **分支与提交**：分支 `codex/v3-diag-20261105`，起点 `7d22dda1`。证据提交 `26b7845cb9826d3f0ce78734be47e7f8049580dd` 已推送到 origin（cyc292cycjin-oss/SGP-ESE5004-Stage2），包含本文件夹的镜像 `research/06_scope_redesign/p1_v3_diag_20261105/` 和台账条目；收尾提交只更新本节与进度文件。未创建 PR。
+- **审阅 ZIP**：`work/p1_v3_diag_20261105_REVIEW.zip`，不入库，内附逐成员 SHA256 与 CRC 清单。
