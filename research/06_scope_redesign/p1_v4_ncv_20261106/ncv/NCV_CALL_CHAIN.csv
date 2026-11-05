@@ -1,0 +1,7 @@
+step,file,line,check_text,reads,writes,verified
+1,scripts_project/reconstruct_base_accounts.py,72,def convert,"UNSD_2019_SOURCE_CAPSULE.json (UNdata 2025-05-02 rows), FROZEN_UPSTREAM_CONVERSIONS.json","BASE_RECONSTRUCTION.json (accounts, selected_rows, nonenergy_reference)",True
+2,scripts_project/d1_demand_2050.py,171,BaseMWh,"BASE_RECONSTRUCTION.json, ASSEMBLY_V1_BLEND_BASELINE.json, electricity.json",DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv (base_2019_mwh),True
+3,scripts_project/m08b_demand.py,229,dem = pd.read_csv(RATIO_TABLE,"DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv (RAS seeds, carrier shares), AEO8 anchors","DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv (base copied, value_2050 = anchor-based)",True
+4,scripts_project/s3_0_industry.py,153,e19 =,"ATS anchor table (Industry base x multiplier), industry_cache.json (within-carrier shares)","INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv (T_v2), INDUSTRY_2050_OTHER_BUCKET.csv",True
+5,scripts_project/v3_industry.py,158,"T = float(sum(v2.at[c, col(x)] for x in CARRIERS))","s3_0 summary, nickel / non-ferrous tables",INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv (v3 other bucket by conservation),True
+6,scripts_project/s2_layers.py,24,TFEC_SECTORS,"ATS anchor table value_2050_mwh, v3 industry tables",network loads (constant p_set),True
