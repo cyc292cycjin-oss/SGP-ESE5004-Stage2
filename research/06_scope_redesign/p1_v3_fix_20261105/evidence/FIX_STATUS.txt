@@ -1,0 +1,21 @@
+WIN_START:head=ae849e1e4c4f62acbd5b01b3b00b5ebfeca8a03e:dirty=0:2026-11-05T10:31:00Z
+BUILD_START:F1_M01:F1:[0,248):window:2026-11-05T10:31:00Z
+BUILD_END:F1_M01:exit=0:97s:peak_gib=8.51:lp_bytes=448632863:dir_bytes=1009224344:lp_sha256=271a2a399a72fdc251a59f018c9223a60f3979838d3bff9708dffaea7fc48926:2026-11-05T10:32:38Z
+GUROBI_CALL_1:F1_M01:probe(b4_split_solve --probe-ordering-only --protect MemLimit=7 --protect SoftMemLimit=6):start:2026-11-05T10:32:39Z
+GUROBI_CALL_1:F1_M01:end:exit=1:status=:presolve_s=19.28:runtime_s=:maxmem_gb=:peak_rss_gib=6.06:88s:2026-11-05T10:34:07Z
+VERDICT:F1_M01:PRESOLVE_PASSED:probe_exit=1:presolved_line=Presolved: 2301392 rows, 2195530 columns, 9198477 nonzeros:rows=7077475:cols=3192900:nnz=16432380:diag_rows=7057140:diag_cols=3192900:diag_nnz=16412045:rows_minus_diag=20335:expected=20335
+LP_REMOVED:F1_M01:presolve passed
+BUILD_START:F2_M02:F2:[248,472):window:2026-11-05T10:34:07Z
+BUILD_END:F2_M02:exit=0:73s:peak_gib=6.76:lp_bytes=390499544:dir_bytes=879224277:lp_sha256=9f3fb7e21d4aa051992f9424d5f45dbffb1a1259ba624145bf872f6425d4ba48:2026-11-05T10:35:20Z
+GUROBI_CALL_2:F2_M02:probe(b4_split_solve --probe-ordering-only --protect MemLimit=7 --protect SoftMemLimit=6):start:2026-11-05T10:35:21Z
+GUROBI_CALL_2:F2_M02:end:exit=1:status=:presolve_s=12.11:runtime_s=:maxmem_gb=:peak_rss_gib=6.11:37s:2026-11-05T10:35:58Z
+VERDICT:F2_M02:PRESOLVE_PASSED:probe_exit=1:presolved_line=Presolved: 1924731 rows, 1887998 columns, 7723427 nonzeros:rows=6205085:cols=2800578:nnz=14230845:diag_rows=6186718:diag_cols=2800578:diag_nnz=14212478:rows_minus_diag=18367:expected=18367
+LP_REMOVED:F2_M02:presolve passed
+WIN_DONE:2026-11-05T10:35:59Z
+DRILL_START:package=/home/jin/v3fix/drill_pkg_13ebce95:commit=13ebce95ef3ac521ca40766ad6a52b4494953acc:job=hpr3_smoke56:ncpus=17:mem_gb=32:2026-11-05T11:23:37Z
+GUROBI_CALL_3:smoke56_v31_F1:job body (run_batch4.sh --only F1, TRUNCATE=56, split):start:2026-11-05T11:23:38Z
+DRILL_JOB:F1:exit=0:813s:DONE_ONLY:2026-11-05T11:37:11Z:F1:optimal:label=ACCEPTED_LAYER2:2026-11-05T11:37:11Z
+GUROBI_CALL_4:smoke56_v31_F2:job body (run_batch4.sh --only F2, TRUNCATE=56, split):start:2026-11-05T11:37:11Z
+DRILL_JOB:F2:exit=0:732s:DONE_ONLY:2026-11-05T11:49:23Z:F2:optimal:label=ACCEPTED_LAYER2:2026-11-05T11:49:23Z
+DRILL_JOB:batch:exit=0:10s:DONE:2026-11-05T11:49:33Z:unusable=none:2026-11-05T11:49:33Z
+DRILL_DONE:2026-11-05T11:49:33Z

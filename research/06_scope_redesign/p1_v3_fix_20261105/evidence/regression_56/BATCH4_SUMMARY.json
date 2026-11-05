@@ -1,0 +1,579 @@
+{
+ "script": "scripts_project/b4_batch4.py",
+ "out": "/home/jin/v3fix/drill_pkg_13ebce95/runs/smoke56_v31",
+ "runs": {
+  "F1": {
+   "rid": "F1",
+   "role": "\u4e00\u4f53\u5316 v3 2920\u00d73h\uff08S-A\uff09\uff1ac(N)\u3001Owen \u5206\u644a\u3001B6 \u57fa\u51c6",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/v3fix/drill_pkg_13ebce95/networks/integrated_2920_3h_unsolved.nc",
+   "network_sha256": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 329705565613.54376,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 96,
+   "solve_seconds": 188.6671643257141,
+   "peak_rss_gib": 2.3992843627929688,
+   "solve_peak_rss_gib": 6.138492584228516,
+   "max_mem_used_gb": 5.961130344,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "F2": {
+   "rid": "F2",
+   "role": "no_new_xb v3 2920\u00d73h\uff08S-A\uff09\uff1aB6 = F2 \u2212 F1",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/v3fix/drill_pkg_13ebce95/networks/no_new_xb_2920_3h_unsolved.nc",
+   "network_sha256": "e2837e4ada978e0d05fc04108d7ceb99567e41c33b6837ab4447be74bdd918b7",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 342268691264.84283,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 81,
+   "solve_seconds": 138.0223503112793,
+   "peak_rss_gib": 2.006481170654297,
+   "solve_peak_rss_gib": 4.632289886474609,
+   "max_mem_used_gb": 4.440636432,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "F3": {
+   "rid": "F3",
+   "role": "\u4e00\u4f53\u5316\uff0cEV \u8f66\u961f\u4ee3\u7406 \u00d70.5\uff08\u7b2c 186 \u9879\uff09",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "not_started",
+   "network": null,
+   "network_sha256": null,
+   "stop_class": null,
+   "termination": null,
+   "objective": null,
+   "gurobi_status": null,
+   "iterations": null,
+   "solve_seconds": null,
+   "peak_rss_gib": null,
+   "solve_peak_rss_gib": null,
+   "max_mem_used_gb": null,
+   "post_solve_errors": [],
+   "c1": null,
+   "v6": null,
+   "v6_provisional": null,
+   "g1": null,
+   "g2": null,
+   "owen_usable": null,
+   "postproc_errors": []
+  },
+  "F4": {
+   "rid": "F4",
+   "role": "no_new_xb\uff0cEV \u8f66\u961f\u4ee3\u7406 \u00d70.5\uff1aB6 = F4 \u2212 F3\uff08\u7b2c 186 \u9879\uff09",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "not_started",
+   "network": null,
+   "network_sha256": null,
+   "stop_class": null,
+   "termination": null,
+   "objective": null,
+   "gurobi_status": null,
+   "iterations": null,
+   "solve_seconds": null,
+   "peak_rss_gib": null,
+   "solve_peak_rss_gib": null,
+   "max_mem_used_gb": null,
+   "post_solve_errors": [],
+   "c1": null,
+   "v6": null,
+   "v6_provisional": null,
+   "g1": null,
+   "g2": null,
+   "owen_usable": null,
+   "postproc_errors": []
+  }
+ },
+ "unusable": {},
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 329705565613.54376,
+   "no_new_xb": 342268691264.84283
+  },
+  "difference": 12563125651.299072,
+  "relative": 0.03810407515542103,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 12.563125651299073,
+  "runs": {
+   "integrated": "F1",
+   "disconnected": "F2"
+  },
+  "labels": {
+   "F1": "ACCEPTED_LAYER2",
+   "F2": "ACCEPTED_LAYER2"
+  },
+  "usable": true,
+  "ledger_total_difference_bn": {
+   "BN": 0.183701322398821,
+   "ID": -0.703855685915329,
+   "KH": 0.6536667526690502,
+   "LA": 1.3594768646351638,
+   "MM": 0.23919029850774098,
+   "MY": 0.8611857705513573,
+   "PH": 0.1301176222174263,
+   "SG": 2.7703727500449427,
+   "TH": 1.9864495851934663,
+   "TL": 0.02631195383310503,
+   "VN": 1.7591877177881698,
+   "ASEAN": 3.2973206993661806
+  },
+  "owen_dual_form_benefit_bn": {
+   "BN": 0.18370131842149795,
+   "ID": -0.7123243942870483,
+   "KH": 0.36621003945255565,
+   "LA": -0.10824479515818179,
+   "MM": 0.29804723853351833,
+   "MY": 0.86965456971315,
+   "PH": 0.13011763623601913,
+   "SG": 2.770372759872927,
+   "TH": 4.073051874602119,
+   "TL": 0.026311953296847046,
+   "VN": 1.3689070656284408,
+   "BUNKER": 3.2973206993680724
+  }
+ },
+ "pairs": {
+  "A": [
+   "F1",
+   "F2"
+  ],
+  "B": [
+   "F3",
+   "F4"
+  ]
+ },
+ "B6_pairs": {
+  "A": {
+   "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+   "passed": true,
+   "objective": {
+    "integrated": 329705565613.54376,
+    "no_new_xb": 342268691264.84283
+   },
+   "difference": 12563125651.299072,
+   "relative": 0.03810407515542103,
+   "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+   "b6_bn": 12.563125651299073,
+   "runs": {
+    "integrated": "F1",
+    "disconnected": "F2"
+   },
+   "labels": {
+    "F1": "ACCEPTED_LAYER2",
+    "F2": "ACCEPTED_LAYER2"
+   },
+   "usable": true,
+   "ledger_total_difference_bn": {
+    "BN": 0.183701322398821,
+    "ID": -0.703855685915329,
+    "KH": 0.6536667526690502,
+    "LA": 1.3594768646351638,
+    "MM": 0.23919029850774098,
+    "MY": 0.8611857705513573,
+    "PH": 0.1301176222174263,
+    "SG": 2.7703727500449427,
+    "TH": 1.9864495851934663,
+    "TL": 0.02631195383310503,
+    "VN": 1.7591877177881698,
+    "ASEAN": 3.2973206993661806
+   },
+   "owen_dual_form_benefit_bn": {
+    "BN": 0.18370131842149795,
+    "ID": -0.7123243942870483,
+    "KH": 0.36621003945255565,
+    "LA": -0.10824479515818179,
+    "MM": 0.29804723853351833,
+    "MY": 0.86965456971315,
+    "PH": 0.13011763623601913,
+    "SG": 2.770372759872927,
+    "TH": 4.073051874602119,
+    "TL": 0.026311953296847046,
+    "VN": 1.3689070656284408,
+    "BUNKER": 3.2973206993680724
+   }
+  },
+  "B": null
+ },
+ "benefit_pairs": {
+  "A": {
+   "computable": true,
+   "b6_bn": 12.563125651299073,
+   "negative_benefit": [
+    "ID",
+    "LA"
+   ],
+   "reason": null
+  },
+  "B": null
+ },
+ "pair_comparison": null,
+ "benefit": {
+  "computable": true,
+  "b6_bn": 12.563125651299073,
+  "negative_benefit": [
+   "ID",
+   "LA"
+  ],
+  "reason": null
+ },
+ "batch3_comparison": null,
+ "reference_comparison": {
+  "reference_file": "/home/jin/v3fix/drill_pkg_13ebce95/REFERENCE_VALUES.json",
+  "source": "V3 HPC make_reference_values_v3.py: committed v3 results - values only",
+  "b6_2920x3h_bn": 12.563125651299073,
+  "objective_2920x3h_eur": {
+   "F1": 329705565613.54376,
+   "F2": 342268691264.84283
+  },
+  "owen_dual_form_alpha_main_bn": {
+   "F1": {
+    "BN": 0.4378476604289669,
+    "ID": 90.09158539007036,
+    "KH": 4.114731626195135,
+    "LA": 0.38219233101865224,
+    "MM": 2.9834994455486292,
+    "MY": 24.86487797486924,
+    "PH": 17.277708408449524,
+    "SG": 10.041267598602039,
+    "TH": 42.9066609390693,
+    "TL": 0.3514390873637385,
+    "VN": 60.178984859047375,
+    "BUNKER": 76.07476497323466
+   },
+   "F2": {
+    "BN": 0.6215489788504648,
+    "ID": 89.37926099578331,
+    "KH": 4.48094166564769,
+    "LA": 0.2739475358604705,
+    "MM": 3.2815466840821474,
+    "MY": 25.73453254458239,
+    "PH": 17.407826044685542,
+    "SG": 12.811640358474966,
+    "TH": 46.97971281367142,
+    "TL": 0.37775104066058557,
+    "VN": 61.54789192467582,
+    "BUNKER": 79.37208567260274
+   }
+  },
+  "pairs": {
+   "v3_365x24h_dmax": {
+    "label": "v3 365\u00d724h \u91cd\u8dd1\uff08\u7b2c 182 \u9879\u540e\uff0cS-B\uff1b\u4e3b\u53c2\u7167\uff0c\u53ea\u7528\u4e8e B6 \u7b26\u53f7\u4e0e\u7a0b\u5e8f\u5bf9\u7167\uff0c\u7b2c 176 \u9879\u7b2c 7 \u6761\uff09",
+    "runs": {
+     "integrated": "V1",
+     "disconnected": "V2"
+    },
+    "b6_bn": 14.57384703771466,
+    "objective_eur": {
+     "integrated": 266272775892.55725,
+     "disconnected": 280846622930.2719
+    },
+    "objective_difference_bn": {
+     "F1_minus_V1": 63.43278972098651,
+     "F2_minus_V2": 61.42206833457092
+    },
+    "delta_b6_bn": -2.0107213864155877,
+    "owen_benefit_difference_bn": {
+     "BN": 0.11776686260520577,
+     "ID": -1.2990675627186126,
+     "KH": 0.17273727111344386,
+     "LA": -0.8836547359656581,
+     "MM": 0.05335297072619891,
+     "MY": -2.306249972817539,
+     "PH": 0.06848816963171768,
+     "SG": -1.149373686179798,
+     "TH": 3.0595521647448995,
+     "TL": -0.12535372278434392,
+     "VN": -3.132793743556488,
+     "BUNKER": 3.413873490209625
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_V1": {
+      "BN": 0.040190894656119046,
+      "ID": 17.756678634574936,
+      "KH": 0.8058011689398117,
+      "LA": 0.27592985534014824,
+      "MM": 1.3815078713546536,
+      "MY": 4.0259238677159885,
+      "PH": 2.776548850663931,
+      "SG": 1.1953826709371815,
+      "TH": 10.221086513558888,
+      "TL": 0.37349994134776765,
+      "VN": 15.103232082375305,
+      "BUNKER": 9.47700507982389
+     },
+     "F2_minus_V2": {
+      "BN": 0.15795775726132483,
+      "ID": 16.457611071856324,
+      "KH": 0.9785384400532555,
+      "LA": -0.60772488062551,
+      "MM": 1.4348608420808524,
+      "MY": 1.719673894898449,
+      "PH": 2.8450370202956488,
+      "SG": 0.046008984757383346,
+      "TH": 13.280638678303788,
+      "TL": 0.2481462185634237,
+      "VN": 11.970438338818818,
+      "BUNKER": 12.890878570033516
+     }
+    }
+   },
+   "v3_365x24h_first": {
+    "label": "v3 365\u00d724h \u7b2c\u4e00\u6b21\u7b5b\u67e5\uff08\u7b2c 182 \u9879\u524d\uff0cS-B\uff1b\u5e76\u5217\uff09",
+    "runs": {
+     "integrated": "V1",
+     "disconnected": "V2"
+    },
+    "b6_bn": 14.348076535372009,
+    "objective_eur": {
+     "integrated": 263596633674.85114,
+     "disconnected": 277944710210.22314
+    },
+    "objective_difference_bn": {
+     "F1_minus_V1": 66.10893193869262,
+     "F2_minus_V2": 64.3239810546197
+    },
+    "delta_b6_bn": -1.784950884072936,
+    "owen_benefit_difference_bn": {
+     "BN": 0.12095909180434447,
+     "ID": -1.2711093761776429,
+     "KH": 0.16911079379298974,
+     "LA": -0.8891208792729499,
+     "MM": 0.09757177165519738,
+     "MY": -2.269680863539047,
+     "PH": 0.07220271681936645,
+     "SG": -1.0743021410421905,
+     "TH": 2.976227100040596,
+     "TL": -0.11110908350745063,
+     "VN": -3.113007327769562,
+     "BUNKER": 3.5072930106425093
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_V1": {
+      "BN": 0.04371438485299641,
+      "ID": 18.33061447108914,
+      "KH": 0.9051568772521096,
+      "LA": 0.283192550921759,
+      "MM": 1.3503232570133799,
+      "MY": 4.0468197228955844,
+      "PH": 3.06323699132337,
+      "SG": 1.1234652815499877,
+      "TH": 10.997091831267662,
+      "TL": 0.37113763998364946,
+      "VN": 16.11089402069513,
+      "BUNKER": 9.483297685159965
+     },
+     "F2_minus_V2": {
+      "BN": 0.1646734766573409,
+      "ID": 17.0595050949115,
+      "KH": 1.0742676710450993,
+      "LA": -0.605928328351191,
+      "MM": 1.4478950286685772,
+      "MY": 1.777138859356537,
+      "PH": 3.1354397081427363,
+      "SG": 0.04916314050779724,
+      "TH": 13.973318931308258,
+      "TL": 0.26002855647619877,
+      "VN": 12.997886692925567,
+      "BUNKER": 12.990590695802474
+     }
+    }
+   },
+   "v3_smoke56_sa": {
+    "label": "v3 \u672c\u673a 56 \u65f6\u6bb5\u5192\u70df\uff08S-A\uff0c\u672c\u5305\u7f51\u7edc\u7684\u622a\u77ed\uff09",
+    "runs": {
+     "integrated": "F1-56",
+     "disconnected": "F2-56"
+    },
+    "b6_bn": 12.563125042220765,
+    "objective_eur": {
+     "integrated": 329705566422.23596,
+     "disconnected": 342268691464.4567
+    },
+    "objective_difference_bn": {
+     "F1_minus_F1-56": -8.086921997070313e-07,
+     "F2_minus_F2-56": -1.996138916015625e-07
+    },
+    "delta_b6_bn": 6.090783077894457e-07,
+    "owen_benefit_difference_bn": {
+     "BN": -4.413082683086395e-08,
+     "ID": 1.3933817031860352e-05,
+     "KH": -7.90392650938034e-06,
+     "LA": 2.8808393013477326e-06,
+     "MM": 3.1187359981536863e-06,
+     "MY": 7.163775672912598e-07,
+     "PH": -9.43386646270752e-07,
+     "SG": -1.0875572681427002e-06,
+     "TH": 9.561825378417968e-06,
+     "TL": -1.9314741909503938e-08,
+     "VN": -7.993863716125488e-06,
+     "BUNKER": -1.7756786590576173e-05
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_F1-56": {
+      "BN": 4.0954535841941835e-08,
+      "ID": -1.423180564880371e-05,
+      "KH": 7.929470880031586e-06,
+      "LA": -3.095242703855038e-06,
+      "MM": -2.935443476200104e-06,
+      "MY": -1.5145227088928223e-06,
+      "PH": 9.667313117980958e-07,
+      "SG": 1.0752567481994628e-06,
+      "TH": -9.715824012756348e-06,
+      "TL": 2.2386261105537413e-08,
+      "VN": 8.004842422485352e-06,
+      "BUNKER": 1.3163157806396484e-05
+     },
+     "F2_minus_F2-56": {
+      "BN": -3.1762909889221192e-09,
+      "ID": -2.979886169433594e-07,
+      "KH": 2.554437065124512e-08,
+      "LA": -2.1440340250730515e-07,
+      "MM": 1.8329252195358277e-07,
+      "MY": -7.981451416015625e-07,
+      "PH": 2.334466552734375e-08,
+      "SG": -1.2300519943237304e-08,
+      "TH": -1.539986343383789e-07,
+      "TL": 3.0715191960334778e-09,
+      "VN": 1.0978706359863282e-08,
+      "BUNKER": -4.593628784179688e-06
+     }
+    }
+   },
+   "v3_smoke56_sb": {
+    "label": "v3 \u8865\u5145 05 \u5192\u70df\uff08S-B\uff0c\u7b2c 180 \u9879\u7f51\u7edc\u7684\u622a\u77ed\uff09",
+    "runs": {
+     "integrated": "S5-I",
+     "disconnected": "S5-R"
+    },
+    "b6_bn": 12.566540445301452,
+    "objective_eur": {
+     "integrated": 329199840179.0184,
+     "disconnected": 341766380624.3198
+    },
+    "objective_difference_bn": {
+     "F1_minus_S5-I": 0.5057254345253906,
+     "F2_minus_S5-R": 0.5023106405230102
+    },
+    "delta_b6_bn": -0.003414794002379651,
+    "owen_benefit_difference_bn": {
+     "BN": 0.0004934825575679541,
+     "ID": 0.11949531602119445,
+     "KH": -0.0011216973057284355,
+     "LA": -0.007156174308192849,
+     "MM": 0.002641768950884819,
+     "MY": 0.023113309111537934,
+     "PH": -0.04269137233687973,
+     "SG": 0.0016186834438095092,
+     "TH": 0.007263756116661072,
+     "TL": 3.5100019599795344e-05,
+     "VN": 0.003106171889968872,
+     "BUNKER": -0.11021944139613342
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_S5-I": {
+      "BN": -0.0004892061014164686,
+      "ID": 0.029054477282318115,
+      "KH": 0.001650044757478237,
+      "LA": 0.0022118181701180936,
+      "MM": -0.01034745155241728,
+      "MY": -0.000800916830493927,
+      "PH": 0.026522331237171175,
+      "SG": 0.0005146105225906372,
+      "TH": -0.005204820504753113,
+      "TL": -3.510018718075752e-05,
+      "VN": -0.0012534433793258666,
+      "BUNKER": 0.463904220065155
+     },
+     "F2_minus_S5-R": {
+      "BN": 4.276456151485443e-06,
+      "ID": 0.14854979330351256,
+      "KH": 0.0005283474517498016,
+      "LA": -0.004944356138074756,
+      "MM": -0.007705682601532459,
+      "MY": 0.022312392281044008,
+      "PH": -0.016169041099708556,
+      "SG": 0.0021332939664001466,
+      "TH": 0.002058935611907959,
+      "TL": -1.6758096218109132e-10,
+      "VN": 0.0018527285106430054,
+      "BUNKER": 0.3536847786690216
+     }
+    }
+   }
+  },
+  "note": "description only: resolution (2920x3h vs 365x24h) and demand version (v2 vs v1) effects; no judgement, no threshold"
+ },
+ "p1": null,
+ "projection": {
+  "F1": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 517.0,
+   "seconds_per_iteration_11_20": 1.3
+  },
+  "F2": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 336.0,
+   "seconds_per_iteration_11_20": 1.1
+  },
+  "F3": null,
+  "F4": null
+ },
+ "stop_not_accepted": [],
+ "stop_safe": null,
+ "postproc_errors": [],
+ "solver_runs": 0,
+ "written_utc": "2026-11-05T11:49:29Z"
+}

@@ -1,0 +1,12 @@
+V3.1 fix (decision 195): bunker net-zero per metering flow, premise checks, downstream shape adaptations, static zero-slack check
+
+- s4c_layers.install_bunker_net_zero: Link-p of every metering link on 'co2 bunkers ASEAN' == 0 in every snapshot (row name research_bunker_co2_limit unchanged) instead of the zero-slack row 'final account level <= 0' (V3_DIAG_REPORT.md section 9, option 1).
+- s4c_layers.validate_bunker_account / bunker_account_premises: the equivalence premises raise when they fail (emission ports with coefficient > 0 incl. time-varying, no removal port, metering p_min_pu >= 0 incl. time-varying, e_initial 0, not cyclic, no standing loss, positive stores / objective weights).
+- Shape adaptations: m12_rhs_audit keeps the BUNKER owner for every row; s4o_c1_precision.country_lookup and l23_violation_analysis.country_of keep the name rule of the former single row; s4b_acceptance comment.
+- Price tables (s4d_ledger.nodal_prices, v5_gates.nodal_prices): the 'co2 bunkers ASEAN' row kept with NaN values and a note (the bus dual is no longer the bunker CO2 shadow price; no substitute constructed).
+- scripts_project/zero_slack_check.py: static zero-slack check of the hook rows (no solver), refuses zero-slack forcing rows unless written per variable.
+- tests/research/test_v31_bunker_fix.py: per-variable rows, premise refusals, zero-slack check on toy networks, downstream adaptations (no solver).
+
+No network, cost, solver profile, limit, acceptance threshold or prediction changed. No solve, no Gurobi.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

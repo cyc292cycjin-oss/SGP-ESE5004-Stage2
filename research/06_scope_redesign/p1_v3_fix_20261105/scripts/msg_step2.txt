@@ -1,0 +1,12 @@
+V3.1 package prep (decision 195): run folders from the definition, v3.1 definition, packaging with the zero-slack gate
+
+- b4_batch4.py: RUN_DIRS (defaults runs/batch4, runs/smoke56, runs/build_only_f1; a definition may name others, validated runs/<name>, distinct); hpc-plan line RUNDIRS.
+- hpc_package_src: hpr_job.sh, hpr_submit.sh and hpr_status.sh read the run folders from pbs/HPC_PLAN.txt (RUNDIRS); without the line the v2 / v3 folders as before. hpr_consistency.py: run-folder rows when the definition carries run_dirs.
+- batch_def/BATCH_DEF_2920x3h_v31hpc.json: the v3 definition (asserted key by key) + run_dirs runs/batch5 / runs/smoke56_v31, new name and note.
+- hpc_v31/make_hpc_package_v31.sh: networks from the v3 package (checked against its SHA256SUMS and the definition), static zero-slack check as a package gate (ZERO_SLACK_CHECK.json, no package unless passed), plan section 15 required (V31_DRILL=1: drill package outside work/, marked not for upload).
+- RUN_PLAN_HPC_V3.md: v3.1 header note and paths (runs/batch5, runs/smoke56_v31, /hpctmp/<user>/hpr31/); section 15 follows after the local verification.
+- tests/research/test_v31_hpc_package.py: definition, RUNDIRS and refusals, consistency rows, submit / status / job body with the v3.1 folders (stand-ins, no solver).
+
+Limits, walltimes, resources, acceptance and predictions unchanged. No solve.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

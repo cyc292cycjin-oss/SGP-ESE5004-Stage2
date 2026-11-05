@@ -1,0 +1,49 @@
+DRY:start:2026-11-05T11:55:58Z:package=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3_1:commit=d3b9a3bca18755b50397f31d4b61abe39fb50c3f:shell=GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)
+PREFLIGHT:exit=0:PREFLIGHT OK
+all 47 files OK
+== limits of the package definition: TimeLimit 864000 s, status REGISTERED (PROPOSED = formal jobs refuse until registered)
+all_equal
+== environment vs env/ENV_LOCK.txt
+{"key_all_equal": true, "key": {}, "counts": [284, 284], "only_lock": [], "only_instance": [], "n_version_differences": 0}
+formal_barrier_1e6_t16 {'Method': 2, 'Crossover': 0, 'BarConvTol': 1e-06, 'BarHomogeneous': 1, 'Threads': 16, 'Seed': 123, 'AggFill': 0, 'PreDual': 0, 'GURO_PAR_BARDENSETHRESH': 200} | interior-point gate path: True | Threads 16 | TimeLimit 864000.0 OK
+PREFLIGHT OK
+BUILD_ONLY_ALL:exit=0:140s
+BASE_CHECK:all_equal:registered_values_not_enforced (ALLOW_UNREGISTERED=1)
+BUILD_F1:exit=0:36s:peak=2.26GiB:lp_bytes=97761128:2026-11-05T11:56:37Z
+BUILD_CHECK_F1:{"passed": true, "failed": [], "lp": {"num_row": 1607971, "num_col": 729156, "nnz": 3720313, "build_seconds": 21.57383418083191}, "receipt_state": "split_built", "peak_rss_gib": 2.14}
+BUILD_F2:exit=0:35s:peak=2.01GiB:lp_bytes=94408695:2026-11-05T11:57:12Z
+BUILD_CHECK_F2:{"passed": true, "failed": [], "lp": {"num_row": 1560389, "num_col": 707802, "nnz": 3570079, "build_seconds": 21.59788942337036}, "receipt_state": "split_built", "peak_rss_gib": 1.78}
+BUILD_F3:exit=0:37s:peak=2.26GiB:lp_bytes=97761349:2026-11-05T11:57:49Z
+BUILD_CHECK_F3:{"passed": true, "failed": [], "lp": {"num_row": 1607971, "num_col": 729156, "nnz": 3720313, "build_seconds": 23.0003023147583}, "receipt_state": "split_built", "peak_rss_gib": 2.1}
+BUILD_F4:exit=0:31s:peak=1.99GiB:lp_bytes=94408916:2026-11-05T11:58:20Z
+BUILD_CHECK_F4:{"passed": true, "failed": [], "lp": {"num_row": 1560389, "num_col": 707802, "nnz": 3570079, "build_seconds": 19.542203426361084}, "receipt_state": "split_built", "peak_rss_gib": 1.72}
+DONE:2026-11-05T11:58:21Z:unusable=none
+LP:F1:rows=1607971:cols=729156:nnz=3720313:bunker_row_in_hooks=True
+LP:F2:rows=1560389:cols=707802:nnz=3570079:bunker_row_in_hooks=True
+LP:F3:rows=1607971:cols=729156:nnz=3720313:bunker_row_in_hooks=True
+LP:F4:rows=1560389:cols=707802:nnz=3570079:bunker_row_in_hooks=True
+JOB_BODY_BUILD_ONLY_F3:exit=0:38s
+BUILD_ONLY:F3:jobid=local.dry:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:ncpus=16:mem_gb=10:cgroup=none:utc=2026-11-05T11:58:59Z
+RUNNER_EXIT:0
+PEAK_RSS_GIB:2.25 (GNU time of process 1; estimate: v2 B4P 72-92 GiB, V3 about 96 GiB - RUN_PLAN_HPC(_V3) section 9)
+LP_FILE_BYTES:97761349 (estimate: v2 5.1-5.4 GB, V3 about 5.5 GB)
+LP_ARRAYS_BYTES:127285968 (lp/ kept; purged by /hpctmp after 60 days)
+BUILD_SECONDS:22.9 WRITE_SECONDS:8.5 (process 1 total 38 s incl. preflight; runner timeout 5400 s)
+LP_ROWS_COLS_NNZ:1607971 729156 3720313
+SCRATCH_WRITE_MBPS:lp_write=11.5 dd_1GiB_fsync=1024 (MB/s, 1e6 B)
+BUILD_CHECK_F3:{"passed": true, "failed": [], "lp": {"num_row": 1607971, "num_col": 729156, "nnz": 3720313, "build_seconds": 22.917431354522705}, "receipt_state": "split_built", "peak_rss_gib": 2.14}
+LP_DELETED:/home/jin/v3fix/dry_20261105T115554Z/jobroot/runs/build_only_f1/F3/split/problem.lp
+DONE:utc=2026-11-05T11:58:59Z
+JOB_BODY_FORMAL_F1_WITH_HOOK_REFUSED:exit=2:REFUSED: test hook / dry-run switch / runner override set in the job environment: BUILD_ONLY (every value comes from the job script and this body):started=no:runs_created=
+JOB_BODY_FORMAL_F3_PREDECESSOR:exit=3:STOP_SAFE:PREDECESSOR_NOT_ENDED:F3:F1 (see /home/jin/v3fix/dry_20261105T115554Z/jobroot3/runs/batch5/STOP_SAFE):stop_safe=PREDECESSOR_NOT_ENDED:F3:F1 has no .ended and the batch was not halted (its job ended without a run end: refusal, prefli:started=no:preflight_run=0:runs_created=batch5 
+SUBMIT_DRY_RUN:exit=0:qsub_lines=5:notes=3:last=DRY_RUN_OK: nothing submitted (bash 5.3.9(1)-release; 5 jobs; 3 check(s) above would refuse a real submission):runs_dir=no
+DRY-RUN NOTE: --auth-file FILE (the user authorisation text) is required (step D1 writes HPR_AUTH.txt) - a real submission would be refused
+DRY-RUN NOTE: the smoke job has not passed (/home/jin/v3fix/dry_20261105T115554Z/pkg/runs/smoke56_v31/SMOKE_STATUS.txt: SMOKE_RESULT:PASS missing) - step D first - a real submission would be refused
+DRY-RUN NOTE: qsub not found (login node?) - a real submission would be refused
+DRY-RUN: qsub pbs/hpr3_f1.pbs
+DRY-RUN: qsub -W depend=after:F1_JOBID pbs/hpr3_f2.pbs
+DRY-RUN: qsub -W depend=afterany:F1_JOBID pbs/hpr3_f3.pbs
+DRY-RUN: qsub -W depend=afterany:F2_JOBID pbs/hpr3_f4.pbs
+DRY-RUN: qsub -W depend=afterany:F3_JOBID:F4_JOBID pbs/hpr3_batch.pbs
+STATUS_DEFAULT_FOLDER:exit=0:runs runs/batch5
+DRY:end:2026-11-05T11:58:59Z:disk=1.5G

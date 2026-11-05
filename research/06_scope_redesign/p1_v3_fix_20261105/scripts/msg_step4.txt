@@ -1,0 +1,8 @@
+V3.1 plan section 15 and operator guide v3.1 (decision 195), before any v3.1 HPC solve
+
+- RUN_PLAN_HPC_V3.md section 15: root cause, changed files and commits (ae849e1e, 64aea2e3, 13ebce95), the equivalence premises measured on F1-F4, the static zero-slack check (all four passed), the local verification (failure windows F1_M01 / F2_M02 presolve now passes; 56x3h regression through the v3.1 smoke job body: SMOKE_RESULT:PASS, objectives within 2.5e-9, Owen signs unchanged, max Owen difference 17,757 EUR, max ledger difference 14,288 EUR, B6 +609 EUR), iterations / work units +20-41 % noted; TimeLimit, walltime, resources, early projection, build timeout, acceptance and predictions unchanged. Section 8: local results folder hpc_results_v31.
+- HPC_OPERATOR_GUIDE_V3.md rewritten for v3.1: upload to /hpctmp/$USER/hpr31/ (one scp stream, sha256sum -c), the v3 folder hpr3/ untouched, login-node bash version and no leftover v3 jobs, two no-submit drills, login preflight reusing the installed environment, the HPC smoke must pass before the formal batch, submit / queue / cancel commands, results to hpc_results_v31 and the 60-day purge; no angle-bracket placeholders in commands.
+
+This commit is the code commit of the v3.1 package (work/p1_v3_20261102/hpc_package_v3_1). No solve on the HPC, no upload.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
