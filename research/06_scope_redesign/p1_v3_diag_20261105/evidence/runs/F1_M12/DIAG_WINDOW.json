@@ -1,0 +1,72 @@
+{
+ "script": "work/p1_v3_diag_20261105/scripts/diag_build.py",
+ "mode": "build",
+ "window_start": 2672,
+ "window_len": 248,
+ "weighting": "runner TRUNCATE (set_representative_weights, 8760/len)",
+ "window_end_excl": 2920,
+ "first_snapshot": "2013-12-01 00:00:00",
+ "last_snapshot": "2013-12-31 21:00:00",
+ "full_snapshots": 2920,
+ "window_applied": true,
+ "weights_before_main": {
+  "objective": 744.0,
+  "generators": 744.0,
+  "stores": 744.0
+ },
+ "s2_solve_args": [
+  "--repo",
+  "/home/jin/wt_v3_diag",
+  "--network",
+  "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3/networks/integrated_2920_3h_unsolved.nc",
+  "--scenario",
+  "integrated",
+  "--output",
+  "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v3diag/F1_M12",
+  "--label",
+  "SMOKE_TEST_ONLY",
+  "--authorization",
+  "V3 DIAG decision 194 F1_M12 F1 window [2672,2920) presolve only",
+  "--solver",
+  "gurobi",
+  "--solver-profile",
+  "formal_barrier_1e6_t16",
+  "--scaling",
+  "on",
+  "--time-limit",
+  "864000",
+  "--costs-table",
+  "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3/networks/integrated_costs_active_research.csv",
+  "--truncate",
+  "248",
+  "--split-stage",
+  "build"
+ ],
+ "s2_solve_rc": 0,
+ "build_wall_s": 94.6,
+ "weights_after_main": {
+  "objective": {
+   "per_snapshot_min": 35.32258064516129,
+   "per_snapshot_max": 35.32258064516129,
+   "sum": 8760.0
+  },
+  "generators": {
+   "per_snapshot_min": 35.32258064516129,
+   "per_snapshot_max": 35.32258064516129,
+   "sum": 8760.0
+  },
+  "stores": {
+   "per_snapshot_min": 35.32258064516129,
+   "per_snapshot_max": 35.32258064516129,
+   "sum": 8760.0
+  }
+ },
+ "representative_weights_meta": {
+  "snapshots": 248,
+  "weight_hours_per_snapshot": 35.32258064516129,
+  "sum_hours": 8760.0,
+  "annual_caps_scaled": false,
+  "decision": "58",
+  "reference": "PyPSA-Eur v2025.07.0 scripts/prepare_network.py (average_every_nhours: snapshot_weightings = n.snapshot_weightings.resample(offset).sum(); segmentation: weightings sum 8760)"
+ }
+}
