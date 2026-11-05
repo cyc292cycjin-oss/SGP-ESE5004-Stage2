@@ -119,7 +119,7 @@
 ## 8. 结果回收
 
 - **每个运行结束后**（`hpc/hpr_status.sh` 显示 `ended`）：用户下载该运行的导出 `runs/batch5/export/<编号>/`（v3.1；单路一个 `tar` 打包 + `sha256sum`，见操作指南第 6 节），不必等批级作业。
-- 批级作业结束后：`runs/batch5/results_light_final_*.tar.gz`、`results_full_final_*.tar.gz` 与各自的 `.sha256`（停批时 `*_halted_*`）。用户尽快下载到 `D:\ResearchWorkspaces\ASEAN\work\p1_v3_20261102\hpc_results\`，**单路**，本机核对 SHA256（PowerShell `Get-FileHash`）。
+- 批级作业结束后：`runs/batch5/results_light_final_*.tar.gz`、`results_full_final_*.tar.gz` 与各自的 `.sha256`（停批时 `*_halted_*`）。用户尽快下载到 `D:\ResearchWorkspaces\ASEAN\work\p1_v3_20261102\hpc_results_v31\`（v3.1 的新目录），**单路**，本机核对 SHA256（PowerShell `Get-FileHash`）。
 - LP / 解数组（约 4 × 7.8 GB）留在 `/hpctmp`（`ARRAYS_MANIFEST.json` 登记 SHA256），60 天未改动自动清除；需要时另行下载。
 
 ## 9. 测试作业（登记为测试，不属于正式运行）
@@ -242,3 +242,53 @@ F1、F3 300 GB，F2、F4 250 GB，均 48 核；批级 12 核 / 120 GB（与原�
 ### 14.7 登记的落实
 
 定义文件 `batch_def/BATCH_DEF_2920x3h_v3hpc.json`：`limits_status` `REGISTERED`，`time_limit_s` 864,000、`build_timeout_s` 5,400，walltime F1 / F2 / F3 / F4 = `260:00:00` / `262:00:00` / `260:00:00` / `262:00:00`，其余不变；包按此重新打出（`hpc_package_v3/`，旧包 `hpc_package_v3_superseded_1e7b503c/` 改名保留），一致性检查全部一致后出包。
+
+## 15. v3.1 修正（第 195 项，2026-11-05）
+
+**依据：** `work/p1_v3_fix_20261105/V3_FIX_INSTRUCTION.md` v1（SHA256 `f8ba88a29ff08aa6b11becf432809355d98f8a406f6e482debff482e5fdfa5aa`，与同目录登记文件一致），用户 2026-11-05 17:46 同意第 195 项路线（`work/p1_v3_diag_20261105/V3_DIAG_REPORT.md` 第 9 节方案 1）。本节在任何 v3.1 的 HPC 求解之前提交。报告：`work/p1_v3_fix_20261105/V3_REPORT_FIX.md`。
+
+**根因（一句话）：** 燃料舱净零约束原写成"只有排放端口的账户在末时段水平 ≤ 0"的一条零松弛行，它经整条 Store 链强制全部 82 个化石航煤计量流量为 0；Gurobi 默认预处理（代换聚合加对偶约简）在 2920×3h 的若干时段数与权重组合下据此判定 INF_OR_UNBD，v3 批次因此在预处理就停下。
+
+**改动（只换代码，网络不重建）：**
+
+| 项 | 内容 | 提交 |
+|---|---|---|
+| 约束写法 | `scripts_project/s4c_layers.py` `install_bunker_net_zero`：账户全部排放端口所在链路的 `Link-p` 逐时段 = 0，约束名 `research_bunker_co2_limit` 不变；`validate_bunker_account` / `bunker_account_premises` 对等价性前提逐项断言（端口系数 > 0 含时变、无移除端口、计量 `p_min_pu ≥ 0` 含时变、账户初值 0、非循环、无存储损耗、全部时段 stores 与 objective 权重 > 0），任一不满足即报错 | `ae849e1e` |
+| 下游形状适配 | `m12_rhs_audit.py` 行所有者仍为 BUNKER；`s4o_c1_precision.py`、`l23_violation_analysis.py` 的分国归属保持原标量行的名称规则；`s4d_ledger.nodal_prices`（`NODAL_PRICES.csv`）与 `v5_gates.nodal_prices`（`nodal_prices_summary.csv`）中 `co2 bunkers ASEAN` 行置 NaN 并加 `note`：该母线价格原为燃料舱 CO₂ 影子价格，新写法下恒为 0、不是价格，不构造替代量。Owen 分摊的任何参与者数值都不依赖原标量对偶（只依赖右端项 0） | `ae849e1e` |
+| 建包闸门 | `scripts_project/zero_slack_check.py`（不调用求解器），接入 `hpc_v31/make_hpc_package_v31.sh`：不通过就不出包；包内 `ZERO_SLACK_CHECK.json` | `ae849e1e`、`64aea2e3` |
+| 运行目录 | 定义文件 `batch_def/BATCH_DEF_2920x3h_v31hpc.json` 的 `run_dirs` → `b4_batch4.py` → `pbs/HPC_PLAN.txt` 的 `RUNDIRS` 行，作业体、提交与状态脚本都读这一行：正式 `runs/batch5`，冒烟 `runs/smoke56_v31`；包目录 `/hpctmp/<用户>/hpr31/` | `64aea2e3` |
+| 测试 | 新测试 22 项；DFX F0.3 规则豁免新文件 `zero_slack_check.py` | `ae849e1e`、`64aea2e3`、`13ebce95` |
+
+### 15.1 等价性与前提（EXACT 的逻辑 + VERIFIED 的实测）
+
+账户母线上只有 82 个排放端口和账户 Store；端口系数 0.2571 t/MWh > 0、计量流量 ≥ 0、账户初值 0、非循环、无损耗、权重 > 0 ⇒ 末时段水平 = Σ 权重 × 非负流入，所以"末时段水平 ≤ 0" ⇔ "每个时段每条计量流量 = 0"。四个网络在全年 2920 时段上实测这些前提全部满足（82 个端口 / 82 条计量链路，系数全为 0.2571 且无时变，移除端口 0，`p_min_pu` 最小 0 且无时变，`e_initial` 0、非循环、无损耗，权重最小 3 h）。可行域与最优目标不变，B1_BUNKERS 照常满足。
+
+### 15.2 静态零松弛检查（VERIFIED；`ZERO_SLACK_CHECK.json`）
+
+F1–F4 全部通过，结果相同：11 行国家净零（末时段大气水平 ≤ 0）都有移除端口（DAC、生物质末端捕集等，每国 7–312 个）；7 行封存上限（BN、ID、KH、MY、PH、TH、VN）上限为正；封存上限为 0 的 LA、MM、SG、TL 没有封存账户，因而没有该行；19 行年度燃气产量上限为正；燃料舱为显式逐变量为零，恰好覆盖 82 条计量链路 × 全部时段；其余挂接（Store 方向、电池容量耦合、有损双向同步、新水电入流）不属于两种形式。没有零松弛强制行。
+
+### 15.3 本机验证（VERIFIED；Gurobi 4 / 6 次，串行）
+
+**失败窗口复核（第 1、2 次，只到预处理；诊断入口与保护参数同诊断）：** F1_M01 `[0,248)` 与 F2_M02 `[248,472)` 在修正后的代码上都出现 `Presolved:`（2,301,392 / 1,924,731 行），没有任何不可行判定（诊断时两者都是 INF_OR_UNBD）；之后 ordering 完成、barrier 分配内存碰到 7 GB 保护上限而停。LP 行与非零元恰好多 82 × 时段数 − 1（20,335 / 18,367），列数不变。
+
+**56×3h 回归（第 3、4 次）：** 在 v3.1 演练包上原样运行 HPC 冒烟作业体（`runs/smoke56_v31`；运行器 split 路径，`TRUNCATE=56`，`formal_barrier_1e6_t16`，F1 → F2 → 批级），`SMOKE_RESULT:PASS`。与修正前的本机冒烟（第 25 节，本节第 9 条的期望值）对比：
+
+| 项 | F1 | F2 |
+|---|---|---|
+| 终止 / 标签 / C1 abc | optimal / `ACCEPTED_LAYER2` / 111 | optimal / `ACCEPTED_LAYER2` / 111 |
+| 目标值 EUR（新 / 修正前） | 329,705,565,613.54 / 329,705,566,422.24 | 342,268,691,264.84 / 342,268,691,464.46 |
+| 相对差 | 2.45e-9 | 5.83e-10 |
+| barrier 迭代（新 / 修正前） | 96 / 80 | 81 / 66 |
+| barrier 用时 s（本机，新 / 修正前） | 182.95 / 190.53 | 132.52 / 111.24 |
+| barrier work units（新 / 修正前） | 268.8 / 225.5（+19 %） | 192.8 / 137.1（+41 %） |
+| LP 行（新 − 修正前） | +4,591 = 82 × 56 − 1 | +4,591 |
+| 各国台账 total 的最大差 | 14,288 EUR（ID） | 9,697 EUR（SG） |
+| 不通过的闸门 | 与修正前相同（A1_A2、A1_A2_S4B、A3、B1、B3、B8） | 与修正前相同（同左去掉 B3） |
+
+12 个参与者的 Owen 受益（α 0.5）符号全部不变，最大差 17,757 EUR（BUNKER），都远小于 max(0.1 %, 1 M EUR)；B6 = 12,563,125,651 EUR（修正前 12,563,125,042，差 609 EUR）。燃料舱账户末值与毛流量都为 0.0，B1_BUNKERS 通过；台账的燃料舱 CO₂ 结算列由几欧元变为 0。**须知（INFERENCE，不改登记值）：** 56 时段上 barrier 迭代增加 20–23 %、work units 增加 19–41 %（预处理更快：3.5 / 2.6 s 对 4.1 / 2.5 s）。两种写法的预处理结果不同（新写法里计量变量直接被固定并消去，原写法要经 Store 链聚合），内点路径随之不同；这类差异与线程数造成的路径差异同属一类，56 时段一次运行不足以外推到全年。全年运行若因此更慢，由第 5 节的早期测速止损处理（第 14.2 节：Atlas 上每次迭代超过约 1,850 s 时止损）；按指令，TimeLimit、walltime、参考迭代数与第 26 节预测都不改。
+
+### 15.4 不变项与 v3.1 包
+
+**全部不变：** TimeLimit 864,000 s、进程 2 墙钟 871,200 s、walltime（F1 / F2 / F3 / F4 = 260 / 262 / 260 / 262 h，批级 48 h，冒烟 4 h）、资源（F1、F3 300 GB，F2、F4 250 GB，48 核；批级 120 GB / 12 核）、早期测速（0.80 × TimeLimit，参考迭代 350 / 250 / 350 / 250）、进程 1 构建超时 5,400 s、验收（GATES_V6、C1 阈值）、第 26 节预测、冒烟期望值与作业名、依赖。全年 LP 每个运行比 v3 多 82 × 2920 − 1 = 239,439 行与同样多的非零元（约 +0.3 % 行），列数不变；对构建、内存与时限的影响可忽略（INFERENCE）。
+
+**v3.1 包：** `work/p1_v3_20261102/hpc_package_v3_1/`，由 `hpc_v31/make_hpc_package_v31.sh` 在本节所在的提交上打出（包内 `COMMIT`；本节不能写自己的提交号，提交号与 `SHA256SUMS` 的 SHA256 记在 `V3_REPORT_FIX.md` 与 `V3_HPC_PROGRESS.md` 的最后一行）。v3 包 `hpc_package_v3/` 原样保留。用户步骤见 `HPC_OPERATOR_GUIDE_V3.md`（v3.1）开头的清单：上传到新目录 `/hpctmp/<用户>/hpr31/`，HPC 冒烟必须 PASS 后才提交正式批次。
