@@ -13,4 +13,8 @@
 | I2-5 | W08 实施清单、验证计划、缺失数据汇总 | 完成：`W08_IMPLEMENTATION_SPEC.md`、`W08_VALIDATION_PLAN.md`、`i2_missing.py`（24 个主题） | 同上 |
 | I2-6 | 报告、证据、台账、审阅包、推送 | 报告 `REPORT.md`、`EVIDENCE.json`、台账条目（`LEDGER_ENTRY_DRAFT.md`，并写入台账）完成；审阅包与收尾见下一行 | 见 git log（I2-6） |
 
+| 收尾 | 审阅包 `REVIEW_2bf62ee4.zip`（73 个成员，892,484 B，SHA256 `c8105ab8955abccd984b4e60a845898e37931c6c246d78afab793ec7cbf63056`，testzip OK；zip 不入库，清单 `evidence/REVIEW_ZIP_MANIFEST_2bf62ee4.txt` 入库）；本进度最终行 | 完成 | 收尾提交 |
+
 续做点：若会话中断，按 `scripts/i2_base.py` → `i2_chain.py` → `i2_biomass.py`（S7 用的潜力文件）→ `i2_chain.py` → `i2_tables.py` → `i2_peaks.py` → `i2_sens.py` → `i2_missing.py` → `i2_repro.py` → `i2_evidence.py` 重跑（临时副本 `/home/jin/v4i2/`，输出覆盖写入本目录）。
+
+**最终状态（2026-11-06 SGT）：I2 全部完成，只读，求解器 0 次。提交：`063dbbc3`（I2-1 台账条目）、`14c7c8fd`（I2-2 基年、引擎、复现）、`cf783612`（I2-3/4/5 重算、表、曲线、敏感性、W08 文档）、`2bf62ee4`（I2-6 报告、证据、台账）、收尾提交（本行，见 `git log -1 codex/v4-i2-20261106`）；九个分支的合并提交见上表。推送到 `origin/codex/v4-i2-20261106`；不建 PR、不合并 main、不 force-push、未跳过 hooks。等待审阅端审阅（11 个待决问题见 `REPORT.md` 第 0.1 节）。**
