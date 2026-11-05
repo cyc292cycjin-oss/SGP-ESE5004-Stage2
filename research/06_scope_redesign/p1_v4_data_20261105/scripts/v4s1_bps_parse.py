@@ -160,11 +160,11 @@ def main():
                     rel = diff / pv if pv else (0.0 if s == 0 else np.inf)
                     checks.append(dict(table=tab, line=kind, parent=parent, parent_level=int(lev), children=len(kids), column=c, printed=pv,
                                        sum_children=s, children_not_published=star, diff=diff, rel_diff=rel,
-                                       status=("OK" if abs(rel) <= 0.005 else ("LOWER_BOUND_STAR" if star and diff < 0 else "DIFF_GT_0.5PCT"))))
+                                       status=(("LOWER_BOUND_STAR" if star else "OK") if abs(rel) <= 0.005 else ("LOWER_BOUND_STAR" if star and diff < 0 else "DIFF_GT_0.5PCT"))))
     R = pd.DataFrame(raw)
     R.to_csv(out / "ID_BPS_IBS_2019_RAW.csv", index=False)
     C = pd.DataFrame(checks)
-    C.to_csv(out / "ID_BPS_PARSE_CHECK.csv", index=False, float_format="%.6g")
+    C.to_csv(out / "ID_BPS_PARSE_CHECK.csv", index=False, float_format="%.12g")
     s = C.groupby(["table", "line", "status"]).size().unstack(fill_value=0)
     print(s.to_string())
     bad = C[C.status == "DIFF_GT_0.5PCT"]

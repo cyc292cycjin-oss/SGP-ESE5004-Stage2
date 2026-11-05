@@ -102,7 +102,7 @@ def main():
     for col in ("fuels_twh", "el_end_use_twh", "coal_kg", "gas_pgn_m3"):
         if abs(two[col].sum() - tot[col]) > 1e-6 * max(1.0, abs(tot[col])):
             raise ValueError(f"2-digit codes do not add up to the printed total: {col}")
-    K.to_csv(out / "ID_BPS_IBS_2019_BY_KBLI.csv", index=False, float_format="%.6g")
+    K.to_csv(out / "ID_BPS_IBS_2019_BY_KBLI.csv", index=False, float_format="%.12g")
 
     # ---- 4. comparison with UNSD and HEESI ---------------------------------------------------------------------------------
     dem = pd.read_csv(R / "demand_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", keep_default_na=False)
