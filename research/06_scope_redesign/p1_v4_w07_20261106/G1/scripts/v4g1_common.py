@@ -311,6 +311,7 @@ def node_of(df: pd.DataFrame, regions) -> tuple[pd.Series, pd.Series]:
     r = regions[regions.country == CC]
     j = gpd.sjoin(g, r[["node", "geometry"]], how="left", predicate="within"); j = j[~j.index.duplicated()]
     out = j.node.copy(); how = pd.Series("point in region", index=j.index)
+    rp, gp = r.to_crs(3857), g.to_crs(3857)   # metric distances for the nearest-region fallback
     for i in out[out.isna()].index:
-        out.at[i] = r.node.iloc[int(np.argmin(r.geometry.distance(g.geometry.at[i]).values))]; how.at[i] = "nearest node (point outside the onshore regions)"
+        out.at[i] = rp.node.iloc[int(np.argmin(rp.geometry.distance(gp.geometry.at[i]).values))]; how.at[i] = "nearest node (point outside the onshore regions)"
     return out, how
