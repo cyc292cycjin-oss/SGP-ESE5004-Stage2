@@ -1,0 +1,317 @@
+{
+ "script": "scripts/g5_profiles.py",
+ "inputs": {
+  "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_data_20261105/downloads/08_ffe_profiles/opendata.customization": "22969e8b65690203f827d9f0a67eae41c6594487a0a1d3e6e7880c7f1f8360f2",
+  "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_data_20261105/evidence/V3_DISPERSED_BY_UNSD_ROW.csv": "50bad064631bb3b36e064e3ca2bdfc51eb6ee53c790237bc68c961c480db76a1",
+  "/home/jin/wt_v4_g5/research_inputs/transport_v3/EV_NODE_TIMEZONE_V3.csv": "d01998416ba909ffa98283d6e9e3f72231870be6888fd766b1e92e44fb616b17",
+  "/home/jin/wt_v4_g5/research/06_scope_redesign/p1_v3_20261102/evidence/ID_NODE_TIMEZONE_PROPOSAL.csv": "69310fe7d47abb58b921bd345b4d2370fc418327d708455e455de6711d6d21a5",
+  "/home/jin/wt_v4_g5/research_inputs/industry_v3/ADM1_NODE_OVERLAP_V3.csv": "39c273af58205e7b54ff214f31ca4434e7a0a84d193f7fc7f914b63f19ed8d75",
+  "/home/jin/v3fix/dry_20261105T115859Z/pkg/networks/integrated_2920_3h_unsolved.nc": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef"
+ },
+ "ffe_tests": {
+  "day_alignment": {
+   "labelling_offset_best": 0,
+   "weekend_over_weekday_by_offset": {
+    "0": 0.4506534144597811,
+    "1": 0.7817507697644398,
+    "2": 1.2374162230205281,
+    "3": 1.3986371985539843,
+    "4": 1.38480321994784,
+    "5": 1.2633499108148754,
+    "6": 0.7343806914354136
+   },
+   "note": "offset 0 = file day 0 is 2017-01-01 (Sunday) as the metadata reference date says"
+  },
+  "holiday_days": {
+   "n": 11,
+   "threshold": "Mon-Fri daily mean < 0.85 x median of same weekday within +-28 days (curve 13)",
+   "matched_german_holidays": 11
+  },
+  "clock": {
+   "Non-metallic minerals": {
+    "best_lag_summer_to_winter_h": 1,
+    "corr": {
+     "-3": 0.14936541316469534,
+     "-2": 0.3719645704002982,
+     "-1": 0.6352478156837256,
+     "0": 0.8789137687235373,
+     "1": 0.9655390629394303,
+     "2": 0.8298552716609148,
+     "3": 0.5739606986436725
+    },
+    "ramp_hour_winter": 6.0,
+    "ramp_hour_summer": 5.0,
+    "max_abs_diff_win_summer": 0.19232346183361204
+   },
+   "Transport equipment": {
+    "best_lag_summer_to_winter_h": 0,
+    "corr": {
+     "-3": 0.6009062656030194,
+     "-2": 0.8003038237703386,
+     "-1": 0.9454566629246288,
+     "0": 0.9998075686766758,
+     "1": 0.9448336035327879,
+     "2": 0.8018045200764404,
+     "3": 0.606985113114196
+    },
+    "ramp_hour_winter": 5.0,
+    "ramp_hour_summer": 6.0,
+    "max_abs_diff_win_summer": 0.00678160946113171
+   },
+   "Mining and quarrying": {
+    "best_lag_summer_to_winter_h": 0,
+    "corr": {
+     "-3": 0.6140101395680811,
+     "-2": 0.7984623308272961,
+     "-1": 0.9420072637559906,
+     "0": 0.9998776342602671,
+     "1": 0.940966108626955,
+     "2": 0.7972197878070124,
+     "3": 0.61288983731885
+    },
+    "ramp_hour_winter": 6.0,
+    "ramp_hour_summer": 6.0,
+    "max_abs_diff_win_summer": 0.018501553727855502
+   },
+   "Food and tobacco": {
+    "best_lag_summer_to_winter_h": 0,
+    "corr": {
+     "-3": 0.6375546340876599,
+     "-2": 0.825060004550011,
+     "-1": 0.9542249925893124,
+     "0": 0.999700781656623,
+     "1": 0.9481624092932888,
+     "2": 0.8160711795891186,
+     "3": 0.6284136821460033
+    },
+    "ramp_hour_winter": 5.0,
+    "ramp_hour_summer": 5.0,
+    "max_abs_diff_win_summer": 0.005726583347160696
+   },
+   "Non-specified (industry)": {
+    "best_lag_summer_to_winter_h": 0,
+    "corr": {
+     "-3": 0.6051762451238613,
+     "-2": 0.7873596542017346,
+     "-1": 0.9340109610884474,
+     "0": 0.9987223194781429,
+     "1": 0.9126448104205479,
+     "2": 0.7559788406865359,
+     "3": 0.574176704350431
+    },
+    "ramp_hour_winter": 6.0,
+    "ramp_hour_summer": 6.0,
+    "max_abs_diff_win_summer": 0.02631309186160924
+   }
+  },
+  "clock_verdict": "mixed",
+  "clock_note": "lag 0: the workday cycle has the same index hours in winter and in summer -> the file is on the German local clock (CET/CEST) or the regression used local-clock hours; lag +1 would mean a fixed-offset clock (UTC or CET) with local-clock behaviour"
+ },
+ "ffe_interpretation": {
+  "main": "local",
+  "sensitivity": "utc"
+ },
+ "nrel": {
+  "hours_type": "mean",
+  "weighting": "equal weight over NAICS x employment-size shapes in a group (no energy weights on disk)",
+  "month_removal": "day-weighted mean of the 12 monthly typical weeks",
+  "dayofweek": "0 = Monday (VERIFIED: weekday_single schedules are lower on 5, 6)",
+  "shapes": 780,
+  "naics3_groups": 21
+ },
+ "mix_dispersed_weights": {
+  "alumina": 0.000124,
+  "aluminium_primary": 0.000104,
+  "aluminium_secondary": 1.6e-05,
+  "ammonia": 0.0,
+  "ceramics_nmm": 0.134854,
+  "chemicals_other": 0.063953,
+  "chlorine": 0.011636,
+  "ethylene": 0.070978,
+  "food": 0.298669,
+  "glass_lime": 0.044063,
+  "machinery": 0.088638,
+  "methanol": 0.003782,
+  "nonferrous_other": 0.000154,
+  "pharma": 0.023895,
+  "printing": 0.006523,
+  "pulp_paper": 0.077934,
+  "textiles": 0.135085,
+  "transport_equipment": 0.006891,
+  "wood": 0.032702
+ },
+ "mix_dispersed_note": "weights = v3 2050 dispersed energy (all carriers) by PyPSA-Eur sector, all ASEAN countries in V3_DISPERSED_BY_UNSD_ROW.csv; used for 'other'",
+ "profiles": {
+  "curves": 584,
+  "rows": 8760,
+  "max_abs_mean_minus_1": 6.661338147750939e-16,
+  "min_value": 0.13880784911734412,
+  "max_value": 2.435620200283464,
+  "index_rows": 3016,
+  "variants": [
+   "MAIN",
+   "S1_SOURCE",
+   "S2_OTHER_FLAT",
+   "S3_OTHER_FFE13",
+   "S4_FFE_CLOCK_UTC",
+   "S5_SAT_WORKDAY",
+   "S6_SHIFT_P1",
+   "S6_SHIFT_M1",
+   "S7_HOLIDAYS",
+   "S8_UPPER"
+  ]
+ },
+ "timezones": {
+  "nodes": 96,
+  "by_offset": {
+   "BN@8": 1,
+   "ID@7": 16,
+   "ID@8": 17,
+   "ID@9": 6,
+   "KH@7": 5,
+   "LA@7": 6,
+   "MM@6.5": 17,
+   "MY@8": 7,
+   "PH@8": 5,
+   "SG@8": 1,
+   "TH@7": 6,
+   "TL@9": 1,
+   "VN@7": 8
+  },
+  "checks_failed": 0,
+  "id_provinces_unmapped": [],
+  "id_nodes_multi_tz_area": 5,
+  "id_multi_tz_industry_elec_twh": 9.31580177631503,
+  "id_multi_tz_nodes": [
+   {
+    "node": "ID_Kalimantan4 10",
+    "utc_offset_h": 7.0,
+    "area_share_in_assigned_tz": 0.8719884434637378,
+    "area_shares_by_tz": "7:0.872;8:0.128",
+    "industry_electricity_2050_twh_v3": 0.32079116311298134
+   },
+   {
+    "node": "ID_Kalimantan4 11",
+    "utc_offset_h": 8.0,
+    "area_share_in_assigned_tz": 0.7438392803161504,
+    "area_shares_by_tz": "7:0.256;8:0.744",
+    "industry_electricity_2050_twh_v3": 2.0899061137003057
+   },
+   {
+    "node": "ID_Kalimantan4 4",
+    "utc_offset_h": 8.0,
+    "area_share_in_assigned_tz": 0.7390845618614542,
+    "area_shares_by_tz": "7:0.261;8:0.739",
+    "industry_electricity_2050_twh_v3": 4.195719611723353
+   },
+   {
+    "node": "ID_Nusa-Tenggara15 0",
+    "utc_offset_h": 8.0,
+    "area_share_in_assigned_tz": 0.8646105479190488,
+    "area_shares_by_tz": "8:0.865;9:0.135",
+    "industry_electricity_2050_twh_v3": 0.3204535285360793
+   },
+   {
+    "node": "ID_Sulawesi0 2",
+    "utc_offset_h": 8.0,
+    "area_share_in_assigned_tz": 0.9437824328062293,
+    "area_shares_by_tz": "8:0.944;9:0.056",
+    "industry_electricity_2050_twh_v3": 2.38893135924231
+   }
+  ]
+ },
+ "holidays_2013_design": {
+  "ID": [
+   "2013-01-01",
+   "2013-08-05",
+   "2013-08-06",
+   "2013-08-07",
+   "2013-08-08",
+   "2013-08-09",
+   "2013-08-12",
+   "2013-08-13",
+   "2013-12-25"
+  ],
+  "MY": [
+   "2013-01-01",
+   "2013-02-11",
+   "2013-02-12",
+   "2013-08-08",
+   "2013-08-09",
+   "2013-08-31",
+   "2013-12-25"
+  ],
+  "SG": [
+   "2013-01-01",
+   "2013-02-11",
+   "2013-02-12",
+   "2013-08-08",
+   "2013-08-09",
+   "2013-12-25"
+  ],
+  "TH": [
+   "2013-01-01",
+   "2013-04-15",
+   "2013-04-16",
+   "2013-04-12",
+   "2013-12-05",
+   "2013-12-31"
+  ],
+  "VN": [
+   "2013-01-01",
+   "2013-02-11",
+   "2013-02-12",
+   "2013-02-13",
+   "2013-02-14",
+   "2013-02-15",
+   "2013-04-19",
+   "2013-04-30",
+   "2013-05-01",
+   "2013-09-02"
+  ],
+  "PH": [
+   "2013-01-01",
+   "2013-03-28",
+   "2013-03-29",
+   "2013-12-24",
+   "2013-12-25",
+   "2013-12-30",
+   "2013-12-31"
+  ],
+  "MM": [
+   "2013-01-04",
+   "2013-04-15",
+   "2013-04-16",
+   "2013-04-17",
+   "2013-04-12"
+  ],
+  "KH": [
+   "2013-01-01",
+   "2013-04-15",
+   "2013-04-16",
+   "2013-10-03",
+   "2013-10-04",
+   "2013-11-18"
+  ],
+  "LA": [
+   "2013-01-01",
+   "2013-04-15",
+   "2013-04-16",
+   "2013-12-02"
+  ],
+  "BN": [
+   "2013-01-01",
+   "2013-08-08",
+   "2013-08-09",
+   "2013-08-10",
+   "2013-12-25"
+  ],
+  "TL": [
+   "2013-01-01",
+   "2013-03-28",
+   "2013-03-29",
+   "2013-11-28",
+   "2013-12-25"
+  ]
+ }
+}
