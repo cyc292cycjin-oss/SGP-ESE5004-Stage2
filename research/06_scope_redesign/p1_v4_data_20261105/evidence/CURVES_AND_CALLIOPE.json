@@ -1,0 +1,252 @@
+{
+ "ffe": {
+  "curves": 11,
+  "internal_ids": [
+   1,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13
+  ],
+  "missing_ids": {
+   "0": "Industry (total)",
+   "2": "Chemical and petrochemical",
+   "3": "Non-ferrous metals"
+  },
+  "identical_groups": [
+   [
+    1,
+    9
+   ],
+   [
+    4
+   ],
+   [
+    5,
+    6
+   ],
+   [
+    7
+   ],
+   [
+    8
+   ],
+   [
+    10,
+    11,
+    12,
+    13
+   ]
+  ],
+  "distinct_shapes": 6,
+  "normalisation": "each curve sums to 1 over 8760 hourly values (share of annual energy)",
+  "timestamps": "none in the file; 8760 values for reference year 2017 (2017-01-01 is a Sunday); time zone not stated"
+ },
+ "nrel": {
+  "parquet_partitions": 132,
+  "parquet_rows": 4789314,
+  "emp_sizes": [
+   "n1000",
+   "n100_249",
+   "n1_49",
+   "n250_499",
+   "n500_999",
+   "n50_99"
+  ],
+  "hours_types": [
+   "high",
+   "low",
+   "mean"
+  ],
+  "schedules": [
+   "continuous",
+   "saturday_double",
+   "saturday_single",
+   "sunday_double",
+   "sunday_single",
+   "weekday_double",
+   "weekday_single"
+  ],
+  "structure": "typical week per month: 12 months x 7 days x 24 h = 2016 steps per (NAICS, employment size, hours type); value = fraction of annual energy",
+  "csv": {
+   "process_heat": {
+    "rows": 2505888,
+    "naics": 273,
+    "emp_sizes": [
+     "ghgrp",
+     "n1000",
+     "n100_249",
+     "n1_49",
+     "n250_499",
+     "n500_999",
+     "n50_99"
+    ],
+    "rows_per_naics_size": 2016,
+    "weekly_op_hours_range": [
+     0.1825,
+     1.0
+    ]
+   },
+   "boiler": {
+    "rows": 2505888,
+    "naics": 273,
+    "emp_sizes": [
+     "ghgrp",
+     "n1000",
+     "n100_249",
+     "n1_49",
+     "n250_499",
+     "n500_999",
+     "n50_99"
+    ],
+    "rows_per_naics_size": 2016,
+    "weekly_op_hours_range": [
+     0.228125,
+     1.0
+    ]
+   }
+  },
+  "naics3_present": [
+   "311",
+   "312",
+   "313",
+   "314",
+   "315",
+   "316",
+   "321",
+   "322",
+   "323",
+   "324",
+   "325",
+   "326",
+   "327",
+   "331",
+   "332",
+   "333",
+   "334",
+   "335",
+   "336",
+   "337",
+   "339"
+  ]
+ },
+ "calliope": {
+  "path": "extracted/11_calliope_indonesia/calliope_indonesia_c8584f7b/calliope_indonesia",
+  "calliope_version": "0.6.8 (model.yaml)",
+  "locations": 34,
+  "techs_with_caps": {
+   "biomass": {
+    "energy_cap_max": 30050.799999999996
+   },
+   "geothermal": {
+    "energy_cap_max": 12204.699999999999
+   },
+   "large_hydro": {
+    "energy_cap_max": 75092.0,
+    "energy_cap_equals": 0.0
+   },
+   "otec": {
+    "energy_cap_max": 239088.0
+   },
+   "onshore_wind": {
+    "energy_cap_max": 17505.0
+   },
+   "small_hydro": {
+    "energy_cap_max": 68669.1
+   },
+   "solar_onshore": {
+    "energy_cap_max": 8968805.2
+   },
+   "solar_floating": {
+    "energy_cap_max": 48827764.0
+   },
+   "pumped_hydro": {
+    "energy_cap_max": 7915410.0
+   },
+   "offshore_wind": {
+    "energy_cap_max": 199897.2
+   }
+  },
+  "links": {
+   "links_with_interconnection.yaml": 40,
+   "links_without_interconnection.yaml": 31
+  },
+  "demand_files": {
+   "Demand_Profiles_2030_MAY_RUPTL.csv": {
+    "hours": 8760,
+    "provinces": 34,
+    "total_twh": 421.0150287000001,
+    "peak_gw": 59.9682,
+    "first": "2050/01/01 00:00:00",
+    "last": "2050/12/31 23:00:00"
+   },
+   "Demand_Profiles_2030_MAY_extreme.csv": {
+    "hours": 8760,
+    "provinces": 34,
+    "total_twh": 582.7500752000001,
+    "peak_gw": 83.00559999999999,
+    "first": "2050/01/01 00:00:00",
+    "last": "2050/12/31 23:00:00"
+   },
+   "Demand_Profiles_2040_MAY_RUPTL.csv": {
+    "hours": 8784,
+    "provinces": 34,
+    "total_twh": 688.2905473999999,
+    "peak_gw": 97.80630000000001,
+    "first": "2040/01/01 00:00:00",
+    "last": "2040/12/31 23:00:00"
+   },
+   "Demand_Profiles_2040_MAY_extreme.csv": {
+    "hours": 8784,
+    "provinces": 34,
+    "total_twh": 1296.5676950999998,
+    "peak_gw": 184.24269999999996,
+    "first": "2040/01/01 00:00:00",
+    "last": "2040/12/31 23:00:00"
+   },
+   "Demand_Profiles_2050_KAL.csv": {
+    "hours": 8760,
+    "provinces": 34,
+    "total_twh": 1141.3759965,
+    "peak_gw": 181.03779999999998,
+    "first": "2050/01/01 00:00:00",
+    "last": "2050/12/31 23:00:00"
+   },
+   "Demand_Profiles_2050_MAY_RUPTL.csv": {
+    "hours": 8760,
+    "provinces": 34,
+    "total_twh": 1141.3760216,
+    "peak_gw": 162.57480000000004,
+    "first": "2050/01/01 00:00:00",
+    "last": "2050/12/31 23:00:00"
+   },
+   "Demand_Profiles_2050_MAY_extreme.csv": {
+    "hours": 8760,
+    "provinces": 34,
+    "total_twh": 2871.1160075,
+    "peak_gw": 408.95449999999994,
+    "first": "2050/01/01 00:00:00",
+    "last": "2050/12/31 23:00:00"
+   }
+  },
+  "licence": "none in the repository; ask before citing",
+  "our_id_ac_node_electricity_loads_twh": {
+   "static": 300.87803189524453,
+   "time_series": 310.8959773877922,
+   "total": 611.7740092830368,
+   "by_carrier": {
+    "agriculture machinery electric": 2.993,
+    "electricity": 310.896,
+    "industry electricity": 297.885
+   },
+   "ac_nodes": 39,
+   "note": "F1 integrated 2920x3h network; fixed loads only (no electrolysis, heat pumps, DAC)"
+  }
+ }
+}
