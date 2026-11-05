@@ -10,6 +10,6 @@
 | I1-2 | RAS 与增长锚机制、跨国耦合、AEO8 基数、修正分类 | 完成（`RAS_MECHANISM.md`、`CORRECTION_CLASSIFICATION.csv`、`scripts/i1_aeo8.py`、`i1_classify.py`；链路变体 IIa–IId 在 `i1_chain.py`） | 见 git log（I1-2/3/4） |
 | I1-3 | HVC / 甲醇 2050 单耗 | 完成（`HVC_VECTOR_CHECK.csv`、`scripts/i1_hvc.py`，临时副本中运行 PyPSA-Eur 原函数，分量复现登记表） | 同上 |
 | I1-4 | ID / MM 家庭汽油 | 完成（`ID_GASOLINE_CHECK.csv`、`scripts/i1_gasoline.py`；2050 年量化来自链路情形 GASmove） | 同上 |
-| I1-5 | 报告、证据、审阅包 | 未开始 | — |
+| I1-5 | 报告、证据、审阅包 | 报告 `REPORT.md`、`EVIDENCE.json`、`LEDGER_ENTRY_DRAFT.md` 完成；审阅包与收尾提交见下一行 | 见 git log（I1-5） |
 
 续做点：若会话中断，从本表第一条"进行中"开始；`scripts/i1_*.py` 均可单独重跑（输出覆盖写入本目录）。
