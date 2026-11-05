@@ -1,0 +1,1043 @@
+{
+ "session": "V4 W07 G5",
+ "instruction_sha256": "20d03b692f1d32733f34b04d85c01fb3df1345f95f366a6bf25de36ac7ec7baf",
+ "solver_runs": 0,
+ "entries": [
+  {
+   "key": "network_sha256",
+   "value": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef",
+   "unit": "",
+   "source": "v3.1 F1 integrated_2920_3h_unsolved.nc (package copy)",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "same file as V3 HPC package F1"
+  },
+  {
+   "key": "snapshots",
+   "value": "2920 x 3 h, 2013-01-01 00:00:00 .. 2013-12-31 21:00:00, tz=None",
+   "unit": "",
+   "source": "evidence/G5_PROBE_NETWORK.json",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "snapshot_clock",
+   "value": "UTC",
+   "unit": "",
+   "source": "evidence/G5_SOLAR_PEAK_HOUR_NETWORK.csv, G5_SOLAR_PEAK_HOUR_1H.csv, G5_ELEC_LOAD_CYCLE.csv",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "network solar peak in snapshot 03 or 06 UTC for all 11 countries; base electricity peak in snapshot 09-12 UTC (local evening)"
+  },
+  {
+   "key": "solar_1h_centroid_minus_utc_noon_median_h",
+   "value": 0.9796000000000005,
+   "unit": "h",
+   "source": "evidence/G5_SOLAR_PEAK_HOUR_1H.csv (287 bus classes)",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "a local clock would give about +7 h; the ~0.5 h left after the +0.5 h interval convention fits ERA5 accumulation labels at the end of the hour (INFERENCE)"
+  },
+  {
+   "key": "solar_1h_centroid_minus_utc_noon_p05_p95_h",
+   "value": [
+    0.8214000000000001,
+    1.4816100000000003
+   ],
+   "unit": "h",
+   "source": "evidence/G5_SOLAR_PEAK_HOUR_1H.csv",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "industry_loads_static",
+   "value": "2188 loads, 192 with time series (electricity, land transport EV)",
+   "unit": "",
+   "source": "evidence/G5_LOAD_CARRIERS.csv",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "industry loads are per node x carrier, not per subsector"
+  },
+  {
+   "key": "ffe_day_alignment_offset",
+   "value": 0,
+   "unit": "days",
+   "source": "FfE 59 curve 13",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "0 = file day 0 is 2017-01-01 (Sunday)"
+  },
+  {
+   "key": "ffe_holiday_days_detected",
+   "value": 11,
+   "unit": "days",
+   "source": "evidence/G5_FFE_HOLIDAY_DAYS.csv",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "11 of them are German holidays 2017 (holiday list from memory: INFERENCE)"
+  },
+  {
+   "key": "ffe_clock_test_lags",
+   "value": {
+    "Non-metallic minerals": 1,
+    "Transport equipment": 0,
+    "Mining and quarrying": 0,
+    "Food and tobacco": 0,
+    "Non-specified (industry)": 0
+   },
+   "unit": "h",
+   "source": "evidence/G5_PROFILES.json ffe_tests.clock",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "lag 0 = same index hours in winter and summer; verdict: mixed"
+  },
+  {
+   "key": "ffe_clock_main",
+   "value": "German local clock (CET/CEST)",
+   "unit": "",
+   "source": "S0 6.4 proposal; clock test inconclusive",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "UTC reading = sensitivity S4"
+  },
+  {
+   "key": "ffe_licence",
+   "value": "CC-BY-4.0, attribution '© FfE, eXtremOS Project'; citation 'Normalized Industrial Electrical Load Profiles (Germany): <URL>; München: FfE München, 2021'",
+   "unit": "",
+   "source": "metadata JSON on disk + https://opendata.ffe.de/dataset/normalized-industrial-electrical-load-profiles-germany/ (read 2026-11-06)",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "nrel_licence",
+   "value": "DOE/NREL/ALLIANCE data licence (not Creative Commons): free use and copying; credit DOE/NREL/ALLIANCE in publications; the notice must appear in all copies of the Data",
+   "unit": "",
+   "source": "https://data.nlr.gov/node/118/license (read 2026-11-06); dataset 'Manufacturing Thermal Energy Use in 2014', McMillan 2019, DOI 10.7799/1570008",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "nrel_dayofweek_convention",
+   "value": "0 = Monday",
+   "unit": "",
+   "source": "parquet weekday_single schedules lower on 5 and 6",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_STEEL_PAPER_peak_over_mean",
+   "value": 1.00792,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_STEEL_PAPER_weekday_over_weekend",
+   "value": 1.00003,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_STEEL_PAPER_removed_month_max_over_min",
+   "value": 1.00345,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NMM_peak_over_mean",
+   "value": 1.36106,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NMM_weekday_over_weekend",
+   "value": 1.58878,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NMM_removed_month_max_over_min",
+   "value": 1.1259,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_TRANSPORT_MACH_peak_over_mean",
+   "value": 1.42594,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_TRANSPORT_MACH_weekday_over_weekend",
+   "value": 2.03736,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_TRANSPORT_MACH_removed_month_max_over_min",
+   "value": 1.12646,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_MINING_peak_over_mean",
+   "value": 2.36386,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_MINING_weekday_over_weekend",
+   "value": 5.83538,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_MINING_removed_month_max_over_min",
+   "value": 1.18633,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_FOOD_peak_over_mean",
+   "value": 1.36743,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_FOOD_weekday_over_weekend",
+   "value": 1.80841,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_FOOD_removed_month_max_over_min",
+   "value": 1.10716,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NONSPEC_peak_over_mean",
+   "value": 1.50304,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NONSPEC_weekday_over_weekend",
+   "value": 2.27847,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_FFE_NONSPEC_removed_month_max_over_min",
+   "value": 1.11455,
+   "unit": "-",
+   "source": "FfE 2017 monthly means",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_NREL_ALL_peak_over_mean",
+   "value": 1.06686,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_NREL_ALL_weekday_over_weekend",
+   "value": 1.14997,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_MIX_DISPERSED_elec_peak_over_mean",
+   "value": 1.2684,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_MIX_DISPERSED_elec_weekday_over_weekend",
+   "value": 1.51781,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_MIX_DISPERSED_heat_peak_over_mean",
+   "value": 1.04966,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv (168-h local week, season removed)",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "shape_MIX_DISPERSED_heat_weekday_over_weekend",
+   "value": 1.10682,
+   "unit": "-",
+   "source": "evidence/G5_SHAPE_STATS.csv",
+   "status": "EXACT",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "mix_dispersed_weights",
+   "value": {
+    "alumina": 0.000124,
+    "aluminium_primary": 0.000104,
+    "aluminium_secondary": 1.6e-05,
+    "ammonia": 0.0,
+    "ceramics_nmm": 0.134854,
+    "chemicals_other": 0.063953,
+    "chlorine": 0.011636,
+    "ethylene": 0.070978,
+    "food": 0.298669,
+    "glass_lime": 0.044063,
+    "machinery": 0.088638,
+    "methanol": 0.003782,
+    "nonferrous_other": 0.000154,
+    "pharma": 0.023895,
+    "printing": 0.006523,
+    "pulp_paper": 0.077934,
+    "textiles": 0.135085,
+    "transport_equipment": 0.006891,
+    "wood": 0.032702
+   },
+   "unit": "share",
+   "source": "S0 evidence/V3_DISPERSED_BY_UNSD_ROW.csv (v3 2050 dispersed energy by PyPSA-Eur sector)",
+   "status": "EXACT",
+   "grade": "D",
+   "note": "row energy of all carriers used as weight for electricity and heat (INFERENCE)"
+  },
+  {
+   "key": "profiles_distinct_curves",
+   "value": 584,
+   "unit": "curves",
+   "source": "PROFILES_8760.parquet",
+   "status": "EXACT",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "profiles_max_abs_mean_minus_1",
+   "value": 6.661338147750939e-16,
+   "unit": "-",
+   "source": "PROFILES_8760.parquet",
+   "status": "EXACT",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "profiles_variants",
+   "value": [
+    "MAIN",
+    "S1_SOURCE",
+    "S2_OTHER_FLAT",
+    "S3_OTHER_FFE13",
+    "S4_FFE_CLOCK_UTC",
+    "S5_SAT_WORKDAY",
+    "S6_SHIFT_P1",
+    "S6_SHIFT_M1",
+    "S7_HOLIDAYS",
+    "S8_UPPER"
+   ],
+   "unit": "",
+   "source": "PROFILE_INDEX.csv",
+   "status": "PROPOSED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "tz_nodes_by_offset",
+   "value": {
+    "BN@8": 1,
+    "ID@7": 16,
+    "ID@8": 17,
+    "ID@9": 6,
+    "KH@7": 5,
+    "LA@7": 6,
+    "MM@6.5": 17,
+    "MY@8": 7,
+    "PH@8": 5,
+    "SG@8": 1,
+    "TH@7": 6,
+    "TL@9": 1,
+    "VN@7": 8
+   },
+   "unit": "nodes",
+   "source": "TIMEZONE_NODES.csv (EV_NODE_TIMEZONE_V3.csv, decision 165)",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "tz_province_rule_failures",
+   "value": 0,
+   "unit": "nodes",
+   "source": "TIMEZONE_NODES.csv vs Keppres 41/1987 province list (list from memory: INFERENCE)",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "tz_id_multi_zone_nodes",
+   "value": 5,
+   "unit": "nodes",
+   "source": "ADM1_NODE_OVERLAP_V3.csv",
+   "status": "VERIFIED",
+   "grade": "",
+   "note": "9.32 TWh v3 2050 industry electricity in them"
+  },
+  {
+   "key": "tz_id_longitude_rule_differs",
+   "value": 4,
+   "unit": "nodes",
+   "source": "evidence/G5_ID_LONGITUDE_RULE_DIFF.csv",
+   "status": "EXACT",
+   "grade": "",
+   "note": "nearest-meridian rule (112.5 / 127.5 E) vs legal province zone"
+  },
+  {
+   "key": "composition_check_max_abs_diff_mwh",
+   "value": 5.960464477539062e-07,
+   "unit": "MWh",
+   "source": "evidence/G5_PEAKS.json composition_check (v3 table electricity vs network 'industry electricity', by country and ID zone)",
+   "status": "EXACT",
+   "grade": "",
+   "note": ""
+  },
+  {
+   "key": "BN_industry_elec_2050_twh",
+   "value": 0.431800051,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "BN_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.0857,
+    1.0841,
+    1.0436
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "BN_main_ac_fixed_peak_change",
+   "value": [
+    0.004,
+    0.67
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "BN_ac_change_range_pct",
+   "value": [
+    0.0,
+    3.87
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "ID_industry_elec_2050_twh",
+   "value": 297.884938894,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ID_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.1603,
+    1.1599,
+    1.0822
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ID_main_ac_fixed_peak_change",
+   "value": [
+    1.136,
+    1.43
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ID_ac_change_range_pct",
+   "value": [
+    0.0,
+    10.5
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "KH_industry_elec_2050_twh",
+   "value": 10.00741997,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "KH_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.229,
+    1.2271,
+    1.1165
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "KH_main_ac_fixed_peak_change",
+   "value": [
+    0.175,
+    5.2
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "KH_ac_change_range_pct",
+   "value": [
+    0.0,
+    12.8
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "LA_industry_elec_2050_twh",
+   "value": 7.216639506999999,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "LA_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.2291,
+    1.2272,
+    1.1165
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "LA_main_ac_fixed_peak_change",
+   "value": [
+    0.147,
+    6.78
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "LA_ac_change_range_pct",
+   "value": [
+    0.0,
+    15.05
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "MM_industry_elec_2050_twh",
+   "value": 9.109627213000001,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MM_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.2177,
+    1.2075,
+    1.1117
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MM_main_ac_fixed_peak_change",
+   "value": [
+    0.088,
+    2.0
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MM_ac_change_range_pct",
+   "value": [
+    0.67,
+    5.88
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "MY_industry_elec_2050_twh",
+   "value": 128.717093502,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MY_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.1812,
+    1.1779,
+    1.0921
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MY_main_ac_fixed_peak_change",
+   "value": [
+    1.883,
+    5.57
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "MY_ac_change_range_pct",
+   "value": [
+    0.0,
+    12.74
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "PH_industry_elec_2050_twh",
+   "value": 56.88162514400001,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "PH_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.2607,
+    1.2573,
+    1.134
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "PH_main_ac_fixed_peak_change",
+   "value": [
+    0.206,
+    0.92
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "PH_ac_change_range_pct",
+   "value": [
+    -0.24,
+    3.78
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "SG_industry_elec_2050_twh",
+   "value": 44.243550637999995,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "SG_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.1455,
+    1.1428,
+    1.074
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "SG_main_ac_fixed_peak_change",
+   "value": [
+    0.639,
+    6.31
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "SG_ac_change_range_pct",
+   "value": [
+    0.0,
+    23.19
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S2_OTHER_FLAT .. S8_UPPER"
+  },
+  {
+   "key": "TH_industry_elec_2050_twh",
+   "value": 250.89518190599998,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "TH_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.2688,
+    1.2636,
+    1.1377
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "TH_main_ac_fixed_peak_change",
+   "value": [
+    7.02,
+    12.11
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "TH_ac_change_range_pct",
+   "value": [
+    8.93,
+    16.27
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S5_SAT_WORKDAY .. S8_UPPER"
+  },
+  {
+   "key": "VN_industry_elec_2050_twh",
+   "value": 465.81756569000004,
+   "unit": "TWh",
+   "source": "v3 INDUSTRY_2050_SUBSECTOR_CARRIER_V3.csv main",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "VN_main_industry_peak_over_mean_1h_3h_daily",
+   "value": [
+    1.2462,
+    1.2449,
+    1.1235
+   ],
+   "unit": "-",
+   "source": "evidence/G5_PEAK_IMPACT.csv",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "VN_main_ac_fixed_peak_change",
+   "value": [
+    11.056,
+    13.53
+   ],
+   "unit": "GW, %",
+   "source": "evidence/G5_PEAK_IMPACT.csv (3 h, base electricity + agriculture + industry)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "VN_ac_change_range_pct",
+   "value": [
+    9.87,
+    19.56
+   ],
+   "unit": "%",
+   "source": "evidence/G5_PEAK_IMPACT.csv (9 variants)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": "S5_SAT_WORKDAY .. S8_UPPER"
+  },
+  {
+   "key": "ASEAN_FLAT_ac_fixed_peak_change_gw",
+   "value": 0.0,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_MAIN_ac_fixed_peak_change_gw",
+   "value": 27.893,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S1_SOURCE_ac_fixed_peak_change_gw",
+   "value": 36.16,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S2_OTHER_FLAT_ac_fixed_peak_change_gw",
+   "value": 17.191,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S3_OTHER_FFE13_ac_fixed_peak_change_gw",
+   "value": 37.152,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S4_FFE_CLOCK_UTC_ac_fixed_peak_change_gw",
+   "value": 28.967,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S5_SAT_WORKDAY_ac_fixed_peak_change_gw",
+   "value": 20.573,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S6_SHIFT_P1_ac_fixed_peak_change_gw",
+   "value": 29.061,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S6_SHIFT_M1_ac_fixed_peak_change_gw",
+   "value": 26.746,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S7_HOLIDAYS_ac_fixed_peak_change_gw",
+   "value": 29.325,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_S8_UPPER_ac_fixed_peak_change_gw",
+   "value": 47.832,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv (coincident, 3 h)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "note": ""
+  },
+  {
+   "key": "ASEAN_flat_ac_fixed_peak_gw",
+   "value": 287.59,
+   "unit": "GW",
+   "source": "evidence/G5_PEAK_IMPACT_ASEAN.csv",
+   "status": "VERIFIED",
+   "grade": "C",
+   "note": ""
+  }
+ ]
+}
