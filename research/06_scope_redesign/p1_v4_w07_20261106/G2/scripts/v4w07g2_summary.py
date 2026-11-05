@@ -28,7 +28,7 @@ def main():
     out = dict(session="W07 G2 (Viet Nam)", instruction_sha256=INSTR_SHA, count=len(nums),
                count_by_status=dict(collections.Counter(n["status"] for n in nums)), count_by_grade=dict(collections.Counter(str(n["grade"]) for n in nums)),
                fragments=frags, numbers=nums)
-    (W / "EVIDENCE.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    (W / "EVIDENCE.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")   # LF on Windows too
     print(out["count"], out["count_by_status"])
 
 

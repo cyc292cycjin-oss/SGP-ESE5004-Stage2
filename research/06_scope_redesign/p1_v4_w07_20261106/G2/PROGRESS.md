@@ -16,8 +16,10 @@
 | G2-5 | 生物质口径（两个 UNSD 版本、2015–2019 断裂、FAOSTAT 对照） | 完成 | G2-B |
 | G2-6 | 空间分配（GEM、SFI、Climate TRACE 按国家过滤读取） | 完成 | G2-B |
 | G2-7 | 合并量化（两套热值 × 9 步，17 项敏感性）与 A6 表 | 完成 | G2-B |
-| G2-8 | 报告、证据（`EVIDENCE.json`）、待决问题、缺失数据、台账草稿、审阅包、推送 | 进行中 | G2-C（报告）、收尾提交见最后一行 |
+| G2-8 | 报告、证据（`EVIDENCE.json`）、待决问题、缺失数据、台账草稿、审阅包、推送 | 完成 | `61c5b047`（G2-C，报告）；收尾提交见最后一行 |
 
 说明：G2-3 至 G2-7 合在一个提交（G2-B），原因是本会话期间 WSL 服务多次返回 `E_UNEXPECTED`，无法逐步提交；各步脚本与表在提交前已全部重跑。
 
-续做起点：G2-8（若中断：重跑 `v4w07g2_steps.py`、`v4w07g2_figure.py`、`v4w07g2_summary.py`，再提交报告与审阅包）。
+续做起点：无。G2 完成，等待审阅端审阅；未开 PR，未合并 main，未 force-push。
+
+最终状态（2026-11-06）：提交 G2-A `734b12ad` → G2-B `e03d67e0` → 报告提交 G2-C `61c5b0473c757d20c712c518a07e9a69d8b36e2d`；审阅 ZIP `work/p1_v4_w07_20261106/G2/REVIEW_61c5b047.zip`（`git archive` 报告提交的交付目录，87 个成员，SHA256 `4bf94dcedeeb0f6e997970ec9a8f505849b341d9597f519549142d3e2c142f9a`，成员清单 `REVIEW_ZIP_MANIFEST.txt`，不含台账：本会话只写台账草稿 `LEDGER_ENTRY_DRAFT.md`）；收尾提交只含本行、成员清单、`EVIDENCE.json`（改为 LF 换行，内容不变）与 `scripts/v4w07g2_summary.py`（LF 输出）；分支 `codex/v4-w07-g2-20261106` 推送到 origin。求解器 0 次，本机计算约 15 分钟，新增磁盘约 0.2 GB，未触发停止条件。
