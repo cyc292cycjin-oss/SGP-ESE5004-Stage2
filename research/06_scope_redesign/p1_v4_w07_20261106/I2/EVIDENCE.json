@@ -1,0 +1,5167 @@
+{
+ "session": "I2",
+ "instruction": "work/p1_v4_w07_20261106/V4_I2_INSTRUCTION.md v1",
+ "instruction_sha256": "36c3a2bd9b77ee76f08e1bd20759d4efb388889775285d944b3f0ee9dd02fdd5",
+ "branch": "codex/v4-i2-20261106",
+ "base_commit": "07e08f387bcb5894384c008debc97d9e9c30ae4b",
+ "merges": {
+  "ncv": "7c23e456",
+  "g0": "80961534",
+  "g1": "ed9f967b",
+  "g2": "ac05af91",
+  "g3": "bdb04eab",
+  "g4": "913d86b6",
+  "g5": "c49531a0",
+  "w12": "a180b8b0",
+  "i1": "a2daeaca"
+ },
+ "solver_calls": 0,
+ "note": "Merge and quantification. No model code / config / network / registry / T_v2 change in the repository. Scratch copies outside the repository: /home/jin/v4i2 (i1code: I1 rebuild code with path / coke edits; chain: m08b + s3_0 with env-gated patches, byte-identical without the variables; results: one JSON per case; g5: G5 peak script inputs). SDMX: W12 responses, not re-downloaded.",
+ "rule_differences": [
+  {
+   "item": "2019 base",
+   "rule": "UNSD SDMX current database for every country (decision 210 item 1); SDMX factors, ID hard coal 20.29, ID coke 28.20",
+   "differs_from": "G2 VN fuelwood (export 14,725 thousand m3 kept as main) and G4 MM fuelwood / bagasse (export values kept)",
+   "reason": "one base version for all countries; the export values become sensitivities (G2 / G4 recommended the export value only because the base was the export)"
+  },
+  {
+   "item": "self-produced residues",
+   "rule": "bagasse, black liquor and 5150 in food / wood / paper / n.e.s. rows out of demand and potential in every country (210 item 4 a)",
+   "differs_from": "G0 (bagasse kept in T_v2), G4 (MM / LA bagasse kept), G2 (VN bagasse kept); G3 already removed TH / PH bagasse",
+   "reason": "decision 210 item 4 supersedes decision 208 item 1 and the 'reported -> keep' reading of 206 item 3"
+  },
+  {
+   "item": "pulp and paper",
+   "rule": "FAOSTAT x JRC-IDEES today (PyPSA-Eur structure); black liquor of chemical + dissolving pulp x 22 GJ/t capped at the fuel part, outside T_v2; all other fuel incl. biomass purchased; 2019 deduction from the paper row, excess from 'other', rest recorded",
+   "differs_from": "G0 ID (non-biomass 2019 fuel 0.66 TWh kept as purchased; same 2050), G1 MY (all biomass outside T_v2), G3 TH / PH (2019 deduction capped at the paper row), G4 MM (paper biomass outside T_v2)",
+   "reason": "one rule: only own black liquor is self-produced (210 item 4 a); recovered-fibre mills buy their steam fuel (G1 decision 5, G4 MM item 7); the row cap of G3 is replaced by the general S0 3.2 rule (row, then other, then D163-4)"
+  },
+  {
+   "item": "HVC",
+   "rule": "2019 deduction 5.191 MWh/t (electricity 0.272, fuel 4.918), 2050 vector (b) 4.627 MWh/t (decision 210 item 5)",
+   "differs_from": "G0-G3 (3.269 / 6.103)",
+   "reason": "decision 210 item 5"
+  },
+  {
+   "item": "new plants",
+   "rule": "plants operating in the latest status year are main: ID LINE, MY PIC and Sarawak Petchem methanol, VN Long Son, TH Cracker No 5, LA paper line (2021); SG without GEPDSGP0004",
+   "differs_from": "G1 / G2 / G3 (R4 sensitivity), G4 (LA paper line sensitivity)",
+   "reason": "decision 208 (new plants), applied to every country including the LA paper line"
+  },
+  {
+   "item": "methanol",
+   "rule": "EU27-weight methanol load of the chemicals row dropped in BN, ID, MM, PH, SG, TH, VN (DFX F2 precedent); explicit energy use for MY (Labuan, Sarawak), ID (Kaltim 660 kt) and BN (850 kt) at the G1 intensity",
+   "differs_from": "all sessions (methanol load kept); BN chemicals not counted (G4, decision 202 item 4)",
+   "reason": "decision 210 item 7"
+  },
+  {
+   "item": "nickel",
+   "rule": "2023 base, Wei Case 3 for every product (decision 208)",
+   "differs_from": "G0 main (NPI Case 4)",
+   "reason": "decision 208"
+  },
+  {
+   "item": "growth readings",
+   "rule": "SDMX base and (ii) corrections under IId; (i) corrections (captive coal) and items outside the national balance (ID fuelwood) under reading I",
+   "differs_from": "G0-G4 (reading I for everything)",
+   "reason": "decision 210 items 2-4"
+  },
+  {
+   "item": "ID industrial fuelwood",
+   "rule": "2010-2017 mean (29,510 thousand m3) outside the anchor, reading-I growth (210 item 4 b)",
+   "differs_from": "G0 (inside the anchor, reading I)",
+   "reason": "decision 210 item 4 b"
+  },
+  {
+   "item": "VN decomposition",
+   "rule": "hybrid split; T_v2 and decomposition from the same run (decision 208)",
+   "differs_from": "G2 main (v3 two-run rule)",
+   "reason": "decision 208"
+  }
+ ],
+ "status_counts": {
+  "VERIFIED": 24,
+  "EXACT": 57,
+  "INFERENCE": 3,
+  "PROPOSED": 234
+ },
+ "grade_counts": {
+  "-": 8,
+  "A": 32,
+  "D": 12,
+  "C": 206,
+  "B": 60
+ },
+ "items": [
+  {
+   "item": "I2_base",
+   "file": "evidence/I2_base.json",
+   "n": 17
+  },
+  {
+   "item": "I2_biomass",
+   "file": "evidence/I2_biomass.json",
+   "n": 32
+  },
+  {
+   "item": "I2_peaks",
+   "file": "evidence/I2_peaks.json",
+   "n": 13
+  },
+  {
+   "item": "I2_repro",
+   "file": "evidence/I2_repro.json",
+   "n": 17
+  },
+  {
+   "item": "I2_sens",
+   "file": "evidence/I2_sens.json",
+   "n": 10
+  },
+  {
+   "item": "I2_tables",
+   "file": "evidence/I2_tables.json",
+   "n": 37
+  }
+ ],
+ "n_entries": 318,
+ "entries": [
+  {
+   "id": "I2_base.code.i1_common.py",
+   "value": {
+    "source_sha256": "a2477279940d479183c67d102ac0017be3d6b9681421e70f3dd8b7f381c3fa24",
+    "copy_sha256": "6aa6c79354a4293099c67b4cce075b40732397418fb88d69e148b2c6bdd240c5",
+    "edits": [
+     "REPO = Path(\"/home/jin/wt_v4_i2\")",
+     "SCRATCH = Path(\"/home/jin/v4i2\")"
+    ]
+   },
+   "unit": "file",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_w07_20261106/I1/scripts/i1_common.py -> /home/jin/v4i2/i1code/scripts/i1_common.py",
+   "locator": "I1 rebuild code re-used with path / coke edits only",
+   "note": ""
+  },
+  {
+   "id": "I2_base.code.i1_base.py",
+   "value": {
+    "source_sha256": "ad18f0a229c3bddb2560180d9d1bd1488fceeded2fdbea6c454dbdbe7d998564",
+    "copy_sha256": "e391c39ea515c0d65975d2f7579b26489a3451e367bded2dcb477cee5df1b6bf",
+    "edits": [
+     "D207_COAL = {(\"ID\", \"hard coal\"): D(\"20.29\"), (\"ID\", \"coke oven coke\"): D(\"28.20\")}   # I2 copy: decision 210 item 1 (ID coke 28.20)"
+    ]
+   },
+   "unit": "file",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_w07_20261106/I1/scripts/i1_base.py -> /home/jin/v4i2/i1code/scripts/i1_base.py",
+   "locator": "I1 rebuild code re-used with path / coke edits only",
+   "note": ""
+  },
+  {
+   "id": "I2_base.code.i1_sdmx.py",
+   "value": {
+    "source_sha256": "2cd59f04b5dcaa1a60173b3d69d479495e42d65703ee821907fa038ed943786d",
+    "copy_sha256": "2cd59f04b5dcaa1a60173b3d69d479495e42d65703ee821907fa038ed943786d",
+    "edits": []
+   },
+   "unit": "file",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_w07_20261106/I1/scripts/i1_sdmx.py -> /home/jin/v4i2/i1code/scripts/i1_sdmx.py",
+   "locator": "I1 rebuild code re-used with path / coke edits only",
+   "note": ""
+  },
+  {
+   "id": "I2_base.timing_s",
+   "value": {
+    "i1_sdmx": 1.0194220542907715,
+    "i1_base": 4.424103021621704
+   },
+   "unit": "s",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "scratch run",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.SDMX capsule records = I1 committed",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S0 = I1 committed BASE2019_SDMX_D1_ROWS.csv S0",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S1 = I1 committed BASE2019_SDMX_D1_ROWS.csv S1",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S2 = I1 committed BASE2019_SDMX_D1_ROWS.csv S2",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S3 = I1 committed BASE2019_SDMX_D1_ROWS.csv S3",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S4 = I1 committed BASE2019_SDMX_D1_ROWS.csv S4",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 row ID NonEnergyUse coal 'NonEnergy:Coke-oven coke': S5p - I1 S5 = 791 kt x (28.20 - 20",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "6.984919309616089e-10",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.D1 rows S5 = I1 committed BASE2019_SDMX_D1_ROWS.csv S5 (I2 S5p, every row except the ID NE",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "0.0",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.scratch d1_base_S0.csv byte-identical to I1 scratch d1_base_S0.csv",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.I1 code gate gate.G1_reconstruct_equals_repository",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.I1 code gate gate.G2_d1_base_equals_repository",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.check.I1 code gate gate.G3_generalised_blend_reproduces",
+   "value": true,
+   "unit": "bool",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "tables/I2_BASE_CHECKS.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_base.base.S5p_sha256",
+   "value": "64a3810a357f7e02fd5231a36100812cafb62f04619a775013d1ce32cc7e7f52",
+   "unit": "sha256",
+   "status": "EXACT",
+   "grade": "A",
+   "source": "/home/jin/v4i2/d1_base_S5p.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.BN.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "INFERENCE",
+   "grade": "D",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.ID.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.ID.sens.pks_0pct.total_adjusted_twh",
+   "value": 805.769645358,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.ID.sens.pks_100pct.total_adjusted_twh",
+   "value": 739.747688111,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.KH.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "INFERENCE",
+   "grade": "D",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.KH.sens.pks_0pct.total_adjusted_twh",
+   "value": 48.612227369,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.KH.sens.pks_100pct.total_adjusted_twh",
+   "value": 48.462634408,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.LA.bagasse_selfuse_share",
+   "value": 0.816091954,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MM.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MY.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MY.sens.pks_0pct.total_adjusted_twh",
+   "value": 186.634550125,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MY.sens.pks_100pct.total_adjusted_twh",
+   "value": 159.798629401,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.PH.bagasse_selfuse_share",
+   "value": 0.56836499,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.PH.sens.pks_0pct.total_adjusted_twh",
+   "value": 126.805980123,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.PH.sens.pks_100pct.total_adjusted_twh",
+   "value": 126.660367834,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.TH.bagasse_selfuse_share",
+   "value": 0.480694569,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.TH.sens.pks_0pct.total_adjusted_twh",
+   "value": 267.319195167,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.TH.sens.pks_100pct.total_adjusted_twh",
+   "value": 262.460515218,
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "D",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "solid potential with the PKS in-mill share at this value",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.VN.bagasse_selfuse_share",
+   "value": 1.0,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "A",
+   "source": "W12_3_UNSD_BAGASSE_2019.csv (industry final consumption / production)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.BN.total",
+   "value": {
+    "v3": 0.11593582841735019,
+    "F3": 0.0,
+    "F4": -5.043870182030538e-05,
+    "adjusted": 0.11588538971552989,
+    "cap99": 0.11472653581837458
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.ID.total",
+   "value": {
+    "v3": 976.7486878837999,
+    "F3": -8.618953616064157,
+    "F4": -195.37106753288785,
+    "adjusted": 772.7586667348479,
+    "cap99": 765.0310800674994
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.KH.total",
+   "value": {
+    "v3": 49.348607720556,
+    "F3": 0.0,
+    "F4": -0.8111768320941299,
+    "adjusted": 48.53743088846187,
+    "cap99": 48.052056579577254
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.LA.total",
+   "value": {
+    "v3": 26.35129884452,
+    "F3": -0.08806417881151724,
+    "F4": -0.6541668258587974,
+    "adjusted": 25.609067839849683,
+    "cap99": 25.352977161451186
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MM.total",
+   "value": {
+    "v3": 104.030364057363,
+    "F3": -5.535381239719554,
+    "F4": -12.864558245066661,
+    "adjusted": 85.63042457257679,
+    "cap99": 84.77412032685102
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.MY.total",
+   "value": {
+    "v3": 247.02481683540046,
+    "F3": -0.002656696805974801,
+    "F4": -73.80557037561309,
+    "adjusted": 173.21658976298139,
+    "cap99": 171.48442386535154
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.PH.total",
+   "value": {
+    "v3": 141.37775567691702,
+    "F3": -5.370258972910571,
+    "F4": -9.27432272551081,
+    "adjusted": 126.73317397849561,
+    "cap99": 125.46584223871065
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.SG.total",
+   "value": {
+    "v3": 0.03151024688921739,
+    "F3": 0.0,
+    "F4": 0.0,
+    "adjusted": 0.03151024688921739,
+    "cap99": 0.031195144420325217
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.TH.total",
+   "value": {
+    "v3": 319.4197832786601,
+    "F3": -5.216060446772102,
+    "F4": -49.313867639421495,
+    "adjusted": 264.8898551924664,
+    "cap99": 262.24095664054175
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.TL.total",
+   "value": {
+    "v3": 0.594009865915919,
+    "F3": 0.0,
+    "F4": 0.0,
+    "adjusted": 0.594009865915919,
+    "cap99": 0.5880697672567599
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.VN.total",
+   "value": {
+    "v3": 125.77256615328,
+    "F3": -1.1372233330531787,
+    "F4": -4.269443034152001,
+    "adjusted": 120.36589978607482,
+    "cap99": 119.16224078821408
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.ASEAN11.total",
+   "value": {
+    "v3": 1990.815336391719,
+    "F3": -25.968598484137054,
+    "F4": -346.36422364930667,
+    "adjusted": 1618.4825142582754,
+    "cap99": 1602.2976891156923
+   },
+   "unit": "TWh",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_biomass.scratch_potential_file_sha256",
+   "value": "cd9df282168598cc0080cc15e94baa77554a51bc0f6c091cfdf448030948bca8",
+   "unit": "sha256",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "/home/jin/v4i2/BIOMASS_POTENTIAL_2050_I2.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.code.g5_peaks_copy",
+   "value": {
+    "source_sha256": "713e3d790d67acbf21593d38445cb47d38213ba5210fa5fecf52f7ee8a14da29",
+    "copy_sha256": "3d63eafa61a1ae05f537477ee7b67af8d07813176d034ea095c748bd384dacb1",
+    "net_sha256": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef"
+   },
+   "unit": "file",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "G5 scripts copied; only V3_KEY extended",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.gate.v3_control_reproduces_G5_ASEAN_peaks",
+   "value": 0.0,
+   "unit": "GW (max abs)",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "G5 evidence/G5_PEAK_IMPACT_ASEAN.csv vs the I2 control run",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.FLAT",
+   "value": {
+    "v3_ac_peak_change_gw": 0.0,
+    "v4_ac_peak_change_gw": 0.0,
+    "v3_industry_peak_gw": 145.1148,
+    "v4_industry_peak_gw": 140.4821,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.MAIN",
+   "value": {
+    "v3_ac_peak_change_gw": 27.8929,
+    "v4_ac_peak_change_gw": 21.5203,
+    "v3_industry_peak_gw": 176.7943,
+    "v4_industry_peak_gw": 165.0157,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S1_SOURCE",
+   "value": {
+    "v3_ac_peak_change_gw": 36.1596,
+    "v4_ac_peak_change_gw": 30.9858,
+    "v3_industry_peak_gw": 186.1342,
+    "v4_industry_peak_gw": 175.5501,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S2_OTHER_FLAT",
+   "value": {
+    "v3_ac_peak_change_gw": 17.1907,
+    "v4_ac_peak_change_gw": 11.2241,
+    "v3_industry_peak_gw": 165.2202,
+    "v4_industry_peak_gw": 153.8833,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S3_OTHER_FFE13",
+   "value": {
+    "v3_ac_peak_change_gw": 37.1523,
+    "v4_ac_peak_change_gw": 30.42,
+    "v3_industry_peak_gw": 185.9933,
+    "v4_industry_peak_gw": 173.8632,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S4_FFE_CLOCK_UTC",
+   "value": {
+    "v3_ac_peak_change_gw": 28.967,
+    "v4_ac_peak_change_gw": 22.1212,
+    "v3_industry_peak_gw": 175.5694,
+    "v4_industry_peak_gw": 164.0882,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S5_SAT_WORKDAY",
+   "value": {
+    "v3_ac_peak_change_gw": 20.5731,
+    "v4_ac_peak_change_gw": 15.8282,
+    "v3_industry_peak_gw": 169.3533,
+    "v4_industry_peak_gw": 159.2399,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S6_SHIFT_P1",
+   "value": {
+    "v3_ac_peak_change_gw": 29.0606,
+    "v4_ac_peak_change_gw": 22.3625,
+    "v3_industry_peak_gw": 175.6501,
+    "v4_industry_peak_gw": 164.3239,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S6_SHIFT_M1",
+   "value": {
+    "v3_ac_peak_change_gw": 26.7461,
+    "v4_ac_peak_change_gw": 20.5943,
+    "v3_industry_peak_gw": 176.3841,
+    "v4_industry_peak_gw": 164.8095,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S7_HOLIDAYS",
+   "value": {
+    "v3_ac_peak_change_gw": 29.3253,
+    "v4_ac_peak_change_gw": 22.6286,
+    "v3_industry_peak_gw": 178.2542,
+    "v4_industry_peak_gw": 166.1415,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_peaks.asean.S8_UPPER",
+   "value": {
+    "v3_ac_peak_change_gw": 47.8316,
+    "v4_ac_peak_change_gw": 41.9832,
+    "v3_industry_peak_gw": 197.7934,
+    "v4_industry_peak_gw": 186.5319,
+    "v4_industry_mean_gw": 140.4821
+   },
+   "unit": "GW",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "locator": "3 h, coincident; change vs the flat curve of the same energy",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 I S5.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 I S5c.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 I S5x.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 I S5xc.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IIa S5.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IIa S5c.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IIa S5x.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IIa S5xc.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IId S5.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IId S5c.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IId S5x.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R1 I1 IId S5xc.max_abs_dev_twh",
+   "value": 0.0,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "11 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R2 G3 v3 line step 8.max_abs_dev_twh",
+   "value": 4.89e-07,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "6 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R3 G4 v3 line step 4.max_abs_dev_twh",
+   "value": 0.000106557,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "8 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R4 G1 v3 sequence step 10.max_abs_dev_twh",
+   "value": 3.76e-07,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "2 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R5 G0 v3 NCV, Case 3 path, step 8.max_abs_dev_twh",
+   "value": 4.27e-07,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "2 values",
+   "note": ""
+  },
+  {
+   "id": "I2_repro.R6 G2 v3 line step 1 (hybrid split, v3 two-run rule).max_abs_dev_twh",
+   "value": 4.76e-07,
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_REPRODUCTION.csv",
+   "locator": "5 values",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top1",
+   "value": {
+    "sensitivity": "锚构造 IIb（冻结 v3 各国 × 部门锚）",
+    "dT_v2": 474.510923,
+    "dOther": 332.943605,
+    "dPotential": 0.0,
+    "magnitude": 474.510923
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top2",
+   "value": {
+    "sensitivity": "锚构造 IIa（RAS 重解，守 C.3；残渣锚扣减不适用）",
+    "dT_v2": 465.133422,
+    "dOther": 305.373272,
+    "dPotential": 0.0,
+    "magnitude": 465.133422
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top3",
+   "value": {
+    "sensitivity": "镍 NIUPPER（Case 3 × 3.571）",
+    "dT_v2": 0.0,
+    "dOther": -418.236174,
+    "dPotential": 0.0,
+    "magnitude": 418.236174
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top4",
+   "value": {
+    "sensitivity": "NPI 用 Wei Case 4（G0 主线）",
+    "dT_v2": 0.0,
+    "dOther": -171.577234,
+    "dPotential": 0.0,
+    "magnitude": 171.577234
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top5",
+   "value": {
+    "sensitivity": "蔗渣留在 T_v2（第 208 项第 1 条旧读法）",
+    "dT_v2": 170.887464,
+    "dOther": 48.332341,
+    "dPotential": 0.0,
+    "magnitude": 170.887464
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top6",
+   "value": {
+    "sensitivity": "ID 造纸行燃料木材（SDMX 1214G，占 ID 工业燃料木材 76%）视为纸浆厂自产树皮 / 木材废料（(a) 移出）",
+    "dT_v2": -161.814857,
+    "dOther": 0.438819,
+    "dPotential": 0.0,
+    "magnitude": 161.814857
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top7",
+   "value": {
+    "sensitivity": "ID 自备煤 high 档",
+    "dT_v2": -115.343324,
+    "dOther": -115.343324,
+    "dPotential": 0.0,
+    "magnitude": 115.343324
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top8",
+   "value": {
+    "sensitivity": "ID：NCV v3 25.80",
+    "dT_v2": 102.713968,
+    "dOther": 97.252282,
+    "dPotential": 0.0,
+    "magnitude": 102.713968
+   },
+   "unit": "TWh (2050)",
+   "status": "INFERENCE",
+   "grade": "C",
+   "source": "G0 ID_G0_SENSITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top9",
+   "value": {
+    "sensitivity": "HVC 用 S2 口径（2019 3.269、2050 6.103）",
+    "dT_v2": 98.44635,
+    "dOther": 10.789391,
+    "dPotential": 0.0,
+    "magnitude": 98.44635
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_sens.top10",
+   "value": {
+    "sensitivity": "全部口径 I（v3 倍数不变，新基年 × v3 倍数）",
+    "dT_v2": 58.624821,
+    "dOther": -13.303397,
+    "dPotential": 0.0,
+    "magnitude": 92.354104
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "I2 re-run on the final state (S7)",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.gate.node_rule_reproduces_v3_carrier_node_shares",
+   "value": 0.0,
+   "unit": "max abs share difference",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "INDUSTRY_CARRIER_NODE_SHARES_V3.csv (case main) vs the I2 rule at S0",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.ID.S0",
+   "value": {
+    "T_v2": 1793.67730837114,
+    "other": 1449.0441441359137,
+    "share": 0.80786222659627,
+    "industry_fe": 2027.9672991283928
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.VN.S0",
+   "value": {
+    "T_v2": 887.954392542273,
+    "other": 162.50591527578302,
+    "share": 0.18301155626981885,
+    "industry_fe": 1232.6717139982056
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.TH.S0",
+   "value": {
+    "T_v2": 507.7005755084501,
+    "other": 41.46167156519007,
+    "share": 0.08166559890870165,
+    "industry_fe": 596.3297383697123
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.MY.S0",
+   "value": {
+    "T_v2": 313.91826453979,
+    "other": 219.66466638094744,
+    "share": 0.6997511492457437,
+    "industry_fe": 295.0563867175276
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.PH.S0",
+   "value": {
+    "T_v2": 144.92284378600948,
+    "other": 23.67454351080098,
+    "share": 0.16335963946276402,
+    "industry_fe": 143.66424806022977
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.SG.S0",
+   "value": {
+    "T_v2": 74.178382997443,
+    "other": 46.634019792,
+    "share": 0.628673987051019,
+    "industry_fe": 91.17507989407319
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.MM.S0",
+   "value": {
+    "T_v2": 61.0250645084579,
+    "other": 45.12487578085999,
+    "share": 0.739448227450965,
+    "industry_fe": 59.88584721916683
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.KH.S0",
+   "value": {
+    "T_v2": 20.343444408548102,
+    "other": 8.555273309584063,
+    "share": 0.4205420251247732,
+    "industry_fe": 35.21226940651081
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.LA.S0",
+   "value": {
+    "T_v2": 14.6536634940866,
+    "other": 6.171784242548837,
+    "share": 0.4211768780577924,
+    "industry_fe": 16.20192698619951
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.BN.S0",
+   "value": {
+    "T_v2": 1.6798216465412699,
+    "other": 1.0118320123248,
+    "share": 0.6023449063227327,
+    "industry_fe": 1.8531437905384913
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.TL.S0",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "share": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.ID.S7",
+   "value": {
+    "T_v2": 1488.6762940384258,
+    "other": 829.2002240567856,
+    "share": 0.5570050570277855,
+    "industry_fe": 1640.047493636266
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.VN.S7",
+   "value": {
+    "T_v2": 742.4614868079228,
+    "other": 175.16628565252995,
+    "share": 0.2359264268448796,
+    "industry_fe": 1025.3820125604643
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.TH.S7",
+   "value": {
+    "T_v2": 400.4885445533897,
+    "other": 36.44932220352995,
+    "share": 0.09101214678731176,
+    "industry_fe": 454.2552316595122
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.MY.S7",
+   "value": {
+    "T_v2": 359.09848429544354,
+    "other": 173.88004268766446,
+    "share": 0.48421268897533676,
+    "industry_fe": 334.8941592299135
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.PH.S7",
+   "value": {
+    "T_v2": 141.31089008531887,
+    "other": 22.479872440949002,
+    "share": 0.1590809627437517,
+    "industry_fe": 147.48564216724964
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.SG.S7",
+   "value": {
+    "T_v2": 92.16336007263658,
+    "other": 40.13828993935853,
+    "share": 0.43551244125349164,
+    "industry_fe": 94.54652265981609
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.MM.S7",
+   "value": {
+    "T_v2": 56.5340508576012,
+    "other": 39.418570621700006,
+    "share": 0.6972536024525835,
+    "industry_fe": 54.37556939074628
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.KH.S7",
+   "value": {
+    "T_v2": 23.002393809563998,
+    "other": 11.214222710551535,
+    "share": 0.48752415958937523,
+    "industry_fe": 38.87850955331722
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.LA.S7",
+   "value": {
+    "T_v2": 18.79418572788725,
+    "other": 5.140961962947157,
+    "share": 0.27354002122682425,
+    "industry_fe": 17.34294702795434
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.BN.S7",
+   "value": {
+    "T_v2": 5.807021449902129,
+    "other": 1.2642443777475003,
+    "share": 0.21770961045249934,
+    "industry_fe": 6.042156744041625
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.TL.S7",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "share": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.ASEAN11.S0",
+   "value": {
+    "T_v2": 3820.0537618027397,
+    "other": 2003.8487260059528,
+    "share": 0.5245603467790744,
+    "industry_fe": 4500.017653570557
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.ASEAN11.S7",
+   "value": {
+    "T_v2": 3328.336711698092,
+    "other": 1334.3520366537637,
+    "share": 0.40090656452032686,
+    "industry_fe": 3813.250244629281
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.ID",
+   "value": {
+    "non_additive_T": 15.710948989168855,
+    "non_additive_other": -15.061302667999371
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.VN",
+   "value": {
+    "non_additive_T": -4.233029967567404,
+    "non_additive_other": -4.113398382534626
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.TH",
+   "value": {
+    "non_additive_T": 0.6295533154608393,
+    "non_additive_other": -0.002916424640311277
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.MY",
+   "value": {
+    "non_additive_T": -0.01673765229975288,
+    "non_additive_other": -0.016737651552148236
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.PH",
+   "value": {
+    "non_additive_T": 2.4225118302722706,
+    "non_additive_other": 1.3500311979441904e-13
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.SG",
+   "value": {
+    "non_additive_T": 0.5568865840530037,
+    "non_additive_other": 1.7256951423405553e-10
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.MM",
+   "value": {
+    "non_additive_T": -0.07387625377688778,
+    "non_additive_other": -0.07370080451009642
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.KH",
+   "value": {
+    "non_additive_T": 0.03216127223999621,
+    "non_additive_other": 0.0321612721915745
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.LA",
+   "value": {
+    "non_additive_T": -1.000088900582341e-11,
+    "non_additive_other": -4.977351863999502e-12
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.BN",
+   "value": {
+    "non_additive_T": 1.7763568394002505e-15,
+    "non_additive_other": 6.661338147750939e-16
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.TL",
+   "value": {
+    "non_additive_T": 0.0,
+    "non_additive_other": 0.0
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_tables.additivity.ASEAN11",
+   "value": {
+    "non_additive_T": 15.028418117537967,
+    "non_additive_other": -19.235894658882216
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/I2_ADDITIVITY.csv",
+   "locator": "",
+   "note": ""
+  },
+  {
+   "id": "I2_steps.ID.S0",
+   "value": {
+    "T_v2": 1793.677308,
+    "other": 1449.044144,
+    "other_share": 0.807862,
+    "delta_T": 0.0,
+    "industry_fe": 2027.967299
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.VN.S0",
+   "value": {
+    "T_v2": 887.954393,
+    "other": 162.505915,
+    "other_share": 0.183012,
+    "delta_T": 0.0,
+    "industry_fe": 1232.671714
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.TH.S0",
+   "value": {
+    "T_v2": 507.700576,
+    "other": 41.461672,
+    "other_share": 0.081666,
+    "delta_T": 0.0,
+    "industry_fe": 596.329738
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.MY.S0",
+   "value": {
+    "T_v2": 313.918265,
+    "other": 219.664666,
+    "other_share": 0.699751,
+    "delta_T": 0.0,
+    "industry_fe": 295.056387
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.PH.S0",
+   "value": {
+    "T_v2": 144.922844,
+    "other": 23.674544,
+    "other_share": 0.16336,
+    "delta_T": 0.0,
+    "industry_fe": 143.664248
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.SG.S0",
+   "value": {
+    "T_v2": 74.178383,
+    "other": 46.63402,
+    "other_share": 0.628674,
+    "delta_T": 0.0,
+    "industry_fe": 91.17508
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.MM.S0",
+   "value": {
+    "T_v2": 61.025065,
+    "other": 45.124876,
+    "other_share": 0.739448,
+    "delta_T": 0.0,
+    "industry_fe": 59.885847
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.KH.S0",
+   "value": {
+    "T_v2": 20.343444,
+    "other": 8.555273,
+    "other_share": 0.420542,
+    "delta_T": 0.0,
+    "industry_fe": 35.212269
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.LA.S0",
+   "value": {
+    "T_v2": 14.653663,
+    "other": 6.171784,
+    "other_share": 0.421177,
+    "delta_T": 0.0,
+    "industry_fe": 16.201927
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.BN.S0",
+   "value": {
+    "T_v2": 1.679822,
+    "other": 1.011832,
+    "other_share": 0.602345,
+    "delta_T": 0.0,
+    "industry_fe": 1.853144
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.TL.S0",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.ID.S1",
+   "value": {
+    "T_v2": 1761.934983,
+    "other": 1145.835844,
+    "other_share": 0.650328,
+    "delta_T": -31.742325,
+    "industry_fe": 1952.21931
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S1",
+   "value": {
+    "T_v2": 782.404831,
+    "other": 162.227512,
+    "other_share": 0.207345,
+    "delta_T": -105.549561,
+    "industry_fe": 1046.68673
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S1",
+   "value": {
+    "T_v2": 536.61851,
+    "other": 38.954118,
+    "other_share": 0.072592,
+    "delta_T": 28.917935,
+    "industry_fe": 617.046136
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S1",
+   "value": {
+    "T_v2": 318.963947,
+    "other": 224.710349,
+    "other_share": 0.704501,
+    "delta_T": 5.045682,
+    "industry_fe": 300.312057
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S1",
+   "value": {
+    "T_v2": 153.210972,
+    "other": 22.478399,
+    "other_share": 0.146715,
+    "delta_T": 8.288129,
+    "industry_fe": 164.982338
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S1",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": -2.962232,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S1",
+   "value": {
+    "T_v2": 65.970469,
+    "other": 50.310555,
+    "other_share": 0.762622,
+    "delta_T": 4.945405,
+    "industry_fe": 65.00793
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S1",
+   "value": {
+    "T_v2": 21.832237,
+    "other": 10.044065,
+    "other_share": 0.460057,
+    "delta_T": 1.488792,
+    "industry_fe": 36.700763
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S1",
+   "value": {
+    "T_v2": 14.797071,
+    "other": 6.315192,
+    "other_share": 0.426787,
+    "delta_T": 0.143408,
+    "industry_fe": 16.001807
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S1",
+   "value": {
+    "T_v2": 1.704097,
+    "other": 1.037492,
+    "other_share": 0.608822,
+    "delta_T": 0.024275,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S1",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S2",
+   "value": {
+    "T_v2": 1755.520604,
+    "other": 1242.868343,
+    "other_share": 0.707977,
+    "delta_T": -6.414379,
+    "industry_fe": 1997.685757
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S2",
+   "value": {
+    "T_v2": 754.715954,
+    "other": 148.962268,
+    "other_share": 0.197375,
+    "delta_T": -27.688878,
+    "industry_fe": 1016.003671
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S2",
+   "value": {
+    "T_v2": 390.706964,
+    "other": 38.905196,
+    "other_share": 0.099576,
+    "delta_T": -145.911546,
+    "industry_fe": 466.317559
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S2",
+   "value": {
+    "T_v2": 318.948569,
+    "other": 224.694971,
+    "other_share": 0.704487,
+    "delta_T": -0.015377,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S2",
+   "value": {
+    "T_v2": 133.827042,
+    "other": 22.478399,
+    "other_share": 0.167966,
+    "delta_T": -19.383931,
+    "industry_fe": 144.774133
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S2",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S2",
+   "value": {
+    "T_v2": 56.323941,
+    "other": 40.664027,
+    "other_share": 0.721967,
+    "delta_T": -9.646528,
+    "industry_fe": 54.290977
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S2",
+   "value": {
+    "T_v2": 21.832237,
+    "other": 10.044065,
+    "other_share": 0.460057,
+    "delta_T": 0.0,
+    "industry_fe": 36.700763
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S2",
+   "value": {
+    "T_v2": 14.797071,
+    "other": 6.315192,
+    "other_share": 0.426787,
+    "delta_T": 0.0,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S2",
+   "value": {
+    "T_v2": 1.704097,
+    "other": 1.037492,
+    "other_share": 0.608822,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S2",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S3",
+   "value": {
+    "T_v2": 1581.621396,
+    "other": 1077.530233,
+    "other_share": 0.681282,
+    "delta_T": -173.899209,
+    "industry_fe": 1761.71476
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S3",
+   "value": {
+    "T_v2": 755.273097,
+    "other": 149.107903,
+    "other_share": 0.197422,
+    "delta_T": 0.557143,
+    "industry_fe": 1016.996976
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S3",
+   "value": {
+    "T_v2": 391.071587,
+    "other": 38.949753,
+    "other_share": 0.099598,
+    "delta_T": 0.364623,
+    "industry_fe": 466.851619
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S3",
+   "value": {
+    "T_v2": 318.948569,
+    "other": 224.694971,
+    "other_share": 0.704487,
+    "delta_T": 0.0,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S3",
+   "value": {
+    "T_v2": 133.832264,
+    "other": 22.479872,
+    "other_share": 0.167971,
+    "delta_T": 0.005222,
+    "industry_fe": 144.783623
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S3",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S3",
+   "value": {
+    "T_v2": 56.6134,
+    "other": 40.927758,
+    "other_share": 0.722934,
+    "delta_T": 0.289459,
+    "industry_fe": 54.643087
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S3",
+   "value": {
+    "T_v2": 22.42823,
+    "other": 10.640059,
+    "other_share": 0.474405,
+    "delta_T": 0.595994,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S3",
+   "value": {
+    "T_v2": 14.797071,
+    "other": 6.315192,
+    "other_share": 0.426787,
+    "delta_T": 0.0,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S3",
+   "value": {
+    "T_v2": 1.704097,
+    "other": 1.037492,
+    "other_share": 0.608822,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S3",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S4",
+   "value": {
+    "T_v2": 1485.829778,
+    "other": 981.738616,
+    "other_share": 0.660734,
+    "delta_T": -95.791618,
+    "industry_fe": 1649.663439
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S4",
+   "value": {
+    "T_v2": 755.273097,
+    "other": 149.107903,
+    "other_share": 0.197422,
+    "delta_T": 0.0,
+    "industry_fe": 1016.996976
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S4",
+   "value": {
+    "T_v2": 391.071587,
+    "other": 38.949753,
+    "other_share": 0.099598,
+    "delta_T": 0.0,
+    "industry_fe": 466.851619
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S4",
+   "value": {
+    "T_v2": 318.948569,
+    "other": 224.694971,
+    "other_share": 0.704487,
+    "delta_T": 0.0,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S4",
+   "value": {
+    "T_v2": 132.256999,
+    "other": 22.479872,
+    "other_share": 0.169971,
+    "delta_T": -1.575265,
+    "industry_fe": 139.578849
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S4",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S4",
+   "value": {
+    "T_v2": 56.354692,
+    "other": 40.66905,
+    "other_share": 0.721662,
+    "delta_T": -0.258708,
+    "industry_fe": 54.344916
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S4",
+   "value": {
+    "T_v2": 22.42823,
+    "other": 10.640059,
+    "other_share": 0.474405,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S4",
+   "value": {
+    "T_v2": 14.797071,
+    "other": 6.315192,
+    "other_share": 0.426787,
+    "delta_T": 0.0,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S4",
+   "value": {
+    "T_v2": 1.704097,
+    "other": 1.037492,
+    "other_share": 0.608822,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S4",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5a",
+   "value": {
+    "T_v2": 1485.829778,
+    "other": 981.738616,
+    "other_share": 0.660734,
+    "delta_T": 0.0,
+    "industry_fe": 1649.663439
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5a",
+   "value": {
+    "T_v2": 755.273097,
+    "other": 149.107903,
+    "other_share": 0.197422,
+    "delta_T": 0.0,
+    "industry_fe": 1016.996976
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5a",
+   "value": {
+    "T_v2": 391.071587,
+    "other": 38.949753,
+    "other_share": 0.099598,
+    "delta_T": 0.0,
+    "industry_fe": 466.851619
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5a",
+   "value": {
+    "T_v2": 318.948569,
+    "other": 224.694971,
+    "other_share": 0.704487,
+    "delta_T": 0.0,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5a",
+   "value": {
+    "T_v2": 132.256999,
+    "other": 22.479872,
+    "other_share": 0.169971,
+    "delta_T": 0.0,
+    "industry_fe": 139.578849
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5a",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5a",
+   "value": {
+    "T_v2": 56.354692,
+    "other": 40.66905,
+    "other_share": 0.721662,
+    "delta_T": 0.0,
+    "industry_fe": 54.344916
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5a",
+   "value": {
+    "T_v2": 22.42823,
+    "other": 10.640059,
+    "other_share": 0.474405,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5a",
+   "value": {
+    "T_v2": 14.797071,
+    "other": 6.315192,
+    "other_share": 0.426787,
+    "delta_T": 0.0,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5a",
+   "value": {
+    "T_v2": 1.704097,
+    "other": 1.037492,
+    "other_share": 0.608822,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5a",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5b",
+   "value": {
+    "T_v2": 1490.02897,
+    "other": 985.937808,
+    "other_share": 0.66169,
+    "delta_T": 4.199192,
+    "industry_fe": 1649.663439
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5b",
+   "value": {
+    "T_v2": 761.129526,
+    "other": 154.964333,
+    "other_share": 0.203598,
+    "delta_T": 5.85643,
+    "industry_fe": 1016.996976
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5b",
+   "value": {
+    "T_v2": 392.380049,
+    "other": 38.949753,
+    "other_share": 0.099265,
+    "delta_T": 1.308462,
+    "industry_fe": 466.851619
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5b",
+   "value": {
+    "T_v2": 319.414817,
+    "other": 225.161218,
+    "other_share": 0.704918,
+    "delta_T": 0.466247,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5b",
+   "value": {
+    "T_v2": 132.256999,
+    "other": 22.479872,
+    "other_share": 0.169971,
+    "delta_T": 0.0,
+    "industry_fe": 139.578849
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5b",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5b",
+   "value": {
+    "T_v2": 56.457933,
+    "other": 40.772292,
+    "other_share": 0.722171,
+    "delta_T": 0.103241,
+    "industry_fe": 54.344916
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5b",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.574163,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5b",
+   "value": {
+    "T_v2": 15.082117,
+    "other": 6.600238,
+    "other_share": 0.43762,
+    "delta_T": 0.285046,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5b",
+   "value": {
+    "T_v2": 1.649844,
+    "other": 1.264244,
+    "other_share": 0.766281,
+    "delta_T": -0.054253,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5b",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5c",
+   "value": {
+    "T_v2": 1490.02897,
+    "other": 873.260423,
+    "other_share": 0.586069,
+    "delta_T": 0.0,
+    "industry_fe": 1649.663439
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5c",
+   "value": {
+    "T_v2": 761.129526,
+    "other": 154.964333,
+    "other_share": 0.203598,
+    "delta_T": 0.0,
+    "industry_fe": 1016.996976
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5c",
+   "value": {
+    "T_v2": 392.380049,
+    "other": 38.949753,
+    "other_share": 0.099265,
+    "delta_T": 0.0,
+    "industry_fe": 466.851619
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5c",
+   "value": {
+    "T_v2": 319.414817,
+    "other": 225.161218,
+    "other_share": 0.704918,
+    "delta_T": 0.0,
+    "industry_fe": 300.29498
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5c",
+   "value": {
+    "T_v2": 132.256999,
+    "other": 22.479872,
+    "other_share": 0.169971,
+    "delta_T": 0.0,
+    "industry_fe": 139.578849
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5c",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5c",
+   "value": {
+    "T_v2": 56.457933,
+    "other": 40.772292,
+    "other_share": 0.722171,
+    "delta_T": 0.0,
+    "industry_fe": 54.344916
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5c",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5c",
+   "value": {
+    "T_v2": 15.082117,
+    "other": 6.600238,
+    "other_share": 0.43762,
+    "delta_T": 0.0,
+    "industry_fe": 13.630879
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5c",
+   "value": {
+    "T_v2": 1.649844,
+    "other": 1.264244,
+    "other_share": 0.766281,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5c",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5d",
+   "value": {
+    "T_v2": 1480.734358,
+    "other": 829.200224,
+    "other_share": 0.559993,
+    "delta_T": -9.294612,
+    "industry_fe": 1640.368827
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5d",
+   "value": {
+    "T_v2": 760.106655,
+    "other": 157.608118,
+    "other_share": 0.20735,
+    "delta_T": -1.022871,
+    "industry_fe": 1014.769121
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5d",
+   "value": {
+    "T_v2": 390.095967,
+    "other": 36.449322,
+    "other_share": 0.093437,
+    "delta_T": -2.284082,
+    "industry_fe": 466.015653
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5d",
+   "value": {
+    "T_v2": 327.680889,
+    "other": 219.804501,
+    "other_share": 0.670788,
+    "delta_T": 8.266073,
+    "industry_fe": 308.174316
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5d",
+   "value": {
+    "T_v2": 133.88999,
+    "other": 22.479872,
+    "other_share": 0.167898,
+    "delta_T": 1.632991,
+    "industry_fe": 141.414556
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5d",
+   "value": {
+    "T_v2": 71.216151,
+    "other": 44.759531,
+    "other_share": 0.628503,
+    "delta_T": 0.0,
+    "industry_fe": 87.509571
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5d",
+   "value": {
+    "T_v2": 56.349444,
+    "other": 39.957427,
+    "other_share": 0.709101,
+    "delta_T": -0.108489,
+    "industry_fe": 54.168831
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5d",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5d",
+   "value": {
+    "T_v2": 14.8403,
+    "other": 5.790405,
+    "other_share": 0.390181,
+    "delta_T": -0.241818,
+    "industry_fe": 13.389061
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5d",
+   "value": {
+    "T_v2": 1.649844,
+    "other": 1.264244,
+    "other_share": 0.766281,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5d",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5e",
+   "value": {
+    "T_v2": 1479.599815,
+    "other": 829.200224,
+    "other_share": 0.560422,
+    "delta_T": -1.134543,
+    "industry_fe": 1632.995821
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5e",
+   "value": {
+    "T_v2": 760.106655,
+    "other": 157.608118,
+    "other_share": 0.20735,
+    "delta_T": 0.0,
+    "industry_fe": 1014.769121
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5e",
+   "value": {
+    "T_v2": 397.819302,
+    "other": 36.449322,
+    "other_share": 0.091623,
+    "delta_T": 7.723335,
+    "industry_fe": 452.042993
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5e",
+   "value": {
+    "T_v2": 334.233547,
+    "other": 196.272611,
+    "other_share": 0.587232,
+    "delta_T": 6.552657,
+    "industry_fe": 312.278299
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5e",
+   "value": {
+    "T_v2": 139.031297,
+    "other": 22.479872,
+    "other_share": 0.161689,
+    "delta_T": 5.141307,
+    "industry_fe": 145.168822
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5e",
+   "value": {
+    "T_v2": 92.132402,
+    "other": 40.323117,
+    "other_share": 0.437665,
+    "delta_T": 20.916252,
+    "industry_fe": 94.529002
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5e",
+   "value": {
+    "T_v2": 56.349444,
+    "other": 39.957427,
+    "other_share": 0.709101,
+    "delta_T": 0.0,
+    "industry_fe": 54.168831
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5e",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5e",
+   "value": {
+    "T_v2": 14.8403,
+    "other": 5.790405,
+    "other_share": 0.390181,
+    "delta_T": 0.0,
+    "industry_fe": 13.389061
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5e",
+   "value": {
+    "T_v2": 1.649844,
+    "other": 1.264244,
+    "other_share": 0.766281,
+    "delta_T": 0.0,
+    "industry_fe": 1.877555
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5e",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5f",
+   "value": {
+    "T_v2": 1478.996833,
+    "other": 829.200224,
+    "other_share": 0.56065,
+    "delta_T": -0.602981,
+    "industry_fe": 1630.368033
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5f",
+   "value": {
+    "T_v2": 759.453057,
+    "other": 157.940183,
+    "other_share": 0.207966,
+    "delta_T": -0.653598,
+    "industry_fe": 1014.769121
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5f",
+   "value": {
+    "T_v2": 397.515,
+    "other": 36.449322,
+    "other_share": 0.091693,
+    "delta_T": -0.304302,
+    "industry_fe": 452.042993
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5f",
+   "value": {
+    "T_v2": 339.542673,
+    "other": 184.119818,
+    "other_share": 0.542258,
+    "delta_T": 5.309127,
+    "industry_fe": 316.297411
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5f",
+   "value": {
+    "T_v2": 138.99407,
+    "other": 22.479872,
+    "other_share": 0.161733,
+    "delta_T": -0.037227,
+    "industry_fe": 145.168822
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5f",
+   "value": {
+    "T_v2": 92.132402,
+    "other": 40.323117,
+    "other_share": 0.437665,
+    "delta_T": 0.0,
+    "industry_fe": 94.529002
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5f",
+   "value": {
+    "T_v2": 56.327432,
+    "other": 39.957427,
+    "other_share": 0.709378,
+    "delta_T": -0.022012,
+    "industry_fe": 54.168831
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5f",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5f",
+   "value": {
+    "T_v2": 14.8403,
+    "other": 5.790405,
+    "other_share": 0.390181,
+    "delta_T": 0.0,
+    "industry_fe": 13.389061
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5f",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 4.157178,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5f",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S5g",
+   "value": {
+    "T_v2": 1488.676294,
+    "other": 829.200224,
+    "other_share": 0.557005,
+    "delta_T": 9.679461,
+    "industry_fe": 1640.047494
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S5g",
+   "value": {
+    "T_v2": 771.461822,
+    "other": 157.940183,
+    "other_share": 0.204728,
+    "delta_T": 12.008765,
+    "industry_fe": 1026.777886
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S5g",
+   "value": {
+    "T_v2": 402.047745,
+    "other": 36.449322,
+    "other_share": 0.090659,
+    "delta_T": 4.532745,
+    "industry_fe": 456.575738
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S5g",
+   "value": {
+    "T_v2": 366.07429,
+    "other": 184.119818,
+    "other_share": 0.502958,
+    "delta_T": 26.531617,
+    "industry_fe": 342.829027
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S5g",
+   "value": {
+    "T_v2": 138.99407,
+    "other": 22.479872,
+    "other_share": 0.161733,
+    "delta_T": 0.0,
+    "industry_fe": 145.168822
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S5g",
+   "value": {
+    "T_v2": 92.132402,
+    "other": 40.323117,
+    "other_share": 0.437665,
+    "delta_T": 0.0,
+    "industry_fe": 94.529002
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S5g",
+   "value": {
+    "T_v2": 56.327432,
+    "other": 39.957427,
+    "other_share": 0.709378,
+    "delta_T": 0.0,
+    "industry_fe": 54.168831
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S5g",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S5g",
+   "value": {
+    "T_v2": 19.078123,
+    "other": 5.790405,
+    "other_share": 0.30351,
+    "delta_T": 4.237823,
+    "industry_fe": 17.626884
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S5g",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 0.0,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S5g",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S6a",
+   "value": {
+    "T_v2": 1488.676294,
+    "other": 829.200224,
+    "other_share": 0.557005,
+    "delta_T": 0.0,
+    "industry_fe": 1640.047494
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S6a",
+   "value": {
+    "T_v2": 771.461822,
+    "other": 157.940183,
+    "other_share": 0.204728,
+    "delta_T": 0.0,
+    "industry_fe": 1026.777886
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S6a",
+   "value": {
+    "T_v2": 402.047745,
+    "other": 36.449322,
+    "other_share": 0.090659,
+    "delta_T": 0.0,
+    "industry_fe": 456.575738
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S6a",
+   "value": {
+    "T_v2": 358.141548,
+    "other": 176.187077,
+    "other_share": 0.491948,
+    "delta_T": -7.932742,
+    "industry_fe": 334.14291
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S6a",
+   "value": {
+    "T_v2": 138.99407,
+    "other": 22.479872,
+    "other_share": 0.161733,
+    "delta_T": 0.0,
+    "industry_fe": 145.168822
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S6a",
+   "value": {
+    "T_v2": 92.132402,
+    "other": 40.323117,
+    "other_share": 0.437665,
+    "delta_T": 0.0,
+    "industry_fe": 94.529002
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S6a",
+   "value": {
+    "T_v2": 56.327432,
+    "other": 39.957427,
+    "other_share": 0.709378,
+    "delta_T": 0.0,
+    "industry_fe": 54.168831
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S6a",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S6a",
+   "value": {
+    "T_v2": 19.078123,
+    "other": 5.790405,
+    "other_share": 0.30351,
+    "delta_T": 0.0,
+    "industry_fe": 17.626884
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S6a",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 0.0,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S6a",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S6b",
+   "value": {
+    "T_v2": 1488.676294,
+    "other": 829.200224,
+    "other_share": 0.557005,
+    "delta_T": 0.0,
+    "industry_fe": 1640.047494
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S6b",
+   "value": {
+    "T_v2": 771.623796,
+    "other": 144.397733,
+    "other_share": 0.187135,
+    "delta_T": 0.161974,
+    "industry_fe": 1025.382013
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S6b",
+   "value": {
+    "T_v2": 400.488545,
+    "other": 36.449322,
+    "other_share": 0.091012,
+    "delta_T": -1.5592,
+    "industry_fe": 454.255232
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S6b",
+   "value": {
+    "T_v2": 359.098484,
+    "other": 173.880043,
+    "other_share": 0.484213,
+    "delta_T": 0.956936,
+    "industry_fe": 334.894159
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S6b",
+   "value": {
+    "T_v2": 141.31089,
+    "other": 22.479872,
+    "other_share": 0.159081,
+    "delta_T": 2.316821,
+    "industry_fe": 147.485642
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S6b",
+   "value": {
+    "T_v2": 92.16336,
+    "other": 40.13829,
+    "other_share": 0.435512,
+    "delta_T": 0.030958,
+    "industry_fe": 94.546523
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S6b",
+   "value": {
+    "T_v2": 56.534051,
+    "other": 39.418571,
+    "other_share": 0.697254,
+    "delta_T": 0.206618,
+    "industry_fe": 54.375569
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S6b",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S6b",
+   "value": {
+    "T_v2": 18.794186,
+    "other": 5.140962,
+    "other_share": 0.27354,
+    "delta_T": -0.283937,
+    "industry_fe": 17.342947
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S6b",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 0.0,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S6b",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S6c",
+   "value": {
+    "T_v2": 1488.676294,
+    "other": 829.200224,
+    "other_share": 0.557005,
+    "delta_T": 0.0,
+    "industry_fe": 1640.047494
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S6c",
+   "value": {
+    "T_v2": 742.461487,
+    "other": 175.166286,
+    "other_share": 0.235926,
+    "delta_T": -29.162309,
+    "industry_fe": 1025.382013
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S6c",
+   "value": {
+    "T_v2": 400.488545,
+    "other": 36.449322,
+    "other_share": 0.091012,
+    "delta_T": 0.0,
+    "industry_fe": 454.255232
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S6c",
+   "value": {
+    "T_v2": 359.098484,
+    "other": 173.880043,
+    "other_share": 0.484213,
+    "delta_T": 0.0,
+    "industry_fe": 334.894159
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S6c",
+   "value": {
+    "T_v2": 141.31089,
+    "other": 22.479872,
+    "other_share": 0.159081,
+    "delta_T": 0.0,
+    "industry_fe": 147.485642
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S6c",
+   "value": {
+    "T_v2": 92.16336,
+    "other": 40.13829,
+    "other_share": 0.435512,
+    "delta_T": 0.0,
+    "industry_fe": 94.546523
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S6c",
+   "value": {
+    "T_v2": 56.534051,
+    "other": 39.418571,
+    "other_share": 0.697254,
+    "delta_T": 0.0,
+    "industry_fe": 54.375569
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S6c",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S6c",
+   "value": {
+    "T_v2": 18.794186,
+    "other": 5.140962,
+    "other_share": 0.27354,
+    "delta_T": 0.0,
+    "industry_fe": 17.342947
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S6c",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 0.0,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S6c",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ID.S7",
+   "value": {
+    "T_v2": 1488.676294,
+    "other": 829.200224,
+    "other_share": 0.557005,
+    "delta_T": 0.0,
+    "industry_fe": 1640.047494
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.VN.S7",
+   "value": {
+    "T_v2": 742.461487,
+    "other": 175.166286,
+    "other_share": 0.235926,
+    "delta_T": 0.0,
+    "industry_fe": 1025.382013
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TH.S7",
+   "value": {
+    "T_v2": 400.488545,
+    "other": 36.449322,
+    "other_share": 0.091012,
+    "delta_T": 0.0,
+    "industry_fe": 454.255232
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MY.S7",
+   "value": {
+    "T_v2": 359.098484,
+    "other": 173.880043,
+    "other_share": 0.484213,
+    "delta_T": 0.0,
+    "industry_fe": 334.894159
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.PH.S7",
+   "value": {
+    "T_v2": 141.31089,
+    "other": 22.479872,
+    "other_share": 0.159081,
+    "delta_T": 0.0,
+    "industry_fe": 147.485642
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.SG.S7",
+   "value": {
+    "T_v2": 92.16336,
+    "other": 40.13829,
+    "other_share": 0.435512,
+    "delta_T": 0.0,
+    "industry_fe": 94.546523
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.MM.S7",
+   "value": {
+    "T_v2": 56.534051,
+    "other": 39.418571,
+    "other_share": 0.697254,
+    "delta_T": 0.0,
+    "industry_fe": 54.375569
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.KH.S7",
+   "value": {
+    "T_v2": 23.002394,
+    "other": 11.214223,
+    "other_share": 0.487524,
+    "delta_T": 0.0,
+    "industry_fe": 38.87851
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.LA.S7",
+   "value": {
+    "T_v2": 18.794186,
+    "other": 5.140962,
+    "other_share": 0.27354,
+    "delta_T": 0.0,
+    "industry_fe": 17.342947
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.BN.S7",
+   "value": {
+    "T_v2": 5.807021,
+    "other": 1.264244,
+    "other_share": 0.21771,
+    "delta_T": 0.0,
+    "industry_fe": 6.042157
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.TL.S7",
+   "value": {
+    "T_v2": 0.0,
+    "other": 0.0,
+    "other_share": 0.0,
+    "delta_T": 0.0,
+    "industry_fe": 0.0
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S0",
+   "value": {
+    "T_v2": 3820.053762,
+    "other": 2003.848726,
+    "other_share": 0.52456,
+    "delta_T": 0.0,
+    "industry_fe": 4500.017654
+   },
+   "unit": "TWh (2050)",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S0: v3",
+   "note": "EXACT"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S1",
+   "value": {
+    "T_v2": 3728.653268,
+    "other": 1706.673057,
+    "other_share": 0.457718,
+    "delta_T": -91.400493,
+    "industry_fe": 4288.344197
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "A",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S1: 基年替换（SDMX，IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S2",
+   "value": {
+    "T_v2": 3519.59263,
+    "other": 1780.729485,
+    "other_share": 0.505948,
+    "delta_T": -209.060639,
+    "industry_fe": 4119.085844
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S2: 锚边界对齐（残渣移出；ID 平衡表外生物质按口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S3",
+   "value": {
+    "T_v2": 3347.505861,
+    "other": 1616.442765,
+    "other_share": 0.48288,
+    "delta_T": -172.086769,
+    "industry_fe": 3887.181559
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S3: (ii) 类：ID 家庭汽油移道路、铁路父行移出（IId）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S4",
+   "value": {
+    "T_v2": 3249.88027,
+    "other": 1520.39244,
+    "other_share": 0.46783,
+    "delta_T": -97.625591,
+    "industry_fe": 3769.627293
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S4: (i) 类：自备电厂 (b)（口径 I）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5a",
+   "value": {
+    "T_v2": 3249.88027,
+    "other": 1520.39244,
+    "other_share": 0.46783,
+    "delta_T": 0.0,
+    "industry_fe": 3769.627293
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5a: 钢（只换空间）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5b",
+   "value": {
+    "T_v2": 3262.618799,
+    "other": 1532.103512,
+    "other_share": 0.469593,
+    "delta_T": 12.738529,
+    "industry_fe": 3769.627293
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5b: 水泥 (ii) / BN (iii)",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5c",
+   "value": {
+    "T_v2": 3262.618799,
+    "other": 1419.426127,
+    "other_share": 0.435057,
+    "delta_T": 0.0,
+    "industry_fe": 3769.627293
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "B",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5c: 镍 2023 基年（Case 3）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5d",
+   "value": {
+    "T_v2": 3259.565991,
+    "other": 1368.527867,
+    "other_share": 0.41985,
+    "delta_T": -3.052808,
+    "industry_fe": 3766.566
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5d: 纸浆造纸（统一规则）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5e",
+   "value": {
+    "T_v2": 3298.764998,
+    "other": 1340.559564,
+    "other_share": 0.406382,
+    "delta_T": 39.199007,
+    "industry_fe": 3760.098014
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5e: HVC（2019 在运装置，5.191 / 4.627）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5f",
+   "value": {
+    "T_v2": 3306.611182,
+    "other": 1328.738836,
+    "other_share": 0.401843,
+    "delta_T": 7.846184,
+    "industry_fe": 3765.65394
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5f: 甲醇（去欧盟份额；MY / ID / BN 显式）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S5g",
+   "value": {
+    "T_v2": 3363.601592,
+    "other": 1328.738836,
+    "other_share": 0.395035,
+    "delta_T": 56.99041,
+    "industry_fe": 3822.64435
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S5g: 新装置（LINE、PIC、Sarawak 甲醇、龙山、No 5、LA 纸线）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S6a",
+   "value": {
+    "T_v2": 3355.668851,
+    "other": 1320.806095,
+    "other_share": 0.393604,
+    "delta_T": -7.932742,
+    "industry_fe": 3813.958232
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6a: MY 合成氨燃料重复（中档）",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S6b",
+   "value": {
+    "T_v2": 3357.499021,
+    "other": 1303.583484,
+    "other_share": 0.38826,
+    "delta_T": 1.83017,
+    "industry_fe": 3813.250245
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6b: 玻璃、氧化铝、铜、石灰",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S6c",
+   "value": {
+    "T_v2": 3328.336712,
+    "other": 1334.352037,
+    "other_share": 0.400907,
+    "delta_T": -29.162309,
+    "industry_fe": 3813.250245
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S6c: VN 混合拆分、同一次运行",
+   "note": "PROPOSED (quantified)"
+  },
+  {
+   "id": "I2_steps.ASEAN11.S7",
+   "value": {
+    "T_v2": 3328.336712,
+    "other": 1334.352037,
+    "other_share": 0.400907,
+    "delta_T": 0.0,
+    "industry_fe": 3813.250245
+   },
+   "unit": "TWh (2050)",
+   "status": "PROPOSED",
+   "grade": "C",
+   "source": "tables/I2_STEPS_LONG.csv (scratch chain run)",
+   "locator": "step S7: 网络层：生物质上限 99 %、潜力调整（只影响溢出）",
+   "note": "PROPOSED (quantified)"
+  }
+ ],
+ "files": [
+  {
+   "path": "REPORT.md",
+   "bytes": 31841,
+   "sha256": "dbba743dfeffdbf390cb1dc939ebb574be91b87010360e97356d5b85dcf07244"
+  },
+  {
+   "path": "W08_IMPLEMENTATION_SPEC.md",
+   "bytes": 16291,
+   "sha256": "b90c9c1cb47f08c8cb23895d6af054b810860b28be43fbe32ded0117684ff8e8"
+  },
+  {
+   "path": "W08_VALIDATION_PLAN.md",
+   "bytes": 6192,
+   "sha256": "c56298078424635f860370e4b001ffb544164089933011bf7e391798d5a8eba6"
+  },
+  {
+   "path": "ASEAN_V4_SUMMARY.csv",
+   "bytes": 3797,
+   "sha256": "002946d63e03c7e5e9a3d63f4de804a12e5d5263ca7597302f31f2b7acdf30e8"
+  },
+  {
+   "path": "BIOMASS_POTENTIAL_ADJ.csv",
+   "bytes": 12552,
+   "sha256": "e1b5636a2bbea96a293942418f601ae4fde72995650ad9fc4981b043ebda467e"
+  },
+  {
+   "path": "SENSITIVITY_TOP10.csv",
+   "bytes": 2485,
+   "sha256": "26501bcec5483dff677cc95503ec3f78371cf9d6fc744eae91ad246128e35aea"
+  },
+  {
+   "path": "MISSING_DATA_ALL.csv",
+   "bytes": 19099,
+   "sha256": "beb910a6adcb6aea031ffc8a84925ebc685e69d01f6082d15fa0520f8f9a5c45"
+  },
+  {
+   "path": "PROGRESS.md",
+   "bytes": 2659,
+   "sha256": "9d9df7258a5107b2273d9d22b2fc1450a6839854d1a012502d702921ab73d171"
+  },
+  {
+   "path": "LEDGER_ENTRY_DRAFT.md",
+   "bytes": 2470,
+   "sha256": "b7d6e9c551bd83baa4a461b367bd067f5e409da4b515b05fc4d2db9799cd51c8"
+  },
+  {
+   "path": "BN_V4_FINAL.csv",
+   "bytes": 12803,
+   "sha256": "fc52eea939120f04bebcbdc10c3e09750da98fcf820cbf5231daad9d22a79bfe"
+  },
+  {
+   "path": "ID_V4_FINAL.csv",
+   "bytes": 21993,
+   "sha256": "cabe558592adeaa819a402c5bf2640614a8d85ffd4c2682e30e99c704967fb59"
+  },
+  {
+   "path": "KH_V4_FINAL.csv",
+   "bytes": 13445,
+   "sha256": "320fee2acc2bcc63db11d0465eb7cf9c64d7e9fa74cf6fd52f45af5ba09b3c88"
+  },
+  {
+   "path": "LA_V4_FINAL.csv",
+   "bytes": 14210,
+   "sha256": "624ab5ec49bbe600d8da803792eaec7ddc39f68c5cc9c21bf6aac206a83ea517"
+  },
+  {
+   "path": "MM_V4_FINAL.csv",
+   "bytes": 15862,
+   "sha256": "b9f5258c7b96af3b8437847b544f3805ddc088994ffa8d21d5e6da99faf12430"
+  },
+  {
+   "path": "MY_V4_FINAL.csv",
+   "bytes": 16127,
+   "sha256": "5401e80eb58a1ea0981680233f7186529a6cce8fdd47fd61afa64e9ba96c3d5c"
+  },
+  {
+   "path": "PH_V4_FINAL.csv",
+   "bytes": 14476,
+   "sha256": "87dd26d5433bf7f2c2b6c0b799873f6d842f48504b33aeddad5fba5e37ceedd5"
+  },
+  {
+   "path": "SG_V4_FINAL.csv",
+   "bytes": 13366,
+   "sha256": "bc7f8ac5afe71f1242aa36676f5b25b4fb41f738e4e106d3c26a5dbc3ff9cddc"
+  },
+  {
+   "path": "TH_V4_FINAL.csv",
+   "bytes": 15099,
+   "sha256": "b4568972d65c370a08b0605a83b4d9a853e07b053cf36aa5f55f989aa41548d6"
+  },
+  {
+   "path": "TL_V4_FINAL.csv",
+   "bytes": 10892,
+   "sha256": "19e5d8d931931da532e8a76e974402632ceab917a317b654ed597679ae9f80bf"
+  },
+  {
+   "path": "VN_V4_FINAL.csv",
+   "bytes": 15574,
+   "sha256": "a0a3f049dbc9ce3f85b334f679ed29a3a6a2de615f4c986fae42bce039510bc8"
+  },
+  {
+   "path": "tables/I2_ADDITIVITY.csv",
+   "bytes": 1079,
+   "sha256": "a42834b97e4c965f05dc07e659808110d52102c47fdc78389b81a3bd795870b8"
+  },
+  {
+   "path": "tables/I2_AEO8_DEVIATION.csv",
+   "bytes": 4663,
+   "sha256": "a2226788ac7e8e294c08034295f06725b94996b6946fc3f070762f8875dae719"
+  },
+  {
+   "path": "tables/I2_BASE_CHECKS.csv",
+   "bytes": 1182,
+   "sha256": "0fa7d03da9048c21d4014a7889eac51c65d65ba927fb22cea93ddc8d381588f7"
+  },
+  {
+   "path": "tables/I2_CURVE_WEIGHTS.csv",
+   "bytes": 9619,
+   "sha256": "284371fdfdc32e4cfbe110d140dd6b548dafffde1c871a3369261aa4e363cbd0"
+  },
+  {
+   "path": "tables/I2_DEDUCTION_LOG.csv",
+   "bytes": 2480,
+   "sha256": "98abc3b51607f185798add22b3b537201da6bec0f08ef323dd165a1252f9730f"
+  },
+  {
+   "path": "tables/I2_MISSING_DATA_ROWS.csv",
+   "bytes": 24672,
+   "sha256": "bd5a8ee15e082f152ac478860f8d27bd1e37bb42d67d563c6ccde5614cac796f"
+  },
+  {
+   "path": "tables/I2_NODE_SHARES_BY_STEP.csv",
+   "bytes": 84124,
+   "sha256": "f3a7672a307fd888b3f37143ab39ee7d0d943fa9b5d0f340d606324398a76e69"
+  },
+  {
+   "path": "tables/I2_PEAK_IMPACT_ASEAN.csv",
+   "bytes": 1554,
+   "sha256": "24e6c07d99ec9fdac900b9ac18eb61a6fb8ecac21c871106a405e2281a2b898a"
+  },
+  {
+   "path": "tables/I2_PEAK_IMPACT_BY_COUNTRY.csv",
+   "bytes": 1888,
+   "sha256": "db09e18e597708d24440e22df692051a3dcbe8262238f360524efa9763b02a0b"
+  },
+  {
+   "path": "tables/I2_REPRODUCTION.csv",
+   "bytes": 11229,
+   "sha256": "9fc3f366b073b0365b15e3c8c6c6c7dacf18f976d8c7beaaf7aca3dcb2047416"
+  },
+  {
+   "path": "tables/I2_RESIDUE_A_RECORDS.csv",
+   "bytes": 1919,
+   "sha256": "184c72780403d28e4ded58ccfaedc079afc77e95c40cd95277dce984ff1ec582"
+  },
+  {
+   "path": "tables/I2_RUNS_INDEX.csv",
+   "bytes": 4371,
+   "sha256": "2c53d92046509f19f4d68add1e5cdaccdde51e6536bc5278e03ac1632d620cb1"
+  },
+  {
+   "path": "tables/I2_SENSITIVITY_ALL.csv",
+   "bytes": 25075,
+   "sha256": "392ea37cdcd43e2e3124cf5247102d8a64b9758bc25333154687861176a3b939"
+  },
+  {
+   "path": "tables/I2_SENSITIVITY_RUNS.csv",
+   "bytes": 41243,
+   "sha256": "36b5cd15c2baa0ff95936b29003342f8b37ba53702e41e94184658c75ade6962"
+  },
+  {
+   "path": "tables/I2_SINGLE_STEPS.csv",
+   "bytes": 13875,
+   "sha256": "3d3428a439581642fa701344c13524f4f417c49528e3efbe13d961a82bd58537"
+  },
+  {
+   "path": "tables/I2_STEPS_LONG.csv",
+   "bytes": 118493,
+   "sha256": "b895e9bc53782e97cc9f8db9dcbba1859e0cff597275b6d09a102a7c59e9df40"
+  },
+  {
+   "path": "tables/I2_V4_DISPERSED_BY_UNSD_ROW.csv",
+   "bytes": 8798,
+   "sha256": "db109fc3e31c8a7dff5b9b0e9e12ac39b55a690a52fd877a541ea1de3a527ad4"
+  },
+  {
+   "path": "tables/I2_V4_SUBSECTOR_CARRIER.csv",
+   "bytes": 9659,
+   "sha256": "9850d3e3367e1a380904ccdc934cbb2d7c5c465cf091ebc57e97fb9e817a6a97"
+  },
+  {
+   "path": "scripts/i2_base.py",
+   "bytes": 7110,
+   "sha256": "c68d2f7f4808c08494b736cf7b316099c5972800d9f95b2b285ab28cf6a20f8f"
+  },
+  {
+   "path": "scripts/i2_biomass.py",
+   "bytes": 8772,
+   "sha256": "aeb2f88f7dcb122e5aff2b8d7e6ebcdf8e430cec20db47fd8f3ece200a8bf156"
+  },
+  {
+   "path": "scripts/i2_chain.py",
+   "bytes": 30891,
+   "sha256": "6f8ad6d485b04064ed1f9d3aae25f8642defc96a3bb06f5ffd3073d2ed5f86c5"
+  },
+  {
+   "path": "scripts/i2_common.py",
+   "bytes": 4908,
+   "sha256": "9a34992b622460e921d879235ec4710fff8f3c3569cf91f50a493473fb969bd9"
+  },
+  {
+   "path": "scripts/i2_engine.py",
+   "bytes": 33661,
+   "sha256": "7a5f5a26a0c0d03e886fe521b336e99295b8298ea0e7a54c06eccd2189474afb"
+  },
+  {
+   "path": "scripts/i2_evidence.py",
+   "bytes": 3792,
+   "sha256": "4f6403e975a3f89f7295d0344068de28e83d1714c5f3a78d5ca4cf3514eef9f4"
+  },
+  {
+   "path": "scripts/i2_items.py",
+   "bytes": 21871,
+   "sha256": "1ec27d72081329c52926aa42a651001ffa27982196407d57ed13bfcc2a2ac214"
+  },
+  {
+   "path": "scripts/i2_missing.py",
+   "bytes": 13517,
+   "sha256": "9e64e323ad0fa0aa1265f59011856a48d267a20fe25884c40713a8e57fbe2249"
+  },
+  {
+   "path": "scripts/i2_peaks.py",
+   "bytes": 8069,
+   "sha256": "cf636482ac7e80062196a80ecedccb265fdef34b3afc624af4e1456eceb1f493"
+  },
+  {
+   "path": "scripts/i2_repro.py",
+   "bytes": 12079,
+   "sha256": "f41caf728e904f1c0fa2fa86af3f285f9dc414b47d54761e8f3ea6aa23f544f2"
+  },
+  {
+   "path": "scripts/i2_review_zip.py",
+   "bytes": 1995,
+   "sha256": "221dfd37aa2d9033f4f88222b33b35c0509f3cabe5383a87b0ab119a4a89b903"
+  },
+  {
+   "path": "scripts/i2_sens.py",
+   "bytes": 9134,
+   "sha256": "315fbe8efaea863815c705682458f810558aa54657624b3930968f20b974a796"
+  },
+  {
+   "path": "scripts/i2_sync.py",
+   "bytes": 1841,
+   "sha256": "f66575cd9502f2cfb1cb5ffb470cf756ddcfa8eecee8217dfb91c18c4a7959e6"
+  },
+  {
+   "path": "scripts/i2_tables.py",
+   "bytes": 27760,
+   "sha256": "18b75f61aea4061485baff4ac30d347f522598dfa967c038f36786f3e26e1918"
+  },
+  {
+   "path": "figures/fig_i2_asean_sectors.png",
+   "bytes": 31883,
+   "sha256": "ae1f7a3f85796e646003e41ea80d6713421041416d8e1269ff3867a081d81fdf"
+  },
+  {
+   "path": "figures/fig_i2_other_share.png",
+   "bytes": 33996,
+   "sha256": "a4bd9f053e792b02d3723e29736540d605951118c3ae8c72d928bf092cfa9dfb"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_ASEAN11.png",
+   "bytes": 71152,
+   "sha256": "8a92ee9b74dac3d9fef092a50606d890102cc5dacabef8ebff2b8ced0b05302a"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_BN.png",
+   "bytes": 60615,
+   "sha256": "66c59626fab64036655f103ce8723f88cf7933d407fc0fe8bdea9bf000a5f97b"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_ID.png",
+   "bytes": 68116,
+   "sha256": "dc29d2de88e1895342fd6c3788c8d5bd8ee6f6da4a249ffde1c0da693c02179d"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_KH.png",
+   "bytes": 59746,
+   "sha256": "461d9abcdfab0b8b00637c84fe1adcf9410f1a843ce8de2ad51dd443fffec8e3"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_LA.png",
+   "bytes": 61478,
+   "sha256": "1302a59c5f48ad6bb1dc112c9abcff96caf7d986f93feca7b4a9454e777058bc"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_MM.png",
+   "bytes": 65119,
+   "sha256": "6fd90bd7dffa08643fd697903f21ee384ed5d37bd8e66c92c9eea9330663528b"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_MY.png",
+   "bytes": 67125,
+   "sha256": "4c6e41510fb721d76fe14c4a62af1485294340c50ba933cea105e2c57c981375"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_PH.png",
+   "bytes": 63280,
+   "sha256": "ef7669e748f204bb892636788f788cf9b6ea6c148a9770aa348f6a19aad36fa6"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_SG.png",
+   "bytes": 61721,
+   "sha256": "416c8bc9bd386c0609794f656682f496c5795c2a6d9ae275fe225c3266a1353c"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_TH.png",
+   "bytes": 66209,
+   "sha256": "b7c9d0c47024f9a8f7c75d82b01a691c8cd1fdd94f174d8984ec527617daa1c6"
+  },
+  {
+   "path": "figures/fig_i2_waterfall_VN.png",
+   "bytes": 64421,
+   "sha256": "27938b92d6afb82729576cb4b5b4a6083f11f43e718eeb1ebfe79a3ca8b157c2"
+  }
+ ]
+}
