@@ -1,0 +1,28 @@
+item,value,unit,source,grade
+EDGAR 2025 2.A.1 2019,6579.452921,kt CO2,EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv,B
+EDGAR 2025 2.A.1 2024,8199.569108,kt CO2,same,B
+clinker 2019 = 2.A.1 / 0.52,12652.794079,kt,IPCC 2006 default EF with CKD (registry industry_clinker_emission_factor_ipcc),C
+clinker 2024 = 2.A.1 / 0.52,15768.402131,kt,same,C
+v3 cement equivalent 2019 = clinker / 0.656,19287.795852,kt,s3_0 (technology-data cement finishing),C
+USGS cement 2019,16102.000000,kt,USGS MYB 2023 Cement T22,A
+USGS cement 2020,19936.000000,kt,USGS MYB 2023 Cement T22,A
+USGS cement 2021,19961.000000,kt,USGS MYB 2023 Cement T22,A
+USGS cement 2022,19856.000000,kt,USGS MYB 2023 Cement T22,A
+USGS cement 2023,23191.000000,kt,USGS MYB 2023 Cement T22,A
+implied clinker / cement 2019 (EDGAR / USGS),0.785790,-,derived,C
+"implied clinker / cement, EDGAR 2024 / USGS 2023",0.679936,-,derived (years differ),C
+v3 cement equivalent / USGS 2019,1.197851,-,derived,C
+v3 2019 cement deduction total,16.615557,TWh,s3_0 output,C
+v3 2019 kiln fuel (0.7548 MWh/t x cement equivalent),14.559133,TWh,PyPSA-Eur Cement ratio,C
+v3 2019 grinding electricity (0.1066 MWh/t x cement equivalent),2.056424,TWh,PyPSA-Eur Cement ratio,C
+UNSD 2019 NMM hard coal (Estimate) x v3 factor,8.834696,TWh,"UNdata export 1,232.691 kt x 0.007167 TWh/kt",C
+"kiln fuel taken from 'other' (gas and oil, spread) in v3",5.724437,TWh,s3_0 cement logic (excess over the NMM row),C
+grinding electricity taken from 'other' in v3,2.056424,TWh,s3_0 cement logic (NMM row has no electricity),C
+correction (ii): grinding electricity on USGS 2019 cement,1.716761,TWh,"0.1066 MWh/t x 16,102 kt",C
+correction (ii): change of the 2019 cement deduction,-0.339663,TWh,derived,C
+"kiln heat need at ETSAP BAT 2.9 GJ/t clinker, as hard coal at 26.394 GJ/t",1390.206215,kt coal-eq,ETSAP BAT clinker heat,C
+kiln fuel of v3 (0.7548 MWh/t cement-eq) as hard coal at 26.394 GJ/t,1985.787645,kt coal-eq,derived,C
+"NEB 2019 industry coal (table 9) = UNSD NMM coal + coke into BF (difference, t)",-46.000000,t,NEB 2019 p.46; UNSD,A
+GEM GCCT 2026-07 cement_mtpa,31.210000,-,S0 coverage table,B
+GEM GCCT 2026-07 clinker_mtpa,23.640000,-,S0 coverage table,B
+GEM GCCT 2026-07 plants,21.000000,-,S0 coverage table,B
