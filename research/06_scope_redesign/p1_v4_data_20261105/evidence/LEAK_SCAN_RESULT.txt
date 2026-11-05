@@ -1,0 +1,14 @@
+V4 S0 stop-condition check (licence content / login data), scripts/v4s0_leak_scan.py, 2026-11-05, 915.8 s
+
+Scope: every file under downloads/ (37) and extracted/ (399 members), xlsx and zip members decompressed, nested Climate TRACE V5.5.0 per-gas zips scanned member by member.
+Personal patterns: 3 forms of the requesting user's name and e-mail domain, supplied through an environment variable at run time (not stored in any file).
+
+Result
+- Personal pattern hits: none.
+- Generic token markers: only in Global-Energy-Ownership-Tracker-October-2026-V1.xlsx (two byte-identical copies, in 01_gem_steel and 02_gem_cement):
+  'access_token' / 'token=' inside third-party source URLs cited by GEM (ASX research file links on cdn-api.markitdigital.com, a German
+  company-register search token, corporate PDF 'channelToken' parameters). Values were masked when inspected and are not reproduced here.
+  These are public citation URLs of the GEM dataset, not credentials of this project; the Ownership Tracker is not used in S0 and no raw
+  download or extracted file is committed.
+
+Verdict: the stop condition 'possible leak of licence content or login data' is not triggered.
