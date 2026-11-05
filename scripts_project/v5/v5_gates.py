@@ -405,7 +405,11 @@ def nodal_prices(n):
     for bus in mp.columns:
         z=n.buses.loc[bus];v=mp[bus]
         rows.append(dict(bus=bus,carrier=str(z.carrier),country=str(z.get('country','')),time_weighted_mean=float((v*w).sum()/w.sum()),minimum=float(v.min()),maximum=float(v.max())))
-    return pd.DataFrame(rows),mp
+    from s4c_layers import blank_bunker_account_price  # V3.1 (decision 195): the bunker account row keeps its place, values NaN + note
+    s=pd.DataFrame(rows)
+    if not len(s):return s,mp
+    s=blank_bunker_account_price(s.set_index('bus'),['time_weighted_mean','minimum','maximum']).reset_index()
+    return s,mp
 
 def cross_border_flows(n):
     rows=[];w=n.snapshot_weightings.objective

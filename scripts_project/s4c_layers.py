@@ -46,7 +46,8 @@ S4C-3 (decision 88, modifying decision 10):
     'co2 bunkers ASEAN' account (same Store contract as the national atmospheres) whose final level must be <= 0 on its own
     (hook research_bunker_net_zero, row research_bunker_co2_limit). No removal can enter the account (every port is an emission port;
     validate_bunker_account), so no country's negative emissions are transferred to it (decision 9) and the account can only be met with
-    non-fossil fuel. Methanol is zero at use under origin_neutral (decision 64: its carbon is booked at synthesis in the producing
+    non-fossil fuel. V3.1 (decision 195): the hook writes this explicitly per variable (every metering flow into the account = 0 in every
+    snapshot, same row name), which is equivalent under the premises checked by validate_bunker_account and has no zero-slack row. Methanol is zero at use under origin_neutral (decision 64: its carbon is booked at synthesis in the producing
     country), so asean_pool requires research.s3.fuel_carbon_mode = origin_neutral.
 
 S4C-4 (decision 89):
@@ -472,9 +473,63 @@ def _attached(n, bus):
     return out
 
 
+def _efficiency_col(port: str) -> str:
+    return "efficiency" if port == "bus1" else "efficiency" + port[3:]
+
+
+def bunker_account_premises(n, store: str, ports: list) -> dict:
+    """V3.1 (decision 195): the premises under which 'final level of the bunker account <= 0' is equivalent to 'every metering flow into the account
+    is 0 in every snapshot' (the per-variable form of install_bunker_net_zero), measured on the network:
+      (i)   every port on the account is an emission port with a coefficient > 0 (static and, if present, time-varying efficiency) - no removal port;
+      (ii)  the metering links cannot run backwards: p_min_pu >= 0 (static and time-varying), so every port flow into the account is >= 0;
+      (iii) the account starts at 0, is not cyclic and has no standing loss (the national atmosphere contract);
+      (iv)  every snapshot has a positive stores weighting and a positive objective weighting.
+    Then the account level is the weighted sum of non-negative inflows: level_T <= 0 <=> every inflow = 0 <=> every metering flow = 0.
+    Returns the measured values and the list of failed premises (empty = all hold)."""
+    fails = []
+    links = list(dict.fromkeys(p["link"] for p in ports))
+    coef = [float(p["coefficient_t_per_mwh"]) for p in ports]
+    if any(k <= 0 for k in coef):
+        fails.append("(i) port coefficient <= 0: " + ", ".join(p["link"] + " " + p["port"] for p in ports if float(p["coefficient_t_per_mwh"]) <= 0)[:300])
+    tv_coef = []
+    for p in ports:
+        df = n.links_t.get(_efficiency_col(p["port"]))
+        if df is not None and p["link"] in getattr(df, "columns", []):
+            tv_coef.append(float(df[p["link"]].min()))
+    if any(k <= 0 for k in tv_coef):
+        fails.append("(i) time-varying port coefficient <= 0")
+    pmin_static = [float(n.links.at[x, "p_min_pu"]) for x in links]
+    if any(v < 0 for v in pmin_static):
+        fails.append("(ii) metering link p_min_pu < 0: " + ", ".join(x for x in links if float(n.links.at[x, "p_min_pu"]) < 0)[:300])
+    tv = n.links_t.get("p_min_pu"); tv_cols = [x for x in links if tv is not None and x in tv.columns]
+    pmin_tv = float(tv[tv_cols].min().min()) if tv_cols else None
+    if pmin_tv is not None and pmin_tv < 0:
+        fails.append("(ii) metering link time-varying p_min_pu < 0")
+    e_initial, e_cyclic, standing = float(n.stores.at[store, "e_initial"]), bool(n.stores.at[store, "e_cyclic"]), float(n.stores.at[store, "standing_loss"])
+    if e_initial != 0:
+        fails.append(f"(iii) account e_initial = {e_initial} != 0")
+    if e_cyclic:
+        fails.append("(iii) account is cyclic")
+    if standing != 0:
+        fails.append(f"(iii) account standing_loss = {standing} != 0")
+    ws, wo = n.snapshot_weightings.stores, n.snapshot_weightings.objective
+    if len(ws) and float(ws.min()) <= 0:
+        fails.append(f"(iv) stores weighting <= 0 in {int((ws <= 0).sum())} snapshot(s)")
+    if len(wo) and float(wo.min()) <= 0:
+        fails.append(f"(iv) objective weighting <= 0 in {int((wo <= 0).sum())} snapshot(s)")
+    return dict(ports=len(ports), metering_links=len(links), removal_ports=int(sum(k <= 0 for k in coef + tv_coef)),
+                coefficient_min=(min(coef) if coef else None), coefficient_max=(max(coef) if coef else None),
+                time_varying_coefficient_min=(min(tv_coef) if tv_coef else None), p_min_pu_static_min=(min(pmin_static) if pmin_static else None),
+                p_min_pu_time_varying_min=pmin_tv, e_initial=e_initial, e_cyclic=e_cyclic, standing_loss=standing,
+                snapshots=int(len(ws)), stores_weighting_min=(float(ws.min()) if len(ws) else None), objective_weighting_min=(float(wo.min()) if len(wo) else None),
+                failed=fails, passed=not fails)
+
+
 def validate_bunker_account(n) -> dict:
-    """The bunker account: one Store with the national atmosphere contract; every Link port on it is an output port with a non-negative
-    coefficient (emission), never bus0 and never a removal; nothing else attached."""
+    """The bunker account: one Store with the national atmosphere contract; every Link port on it is an output port with a positive
+    coefficient (emission), never bus0 and never a removal; nothing else attached. V3.1 (decision 195): also every premise of
+    bunker_account_premises (metering links cannot run backwards, no standing loss, positive weights) - any failure raises, because the
+    per-variable form of install_bunker_net_zero is equivalent to the final-level row only under these premises."""
     if BUNKER_CO2_BUS not in n.buses.index:
         return dict(present=False)
     st = n.stores.index[n.stores.bus == BUNKER_CO2_BUS]
@@ -486,10 +541,13 @@ def validate_bunker_account(n) -> dict:
             continue
         if typ != "Link" or col == "bus0":
             raise ValueError(f"Bunker account: {typ} {name} {col} is not a Link emission port")
-        k = float(n.links.at[name, "efficiency" if col == "bus1" else "efficiency" + col[3:]])
+        k = float(n.links.at[name, _efficiency_col(col)])
         if k < 0:
             raise ValueError("Bunker account: removal port " + name + " (decision 88: no negative emissions enter the account)")
         ports.append(dict(link=name, port=col, coefficient_t_per_mwh=k, carrier=str(n.links.at[name, "carrier"])))
+    pre = bunker_account_premises(n, st[0], ports)
+    if pre["failed"]:
+        raise ValueError("Bunker account premise failed (V3.1, decision 195): " + "; ".join(pre["failed"]))
     return dict(present=True, store=st[0], ports=ports)
 
 
@@ -623,16 +681,45 @@ def _apply_bunker_nodal(n, cfg, demand: dict, src: pd.DataFrame, led: dict) -> d
     return led
 
 
+def bunker_metering_links(acc: dict) -> list:
+    """The links with an emission port on the bunker account (validate_bunker_account), each once, in port order."""
+    return list(dict.fromkeys(p["link"] for p in acc.get("ports", [])))
+
+
 def install_bunker_net_zero(n):
-    """extra_functionality hook (research_bunker_net_zero): final-snapshot level of the bunker account <= 0."""
+    """extra_functionality hook (research_bunker_net_zero). V3.1 (decision 195): every metering flow into the bunker account is 0 in every snapshot,
+    written per variable - Link-p of every link with an emission port on the account == 0 (rows snapshot x link), row name unchanged. Under the
+    premises checked by validate_bunker_account (account starts at 0, not cyclic, no standing loss, only emission ports with coefficient > 0,
+    metering flows >= 0, positive weights) this is exactly the former single row 'final-snapshot account level <= 0': the level is the weighted
+    sum of non-negative inflows. The former row was a zero-slack row through the whole Store chain, declared INF_OR_UNBD by Gurobi's default
+    presolve on the 2920x3h windows (work/p1_v3_diag_20261105/V3_DIAG_REPORT.md section 9, option 1)."""
     if getattr(n, "_research_bunker_net_zero_model", None) is n.model:
         raise ValueError("Bunker net-zero hook already installed")
     if BUNKER_CO2_BUS not in n.stores.index:
         raise ValueError("Bunker account Store missing")
-    validate_bunker_account(n)
+    meters = bunker_metering_links(validate_bunker_account(n))
+    if not meters:
+        raise ValueError("Bunker account has no emission port: the net-zero hook would add no row")
     m = n.model
-    m.add_constraints(m["Store-e"].sel(snapshot=n.snapshots[-1], Store=BUNKER_CO2_BUS) <= 0.0, name=BUNKER_ROW)
+    m.add_constraints(m["Link-p"].sel(Link=meters) == 0.0, name=BUNKER_ROW)
     n._research_bunker_net_zero_model = m
+
+
+BUNKER_PRICE_NOTE = ("NaN by design (V3.1, decision 195): the bunker net-zero is written per metering flow (every flow into 'co2 bunkers ASEAN' = 0), "
+                     "so the dual price of this bus is no longer the bunker CO2 shadow price of the former single final-level row (with a zero-cost "
+                     "account capacity and no final-level row the dual chain gives 0, which is not a price); no substitute is constructed")
+
+
+def blank_bunker_account_price(df: pd.DataFrame, value_cols) -> pd.DataFrame:
+    """V3.1 (decision 195, instruction 2.3): a price table indexed by bus keeps the row of the bunker account, its values become NaN and a
+    'note' column carries BUNKER_PRICE_NOTE (empty for every other bus). Tables without the account are returned unchanged."""
+    if BUNKER_CO2_BUS not in df.index:
+        return df
+    df = df.copy()
+    df.loc[BUNKER_CO2_BUS, list(value_cols)] = np.nan
+    df["note"] = ""
+    df.loc[BUNKER_CO2_BUS, "note"] = BUNKER_PRICE_NOTE
+    return df
 
 
 def bunker_gross_co2_flow(n) -> float:

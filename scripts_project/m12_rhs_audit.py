@@ -150,6 +150,8 @@ class Owners:
     def array(self, name: str, lab) -> np.ndarray:
         """owner code (int) for every element of a linopy label array (component dimension, else the name; UNRESOLVED = 0)."""
         arr = np.asarray(lab.values)
+        if name == "research_bunker_co2_limit":   # V3.1 (decision 195): the bunker net-zero rows (snapshot x metering link, one row before) keep the owner of the former row (by_name: BUNKER)
+            return np.full(arr.shape, self.code(BUNKER), dtype=np.int32)
         dims = list(lab.dims); comp = [d for d in dims if str(d).split("-")[0] in COMP_TYPES]
         if comp:
             d = comp[0]; t = str(d).split("-")[0]

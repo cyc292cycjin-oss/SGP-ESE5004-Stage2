@@ -87,6 +87,8 @@ def decode(store, names_by_gid, gid, labels, idx):
 
 
 def country_of(n, coords: dict, name: str) -> str:
+    if name == "research_bunker_co2_limit":   # V3.1 (decision 195): the bunker net-zero rows (snapshot x metering link) keep the name rule of the former single row
+        coords = {}
     for d, v in coords.items():
         t = str(d).split("-")[0]
         if t not in COMP_TYPES:

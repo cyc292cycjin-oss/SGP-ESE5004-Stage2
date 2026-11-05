@@ -162,7 +162,7 @@ def country_lookup(store, labels_exported: np.ndarray, maps: dict, codes: dict) 
                 look[int(arr)] = codes.setdefault(c, len(codes))
             continue
         dims = list(lab.dims); comp = [d for d in dims if str(d).split("-")[0] in COMP_TYPES]
-        if comp:
+        if comp and str(name) != "research_bunker_co2_limit":   # V3.1 (decision 195): the bunker net-zero rows (snapshot x metering link) keep the name rule of the former single row
             d = comp[0]; t = str(d).split("-")[0]
             vals = pd.Index(map(str, lab.coords[d].values)) if d in lab.coords else pd.Index([])
             cv = maps[t].reindex(vals).fillna("-").to_numpy()

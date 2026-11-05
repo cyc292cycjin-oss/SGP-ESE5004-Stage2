@@ -311,4 +311,5 @@ def nodal_prices(n, freq: str = "D") -> pd.DataFrame:
     head = pd.DataFrame(dict(node=(meta.location if "location" in meta else pd.Series("", index=meta.index)).astype(str), carrier=meta.carrier, country=meta.country,
                              mean=(mp.mul(w, axis=0).sum() / w.sum()), min=mp.min(), max=mp.max()), index=mp.columns)
     out = pd.concat([head, day], axis=1); out.index.name = "bus"
-    return out
+    from s4c_layers import blank_bunker_account_price   # V3.1 (decision 195): the bunker account row keeps its place, values NaN + note
+    return blank_bunker_account_price(out, [c for c in out.columns if c not in ("node", "carrier", "country")])

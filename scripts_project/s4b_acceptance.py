@@ -87,7 +87,7 @@ def special_references(m, n, row_labels: np.ndarray, col_labels: np.ndarray, gro
                 for l in np.asarray(m.constraints[name].labels).ravel():
                     if int(l) in rpos:
                         row_ref[rpos[int(l)]] = max(row_ref[rpos[int(l)]], gross.get(c, 0.0)); tagged["net_zero_rows"][name] = gross.get(c, 0.0)
-    if "research_bunker_co2_limit" in m.constraints:   # S4C-3 (decision 88): the bunker account row takes its own gross flow
+    if "research_bunker_co2_limit" in m.constraints:   # S4C-3 (decision 88): the bunker account row takes its own gross flow (V3.1, decision 195: every row snapshot x metering link)
         from s4c_layers import bunker_gross_co2_flow
         gb = bunker_gross_co2_flow(n)
         for l in np.asarray(m.constraints["research_bunker_co2_limit"].labels).ravel():
