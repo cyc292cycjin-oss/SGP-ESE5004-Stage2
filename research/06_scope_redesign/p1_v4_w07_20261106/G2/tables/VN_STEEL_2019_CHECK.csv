@@ -1,0 +1,15 @@
+item,value,twh,source,status,grade
+worldsteel 2019: crude / BOF / EAF / induction / pig iron (kt),17469 / 9746 / 4925 / 2798 / 9836.0,,repository WORLDSTEEL_2019_ASEAN.csv,VERIFIED,A
+JRC-IDEES EU27 2019 final-energy boundary: BOF x 2.292 + (EAF + IF) x 1.362 MWh/t,,32.8565,INDUSTRY_SECTOR_RATIOS_TODAY_EU27_2019.csv,EXACT,C
+ETSAP BAT whole route (BF-BOF 19.51 GJ/t incl. blast-furnace reductant; scrap EAF / IF 2.68 GJ/t),,58.5673,S0 V4_PRODUCT_ROUTE_MAP.csv,EXACT,C
+ETSAP BAT x ODA whole route,,78.3651,S0 V4_PRODUCT_ROUTE_MAP.csv,EXACT,C
+v3 s3_0 want_steel 2019 (PyPSA-Eur ratio table x worldsteel; Integrated steelworks coal + coke + gas + elec),,26.5490,s3_0_industry.py lines 187-192,EXACT,C
+"UNSD 2019 iron-and-steel row in the model base: coke 5,326 kt + LPG 50 kt + fuel oil 6 kt",,42.4445,industry_cache.json / SDMX,EXACT,A
+  of which coke (blast furnace + sinter; VN reports no blast-furnace transformation),541 kg per t pig iron,41.7207,SDMX 0311/1211; worldsteel pig iron,EXACT,A
+  diesel of the steel row missing from the model base (export truncated): 102 kt,,1.2179,SDMX 4670/1211 2019,EXACT,A
+UNSD steel electricity (reported only from 2020): 2020 / 2021 / 2022 GWh,"11,326 / 18,863 / 18,580",11.3260,SDMX 7000/1211,VERIFIED,A
+"  per t raw steel 2020 (USGS 19,900 kt), MWh/t",0.569,9.9424,back-cast to 2019 with USGS 2019 raw steel (C),INFERENCE,C
+"UNSD steel hard coal (reported only 2021-2022), kt",965 / 970,6.2828,SDMX 0100/1211,VERIFIED,A
+"APEC 2022 iron and steel row (177 PJ; 20,004 kt raw steel), scaled to 2019 output",,42.9360,APEC2022_VN_INDUSTRY_PJ.csv x USGS,INFERENCE,C
+v3 decomposition (APEC 2022 shares): 2019 steel energy deducted,,36.7102,tables/VN_SPLIT_VARIANTS.csv,EXACT,C
+hybrid decomposition: 2019 steel energy deducted,,52.3869,tables/VN_SPLIT_VARIANTS.csv,EXACT,C
