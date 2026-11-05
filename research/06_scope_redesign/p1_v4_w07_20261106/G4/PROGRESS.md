@@ -12,7 +12,7 @@
 | G4-1 | 国家统计基数（UNdata 导出与 SDMX 对照）、SDMX 热值（`g4_sdmx.py`、`g4_sdmx_parse.py`、`g4_facts.py`） | 完成 | 见 G4-A |
 | G4-2 | 自备不等式与 GIPT 核查、MM 低/中/高估算（`g4_facts.py`） | 完成 | 见 G4-A（与 G4-1、G4-3 事实部分同一脚本写成，同一提交） |
 | G4-3 | 水泥熟料比、生物质口径、新增产品的事实与链输入（`g4_usgs_text.py`、`g4_facts.py`） | 完成 | 见 G4-A |
-| G4-4 | 合并量化（两套热值，`g4_chain.py`；复现逐字节通过）、A6 其余输出 | 量化完成，A6 其余输出进行中 | 见 G4-B |
+| G4-4 | 合并量化（两套热值，`g4_chain.py`；复现逐字节通过）、A6 表格（`g4_outputs.py`）、`EVIDENCE.json` | 完成 | 见 G4-B |
 | G4-5 | 报告、证据、审阅包、推送 | 待做 | |
 
-续做起点：G4-4 的 A6 其余输出（`g4_outputs.py`：SUBSECTORS、CAPTIVE、BIOMASS_CHECK、NODE_SHARES、MISSING_DATA、EVIDENCE.json），然后报告与决策（G4-5）。
+续做起点：G4-5（五国 `<CC>_DECISIONS.md`、`REPORT.md`、台账条目草稿、审阅包、推送）。
