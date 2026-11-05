@@ -61,6 +61,7 @@ def heesi_values(work: Path) -> pd.DataFrame:
     r = heesi_year_rows(work, 62, "2019")[0]   # 5.1.2 same, energy units (thousand BOE)
     add(62, 46, "5.1.2 Energy Consumption in Industrial Sector (Energy Unit)", "Coal", 2019, r[2] * 1e3, "BOE")
     add(62, 46, "5.1.2", "Electricity", 2019, r[17] * 1e3, "BOE")
+    add(62, 46, "5.1.2", "Industrial biomass", 2019, r[0] * 1e3, "BOE")
     add(62, 46, "5.1.2", "Total", 2019, r[18] * 1e3, "BOE")
     for y in ("2018", "2019"):
         r = heesi_year_rows(work, 90, y)[0]   # 6.1.4 domestic coal sales (t)
