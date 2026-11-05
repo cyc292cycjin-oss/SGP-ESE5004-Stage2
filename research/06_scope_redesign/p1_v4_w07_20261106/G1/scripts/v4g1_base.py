@@ -237,6 +237,15 @@ def neb(ev):
     for reg, pat in (("Peninsular Malaysia", r"PENINSULAR\s+MALAYSIA\s+([\d,]+)"), ("Sarawak", r"SARAWAK\s+([\d,]+)"), ("Sabah", r"SABAH\s+([\d,]+)"), ("Malaysia", r"TOTAL\s+([\d,]+)\s+100\.0")):
         mm = re.search(pat, txt)
         put("17 electricity consumption 2019", 57, "industry", reg, float(mm.group(1).replace(",", "")), "GWh")
+    # ---- table 29 imports row (coal & coke) and figure 25 industry coal series 1990-2019 (ktoe), PDF pages 72 and 48
+    ln = [x for x in cm.neb_page(72).splitlines() if x.startswith("3. Imports")][0]
+    for c, v in zip(cols29, cm.neb_numbers(ln[len("3. Imports"):])):
+        put("29 energy balance 2019", 72, "imports", c, v, "ktoe")
+    f25 = [x for x in cm.neb_page(48).splitlines() if x.startswith("513 599 672")]
+    if len(f25) != 1:
+        raise ValueError("figure 25 industry series not found")
+    for y, v in zip(range(1990, 2020), cm.neb_numbers(f25[0])):
+        put("figure 25 coal consumption by sectors", 48, "industry", str(y), v, "ktoe")
     N = pd.DataFrame(V)
     N.to_csv(OUT / "MY_NEB_2019_VALUES.csv", index=False, float_format="%.10g")
     g = lambda t, i, c: float(N[(N.table.str.startswith(t)) & (N["item"] == i) & (N.column == c)].value.iloc[0])
@@ -259,6 +268,18 @@ def neb(ev):
         chk[f"industry_electricity_share_{reg}"] = g("17", "industry", reg) / g("17", "industry", "Malaysia")
         chk[f"industry_coal_t_{reg}"] = g("9", "industry", reg)
     chk["industry_coal_t_minus_unsd_nmm_coal_and_bf_coke_t"] = g("9", "industry", "Malaysia") - 1232691 - 1474024
+    # NEB coal & coke imports (ktoe) against UNSD imports of hard coal and coke at the SDMX factors: does the NEB industry coal include the BF coke?
+    TOE = 41.868
+    chk["neb_imports_coal_coke_ktoe"] = g("29", "imports", "coal & coke")
+    chk["unsd_imports_hard_coal_plus_coke_ktoe_at_sdmx_ncv"] = (29655.4 * 26.394 + 1474.024 * 26.377) / TOE
+    chk["unsd_imports_hard_coal_only_ktoe_at_sdmx_ncv"] = 29655.4 * 26.394 / TOE
+    chk["neb_industry_coal_coke_ktoe_minus_2706669t_at_26394"] = g("29", "industry", "coal & coke") - 2706.669 * 26.394 / TOE
+    U = cm.unsd_export()[0]
+    nmm = U[(U.commodity.str.lower() == "hard coal") & (U.transaction.str.lower() == "consumption by non-metallic minerals industry")].drop_duplicates("y").set_index("y").q
+    for y in range(2012, 2020):
+        f25v = float(N[(N.table.str.startswith("figure 25")) & (N.column == str(y))].value.iloc[0])
+        chk[f"neb_fig25_industry_coal_{y}_kt_at_26394"] = f25v * TOE / 26.394
+        chk[f"unsd_nmm_hard_coal_{y}_kt"] = float(nmm.get(y, np.nan))
     chk["cogeneration_gas_mw"] = sum(g("10", f"co-generation {r}", "natural gas") for r in ("Peninsular Malaysia", "Sabah", "Sarawak"))
     chk["selfgeneration_biomass_mw"] = sum(g("10", f"self-generation {r}", "biomass") for r in ("Peninsular Malaysia", "Sabah", "Sarawak"))
     chk["cogeneration_biomass_mw"] = sum(g("10", f"co-generation {r}", "biomass") for r in ("Peninsular Malaysia", "Sabah", "Sarawak"))
