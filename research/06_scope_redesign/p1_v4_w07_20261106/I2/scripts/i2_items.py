@@ -247,7 +247,9 @@ def methanol_items(S: dict) -> dict:
                      fuel_split={"gas": 1.0}, v2050=vec(g1["chem_2050"]["central"]["methanol"]), src="G1 Labuan 2,330 kt x 0.85, energy use only")
     for cc, cap in (("ID", 660000.0), ("BN", 850000.0)):
         t19 = cap * 0.85; t50 = t19 * growth(cc, 2019)
-        out[cc] = dict(name="methanol", row=CHEM, fuel19=t19 * MEOH_GAS_PER_T, el19=t19 * MEOH_EL_PER_T, fuel_split=None,
+        # BN: the plant's 2019 energy use is in UNSD non-energy use (gas) and not in the industry rows (G4, decision 202 item 4) -> no 2019
+        # deduction from industry (recorded, D163-4); W08 must lower BN NEU gas by the same energy use (2019 and 2050) to avoid a double count
+        out[cc] = dict(name="methanol", row=(None if cc == "BN" else CHEM), spill=(cc != "BN"), fuel19=t19 * MEOH_GAS_PER_T, el19=t19 * MEOH_EL_PER_T, fuel_split=None,
                        v2050=vec({"gas": MEOH_GAS_PER_T * t50, "electricity": MEOH_EL_PER_T * t50}),
                        src=f"GEM GCT 2026-11 operating capacity {cap / 1e3:.0f} kt x 0.85; G1 energy-use intensity (gas {MEOH_GAS_PER_T:.4f}, electricity {MEOH_EL_PER_T} MWh/t)")
     out["MY_new"] = dict(v2050=vec(g1["chem_2050_r4"]["sarawak_petchem_2023"]), src="G1: Sarawak Petchem 1,750 kt (2023), R4 -> main")

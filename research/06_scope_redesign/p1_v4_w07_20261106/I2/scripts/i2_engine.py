@@ -442,8 +442,13 @@ class Engine:
         ats = self.ats_frame(mo[ATS_REL])
         cache = copy.deepcopy(case.get("cache") or json.loads(self.orig[CACHE_REL]))
         log, dlog = [], []
-        for cc, car, dv in case.get("ats_add", []):   # reading-I base change of the industry row (multiplier kept)
-            self.set_base(ats, cc, car, self.e19(ats, cc, car) + dv)
+        add_info = []
+        for a in case.get("ats_add", []):   # reading-I base change of the industry row (multiplier kept)
+            cc, car, dv = a[0], a[1], a[2]; m_t = a[3] if len(a) > 3 else None
+            m_row = float(ats.loc[self.ind_row(ats, cc, car), "multiplier_total"].iloc[0])
+            eff = dv * (m_t / m_row if (m_t and m_row) else 1.0)   # grow at the target multiplier m_t: s3_0 multiplies e19 by the row multiplier
+            self.set_base(ats, cc, car, self.e19(ats, cc, car) + eff)
+            add_info.append(dict(country=cc, carrier=car, d_mwh=dv, m_target=m_t, m_row=m_row, base_added_mwh=eff))
         cem, ez, bc, bp = case.get("cem"), case.get("edgar_zero"), case.get("bio_cap_share"), case.get("biopot")
         extra = {c: dict(v) for c, v in case.get("extra", {}).items()}
         ats0 = ats.copy(); cache0 = copy.deepcopy(cache)
@@ -465,7 +470,8 @@ class Engine:
             S2, _, _, _, _ = self.evaluate(ats0, vc, vmoves, vprods, {}, [], self.vn_dlog, case, mo)
             vn_dec = S2.loc["VN"]
         an = pd.read_csv(io.BytesIO(mo[ANCH_REL])).set_index("country")
-        res = dict(snap={}, log=log, dlog=dlog, vn_dlog=self.vn_dlog, gaps=gp, pz=pz, ats_sectors=self.sectors(ats), anchors=an, moves=moves)
+        res = dict(snap={}, log=log, dlog=dlog, vn_dlog=self.vn_dlog, gaps=gp, pz=pz, ats_sectors=self.sectors(ats), anchors=an, moves=moves, ats_add_info=add_info)
+        nf_mask = gp.item.str.contains("not found|exceeds the other bucket", regex=True) & (gp.carrier != "all") & (gp.carrier != "hydrogen")
         nf_case = case.get("nf", {})
         for cc in cm.ASEAN:
             if cc not in S.index:
@@ -486,7 +492,9 @@ class Engine:
                 other19_car={c_: (float(o[f"other_2019_{c_}_mwh"]) if o is not None else 0.0) for c_ in cm.CARS19},
                 ind_anchor=float(an.at[cc, "industry_anchor_mwh"]), ind_mult=float(an.at[cc, "industry_multiplier"]), tfec_anchor=float(an.at[cc, "ats_tfec_2050_mwh"]),
                 overflow=float(row_T.get("biomass_overflow_industry_mwh", 0.0)), bio_before=float(row_T.get("pe_biomass_before_overflow_mwh", 0.0)),
-                pot=float(row_T.get("solid_biomass_potential_main_mwh", 0.0)), gaps=float(gp[(gp.country == cc) & (gp.carrier != "hydrogen")].mwh.sum()))
+                pot=float(row_T.get("solid_biomass_potential_main_mwh", 0.0)), gaps=float(gp[(gp.country == cc) & (gp.carrier != "hydrogen")].mwh.sum()),
+                s30_not_found=float(gp[(gp.country == cc) & nf_mask].mwh.sum()),
+                ind19_true=float(pd.to_numeric(ind.base_2019_mwh).sum()) - sum(a["base_added_mwh"] - a["d_mwh"] for a in add_info if a["country"] == cc))
         return res
 
     @staticmethod

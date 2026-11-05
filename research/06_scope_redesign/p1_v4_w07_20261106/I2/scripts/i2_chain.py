@@ -56,9 +56,10 @@ class Inputs:
         ra = r[r.cls == "a"]
         self.a_tot = ra.groupby("country").mwh.sum().to_dict()
         self.a_drop = {(x.country, x.code, x.tx) for x in ra.itertuples()}
-        # ---- ID (b): industrial biomass outside HEESI (fuelwood at the 2010-2017 mean, charcoal; ID has no purchased 5150) -----------------
-        idb = c[(c.country == "ID") & (c.tx != "121") & (c.carrier == "biomass") & ~c.code.isin(["5120", "5140", "5150"])]
-        fw = idb[idb.code == IT.FW_CODE]
+        # ---- ID (b): industrial fuelwood is outside the national balance (HEESI industrial biomass 0.9 TWh ~ the SDMX charcoal 0.80 TWh;
+        #      biodiesel 3.70 TWh is in HEESI) -> only fuelwood (2010-2017 mean, decision 206) leaves the seed and grows at the v3 multiplier
+        idb = c[(c.country == "ID") & (c.tx != "121") & (c.carrier == "biomass") & (c.code == IT.FW_CODE)]
+        fw = idb
         self.fw_factor = float(fw.factor.astype(float).iloc[0])                 # SDMX GJ per m3
         self.fw_sdmx_km3 = float(fw.quantity.sum()); self.fw_sdmx_mwh = float(fw.mwh.sum())
         self.fw_mean_mwh = IT.ID_FW_MEAN_KM3 * self.fw_factor * 1000.0 / 3.6
@@ -92,6 +93,33 @@ class Inputs:
         self.pp = {k: v for k, v in self.pp.items() if v}; self.pp_new = {k: v for k, v in self.pp_new.items() if v}
         self.hvc = IT.hvc_items(S, "i2"); self.hvc_s2 = IT.hvc_items(S, "s2")
         self.meoh = IT.methanol_items(S); self.oth = IT.other_items(S)
+        an = pd.read_csv(cm.DEMAND / "DEMAND_ANCHOR_AEO8_ATS.csv").set_index("country")
+        self.m_v3 = {cc: float(an.at[cc, "industry_multiplier"]) for cc in cm.ASEAN}
+        # ---- sensitivity inputs (session deliverables) ---------------------------------------------------------------------------------
+        hc = c[(c.country == "ID") & (c.tx == "121") & (c.carrier == "coal") & (c.commodity.str.lower() == "hard coal")]
+        self.id_hard_coal_kt = float(hc.quantity.sum())
+        self.id_ncv_delta = self.id_hard_coal_kt * 1000.0 * (0.007167 * 3600.0 - 20.29) / 3.6     # v3 25.8012 vs decision 207 20.29 GJ/t, MWh 2019
+        det = json.loads((cm.G["G0"] / "evidence/_chain_detail.json").read_text())["details"]["by_product|207"]
+        last = det["8"]   # G0 main path final step (NPI Case 4-NPI, ferronickel / matte Case 3)
+        self.ni_case4 = {k: float(v) for k, v in last["explicit_carriers"]["nonferrous_nickel"].items()}
+        import v3_industry as v3   # noqa: E402
+        ne = v3.nickel_unit_energy()
+        self.niupper_scale = (v3.NI_UPPER_MWH_PER_T_NPI / v3.NI_NPI_NI_FRACTION) / (ne["electricity_mwh_per_t_ni"] + ne["fuel_mwh_per_t_ni"])
+        B = {x["key"]: x["value"] for x in json.loads((cm.S2D / "s2/_biomass_evidence.json").read_text())["numbers"]}
+        self.fw_m2021_km3 = float(B["3.series.industry_mean_2020_2021_km3"])
+        g1 = {x["key"]: x["value"] for x in json.loads((cm.G["G1"] / "tables/_chain_evidence.json").read_text())["numbers"]}
+        self.sabah_resid = float(g1["chain.sabah.industry_gas_minus_chem_central_2019"]) * 1e6
+        g3 = {x["key"]: x["value"] for x in json.loads((cm.G["G3"] / "tables/_chain_evidence.json").read_text())["numbers"]}
+        conv = json.loads((cm.SRC / "FROZEN_UPSTREAM_CONVERSIONS.json").read_text())["constants"]["fuels_conv_toTWh"]
+        self.sg_refgas_kt = float(g3["chain.SG.refinery_gas_2019_kt.excess_over_supply"]); self.sg_refgas_mwh = self.sg_refgas_kt * conv["Refinery gas"] * 1e6
+
+    def fw_sdmx_km3_cc(self, cc: str) -> float:
+        z = self.cells[(self.cells.country == cc) & (self.cells.tx != "121") & (self.cells.code == IT.FW_CODE)]
+        return float(z.quantity.sum())
+
+    def fw_mwh_cc(self, cc: str) -> float:
+        z = self.cells[(self.cells.country == cc) & (self.cells.tx != "121") & (self.cells.code == IT.FW_CODE)]
+        return float(z.mwh.sum())
 
 
 def hvc_item(h: dict, scale_u: float = 1.0) -> dict:
@@ -156,7 +184,7 @@ def build_steps(I: Inputs, eng: E.Engine):
         ed[IND_BIO("ID")] = ed.get(IND_BIO("ID"), 0.0) - I.idb_sdmx
         c["d1"] = d1_with(c, ed)
         c["anchor_adj"] = {cc: v for cc, v in I.a_tot.items() if cc != "ID"}
-        c["ats_add"] = list(c.get("ats_add", [])) + [("ID", "biomass", I.idb_main)]
+        c["ats_add"] = list(c.get("ats_add", [])) + [("ID", "biomass", I.idb_main, I.m_v3["ID"])]   # 210 item 4 b: reading I = v3 ATS industry multiplier
         c["cache"] = I.cache_a
         return c
 
@@ -246,6 +274,117 @@ def build_steps(I: Inputs, eng: E.Engine):
             ("S6b", "玻璃、氧化铝、铜、石灰", s6b), ("S6c", "VN 混合拆分、同一次运行", s6c), ("S7", "网络层：生物质上限 99 %、潜力调整（只影响溢出）", s7)]
 
 
+# ============================================================================================================== sensitivities
+def sensitivities(I: Inputs, eng: E.Engine, cases: dict, steps: list):
+    """(name, label, case) on the final state; each changes one rule. Quantities from the session deliverables where a session defined the variant."""
+    F = cases[steps[-1][0]]
+    out = []
+
+    def mod(**kw):
+        c = dict(F); c.update(kw); return c
+
+    out.append(("anchor_IIa", "锚构造 IIa（RAS 重解，守 C.3；残渣锚扣减不适用）", mod(anchor_mode="ras", anchor_adj=None)))
+    out.append(("anchor_IIb", "锚构造 IIb（冻结 v3 各国 × 部门锚）", mod(anchor_mode="frozen", anchor_adj=None)))
+    out.append(("reading_I", "全部口径 I（v3 倍数不变，新基年 × v3 倍数）", mod(anchor_mode="I", anchor_adj=None)))
+    out.append(("balance_excl", "平衡表覆盖：各国平衡表都不含自用残渣（锚不扣减）", mod(anchor_adj={})))
+    adj = dict(F.get("anchor_adj") or {}); adj["ID"] = adj.get("ID", 0.0) + I.id_ncv_delta
+    out.append(("id_ncv_i", "ID 热值修正按 (i)（倍数不变；25.80 → 20.29）", mod(anchor_adj=adj)))
+    # HVC S2 basis
+    pr = copy.deepcopy(F["products"]); ex = copy.deepcopy(F["extra"])
+    for cc, h in I.hvc_s2.items():
+        if cc in pr:
+            pr[cc] = [hvc_item(h) if it["name"] == "hvc" else it for it in pr[cc]]
+        if h["hvc50_new_t"] > 0:
+            ex[cc]["hvc_new_plants"] = IT.vec(h["vec"], h["hvc50_new_t"])
+    out.append(("hvc_s2", "HVC 用 S2 口径（2019 3.269、2050 6.103）", mod(products=pr, extra=ex)))
+    for u, nm in ((0.75, "u075"), (0.95, "u095")):
+        pr = copy.deepcopy(F["products"]); ex = copy.deepcopy(F["extra"])
+        for cc, h in I.hvc.items():
+            if cc in pr:
+                pr[cc] = [hvc_item(h, u / 0.85) if it["name"] == "hvc" else it for it in pr[cc]]
+            if h["hvc50_new_t"] > 0:
+                ex[cc]["hvc_new_plants"] = IT.vec(h["vec"], h["hvc50_new_t"] * u / 0.85)
+        out.append((f"eth_{nm}", f"乙烯利用率 {u}", mod(products=pr, extra=ex)))
+    nf = copy.deepcopy(F["nf"]); nf["ID"]["nonferrous_nickel"] = I.ni_case4
+    out.append(("ni_case4", "NPI 用 Wei Case 4（G0 主线）", mod(nf=nf)))
+    nf = copy.deepcopy(F["nf"]); nf["ID"]["nonferrous_nickel"] = {k: v * I.niupper_scale for k, v in F["nf"]["ID"]["nonferrous_nickel"].items()}
+    out.append(("ni_upper", "镍 NIUPPER（Case 3 × 3.571）", mod(nf=nf)))
+    for nm, lab, km3 in (("fw2021", "ID 燃料木材 2020–2021 年均", I.fw_m2021_km3), ("fwsdmx", "ID 燃料木材 SDMX 2019（不改）", I.fw_sdmx_km3)):
+        e = km3 * I.fw_factor * 1000.0 / 3.6; add = I.idb_sdmx - I.fw_sdmx_mwh + e
+        aa = [(a[0], a[1], (add if (a[0] == "ID" and a[1] == "biomass") else a[2])) + tuple(a[3:]) for a in F["ats_add"]]
+        cc_ = IT.build_cache(I.cells, drop=I.a_drop, scale={("ID", IT.FW_CODE): e / I.fw_sdmx_mwh})
+        if F.get("vn_same_run"):
+            cc_ = set_vn_cache(cc_, vn_hybrid(cc_, I.S["vn_el_rows"]))
+        out.append((nm, lab, mod(ats_add=aa, cache=cc_)))
+    for cc, nm, ratio, lab in (("VN", "vnfw_export", 14725.0 / I.fw_sdmx_km3_cc("VN"), "VN 燃料木材用导出版本（14,725 千 m³，G2 主算）"),):
+        dmw = I.fw_mwh_cc(cc) * (ratio - 1.0)
+        d1 = F["d1"].copy(); d1[IND_BIO(cc)] = d1.get(IND_BIO(cc), 0.0) + dmw
+        cc_ = IT.build_cache(I.cells, drop=I.a_drop, scale={("ID", IT.FW_CODE): I.fw_scale, (cc, IT.FW_CODE): ratio})
+        if F.get("vn_same_run"):
+            cc_ = set_vn_cache(cc_, vn_hybrid(cc_, I.S["vn_el_rows"]))
+        out.append((nm, lab, mod(d1=d1, cache=cc_)))
+    # ID fuelwood booked in the SDMX paper row (1214G) read as self-produced bark / wood waste of pulp mills (210 item 4 a) instead of (b)
+    fwc = I.cells[(I.cells.country == "ID") & (I.cells.code == IT.FW_CODE) & (I.cells.tx != "121")]
+    sh_nes = float(fwc[fwc.tx != "1214G"].mwh.sum()) / float(fwc.mwh.sum())
+    aa = [(a[0], a[1], (a[2] * sh_nes if (a[0] == "ID" and a[1] == "biomass") else a[2])) + tuple(a[3:]) for a in F["ats_add"]]
+    cc_ = IT.build_cache(I.cells, drop=set(I.a_drop) | {("ID", IT.FW_CODE, "1214G")}, scale={("ID", IT.FW_CODE): I.fw_scale})
+    if F.get("vn_same_run"):
+        cc_ = set_vn_cache(cc_, vn_hybrid(cc_, I.S["vn_el_rows"]))
+    out.append(("id_paper_fw_selfuse", f"ID 造纸行燃料木材（SDMX 1214G，占 ID 工业燃料木材 {1 - sh_nes:.0%}）视为纸浆厂自产树皮 / 木材废料（(a) 移出）", mod(ats_add=aa, cache=cc_)))
+    out.append(("my_sabah_neu", "MY 沙巴解释不了的工业用气 16.94 TWh 转 NEU（口径 I）", mod(moves=list(F["moves"]) + [("MY", "other", "gas", I.sabah_resid)])))
+    out.append(("sg_refgas", "SG 化工行炼厂气超出供应 783 kt 移出（口径 I）", mod(moves=list(F["moves"]) + [("SG", IT.CHEM, "oil", I.sg_refgas_mwh)])))
+    for lv in ("low", "mid", "high"):
+        c = I.S["id_captive"][lv]
+        mv = [m for m in F["moves"] if not (m[0] == "ID" and m[1] == "other" and m[2] in ("coal", "electricity") and m in I.captive["ID"])]
+        mv += [("ID", "other", "coal", c["C_kt"] * 20.29 / 3.6 * 1e3), ("ID", "other", "electricity", -c["E_mwh"])]
+        out.append((f"id_captive_{lv}", f"ID 自备煤 {lv} 档", mod(moves=mv)))
+    pr = copy.deepcopy(F["products"])
+    has_row = {cc for cc in cm.ASEAN if sum(float(r[IT.PAPER]) for r in I.cache_a["records"] if r["country"] == cc) > 0}
+    for cc in pr:
+        pr[cc] = [dict(it, spill=False) if (it["name"] == "pulp_paper" and cc in has_row) else it for it in pr[cc]]
+    out.append(("pp_cap", "纸浆造纸 2019 扣除以造纸行为上限（G3 规则；只对有 UNSD 造纸行的国家）", mod(products=pr)))
+    aa = [tuple(a[:3]) for a in F["ats_add"]]
+    out.append(("b_items_current_mult", "ID 平衡表外生物质按当期 IId 工业倍数增长（而非 v3 倍数）", mod(ats_add=aa)))
+    pr = copy.deepcopy(F["products"])
+    for cc in pr:
+        pr[cc] = [dict(it, v2050=dict(it["v2050"], biomass=0.0)) if it["name"] == "pulp_paper" else it for it in pr[cc]]
+    out.append(("pp_literal", "纸浆造纸 2050 生物质全部单列（字面闭环）", mod(products=pr)))
+    ex = copy.deepcopy(F["extra"])
+    for cc in ex:
+        for k in [k for k in ex[cc] if k.endswith("_new_plants") or k.endswith("_new_lines")]:
+            del ex[cc][k]
+    out.append(("no_new_plants", "新装置全部只作 R4 敏感性（不进主算）", mod(extra=ex)))
+    pr = copy.deepcopy(F["products"]); pr["BN"] = [it for it in pr.get("BN", []) if it["name"] != "methanol"]
+    out.append(("bn_meoh_out", "BN 甲醇不计入（第 202 项第 4 条）", mod(products=pr)))
+    out.append(("meoh_keep", "保留欧盟权重甲醇负荷（不去份额）", mod(meoh_drop=[])))
+    d1 = F["d1"].copy()
+    d1[("MM", "Residential", "oil", "ResidentialFuel")] = d1.get(("MM", "Residential", "oil", "ResidentialFuel"), 0.0) - I.gas["MM"]
+    d1[("MM", "Transport", "oil", "RoadResidualFuel")] = d1.get(("MM", "Transport", "oil", "RoadResidualFuel"), 0.0) + I.gas["MM"]
+    out.append(("mm_gasoline", "MM 家庭汽油也移到道路", mod(d1=d1)))
+    out.append(("no_f7", "生物质上限不留余量（F7 关）", mod(bio_cap_share=1.0)))
+    out.append(("pot_v3", "生物质潜力不调整（F3 / F4 关）", {k: v for k, v in F.items() if k != "biopot"}))
+    # residue classification variants (rebuild seed, anchor adjustment and cache)
+    for nm, lab, keep in (("res_nes_purchased", "n.e.s. 行的 5150 视为外购 (c)（MM 9.42 TWh 等）", lambda r: not (r.code == "5150" and r.tx == "1214O")),
+                          ("res_bagasse_kept", "蔗渣留在 T_v2（第 208 项第 1 条旧读法）", lambda r: r.code != "5120")):
+        ra = I.res[(I.res.cls == "a")]; ra = ra[ra.apply(keep, axis=1)]
+        a_tot = ra.groupby("country").mwh.sum().to_dict(); a_drop = {(x.country, x.code, x.tx) for x in ra.itertuples()}
+        d1 = F["d1"].copy()
+        for cc in cm.ASEAN:
+            d1[IND_BIO(cc)] = d1.get(IND_BIO(cc), 0.0) + I.a_tot.get(cc, 0.0) - a_tot.get(cc, 0.0)
+        cc_ = IT.build_cache(I.cells, drop=a_drop, scale={("ID", IT.FW_CODE): I.fw_scale})
+        if F.get("vn_same_run"):
+            cc_ = set_vn_cache(cc_, vn_hybrid(cc_, I.S["vn_el_rows"]))
+        aadj = {cc: v for cc, v in a_tot.items() if cc != "ID"}
+        if nm == "res_bagasse_kept":   # ID bagasse back in the seed: ID balance (HEESI) has no bagasse -> outside the anchor like the other ID biomass
+            idb = float(I.res[(I.res.country == "ID") & (I.res.code == "5120")].mwh.sum())
+            d1[IND_BIO("ID")] -= idb
+            aa = [(a[0], a[1], (a[2] + idb if (a[0] == "ID" and a[1] == "biomass") else a[2])) + tuple(a[3:]) for a in F["ats_add"]]
+            out.append((nm, lab, mod(d1=d1, cache=cc_, anchor_adj=aadj, ats_add=aa)))
+        else:
+            out.append((nm, lab, mod(d1=d1, cache=cc_, anchor_adj=aadj)))
+    return out
+
+
 # ============================================================================================================== serialisation
 def pack(res: dict, label: str, extra: dict | None = None) -> dict:
     out = dict(label=label, countries={}, ats_sectors=res["ats_sectors"], dlog=res["dlog"], vn_dlog=res.get("vn_dlog", []), **(extra or {}))
@@ -253,8 +392,12 @@ def pack(res: dict, label: str, extra: dict | None = None) -> dict:
         L = s["L"]
         out["countries"][cc] = dict(T=s["T"], other=s["other"], share=s["share"], T_car=L["T_car"], other_car=L["other"], scale=L["scale"],
                                     by_sub=L["by_sub"], parts={k: dict(v) for k, v in L["parts"].items()}, meoh_dropped=L["meoh_dropped"],
-                                    **{k: s[k] for k in ("ind19", "ind50_ats", "ind19_car", "prod50", "other19", "other19_car", "ind_anchor", "ind_mult", "tfec_anchor",
-                                                         "overflow", "bio_before", "pot", "gaps")})
+                                    **{k: s[k] for k in ("ind19", "ind19_true", "ind50_ats", "ind19_car", "prod50", "other19", "other19_car", "ind_anchor", "ind_mult", "tfec_anchor",
+                                                         "overflow", "bio_before", "pot", "gaps", "s30_not_found")})
+    out["ats_add_info"] = res.get("ats_add_info", [])
+    pz = res["pz"]; pz = pz[pz.carrier == "all (see mapping shares)"]
+    out["pz_dispersed"] = [dict(country=r.country, unsd_row=r.subsector, pypsa_eur_sector=str(r.method).split(" via ")[-1], mwh_2019=float(r.mwh_2019), mwh_2050=float(r.mwh_2050))
+                           for r in pz.itertuples()]
     return out
 
 
@@ -266,6 +409,9 @@ def save(obj: dict, name: str):
 def main():
     quick = "--quick" in sys.argv
     t0 = time.time()
+    if OUT.exists():   # results of earlier runs (e.g. a sensitivity that no longer exists) must not reach the tables
+        for f in OUT.glob("*.json"):
+            f.unlink()
     eng = E.Engine(); gate = eng.reproduce()
     I = Inputs()
     steps = build_steps(I, eng)
@@ -296,6 +442,15 @@ def main():
         r = eng.run(c); save(pack(r, f"single {code} {label}"), f"single_{code}")
         index.append(dict(name=f"single_{code}", label=label, seconds=time.time() - t0))
     print("singles done", round(time.time() - t0, 1), flush=True)
+    # ---- sensitivities on the final state ----------------------------------------------------------------------------------------------
+    for name, label, c in sensitivities(I, eng, cases, steps):
+        try:
+            r = eng.run(c); save(pack(r, f"sens {label}"), f"sens_{name}")
+            index.append(dict(name=f"sens_{name}", label=label, seconds=time.time() - t0))
+        except Exception as exc:   # recorded, not hidden
+            index.append(dict(name=f"sens_{name}", label=label, error=str(exc)[:300]))
+            print("SENS FAILED", name, exc, flush=True)
+    print("sensitivities done", round(time.time() - t0, 1), flush=True)
     cm.write_csv(index, cm.TABLES / "I2_RUNS_INDEX.csv")
     (cm.SCRATCH / "final_case_keys.json").write_text(json.dumps(sorted(case.keys())))
     print("runs: m08b", eng.n_m08b, "s3_0", eng.n_s30, "seconds", round(time.time() - t0, 1))
