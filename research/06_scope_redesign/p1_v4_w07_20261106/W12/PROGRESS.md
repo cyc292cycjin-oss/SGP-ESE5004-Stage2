@@ -11,7 +11,7 @@
 | W12-2 | 铁路非电燃料重复加载 | 完成（`scripts/w12_rail.py`、`w12_rail_b6.py`，表 `tables/W12_2_*.csv`；临时副本 `/home/jin/v4w07_w12/chain` 未改动时 8 个输出逐字节复现） | a8744e95 |
 | W12-3 | 蔗渣两端热值 | 完成（`scripts/w12_bagasse.py`，表 `tables/W12_3_*.csv`；s3_0 未改动副本 4 个输出逐字节复现） | 6dc598c6 |
 | W12-4 | UNdata 导出缺品种（覆盖缺口） | 完成（`scripts/w12_sdmx.py`、`w12_coverage.py`、`w12_coverage_chain.py`；SDMX 11 个原始响应 `sdmx/`，登记 `DATA_REGISTRY_W12_SDMX.csv`；表 `tables/W12_4_*.csv`） | 0728ca4c |
-| W12-5 | 同类排查 | 完成（`scripts/w12_scan.py`，表 `tables/W12_5_*.csv`，疑点清单 `W12_5_SUSPECTS.csv` 11 条） | 本提交 |
-| W12-6 | 报告、证据、审阅包 | 进行中 | |
+| W12-5 | 同类排查 | 完成（`scripts/w12_scan.py`，表 `tables/W12_5_*.csv`，疑点清单 `W12_5_SUSPECTS.csv` 11 条） | 178d2802 |
+| W12-6 | 报告、证据、审阅包 | 报告 `REPORT.md`、`EVIDENCE.json`（1,355 项）、`MISSING_DATA.csv`、`LEDGER_ENTRY_DRAFT.md` 本提交；审阅包在报告提交之后生成 | 本提交 |
 
-续做点：W12-6（报告 REPORT.md、合并 EVIDENCE.json、MISSING_DATA.csv、台账草稿、审阅包）。
+续做点：生成 `REVIEW_<报告提交前 8 位>.zip` 与清单，收尾提交并推送。
