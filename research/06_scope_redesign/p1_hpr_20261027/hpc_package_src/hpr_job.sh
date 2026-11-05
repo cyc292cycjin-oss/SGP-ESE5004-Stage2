@@ -34,10 +34,16 @@ case "$JOB_MODE" in formal|batch|smoke56|build_only) ;; *) echo "REFUSED: JOB_MO
 HOOKS="ALLOW_UNREGISTERED BUILD_ONLY POST_ONLY DRY TRUNCATE SOLVE_CMD SPLIT_CMD VA_CMD C1_CMD M12_CMD M12A_CMD G6_CMD SUM_CMD PACK_CMD LEDGER_CMD WALL_CAP_S GUROBI_TIME_LIMIT_S LICENCE_GAP_S GRACE_S MONITOR_S POST_TIMEOUT_S PACK_TIMEOUT_S SOLVE_MODE P1_WINDOW_S P1_THRESHOLD P1_MIN_CORES MEMORY_STOP_FRACTION PROJECTION_FRACTION BUILD_TIMEOUT_S ASSIGN_TIMEOUT_S POST_MEM_NEED_GIB WAIT_START_MAX_S MEM_MEASURE CGROUP_ROOT RUN_DIR CORES MEM_QUOTA_GIB WAIT_START_OF REPO NETS"
 bad=""; for k in $HOOKS $(compgen -A variable | grep -E '^FAKE_'); do [ -z "${!k:-}" ] || bad="$bad $k"; done
 if [ -n "$bad" ] && [ -z "${HPR_TEST_STANDIN:-}" ]; then echo "REFUSED: test hook / dry-run switch / runner override set in the job environment:$bad (every value comes from the job script and this body)"; exit 2; fi
+# V3.1 (decision 195): the run folders of the package plan (pbs/HPC_PLAN.txt RUNDIRS = b4_batch4.py RUN_DIRS; v3.1 runs/batch5, runs/smoke56_v31); without the line
+# (v2 / v3 packages) runs/batch4, runs/smoke56, runs/build_only_f1
+RD_FORMAL=runs/batch4; RD_SMOKE=runs/smoke56; RD_BUILD=runs/build_only_f1
+RDL=$(grep '^RUNDIRS|' "$PKG/pbs/HPC_PLAN.txt" 2>/dev/null | tail -1)
+[ -z "$RDL" ] || IFS='|' read -r _ RD_FORMAL RD_SMOKE RD_BUILD <<< "$RDL"
+for x in "$RD_FORMAL" "$RD_SMOKE" "$RD_BUILD"; do [[ "$x" =~ ^runs/[A-Za-z0-9_][A-Za-z0-9_.-]*$ ]] || { echo "REFUSED: run folder '$x' of pbs/HPC_PLAN.txt (RUNDIRS) is not runs/<name>"; exit 2; }; done
 case "$JOB_MODE" in
-  formal|batch) RUN_DIR=$RUNS_ROOT/runs/batch4;;
-  smoke56) RUN_DIR=$RUNS_ROOT/runs/smoke56;;
-  build_only) RUN_DIR=$RUNS_ROOT/runs/build_only_f1;;
+  formal|batch) RUN_DIR=$RUNS_ROOT/$RD_FORMAL;;
+  smoke56) RUN_DIR=$RUNS_ROOT/$RD_SMOKE;;
+  build_only) RUN_DIR=$RUNS_ROOT/$RD_BUILD;;
 esac
 # ---- authorisation text (solve modes): environment, else <package>/HPR_AUTH.txt
 AUTH=${HPR_AUTH:-}; [ -n "$AUTH" ] || { [ -f "$PKG/HPR_AUTH.txt" ] && AUTH=$(cat "$PKG/HPR_AUTH.txt"); }
@@ -53,7 +59,7 @@ case "$JOB_MODE" in
     [ "$DEF_STATUS" = REGISTERED ] || { echo "REFUSED: the limits of BATCH_DEF.json are $DEF_STATUS (RUN_PLAN_HPC_V3.md section 2) - the formal jobs wait for the registered values"; exit 2; }
     for d in "$RUN_DIR"/F*; do
       [ -d "$d" ] || continue
-      c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) echo "REFUSED: $d holds a dry-run leftover (.cond=$c) - the formal RUN_DIR must be fresh (runs/batch4)"; exit 2;; esac
+      c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) echo "REFUSED: $d holds a dry-run leftover (.cond=$c) - the formal RUN_DIR must be fresh ($RD_FORMAL)"; exit 2;; esac
       [ -f "$d/RUN.json" ] && grep -q '"label": "SMOKE_TEST_ONLY"' "$d/RUN.json" && { echo "REFUSED: $d holds a smoke leftover (label SMOKE_TEST_ONLY)"; exit 2; }
       [ -f "$d/RUN.json" ] && grep -Eq '"truncate": [0-9]' "$d/RUN.json" && { echo "REFUSED: $d holds a truncated run"; exit 2; }
     done;;
@@ -70,7 +76,7 @@ case "$JOB_MODE" in
     case " $DEF_RUNS " in *" $JOB_RID "*) ;; *) echo "REFUSED: JOB_RID=$JOB_RID ($DEF_RUNS)"; exit 2;; esac
     # a folder holding a previous build-only run (self-check S-01 after the review): the runner would skip the build on its receipt (.cond=build_only /
     # split_built) and the records below would repeat the old numbers with the LP already deleted - the folder must be moved aside first
-    if [ -d "$RUN_DIR/$JOB_RID" ] || [ -f "$RUN_DIR/BUILD_ONLY_STATUS.txt" ]; then echo "REFUSED: $RUN_DIR holds a previous build-only run - move it aside first (mv runs/build_only_f1 runs/build_only_f1_<date>); nothing started"; exit 2; fi;;
+    if [ -d "$RUN_DIR/$JOB_RID" ] || [ -f "$RUN_DIR/BUILD_ONLY_STATUS.txt" ]; then echo "REFUSED: $RUN_DIR holds a previous build-only run - move it aside first (mv $RD_BUILD ${RD_BUILD}_<date>); nothing started"; exit 2; fi;;
 esac
 # ---- licence file: existence and mode only (never read); the formal / smoke solve modes need it, build_only and batch do not use it
 export GRB_LICENSE_FILE=${GRB_LICENSE_FILE:-$HOME/.gurobi/gurobi.lic}

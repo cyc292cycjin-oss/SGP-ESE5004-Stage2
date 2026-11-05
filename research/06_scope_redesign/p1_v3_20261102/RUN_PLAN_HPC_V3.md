@@ -4,6 +4,7 @@
 **状态：** 本文件在任何 F1–F4 的 HPC 求解之前提交。第 2 节的 TimeLimit、walltime、进程 1 超时与批级 walltime 原为 PROPOSED（V3 HPC v1），**2026-11-04 由审阅端按用户授权决定并登记**（`V3_HPC_UNATTENDED.md` 第 1 节；推导见第 14 节）：定义文件 `limits_status` 为 `REGISTERED`，包按登记值重新打出。第 2.2、3、5、10 节已改为登记值，第 12 节保留原 PROPOSED 取值作为记录。其余各节沿用 v2 已登记的规则，按四个运行写明。
 **单一来源：** 定义文件 `batch_def/BATCH_DEF_2920x3h_v3hpc.json`（包内 `BATCH_DEF.json`）→ `scripts_project/b4_batch4.py`（运行表、登记网络、时限、作业表、冒烟期望值）→ `run_batch4.sh`（经 `b4_batch4.py hpc-plan` / `runmeta` 读取）、`preflight.sh`、`hpc/make_pbs.sh` 生成的作业脚本、`hpc/hpr_submit.sh`；`hpc/hpr_consistency.py` 把本文件与这些来源逐项比对（包内 `HPC_CONSISTENCY.json`，必须 `ALL_CONSISTENT` 才出包）。
 **模型、网络、成本表、求解档案参数、GATES_V6 / C1 阈值一律不改。**
+**v3.1（2026-11-05，决策清单第 195 项）：** 燃料舱净零约束改为逐计量流量为零的等价写法，部署包换成新的代码提交与 v3.1 定义文件 `batch_def/BATCH_DEF_2920x3h_v31hpc.json`（与 v3 定义只差名称、说明与运行目录），见第 15 节。v3.1 的正式运行目录为 `runs/batch5/`（HPC 上 `hpr3/runs/batch4/` 是 v3 的停批记录，保留不动），冒烟目录为 `runs/smoke56_v31/`，包目录为 `/hpctmp/<用户>/hpr31/`；下文各节的路径已按 v3.1 写。TimeLimit、walltime、资源、早期测速、构建超时、验收与预测全部不变。
 
 ---
 
@@ -84,7 +85,7 @@
 
 - **≤ 2 个会话：** F1 与 F3 串行（`afterany`），F2 与 F4 串行，所以同时最多两个求解；运行器另在启动锁内核对共享运行目录中"已启动未结束"的其他求解少于 2 个，否则等待（上限 `WAIT_START_MAX_S`，超时 `STOP_SAFE:START_LOCK`）。
 - **F2 等 F1（沿用 v2 两重机制）：** `qsub -W depend=after:<F1>`，运行器 `--only F2` 以 `WAIT_START_OF=F1` 运行：F2 的进程 2 等到 `F1/.solve_start` 距今 ≥ 330 s（或 F1 已结束求解 / 未经 Gurobi 就结束）。
-- **启动锁（新增，所有运行）：** 每个运行在启动 Gurobi 前用原子 `mkdir runs/batch4/.gurobi_start_lock` 取得锁（跨节点也有效），锁内等到距其他运行的每次 Gurobi 启动、任何运行的 Gurobi 结束与本运行器启动都 ≥ 330 s，且其他在跑的 Gurobi 少于 2 个，写出 `.solve_start` 后立即释放。这样 F3 与 F2、F3 与 F4、F4 与 F1 的启动无论何时重合都保持间隔。锁不会被自动打破：若持锁作业在持锁期间被杀，其他运行等满 `WAIT_START_MAX_S` 后 `STOP_SAFE:START_LOCK`，由用户确认没有运行器持锁、审阅端同意后把该目录改名移开（操作指南步骤 H3）；`hpr_submit.sh --resume` 发现锁目录即拒绝（审查第 6 条）。持锁时间正常为几分钟；当另一个运行的 Gurobi 刚启动或结束（< 330 s）、或已有 2 个在跑时，可以合法持锁到 `WAIT_START_MAX_S`。
+- **启动锁（新增，所有运行）：** 每个运行在启动 Gurobi 前用原子 `mkdir runs/batch5/.gurobi_start_lock`（v3 为 `runs/batch4/`；锁在正式运行目录内）取得锁（跨节点也有效），锁内等到距其他运行的每次 Gurobi 启动、任何运行的 Gurobi 结束与本运行器启动都 ≥ 330 s，且其他在跑的 Gurobi 少于 2 个，写出 `.solve_start` 后立即释放。这样 F3 与 F2、F3 与 F4、F4 与 F1 的启动无论何时重合都保持间隔。锁不会被自动打破：若持锁作业在持锁期间被杀，其他运行等满 `WAIT_START_MAX_S` 后 `STOP_SAFE:START_LOCK`，由用户确认没有运行器持锁、审阅端同意后把该目录改名移开（操作指南步骤 H3）；`hpr_submit.sh --resume` 发现锁目录即拒绝（审查第 6 条）。持锁时间正常为几分钟；当另一个运行的 Gurobi 刚启动或结束（< 330 s）、或已有 2 个在跑时，可以合法持锁到 `WAIT_START_MAX_S`。
 - **已知局限（审查第 2 条，不改求解路径）：** `.solve_start` 由运行器在启动进程 2 时写出，早于 `b4_split_solve.py` 里 `gp.Env()` 真正建立 WLS 会话（之前还有 import 与读入 LP 标签）；`.solve_end` 比进程退出最多晚约 5 s。所以两次会话启动的实际间隔 = 330 s + 后者的延迟 − 前者的延迟，理论上可能略小于 330 s。本批不改：同时只有 F1、F2 两个会话，不超过上限；F3、F4 开会话前还有约 40 分钟无许可的构建（进程 1），与前一个会话的间隔自然远大于 330 s。
 - 正式作业不运行预检的 `licence` 节；作业开头只检查许可文件存在与权限 600。许可可用性由冒烟作业验证。
 - **F1–F4 运行期间（从第一个正式作业开始到最后一个求解结束），本机与 AutoDL 都不得启动 Gurobi 会话**（同一 WLS 许可）。
@@ -117,8 +118,8 @@
 
 ## 8. 结果回收
 
-- **每个运行结束后**（`hpc/hpr_status.sh` 显示 `ended`）：用户下载该运行的导出 `runs/batch4/export/<编号>/`（单路一个 `tar` 打包 + `sha256sum`，见操作指南第 6 节），不必等批级作业。
-- 批级作业结束后：`runs/batch4/results_light_final_*.tar.gz`、`results_full_final_*.tar.gz` 与各自的 `.sha256`（停批时 `*_halted_*`）。用户尽快下载到 `D:\ResearchWorkspaces\ASEAN\work\p1_v3_20261102\hpc_results\`，**单路**，本机核对 SHA256（PowerShell `Get-FileHash`）。
+- **每个运行结束后**（`hpc/hpr_status.sh` 显示 `ended`）：用户下载该运行的导出 `runs/batch5/export/<编号>/`（v3.1；单路一个 `tar` 打包 + `sha256sum`，见操作指南第 6 节），不必等批级作业。
+- 批级作业结束后：`runs/batch5/results_light_final_*.tar.gz`、`results_full_final_*.tar.gz` 与各自的 `.sha256`（停批时 `*_halted_*`）。用户尽快下载到 `D:\ResearchWorkspaces\ASEAN\work\p1_v3_20261102\hpc_results\`，**单路**，本机核对 SHA256（PowerShell `Get-FileHash`）。
 - LP / 解数组（约 4 × 7.8 GB）留在 `/hpctmp`（`ARRAYS_MANIFEST.json` 登记 SHA256），60 天未改动自动清除；需要时另行下载。
 
 ## 9. 测试作业（登记为测试，不属于正式运行）
@@ -126,7 +127,7 @@
 | 作业 | 队列 / 资源 | walltime | 内容 | 判据 |
 |---|---|---|---|---|
 | 环境安装 `hpr3_install`（通常不需要） | `serial`，`ncpus=1:mem=8gb` | 02:00:00 | 同 v2；HPC 上已有环境，登录预检 `env` 节 key packages 一致（284 / 284）即复用，不提交本作业 | `INSTALL_STATUS.txt` |
-| **冒烟** `hpr3_smoke56`（正式提交前必须 PASS） | `parallel`，`ncpus=17:mem=32gb` | 04:00:00 | 作业体依次以 `JOB_MODE=smoke56` 运行 F1 体、F2 体、批级体：`TRUNCATE=56 ALLOW_UNREGISTERED=1 GUROBI_TIME_LIMIT_S=3000 WALL_CAP_S=3600`，标签 `SMOKE_TEST_ONLY`，运行目录 `runs/smoke56`；两次 Gurobi 会话串行（间隔 ≥ 330 s）；F3、F4 与 F1、F2 走同一代码路径，不进冒烟 | `SMOKE_STATUS.txt`：F1、F2 optimal、ACCEPTED、后处理与批级 exit 0、`DONE`；目标值与本机冒烟（`RUN_PLAN_V3.md` 第 25 节：F1 329,705,566,422.23596、F2 342,268,691,464.4567 EUR）相对偏差 ≤ 1e-6（跨机器只记录差异） |
+| **冒烟** `hpr3_smoke56`（正式提交前必须 PASS） | `parallel`，`ncpus=17:mem=32gb` | 04:00:00 | 作业体依次以 `JOB_MODE=smoke56` 运行 F1 体、F2 体、批级体：`TRUNCATE=56 ALLOW_UNREGISTERED=1 GUROBI_TIME_LIMIT_S=3000 WALL_CAP_S=3600`，标签 `SMOKE_TEST_ONLY`，运行目录 `runs/smoke56_v31`（v3 为 `runs/smoke56`）；两次 Gurobi 会话串行（间隔 ≥ 330 s）；F3、F4 与 F1、F2 走同一代码路径，不进冒烟 | `SMOKE_STATUS.txt`：F1、F2 optimal、ACCEPTED、后处理与批级 exit 0、`DONE`；目标值与本机冒烟（`RUN_PLAN_V3.md` 第 25 节：F1 329,705,566,422.23596、F2 342,268,691,464.4567 EUR）相对偏差 ≤ 1e-6（跨机器只记录差异） |
 | 全尺寸 BUILD_ONLY `hpr3_build_only_f1`（可选） | `parallel`，`ncpus=48:mem=300gb` | 02:30:00 | 同 v2 的 D2：只跑进程 1，记录峰值、LP 字节、构建与写出秒数 | `BUILD_ONLY_STATUS.txt`：`BUILD_CHECK_F1 passed`；参考：峰值约 96 GiB、LP 约 5.5 GB、≤ 2,700 s |
 
 - 测试作业的开关只在对应作业体内导出；正式作业在开关残留、`--auth` 缺失、运行目录含测试残留时拒绝（退出码 2）。
@@ -163,13 +164,13 @@
 
 | 内容 | 位置 |
 |---|---|
-| 包目录（= `PBS_O_WORKDIR`，作业从这里提交） | `/hpctmp/<用户>/hpr3/`（与 v2 的 `/hpctmp/<用户>/hpr/` 分开） |
-| 代码 | `/hpctmp/<用户>/hpr3/repo/`（预检 `sha` 节解包，`.package_commit` = `COMMIT`） |
+| 包目录（= `PBS_O_WORKDIR`，作业从这里提交） | v3.1：`/hpctmp/<用户>/hpr31/`（新目录；v3 的 `/hpctmp/<用户>/hpr3/` 与 v2 的 `/hpctmp/<用户>/hpr/` 保留不动） |
+| 代码 | `/hpctmp/<用户>/hpr31/repo/`（预检 `sha` 节解包，`.package_commit` = `COMMIT`） |
 | conda 环境 | `$HOME/miniforge3/envs/pypsa-earth`（HPR 步骤已装；预检 `env` 节核对） |
-| 运行目录 | 正式 `runs/batch4/`；冒烟 `runs/smoke56/`；BUILD_ONLY `runs/build_only_f1/` |
-| 结果包 | `runs/batch4/results_{light,full}_final_*.tar.gz`（+ `.sha256`） |
+| 运行目录 | 正式 `runs/batch5/`；冒烟 `runs/smoke56_v31/`；BUILD_ONLY `runs/build_only_f1/`（定义文件 `run_dirs` → `pbs/HPC_PLAN.txt` 的 `RUNDIRS` 行，作业体、提交与状态脚本都读这一行；v3 为 `runs/batch4/`、`runs/smoke56/`） |
+| 结果包 | `runs/batch5/results_{light,full}_final_*.tar.gz`（+ `.sha256`） |
 | 许可 | `$HOME/.gurobi/gurobi.lic`，`chmod 600`，用户自行放置 |
-| 作业日志 | `/hpctmp/<用户>/hpr3/<作业名>.o<作业序号>` |
+| 作业日志 | `/hpctmp/<用户>/hpr31/<作业名>.o<作业序号>` |
 
 ## 12. 原 PROPOSED 取值与可选提议（记录；2026-11-04 已按第 14 节决定）
 

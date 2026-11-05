@@ -143,6 +143,13 @@ def main():
         row("pairs (integrated / reference)", dict(plan=";".join(f"{p}:{i}/{d}" for p, (i, d) in B.pairs().items()) if all(f"{i} / {d}" in plan for i, d in B.pairs().values()) else None,
                                                     b4_batch4=";".join(f"{p}:{i}/{d}" for p, (i, d) in B.pairs().items())))
         row("every run stops the batch (G2 / no solution / C1 (a))", dict(check=str(set(B.STOP_ALWAYS) == set(B.RUNS)), expected="True"))
+    if v3 and (getattr(B, "_DEF", None) or {}).get("run_dirs"):   # V3.1 (decision 195): run folders of the definition = plan text = pbs/HPC_PLAN.txt (read by job body / submit / status)
+        hpt = (a.pbs / "HPC_PLAN.txt").read_text() if (a.pbs / "HPC_PLAN.txt").exists() else ""
+        mm = re.search(r"^RUNDIRS\|([^|\n]+)\|([^|\n]+)\|([^|\n]+)$", hpt, re.M)
+        for i, key in enumerate(("formal", "smoke56")):
+            v = B.RUN_DIRS[key]
+            row(f"run folder {key}", dict(plan=v if (f"`{v}`" in plan or f"`{v}/`" in plan) else None, b4_batch4=v, pbs_hpc_plan=(mm.group(i + 1) if mm else None)))
+        row("job body reads the run folders from pbs/HPC_PLAN.txt (RUNDIRS)", dict(hpr_job=str("^RUNDIRS|" in job), expected="True"))
     res = dict(script="hpc/hpr_consistency.py", written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), rows=rows, all_consistent=all(r["consistent"] for r in rows), walltime_components=wc,
                batch_def=os.environ.get("BATCH_DEF"), sources=dict(plan=str(a.plan), runner=str(a.runner), preflight=str(a.preflight), pbs=str(a.pbs), job=str(a.job)))
     a.out.write_text(json.dumps(res, indent=1, ensure_ascii=False) + "\n")

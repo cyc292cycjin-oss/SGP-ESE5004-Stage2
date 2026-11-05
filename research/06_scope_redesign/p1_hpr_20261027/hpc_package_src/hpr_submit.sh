@@ -5,16 +5,20 @@
 # maintenance overlapping the run (the operator confirms with --motd-checked).
 #   bash hpc/hpr_submit.sh --auth-file HPR_AUTH.txt --motd-checked [--resume] [--dry-run]
 #   --auth-file  the user's authorisation text (one file, plain text, no host / account / licence content); copied to <package>/HPR_AUTH.txt (mode 600)
-#   --resume     allowed only to resubmit after an interruption into the SAME runs/batch4 (an ended run is skipped by the runner, a started-not-ended
-#                run is STOP_SAFE:INTERRUPTED - RUN_PLAN_HPC 6); without --resume an existing runs/batch4 refuses
+#   --resume     allowed only to resubmit after an interruption into the SAME formal run folder (an ended run is skipped by the runner, a started-not-ended
+#                run is STOP_SAFE:INTERRUPTED - RUN_PLAN_HPC 6); without --resume an existing formal run folder refuses. V3.1 (decision 195): the run folders
+#                come from pbs/HPC_PLAN.txt (RUNDIRS; v3.1 runs/batch5 and runs/smoke56_v31; without the line runs/batch4 and runs/smoke56)
 #   --dry-run    V3 HPC (review item 1; HPC_OPERATOR_GUIDE_V3 step c2): nothing is written, copied or submitted and qsub is never called - every check below runs, a
 #                check that would refuse a real submission prints "DRY-RUN NOTE: ... - a real submission would be refused" instead, the qsub commands are printed with
 #                placeholder job ids (F1_JOBID, ...) and the last line is DRY_RUN_OK; a broken package (plan, job scripts, dependency order) still refuses (exit 2)
 # Refusals (exit 2, nothing submitted): a test hook / dry-run switch in this shell, no --motd-checked, missing authorisation, smoke not passed,
-# runs/batch4 present without --resume, a STOP / STOP_SAFE present in runs/batch4 (the user resolves it first), a start lock directory left in runs/batch4
+# the formal run folder present without --resume, a STOP / STOP_SAFE present in it (the user resolves it first), a start lock directory left in it
 # (review item 6), repo commit != COMMIT, licence file missing / not 600, job scripts missing.
 set -u
 PKG="$(cd "$(dirname "$0")/.." && pwd)"; cd "$PKG" || exit 2
+RD_FORMAL=runs/batch4; RD_SMOKE=runs/smoke56   # V3.1: the run folders of pbs/HPC_PLAN.txt (RUNDIRS); v2 / v3 packages: these defaults
+RDL=$(grep '^RUNDIRS|' pbs/HPC_PLAN.txt 2>/dev/null | tail -1); [ -z "$RDL" ] || IFS='|' read -r _ RD_FORMAL RD_SMOKE _ <<< "$RDL"
+for x in "$RD_FORMAL" "$RD_SMOKE"; do [[ "$x" =~ ^runs/[A-Za-z0-9_][A-Za-z0-9_.-]*$ ]] || { echo "REFUSED: run folder '$x' of pbs/HPC_PLAN.txt (RUNDIRS) is not runs/<name>"; exit 2; }; done
 AUTHF=""; MOTD=0; RESUME=0; DRYRUN=0; NOTES=0
 while [ $# -gt 0 ]; do case "$1" in --auth-file) AUTHF="$2"; shift 2;; --motd-checked) MOTD=1; shift;; --resume) RESUME=1; shift;; --dry-run) DRYRUN=1; shift;; *) echo "unknown argument $1"; exit 2;; esac; done
 refuse() { if [ $DRYRUN = 1 ]; then echo "DRY-RUN NOTE: $1 - a real submission would be refused"; NOTES=$((NOTES + 1)); else echo "REFUSED: $1"; exit 2; fi; }   # a check of the submission
@@ -31,7 +35,7 @@ if [ -n "$AUTHF" ] && [ -s "$AUTHF" ]; then
     grep -qiE "$AUTHPAT" "$PKG/HPR_AUTH.txt" && { echo "REFUSED: the authorisation text must not contain licence or password words"; rm -f "$PKG/HPR_AUTH.txt"; exit 2; }
   fi
 else refuse "--auth-file FILE (the user authorisation text) is required (step D1 writes HPR_AUTH.txt)"; fi
-S="$PKG/runs/smoke56/SMOKE_STATUS.txt"; [ -f "$S" ] && grep -q "^SMOKE_RESULT:PASS" "$S" || refuse "the smoke job has not passed ($S: SMOKE_RESULT:PASS missing) - step D first"
+S="$PKG/$RD_SMOKE/SMOKE_STATUS.txt"; [ -f "$S" ] && grep -q "^SMOKE_RESULT:PASS" "$S" || refuse "the smoke job has not passed ($S: SMOKE_RESULT:PASS missing) - step D first"
 [ "$(cat repo/.package_commit 2>/dev/null)" = "$(cat COMMIT)" ] || refuse "./repo is not the package commit $(cat COMMIT) (step C install job / preflight sha)"
 LIC=${GRB_LICENSE_FILE:-$HOME/.gurobi/gurobi.lic}; [ -f "$LIC" ] && [ "$(stat -c %a "$LIC")" = 600 ] || refuse "licence file missing or not mode 600 at $LIC (step B)"
 # the formal and batch jobs with their dependencies, in registration order, from pbs/HPC_PLAN.txt (= b4_batch4.py hpc-plan, written by hpc/make_pbs.sh):
@@ -41,11 +45,11 @@ ST=$(grep '^STATUS|' pbs/HPC_PLAN.txt | cut -d'|' -f2); [ -z "$ST" ] || [ "$ST" 
 ORDER=(); while IFS='|' read -r _ key name _ _ _ _ mode _ depends _; do case "$mode" in formal|batch) ORDER+=("$key|$name|$depends");; esac; done < <(grep '^JOB|' pbs/HPC_PLAN.txt)
 [ ${#ORDER[@]} -ge 3 ] || broken "pbs/HPC_PLAN.txt lists ${#ORDER[@]} formal / batch jobs"
 for x in "${ORDER[@]}"; do IFS='|' read -r key name dep <<< "$x"; [ -f "pbs/$name.pbs" ] || broken "pbs/$name.pbs missing (hpc/make_pbs.sh)"; done
-if [ -d runs/batch4 ]; then
-  [ $RESUME = 1 ] || refuse "runs/batch4 exists - a formal RUN_DIR is used once; --resume only to continue after an interruption (RUN_PLAN_HPC 6)"
-  { [ -f runs/batch4/STOP ] || [ -f runs/batch4/STOP_SAFE ]; } && refuse "runs/batch4 holds STOP / STOP_SAFE - the user resolves it first (a resource restart is a NEW RUN_DIR with authorisation)"
-  [ -d runs/batch4/.gurobi_start_lock ] && refuse "runs/batch4/.gurobi_start_lock exists (owner: $(cat runs/batch4/.gurobi_start_lock/owner 2>/dev/null || echo unknown)) - a runner may still hold it or a killed job left it; with no job of this package in qstat the reviewer decides (HPC_OPERATOR_GUIDE_V3 H3)"
-  for d in runs/batch4/F*; do [ -d "$d" ] || continue; c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) refuse "$d holds a dry-run leftover";; esac; done
+if [ -d "$RD_FORMAL" ]; then
+  [ $RESUME = 1 ] || refuse "$RD_FORMAL exists - a formal RUN_DIR is used once; --resume only to continue after an interruption (RUN_PLAN_HPC 6)"
+  { [ -f "$RD_FORMAL/STOP" ] || [ -f "$RD_FORMAL/STOP_SAFE" ]; } && refuse "$RD_FORMAL holds STOP / STOP_SAFE - the user resolves it first (a resource restart is a NEW RUN_DIR with authorisation)"
+  [ -d "$RD_FORMAL/.gurobi_start_lock" ] && refuse "$RD_FORMAL/.gurobi_start_lock exists (owner: $(cat "$RD_FORMAL/.gurobi_start_lock/owner" 2>/dev/null || echo unknown)) - a runner may still hold it or a killed job left it; with no job of this package in qstat the reviewer decides (HPC_OPERATOR_GUIDE_V3 H3)"
+  for d in "$RD_FORMAL"/F*; do [ -d "$d" ] || continue; c=$(cat "$d/.cond" 2>/dev/null); case "$c" in build_only|split_built|stopped_before_solve) refuse "$d holds a dry-run leftover";; esac; done
 fi
 command -v qsub > /dev/null 2>&1 || refuse "qsub not found (login node?)"
 declare -A JID; LINE="SUBMITTED:utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"; QUEUED=""
@@ -55,10 +59,10 @@ for x in "${ORDER[@]}"; do
   if [ $DRYRUN = 1 ]; then echo "DRY-RUN: qsub ${W[*]:-}${W[*]:+ }pbs/$name.pbs"; JID[$key]="${key}_JOBID"; continue; fi
   id=$(qsub ${W[@]+"${W[@]}"} "pbs/$name.pbs") || { if [ -n "$QUEUED" ]; then echo "qsub $key failed - already queued:$QUEUED (qdel them if you do not want them alone)"; else echo "qsub $key failed - nothing submitted; fix the qsub error and run this command again"; fi; exit 1; }
   JID[$key]=$id; QUEUED="$QUEUED $key=$id"; LINE="$LINE:$key=$id"
-  [ -d runs/batch4 ] || mkdir -p runs/batch4   # created only after the first job is queued (review F-11: a failed first qsub must not block the retry)
+  [ -d "$RD_FORMAL" ] || mkdir -p "$RD_FORMAL"   # created only after the first job is queued (review F-11: a failed first qsub must not block the retry)
   echo "$key job id: $id${dep:+   (depend=$dep)}"
 done
 if [ $DRYRUN = 1 ]; then echo "DRY_RUN_OK: nothing submitted (bash ${BASH_VERSION}; ${#ORDER[@]} jobs; $NOTES check(s) above would refuse a real submission)"; exit 0; fi
-echo "$LINE:resume=$RESUME" | tee -a runs/batch4/SUBMITTED.txt
+echo "$LINE:resume=$RESUME" | tee -a "$RD_FORMAL/SUBMITTED.txt"
 echo "F2 starts after F1 started; its Gurobi process waits for F1's Gurobi start + 330 s. F3 / F4 (when in the plan) start after F1 / F2 ended; every Gurobi start takes the start lock (>= 330 s after any other start or end, < 2 other sessions). The batch job runs after all runs ended."
 echo "monitor: bash hpc/hpr_status.sh"

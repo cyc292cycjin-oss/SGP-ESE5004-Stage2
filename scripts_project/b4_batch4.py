@@ -98,6 +98,14 @@ if _DEF and _DEF.get("smoke_expected"):
     SMOKE_EXPECTED_OBJECTIVE = {k: float(v) for k, v in _DEF["smoke_expected"]["objective"].items()}; SMOKE_EXPECTED_ITERATIONS = dict(_DEF["smoke_expected"].get("iterations", {}))
 if _DEF and _DEF.get("high_peak_gib"):
     B4P_HIGH_PEAK_GIB = {k: float(v) for k, v in _DEF["high_peak_gib"].items()}
+# V3.1 (decision 195; V3_FIX_INSTRUCTION.md 6.1): the run folders of the package (relative to the package folder). v2 / v3 packages keep runs/batch4, runs/smoke56,
+# runs/build_only_f1; a definition may name new ones (v3.1: runs/batch5 - runs/batch4 on the HPC is the halted v3 batch, kept untouched - and runs/smoke56_v31).
+# The job body, the submit and the status scripts read them from pbs/HPC_PLAN.txt (hpc-plan line RUNDIRS).
+RUN_DIRS = dict(formal="runs/batch4", smoke56="runs/smoke56", build_only="runs/build_only_f1")
+if _DEF and _DEF.get("run_dirs"):
+    RUN_DIRS = {**RUN_DIRS, **{str(k): str(v) for k, v in _DEF["run_dirs"].items()}}
+if set(RUN_DIRS) != {"formal", "smoke56", "build_only"} or not all(re.fullmatch(r"runs/[A-Za-z0-9_][A-Za-z0-9_.-]*", v) for v in RUN_DIRS.values()) or len(set(RUN_DIRS.values())) != 3:
+    raise ValueError(f"run_dirs of the batch definition: keys formal / smoke56 / build_only, distinct runs/<name> folders - got {RUN_DIRS}")
 
 
 def pairs() -> dict:
@@ -573,6 +581,7 @@ def main():
         for p, rr in pairs().items():
             print(f"PAIR|{p}|{rr[0]}|{rr[1]}")
         print(f"STATUS|{LIMITS_STATUS}")
+        print(f"RUNDIRS|{RUN_DIRS['formal']}|{RUN_DIRS['smoke56']}|{RUN_DIRS['build_only']}")   # V3.1: run folders (hpr_job.sh / hpr_submit.sh / hpr_status.sh)
 
 
 if __name__ == "__main__":

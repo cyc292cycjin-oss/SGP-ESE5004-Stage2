@@ -1,10 +1,13 @@
 #!/bin/bash
 # HPR step F (HPC_OPERATOR_GUIDE.md): ONE status command on the login node - job states, the current phase of F1 / F2, the latest barrier iteration,
 # memory and time projections, stop lines, packs; nothing of the licence is printed (the Gurobi log lines are filtered).
-#   bash hpc/hpr_status.sh [runs dir]      default runs/batch4 (also: runs/smoke56, runs/build_only_f1)
+#   bash hpc/hpr_status.sh [runs dir]      default: the formal run folder of pbs/HPC_PLAN.txt (RUNDIRS; v3.1 runs/batch5, smoke runs/smoke56_v31);
+#                                          without that line runs/batch4 (also: runs/smoke56, runs/build_only_f1)
 set -u
 PKG="$(cd "$(dirname "$0")/.." && pwd)"; cd "$PKG" || exit 2
-OUT=${1:-runs/batch4}; PY=${PY:-$HOME/miniforge3/envs/pypsa-earth/bin/python}; SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'
+RD_FORMAL=runs/batch4; RDL=$(grep '^RUNDIRS|' pbs/HPC_PLAN.txt 2>/dev/null | tail -1); [ -z "$RDL" ] || IFS='|' read -r _ RD_FORMAL _ _ <<< "$RDL"
+[[ "$RD_FORMAL" =~ ^runs/[A-Za-z0-9_][A-Za-z0-9_.-]*$ ]] || { echo "run folder '$RD_FORMAL' of pbs/HPC_PLAN.txt (RUNDIRS) is not runs/<name>"; exit 2; }
+OUT=${1:-$RD_FORMAL}; PY=${PY:-$HOME/miniforge3/envs/pypsa-earth/bin/python}; SCRUB='licen[cs]e|registered[[:space:]]+to|wls(access|secret)|academic'
 echo "== $(date -u +%Y-%m-%dT%H:%M:%SZ) UTC  $(date) local ; package $(cat COMMIT 2>/dev/null | cut -c1-8) ; runs $OUT"
 echo "== PBS jobs"; command -v qstat > /dev/null 2>&1 && qstat -u "${USER:-$(id -un)}" 2>/dev/null | tail -n +3 || echo "(qstat not available here)"
 [ -f "$OUT/SUBMITTED.txt" ] && { echo "== submitted"; cat "$OUT/SUBMITTED.txt"; }
