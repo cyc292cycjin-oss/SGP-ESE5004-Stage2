@@ -18,4 +18,6 @@
 
 说明：BPS PDF 为矢量文字（每页一个 Form XObject，含 ToUnicode），不是扫描件；`v4s1_pdf_text.py` 的页面文字只有水印，表格由 `v4s1_bps_text.py` / `v4s1_bps_glyphs.py` 从表单对象逐字形读取。选项量化在仓库外的副本 `/home/jin/v4s1/chain_captive` 中重跑 `s3_0_industry.py`，未改动的副本逐位复现仓库 ID 行。
 
-续做起点：无。S1 完成后等待审阅端审阅；S2 须另有指令。
+续做起点：无。S1 完成，等待审阅端审阅；S2 须另有指令。
+
+最终状态（2026-11-06）：报告提交 `8ad5f7a9f3fc490ebd72fb49024b6e35e946fb24`（S1-E）已推送，`origin/codex/v4-data-20261105` 与本地一致；审阅 ZIP `work/p1_v4_data_20261105/V4_S1_REVIEW_8ad5f7a9.zip`（97 个成员 = 交付目录 96 个文件 + 台账，SHA256 `7ff5e7c185d94ed49d240fefc52c59de5cc2743249e06653776acc82ef78826e`，成员清单 `evidence/REVIEW_ZIP_MANIFEST_8ad5f7a9.txt`）；交付目录与工作目录 96 个文件逐一一致；本行与清单所在的收尾提交见 `git log` 头。求解器 0 次，本机计算约 10 分钟，新增磁盘约 0.22 GB，未触发停止条件；未开 PR。
