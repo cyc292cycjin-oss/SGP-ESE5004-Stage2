@@ -24,21 +24,38 @@ import v4w07g2_unsd as un   # noqa: E402
 OTHER_ROWS = ("other", "construction", "mining and quarrying")
 
 
-def matrices(cache_ratio: dict | None = None) -> dict:
-    """Decomposition matrices; the UNSD matrix after an optional NCV cell ratio (the hybrid follows the NCV of the UNSD cells)."""
+def unsd_matrix(cache_ratio: dict | None = None, cache_add: dict | None = None) -> pd.DataFrame:
+    """VN UNSD sub-sector matrix of industry_cache.json (MWh) after the NCV cell ratios and absolute additions (same edits as Chain.run)."""
     cache = json.loads((cm.REPO / cm.CACHE_REL).read_text())
     subs = [k for k in cache["records"][0] if k not in ("country", "carrier")]
     U = pd.DataFrame({r["carrier"]: {k: float(r[k]) for k in subs} for r in cache["records"] if r["country"] == cm.CC})
     for (car, sub), f in (cache_ratio or {}).items():
         U.at[sub, car] *= f
+    for (car, sub), x in (cache_add or {}).items():
+        U.at[sub, car] += x
+    return U
+
+
+EL_ROWS = None
+
+
+def matrices(cache_ratio: dict | None = None, cache_add: dict | None = None, bag_mwh: float | None = None) -> dict:
+    """Decomposition matrices; the UNSD matrix after an optional NCV cell ratio (the hybrid follows the NCV of the UNSD cells)."""
+    global EL_ROWS
+    if EL_ROWS is None:
+        EL_ROWS = un.el_rows_2019()
+    U = unsd_matrix(cache_ratio, cache_add)
+    subs = list(U.index)
     A = pd.read_csv(cm.REPO / cm.APEC_REL).set_index("cache_subsector")
     A = A[[cm.APEC_COL[c] for c in cm.CARS19]].rename(columns={v: k for k, v in cm.APEC_COL.items()}).reindex(subs).fillna(0.0).astype(float)
     Ay = A.copy()
     for sub, (q19, q22, _) in un.ACT_2019_2022.items():
         Ay.loc[sub] = Ay.loc[sub] * q19 / q22
-    rows = pd.read_csv(cm.WORK / "tables/VN_UNSD_2019_ROWS.csv")
-    bag = float(rows[(rows.commodity == "Bagasse") & (rows.sdmx_transaction == "121")].twh_v3_factor.iloc[0]) * 1e6
-    out = {"apec2022": A, "apec2022_yearadj": Ay, "hybrid": un.hybrid(U, A, bag), "hybrid_yearadj": un.hybrid(U, Ay, bag), "unsd_only": U}
+    if bag_mwh is None:
+        rows = pd.read_csv(cm.WORK / "tables/VN_UNSD_2019_ROWS.csv")
+        bag_mwh = float(rows[(rows.commodity == "Bagasse") & (rows.sdmx_transaction == "121")].twh_v3_factor.iloc[0]) * 1e6
+    out = {"apec2022": A, "apec2022_yearadj": Ay, "hybrid": un.hybrid(U, A, bag_mwh, EL_ROWS), "hybrid_no_el2020": un.hybrid(U, A, bag_mwh),
+           "hybrid_yearadj": un.hybrid(U, Ay, bag_mwh, EL_ROWS), "unsd_only": U}
     return {k: v.rename(columns={c: cm.APEC_COL[c] for c in cm.CARS19}) for k, v in out.items()}
 
 

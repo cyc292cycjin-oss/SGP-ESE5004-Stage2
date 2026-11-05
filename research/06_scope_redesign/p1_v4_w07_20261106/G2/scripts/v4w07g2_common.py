@@ -108,10 +108,18 @@ def vec2050(sector: str, t: float) -> dict:
 class Chain:
     """Scratch copy of the data chain. run() applies VN edits, runs s3_0 twice (UNSD matrix, then APEC matrix) and returns both VN rows."""
 
+    M08B_OTHER = ("research_inputs/demand_v5/DEMAND_ANCHOR_AEO8_ATS.csv", "research_inputs/demand_v5/INDUSTRY_OUTPUT_2050_M08B.csv",
+                  "research_inputs/demand_v5/INDUSTRY_OUTPUT_BASE_M08B.csv")
+
     def __init__(self, repo: Path = REPO, chain: Path = CHAIN):
         self.repo, self.chain = repo, chain
-        self.orig = {rel: (repo / rel).read_bytes() for rel in (CACHE_REL, ATS_REL, D1_REL, APEC_REL, S30_REL)}
+        self.orig = {rel: (repo / rel).read_bytes() for rel in (CACHE_REL, ATS_REL, D1_REL, APEC_REL, S30_REL) + self.M08B_OTHER}
         self.patched = False
+
+    def m08b(self):
+        r = subprocess.run([sys.executable, "m08b_demand.py"], cwd=self.chain / "scripts_project", capture_output=True, text=True, env=dict(ENV))
+        if r.returncode:
+            raise RuntimeError(r.stderr[-3000:])
 
     def copy(self):
         if self.chain.exists():
@@ -146,12 +154,25 @@ class Chain:
         return pd.read_csv(self.chain / APEC_REL).set_index("cache_subsector")
 
     def run(self, moves_unsd=(), moves_apec=(), base_delta: dict | None = None, apec_override: pd.DataFrame | None = None,
-            cache_ratio: dict | None = None, cem_el_t19: float | None = None, keep_outputs: bool = False) -> dict:
+            cache_ratio: dict | None = None, cem_el_t19: float | None = None, keep_outputs: bool = False, cache_add: dict | None = None,
+            d1_delta: dict | None = None) -> dict:
         """moves_*: (subsector, carrier, d_mwh) leaving sub19 of VN in that run (negative d adds); every move must have the same per-carrier
-        total in both runs (it changes the shared e19). base_delta: {carrier: d_mwh} added to e19 WITHOUT a matching matrix edit (the shares then
-        spread it over all sub-sectors, e.g. an NCV change of a whole carrier). cache_ratio: {(carrier, subsector): factor} on the UNSD matrix
-        (NCV). apec_override: a replacement APEC matrix (PJ). Returns {'main': VN row, 'apec': VN row, 'gaps': VN gap rows, 'pz': VN s3_0 rows}."""
+        total in both runs (it changes the shared e19). base_delta: {carrier: d_mwh} added to e19 of the ATS table (growth mode I: multiplier
+        unchanged) WITHOUT a matching matrix edit (the shares then spread it over all sub-sectors, e.g. an NCV change of a whole carrier).
+        cache_ratio: {(carrier, subsector): factor} on the UNSD matrix (NCV); cache_add: {(carrier, subsector): MWh} added to UNSD matrix cells
+        (pair it with base_delta or d1_delta of the same total). d1_delta: {carrier: d_mwh} added to the D1 table, then m08b_demand.py is run
+        (growth mode II: AEO8 anchors absolute). apec_override: a replacement APEC-run matrix (any unit, shares only).
+        Returns {'main': VN row, 'apec': VN row, 'gaps': VN gap rows, 'pz': VN s3_0 rows, ...}."""
         self.restore()
+        if d1_delta:
+            d1 = pd.read_csv(self.chain / D1_REL, keep_default_na=False, dtype=str)
+            for c, dv in d1_delta.items():
+                m = (d1.country == CC) & (d1.sector == "Industry") & (d1.carrier == c)
+                if m.sum() != 1:
+                    raise ValueError(f"D1 {CC} Industry {c}: {m.sum()} rows")
+                d1.loc[m, "base_2019_mwh"] = repr(float(d1.loc[m, "base_2019_mwh"].iloc[0]) + dv)
+            (self.chain / D1_REL).write_text(d1.to_csv(index=False))
+            self.m08b()
         moves_unsd = [m for m in moves_unsd if abs(m[2]) > 0]; moves_apec = [m for m in moves_apec if abs(m[2]) > 0]
         tot_u = {c: sum(m[2] for m in moves_unsd if m[1] == c) for c in CARS19}
         tot_a = {c: sum(m[2] for m in moves_apec if m[1] == c) for c in CARS19}
@@ -170,6 +191,9 @@ class Chain:
         if cache_ratio:
             for (car, sub), f in cache_ratio.items():
                 recs[car][sub] = repr(float(recs[car][sub]) * float(f))
+        if cache_add:
+            for (car, sub), x in cache_add.items():
+                recs[car][sub] = repr(float(recs[car][sub]) + float(x))
         bd = {c: float((base_delta or {}).get(c, 0.0)) for c in CARS19}
         e19_1 = {c: e19[c] + bd[c] for c in CARS19}
 

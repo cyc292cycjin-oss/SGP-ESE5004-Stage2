@@ -144,13 +144,17 @@ def main():
     ats = pd.read_csv(cm.REPO / cm.ATS_REL)
     e19 = {c: float(ats[(ats.country == cm.CC) & (ats.sector == "Industry") & (ats.carrier == c)].base_2019_mwh.iloc[0]) for c in cm.CARS19}
     bag_mwh = float(rows19[(rows19.commodity == "Bagasse") & (rows19.sdmx_transaction == "121")].twh_v3_factor.iloc[0]) * 1e6
-    H = hybrid(U, A, bag_mwh)
+    A = A.astype(float)
+    elr = el_rows_2019()
+    for k, x in elr.items():
+        ev.put(f"el_row_2019_backcast.{k.replace(' ', '_')}", x / 1e6, "TWh", "UNSD SDMX 2020 electricity sub-row back-cast to 2019 (steel by raw steel output, chemical by share)", "INFERENCE", "C")
+    H = hybrid(U, A, bag_mwh, elr); H0 = hybrid(U, A, bag_mwh)
     Ay = A.copy()
     for sub, (q19, q22, _) in ACT_2019_2022.items():
         Ay.loc[sub] = Ay.loc[sub] * q19 / q22
-    Hy = hybrid(U, Ay, bag_mwh)
+    Hy = hybrid(U, Ay, bag_mwh, elr)
     mats = []
-    for name, M in (("unsd_cache", U), ("apec2022", A), ("hybrid", H), ("apec2022_yearadj", Ay), ("hybrid_yearadj", Hy)):
+    for name, M in (("unsd_cache", U), ("apec2022", A), ("hybrid", H), ("hybrid_no_el2020", H0), ("apec2022_yearadj", Ay), ("hybrid_yearadj", Hy)):
         for c in cm.CARS19:
             tot = float(M[c].sum())
             for sub in subs:
@@ -183,10 +187,19 @@ def main():
     print(xf[xf.at_row_limit | ~xf.has_viet_nam].head(60)[["file", "commodity", "data_rows", "last_country", "has_viet_nam"]].to_string())
 
 
-def hybrid(U: pd.DataFrame, A: pd.DataFrame, bag_mwh: float) -> pd.DataFrame:
+def el_rows_2019() -> dict:
+    """UNSD reports VN industry electricity sub-rows only from 2020 (iron and steel, chemical): back-cast to 2019 (grade C). Steel by raw steel
+    output (USGS 17,469 / 19,900 kt), chemical by its 2020 share of industry electricity. MWh."""
+    s = cm.sdmx_long()
+    v = lambda tr, y: float(s[(s.commodity == "7000") & (s.transaction == tr) & (s.year == y)].value.sum()) * 1e3
+    return {"iron and steel": v("1211", 2020) * 17469.0 / 19900.0, "chemical and petrochemical": v("1213", 2020) / v("121", 2020) * v("121", 2019)}
+
+
+def hybrid(U: pd.DataFrame, A: pd.DataFrame, bag_mwh: float, el_rows: dict | None = None) -> pd.DataFrame:
     """UNSD explicit rows kept; the UNSD 'other' (n.e.s.) amount of each carrier spread over the APEC rows that UNSD does not report for that
     carrier ('other' = APEC non-specified keeps its own APEC weight). Biomass: bagasse to food and tobacco (sugar mills), fuelwood spread over the
-    APEC biomass rows except food (APEC 2022 food biomass 34 PJ ~ bagasse). Units: MWh."""
+    APEC biomass rows except food (APEC 2022 food biomass 34 PJ ~ bagasse). el_rows: electricity rows back-cast from UNSD 2020 (taken out of the
+    n.e.s. electricity before the APEC spread). Units: MWh."""
     H = pd.DataFrame(0.0, index=U.index, columns=list(cm.CARS19))
     for c in cm.CARS19:
         explicit = [s for s in U.index if s != "other" and U.at[s, c] > 0]
@@ -196,6 +209,10 @@ def hybrid(U: pd.DataFrame, A: pd.DataFrame, bag_mwh: float) -> pd.DataFrame:
         if c == "biomass":
             H.at["food and tobacco", c] = bag_mwh; nes -= bag_mwh
             explicit = explicit + ["food and tobacco"]
+        if c == "electricity" and el_rows:
+            for s_, x in el_rows.items():
+                H.at[s_, c] += x; nes -= x
+            explicit = explicit + list(el_rows)
         w = A[c].copy(); w[explicit] = 0.0
         if w.sum() > 0:
             H[c] += nes * w / w.sum()
