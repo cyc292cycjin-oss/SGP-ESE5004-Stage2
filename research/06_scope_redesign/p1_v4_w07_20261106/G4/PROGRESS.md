@@ -13,6 +13,6 @@
 | G4-2 | 自备不等式与 GIPT 核查、MM 低/中/高估算（`g4_facts.py`） | 完成 | 见 G4-A（与 G4-1、G4-3 事实部分同一脚本写成，同一提交） |
 | G4-3 | 水泥熟料比、生物质口径、新增产品的事实与链输入（`g4_usgs_text.py`、`g4_facts.py`） | 完成 | 见 G4-A |
 | G4-4 | 合并量化（两套热值，`g4_chain.py`；复现逐字节通过）、A6 表格（`g4_outputs.py`）、`EVIDENCE.json` | 完成 | 见 G4-B |
-| G4-5 | 报告、证据、审阅包、推送 | 待做 | |
+| G4-5 | 五国 `<CC>_DECISIONS.md`、`REPORT.md`、`LEDGER_ENTRY_DRAFT.md`；审阅包与推送 | 报告完成，审阅包与推送见最后一行 | 见 G4-C、G4-D |
 
-续做起点：G4-5（五国 `<CC>_DECISIONS.md`、`REPORT.md`、台账条目草稿、审阅包、推送）。
+续做起点：无（G4-C 提交后只剩审阅包、最后一行与推送）。
