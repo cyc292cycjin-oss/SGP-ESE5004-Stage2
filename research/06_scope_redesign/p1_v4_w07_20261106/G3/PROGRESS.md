@@ -24,3 +24,5 @@
 ## 恢复点
 
 全部完成，等待审阅端审阅。若需重算：在 WSL 中依次运行 `scripts/g3_ncv.py`、`g3_captive.py`、`g3_products.py`、`g3_biomass.py`、`g3_chain.py`、`g3_summary.py`（`g3_sdmx.py` 不会覆盖已存的 SDMX 响应；`g3_usgs_text.py` 用 Windows 解释器）。
+
+最后一行：G3-A `88d36cf3` → G3-B `7dfaf728` → G3-C `0250f5b7` → G3-D `4fb031d3`（报告）→ G3-E（本行与 `REVIEW_ZIP_MANIFEST.txt`）；审阅包 `REVIEW_4fb031d3.zip`（80 个成员，zip SHA256 `4bc7b6d18d5714ade4aef5074a6b5d5b0b6018120e0d80c2c670dc6566e9948d`，留在工作目录）；分支 `codex/v4-w07-g3-20261106` 推送到 origin（不建 PR，不合并 main，不 force-push）。
