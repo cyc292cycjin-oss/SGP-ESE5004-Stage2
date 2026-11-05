@@ -1,0 +1,25 @@
+file,line,check_text,value,unit,stated_source,used_for,flows_into,verified
+scripts_project/reconstruct_base_accounts.py,79,D('0.9'),0.9,NCV/GCV,UNSD 05.pdf: natural gas TJ on GCV basis x 0.90,UNSD natural gas TJ -> MWh NCV,D1 2019 base (all sectors),True
+scripts_project/reconstruct_base_accounts.py,80,D('0.0036'),0.0036,TJ/MWh,-,"TJ rows (biomass, coal gases, heat) taken as NCV",D1 2019 base,True
+scripts_project/reconstruct_base_accounts.py,82,frozen commodity-specific TWh/kton,,TWh/kt,FROZEN_UPSTREAM_CONVERSIONS.json = pypsa-asean get_conv_factors,kt rows,D1 2019 base,True
+scripts_project/reconstruct_base_accounts.py,84,frozen0.00254TWh/1000m3,0.00254,TWh per 10^3 m3,upstream (UNSD 9.135 GJ/m3 rounded),fuelwood,D1 2019 base,True
+scripts_project/reconstruct_base_accounts.py,90,"('hard coal',{'anthracite','coking coal','other bituminous coal'})",,-,-,"coal hierarchy: parent kept, children excluded",D1 2019 base,True
+scripts_project/s3_0_industry.py,153,e19 = {car: float(d[d.carrier == car].base_2019_mwh.sum()),,MWh,-,industry 2019 total per carrier = D1 base,T_v2,True
+scripts_project/s3_0_industry.py,158,sub19[s_][car] = e19[car] * ((float(col[s_]) / tot),,share,industry_cache.json,within-carrier sub-sector shares,"T_v2 split, other bucket",True
+scripts_project/d1_common.py,127,11.63,11.63,MWh/toe,IEA toe,"AEO8 Mtoe anchors, EU27 ktoe",2050 anchors,True
+scripts_project/d1_common.py,133,0.29307107,0.29307107,MWh/MMBtu,NIST,"gas price, LNG regas adder",costs,True
+scripts_project/d1_common.py,137,25.1208,25.1208,GJ/t,"WEO T2.3 (6,000 kcal/kg)",coal price $/t -> $/MWh,costs,True
+scripts_project/d1_common.py,142,0.9,0.9,NCV/GCV,UNSD 05.pdf,"gas production, pipelines",supply caps,True
+scripts_project/d1_common.py,147,42.3,42.3,GJ/t,UNSD standard,crude production,supply caps,True
+scripts_project/d1_common.py,150,44.2,44.2,GJ/t,UNSD standard,NGL production,supply caps,True
+scripts_project/d1_common.py,153,25.8,25.8,GJ/t,UNSD standard,hard coal production,supply caps,True
+scripts_project/d1_common.py,156,14.0,14.0,GJ/t,UNSD standard,brown coal production,supply caps,True
+scripts_project/d1_common.py,162,48.0,48.0,GJ/t,IPCC T1.2 natural gas,LNG Mtpa -> MWh,LNG terminal capacity,True
+scripts_project/d1_common.py,171,9.14,9.14,GJ/m3,UNSD standard,wood processing residues,biomass potential,True
+scripts_project/d1_biomass.py,47,LHV_RESIDUE_GJ_T = 15.0,15.0,GJ/t,IRENA 2017 p.5 (moisture basis not stated),crop residues incl. bagasse,biomass potential and cost,True
+scripts_project/d1_biomass.py,486,15 GJ/t,15.0,GJ/t,IRENA 2017,sugarcane residues price per MWh,biomass cost,True
+scripts_project/d1_biomass.py,492,3500 * 4.1868,14.65,GJ/t,"ERIA T3.8 (3,500 kcal/kg)",palm kernel shell price per MWh,biomass cost,True
+scripts_project/d1_biomass.py,497,2450 * 4.1868,10.26,GJ/t,"ERIA T3.8 (2,450 kcal/kg)",sawdust price per MWh,biomass cost,True
+scripts_project/m08b_demand.py,64,10.8,10.8,MWh CH4 per t NH3,PyPSA-Eur config,ammonia feedstock gas deducted from NEU gas,NEU gas 2050,True
+scripts_project/d1_fossil_production.py,5,Natural gas gross production (TJ GCV) x 0.90,0.9,NCV/GCV,UNSD,gas production cap uses GROSS production,supply caps,True
+scripts_project/d1_fossil_production.py,28,"(""Natural gas"", ""gross production""): ""gas""",,-,-,gross production selected (marketed row exists in the export),supply caps,True
