@@ -854,3 +854,13 @@
 - **测试：** 新测试 22 项；全量 @64aea2e3 855 通过 / 5 失败（4 项 = V14 基线；1 项 `test_dfx_demand::test_f0` 由新文件触发，已修，`13ebce95`）；bash 4.2 替身测试 43 项通过；最终提交上的全量见报告第 7.1 节。
 - **v3.1 包：** `work/p1_v3_20261102/hpc_package_v3_1/`，COMMIT `d3b9a3bc`，`SHA256SUMS` 的 SHA256 `b8216361…be1ee`，49 个文件 374.5 MB，一致性 60 / 60，运行目录 `runs/batch5` / `runs/smoke56_v31`，上传到新目录 `/hpctmp/$USER/hpr31/`（v3 的 `hpr3/runs/batch4` 停批记录不动）；干跑 bash 5 与 4.2 都通过；`RUN_PLAN_HPC_V3.md` 第 15 节与 v3.1 操作指南在任何 v3.1 HPC 求解之前提交；可选脚本 `hpc_v31/fullsize_presolve.sh`（未运行）。
 - **交付：** `research/06_scope_redesign/p1_v3_fix_20261105/`（报告 `V3_REPORT_FIX.md`、证据、脚本、指令及其 SHA256），镜像 `work/p1_v3_fix_20261105/`；最终状态见 `work/p1_v3_20261102/V3_HPC_PROGRESS.md` 最后一行。不连 HPC、云、VPN，未上传。
+
+### V4 S0（W03，第 196、198 项：v4 工业细分的数据登记与口径摘清；只读）— 2026-11-05
+
+- **范围：** `V4_S0_INSTRUCTION.md` v1，SHA256 9d142bee…de13，已核对一致；开始条件由用户确认（08 FfE 不补）。分支 `codex/v4-data-20261105`（自 `1117a07f`），worktree `/home/jin/wt_v4_data`。没有改模型代码、配置、网络、注册表；求解器 0 次；没有下载新数据。
+- **数据登记：** 37 个文件 1,022,263,964 B（`DATA_REGISTRY_V4_DOWNLOADS.csv`，SHA256 经独立复算一致）；解压 399 个成员 1.34 GB 在工作目录；缺口 9 项（Climate TRACE 以行业分包代替国别包、FfE 只有 JSON、NREL 元数据与许可、Calliope 无许可、本机 UNSD 2022 不完整）。隐私扫描无命中。
+- **v3 现状（EXACT）：** 东盟"其他"桶 2050 年 2,003.85 TWh = 绑定总量 3,820.05 TWh 的 52.46 %（v2 67.88 %）；2019 口径 959.38 / 1,905.19 TWh（50.36 %）。ID 1,449.04 TWh 占 72 %。有用热 75.6 %、电 19.1 %、柴油机油 5.3 %；建筑 39.87、采矿 43.54 TWh 在桶内。按产量自下而上的子部门只占 19.1 %，`dispersed` 与"其他"合计 80.9 %。F1 网络 871 个工业负荷与 v3 表相差不超过 1.3e-12 TWh，全部为恒定负荷。
+- **口径：** `T_v2` 只含能源用途（AEO8 附录 E；DFX F1.2 / F2.4）；UNSD 工业行只取"consumption by <行业>"，不含焦炉转换与能源部门自用；炼油不在工业终端。ETSAP BF-BOF 全流程 5.42 MWh/t 对 JRC-IDEES 终端口径 2.29 MWh/t，S1 须先对齐口径。
+- **数据源：** Climate TRACE 东盟活动量全部等于产能 × 利用率（模型估计）；ETSAP 东盟全属 ODA，ODA 有色燃料系数 6.77、化工电力系数 4.90 不宜按产品使用；FfE 只有 6 种不同形状，缺化工与有色；GEM 钢铁逐厂产量稀少，ID 水泥熟料产能 46 家中只有 15 家有值。
+- **设计（PROPOSED）：** `V4_PRODUCT_ROUTE_MAP.csv` 22 行；扣减顺序"先扣同名 UNSD 分行、再扣其他"；基年规则 R1–R5；S1 印尼钢、水泥试点的字段、利用率、单耗、对照门槛；预计其他桶降幅约 202–211 TWh（约 10 %），BN 化工设施能耗超出其桶；12 个待决问题。
+- **交付：** `research/06_scope_redesign/p1_v4_data_20261105/`（报告 `V4_DATA_SCOPE.md`、登记表、映射表、证据、脚本、指令及其 SHA256），镜像 `work/p1_v4_data_20261105/`；提交号与推送结果见 `V4_S0_PROGRESS.md` 最后一行。等待审阅端审阅。
