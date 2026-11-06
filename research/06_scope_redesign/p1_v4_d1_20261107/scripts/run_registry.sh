@@ -4,6 +4,8 @@ set -u
 R=/home/jin/wt_v4_d1; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python; T=/home/jin/v4d1
 export PYTHONHASHSEED=0
 cd $R || exit 1
+bash /mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d1_20261107/scripts/sync.sh > /dev/null   # the registry cites files of the D1 delivery
+$PY scripts_project/v4_registry.py || exit 1   # W08 fragment (file SHA256 of the v4 potential tables)
 git show HEAD:research_inputs/registry_v5/DATA_REGISTRY.csv > $T/DATA_REGISTRY_head.csv
 $PY scripts_project/v4_d1_registry.py || exit 1
 $PY scripts_project/d1_registry.py > $T/d1_registry.log 2>&1 || { tail -20 $T/d1_registry.log; exit 1; }

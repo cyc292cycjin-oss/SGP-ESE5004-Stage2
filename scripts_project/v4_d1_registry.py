@@ -3,7 +3,8 @@ scripts_project/d1_registry.py.
 
     PYTHONHASHSEED=0 python scripts_project/v4_d1_registry.py && python scripts_project/d1_registry.py
 
-  fragments/v4_d1.csv              new rows: the missing-cost rule of the biomass pools (section 3; value read from the registry proxy rows of unsourced residues).
+  fragments/v4_d1.csv              new rows: the missing-cost rule of the biomass pools (section 3; value read from the registry proxy rows of unsourced residues);
+                                   the palm mill self-use table and its per-country fibre / PKS shares (section 5, T03; evidence of the D1 delivery).
   fragments/v4_d1_corrections.csv  full-row replacements (section 4, decision 212 (a)): registered sensitivity ranges whose endpoints violate a physical bound are
                                    clipped to it (main values and networks unchanged); physics_limits() holds the derivations (stoichiometry, model heating values).
 Deterministic (no time stamps). Nothing is solved.
@@ -113,10 +114,37 @@ def missing_cost_row(r: Registry, reg: pd.DataFrame) -> None:
           decision_ref="212 item 5, 215 item 5", status="REGISTERED")
 
 
+D1_DIR = "research/06_scope_redesign/p1_v4_d1_20261107"
+
+
+def palm_rows(r: Registry) -> None:
+    """V4 D1 section 5 (decision 214 (a), T03): PALM_MILL_SELF_USE.csv (file row) and one row per country and stream (mid, low / high, grade, verdict)."""
+    from v4_common import BIOMASS_DIR, ROOT, sha256
+    p = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"
+    ev = ROOT / D1_DIR / "evidence/T03_LITERATURE.json"
+    if not ev.exists():
+        raise SystemExit(f"{ev} missing: sync the D1 delivery folder into the repository first")
+    r.add("v4_palm_mill_self_use_table", "per-country in-mill self-use shares of mesocarp fibre and palm kernel shell (low / mid / high, grade, verdict, sources; V4 D1 T03)",
+          int(p.stat().st_size), "bytes", "C", "V4 D1 T03: literature (evidence/T03_LITERATURE.json) and palm oil mill energy balance (PALM_MILL_ENERGY_BALANCE.csv)",
+          f"file: {p.relative_to(ROOT)}", sha256(p), decision_ref="214 (a)", status="REFERENCE_ONLY")
+    t = pd.read_csv(p)
+    for x in t.itertuples():
+        for s, name in (("fibre", "mesocarp fibre"), ("pks", "palm kernel shell")):
+            g = getattr(x, f"grade_{s}"); v = getattr(x, f"verdict_{s}")
+            r.add(f"v4_palm_mill_{s}_self_use_{x.country}",
+                  f"{x.country} share of {name} burned in the palm oil mills (removed from the solid-biomass potential); T03 verdict {v} (literature "
+                  f"{getattr(x, f'literature_{s}'):.3f}, energy balance {getattr(x, f'balance_{s}'):.3f}, instruction 5.3); grade {g}",
+                  getattr(x, f"{s}_mid"), "share", "B" if g == "B" else "C",
+                  f"V4 D1 T03 literature ({getattr(x, f'sources_{s}')}) and energy balance", f"{D1_DIR}/evidence/T03_LITERATURE.json; PALM_MILL_SELF_USE.csv",
+                  sha256(ev), country=x.country, sensitivity_low=getattr(x, f"{s}_low"), sensitivity_high=getattr(x, f"{s}_high"), decision_ref="214 (a)",
+                  status="REGISTERED")
+
+
 def main():
     reg = pd.read_csv(REG_DIR / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False)
     r = Registry(SCRIPT)
     missing_cost_row(r, reg)
+    palm_rows(r)
     out = REG_DIR / "fragments" / "v4_d1.csv"
     r.write(out)
     print(out, len(r.rows))

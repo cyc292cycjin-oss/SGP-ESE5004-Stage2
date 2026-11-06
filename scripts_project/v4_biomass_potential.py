@@ -4,8 +4,9 @@ the in-mill self-use of the residues removed from demand (rules moved from work/
     PYTHONHASHSEED=0 python scripts_project/v4_biomass_potential.py
 
   F3   sugarcane_residues: minus the W12 R2 over-estimate of the bagasse part (W12_BAGASSE_SUPPLY_OVERESTIMATE.csv); KH / BN / SG unchanged.
-  F4a  oil_palm_fibre: 100 % burned in the mill boilers -> deducted.
-  F4b  oil_palm_pks: in-mill share PKS_IN_MILL_SHARE (0.5 central, D; MISSING T03 - to replace), 0 / 1 sensitivities.
+  F4a  oil_palm_fibre: in-mill share of the country (V4 D1 T03: research_inputs/biomass_v5/PALM_MILL_SELF_USE.csv, mid = 1.00 in every country) -> deducted.
+  F4b  oil_palm_pks: in-mill share of the country (PALM_MILL_SELF_USE.csv, mid = 0.50; TH flagged contradictory, grade D); the W08 constants
+       FIBRE_IN_MILL_SHARE 1.0 / PKS_IN_MILL_SHARE 0.5 are the fallback (adjust(source="constant")); low / high of the table = sensitivities.
   F4c  bagasse: UNSD 2019 industry final consumption / production (W12_UNSD_BAGASSE_2019.csv) on the bagasse part after F3.
   F4d  other vegetal residues used in food / n.e.s. rows (removed from demand): the part not covered by the palm deductions -> rice / coconut
        residues pro rata, 2019 energy x category growth; the paper-row 5150 and (decision 211 item 2) the ID paper-row fuelwood have no supply
@@ -29,12 +30,33 @@ if str(HERE) not in sys.path:
 import v4_industry_cache as VC   # noqa: E402
 from v4_common import ASEAN, BIOMASS_DIR   # noqa: E402
 
-PKS_IN_MILL_SHARE = 0.5   # D: MISSING T03 (GAPKI / MPOB steam balance), 0 / 1 sensitivities
+PKS_IN_MILL_SHARE = 0.5     # W08 constant (I2 central, grade D); V4 D1: fallback of the table (source="constant")
+FIBRE_IN_MILL_SHARE = 1.0   # W08 constant; V4 D1: fallback of the table
 OUT = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4.csv"
 ADJ = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4.csv"
+SELF_USE = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"   # V4 D1 (decision 214 (a), T03): per country fibre / PKS low / mid / high, grades, verdicts, sources
 
 
-def adjust(pks_share: float = PKS_IN_MILL_SHARE) -> tuple[pd.DataFrame, pd.DataFrame]:
+def self_use(source: str = "table", level: str = "mid") -> dict:
+    """In-mill self-use shares {country: dict(fibre, pks, grade_fibre, grade_pks, src_fibre, src_pks)}: source table (PALM_MILL_SELF_USE.csv, level low | mid | high) or
+    constant (the W08 values 1.0 / 0.5, grades C / D). Countries missing from the table get the constants."""
+    const = lambda cc: dict(fibre=FIBRE_IN_MILL_SHARE, pks=PKS_IN_MILL_SHARE, grade_fibre="C", grade_pks="D", src_fibre="W08 constant", src_pks="W08 constant")   # noqa: E731
+    if source == "constant":
+        return {cc: const(cc) for cc in ASEAN}
+    if source != "table" or level not in ("low", "mid", "high"):
+        raise ValueError(f"self_use source {source} / level {level}")
+    t = pd.read_csv(SELF_USE).set_index("country")
+    out = {cc: const(cc) for cc in ASEAN}
+    for cc in t.index:
+        out[cc] = dict(fibre=float(t.at[cc, f"fibre_{level}"]), pks=float(t.at[cc, f"pks_{level}"]), grade_fibre=str(t.at[cc, "grade_fibre"]),
+                       grade_pks=str(t.at[cc, "grade_pks"]), src_fibre=f"PALM_MILL_SELF_USE.csv {level}, {t.at[cc, 'verdict_fibre'].lower()} (V4 D1 T03)",
+                       src_pks=f"PALM_MILL_SELF_USE.csv {level}, {t.at[cc, 'verdict_pks'].lower()} (V4 D1 T03)")
+    return out
+
+
+def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """pks_share (W08 interface): one PKS share for every country (sensitivity) instead of the table / constant value."""
+    su = self_use(source, level)
     bp = pd.read_csv(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
     sol = bp[bp.feedstock_group != "biogas"].copy()
     over = pd.read_csv(BIOMASS_DIR / "W12_BAGASSE_SUPPLY_OVERESTIMATE.csv").set_index("country")
@@ -65,10 +87,14 @@ def adjust(pks_share: float = PKS_IN_MILL_SHARE) -> tuple[pd.DataFrame, pd.DataF
             d["sugarcane_residues"]["F4"] -= share * bag_after
             d["sugarcane_residues"]["rule"].append(f"F4c bagasse self-use share {share:.3f} x bagasse part after F3 {bag_after / 1e6:.3f} TWh")
         palm_ded = 0.0
+        u = su[cc]; grades = {}
         if "oil_palm_fibre" in pot:
-            d["oil_palm_fibre"]["F4"] -= pot["oil_palm_fibre"]; palm_ded += pot["oil_palm_fibre"]; d["oil_palm_fibre"]["rule"].append("F4a fibre 100 % in-mill")
+            x = u["fibre"] * pot["oil_palm_fibre"]; d["oil_palm_fibre"]["F4"] -= x; palm_ded += x
+            d["oil_palm_fibre"]["rule"].append(f"F4a fibre in-mill share {u['fibre']:.0%} ({u['src_fibre']})"); grades["oil_palm_fibre"] = u["grade_fibre"]
         if "oil_palm_pks" in pot:
-            x = pks_share * pot["oil_palm_pks"]; d["oil_palm_pks"]["F4"] -= x; palm_ded += x; d["oil_palm_pks"]["rule"].append(f"F4b PKS in-mill share {pks_share:.0%} (central, INFERENCE)")
+            s = u["pks"] if pks_share is None else float(pks_share)
+            x = s * pot["oil_palm_pks"]; d["oil_palm_pks"]["F4"] -= x; palm_ded += x
+            d["oil_palm_pks"]["rule"].append(f"F4b PKS in-mill share {s:.0%} ({u['src_pks'] if pks_share is None else 'sensitivity'})"); grades["oil_palm_pks"] = u["grade_pks"] if pks_share is None else "D"
         fz = float(r5150[(r5150.country == cc) & r5150.tx.isin(["1214F", "1214O"])].mwh.sum())
         palm19 = palm_ded / g.get("oil_palm_fibre", 1.0) if palm_ded > 0 else 0.0
         resid19 = max(0.0, fz - palm19)
@@ -87,7 +113,7 @@ def adjust(pks_share: float = PKS_IN_MILL_SHARE) -> tuple[pd.DataFrame, pd.DataF
             rows.append(dict(country=cc, category=k, potential_v3_TWh=v / 1e6, F3_bagasse_R2_TWh=d[k]["F3"] / 1e6, F4_self_use_TWh=d[k]["F4"] / 1e6,
                              potential_adjusted_TWh=a / 1e6, F7_cap_99pct_TWh=0.99 * a / 1e6, rule="; ".join(d[k]["rule"]),
                              status="PROPOSED (quantified)" if d[k]["rule"] else "VERIFIED (unchanged)",
-                             grade=("D" if any("PKS" in s or "KH" in s for s in d[k]["rule"]) else ("C" if d[k]["rule"] else "B"))))
+                             grade=(grades[k] if k in grades else ("D" if any("PKS" in s or "KH" in s for s in d[k]["rule"]) else ("C" if d[k]["rule"] else "B")))))
             m = (adj.country == cc) & (adj.category == k)
             adj.loc[m, "potential_main_mwh"] = a
         T0 = sum(pot.values()); T1 = sum(max(0.0, pot[k] + d[k]["F3"] + d[k]["F4"]) for k in pot)
