@@ -23,6 +23,18 @@ HOURS = 8760.0
 S2_OWNER_KIND = "S2_DEMAND_TABLE"
 TFEC_SECTORS = ["Industry", "Transport", "Residential", "Commercial", "AgricultureOthers"]
 LAND_TRANSPORT_ACCOUNTS = {"RoadResidualFuel", "TransportNEC", "TransportEmbeddedFuelParent"}
+
+
+def land_transport_accounts(cfg) -> set:
+    """V4 W08 (W12 F2 / F6 option b, decision 209): with research.demand.v4.enabled and rail_parent = children_only the rail parent row leaves the
+    land-transport accounts (its fuel is the RailNonElectric children, loaded as rail); v3.1 default: unchanged set."""
+    from v4_common import switches
+    s = switches(cfg)
+    if s["enabled"] and s["rail_parent"] == "children_only":
+        return LAND_TRANSPORT_ACCOUNTS - {"TransportEmbeddedFuelParent"}
+    return set(LAND_TRANSPORT_ACCOUNTS)
+
+
 # S4J-1 (decision 104): demand-table electricity sectors that no other demand of the model represents. Residential / commercial electricity (incl. building
 # cooling, not modelled separately) and agriculture-and-others electricity have no explicit load; the transport electricity row (rail, existing electric road)
 # is not modelled either (the explicit EV / FCEV loads convert the non-electric land-transport fuel rows only). Industry electricity is explicit in the route
@@ -766,11 +778,12 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         register(name, country, sector, account, carrier, source_row, annual_mwh, bus)
 
     tf = dem[dem.value_2050_mwh != ""].copy(); tf["v"] = tf.value_2050_mwh.astype(float)
+    land_accounts = land_transport_accounts(cfg)   # V4 W08 (W12 F2 / F6 option b): rail parent out of the land-transport accounts when the v4 switch says so
     for c in sorted(COUNTRIES):
         d = tf[tf.country == c]
         cnodes = [x for x in nodes if country_of(n, x) == c]
         # ---- transport ------------------------------------------------------------------------------
-        land = d[(d.sector == "Transport") & d.account.isin(LAND_TRANSPORT_ACCOUNTS) & (d.carrier != "electricity")]
+        land = d[(d.sector == "Transport") & d.account.isin(land_accounts) & (d.carrier != "electricity")]
         E_land = float(land.v.sum()); src_land = ";".join(sorted(set(land.account)))
         sh, acc_used = _shares_for(shares, astar_shares, c, "Transport")
         for node, s in sh.items():
