@@ -711,7 +711,15 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_ASEAN_OWN_2019.csv")
     elif other_bucket == "useful_heat_bands":   # M08b B2 (decision 133): other-bucket fuels -> useful heat in four temperature bands (supplement 01)
         ind_path = ind_path.with_name(ind_path.stem + "_OTHER_USEFUL_HEAT_BANDS.csv")
-    v3 = I.get("v3") or {}   # V3 (decisions 163, 164): sub-sector structure inside the v2 country totals, node allocation by facility
+    v3 = dict(I.get("v3") or {})   # V3 (decisions 163, 164): sub-sector structure inside the v2 country totals, node allocation by facility
+    from v4_common import v4_tables
+    v4t = v4_tables(cfg, repo)   # V4 W08 (decisions 203-211): the out_<anchor_mode> tables replace the v3 summary / carrier node shares (process node shares kept)
+    if v4t:
+        if other_bucket != "useful_heat_bands" or ratio_source != "jrc_idees_2021" or str(v3.get("case", "main")) != "main":
+            raise ValueError("V4 tables exist for other_bucket useful_heat_bands, ratio_source jrc_idees_2021 and v3 case main only")
+        v3.update(summary_table=v4t["summary_table"], carrier_node_shares=v4t["carrier_node_shares"])
+        if anchor_tab is not None:   # anchors of the v4 run (the build checks the base load and transport totals against them)
+            anchor_tab = pd.read_csv(repo / v4t["anchor_table"]).set_index("country")
     if v3.get("summary_table"):
         ind_path = repo / v3["summary_table"]
     car_shares, proc_shares = {}, {}
@@ -742,8 +750,16 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     fc_mode = str(I.get("feedstock_carbon_mode", "full_release"))
     if fc_mode not in ("territorial", "full_release"):
         raise ValueError("Unknown research.s2.industry.feedstock_carbon_mode " + fc_mode)
-    fc_path = repo / I["territorial_tables"][alloc_mode]
+    fc_path = repo / (v4t["feedstock_table"] if v4t else I["territorial_tables"][alloc_mode])
     fc_table = pd.read_csv(fc_path, keep_default_na=False).set_index("country")
+    # V4 W08: process emissions 2050 with the v4 ATS industry multiplier (PROCESS_EMISSIONS_2050_V4.csv) instead of the registry ats_anchor rows
+    v4_proc = ({(r.country, r.group): float(r.tco2_2050) for r in pd.read_csv(repo / v4t["process_table"]).itertuples()} if v4t else None)
+    v4_cap_share = float(v4t["switches"]["bio_cap_share"]) if v4t else 1.0   # W12 F7: overflow cap = share x potential
+    shapes = None
+    if v4t and v4t["switches"]["industry_curves"] == "g5_main":   # checklist section 9: G5 MAIN composite curves for industry electricity and heat
+        from v4_profiles import Shapes
+        shapes = Shapes(pd.read_csv(repo / v4t["curve_weights"]), "MAIN")
+    curve_ledger = {}
     feedstock_ledger = {}
     loads, deductions, deferred = [], [], []
     n.meta.setdefault("demand_owners", {}); n.meta.setdefault("demand_identity", {})
@@ -776,6 +792,19 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
     def plain_load(node, country, sector, account, carrier, bus, annual_mwh, source_row, name):
         n.add("Load", name, bus=bus, carrier=carrier, p_set=annual_mwh / HOURS)
         register(name, country, sector, account, carrier, source_row, annual_mwh, bus)
+
+    def profile(name, country, node, et, annual_mwh):
+        """V4 W08 checklist section 9: G5 MAIN composite shape (annual mean 1.0) of the node's zone on an industrial electricity / heat load; the
+        annual energy is unchanged; flat without v4 curves (v3.1) or without a composition for the zone."""
+        if shapes is None or annual_mwh <= 0:
+            return
+        y = shapes.shape_3h(country, node, et, len(n.snapshots))
+        led = curve_ledger.setdefault(country, dict(profiled=0, flat=0, profiled_mwh=0.0))
+        if y is None:
+            led["flat"] += 1
+            return
+        n.loads_t.p_set[name] = annual_mwh / HOURS * y
+        led["profiled"] += 1; led["profiled_mwh"] += annual_mwh
 
     tf = dem[dem.value_2050_mwh != ""].copy(); tf["v"] = tf.value_2050_mwh.astype(float)
     land_accounts = land_transport_accounts(cfg)   # V4 W08 (W12 F2 / F6 option b): rail parent out of the land-transport accounts when the v4 switch says so
@@ -886,7 +915,10 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ag_bio = float(ag_rows.v.sum())
         pot_c = float(n.stores[(n.stores.bus == f"solid biomass {c}") & (n.stores.research_role == "FINITE_RESOURCE")].e_nom.sum()) if "research_role" in n.stores else 0.0
         bio_before = ind_car.get("biomass", 0.0) + ag_bio
-        ov_ind, ov_ag, cap_c, ov_binding = biomass_overflow(ind_car.get("biomass", 0.0), ag_bio, pot_c, ov_cap_share, ov_binding_ratio)
+        if v4_cap_share < 1.0:   # V4 W08 (W12 F7, decision 209): cap = share x potential, unconditional (the s3_0 rule); 1 % of the pool stays free
+            ov_ind, ov_ag, cap_c, ov_binding = biomass_overflow(ind_car.get("biomass", 0.0), ag_bio, pot_c * v4_cap_share, 1.0, ov_binding_ratio)
+        else:
+            ov_ind, ov_ag, cap_c, ov_binding = biomass_overflow(ind_car.get("biomass", 0.0), ag_bio, pot_c, ov_cap_share, ov_binding_ratio)
         overflow = ov_ind + ov_ag
         ind_car["biomass"] = ind_car.get("biomass", 0.0) - ov_ind
         to_gas = ov_mode == "methane"
@@ -908,11 +940,13 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
             S = (lambda k, node=node: cs.get(k, {}).get(node, 0.0)) if cs else (lambda k, s=s: s)
             if ind_car.get("heat", 0.0) * S("heat") > 0:
                 plain_load(node, c, "Industry", "IndustryLowTemperatureHeat", "industry heat", f"{node} industry heat", ind_car["heat"] * S("heat"), heat_src, f"{node} industry heat demand")
+                profile(f"{node} industry heat demand", c, node, "heat", ind_car["heat"] * S("heat"))
             for band in band_up:   # M08b B2: other-bucket useful heat, carrier chosen by the model among the band's technology-data options
                 bc = HEAT_BAND_BUS[band][0]
                 if ind_car.get(f"heat_{band}", 0.0) * S(f"heat_{band}") > 0:
                     plain_load(node, c, "Industry", HEAT_BAND_ACCOUNT[band], bc, f"{node} {bc}", ind_car[f"heat_{band}"] * S(f"heat_{band}"),
                                f"{src_ind}:heat_{band} (other bucket fuels x JRC-IDEES OIS band share x useful-heat efficiency)", f"{node} {bc} demand")
+                    profile(f"{node} {bc} demand", c, node, "heat", ind_car[f"heat_{band}"] * S(f"heat_{band}"))
             for carrier in ["coal", "oil", "gas", "biomass", "unclassified_fuel"]:
                 v = ind_car.get(carrier, 0.0)
                 if v * S(carrier) > 0:
@@ -929,6 +963,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 meter_load(node, c, "industry overflow", "gas", ov_ind * s_ov, f"{c}:IndustryBiomass -> gas (above solid-biomass potential, decision 36)", "IndustryBiomassOverflowToGas")
             if ind_car.get("electricity", 0.0) * S("electricity") > 0:
                 plain_load(node, c, "Industry", "IndustryElectricityRoutes", "industry electricity", node, ind_car["electricity"] * S("electricity"), f"{src_ind}:electricity", f"{node} industry electricity demand")
+                profile(f"{node} industry electricity demand", c, node, "elec", ind_car["electricity"] * S("electricity"))
             if ind_car.get("hydrogen", 0.0) * S("hydrogen") > 0:
                 plain_load(node, c, "Industry", "IndustryHydrogenDRI", "industry hydrogen", f"{node} H2", ind_car["hydrogen"] * S("hydrogen"), f"{src_ind}:hydrogen", f"{node} industry hydrogen demand")
             # S3-3 (decision 44), regional_buses mode: ammonia load on the regional ammonia bus (no CO2); methanol through a node link that books the
@@ -1036,7 +1071,8 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                 plain_load(node, c, "NonEnergyUse", f"NonEnergy:{carrier}", f"{carrier} feedstock", fb, v * s * scale, src_neu, f"{node} feedstock {carrier} demand")
         # ---- process emissions (EDGAR 2.A + 2.C, 2050; territorial mode adds 2.B + 2.D) ------------------------
         pe_sfx = "_level" if alloc_mode.endswith("_level") else ("_ats_anchor" if alloc_mode == "aeo8_ats_anchor" else "")   # S3B R1 level rows; M08b B1 anchor rows
-        proc = sum(float(reg.loc[f"process_emissions_{g}_2050{pe_sfx}_{c}", "value"]) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
+        pe_val = (lambda g_, c_=c: v4_proc[(c_, g_)]) if v4_proc is not None else (lambda g_, c_=c: float(reg.loc[f"process_emissions_{g_}_2050{pe_sfx}_{c_}", "value"]))   # V4 W08: v4 multipliers
+        proc = sum(pe_val(g) for g in S2["co2"]["process_emissions_scope"] if reg.loc[f"process_emissions_{g}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO"))
         fc_row = fc_table.loc[c] if c in fc_table.index else None
         proc_feed = float(fc_row["process_2B_2D_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
         plastics = float(fc_row["plastics_burned_co2_2050_t"]) if (fc_mode == "territorial" and fc_row is not None) else 0.0
@@ -1046,7 +1082,7 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
         ensure_carrier(n, "process emissions")
         ps = proc_shares.get(c)
         if ps:   # V3 (D164-5 a): 2.A with the cement plants, 2.C with steel and non-ferrous metals, 2.B + 2.D with the petrochemical sites
-            part = {g_: (float(reg.loc[f"process_emissions_{g_}_2050{pe_sfx}_{c}", "value"]) if g_ in S2["co2"]["process_emissions_scope"] and reg.loc[f"process_emissions_{g_}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO") else 0.0) for g_ in ("minerals", "metals")}
+            part = {g_: (pe_val(g_) if g_ in S2["co2"]["process_emissions_scope"] and reg.loc[f"process_emissions_{g_}_2050_{c}", "status"] in ("REGISTERED", "SOURCE_ZERO") else 0.0) for g_ in ("minerals", "metals")}
             pn = {}
             for val, key in ((part["minerals"], "process_minerals"), (part["metals"], "process_metals"), (proc_feed, "petrochem")):
                 for x_, y_ in ps.get(key, sh).items():
@@ -1131,7 +1167,9 @@ def add_demand_layer(n, costs, cfg, repo: Path, registry: pd.DataFrame, demand_c
                   cookstove_basic_default=COOKSTOVE_BASIC_DEFAULT, cookstove_modern=COOKSTOVE_MODERN, industry_carrier_mode=carrier_mode, nonindustrial_electricity=ne_mode, industry_table=str(ind_path.relative_to(repo))), node_share_source=D["node_allocation"],
                   industry=dict(carrier_mode=carrier_mode, ratio_source=ratio_source, ammonia_methanol_mode=am_mode, table=str(ind_path.relative_to(repo)), biomass_overflow=overflow_ledger,
                                 hydrogen_mwh=hydrogen_ledger, ammonia_methanol=am_ledger, other_bucket=other_bucket, heat_bands=heat_bands, heat_band_settings=heat_cfg,
-                                biomass_overflow_mode=ov_mode, physical_output=output_rule),
+                                biomass_overflow_mode=ov_mode, physical_output=output_rule,
+                                **({} if v4t is None else dict(v4_w08=dict(tables_dir=str(v4t["dir"].relative_to(repo)), switch_sha256=v4t["record"]["switch_sha256"],
+                                                                              bio_cap_share=v4_cap_share, process_table=v4t["process_table"], curves=curve_ledger)))),
                   anchors=dict(settings=anchors, checks=anchor_checks),
                   feedstock=dict(mode=fc_mode, table=str(fc_path.relative_to(repo)), by_country=feedstock_ledger))
     return ledger

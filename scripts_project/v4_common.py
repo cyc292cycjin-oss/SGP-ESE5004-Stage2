@@ -47,12 +47,37 @@ SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "
 
 
 def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
-    """Effective switch set: research.demand.anchor_mode + research.demand.v4 of the composed configuration (missing keys = v3.1 defaults)."""
+    """Effective switch set from research.demand.anchor_mode + research.demand.v4 of the composed configuration: v4.enabled false -> every rule at
+    its v3.1 value (the other v4 keys are ignored); v4.enabled true -> the listed v4 keys (missing keys = the v4 main set V4_MAIN)."""
     d = ((cfg or {}).get("research") or {}).get("demand") or {}
-    s = dict(V31); s.update(copy.deepcopy(d.get("v4") or {})); s["anchor_mode"] = str(d.get("anchor_mode", "ras"))
+    v = copy.deepcopy(d.get("v4") or {})
+    if v.get("enabled"):
+        s = dict(V4_MAIN); s.update(v)
+    else:
+        s = dict(V31)
+    s["anchor_mode"] = str(d.get("anchor_mode", "ras"))
     s.update(overrides or {})
     check(s)
     return s
+
+
+def v4_tables(cfg: dict, repo: Path | None = None) -> dict | None:
+    """Network-facing v4 tables of the configured switch set (None when research.demand.v4.enabled is false). The folder's V4_SWITCHES.json must
+    carry the same switch set (SHA256), otherwise the build stops: regenerate with scripts_project/v4_industry.py --anchor-mode <m>."""
+    s = switches(cfg)
+    if not s["enabled"]:
+        return None
+    od = (repo or ROOT) / "research_inputs" / "industry_v4" / f"out_{s['anchor_mode']}"
+    rec = json.loads((od / "V4_SWITCHES.json").read_text())
+    if rec["switch_sha256"] != switch_sha(s):
+        raise ValueError(f"v4 tables in {od} were written for another switch set ({rec['switches']}) than the configuration ({s}): rerun v4_industry.py")
+    rel = lambda n: str((od / n).relative_to(repo or ROOT))   # noqa: E731
+    return dict(dir=od, switches=s, record=rec, demand_table=rel("DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv"), anchor_table=rel("DEMAND_ANCHOR_AEO8_ATS.csv"),
+                summary_table=rel("INDUSTRY_2050_SUMMARY_V4.csv"), carrier_node_shares=rel("INDUSTRY_CARRIER_NODE_SHARES_V4.csv"),
+                feedstock_table=rel("FEEDSTOCK_CARBON_TERRITORIAL_2050_V4.csv"), process_table=rel("PROCESS_EMISSIONS_2050_V4.csv"),
+                curve_weights=rel("INDUSTRY_CURVE_WEIGHTS_V4.csv"),
+                biomass_potential=("research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv" if s["biomass_potential"] == "v4_adjusted" else None),
+                gas_caps=("research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv" if s["gas_caps"] == "marketed" else None))
 
 
 def check(s: dict) -> None:

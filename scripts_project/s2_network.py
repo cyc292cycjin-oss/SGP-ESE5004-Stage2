@@ -362,12 +362,22 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                      domestic_by_country=({str(c): int(k) for c, k in candidates[~candidates.cross_border].groupby("country_a").size().items()} if candidates is not None else None),
                      h2=h2_pipes, underwater_fraction_source="corridor table subsea_share (cross-border); 0 for domestic pairs (no data)",
                      table=(candidates.to_dict("records") if candidates is not None else None))
-    bio = add_biomass_layer(n, costs, S2, repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv", nodes, cc)
+    from v4_common import v4_tables
+    v4t = v4_tables(cfg, repo)   # V4 W08: None unless research.demand.v4.enabled (then the out_<anchor_mode> tables of v4_industry.py)
+    biomass_csv = repo / (v4t["biomass_potential"] if (v4t and v4t["biomass_potential"]) else "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")
+    bio = add_biomass_layer(n, costs, S2, biomass_csv, nodes, cc)
     heat = add_industrial_heat(n, costs, nodes, cc, bands=bool(S2["industry"].get("heat_bands")))   # M08b B2: low / medium / high useful-heat buses
     demand_astar = bind_astar(n, repo, allocation)
     from s2_layers import demand_table_key
     allocation_mode = demand_table_key(cfg)   # R3 (decision 57) + S3B R1 growth method suffix (decision 66)
     demand_table = repo / S2["demand"].get("tables_by_allocation", {}).get(allocation_mode, S2["demand"]["table"])
+    if v4t:
+        if allocation_mode != "aeo8_ats_anchor":
+            raise ValueError("V4 tables exist for growth_method ats_anchor only")
+        demand_table = repo / v4t["demand_table"]
+        n.meta["v4_w08"] = jsonable(dict(switches=v4t["switches"], switch_sha256=v4t["record"]["switch_sha256"], tables_dir=str(v4t["dir"].relative_to(repo)),
+                                         files=v4t["record"]["files"], biomass_potential=str(biomass_csv.relative_to(repo)), biomass_potential_sha256=sha(biomass_csv),
+                                         asean_T_v2_TWh=v4t["record"]["asean_T_v2_TWh"]))
     demand = add_demand_layer(n, costs, demand_cfg(cfg), repo, registry, demand_table, repo / "research_inputs/registry_v5/FEEDSTOCK_CARBON_BOUNDARY_2019.csv", allocation, nodes, cc)
     demand["country_allocation"] = dict(mode=allocation_mode, table=str(demand_table.relative_to(repo)), sha256=sha(demand_table))
     n.meta["s2_demand_ledger"] = jsonable(dict(deductions=demand["deductions"], deferred=demand["deferred"], parameters=demand["parameters"],
@@ -454,7 +464,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
                    network=dict(file=str(path), sha256=sha(path), bytes=path.stat().st_size, snapshots=int(len(n.snapshots)), components={c.name: int(len(c.df)) for c in n.iterate_components()}),
                    inputs={"electric_base": dict(path=str(electric_base), sha256=ELECTRIC_BASE_SHA), "costs_active": dict(path=str(costs_path), sha256=sha(costs_path)),
                            "registry": dict(path=str(registry_csv), sha256=sha(registry_csv)), "demand_table": dict(path=str(demand_table.relative_to(repo)), sha256=sha(demand_table), country_allocation=allocation_mode),
-                           "biomass_table": dict(sha256=sha(repo / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")), "survival": dict(sha256=sha(survival_json)),
+                           "biomass_table": dict(sha256=sha(biomass_csv)), "survival": dict(sha256=sha(survival_json)),
                            "allocation_manifest": dict(sha256=sha(Path(allocation) / "allocation_manifest.json")), "corridors": dict(file=corridors_path, sha256=sha(repo / corridors_path), th_my_stock=th_my["mode"], optional_sg_vn_kh=optional_corridors["mode"],
                                                  corrections={k: dict(file=f, sha256=sha(repo / f)) for k, f in [("th_my_stock", th_my.get("table")), ("optional", optional_corridors.get("table")),
                                                                                                                   ("apg_plan_caps", max_ext.get("apg_table")),

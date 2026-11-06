@@ -83,8 +83,13 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     ext = list(n.generators.index[(n.generators.carrier == "gas") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
     n.mremove("Generator", ext)
     led["external_gas_generators_removed"] = len(ext)
-    # 2. domestic production (decision 43)
-    caps = pd.read_csv(repo / G["production_caps"], keep_default_na=False)
+    # 2. domestic production (decision 43); V4 W08 (W12 F1, decision 209): research.demand.v4.gas_caps = marketed -> UNSD marketed production caps and
+    #    the fugitive factors on the same cap row (GAS_PRODUCTION_CAPS_2050_V4.csv, registry fugitive_factor_oilgas_v4_*)
+    from v4_common import v4_tables
+    v4t = v4_tables(cfg, repo)
+    caps_path = (v4t["gas_caps"] if (v4t and v4t["gas_caps"]) else G["production_caps"])
+    led["production_caps_table"] = caps_path
+    caps = pd.read_csv(repo / caps_path, keep_default_na=False)
     load_shares = electricity_load_shares(n, nodes); shares = dict(load_shares); alloc_mode = str(G.get("production_node_allocation", "load_shares")); alloc_used = {}
     if alloc_mode == "gem_fields":   # S4A-2: GEM GOGET field production shares (nearest node); countries without a field keep the load shares
         gs = pd.read_csv(repo / G["gem_field_shares"])

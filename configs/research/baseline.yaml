@@ -506,3 +506,19 @@ research:
     transport_anchor: ats_service         # M08b B1 (registry demand_transport_anchor_rule): transport fuel rows = ATS transport anchor - transport electricity anchor, EV / FCEV / ICE shares and efficiencies per the current PyPSA-Eur 2050 registry rows | table
     anchor_table: research_inputs/demand_v5/DEMAND_ANCHOR_AEO8_ATS.csv   # M08b B1: per-country anchors; the build checks the base load and transport totals against it (1e-9)
     nonindustrial_electricity: table_sectors   # S4J-1 (decision 104; scripts_project/s2_layers.py): table_sectors (main: per country the Astar base load is scaled to the 2050 demand-table electricity of the sectors not modelled separately - residential, commercial, agriculture and others, transport (rail / existing electric road); Astar gives only the hourly shape and the node split) | astar_residual (former method: Astar minus the ratio-method industry electricity and the transport electricity; comparison)
+    anchor_mode: ras                      # V4 W08 (decisions 210 item 3, 211 item 1; scripts_project/m08b_demand.py --anchor-mode): ras = IIa (RAS: AEO8 country TFEC rows and C.3 ASEAN sector columns; v3.1 with the v3.1 seed, v4 main with the v4 seed) | iid (v3 RAS sector factors x own seed; sensitivity) | iib (frozen v3 anchors; sensitivity) | external (AEO8 AEDS country x sector; MISSING T01, interface only). The residue anchor alignment (210 item 4) applies in every mode
+    v4:                                   # V4 W08 (decisions 203-211; W08_IMPLEMENTATION_SPEC.md): enabled false = every v3.1 table (byte-identical; the keys below are ignored); enabled true = the build reads research_inputs/industry_v4/out_<anchor_mode>/ (scripts_project/v4_industry.py) and refuses a table set written for other switches
+      enabled: false
+      base: sdmx_2019                     # sdmx_2019 (UNSD SDMX current database, 210 item 1) | v3_1 (UNdata export capsule)
+      residue_boundary: true              # 210 item 4: self-produced residues (a) out of seed / cache / potential, anchor deduction where the national balance contains them, ID fuelwood (b) outside the anchor
+      id_paper_fuelwood: residue          # 211 item 2: residue (main: ID paper-row fuelwood = self-produced residue (a)) | purchased (sensitivity, I2 main)
+      household_gasoline: id_to_road      # 210 item 6: ID household motor gasoline -> road | none
+      rail_parent: children_only          # 209 F2 / F6 option b: rail parent out of the seed and the land-transport accounts | in_d1 (v3.1)
+      captive_coal: true                  # 204 / 208: captive coal option (b), reading I (research_inputs/industry_v4/CAPTIVE_COAL_2019.csv)
+      products: true                      # 204, 206, 208, 210 items 5 / 7: cement (ii) / BN (iii), nickel 2023, pulp and paper, HVC, methanol, new plants, MY ammonia duplicate, glass / alumina / copper / lime
+      vn_same_run: true                   # 208: VN hybrid split, T_v2 and decomposition from the same run
+      bio_cap_share: 0.99                 # 209 F7: overflow cap = share x solid-biomass potential (s3_0 and the build)
+      biomass_potential: v4_adjusted      # 209 F3 / F4: BIOMASS_POTENTIAL_2050_V4.csv (bagasse R2, in-mill self-use) | v3
+      gas_caps: marketed                  # 209 F1: UNSD marketed production caps, fugitive factor on the same row (GAS_PRODUCTION_CAPS_2050_V4.csv) | gross
+      industry_curves: g5_main            # checklist section 9: G5 MAIN composite curves on industry electricity and the four industrial heat loads | flat | all_flat
+      mm_gasoline: false                  # sensitivity: MM household gasoline also to road
