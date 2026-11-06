@@ -1,0 +1,734 @@
+{
+ "schema": "v4-d1-evidence-1",
+ "n": 32,
+ "entries": [
+  {
+   "id": "instruction.sha256",
+   "value": "189bcfa54d9d5f462346e9618c58a4ba96d3edccc7c48a83d5633783dbf1f8a5",
+   "unit": "sha256",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "V4_D1_INSTRUCTION.md",
+   "note": "= V4_D1_SHA256.txt (checked before starting)"
+  },
+  {
+   "id": "branch.base",
+   "value": {
+    "branch": "codex/v4-d1-20261107",
+    "base": "7aa356e49d284749d27c79fbdc75ade85f62866a",
+    "w08_review_commit_ancestor": "bd890bf9",
+    "files_changed_between": "3, all under research/06_scope_redesign/p1_v4_w08_20261106/"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "git merge-base / git diff --name-only",
+   "note": ""
+  },
+  {
+   "id": "s2.hvc_basis_chain_vs_i2",
+   "value": {
+    "max_abs_diff_basis_b_TWh": 4.5e-07,
+    "max_abs_diff_basis_a_TWh": 4.5e-07
+   },
+   "unit": "TWh",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "tables/D1_HVC_CHAIN_CHECK.csv",
+   "note": "S7, I2 main switch set (IId + paper fuelwood purchased); I2 table printed to 6 decimals"
+  },
+  {
+   "id": "s2.ev_factor",
+   "value": {
+    "unrounded": 0.3021470201165633,
+    "w08_rounded": 0.30215,
+    "relative_difference": 9.862362486678933e-06
+   },
+   "unit": "MWh_el/MWh_oil",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "registry share_transport_ice_efficiency / share_transport_electric_efficiency x share_land_transport_electric_share_2050",
+   "note": ""
+  },
+  {
+   "id": "s2.out_tables_network_facing_identical",
+   "value": true,
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "scripts/regen_tables.sh",
+   "note": "out_ras / out_iid: 10 tables byte-identical to W08; SNAPSHOT.json and V4_SWITCHES.json changed"
+  },
+  {
+   "id": "s2.batch_def_draft",
+   "value": {
+    "limits_status": "PROPOSED",
+    "limits": {
+     "time_limit_s": 259200,
+     "wall_margin_s": 7200,
+     "licence_gap_s": 330,
+     "wait_start_max_s": 7200,
+     "build_timeout_s": 7200,
+     "assign_timeout_s": 32400,
+     "post_timeout_s": 10800,
+     "pack_timeout_s": 7200
+    },
+    "run_dirs": {
+     "formal": "runs/batch6",
+     "smoke56": "runs/smoke56_v4",
+     "build_only": "runs/build_only_f1_v4"
+    },
+    "walltime_F1": "96:00:00"
+   },
+   "unit": "-",
+   "status": "PROPOSED",
+   "grade": "-",
+   "source": "batch_def/BATCH_DEF_2920x3h_v4hpc.json",
+   "note": "draft only; not packaged, not registered"
+  },
+  {
+   "id": "s3.missing_cost_proxy",
+   "value": 6.26706128163,
+   "unit": "EUR2020/MWh",
+   "status": "VERIFIED",
+   "grade": "C (trunk: D)",
+   "source": "registry biomass_missing_cost_proxy = 32 proxy rows",
+   "note": "applies to the five oil_palm_trunk pools"
+  },
+  {
+   "id": "s4.physics_fixes",
+   "value": [
+    {
+     "param_id": "share_bev_charge_efficiency",
+     "old_low": 0.72,
+     "old_high": 1.08,
+     "new_low": 0.72,
+     "new_high": 1.0,
+     "violation_class": "efficiency > 1"
+    },
+    {
+     "param_id": "share_bev_avail_max",
+     "old_low": 0.76,
+     "old_high": 1.14,
+     "new_low": 0.76,
+     "new_high": 1.0,
+     "violation_class": "share > 1"
+    },
+    {
+     "param_id": "share_MWh_MeOH_per_tCO2",
+     "old_low": 3.22568,
+     "old_high": 4.83852,
+     "new_low": 3.22568,
+     "new_high": 4.02481710559,
+     "violation_class": "above stoichiometry"
+    },
+    {
+     "param_id": "share_MWh_MeOH_per_MWh_H2",
+     "old_low": 0.70296,
+     "old_high": 1.05444,
+     "new_low": 0.70296,
+     "new_high": 0.878699854112,
+     "violation_class": "above stoichiometry"
+    },
+    {
+     "param_id": "share_MWh_H2_per_tNH3_electrolysis",
+     "old_low": 4.744,
+     "old_high": 7.116,
+     "new_low": 5.918027127,
+     "new_high": 7.116,
+     "violation_class": "below stoichiometry"
+    },
+    {
+     "param_id": "share_MWh_NH3_per_tNH3",
+     "old_low": 4.1328,
+     "old_high": 6.1992,
+     "new_low": 5.166,
+     "new_high": 5.166,
+     "violation_class": "pure-substance heating value"
+    },
+    {
+     "param_id": "liquid_ship_mwh_per_t_ammonia",
+     "old_low": 2.583,
+     "old_high": 7.749,
+     "new_low": 5.166,
+     "new_high": 5.166,
+     "violation_class": "pure-substance heating value"
+    },
+    {
+     "param_id": "liquid_ship_mwh_per_t_methanol",
+     "old_low": 2.764,
+     "old_high": 8.292,
+     "new_low": 5.528,
+     "new_high": 5.528,
+     "violation_class": "pure-substance heating value"
+    },
+    {
+     "param_id": "liquid_ship_mwh_per_t_oil",
+     "old_low": 5.95,
+     "old_high": 17.85,
+     "new_low": 5.95,
+     "new_high": 13.9,
+     "violation_class": "heating value above any hydrocarbon"
+    },
+    {
+     "param_id": "conv_gj_per_t_natural_gas_mass",
+     "old_low": 46.5,
+     "old_high": 50.4,
+     "new_low": 46.5,
+     "new_high": 50.04,
+     "violation_class": "heating value above any hydrocarbon"
+    },
+    {
+     "param_id": "liquid_ship_hours_per_year",
+     "old_low": 4000.0,
+     "old_high": 12000.0,
+     "new_low": 4000.0,
+     "new_high": 8760.0,
+     "violation_class": "hours above the year"
+    }
+   ],
+   "unit": "-",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "PHYSICS_BOUNDS_FIX.csv",
+   "note": ""
+  },
+  {
+   "id": "s4.scan",
+   "value": {
+    "in_use_rows": 1486,
+    "rows_with_range": 534,
+    "checks": [
+     [
+      "fraction_or_efficiency_in_0_1",
+      48,
+      2
+     ],
+     [
+      "no_negative_endpoint",
+      534,
+      0
+     ],
+     [
+      "stoichiometry",
+      4,
+      3
+     ],
+     [
+      "pure_substance_heating_value",
+      3,
+      3
+     ],
+     [
+      "hydrocarbon_heating_value_below_methane",
+      5,
+      2
+     ],
+     [
+      "hours_per_year",
+      1,
+      1
+     ],
+     [
+      "percent_in_0_100",
+      2,
+      0
+     ],
+     [
+      "real_rate_above_minus_one",
+      1,
+      0
+     ]
+    ]
+   },
+   "unit": "rows",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/PHYSICS_SCAN.json",
+   "note": ""
+  },
+  {
+   "id": "s4.meoh_per_tco2_main_above_limit",
+   "value": {
+    "main": 4.0321,
+    "limit": 4.024817105592038,
+    "excess_rel": 0.0018094969825692697
+   },
+   "unit": "MWh/t",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "evidence/PHYSICS_SCAN.json",
+   "note": "main value not changed (instruction 4.1); PyPSA-Eur config value"
+  },
+  {
+   "id": "s5.balance_main",
+   "value": {
+    "Q_gj_per_t_ffb": 1.978790697674419,
+    "A_fibre_gj": 1.4807000000000001,
+    "A_shell_gj": 1.02624,
+    "share_fibre": 1.0,
+    "share_pks": 0.4853549829225316
+   },
+   "unit": "GJ/t FFB; share",
+   "status": "INFERENCE",
+   "grade": "C",
+   "source": "evidence/T03_BALANCE.json",
+   "note": "pooled medians of independent source groups"
+  },
+  {
+   "id": "s5.balance_corners",
+   "value": {
+    "low": {
+     "Q_gj_per_t_ffb": 1.1625882352941177,
+     "A_fibre_gj": 1.9581,
+     "A_shell_gj": 1.4734399999999999,
+     "share_fibre": 0.5937328202308961,
+     "share_pks": 0.0
+    },
+    "high": {
+     "Q_gj_per_t_ffb": 2.9947183098591545,
+     "A_fibre_gj": 1.0229,
+     "A_shell_gj": 0.59655,
+     "share_fibre": 1.0,
+     "share_pks": 1.0
+    }
+   },
+   "unit": "GJ/t FFB; share",
+   "status": "INFERENCE",
+   "grade": "C",
+   "source": "evidence/T03_BALANCE.json",
+   "note": ""
+  },
+  {
+   "id": "s5.self_use_ID",
+   "value": {
+    "fibre": [
+     0.85,
+     1.0,
+     1.0
+    ],
+    "pks": [
+     0.355,
+     0.5,
+     0.63
+    ],
+    "verdict_fibre": "CONSISTENT",
+    "verdict_pks": "CONSISTENT",
+    "literature": [
+     0.925,
+     0.55
+    ],
+    "balance": [
+     1.0,
+     0.4854
+    ]
+   },
+   "unit": "share",
+   "status": "VERIFIED (literature) / INFERENCE (balance)",
+   "grade": "fibre C, PKS C",
+   "source": "PALM_MILL_SELF_USE.csv",
+   "note": ""
+  },
+  {
+   "id": "s5.self_use_MY",
+   "value": {
+    "fibre": [
+     0.805,
+     1.0,
+     1.0
+    ],
+    "pks": [
+     0.452,
+     0.5,
+     0.58
+    ],
+    "verdict_fibre": "CONSISTENT",
+    "verdict_pks": "CONSISTENT",
+    "literature": [
+     0.865,
+     0.5
+    ],
+    "balance": [
+     1.0,
+     0.4854
+    ]
+   },
+   "unit": "share",
+   "status": "VERIFIED (literature) / INFERENCE (balance)",
+   "grade": "fibre B, PKS C",
+   "source": "PALM_MILL_SELF_USE.csv",
+   "note": ""
+  },
+  {
+   "id": "s5.self_use_TH",
+   "value": {
+    "fibre": [
+     0.964,
+     1.0,
+     1.0
+    ],
+    "pks": [
+     0.048,
+     0.5,
+     0.545
+    ],
+    "verdict_fibre": "CONSISTENT",
+    "verdict_pks": "CONTRADICTORY",
+    "literature": [
+     0.9785,
+     0.2965
+    ],
+    "balance": [
+     1.0,
+     0.4854
+    ]
+   },
+   "unit": "share",
+   "status": "VERIFIED (literature) / INFERENCE (balance)",
+   "grade": "fibre C, PKS D",
+   "source": "PALM_MILL_SELF_USE.csv",
+   "note": ""
+  },
+  {
+   "id": "s5.self_use_PH",
+   "value": {
+    "fibre": [
+     0.805,
+     1.0,
+     1.0
+    ],
+    "pks": [
+     0.048,
+     0.5,
+     0.63
+    ],
+    "verdict_fibre": "CONSISTENT",
+    "verdict_pks": "CONSISTENT",
+    "literature": [
+     0.95,
+     0.5
+    ],
+    "balance": [
+     1.0,
+     0.4854
+    ]
+   },
+   "unit": "share",
+   "status": "VERIFIED (literature) / INFERENCE (balance)",
+   "grade": "fibre C, PKS C",
+   "source": "PALM_MILL_SELF_USE.csv",
+   "note": ""
+  },
+  {
+   "id": "s5.self_use_KH",
+   "value": {
+    "fibre": [
+     0.805,
+     1.0,
+     1.0
+    ],
+    "pks": [
+     0.048,
+     0.5,
+     0.63
+    ],
+    "verdict_fibre": "CONSISTENT",
+    "verdict_pks": "CONSISTENT",
+    "literature": [
+     0.95,
+     0.5
+    ],
+    "balance": [
+     1.0,
+     0.4854
+    ]
+   },
+   "unit": "share",
+   "status": "VERIFIED (literature) / INFERENCE (balance)",
+   "grade": "fibre C, PKS C",
+   "source": "PALM_MILL_SELF_USE.csv",
+   "note": ""
+  },
+  {
+   "id": "s5.potential_effect_low_high",
+   "value": {
+    "low": 47.7706092728867,
+    "mid": 0.0,
+    "high": -10.986745380175147
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "evidence/T03_BALANCE.json",
+   "note": "ASEAN solid-biomass potential vs the kept values"
+  },
+  {
+   "id": "s5.pks_trade_side_evidence",
+   "value": [
+    {
+     "item": "ID exports 2020 Q1 x 4 (T03-C01, annualised: INFERENCE)",
+     "country": "ID",
+     "t_per_a": 2808000.0,
+     "pks_generated_t_per_a": 15027200.0,
+     "share_leaving_mills_lower_bound": 0.1868611584327087
+    },
+    {
+     "item": "MY exports 2020 Q1 x 4 (T03-C01, annualised: INFERENCE)",
+     "country": "MY",
+     "t_per_a": 816000.0,
+     "pks_generated_t_per_a": 6108100.4672,
+     "share_leaving_mills_lower_bound": 0.13359308747160484
+    },
+    {
+     "item": "Japan imports from ID 2025-03 x 12 (T03-C02, annualised: INFERENCE)",
+     "country": "ID",
+     "t_per_a": 5732400.0,
+     "pks_generated_t_per_a": 15027200.0,
+     "share_leaving_mills_lower_bound": 0.3814682708688245
+    },
+    {
+     "item": "Japan imports from MY 2025-03 x 12 (T03-C02, annualised: INFERENCE)",
+     "country": "MY",
+     "t_per_a": 2250000.0,
+     "pks_generated_t_per_a": 6108100.4672,
+     "share_leaving_mills_lower_bound": 0.36836329266067513
+    }
+   ],
+   "unit": "t/a; share",
+   "status": "INFERENCE",
+   "grade": "B",
+   "source": "evidence/T03_BALANCE.json",
+   "note": "annualised quarter / month values"
+  },
+  {
+   "id": "s5.potential_file_identical",
+   "value": "cd9df282168598cc0080 (BIOMASS_POTENTIAL_2050_V4.csv)",
+   "unit": "sha256 prefix",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "test_v4_d1_palm.py",
+   "note": ""
+  },
+  {
+   "id": "s5.checkpoints",
+   "value": {
+    "rows": 396,
+    "all_within_1e6": true,
+    "max_abs_diff_T": 0.0,
+    "S7": {
+     "main": 3490.33801,
+     "iid": 3166.52185,
+     "i2chk": 3328.33671
+    }
+   },
+   "unit": "TWh",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "CHECKPOINTS.csv",
+   "note": ""
+  },
+  {
+   "id": "s6.model_phs",
+   "value": {
+    "existing_MW": {
+     "ID": 1040.0,
+     "PH": 856.0,
+     "TH": 2310.0,
+     "VN": 1200.0
+    },
+    "candidate_cap_MW": {
+     "ID": 2400.0,
+     "LA": 100.0,
+     "PH": 7958.0,
+     "TH": 2480.0,
+     "VN": 1500.0
+    },
+    "existing_total_MW": 5406.0,
+    "candidate_total_MW": 14438.0
+   },
+   "unit": "MW",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/PHS_MODEL.json (by_country, carriers 'PHS existing' / 'PHS')",
+   "note": "the totals field of PHS_MODEL.json also counts reservoir hydro"
+  },
+  {
+   "id": "s6.cost_eur2020_per_kw",
+   "value": {
+    "lu2021_6h": 754.42,
+    "anu2025_6h": 740.48,
+    "lu2021_24h": 1543.92,
+    "anu2025_24h": 1508.93,
+    "model": 2297.34
+   },
+   "unit": "EUR2020/kW",
+   "status": "INFERENCE",
+   "grade": "B",
+   "source": "PHS_PROPOSAL.md section 4",
+   "note": "registry conversions deflator_usd_2024_to_2020 x fx_usd_to_eur_2020"
+  },
+  {
+   "id": "s6.existing_iha_2024",
+   "value": 2260,
+   "unit": "MW",
+   "status": "VERIFIED",
+   "grade": "B",
+   "source": "evidence/PHS_LITERATURE.json C01-C03",
+   "note": ""
+  },
+  {
+   "id": "s7.static_main_F1",
+   "value": {
+    "network_sha256": "d40352b252f1b28612b92a58b5144d5b174542081e63b2beb6e3d896a13c3871",
+    "network_bytes": 82721770,
+    "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+    "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+    "C3_max_ratio": 0.9899999999999999,
+    "C4_total_change_twh": -298.40681391399903,
+    "C6_switch_sha_equals_tables": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s7.static_main_F2",
+   "value": {
+    "network_sha256": "c11f5b65b9922cb30f7d935b89f1a108778a1a51dbd771de42c30e4879936795",
+    "network_bytes": 82083432,
+    "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+    "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+    "C3_max_ratio": 0.9899999999999999,
+    "C4_total_change_twh": -298.40681391399903,
+    "C6_switch_sha_equals_tables": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s7.network_diff_vs_w08",
+   "value": {
+    "integrated_2920_3h": true,
+    "integrated_365_24h": true,
+    "no_new_xb_2920_3h": true,
+    "no_new_xb_365_24h": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D1_NETWORK_DIFF.json",
+   "note": ""
+  },
+  {
+   "id": "s7.zero_slack_gate",
+   "value": {
+    "passed": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/ZERO_SLACK_CHECK_D1.json",
+   "note": ""
+  },
+  {
+   "id": "s7.bounds_registered",
+   "value": {
+    "R1_v4d1_F1": {
+     "upper_bound_eur": 1449347007.6519861,
+     "interval_eur": [
+      -337843.5032374924,
+      1449684851.1552236
+     ]
+    },
+    "R2_v4d1_F2": {
+     "upper_bound_eur": 1449347007.5314376,
+     "interval_eur": [
+      -350727.3755471384,
+      1449697734.9069848
+     ]
+    }
+   },
+   "unit": "EUR",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "evidence/D1_BOUNDS_PRE.json",
+   "note": "registered in SMOKE56_D1.md section 1 (commit 365c8d62) before any D1 solve"
+  },
+  {
+   "id": "s7.smoke_v4d1_F1",
+   "value": {
+    "termination": "optimal",
+    "objective_eur": 339292850746.34784,
+    "objective_lp_eur": 336922448611.54376,
+    "dV_eur": 1449347508.8554077,
+    "within_registered": true,
+    "dV_over_upper": 1.0000003458132656,
+    "barrier_iterations": 84,
+    "solve_seconds": 225.92380928993225,
+    "peak_rss_gib": 6.872486114501953,
+    "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B8",
+    "V6_label": "ACCEPTED_LAYER2"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D1_smoke56.json",
+   "note": ""
+  },
+  {
+   "id": "s7.smoke_v4d1_F2",
+   "value": {
+    "termination": "optimal",
+    "objective_eur": 352176720807.95056,
+    "objective_lp_eur": 349635641617.0601,
+    "dV_eur": 1449345260.8121338,
+    "within_registered": true,
+    "dV_over_upper": 0.9999987948232585,
+    "barrier_iterations": 92,
+    "solve_seconds": 178.95391297340393,
+    "peak_rss_gib": 5.729774475097656,
+    "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+    "V6_label": "ACCEPTED_LAYER2"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D1_smoke56.json",
+   "note": ""
+  },
+  {
+   "id": "s7.smoke_criteria",
+   "value": {
+    "v4d1_F1": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "dV_in_registered_interval": true,
+     "all": true
+    },
+    "v4d1_F2": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "dV_in_registered_interval": true,
+     "all": true
+    },
+    "B6_regression_only": {
+     "d1_eur": 12883870061.602722,
+     "w08_eur": 12883872309.645996,
+     "change_eur": -2248.0432739257812
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D1_smoke56.json",
+   "note": ""
+  }
+ ]
+}
