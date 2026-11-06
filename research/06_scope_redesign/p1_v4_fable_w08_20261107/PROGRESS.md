@@ -12,3 +12,4 @@
 - 09 第 3 节提交 `6abe892f`（FINDINGS_PRE 等 54 个文件），推送到 `origin/codex/v4-fable-w08-20261107`。
 - 10 第 4 节：读 W08 REPORT 第 0–6 节、SMOKE56_V4、HPC 草案、附录；只读分解三次冒烟解（目标常数相同、生物质去向、价格恒定、成本台账逐国 / 逐类别差异）；REPORT.md 写成，FINDINGS.csv 加 F-20–F-22。
 - 11 第 5 节：EVIDENCE.json、审阅包与清单、最终提交推送（提交号见下一行）。
+- 12 最终提交链：第 3 节 6abe892f → 第 4–5 节 93649c3e00cc23e3f1082ec00aeeae65841eaec3 → 清单与本行（见 git log 最新提交）；审阅包 REVIEW_93649c3e.zip（zip 不入库，清单 evidence/REVIEW_ZIP_MANIFEST_93649c3e.txt 入库）。推送到 origin/codex/v4-fable-w08-20261107 后停止，等审阅。
