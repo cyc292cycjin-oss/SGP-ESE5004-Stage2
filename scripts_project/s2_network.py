@@ -365,7 +365,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     from v4_common import v4_tables
     v4t = v4_tables(cfg, repo)   # V4 W08: None unless research.demand.v4.enabled (then the out_<anchor_mode> tables of v4_industry.py)
     biomass_csv = repo / (v4t["biomass_potential"] if (v4t and v4t["biomass_potential"]) else "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")
-    bio = add_biomass_layer(n, costs, S2, biomass_csv, nodes, cc)
+    from s2_layers import biomass_missing_cost
+    from v4_common import switches as v4_switches
+    bio = add_biomass_layer(n, costs, S2, biomass_csv, nodes, cc, missing_cost=biomass_missing_cost(registry, v4_switches(cfg)["missing_cost_rule"]))   # V4 D1: research.biomass.missing_cost_rule
     heat = add_industrial_heat(n, costs, nodes, cc, bands=bool(S2["industry"].get("heat_bands")))   # M08b B2: low / medium / high useful-heat buses
     demand_astar = bind_astar(n, repo, allocation)
     from s2_layers import demand_table_key

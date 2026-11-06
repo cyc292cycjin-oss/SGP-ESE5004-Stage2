@@ -461,8 +461,31 @@ def add_co2_layer(n, costs, s2cfg, registry: pd.DataFrame, nodes, cc_fraction: f
 # ----------------------------------------------------------------------------------------------
 # S2-3: biomass supply and conversion (decisions 31, 32, 36)
 # ----------------------------------------------------------------------------------------------
-def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction: float):
+MISSING_COST_PROXY_ID = "biomass_missing_cost_proxy"   # V4 D1 (decisions 212 item 5, 215 item 5): registry row of the missing-cost proxy
+MISSING_COST_PROXY_SOURCE = "proxy: mean of bagasse, rice husk, maize cob prices 35.5 USD/t"   # the uniform proxy of unsourced residues in the registry
+
+
+def biomass_missing_cost(registry: pd.DataFrame, rule: str) -> dict | None:
+    """V4 D1 (decisions 212 item 5, 215 item 5; research.biomass.missing_cost_rule): zero -> None (v3.1: a pool whose cost column is empty enters at
+    0 EUR/MWh); proxy -> the registry proxy of unsourced residues (row biomass_missing_cost_proxy, which must equal the value of every biomass_cost_*
+    row whose source is that proxy) and the registry status of every biomass_cost_<country>_<category> row. add_biomass_layer applies the proxy only
+    to pools whose registry cost is DATA_PENDING and whose cost column is empty (the five oil_palm_trunk pools); every other cost stays as it is."""
+    if rule == "zero":
+        return None
+    if rule != "proxy":
+        raise ValueError(f"research.biomass.missing_cost_rule {rule} not in (zero, proxy)")
+    proxy = float(registry.at[MISSING_COST_PROXY_ID, "value"])
+    peers = registry[registry.index.str.startswith("biomass_cost_") & registry["source"].astype(str).str.startswith(MISSING_COST_PROXY_SOURCE)]
+    vals = sorted(set(peers["value"].astype(float)))
+    if len(peers) == 0 or vals != [proxy]:
+        raise ValueError(f"{MISSING_COST_PROXY_ID} = {proxy} differs from the registry proxy rows ({len(peers)} rows, values {vals})")
+    status = {str(k): str(v) for k, v in registry["status"].items() if str(k).startswith("biomass_cost_")}
+    return dict(rule="proxy", param_id=MISSING_COST_PROXY_ID, proxy_eur_per_mwh=proxy, proxy_source=MISSING_COST_PROXY_SOURCE, peer_rows=int(len(peers)), status=status)
+
+
+def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction: float, missing_cost: dict | None = None):
     R = s2cfg["biomass"]
+    proxied = []   # V4 D1: pools priced by the missing-cost rule (missing_cost from biomass_missing_cost; None = v3.1 path)
     df = pd.read_csv(potentials_csv, keep_default_na=False)
     ledger = dict(stores=[], skipped=[], conversion_links=0, by_country_mwh={})
     for c in sorted(COUNTRIES):
@@ -478,6 +501,9 @@ def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction:
         bus = f"biogas {r.country}" if r.feedstock_group == "biogas" else f"solid biomass {r.country}"
         mc = float(r.cost_eur2020_per_mwh) if r.cost_eur2020_per_mwh != "" else 0.0
         name = f"{r.country} biomass {r.category}"
+        if missing_cost is not None and r.cost_eur2020_per_mwh == "" and missing_cost["status"].get(f"biomass_cost_{r.country}_{r.category}") == "DATA_PENDING":
+            mc = float(missing_cost["proxy_eur_per_mwh"])
+            proxied.append(dict(store=name, country=r.country, category=r.category, potential_mwh=pot, marginal_cost=mc, registry_cost=f"biomass_cost_{r.country}_{r.category}"))
         n.add("Store", name, bus=bus, carrier=n.buses.at[bus, "carrier"], e_nom=pot, e_nom_extendable=False, e_initial=pot, e_cyclic=False, marginal_cost=mc)
         n.stores.loc[name, ["country", "research_role", "s2_category", "s2_cost_tier"]] = [r.country, "FINITE_RESOURCE", r.category, r.cost_tier]
         n.meta.setdefault("store_power_rules", {})[name] = "discharge_only"
@@ -486,6 +512,10 @@ def add_biomass_layer(n, costs, s2cfg, potentials_csv: Path, nodes, cc_fraction:
                                      potential_high_mwh=float(r.potential_high_mwh) if r.potential_high_mwh != "" else None, marginal_cost=mc, cost_tier=r.cost_tier))
         ledger["by_country_mwh"][r.country] = ledger["by_country_mwh"].get(r.country, 0.0) + pot
     n.meta["research_biomass"] = dict(stores={s["store"]: s["potential_mwh"] for s in ledger["stores"]}, cross_border=False, layer=R["potential_layer"])
+    if missing_cost is not None:   # V4 D1: recorded only under the proxy rule (the zero rule is the unchanged v3.1 path)
+        mcl = dict(rule="proxy", param_id=missing_cost["param_id"], proxy_eur_per_mwh=missing_cost["proxy_eur_per_mwh"], proxy_source=missing_cost["proxy_source"],
+                   peer_rows=missing_cost["peer_rows"], applies_to="registry cost DATA_PENDING and empty cost column", stores=proxied)
+        n.meta["research_biomass"]["missing_cost_rule"] = mcl; ledger["missing_cost_rule"] = mcl
     # conversion at every node from the national pools
     ef_bio = cost(costs, "solid biomass", "CO2 intensity"); ef_gas = cost(costs, "gas", "CO2 intensity"); ef_oil = cost(costs, "oil", "CO2 intensity"); cc = float(cc_fraction)
     eop_eff = cost(costs, "biomass EOP", "efficiency"); eop_fixed = cost(costs, "biomass EOP", "fixed"); eop_vom = cost(costs, "biomass EOP", "VOM"); eop_life = cost(costs, "biomass EOP", "lifetime")
