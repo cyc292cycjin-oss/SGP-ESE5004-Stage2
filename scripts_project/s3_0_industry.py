@@ -26,6 +26,7 @@ temperature bands (m08b_heat_bands.py; supplement 01: medium split at 200 C) and
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pandas as pd
 
@@ -81,14 +82,44 @@ def td_value(td, tech, param):
     return float(r.value.iloc[0])
 
 
-def main():
-    cache = json.loads(CACHE.read_text()); cache_sha = sha256(CACHE)
+def parse_args(argv=None):
+    """V4 W08 options (checklist sections 3, 7, 8). Without options the script is the v3.1 one (every allocation mode, outputs in demand_v5, registry
+    fragment). --only-mode runs one allocation mode on the given tables and writes its outputs to --out-dir only (no registry fragment)."""
+    import argparse
+    p = argparse.ArgumentParser(description="S3-0 industry 2050; V4 W08 options (default = v3.1)")
+    p.add_argument("--only-mode", default=None, choices=list(ALLOCATIONS))
+    p.add_argument("--ats-table", type=Path, default=None, help="demand table of --only-mode (v4: the ATS table after the v4 moves)")
+    p.add_argument("--output-rule", type=Path, default=None, help="physical output rule table of --only-mode (m08b_demand.py output)")
+    p.add_argument("--cache", type=Path, default=CACHE)
+    p.add_argument("--out-dir", type=Path, default=None)
+    p.add_argument("--cement-el-t19", type=Path, default=None, help="country,cement_2019_t: grinding electricity on these tonnes (decision 210 item 5 / I2 cement correction ii)")
+    p.add_argument("--edgar-2a1-zero", default="", help="comma-separated countries whose EDGAR 2.A.1 counts as 0 (BN, I2 (iii))")
+    p.add_argument("--biomass-potential", type=Path, default=None, help="potential table (v4: BIOMASS_POTENTIAL_2050_V4.csv)")
+    p.add_argument("--biomass-cap-share", type=float, default=None, help="overflow cap = share x potential (W12 F7: 0.99)")
+    a = p.parse_args(argv)
+    if (a.only_mode is None) != (a.out_dir is None):
+        p.error("--only-mode and --out-dir go together")
+    return a
+
+
+def main(argv=None):
+    a = parse_args(argv)
+    DEMAND_OUT = a.out_dir if a.out_dir is not None else DEMAND_DIR
+    if a.out_dir is not None:
+        a.out_dir.mkdir(parents=True, exist_ok=True)
+    CACHE_ = a.cache
+    cache = json.loads(CACHE_.read_text()); cache_sha = sha256(CACHE_)
     cdf = pd.DataFrame(cache["records"]); subs = [c for c in cdf.columns if c not in ("country", "carrier")]
     for s_ in subs:
         cdf[s_] = cdf[s_].astype(float)
     ws = {r["iso2"]: r for r in read_csv(SRC_DIR / WORLDSTEEL)}; ws_sha = src_sha(WORLDSTEEL)
     ed = pd.read_csv(SRC_DIR / EDGAR); ed_sha = src_sha(EDGAR)
     clinker_kt = {c: float(ed[(ed.iso == c) & (ed.ipcc_code_2006_for_standard_report == "2.A.1")].kt_CO2_2019.fillna(0.0).sum()) for c in ASEAN}
+    for c in [x for x in a.edgar_2a1_zero.split(",") if x]:   # V4 W08 (I2 S5b, BN (iii)): EDGAR 2.A.1 counted as 0
+        clinker_kt[c] = 0.0
+    cem_el_t19 = {}
+    if a.cement_el_t19 is not None:   # V4 W08 (I2 S5b, cement correction (ii)): grinding electricity on the USGS 2019 cement tonnes
+        cem_el_t19 = {r.country: float(r.cement_2019_t) for r in pd.read_csv(a.cement_el_t19, float_precision="round_trip").itertuples()}
     td = pd.read_csv(TD); td_sha = sha256(TD)
     cf_ck = td_value(td, "cement finishing", "clinker-input"); ck_heat = td_value(td, "cement dry clinker", "heat-input"); ck_gas = td_value(td, "cement dry clinker", "gas-input")
     ck_el = td_value(td, "cement dry clinker", "electricity-input"); cf_el = td_value(td, "cement finishing", "electricity-input")
@@ -128,20 +159,25 @@ def main():
                                      today_mwh_per_t=today_spec[s], future_mwh_per_t=fut_total[s], efficiency_factor=(fut_total[s] / today_spec[s]) if today_spec[s] else None,
                                      future_shares={k: (v / fut_total[s] if fut_total[s] else 0.0) for k, v in fut[s].items()}))
     mp = {(r["unsd_subsector"], r["pypsa_eur_sector"]): r for r in mapping_rows}
-    write_csv([dict(r, future_shares=json.dumps({k: round(v, 6) for k, v in r["future_shares"].items()})) for r in mapping_rows], DEMAND_DIR / "INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv",
+    write_csv([dict(r, future_shares=json.dumps({k: round(v, 6) for k, v in r["future_shares"].items()})) for r in mapping_rows], DEMAND_OUT / "INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv",
               ["unsd_subsector", "pypsa_eur_sector", "weight", "weight_basis", "today_mwh_per_t", "future_mwh_per_t", "efficiency_factor", "future_shares"])
-    bio = pd.read_csv(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
+    bio = pd.read_csv(a.biomass_potential if a.biomass_potential is not None else BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
     solid_pot = bio[bio.feedstock_group != "biogas"].assign(p=pd.to_numeric(bio.potential_main_mwh, errors="coerce").fillna(0.0)).groupby("country").p.sum().to_dict()
     s2b_path = DEMAND_DIR / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative_S2B_FROZEN.csv"   # S2B result frozen from commit 8d61bd37 (s2b_industry.py) -> comparison column
     s2b_summary = pd.read_csv(s2b_path).set_index("country").to_dict("index"); s2b_sha = sha256(s2b_path)
     outputs, gaps, other_rows, outputs_today = {}, [], [], {}
-    out_rule = {m: pd.read_csv(p).set_index("country") for m, p in OUTPUT_RULE_TABLES.items()}
+    rule_tables = dict(OUTPUT_RULE_TABLES)
+    if a.only_mode is not None and a.output_rule is not None:
+        rule_tables[a.only_mode] = a.output_rule
+    out_rule = {m: pd.read_csv(p).set_index("country") for m, p in rule_tables.items()}
     hb = pd.read_csv(HEAT_BANDS).set_index("carrier"); hb_sha = sha256(HEAT_BANDS)
     band_share = {car: {u: float(hb.at[car, f"share_{u}"]) for u in HEAT_BAND_USES + ("mechanical",)} for car in FUELS}
     medium_a_fraction = float(hb.medium_a_fraction.iloc[0])   # 200 C split of the medium band (m08b_heat_bands.py; supplement 01 section 2)
     reg = Registry(SCRIPT)
     for mode, fname in ALLOCATIONS.items():
-        dem = pd.read_csv(DEMAND_DIR / fname, keep_default_na=False)
+        if a.only_mode is not None and mode != a.only_mode:
+            continue
+        dem = pd.read_csv(a.ats_table if (a.only_mode is not None and a.ats_table is not None) else DEMAND_DIR / fname, keep_default_na=False)
         rows, summaries, tds = [], {ob: [] for ob in SUMMARY_MODES}, {ob: [] for ob in SUMMARY_MODES}
         rule = out_rule.get(mode)
         summary, td_rows = summaries["pypsa_eur_2050"], tds["pypsa_eur_2050"]
@@ -213,7 +249,7 @@ def main():
             clk19 = clinker_kt[c] * 1e3 / EF_CLINKER; cem_t19 = clk19 / cf_ck
             cem19_spec = {car: 0.0 for car in CARRIERS}
             fuel19 = (float(ratios.at["methane", "Cement"]) + float(ratios.at["biomass", "Cement"])) * cem_t19   # kiln fuel (today: same total, IDEES fuels)
-            el19 = float(ratios.at["elec", "Cement"]) * cem_t19
+            el19 = float(ratios.at["elec", "Cement"]) * (cem_el_t19[c] if c in cem_el_t19 else cem_t19)   # V4 W08 option --cement-el-t19 (default: EDGAR clinker cement)
             if "non-metallic minerals" in present:
                 nmm19 = dict(sub19["non-metallic minerals"]); nmm_src = "UNSD NMM row: cement part = EDGAR clinker x PyPSA-Eur Cement ratio, remainder = ceramics/glass"
                 want = spread(fuel19, el19, nmm19); got = take(nmm19, want, "cement: activity-based 2019 energy above the UNSD NMM row (logged, then taken from other)")
@@ -344,7 +380,10 @@ def main():
                         gaps.append(dict(mode=mode, country=c, item="net industrial hydrogen negative (chlorine by-product > H2 uses) -> 0, by-product not credited", carrier="hydrogen", mwh=pe["hydrogen"]))
                     pe["hydrogen"] = 0.0
                 bas = {car: e19[car] * mult for car in CARRIERS}
-                pot = float(solid_pot.get(c, 0.0)); overflow = max(0.0, pe["biomass"] + ag_bio_50 - pot)
+                pot = float(solid_pot.get(c, 0.0))
+                if a.biomass_cap_share is not None:   # V4 W08 (W12 F7): overflow cap = share x potential
+                    pot = pot * float(a.biomass_cap_share)
+                overflow = max(0.0, pe["biomass"] + ag_bio_50 - pot)
                 ov_ind = min(overflow, pe["biomass"]); ov_ag = min(overflow - ov_ind, ag_bio_50)
                 pe_final = dict(pe)
                 if heat_ob:   # M08b B2: the overflow becomes useful heat in the build (s2_layers biomass_overflow_mode useful_heat), not methane here
@@ -386,20 +425,25 @@ def main():
                                    biomass_source_band_medium_a_share=med * medium_a_fraction, biomass_source_band_medium_b_share=med * (1.0 - medium_a_fraction),
                                    biomass_source_band_high_share=hi)
         outputs[mode] = summary
-        write_csv(rows, DEMAND_DIR / f"INDUSTRY_2050_PYPSA_EUR_{mode}.csv", list(rows[0].keys()))
-        write_csv(summary, DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}.csv", list(summary[0].keys()))
-        write_csv(td_rows, DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY.csv", list(td_rows[0].keys()))
+        write_csv(rows, DEMAND_OUT / f"INDUSTRY_2050_PYPSA_EUR_{mode}.csv", list(rows[0].keys()))
+        write_csv(summary, DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}.csv", list(summary[0].keys()))
+        write_csv(td_rows, DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY.csv", list(td_rows[0].keys()))
         sfx = OTHER_BUCKET_SUFFIX["idees_today"]; outputs_today[mode] = summaries["idees_today"]   # S3B R2 sensitivity tables (research.s3.industry.other_bucket = idees_today)
-        write_csv(summaries["idees_today"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx}.csv", list(summaries["idees_today"][0].keys()))
-        write_csv(tds["idees_today"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx}.csv", list(tds["idees_today"][0].keys()))
+        write_csv(summaries["idees_today"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}{sfx}.csv", list(summaries["idees_today"][0].keys()))
+        write_csv(tds["idees_today"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx}.csv", list(tds["idees_today"][0].keys()))
         sfx_own = OTHER_BUCKET_SUFFIX["asean_own_2019"]   # S4B-0: research.s3.industry.other_bucket = asean_own_2019 (implemented only)
-        write_csv(summaries["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_own}.csv", list(summaries["asean_own_2019"][0].keys()))
-        write_csv(tds["asean_own_2019"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_own}.csv", list(tds["asean_own_2019"][0].keys()))
+        write_csv(summaries["asean_own_2019"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_own}.csv", list(summaries["asean_own_2019"][0].keys()))
+        write_csv(tds["asean_own_2019"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_own}.csv", list(tds["asean_own_2019"][0].keys()))
         sfx_uh = OTHER_BUCKET_SUFFIX["useful_heat_bands"]   # M08b B2: research.s3.industry.other_bucket = useful_heat_bands
-        write_csv(summaries["useful_heat_bands"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_uh}.csv", list(summaries["useful_heat_bands"][0].keys()))
-        write_csv(tds["useful_heat_bands"], DEMAND_DIR / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_uh}.csv", list(tds["useful_heat_bands"][0].keys()))
-    write_csv(gaps, DEMAND_DIR / "INDUSTRY_2050_GAPS.csv", ["mode", "country", "item", "carrier", "mwh"])
-    write_csv(other_rows, DEMAND_DIR / "INDUSTRY_2050_OTHER_BUCKET.csv", list(other_rows[0].keys()))
+        write_csv(summaries["useful_heat_bands"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}{sfx_uh}.csv", list(summaries["useful_heat_bands"][0].keys()))
+        write_csv(tds["useful_heat_bands"], DEMAND_OUT / f"INDUSTRY_2050_SUMMARY_{mode}_TD_SENSITIVITY{sfx_uh}.csv", list(tds["useful_heat_bands"][0].keys()))
+    write_csv(gaps, DEMAND_OUT / "INDUSTRY_2050_GAPS.csv", ["mode", "country", "item", "carrier", "mwh"])
+    write_csv(other_rows, DEMAND_OUT / "INDUSTRY_2050_OTHER_BUCKET.csv", list(other_rows[0].keys()))
+    if a.only_mode is not None:   # V4 W08: one mode only -> no cross-mode comparison tables, no registry fragment, no evidence file
+        write_json(dict(script=SCRIPT, v4_w08_only_mode=a.only_mode, sources=dict(industry_cache=cache_sha, ats_table=sha256(a.ats_table) if a.ats_table else "",
+                        output_rule=sha256(rule_tables[a.only_mode]) if a.only_mode in rule_tables else "", edgar=ed_sha), edgar_2a1_zero=a.edgar_2a1_zero,
+                        cement_el_t19=cem_el_t19, biomass_cap_share=a.biomass_cap_share, gaps=len(gaps)), DEMAND_OUT / "INDUSTRY_2050_EVIDENCE.json")
+        return
     ob_cmp = []
     for r_m, r_t in zip(outputs["aeo8_ats_relative"], outputs_today["aeo8_ats_relative"]):
         assert r_m["country"] == r_t["country"]

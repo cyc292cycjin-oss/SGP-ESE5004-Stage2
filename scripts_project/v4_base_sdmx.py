@@ -390,8 +390,28 @@ def capsule_obj(x: dict) -> dict:
     return dict(schema="i1-sdmx-capsule-1", year=2019, source=SOURCE_LABEL, files={f"sdmx/{cc}_2019_all.xml": x["shas"][cc] for cc in ASEAN}, records=x["recs"])
 
 
+BASE_V31_CSV = V4_DIR / "D1_BASE2019_V31_REBUILD.csv"
+
+
+def v31_rebuild_rows(memo: dict) -> pd.DataFrame:
+    """The v3.1 base rebuilt at full precision by the generalised rule on the unchanged capsule (gate G3 path; = I1 / I2 'S0'): the reference
+    of the v4 seed edits (the D1 table itself stores 12 significant digits, d1_common.fmt)."""
+    conv = json.loads((SRC / "FROZEN_UPSTREAM_CONVERSIONS.json").read_text())
+    elec_exp = json.loads((SRC / "electricity.json").read_text())["records"]
+    eb = {(r["iso2"], r["flow"]): r for r in pd.read_csv(SRC_DIR / BUNKER_EB_CSV, dtype=str).to_dict("records")}
+    cap0 = json.loads((SRC / "UNSD_2019_SOURCE_CAPSULE.json").read_text())["records"]
+    cap_frozen = copy.deepcopy(cap0)
+    ov = json.loads((SRC / "TH_ROAD_LOCAL_VINTAGE_APPLIED.json").read_text())
+    byid = {rba.row_id(r): i for i, r in enumerate(cap0)}
+    for e in ov["replacements"]:
+        cap0[byid[e["OldRowID"]]] = e["NewRawRow"]
+    S0 = build_version(copy.deepcopy(cap0), conv, "frozen", memo, [], "S0", cap_frozen)
+    return d1_rows(S0, elec_exp, None, eb)
+
+
 def build_sdmx_base() -> dict:
     x = compute()
+    v31_rebuild_rows(memo_dict(pd.DataFrame(x["memo_rows"]).astype(str))).to_csv(BASE_V31_CSV, index=False, lineterminator="\n")
     T, recs, memo_rows, dropped, log, dropped_neu, DR, gas = x["T"], x["recs"], x["memo_rows"], x["dropped"], x["log"], x["dropped_neu"], x["DR"], x["gas"]
     write_json_i1(capsule_obj(x), CAPSULE)
     write_csv_i1(memo_rows, MEMO_CSV)

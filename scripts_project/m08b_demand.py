@@ -27,6 +27,11 @@ Only activity levels are anchored (S4R supplement 01 section 2); carrier structu
     sector, so this is also its carrier structure); a negative value is set to 0 and listed (country, sector, value), never filled from another
     source; a positive value without any 2019 fuel row (no carrier structure) is also left at 0 and listed.
 International bunkers stay UNSD 2019 constants (decision 10; sector InternationalBunkers, not anchored).
+V4 W08 (decisions 210 items 3-4, 211 item 1; checklist section 3) adds options only; without options the script is the v3.1 one (A2):
+--table (v4 seed table), --out-dir (v4 outputs + DEMAND_ANCHOR_C3_DEVIATION.csv), --anchor-mode ras | iid (v3 RAS sector factors x own seed,
+DEMAND_ANCHOR_V3_SECTOR_FACTORS.csv) | iib (frozen v3 anchors, DEMAND_ANCHOR_V3_FROZEN.csv) | external (AEO8 AEDS table, interface only),
+--residue-anchor-adj (residues removed from the seed that the national balance contains: the split is computed with the residue in the industry
+seed, then the industry anchor falls by residue x multiplier - in every mode), --dump-anchors.
 
     python scripts_project/m08b_demand.py
 """
@@ -225,8 +230,71 @@ def physical_output(bases, pop, g):
     return rows
 
 
-def main():
-    dem = pd.read_csv(RATIO_TABLE, dtype=str, keep_default_na=False)
+def parse_args(argv=None):
+    """V4 W08 (decision 211 item 1; checklist section 3). Without options the script is the v3.1 one (RAS on the D1 table, outputs in demand_v5)."""
+    import argparse
+    p = argparse.ArgumentParser(description="M08b ATS anchors; V4 W08 options (default = v3.1)")
+    p.add_argument("--table", type=Path, default=RATIO_TABLE, help="seed / row-structure table (v4: the v4 D1 table written by v4_industry.py)")
+    p.add_argument("--out-dir", type=Path, default=None, help="write the outputs here instead of research_inputs/demand_v5 (v4 runs)")
+    p.add_argument("--anchor-mode", choices=("ras", "iid", "iib", "external"), default="ras",
+                   help="ras (IIa, DFX F1 RAS; v3.1) | iid (v3 RAS sector factors x own seed, country TFEC = AEO8) | iib (frozen v3 country x sector anchors) | external (country x sector anchors from a table)")
+    p.add_argument("--sector-factors", type=Path, default=DEMAND_DIR / "DEMAND_ANCHOR_V3_SECTOR_FACTORS.csv")
+    p.add_argument("--frozen-anchors", type=Path, default=DEMAND_DIR / "DEMAND_ANCHOR_V3_FROZEN.csv")
+    p.add_argument("--external-anchors", type=Path, default=None, help="country,sector,anchor_mwh (AEO8 AEDS; MISSING T01 - interface only)")
+    p.add_argument("--residue-anchor-adj", type=Path, default=None,
+                   help="JSON {country: MWh}: self-produced residues removed from the seed that the national balance contains (decision 210 item 4 a)")
+    p.add_argument("--dump-anchors", type=Path, default=None, help="JSON with tfa / t19 (exact floats) after the anchor step")
+    return p.parse_args(argv)
+
+
+def v4_anchor_modes(a, tfa: dict, t19: dict, A_tfec: dict, seed, row_t, col_t) -> tuple[dict, dict]:
+    """V4 W08 checklist section 3 (decisions 210 items 3-4, 211 item 1). Default (ras, no residue adjustment): tfa unchanged.
+    The residue anchor alignment applies in every mode: the sector split is computed with the residue still in the industry seed of the countries
+    whose national balance contains it (RAS: refit with the same row / column targets), then the industry anchor falls by residue x the industry
+    multiplier (all other sector anchors and every multiplier unchanged)."""
+    adj = {}
+    if a.residue_anchor_adj is not None:
+        adj = {c: float(v) for c, v in json.loads(a.residue_anchor_adj.read_text()).items() if c in ASEAN10 and v}
+    info = dict(anchor_mode=a.anchor_mode, residue_adjustment_mwh=adj)
+    if a.anchor_mode == "ras" and not adj:
+        return tfa, info
+    tfa = {c: dict(v) for c, v in tfa.items()}
+    if a.anchor_mode == "ras":
+        seed_r = np.array([[t19[c][s] + (adj.get(c, 0.0) if s == "Industry" else 0.0) for s in SECTORS] for c in ASEAN10])
+        X, it, er, ec = ras_split(seed_r, row_t, col_t)
+        for i, c in enumerate(ASEAN10):
+            tfa[c] = {s: float(X[i, j]) for j, s in enumerate(SECTORS)}
+        info["ras_refit"] = dict(iterations=it, row_error=er, column_error=ec)
+    elif a.anchor_mode == "iid":   # I1 'fixedcol': X = diag(r) seed diag(sigma) with the v3 RAS sector factors sigma, row = AEO8 country TFEC
+        f = pd.read_csv(a.sector_factors, dtype=str).set_index("sector").factor
+        sig = {s: float(f[s]) for s in SECTORS}
+        for c in ASEAN10:
+            sd = {s: t19[c][s] + (adj.get(c, 0.0) if s == "Industry" else 0.0) for s in SECTORS}
+            w = {s: sd[s] * sig[s] for s in SECTORS}; ws = sum(w.values())
+            tfa[c] = {s: A_tfec[c] * w[s] / ws for s in SECTORS}
+        info["sector_factors"] = dict(file=a.sector_factors.name, sha256=sha256(a.sector_factors), values=sig)
+    elif a.anchor_mode in ("iib", "external"):
+        p = a.frozen_anchors if a.anchor_mode == "iib" else a.external_anchors
+        if p is None:
+            raise ValueError("anchor mode external needs --external-anchors (AEO8 AEDS country x sector; MISSING T01)")
+        t = pd.read_csv(p, dtype=str)
+        for r in t.itertuples():
+            if r.country in tfa and r.sector in SECTORS:
+                tfa[r.country][r.sector] = float(r.anchor_mwh)
+        info["anchor_table"] = dict(file=p.name, sha256=sha256(p))
+    for c, r in adj.items():
+        tfa[c]["Industry"] = tfa[c]["Industry"] / (t19[c]["Industry"] + r) * t19[c]["Industry"]
+    return tfa, info
+
+
+def main(argv=None):
+    a = parse_args(argv)
+    od = a.out_dir
+    ANCHORS_, ANCHOR_TABLE_, OUTPUT_BASE_, PLAN_CAPS_, OUTPUT_2050_, EVIDENCE_ = ((od / p.name for p in (ANCHORS, ANCHOR_TABLE, OUTPUT_BASE, PLAN_CAPS, OUTPUT_2050, EVIDENCE))
+                                                                             if od is not None else (ANCHORS, ANCHOR_TABLE, OUTPUT_BASE, PLAN_CAPS, OUTPUT_2050, EVIDENCE))
+    if od is not None:
+        od.mkdir(parents=True, exist_ok=True)
+    dem = pd.read_csv(a.table, dtype=str, keep_default_na=False)
     base = pd.to_numeric(dem.base_2019_mwh, errors="coerce").fillna(0.0)
     a8 = aeo8_country(); c3 = c3_ats(); g = gdp_growth()
     g_el = {s: c3[s][1] / c3[s][0] for s in SECTORS}; g_el["Residential"] = RES_ELEC_ATS_MTOE[1] / RES_ELEC_ATS_MTOE[0]
@@ -246,6 +314,9 @@ def main():
     tfa = {c: {s: float(X[i, j]) for j, s in enumerate(SECTORS)} for i, c in enumerate(ASEAN10)}
     w_tl = {s: t19["TL"][s] * g_tfec[s] for s in SECTORS}; w_tl_sum = sum(w_tl.values())   # TL: normalised weights (outside AEO8), NEU excluded
     tfa["TL"] = {s: A_tfec["TL"] * w_tl[s] / w_tl_sum for s in SECTORS}
+    if a.dump_anchors is not None:
+        a.dump_anchors.write_text(json.dumps(dict(tfa={c: {s: tfa[c][s] for s in SECTORS} for c in ASEAN}, t19={c: {s: t19[c][s] for s in SECTORS} for c in ASEAN})))
+    tfa, v4_info = v4_anchor_modes(a, tfa, t19, A_tfec, seed, row_t, col_t)   # V4 W08: no-op for the v3.1 default
     # ---- physical output first: the ammonia feedstock gas deduction (DFX F2.4) needs the 2050 ammonia production -------------------------
     bases = output_bases()
     pop = {c: a8[c]["pop_2050_million"] for c in ASEAN}
@@ -348,12 +419,19 @@ def main():
                                                                         (f"{f['key']}_fuel_multiplier", f["mult"]), (f"{f['key']}_fuel_zeroed", f["zeroed"]),
                                                                         (f"{f['key']}_fuel_ratio_table_mwh", float(pd.to_numeric(dem[m & (dem.sector == FUEL_SECTORS[f['key']]) & ~is_el].value_2050_mwh, errors="coerce").fillna(0).sum())))}))
     an = pd.DataFrame(anchors)
-    an.to_csv(ANCHORS, index=False, float_format="%.12g")
-    new.to_csv(ANCHOR_TABLE, index=False)
-    pd.DataFrame(bases).to_csv(OUTPUT_BASE, index=False, float_format="%.12g")
-    pd.DataFrame(PLAN).to_csv(PLAN_CAPS, index=False)
+    an.to_csv(ANCHORS_, index=False, float_format="%.12g")
+    new.to_csv(ANCHOR_TABLE_, index=False)
+    pd.DataFrame(bases).to_csv(OUTPUT_BASE_, index=False, float_format="%.12g")
+    pd.DataFrame(PLAN).to_csv(PLAN_CAPS_, index=False)
     out = pd.DataFrame(out_rows)
-    out.to_csv(OUTPUT_2050, index=False, float_format="%.12g")
+    out.to_csv(OUTPUT_2050_, index=False, float_format="%.12g")
+    if od is not None:   # V4 W08 checklist section 3 test (3): ASEAN10 sector anchors against the C.3 x k column targets (RAS: equal unless residues are deducted)
+        dv = []
+        for j, s in enumerate(SECTORS):
+            v = float(sum(tfa[c][s] for c in ASEAN10))
+            dv.append(dict(sector=s, asean10_anchor_mwh=v, c3_x_k_mwh=float(col_t[j]), deviation_mwh=v - float(col_t[j]), deviation_pct=(v / float(col_t[j]) - 1.0) * 100.0,
+                           anchor_mode=a.anchor_mode, residue_adjusted_countries=";".join(sorted(v4_info["residue_adjustment_mwh"]))))
+        pd.DataFrame(dv).to_csv(od / "DEMAND_ANCHOR_C3_DEVIATION.csv", index=False, float_format="%.12g")
     ten = an[an.country != "TL"]
     tot = dict(base_load_anchor_11_twh=float(an.base_load_anchor_mwh.sum() / 1e6), base_load_buildings_agri_11_twh=float(an.base_load_buildings_agri_mwh.sum() / 1e6),
                base_load_ratio_table_11_twh=float(an.base_load_ratio_table_mwh.sum() / 1e6), transport_anchor_11_twh=float(an.transport_anchor_mwh.sum() / 1e6),
@@ -370,7 +448,7 @@ def main():
                **{f"{k}_fuel_ratio_table_11_twh": float(an[f"{k}_fuel_ratio_table_mwh"].sum() / 1e6) for k in FUEL_SECTORS},
                fuel_anchor_zeroed=[dict(country=r.country, sector=FUEL_SECTORS[k], reason=r[f"{k}_fuel_zeroed"], anchor_mwh=float(r[f"{k}_fuel_anchor_raw_mwh"]))
                                    for _, r in an.iterrows() for k in FUEL_SECTORS if r[f"{k}_fuel_zeroed"]])
-    srcs = {p.name: sha256(p) for p in (RATIO_TABLE, SRC_DIR / AEO8_COUNTRY_CSV, SRC_DIR / AEO8_CSV, D2_CSV, WPP_CSV, USGS_XLSX, WORLDSTEEL_XLSX, AMMONIA_CSV)}
+    srcs = {p.name: sha256(p) for p in (a.table, SRC_DIR / AEO8_COUNTRY_CSV, SRC_DIR / AEO8_CSV, D2_CSV, WPP_CSV, USGS_XLSX, WORLDSTEEL_XLSX, AMMONIA_CSV)}
     ras = dict(rule="DFX_RULES section 1.3: RAS biproportional fitting, rows first then columns, zero seeds stay zero", countries=list(ASEAN10), sectors=list(SECTORS),
                seed="D1 table base_2019_mwh by sector (energy use; NonEnergyUse excluded)", row_targets="country ATS TFEC anchors (C.8 x D.1)",
                column_targets_printed_mtoe={s: c3[s][1] for s in SECTORS}, k_scale=k_scale, sum_row_targets_mwh=float(row_t.sum()), sum_column_targets_printed_mwh=float(col_printed.sum()),
@@ -386,7 +464,8 @@ def main():
                     gdp_growth_2022_2050=g, tl_rule=f"per capita = mean({', '.join(TL_PEERS)}) ATS 2050; population UN WPP 2024 median 2050", elasticity=ELASTICITY,
                     elasticity_range=ELASTICITY_RANGE, saturation_t_per_cap=SATURATION, saturation_range=SATURATION_RANGE, base_year=BASE_YEAR, plan_caps=PLAN, totals=tot,
                     ras=ras, ammonia=ammonia, neu=dict(rule="DFX F1.2: NEU outside the TFEC envelope; 2050 = 2019 x industry multiplier (energy-use anchor / 2019 industry energy use)"),
-                    outputs={p.name: sha256(p) for p in (ANCHORS, ANCHOR_TABLE, OUTPUT_BASE, PLAN_CAPS, OUTPUT_2050)}), EVIDENCE)
+                    outputs={p.name: sha256(p) for p in (ANCHORS_, ANCHOR_TABLE_, OUTPUT_BASE_, PLAN_CAPS_, OUTPUT_2050_)},
+                    **({} if (od is None and a.anchor_mode == "ras" and a.residue_anchor_adj is None) else dict(v4_w08=v4_info))), EVIDENCE_)
     pd.set_option("display.width", 250)
     show = an.set_index("country")[["ats_elec_2050_mwh", "base_share_of_ats_elec", "base_load_anchor_mwh", "base_load_ratio_table_mwh", "transport_anchor_mwh", "transport_ratio_table_mwh", "industry_multiplier", "neu_2050_mwh"]].copy()
     show.iloc[:, [0, 2, 3, 4, 5, 7]] /= 1e6
