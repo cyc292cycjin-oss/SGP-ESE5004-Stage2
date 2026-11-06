@@ -1,0 +1,135 @@
+{
+ "name": "V4 2920x3h formal batch on NUS Atlas (PBS Pro): F1 / F2 v4 main (decisions 203-215; V4 D1 draft)",
+ "note": "DRAFT (V4_D1_INSTRUCTION.md section 2 item 5; decision 215 item 7): not packaged, not registered, limits PROPOSED. Limits from work/p1_v31_w15_20261106/HPC_RUNTIME_FACTS.md section 3 (v3.1 Atlas measurements F1 10.9 h / F2 5.6 h / F4 8.3 h of process 2, iterations 244 / 153 / 218, RSS <= 116.4 GiB): TimeLimit 72 h (= max(72 h, 2 x 10.9 h x 1.5 x 1.5 x r) for r <= 1.47), process-1 timeout 7,200 s, no_new_xb reference iterations 300, walltime 96 h. Networks: the v4 main integrated build and its no_new_xb variant at the package commit (registered_sha filled when the package networks are built; the D1 section-7 56-snapshot smoke networks are candidates only - any later code or input change rebuilds them). Runner hpc_v4/run_batch4.sh (package COMMIT into RUN.json and the solve receipt), status hpc_v4/hpr_status.sh (objective incl. the constant and objective_lp). Smoke expectations = the D1 local 56-snapshot smoke R1 / R2 (SMOKE56_D1.md section 2, objective incl. the constant). Sensitivity pairs of HPC_V4_PLAN_DRAFT.md (365x24h, flat curves) are not in this definition.",
+ "runs": {
+  "F1": {
+   "scenario": "integrated",
+   "base": "integrated_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "一体化 v4 主算 2920×3h：c(N)、Owen 分摊、B6 基准",
+   "iterations_reference": 350,
+   "pair": "A"
+  },
+  "F2": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "no_new_xb v4 主算 2920×3h：B6 = F2 − F1",
+   "iterations_reference": 300,
+   "pair": "A"
+  }
+ },
+ "registered_sha": {
+  "integrated_2920_3h_unsolved.nc": "PENDING_PACKAGE_BUILD",
+  "no_new_xb_2920_3h_unsolved.nc": "PENDING_PACKAGE_BUILD"
+ },
+ "registered_bytes": {
+  "integrated_2920_3h_unsolved.nc": null,
+  "no_new_xb_2920_3h_unsolved.nc": null
+ },
+ "build_commit": "PENDING_PACKAGE_BUILD",
+ "limits_status": "PROPOSED",
+ "limits": {
+  "time_limit_s": 259200,
+  "wall_margin_s": 7200,
+  "licence_gap_s": 330,
+  "wait_start_max_s": 7200,
+  "build_timeout_s": 7200,
+  "assign_timeout_s": 32400,
+  "post_timeout_s": 10800,
+  "pack_timeout_s": 7200
+ },
+ "limits_basis": {
+  "time_limit_s": "HPC_RUNTIME_FACTS.md 3: 72 h = max(72 h, 2 U'), U' = 10.9 h x 1.5 (iterations) x 1.5 (node) x r = 24.5 h x r; recompute when the v4 LP size ratio r (nonzeros vs v3.1 F1 193,058,183) > 1.47",
+  "build_timeout_s": "HPC_RUNTIME_FACTS.md 3: F4 process 1 used 3,414 s (63 % of 5,400 s); 7,200 s",
+  "iterations_reference": "integrated 350 (unchanged), no_new_xb 300 (F4 reached 218 = 87 % of 250)",
+  "walltime": "HPC_RUNTIME_FACTS.md 3 (section 14.4 formula): 330 + 7,200 + (259,200 + 7,200) + 32,400 + 2 x 3,900 + 1,800 = 315,930 s = 87.8 h, + waits (2 h) <= 91.8 h -> 96 h",
+  "memory": "unchanged from v3.1 (300 / 250 GB): measured RSS <= 116.4 GiB; r = 1.3 about 150 GiB, below the 80 % stop line of 250 GB"
+ },
+ "hpc_jobs": {
+  "F1": {
+   "name": "hpr4_f1",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 300,
+   "walltime": "96:00:00",
+   "mode": "formal",
+   "rid": "F1",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "F2": {
+   "name": "hpr4_f2",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 250,
+   "walltime": "96:00:00",
+   "mode": "formal",
+   "rid": "F2",
+   "depends": "after:F1",
+   "wait_start_of": "F1"
+  },
+  "batch": {
+   "name": "hpr4_batch",
+   "queue": "parallel",
+   "ncpus": 12,
+   "mem_gb": 120,
+   "walltime": "48:00:00",
+   "mode": "batch",
+   "rid": "batch",
+   "depends": "afterany:F1:F2",
+   "wait_start_of": ""
+  },
+  "smoke56": {
+   "name": "hpr4_smoke56",
+   "queue": "parallel",
+   "ncpus": 17,
+   "mem_gb": 32,
+   "walltime": "04:00:00",
+   "mode": "smoke56",
+   "rid": "all",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "build_only_f1": {
+   "name": "hpr4_build_only_f1",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 300,
+   "walltime": "03:00:00",
+   "mode": "build_only",
+   "rid": "F1",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "install": {
+   "name": "hpr4_install",
+   "queue": "serial",
+   "ncpus": 1,
+   "mem_gb": 8,
+   "walltime": "02:00:00",
+   "mode": "install",
+   "rid": "",
+   "depends": "",
+   "wait_start_of": ""
+  }
+ },
+ "high_peak_gib": {
+  "F1": 208,
+  "F2": 194
+ },
+ "smoke_expected": {
+  "note": "PENDING: the D1 local 56-snapshot smoke R1 / R2 (SMOKE56_D1.md section 2; objective incl. the constant term, barrier iterations) at the package commit; the HPC smoke job compares within a relative 1e-6 (cross-machine)",
+  "objective": {},
+  "iterations": {}
+ },
+ "run_dirs": {
+  "formal": "runs/batch6",
+  "smoke56": "runs/smoke56_v4",
+  "build_only": "runs/build_only_f1_v4"
+ }
+}

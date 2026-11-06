@@ -458,6 +458,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     static = static_validate_s2(n, cfg, corridors, demand)
     inventory = component_inventory(n)
     suffix = "_gap_diagnostic" if gap_diagnostic else ""
+    from v4_common import check_network_meta
+    check_network_meta(n.meta, cfg, repo)   # V4 D1 (decision 214 item 8): switch SHA256 of the network meta = table folder = configuration
     path = output / f"{scenario}{suffix}_2920_3h_unsolved.nc"; n.export_to_netcdf(path)
     back = pypsa.Network(str(path)); compare_roundtrip(n, back)
     receipt = dict(status="S2_SCENARIO_BUILT_STATIC_PASS", scenario=scenario, gap_diagnostic=gap_diagnostic, s2_status=S2["status"],

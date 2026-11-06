@@ -113,6 +113,10 @@ def pp_item(cc: str, T: pd.DataFrame, part: str = "existing") -> dict | None:
 
 # ---- HVC -------------------------------------------------------------------------------------------------------------------------------
 def hvc_plants(basis: str = "b") -> dict:
+    """basis b (main, decision 210 item 5): 2019 deduction HVC_C2 5.191, 2050 vector (b) 4.627 MWh/t; a (S2 basis, research.demand.v4.hvc_basis = a):
+    3.269 / 6.103 MWh/t (= I2 i2_items.hvc_items basis "s2"); electricity per t 3.269 / 12 in both."""
+    if basis not in ("a", "b"):
+        raise ValueError(f"HVC basis {basis} not in (a, b)")
     out = {}
     for r in rd("HVC_PLANTS_V4.csv").to_dict("records"):
         d = dict(hvc19_t=float(r["hvc19_t"]), hvc50_base_t=float(r["hvc50_base_t"]), hvc50_new_t=float(r["hvc50_new_t"]), row=(r["row"] or None),
@@ -199,7 +203,7 @@ def set_vn_cache(cache: dict, H: dict) -> dict:
 
 
 # ---- everything for v4_industry.build_steps ------------------------------------------------------------------------------------------------------------
-def load_items() -> dict:
+def load_items(hvc_basis: str = "b") -> dict:
     import v3_industry as v3
     it = {}
     cap = rd("CAPTIVE_COAL_2019.csv")
@@ -221,7 +225,7 @@ def load_items() -> dict:
     order = list(dict.fromkeys(F.country))
     it["pp"] = {cc: x for cc in order if (x := pp_item(cc, F[F.country == cc]))}
     it["pp_new"] = {cc: x for cc in order if (x := pp_item(cc, F[F.country == cc], "new"))}
-    H = hvc_plants("b")
+    H = hvc_plants(hvc_basis)   # V4 D1: research.demand.v4.hvc_basis
     it["hvc_plants"] = H
     it["hvc"] = {cc: hvc_item(h) for cc, h in H.items() if h["hvc19_t"] > 0 or h["hvc50_base_t"] > 0}
     it["methanol"] = methanol_items(); it["methanol_drop"] = list(METHANOL_DROP)

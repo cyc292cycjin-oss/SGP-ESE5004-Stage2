@@ -522,3 +522,6 @@ research:
       gas_caps: marketed                  # 209 F1: UNSD marketed production caps, fugitive factor on the same row (GAS_PRODUCTION_CAPS_2050_V4.csv) | gross
       industry_curves: g5_main            # checklist section 9: G5 MAIN composite curves on industry electricity and the four industrial heat loads | flat | all_flat
       mm_gasoline: false                  # sensitivity: MM household gasoline also to road
+      hvc_basis: b                        # V4 D1 (decision 214 items 8 / 9): b (main: HVC 2019 deduction 5.191, 2050 vector 4.627 MWh/t) | a (S2 basis 3.269 / 6.103; I2 sensitivity hvc_s2)
+  biomass:                              # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
+    missing_cost_rule: null             # zero (v3.1: an empty cost column enters at 0) | proxy (registry biomass_missing_cost_proxy, the uniform proxy of unsourced residues); null = the switch-set value (v4.enabled false -> zero, true -> proxy)

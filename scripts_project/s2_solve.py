@@ -262,6 +262,8 @@ def main(a):
     logging.getLogger("pypsa").setLevel(logging.ERROR)
     out = Path(a.output); out.mkdir(parents=True, exist_ok=True)
     run = dict(label=a.label, scenario=a.scenario, authorization=a.authorization, solver=a.solver, started_epoch=time.time(), optimize_calls=0, retry=False, stage="S2")
+    if getattr(a, "package_commit", None):   # V4 D1 (decision 215 item 2): the v4 package runner passes its COMMIT; without the option the receipt is unchanged
+        run["package_commit"] = str(a.package_commit)
     sampler = Sampler(out / "RESOURCE.jsonl"); sampler.start()
     split_dir = out / "split"
     try:
@@ -563,4 +565,5 @@ if __name__ == "__main__":
     p.add_argument("--solver", choices=["highs", "gurobi"], default="highs"); p.add_argument("--truncate", type=int, default=0); p.add_argument("--label", default="SMOKE_TEST_ONLY"); p.add_argument("--authorization", required=True); p.add_argument("--time-limit", type=float, default=3600.0); p.add_argument("--highs-ipm", action="store_true")
     p.add_argument("--stop-before-solve", action="store_true", help="M10P dry run: build and export the LP, fix the solver parameters, write the receipt and exit before the solver is called")
     p.add_argument("--split-stage", choices=["build", "assign"], default=None, help="B4P split solve: build = process 1 (model, LP arrays, problem file split/problem.lp, no solver call); assign = process 3 (the result of b4_split_solve.py mapped back, then the post-processing)")
+    p.add_argument("--package-commit", default=None, help="V4 D1: commit of the package (its COMMIT file), recorded in SOLVE_RECEIPT.json as package_commit")
     sys.exit(main(p.parse_args()))

@@ -52,7 +52,19 @@ APEC = IND_V3 / "APEC2022_VN_INDUSTRY_PJ.csv"
 SUMMARY = "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv"
 MODE = "aeo8_ats_anchor"
 KEY = ["country", "sector", "carrier", "account"]
-EV_FACTOR = 0.30215   # oil_to_electricity x ev_share 1 (v3.1 networks; W12 section 3.2)
+EV_FACTOR_W08 = 0.30215   # W08: the rounded value of oil_to_electricity x ev_share (static-check difference 9.9e-6); kept for reference only
+REGISTRY = REG_DIR / "DATA_REGISTRY.csv"
+
+
+def ev_factor() -> float:
+    """V4 D1 (decision 214 item 9): EV MWh_el per MWh of land-transport oil = share_transport_ice_efficiency / share_transport_electric_efficiency
+    x share_land_transport_electric_share_2050 from the registry - the expression of s2_layers.add_demand_layer (oil_to_el x ev_share), unrounded
+    (16.0712 / 53.19 x 1 = 0.302147020116563...)."""
+    r = pd.read_csv(REGISTRY, dtype=str, keep_default_na=False).set_index("param_id").value
+    return float(r["share_transport_ice_efficiency"]) / float(r["share_transport_electric_efficiency"]) * float(r["share_land_transport_electric_share_2050"])
+
+
+EV_FACTOR = ev_factor()
 CHEM = "chemical and petrochemical"
 NMM = "non-metallic minerals"
 PAPER = "paper pulp and print"
@@ -496,18 +508,25 @@ class Inputs:
         self.gas = {cc: float(g.get(cc, 0.0)) for cc in ("ID", "MM")}
         an = pd.read_csv(ANCH_V31).set_index("country")
         self.m_v3 = {cc: float(an.at[cc, "industry_multiplier"]) for cc in ASEAN}
-        self._items = None
+        self._items = {}
+
+    def items_for(self, s: dict | None = None) -> dict:
+        """Product items of the switch set s (V4 D1: research.demand.v4.hvc_basis b | a selects the HVC 2019 deduction and 2050 vector)."""
+        basis = str((s or {}).get("hvc_basis", "b"))
+        if basis not in self._items:
+            import v4_products as P
+            self._items[basis] = P.load_items(hvc_basis=basis)
+        return self._items[basis]
 
     @property
-    def items(self):
-        if self._items is None:
-            import v4_products as P
-            self._items = P.load_items()
-        return self._items
+    def items(self):   # the v4 main basis (b)
+        return self.items_for(None)
 
 
 def build_steps(I: Inputs, s: dict) -> list:
     """Cumulative steps S1-S7 (I2 i2_chain.build_steps with the decision-211 changes) for the switch set s; a step whose switch is off is a no-op."""
+    items = lambda: I.items_for(s)   # noqa: E731  (V4 D1: product items of this switch set, hvc_basis)
+
     def d1_with(case, edits):
         if case.get("d1") is None:   # v3.1 seed: edits on the full-precision v3.1 rebuild
             case["d1"], case["d1_s0"] = I.S0.copy(), I.S0
@@ -556,7 +575,7 @@ def build_steps(I: Inputs, s: dict) -> list:
     def s4(c):
         c = dict(c)
         if s["captive_coal"]:
-            c["moves"] = list(c.get("moves", [])) + I.items["captive"]
+            c["moves"] = list(c.get("moves", [])) + items()["captive"]
         return c
 
     def add_prod(c, cc, item):
@@ -571,41 +590,41 @@ def build_steps(I: Inputs, s: dict) -> list:
     def s5b(c):
         c = dict(c)
         if s["products"]:
-            c.update(cem=dict(I.items["cement_usgs_2019_t"]), edgar_zero=list(I.items["edgar_zero"]), bn_iii=True)
+            c.update(cem=dict(items()["cement_usgs_2019_t"]), edgar_zero=list(items()["edgar_zero"]), bn_iii=True)
         return c
 
     def s5c(c):
         c = dict(c)
         if s["products"]:
-            nf = copy.deepcopy(c.get("nf", {})); nf.setdefault("ID", {})["nonferrous_nickel"] = dict(I.items["nickel_2023"]); c["nf"] = nf
+            nf = copy.deepcopy(c.get("nf", {})); nf.setdefault("ID", {})["nonferrous_nickel"] = dict(items()["nickel_2023"]); c["nf"] = nf
         return c
 
     def s5d(c):
         c = dict(c)
         if s["products"]:
-            for cc, it in I.items["pp"].items():
+            for cc, it in items()["pp"].items():
                 add_prod(c, cc, dict(it))
         return c
 
     def s5e(c):
         c = dict(c)
         if s["products"]:
-            for cc, it in I.items["hvc"].items():
+            for cc, it in items()["hvc"].items():
                 add_prod(c, cc, dict(it))
         return c
 
     def s5f(c):
         c = dict(c)
         if s["products"]:
-            c["meoh_drop"] = list(I.items["methanol_drop"])
-            for cc, it in I.items["methanol"].items():
+            c["meoh_drop"] = list(items()["methanol_drop"])
+            for cc, it in items()["methanol"].items():
                 add_prod(c, cc, dict(it))
         return c
 
     def s5g(c):
         c = dict(c)
         if s["products"]:
-            for cc, d in I.items["new_plants"].items():
+            for cc, d in items()["new_plants"].items():
                 for key, v in d.items():
                     add_extra(c, cc, key, v)
         return c
@@ -613,14 +632,14 @@ def build_steps(I: Inputs, s: dict) -> list:
     def s6a(c):
         c = dict(c)
         if s["products"]:
-            c["moves"] = list(c.get("moves", [])) + I.items["my_ammonia_dup"]
+            c["moves"] = list(c.get("moves", [])) + items()["my_ammonia_dup"]
         return c
 
     def s6b(c):
         c = dict(c)
         if s["products"]:
             for grp in ("glass", "alumina", "copper", "lime"):
-                for cc, it in I.items[grp].items():
+                for cc, it in items()[grp].items():
                     add_prod(c, cc, dict(it))
         return c
 
@@ -628,7 +647,7 @@ def build_steps(I: Inputs, s: dict) -> list:
         c = dict(c)
         if s["vn_same_run"]:
             import v4_products as P
-            H = P.vn_hybrid(c.get("cache") or I.cache_full, I.items["vn_el_rows"])
+            H = P.vn_hybrid(c.get("cache") or I.cache_full, items()["vn_el_rows"])
             c["cache"] = P.set_vn_cache(c.get("cache") or I.cache_full, H); c["vn_same_run"] = True
         return c
 

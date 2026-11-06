@@ -31,7 +31,7 @@ if str(HERE) not in sys.path:
 import v3_industry as v3   # noqa: E402
 import v4_profiles as PR   # noqa: E402
 from d1_common import HVC_FEEDSTOCK_ACCOUNTS, NEU_GAS_ACCOUNT   # noqa: E402
-from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, out_dir, sha256, switch_sha   # noqa: E402
+from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, is_main_set, out_dir, sha256, switch_sha   # noqa: E402
 
 EDGAR = REG_DIR / "sources/EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv"
 GROUPS = {"minerals": ["2.A.1", "2.A.2", "2.A.3", "2.A.4"], "chemicals": ["2.B"], "metals": ["2.C"]}   # = s2_0_process_emissions.GROUPS
@@ -147,7 +147,6 @@ def process_and_feedstock(ats: pd.DataFrame, main_summary: pd.DataFrame) -> tupl
 
 def write_tables(s: dict, chain=None) -> dict:
     import v4_industry as V
-    import v4_products as P
     ch = chain or V.Chain()
     I = V.Inputs()
     case = V.final_case(I, s)
@@ -157,7 +156,7 @@ def write_tables(s: dict, chain=None) -> dict:
         shutil.rmtree(od)
     od.mkdir(parents=True)
     ats = res["ats"].copy()
-    neu = bn_neu_methanol(ats, P.load_items()["bn_neu_methanol"]) if s["products"] else None
+    neu = bn_neu_methanol(ats, I.items_for(s)["bn_neu_methanol"]) if s["products"] else None
     ats.to_csv(od / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", index=False, lineterminator="\n")
     mo = res["mo"]
     (od / "DEMAND_ANCHOR_AEO8_ATS.csv").write_bytes(mo["ANCH"]); (od / "INDUSTRY_OUTPUT_2050_M08B.csv").write_bytes(mo["OUTRULE"])
@@ -198,7 +197,7 @@ def write_tables(s: dict, chain=None) -> dict:
     # ---- snapshot and switches
     snap = V.pack(res, "final"); (od / "SNAPSHOT.json").write_text(json.dumps(snap, default=float))
     files = {p.name: sha256(p) for p in sorted(od.glob("*")) if p.is_file()}
-    rec = dict(switches=s, switch_sha256=switch_sha(s), asean_T_v2_TWh=sum(v["T"] for v in snap["countries"].values()) / 1e6,
+    rec = dict(switches=s, switch_sha256=switch_sha(s), dir=od.name, main_set=is_main_set(s), asean_T_v2_TWh=sum(v["T"] for v in snap["countries"].values()) / 1e6,
                T_v2_TWh={c: v["T"] / 1e6 for c, v in snap["countries"].items()}, other_TWh={c: v["other"] / 1e6 for c, v in snap["countries"].items()},
                bn_neu_methanol=neu, node_share_sources=srcs, files=files, m08b_runs=ch.n_m08b, s30_runs=ch.n_s30)
     (od / "V4_SWITCHES.json").write_text(json.dumps(rec, indent=1, default=float) + "\n")

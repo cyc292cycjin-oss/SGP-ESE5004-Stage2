@@ -1,0 +1,56 @@
+.....................FF.                                                 [100%]
+=================================== FAILURES ===================================
+_____________ test_land_fuel_and_ev_equal_the_reference[ras-MAIN] ______________
+
+s3_runs = (<v4_industry.Inputs object at 0x720946afa5d0>, {'iid': ({'anchor_adj': {'LA': 913781.8333333334, 'MM': 11239940.27777...base_added_mwh': 14446919.696845854, 'carrier': 'biomass', 'country': 'ID', 'd_mwh': 17673285.301935982, ...}], ...})})
+mode = 'ras', ref = 'MAIN'
+
+    @pytest.mark.parametrize("mode,ref", [("ras", "MAIN"), ("iid", "IID")])
+    def test_land_fuel_and_ev_equal_the_reference(s3_runs, mode, ref):
+        _, out = s3_runs
+        R = pd.read_csv(W08 / f"REFERENCE_V4_{ref}.csv")
+        r = R[(R.step == "S3") & (R.country == "ID")].iloc[0]
+        sec = out[mode][1]["ats_sectors"]["ID"]
+        assert abs(sec["land"] / 1e6 - float(r.land_fuel_2050_TWh)) <= 1e-6
+>       assert abs(sec["ev"] / 1e6 - float(r.ev_electricity_2050_TWh)) <= 1e-6
+E       assert 0.0028015677384587434 <= 1e-06
+E        +  where 0.0028015677384587434 = abs(((284066612.81326157 / 1000000.0) - 284.069414381))
+E        +    where 284.069414381 = float(284.069414381)
+E        +      where 284.069414381 = run                                                      main\nstep                                                    ...                 1600733979.61788\nother_2050_MWh                              1251499205.057914\nName: 36, dtype: object.ev_electricity_2050_TWh
+
+tests/research/test_v4_transport_accounts.py:48: AssertionError
+______________ test_land_fuel_and_ev_equal_the_reference[iid-IID] ______________
+
+s3_runs = (<v4_industry.Inputs object at 0x720946afa5d0>, {'iid': ({'anchor_adj': {'LA': 913781.8333333334, 'MM': 11239940.27777...base_added_mwh': 14446919.696845854, 'carrier': 'biomass', 'country': 'ID', 'd_mwh': 17673285.301935982, ...}], ...})})
+mode = 'iid', ref = 'IID'
+
+    @pytest.mark.parametrize("mode,ref", [("ras", "MAIN"), ("iid", "IID")])
+    def test_land_fuel_and_ev_equal_the_reference(s3_runs, mode, ref):
+        _, out = s3_runs
+        R = pd.read_csv(W08 / f"REFERENCE_V4_{ref}.csv")
+        r = R[(R.step == "S3") & (R.country == "ID")].iloc[0]
+        sec = out[mode][1]["ats_sectors"]["ID"]
+        assert abs(sec["land"] / 1e6 - float(r.land_fuel_2050_TWh)) <= 1e-6
+>       assert abs(sec["ev"] / 1e6 - float(r.ev_electricity_2050_TWh)) <= 1e-6
+E       assert 0.0035754874817257587 <= 1e-06
+E        +  where 0.0035754874817257587 = abs(((362538604.3365183 / 1000000.0) - 362.542179824))
+E        +    where 362.542179824 = float(362.542179824)
+E        +      where 362.542179824 = run                                                       iid\nstep                                                    ...                 1419806313.39553\nother_2050_MWh                              1077968825.434714\nName: 36, dtype: object.ev_electricity_2050_TWh
+
+tests/research/test_v4_transport_accounts.py:48: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+  /home/jin/wt_v4_d1/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+  /home/jin/wt_v4_d1/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_transport_accounts.py::test_land_fuel_and_ev_equal_the_reference[ras-MAIN]
+FAILED tests/research/test_v4_transport_accounts.py::test_land_fuel_and_ev_equal_the_reference[iid-IID]
+2 failed, 22 passed, 4 warnings in 20.15s
