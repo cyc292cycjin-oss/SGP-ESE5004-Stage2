@@ -53,6 +53,15 @@ if (E / "OFF_BUILD_VS_V31.json").exists():
     diff_comp = {k: v for k, v in ob["components"].items() if v.get("static_diffs") or v.get("timeseries_diffs") or not v["index_equal"] or v["columns_only_a"] or v["columns_only_b"]}
     ev["off_build_vs_v31_package"] = dict(grade="VERIFIED", components_compared=len(ob["components"]), components_with_differences=diff_comp, meta_only_in_off_build=ob["meta_only_in_off_build"], meta_only_in_v31=ob["meta_only_in_v31"],
                                           meta_keys_differing=ob["meta_keys_differing"], gas_network_subkeys=ob.get("meta_research_gas_network_subkeys_differing"), demand_ledger_subkeys=ob.get("meta_s2_demand_ledger_subkeys_differing"), file="evidence/OFF_BUILD_VS_V31.json")
+if (E / "SMOKE_LEDGER_CMP.json").exists():
+    lc = J("SMOKE_LEDGER_CMP.json"); bc = lc["by_country"]
+    ev["smoke56_cost_ledger_comparison"] = dict(grade="VERIFIED", total_column=lc["total_col"], delta_by_entity_bn={k: dict(main=(bc["v4_F1"][k] - bc["v31_F1"][k]) / 1e9, iid=(bc["v4iid_F1"][k] - bc["v31_F1"][k]) / 1e9) for k in bc["v31_F1"]},
+                                                 delta_by_column_asean_bn={k: dict(main=(v["v4"] - v["v31"]) / 1e9, iid=(v["iid"] - v["v31"]) / 1e9) for k, v in lc["by_column_asean"].items() if abs(v["v4"] - v["v31"]) > 1e7}, detail_top_bn=lc["detail_top"][:25])
+if (E / "SMOKE_DECOMP.json").exists():
+    sd = J("SMOKE_DECOMP.json")
+    ev["smoke56_decomposition"] = {r: dict(objective=v["objective"], objective_lp=v["objective_lp"], constant=v["constant"], biomass_use_twh=v["biomass_use_total_twh_annualised"],
+                                           ID_biomass_use_by_link=v["biomass_use_mwh_56snap_weighted"].get("ID"), ID_heat_supply=v["industry_heat_supply_mwh_weighted"].get("ID"),
+                                           solid_biomass_price_ID=v["solid_biomass_price_mean_max"].get("solid biomass ID")) for r, v in sd.items()}
 tv = (E / "tests_v4.txt").read_text().splitlines()
 ev["tests_v4_in_copy"] = dict(first_run=[l for l in tv if "passed" in l or "failed" in l][-1:], registry_rerun_after_adding_scripts_and_config=[l for l in (E / "tests_registry_rerun.log").read_text().splitlines() if "passed" in l][-1:],
                               note="the two registry failures of the first run were the copy lacking the upstream scripts/ folder and config.default.yaml; all 37 pass with them")

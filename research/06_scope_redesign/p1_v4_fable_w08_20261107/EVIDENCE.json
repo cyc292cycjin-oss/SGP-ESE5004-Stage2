@@ -1,0 +1,1393 @@
+{
+ "review": "v4 W08 independent review (Fable 5.1), instruction V4_FABLE_W08_INSTRUCTION.md v1",
+ "date": "2026-11-07",
+ "instruction_sha256": {
+  "V4_FABLE_W08_INSTRUCTION.md": "046beb55d545113497e764a384623933c3b9e78321bedd9bcf2bb502bee3c186",
+  "APPENDIX_REVIEWER_214.md": "0290dc286f25316676ff88593ba68f2e4d2058273d1b6471b3a1c31344c52569"
+ },
+ "object": {
+  "branch": "codex/v4-w08-20261106",
+  "head": "7aa356e49d284749d27c79fbdc75ade85f62866a",
+  "review_package_commit": "bd890bf9",
+  "base": "aad8e476",
+  "v31": "d3b9a3bc"
+ },
+ "review_branch": {
+  "branch": "codex/v4-fable-w08-20261107",
+  "head": "6abe892fade3e6a4093e20efb9ba7ea74da47b7e (stage 3 commit; later commits in PROGRESS.md)",
+  "worktree": "/home/jin/wt_v4_fable"
+ },
+ "solver_runs": 0,
+ "hpc": false,
+ "downloads": 0,
+ "repository_edits": 0,
+ "scratch": "/home/jin/v4fable (repo, a2, tests_copy; <= 0.7 GB)",
+ "A2_fallback": {
+  "grade": "VERIFIED",
+  "files_written_by_default_runs": 58,
+  "identical_to_v31": 58,
+  "identical_to_head": 58,
+  "file": "evidence/a2_compare.txt"
+ },
+ "out_tables_regeneration": {
+  "grade": "VERIFIED",
+  "files": 24,
+  "same": 24,
+  "file": "evidence/out_compare.txt"
+ },
+ "A0_S7_reproduction": {
+  "main": {
+   "grade": "EXACT",
+   "asean_repro_TWh": 3490.3380112057143,
+   "asean_ref_TWh": 3490.338011206,
+   "max_abs_diff_TWh": 5.000000413701855e-10,
+   "all_within_1e6": true
+  },
+  "iid": {
+   "grade": "EXACT",
+   "asean_repro_TWh": 3166.5218549904916,
+   "asean_ref_TWh": 3166.52185499,
+   "max_abs_diff_TWh": 5.000000413701855e-10,
+   "all_within_1e6": true
+  }
+ },
+ "data_chains": {
+  "grade": "EXACT",
+  "chains": 21,
+  "absent": [
+   "PH hard coal, industry total"
+  ],
+  "max_abs_diff_cells_mwh": 7.450580596923828e-09,
+  "max_abs_diff_ats_2050_mwh": 5.960464477539063e-08,
+  "household_gasoline_ID_TWh": 197.03176869444442,
+  "file": "evidence/CHAIN_CHECK.json"
+ },
+ "conservation": {
+  "out_ras": {
+   "grade": "EXACT",
+   "asean_T_TWh": 3490.338011205715,
+   "max_abs_parts_minus_T_mwh": 1.1920928955078125e-07,
+   "negative_other_cells": 0,
+   "rail_parent_2050_TWh": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "bn_neu_gas_rows": [
+    {
+     "account": "NonEnergy:Natural gas (including LNG)",
+     "base_2019_mwh": "5458799.25",
+     "value_2050_mwh": "1711807.5399135835",
+     "growth_method": "ats_anchor (DFX F1.2): non-energy use outside the TFEC envelope = 2019 x the industry multiplier; minus BN methanol energy use 4.02395e+06 MWh (V4 W08, decision 210 item 7)"
+    }
+   ]
+  },
+  "out_iid": {
+   "grade": "EXACT",
+   "asean_T_TWh": 3166.5218549904926,
+   "max_abs_parts_minus_T_mwh": 4.76837158203125e-07,
+   "negative_other_cells": 0,
+   "rail_parent_2050_TWh": {
+    "BN": 0.0,
+    "ID": 0.0,
+    "KH": 0.0,
+    "LA": 0.0,
+    "MM": 0.0,
+    "MY": 0.0,
+    "PH": 0.0,
+    "SG": 0.0,
+    "TH": 0.0,
+    "TL": 0.0,
+    "VN": 0.0
+   },
+   "bn_neu_gas_rows": [
+    {
+     "account": "NonEnergy:Natural gas (including LNG)",
+     "base_2019_mwh": "5458799.25",
+     "value_2050_mwh": "539547.254700453",
+     "growth_method": "ats_anchor (DFX F1.2): non-energy use outside the TFEC envelope = 2019 x the industry multiplier; minus BN methanol energy use 4.02395e+06 MWh (V4 W08, decision 210 item 7)"
+    }
+   ]
+  }
+ },
+ "residue_symmetry": [
+  {
+   "country": "ID",
+   "demand_removed_2019_mwh": 59992849.516666666,
+   "bagasse_2019": 13665113.961111112,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 46327735.55555555,
+   "industry_multiplier_ras": 3.20341300781,
+   "demand_removed_2050_at_multiplier_mwh": 192181874.51727787,
+   "potential_F4_deduction_2050_mwh": -195371068.0,
+   "potential_F3_mwh": -8618954.0,
+   "balance_contains": "no",
+   "anchor_deducted": false,
+   "rules": "F3 R2 bagasse over-estimate 8.619 TWh (W12); F4c bagasse self-use share 1.000 x bagasse part after F3 13.811 TWh; F4a fibre 100 % in-mill; F4b PKS in-mill share 50% (central, INFERENCE)"
+  },
+  {
+   "country": "LA",
+   "demand_removed_2019_mwh": 913781.8333333334,
+   "bagasse_2019": 913781.8333333334,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 0.0,
+   "industry_multiplier_ras": 3.0652493031,
+   "demand_removed_2050_at_multiplier_mwh": 2800969.1278104405,
+   "potential_F4_deduction_2050_mwh": -654167.0,
+   "potential_F3_mwh": -88064.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 0.088 TWh (W12); F4c bagasse self-use share 0.816 x bagasse part after F3 0.802 TWh"
+  },
+  {
+   "country": "MM",
+   "demand_removed_2019_mwh": 11239940.277777776,
+   "bagasse_2019": 1823273.611111111,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 9416666.666666666,
+   "industry_multiplier_ras": 1.0508669567,
+   "demand_removed_2050_at_multiplier_mwh": 11811681.833198084,
+   "potential_F4_deduction_2050_mwh": -12864558.0,
+   "potential_F3_mwh": -5535381.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 5.535 TWh (W12); F4c bagasse self-use share 1.000 x bagasse part after F3 1.832 TWh; F4d food / n.e.s. 5150 self-use 9.417 TWh (2019) pro rata x growth 1.1716"
+  },
+  {
+   "country": "MY",
+   "demand_removed_2019_mwh": 12441.16111111111,
+   "bagasse_2019": 12441.16111111111,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 0.0,
+   "industry_multiplier_ras": 1.66688190224,
+   "demand_removed_2050_at_multiplier_mwh": 20737.9462989632,
+   "potential_F4_deduction_2050_mwh": -73805570.0,
+   "potential_F3_mwh": -2657.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 0.003 TWh (W12); F4c bagasse self-use share 1.000 x bagasse part after F3 0.007 TWh; F4a fibre 100 % in-mill; F4b PKS in-mill share 50% (central, INFERENCE)"
+  },
+  {
+   "country": "PH",
+   "demand_removed_2019_mwh": 10246581.119444445,
+   "bagasse_2019": 5173377.994444445,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 5073203.125,
+   "industry_multiplier_ras": 2.38289118141,
+   "demand_removed_2050_at_multiplier_mwh": 24416487.78912637,
+   "potential_F4_deduction_2050_mwh": -9274322.0,
+   "potential_F3_mwh": -5370259.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 5.370 TWh (W12); F4c bagasse self-use share 0.568 x bagasse part after F3 5.981 TWh; F4a fibre 100 % in-mill; F4b PKS in-mill share 50% (central, INFERENCE); F4d food / n.e.s. 5150 self-use 4.673 TWh (2019) pro rata x growth 1.1716"
+  },
+  {
+   "country": "TH",
+   "demand_removed_2019_mwh": 78334400.52777778,
+   "bagasse_2019": 53280344.97222222,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 25054055.555555556,
+   "industry_multiplier_ras": 2.28952398602,
+   "demand_removed_2050_at_multiplier_mwh": 179348488.93884495,
+   "potential_F4_deduction_2050_mwh": -49313868.0,
+   "potential_F3_mwh": -5216060.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 5.216 TWh (W12); F4c bagasse self-use share 0.481 x bagasse part after F3 60.483 TWh; F4a fibre 100 % in-mill; F4b PKS in-mill share 50% (central, INFERENCE); F4d food / n.e.s. 5150 self-use 4.689 TWh (2019) pro rata x growth 1.1716; F4e wood-row 5150 1.385 TWh (2019)"
+  },
+  {
+   "country": "VN",
+   "demand_removed_2019_mwh": 11674722.222546112,
+   "bagasse_2019": 11674722.222546112,
+   "black_liquor_2019": 0.0,
+   "residues_5150_2019": 0.0,
+   "industry_multiplier_ras": 2.89040115392,
+   "demand_removed_2050_at_multiplier_mwh": 33744630.58374275,
+   "potential_F4_deduction_2050_mwh": -4269443.0,
+   "potential_F3_mwh": -1137223.0,
+   "balance_contains": "as_unsd",
+   "anchor_deducted": true,
+   "rules": "F3 R2 bagasse over-estimate 1.137 TWh (W12); F4c bagasse self-use share 1.000 x bagasse part after F3 4.269 TWh"
+  }
+ ],
+ "F01_paper_fuelwood_literal_reading": {
+  "ras": {
+   "grade": "EXACT",
+   "ID_T_w08_TWh": 1483.776362231026,
+   "ID_T_literal_TWh": 1520.6662159147259,
+   "diff_TWh": 36.88985368369985,
+   "other_diff_TWh": 36.885084903999925,
+   "w08_add_TWh": 17.673285301935984,
+   "literal_add_TWh": 33.29559722222223
+  },
+  "iid": {
+   "grade": "EXACT",
+   "ID_T_w08_TWh": 1326.8614373308258,
+   "ID_T_literal_TWh": 1363.7500594594258,
+   "diff_TWh": 36.888622128599884,
+   "other_diff_TWh": 36.88385334869957,
+   "w08_add_TWh": 17.673285301935984,
+   "literal_add_TWh": 33.29559722222223
+  }
+ },
+ "F01_fuelwood_inputs": {
+  "factor_gj_m3": 9.135,
+  "sdmx_km3": 21451.482182478925,
+  "sdmx_mwh": 54433136.03804028,
+  "mean_km3": 29510.0,
+  "mean_mwh": 74881625.0,
+  "scale": 1.3756625182805822,
+  "paper_sdmx_mwh": 41586027.777777776,
+  "paper_sdmx_km3": 16388.582375478927,
+  "share_non_paper": 0.2360163164452692
+ },
+ "network_main_2920": {
+  "grade": "EXACT",
+  "meta_switch_sha_ok": true,
+  "meta_files_ok": true,
+  "max_abs_diff_mwh": {
+   "electricity": 5.960464477539062e-07,
+   "heat_low": 1.1175870895385742e-07,
+   "heat_medium_a": 2.9802322387695312e-08,
+   "heat_medium_b": 1.4901161193847656e-07,
+   "heat_high": 1.0728836059570312e-06,
+   "coal": 0.0,
+   "hydrogen": 7.450580596923828e-09,
+   "ammonia": 1.043081283569336e-07,
+   "methanol": 0.0,
+   "ev": 2.9802322387695312e-08,
+   "rail": 1.862645149230957e-09
+  },
+  "loads_with_rail_parent_source": 0,
+  "gas_caps_max_abs_diff_mwh": 0.0,
+  "gas_caps_table": "research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv",
+  "fugitive_factors": {
+   "BN": 0.00460101036709,
+   "ID": 0.00441690120296,
+   "MM": 0.000242230387835,
+   "MY": 0.00500482540249,
+   "PH": 0.00333773809652,
+   "TH": 0.0051539550612,
+   "TL": 0.00138034158391,
+   "VN": 0.006534492348
+  },
+  "VN_overflow_ledger": {
+   "industry_biomass_before_mwh": 148640232.91170257,
+   "agriculture_biomass_before_mwh": 11619227.514025994,
+   "cap_mwh": 119162240.78821407,
+   "overflow_industry_mwh": 41097219.63751449,
+   "useful_heat_efficiency": 0.9
+  },
+  "VN_overflow_table_mwh": 29951239.3225,
+  "VN_overflow_heat_loads_mwh": 36987497.67376304,
+  "curves_profiled": {
+   "BN": {
+    "flat": 0,
+    "profiled": 5,
+    "profiled_mwh": 1597225.1063164887
+   },
+   "ID": {
+    "flat": 0,
+    "profiled": 195,
+    "profiled_mwh": 1186671260.0037467
+   },
+   "KH": {
+    "flat": 0,
+    "profiled": 25,
+    "profiled_mwh": 15092314.141057126
+   },
+   "LA": {
+    "flat": 0,
+    "profiled": 12,
+    "profiled_mwh": 8991887.805638215
+   },
+   "MM": {
+    "flat": 0,
+    "profiled": 85,
+    "profiled_mwh": 40301591.98723185
+   },
+   "MY": {
+    "flat": 0,
+    "profiled": 35,
+    "profiled_mwh": 269931049.6164665
+   },
+   "PH": {
+    "flat": 0,
+    "profiled": 25,
+    "profiled_mwh": 74251902.42209922
+   },
+   "SG": {
+    "flat": 0,
+    "profiled": 5,
+    "profiled_mwh": 72569025.32991107
+   },
+   "TH": {
+    "flat": 0,
+    "profiled": 30,
+    "profiled_mwh": 247633814.6413104
+   },
+   "VN": {
+    "flat": 0,
+    "profiled": 40,
+    "profiled_mwh": 488281228.98631364
+   }
+  },
+  "biomass_pools": {
+   "BN": {
+    "store": 115028.95248794,
+    "table": 115885.3897155299
+   },
+   "ID": {
+    "store": 772758666.734848,
+    "table": 772758666.7348479
+   },
+   "KH": {
+    "store": 48537430.88846187,
+    "table": 48537430.88846187
+   },
+   "LA": {
+    "store": 25609067.839849684,
+    "table": 25609067.839849684
+   },
+   "MM": {
+    "store": 85630424.57257679,
+    "table": 85630424.57257678
+   },
+   "MY": {
+    "store": 173215797.37295693,
+    "table": 173216589.76298138
+   },
+   "PH": {
+    "store": 126733173.97849561,
+    "table": 126733173.97849561
+   },
+   "SG": {
+    "store": 31036.81776382,
+    "table": 31510.246889217393
+   },
+   "TH": {
+    "store": 264889855.1924664,
+    "table": 264889855.1924664
+   },
+   "TL": {
+    "store": 593345.9564671,
+    "table": 594009.865915919
+   },
+   "VN": {
+    "store": 120365899.78607482,
+    "table": 120365899.78607482
+   }
+  }
+ },
+ "network_iid_2920": {
+  "grade": "EXACT",
+  "meta_switch_sha_ok": true,
+  "meta_files_ok": true,
+  "max_abs_diff_mwh": {
+   "electricity": 4.76837158203125e-07,
+   "heat_low": 8.195638656616211e-08,
+   "heat_medium_a": 1.1175870895385742e-08,
+   "heat_medium_b": 5.960464477539063e-08,
+   "heat_high": 7.748603820800781e-07,
+   "coal": 0.0,
+   "hydrogen": 1.862645149230957e-09,
+   "ammonia": 1.043081283569336e-07,
+   "methanol": 0.0,
+   "ev": 5.960464477539063e-08,
+   "rail": 1.862645149230957e-09
+  },
+  "loads_with_rail_parent_source": 0,
+  "gas_caps_max_abs_diff_mwh": 0.0,
+  "gas_caps_table": "research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv",
+  "fugitive_factors": {
+   "BN": 0.00460101036709,
+   "ID": 0.00441690120296,
+   "MM": 0.000242230387835,
+   "MY": 0.00500482540249,
+   "PH": 0.00333773809652,
+   "TH": 0.0051539550612,
+   "TL": 0.00138034158391,
+   "VN": 0.006534492348
+  },
+  "VN_overflow_ledger": {
+   "industry_biomass_before_mwh": 138195415.22370258,
+   "agriculture_biomass_before_mwh": 13040593.350833734,
+   "cap_mwh": 119162240.78821407,
+   "overflow_industry_mwh": 32073767.78632225,
+   "useful_heat_efficiency": 0.9
+  },
+  "VN_overflow_table_mwh": 20927787.4718,
+  "VN_overflow_heat_loads_mwh": 28866391.007690016,
+  "curves_profiled": {
+   "BN": {
+    "flat": 0,
+    "profiled": 5,
+    "profiled_mwh": 1307602.8026600888
+   },
+   "ID": {
+    "flat": 0,
+    "profiled": 195,
+    "profiled_mwh": 1045481419.12347
+   },
+   "KH": {
+    "flat": 0,
+    "profiled": 25,
+    "profiled_mwh": 12414380.539890796
+   },
+   "LA": {
+    "flat": 0,
+    "profiled": 12,
+    "profiled_mwh": 8059416.800178211
+   },
+   "MM": {
+    "flat": 0,
+    "profiled": 85,
+    "profiled_mwh": 37070551.314721845
+   },
+   "MY": {
+    "flat": 0,
+    "profiled": 35,
+    "profiled_mwh": 231736487.25626335
+   },
+   "PH": {
+    "flat": 0,
+    "profiled": 25,
+    "profiled_mwh": 64485400.88331125
+   },
+   "SG": {
+    "flat": 0,
+    "profiled": 5,
+    "profiled_mwh": 68046336.21047807
+   },
+   "TH": {
+    "flat": 0,
+    "profiled": 30,
+    "profiled_mwh": 217853435.83595031
+   },
+   "VN": {
+    "flat": 0,
+    "profiled": 40,
+    "profiled_mwh": 451929251.9441435
+   }
+  },
+  "biomass_pools": {
+   "BN": {
+    "store": 115028.95248794,
+    "table": 115885.3897155299
+   },
+   "ID": {
+    "store": 772758666.734848,
+    "table": 772758666.7348479
+   },
+   "KH": {
+    "store": 48537430.88846187,
+    "table": 48537430.88846187
+   },
+   "LA": {
+    "store": 25609067.839849684,
+    "table": 25609067.839849684
+   },
+   "MM": {
+    "store": 85630424.57257679,
+    "table": 85630424.57257678
+   },
+   "MY": {
+    "store": 173215797.37295693,
+    "table": 173216589.76298138
+   },
+   "PH": {
+    "store": 126733173.97849561,
+    "table": 126733173.97849561
+   },
+   "SG": {
+    "store": 31036.81776382,
+    "table": 31510.246889217393
+   },
+   "TH": {
+    "store": 264889855.1924664,
+    "table": 264889855.1924664
+   },
+   "TL": {
+    "store": 593345.9564671,
+    "table": 594009.865915919
+   },
+   "VN": {
+    "store": 120365899.78607482,
+    "table": 120365899.78607482
+   }
+  }
+ },
+ "anchors": {
+  "grade": "EXACT",
+  "residue_adjustment_mwh": {
+   "LA": 913781.8333333334,
+   "MM": 11239940.277777776,
+   "MY": 12441.16111111111,
+   "PH": 10246581.119444445,
+   "TH": 78334400.52777778,
+   "VN": 11674722.222546112
+  },
+  "ras_rows_max_residual_mwh": 0.08694280683994293,
+  "iid_rows_max_residual_mwh": 0.00346924364566803,
+  "ras_columns_deviation_mwh": {
+   "Industry": -252142996.21893024,
+   "Transport": -0.002460002899169922,
+   "Residential": 0.0002619028091430664,
+   "Commercial": -0.000519871711730957,
+   "AgricultureOthers": 0.0006159543991088867
+  },
+  "iid_columns_deviation_mwh": {
+   "Industry": -808921904.4823098,
+   "Transport": 696511136.4335198,
+   "Residential": -149536459.94542396,
+   "Commercial": 35978949.66544008,
+   "AgricultureOthers": 10970025.209900975
+  },
+  "v31_ras_rank_one_max_dev": 1.5543122344752192e-15
+ },
+ "profiles": {
+  "grade": "EXACT",
+  "curves": 584,
+  "hours": 8760,
+  "index_rows": 3016,
+  "variants": [
+   "MAIN",
+   "S1_SOURCE",
+   "S2_OTHER_FLAT",
+   "S3_OTHER_FFE13",
+   "S4_FFE_CLOCK_UTC",
+   "S5_SAT_WORKDAY",
+   "S6_SHIFT_M1",
+   "S6_SHIFT_P1",
+   "S7_HOLIDAYS",
+   "S8_UPPER"
+  ],
+  "etypes": [
+   "elec",
+   "heat"
+  ],
+  "keys": [
+   "alumina",
+   "aluminium_primary",
+   "aluminium_secondary",
+   "ammonia",
+   "cement",
+   "ceramics_nmm",
+   "chemicals_other",
+   "chlorine",
+   "construction",
+   "copper",
+   "ethylene",
+   "food",
+   "glass_lime",
+   "machinery",
+   "methanol",
+   "mining",
+   "nickel",
+   "nonferrous_other",
+   "other",
+   "pharma",
+   "printing",
+   "pulp_paper",
+   "steel",
+   "textiles",
+   "transport_equipment",
+   "wood"
+  ],
+  "mean_abs_dev_from_one_max": 6.661338147750939e-16,
+  "min_value": 0.13880784911734412,
+  "neg_curves": 0,
+  "flat_curves": 1,
+  "zone_shift_non_flat_all_minus_one_hour": true,
+  "zone_shift_max_abs_diff": 0.0018642520133620444,
+  "weights": {
+   "rows": 273,
+   "countries": [
+    "BN",
+    "ID",
+    "KH",
+    "LA",
+    "MM",
+    "MY",
+    "PH",
+    "SG",
+    "TH",
+    "VN"
+   ],
+   "zones_by_country": {
+    "BN": [
+     "UTC+8"
+    ],
+    "ID": [
+     "UTC+7",
+     "UTC+8",
+     "UTC+9"
+    ],
+    "KH": [
+     "UTC+7"
+    ],
+    "LA": [
+     "UTC+7"
+    ],
+    "MM": [
+     "UTC+6.5"
+    ],
+    "MY": [
+     "UTC+8"
+    ],
+    "PH": [
+     "UTC+8"
+    ],
+    "SG": [
+     "UTC+8"
+    ],
+    "TH": [
+     "UTC+7"
+    ],
+    "VN": [
+     "UTC+7"
+    ]
+   },
+   "keys_missing_in_index": [],
+   "elec_mwh_twh": 1305.965769253386,
+   "heat_mwh_twh": 1099.3555307867075
+  }
+ },
+ "off_build_vs_v31_package": {
+  "grade": "VERIFIED",
+  "components_compared": 10,
+  "components_with_differences": {},
+  "meta_only_in_off_build": [],
+  "meta_only_in_v31": [],
+  "meta_keys_differing": [
+   "research_config",
+   "research_config_sha256",
+   "research_config_subset_sha256",
+   "research_gas_network",
+   "s2_layers",
+   "s3_layers"
+  ],
+  "gas_network_subkeys": [
+   "production_caps_table"
+  ],
+  "demand_ledger_subkeys": null,
+  "file": "evidence/OFF_BUILD_VS_V31.json"
+ },
+ "smoke56_cost_ledger_comparison": {
+  "grade": "VERIFIED",
+  "total_column": "total",
+  "delta_by_entity_bn": {
+   "ASEAN_BUNKER": {
+    "main": 4.7462440270193635,
+    "iid": 4.7368678455059054
+   },
+   "BN": {
+    "main": 0.16924211412325502,
+    "iid": 0.11492338391118097
+   },
+   "ID": {
+    "main": -1.124113465726349,
+    "iid": -2.9951985883645476
+   },
+   "KH": {
+    "main": -0.01930086478600979,
+    "iid": 0.166375755757432
+   },
+   "LA": {
+    "main": 0.10347065154906201,
+    "iid": 0.10986086550454503
+   },
+   "MM": {
+    "main": 0.020020832033129217,
+    "iid": 0.054696412509499075
+   },
+   "MY": {
+    "main": 7.190440857246296,
+    "iid": 5.366385535671147
+   },
+   "PH": {
+    "main": -0.8150015199541893,
+    "iid": -0.3620425733933659
+   },
+   "SG": {
+    "main": 1.6612264057855664,
+    "iid": 1.1702463412576924
+   },
+   "TH": {
+    "main": -2.210043055118721,
+    "iid": -4.124376329627586
+   },
+   "TL": {
+    "main": 0.005790522751914978,
+    "iid": 0.0033697234909589886
+   },
+   "VN": {
+    "main": -1.5900388809765473,
+    "iid": -1.648791602766556
+   }
+  },
+  "delta_by_column_asean_bn": {
+   "capex_new": {
+    "main": 6.275990367954621,
+    "iid": 7.4393644780852055
+   },
+   "co2_ship_freight": {
+    "main": 0.014123549598681808,
+    "iid": 0.0010659440067218543
+   },
+   "liquid_ship_freight": {
+    "main": -0.024093634059114216,
+    "iid": -0.023054500995240926
+   },
+   "network_trade_AC": {
+    "main": 0.10999231782370138,
+    "iid": 0.16419711146017457
+   },
+   "network_trade_CO2 pipeline": {
+    "main": 0.029480134439045666,
+    "iid": 0.00609267066876775
+   },
+   "network_trade_DC": {
+    "main": 0.04808205284977031,
+    "iid": 0.05019334422007728
+   },
+   "network_trade_H2 pipeline": {
+    "main": 0.015476264326797962,
+    "iid": 0.019984420617887973
+   },
+   "network_trade_gas pipeline": {
+    "main": 0.04547705736387223,
+    "iid": 0.03487089863681608
+   },
+   "variable_cost": {
+    "main": 1.5426624582899933,
+    "iid": -5.182514907518264
+   },
+   "xb_share_congestion_rent": {
+    "main": -0.24850782675401784,
+    "iid": -0.2753384454242315
+   },
+   "xb_share_infrastructure_cost": {
+    "main": 0.32809063971143343,
+    "iid": 0.35620547944266606
+   },
+   "total": {
+    "main": 8.137937623946778,
+    "iid": 2.59231676945636
+   },
+   "total_length_split": {
+    "main": 8.137937623946778,
+    "iid": 2.592316769456299
+   }
+  },
+  "detail_top_bn": [
+   {
+    "carrier": "offwind-dc",
+    "v31": 36.1029,
+    "v4": 42.0028,
+    "d": 5.9
+   },
+   {
+    "carrier": "offwind-float",
+    "v31": 8.0696,
+    "v4": 2.8599,
+    "d": -5.2096
+   },
+   {
+    "carrier": "CCGT CC",
+    "v31": 1.6649,
+    "v4": 5.1082,
+    "d": 3.4433
+   },
+   {
+    "carrier": "BtL",
+    "v31": 5.2077,
+    "v4": 2.3652,
+    "d": -2.8425
+   },
+   {
+    "carrier": "industry direct firing biomass CC",
+    "v31": 11.3688,
+    "v4": 9.1054,
+    "d": -2.2634
+   },
+   {
+    "carrier": "H2 Electrolysis",
+    "v31": 4.643,
+    "v4": 6.365,
+    "d": 1.7221
+   },
+   {
+    "carrier": "electrobiofuels",
+    "v31": 0.9851,
+    "v4": 2.672,
+    "d": 1.6869
+   },
+   {
+    "carrier": "industry biomass boiler CC",
+    "v31": 0.8333,
+    "v4": 2.3199,
+    "d": 1.4866
+   },
+   {
+    "carrier": "gas production",
+    "v31": 48.4288,
+    "v4": 49.8863,
+    "d": 1.4575
+   },
+   {
+    "carrier": "solid biomass",
+    "v31": 7.8801,
+    "v4": 6.5343,
+    "d": -1.3458
+   },
+   {
+    "carrier": "LNG import",
+    "v31": 10.7915,
+    "v4": 11.9436,
+    "d": 1.1521
+   },
+   {
+    "carrier": "DAC",
+    "v31": 3.6297,
+    "v4": 4.5606,
+    "d": 0.9309
+   },
+   {
+    "carrier": "industry heat pump",
+    "v31": 2.577,
+    "v4": 1.6506,
+    "d": -0.9263
+   },
+   {
+    "carrier": "hydro",
+    "v31": 12.1732,
+    "v4": 13.0821,
+    "d": 0.9089
+   },
+   {
+    "carrier": "solar",
+    "v31": 18.3871,
+    "v4": 19.2154,
+    "d": 0.8282
+   },
+   {
+    "carrier": "offwind-ac",
+    "v31": 9.4248,
+    "v4": 8.8193,
+    "d": -0.6054
+   },
+   {
+    "carrier": "process emissions CC",
+    "v31": 7.1675,
+    "v4": 7.704,
+    "d": 0.5365
+   },
+   {
+    "carrier": "oil import",
+    "v31": 35.8635,
+    "v4": 36.3449,
+    "d": 0.4814
+   },
+   {
+    "carrier": "onwind",
+    "v31": 26.5633,
+    "v4": 26.0924,
+    "d": -0.471
+   },
+   {
+    "carrier": "ror",
+    "v31": 0.5749,
+    "v4": 1.044,
+    "d": 0.4691
+   },
+   {
+    "carrier": "DC",
+    "v31": 1.7977,
+    "v4": 2.2597,
+    "d": 0.462
+   },
+   {
+    "carrier": "AC",
+    "v31": 6.1962,
+    "v4": 6.5382,
+    "d": 0.342
+   },
+   {
+    "carrier": "SMR CC",
+    "v31": 9.0147,
+    "v4": 9.3293,
+    "d": 0.3146
+   },
+   {
+    "carrier": "geothermal",
+    "v31": 6.538,
+    "v4": 6.8016,
+    "d": 0.2636
+   },
+   {
+    "carrier": "CCGT existing",
+    "v31": 2.9542,
+    "v4": 2.7484,
+    "d": -0.2058
+   }
+  ]
+ },
+ "smoke56_decomposition": {
+  "v31_F1": {
+   "objective": 329705565613.54376,
+   "objective_lp": 327335163478.7397,
+   "constant": 2370402134.804077,
+   "biomass_use_twh": {
+    "BN": 0.1150289526515383,
+    "ID": 976.7486879761881,
+    "KH": 49.34860772038061,
+    "LA": 26.351298847571226,
+    "MM": 104.03036406925209,
+    "MY": 247.02402446072196,
+    "PH": 141.37775567643484,
+    "SG": 0.031036817866954742,
+    "TH": 319.41978328250246,
+    "TL": 0.5933459555289116,
+    "VN": 125.77256616048805
+   },
+   "ID_biomass_use_by_link": {
+    "biomass EOP": 0.20122719280253754,
+    "biomass EOP CC": 0.25515321602328805,
+    "BtL": 0.3368645518398725,
+    "industry biomass boiler": 0.6011508683195845,
+    "industry biomass boiler CC": 1.0643147715224532,
+    "industry direct firing biomass": 1.3626200804595057,
+    "industry direct firing biomass CC": 933719164.5755955,
+    "biomass final-energy accounting": 20642574.22876141,
+    "industry biomass CC": 22386944.937319383,
+    "biomass-to-methanol": 0.006000768532219857,
+    "electrobiofuels": 0.4071803039836287
+   },
+   "ID_heat_supply": {
+    "industry electric boiler": 34341250.91658209,
+    "industry heat pump": 100118039.02049337,
+    "industry gas boiler": 68010254.11119908,
+    "industry biomass boiler": 0.5410357814876262,
+    "industry biomass boiler CC": 0.9578832943702077,
+    "industry direct firing gas": 98878329.50442655,
+    "industry direct firing biomass": 1.3626200804595057,
+    "industry direct firing biomass CC": 933719164.5755955
+   },
+   "solid_biomass_price_ID": {
+    "mean": 58.17613735235058,
+    "max": 58.17613735239142,
+    "min": 58.17613735149294
+   }
+  },
+  "v4_F1": {
+   "objective": 337843503237.49243,
+   "objective_lp": 335473101102.68835,
+   "constant": 2370402134.804077,
+   "biomass_use_twh": {
+    "BN": 0.11502895247139308,
+    "ID": 772.7586667803281,
+    "KH": 48.537430887852885,
+    "LA": 25.609067840153863,
+    "MM": 85.63042457473814,
+    "MY": 173.21579738296438,
+    "PH": 126.73317397733989,
+    "SG": 0.03103681776363145,
+    "TH": 264.8898551867766,
+    "TL": 0.5933459560856126,
+    "VN": 120.3658997877677
+   },
+   "ID_biomass_use_by_link": {
+    "biomass EOP": 0.17337579903702122,
+    "biomass EOP CC": 0.367056252845348,
+    "BtL": 0.3861896180999913,
+    "industry biomass boiler": 0.8891103328579056,
+    "industry biomass boiler CC": 48874675.0081249,
+    "industry direct firing biomass": 4.110631635097843,
+    "industry direct firing biomass CC": 695264062.3879793,
+    "biomass final-energy accounting": 6232977.966262963,
+    "industry biomass CC": 22386945.06437743,
+    "biomass-to-methanol": 0.006809698087351644,
+    "electrobiofuels": 0.4204102745241598
+   },
+   "ID_heat_supply": {
+    "industry electric boiler": 13912378.361323133,
+    "industry heat pump": 27033824.145620972,
+    "industry gas boiler": 882127.2747371302,
+    "industry biomass boiler": 0.8001992995721153,
+    "industry biomass boiler CC": 43987207.5073124,
+    "industry direct firing gas": 35168.050915589374,
+    "industry direct firing biomass": 4.110631635097843,
+    "industry direct firing biomass CC": 695264062.3879793
+   },
+   "solid_biomass_price_ID": {
+    "mean": 45.5670965947769,
+    "max": 45.567096595234624,
+    "min": 45.56709659058387
+   }
+  },
+  "v4iid_F1": {
+   "objective": 332297882382.9991,
+   "objective_lp": 329927480248.195,
+   "constant": 2370402134.804077,
+   "biomass_use_twh": {
+    "BN": 0.1150289525247607,
+    "ID": 772.7586666031036,
+    "KH": 48.53743088809615,
+    "LA": 25.60906784156659,
+    "MM": 85.63042457585311,
+    "MY": 173.2157972829509,
+    "PH": 126.73317397297633,
+    "SG": 0.031036817796463955,
+    "TH": 264.8898551830206,
+    "TL": 0.5933459555785595,
+    "VN": 120.36589978380958
+   },
+   "ID_biomass_use_by_link": {
+    "biomass EOP": 0.6170660658204763,
+    "biomass EOP CC": 59675575.84956425,
+    "BtL": 9.946781408321401,
+    "industry biomass boiler": 4.750565894685747,
+    "industry biomass boiler CC": 81607213.48049839,
+    "industry direct firing biomass": 28111.901194996455,
+    "industry direct firing biomass CC": 602670925.5496993,
+    "biomass final-energy accounting": 6389844.749823789,
+    "industry biomass CC": 22386944.975870542,
+    "biomass-to-methanol": 0.040942045789100975,
+    "electrobiofuels": 34.74109699409218
+   },
+   "ID_heat_supply": {
+    "industry electric boiler": 220757.8580818259,
+    "industry heat pump": 22622.332784150683,
+    "industry gas boiler": 208729.27583532382,
+    "industry biomass boiler": 4.275509305217172,
+    "industry biomass boiler CC": 73446492.13244852,
+    "industry direct firing gas": 1566.5818857981865,
+    "industry direct firing biomass": 28111.901194996455,
+    "industry direct firing biomass CC": 602670925.5496993
+   },
+   "solid_biomass_price_ID": {
+    "mean": 29.942722138395897,
+    "max": 29.942722138562324,
+    "min": 29.942722137543516
+   }
+  },
+  "v4_F2": {
+   "objective": 350727375547.1384,
+   "objective_lp": 348186296356.248,
+   "constant": 2541079190.890442,
+   "biomass_use_twh": {
+    "BN": 0.11502895233455529,
+    "ID": 772.7586665928429,
+    "KH": 48.537430885767186,
+    "LA": 25.6090678373838,
+    "MM": 85.63042456904051,
+    "MY": 173.21579733148707,
+    "PH": 126.7331739740204,
+    "SG": 0.03103681771037344,
+    "TH": 264.889855150546,
+    "TL": 0.5933459557467561,
+    "VN": 120.36589978202986
+   },
+   "ID_biomass_use_by_link": {
+    "biomass EOP": 0.3817406323955908,
+    "biomass EOP CC": 0.7295290684478013,
+    "BtL": 1.0014940655652858,
+    "industry biomass boiler": 2.292855515754381,
+    "industry biomass boiler CC": 48885065.959129885,
+    "industry direct firing biomass": 47.06773468724522,
+    "industry direct firing biomass CC": 695253625.1154253,
+    "biomass final-energy accounting": 6232978.089711037,
+    "industry biomass CC": 22386944.940929357,
+    "biomass-to-methanol": 0.018780571575108602,
+    "electrobiofuels": 0.9955125596746077
+   },
+   "ID_heat_supply": {
+    "industry electric boiler": 15807122.782272898,
+    "industry heat pump": 24993146.518732656,
+    "industry gas boiler": 1018708.0708419457,
+    "industry biomass boiler": 2.063569964178944,
+    "industry biomass boiler CC": 43996559.36321692,
+    "industry direct firing gas": 45561.89000164622,
+    "industry direct firing biomass": 47.06773468724522,
+    "industry direct firing biomass CC": 695253625.1154253
+   },
+   "solid_biomass_price_ID": {
+    "mean": 41.561093797259176,
+    "max": 41.56109379755751,
+    "min": 41.56109379518972
+   }
+  }
+ },
+ "tests_v4_in_copy": {
+  "first_run": [
+   "2 failed, 35 passed in 27.75s"
+  ],
+  "registry_rerun_after_adding_scripts_and_config": [
+   "3 passed, 4 warnings in 3.33s"
+  ],
+  "note": "the two registry failures of the first run were the copy lacking the upstream scripts/ folder and config.default.yaml; all 37 pass with them"
+ },
+ "registry": {
+  "grade": "VERIFIED",
+  "fragment_rows": 69,
+  "file_rows_checked": 67,
+  "sha_mismatches": 0,
+  "bytes_mismatches": 0,
+  "fragment_equals_registry_rows": true,
+  "data_registry_reassembly_identical": true,
+  "d1_evidence_differs_only_generated_utc": true,
+  "removed_rows": 0,
+  "licence_scan_hits": 0
+ },
+ "files": {
+  "FINDINGS.csv": {
+   "bytes": 9097,
+   "sha256": "65ecfff63568d5bf70f4f6ce6473037363419a7af9347f9545926de53da386d5"
+  },
+  "FINDINGS_PRE.md": {
+   "bytes": 23054,
+   "sha256": "e83fe0e7f7169647f446a2fc6b2fd68fe0c11ca850d2cb775adb28cb85d19859"
+  },
+  "REPORT.md": {
+   "bytes": 23787,
+   "sha256": "98fb43ff1dcad11e80a63eb4c84accd4f22a985b1b2a4d9b445b61be136d226a"
+  },
+  "evidence/ANCHOR_PROFILE_CHECK.json": {
+   "bytes": 24898,
+   "sha256": "ec7ffb1d625261a38562ea4a55c2f44696544e92452cd95035d69228577f3c0d"
+  },
+  "evidence/CHAIN_CHECK.json": {
+   "bytes": 18080,
+   "sha256": "31f95716d558d95c1e6ad8b69aff0d4a54c00fb7e547d3a7c359c08d309c060f"
+  },
+  "evidence/CONSERVATION_CHECK.json": {
+   "bytes": 26596,
+   "sha256": "e75572b36eaa901310f7b022e48ca6748332c969f82e350f588d271598bf09be"
+  },
+  "evidence/NET_CHECK_iid.json": {
+   "bytes": 58747,
+   "sha256": "e8205c5b63f68f4331d210aa2021bc984aa945338933862f3e89698cfad2fe28"
+  },
+  "evidence/NET_CHECK_main.json": {
+   "bytes": 59063,
+   "sha256": "929b251c60a8af3a44e0699a2fe9d49e4f8db34b34727f01a0ad1a159eab91f7"
+  },
+  "evidence/OFF_BUILD_VS_V31.json": {
+   "bytes": 2760,
+   "sha256": "da3e2cf9e17c7c23bcdf5a50a0958cb7650470618d2a808e660d9e066344ce5f"
+  },
+  "evidence/S7_COMPARE.json": {
+   "bytes": 9939,
+   "sha256": "6fe66c675bef03f573b462c20b1e6b60bd75e20cafe19ebb083357d043ac84e3"
+  },
+  "evidence/SENS_PAPER_FUELWOOD.json": {
+   "bytes": 2102,
+   "sha256": "8df190558d65d613f238955af023ee4b45d6bda7e47bf260893946280a661e6a"
+  },
+  "evidence/SMOKE_DECOMP.json": {
+   "bytes": 63927,
+   "sha256": "a40b45838addc12ddc000277a5979d38e0a7bf4d2ab4540b7435b7cd01e2cab6"
+  },
+  "evidence/SMOKE_LEDGER_CMP.json": {
+   "bytes": 8087,
+   "sha256": "7e0813deb30294432ed503adc96008b58bbd5e8c197220d3f358b5fe335d5d01"
+  },
+  "evidence/a2_compare.txt": {
+   "bytes": 9590,
+   "sha256": "9c52348cd908026cbc08b39e7259cb08f2553bbbf52e0220bbdbe874b5e47907"
+  },
+  "evidence/off_build.log": {
+   "bytes": 2643,
+   "sha256": "cc2a1048038ccc9222aa2fc18bdb99958fb8b2160f272245802cc0a5a624cc17"
+  },
+  "evidence/out_compare.txt": {
+   "bytes": 1066,
+   "sha256": "3d9507984f0140b44f31cd47b1cfe7fd7bb77d0225e3385346147579bd460831"
+  },
+  "evidence/runs1.log": {
+   "bytes": 451,
+   "sha256": "dffea899caddddda50df7b6023a16e1cc47acb4c726d33eb1695b9b031db6ba2"
+  },
+  "evidence/tests_registry_rerun.log": {
+   "bytes": 2968,
+   "sha256": "24e2d447d63b90454d3efadcbc72a534337a5e0dada44f88715e211aa64ee5ed"
+  },
+  "evidence/tests_v4.txt": {
+   "bytes": 2238,
+   "sha256": "e5a30ce4c586bcac89ec42c5420385a8ce0fcba8a840aadc426b3e09d6e99986"
+  },
+  "scripts/anchor_profile_check.py": {
+   "bytes": 6474,
+   "sha256": "caaf14ed53fba8adb8373f72ffc96471cd23edf560cc177a4dd79c7518a5a586"
+  },
+  "scripts/build_evidence.py": {
+   "bytes": 9596,
+   "sha256": "06be6f422d123c2687b38b0d8ace8cb6534fa662ecb1e9052a731d1331929606"
+  },
+  "scripts/chain_check.py": {
+   "bytes": 9167,
+   "sha256": "a4fe59151cbcd54e614b63b922ac7f6429e0b15a30d1dce754e690c6babf3025"
+  },
+  "scripts/compare_off_build.py": {
+   "bytes": 4104,
+   "sha256": "4eead8af1d9c74bf2fd37719f9837e803cd9ce9973775a8bfecbef4f3d783a8c"
+  },
+  "scripts/conservation_check.py": {
+   "bytes": 7504,
+   "sha256": "69fcc0a862e1c9f816c208303b3f4a7a1b733e7199cccdf6ee5fc2180dab0418"
+  },
+  "scripts/helpers/_build_off.sh": {
+   "bytes": 1117,
+   "sha256": "182bc84ea362ba511a22dec450204500b5794389fdfe5602f731b2b433ebcdf0"
+  },
+  "scripts/helpers/_build_off2.sh": {
+   "bytes": 2215,
+   "sha256": "7b7c0f65135f11b88594cec3a1ef72840fee437703ccd94d48a948b45be7635a"
+  },
+  "scripts/helpers/_build_off3.sh": {
+   "bytes": 1966,
+   "sha256": "aeba373df60e50c58de9f234cc1d4a3f922f87b195ee3df9ff6843664d0f0568"
+  },
+  "scripts/helpers/_cat_inputs.sh": {
+   "bytes": 1648,
+   "sha256": "f76223548b283d726efe052366175d5c778889049e9f0e01f3e41b2ab3a70381"
+  },
+  "scripts/helpers/_cat_tests.sh": {
+   "bytes": 329,
+   "sha256": "1e6525fc25a618d908238cd84f460d36dab874fe002ba23313e2a10f2efcdc98"
+  },
+  "scripts/helpers/_cat_w08scripts.sh": {
+   "bytes": 698,
+   "sha256": "90ec0e76a7c893202d5533b307c804502341d4b692a50b7fab45ada13e7d183e"
+  },
+  "scripts/helpers/_checks2.sh": {
+   "bytes": 968,
+   "sha256": "e6cd8501e5e00f7b56112eead25b1df9d0c5bfe120a22c096ce458d171fc2c2b"
+  },
+  "scripts/helpers/_checks3.sh": {
+   "bytes": 2519,
+   "sha256": "bc172b1ef6d15e450fd21471a67e08f31735380fda1c37b60ad55f5f1e95dcc7"
+  },
+  "scripts/helpers/_commit1.sh": {
+   "bytes": 977,
+   "sha256": "e417b1df848bb2ecc76f91b2d45fb874a5d569331df432a385419ae1352851fb"
+  },
+  "scripts/helpers/_commit_msg1.txt": {
+   "bytes": 1398,
+   "sha256": "16acf333b4228e7a0a8d6b194e3bf8b31281778e1ab2e42ac3056446e8c24467"
+  },
+  "scripts/helpers/_commit_msg2.txt": {
+   "bytes": 1298,
+   "sha256": "933aba0059dd6cb01d17c1dd74a8d7166af8fda517bdca4779771ea592de062a"
+  },
+  "scripts/helpers/_commit_msg3.txt": {
+   "bytes": 282,
+   "sha256": "1ef547910cb9cc429a014a5165a9a547f9dc748f1bc5e7fc644faca85adbd10c"
+  },
+  "scripts/helpers/_cost_breakdown.sh": {
+   "bytes": 3309,
+   "sha256": "2970ff1179f47c7ed2879072977a14ba0e20cc25b2b825600183a98c7696f6c8"
+  },
+  "scripts/helpers/_diag.sh": {
+   "bytes": 692,
+   "sha256": "7a4ea48eb666a6b3a33e87b801973644a86e18d49b77b9c7cab37c85dd55a52d"
+  },
+  "scripts/helpers/_final.sh": {
+   "bytes": 1377,
+   "sha256": "fc9e999e3d20c60d77cc39537499fbf132bed51bba82bb4b987590c53547cccd"
+  },
+  "scripts/helpers/_fix_scripts.sh": {
+   "bytes": 1009,
+   "sha256": "503390ac1d368c6fdb8f80ffbb172f241aff3a4ddeaa1c675bf52073d568275a"
+  },
+  "scripts/helpers/_git2.sh": {
+   "bytes": 1401,
+   "sha256": "7565003e8e1e8d2f8ba9b4d27c781ff6608596c5f1fe571486e6a2340730b5b0"
+  },
+  "scripts/helpers/_grep2.sh": {
+   "bytes": 609,
+   "sha256": "86f2b17bd2a2e4ecb7a63ba01022fb3765bdef6eeff568a50171685ede6e558b"
+  },
+  "scripts/helpers/_grep_funcs.sh": {
+   "bytes": 1667,
+   "sha256": "1f2e31210baecb29fa1a90fa336b219674fd07f63417b86a9473d14b4113b2b6"
+  },
+  "scripts/helpers/_ledger_cmp.sh": {
+   "bytes": 3467,
+   "sha256": "82dd71b4c1616e29634bdfcfc8d19d8e1de6a9d7bb367a6216ea6f7e6688870a"
+  },
+  "scripts/helpers/_misc.sh": {
+   "bytes": 1878,
+   "sha256": "18b8ba747081f72675b637e204f7a6b71e12b78aa9e2be4182d48dc4703281aa"
+  },
+  "scripts/helpers/_mk_wt.sh": {
+   "bytes": 859,
+   "sha256": "0beefd7be83e7084783e66dd0d1806d2b8a9ca35487647bc9cbd07f370f25b07"
+  },
+  "scripts/helpers/_net_explore.sh": {
+   "bytes": 2504,
+   "sha256": "eebf6707eb12ea62c3868b9ef9a701b252a71feb01c01e309ba3116381c77a25"
+  },
+  "scripts/helpers/_peek_xml.sh": {
+   "bytes": 1433,
+   "sha256": "452cbaba64eab7b73fbb68e246af80c67aa664450cd4ba20a44b11ed46eb994e"
+  },
+  "scripts/helpers/_probe_git.sh": {
+   "bytes": 902,
+   "sha256": "7a414df99701d0a0f11c22a03127a0f314f580dbf80750f927be1e367a6c068f"
+  },
+  "scripts/helpers/_push.sh": {
+   "bytes": 228,
+   "sha256": "5c7c59780c5fe04b68fc11a1948c2fdab7e79853c1563ed759096aca5d459c41"
+  },
+  "scripts/helpers/_reg_check.sh": {
+   "bytes": 3457,
+   "sha256": "c2cff08aaa0acbfa89d467590cfdabf1171c8a1a941acd019e6c92c2b7af1f94"
+  },
+  "scripts/helpers/_runs1.sh": {
+   "bytes": 2699,
+   "sha256": "94c21c33a6b63d30bbbbef36fe5f33e672e553fe8a84e83dc18e852ca3665615"
+  },
+  "scripts/helpers/_setup_copy.sh": {
+   "bytes": 1316,
+   "sha256": "bf044b524b38902d00e09a8091beba84c7ad574e2c205129240167e5249d7198"
+  },
+  "scripts/helpers/_smoke_decomp.sh": {
+   "bytes": 590,
+   "sha256": "36ae26dce6c1050d33b407b359381c06d72db1244caf42f55403d0a317095dbe"
+  },
+  "scripts/helpers/_tests.sh": {
+   "bytes": 983,
+   "sha256": "02aef28c7f76e6bc1897ae81e8fda992095cb256a74957e633a77b6a3ba775f3"
+  },
+  "scripts/make_review_zip.py": {
+   "bytes": 1032,
+   "sha256": "3ced5200200f8f667d31998bc9621626529fbd3dea6d0cc6a1c332b43e4c3ba5"
+  },
+  "scripts/net_check.py": {
+   "bytes": 10021,
+   "sha256": "efc97fa13c7b601e65f7d05c0fd9958baa2f5a54f2c5f646d35fe102737fb7c3"
+  },
+  "scripts/s7_compare.py": {
+   "bytes": 2719,
+   "sha256": "2d238b8bbf71fb1748ac907cde771b6902b30375e28bcffba2861c4cb9d9c08d"
+  },
+  "scripts/sens_paper_fuelwood.py": {
+   "bytes": 2315,
+   "sha256": "7112c1ddfdaee6b103e20acd44acead4c6592b07b7375e5309d40991c5d6874f"
+  },
+  "scripts/smoke_decomp.py": {
+   "bytes": 4243,
+   "sha256": "08f442800539c26a6edb2e70bf75aed3be3398300800aabf1f1fbe651e290d82"
+  }
+ }
+}

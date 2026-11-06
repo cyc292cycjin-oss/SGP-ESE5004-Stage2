@@ -9,4 +9,6 @@
 - 06 锚构造、曲线、残渣对称、守恒检查完成；造纸木材字面读法量化（ID +36.89 TWh，F-01）。
 - 07 v4 测试 37 项在副本中全部通过（注册表两项补齐上游 `scripts/`、`config.default.yaml` 后通过）。
 - 08 FINDINGS_PRE.md 写成；开关全关网络构建（W08 代码，1.5 分钟）与 v3.1 包网络 10 类组件逐值相同（仅 meta 配置快照 / 哈希 / 气网台账新键不同）。
-- 下一步：提交推送 FINDINGS_PRE（第 3 节）→ 第 4 节对照阅读 → REPORT.md、FINDINGS.csv、EVIDENCE.json、审阅包 → 提交推送后停止。
+- 09 第 3 节提交 `6abe892f`（FINDINGS_PRE 等 54 个文件），推送到 `origin/codex/v4-fable-w08-20261107`。
+- 10 第 4 节：读 W08 REPORT 第 0–6 节、SMOKE56_V4、HPC 草案、附录；只读分解三次冒烟解（目标常数相同、生物质去向、价格恒定、成本台账逐国 / 逐类别差异）；REPORT.md 写成，FINDINGS.csv 加 F-20–F-22。
+- 11 第 5 节：EVIDENCE.json、审阅包与清单、最终提交推送（提交号见下一行）。
