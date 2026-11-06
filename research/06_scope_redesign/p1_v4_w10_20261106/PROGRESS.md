@@ -7,11 +7,13 @@
 | 子步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
 | W10-0 | SHA 核对、分支与 worktree、口径对账（第 201 项 1,436 / 441 = 72083fde 注册表 REGISTERED+SENSITIVITY+DATA_PENDING） | 完成 | — |
-| W10-1 | `C_GRADE_INVENTORY.csv`（462 行在用 C 级，含入网路径与一阶机制；`scripts/build_inventory.py`） | 完成 | 见下 |
-| W10-2 | 已解结果提取与一阶影响 `IMPACT_FIRST_ORDER.csv`、`UNRELIABLE_FIRST_ORDER.csv`（3 组 6 个网络；平稳性与价格核对 `evidence/CHECKS.json`） | 完成 | 见下（与 W10-3、W10-4 同一提交：三者由同一脚本链一次写出） |
-| W10-3 | `TOP30.csv`、`W10_DOWNLOAD_CANDIDATES.csv`、`REMAINING_C_TREATMENT.csv` | 完成 | 同上 |
-| W10-4 | `rerank_with_results.py` 重排接口与自测（`evidence/SELFTEST.json`，3 项 PASS） | 完成 | 同上 |
-| W10-5 | `REPORT.md`、`EVIDENCE.json`、审阅包、台账条目草稿、推送 | 进行中 | |
+| W10-1 | `C_GRADE_INVENTORY.csv`（462 行在用 C 级，含入网路径与一阶机制；`scripts/build_inventory.py`） | 完成 | `15c2b968` |
+| W10-2 | 已解结果提取与一阶影响 `IMPACT_FIRST_ORDER.csv`、`UNRELIABLE_FIRST_ORDER.csv`（3 组 6 个网络；平稳性与价格核对 `evidence/CHECKS.json`） | 完成 | `fdcc3f91`（与 W10-3、W10-4 同一提交：三者由同一脚本链一次写出） |
+| W10-3 | `TOP30.csv`、`W10_DOWNLOAD_CANDIDATES.csv`、`REMAINING_C_TREATMENT.csv` | 完成 | `fdcc3f91` |
+| W10-4 | `rerank_with_results.py` 重排接口与自测（`evidence/SELFTEST.json`，3 项 PASS） | 完成 | `fdcc3f91` |
+| W10-5 | `REPORT.md`、`EVIDENCE.json`、台账条目草稿 `LEDGER_ENTRY_DRAFT.md`、审阅包、推送 | 进行中 | 本提交 |
+
+提交 `15c2b968`、`fdcc3f91` 时命令多带了 `-c core.hooksPath=.git/hooks`；已核实仓库未设置 `core.hooksPath`、hooks 目录只有 `.sample`、未安装 pre-commit，没有 hook 被跳过；之后的提交不带该参数。
 
 缓存 `cache/`（6 个网络的提取，22 MB）只在工作目录，不入库；`rerank_with_results.py --cache` 指向它即可复用。
 求解器 0 次；本机计算合计约 3 分钟（提取 61 s，各次重排 20 s）；磁盘新增约 25 MB。
