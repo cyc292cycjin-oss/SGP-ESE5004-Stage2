@@ -1,0 +1,29 @@
+base_files: ['config.default.yaml', 'configs/plotting.default.yaml', 'configs/solving.default.yaml', 'configs/bundle_config.yaml', 'configs/powerplantmatching_config.yaml', 'configs/config.asean.yaml'] ['configs/research/baseline.yaml', 'configs/research/integrated.yaml']
+== registry tests ==
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 4 warnings in 3.33s
+== build off ==
+BUILD exit 1 	Maximum resident set size (kbytes): 526624 	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.49
+total 1040
+drwxr-xr-x 2 jin jin   4096 Nov  7 03:16 .
+drwxr-xr-x 3 jin jin   4096 Nov  7 03:04 ..
+-rw-r--r-- 1 jin jin 164798 Nov  7 03:16 carbon_component_map.json
+-rw-r--r-- 1 jin jin 812689 Nov  7 03:16 carrier_fragment.json
+-rw-r--r-- 1 jin jin  42518 Nov  7 03:16 costs_active_research.csv
+-rw-r--r-- 1 jin jin  22398 Nov  7 03:16 costs_active_research_ledger.json
+-rw-r--r-- 1 jin jin     26 Nov  7 03:16 empty_gas_pipelines.csv
+12650:Traceback (most recent call last):
+12651-  File "/home/jin/v4fable/repo/scripts_project/s2_network.py", line 504, in <module>
+12652-    n, r = build_scenario_s2(repo, a.scenario, a.output, eb, al, hydro, sv, daily=not a.no_daily, gap_diagnostic=a.gap_diagnostic, overrides=a.override)
+12653-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12654-  File "/home/jin/v4fable/repo/scripts_project/s2_network.py", line 337, in build_scenario_s2
+12655-    f, carbon, fragment_manifest = build_fragment(repo, n, costs_path, output, price_layer=None, cc_fraction=cc)
+12656-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12657-  File "/home/jin/v4fable/repo/scripts_project/build_research_assets.py", line 224, in build_fragment
+12658-    manifest=dict(status='S1_CARRIER_RECIPE_BUILT',target_year=2050,geographical_nodes=int(len(geo)),buses=len(f.buses),components=len(f.components),carbon_events=len(carbon),files={p.name:sha(p) for p in [output/'carrier_fragment.json',output/'carbon_component_map.json']},inputs={str(costs):source},code_sha=version(repo),builder_sha256=sha(__file__),environment={'python':platform.python_version(),'pypsa':pypsa.__version__},solver_runs=0)
+12659-                                                                                                                                                                                                                                                                                                                      ^^^^^^^^^^^^^
+12660-  File "/home/jin/v4fable/repo/scripts_project/build_research_assets.py", line 23, in version
+12661-    def version(repo):return subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+12662-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+DONE 19:16:23

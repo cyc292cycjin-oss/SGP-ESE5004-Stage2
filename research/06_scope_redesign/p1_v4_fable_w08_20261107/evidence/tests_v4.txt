@@ -1,0 +1,48 @@
+...............................FF....                                    [100%]
+=================================== FAILURES ===================================
+__________________ test_switches_default_off_and_config_hash ___________________
+
+    def test_switches_default_off_and_config_hash():
+        from phase4_static import config
+        from v4_common import switches, v4_tables, V31
+>       cfg = config(ROOT, "integrated")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_registry.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/home/jin/v4fable/tests_copy'), name = 'integrated'
+
+    def config(repo, name='baseline'):
+        """Resolve declared inputs with upstream deep merge/migrations; no Snakefile."""
+        repo=Path(repo);sys.path.insert(0,str(repo/'scripts'))
+>       from _helpers import _deep_merge_dicts, migrate_config
+E       ModuleNotFoundError: No module named '_helpers'
+
+scripts_project/phase4_static.py:168: ModuleNotFoundError
+___________________ test_v4_table_sets_match_their_switches ____________________
+
+    def test_v4_table_sets_match_their_switches():
+        from phase4_static import config
+        from v4_common import switch_sha, v4_tables
+        for mode in ("ras", "iid"):
+>           cfg = config(ROOT, "integrated")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_registry.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/home/jin/v4fable/tests_copy'), name = 'integrated'
+
+    def config(repo, name='baseline'):
+        """Resolve declared inputs with upstream deep merge/migrations; no Snakefile."""
+        repo=Path(repo);sys.path.insert(0,str(repo/'scripts'))
+>       from _helpers import _deep_merge_dicts, migrate_config
+E       ModuleNotFoundError: No module named '_helpers'
+
+scripts_project/phase4_static.py:168: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+FAILED tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+2 failed, 35 passed in 27.75s
+EXIT:1
