@@ -11,7 +11,7 @@
 | A2 | 运行事实 `RUN_FACTS.csv`、`HPC_RUNTIME_FACTS.md` | 完成 | `aae325ec` |
 | A3 | 分辨率分解 `RESOLUTION_DECOMP.csv`、`RESOLUTION_CAPACITY.csv` 与图 | 完成 | `c1b561be` |
 | A4 | 已知问题：油棕树干、零成本排查、燃料舱 | 完成 | `48a0d1e3` |
-| A5 | `STAGE_A_REPORT.md`、`EVIDENCE.json`、台账草稿 | 完成 | 见下一次提交 |
-| A6 | 审阅包、推送 | 进行中 | |
+| A5 | `STAGE_A_REPORT.md`、`EVIDENCE.json`、台账草稿 | 完成 | `558143e5` |
+| A6 | 审阅包 `REVIEW_558143e5.zip`（28 个成员，SHA256 `9a47e948adc67f8e7ab03cde08bb99b3a7e71422796a38643c9da49bd7f1421b`，不入库）与 `REVIEW_MANIFEST.csv`（逐成员 SHA256、CRC32） | 完成 | 本提交 |
 
-**续做起点：** A6（审阅包 `REVIEW_<A5 提交>.zip` 与 `REVIEW_MANIFEST.csv`，推送）。阶段 B 的起点：用户说"G2 已完成"后，从指令第 5 节开始。
+**最后状态（2026-11-06）：** 阶段 A 完成，本提交之后推送 `codex/v31-w15-20261106` 并停下。阶段 B 的起点：用户在本会话说"G2 已完成"后，从指令第 5 节开始（不需重新核对 SHA256）。
