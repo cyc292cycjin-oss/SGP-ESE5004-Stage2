@@ -1,0 +1,31 @@
+{
+ "script": "rerank_with_results.py",
+ "date_utc": "2026-11-06",
+ "solver_calls": 0,
+ "tests": {
+  "a_identical_call_byte_identical": {
+   "result": "PASS",
+   "files": {
+    "IMPACT_FIRST_ORDER.csv": "b1124a92c3f17b3a (16 hex of SHA256, both runs)",
+    "IMPACT_FIRST_ORDER_BY_SET.csv": "cd1d91690a593fdb",
+    "TOP30.csv": "7950feeafedfda55",
+    "UNRELIABLE_FIRST_ORDER.csv": "4e2f20419a370b96"
+   }
+  },
+  "b_set_order_reversed_same_reference": {
+   "result": "PASS",
+   "max_abs_diff": {"dZ_F1": 0.0, "dZ_F2": 0.0, "dB6": 0.0, "rank": 0.0, "dB6_screen": 0.0, "dB6_smoke56v31": 0.0, "rank_screen": 0.0, "rank_smoke56v31": 0.0}
+  },
+  "c_single_set_rerank_equals_multi_set_column": {
+   "result": "PASS",
+   "max_abs_diff_dB6": 0.0,
+   "max_abs_diff_rank": 0.0,
+   "note": "the use case of section 4: a new result set alone (here the v3.1 smoke) as reference reproduces its column of the multi-set run"
+  }
+ },
+ "timing": {
+  "first_extraction_three_sets_six_networks_s": 60.7,
+  "rerank_with_cached_extracts_s": 19.7,
+  "peak_rss_gib_extraction": 1.37
+ }
+}
