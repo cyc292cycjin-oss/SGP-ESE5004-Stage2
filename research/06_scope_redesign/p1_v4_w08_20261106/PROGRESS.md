@@ -21,4 +21,4 @@
 | W08-5 | 4 次 56 时段求解 | 完成（4 / 4 次已用，无重试）：全部 optimal；R0 = v3.1 冒烟逐位相同；v4 − v3.1 +8.138 / +8.459 / +2.592 bn；失败门都在 v3.1 并集内、C1 全过、v4 三次 `ACCEPTED_LAYER2`；**判据 4（一阶 ± 50 %）三对都不满足** → 数据链核查（`scripts/w08_bounds.py`、`w08_regime.py`、`w08_heat_prices.py`）：链无错，结果在 LP 凸性上下界内，原因为工业热价随需求大降（二阶项）；按指令停下汇报（`SMOKE56_V4.md` 第 2 节） | 见 git log（W08-5） |
 | W08-6 | 报告、证据、审阅包、HPC 草案、推送 | 完成：REPORT 第 0（摘要与 9 个待决问题）、5、6 节；全量 `tests/research` 825 过 / 1 败 / 58 跳过（失败项读旧 S1 网络，跨境 co2 开关与起点配置就不同，与 W08 无关，见 REPORT 第 6 节）；`EVIDENCE.json`；`LEDGER_ENTRY_DRAFT.md`；审阅包清单 `evidence/REVIEW_ZIP_MANIFEST_*.txt`；推送后停下等审阅 | 见 git log（W08-5、W08-6） |
 
-续做点：见上表第一个"进行中 / 待做"的行。
+续做点：W08 全部完成，停下等审阅（待决问题见 `REPORT.md` 第 0.1 节）。W08-5 提交 `bd890bf9`；审阅包 `REVIEW_bd890bf9.zip`（不入库）317,017 字节，SHA256 `eacf349fcf1b5ab67d207dc6580f698cab7475d9e867f50b7caa8bea9fdefd33`，81 个成员，清单 `evidence/REVIEW_ZIP_MANIFEST_bd890bf9.txt`；`EVIDENCE.json` 51 条。本行所在提交（W08-6）= 推送时的分支头。
