@@ -17,4 +17,4 @@
 | D1-7b | 第 7.3 节：2 次 56 时段求解 | 完成（2 / 2 次已用，无重试）：R1 optimal 339,292,850,746.35 EUR（ΔV +1,449,347,508.86）、R2 optimal 352,176,720,807.95 EUR（ΔV +1,449,345,260.81），都在登记区间内；`ACCEPTED_LAYER2`、C1 全过、未过的门在 v3.1 并集内；障碍迭代 84 / 92；B6（回归）−2,248 EUR（`SMOKE56_D1.md` 第 2 节）；定义草案补 `d1_candidates` | 见 git log（D1-7b） |
 | D1-8 | 报告、证据、审阅包、推送 | 完成：`REPORT.md`（第 0 节与 7 个待决问题）、`EVIDENCE.json`、`LEDGER_ENTRY_DRAFT.md`；全量 `tests/research` 852 过 / 1 败（与 W08 相同的旧 S1 网络项）/ 58 跳过；审阅包见下行 | 见 git log（D1-8） |
 
-续做点：D1 全部完成，停下等审阅（待决问题见 `REPORT.md` 第 0.1 节）。
+续做点：D1 全部完成，停下等审阅（待决问题见 `REPORT.md` 第 0.1 节）。D1-8 提交 `6142d8ac`；审阅包 `REVIEW_6142d8ac.zip`（不入库）216,722 字节，SHA256 `4c1b3588ebad109f60addb7541f244b48c395c8c5bb2a81d54dc7f2941a69e45`，63 个成员（含 MANIFEST.tsv），清单 `evidence/REVIEW_ZIP_MANIFEST_6142d8ac.txt`；许可类内容扫描（模式运行时读入，不入库）交付目录 0、审阅包 0。本行所在提交（D1-8b）= 推送时的分支头。
