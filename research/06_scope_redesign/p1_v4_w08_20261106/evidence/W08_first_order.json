@@ -1,0 +1,141 @@
+{
+ "status": "INFERENCE (pre-solve, registered before any W08 solve)",
+ "method": "W08 section 5 / validation plan section 2: first-order estimate of the system-cost difference v4 - v3.1 of the 56-snapshot smoke, written and\ncommitted BEFORE any W08 solve (INFERENCE; the criterion of the instruction: the solved difference within the estimate +- 50 %).\n\n    PYTHONHASHSEED=0 /home/jin/miniforge3/envs/pypsa-earth/bin/python scripts/w08_first_order.py\n\nFixed point: the v3.1 local regression smoke (V3.1 FIX, d3b9a3bc code; /home/jin/v3fix/drill_pkg_13ebce95/runs/smoke56_v31/F1, F2: solved networks and\nDUALS_BY_CONSTRAINT.nc). First 56 snapshots, representative weights 8760 / 56 (s2_solve.set_representative_weights; annual quantities unscaled).\n  loads   sum over every load of the union (v3.1 network, v4 network): sum_t (p_v4(t) - p_v31(t)) x marginal price of its bus (v3.1 smoke) x weight;\n  pools   every Store whose e_initial changes (solid-biomass potentials): - delta e_initial x |dual of its first-snapshot energy balance| (value of one\n          more MWh in the pool);\n  caps    every domestic gas production generator: - delta annual cap x |dual of ResearchImportAnnual-<generator>| (binding caps only carry a dual).\nNot included (second order or structural, listed): EV battery / charger sizes, fugitive factor per MWh, new / removed components without a v3.1 dual.\nPairs: v4_F1 = v4 main integrated vs v3.1 F1; v4_F2 = v4 main no_new_xb vs v3.1 F2; v4iid_F1 = v4 IId integrated vs v3.1 F1.\nWrites SMOKE56_FIRST_ORDER.csv (pair x term x country) and evidence/W08_first_order.json.\n",
+ "pairs": {
+  "substitute_valuation": {
+   "v4_F1": {
+    "VN": {
+     "mean_eur_per_mwh": 51.92717338406924,
+     "degenerate_dual_mean_eur_per_mwh": 2934.1301441815554
+    }
+   },
+   "v4_F2": {
+    "VN": {
+     "mean_eur_per_mwh": 52.85215825535717,
+     "degenerate_dual_mean_eur_per_mwh": 28399.2061089071
+    }
+   },
+   "v4iid_F1": {
+    "VN": {
+     "mean_eur_per_mwh": 51.92717338406924,
+     "degenerate_dual_mean_eur_per_mwh": 2934.1301441815554
+    }
+   }
+  },
+  "v4_F1": {
+   "v31_network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3_1/networks/integrated_2920_3h_unsolved.nc",
+   "v4_network": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4w08/builds/main/integrated/integrated_2920_3h_unsolved.nc",
+   "v31_smoke": "/home/jin/v3fix/drill_pkg_13ebce95/runs/smoke56_v31/F1",
+   "v31_objective_eur": 329705565613.54376,
+   "first_order_delta_eur": 2843749471.390726,
+   "first_order_delta_raw_dual_eur": -595335808.0275688,
+   "criterion": "primary: first_order_delta_eur (zero-slack biomass at the substitute value) +- 50 %; the raw-dual value is reported only",
+   "by_term": {
+    "load": -12495745256.711794,
+    "pool": 15289456494.360678,
+    "gas_cap": 50038233.74184336
+   },
+   "band_eur": [
+    1421874735.695363,
+    4265624207.086089
+   ],
+   "expected_v4_objective_eur": 332549315084.9345,
+   "unmatched": [
+    "TH2 0 Residential clean cooking demand",
+    "TH2 1 Residential clean cooking demand",
+    "TH2 2 Residential clean cooking demand",
+    "TH2 3 Residential clean cooking demand",
+    "TH2 4 Residential clean cooking demand",
+    "TH2 5 Residential clean cooking demand",
+    "VN2 0 Residential clean cooking demand",
+    "VN2 1 Residential clean cooking demand",
+    "VN2 2 Residential clean cooking demand",
+    "VN2 3 Residential clean cooking demand",
+    "VN2 4 Residential clean cooking demand",
+    "VN2 5 Residential clean cooking demand",
+    "VN2 6 Residential clean cooking demand",
+    "VN2 7 Residential clean cooking demand"
+   ],
+   "n_unmatched": 14,
+   "unmatched_load_annual_mwh": 3765682.074033327,
+   "gross_terms_eur": 114031648449.89966,
+   "proxied_loads": 56,
+   "proxied_load_annual_mwh": 47421902.91210685,
+   "not_included": "EV battery / charger sizes (fleet proxy), fugitive factor per MWh of production, components without a v3.1 dual"
+  },
+  "v4_F2": {
+   "v31_network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3_1/networks/no_new_xb_2920_3h_unsolved.nc",
+   "v4_network": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4w08/builds/main/no_new_xb/no_new_xb_2920_3h_unsolved.nc",
+   "v31_smoke": "/home/jin/v3fix/drill_pkg_13ebce95/runs/smoke56_v31/F2",
+   "v31_objective_eur": 342268691264.84283,
+   "first_order_delta_eur": 3253823815.0543423,
+   "first_order_delta_raw_dual_eur": -30835355466.49456,
+   "criterion": "primary: first_order_delta_eur (zero-slack biomass at the substitute value) +- 50 %; the raw-dual value is reported only",
+   "by_term": {
+    "load": -12544402667.170975,
+    "pool": 15332223447.438183,
+    "gas_cap": 466003034.7871411
+   },
+   "band_eur": [
+    1626911907.5271711,
+    4880735722.581513
+   ],
+   "expected_v4_objective_eur": 345522515079.89716,
+   "unmatched": [
+    "TH2 0 Residential clean cooking demand",
+    "TH2 1 Residential clean cooking demand",
+    "TH2 2 Residential clean cooking demand",
+    "TH2 3 Residential clean cooking demand",
+    "TH2 4 Residential clean cooking demand",
+    "TH2 5 Residential clean cooking demand",
+    "VN2 0 Residential clean cooking demand",
+    "VN2 1 Residential clean cooking demand",
+    "VN2 2 Residential clean cooking demand",
+    "VN2 3 Residential clean cooking demand",
+    "VN2 4 Residential clean cooking demand",
+    "VN2 5 Residential clean cooking demand",
+    "VN2 6 Residential clean cooking demand",
+    "VN2 7 Residential clean cooking demand"
+   ],
+   "n_unmatched": 14,
+   "unmatched_load_annual_mwh": 3765682.074033327,
+   "gross_terms_eur": 117682076633.93036,
+   "proxied_loads": 56,
+   "proxied_load_annual_mwh": 47421902.91210685,
+   "not_included": "EV battery / charger sizes (fleet proxy), fugitive factor per MWh of production, components without a v3.1 dual"
+  },
+  "v4iid_F1": {
+   "v31_network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v3_20261102/hpc_package_v3_1/networks/integrated_2920_3h_unsolved.nc",
+   "v4_network": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4w08/builds/iid/integrated/integrated_2920_3h_unsolved.nc",
+   "v31_smoke": "/home/jin/v3fix/drill_pkg_13ebce95/runs/smoke56_v31/F1",
+   "v31_objective_eur": 329705565613.54376,
+   "first_order_delta_eur": -3813789182.901533,
+   "first_order_delta_raw_dual_eur": -7209115650.357323,
+   "criterion": "primary: first_order_delta_eur (zero-slack biomass at the substitute value) +- 50 %; the raw-dual value is reported only",
+   "by_term": {
+    "load": -19153283911.00405,
+    "pool": 15289456494.360678,
+    "gas_cap": 50038233.74184336
+   },
+   "band_eur": [
+    -5720683774.3523,
+    -1906894591.4507666
+   ],
+   "expected_v4_objective_eur": 325891776430.6422,
+   "unmatched": [
+    "TH2 0 Residential clean cooking demand",
+    "TH2 1 Residential clean cooking demand",
+    "TH2 2 Residential clean cooking demand",
+    "TH2 3 Residential clean cooking demand",
+    "TH2 4 Residential clean cooking demand",
+    "TH2 5 Residential clean cooking demand"
+   ],
+   "n_unmatched": 6,
+   "unmatched_load_annual_mwh": 627388.2146505688,
+   "gross_terms_eur": 116776857470.35294,
+   "proxied_loads": 40,
+   "proxied_load_annual_mwh": 33769332.598787844,
+   "not_included": "EV battery / charger sizes (fleet proxy), fugitive factor per MWh of production, components without a v3.1 dual"
+  }
+ }
+}

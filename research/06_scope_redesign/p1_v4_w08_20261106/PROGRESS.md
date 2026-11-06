@@ -17,8 +17,8 @@
 | W08-2.8 | 清单第 8 节：网络层（检查点 S7） | 完成：`v4_biomass_potential.py`（潜力文件与 I2 逐字节相同，东盟 1,990.82 → 1,618.48 TWh）、`v4_gas_caps.py`（商品气上限 −298.41 TWh，逸散因子 = W12）、溢出上限 0.99（s3_0 与构建）、F2/F6 见 2.4；检查点 S7 主算 3,490.338011、IId 3,166.521855、I2 原主算 3,328.336712 TWh，与参照差 0（A0）；`test_v4_biomass_potential.py` 3 项。与第 9、10 节共用网络端开关代码，同一次提交 | 见 git log（W08-2.8/2.9/2.10） |
 | W08-2.9 | 清单第 9 节：小时曲线 | 完成：`v4_profiles.py`（G5 MAIN 合成曲线，I2 键扩展）；构建中工业电与四个工业热负荷按节点时区加曲线（年电量不变）；权重与 I2 表差 ≤ 0.48 MWh（I2 表取整）；`test_v4_profiles.py` 3 项 | 同上 |
 | W08-2.10 | 清单第 10 节：注册表与配置哈希 | 完成：`v4_outputs.py`（网络读取的 v4 表 out_ras / out_iid，含 BN NEU 甲醇气扣减、过程排放与原料碳按 v4 倍数）；配置键 `research.demand.anchor_mode`、`research.demand.v4.*`（默认关 = v3.1）；构建端 `s2_network.py` / `s2_layers.py` / `s3_layers.py` 读 v4 表并核对开关集 SHA256；注册表片段 `v4_w08.csv`（69 行），DATA_REGISTRY 2,321 → 2,390 行（原有行不变）；`test_v4_registry.py` 3 项 | 同上 |
-| W08-4 | 56 时段网络重建与静态检查 | 待做 | |
-| W08-5 | 4 次 56 时段求解 | 待做 | |
+| W08-4 | 56 时段网络重建与静态检查 | 完成：主算一体化 `cbe051d8…`、主算 `no_new_xb` `aa2bab39…`、IId 一体化 `09480713…`（构建提交 `17a15c22`）；静态检查全部通过（`STATIC_CHECKS.md`）；零松弛门 3/3 通过；求解前一阶估计登记（`SMOKE56_V4.md` 第 1 节） | 见 git log（W08-4） |
+| W08-5 | 4 次 56 时段求解 | 进行中（脚本 `scripts/smoke_w08.sh`，输出主检出 `results_project/v4w08/smoke56/`） | |
 | W08-6 | 报告、证据、审阅包、HPC 草案、推送 | 待做 | |
 
 续做点：见上表第一个"进行中 / 待做"的行。
