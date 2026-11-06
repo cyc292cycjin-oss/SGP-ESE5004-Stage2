@@ -1,0 +1,330 @@
+{
+ "status": "EXACT bracket rule (LP convexity) with VERIFIED duals; INFERENCE where components are unpriced",
+ "method": "W08 section 5, data-chain check after the cost criterion missed (post-solve, no solver): convexity bracket of the solved cost difference.\n\nFor an LP min c'x s.t. A x = b (loads, pool sizes, annual caps on the right-hand side) the optimal value V(b) is convex in b, so with duals y as\nsubgradients:   y_v31' (b_v4 - b_v31)  <=  V(b_v4) - V(b_v31)  <=  y_v4' (b_v4 - b_v31).\nLower bound: the v3.1 smoke duals (raw duals, the registered 'raw-dual' column of the first-order table); upper bound: the duals of the v4 smoke\nsolve of the same scenario. Same terms as w08_first_order.py (loads, pool initial energy, annual gas caps), raw duals only (no substitute valuation).\nPost-solve completion: loads on buses absent from a solve are priced at the mean price of the buses of the same country and carrier\n(else same carrier); a pool present on one side only (oil_palm_fibre removed in v4) at the mean bus price minus the store marginal cost;\nfixed capacities (non-extendable store e_nom and link p_nom, e.g. EV batteries / chargers) at the summed |dual| of their upper bounds.\nComponents still without a price are listed (missing).\n\n    PYTHONHASHSEED=0 /home/jin/miniforge3/envs/pypsa-earth/bin/python scripts/w08_bounds.py\nWrites tables/W08_SMOKE56_BRACKET.csv and evidence/W08_bracket.json.\n",
+ "pairs": {
+  "v4_F1": {
+   "pair": "v4_F1",
+   "lower_bound_v31_duals_eur": -569445324.9699813,
+   "solved_delta_eur": 8137937623.948669,
+   "upper_bound_v4_duals_eur": 12326767401.952984,
+   "inside": true,
+   "lower_terms": {
+    "load": -31243888465.042873,
+    "pool": 30842480300.53595,
+    "gas_cap": 50038233.741843365,
+    "removed_pool": 0.0,
+    "capacity": -218075394.20490095
+   },
+   "upper_terms": {
+    "load": -374578218.5841046,
+    "pool": 4467314472.499237,
+    "gas_cap": 79379960.97375105,
+    "removed_pool": 8594699170.549442,
+    "capacity": -440047983.48534244
+   },
+   "upper_load_by_carrier": {
+    "AC": {
+     "delta_annual_mwh": 66449925.16337924,
+     "cost_eur": 6338242130.720232
+    },
+    "oil final energy": {
+     "delta_annual_mwh": -46767002.12287746,
+     "cost_eur": -2907071812.3541245
+    },
+    "gas feedstock": {
+     "delta_annual_mwh": 88425912.99232338,
+     "cost_eur": 2544578590.7776904
+    },
+    "oil feedstock": {
+     "delta_annual_mwh": 60448236.407925606,
+     "cost_eur": 2134922758.5097713
+    },
+    "biomass final energy": {
+     "delta_annual_mwh": -42566332.95851997,
+     "cost_eur": -1254029680.4033866
+    },
+    "gas final energy": {
+     "delta_annual_mwh": 106368368.69751783,
+     "cost_eur": 6014869155.44912
+    },
+    "industry heat": {
+     "delta_annual_mwh": -58666494.374675706,
+     "cost_eur": -1805505913.308386
+    },
+    "industry heat high": {
+     "delta_annual_mwh": -71334956.6748214,
+     "cost_eur": -666944013.7790815
+    },
+    "industry heat medium A": {
+     "delta_annual_mwh": -75629025.2485437,
+     "cost_eur": -2562738866.5712304
+    },
+    "industry heat medium B": {
+     "delta_annual_mwh": -302516100.99574995,
+     "cost_eur": -9009027366.381422
+    },
+    "methanol final energy": {
+     "delta_annual_mwh": -14689185.925437996,
+     "cost_eur": -1624532845.5262077
+    },
+    "Li ion": {
+     "delta_annual_mwh": 17895507.705115724,
+     "cost_eur": 2668027738.5894637
+    },
+    "clean cooking useful": {
+     "delta_annual_mwh": 4654929.239315658,
+     "cost_eur": 307900169.2780887
+    },
+    "coal final energy": {
+     "delta_annual_mwh": -18449026.920036882,
+     "cost_eur": -1155475024.7466059
+    },
+    "coal feedstock": {
+     "delta_annual_mwh": 9805820.366560645,
+     "cost_eur": 86885278.34719586
+    },
+    "H2": {
+     "delta_annual_mwh": 7861265.2194314925,
+     "cost_eur": 515321482.81476164
+    },
+    "ammonia": {
+     "delta_annual_mwh": 1.4938450476620344e-09,
+     "cost_eur": 1.384861685313525e-07
+    }
+   },
+   "upper_load_by_country": {
+    "BN": 183451491.92701894,
+    "ID": -1396113210.4603257,
+    "ASEAN": 12582905.240372086,
+    "KH": -50913706.339133725,
+    "LA": -24195070.59096256,
+    "MM": -289557275.01691127,
+    "MY": 5926185663.1741905,
+    "PH": -1170188794.8304353,
+    "SG": 1407472401.8845558,
+    "TH": -3282189176.9452934,
+    "TL": 3360815.848373622,
+    "VN": -1694474262.47555
+   },
+   "upper_proxied_load_annual_mwh": 15285700.786142964,
+   "unpriced_lower_mwh": 0.0,
+   "unpriced_upper_mwh": 0.0
+  },
+  "v4_F2": {
+   "pair": "v4_F2",
+   "lower_bound_v31_duals_eur": -30603449156.673912,
+   "solved_delta_eur": 8458684282.298401,
+   "upper_bound_v4_duals_eur": 12383543053.273724,
+   "inside": true,
+   "lower_terms": {
+    "load": -199599942497.94504,
+    "pool": 168561415925.43906,
+    "gas_cap": 466003034.787141,
+    "removed_pool": 0.0,
+    "capacity": -30925618.955072183
+   },
+   "upper_terms": {
+    "load": -264093321.0196171,
+    "pool": 4297167733.899628,
+    "gas_cap": 431089842.7880804,
+    "removed_pool": 8064858465.7690935,
+    "capacity": -145479668.16346025
+   },
+   "upper_load_by_carrier": {
+    "AC": {
+     "delta_annual_mwh": 66449925.16337924,
+     "cost_eur": 6636921837.101174
+    },
+    "oil final energy": {
+     "delta_annual_mwh": -46767002.12287746,
+     "cost_eur": -2638862366.0949454
+    },
+    "gas feedstock": {
+     "delta_annual_mwh": 88425912.99232338,
+     "cost_eur": 2618593169.8431945
+    },
+    "oil feedstock": {
+     "delta_annual_mwh": 60448236.407925606,
+     "cost_eur": 2134922758.5117693
+    },
+    "biomass final energy": {
+     "delta_annual_mwh": -42566332.95851997,
+     "cost_eur": -1213049461.1152654
+    },
+    "gas final energy": {
+     "delta_annual_mwh": 106368368.69751783,
+     "cost_eur": 6052585918.663635
+    },
+    "industry heat": {
+     "delta_annual_mwh": -58666494.374675706,
+     "cost_eur": -1784416008.936446
+    },
+    "industry heat high": {
+     "delta_annual_mwh": -71334956.6748214,
+     "cost_eur": -708982961.231866
+    },
+    "industry heat medium A": {
+     "delta_annual_mwh": -75629025.2485437,
+     "cost_eur": -2565815768.668423
+    },
+    "industry heat medium B": {
+     "delta_annual_mwh": -302516100.99574995,
+     "cost_eur": -9071619448.229078
+    },
+    "methanol final energy": {
+     "delta_annual_mwh": -14689185.925437996,
+     "cost_eur": -1654701458.471286
+    },
+    "Li ion": {
+     "delta_annual_mwh": 17895507.705115724,
+     "cost_eur": 2173694763.9399366
+    },
+    "clean cooking useful": {
+     "delta_annual_mwh": 4654929.239315658,
+     "cost_eur": 318612401.42744255
+    },
+    "coal final energy": {
+     "delta_annual_mwh": -18449026.920036882,
+     "cost_eur": -1185413484.432564
+    },
+    "coal feedstock": {
+     "delta_annual_mwh": 9805820.366560645,
+     "cost_eur": 86885278.34719586
+    },
+    "H2": {
+     "delta_annual_mwh": 7861265.2194314925,
+     "cost_eur": 536551508.32590663
+    },
+    "ammonia": {
+     "delta_annual_mwh": 1.4938450476620344e-09,
+     "cost_eur": 1.403955217653532e-07
+    }
+   },
+   "upper_load_by_country": {
+    "BN": 219272686.2269406,
+    "ID": -1073040785.4853122,
+    "ASEAN": 12906560.325457543,
+    "KH": -92409368.00137658,
+    "LA": -37006723.26974083,
+    "MM": -318551243.9685695,
+    "MY": 5558905558.643703,
+    "PH": -1177081894.0272088,
+    "SG": 1781629892.7045069,
+    "TH": -3527660837.106237,
+    "TL": 3373455.978159916,
+    "VN": -1614430623.0399399
+   },
+   "upper_proxied_load_annual_mwh": 15285700.786142964,
+   "unpriced_lower_mwh": 0.0,
+   "unpriced_upper_mwh": 0.0
+  },
+  "v4iid_F1": {
+   "pair": "v4iid_F1",
+   "lower_bound_v31_duals_eur": -9057779955.43873,
+   "solved_delta_eur": 2592316769.4553223,
+   "upper_bound_v4_duals_eur": 11656194954.212221,
+   "inside": true,
+   "lower_terms": {
+    "load": -38060987812.16866,
+    "pool": 30842480300.53595,
+    "gas_cap": 50038233.741843365,
+    "removed_pool": 0.0,
+    "capacity": -1889310677.5478601
+   },
+   "upper_terms": {
+    "load": 4090258738.0991,
+    "pool": 3601201635.484712,
+    "gas_cap": 69950490.44084114,
+    "removed_pool": 6273310759.549056,
+    "capacity": -2378526669.3614883
+   },
+   "upper_load_by_carrier": {
+    "AC": {
+     "delta_annual_mwh": -52380655.74608023,
+     "cost_eur": -897724815.8344445
+    },
+    "oil final energy": {
+     "delta_annual_mwh": -66289650.52237285,
+     "cost_eur": -4163534789.9494033
+    },
+    "gas feedstock": {
+     "delta_annual_mwh": 1278218.0486156987,
+     "cost_eur": 40018265.223523274
+    },
+    "oil feedstock": {
+     "delta_annual_mwh": 496022.7703089807,
+     "cost_eur": 17520374.606690645
+    },
+    "biomass final energy": {
+     "delta_annual_mwh": -61647290.05513709,
+     "cost_eur": -1053288026.0775155
+    },
+    "gas final energy": {
+     "delta_annual_mwh": 104858270.48952532,
+     "cost_eur": 5924771022.042264
+    },
+    "industry heat": {
+     "delta_annual_mwh": -71313425.33836928,
+     "cost_eur": -1354470203.3738449
+    },
+    "industry heat high": {
+     "delta_annual_mwh": -166154165.83769313,
+     "cost_eur": -727845563.4708356
+    },
+    "industry heat medium A": {
+     "delta_annual_mwh": -84972346.54516996,
+     "cost_eur": -1853810601.8169484
+    },
+    "industry heat medium B": {
+     "delta_annual_mwh": -339889386.1821282,
+     "cost_eur": -5825000415.592217
+    },
+    "methanol final energy": {
+     "delta_annual_mwh": -3596577.502068083,
+     "cost_eur": -289174141.3648542
+    },
+    "Li ion": {
+     "delta_annual_mwh": 210249884.52243137,
+     "cost_eur": 14869465223.122972
+    },
+    "clean cooking useful": {
+     "delta_annual_mwh": -1520722.3795547981,
+     "cost_eur": -115377425.1254842
+    },
+    "coal final energy": {
+     "delta_annual_mwh": -17051787.535127662,
+     "cost_eur": -1064198317.0938085
+    },
+    "coal feedstock": {
+     "delta_annual_mwh": 6440549.377920062,
+     "cost_eur": 57067017.80074701
+    },
+    "H2": {
+     "delta_annual_mwh": 8010559.169090502,
+     "cost_eur": 525841135.00227183
+    },
+    "ammonia": {
+     "delta_annual_mwh": 1.4938450476620344e-09,
+     "cost_eur": 1.3783281636246192e-07
+    }
+   },
+   "upper_load_by_country": {
+    "BN": 130122182.08211529,
+    "ID": 5315896767.445623,
+    "ASEAN": 12580621.68320985,
+    "KH": 147009390.48357308,
+    "LA": 5597238.270528963,
+    "MM": -234373205.7823341,
+    "MY": 4413249569.95902,
+    "PH": -643709617.3888279,
+    "SG": 1137494406.3725238,
+    "TH": -4661870787.862083,
+    "TL": 936284.8946328445,
+    "VN": -1532674112.0588613
+   },
+   "upper_proxied_load_annual_mwh": 15285700.786142964,
+   "unpriced_lower_mwh": 0.0,
+   "unpriced_upper_mwh": 0.0
+  }
+ }
+}

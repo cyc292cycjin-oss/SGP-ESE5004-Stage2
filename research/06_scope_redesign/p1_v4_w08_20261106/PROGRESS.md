@@ -3,7 +3,7 @@
 - 分支 `codex/v4-w08-20261106`（起点 `aad8e476` = `codex/v4-i2-20261106` 头，开工时本地与远端一致），worktree `/home/jin/wt_v4_w08`。
 - 交付目录 `work/p1_v4_w08_20261106/` = 仓库 `research/06_scope_redesign/p1_v4_w08_20261106/`（zip 不入库）。
 - 参照引擎临时目录 `/home/jin/v4w08/ref_main`、`/home/jin/v4w08/ref_iid`（I2 引擎副本，第 1 节）。
-- 求解额度：第 5 节 4 次 56 时段求解（v3.1 对照、v4 一体化、v4 不互联、v4 IId 一体化）；已用 0 次。
+- 求解额度：第 5 节 4 次 56 时段求解（v3.1 对照、v4 一体化、v4 不互联、v4 IId 一体化）；已用 4 次（无重试）。
 
 | 步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | W08-2.9 | 清单第 9 节：小时曲线 | 完成：`v4_profiles.py`（G5 MAIN 合成曲线，I2 键扩展）；构建中工业电与四个工业热负荷按节点时区加曲线（年电量不变）；权重与 I2 表差 ≤ 0.48 MWh（I2 表取整）；`test_v4_profiles.py` 3 项 | 同上 |
 | W08-2.10 | 清单第 10 节：注册表与配置哈希 | 完成：`v4_outputs.py`（网络读取的 v4 表 out_ras / out_iid，含 BN NEU 甲醇气扣减、过程排放与原料碳按 v4 倍数）；配置键 `research.demand.anchor_mode`、`research.demand.v4.*`（默认关 = v3.1）；构建端 `s2_network.py` / `s2_layers.py` / `s3_layers.py` 读 v4 表并核对开关集 SHA256；注册表片段 `v4_w08.csv`（69 行），DATA_REGISTRY 2,321 → 2,390 行（原有行不变）；`test_v4_registry.py` 3 项 | 同上 |
 | W08-4 | 56 时段网络重建与静态检查 | 完成：主算一体化 `cbe051d8…`、主算 `no_new_xb` `aa2bab39…`、IId 一体化 `09480713…`（构建提交 `17a15c22`）；静态检查全部通过（`STATIC_CHECKS.md`）；零松弛门 3/3 通过；求解前一阶估计登记（`SMOKE56_V4.md` 第 1 节） | 见 git log（W08-4） |
-| W08-5 | 4 次 56 时段求解 | 进行中（脚本 `scripts/smoke_w08.sh`，输出主检出 `results_project/v4w08/smoke56/`） | |
-| W08-6 | 报告、证据、审阅包、HPC 草案、推送 | 待做 | |
+| W08-5 | 4 次 56 时段求解 | 完成（4 / 4 次已用，无重试）：全部 optimal；R0 = v3.1 冒烟逐位相同；v4 − v3.1 +8.138 / +8.459 / +2.592 bn；失败门都在 v3.1 并集内、C1 全过、v4 三次 `ACCEPTED_LAYER2`；**判据 4（一阶 ± 50 %）三对都不满足** → 数据链核查（`scripts/w08_bounds.py`、`w08_regime.py`、`w08_heat_prices.py`）：链无错，结果在 LP 凸性上下界内，原因为工业热价随需求大降（二阶项）；按指令停下汇报（`SMOKE56_V4.md` 第 2 节） | 见 git log（W08-5） |
+| W08-6 | 报告、证据、审阅包、HPC 草案、推送 | 完成：REPORT 第 0（摘要与 9 个待决问题）、5、6 节；全量 `tests/research` 825 过 / 1 败 / 58 跳过（失败项读旧 S1 网络，跨境 co2 开关与起点配置就不同，与 W08 无关，见 REPORT 第 6 节）；`EVIDENCE.json`；`LEDGER_ENTRY_DRAFT.md`；审阅包清单 `evidence/REVIEW_ZIP_MANIFEST_*.txt`；推送后停下等审阅 | 见 git log（W08-5、W08-6） |
 
 续做点：见上表第一个"进行中 / 待做"的行。
