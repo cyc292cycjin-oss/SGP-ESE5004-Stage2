@@ -1,4 +1,4 @@
-{"ranked_rows": 276, "inactive_basis_rows": ["liquid_ship_cargo_loss_per_km", "liquid_ship_ckm_td_ammonia", "liquid_ship_ckm_td_methanol", "liquid_ship_ckm_td_oil", "liquid_ship_hours_per_year", "liquid_ship_speed_km_h"], "range_updates": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_mwh_per_t_methanol", "liquid_ship_mwh_per_t_oil", "share_MWh_H2_per_tNH3_electrolysis", "share_MWh_MeOH_per_MWh_H2", "share_MWh_MeOH_per_tCO2", "share_MWh_NH3_per_tNH3", "share_bev_avail_max", "share_bev_charge_efficiency"], "top30_overlap_with_w15": 27, "entered": ["biomass_msw_ch4_yield_food_wet", "biomass_potential_MY_oil_palm_trunk", "co2_injection_cap_unified_KH"], "left": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_speed_km_h"], "spearman_vs_w15": 0.945461965439991, "duplicate_bounds": 14, "bias_classes": {"cost": 131, "rhs": 121, "coefficient": 18, "discrete": 6}}
+{"ranked_rows": 276, "inactive_basis_rows": ["liquid_ship_cargo_loss_per_km", "liquid_ship_ckm_td_ammonia", "liquid_ship_ckm_td_methanol", "liquid_ship_ckm_td_oil", "liquid_ship_hours_per_year", "liquid_ship_speed_km_h"], "range_updates": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_mwh_per_t_methanol", "liquid_ship_mwh_per_t_oil", "share_MWh_H2_per_tNH3_electrolysis", "share_MWh_MeOH_per_MWh_H2", "share_MWh_MeOH_per_tCO2", "share_MWh_NH3_per_tNH3", "share_bev_avail_max", "share_bev_charge_efficiency"], "top30_overlap_with_w15": 27, "entered": ["biomass_msw_ch4_yield_food_wet", "biomass_potential_MY_oil_palm_trunk", "co2_injection_cap_unified_KH"], "left": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_speed_km_h"], "spearman_vs_w15": 0.945461965439991, "duplicate_bounds": 7, "bias_classes": {"cost": 131, "rhs": 121, "coefficient": 18, "discrete": 6}}
     rank                                         param_id   bias_class           dB6         dZ_F1  rank_v31ev05
 0    1.0                        scenario_switch_wacc_mode     discrete -3.537480e+09 -1.116085e+10           1.0
 1    2.0                   offwind_alpha_calibration_rule  coefficient -2.492376e+09 -7.189159e+06           2.0
@@ -30,17 +30,44 @@
 27  28.0  share_agriculture_machinery_electric_efficiency          rhs  5.762659e+07  4.427880e+08          27.0
 28  29.0              biomass_potential_MY_oil_palm_trunk          rhs -5.582281e+07 -5.322376e+09          22.0
 29  30.0                   biomass_msw_ch4_yield_food_wet          rhs  4.851037e+07  1.372289e+09          28.0
-Traceback (most recent call last):
-  File "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2a_20261107/scripts/rerank_d2a_post.py", line 113, in <module>
-    main()
-  File "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2a_20261107/scripts/rerank_d2a_post.py", line 109, in main
-    print(diff.reset_index()[["index", "rank_w15", "rank_d2a", "dB6_w15", "dB6_d2a", "reason"]].head(40).to_string())
-          ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/frame.py", line 4113, in __getitem__
-    indexer = self.columns._get_indexer_strict(key, "columns")[1]
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
-    self._raise_if_missing(keyarr, indexer, axis_name)
-  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 6264, in _raise_if_missing
-    raise KeyError(f"{not_found} not in index")
-KeyError: "['index'] not in index"
+                                           param_id  rank_w15  rank_d2a       dB6_w15       dB6_d2a                                                         reason
+0                      co2_injection_cap_unified_KH     259.0       3.0  0.000000e+00 -2.162965e+09       4.1 CO2 storage cap dual read from the Store e_nom bound
+1              renewable_cap_built_solar_rooftop_MY       3.0       4.0 -1.317236e+09 -1.317236e+09                   rank shift from rows above moving (same dB6)
+2               share_transport_electric_efficiency       4.0       5.0  1.239660e+09  1.239660e+09                   rank shift from rows above moving (same dB6)
+3               fuel_price_lng_regasification_adder       5.0       6.0  1.078983e+09  1.078983e+09                   rank shift from rows above moving (same dB6)
+4                       share_bev_charge_efficiency       6.0       7.0  9.593605e+08  9.593605e+08  4.4 notch refreshed from the physics-corrected registry range
+5                    share_transport_ice_efficiency       7.0       8.0 -9.593605e+08 -9.593605e+08                   rank shift from rows above moving (same dB6)
+6                         co2_ship_chain_fixed_cost       8.0       9.0  6.119962e+08  6.119962e+08                   rank shift from rows above moving (same dB6)
+7               biomass_potential_ID_oil_palm_trunk       9.0      10.0 -4.665591e+08 -4.665591e+08                   rank shift from rows above moving (same dB6)
+8                 gas_production_node_allocation_TH      10.0      11.0  3.896381e+08  3.896381e+08                   rank shift from rows above moving (same dB6)
+9                share_shipping_methanol_share_2050      11.0      12.0 -3.553047e+08 -3.553047e+08                   rank shift from rows above moving (same dB6)
+10                                  onwind_alpha_MY      12.0      13.0 -3.174833e+08 -3.174833e+08                   rank shift from rows above moving (same dB6)
+11                co2_sequestration_cost_price_year      13.0      14.0 -2.906988e+08 -2.906988e+08                   rank shift from rows above moving (same dB6)
+12         share_land_transport_electric_share_2050      14.0      15.0 -2.564682e+08 -2.564682e+08                   rank shift from rows above moving (same dB6)
+13                lng_terminal_expansion_capex_main      15.0      16.0 -1.844899e+08 -1.844899e+08                   rank shift from rows above moving (same dB6)
+14                gas_production_node_allocation_MY      16.0      17.0 -1.843900e+08 -1.843900e+08                   rank shift from rows above moving (same dB6)
+15                   xb_stock_la_th_dedicated_lines      21.0      19.0  1.438950e+08  1.438950e+08                   rank shift from rows above moving (same dB6)
+16                                  onwind_alpha_MM      22.0      20.0  1.406555e+08  1.406555e+08                   rank shift from rows above moving (same dB6)
+17             renewable_cap_built_solar_rooftop_SG      23.0      21.0  1.321026e+08  1.321026e+08                   rank shift from rows above moving (same dB6)
+18                  share_bev_dsm_restriction_value      24.0      22.0 -1.294690e+08 -1.294690e+08                   rank shift from rows above moving (same dB6)
+19                        share_MWh_MeOH_per_MWh_H2      25.0      23.0  1.228821e+08  1.228821e+08  4.4 notch refreshed from the physics-corrected registry range
+20                                  onwind_alpha_LA      26.0      24.0  7.176191e+07  7.176191e+07                   rank shift from rows above moving (same dB6)
+21                         share_MWh_MeOH_per_MWh_e      27.0      25.0  6.428578e+07  6.428578e+07                   rank shift from rows above moving (same dB6)
+22                       co2_ship_chain_per_km_cost      28.0      26.0 -6.422950e+07 -6.422950e+07                   rank shift from rows above moving (same dB6)
+23                          th_my_line91_s_nom_2025      29.0      27.0 -6.367296e+07 -6.367296e+07                   rank shift from rows above moving (same dB6)
+24  share_agriculture_machinery_electric_efficiency      30.0      28.0  5.762659e+07  5.762659e+07                   rank shift from rows above moving (same dB6)
+25              biomass_potential_MY_oil_palm_trunk      31.0      29.0 -5.582281e+07 -5.582281e+07                   rank shift from rows above moving (same dB6)
+26                   biomass_msw_ch4_yield_food_wet      32.0      30.0  4.851037e+07  4.851037e+07                   rank shift from rows above moving (same dB6)
+27                biomass_potential_ID_oil_palm_efb      33.0      31.0  4.832256e+07  4.832256e+07                   rank shift from rows above moving (same dB6)
+28      share_agriculture_machinery_fuel_efficiency      34.0      32.0 -4.610127e+07 -4.610127e+07                   rank shift from rows above moving (same dB6)
+29                   liquid_ship_ckm_ieaghg_ammonia      35.0      33.0 -4.375539e+07 -4.375539e+07                   rank shift from rows above moving (same dB6)
+30              biomass_potential_ID_oil_palm_fibre      36.0      34.0  3.313547e+07  3.313547e+07                   rank shift from rows above moving (same dB6)
+31                                 share_bev_energy      37.0      35.0  3.236725e+07  3.236725e+07                   rank shift from rows above moving (same dB6)
+32                       share_bev_dsm_availability      38.0      36.0  3.236725e+07  3.236725e+07                   rank shift from rows above moving (same dB6)
+33                            co2_ship_route_factor      39.0      37.0 -3.211475e+07 -3.211475e+07                   rank shift from rows above moving (same dB6)
+34           waste_uncollected_open_burned_share_VN      40.0      38.0 -3.166175e+07 -3.166175e+07                   rank shift from rows above moving (same dB6)
+35                 liquid_ship_fixed_ieaghg_ammonia      42.0      39.0  2.993974e+07  2.993974e+07                   rank shift from rows above moving (same dB6)
+36             renewable_cap_built_solar_rooftop_BN      43.0      40.0  2.862253e+07  2.862253e+07                   rank shift from rows above moving (same dB6)
+37                co2_land_transport_rail_unit_cost      44.0      41.0 -2.796090e+07 -2.796090e+07                   rank shift from rows above moving (same dB6)
+38          biomass_potential_LA_msw_organic_biogas      46.0      42.0 -2.252697e+07 -2.252697e+07                   rank shift from rows above moving (same dB6)
+39          biomass_potential_VN_msw_organic_biogas      47.0      43.0  1.648626e+07  1.648626e+07                   rank shift from rows above moving (same dB6)
