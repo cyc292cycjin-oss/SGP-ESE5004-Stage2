@@ -147,6 +147,12 @@ def nodal_bunker_row(p: Path) -> dict:
 def run(rid: str, d: Path, bdef: dict, commit: str) -> tuple[dict, dict]:
     R = jl(d / "RUN.json"); S = jl(d / "SOLVE_RECEIPT.json"); SS = jl(d / "split" / "SPLIT_SOLVE.json"); SB = jl(d / "split" / "SPLIT_BUILD.json")
     V = jl(d / "VIOLATIONS.json"); A = jl(d / "V6_ACCEPTANCE.json"); P = jl(d / "PRECISION.json"); K = jl(d / "kkt_summary.json")
+    # stage B (batch result pack): V6_ACCEPTANCE.json is the final label after the batch regrade, V6_ACCEPTANCE_PROVISIONAL.json the provisional one
+    AP = jl(d / "V6_ACCEPTANCE_PROVISIONAL.json"); final_pack = AP is not None
+    if final_pack:
+        A, A_final = AP, A
+    else:
+        A_final = None
     AL = jl(d / "ALLOCATION.json"); RA = jl(d / "m12_owen" / "RHS_AUDIT.json"); OW = jl(d / "m12_owen" / "OWEN.json"); PJ = jl(d / f"PROJECTION_{rid}.json")
     G = gurobi_log(d / "GUROBI_LOG_SCRUBBED.txt"); T2 = time_v(d / "p2_time.txt"); RP = resource_phases(d / "RESOURCE.jsonl"); M = monitor(d / f"MONITOR_{rid}.csv")
     P1 = last_json_line(d / "p1_log_scrubbed.txt") or {}; P3 = last_json_line(d / "p3_log_scrubbed.txt") or {}
@@ -174,9 +180,12 @@ def run(rid: str, d: Path, bdef: dict, commit: str) -> tuple[dict, dict]:
         violations=dict(termination=V["termination"], rows_over_budget=V["totals"]["rows_over_budget"], columns_over_budget=V["totals"]["columns_over_budget"],
                         row_violation_max=V["totals"]["row_violation_max"], row_max_ratio_to_budget=V["totals"]["row_max_ratio_to_budget"],
                         first_order_cost_eur=V["totals"]["first_order_cost_eur"], rows_without_group=V["label_check"]["rows_without_group"]),
-        v6_provisional=dict(file="V6_ACCEPTANCE.json (copied to V6_ACCEPTANCE_PROVISIONAL.json only by the batch regrade, run_batch4.sh:524)",
+        v6_provisional=dict(file=("V6_ACCEPTANCE_PROVISIONAL.json" if final_pack else "V6_ACCEPTANCE.json (copied to V6_ACCEPTANCE_PROVISIONAL.json only by the batch regrade, run_batch4.sh:524)"),
                             label=A["label"], resolution=A["resolution"], profile=A["profile"], G1=dict(a=A["G1"]["a"], b=A["G1"]["b"], c=A["G1"]["c"]),
                             G1_reference=A["G1"]["reference"][:60], G2=all(A["G2"][k]["passed"] for k in ("G2_1", "G2_2", "G2_3")), solver_runs=A["solver_runs"]),
+        v6_final=(dict(file="V6_ACCEPTANCE.json", label=A_final["label"], G1=dict(a=A_final["G1"]["a"], b=A_final["G1"]["b"], c=A_final["G1"]["c"]),
+                       G1_reference=scrub(str(A_final["G1"]["reference"]))[:80], G2=all(A_final["G2"][k]["passed"] for k in ("G2_1", "G2_2", "G2_3")))
+                  if A_final else None),
         c1=dict(grade=P["grade"]["grade"], a=P["acceptance"]["a"], b=P["acceptance"]["b"], c=P["acceptance"]["c"], optimal=P["acceptance"]["optimal"],
                 reference=P["reference"]["source"][:60]),
         postprocessing_outputs=dict(violations=V is not None, precision=P is not None, allocation=AL is not None, owen=OW is not None, v6=A is not None),
@@ -185,6 +194,7 @@ def run(rid: str, d: Path, bdef: dict, commit: str) -> tuple[dict, dict]:
     fact = dict(
         rid=rid, pair=defn["pair"], scenario=sc, network_sha256=R["network_sha256"][:16],
         termination=S["termination_condition"], gurobi_status=S["split"]["gurobi_status_name"], label_provisional=A["label"],
+        label_final=(A_final["label"] if A_final else "batch regrade not yet run"), c1_reference=P["reference"]["source"][:40],
         c1_abc="".join(str(int(bool(P["acceptance"][k]))) for k in "abc"),
         barrier_iterations=S["split"]["bar_iter_count"], log_last_iteration=its[-1]["iter"] if its else None,
         presolve_s=G.get("presolve_s"), ordering_s=G.get("ordering_s"), iter0_log_time_s=G.get("iter0_time_s"),

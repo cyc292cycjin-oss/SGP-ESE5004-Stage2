@@ -2,11 +2,10 @@
  "runs_present": [
   "F1",
   "F2",
+  "F3",
   "F4"
  ],
- "runs_missing": [
-  "F3"
- ],
+ "runs_missing": [],
  "package_commit": "d3b9a3bca18755b50397f31d4b61abe39fb50c3f",
  "runs": {
   "F1": {
@@ -71,7 +70,7 @@
     "rows_without_group": 0
    },
    "v6_provisional": {
-    "file": "V6_ACCEPTANCE.json (copied to V6_ACCEPTANCE_PROVISIONAL.json only by the batch regrade, run_batch4.sh:524)",
+    "file": "V6_ACCEPTANCE_PROVISIONAL.json",
     "label": "ACCEPTED_LAYER2",
     "resolution": "2920x3h",
     "profile": "formal_barrier_1e6_t16",
@@ -84,13 +83,24 @@
     "G2": true,
     "solver_runs": 0
    },
+   "v6_final": {
+    "file": "V6_ACCEPTANCE.json",
+    "label": "ACCEPTED_LAYER2",
+    "G1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "G1_reference": "this batch: disconnected - integrated ledger difference (/hpctmp/<user>/hpr31/ru",
+    "G2": true
+   },
    "c1": {
     "grade": "layer1_plus_nodal_price_settlement",
     "a": true,
     "b": true,
     "c": true,
     "optimal": true,
-    "reference": "L23 365x24h ledger difference disconnected - integrated (res"
+    "reference": "this batch: disconnected - integrated ledger difference (/hp"
    },
    "postprocessing_outputs": {
     "violations": true,
@@ -162,7 +172,7 @@
     "rows_without_group": 0
    },
    "v6_provisional": {
-    "file": "V6_ACCEPTANCE.json (copied to V6_ACCEPTANCE_PROVISIONAL.json only by the batch regrade, run_batch4.sh:524)",
+    "file": "V6_ACCEPTANCE_PROVISIONAL.json",
     "label": "ACCEPTED_LAYER2",
     "resolution": "2920x3h",
     "profile": "formal_barrier_1e6_t16",
@@ -175,13 +185,126 @@
     "G2": true,
     "solver_runs": 0
    },
+   "v6_final": {
+    "file": "V6_ACCEPTANCE.json",
+    "label": "ACCEPTED_LAYER2",
+    "G1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "G1_reference": "this batch: disconnected - integrated ledger difference (/hpctmp/<user>/hpr31/ru",
+    "G2": true
+   },
    "c1": {
     "grade": "layer1_plus_nodal_price_settlement",
     "a": true,
     "b": true,
     "c": true,
     "optimal": true,
-    "reference": "L23 365x24h ledger difference disconnected - integrated (res"
+    "reference": "this batch: disconnected - integrated ledger difference (/hp"
+   },
+   "postprocessing_outputs": {
+    "violations": true,
+    "precision": true,
+    "allocation": true,
+    "owen": true,
+    "v6": true
+   }
+  },
+  "F3": {
+   "rid": "F3",
+   "scenario": "integrated",
+   "network_file": "integrated_ev05_2920_3h_unsolved.nc",
+   "run_json_network_sha256": "c4eb7c44a54175ba06d7d60d4926cb095fc0ec603eced4ff28aecd8493bcb063",
+   "run_json_registered_sha256": "c4eb7c44a54175ba06d7d60d4926cb095fc0ec603eced4ff28aecd8493bcb063",
+   "batch_def_registered_sha": "c4eb7c44a54175ba06d7d60d4926cb095fc0ec603eced4ff28aecd8493bcb063",
+   "network_sha_equal": true,
+   "profile": "formal_barrier_1e6_t16",
+   "profile_ok": true,
+   "solver_parameters": {
+    "Method": 2,
+    "Crossover": 0,
+    "BarConvTol": 1e-06,
+    "BarHomogeneous": 1,
+    "Threads": 16,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
+    "TimeLimit": 864000.0
+   },
+   "code_commit_in_export": null,
+   "code_commit_note": "no export file records the code commit (RUN.json, SOLVE_RECEIPT.json, split receipts, logs searched); package COMMIT = d3b9a3bca18755b50397f31d4b61abe39fb50c3f; indirect evidence below",
+   "indirect_code_evidence": {
+    "code_path": "/hpctmp/<user>/hpr31/repo/scripts_project/b4_split_solve.py",
+    "lp_cols": 37480004,
+    "lp_rows": 83194739,
+    "v3_predicted_cols": 37480004,
+    "v3_predicted_rows": 82955300,
+    "lp_cols_equal_v3": true,
+    "lp_rows_minus_v3": 239439,
+    "v31_extra_rows_expected": 239439,
+    "lp_rows_match_v31": true,
+    "nodal_prices_bunker_row": {
+     "present": true,
+     "values_all_nan": false,
+     "note_present": true
+    },
+    "research_bunker_row_in_lp": true
+   },
+   "solve_receipt": {
+    "status": "ok",
+    "termination": "optimal",
+    "decision": "SOLVED_BATCH4_2920X3H",
+    "retry": false,
+    "optimize_calls": 1,
+    "post_solve_complete": true,
+    "gurobi_status": "OPTIMAL",
+    "sol_count": 1,
+    "p3_post_solve_errors": []
+   },
+   "violations": {
+    "termination": "optimal",
+    "rows_over_budget": 1,
+    "columns_over_budget": 0,
+    "row_violation_max": 0.054198097310290905,
+    "row_max_ratio_to_budget": 1.947053143751621,
+    "first_order_cost_eur": 570.9178696590741,
+    "rows_without_group": 0
+   },
+   "v6_provisional": {
+    "file": "V6_ACCEPTANCE_PROVISIONAL.json",
+    "label": "ACCEPTED_LAYER2",
+    "resolution": "2920x3h",
+    "profile": "formal_barrier_1e6_t16",
+    "G1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "G1_reference": "L23 365x24h ledger difference disconnected - integrated (res",
+    "G2": true,
+    "solver_runs": 0
+   },
+   "v6_final": {
+    "file": "V6_ACCEPTANCE.json",
+    "label": "ACCEPTED_LAYER2",
+    "G1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "G1_reference": "this batch: disconnected - integrated ledger difference (/hpctmp/<user>/hpr31/ru",
+    "G2": true
+   },
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "optimal": true,
+    "reference": "this batch: disconnected - integrated ledger difference (/hp"
    },
    "postprocessing_outputs": {
     "violations": true,
@@ -253,7 +376,7 @@
     "rows_without_group": 0
    },
    "v6_provisional": {
-    "file": "V6_ACCEPTANCE.json (copied to V6_ACCEPTANCE_PROVISIONAL.json only by the batch regrade, run_batch4.sh:524)",
+    "file": "V6_ACCEPTANCE_PROVISIONAL.json",
     "label": "ACCEPTED_LAYER2",
     "resolution": "2920x3h",
     "profile": "formal_barrier_1e6_t16",
@@ -266,13 +389,24 @@
     "G2": true,
     "solver_runs": 0
    },
+   "v6_final": {
+    "file": "V6_ACCEPTANCE.json",
+    "label": "ACCEPTED_LAYER2",
+    "G1": {
+     "a": true,
+     "b": true,
+     "c": true
+    },
+    "G1_reference": "this batch: disconnected - integrated ledger difference (/hpctmp/<user>/hpr31/ru",
+    "G2": true
+   },
    "c1": {
     "grade": "layer1_plus_nodal_price_settlement",
     "a": true,
     "b": true,
     "c": true,
     "optimal": true,
-    "reference": "L23 365x24h ledger difference disconnected - integrated (res"
+    "reference": "this batch: disconnected - integrated ledger difference (/hp"
    },
    "postprocessing_outputs": {
     "violations": true,
