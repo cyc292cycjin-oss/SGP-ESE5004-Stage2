@@ -511,7 +511,7 @@ research:
       enabled: false
       base: sdmx_2019                     # sdmx_2019 (UNSD SDMX current database, 210 item 1) | v3_1 (UNdata export capsule)
       residue_boundary: true              # 210 item 4: self-produced residues (a) out of seed / cache / potential, anchor deduction where the national balance contains them, ID fuelwood (b) outside the anchor
-      id_paper_fuelwood: residue          # 211 item 2: residue (main: ID paper-row fuelwood = self-produced residue (a)) | purchased (sensitivity, I2 main)
+      id_paper_fuelwood: residue          # 211 item 2: residue (main: ID paper-row fuelwood = self-produced residue (a); the paper share of the 2010-2017 mean leaves the anchor, (b) item 17.67 TWh) | residue_literal (V4 D2a, Fable F-01 / decision 220: the 2019 paper-row quantity 41.59 TWh leaves the 2010-2017 mean, (b) item 33.29 TWh; sensitivity, ID 2050 T_v2 +36.89 TWh) | purchased (sensitivity, I2 main)
       household_gasoline: id_to_road      # 210 item 6: ID household motor gasoline -> road | none
       rail_parent: children_only          # 209 F2 / F6 option b: rail parent out of the seed and the land-transport accounts | in_d1 (v3.1)
       captive_coal: true                  # 204 / 208: captive coal option (b), reading I (research_inputs/industry_v4/CAPTIVE_COAL_2019.csv)
@@ -523,5 +523,6 @@ research:
       industry_curves: g5_main            # checklist section 9: G5 MAIN composite curves on industry electricity and the four industrial heat loads | flat | all_flat
       mm_gasoline: false                  # sensitivity: MM household gasoline also to road
       hvc_basis: b                        # V4 D1 (decision 214 items 8 / 9): b (main: HVC 2019 deduction 5.191, 2050 vector 4.627 MWh/t) | a (S2 basis 3.269 / 6.103; I2 sensitivity hvc_s2)
+      meoh_per_tco2: stoichiometric       # V4 D2a (decision 220): stoichiometric (v4 main: methanolisation MWh_MeOH per t CO2 = M_MeOH / M_CO2 x LHV_MeOH = 4.0248, registry ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric; scripts_project/s3_layers.py) | pypsa_eur (v3.1 fallback: research.s3.ammonia_methanol.MWh_MeOH_per_tCO2 = 4.0321). Network build only; part of the switch set
   biomass:                              # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
     missing_cost_rule: null             # zero (v3.1: an empty cost column enters at 0) | proxy (registry biomass_missing_cost_proxy, the uniform proxy of unsourced residues); null = the switch-set value (v4.enabled false -> zero, true -> proxy)

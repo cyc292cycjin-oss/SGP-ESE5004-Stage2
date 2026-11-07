@@ -117,12 +117,13 @@ def fuelwood_mean(cells: pd.DataFrame, cc: str = "ID") -> dict:
 
 
 def drop_set(cells: pd.DataFrame, s: dict) -> set:
-    """Records dropped from the cache under the switch set s: residues (a) when residue_boundary; the ID paper-row fuelwood when id_paper_fuelwood = residue."""
+    """Records dropped from the cache under the switch set s: residues (a) when residue_boundary; the ID paper-row fuelwood when id_paper_fuelwood = residue
+    or residue_literal (V4 D2a: the two readings differ only in the (b) item added outside the anchor, v4_industry.build_steps s2)."""
     out = set()
     if s.get("residue_boundary"):
         ra = residues(cells); ra = ra[ra.cls == "a"]
         out |= {(x.country, x.code, x.tx) for x in ra.itertuples()}
-        if s.get("id_paper_fuelwood") == "residue":
+        if s.get("id_paper_fuelwood") in ("residue", "residue_literal"):   # V4 D2a: both readings of decision 211 item 2 drop the paper-row fuelwood record
             out |= {("ID", FW_CODE, "1214G")}
     return out
 

@@ -1,0 +1,64 @@
+F.s.....F............................................................... [ 96%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer ____
+
+    def test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer():
+        import s2_layers as L
+        folders = _folders()
+        assert len(folders) >= 3   # out_ras, out_iid, the residue_literal set
+        for od in folders:
+            rec = json.loads((od / "V4_SWITCHES.json").read_text()); s = rec["switches"]
+            S = pd.read_csv(od / "INDUSTRY_2050_SUMMARY_V4.csv").set_index("country")
+            pot = _potential(s)
+            for c in S.index:
+                cap = float(pot.get(c, 0.0)) * float(s["bio_cap_share"])
+                assert abs(float(S.at[c, "solid_biomass_potential_main_mwh"]) - cap) <= 1e-3, (od.name, c, "F-14: table cap = build cap")
+                bio, ag = float(S.at[c, "pe_biomass_mwh"]), float(S.at[c, "agriculture_biomass_2050_mwh"])
+                ov_ind, ov_ag, _, _ = L.biomass_overflow(bio, ag, cap, 1.0, 0.999)   # the build call for bio_cap_share < 1 (cap passed as the potential)
+>               assert float(S.at[c, "biomass_overflow_industry_mwh"]) == pytest.approx(ov_ind, abs=1e-6), (od.name, c)
+E               AssertionError: ('out_iid', 'VN')
+E               assert 32073767.786502585 == 32073767.7862885 ± 1.0e-06
+E                 
+E                 comparison failed
+E                 Obtained: 32073767.786502585
+E                 Expected: 32073767.7862885 ± 1.0e-06
+
+tests/research/test_v4_d2a_fixes.py:52: AssertionError
+________________ test_f06_registry_rows_and_convergence_record _________________
+
+    def test_f06_registry_rows_and_convergence_record():
+        from v4_common import sha256
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        r = reg.loc["v4_pks_in_mill_share"]
+>       assert r.tier == "D" and "grade D" in r.description
+E       AssertionError: assert ('C' == 'D'
+E         
+E         - D
+E         + C)
+
+tests/research/test_v4_d2a_fixes.py:199: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_fixes.py::test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer
+FAILED tests/research/test_v4_d2a_fixes.py::test_f06_registry_rows_and_convergence_record
+2 failed, 72 passed, 1 skipped, 12 warnings in 44.42s

@@ -162,6 +162,10 @@ def main(argv=None):
     write_csv([dict(r, future_shares=json.dumps({k: round(v, 6) for k, v in r["future_shares"].items()})) for r in mapping_rows], DEMAND_OUT / "INDUSTRY_SUBSECTOR_MAPPING_UNSD_PYPSA_EUR.csv",
               ["unsd_subsector", "pypsa_eur_sector", "weight", "weight_basis", "today_mwh_per_t", "future_mwh_per_t", "efficiency_factor", "future_shares"])
     bio = pd.read_csv(a.biomass_potential if a.biomass_potential is not None else BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
+    if (a.biomass_potential is not None or a.biomass_cap_share is not None) and "status" in bio.columns:
+        # V4 D2a (Fable F-14): on the v4 paths the potential excludes the rows the build skips (s2_layers.add_biomass_layer: DATA_PENDING / ZERO_BY_DECISION),
+        # so the cap of this table equals the cap of the network (MY 793, BN 856, SG 473, TL 664 MWh); the default v3.1 run is unchanged (A2)
+        bio = bio[~bio.status.isin(["DATA_PENDING", "ZERO_BY_DECISION"])]
     solid_pot = bio[bio.feedstock_group != "biogas"].assign(p=pd.to_numeric(bio.potential_main_mwh, errors="coerce").fillna(0.0)).groupby("country").p.sum().to_dict()
     s2b_path = DEMAND_DIR / "INDUSTRY_2050_SUMMARY_aeo8_ats_relative_S2B_FROZEN.csv"   # S2B result frozen from commit 8d61bd37 (s2b_industry.py) -> comparison column
     s2b_summary = pd.read_csv(s2b_path).set_index("country").to_dict("index"); s2b_sha = sha256(s2b_path)

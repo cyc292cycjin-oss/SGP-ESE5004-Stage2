@@ -124,6 +124,6 @@ class Shapes:
             return None
         if n_snap == 8760:
             return y
-        if n_snap != 2920:
-            raise ValueError(f"industry curves: {n_snap} snapshots (2920 x 3 h or 8760 expected)")
-        return y.reshape(2920, 3).mean(1)
+        if n_snap <= 0 or 8760 % n_snap:   # V4 D2a (Fable F-12): any regular aggregation of the hourly year (2920 x 3 h, 1460 x 6 h, 365 x 24 h, ...)
+            raise ValueError(f"industry curves: {n_snap} snapshots (a divisor of 8760 expected: 8760, 2920 x 3 h, 365 x 24 h, ...)")
+        return y.reshape(n_snap, 8760 // n_snap).mean(1)

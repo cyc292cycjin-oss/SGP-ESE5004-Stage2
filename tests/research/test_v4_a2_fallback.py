@@ -1,5 +1,5 @@
 """V4 W08 acceptance A2: with every v4 switch off (the scripts called without options) m08b_demand.py and s3_0_industry.py reproduce the eight
-v3.1 outputs byte for byte. The scripts run in a copy of research_inputs + scripts_project (temporary folder); the repository is not written.
+v3.1 outputs byte for byte - and (V4 D2a, Fable F-05) every file they write (56 files: demand_v5 tables, evidence JSON, registry fragment). The scripts run in a copy of research_inputs + scripts_project (temporary folder); the repository is not written.
 Also: the v4 chain with every switch off (empty case) gives the v3.1 T_v2 of v3_industry (S0). No solver."""
 import shutil
 import subprocess
@@ -31,11 +31,22 @@ def run(root: Path, script: str):
 
 
 def test_a2_eight_outputs_byte_identical(copy_root):
+    import time
+    before = {q: q.stat().st_mtime_ns for q in (copy_root / "research_inputs").rglob("*") if q.is_file()}
+    t0 = time.time_ns(); time.sleep(0.05)
     run(copy_root, "m08b_demand.py"); run(copy_root, "s3_0_industry.py")
     diff = [f for f in M08B_OUT + S30_OUT if (copy_root / DV / f).read_bytes() != (ROOT / DV / f).read_bytes()]
     assert not diff, diff
     # the default runs leave no v4 file behind
     assert not (copy_root / DV / "DEMAND_ANCHOR_C3_DEVIATION.csv").exists()
+    # V4 D2a (Fable F-05): every file the two default runs write (new or rewritten) is byte-identical to the committed one (Fable counted 56)
+    written = [q for q in (copy_root / "research_inputs").rglob("*") if q.is_file() and (q not in before or q.stat().st_mtime_ns > t0)]
+    assert len(written) >= 56, len(written)
+    rel = [q.relative_to(copy_root) for q in written]
+    missing = [str(r) for r in rel if not (ROOT / r).exists()]
+    assert not missing, missing
+    changed = [str(r) for r in rel if (copy_root / r).read_bytes() != (ROOT / r).read_bytes()]
+    assert not changed, changed
 
 
 def test_v4_chain_all_switches_off_is_v31(tmp_path):

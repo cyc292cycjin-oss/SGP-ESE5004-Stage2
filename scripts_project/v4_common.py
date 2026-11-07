@@ -8,6 +8,12 @@ Every v4 change sits behind a switch of research.demand (configs/research/baseli
                                      v4_industry.py records the switch set in out_<anchor_mode>/V4_SWITCHES.json and the build refuses a table
                                      set whose switches differ from the configuration.
   research.demand.v4.hvc_basis       V4 D1 (decision 214 items 8 / 9): b (main: 2019 deduction 5.191, 2050 vector 4.627 MWh/t) | a (S2 basis 3.269 / 6.103)
+  research.demand.v4.id_paper_fuelwood  residue (main, W08 reading of decision 211 item 2: the paper share of the 2010-2017 fuelwood mean leaves the anchor,
+                                     (b) item 17.67 TWh) | residue_literal (V4 D2a, Fable F-01 / decision 220: the 2019 paper-row quantity 41.59 TWh leaves the
+                                     2010-2017 mean, (b) item 33.29 TWh; sensitivity, ID 2050 T_v2 +36.89 TWh) | purchased (I2 main)
+  research.demand.v4.meoh_per_tco2   V4 D2a (decision 220): stoichiometric (v4 main: MWh methanol per t CO2 of the methanolisation link = M_MeOH / M_CO2 x
+                                     LHV_MeOH = 4.0248, registry ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric) | pypsa_eur (v3.1: research.s3.ammonia_methanol
+                                     .MWh_MeOH_per_tCO2 = 4.0321). Acts on the network build only (s3_layers); part of the switch set (SHA256, folder).
   research.biomass.missing_cost_rule V4 D1 (decisions 212 item 5, 215 item 5): zero (v3.1: an empty cost of a pool whose registry cost is DATA_PENDING
                                      enters at 0) | proxy (the registry proxy biomass_missing_cost_proxy); null = the value of the switch set (v4.enabled
                                      false -> zero, true -> proxy). It acts on the network build only and is part of the switch set (SHA256, folder).
@@ -44,13 +50,15 @@ ANCHOR_MODES = ("ras", "iid", "iib", "external")
 # switch defaults = v3.1 (every v4 rule off); the v4 main set (decision 211) is V4_MAIN
 V31 = dict(enabled=False, base="v3_1", residue_boundary=False, id_paper_fuelwood="purchased", household_gasoline="none", rail_parent="in_d1",
            captive_coal=False, products=False, vn_same_run=False, bio_cap_share=1.0, biomass_potential="v3", gas_caps="gross",
-           industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero")
+           industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero", meoh_per_tco2="pypsa_eur")
 V4_MAIN = dict(enabled=True, base="sdmx_2019", residue_boundary=True, id_paper_fuelwood="residue", household_gasoline="id_to_road", rail_parent="children_only",
                captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted", gas_caps="marketed",
-               industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy")
-SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "purchased"), household_gasoline=("none", "id_to_road"),
+               industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy", meoh_per_tco2="stoichiometric")
+SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "purchased", "residue_literal"), household_gasoline=("none", "id_to_road"),
                      rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted"), gas_caps=("gross", "marketed"),
-                     industry_curves=("flat", "g5_main", "all_flat"), hvc_basis=("b", "a"), missing_cost_rule=("zero", "proxy"))
+                     industry_curves=("flat", "g5_main", "all_flat"), hvc_basis=("b", "a"), missing_cost_rule=("zero", "proxy"),
+                     meoh_per_tco2=("pypsa_eur", "stoichiometric"))
+MEOH_STOICH_ROW = "ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric"   # V4 D2a: registry row of the stoichiometric value (v4_d1_registry.py)
 
 
 def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
@@ -108,6 +116,8 @@ def v4_tables(cfg: dict, repo: Path | None = None) -> dict | None:
 def check(s: dict) -> None:
     if s["anchor_mode"] not in ANCHOR_MODES:
         raise ValueError(f"research.demand.anchor_mode {s['anchor_mode']} not in {ANCHOR_MODES}")
+    if not s["enabled"] and s["anchor_mode"] != "ras":   # V4 D2a (Fable F-11): with v4 disabled the anchor mode would be silently inert
+        raise ValueError(f"research.demand.anchor_mode {s['anchor_mode']} needs research.demand.v4.enabled true (with v4 disabled the v3.1 tables are read and the mode is inert)")
     for k, allowed in SWITCH_VALUES.items():
         if str(s.get(k)) not in allowed:
             raise ValueError(f"research.demand.v4.{k} = {s.get(k)} not in {allowed}")
@@ -149,6 +159,29 @@ def check_network_meta(meta: dict, cfg: dict, repo: Path | None = None) -> dict:
 
 def switch_sha(s: dict) -> str:
     return hashlib.sha256(json.dumps({k: s[k] for k in sorted(s)}, sort_keys=True).encode()).hexdigest()
+
+
+def overflow_split(biomass_mwh: float, agriculture_mwh: float, cap_mwh: float) -> tuple[float, float]:
+    """V4 D2a (Fable F-02, decision 220): fixed solid-biomass demand above the cap (cap = bio_cap_share x potential), industry first, then agriculture -
+    the s3_0_industry.py / s2_layers.biomass_overflow rule applied to the conservation-layer biomass (T_v2 biomass incl. the product vectors)."""
+    overflow = max(0.0, float(biomass_mwh) + float(agriculture_mwh) - float(cap_mwh))
+    ov_ind = min(overflow, float(biomass_mwh))
+    return ov_ind, min(overflow - ov_ind, float(agriculture_mwh))
+
+
+def meoh_per_tco2_value(cfg: dict, repo: Path | None = None) -> tuple[float, str]:
+    """V4 D2a (decision 220): MWh methanol per t CO2 of the methanolisation link for the configured switch set - pypsa_eur: the configured
+    research.s3.ammonia_methanol.MWh_MeOH_per_tCO2 (v3.1, 4.0321); stoichiometric: the registry row MEOH_STOICH_ROW (CO2 + 3 H2 -> CH3OH + H2O,
+    M_MeOH / M_CO2 x LHV_MeOH = 4.0248). Returns (value, basis)."""
+    A = cfg["research"]["s3"]["ammonia_methanol"]
+    s = switches(cfg)
+    if s["meoh_per_tco2"] == "pypsa_eur":
+        return float(A["MWh_MeOH_per_tCO2"]), "pypsa_eur: research.s3.ammonia_methanol.MWh_MeOH_per_tCO2"
+    import pandas as pd
+    reg = pd.read_csv((repo or ROOT) / "research_inputs" / "registry_v5" / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+    if MEOH_STOICH_ROW not in reg.index:
+        raise KeyError(f"registry row {MEOH_STOICH_ROW} missing (scripts_project/v4_d1_registry.py)")
+    return float(reg.at[MEOH_STOICH_ROW, "value"]), f"stoichiometric: registry {MEOH_STOICH_ROW}"
 
 
 def sha256(p: Path) -> str:

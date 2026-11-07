@@ -338,7 +338,9 @@ def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
       (no district-heat buses in this model), relocation options.
     """
     A = cfg["research"]["s3"]["ammonia_methanol"]
-    meoh_per_h2, meoh_per_tco2, meoh_per_e = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"]), float(A["MWh_MeOH_per_MWh_e"])
+    from v4_common import meoh_per_tco2_value
+    meoh_per_tco2, meoh_basis = meoh_per_tco2_value(cfg)   # V4 D2a (decision 220): stoichiometric 4.0248 in the v4 main set, the configured 4.0321 (PyPSA-Eur) in v3.1
+    meoh_per_h2, meoh_per_e = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_MWh_e"])
     cracker_in = float(A["MWh_NH3_per_MWh_H2_cracker"]); min_pl = float(A["min_part_load_methanolisation"])
     pools = sorted(COUNTRIES) if liquids_national(cfg) else ["ASEAN"]   # V3 (decision 161): one ammonia and one methanol bus per country
     led = dict(buses=[ensure_liquid_bus(n, cfg, c, k) for c in pools for k in ("ammonia", "methanol")], components={})
@@ -384,7 +386,7 @@ def add_ammonia_methanol(n, costs, cfg, repo, registry: pd.DataFrame, nodes):
             add_link(n, f"{node} OCGT methanol", c, "OCGT methanol", [meoh, node, atmo], [oc_eff, ef_meoh], capital_cost=oc_fixed * oc_eff, marginal_cost=oc_vom * oc_eff, lifetime=oc_life)
             counts["methanol_ocgt"] += 1
     led["components"] = counts
-    led["parameters"] = dict(MWh_MeOH_per_MWh_H2=meoh_per_h2, MWh_MeOH_per_tCO2=meoh_per_tco2, MWh_MeOH_per_MWh_e=meoh_per_e, MWh_NH3_per_MWh_H2_cracker=cracker_in, min_part_load_methanolisation=min_pl,
+    led["parameters"] = dict(MWh_MeOH_per_MWh_H2=meoh_per_h2, MWh_MeOH_per_tCO2=meoh_per_tco2, MWh_MeOH_per_tCO2_basis=meoh_basis, MWh_MeOH_per_MWh_e=meoh_per_e, MWh_NH3_per_MWh_H2_cracker=cracker_in, min_part_load_methanolisation=min_pl,
                              haber_bosch_electricity_input=hb_el, haber_bosch_hydrogen_input=hb_h2, methanol_co2_intensity=ef_meoh, biomass_to_methanol=bool(btm), methanol_ocgt=bool(ocgt))
     n.meta["research_ammonia_methanol"] = led
     return led
@@ -426,7 +428,8 @@ def add_fuel_carbon_mode(n, costs, cfg, nodes):
         raise ValueError("Unknown research.s3.fuel_carbon_mode " + mode)
     ef_oil, ef_meoh = cost(costs, "oil", "CO2 intensity"), cost(costs, "methanol", "CO2 intensity")
     A = cfg["research"]["s3"]["ammonia_methanol"]
-    meoh_per_h2, meoh_per_tco2 = float(A["MWh_MeOH_per_MWh_H2"]), float(A["MWh_MeOH_per_tCO2"])
+    from v4_common import meoh_per_tco2_value
+    meoh_per_h2, meoh_per_tco2 = float(A["MWh_MeOH_per_MWh_H2"]), meoh_per_tco2_value(cfg)[0]   # V4 D2a (decision 220): the same value as the methanolisation link
     nat = liquids_national(cfg); nat_buses = national_liquid_buses(cfg)   # V3 (decision 161): one non-fossil oil bus and store per country
     if nat:
         ensure_carrier(n, "oil non-fossil store")

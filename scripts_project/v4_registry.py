@@ -80,10 +80,10 @@ def main():
             "UNSD fuelwood n.e.s. industry 2010-2017 (S2 section 3; G0 step 8)", f"file: {(V4_DIR / 'FUELWOOD_OUTSIDE_BALANCE.csv').relative_to(ROOT)}", sha256(V4_DIR / "FUELWOOD_OUTSIDE_BALANCE.csv"),
             country="ID", decision_ref="206, 210")
     from v4_biomass_potential import PKS_IN_MILL_SHARE
-    reg.add("v4_pks_in_mill_share", "share of palm kernel shells burned in the mills (removed from the potential): W08 constant, since V4 D1 the fallback of the per-country table PALM_MILL_SELF_USE.csv (registry v4_palm_mill_*; T03)", PKS_IN_MILL_SHARE, "share", "C",
+    reg.add("v4_pks_in_mill_share", "share of palm kernel shells burned in the mills (removed from the potential): W08 constant, since V4 D1 only the fallback of the per-country table PALM_MILL_SELF_USE.csv (registry v4_palm_mill_pks_self_use_<CC>, grades C / D; T03). Evidence grade D (I2 central assumption); registry tier C = the lowest tier of the registry scale A / B / C (V4 D2a, Fable F-06)", PKS_IN_MILL_SHARE, "share", "C",
             "I2 central assumption (grade D)", "scripts_project/v4_biomass_potential.py PKS_IN_MILL_SHARE", sha256(HERE / "v4_biomass_potential.py"), sensitivity_low=0.0, sensitivity_high=1.0, decision_ref="209, 210")
-    reg.add("v4_biomass_overflow_cap_share", "overflow cap = share x solid-biomass potential (W12 F7; 1 % margin of the pool)", 0.99, "share", "C", "decision 209 F7",
-            "configs/research/baseline.yaml research.demand.v4.bio_cap_share", sha256(ROOT / "configs/research/baseline.yaml"), sensitivity_low=0.98, sensitivity_high=1.0, decision_ref="209")
+    reg.add("v4_biomass_overflow_cap_share", "overflow cap = share x solid-biomass potential (W12 F7; 1 % margin of the pool); value = research.demand.v4.bio_cap_share of configs/research/baseline.yaml (V4 D2a, Fable F-06: file locator, SHA256 of the configuration file)", 0.99, "share", "C", "decision 209 F7",
+            "file: configs/research/baseline.yaml research.demand.v4.bio_cap_share", sha256(ROOT / "configs/research/baseline.yaml"), sensitivity_low=0.98, sensitivity_high=1.0, decision_ref="209")
     g = pd.read_csv(ROOT / "research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv"); f = pd.read_csv(ROOT / "research_inputs/gas_v5/FUGITIVE_FACTORS_V4.csv").set_index("country")
     gsha = sha256(ROOT / "research_inputs/gas_v5/W12_UNSD_GAS_2019.csv"); fsha = sha256(ROOT / "research_inputs/gas_v5/FUGITIVE_FACTORS_V4.csv")
     for r in g.itertuples():

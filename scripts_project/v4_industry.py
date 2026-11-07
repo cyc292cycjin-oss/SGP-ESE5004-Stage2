@@ -14,6 +14,9 @@ A case is a JSON-serialisable dict (I2 keys): d1 / d1_s0 (pd.Series base_2019_mw
 target multiplier)], cache, moves [(cc, sub, carrier, MWh)], products {cc: [item]}, cem {cc: t}, edgar_zero [cc], bn_iii, nf {cc: {key: vec}},
 extra {cc: {key: vec}}, meoh_drop [cc], vn_same_run, bio_cap_share, biopot (path or bytes). run_case returns the snapshot (T_v2 = the 12 columns
 of v3_industry.CARRIERS, biomass before overflow; 'other'; carriers; sub-sectors; anchors; sectors; overflow; deduction log). Nothing is solved.
+V4 D2a (Fable F-02): the snapshot overflow (keys overflow, overflow_agriculture, bio_before) is the overflow of the conservation-layer biomass (T_v2 biomass
+incl. the product vectors) against the cap, as the build computes it; the s3_0 columns computed before the product vectors are kept as overflow_s30 /
+bio_before_s30. Switch value id_paper_fuelwood = residue_literal (Fable F-01) = the literal reading of decision 211 item 2.
 """
 from __future__ import annotations
 
@@ -38,7 +41,7 @@ import v3_industry as v3   # noqa: E402
 import v4_industry_cache as VC   # noqa: E402
 from d1_common import fmt   # noqa: E402
 from v4_common import (ASEAN, BIOMASS_DIR, CARS19, DEMAND_DIR, FOSSIL, FUELS, IND_V3, OUTC, REG_DIR, ROOT, SECTORS, SRC, V4_DIR, V4_MAIN,   # noqa: E402
-                       out_dir, sha256, switch_sha, switches)
+                       out_dir, overflow_split, sha256, switch_sha, switches)
 
 D1_TABLE = DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER.csv"
 ATS_V31 = DEMAND_DIR / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv"
@@ -430,6 +433,10 @@ class Chain:
             o = ob.loc[cc] if cc in ob.index else None
             prod50 = sum(fsum(v) for v in extra.get(cc, {}).values())
             ind = ats[(ats.country == cc) & (ats.sector == "Industry")]
+            # V4 D2a (Fable F-02): the overflow of the conservation-layer biomass (T_v2 biomass incl. the product vectors), the rule of s3_0 / the build;
+            # the s3_0 columns (computed before the product vectors) are kept as *_s30 for the record
+            ag50 = float(row_T.get("agriculture_biomass_2050_mwh", 0.0)); pot50 = float(row_T.get("solid_biomass_potential_main_mwh", 0.0))
+            ov_ind, ov_ag = overflow_split(L["T_car"].get("biomass", 0.0), ag50, pot50)
             res["snap"][cc] = dict(
                 L=L, T=L["T"], other=L["other_total"], share=(L["other_total"] / L["T"] if L["T"] > 0 else 0.0),
                 ind19=float(pd.to_numeric(ind.base_2019_mwh).sum()), ind50_ats=float(pd.to_numeric(ind.value_2050_mwh, errors="coerce").fillna(0).sum()),
@@ -437,8 +444,9 @@ class Chain:
                 prod50=prod50, other19=(float(o.other_2019_mwh) if o is not None else 0.0),
                 other19_car={c_: (float(o[f"other_2019_{c_}_mwh"]) if o is not None else 0.0) for c_ in CARS19},
                 ind_anchor=float(an.at[cc, "industry_anchor_mwh"]), ind_mult=float(an.at[cc, "industry_multiplier"]), tfec_anchor=float(an.at[cc, "ats_tfec_2050_mwh"]),
-                overflow=float(row_T.get("biomass_overflow_industry_mwh", 0.0)), bio_before=float(row_T.get("pe_biomass_before_overflow_mwh", 0.0)),
-                pot=float(row_T.get("solid_biomass_potential_main_mwh", 0.0)), gaps=float(gp[(gp.country == cc) & (gp.carrier != "hydrogen")].mwh.sum()),
+                overflow=ov_ind, overflow_agriculture=ov_ag, bio_before=float(L["T_car"].get("biomass", 0.0)), agriculture_biomass=ag50,
+                overflow_s30=float(row_T.get("biomass_overflow_industry_mwh", 0.0)), bio_before_s30=float(row_T.get("pe_biomass_before_overflow_mwh", 0.0)),
+                pot=pot50, gaps=float(gp[(gp.country == cc) & (gp.carrier != "hydrogen")].mwh.sum()),
                 s30_not_found=float(gp[(gp.country == cc) & nf_mask].mwh.sum()),
                 ind19_true=float(pd.to_numeric(ind.base_2019_mwh).sum()) - sum(a["base_added_mwh"] - a["d_mwh"] for a in add_info if a["country"] == cc))
         return res
@@ -465,7 +473,8 @@ def pack(res: dict, label: str, extra: dict | None = None) -> dict:
         out["countries"][cc] = dict(T=s["T"], other=s["other"], share=s["share"], T_car=L["T_car"], other_car=L["other"], scale=L["scale"],
                                     by_sub=L["by_sub"], parts={k: dict(v) for k, v in L["parts"].items()}, meoh_dropped=L["meoh_dropped"],
                                     **{k: s[k] for k in ("ind19", "ind19_true", "ind50_ats", "ind19_car", "prod50", "other19", "other19_car", "ind_anchor", "ind_mult", "tfec_anchor",
-                                                         "overflow", "bio_before", "pot", "gaps", "s30_not_found")})
+                                                         "overflow", "overflow_agriculture", "bio_before", "agriculture_biomass", "overflow_s30", "bio_before_s30", "pot", "gaps",
+                                                         "s30_not_found")})
     out["ats_add_info"] = res.get("ats_add_info", [])
     return out
 
@@ -550,8 +559,12 @@ def build_steps(I: Inputs, s: dict) -> list:
         ed[IND_BIO("ID")] = ed.get(IND_BIO("ID"), 0.0) - I.idb_sdmx
         c["d1"] = d1_with(c, ed)
         c["anchor_adj"] = {cc: v for cc, v in I.a_tot.items() if I.balance_contains.get(cc, True)}
-        paper = s["id_paper_fuelwood"] == "residue"
-        c["ats_add"] = list(c.get("ats_add", [])) + [("ID", "biomass", I.idb_main * I.fw["share_non_paper"] if paper else I.idb_main, I.m_v3["ID"])]
+        paper = s["id_paper_fuelwood"] in ("residue", "residue_literal")
+        if s["id_paper_fuelwood"] == "residue_literal":   # V4 D2a (Fable F-01, decision 220): literal reading of 211 item 2 - the 2019 paper-row quantity leaves the 2010-2017 mean
+            add = I.fw["mean_mwh"] - I.fw["paper_sdmx_mwh"]
+        else:   # W08 reading (main): the non-paper share of the 2010-2017 mean; purchased: the whole mean
+            add = I.idb_main * I.fw["share_non_paper"] if paper else I.idb_main
+        c["ats_add"] = list(c.get("ats_add", [])) + [("ID", "biomass", add, I.m_v3["ID"])]
         c["cache"] = I.cache_a_paper if paper else I.cache_a
         return c
 

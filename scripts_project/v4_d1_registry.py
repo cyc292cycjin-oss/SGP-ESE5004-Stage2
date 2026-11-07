@@ -4,7 +4,8 @@ scripts_project/d1_registry.py.
     PYTHONHASHSEED=0 python scripts_project/v4_d1_registry.py && python scripts_project/d1_registry.py
 
   fragments/v4_d1.csv              new rows: the missing-cost rule of the biomass pools (section 3; value read from the registry proxy rows of unsourced residues);
-                                   the palm mill self-use table and its per-country fibre / PKS shares (section 5, T03; evidence of the D1 delivery).
+                                   the palm mill self-use table and its per-country fibre / PKS shares (section 5, T03; evidence of the D1 delivery);
+                                   V4 D2a (decision 220): the stoichiometric methanol output per t CO2 (v4 main value) and the hydrogen LHV 33.33 MWh/t.
   fragments/v4_d1_corrections.csv  full-row replacements (section 4, decision 212 (a)): registered sensitivity ranges whose endpoints violate a physical bound are
                                    clipped to it (main values and networks unchanged); physics_limits() holds the derivations (stoichiometry, model heating values).
 Deterministic (no time stamps). Nothing is solved.
@@ -20,6 +21,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 from d1_common import REG_DIR, Registry, fmt   # noqa: E402
+from v4_common import sha256   # noqa: E402
 from s2_layers import MISSING_COST_PROXY_ID, MISSING_COST_PROXY_SOURCE   # noqa: E402
 
 SCRIPT = "scripts_project/v4_d1_registry.py"
@@ -140,11 +142,29 @@ def palm_rows(r: Registry) -> None:
                   status="REGISTERED")
 
 
+def methanol_rows(r: Registry, reg: pd.DataFrame) -> None:
+    """V4 D2a (decision 220; V4_D2A_INSTRUCTION.md section 3.1): the stoichiometric methanol output per t CO2 (v4 main value of the methanolisation link,
+    research.demand.v4.meoh_per_tco2 = stoichiometric; v3.1 fallback pypsa_eur = 4.0321) and the hydrogen heating value the physics limits use."""
+    L = physics_limits(reg); R = reg.set_index("param_id")
+    r.add("ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric",
+          f"Methanolisation MWh methanol per t CO2 input, stoichiometric: CO2 + 3 H2 -> CH3OH + H2O, M_MeOH / M_CO2 x LHV_MeOH = {MOLAR['MeOH']:.3f} / {MOLAR['CO2']:.3f} x "
+          f"{L['lhv_meoh_mwh_t']} MWh/t (IUPAC 2021 atomic weights; registry industry_pe_param_MWh_MeOH_per_tMeOH). v4 main value of the methanolisation link "
+          "(research.demand.v4.meoh_per_tco2 = stoichiometric, scripts_project/s3_layers.py via v4_common.meoh_per_tco2_value); the v3.1 fallback (pypsa_eur) keeps "
+          "ammonia_methanol_MWh_MeOH_per_tCO2 = 4.0321 (PyPSA-Eur config, 0.18 % above stoichiometry). EXACT derivation (V4 D1 section 4, decision 220)",
+          float(L["meoh_per_tco2_max"]), "MWh_MeOH/tCO2", "B", "stoichiometry (IUPAC 2021 atomic weights) x registry methanol LHV", "scripts_project/v4_d1_registry.py physics_limits",
+          str(R.at["industry_pe_param_MWh_MeOH_per_tMeOH", "source_sha256"]), decision_ref="212 (a), 220", status="REGISTERED")
+    r.add("physics_hydrogen_lhv_mwh_per_t", "Hydrogen lower heating value used by the physical bounds of the registered ranges and the model's hydrogen MWh (technology-data / PyPSA-Eur "
+          "convention: 33.33 kWh/kg = 120.0 MJ/kg LHV); registered on decision 220 (V4 D1 section 4 noted that the registry had no hydrogen heating-value row); 119.96 MJ/kg "
+          "(33.322) changes the derived limits by <= 1e-4 relative", LHV_H2_MWH_PER_T, "MWh/t", "B", "technology-data / PyPSA-Eur convention (hydrogen LHV 120 MJ/kg)",
+          "scripts_project/v4_d1_registry.py LHV_H2_MWH_PER_T", sha256(HERE / "v4_d1_registry.py"), sensitivity_low=33.322, sensitivity_high=33.333, decision_ref="212 (a), 220", status="REGISTERED")
+
+
 def main():
     reg = pd.read_csv(REG_DIR / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False)
     r = Registry(SCRIPT)
     missing_cost_row(r, reg)
     palm_rows(r)
+    methanol_rows(r, reg)
     out = REG_DIR / "fragments" / "v4_d1.csv"
     r.write(out)
     print(out, len(r.rows))

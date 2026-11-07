@@ -6,7 +6,10 @@ Tables (final step S7 of v4_industry.build_steps):
   DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv  ATS table after the v4 seed, anchors and reading-I edits; BN methanol energy use taken out of the
                                                         BN NEU gas rows (decision 210 item 7; 2019 3.45 TWh, 2050 x growth);
   DEMAND_ANCHOR_AEO8_ATS.csv, INDUSTRY_OUTPUT_2050_M08B.csv, DEMAND_ANCHOR_C3_DEVIATION.csv   m08b outputs of the run;
-  INDUSTRY_2050_SUMMARY_V4.csv           s3_0 heat-band summary with the carrier columns = T_v2 by carrier of the conservation layer (v3_industry rule);
+  INDUSTRY_2050_SUMMARY_V4.csv           s3_0 heat-band summary with the carrier columns = T_v2 by carrier of the conservation layer (v3_industry rule) and
+                                         (V4 D2a, Fable F-02) the overflow columns recomputed from that biomass (the build rule); the other s3_0 columns
+                                         (bas_*, other_*, td_*, s2b_td_*) are the pre-conservation s3_0 values (Fable F-09; the build does not read them);
+  DEMAND_ANCHOR_M08B_EVIDENCE.json       (V4 D2a, Fable F-06) the m08b RAS / refit convergence record of the run;
   INDUSTRY_2050_SUBSECTOR_CARRIER_V4.csv parts (sub-sector x carrier, 2050);
   INDUSTRY_CARRIER_NODE_SHARES_V4.csv    carrier node shares = sum over parts of energy x sub-sector node shares (I2 i2_tables.Nodes rule: v3 sub-sector
                                          shares, ammonia on the v2 national shares, new / re-located sub-sectors on the W07 session shares share_v4);
@@ -31,7 +34,7 @@ if str(HERE) not in sys.path:
 import v3_industry as v3   # noqa: E402
 import v4_profiles as PR   # noqa: E402
 from d1_common import HVC_FEEDSTOCK_ACCOUNTS, NEU_GAS_ACCOUNT   # noqa: E402
-from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, is_main_set, out_dir, sha256, switch_sha   # noqa: E402
+from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, is_main_set, out_dir, overflow_split, sha256, switch_sha   # noqa: E402
 
 EDGAR = REG_DIR / "sources/EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv"
 GROUPS = {"minerals": ["2.A.1", "2.A.2", "2.A.3", "2.A.4"], "chemicals": ["2.B"], "metals": ["2.C"]}   # = s2_0_process_emissions.GROUPS
@@ -104,7 +107,9 @@ def norm(d: dict) -> dict:
 
 
 def bn_neu_methanol(ats: pd.DataFrame, item: dict) -> dict:
-    """Decision 210 item 7: BN methanol energy use (gas) leaves the BN NEU gas rows (2050 value; floored at 0, truncation reported)."""
+    """Decision 210 item 7: BN methanol energy use (gas) leaves the BN NEU gas rows - the 2050 value and (V4 D2a, Fable F-07) the 2019 base, each by the
+    plant's gas energy use of that year (floored at 0, truncation reported). The two deductions grow with the plant (2050 / 2019 = 1.166), the row itself
+    with the NEU multiplier (1.051): the row's multiplier_total is not changed, the deducted row no longer equals base x multiplier."""
     m = (ats.country == "BN") & (ats.sector == "NonEnergyUse") & (ats.carrier == "gas") & (ats.account == NEU_GAS_ACCOUNT) & (ats.value_2050_mwh != "")
     before = float(pd.to_numeric(ats.loc[m, "value_2050_mwh"]).sum()); want = float(item["gas_2050_mwh"])
     after = max(0.0, before - want)
@@ -113,7 +118,17 @@ def bn_neu_methanol(ats: pd.DataFrame, item: dict) -> dict:
         for i in ats.index[m]:
             ats.at[i, "value_2050_mwh"] = repr(float(ats.at[i, "value_2050_mwh"]) * f)
             ats.at[i, "growth_method"] = str(ats.at[i, "growth_method"]) + f"; minus BN methanol energy use {want:.6g} MWh (V4 W08, decision 210 item 7)"
-    return dict(before_mwh=before, deducted_mwh=min(want, before), truncated_mwh=max(0.0, want - before), after_mwh=after)
+    out = dict(before_mwh=before, deducted_mwh=min(want, before), truncated_mwh=max(0.0, want - before), after_mwh=after)
+    mb = m & (ats.base_2019_mwh != "")
+    before19 = float(pd.to_numeric(ats.loc[mb, "base_2019_mwh"]).sum()); want19 = float(item["gas_2019_mwh"])
+    after19 = max(0.0, before19 - want19)
+    if before19 > 0:
+        f19 = after19 / before19
+        for i in ats.index[mb]:
+            ats.at[i, "base_2019_mwh"] = repr(float(ats.at[i, "base_2019_mwh"]) * f19)
+            ats.at[i, "growth_method"] = str(ats.at[i, "growth_method"]) + f"; 2019 base minus {want19:.6g} MWh (V4 D2a, Fable F-07)"
+    out.update(base_2019_before_mwh=before19, base_2019_deducted_mwh=min(want19, before19), base_2019_truncated_mwh=max(0.0, want19 - before19), base_2019_after_mwh=after19)
+    return out
 
 
 def process_and_feedstock(ats: pd.DataFrame, main_summary: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -162,9 +177,11 @@ def write_tables(s: dict, chain=None) -> dict:
     (od / "DEMAND_ANCHOR_AEO8_ATS.csv").write_bytes(mo["ANCH"]); (od / "INDUSTRY_OUTPUT_2050_M08B.csv").write_bytes(mo["OUTRULE"])
     if mo.get("DIR") is not None and (mo["DIR"] / "DEMAND_ANCHOR_C3_DEVIATION.csv").exists():
         shutil.copyfile(mo["DIR"] / "DEMAND_ANCHOR_C3_DEVIATION.csv", od / "DEMAND_ANCHOR_C3_DEVIATION.csv")
+    if mo.get("DIR") is not None and (mo["DIR"] / "DEMAND_ANCHOR_M08B_EVIDENCE.json").exists():   # V4 D2a (Fable F-06): RAS / refit convergence record of this run
+        shutil.copyfile(mo["DIR"] / "DEMAND_ANCHOR_M08B_EVIDENCE.json", od / "DEMAND_ANCHOR_M08B_EVIDENCE.json")
     # ---- industry summary (v3_industry rule: carrier columns = T_v2 by carrier of the conservation layer)
     S = res["S"].copy()
-    parts_all, comp = {}, []
+    parts_all, comp, ov_log = {}, [], {}
     for c, snap in res["snap"].items():
         L = snap["L"]
         if L["T"] <= 0:
@@ -173,6 +190,16 @@ def write_tables(s: dict, chain=None) -> dict:
             S.at[c, v3.col(k)] = sum(v.get(k, 0.0) for v in L["parts"].values())
             if k == "biomass":
                 S.at[c, "pe_biomass_mwh"] = S.at[c, v3.col(k)]
+        # V4 D2a (Fable F-02, decision 220): the overflow columns are recomputed after the conservation layer from the full T_v2 biomass (incl. the purchased
+        # biomass of the product vectors), the same rule as the build (s2_layers.biomass_overflow with cap = bio_cap_share x potential); the s3_0 values
+        # (computed before the product vectors) are recorded in V4_SWITCHES.json. The *_to_gas columns stay 0 (useful-heat table), the source band shares
+        # of the fixed biomass are the s3_0 shares (cement kiln share of the pre-product biomass; the product biomass is medium-band steam / drying use).
+        bio = float(S.at[c, "pe_biomass_mwh"]); ag = float(S.at[c, "agriculture_biomass_2050_mwh"]); cap = float(S.at[c, "solid_biomass_potential_main_mwh"])
+        old = (float(S.at[c, "biomass_overflow_industry_mwh"]), float(S.at[c, "biomass_overflow_agriculture_mwh"]))
+        ov_ind, ov_ag = overflow_split(bio, ag, cap)
+        S.at[c, "biomass_overflow_industry_mwh"] = ov_ind; S.at[c, "biomass_overflow_agriculture_mwh"] = ov_ag
+        ov_log[c] = dict(biomass_T_v2_mwh=bio, agriculture_biomass_mwh=ag, cap_mwh=cap, overflow_industry_mwh=ov_ind, overflow_agriculture_mwh=ov_ag,
+                         s30_overflow_industry_mwh=old[0], s30_overflow_agriculture_mwh=old[1], s30_biomass_mwh=float(snap["bio_before_s30"]))
         parts_all[c] = L["parts"]
         for sub, v in L["parts"].items():
             for k, x in v.items():
@@ -199,7 +226,7 @@ def write_tables(s: dict, chain=None) -> dict:
     files = {p.name: sha256(p) for p in sorted(od.glob("*")) if p.is_file()}
     rec = dict(switches=s, switch_sha256=switch_sha(s), dir=od.name, main_set=is_main_set(s), asean_T_v2_TWh=sum(v["T"] for v in snap["countries"].values()) / 1e6,
                T_v2_TWh={c: v["T"] / 1e6 for c, v in snap["countries"].items()}, other_TWh={c: v["other"] / 1e6 for c, v in snap["countries"].items()},
-               bn_neu_methanol=neu, node_share_sources=srcs, files=files, m08b_runs=ch.n_m08b, s30_runs=ch.n_s30)
+               bn_neu_methanol=neu, biomass_overflow_recomputed=ov_log, node_share_sources=srcs, files=files, m08b_runs=ch.n_m08b, s30_runs=ch.n_s30)
     (od / "V4_SWITCHES.json").write_text(json.dumps(rec, indent=1, default=float) + "\n")
     print(json.dumps(dict(out=str(od.relative_to(ROOT)), asean_T_v2_TWh=rec["asean_T_v2_TWh"], bn_neu=neu), indent=1))
     return rec
