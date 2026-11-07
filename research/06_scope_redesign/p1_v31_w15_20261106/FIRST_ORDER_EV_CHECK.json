@@ -1,0 +1,44 @@
+{
+ "method": "dZ = rel x (sum EV-store d_enom_fixed x e_nom - sum BEV-charger capacity value x p_nom), W10 mechanism 'ev_fleet'; rel = -0.5 from F1/F2 (full fleet -> x0.5), +1.0 from F3/F4 (x0.5 -> full); the fleet enters as a right-hand side, Z is convex in it, so each one-sided first-order estimate is a lower bound of the true change (decision 212 (b)) and the two give a bracket",
+ "runs": {
+  "F3-F1": {
+   "actual": 2015724437.7366943,
+   "first_order_from_full": 1168102952.0760322,
+   "upper_from_half": 3863979484.9401135,
+   "rel_error_first_order": -0.4205046432896318,
+   "lower_bound_holds": true,
+   "bracket_holds": true,
+   "components": {
+    "full_store_term": -2336205904.1520643,
+    "full_charger_term": 0.0,
+    "half_store_term": -3863979483.447961,
+    "half_charger_term": 1.49215255255549,
+    "ev_stores": 96,
+    "chargers": 96
+   }
+  },
+  "F4-F2": {
+   "actual": 2088018259.3971558,
+   "first_order_from_full": 1249021075.5113468,
+   "upper_from_half": 3900659539.672486,
+   "rel_error_first_order": -0.4018150608165854,
+   "lower_bound_holds": true,
+   "bracket_holds": true,
+   "components": {
+    "full_store_term": -2498042151.0226936,
+    "full_charger_term": 0.0,
+    "half_store_term": -3900659539.0849314,
+    "half_charger_term": 0.5875543611930854,
+    "ev_stores": 96,
+    "chargers": 96
+   }
+  }
+ },
+ "dB6": {
+  "actual": 72293821.66046143,
+  "first_order": 80918123.43531466,
+  "rel_error": 0.11929514274896867,
+  "sign_same": true,
+  "note": "dB6 is a difference of two lower bounds: no bound guarantee"
+ }
+}
