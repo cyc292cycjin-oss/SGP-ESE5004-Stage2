@@ -29,7 +29,8 @@ def main():
     S07 = V3 / "cloud_results" / "final_20261103T160537Z" / "full_unpacked" / "export"
     rel = lambda p: str(p.relative_to(W)) if str(p).startswith(str(W)) else str(p)
     inputs = {}
-    inputs["instruction"] = [entry(OUT / f, rel(OUT / f)) for f in ("V31_W15_INSTRUCTION.md", "V31_W15_SHA256.txt")]
+    inputs["instruction"] = [entry(OUT / f, rel(OUT / f)) for f in ("V31_W15_INSTRUCTION.md", "V31_W15_SHA256.txt", "V31_W15_SUPP01.md", "V31_W15_SUPP01_SHA256.txt")
+                             if (OUT / f).exists()]
     inputs["archives"] = [entry(p, rel(p)) for p in sorted(RES.glob("interim_F*.tar.gz*"))]
     inputs["interim_unpacked"] = [entry(p, rel(p)) for p in sorted((RES / "interim_unpacked").rglob("*")) if p.is_file()]
     inputs["hpc_package_v3_1"] = [entry(PKG / f, rel(PKG / f)) for f in ("BATCH_DEF.json", "REFERENCE_VALUES.json", "COMMIT", "RUN_PLAN_HPC_V3.md", "RUN_PLAN_V3.md",
