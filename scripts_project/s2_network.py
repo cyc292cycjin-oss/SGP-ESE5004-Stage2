@@ -27,7 +27,7 @@ from scenario_network import (ELECTRIC_BASE_SHA, EXTENDABLE_REQUIRED, XB_FOM_HOO
 from s2_costs import build_research_costs, write_costs
 from s3_layers import add_gas_network, add_imports, add_ammonia_methanol, add_fuel_carbon_mode
 from s4a_layers import apply_renewable_profiles
-from s4a_fleet import add_gem_fleet, remove_not_operating_units
+from s4a_fleet import add_gem_fleet, reclassify_phs_stock, remove_not_operating_units
 from s4b_layers import apply_sector_alignment, apply_typhoon_premium
 from s4b_candidates import apply_candidate_caps
 from s4c_layers import (check_fuel_prices, apply_wacc_mode, apply_cost_layer_s4c1, apply_hydro_inflow_normalization, bunker_mode, apply_bunker_attribution,
@@ -350,6 +350,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
     fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
     fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
+    fleet["phs_reclass"] = reclassify_phs_stock(n, costs, cfg, repo)   # V4 D2a (decision 220, section 3.3): frozen PHS groups holding conventional units (Bhumibol) split; null = follows v4.enabled
     vintage = apply_existing_vintage_costs(n, cfg, repo)   # M08a A3 (decision 131): existing stock priced with technology-data v0.15.0 of its commissioning year (author_v0_13_2 = former)
     fleet["vintage_costs"] = {k: v for k, v in vintage.items() if k != "table"}
     cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch

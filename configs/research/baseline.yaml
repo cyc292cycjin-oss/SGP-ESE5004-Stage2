@@ -255,6 +255,8 @@ research:
     construction_no_start_year_table: research_inputs/fleet_v5/FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv
     remove_not_operating_gipt2026: true   # S4B-1 (decision 77): remove the 11 frozen-stock units (2,854 MW) that GIPT 2026-09 lists as cancelled / mothballed / retired / absent (data correction); false = keep (S1 frozen stock)
     removal_table: research_inputs/fleet_v5/FLEET_REMOVED_NOT_OPERATING_GIPT2026.csv
+    phs_stock_reclass: null               # V4 D2a (decision 220, section 3.3; scripts_project/s4a_fleet.py reclassify_phs_stock): null = follows research.demand.v4.enabled (v4 main: on; v3.1: off) | true | false. Frozen-stock PHS groups that aggregate conventional reservoir units: Bhumibol TH2 4 950 MW -> 171 MW PHS existing + 608.2 MW reservoir hydro existing + 170.8 MW GEM double count dropped (EGAT contracted 779.2 MW includes the 171 MW unit 8; IHA TH pumped storage 1,531 MW)
+    phs_reclass_table: research_inputs/fleet_v5/PHS_STOCK_RECLASS_V4.csv
     existing_cost_basis: td_v0_15_0_by_commissioning_year   # M08a A3 (decision 131, registry existing_fleet_cost_rule; scripts_project/m08a_layers.py): td_v0_15_0_by_commissioning_year (MAIN: every existing component - frozen base, GEM additions - gets FOM (FOM % x investment), VOM and, for the fuel Links CCGT / OCGT / coal / lignite / oil, the efficiency of the technology-data v0.15.0 table of its units' commissioning year (active cost layer rebase variant, by_year_dir); mixed-year components: capacity-weighted FOM / VOM, efficiency keeping the fuel-input capacity; geothermal keeps AEO8) | author_v0_13_2 (former: frozen-base author v0.13.2 table costs year 2030, GEM additions on the 2050 table; comparison)
     existing_cost_year_rule: {step: 5, min: 2020, max: 2050, rounding: nearest}   # M08a A3: commissioning year -> nearest 5-year table, clipped to [2020, 2050]; units commissioned before 2020 use costs_2020 (registry existing_fleet_cost_year_rule)
   nuclear:                                # decision 38; siting table is a grade-C assumption
@@ -275,6 +277,9 @@ research:
     caps_table: research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv
     nuclear_cap: none                     # decision 79: none (main, decision 38) | national_plans (PH 4.8, VN 14.4, ID 10, TH 0.6 GW on nuclear + nuclear SMR, others 0; implemented only)
     nuclear_caps_table: research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv
+  supply:                                 # V4 D2a (decision 220; V4 D1 PHS_PROPOSAL.md section 5): W19 sensitivity switch of the new pumped-storage candidates (scripts_project/s4b_candidates.py phs_asean_case)
+    phs_case: main                        # main (the S4B-2 candidates: GEM pipeline caps, 6 h, round trip 0.75, technology-data 2,297 EUR2020/kW) | asean (sensitivity, not main: Lu et al. 2021 power + energy costs in EUR2020 (PHS_ASEAN_CASE_V4.csv), three duration tiers 6 / 12 / 24 h chosen by the model, round trip 0.80, one energy cap per country = ANU 2025 short list through the hook research_phs_energy_cap; countries without an ANU figure keep the S4B-2 caps)
+    phs_asean_table: research_inputs/potentials_v5/PHS_ASEAN_CASE_V4.csv
   hydro:                                  # S4C-2 (decision 83; user decision 2026-10-17): data correction of the frozen electric base, deviating from the PyPSA-Earth runoff allocation
     inflow_normalization: national_observed   # national_observed (main, option B: national inflow of the existing stock = Ember 2019-2025 median hydro generation x 1.1, allocated by capacity share, unit seasonal shape kept; new-build per-MW inflow from the corrected same-country stock) | national_observed_runoff_shares (option A, sensitivity: same target, author runoff shares kept) | frozen_base (former state)
     target_table: research_inputs/hydro_v5/HYDRO_NATIONAL_TARGET_S4C2.csv
@@ -518,7 +523,7 @@ research:
       products: true                      # 204, 206, 208, 210 items 5 / 7: cement (ii) / BN (iii), nickel 2023, pulp and paper, HVC, methanol, new plants, MY ammonia duplicate, glass / alumina / copper / lime
       vn_same_run: true                   # 208: VN hybrid split, T_v2 and decomposition from the same run
       bio_cap_share: 0.99                 # 209 F7: overflow cap = share x solid-biomass potential (s3_0 and the build)
-      biomass_potential: v4_adjusted      # 209 F3 / F4: BIOMASS_POTENTIAL_2050_V4.csv (bagasse R2, in-mill self-use) | v3
+      biomass_potential: v4_adjusted_t04  # 209 F3 / F4 + V4 D2a T04 (decision 220): v4_adjusted_t04 (main: BIOMASS_POTENTIAL_2050_V4_T04.csv = bagasse R2, in-mill self-use and the palm-residue energy basis - EFB / fibre = wet mass x (1 - moisture) x LHV_dry, PALM_RESIDUE_BASIS_T04.csv) | v4_adjusted (W08: BIOMASS_POTENTIAL_2050_V4.csv, 15 GJ/t on the wet mass; switch alternative) | v3
       gas_caps: marketed                  # 209 F1: UNSD marketed production caps, fugitive factor on the same row (GAS_PRODUCTION_CAPS_2050_V4.csv) | gross
       industry_curves: g5_main            # checklist section 9: G5 MAIN composite curves on industry electricity and the four industrial heat loads | flat | all_flat
       mm_gasoline: false                  # sensitivity: MM household gasoline also to road

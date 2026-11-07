@@ -105,7 +105,7 @@
    "section": "1"
   }
  ],
- "generated_utc": "2026-11-07T07:18:24+00:00",
+ "generated_utc": "2026-11-07T07:50:04+00:00",
  "network_builds": 0,
  "outputs": {
   "research_inputs/biomass_v5/BIOMASS_CROSSCHECK_IRENA.csv": {
@@ -120,13 +120,25 @@
    "bytes": 93610,
    "sha256": "cd9df282168598cc0080cc15e94baa77554a51bc0f6c091cfdf448030948bca8"
   },
+  "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv": {
+   "bytes": 94994,
+   "sha256": "598605c3db0799e30c77d8130d4a72c7a1684ceda1caa8246b7a0ea492e291f6"
+  },
   "research_inputs/biomass_v5/BIOMASS_POTENTIAL_ADJ_V4.csv": {
    "bytes": 13015,
    "sha256": "2674c4dc1584b14f2ae5e241ea7d57cac35429532578e732bb29557b7d8b50da"
   },
+  "research_inputs/biomass_v5/BIOMASS_POTENTIAL_ADJ_V4_T04.csv": {
+   "bytes": 14957,
+   "sha256": "64e0d8a8de08db4a9afbd6323e2ed2019c76cfd812331d889f3f76f7ace68bc6"
+  },
   "research_inputs/biomass_v5/PALM_MILL_SELF_USE.csv": {
    "bytes": 2423,
    "sha256": "a97c3593d61ffb23f065092fe477db41898064041a65447e920686e7c92eb492"
+  },
+  "research_inputs/biomass_v5/PALM_RESIDUE_BASIS_T04.csv": {
+   "bytes": 3407,
+   "sha256": "05bbff8784fa6e77560cd8a29addb69af39617d76aa2b3362083d609601dc08c"
   },
   "research_inputs/biomass_v5/REPLICATION_FAOSTAT2010_VS_R1A.csv": {
    "bytes": 617,
@@ -689,16 +701,16 @@
    "sha256": "93cc9d6ee782cf868210ff1947b7a7d2ae3784c9cde1c7aa238c13d94b81d708"
   },
   "research_inputs/registry_v5/D1_EVIDENCE.json": {
-   "bytes": 63962,
-   "sha256": "c1f75fb6ce6b692ba2d2d43b4a0b13d964824d0bf489e4cc7cc0c77c24bfa08b"
+   "bytes": 64514,
+   "sha256": "af3f44d986f5b20f2d7976395e0ee1e00cf22f85050910ac3d7b6a889058dd4e"
   },
   "research_inputs/registry_v5/DATA_PENDING_LIST.csv": {
    "bytes": 13219,
    "sha256": "d42deb9362c6db038acc21122d2403d6bd54827c8758a485885e4b0370530bc2"
   },
   "research_inputs/registry_v5/DATA_REGISTRY.csv": {
-   "bytes": 1416984,
-   "sha256": "2a17a21f5c144c76c247f59546e74a1798c08263dfad9fb7ded578ca85c377d3"
+   "bytes": 1434993,
+   "sha256": "e9d45f9a4c2f91d664103508d990185938872e1ffe1708191144ddfeae559415"
   },
   "research_inputs/registry_v5/DOWNLOAD_LIST.csv": {
    "bytes": 2409,
@@ -1037,7 +1049,7 @@
  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
  "python": "3.11.13",
  "registry": "research_inputs/registry_v5/DATA_REGISTRY.csv",
- "registry_sha256": "2a17a21f5c144c76c247f59546e74a1798c08263dfad9fb7ded578ca85c377d3",
+ "registry_sha256": "e9d45f9a4c2f91d664103508d990185938872e1ffe1708191144ddfeae559415",
  "schema": "d1-data-registry-evidence-v1",
  "scripts": {
   "scripts_project/d1_biomass.py": "8a4ef9ad210144ffff6989606dd32a877a24c1ba82774c0b9a0839c9b4b60727",
@@ -1049,7 +1061,7 @@
   "scripts_project/d1_fossil_production.py": "94a1e9c5ee977d87d8bf20f2c87abcfa8cd31136605ffa5921094d6003a15444",
   "scripts_project/d1_fuel_prices.py": "5e27a4df4e599d5457975d5cf2aedec3285650009651f7c8f2e256e26db52a6f",
   "scripts_project/d1_lng_terminals.py": "9e5e92c17ab1cdc5e4f9a642f79ce4cd745726393002351a329ca9be840e7ec0",
-  "scripts_project/d1_registry.py": "bf1f1c8d71fd826f271e22a18608a880b351436b92bf47ceb222efa0ce1b6a31",
+  "scripts_project/d1_registry.py": "fd67e2f10b5f9db14a85c7094e8b5f789e076075f6a0a83cda38f472163b3329",
   "scripts_project/dfx_data.py": "1662a646e9f9eec8ab02d021883905950b3a83998f4c05e5d0eacadcbbf6dc94",
   "scripts_project/m080_data.py": "afe1459ede34b38a7c05e8574badfb3bb37e805ba596f1495362bc7a405164d5",
   "scripts_project/m08a_data.py": "8c7d337b1efaf58f9915cd48a7f75a8a532436b97be62476f6e0d4faaf989c65",
@@ -1148,21 +1160,22 @@
    "scripts_project/s4o_1_data.py": 4,
    "scripts_project/v3_data.py": 41,
    "scripts_project/v4_d1_registry.py": 14,
+   "scripts_project/v4_d2a_registry.py": 32,
    "scripts_project/v4_registry.py": 69
   },
   "by_status": {
    "CANDIDATE_ONLY": 35,
    "DATA_PENDING": 48,
-   "REFERENCE_ONLY": 696,
-   "REGISTERED": 1321,
-   "SENSITIVITY": 129,
+   "REFERENCE_ONLY": 702,
+   "REGISTERED": 1331,
+   "SENSITIVITY": 145,
    "SOURCE_ZERO": 164,
    "ZERO_BY_DECISION": 11
   },
   "by_tier": {
    "A": 299,
-   "B": 1451,
-   "C": 654
+   "B": 1472,
+   "C": 665
   },
   "corrections": {
    "files": [
@@ -1394,6 +1407,6 @@
    "rows": 217
   },
   "data_pending": 48,
-  "rows": 2404
+  "rows": 2436
  }
 }

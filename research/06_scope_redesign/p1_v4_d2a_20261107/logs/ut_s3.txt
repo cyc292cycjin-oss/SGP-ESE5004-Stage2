@@ -1,0 +1,408 @@
+.F.F......FF.s.....F.................................................... [ 83%]
+...........EEE                                                           [100%]
+==================================== ERRORS ====================================
+_______ ERROR at setup of test_only_the_ranges_of_the_eleven_rows_change _______
+
+    @pytest.fixture(scope="module")
+    def regs():
+        import d1_registry as DR
+>       base, _ = DR.assemble([c for c in DR.CORRECTIONS if c != "v4_d1_corrections"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d1_physics.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+corrections = ['m080_corrections', 'm08a_corrections', 'm08b_corrections', 'dfx_corrections']
+
+    def assemble(corrections: list | None = None) -> tuple:
+        """Fragments + unit rows, then the correction files in order (default CORRECTIONS); returns (registry frame sorted by param_id, corrected ids).
+        V4 D1: scripts_project/v4_d1_registry.py writes its corrections against the registry assembled without v4_d1_corrections."""
+        frames = []
+        for f in FRAGMENTS:
+            p = REG_DIR / "fragments" / f"{f}.csv"
+            if not p.exists():
+>               raise SystemExit(f"missing fragment {p}; run scripts_project/d1_{f}.py first")
+E               SystemExit: missing fragment /home/jin/wt_v4_d2a/research_inputs/registry_v5/fragments/v4_d2a.csv; run scripts_project/d1_v4_d2a.py first
+
+scripts_project/d1_registry.py:142: SystemExit
+_________ ERROR at setup of test_corrections_fragment_is_reproducible __________
+
+    @pytest.fixture(scope="module")
+    def regs():
+        import d1_registry as DR
+>       base, _ = DR.assemble([c for c in DR.CORRECTIONS if c != "v4_d1_corrections"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d1_physics.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+corrections = ['m080_corrections', 'm08a_corrections', 'm08b_corrections', 'dfx_corrections']
+
+    def assemble(corrections: list | None = None) -> tuple:
+        """Fragments + unit rows, then the correction files in order (default CORRECTIONS); returns (registry frame sorted by param_id, corrected ids).
+        V4 D1: scripts_project/v4_d1_registry.py writes its corrections against the registry assembled without v4_d1_corrections."""
+        frames = []
+        for f in FRAGMENTS:
+            p = REG_DIR / "fragments" / f"{f}.csv"
+            if not p.exists():
+>               raise SystemExit(f"missing fragment {p}; run scripts_project/d1_{f}.py first")
+E               SystemExit: missing fragment /home/jin/wt_v4_d2a/research_inputs/registry_v5/fragments/v4_d2a.csv; run scripts_project/d1_v4_d2a.py first
+
+scripts_project/d1_registry.py:142: SystemExit
+_ ERROR at setup of test_no_in_use_range_violates_the_checked_bounds_after_correction _
+
+    @pytest.fixture(scope="module")
+    def regs():
+        import d1_registry as DR
+>       base, _ = DR.assemble([c for c in DR.CORRECTIONS if c != "v4_d1_corrections"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d1_physics.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+corrections = ['m080_corrections', 'm08a_corrections', 'm08b_corrections', 'dfx_corrections']
+
+    def assemble(corrections: list | None = None) -> tuple:
+        """Fragments + unit rows, then the correction files in order (default CORRECTIONS); returns (registry frame sorted by param_id, corrected ids).
+        V4 D1: scripts_project/v4_d1_registry.py writes its corrections against the registry assembled without v4_d1_corrections."""
+        frames = []
+        for f in FRAGMENTS:
+            p = REG_DIR / "fragments" / f"{f}.csv"
+            if not p.exists():
+>               raise SystemExit(f"missing fragment {p}; run scripts_project/d1_{f}.py first")
+E               SystemExit: missing fragment /home/jin/wt_v4_d2a/research_inputs/registry_v5/fragments/v4_d2a.csv; run scripts_project/d1_v4_d2a.py first
+
+scripts_project/d1_registry.py:142: SystemExit
+=================================== FAILURES ===================================
+______ test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged _______
+
+    def test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged():
+        import v4_biomass_potential as B
+        adj0, tab0 = B.adjust(); adj4, tab4 = B.adjust(basis="t04")
+        for adj, out in ((adj0, B.OUT), (adj4, B.OUT_T04)):
+            buf = io.StringIO(); adj.to_csv(buf, index=False, lineterminator="\n")
+            assert out.read_text() == buf.getvalue(), out.name
+        assert B.OUT.read_text() == (ROOT / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv").read_text()
+        a0 = adj0.set_index(["country", "category"]); a4 = adj4.set_index(["country", "category"])
+>       assert list(a0.index) == list(a4.index) and (a0.mass_main_t.astype(float) == a4.mass_main_t.astype(float)).all()   # masses unchanged, energy basis changed
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ([('BN', 'cass...sidues'), ...] == [('BN', 'cass...sidues'), ...]
+E         
+E         Use -v to get more diff and False)
+E        +  where False = all()
+E        +    where all = country  cate...dtype: float64 == country  cate...dtype: float64
+E             
+E             Use -v to get more diff.all
+
+tests/research/test_v4_d2a_efb.py:42: AssertionError
+_______________________ test_registry_rows_of_the_basis ________________________
+
+self = Index(['acceptance_column_dual_sign_scale_confirmed',
+       'acceptance_tolerance_basis', 'aeo8_c3_ats_2022_Agricultu...', 'working_principle_8',
+       'xb_stock_la_th_dedicated_lines'],
+      dtype='object', name='param_id', length=2404)
+key = 'v4_palm_residue_moisture_ar_efb'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'v4_palm_residue_moisture_ar_efb'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+    def test_registry_rows_of_the_basis():
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+>       assert float(reg.at["v4_palm_residue_moisture_ar_efb", "value"]) == 0.60 and float(reg.at["v4_palm_residue_lhv_dry_efb", "value"]) == 18.0
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d2a_efb.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexing.py:2575: in __getitem__
+    return super().__getitem__(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexing.py:2527: in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/frame.py:4226: in _get_value
+    row = self.index.get_loc(index)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['acceptance_column_dual_sign_scale_confirmed',
+       'acceptance_tolerance_basis', 'aeo8_c3_ats_2022_Agricultu...', 'working_principle_8',
+       'xb_stock_la_th_dedicated_lines'],
+      dtype='object', name='param_id', length=2404)
+key = 'v4_palm_residue_moisture_ar_efb'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'v4_palm_residue_moisture_ar_efb'
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py:3819: KeyError
+________________ test_asean_table_conversion_and_registry_rows _________________
+
+self = Index(['acceptance_column_dual_sign_scale_confirmed',
+       'acceptance_tolerance_basis', 'aeo8_c3_ats_2022_Agricultu...', 'working_principle_8',
+       'xb_stock_la_th_dedicated_lines'],
+      dtype='object', name='param_id', length=2404)
+key = 'phs_asean_energy_cap_ID'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'phs_asean_energy_cap_ID'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+    def test_asean_table_conversion_and_registry_rows():
+        t = pd.read_csv(ROOT / "research_inputs/potentials_v5/PHS_ASEAN_CASE_V4.csv", keep_default_na=False).set_index("country")
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        fx = float(reg.at["fx_usd_to_eur_2020", "value"])
+        for c in ("ID", "LA", "MY", "MM", "VN", "PH", "TH"):
+            assert float(t.at[c, "power_eur2020_per_kw"]) == pytest.approx(560.0 * fx) and float(t.at[c, "energy_eur2020_per_kwh"]) == pytest.approx(50.0 * fx)
+>           assert float(reg.at[f"phs_asean_energy_cap_{c}", "value"]) == pytest.approx(float(t.at[c, "anu_shortlist_twh"]) * 1e6) and reg.at[f"phs_asean_energy_cap_{c}", "status"] == "SENSITIVITY"
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d2a_supply.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexing.py:2575: in __getitem__
+    return super().__getitem__(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexing.py:2527: in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/frame.py:4226: in _get_value
+    row = self.index.get_loc(index)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['acceptance_column_dual_sign_scale_confirmed',
+       'acceptance_tolerance_basis', 'aeo8_c3_ats_2022_Agricultu...', 'working_principle_8',
+       'xb_stock_la_th_dedicated_lines'],
+      dtype='object', name='param_id', length=2404)
+key = 'phs_asean_energy_cap_ID'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'phs_asean_energy_cap_ID'
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py:3819: KeyError
+____ test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer ____
+
+    def test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer():
+        import s2_layers as L
+        folders = _folders()
+        assert len(folders) >= 3   # out_ras, out_iid, the residue_literal set
+        for od in folders:
+            rec = json.loads((od / "V4_SWITCHES.json").read_text()); s = rec["switches"]
+            S = pd.read_csv(od / "INDUSTRY_2050_SUMMARY_V4.csv").set_index("country")
+            pot = _potential(s)
+            for c in S.index:
+                cap = float(pot.get(c, 0.0)) * float(s["bio_cap_share"])
+>               assert abs(float(S.at[c, "solid_biomass_potential_main_mwh"]) - cap) <= 1e-3, (od.name, c, "F-14: table cap = build cap")
+E               AssertionError: ('out_iid', 'BN', 'F-14: table cap = build cap')
+E               assert 49.934315176680684 <= 0.001
+E                +  where 49.934315176680684 = abs((114726.535818 - 114776.47013317668))
+E                +    where 114726.535818 = float(114726.535818)
+
+tests/research/test_v4_d2a_fixes.py:49: AssertionError
+________________ test_f06_registry_rows_and_convergence_record _________________
+
+    def test_f06_registry_rows_and_convergence_record():
+        from v4_common import sha256
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        r = reg.loc["v4_pks_in_mill_share"]
+        assert r.tier == "C" and "grade D" in r.description and "tier C" in r.description   # the registry tier scale is A / B / C; the evidence grade D is stated
+        r = reg.loc["v4_biomass_overflow_cap_share"]
+>       assert r.source_locator.startswith("file: configs/research/baseline.yaml") and sha256(ROOT / "configs/research/baseline.yaml") == r.source_sha256
+E       AssertionError: assert (True and '7c85549b79ed...a2843fe4cc0e0' == '4a01fa1cace7...f9e86bf3a193e'
+E        +  where True = <built-in method startswith of str object at 0x77502b22e3b0>('file: configs/research/baseline.yaml')
+E        +    where <built-in method startswith of str object at 0x77502b22e3b0> = 'file: configs/research/baseline.yaml research.demand.v4.bio_cap_share'.startswith
+E        +      where 'file: configs/research/baseline.yaml research.demand.v4.bio_cap_share' = description          overflow cap = share x solid-biomass potential...\nvalue                                          ...atus                                                      REGISTERED\nName: v4_biomass_overflow_cap_share, dtype: object.source_locator
+E         
+E         - 4a01fa1cace79e822796f9506fc8fa8dc210a3d9a402b7e23d9f9e86bf3a193e
+E         + 7c85549b79ed35a6bdeb55775ffb7e1f7f83be0bb95864531bea2843fe4cc0e0)
+
+tests/research/test_v4_d2a_fixes.py:203: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_efb.py::test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged
+FAILED tests/research/test_v4_d2a_efb.py::test_registry_rows_of_the_basis - K...
+FAILED tests/research/test_v4_d2a_supply.py::test_asean_table_conversion_and_registry_rows
+FAILED tests/research/test_v4_d2a_fixes.py::test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer
+FAILED tests/research/test_v4_d2a_fixes.py::test_f06_registry_rows_and_convergence_record
+ERROR tests/research/test_v4_d1_physics.py::test_only_the_ranges_of_the_eleven_rows_change
+ERROR tests/research/test_v4_d1_physics.py::test_corrections_fragment_is_reproducible
+ERROR tests/research/test_v4_d1_physics.py::test_no_in_use_range_violates_the_checked_bounds_after_correction
+5 failed, 77 passed, 1 skipped, 14 warnings, 3 errors in 37.47s

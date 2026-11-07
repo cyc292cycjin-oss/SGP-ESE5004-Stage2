@@ -1,0 +1,59 @@
+.F...........s.......................................................... [ 83%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+______ test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged _______
+
+    def test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged():
+        import v4_biomass_potential as B
+        adj0, tab0 = B.adjust(); adj4, tab4 = B.adjust(basis="t04")
+        for adj, out in ((adj0, B.OUT), (adj4, B.OUT_T04)):
+            buf = io.StringIO(); adj.to_csv(buf, index=False, lineterminator="\n")
+            assert out.read_text() == buf.getvalue(), out.name
+        assert B.OUT.read_text() == (ROOT / "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv").read_text()
+        a0 = adj0.set_index(["country", "category"]); a4 = adj4.set_index(["country", "category"])
+        assert list(a0.index) == list(a4.index)
+        m0 = pd.to_numeric(a0.mass_main_t, errors="coerce").fillna(-1.0); m4 = pd.to_numeric(a4.mass_main_t, errors="coerce").fillna(-1.0)
+        assert (m0 == m4).all()   # masses unchanged, energy basis changed
+        f = B.basis_factors("t04")
+        for (c, k), r in a4.iterrows():
+            p0 = float(a0.at[(c, k), "potential_main_mwh"]) if str(a0.at[(c, k), "potential_main_mwh"]) != "" else 0.0
+            p4 = float(r.potential_main_mwh) if str(r.potential_main_mwh) != "" else 0.0
+            if k == "oil_palm_efb":
+                assert p4 == pytest.approx(p0 * f[k][0], rel=1e-12) and float(r.lhv_gj_per_t) == pytest.approx(7.2)
+            elif k == "oil_palm_fibre":
+                assert p4 == 0.0 and p0 == 0.0   # 100 % in-mill (T03)
+            elif k in ("oil_palm_pks", "oil_palm_trunk", "sugarcane_residues", "wood_processing_residues") or r.feedstock_group == "biogas":
+>               assert p4 == pytest.approx(p0, rel=1e-12), (c, k)
+E               AssertionError: ('LA', 'msw_organic_biogas')
+E               assert nan == nan ± ???
+E                 
+E                 comparison failed
+E                 Obtained: nan
+E                 Expected: nan ± ???
+
+tests/research/test_v4_d2a_efb.py:54: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_efb.py::test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged
+1 failed, 84 passed, 1 skipped, 14 warnings in 37.11s

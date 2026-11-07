@@ -148,6 +148,98 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
     return led
 
 
+def reclassify_phs_stock(n, costs, cfg, repo: Path):
+    """V4 D2a (decision 220; V4_D2A_INSTRUCTION.md section 3.3): frozen-stock pumped-storage groups that aggregate conventional reservoir units
+    (research_inputs/fleet_v5/PHS_STOCK_RECLASS_V4.csv: Bhumibol, TH2 4 - GEM lists the plant twice, 779 MW conventional + 171 MW pumped, the 779 MW already
+    containing the 171 MW reversible unit; EGAT contracted capacity 779.2 MW). research.fleet.phs_stock_reclass: null = follows research.demand.v4.enabled
+    (v4 main on, v3.1 off) | true | false. Each identity of the table leaves its PHS component (capacity and the proportional fixed O&M) and joins the
+    'hydro existing' StorageUnit existing_survivor::<node>::hydro existing::D2A (created when absent: reservoir representation of add_gem_fleet - node, else
+    country inflow / max_hours proxy, efficiency_dispatch 0.9, no pumping) with reclass_mw; drop_mw (the double count) leaves the stock. The vintage cost step
+    (m08a_layers.apply_existing_vintage_costs, run afterwards) prices both parts by commissioning year and recomputes the FOM constant; the national inflow
+    normalisation (s4c_layers, run afterwards) shares the country's observed inflow by capacity, so the reclassified capacity adds no energy."""
+    import hashlib
+    import json
+    F = dict(cfg["research"].get("fleet") or {})
+    flag = F.get("phs_stock_reclass", None)
+    if flag is None:
+        from v4_common import switches
+        enabled = bool(switches(cfg)["enabled"]); rule = "null: follows research.demand.v4.enabled"
+    else:
+        enabled = bool(flag); rule = "explicit"
+    led = dict(enabled=enabled, rule=rule, moved=[], created=[], missing=[], mw_reclassified=0.0, mw_dropped=0.0, fom_delta_eur=0.0)
+    if not enabled:
+        n.meta["research_phs_stock_reclass"] = led
+        return led
+    p = Path(repo) / str(F.get("phs_reclass_table", "research_inputs/fleet_v5/PHS_STOCK_RECLASS_V4.csv")); tab = pd.read_csv(p, keep_default_na=False)
+    led["table"] = dict(path=str(p.relative_to(repo)), sha256=hashlib.sha256(p.read_bytes()).hexdigest(), rows=int(len(tab)))
+    ident = n.meta["existing_unit_components"]
+    fom_hydro = cost(costs, "hydro", "FOM") / 100.0 * cost(costs, "hydro", "investment")
+    for r in tab.itertuples():
+        if r.identity not in ident:
+            led["missing"].append(r.identity); continue
+        z = ident[r.identity]; comp = z["component"]; mw = float(z["capacity_mw"])
+        su = n.storage_units
+        if z["component_type"] != "StorageUnit" or comp not in su.index or str(su.at[comp, "carrier"]) != "PHS existing":
+            raise ValueError(f"{r.identity}: not a 'PHS existing' StorageUnit ({comp})")
+        if abs(mw - float(r.gem_capacity_mw)) > 1e-6 or abs(float(r.reclass_mw) + float(r.drop_mw) - mw) > 1e-6:
+            raise ValueError(f"{r.identity}: table capacities {r.gem_capacity_mw} = {r.reclass_mw} + {r.drop_mw} do not match the identity {mw} MW")
+        if str(r.reclass_to) != "hydro existing":
+            raise ValueError(f"{r.identity}: reclass_to {r.reclass_to} not implemented (hydro existing only)")
+        node = str(su.at[comp, "bus"]); c = str(su.at[comp, "country"]); fom_phs = float(su.at[comp, "existing_fixed_om_eur_per_mw_year"])
+        rest = [v for k, v in ident.items() if v["component"] == comp and k != r.identity]
+        # 1. the PHS component keeps the other units only
+        if rest:
+            keep = sum(float(v["capacity_mw"]) for v in rest)
+            su.at[comp, "p_nom"] = keep; su.at[comp, "existing_annual_fixed_om_eur"] = fom_phs * keep
+            for col in ("retained_electric_capacity_mw", "source_group_capacity_mw"):
+                if col in su.columns:
+                    su.at[comp, col] = keep
+            if "source_unit_id" in su.columns:
+                su.at[comp, "source_unit_id"] = json.dumps([k.split(":", 1)[1] for k, v in ident.items() if v["component"] == comp and k != r.identity])
+        else:
+            n.remove("StorageUnit", comp); led.setdefault("components_removed", []).append(comp)
+        # 2. the reservoir component of the node (created once)
+        name = f"existing_survivor::{node}::hydro existing::D2A"
+        su = n.storage_units
+        if name not in su.index:
+            ex = su[(su.carrier == "hydro existing") & (su.bus == node) & su.index.isin(n.storage_units_t.inflow.columns)]; scope = "node"
+            if not len(ex):
+                ex = su[(su.carrier == "hydro existing") & (su.bus.map(n.buses.country) == c) & su.index.isin(n.storage_units_t.inflow.columns)]; scope = "country"
+            if not len(ex):
+                raise ValueError("no existing reservoir inflow proxy for " + name)
+            inflow_per_mw = n.storage_units_t.inflow[ex.index].sum(axis=1) / float(ex.p_nom.sum()); hours = float((ex.max_hours * ex.p_nom).sum() / ex.p_nom.sum())
+            n.add("StorageUnit", name, bus=node, carrier="hydro existing", p_nom=0.0, p_nom_extendable=False, max_hours=hours, efficiency_store=0.0, efficiency_dispatch=0.9,
+                  p_min_pu=0.0, cyclic_state_of_charge=True, capital_cost=0.0, marginal_cost=0.0, lifetime=float(z.get("retirement_year", 2064.0)) - float(z["commissioning_year"]),
+                  build_year=int(z["commissioning_year"]))
+            n.storage_units_t.inflow[name] = 0.0
+            n.storage_units.loc[name, ["asset_role", "country", "research_role", "existing_fixed_om_eur_per_mw_year", "existing_annual_fixed_om_eur", "hydro_subtype", "variable_cost_method",
+                                       "cost_qualification", "source_parent_id", "storage_energy_basis", "source_group_capacity_mw", "retained_electric_capacity_mw"]] = \
+                ["existing_survivor", c, "EXISTING_FLEET_D2A_RECLASS", fom_hydro, 0.0, "Reservoir", f"inflow per MW and max_hours = capacity-weighted existing reservoirs of the {scope} (grade C); "
+                 "V4 D2a reclassification of a frozen PHS group (PHS_STOCK_RECLASS_V4.csv)", "TECHNOLOGY_DATA_V015_FOM_PROXY_INFLOW", str(su.at[comp, "source_parent_id"]) if comp in su.index and "source_parent_id" in su.columns else "",
+                 "ASSEMBLY_V1_RESERVOIR_PROXY_D2A", 0.0, 0.0]
+            n.meta.setdefault("research_phs_stock_reclass_inflow_proxy", {})[name] = dict(scope=scope, proxies=sorted(ex.index), per_mw_annual_mwh=float((inflow_per_mw * n.snapshot_weightings.generators).sum()))
+            led["created"].append(dict(component=name, node=node, country=c, proxy_scope=scope, max_hours=hours))
+        else:
+            pr = n.meta["research_phs_stock_reclass_inflow_proxy"][name]
+            ex = n.storage_units.loc[pr["proxies"]]; inflow_per_mw = n.storage_units_t.inflow[ex.index].sum(axis=1) / float(ex.p_nom.sum())
+        add = float(r.reclass_mw)
+        su = n.storage_units
+        su.at[name, "p_nom"] = float(su.at[name, "p_nom"]) + add
+        su.at[name, "existing_annual_fixed_om_eur"] = fom_hydro * float(su.at[name, "p_nom"])
+        for col in ("source_group_capacity_mw", "retained_electric_capacity_mw"):
+            su.at[name, col] = float(su.at[name, "p_nom"])
+        n.storage_units_t.inflow[name] = n.storage_units_t.inflow[name].values + (inflow_per_mw * add).values
+        ident[r.identity] = dict(z, component=name, component_type="StorageUnit", capacity_mw=add,
+                                 d2a_reclass=dict(from_component=comp, gem_capacity_mw=mw, reclass_mw=add, drop_mw=float(r.drop_mw), gem_technology=str(r.gem_technology), reason=str(r.reason), sources=str(r.sources)))
+        d_fom = -fom_phs * mw + fom_hydro * add
+        led["fom_delta_eur"] += d_fom; led["mw_reclassified"] += add; led["mw_dropped"] += float(r.drop_mw)
+        led["moved"].append(dict(identity=r.identity, from_component=comp, to_component=name, node=node, country=c, gem_capacity_mw=mw, reclass_mw=add, drop_mw=float(r.drop_mw),
+                                 phs_component_p_nom_after=(float(n.storage_units.at[comp, "p_nom"]) if comp in n.storage_units.index else 0.0), fom_delta_eur=d_fom))
+    n.meta["existing_annual_fixed_om_eur"] = float(n.meta.get("existing_annual_fixed_om_eur", 0.0)) + led["fom_delta_eur"]
+    n.meta["research_phs_stock_reclass"] = led
+    return led
+
+
 def remove_not_operating_units(n, cfg, repo: Path):
     """S4B-1 (decision 77): remove the frozen-stock units that GEM GIPT 2026-09 lists as cancelled / mothballed / retired / absent
     (research.fleet.remove_not_operating_gipt2026, data correction). Each identity leaves existing_unit_components (kept in

@@ -1,0 +1,46 @@
+{"ranked_rows": 276, "inactive_basis_rows": ["liquid_ship_cargo_loss_per_km", "liquid_ship_ckm_td_ammonia", "liquid_ship_ckm_td_methanol", "liquid_ship_ckm_td_oil", "liquid_ship_hours_per_year", "liquid_ship_speed_km_h"], "range_updates": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_mwh_per_t_methanol", "liquid_ship_mwh_per_t_oil", "share_MWh_H2_per_tNH3_electrolysis", "share_MWh_MeOH_per_MWh_H2", "share_MWh_MeOH_per_tCO2", "share_MWh_NH3_per_tNH3", "share_bev_avail_max", "share_bev_charge_efficiency"], "top30_overlap_with_w15": 27, "entered": ["biomass_msw_ch4_yield_food_wet", "biomass_potential_MY_oil_palm_trunk", "co2_injection_cap_unified_KH"], "left": ["liquid_ship_hours_per_year", "liquid_ship_mwh_per_t_ammonia", "liquid_ship_speed_km_h"], "spearman_vs_w15": 0.945461965439991, "duplicate_bounds": 14, "bias_classes": {"cost": 131, "rhs": 121, "coefficient": 18, "discrete": 6}}
+    rank                                         param_id   bias_class           dB6         dZ_F1  rank_v31ev05
+0    1.0                        scenario_switch_wacc_mode     discrete -3.537480e+09 -1.116085e+10           1.0
+1    2.0                   offwind_alpha_calibration_rule  coefficient -2.492376e+09 -7.189159e+06           2.0
+2    3.0                     co2_injection_cap_unified_KH          rhs -2.162965e+09 -9.343344e+09           3.0
+3    4.0             renewable_cap_built_solar_rooftop_MY          rhs -1.317236e+09 -3.064454e+08           4.0
+4    5.0              share_transport_electric_efficiency          rhs  1.239660e+09  6.696317e+09           5.0
+5    6.0              fuel_price_lng_regasification_adder         cost  1.078983e+09  5.874882e+08           6.0
+6    7.0                      share_bev_charge_efficiency  coefficient  9.593605e+08  4.889812e+09           8.0
+7    8.0                   share_transport_ice_efficiency          rhs -9.593605e+08 -4.889812e+09           7.0
+8    9.0                        co2_ship_chain_fixed_cost         cost  6.119962e+08  2.445909e+08           9.0
+9   10.0              biomass_potential_ID_oil_palm_trunk          rhs -4.665591e+08 -2.085028e+10          10.0
+10  11.0                gas_production_node_allocation_TH     discrete  3.896381e+08 -7.839194e+08          11.0
+11  12.0               share_shipping_methanol_share_2050          rhs -3.553047e+08 -2.358274e+10          12.0
+12  13.0                                  onwind_alpha_MY  coefficient -3.174833e+08 -1.065048e+08          14.0
+13  14.0                co2_sequestration_cost_price_year         cost -2.906988e+08 -3.434250e+09          13.0
+14  15.0         share_land_transport_electric_share_2050          rhs -2.564682e+08  3.435547e+10          20.0
+15  16.0                lng_terminal_expansion_capex_main         cost -1.844899e+08 -5.492052e+07          15.0
+16  17.0                gas_production_node_allocation_MY     discrete -1.843900e+08 -5.425741e+08          26.0
+17  18.0                         ev_annual_km_per_vehicle          rhs -1.618362e+08 -2.336206e+09          32.0
+18  19.0                   xb_stock_la_th_dedicated_lines          rhs  1.438950e+08  2.435103e+06          16.0
+19  20.0                                  onwind_alpha_MM  coefficient  1.406555e+08 -1.425823e+08          17.0
+20  21.0             renewable_cap_built_solar_rooftop_SG          rhs  1.321026e+08  3.916529e+07          19.0
+21  22.0                  share_bev_dsm_restriction_value          rhs -1.294690e+08 -1.868967e+09          36.0
+22  23.0                        share_MWh_MeOH_per_MWh_H2  coefficient  1.228821e+08  9.637520e+09          18.0
+23  24.0                                  onwind_alpha_LA  coefficient  7.176191e+07 -1.183640e+08          21.0
+24  25.0                         share_MWh_MeOH_per_MWh_e  coefficient  6.428578e+07  1.427803e+09          25.0
+25  26.0                       co2_ship_chain_per_km_cost         cost -6.422950e+07 -7.632092e+07          23.0
+26  27.0                          th_my_line91_s_nom_2025          rhs -6.367296e+07 -3.666439e+06          24.0
+27  28.0  share_agriculture_machinery_electric_efficiency          rhs  5.762659e+07  4.427880e+08          27.0
+28  29.0              biomass_potential_MY_oil_palm_trunk          rhs -5.582281e+07 -5.322376e+09          22.0
+29  30.0                   biomass_msw_ch4_yield_food_wet          rhs  4.851037e+07  1.372289e+09          28.0
+Traceback (most recent call last):
+  File "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2a_20261107/scripts/rerank_d2a_post.py", line 113, in <module>
+    main()
+  File "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2a_20261107/scripts/rerank_d2a_post.py", line 109, in main
+    print(diff.reset_index()[["index", "rank_w15", "rank_d2a", "dB6_w15", "dB6_d2a", "reason"]].head(40).to_string())
+          ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 6264, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['index'] not in index"

@@ -51,6 +51,7 @@ BASEOUT_V31 = DEMAND_DIR / "INDUSTRY_OUTPUT_BASE_M08B.csv"
 CACHE_V31 = SRC / "industry_cache.json"
 BIOPOT_V31 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv"
 BIOPOT_V4 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4.csv"
+BIOPOT_V4_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T04.csv"   # V4 D2a (T04): the v4 main potential (palm-residue basis corrected)
 APEC = IND_V3 / "APEC2022_VN_INDUSTRY_PJ.csv"
 SUMMARY = "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv"
 MODE = "aeo8_ats_anchor"
@@ -670,6 +671,8 @@ def build_steps(I: Inputs, s: dict) -> list:
             c["bio_cap_share"] = float(s["bio_cap_share"])
         if s["biomass_potential"] == "v4_adjusted":
             c["biopot"] = str(BIOPOT_V4)
+        elif s["biomass_potential"] == "v4_adjusted_t04":   # V4 D2a (T04, decision 220)
+            c["biopot"] = str(BIOPOT_V4_T04)
         return c
 
     return [("S1", "基年替换（SDMX）与锚构造", s1), ("S2", "锚边界对齐（残渣移出、平衡表外燃料木材）", s2), ("S3", "(ii) 类：ID 家庭汽油移道路、铁路父行移出", s3),

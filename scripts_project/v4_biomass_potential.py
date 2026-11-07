@@ -13,8 +13,12 @@ the in-mill self-use of the residues removed from demand (rules moved from work/
        category (bark is not in the potential) -> no deduction.
   F4e  wood_processing_residues: the wood-row 5150 removed from demand (TH 1.38 TWh 2019).
   F7   cap of the overflow rule = 0.99 x potential (research.demand.v4.bio_cap_share; s3_0_industry.py --biomass-cap-share, s2_layers).
-Writes research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv (format of BIOMASS_POTENTIAL_2050.csv, potential_main_mwh adjusted) and
-BIOMASS_POTENTIAL_ADJ_V4.csv (country x category with the rule). Nothing is solved.
+  F5   V4 D2a (T04, decision 220; research.demand.v4.biomass_potential = v4_adjusted_t04, the v4 main set): palm-residue energy basis - EFB and mesocarp
+       fibre energy = wet mass x (1 - moisture_ar) x LHV_dry (PALM_RESIDUE_BASIS_T04.csv: EFB 0.60 / 18.0 GJ/t -> 7.2 GJ per wet t, fibre 0.37 / 18.1 ->
+       11.4) instead of wet mass x 15 GJ/t; PKS consistent (kept); trunk undetermined (kept, reviewer). Applied before F3 / F4.
+Writes research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv (format of BIOMASS_POTENTIAL_2050.csv, potential_main_mwh adjusted; W08 basis, the switch
+alternative v4_adjusted) and BIOMASS_POTENTIAL_ADJ_V4.csv (country x category with the rule); BIOMASS_POTENTIAL_2050_V4_T04.csv / BIOMASS_POTENTIAL_ADJ_V4_T04.csv
+(T04 basis, v4 main). Nothing is solved.
 """
 from __future__ import annotations
 
@@ -34,6 +38,10 @@ PKS_IN_MILL_SHARE = 0.5     # W08 constant (I2 central, grade D); V4 D1: fallbac
 FIBRE_IN_MILL_SHARE = 1.0   # W08 constant; V4 D1: fallback of the table
 OUT = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4.csv"
 ADJ = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4.csv"
+OUT_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T04.csv"   # V4 D2a (T04, decision 220): research.demand.v4.biomass_potential = v4_adjusted_t04 (v4 main)
+ADJ_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T04.csv"
+BASIS_T04 = BIOMASS_DIR / "PALM_RESIDUE_BASIS_T04.csv"   # V4 D2a: moisture / LHV basis of the palm residues (evidence/T04_LITERATURE.json of the D2a delivery)
+BASES = ("w08", "t04")
 SELF_USE = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"   # V4 D1 (decision 214 (a), T03): per country fibre / PKS low / mid / high, grades, verdicts, sources
 
 
@@ -54,9 +62,31 @@ def self_use(source: str = "table", level: str = "mid") -> dict:
     return out
 
 
-def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid") -> tuple[pd.DataFrame, pd.DataFrame]:
-    """pks_share (W08 interface): one PKS share for every country (sensitivity) instead of the table / constant value."""
+def basis_factors(basis: str = "w08") -> dict:
+    """V4 D2a (T04): {category: (factor on the W08 energy, GJ per wet tonne, rule text)} of the palm-residue basis correction; empty for the W08 basis.
+    factor = (1 - moisture_ar) x LHV_dry / 15 for the rows of PALM_RESIDUE_BASIS_T04.csv whose verdict is INCONSISTENT (applied True)."""
+    if basis not in BASES:
+        raise ValueError(f"palm residue basis {basis} not in {BASES}")
+    if basis == "w08":
+        return {}
+    t = pd.read_csv(BASIS_T04, keep_default_na=False)
+    out = {}
+    for r in t.itertuples():
+        if str(r.applied) != "True":
+            continue
+        f = (1.0 - float(r.moisture_ar_mid)) * float(r.lhv_dry_gj_t_mid) / 15.0
+        if abs(f - float(r.factor_mid)) > 1e-9:
+            raise ValueError(f"PALM_RESIDUE_BASIS_T04.csv {r.category}: factor_mid {r.factor_mid} != (1 - {r.moisture_ar_mid}) x {r.lhv_dry_gj_t_mid} / 15 = {f}")
+        out[r.category] = (f, 15.0 * f, f"F5 T04 basis: (1 - {float(r.moisture_ar_mid):.2f}) x {float(r.lhv_dry_gj_t_mid):g} GJ/t dry = {15.0 * f:.3f} GJ per wet t instead of 15 (x {f:.4f})")
+    return out
+
+
+def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid", basis: str = "w08") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """pks_share (W08 interface): one PKS share for every country (sensitivity) instead of the table / constant value.
+    basis (V4 D2a, T04): w08 = the W08 energy basis (15 GJ/t on the wet residue mass) | t04 = the palm-residue basis correction of PALM_RESIDUE_BASIS_T04.csv
+    applied to the v3 potential before the F3 / F4 deductions (EFB, fibre; PKS kept; trunk undetermined, kept)."""
     su = self_use(source, level)
+    bf = basis_factors(basis)
     bp = pd.read_csv(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
     sol = bp[bp.feedstock_group != "biogas"].copy()
     over = pd.read_csv(BIOMASS_DIR / "W12_BAGASSE_SUPPLY_OVERESTIMATE.csv").set_index("country")
@@ -73,7 +103,16 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
         g = {}
         for k, m in z.potential_method.items():
             mm = re.search(r"x ([0-9.]+) growth", str(m)); g[k] = float(mm.group(1)) if mm else 1.0
-        d = {k: dict(F3=0.0, F4=0.0, rule=[]) for k in pot}
+        d = {k: dict(F3=0.0, F4=0.0, F5=0.0, rule=[]) for k in pot}
+        for k, (f, gj, txt) in bf.items():   # V4 D2a (T04): basis correction before the deductions (the shares of F4 act on the corrected energy)
+            if k in pot:
+                d[k]["F5"] = pot[k] * (f - 1.0); d[k]["rule"].append(txt)
+                pot[k] = pot[k] * f
+                m = (adj.country == cc) & (adj.category == k)
+                for col in ("potential_low_mwh", "potential_high_mwh"):
+                    adj.loc[m, col] = pd.to_numeric(adj.loc[m, col], errors="coerce") * f
+                adj.loc[m, "lhv_gj_per_t"] = gj
+                adj.loc[m, "potential_method"] = adj.loc[m, "potential_method"].astype(str) + f" | V4 D2a T04: {txt} (PALM_RESIDUE_BASIS_T04.csv)"
         if "sugarcane_residues" in pot:
             o = over.loc[cc] if cc in over.index else None
             r2 = float(o.overestimate_mwh_R2) if (o is not None and pd.notna(o.overestimate_mwh_R2)) else 0.0
@@ -110,16 +149,19 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
             d["wood_processing_residues"]["rule"].append(f"F4e wood-row 5150 {wz / 1e6:.3f} TWh (2019)")
         for k, v in pot.items():
             a = max(0.0, v + d[k]["F3"] + d[k]["F4"])
-            rows.append(dict(country=cc, category=k, potential_v3_TWh=v / 1e6, F3_bagasse_R2_TWh=d[k]["F3"] / 1e6, F4_self_use_TWh=d[k]["F4"] / 1e6,
-                             potential_adjusted_TWh=a / 1e6, F7_cap_99pct_TWh=0.99 * a / 1e6, rule="; ".join(d[k]["rule"]),
-                             status="PROPOSED (quantified)" if d[k]["rule"] else "VERIFIED (unchanged)",
-                             grade=(grades[k] if k in grades else ("D" if any("PKS" in s or "KH" in s for s in d[k]["rule"]) else ("C" if d[k]["rule"] else "B")))))
+            row = dict(country=cc, category=k, potential_v3_TWh=(v - d[k]["F5"]) / 1e6, F3_bagasse_R2_TWh=d[k]["F3"] / 1e6, F4_self_use_TWh=d[k]["F4"] / 1e6,
+                       potential_adjusted_TWh=a / 1e6, F7_cap_99pct_TWh=0.99 * a / 1e6, rule="; ".join(d[k]["rule"]),
+                       status="PROPOSED (quantified)" if d[k]["rule"] else "VERIFIED (unchanged)",
+                       grade=(grades[k] if k in grades else ("D" if any("PKS" in s or "KH" in s for s in d[k]["rule"]) else ("C" if d[k]["rule"] else "B"))))
+            if bf:
+                row["F5_basis_TWh"] = d[k]["F5"] / 1e6
+            rows.append(row)
             m = (adj.country == cc) & (adj.category == k)
             adj.loc[m, "potential_main_mwh"] = a
-        T0 = sum(pot.values()); T1 = sum(max(0.0, pot[k] + d[k]["F3"] + d[k]["F4"]) for k in pot)
+        T0 = sum(pot[k] - d[k]["F5"] for k in pot); T1 = sum(max(0.0, pot[k] + d[k]["F3"] + d[k]["F4"]) for k in pot)
         tot.append(dict(country=cc, category="TOTAL solid", potential_v3_TWh=T0 / 1e6, F3_bagasse_R2_TWh=sum(x["F3"] for x in d.values()) / 1e6,
                         F4_self_use_TWh=sum(x["F4"] for x in d.values()) / 1e6, potential_adjusted_TWh=T1 / 1e6, F7_cap_99pct_TWh=0.99 * T1 / 1e6,
-                        rule="country total", status="PROPOSED (quantified)", grade="C"))
+                        rule="country total", status="PROPOSED (quantified)", grade="C", **({"F5_basis_TWh": sum(x["F5"] for x in d.values()) / 1e6} if bf else {})))
     asean = pd.DataFrame(tot).sum(numeric_only=True).to_dict()
     tot.append(dict(country="ASEAN11", category="TOTAL solid", **{k: v for k, v in asean.items()}, rule="sum", status="PROPOSED (quantified)", grade="C"))
     return adj, pd.DataFrame(rows + tot)
@@ -130,6 +172,10 @@ def main():
     adj.to_csv(OUT, index=False, lineterminator="\n")
     tab.to_csv(ADJ, index=False, float_format="%.6f", lineterminator="\n")
     print(tab[tab.category == "TOTAL solid"].round(2).to_string())
+    adj4, tab4 = adjust(basis="t04")   # V4 D2a (T04): the v4 main potential
+    adj4.to_csv(OUT_T04, index=False, lineterminator="\n")
+    tab4.to_csv(ADJ_T04, index=False, float_format="%.6f", lineterminator="\n")
+    print(tab4[tab4.category == "TOTAL solid"].round(2).to_string())
 
 
 if __name__ == "__main__":

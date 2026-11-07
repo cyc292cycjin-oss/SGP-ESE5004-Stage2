@@ -28,7 +28,9 @@ def _folders():
 
 def _potential(s: dict) -> pd.Series:
     """Solid-biomass potential per country as the build takes it (status-filtered rows) for the switch set s."""
-    f = ROOT / "research_inputs/biomass_v5" / ("BIOMASS_POTENTIAL_2050_V4.csv" if s["biomass_potential"] == "v4_adjusted" else "BIOMASS_POTENTIAL_2050.csv")
+    from v4_common import BIOMASS_POTENTIAL_FILES
+    rel = BIOMASS_POTENTIAL_FILES[s["biomass_potential"]]
+    f = ROOT / (rel if rel else "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")
     bp = pd.read_csv(f, keep_default_na=False)
     bp["p"] = pd.to_numeric(bp.potential_main_mwh, errors="coerce").fillna(0.0)
     solid = bp[(bp.feedstock_group != "biogas") & ~bp.status.isin(["DATA_PENDING", "ZERO_BY_DECISION"])]

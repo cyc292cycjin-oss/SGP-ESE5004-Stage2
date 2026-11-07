@@ -25,6 +25,8 @@ import pandas as pd
 AEO8_GEOTHERMAL_CF = 0.719443559520017
 NAMES = {"geothermal": ("Generator", "geothermal"), "ror": ("Generator", "ror_new"), "hydro": ("StorageUnit", "hydro_new"), "PHS": ("StorageUnit", "PHS_new")}
 INFLOW_HOOK = "research_new_hydro_inflow"; NUCLEAR_HOOK = "research_nuclear_national_cap"
+PHS_ENERGY_HOOK = "research_phs_energy_cap"   # V4 D2a (decision 220, section 3.4): research.supply.phs_case = asean, one energy cap per country
+PHS_TIERS = (6.0, 12.0, 24.0)                 # duration tiers of the asean case (hours); the 6 h tier reuses the S4B-2 component name
 
 
 def _proxy(n, node, country, rows, series):
@@ -105,8 +107,83 @@ def apply_candidate_caps(n, cfg, repo: Path, nodes):
         led["nuclear"]["caps"] = {c: v["cap_mw"] for c, v in caps_meta.items()}
     elif ncap != "none":
         raise ValueError("Unknown research.candidates.nuclear_cap " + ncap)
+    led["phs_case"] = phs_asean_case(n, cfg, repo)   # V4 D2a (decision 220, section 3.4): sensitivity switch of the new PHS candidates (main = unchanged)
     n.meta["research_candidates_s4b2"] = led
     return led
+
+
+def phs_asean_case(n, cfg, repo: Path) -> dict:
+    """V4 D2a (decision 220; V4_D1 PHS_PROPOSAL.md section 5, structure A): research.supply.phs_case = main (the S4B-2 candidates unchanged) | asean (W19
+    sensitivity): every PHS_new candidate of a country listed in PHS_ASEAN_CASE_V4.csv becomes three StorageUnit tiers (6 / 12 / 24 h; the 6 h tier keeps the
+    S4B-2 component name) priced with the Lu et al. (2021) power + energy costs in EUR2020 (annuity at research.finance.uniform_discount_rate over the Lu
+    lifetime, FOM added), round trip 0.80; the country's energy cap (ANU 2025 short list, TWh) binds the sum p_nom x max_hours of its tiers through the hook
+    research_phs_energy_cap (each tier's p_nom_max = cap / hours). Countries without an ANU figure keep the S4B-2 caps and costs. Countries without a GEM
+    pipeline cap (MY, MM) get the PHS_new structures of the nodes with existing reservoir hydro (INFERENCE proxy). Main = no change (returns mode only)."""
+    S = dict(cfg["research"].get("supply") or {})
+    case = str(S.get("phs_case", "main"))
+    if case == "main":
+        return dict(mode="main")
+    if case != "asean":
+        raise ValueError("Unknown research.supply.phs_case " + case)
+    import hashlib
+    p = Path(repo) / str(S.get("phs_asean_table", "research_inputs/potentials_v5/PHS_ASEAN_CASE_V4.csv")); tab = pd.read_csv(p, keep_default_na=False).set_index("country")
+    r = float(cfg["research"]["finance"]["uniform_discount_rate"])
+    out = dict(mode="asean", table=dict(path=str(p.relative_to(repo)), sha256=hashlib.sha256(p.read_bytes()).hexdigest()), discount_rate=r, tiers=list(PHS_TIERS), countries={})
+    su = n.storage_units
+    cand = [x for x in su.index if str(su.at[x, "carrier"]) == "PHS" and x.endswith(" PHS_new")]
+    std = ["bus", "carrier", "p_nom", "p_nom_extendable", "p_nom_min", "p_nom_max", "max_hours", "efficiency_store", "efficiency_dispatch", "capital_cost", "marginal_cost",
+           "cyclic_state_of_charge", "p_min_pu", "p_max_pu", "lifetime", "build_year"]
+    extra = [c for c in ("country", "s1_candidate_status", "research_role", "asset_role") if c in su.columns]
+    for c in tab.index:
+        row = tab.loc[c]
+        if str(row.anu_shortlist_twh) == "":
+            out["countries"][c] = dict(mode="kept S4B-2 (no ANU short-list figure)"); continue
+        E = float(row.anu_shortlist_twh) * 1e6; life = float(row.lu2021_lifetime_a); af = r / (1.0 - (1.0 + r) ** (-life))
+        cp = float(row.power_eur2020_per_kw) * 1e3 * af + float(row.fom_eur2020_per_kw_a) * 1e3   # EUR per MW per year
+        ce = float(row.energy_eur2020_per_kwh) * 1e3 * af                                            # EUR per MWh per year
+        eff = float(row.round_trip) ** 0.5
+        su = n.storage_units
+        nodes_c = [x for x in cand if str(n.buses.at[su.at[x, "bus"], "country"]) == c and float(su.at[x, "p_nom_max"]) > 0]; rule = "PHS_new candidates with a GEM pipeline cap"
+        if not nodes_c:
+            hyd = su[su.carrier == "hydro existing"]; hn = set(hyd.bus[hyd.bus.map(n.buses.country) == c])
+            nodes_c = [x for x in cand if su.at[x, "bus"] in hn]; rule = "nodes with existing reservoir hydro (INFERENCE proxy)"
+            if not nodes_c:
+                nodes_c = [x for x in cand if str(n.buses.at[su.at[x, "bus"], "country"]) == c]; rule = "all AC nodes of the country"
+        units = []
+        for x in nodes_c:
+            for h in PHS_TIERS:
+                name = x if h == PHS_TIERS[0] else f"{x} {int(h)}h"
+                if name != x:
+                    vals = {k: n.storage_units.at[x, k] for k in std}
+                    n.add("StorageUnit", name, **vals)
+                    for k in extra:
+                        n.storage_units.at[name, k] = n.storage_units.at[x, k]
+                su = n.storage_units
+                su.at[name, "max_hours"] = h; su.at[name, "efficiency_store"] = eff; su.at[name, "efficiency_dispatch"] = eff
+                su.at[name, "capital_cost"] = cp + h * ce; su.at[name, "p_nom_max"] = E / h; su.at[name, "p_nom_extendable"] = True; su.at[name, "p_nom"] = 0.0
+                if "s1_candidate_status" in su.columns:
+                    su.at[name, "s1_candidate_status"] = "REGISTERED_D2A_ASEAN"
+                units.append(name)
+        out["countries"][c] = dict(mode="asean", energy_cap_mwh=E, units=units, node_rule=rule, round_trip=float(row.round_trip), lifetime=life, annuity_factor=af,
+                                   capital_cost_eur_per_mw_a={str(int(h)): cp + h * ce for h in PHS_TIERS}, power_eur_per_mw_a=cp, energy_eur_per_mwh_a=ce)
+    caps = {c: dict(cap_mwh=v["energy_cap_mwh"], units=v["units"]) for c, v in out["countries"].items() if v.get("mode") == "asean"}
+    n.meta["research_phs_energy_caps"] = caps
+    n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {PHS_ENERGY_HOOK})
+    return out
+
+
+def install_phs_energy_cap(n):
+    """V4 D2a: sum over the asean-case PHS tiers of a country of p_nom x max_hours <= the ANU short-list energy (MWh)."""
+    if getattr(n, "_research_phs_cap_model", None) is n.model:
+        raise ValueError("PHS energy cap hook already installed")
+    import xarray as xr
+    m = n.model; p_nom = m["StorageUnit-p_nom"]
+    for c, v in n.meta.get("research_phs_energy_caps", {}).items():
+        units = [u for u in v["units"] if u in p_nom.coords["StorageUnit-ext"].values]
+        if units:
+            hours = xr.DataArray([float(n.storage_units.at[u, "max_hours"]) for u in units], coords={"StorageUnit-ext": units}, dims=["StorageUnit-ext"])
+            m.add_constraints((p_nom.sel({"StorageUnit-ext": units}) * hours).sum() <= float(v["cap_mwh"]), name=f"{PHS_ENERGY_HOOK}-{c}")
+    n._research_phs_cap_model = m
 
 
 def install_new_hydro_inflow_tie(n):
