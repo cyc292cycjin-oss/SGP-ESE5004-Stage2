@@ -1,5 +1,5 @@
 #!/bin/bash
-# D2c section 5 / 6.1: static checks of the two D2c main networks (W08 / D1 C1-C6, C8 difference vs the D2b networks with the expected set of sections 2-4, C10
+# D2c section 3 / 4: static checks of the two D2c main networks (W08 / D1 C1-C6, C8 difference vs the D2b networks with the expected set of section 2 (trunk pools only), C10
 # overflow ledger = table), the V3.1 zero-slack gate (no solver; LP rows of the hooks on 3 snapshots), the alarm lines from the D2b smoke duals. Nothing is solved.
 set -u
 W=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2c_20261109; R=/home/jin/wt_v4_d2c; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python

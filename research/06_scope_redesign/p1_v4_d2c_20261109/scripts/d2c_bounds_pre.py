@@ -1,18 +1,18 @@
-"""V4 D2c section 6 (registration BEFORE the solves; SMOKE56_D2C.md section 1): alarm lines of the objective change of the D2c networks against the D2b smoke
+"""V4 D2c section 4 (registration BEFORE the solves; SMOKE56_D2C.md section 1): alarm lines of the objective change of the D2c networks against the D2b smoke
 solves (results_project/v4d2b/smoke56). The alarm line is a necessary condition ("violated -> something is wrong"), not a pass gate.
+(Copy of the D2b scripts/d2b_bounds_pre.py; computation unchanged, the reference is now the D2b solve.)
 
 Change set (C8 of scripts/d2c_static.py, by class; decision 212 (b)):
-  right-hand side (lower bound from the D2b duals, V(b) convex, y_D2b a subgradient: dV >= y_D2b'(b_D2c - b_D2b)):
-    (a) oil palm trunk pool sizes (T05): Store e_initial / e_nom; dual = |Store-energy_balance| at the first snapshot (marginal value of the initial energy,
-        EUR/MWh) of the D2b solve; the 56-snapshot solve truncates the pools, so the annual change is scaled by the solved / full e_initial ratio;
-    (c) overflow useful-heat loads (source_band_basis post_product): dLoad x the band-bus price, sum over the 56 snapshots with the objective weights
-        (the bus price lambda_t = nodal-balance dual per weighted MWh of the D2b solve).
-  cost class (upper bound of that class from the D2b solution, V(c) concave: V(c + dc) <= V(c) + x_D2b'dc; the class contribution is >= 0 because the
-    LNG import marginal cost only rises and the dispatch is >= 0):
-    (b) LNG import marginal cost +0.7907 EUR/MWh: x = LNG import dispatch of the D2b solve.
+  right-hand side only (instruction section 4: "只有右端类变动（树干池上限下调），用 D2b 冒烟的对偶给目标值变化的下界"); V(b) convex, y_D2b a subgradient:
+    dV >= y_D2b'(b_D2c - b_D2b).
+    (a) oil palm trunk pool sizes (T05 -> T06): Store e_initial / e_nom; dual = |Store-energy_balance| at the first snapshot (marginal value of the initial
+        energy, EUR/MWh) of the D2b solve; the 56-snapshot solve may truncate the pools, so the annual change is scaled by the solved / full e_initial ratio.
+        The e_nom upper-bound duals are left out (their term is >= 0 for a cut, so the bound stays valid, only weaker).
+  The load (static p_set) and cost (marginal_cost) loops of the D2b script are kept as guards: with the C8 result of D2c (trunk pools only) they find nothing
+  and contribute 0; a non-zero entry there would contradict C8.
   coefficient class: none.
   tolerance: 1e-6 x |V_D2b| (barrier 1e-6). Alarm line (lower): dV < rhs lower bound - tolerance -> violated. Expected size (INFERENCE): dV ~ rhs lower
-  bound + (0 ... cost first-order upper bound) + the convexity excess of the trunk cut (the replacement routes cost more than the D2b marginal value).
+  bound + the convexity excess of the trunk cut (the replacement routes cost more than the D2b marginal value; D2b exceeded its bound by +1.5 / +2.6 bn).
 Writes evidence/D2C_BOUNDS_PRE.json and tables/D2C_BOUNDS_PRE.csv. Nothing is solved.
 """
 import json

@@ -1,8 +1,8 @@
 #!/bin/bash
-# D2c section 5: rebuild the v4 networks at the committed D2c head (no solver, no licence), the W08 / D1 build rule:
+# D2c section 3: rebuild the v4 networks at the committed D2c head (no solver, no licence), the W08 / D1 build rule:
 #   <set>/integrated   s2_network.py --scenario integrated --override demand.v4.enabled=true [--override demand.v4.<key>=<value> ...]
 #   <set>/no_new_xb    m08a_variants.py --set cross_border.stock_mode=no_new_xb from <set>/integrated (2920x3h and 365x24h)
-# usage: build_d2b.sh <set name: main> [extra --override k=v ...]
+# usage: build_d2c.sh <set name: main> [extra --override k=v ...]
 # Inputs from the main checkout's results_project (assembly_v1, s1) through symlinks in the worktree (git-ignored); outputs to the main checkout's
 # results_project/v4d2c/builds/<set> (git-ignored; a symlink results_project/v4d2c in the worktree points there for the tests).
 set -u

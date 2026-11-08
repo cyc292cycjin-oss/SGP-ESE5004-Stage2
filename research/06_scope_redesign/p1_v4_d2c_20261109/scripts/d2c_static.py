@@ -1,4 +1,4 @@
-"""V4 D2c section 5 (copy of the D2b scripts/d2b_static.py C1-C6 / C8 / C10, D2c expectations): static checks of the rebuilt v4 main networks (no solver).
+"""V4 D2c section 3 (copy of the D2b scripts/d2b_static.py C1-C6 / C8 / C10-C12, D2c expectations): static checks of the rebuilt v4 main networks (no solver).
 Writes STATIC_CHECKS.json and evidence/D2C_NETWORK_DIFF.json into the delivery folder.
 
     PYTHONHASHSEED=0 /home/jin/miniforge3/envs/pypsa-earth/bin/python scripts/d2c_static.py
@@ -8,15 +8,15 @@ Writes STATIC_CHECKS.json and evidence/D2C_NETWORK_DIFF.json into the delivery f
   C3 solid-biomass pools: fixed demand / pool <= 0.99; VN slack >= 1 %; no pool at or above 0.999 that was not there in D2b
   C4 domestic gas caps = GAS_PRODUCTION_CAPS_2050_V4.csv (generator count = D2b)
   C5 curves (peak / mean; ID three time zones)
-  C6 v4 identity: n.meta v4_w08 switch SHA = the table folder (biomass_potential v4_adjusted_t05, source_band_basis post_product, lng_regas_adder asean_tariffs)
+  C6 v4 identity: n.meta v4_w08 switch SHA = the table folder (biomass_potential v4_adjusted_t06, source_band_basis post_product, lng_regas_adder asean_tariffs)
   C8 network difference D2c vs D2b (2920x3h and 365x24h): every component table and time series value by value, classified into the EXPECTED set registered
-     before the build from the change list of sections 2-4 (written in this file before the first build of D2c):
-       (a) Store e_nom / e_initial of the oil palm trunk pools (T05 basis; every other pool unchanged);
-       (b) Generator marginal_cost of the 'LNG import' generators (lng_regas_adder 1.26 -> 2.0507 EUR2020/MWh);
-       (c) Load p_set of the industrial overflow useful-heat loads (account IndustryBiomassOverflowUsefulHeat; source_band_basis post_product).
-     Anything else is listed as UNEXPECTED (stop condition of the instruction).
-  C10 the overflow ledger of the network = INDUSTRY_2050_SUMMARY_V4.csv (Fable F-05); C11 the band shares of the ledger = the table (section 3);
-  C12 LNG import marginal cost - D2b = the adder change exactly.
+     before the build from the change list of section 2 (written in this file before the first build of D2c; instruction section 3: "对 D2b 网络的差异只能是
+     五个树干 Store 的潜力（e_nom / e_initial），其余为 UNEXPECTED 即停"):
+       (a) Store e_nom / e_initial of the five oil palm trunk pools (T06 basis; every other pool unchanged).
+     Anything else (any other static column, any time series, any component set, snapshots / weightings) is listed as UNEXPECTED (stop condition).
+     Metadata keys (switch SHA, file hashes, ledgers) are reported, not classified.
+  C10 the overflow ledger of the network = INDUSTRY_2050_SUMMARY_V4.csv (Fable F-05); C11 the band shares of the ledger = the table;
+  C12 LNG import marginal cost = D2b exactly (no LNG change in D2c).
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ W = Path(__file__).resolve().parents[1]
 R = Path("/home/jin/wt_v4_d2c")
 B = Path("/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2c/builds/main")
 B1 = Path("/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2b/builds/main")
-ADDER_OLD, ADDER_NEW_ROW = 1.26, "v4_lng_regas_adder_asean_tariffs"
+# (D2c: the LNG adder is unchanged; C12 checks equality with D2b)
 
 
 def annual(n, names) -> pd.Series:
@@ -105,16 +105,14 @@ def check(tag, n, n365, n1) -> dict:
     res["C11_band_shares_ledger_vs_table_max_abs"] = max(c11.values()) if c11 else 0.0
     res["C11_overflow_useful_heat_mwh"] = {c: d.get("useful_heat_mwh") for c, d in led.items() if float(d["overflow_industry_mwh"]) > 0}
     res["C11_overflow_useful_heat_mwh_D2b"] = {c: d.get("useful_heat_mwh") for c, d in led1.items() if float(d["overflow_industry_mwh"]) > 0}
-    # C12 LNG adder
-    reg = pd.read_csv(R / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
-    new = float(reg.at[ADDER_NEW_ROW, "value"])
+    # C12 LNG adder (D2c: no LNG change; the marginal cost must equal the D2b network exactly)
     lng = n.generators[n.generators.carrier == "LNG import"]; lng1 = n1.generators[n1.generators.carrier == "LNG import"]
     common = lng.index.intersection(lng1.index)
     d_mc = (lng.loc[common, "marginal_cost"].astype(float) - lng1.loc[common, "marginal_cost"].astype(float))
     res["C12_lng_generators"] = int(len(lng)); res["C12_lng_generators_D2b"] = int(len(lng1))
     res["C12_lng_mc_change_min_max"] = [float(d_mc.min()), float(d_mc.max())] if len(d_mc) else None
-    res["C12_lng_mc_change_expected"] = new - ADDER_OLD
-    res["C12_lng_mc_change_max_dev"] = float((d_mc - (new - ADDER_OLD)).abs().max()) if len(d_mc) else None
+    res["C12_lng_mc_change_expected"] = 0.0
+    res["C12_lng_mc_change_max_dev"] = float(d_mc.abs().max()) if len(d_mc) else None
     res["C12_lng_ledger"] = {k: v for k, v in ((n.meta.get("s3_gas_ledger") or n.meta.get("research_gas") or {}).get("lng") or {}).items() if k in ("regasification_adder", "adder_status")} if isinstance(n.meta.get("s3_gas_ledger") or n.meta.get("research_gas"), dict) else None
     return res
 
@@ -155,19 +153,19 @@ def diff(n1, n2) -> dict:
 
 
 def classify(d: dict, n1, n2) -> dict:
-    """The expected differences registered in the docstring (a)-(c) vs anything else."""
-    exp, unexp = [], []
+    """The expected difference registered in the docstring (a) - the e_nom / e_initial of the five oil palm trunk pools - vs anything else."""
+    exp, unexp, trunk = [], [], {}
     for comp, cols in d["static"].items():
         for col, v in cols.items():
             names = v["all_names"] if isinstance(v, dict) else []
             if comp == "Store" and col in ("e_nom", "e_initial") and names and all(" biomass oil_palm_trunk" in x for x in names):
-                exp.append(f"(a) Store.{col} of {len(names)} oil palm trunk pools (T05 basis)")
-            elif comp == "Generator" and col == "marginal_cost" and names and all(n2.generators.at[x, "carrier"] == "LNG import" for x in names):
-                exp.append(f"(b) Generator.marginal_cost of {len(names)} LNG import generators (lng_regas_adder)")
-            elif comp == "Load" and col == "p_set" and names and all(str(n2.loads.at[x, "account"]) == "IndustryBiomassOverflowUsefulHeat" for x in names):
-                exp.append(f"(c) Load.p_set of {len(names)} overflow useful-heat loads ({sorted(set(n2.loads.loc[names, 'country']))}; source_band_basis)")
+                exp.append(f"(a) Store.{col} of {len(names)} oil palm trunk pools (T06 basis): {sorted(names)}")
+                trunk[col] = sorted(names)
             else:
                 unexp.append(dict(component=comp, column=col, detail={k: v[k] for k in v if k != "all_names"} if isinstance(v, dict) else str(v)))
+    all_trunk = sorted(x for x in n2.stores.index if " biomass oil_palm_trunk" in x)
+    if trunk.get("e_nom") != all_trunk or trunk.get("e_initial") != all_trunk or len(all_trunk) != 5:   # the five trunk pools must all change, in both columns
+        unexp.append(dict(component="Store", column="e_nom / e_initial", detail=f"trunk pools changed {trunk} vs the network's trunk pools {all_trunk}"))
     for comp, sers in d["series"].items():
         for k, v in sers.items():
             unexp.append(dict(component=comp, series=k, detail={kk: vv for kk, vv in v.items() if kk != "all_names"}))

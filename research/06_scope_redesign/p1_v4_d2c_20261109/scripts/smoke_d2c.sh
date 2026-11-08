@@ -1,6 +1,6 @@
 #!/bin/bash
-# V4 D2c section 6 (V4_D2C_INSTRUCTION.md SHA bdd67b0f; copy of the D2b scripts/smoke_d2b.sh): TWO local 56-snapshot solves, authorised by the instruction itself (section 0 /
-# 6: "用户启动本指令即授权"), serial, at most one local Gurobi process, >= 330 s apart, no retry, no parameter change:
+# V4 D2c section 4 (V4_D2C_INSTRUCTION.md SHA 18f6e403; copy of the D2b scripts/smoke_d2b.sh): TWO local 56-snapshot solves, authorised by the instruction itself (section 0 /
+# 4: "用户启动本指令即授权"), serial, at most one local Gurobi process, >= 330 s apart, no retry, no parameter change:
 #   R1 v4d2c_F1  v4 main integrated (D2c build)          R2 v4d2c_F2  v4 main no_new_xb (derived from R1 build)
 # Same path and settings as the v3.1 local smoke (smoke_h.sh): profile formal_barrier_1e6_t16 (Threads 16), --truncate 56, Gurobi TimeLimit 3,000 s,
 # wall cap 3,600 s (process group killed), label SMOKE_TEST_ONLY. Before every solve: a bare TCP connect to the token server (no data, no licence).
@@ -14,7 +14,7 @@ B=$MAIN/results_project/v4d2c/builds
 RUN=$MAIN/results_project/v4d2c/smoke56; ST=$RUN/STATUS.txt
 LIC=/home/jin/gurobi.lic; TL=3000; WALL=3600; GAP=330; GRACE=60; N=56; PROFILE=formal_barrier_1e6_t16
 [ "${1:-}" = "--confirmed" ] || { echo "REFUSED: needs --confirmed <time>"; exit 5; }
-AUTH="V4 D2c section 6 (V4_D2C_INSTRUCTION.md SHA bdd67b0f, 2 local 56-snapshot solves authorised by starting the instruction; ${2:?time}): profile $PROFILE, TimeLimit $TL s, wall cap $WALL s, no retry"
+AUTH="V4 D2c section 4 (V4_D2C_INSTRUCTION.md SHA 18f6e403, 2 local 56-snapshot solves authorised by starting the instruction; ${2:?time}): profile $PROFILE, TimeLimit $TL s, wall cap $WALL s, no retry"
 mkdir -p $RUN; cd $WT || exit 1
 log() { echo "$1:$(date -u +%Y-%m-%dT%H:%M:%SZ)${2:+:$2}" >> $ST; }
 busy() { ps -eo args= | grep -E '[s]2_solve\.py|[g]urobi_cl|[b]4_split_solve\.py|[s]2_network\.py' | grep -vcE '^(/usr/bin/)?time |^setsid |^env '; }
@@ -61,7 +61,7 @@ for spec in "${SPECS[@]}"; do
   ( env -u GRB_LICENSE_FILE "$PY" scripts_project/s4o_c1_precision.py run --repo . --solve-dir $dir --network "$net" --scenario $sc --label SMOKE_TEST_ONLY --violations $dir/VIOLATIONS.json --truncate $N > $dir/c1_precision.log 2>&1 ); log C1_$rid "exit=$?"
   ( env -u GRB_LICENSE_FILE "$PY" scripts_project/m12_allocation.py run --repo . --solve-dir $dir --scenario $sc --label SMOKE_$rid --out $dir --register > $dir/m12.log 2>&1 ); log M12_$rid "exit=$?"
   ( env -u GRB_LICENSE_FILE "$PY" scripts_project/m12_rhs_audit.py audit --repo . --network "$net" --scenario $sc --solve-dir $dir --allocation $dir/ALLOCATION.json --tag SMOKE_$rid --out $dir/m12_owen --register-dir $dir --truncate $N > $dir/m12_owen.log 2>&1 ); log OWEN_$rid "exit=$?"
-  if [ "$(echo $cond | cut -d' ' -f1)" != "optimal" ]; then log STOP_NOT_OPTIMAL_$rid "$cond - the remaining runs are not started (instruction section 6)"; break; fi
+  if [ "$(echo $cond | cut -d' ' -f1)" != "optimal" ]; then log STOP_NOT_OPTIMAL_$rid "$cond - the remaining runs are not started (instruction section 4)"; break; fi
 done
 a=v4d2c_F1; b=v4d2c_F2
 if [ -f $RUN/$a/COUNTRY_COST_LEDGER.csv ] && [ -f $RUN/$b/COUNTRY_COST_LEDGER.csv ]; then

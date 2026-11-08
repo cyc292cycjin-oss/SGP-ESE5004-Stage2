@@ -1,4 +1,4 @@
-"""V4 D2c section 6.2: evaluation of the two 56-snapshot runs against the criteria registered in SMOKE56_D2C.md section 1 (no solver; copy of the D2b
+"""V4 D2c section 4: evaluation of the two 56-snapshot runs against the criteria registered in SMOKE56_D2C.md section 1 (no solver; copy of the D2b
 scripts/d2b_smoke_eval.py smoke mode, reference = the D2b smoke runs).
 
     <env python> scripts/d2c_smoke_eval.py     # v4d2c_F1 / F2 vs the D2b runs and the alarm lines -> tables/D2C_SMOKE56_RESULTS.csv, evidence/D2C_smoke56.json
