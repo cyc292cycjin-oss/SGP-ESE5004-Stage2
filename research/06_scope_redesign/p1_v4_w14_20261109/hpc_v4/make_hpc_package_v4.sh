@@ -103,8 +103,13 @@ ls "$DIST"/networks/*_365_24h_* > /dev/null 2>&1 && { echo "365x24h network in t
 CHK=$(mktemp -d "${TMPDIR:-/tmp}/w14_pkgcheck_XXXXXX"); cp -r "$DIST" "$CHK/pkg"
 ( cd "$CHK/pkg" && env -u GRB_LICENSE_FILE PY="$PY" PREFLIGHT_ONLY=guards,sha,networks,env,profile,code,tools bash preflight.sh > "$CHK/preflight.txt" 2>&1 ) || { tail -30 "$CHK/preflight.txt"; echo "REFUSED: the package preflight failed on a copy ($CHK)"; exit 1; }
 grep -E "files OK|limits of the package|v4 network metadata|^F[12] |PREFLIGHT OK" "$CHK/preflight.txt" || true
-if grep -rIilE "$LRX" "$CHK/pkg/repo" > /dev/null 2>&1; then grep -rIilE "$LRX" "$CHK/pkg/repo" | head -5; echo "LICENCE-LIKE STRING IN THE UNPACKED CODE - refused"; exit 1; fi
-echo "licence-like strings (pack_results.sh regex) in the unpacked code: 0 files"
+# the unpacked code (inside the binary code archive, so not seen by the package scan above): every matching line must be on the allow-list - the log-scrub marker
+# list of scripts_project/s2_solve.py (the words it REMOVES from solver logs; no licence content; the same file was in the v3.1 package); anything else refuses
+ALLOW='scripts_project/s2_solve.py:LICENSE_MARKERS = ("license", "licenseid", "wls", "registered to", "academic", "secret", "accessid", "token")'
+CHITS=$( (cd "$CHK/pkg/repo" && grep -rIinE "$LRX" . 2>/dev/null) | sed -E 's|^\./||; s|^([^:]+):[0-9]+:|\1:|' | sort -u)
+CBAD=$(printf '%s\n' "$CHITS" | grep -vxF "$ALLOW" | grep -v '^$' || true)
+[ -z "$CBAD" ] || { printf '%s\n' "$CBAD" | cut -c1-200 | head -5; echo "LICENCE-LIKE STRING IN THE UNPACKED CODE (not on the allow-list) - refused"; exit 1; }
+echo "licence-like strings (pack_results.sh regex) in the unpacked code: $(printf '%s\n' "$CHITS" | grep -c . ) line(s), all on the allow-list (s2_solve.py log-scrub marker list; no licence content)"
 cp "$CHK/preflight.txt" "${DIST}_preflight_check.txt"   # next to the package folder (not inside it; never uploaded)
 rm -rf "$CHK"
 # 8. manifest
