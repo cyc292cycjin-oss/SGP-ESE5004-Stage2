@@ -115,7 +115,7 @@ def main():
     if alpha.exists():
         calc["vn_offwind_alpha"] = json.loads(alpha.read_text())
     (W / "evidence").mkdir(exist_ok=True)
-    (W / "evidence/DATA_UPGRADES_CALC.json").write_text(json.dumps(calc, indent=1, default=float) + "\n")
+    (W / "evidence/DATA_UPGRADES_CALC.json").write_text(json.dumps(calc, indent=1, default=float) + "\n", newline="\n")   # LF also on Windows (the repository commits LF)
     print(json.dumps(dict(lng=dict(groups=L["country_groups"], value=L["value"], low=L["low"], high=L["high"]), ship=dict(fixed=S["fixed_range"], slope=S["slope_range"], chain=S["chain_1000km"]),
                           ev=dict(mid=E["fleet_ratio_mid"], low=E["fleet_ratio_low"], high=E["fleet_ratio_high"], pct=E["mid_vs_model_pct"], eff=E["ev_eff_range_at_ice_16_0712"]),
                           rooftop=R["ratio"]), indent=1, default=float))
