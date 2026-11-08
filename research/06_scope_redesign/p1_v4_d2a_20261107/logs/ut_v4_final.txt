@@ -1,0 +1,120 @@
+................................................F......FF............... [ 83%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+____ test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer ____
+
+    def test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer():
+        import s2_layers as L
+        folders = _folders()
+        assert len(folders) >= 3   # out_ras, out_iid, the residue_literal set
+        for od in folders:
+            rec = json.loads((od / "V4_SWITCHES.json").read_text()); s = rec["switches"]
+            S = pd.read_csv(od / "INDUSTRY_2050_SUMMARY_V4.csv").set_index("country")
+            pot = _potential(s)
+            for c in S.index:
+                cap = float(pot.get(c, 0.0)) * float(s["bio_cap_share"])
+                assert abs(float(S.at[c, "solid_biomass_potential_main_mwh"]) - cap) <= 1e-3, (od.name, c, "F-14: table cap = build cap")
+                bio, ag = float(S.at[c, "pe_biomass_mwh"]), float(S.at[c, "agriculture_biomass_2050_mwh"])
+                cap_tab = float(S.at[c, "solid_biomass_potential_main_mwh"])   # the table's own cap (its summation order differs from the recomputed one by ~1e-5 MWh)
+                ov_ind, ov_ag, _, _ = L.biomass_overflow(bio, ag, cap_tab, 1.0, 0.999)   # the build call for bio_cap_share < 1 (cap passed as the potential)
+                assert float(S.at[c, "biomass_overflow_industry_mwh"]) == pytest.approx(ov_ind, abs=1e-6), (od.name, c)
+                assert float(S.at[c, "biomass_overflow_agriculture_mwh"]) == pytest.approx(ov_ag, abs=1e-6), (od.name, c)
+                assert float(S.at[c, "pe_biomass_before_overflow_mwh"]) == float(S.at[c, "pe_biomass_mwh"])
+                assert float(S.at[c, "biomass_overflow_industry_to_gas_mwh"]) == 0.0   # useful-heat table
+            log = rec["biomass_overflow_recomputed"]
+            assert set(log) >= {"VN", "ID", "MY"}
+            for c, v in log.items():
+                assert v["overflow_industry_mwh"] == pytest.approx(float(S.at[c, "biomass_overflow_industry_mwh"]), abs=1e-6)
+            if s["anchor_mode"] == "ras" and s["id_paper_fuelwood"] == "residue":   # Fable F-02: VN main 29.95 -> 41.10 TWh, the pulp-and-paper purchased biomass vector
+                vn = log["VN"]
+>               assert vn["overflow_industry_mwh"] == pytest.approx(41097219.64, abs=1.0) and vn["s30_overflow_industry_mwh"] == pytest.approx(29951239.32, abs=1.0)
+E               assert (34486894.272702575 == 41097219.64 ± 1
+E                 
+E                 comparison failed
+E                 Obtained: 34486894.272702575
+E                 Expected: 41097219.64 ± 1)
+
+tests/research/test_v4_d2a_fixes.py:65: AssertionError
+_________________ test_f07_bn_neu_gas_rows_2019_base_deducted __________________
+
+    def test_f07_bn_neu_gas_rows_2019_base_deducted():
+        import v4_products as P
+        from d1_common import NEU_GAS_ACCOUNT
+        item = P.bn_neu_methanol_gas()
+        assert item["gas_2019_mwh"] == pytest.approx(3451944.44, abs=1.0) and item["gas_2050_mwh"] == pytest.approx(4023950.88, abs=1.0)
+        for od in _folders():
+            rec = json.loads((od / "V4_SWITCHES.json").read_text())["bn_neu_methanol"]
+            ats = pd.read_csv(od / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", dtype=str, keep_default_na=False)
+            m = (ats.country == "BN") & (ats.sector == "NonEnergyUse") & (ats.carrier == "gas") & (ats.account == NEU_GAS_ACCOUNT)
+            base = pd.to_numeric(ats.loc[m, "base_2019_mwh"]).sum(); v50 = pd.to_numeric(ats.loc[m, "value_2050_mwh"]).sum()
+>           assert rec["base_2019_before_mwh"] == pytest.approx(5458799.25, abs=0.01) and rec["base_2019_truncated_mwh"] == 0.0
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: 'NoneType' object is not subscriptable
+
+tests/research/test_v4_d2a_fixes.py:192: TypeError
+________________ test_f06_registry_rows_and_convergence_record _________________
+
+    def test_f06_registry_rows_and_convergence_record():
+        from v4_common import sha256
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        r = reg.loc["v4_pks_in_mill_share"]
+        assert r.tier == "C" and "grade D" in r.description and "tier C" in r.description   # the registry tier scale is A / B / C; the evidence grade D is stated
+        r = reg.loc["v4_biomass_overflow_cap_share"]
+        assert r.source_locator.startswith("file: configs/research/baseline.yaml") and sha256(ROOT / "configs/research/baseline.yaml") == r.source_sha256
+        for od in _folders():
+>           ev = json.loads((od / "DEMAND_ANCHOR_M08B_EVIDENCE.json").read_text())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v4_d2a_fixes.py:207: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../miniforge3/envs/pypsa-earth/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/jin/wt_v4_d2a/research_inputs/industry_v4/out_ras_f5e106da1fde/DEMAND_ANCHOR_M08B_EVIDENCE.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/jin/wt_v4_d2a/research_inputs/industry_v4/out_ras_f5e106da1fde/DEMAND_ANCHOR_M08B_EVIDENCE.json'
+
+../miniforge3/envs/pypsa-earth/lib/python3.11/pathlib.py:1044: FileNotFoundError
+=============================== warnings summary ===============================
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+  /home/jin/wt_v4_d2a/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+tests/research/test_v4_d2a_fixes.py::test_f05_network_overflow_ledger_equals_the_table
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_fixes.py::test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer
+FAILED tests/research/test_v4_d2a_fixes.py::test_f07_bn_neu_gas_rows_2019_base_deducted
+FAILED tests/research/test_v4_d2a_fixes.py::test_f06_registry_rows_and_convergence_record
+3 failed, 83 passed, 15 warnings in 40.56s

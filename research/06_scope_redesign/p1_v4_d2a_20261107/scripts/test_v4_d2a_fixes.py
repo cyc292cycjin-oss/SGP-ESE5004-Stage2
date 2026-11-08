@@ -60,11 +60,12 @@ def test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer():
         assert set(log) >= {"VN", "ID", "MY"}
         for c, v in log.items():
             assert v["overflow_industry_mwh"] == pytest.approx(float(S.at[c, "biomass_overflow_industry_mwh"]), abs=1e-6)
-        if s["anchor_mode"] == "ras" and s["id_paper_fuelwood"] == "residue":   # Fable F-02: VN main 29.95 -> 41.10 TWh, the pulp-and-paper purchased biomass vector
+        main_bio = s["biomass_potential"] == "v4_adjusted_t04" and float(s["bio_cap_share"]) == 0.99 and s["base"] == "sdmx_2019" and s["products"]   # main-set biomass / demand settings (the attribution corner folders (D4,P31) / (D31,P4) differ)
+        if main_bio and s["anchor_mode"] == "ras" and s["id_paper_fuelwood"] == "residue":   # Fable F-02: VN main 29.95 -> 41.10 TWh, the pulp-and-paper purchased biomass vector
             vn = log["VN"]
             assert vn["overflow_industry_mwh"] == pytest.approx(41097219.64, abs=1.0) and vn["s30_overflow_industry_mwh"] == pytest.approx(29951239.32, abs=1.0)
             assert vn["overflow_industry_mwh"] - vn["s30_overflow_industry_mwh"] == pytest.approx(11145980.3, abs=1.0)
-        if s["anchor_mode"] == "iid" and s["id_paper_fuelwood"] == "residue":
+        if main_bio and s["anchor_mode"] == "iid" and s["id_paper_fuelwood"] == "residue":
             assert log["VN"]["overflow_industry_mwh"] == pytest.approx(32073767.79, abs=1.0)
 
 
@@ -185,7 +186,10 @@ def test_f07_bn_neu_gas_rows_2019_base_deducted():
     item = P.bn_neu_methanol_gas()
     assert item["gas_2019_mwh"] == pytest.approx(3451944.44, abs=1.0) and item["gas_2050_mwh"] == pytest.approx(4023950.88, abs=1.0)
     for od in _folders():
-        rec = json.loads((od / "V4_SWITCHES.json").read_text())["bn_neu_methanol"]
+        full = json.loads((od / "V4_SWITCHES.json").read_text()); rec = full["bn_neu_methanol"]
+        if rec is None:   # no product vectors in this switch set (attribution corner (D31,P4): base v3_1, products off)
+            assert not full["switches"]["products"], od.name
+            continue
         ats = pd.read_csv(od / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv", dtype=str, keep_default_na=False)
         m = (ats.country == "BN") & (ats.sector == "NonEnergyUse") & (ats.carrier == "gas") & (ats.account == NEU_GAS_ACCOUNT)
         base = pd.to_numeric(ats.loc[m, "base_2019_mwh"]).sum(); v50 = pd.to_numeric(ats.loc[m, "value_2050_mwh"]).sum()
@@ -204,6 +208,9 @@ def test_f06_registry_rows_and_convergence_record():
     r = reg.loc["v4_biomass_overflow_cap_share"]
     assert r.source_locator.startswith("file: configs/research/baseline.yaml") and sha256(ROOT / "configs/research/baseline.yaml") == r.source_sha256
     for od in _folders():
+        if json.loads((od / "V4_SWITCHES.json").read_text())["switches"]["base"] != "sdmx_2019":   # no m08b anchoring on the v3.1 base (attribution corner (D31,P4))
+            assert not (od / "DEMAND_ANCHOR_M08B_EVIDENCE.json").exists(), od.name
+            continue
         ev = json.loads((od / "DEMAND_ANCHOR_M08B_EVIDENCE.json").read_text())
         found = []
 

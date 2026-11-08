@@ -3,7 +3,7 @@
 - 分支 `codex/v4-d2a-20261107`，起点 `4026c1c84d8d349e9bb8c11f3e6da8f82588d621` = `codex/v4-d1-20261107` 头（fetch 核过，本地 = 远端）；`6142d8ac`（D1 审阅包）是其祖先，二者之间只改了 `research/06_scope_redesign/p1_v4_d1_20261107/` 下 3 个文件（PROGRESS.md、evidence/REVIEW_ZIP_MANIFEST_6142d8ac.txt、scripts/leak_scan.sh），交付目录之外 0 个。
 - worktree `/home/jin/wt_v4_d2a`；临时目录 `/home/jin/v4d2a`；主检出 `results_project/v4d2a/`（构建与冒烟输出，不入库）。
 - 交付目录 `work/p1_v4_d2a_20261107/` = 仓库 `research/06_scope_redesign/p1_v4_d2a_20261107/`（zip 不入库）。
-- 求解额度：至多 6 次（第 6 节 2 次、第 7 节至多 4 次）；第 6 节 2 次进行中（2026-11-07 16:20 SGT 启动）。
+- 求解额度：至多 6 次（第 6 节 2 次、第 7 节至多 4 次）；**已用 6 / 6**（第 6 节 2 次 2026-11-07 16:11–16:30 SGT，第 7 节 4 次 16:30–17:12 SGT；全部 optimal，无重试）。
 
 | 步 | 内容 | 状态 | 提交 |
 |---|---|---|---|
