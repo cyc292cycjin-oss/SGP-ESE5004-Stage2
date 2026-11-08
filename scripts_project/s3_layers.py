@@ -78,7 +78,8 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     led = {}
     price = fuel_price(cfg, registry, "gas")   # S4C-0 (decision 85): WEO 2025 scenario of research.fuels.price_scenario; domestic production at the same price (decision 43)
     led["price_scenario"] = fuel_price_scenario(cfg); led["price_registry_id"] = fuel_price_ids(cfg)["gas"]
-    adder = float(G.get("lng_regasification_adder_eur_per_mwh", 0.0))
+    from v4_common import lng_regas_adder_value
+    adder, adder_basis = lng_regas_adder_value(cfg, repo)   # V4 D2b (section 4.1): m08a = the configured 1.26 (v3.1); asean_tariffs = registry row (v4 main)
     # 1. remove the unlimited per-node external gas supply of the carrier recipe
     ext = list(n.generators.index[(n.generators.carrier == "gas") & (n.generators.research_role == "EXTERNAL_SUPPLY")])
     n.mremove("Generator", ext)
@@ -227,7 +228,8 @@ def add_lng_terminals(n, cfg, repo, price: float, adder: float, led: dict) -> di
                 "Ulvestad & Overland (2012) converted, 8,020.43 EUR2020/MW/a (registry lng_terminal_expansion_capex_main, grade C, +-50 %; M08-3, decision 131)" if abs(base_cost - 8020.43343542) < 0.01 else
                 f"research.s3.gas.lng_expansion_capital_cost_eur_per_mw_a = {base_cost}")
     led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder,
-                      adder_status=("registry fuel_price_lng_regasification_adder 1.26 EUR2020/MWh (M08-3, decision 131; grade C)" if adder else "0 (no regasification adder)"),
+                      adder_status=(("registry fuel_price_lng_regasification_adder 1.26 EUR2020/MWh (M08-3, decision 131; grade C)" if adder else "0 (no regasification adder)")
+                                    if adder_basis.startswith("m08a") else f"{adder_basis} = {adder} EUR2020/MWh (V4 D2b section 4.1; grade C)"),
                       cap_factor=factor, expansion=expansion, terminals=terms,
                       expansion_capital_cost_eur_per_mw_a=capex, expansion_cost_base_eur_per_mw_a=base_cost,
                       expansion_cost_sensitivity=float(G.get("lng_expansion_cost_sensitivity", 0.0)), expansion_cost_source=cost_src)

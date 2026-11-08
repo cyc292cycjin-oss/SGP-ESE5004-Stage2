@@ -1,0 +1,1156 @@
+{
+ "note": {
+  "task": "DATA_UPG_A literature check for 4 parameters (ASEAN energy model, EUR2020)",
+  "access_window_utc": "2026-11-08 15:40-16:30",
+  "access_method": "WebSearch/WebFetch for web pages and PDF reports (PDF bodies that WebFetch could not render were text-extracted locally with pypdf from the WebFetch-saved copy); GitHub history for param 3 read via the public GitHub API (gh api, read-only).",
+  "conversion_convention": "Local currency of price year Y -> EUR at Eurostat ert_bil_eur_a annual average of Y -> EUR2020 via euro-area HICP (prc_hicp_aind CP00, 2015=100) ratio 2020/Y. 1 MMBtu = 0.29307 MWh; 1 MWh = 3.6 GJ.",
+  "fx_used_per_EUR": {
+   "USD_2017": 1.1297,
+   "USD_2019": 1.1195,
+   "USD_2020": 1.1422,
+   "THB_2020": 35.7081,
+   "THB_2024": 38.1811,
+   "MYR_2019": 4.6374,
+   "MYR_2025": 4.8339,
+   "SGD_2025": 1.4756,
+   "GBP_2017": 0.87667
+  },
+  "hicp_EA_2015eq100": {
+   "2009": 91.65,
+   "2017": 101.78,
+   "2018": 103.56,
+   "2019": 104.8,
+   "2020": 105.06,
+   "2024": 126.07,
+   "2025": 128.75
+  },
+  "model_values": {
+   "p1_lng_regas_adder_EUR2020_MWh": 1.26,
+   "p1_range": [
+    0.753,
+    3.265
+   ],
+   "p2_fixed_EUR2020_t": 11.4167,
+   "p2_per_t_km": 0.0029515,
+   "p2_fixed_range": [
+    5.71,
+    17.12
+   ],
+   "p3_co2_sequestration_cost": 30
+  },
+  "grades": "VERIFIED = read in source text; SNIPPET = search-result summary only; NOT_READ = page/PDF not reachable",
+  "derived_values": "Fields named derived_* are computed by this agent from source numbers, not stated in the source."
+ },
+ "entries": [
+  {
+   "id": "D01",
+   "param": 1,
+   "country": "TH",
+   "source": "The Nation (Thailand), 'PTT proposal to hike LNG charge accepted', 2020-08-29 (ERC decision on PTTLNG Map Ta Phut terminal)",
+   "url": "https://www.nationthailand.com/news/30393715",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Fixed cost at Bt18.35 per million BTU, which will be revised every 4-5 years",
+   "page_or_table": "article body",
+   "value": {
+    "item": "Ld (fixed/demand charge), PTTLNG Map Ta Phut (LMPT1)",
+    "number": 18.35,
+    "currency": "THB",
+    "price_year": 2020,
+    "unit": "THB/MMBtu"
+   },
+   "eur2020_mwh": 1.7535,
+   "conversion_chain": "18.35 THB/MMBtu / 0.29307 = 62.6130 THB/MWh; / 35.7081 THB/EUR (2020 avg) = 1.7535 EUR2020/MWh; x HICP_EA 2020/2020 (105.06/105.06) = 1.7535 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Ld alone; total with Lc see D02."
+  },
+  {
+   "id": "D02",
+   "param": 1,
+   "country": "TH",
+   "source": "The Nation (Thailand), 2020-08-29 (same article as D01)",
+   "url": "https://www.nationthailand.com/news/30393715",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "approved the adjustment of LNG commodity charge up to Bt0.5382 per million BTU",
+   "page_or_table": "article body",
+   "value": {
+    "item": "Lc (commodity charge) approved ceiling 1 Sep-31 Dec 2020 (previous 0.481; PTTLNG had requested 1.4217)",
+    "number": 0.5382,
+    "currency": "THB",
+    "price_year": 2020,
+    "unit": "THB/MMBtu",
+    "total_Ld_plus_Lc_THB_per_MMBtu": 18.8882
+   },
+   "eur2020_mwh": 1.8049,
+   "conversion_chain": "Ld+Lc: 18.8882 THB/MMBtu / 0.29307 = 64.4494 THB/MWh; / 35.7081 THB/EUR (2020 avg) = 1.8049 EUR2020/MWh; x HICP_EA 2020/2020 (105.06/105.06) = 1.8049 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Regulated full-cost terminal service rate (unloading, storage, regasification), at contracted capacity. Directly 2020 price year: no deflation needed."
+  },
+  {
+   "id": "D03",
+   "param": 1,
+   "country": "TH",
+   "source": "ERC (Energy Regulatory Commission of Thailand) public-hearing / decision document, 2024-03 (PTTLNG LMPT1 + LMPT2 roll-in Ld 2023-2027 cycle; Lc 2024)",
+   "url": "https://www.erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202403/m_publichearing/8776/525/file_download/43aa8135115e4882c27ab7e499d1fcd2.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "unknown (document not reachable)",
+   "value": {
+    "Ld_rollin_THB_per_MMBtu": 17.7598,
+    "Ld_LMPT1_calc": 17.291,
+    "Ld_LMPT2_calc": 18.5046,
+    "Lc_2024_LMPT1": 0.9033,
+    "Lc_2024_LMPT2": 0.7754,
+    "currency": "THB",
+    "price_year": 2024,
+    "unit": "THB/MMBtu",
+    "effective": "Ld ceiling from March 2024 until re-approval"
+   },
+   "eur2020_mwh": {
+    "LMPT1": 1.3899,
+    "LMPT2": 1.3804
+   },
+   "conversion_chain": "LMPT1 Ld+Lc: 18.6631 THB/MMBtu / 0.29307 = 63.6814 THB/MWh; / 38.1811 THB/EUR (2024 avg) = 1.6679 EUR2024/MWh; x HICP_EA 2020/2024 (105.06/126.07) = 1.3899 EUR2020/MWh || LMPT2 Ld+Lc: 18.5352 THB/MMBtu / 0.29307 = 63.2450 THB/MWh; / 38.1811 THB/EUR (2024 avg) = 1.6564 EUR2024/MWh; x HICP_EA 2020/2024 (105.06/126.07) = 1.3804 EUR2020/MWh",
+   "grade": "SNIPPET",
+   "note": "Numbers come from a web-search summary of the ERC PDF; erc.or.th refused connection (ECONNREFUSED) so no verbatim quote. Needs re-check before use."
+  },
+  {
+   "id": "D04",
+   "param": 1,
+   "country": "TH",
+   "source": "ERC public-hearing documents 2022-06 and 2023-06 (LMPT2 initial rate; Lc 2023)",
+   "url": "https://www.erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202206/m_publichearing/8776/459/file_download/24515ce8281e7cd15a2159f48259cf78.pdf ; https://www.erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202306/m_publichearing/8776/502/file_download/9b649fe20e432f1e09ff8c8d615b79e4.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ",
+   "value": {
+    "snippet_LMPT2_2022": "Ld 18.3506 + Lc 0.4807 THB/MMBtu calculated; set equal to LMPT1 total 18.8313",
+    "snippet_conflicting": "another summary gives LMPT2 Ld 17.9292 and Lc 1.4518 THB/MMBtu",
+    "currency": "THB",
+    "unit": "THB/MMBtu"
+   },
+   "eur2020_mwh": null,
+   "conversion_chain": null,
+   "grade": "NOT_READ",
+   "note": "erc.or.th not reachable; search summaries conflict, not used."
+  },
+  {
+   "id": "D05",
+   "param": 1,
+   "country": "MY",
+   "source": "The Edge Malaysia, 'Petronas Gas revises tariffs under TPA' (dateline Dec 31, likely 2018; Energy Commission IBR pilot period 2019)",
+   "url": "https://theedgemalaysia.com/article/petronas-gas-revises-tariffs-under-tpa-impact-revenue",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the tariff for RGTSU is RM3.518 per million British thermal unit",
+   "page_or_table": "article body",
+   "value": {
+    "item": "RGTSU (Sungai Udang, Melaka) regasification tariff, whole 2019",
+    "number": 3.518,
+    "currency": "MYR",
+    "price_year": 2019,
+    "unit": "MYR/MMBtu"
+   },
+   "eur2020_mwh": 2.5949,
+   "conversion_chain": "3.518 MYR/MMBtu / 0.29307 = 12.0040 MYR/MWh; / 4.6374 MYR/EUR (2019 avg) = 2.5885 EUR2019/MWh; x HICP_EA 2020/2019 (105.06/104.8) = 2.5949 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Energy Commission (Suruhanjaya Tenaga) IBR base tariff; publication year inferred."
+  },
+  {
+   "id": "D06",
+   "param": 1,
+   "country": "MY",
+   "source": "The Edge Malaysia (same article as D05)",
+   "url": "https://theedgemalaysia.com/article/petronas-gas-revises-tariffs-under-tpa-impact-revenue",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "RGTP is US$0.637 per mmBtu",
+   "page_or_table": "article body",
+   "value": {
+    "item": "RGTP (Pengerang, Johor) regasification tariff, whole 2019",
+    "number": 0.637,
+    "currency": "USD",
+    "price_year": 2019,
+    "unit": "USD/MMBtu"
+   },
+   "eur2020_mwh": 1.9463,
+   "conversion_chain": "0.637 USD/MMBtu / 0.29307 = 2.1735 USD/MWh; / 1.1195 USD/EUR (2019 avg) = 1.9415 EUR2019/MWh; x HICP_EA 2020/2019 (105.06/104.8) = 1.9463 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D07",
+   "param": 1,
+   "country": "MY",
+   "source": "The Star, 'PETRONAS Gas announces adjusted tariffs for 2025', 2025-03-20 (ST approval 2025-03-11, Bursa filing)",
+   "url": "https://thestar.com.my/business/business-news/2025/03/20/petronas-gas-announces-adjusted-tariffs-for-2025",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the regasification tariff for RGTSU has increased marginally from RM3.455/GJ/day to RM3.456/GJ/day",
+   "page_or_table": "article body",
+   "value": {
+    "item": "RGTSU FY2025 adjusted tariff",
+    "number": 3.456,
+    "previous": 3.455,
+    "currency": "MYR",
+    "price_year": 2025,
+    "unit": "MYR/GJ/day (capacity-based)"
+   },
+   "eur2020_mwh": 2.1002,
+   "conversion_chain": "3.456 MYR/GJ x 3.6 GJ/MWh = 12.4416 MYR/MWh; / 4.8339 MYR/EUR (2025 avg) = 2.5738 EUR2025/MWh; x HICP_EA 2020/2025 (105.06/128.75) = 2.1002 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Interpreted as MYR per GJ of reserved daily capacity per day = MYR/GJ at 100% utilisation; consistent with 2019 RM3.518/MMBtu (=RM3.33/GJ). HICP 2025 used."
+  },
+  {
+   "id": "D08",
+   "param": 1,
+   "country": "MY",
+   "source": "The Star, 2025-03-20 (same as D07)",
+   "url": "https://thestar.com.my/business/business-news/2025/03/20/petronas-gas-announces-adjusted-tariffs-for-2025",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the RGTP regasification tariff has been revised downward from RM3.165/GJ/day to RM3.149/GJ/day",
+   "page_or_table": "article body",
+   "value": {
+    "item": "RGTP FY2025 adjusted tariff",
+    "number": 3.149,
+    "previous": 3.165,
+    "currency": "MYR",
+    "price_year": 2025,
+    "unit": "MYR/GJ/day (capacity-based)"
+   },
+   "eur2020_mwh": 1.9137,
+   "conversion_chain": "3.149 MYR/GJ x 3.6 GJ/MWh = 11.3364 MYR/MWh; / 4.8339 MYR/EUR (2025 avg) = 2.3452 EUR2025/MWh; x HICP_EA 2020/2025 (105.06/128.75) = 1.9137 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Same unit interpretation as D07."
+  },
+  {
+   "id": "D09",
+   "param": 1,
+   "country": "SG",
+   "source": "SLNG, 'Schedule of Approved Terminal Tariffs for the period 1 April 2026 to 31 March 2027' (approved by EMA)",
+   "url": "https://www.slng.com.sg/sites/default/files/2026-04/schedule-of-approved-tariffs-for-1-apr-2026-31-mar-2027.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "S$ 0.95 per mmBtu, which shall be applied to a Throughput Customer’s MaxGRR",
+   "page_or_table": "p.1, items 1-2",
+   "value": {
+    "reservation_SGD_per_MMBtu_of_MaxGRR_per_day": 0.95,
+    "utilisation_SGD_per_MMBtu": {
+     "peak": 0.22,
+     "shoulder": 0.12,
+     "off_peak": 0.02
+    },
+    "excess_rate_SGD_per_MMBtu": {
+     "peak": 1.37,
+     "shoulder": 1.27,
+     "off_peak": 1.17
+    },
+    "low_aggregate_take_surcharge": 0.6,
+    "currency": "SGD",
+    "price_year": "FY2026/27 (nominal)",
+    "unit": "SGD/MMBtu"
+   },
+   "eur2020_mwh": {
+    "central_100pct_load_incl_GSC": 2.099,
+    "low": 1.9058,
+    "high": 2.2832,
+    "reservation_only": 1.7926
+   },
+   "conversion_chain": "central = 0.95 + time-weighted utilisation 0.1224 (weekday 12h peak/4h shoulder/8h off-peak, weekend 16h shoulder/8h off-peak, 5/7-2/7) + GSC 0.04 (D10); 1.1124 SGD/MMBtu / 0.29307 = 3.7957 SGD/MWh; / 1.4756 SGD/EUR (2025 avg) = 2.5723 EUR2025/MWh; x HICP_EA 2020/2025 (105.06/128.75) = 2.0990 EUR2020/MWh; low = util 0.02, high = util 0.22. 2025 FX and 2025 HICP used as proxy for FY2026 (2026 annual data not complete).",
+   "grade": "VERIFIED",
+   "note": "Throughput services = berthing/unloading, storage, regasification, send-out. Full-load assumption; lower utilisation raises per-MWh cost."
+  },
+  {
+   "id": "D10",
+   "param": 1,
+   "country": "SG",
+   "source": "EMA, Information Paper 'Policy on Recovery of Strategic LNG Terminal Capacity Cost', Table 1",
+   "url": "https://www.ema.gov.sg/content/dam/corporate/regulations/policy-papers/pdf-files/EMA-Regulations-Policies-Info-Paper-Policy-Recovery-Strategic-LNG-Terminal-Capacity-Cost.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the indicative GSC rates for 1 Apr 2024 to 31 Mar 2029",
+   "page_or_table": "p.2 (printed), Table 1",
+   "value": {
+    "GSC_LNG_users_SGD_per_MMBtu": {
+     "FY19-23": 0.01,
+     "FY24": 0.02,
+     "FY25": 0.03,
+     "FY26": 0.04,
+     "FY27": 0.04,
+     "FY28": 0.05
+    },
+    "GSC_PNG_users_SGD_per_MMBtu": {
+     "FY19-23": 0.02,
+     "FY24": 0.2,
+     "FY25": 0.22,
+     "FY26": 0.23,
+     "FY27": 0.23,
+     "FY28": 0.25
+    },
+    "currency": "SGD",
+    "price_year": "nominal",
+    "unit": "SGD/MMBtu"
+   },
+   "eur2020_mwh": null,
+   "conversion_chain": "added into D09 central/low/high",
+   "grade": "VERIFIED",
+   "note": "Strategic capacity charge collected via PowerGas transmission tariff; FY24+ values indicative."
+  },
+  {
+   "id": "D11",
+   "param": 1,
+   "country": "ID",
+   "source": "detikFinance, 'Cerita di Balik Mahalnya Distribusi Gas ke Belawan', 2017-04-06",
+   "url": "https://finance.detik.com/energi/d-3466632/cerita-di-balik-mahalnya-distribusi-gas-ke-belawan",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Biaya regasifikasi di Terminal LNG Arun US$ 1,53/MMBtu",
+   "page_or_table": "article body",
+   "value": {
+    "item": "Arun LNG regasification terminal (Pertamina) regas fee, excl. Arun-Belawan pipeline toll",
+    "number": 1.53,
+    "currency": "USD",
+    "price_year": 2017,
+    "unit": "USD/MMBtu"
+   },
+   "eur2020_mwh": 4.7701,
+   "conversion_chain": "1.53 USD/MMBtu / 0.29307 = 5.2206 USD/MWh; / 1.1297 USD/EUR (2017 avg) = 4.6212 EUR2017/MWh; x HICP_EA 2020/2017 (105.06/101.78) = 4.7701 EUR2020/MWh",
+   "grade": "VERIFIED",
+   "note": "Commercial fee reported by media, not a BPH Migas-regulated toll; converted/reconverted terminal with low utilisation."
+  },
+  {
+   "id": "D12",
+   "param": 1,
+   "country": "ID",
+   "source": "Bisnis.com, 'Biaya Regasifikasi Belum Perlu Diatur', 2017-10-20 (citing SKK Migas)",
+   "url": "https://ekonomi.bisnis.com/read/20171020/44/701469/biaya-regasifikasi-belum-perlu-diatur",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (HTTP 403); values from search snippet",
+   "value": {
+    "FSRU_West_Java_Lampung_Bali_USD_per_MMBtu": 3.0,
+    "Arun_USD_per_MMBtu": 1.5,
+    "currency": "USD",
+    "price_year": 2017,
+    "unit": "USD/MMBtu"
+   },
+   "eur2020_mwh": {
+    "FSRU_3.0": 9.3532,
+    "Arun_1.5": 4.6766
+   },
+   "conversion_chain": "FSRU: 3.0 USD/MMBtu / 0.29307 = 10.2365 USD/MWh; / 1.1297 USD/EUR (2017 avg) = 9.0612 EUR2017/MWh; x HICP_EA 2020/2017 (105.06/101.78) = 9.3532 EUR2020/MWh",
+   "grade": "SNIPPET",
+   "note": "Same snippet reports a minister calling Nusantara Regas rate US$0.8/MMBtu (conflicting). Unverified."
+  },
+  {
+   "id": "D13",
+   "param": 1,
+   "country": "ID",
+   "source": "Bisnis.com, 'BPH Migas Siapkan Aturan tentang Biaya Regasifikasi LNG', 2019-11-18",
+   "url": "https://ekonomi.bisnis.com/read/20191118/44/1171383/bph-migas-siapkan-aturan-tentang-biaya-regasifikasi-lng",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (HTTP 403)",
+   "value": {
+    "finding": "search snippets: in 2019 regas costs not yet regulated; BPH Migas drafting rule analogous to pipeline toll; no published BPH Migas regas toll found"
+   },
+   "eur2020_mwh": null,
+   "conversion_chain": null,
+   "grade": "NOT_READ",
+   "note": "No BPH Migas regas/FSRU toll-fee decision located in this search."
+  },
+  {
+   "id": "D14",
+   "param": 1,
+   "country": "ID",
+   "source": "The Jakarta Post, 'PLN, Regas agree gas price for West Java', 2012-09-28",
+   "url": "https://www.thejakartapost.com/news/2012/09/28/pln-regas-agree-gas-price-west-java.html",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "We set the alpha at $3.43 per mmbtu based on the results of an audit",
+   "page_or_table": "article body",
+   "value": {
+    "item": "Nusantara Regas FSRU West Java 'alpha' (delivery + regasification margin over LNG cost)",
+    "number": 3.43,
+    "currency": "USD",
+    "price_year": 2012,
+    "unit": "USD/MMBtu"
+   },
+   "eur2020_mwh": null,
+   "conversion_chain": "not converted: scope wider than regas fee",
+   "grade": "VERIFIED",
+   "note": "Not comparable (includes delivery); context only."
+  },
+  {
+   "id": "D15",
+   "param": 2,
+   "source": "IEAGHG Technical Report 2020-10, 'The Status and Challenges of CO2 Shipping Infrastructures' (Element Energy, SINTEF Industry, Brevik Engineering, IOM Law)",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Scenario 1 has the lowest overall unit cost, excluding transport beyond the port (€26/tCO2)",
+   "page_or_table": "PDF p.9 (printed 7) text; Table 4-7, PDF p.70 (printed 36)",
+   "value": {
+    "scenario": "1: Rotterdam-Kollsnes, onshore unloading, Low P 7 barg -50C, 3 ships x 10,000 tCO2, 1,000 km, liquefaction sized 1.8 Mtpa, inlet 1 barg (non-pressurised)",
+    "shipping_chain_EUR_per_t": {
+     "0pct": 26,
+     "4pct": 29,
+     "7.5pct": 32,
+     "10pct": 35
+    },
+    "with_shore_to_offshore_pipeline_EUR_per_t": {
+     "0pct": 34,
+     "4pct": 40,
+     "7.5pct": 47,
+     "10pct": 52
+    },
+    "medium_P_15barg_scenario2_chain_EUR_per_t": {
+     "0pct": 28,
+     "4pct": 32,
+     "7.5pct": 37,
+     "10pct": 40
+    },
+    "currency": "EUR",
+    "price_year": 2018,
+    "unit": "EUR/tCO2"
+   },
+   "eur2020_t": {
+    "0pct": 26.377,
+    "7.5pct": 32.463
+   },
+   "conversion_chain": "x HICP_EA 2020/2018 (105.06/103.56) = 1.014484",
+   "grade": "VERIFIED",
+   "note": "Includes liquefaction, intermediate storage, loading/unloading, ship, conditioning; excludes injection. Non-pressurised inlet, so higher than model S-A (100 bar inlet). Model S-A at 1,000 km = 11.4167 + 2.9515 = 14.37 EUR2020/t."
+  },
+  {
+   "id": "D16",
+   "param": 2,
+   "source": "IEAGHG 2020-10 (as D15), Overview",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "costs of the shipping chain can be reduced to €17/tCO2",
+   "page_or_table": "PDF p.10 (printed 8); also p.69 (printed 35): pre-pressurisation lowers cost by €9-10/t",
+   "value": {
+    "item": "Scenario 1 shipping chain with pre-pressurised CO2 inlet, 1,000 km, undiscounted, 20-yr life",
+    "number": 17,
+    "currency": "EUR",
+    "price_year": 2018,
+    "unit": "EUR/tCO2"
+   },
+   "eur2020_t": 17.246,
+   "conversion_chain": "17 x 1.014484 (HICP_EA 2020/2018) = 17.246 EUR2020/t",
+   "grade": "VERIFIED",
+   "note": "Closest in scope to model S-A (pre-pressurised inlet, LP 7 barg, onshore unloading). Single distance point: fixed vs per-km split not separable. Same report: 'Liquefaction accounts for 40% of the overall unit cost for Scenario 1' (incl. pipeline)."
+  },
+  {
+   "id": "D17",
+   "param": 2,
+   "source": "IEAGHG 2020-10 (as D15), Table 4-5",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Summary of estimated costs for liquefaction, based on 1.8 Mtpa flow rate",
+   "page_or_table": "Table 4-5, PDF p.67 (printed 33)",
+   "value": {
+    "LowP_nonpressurised": {
+     "CAPEX_MEUR": 70,
+     "OPEX_MEUR_per_y": 21
+    },
+    "LowP_prepressurised": {
+     "CAPEX_MEUR": 29,
+     "OPEX_MEUR_per_y": 6.9
+    },
+    "MediumP_nonpressurised": {
+     "CAPEX_MEUR": 64,
+     "OPEX_MEUR_per_y": 18.5
+    },
+    "MediumP_prepressurised": {
+     "CAPEX_MEUR": 13,
+     "OPEX_MEUR_per_y": 3.2
+    },
+    "currency": "EUR",
+    "price_year": 2018,
+    "unit": "MEUR, MEUR/y at 1.8 Mtpa"
+   },
+   "eur2020_t": {
+    "derived_undiscounted_LowP_pre": 4.706,
+    "derived_undiscounted_LowP_non": 13.808
+   },
+   "conversion_chain": "derived (this agent): CAPEX/(20 y x 1.8 Mt) + OPEX/1.8 Mt; LowP pre = 4.639 EUR2018/t, non = 13.611 EUR2018/t; x 1.014484",
+   "grade": "VERIFIED",
+   "note": "Table 10-7 (PDF p.151): LowP pressurised Capex 16.3 EUR/(t/y), 39 kWh/t; non-press. 38.9 EUR/(t/y), 134 kWh/t. Undiscounted derivation ignores financing."
+  },
+  {
+   "id": "D18",
+   "param": 2,
+   "source": "IEAGHG 2020-10 (as D15), Table 4-6 and loading/unloading text",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "This pump gives rather a small cost compared to the other cost items",
+   "page_or_table": "Table 4-6 and 'Loading/unloading', PDF p.67 (printed 33)",
+   "value": {
+    "buffer_storage_scenario1_LowP": {
+     "CAPEX_MEUR": 13.0,
+     "OPEX_MEUR_per_y": 0.7,
+     "storage_factor": 1
+    },
+    "buffer_storage_scenario2_MediumP": {
+     "CAPEX_MEUR": 27.7,
+     "OPEX_MEUR_per_y": 1.4
+    },
+    "loading_unloading_pump": {
+     "CAPEX_MEUR": 0.4,
+     "OPEX_MEUR_per_y": 0.02
+    },
+    "currency": "EUR",
+    "price_year": 2018
+   },
+   "eur2020_t": {
+    "derived_undiscounted_buffer_LowP": 0.761
+   },
+   "conversion_chain": "derived: 13.0/(20x1.8) + 0.7/1.8 = 0.750 EUR2018/t; x 1.014484",
+   "grade": "VERIFIED",
+   "note": "Medium P storage about 2x Low P."
+  },
+  {
+   "id": "D19",
+   "param": 2,
+   "source": "IEAGHG 2020-10 (as D15), Table 10-6 and footnote 392",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Reference year for cost level 2018",
+   "page_or_table": "Table 10-6, PDF p.149 (printed 115); footnote 392 PDF p.153 'All data has been converted to 2018€.'",
+   "value": {
+    "price_year": 2018,
+    "currency": "EUR",
+    "electricity": "0.08 EUR/kWh",
+    "accuracy": "+/-40 % within 80 % CI"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Price-year evidence for D15-D18."
+  },
+  {
+   "id": "D20",
+   "param": 2,
+   "source": "IEAGHG 2020-10 (as D15), Overview distance comparison",
+   "url": "https://ieaghg.org/publications/2020-10%20The%20Status%20and%20Challenges%20of%20CO2%20Shipping%20Infrastructures.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Pipeline costs are also much more sensitive to the transport distance than shipping costs",
+   "page_or_table": "PDF p.13 (printed 11); Figure 9 PDF p.14",
+   "value": {
+    "breakeven_ship_vs_pipe_km": {
+     "1Mtpa_nonpress": 650,
+     "2Mtpa_nonpress": 920,
+     "1Mtpa_prepress": 320,
+     "2Mtpa_prepress": 520,
+     "direct_injection_1Mtpa": 660,
+     "direct_injection_2Mtpa": 990
+    }
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Per-km shipping cost only shown graphically (Figure 9) - per-km value NOT_READ from text."
+  },
+  {
+   "id": "D21",
+   "param": 2,
+   "source": "Element Energy for BEIS (2018), 'Shipping CO2 - UK Cost Estimation Study', Final report, Nov 2018",
+   "url": "https://assets.publishing.service.gov.uk/media/5c07a24f40f0b67052a55bf9/BEIS_Shipping_CO2.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "The unit cost in the central case is £10.02/tCO2",
+   "page_or_table": "Table 5-1 PDF p.35 (printed 31); text PDF p.38 (printed 34)",
+   "value": {
+    "central_case": "onshore unloading, 1 Mtpa, 600 km, pre-pressurised inlet, Low P, 10 ktCO2 ship, LNG fuel, 20 y, 0% discount",
+    "number": 10.02,
+    "currency": "GBP",
+    "price_year": 2017,
+    "unit": "GBP/tCO2 (undiscounted)"
+   },
+   "eur2020_t": 11.798,
+   "conversion_chain": "10.02 GBP2017 / 0.87667 GBP/EUR (2017 avg) = 11.4296 EUR2017; x HICP_EA 2020/2017 (105.06/101.78) = 11.798 EUR2020/t",
+   "grade": "VERIFIED",
+   "note": "Ship + liquefaction = 83% of cost. Model S-A at 600 km = 11.4167 + 0.0029515x600 = 13.19 EUR2020/t. Not independent of IEAGHG 2020-10 (same lead consultant/model)."
+  },
+  {
+   "id": "D22",
+   "param": 2,
+   "source": "Element Energy for BEIS (2018), Executive summary",
+   "url": "https://assets.publishing.service.gov.uk/media/5c07a24f40f0b67052a55bf9/BEIS_Shipping_CO2.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "total shipping costs can be in the range of £7-12/tCO2 for pre-pressurised CO2",
+   "page_or_table": "PDF p.6 (Executive summary)",
+   "value": {
+    "range": [
+     7,
+     12
+    ],
+    "currency": "GBP",
+    "price_year": 2017,
+    "unit": "GBP/tCO2",
+    "scope": "excl. transport from source to port and initial compression"
+   },
+   "eur2020_t": [
+    8.242,
+    14.129
+   ],
+   "conversion_chain": "x (1/0.87667) x 1.032226 = x 1.177440",
+   "grade": "VERIFIED",
+   "note": "Conclusions section repeats £7-10/t for pre-pressurised + low pressure."
+  },
+  {
+   "id": "D23",
+   "param": 2,
+   "source": "Element Energy for BEIS (2018), Table 4-2 and Table 4-4",
+   "url": "https://assets.publishing.service.gov.uk/media/5c07a24f40f0b67052a55bf9/BEIS_Shipping_CO2.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Costs have been converted to 2017 £ using UK government exchange",
+   "page_or_table": "PDF p.24 (printed 20); Table 4-2 PDF p.26; Table 4-4 PDF p.28",
+   "value": {
+    "liquefaction_LowP_prepressurised": {
+     "specific_CAPEX_GBP_per_tpa": 9.8,
+     "fixed_OPEX_pct_CAPEX": 10,
+     "energy_kWh_per_t": 24.6
+    },
+    "liquefaction_LowP_nonpressurised": {
+     "specific_CAPEX_GBP_per_tpa": 19.5,
+     "energy_kWh_per_t": 104.2
+    },
+    "liquefaction_MedP_prepressurised": {
+     "specific_CAPEX_GBP_per_tpa": 7.6,
+     "energy_kWh_per_t": 19.6
+    },
+    "temporary_storage_CAPEX_GBP_per_t_capacity": {
+     "LowP": 516,
+     "MedP": 795,
+     "HighP": 3073
+    },
+    "electricity_GBP_per_kWh": 0.08,
+    "currency": "GBP",
+    "price_year": 2017
+   },
+   "eur2020_t": {
+    "derived_undiscounted_liquefaction_LowP_pre": 4.048
+   },
+   "conversion_chain": "derived: 9.8/20 + 0.10x9.8 + 24.6x0.08 = 3.438 GBP2017/t; x 1.177440",
+   "grade": "VERIFIED",
+   "note": "Pre-pressurised inlet 70-100 bar per literature basis."
+  },
+  {
+   "id": "D24",
+   "param": 2,
+   "source": "Element Energy for BEIS (2018), Section 5.1.4 sensitivities",
+   "url": "https://assets.publishing.service.gov.uk/media/5c07a24f40f0b67052a55bf9/BEIS_Shipping_CO2.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Reducing the distance by 25% (to 450 km) leads to a decrease",
+   "page_or_table": "PDF p.39 (printed 35)",
+   "value": {
+    "distance_minus25pct_450km": "-5% unit cost (ship 8 kt instead of 10 kt)",
+    "distance_plus25pct_750km": "+19% unit cost (ship 20 kt instead of 10 kt)",
+    "implied_slope_from_minus25pct_GBP_per_t_km": 0.00334
+   },
+   "eur2020_t": {
+    "implied_slope_EUR2020_per_t_km": 0.00393
+   },
+   "conversion_chain": "derived: 0.05 x 10.02 / 150 km = 0.00334 GBP2017/(t km); x 1.177440",
+   "grade": "VERIFIED",
+   "note": "Distance effect confounded by discrete ship-size steps; not a clean per-km rate."
+  },
+  {
+   "id": "D25",
+   "param": 2,
+   "source": "ZEP (European Technology Platform for Zero Emission Fossil Fuel Power Plants), 'The Costs of CO2 Transport - Post-demonstration CCS in the EU', 2011, Table 1",
+   "url": "https://carbonmanagementeurope.org/wp-content/uploads/2025/07/CO2-Transport-Report-.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "shipping costs are only marginally influenced by distance",
+   "page_or_table": "Table 1, PDF p.6",
+   "value": {
+    "case": "2.5 Mtpa point-to-point, offshore discharge",
+    "distance_km": [
+     180,
+     500,
+     750,
+     1500
+    ],
+    "ship_EUR_per_t": [
+     8.2,
+     9.5,
+     10.6,
+     14.5
+    ],
+    "liquefaction_EUR_per_t": 5.3,
+    "currency": "EUR",
+    "price_year": "Q2 2009",
+    "unit": "EUR/tCO2"
+   },
+   "eur2020_t": {
+    "derived_zero_km_incl_liquefaction": 14.292,
+    "derived_slope_per_t_km": 0.005528
+   },
+   "conversion_chain": "derived OLS on 4 points: ship = 7.1675 + 0.004823 x km (EUR2009); fixed = 7.1675 + 5.3 = 12.4675; x HICP_EA 2020/2009 (105.06/91.65) = 1.146318 (annual 2009 used for Q2 2009)",
+   "grade": "VERIFIED",
+   "note": "Ship cost includes buffer storage (100% of ship size, floating barge), quay loading arm, offshore submerged-turret discharge, on-board conditioning. Liquefaction inlet 100 barg -> 7 bara, -50 C (PDF p.18) = same basis as model S-A."
+  },
+  {
+   "id": "D26",
+   "param": 2,
+   "source": "ZEP 2011 (as D25), Table 2",
+   "url": "https://carbonmanagementeurope.org/wp-content/uploads/2025/07/CO2-Transport-Report-.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Shipping costs here include the costs for a stand-alone liquefaction unit",
+   "page_or_table": "Table 2, PDF p.7",
+   "value": {
+    "case": "20 Mtpa network, ship as spine",
+    "spine_distance_km": [
+     180,
+     500,
+     750,
+     1500
+    ],
+    "ship_incl_liquefaction_EUR_per_t": [
+     11.1,
+     12.2,
+     13.2,
+     16.1
+    ],
+    "currency": "EUR",
+    "price_year": "Q2 2009",
+    "unit": "EUR/tCO2"
+   },
+   "eur2020_t": {
+    "derived_zero_km_incl_liquefaction": 11.871,
+    "derived_slope_per_t_km": 0.004372
+   },
+   "conversion_chain": "derived OLS: 10.3560 + 0.003814 x km (EUR2009); x 1.146318",
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D27",
+   "param": 2,
+   "source": "ZEP 2011 (as D25), cost basis",
+   "url": "https://carbonmanagementeurope.org/wp-content/uploads/2025/07/CO2-Transport-Report-.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Costs refer to cost levels in the second quarter of 2009.",
+   "page_or_table": "PDF p.11; also exchange rates 0.683 EUR/USD, 1.258 EUR/GBP",
+   "value": {
+    "price_year": "Q2 2009",
+    "currency": "EUR"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Price-year evidence for D25-D26."
+  },
+  {
+   "id": "D28",
+   "param": 2,
+   "source": "ZEP & CCSA (2024), 'Achieving a European market for CO2 transport by ship'",
+   "url": "https://carbonmanagementeurope.org/wp-content/uploads/2024/07/ZEP_CO2_Shipping.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (PDF > 10 MB WebFetch limit)",
+   "value": {
+    "landing_page": "https://carbonmanagementeurope.org/co2-transport-by-ship-market",
+    "finding": "landing page gives no cost figures; scope is market mapping 2030, interoperability, barriers"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "NOT_READ",
+   "note": ""
+  },
+  {
+   "id": "D29",
+   "param": 2,
+   "source": "Clarksons / CCSA (2024), 'Updated Costs for CO2 Ship Transport'",
+   "url": "https://cms.ccsassociation.org/?p=40137",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (no PDF link exposed)",
+   "value": {
+    "finding": "route-specific NW Europe costs at 2024 prices; numbers not retrieved"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "NOT_READ",
+   "note": ""
+  },
+  {
+   "id": "D30",
+   "param": 2,
+   "source": "Roussanaly, Deng, Skaugen, Gundersen (2021), 'At what Pressure Shall CO2 Be Transported by Ship? An in-Depth Cost Comparison of 7 and 15 Barg Shipping', Energies 14(18):5635",
+   "url": "https://www.mdpi.com/1996-1073/14/18/5635 ; https://psecommunity.org/LAPSE:2021.0592",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (HTTP 403 / 429)",
+   "value": {
+    "snippet": "7 barg cost-optimal where shipping wins; >30% savings vs 15 barg over wide volume range; up to 20 Mtpa, 2,000 km"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "NOT_READ",
+   "note": "Journal is Energies, not IJGGC; no IJGGC 2021 Roussanaly shipping-cost paper identified."
+  },
+  {
+   "id": "D31",
+   "param": 3,
+   "source": "PyPSA-Eur v2025.07.0, config/config.default.yaml",
+   "url": "https://github.com/PyPSA/pypsa-eur/blob/v2025.07.0/config/config.default.yaml#L711",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "co2_sequestration_cost: 30",
+   "page_or_table": "line 711 (sector:); costs: year 2050, version v0.13.2 at lines 913-915",
+   "value": {
+    "number": 30,
+    "unit": "currency/tCO2 (no year stated)",
+    "costs_year": 2050,
+    "technology_data_version": "v0.13.2"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Used in scripts/prepare_sector_network.py (v2025.07.0, line 833) as capital_cost of the 'co2 sequestered' Store (marginal_cost -0.1)."
+  },
+  {
+   "id": "D32",
+   "param": 3,
+   "source": "PyPSA-Eur commit e43746df6e1b3b248e2c2c2366901ff1a48490ba, PR #1753 'prepare release v2025.07.0' (Fabian Neumann, merged 2025-07-11)",
+   "url": "https://github.com/PyPSA/pypsa-eur/pull/1753 ; https://github.com/PyPSA/pypsa-eur/commit/e43746df6e1b3b248e2c2c2366901ff1a48490ba",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "-  co2_sequestration_cost: 10 / +  co2_sequestration_cost: 30",
+   "page_or_table": "config/config.default.yaml diff hunk @@ -673,21 +703,21 @@",
+   "value": {
+    "old": 10,
+    "new": 30,
+    "same_commit_changes": "costs year 2030->2050; technology-data v0.10.1->v0.13.2; co2_sequestration_potential 2050 200->250; co2_spatial/co2_network false->true"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "PR body empty; no issue or review comments. Tag check: value 10 at v0.8.1 through v2025.04.0, 30 at v2025.07.0 and current master (v2026.09.0)."
+  },
+  {
+   "id": "D33",
+   "param": 3,
+   "source": "PyPSA-Eur doc/release_notes.rst, section 'PyPSA-Eur v2025.07.0 (11th July 2025)'",
+   "url": "https://github.com/PyPSA/pypsa-eur/blob/v2025.07.0/doc/release_notes.rst",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Adjusted a series of default values in ``config.default.yaml``.",
+   "page_or_table": "Changes, first bullet (line ~52)",
+   "value": {
+    "finding": "no mention of co2_sequestration_cost, its basis or currency year"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D34",
+   "param": 3,
+   "source": "PyPSA-Eur doc/configtables/sector.csv (v2025.07.0) and scripts/lib/validation/config/sector.py (master)",
+   "url": "https://github.com/PyPSA/pypsa-eur/blob/v2025.07.0/doc/configtables/sector.csv",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "The cost of sequestering a ton of CO2 (currency/tCO2).",
+   "page_or_table": "sector.csv line 151 'currency/tCO2'; validation sector.py lines 771-773 (master)",
+   "value": {
+    "unit_documented": "currency/tCO2",
+    "currency_year_documented": null
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D35",
+   "param": 3,
+   "source": "PyPSA-Eur doc/sector.rst (v2025.07.0)",
+   "url": "https://github.com/PyPSA/pypsa-eur/blob/v2025.07.0/doc/sector.rst",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the cost assumption is defined in the config file",
+   "page_or_table": "line 618 (carbon capture / sequestration paragraph)",
+   "value": {
+    "finding": "no source or price year for the sequestration cost"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D36",
+   "param": 3,
+   "source": "PyPSA-Eur commit ec04d7909afe31454f3ab47a821ad1bd51e1ed3a (merge of PyPSA-Eur-Sec PR #148 'Add CO2 network', 2021-09-28)",
+   "url": "https://github.com/PyPSA/pypsa-eur/commit/ec04d7909afe31454f3ab47a821ad1bd51e1ed3a",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "co2_sequestration_cost: 10   #EUR/tCO2 for sequestration of CO2",
+   "page_or_table": "config.default.yaml diff",
+   "value": {
+    "old": "20 #EUR/tCO2 for transport and sequestration of CO2",
+    "new": "10 #EUR/tCO2 for sequestration of CO2"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Value moved from code to config in PyPSA-Eur-Sec 0.4.0 (11 Dec 2020) release note; no currency year at any step."
+  },
+  {
+   "id": "D37",
+   "param": 3,
+   "source": "PyPSA technology-data config.yaml at v0.13.2 (and v0.10.1)",
+   "url": "https://github.com/PyPSA/technology-data/blob/v0.13.2/config.yaml",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "#year for EUR outputs / eur_year: 2020",
+   "page_or_table": "lines 17-18 (v0.13.2); lines 8-9 (v0.10.1)",
+   "value": {
+    "eur_year": 2020
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Applies to costs_{year}.csv only; co2_sequestration_cost is a hand-set config scalar, not read from technology-data (no geological storage row found in costs_2050.csv v0.13.2). EUR2020 for 30 is an inference, not documented."
+  },
+  {
+   "id": "D38",
+   "param": 3,
+   "source": "PyPSA-Eur PR #2161 'improving Carbon Manangement Modeling' (merged 2026-08-12)",
+   "url": "https://github.com/PyPSA/pypsa-eur/pull/2161",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Moved costs for sequestration from the storage sites `capital_cost` to the sequestration link `marginal_cost`",
+   "page_or_table": "PR description",
+   "value": {
+    "finding": "later change of how the 30 is applied; no currency year discussed"
+   },
+   "eur2020_t": null,
+   "conversion_chain": null,
+   "grade": "VERIFIED",
+   "note": "Not in v2025.07.0; relevant only if model upgrades PyPSA-Eur."
+  },
+  {
+   "id": "D39",
+   "param": 4,
+   "country": "ID",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Table 1.6. Indonesia: Estimated CO2 Storage Resources in Saline Formations",
+   "page_or_table": "Table 1.6 p.15 (header P10 P50 P90 = 32 49 75); Table 1.4 pp.14-15 (HC P50 net total 2,275 MtCO2)",
+   "value": {
+    "saline_low_mid_high_Gt": [
+     32,
+     49,
+     75
+    ],
+    "hydrocarbon_P50_net_Gt": 2.275,
+    "total_low_mid_high_Gt_derived": [
+     34.275,
+     51.275,
+     77.275
+    ]
+   },
+   "model_P50": 51.28,
+   "grade": "VERIFIED",
+   "note": "Model 51.28 = saline P50 49 + HC P50 net 2.275. Table 1.6 labels ascending values P10/P50/P90 while other countries label them P90/P50/P10: treat as low/mid/high. Basins: Kutei 23/35/53, East Java 4/8/13, Central Sumatra 5/6/9. HC fields have P50 only; derived total = saline bound + HC P50."
+  },
+  {
+   "id": "D40",
+   "param": 4,
+   "country": "MY",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Note: the resources of the Malaysian part of the Sabah Basin were not completed",
+   "page_or_table": "Table 1.9 p.26 (P90 80 / P50 127 / P10 197); Table 1.7 p.26 (HC P50 net 1,773 MtCO2)",
+   "value": {
+    "saline_low_mid_high_Gt": [
+     80,
+     127,
+     197
+    ],
+    "hydrocarbon_P50_net_Gt": 1.773,
+    "total_low_mid_high_Gt_derived": [
+     81.773,
+     128.773,
+     198.773
+    ]
+   },
+   "model_P50": 128.77,
+   "grade": "VERIFIED",
+   "note": "Malay 48/83/136, Sarawak 31/44/61. Model 128.77 = 127 + 1.773."
+  },
+  {
+   "id": "D41",
+   "param": 4,
+   "country": "BN",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Table 1.12. Brunei: Estimated CO2 Storage Resources in Saline Formations",
+   "page_or_table": "Table 1.12 p.35 (P90 13 / P50 18 / P10 25); Table 1.10 p.35 (HC P50 net 579.3 MtCO2)",
+   "value": {
+    "saline_low_mid_high_Gt": [
+     13,
+     18,
+     25
+    ],
+    "hydrocarbon_P50_net_Gt": 0.5793,
+    "total_low_mid_high_Gt_derived": [
+     13.5793,
+     18.5793,
+     25.5793
+    ]
+   },
+   "model_P50": 18.58,
+   "grade": "VERIFIED",
+   "note": "Baram Fluvial-Deltaic System sands. Model 18.58 = 18 + 0.579."
+  },
+  {
+   "id": "D42",
+   "param": 4,
+   "country": "TH",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Table 1.14. Thailand: Estimated CO2 Storage Resources in Saline Formations",
+   "page_or_table": "Table 1.14 p.40 (total P90 11 / P50 15 / P10 22); Table 1.13 p.40 (HC P50 net 1,024 MtCO2)",
+   "value": {
+    "saline_low_mid_high_Gt": [
+     11,
+     15,
+     22
+    ],
+    "hydrocarbon_P50_net_Gt": 1.024,
+    "total_low_mid_high_Gt_derived": [
+     12.024,
+     16.024,
+     23.024
+    ]
+   },
+   "model_P50": 16.02,
+   "grade": "VERIFIED",
+   "note": "Pattani 9/13/18, Malay (Thailand) 1.5/2/4. Model 16.02 = 15 + 1.024."
+  },
+  {
+   "id": "D43",
+   "param": 4,
+   "country": "VN",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Table 1.17. Viet Nam: Estimated CO2 Storage Resources in Saline Formations",
+   "page_or_table": "Table 1.17 p.47 (Cuu Long Bach Ho P90 3 / P50 5 / P10 9); Table 1.15 p.47 (HC P50 net 303.4 MtCO2)",
+   "value": {
+    "saline_low_mid_high_Gt": [
+     3,
+     5,
+     9
+    ],
+    "hydrocarbon_P50_net_Gt": 0.3034,
+    "total_low_mid_high_Gt_derived": [
+     3.3034,
+     5.3034,
+     9.3034
+    ]
+   },
+   "model_P50": 5.3,
+   "grade": "VERIFIED",
+   "note": "Model 5.30 = 5 + 0.3034."
+  },
+  {
+   "id": "D44",
+   "param": 4,
+   "country": "PH",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "There was no data for saline formation resource estimates.",
+   "page_or_table": "Table 1.18 p.53 (North Palawan, Malampaya: P50 net 67.2 MtCO2)",
+   "value": {
+    "hydrocarbon_P50_net_Gt": 0.0672,
+    "saline": null,
+    "P10_P90": null
+   },
+   "model_P50": 0.0672,
+   "grade": "VERIFIED",
+   "note": "No ERIA range. Same chapter cites ADB (2013) ~32 Gt saline in Luzon/Cagayan basins (secondary, not adopted)."
+  },
+  {
+   "id": "D45",
+   "param": 4,
+   "country": "SG",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "The geology of Singapore indicates there is no storage potential in that country.",
+   "page_or_table": "Section 1.3.8 p.56",
+   "value": {
+    "Gt": 0
+   },
+   "model_P50": 0,
+   "grade": "VERIFIED",
+   "note": ""
+  },
+  {
+   "id": "D46",
+   "param": 4,
+   "country": "KH/LA/MM",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "The storage potential of these nations is currently unknown as no analysis has been completed.",
+   "page_or_table": "Section 1.3.9 p.56",
+   "value": {
+    "Gt": null
+   },
+   "model_P50": {
+    "KH": 0.09,
+    "LA": 0,
+    "MM": 0
+   },
+   "grade": "VERIFIED",
+   "note": "ERIA gives no number for KH; model KH 0.09 from OGCI/CSRC 2025 (D48, not read). TL not assessed in Ch.1."
+  },
+  {
+   "id": "D47",
+   "param": 4,
+   "country": "method",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.)",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "Therefore, the results may be overly optimistic.",
+   "page_or_table": "Section 1.2.2 pp.10 (CO2-SCREEN v4.1 Monte Carlo, IEAGHG 2009 efficiency factors)",
+   "value": {
+    "method": "NETL CO2-SCREEN v4.1 probabilistic saline estimates; HC fields deterministic P50 (depth > 800 m, > 5 MtCO2)"
+   },
+   "model_P50": null,
+   "grade": "VERIFIED",
+   "note": "Sum of basin P10/P90 is not a statistical P10/P90 of the country total; report adds them."
+  },
+  {
+   "id": "D48",
+   "param": 4,
+   "country": "ASEAN",
+   "source": "OGCI, CO2 Storage Resource Catalogue Cycle 5, Appendix B Asia (August 2025)",
+   "url": "https://www.ogci.com/wp-content/uploads/2025/11/CSRC_Cycle_5_Appendix_B_Asia-_August_2025.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": null,
+   "page_or_table": "NOT_READ (HTTP 403; Cycle 3 Appendix B also 403)",
+   "value": {
+    "snippet": "Asia region ~57 Gt sub-commercial, ~4,332 Gt undiscovered; per-country tables exist"
+   },
+   "model_P50": null,
+   "grade": "NOT_READ",
+   "note": "Likely compiles ERIA/GCCSI and national studies, so may not be independent of D39-D43."
+  },
+  {
+   "id": "D49",
+   "param": 4,
+   "country": "VN/TH/PH/ID(S.Sumatra)",
+   "source": "ERIA/GCCSI (2024), Comprehensive CCUS Research Report, ERIA Research Project Report 2024 No.16, Ch.1 'Geological Storage Potential of CO2 in Southeast Asia' (Consoli et al.) citing ADB (2013) 'Prospects for CCS in Southeast Asia'",
+   "url": "https://eria.org/uploads/1_Chapter-1-Geological-Storage-Potential-of-CO2-in-Southeast_Asia.pdf",
+   "accessed_utc": "2026-11-08T16:00Z",
+   "quote": "the storage resource estimate for the four nations was 54 GtCO2",
+   "page_or_table": "Section 1.1 p.1",
+   "value": {
+    "ADB_2013_four_countries_Gt": 54,
+    "saline_share": "88%",
+    "HC_fields_Gt": 3.5
+   },
+   "model_P50": null,
+   "grade": "VERIFIED",
+   "note": "Aggregate only, no per-country split in ERIA text; secondary citation."
+  }
+ ]
+}

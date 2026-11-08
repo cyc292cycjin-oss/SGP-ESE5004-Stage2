@@ -1,0 +1,421 @@
+{
+ "lng": {
+  "terminals": {
+   "TH_LMPT1_2020_Ld_plus_Lc": {
+    "eur2020_mwh": 1.8048971784304961,
+    "ev": "D01;D02",
+    "note": "ERC-approved Ld 18.35 + Lc 0.5382 THB/MMBtu (2020)"
+   },
+   "MY_RGTSU_2025": {
+    "eur2020_mwh": 2.1002390616272577,
+    "ev": "D07",
+    "note": "ST-approved 3.456 RM/GJ/day of capacity, read at full utilisation"
+   },
+   "MY_RGTP_2025": {
+    "eur2020_mwh": 1.9136726866505311,
+    "ev": "D08",
+    "note": "ST-approved 3.149 RM/GJ/day, full utilisation"
+   },
+   "MY_RGTSU_2019": {
+    "eur2020_mwh": 2.594932270415488,
+    "ev": "D05",
+    "note": "2019 tariff (superseded by 2025; not used in the median)"
+   },
+   "MY_RGTP_2019": {
+    "eur2020_mwh": 1.9463461659174341,
+    "ev": "D06",
+    "note": "2019 tariff (superseded by 2025; not used in the median)"
+   },
+   "SG_SLNG_FY26": {
+    "eur2020_mwh": 2.09446509295604,
+    "ev": "D09;D10",
+    "note": "SLNG/EMA FY26: 0.95 reservation + 0.12 shoulder utilisation + 0.04 GSC SGD/MMBtu (range 0.02-0.22 utilisation)",
+    "low": 1.830298324475098,
+    "high": 2.283155641870999
+   },
+   "ID_Arun_2017": {
+    "eur2020_mwh": 4.770148372049234,
+    "ev": "D11",
+    "note": "Arun regasification fee (Pertamina), news report; no BPH Migas regulated toll found (D13)"
+   },
+   "ID_FSRU_2017_snippet": {
+    "eur2020_mwh": 9.353232102057321,
+    "ev": "D12",
+    "note": "SNIPPET only (403): FSRU West Java / Lampung / Bali ~3.0 USD/MMBtu - not used"
+   }
+  },
+  "country_groups": {
+   "TH": 1.8048971784304961,
+   "MY": 2.006955874138894,
+   "SG": 2.09446509295604,
+   "ID": 4.770148372049234
+  },
+  "value": 2.0507104835474674,
+  "low": 1.8048971784304961,
+  "high": 4.770148372049234,
+  "old": 1.26,
+  "change_pct": 62.75480028154503,
+  "verdict": "REPLACE: four national regulators / operators (TH ERC, MY Suruhanjaya Tenaga, SG EMA-SLNG, ID Arun) publish per-energy terminal tariffs; independent, convertible (full-utilisation tariff per MWh, the basis of the registered adder); value = median of the country groups",
+  "caveat": "the published tariffs are full-cost (capacity charge incl. capital recovery); the model also charges the expansion capex 8,020 EUR2020/MW/a on NEW terminal capacity (~0.92 EUR/MWh at full use) - the capital part is counted twice on expanded capacity (as for the old 1.26); open question"
+ },
+ "co2_ship": {
+  "model": {
+   "fixed": 11.4166656,
+   "slope": 0.0029515
+  },
+  "zep_table1": {
+   "fixed": 14.29,
+   "slope": 0.00553,
+   "ev": "D25",
+   "note": "ZEP 2011 Table 1 (2.5 Mtpa point-to-point, ship + liquefaction 5.3), OLS through 180-1,500 km, Q2 2009 -> EUR2020 (derived, re-computed: slope 0.00482 EUR2009/(t km), intercept 7.17 + 5.3)"
+  },
+  "zep_table2": {
+   "fixed": 11.87,
+   "slope": 0.00437,
+   "ev": "D26",
+   "note": "ZEP 2011 Table 2 (20 Mtpa network, ship incl. stand-alone liquefaction), OLS (derived)"
+  },
+  "ieaghg2020": {
+   "total_1000km": 17.246,
+   "ev": "D16",
+   "note": "IEAGHG 2020-10 scenario 1 pre-pressurised, 1,000 km, 7 barg (EUR2018)"
+  },
+  "beis2018": {
+   "total_600km": 11.798,
+   "slope_minus25pct": 0.00393,
+   "ev": "D21;D24",
+   "note": "Element Energy for BEIS 2018 central case 600 km pre-pressurised (GBP2017); same consultancy as IEAGHG 2020 (not independent)"
+  },
+  "fixed_from_totals": {
+   "IEAGHG2020_at_model_slope": 14.2945,
+   "BEIS2018_at_model_slope": 10.0271
+  },
+  "fixed_range": [
+   10.0271,
+   14.2945
+  ],
+  "slope_range": [
+   0.0029515,
+   0.00553
+  ],
+  "chain_1000km": {
+   "model": 14.368165600000001,
+   "ieaghg2020": 17.246,
+   "zep_t1": 19.82,
+   "zep_t2": 16.24
+  },
+  "verdict": "KEEP + RANGE: the literature gives chain totals at single distances with different pressure levels (7 barg low pressure vs the 100 bar chain of IEAGHG 2004), inlet conditions (pre-pressurised) and ship sizes; the split into a distance-independent part and a per-km slope is a derivation (OLS / model slope), not a source value. IEAGHG 2020 and BEIS 2018 share the lead consultancy. Model chain at 1,000 km (14.37 EUR2020/t) lies inside the literature spread (BEIS lower, IEAGHG / ZEP higher). Fixed part range and slope range registered"
+ },
+ "co2_storage_potential": {
+  "countries": {
+   "ID": {
+    "low_gt": 34.275,
+    "p50_gt": 51.275,
+    "high_gt": 77.275,
+    "cap_low_t": 685500000.0,
+    "cap_p50_t": 1025500000.0,
+    "cap_high_t": 1545500000.0,
+    "ev": "D39"
+   },
+   "MY": {
+    "low_gt": 81.773,
+    "p50_gt": 128.773,
+    "high_gt": 198.773,
+    "cap_low_t": 1635460000.0,
+    "cap_p50_t": 2575460000.0,
+    "cap_high_t": 3975460000.0,
+    "ev": "D40"
+   },
+   "BN": {
+    "low_gt": 13.5793,
+    "p50_gt": 18.5793,
+    "high_gt": 25.5793,
+    "cap_low_t": 271586000.0,
+    "cap_p50_t": 371586000.0,
+    "cap_high_t": 511586000.0,
+    "ev": "D41"
+   },
+   "TH": {
+    "low_gt": 12.024,
+    "p50_gt": 16.024,
+    "high_gt": 23.024,
+    "cap_low_t": 240480000.0,
+    "cap_p50_t": 320480000.0,
+    "cap_high_t": 460480000.0,
+    "ev": "D42"
+   },
+   "VN": {
+    "low_gt": 3.3034,
+    "p50_gt": 5.3034,
+    "high_gt": 9.3034,
+    "cap_low_t": 66068000.0,
+    "cap_p50_t": 106068000.0,
+    "cap_high_t": 186068000.0,
+    "ev": "D43"
+   },
+   "PH": {
+    "low_gt": null,
+    "p50_gt": 0.0672,
+    "high_gt": null,
+    "ev": "D44",
+    "note": "hydrocarbon fields only (Malampaya); no ERIA range"
+   },
+   "KH": {
+    "note": "not assessed by ERIA (D46); model 0.09 Gt / cap 1.8 Mt/a from OGCI 2025 / IJGGC 2014 (not read: D48)"
+   }
+  },
+  "verdict": "RANGE ONLY (decision 126: main stays P50): ERIA / GCCSI 2024 Ch.1 saline P90 / P50 / P10 + hydrocarbon P50 (deterministic); one source (OGCI not read) - ranges registered for W19, main values unchanged; annual caps = potential / 50 years (the build rule)"
+ },
+ "ev_ice": {
+  "class_ratio": {
+   "two_wheeler": {
+    "low": 5.955172413793104,
+    "high": 8.9,
+    "mid": 7.380109916951636,
+    "ev": "E03-E08, E10, E11, E20",
+    "pairs": "ITDP ID test 17.27 / 2.9; ADB monitored 22.25 / 2.5; VN 15.66 (ITDP) / 2.047 (Le 2023 on-road); ADBI 2040 28.44 / 4.0"
+   },
+   "car": {
+    "low": 3.56,
+    "high": 4.510135135135135,
+    "mid": 3.56,
+    "ev": "E10, E11, E14, E16, E18, E19",
+    "pairs": "ERIA 20 km/L vs 8 km/kWh; ADBI ID 13.74 km/L vs 18.4 kWh/100 km; IEA/GFEI TH 7.5 Lge/100 km (WLTP) vs TH real-world 14.8 kWh/100 km"
+   },
+   "bus": {
+    "low": 1.4777327935222673,
+    "high": 3.2647773279352226,
+    "mid": 2.159514170040486,
+    "ev": "E10, E11 (ADBI only; trucks not comparable)",
+    "pairs": "ADBI buses 5.48 / 3.75 / 2.48 km/L diesel vs 0.81 km/kWh"
+   }
+  },
+  "shares": {
+   "two_wheeler": {
+    "low": 0.08,
+    "mid": 0.165,
+    "high": 0.27,
+    "ev": "E21 (IEA 2018: ID 27 / VN 21 / TH 10 / PH 8 % of road fuel)"
+   },
+   "heavy": {
+    "low": 0.2,
+    "mid": 0.22,
+    "high": 0.51,
+    "ev": "E13 (ADBI 2015 fuel by class: MY 21.5 / TH 19.7 / VN 23.0 / ID 50.9 % trucks + buses; several cells implausible)"
+   }
+  },
+  "fleet_ratio_mid": 3.367173820465996,
+  "fleet_ratio_low": 2.1109269880741355,
+  "fleet_ratio_high": 4.78216959494951,
+  "model_ratio": 3.309647070536114,
+  "mid_vs_model_pct": 1.7381536068304504,
+  "ev_eff_range_at_ice_16_0712": [
+   33.92512981073705,
+   76.85520399435256
+  ],
+  "verdict": "KEEP + RANGE: class values have >= 2 sources (two-wheelers, cars), but the fleet weights contradict each other (TH two-wheeler share of road fuel 10 % IEA vs 27 % ADBI) and trucks have no comparable electric / combustion pair; the energy-weighted mid estimate differs from the model ratio 3.31 by less than 10 % -> current values kept (instruction 4.4), fleet ratio range registered (INFERENCE)"
+ },
+ "my_rooftop": {
+  "model_mw": 83146.768938,
+  "myrer_mw": 42000.0,
+  "ratio": 0.5051308732311428,
+  "peninsular_mw": [
+   34194.0,
+   37429.0
+  ],
+  "ev": "E50-E53",
+  "verdict": "RANGE ONLY: one source lineage (SEDA MyRER 42 GW national; 34.2 / 37.4 GW peninsular from SEDA too; BCG 4.4 GW covers non-residential estates only) - low end of the registered range = 42,000 MW"
+ },
+ "wacc": {
+  "iea": "nominal, after tax, local currency (E60-E62)",
+  "country_table": "COUNTRY_WACC_REAL_M08A.csv: IEA nominal post-tax midpoints converted to real by (1 + n) / (1 + CPI 2028-2030) - 1 -> real, after tax",
+  "uniform": "7 %: technology-data / PyPSA-Eur fill value; origin Hirth 2013 (basis not stated, constant-price model) and Noothout et al. 2016 (nominal post-tax) (E64-E67); technology-data costs are in a fixed currency year (real) (E68)",
+  "verdict": "NOTE ONLY (no change to the main run): the country table is real after-tax; the uniform 7 % has no stated basis - its documented origin is nominal post-tax, applied to real (constant EUR2020) costs. The two are therefore not on the same basis; the country-specific WACC stays a W19 sensitivity"
+ },
+ "co2_sequestration_price_year": {
+  "value": 2020,
+  "basis": "INFERENCE: PyPSA-Eur v2025.07.0 docs give 'currency/tCO2' without a year (D34, D35); 30 replaced 10 in release commit e43746df / PR #1753 (D32) together with technology-data v0.10.1 -> v0.13.2 (eur_year 2020, D37); the parameter is not read from technology-data",
+  "verdict": "DETERMINED BY INFERENCE: EUR2020 (as already used); the registered factor range 0.86-1.0 is kept; value 30 EUR/t unchanged (no network change)"
+ },
+ "vn_offwind_alpha": {
+  "model_vn_offshore": {
+   "offwind-ac_c1": {
+    "potential_mw": 127841.42423108495,
+    "cf_cap_weighted": 0.27973471764453517,
+    "cf_best_class": 0.3678483175477186,
+    "rows": 7
+   },
+   "offwind-ac_c3": {
+    "potential_mw": 127841.42423108495,
+    "cf_cap_weighted": 0.2797347176445351,
+    "cf_best_class": 0.5003327118536999,
+    "rows": 21
+   },
+   "offwind-dc_c1": {
+    "potential_mw": 420755.76640262816,
+    "cf_cap_weighted": 0.37583319530680587,
+    "cf_best_class": 0.5629893142951431,
+    "rows": 7
+   },
+   "offwind-dc_c3": {
+    "potential_mw": 420755.7664026282,
+    "cf_cap_weighted": 0.3758331953068058,
+    "cf_best_class": 0.5854683532971431,
+    "rows": 20
+   },
+   "offwind-float_c1": {
+    "potential_mw": 402547.36814807757,
+    "cf_cap_weighted": 0.3432720233801088,
+    "cf_best_class": 0.4380345068275478,
+    "rows": 7
+   },
+   "offwind-float_c3": {
+    "potential_mw": 402547.3681480776,
+    "cf_cap_weighted": 0.34327202338010876,
+    "cf_best_class": 0.4852773933141138,
+    "rows": 21
+   }
+  },
+  "box": {
+   "lat": [
+    10.0,
+    11.3
+   ],
+   "lon": [
+    108.0,
+    109.6
+   ],
+   "sea_cells": 19,
+   "cells": [
+    [
+     10.2,
+     108.0
+    ],
+    [
+     10.2,
+     108.3
+    ],
+    [
+     10.2,
+     108.6
+    ],
+    [
+     10.2,
+     108.9
+    ],
+    [
+     10.2,
+     109.2
+    ],
+    [
+     10.2,
+     109.5
+    ],
+    [
+     10.5,
+     108.0
+    ],
+    [
+     10.5,
+     108.3
+    ],
+    [
+     10.5,
+     108.6
+    ],
+    [
+     10.5,
+     108.9
+    ],
+    [
+     10.5,
+     109.2
+    ],
+    [
+     10.5,
+     109.5
+    ],
+    [
+     10.8,
+     108.6
+    ],
+    [
+     10.8,
+     108.9
+    ],
+    [
+     10.8,
+     109.2
+    ],
+    [
+     10.8,
+     109.5
+    ],
+    [
+     11.1,
+     108.9
+    ],
+    [
+     11.1,
+     109.2
+    ],
+    [
+     11.1,
+     109.5
+    ]
+   ]
+  },
+  "era5_box_mean_ws100": 9.342384144745573,
+  "era5_best_cell": {
+   "lat": 11.1,
+   "lon": 109.5,
+   "ws100": 10.018809878679852
+  },
+  "turbine": {
+   "name": "NREL_ReferenceTurbine_2020ATB_5.5MW",
+   "hub_height": 120.0,
+   "P": 5.5,
+   "correction": 0.8855
+  },
+  "cf_alpha1_box": 0.5826268068979518,
+  "cf_alpha1_best": 0.6130355601831657,
+  "alpha_cf_match": {
+   "tc2021_fixed_2050_incl_outages": {
+    "target": 0.53,
+    "alpha_box": 0.8960797361696348,
+    "alpha_best_cell": 0.8255711724130385
+   },
+   "wb_roadmap_2050_net": {
+    "target": 0.6,
+    "alpha_box": 1.042343080531983,
+    "alpha_best_cell": 0.9651230666594078
+   },
+   "pecc3_binh_thuan_net": {
+    "target": 0.5,
+    "alpha_box": 0.84924303210872,
+    "alpha_best_cell": 0.7822395529067309
+   },
+   "tc2021_fixed_2030": {
+    "target": 0.46,
+    "alpha_box": 0.7955719336818636,
+    "alpha_best_cell": 0.7333554915217423
+   }
+  },
+  "alpha_speed_ratio": {
+   "wb_ref_site_2030_2035_100m": {
+    "ref_ws100": 8.5,
+    "alpha_box": 0.9098319945215104,
+    "alpha_best_cell": 0.8484041620640095
+   },
+   "wb_ref_site_2023_100m": {
+    "ref_ws100": 7.5,
+    "alpha_box": 0.8027929363425093,
+    "alpha_best_cell": 0.7485919077035378
+   }
+  },
+  "bounds": [
+   0.8,
+   1.6
+  ]
+ }
+}

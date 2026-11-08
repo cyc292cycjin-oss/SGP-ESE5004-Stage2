@@ -11,9 +11,15 @@ Every v4 change sits behind a switch of research.demand (configs/research/baseli
   research.demand.v4.id_paper_fuelwood  residue (main, W08 reading of decision 211 item 2: the paper share of the 2010-2017 fuelwood mean leaves the anchor,
                                      (b) item 17.67 TWh) | residue_literal (V4 D2a, Fable F-01 / decision 220: the 2019 paper-row quantity 41.59 TWh leaves the
                                      2010-2017 mean, (b) item 33.29 TWh; sensitivity, ID 2050 T_v2 +36.89 TWh) | purchased (I2 main)
-  research.demand.v4.biomass_potential  v3 (v3.1 table) | v4_adjusted (W08: F3 bagasse R2, F4 in-mill self-use) | v4_adjusted_t04 (V4 D2a main, T04: the W08 adjustments plus
+  research.demand.v4.biomass_potential  v3 (v3.1 table) | v4_adjusted (W08: F3 bagasse R2, F4 in-mill self-use) | v4_adjusted_t04 (V4 D2a, T04: the W08 adjustments plus
                                      the palm-residue basis correction - EFB and fibre energy = wet mass x (1 - moisture) x LHV_dry instead of wet mass x 15 GJ/t,
-                                     research_inputs/biomass_v5/PALM_RESIDUE_BASIS_T04.csv)
+                                     research_inputs/biomass_v5/PALM_RESIDUE_BASIS_T04.csv; switch alternative) | v4_adjusted_t05 (V4 D2b main, decision 221: the energy
+                                     basis audit of every category, research_inputs/biomass_v5/BIOMASS_BASIS_T05.csv - T04 plus the categories judged INCONSISTENT there)
+  research.demand.v4.source_band_basis  V4 D2b (section 3, Fable F-02 side note): source temperature band shares of the fixed industrial biomass (the bands of the
+                                     overflow useful heat) - post_product (v4 main: high = cement-kiln biomass / T_v2 biomass after the product vectors, the rest split at
+                                     200 C with the s3_0 medium_a_fraction) | s30 (D2a and earlier: the s3_0 shares computed before the product vectors)
+  research.demand.v4.lng_regas_adder V4 D2b (section 4.1): asean_tariffs (v4 main: registry v4_lng_regas_adder_asean_tariffs = median of the regulated terminal
+                                     tariffs TH / MY / SG / ID) | m08a (v3.1: research.s3.gas.lng_regasification_adder_eur_per_mwh = 1.26). Network build only (s3_layers)
   research.demand.v4.meoh_per_tco2   V4 D2a (decision 220): stoichiometric (v4 main: MWh methanol per t CO2 of the methanolisation link = M_MeOH / M_CO2 x
                                      LHV_MeOH = 4.0248, registry ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric) | pypsa_eur (v3.1: research.s3.ammonia_methanol
                                      .MWh_MeOH_per_tCO2 = 4.0321). Acts on the network build only (s3_layers); part of the switch set (SHA256, folder).
@@ -53,18 +59,22 @@ ANCHOR_MODES = ("ras", "iid", "iib", "external")
 # switch defaults = v3.1 (every v4 rule off); the v4 main set (decision 211) is V4_MAIN
 V31 = dict(enabled=False, base="v3_1", residue_boundary=False, id_paper_fuelwood="purchased", household_gasoline="none", rail_parent="in_d1",
            captive_coal=False, products=False, vn_same_run=False, bio_cap_share=1.0, biomass_potential="v3", gas_caps="gross",
-           industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero", meoh_per_tco2="pypsa_eur")
+           industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero", meoh_per_tco2="pypsa_eur", source_band_basis="s30",
+           lng_regas_adder="m08a")
 V4_MAIN = dict(enabled=True, base="sdmx_2019", residue_boundary=True, id_paper_fuelwood="residue", household_gasoline="id_to_road", rail_parent="children_only",
-               captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted_t04", gas_caps="marketed",
-               industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy", meoh_per_tco2="stoichiometric")
+               captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted_t05", gas_caps="marketed",
+               industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy", meoh_per_tco2="stoichiometric", source_band_basis="post_product",
+               lng_regas_adder="asean_tariffs")
 SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "purchased", "residue_literal"), household_gasoline=("none", "id_to_road"),
-                     rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted", "v4_adjusted_t04"), gas_caps=("gross", "marketed"),
+                     rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted", "v4_adjusted_t04", "v4_adjusted_t05"), gas_caps=("gross", "marketed"),
                      industry_curves=("flat", "g5_main", "all_flat"), hvc_basis=("b", "a"), missing_cost_rule=("zero", "proxy"),
-                     meoh_per_tco2=("pypsa_eur", "stoichiometric"))
+                     meoh_per_tco2=("pypsa_eur", "stoichiometric"), source_band_basis=("s30", "post_product"), lng_regas_adder=("m08a", "asean_tariffs"))
 MEOH_STOICH_ROW = "ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric"   # V4 D2a: registry row of the stoichiometric value (v4_d1_registry.py)
+LNG_REGAS_ROW = "v4_lng_regas_adder_asean_tariffs"   # V4 D2b (section 4.1): registry row of the ASEAN regulated-tariff regasification adder (v4_d2b_registry.py)
 # research.demand.v4.biomass_potential -> potential table of the build (None = the v3.1 table BIOMASS_POTENTIAL_2050.csv)
 BIOMASS_POTENTIAL_FILES = {"v3": None, "v4_adjusted": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv",
-                           "v4_adjusted_t04": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv"}   # V4 D2a (T04, decision 220): v4 main
+                           "v4_adjusted_t04": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv",   # V4 D2a (T04, decision 220): switch alternative
+                           "v4_adjusted_t05": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv"}   # V4 D2b (T05, decision 221): v4 main
 
 
 def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
@@ -175,6 +185,24 @@ def overflow_split(biomass_mwh: float, agriculture_mwh: float, cap_mwh: float) -
     return ov_ind, min(overflow - ov_ind, float(agriculture_mwh))
 
 
+SOURCE_BAND_MIN_MWH = 1.0   # V4 D2b: below 1 MWh of fixed industrial biomass the source band shares stay the s3_0 shares
+
+
+def source_band_shares(cement_biomass_mwh: float, biomass_mwh: float, medium_a_fraction: float) -> dict:
+    """V4 D2b (section 3, Fable F-02 side note; research.demand.v4.source_band_basis = post_product): source band shares of the fixed industrial biomass
+    after the product vectors - the s3_0_industry.py rule (high = cement-kiln biomass / fixed biomass, medium = the rest, split at 200 C with
+    medium_a_fraction) applied to the conservation-layer biomass (T_v2 biomass incl. the purchased biomass of the product vectors, which is medium-band
+    steam / drying use). Returns None when the fixed biomass is below SOURCE_BAND_MIN_MWH (numerical dust, e.g. BN 3.5e-8 MWh in the dispersed row): the
+    s3_0 shares are kept (they act on an overflow of 0)."""
+    bio = float(biomass_mwh)
+    if bio < SOURCE_BAND_MIN_MWH:
+        return None
+    hi = min(1.0, max(0.0, float(cement_biomass_mwh)) / bio)
+    med = 1.0 - hi
+    f = float(medium_a_fraction)
+    return {"medium_a": med * f, "medium_b": med * (1.0 - f), "high": hi}
+
+
 def meoh_per_tco2_value(cfg: dict, repo: Path | None = None) -> tuple[float, str]:
     """V4 D2a (decision 220): MWh methanol per t CO2 of the methanolisation link for the configured switch set - pypsa_eur: the configured
     research.s3.ammonia_methanol.MWh_MeOH_per_tCO2 (v3.1, 4.0321); stoichiometric: the registry row MEOH_STOICH_ROW (CO2 + 3 H2 -> CH3OH + H2O,
@@ -188,6 +216,20 @@ def meoh_per_tco2_value(cfg: dict, repo: Path | None = None) -> tuple[float, str
     if MEOH_STOICH_ROW not in reg.index:
         raise KeyError(f"registry row {MEOH_STOICH_ROW} missing (scripts_project/v4_d1_registry.py)")
     return float(reg.at[MEOH_STOICH_ROW, "value"]), f"stoichiometric: registry {MEOH_STOICH_ROW}"
+
+
+def lng_regas_adder_value(cfg: dict, repo: Path | None = None) -> tuple[float, str]:
+    """V4 D2b (section 4.1): LNG regasification adder on the LNG import marginal cost (EUR2020/MWh) for the configured switch set - m08a: the configured
+    research.s3.gas.lng_regasification_adder_eur_per_mwh (v3.1, 1.26 = 0.5 USD2024/MMBtu, Argus / IGU secondary); asean_tariffs: the registry row LNG_REGAS_ROW
+    (median of the published regulated terminal tariffs of TH / MY / SG / ID at full utilisation, EUR2020/MWh). Returns (value, basis)."""
+    s = switches(cfg)
+    if s["lng_regas_adder"] == "m08a":
+        return float(cfg["research"]["s3"]["gas"].get("lng_regasification_adder_eur_per_mwh", 0.0)), "m08a: research.s3.gas.lng_regasification_adder_eur_per_mwh"
+    import pandas as pd
+    reg = pd.read_csv((repo or ROOT) / "research_inputs" / "registry_v5" / "DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+    if LNG_REGAS_ROW not in reg.index:
+        raise KeyError(f"registry row {LNG_REGAS_ROW} missing (scripts_project/v4_d2b_registry.py)")
+    return float(reg.at[LNG_REGAS_ROW, "value"]), f"asean_tariffs: registry {LNG_REGAS_ROW}"
 
 
 def sha256(p: Path) -> str:

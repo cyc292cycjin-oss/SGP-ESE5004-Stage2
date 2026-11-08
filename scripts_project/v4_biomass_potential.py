@@ -41,7 +41,10 @@ ADJ = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4.csv"
 OUT_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T04.csv"   # V4 D2a (T04, decision 220): research.demand.v4.biomass_potential = v4_adjusted_t04 (v4 main)
 ADJ_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T04.csv"
 BASIS_T04 = BIOMASS_DIR / "PALM_RESIDUE_BASIS_T04.csv"   # V4 D2a: moisture / LHV basis of the palm residues (evidence/T04_LITERATURE.json of the D2a delivery)
-BASES = ("w08", "t04")
+OUT_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T05.csv"   # V4 D2b (T05, decision 221): research.demand.v4.biomass_potential = v4_adjusted_t05 (v4 main)
+ADJ_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T05.csv"
+BASIS_T05 = BIOMASS_DIR / "BIOMASS_BASIS_T05.csv"   # V4 D2b: mass / heating-value basis audit of every category (BIOMASS_BASIS_AUDIT.csv of the D2b delivery)
+BASES = ("w08", "t04", "t05")
 SELF_USE = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"   # V4 D1 (decision 214 (a), T03): per country fibre / PKS low / mid / high, grades, verdicts, sources
 
 
@@ -63,21 +66,38 @@ def self_use(source: str = "table", level: str = "mid") -> dict:
 
 
 def basis_factors(basis: str = "w08") -> dict:
-    """V4 D2a (T04): {category: (factor on the W08 energy, GJ per wet tonne, rule text)} of the palm-residue basis correction; empty for the W08 basis.
-    factor = (1 - moisture_ar) x LHV_dry / 15 for the rows of PALM_RESIDUE_BASIS_T04.csv whose verdict is INCONSISTENT (applied True)."""
+    """V4 D2a (T04) / D2b (T05): {category: (factor on the W08 energy, GJ per reported tonne, rule text, low rule)} of the energy-basis correction; empty for W08.
+    T04: factor = (1 - moisture_ar) x LHV_dry / 15 for the rows of PALM_RESIDUE_BASIS_T04.csv whose verdict is INCONSISTENT (applied True).
+    T05: the rows of BIOMASS_BASIS_T05.csv with applied True; factor = dry_matter_per_reported_t x LHV_dry / lhv_table (dry_matter = 1 - moisture of the
+    reported mass, lhv_table = the GJ/t of the table row, 15 or 9.14 GJ/m3); the T04 palm rows are carried over unchanged (same factors). low_rule:
+    scale (the table's low / high variants are collection or residue-factor variants: x factor) | basis (the table's low variant is itself an energy-basis
+    variant, e.g. the trunk 'dry matter 0.2': low = main x factor_low, high x factor_mid)."""
     if basis not in BASES:
-        raise ValueError(f"palm residue basis {basis} not in {BASES}")
+        raise ValueError(f"biomass energy basis {basis} not in {BASES}")
     if basis == "w08":
         return {}
-    t = pd.read_csv(BASIS_T04, keep_default_na=False)
+    if basis == "t04":
+        t = pd.read_csv(BASIS_T04, keep_default_na=False)
+        out = {}
+        for r in t.itertuples():
+            if str(r.applied) != "True":
+                continue
+            f = (1.0 - float(r.moisture_ar_mid)) * float(r.lhv_dry_gj_t_mid) / 15.0
+            if abs(f - float(r.factor_mid)) > 1e-9:
+                raise ValueError(f"PALM_RESIDUE_BASIS_T04.csv {r.category}: factor_mid {r.factor_mid} != (1 - {r.moisture_ar_mid}) x {r.lhv_dry_gj_t_mid} / 15 = {f}")
+            out[r.category] = (f, 15.0 * f, f"F5 T04 basis: (1 - {float(r.moisture_ar_mid):.2f}) x {float(r.lhv_dry_gj_t_mid):g} GJ/t dry = {15.0 * f:.3f} GJ per wet t instead of 15 (x {f:.4f})", "scale", None)
+        return out
+    t = pd.read_csv(BASIS_T05, keep_default_na=False)
     out = {}
     for r in t.itertuples():
         if str(r.applied) != "True":
             continue
-        f = (1.0 - float(r.moisture_ar_mid)) * float(r.lhv_dry_gj_t_mid) / 15.0
+        dm, lhv, tab = float(r.dry_matter_mid), float(r.lhv_dry_gj_t_mid), float(r.lhv_table_gj_t)
+        f = dm * lhv / tab
         if abs(f - float(r.factor_mid)) > 1e-9:
-            raise ValueError(f"PALM_RESIDUE_BASIS_T04.csv {r.category}: factor_mid {r.factor_mid} != (1 - {r.moisture_ar_mid}) x {r.lhv_dry_gj_t_mid} / 15 = {f}")
-        out[r.category] = (f, 15.0 * f, f"F5 T04 basis: (1 - {float(r.moisture_ar_mid):.2f}) x {float(r.lhv_dry_gj_t_mid):g} GJ/t dry = {15.0 * f:.3f} GJ per wet t instead of 15 (x {f:.4f})")
+            raise ValueError(f"BIOMASS_BASIS_T05.csv {r.category}: factor_mid {r.factor_mid} != {dm} x {lhv} / {tab} = {f}")
+        out[r.category] = (f, tab * f, f"F5 T05 basis: {dm:.3f} dry matter per reported t x {lhv:g} GJ/t dry = {tab * f:.3f} GJ per reported t instead of {tab:g} (x {f:.4f})",
+                           str(r.low_rule), float(r.factor_low))
     return out
 
 
@@ -104,15 +124,20 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
         for k, m in z.potential_method.items():
             mm = re.search(r"x ([0-9.]+) growth", str(m)); g[k] = float(mm.group(1)) if mm else 1.0
         d = {k: dict(F3=0.0, F4=0.0, F5=0.0, rule=[]) for k in pot}
-        for k, (f, gj, txt) in bf.items():   # V4 D2a (T04): basis correction before the deductions (the shares of F4 act on the corrected energy)
+        for k, (f, gj, txt, low_rule, f_low) in bf.items():   # V4 D2a (T04) / D2b (T05): basis correction before the deductions (the shares of F4 act on the corrected energy)
             if k in pot:
                 d[k]["F5"] = pot[k] * (f - 1.0); d[k]["rule"].append(txt)
-                pot[k] = pot[k] * f
                 m = (adj.country == cc) & (adj.category == k)
-                for col in ("potential_low_mwh", "potential_high_mwh"):
-                    adj.loc[m, col] = pd.to_numeric(adj.loc[m, col], errors="coerce") * f
+                if low_rule == "basis":   # the table's low variant was an energy-basis variant: low = main x factor_low; high (a mass variant) x factor
+                    adj.loc[m, "potential_low_mwh"] = pot[k] * f_low
+                    adj.loc[m, "potential_high_mwh"] = pd.to_numeric(adj.loc[m, "potential_high_mwh"], errors="coerce") * f
+                else:
+                    for col in ("potential_low_mwh", "potential_high_mwh"):
+                        adj.loc[m, col] = pd.to_numeric(adj.loc[m, col], errors="coerce") * f
+                pot[k] = pot[k] * f
                 adj.loc[m, "lhv_gj_per_t"] = gj
-                adj.loc[m, "potential_method"] = adj.loc[m, "potential_method"].astype(str) + f" | V4 D2a T04: {txt} (PALM_RESIDUE_BASIS_T04.csv)"
+                tag, tab = ("V4 D2a T04", "PALM_RESIDUE_BASIS_T04.csv") if basis == "t04" else ("V4 D2b T05", "BIOMASS_BASIS_T05.csv")
+                adj.loc[m, "potential_method"] = adj.loc[m, "potential_method"].astype(str) + f" | {tag}: {txt} ({tab})"
         if "sugarcane_residues" in pot:
             o = over.loc[cc] if cc in over.index else None
             r2 = float(o.overestimate_mwh_R2) if (o is not None and pd.notna(o.overestimate_mwh_R2)) else 0.0
@@ -172,10 +197,14 @@ def main():
     adj.to_csv(OUT, index=False, lineterminator="\n")
     tab.to_csv(ADJ, index=False, float_format="%.6f", lineterminator="\n")
     print(tab[tab.category == "TOTAL solid"].round(2).to_string())
-    adj4, tab4 = adjust(basis="t04")   # V4 D2a (T04): the v4 main potential
+    adj4, tab4 = adjust(basis="t04")   # V4 D2a (T04): switch alternative since D2b
     adj4.to_csv(OUT_T04, index=False, lineterminator="\n")
     tab4.to_csv(ADJ_T04, index=False, float_format="%.6f", lineterminator="\n")
     print(tab4[tab4.category == "TOTAL solid"].round(2).to_string())
+    adj5, tab5 = adjust(basis="t05")   # V4 D2b (T05, decision 221): the v4 main potential
+    adj5.to_csv(OUT_T05, index=False, lineterminator="\n")
+    tab5.to_csv(ADJ_T05, index=False, float_format="%.6f", lineterminator="\n")
+    print(tab5[tab5.category == "TOTAL solid"].round(2).to_string())
 
 
 if __name__ == "__main__":

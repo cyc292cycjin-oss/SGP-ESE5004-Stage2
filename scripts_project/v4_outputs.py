@@ -7,7 +7,8 @@ Tables (final step S7 of v4_industry.build_steps):
                                                         BN NEU gas rows (decision 210 item 7; 2019 3.45 TWh, 2050 x growth);
   DEMAND_ANCHOR_AEO8_ATS.csv, INDUSTRY_OUTPUT_2050_M08B.csv, DEMAND_ANCHOR_C3_DEVIATION.csv   m08b outputs of the run;
   INDUSTRY_2050_SUMMARY_V4.csv           s3_0 heat-band summary with the carrier columns = T_v2 by carrier of the conservation layer (v3_industry rule) and
-                                         (V4 D2a, Fable F-02) the overflow columns recomputed from that biomass (the build rule); the other s3_0 columns
+                                         (V4 D2a, Fable F-02) the overflow columns recomputed from that biomass (the build rule); (V4 D2b, source_band_basis
+                                         post_product) the source band shares of the fixed biomass recomputed from it as well; the other s3_0 columns
                                          (bas_*, other_*, td_*, s2b_td_*) are the pre-conservation s3_0 values (Fable F-09; the build does not read them);
   DEMAND_ANCHOR_M08B_EVIDENCE.json       (V4 D2a, Fable F-06) the m08b RAS / refit convergence record of the run;
   INDUSTRY_2050_SUBSECTOR_CARRIER_V4.csv parts (sub-sector x carrier, 2050);
@@ -34,7 +35,7 @@ if str(HERE) not in sys.path:
 import v3_industry as v3   # noqa: E402
 import v4_profiles as PR   # noqa: E402
 from d1_common import HVC_FEEDSTOCK_ACCOUNTS, NEU_GAS_ACCOUNT   # noqa: E402
-from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, is_main_set, out_dir, overflow_split, sha256, switch_sha   # noqa: E402
+from v4_common import ASEAN, DEMAND_DIR, IND_V3, OUTC, REG_DIR, ROOT, V4_DIR, is_main_set, out_dir, overflow_split, sha256, source_band_shares, switch_sha   # noqa: E402
 
 EDGAR = REG_DIR / "sources/EDGAR2025_IPPU_FUGITIVE_WASTE_ASEAN11_2019.csv"
 GROUPS = {"minerals": ["2.A.1", "2.A.2", "2.A.3", "2.A.4"], "chemicals": ["2.B"], "metals": ["2.C"]}   # = s2_0_process_emissions.GROUPS
@@ -192,14 +193,27 @@ def write_tables(s: dict, chain=None) -> dict:
                 S.at[c, "pe_biomass_mwh"] = S.at[c, v3.col(k)]
         # V4 D2a (Fable F-02, decision 220): the overflow columns are recomputed after the conservation layer from the full T_v2 biomass (incl. the purchased
         # biomass of the product vectors), the same rule as the build (s2_layers.biomass_overflow with cap = bio_cap_share x potential); the s3_0 values
-        # (computed before the product vectors) are recorded in V4_SWITCHES.json. The *_to_gas columns stay 0 (useful-heat table), the source band shares
-        # of the fixed biomass are the s3_0 shares (cement kiln share of the pre-product biomass; the product biomass is medium-band steam / drying use).
+        # (computed before the product vectors) are recorded in V4_SWITCHES.json. The *_to_gas columns stay 0 (useful-heat table); the source band shares
+        # of the fixed biomass follow research.demand.v4.source_band_basis (V4 D2b; below).
         bio = float(S.at[c, "pe_biomass_mwh"]); ag = float(S.at[c, "agriculture_biomass_2050_mwh"]); cap = float(S.at[c, "solid_biomass_potential_main_mwh"])
         old = (float(S.at[c, "biomass_overflow_industry_mwh"]), float(S.at[c, "biomass_overflow_agriculture_mwh"]))
         ov_ind, ov_ag = overflow_split(bio, ag, cap)
         S.at[c, "biomass_overflow_industry_mwh"] = ov_ind; S.at[c, "biomass_overflow_agriculture_mwh"] = ov_ag
         ov_log[c] = dict(biomass_T_v2_mwh=bio, agriculture_biomass_mwh=ag, cap_mwh=cap, overflow_industry_mwh=ov_ind, overflow_agriculture_mwh=ov_ag,
                          s30_overflow_industry_mwh=old[0], s30_overflow_agriculture_mwh=old[1], s30_biomass_mwh=float(snap["bio_before_s30"]))
+        # V4 D2b (section 3, Fable F-02 side note; research.demand.v4.source_band_basis): source band shares of the fixed biomass after the product vectors
+        # (cement-kiln biomass of the conservation layer / T_v2 biomass); the s3_0 shares are kept in the record (s30_band_*) and stay in the table for s30.
+        bkeys = ("medium_a", "medium_b", "high")
+        s30_band = {b: float(S.at[c, f"biomass_source_band_{b}_share"]) for b in bkeys}
+        ov_log[c].update({f"s30_band_{b}_share": s30_band[b] for b in bkeys})
+        if s.get("source_band_basis", "s30") == "post_product":
+            cem_bio = float(L["parts"].get("cement", {}).get("biomass", 0.0))
+            nb = source_band_shares(cem_bio, bio, float(S.at[c, "medium_a_fraction"]))
+            if nb is not None:
+                for b in bkeys:
+                    S.at[c, f"biomass_source_band_{b}_share"] = nb[b]
+            ov_log[c].update(cement_kiln_biomass_mwh=cem_bio, source_band_basis="post_product" if nb is not None else "s30 (fixed biomass 0)",
+                             **{f"band_{b}_share": float(S.at[c, f"biomass_source_band_{b}_share"]) for b in bkeys})
         parts_all[c] = L["parts"]
         for sub, v in L["parts"].items():
             for k, x in v.items():

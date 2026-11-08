@@ -1,0 +1,74 @@
+.....F..F.............s................................................. [ 75%]
+.......................                                                  [100%]
+=================================== FAILURES ===================================
+_____________________________ test_t05_table_rules _____________________________
+
+    def test_t05_table_rules():
+        import v4_biomass_potential as B
+        t = pd.read_csv(B.BASIS_T05, keep_default_na=False).set_index("category")
+        cats = {"oil_palm_efb", "oil_palm_fibre", "oil_palm_pks", "oil_palm_trunk", "rice_residues", "maize_residues", "sugarcane_residues", "coconut_residues", "cassava_residues",
+                "other_crop_residues", "wood_processing_residues", "msw_organic_biogas", "oil_palm_pome"}
+        assert set(t.index) == cats   # every category of the potential table is audited
+        applied = {k for k in t.index if str(t.at[k, "applied"]) == "True"}
+        assert applied == {"oil_palm_efb", "oil_palm_fibre", "oil_palm_trunk"}
+        for k in applied:
+            r = t.loc[k]
+            assert r.verdict.startswith("INCONSISTENT")
+            assert float(r.factor_mid) == pytest.approx(float(r.dry_matter_mid) * float(r.lhv_dry_gj_t_mid) / float(r.lhv_table_gj_t), abs=1e-12)
+            assert float(r.factor_low) <= float(r.factor_mid) <= float(r.factor_high)
+        t4 = pd.read_csv(B.BASIS_T04, keep_default_na=False).set_index("category")
+        for k in ("oil_palm_efb", "oil_palm_fibre"):   # the T04 rows carried over with the same factors
+            assert float(t.at[k, "factor_mid"]) == pytest.approx(float(t4.at[k, "factor_mid"]), abs=1e-9)
+        tr = t.loc["oil_palm_trunk"]
+        assert float(tr.moisture_reported_mid) == pytest.approx(0.708333, abs=1e-6) and float(tr.lhv_dry_gj_t_mid) == pytest.approx(16.1218, abs=1e-4)
+>       assert float(tr.factor_mid) == pytest.approx(0.313465, abs=1e-5) and tr.low_rule == "basis" and float(tr.factor_low) == pytest.approx(0.274 * float(tr.lhv_dry_gj_t_low) / 30.0, abs=1e-12)
+E       assert (0.3134798333333334 == 0.313465 ± 1.0e-05
+E         
+E         comparison failed
+E         Obtained: 0.3134798333333334
+E         Expected: 0.313465 ± 1.0e-05)
+
+tests/research/test_v4_d2b_biomass.py:36: AssertionError
+________________________ test_registry_rows_and_ranges _________________________
+
+    def test_registry_rows_and_ranges():
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        for pid in ("v4_biomass_basis_table_t05", "v4_biomass_potential_2050_t05", "v4_oil_palm_trunk_moisture_fresh", "v4_oil_palm_trunk_lhv_dry", "v4_oil_palm_trunk_energy_per_fresh_t",
+                    "v4_source_band_basis_rule", "v4_transport_fleet_energy_ratio_asean", "v4_offwind_alpha_vn_reference_area", "v4_wacc_basis_note"):
+            assert pid in reg.index, pid
+>       assert float(reg.at["v4_oil_palm_trunk_energy_per_fresh_t", "value"]) == pytest.approx(15.0 * 0.313465, abs=1e-4)
+E       assert 4.7021975 == 4.701975 ± 1.0e-04
+E         
+E         comparison failed
+E         Obtained: 4.7021975
+E         Expected: 4.701975 ± 1.0e-04
+
+tests/research/test_v4_d2b_biomass.py:92: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v4_d2b_biomass.py::test_switches_and_files
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2b/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_v4_d2b_biomass.py::test_switches_and_files
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+tests/research/test_v4_registry.py::test_switches_default_off_and_config_hash
+tests/research/test_v4_registry.py::test_v4_table_sets_match_their_switches
+tests/research/test_v4_d1_prep.py::test_out_names_by_switch_set_and_config_keys
+tests/research/test_v4_d1_prep.py::test_v4_tables_and_network_meta_check
+tests/research/test_v4_d1_missing_cost.py::test_build_reads_the_switch
+  /home/jin/wt_v4_d2b/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2b_biomass.py::test_t05_table_rules - assert (...
+FAILED tests/research/test_v4_d2b_biomass.py::test_registry_rows_and_ranges
+2 failed, 92 passed, 1 skipped, 16 warnings in 44.69s

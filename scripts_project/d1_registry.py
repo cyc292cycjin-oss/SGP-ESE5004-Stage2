@@ -25,9 +25,11 @@ FRAGMENTS = ["co2_storage", "fuel_prices", "lng_terminals", "fossil_production",
 FRAGMENTS = FRAGMENTS + ["v4_w08"]   # V4 W08 (decisions 203-211; scripts_project/v4_registry.py): v4 inputs, marketed gas caps and their fugitive factors
 FRAGMENTS = FRAGMENTS + ["v4_d1"]    # V4 D1 (decisions 212, 214, 215; scripts_project/v4_d1_registry.py): missing-cost rule of the biomass pools, palm mill self-use (T03)
 FRAGMENTS = FRAGMENTS + ["v4_d2a"]   # V4 D2a (decision 220; scripts_project/v4_d2a_registry.py): palm-residue basis (T04), PHS stock reclassification, PHS asean case
+FRAGMENTS = FRAGMENTS + ["v4_d2b"]   # V4 D2b (decision 221; scripts_project/v4_d2b_registry.py): biomass energy-basis audit (T05), source band rule, LNG regasification tariffs, literature ranges
 # M08-0 (item 130): full replacement rows for existing param_ids, applied after the concatenation; the original fragments stay unchanged (history)
 CORRECTIONS =["m080_corrections", "m08a_corrections", "m08b_corrections", "dfx_corrections"]   # M08a (decisions 129-133): scripts_project/m08a_data.py, applied after the M08-0 corrections; M08b (decisions 133, 134): m08b_data.py; DFX F4: dfx_data.py (applied last)
 CORRECTIONS = CORRECTIONS + ["v4_d1_corrections"]   # V4 D1 section 4 (decision 212 (a); scripts_project/v4_d1_registry.py): registered ranges clipped to physical bounds (applied last)
+CORRECTIONS = CORRECTIONS + ["v4_d2b_corrections"]   # V4 D2b (decision 221; scripts_project/v4_d2b_registry.py): literature ranges of sections 2 / 4 on existing rows (main values unchanged; applied last)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,

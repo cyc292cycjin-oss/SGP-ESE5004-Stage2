@@ -63,15 +63,16 @@ def test_t04_potential_file_is_the_rule_output_and_w08_file_unchanged():
 def test_switch_value_and_table_selection():
     from phase4_static import config
     from v4_common import BIOMASS_POTENTIAL_FILES, SWITCH_VALUES, V31, V4_MAIN, switches, v4_tables
-    assert SWITCH_VALUES["biomass_potential"] == ("v3", "v4_adjusted", "v4_adjusted_t04") and V4_MAIN["biomass_potential"] == "v4_adjusted_t04" and V31["biomass_potential"] == "v3"
+    # V4 D2b (decision 221): v4_adjusted_t05 is the v4 main value; t04 stays a switch alternative (its file and selection are checked here)
+    assert SWITCH_VALUES["biomass_potential"] == ("v3", "v4_adjusted", "v4_adjusted_t04", "v4_adjusted_t05") and V4_MAIN["biomass_potential"] == "v4_adjusted_t05" and V31["biomass_potential"] == "v3"
     assert BIOMASS_POTENTIAL_FILES["v3"] is None and BIOMASS_POTENTIAL_FILES["v4_adjusted_t04"].endswith("_V4_T04.csv")
     cfg = config(ROOT, "integrated"); cfg["research"]["demand"]["v4"]["enabled"] = True
-    assert switches(cfg)["biomass_potential"] == "v4_adjusted_t04" and v4_tables(cfg)["biomass_potential"].endswith("BIOMASS_POTENTIAL_2050_V4_T04.csv")
+    assert switches(cfg)["biomass_potential"] == "v4_adjusted_t05" and v4_tables(cfg)["biomass_potential"].endswith("BIOMASS_POTENTIAL_2050_V4_T05.csv")
     rec = json.loads((ROOT / "research_inputs/industry_v4/out_ras/V4_SWITCHES.json").read_text())
-    assert rec["switches"]["biomass_potential"] == "v4_adjusted_t04"
+    assert rec["switches"]["biomass_potential"] == "v4_adjusted_t05"
     import v4_industry as V
     I = V.Inputs()
-    case = V.final_case(I, dict(V4_MAIN, anchor_mode="ras")); assert case["biopot"].endswith("BIOMASS_POTENTIAL_2050_V4_T04.csv")
+    case = V.final_case(I, dict(V4_MAIN, anchor_mode="ras", biomass_potential="v4_adjusted_t04")); assert case["biopot"].endswith("BIOMASS_POTENTIAL_2050_V4_T04.csv")
     case = V.final_case(I, dict(V4_MAIN, anchor_mode="ras", biomass_potential="v4_adjusted")); assert case["biopot"].endswith("BIOMASS_POTENTIAL_2050_V4.csv")
     assert "biopot" not in V.final_case(I, dict(V4_MAIN, anchor_mode="ras", biomass_potential="v3"))
 
