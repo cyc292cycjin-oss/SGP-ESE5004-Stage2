@@ -1,0 +1,1094 @@
+{
+ "note": "V4 D2b evidence index (V4_D2B_INSTRUCTION.md v1); numbers read from the delivery tables / evidence files",
+ "entries": [
+  {
+   "id": "instruction.sha256",
+   "value": "bdd67b0fcdf809914d8e53dbc24037dd19eaed4251c2afd22699f6959fbf303c",
+   "unit": "sha256",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "V4_D2B_INSTRUCTION.md",
+   "note": "= V4_D2B_SHA256.txt (checked before starting)"
+  },
+  {
+   "id": "session.model",
+   "value": "claude-opus-5-5 (Opus 5.5)",
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "session system information",
+   "note": "effort setting of the session not visible to the session (instruction asks Xhigh)"
+  },
+  {
+   "id": "branch.base",
+   "value": {
+    "branch": "codex/v4-d2b-20261108",
+    "base": "385bdff08e932afef79755be5b1af7ebb2839350",
+    "d2a_review_commit_ancestor": "15533817",
+    "files_changed_between": "3, all under research/06_scope_redesign/p1_v4_d2a_20261107/"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "git merge-base --is-ancestor / git diff --name-only",
+   "note": ""
+  },
+  {
+   "id": "s2.trunk_chain",
+   "value": [
+    {
+     "country": "ID",
+     "trunk_t_per_replanted_ha": 280,
+     "ffb_yield_t_ha": 17.2876,
+     "trunk_t_per_t_ffb_before_cap": 0.647864,
+     "trunk_t_per_t_ffb_after_cap": 0.161966,
+     "potential_twh": 158.457
+    },
+    {
+     "country": "MY",
+     "trunk_t_per_replanted_ha": 280,
+     "ffb_yield_t_ha": 18.46,
+     "trunk_t_per_t_ffb_before_cap": 0.606717,
+     "trunk_t_per_t_ffb_after_cap": 0.151679,
+     "potential_twh": 60.3171
+    },
+    {
+     "country": "TH",
+     "trunk_t_per_replanted_ha": 280,
+     "ffb_yield_t_ha": 18.0517,
+     "trunk_t_per_t_ffb_before_cap": 0.620442,
+     "trunk_t_per_t_ffb_after_cap": 0.15511,
+     "potential_twh": 11.1675
+    },
+    {
+     "country": "PH",
+     "trunk_t_per_replanted_ha": 280,
+     "ffb_yield_t_ha": 8.14675,
+     "trunk_t_per_t_ffb_before_cap": 1.37479,
+     "trunk_t_per_t_ffb_after_cap": 0.343695,
+     "potential_twh": 0.741601
+    },
+    {
+     "country": "KH",
+     "trunk_t_per_replanted_ha": 280,
+     "ffb_yield_t_ha": 10.6782,
+     "trunk_t_per_t_ffb_before_cap": 1.04886,
+     "trunk_t_per_t_ffb_after_cap": 0.262215,
+     "potential_twh": 0.581257
+    }
+   ],
+   "unit": "t / TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "tables/TRUNK_CHAIN_CHECK.csv (FAOSTAT QCL 2019-2023 means x the v3 chain)",
+   "note": "literature: trunk fresh ~205 t/ha (Khalid 1999 1.508 t x 136), trunk dry 37-42 t DM/ha (Khalid 41.07, Chow 37.3, Henson ~42), whole palm fresh ~300 t/ha"
+  },
+  {
+   "id": "s2.t05_basis_table",
+   "value": [
+    {
+     "category": "oil_palm_efb",
+     "verdict": "INCONSISTENT (D2a T04)",
+     "applied": true,
+     "factor_mid": 0.48,
+     "factor_low": 0.3482599999999999,
+     "factor_high": 0.5447013333333335,
+     "grade": "C",
+     "sources": "E01;E05;E12;E13;E14;E10;E17 (D2a)"
+    },
+    {
+     "category": "oil_palm_fibre",
+     "verdict": "INCONSISTENT (D2a T04)",
+     "applied": true,
+     "factor_mid": 0.7602,
+     "factor_low": 0.7477386666666667,
+     "factor_high": 0.776768,
+     "grade": "C",
+     "sources": "E01;E06;E08;E13;E17 (D2a)"
+    },
+    {
+     "category": "oil_palm_pks",
+     "verdict": "CONSISTENT (D2a T04)",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.933,
+     "factor_high": 1.209,
+     "grade": "B",
+     "sources": "E07;E09;E12;E13;E17 (D2a)"
+    },
+    {
+     "category": "oil_palm_trunk",
+     "verdict": "INCONSISTENT",
+     "applied": true,
+     "factor_mid": 0.3134798333333334,
+     "factor_low": 0.1469673893333333,
+     "factor_high": 0.3750441333333334,
+     "grade": "C",
+     "sources": "T01;T02;T04;T07;T08;T09;T10;T11;T12;T13;T20;E13(D2a);E11(D2a)"
+    },
+    {
+     "category": "rice_residues",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.865434,
+     "factor_high": 1.0,
+     "grade": "C",
+     "sources": "R03;R05;R06;R13;R14;R26;R30;R31;Smeets2007"
+    },
+    {
+     "category": "maize_residues",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.8862666666666666,
+     "factor_high": 1.0308417333333333,
+     "grade": "C",
+     "sources": "R06;R15;R34;R35;Smeets2007"
+    },
+    {
+     "category": "sugarcane_residues",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.8,
+     "factor_high": 1.03,
+     "grade": "C",
+     "sources": "R17;R18;R26;R27;R28;R32;R33;R41;W12"
+    },
+    {
+     "category": "coconut_residues",
+     "verdict": "UNDETERMINED",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.4375,
+     "factor_high": 1.0,
+     "grade": "D",
+     "sources": "R03;R19;R20;R36"
+    },
+    {
+     "category": "cassava_residues",
+     "verdict": "UNDETERMINED",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.2493333333333333,
+     "factor_high": 1.0,
+     "grade": "D",
+     "sources": "R16;R26;R38;R48;Smeets2007"
+    },
+    {
+     "category": "other_crop_residues",
+     "verdict": "UNDETERMINED",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.16,
+     "factor_high": 1.0,
+     "grade": "D",
+     "sources": "R06;R38;Smeets2007"
+    },
+    {
+     "category": "wood_processing_residues",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 0.9190371991247264,
+     "factor_high": 1.0940919037199124,
+     "grade": "B",
+     "sources": "R40;R41;R42;R43;R47;R39"
+    },
+    {
+     "category": "msw_organic_biogas",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 1.0,
+     "factor_high": 1.0,
+     "grade": "B",
+     "sources": "IPCC2006 V5 Ch2-3 (v3 table)"
+    },
+    {
+     "category": "oil_palm_pome",
+     "verdict": "CONSISTENT",
+     "applied": false,
+     "factor_mid": 1.0,
+     "factor_low": 1.0,
+     "factor_high": 1.0,
+     "grade": "C",
+     "sources": "E01;E02 (D2a)"
+    }
+   ],
+   "unit": "-",
+   "status": "VERIFIED (sources) / EXACT (factors) / INFERENCE (verdicts of kept rows)",
+   "grade": "C / D",
+   "source": "research_inputs/biomass_v5/BIOMASS_BASIS_T05.csv; evidence/TRUNK_LITERATURE.json, RESIDUE_LITERATURE.json",
+   "note": ""
+  },
+  {
+   "id": "s2.potential_by_category_twh",
+   "value": [
+    {
+     "category": "cassava_residues",
+     "old_t04_twh": 125.324381,
+     "new_t05_twh": 125.324381,
+     "change_twh": 0.0,
+     "range_low_twh": 31.247546,
+     "range_high_twh": 125.324381
+    },
+    {
+     "category": "coconut_residues",
+     "old_t04_twh": 144.568124,
+     "new_t05_twh": 144.568124,
+     "change_twh": 0.0,
+     "range_low_twh": 63.248554,
+     "range_high_twh": 144.568124
+    },
+    {
+     "category": "maize_residues",
+     "old_t04_twh": 73.08056,
+     "new_t05_twh": 73.08056,
+     "change_twh": 0.0,
+     "range_low_twh": 64.768866,
+     "range_high_twh": 75.334492
+    },
+    {
+     "category": "msw_organic_biogas",
+     "old_t04_twh": 84.273407,
+     "new_t05_twh": 84.273407,
+     "change_twh": 0.0,
+     "range_low_twh": 84.273407,
+     "range_high_twh": 84.273407
+    },
+    {
+     "category": "oil_palm_efb",
+     "old_t04_twh": 154.368527,
+     "new_t05_twh": 154.368527,
+     "change_twh": 0.0,
+     "range_low_twh": 112.000797,
+     "range_high_twh": 175.176548
+    },
+    {
+     "category": "oil_palm_fibre",
+     "old_t04_twh": 0.0,
+     "new_t05_twh": 0.0,
+     "change_twh": 0.0,
+     "range_low_twh": 0.0,
+     "range_high_twh": 0.0
+    },
+    {
+     "category": "oil_palm_pks",
+     "old_t04_twh": 49.005881,
+     "new_t05_twh": 49.005881,
+     "change_twh": 0.0,
+     "range_low_twh": 45.722487,
+     "range_high_twh": 59.248111
+    },
+    {
+     "category": "oil_palm_pome",
+     "old_t04_twh": 45.633324,
+     "new_t05_twh": 45.633324,
+     "change_twh": 0.0,
+     "range_low_twh": 45.633324,
+     "range_high_twh": 45.633324
+    },
+    {
+     "category": "oil_palm_trunk",
+     "old_t04_twh": 231.264216,
+     "new_t05_twh": 72.496667,
+     "change_twh": -158.767547,
+     "range_low_twh": 33.988298,
+     "range_high_twh": 86.734287
+    },
+    {
+     "category": "other_crop_residues",
+     "old_t04_twh": 248.110768,
+     "new_t05_twh": 248.110768,
+     "change_twh": 0.0,
+     "range_low_twh": 39.697722,
+     "range_high_twh": 248.110768
+    },
+    {
+     "category": "rice_residues",
+     "old_t04_twh": 312.856317,
+     "new_t05_twh": 312.856317,
+     "change_twh": 0.0,
+     "range_low_twh": 270.756493,
+     "range_high_twh": 312.856317
+    },
+    {
+     "category": "sugarcane_residues",
+     "old_t04_twh": 81.451609,
+     "new_t05_twh": 81.451609,
+     "change_twh": 0.0,
+     "range_low_twh": 65.161286,
+     "range_high_twh": 83.895157
+    },
+    {
+     "category": "wood_processing_residues",
+     "old_t04_twh": 28.056166,
+     "new_t05_twh": 28.056166,
+     "change_twh": 0.0,
+     "range_low_twh": 25.784659,
+     "range_high_twh": 30.696022
+    }
+   ],
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "BIOMASS_BASIS_AUDIT.csv",
+   "note": ""
+  },
+  {
+   "id": "s2.asean_solid_potential_twh",
+   "value": {
+    "t04": 1448.086549,
+    "t05": 1289.3190000000002
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "BIOMASS_BASIS_AUDIT.csv",
+   "note": ""
+  },
+  {
+   "id": "s2.checkpoints",
+   "value": {
+    "iid_t05": {
+     "rows": 180,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_cap": 0.0
+    },
+    "main_t05": {
+     "rows": 192,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_cap": 0.0
+    }
+   },
+   "unit": "TWh",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "CHECKPOINTS.csv (reference engine scripts/ref on the T05 potential)",
+   "note": ""
+  },
+  {
+   "id": "s3.band_shares_ras",
+   "value": {
+    "LA": {
+     "s30_band_medium_a_share": 0.0,
+     "s30_band_medium_b_share": 0.0,
+     "s30_band_high_share": 1.0,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.12636726313832686,
+     "band_medium_b_share": 0.5054690525533074,
+     "band_high_share": 0.3681636843083657
+    },
+    "MM": {
+     "s30_band_medium_a_share": 0.0887236432133,
+     "s30_band_medium_b_share": 0.354894572853,
+     "s30_band_high_share": 0.556381783934,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.10157295522305446,
+     "band_medium_b_share": 0.4062918208922178,
+     "band_high_share": 0.49213522388472775
+    },
+    "MY": {
+     "s30_band_medium_a_share": 0.0,
+     "s30_band_medium_b_share": 0.0,
+     "s30_band_high_share": 1.0,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.11501521053780078,
+     "band_medium_b_share": 0.46006084215120313,
+     "band_high_share": 0.42492394731099614
+    },
+    "PH": {
+     "s30_band_medium_a_share": 0.140114145956,
+     "s30_band_medium_b_share": 0.560456583823,
+     "s30_band_high_share": 0.299429270221,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.1451832382140308,
+     "band_medium_b_share": 0.5807329528561233,
+     "band_high_share": 0.27408380892984596
+    },
+    "TH": {
+     "s30_band_medium_a_share": 0.174825206657,
+     "s30_band_medium_b_share": 0.699300826629,
+     "s30_band_high_share": 0.125873966714,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.1775456771639841,
+     "band_medium_b_share": 0.7101827086559364,
+     "band_high_share": 0.11227161418007957
+    },
+    "VN": {
+     "s30_band_medium_a_share": 0.169115257615,
+     "s30_band_medium_b_share": 0.676461030461,
+     "s30_band_high_share": 0.154423711924,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.17143119001054274,
+     "band_medium_b_share": 0.685724760042171,
+     "band_high_share": 0.14284404994728622
+    }
+   },
+   "unit": "share",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "out_ras/V4_SWITCHES.json biomass_overflow_recomputed",
+   "note": "only the overflow useful heat (VN) acts in the network"
+  },
+  {
+   "id": "s3.band_shares_iid",
+   "value": {
+    "LA": {
+     "s30_band_medium_a_share": 0.0,
+     "s30_band_medium_b_share": 0.0,
+     "s30_band_high_share": 1.0,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.12636726313832686,
+     "band_medium_b_share": 0.5054690525533074,
+     "band_high_share": 0.3681636843083657
+    },
+    "MM": {
+     "s30_band_medium_a_share": 0.084267371308,
+     "s30_band_medium_b_share": 0.337069485232,
+     "s30_band_high_share": 0.57866314346,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.09810246280926334,
+     "band_medium_b_share": 0.39240985123705335,
+     "band_high_share": 0.5094876859536833
+    },
+    "MY": {
+     "s30_band_medium_a_share": 0.0,
+     "s30_band_medium_b_share": 0.0,
+     "s30_band_high_share": 1.0,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.11501521053780078,
+     "band_medium_b_share": 0.46006084215120313,
+     "band_high_share": 0.42492394731099614
+    },
+    "PH": {
+     "s30_band_medium_a_share": 0.131893077053,
+     "s30_band_medium_b_share": 0.527572308214,
+     "s30_band_high_share": 0.340534614733,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.13837414788873856,
+     "band_medium_b_share": 0.5534965915549542,
+     "band_high_share": 0.30812926055630724
+    },
+    "TH": {
+     "s30_band_medium_a_share": 0.170772893432,
+     "s30_band_medium_b_share": 0.68309157373,
+     "s30_band_high_share": 0.146135532838,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.17437697323554746,
+     "band_medium_b_share": 0.6975078929421898,
+     "band_high_share": 0.1281151338222628
+    },
+    "VN": {
+     "s30_band_medium_a_share": 0.166576202611,
+     "s30_band_medium_b_share": 0.666304810442,
+     "s30_band_high_share": 0.167118986947,
+     "source_band_basis": "post_product",
+     "band_medium_a_share": 0.16927195765525826,
+     "band_medium_b_share": 0.6770878306210331,
+     "band_high_share": 0.15364021172370868
+    }
+   },
+   "unit": "share",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "out_iid/V4_SWITCHES.json biomass_overflow_recomputed",
+   "note": "only the overflow useful heat (VN) acts in the network"
+  },
+  {
+   "id": "s4.lng_regas_adder",
+   "value": {
+    "old": 1.26,
+    "new": 2.0507104835474674,
+    "groups": {
+     "TH": 1.8048971784304961,
+     "MY": 2.006955874138894,
+     "SG": 2.09446509295604,
+     "ID": 4.770148372049234
+    },
+    "low": 1.8048971784304961,
+    "high": 4.770148372049234
+   },
+   "unit": "EUR2020/MWh",
+   "status": "VERIFIED (tariffs) / EXACT (median)",
+   "grade": "C",
+   "source": "evidence/DATA_UPG_A.json D01-D14; DATA_UPGRADES_CALC.json",
+   "note": ""
+  },
+  {
+   "id": "s4.ev_ice_fleet_ratio",
+   "value": {
+    "model": 3.309647070536114,
+    "mid": 3.367173820465996,
+    "low": 2.1109269880741355,
+    "high": 4.78216959494951
+   },
+   "unit": "ratio",
+   "status": "INFERENCE",
+   "grade": "C",
+   "source": "evidence/DATA_UPG_B.json E01-E28; DATA_UPGRADES_CALC.json",
+   "note": ""
+  },
+  {
+   "id": "s4.co2_ship",
+   "value": {
+    "fixed_range": [
+     10.0271,
+     14.2945
+    ],
+    "slope_range": [
+     0.0029515,
+     0.00553
+    ],
+    "chain_1000km": {
+     "model": 14.368165600000001,
+     "ieaghg2020": 17.246,
+     "zep_t1": 19.82,
+     "zep_t2": 16.24
+    }
+   },
+   "unit": "EUR2020/t",
+   "status": "VERIFIED (totals) / INFERENCE (split)",
+   "grade": "C",
+   "source": "evidence/DATA_UPG_A.json D15-D30",
+   "note": ""
+  },
+  {
+   "id": "s4.co2_storage_p10_p90",
+   "value": {
+    "ID": {
+     "low": 34.275,
+     "p50": 51.275,
+     "high": 77.275
+    },
+    "MY": {
+     "low": 81.773,
+     "p50": 128.773,
+     "high": 198.773
+    },
+    "BN": {
+     "low": 13.5793,
+     "p50": 18.5793,
+     "high": 25.5793
+    },
+    "TH": {
+     "low": 12.024,
+     "p50": 16.024,
+     "high": 23.024
+    },
+    "VN": {
+     "low": 3.3034,
+     "p50": 5.3034,
+     "high": 9.3034
+    },
+    "PH": {
+     "low": null,
+     "p50": 0.0672,
+     "high": null
+    },
+    "KH": {
+     "low": null,
+     "p50": null,
+     "high": null
+    }
+   },
+   "unit": "GtCO2",
+   "status": "VERIFIED",
+   "grade": "B",
+   "source": "evidence/DATA_UPG_A.json D39-D49",
+   "note": ""
+  },
+  {
+   "id": "s4.vn_offwind_alpha",
+   "value": {
+    "cf_alpha1_box": 0.5826268068979518,
+    "era5_box_ws100": 9.342384144745573,
+    "alpha_cf_match": {
+     "tc2021_fixed_2050_incl_outages": 0.8960797361696348,
+     "wb_roadmap_2050_net": 1.042343080531983,
+     "pecc3_binh_thuan_net": 0.84924303210872,
+     "tc2021_fixed_2030": 0.7955719336818636
+    },
+    "alpha_speed_ratio": {
+     "wb_ref_site_2030_2035_100m": 0.9098319945215104,
+     "wb_ref_site_2023_100m": 0.8027929363425093
+    },
+    "model_vn_cf": {
+     "offwind-ac_c3": 0.2797347176445351,
+     "offwind-dc_c3": 0.3758331953068058,
+     "offwind-float_c3": 0.34327202338010876
+    }
+   },
+   "unit": "alpha / CF",
+   "status": "EXACT (computation) / INFERENCE (reference area)",
+   "grade": "C",
+   "source": "evidence/VN_OFFWIND_ALPHA.json; scripts/d2b_vn_offwind_alpha.py",
+   "note": "not applied"
+  },
+  {
+   "id": "s4.co2_sequestration_price_year",
+   "value": 2020,
+   "unit": "year",
+   "status": "INFERENCE",
+   "grade": "C",
+   "source": "evidence/DATA_UPG_A.json D31-D38",
+   "note": "range 2015-2020"
+  },
+  {
+   "id": "s4.my_rooftop",
+   "value": {
+    "model_mw": 83146.768938,
+    "myrer_mw": 42000.0
+   },
+   "unit": "MW",
+   "status": "VERIFIED",
+   "grade": "C",
+   "source": "evidence/DATA_UPG_B.json E50-E56",
+   "note": ""
+  },
+  {
+   "id": "registry.rows",
+   "value": 2463,
+   "unit": "rows",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "research_inputs/registry_v5/DATA_REGISTRY.csv",
+   "note": "D2a head 2,436 -> 2,463 (+27 new rows, 49 range replacements)"
+  },
+  {
+   "id": "s5.static",
+   "value": {
+    "main_F1": {
+     "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+     "C1_profiled_loads": 457,
+     "C1_profiled_mean_vs_constant_max_rel": 4.440892098500626e-16,
+     "C1_365_vs_2920_industry_rel": 0.0,
+     "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+     "C2_rail_vs_table_max_abs_mwh": 1.862645149230957e-09,
+     "C2_parent_rows_in_table_mwh": 0.0,
+     "C3_max_ratio": 0.9899999999999999,
+     "C3_VN_slack_share": 0.01000000000000012,
+     "C3_pool_change_vs_D2a_twh": {
+      "ID": -108.78369720967329,
+      "KH": -0.3990444236763418,
+      "MY": -41.40893964204115,
+      "PH": -0.5091240421201736,
+      "TH": -7.666742108576834
+     },
+     "C4_gas_caps_vs_table_max_rel": 0.0,
+     "C4_gas_generators": 19,
+     "C4_gas_generators_D2a": 19,
+     "C4_gas_caps_total_twh": 2148.53275032,
+     "C6_v4_meta_switch_sha": "acbac89d4e84bac429a3fc0019285c8528b6d8cb4fb7c4817de660947c5fe680",
+     "C6_switch_sha_equals_tables": true,
+     "C6_switches": {
+      "enabled": true,
+      "base": "sdmx_2019",
+      "residue_boundary": true,
+      "id_paper_fuelwood": "residue",
+      "household_gasoline": "id_to_road",
+      "rail_parent": "children_only",
+      "captive_coal": true,
+      "products": true,
+      "vn_same_run": true,
+      "bio_cap_share": 0.99,
+      "biomass_potential": "v4_adjusted_t05",
+      "gas_caps": "marketed",
+      "industry_curves": "g5_main",
+      "mm_gasoline": false,
+      "hvc_basis": "b",
+      "missing_cost_rule": "proxy",
+      "meoh_per_tco2": "stoichiometric",
+      "source_band_basis": "post_product",
+      "lng_regas_adder": "asean_tariffs",
+      "anchor_mode": "ras"
+     },
+     "C6_tables_dir": "research_inputs/industry_v4/out_ras",
+     "C6_main_set": true,
+     "C6_biomass_potential_file": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv",
+     "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+     "C10_cap_ledger_vs_table_max_abs_mwh": 0.0003479123115539551,
+     "C11_band_shares_ledger_vs_table_max_abs": 0.0,
+     "C12_lng_generators": 16,
+     "C12_lng_generators_D2a": 16,
+     "C12_lng_mc_change_min_max": [
+      0.7907104835499972,
+      0.7907104835499972
+     ],
+     "C12_lng_mc_change_expected": 0.7907104835500001,
+     "C12_lng_mc_change_max_dev": 2.886579864025407e-15,
+     "C12_lng_ledger": null,
+     "network_sha256": "6f027c263ef22e219ba4321a30526643230ba161b35234a75a2c7faee75d882e",
+     "network_bytes": 82749921,
+     "network_365_sha256": "4661a97ef30ee6c3c390d9994ff8b9ba02d241fc0a5278565fac30a517dbdddc"
+    },
+    "main_F2": {
+     "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+     "C1_profiled_loads": 457,
+     "C1_profiled_mean_vs_constant_max_rel": 4.440892098500626e-16,
+     "C1_365_vs_2920_industry_rel": 0.0,
+     "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+     "C2_rail_vs_table_max_abs_mwh": 1.862645149230957e-09,
+     "C2_parent_rows_in_table_mwh": 0.0,
+     "C3_max_ratio": 0.9899999999999999,
+     "C3_VN_slack_share": 0.01000000000000012,
+     "C3_pool_change_vs_D2a_twh": {
+      "ID": -108.78369720967329,
+      "KH": -0.3990444236763418,
+      "MY": -41.40893964204115,
+      "PH": -0.5091240421201736,
+      "TH": -7.666742108576834
+     },
+     "C4_gas_caps_vs_table_max_rel": 0.0,
+     "C4_gas_generators": 19,
+     "C4_gas_generators_D2a": 19,
+     "C4_gas_caps_total_twh": 2148.53275032,
+     "C6_v4_meta_switch_sha": "acbac89d4e84bac429a3fc0019285c8528b6d8cb4fb7c4817de660947c5fe680",
+     "C6_switch_sha_equals_tables": true,
+     "C6_switches": {
+      "enabled": true,
+      "base": "sdmx_2019",
+      "residue_boundary": true,
+      "id_paper_fuelwood": "residue",
+      "household_gasoline": "id_to_road",
+      "rail_parent": "children_only",
+      "captive_coal": true,
+      "products": true,
+      "vn_same_run": true,
+      "bio_cap_share": 0.99,
+      "biomass_potential": "v4_adjusted_t05",
+      "gas_caps": "marketed",
+      "industry_curves": "g5_main",
+      "mm_gasoline": false,
+      "hvc_basis": "b",
+      "missing_cost_rule": "proxy",
+      "meoh_per_tco2": "stoichiometric",
+      "source_band_basis": "post_product",
+      "lng_regas_adder": "asean_tariffs",
+      "anchor_mode": "ras"
+     },
+     "C6_tables_dir": "research_inputs/industry_v4/out_ras",
+     "C6_main_set": true,
+     "C6_biomass_potential_file": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv",
+     "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+     "C10_cap_ledger_vs_table_max_abs_mwh": 0.0003479123115539551,
+     "C11_band_shares_ledger_vs_table_max_abs": 0.0,
+     "C12_lng_generators": 16,
+     "C12_lng_generators_D2a": 16,
+     "C12_lng_mc_change_min_max": [
+      0.7907104835499972,
+      0.7907104835499972
+     ],
+     "C12_lng_mc_change_expected": 0.7907104835500001,
+     "C12_lng_mc_change_max_dev": 2.886579864025407e-15,
+     "C12_lng_ledger": null,
+     "network_sha256": "7bf008dd2030796a58cc1b629c76f5234e245bfc3130af228a15520c4c582cb0",
+     "network_bytes": 82112453,
+     "network_365_sha256": "ccdba146f4e53bbf0a8166574e217b502762481f71da93a18a7815806bf971af"
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s5.c8",
+   "value": {
+    "integrated_2920_3h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T05 basis)",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T05 basis)",
+      "(b) Generator.marginal_cost of 16 LNG import generators (lng_regas_adder)",
+      "(c) Load.p_set of 24 overflow useful-heat loads (['VN']; source_band_basis)"
+     ],
+     "unexpected": 0
+    },
+    "integrated_365_24h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T05 basis)",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T05 basis)",
+      "(b) Generator.marginal_cost of 16 LNG import generators (lng_regas_adder)",
+      "(c) Load.p_set of 24 overflow useful-heat loads (['VN']; source_band_basis)"
+     ],
+     "unexpected": 0
+    },
+    "no_new_xb_2920_3h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T05 basis)",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T05 basis)",
+      "(b) Generator.marginal_cost of 16 LNG import generators (lng_regas_adder)",
+      "(c) Load.p_set of 24 overflow useful-heat loads (['VN']; source_band_basis)"
+     ],
+     "unexpected": 0
+    },
+    "no_new_xb_365_24h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T05 basis)",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T05 basis)",
+      "(b) Generator.marginal_cost of 16 LNG import generators (lng_regas_adder)",
+      "(c) Load.p_set of 24 overflow useful-heat loads (['VN']; source_band_basis)"
+     ],
+     "unexpected": 0
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2B_NETWORK_DIFF.json",
+   "note": ""
+  },
+  {
+   "id": "s5.zero_slack",
+   "value": "PASS (both networks; see file)",
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/ZERO_SLACK_CHECK_D2B.json",
+   "note": ""
+  },
+  {
+   "id": "s6.alarm_lines",
+   "value": {
+    "R1_v4d2b_F1": {
+     "rhs_lower_bound": 10006981570.07227,
+     "alarm_line": 10006632750.489758,
+     "cost_ub": 488524661.1619916,
+     "pools": 10008712271.51057,
+     "loads": -1730701.4383016045
+    },
+    "R2_v4d2b_F2": {
+     "rhs_lower_bound": 9436919269.714924,
+     "alarm_line": 9436558119.023878,
+     "cost_ub": 715095656.5891137,
+     "pools": 9438526034.990824,
+     "loads": -1606765.2758997863
+    }
+   },
+   "unit": "EUR",
+   "status": "EXACT (rule) / VERIFIED (duals)",
+   "grade": "-",
+   "source": "evidence/D2B_BOUNDS_PRE.json",
+   "note": "registered before the solves (commit 0b02cfe8)"
+  },
+  {
+   "id": "s6.smoke",
+   "value": {
+    "v4d2b_F1": {
+     "termination": "optimal",
+     "objective_eur": 360297838673.07825,
+     "d2a_objective_eur": 348819582511.57465,
+     "dV_eur": 11478256161.503601,
+     "dV_lp_eur": 11478256161.503601,
+     "alarm_line_eur": 10006632750.489758,
+     "above_alarm_line": true,
+     "dV_minus_lower_bound_eur": 1471274591.4313316,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "V6_label": "ACCEPTED_LAYER2",
+     "barrier_iterations": 79,
+     "solve_seconds": 245.93472909927368,
+     "peak_rss_gib": 6.693538665771484
+    },
+    "v4d2b_F2": {
+     "termination": "optimal",
+     "objective_eur": 373139235116.4947,
+     "d2a_objective_eur": 361150691045.2904,
+     "dV_eur": 11988544071.204285,
+     "dV_lp_eur": 11988544071.204285,
+     "alarm_line_eur": 9436558119.023878,
+     "above_alarm_line": true,
+     "dV_minus_lower_bound_eur": 2551624801.489361,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "V6_label": "ACCEPTED_LAYER2",
+     "barrier_iterations": 95,
+     "solve_seconds": 177.23386788368225,
+     "peak_rss_gib": 5.706340789794922
+    }
+   },
+   "unit": "EUR",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2B_smoke56.json; tables/D2B_SMOKE56_RESULTS.csv",
+   "note": ""
+  },
+  {
+   "id": "s6.criteria",
+   "value": {
+    "v4d2b_F1": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "v4d2b_F2": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "B6_regression_only": {
+     "d2b_eur": 12841396443.416443,
+     "d2a_eur": 12331108533.71576,
+     "change_eur": 510287909.7006836
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2B_smoke56.json",
+   "note": ""
+  },
+  {
+   "id": "s7.rerank",
+   "value": {
+    "reference": "v31",
+    "control": "v31ev05",
+    "ranked_rows": 276,
+    "ranked_rows_d2a": 276,
+    "range_updates_d2b": [
+     "biomass_potential_BN_cassava_residues",
+     "biomass_potential_BN_coconut_residues",
+     "biomass_potential_BN_other_crop_residues",
+     "biomass_potential_ID_oil_palm_trunk",
+     "biomass_potential_KH_cassava_residues",
+     "biomass_potential_KH_coconut_residues",
+     "biomass_potential_KH_oil_palm_trunk",
+     "biomass_potential_KH_other_crop_residues",
+     "biomass_potential_LA_cassava_residues",
+     "biomass_potential_LA_other_crop_residues",
+     "biomass_potential_MM_cassava_residues",
+     "biomass_potential_MM_coconut_residues",
+     "biomass_potential_MM_other_crop_residues",
+     "biomass_potential_MY_oil_palm_trunk",
+     "biomass_potential_PH_oil_palm_trunk",
+     "biomass_potential_SG_cassava_residues",
+     "biomass_potential_SG_coconut_residues",
+     "biomass_potential_SG_other_crop_residues",
+     "biomass_potential_TH_oil_palm_trunk",
+     "biomass_potential_TL_cassava_residues",
+     "biomass_potential_TL_coconut_residues",
+     "biomass_potential_TL_other_crop_residues",
+     "co2_ship_chain_fixed_cost",
+     "co2_ship_chain_per_km_cost",
+     "fuel_price_lng_regasification_adder",
+     "renewable_cap_built_solar_rooftop_MY",
+     "share_transport_electric_efficiency"
+    ],
+    "range_updates_all": 37,
+    "inventory_overrides": [
+     "co2_sequestration_cost_price_year",
+     "offwind_alpha_calibration_rule"
+    ],
+    "top30_overlap_with_d2a": 29,
+    "entered": [
+     "biomass_potential_ID_oil_palm_efb"
+    ],
+    "left": [
+     "biomass_potential_MY_oil_palm_trunk"
+    ],
+    "spearman_vs_d2a": 0.9995199840184928,
+    "stability_vs_v31ev05": {
+     "spearman": 0.9946810119718612,
+     "top_overlap": 28,
+     "top": 30,
+     "moved_out": [
+      "ev_annual_km_per_vehicle",
+      "share_bev_dsm_restriction_value"
+     ]
+    },
+    "b6_base": {
+     "v31": 11976379452.622498,
+     "v31ev05": 12048673274.282959
+    },
+    "top30_abs_dB6_share": 0.9674440217730236,
+    "w19_rows": 27,
+    "w19_changed_by_d2b": 19
+   },
+   "unit": "-",
+   "status": "VERIFIED (method) / INFERENCE (first order)",
+   "grade": "-",
+   "source": "evidence/RERANK_D2B_SUMMARY.json",
+   "note": ""
+  },
+  {
+   "id": "literature.RESIDUE_LITERATURE",
+   "value": {
+    "entries": 49,
+    "verified": 44,
+    "sha256": "ec0d7b5a667007514e6a19ab57b1f025009a2c2921e90b8c4ff9218568c2545f"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/RESIDUE_LITERATURE.json",
+   "note": "web read-only by subagents, every entry reviewed in this session; quotes <= 15 words"
+  },
+  {
+   "id": "literature.TRUNK_LITERATURE",
+   "value": {
+    "entries": 36,
+    "verified": 23,
+    "sha256": "d690a3705aa2962b786f93c61af1faf4381152ef5b5aba5389bf10f63b2af5ea"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/TRUNK_LITERATURE.json",
+   "note": "web read-only by subagents, every entry reviewed in this session; quotes <= 15 words"
+  },
+  {
+   "id": "literature.DATA_UPG_A",
+   "value": {
+    "entries": 49,
+    "verified": 41,
+    "sha256": "96c68510d644d2001c3d055fb06363f4b5de943885e9899a006a9e0bb25c7ab3"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/DATA_UPG_A.json",
+   "note": "web read-only by subagents, every entry reviewed in this session; quotes <= 15 words"
+  },
+  {
+   "id": "literature.DATA_UPG_B",
+   "value": {
+    "entries": 59,
+    "verified": 50,
+    "sha256": "913a658d4da223624245428b270ad70f0b6fa13f7362e1064537ea0231153eee"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/DATA_UPG_B.json",
+   "note": "web read-only by subagents, every entry reviewed in this session; quotes <= 15 words"
+  },
+  {
+   "id": "incident.download",
+   "value": {
+    "file": "C:/Users/20122/Downloads/NWS-E-2006-202.pdf",
+    "bytes": 1447845,
+    "sha256": "bfd7795a731412178b8c1657dd21b433b8a95d01fa03429eaf8d96f9048f2441",
+    "what": "Smeets et al. 2007 PECS 33:56-106 author copy (Utrecht DSpace), saved by the built-in browser when a residue subagent opened the PDF link; not requested",
+    "use": "read only (pypdf text extraction of a copy in the session scratchpad) for Smeets 2007 section 5.1; file left in place for the user"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "RESIDUE_LITERATURE.json note",
+   "note": ""
+  }
+ ]
+}
