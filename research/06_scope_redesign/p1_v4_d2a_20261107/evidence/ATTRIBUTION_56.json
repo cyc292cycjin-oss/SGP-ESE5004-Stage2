@@ -1,0 +1,545 @@
+{
+ "method": "V4 D2a section 7 (Fable F-22; decision 220): two-factor Shapley attribution of the v4 cost increase on the 56-snapshot smoke runs.\n\nFactors: D = v4 demand (industry tables, curves, process emissions, feedstock carbon); P = v4 resource caps (biomass potential incl. T04, 0.99 cap, marketed\ngas caps). Corners (every other v4 change at its v4 value):\n  (D4, P4)   section-6 smoke  results_project/v4d2a/smoke56/v4d2a_F1 | _F2\n  (D4, P31)  attrib56/d4p31_F1 | _F2        (D31, P4)  attrib56/d31p4_F1 | _F2\n  (D31, P31) not solved (budget): APPROXIMATED (INFERENCE) = the W08 R0 run (v3.1 network on the W08 code, integrated) and, for no_new_xb, the v3.1 local\n             smoke of the v3.1 package, plus the known other v4 changes on the v3.1 network: the D1 proxy cost (+1.449 bn, the trunk pools used in full),\n             the D2a PHS reclassification and the methanol coefficient (first-order terms of SMOKE56_D2A.md section 1 applied to the v3.1 solution as a proxy).\nShapley (two players): phi_D = 1/2 [Z(D4,P31) - Z(D31,P31) + Z(D4,P4) - Z(D31,P4)], phi_P = 1/2 [Z(D31,P4) - Z(D31,P31) + Z(D4,P4) - Z(D4,P31)];\nphi_D + phi_P = Z(D4,P4) - Z(D31,P31). Applied to the integrated objective, the no_new_xb objective, B6 = Z(F2) - Z(F1) and, per country, to the Owen\nallocation of the corners (M12_BENEFIT*/BENEFIT.csv) and the country cost ledgers. 56 snapshots: direction only.\n\n    <env python> scripts/attribution.py\nWrites ATTRIBUTION_56.md (tables) and evidence/ATTRIBUTION_56.json.\n",
+ "corners": {
+  "D4,P4,F1": {
+   "objective": 348819582511.57465,
+   "objective_lp": 346453104237.3314,
+   "termination": "optimal",
+   "network_sha256": "334904c4d4998dc3409611f103b91a4d00ce7d323b296ada5242fcf9b450fe16",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/smoke56/v4d2a_F1",
+   "owen": {
+    "BN": 220506346.41670644,
+    "ID": 1075859809.053711,
+    "KH": 292584084.41772604,
+    "LA": 6482982.167075276,
+    "MM": 289787103.16684484,
+    "MY": 1065557389.0070152,
+    "PH": -352063683.2694378,
+    "SG": 2936960856.9809093,
+    "TH": 3233038133.898041,
+    "TL": 23238037.069134355,
+    "VN": 1125189963.9901352,
+    "BUNKER": 2413965249.32695
+   },
+   "ledger": {
+    "ASEAN_BUNKER": 84302547066.43855,
+    "BN": 608250887.353418,
+    "ID": 95638421957.1697,
+    "KH": 3740207985.614553,
+    "LA": 346542938.777465,
+    "MM": 2835343272.327056,
+    "MY": 33530943985.116154,
+    "PH": 16257298085.497845,
+    "SG": 11751968295.424185,
+    "TH": 41282217300.86192,
+    "TL": 358110067.404063,
+    "VN": 58167730669.54102
+   }
+  },
+  "D4,P4,F2": {
+   "objective": 361150691045.2904,
+   "objective_lp": 358613535714.9608,
+   "termination": "optimal",
+   "network_sha256": "9ec39333ee0519566f1bfa46803d2dde61ceb4e3332825ee31c0092f2b4dec1e",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/smoke56/v4d2a_F2",
+   "owen": null,
+   "ledger": {
+    "ASEAN_BUNKER": 86716512315.76634,
+    "BN": 828757293.959184,
+    "ID": 96721864487.10202,
+    "KH": 4344536012.641124,
+    "LA": 1465503517.14081,
+    "MM": 3053594138.994879,
+    "MY": 34588919572.78262,
+    "PH": 15905234584.986994,
+    "SG": 14688929164.683794,
+    "TH": 42860547620.47782,
+    "TL": 381348133.347438,
+    "VN": 59594944203.34827
+   }
+  },
+  "D4,P31,F1": {
+   "objective": 329853409059.35693,
+   "objective_lp": 327486930785.1137,
+   "termination": "optimal",
+   "network_sha256": "d49e5df08dce7aa19b983e5589a74aa7c4d08ef241b831fd099f1ff91ae0c9cb",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/attrib56/d4p31_F1",
+   "owen": {
+    "BN": 218870112.27343532,
+    "ID": -9550890.463348389,
+    "KH": 296091621.65407324,
+    "LA": 36776983.4040432,
+    "MM": 317648536.8194685,
+    "MY": 915732850.8160628,
+    "PH": 56248020.07331467,
+    "SG": 3137697233.01021,
+    "TH": 3537616871.3157806,
+    "TL": 25173719.826401357,
+    "VN": 1161559481.2493668,
+    "BUNKER": 2884164825.49115
+   },
+   "ledger": {
+    "ASEAN_BUNKER": 73549328394.27399,
+    "BN": 604970255.226487,
+    "ID": 89015838995.07776,
+    "KH": 3959327251.86028,
+    "LA": 576245849.83293,
+    "MM": 3125746514.654723,
+    "MY": 31492141114.543167,
+    "PH": 16637214958.537935,
+    "SG": 11514219131.998192,
+    "TH": 41209264757.34172,
+    "TL": 355263773.614808,
+    "VN": 57813848062.336464
+   }
+  },
+  "D4,P31,F2": {
+   "objective": 342431438654.97406,
+   "objective_lp": 339894283324.6445,
+   "termination": "optimal",
+   "network_sha256": "dc589ba93ba5ecefe204c5ef817949453f936f3c1ad7de8e7c8a2772fecafd81",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/attrib56/d4p31_F2",
+   "owen": null,
+   "ledger": {
+    "ASEAN_BUNKER": 76433493219.76569,
+    "BN": 823840377.214611,
+    "ID": 89015304656.53255,
+    "KH": 4532864183.420828,
+    "LA": 1780477381.994327,
+    "MM": 3357950825.137382,
+    "MY": 32398857546.195244,
+    "PH": 16693463028.050749,
+    "SG": 14651916362.717104,
+    "TH": 43100839723.6764,
+    "TL": 380437501.813699,
+    "VN": 59261993848.38982
+   }
+  },
+  "D31,P4,F1": {
+   "objective": 362445881245.88605,
+   "objective_lp": 360079402971.6428,
+   "termination": "optimal",
+   "network_sha256": "e01503b06b8ec91108480f62abce9436ccee771357a81da0c6ba1a649a840018",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/attrib56/d31p4_F1",
+   "owen": {
+    "BN": 178612473.04144496,
+    "ID": 781515083.1017151,
+    "KH": 415126326.68169737,
+    "LA": -197730688.015264,
+    "MM": 374188196.476799,
+    "MY": 1164567256.514389,
+    "PH": -357795484.9327412,
+    "SG": 2661768821.8240986,
+    "TH": 3764730216.874687,
+    "TL": 23162818.229492307,
+    "VN": 1281334371.6786425,
+    "BUNKER": 2061718153.8347168
+   },
+   "ledger": {
+    "ASEAN_BUNKER": 85209940712.86778,
+    "BN": 443192660.647863,
+    "ID": 109879023779.9724,
+    "KH": 3645477874.845185,
+    "LA": 271610439.791037,
+    "MM": 2995145982.661271,
+    "MY": 27434242816.552685,
+    "PH": 17337171776.120747,
+    "SG": 10167311838.837105,
+    "TH": 44228427785.2412,
+    "TL": 354792246.741417,
+    "VN": 60479543331.559456
+   }
+  },
+  "D31,P4,F2": {
+   "objective": 374597076484.48047,
+   "objective_lp": 372059921154.1509,
+   "termination": "optimal",
+   "network_sha256": "7bc9f2f42f553bb50f6779b801054f19441957aa92fefa741f937aed053a1649",
+   "gates_v6": null,
+   "run": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2a/attrib56/d31p4_F2",
+   "owen": null,
+   "ledger": {
+    "ASEAN_BUNKER": 87271658866.70166,
+    "BN": 621805109.682963,
+    "ID": 110666586693.88428,
+    "KH": 4384349691.441716,
+    "LA": 1429265719.735751,
+    "MM": 3313256332.12126,
+    "MY": 28592761003.17111,
+    "PH": 16979376139.19198,
+    "SG": 12829080625.144522,
+    "TH": 45982886526.86805,
+    "TL": 377955041.994597,
+    "VN": 62148094734.48857
+   }
+  },
+  "D31,P31,F1": {
+   "objective": 331145046403.91595,
+   "v31_objective_eur": 329705565613.54376,
+   "other_changes_eur": {
+    "trunk_proxy_cost_D1": 1449347508.86,
+    "phs_reclass_lower_bound_terms_D2a": -33339621.96926771,
+    "methanol_coefficient_first_order_D2a": 23472903.481474586
+   },
+   "grade": "INFERENCE (approximated, not solved)"
+  },
+  "D31,P31,F2": {
+   "objective": 343639187359.3769,
+   "v31_objective_eur": 342268691464.4567,
+   "other_changes_eur": {
+    "trunk_proxy_cost_D1": 1449345260.81,
+    "phs_reclass_lower_bound_terms_D2a": -101815968.21039876,
+    "methanol_coefficient_first_order_D2a": 22966602.320535485
+   },
+   "grade": "INFERENCE (approximated, not solved)"
+  }
+ },
+ "approximation": {
+  "v31_objective_eur": {
+   "F1": 329705565613.54376,
+   "F2": 342268691464.4567
+  },
+  "v31_networks": {
+   "F1": "8b5fd663d6c783e9af549bec8394700c9b4b5785b1ec809ab7d8e668d78657ef",
+   "F2": "e2837e4ada978e0d05fc04108d7ceb99567e41c33b6837ab4447be74bdd918b7"
+  },
+  "v31_source": "F1 W08 R0 (v3.1 package integrated network solved on the W08 code; the v3.1 package smoke gives 329,705,566,422.24, +808.69 EUR); F2 v3.1 package local smoke results_project/v3hpc/smoke_hpc/no_new_xb",
+  "other_v4_changes_on_v31_eur": {
+   "F1": {
+    "trunk_proxy_cost_D1": 1449347508.86,
+    "phs_reclass_lower_bound_terms_D2a": -33339621.96926771,
+    "methanol_coefficient_first_order_D2a": 23472903.481474586
+   },
+   "F2": {
+    "trunk_proxy_cost_D1": 1449345260.81,
+    "phs_reclass_lower_bound_terms_D2a": -101815968.21039876,
+    "methanol_coefficient_first_order_D2a": 22966602.320535485
+   }
+  },
+  "other_v4_changes_notes": {
+   "trunk_proxy_cost_D1": "D1 section 7: realised dV of the proxy cost on the W08 solution (trunk pools fully used; the same holds for the v3.1 smoke, zero-cost pools), scaled 1:1 (INFERENCE)",
+   "phs_reclass_lower_bound_terms_D2a": "D2a SMOKE56_D2A.md section 1: PHS capacity value + TH inflow re-sharing + new-reservoir completion (lower-bound terms at the D1 duals, used as the estimate; sign of the new reservoir indefinite)",
+   "methanol_coefficient_first_order_D2a": "D2a SMOKE56_D2A.md section 1: first order at the D1 solution (no bound)"
+  },
+  "v31_by_player": {
+   "owen": {
+    "MY": 869653853.3355827,
+    "ID": -712338328.1040802,
+    "SG": 2770373847.430195,
+    "BUNKER": 3297338456.154663
+   },
+   "ledger_F1": {
+    "MY": 25251360491.101295,
+    "ID": 91076190499.74211,
+    "SG": 10041265906.407047,
+    "BUNKER": 76074751813.519
+   }
+  },
+  "proxy_by_country_F1": {
+   "ID": 993057640.485761,
+   "KH": 3642771.149893,
+   "MY": 378011273.292619,
+   "PH": 4647658.912536,
+   "TH": 69987663.811177
+  },
+  "proxy_by_country_F2": {
+   "ID": 993057640.367019,
+   "KH": 3642771.149156,
+   "MY": 378011273.293291,
+   "PH": 4647658.91196,
+   "TH": 69987663.810011
+  },
+  "v31_owen_all": {
+   "BN": 183701362.5523248,
+   "ID": -712338328.1040802,
+   "KH": 366217943.379065,
+   "LA": -108247675.99748312,
+   "MM": 298044119.79752016,
+   "MY": 869653853.3355827,
+   "PH": 130118579.6226654,
+   "SG": 2770373847.430195,
+   "TH": 4073042312.776741,
+   "TL": 26311972.611588955,
+   "VN": 1368915059.492157,
+   "BUNKER": 3297338456.154663
+  },
+  "v31_ledger_F1_all": {
+   "ASEAN_BUNKER": 76074751813.519,
+   "BN": 437847723.042996,
+   "ID": 90083132859.25635,
+   "KH": 3828377247.449202,
+   "LA": 338089894.25014,
+   "MM": 3042360135.320029,
+   "MY": 24873349217.808678,
+   "PH": 17277707838.431545,
+   "SG": 10041265906.407047,
+   "TH": 43568544389.887566,
+   "TL": 351439136.162846,
+   "VN": 59788700260.64001
+  },
+  "grade": "INFERENCE (approximation; the (D31, P31) corner is not solved)"
+ },
+ "results": {
+  "F1": {
+   "values": {
+    "D4,P4": 348819582511.57465,
+    "D4,P31": 329853409059.35693,
+    "D31,P4": 362445881245.88605,
+    "D31,P31": 331145046403.91595
+   },
+   "shapley": {
+    "phi_D": -7458968039.435211,
+    "phi_P": 25133504147.093903,
+    "total": 17674536107.65869,
+    "D_first": {
+     "D": -1291637344.559021,
+     "P": 18966173452.217712
+    },
+    "P_first": {
+     "P": 31300834841.970093,
+     "D": -13626298734.311401
+    },
+    "interaction": -12334661389.75238
+   }
+  },
+  "F2": {
+   "values": {
+    "D4,P4": 361150691045.2904,
+    "D4,P31": 342431438654.97406,
+    "D31,P4": 374597076484.48047,
+    "D31,P31": 343639187359.3769
+   },
+   "shapley": {
+    "phi_D": -7327067071.796448,
+    "phi_P": 24838570757.70996,
+    "total": 17511503685.913513,
+    "D_first": {
+     "D": -1207748704.402832,
+     "P": 18719252390.316345
+    },
+    "P_first": {
+     "P": 30957889125.103577,
+     "D": -13446385439.190063
+    },
+    "interaction": -12238636734.787231
+   }
+  },
+  "B6": {
+   "values": {
+    "D4,P4": 12331108533.71576,
+    "D4,P31": 12578029595.617126,
+    "D31,P4": 12151195238.594421,
+    "D31,P31": 12494140955.460938
+   },
+   "shapley": {
+    "phi_D": 131900967.63876343,
+    "phi_P": -294933389.38394165,
+    "total": -163032421.74517822,
+    "D_first": {
+     "D": 83888640.15618896,
+     "P": -246921061.9013672
+    },
+    "P_first": {
+     "P": -342945716.8665161,
+     "D": 179913295.1213379
+    },
+    "interaction": 96024654.96514893
+   }
+  }
+ },
+ "by_player": {
+  "owen": {
+   "MY": {
+    "values": {
+     "D4,P4": 1065557389.0070152,
+     "D4,P31": 915732850.8160628,
+     "D31,P4": 1164567256.514389,
+     "D31,P31": 869653853.3355827
+    },
+    "shapley": {
+     "phi_D": -26465435.013446867,
+     "phi_P": 222368970.68487936,
+     "total": 195903535.6714325,
+     "D_first": {
+      "D": 46078997.480480075,
+      "P": 149824538.19095242
+     },
+     "P_first": {
+      "P": 294913403.1788063,
+      "D": -99009867.50737381
+     },
+     "interaction": -145088864.98785388
+    },
+    "label": "Owen benefit (B6 allocation)"
+   },
+   "ID": {
+    "values": {
+     "D4,P4": 1075859809.053711,
+     "D4,P31": -9550890.463348389,
+     "D31,P4": 781515083.1017151,
+     "D31,P31": -712338328.1040802
+    },
+    "shapley": {
+     "phi_D": 498566081.79636383,
+     "phi_P": 1289632055.3614273,
+     "total": 1788198137.1577911,
+     "D_first": {
+      "D": 702787437.6407318,
+      "P": 1085410699.5170593
+     },
+     "P_first": {
+      "P": 1493853411.2057953,
+      "D": 294344725.95199585
+     },
+     "interaction": -408442711.68873596
+    },
+    "label": "Owen benefit (B6 allocation)"
+   },
+   "SG": {
+    "values": {
+     "D4,P4": 2936960856.9809093,
+     "D4,P31": 3137697233.01021,
+     "D31,P4": 2661768821.8240986,
+     "D31,P31": 2770373847.430195
+    },
+    "shapley": {
+     "phi_D": 321257710.368413,
+     "phi_P": -154670700.81769848,
+     "total": 166587009.5507145,
+     "D_first": {
+      "D": 367323385.5800152,
+      "P": -200736376.0293007
+     },
+     "P_first": {
+      "P": -108605025.60609627,
+      "D": 275192035.15681076
+     },
+     "interaction": -92131350.42320442
+    },
+    "label": "Owen benefit (B6 allocation)"
+   },
+   "BUNKER": {
+    "values": {
+     "D4,P4": 2413965249.32695,
+     "D4,P31": 2884164825.49115,
+     "D31,P4": 2061718153.8347168,
+     "D31,P31": 3297338456.154663
+    },
+    "shapley": {
+     "phi_D": -30463267.585639954,
+     "phi_P": -852909939.242073,
+     "total": -883373206.827713,
+     "D_first": {
+      "D": -413173630.6635132,
+      "P": -470199576.1641998
+     },
+     "P_first": {
+      "P": -1235620302.3199463,
+      "D": 352247095.4922333
+     },
+     "interaction": 765420726.1557465
+    },
+    "label": "Owen benefit (B6 allocation)"
+   }
+  },
+  "ledger_F1": {
+   "MY": {
+    "values": {
+     "D4,P4": 33530943985.116154,
+     "D4,P31": 31492141114.543167,
+     "D31,P4": 27434242816.552685,
+     "D31,P31": 25251360491.101295
+    },
+    "shapley": {
+     "phi_D": 6168740896.00267,
+     "phi_P": 2110842598.012188,
+     "total": 8279583494.014858,
+     "D_first": {
+      "D": 6240780623.441872,
+      "P": 2038802870.5729866
+     },
+     "P_first": {
+      "P": 2182882325.4513893,
+      "D": 6096701168.563469
+     },
+     "interaction": -144079454.8784027
+    },
+    "label": "integrated cost ledger"
+   },
+   "ID": {
+    "values": {
+     "D4,P4": 95638421957.1697,
+     "D4,P31": 89015838995.07776,
+     "D31,P4": 109879023779.9724,
+     "D31,P31": 91076190499.74211
+    },
+    "shapley": {
+     "phi_D": -8150476663.733528,
+     "phi_P": 12712708121.16111,
+     "total": 4562231457.427582,
+     "D_first": {
+      "D": -2060351504.6643524,
+      "P": 6622582962.091934
+     },
+     "P_first": {
+      "P": 18802833280.230286,
+      "D": -14240601822.802704
+     },
+     "interaction": -12180250318.138351
+    },
+    "label": "integrated cost ledger"
+   },
+   "SG": {
+    "values": {
+     "D4,P4": 11751968295.424185,
+     "D4,P31": 11514219131.998192,
+     "D31,P4": 10167311838.837105,
+     "D31,P31": 10041265906.407047
+    },
+    "shapley": {
+     "phi_D": 1528804841.0891123,
+     "phi_P": 181897547.92802525,
+     "total": 1710702389.0171375,
+     "D_first": {
+      "D": 1472953225.5911446,
+      "P": 237749163.42599297
+     },
+     "P_first": {
+      "P": 126045932.43005753,
+      "D": 1584656456.58708
+     },
+     "interaction": 111703230.99593544
+    },
+    "label": "integrated cost ledger"
+   },
+   "BUNKER": {
+    "values": {
+     "D4,P4": 84302547066.43855,
+     "D4,P31": 73549328394.27399,
+     "D31,P4": 85209940712.86778,
+     "D31,P31": 76074751813.519
+    },
+    "shapley": {
+     "phi_D": -1716408532.83712,
+     "phi_P": 9944203785.756676,
+     "total": 8227795252.919556,
+     "D_first": {
+      "D": -2525423419.2450104,
+      "P": 10753218672.164566
+     },
+     "P_first": {
+      "P": 9135188899.348785,
+      "D": -907393646.4292297
+     },
+     "interaction": 1618029772.8157806
+    },
+    "label": "integrated cost ledger"
+   }
+  }
+ }
+}

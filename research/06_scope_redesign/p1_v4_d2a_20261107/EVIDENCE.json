@@ -1,0 +1,834 @@
+{
+ "generated_for": "V4 D2a (decision 220)",
+ "entries": [
+  {
+   "id": "instruction.sha256",
+   "value": "4920db6341793bf5df76b7651a982cdb4a653c1bc6dc866a9df3227d626e38fa",
+   "unit": "sha256",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "V4_D2A_INSTRUCTION.md",
+   "note": "= V4_D2A_SHA256.txt (checked before starting)"
+  },
+  {
+   "id": "branch.base",
+   "value": {
+    "branch": "codex/v4-d2a-20261107",
+    "base": "4026c1c84d8d349e9bb8c11f3e6da8f82588d621",
+    "d1_review_commit_ancestor": "6142d8ac",
+    "files_changed_between": "3, all under research/06_scope_redesign/p1_v4_d1_20261107/"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "git merge-base / git diff --stat",
+   "note": ""
+  },
+  {
+   "id": "s2.f02_vn_overflow_ras",
+   "value": {
+    "s30_twh": 29.9512393225,
+    "recomputed_twh": 41.09721963770257,
+    "difference_twh": 11.145980315202568,
+    "biomass_T_v2_twh": 148.64023291170258,
+    "cap_twh": 119.162240788
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "out_ras/V4_SWITCHES.json biomass_overflow_recomputed",
+   "note": "overflow after the conservation layer = the build rule (Fable F-02); difference = the VN pulp-and-paper purchased biomass vector"
+  },
+  {
+   "id": "s2.f07_bn_neu_ras",
+   "value": {
+    "base_2019_before_twh": 5.45879925,
+    "base_2019_after_twh": 2.006854805395,
+    "value_2050_before_twh": 5.735758419106498,
+    "value_2050_after_twh": 1.7118075399135835
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "out_ras/V4_SWITCHES.json bn_neu_methanol",
+   "note": "BN T_v2 effect 0 (NEU outside T_v2)"
+  },
+  {
+   "id": "s2.f02_vn_overflow_iid",
+   "value": {
+    "s30_twh": 20.9277874718,
+    "recomputed_twh": 32.073767786502586,
+    "difference_twh": 11.145980314702586,
+    "biomass_T_v2_twh": 138.19541522370258,
+    "cap_twh": 119.162240788
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "out_iid/V4_SWITCHES.json biomass_overflow_recomputed",
+   "note": "overflow after the conservation layer = the build rule (Fable F-02); difference = the VN pulp-and-paper purchased biomass vector"
+  },
+  {
+   "id": "s2.f07_bn_neu_iid",
+   "value": {
+    "base_2019_before_twh": 5.45879925,
+    "base_2019_after_twh": 2.006854805395,
+    "value_2050_before_twh": 4.563498133893367,
+    "value_2050_after_twh": 0.5395472547004531
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "out_iid/V4_SWITCHES.json bn_neu_methanol",
+   "note": "BN T_v2 effect 0 (NEU outside T_v2)"
+  },
+  {
+   "id": "s2.f01_literal_reading",
+   "value": {
+    "id_T_v2_main_twh": 1483.776362231026,
+    "id_T_v2_literal_twh": 1520.6662159147259,
+    "difference_twh": 36.88985368369981,
+    "asean_literal_twh": 3527.227864889414,
+    "fable_difference_twh": 36.889854
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "out_ras_5ba297a881ba/V4_SWITCHES.json vs out_ras",
+   "note": "= Fable SENS_PAPER_FUELWOOD.json"
+  },
+  {
+   "id": "s2_s5.checkpoints",
+   "value": {
+    "i2chk": {
+     "rows": 24,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    },
+    "i2chk_s3": {
+     "rows": 24,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    },
+    "iid": {
+     "rows": 180,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    },
+    "iid_t04": {
+     "rows": 180,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    },
+    "main": {
+     "rows": 192,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    },
+    "main_t04": {
+     "rows": 192,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_overflow": 0.0
+    }
+   },
+   "unit": "TWh",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "CHECKPOINTS.csv (corrected reference engine scripts/ref)",
+   "note": ""
+  },
+  {
+   "id": "s3.t04_basis_table",
+   "value": [
+    {
+     "category": "oil_palm_efb",
+     "moisture_ar_mid": "0.60",
+     "lhv_dry_gj_t_mid": "18.0",
+     "consistent_gj_per_wet_t_mid": "7.2",
+     "factor_mid": 0.48,
+     "factor_low": 0.34826,
+     "factor_high": 0.544701,
+     "verdict": "INCONSISTENT: wet share x 15 GJ/t, but 15 GJ/t is a dry-basis magnitude (as-received LHV 4.6-6.2 GJ/t)",
+     "applied": true,
+     "grade": "C"
+    },
+    {
+     "category": "oil_palm_fibre",
+     "moisture_ar_mid": "0.37",
+     "lhv_dry_gj_t_mid": "18.1",
+     "consistent_gj_per_wet_t_mid": "11.403",
+     "factor_mid": 0.7602,
+     "factor_low": 0.747738,
+     "factor_high": 0.776768,
+     "verdict": "INCONSISTENT: wet share x 15 GJ/t (as-received LHV 10.5-10.6 GJ/t); the main set removes 100 % of the fibre in the mills (T03), so only the T03 low / high sensitivities change",
+     "applied": true,
+     "grade": "C"
+    },
+    {
+     "category": "oil_palm_pks",
+     "moisture_ar_mid": "0.12",
+     "lhv_dry_gj_t_mid": "19.3",
+     "consistent_gj_per_wet_t_mid": "16.7",
+     "factor_mid": 1.0,
+     "factor_low": 0.933,
+     "factor_high": 1.209,
+     "verdict": "CONSISTENT: 15 GJ/t lies inside the as-received LHV range 14.0-18.1 GJ/t (ERIA 3,500 kcal/kg = 14.65 GJ/t is the cost basis); current value kept, sources upgraded",
+     "applied": false,
+     "grade": "B"
+    },
+    {
+     "category": "oil_palm_trunk",
+     "moisture_ar_mid": "0.75",
+     "lhv_dry_gj_t_mid": "",
+     "consistent_gj_per_wet_t_mid": "",
+     "factor_mid": 1.0,
+     "factor_low": 0.2,
+     "factor_high": 0.36,
+     "verdict": "UNDETERMINED: the table applies 15 GJ/t to the wet mass (its own low variant = dry matter 0.2 x 15 GJ/t); the dry LHV is unsourced, so the rule 'keep, give the range, refer to the reviewer' applies; range = dry matter 0.20-0.30 x LHV_dry 15-18 GJ/t over 15",
+     "applied": false,
+     "grade": "D"
+    },
+    {
+     "category": "other_agricultural_residues",
+     "moisture_ar_mid": "",
+     "lhv_dry_gj_t_mid": "",
+     "consistent_gj_per_wet_t_mid": "",
+     "factor_mid": 1.0,
+     "factor_low": 0.87,
+     "factor_high": 1.07,
+     "verdict": "NOT ASSESSED: IRENA 2017a states 15 GJ/t without a moisture basis; the residue factors are per tonne of crop; no evidence of inconsistency found (INFERENCE)",
+     "applied": false,
+     "grade": "C"
+    }
+   ],
+   "unit": "-",
+   "status": "VERIFIED (sources) / EXACT (factors)",
+   "grade": "C",
+   "source": "PALM_RESIDUE_BASIS_T04.csv; evidence/T04_LITERATURE.json",
+   "note": ""
+  },
+  {
+   "id": "s3.t04_potential_change_twh",
+   "value": {
+    "ID": {
+     "w08": 772.758667,
+     "t04": 660.108702,
+     "change": -112.64996499999995
+    },
+    "KH": {
+     "w08": 48.537431,
+     "t04": 48.282188,
+     "change": -0.2552430000000001
+    },
+    "MY": {
+     "w08": 173.21659,
+     "t04": 127.4278,
+     "change": -45.78878999999999
+    },
+    "PH": {
+     "w08": 126.733174,
+     "t04": 126.392676,
+     "change": -0.34049800000001085
+    },
+    "TH": {
+     "w08": 264.889855,
+     "t04": 253.528382,
+     "change": -11.361473000000018
+    },
+    "ASEAN11": {
+     "w08": 1618.482514,
+     "t04": 1448.086546,
+     "change": -170.39596800000004
+    }
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ_V4_T04.csv vs BIOMASS_POTENTIAL_ADJ_V4.csv",
+   "note": ""
+  },
+  {
+   "id": "s3.phs_reclass",
+   "value": [
+    {
+     "identity": "GEM:G100000603603",
+     "gem_capacity_mw": 779,
+     "reclass_to": "hydro existing",
+     "reclass_mw": 608.2,
+     "drop_mw": 170.8
+    }
+   ],
+   "unit": "MW",
+   "status": "VERIFIED",
+   "grade": "B",
+   "source": "PHS_STOCK_RECLASS_V4.csv; evidence/PHS_STOCK_LITERATURE.json (EGAT T-01, ANDRITZ T-03, IHA T-20)",
+   "note": ""
+  },
+  {
+   "id": "s3.phs_stock_after",
+   "value": {
+    "TH_pumped_mw": 1531.0,
+    "TH_conventional_added_mw": 608.2,
+    "PH_kept_mw": 856.0,
+    "asean_pumped_mw": 4627.0
+   },
+   "unit": "MW",
+   "status": "VERIFIED",
+   "grade": "B",
+   "source": "STATIC_CHECKS.json PHS_existing_by_country_mw",
+   "note": ""
+  },
+  {
+   "id": "s3.meoh_per_tco2",
+   "value": {
+    "v4_main": 4.02481710559,
+    "v31_fallback": 4.0321,
+    "hydrogen_lhv_mwh_t": 33.33
+   },
+   "unit": "MWh_MeOH/tCO2",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "registry rows",
+   "note": ""
+  },
+  {
+   "id": "s3.phs_asean_costs",
+   "value": {
+    "phs_asean_power_cost_eur2020_per_kw": 491.248034241,
+    "phs_asean_energy_cost_eur2020_per_kwh": 43.8614316287,
+    "phs_asean_fom_eur2020_per_kw_a": 6.14060042801,
+    "phs_asean_lifetime_a": 50.0,
+    "phs_asean_round_trip": 0.8
+   },
+   "unit": "EUR2020 / a / per unit",
+   "status": "EXACT (conversion) / VERIFIED (source)",
+   "grade": "B",
+   "source": "registry (Lu et al. 2021 Table 3 x fx_usd_to_eur_2020)",
+   "note": "SENSITIVITY rows"
+  },
+  {
+   "id": "s3.registry_rows",
+   "value": {
+    "total": 2436,
+    "d2a_fragment": 32
+   },
+   "unit": "rows",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "DATA_REGISTRY.csv",
+   "note": ""
+  },
+  {
+   "id": "s4.rerank_summary",
+   "value": {
+    "ranked_rows": 276,
+    "ranked_rows_w15": 282,
+    "inactive_basis_rows": [
+     "liquid_ship_cargo_loss_per_km",
+     "liquid_ship_ckm_td_ammonia",
+     "liquid_ship_ckm_td_methanol",
+     "liquid_ship_ckm_td_oil",
+     "liquid_ship_hours_per_year",
+     "liquid_ship_speed_km_h"
+    ],
+    "range_updates": [
+     "liquid_ship_hours_per_year",
+     "liquid_ship_mwh_per_t_ammonia",
+     "liquid_ship_mwh_per_t_methanol",
+     "liquid_ship_mwh_per_t_oil",
+     "share_MWh_H2_per_tNH3_electrolysis",
+     "share_MWh_MeOH_per_MWh_H2",
+     "share_MWh_MeOH_per_tCO2",
+     "share_MWh_NH3_per_tNH3",
+     "share_bev_avail_max",
+     "share_bev_charge_efficiency"
+    ],
+    "top30_overlap_with_w15": 27,
+    "entered": [
+     "biomass_msw_ch4_yield_food_wet",
+     "biomass_potential_MY_oil_palm_trunk",
+     "co2_injection_cap_unified_KH"
+    ],
+    "left": [
+     "liquid_ship_hours_per_year",
+     "liquid_ship_mwh_per_t_ammonia",
+     "liquid_ship_speed_km_h"
+    ],
+    "spearman_vs_w15": 0.945461965439991,
+    "duplicate_bounds": 7,
+    "bias_classes": {
+     "cost": 131,
+     "rhs": 121,
+     "coefficient": 18,
+     "discrete": 6
+    },
+    "top30_abs_dB6_share": 0.9642509486166556
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/RERANK_D2A_SUMMARY.json; rerank/",
+   "note": ""
+  },
+  {
+   "id": "s4.top5",
+   "value": [
+    {
+     "rank": 1.0,
+     "param_id": "scenario_switch_wacc_mode",
+     "bias_class": "discrete",
+     "dB6": -3537480213.217388,
+     "dZ_F1": -11160854816.419653
+    },
+    {
+     "rank": 2.0,
+     "param_id": "offwind_alpha_calibration_rule",
+     "bias_class": "coefficient",
+     "dB6": -2492376473.1691294,
+     "dZ_F1": -7189158.834559881
+    },
+    {
+     "rank": 3.0,
+     "param_id": "co2_injection_cap_unified_KH",
+     "bias_class": "rhs",
+     "dB6": -2162964600.71184,
+     "dZ_F1": -9343344418.42972
+    },
+    {
+     "rank": 4.0,
+     "param_id": "renewable_cap_built_solar_rooftop_MY",
+     "bias_class": "rhs",
+     "dB6": -1317236107.4140878,
+     "dZ_F1": -306445368.643578
+    },
+    {
+     "rank": 5.0,
+     "param_id": "share_transport_electric_efficiency",
+     "bias_class": "rhs",
+     "dB6": 1239659719.3940716,
+     "dZ_F1": 6696316820.400621
+    }
+   ],
+   "unit": "EUR",
+   "status": "INFERENCE (first order)",
+   "grade": "C",
+   "source": "RERANK_D2A_TOP30.csv",
+   "note": ""
+  },
+  {
+   "id": "s4.kh_co2_cap_dual",
+   "value": [
+    {
+     "dual_global_row": -0.0,
+     "dual_store_e_nom_upper": -10.402298395045335,
+     "dual_total": -10.402298395045335
+    }
+   ],
+   "unit": "EUR/t",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "rerank/DUPLICATE_BOUNDS.csv (v31 F1 duals)",
+   "note": ""
+  },
+  {
+   "id": "s5.static_main_F1",
+   "value": {
+    "network_sha256": "334904c4d4998dc3409611f103b91a4d00ce7d323b296ada5242fcf9b450fe16",
+    "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+    "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+    "C3_max_ratio": 0.9899999999999999,
+    "C3_VN_slack_share": 0.01000000000000012,
+    "C4_gas_caps_vs_table_max_rel": 0.0,
+    "C6_switch_sha_equals_tables": true,
+    "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+    "PHS_existing_by_country_mw": {
+     "ID": 1040.0,
+     "PH": 856.0,
+     "TH": 1531.0,
+     "VN": 1200.0
+    },
+    "hydro_inflow_TH_annual_twh": 7.269900000000001,
+    "hydro_inflow_TH_annual_twh_D1": 7.2699,
+    "C3_pool_change_vs_D1_twh": {
+     "ID": -112.64996455232,
+     "KH": -0.25524299014656243,
+     "MY": -45.788789735364006,
+     "PH": -0.3404978511755317,
+     "TH": -11.361472959383935
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s5.static_main_F2",
+   "value": {
+    "network_sha256": "9ec39333ee0519566f1bfa46803d2dde61ceb4e3332825ee31c0092f2b4dec1e",
+    "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+    "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+    "C3_max_ratio": 0.9899999999999999,
+    "C3_VN_slack_share": 0.01000000000000012,
+    "C4_gas_caps_vs_table_max_rel": 0.0,
+    "C6_switch_sha_equals_tables": true,
+    "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+    "PHS_existing_by_country_mw": {
+     "ID": 1040.0,
+     "PH": 856.0,
+     "TH": 1531.0,
+     "VN": 1200.0
+    },
+    "hydro_inflow_TH_annual_twh": 7.269900000000001,
+    "hydro_inflow_TH_annual_twh_D1": 7.2699,
+    "C3_pool_change_vs_D1_twh": {
+     "ID": -112.64996455232,
+     "KH": -0.25524299014656243,
+     "MY": -45.788789735364006,
+     "PH": -0.3404978511755317,
+     "TH": -11.361472959383935
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s5.c8_network_diff_vs_d1",
+   "value": {
+    "integrated_2920_3h": {
+     "passed": true,
+     "expected": [
+      "StorageUnit.existing_annual_fixed_om_eur of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.p_nom of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.retained_electric_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_group_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_unit_id of the TH2 4 PHS group (reclassification)",
+      "Link.efficiency3 of 30 methanolisation links (meoh_per_tco2)",
+      "Link.efficiency4 of 30 links (fuel-carbon port, meoh_per_tco2)",
+      "Store.e_initial of 9 biomass pools (T04 potential)",
+      "Store.e_nom of 9 biomass pools (T04 potential)",
+      "StorageUnit.inflow of 8 TH reservoirs (national inflow re-shared with the reclassified capacity)",
+      "new StorageUnit TH2 4 hydro existing::D2A (reclassification)"
+     ],
+     "unexpected": []
+    },
+    "integrated_365_24h": {
+     "passed": true,
+     "expected": [
+      "StorageUnit.existing_annual_fixed_om_eur of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.p_nom of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.retained_electric_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_group_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_unit_id of the TH2 4 PHS group (reclassification)",
+      "Link.efficiency3 of 30 methanolisation links (meoh_per_tco2)",
+      "Link.efficiency4 of 30 links (fuel-carbon port, meoh_per_tco2)",
+      "Store.e_initial of 9 biomass pools (T04 potential)",
+      "Store.e_nom of 9 biomass pools (T04 potential)",
+      "StorageUnit.inflow of 8 TH reservoirs (national inflow re-shared with the reclassified capacity)",
+      "new StorageUnit TH2 4 hydro existing::D2A (reclassification)"
+     ],
+     "unexpected": []
+    },
+    "no_new_xb_2920_3h": {
+     "passed": true,
+     "expected": [
+      "StorageUnit.existing_annual_fixed_om_eur of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.p_nom of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.retained_electric_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_group_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_unit_id of the TH2 4 PHS group (reclassification)",
+      "Link.efficiency3 of 30 methanolisation links (meoh_per_tco2)",
+      "Link.efficiency4 of 30 links (fuel-carbon port, meoh_per_tco2)",
+      "Store.e_initial of 9 biomass pools (T04 potential)",
+      "Store.e_nom of 9 biomass pools (T04 potential)",
+      "StorageUnit.inflow of 8 TH reservoirs (national inflow re-shared with the reclassified capacity)",
+      "new StorageUnit TH2 4 hydro existing::D2A (reclassification)"
+     ],
+     "unexpected": []
+    },
+    "no_new_xb_365_24h": {
+     "passed": true,
+     "expected": [
+      "StorageUnit.existing_annual_fixed_om_eur of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.p_nom of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.retained_electric_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_group_capacity_mw of the TH2 4 PHS group (reclassification)",
+      "StorageUnit.source_unit_id of the TH2 4 PHS group (reclassification)",
+      "Link.efficiency3 of 30 methanolisation links (meoh_per_tco2)",
+      "Link.efficiency4 of 30 links (fuel-carbon port, meoh_per_tco2)",
+      "Store.e_initial of 9 biomass pools (T04 potential)",
+      "Store.e_nom of 9 biomass pools (T04 potential)",
+      "StorageUnit.inflow of 8 TH reservoirs (national inflow re-shared with the reclassified capacity)",
+      "new StorageUnit TH2 4 hydro existing::D2A (reclassification)"
+     ],
+     "unexpected": []
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2A_NETWORK_DIFF.json",
+   "note": ""
+  },
+  {
+   "id": "s5.zero_slack",
+   "value": {
+    "v4d2a_F1": {
+     "passed": true,
+     "rows": 705,
+     "forcing": []
+    },
+    "v4d2a_F2": {
+     "passed": true,
+     "rows": 589,
+     "forcing": []
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/ZERO_SLACK_CHECK_D2A.json",
+   "note": ""
+  },
+  {
+   "id": "s6.alarm_lines",
+   "value": {
+    "R1_v4d2a_F1": {
+     "d1_objective_eur": 339292850746.34784,
+     "rhs_lower_bound_eur": 6563164583.498973,
+     "coefficient_first_order_eur": 23472903.481474586,
+     "tolerance_eur": 339292.8507463478,
+     "alarm_line_eur": 6515879483.685278,
+     "pools_eur": 6596504205.468241,
+     "phs_eur": 2879401.6162347463,
+     "inflow_eur": 136608.48590507565,
+     "new_reservoir_eur": -36355632.071407534
+    },
+    "R2_v4d2a_F2": {
+     "d1_objective_eur": 352176720807.95056,
+     "rhs_lower_bound_eur": 6094966989.025405,
+     "coefficient_first_order_eur": 22966602.320535485,
+     "tolerance_eur": 352176.72080795054,
+     "alarm_line_eur": 6048681607.663526,
+     "pools_eur": 6196782957.235804,
+     "phs_eur": 4422960.538917327,
+     "inflow_eur": 148007.14983860453,
+     "new_reservoir_eur": -106386935.8991547
+    }
+   },
+   "unit": "EUR",
+   "status": "EXACT (rule) / VERIFIED (D1 duals) / INFERENCE (completion)",
+   "grade": "-",
+   "source": "evidence/D2A_BOUNDS_PRE.json",
+   "note": "registered before the solves (commit 63651f19)"
+  },
+  {
+   "id": "s6.smoke_runs",
+   "value": {
+    "v4d2a_F1": {
+     "network_sha256": "334904c4d4998dc3409611f103b91a4d00ce7d323b296ada5242fcf9b450fe16",
+     "termination": "optimal",
+     "objective_eur": 348819582511.57465,
+     "objective_lp_eur": 346453104237.3314,
+     "d1_objective_eur": 339292850746.34784,
+     "dV_eur": 9526731765.226807,
+     "rhs_lower_bound_eur": 6563164583.498973,
+     "alarm_line_eur": 6515879483.685278,
+     "above_alarm_line": true,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "V6_label": "ACCEPTED_LAYER2",
+     "C1_accepted": true,
+     "barrier_iterations": 77,
+     "solve_seconds": 201.8187825679779,
+     "peak_rss_gib": 7.282596588134766
+    },
+    "v4d2a_F2": {
+     "network_sha256": "9ec39333ee0519566f1bfa46803d2dde61ceb4e3332825ee31c0092f2b4dec1e",
+     "termination": "optimal",
+     "objective_eur": 361150691045.2904,
+     "objective_lp_eur": 358613535714.9608,
+     "d1_objective_eur": 352176720807.95056,
+     "dV_eur": 8973970237.339844,
+     "rhs_lower_bound_eur": 6094966989.025405,
+     "alarm_line_eur": 6048681607.663526,
+     "above_alarm_line": true,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "V6_label": "ACCEPTED_LAYER2",
+     "C1_accepted": true,
+     "barrier_iterations": 89,
+     "solve_seconds": 171.0793261528015,
+     "peak_rss_gib": 5.717823028564453
+    }
+   },
+   "unit": "EUR",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2A_smoke56.json (SOLVE_RECEIPT / V5_GATES / PRECISION / V6_ACCEPTANCE)",
+   "note": ""
+  },
+  {
+   "id": "s6.criteria",
+   "value": {
+    "v4d2a_F1": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "v4d2a_F2": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "B6_regression_only": {
+     "d2a_eur": 12331108533.71576,
+     "d1_eur": 12883870061.602722,
+     "change_eur": -552761527.8869629
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2A_smoke56.json",
+   "note": ""
+  },
+  {
+   "id": "s7.attrib_runs",
+   "value": {
+    "d4p31_F1": {
+     "network_sha256": "d49e5df08dce7aa19b983e5589a74aa7c4d08ef241b831fd099f1ff91ae0c9cb",
+     "termination": "optimal",
+     "objective_eur": 329853409059.35693,
+     "V6_label": "ACCEPTED_LAYER2",
+     "gates_failed_outside_v31_union": ""
+    },
+    "d4p31_F2": {
+     "network_sha256": "dc589ba93ba5ecefe204c5ef817949453f936f3c1ad7de8e7c8a2772fecafd81",
+     "termination": "optimal",
+     "objective_eur": 342431438654.97406,
+     "V6_label": "ACCEPTED_LAYER2",
+     "gates_failed_outside_v31_union": ""
+    },
+    "d31p4_F1": {
+     "network_sha256": "e01503b06b8ec91108480f62abce9436ccee771357a81da0c6ba1a649a840018",
+     "termination": "optimal",
+     "objective_eur": 362445881245.88605,
+     "V6_label": "ACCEPTED_LAYER2",
+     "gates_failed_outside_v31_union": ""
+    },
+    "d31p4_F2": {
+     "network_sha256": "7bc9f2f42f553bb50f6779b801054f19441957aa92fefa741f937aed053a1649",
+     "termination": "optimal",
+     "objective_eur": 374597076484.48047,
+     "V6_label": "ACCEPTED_LAYER2",
+     "gates_failed_outside_v31_union": ""
+    }
+   },
+   "unit": "EUR",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2A_attrib56.json",
+   "note": ""
+  },
+  {
+   "id": "s7.shapley",
+   "value": {
+    "F1": {
+     "phi_D": -7458968039.435211,
+     "phi_P": 25133504147.093903,
+     "total": 17674536107.65869,
+     "D_first": {
+      "D": -1291637344.559021,
+      "P": 18966173452.217712
+     },
+     "P_first": {
+      "P": 31300834841.970093,
+      "D": -13626298734.311401
+     },
+     "interaction": -12334661389.75238
+    },
+    "F2": {
+     "phi_D": -7327067071.796448,
+     "phi_P": 24838570757.70996,
+     "total": 17511503685.913513,
+     "D_first": {
+      "D": -1207748704.402832,
+      "P": 18719252390.316345
+     },
+     "P_first": {
+      "P": 30957889125.103577,
+      "D": -13446385439.190063
+     },
+     "interaction": -12238636734.787231
+    },
+    "B6": {
+     "phi_D": 131900967.63876343,
+     "phi_P": -294933389.38394165,
+     "total": -163032421.74517822,
+     "D_first": {
+      "D": 83888640.15618896,
+      "P": -246921061.9013672
+     },
+     "P_first": {
+      "P": -342945716.8665161,
+      "D": 179913295.1213379
+     },
+     "interaction": 96024654.96514893
+    }
+   },
+   "unit": "EUR",
+   "status": "VERIFIED (3 corners) / INFERENCE ((D31,P31) approximated)",
+   "grade": "-",
+   "source": "evidence/ATTRIBUTION_56.json; ATTRIBUTION_56.md",
+   "note": ""
+  },
+  {
+   "id": "s7.d31p31_approximation",
+   "value": {
+    "F1": {
+     "trunk_proxy_cost_D1": 1449347508.86,
+     "phs_reclass_lower_bound_terms_D2a": -33339621.96926771,
+     "methanol_coefficient_first_order_D2a": 23472903.481474586
+    },
+    "F2": {
+     "trunk_proxy_cost_D1": 1449345260.81,
+     "phs_reclass_lower_bound_terms_D2a": -101815968.21039876,
+     "methanol_coefficient_first_order_D2a": 22966602.320535485
+    }
+   },
+   "unit": "EUR",
+   "status": "INFERENCE",
+   "grade": "-",
+   "source": "evidence/ATTRIB_INPUTS.json",
+   "note": ""
+  },
+  {
+   "id": "budget.solver_calls",
+   "value": {
+    "section6": 2,
+    "section7": 4,
+    "authorised": 6
+   },
+   "unit": "runs",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "results_project/v4d2a/{smoke56,attrib56}/STATUS.txt",
+   "note": ""
+  }
+ ]
+}
