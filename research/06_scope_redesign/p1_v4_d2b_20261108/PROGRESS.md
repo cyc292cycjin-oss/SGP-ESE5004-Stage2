@@ -17,7 +17,9 @@
 | D2b-7 | 第 7 节：W19 候选刷新（不求解） | 完成：D2a 重排脚本（方法不变）+ 本分支注册表区间（37 对刷新，其中 D2b 新增 27 对）+ 清单覆盖 2 行（VN 海风 alpha −15.1 % / +4.2 %、封存价格年 0.952–1.0）；缓存只读复用 D2a `cache/`；276 行排序，前 30 与 D2a 重合 29、Spearman 0.9995；EV 能效 5 → 2、LNG 6 → 4、海风 alpha 2 → 5（方向翻转）、ID 树干 10 → 22；`W19_CANDIDATES_D2B.csv` 27 项（19 项标 changed_by_d2b） | 与 D2b-6b 同一提交（交付目录整体同步） |
 | D2b-8 | 第 8 节：报告、证据、审阅包、推送 | 完成：`REPORT.md`（第 0 节结论 9 条 + 待决 10 条）、`LEDGER_ENTRY_DRAFT.md`、`EVIDENCE.json`（30 条）、`DOWNLOAD_CANDIDATES.csv`（19 条）；全量 `tests/research` 868 过 / 3 败 / 56 跳过（补齐被忽略的 WACC 输入后 870 过 / 1 既有失败）；审阅包、泄露扫描与推送见 D2b-8b | D2b-8（本行所在提交）、D2b-8b |
 
-续做点：D2b-2（文献子代理 4 个在跑：树干、其余农残、第 4 节 A / B 组；证据 JSON 在会话 scratchpad `lit/`，完成后复制到 `evidence/`）。
+续做点：全部 8 节完成。提交链 `1e07c4ec`（D2b-2/3/4）→ `f6b0c28c`（D2b-4b）→ `5571cb19`（D2b-5a）→ `c7178a6b`（D2b-5b）→ `0b02cfe8`（D2b-5/6a，求解前登记）→ `064e1d46`（D2b-6b/7）→ `4e90ea4b`（D2b-8）→ D2b-8b（审阅包清单 + 本行）；推送 `codex/v4-d2b-20261108` 后停止，没有开 PR，等待审阅。审阅包 `REVIEW_4e90ea4b.zip`（对提交 `4e90ea4b` 的交付目录 + 代码差异 `385bdff0..4e90ea4b`；81 个成员，494,528 字节，SHA256 `5e7625cf14940b4852576b6a3a19cb78b4a69f4acd7c4ee6cb459f33a20546b4`；清单 `evidence/REVIEW_ZIP_MANIFEST_4e90ea4b.txt`；zip 不入库）；泄露扫描目录 0、zip 0 命中。求解器 2 / 2 次。未做：VN 海风系数、EV 车队比值、CO₂ 船运等只登记未替换（按判定规则）；用户下载目录中误下载的 `NWS-E-2006-202.pdf` 未删除（交用户决定）。
+
+（以下为开工时的工作记录）
 
 已做（未提交）：
 - 代码：`v4_common`（`biomass_potential` 新取值 `v4_adjusted_t05` = 新主集，t04 保留；新开关键 `source_band_basis: post_product | s30`，`source_band_shares()`，阈值 1 MWh）、`v4_outputs.write_tables`（产品后重算三带份额，s3_0 值记入 `V4_SWITCHES.json`）、`v4_industry.s7`（t05 文件）、`v4_biomass_potential`（`basis_factors("t05")` 读 `BIOMASS_BASIS_T05.csv`，`low_rule` basis / scale；`main()` 另写 T05 两表）、`baseline.yaml`（两键）。
