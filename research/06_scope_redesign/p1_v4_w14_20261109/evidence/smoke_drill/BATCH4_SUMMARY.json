@@ -1,0 +1,460 @@
+{
+ "script": "scripts_project/b4_batch4.py",
+ "out": "/home/jin/v4w14/smoke_20261108T204757Z/pkg/runs/smoke56_v4",
+ "runs": {
+  "F1": {
+   "rid": "F1",
+   "role": "\u4e00\u4f53\u5316 v4 \u4e3b\u7b97 2920\u00d73h\uff1ac(N)\u3001Owen \u5206\u644a\u3001B6 \u57fa\u51c6",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/v4w14/smoke_20261108T204757Z/pkg/networks/integrated_2920_3h_unsolved.nc",
+   "network_sha256": "86f6d6a0fce2f0e04d12ee7993aee885256fcaadadaeeca308414017738c801d",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 363190038821.0828,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 89,
+   "solve_seconds": 216.65154647827148,
+   "peak_rss_gib": 2.0584793090820312,
+   "solve_peak_rss_gib": 6.072990417480469,
+   "max_mem_used_gb": 5.938768184,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  },
+  "F2": {
+   "rid": "F2",
+   "role": "no_new_xb v4 \u4e3b\u7b97 2920\u00d73h\uff1aB6 = F2 \u2212 F1",
+   "profile": "formal_barrier_1e6_t16",
+   "state": "ended",
+   "network": "/home/jin/v4w14/smoke_20261108T204757Z/pkg/networks/no_new_xb_2920_3h_unsolved.nc",
+   "network_sha256": "24e835f74365f63f6dc2c848f81bb43727e082be6c34f2c3aca0594641b25187",
+   "stop_class": null,
+   "termination": "optimal",
+   "objective": 376143650003.4369,
+   "gurobi_status": "OPTIMAL",
+   "iterations": 80,
+   "solve_seconds": 127.46892762184143,
+   "peak_rss_gib": 1.9183235168457031,
+   "solve_peak_rss_gib": 4.664997100830078,
+   "max_mem_used_gb": 4.470386,
+   "post_solve_errors": [],
+   "c1": {
+    "grade": "layer1_plus_nodal_price_settlement",
+    "a": true,
+    "b": true,
+    "c": true,
+    "reference": "batch",
+    "regrades": 1
+   },
+   "v6": "ACCEPTED_LAYER2",
+   "v6_provisional": "ACCEPTED_LAYER2",
+   "g1": {
+    "a": true,
+    "b": true,
+    "c": true
+   },
+   "g2": {
+    "G2_1": true,
+    "G2_2": true,
+    "G2_3": true
+   },
+   "owen_usable": true,
+   "postproc_errors": []
+  }
+ },
+ "unusable": {},
+ "B6": {
+  "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+  "passed": true,
+  "objective": {
+   "integrated": 363190038821.0828,
+   "no_new_xb": 376143650003.4369
+  },
+  "difference": 12953611182.354065,
+  "relative": 0.0356662072131757,
+  "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+  "b6_bn": 12.953611182354065,
+  "runs": {
+   "integrated": "F1",
+   "disconnected": "F2"
+  },
+  "labels": {
+   "F1": "ACCEPTED_LAYER2",
+   "F2": "ACCEPTED_LAYER2"
+  },
+  "usable": true,
+  "ledger_total_difference_bn": {
+   "BN": 0.21030318827675198,
+   "ID": 1.1457101006118622,
+   "KH": 0.6686859976738486,
+   "LA": 1.036617643344287,
+   "MM": 0.28864019274985075,
+   "MY": 1.3228075201000749,
+   "PH": -0.5400839412079391,
+   "SG": 2.9955946454306166,
+   "TH": 1.6311181092275773,
+   "TL": 0.02334119233729398,
+   "VN": 1.4013365762267456,
+   "ASEAN": 2.7695399575887145
+  },
+  "owen_dual_form_benefit_bn": {
+   "BN": 0.21030320149418366,
+   "ID": 1.1360099042331084,
+   "KH": 0.3476206158130121,
+   "LA": -0.1949733510003136,
+   "MM": 0.3599249334310203,
+   "MY": 1.3325071339781493,
+   "PH": -0.5400839174438495,
+   "SG": 2.995594669134035,
+   "TH": 3.407810057866959,
+   "TL": 0.023341181088629783,
+   "VN": 1.106016287127304,
+   "BUNKER": 2.769539957587967
+  }
+ },
+ "pairs": {
+  "A": [
+   "F1",
+   "F2"
+  ]
+ },
+ "B6_pairs": {
+  "A": {
+   "gate": "B6_INTEGRATED_COST_NOT_ABOVE_DISCONNECTED",
+   "passed": true,
+   "objective": {
+    "integrated": 363190038821.0828,
+    "no_new_xb": 376143650003.4369
+   },
+   "difference": 12953611182.354065,
+   "relative": 0.0356662072131757,
+   "note": "objectives include the fixed-at-1 FOM constants (existing assets, existing cross-border capacity); sunk CAPEX of existing capacity is excluded in both by the PyPSA objective constant",
+   "b6_bn": 12.953611182354065,
+   "runs": {
+    "integrated": "F1",
+    "disconnected": "F2"
+   },
+   "labels": {
+    "F1": "ACCEPTED_LAYER2",
+    "F2": "ACCEPTED_LAYER2"
+   },
+   "usable": true,
+   "ledger_total_difference_bn": {
+    "BN": 0.21030318827675198,
+    "ID": 1.1457101006118622,
+    "KH": 0.6686859976738486,
+    "LA": 1.036617643344287,
+    "MM": 0.28864019274985075,
+    "MY": 1.3228075201000749,
+    "PH": -0.5400839412079391,
+    "SG": 2.9955946454306166,
+    "TH": 1.6311181092275773,
+    "TL": 0.02334119233729398,
+    "VN": 1.4013365762267456,
+    "ASEAN": 2.7695399575887145
+   },
+   "owen_dual_form_benefit_bn": {
+    "BN": 0.21030320149418366,
+    "ID": 1.1360099042331084,
+    "KH": 0.3476206158130121,
+    "LA": -0.1949733510003136,
+    "MM": 0.3599249334310203,
+    "MY": 1.3325071339781493,
+    "PH": -0.5400839174438495,
+    "SG": 2.995594669134035,
+    "TH": 3.407810057866959,
+    "TL": 0.023341181088629783,
+    "VN": 1.106016287127304,
+    "BUNKER": 2.769539957587967
+   }
+  }
+ },
+ "benefit_pairs": {
+  "A": {
+   "computable": true,
+   "b6_bn": 12.953611182354065,
+   "negative_benefit": [
+    "LA",
+    "PH"
+   ],
+   "reason": null
+  }
+ },
+ "pair_comparison": null,
+ "benefit": {
+  "computable": true,
+  "b6_bn": 12.953611182354065,
+  "negative_benefit": [
+   "LA",
+   "PH"
+  ],
+  "reason": null
+ },
+ "batch3_comparison": null,
+ "reference_comparison": {
+  "reference_file": "/home/jin/v4w14/smoke_20261108T204757Z/pkg/REFERENCE_VALUES.json",
+  "source": "V4 W14 make_reference_values_v4.py: committed v3.1 / v4 results - values only",
+  "b6_2920x3h_bn": 12.953611182354065,
+  "objective_2920x3h_eur": {
+   "F1": 363190038821.0828,
+   "F2": 376143650003.4369
+  },
+  "owen_dual_form_alpha_main_bn": {
+   "F1": {
+    "BN": 0.6184539851597449,
+    "ID": 105.71883999678462,
+    "KH": 3.971573418395894,
+    "LA": 0.3477892824064077,
+    "MM": 2.46571435903056,
+    "MY": 36.76663156982408,
+    "PH": 16.136416667156865,
+    "SG": 11.862480026897831,
+    "TH": 40.63951194568444,
+    "TL": 0.35800686598057974,
+    "VN": 58.58018245240918,
+    "BUNKER": 85.72443373186941
+   },
+   "F2": {
+    "BN": 0.8287571866539286,
+    "ID": 106.85484990101773,
+    "KH": 4.319194034208906,
+    "LA": 0.1528159314060941,
+    "MM": 2.82563929246158,
+    "MY": 38.09913870380223,
+    "PH": 15.596332749713017,
+    "SG": 14.858074696031865,
+    "TH": 44.0473220035514,
+    "TL": 0.3813480470692095,
+    "VN": 59.686198739536486,
+    "BUNKER": 88.49397368945738
+   }
+  },
+  "pairs": {
+   "v31_2920x3h": {
+    "label": "v3.1 2920\u00d73h HPC \u4e3b\u7b97\uff08\u7b2c 195 \u9879\uff1bv3.1 \u57fa\u7ebf BASELINE_V31.md\uff0c\u4e3b\u5bf9\u7167\uff09",
+    "runs": {
+     "integrated": "F1",
+     "disconnected": "F2"
+    },
+    "b6_bn": 11.976379452622497,
+    "objective_eur": {
+     "integrated": 305052496175.7703,
+     "disconnected": 317028875628.3928
+    },
+    "objective_difference_bn": {
+     "F1_minus_F1": 58.1375426453125,
+     "F2_minus_F2": 59.114774375044064
+    },
+    "delta_b6_bn": 0.9772317297315674,
+    "owen_benefit_difference_bn": {
+     "BN": 0.15365935691920662,
+     "ID": 0.7717642895630645,
+     "KH": 0.22346152077195738,
+     "LA": -1.0074566833914282,
+     "MM": 0.1020789047730136,
+     "MY": -0.5292480772555275,
+     "PH": -0.5556301162307796,
+     "SG": 0.05660908815065575,
+     "TH": 2.80562947151989,
+     "TL": -0.10245830144764137,
+     "VN": -2.824798064870796,
+     "BUNKER": 1.8836224436323241
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_F1": {
+      "BN": 0.1554655459093613,
+      "ID": 21.638366714701768,
+      "KH": 0.34026765978083945,
+      "LA": 0.3232979708171353,
+      "MM": 0.6108226228529148,
+      "MY": 12.90531477629935,
+      "PH": -0.34626896552350234,
+      "SG": 1.8980451556377258,
+      "TH": 2.0115417494827192,
+      "TL": 0.30813362537525296,
+      "VN": 4.394728616231109,
+      "BUNKER": 13.89786374183493
+     },
+     "F2_minus_F2": {
+      "BN": 0.3091249028285679,
+      "ID": 22.41013100426483,
+      "KH": 0.5637291805527969,
+      "LA": -0.6841587125742931,
+      "MM": 0.7129015276259284,
+      "MY": 12.376066699043824,
+      "PH": -0.901899081754282,
+      "SG": 1.9546542437883816,
+      "TH": 4.817171221002609,
+      "TL": 0.2056753239276116,
+      "VN": 1.5699305513603135,
+      "BUNKER": 15.781486185467255
+     }
+    }
+   },
+   "v4_smoke56_d2c": {
+    "label": "v4 D2c \u672c\u673a 56 \u65f6\u6bb5\u5192\u70df\uff08\u672c\u5305\u7f51\u7edc\u622a\u77ed\u540e\u4e0e\u4e4b\u9010\u7ec4\u4ef6\u76f8\u540c\uff1bHPC \u5192\u70df\u671f\u671b\u503c\u6765\u6e90\uff09",
+    "runs": {
+     "integrated": "v4d2c_F1",
+     "disconnected": "v4d2c_F2"
+    },
+    "b6_bn": 12.953611182354065,
+    "objective_eur": {
+     "integrated": 363190038821.0828,
+     "disconnected": 376143650003.4369
+    },
+    "objective_difference_bn": {
+     "F1_minus_v4d2c_F1": 0.0,
+     "F2_minus_v4d2c_F2": 0.0
+    },
+    "delta_b6_bn": 0.0,
+    "owen_benefit_difference_bn": {
+     "BN": 0.0,
+     "ID": 0.0,
+     "KH": 0.0,
+     "LA": 0.0,
+     "MM": 0.0,
+     "MY": 0.0,
+     "PH": 0.0,
+     "SG": 0.0,
+     "TH": 0.0,
+     "TL": 0.0,
+     "VN": 0.0,
+     "BUNKER": 0.0
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_v4d2c_F1": {
+      "BN": 0.0,
+      "ID": 0.0,
+      "KH": 0.0,
+      "LA": 0.0,
+      "MM": 0.0,
+      "MY": 0.0,
+      "PH": 0.0,
+      "SG": 0.0,
+      "TH": 0.0,
+      "TL": 0.0,
+      "VN": 0.0,
+      "BUNKER": 0.0
+     },
+     "F2_minus_v4d2c_F2": {
+      "BN": 0.0,
+      "ID": 0.0,
+      "KH": 0.0,
+      "LA": 0.0,
+      "MM": 0.0,
+      "MY": 0.0,
+      "PH": 0.0,
+      "SG": 0.0,
+      "TH": 0.0,
+      "TL": 0.0,
+      "VN": 0.0,
+      "BUNKER": 0.0
+     }
+    }
+   },
+   "v31_smoke56": {
+    "label": "v3.1 \u672c\u673a 56 \u65f6\u6bb5\u56de\u5f52\uff08\u7b2c 195 \u9879\u4fee\u6b63\u540e\uff0c\u622a\u77ed\uff09",
+    "runs": {
+     "integrated": "F1-56",
+     "disconnected": "F2-56"
+    },
+    "b6_bn": 12.563125651299073,
+    "objective_eur": {
+     "integrated": 329705565613.54376,
+     "disconnected": 342268691264.84283
+    },
+    "objective_difference_bn": {
+     "F1_minus_F1-56": 33.48447320753906,
+     "F2_minus_F2-56": 33.87495873859405
+    },
+    "delta_b6_bn": 0.39048553105499195,
+    "owen_benefit_difference_bn": {
+     "BN": 0.02660188307268572,
+     "ID": 1.848334298520157,
+     "KH": -0.018589423639543533,
+     "LA": -0.08672855584213182,
+     "MM": 0.061877694897501945,
+     "MY": 0.4628525642649994,
+     "PH": -0.6702015536798687,
+     "SG": 0.2252219092611084,
+     "TH": -0.6652418167351608,
+     "TL": -0.0029707722082172633,
+     "VN": -0.2628907785011368,
+     "BUNKER": -0.5277807417801056
+    },
+    "owen_share_difference_bn": {
+     "F1_minus_F1-56": {
+      "BN": 0.1806063247307781,
+      "ID": 15.627254606714263,
+      "KH": -0.14315820779924107,
+      "LA": -0.034403048612244545,
+      "MM": -0.5177850865180693,
+      "MY": 11.901753594954842,
+      "PH": -1.1412917412926578,
+      "SG": 1.8212124282957916,
+      "TH": -2.267148993384857,
+      "TL": 0.006567778616841197,
+      "VN": -1.598802406638199,
+      "BUNKER": 9.64966875863475
+     },
+     "F2_minus_F2-56": {
+      "BN": 0.20720820780346383,
+      "ID": 17.47558890523442,
+      "KH": -0.1617476314387846,
+      "LA": -0.12113160445437637,
+      "MM": -0.4559073916205673,
+      "MY": 12.364606159219841,
+      "PH": -1.8114932949725266,
+      "SG": 2.0464343375569,
+      "TH": -2.932390810120018,
+      "TL": 0.003597006408623934,
+      "VN": -1.8616931851393357,
+      "BUNKER": 9.121888016854644
+     }
+    }
+   }
+  },
+  "note": "description only: resolution (2920x3h vs 365x24h) and demand version (v2 vs v1) effects; no judgement, no threshold"
+ },
+ "p1": null,
+ "projection": {
+  "F1": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 683.0,
+   "seconds_per_iteration_11_20": 1.6
+  },
+  "F2": {
+   "ready": true,
+   "exceeded": false,
+   "projected_total_s": 421.0,
+   "seconds_per_iteration_11_20": 1.2
+  }
+ },
+ "stop_not_accepted": [],
+ "stop_safe": null,
+ "postproc_errors": [],
+ "solver_runs": 0,
+ "written_utc": "2026-11-08T21:13:50Z"
+}

@@ -1,0 +1,10 @@
+AFTER_SMOKE_DRY_RUN:shell=GNU bash, version 5.3.9(1)-release (x86_:exit=0:qsub_lines=3:notes=0:stub_called=0:runs_batch6=no
+DRY-RUN: qsub pbs/hpr4_f1.pbs
+DRY-RUN: qsub -W depend=after:F1_JOBID pbs/hpr4_f2.pbs
+DRY-RUN: qsub -W depend=afterany:F1_JOBID:F2_JOBID pbs/hpr4_batch.pbs
+DRY_RUN_OK: nothing submitted (bash 5.3.9(1)-release; 3 jobs; 0 check(s) above would refuse a real submission)
+AFTER_SMOKE_DRY_RUN:shell=GNU bash, version 4.2.0(2)-release (x86_:exit=0:qsub_lines=3:notes=0:stub_called=0:runs_batch6=no
+DRY-RUN: qsub pbs/hpr4_f1.pbs
+DRY-RUN: qsub -W depend=after:F1_JOBID pbs/hpr4_f2.pbs
+DRY-RUN: qsub -W depend=afterany:F1_JOBID:F2_JOBID pbs/hpr4_batch.pbs
+DRY_RUN_OK: nothing submitted (bash 4.2.0(2)-release; 3 jobs; 0 check(s) above would refuse a real submission)

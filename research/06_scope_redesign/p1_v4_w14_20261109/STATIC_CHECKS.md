@@ -54,6 +54,14 @@
 
 **结论（第 2.3 条）：** 56 时段网络与 D2c 冒烟网络逐组件相同（元数据只差构建路径），**HPC 冒烟期望值取 D2c 冒烟的目标值**：F1 363,190,038,821.0828、F2 376,143,650,003.4369 EUR（含常数项；迭代 89 / 80；`SMOKE56_D2C.md` 第 2 节）。第 3 节演练仍按授权求解 2 次，以在包的解压副本中原样验证冒烟作业体（`DRILL_REPORT.md`）。
 
-## 4. 在包的代码提交上重建核对（第 2.1 条；包提交之后补入）
+## 4. 在包的代码提交上重建核对（第 2.1 条；VERIFIED；包提交之后补入）
 
-（见 `DRILL_REPORT.md` 与本节后续补记。）
+**为什么需要这一节：** 指令要求"在包的代码提交上构建"。网络 SHA256 与构建提交必须登记在定义文件里（`registered_sha`、`build_commit`；`base-check` 核对构建回执的 `code_sha`），而定义文件本身属于包的代码提交，所以登记所用的构建只能在更早的提交上做（v3 先例：构建 `a1ef782b`、包 `d3b9a3bc`）。包里放的是构建提交 `59b128ea` 的网络与回执；下面证明它们与"在包的代码提交上构建"的结果逐字节相同。
+
+| 重建所在提交 | 规则 / 路径 | F1 2920×3h | F2 2920×3h | F1 365×24h | F2 365×24h | 回执差异 |
+|---|---|---|---|---|---|---|
+| `12083cf5`（第二次打包的提交） | `scripts/build_w14.sh rebuild_pkg`，同一 worktree 路径 | **逐字节相同** `86f6d6a0…` | **逐字节相同** `24e835f7…` | 相同 `10759e04…` | 相同 `08ce15f9…` | 只有 `build_seconds`、`code_sha`（`59b128ea` → `12083cf5`）与输出路径 |
+| **`26c2e47d`（包的 `COMMIT`）** | `scripts/build_w14.sh rebuild_pkg_26c2e47d` | **逐字节相同** | **逐字节相同** | 相同 | 相同 | 同上 |
+
+- 三个提交在 `research/` 之外逐文件相同（`git diff --name-only 59b128ea 26c2e47d -- . ':!research/'` 为空，打包脚本出包前也核对）；包内 `networks/integrated_2920_3h_unsolved.nc` 与 `builds/main` 的文件逐字节相同（`logs/final_drill.txt`）。
+- 日志：`logs/rebuild_and_dry_12083cf5.txt`、`logs/build_rebuild_pkg.txt`、`logs/final_drill.txt`、`logs/build_rebuild_pkg_26c2e47d.txt`。
