@@ -14,6 +14,6 @@
 | D2a-5 | 第 5 节：重建 56 时段网络、静态检查、检查点 | 完成：一体化 `334904c4…`、`no_new_xb` `9ec39333…`；C1–C6、C10 通过；C8 对 D1 只含预期差异（9 个池、`TH2 4` 拆分、泰国来水重分配、30 条甲醇化链路系数）；零松弛门通过；检查点 0 差 | `63651f19` |
 | D2a-6 | 第 6 节：登记报警线后 2 次冒烟 | 完成：登记（下界 F1 +6,563 M / F2 +6,095 M；报警线 +6,516 / +6,049 M EUR）；2 次求解 optimal、ACCEPTED_LAYER2、失败门在 v3.1 并集内、ΔV +9,526.7 / +8,974.0 M 高于报警线（`SMOKE56_D2A.md` 第 2 节、`tables/D2A_SMOKE56_RESULTS.csv`、`evidence/D2A_smoke56.json`）；56 时段 B6 12.3311 bn（D1 12.8839） | 登记 `63651f19`；结果随 D2a-6b/7b 提交 |
 | D2a-7 | 第 7 节：成本上升归因（至多 4 次求解） | 完成：角点表集与网络（`d4p31`、`d31p4`）；4 次求解全部 optimal、ACCEPTED_LAYER2、失败门在并集内（`tables/D2A_ATTRIB56_RESULTS.csv`、`evidence/D2A_attrib56.json`）；两因素 Shapley（`ATTRIBUTION_56.md`）：F1 总变化 +17.67 bn = D −7.46 + P +25.13（交互 −12.33）；(D31,P31) 用 v3.1 冒烟 + 其他改动近似（INFERENCE） | 表集 `8e94bbe5`；结果随 D2a-6b/7b 提交 |
-| D2a-8 | 第 8 节：报告、证据、审阅包、推送 | 待做 | |
+| D2a-8 | 第 8 节：报告、证据、审阅包、推送 | 完成：`REPORT.md`（第 0 节结论 10 条 + 待决 8 条）、`LEDGER_ENTRY_DRAFT.md`（W18）、`EVIDENCE.json`（29 条）；17 个 v4 测试文件 86 过 0 败（3 个 D2a 测试收窄到所述开关集，代码不改）；审阅包 `REVIEW_15533817.zip`（逐成员 SHA256 + CRC32，清单 `evidence/REVIEW_ZIP_MANIFEST_15533817.txt`）；泄露扫描 0 命中；推送 `codex/v4-d2a-20261107` | `15533817`（D2a-8）、清单提交 D2a-8b 见下行 |
 
-续做点：第 6、7 节求解与评估已完成（求解器 6 / 6 次用尽）→ 提交 D2a-6b/7b → 第 8 节：`REPORT.md` 第 7 节与第 0 节、`scripts/d2a_evidence.py` → `EVIDENCE.json`、`scripts/d2a_review_zip.py <提交>`、`scripts/leak_scan.sh`、最终提交 D2a-8 → 推送 `codex/v4-d2a-20261107`（不开 PR，推送后停止）。
+续做点：全部 8 节完成。提交链 `f90bba46`（D2a-2）→ `50dfdcf7`（D2a-3）→ `8e94bbe5`（D2a-7a）→ `63651f19`（D2a-6a）→ `e9339846`（D2a-6b/7b）→ `15533817`（D2a-8）→ D2a-8b（审阅包清单 + 本行）；推送 `codex/v4-d2a-20261107` 后停止，没有开 PR，等待审阅。未做：全量 `tests/research`（≈ 33 分钟）；(D31,P31) 角未求解（额度）；`phs_case: asean` 网络未构建（不在指令要求内）。
