@@ -19,6 +19,9 @@ echo "DRY:start:$(date -u +%FT%TZ):package=$SRC:commit=$(cat COMMIT):shell=$(bas
 echo "UNPACKED_COPY_SHA256SUMS:not_ok=$(sha256sum -c SHA256SUMS 2>/dev/null | grep -vc ': OK$'):files=$(wc -l < SHA256SUMS):count=$(find . -type f | wc -l)" >> $R
 env -u GRB_LICENSE_FILE PY=$PY PREFLIGHT_ONLY=guards,sha,networks,env,profile,code,tools bash preflight.sh > $D/preflight.txt 2>&1; echo "PREFLIGHT:exit=$?:$(tail -1 $D/preflight.txt)" >> $R
 grep -E "files OK|limits of the package|all_equal|v4 network metadata|^F[12] |ENV|FAILED|DIFFER|MISSING|unbound|syntax error|NOTE" $D/preflight.txt | head -20 >> $R
+lic=$D/fake_lic; echo "placeholder" > $lic; chmod 600 $lic   # a placeholder path for the existence / mode checks only (never a licence)
+GRB_LICENSE_FILE=$lic PY=$PY bash hpc/hpr_preflight_login.sh > $D/login_preflight.txt 2>&1; echo "LOGIN_PREFLIGHT:exit=$?:$(tail -1 $D/login_preflight.txt)" >> $R
+grep -E "licence file|files OK|key packages|limits of the package|v4 network metadata|_unsolved.nc: switch|PREFLIGHT OK|PREFLIGHT FAILED|HPR_PREFLIGHT_LOGIN" $D/login_preflight.txt | cut -c1-260 >> $R
 T0=$(date +%s)
 env -u GRB_LICENSE_FILE PY=$PY BUILD_ONLY=1 TRUNCATE=56 ALLOW_UNREGISTERED=1 RUN_DIR=$D/runs/build_only_all bash run_batch4.sh > $D/build_only.out 2>&1; rc=$?
 echo "BUILD_ONLY_ALL:exit=$rc:$(( $(date +%s) - T0 ))s" >> $R
@@ -32,7 +35,6 @@ env -u GRB_LICENSE_FILE PBS_O_WORKDIR=$D/pkg PBS_JOBID=local.dry JOB_KEY=build_o
 echo "JOB_BODY_BUILD_ONLY_F1:exit=$rc:$(( $(date +%s) - T0 ))s:run_dir=$(ls -d $D/jobroot/runs/* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')" >> $R
 cat $D/jobroot/runs/build_only_f1_v4/BUILD_ONLY_STATUS.txt 2>/dev/null | cut -c1-200 >> $R
 grep -E "unbound|syntax error|command not found" $D/job_build_only.out | head -5 >> $R
-lic=$D/fake_lic; echo "placeholder" > $lic; chmod 600 $lic
 env -u GRB_LICENSE_FILE PBS_O_WORKDIR=$D/pkg PBS_JOBID=local.dry JOB_KEY=F1 JOB_MODE=formal JOB_RID=F1 JOB_NCPUS=48 JOB_MEM_GB=300 JOB_WALLTIME=96:00:00 PY=$PY BUILD_ONLY=1 \
   HPR_LOCAL_DRILL=1 HPR_RUN_ROOT=$D/jobroot2 HPR_AUTH="dry run refusal check" GRB_LICENSE_FILE=$lic bash hpc/hpr_job.sh > $D/job_formal_hook.out 2>&1; rc=$?
 echo "JOB_BODY_FORMAL_F1_WITH_HOOK_REFUSED:exit=$rc:$(head -1 $D/job_formal_hook.out | cut -c1-200):started=$( [ -e $D/jobroot2/runs/batch6/F1 ] && echo yes || echo no):runs_created=$(ls $D/jobroot2/runs 2>/dev/null | tr '\n' ' ')" >> $R
