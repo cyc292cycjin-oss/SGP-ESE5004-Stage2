@@ -1,0 +1,154 @@
+{
+ "name": "V4 2920x3h formal batch on NUS Atlas (PBS Pro): F1 / F2 v4 main pair (decisions 213, 215, 216, 221, 222, 223; V4 W14)",
+ "note": "V4 W14 (V4_W14_INSTRUCTION.md v2): the D1 draft research/06_scope_redesign/p1_v4_d1_20261107/batch_def/BATCH_DEF_2920x3h_v4hpc.json updated and REGISTERED (decision 222): only the v4 main pair F1 integrated / F2 no_new_xb plus the batch job (afterany:F1:F2), the smoke, the install and the build-only jobs; profile formal_barrier_1e6_t16 (as v3.1); TimeLimit 259,200 s (72 h); early projection stop 0.8 x TimeLimit with reference iterations integrated 350, no_new_xb 300; process-1 build timeout 7,200 s; walltime 96 h; F1 48 cores / 300 GB, F2 48 cores / 250 GB, batch 12 cores / 120 GB; HPC folder /hpctmp/<user>/hpr4, run folders runs/batch6 (formal), runs/smoke56_v4 (smoke). Networks: the v4 main build of W14 (build commit below, PYTHONHASHSEED=0; network meta switch set SHA256 and table folder in v4_meta, checked by the package preflight); smoke expectation = the D2c local 56-snapshot smoke R1 / R2 (SMOKE56_D2C.md section 2; the 56-snapshot networks cut from these networks are component-identical to the D2c smoke networks, W14 STATIC_CHECKS.md). RUN_PLAN_HPC_V4.md is the registered plan.",
+ "runs": {
+  "F1": {
+   "scenario": "integrated",
+   "base": "integrated_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "一体化 v4 主算 2920×3h：c(N)、Owen 分摊、B6 基准",
+   "iterations_reference": 350,
+   "pair": "A"
+  },
+  "F2": {
+   "scenario": "no_new_xb",
+   "base": "no_new_xb_2920_3h",
+   "set": "",
+   "profile": "formal_barrier_1e6_t16",
+   "costs": "integrated",
+   "role": "no_new_xb v4 主算 2920×3h：B6 = F2 − F1",
+   "iterations_reference": 300,
+   "pair": "A"
+  }
+ },
+ "registered_sha": {
+  "integrated_2920_3h_unsolved.nc": "86f6d6a0fce2f0e04d12ee7993aee885256fcaadadaeeca308414017738c801d",
+  "no_new_xb_2920_3h_unsolved.nc": "24e835f74365f63f6dc2c848f81bb43727e082be6c34f2c3aca0594641b25187"
+ },
+ "registered_bytes": {
+  "integrated_2920_3h_unsolved.nc": 82749911,
+  "no_new_xb_2920_3h_unsolved.nc": 82112443
+ },
+ "build_commit": "59b128ea047de600adbd2a54e6e84b48a1544fe5",
+ "v4_meta": {
+  "switch_sha256": "d89ccbf47b0002e65246ce75ba06158f76c340f5091127f6658eec06ed727a62",
+  "tables_dir": "research_inputs/industry_v4/out_ras",
+  "main_set": true,
+  "build_overrides": {
+   "integrated_2920_3h_unsolved.nc": ["demand.v4.enabled=true"],
+   "no_new_xb_2920_3h_unsolved.nc": ["demand.v4.enabled=true", "cross_border.stock_mode=no_new_xb"]
+  },
+  "research_config_sha256": {
+   "integrated_2920_3h_unsolved.nc": "6db27bebc196b400ad0e2f408b702d45040782904795beeac0845764a86096ca",
+   "no_new_xb_2920_3h_unsolved.nc": "78cb4d7c126b1d17995431b95d12206ade217387f7ace13f7bab90280b1823d2"
+  }
+ },
+ "limits_status": "REGISTERED",
+ "limits": {
+  "time_limit_s": 259200,
+  "wall_margin_s": 7200,
+  "licence_gap_s": 330,
+  "wait_start_max_s": 7200,
+  "build_timeout_s": 7200,
+  "assign_timeout_s": 32400,
+  "post_timeout_s": 10800,
+  "pack_timeout_s": 7200
+ },
+ "limits_basis": {
+  "time_limit_s": "decision 222 (HPC_RUNTIME_FACTS.md 3: 72 h = max(72 h, 2 U'), U' = 10.9 h x 1.5 x 1.5 x r = 24.5 h x r; r = v4 / v3.1 LP non-zeros = 1.0005 on the 56-snapshot LPs, < 1.47)",
+  "build_timeout_s": "decision 222 (HPC_RUNTIME_FACTS.md 3: F4 process 1 used 3,414 s = 63 % of 5,400 s)",
+  "iterations_reference": "decision 222: integrated 350, no_new_xb 300 (v3.1 F4 reached 218)",
+  "walltime": "decision 222: 330 + 7,200 + (259,200 + 7,200) + 32,400 + 2 x 3,900 + 1,800 = 315,930 s (F1); F2 + 2 x 7,200 (wait for F1's Gurobi start and the start lock) = 330,330 s; 96 h = 345,600 s",
+  "memory": "decision 222: unchanged from v3.1 (300 / 250 GB); v3.1 RSS <= 116.4 GiB, v4 LP the same size (r = 1.0005)"
+ },
+ "hpc_jobs": {
+  "F1": {
+   "name": "hpr4_f1",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 300,
+   "walltime": "96:00:00",
+   "mode": "formal",
+   "rid": "F1",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "F2": {
+   "name": "hpr4_f2",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 250,
+   "walltime": "96:00:00",
+   "mode": "formal",
+   "rid": "F2",
+   "depends": "after:F1",
+   "wait_start_of": "F1"
+  },
+  "batch": {
+   "name": "hpr4_batch",
+   "queue": "parallel",
+   "ncpus": 12,
+   "mem_gb": 120,
+   "walltime": "48:00:00",
+   "mode": "batch",
+   "rid": "batch",
+   "depends": "afterany:F1:F2",
+   "wait_start_of": ""
+  },
+  "smoke56": {
+   "name": "hpr4_smoke56",
+   "queue": "parallel",
+   "ncpus": 17,
+   "mem_gb": 32,
+   "walltime": "04:00:00",
+   "mode": "smoke56",
+   "rid": "all",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "build_only_f1": {
+   "name": "hpr4_build_only_f1",
+   "queue": "parallel",
+   "ncpus": 48,
+   "mem_gb": 300,
+   "walltime": "03:00:00",
+   "mode": "build_only",
+   "rid": "F1",
+   "depends": "",
+   "wait_start_of": ""
+  },
+  "install": {
+   "name": "hpr4_install",
+   "queue": "serial",
+   "ncpus": 1,
+   "mem_gb": 8,
+   "walltime": "02:00:00",
+   "mode": "install",
+   "rid": "",
+   "depends": "",
+   "wait_start_of": ""
+  }
+ },
+ "high_peak_gib": {
+  "F1": 208,
+  "F2": 194
+ },
+ "smoke_expected": {
+  "note": "the D2c local 56-snapshot smoke R1 v4d2c_F1 / R2 v4d2c_F2 (SMOKE56_D2C.md section 2, build 8d05c2da, networks db33f84e / f03aab19; objective incl. the constant term, barrier iterations); the W14 networks cut to 56 snapshots by the same rule are component-identical to them (W14 STATIC_CHECKS.md, T56); the HPC smoke job compares within a relative 1e-6 (cross-machine)",
+  "objective": {
+   "F1": 363190038821.0828,
+   "F2": 376143650003.4369
+  },
+  "iterations": {
+   "F1": 89,
+   "F2": 80
+  }
+ },
+ "run_dirs": {
+  "formal": "runs/batch6",
+  "smoke56": "runs/smoke56_v4",
+  "build_only": "runs/build_only_f1_v4"
+ }
+}
