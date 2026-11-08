@@ -170,7 +170,7 @@ def main():
     r = new_rows(calc)
     out = REG_DIR / "fragments" / "v4_d2b.csv"
     r.write(out)
-    base, _ = DR.assemble([c for c in DR.CORRECTIONS if c != "v4_d2b_corrections"])
+    base, _ = DR.assemble(DR.CORRECTIONS[:DR.CORRECTIONS.index("v4_d2b_corrections")])   # V4 D2c: the corrections before this one only (later ones, e.g. v4_d2c, build on it)
     corr = corrections(base, calc)
     corr.sort_values("param_id").to_csv(REG_DIR / "fragments" / "v4_d2b_corrections.csv", index=False, lineterminator="\n")
     print(out, len(r.rows), "rows; corrections", len(corr))

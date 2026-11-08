@@ -13,8 +13,10 @@ Every v4 change sits behind a switch of research.demand (configs/research/baseli
                                      2010-2017 mean, (b) item 33.29 TWh; sensitivity, ID 2050 T_v2 +36.89 TWh) | purchased (I2 main)
   research.demand.v4.biomass_potential  v3 (v3.1 table) | v4_adjusted (W08: F3 bagasse R2, F4 in-mill self-use) | v4_adjusted_t04 (V4 D2a, T04: the W08 adjustments plus
                                      the palm-residue basis correction - EFB and fibre energy = wet mass x (1 - moisture) x LHV_dry instead of wet mass x 15 GJ/t,
-                                     research_inputs/biomass_v5/PALM_RESIDUE_BASIS_T04.csv; switch alternative) | v4_adjusted_t05 (V4 D2b main, decision 221: the energy
-                                     basis audit of every category, research_inputs/biomass_v5/BIOMASS_BASIS_T05.csv - T04 plus the categories judged INCONSISTENT there)
+                                     research_inputs/biomass_v5/PALM_RESIDUE_BASIS_T04.csv; switch alternative) | v4_adjusted_t05 (V4 D2b, decision 221: the energy
+                                     basis audit of every category, research_inputs/biomass_v5/BIOMASS_BASIS_T05.csv - T04 plus the categories judged INCONSISTENT there;
+                                     since D2c the high-sensitivity switch value of the trunk) | v4_adjusted_t06 (V4 D2c main, decision 223: T05 with the oil palm trunk on
+                                     the measured trunk dry mass per palm x LHV_dry, research_inputs/biomass_v5/BIOMASS_BASIS_T06.csv; only the five trunk pools differ)
   research.demand.v4.source_band_basis  V4 D2b (section 3, Fable F-02 side note): source temperature band shares of the fixed industrial biomass (the bands of the
                                      overflow useful heat) - post_product (v4 main: high = cement-kiln biomass / T_v2 biomass after the product vectors, the rest split at
                                      200 C with the s3_0 medium_a_fraction) | s30 (D2a and earlier: the s3_0 shares computed before the product vectors)
@@ -62,11 +64,11 @@ V31 = dict(enabled=False, base="v3_1", residue_boundary=False, id_paper_fuelwood
            industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero", meoh_per_tco2="pypsa_eur", source_band_basis="s30",
            lng_regas_adder="m08a")
 V4_MAIN = dict(enabled=True, base="sdmx_2019", residue_boundary=True, id_paper_fuelwood="residue", household_gasoline="id_to_road", rail_parent="children_only",
-               captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted_t05", gas_caps="marketed",
+               captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted_t06", gas_caps="marketed",
                industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy", meoh_per_tco2="stoichiometric", source_band_basis="post_product",
                lng_regas_adder="asean_tariffs")
 SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "purchased", "residue_literal"), household_gasoline=("none", "id_to_road"),
-                     rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted", "v4_adjusted_t04", "v4_adjusted_t05"), gas_caps=("gross", "marketed"),
+                     rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted", "v4_adjusted_t04", "v4_adjusted_t05", "v4_adjusted_t06"), gas_caps=("gross", "marketed"),
                      industry_curves=("flat", "g5_main", "all_flat"), hvc_basis=("b", "a"), missing_cost_rule=("zero", "proxy"),
                      meoh_per_tco2=("pypsa_eur", "stoichiometric"), source_band_basis=("s30", "post_product"), lng_regas_adder=("m08a", "asean_tariffs"))
 MEOH_STOICH_ROW = "ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric"   # V4 D2a: registry row of the stoichiometric value (v4_d1_registry.py)
@@ -74,7 +76,8 @@ LNG_REGAS_ROW = "v4_lng_regas_adder_asean_tariffs"   # V4 D2b (section 4.1): reg
 # research.demand.v4.biomass_potential -> potential table of the build (None = the v3.1 table BIOMASS_POTENTIAL_2050.csv)
 BIOMASS_POTENTIAL_FILES = {"v3": None, "v4_adjusted": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv",
                            "v4_adjusted_t04": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv",   # V4 D2a (T04, decision 220): switch alternative
-                           "v4_adjusted_t05": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv"}   # V4 D2b (T05, decision 221): v4 main
+                           "v4_adjusted_t05": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv",   # V4 D2b (T05, decision 221): high-sensitivity switch value since D2c
+                           "v4_adjusted_t06": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T06.csv"}   # V4 D2c (T06, decision 223): v4 main
 
 
 def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:

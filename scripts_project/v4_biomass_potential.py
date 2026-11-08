@@ -19,6 +19,9 @@ the in-mill self-use of the residues removed from demand (rules moved from work/
 Writes research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv (format of BIOMASS_POTENTIAL_2050.csv, potential_main_mwh adjusted; W08 basis, the switch
 alternative v4_adjusted) and BIOMASS_POTENTIAL_ADJ_V4.csv (country x category with the rule); BIOMASS_POTENTIAL_2050_V4_T04.csv / BIOMASS_POTENTIAL_ADJ_V4_T04.csv
 (T04 basis, v4 main). Nothing is solved.
+  V4 D2b: BIOMASS_POTENTIAL_2050_V4_T05.csv / BIOMASS_POTENTIAL_ADJ_V4_T05.csv (T05: every category audited; trunk fresh mass x 15 GJ/t -> dry matter x LHV_dry).
+  V4 D2c (decision 223): BIOMASS_POTENTIAL_2050_V4_T06.csv / BIOMASS_POTENTIAL_ADJ_V4_T06.csv (T06 = v4 main: T05 with the trunk on the measured trunk dry mass
+  per palm, BIOMASS_BASIS_T06.csv); T05 stays as the high-sensitivity switch value, T04 / W08 / v3 as alternatives (their files unchanged).
 """
 from __future__ import annotations
 
@@ -41,10 +44,13 @@ ADJ = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4.csv"
 OUT_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T04.csv"   # V4 D2a (T04, decision 220): research.demand.v4.biomass_potential = v4_adjusted_t04 (v4 main)
 ADJ_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T04.csv"
 BASIS_T04 = BIOMASS_DIR / "PALM_RESIDUE_BASIS_T04.csv"   # V4 D2a: moisture / LHV basis of the palm residues (evidence/T04_LITERATURE.json of the D2a delivery)
-OUT_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T05.csv"   # V4 D2b (T05, decision 221): research.demand.v4.biomass_potential = v4_adjusted_t05 (v4 main)
+OUT_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T05.csv"   # V4 D2b (T05, decision 221): research.demand.v4.biomass_potential = v4_adjusted_t05 (high-sensitivity switch value since D2c)
 ADJ_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T05.csv"
 BASIS_T05 = BIOMASS_DIR / "BIOMASS_BASIS_T05.csv"   # V4 D2b: mass / heating-value basis audit of every category (BIOMASS_BASIS_AUDIT.csv of the D2b delivery)
-BASES = ("w08", "t04", "t05")
+OUT_T06 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T06.csv"   # V4 D2c (T06, decision 223): research.demand.v4.biomass_potential = v4_adjusted_t06 (v4 main)
+ADJ_T06 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T06.csv"
+BASIS_T06 = BIOMASS_DIR / "BIOMASS_BASIS_T06.csv"   # V4 D2c: T05 with the oil palm trunk row on the measured trunk dry mass per palm (TRUNK_DRY_MASS.csv of the D2c delivery)
+BASES = ("w08", "t04", "t05", "t06")
 SELF_USE = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"   # V4 D1 (decision 214 (a), T03): per country fibre / PKS low / mid / high, grades, verdicts, sources
 
 
@@ -71,7 +77,9 @@ def basis_factors(basis: str = "w08") -> dict:
     T05: the rows of BIOMASS_BASIS_T05.csv with applied True; factor = dry_matter_per_reported_t x LHV_dry / lhv_table (dry_matter = 1 - moisture of the
     reported mass, lhv_table = the GJ/t of the table row, 15 or 9.14 GJ/m3); the T04 palm rows are carried over unchanged (same factors). low_rule:
     scale (the table's low / high variants are collection or residue-factor variants: x factor) | basis (the table's low variant is itself an energy-basis
-    variant, e.g. the trunk 'dry matter 0.2': low = main x factor_low, high x factor_mid)."""
+    variant, e.g. the trunk 'dry matter 0.2': low = main x factor_low, high x factor_mid).
+    T06 (V4 D2c, decision 223): the rows of BIOMASS_BASIS_T06.csv, same rule as T05; only the oil_palm_trunk row differs from T05 (dry matter per reported t =
+    measured trunk dry mass per palm / 2 t per palm)."""
     if basis not in BASES:
         raise ValueError(f"biomass energy basis {basis} not in {BASES}")
     if basis == "w08":
@@ -87,18 +95,30 @@ def basis_factors(basis: str = "w08") -> dict:
                 raise ValueError(f"PALM_RESIDUE_BASIS_T04.csv {r.category}: factor_mid {r.factor_mid} != (1 - {r.moisture_ar_mid}) x {r.lhv_dry_gj_t_mid} / 15 = {f}")
             out[r.category] = (f, 15.0 * f, f"F5 T04 basis: (1 - {float(r.moisture_ar_mid):.2f}) x {float(r.lhv_dry_gj_t_mid):g} GJ/t dry = {15.0 * f:.3f} GJ per wet t instead of 15 (x {f:.4f})", "scale", None)
         return out
-    t = pd.read_csv(BASIS_T05, keep_default_na=False)
+    path = BASIS_T05 if basis == "t05" else BASIS_T06
+    new6 = t06_changed() if basis == "t06" else set()
+    t = pd.read_csv(path, keep_default_na=False)
     out = {}
     for r in t.itertuples():
         if str(r.applied) != "True":
             continue
+        tag = "T06" if r.category in new6 else "T05"   # V4 D2c: rows carried over unchanged from T05 keep the T05 text (the T06 file = T05 except the trunk rows)
         dm, lhv, tab = float(r.dry_matter_mid), float(r.lhv_dry_gj_t_mid), float(r.lhv_table_gj_t)
         f = dm * lhv / tab
         if abs(f - float(r.factor_mid)) > 1e-9:
-            raise ValueError(f"BIOMASS_BASIS_T05.csv {r.category}: factor_mid {r.factor_mid} != {dm} x {lhv} / {tab} = {f}")
-        out[r.category] = (f, tab * f, f"F5 T05 basis: {dm:.3f} dry matter per reported t x {lhv:g} GJ/t dry = {tab * f:.3f} GJ per reported t instead of {tab:g} (x {f:.4f})",
+            raise ValueError(f"{path.name} {r.category}: factor_mid {r.factor_mid} != {dm} x {lhv} / {tab} = {f}")
+        out[r.category] = (f, tab * f, f"F5 {tag} basis: {dm:.3f} dry matter per reported t x {lhv:g} GJ/t dry = {tab * f:.3f} GJ per reported t instead of {tab:g} (x {f:.4f})",
                            str(r.low_rule), float(r.factor_low))
     return out
+
+
+def t06_changed() -> set:
+    """V4 D2c: categories whose BIOMASS_BASIS_T06.csv row differs from BIOMASS_BASIS_T05.csv (decision 223: only the oil palm trunk); every other row is the T05 row."""
+    a = pd.read_csv(BASIS_T05, dtype=str, keep_default_na=False).set_index("category")
+    b = pd.read_csv(BASIS_T06, dtype=str, keep_default_na=False).set_index("category")
+    if set(a.index) != set(b.index) or list(a.columns) != list(b.columns):
+        raise ValueError("BIOMASS_BASIS_T06.csv must hold the categories and columns of BIOMASS_BASIS_T05.csv")
+    return {k for k in b.index if not a.loc[k].equals(b.loc[k])}
 
 
 def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid", basis: str = "w08") -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -107,6 +127,7 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
     applied to the v3 potential before the F3 / F4 deductions (EFB, fibre; PKS kept; trunk undetermined, kept)."""
     su = self_use(source, level)
     bf = basis_factors(basis)
+    new6 = t06_changed() if basis == "t06" else set()
     bp = pd.read_csv(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
     sol = bp[bp.feedstock_group != "biogas"].copy()
     over = pd.read_csv(BIOMASS_DIR / "W12_BAGASSE_SUPPLY_OVERESTIMATE.csv").set_index("country")
@@ -136,7 +157,12 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
                         adj.loc[m, col] = pd.to_numeric(adj.loc[m, col], errors="coerce") * f
                 pot[k] = pot[k] * f
                 adj.loc[m, "lhv_gj_per_t"] = gj
-                tag, tab = ("V4 D2a T04", "PALM_RESIDUE_BASIS_T04.csv") if basis == "t04" else ("V4 D2b T05", "BIOMASS_BASIS_T05.csv")
+                if basis == "t04":
+                    tag, tab = ("V4 D2a T04", "PALM_RESIDUE_BASIS_T04.csv")
+                elif basis == "t06" and k in new6:   # V4 D2c: only the rows that differ from T05 cite T06; the rest stay byte-identical to the T05 output
+                    tag, tab = ("V4 D2c T06", "BIOMASS_BASIS_T06.csv")
+                else:
+                    tag, tab = ("V4 D2b T05", "BIOMASS_BASIS_T05.csv")
                 adj.loc[m, "potential_method"] = adj.loc[m, "potential_method"].astype(str) + f" | {tag}: {txt} ({tab})"
         if "sugarcane_residues" in pot:
             o = over.loc[cc] if cc in over.index else None
@@ -201,10 +227,14 @@ def main():
     adj4.to_csv(OUT_T04, index=False, lineterminator="\n")
     tab4.to_csv(ADJ_T04, index=False, float_format="%.6f", lineterminator="\n")
     print(tab4[tab4.category == "TOTAL solid"].round(2).to_string())
-    adj5, tab5 = adjust(basis="t05")   # V4 D2b (T05, decision 221): the v4 main potential
+    adj5, tab5 = adjust(basis="t05")   # V4 D2b (T05, decision 221): high-sensitivity switch value since D2c (decision 223)
     adj5.to_csv(OUT_T05, index=False, lineterminator="\n")
     tab5.to_csv(ADJ_T05, index=False, float_format="%.6f", lineterminator="\n")
     print(tab5[tab5.category == "TOTAL solid"].round(2).to_string())
+    adj6, tab6 = adjust(basis="t06")   # V4 D2c (T06, decision 223): the v4 main potential (measured trunk dry mass)
+    adj6.to_csv(OUT_T06, index=False, lineterminator="\n")
+    tab6.to_csv(ADJ_T06, index=False, float_format="%.6f", lineterminator="\n")
+    print(tab6[tab6.category == "TOTAL solid"].round(2).to_string())
 
 
 if __name__ == "__main__":

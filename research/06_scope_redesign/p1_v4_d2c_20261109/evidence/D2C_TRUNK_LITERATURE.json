@@ -1,0 +1,41 @@
+{
+ "note": {
+  "purpose": "D2c 第 2.1 节：Henson 2006 图 8 每公顷树干干重换算为每株所需的种植密度（D2b 证据 T12 未记）。",
+  "method": "只读：WebFetch 取回 PDF（工具把二进制存放在会话 tool-results 目录，未进入用户下载目录；读前读后核对下载目录列表一致），复制到会话临时目录的隔离子目录，用 python -I + pypdf 6.21.1 本地抽取正文阅读；未下载数据文件，PDF 不入库、不进审阅包。",
+  "pdf": {"url": "https://palmoilis.mpob.gov.my/publications/OPB/opb52-henson1.pdf", "bytes": 748274, "sha256": "402652ec26f019c337aa425cb2f13c3f6bdddd7f80d54346d26ca1b16485486f", "pages": 24, "accessed_utc": "2026-11-08T18:14Z"},
+  "grade_definitions": "同 D2b TRUNK_LITERATURE.json：VERIFIED = 读到含该数值的原文。"
+ },
+ "entries": [
+  {
+   "id": "H1",
+   "source": "Henson I E (2006). Measuring and modelling oil palm trunk growth. Oil Palm Bulletin 52: 1-24 (MPOB).",
+   "location": "p. 8, 'MODELLING TRUNK BIOMASS' 第一段",
+   "quote": "to a standard of 148 palms per hectare",
+   "value": "图 8 的树干立木生物量为每公顷干物质吨数，必要时按种植密度差异调整到标准密度 148 株/ha；只收录中等（商业）密度的数据；拟合 r2 = 0.967",
+   "basis": "干物质 t/ha @148 株/ha",
+   "grade": "VERIFIED",
+   "independence_group": "G_MPOB_Henson"
+  },
+  {
+   "id": "H2",
+   "source": "Henson (2006)，同 H1",
+   "location": "p. 24, Appendix 1 第 1 步",
+   "quote": "TBPP (kg) = (TSB/PD) x 1000",
+   "value": "每株树干生物量 = 每公顷树干立木生物量 / 种植密度 x 1000（kg）；D2c 用 PD = 148（H1）把图 8 曲线换算为每株",
+   "basis": "换算规则",
+   "grade": "VERIFIED",
+   "independence_group": "G_MPOB_Henson"
+  },
+  {
+   "id": "H3",
+   "source": "Henson (2006)，同 H1",
+   "location": "p. 12, Figure 8 图注与数据来源表",
+   "quote": "Data obtained using both destructive (d) and non-destructive (nd) methods",
+   "value": "拟合式 y = 0.0001x^4 - 0.0114x^3 + 0.3002x^2 - 0..2645x（原文 '0..2645' 为排印，取 0.2645；D2b 用同一式算得 23/25/27 年 42.00/41.95/40.46 t DM/ha）；数据来源 6 组：Ban、Nil（Henson 未发表，nd）、KLU（Khalid et al. 1999，d）、PNG（Breure 1988，nd）、TI（Henson & Mohd Tayeb 2003，nd）、WM（Corley et al. 1971b，d）；排除极低或极高密度",
+   "basis": "干物质 t/ha @148 株/ha（H1）",
+   "grade": "VERIFIED",
+   "independence_group": "G_MPOB_Henson",
+   "remark": "汇编：包含 Khalid 1999 的破坏取样点，因此与 KHALID1999 不完全独立（D2c 报告注明；决策第 223 项按三份实测计）。"
+  }
+ ]
+}

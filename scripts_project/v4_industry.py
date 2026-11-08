@@ -52,7 +52,8 @@ CACHE_V31 = SRC / "industry_cache.json"
 BIOPOT_V31 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv"
 BIOPOT_V4 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4.csv"
 BIOPOT_V4_T04 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T04.csv"   # V4 D2a (T04): palm-residue basis corrected (switch alternative since D2b)
-BIOPOT_V4_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T05.csv"   # V4 D2b (T05): the v4 main potential (energy basis audit of every category)
+BIOPOT_V4_T05 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T05.csv"   # V4 D2b (T05): energy basis audit of every category (high-sensitivity switch value since D2c)
+BIOPOT_V4_T06 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T06.csv"   # V4 D2c (T06, decision 223): the v4 main potential (trunk on the measured trunk dry mass)
 APEC = IND_V3 / "APEC2022_VN_INDUSTRY_PJ.csv"
 SUMMARY = "INDUSTRY_2050_SUMMARY_aeo8_ats_anchor_OTHER_USEFUL_HEAT_BANDS.csv"
 MODE = "aeo8_ats_anchor"
@@ -674,8 +675,10 @@ def build_steps(I: Inputs, s: dict) -> list:
             c["biopot"] = str(BIOPOT_V4)
         elif s["biomass_potential"] == "v4_adjusted_t04":   # V4 D2a (T04, decision 220)
             c["biopot"] = str(BIOPOT_V4_T04)
-        elif s["biomass_potential"] == "v4_adjusted_t05":   # V4 D2b (T05, decision 221): v4 main
+        elif s["biomass_potential"] == "v4_adjusted_t05":   # V4 D2b (T05, decision 221): high-sensitivity switch value since D2c
             c["biopot"] = str(BIOPOT_V4_T05)
+        elif s["biomass_potential"] == "v4_adjusted_t06":   # V4 D2c (T06, decision 223): v4 main
+            c["biopot"] = str(BIOPOT_V4_T06)
         return c
 
     return [("S1", "基年替换（SDMX）与锚构造", s1), ("S2", "锚边界对齐（残渣移出、平衡表外燃料木材）", s2), ("S3", "(ii) 类：ID 家庭汽油移道路、铁路父行移出", s3),

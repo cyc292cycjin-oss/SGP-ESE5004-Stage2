@@ -1,5 +1,5 @@
 """V4 D2b (decision 221; V4_D2B_INSTRUCTION.md sections 2 / 4.1): the energy-basis audit of every biomass category (T05) and the LNG regasification switch.
-  biomass_potential = v4_adjusted_t05 (v4 main): T04 plus the oil palm trunk (fresh mass x 15 GJ/t -> dry matter x LHV_dry); T04 / W08 files unchanged
+  biomass_potential = v4_adjusted_t05 (v4 main in D2b; the high-sensitivity switch value since D2c): T04 plus the oil palm trunk (fresh mass x 15 GJ/t -> dry matter x LHV_dry); T04 / W08 files unchanged
   lng_regas_adder   = asean_tariffs (v4 main, registry v4_lng_regas_adder_asean_tariffs) | m08a (v3.1: the configured 1.26)
 No solver, no network build."""
 import io
@@ -66,7 +66,8 @@ def test_t05_files_are_the_rule_output_and_older_files_unchanged():
 def test_switches_and_files():
     from phase4_static import config
     from v4_common import BIOMASS_POTENTIAL_FILES, SWITCH_VALUES, V31, V4_MAIN, lng_regas_adder_value, switches, v4_tables
-    assert BIOMASS_POTENTIAL_FILES["v4_adjusted_t05"].endswith("_V4_T05.csv") and V4_MAIN["biomass_potential"] == "v4_adjusted_t05"
+    # V4 D2c (decision 223): t05 is the high-sensitivity switch value of the trunk, the v4 main value is t06 (test_v4_d2c_trunk.py)
+    assert BIOMASS_POTENTIAL_FILES["v4_adjusted_t05"].endswith("_V4_T05.csv") and V4_MAIN["biomass_potential"] == "v4_adjusted_t06"
     assert SWITCH_VALUES["lng_regas_adder"] == ("m08a", "asean_tariffs") and V31["lng_regas_adder"] == "m08a" and V4_MAIN["lng_regas_adder"] == "asean_tariffs"
     cfg = config(ROOT, "integrated")
     v31, b31 = lng_regas_adder_value(cfg)
@@ -79,9 +80,9 @@ def test_switches_and_files():
     cfg["research"]["demand"]["v4"]["lng_regas_adder"] = "m08a"
     assert lng_regas_adder_value(cfg)[0] == 1.26
     cfg["research"]["demand"]["v4"]["lng_regas_adder"] = "asean_tariffs"
-    assert switches(cfg)["biomass_potential"] == "v4_adjusted_t05" and v4_tables(cfg)["biomass_potential"].endswith("BIOMASS_POTENTIAL_2050_V4_T05.csv")
+    assert switches(cfg)["biomass_potential"] == "v4_adjusted_t06" and v4_tables(cfg)["biomass_potential"].endswith("BIOMASS_POTENTIAL_2050_V4_T06.csv")
     import v4_industry as V
-    case = V.final_case(V.Inputs(), dict(V4_MAIN, anchor_mode="ras")); assert case["biopot"].endswith("BIOMASS_POTENTIAL_2050_V4_T05.csv")
+    case = V.final_case(V.Inputs(), dict(V4_MAIN, anchor_mode="ras", biomass_potential="v4_adjusted_t05")); assert case["biopot"].endswith("BIOMASS_POTENTIAL_2050_V4_T05.csv")
 
 
 def test_registry_rows_and_ranges():
@@ -90,9 +91,9 @@ def test_registry_rows_and_ranges():
                 "v4_source_band_basis_rule", "v4_transport_fleet_energy_ratio_asean", "v4_offwind_alpha_vn_reference_area", "v4_wacc_basis_note"):
         assert pid in reg.index, pid
     assert float(reg.at["v4_oil_palm_trunk_energy_per_fresh_t", "value"]) == pytest.approx(15.0 * 0.3134798, abs=1e-5)
-    for c in ("ID", "MY", "TH", "PH", "KH"):   # trunk ranges = v3 value x the basis range
+    for c in ("ID", "MY", "TH", "PH", "KH"):   # trunk ranges = v3 value x the basis range (V4 D2c: low = T06 minimum measured dry mass 0.14725, high = T05 0.31348)
         r = reg.loc[f"biomass_potential_{c}_oil_palm_trunk"]
-        assert float(r.sensitivity_low) == pytest.approx(float(r.value) * 0.14697, rel=1e-3) and float(r.sensitivity_high) < float(r.value)
+        assert float(r.sensitivity_low) == pytest.approx(float(r.value) * 0.14725, rel=1e-3) and float(r.sensitivity_high) < float(r.value)
     assert reg.at["co2_sequestration_cost_price_year", "value"] == "2020" and reg.at["co2_sequestration_cost_price_year", "status"] == "REGISTERED"
     assert float(reg.at["co2_injection_cap_unified_VN", "sensitivity_low"]) == pytest.approx(3.3034e9 / 50) and float(reg.at["fuel_price_lng_regasification_adder", "value"]) == 1.26
     t = json.loads((ROOT / "research_inputs/industry_v4/out_ras/V4_SWITCHES.json").read_text())
