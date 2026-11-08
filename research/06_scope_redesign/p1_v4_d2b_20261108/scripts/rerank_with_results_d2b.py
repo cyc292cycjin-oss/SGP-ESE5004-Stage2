@@ -1026,9 +1026,9 @@ def main():
             if lo != "" and hi != "" and not (same(lo, r.notch_low) and same(hi, r.notch_high)):
                 upd.append(dict(param_id=r.param_id, notch_low_w10=r.notch_low, notch_high_w10=r.notch_high, notch_low_d2a=lo, notch_high_d2a=hi, value=r.value, registry_value=reg.at[r.param_id, "value"]))
                 inv.at[i, "notch_low"] = lo; inv.at[i, "notch_high"] = hi
-                inv.at[i, "notch_basis"] = r.notch_basis + " refreshed from the D2a registry (physics-corrected range)"
+                inv.at[i, "notch_basis"] = r.notch_basis + " refreshed from the D2b branch registry"
         pd.DataFrame(upd).to_csv(out / "INVENTORY_RANGE_UPDATES.csv", index=False, lineterminator="\n")
-        inv.to_csv(out / "C_GRADE_INVENTORY_D2A.csv", index=False, lineterminator="\n")
+        inv.to_csv(out / "C_GRADE_INVENTORY_D2B.csv", index=False, lineterminator="\n")
         print(f"[registry-ranges] {len(upd)} notch pairs refreshed", flush=True)
     ctx = Ctx(reg, repo)
     sets, extracts = {}, {}
