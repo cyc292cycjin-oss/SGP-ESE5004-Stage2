@@ -73,6 +73,12 @@ def electricity_load_shares(n, nodes):
     return out
 
 
+def _adder_basis(cfg, repo) -> str:
+    """V4 D2b (section 4.1): basis text of the LNG regasification adder of the configured switch set (v4_common.lng_regas_adder_value)."""
+    from v4_common import lng_regas_adder_value
+    return lng_regas_adder_value(cfg, repo)[1]
+
+
 def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidates: pd.DataFrame):
     G = cfg["research"]["s3"]["gas"]
     led = {}
@@ -229,7 +235,7 @@ def add_lng_terminals(n, cfg, repo, price: float, adder: float, led: dict) -> di
                 f"research.s3.gas.lng_expansion_capital_cost_eur_per_mw_a = {base_cost}")
     led["lng"] = dict(price_eur_per_mwh=price, regasification_adder=adder,
                       adder_status=(("registry fuel_price_lng_regasification_adder 1.26 EUR2020/MWh (M08-3, decision 131; grade C)" if adder else "0 (no regasification adder)")
-                                    if adder_basis.startswith("m08a") else f"{adder_basis} = {adder} EUR2020/MWh (V4 D2b section 4.1; grade C)"),
+                                    if _adder_basis(cfg, repo).startswith("m08a") else f"{_adder_basis(cfg, repo)} = {adder} EUR2020/MWh (V4 D2b section 4.1; grade C)"),
                       cap_factor=factor, expansion=expansion, terminals=terms,
                       expansion_capital_cost_eur_per_mw_a=capex, expansion_cost_base_eur_per_mw_a=base_cost,
                       expansion_cost_sensitivity=float(G.get("lng_expansion_cost_sensitivity", 0.0)), expansion_cost_source=cost_src)

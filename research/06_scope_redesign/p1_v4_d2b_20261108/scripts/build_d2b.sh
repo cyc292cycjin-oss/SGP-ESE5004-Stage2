@@ -1,5 +1,5 @@
 #!/bin/bash
-# D2b section 5: rebuild the v4 networks at the committed D2a head (no solver, no licence), the W08 / D1 build rule:
+# D2b section 5: rebuild the v4 networks at the committed D2b head (no solver, no licence), the W08 / D1 build rule:
 #   <set>/integrated   s2_network.py --scenario integrated --override demand.v4.enabled=true [--override demand.v4.<key>=<value> ...]
 #   <set>/no_new_xb    m08a_variants.py --set cross_border.stock_mode=no_new_xb from <set>/integrated (2920x3h and 365x24h)
 # usage: build_d2b.sh <set name: main> [extra --override k=v ...]
