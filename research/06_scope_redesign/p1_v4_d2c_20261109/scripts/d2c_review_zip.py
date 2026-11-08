@@ -1,5 +1,5 @@
 """V4 D2c review package (copy of the D2b scripts/d2b_review_zip.py): REVIEW_<commit8>.zip of the delivery folder (zip files, logs, cache, commit-message files and
-__pycache__ excluded) plus the repository diff 385bdff0..<commit> of scripts_project / configs / tests (patch), diff stat and log; manifest with SHA256 and
+__pycache__ excluded) plus the repository diff 25bd7cf0 (D2b head = D2c start)..<commit> of scripts_project / configs / tests and the D2c data files (T06 tables, registry, main table folders) (patch), diff stat and log; manifest with SHA256 and
 CRC32 per member.
 
     /home/jin/miniforge3/envs/pypsa-earth/bin/python scripts/d2c_review_zip.py <commit>
@@ -15,12 +15,14 @@ from pathlib import Path
 
 W = Path(__file__).resolve().parents[1]
 R = Path("/home/jin/wt_v4_d2c")
-BASE = "385bdff0"
+BASE = "25bd7cf0"
+PATHS = ["scripts_project", "configs", "tests", "research_inputs/biomass_v5", "research_inputs/registry_v5/DATA_REGISTRY.csv", "research_inputs/registry_v5/fragments",
+         "research_inputs/industry_v4/out_ras", "research_inputs/industry_v4/out_iid"]
 
 
 def main():
     commit = sys.argv[1]
-    diff = subprocess.run(["git", "-C", str(R), "diff", BASE, commit, "--", "scripts_project", "configs", "tests"], capture_output=True, text=True, check=True).stdout
+    diff = subprocess.run(["git", "-C", str(R), "diff", BASE, commit, "--", *PATHS], capture_output=True, text=True, check=True).stdout
     stat = subprocess.run(["git", "-C", str(R), "diff", "--stat", BASE, commit], capture_output=True, text=True, check=True).stdout
     log = subprocess.run(["git", "-C", str(R), "log", "--format=%H %s", f"{BASE}..{commit}"], capture_output=True, text=True, check=True).stdout
     extra = {f"repo/CODE_DIFF_{BASE}.patch": diff.encode(), f"repo/DIFF_STAT_{BASE}.txt": stat.encode(), "repo/GIT_LOG.txt": log.encode()}

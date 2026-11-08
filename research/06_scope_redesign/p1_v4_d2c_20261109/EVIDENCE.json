@@ -1,0 +1,777 @@
+{
+ "step": "V4 D2c (decision 223)",
+ "entries": [
+  {
+   "id": "instruction.sha256",
+   "value": "18f6e4037de2a4ab770c6d27e77e9e36fcb8e93788aaf77cbfc226e642db95b1",
+   "unit": "sha256",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "V4_D2C_INSTRUCTION.md",
+   "note": "= V4_D2C_SHA256.txt (checked before starting)"
+  },
+  {
+   "id": "session.model",
+   "value": "claude-opus-5-5 (Opus 5.5)",
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "session system information",
+   "note": "effort setting of the session not visible to the session (instruction asks Xhigh)"
+  },
+  {
+   "id": "branch.base",
+   "value": {
+    "branch": "codex/v4-d2c-20261109",
+    "base": "25bd7cf0be0c17caac1fcc272ed2f3c2779312d2",
+    "d2b_review_commit_ancestor": "4e90ea4b",
+    "files_changed_between": "2, all under research/06_scope_redesign/p1_v4_d2b_20261108/"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "git merge-base --is-ancestor / git diff --name-only (/home/jin/v4d2c/s1_verify.log)",
+   "note": ""
+  },
+  {
+   "id": "s2.trunk_dry_mass_sources",
+   "value": [
+    {
+     "source_id": "KHALID1999",
+     "value_reported": "41.070000",
+     "unit_reported": "t DM/ha",
+     "density_palms_per_ha": "136.000000",
+     "age_years": "23",
+     "conversion": "41.07 t DM/ha / 136 palms/ha",
+     "per_palm_t_dm": "0.301985"
+    },
+    {
+     "source_id": "CHOW2008",
+     "value_reported": "37.264000",
+     "unit_reported": "t DM/ha",
+     "density_palms_per_ha": "136.000000",
+     "age_years": "~25 (economic life)",
+     "conversion": "37.264 t DM/ha (= 136 x 274 kg) / 136 palms/ha",
+     "per_palm_t_dm": "0.274000"
+    },
+    {
+     "source_id": "HENSON2006",
+     "value_reported": "41.950000",
+     "unit_reported": "t DM/ha",
+     "density_palms_per_ha": "148.000000",
+     "age_years": "25",
+     "conversion": "Fig. 8 polynomial at 25 years after planting / 148 palms/ha",
+     "per_palm_t_dm": "0.283446"
+    }
+   ],
+   "unit": "t DM per palm",
+   "status": "VERIFIED (source values and densities) / EXACT (division)",
+   "grade": "B",
+   "source": "TRUNK_DRY_MASS.csv; evidence/D2C_TRUNK_LITERATURE.json H1-H3; D2b evidence/TRUNK_LITERATURE.json T01 T04 T09 T12",
+   "note": "Henson Fig. 8 includes the Khalid 1999 points (compilation, not fully independent)"
+  },
+  {
+   "id": "s2.trunk_dry_mass_per_palm",
+   "value": {
+    "centre": 0.283446,
+    "low": 0.274,
+    "high": 0.301985,
+    "per_ha_at_model_140": {
+     "centre": 39.682432,
+     "low": 38.36,
+     "high": 42.277941
+    }
+   },
+   "unit": "t DM per palm",
+   "status": "EXACT",
+   "grade": "B",
+   "source": "TRUNK_DRY_MASS.csv (median / min / max of the three included sources)",
+   "note": ""
+  },
+  {
+   "id": "s2.not_used_sources",
+   "value": [
+    {
+     "source_id": "HUSIN_POD36",
+     "per_palm_t_dm": "0.600000",
+     "evidence_grade": "VERIFIED",
+     "note": "not used: an estimate carried from Mohd Husin et al. 1985, not a measurement on the page (D2b T07); about twice the measured values"
+    },
+    {
+     "source_id": "CORLEY1971",
+     "per_palm_t_dm": "0.300000",
+     "evidence_grade": "SNIPPET",
+     "note": "not used: secondary quotation (original not read); the Corley 1971b data are already points of Henson Fig. 8 (WM)"
+    },
+    {
+     "source_id": "TINKER_SMILDE1963",
+     "per_palm_t_dm": "0.344000",
+     "evidence_grade": "SNIPPET",
+     "note": "not used: secondary quotation (original not read), West African material"
+    },
+    {
+     "source_id": "SISWOKO2018",
+     "per_palm_t_dm": "",
+     "evidence_grade": "SNIPPET",
+     "note": "not used: abstract only, carbon basis (dry mass derived)"
+    },
+    {
+     "source_id": "HAMBALI2017",
+     "per_palm_t_dm": "",
+     "evidence_grade": "VERIFIED",
+     "note": "not used: fresh / dry basis not stated"
+    },
+    {
+     "source_id": "WARDANI2013",
+     "per_palm_t_dm": "",
+     "evidence_grade": "SNIPPET",
+     "note": "not used: whole palm including fronds and roots, no trunk value"
+    }
+   ],
+   "unit": "t DM per palm",
+   "status": "VERIFIED / SNIPPET",
+   "grade": "-",
+   "source": "TRUNK_DRY_MASS.csv",
+   "note": ""
+  },
+  {
+   "id": "s2.centre_robustness",
+   "value": {
+    "robustness_of_centre": {
+     "plus_tinker_smilde": {
+      "median": 0.2927156200317965,
+      "min": 0.274,
+      "max": 0.344,
+      "n": 4
+     },
+     "plus_husin": {
+      "median": 0.2927156200317965,
+      "min": 0.274,
+      "max": 0.6,
+      "n": 4
+     },
+     "plus_corley_tinker_husin": {
+      "median": 0.30099264705882356,
+      "min": 0.274,
+      "max": 0.6,
+      "n": 6
+     }
+    },
+    "henson_age": {
+     "23": 0.28380135135135137,
+     "24": 0.2848054054054055,
+     "25": 0.28344594594594597,
+     "26": 0.2796581081081081,
+     "27": 0.27339324324324343
+    }
+   },
+   "unit": "t DM per palm",
+   "status": "EXACT",
+   "grade": "-",
+   "source": "evidence/D2C_TRUNK_CALC.json",
+   "note": "medians if the not-used values were included; Henson per palm at 23-27 years"
+  },
+  {
+   "id": "s2.trunk_factor",
+   "value": {
+    "t06": {
+     "mid": 0.1523221506756757,
+     "low": 0.147245956,
+     "high": 0.1622850851470588,
+     "dry_matter_per_reported_t": 0.14172297297297298,
+     "lhv_dry": 16.12182
+    },
+    "t05": {
+     "mid": 0.3134798333333334,
+     "low": 0.1469673893333333,
+     "high": 0.3750441333333334
+    },
+    "ratio_t06_t05": 0.48590733590733587
+   },
+   "unit": "factor on the W08 energy",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "research_inputs/biomass_v5/BIOMASS_BASIS_T06.csv / _T05.csv",
+   "note": "factor = dry mass per palm / 2 t per palm x 16.12182 / 15"
+  },
+  {
+   "id": "s2.trunk_potential_twh",
+   "value": {
+    "t05": {
+     "ID": 49.672969,
+     "KH": 0.182212,
+     "MY": 18.90821,
+     "PH": 0.232477,
+     "TH": 3.500799
+    },
+    "t06": {
+     "ID": 24.13646,
+     "KH": 0.088538,
+     "MY": 9.187638,
+     "PH": 0.112962,
+     "TH": 1.701064
+    },
+    "sum_t05": 72.496667,
+    "sum_t06": 35.226662000000005
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ_V4_T05.csv / _T06.csv",
+   "note": ""
+  },
+  {
+   "id": "s2.solid_potential_twh",
+   "value": {
+    "t05": {
+     "BN": 0.115885,
+     "ID": 551.325005,
+     "KH": 47.883143,
+     "LA": 25.609068,
+     "MM": 85.630425,
+     "MY": 86.01886,
+     "PH": 125.883552,
+     "SG": 0.03151,
+     "TH": 245.86164,
+     "TL": 0.59401,
+     "VN": 120.3659,
+     "ASEAN11": 1289.318999
+    },
+    "t06": {
+     "BN": 0.115885,
+     "ID": 525.788496,
+     "KH": 47.789469,
+     "LA": 25.609068,
+     "MM": 85.630425,
+     "MY": 76.298288,
+     "PH": 125.764037,
+     "SG": 0.03151,
+     "TH": 244.061905,
+     "TL": 0.59401,
+     "VN": 120.3659,
+     "ASEAN11": 1252.048994
+    }
+   },
+   "unit": "TWh",
+   "status": "EXACT",
+   "grade": "C",
+   "source": "BIOMASS_POTENTIAL_ADJ_V4_T05.csv / _T06.csv (TOTAL solid)",
+   "note": "ASEAN11 row = sum"
+  },
+  {
+   "id": "s2.files",
+   "value": {
+    "BIOMASS_BASIS_T06.csv": "72eee1a13498b0cbe4ae0b84e07c2cc9494fc8b50ad1a178b9b9f739782cfd46",
+    "BIOMASS_POTENTIAL_2050_V4_T06.csv": "4e005c74f3543c0592145ab1269b9613f5967bc47f7d1751f455813e41036039",
+    "BIOMASS_POTENTIAL_ADJ_V4_T06.csv": "1834a593e7ea1dae1fe40ff611d76888ad7596bce41b0c84fa090ef25f80f5b8"
+   },
+   "unit": "sha256",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "research_inputs/biomass_v5",
+   "note": "W08 / T04 / T05 files byte-identical to HEAD of D2b (logs/s2_pot.txt); T06 potential = T05 except the five trunk lines"
+  },
+  {
+   "id": "s2.checkpoints",
+   "value": {
+    "iid_t06": {
+     "rows": 180,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_cap": 0.0,
+     "T_v2_S7_asean": 3166.52185
+    },
+    "main_t06": {
+     "rows": 192,
+     "all_within_1e6": true,
+     "max_abs_diff_T": 0.0,
+     "max_abs_diff_cap": 0.0,
+     "T_v2_S7_asean": 3490.33801
+    }
+   },
+   "unit": "TWh",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "CHECKPOINTS.csv (reference engine scripts/ref on the T06 potential)",
+   "note": "T_v2 unchanged vs D2b (3,490.338 / 3,166.522 TWh)"
+  },
+  {
+   "id": "s2.table_folder_ras",
+   "value": {
+    "switch_sha256": "d89ccbf47b0002e65246ce75ba06158f76c340f5091127f6658eec06ed727a62",
+    "biomass_potential": "v4_adjusted_t06",
+    "main_set": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "research_inputs/industry_v4/out_ras/V4_SWITCHES.json",
+   "note": ""
+  },
+  {
+   "id": "s2.table_folder_iid",
+   "value": {
+    "switch_sha256": "f14bf391f29ee26b71f1feeeac0ad62787b66a95d246e385eb2024f3f1f4079e",
+    "biomass_potential": "v4_adjusted_t06",
+    "main_set": true
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "research_inputs/industry_v4/out_iid/V4_SWITCHES.json",
+   "note": ""
+  },
+  {
+   "id": "s2.registry_rows",
+   "value": {
+    "v4_oil_palm_trunk_dry_mass_per_palm": {
+     "value": "0.283446",
+     "unit": "t DM per palm",
+     "tier": "B",
+     "sensitivity_low": "0.274",
+     "sensitivity_high": "0.301985",
+     "status": "REGISTERED",
+     "decision_ref": "223"
+    },
+    "v4_oil_palm_trunk_energy_per_reported_t_t06": {
+     "value": "2.28483226014",
+     "unit": "GJ per reported t",
+     "tier": "C",
+     "sensitivity_low": "2.20868934",
+     "sensitivity_high": "2.43427627721",
+     "status": "REGISTERED",
+     "decision_ref": "223"
+    },
+    "v4_oil_palm_replanting_rate": {
+     "value": "0.04",
+     "unit": "share of harvested area per year",
+     "tier": "C",
+     "sensitivity_low": "0.022",
+     "sensitivity_high": "0.04",
+     "status": "SENSITIVITY",
+     "decision_ref": "223"
+    },
+    "v4_biomass_basis_table_t06": {
+     "value": "6789",
+     "unit": "bytes",
+     "tier": "C",
+     "sensitivity_low": "",
+     "sensitivity_high": "",
+     "status": "REFERENCE_ONLY",
+     "decision_ref": "223"
+    },
+    "v4_biomass_potential_2050_t06": {
+     "value": "96135",
+     "unit": "bytes",
+     "tier": "C",
+     "sensitivity_low": "",
+     "sensitivity_high": "",
+     "status": "REFERENCE_ONLY",
+     "decision_ref": "223"
+    },
+    "v4_biomass_potential_adjustment_t06": {
+     "value": "15798",
+     "unit": "bytes",
+     "tier": "C",
+     "sensitivity_low": "",
+     "sensitivity_high": "",
+     "status": "REFERENCE_ONLY",
+     "decision_ref": "223"
+    },
+    "biomass_potential_ID_oil_palm_trunk": {
+     "value": "158456666.667",
+     "unit": "MWh/a",
+     "tier": "C",
+     "sensitivity_low": "23332103.368",
+     "sensitivity_high": "49672969.4573",
+     "status": "REGISTERED",
+     "decision_ref": "31,32,36, 221, 223"
+    },
+    "biomass_potential_KH_oil_palm_trunk": {
+     "value": "581256.666667",
+     "unit": "MWh/a",
+     "tier": "C",
+     "sensitivity_low": "85587.6935648",
+     "sensitivity_high": "182212.242991",
+     "status": "REGISTERED",
+     "decision_ref": "31,32,36, 221, 223"
+    },
+    "biomass_potential_MY_oil_palm_trunk": {
+     "value": "60317149.6667",
+     "unit": "MWh/a",
+     "tier": "C",
+     "sensitivity_low": "8881456.36587",
+     "sensitivity_high": "18908210.0247",
+     "status": "REGISTERED",
+     "decision_ref": "31,32,36, 221, 223"
+    },
+    "biomass_potential_PH_oil_palm_trunk": {
+     "value": "741601",
+     "unit": "MWh/a",
+     "tier": "C",
+     "sensitivity_low": "109197.748216",
+     "sensitivity_high": "232476.95788",
+     "status": "REGISTERED",
+     "decision_ref": "31,32,36, 221, 223"
+    },
+    "biomass_potential_TH_oil_palm_trunk": {
+     "value": "11167541",
+     "unit": "MWh/a",
+     "tier": "C",
+     "sensitivity_low": "1644375.25071",
+     "sensitivity_high": "3500798.89142",
+     "status": "REGISTERED",
+     "decision_ref": "31,32,36, 221, 223"
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "B / C",
+   "source": "research_inputs/registry_v5/DATA_REGISTRY.csv",
+   "note": "rows 2469 (D2b 2,463)"
+  },
+  {
+   "id": "s3.networks",
+   "value": {
+    "main_F1": {
+     "sha256": "db33f84ed2e430a11dc30a51e66121b87aba288a08025acefdc85f75d2a8369f",
+     "bytes": 82749911,
+     "sha256_365": "2b31d60c61917a1561d80135533ae677f572cd38b0f220271392498f79269dce"
+    },
+    "main_F2": {
+     "sha256": "f03aab19b04d44185b426befff942b5b060984a238e2a2d6e24f6e5632b88a1c",
+     "bytes": 82112443,
+     "sha256_365": "ebb0588c8e18b44c22cbb8ee092a18adb315fdf914894fe8eeeb70a2c691a692"
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json; logs/build_main.txt",
+   "note": ""
+  },
+  {
+   "id": "s3.c8",
+   "value": {
+    "integrated_2920_3h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']"
+     ],
+     "unexpected": [],
+     "meta_keys": [
+      "research_biomass",
+      "research_config",
+      "research_config_sha256",
+      "research_config_subset_sha256",
+      "research_dust_cleanup",
+      "s2_demand_ledger",
+      "s2_layers",
+      "s4l_layers",
+      "v4_w08"
+     ]
+    },
+    "integrated_365_24h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']"
+     ],
+     "unexpected": [],
+     "meta_keys": [
+      "research_biomass",
+      "research_config",
+      "research_config_sha256",
+      "research_config_subset_sha256",
+      "research_dust_cleanup",
+      "s2_demand_ledger",
+      "s2_layers",
+      "s4l_layers",
+      "v4_w08"
+     ]
+    },
+    "no_new_xb_2920_3h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']"
+     ],
+     "unexpected": [],
+     "meta_keys": [
+      "research_biomass",
+      "research_config",
+      "research_config_sha256",
+      "research_config_subset_sha256",
+      "research_dust_cleanup",
+      "research_variant",
+      "s2_demand_ledger",
+      "s2_layers",
+      "s4l_layers",
+      "v4_w08"
+     ]
+    },
+    "no_new_xb_365_24h": {
+     "passed": true,
+     "expected": [
+      "(a) Store.e_initial of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']",
+      "(a) Store.e_nom of 5 oil palm trunk pools (T06 basis): ['ID biomass oil_palm_trunk', 'KH biomass oil_palm_trunk', 'MY biomass oil_palm_trunk', 'PH biomass oil_palm_trunk', 'TH biomass oil_palm_trunk']"
+     ],
+     "unexpected": [],
+     "meta_keys": [
+      "research_biomass",
+      "research_config",
+      "research_config_sha256",
+      "research_config_subset_sha256",
+      "research_dust_cleanup",
+      "research_variant",
+      "s2_demand_ledger",
+      "s2_layers",
+      "s4l_layers",
+      "v4_w08"
+     ]
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2C_NETWORK_DIFF.json",
+   "note": "expected set registered in scripts/d2c_static.py before the first build"
+  },
+  {
+   "id": "s3.static",
+   "value": {
+    "main_F1": {
+     "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+     "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+     "C3_max_ratio": 0.9899999999999999,
+     "C3_pools_at_or_above_0.999": [],
+     "C4_gas_caps_vs_table_max_rel": 0.0,
+     "C6_switch_sha_equals_tables": true,
+     "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+     "C11_band_shares_ledger_vs_table_max_abs": 0.0,
+     "C12_lng_mc_change_max_dev": 0.0
+    },
+    "main_F2": {
+     "C1_industry_loads_vs_summary_max_abs_mwh": 1.0728836059570312e-06,
+     "C2_ev_vs_land_x_ev_factor_max_rel": 2.220446049250313e-16,
+     "C3_max_ratio": 0.9899999999999999,
+     "C3_pools_at_or_above_0.999": [],
+     "C4_gas_caps_vs_table_max_rel": 0.0,
+     "C6_switch_sha_equals_tables": true,
+     "C10_overflow_ledger_vs_table_max_abs_mwh": 0.00018808245658874512,
+     "C11_band_shares_ledger_vs_table_max_abs": 0.0,
+     "C12_lng_mc_change_max_dev": 0.0
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "STATIC_CHECKS.json",
+   "note": ""
+  },
+  {
+   "id": "s3.zero_slack",
+   "value": [
+    {
+     "network": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2c/builds/main/integrated/integrated_2920_3h_unsolved.nc",
+     "label": "v4d2c_F1",
+     "scenario": "integrated",
+     "passed": true,
+     "zero_slack_forcing_rows": [],
+     "rows": 705
+    },
+    {
+     "network": "/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2c/builds/main/no_new_xb/no_new_xb_2920_3h_unsolved.nc",
+     "label": "v4d2c_F2",
+     "scenario": "no_new_xb",
+     "passed": true,
+     "zero_slack_forcing_rows": [],
+     "rows": 589
+    }
+   ],
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/ZERO_SLACK_CHECK_D2C.json",
+   "note": ""
+  },
+  {
+   "id": "s4.alarm_lines",
+   "value": {
+    "R1_v4d2c_F1": {
+     "rhs_lower_bound_eur": 2881359663.708966,
+     "tolerance_eur": 360297.8386730782,
+     "alarm_line_eur": 2880999365.8702927,
+     "pool_terms": {
+      "ID biomass oil_palm_trunk": {
+       "marginal_value": 79.64692803458468,
+       "delta_mwh": -25536509.201710634,
+       "term_eur": 2033904510.6431563
+      },
+      "KH biomass oil_palm_trunk": {
+       "marginal_value": 25.7070070744288,
+       "delta_mwh": -93673.97742936831,
+       "term_eur": 2408077.600466655
+      },
+      "MY biomass oil_palm_trunk": {
+       "marginal_value": 81.32260158193102,
+       "delta_mwh": -9720572.06480048,
+       "term_eur": 790502209.174218
+      },
+      "PH biomass oil_palm_trunk": {
+       "marginal_value": 24.644101175373805,
+       "delta_mwh": -119514.69861660161,
+       "term_eur": 2945332.324651838
+      },
+      "TH biomass oil_palm_trunk": {
+       "marginal_value": 28.67062825809792,
+       "delta_mwh": -1799735.0285443815,
+       "term_eur": 51599533.966473214
+      }
+     },
+     "loads": 0,
+     "costs": 0
+    },
+    "R2_v4d2c_F2": {
+     "rhs_lower_bound_eur": 2996741570.2336836,
+     "tolerance_eur": 373139.23511649464,
+     "alarm_line_eur": 2996368430.998567,
+     "pool_terms": {
+      "ID biomass oil_palm_trunk": {
+       "marginal_value": 79.76060780527342,
+       "delta_mwh": -25536509.201710634,
+       "term_eur": 2036807495.1533978
+      },
+      "KH biomass oil_palm_trunk": {
+       "marginal_value": 26.011456681418533,
+       "delta_mwh": -93673.97742936831,
+       "term_eur": 2436596.606080191
+      },
+      "MY biomass oil_palm_trunk": {
+       "marginal_value": 92.25990153618017,
+       "delta_mwh": -9720572.06480048,
+       "term_eur": 896819021.5738358
+      },
+      "PH biomass oil_palm_trunk": {
+       "marginal_value": 26.514704523593235,
+       "delta_mwh": -119514.69861660161,
+       "term_eur": 3168896.920045489
+      },
+      "TH biomass oil_palm_trunk": {
+       "marginal_value": 31.954459444420365,
+       "delta_mwh": -1799735.0285443815,
+       "term_eur": 57509559.980324164
+      }
+     },
+     "loads": 0,
+     "costs": 0
+    }
+   },
+   "unit": "EUR",
+   "status": "EXACT (rule) / VERIFIED (D2b duals)",
+   "grade": "-",
+   "source": "evidence/D2C_BOUNDS_PRE.json; SMOKE56_D2C.md 1.3",
+   "note": "registered in commit 88bbbe57 before the solves"
+  },
+  {
+   "id": "s4.smoke",
+   "value": {
+    "v4d2c_F1": {
+     "termination": "optimal",
+     "objective_eur": 363190038821.0828,
+     "d2b_objective_eur": 360297838673.07825,
+     "dV_eur": 2892200148.0045776,
+     "alarm_line_eur": 2880999365.8702927,
+     "above_alarm_line": true,
+     "dV_minus_lower_bound_eur": 10840484.295611858,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_d2b": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "C1_accepted": true,
+     "V6_label": "ACCEPTED_LAYER2",
+     "barrier_iterations": 89,
+     "solve_seconds": 216.0748996734619,
+     "peak_rss_gib": 7.271087646484375
+    },
+    "v4d2c_F2": {
+     "termination": "optimal",
+     "objective_eur": 376143650003.4369,
+     "d2b_objective_eur": 373139235116.4947,
+     "dV_eur": 3004414886.9421997,
+     "alarm_line_eur": 2996368430.998567,
+     "above_alarm_line": true,
+     "dV_minus_lower_bound_eur": 7673316.708516121,
+     "gates_failed": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_d2b": "A1_A2;A1_A2_S4B;A3;B1;B3;B8",
+     "gates_failed_outside_v31_union": "",
+     "C1_accepted": true,
+     "V6_label": "ACCEPTED_LAYER2",
+     "barrier_iterations": 80,
+     "solve_seconds": 148.52897787094116,
+     "peak_rss_gib": 5.719280242919922
+    }
+   },
+   "unit": "EUR",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2C_smoke56.json; tables/D2C_SMOKE56_RESULTS.csv",
+   "note": ""
+  },
+  {
+   "id": "s4.criteria",
+   "value": {
+    "v4d2c_F1": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "v4d2c_F2": {
+     "optimal": true,
+     "accepted_layer2": true,
+     "failed_in_v31_union": true,
+     "above_alarm_line": true,
+     "all": true
+    },
+    "B6_regression_only": {
+     "d2c_eur": 12953611182.354065,
+     "d2b_eur": 12841396443.416443,
+     "change_eur": 112214738.93762207
+    }
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2C_smoke56.json",
+   "note": "B6 at 56 snapshots: regression only"
+  },
+  {
+   "id": "tests",
+   "value": {
+    "v4_set": "99 passed, 1 skipped, 18 warnings in 45.47s",
+    "network": "25 passed, 7 warnings in 8.56s",
+    "full": "1 failed, 875 passed, 56 skipped, 5 deselected, 1346 warnings in 1904.66s (0:31:44)"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "logs/ut_*.txt",
+   "note": ""
+  },
+  {
+   "id": "literature_access",
+   "value": {
+    "henson_pdf_sha256": "402652ec26f019c337aa425cb2f13c3f6bdddd7f80d54346d26ca1b16485486f",
+    "via": "WebFetch (read only); kept in the session scratch, not in the repository / zip",
+    "user_downloads_folder": "unchanged (listing before / after)"
+   },
+   "unit": "-",
+   "status": "VERIFIED",
+   "grade": "-",
+   "source": "evidence/D2C_TRUNK_LITERATURE.json note",
+   "note": ""
+  }
+ ]
+}
