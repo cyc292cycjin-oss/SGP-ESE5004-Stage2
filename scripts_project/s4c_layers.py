@@ -98,7 +98,8 @@ def check_fuel_prices(n, cfg, registry: pd.DataFrame, cost_ledger: dict) -> dict
         raise AssertionError(f"cost-layer fuel overrides do not use the {scen} registry rows: {over}")
     if cost_ledger.get("fuel_price_scenario") != scen:
         raise AssertionError("cost ledger fuel_price_scenario differs from research.fuels.price_scenario")
-    adder = float(cfg["research"]["s3"]["gas"].get("lng_regasification_adder_eur_per_mwh", 0.0))
+    from v4_common import lng_regas_adder_value
+    adder = lng_regas_adder_value(cfg)[0]   # V4 D2b (section 4.1): the adder of the switch set (v3.1: the configured 1.26; v4 main: registry asean_tariffs)
     g = n.generators
     groups = {"gas LNG import": (g.carrier == "LNG import", price["gas"] + adder), "gas domestic production (decision 43)": (g.carrier == "gas production", price["gas"]),
               "oil ASEAN import": (g.carrier == "oil import", price["oil"]),
