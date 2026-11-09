@@ -1,0 +1,108 @@
+START 2026-11-09T10:22:06Z commit=b62ef3c020a2514df4db4c4809809f88ef36e475 module_sha256=b8ce09e06ae4532407935e80dd911bee101a06f3cee65263586420853fb94920 ports_test_sha256=8b54e8a65affe80acd722f72214e8cc7b7cc89361d812f6c6306640ec18bf4d7 w20_test_sha256=41d8d5e80d05dd142a21585eb9bc26ba6930670f6bb232ddfb56839a93687bdc
+solver calls in the test files (optimize( / .solve( / linprog):
+  none
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /home/jin/miniforge3/envs/pypsa-earth/bin/python
+rootdir: /home/jin/wt_v4_w20b
+plugins: anyio-4.10.0
+collecting ... collected 69 items
+
+tests/research/test_v4_coalition.py::test_toy_full_with_bunker_is_identity PASSED [  1%]
+tests/research/test_v4_coalition.py::test_toy_coalition_rules_and_metadata PASSED [  2%]
+tests/research/test_v4_coalition.py::test_toy_dangling_bus_removed PASSED [  4%]
+tests/research/test_v4_coalition.py::test_toy_bunker_kept_on_a_subset_follows_the_nodes PASSED [  5%]
+tests/research/test_v4_coalition.py::test_toy_refusals PASSED            [  7%]
+tests/research/test_v4_coalition.py::test_coalition_list PASSED          [  8%]
+tests/research/test_v4_coalition.py::test_a_identity_2920 PASSED         [ 10%]
+tests/research/test_v4_coalition.py::test_a_identity_56_and_cut_commutes PASSED [ 11%]
+tests/research/test_v4_coalition.py::test_a_full_without_bunker_removes_only_the_bunker PASSED [ 13%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[BN] PASSED     [ 14%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[ID] PASSED     [ 15%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[KH] PASSED     [ 17%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[LA] PASSED     [ 18%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[MM] PASSED     [ 20%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[MY] PASSED     [ 21%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[PH] PASSED     [ 23%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[SG] PASSED     [ 24%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[TH] PASSED     [ 26%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[TL] PASSED     [ 27%]
+tests/research/test_v4_coalition.py::test_b_leave_one_out[VN] PASSED     [ 28%]
+tests/research/test_v4_coalition.py::test_c_blocs[GMS] PASSED            [ 30%]
+tests/research/test_v4_coalition.py::test_c_blocs[LTMS] PASSED           [ 31%]
+tests/research/test_v4_coalition.py::test_c_blocs[BIMP] PASSED           [ 33%]
+tests/research/test_v4_coalition.py::test_cli_deterministic_and_receipt PASSED [ 34%]
+tests/research/test_v4_coalition.py::test_d_main_build_path_does_not_import_the_module PASSED [ 36%]
+tests/research/test_v4_coalition_ports.py::test_bunker_mode_values PASSED [ 37%]
+tests/research/test_v4_coalition_ports.py::test_w20b_runs PASSED         [ 39%]
+tests/research/test_v4_coalition_ports.py::test_toy_ports_full_is_identity PASSED [ 40%]
+tests/research/test_v4_coalition_ports.py::test_toy_ports_subset_follows_the_ports PASSED [ 42%]
+tests/research/test_v4_coalition_ports.py::test_toy_ports_member_without_bunker_drops_the_account PASSED [ 43%]
+tests/research/test_v4_coalition_ports.py::test_toy_ports_refusals PASSED [ 44%]
+tests/research/test_v4_coalition_ports.py::test_toy_false_and_true_unchanged_metadata PASSED [ 46%]
+tests/research/test_v4_coalition_ports.py::test_a_ports_identity_2920 PASSED [ 47%]
+tests/research/test_v4_coalition_ports.py::test_a_ports_identity_56 PASSED [ 49%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[GMS] PASSED [ 50%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[LTMS] PASSED [ 52%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[BIMP] PASSED [ 53%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[nonGMS] PASSED [ 55%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[nonLTMS] PASSED [ 56%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[nonBIMP] PASSED [ 57%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusBN] PASSED [ 59%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusID] PASSED [ 60%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusKH] PASSED [ 62%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusLA] PASSED [ 63%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusMM] PASSED [ 65%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusMY] PASSED [ 66%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusPH] PASSED [ 68%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusSG] PASSED [ 69%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusTH] PASSED [ 71%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusTL] PASSED [ 72%]
+tests/research/test_v4_coalition_ports.py::test_b_false_networks_byte_identical_to_w20[minusVN] PASSED [ 73%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[GMS] PASSED [ 75%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[LTMS] PASSED [ 76%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[BIMP] PASSED [ 78%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[nonGMS] PASSED [ 79%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[nonLTMS] PASSED [ 81%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[nonBIMP] PASSED [ 82%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusBN] PASSED [ 84%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusID] PASSED [ 85%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusKH] PASSED [ 86%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusLA] PASSED [ 88%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusMM] PASSED [ 89%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusMY] PASSED [ 91%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusPH] PASSED [ 92%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusSG] PASSED [ 94%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusTH] PASSED [ 95%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusTL] PASSED [ 97%]
+tests/research/test_v4_coalition_ports.py::test_c_d_ports_coalition[minusVN] PASSED [ 98%]
+tests/research/test_v4_coalition_ports.py::test_ports_vs_true_same_components_real PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/research/test_v4_coalition.py::test_a_identity_2920
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 69 passed, 1 warning in 127.10s (0:02:07) ===================
+	Command being timed: "/home/jin/miniforge3/envs/pypsa-earth/bin/python -m pytest -p no:cacheprovider -v tests/research/test_v4_coalition.py tests/research/test_v4_coalition_ports.py"
+	User time (seconds): 130.14
+	System time (seconds): 8.31
+	Percent of CPU this job got: 108%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:07.76
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 791276
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 52
+	Minor (reclaiming a frame) page faults: 2351526
+	Voluntary context switches: 17023
+	Involuntary context switches: 778
+	Swaps: 0
+	File system inputs: 1026384
+	File system outputs: 752
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+DONE 2026-11-09T10:24:14Z

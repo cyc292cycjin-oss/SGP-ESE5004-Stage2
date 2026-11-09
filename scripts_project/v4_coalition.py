@@ -3,6 +3,17 @@
     PYTHONHASHSEED=0 python scripts_project/v4_coalition.py list
     PYTHONHASHSEED=0 python scripts_project/v4_coalition.py build --base <integrated_2920_3h_unsolved.nc> --coalition GMS --out <dir> [--truncate 56]
     PYTHONHASHSEED=0 python scripts_project/v4_coalition.py build --base <nc> --members KH,LA,MM,TH,VN [--include-bunker] --name X --out <dir>
+    PYTHONHASHSEED=0 python scripts_project/v4_coalition.py list --w20b
+    PYTHONHASHSEED=0 python scripts_project/v4_coalition.py build --base <nc> --w20b-run GMS --out <dir> --truncate 56      (W20b, decision 230)
+    PYTHONHASHSEED=0 python scripts_project/v4_coalition.py build --base <nc> --coalition GMS --bunker-ports --out <dir>     (same rule, any coalition)
+
+W20b (decision 230): include_bunker="ports" splits the bunker player by bunkering port into sub-players B_i (the bunker loads on the port /
+airport nodes of country i) merged into country i (merged game x_i^m = x_i + x_{B,i}). A coalition keeps the bunker loads located at member
+nodes, their bunker terminal buses and supply / metering links (fed from the member's own national liquid buses), and the bunker account with
+only the metering links of member nodes (account level <= 0 unchanged: per-variable rows of the remaining meters); bunker components at non-member
+nodes leave with the non-member (rule R3). Every bunker terminal bus must sit at a node (bus 'location') of one of the 11 countries, else refused.
+If no metering link remains, the account leaves with its hook. include_bunker=False and include_bunker=True behave exactly as in W20 (the W20
+networks are rebuilt byte-identically, test (b) of W20b).
 
 coalition_subnetwork(network, members, include_bunker=False) returns (S-only network, ledger). The definition is decision 133 (2)a as restated in
 decision 228 (V4_W20_INSTRUCTION.md section 0): a non-member country leaves ENTIRELY (demand, resources, facilities, potentials, stock and
@@ -20,7 +31,9 @@ it keeps the bunker player). Rules, applied in this order (each removed item is 
                           liquid transit rail, CO2 ships / transit links into non-member stores, liquid-pool access of non-members
   R3  by participant      the bunker player: buses of country 'ASEAN' (bunker final-energy buses, the account bus), their loads and Store, the
                           metering / bunker shipping links feeding them; the hook research_bunker_net_zero and n.meta['research_bunkers']
-                          (include_bunker=True on a subset keeps the bunker buses located at member nodes and the account)
+                          (include_bunker=True on a subset keeps the bunker buses located at member nodes and the account;
+                          include_bunker="ports", W20b: the same node rule with the location of every bunker bus required, the metadata
+                          research_bunkers.asean_loads / account.ports / by_country following the members, and post-build invariants)
   R4  global / hook rows  GlobalConstraint rows referencing a removed carrier or bus (the v4 network has none); the per-country hook rows follow
                           the network: research_country_co2_limit-<c> for c in n.meta['research_countries'] = members, research_co2_storage_cap-<c>
                           for members with a store, ResearchImportAnnual-<generator> / ResearchStoreDirection-<store> / battery pairs / new-hydro
@@ -60,6 +73,7 @@ if str(HERE) not in sys.path:
 
 SCRIPT = "scripts_project/v4_coalition.py"
 RULES_VERSION = "W20-v1"
+RULES_VERSION_PORTS = "W20b-v1"   # include_bunker="ports" only; False / True keep RULES_VERSION (W20 networks byte-identical)
 BUNKER = "ASEAN"
 COUNTRIES = ("BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN")
 ONE_PORT = ("Load", "Generator", "Store", "StorageUnit", "ShuntImpedance")
@@ -83,6 +97,28 @@ def coalitions() -> dict:
 
 
 COALITION_ORDER = ["GMS", "LTMS", "BIMP", "nonGMS", "nonLTMS", "nonBIMP"] + ["minus" + c for c in COUNTRIES]
+# W20b (decision 230) sections 3 / 4: R0 = all 11 countries without the bunker, then the 17 merged-game coalitions with the bunker split by port
+W20B_ORDER = ["R0"] + COALITION_ORDER
+
+
+def w20b_runs() -> dict:
+    """the 18 W20b networks in solve order: name -> members, include_bunker, network name (file <net>_<res>_unsolved.nc)."""
+    out = {"R0": dict(members=tuple(COUNTRIES), include_bunker=False, net="R0_noBunker")}
+    for k in COALITION_ORDER:
+        out[k] = dict(members=coalitions()[k], include_bunker="ports", net=f"{k}_ports")
+    return out
+
+
+def bunker_mode(include_bunker) -> str:
+    """False -> 'none' (W20: the bunker player leaves); True -> 'all' (W20: kept; on a subset the bunker buses at member nodes stay);
+    'ports' -> W20b (decision 230): the bunker split by bunkering port, B_i merged into country i."""
+    if include_bunker is False or include_bunker is None or (isinstance(include_bunker, (bool, np.bool_)) and not include_bunker):
+        return "none"
+    if include_bunker is True or (isinstance(include_bunker, np.bool_) and bool(include_bunker)):
+        return "all"
+    if include_bunker == "ports":
+        return "ports"
+    raise ValueError(f"include_bunker must be False, True or 'ports' (got {include_bunker!r})")
 
 
 def sha(p: Path) -> str:
@@ -168,6 +204,7 @@ def coalition_subnetwork(network, members, include_bunker: bool = False, *, inpl
         raise ValueError("a coalition needs at least one member")
     if set(S) - set(COUNTRIES):
         raise ValueError(f"unknown countries {sorted(set(S) - set(COUNTRIES))}")
+    ports = bunker_mode(include_bunker) == "ports"   # W20b (decision 230); False / True: the W20 code paths below, unchanged
     import copy as _copy
     if inplace:
         n = network
@@ -195,10 +232,20 @@ def coalition_subnetwork(network, members, include_bunker: bool = False, *, inpl
     # --- R1 / R3 bus sets ---------------------------------------------------------------------------------------------------------
     r1_bus = set(n.buses.index[bc.isin(out_members)])
     asean = set(n.buses.index[bc == BUNKER])
+    port_country = {}   # W20b: bunker terminal bus -> country of its port / airport node (bus 'location')
+    if ports:
+        locp = n.buses.location.astype(str) if "location" in n.buses else pd.Series("", index=n.buses.index)
+        port_country = {b: str(bc.get(locp[b], "")) for b in sorted(asean) if b != BUNKER_STORE}
+        bad = [b for b, c in port_country.items() if c not in COUNTRIES]
+        if bad:
+            raise ValueError(f"include_bunker='ports': bunker buses without a port / airport node of one of the 11 countries {bad[:5]}")
+    bunker_loads0 = {str(x): str(b) for x, b in n.loads.bus.items() if str(b) in port_country}   # before any removal (inplace-safe)
     if not include_bunker:
         r3_bus = set(asean)
     elif full:
         r3_bus = set()
+    elif ports:   # W20b: every bunker terminal bus follows the country of its node (B_i merged into i); the account stays while a member meter remains
+        r3_bus = {b for b, c in port_country.items() if c in out_members}
     else:   # bunker buses located at non-member nodes leave with the node; the account stays while a metering link remains (checked below)
         loc = n.buses.location.astype(str) if "location" in n.buses else pd.Series("", index=n.buses.index)
         r3_bus = {b for b in asean if b != BUNKER_STORE and str(bc.get(loc[b], "")) in out_members}
@@ -359,8 +406,27 @@ def coalition_subnetwork(network, members, include_bunker: bool = False, *, inpl
         if isinstance(rb.get("account"), dict):
             rb["account"]["ports"] = [p for p in rb["account"].get("ports", []) if ("Link", p.get("link")) not in gone]
         if isinstance(rb.get("asean_loads"), dict):
-            rb["asean_loads"] = {k: v for k, v in rb["asean_loads"].items() if ("Load", k) not in gone}
+            rb["asean_loads"] = {k: v for k, v in rb["asean_loads"].items() if ("Load", k) not in gone
+                                 and not (ports and isinstance(v, dict) and ("Bus", str(v.get("bus"))) in gone)}   # W20b: entries whose bus left too
+        if ports and isinstance(rb.get("by_country"), dict):
+            rb["by_country"] = {c: v for c, v in rb["by_country"].items() if c in S}
         bunker_meta = dict(removed=False, account_ports=len(rb["account"]["ports"]), asean_loads=len(rb["asean_loads"]))
+    if ports:
+        term_now = sorted(b for b in n.buses.index[n.buses.country.astype(str) == BUNKER] if b != BUNKER_STORE)
+        if acc_removed and term_now:
+            raise ValueError("include_bunker='ports': bunker loads remain at member nodes but no metering link into the account (no defined account)")
+        ld_now = n.loads.index[n.loads.bus.astype(str).isin(term_now)]
+        w = n.snapshot_weightings.generators
+        e_now = n.get_switchable_as_dense("Load", "p_set")[list(ld_now)].mul(w, axis=0).sum() if len(ld_now) else pd.Series(dtype=float)
+        by_c = defaultdict(float); kinds = defaultdict(float)
+        for x in ld_now:
+            c = port_country[str(n.loads.at[x, "bus"])]; by_c[c] += float(e_now[x]); kinds[f"{c}|{n.loads.at[x, 'carrier']}"] += float(e_now[x])
+        acc_links = sorted(n.links.index[n.links[port_columns(n.links)].astype(str).eq(BUNKER_STORE).any(axis=1)]) if BUNKER_STORE in n.buses.index else []
+        bunker_meta = dict(bunker_meta or dict(removed=bool(acc_removed)), mode="ports", rule="decision 230: bunker split by bunkering port, B_i merged into country i",
+                           terminal_buses_kept=len(term_now), terminal_buses_removed=len(r3_bus), loads_kept=int(len(ld_now)),
+                           loads_removed=int(len(removed.get("R3_bunker", {}).get("Load", []))), metering_links_kept=len(acc_links),
+                           account_kept=bool(BUNKER_STORE in n.stores.index), energy_mwh_kept_by_country=dict(sorted(by_c.items())),
+                           energy_mwh_kept_by_country_carrier=dict(sorted(kinds.items())), energy_mwh_removed=float(demand["R3_mwh"]))
     mled["required_constraint_hooks"] = sorted(m.get("required_constraint_hooks", []))
     # --- retained cross-border facilities and transit links ---------------------------------------------------------------------
     retained = []
@@ -427,9 +493,32 @@ def coalition_subnetwork(network, members, include_bunker: bool = False, *, inpl
         raise AssertionError(f"components reference carriers that are not in n.carriers: {sorted(missing_carriers(n) - miss0)[:5]}")
     if len(n.global_constraints):   # R4: the v4 network has none; a row naming a removed carrier / bus would be refused here
         raise AssertionError("GlobalConstraint rows present: rule R4 has no handling for them (the v4 main network has none)")
+    if ports:   # W20b invariants (decision 230): the bunker part of S is exactly B_i for i in S
+        bcn = n.buses.country.astype(str); asean_now = set(n.buses.index[bcn == BUNKER])
+        off = sorted(b for b in asean_now - {BUNKER_STORE} if port_country.get(b) not in S)
+        if off:
+            raise AssertionError(f"bunker buses at non-member nodes remain {off[:3]}")
+        P_ = port_columns(n.links)
+        for x, r in n.links[n.links[P_].astype(str).isin(asean_now).any(axis=1)].iterrows():
+            cs = {str(bus_country0.get(str(r[p]), "")) for p in P_ if _used(r[p]) and str(r[p]) not in asean_now}
+            if not cs <= set(S):
+                raise AssertionError(f"bunker supply / metering link {x} is fed from outside the coalition {sorted(cs)}")
+        want_ld = {x for x, b in bunker_loads0.items() if port_country[b] in S}
+        if set(n.loads.index[n.loads.bus.astype(str).isin(asean_now)]) != want_ld:
+            raise AssertionError("the bunker loads kept differ from the bunker loads at member nodes")
+        if BUNKER_STORE in n.stores.index:
+            acc = set(n.links.index[n.links[P_].astype(str).eq(BUNKER_STORE).any(axis=1)])
+            if acc != {p["link"] for p in m["research_bunkers"]["account"]["ports"]}:
+                raise AssertionError("research_bunkers.account.ports differs from the metering links on the account")
+            if set(n.loads.index[n.loads.bus.astype(str).isin(asean_now)]) - set(m["research_bunkers"]["asean_loads"]):
+                raise AssertionError("bunker loads missing in research_bunkers.asean_loads")
+            if BUNKER_HOOK not in m.get("required_constraint_hooks", []):
+                raise AssertionError("bunker account kept without its hook")
     by_rule = {r: {t: len(v) for t, v in d.items() if v} for r, d in removed.items()}
-    ledger = dict(script=SCRIPT, rules_version=RULES_VERSION, decision="228 (definition decision 133 (2)a)", members=S, non_members=out_members,
-                  include_bunker=bool(include_bunker), bunker_account_removed=bool(acc_removed), full_coalition=bool(full),
+    ledger = dict(script=SCRIPT, rules_version=(RULES_VERSION_PORTS if ports else RULES_VERSION),
+                  decision=("230 (bunker split by bunkering port, B_i merged into country i; definition decision 133 (2)a)" if ports else "228 (definition decision 133 (2)a)"),
+                  members=S, non_members=out_members,
+                  include_bunker=("ports" if ports else bool(include_bunker)), bunker_account_removed=bool(acc_removed), full_coalition=bool(full),
                   removed_by_rule=by_rule, removed_total={t: int(sum(by_rule[r].get(t, 0) for r in by_rule)) for t in sorted({t for d in by_rule.values() for t in d})},
                   boundary_by_carrier={f"{t}|{c}": k for (t, c), k in sorted(boundary.items())}, boundary_components=boundary_rows,
                   existing_cross_border_fom_removed=xb_removed, existing_cross_border_fom_removed_eur=float(sum(r["annual_fom_eur"] for r in xb_removed)),
@@ -443,8 +532,9 @@ def coalition_subnetwork(network, members, include_bunker: bool = False, *, inpl
                   retained_cross_border_trade_links=dict(Counter(r["carrier"] for r in retained if r["component_type"] == "Link" and r["carrier"] not in PHYSICAL_XB)),
                   transit_via_non_member=transit, demand_removed_mwh=demand, bunker=bunker_meta, meta=mled,
                   components_before=components_before, components_after={c.name: int(len(c.df)) for c in n.iterate_components()})
-    m["research_coalition"] = jsonable(dict(members=S, non_members=out_members, include_bunker=bool(include_bunker), rules_version=RULES_VERSION, script=SCRIPT,
-                                            decision="228", removed_by_rule=by_rule, retained_cross_border=len(retained),
+    m["research_coalition"] = jsonable(dict(members=S, non_members=out_members, include_bunker=("ports" if ports else bool(include_bunker)),
+                                            rules_version=(RULES_VERSION_PORTS if ports else RULES_VERSION), script=SCRIPT,
+                                            decision=("230" if ports else "228"), removed_by_rule=by_rule, retained_cross_border=len(retained),
                                             retained_cross_border_stock=len(ledger["retained_cross_border_stock"]), solver_runs=0))
     return n, ledger
 
@@ -497,7 +587,7 @@ def cut(n, snapshots: int) -> dict:
 
 
 # ------------------------------------------------------------------------------------------------------------------------------- CLI
-def build(base: Path, out: Path, name: str, members, include_bunker: bool, truncate: int, expect_sha: str | None = None) -> dict:
+def build(base: Path, out: Path, name: str, members, include_bunker, truncate: int, expect_sha: str | None = None) -> dict:
     import pypsa
     import logging
     from network_checks import compare_roundtrip
@@ -528,25 +618,40 @@ def build(base: Path, out: Path, name: str, members, include_bunker: bool, trunc
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("list")
+    ls_ = sub.add_parser("list"); ls_.add_argument("--w20b", action="store_true", help="the 18 W20b runs (decision 230): name, network name, bunker mode, members")
     b = sub.add_parser("build")
     b.add_argument("--base", type=Path, required=True); b.add_argument("--out", type=Path, required=True)
     b.add_argument("--coalition", choices=COALITION_ORDER, default=None); b.add_argument("--members", default=None, help="comma-separated ISO2 codes")
+    b.add_argument("--w20b-run", choices=W20B_ORDER, default=None, help="one of the 18 W20b runs (members, bunker mode and network name from w20b_runs())")
     b.add_argument("--name", default=None); b.add_argument("--include-bunker", action="store_true")
+    b.add_argument("--bunker-ports", action="store_true", help="include_bunker='ports' (W20b, decision 230): bunker split by bunkering port, merged into the country")
     b.add_argument("--truncate", type=int, default=0, help="cut to the first N snapshots with the s2_solve.py --truncate rule after the subnetwork")
     b.add_argument("--expect-base-sha256", default=None)
     a = p.parse_args(argv)
     if a.cmd == "list":
+        if a.w20b:
+            for k, v in w20b_runs().items():
+                print(k, v["net"], "ports" if v["include_bunker"] == "ports" else ("bunker" if v["include_bunker"] else "no_bunker"), ",".join(v["members"]))
+            return 0
         for k in COALITION_ORDER:
             print(k, ",".join(coalitions()[k]))
         return 0
-    if bool(a.coalition) == bool(a.members):
-        p.error("give exactly one of --coalition / --members")
-    members = coalitions()[a.coalition] if a.coalition else [x.strip() for x in a.members.split(",") if x.strip()]
-    name = a.name or a.coalition
+    if a.include_bunker and a.bunker_ports:
+        p.error("give at most one of --include-bunker / --bunker-ports")
+    if a.w20b_run:
+        if a.coalition or a.members or a.include_bunker or a.bunker_ports:
+            p.error("--w20b-run fixes members and the bunker mode")
+        spec = w20b_runs()[a.w20b_run]
+        members, inc, name = spec["members"], spec["include_bunker"], (a.name or spec["net"])
+    else:
+        if bool(a.coalition) == bool(a.members):
+            p.error("give exactly one of --coalition / --members / --w20b-run")
+        members = coalitions()[a.coalition] if a.coalition else [x.strip() for x in a.members.split(",") if x.strip()]
+        inc = "ports" if a.bunker_ports else a.include_bunker
+        name = a.name or (a.coalition + ("_ports" if a.bunker_ports else "") if a.coalition else None)
     if not name:
         p.error("--name is required with --members")
-    r = build(a.base, a.out, name, members, a.include_bunker, a.truncate, a.expect_base_sha256)
+    r = build(a.base, a.out, name, members, inc, a.truncate, a.expect_base_sha256)
     L = r["ledger"]
     print(json.dumps(dict(output=r["output"]["path"], sha256=r["output"]["sha256"], members=L["members"], removed_total=L["removed_total"],
                           boundary=sum(L["boundary_by_carrier"].values()), retained_cross_border=len(L["retained_cross_border"]),
