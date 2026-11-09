@@ -14,4 +14,7 @@
 - 07:47–07:53 第 5 节：`scripts/w19a_4_registry_tiers.py` → `REGISTRY_TIERS.csv`、`evidence/REGISTRY_C462_CLASSES.csv` 等；`scripts/w19a_5_top30.py` → `TOP30_STATUS.csv`（审阅端 05:00 分类在工作区内未找到）。
 - 07:53–07:55 第 3 节换算：`scripts/w19a_6_wacc_basis.py` → `evidence/WACC_BASIS.csv/json`（税率 INFERENCE）。
 - 07:55–07:59 `REPORT.md`、`DOWNLOAD_CANDIDATES.csv`、`evidence/APPENDIX_LITERATURE.md`、`EVIDENCE.json`（`scripts/w19a_7_evidence.py`）；用户下载目录无新文件。
-- 恢复点：同步到仓库目录、泄露扫描、提交 W19a-1、审阅包与清单、提交 W19a-2、推送。
+- 08:00 同步到 `research/06_scope_redesign/p1_v4_w19a_20261109/`（`scripts/sync.sh`，cache/ 与 zip 不入库）；许可 / 令牌类字符串扫描 0 个文件（模式只在运行时给出）。
+- 08:01 提交 W19a-1 `47ef36db`（30 个文件）；`.gitignore` 的 `*.csv` 规则忽略了 7 个交付 CSV，按 D2b / D2c 先例强制加入，提交 W19a-1b `f011bf3d`（37 个文件全部入库）。未用 `--no-verify` / `core.hooksPath`。
+- 08:03 审阅包 `REVIEW_f011bf3d.zip`（`git archive` 自 f011bf3d，37 个成员，107,740 字节，SHA256 5cc9f8c27678189c144e6268b0d8750077df3c3a788e2f52ea29d07a42a30db7；逐成员 SHA256 / CRC32 见 `evidence/REVIEW_MANIFEST.csv`，zip 不入库）。
+- 恢复点：提交 W19a-2（清单、进度）并推送 `asean/v4-w19a-20261109`；不开 PR（同 W10 / D2c / W14 先例），等待审阅。
