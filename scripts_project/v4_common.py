@@ -80,6 +80,15 @@ BIOMASS_POTENTIAL_FILES = {"v3": None, "v4_adjusted": "research_inputs/biomass_v
                            "v4_adjusted_t04": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv",   # V4 D2a (T04, decision 220): switch alternative
                            "v4_adjusted_t05": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv",   # V4 D2b (T05, decision 221): high-sensitivity switch value since D2c
                            "v4_adjusted_t06": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T06.csv"}   # V4 D2c (T06, decision 223): v4 main
+BIOMASS_POTENTIAL_V5FIX = "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv"   # V5 X20 (1-7): T06 on the corrected residue chain
+
+
+def biomass_potential_file(s: dict) -> str | None:
+    """Potential table of the switch set: V5 X20 v5_biomass_residue_fix = corrected -> T06 on the corrected d1_biomass chain (needs v4_adjusted_t06);
+    otherwise BIOMASS_POTENTIAL_FILES[biomass_potential]."""
+    if s.get("v5_biomass_residue_fix") == "corrected":
+        return BIOMASS_POTENTIAL_V5FIX
+    return BIOMASS_POTENTIAL_FILES[s["biomass_potential"]]
 
 
 def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
@@ -152,7 +161,7 @@ def v4_tables(cfg: dict, repo: Path | None = None) -> dict | None:
                 summary_table=rel("INDUSTRY_2050_SUMMARY_V4.csv"), carrier_node_shares=rel("INDUSTRY_CARRIER_NODE_SHARES_V4.csv"),
                 feedstock_table=rel("FEEDSTOCK_CARBON_TERRITORIAL_2050_V4.csv"), process_table=rel("PROCESS_EMISSIONS_2050_V4.csv"),
                 curve_weights=rel("INDUSTRY_CURVE_WEIGHTS_V4.csv"),
-                biomass_potential=BIOMASS_POTENTIAL_FILES[s["biomass_potential"]],
+                biomass_potential=biomass_potential_file(s),
                 gas_caps=("research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv" if s["gas_caps"] == "marketed" else None))
 
 
@@ -177,6 +186,8 @@ def check(s: dict) -> None:
         for k in V5.TABLE_KEYS:
             if str(s[f"v5_{k}"]) not in V5.SWITCH_VALUES[k]:
                 raise ValueError(f"research.demand.v5.{k} = {s[f'v5_{k}']} not in {V5.SWITCH_VALUES[k]}")
+        if s["v5_biomass_residue_fix"] == "corrected" and s["biomass_potential"] != "v4_adjusted_t06":
+            raise ValueError("research.demand.v5.biomass_residue_fix corrected is implemented on research.demand.v4.biomass_potential v4_adjusted_t06 only")
 
 
 def out_dir(s: dict) -> Path:

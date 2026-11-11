@@ -679,6 +679,8 @@ def build_steps(I: Inputs, s: dict) -> list:
             c["biopot"] = str(BIOPOT_V4_T05)
         elif s["biomass_potential"] == "v4_adjusted_t06":   # V4 D2c (T06, decision 223): v4 main
             c["biopot"] = str(BIOPOT_V4_T06)
+        if s.get("v5_biomass_residue_fix") == "corrected":   # V5 X20 (1-7): T06 on the corrected residue chain (v4_common.check: needs v4_adjusted_t06)
+            c["biopot"] = str(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv")
         return c
 
     return [("S1", "基年替换（SDMX）与锚构造", s1), ("S2", "锚边界对齐（残渣移出、平衡表外燃料木材）", s2), ("S3", "(ii) 类：ID 家庭汽油移道路、铁路父行移出", s3),

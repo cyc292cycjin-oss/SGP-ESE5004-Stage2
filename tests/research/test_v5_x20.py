@@ -414,3 +414,39 @@ def test_geothermal_caps_v5():
             else:
                 assert led["PH_rebuild"]["v5_mw"] < led["PH_rebuild"]["v4_mw"]                       # 40 a / inclusive: fewer units retire before 2050
     assert L.geothermal_caps_v5(n, caps, cfg(), ROOT)[0] is caps                                      # v5 off: the table rows as they are
+
+
+# ---- 1-7 residue chain fixes E1 / E2 (decisions 241, 246; addendum section 4.3) -----------------------------------------------------
+def test_biomass_v5fix_tables():
+    b = ROOT / "research_inputs/biomass_v5"
+    a, f = pd.read_csv(b / "BIOMASS_POTENTIAL_2050.csv"), pd.read_csv(b / "BIOMASS_POTENTIAL_2050_V5FIX.csv")
+    a6, f6 = pd.read_csv(b / "BIOMASS_POTENTIAL_2050_V4_T06.csv"), pd.read_csv(b / "BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv")
+    assert list(a.columns) == list(f.columns) and set(zip(a.country, a.category)) == set(zip(f.country, f.category))
+    d = f.set_index(["country", "category"]).potential_main_mwh.sub(a.set_index(["country", "category"]).potential_main_mwh, fill_value=0)
+    assert set(d[d.abs() > 1e-6].index.get_level_values(1)) <= {"other_crop_residues"}             # E1 / E2 act on the other-crop pool only
+    mm = lambda t: float(t[(t.country == "MM") & (t.feedstock_group != "biogas")].potential_main_mwh.sum()) / 1e6   # noqa: E731
+    assert abs(mm(a6) - 85.6304) < 1e-3 and abs(mm(f6) - 84.2149) < 1e-3                          # MM 85.63 -> 84.21 TWh
+    x = pd.read_csv(b / "BIOMASS_CROSSCHECK_IRENA_V5.csv").set_index("country")
+    assert abs(x.at["MM", "irena2022_collectable_2050_PJ"] - 33.2) < 1e-9 and x.t06_v5fix_solid_PJ.gt(0).all()
+
+
+def test_biomass_potential_switch():
+    import v4_common as C
+    s = C.switches(None, {**C.V4_MAIN, "v5_neu_gas_growth": "product", "v5_biomass_residue_fix": "corrected"})
+    assert C.biomass_potential_file(s) == C.BIOMASS_POTENTIAL_V5FIX
+    assert C.biomass_potential_file(dict(s, v5_biomass_residue_fix="v4")) == C.BIOMASS_POTENTIAL_FILES["v4_adjusted_t06"]
+    assert C.biomass_potential_file(C.switches(None, dict(C.V4_MAIN))) == C.BIOMASS_POTENTIAL_FILES["v4_adjusted_t06"]
+    with pytest.raises(ValueError):
+        C.switches(None, {**C.V4_MAIN, "biomass_potential": "v4_adjusted_t05", "v5_neu_gas_growth": "product", "v5_biomass_residue_fix": "corrected"})
+
+
+def test_d1_biomass_v5_constants():
+    import d1_biomass as B
+    assert set(B.V5_GROUPS_ADD) == {"Spices", "Cereals, other", "Sunflowers"} and not set(B.V5_GROUPS_ADD) & set(B.GROUPS)
+    assert set(B.V5_DROP_ITEMS) <= set(B.FAO_TO_IRENA) and B.FAO_TO_IRENA["Seed cotton, unginned"] == "Seed cotton"
+    txt = B.IRENA_TXT.read_text(encoding="utf-8")
+    r5, r4 = B.parse_r3(txt, B.GROUPS + list(B.V5_GROUPS_ADD)), B.parse_r3(txt)
+    labels = {"Chillies and peppers, dry", "Spices not elsewhere specified", "Cereals not elsewhere specified", "Sunflower seed"}   # the mapped R-3 labels
+    assert labels <= set(r5.commodity) and set(r5[r5.commodity.isin(labels)].group) <= set(B.V5_GROUPS_ADD)   # E2: prefixes stripped, labels match the mapping
+    assert not labels & set(r4.commodity) and r4.commodity.str.startswith(("Spices Chillies", "Cereals, other ", "Sunflowers ")).any()   # v4: labels kept the prefix
+    assert len(r5) == len(r4)

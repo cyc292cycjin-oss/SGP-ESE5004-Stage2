@@ -1,0 +1,43 @@
+== (1) reproduction (v4 mode)
+d1_biomass exit 0
+v4_biomass_potential exit 0
+git status after the v4-mode reruns (must be empty):
+ M research_inputs/registry_v5/fragments/biomass.csv
+ M research_inputs/registry_v5/fragments/biomass.json
+(end)
+== (2) --v5-residue-fix
+V5 X20 1-7: wrote BIOMASS_POTENTIAL_2050_V5FIX.csv 119 rows
+exit 0
+112       TL  TOTAL solid              0.60               0.00             0.00                    0.60              0.59  country total  PROPOSED (quantified)     C          0.00
+113       VN  TOTAL solid            126.56              -1.14            -4.27                  121.15            119.94  country total  PROPOSED (quantified)     C          0.00
+114  ASEAN11  TOTAL solid           2002.08             -25.97          -296.65                 1263.31           1250.68            sum  PROPOSED (quantified)     C       -416.15
+exit 0
+         v3_base_TWh  v5fix_base_TWh   t06_TWh  t06_v5fix_TWh  d_t06_TWh
+country                                                                 
+BN            0.1159          0.1180    0.1159         0.1179     0.0021
+ID          976.7487        986.6054  525.7885       535.6452     9.8567
+KH           49.3486         49.3877   47.7895        47.8285     0.0391
+LA           26.3513         26.4131   25.6091        25.6709     0.0618
+MM          104.0304        102.6149   85.6304        84.2149    -1.4155
+MY          247.0248        247.1483   76.2983        76.4218     0.1235
+PH          141.3778        141.4314  125.7640       125.8177     0.0537
+SG            0.0315          0.0315    0.0315         0.0315     0.0000
+TH          319.4198        321.1742  244.0619       245.8163     1.7544
+TL            0.5940          0.5951    0.5940         0.5951     0.0010
+VN          125.7726        126.5561  120.3659       121.1494     0.7835
+ASEAN d_t06 TWh 11.2602
+MM base change by category (TWh, v4 - v5fix):
+category
+other_crop_residues    1.4155
+country  t06_solid_PJ  t06_v5fix_solid_PJ  t06_crop_residues_PJ  t06_v5fix_crop_residues_PJ  irena2022_collectable_2050_PJ  ratio_t06_v5fix_to_irena2022
+     BN         0.417               0.425                 0.164                       0.171                            NaN                           NaN
+     ID      1892.839            1928.323              1004.192                    1039.676                         2594.6                         0.743
+     KH       172.042             172.183               165.576                     165.716                            NaN                           NaN
+     LA        92.193              92.415                87.621                      87.843                            NaN                           NaN
+     MM       308.270             303.174               271.104                     266.008                           33.2                         9.132
+     MY       274.674             275.118                23.909                      24.354                          197.0                         1.397
+     PH       452.751             452.944               285.851                     286.044                            NaN                           NaN
+     SG         0.113               0.113                 0.085                       0.085                            NaN                           NaN
+     TH       878.623             884.939               778.691                     785.007                          978.8                         0.904
+     TL         2.138               2.142                 1.663                       1.667                            NaN                           NaN
+     VN       433.317             436.138               408.110                     410.930                          485.5                         0.898

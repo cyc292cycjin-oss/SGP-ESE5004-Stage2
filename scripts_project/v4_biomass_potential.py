@@ -51,6 +51,11 @@ OUT_T06 = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T06.csv"   # V4 D2c (T06, dec
 ADJ_T06 = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T06.csv"
 BASIS_T06 = BIOMASS_DIR / "BIOMASS_BASIS_T06.csv"   # V4 D2c: T05 with the oil palm trunk row on the measured trunk dry mass per palm (TRUNK_DRY_MASS.csv of the D2c delivery)
 BASES = ("w08", "t04", "t05", "t06")
+# V5 X20 (1-7, decisions 241, 246): T06 on the corrected residue table of d1_biomass.py --v5-residue-fix (research.demand.v5.biomass_residue_fix = corrected)
+BASE_V5FIX = "BIOMASS_POTENTIAL_2050_V5FIX.csv"
+OUT_T06_V5FIX = BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv"
+ADJ_T06_V5FIX = BIOMASS_DIR / "BIOMASS_POTENTIAL_ADJ_V4_T06_V5FIX.csv"
+CROSSCHECK_V5 = BIOMASS_DIR / "BIOMASS_CROSSCHECK_IRENA_V5.csv"
 SELF_USE = BIOMASS_DIR / "PALM_MILL_SELF_USE.csv"   # V4 D1 (decision 214 (a), T03): per country fibre / PKS low / mid / high, grades, verdicts, sources
 
 
@@ -121,14 +126,15 @@ def t06_changed() -> set:
     return {k for k in b.index if not a.loc[k].equals(b.loc[k])}
 
 
-def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid", basis: str = "w08") -> tuple[pd.DataFrame, pd.DataFrame]:
+def adjust(pks_share: float | None = None, source: str = "table", level: str = "mid", basis: str = "w08", base: str = "BIOMASS_POTENTIAL_2050.csv") -> tuple[pd.DataFrame, pd.DataFrame]:
     """pks_share (W08 interface): one PKS share for every country (sensitivity) instead of the table / constant value.
     basis (V4 D2a, T04): w08 = the W08 energy basis (15 GJ/t on the wet residue mass) | t04 = the palm-residue basis correction of PALM_RESIDUE_BASIS_T04.csv
-    applied to the v3 potential before the F3 / F4 deductions (EFB, fibre; PKS kept; trunk undetermined, kept)."""
+    applied to the v3 potential before the F3 / F4 deductions (EFB, fibre; PKS kept; trunk undetermined, kept).
+    base (V5 X20 1-7): the d1_biomass table the adjustments start from (BASE_V5FIX = the corrected residue chain)."""
     su = self_use(source, level)
     bf = basis_factors(basis)
     new6 = t06_changed() if basis == "t06" else set()
-    bp = pd.read_csv(BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv")
+    bp = pd.read_csv(BIOMASS_DIR / base)
     sol = bp[bp.feedstock_group != "biogas"].copy()
     over = pd.read_csv(BIOMASS_DIR / "W12_BAGASSE_SUPPLY_OVERESTIMATE.csv").set_index("country")
     ub = pd.read_csv(BIOMASS_DIR / "W12_UNSD_BAGASSE_2019.csv").set_index("country")
@@ -218,7 +224,33 @@ def adjust(pks_share: float | None = None, source: str = "table", level: str = "
     return adj, pd.DataFrame(rows + tot)
 
 
-def main():
+CROP_CATS = ("rice_residues", "sugarcane_residues", "maize_residues", "cassava_residues", "other_crop_residues")
+
+
+def crosscheck_v5(t6: pd.DataFrame, t6fix: pd.DataFrame) -> pd.DataFrame:
+    """V5 X20 (1-7, X20_SPEC 1.7 item 3): IRENA 2022 collectable 2050 residues against the current T06 tables (the v3-based BIOMASS_CROSSCHECK_IRENA.csv is
+    kept as it is). Solid pools only (feedstock_group != biogas), PJ."""
+    from d1_biomass import IRENA2022_COLLECTABLE_2050_PJ
+    pj = lambda d, cats=None: float(d[(d.feedstock_group != "biogas") & (d.category.isin(cats) if cats else True)].potential_main_mwh.fillna(0).sum()) * 3.6 / 1e6   # noqa: E731
+    rows = []
+    for c in sorted(set(t6.country)):
+        a, b = t6[t6.country == c], t6fix[t6fix.country == c]
+        ir = IRENA2022_COLLECTABLE_2050_PJ.get(c)
+        rows.append(dict(country=c, t06_solid_PJ=pj(a), t06_v5fix_solid_PJ=pj(b), t06_crop_residues_PJ=pj(a, CROP_CATS), t06_v5fix_crop_residues_PJ=pj(b, CROP_CATS),
+                         irena2022_collectable_2050_PJ=ir, ratio_t06_v5fix_to_irena2022=(pj(b) / ir) if ir else None))
+    return pd.DataFrame(rows)
+
+
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--v5-residue-fix", action="store_true", help="V5 X20 1-7: T06 on BIOMASS_POTENTIAL_2050_V5FIX.csv only (+ IRENA cross-check V5)")
+    if ap.parse_args(argv).v5_residue_fix:
+        adj6, tab6 = adjust(basis="t06", base=BASE_V5FIX)
+        adj6.to_csv(OUT_T06_V5FIX, index=False, lineterminator="\n")
+        tab6.to_csv(ADJ_T06_V5FIX, index=False, float_format="%.6f", lineterminator="\n")
+        crosscheck_v5(pd.read_csv(OUT_T06), adj6).to_csv(CROSSCHECK_V5, index=False, lineterminator="\n")
+        print(tab6[tab6.category == "TOTAL solid"].round(2).to_string())
+        return
     adj, tab = adjust()
     adj.to_csv(OUT, index=False, lineterminator="\n")
     tab.to_csv(ADJ, index=False, float_format="%.6f", lineterminator="\n")

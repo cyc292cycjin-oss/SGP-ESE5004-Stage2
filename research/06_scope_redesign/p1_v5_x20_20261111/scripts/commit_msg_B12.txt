@@ -1,0 +1,26 @@
+X20 1-7 (decisions 241, 246): residue chain fixes E1 / E2 behind biomass_residue_fix
+
+research.demand.v5.biomass_residue_fix: corrected (v5 main) | v4; a
+table-level key (it changes the potential that also sets the overflow cap
+of the v4 table chain), so it enters the v4 switch set as
+v5_biomass_residue_fix (decision 246, addendum section 4.3).
+
+d1_biomass.py --v5-residue-fix: E1 cotton counted three times (seed cotton,
+lint and cottonseed each mapped to an IRENA R-3 row with field factors) ->
+only seed cotton kept; E2 the R-3 group prefixes "Spices", "Cereals,
+other", "Sunflowers" were missing from GROUPS, so the labels kept the
+prefix and matched no mapping -> added. Writes BIOMASS_POTENTIAL_2050_
+V5FIX.csv only. v4_biomass_potential.py --v5-residue-fix: T06 on that base
+(BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv, ADJ table) and the IRENA 2022
+cross-check on the current T06 tables (BIOMASS_CROSSCHECK_IRENA_V5.csv; the
+v3-based table kept). v4_common.biomass_potential_file / v4_industry S7
+read the V5FIX table when the key is corrected (needs v4_adjusted_t06).
+
+Both scripts reproduce every committed v4 output in v4 mode. The registry
+fragment biomass.* would only change its irena_text_sha256: the fragment
+cites eaf81aa2 (main-checkout working copy) while the git blob of
+IRENA2017_pdf20_40_pypdf_text.txt is 76356c9e; left unchanged (limitation).
+T06 change: MM 85.63 -> 84.21 TWh (other crop residues only), ASEAN +11.26
+TWh (ID +9.86, TH +1.75, VN +0.78). Targeted tests: 66 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

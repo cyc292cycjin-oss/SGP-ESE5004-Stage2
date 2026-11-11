@@ -132,8 +132,9 @@ def to_num(s):
     return 0.0 if s.strip() == "-" else float(s.replace(" ", ""))
 
 
-def parse_r3(text):
-    """Return DataFrame(country, group, commodity, hf, h_kt, pf, p_kt) from the five R-3 tables."""
+def parse_r3(text, groups=None):
+    """Return DataFrame(country, group, commodity, hf, h_kt, pf, p_kt) from the five R-3 tables (groups: commodity-group prefixes, default GROUPS)."""
+    groups = GROUPS if groups is None else groups
     rows = []
     bounds = [(c, text.index(R3_HEADERS[c])) for c in IRENA_COUNTRY_ORDER]
     end = text.index("Table R-4 Growth rates for crop output")
@@ -150,7 +151,7 @@ def parse_r3(text):
             txt = m.group("text").strip()
             txt = re.sub(r"^\d+\s+", "", txt)
             group = ""
-            for g in sorted(GROUPS, key=len, reverse=True):
+            for g in sorted(groups, key=len, reverse=True):
                 if txt.startswith(g + " ") and len(txt) > len(g) + 1:
                     group, txt = g, txt[len(g) + 1:].strip()
                     break
@@ -193,9 +194,21 @@ def fao_recent(csv_path):
     return q
 
 
-def main():
+# V5 X20 (1-7, decisions 241, 246; X20_SPEC_ADDENDUM_246.md section 4.3): two method errors of the residue chain, fixed for all 11 countries with
+# --v5-residue-fix (research.demand.v5.biomass_residue_fix = corrected; output BIOMASS_POTENTIAL_2050_V5FIX.csv only, every v4 output untouched):
+#   E1 cotton counted three times - seed cotton, cotton lint and cottonseed each mapped to an R-3 row with field factors; only seed cotton is kept
+#   E2 R-3 commodity-group prefixes "Spices", "Cereals, other", "Sunflowers" were missing from GROUPS, the labels kept the prefix and matched no mapping
+V5_GROUPS_ADD = ("Spices", "Cereals, other", "Sunflowers")
+V5_DROP_ITEMS = ("Cotton lint, ginned", "Cotton seed")
+
+
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--v5-residue-fix", action="store_true", help="V5 X20 1-7: E1 / E2 fixed, writes BIOMASS_POTENTIAL_2050_V5FIX.csv only")
+    v5fix = ap.parse_args(argv).v5_residue_fix
+    fao_map = {k: v for k, v in FAO_TO_IRENA.items() if k not in V5_DROP_ITEMS} if v5fix else FAO_TO_IRENA
     text = IRENA_TXT.read_text(encoding="utf-8")
-    r3 = parse_r3(text)
+    r3 = parse_r3(text, (GROUPS + list(V5_GROUPS_ADD)) if v5fix else None)
     r2 = parse_r2(text)
     irena_sha = f"IRENA_Biofuel_Potential_SE_Asia_2017.pdf:{IRENA2017_PDF_SHA}...; text:{sha256(IRENA_TXT)}"
     # ---- Step 1a: internal replication of R-1a from R-3 rows ---------------------------------------------
@@ -223,7 +236,7 @@ def main():
     fac_df = pd.DataFrame(fac)
     # ---- Step 1b: FAOSTAT 2010 (current revision) x IRENA factors ------------------------------------------
     f10 = fao_2010(QCL_ZIP)
-    f10["irena"] = f10.Item.map(FAO_TO_IRENA)
+    f10["irena"] = f10.Item.map(fao_map)
     factors = r3.groupby("commodity").agg(hf=("hf", lambda s: statistics.mode(s)), pf=("pf", lambda s: statistics.mode(s))).to_dict("index")
     fao_rep, crop_rep = [], []
     for c in IRENA_COUNTRY_ORDER:
@@ -248,7 +261,7 @@ def main():
     # ---- Step 2/3: 2050 potentials for 11 countries -----------------------------------------------------------
     q = fao_recent(SRC_DIR / QCL_CSV)
     prod = q[(q.Element == "Production") & (q.Unit == "t")].copy()
-    prod["irena"] = prod.Item.map(FAO_TO_IRENA)
+    prod["irena"] = prod.Item.map(fao_map)
     area = q[(q.Element == "Area harvested") & (q.Unit == "ha") & (q.Item == "Oil palm fruit")].set_index("ISO2").mean_2019_2023
     fo = pd.read_csv(SRC_DIR / FO_CSV, dtype=str)
     for y in ["Y2019", "Y2020", "Y2021", "Y2022", "Y2023"]:
@@ -368,6 +381,10 @@ def main():
             "potential_tier", "potential_method", "potential_sources", "cost_eur2020_per_mwh", "cost_low_eur2020_per_mwh", "cost_high_eur2020_per_mwh",
             "cost_tier", "cost_source", "status", "notes"]
     out.sort(key=lambda r: (r["country"], r["category"]))
+    if v5fix:   # V5 X20 (1-7): the corrected potential table only (no cross-check, replication, registry or evidence output)
+        write_csv(out, BIOMASS_DIR / "BIOMASS_POTENTIAL_2050_V5FIX.csv", cols)
+        print("V5 X20 1-7: wrote BIOMASS_POTENTIAL_2050_V5FIX.csv", len(out), "rows")
+        return
     write_csv(out, BIOMASS_DIR / "BIOMASS_POTENTIAL_2050.csv", cols)
     # cross-checks against IRENA
     xc = []
