@@ -143,6 +143,8 @@ def derive(repo: Path, base: Path, out: Path, sets: dict, costs_path: Path | Non
         pass
     from v4_common import check_network_meta
     check_network_meta(n.meta, cfg, repo)   # V4 D1 (decision 214 item 8): the variant keeps the base network's v4 table set
+    from v5_common import check_network_meta_v5
+    check_network_meta_v5(n.meta, cfg)   # V5 X20 (decisions 241, 244, 246): the variant keeps the base network's v5 switch set
     path = out / f"{name}_{res}_unsolved.nc"
     n.export_to_netcdf(path)
     back = pypsa.Network(str(path)); compare_roundtrip(n, back)

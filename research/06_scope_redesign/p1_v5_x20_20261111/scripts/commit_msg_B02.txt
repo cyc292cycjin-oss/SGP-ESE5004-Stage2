@@ -1,0 +1,28 @@
+X20 B-1 framework (decisions 241, 244, 246): v5 switch set, table identity, meta check
+
+research.demand.v5 (configs/research/baseline.yaml, after the v4 block):
+enabled false is the default and keeps every rule at its 26c2e47d (v4 W14)
+behaviour; the listed keys are the v5 main set (scripts_project/v5_common.py
+V5_MAIN / V5_OFF, allowed values, switch SHA256). v5 needs v4 enabled.
+
+v4_common: with v5 enabled the two table-level keys (neu_gas_growth 2-4,
+biomass_residue_fix 1-7) join the v4 switch set as v5_<key>; the v4 main set
+plus their v5 main values is the folder out_<anchor>_v5, any other set
+out_<anchor>_<sha12>. With v5 disabled the v4 switch set, its SHA256 and the
+folder identity are those of 26c2e47d.
+
+s2_network writes n.meta["v5_x20"] (switches, SHA256, tables, ledgers) and
+refuses a network whose record differs from the configuration;
+m08a_variants checks the same before export. test_dfx_demand F0.3: v5_*.py
+files are exempt like v3_ / v4_ files (documented in the X20 folder).
+
+Registry chain rerun (baseline.yaml SHA256 is cited): 2,469 rows, only
+v4_biomass_overflow_cap_share source_sha256 changed. v4 baseline full tests
+at e4b590f8: 875 passed, 1 failed (the known S1 reload test), 56 skipped.
+Targeted tests after this change: 185 passed.
+
+Step folder: PROGRESS.md (stale A placeholder sentence removed from the
+23:15 row), X20_SPEC_ADDENDUM_246.md section 4 (Q7 result, 2-4 product rule,
+1-7 handling), data-preparation scripts, logs and evidence.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

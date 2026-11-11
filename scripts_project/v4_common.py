@@ -29,6 +29,8 @@ Every v4 change sits behind a switch of research.demand (configs/research/baseli
                                      enters at 0) | proxy (the registry proxy biomass_missing_cost_proxy); null = the value of the switch set (v4.enabled
                                      false -> zero, true -> proxy). It acts on the network build only and is part of the switch set (SHA256, folder).
 Table folders (V4 D1, decision 214 item 8): out_<anchor_mode> holds only the v4 main set of that anchor mode (V4_MAIN with that anchor_mode);
+V5 X20 (decisions 241, 244, 246): with research.demand.v5.enabled true the table-level v5 keys (v5_common.TABLE_KEYS) join the switch set as
+v5_<key>; out_<anchor_mode>_v5 holds the v4 main set plus the v5 main values of those keys (v4_industry.py --set v5_<key>=<value>);
 every other switch set is written to out_<anchor_mode>_<first 12 hex of its switch SHA256>; every folder carries V4_SWITCHES.json, and the build
 (s2_network.py, m08a_variants.py) checks that the switch SHA256 in the network meta = the folder's = the configuration's (check_network_meta).
 Nothing here solves or builds a network.
@@ -95,6 +97,10 @@ def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
     mc = (R.get("biomass") or {}).get("missing_cost_rule")
     if mc is not None:
         s["missing_cost_rule"] = str(mc)
+    if (d.get("v5") or {}).get("enabled"):   # V5 X20 (decisions 241, 244, 246): the table-level v5 keys join the v4 switch set (v5_common.TABLE_KEYS)
+        import v5_common as V5
+        s5 = V5.switches(cfg)   # raises when research.demand.v4.enabled is false
+        s.update({f"v5_{k}": s5[k] for k in V5.TABLE_KEYS})
     s.update(overrides or {})
     check(s)
     return s
@@ -105,9 +111,27 @@ def is_main_set(s: dict) -> bool:
     return set(s) == set(V4_MAIN) | {"anchor_mode"} and all(s[k] == v for k, v in V4_MAIN.items())
 
 
+def v5_table_keys(s: dict) -> list:
+    """V5 X20: the v5_<key> members of a v4 switch set (empty with research.demand.v5.enabled false)."""
+    return sorted(k for k in s if k.startswith("v5_"))
+
+
+def is_v5_main_tables(s: dict) -> bool:
+    """V5 X20: True when s is the v4 main set plus the v5 main values of every table-level v5 key (folder out_<anchor_mode>_v5)."""
+    import v5_common as V5
+    want = {f"v5_{k}" for k in V5.TABLE_KEYS}
+    return (set(s) == set(V4_MAIN) | {"anchor_mode"} | want and all(s[k] == v for k, v in V4_MAIN.items())
+            and all(s[f"v5_{k}"] == V5.V5_MAIN[k] for k in V5.TABLE_KEYS))
+
+
 def out_name(s: dict) -> str:
-    """Table folder name: out_<anchor_mode> for the v4 main set of that anchor mode, out_<anchor_mode>_<switch SHA256[:12]> otherwise (V4 D1)."""
-    return f"out_{s['anchor_mode']}" if is_main_set(s) else f"out_{s['anchor_mode']}_{switch_sha(s)[:12]}"
+    """Table folder name: out_<anchor_mode> for the v4 main set of that anchor mode, out_<anchor_mode>_v5 for the v4 main set plus the v5 main table keys
+    (V5 X20), out_<anchor_mode>_<switch SHA256[:12]> otherwise (V4 D1)."""
+    if is_main_set(s):
+        return f"out_{s['anchor_mode']}"
+    if v5_table_keys(s) and is_v5_main_tables(s):
+        return f"out_{s['anchor_mode']}_v5"
+    return f"out_{s['anchor_mode']}_{switch_sha(s)[:12]}"
 
 
 def v4_tables(cfg: dict, repo: Path | None = None) -> dict | None:
@@ -142,6 +166,17 @@ def check(s: dict) -> None:
             raise ValueError(f"research.demand.v4.{k} = {s.get(k)} not in {allowed}")
     if not 0.0 < float(s["bio_cap_share"]) <= 1.0:
         raise ValueError("research.demand.v4.bio_cap_share must be in (0, 1]")
+    v5k = v5_table_keys(s)
+    if v5k:   # V5 X20: all table-level v5 keys or none, only on the v4 switch set
+        import v5_common as V5
+        want = sorted(f"v5_{k}" for k in V5.TABLE_KEYS)
+        if v5k != want:
+            raise ValueError(f"v5 table keys {v5k} differ from {want}")
+        if not s["enabled"]:
+            raise ValueError("v5 table keys need research.demand.v4.enabled true")
+        for k in V5.TABLE_KEYS:
+            if str(s[f"v5_{k}"]) not in V5.SWITCH_VALUES[k]:
+                raise ValueError(f"research.demand.v5.{k} = {s[f'v5_{k}']} not in {V5.SWITCH_VALUES[k]}")
 
 
 def out_dir(s: dict) -> Path:

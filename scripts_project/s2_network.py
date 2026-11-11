@@ -305,6 +305,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         raise ValueError("Frozen electric base identity changed")
     registry_csv = repo / "research_inputs/registry_v5/DATA_REGISTRY.csv"
     registry = pd.read_csv(registry_csv, dtype=str, keep_default_na=False).set_index("param_id")
+    import v5_common as V5   # V5 X20 (decisions 241, 244, 246): research.demand.v5 switch set (enabled false = 26c2e47d behaviour); the v5 layers add their tables / ledgers to v5x
+    v5s = V5.switches(cfg); v5x = dict(tables={}, ledgers={})
     costs, cost_ledger = build_research_costs(repo, cfg, registry_csv)
     costs_path = write_costs(costs, cost_ledger, output)
     n = pypsa.Network(str(electric_base)); assert_input_only(n)
@@ -457,12 +459,15 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
             n.meta[key] = jsonable(n.meta[key])
     n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {"install_fragment_constraints"})
     n.meta["qualification_dimensions"] = dict(n.meta.get("qualification_dimensions", {}), physical_integrity="S2_STATIC_VALIDATION", input_coverage="S2_SECTORS_EXCEPT_SHIPPING", price_usability="COST_LAYER_LEDGER")
+    if v5s["enabled"]:
+        n.meta["v5_x20"] = jsonable(V5.record(n, v5s, v5x["tables"], v5x["ledgers"], repo))   # V5 X20: switch set + SHA256, input tables (SHA256) and ledgers of the v5 layers
     normalise = normalise_optional_strings(n)
     static = static_validate_s2(n, cfg, corridors, demand)
     inventory = component_inventory(n)
     suffix = "_gap_diagnostic" if gap_diagnostic else ""
     from v4_common import check_network_meta
     check_network_meta(n.meta, cfg, repo)   # V4 D1 (decision 214 item 8): switch SHA256 of the network meta = table folder = configuration
+    V5.check_network_meta_v5(n.meta, cfg)   # V5 X20: no v5 record with v5 disabled; with v5 enabled the recorded switch SHA256 = the configuration's
     path = output / f"{scenario}{suffix}_2920_3h_unsolved.nc"; n.export_to_netcdf(path)
     back = pypsa.Network(str(path)); compare_roundtrip(n, back)
     receipt = dict(status="S2_SCENARIO_BUILT_STATIC_PASS", scenario=scenario, gap_diagnostic=gap_diagnostic, s2_status=S2["status"],

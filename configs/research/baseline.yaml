@@ -531,5 +531,27 @@ research:
       meoh_per_tco2: stoichiometric       # V4 D2a (decision 220): stoichiometric (v4 main: methanolisation MWh_MeOH per t CO2 = M_MeOH / M_CO2 x LHV_MeOH = 4.0248, registry ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric; scripts_project/s3_layers.py) | pypsa_eur (v3.1 fallback: research.s3.ammonia_methanol.MWh_MeOH_per_tCO2 = 4.0321). Network build only; part of the switch set
       lng_regas_adder: asean_tariffs      # V4 D2b (section 4.1): asean_tariffs (v4 main: registry v4_lng_regas_adder_asean_tariffs = median of the regulated LNG terminal tariffs TH ERC / MY ST / SG EMA-SLNG / ID Arun at full utilisation, EUR2020/MWh; v4_common.lng_regas_adder_value) | m08a (v3.1 fallback: research.s3.gas.lng_regasification_adder_eur_per_mwh = 1.26). Network build only; part of the switch set
       source_band_basis: post_product     # V4 D2b (section 3, Fable F-02 side note): post_product (v4 main: source band shares of the fixed industrial biomass = cement-kiln biomass / T_v2 biomass after the product vectors; v4_common.source_band_shares) | s30 (D2a and earlier: the s3_0 shares before the product vectors). Acts on the bands of the overflow useful heat only
+    v5:                                   # V5 X20 (decisions 241, 244, 246; research/06_scope_redesign/p1_v5_x20_20261111/X20_SPEC.md + X20_SPEC_ADDENDUM_246.md; scripts_project/v5_common.py): enabled false = every rule at its 26c2e47d (v4 W14) behaviour, the keys below are ignored; enabled true (needs v4.enabled true) = the keys below (the v5 main set). Build: --override demand.v4.enabled=true --override demand.v5.enabled=true
+      enabled: false
+      onwind_calibration: gwa_cell_ember  # 1-1: gwa_cell_ember (v5 main: ERA5 100 m wind x GWA v4 cell factor WIND_GWA_CELL_FACTOR_V5.nc, alpha re-calibrated on Ember at the farm points, Q1 (b); profiles_calibrated_gwa_v5) | ember_country (v4: calibrated_modern)
+      existing_wind_profile: best_class   # 1-2: best_class (v5 main: existing wind copies the highest class of its node) | class0 (v4: class 0 = the worst class)
+      existing_solar_profile: node_average   # Q12 (decision 246): node_average | best_class (the one closer to the Ember country solar CF, rule of X20_SPEC_ADDENDUM_246.md section 3, applied to all 11 countries) | class0 (v4)
+      offwind_asean_premium_pct: 0.0      # 1-3: ASEAN capital-cost premium on extendable offshore wind, % (0 main; sensitivity 10 / 20 / 30)
+      solar_cap_scale_MY: 1.0             # 1-4: country factor on the ground-mounted solar caps (1.0 main; sensitivity 0.5 / 2)
+      solar_cap_scale_ID: 1.0             # 1-4
+      solar_cap_scale_VN: 1.0             # 1-4
+      solar_landuse_my: lc100             # 1-4: lc100 (main) | open_forest (LC100 121-126 counted, MY cap x 198 / 86.4) | oil_palm (FAOSTAT oil palm area counted, MY cap x 4.1); SOLAR_MY_LANDUSE_VARIANTS_V5.csv
+      hydro_inflow_denominator: operating_only   # 1-5: operating_only (v5 main: national inflow / capacity operating 2019-2025, construction units get the same per-MW inflow) | all_stock (v4)
+      hydro_inflow_multiplier: 1.1        # 1-5: x1.1 of the national target (author chain hydro multiplier; main) | 1.0
+      geothermal_cap_id: reserves_2017    # 1-6: reserves_2017 (v5 main: 17,506 MW - ID stock) | proven_probable (5,460 MW - stock) | resource_potential (v4: 23,590 MW - stock)
+      ph_dc_stock: ngcp_tdp               # 2-1: ngcp_tdp (v5 main: PH_DC_STOCK_V5.csv, NGCP TDP 2025-2050) | frozen_base (v4)
+      ac_dedup: dedup_cables              # 2-2: dedup_cables (v5 main: AC_DEDUP_V5.csv, OSM duplicate rows removed, circuits = cables / 3 where tagged) | dedup_only | frozen_base (v4)
+      gas_cap_rule: field_status          # 2-3: field_status (v5 main: rule B, GAS_CAP_FRACTIONS_V5.csv) | reserve_average (rule A) | marketed (v4)
+      neu_gas_growth: product             # 2-4: product (v5 main: NEU gas by product - ammonia part with the ammonia output, residual with the industry multiplier; table-level key) | industry_multiplier (v4)
+      lifetime_boundary: inclusive        # 2-5: inclusive (v5 main: commissioning + lifetime >= 2050 in service) | strict (v4: > 2050)
+      geothermal_existing_lifetime: 40    # 2-5: 40 a (v5 main) | 30 a (v4, S1-3)
+      gem_coord_fix: verified             # 2-6: verified (v5 main: GEM_COORD_CORRECTIONS_V5.csv, nodes of the checked units) | gem (v4)
+      distribution_grid: lv_pypsa_eur     # 3-4: lv_pypsa_eur (v5 main: electric loads, BEV chargers, heat pumps, electric boilers, electric cooking on LV; distribution grid both ways 0.97) | hv_lossless (v4)
+      biomass_residue_fix: corrected      # 1-7: corrected (v5 main: d1_biomass cotton triple count and R-3 group prefixes fixed, BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv; table-level key) | v4
   biomass:                             # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
     missing_cost_rule: null             # zero (v3.1: an empty cost column enters at 0) | proxy (registry biomass_missing_cost_proxy, the uniform proxy of unsourced residues); null = the switch-set value (v4.enabled false -> zero, true -> proxy)

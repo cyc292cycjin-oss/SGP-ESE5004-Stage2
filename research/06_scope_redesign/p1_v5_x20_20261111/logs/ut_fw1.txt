@@ -1,0 +1,98 @@
+HEAD e4b590f830d864b3d755129f4da2b6785cb5fd30; dirty files 7
+py_compile OK
+........................................................................ [ 38%]
+...............F....................................F................... [ 77%]
+.........................................                                [100%]
+=================================== FAILURES ===================================
+________________ test_f06_registry_rows_and_convergence_record _________________
+
+    def test_f06_registry_rows_and_convergence_record():
+        from v4_common import sha256
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        r = reg.loc["v4_pks_in_mill_share"]
+        assert r.tier == "C" and "grade D" in r.description and "tier C" in r.description   # the registry tier scale is A / B / C; the evidence grade D is stated
+        r = reg.loc["v4_biomass_overflow_cap_share"]
+>       assert r.source_locator.startswith("file: configs/research/baseline.yaml") and sha256(ROOT / "configs/research/baseline.yaml") == r.source_sha256
+E       AssertionError: assert (True and '818b0fe4d81a...f0de9221a2410' == '8a96fc173ef4...4d848c6658121'
+E        +  where True = <built-in method startswith of str object at 0x7ca3eac453b0>('file: configs/research/baseline.yaml')
+E        +    where <built-in method startswith of str object at 0x7ca3eac453b0> = 'file: configs/research/baseline.yaml research.demand.v4.bio_cap_share'.startswith
+E        +      where 'file: configs/research/baseline.yaml research.demand.v4.bio_cap_share' = description          overflow cap = share x solid-biomass potential...\nvalue                                          ...atus                                                      REGISTERED\nName: v4_biomass_overflow_cap_share, dtype: object.source_locator
+E         
+E         - 8a96fc173ef41758f03498ab9a18ef17badea5525ea0207b4964d848c6658121
+E         + 818b0fe4d81a3223ecd7700fc6a49079d06eab11c236e9f5ba1f0de9221a2410)
+
+tests/research/test_v4_d2a_fixes.py:209: AssertionError
+____________________ test_fragment_file_hashes_and_assembly ____________________
+
+    def test_fragment_file_hashes_and_assembly():
+        from v4_common import sha256
+        frag = pd.read_csv(ROOT / "research_inputs/registry_v5/fragments/v4_w08.csv", dtype=str, keep_default_na=False)
+        reg = pd.read_csv(ROOT / "research_inputs/registry_v5/DATA_REGISTRY.csv", dtype=str, keep_default_na=False).set_index("param_id")
+        assert len(frag) >= 60 and set(frag.param_id) <= set(reg.index)
+        files = frag[frag.source_locator.str.startswith("file: ")]
+        assert len(files) >= 45
+        for r in files.itertuples():
+            p = ROOT / r.source_locator[len("file: "):].split(" ")[0]
+>           assert sha256(p) == r.source_sha256, r.param_id
+E           AssertionError: v4_biomass_overflow_cap_share
+E           assert '818b0fe4d81a...f0de9221a2410' == '8a96fc173ef4...4d848c6658121'
+E             
+E             - 8a96fc173ef41758f03498ab9a18ef17badea5525ea0207b4964d848c6658121
+E             + 818b0fe4d81a3223ecd7700fc6a49079d06eab11c236e9f5ba1f0de9221a2410
+
+tests/research/test_v4_registry.py:22: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_dfx_demand.py: 1 warning
+tests/research/test_v4_d1_missing_cost.py: 1 warning
+tests/research/test_v4_d1_prep.py: 2 warnings
+tests/research/test_v4_d2a_efb.py: 1 warning
+tests/research/test_v4_d2a_fixes.py: 1 warning
+tests/research/test_v4_d2b_biomass.py: 1 warning
+tests/research/test_v4_d2c_trunk.py: 1 warning
+tests/research/test_v4_registry.py: 2 warnings
+tests/research/test_m08a_a2.py: 1 warning
+tests/research/test_m08a_a3.py: 1 warning
+tests/research/test_m08a_a4.py: 1 warning
+tests/research/test_m08a_a5.py: 2 warnings
+tests/research/test_m08a_a6.py: 1 warning
+tests/research/test_m08a_a7.py: 9 warnings
+tests/research/test_m08a_a8.py: 1 warning
+tests/research/test_m08a_a9.py: 3 warnings
+  /home/jin/wt_v5_x20/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_dfx_demand.py: 1 warning
+tests/research/test_v4_d1_missing_cost.py: 1 warning
+tests/research/test_v4_d1_prep.py: 2 warnings
+tests/research/test_v4_d2a_efb.py: 1 warning
+tests/research/test_v4_d2a_fixes.py: 1 warning
+tests/research/test_v4_d2b_biomass.py: 1 warning
+tests/research/test_v4_d2c_trunk.py: 1 warning
+tests/research/test_v4_registry.py: 2 warnings
+tests/research/test_m08a_a2.py: 1 warning
+tests/research/test_m08a_a3.py: 1 warning
+tests/research/test_m08a_a4.py: 1 warning
+tests/research/test_m08a_a5.py: 2 warnings
+tests/research/test_m08a_a6.py: 1 warning
+tests/research/test_m08a_a7.py: 9 warnings
+tests/research/test_m08a_a8.py: 1 warning
+tests/research/test_m08a_a9.py: 3 warnings
+  /home/jin/wt_v5_x20/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+tests/research/test_dfx_demand.py::test_f4_registry_rows_equal_the_network
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/research/test_m08a_a1.py::test_td_inflation_rule_mirrored
+tests/research/test_m08a_a1.py::test_td_inflation_rule_mirrored
+tests/research/test_m08a_a1.py::test_download_cross_check_identical_rates
+tests/research/test_m08a_a1.py::test_download_cross_check_identical_rates
+  /home/jin/miniforge3/envs/pypsa-earth/lib/python3.11/site-packages/openpyxl/styles/stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
+    warn("Workbook contains no default style, apply openpyxl's default")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_fixes.py::test_f06_registry_rows_and_convergence_record
+FAILED tests/research/test_v4_registry.py::test_fragment_file_hashes_and_assembly
+2 failed, 183 passed, 63 warnings in 95.99s (0:01:35)
+EXIT:1 seconds:97

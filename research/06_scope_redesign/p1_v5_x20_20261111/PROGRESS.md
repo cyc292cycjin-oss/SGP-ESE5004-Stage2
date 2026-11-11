@@ -38,4 +38,21 @@
 | 时间 (SGT) | 事项 | 状态 / 恢复点 |
 |---|---|---|
 | 23:11 | worktree 改为完整检出（720,515,978 B），复制 finance_v5 两个被忽略输入，`results_project/{assembly_v1,s1}` 链接主检出、`v5x20` 链接 D 盘 `builds/`；本步目录 36 个文件模式改回 100644；WSL `df -h /`：250G 已用、707G 可用 | 完成 |
-| 23:15 | 写 `X20_SPEC_ADDENDUM_246.md`（Q12 规则在计算前写定）；B 段第 1 个提交：文件模式 + 补记 | 进行中 | B 段需要等审阅通过、用户转达"继续 B 段"后才开始；开始前须答复 `X20_SPEC.md` 第 6 节的待决问题，尤其是 Q2（冻结底座边界机组）、Q18（56 时段求解的内存门槛）、Q3 / Q4（配电网范围与扣损）、Q1（风电回标口径）。
+| 23:15 | 写 `X20_SPEC_ADDENDUM_246.md`（Q12 规则在计算前写定）；B 段第 1 个提交 `e4b590f8`（补记 + 文件模式），已推送 | 完成 |
+| 23:16 | 用户转达：HK01 清理会话已结束，Q18 的"本机没有其他会话"条件已满足；56 时段求解按"预计峰值 ≤ 可用 − 2 GiB"执行，Gurobi 一次只跑一个 | 记录 |
+| 23:18 | v4 基线全量测试第 1 次启动 22 s 即退出（pytest 捕获临时文件在 9p 的 TMPDIR 上无法 truncate；日志改名为 `logs/ut_full_base_failed_tmpdir.txt`）；改为 WSL `/tmp` 作 TMPDIR 与 basetemp（跑完记体积后删除），重跑中 | 进行中 |
+| 23:20 | D 盘写 netCDF 测试通过（默认 HDF5 文件锁可用），构建输出可直接写 D 盘 | 完成 |
+| 23:22 | Q7 核实：非能源用气在 RAS 锚之外（`m08b_demand.py:7,11,315,453,466`：种子"non-energy use excluded"，"NEU outside the TFEC envelope"）→ ②4 可实施 | 完成 |
+| 23:25 | ②2 数据：OSM 预建库国内交流重复组 318 组 / 937 行（MY 292 / 877）；OSM API 4 次请求取 314 个 way 标签，427,221 B，0 缺失，299 个带 cables（`downloads/osm/OSM_API_LOG.tsv`） | 完成 |
+| 23:27 | ②1 数据：NGCP TDP 2025–2050 PDF 5,415,314 B，SHA256 `eb39b15e…`（`downloads/ngcp/NGCP_DOWNLOAD_LOG.tsv`）；PDF 第 5 页 MVIP 450 MW；第 35、40、72 页民都洛线路均为规划（2027-09 / 2030-12 / 2033-02）；第 43–44 页双极化"additional 440 MW" | 完成 |
+| 23:28 | 两个只读子代理在跑：②6 五台机组坐标（只用网页阅读）、①7 MM 生物质复核 | 完成（见下） |
+| 23:25–23:29 | **中断：** 上一次会话退出，WSL 随之停机（`wsl -l -v` Stopped），基线测试与 GWA 试跑都以退出码 4 结束（日志改名 `*_interrupted*`）；23:29 重启 WSL，worktree 干净（HEAD `e4b590f8`），两项任务重跑，两个子代理续跑 | 记录 |
+| 23:30 | ①1 数据试跑：`v5_wind_gwa.py` 39 s、峰值 RSS 1.69 GB；有效格点 4,048 个，系数中位数 1.244，截断 1 个；156 个校准风场全部取到 GWA 点位值；容量加权点位系数 / 格点系数：TH 1.432 / 1.265，VN 1.311 / 1.171，PH 1.326 / 1.03 | 完成（试跑在 D 盘 cache，正式运行在 worktree） |
+| 23:31 | Q12 观测值：Ember 光伏 CF（同风电校准算法，VN 2020–2022 不进主值）：可用 8 国 ID 0.187、KH 0.191、MM 0.089、MY 0.221、PH 0.135、SG 0.137、TH 0.192、VN 0.201（`cache/q12/`） | 完成 |
+| 23:36 | ①7 子代理结论：MM 偏高主要是口径（IRENA 2022 缅甸只含木质残余）；确认 2 处方法错误（E1 棉花三重计数、E2 R-3 组名前缀未剥离，11 国共用），MM 净 −1.42 TWh；3 处疑点写局限。已亲自核对 `d1_biomass.py:79-81,97`。补记 §4.3 写定处理：开关 `biomass_residue_fix`（表级） | 完成 |
+| 23:40 | ②2 数据试跑：只有 MY 5 条国内走廊有重复行，4 条通过重建核对（线 90 ×0.320、93 ×0.222、95 ×0.445、96 ×0.387），线 94 核对失败（140 倍）不改；BN / TL / LA / TH / VN 的重复组都在节点内部或不对应国内存量线。**更正规格 §1.9：** `regions_onshore.geojson` 是节点坐标的分国 Voronoi（被 git 忽略），不是作者 busmap，归属改为同国最近节点（同 X10） | 完成 |
+| 23:45 | ②6 子代理结论 + 节点计算：只有 Truong Son 二期改节点（LA2 1 → LA2 3，OSM 一期风机群，二期"同一区域"）；Thai Binh（推定厂址区域内各点均为 VN2 6）、Upper Yeywa（坝址仍为 MM2 5）、New Kapar（保留 GEM）节点不变 | 完成 |
+| 01:54 | 第 2 次基线测试 2 h 25 min 只到约 40 %（m10p 子进程测试段）。原因 VERIFIED：`PYTHONPYCACHEPREFIX` 指向 D 盘（9p）时每个子进程 `import pypsa, xarray, pandas` 要 22.8 / 26.3 s，不设时 2.2 / 1.7 s（`scripts/31_import_timing.sh`）。停掉该次测试（`scripts/32_stop_base_tests.sh`；EXIT 143，用时 8,875 s，basetemp 385,096,087 B 已删；另清理 1 组孤儿 `gates_v6.py select-profile` 进程组）；日志改名 `logs/ut_full_base_stopped_slow_pycache.txt`。**本地计算预算多耗约 2.5 h（偏离，写入报告）** | 记录 |
+| 01:58 | `21_full_tests.sh` 去掉 pycache 前缀（worktree `__pycache__` 被 .gitignore 忽略，结尾记录体积与残留进程），第 3 次基线测试启动，20 s 内约 20 个测试 | 完成 |
+| 02:30 | **v4 基线全量测试 VERIFIED**（`logs/ut_full_base.txt`，HEAD `e4b590f8`）：1 failed / 875 passed / 56 skipped / 5 deselected，1,917.75 s（31:57）；失败的仍是 `test_s1_built_networks.py::BuiltNetworks::test_static_validation_passes_on_reload`，与 D2c 记录（875 / 1 / 56）一致。basetemp 511,350,578 B 已删；worktree `__pycache__` 10,870,068 B；无残留进程；git status 干净 | 完成 |
+| 02:39 | 框架：`v5_common.py`（开关集、SHA256、meta 记录与核对）；baseline.yaml 第 533 行后插入 `research.demand.v5`（enabled false，列出的值 = v5 主集）；`v4_common`：v5 启用时两个表级键 `v5_neu_gas_growth` / `v5_biomass_residue_fix` 进入 v4 开关集，主集目录 `out_<anchor>_v5`，v5 关闭时 v4 开关集与 26c2e47d 相同；`s2_network` 导出前写 `v5_x20` 记录并核对，`m08a_variants` 核对；F0.3 豁免加 `v5_` 前缀。注册表链重跑（`scripts/36_registry_chain.sh fw`）：2,469 行，只有 `v4_biomass_overflow_cap_share` 的 source_sha256 随 baseline.yaml 变（`8a96fc17…` → `818b0fe4…`）。定向测试 185 passed（`logs/ut_fw2.txt`）。本提交同时删掉 23:15 行末残留的 A 段占位句、补记 §4 入库 | 提交中 |
