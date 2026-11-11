@@ -1,0 +1,30 @@
+X20 registry (decisions 241, 244, 246, 251): v5_x20 fragment and description corrections
+
+scripts_project/v5_x20_registry.py writes fragments/v5_x20.csv (103 rows:
+switch rules with their sources, the v5 input tables as file rows with
+SHA256, alpha V5 by country (PH / TH / VN grade B, the rest C with the
+range of the three), the decision-251 effective-multiplier check, the
+calibrated_gwa_v5 profiles, the Q12 rule with its E values, offshore
+premium / solar factors / MY land-use variants (SENSITIVITY), hydro
+denominator rule and the 1.1 multiplier provenance (C, 1.0-1.1), ID
+geothermal reserves 17,506 (C as a 2050 cap, range 5,460-23,590) and
+proven+probable 5,460, biomass V5FIX tables, PH DC stock by link, AC dedup
+and OSM tag tables, gas cap fractions (rule B; PH / TL SOURCE_ZERO), NEU gas
+2050 by country, lifetime boundary, v5 geothermal lifetime 40 (C, 30-50),
+GEM additions V5 by country, GEM coordinate table, CO2 low cases (ii-a)
+and (ii-b) by country, extra-ASEAN capacity key, DAC scale, EV smart share,
+distribution grid efficiency 0.97 / LV attachment, bunker attribution
+rule) and fragments/v5_x20_corrections.csv (30 description corrections,
+values unchanged: onwind_gwa_crosscheck_s4b3, renewable_capacity_per_sqkm_
+solar, hydro_inflow_normalization_main, candidate_cap_geothermal_ID,
+demand_neu_2050_ID, fleet_lifetime_rule_s1, s4j2_link_losses, the CO2 /50
+rows). v4 rows that a v5 switch changes keep their value (v5 off = the
+26c2e47d build); deviation from X20_SPEC 1.1 (d) / 1.12: the v5 values are
+new v5_* rows instead of value corrections of onwind_alpha_<C> and
+geothermal_existing_lifetime.
+
+d1_registry: FRAGMENTS + v5_x20, CORRECTIONS + v5_x20_corrections.
+DATA_REGISTRY.csv 2,469 -> 2,572 rows (validation passed). Registry tests:
+145 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -11,10 +11,12 @@ cd $R || exit 1
 {
 echo "HEAD $(git rev-parse HEAD) baseline.yaml sha256 $(sha256sum configs/research/baseline.yaml | cut -c1-64)"
 git show HEAD:research_inputs/registry_v5/DATA_REGISTRY.csv > $T/DATA_REGISTRY_head.csv
+if [ -e scripts_project/v5_x20_registry.py ]; then   # placeholders first: every *_registry.py assembles all FRAGMENTS / CORRECTIONS
+  for f in v5_x20 v5_x20_corrections; do [ -e research_inputs/registry_v5/fragments/$f.csv ] || { head -1 research_inputs/registry_v5/fragments/v4_d2b.csv > research_inputs/registry_v5/fragments/$f.csv; echo "placeholder $f.csv (header only; written below by v5_x20_registry.py)"; }; done
+fi
 $PY scripts_project/v4_registry.py > $T/v4_registry.log 2>&1 || { tail -20 $T/v4_registry.log; exit 1; }
 for s in v4_d1 v4_d2a v4_d2b v4_d2c; do $PY scripts_project/${s}_registry.py > $T/$s.log 2>&1 || { tail -20 $T/$s.log; exit 1; }; done
 if [ -e scripts_project/v5_x20_registry.py ]; then
-  for f in v5_x20 v5_x20_corrections; do [ -e research_inputs/registry_v5/fragments/$f.csv ] || { head -1 research_inputs/registry_v5/fragments/v4_d2b.csv > research_inputs/registry_v5/fragments/$f.csv; echo "placeholder $f.csv (header only; written below by v5_x20_registry.py)"; }; done
   $PY scripts_project/v5_x20_registry.py > $T/v5_x20.log 2>&1 || { tail -20 $T/v5_x20.log; exit 1; }
 fi
 $PY scripts_project/d1_registry.py > $T/d1_registry.log 2>&1 || { tail -20 $T/d1_registry.log; exit 1; }

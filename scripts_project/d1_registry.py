@@ -27,11 +27,13 @@ FRAGMENTS = FRAGMENTS + ["v4_d1"]    # V4 D1 (decisions 212, 214, 215; scripts_p
 FRAGMENTS = FRAGMENTS + ["v4_d2a"]   # V4 D2a (decision 220; scripts_project/v4_d2a_registry.py): palm-residue basis (T04), PHS stock reclassification, PHS asean case
 FRAGMENTS = FRAGMENTS + ["v4_d2b"]   # V4 D2b (decision 221; scripts_project/v4_d2b_registry.py): biomass energy-basis audit (T05), source band rule, LNG regasification tariffs, literature ranges
 FRAGMENTS = FRAGMENTS + ["v4_d2c"]   # V4 D2c (decision 223; scripts_project/v4_d2c_registry.py): measured oil palm trunk dry mass per palm (T06), trunk energy, replanting-rate low
+FRAGMENTS = FRAGMENTS + ["v5_x20"]   # V5 X20 (decisions 241, 244, 246, 251; scripts_project/v5_x20_registry.py): v5 switch rules, input tables and values
 # M08-0 (item 130): full replacement rows for existing param_ids, applied after the concatenation; the original fragments stay unchanged (history)
 CORRECTIONS =["m080_corrections", "m08a_corrections", "m08b_corrections", "dfx_corrections"]   # M08a (decisions 129-133): scripts_project/m08a_data.py, applied after the M08-0 corrections; M08b (decisions 133, 134): m08b_data.py; DFX F4: dfx_data.py (applied last)
 CORRECTIONS = CORRECTIONS + ["v4_d1_corrections"]   # V4 D1 section 4 (decision 212 (a); scripts_project/v4_d1_registry.py): registered ranges clipped to physical bounds (applied last)
 CORRECTIONS = CORRECTIONS + ["v4_d2b_corrections"]   # V4 D2b (decision 221; scripts_project/v4_d2b_registry.py): literature ranges of sections 2 / 4 on existing rows (main values unchanged; applied last)
 CORRECTIONS = CORRECTIONS + ["v4_d2c_corrections"]   # V4 D2c (decision 223; scripts_project/v4_d2c_registry.py): trunk potential ranges (T06 low ... T05; values unchanged; applied last)
+CORRECTIONS = CORRECTIONS + ["v5_x20_corrections"]   # V5 X20 (scripts_project/v5_x20_registry.py): description corrections of existing rows (values unchanged; applied last)
 CONST_SHA = {
     "UNSD": "UNSD_energy_statistics_2014_conversion_05.pdf", "IPCC": "IPCC_2006_Vol2_Ch1_Introduction.pdf",
     "FRED": "A191RD3A086NBEA.csv", "NIST": None, "EIA": None, "ECB": None,
