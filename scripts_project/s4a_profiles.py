@@ -62,7 +62,15 @@ VARIANTS = {
     "gwa_check": {
         "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_gwa_check", cf_only=True),
     },
+    # V5 X20 (1-1, decisions 241, 246 Q1 (b), 251): ERA5 100 m wind x GWA v4 cell factor (WIND_GWA_CELL_FACTOR_V5.nc, v5_wind_gwa.py) x the country
+    # alpha calibrated on Ember at the farm points (WIND_CALIBRATION_ALPHA_V5.csv, s4b_3_wind_calibration.py --point-factor) + DEA 2050 turbine;
+    # the variant carries its own alpha table and cell factor (ROOT-relative), so it runs next to calibrated_modern in one call
+    "calibrated_gwa_v5": {
+        "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_main",
+                       alpha_table="research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv", cell_factor="research_inputs/renewable_v5/WIND_GWA_CELL_FACTOR_V5.nc"),
+    },
 }
+NON_ATLITE_KEYS = ("alpha", "cf_only", "alpha_table", "cell_factor")   # spec keys of this script, not passed to atlite
 
 
 def node_regions(nodes: pd.DataFrame, shapes: gpd.GeoDataFrame, kind: str) -> gpd.GeoDataFrame:
@@ -107,8 +115,9 @@ def convert(cutout: atlite.Cutout, spec: dict, **kw):
     return cf, cutout.pv(panel=spec["panel"], orientation=spec["orientation"], **kw)
 
 
-def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, column: str) -> tuple[atlite.Cutout, dict]:
-    """S4B-3: copy of the cutout whose wnd100m is multiplied by the country alpha (cell -> country with the largest area share; no country -> 1)."""
+def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, column: str, cell_factor: Path | None = None) -> tuple[atlite.Cutout, dict]:
+    """S4B-3: copy of the cutout whose wnd100m is multiplied by the country alpha (cell -> country with the largest area share; no country -> 1).
+    V5 X20 (1-1): cell_factor (WIND_GWA_CELL_FACTOR_V5.nc on the cutout grid) multiplies the same grid (effective multiplier f(y, x) x alpha_c)."""
     al = pd.read_csv(table).set_index("country")[column]
     I = cutout.indicatormatrix(shapes.geometry).toarray().reshape(len(shapes), len(cutout.data.y), len(cutout.data.x))
     grid = np.ones((len(cutout.data.y), len(cutout.data.x)))
@@ -116,6 +125,11 @@ def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, c
     for i, c in enumerate(shapes.index):
         if c in al.index and np.isfinite(al[c]):
             grid[(best == i) & has] = float(al[c])
+    if cell_factor is not None:
+        f = xr.open_dataarray(cell_factor).transpose("y", "x")
+        if f.shape != grid.shape or not (np.allclose(f.y.values, cutout.data.y.values) and np.allclose(f.x.values, cutout.data.x.values)):
+            raise ValueError("V5 X20: the cell factor grid differs from the cutout grid")
+        grid = grid * f.values.astype(np.float64)
     da = xr.DataArray(grid, coords=dict(y=cutout.data.y, x=cutout.data.x), dims=["y", "x"])
     out = atlite.Cutout(str(CUTOUT)); out.data = cutout.data.assign(wnd100m=cutout.data["wnd100m"] * da)
     return out, {str(c): float(al[c]) for c in shapes.index if c in al.index}
@@ -140,17 +154,26 @@ def main():
     log["timings"]["regions"] = round(time.time() - t0, 1)
     scaled = {}
 
-    def cut_for(spec):   # S4B-3: alpha-scaled cutout copies, one per alpha column
+    def cut_for(spec):   # S4B-3: alpha-scaled cutout copies, one per alpha column (V5 X20: per alpha table and cell factor of the variant)
         k = spec.get("alpha")
         if not k:
             return cutout
+        if spec.get("alpha_table") or spec.get("cell_factor"):
+            tab = ROOT / spec.get("alpha_table", a.alpha_table); cf = (ROOT / spec["cell_factor"]) if spec.get("cell_factor") else None
+            key = f"{k}|{tab.name}|{cf.name if cf else ''}"
+            if key not in scaled:
+                import hashlib
+                scaled[key], log.setdefault("alpha", {})[key] = alpha_cutout(cutout, onshore, tab, k, cf)
+                log.setdefault("v5_x20", {})[key] = dict(alpha_table=str(tab), alpha_table_sha256=hashlib.sha256(tab.read_bytes()).hexdigest(),
+                                                         cell_factor=(str(cf) if cf else None), cell_factor_sha256=(hashlib.sha256(cf.read_bytes()).hexdigest() if cf else None))
+            return scaled[key]
         if k not in scaled:
             scaled[k], log.setdefault("alpha", {})[k] = alpha_cutout(cutout, onshore, a.alpha_table, k)
             log.setdefault("alpha_table", str(a.alpha_table))
         return scaled[k]
 
     def plain(spec):
-        return {kk: vv for kk, vv in spec.items() if kk not in ("alpha", "cf_only")}
+        return {kk: vv for kk, vv in spec.items() if kk not in NON_ATLITE_KEYS}
     results = []
     for tech in a.techs:
         kind = TECHS[tech]; reg = regions[kind]

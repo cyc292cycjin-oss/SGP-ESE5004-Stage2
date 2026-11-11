@@ -1,0 +1,33 @@
+X20 1-1 part 2 (decisions 241, 246 Q1 (b), 251): farm-point alpha, effective-multiplier bound, calibrated_gwa_v5 profiles
+
+Decision 251 (after the point-factor alphas PH 0.699 / VN 0.789 fell below
+the v4 bound 0.8): keep Q1 (b); in v5 alpha scales the GWA-corrected speed,
+so the [0.8, 1.6] bound is checked on the effective multiplier cell factor
+x alpha (relative to ERA5): potential-weighted p10 / median / p90 over the
+candidate cells of each country, continue when every country median is in
+the bound. This is a rule correction made after seeing the result
+(X20_SPEC_ADDENDUM_246.md section 5, written before the multiplier run).
+
+s4b_3_wind_calibration.py --point-factor: alpha outside the v4 bound is
+recorded only. Outputs WIND_CALIBRATION_ALPHA_V5.csv (PH 0.6994, TH 0.9079,
+VN 0.7893, other 8 = capacity-weighted 0.8059, range 0.699-0.908),
+WIND_FARMS_MODEL_CF_2013_V5.csv, WIND_CALIBRATION_S4B3_V5.json.
+scripts_project/v5_wind_effective_multiplier.py: medians 0.831 (BN) to
+1.312 (TL), all in [0.8, 1.6] -> WIND_EFFECTIVE_MULTIPLIER_V5.csv / .json;
+the v4 / (a) / (b) comparison with candidate CFs is in the step folder.
+
+s4a_profiles.py: variant calibrated_gwa_v5 (DEA 2050 turbine, ERA5 x cell
+factor x alpha; the variant carries its alpha table and cell factor), run
+together with calibrated_modern, whose c1 and c3 profiles reproduce the
+committed files value for value. s4b_3_export.py --variant
+calibrated_gwa_v5 writes profiles_calibrated_gwa_v5_c{1,3}_3h.nc (offshore
+and solar asserted equal to calibrated_modern) with separate class tables,
+MANIFEST_V5.json and run logs (v4 inputs unchanged). s4a_layers uses the
+variant when research.demand.v5.onwind_calibration = gwa_cell_ember; the
+files go to n.meta v5_x20. Node-mean onshore CF: c1 8.72 % -> 5.45 %.
+
+Also in the step folder: the 1-5 spill regression on the W14 2920x3h solved
+networks (F1 526.956 / 519.865 / 7.091 TWh, F2 528.900 / 521.510 / 7.390
+TWh = X03). Targeted tests: 49 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

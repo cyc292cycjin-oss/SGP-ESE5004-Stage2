@@ -285,3 +285,75 @@ def test_hydro_spill_tables():
     assert t["new_inflow_full_cap_twh"] == pytest.approx(7.2) and t["new_spill_reported_twh"] == pytest.approx(4.8)
     assert t["new_spill_bookkeeping_twh"] == pytest.approx(6.0 * 0.5 + 1.2) and t["new_spill_true_twh"] == pytest.approx(4.8 - 4.2)   # n2 built 0.5 MW < 1 MW -> unbuilt
     assert t["existing_spill_twh"] == pytest.approx(0.6) and r["all_reported_spill_twh"] == pytest.approx(5.4)
+
+
+# ---- 1-1 farm-point calibration, decision-251 bound, calibrated_gwa_v5 profiles ---------------------------------------------------
+RV = ROOT / "research_inputs/renewable_v5"
+
+
+def test_onwind_v5_calibration_tables():
+    a = pd.read_csv(RV / "WIND_CALIBRATION_ALPHA_V5.csv").set_index("country"); s = pd.read_csv(RV / "WIND_OBSERVED_CF_SUMMARY.csv").set_index("country")
+    cal = a[a.calibrated_individually]
+    assert set(cal.index) == {"PH", "TH", "VN"} and (cal.alpha_grade == "B").all()
+    w = s.loc[cal.index, "max_capacity_gw"]; aw = float((cal.alpha_main * w).sum() / w.sum())
+    rest = a[~a.calibrated_individually]
+    assert (rest.alpha_main - aw).abs().max() < 1e-12 and (rest.alpha_range_low == cal.alpha_main.min()).all() and (rest.alpha_range_high == cal.alpha_main.max()).all()
+    fm = pd.read_csv(RV / "WIND_FARMS_MODEL_CF_2013_V5.csv")
+    for c in cal.index:   # the farm-point calibrated CF (NREL 4 MW, capacity-weighted) equals the Ember observation
+        d = fm[fm.iso == c]
+        assert abs(float((d.cf_calibrated_nrel4mw * d["Capacity (MW)"]).sum() / d["Capacity (MW)"].sum()) - float(a.at[c, "cf_obs"])) < 1e-6
+    pf = pd.read_csv(RV / "WIND_GWA_FARM_POINT_FACTOR_V5.csv").set_index("GEM unit/phase ID")
+    assert (fm.set_index("GEM unit/phase ID").factor_point == pf.loc[fm["GEM unit/phase ID"], "factor_point"].values).all()
+
+
+def test_onwind_effective_multiplier_bound():
+    import json
+    t = pd.read_csv(RV / "WIND_EFFECTIVE_MULTIPLIER_V5.csv"); ev = json.loads((RV / "WIND_EFFECTIVE_MULTIPLIER_V5.json").read_text())
+    assert (t.set == "b").all() and t.cell_factor.all() and t.m_p50.between(0.8, 1.6).all() and t.median_in_bounds.all() and ev["stop"] == []
+    assert (t.m_p10 <= t.m_p50).all() and (t.m_p50 <= t.m_p90).all() and tuple(ev["bounds"]) == (0.8, 1.6)
+    a = pd.read_csv(RV / "WIND_CALIBRATION_ALPHA_V5.csv").set_index("country").alpha_main
+    assert (t.set_index("country").alpha - a.reindex(t.country).values).abs().max() < 1e-12
+    assert t.alpha_table_sha256.iloc[0] == V.sha256(RV / "WIND_CALIBRATION_ALPHA_V5.csv")
+
+
+def test_wquantile():
+    import numpy as np
+    from v5_wind_effective_multiplier import wquantile
+    v = np.array([3.0, 1.0, 2.0]); w = np.array([1.0, 1.0, 2.0])
+    assert wquantile(v, w, 0.1) == 1.0 and wquantile(v, w, 0.5) == 2.0 and wquantile(v, w, 0.9) == 3.0 and wquantile(v, w, 0.25) == 1.0
+
+
+def test_calibrated_gwa_v5_profiles_and_classes():
+    import numpy as np
+    import xarray as xr
+    for N in (1, 3):
+        new = xr.open_dataset(RV / f"profiles_calibrated_gwa_v5_c{N}_3h.nc"); ref = xr.open_dataset(RV / f"profiles_calibrated_modern_c{N}_3h.nc")
+        for k in ("offwind_ac", "offwind_dc", "solar"):   # offshore and solar = the pypsa_eur run, as in calibrated_modern
+            assert np.array_equal(new[k].values, ref[k].values, equal_nan=True)
+        assert list(new.onwind.bus.values) == list(ref.onwind.bus.values) and not np.array_equal(new.onwind.values, ref.onwind.values)
+        assert float(new.onwind.min()) >= 0.0 and float(new.onwind.max()) <= 1.0
+        cls = pd.read_csv(RV / f"S4A_PROFILE_CLASSES_calibrated_gwa_v5_c{N}.csv")
+        assert set(cls.variant) == {"calibrated_gwa_v5"} and set(cls.tech) == {"onwind", "offwind-ac", "offwind-dc", "solar"}
+        s = cls[cls.tech == "onwind"].groupby("node").potential_share.sum()
+        assert np.allclose(s.values, 1.0, atol=1e-9)                                                 # the classes partition the node potential
+    import json
+    man = json.loads((RV / "MANIFEST_V5.json").read_text())
+    assert all(man[f"profiles_calibrated_gwa_v5_c{N}_3h.nc"]["sha256"] == V.sha256(RV / f"profiles_calibrated_gwa_v5_c{N}_3h.nc") for N in (1, 3))
+
+
+def test_profile_variant_switch():
+    import numpy as np
+    import pypsa
+    from s4a_layers import apply_renewable_profiles
+    n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=2920, freq="3h"))
+    base = {"research": {"renewable": {"profile_variant": "calibrated_modern", "resource_classes": 3, "profile_dir": "research_inputs/renewable_v5"},
+                         "demand": {"v4": {"enabled": True}, "v5": {}}}}
+    led4 = apply_renewable_profiles(n, base, ROOT)
+    assert led4["profile_variant"] == "calibrated_modern" and "S4A_PROFILE_CLASSES_c3.csv" in led4["files"]
+    c5 = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True}})}
+    led5 = apply_renewable_profiles(n, c5, ROOT)
+    assert led5["profile_variant"] == "calibrated_gwa_v5" and set(led5["files"]) == {"profiles_calibrated_gwa_v5_c3_3h.nc", "profiles_calibrated_gwa_v5_c1_3h.nc",
+                                                                                     "S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv"}
+    c5e = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True, "onwind_calibration": "ember_country"}})}
+    assert apply_renewable_profiles(n, c5e, ROOT)["profile_variant"] == "calibrated_modern"
+    assert np.isfinite(led5["solar_density"]["scale"])

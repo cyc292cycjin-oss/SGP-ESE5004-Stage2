@@ -314,6 +314,12 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         raise ValueError("Electric base is not the source-qualified asset")
     rename_map = rename_legacy_buses(n)
     renewable = apply_renewable_profiles(n, cfg, repo)   # S4A-1 (L14): rebuilt wind / solar profiles per research.renewable (original keeps the electric base untouched)
+    if v5s["enabled"] and renewable.get("v5_onwind_calibration"):   # V5 X20 (1-1): GWA-corrected onshore-wind profiles and their inputs
+        pd_ = renewable["profile_dir"]
+        v5x["tables"].update({f"renewable_{k}": f"{pd_}/{k}" for k in renewable["files"]})
+        v5x["tables"].update(onwind_alpha_v5=f"{pd_}/WIND_CALIBRATION_ALPHA_V5.csv", onwind_cell_factor=f"{pd_}/WIND_GWA_CELL_FACTOR_V5.nc",
+                             onwind_effective_multiplier=f"{pd_}/WIND_EFFECTIVE_MULTIPLIER_V5.csv")
+        v5x["ledgers"]["onwind_1_1"] = renewable["v5_onwind_calibration"]
     corridors_path, domestic_path = corridor_tables(cfg)   # S4E-1 (decision 94): research.corridors.adjacency_completion on -> CORRIDORS_S4E1.csv + domestic candidates
     corridors = pd.read_csv(repo / corridors_path, float_precision="round_trip")
     corridors, optional_corridors = extend_optional_corridors(corridors, cfg, repo)   # S4F-2 d (decision 97 d): SG-VN / SG-KH second-batch candidates (off in the main run)

@@ -24,7 +24,10 @@ import pandas as pd
 import xarray as xr
 
 TECHS = ["onwind", "offwind-ac", "offwind-dc", "solar"]
-VARIANTS = ("original", "fork", "pypsa_eur", "calibrated_modern")   # S4B-3 (decision 74): calibrated_modern = onshore wind from the Ember-calibrated ERA5 wind speed + DEA 2050 turbine, offshore / solar = pypsa_eur
+VARIANTS = ("original", "fork", "pypsa_eur", "calibrated_modern", "calibrated_gwa_v5")   # S4B-3 (decision 74): calibrated_modern = onshore wind from the Ember-calibrated ERA5 wind speed + DEA 2050 turbine, offshore / solar = pypsa_eur
+# V5 X20 (1-1, decisions 241, 246 Q1 (b), 251): calibrated_gwa_v5 = ERA5 x GWA v4 cell factor x farm-point-calibrated alpha (research.demand.v5.onwind_calibration
+# = gwa_cell_ember replaces the configured calibrated_modern); its class table is S4A_PROFILE_CLASSES_calibrated_gwa_v5_c{N}.csv (the v4 class tables unchanged)
+V5_CLASS_TABLE_VARIANTS = ("calibrated_gwa_v5",)
 OFFSHORE_TECHS = ("offwind-ac", "offwind-dc", "offwind-float")
 OFFSHORE_RULES = ("author_pypsa_earth", "pypsa_eur_v2025_07")   # M08a A6.2: research.renewable.offshore_rules
 OFFSHORE_FILE = "profiles_offshore_pypsa_eur_v2025_07_c{ncls}_3h.nc"
@@ -160,10 +163,17 @@ def apply_renewable_profiles(n, cfg, repo: Path):
         raise ValueError("Unknown research.renewable.profile_variant " + variant)
     if ncls < 1:
         raise ValueError("research.renewable.resource_classes must be >= 1")
-    led = dict(profile_variant=variant, resource_classes=ncls, clip_p_max_pu=clip, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
-    led["solar_density"] = apply_solar_density(n, RN)   # M08a A6 (M08-7, decisions 129, 131): before the class split, so every class keeps its share
     import v5_common as V5
-    if V5.switches(cfg)["enabled"]:   # V5 X20 (1-4, decision 241): MY / ID / VN solar cap factors and the MY land-use variant, also before the class split
+    s5 = V5.switches(cfg); v5_variant = None
+    if s5["enabled"] and s5["onwind_calibration"] == "gwa_cell_ember":   # V5 X20 (1-1): the GWA-corrected onshore-wind profiles replace calibrated_modern
+        if variant != "calibrated_modern":
+            raise ValueError(f"research.demand.v5.onwind_calibration gwa_cell_ember needs research.renewable.profile_variant calibrated_modern (got {variant})")
+        v5_variant = variant = "calibrated_gwa_v5"
+    led = dict(profile_variant=variant, resource_classes=ncls, clip_p_max_pu=clip, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
+    if v5_variant:
+        led["v5_onwind_calibration"] = dict(switch=s5["onwind_calibration"], configured_variant="calibrated_modern", used_variant=v5_variant)
+    led["solar_density"] = apply_solar_density(n, RN)   # M08a A6 (M08-7, decisions 129, 131): before the class split, so every class keeps its share
+    if s5["enabled"]:   # V5 X20 (1-4, decision 241): MY / ID / VN solar cap factors and the MY land-use variant, also before the class split
         from v5_layers import apply_solar_cap_scale
         led["v5_solar_cap_scale"] = apply_solar_cap_scale(n, cfg, repo)
     new_offshore = offshore_rule(RN) == "pypsa_eur_v2025_07"   # M08a A6.2: offshore candidates replaced by apply_offshore_rules below
@@ -172,7 +182,8 @@ def apply_renewable_profiles(n, cfg, repo: Path):
             raise ValueError("research.renewable.offshore_rules pypsa_eur_v2025_07 needs a rebuilt profile variant (not original)")
         n.meta["research_renewable"] = led
         return led
-    f = pdir / f"profiles_{variant}_c{ncls}_3h.nc"; f1 = pdir / f"profiles_{variant}_c1_3h.nc"; fc = pdir / f"S4A_PROFILE_CLASSES_c{ncls}.csv"
+    f = pdir / f"profiles_{variant}_c{ncls}_3h.nc"; f1 = pdir / f"profiles_{variant}_c1_3h.nc"
+    fc = pdir / (f"S4A_PROFILE_CLASSES_{variant}_c{ncls}.csv" if variant in V5_CLASS_TABLE_VARIANTS else f"S4A_PROFILE_CLASSES_c{ncls}.csv")
     for p in (f, f1, fc):
         if not p.exists():
             raise FileNotFoundError("S4A-1 profile input missing: " + str(p))

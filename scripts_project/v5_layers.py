@@ -81,8 +81,8 @@ def apply_solar_cap_scale(n, cfg, repo: Path = ROOT) -> dict:
         led["variant_factor"] = float(v.at[s["solar_landuse_my"], "factor"]); fac["MY"] = fac["MY"] * led["variant_factor"]
         import hashlib
         led["variant_table"] = dict(path=SOLAR_MY_VARIANTS, sha256=hashlib.sha256((Path(repo) / SOLAR_MY_VARIANTS).read_bytes()).hexdigest())
-    g = n.generators; cty = g.bus.map(n.buses.country)
-    out = {}
+    g = n.generators; out = {}
+    cty = g.bus.map(n.buses.country) if any(f != 1.0 for f in fac.values()) else None   # all factors 1 (main): nothing to map
     for c, f in fac.items():
         if f == 1.0:
             continue

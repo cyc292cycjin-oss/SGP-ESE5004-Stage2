@@ -165,9 +165,10 @@ def main():
     A["alpha_grade"] = np.where(A.calibrated_individually & A[key].notna(), "B", "C (capacity-weighted alpha of the calibrated countries)")
     A["alpha_v112_weighted"] = np.nan
     out_of_bounds = A[(A.alpha_main < ALPHA_BOUNDS[0]) | (A.alpha_main > ALPHA_BOUNDS[1])]   # stop rule on the alpha that would be applied; comparison-turbine alphas are reported only
-    if pf_mode:   # V5 X20: the stop rule of the docstring is enforced; grade-C countries carry the range of the calibrated alphas (registry)
-        if len(out_of_bounds):
-            raise SystemExit(f"V5 X20: alpha outside {ALPHA_BOUNDS}: {out_of_bounds.alpha_main.to_dict()}")
+    if pf_mode:   # V5 X20: grade-C countries carry the range of the calibrated alphas (registry)
+        # decision 251: in v5 alpha scales the GWA-corrected speed, so the [0.8, 1.6] bound is checked on the effective multiplier cell factor x alpha
+        # (scripts_project/v5_wind_effective_multiplier.py, potential-weighted country median); alpha outside the bound is only recorded here
+        A["alpha_outside_v4_bound"] = (A.alpha_main < ALPHA_BOUNDS[0]) | (A.alpha_main > ALPHA_BOUNDS[1])
         cal = A.calibrated_individually & A[key].notna()
         A["alpha_range_low"] = np.where(cal, np.nan, float(calc[key].min())); A["alpha_range_high"] = np.where(cal, np.nan, float(calc[key].max()))
         A["factor_point_capacity_weighted"] = [float((f.loc[f.iso == c, "factor_point"] * f.loc[f.iso == c, "Capacity (MW)"]).sum() / f.loc[f.iso == c, "Capacity (MW)"].sum()) if (f.iso == c).any() else np.nan for c in A.index]
@@ -207,6 +208,9 @@ def main():
     if pf_mode:
         import hashlib
         ev["v5_x20"] = dict(rule="1-1 (decision 246 Q1 (b)): farm wind speed = ERA5 w100 of the farm cell x GWA farm-point factor; profiles use the cell factor",
+                            bound_rule="decision 251: [0.8, 1.6] applies to the potential-weighted country median of the effective multiplier cell factor x alpha "
+                                       "(v5_wind_effective_multiplier.py); alpha outside the v4 bound recorded only",
+                            alpha_outside_v4_bound=out_of_bounds.alpha_main.to_dict(),
                             point_factor=dict(path=str(a.point_factor), sha256=hashlib.sha256(a.point_factor.read_bytes()).hexdigest()),
                             ember=dict(path=str(a.ember), sha256=hashlib.sha256(a.ember.read_bytes()).hexdigest()))
     (a.output / f"WIND_CALIBRATION_S4B3{sfx}.json").write_text(json.dumps(ev, indent=1, default=float))

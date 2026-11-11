@@ -1,0 +1,19 @@
+{
+ "script": "scripts_project/v5_wind_effective_multiplier.py",
+ "rule": "In v5 the country alpha scales the GWA-corrected ERA5 speed, so the v4 bound [0.8, 1.6] on alpha alone (s4b_3_wind_calibration.py ALPHA_BOUNDS) is\nreplaced (a rule correction made after the point-factor alphas PH 0.699 / VN 0.789 were seen, X20_SPEC_ADDENDUM_246.md section 5) by a check of\n  m(y, x) = cell factor f(y, x) x alpha_c   (relative to the ERA5 2013 100 m speed; v4: f = 1)\non the candidate cells of each country:\n  candidate cells   author onshore-wind potential > 0 (s4a_profiles.author_potential, profile_onwind.nc), country = the country shape with the largest\n                    area share of the cell (the s4a_profiles.alpha_cutout rule)\n  statistics        potential-weighted p10 / median / p90 of m (weighted quantile: the first value whose cumulative weight share >= q)\n  rule              every country median in [0.8, 1.6] -> continue; any median outside -> the step stops (SystemExit)\n  candidate CF      potential-weighted 2013 mean CF of the DEA 2050 turbine (hub 110 m) at the speed m x ERA5 w100, s4b_3_wind_calibration.cf_series arithmetic\nSets: --set label=alpha_csv[:cell] (\":cell\" multiplies the cell factor); the first set is the checked one (v5 main = WIND_CALIBRATION_ALPHA_V5.csv:cell).",
+ "bounds": [
+  0.8,
+  1.6
+ ],
+ "checked_set": "b",
+ "stop": [],
+ "cell_factor": {
+  "path": "/home/jin/wt_v5_x20/research_inputs/renewable_v5/WIND_GWA_CELL_FACTOR_V5.nc",
+  "sha256": "1ce979092d817c9b365cf515b68a1bee53cfe448d83954fc4a5404e3f19112b0"
+ },
+ "candidate_cells": 5386,
+ "output": {
+  "path": "research_inputs/renewable_v5/WIND_EFFECTIVE_MULTIPLIER_V5.csv",
+  "sha256": "7c66af67057d073c09e208f1a9f51037908b605dcd58921956ddad367a521aae"
+ }
+}
