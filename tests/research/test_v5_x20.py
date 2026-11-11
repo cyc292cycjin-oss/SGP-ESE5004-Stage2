@@ -626,3 +626,43 @@ def test_distribution_grid_layer():
     m = net(); m.remove("Bus", "A 0 low voltage")
     with pytest.raises(ValueError):
         L.apply_distribution_grid_v5(m, cfg({"enabled": True}), None)                                 # an AC node with a load but no LV bus stops
+
+
+# ---- 3-5 bunker carbon attribution (decision 244) ------------------------------------------------------------------------------
+def test_bunker_attribution_two_countries_one_port():
+    """Toy: A synthesises 100 MWh methanol (carbon 20 t, pool 75 % DAC / 25 % fossil), ships 60 MWh to B; B uses all at its bunker port, A burns 40 in
+    domestic shipping -> bunker 12 t (all from A), domestic 8 t; totals = synthesis carbon."""
+    import v5_bunker_attribution as BA
+    K = pd.DataFrame(dict(carrier=["methanolisation", "methanol ship", "shipping methanol", "shipping methanol", "DAC", "SMR CC"],
+                          bus0=["A H2", "A methanol", "A methanol", "B methanol", "A AC", "A gas"], bus1=["A methanol", "B methanol", "A shipping", "B bunker shipping methanol", "A co2 stored", "A H2"],
+                          bus2=["A co2 stored", "", "", "", "", "A co2 stored"], bus3=["", "", "", "", "", ""], bus4=["A atmosphere", "", "", "", "", ""]),
+                     index=["A meoh", "A-B ship", "A dom", "B bunk", "A DAC", "A SMR CC"])
+    fl = {0: pd.DataFrame(dict(pos=[150.0, 60.0, 40.0, 60.0, 1.0, 1.0], neg=0.0), index=K.index),
+          1: pd.DataFrame(dict(pos=0.0, neg=[-100.0, -60.0, -40.0, -60.0, -15.0, -1.0]), index=K.index),
+          2: pd.DataFrame(dict(pos=[20.0, 0, 0, 0, 0, 0], neg=[0.0, 0, 0, 0, 0, -5.0]), index=K.index),
+          4: pd.DataFrame(dict(pos=0.0, neg=[-20.0, 0, 0, 0, 0, 0]), index=K.index)}
+    B = pd.DataFrame(dict(country=["A", "B", "A", "A"], carrier=["methanol", "methanol", "co2 stored", "AC"]), index=["A methanol", "B methanol", "A co2 stored", "A AC"])
+    rep = BA.attribute(K, fl, B, pd.DataFrame(columns=["bus", "carrier"]), pd.DataFrame(columns=["bus", "carrier"]), pd.Series(dtype=float), None, {})
+    assert rep["check_passed"] and abs(rep["synthesis_carbon_mt"] - 20e-6) < 1e-15 and abs(rep["bunker_attributed_mt"] - 12e-6) < 1e-15
+    assert abs(rep["by_use"]["domestic shipping"] - 8e-6) < 1e-12 and rep["bunker_own_producer_mt"] == 0.0
+    sh = rep["pool_source_shares"]["A"]
+    assert abs(sh["DAC (atmospheric)"] - 0.75) < 1e-12 and abs(sh["fossil point source"] - 0.25) < 1e-12
+
+
+# ---- 4-1 export metadata (decision 244; Q11) -----------------------------------------------------------------------------------
+def test_export_meta_roundtrip(tmp_path):
+    import pypsa
+    from types import SimpleNamespace
+    n = toy(); n.add("Load", "A 0 electricity", bus="A 0", p_set=1.0)
+    n.meta = dict(stage="S2", interim_notice="x", skeleton_status="S2_SECTOR_COUPLED_SMOKE", asset_role="S2_SCENARIO_UNSOLVED", source_is_solved=False,
+                  qualification_dimensions=dict(physical_integrity="S2_STATIC_VALIDATION", policy_constraint_qualification="old"), required_constraint_hooks=["h1"], v5_x20={"a": 1})
+    run = dict(status="ok", termination_condition="optimal", objective=1.5, label="SMOKE")
+    gates = dict(A1_A2=dict(passed=True), A3=dict(passed=True), A5=dict(passed=False))
+    r = V.export_meta(n, run, gates, SimpleNamespace(authorization="test", package_commit="abc"), ROOT)
+    m = n.meta
+    assert "stage" not in m and "interim_notice" not in m and "policy_constraint_qualification" not in m["qualification_dimensions"]
+    assert m["skeleton_status"] == "S2_SECTOR_COUPLED_SMOKE" and m["build_history"]["copied_after_solve"]["skeleton_status"] == "S2_SECTOR_COUPLED_SMOKE"
+    assert m["build_history"]["moved_after_solve"]["stage"] == "S2" and m["run_status"]["gates_before_export"] == dict(A1_A2=True, A3=True, A5=False)
+    assert m["run_status"]["v6_acceptance"].startswith("V6_PENDING") and m["run_status"]["package_commit"] == "abc" and len(m["run_status"]["git_head"]) == 40
+    p = tmp_path / "x.nc"; n.export_to_netcdf(p); back = pypsa.Network(str(p))
+    assert back.meta["run_status"] == m["run_status"] and back.meta["build_history"] == m["build_history"]

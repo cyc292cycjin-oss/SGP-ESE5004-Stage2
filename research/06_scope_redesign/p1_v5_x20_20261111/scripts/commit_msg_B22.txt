@@ -1,0 +1,34 @@
+X20 3-5 and 4-1 (decision 244; Q11): bunker carbon attribution report, export metadata
+
+Both are post-solve exports of s2_solve for networks with a v5_x20 record
+(no change to the optimisation); one commit because they edit the same
+export flow.
+
+3-5 scripts_project/v5_bunker_attribution.py: synthesis carbon of the
+methanolisation atmosphere port by producer; destinations by annual
+proportional mixing on the national methanol buses through every
+bus-to-bus transfer (methanol ships, the Lao rail transit; INFERENCE) - X10
+counted only the producer's own bunker; carbon sources by the inflow shares
+of the producer's co2 stored pools (CO2 transfers excluded). Check: the uses
+carry the whole synthesis carbon (relative 1e-6). On the W14 2920x3h solved
+networks: F1 130.958 Mt synthesis carbon, 120.13 Mt to bunker shipping
+(X10 memo 130.96 / about 117-121; own-producer bunker only 3.54 Mt), F2
+131.17 / 120.34 Mt; unattributed 0 (evidence in the step folder). s2_solve
+writes BUNKER_CARBON_ATTRIBUTION.json / .csv after BUNKER_ACCOUNT.json.
+
+4-1 v5_common.export_meta (s2_solve, before gate A4 exports the network):
+n.meta['run_status'] = termination, the gates computed before the export,
+constraint hooks, authorization, package COMMIT, git HEAD, V6 acceptance
+V6_PENDING (gates_v6 accept runs after the solve); RUN_STATUS.json sidecar
+with every gate after the export (the network is not rewritten; the B4P step
+order is kept). n.meta['build_history']: stale build-time keys moved when
+nothing reads them after the solve (interim_notice, stage,
+fullsc_network_complete, input_coverage_complete, resource_occupancy_status,
+qualification_dimensions.policy_constraint_qualification), copied when read
+elsewhere (skeleton_status, asset_role, scientific_results_allowed,
+source_is_solved, asset_qualification; read sites in
+logs/64_meta_key_reads.log); research_config status keys not moved (SHA).
+Tests: toy attribution (two countries, one port), export / read-back of
+run_status and build_history; 38 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,43 @@
+== interim_notice
+== skeleton_status
+./build_research_network.py:46:    if n.meta.get('skeleton_status')!='INTERIM_S1_SKELETON':raise ValueError('S1 interim status must be declared in metadata')
+./s2_network.py:124:    if n.meta.get("skeleton_status") != S2["status"]:
+./v5/v5_gates.py:186:    checks=dict(research_config_sha256_matches=actual==expected,scenario_tag_matches=n.meta.get('scenario')==R['scenario'],switch_metadata_matches=n.meta.get('research_cross_borde
+== stage
+./gate6_execution_context.py:27:    require(a.get('gate')=='GATE6' and a.get('scenario')=='BASELINE' and a.get('stage')==mode,'Old Gate5 or wrong-stage authorization rejected')
+./b4_batch4.py:182:    if (r.get("split") or {}).get("stage") == "build":
+== asset_role
+./price_basis.py:122:            carrier=str(z.carrier);existing=z.get('asset_role')=='existing_survivor';year=2030 if existing else 2050
+./s1_inputs_review.py:104:        ex=df[(df.get('asset_role','')=='existing_survivor')&df.hydro_subtype.fillna('').ne('')]
+./s1_candidates.py:91:            sel=df.index[(df.carrier==carrier)&(df.get('asset_role',pd.Series('',index=df.index)).fillna('')!='existing_survivor')]
+./closeout_gate5_metadata.py:59:    inherited=['artifact_role','asset_role','source_is_solved','reference_source_is_solved','input_only_extraction','static_validation',
+./gate6_result.py:36:    m['gate6_parent_state']=dict(parent_sha256=parent_sha,inherited_state={k:copy.deepcopy(m.get(k)) for k in ['artifact_role','asset_role','source_is_solved','static_validation',
+./test_gate5_metadata_closeout.py:50:   assert m['source_is_solved'] is False and m['asset_role']=='SOURCE_UNSOLVED' and m['static_validation']==m['parent_input_and_delivery_state']['inherited_state']
+./validate_fullsc_final.py:37:                active=c.df.get('asset_role',__import__('pandas').Series('',index=c.df.index)).eq('existing_survivor')
+./selected_closure.py:31:        if z.get('asset_role')!='new_build_candidate' or z.carrier not in ['solar','onwind','offwind-ac','offwind-dc']:continue
+== scientific_results_allowed
+./run_gate6_baseline.py:82:    require(n.meta['scientific_results_allowed'] is False and not n.meta['FullSystemCostComplete'] and not n.meta['FullSystemEmissionsComplete'],'Scientific reporting bounda
+./test_precision_handoff.py:68:    n.meta={'artifact_role':'SYNTHETIC_TEST_ONLY','scientific_results_allowed':False}
+./closeout_gate5_metadata.py:52:    for key in ['scientific_results_allowed','formal_phase5_allowed','gate6_allowed','policy_enabled','FullSystemCostComplete','FullSystemEmissionsComplete','full_syste
+./gate6_execution_context.py:92:        require(n.meta.get('scientific_results_allowed') is False and n.meta.get('formal_phase5_allowed') is not True,'Scientific/Phase5 permission forbidden')
+./test_gate6_authorization_flow.py:21:    assert n.meta.get('scientific_results_allowed') is False
+./test_gate6_authorization_flow.py:126:        reread=pypsa.Network(export);assert reread.meta['solver_allowed'] is False and reread.meta['scientific_results_allowed'] is False and reread.meta['formal
+./test_gate5_metadata_closeout.py:20:  gate5_allowed=True,ready_for_gate5_reduced_validation_solve=True,source_is_solved=False,asset_role='SOURCE_UNSOLVED',**{k:False for k in ['scientific_results_all
+== fullsc_network_complete
+./validation_temporal.py:10:    if n.meta.get('artifact_role')!='FULL_SC_RESEARCH_BASELINE_UNSOLVED' or not n.meta.get('fullsc_network_complete'):
+== input_coverage_complete
+== source_is_solved
+./closeout_gate5_metadata.py:59:    inherited=['artifact_role','asset_role','source_is_solved','reference_source_is_solved','input_only_extraction','static_validation',
+./retired/build_diagnostic_network.py:60:    if n.meta.get('source_is_solved') is not False or n.meta.get('input_only_extraction') is not True:raise ValueError('Base input provenance missing')
+./retired/build_diagnostic_network.py:129:    if bundle.get('source_is_solved') is not False or bundle.get('solver_allowed') is not False:raise ValueError('Asset bundle guard missing')
+./gate6_result.py:36:    m['gate6_parent_state']=dict(parent_sha256=parent_sha,inherited_state={k:copy.deepcopy(m.get(k)) for k in ['artifact_role','asset_role','source_is_solved','static_validation',
+./test_gate5_metadata_closeout.py:50:   assert m['source_is_solved'] is False and m['asset_role']=='SOURCE_UNSOLVED' and m['static_validation']==m['parent_input_and_delivery_state']['inherited_state']
+./network_checks.py:7:    if n.meta.get('source_is_solved') is not False or n.meta.get('input_only_extraction') is not True:raise ValueError('Base input provenance missing')
+== asset_qualification
+./scenario_network.py:199:    if n.meta.get('asset_qualification')!='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED':raise ValueError('Electric base is not the source-qualified asset')
+./s2_network.py:313:    if n.meta.get("asset_qualification") != "SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED":
+./build_research_assets.py:158:    n.meta['asset_qualification']='SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED' if qualified else 'DEVELOPMENT_ONLY_PENDING_SURVIVOR_QUALIFICATION'
+./build_research_assets.py:170:    manifest.update(status=n.meta['asset_qualification'],survivor_integration=integrated,unit_first_selection=True,conditional_stock_materialised=False)
+== resource_occupancy_status
+./build_research_assets.py:157:    n.meta['resource_occupancy_status']='QUALIFIED_SHARED_ENVELOPES' if qualified else 'PENDING_COMPLETE_STOCK_AND_RESOURCE_QUALIFICATION'
+== policy_constraint_qualification

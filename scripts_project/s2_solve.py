@@ -504,6 +504,10 @@ def post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source
         a3, a5 = gate_a3_a5_physics(n, known_terms=known, ignore_checks=("COUNTRY_CO2_CAP:",) if gap else ()); gates["A3"] = a3; gates["A5"] = a5
     except Exception as e:
         gates["A3"] = dict(gate="A3_PHYSICS", passed=False, error=str(e)[:500]); gates["A5"] = dict(gate="A5_FOM_ONCE", passed=False, error=str(e)[:500])
+    v5meta = None
+    if n.meta.get("v5_x20"):   # V5 X20 (4-1, decision 244; Q11): run_status and build_history in the meta of the exported network (before A4 exports it)
+        from v5_common import export_meta
+        v5meta = guard("v5_export_meta", lambda: export_meta(n, run, gates, a, getattr(a, "repo", None)))
     gates["A4"] = guard("a4_readback", lambda: gate_a4_readback(n, out / (a.scenario + "_" + a.label + "_solved.nc"))) or dict(gate="A4_NETCDF_READBACK", passed=False, error="export failed (post_solve_errors)", file=str(out / (a.scenario + "_" + a.label + "_solved.nc")))
     gates["A6"] = guard("a6_binding", lambda: gate_a6_binding(run, lp_meta, net_sha)) or dict(gate="A6_SCALE_BINDING", passed=False, error="failed (post_solve_errors)")
     def _gate(key, fn, name):
@@ -517,6 +521,11 @@ def post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source
             rep = bunker_account_report(n, float(SV.get("interior", {}).get("solver_tol_factor", 10)) * float(SV.get("interior", {}).get("feasibility_tol", 1e-6)), ABS_FLOOR)
             save(out / "BUNKER_ACCOUNT.json", rep); return rep
         _gate("B1_BUNKERS", _bunkers, "B1_BUNKERS")
+    if n.meta.get("v5_x20"):   # V5 X20 (3-5, decision 244): post-solve attribution of the methanol synthesis carbon (report only)
+        def _battr():
+            from v5_bunker_attribution import attribute, tables_from_network, write
+            rep = attribute(*tables_from_network(n)); write(rep, out); return dict(check_passed=rep["check_passed"], bunker_attributed_mt=rep["bunker_attributed_mt"])
+        run["v5_bunker_attribution"] = guard("v5_bunker_attribution", _battr)
     _gate("B2", lambda: gate_b2_storage_cap(n), "B2_STORAGE_CAP"); _gate("B3", lambda: gate_b3_biomass(n), "B3_BIOMASS"); _gate("B8", lambda: gate_b8_demand_consistency(n), "B8_DEMAND")
     _gate("B11", lambda: gate_b11_supply_routes(n, cfg), "B11_SUPPLY_ROUTES"); _gate("B12", lambda: gate_b12_hash(n, cfg), "B12_HASH")
     _gate("B13", lambda: gate_b13_imports_one_way(n), "B13_IMPORTS"); _gate("B14", lambda: gate_b14_terminal_caps(n), "B14_TERMINALS"); _gate("B15", lambda: gate_b15_domestic_production_caps(n), "B15_DOMESTIC")   # S3-6
@@ -558,6 +567,10 @@ def post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source
     run.update(gates={k: v["passed"] for k, v in gates.items() if isinstance(v, dict) and "passed" in v}, peak_rss_bytes=sampler.peak, finished_epoch=time.time(),
                solved_network=gates["A4"].get("file"), emissions_by_country=(emis or {}).get("by_country"), co2_flows=flows, post_solve_errors=errors, post_solve_complete=(not errors))
     save(out / "SOLVE_RECEIPT.json", run)
+    if v5meta is not None:   # V5 X20 (4-1): sidecar with the complete gate summary (the exported network keeps V6_PENDING; it is not rewritten)
+        save(out / "RUN_STATUS.json", dict(run_status_in_network=v5meta.get("run_status"), gates_all=run["gates"], post_solve_errors=[e["step"] for e in errors],
+                                           build_history_moved=v5meta.get("moved"), build_history_copied=v5meta.get("copied"),
+                                           v6_acceptance="V6_PENDING: run scripts_project/v5/gates_v6.py accept on SOLVE_RECEIPT.json (V6_ACCEPTANCE.json)"))
     print(json.dumps(dict(status=status, objective=run["objective"], gates=run["gates"], peak_rss_gib=round(sampler.peak / 2**30, 2), post_solve_errors=[e["step"] for e in errors])))
     return 0 if not errors else 4
 

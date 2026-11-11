@@ -1,0 +1,280 @@
+{
+ "rule": "V5 X20 revision 3-5 (decision 244; X20_SPEC.md 1.18): post-solve attribution of the methanol synthesis carbon to its uses (report only, no change to\nthe optimisation). Method (X10 scripts/08_x16_bunker.py with two corrections):\n  (1) synthesis carbon: the atmosphere port p4 of the methanolisation links of each country (origin_neutral: the synthesis releases the carbon in the\n      producing country, s3_layers.py), t CO2, by producer;\n  (2) destinations: annual proportional mixing on the national methanol buses (INFERENCE): the methanol of a country bus is a mix of its own synthetic,\n      biomass-based and extra-ASEAN imported methanol and of the methanol shipped in from other buses ('methanol ship' links, a linear system solved for\n      the origin shares); every use of a bus (bunker shipping methanol, domestic shipping methanol, OCGT methanol, other) takes the bus mix - X10 counted\n      only the own bunker of the producer; transport losses and the net store change are reported as 'unattributed';\n  (3) carbon source of the synthesis carbon: the inflow shares of the producer's 'co2 stored' pools by capture carrier (CO2 pipeline / ship / transit\n      excluded, X10 L36-50), classes fossil point source / process / DAC / biogenic / waste / other.\nOutput: rows producer x destination country x use x source class (Mt CO2); totals check: sum = synthesis carbon (relative 1e-6).\ns2_solve writes BUNKER_CARBON_ATTRIBUTION.json / .csv after BUNKER_ACCOUNT.json for networks with a v5_x20 record; the CLI reads a solved file.\n    python scripts_project/v5_bunker_attribution.py --network <solved .nc> --output <dir>\n",
+ "synthesis_carbon_mt": 131.17282717929555,
+ "attributed_total_mt": 131.17282717929555,
+ "relative_difference": 6.280158875348454e-11,
+ "check_passed": true,
+ "bunker_attributed_mt": 120.33929624271804,
+ "bunker_own_producer_mt": 3.542001727465067,
+ "unattributed_mt": 8.237892621743759e-09,
+ "by_use": {
+  "OCGT methanol": 0.00621,
+  "bunker shipping": 120.339296,
+  "domestic shipping": 10.82732,
+  "unattributed (transport loss / store change)": 0.0
+ },
+ "by_producer": {
+  "BN": 0.0,
+  "ID": 46.551715,
+  "KH": 2.647113,
+  "LA": 1.940985,
+  "MM": 3.621843,
+  "MY": 3e-06,
+  "PH": 6.813013,
+  "SG": 0.0,
+  "TH": 69.068458,
+  "TL": 0.529689,
+  "VN": 8e-06
+ },
+ "pool_source_shares": {
+  "BN": {
+   "fossil point source": 0.3515138033065124,
+   "DAC (atmospheric)": 0.6250788244648913,
+   "process (mineral / feedstock) point source": 0.003927306968779806,
+   "biogenic": 0.019480065259816493
+  },
+  "ID": {
+   "fossil point source": 0.17783060852105054,
+   "DAC (atmospheric)": 0.08182044543055508,
+   "process (mineral / feedstock) point source": 0.28734631268207944,
+   "biogenic": 0.4530026333663149
+  },
+  "KH": {
+   "fossil point source": 0.28153785175492885,
+   "DAC (atmospheric)": 0.311464750285082,
+   "process (mineral / feedstock) point source": 0.1877255273434222,
+   "biogenic": 0.21927187061656706
+  },
+  "LA": {
+   "fossil point source": 6.516667067277344e-08,
+   "DAC (atmospheric)": 0.22276994190981522,
+   "process (mineral / feedstock) point source": 0.4270576376574034,
+   "biogenic": 0.3501723552661108
+  },
+  "MM": {
+   "fossil point source": 0.4843930817085483,
+   "DAC (atmospheric)": 5.916658680096898e-07,
+   "process (mineral / feedstock) point source": 0.13854456296913362,
+   "biogenic": 0.37706176365644994
+  },
+  "MY": {
+   "fossil point source": 0.35143379946172165,
+   "DAC (atmospheric)": 0.10326372576330885,
+   "process (mineral / feedstock) point source": 0.2895015668155907,
+   "biogenic": 0.255800907959379
+  },
+  "PH": {
+   "fossil point source": 0.2564011246498026,
+   "DAC (atmospheric)": 0.14134505001382866,
+   "process (mineral / feedstock) point source": 0.2846274158397536,
+   "biogenic": 0.317626409496615
+  },
+  "SG": {
+   "fossil point source": 0.549945861693127,
+   "DAC (atmospheric)": 0.22153799232990695,
+   "process (mineral / feedstock) point source": 0.2283334507096473,
+   "biogenic": 0.00018269526731886835
+  },
+  "TH": {
+   "fossil point source": 0.30203933815439477,
+   "DAC (atmospheric)": 0.19419833710685067,
+   "process (mineral / feedstock) point source": 0.2088934351258876,
+   "biogenic": 0.29486888961286695
+  },
+  "TL": {
+   "fossil point source": 0.2550385272073272,
+   "DAC (atmospheric)": 0.5166824024199257,
+   "biogenic": 0.22827907037274708
+  },
+  "VN": {
+   "fossil point source": 0.039286409130085055,
+   "DAC (atmospheric)": 0.34782799533483755,
+   "process (mineral / feedstock) point source": 0.347426979408599,
+   "biogenic": 0.26545861612647836
+  }
+ },
+ "origin_shares": {
+  "BN methanol": {
+   "biomass:BN": 0.00022611986778425702,
+   "biomass:ID": 3.349461351101489e-11,
+   "biomass:KH": 8.781085908520457e-09,
+   "biomass:LA": 8.859277639114154e-09,
+   "biomass:MM": 5.921247553491417e-09,
+   "biomass:MY": 5.318246077351023e-10,
+   "biomass:PH": 1.0500533624145875e-08,
+   "biomass:SG": 3.808400121057824e-12,
+   "biomass:TH": 1.7978988422760486e-10,
+   "biomass:TL": 1.7637815208780138e-08,
+   "biomass:VN": 8.045070223229215e-10,
+   "import:extra-ASEAN": 0.019908571617919476,
+   "synthetic:BN": 0.005159232914089956,
+   "synthetic:ID": 0.0922397105901136,
+   "synthetic:KH": 0.09120399796365711,
+   "synthetic:LA": 0.1140411519457909,
+   "synthetic:MM": 0.1035632586841972,
+   "synthetic:MY": 1.2116865017348467e-07,
+   "synthetic:PH": 0.3493484158837745,
+   "synthetic:SG": 4.7029625463720445e-11,
+   "synthetic:TH": 0.10991565153767512,
+   "synthetic:TL": 0.114393260794188,
+   "synthetic:VN": 4.537317455650708e-07
+  },
+  "ID methanol": {
+   "biomass:BN": 1.3453533051441592e-11,
+   "biomass:ID": 3.63125525597482e-10,
+   "import:extra-ASEAN": 2.2615707378055558e-08,
+   "synthetic:BN": 3.06960689522511e-10,
+   "synthetic:ID": 0.9999993992460833,
+   "synthetic:KH": 7.155028194592113e-08,
+   "synthetic:LA": 7.586395710414907e-08,
+   "synthetic:MM": 1.1292025936311812e-07,
+   "synthetic:PH": 9.721850838774653e-08,
+   "synthetic:TH": 9.577464536971281e-08,
+   "synthetic:TL": 1.2412653830691765e-07
+  },
+  "KH methanol": {
+   "biomass:BN": 2.3718948675549746e-10,
+   "biomass:KH": 9.627851283226529e-08,
+   "import:extra-ASEAN": 3.8243513989341967e-07,
+   "synthetic:BN": 5.41180135534408e-09,
+   "synthetic:ID": 1.389252547424274e-06,
+   "synthetic:KH": 0.9999885412551881,
+   "synthetic:LA": 1.9158562823023312e-06,
+   "synthetic:MM": 1.826103890702666e-06,
+   "synthetic:MY": 2.2192471025298917e-12,
+   "synthetic:PH": 1.9465354546403967e-06,
+   "synthetic:TH": 2.6431340368442775e-06,
+   "synthetic:TL": 1.2534895807059097e-06,
+   "synthetic:VN": 7.622553792108797e-12
+  },
+  "LA methanol": {
+   "biomass:LA": 7.768491285512498e-08,
+   "synthetic:KH": 1.085121901749856e-12,
+   "synthetic:LA": 0.9999999223066088,
+   "synthetic:MM": 1.0831512966361602e-12,
+   "synthetic:PH": 1.4181776060371734e-12,
+   "synthetic:TH": 1.2848282106778369e-12,
+   "synthetic:VN": 1.762413933986869e-12
+  },
+  "MM methanol": {
+   "biomass:BN": 9.943979678125837e-11,
+   "biomass:MM": 5.717494063014637e-08,
+   "import:extra-ASEAN": 2.3638137297510047e-07,
+   "synthetic:BN": 2.2688544688774286e-09,
+   "synthetic:ID": 6.861581353047711e-07,
+   "synthetic:KH": 5.551198174444637e-07,
+   "synthetic:LA": 5.64883135101982e-07,
+   "synthetic:MM": 0.9999958814831279,
+   "synthetic:MY": 1.2721742716329981e-12,
+   "synthetic:PH": 6.711489223542549e-07,
+   "synthetic:TH": 7.781666441144758e-07,
+   "synthetic:TL": 5.671118734951905e-07,
+   "synthetic:VN": 2.2474817779105394e-12
+  },
+  "MY methanol": {
+   "biomass:BN": 2.6383489944159363e-09,
+   "biomass:KH": 3.339073325236223e-12,
+   "biomass:LA": 2.757098806551688e-12,
+   "biomass:MM": 5.716132554521247e-08,
+   "biomass:MY": 1.332831002832983e-08,
+   "biomass:PH": 1.1331709581679722e-12,
+   "biomass:TL": 5.74678836064135e-12,
+   "import:extra-ASEAN": 1.5361102026337e-05,
+   "synthetic:BN": 6.019752755133411e-08,
+   "synthetic:ID": 4.093950511977219e-05,
+   "synthetic:KH": 3.4680999585694565e-05,
+   "synthetic:LA": 3.549078567527082e-05,
+   "synthetic:MM": 0.9997577521784033,
+   "synthetic:MY": 3.036665306075589e-06,
+   "synthetic:PH": 3.77001296630466e-05,
+   "synthetic:TH": 3.7633312306148136e-05,
+   "synthetic:TL": 3.727184188553004e-05,
+   "synthetic:VN": 1.4120601082292723e-10
+  },
+  "PH methanol": {
+   "biomass:BN": 5.933118734606354e-11,
+   "biomass:LA": 9.339730261353911e-11,
+   "biomass:PH": 2.9991926163665974e-08,
+   "biomass:TL": 1.5067720166544217e-10,
+   "biomass:VN": 8.481367091022145e-12,
+   "import:extra-ASEAN": 9.943238322011199e-08,
+   "synthetic:BN": 1.353721889134946e-09,
+   "synthetic:ID": 3.0397792170300217e-07,
+   "synthetic:KH": 2.9199953143308134e-07,
+   "synthetic:LA": 0.0012022578377781415,
+   "synthetic:MM": 3.9337211826794785e-07,
+   "synthetic:PH": 0.9978189937401494,
+   "synthetic:TH": 3.7878247274390746e-07,
+   "synthetic:TL": 0.0009772444161492886,
+   "synthetic:VN": 4.7833833493164555e-09
+  },
+  "SG methanol": {
+   "biomass:BN": 7.15377596017095e-11,
+   "biomass:ID": 1.2586871122336096e-10,
+   "biomass:KH": 1.7759181291040279e-09,
+   "biomass:LA": 8.409737975289997e-10,
+   "biomass:MM": 1.2917273168761875e-09,
+   "biomass:PH": 6.74873372649551e-10,
+   "biomass:SG": 9.172211535747685e-11,
+   "biomass:TH": 9.350241315628967e-10,
+   "biomass:TL": 6.993509424346395e-10,
+   "biomass:VN": 7.636845274095121e-11,
+   "import:extra-ASEAN": 0.0028896616497019246,
+   "synthetic:BN": 1.6322314688841807e-09,
+   "synthetic:ID": 0.34662568928509513,
+   "synthetic:KH": 0.01844542179837486,
+   "synthetic:LA": 0.010825444752177685,
+   "synthetic:MM": 0.022592450165035395,
+   "synthetic:PH": 0.022452758316503018,
+   "synthetic:SG": 1.132668993510097e-09,
+   "synthetic:TH": 0.5716327537876283,
+   "synthetic:TL": 0.004535767825981202,
+   "synthetic:VN": 4.307083767672435e-08
+  },
+  "TH methanol": {
+   "biomass:BN": 7.555304533984749e-12,
+   "biomass:TH": 1.635707207820556e-09,
+   "import:extra-ASEAN": 1.2100025843089904e-08,
+   "synthetic:BN": 1.7238456845772603e-10,
+   "synthetic:ID": 4.5379249484751644e-08,
+   "synthetic:KH": 6.429382688784278e-08,
+   "synthetic:LA": 5.5364483903407646e-08,
+   "synthetic:MM": 6.07143607646915e-08,
+   "synthetic:PH": 5.847407750770135e-08,
+   "synthetic:TH": 0.9999996620769998,
+   "synthetic:TL": 3.9781009942690704e-08
+  },
+  "TL methanol": {
+   "biomass:BN": 6.589351694651239e-10,
+   "biomass:TL": 1.5418151225296745e-07,
+   "import:extra-ASEAN": 1.3125898740915901e-06,
+   "synthetic:BN": 1.5034503813700704e-08,
+   "synthetic:ID": 4.504544211210285e-06,
+   "synthetic:KH": 3.1583079769451266e-06,
+   "synthetic:LA": 3.282688096449269e-06,
+   "synthetic:MM": 5.223030446273263e-06,
+   "synthetic:MY": 6.910436864169472e-12,
+   "synthetic:PH": 5.683942205007903e-06,
+   "synthetic:TH": 4.404717138950301e-06,
+   "synthetic:TL": 0.9999722602840349,
+   "synthetic:VN": 1.3060722158047094e-11
+  },
+  "VN methanol": {
+   "biomass:BN": 3.512819147985024e-10,
+   "biomass:LA": 7.768342599927093e-08,
+   "biomass:VN": 7.054397015236289e-09,
+   "import:extra-ASEAN": 5.03532095317539e-07,
+   "synthetic:BN": 8.014975573407609e-09,
+   "synthetic:ID": 1.9072533967813922e-06,
+   "synthetic:KH": 2.4496262985527793e-06,
+   "synthetic:LA": 0.9999807827377546,
+   "synthetic:MM": 2.445177723602087e-06,
+   "synthetic:MY": 2.9840713248758896e-12,
+   "synthetic:PH": 3.201488380397759e-06,
+   "synthetic:TH": 2.9004565928708647e-06,
+   "synthetic:TL": 1.738029588432783e-06,
+   "synthetic:VN": 3.9785903451659544e-06
+  }
+ },
+ "network": "/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111/cache/v4solved/export/F2/no_new_xb_BATCH4_2920X3H_solved.nc"
+}

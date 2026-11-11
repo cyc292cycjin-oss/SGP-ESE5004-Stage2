@@ -132,3 +132,43 @@ def check_network_meta_v5(meta: dict, cfg: dict) -> dict:
     if v.get("switch_sha256") != switch_sha(s):
         raise ValueError(f"v5 switch SHA256 of the network ({v.get('switch_sha256')}) differs from the configuration ({switch_sha(s)})")
     return dict(enabled=True, switch_sha256=switch_sha(s), main_set=is_main_set(s))
+
+
+# ---- 4-1 export metadata of a solved network (decision 244; Q11) ---------------------------------------------------------------
+BUILD_HISTORY_MOVE = ("interim_notice", "stage", "fullsc_network_complete", "input_coverage_complete", "resource_occupancy_status")   # no read site after the solve
+BUILD_HISTORY_COPY = ("skeleton_status", "asset_role", "scientific_results_allowed", "source_is_solved", "asset_qualification")   # read elsewhere: kept in place, copied
+STALE_IN_RESEARCH_CONFIG = ("research_config.skeleton_status", "research_config.stage", "research_config.demand.status", "research_config.s2.status",
+                            "research_config.site_candidates.*.status")   # not moved: research_config must stay equal to research_config_sha256
+
+
+def export_meta(n, run: dict, gates: dict, a, repo: Path | None = None) -> dict:
+    """V5 X20 4-1: before the solved network is exported (s2_solve, ahead of gate A4): n.meta['run_status'] (termination, the gates computed before the
+    export, constraint hooks, authorization, package COMMIT, git HEAD; V6 acceptance V6_PENDING - gates_v6 accept runs after the solve, its result
+    goes to the RUN_STATUS.json sidecar, the network is not rewritten) and n.meta['build_history'] (stale build-time keys: moved when nothing reads
+    them after the solve, copied otherwise; logs/64_meta_key_reads.log of X20)."""
+    import subprocess
+    head = None
+    try:
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(repo or ROOT), capture_output=True, text=True, check=True).stdout.strip()
+    except Exception:   # noqa: BLE001 - outside a git checkout (packages): recorded as None
+        pass
+    pre = {k: bool(v.get("passed")) for k, v in gates.items() if isinstance(v, dict) and "passed" in v}
+    rs = dict(status=run.get("status"), termination_condition=run.get("termination_condition"), objective=run.get("objective"), label=run.get("label"),
+              gates_before_export=pre, gates_after_export="RUN_STATUS.json sidecar (B gates, acceptance verdicts)", constraint_hooks=sorted(n.meta.get("required_constraint_hooks", [])),
+              authorization=getattr(a, "authorization", None), package_commit=getattr(a, "package_commit", None), git_head=head,
+              v6_acceptance="V6_PENDING (gates_v6 accept reads SOLVE_RECEIPT.json after the solve; see V6_ACCEPTANCE.json / RUN_STATUS.json)")
+    bh = dict(n.meta.get("build_history") or {})
+    moved, copied = {}, {}
+    for k in BUILD_HISTORY_MOVE:
+        if k in n.meta:
+            moved[k] = n.meta.pop(k)
+    for k in BUILD_HISTORY_COPY:
+        if k in n.meta:
+            copied[k] = n.meta[k]
+    qd = n.meta.get("qualification_dimensions") or {}
+    if isinstance(qd, dict) and "policy_constraint_qualification" in qd:
+        moved["qualification_dimensions.policy_constraint_qualification"] = qd.pop("policy_constraint_qualification")
+    bh.update(moved_after_solve=moved, copied_after_solve=copied, stale_not_moved=list(STALE_IN_RESEARCH_CONFIG),
+              note="build-time status keys of the unsolved network; superseded by run_status (V5 X20 4-1)")
+    n.meta["build_history"] = bh; n.meta["run_status"] = rs
+    return dict(run_status=rs, moved=sorted(moved), copied=sorted(copied))
