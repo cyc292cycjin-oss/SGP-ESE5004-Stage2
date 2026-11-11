@@ -1,0 +1,22 @@
+X20 1-1 part 1 (decisions 241, 246 Q1 (b)): GWA v4 correction fields, point-factor calibration mode
+
+scripts_project/v5_wind_gwa.py writes research_inputs/renewable_v5/
+WIND_GWA_CELL_FACTOR_V5.nc / .csv (GWA v4 ws100 land mean / ERA5 2013
+time-mean wnd100m per cutout cell; 1 below 50 % GWA coverage; clipped to
+[0.5, 3]; 4,048 cells used, 1 clipped), WIND_GWA_FARM_POINT_FACTOR_V5.csv
+(GWA ws100 at the 156 calibration farm points / ERA5 cell mean) and
+WIND_GWA_V5_LOG.json (input and output SHA256). Identical to the D-drive
+trial run.
+
+s4b_3_wind_calibration.py: --point-factor (Q1 (b): farm wind speed = ERA5
+w100 of the farm cell x farm-point factor), outputs *_V5, the alpha bound
+stop rule of the docstring is enforced, grade-C rows carry the range of the
+calibrated alphas. The v4 mode reproduces the five committed files byte for
+byte before and after the edit.
+
+Stopped at the bound rule: point-factor alphas PH 0.6994 and VN 0.7893 are
+below 0.8, so no V5 alpha table is written and the calibrated_gwa_v5
+profiles are not built; the choice is the user's (diagnostic in the step
+folder: evidence/ALPHA_DIAG_V4_POINT_CELL.csv, logs/43_calib_v5_diag.log).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

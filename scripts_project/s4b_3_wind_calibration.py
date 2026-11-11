@@ -88,8 +88,13 @@ def observed(ember_csv):
 
 def main():
     import atlite
-    ap = argparse.ArgumentParser(); ap.add_argument("--ember", type=Path, required=True); ap.add_argument("--output", type=Path, required=True); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--ember", type=Path, required=True); ap.add_argument("--output", type=Path, required=True)
+    # V5 X20 (1-1, decisions 241, 246 Q1 (b)): calibration on the GWA-corrected farm-point wind speed - w100 of each farm x its factor_point
+    # (WIND_GWA_FARM_POINT_FACTOR_V5.csv, scripts_project/v5_wind_gwa.py); outputs *_V5 (alpha, evidence, farm CF), an alpha outside the bounds stops the step
+    ap.add_argument("--point-factor", type=Path, default=None)
+    a = ap.parse_args()
     a.output.mkdir(parents=True, exist_ok=True)
+    pf_mode = a.point_factor is not None; sfx = "_V5" if pf_mode else ""
     obs = observed(a.ember)
     summ = []
     for c, d in obs.groupby("country"):
@@ -114,13 +119,24 @@ def main():
     del Z
     cell_id = {(int(r.ix), int(r.iy)): i for i, r in cells.iterrows()}
     f["cell"] = [cell_id[(int(i), int(j))] for i, j in zip(f.ix, f.iy)]
+    if pf_mode:   # V5 X20: farm-point factors joined by GEM unit ID (same farm filter and cell rule as v5_wind_gwa.farm_points)
+        pf = pd.read_csv(a.point_factor).set_index("GEM unit/phase ID")
+        f["factor_point"] = f["GEM unit/phase ID"].map(pf.factor_point)
+        if f.factor_point.isna().any() or not (f[["ix", "iy"]].values == pf.loc[f["GEM unit/phase ID"], ["ix", "iy"]].values).all():
+            raise SystemExit("V5 X20: point factor missing for a calibration farm or a different farm cell")
     turbs = {"nrel_atb2020_4mw": atlite_turbine("NREL_ReferenceTurbine_2020ATB_4MW"), "vestas_v112": atlite_turbine("Vestas_V112_3MW"), "dea2050_synthetic": dea2050_turbine()}
+
+    def farm_cf(d, turb, alpha):
+        """time-mean CF of the farms d: v4 = CF of the farm cell; V5 X20 = CF at the GWA-corrected farm-point speed (w100 of the cell x factor_point)"""
+        if pf_mode:
+            return cf_series(w100[:, d.cell.values] * d.factor_point.values[None, :], z0[:, d.cell.values], turb, alpha).mean(axis=0)
+        return cf_series(w100, z0, turb, alpha).mean(axis=0)[d.cell.values]
+
     def country_cf(c, turb, alpha):
         d = f[f.iso == c]
         if not len(d):
             return np.nan
-        cfc = cf_series(w100, z0, turb, alpha).mean(axis=0)
-        return float((cfc[d.cell.values] * d["Capacity (MW)"].values).sum() / d["Capacity (MW)"].sum())
+        return float((farm_cf(d, turb, alpha) * d["Capacity (MW)"].values).sum() / d["Capacity (MW)"].sum())
     def solve(c, turb, target):
         lo, hi = 0.3, 3.0
         if not (country_cf(c, turb, lo) <= target <= country_cf(c, turb, hi)):
@@ -149,6 +165,12 @@ def main():
     A["alpha_grade"] = np.where(A.calibrated_individually & A[key].notna(), "B", "C (capacity-weighted alpha of the calibrated countries)")
     A["alpha_v112_weighted"] = np.nan
     out_of_bounds = A[(A.alpha_main < ALPHA_BOUNDS[0]) | (A.alpha_main > ALPHA_BOUNDS[1])]   # stop rule on the alpha that would be applied; comparison-turbine alphas are reported only
+    if pf_mode:   # V5 X20: the stop rule of the docstring is enforced; grade-C countries carry the range of the calibrated alphas (registry)
+        if len(out_of_bounds):
+            raise SystemExit(f"V5 X20: alpha outside {ALPHA_BOUNDS}: {out_of_bounds.alpha_main.to_dict()}")
+        cal = A.calibrated_individually & A[key].notna()
+        A["alpha_range_low"] = np.where(cal, np.nan, float(calc[key].min())); A["alpha_range_high"] = np.where(cal, np.nan, float(calc[key].max()))
+        A["factor_point_capacity_weighted"] = [float((f.loc[f.iso == c, "factor_point"] * f.loc[f.iso == c, "Capacity (MW)"]).sum() / f.loc[f.iso == c, "Capacity (MW)"].sum()) if (f.iso == c).any() else np.nan for c in A.index]
     # calibrated-farm CF with the new turbine at alpha_main (diagnostic)
     A["cf_farms_dea2050_alpha_main"] = [country_cf(c, turbs["dea2050_synthetic"], float(A.at[c, "alpha_main"])) if A.at[c, "farms"] else np.nan for c in A.index]
     # GWA cross-check alpha: GWA land-mean 100 m speed / ERA5 2013 land-mean 100 m speed
@@ -161,19 +183,33 @@ def main():
             A.at[c, "era5_land_mean_ws100"] = float((I[i] * wmean).sum() / I[i].sum())
             A.at[c, "gwa_mean_ws100"] = GWA_WS100.get(c, np.nan)
             A.at[c, "alpha_gwa_check"] = A.at[c, "gwa_mean_ws100"] / A.at[c, "era5_land_mean_ws100"]
-    # outputs
-    obs.to_csv(a.output / "WIND_OBSERVED_CF_EMBER_2019_2025.csv", index=False)
-    S.reset_index().to_csv(a.output / "WIND_OBSERVED_CF_SUMMARY.csv", index=False)
-    A.reset_index().to_csv(a.output / "WIND_CALIBRATION_ALPHA.csv", index=False)
+    # outputs (V5 X20 point-factor mode: the Ember tables are unchanged and not rewritten; alpha, farm CF and evidence get the _V5 suffix)
+    if not pf_mode:
+        obs.to_csv(a.output / "WIND_OBSERVED_CF_EMBER_2019_2025.csv", index=False)
+        S.reset_index().to_csv(a.output / "WIND_OBSERVED_CF_SUMMARY.csv", index=False)
+    A.reset_index().to_csv(a.output / f"WIND_CALIBRATION_ALPHA{sfx}.csv", index=False)
     fo = f[["GEM unit/phase ID", "Plant / Project name", "iso", "Technology", "Capacity (MW)", "Start year", "Latitude", "Longitude", "cell_x", "cell_y"]].copy()
     for k, t in turbs.items():
-        cfc = cf_series(w100, z0, t, 1.0).mean(axis=0); fo[f"cf_alpha1_{k}"] = cfc[f.cell.values]
-    fo["alpha_main"] = fo.iso.map(A.alpha_main); fo["cf_calibrated_nrel4mw"] = [float(cf_series(w100[:, [cl]], z0[:, [cl]], turbs["nrel_atb2020_4mw"], al).mean()) for cl, al in zip(f.cell.values, fo.alpha_main.values)]
-    fo.to_csv(a.output / "WIND_FARMS_MODEL_CF_2013.csv", index=False)
+        if pf_mode:
+            fo[f"cf_alpha1_{k}"] = farm_cf(f, t, 1.0)
+        else:
+            cfc = cf_series(w100, z0, t, 1.0).mean(axis=0); fo[f"cf_alpha1_{k}"] = cfc[f.cell.values]
+    fo["alpha_main"] = fo.iso.map(A.alpha_main)
+    if pf_mode:
+        fo["factor_point"] = f.factor_point.values
+        fo["cf_calibrated_nrel4mw"] = [float(farm_cf(f.iloc[[i]], turbs["nrel_atb2020_4mw"], al)[0]) for i, al in enumerate(fo.alpha_main.values)]
+    else:
+        fo["cf_calibrated_nrel4mw"] = [float(cf_series(w100[:, [cl]], z0[:, [cl]], turbs["nrel_atb2020_4mw"], al).mean()) for cl, al in zip(f.cell.values, fo.alpha_main.values)]
+    fo.to_csv(a.output / f"WIND_FARMS_MODEL_CF_2013{sfx}.csv", index=False)
     turb_out = {k: {kk: (list(map(float, vv)) if isinstance(vv, (list, np.ndarray)) else vv) for kk, vv in t.items()} for k, t in turbs.items()}
     ev = dict(method=__doc__.split("\n\n")[0], ember_rows=int(len(obs)), farms=int(len(f)), cells=int(len(cells)), alpha_bounds=ALPHA_BOUNDS, alpha_weighted_calibrated=alpha_w,
               alpha_out_of_bounds=out_of_bounds.index.tolist(), turbines=turb_out, summary=S.reset_index().to_dict("records"), calibration=A.reset_index().to_dict("records"))
-    (a.output / "WIND_CALIBRATION_S4B3.json").write_text(json.dumps(ev, indent=1, default=float))
+    if pf_mode:
+        import hashlib
+        ev["v5_x20"] = dict(rule="1-1 (decision 246 Q1 (b)): farm wind speed = ERA5 w100 of the farm cell x GWA farm-point factor; profiles use the cell factor",
+                            point_factor=dict(path=str(a.point_factor), sha256=hashlib.sha256(a.point_factor.read_bytes()).hexdigest()),
+                            ember=dict(path=str(a.ember), sha256=hashlib.sha256(a.ember.read_bytes()).hexdigest()))
+    (a.output / f"WIND_CALIBRATION_S4B3{sfx}.json").write_text(json.dumps(ev, indent=1, default=float))
     pd.set_option("display.width", 250); pd.set_option("display.max_columns", 30)
     print(S.round(3).to_string()); print(A.round(3).to_string()); print("alpha weighted", alpha_w, "OUT OF BOUNDS:", out_of_bounds.index.tolist())
 

@@ -155,3 +155,26 @@ def test_gem_coord_table_and_override():
         L.gem_node_override(df.assign(node="LA2 2"), cfg({"enabled": True}), ROOT)
     with pytest.raises(ValueError):
         L.gem_node_override(df.iloc[1:], cfg({"enabled": True}), ROOT)
+
+
+# ---- 1-1 GWA v4 correction fields (decisions 241, 246 Q1 (b)) ------------------------------------------------------------------
+def test_wind_gwa_factor_files():
+    import json
+    import numpy as np
+    import xarray as xr
+    rv = ROOT / "research_inputs/renewable_v5"
+    f = xr.open_dataarray(rv / "WIND_GWA_CELL_FACTOR_V5.nc")
+    t = pd.read_csv(rv / "WIND_GWA_CELL_FACTOR_V5.csv")
+    log = json.loads((rv / "WIND_GWA_V5_LOG.json").read_text())
+    v = f.values
+    assert v.shape == (f.sizes["y"], f.sizes["x"]) and np.isfinite(v).all() and v.min() >= 0.5 and v.max() <= 3.0
+    used = t[t.used]
+    assert len(used) == log["cells_used"] == 4048 and int(t.clipped.sum()) == log["cells_clipped"] == 1 and (used.coverage >= 0.5).all()
+    assert np.allclose(v[used.iy.values, used.ix.values], used.factor.values, rtol=0, atol=1e-9)
+    mask = np.ones_like(v, dtype=bool); mask[used.iy.values, used.ix.values] = False
+    assert (v[mask] == 1.0).all()                                                                  # unused cells carry factor 1
+    pf = pd.read_csv(rv / "WIND_GWA_FARM_POINT_FACTOR_V5.csv")
+    assert len(pf) == 156 and pf.factor_point.notna().all() and pf.factor_point.between(0.5, 3.0).all()
+    assert np.allclose(pf.factor_point_raw.clip(0.5, 3.0), pf.factor_point)
+    for k, o in log["outputs"].items():
+        assert V.sha256(rv / k) == o["sha256"]
