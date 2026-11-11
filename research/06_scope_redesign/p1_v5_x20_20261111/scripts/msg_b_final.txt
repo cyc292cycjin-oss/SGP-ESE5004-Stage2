@@ -1,0 +1,14 @@
+X20 B 段 §3 第 4–7 步与 ④2（决策 244、246、251）：静态与零松弛检查、输入桥表、56 时段回归、报告、局限清单、台账
+
+- 静态检查（不求解）：x20_static.py（开关 SHA、B12、各 v5 层账本、组件差异）；68_static_w14.py（W14 的 C1-C12、C6b 移植，
+  对照 v5off，C6v5 用覆盖项重组配置）；56 时段切分 F1 4e719365 / F2 61bb9b98；零松弛门 4 张网络 PASS；s3_6 B1、B11-B16 通过；
+  网络 SHA 与构建回执一致。s4i_static_audit 与 b4 base-check 是打包后门检，不适用（LIMITATIONS_V5.md L-C21）。
+- 桥表 X20_BRIDGE.csv（x20_bridge.py，284 行，F2 重算逐行相同）与陆上风电合理性对照 ONWIND_SANITY_V5.csv。
+- 56 时段回归（69_smoke56.sh，Gurobi 2 次，代码 = 构建提交 b05753a1）：F1 optimal 396,174,224,434.2545，
+  F2 optimal 410,510,617,063.0309；V6 ACCEPTED_LAYER2 x2；Owen 前提通过；x20_smoke_eval.py 与 D2c 冒烟对照（不作数量结论）。
+- 全量测试：v5 1 failed / 919 passed / 55 skipped，唯一失败与 v4 基线相同。
+- REPORT.md（SHA256 f08b14b0）、LIMITATIONS_V5.md（④2，33 条）、SOURCES.csv、DOWNLOAD_CANDIDATES.csv、EVIDENCE.json、PROGRESS.md；
+  台账 research/STAGE2_PROJECT_LEDGER.md 新增 V5 X20 条目。
+- 模型代码、配置与输入在本提交中不变（scripts_project / configs / research_inputs 无改动）。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
