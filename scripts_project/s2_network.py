@@ -419,7 +419,7 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     nh3_meoh = add_ammonia_methanol(n, costs, cfg, repo, registry, nodes) if ("s3" in R and "ammonia_methanol" in R["s3"]) else None   # S3-3: Haber-Bosch, cracker, methanolisation, biomass-to-methanol, methanol OCGT, stores
     sector = apply_sector_alignment(n, costs, cfg, nodes) if "sector" in R else None   # S4B-0 (decision 70): PyPSA-Eur sector defaults (Sabatier, electrobiofuels, FT part load, switches)
     fuel_carbon = add_fuel_carbon_mode(n, costs, cfg, nodes) if ("s3" in R and "fuel_carbon_mode" in R["s3"]) else None   # S3-5 (decision 64): origin_neutral main / producer_credit sensitivity
-    ev = apply_ev_structure(n, cfg, repo, registry)   # V3 (decision 165): EV load shape, charger, battery store (flat = v2)
+    ev = apply_ev_structure(n, cfg, repo, registry, demand)   # V3 (decision 165): EV load shape, charger, battery store (flat = v2); V5 X20 (3-3): ev_smart_share (1.0 = unchanged)
     bunkers = apply_bunker_attribution(n, costs, cfg, demand)   # S4C-3 (decision 88): asean_pool (main: regional bunker loads, separate net-zero bunker account) | bunkering_country | excluded
     extra_co2 = apply_extra_asean_storage(n, cfg, registry, nodes)   # S4C-4 (decision 89): per-country uncapped extra-ASEAN CO2 storage export (on main | off); S4D-1 (decision 93): coastal nodes only, Lao transit
     shipping = apply_intra_asean_shipping(n, cfg, registry)   # S4D-2 (decision 92): intra-ASEAN CO2 shipping into the receivers' national stores, maritime trade, both scenarios

@@ -304,8 +304,15 @@ def add_liquid_shipping(n, cfg, registry: pd.DataFrame) -> dict:
     return led
 
 
-def apply_ev_structure(n, cfg, repo, registry: pd.DataFrame) -> dict:
-    """Decision 165, D165-1 to D165-4: EV load shape on the battery bus, charger, battery store, V2G. flat keeps the v2 structure."""
+EV_UNCONTROLLED_CARRIER = "land transport EV uncontrolled"   # V5 X20 (3-3): grid-side load of the uncontrolled EV share
+
+
+def apply_ev_structure(n, cfg, repo, registry: pd.DataFrame, demand: dict | None = None) -> dict:
+    """Decision 165, D165-1 to D165-4: EV load shape on the battery bus, charger, battery store, V2G. flat keeps the v2 structure.
+    V5 X20 (3-3, decision 244): research.s2.demand.ev_smart_share s (1.0 default = unchanged, bit-identical). With s < 1 in the smart modes the fleet,
+    charger, battery and the battery-bus load are scaled by s, and the uncontrolled part becomes the grid-side Load '<node> land transport EV uncontrolled'
+    (carrier land transport EV uncontrolled) on the charger's bus0 (decision 246 Q5 (a)) = (1 - s) x drive load, shifted by ev_uncontrolled_delay_h, / the
+    charge efficiency; the demand ledger gets a row with the grid / final factor. Final EV energy is unchanged (smart final + uncontrolled grid x eff)."""
     from s2_layers import add_link, ensure_carrier
     from v3_ev import NODE_TZ, SHAPE, ev_series
     D = cfg["research"]["s2"]["demand"]; mode = str(D.get("ev_structure", "flat"))
@@ -322,6 +329,10 @@ def apply_ev_structure(n, cfg, repo, registry: pd.DataFrame) -> dict:
     scale = float(D.get("ev_fleet_scale", 1.0)); delay = float(D.get("ev_uncontrolled_delay_h", 3.0))
     e_car, rate, avail, eff = rv("share_bev_energy"), rv("share_bev_charge_rate"), rv("share_bev_dsm_availability"), rv("share_bev_charge_efficiency")
     res_v, res_h = rv("share_bev_dsm_restriction_value"), rv("share_bev_dsm_restriction_time")
+    sh = float(D.get("ev_smart_share", 1.0))   # V5 X20 (3-3)
+    if not 0.0 <= sh <= 1.0:
+        raise ValueError("research.s2.demand.ev_smart_share must be in [0, 1]")
+    unc = []   # (node, load name, series of the uncontrolled final energy) for s < 1
     load_ts, charger_ts, emin_ts, v2g_ts = {}, {}, {}, {}
     fleet = 0.0
     ensure_carrier(n, "EV battery")
@@ -331,7 +342,10 @@ def apply_ev_structure(n, cfg, repo, registry: pd.DataFrame) -> dict:
         load_ts[name] = float(z.p_set) * s
         if mode == "uncontrolled":
             continue
-        N = float(z.p_set) * 8760.0 / a * scale; fleet += N
+        if sh < 1.0:   # V5 X20 (3-3): the smart share stays on the battery bus, the rest is drawn uncontrolled (drive shape delayed)
+            su = ev_series(sn, off - delay, week); su = su / su.mean()
+            unc.append((node, name, (1.0 - sh) * float(z.p_set) * su)); load_ts[name] = sh * float(z.p_set) * s
+        N = float(z.p_set) * 8760.0 / a * scale * sh; fleet += N
         ch = f"{node} BEV charger"
         n.links.loc[ch, ["p_nom", "p_nom_extendable", "p_max_pu"]] = [N * rate, False, 1.0]
         charger_ts[ch] = ev_series(sn, off, plug)
@@ -347,6 +361,27 @@ def apply_ev_structure(n, cfg, repo, registry: pd.DataFrame) -> dict:
             n.links.loc[v2g, ["p_nom", "p_nom_extendable", "p_max_pu"]] = [N * rate, False, 1.0]
             v2g_ts[v2g] = charger_ts[ch]
     n.loads_t.p_set = pd.concat([n.loads_t.p_set, pd.DataFrame(load_ts, index=sn)], axis=1)
+    if unc:   # V5 X20 (3-3): grid-side uncontrolled loads, outside the loop over the 'land transport EV' loads (their bus parsing)
+        ensure_carrier(n, EV_UNCONTROLLED_CARRIER); uts = {}; urows = []
+        for node, name, ser in unc:
+            ch = f"{node} BEV charger"; b0 = str(n.links.at[ch, "bus0"]) if ch in n.links.index else node
+            un = f"{node} {EV_UNCONTROLLED_CARRIER}"
+            n.add("Load", un, bus=b0, carrier=EV_UNCONTROLLED_CARRIER)
+            if "country" in n.loads.columns:
+                n.loads.loc[un, "country"] = str(n.buses.at[node, "country"])
+            uts[un] = ser / eff
+            urows.append(dict(load=un, parent=name, bus=b0, final_mwh=float((ser * n.snapshot_weightings.generators).sum()), grid_mwh=float((ser / eff * n.snapshot_weightings.generators).sum()),
+                              grid_per_final=1.0 / eff))
+            if demand is not None:
+                par = next((r for r in demand.get("loads", []) if r.get("load") == name), None)
+                if par is not None:
+                    fin = float(par.get("annual_mwh", 0.0)) * (1.0 - sh); par["annual_mwh"] = float(par.get("annual_mwh", 0.0)) * sh
+                    demand["loads"].append(dict(par, load=un, carrier=EV_UNCONTROLLED_CARRIER, bus=b0, annual_mwh=fin, grid_per_final=1.0 / eff,
+                                                account=str(par.get("account", "")) + " (V5 X20 3-3: uncontrolled share, final energy; the load is grid side = final / charge efficiency)"))
+        n.loads_t.p_set = pd.concat([n.loads_t.p_set, pd.DataFrame(uts, index=sn)], axis=1)
+        led["v5_uncontrolled"] = dict(smart_share=sh, loads=urows, final_twh=float(sum(r["final_mwh"] for r in urows)) / 1e6, grid_twh=float(sum(r["grid_mwh"] for r in urows)) / 1e6)
+    if sh != 1.0:
+        led["ev_smart_share"] = sh
     if charger_ts or v2g_ts:
         n.links_t.p_max_pu = pd.concat([n.links_t.p_max_pu, pd.DataFrame({**charger_ts, **v2g_ts}, index=sn)], axis=1)
     if emin_ts:

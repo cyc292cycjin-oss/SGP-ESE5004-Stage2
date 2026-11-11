@@ -327,7 +327,7 @@ def apply_distribution_grid_v5(n, cfg, demand: dict | None = None) -> dict:
         return b
     nodes = set(n.buses.index[n.buses.carrier == "AC"])
     L = n.loads
-    mv_loads = L.index[L.carrier.astype(str).str.contains(LV_LOAD_MATCH) & L.bus.isin(nodes)]
+    mv_loads = L.index[(L.carrier.astype(str).str.contains(LV_LOAD_MATCH) | (L.carrier.astype(str) == "land transport EV uncontrolled")) & L.bus.isin(nodes)]   # + the 3-3 uncontrolled EV load (Q5 (a): the charger's bus)
     new_bus = {k: lv(L.at[k, "bus"]) for k in mv_loads}
     for k, b in new_bus.items():
         n.loads.at[k, "bus"] = b

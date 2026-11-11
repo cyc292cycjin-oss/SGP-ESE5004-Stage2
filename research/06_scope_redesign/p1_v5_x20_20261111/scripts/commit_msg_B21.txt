@@ -1,0 +1,20 @@
+X20 3-3 (decision 244, Q5 (a)): EV smart-charging share
+
+research.s2.demand.ev_smart_share: 1.0 (main: unchanged, the EV ledger
+keeps no new key) | 0.5 (sensitivity). v3_layers.apply_ev_structure (smart
+modes): fleet, charger, battery and the battery-bus load scale with s; the
+rest becomes the grid-side Load '<node> land transport EV uncontrolled'
+(carrier land transport EV uncontrolled) on the charger's bus0 = (1 - s) x
+drive load shifted by ev_uncontrolled_delay_h / charge efficiency (0.9),
+built after the loop over the 'land transport EV' loads; the demand ledger
+row of the EV load is split (final energy; the new row records grid /
+final = 1 / 0.9), so the EV final energy is conserved. The distribution
+layer (3-4) also moves this carrier with the charger to LV (Q5 (a)).
+s2_network passes the demand ledger to the EV layer.
+
+Not verified by a build with s < 1 (limitation): B8 / the ATS anchor
+check, daily-resolution aggregation, FIXED_ELEC lists and carrier sums that
+key on 'land transport EV'. Registry chain rerun (baseline.yaml cited).
+Tests: test_v3_units (s = 1 / 0.5 energy conservation), 74 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -410,7 +410,8 @@ research:
       bev_dsm: false                      # no ASEAN fleet data (number of cars) -> no DSM store; DATA_PENDING (v2 key, superseded by ev_structure)
       ev_structure: smart                 # V3 (decision 165, D165-4): smart (E2, main: EV battery store, RAMP consumption + plug-in shapes, fleet proxy) | smart_v2g (E3) | uncontrolled (E4) | flat (v2)
       ev_fleet_scale: 1.0                 # x 0.5 / x 2 sensitivity of the fleet proxy
-      ev_uncontrolled_delay_h: 3.0        # E4 only
+      ev_uncontrolled_delay_h: 3.0        # E4 only; V5 X20 (3-3) also the delay of the uncontrolled share below
+      ev_smart_share: 1.0                 # V5 X20 (3-3, decision 244): share s of the EV fleet on smart charging (smart modes); 1.0 main = unchanged; s < 1 -> the rest is the grid-side load '<node> land transport EV uncontrolled' on the charger's bus (sensitivity 0.5)
       clean_cooking: true                 # decision 23: traditional biomass cooking -> useful energy served by modern stoves (electricity/gas/LPG)
       cookstove_efficiency_source: IEA Defining energy access 2020 methodology, Table 2 (Indonesia, Thailand, Other Southeast Asia)
     industry:

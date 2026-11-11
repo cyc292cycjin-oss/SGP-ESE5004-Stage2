@@ -182,3 +182,28 @@ def test_direct_subjects_single_source():
     assert set(s4d_ledger.FREIGHT_SUBJECTS.values()) <= set(s4d_ledger.DIRECT_SUBJECTS) and "co2_transit_rail_freight" in s4d_ledger.DIRECT_SUBJECTS
     assert s4d_ledger.DIRECT_SUBJECTS[:3] == ("capex_new", "fom_existing", "variable_cost") and len(set(s4d_ledger.DIRECT_SUBJECTS)) == len(s4d_ledger.DIRECT_SUBJECTS)
     assert "DIRECT_SUBJECTS" in inspect.getsource(s4d_ledger.country_cost_ledger)
+
+
+@pytest.mark.parametrize("sh", [1.0, 0.5])
+def test_ev_smart_share_energy(sh):
+    """V5 X20 (3-3): the smart share s scales fleet, charger, battery and the battery-bus load; the rest is a grid-side uncontrolled load on the
+    charger's bus0 (final energy conserved: smart final + uncontrolled grid x efficiency = the original load); s = 1 is the unchanged structure."""
+    from v3_layers import EV_UNCONTROLLED_CARRIER, apply_ev_structure
+    reg = registry(); n = ev_network(); cfg = dict(research=dict(s2=dict(demand=dict(ev_structure="smart", ev_smart_share=sh))))
+    dem = {"loads": [dict(load=f"{node} land transport EV", bus=f"{node} EV battery", carrier="land transport EV", annual_mwh=1000.0 * 8760.0) for node in EV_NODES]}
+    led = apply_ev_structure(n, cfg, ROOT, reg, dem)
+    a = rv(reg, "ev_annual_km_per_vehicle") / (rv(reg, "share_transport_electric_efficiency") * 100.0)
+    w = n.snapshot_weightings.generators
+    for node in EV_NODES:
+        ld, ch, un = f"{node} land transport EV", f"{node} BEV charger", f"{node} {EV_UNCONTROLLED_CARRIER}"
+        smart = float((n.loads_t.p_set[ld] * w).sum())
+        assert smart == pytest.approx(sh * 1000.0 * 8760.0, rel=1e-12)
+        assert n.links.at[ch, "p_nom"] == pytest.approx(1000.0 * 8760.0 / a * sh * rv(reg, "share_bev_charge_rate"))
+        if sh < 1.0:
+            assert n.loads.at[un, "bus"] == node and n.loads.at[un, "carrier"] == EV_UNCONTROLLED_CARRIER
+            grid = float((n.loads_t.p_set[un] * w).sum())
+            assert smart + grid * 0.9 == pytest.approx(1000.0 * 8760.0, rel=1e-12)                   # charger efficiency 0.9 of the toy charger? registry value below
+        else:
+            assert un not in n.loads.index and "ev_smart_share" not in led
+    if sh < 1.0:
+        assert abs(sum(r["annual_mwh"] for r in dem["loads"]) - 4 * 1000.0 * 8760.0) < 1e-6 and len(dem["loads"]) == 8
