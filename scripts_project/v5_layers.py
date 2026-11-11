@@ -257,3 +257,42 @@ def apply_ph_dc_stock(n, corridors: pd.DataFrame, cfg, repo: Path = ROOT):
         rows.append(dict(component=name, action=str(r.action), extendable=ext, frozen_base_mw=before, corrected_mw=v, grade=str(r.grade), source_page=str(r.source_page)))
     led.update(table=PH_DC_TABLE, rows=rows, total_before_mw=float(sum(x["frozen_base_mw"] for x in rows)), total_after_mw=float(sum(x["corrected_mw"] for x in rows)))
     return corridors, led
+
+
+AC_DEDUP_TABLE = "research_inputs/corridors/AC_DEDUP_V5.csv"
+
+
+def apply_ac_dedup(n, cfg, repo: Path = ROOT) -> dict:
+    """2-2 (decision 244; Q6 (a)): domestic AC corridors carrying OSM duplicate rows (same way, end buses, voltage, length) get s_nom = frozen s_nom x
+    factor (AC_DEDUP_V5.csv, scripts_project/v5_ac_dedup_data.py: deduplicated / counted OSM capacity of the corridor; dedup_cables also recounts
+    circuits = cables / 3 where the OSM API tag exists); s_nom_min follows when it was the stock bound; num_parallel / x / r / b follow the S4G-1 rule
+    (npar = s_nom / (sqrt 3 v_nom i_nom), x = x_per_length l / npar, r likewise, b = 2 pi f c_per_length l npar 1e-9). Only rows with applied = True
+    (reconstruction check counted / model s_nom in [0.8, 1.25]); corridors that fail the check stay unchanged (limitation)."""
+    import math
+    s = switches(cfg); mode = s["ac_dedup"]; led = dict(mode=mode)
+    if not s["enabled"] or mode == "frozen_base":
+        return led
+    t = pd.read_csv(Path(repo) / AC_DEDUP_TABLE, dtype={"line": str})
+    t = t[t.applied.astype(str).str.lower() == "true"]
+    col = "factor_dedup_cables" if mode == "dedup_cables" else "factor_dedup_only"
+    lt = n.line_types; rows = []
+    for _, r in t.iterrows():
+        k = r.line
+        if k not in n.lines.index:
+            raise ValueError(f"AC dedup: line {k} not in the network")
+        z = n.lines.loc[k]
+        if abs(float(z.s_nom) - float(r.frozen_s_nom_mw)) > 1e-6 * max(1.0, float(r.frozen_s_nom_mw)):
+            raise ValueError(f"AC dedup: line {k} has s_nom {z.s_nom}, the table says {r.frozen_s_nom_mw}")
+        f = float(r[col]); new = float(z.s_nom) * f
+        t_ = lt.loc[z.type]; v = float(n.buses.at[z.bus0, "v_nom"])
+        npar = new / (math.sqrt(3) * v * float(t_.i_nom))
+        x = float(t_.x_per_length) * float(z.length) / npar; rr = float(t_.r_per_length) * float(z.length) / npar
+        b = 2 * math.pi * 1e-9 * float(t_.f_nom) * float(t_.c_per_length) * float(z.length) * npar
+        rows.append(dict(line=k, country=str(r.country), factor=f, s_nom_before=float(z.s_nom), s_nom_after=new, num_parallel_before=float(z.num_parallel),
+                         num_parallel_after=npar, x_before=float(z.x), x_after=x))
+        n.lines.loc[k, ["s_nom", "num_parallel", "x", "r", "b"]] = [new, npar, x, rr, b]
+        if float(z.s_nom_min) > 0:
+            n.lines.loc[k, "s_nom_min"] = new
+    led.update(table=AC_DEDUP_TABLE, column=col, lines=len(rows), rows=rows, s_nom_before_mw=float(sum(x["s_nom_before"] for x in rows)),
+               s_nom_after_mw=float(sum(x["s_nom_after"] for x in rows)))
+    return led

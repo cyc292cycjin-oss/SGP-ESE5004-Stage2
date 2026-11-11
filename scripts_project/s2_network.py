@@ -329,6 +329,10 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         corridors, v5x["ledgers"]["ph_dc_2_1"] = apply_ph_dc_stock(n, corridors, cfg, repo)
         if v5s["ph_dc_stock"] != "frozen_base":
             v5x["tables"]["ph_dc_stock"] = PH_DC_TABLE
+        from v5_layers import AC_DEDUP_TABLE, apply_ac_dedup   # V5 X20 (2-2, decision 244; Q6 (a)): OSM duplicate rows of the domestic AC corridors
+        v5x["ledgers"]["ac_dedup_2_2"] = apply_ac_dedup(n, cfg, repo)
+        if v5s["ac_dedup"] != "frozen_base":
+            v5x["tables"]["ac_dedup"] = AC_DEDUP_TABLE
     apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base; S4E-1 land-adjacency AC candidates
     s4e_corridors = dict(mode=corridor_mode(cfg), table=corridors_path, table_sha256=sha(repo / corridors_path), ac_added=len(apg_added),
                          dc_added=add_corridor_dc_links(n, corridors), domestic_table=domestic_path,

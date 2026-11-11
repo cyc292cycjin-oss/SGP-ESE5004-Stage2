@@ -1,0 +1,20 @@
+X20 2-2 (decision 244, Q6 (a)): OSM duplicate rows of domestic AC corridors
+
+research.demand.v5.ac_dedup: dedup_cables (v5 main) | dedup_only |
+frozen_base (v4). scripts_project/v5_ac_dedup_data.py writes
+research_inputs/corridors/AC_DEDUP_V5.csv / .json from the OSM prebuilt
+0.1.1 rows (331 duplicate groups of identical rows: same way, end buses,
+voltage, length), the OSM API way tags (research_inputs/corridors/
+OSM_WAY_TAGS_V5.csv, 314 ways fetched in X20 B) and the electric base
+(OSM buses -> nearest same-country node; correcting the spec: the S4A
+regions are the per-country Voronoi of the node coordinates, the same
+rule). Only MY corridors carry duplicate rows; lines 90 (x 0.3203), 93
+(x 0.2222), 95 (x 0.4454), 96 (x 0.3873) pass the reconstruction check
+(counted / model in [0.8, 1.25]); line 94 (ratio 140.5) stays unchanged
+(limitation). Identical to the D-drive trial.
+
+v5_layers.apply_ac_dedup (s2_network, after the PH DC stock): s_nom (and
+the stock bound s_nom_min) x factor, num_parallel / x / r / b by the S4G-1
+rule; the frozen s_nom is checked first. Targeted tests: 51 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

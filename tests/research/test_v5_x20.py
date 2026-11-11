@@ -472,3 +472,32 @@ def test_ph_dc_table_and_layer():
     assert k.at["151018428-1_0+2", "p_nom"] == 440.0 and k.at["1076672675-1_0+4", "p_nom_min"] == 450.0
     with pytest.raises(ValueError):   # second application: the frozen-base check fails
         L.apply_ph_dc_stock(n, corr, cfg({"enabled": True}), ROOT)
+
+
+# ---- 2-2 OSM duplicate rows of domestic AC corridors (decision 244, Q6 (a)) ---------------------------------------------------------
+def test_ac_dedup_table():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.AC_DEDUP_TABLE, dtype={"line": str}).set_index("line")
+    assert list(t.index) == ["90", "93", "94", "95", "96"] and set(t.country) == {"MY"}
+    assert list(t.index[t.applied]) == ["90", "93", "95", "96"] and not t.at["94", "applied"]          # line 94 fails the reconstruction check
+    assert t.loc[t.applied, "recon_over_model"].between(0.8, 1.25).all() and (t.factor_dedup_cables <= t.factor_dedup_only + 1e-12).all()
+
+
+def test_ac_dedup_layer_impedance(tmp_path):
+    import numpy as np
+    import v5_layers as L
+    n = toy(); lt = n.line_types.loc["Al/St 240/40 4-bundle 380.0"]
+    s0 = 3 * np.sqrt(3) * 380.0 * lt.i_nom
+    n.add("Line", "90", bus0="A 0", bus1="A 1", type="Al/St 240/40 4-bundle 380.0", length=100.0, num_parallel=3.0, s_nom=s0, s_nom_min=s0, s_nom_extendable=True)
+    tab = pd.DataFrame(dict(line=["90"], country=["MY"], frozen_s_nom_mw=[s0], factor_dedup_only=[1 / 3], factor_dedup_cables=[2 / 9], applied=[True]))
+    p = tmp_path / L.AC_DEDUP_TABLE; p.parent.mkdir(parents=True); tab.to_csv(p, index=False)
+    assert L.apply_ac_dedup(n, cfg(), tmp_path) == {"mode": "frozen_base"} and n.lines.at["90", "s_nom"] == s0
+    led = L.apply_ac_dedup(n, cfg({"enabled": True}), tmp_path)
+    z = n.lines.loc["90"]
+    assert abs(z.s_nom - s0 * 2 / 9) < 1e-6 and abs(z.s_nom_min - z.s_nom) < 1e-9 and abs(z.num_parallel - 3 * 2 / 9) < 1e-9
+    assert abs(z.x - lt.x_per_length * 100.0 / z.num_parallel) < 1e-12 and abs(z.r - lt.r_per_length * 100.0 / z.num_parallel) < 1e-12 and led["lines"] == 1
+    with pytest.raises(ValueError):   # frozen s_nom check
+        L.apply_ac_dedup(n, cfg({"enabled": True}), tmp_path)
+    n2 = toy(); n2.add("Line", "90", bus0="A 0", bus1="A 1", type="Al/St 240/40 4-bundle 380.0", length=100.0, num_parallel=3.0, s_nom=s0, s_nom_min=s0)
+    L.apply_ac_dedup(n2, cfg({"enabled": True, "ac_dedup": "dedup_only"}), tmp_path)
+    assert abs(n2.lines.at["90", "s_nom"] - s0 / 3) < 1e-6
