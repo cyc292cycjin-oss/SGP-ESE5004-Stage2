@@ -440,6 +440,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     dedicated = add_dedicated_plant_lines(n, cfg, repo, costs, R["existing_cross_border_electricity"])   # V3 X1b (decisions 172, 173): fixed Lao IPP export lines, not in the disconnected network
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
+    if v5s["enabled"]:   # V5 X20 (3-2): the cost-scaling ledger (incl. the DAC key) is recorded in n.meta v5_x20
+        v5x["ledgers"]["cost_scaling_3_2"] = scaling
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
     if v5s["enabled"]:   # V5 X20 (1-3, decision 241): ASEAN offshore-wind capital-cost premium (0 % main), after cost_scaling and the typhoon premium
         from v5_layers import apply_offwind_premium

@@ -570,3 +570,16 @@ def test_extra_asean_capacity_key():
     assert extra_asean_capacity(c(None), "ID") is None and extra_asean_capacity({"research": {"co2": {}}}, "ID") is None
     assert extra_asean_capacity(c(5), "ID") == 5.0 and extra_asean_capacity(c({"ID": 0, "MY": 2.5}), "ID") == 0.0
     assert extra_asean_capacity(c({"ID": 0, "MY": 2.5}), "MY") == 2.5 and extra_asean_capacity(c({"ID": 0}), "TH") is None
+
+
+# ---- 3-2 DAC cost-scaling key (decision 244) -----------------------------------------------------------------------------------
+def test_dac_cost_scaling_key():
+    import yaml
+    from s1_candidates import apply_cost_scaling
+    b = yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())["research"]["cost_scaling"]
+    assert b["DAC"] == 1.0
+    n = toy()
+    n.add("Link", "A 0 DAC", bus0="A 0", bus1="A 1", carrier="DAC", p_nom_extendable=True, capital_cost=100.0)
+    n.add("Link", "A 0 H2 Electrolysis", bus0="A 0", bus1="A 1", carrier="H2 Electrolysis", p_nom_extendable=True, capital_cost=50.0)
+    led = apply_cost_scaling(n, {"DAC": 1.0}); assert n.links.at["A 0 DAC", "capital_cost"] == 100.0 and led[0]["applied"] is False
+    apply_cost_scaling(n, {"DAC": 1.5}); assert n.links.at["A 0 DAC", "capital_cost"] == 150.0 and n.links.at["A 0 H2 Electrolysis", "capital_cost"] == 50.0

@@ -1,0 +1,16 @@
+X20 3-2 (decision 244): DAC cost-scaling key
+
+research.cost_scaling.DAC: 1.0 (main, bit-identical; sensitivity 1.5 / 2).
+s1_candidates.apply_cost_scaling matches the carrier exactly (DAC links
+carry carrier "DAC") and multiplies capital_cost = annualised investment +
+FOM, as every other cost_scaling key. The scaling ledger now goes to n.meta
+v5_x20 (cost_scaling_3_2) when v5 is enabled.
+
+Not changed (limitation, deviation from X20_SPEC 1.15): s4i_static_audit.py
+:170 and s4c_1_cost_audit.py:86 recompute the DAC capital cost from the
+cost table without any cost_scaling factor - they read no factor for any
+carrier today, so a non-1 DAC factor (X21) needs both audits updated.
+Registry chain rerun (baseline.yaml cited): one source SHA256 changed.
+Targeted tests: 77 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
