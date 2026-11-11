@@ -1,0 +1,23 @@
+X20 3-4 (decision 244; Q3 (b), Q4 (a), Q5 (a)): distribution grid and load buses
+
+research.demand.v5.distribution_grid: lv_pypsa_eur (v5 main) | hv_lossless
+(v4). v5_layers.apply_distribution_grid_v5 (PyPSA-Eur v2025.07.0
+insert_electricity_distribution_grid): every Load with 'electric' in its
+carrier on an AC node (electricity, industry electricity, agriculture
+machinery electric) and bus0 of BEV chargers (smart / uncontrolled),
+industrial heat pumps, industrial electric boilers and electric cooking
+(Q3 (b)) move to the node's low-voltage bus; electrolysis, DAC, Haber-Bosch
+and grid batteries stay on HV. The distribution grid link becomes forward
+(p_min_pu 0, efficiency 0.97, PyPSA-Eur config L762-763) plus a '-reversed'
+twin (LV -> HV, 0.97, capital cost 0, length 0, no FOM); the existing hook
+research_lossy_bidirectional_sync collects every extendable reversed link,
+so the twins are synchronised without a new list. Loads are not scaled
+(Q4 (a)). The demand ledger rows (S2_DEMAND_OWNERSHIP) follow the moved
+loads; LV buses without location get their node. An AC node with a moved
+load but no LV bus stops the build.
+
+s2_network calls the layer after the transmission / AC loss layers (they
+refuse existing reversed links and zero lengths), before the dedicated
+lines and the cost scaling. Toy-network tests: 56 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

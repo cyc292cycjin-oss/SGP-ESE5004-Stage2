@@ -296,3 +296,76 @@ def apply_ac_dedup(n, cfg, repo: Path = ROOT) -> dict:
     led.update(table=AC_DEDUP_TABLE, column=col, lines=len(rows), rows=rows, s_nom_before_mw=float(sum(x["s_nom_before"] for x in rows)),
                s_nom_after_mw=float(sum(x["s_nom_after"] for x in rows)))
     return led
+
+
+LV_LOAD_MATCH = "electric"   # PyPSA-Eur v2025.07.0 prepare_sector_network.py:1567-1570: loads whose carrier contains "electric"
+LV_LINK_CARRIERS_BUS0 = ("BEV charger", "BEV charger uncontrolled", "industry heat pump", "industry electric boiler", "cooking electric")   # decision 246 Q3 (b), Q5 (a)
+DIST = "electricity distribution grid"
+DIST_EFFICIENCY = 0.97   # PyPSA-Eur v2025.07.0 config.default.yaml transmission_efficiency.electricity distribution grid.efficiency_static (L762-763)
+
+
+def apply_distribution_grid_v5(n, cfg, demand: dict | None = None) -> dict:
+    """3-4 (decision 244; Q3 (b), Q4 (a), Q5 (a)): research.demand.v5.distribution_grid = lv_pypsa_eur moves to the node's low-voltage bus every Load
+    with 'electric' in its carrier on an AC node (Astar base load 'electricity', 'industry electricity', 'agriculture machinery electric') and bus0 of the
+    BEV chargers (smart and uncontrolled), industrial heat pumps, industrial electric boilers and electric cooking; electrolysis, DAC, Haber-Bosch and grid
+    batteries stay on the high-voltage node; rooftop PV and home batteries are on LV already. The distribution grid link of each node (bidirectional,
+    efficiency 1.0 in the frozen base) becomes a forward link (HV -> LV, p_min_pu 0, efficiency 0.97) plus a '-reversed' twin (LV -> HV, efficiency 0.97,
+    capital cost 0, length 0, no FOM) whose capacity equals the forward one (hook research_lossy_bidirectional_sync collects every extendable reversed
+    link). Loads are not scaled (Q4 (a)). Called after apply_transmission_losses / apply_ac_losses (s2_network: that layer refuses existing reversed
+    links and lengths <= 0). An AC node with a moved load but no LV bus stops the build. LV buses without a location get their node."""
+    from s4j_layers import REV, SYNC_HOOK
+    s = switches(cfg); mode = s["distribution_grid"]; led = dict(mode=mode)
+    if not s["enabled"] or mode == "hv_lossless":
+        return led
+    lvb = set(n.buses.index[n.buses.carrier == "low voltage"])
+
+    def lv(bus):
+        b = f"{bus} low voltage"
+        if b not in lvb:
+            raise ValueError(f"distribution grid v5: no low-voltage bus for {bus}")
+        return b
+    nodes = set(n.buses.index[n.buses.carrier == "AC"])
+    L = n.loads
+    mv_loads = L.index[L.carrier.astype(str).str.contains(LV_LOAD_MATCH) & L.bus.isin(nodes)]
+    new_bus = {k: lv(L.at[k, "bus"]) for k in mv_loads}
+    for k, b in new_bus.items():
+        n.loads.at[k, "bus"] = b
+    ledger_rows = 0
+    if demand is not None:
+        for r in demand.get("loads", []):
+            if r.get("load") in new_bus:
+                r["bus"] = new_bus[r["load"]]; ledger_rows += 1
+    K = n.links
+    mv_links = K.index[K.carrier.isin(LV_LINK_CARRIERS_BUS0) & K.bus0.isin(nodes)]
+    for k in mv_links:
+        n.links.at[k, "bus0"] = lv(K.at[k, "bus0"])
+    if "location" in n.buses.columns:   # LV buses carry their node as location (bus_location / per-node reports)
+        emp = [b for b in lvb if str(n.buses.at[b, "location"]) in ("", "nan", "None")]
+        for b in emp:
+            n.buses.at[b, "location"] = b[: -len(" low voltage")]
+        led["lv_location_filled"] = len(emp)
+    K = n.links
+    dist = K.index[(K.carrier == DIST) & ~K.index.str.endswith(REV)]
+    if "reversed" not in n.links:
+        n.links["reversed"] = False
+    if "length_original" not in n.links:
+        n.links["length_original"] = n.links["length"]
+    rev = n.links.loc[dist].copy().rename(columns={"bus0": "bus1", "bus1": "bus0"})
+    rev["capital_cost"] = 0.0; rev["length"] = 0.0; rev["reversed"] = True; rev["p_min_pu"] = 0.0; rev["efficiency"] = DIST_EFFICIENCY
+    for c in ("existing_annual_fixed_om_eur", "existing_fixed_om_eur_per_mw_year"):
+        if c in rev:
+            rev[c] = 0.0
+    rev.index = [x + REV for x in dist]; rev.index.name = "Link"
+    if set(rev.index) & set(n.links.index):
+        raise ValueError("distribution grid v5: reverse link exists already")
+    n.links.loc[dist, ["p_min_pu", "efficiency"]] = [0.0, DIST_EFFICIENCY]
+    n.import_components_from_dataframe(rev[[c for c in rev.columns if c in n.links.columns]], "Link")
+    n.links.loc[rev.index, "reversed"] = True
+    n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool)
+    if (n.links.loc[rev.index, "p_nom_extendable"].astype(bool)).any():
+        n.meta["required_constraint_hooks"] = sorted(set(n.meta.get("required_constraint_hooks", [])) | {SYNC_HOOK})
+    by = lambda idx, col: {str(k): int(v) for k, v in pd.Series(col).loc[idx].value_counts().items()}   # noqa: E731
+    led.update(loads_moved=int(len(mv_loads)), loads_by_carrier=by(mv_loads, n.loads.carrier), demand_ledger_rows_updated=ledger_rows, links_moved=int(len(mv_links)),
+               links_by_carrier=by(mv_links, n.links.carrier), distribution_links=int(len(dist)), reversed_twins=int(len(rev)), efficiency=DIST_EFFICIENCY,
+               load_scaling="none (decision 246 Q4 (a): the loads are final-energy based)")
+    return led

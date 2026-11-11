@@ -437,7 +437,10 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
     losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
     ac_losses = apply_ac_losses(n, cfg, losses)   # S4K-1 (decision 108): research.network.ac_losses - AC linear loss proxy (per-line lambda, hook research_ac_loss_proxy) | pypsa_tangent (S4J) | none
-    dedicated = add_dedicated_plant_lines(n, cfg, repo, costs, R["existing_cross_border_electricity"])   # V3 X1b (decisions 172, 173): fixed Lao IPP export lines, not in the disconnected network
+    if v5s["enabled"]:   # V5 X20 (3-4, decision 244; Q3 (b), Q4 (a), Q5 (a)): electric loads and charger / heat-pump / boiler / cooking inputs on LV, lossy distribution grid
+        from v5_layers import apply_distribution_grid_v5
+        v5x["ledgers"]["distribution_grid_3_4"] = apply_distribution_grid_v5(n, cfg, demand)
+    dedicated =add_dedicated_plant_lines(n, cfg, repo, costs, R["existing_cross_border_electricity"])   # V3 X1b (decisions 172, 173): fixed Lao IPP export lines, not in the disconnected network
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     if v5s["enabled"]:   # V5 X20 (3-2): the cost-scaling ledger (incl. the DAC key) is recorded in n.meta v5_x20

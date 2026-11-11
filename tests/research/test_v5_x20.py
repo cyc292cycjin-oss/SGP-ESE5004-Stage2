@@ -583,3 +583,43 @@ def test_dac_cost_scaling_key():
     n.add("Link", "A 0 H2 Electrolysis", bus0="A 0", bus1="A 1", carrier="H2 Electrolysis", p_nom_extendable=True, capital_cost=50.0)
     led = apply_cost_scaling(n, {"DAC": 1.0}); assert n.links.at["A 0 DAC", "capital_cost"] == 100.0 and led[0]["applied"] is False
     apply_cost_scaling(n, {"DAC": 1.5}); assert n.links.at["A 0 DAC", "capital_cost"] == 150.0 and n.links.at["A 0 H2 Electrolysis", "capital_cost"] == 50.0
+
+
+# ---- 3-4 distribution grid and load buses (decision 244; Q3 (b), Q4 (a), Q5 (a)) ---------------------------------------------------
+def test_distribution_grid_layer():
+    import v5_layers as L
+    def net():
+        n = toy(("A 0",))
+        n.buses["location"] = ""
+        n.add("Load", "A 0 electricity", bus="A 0", carrier="electricity", p_set=10.0)
+        n.add("Load", "A 0 industry electricity", bus="A 0", carrier="industry electricity", p_set=4.0)
+        n.add("Load", "A 0 industry heat", bus="A 0", carrier="industry heat", p_set=1.0)
+        n.add("Bus", "A 0 EV battery", carrier="Li ion"); n.buses.loc["A 0 EV battery", "country"] = "MY"
+        for k, c in [("A 0 BEV charger", "BEV charger"), ("A 0 DAC", "DAC"), ("A 0 industry heat pump", "industry heat pump"), ("A 0 H2 Electrolysis", "H2 Electrolysis"),
+                     ("A 0 cooking electric", "cooking electric"), ("A 0 industry electric boiler", "industry electric boiler")]:
+            n.add("Link", k, bus0="A 0", bus1="A 0 EV battery", carrier=c)
+        n.add("Link", "A 0 electricity distribution grid", bus0="A 0", bus1="A 0 low voltage", carrier="electricity distribution grid", p_min_pu=-1, p_nom_extendable=True,
+              capital_cost=5.0, length=0.0)
+        n.meta = {}
+        return n
+    n = net(); before_l, before_k = n.loads.copy(), n.links.copy()
+    assert L.apply_distribution_grid_v5(n, cfg({"enabled": True, "distribution_grid": "hv_lossless"}), None) == {"mode": "hv_lossless"}
+    assert n.loads.equals(before_l) and n.links.equals(before_k)                                        # hv_lossless = v4
+    dem = {"loads": [dict(load="A 0 electricity", bus="A 0"), dict(load="A 0 industry heat", bus="A 0")]}
+    led = L.apply_distribution_grid_v5(n, cfg({"enabled": True}), dem)
+    lvb = "A 0 low voltage"
+    assert n.loads.at["A 0 electricity", "bus"] == lvb and n.loads.at["A 0 industry electricity", "bus"] == lvb and n.loads.at["A 0 industry heat", "bus"] == "A 0"
+    assert dem["loads"][0]["bus"] == lvb and dem["loads"][1]["bus"] == "A 0" and led["demand_ledger_rows_updated"] == 1
+    for k in ("A 0 BEV charger", "A 0 industry heat pump", "A 0 cooking electric", "A 0 industry electric boiler"):
+        assert n.links.at[k, "bus0"] == lvb
+    assert n.links.at["A 0 DAC", "bus0"] == "A 0" and n.links.at["A 0 H2 Electrolysis", "bus0"] == "A 0"   # electrolysis and DAC stay HV
+    f, r = "A 0 electricity distribution grid", "A 0 electricity distribution grid-reversed"
+    assert n.links.at[f, "efficiency"] == 0.97 and n.links.at[f, "p_min_pu"] == 0.0 and n.links.at[r, "efficiency"] == 0.97
+    assert n.links.at[r, "bus0"] == lvb and n.links.at[r, "bus1"] == "A 0" and n.links.at[r, "capital_cost"] == 0.0 and bool(n.links.at[r, "p_nom_extendable"])
+    assert bool(n.links.at[r, "reversed"]) and not bool(n.links.at[f, "reversed"]) and "research_lossy_bidirectional_sync" in n.meta["required_constraint_hooks"]
+    assert n.loads.p_set.sum() == before_l.p_set.sum() and n.buses.at[lvb, "location"] == "A 0"     # loads not scaled (Q4 (a))
+    with pytest.raises(ValueError):
+        L.apply_distribution_grid_v5(n, cfg({"enabled": True}), None)                                 # twin exists already
+    m = net(); m.remove("Bus", "A 0 low voltage")
+    with pytest.raises(ValueError):
+        L.apply_distribution_grid_v5(m, cfg({"enabled": True}), None)                                 # an AC node with a load but no LV bus stops
