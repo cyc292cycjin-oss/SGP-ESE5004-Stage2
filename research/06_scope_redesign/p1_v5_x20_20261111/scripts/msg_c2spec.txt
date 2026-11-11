@@ -1,0 +1,10 @@
+X20 C-1 预构建核对与 C-2 规格（决策 252；L-C10、L-C11）
+
+- C-1 预构建（builds/c1pre，只为验证）与 B 段 v5main 对照（scripts/82_c1_check.py）：只有新建候选的入流与 ror p_max_pu 改变；
+  存量入流逐值相同（274.729 TWh）；水库候选 CF = 表值；ror 只在截断处低于表值（LA 0.4601、MM 0.3620）；
+  开关 SHA = 新主集 bce04fb1（evidence/C1_HYDRO_CANDIDATE_CHECK.json、C1_HYDRO_CANDIDATE_CF.csv）。
+- C-2 规格 X20_C2_ONWIND_SUBGRID_SPEC.md（PROPOSED）：GWA 像元风速比 10 个等面积分位档，逐档算 CF 再平均；
+  开关 onwind_subgrid（quantile10 / cell_mean）；验收：11 国 v5 / 参照全部在 [0.8, 1.25]，越界即停，不调参数。等待审阅端确认。
+- 模型代码、配置与输入在本提交中不变。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
