@@ -206,3 +206,34 @@ def test_offwind_premium():
     c = n.generators.capital_cost
     assert led["generators"] == 2 and abs(c["A 0 offwind-dc-2025 c2"] - 110.0) < 1e-12 and abs(c["A 0 offwind-float-2025"] - 220.0) < 1e-12
     assert c["A 0 onwind-2025"] == 80.0 and c["existing_survivor::A 0::offwind existing::S4A"] == 0.0
+
+
+# ---- 1-4 solar cap factors and the MY land-use variants (decision 241, Q15 (a)) ------------------------------------------------------
+def test_solar_my_variants_table():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.SOLAR_MY_VARIANTS).set_index("variant")
+    assert list(t.index) == ["lc100", "open_forest", "oil_palm"] and t.at["lc100", "factor"] == 1.0
+    assert abs(t.at["lc100", "cap_before_mw"] - 86396.0293) < 1e-3                                   # = the W14 MY ground-mounted solar cap
+    assert abs(t.at["open_forest", "factor"] - 198.0 / 86.4) < 1e-12                                  # X20_SPEC 1.4 item 3
+    assert abs(t.at["oil_palm", "added_area_km2"] - 51700.4) < 0.1 and abs(t.at["oil_palm", "factor"] - (1 + 51700.4146 * 5.1 / 86396.0293)) < 1e-6
+
+
+def test_solar_cap_scale_layer():
+    import v5_layers as L
+    n = toy(("A 0", "B 0"))
+    n.buses.loc["B 0", "country"] = "ID"
+    n.add("Generator", "A 0 solar-2025", bus="A 0", carrier="solar", p_nom_extendable=True, p_nom_max=10.0)
+    n.add("Generator", "B 0 solar-2025", bus="B 0", carrier="solar", p_nom_extendable=True, p_nom_max=7.0)
+    n.add("Generator", "A 0 solar rooftop-2025", bus="A 0 low voltage", carrier="solar rooftop", p_nom_extendable=True, p_nom_max=3.0)
+    n.add("Generator", "existing_survivor::A 0::solar existing::S4A", bus="A 0", carrier="solar existing", p_nom=2.0, p_nom_max=2.0)
+    before = n.generators.p_nom_max.copy()
+    assert "by_country" not in L.apply_solar_cap_scale(n, cfg({"solar_cap_scale_MY": 2.0}), ROOT) and n.generators.p_nom_max.equals(before)   # v5 off
+    assert L.apply_solar_cap_scale(n, cfg({"enabled": True}), ROOT)["by_country"] == {} and n.generators.p_nom_max.equals(before)             # main: unchanged
+    led = L.apply_solar_cap_scale(n, cfg({"enabled": True, "solar_cap_scale_MY": 2.0, "solar_cap_scale_ID": 0.5}), ROOT)
+    p = n.generators.p_nom_max
+    assert p["A 0 solar-2025"] == 20.0 and p["B 0 solar-2025"] == 3.5 and p["A 0 solar rooftop-2025"] == 3.0 and p["existing_survivor::A 0::solar existing::S4A"] == 2.0
+    assert set(led["by_country"]) == {"MY", "ID"}
+    n2 = toy(); n2.add("Generator", "A 0 solar-2025", bus="A 0", carrier="solar", p_nom_extendable=True, p_nom_max=10.0)
+    led2 = L.apply_solar_cap_scale(n2, cfg({"enabled": True, "solar_landuse_my": "oil_palm"}), ROOT)
+    t = pd.read_csv(ROOT / L.SOLAR_MY_VARIANTS).set_index("variant")
+    assert abs(n2.generators.at["A 0 solar-2025", "p_nom_max"] - 10.0 * t.at["oil_palm", "factor"]) < 1e-9 and led2["variant_factor"] == t.at["oil_palm", "factor"]

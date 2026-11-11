@@ -162,6 +162,10 @@ def apply_renewable_profiles(n, cfg, repo: Path):
         raise ValueError("research.renewable.resource_classes must be >= 1")
     led = dict(profile_variant=variant, resource_classes=ncls, clip_p_max_pu=clip, profile_dir=str(pdir.relative_to(repo)), replaced={}, added=[], untouched=[], files={})
     led["solar_density"] = apply_solar_density(n, RN)   # M08a A6 (M08-7, decisions 129, 131): before the class split, so every class keeps its share
+    import v5_common as V5
+    if V5.switches(cfg)["enabled"]:   # V5 X20 (1-4, decision 241): MY / ID / VN solar cap factors and the MY land-use variant, also before the class split
+        from v5_layers import apply_solar_cap_scale
+        led["v5_solar_cap_scale"] = apply_solar_cap_scale(n, cfg, repo)
     new_offshore = offshore_rule(RN) == "pypsa_eur_v2025_07"   # M08a A6.2: offshore candidates replaced by apply_offshore_rules below
     if variant == "original":
         if new_offshore:

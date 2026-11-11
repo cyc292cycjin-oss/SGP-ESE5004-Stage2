@@ -1,0 +1,20 @@
+X20 1-4 (decision 241, Q15 (a)): solar cap factors MY / ID / VN and MY land-use variants
+
+research.demand.v5.solar_cap_scale_MY / _ID / _VN: 1.0 (v5 main) | 0.5 | 2;
+solar_landuse_my: lc100 (main) | open_forest | oil_palm. v5_layers.
+apply_solar_cap_scale multiplies p_nom_max of the ground-mounted 'solar'
+candidates of the country, called in s4a_layers.apply_renewable_profiles
+after the solar density and before the class split (class shares kept;
+rooftop and existing PV unchanged; all factors 1 = no change).
+
+scripts_project/v5_solar_my_variants_data.py writes
+research_inputs/renewable_v5/SOLAR_MY_LANDUSE_VARIANTS_V5.csv: MY base cap
+86,396.03 MW (electric base x 5.1 / 4.6 = the W14 value); oil_palm =
+FAOSTAT QCL 2019-2023 mean harvested area 51,700.41 km2 x 5.1 MW/km2,
+factor 4.0519 (X03 4.4 method); open_forest = 198 / 86.4 = 2.2917 (spec
+1.4 item 3, X03 4.5 [E], after the protected-area exclusion; the raw LC100
+121-126 area without that exclusion gives 2.3957, reported only). The
+increment is spread pro rata over the MY node caps (Q15 (a)).
+Targeted tests: 47 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

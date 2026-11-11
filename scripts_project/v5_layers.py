@@ -56,3 +56,34 @@ def apply_offwind_premium(n, cfg) -> dict:
     led.update(generators=int(len(sel)), capital_cost_before_sum=float(before.sum()), capital_cost_after_sum=float(n.generators.loc[sel, "capital_cost"].sum()),
                by_country={str(c): int(k) for c, k in g.loc[sel, "bus"].map(n.buses.country).value_counts().items()})
     return led
+
+
+SOLAR_MY_VARIANTS = "research_inputs/renewable_v5/SOLAR_MY_LANDUSE_VARIANTS_V5.csv"
+
+
+def apply_solar_cap_scale(n, cfg, repo: Path = ROOT) -> dict:
+    """1-4 (decision 241; Q15 (a)): country factor on p_nom_max of the ground-mounted solar candidates (carrier 'solar', extendable) -
+    research.demand.v5.solar_cap_scale_MY / _ID / _VN (1.0 main | 0.5 | 2) times, for MY, the land-use variant factor of solar_landuse_my
+    (lc100 main = 1 | open_forest | oil_palm, SOLAR_MY_LANDUSE_VARIANTS_V5.csv, scripts_project/v5_solar_my_variants_data.py; the country
+    increment spread pro rata over the MY node caps). Called after apply_solar_density and before the class split
+    (s4a_layers.apply_renewable_profiles), so every class keeps its share. Rooftop and existing PV unchanged; all factors 1 -> no change."""
+    s = switches(cfg); led = dict(scale={c: float(s[f"solar_cap_scale_{c}"]) for c in ("MY", "ID", "VN")}, landuse_my=s["solar_landuse_my"])
+    if not s["enabled"]:
+        return led
+    fac = dict(led["scale"])
+    if s["solar_landuse_my"] != "lc100":
+        v = pd.read_csv(Path(repo) / SOLAR_MY_VARIANTS).set_index("variant")
+        led["variant_factor"] = float(v.at[s["solar_landuse_my"], "factor"]); fac["MY"] = fac["MY"] * led["variant_factor"]
+        import hashlib
+        led["variant_table"] = dict(path=SOLAR_MY_VARIANTS, sha256=hashlib.sha256((Path(repo) / SOLAR_MY_VARIANTS).read_bytes()).hexdigest())
+    g = n.generators; cty = g.bus.map(n.buses.country)
+    out = {}
+    for c, f in fac.items():
+        if f == 1.0:
+            continue
+        sel = g.index[(g.carrier == "solar") & g.p_nom_extendable & (cty == c)]
+        before = float(g.loc[sel, "p_nom_max"].sum())
+        n.generators.loc[sel, "p_nom_max"] = g.loc[sel, "p_nom_max"] * f
+        out[c] = dict(factor=f, generators=int(len(sel)), p_nom_max_before_mw=before, p_nom_max_after_mw=float(n.generators.loc[sel, "p_nom_max"].sum()))
+    led["by_country"] = out
+    return led
