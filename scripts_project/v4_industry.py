@@ -173,13 +173,14 @@ class Chain:
         if r.returncode:
             raise RuntimeError(f"{args[0]}: {r.stderr[-3000:]}")
 
-    def m08b(self, d1: bytes | None, mode: str, adj: dict | None) -> dict:
+    def m08b(self, d1: bytes | None, mode: str, adj: dict | None, neu_rule: str = "industry_multiplier") -> dict:
         mode = MODE_ALIAS.get(mode, mode)
-        key = hashlib.sha256((d1 or b"REPO") + mode.encode() + json.dumps(adj or {}, sort_keys=True).encode()).hexdigest()
+        key = hashlib.sha256((d1 or b"REPO") + mode.encode() + json.dumps(adj or {}, sort_keys=True).encode()
+                             + (b"" if neu_rule == "industry_multiplier" else ("|neu_gas_rule=" + neu_rule).encode())).hexdigest()   # V5 X20 (2-4): v4 keys unchanged
         if key in self.m08b_cache:
             return self.m08b_cache[key]
         names = ("ATS", "ANCH", "OUTRULE", "BASEOUT")
-        if mode == "I" or (d1 is None and mode == "ras" and not adj):
+        if mode == "I" or (d1 is None and mode == "ras" and not adj and neu_rule == "industry_multiplier"):
             out = dict(zip(names, (self.orig[ATS_V31], self.orig[ANCH_V31], self.orig[OUTRULE_V31], self.orig[BASEOUT_V31])))
         else:
             wd = self.work / f"m08b_{key[:16]}"; wd.mkdir(parents=True, exist_ok=True)
@@ -187,6 +188,8 @@ class Chain:
             args = ["scripts_project/m08b_demand.py", "--table", wd / "d1_seed.csv", "--out-dir", wd, "--anchor-mode", mode]
             if adj:
                 (wd / "residue_anchor_adj.json").write_text(json.dumps(adj)); args += ["--residue-anchor-adj", wd / "residue_anchor_adj.json"]
+            if neu_rule != "industry_multiplier":
+                args += ["--neu-gas-rule", neu_rule]
             self._exec(args); self.n_m08b += 1
             out = dict(zip(names, ((wd / ATS_V31.name).read_bytes(), (wd / ANCH_V31.name).read_bytes(), (wd / OUTRULE_V31.name).read_bytes(),
                                    (wd / BASEOUT_V31.name).read_bytes())))
@@ -389,7 +392,7 @@ class Chain:
         if case.get("d1") is not None:
             d1 = write_d1(self.orig[D1_TABLE], case["d1"], case["d1_s0"])
         mode = MODE_ALIAS.get(case.get("anchor_mode", "ras"), case.get("anchor_mode", "ras"))
-        mo = dict(self.m08b(None if mode == "I" else d1, mode, case.get("anchor_adj")))
+        mo = dict(self.m08b(None if mode == "I" else d1, mode, case.get("anchor_adj"), case.get("neu_gas_rule", "industry_multiplier")))
         if mode == "I" and case.get("d1") is not None:
             mo["ATS"] = write_ats_I(self.orig[ATS_V31], case["d1"], case["d1_s0"])
         ats = self.ats_frame(mo["ATS"])
@@ -552,6 +555,8 @@ def build_steps(I: Inputs, s: dict) -> list:
         if s["base"] == "sdmx_2019":
             c.update(d1=I.B.copy(), d1_s0=I.S0, cache=I.cache_full)
         c["anchor_mode"] = s["anchor_mode"]
+        if s.get("v5_neu_gas_growth") == "product":   # V5 X20 (2-4): NEU natural gas by product in the m08b run (table-level v5 key)
+            c["neu_gas_rule"] = "product"
         return c
 
     def s2(c):

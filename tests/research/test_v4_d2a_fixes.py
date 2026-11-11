@@ -28,8 +28,8 @@ def _folders():
 
 def _potential(s: dict) -> pd.Series:
     """Solid-biomass potential per country as the build takes it (status-filtered rows) for the switch set s."""
-    from v4_common import BIOMASS_POTENTIAL_FILES
-    rel = BIOMASS_POTENTIAL_FILES[s["biomass_potential"]]
+    from v4_common import biomass_potential_file
+    rel = biomass_potential_file(s)   # V5 X20 (1-7): the v5 table key selects the corrected T06 table, as in the build (v4_common.v4_tables)
     f = ROOT / (rel if rel else "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050.csv")
     bp = pd.read_csv(f, keep_default_na=False)
     bp["p"] = pd.to_numeric(bp.potential_main_mwh, errors="coerce").fillna(0.0)

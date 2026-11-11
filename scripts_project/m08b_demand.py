@@ -244,6 +244,8 @@ def parse_args(argv=None):
     p.add_argument("--residue-anchor-adj", type=Path, default=None,
                    help="JSON {country: MWh}: self-produced residues removed from the seed that the national balance contains (decision 210 item 4 a)")
     p.add_argument("--dump-anchors", type=Path, default=None, help="JSON with tfa / t19 (exact floats) after the anchor step")
+    p.add_argument("--neu-gas-rule", choices=("industry_multiplier", "product"), default="industry_multiplier",
+                   help="V5 X20 (2-4): industry_multiplier (v4: NEU gas 2019 x NEU multiplier) | product (ammonia part with the ammonia output, residual with the multiplier)")
     return p.parse_args(argv)
 
 
@@ -324,6 +326,7 @@ def main(argv=None):
     m_ind_raw = {c: (tfa[c]["Industry"] / t19[c]["Industry"] if t19[c]["Industry"] > 0 else None) for c in ASEAN}
     peer_mult = float(np.mean([m_ind_raw[p] for p in TL_PEERS]))
     anchors, new = [], dem.copy()
+    neu_rule_rows = []   # V5 X20 (2-4): per-country record of the product rule (written only with --neu-gas-rule product)
     for c in ASEAN:
         m = dem.country == c
         el19 = {s: float(base[m & is_el & (dem.sector == s)].sum()) for s in SECTORS}
@@ -380,6 +383,27 @@ def main(argv=None):
                 new.at[i, "existing_electricity_load_2050_mwh"] = repr(float(v))
             refs = [x.strip() for x in str(dem.at[i, "decision_ref"]).replace(";", ",").split(",") if x.strip()]
             new.at[i, "decision_ref"] = ",".join(refs + [x for x in note.split(",") if x not in refs])
+        # ---- V5 X20 (2-4, decisions 244, 246; X20_SPEC_ADDENDUM_246.md section 4.2): NEU natural gas by product ------------------------------------
+        # a = min(NEU gas 2019, 2019 ammonia x 10.8 MWh/t) grows with the ammonia output, the residual r with the NEU multiplier; the methanol part b = 0
+        # (no sourced methanol feedstock-gas intensity in the repository; methanol feed gas stays in the residual - limitation); then DFX F2.4 as before
+        neu_prod = None
+        if a.neu_gas_rule == "product":
+            gi = [i for i in dem.index[m & (dem.sector == NEU_SECTOR) & (dem.carrier == "gas") & (dem.account == NEU_GAS_ACCOUNT)] if new.at[i, "value_2050_mwh"] != ""]
+            b19 = {i: float(dem.at[i, "base_2019_mwh"]) for i in gi if str(dem.at[i, "base_2019_mwh"]) not in ("", "nan")}
+            neu19g = float(sum(b19.values()))
+            nh3_19 = float(out_by[c]["ammonia_base_mt"]) * 1e6; nh3_50 = float(out_by[c]["ammonia_2050_mt"]) * 1e6
+            g_nh3 = (nh3_50 / nh3_19) if nh3_19 > 0 else 0.0
+            a_part = min(neu19g, nh3_19 * AMMONIA_GAS_MWH_PER_T); r_part = neu19g - a_part
+            target = a_part * g_nh3 + r_part * m_neu
+            for i, bi in b19.items():
+                new.at[i, "value_2050_mwh"] = repr(float(bi / neu19g * target)) if neu19g > 0 else repr(0.0)
+                new.at[i, "multiplier_total"] = repr(float(target / neu19g)) if neu19g > 0 else repr(0.0)
+                new.at[i, "growth_method"] = (new.at[i, "growth_method"] + f"; V5 X20 2-4 product rule: ammonia part {a_part:.6g} MWh x ammonia growth {g_nh3:.6g} + residual "
+                                              f"{r_part:.6g} MWh x NEU multiplier {m_neu:.6g}")
+            neu_prod = dict(neu_gas_2019_mwh=neu19g, ammonia_2019_t=nh3_19, ammonia_part_2019_mwh=a_part, methanol_part_2019_mwh=0.0, residual_2019_mwh=r_part,
+                            ammonia_growth=g_nh3, neu_multiplier=m_neu, neu_gas_2050_product_rule_mwh=target, neu_gas_2050_industry_multiplier_mwh=neu19g * m_neu)
+        if neu_prod is not None:
+            neu_rule_rows.append(dict(country=c, **neu_prod))
         # ---- DFX F2.4: ammonia feedstock gas deducted from the NEU natural-gas rows (floored at 0; the truncated amount is reported) ------------
         nh3_t = float(out_by[c]["ammonia_2050_mt"]) * 1e6
         gas_ded = nh3_t * AMMONIA_GAS_MWH_PER_T
@@ -465,7 +489,9 @@ def main(argv=None):
                     elasticity_range=ELASTICITY_RANGE, saturation_t_per_cap=SATURATION, saturation_range=SATURATION_RANGE, base_year=BASE_YEAR, plan_caps=PLAN, totals=tot,
                     ras=ras, ammonia=ammonia, neu=dict(rule="DFX F1.2: NEU outside the TFEC envelope; 2050 = 2019 x industry multiplier (energy-use anchor / 2019 industry energy use)"),
                     outputs={p.name: sha256(p) for p in (ANCHORS_, ANCHOR_TABLE_, OUTPUT_BASE_, PLAN_CAPS_, OUTPUT_2050_)},
-                    **({} if (od is None and a.anchor_mode == "ras" and a.residue_anchor_adj is None) else dict(v4_w08=v4_info))), EVIDENCE_)
+                    **({} if (od is None and a.anchor_mode == "ras" and a.residue_anchor_adj is None) else dict(v4_w08=v4_info)),
+                    **(dict(v5_x20_neu_gas_product=dict(rule="2-4: a = min(NEU gas 2019, ammonia 2019 x 10.8) x ammonia growth + residual x NEU multiplier, methanol part 0; "
+                                                             "then DFX F2.4", countries=neu_rule_rows)) if a.neu_gas_rule == "product" else {})), EVIDENCE_)
     pd.set_option("display.width", 250)
     show = an.set_index("country")[["ats_elec_2050_mwh", "base_share_of_ats_elec", "base_load_anchor_mwh", "base_load_ratio_table_mwh", "transport_anchor_mwh", "transport_ratio_table_mwh", "industry_multiplier", "neu_2050_mwh"]].copy()
     show.iloc[:, [0, 2, 3, 4, 5, 7]] /= 1e6

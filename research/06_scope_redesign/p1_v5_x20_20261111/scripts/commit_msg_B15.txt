@@ -1,0 +1,31 @@
+X20 2-4 (decisions 244, 246; Q7): NEU natural gas by product; v5 table folder out_ras_v5
+
+Q7 verified first: NEU is outside the RAS / TFEC anchor (m08b_demand.py
+lines 7 / 11 / 315 / 453 / 466), so the rule does not change the anchors.
+research.demand.v5.neu_gas_growth: product (v5 main) | industry_multiplier
+(v4); table-level key (v5_neu_gas_growth in the v4 switch set).
+
+m08b_demand.py --neu-gas-rule product (addendum section 4.2): a =
+min(NEU gas 2019, ammonia 2019 x 10.8 MWh/t) grows with the ammonia output,
+the residual with the NEU multiplier; the methanol part b = 0 (no sourced
+methanol feedstock-gas intensity in the repository; G1's 4.7778 MWh/t is
+energy use only - limitation); DFX F2.4 then deducts ammonia 2050 x 10.8
+as before. USGS lists ammonia 2019 for ID / MY / VN only; ID and MY are
+taken as gas-based (INFERENCE), VN is 0 in 2050 for any gas-based share.
+v4_industry: the m08b cache key and arguments change only for the product
+rule (v4 keys unchanged); S1 passes the rule from v5_neu_gas_growth.
+
+Table chain (work folder on D:): the v4 main set reproduces out_ras byte for
+byte; --set v5_neu_gas_growth=product --set v5_biomass_residue_fix=corrected
+writes research_inputs/industry_v4/out_ras_v5 (both v5 table keys). NEU gas
+2050: ID 84.37 -> 0 TWh, MY 181.67 -> 183.50 TWh (the ammonia part grows
+with 1.783 instead of 1.667), TH / MM / BN / VN unchanged; process emissions
+unchanged, feedstock carbon follows the NEU rows; the biomass caps follow
+the corrected T06 table (1-7). Per-country table in the step folder
+(evidence/NEU_GAS_PRODUCT_RULE_V5.csv).
+
+test_v4_d2a_fixes F-14 helper reads the potential table through
+v4_common.biomass_potential_file (the build rule). Targeted tests: v4 /
+DFX / v5 tests pass (171 + fix rerun 41 passed).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

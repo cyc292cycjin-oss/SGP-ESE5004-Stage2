@@ -501,3 +501,26 @@ def test_ac_dedup_layer_impedance(tmp_path):
     n2 = toy(); n2.add("Line", "90", bus0="A 0", bus1="A 1", type="Al/St 240/40 4-bundle 380.0", length=100.0, num_parallel=3.0, s_nom=s0, s_nom_min=s0)
     L.apply_ac_dedup(n2, cfg({"enabled": True, "ac_dedup": "dedup_only"}), tmp_path)
     assert abs(n2.lines.at["90", "s_nom"] - s0 / 3) < 1e-6
+
+
+# ---- 2-4 NEU natural gas by product; the v5 table folder out_ras_v5 (decisions 244, 246; addendum section 4.2) ------------------------
+def test_out_ras_v5_tables():
+    import json
+    import v4_common as C
+    R = ROOT / "research_inputs/industry_v4"
+    rec = json.loads((R / "out_ras_v5/V4_SWITCHES.json").read_text())
+    s = C.switches({"research": {"demand": {"v4": {"enabled": True}, "v5": {"enabled": True}}}})
+    assert rec["dir"] == "out_ras_v5" and rec["switch_sha256"] == C.switch_sha(s) and rec["switches"]["v5_neu_gas_growth"] == "product"
+    for k, v in rec["files"].items():
+        assert V.sha256(R / "out_ras_v5" / k) == v
+    acc = "NonEnergy:Natural gas (including LNG)"
+    def neu(folder):
+        d = pd.read_csv(R / folder / "DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv")
+        g = d[(d.sector == "NonEnergyUse") & (d.carrier == "gas") & (d.account == acc)]
+        return pd.to_numeric(g.value_2050_mwh, errors="coerce").fillna(0).groupby(g.country).sum() / 1e6
+    a, b = neu("out_ras"), neu("out_ras_v5")
+    assert abs(a["ID"] - 84.368) < 1e-3 and b["ID"] == 0.0                                      # ID: residual 0 -> NEU gas 0 after the ammonia deduction
+    assert abs(b["TH"] - a["TH"]) < 1e-9 and abs(b["MM"] - a["MM"]) < 1e-9 and abs(b["BN"] - a["BN"]) < 1e-9   # no ammonia: unchanged
+    assert abs(b["MY"] - 183.502) < 1e-3                                                         # MY: 15.74 TWh ammonia part x 1.783, residual x 1.667, minus 28.06
+    pa = (R / "out_ras/PROCESS_EMISSIONS_2050_V4.csv").read_bytes() == (R / "out_ras_v5/PROCESS_EMISSIONS_2050_V4.csv").read_bytes()
+    assert pa                                                                                    # process emissions do not follow the NEU rows

@@ -1,0 +1,59 @@
+HEAD f25fa9b5c41f23dffe1b096825cfab55ef6d24c9; dirty files 6
+  File "scripts_project/v5_gas_cap_data.py", line 33
+    t = pd.DataFrame(dict(country=g.country, rule_a_reserve_average=g.ruleA_fraction_reserve_average, rule_b_field_status=g.ruleB_fraction_field_status)   # full precision of the X10 table)
+                    ^
+SyntaxError: '(' was never closed
+........................................................................ [ 41%]
+....................F................................................... [ 83%]
+............................                                             [ 91%]
+=================================== FAILURES ===================================
+____ test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer ____
+
+    def test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer():
+        import s2_layers as L
+        folders = _folders()
+        assert len(folders) >= 3   # out_ras, out_iid, the residue_literal set
+        for od in folders:
+            rec = json.loads((od / "V4_SWITCHES.json").read_text()); s = rec["switches"]
+            S = pd.read_csv(od / "INDUSTRY_2050_SUMMARY_V4.csv").set_index("country")
+            pot = _potential(s)
+            for c in S.index:
+                cap = float(pot.get(c, 0.0)) * float(s["bio_cap_share"])
+>               assert abs(float(S.at[c, "solid_biomass_potential_main_mwh"]) - cap) <= 1e-3, (od.name, c, "F-14: table cap = build cap")
+E               AssertionError: ('out_ras_v5', 'BN', 'F-14: table cap = build cap')
+E               assert 2031.5511066254112 <= 0.001
+E                +  where 2031.5511066254112 = abs((116758.086925 - 114726.53581837458))
+E                +    where 116758.086925 = float(116758.086925)
+
+tests/research/test_v4_d2a_fixes.py:51: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v5_x20.py::test_v5_fleet_additions_no_double_count
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/research/test_dfx_demand.py: 2 warnings
+tests/research/test_v4_d1_missing_cost.py: 1 warning
+tests/research/test_v4_d1_prep.py: 2 warnings
+tests/research/test_v4_d2a_efb.py: 1 warning
+tests/research/test_v4_d2a_fixes.py: 1 warning
+tests/research/test_v4_d2b_biomass.py: 1 warning
+tests/research/test_v4_d2c_trunk.py: 1 warning
+tests/research/test_v4_registry.py: 2 warnings
+  /home/jin/wt_v5_x20/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_dfx_demand.py: 2 warnings
+tests/research/test_v4_d1_missing_cost.py: 1 warning
+tests/research/test_v4_d1_prep.py: 2 warnings
+tests/research/test_v4_d2a_efb.py: 1 warning
+tests/research/test_v4_d2a_fixes.py: 1 warning
+tests/research/test_v4_d2b_biomass.py: 1 warning
+tests/research/test_v4_d2c_trunk.py: 1 warning
+tests/research/test_v4_registry.py: 2 warnings
+  /home/jin/wt_v5_x20/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v4_d2a_fixes.py::test_f02_table_overflow_is_the_build_rule_after_the_conservation_layer
+1 failed, 171 passed, 23 warnings in 176.10s (0:02:56)
+EXIT:1 seconds:177
