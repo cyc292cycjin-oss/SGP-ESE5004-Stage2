@@ -39,6 +39,11 @@ ROWS = [
     ("G100001090630", "Truong Son wind farm", "2", "LA", 19.001, 103.001, 18.303, 105.139, "B",
      "centre of the phase 1 turbines (OSM nodes 13455343457-465, operator=Truong Son Wind Power Project); phase 2 'located in the same area' (Vientiane Times); = Xeuchin 2 (KPL 2025-10-10)",
      "https://www.openstreetmap.org/node/13455343460 ; https://www.vientianetimes.org.la/freefreenews/freecontent_118_Borikhamxay_y25.php ; https://kpl.gov.la/En/detail.aspx?id=94998"),
+    # X20 B (after the pre-build of the v5 network): phase 1 enters the 2050 stock through the inclusive boundary of 2-5 (start 2025 + 25 a = 2050) and has
+    # the same GEM placeholder point; the OSM turbines are phase 1 itself -> the same checked point (extension of the five units of X20_SPEC 1.13)
+    ("G100000927625", "Truong Son wind farm", "1", "LA", 19.001, 103.001, 18.303, 105.139, "B",
+     "centre of the phase 1 turbines (OSM nodes 13455343457-465, operator=Truong Son Wind Power Project); unit added in X20 B: in the 2050 stock only under the inclusive boundary (2-5)",
+     "https://www.openstreetmap.org/node/13455343460 ; https://kpl.gov.la/En/detail.aspx?id=94998"),
     ("G100000602599", "Upper Yeywa hydroelectric plant", "", "MM", 22.6243, 97.3011, 22.2421, 97.1017, "A",
      "dam (OSM node 487090340 'Upper Yeywa Dam'; rccdams.co.uk 22.242104 N 97.101898 E; Wikidata Q65205813)",
      "https://www.openstreetmap.org/node/487090340 ; https://rccdams.co.uk/dams/upper-yeywa--kyaukme-/"),

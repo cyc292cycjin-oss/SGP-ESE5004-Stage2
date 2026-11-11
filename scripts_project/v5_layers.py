@@ -32,8 +32,9 @@ def gem_node_override(df: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[pd.Data
     df = df.copy()
     for r in t.itertuples():
         m = df.gem_unit_id.astype(str) == r.gem_unit_id
-        if not m.any():
-            raise ValueError(f"GEM coordinate correction: unit {r.gem_unit_id} not in the GEM addition tables")
+        if not m.any():   # e.g. Truong Son 1 is in the 2050 stock only under the inclusive lifetime boundary (2-5): nothing to move under strict
+            moved.append(dict(gem_unit_id=r.gem_unit_id, plant=r.plant, mw=0.0, node_from=r.gem_node, node_to=r.checked_node, note="not in the addition tables of this switch set"))
+            continue
         if not (df.loc[m, "node"] == r.gem_node).all():
             raise ValueError(f"GEM coordinate correction: unit {r.gem_unit_id} node {df.loc[m, 'node'].tolist()} differs from the table {r.gem_node}")
         df.loc[m, "node"] = r.checked_node

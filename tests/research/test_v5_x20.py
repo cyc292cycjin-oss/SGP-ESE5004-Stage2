@@ -141,20 +141,23 @@ def test_v5_fleet_additions_no_double_count():
 def test_gem_coord_table_and_override():
     import v5_layers as L
     t = pd.read_csv(ROOT / L.GEM_COORD_TABLE, dtype={"gem_unit_id": str})
-    assert len(t) == 5 and t.gem_unit_id.is_unique and set(t.grade) <= {"A", "B", "C"} and t.source.str.startswith("https://").all()
-    assert t.loc[t.node_changes, "gem_unit_id"].tolist() == ["G100001090630"]                      # only Truong Son 2: LA2 1 -> LA2 3
+    assert len(t) == 6 and t.gem_unit_id.is_unique and set(t.grade) <= {"A", "B", "C"} and t.source.str.startswith("https://").all()
+    assert t.loc[t.node_changes, "gem_unit_id"].tolist() == ["G100001090630", "G100000927625"]     # Truong Son 2 and 1 (1 enters through 2-5): LA2 1 -> LA2 3
     tabs = pd.concat([pd.read_csv(FV / f, dtype={"gem_unit_id": str}) for f in ("FLEET_ADDITIONS_2050_V5.csv", "FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv")])
     node = tabs.set_index("gem_unit_id").node
     assert all(node[r.gem_unit_id] == r.gem_node for r in t.itertuples())                         # the GEM node is the node of the addition tables
     df = pd.DataFrame(dict(gem_unit_id=["G100001090630", "X"], node=["LA2 1", "LA2 1"], capacity_mw=[350.0, 10.0]))
     out, moved = L.gem_node_override(df, cfg({"enabled": True}), ROOT)
-    assert out.loc[0, "node"] == "LA2 3" and out.loc[1, "node"] == "LA2 1" and moved == [dict(gem_unit_id="G100001090630", plant="Truong Son wind farm", mw=350.0, node_from="LA2 1", node_to="LA2 3")]
+    assert out.loc[0, "node"] == "LA2 3" and out.loc[1, "node"] == "LA2 1"
+    assert moved[0] == dict(gem_unit_id="G100001090630", plant="Truong Son wind farm", mw=350.0, node_from="LA2 1", node_to="LA2 3")
+    assert moved[1]["gem_unit_id"] == "G100000927625" and moved[1]["mw"] == 0.0 and "not in the addition tables" in moved[1]["note"]   # phase 1 absent (strict rule)
     assert df.loc[0, "node"] == "LA2 1"                                                            # input frame unchanged
     assert L.gem_node_override(df, cfg(), ROOT) == (df, []) and L.gem_node_override(df, cfg({"enabled": True, "gem_coord_fix": "gem"}), ROOT)[1] == []
     with pytest.raises(ValueError):
-        L.gem_node_override(df.assign(node="LA2 2"), cfg({"enabled": True}), ROOT)
-    with pytest.raises(ValueError):
-        L.gem_node_override(df.iloc[1:], cfg({"enabled": True}), ROOT)
+        L.gem_node_override(df.assign(node="LA2 2"), cfg({"enabled": True}), ROOT)              # node of the table differs: stop
+    both = pd.concat([df, pd.DataFrame(dict(gem_unit_id=["G100000927625"], node=["LA2 1"], capacity_mw=[250.0]))], ignore_index=True)
+    out2, moved2 = L.gem_node_override(both, cfg({"enabled": True}), ROOT)
+    assert out2.loc[2, "node"] == "LA2 3" and moved2[1]["mw"] == 250.0
 
 
 # ---- 1-1 GWA v4 correction fields (decisions 241, 246 Q1 (b)) ------------------------------------------------------------------

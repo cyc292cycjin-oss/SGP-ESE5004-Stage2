@@ -1,0 +1,53 @@
+HEAD 26b86a7789482141623a652173f31a306b5b8d24; dirty files 5
+py_compile OK
+.......F....................................                             [100%]
+=================================== FAILURES ===================================
+______________________ test_gem_coord_table_and_override _______________________
+
+    def test_gem_coord_table_and_override():
+        import v5_layers as L
+        t = pd.read_csv(ROOT / L.GEM_COORD_TABLE, dtype={"gem_unit_id": str})
+        assert len(t) == 6 and t.gem_unit_id.is_unique and set(t.grade) <= {"A", "B", "C"} and t.source.str.startswith("https://").all()
+        assert t.loc[t.node_changes, "gem_unit_id"].tolist() == ["G100001090630", "G100000927625"]     # Truong Son 2 and 1 (1 enters through 2-5): LA2 1 -> LA2 3
+        tabs = pd.concat([pd.read_csv(FV / f, dtype={"gem_unit_id": str}) for f in ("FLEET_ADDITIONS_2050_V5.csv", "FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv")])
+        node = tabs.set_index("gem_unit_id").node
+        assert all(node[r.gem_unit_id] == r.gem_node for r in t.itertuples())                         # the GEM node is the node of the addition tables
+        df = pd.DataFrame(dict(gem_unit_id=["G100001090630", "X"], node=["LA2 1", "LA2 1"], capacity_mw=[350.0, 10.0]))
+>       out, moved = L.gem_node_override(df, cfg({"enabled": True}), ROOT)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/research/test_v5_x20.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+df =      gem_unit_id   node  capacity_mw
+0  G100001090630  LA2 3        350.0
+1              X  LA2 1         10.0
+cfg = {'research': {'demand': {'v4': {'enabled': True}, 'v5': {'enabled': True}}}}
+repo = PosixPath('/home/jin/wt_v5_x20')
+
+    def gem_node_override(df: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[pd.DataFrame, list]:
+        """2-6 (decision 244): node of the GEM addition rows whose checked coordinate moves them (GEM_COORD_CORRECTIONS_V5.csv node_changes = True;
+        scripts_project/v5_gem_coord_data.py). The row node must be the table's GEM node, otherwise the build stops."""
+        s = switches(cfg)
+        if s["gem_coord_fix"] != "verified":
+            return df, []
+        t = pd.read_csv(Path(repo) / GEM_COORD_TABLE, dtype={"gem_unit_id": str})
+        t = t[t.node_changes.astype(str).str.lower() == "true"]
+        moved = []
+        df = df.copy()
+        for r in t.itertuples():
+            m = df.gem_unit_id.astype(str) == r.gem_unit_id
+            if not m.any():
+>               raise ValueError(f"GEM coordinate correction: unit {r.gem_unit_id} not in the GEM addition tables")
+E               ValueError: GEM coordinate correction: unit G100000927625 not in the GEM addition tables
+
+scripts_project/v5_layers.py:36: ValueError
+=============================== warnings summary ===============================
+tests/research/test_v5_x20.py::test_v5_fleet_additions_no_double_count
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_v5_x20.py::test_gem_coord_table_and_override - Val...
+1 failed, 43 passed, 1 warning in 8.08s
+EXIT:1 seconds:9

@@ -251,6 +251,10 @@ def add_dedicated_plant_lines(n, cfg, repo, costs, existing_cfg, status=None) ->
     if status is None:   # decision 180: GIPT 2026-09 Status by GEM unit id, written by scripts_project/v3_dedicated_lines.py --status-table
         import hashlib
         p = Path(repo) / DEDICATED_STATUS_TABLE; status = pd.read_csv(p).set_index("identity").gipt_status.to_dict(); led["status_table"] = dict(path=DEDICATED_STATUS_TABLE, sha256=hashlib.sha256(p.read_bytes()).hexdigest())
+    import v5_common as V5
+    if V5.switches(cfg)["enabled"]:   # V5 X20 (2-5 / 2-6): GEM additions new in v5 carry their GIPT 2026-09 status (gem_status) - the source of the status table (decision 180)
+        extra = {k: str(z["gem_status"]) for k, z in n.meta["existing_unit_components"].items() if k not in status and str(z.get("gem_status") or "") != ""}
+        status = dict(status, **extra); led["v5_status_from_identity"] = sorted(extra)
     sources = bind_dedicated_sources(n, rows, status)
     n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool); n.links["stock"] = n.links["stock"].fillna("").astype(str)   # as s4j_layers: a mixed column does not export
     if rows:
