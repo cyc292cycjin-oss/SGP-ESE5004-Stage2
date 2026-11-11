@@ -356,6 +356,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         v5x["ledgers"]["lifetime_2_5"] = dict(rule=list(life_rule), s2_geothermal_in_service_mw=geo["in_service_mw"], gem_additions_table=fleet.get("table"))
         if fleet.get("table"):
             v5x["tables"]["fleet_additions"] = fleet["table"]["path"]
+        if (fleet.get("v5_gem_coord") or {}).get("table"):   # V5 X20 (2-6)
+            v5x["tables"]["gem_coord"] = fleet["v5_gem_coord"]["table"]["path"]; v5x["ledgers"]["gem_coord_2_6"] = fleet["v5_gem_coord"]
     fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
     fleet["phs_reclass"] = reclassify_phs_stock(n, costs, cfg, repo)   # V4 D2a (decision 220, section 3.3): frozen PHS groups holding conventional units (Bhumibol) split; null = follows v4.enabled
     vintage = apply_existing_vintage_costs(n, cfg, repo)   # M08a A3 (decision 131): existing stock priced with technology-data v0.15.0 of its commissioning year (author_v0_13_2 = former)

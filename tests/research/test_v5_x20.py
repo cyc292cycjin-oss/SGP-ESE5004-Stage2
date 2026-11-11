@@ -135,3 +135,23 @@ def test_v5_fleet_additions_no_double_count():
         import netCDF4
         ds = netCDF4.Dataset(EB); frozen = json.loads(ds.getncattr("meta"))["existing_unit_components"]; ds.close()
         assert not {f"GEM:{g}" for g in a5.gem_unit_id} & set(frozen) and not {f"GEM:{g}" for g in ids} & set(frozen)
+
+
+# ---- 2-6 checked coordinates of approximate GEM points (decision 244) --------------------------------------------------------------
+def test_gem_coord_table_and_override():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.GEM_COORD_TABLE, dtype={"gem_unit_id": str})
+    assert len(t) == 5 and t.gem_unit_id.is_unique and set(t.grade) <= {"A", "B", "C"} and t.source.str.startswith("https://").all()
+    assert t.loc[t.node_changes, "gem_unit_id"].tolist() == ["G100001090630"]                      # only Truong Son 2: LA2 1 -> LA2 3
+    tabs = pd.concat([pd.read_csv(FV / f, dtype={"gem_unit_id": str}) for f in ("FLEET_ADDITIONS_2050_V5.csv", "FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv")])
+    node = tabs.set_index("gem_unit_id").node
+    assert all(node[r.gem_unit_id] == r.gem_node for r in t.itertuples())                         # the GEM node is the node of the addition tables
+    df = pd.DataFrame(dict(gem_unit_id=["G100001090630", "X"], node=["LA2 1", "LA2 1"], capacity_mw=[350.0, 10.0]))
+    out, moved = L.gem_node_override(df, cfg({"enabled": True}), ROOT)
+    assert out.loc[0, "node"] == "LA2 3" and out.loc[1, "node"] == "LA2 1" and moved == [dict(gem_unit_id="G100001090630", plant="Truong Son wind farm", mw=350.0, node_from="LA2 1", node_to="LA2 3")]
+    assert df.loc[0, "node"] == "LA2 1"                                                            # input frame unchanged
+    assert L.gem_node_override(df, cfg(), ROOT) == (df, []) and L.gem_node_override(df, cfg({"enabled": True, "gem_coord_fix": "gem"}), ROOT)[1] == []
+    with pytest.raises(ValueError):
+        L.gem_node_override(df.assign(node="LA2 2"), cfg({"enabled": True}), ROOT)
+    with pytest.raises(ValueError):
+        L.gem_node_override(df.iloc[1:], cfg({"enabled": True}), ROOT)

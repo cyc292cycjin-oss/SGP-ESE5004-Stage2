@@ -1,0 +1,21 @@
+X20 2-6 (decision 244): checked coordinates of approximate GEM points
+
+research.demand.v5.gem_coord_fix: verified (v5 main) | gem (v4).
+scripts_project/v5_gem_coord_data.py writes
+research_inputs/fleet_v5/GEM_COORD_CORRECTIONS_V5.csv for the five units
+whose nearest and second nearest node differ by < 50 km (X10): checked
+coordinate, basis, grade, public sources (web reading only), and the
+nearest same-country AC node with the rule of the GEM additions
+(s4a_2_fleet_data.nearest_node on the electric-base AC buses; the GEM node
+of every row is asserted to equal the node in the addition tables).
+
+Only Truong Son wind phase 2 (350 MW, S4B-1 construction table) changes
+node: LA2 1 -> LA2 3 (phase 1 turbines in OSM, "same area"). New Kapar,
+Thai Binh x2 and Upper Yeywa keep their node.
+
+New scripts_project/v5_layers.py with gem_node_override, applied in
+s4a_fleet.add_gem_fleet after the S4A + S4B-1 concatenation; the move and
+the table SHA256 are recorded in the fleet ledger and n.meta v5_x20.
+Targeted tests: 30 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

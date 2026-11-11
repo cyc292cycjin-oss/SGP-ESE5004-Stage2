@@ -66,6 +66,11 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
         d2["capacity_mw"] = d2.capacity_mw.astype(float); d2["start_year"] = d2.assumed_start_year.astype(float); d2["batch"] = "S4B1"
         led["table_construction_no_start_year"] = dict(path=str(p2.relative_to(repo)), sha256=hashlib.sha256(p2.read_bytes()).hexdigest(), units=int(len(d2)), mw=float(d2.capacity_mw.sum()))
         df = pd.concat([df, d2[[c for c in d2.columns if c in df.columns]]], ignore_index=True)
+    if s5["enabled"]:   # V5 X20 (2-6, decision 244): checked coordinates of approximate GEM points - only a node change moves a unit (GEM_COORD_CORRECTIONS_V5.csv)
+        from v5_layers import GEM_COORD_TABLE, gem_node_override
+        df, moved = gem_node_override(df, cfg, repo)
+        led["v5_gem_coord"] = dict(mode=s5["gem_coord_fix"], moved=moved, table=(dict(path=GEM_COORD_TABLE, sha256=hashlib.sha256((Path(repo) / GEM_COORD_TABLE).read_bytes()).hexdigest())
+                                                                                if s5["gem_coord_fix"] == "verified" else None))
     n.meta.setdefault("existing_unit_components", {})
     ident = n.meta["existing_unit_components"]
     w = n.snapshot_weightings.generators
