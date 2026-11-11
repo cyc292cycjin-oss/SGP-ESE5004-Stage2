@@ -1,0 +1,91 @@
+== staged
+ .../p1_v5_x20_20261111/logs/29_lv_carriers.log     |  37 +++
+ .../p1_v5_x20_20261111/logs/36_registry_fw.log     |   9 +
+ .../p1_v5_x20_20261111/logs/bcommit_B01.log        |  94 ++++++
+ .../p1_v5_x20_20261111/logs/bcommit_B02.log        |   0
+ .../p1_v5_x20_20261111/logs/push_last.log          |   3 +
+ .../p1_v5_x20_20261111/logs/ut_full_base.txt       | 315 +++++++++++++++++++++
+ .../logs/ut_full_base_failed_tmpdir.txt            |  56 ++++
+ .../logs/ut_full_base_interrupted_wsl_stop.txt     |   3 +
+ .../logs/ut_full_base_stopped_slow_pycache.txt     |  11 +
+ .../p1_v5_x20_20261111/logs/ut_fw1.txt             |  98 +++++++
+ .../p1_v5_x20_20261111/logs/ut_fw2.txt             |  57 ++++
+ .../p1_v5_x20_20261111/scripts/21_full_tests.sh    |  36 +++
+ .../p1_v5_x20_20261111/scripts/22_nc_write_test.sh |  19 ++
+ .../p1_v5_x20_20261111/scripts/23_osm_dup_fetch.py |  84 ++++++
+ .../p1_v5_x20_20261111/scripts/24_ngcp_pages.py    |  30 ++
+ .../scripts/25_ember_solar_cf.py                   |  45 +++
+ .../scripts/26_wind_gwa_trial.sh                   |  21 ++
+ .../scripts/27_ac_dedup_trial.sh                   |  23 ++
+ .../p1_v5_x20_20261111/scripts/27b_debug.py        |   9 +
+ .../p1_v5_x20_20261111/scripts/28_coord_nodes.py   |  26 ++
+ .../p1_v5_x20_20261111/scripts/29_lv_carriers.py   |  18 ++
+ .../p1_v5_x20_20261111/scripts/30_inspect_tests.sh |  15 +
+ .../p1_v5_x20_20261111/scripts/31_import_timing.sh |   9 +
+ .../scripts/32_stop_base_tests.sh                  |   9 +
+ .../scripts/33_grep_v4_switch_uses.sh              |   5 +
+ .../scripts/34_apply_framework.sh                  |  19 ++
+ .../scripts/35_targeted_tests.sh                   |  16 ++
+ .../p1_v5_x20_20261111/scripts/35b_fw_tests.sh     |   4 +
+ .../scripts/36_registry_chain.sh                   |  39 +++
+ .../p1_v5_x20_20261111/scripts/commit_msg_B02.txt  |  28 ++
+ research_inputs/registry_v5/D1_EVIDENCE.json       |  10 +-
+ research_inputs/registry_v5/DATA_REGISTRY.csv      |   2 +-
+ research_inputs/registry_v5/fragments/v4_w08.csv   |   2 +-
+ scripts_project/m08a_variants.py                   |   2 +
+ scripts_project/s2_network.py                      |   5 +
+ scripts_project/v4_common.py                       |  39 ++-
+ scripts_project/v5_common.py                       | 111 ++++++++
+ tests/research/test_dfx_demand.py                  |   2 +-
+ tests/research/test_v5_x20.py                      |  82 ++++++
+ 50 files changed, 1640 insertions(+), 11 deletions(-)
+== untracked / ignored new files under research_inputs (not staged)
+!! research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv
+!! research_inputs/finance_v5/DISCOUNT_RATE_IN_USE.csv
+[asean/v5-x20-20261111 409deeb8] X20 B-1 framework (decisions 241, 244, 246): v5 switch set, table identity, meta check
+ 50 files changed, 1640 insertions(+), 11 deletions(-)
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/23_osm_dup_fetch.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/24_ngcp_pages.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/24b_ngcp_terms.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/25_ember_solar_cf.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/26_wind_gwa_trial.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/26_wind_gwa_trial_interrupted.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/27_ac_dedup_trial.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/28_coord_nodes.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/29_lv_carriers.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/36_registry_fw.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/bcommit_B02.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/push_last.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_full_base.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_full_base_failed_tmpdir.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_full_base_interrupted_wsl_stop.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_full_base_stopped_slow_pycache.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_fw1.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_fw2.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/21_full_tests.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/22_nc_write_test.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/23_osm_dup_fetch.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/24_ngcp_pages.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/25_ember_solar_cf.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/26_wind_gwa_trial.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/27_ac_dedup_trial.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/27b_debug.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/28_coord_nodes.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/29_lv_carriers.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/30_inspect_tests.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/31_import_timing.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/32_stop_base_tests.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/33_grep_v4_switch_uses.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/34_apply_framework.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/35_targeted_tests.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/35b_fw_tests.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/36_registry_chain.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/commit_msg_B02.txt
+ create mode 100644 scripts_project/v5_common.py
+ create mode 100644 tests/research/test_v5_x20.py
+HEAD 409deeb862196b0808f1ce1b007015f08b73c4b8 X20 B-1 framework (decisions 241, 244, 246): v5 switch set, table identity, meta check
+To https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2.git
+   e4b590f8..409deeb8  asean/v5-x20-20261111 -> asean/v5-x20-20261111
+branch 'asean/v5-x20-20261111' set up to track 'origin/asean/v5-x20-20261111'.
+push_exit=0
+409deeb862196b0808f1ce1b007015f08b73c4b8	refs/heads/asean/v5-x20-20261111

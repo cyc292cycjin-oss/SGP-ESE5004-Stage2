@@ -321,7 +321,10 @@ def test_f0_changed_scripts_in_the_executed_lists():
     later = sorted(set(git("diff", "--name-only", "72083fde", "--", "scripts_project")) | set(git("ls-files", "--others", "--exclude-standard", "scripts_project")))
     later = [p for p in later if not Path(p).name.startswith(("v3_", "v4_", "v5_")) and Path(p).name not in ("batch_def.py", "zero_slack_check.py")]   # new files of the V3 / V3.1 steps (V3.1: the static zero-slack check, decision 195), of V4 W08 (v4_*.py, decisions 203-211) and of V5 X20 (v5_*.py, decisions 241, 244, 246), documented in their own folders
     f6 = {"scripts_project/dfx_batch.py"}
-    assert set(later) <= f6 | executed, [p for p in later if p not in f6 | executed]
+    # V5 X20 (decisions 241, 244, 246): offline data-chain scripts changed by X20 (they write research_inputs tables, never run by the build; listed in
+    # research/06_scope_redesign/p1_v5_x20_20261111/REPORT.md, documented in CODE_MAP.md like every other file)
+    x20_data_chain = {f"scripts_project/{f}" for f in ("s4a_2_fleet_data.py", "s4a_profiles.py", "s4b_3_wind_calibration.py", "s4b_3_export.py", "d1_biomass.py", "s4b_2_candidates_data.py")}
+    assert set(later) <= f6 | executed | x20_data_chain, [p for p in later if p not in f6 | executed | x20_data_chain]
     code_map = (DFX / "CODE_MAP.md").read_text(encoding="utf-8")
     assert all(Path(p).name in code_map for p in later), "a later scripts_project change is not documented in CODE_MAP.md"
 

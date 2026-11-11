@@ -1,0 +1,31 @@
+X20 2-5 (decisions 244, 246 Q2 (b)): lifetime boundary >= 2050, geothermal 40 a
+
+research.demand.v5.lifetime_boundary (inclusive main | strict) and
+geothermal_existing_lifetime (40 main | 30). The frozen electric base is
+unchanged (asset_survival.py, selected_closure.py untouched, Q2 (b)); the
+boundary units enter through the GEM additions only.
+
+s4a_2_fleet_data.py: --boundary, --geothermal-lifetime, --v5-out (writes
+FLEET_ADDITIONS_2050_V5.csv, coverage and evidence _V5; the unresolved,
+not-operating and gas tables are recomputed and must equal the committed
+ones), --out-dir (reproduction). The "in network" identity set = network
+identities + the S1 geothermal records that the S2 path adds under the same
+rule (v5_common.s1_geothermal_in_service), so no geothermal unit enters
+twice. With the electric base and strict / 30 a the 9 committed files are
+reproduced byte for byte (748 identities = 745 + 3 S1 geothermal).
+
+V5 table: 501 rows, 79,153.1 MW (v4 299 rows, 73,614.7 MW): +202 rows,
+5,538.4 MW (boundary 5,483.4, geothermal 40 a 55.0), none removed.
+s2_layers.geothermal_unit_table re-judges the aged S1 geothermal records
+(rule != strict / 30): 20 units, 1,123 MW (ID 1,051, PH 72).
+s4a_fleet.add_gem_fleet reads the _V5 table under the v5 rule.
+
+Q2 check (evidence/Q2_BOUNDARY_UNITS.csv, Q2_NO_DOUBLE_COUNT.json): the S1
+boundary units are 8 (not 7 as written in the A spec), 2,503.1 MW; 7 units,
+1,833.1 MW enter via the GEM table, North Bangkok 1 (670 MW) does not (GIPT
+2026-09 mothballed); no unit is in both the frozen stock and the GEM table.
+
+Tests: test_s4a_fleet parametrised over the v4 / v5 tables, new 2-5 tests;
+F0.3 exempts the X20 offline data-chain scripts. Targeted: 60 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

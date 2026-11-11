@@ -184,7 +184,10 @@ def add_link(n, name, country, carrier, ports, effs, *, capital_cost=0.0, margin
 # ----------------------------------------------------------------------------------------------
 # S2-1: SMR, existing geothermal (decision 52), transmission (decision 45)
 # ----------------------------------------------------------------------------------------------
-def geothermal_unit_table(survival_json: Path) -> pd.DataFrame:
+def geothermal_unit_table(survival_json: Path, rule: tuple | None = None) -> pd.DataFrame:
+    """rule = None (v4, S1 status) | (boundary, lifetime) of research.demand.v5 (V5 X20 2-5): the records S1 judged by age (SURVIVES_2050 / NOT_ACTIVE_2050)
+    are re-judged from CommissioningYear with that lifetime and boundary (v5_common.s1_geothermal_in_service; the same set is excluded from the GEM
+    additions by s4a_2_fleet_data.py), Lifetime / RetirementYear follow the rule; the other S1 statuses stay out."""
     S = jload(survival_json)
     rec = [r for r in S["unit_evidence"]["records"] if r.get("Technology") == "Geothermal"]
     cols = ["AssetID", "ParentAssetID", "Country", "OriginalCapacity", "CommissioningYear", "RetirementYear", "Lifetime", "LifetimeSource",
@@ -194,16 +197,31 @@ def geothermal_unit_table(survival_json: Path) -> pd.DataFrame:
         if c not in df:
             df[c] = ""
     df = df[cols].copy()
-    df["in_service_2050"] = df.SurvivalStatus == "SURVIVES_2050"
-    df["judgement"] = np.where(df.SurvivalStatus == "SURVIVES_2050", "commissioning + 30 a > 2050: in service",
-                      np.where(df.SurvivalStatus == "NOT_ACTIVE_2050", "commissioning + 30 a <= 2050: retired",
+    if rule is None or tuple(rule) == ("strict", 30):
+        df["in_service_2050"] = df.SurvivalStatus == "SURVIVES_2050"
+        df["judgement"] = np.where(df.SurvivalStatus == "SURVIVES_2050", "commissioning + 30 a > 2050: in service",
+                          np.where(df.SurvivalStatus == "NOT_ACTIVE_2050", "commissioning + 30 a <= 2050: retired",
+                          np.where(df.SurvivalStatus == "UNRESOLVED_COMMISSIONING", "no commissioning year: DATA_PENDING, not added", df.SurvivalStatus)))
+        return df
+    from v5_common import s1_geothermal_in_service
+    boundary, life = str(rule[0]), int(rule[1])
+    live = {r["AssetID"] for r in s1_geothermal_in_service(survival_json, boundary, life)}
+    aged = df.SurvivalStatus.isin(["SURVIVES_2050", "NOT_ACTIVE_2050"])
+    df["in_service_2050"] = df.AssetID.isin(live)
+    df.loc[aged, "Lifetime"] = float(life)
+    df.loc[aged, "RetirementYear"] = pd.to_numeric(df.loc[aged, "CommissioningYear"], errors="coerce") + float(life)
+    df.loc[aged, "LifetimeSource"] = f"V5 X20 (2-5, decision 244): research.demand.v5.geothermal_existing_lifetime = {life} a"
+    op = ">=" if boundary == "inclusive" else ">"
+    df["judgement"] = np.where(df.in_service_2050, f"commissioning + {life} a {op} 2050: in service (V5 X20 rule {boundary})",
+                      np.where(aged, f"commissioning + {life} a not {op} 2050: retired (V5 X20 rule {boundary})",
                       np.where(df.SurvivalStatus == "UNRESOLVED_COMMISSIONING", "no commissioning year: DATA_PENDING, not added", df.SurvivalStatus)))
     return df
 
 
-def add_existing_geothermal(n, costs, survival_json: Path, capacity_factor: float, cf_source: str, bus_mapping: dict | None = None):
-    """bus_mapping: reference-network bus id (OriginalMappedBus) -> research node, from the Assembly-V1 integration contract."""
-    units = geothermal_unit_table(survival_json)
+def add_existing_geothermal(n, costs, survival_json: Path, capacity_factor: float, cf_source: str, bus_mapping: dict | None = None, rule: tuple | None = None):
+    """bus_mapping: reference-network bus id (OriginalMappedBus) -> research node, from the Assembly-V1 integration contract.
+    rule: None (v4) | (lifetime_boundary, geothermal_existing_lifetime) of research.demand.v5 (V5 X20 2-5, geothermal_unit_table)."""
+    units = geothermal_unit_table(survival_json, rule)
     bus_mapping = bus_mapping or {}
     units["node"] = [bus_mapping.get(str(b), {}).get("Node", str(b)) if isinstance(bus_mapping.get(str(b), {}), dict) else bus_mapping.get(str(b), str(b)) for b in units.OriginalMappedBus]
     live = units[units.in_service_2050]

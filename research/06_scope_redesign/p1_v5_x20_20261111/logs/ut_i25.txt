@@ -1,0 +1,70 @@
+HEAD 409deeb862196b0808f1ce1b007015f08b73c4b8; dirty files 8
+py_compile OK
+................F..........s.........s..ss......................         [100%]
+=================================== FAILURES ===================================
+________________ test_f0_changed_scripts_in_the_executed_lists _________________
+
+    def test_f0_changed_scripts_in_the_executed_lists():
+        """F0.3: every scripts_project file changed by DFX (base commit 55ab07c0 -> HEAD, plus uncommitted changes) is in the actual-execution lists of the
+        build, solve, post-processing, batch or data-chain runs (CODE_MAP_DATA.json executed_union)."""
+        data = json.loads((DFX / "CODE_MAP_DATA.json").read_text(encoding="utf-8"))
+        executed = set(data["executed_union"])
+        git = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+        f1_f4 = git("diff", "--name-only", "55ab07c0", "72083fde", "--", "scripts_project")   # the F1-F4 commit: the demand changes the F0.3 rule is about
+        assert f1_f4, "no F1-F4 change under scripts_project"
+        outside = [p for p in f1_f4 if p not in executed]
+        assert not outside, outside
+        # later scripts_project changes of the branch (F6: the DFX batch module run as its own process by run_dfx.sh) are not demand changes; they must be
+        # the documented F6 files only (CODE_MAP.md section 14), never a change of a demand module outside the executed lists
+        later = sorted(set(git("diff", "--name-only", "72083fde", "--", "scripts_project")) | set(git("ls-files", "--others", "--exclude-standard", "scripts_project")))
+        later = [p for p in later if not Path(p).name.startswith(("v3_", "v4_", "v5_")) and Path(p).name not in ("batch_def.py", "zero_slack_check.py")]   # new files of the V3 / V3.1 steps (V3.1: the static zero-slack check, decision 195), of V4 W08 (v4_*.py, decisions 203-211) and of V5 X20 (v5_*.py, decisions 241, 244, 246), documented in their own folders
+        f6 = {"scripts_project/dfx_batch.py"}
+>       assert set(later) <= f6 | executed, [p for p in later if p not in f6 | executed]
+E       AssertionError: ['scripts_project/s4a_2_fleet_data.py']
+E       assert {'scripts_pro...ysis.py', ...} <= {'scripts_pro...work.py', ...}
+E         
+E         Extra items in the left set:
+E         'scripts_project/s4a_2_fleet_data.py'
+
+tests/research/test_dfx_demand.py:324: AssertionError
+=============================== warnings summary ===============================
+tests/research/test_v5_x20.py::test_v5_fleet_additions_no_double_count
+  <frozen importlib._bootstrap>:241: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/research/test_dfx_demand.py::test_f3_hvc_accounts_exhaustive
+tests/research/test_s4a_fleet.py::test_config_defaults
+tests/research/test_s4a_profiles.py::test_config_default_and_switch_validation
+tests/research/test_s4a_profiles.py::test_apply_profiles_on_electric_base
+tests/research/test_s4a_profiles.py::test_offshore_rules_on_electric_base
+tests/research/test_s4b_1.py::test_config
+tests/research/test_s4b_2.py::test_config
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+  /home/jin/wt_v5_x20/scripts/_helpers.py:245: FutureWarning: 'scenario.demand' is deprecated, use 'demand_data.scenario' instead.
+    warn("scenario.demand", "demand_data.scenario")
+
+tests/research/test_dfx_demand.py::test_f3_hvc_accounts_exhaustive
+tests/research/test_s4a_fleet.py::test_config_defaults
+tests/research/test_s4a_profiles.py::test_config_default_and_switch_validation
+tests/research/test_s4a_profiles.py::test_apply_profiles_on_electric_base
+tests/research/test_s4a_profiles.py::test_offshore_rules_on_electric_base
+tests/research/test_s4b_1.py::test_config
+tests/research/test_s4b_2.py::test_config
+tests/research/test_v4_d2a_efb.py::test_switch_value_and_table_selection
+tests/research/test_v4_d2a_fixes.py::test_f05_v4_tables_refuses_a_tampered_switch_record
+  /home/jin/wt_v5_x20/scripts/_helpers.py:253: FutureWarning: 'export.h2export (list)' is deprecated, use 'export.h2export (scalar)' instead.
+    warn("export.h2export (list)", "export.h2export (scalar)")
+
+tests/research/test_s4a_profiles.py: 932 warnings
+  /home/jin/wt_v5_x20/scripts_project/s4a_layers.py:221: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    n.generators_t.p_max_pu[new] = series
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_dfx_demand.py::test_f0_changed_scripts_in_the_executed_lists
+SKIPPED [1] tests/research/test_s4a_fleet.py:69: S4A-2 build check network not present
+SKIPPED [1] tests/research/test_s4b_1.py:35: S4B-1 build not present
+SKIPPED [1] tests/research/test_s4b_2.py:38: S4B-2 build not present
+SKIPPED [1] tests/research/test_s4b_2.py:55: S4B-2 nuclear_plans build not present
+1 failed, 59 passed, 4 skipped, 951 warnings in 25.10s
+EXIT:1 seconds:27

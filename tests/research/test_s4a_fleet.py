@@ -15,26 +15,42 @@ CLASSES = {"coal existing", "lignite existing", "oil existing", "CCGT existing",
            "solar existing", "onwind existing", "offwind existing", "waste existing"}
 
 
-def test_additions_table_consistent():
-    add = pd.read_csv(FV / "FLEET_ADDITIONS_2050.csv")
-    assert add.gem_unit_id.is_unique and len(add) == 299
+# V5 X20 (2-5): the v4 table (S1 rule start + lifetime > 2050, geothermal 30 a) and the v5 table (>= 2050, geothermal 40 a; s4a_2_fleet_data.py --v5-out)
+TABLES = [("", 299, "strict", 30), ("_V5", 501, "inclusive", 40)]
+
+
+@pytest.mark.parametrize("sfx,rows,boundary,geo_life", TABLES)
+def test_additions_table_consistent(sfx, rows, boundary, geo_life):
+    add = pd.read_csv(FV / f"FLEET_ADDITIONS_2050{sfx}.csv")
+    assert add.gem_unit_id.is_unique and len(add) == rows
     assert add.start_year.notna().all() and (add.start_year <= 2050).all()          # no start year -> UNRESOLVED list, never added
-    assert (add.retire_year == add.start_year + add.lifetime).all() and (add.retire_year > 2050).all()   # S1 lifetime rule
+    assert (add.retire_year == add.start_year + add.lifetime).all()
+    assert ((add.retire_year >= 2050) if boundary == "inclusive" else (add.retire_year > 2050)).all()   # S1 lifetime rule (v4) | inclusive boundary (v5)
+    assert (add.loc[add.model_class == "geothermal existing", "lifetime"] == geo_life).all()
     assert add.Status.isin(["operating", "construction"]).all()
     assert set(add.model_class) <= CLASSES and (add.capacity_mw > 0).all()
     assert add.node.notna().all() and add.node.str[:2].eq(add.country).all()          # nearest node of the same country
     assert (add.node_distance_km < 1500).all()
-    ev = json.loads((FV / "FLEET_S4A_EVIDENCE.json").read_text())
+    ev = json.loads((FV / f"FLEET_S4A_EVIDENCE{sfx}.json").read_text())
     by_cls = add.groupby("model_class").capacity_mw.sum().round(1).to_dict()
     assert by_cls == {k: round(v, 1) for k, v in ev["additions_by_class"].items()}
     assert ev["include_construction"] is True
 
 
-def test_coverage_and_unresolved_tables():
-    cov = pd.read_csv(FV / "FLEET_COVERAGE_GEM_2026_BY_COUNTRY_TYPE.csv")
+def test_v5_additions_contain_the_v4_table():
+    a4 = pd.read_csv(FV / "FLEET_ADDITIONS_2050.csv", dtype={"gem_unit_id": str}); a5 = pd.read_csv(FV / "FLEET_ADDITIONS_2050_V5.csv", dtype={"gem_unit_id": str})
+    assert set(a4.gem_unit_id) <= set(a5.gem_unit_id)                                     # the inclusive rule only adds units
+    new = a5[~a5.gem_unit_id.isin(a4.gem_unit_id)]
+    assert len(new) == 202 and abs(new.capacity_mw.sum() - 5538.4) < 0.05
+    assert abs(new[new.retire_year == 2050].capacity_mw.sum() - 5483.4) < 0.05           # boundary units (X10 count 200 + 2 geothermal 40 a)
+
+
+@pytest.mark.parametrize("sfx", ["", "_V5"])
+def test_coverage_and_unresolved_tables(sfx):
+    cov = pd.read_csv(FV / f"FLEET_COVERAGE_GEM_2026_BY_COUNTRY_TYPE{sfx}.csv")
     assert (cov.survives_2050_missing_mw <= cov.survives_2050_mw + 1e-6).all()
     assert (cov.matched_in_network_mw <= cov.gem_operating_mw + cov.gem_construction_mw + 1e-6).all()
-    add = pd.read_csv(FV / "FLEET_ADDITIONS_2050.csv"); unres = pd.read_csv(FV / "FLEET_UNRESOLVED_START_YEAR.csv")
+    add = pd.read_csv(FV / f"FLEET_ADDITIONS_2050{sfx}.csv"); unres = pd.read_csv(FV / "FLEET_UNRESOLVED_START_YEAR.csv")
     assert not set(add.gem_unit_id) & set(unres["GEM unit/phase ID"])                  # unresolved units are not added
     assert abs(cov.survives_2050_missing_mw.sum() - add.capacity_mw.sum()) < 1.0
     shares = pd.read_csv(FV / "GAS_PRODUCTION_NODE_SHARES_GEM.csv")

@@ -96,6 +96,29 @@ def record(n, s: dict, tables: dict | None = None, ledgers: dict | None = None, 
     return rec
 
 
+def in_service(start_year: float, lifetime: float, boundary: str, year: int = 2050) -> bool:
+    """V5 X20 (2-5): 2050 in-service rule of an existing unit - strict (S1 / v4): start <= year < start + lifetime; inclusive (v5 main): start + lifetime >= year."""
+    s, end = float(start_year), float(start_year) + float(lifetime)
+    if boundary not in ("strict", "inclusive"):
+        raise ValueError(f"lifetime boundary {boundary}")
+    return s <= year and (end >= year if boundary == "inclusive" else end > year)
+
+
+def s1_geothermal_in_service(survival_json, boundary: str, lifetime: int) -> list:
+    """V5 X20 (2-5): S1 geothermal records in service in 2050 under the rule (boundary, lifetime) - re-judged from CommissioningYear for the records S1
+    judged by age (SURVIVES_2050 / NOT_ACTIVE_2050); UNRESOLVED_COMMISSIONING and NOT_INHERITED_COMMITTED_OR_PLANNED stay out. With strict / 30 a this is
+    exactly the S1 SURVIVES_2050 set (3 records, 186 MW). Shared by s2_layers.geothermal_unit_table (S2 path) and s4a_2_fleet_data.py (GEM path exclusion)."""
+    S = json.loads(Path(survival_json).read_text())
+    out = []
+    for r in S["unit_evidence"]["records"]:
+        if r.get("Technology") != "Geothermal" or r.get("SurvivalStatus") not in ("SURVIVES_2050", "NOT_ACTIVE_2050"):
+            continue
+        if r.get("CommissioningYear") in (None, "") or not in_service(float(r["CommissioningYear"]), lifetime, boundary):
+            continue
+        out.append(r)
+    return out
+
+
 def check_network_meta_v5(meta: dict, cfg: dict) -> dict:
     """Before export: v5 disabled -> no v5_x20 record; enabled -> the recorded switch SHA256 = the configuration's."""
     s = switches(cfg)

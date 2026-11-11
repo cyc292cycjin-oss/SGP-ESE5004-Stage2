@@ -44,6 +44,14 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
         n.meta["research_fleet"] = led
         return led
     table = Path(repo) / str(F.get("table", "research_inputs/fleet_v5/FLEET_ADDITIONS_2050.csv"))
+    import v5_common as V5
+    s5 = V5.switches(cfg)
+    rule = (s5["lifetime_boundary"], int(s5["geothermal_existing_lifetime"]))
+    if s5["enabled"] and rule != ("strict", 30):   # V5 X20 (2-5, decisions 244, 246 Q2 (b)): GEM additions of the v5 lifetime rule (s4a_2_fleet_data.py --v5-out)
+        table = table.with_name(table.stem + ("_V5" if rule == ("inclusive", 40) else f"_V5_{rule[0]}_L{rule[1]}") + table.suffix)
+        if not table.exists():
+            raise FileNotFoundError(f"{table} missing: run scripts_project/s4a_2_fleet_data.py --boundary {rule[0]} --geothermal-lifetime {rule[1]} --v5-out")
+        led["v5_lifetime_rule"] = list(rule)
     df = pd.read_csv(table, keep_default_na=False)
     df["capacity_mw"] = df.capacity_mw.astype(float); df["start_year"] = df.start_year.astype(float)
     df["batch"] = "S4A"; df["age_basis"] = "SOURCE_UNIT_YEAR"

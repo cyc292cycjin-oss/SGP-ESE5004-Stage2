@@ -9,6 +9,15 @@ the same country (great circle). Performance parameters: technology-data v0.15.0
 (geothermal, grade C) -> hydro / ROR / PHS time-series proxies from the node or country existing units (grade C).
 
     python scripts_project/s4a_2_fleet_data.py --network results_project/s3b/smoke/builds/integrated/integrated_2920_3h_unsolved.nc
+
+V5 X20 (2-5, decisions 241, 244, 246 Q2 (b)): --boundary inclusive (start year + lifetime >= 2050 in service) and --geothermal-lifetime 40
+(research.demand.v5.lifetime_boundary / geothermal_existing_lifetime) with --v5-out write FLEET_ADDITIONS_2050_V5.csv (+ coverage, evidence;
+other combinations _V5_<boundary>_L<life>); the v4 tables, the registry fragment and the gas tables are not written (the gas, unresolved and
+not-operating tables are recomputed and must equal the committed ones). The "in network" identity set = the network identities plus the S1
+geothermal records that the S2 path adds under the same rule (s2_layers.geothermal_unit_table, v5_common.s1_geothermal_in_service), so that
+no geothermal unit enters through both paths; with the electric base as --network and the strict / 30 a rule this is the 748-identity set of
+the original S4A-2 run (745 electric-base identities + 3 S1 geothermal survivors). --out-dir writes every table (and the fragment) elsewhere
+(reproduction check of the committed v4 tables).
 """
 from __future__ import annotations
 
@@ -24,6 +33,7 @@ from d1_common import ASEAN, REG_DIR, ROOT, SRC_DIR, Registry, read_csv, sha256,
 
 SCRIPT = "scripts_project/s4a_2_fleet_data.py"
 OUT = ROOT / "research_inputs/fleet_v5"
+S1_SURVIVAL = ROOT / "research/06_scope_redesign/p1_step1_20261015/evidence/S1_SELECTED_ASSET_SURVIVAL_2050.json"   # = results_project/s1 copy (SHA256 b32602a3)
 GIPT = "GEM_GIPT_2026-09_ASEAN11.csv"
 GOGET_FIELDS = "GEM_GOGET_2026-03_ASEAN_fields.csv"
 GOGET_PROD = "GEM_GOGET_2026-03_ASEAN_gas_production.csv"
@@ -79,22 +89,53 @@ def nearest_node(nodes, country, lat, lon):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--network", type=Path, required=True); ap.add_argument("--include-construction", type=int, default=1)
-    a = ap.parse_args(); OUT.mkdir(parents=True, exist_ok=True)
+    ap.add_argument("--boundary", choices=("strict", "inclusive"), default="strict", help="V5 X20 (2-5): strict = start + lifetime > 2050 (S1 rule) | inclusive = >= 2050")
+    ap.add_argument("--geothermal-lifetime", type=int, choices=(30, 40), default=30, help="V5 X20 (2-5): existing geothermal lifetime, a (30 = S1-3)")
+    ap.add_argument("--s1-survival", type=Path, default=S1_SURVIVAL, help="S1 survival JSON (geothermal records of the S2 path)")
+    ap.add_argument("--v5-out", action="store_true", help="V5 X20: write the _V5 tables only (needs a rule other than strict / 30 a)")
+    ap.add_argument("--out-dir", type=Path, default=None, help="write every table and the registry fragment into this folder (reproduction check)")
+    a = ap.parse_args()
+    from v5_common import s1_geothermal_in_service
+    rule = (a.boundary, int(a.geothermal_lifetime))
+    if a.v5_out and rule == ("strict", 30):
+        raise SystemExit("--v5-out needs --boundary inclusive or --geothermal-lifetime 40 (strict / 30 a = the v4 tables)")
+    od = a.out_dir or OUT; od.mkdir(parents=True, exist_ok=True)
+    sfx = "" if not a.v5_out else ("_V5" if rule == ("inclusive", 40) else f"_V5_{a.boundary}_L{a.geothermal_lifetime}")
+    life_tab = dict(LIFETIME, Geothermal=int(a.geothermal_lifetime))
     gem = pd.read_csv(SRC_DIR / GIPT, low_memory=False); gem_sha = src_sha(GIPT)
     n = pypsa.Network(str(a.network)); nodes = n.buses[n.buses.carrier == "AC"][["x", "y", "country"]]
     ids = pd.DataFrame(n.meta["existing_unit_components"]).T; ids["gem_id"] = ids.index.str.replace("GEM:", "", regex=False)
     ids["node_country"] = ids.node.map(n.buses.country)
+    # V5 X20 (2-5): S1 geothermal records added by the S2 path under the same rule count as in the network (one path per unit)
+    geo_s2 = s1_geothermal_in_service(a.s1_survival, a.boundary, int(a.geothermal_lifetime))
+    geo_ids = {str(r["AssetID"]).replace("GEM:", "") for r in geo_s2}
+    in_net_ids = set(ids.gem_id) | geo_ids
     op = gem[gem.Status.isin(["operating", "construction"])].copy()
-    op["s1_fuel"] = op.apply(s1_fuel, axis=1); op["lifetime"] = op.s1_fuel.map(LIFETIME)
+    op["s1_fuel"] = op.apply(s1_fuel, axis=1); op["lifetime"] = op.s1_fuel.map(life_tab)
     op["retire_year"] = op["Start year"] + op.lifetime
-    op["in_network"] = op["GEM unit/phase ID"].isin(set(ids.gem_id))
-    op["age_status"] = np.where(op["Start year"].isna(), "UNRESOLVED_COMMISSIONING", np.where(op.retire_year > 2050, "SURVIVES_2050", "NOT_ACTIVE_2050"))
+    op["in_network"] = op["GEM unit/phase ID"].isin(in_net_ids)
+    survives = (op.retire_year >= 2050) if a.boundary == "inclusive" else (op.retire_year > 2050)
+    op["age_status"] = np.where(op["Start year"].isna(), "UNRESOLVED_COMMISSIONING", np.where(survives, "SURVIVES_2050", "NOT_ACTIVE_2050"))
     op["model_class"] = op.apply(model_class, axis=1)
     mapped = op.apply(lambda r: nearest_node(nodes, r.iso, r.Latitude, r.Longitude), axis=1, result_type="expand"); op["node"] = mapped[0]; op["node_distance_km"] = mapped[1]
     # reverse check: network identities whose GEM unit is no longer operating/construction in the 2026-09 tracker
     gem_status = gem.set_index("GEM unit/phase ID").Status
     ids["gipt_status_2026"] = ids.gem_id.map(gem_status).fillna("not in GIPT")
     rev = ids[~ids.gipt_status_2026.isin(["operating", "construction"])]
+    import filecmp
+    import shutil
+    import tempfile
+    chk = Path(tempfile.mkdtemp(prefix="s4a2_v5check_")) if a.v5_out else None
+
+    def put(name, recs, cols, fixed=False):
+        """v4 run: write od/name. --v5-out: rule-dependent tables -> od/<name>_V5..., fixed tables recomputed and compared with the committed file."""
+        if not a.v5_out:
+            write_csv(recs, od / name, cols); return
+        if not fixed:
+            write_csv(recs, od / name.replace(".csv", f"{sfx}.csv"), cols); return
+        p = chk / name; write_csv(recs, p, cols)
+        if not filecmp.cmp(p, OUT / name, shallow=False):
+            raise SystemExit(f"V5 X20 (2-5): {name} changes under the rule {rule}; it must stay the committed table")
     # coverage table (today and 2050)
     rows = []
     for (t, c), d in op.groupby(["Type", "iso"]):
@@ -103,7 +144,7 @@ def main():
                          matched_in_network_mw=d.loc[d.in_network, "Capacity (MW)"].sum(), coverage_today=(d.loc[d.in_network & (d.Status == "operating"), "Capacity (MW)"].sum() / d.loc[d.Status == "operating", "Capacity (MW)"].sum()) if d.loc[d.Status == "operating", "Capacity (MW)"].sum() else np.nan,
                          survives_2050_mw=surv["Capacity (MW)"].sum(), survives_2050_in_network_mw=surv.loc[surv.in_network, "Capacity (MW)"].sum(), survives_2050_missing_mw=surv.loc[~surv.in_network, "Capacity (MW)"].sum(),
                          survives_2050_missing_construction_mw=surv.loc[~surv.in_network & (surv.Status == "construction"), "Capacity (MW)"].sum(), unresolved_mw=d.loc[d.age_status == "UNRESOLVED_COMMISSIONING", "Capacity (MW)"].sum(), unresolved_units=int((d.age_status == "UNRESOLVED_COMMISSIONING").sum())))
-    cov = pd.DataFrame(rows).round(1); write_csv(cov.to_dict("records"), OUT / "FLEET_COVERAGE_GEM_2026_BY_COUNTRY_TYPE.csv", list(cov.columns))
+    cov = pd.DataFrame(rows).round(1); put("FLEET_COVERAGE_GEM_2026_BY_COUNTRY_TYPE.csv", cov.to_dict("records"), list(cov.columns))
     # additions: surviving, not in network, resolved age, (construction optional)
     add = op[(op.age_status == "SURVIVES_2050") & ~op.in_network & op.node.notna()].copy()
     if not a.include_construction:
@@ -115,10 +156,11 @@ def main():
     cols = ["GEM unit/phase ID", "GEM location ID", "Plant / Project name", "Unit / Phase name", "iso", "Type", "Technology", "Fuel (combustion only)", "Status", "Capacity (MW)", "Start year", "s1_fuel", "lifetime", "retire_year", "model_class", "Latitude", "Longitude", "Location accuracy", "node", "node_distance_km", "param_source", "GEM.Wiki URL"]
     add = add[cols].rename(columns={"GEM unit/phase ID": "gem_unit_id", "GEM location ID": "gem_location_id", "Plant / Project name": "plant", "Unit / Phase name": "unit", "iso": "country", "Capacity (MW)": "capacity_mw", "Start year": "start_year", "Fuel (combustion only)": "fuel", "Location accuracy": "location_accuracy", "GEM.Wiki URL": "gem_wiki_url"})
     add = add.sort_values(["country", "model_class", "capacity_mw"], ascending=[True, True, False])
-    write_csv(add.to_dict("records"), OUT / "FLEET_ADDITIONS_2050.csv", list(add.columns))
+    put("FLEET_ADDITIONS_2050.csv", add.to_dict("records"), list(add.columns))
     unres = op[(op.age_status == "UNRESOLVED_COMMISSIONING") & ~op.in_network][["GEM unit/phase ID", "Plant / Project name", "Unit / Phase name", "iso", "Type", "Technology", "Status", "Capacity (MW)", "GEM.Wiki URL"]]
-    write_csv(unres.to_dict("records"), OUT / "FLEET_UNRESOLVED_START_YEAR.csv", list(unres.columns))
-    write_csv(rev.reset_index().rename(columns={"index": "identity"})[["identity", "component", "capacity_mw", "node", "gipt_status_2026", "source"]].to_dict("records"), OUT / "FLEET_NETWORK_UNITS_NOT_OPERATING_IN_GIPT_2026.csv", ["identity", "component", "capacity_mw", "node", "gipt_status_2026", "source"])
+    put("FLEET_UNRESOLVED_START_YEAR.csv", unres.to_dict("records"), list(unres.columns), fixed=True)
+    put("FLEET_NETWORK_UNITS_NOT_OPERATING_IN_GIPT_2026.csv", rev.reset_index().rename(columns={"index": "identity"})[["identity", "component", "capacity_mw", "node", "gipt_status_2026", "source"]].to_dict("records"),
+        ["identity", "component", "capacity_mw", "node", "gipt_status_2026", "source"], fixed=True)
     # ---- gas fields (S3 section 11 item 8) ----
     fields = pd.read_csv(SRC_DIR / GOGET_FIELDS); prod = pd.read_csv(SRC_DIR / GOGET_PROD)
     latest = prod.sort_values("Data Year").groupby("Unit ID").tail(1)
@@ -127,15 +169,15 @@ def main():
     latest = latest[latest.node.notna()]
     latest["share_in_country"] = latest["Quantity (converted)"] / latest.groupby("iso")["Quantity (converted)"].transform("sum")
     gf = latest[["Unit ID", "Unit Name", "iso", "Status", "Quantity (converted)", "Data Year", "Latitude", "Longitude", "Onshore/Offshore", "node", "node_distance_km", "share_in_country"]].rename(columns={"Unit ID": "gem_unit_id", "Unit Name": "field", "iso": "country", "Quantity (converted)": "production_mcm_per_y", "Data Year": "data_year"})
-    write_csv(gf.sort_values(["country", "share_in_country"], ascending=[True, False]).to_dict("records"), OUT / "GAS_FIELD_NODE_ALLOCATION.csv", list(gf.columns))
+    put("GAS_FIELD_NODE_ALLOCATION.csv", gf.sort_values(["country", "share_in_country"], ascending=[True, False]).to_dict("records"), list(gf.columns), fixed=True)
     node_share = gf.groupby(["country", "node"]).share_in_country.sum().reset_index()
     covrows = []
     for c, cap in UNSD_GAS_CAP_TWH.items():
         s = float(gf[gf.country == c].production_mcm_per_y.sum()); twh = s / 1e3 * MW_PER_BCM_Y_GCV * 8760 * GCV_TO_NCV / 1e6
         covrows.append(dict(country=c, gem_fields_with_production=int((gf.country == c).sum()), gem_latest_production_bcm=s / 1e3, gem_production_twh_ncv=twh, unsd_2019_cap_twh=cap, coverage_ratio=twh / cap if cap else np.nan,
                             nodes_with_fields=int(node_share[node_share.country == c].node.nunique()), allocation=("gem_fields" if (gf.country == c).sum() else "load_shares (no GEM field with production; DATA_PENDING)")))
-    write_csv(covrows, OUT / "GAS_FIELD_COVERAGE_VS_UNSD.csv", list(covrows[0].keys()))
-    write_csv(node_share.to_dict("records"), OUT / "GAS_PRODUCTION_NODE_SHARES_GEM.csv", ["country", "node", "share_in_country"])
+    put("GAS_FIELD_COVERAGE_VS_UNSD.csv", covrows, list(covrows[0].keys()), fixed=True)
+    put("GAS_PRODUCTION_NODE_SHARES_GEM.csv", node_share.to_dict("records"), ["country", "node", "share_in_country"], fixed=True)
     # ---- registry ----
     reg = Registry(SCRIPT); src = f"zip:{ZIP_SHA}|gipt:{GIPT_XLSX_SHA}|extraction:{gem_sha}"
     reg.add("fleet_gem_gipt_source", "GEM Global Integrated Power Tracker, September 2026 release (raw10 gem-data.zip), ASEAN-11 extraction (6,958 units); unit ID join with the network existing-unit identities", "Global Integrated Power September 2026.xlsx", "file", "A",
@@ -157,10 +199,17 @@ def main():
                 country=r["country"], decision_ref="43,L15", status=("REGISTERED" if r["gem_fields_with_production"] else "DATA_PENDING"),
                 # grade C below 50 % coverage: range = [GEM coverage, full coverage]; the load_shares switch is the alternative allocation
                 sensitivity_low=(r["coverage_ratio"] if r["coverage_ratio"] < 0.5 else None), sensitivity_high=(1.0 if r["coverage_ratio"] < 0.5 else None))
-    reg.write(REG_DIR / "fragments" / "fleet_s4a.csv")
-    write_json(dict(script=SCRIPT, sources=dict(gipt_csv=gem_sha, goget_fields=src_sha(GOGET_FIELDS), goget_prod=src_sha(GOGET_PROD)), include_construction=bool(a.include_construction),
-                    coverage_totals=tot.round(1).to_dict("index"), additions_by_class=add.groupby("model_class").capacity_mw.sum().round(1).to_dict(), additions_units=int(len(add)),
-                    reverse_check_units=int(len(rev)), reverse_check_mw=float(rev.capacity_mw.sum()), gas_coverage=covrows), OUT / "FLEET_S4A_EVIDENCE.json")
+    if not a.v5_out:   # V5 X20: the v5 rows go to the v5_x20 fragment (scripts_project/v5_x20_registry.py)
+        reg.write((od if a.out_dir else REG_DIR / "fragments") / "fleet_s4a.csv")
+    ev = dict(script=SCRIPT, sources=dict(gipt_csv=gem_sha, goget_fields=src_sha(GOGET_FIELDS), goget_prod=src_sha(GOGET_PROD)), include_construction=bool(a.include_construction),
+              coverage_totals=tot.round(1).to_dict("index"), additions_by_class=add.groupby("model_class").capacity_mw.sum().round(1).to_dict(), additions_units=int(len(add)),
+              reverse_check_units=int(len(rev)), reverse_check_mw=float(rev.capacity_mw.sum()), gas_coverage=covrows)
+    if a.v5_out:
+        ev.update(v5_x20=dict(boundary=a.boundary, geothermal_lifetime=int(a.geothermal_lifetime), network=str(a.network), network_identities=int(len(ids)),
+                              s1_geothermal_s2_path=dict(units=sorted(geo_ids), mw=float(sum(float(r["OriginalCapacity"]) for r in geo_s2))),
+                              in_network_identities=int(len(in_net_ids)), additions_mw=float(add.capacity_mw.sum()), fixed_tables_unchanged=True))
+        shutil.rmtree(chk)
+    write_json(ev, od / f"FLEET_S4A_EVIDENCE{sfx}.json")
     pd.set_option("display.width", 250); pd.set_option("display.max_rows", 200)
     print(tot.round(0).to_string()); print("additions by class MW"); print(add.groupby(["model_class"]).capacity_mw.sum().round(0).to_string()); print("by country"); print(add.groupby(["country", "model_class"]).capacity_mw.sum().unstack(fill_value=0).round(0).to_string())
     print("reverse check: network units not operating/construction in GIPT 2026:", len(rev), round(float(rev.capacity_mw.sum())), "MW"); print(rev.gipt_status_2026.value_counts().to_dict())
