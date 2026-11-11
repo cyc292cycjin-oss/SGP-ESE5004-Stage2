@@ -105,6 +105,10 @@ def add_gem_fleet(n, costs, cfg, repo: Path):
         elif cls in ("solar existing", "onwind existing", "offwind existing"):
             tech = {"solar existing": "solar", "onwind existing": "onwind", "offwind existing": "offwind"}[cls]
             cand = {"solar existing": f"{node} solar-2025", "onwind existing": f"{node} onwind-2025", "offwind existing": f"{node} offwind-ac-2025"}[cls]
+            if s5["enabled"]:   # V5 X20 (1-2, decision 241; Q12, decision 246): best class for existing wind, the Q12 rule for existing solar
+                from v5_layers import existing_profile_column
+                cand, basis = existing_profile_column(n, node, cls, cfg)
+                led.setdefault("v5_profile_class", []).append(dict(component=name, cls=cls, mw=mw, column=cand, basis=basis))
             if cand not in n.generators_t.p_max_pu.columns:
                 led["skipped"].append(dict(node=node, cls=cls, mw=mw, reason="no candidate profile " + cand)); continue
             fom = cost(costs, tech, "FOM") / 100.0 * cost(costs, tech, "investment"); vom = cost(costs, tech, "VOM")

@@ -357,3 +357,24 @@ def test_profile_variant_switch():
     c5e = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True, "onwind_calibration": "ember_country"}})}
     assert apply_renewable_profiles(n, c5e, ROOT)["profile_variant"] == "calibrated_modern"
     assert np.isfinite(led5["solar_density"]["scale"])
+
+
+# ---- 1-2 existing wind on the best class, Q12 existing solar profile (decisions 241, 246) ------------------------------------------
+def test_existing_profile_column():
+    import v5_layers as L
+    n = toy()
+    cols = ["A 0 onwind-2025", "A 0 onwind-2025 c1", "A 0 onwind-2025 c2", "A 0 offwind-ac-2025", "A 0 offwind-ac-2025 c1", "A 0 solar-2025", "A 0 solar-2025 c1",
+            "A 0 solar-2025 c2", "A 0 solar rooftop-2025", "A 1 onwind-2025", "A 1 solar-2025"]
+    for c in cols:
+        n.add("Generator", c, bus="A 0", carrier="x")
+    n.generators_t.p_max_pu = pd.DataFrame(0.3, index=n.snapshots, columns=cols)
+    f = L.existing_profile_column
+    assert f(n, "A 0", "onwind existing", cfg())[0] == "A 0 onwind-2025"                                            # v5 off: class 0
+    assert f(n, "A 0", "onwind existing", cfg({"enabled": True}))[0] == "A 0 onwind-2025 c2"                         # best class
+    assert f(n, "A 0", "offwind existing", cfg({"enabled": True}))[0] == "A 0 offwind-ac-2025 c1"                   # falls back to the highest present class
+    assert f(n, "A 1", "onwind existing", cfg({"enabled": True})) == ("A 1 onwind-2025", "class 0 (no higher class at the node)")
+    assert f(n, "A 0", "onwind existing", cfg({"enabled": True, "existing_wind_profile": "class0"}))[0] == "A 0 onwind-2025"
+    assert f(n, "A 0", "solar existing", cfg({"enabled": True, "existing_solar_profile": "node_average"}))[0] == "A 0 solar rooftop-2025"
+    assert f(n, "A 0", "solar existing", cfg({"enabled": True, "existing_solar_profile": "best_class"}))[0] == "A 0 solar-2025 c2"
+    assert f(n, "A 1", "solar existing", cfg({"enabled": True, "existing_solar_profile": "node_average"}))[0] == "A 1 solar-2025"   # no rooftop column
+    assert f(n, "A 0", "solar existing", cfg({"enabled": True, "existing_solar_profile": "class0"}))[0] == "A 0 solar-2025"

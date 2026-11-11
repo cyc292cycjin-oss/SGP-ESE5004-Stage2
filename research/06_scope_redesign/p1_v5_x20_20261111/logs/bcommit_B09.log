@@ -1,0 +1,80 @@
+== staged
+ .../evidence/HYDRO_SPILL_V4_W14_F2.json            |  86 ++
+ .../evidence/WIND_EFFECTIVE_MULTIPLIER_V4_A_B.csv  |  34 +
+ .../logs/45_extract_v4_solved.log                  |   5 +
+ .../logs/47_calib_v5_and_multiplier.log            |  64 ++
+ .../logs/48_onwind_profiles_c1.log                 |   8 +
+ .../logs/48_onwind_profiles_c3.log                 |   8 +
+ .../logs/49_hydro_spill_regression.log             |   9 +
+ .../p1_v5_x20_20261111/logs/50_export_gwa_v5.log   |  17 +
+ .../p1_v5_x20_20261111/logs/bcommit_B08.log        |  36 +
+ .../p1_v5_x20_20261111/logs/bcommit_B09.log        |   0
+ .../p1_v5_x20_20261111/logs/push_last.log          |   2 +-
+ .../p1_v5_x20_20261111/logs/ut_i11b.txt            |  34 +
+ .../scripts/47_calib_v5_and_multiplier.sh          |  29 +
+ .../scripts/48_onwind_profiles.sh                  |  32 +
+ .../scripts/49_hydro_spill_regression.sh           |  18 +
+ .../p1_v5_x20_20261111/scripts/50_export_gwa_v5.sh |  12 +
+ .../p1_v5_x20_20261111/scripts/commit_msg_B09.txt  |  33 +
+ .../p1_v5_x20_20261111/scripts/force_add.txt       |  12 +
+ research_inputs/renewable_v5/MANIFEST_V5.json      |  30 +
+ .../S4A_PROFILE_CLASSES_calibrated_gwa_v5_c1.csv   | 331 +++++++
+ .../S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv   | 982 +++++++++++++++++++++
+ .../S4B3_PROFILES_LOG_calibrated_gwa_v5_c1.json    | 161 ++++
+ .../S4B3_PROFILES_LOG_calibrated_gwa_v5_c3.json    | 161 ++++
+ .../renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv     |  12 +
+ .../renewable_v5/WIND_CALIBRATION_S4B3_V5.json     | 672 ++++++++++++++
+ .../renewable_v5/WIND_EFFECTIVE_MULTIPLIER_V5.csv  |  12 +
+ .../renewable_v5/WIND_EFFECTIVE_MULTIPLIER_V5.json |  19 +
+ .../renewable_v5/WIND_FARMS_MODEL_CF_2013_V5.csv   | 157 ++++
+ .../profiles_calibrated_gwa_v5_c1_3h.nc            | Bin 0 -> 3089996 bytes
+ .../profiles_calibrated_gwa_v5_c3_3h.nc            | Bin 0 -> 8678865 bytes
+ scripts_project/s2_network.py                      |   6 +
+ scripts_project/s4a_layers.py                      |  19 +-
+ scripts_project/s4a_profiles.py                    |  31 +-
+ scripts_project/s4b_3_export.py                    |  37 +
+ scripts_project/s4b_3_wind_calibration.py          |  10 +-
+ scripts_project/v5_layers.py                       |   4 +-
+ scripts_project/v5_wind_effective_multiplier.py    | 103 +++
+ tests/research/test_s4a_profiles.py                |   2 +-
+ tests/research/test_v5_x20.py                      |  72 ++
+ 41 files changed, 3334 insertions(+), 16 deletions(-)
+== untracked / ignored new files under research_inputs (not staged)
+!! research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv
+!! research_inputs/finance_v5/DISCOUNT_RATE_IN_USE.csv
+[asean/v5-x20-20261111 5536c9bd] X20 1-1 part 2 (decisions 241, 246 Q1 (b), 251): farm-point alpha, effective-multiplier bound, calibrated_gwa_v5 profiles
+ 41 files changed, 3334 insertions(+), 16 deletions(-)
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/evidence/HYDRO_SPILL_V4_W14_F1.json
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/evidence/HYDRO_SPILL_V4_W14_F2.json
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/evidence/WIND_EFFECTIVE_MULTIPLIER_V4_A_B.csv
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/47_calib_v5_and_multiplier.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/48_onwind_profiles_c1.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/48_onwind_profiles_c3.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/49_hydro_spill_regression.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/50_export_gwa_v5.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/bcommit_B09.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_i11b.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/47_calib_v5_and_multiplier.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/48_onwind_profiles.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/49_hydro_spill_regression.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/50_export_gwa_v5.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/commit_msg_B09.txt
+ create mode 100644 research_inputs/renewable_v5/MANIFEST_V5.json
+ create mode 100644 research_inputs/renewable_v5/S4A_PROFILE_CLASSES_calibrated_gwa_v5_c1.csv
+ create mode 100644 research_inputs/renewable_v5/S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv
+ create mode 100644 research_inputs/renewable_v5/S4B3_PROFILES_LOG_calibrated_gwa_v5_c1.json
+ create mode 100644 research_inputs/renewable_v5/S4B3_PROFILES_LOG_calibrated_gwa_v5_c3.json
+ create mode 100644 research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv
+ create mode 100644 research_inputs/renewable_v5/WIND_CALIBRATION_S4B3_V5.json
+ create mode 100644 research_inputs/renewable_v5/WIND_EFFECTIVE_MULTIPLIER_V5.csv
+ create mode 100644 research_inputs/renewable_v5/WIND_EFFECTIVE_MULTIPLIER_V5.json
+ create mode 100644 research_inputs/renewable_v5/WIND_FARMS_MODEL_CF_2013_V5.csv
+ create mode 100644 research_inputs/renewable_v5/profiles_calibrated_gwa_v5_c1_3h.nc
+ create mode 100644 research_inputs/renewable_v5/profiles_calibrated_gwa_v5_c3_3h.nc
+ create mode 100644 scripts_project/v5_wind_effective_multiplier.py
+HEAD 5536c9bd170b7e442a8a73fea3b1976ade13270c X20 1-1 part 2 (decisions 241, 246 Q1 (b), 251): farm-point alpha, effective-multiplier bound, calibrated_gwa_v5 profiles
+To https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2.git
+   b994c729..5536c9bd  asean/v5-x20-20261111 -> asean/v5-x20-20261111
+branch 'asean/v5-x20-20261111' set up to track 'origin/asean/v5-x20-20261111'.
+push_exit=0
+5536c9bd170b7e442a8a73fea3b1976ade13270c	refs/heads/asean/v5-x20-20261111

@@ -1,0 +1,19 @@
+X20 1-2 (decision 241) and Q12 mechanism (decision 246): profile class of existing wind / solar
+
+research.demand.v5.existing_wind_profile: best_class (v5 main) | class0
+(v4); existing_solar_profile: node_average | best_class | class0 (the Q12
+choice between node_average and best_class is computed on a v5 2920x3h
+build with the rule fixed in X20_SPEC_ADDENDUM_246.md section 3; the
+listed main value is a placeholder until then).
+
+v5_layers.existing_profile_column: best class = the highest '<base> c{k}'
+column at the node, falling back class by class to class 0; node average
+(solar) = the column of '<node> solar rooftop-2025', which s4a_layers fills
+with the c1 node solar profile of the variant. s4a_fleet.add_gem_fleet
+copies that column for every existing wind / solar component when v5 is
+enabled and lists component, column and basis in the fleet ledger (n.meta
+v5_x20). W14 has 13 existing wind components (11 onshore, 2 offshore) and
+12 existing solar components, all GEM additions, each node with c2 and
+rooftop columns. Targeted tests: 44 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

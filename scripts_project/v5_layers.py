@@ -141,3 +141,24 @@ def hydro_spill_report(n) -> dict:
     rep = hydro_spill_tables(su, n.storage_units_t.inflow, n.storage_units_t.spill, n.snapshot_weightings.generators.values, su.bus.map(n.buses.country))
     rep["new_hydro_inflow_tie_units"] = sorted(n.meta.get("research_new_hydro_inflow_tie", []))
     return rep
+
+
+def existing_profile_column(n, node: str, cls: str, cfg) -> tuple[str, str]:
+    """1-2 (decision 241) and Q12 (decision 246): candidate column whose p_max_pu an existing wind / solar component copies (s4a_fleet.add_gem_fleet).
+    class0 (v4): '<node> onwind-2025' / '<node> offwind-ac-2025' / '<node> solar-2025' = class 0, the worst class after the class split;
+    best_class: the highest class column '<base> c{k}' present at the node (falling back class by class to class 0);
+    node_average (solar, Q12): the one-class node profile of the variant, i.e. the column of '<node> solar rooftop-2025' (s4a_layers gives rooftop PV the
+    c1 node solar profile); falls back to class 0 when the node has no rooftop column. Returns (column, basis)."""
+    s = switches(cfg)
+    base = {"solar existing": f"{node} solar-2025", "onwind existing": f"{node} onwind-2025", "offwind existing": f"{node} offwind-ac-2025"}[cls]
+    rule = s["existing_solar_profile"] if cls == "solar existing" else s["existing_wind_profile"]
+    cols = n.generators_t.p_max_pu.columns
+    if not s["enabled"] or rule == "class0":
+        return base, "class 0"
+    if rule == "node_average":
+        roof = f"{node} solar rooftop-2025"
+        return (roof, "node average (c1 node profile = rooftop column)") if roof in cols else (base, "class 0 (no node-average column at the node)")
+    for k in range(9, 0, -1):
+        if f"{base} c{k}" in cols:
+            return f"{base} c{k}", f"best class c{k}"
+    return base, "class 0 (no higher class at the node)"
