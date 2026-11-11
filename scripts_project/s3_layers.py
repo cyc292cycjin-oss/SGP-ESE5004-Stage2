@@ -14,6 +14,8 @@ WEO scenario of the gas and oil prices (S4C-0, decision 85): research.fuels.pric
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -109,8 +111,18 @@ def add_gas_network(n, costs, cfg, repo, registry: pd.DataFrame, nodes, candidat
     ensure_carrier(n, "gas wellhead"); ensure_carrier(n, "gas production"); ensure_carrier(n, "gas production delivery")
     n.meta.setdefault("external_annual_caps", {})
     prod_led = {}
+    import v5_common as V5
+    s5 = V5.switches(cfg); gas_frac = None
+    if s5["enabled"] and s5["gas_cap_rule"] != "marketed":   # V5 X20 (2-3, decision 244): country fraction of the v4 cap (GAS_CAP_FRACTIONS_V5.csv); the v4 table is unchanged
+        fr = pd.read_csv(Path(repo) / "research_inputs/gas_v5/GAS_CAP_FRACTIONS_V5.csv").set_index("country")
+        gas_frac = fr["rule_b_field_status" if s5["gas_cap_rule"] == "field_status" else "rule_a_reserve_average"].astype(float).to_dict()
+        led["v5_gas_cap_rule"] = dict(rule=s5["gas_cap_rule"], table="research_inputs/gas_v5/GAS_CAP_FRACTIONS_V5.csv", fractions=gas_frac)
     for r in caps.itertuples():
         cap = float(r.cap_mwh_per_year); c = r.country
+        if gas_frac is not None:
+            if c not in gas_frac:
+                raise ValueError(f"V5 X20 2-3: no gas cap fraction for {c}")
+            cap = cap * gas_frac[c]   # a fraction 0 leaves cap 0: no wellhead generators, no annual cap row (the existing cap <= 0 branch)
         fid = r.fugitive_factor_id
         if cap <= 0 or c not in shares:
             prod_led[c] = dict(cap_mwh=cap, nodes=0, fugitive_t_per_mwh=None, note="no domestic production (cap 0) -> no wellhead generators; fugitive row not applicable")

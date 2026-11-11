@@ -30,7 +30,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     g = pd.read_csv(a.x10); g = g[g.country != "ASEAN"]
     h_csv = hashlib.sha256(a.x10.read_bytes()).hexdigest(); h_rep = hashlib.sha256(a.x10_report.read_bytes()).hexdigest()
-    t = pd.DataFrame(dict(country=g.country, rule_a_reserve_average=g.ruleA_fraction_reserve_average, rule_b_field_status=g.ruleB_fraction_field_status)   # full precision of the X10 table)
+    t = pd.DataFrame(dict(country=g.country, rule_a_reserve_average=g.ruleA_fraction_reserve_average, rule_b_field_status=g.ruleB_fraction_field_status))   # full precision of the X10 table
     t["note"] = t.country.map(NOTE).fillna("")
     t["source"] = f"X10 GAS_CAPS_BY_COUNTRY.csv sha256 {h_csv}; X10 REPORT.md sha256 {h_rep} section 2"
     t = t.sort_values("country")

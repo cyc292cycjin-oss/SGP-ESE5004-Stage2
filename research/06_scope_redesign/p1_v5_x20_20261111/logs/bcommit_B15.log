@@ -1,0 +1,70 @@
+== staged
+ .../p1_v5_x20_20261111/PROGRESS.md                 |   3 +-
+ .../evidence/NEU_GAS_PRODUCT_RULE_V5.csv           |   7 +
+ .../p1_v5_x20_20261111/logs/56_v4_tables_v5.log    |  32 +
+ .../logs/57_gas_cap_fractions.log                  |   4 +
+ .../p1_v5_x20_20261111/logs/58_neu_rule_table.log  |   8 +
+ .../p1_v5_x20_20261111/logs/bcommit_B14.log        |  36 +
+ .../p1_v5_x20_20261111/logs/bcommit_B15.log        |   0
+ .../p1_v5_x20_20261111/logs/push_last.log          |   2 +-
+ .../p1_v5_x20_20261111/logs/ut_i24.txt             |  59 ++
+ .../p1_v5_x20_20261111/logs/ut_i24b.txt            |  21 +
+ .../p1_v5_x20_20261111/scripts/56_v4_tables_v5.sh  |  23 +
+ .../scripts/58_neu_rule_table.py                   |  26 +
+ .../p1_v5_x20_20261111/scripts/commit_msg_B15.txt  |  31 +
+ .../p1_v5_x20_20261111/scripts/force_add.txt       |   4 +-
+ ...D_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv | 386 ++++++++++
+ .../out_ras_v5/DEMAND_ANCHOR_AEO8_ATS.csv          |  12 +
+ .../out_ras_v5/DEMAND_ANCHOR_C3_DEVIATION.csv      |   6 +
+ .../out_ras_v5/DEMAND_ANCHOR_M08B_EVIDENCE.json    | 454 ++++++++++++
+ .../FEEDSTOCK_CARBON_TERRITORIAL_2050_V4.csv       |  12 +
+ .../INDUSTRY_2050_SUBSECTOR_CARRIER_V4.csv         | 244 +++++++
+ .../out_ras_v5/INDUSTRY_2050_SUMMARY_V4.csv        |  12 +
+ .../out_ras_v5/INDUSTRY_CARRIER_NODE_SHARES_V4.csv | 800 +++++++++++++++++++++
+ .../out_ras_v5/INDUSTRY_CURVE_WEIGHTS_V4.csv       | 274 +++++++
+ .../out_ras_v5/INDUSTRY_OUTPUT_2050_M08B.csv       |  12 +
+ .../out_ras_v5/PROCESS_EMISSIONS_2050_V4.csv       |  34 +
+ .../industry_v4/out_ras_v5/SNAPSHOT.json           |   1 +
+ .../industry_v4/out_ras_v5/V4_SWITCHES.json        | 358 +++++++++
+ scripts_project/m08b_demand.py                     |  28 +-
+ scripts_project/v4_industry.py                     |  13 +-
+ scripts_project/v5_gas_cap_data.py                 |  43 ++
+ tests/research/test_v4_d2a_fixes.py                |   4 +-
+ tests/research/test_v5_x20.py                      |  23 +
+ 32 files changed, 2960 insertions(+), 12 deletions(-)
+== untracked / ignored new files under research_inputs (not staged)
+!! research_inputs/finance_v5/COUNTRY_WACC_PUBLIC_SOURCES.csv
+!! research_inputs/finance_v5/DISCOUNT_RATE_IN_USE.csv
+[asean/v5-x20-20261111 923878a5] X20 2-4 (decisions 244, 246; Q7): NEU natural gas by product; v5 table folder out_ras_v5
+ 32 files changed, 2960 insertions(+), 12 deletions(-)
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/evidence/NEU_GAS_PRODUCT_RULE_V5.csv
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/56_v4_tables_v5.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/57_gas_cap_fractions.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/58_neu_rule_table.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/bcommit_B15.log
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_i24.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/logs/ut_i24b.txt
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/56_v4_tables_v5.sh
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/58_neu_rule_table.py
+ create mode 100644 research/06_scope_redesign/p1_v5_x20_20261111/scripts/commit_msg_B15.txt
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/DEMAND_2050_BY_COUNTRY_SECTOR_CARRIER_ATS_ANCHOR.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/DEMAND_ANCHOR_AEO8_ATS.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/DEMAND_ANCHOR_C3_DEVIATION.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/DEMAND_ANCHOR_M08B_EVIDENCE.json
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/FEEDSTOCK_CARBON_TERRITORIAL_2050_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/INDUSTRY_2050_SUBSECTOR_CARRIER_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/INDUSTRY_2050_SUMMARY_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/INDUSTRY_CARRIER_NODE_SHARES_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/INDUSTRY_CURVE_WEIGHTS_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/INDUSTRY_OUTPUT_2050_M08B.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/PROCESS_EMISSIONS_2050_V4.csv
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/SNAPSHOT.json
+ create mode 100644 research_inputs/industry_v4/out_ras_v5/V4_SWITCHES.json
+ create mode 100644 scripts_project/v5_gas_cap_data.py
+ mode change 100755 => 100644 tests/research/test_v4_d2a_fixes.py
+HEAD 923878a5c4173b37c6eed8b6363501ff8646c5e9 X20 2-4 (decisions 244, 246; Q7): NEU natural gas by product; v5 table folder out_ras_v5
+To https://github.com/cyc292cycjin-oss/SGP-ESE5004-Stage2.git
+   f25fa9b5..923878a5  asean/v5-x20-20261111 -> asean/v5-x20-20261111
+branch 'asean/v5-x20-20261111' set up to track 'origin/asean/v5-x20-20261111'.
+push_exit=0
+923878a5c4173b37c6eed8b6363501ff8646c5e9	refs/heads/asean/v5-x20-20261111

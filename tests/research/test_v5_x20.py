@@ -524,3 +524,14 @@ def test_out_ras_v5_tables():
     assert abs(b["MY"] - 183.502) < 1e-3                                                         # MY: 15.74 TWh ammonia part x 1.783, residual x 1.667, minus 28.06
     pa = (R / "out_ras/PROCESS_EMISSIONS_2050_V4.csv").read_bytes() == (R / "out_ras_v5/PROCESS_EMISSIONS_2050_V4.csv").read_bytes()
     assert pa                                                                                    # process emissions do not follow the NEU rows
+
+
+# ---- 2-3 gas production caps by field status (decision 244) -----------------------------------------------------------------------
+def test_gas_cap_fractions():
+    f = pd.read_csv(ROOT / "research_inputs/gas_v5/GAS_CAP_FRACTIONS_V5.csv").set_index("country")
+    caps = pd.read_csv(ROOT / "research_inputs/gas_v5/GAS_PRODUCTION_CAPS_2050_V4.csv").set_index("country").cap_mwh_per_year.astype(float)
+    assert set(caps.index) <= set(f.index) and f.rule_b_field_status.between(0, 1).all() and f.rule_a_reserve_average.between(0, 1).all()
+    assert f.rule_b_field_status.to_dict() == pytest.approx({"BN": 1, "ID": 1, "KH": 1, "LA": 1, "MM": 0.2, "MY": 1, "PH": 0, "SG": 1, "TH": 0.128852, "TL": 0, "VN": 1}, abs=1e-6)
+    b = (caps * f.rule_b_field_status.reindex(caps.index)) / 1e6; a = (caps * f.rule_a_reserve_average.reindex(caps.index)) / 1e6
+    assert abs(b.sum() - 1594.77) < 0.05 and abs(a.sum() - 930.79) < 0.05                       # X20_SPEC 1.10 table (rule B / rule A totals, TWh)
+    assert abs(b["MM"] - 36.93) < 0.01 and b["PH"] == 0.0 and b["TL"] == 0.0

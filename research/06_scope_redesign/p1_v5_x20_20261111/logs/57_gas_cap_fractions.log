@@ -1,4 +1,37 @@
-  File "/home/jin/wt_v5_x20/scripts_project/v5_gas_cap_data.py", line 33
-    t = pd.DataFrame(dict(country=g.country, rule_a_reserve_average=g.ruleA_fraction_reserve_average, rule_b_field_status=g.ruleB_fraction_field_status)   # full precision of the X10 table)
-                    ^
-SyntaxError: '(' was never closed
+country  rule_a_reserve_average  rule_b_field_status                                                                                      note        
+     BN                0.550868             1.000000                                                                                           X10 GAS
+     ID                0.554702             1.000000                                                                                           X10 GAS
+     KH                1.000000             1.000000                                                                                           X10 GAS
+     LA                1.000000             1.000000                                                                                           X10 GAS
+     MM                0.697472             0.200000   World Bank 2023: 2030 production below 1/5 of 2022; Yadana contract to 2028 (X10 LIT_A) X10 GAS
+     MY                0.374610             1.000000                                                                                           X10 GAS
+     PH                0.076246             0.000000                   Malampaya extended to about 2034, no proven successor field (X10 LIT_A) X10 GAS
+     SG                1.000000             1.000000                                                                                           X10 GAS
+     TH                0.128852             0.128852                  rule B = rule A: 31 years at the 2019 rate = 7.8 x proven reserves (X10) X10 GAS
+     TL                0.000000             0.000000 Bayu-Undan ceased production 2025-06-04; Greater Sunrise at the earliest 2034 (X10 LIT_A) X10 GAS
+     VN                1.000000             1.000000                                                                                           X10 GAS
+101-    if alloc_mode == "gem_fields":   # S4A-2: GEM GOGET field production shares (nearest node); countries without a field keep the load shares
+102-        gs = pd.read_csv(repo / G["gem_field_shares"])
+103-        for c, d in gs.groupby("country"):
+104-            tot = float(d.share_in_country.sum())
+105-            if tot > 0 and all(nd in n.buses.index for nd in d.node):
+106-                shares[c] = {str(nd): float(s) / tot for nd, s in zip(d.node, d.share_in_country)}; alloc_used[c] = "gem_fields"
+107-    elif alloc_mode != "load_shares":
+108-        raise ValueError("Unknown research.s3.gas.production_node_allocation " + alloc_mode)
+109-    ensure_carrier(n, "gas wellhead"); ensure_carrier(n, "gas production"); ensure_carrier(n, "gas production delivery")
+110-    n.meta.setdefault("external_annual_caps", {})
+111-    prod_led = {}
+112-    for r in caps.itertuples():
+113:        cap = float(r.cap_mwh_per_year); c = r.country
+114-        fid = r.fugitive_factor_id
+115-        if cap <= 0 or c not in shares:
+116-            prod_led[c] = dict(cap_mwh=cap, nodes=0, fugitive_t_per_mwh=None, note="no domestic production (cap 0) -> no wellhead generators; fugitive row not applicable")
+117-            continue
+118-        if fid not in registry.index or not str(registry.loc[fid, "unit"]).startswith("tCO2/MWh"):
+119-            raise ValueError(f"fugitive factor {fid} missing or not per MWh of production")
+120-        fug = float(registry.loc[fid, "value"])
+121-        k = 0
+122-        for node, s in shares[c].items():
+123-            if s <= 0:
+124-                continue
+125-            wb = f"{node} gas wellhead"

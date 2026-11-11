@@ -1,0 +1,18 @@
+X20 2-3 (decision 244): gas production caps by field status
+
+research.demand.v5.gas_cap_rule: field_status (v5 main, rule B) |
+reserve_average (rule A) | marketed (v4). The v4 cap table
+GAS_PRODUCTION_CAPS_2050_V4.csv (and its fugitive factors, table-folder
+SHA) is unchanged; s3_layers.add_gas_network multiplies each country's cap
+by the fraction of research_inputs/gas_v5/GAS_CAP_FRACTIONS_V5.csv
+(scripts_project/v5_gas_cap_data.py, copied at full precision from the X10
+check GAS_CAPS_BY_COUNTRY.csv with its sources): rule B MM 0.20, PH 0, TL
+0, TH 0.128852, others 1 -> 1,594.77 TWh (rule A 930.79). A fraction 0
+leaves cap 0, i.e. the existing branch: no wellhead generators, no annual
+cap row (gates B15 / D10 iterate over the existing generators only).
+
+v5_gas_cap_data.py had entered the 2-4 commit 923878a5 with a syntax error
+(an unbalanced parenthesis from an edit); fixed here. Targeted tests: 56
+passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
