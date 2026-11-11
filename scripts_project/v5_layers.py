@@ -34,3 +34,25 @@ def gem_node_override(df: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[pd.Data
         df.loc[m, "node"] = r.checked_node
         moved.append(dict(gem_unit_id=r.gem_unit_id, plant=r.plant, mw=float(df.loc[m, "capacity_mw"].sum()), node_from=r.gem_node, node_to=r.checked_node))
     return df, moved
+
+
+OFFSHORE = ("offwind-ac", "offwind-dc", "offwind-float")
+
+
+def apply_offwind_premium(n, cfg) -> dict:
+    """1-3 (decision 241): research.demand.v5.offwind_asean_premium_pct (0 main | 10 | 20 | 30) on the capital cost of every extendable offshore wind
+    generator (offwind-ac / -dc / -float, all countries, asset_role existing_survivor excluded; the whole capital cost incl. station and connection, as
+    the typhoon premium s4b_layers.py:116). Called after the cost layer, research.cost_scaling and the typhoon premium (s2_network), so the factors
+    multiply; pct = 0 leaves the network bit-identical."""
+    s = switches(cfg); pct = float(s["offwind_asean_premium_pct"]); led = dict(pct=pct, order="after cost layer, cost_scaling and typhoon premium (multiplicative)")
+    if not s["enabled"] or pct == 0.0:
+        led.update(generators=0)
+        return led
+    g = n.generators
+    role = g["asset_role"].astype(str) if "asset_role" in g.columns else pd.Series("", index=g.index)
+    sel = g.index[g.carrier.isin(OFFSHORE) & g.p_nom_extendable & (role != "existing_survivor")]
+    before = g.loc[sel, "capital_cost"].copy()
+    n.generators.loc[sel, "capital_cost"] = before * (1.0 + pct / 100.0)
+    led.update(generators=int(len(sel)), capital_cost_before_sum=float(before.sum()), capital_cost_after_sum=float(n.generators.loc[sel, "capital_cost"].sum()),
+               by_country={str(c): int(k) for c, k in g.loc[sel, "bus"].map(n.buses.country).value_counts().items()})
+    return led

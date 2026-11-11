@@ -423,6 +423,9 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     carbon_meta = install_carbon_metadata(n, R["carbon"])
     scaling = apply_cost_scaling(n, R["cost_scaling"])
     typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
+    if v5s["enabled"]:   # V5 X20 (1-3, decision 241): ASEAN offshore-wind capital-cost premium (0 % main), after cost_scaling and the typhoon premium
+        from v5_layers import apply_offwind_premium
+        v5x["ledgers"]["offwind_premium_1_3"] = apply_offwind_premium(n, cfg)
     fuel_prices = check_fuel_prices(n, cfg, registry, cost_ledger)   # S4C-0 (decision 85): one WEO scenario for gas / oil / coal, network prices = registry values (asserted)
     finance = apply_wacc_mode(n, costs, cfg, repo)   # S4C-0 (decision 90): uniform (main) | country_specific (implemented only)
     dust = apply_dust_cleanup(n, cfg)   # S4L-1 (decision 113 (1)): research.numerics.dust_cleanup off (default) | on - near-zero inventory always, cleanup when on (last layer: after every component-adding layer)

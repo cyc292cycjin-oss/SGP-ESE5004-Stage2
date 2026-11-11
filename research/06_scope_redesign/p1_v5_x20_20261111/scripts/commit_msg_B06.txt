@@ -1,0 +1,13 @@
+X20 1-3 (decision 241): ASEAN offshore-wind capital-cost premium switch
+
+research.demand.v5.offwind_asean_premium_pct: 0 (v5 main, network
+unchanged) | 10 | 20 | 30 (sensitivity, numeric). v5_layers.
+apply_offwind_premium multiplies the capital cost of every extendable
+offwind-ac / -dc / -float generator (existing survivors excluded; the
+whole capital cost incl. station and connection, as the typhoon premium)
+by (1 + pct / 100). s2_network calls it after the cost layer,
+research.cost_scaling and the typhoon premium, so the factors multiply;
+the ledger goes to n.meta v5_x20. Toy-network test: +10 % changes only the
+extendable offshore candidates, 0 % and v5 off leave them unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -178,3 +178,31 @@ def test_wind_gwa_factor_files():
     assert np.allclose(pf.factor_point_raw.clip(0.5, 3.0), pf.factor_point)
     for k, o in log["outputs"].items():
         assert V.sha256(rv / k) == o["sha256"]
+
+
+# ---- toy network helpers -----------------------------------------------------------------------------------------------------
+def toy(nodes=("A 0", "A 1"), country="MY"):
+    import pypsa
+    n = pypsa.Network(); n.set_snapshots(pd.date_range("2013-01-01", periods=4, freq="3h"))
+    for b in nodes:
+        n.add("Bus", b, carrier="AC", v_nom=380.0, x=100.0, y=3.0)
+        n.add("Bus", b + " low voltage", carrier="low voltage", v_nom=0.4)
+    n.buses["country"] = country   # research networks carry buses.country (not a PyPSA standard attribute)
+    return n
+
+
+# ---- 1-3 ASEAN offshore-wind premium (decision 241) ---------------------------------------------------------------------------
+def test_offwind_premium():
+    import v5_layers as L
+    n = toy()
+    n.add("Generator", "A 0 offwind-dc-2025 c2", bus="A 0", carrier="offwind-dc", p_nom_extendable=True, capital_cost=100.0)
+    n.add("Generator", "A 0 offwind-float-2025", bus="A 0", carrier="offwind-float", p_nom_extendable=True, capital_cost=200.0)
+    n.add("Generator", "existing_survivor::A 0::offwind existing::S4A", bus="A 0", carrier="offwind existing", p_nom=50.0, capital_cost=0.0)
+    n.add("Generator", "A 0 onwind-2025", bus="A 0", carrier="onwind", p_nom_extendable=True, capital_cost=80.0)
+    before = n.generators.capital_cost.copy()
+    assert L.apply_offwind_premium(n, cfg({"enabled": True}))["generators"] == 0 and n.generators.capital_cost.equals(before)   # 0 % main: unchanged
+    assert L.apply_offwind_premium(n, cfg({"offwind_asean_premium_pct": 20.0}))["generators"] == 0 and n.generators.capital_cost.equals(before)   # v5 off
+    led = L.apply_offwind_premium(n, cfg({"enabled": True, "offwind_asean_premium_pct": 10.0}))
+    c = n.generators.capital_cost
+    assert led["generators"] == 2 and abs(c["A 0 offwind-dc-2025 c2"] - 110.0) < 1e-12 and abs(c["A 0 offwind-float-2025"] - 220.0) < 1e-12
+    assert c["A 0 onwind-2025"] == 80.0 and c["existing_survivor::A 0::offwind existing::S4A"] == 0.0
