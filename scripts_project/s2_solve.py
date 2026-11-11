@@ -456,6 +456,11 @@ def post_solve(a, run, out, sampler, status, condition, solve_seconds, rc_source
     flows = guard("co2_flows", lambda: co2_flows(n))
     if flows is not None:
         save(out / "CO2_FLOWS.json", flows)
+    if n.meta.get("v5_x20"):   # V5 X20 (1-5, decision 241; networks built with research.demand.v5.enabled): spill split into the bookkeeping part and the true spill
+        def _spill():
+            from v5_layers import hydro_spill_report
+            save(out / "HYDRO_SPILL.json", hydro_spill_report(n))
+        guard("hydro_spill", _spill)
     def _caps():
         caps = {typ: n.df(typ).groupby(["carrier", "country"])[nom + "_opt"].sum().reset_index().to_dict("records") for typ, nom in [("Generator", "p_nom"), ("Link", "p_nom"), ("StorageUnit", "p_nom"), ("Store", "e_nom")] if "country" in n.df(typ)}
         save(out / "CAPACITY_BY_TECH_COUNTRY.json", caps)

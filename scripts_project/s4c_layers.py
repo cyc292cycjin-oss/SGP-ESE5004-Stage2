@@ -342,9 +342,16 @@ def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
         n.meta["research_hydro_inflow"] = led
         return led
     tp = Path(repo) / H["target_table"]
-    tgt = pd.read_csv(tp, keep_default_na=False)
-    tgt = {r.country: float(r.target_mwh) for r in tgt.itertuples() if r.status == "REGISTERED"}
+    tgt_df = pd.read_csv(tp, keep_default_na=False)
+    tgt = {r.country: float(r.target_mwh) for r in tgt_df.itertuples() if r.status == "REGISTERED"}
     led["target_table"] = dict(file=str(H["target_table"]), sha256=hashlib.sha256(tp.read_bytes()).hexdigest())
+    import v5_common as V5
+    s5 = V5.switches(cfg); v5h = None
+    if s5["enabled"]:   # V5 X20 (1-5, decision 241, Q14): per-MW inflow on the operating stock; multiplier 1.0 divides the target by the table multiplier (1.1)
+        from v5_layers import operating_share
+        mult = {r.country: float(r.multiplier) for r in tgt_df.itertuples() if r.status == "REGISTERED"}
+        v5h = dict(denominator=s5["hydro_inflow_denominator"], multiplier=float(s5["hydro_inflow_multiplier"]), countries={})
+        led["v5"] = v5h
     w = n.snapshot_weightings.generators.values
     su, g = n.storage_units, n.generators
     inf, pmax = n.storage_units_t.inflow, n.generators_t.p_max_pu
@@ -365,7 +372,17 @@ def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
         if c not in tgt:
             raise ValueError(f"no national hydro target for {c} (stock {caps.sum():.0f} MW)")
         T = tgt[c]
-        if mode == "national_observed":
+        if v5h is not None:
+            if v5h["multiplier"] == 1.0:
+                T = T / mult[c]
+            sh = (np.array([operating_share(n, x, series[x][2])[0] for x in names]) if v5h["denominator"] == "operating_only" else np.ones(len(names)))
+            if float((caps * sh).sum()) <= 0:
+                sh = np.ones(len(names))   # no operating unit in the country: the whole stock shares the target
+            v5h["countries"][c] = dict(target_mwh=T, stock_mw=float(caps.sum()), operating_mw=float((caps * sh).sum()),
+                                       per_mw_mwh=float(T / (caps * sh).sum()), partly_or_not_operating={x: float(s_) for x, s_ in zip(names, sh) if s_ < 1.0})
+            # operating_only: per-MW inflow u_c = T / operating capacity; every unit (construction ones too) gets u_c x p_nom, the stock total exceeds T
+            target_u = T * caps / (caps * sh).sum() if mode == "national_observed" else energy * (T / (energy * sh).sum())
+        elif mode == "national_observed":
             target_u = T * caps / caps.sum()
         else:
             target_u = energy * (T / energy.sum())

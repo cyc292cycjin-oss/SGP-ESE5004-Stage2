@@ -1,0 +1,16 @@
+== pypsa-asean HEAD 2395be9024192903caab96101072c7143c3fb45e
+445:    multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+== git log -S multiplier: 1.1 (config.default.yaml)
+273eba53bd2606421f883a0cf7b669dcd5ba6b73 2022-06-30 davide-f Add normalization_multiplier
+== git log -S normalization_multiplier
+a1070f5c247bbd0c940b2d3dab16408735193c1d 2022-07-05 davide-f Add option description to configtables
+727e51fe3efe76bdcbdd207ed888252c75b33d86 2022-06-30 davide-f Add normalization multiplier and fix na values
+273eba53bd2606421f883a0cf7b669dcd5ba6b73 2022-06-30 davide-f Add normalization_multiplier
+== commit 273eba53 body
+Add normalization_multiplier
+
+== blame
+a8987468c (Fabian Hofmann 2024-09-19 23:17:23 +0200 445)     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+ clip_min_inflow,MW,float,"To avoid too small values in the inflow time series, values below this threshold are set to zero."
++normalization_multiplier,--,float,"Multiplier factor of the normalization process (default 1.0)"
+doc/configtables/hydro.csv:16:multiplier,--,float,"Multiplier factor of the rescaling process (default 1.0)"

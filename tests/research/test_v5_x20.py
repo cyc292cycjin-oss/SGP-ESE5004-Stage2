@@ -237,3 +237,51 @@ def test_solar_cap_scale_layer():
     led2 = L.apply_solar_cap_scale(n2, cfg({"enabled": True, "solar_landuse_my": "oil_palm"}), ROOT)
     t = pd.read_csv(ROOT / L.SOLAR_MY_VARIANTS).set_index("variant")
     assert abs(n2.generators.at["A 0 solar-2025", "p_nom_max"] - 10.0 * t.at["oil_palm", "factor"]) < 1e-9 and led2["variant_factor"] == t.at["oil_palm", "factor"]
+
+
+# ---- 1-5 hydro inflow on the operating stock, multiplier, spill report (decision 241, Q14) ------------------------------------------
+def _hydro_net():
+    n = toy(("A 0",))
+    n.add("StorageUnit", "h_op", bus="A 0", carrier="hydro existing", p_nom=60.0, max_hours=10.0)
+    n.add("StorageUnit", "h_con", bus="A 0", carrier="hydro existing", p_nom=40.0, max_hours=10.0)
+    n.storage_units["country"] = "MY"; n.generators["country"] = pd.Series(dtype=str)
+    n.storage_units_t.inflow = pd.DataFrame({"h_op": [30.0] * 4, "h_con": [10.0] * 4}, index=n.snapshots)
+    n.meta = {"existing_unit_components": {"GEM:a": dict(component="h_op", capacity_mw=60.0, gem_status="operating", commissioning_year=2010),
+                                           "GEM:b": dict(component="h_con", capacity_mw=40.0, gem_status="construction", commissioning_year=2027)}}
+    return n
+
+
+def test_operating_share():
+    import v5_layers as L
+    n = _hydro_net()
+    assert L.operating_share(n, "h_op", 60.0)[0] == 1.0 and L.operating_share(n, "h_con", 40.0)[0] == 0.0 and L.operating_share(n, "x", 5.0) == (1.0, "no identity: operating")
+    n.meta["existing_unit_components"]["AUTH:c"] = dict(component="h_op", capacity_mw=20.0)   # author unit without GEM status: operating
+    n.meta["existing_unit_components"]["GEM:d"] = dict(component="h_op", capacity_mw=20.0, gem_status="operating", commissioning_year=2026)
+    assert L.operating_share(n, "h_op", 100.0)[0] == pytest.approx(0.8)
+
+
+def test_hydro_inflow_operating_denominator(tmp_path):
+    from s4c_layers import apply_hydro_inflow_normalization
+    pd.DataFrame(dict(country=["MY"], target_mwh=[1100.0], multiplier=[1.1], status=["REGISTERED"])).to_csv(tmp_path / "T.csv", index=False)
+    c = lambda v5: {"research": {"hydro": {"inflow_normalization": "national_observed", "target_table": "T.csv"}, "demand": {"v4": {"enabled": True}, "v5": v5}}}   # noqa: E731
+    e = lambda n: n.storage_units_t.inflow.sum().to_dict()   # noqa: E731  (snapshot weight 1)
+    n = _hydro_net(); apply_hydro_inflow_normalization(n, c({}), tmp_path)
+    assert e(n) == pytest.approx({"h_op": 660.0, "h_con": 440.0})                                   # v4: T shared by capacity incl. construction
+    n = _hydro_net(); led = apply_hydro_inflow_normalization(n, c({"enabled": True}), tmp_path)
+    assert e(n) == pytest.approx({"h_op": 1100.0, "h_con": 1100.0 * 40 / 60})                       # v5: u = T / operating MW, construction units add u x p_nom
+    assert led["v5"]["countries"]["MY"]["operating_mw"] == 60.0 and list(led["v5"]["countries"]["MY"]["partly_or_not_operating"]) == ["h_con"]
+    n = _hydro_net(); apply_hydro_inflow_normalization(n, c({"enabled": True, "hydro_inflow_multiplier": 1.0}), tmp_path)
+    assert e(n) == pytest.approx({"h_op": 1000.0, "h_con": 1000.0 * 40 / 60})                       # multiplier 1.0: T / 1.1
+    n = _hydro_net(); apply_hydro_inflow_normalization(n, c({"enabled": True, "hydro_inflow_denominator": "all_stock"}), tmp_path)
+    assert e(n) == pytest.approx({"h_op": 660.0, "h_con": 440.0})                                   # all_stock = v4
+
+
+def test_hydro_spill_tables():
+    import v5_layers as L
+    su = pd.DataFrame(dict(carrier=["hydro", "hydro", "hydro existing"], p_nom_opt=[50.0, 0.5, 30.0], p_nom_max=[100.0, 10.0, 30.0], bus=["A 0"] * 3), index=["n1", "n2", "e1"])
+    inflow = pd.DataFrame(dict(n1=[1e6, 1e6], n2=[2e5, 2e5], e1=[5e5, 5e5])); spill = pd.DataFrame(dict(n1=[6e5, 6e5], n2=[2e5, 2e5], e1=[1e5, 1e5]))
+    r = L.hydro_spill_tables(su, inflow, spill, [3.0, 3.0], pd.Series("MY", index=su.index))
+    t = r["totals"]
+    assert t["new_inflow_full_cap_twh"] == pytest.approx(7.2) and t["new_spill_reported_twh"] == pytest.approx(4.8)
+    assert t["new_spill_bookkeeping_twh"] == pytest.approx(6.0 * 0.5 + 1.2) and t["new_spill_true_twh"] == pytest.approx(4.8 - 4.2)   # n2 built 0.5 MW < 1 MW -> unbuilt
+    assert t["existing_spill_twh"] == pytest.approx(0.6) and r["all_reported_spill_twh"] == pytest.approx(5.4)

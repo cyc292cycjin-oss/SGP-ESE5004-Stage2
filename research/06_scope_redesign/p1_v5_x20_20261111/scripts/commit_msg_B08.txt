@@ -1,0 +1,27 @@
+X20 1-5 (decision 241, Q14): hydro inflow on the operating stock, multiplier switch, spill report
+
+research.demand.v5.hydro_inflow_denominator: operating_only (v5 main) |
+all_stock (v4); hydro_inflow_multiplier: 1.1 (main) | 1.0.
+s4c_layers.apply_hydro_inflow_normalization: per-MW inflow u_c = national
+target / capacity operating in 2025 (v5_layers.operating_share: identities
+of existing_unit_components with GEM status operating, or no GEM status,
+and commissioning <= 2025; components without identities count as
+operating, so the V4 D2a PHS-reclassified conventional part keeps sharing
+the target as decided in D2a); every existing unit gets u_c x p_nom on its
+own shape, so construction units add energy; the new-build proxies follow
+(per MW of the corrected stock). Multiplier 1.0 divides the target by the
+table multiplier column. v5 off / all_stock = the v4 arithmetic.
+
+Spill report (v5_layers.hydro_spill_tables, X03 5.4 definitions): the
+bookkeeping part = inflow of the unbuilt new-build capacity (built < 1 MW =
+0), true spill = reported - bookkeeping; s2_solve writes HYDRO_SPILL.json
+for networks with a v5_x20 record; scripts_project/v5_hydro_spill.py reads
+a solved file (regression on the v4 2920x3h networks follows).
+
+Multiplier 1.1 provenance (logs/46_hydro_multiplier_source.log): PyPSA-Earth
+commit 273eba53 (2022-06-30, "Add normalization_multiplier") sets 1.1 in
+the default config without a stated reason; the config table documents a
+default of 1.0 -> grade C, range 1.0-1.1.
+Targeted tests: 54 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

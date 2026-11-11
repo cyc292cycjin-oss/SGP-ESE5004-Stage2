@@ -2,11 +2,16 @@
 returns at once with research.demand.v5 disabled (v5_common.V5_OFF), so a v5-off build equals the 26c2e47d build.
 
   gem_node_override        2-6  checked coordinates of GEM additions (GEM_COORD_CORRECTIONS_V5.csv): node of the units whose node changes
+  apply_offwind_premium    1-3  ASEAN capital-cost premium on extendable offshore wind (after cost layer, cost scaling and typhoon premium)
+  apply_solar_cap_scale    1-4  country factor on the ground-mounted solar caps (MY / ID / VN) and the MY open-forest / oil-palm variants
+  operating_share          1-5  share of a hydro component's capacity operating in 2025 (identities of existing_unit_components; s4c_layers)
+  hydro_spill_tables / hydro_spill_report  1-5  bookkeeping part and true spill of a solved network (s2_solve HYDRO_SPILL.json, v5_hydro_spill.py)
 """
 from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from v5_common import switches
@@ -87,3 +92,52 @@ def apply_solar_cap_scale(n, cfg, repo: Path = ROOT) -> dict:
         out[c] = dict(factor=f, generators=int(len(sel)), p_nom_max_before_mw=before, p_nom_max_after_mw=float(n.generators.loc[sel, "p_nom_max"].sum()))
     led["by_country"] = out
     return led
+
+
+def operating_share(n, component: str, p_nom: float, year: int = 2025) -> tuple[float, str]:
+    """1-5 (decision 241; Q14): operating share of an existing hydro / ror component = capacity of its identities (n.meta existing_unit_components) that
+    are operating with commissioning year <= 2025 (frozen-base author units carry no GEM status: operating) / capacity of all its identities. A component
+    without identities (e.g. the V4 D2a PHS-reclassified conventional part) counts as operating. Returns (share, basis)."""
+    ids = [z for z in (n.meta.get("existing_unit_components") or {}).values() if z.get("component") == component]
+    if not ids:
+        return 1.0, "no identity: operating"
+    tot = sum(float(z.get("capacity_mw", 0.0)) for z in ids)
+    if tot <= 0:
+        return 1.0, "identities without capacity: operating"
+
+    def op(z):
+        st = z.get("gem_status"); cy = z.get("commissioning_year")
+        return (st in (None, "", "operating")) and (cy in (None, "") or float(cy) <= year)
+    o = sum(float(z.get("capacity_mw", 0.0)) for z in ids if op(z))
+    return o / tot, f"{sum(1 for z in ids if op(z))} of {len(ids)} identities operating (<= {year})"
+
+
+def hydro_spill_tables(su: pd.DataFrame, inflow: pd.DataFrame, spill: pd.DataFrame, w, country: pd.Series, built_min_mw: float = 1.0) -> dict:
+    """1-5 (decision 241): spill of a solved network split into the bookkeeping part and the true spill (X03 section 5.4 definitions).
+    New-build reservoirs (carrier 'hydro'): the inflow of the full cap p_nom_max is given and research_new_hydro_inflow forces spill + r p_nom >= inflow,
+    so the inflow of the unbuilt part is reported as spill - bookkeeping = sum_x sum_t w inflow_x,t (1 - built_x / p_nom_max_x), built = p_nom_opt
+    (0 below built_min_mw); true spill = reported spill - bookkeeping. Existing reservoirs ('hydro existing'): reported spill = true spill. TWh."""
+    w = np.asarray(w, dtype=float)
+    out, tot = {}, dict(new_inflow_full_cap_twh=0.0, new_spill_reported_twh=0.0, new_spill_bookkeeping_twh=0.0, new_spill_true_twh=0.0, existing_spill_twh=0.0)
+    e = lambda df, x: float((df[x].values * w).sum()) / 1e6 if x in df.columns else 0.0   # noqa: E731
+    for c in sorted(set(country.reindex(su.index).dropna())):
+        s = su[country.reindex(su.index) == c]
+        new = s.index[s.carrier == "hydro"]; ex = s.index[s.carrier == "hydro existing"]
+        built = s.loc[new, "p_nom_opt"].where(s.loc[new, "p_nom_opt"] >= built_min_mw, 0.0)
+        book = sum(e(inflow, x) * (1.0 - float(built[x]) / float(s.at[x, "p_nom_max"])) for x in new if float(s.at[x, "p_nom_max"]) > 0)
+        r = dict(new_inflow_full_cap_twh=sum(e(inflow, x) for x in new), new_spill_reported_twh=sum(e(spill, x) for x in new), new_spill_bookkeeping_twh=book,
+                 existing_spill_twh=sum(e(spill, x) for x in ex), new_built_mw=float(built.sum()), new_cap_mw=float(s.loc[new, "p_nom_max"].sum()))
+        r["new_spill_true_twh"] = r["new_spill_reported_twh"] - book
+        out[c] = r
+        for k in tot:
+            tot[k] += r[k]
+    return dict(rule="bookkeeping = sum inflow x (1 - built / p_nom_max) of the new-build reservoirs (built < %.1f MW = 0); true = reported - bookkeeping; TWh" % built_min_mw,
+                totals=tot, by_country=out, all_reported_spill_twh=float((spill.values * w[:, None]).sum()) / 1e6 if spill.shape[1] else 0.0)
+
+
+def hydro_spill_report(n) -> dict:
+    """1-5: HYDRO_SPILL.json of a solved network (s2_solve.post_solve, research.demand.v5.enabled)."""
+    su = n.storage_units
+    rep = hydro_spill_tables(su, n.storage_units_t.inflow, n.storage_units_t.spill, n.snapshot_weightings.generators.values, su.bus.map(n.buses.country))
+    rep["new_hydro_inflow_tie_units"] = sorted(n.meta.get("research_new_hydro_inflow_tie", []))
+    return rep
