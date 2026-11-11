@@ -324,6 +324,11 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     corridors = pd.read_csv(repo / corridors_path, float_precision="round_trip")
     corridors, optional_corridors = extend_optional_corridors(corridors, cfg, repo)   # S4F-2 d (decision 97 d): SG-VN / SG-KH second-batch candidates (off in the main run)
     corridors, th_my = apply_th_my_stock(n, corridors, cfg, repo)   # S4F-2 a (decision 97 a): TH-MY stock aligned to APG 380 MW (duplicates removed, line 91 = 80 MW); frozen_base = comparison
+    if v5s["enabled"]:   # V5 X20 (2-1, decision 244; Q8): PH inter-island DC stock from the NGCP TDP 2025-2050, before the extension limit and the lossy split
+        from v5_layers import PH_DC_TABLE, apply_ph_dc_stock
+        corridors, v5x["ledgers"]["ph_dc_2_1"] = apply_ph_dc_stock(n, corridors, cfg, repo)
+        if v5s["ph_dc_stock"] != "frozen_base":
+            v5x["tables"]["ph_dc_stock"] = PH_DC_TABLE
     apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base; S4E-1 land-adjacency AC candidates
     s4e_corridors = dict(mode=corridor_mode(cfg), table=corridors_path, table_sha256=sha(repo / corridors_path), ac_added=len(apg_added),
                          dc_added=add_corridor_dc_links(n, corridors), domestic_table=domestic_path,

@@ -1,0 +1,17 @@
+X20 2-1 (decision 244, Q8): PH inter-island DC stock from the NGCP TDP 2025-2050
+
+research.demand.v5.ph_dc_stock: ngcp_tdp (v5 main) | frozen_base (v4).
+scripts_project/v5_ph_dc_data.py writes research_inputs/corridors/
+PH_DC_STOCK_V5.csv (frozen 18,193.28 MW -> 1,330 MW; NGCP TDP PDF SHA256
+eb39b15e..., page numbers per row): Leyte-Luzon HVDC 440 MW on both
+segments through the Visayas10 DC junction (TDP p.43-44 / 51: the bipole
+adds 440 MW; Hitachi Energy project page), MVIP 450 MW (TDP p.5), the two
+Mindoro osm-plus 'DC' rows 0 MW but extendable (TDP p.35 / 40 / 72: links
+after 2025), the 2000 MW B2B placeholder 0 MW and not extendable (Q8: kept
+for the DC / AC bus map). The frozen values equal the electric base.
+
+v5_layers.apply_ph_dc_stock, called in s2_network right after the TH-MY
+stock layer (before the extension limit and the lossy split); checks the
+frozen-base value of each link first. Tests: toy network, 27 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

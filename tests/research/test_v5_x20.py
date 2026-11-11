@@ -450,3 +450,25 @@ def test_d1_biomass_v5_constants():
     assert labels <= set(r5.commodity) and set(r5[r5.commodity.isin(labels)].group) <= set(B.V5_GROUPS_ADD)   # E2: prefixes stripped, labels match the mapping
     assert not labels & set(r4.commodity) and r4.commodity.str.startswith(("Spices Chillies", "Cereals, other ", "Sunflowers ")).any()   # v4: labels kept the prefix
     assert len(r5) == len(r4)
+
+
+# ---- 2-1 PH inter-island DC stock (decision 244, Q8) ----------------------------------------------------------------------------
+def test_ph_dc_table_and_layer():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.PH_DC_TABLE, dtype={"component": str})
+    assert abs(t.frozen_base_mw.sum() - 18193.28) < 1e-6 and abs(t.corrected_mw.sum() - 1330.0) < 1e-9 and t.source.str.contains("sha256 eb39b15e").all()
+    n = toy(("PH_Visayas10 0", "PH_Luzon5 0"), "PH")
+    for r in t.itertuples():
+        ext = r.action != "set_zero_fixed"
+        n.add("Link", r.component, bus0="PH_Visayas10 0", bus1="PH_Luzon5 0", p_nom=r.frozen_base_mw, p_nom_min=(r.frozen_base_mw if ext else 0.0), p_nom_extendable=ext, carrier="DC")
+    corr = pd.DataFrame(columns=["component_type", "component"])
+    before = n.links.copy()
+    assert L.apply_ph_dc_stock(n, corr, cfg(), ROOT)[1] == {"mode": "frozen_base"} and n.links.equals(before)     # v5 off
+    _, led = L.apply_ph_dc_stock(n, corr, cfg({"enabled": True}), ROOT)
+    assert abs(led["total_after_mw"] - 1330.0) < 1e-9 and abs(led["total_before_mw"] - 18193.28) < 1e-6
+    k = n.links
+    assert k.at["convert_935_1501", "p_nom"] == 0.0 and not bool(k.at["convert_935_1501", "p_nom_extendable"])
+    assert k.at["100000087-1_0+1", "p_nom_min"] == 0.0 and bool(k.at["100000087-1_0+1", "p_nom_extendable"])
+    assert k.at["151018428-1_0+2", "p_nom"] == 440.0 and k.at["1076672675-1_0+4", "p_nom_min"] == 450.0
+    with pytest.raises(ValueError):   # second application: the frozen-base check fails
+        L.apply_ph_dc_stock(n, corr, cfg({"enabled": True}), ROOT)

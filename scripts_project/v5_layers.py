@@ -218,3 +218,42 @@ def geothermal_caps_v5(n, caps: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[p
         rows.append(dict(node=node, rebuild_v4_mw=float(v4.get(node, 0.0)), rebuild_v5_mw=float(v5.get(node, 0.0)), cap_before_mw=before, cap_after_mw=max(0.0, before + d)))
     led["PH_rebuild"] = dict(v4_mw=float(v4.sum()), v5_mw=float(v5.sum()), nodes=rows)
     return caps, led
+
+
+PH_DC_TABLE = "research_inputs/corridors/PH_DC_STOCK_V5.csv"
+
+
+def apply_ph_dc_stock(n, corridors: pd.DataFrame, cfg, repo: Path = ROOT):
+    """2-1 (decision 244; Q8): PH inter-island DC stock = NGCP TDP 2025-2050 (PH_DC_STOCK_V5.csv, scripts_project/v5_ph_dc_data.py): Leyte-Luzon 440 MW on
+    both segments through the Visayas10 DC junction, MVIP 450 MW, the two Mindoro 'DC' rows 0 MW and still extendable, the 2000 MW B2B placeholder 0 MW and
+    not extendable (the component is kept for the DC / AC bus map). Called right after s4f_layers.apply_th_my_stock (s2_network), so the extension limit,
+    the converter rule and the lossy split follow the new stock. The frozen-base value (p_nom_min of an extendable link, p_nom otherwise) is checked first."""
+    s = switches(cfg); led = dict(mode=s["ph_dc_stock"])
+    if not s["enabled"] or s["ph_dc_stock"] == "frozen_base":
+        return corridors, led
+    t = pd.read_csv(Path(repo) / PH_DC_TABLE, dtype={"component": str})
+    rows = []
+    for _, r in t.iterrows():
+        name = str(r.component)
+        if r.component_type != "Link" or name not in n.links.index:
+            raise ValueError(f"PH DC stock: Link {name} not in the frozen base")
+        ext = bool(n.links.at[name, "p_nom_extendable"])
+        before = float(n.links.at[name, "p_nom_min" if ext else "p_nom"])
+        if abs(before - float(r.frozen_base_mw)) > 1e-6:
+            raise ValueError(f"PH DC stock: {name} has {before} MW, the table says {r.frozen_base_mw}")
+        v = float(r.corrected_mw)
+        if r.action == "set_capacity":
+            n.links.loc[name, "p_nom"] = v
+            if ext:
+                n.links.loc[name, "p_nom_min"] = v
+        elif r.action == "set_zero_fixed":
+            n.links.loc[name, ["p_nom", "p_nom_min"]] = [0.0, 0.0]; n.links.loc[name, "p_nom_extendable"] = False
+        else:
+            raise ValueError("unknown PH DC action " + str(r.action))
+        if "component" in corridors.columns:
+            sel = corridors.component.astype(str) == name
+            if sel.any():
+                raise ValueError(f"PH DC stock: {name} is a corridor-table row (not expected for a domestic PH link)")
+        rows.append(dict(component=name, action=str(r.action), extendable=ext, frozen_base_mw=before, corrected_mw=v, grade=str(r.grade), source_page=str(r.source_page)))
+    led.update(table=PH_DC_TABLE, rows=rows, total_before_mw=float(sum(x["frozen_base_mw"] for x in rows)), total_after_mw=float(sum(x["corrected_mw"] for x in rows)))
+    return corridors, led
