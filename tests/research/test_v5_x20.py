@@ -378,3 +378,39 @@ def test_existing_profile_column():
     assert f(n, "A 0", "solar existing", cfg({"enabled": True, "existing_solar_profile": "best_class"}))[0] == "A 0 solar-2025 c2"
     assert f(n, "A 1", "solar existing", cfg({"enabled": True, "existing_solar_profile": "node_average"}))[0] == "A 1 solar-2025"   # no rooftop column
     assert f(n, "A 0", "solar existing", cfg({"enabled": True, "existing_solar_profile": "class0"}))[0] == "A 0 solar-2025"
+
+
+# ---- 1-6 geothermal caps on the reserve basis, PH rebuild with the v5 lifetime rule (decision 241, Q16) -----------------------------
+def test_geothermal_id_potential_table():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.GEOTHERMAL_ID_TABLE).set_index("case")
+    assert t.potential_mw.to_dict() == {"resource_potential": 23590, "reserves_2017": 17506, "proven_probable": 5460}
+    assert 12046 + 2493 + 2967 == 17506 and 2493 + 2967 == 5460
+
+
+@pytest.mark.skipif(not EB.exists(), reason="electric base not available")
+def test_geothermal_caps_v5():
+    import pypsa
+    import v5_layers as L
+    n = pypsa.Network(str(EB))
+    caps = pd.read_csv(ROOT / "research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv")
+    caps = caps[(caps["mode"] == "national_potential") & (caps.variant == "announced_preconstruction")]
+    rb4 = L.ph_geothermal_rebuild(n, "strict", 30)
+    assert abs(float(rb4.sum()) - 1827.0) < 0.5                                                     # = the S4B-2 rebuild part (REG candidate_cap_geothermal_PH)
+    for life, bnd in ((30, "strict"), (40, "inclusive")):
+        for case, pot in (("reserves_2017", 17506.0), ("proven_probable", 5460.0), ("resource_potential", 23590.0)):
+            m = n.copy()
+            m.add("Generator", "x geo", bus=m.buses.index[m.buses.country == "ID"][0], carrier="geothermal existing", p_nom=1000.0 + life)
+            out, led = L.geothermal_caps_v5(m, caps, cfg({"enabled": True, "geothermal_cap_id": case, "geothermal_existing_lifetime": life, "lifetime_boundary": bnd}), ROOT)
+            stock = led["ID"]["stock_mw"]
+            idc = out[(out.carrier == "geothermal") & (out.country == "ID")].p_nom_max_mw.sum()
+            assert abs(idc + stock - pot) < 1e-6                                                       # cap + stock = the chosen potential
+            other = out[~((out.carrier == "geothermal") & out.country.isin(["ID", "PH"]))]
+            assert other.equals(caps[~((caps.carrier == "geothermal") & caps.country.isin(["ID", "PH"]))])
+            ph = out[(out.carrier == "geothermal") & (out.country == "PH")].p_nom_max_mw.sum(); ph0 = caps[(caps.carrier == "geothermal") & (caps.country == "PH")].p_nom_max_mw.sum()
+            assert abs(ph - (ph0 - led["PH_rebuild"]["v4_mw"] + led["PH_rebuild"]["v5_mw"])) < 1e-6
+            if life == 30:
+                assert abs(ph - ph0) < 1e-9 and led["PH_rebuild"]["v5_mw"] == led["PH_rebuild"]["v4_mw"]
+            else:
+                assert led["PH_rebuild"]["v5_mw"] < led["PH_rebuild"]["v4_mw"]                       # 40 a / inclusive: fewer units retire before 2050
+    assert L.geothermal_caps_v5(n, caps, cfg(), ROOT)[0] is caps                                      # v5 off: the table rows as they are

@@ -370,6 +370,8 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     vintage = apply_existing_vintage_costs(n, cfg, repo)   # M08a A3 (decision 131): existing stock priced with technology-data v0.15.0 of its commissioning year (author_v0_13_2 = former)
     fleet["vintage_costs"] = {k: v for k, v in vintage.items() if k != "table"}
     cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch
+    if v5s["enabled"] and cand_caps and cand_caps.get("v5_geothermal"):   # V5 X20 (1-6)
+        v5x["tables"]["geothermal_id_potential"] = cand_caps["v5_geothermal"]["ID"]["table"]; v5x["ledgers"]["geothermal_1_6"] = cand_caps["v5_geothermal"]
     hydro_inflow = apply_hydro_inflow_normalization(n, cfg, repo)   # S4C-2 (decision 83): national hydro inflow = Ember median x 1.1 by capacity share (main); new-build proxies from the corrected country stock
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)

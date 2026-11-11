@@ -1,0 +1,20 @@
+X20 1-6 (decision 241, Q16) with 2-5: geothermal caps on the reserve basis at build time
+
+research.demand.v5.geothermal_cap_id: reserves_2017 (v5 main) |
+proven_probable | resource_potential (v4). New table
+research_inputs/potentials_v5/GEOTHERMAL_ID_POTENTIAL_V5.csv: 17,506 MW =
+possible 12,046 + probable 2,493 + proven 2,967 (MEMR geothermal directorate
+2017 via ThinkGeoEnergy, X03 SOURCES C3-5; the article total reads 17,501),
+5,460 = probable + proven, 23,590 = the v4 resource potential.
+
+v5_layers.geothermal_caps_v5 (called in s4b_candidates.apply_candidate_caps
+when v5 is enabled): ID geothermal cap = chosen potential - the ID
+'geothermal existing' p_nom of this network, split by the table shares, so
+cap + stock = potential for every lifetime switch; PH rebuild part (GIPT
+operating units not in service in 2050) re-derived with the v5 lifetime
+rule (v5_common.in_service) and the per-node difference to the strict /
+30 a rebuild added: 1,827 -> 1,755 MW (the v4 1,827 MW is reproduced on the
+electric-base nodes). Other rows unchanged; v5 off = the table rows.
+Targeted tests: 43 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

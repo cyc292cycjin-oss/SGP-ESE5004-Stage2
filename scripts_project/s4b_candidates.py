@@ -47,6 +47,10 @@ def apply_candidate_caps(n, cfg, repo: Path, nodes):
     led["table"] = dict(path=str(table.relative_to(repo)), sha256=hashlib.sha256(table.read_bytes()).hexdigest(), rows=int(len(caps)))
     if mode != "zero" and not len(caps):
         raise ValueError(f"no candidate caps for mode {mode} / variant {variant}")
+    import v5_common as V5
+    if V5.switches(cfg)["enabled"] and mode != "zero":   # V5 X20 (1-6 with 2-5, decision 241, Q16): ID geothermal cap = chosen potential - this network's ID stock; PH rebuild by the v5 lifetime rule
+        from v5_layers import geothermal_caps_v5
+        caps, led["v5_geothermal"] = geothermal_caps_v5(n, caps, cfg, repo)
     g, su = n.generators, n.storage_units
     ror_ex = g[g.carrier == "ror existing"]; hyd_ex = su[su.carrier == "hydro existing"]
     tie = []

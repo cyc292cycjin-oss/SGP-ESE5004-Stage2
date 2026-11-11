@@ -162,3 +162,59 @@ def existing_profile_column(n, node: str, cls: str, cfg) -> tuple[str, str]:
         if f"{base} c{k}" in cols:
             return f"{base} c{k}", f"best class c{k}"
     return base, "class 0 (no higher class at the node)"
+
+
+GEOTHERMAL_ID_TABLE = "research_inputs/potentials_v5/GEOTHERMAL_ID_POTENTIAL_V5.csv"
+
+
+def ph_geothermal_rebuild(n, boundary: str, lifetime: int) -> pd.Series:
+    """PH geothermal units operating in GEM GIPT 2026-09 (start year known) that are NOT in service in 2050 under (boundary, lifetime) - rebuilt on
+    site (S4B-2, s4b_2_candidates_data.py:89-93: strict / 30 a = 'start + 30 <= 2050'); MW by nearest PH AC node."""
+    from d1_common import SRC_DIR
+    from s4a_2_fleet_data import GIPT, nearest_node
+    from v5_common import in_service
+    gem = pd.read_csv(SRC_DIR / GIPT, low_memory=False)
+    phg = gem[(gem.iso == "PH") & (gem.Type == "geothermal") & (gem.Status == "operating") & gem["Start year"].notna()].copy()
+    phg = phg[[not in_service(float(y), lifetime, boundary) for y in phg["Start year"]]]
+    ac = n.buses[n.buses.carrier == "AC"][["x", "y", "country"]]
+    phg["node"] = [nearest_node(ac, "PH", la, lo)[0] for la, lo in zip(phg.Latitude, phg.Longitude)]
+    return phg.groupby("node")["Capacity (MW)"].sum()
+
+
+def geothermal_caps_v5(n, caps: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[pd.DataFrame, dict]:
+    """1-6 (decision 241; Q16) with 2-5: geothermal rows of the S4B-2 caps table at build time (s4b_candidates.apply_candidate_caps).
+    ID: total = potential of research.demand.v5.geothermal_cap_id (GEOTHERMAL_ID_POTENTIAL_V5.csv: reserves_2017 17,506 main | proven_probable 5,460 |
+        resource_potential 23,590 = v4) - the ID 'geothermal existing' p_nom of this network, split over the ID rows by their table shares, so cap + stock =
+        the chosen potential under every lifetime switch;
+    PH: the rebuild part (existing units retiring before 2050 rebuilt on site) re-derived with the v5 lifetime / boundary; the per-node difference to the
+        table's strict / 30 a rebuild is added to the PH rows. Other rows unchanged."""
+    s = switches(cfg)
+    led = dict(geothermal_cap_id=s["geothermal_cap_id"], lifetime=int(s["geothermal_existing_lifetime"]), boundary=s["lifetime_boundary"])
+    if not s["enabled"]:
+        return caps, led
+    caps = caps.copy()
+    t = pd.read_csv(Path(repo) / GEOTHERMAL_ID_TABLE).set_index("case")
+    pot = float(t.at[s["geothermal_cap_id"], "potential_mw"])
+    g = n.generators
+    stock = float(g.loc[(g.carrier == "geothermal existing") & (g.bus.map(n.buses.country) == "ID"), "p_nom"].sum())
+    sel = (caps.carrier == "geothermal") & (caps.country == "ID")
+    old = float(caps.loc[sel, "p_nom_max_mw"].sum()); total = max(0.0, pot - stock)
+    if old > 0:
+        caps.loc[sel, "p_nom_max_mw"] = caps.loc[sel, "p_nom_max_mw"] * (total / old)
+    import hashlib
+    led["ID"] = dict(potential_mw=pot, table=GEOTHERMAL_ID_TABLE, table_sha256=hashlib.sha256((Path(repo) / GEOTHERMAL_ID_TABLE).read_bytes()).hexdigest(),
+                     stock_mw=stock, cap_before_mw=old, cap_after_mw=float(caps.loc[sel, "p_nom_max_mw"].sum()), rows=int(sel.sum()))
+    v4 = ph_geothermal_rebuild(n, "strict", 30); v5 = ph_geothermal_rebuild(n, s["lifetime_boundary"], int(s["geothermal_existing_lifetime"]))
+    rows = []
+    for node in sorted(set(v4.index) | set(v5.index)):
+        d = float(v5.get(node, 0.0)) - float(v4.get(node, 0.0))
+        if d == 0.0:
+            continue
+        m = (caps.carrier == "geothermal") & (caps.node == node)
+        if m.sum() != 1:
+            raise ValueError(f"PH geothermal rebuild: node {node} has {int(m.sum())} cap rows")
+        before = float(caps.loc[m, "p_nom_max_mw"].iloc[0])
+        caps.loc[m, "p_nom_max_mw"] = max(0.0, before + d)
+        rows.append(dict(node=node, rebuild_v4_mw=float(v4.get(node, 0.0)), rebuild_v5_mw=float(v5.get(node, 0.0)), cap_before_mw=before, cap_after_mw=max(0.0, before + d)))
+    led["PH_rebuild"] = dict(v4_mw=float(v4.sum()), v5_mw=float(v5.sum()), nodes=rows)
+    return caps, led
