@@ -535,3 +535,38 @@ def test_gas_cap_fractions():
     b = (caps * f.rule_b_field_status.reindex(caps.index)) / 1e6; a = (caps * f.rule_a_reserve_average.reindex(caps.index)) / 1e6
     assert abs(b.sum() - 1594.77) < 0.05 and abs(a.sum() - 930.79) < 0.05                       # X20_SPEC 1.10 table (rule B / rule A totals, TWh)
     assert abs(b["MM"] - 36.93) < 0.01 and b["PH"] == 0.0 and b["TL"] == 0.0
+
+
+# ---- 3-1 CO2 storage low cases (ii) and the extra-ASEAN capacity key (decision 244, Q13) ---------------------------------------------
+def test_co2_annual_cases():
+    import yaml
+    import s2_layers as S
+    R = yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())["research"]["s2"]["co2"]
+    c50, p50, _ = S.co2_storage_caps(dict(R), None)
+    ca, pa, la = S.co2_storage_caps(dict(R, storage_potential_case="iea_anchor_200"), None)
+    cb, pb, lb = S.co2_storage_caps(dict(R, storage_potential_case="project_ramp_377"), None)
+    assert abs(sum(ca.values()) - 200e6) < 10 and abs(ca["ID"] - 90e6) < 1e-6 and pa == p50 and "not divided" in la["rule"]
+    assert abs(sum(cb.values()) - 377.009097e6) < 10 and all(cb[c] == 0.0 for c in ("BN", "KH", "PH", "VN", "LA", "MM", "SG", "TL"))
+    with pytest.raises(ValueError):
+        S.co2_storage_caps(dict(R, storage_potential_case="nonsense"), None)
+
+
+def test_co2_annual_case_blank_cell(tmp_path, monkeypatch):
+    import yaml
+    import s2_layers as S
+    R = yaml.safe_load((ROOT / "configs/research/baseline.yaml").read_text())["research"]["s2"]["co2"]
+    t = pd.read_csv(ROOT / S.CO2_ANNUAL_TABLE); t.loc[0, "iea_anchor_200_mt"] = None
+    (tmp_path / "research_inputs/co2_v5").mkdir(parents=True); t.to_csv(tmp_path / S.CO2_ANNUAL_TABLE, index=False)
+    (tmp_path / R["storage_potential_table"]).parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / R["storage_potential_table"]).write_bytes((ROOT / R["storage_potential_table"]).read_bytes())
+    monkeypatch.setattr(S, "ROOT", tmp_path)
+    with pytest.raises(ValueError):
+        S.co2_storage_caps(dict(R, storage_potential_case="iea_anchor_200"), None)
+
+
+def test_extra_asean_capacity_key():
+    from s4c_layers import extra_asean_capacity
+    c = lambda v: {"research": {"co2": {"extra_asean_capacity_mt": v}}}   # noqa: E731
+    assert extra_asean_capacity(c(None), "ID") is None and extra_asean_capacity({"research": {"co2": {}}}, "ID") is None
+    assert extra_asean_capacity(c(5), "ID") == 5.0 and extra_asean_capacity(c({"ID": 0, "MY": 2.5}), "ID") == 0.0
+    assert extra_asean_capacity(c({"ID": 0, "MY": 2.5}), "MY") == 2.5 and extra_asean_capacity(c({"ID": 0}), "TH") is None

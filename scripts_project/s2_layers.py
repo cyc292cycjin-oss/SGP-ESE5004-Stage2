@@ -42,6 +42,8 @@ def land_transport_accounts(cfg) -> set:
 TABLE_BASE_SECTORS = ("Residential", "Commercial", "AgricultureOthers", "Transport")
 ROOT = Path(__file__).resolve().parents[1]
 CO2_STORAGE_CASES = {"p50": "potential_gt", "low": "low_gt", "high": "high_gt"}
+CO2_ANNUAL_CASES = {"iea_anchor_200": "iea_anchor_200_mt", "project_ramp_377": "project_ramp_377_mt"}   # V5 X20 (3-1): (ii-a) / (ii-b) annual caps, Mt/a
+CO2_ANNUAL_TABLE = "research_inputs/co2_v5/CO2_STORAGE_CASES_V5.csv"   # scripts_project/v5_co2_cases_data.py (X10 values)
 
 
 def co2_storage_caps(R: dict, registry: pd.DataFrame):
@@ -61,13 +63,24 @@ def co2_storage_caps(R: dict, registry: pd.DataFrame):
     if src != "eria_gccsi_2024_unified":
         raise ValueError(f"research.s2.co2.storage_potential_source must be eria_gccsi_2024_unified or registry_d1, got {src!r}")
     case = str(R.get("storage_potential_case", "p50"))
-    if case not in CO2_STORAGE_CASES:
-        raise ValueError(f"research.s2.co2.storage_potential_case must be one of {sorted(CO2_STORAGE_CASES)}, got {case!r}")
+    if case not in CO2_STORAGE_CASES and case not in CO2_ANNUAL_CASES:
+        raise ValueError(f"research.s2.co2.storage_potential_case must be one of {sorted(CO2_STORAGE_CASES) + sorted(CO2_ANNUAL_CASES)}, got {case!r}")
     import hashlib
     p = ROOT / R["storage_potential_table"]
     t = pd.read_csv(p, keep_default_na=False).set_index("country")
     if set(t.index) != set(COUNTRIES):
         raise ValueError("CO2 storage table must list the 11 countries exactly")
+    if case in CO2_ANNUAL_CASES:   # V5 X20 (3-1, decision 244): the (ii) low cases are annual caps (Mt/a), read directly; potentials stay the P50 column
+        pa = ROOT / CO2_ANNUAL_TABLE
+        ta = pd.read_csv(pa, keep_default_na=False).set_index("country")
+        col = CO2_ANNUAL_CASES[case]
+        if set(ta.index) != set(COUNTRIES) or (ta[col].astype(str).str.strip() == "").any():
+            raise ValueError(f"{CO2_ANNUAL_TABLE}: the 11 countries with a value in {col} are required (no blank cell)")
+        pots = {c: float(t.at[c, "potential_gt"]) for c in sorted(COUNTRIES)}
+        caps = {c: float(ta.at[c, col]) * 1e6 for c in sorted(COUNTRIES)}
+        return caps, pots, dict(source=src, case=case, table=str(R["storage_potential_table"]), table_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),
+                                annual_table=CO2_ANNUAL_TABLE, annual_table_sha256=hashlib.sha256(pa.read_bytes()).hexdigest(),
+                                status={c: str(t.at[c, "status"]) for c in sorted(COUNTRIES)}, rule=f"annual cap = {col} (Mt/a) x 1e6, not divided by storage_years")
     col = CO2_STORAGE_CASES[case]
     pots = {c: float(t.at[c, col]) if str(t.at[c, col]) != "" else float(t.at[c, "potential_gt"]) for c in sorted(COUNTRIES)}
     caps = {c: pots[c] * 1e9 / years for c in sorted(COUNTRIES)}

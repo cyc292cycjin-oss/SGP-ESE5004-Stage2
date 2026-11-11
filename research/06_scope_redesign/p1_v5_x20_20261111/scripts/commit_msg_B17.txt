@@ -1,0 +1,21 @@
+X20 3-1 (decision 244, Q13): CO2 storage low cases (ii), extra-ASEAN capacity key
+
+research.s2.co2.storage_potential_case gains iea_anchor_200 ((ii-a) ASEAN
+200 Mt/a, ID 90) and project_ramp_377 ((ii-b) announced capacity x
+1.10^20): annual caps read directly in Mt/a from research_inputs/co2_v5/
+CO2_STORAGE_CASES_V5.csv (scripts_project/v5_co2_cases_data.py, the X10
+values; every country present, a blank cell stops the build), not divided
+by storage_years; the potentials stay P50. Main value p50 unchanged.
+
+research.co2.extra_asean_capacity_mt (new key, baseline.yaml): null (main,
+uncapped = 26c2e47d) | one number | {country: Mt/a}; applied as e_nom_max
+of the country extra-ASEAN store (s4c_layers.extra_asean_capacity); 0
+builds neither the store nor its export links (no zero right-hand side, no
+dust-cleanup orphan); no ASEAN total (Owen SHARED rows). Values for X21.
+
+Registry chain rerun (baseline.yaml cited): 2,469 rows; changed source
+SHA256 of v4_biomass_overflow_cap_share (baseline.yaml) and
+v4_pks_in_mill_share (v4_biomass_potential.py, edited in the 1-7 commit
+3abd4f3c). Targeted tests: 91 passed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

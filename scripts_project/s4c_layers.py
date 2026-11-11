@@ -777,6 +777,19 @@ def extra_asean_mode(cfg) -> str:
     return v
 
 
+def extra_asean_capacity(cfg, c: str) -> float | None:
+    """V5 X20 (3-1, decision 244; Q13): research.co2.extra_asean_capacity_mt - null (main: uncapped, the 26c2e47d behaviour) | one number for every
+    country | {country: Mt}; a country missing from the mapping is uncapped. No ASEAN total (an ASEAN-wide right-hand side would be SHARED in the
+    Owen allocation, m12_rhs_audit.py:82-88)."""
+    v = (cfg["research"].get("co2") or {}).get("extra_asean_capacity_mt")
+    if v is None:
+        return None
+    if isinstance(v, dict):
+        x = v.get(c)
+        return None if x is None else float(x)
+    return float(v)
+
+
 def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
     """S4C-4 (decision 89): see the module docstring. S4D-1 (decision 93): export links only at coastal nodes, Lao transit links
     (s4d_layers module docstring)."""
@@ -817,10 +830,17 @@ def apply_extra_asean_storage(n, cfg, registry: pd.DataFrame, nodes) -> dict:
         if not ex and not tn:
             led["countries"][c] = dict(store=None, links=0, inland_nodes=inland, note="no coastal buffered node, no transit")
             continue
+        capx = extra_asean_capacity(cfg, c)   # V5 X20 (3-1, decision 244; Q13): research.co2.extra_asean_capacity_mt (null main = uncapped)
+        if capx == 0.0:   # 0: no store and no export link (an e_nom_max of 0 would be a zero right-hand side; below 1000 t the dust cleanup drops the store only)
+            led["countries"][c] = dict(store=None, links=0, note="research.co2.extra_asean_capacity_mt = 0: no extra-ASEAN store or export link")
+            continue
         sb = f"{EXTRA_ASEAN_CARRIER} {c}"
         add_bus(n, sb, EXTRA_ASEAN_CARRIER, c, "")
         n.add("Store", sb, bus=sb, carrier=EXTRA_ASEAN_CARRIER, e_nom_extendable=True, e_cyclic=False, e_initial=0.0, capital_cost=price, lifetime=years)
         n.stores.loc[sb, ["country", "research_role"]] = [c, "PERMANENT_STORAGE_EXTRA_ASEAN"]
+        if capx is not None:
+            n.stores.loc[sb, "e_nom_max"] = capx * 1e6   # Mt -> t (one model year of injection)
+            led.setdefault("v5_capacity_mt", {})[c] = capx
         n.meta.setdefault("store_power_rules", {})[sb] = "charge_only"
         for node in ex:
             add_link(n, f"{node} co2 export extra-ASEAN", c, EXTRA_ASEAN_LINK, [f"{node} co2 stored", sb], [1.0], capital_cost=0.0, lifetime=years, role="PERMANENT_STORAGE",
