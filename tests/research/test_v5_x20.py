@@ -279,6 +279,58 @@ def test_hydro_inflow_operating_denominator(tmp_path):
     assert e(n) == pytest.approx({"h_op": 660.0, "h_con": 440.0})                                   # all_stock = v4
 
 
+# ---- C-1 new-build hydro candidates: national per-MW inflow (decision 252, L-C10) --------------------------------------------------
+def test_hydro_candidate_unit_inflow(tmp_path):
+    from s4c_layers import apply_hydro_inflow_normalization
+    import v5_layers as L
+    pd.DataFrame(dict(country=["MY"], target_mwh=[1100.0], multiplier=[1.1], status=["REGISTERED"])).to_csv(tmp_path / "T.csv", index=False)
+    (tmp_path / "research_inputs/hydro_v5").mkdir(parents=True)
+    pd.DataFrame(dict(country=["MY", "TH"], unit_inflow_mwh_per_mw=[2.0, 1.0], multiplier=[1.1, 1.1], capacity_source=["Ember median"] * 2, status=["REGISTERED", "NO_CAPACITY"])
+                 ).to_csv(tmp_path / L.HYDRO_CANDIDATE_TABLE, index=False)
+    c = lambda v5: {"research": {"hydro": {"inflow_normalization": "national_observed", "target_table": "T.csv"}, "demand": {"v4": {"enabled": True}, "v5": v5}}}   # noqa: E731
+
+    def net(country="MY"):
+        n = _hydro_net()
+        n.add("StorageUnit", "h_new", bus="A 0", carrier="hydro", p_nom_extendable=True, p_nom_max=100.0, max_hours=10.0)
+        n.add("Generator", "r_new", bus="A 0", carrier="ror", p_nom_extendable=True, p_nom_max=50.0)
+        n.storage_units["country"] = "MY"; n.generators["country"] = "MY"
+        n.storage_units.loc["h_new", "country"] = country; n.generators.loc["r_new", "country"] = country
+        return n
+    stock = lambda n: {k: float(n.storage_units_t.inflow[k].sum()) for k in ("h_op", "h_con")}   # noqa: E731 (snapshot weight 1)
+    n0 = net(); apply_hydro_inflow_normalization(n0, c({"enabled": True, "hydro_candidate_unit_inflow": "operating_only"}), tmp_path)
+    assert float(n0.storage_units_t.inflow["h_new"].sum()) == pytest.approx(100.0 * (1100.0 + 1100.0 * 40 / 60) / 100.0)   # X20 B: per-MW inflow of the corrected stock
+    n1 = net(); led = apply_hydro_inflow_normalization(n1, c({"enabled": True}), tmp_path)   # v5 main = national_capacity
+    assert stock(n1) == pytest.approx(stock(n0))                                                     # existing stock unchanged
+    assert float(n1.storage_units_t.inflow["h_new"].sum()) == pytest.approx(2.0 * 100.0)           # u_c x p_nom_max (sum_t w r = u_c)
+    assert n1.generators_t.p_max_pu["r_new"].tolist() == pytest.approx([0.5] * 4)                 # ror: shape x u_c, clipped at 1 (here 2.0 / 4 = 0.5)
+    nb = {r["name"]: r for r in led["new_build"]}
+    assert nb["h_new"]["cf_after"] == pytest.approx(2.0 / 8760) and nb["h_new"]["cf_stock_derived"] == pytest.approx((1100.0 + 1100.0 * 40 / 60) / 100.0 / 8760)
+    assert led["v5"]["candidate_unit_inflow"]["cf"] == {"MY": pytest.approx(2.0 / 8760)}           # only REGISTERED rows carry a value
+    n2 = net(); apply_hydro_inflow_normalization(n2, c({"enabled": True, "hydro_inflow_multiplier": 1.0}), tmp_path)
+    assert float(n2.storage_units_t.inflow["h_new"].sum()) == pytest.approx(2.0 / 1.1 * 100.0)     # multiplier 1.0 as for the stock
+    with pytest.raises(ValueError, match="no national unit inflow for TH"):
+        apply_hydro_inflow_normalization(net("TH"), c({"enabled": True}), tmp_path)                # a country with candidates and no value stops the build
+    n3 = net(); apply_hydro_inflow_normalization(n3, c({}), tmp_path)                               # v5 off: W14 rule (all-stock per-MW)
+    assert float(n3.storage_units_t.inflow["h_new"].sum()) == pytest.approx(100.0 * 1100.0 / 100.0)
+
+
+def test_hydro_candidate_table_values():
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.HYDRO_CANDIDATE_TABLE, keep_default_na=False).set_index("country")
+    T = pd.read_csv(ROOT / "research_inputs/hydro_v5/HYDRO_NATIONAL_TARGET_S4C2.csv", keep_default_na=False).set_index("country")
+    assert set(t.index) == set(T.index) and (t.status == "REGISTERED").sum() == (T.status == "REGISTERED").sum()   # every registered target has a unit inflow
+    r = t[t.status == "REGISTERED"]
+    assert (r.target_mwh.astype(float) == T.loc[r.index, "target_mwh"].astype(float)).all()         # numerator = the existing stock's national target
+    assert (r.unit_inflow_mwh_per_mw.astype(float) == r.target_mwh.astype(float) / r.capacity_mw.astype(float)).all()
+    assert abs(float(t.at["ID", "cf"]) - 0.59) < 0.01 and abs(float(t.at["MY", "cf"]) - 0.64) < 0.01   # decision 252 expectation
+    ember = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_step4b_20261016/sources_s4b/ember/release_generation_yearly_global.csv")
+    if ember.exists():   # the data script reproduces the committed table (Ember decision-74 file, SHA256 checked inside)
+        import v5_hydro_unit_inflow_data as H
+        iha = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x03_renew_20261111/HYDRO_STOCK_CHECK.csv")
+        b = H.build(ember, iha if iha.exists() else None).set_index("country")
+        assert b.unit_inflow_mwh_per_mw.astype(float).fillna(-1).tolist() == pytest.approx(pd.to_numeric(t.unit_inflow_mwh_per_mw, errors="coerce").fillna(-1).tolist())
+
+
 def test_hydro_spill_tables():
     import v5_layers as L
     su = pd.DataFrame(dict(carrier=["hydro", "hydro", "hydro existing"], p_nom_opt=[50.0, 0.5, 30.0], p_nom_max=[100.0, 10.0, 30.0], bus=["A 0"] * 3), index=["n1", "n2", "e1"])

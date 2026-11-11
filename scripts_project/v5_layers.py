@@ -6,6 +6,7 @@ returns at once with research.demand.v5 disabled (v5_common.V5_OFF), so a v5-off
   apply_solar_cap_scale    1-4  country factor on the ground-mounted solar caps (MY / ID / VN) and the MY open-forest / oil-palm variants
   operating_share          1-5  share of a hydro component's capacity operating in 2025 (identities of existing_unit_components; s4c_layers)
   hydro_spill_tables / hydro_spill_report  1-5  bookkeeping part and true spill of a solved network (s2_solve HYDRO_SPILL.json, v5_hydro_spill.py)
+  hydro_candidate_unit_inflow C-1 per-MW annual inflow of the new-build hydro / ror candidates (decision 252; HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv; s4c_layers)
 """
 from __future__ import annotations
 
@@ -18,6 +19,20 @@ from v5_common import switches
 
 ROOT = Path(__file__).resolve().parents[1]
 GEM_COORD_TABLE = "research_inputs/fleet_v5/GEM_COORD_CORRECTIONS_V5.csv"
+HYDRO_CANDIDATE_TABLE = "research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv"
+
+
+def hydro_candidate_unit_inflow(repo: Path = ROOT, multiplier_one: bool = False) -> dict:
+    """C-1 (decision 252; L-C10): per-MW annual inflow u_c (MWh / MW / a) of the new-build hydro and ror candidates = national target (Ember median x 1.1,
+    the existing stock's target) / national hydro capacity of the same basis (Ember median, IHA 2024 where Ember has none); one rule for the 11 countries
+    (scripts_project/v5_hydro_unit_inflow_data.py). multiplier_one (research.demand.v5.hydro_inflow_multiplier 1.0) divides by the table multiplier as for
+    the stock. Only REGISTERED rows carry a value. Returns dict(u={country: MWh/MW/a}, cf={country: cf}, source={country: capacity source}, table, sha256)."""
+    from v5_common import sha256
+    p = Path(repo) / HYDRO_CANDIDATE_TABLE
+    t = pd.read_csv(p, keep_default_na=False)
+    t = t[t.status == "REGISTERED"]
+    u = {r.country: float(r.unit_inflow_mwh_per_mw) / (float(r.multiplier) if multiplier_one else 1.0) for r in t.itertuples()}
+    return dict(u=u, cf={c: v / 8760.0 for c, v in u.items()}, source={r.country: r.capacity_source for r in t.itertuples()}, table=HYDRO_CANDIDATE_TABLE, sha256=sha256(p))
 
 
 def gem_node_override(df: pd.DataFrame, cfg, repo: Path = ROOT) -> tuple[pd.DataFrame, list]:

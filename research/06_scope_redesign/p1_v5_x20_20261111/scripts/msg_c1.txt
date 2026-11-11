@@ -1,0 +1,12 @@
+X20 C-1（决策 252；L-C10）：新建水电候选单位入流 = 国别目标 ÷ Ember 国别装机（开关 hydro_candidate_unit_inflow）
+
+- 规则（11 国统一）：新建 hydro / ror 候选的每 MW 年入流 = 存量的国别目标（Ember 2019-2025 中位数 x 1.1，与存量相同）
+  ÷ 同年份 Ember 水电装机中位数（Capacity (GW)；缺则 IHA 2024，本次无一国需要）；形状仍取同国已校正存量；ror 截断到 1；
+  存量总入流不变。CF：ID 0.5943、MY 0.6437（审阅端预期约 0.59 / 0.64）、KH 0.4570、LA 0.4834、MM 0.3637、PH 0.4154、VN 0.4562。
+- 开关 research.demand.v5.hydro_candidate_unit_inflow：national_capacity（v5 主值）| operating_only（X20 B 行为）；
+  v5 主集开关 SHA 998bdb12 -> bce04fb1。v5 关闭时不变（W14 行为）。
+- 新数据脚本 scripts_project/v5_hydro_unit_inflow_data.py（Ember 决策 74 文件 SHA256 在脚本内核对）-> research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv。
+- s4c_layers：只在有候选时读表；有候选而无值的国家停止构建；台账记录逐候选的新旧 CF。s2_network：表与台账进 meta v5_x20。
+- 注册表 2,572 -> 2,581 行（v5_hydro_candidate_unit_inflow_rule + 8 国）。测试：test_v5_x20 新增 2 项；定向 82 passed / 2 skipped。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

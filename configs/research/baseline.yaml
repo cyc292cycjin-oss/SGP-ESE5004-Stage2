@@ -556,5 +556,6 @@ research:
       gem_coord_fix: verified             # 2-6: verified (v5 main: GEM_COORD_CORRECTIONS_V5.csv, nodes of the checked units) | gem (v4)
       distribution_grid: lv_pypsa_eur     # 3-4: lv_pypsa_eur (v5 main: electric loads, BEV chargers, heat pumps, electric boilers, electric cooking on LV; distribution grid both ways 0.97) | hv_lossless (v4)
       biomass_residue_fix: corrected      # 1-7: corrected (v5 main: d1_biomass cotton triple count and R-3 group prefixes fixed, BIOMASS_POTENTIAL_2050_V4_T06_V5FIX.csv; table-level key) | v4
-  biomass:                             # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
+      hydro_candidate_unit_inflow: national_capacity   # C-1 (decision 252): national_capacity (v5 main: new-build hydro / ror candidates get national target / Ember national hydro capacity per MW, HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv; existing stock unchanged) | operating_only (X20 B: per-MW inflow of the corrected stock)
+  biomass:                            # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
     missing_cost_rule: null             # zero (v3.1: an empty cost column enters at 0) | proxy (registry biomass_missing_cost_proxy, the uniform proxy of unsourced residues); null = the switch-set value (v4.enabled false -> zero, true -> proxy)

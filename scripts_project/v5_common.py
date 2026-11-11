@@ -6,7 +6,9 @@ research.demand.v5 (configs/research/baseline.yaml):
   Keys (X20 revision numbers): onwind_calibration (1-1), existing_wind_profile (1-2), existing_solar_profile (Q12), offwind_asean_premium_pct (1-3),
   solar_cap_scale_MY / _ID / _VN and solar_landuse_my (1-4), hydro_inflow_denominator / hydro_inflow_multiplier (1-5), geothermal_cap_id (1-6),
   ph_dc_stock (2-1), ac_dedup (2-2), gas_cap_rule (2-3), neu_gas_growth (2-4), lifetime_boundary / geothermal_existing_lifetime (2-5),
-  gem_coord_fix (2-6), distribution_grid (3-4), biomass_residue_fix (1-7).
+  gem_coord_fix (2-6), distribution_grid (3-4), biomass_residue_fix (1-7), hydro_candidate_unit_inflow (C-1, decision 252: national_capacity = per-MW inflow
+  of the new-build hydro / ror candidates = national target / Ember national hydro capacity; operating_only = the per-MW inflow of the corrected
+  same-country stock, i.e. the X20 B behaviour, and with hydro_inflow_denominator all_stock the 26c2e47d behaviour).
   Table-level keys (TABLE_KEYS = neu_gas_growth, biomass_residue_fix): they change the v4 table chain (v4_industry.py), so with v5 enabled they enter
   the v4 switch set as v5_<key> (v4_common.switches) and with it the v4 table folder identity: out_<anchor_mode>_v5 = the v4 main set plus the v5 main
   values of both keys, out_<anchor_mode>_<sha12> otherwise. With v5 disabled the v4 switch set has no v5_ key (folder identity of 26c2e47d).
@@ -27,12 +29,14 @@ V5_OFF = dict(enabled=False, onwind_calibration="ember_country", existing_wind_p
               offwind_asean_premium_pct=0.0, solar_cap_scale_MY=1.0, solar_cap_scale_ID=1.0, solar_cap_scale_VN=1.0, solar_landuse_my="lc100",
               hydro_inflow_denominator="all_stock", hydro_inflow_multiplier=1.1, geothermal_cap_id="resource_potential", ph_dc_stock="frozen_base",
               ac_dedup="frozen_base", gas_cap_rule="marketed", neu_gas_growth="industry_multiplier", lifetime_boundary="strict",
-              geothermal_existing_lifetime=30, gem_coord_fix="gem", distribution_grid="hv_lossless", biomass_residue_fix="v4")
+              geothermal_existing_lifetime=30, gem_coord_fix="gem", distribution_grid="hv_lossless", biomass_residue_fix="v4",
+              hydro_candidate_unit_inflow="operating_only")
 V5_MAIN = dict(enabled=True, onwind_calibration="gwa_cell_ember", existing_wind_profile="best_class", existing_solar_profile="node_average",
                offwind_asean_premium_pct=0.0, solar_cap_scale_MY=1.0, solar_cap_scale_ID=1.0, solar_cap_scale_VN=1.0, solar_landuse_my="lc100",
                hydro_inflow_denominator="operating_only", hydro_inflow_multiplier=1.1, geothermal_cap_id="reserves_2017", ph_dc_stock="ngcp_tdp",
                ac_dedup="dedup_cables", gas_cap_rule="field_status", neu_gas_growth="product", lifetime_boundary="inclusive",
-               geothermal_existing_lifetime=40, gem_coord_fix="verified", distribution_grid="lv_pypsa_eur", biomass_residue_fix="corrected")
+               geothermal_existing_lifetime=40, gem_coord_fix="verified", distribution_grid="lv_pypsa_eur", biomass_residue_fix="corrected",
+               hydro_candidate_unit_inflow="national_capacity")
 TABLE_KEYS = ("neu_gas_growth", "biomass_residue_fix")   # the v5 keys that change the v4 table chain (v4_industry.py): part of the v4 table folder identity
 SWITCH_VALUES = dict(onwind_calibration=("ember_country", "gwa_cell_ember"), existing_wind_profile=("class0", "best_class"),
                      existing_solar_profile=("class0", "node_average", "best_class"), solar_landuse_my=("lc100", "open_forest", "oil_palm"),
@@ -40,7 +44,7 @@ SWITCH_VALUES = dict(onwind_calibration=("ember_country", "gwa_cell_ember"), exi
                      ph_dc_stock=("frozen_base", "ngcp_tdp"), ac_dedup=("frozen_base", "dedup_only", "dedup_cables"),
                      gas_cap_rule=("marketed", "field_status", "reserve_average"), neu_gas_growth=("industry_multiplier", "product"),
                      lifetime_boundary=("strict", "inclusive"), gem_coord_fix=("gem", "verified"), distribution_grid=("hv_lossless", "lv_pypsa_eur"),
-                     biomass_residue_fix=("v4", "corrected"))
+                     biomass_residue_fix=("v4", "corrected"), hydro_candidate_unit_inflow=("operating_only", "national_capacity"))
 NUMERIC = dict(offwind_asean_premium_pct=(0.0, 10.0, 20.0, 30.0), solar_cap_scale_MY=(0.5, 1.0, 2.0), solar_cap_scale_ID=(0.5, 1.0, 2.0),
                solar_cap_scale_VN=(0.5, 1.0, 2.0), hydro_inflow_multiplier=(1.0, 1.1), geothermal_existing_lifetime=(30, 40))
 

@@ -107,6 +107,20 @@ def new_rows() -> Registry:
     rule_row(r, "v5_hydro_spill_bookkeeping_rule", "hydro spill report: bookkeeping part = inflow of the unbuilt new-build reservoir capacity (forced into spill by research_new_hydro_inflow), true "
              "spill = reported - bookkeeping (v5_layers.hydro_spill_tables; regression on W14: F1 526.956 / 519.865 / 7.091 TWh)", "report", "X03 section 5.4", rel(HERE / "v5_layers.py"),
              sha256(HERE / "v5_layers.py"), "241", status="REFERENCE_ONLY")
+    # ---- C-1 (decision 252): national per-MW inflow of the new-build hydro / ror candidates
+    hp = ROOT / "research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv"; hh = sha256(hp); ht = pd.read_csv(hp, keep_default_na=False).set_index("country")
+    rule_row(r, "v5_hydro_candidate_unit_inflow_rule", "research.demand.v5.hydro_candidate_unit_inflow: national_capacity (v5 main, decision 252: per-MW annual inflow of the new-build "
+             "hydro / ror candidates = national target (Ember median 2019-2025 x 1.1, the existing stock's target) / national hydro capacity of the same basis (median Ember 'Capacity (GW)' "
+             "of the same years; IHA 2024 where Ember has none); shape of the same-country stock; ror clipped to 1; existing stock unchanged) | operating_only (X20 B: per-MW inflow of the "
+             "corrected stock)", "national_capacity", "decision 252; LIMITATIONS_V5.md L-C10", rel(HERE / "v5_hydro_unit_inflow_data.py"), sha256(HERE / "v5_hydro_unit_inflow_data.py"), "252")
+    for c in COUNTRIES:
+        x = ht.loc[c]
+        if x.status != "REGISTERED":
+            continue
+        r.add(f"v5_hydro_candidate_unit_inflow_{c}", f"{c} per-MW annual inflow of the new-build hydro / ror candidates (C-1): target {float(x.target_mwh):,.0f} MWh / capacity "
+              f"{float(x.capacity_mw):,.0f} MW ({x.capacity_source}, years {x.capacity_years}); CF {float(x.cf):.4f}" + (f"; IHA 2024 {float(x.iha_2024_mw):,.0f} MW for reference" if str(x.iha_2024_mw) not in ("", "nan") else ""),
+              float(x.unit_inflow_mwh_per_mw), "MWh/MW/a", "B", "Ember yearly electricity data (CC BY 4.0, decision-74 file); IHA 2024 country profiles (X03)",
+              "research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv", hh, country=c, decision_ref="252", status="REGISTERED")
     # ---- 1-6
     g = pd.read_csv(ROOT / "research_inputs/potentials_v5/GEOTHERMAL_ID_POTENTIAL_V5.csv").set_index("case"); hg = sha256(ROOT / "research_inputs/potentials_v5/GEOTHERMAL_ID_POTENTIAL_V5.csv")
     r.add("potential_geothermal_ID_reserves_2017", "ID geothermal reserves 2017 = possible 12,046 + probable 2,493 + proven 2,967 MW (MEMR via ThinkGeoEnergy 2017-09-24; the article total reads 17,501; "

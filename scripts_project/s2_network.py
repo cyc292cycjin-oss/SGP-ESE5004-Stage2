@@ -382,6 +382,11 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
     if v5s["enabled"] and cand_caps and cand_caps.get("v5_geothermal"):   # V5 X20 (1-6)
         v5x["tables"]["geothermal_id_potential"] = cand_caps["v5_geothermal"]["ID"]["table"]; v5x["ledgers"]["geothermal_1_6"] = cand_caps["v5_geothermal"]
     hydro_inflow = apply_hydro_inflow_normalization(n, cfg, repo)   # S4C-2 (decision 83): national hydro inflow = Ember median x 1.1 by capacity share (main); new-build proxies from the corrected country stock
+    if v5s["enabled"] and ((hydro_inflow.get("v5") or {}).get("candidate_unit_inflow")):   # V5 X20 C-1 (decision 252): national per-MW inflow of the new-build candidates
+        cu = hydro_inflow["v5"]["candidate_unit_inflow"]; v5x["tables"]["hydro_candidate_unit_inflow"] = cu["table"]
+        v5x["ledgers"]["hydro_candidate_c_1"] = dict(rule=cu["rule"], cf=cu["cf"], source=cu["source"],
+                                                     candidates={k: dict(cf_after=r["cf_after"], cf_stock_derived=r.get("cf_stock_derived"), p_nom_max=r["p_nom_max"], kind=r["kind"], country=r["country"])
+                                                                 for k, r in ((x["name"], x) for x in hydro_inflow["new_build"])})
     # 4. S2 layers
     co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
     pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),

@@ -425,17 +425,41 @@ def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
             if sel and cap > 0:
                 return sum(new_series[nm] for nm in sel) / cap, scope
         raise ValueError(f"no stock to derive the new-build {kind} inflow for {c}")
+    # V5 X20 C-1 (decision 252): national_capacity = the candidates keep the same-country stock shape, scaled to the national per-MW inflow u_c
+    # (national target / Ember national capacity; v5_layers.hydro_candidate_unit_inflow); the existing stock above is not changed
+    cand = None
+    has_cand = bool(((su.carrier == "hydro") & su.p_nom_extendable & (su.p_nom_max > 0)).any() or ((g.carrier == "ror") & g.p_nom_extendable & (g.p_nom_max > 0)).any())
+    if v5h is not None and s5["hydro_candidate_unit_inflow"] == "national_capacity" and has_cand:   # the table is read only when there are candidates
+        from v5_layers import hydro_candidate_unit_inflow
+        cand = hydro_candidate_unit_inflow(repo, multiplier_one=(v5h["multiplier"] == 1.0))
+        v5h["candidate_unit_inflow"] = dict(rule="national_capacity: per-MW inflow = national target / national hydro capacity (Ember median; IHA 2024 where Ember has none); "
+                                            "shape of the same-country stock; ror clipped to 1", table=cand["table"], sha256=cand["sha256"], cf=cand["cf"], source=cand["source"])
+
+    def scaled(r, c):
+        if cand is None:
+            return r, None
+        if c not in cand["u"]:
+            raise ValueError(f"hydro_candidate_unit_inflow national_capacity: no national unit inflow for {c} ({cand['table']}), but {c} has new-build hydro candidates")
+        e = float((r * w).sum())
+        if e <= 0:
+            raise ValueError(f"hydro_candidate_unit_inflow: zero stock shape for {c}")
+        return r * (cand["u"][c] / e), float(e) / 8760.0
     tie = set(n.meta.get("research_new_hydro_inflow_tie", []))
     for name in su.index[(su.carrier == "hydro") & su.p_nom_extendable & (su.p_nom_max > 0)]:
         c = str(su.at[name, "country"]); r, scope = per_mw(c, "reservoir"); cap = float(su.at[name, "p_nom_max"])
+        r, cf_stock = scaled(r, c)
         old = float((inf[name] * w).sum()) if name in inf else 0.0
         n.storage_units_t.inflow[name] = r * cap
-        led["new_build"].append(dict(name=name, kind="reservoir", country=c, p_nom_max=cap, scope=scope, cf_before=old / (cap * 8760), cf_after=float((r * w).sum()) / 8760, in_inflow_tie=name in tie))
+        led["new_build"].append(dict(name=name, kind="reservoir", country=c, p_nom_max=cap, scope=scope, cf_before=old / (cap * 8760), cf_after=float((r * w).sum()) / 8760, in_inflow_tie=name in tie,
+                                     **({} if cf_stock is None else dict(cf_stock_derived=cf_stock))))
     for name in g.index[(g.carrier == "ror") & g.p_nom_extendable & (g.p_nom_max > 0)]:
         c = str(g.at[name, "country"]); r, scope = per_mw(c, "ror"); cap = float(g.at[name, "p_nom_max"])
+        r, cf_stock = scaled(r, c)
         old = float((pmax[name] * w).sum()) / 8760 if name in pmax else float(g.at[name, "p_max_pu"])
         n.generators_t.p_max_pu[name] = np.minimum(r, 1.0)
-        led["new_build"].append(dict(name=name, kind="ror", country=c, p_nom_max=cap, scope=scope, cf_before=old, cf_after=float((np.minimum(r, 1.0) * w).sum()) / 8760))
+        led["new_build"].append(dict(name=name, kind="ror", country=c, p_nom_max=cap, scope=scope, cf_before=old, cf_after=float((np.minimum(r, 1.0) * w).sum()) / 8760,
+                                     **({} if cf_stock is None else dict(cf_stock_derived=float(np.minimum(r * (cf_stock * 8760.0 / float((r * w).sum())), 1.0).dot(w)) / 8760.0,
+                                                                         cf_unclipped=float((r * w).sum()) / 8760.0))))
     led["totals"] = dict(stock_mw=float(sum(v[2] for v in series.values())), energy_before_twh=sum(v["energy_before_mwh"] for v in led["countries"].values()) / 1e6,
                          energy_after_twh=sum(v["energy_after_mwh"] for v in led["countries"].values()) / 1e6, target_twh=sum(v["target_mwh"] for v in led["countries"].values()) / 1e6,
                          ror_clipped_twh=sum(v["ror_clipped_mwh"] for v in led["countries"].values()) / 1e6,

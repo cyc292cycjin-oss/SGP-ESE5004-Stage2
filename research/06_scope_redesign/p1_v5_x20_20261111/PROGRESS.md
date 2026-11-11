@@ -93,3 +93,13 @@
 | 05:42 | **交付提交 `655fe2ffa2448d8669bbd1d9333d7e6fc70de254`**（80 个文件；模型代码、配置、输入、测试 0 个改动），已推送，`ls-remote` 与 HEAD 一致 | 完成 |
 | 05:44 | **审阅包** `REVIEW_f08b14b0.zip`（`REPORT.md` SHA256 `f08b14b029ad9935517ffd799b8d2f8cec3df569b86381a7391368824a52d725`）：805,018 B，SHA256 `64035b3eb05f7778519f8a60cfdbbd1d0dec2676c0ee841cddb1d1e527b63279`，206 个成员（逐成员字节数、SHA256、CRC32 见包内 `MANIFEST.tsv` 与 `evidence/REVIEW_ZIP_MANIFEST_f08b14b0.txt`），testzip 无错，无网络文件；仓库差异 `26c2e47d..655fe2ff`。泄露扫描（模式只在运行时经环境变量传入）：第 1 次 5 个命中，全部为误报（WSL 主机名就是通用的 `localhost`，命中 `\\wsl.localhost` 路径；差异中 `+@pytest` 装饰器被邮箱模式误配），收窄模式后重新打包，扫描 PASS。包内 `PROGRESS.md` 是本行之前的版本 | 完成 |
 | 05:45 | **B 段完成，请交审阅端审阅。** 待审阅端判断的两项：①5 已投运分母下的 ID / MY 单位入流（L-C10）；①1 候选 CF 相对"GWA 毛值 ÷ r"偏低（L-C11）。`cache/v4solved`（2.62 GB，本步自己从 W14 归档提取的已解网络）待用户决定是否删除 | 停止点 |
+
+## C 段（2026-11-12 06:00 SGT 起；决策第 252 项）
+
+用户转达审阅端验收：B 段通过，偏离接受；暂不建 PR（独立审查后再建）；`cache/v4solved` 保留到独立审查结束。冻结前做 C 段两项：①（水电 L-C10）直接实施；②（陆上风电 L-C11）先写简短规格停下等审阅端确认；两项完成后重建 F1 / F2、本机 56 时段回归（Gurobi ≤ 2 次，Q18 门槛同前）、更新桥表与报告。
+
+| 时间 (SGT) | 事项 | 状态 / 恢复点 |
+|---|---|---|
+| 06:00 | 数据来源核对：新建候选的单位入流现由 `s4c_layers.apply_hydro_inflow_normalization` 的 `per_mw()`（同国已校正存量的每 MW 入流）写入，其余读取点只读 tie 名单或网络自身入流（grep 全部读取点）。Ember 决策 74 文件（`p1_step4b_20261016/sources_s4b/ember/release_generation_yearly_global.csv`，SHA256 `b2ac49fa…` = 注册表）含 `Capacity (GW)` 列；IHA 2024 取 X03 `HYDRO_STOCK_CHECK.csv` | 完成 |
+| 06:05 | **C-1 规则（同口径）：** 单位入流 = 存量的国别目标（Ember 2019–2025 中位数 × 1.1，与存量相同）÷ 同年份 Ember 水电装机中位数（缺则 IHA 2024，本次无一国需要）。结果 CF：ID 0.5943、MY 0.6437（审阅端预期约 0.59 / 0.64，一致，继续）；KH 0.4570、LA 0.4834、MM 0.3637、PH 0.4154、VN 0.4562、TH 0.2651（无候选）；BN / SG / TL 无目标。表 `research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv`（`ce8df05d…`，`logs/81_hydro_c1_data.log`） | 完成 |
+| 06:10 | 实施：开关 `hydro_candidate_unit_inflow`（**national_capacity** / operating_only）进 V5 开关集（主集 SHA `998bdb12…` → `bce04fb1…`）；`s4c_layers` 新建循环：候选保留同国存量形状，缩放到国别单位入流，ror 仍截断到 1，存量不变；只在有候选时读表；缺值国家有候选即停；s2_network 把表与逐候选 CF（新、旧）写进 v5_x20 记录；baseline.yaml v5 段加键；注册表链重跑：2,572 → 2,581 行（新 9 行；`v4_biomass_overflow_cap_share`、`v5_hydro_spill_bookkeeping_rule`、`v5_switch_set` 三行 SHA 随文件变）。定向测试 82 passed / 2 skipped（`logs/ut_c1b.txt`） | 提交中 |
