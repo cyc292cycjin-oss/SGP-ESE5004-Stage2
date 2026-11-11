@@ -1,0 +1,73 @@
+== tracked nc / large files under research_inputs at 26c2e47d (top 15 by size)
+14689422 research_inputs/renewable_v5/offshore_m08a/profiles_offshore_pypsa_eur_v2025_07_c3_3h.nc
+8679955 research_inputs/renewable_v5/profiles_pypsa_eur_c3_3h.nc
+8678622 research_inputs/renewable_v5/profiles_calibrated_modern_c3_3h.nc
+8669493 research_inputs/renewable_v5/profiles_fork_c3_3h.nc
+4937886 research_inputs/renewable_v5/offshore_m08a/profiles_offshore_pypsa_eur_v2025_07_c1_3h.nc
+4329394 research_inputs/assembly_v1/sources/methodology/UNSD_BIOFUEL_COMMODITY_BALANCE.pdf
+3092981 research_inputs/renewable_v5/profiles_pypsa_eur_c1_3h.nc
+3089585 research_inputs/renewable_v5/profiles_fork_c1_3h.nc
+3085605 research_inputs/renewable_v5/profiles_calibrated_modern_c1_3h.nc
+2628693 research_inputs/asset_survival/GEM_FROZEN_IDENTITY_FIELDS.json
+2544948 research_inputs/registry_v5/sources/GEM_GIPT_2026-09_ASEAN11.csv
+1797090 research_inputs/asset_survival/integration_contract.json
+1692232 research_inputs/assembly_v1/sources/SDMX_2019_CAPSULE.json
+1606178 research_inputs/assembly_v1/sources/UNSD_2019_SOURCE_CAPSULE.json
+1470624 research_inputs/registry_v5/DATA_REGISTRY.csv
+== renewable_v5 nc files (tracked?)
+26190 research_inputs/renewable_v5/TYPHOON_FREQ_0P3_IBTRACS_1980_2024.nc
+4937886 research_inputs/renewable_v5/offshore_m08a/profiles_offshore_pypsa_eur_v2025_07_c1_3h.nc
+14689422 research_inputs/renewable_v5/offshore_m08a/profiles_offshore_pypsa_eur_v2025_07_c3_3h.nc
+3085605 research_inputs/renewable_v5/profiles_calibrated_modern_c1_3h.nc
+8678622 research_inputs/renewable_v5/profiles_calibrated_modern_c3_3h.nc
+3089585 research_inputs/renewable_v5/profiles_fork_c1_3h.nc
+8669493 research_inputs/renewable_v5/profiles_fork_c3_3h.nc
+3092981 research_inputs/renewable_v5/profiles_pypsa_eur_c1_3h.nc
+8679955 research_inputs/renewable_v5/profiles_pypsa_eur_c3_3h.nc
+== industry_v4 dirs tracked bytes
+out_ras 0.3 MB 13 files
+out_iid 0.3 MB 13 files
+== .git objects size (common dir)
+263M	/home/jin/research/SGP_ESE5004_Stage2/phase2/model-source/.git/objects
+== s4a_profiles args
+126:    ap.add_argument("--variant", nargs="+", default=["fork"]); ap.add_argument("--classes", type=int, default=1); ap.add_argument("--months", type=int, default=12)
+127:    ap.add_argument("--techs", nargs="+", default=list(TECHS)); ap.add_argument("--output", type=Path, required=True); ap.add_argument("--nprocesses", type=int, default=1)
+128:    ap.add_argument("--alpha-table", type=Path, default=ROOT / "research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA.csv")   # S4B-3 variants with an alpha column
+== s4b_3 args
+scripts_project/s4b_3_wind_calibration.py:91:    ap = argparse.ArgumentParser(); ap.add_argument("--ember", type=Path, required=True); ap.add_argument("--output", type=Path, required=True); a = ap.par
+scripts_project/s4b_3_export.py:26:    ap = argparse.ArgumentParser(); ap.add_argument("--classes", type=int, required=True)
+scripts_project/s4b_3_export.py:27:    ap.add_argument("--onwind-source", type=Path, default=None); ap.add_argument("--base-source", type=Path, default=None)
+== s4a_2 / s4b_1 / s4b_2 args
+scripts_project/s4a_2_fleet_data.py:81:    ap = argparse.ArgumentParser(); ap.add_argument("--network", type=Path, required=True); ap.add_argument("--include-construction", type=int, default=1)
+scripts_project/s4b_1_fleet_data.py:38:    ap = argparse.ArgumentParser(); ap.add_argument("--network", type=Path, required=True); a = ap.parse_args()
+scripts_project/s4b_2_candidates_data.py:72:    ap = argparse.ArgumentParser(); ap.add_argument("--network", type=Path, required=True); a = ap.parse_args()
+== v4_industry args
+743:    p.add_argument("--write-anchor-tables", action="store_true", help="write DEMAND_ANCHOR_V3_SECTOR_FACTORS.csv / DEMAND_ANCHOR_V3_FROZEN.csv (v3.1 RAS dump)")
+744:    p.add_argument("--anchor-mode", default=None, choices=("ras", "iid", "iib", "external"))
+745:    p.add_argument("--set", action="append", default=[], help="switch override key=value (research.demand.v4 keys)")
+746:    p.add_argument("--checkpoints", type=Path, default=None, help="write the cumulative checkpoints S0-S7 into this folder (no table output)")
+747:    p.add_argument("--steps", default="", help="comma-separated steps for --checkpoints")
+748:    p.add_argument("--config-switches", action="store_true", help="take the switch set from the configuration (default: the v4 main set V4_MAIN)")
+749:    p.add_argument("--work", type=Path, default=None)
+== W14 smoke drill memory/time lines
+12:START:2026-11-08T20:48:16Z:commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:repo_commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:mode=only(F1):solve_mode=split:mem_measure=rss/rss:cgroup_root=/sys/fs/cgroup:cgroup_anon_source=none(rss_mode):wait_start_of=none:w
+15:BUILD_F1:exit=0:36s:peak=2.22GiB:lp_bytes=97709092:2026-11-08T20:54:22Z
+19:SOLVE_F1:pid=3592:pgid=3592:profile=formal_barrier_1e6_t16:threads=16:time_limit=3000:wall_cap=3600:network_sha256=86f6d6a0fce2f0e04d12ee7993aee885256fcaadadaeeca308414017738c801d:mem_measure=rss:cgroup_anon_source=none(rss_mode):quota_gib=32:stop_gib=25.60:20
+25:START:2026-11-08T21:01:57Z:commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:repo_commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:mode=only(F2):solve_mode=split:mem_measure=rss/rss:cgroup_root=/sys/fs/cgroup:cgroup_anon_source=none(rss_mode):wait_start_of=none:w
+28:BUILD_F2:exit=0:29s:peak=1.99GiB:lp_bytes=94356707:2026-11-08T21:07:57Z
+32:SOLVE_F2:pid=4733:pgid=4733:profile=formal_barrier_1e6_t16:threads=16:time_limit=3000:wall_cap=3600:network_sha256=24e835f74365f63f6dc2c848f81bb43727e082be6c34f2c3aca0594641b25187:mem_measure=rss:cgroup_anon_source=none(rss_mode):quota_gib=32:stop_gib=25.60:20
+38:START:2026-11-08T21:13:47Z:commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:repo_commit=26c2e47d025fdd4e46cb278718d93aeddabbe984:mode=batch:solve_mode=split:mem_measure=rss/rss:cgroup_root=/sys/fs/cgroup:cgroup_anon_source=none(rss_mode):wait_start_of=none:wait
+45:JOB_START:smoke56:smoke56:F1:jobid=local.smoke:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:nproc=16:ncpus=17:mem_gb=32:walltime=04:00:00:queue=parallel:omp_num_threads=unset:shell=/bin/bash:pbs_o_workdir=/home/jin/v4w14/smoke_20261108T204757Z/pkg:r
+46:PREFLIGHT:smoke56:exit=0:sections=guards,sha,networks,env,profile,code,tools:need_cores=17:need_mem_gib=28:PREFLIGHT OK
+48:RUNNER:smoke56:smoke56:F1:exit=0:seconds=822:status_tail=DONE_ONLY:2026-11-08T21:01:52Z:F1:optimal:label=ACCEPTED_LAYER2:utc=2026-11-08T21:01:52Z
+49:JOB_END:smoke56:smoke56:F1:exit=0:seconds=822:utc=2026-11-08T21:01:52Z
+50:JOB_START:smoke56:smoke56:F2:jobid=local.smoke:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:nproc=16:ncpus=17:mem_gb=32:walltime=04:00:00:queue=parallel:omp_num_threads=unset:shell=/bin/bash:pbs_o_workdir=/home/jin/v4w14/smoke_20261108T204757Z/pkg:r
+51:PREFLIGHT:smoke56:exit=0:sections=guards,sha,networks,env,profile,code,tools:need_cores=17:need_mem_gib=28:PREFLIGHT OK
+52:RUNNER:smoke56:smoke56:F2:exit=0:seconds=710:status_tail=DONE_ONLY:2026-11-08T21:13:42Z:F2:optimal:label=ACCEPTED_LAYER2:utc=2026-11-08T21:13:42Z
+53:JOB_END:smoke56:smoke56:F2:exit=0:seconds=710:utc=2026-11-08T21:13:42Z
+54:JOB_START:smoke56:smoke56:batch:jobid=local.smoke:node=localhost:cpu=13th Gen Intel(R) Core(TM) i7-13620H:nproc=16:ncpus=17:mem_gb=32:walltime=04:00:00:queue=parallel:omp_num_threads=unset:shell=/bin/bash:pbs_o_workdir=/home/jin/v4w14/smoke_20261108T204757Z/pk
+55:PREFLIGHT:smoke56:exit=0:sections=guards,sha,networks,env,profile,code,tools:need_cores=17:need_mem_gib=28:PREFLIGHT OK
+56:RUNNER:smoke56:smoke56:batch:exit=0:seconds=11:status_tail=DONE:2026-11-08T21:13:53Z:unusable=none:utc=2026-11-08T21:13:53Z
+57:JOB_END:smoke56:smoke56:batch:exit=0:seconds=11:utc=2026-11-08T21:13:53Z
+== D2c smoke memory/time
+/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v4_d2c_20261109/logs/build_main.txt:2:BUILD_integrated:0:	Maximum resident set size (kbytes): 1066156::mm:ss or m:ss): 1:26.02:18:34:26

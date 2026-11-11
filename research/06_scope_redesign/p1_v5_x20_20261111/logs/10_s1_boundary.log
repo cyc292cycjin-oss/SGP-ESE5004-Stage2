@@ -1,0 +1,25 @@
+top keys: ['schema', 'target_year', 'weather_year', 'asset_source', 'asset_source_sha256', 'raw_source_hashes', 'original_table_rows', 'raw_evidence_matches', 'records', 'unit_evidence', 'lifetime_decision_file', 'lifetime_decision_sha256', 'note', 'selected_closure_decision', 'selected_closure_inputs', 'asset_specific_lifetime_decisions', 's1_provenance']
+records: 3079 example keys: ['AssetClass', 'AssetID', 'CapacityReconciliation', 'CommissioningEvidenceVerified', 'CommissioningYear', 'ConditionalCalculation', 'ConditionalCapacityQualified', 'ConditionalRetainedMW', 'ConditionalSurvivalStatus', 'CostTreatment', 'Country', 'DecisionBasis', 'Lifetime', 'LifetimeAccepted', 'LifetimeDecisionReference', 'LifetimeSource', 'OriginalCapacity', 'OriginalMappedBus', 'ParentAssetID', 'ParentCapacity', 'ParentCapacityDifference', 'RawUnitID', 'ResourceLimitTreatment', 'RetainedCapacity2050', 'RetirementDerivation', 'RetirementEvidenceVerified', 'RetirementYear', 'Source', 'SourceRow', 'SourceVersion', 'SurvivalStatus', 'Technology']
+
+capacity by SurvivalStatus (MW):
+  SURVIVES_2050: 188,270.4
+  NOT_ACTIVE_2050: 115,846.7
+  UNRESOLVED_COMMISSIONING: 19,596.0
+  NOT_INHERITED_COMMITTED_OR_PLANNED: 7,226.5
+  UNRESOLVED_PHYSICAL_IDENTITY: 2,190.1
+  RETIREMENT_PROVEN_BY_COMMISSIONING_UPPER_BOUND: 1,835.5
+  UNRESOLVED_EXISTING_STATUS: 1,383.0
+  NOT_INHERITED_DUPLICATE_SOURCE: 784.0
+  EXCLUDED_NEVER_COMMERCIAL_OPERATION: 621.0
+
+units with RetirementYear == 2050 (country, technology, status): count, MW
+  ('SG', 'CCGT', 'NOT_ACTIVE_2050'): 2, 800.0
+  ('TH', 'CCGT', 'NOT_ACTIVE_2050'): 1, 670.0
+  ('MY', 'CCGT', 'NOT_ACTIVE_2050'): 2, 507.0
+  ('ID', 'CCGT', 'NOT_ACTIVE_2050'): 2, 466.1
+  ('MM', 'Hard Coal', 'NOT_ACTIVE_2050'): 1, 60.0
+  total MW at the boundary: 2,503.1
+
+geothermal by country: survives 30 a (> 2050), survives 40 a (>= 2050), no commissioning year (MW)
+  ID: 186.0 / 1,051.0 / 171.0
+  PH: 0.0 / 72.0 / 0.0

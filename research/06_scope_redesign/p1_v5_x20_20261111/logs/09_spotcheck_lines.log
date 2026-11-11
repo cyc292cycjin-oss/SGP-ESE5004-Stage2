@@ -1,0 +1,449 @@
+---- scripts_project/s4a_profiles.py:110,121
+def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, column: str) -> tuple[atlite.Cutout, dict]:
+    """S4B-3: copy of the cutout whose wnd100m is multiplied by the country alpha (cell -> country with the largest area share; no country -> 1)."""
+    al = pd.read_csv(table).set_index("country")[column]
+    I = cutout.indicatormatrix(shapes.geometry).toarray().reshape(len(shapes), len(cutout.data.y), len(cutout.data.x))
+    grid = np.ones((len(cutout.data.y), len(cutout.data.x)))
+    best = I.argmax(axis=0); has = I.max(axis=0) > 0
+    for i, c in enumerate(shapes.index):
+        if c in al.index and np.isfinite(al[c]):
+            grid[(best == i) & has] = float(al[c])
+    da = xr.DataArray(grid, coords=dict(y=cutout.data.y, x=cutout.data.x), dims=["y", "x"])
+    out = atlite.Cutout(str(CUTOUT)); out.data = cutout.data.assign(wnd100m=cutout.data["wnd100m"] * da)
+    return out, {str(c): float(al[c]) for c in shapes.index if c in al.index}
+---- scripts_project/s4b_3_wind_calibration.py:38,38
+GWA_WS100 = {"BN": 4.58, "KH": 4.14, "ID": 4.19, "LA": 3.75, "MM": 4.09, "MY": 3.62, "PH": 5.86, "SG": 4.02, "TH": 4.28, "TL": 4.11, "VN": 6.27}   # S4A-1 section 1.3 (GWA 3.3 country land mean, 100 m)
+---- scripts_project/s4b_3_wind_calibration.py:111,111
+    W = ds["wnd100m"].transpose("time", "y", "x").values; w100 = W[:, cells.iy.values, cells.ix.values].astype(np.float64)
+---- scripts_project/s4b_3_wind_calibration.py:145,149
+    key = "alpha_nrel_atb2020_4mw"
+    calc = A[A.calibrated_individually & A[key].notna()]
+    w = S.loc[calc.index, "max_capacity_gw"]; alpha_w = float((calc[key] * w).sum() / w.sum()) if len(calc) else np.nan
+    A["alpha_main"] = np.where(A.calibrated_individually & A[key].notna(), A[key], alpha_w)
+    A["alpha_grade"] = np.where(A.calibrated_individually & A[key].notna(), "B", "C (capacity-weighted alpha of the calibrated countries)")
+---- scripts_project/s4a_fleet.py:92,101
+        elif cls in ("solar existing", "onwind existing", "offwind existing"):
+            tech = {"solar existing": "solar", "onwind existing": "onwind", "offwind existing": "offwind"}[cls]
+            cand = {"solar existing": f"{node} solar-2025", "onwind existing": f"{node} onwind-2025", "offwind existing": f"{node} offwind-ac-2025"}[cls]
+            if cand not in n.generators_t.p_max_pu.columns:
+                led["skipped"].append(dict(node=node, cls=cls, mw=mw, reason="no candidate profile " + cand)); continue
+            fom = cost(costs, tech, "FOM") / 100.0 * cost(costs, tech, "investment"); vom = cost(costs, tech, "VOM")
+            n.add("Generator", name, bus=node, carrier=cls, p_nom=mw, p_nom_extendable=False, capital_cost=0.0, marginal_cost=vom, efficiency=1.0, lifetime=life, build_year=start)
+            n.generators_t.p_max_pu[name] = n.generators_t.p_max_pu[cand].values
+            n.generators.loc[name, ["asset_role", "country", "research_role", "existing_fixed_om_eur_per_mw_year", "existing_annual_fixed_om_eur", "variable_cost_method", "cost_qualification"]] = \
+                ["existing_survivor", c, "EXISTING_FLEET_S4A", fom, fom * mw, "technology-data v0.15.0 VOM (grade B); availability = node candidate profile", "TECHNOLOGY_DATA_V015_GRADE_B"]
+---- scripts_project/s4c_2_data.py:22,22
+MULTIPLIER = 1.1
+---- scripts_project/s4c_2_data.py:39,39
+        rows.append(dict(country=c, years=",".join(str(int(y)) for y in x.Year), n_years=int(len(x)), generation_median_twh=med, target_mwh=med * MULTIPLIER * 1e6, multiplier=MULTIPLIER,
+---- scripts_project/s4c_layers.py:334,334
+def apply_hydro_inflow_normalization(n, cfg, repo) -> dict:
+---- scripts_project/s4c_layers.py:351,351
+    res = su.index[(su.carrier == "hydro existing")]; ror = g.index[(g.carrier == "ror existing")]
+---- scripts_project/s4c_layers.py:364,369
+        caps = np.array([series[x][2] for x in names]); energy = np.array([float((series[x][0] * w).sum()) for x in names])
+        if c not in tgt:
+            raise ValueError(f"no national hydro target for {c} (stock {caps.sum():.0f} MW)")
+        T = tgt[c]
+        if mode == "national_observed":
+            target_u = T * caps / caps.sum()
+---- scripts_project/s4b_candidates.py:189,201
+def install_new_hydro_inflow_tie(n):
+    """Usable inflow of every capped new reservoir <= inflow per MW x built capacity: spill_t + r_t p_nom >= inflow_t."""
+    if getattr(n, "_research_hydro_tie_model", None) is n.model:
+        raise ValueError("New hydro inflow hook already installed")
+    m = n.model; names = n.meta.get("research_new_hydro_inflow_tie", [])
+    inflow = n.get_switchable_as_dense("StorageUnit", "inflow")
+    spill = m["StorageUnit-spill"]; p_nom = m["StorageUnit-p_nom"]
+    import xarray as xr
+    for name in names:
+        cap = float(n.storage_units.at[name, "p_nom_max"]); q = inflow[name]
+        r = xr.DataArray((q / cap).values, coords={"snapshot": n.snapshots}, dims=["snapshot"]); rhs = xr.DataArray(q.values, coords={"snapshot": n.snapshots}, dims=["snapshot"])
+        m.add_constraints(spill.sel(StorageUnit=name) + r * p_nom.sel({"StorageUnit-ext": name}) >= rhs, name=f"research_new_hydro_inflow-{name}")
+    n._research_hydro_tie_model = m
+---- scripts_project/s4b_2_candidates_data.py:46,47
+    ("ID", "geothermal"): (23590.0, "B", "potential_geothermal_ID_resource_potential", "Badan Geologi / PSDMBP 2024-08-26"),
+    ("MY", "geothermal"): (229.0, "B", "potential_geothermal_MY_myrer", "SEDA MyRER (Peninsular 162 + Sabah 67 MW)"),
+---- scripts_project/s4b_2_candidates_data.py:89,93
+    # PH geothermal retiring before 2050 (S1 30 a): rebuilt at the same site
+    phg = gem[(gem.iso == "PH") & (gem.Type == "geothermal") & (gem.Status == "operating") & gem["Start year"].notna()].copy()
+    phg = phg[phg["Start year"] + 30 <= 2050]
+    m = phg.apply(lambda r: nearest_node(nodes, r.iso, r.Latitude, r.Longitude), axis=1, result_type="expand"); phg["node"] = m[0]
+    rebuild = phg.groupby("node")["Capacity (MW)"].sum()
+---- scripts_project/s4b_2_candidates_data.py:124,124
+                    caps.append(dict(rec, tech="geothermal", cap_mw=max(0.0, p - stock(c, "geothermal existing")), basis=f"{s}: {p:,.0f} - stock {stock(c, 'geothermal existing'):,.0f}", grade=g, raw=p - stock(c, "geother
+---- scripts_project/s4f_layers.py:80,90
+def apply_max_extension(n, cfg, registry: pd.DataFrame, repo: Path = ROOT) -> dict:
+    """S4F-1 (decision 96): see the module docstring. Call after the cross-border switches (the remaining lines / DC links)."""
+    mode = max_extension_mode(cfg); led = dict(mode=mode)
+    if mode == "none":
+        n.meta["research_max_extension"] = led
+        return led
+    maxext = float(registry.loc[MAX_EXTENSION_PARAM, "value"])
+    dc = n.links.index[n.links.carrier == "DC"]
+    n.lines["s_nom_max"] = n.lines["s_nom"] + maxext
+    n.links.loc[dc, "p_nom_max"] = n.links.loc[dc, "p_nom"] + maxext
+    if (n.lines.s_nom_min > n.lines.s_nom_max).any() or (n.links.loc[dc, "p_nom_min"] > n.links.loc[dc, "p_nom_max"]).any():
+---- scripts_project/s4f_layers.py:132,162
+def apply_th_my_stock(n, corridors: pd.DataFrame, cfg, repo: Path = ROOT):
+    """S4F-2 a (decision 97 a): returns (corridor table, ledger). Checks the frozen-base values before changing them."""
+    mode = th_my_stock_mode(cfg); led = dict(mode=mode)
+    if mode == "frozen_base":
+        n.meta["research_th_my_stock"] = led
+        return corridors, led
+    path = str(_net(cfg)["th_my_stock_table"])
+    t = pd.read_csv(repo / path, dtype={"component": str})
+    corridors = corridors.copy(); rows = []
+    for _, r in t.iterrows():
+        typ, name = str(r.component_type), str(r.component)
+        df = n.df(typ)
+        if name not in df.index:
+            raise ValueError(f"TH-MY correction: {typ} {name} not in the frozen base")
+        nom = "s_nom" if typ == "Line" else "p_nom"
+        before = float(df.at[name, nom + "_min"])
+        if abs(before - float(r.frozen_base_mw)) > 1e-6:
+            raise ValueError(f"TH-MY correction: {typ} {name} has {before} MW, table says {r.frozen_base_mw}")
+        sel = (corridors.component_type == typ) & (corridors.component.astype(str) == name)
+        if r.action == "remove":
+            n.mremove(typ, [name]); corridors = corridors[~sel]
+        elif r.action == "set_capacity":
+            v = float(r.corrected_mw)
+            df.loc[name, [nom, nom + "_min"]] = v
+            corridors.loc[sel, "capacity_2025_mw"] = v; corridors.loc[sel, "nominal_mw_in_base"] = v
+        elif r.action != "keep":
+            raise ValueError("unknown TH-MY action " + str(r.action))
+        rows.append(dict(component_type=typ, component=name, action=str(r.action), frozen_base_mw=before, corrected_mw=float(r.corrected_mw), grade=str(r.grade)))
+    led.update(table=path, rows=rows, th_my_total_before_mw=float(sum(x["frozen_base_mw"] for x in rows)), th_my_total_after_mw=float(sum(x["corrected_mw"] for x in rows)))
+    n.meta["research_th_my_stock"] = led
+    return corridors.reset_index(drop=True), led
+---- scripts_project/s4j_layers.py:75,80
+            cap = float(n.links.at[k, "p_nom_max"])
+            if not (cap < float("inf")):
+                raise ValueError(f"DC link {k} has no finite extension limit")
+            pairs.append(dict(dc_bus=bus, dc_link=k, b2b=c, b2b_p_nom_before=float(n.links.at[c, "p_nom"]), b2b_p_nom_after=cap, dc_p_nom=float(n.links.at[k, "p_nom"]),
+                              dc_p_nom_max=cap, b2b_capital_cost=float(n.links.at[c, "capital_cost"]), b2b_extendable=False))
+            n.links.loc[c, ["p_nom", "p_nom_extendable", "p_min_pu", "p_max_pu", "efficiency"]] = [cap, False, -1.0, 1.0, 1.0]
+---- scripts_project/s4j_layers.py:128,145
+        bidir = idx[n.links.loc[idx, "p_min_pu"] < 0]
+        oneway = idx.difference(bidir)
+        n.links.loc[bidir, "p_min_pu"] = 0.0
+        rev = n.links.loc[bidir].copy().rename(columns={"bus0": "bus1", "bus1": "bus0"})
+        rev["capital_cost"] = 0.0; rev["length"] = 0.0; rev["reversed"] = True
+        if "existing_annual_fixed_om_eur" in rev:
+            rev["existing_annual_fixed_om_eur"] = 0.0
+        rev.index = [x + REV for x in bidir]; rev.index.name = "Link"
+        if set(rev.index) & set(n.links.index):
+            raise ValueError(f"{car}: reverse link name exists already")
+        rev_all.append(rev)
+        rows[car] = dict(links=int(len(idx)), bidirectional_split=int(len(bidir)), one_way_kept=sorted(map(str, oneway)), **par,
+                         efficiency_min=float(n.links.loc[idx, "efficiency"].min()), efficiency_max=float(n.links.loc[idx, "efficiency"].max()))
+    if rev_all:
+        R = pd.concat(rev_all)
+        n.import_components_from_dataframe(R[[c for c in R.columns if c in n.links.columns]], "Link")
+        n.links.loc[R.index, "reversed"] = True
+    n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool)
+---- scripts_project/s4a_2_fleet_data.py:34,34
+LIFETIME = {"Hard Coal": 45, "Lignite": 45, "Natural Gas": 40, "Oil": 40, "Hydro": 100, "Nuclear": 50, "Geothermal": 30, "Solar": 25, "Wind": 25, "Solid Biomass": 20, "Biogas": 20, "Waste": 25}
+---- scripts_project/s4a_2_fleet_data.py:91,91
+    op["age_status"] = np.where(op["Start year"].isna(), "UNRESOLVED_COMMISSIONING", np.where(op.retire_year > 2050, "SURVIVES_2050", "NOT_ACTIVE_2050"))
+---- scripts_project/asset_survival.py:18,26
+    if retirement is not None and r.get('RetirementEvidenceVerified') is True:basis='VERIFIED_RETIREMENT_RECORD'
+    elif r.get('Lifetime') is not None and r.get('LifetimeAccepted') is True:
+        retirement=float(commissioning)+float(r['Lifetime']);basis='DERIVED_FROM_ACCEPTED_LIFETIME'
+    else:return dict(out,SurvivalStatus='UNRESOLVED_RETIREMENT_OR_LIFETIME')
+    if not math.isfinite(float(commissioning)) or not math.isfinite(float(retirement)) or retirement<=commissioning:raise ValueError('Invalid lifetime boundary')
+    survives=commissioning<=year<retirement
+    return dict(out,RetirementYear=retirement,RetirementDerivation=basis,SurvivalStatus='SURVIVES_2050' if survives else 'NOT_ACTIVE_2050',RetainedCapacity2050=capacity if survives else 0.)
+
+def remaining_resource(total,survivors,meaning):
+---- scripts_project/m08b_demand.py:324,324
+    m_ind_raw = {c: (tfa[c]["Industry"] / t19[c]["Industry"] if t19[c]["Industry"] > 0 else None) for c in ASEAN}
+---- scripts_project/m08b_demand.py:335,335
+            m_ind = m_neu = m_ind_raw[c]; mult_src = "ras_industry_anchor / 2019 industry energy use"
+---- scripts_project/m08b_demand.py:383,395
+        # ---- DFX F2.4: ammonia feedstock gas deducted from the NEU natural-gas rows (floored at 0; the truncated amount is reported) ------------
+        nh3_t = float(out_by[c]["ammonia_2050_mt"]) * 1e6
+        gas_ded = nh3_t * AMMONIA_GAS_MWH_PER_T
+        gas_idx = [i for i in dem.index[m & (dem.sector == NEU_SECTOR) & (dem.carrier == "gas") & (dem.account == NEU_GAS_ACCOUNT)] if new.at[i, "value_2050_mwh"] != ""]
+        gas_before = float(sum(float(new.at[i, "value_2050_mwh"]) for i in gas_idx))
+        gas_after = max(0.0, gas_before - gas_ded); gas_trunc = max(0.0, gas_ded - gas_before) if gas_ded > 0 else 0.0
+        if gas_ded > 0 and gas_before > 0:
+            fac = gas_after / gas_before
+            for i in gas_idx:
+                new.at[i, "value_2050_mwh"] = repr(float(float(new.at[i, "value_2050_mwh"]) * fac))
+                new.at[i, "growth_method"] = (new.at[i, "growth_method"] + f"; minus ammonia feedstock gas {nh3_t:.6g} t NH3 x {AMMONIA_GAS_MWH_PER_T} MWh/t = {gas_ded:.6g} MWh (DFX F2.4), "
+                                              + (f"truncated at 0 ({gas_trunc:.6g} MWh not deductible)" if gas_trunc > 0 else "not truncated"))
+        old_base = float(pd.to_numeric(dem[m & is_el & dem.sector.isin(BASE_SECTORS)].value_2050_mwh, errors="coerce").fillna(0).sum())
+---- scripts_project/s3_layers.py:96,116
+    v4t = v4_tables(cfg, repo)
+    caps_path = (v4t["gas_caps"] if (v4t and v4t["gas_caps"]) else G["production_caps"])
+    led["production_caps_table"] = caps_path
+    caps = pd.read_csv(repo / caps_path, keep_default_na=False)
+    load_shares = electricity_load_shares(n, nodes); shares = dict(load_shares); alloc_mode = str(G.get("production_node_allocation", "load_shares")); alloc_used = {}
+    if alloc_mode == "gem_fields":   # S4A-2: GEM GOGET field production shares (nearest node); countries without a field keep the load shares
+        gs = pd.read_csv(repo / G["gem_field_shares"])
+        for c, d in gs.groupby("country"):
+            tot = float(d.share_in_country.sum())
+            if tot > 0 and all(nd in n.buses.index for nd in d.node):
+                shares[c] = {str(nd): float(s) / tot for nd, s in zip(d.node, d.share_in_country)}; alloc_used[c] = "gem_fields"
+    elif alloc_mode != "load_shares":
+        raise ValueError("Unknown research.s3.gas.production_node_allocation " + alloc_mode)
+    ensure_carrier(n, "gas wellhead"); ensure_carrier(n, "gas production"); ensure_carrier(n, "gas production delivery")
+    n.meta.setdefault("external_annual_caps", {})
+    prod_led = {}
+    for r in caps.itertuples():
+        cap = float(r.cap_mwh_per_year); c = r.country
+        fid = r.fugitive_factor_id
+        if cap <= 0 or c not in shares:
+            prod_led[c] = dict(cap_mwh=cap, nodes=0, fugitive_t_per_mwh=None, note="no domestic production (cap 0) -> no wellhead generators; fugitive row not applicable")
+---- scripts_project/v4_common.py:60,100
+
+# switch defaults = v3.1 (every v4 rule off); the v4 main set (decision 211) is V4_MAIN
+V31 = dict(enabled=False, base="v3_1", residue_boundary=False, id_paper_fuelwood="purchased", household_gasoline="none", rail_parent="in_d1",
+           captive_coal=False, products=False, vn_same_run=False, bio_cap_share=1.0, biomass_potential="v3", gas_caps="gross",
+           industry_curves="flat", mm_gasoline=False, hvc_basis="b", missing_cost_rule="zero", meoh_per_tco2="pypsa_eur", source_band_basis="s30",
+           lng_regas_adder="m08a")
+V4_MAIN = dict(enabled=True, base="sdmx_2019", residue_boundary=True, id_paper_fuelwood="residue", household_gasoline="id_to_road", rail_parent="children_only",
+               captive_coal=True, products=True, vn_same_run=True, bio_cap_share=0.99, biomass_potential="v4_adjusted_t06", gas_caps="marketed",
+               industry_curves="g5_main", mm_gasoline=False, hvc_basis="b", missing_cost_rule="proxy", meoh_per_tco2="stoichiometric", source_band_basis="post_product",
+               lng_regas_adder="asean_tariffs")
+SWITCH_VALUES = dict(base=("v3_1", "sdmx_2019"), id_paper_fuelwood=("residue", "purchased", "residue_literal"), household_gasoline=("none", "id_to_road"),
+                     rail_parent=("in_d1", "children_only"), biomass_potential=("v3", "v4_adjusted", "v4_adjusted_t04", "v4_adjusted_t05", "v4_adjusted_t06"), gas_caps=("gross", "marketed"),
+                     industry_curves=("flat", "g5_main", "all_flat"), hvc_basis=("b", "a"), missing_cost_rule=("zero", "proxy"),
+                     meoh_per_tco2=("pypsa_eur", "stoichiometric"), source_band_basis=("s30", "post_product"), lng_regas_adder=("m08a", "asean_tariffs"))
+MEOH_STOICH_ROW = "ammonia_methanol_MWh_MeOH_per_tCO2_stoichiometric"   # V4 D2a: registry row of the stoichiometric value (v4_d1_registry.py)
+LNG_REGAS_ROW = "v4_lng_regas_adder_asean_tariffs"   # V4 D2b (section 4.1): registry row of the ASEAN regulated-tariff regasification adder (v4_d2b_registry.py)
+# research.demand.v4.biomass_potential -> potential table of the build (None = the v3.1 table BIOMASS_POTENTIAL_2050.csv)
+BIOMASS_POTENTIAL_FILES = {"v3": None, "v4_adjusted": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4.csv",
+                           "v4_adjusted_t04": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T04.csv",   # V4 D2a (T04, decision 220): switch alternative
+                           "v4_adjusted_t05": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T05.csv",   # V4 D2b (T05, decision 221): high-sensitivity switch value since D2c
+                           "v4_adjusted_t06": "research_inputs/biomass_v5/BIOMASS_POTENTIAL_2050_V4_T06.csv"}   # V4 D2c (T06, decision 223): v4 main
+
+
+def switches(cfg: dict | None = None, overrides: dict | None = None) -> dict:
+    """Effective switch set from research.demand.anchor_mode + research.demand.v4 (+ research.biomass.missing_cost_rule) of the composed configuration:
+    v4.enabled false -> every rule at its v3.1 value (the other v4 keys are ignored); v4.enabled true -> the listed v4 keys (missing keys = the v4
+    main set V4_MAIN). research.biomass.missing_cost_rule, when not null, overrides the switch-set value in both cases (V4 D1)."""
+    R = (cfg or {}).get("research") or {}
+    d = R.get("demand") or {}
+    v = copy.deepcopy(d.get("v4") or {})
+    if v.get("enabled"):
+        s = dict(V4_MAIN); s.update(v)
+    else:
+        s = dict(V31)
+    s["anchor_mode"] = str(d.get("anchor_mode", "ras"))
+    mc = (R.get("biomass") or {}).get("missing_cost_rule")
+    if mc is not None:
+        s["missing_cost_rule"] = str(mc)
+    s.update(overrides or {})
+    check(s)
+    return s
+---- scripts_project/s2_solve.py:281,281
+        n.meta.update(solver_allowed=True, artifact_role=a.label + "_UNSOLVED", s2_solve_authorization=a.authorization, s2_solve_label=a.label)
+---- scripts_project/s2_solve.py:449,449
+    n.meta["artifact_role"] = a.label + "_SOLVED"; n.meta["result_label"] = a.label
+---- scripts_project/s2_network.py:310,320
+    n = pypsa.Network(str(electric_base)); assert_input_only(n)
+    if n.meta.get("asset_qualification") != "SOURCE_QUALIFIED_ELECTRIC_BASE_UNSOLVED":
+        raise ValueError("Electric base is not the source-qualified asset")
+    rename_map = rename_legacy_buses(n)
+    renewable = apply_renewable_profiles(n, cfg, repo)   # S4A-1 (L14): rebuilt wind / solar profiles per research.renewable (original keeps the electric base untouched)
+    corridors_path, domestic_path = corridor_tables(cfg)   # S4E-1 (decision 94): research.corridors.adjacency_completion on -> CORRIDORS_S4E1.csv + domestic candidates
+    corridors = pd.read_csv(repo / corridors_path, float_precision="round_trip")
+    corridors, optional_corridors = extend_optional_corridors(corridors, cfg, repo)   # S4F-2 d (decision 97 d): SG-VN / SG-KH second-batch candidates (off in the main run)
+    corridors, th_my = apply_th_my_stock(n, corridors, cfg, repo)   # S4F-2 a (decision 97 a): TH-MY stock aligned to APG 380 MW (duplicates removed, line 91 = 80 MW); frozen_base = comparison
+    apg_added = add_apg_corridor_lines(n, corridors)   # S3-0 (decisions 59/62): APG #11 TH-MM (0 MW, candidate) and #17 LA-MM (30 MW stock) absent from the frozen base; S4E-1 land-adjacency AC candidates
+    s4e_corridors = dict(mode=corridor_mode(cfg), table=corridors_path, table_sha256=sha(repo / corridors_path), ac_added=len(apg_added),
+---- scripts_project/s2_network.py:349,360
+    geo = add_existing_geothermal(n, costs, survival_json, AEO8_GEOTHERMAL_CF, AEO8_GEOTHERMAL_CF_SOURCE, bus_mapping=contract.get("mapping", {}))
+    geo["bus_mapping_source"] = dict(path=str(contract_path), sha256=sha(contract_path))
+    fleet = add_gem_fleet(n, costs, cfg, repo)   # S4A-2 (L15): GEM units in service in 2050 missing from the frozen stock; S4B-1 adds construction units without start year
+    fleet["removed"] = remove_not_operating_units(n, cfg, repo)   # S4B-1 (decision 77): frozen-stock units not operating in GIPT 2026 removed (data correction)
+    fleet["phs_reclass"] = reclassify_phs_stock(n, costs, cfg, repo)   # V4 D2a (decision 220, section 3.3): frozen PHS groups holding conventional units (Bhumibol) split; null = follows v4.enabled
+    vintage = apply_existing_vintage_costs(n, cfg, repo)   # M08a A3 (decision 131): existing stock priced with technology-data v0.15.0 of its commissioning year (author_v0_13_2 = former)
+    fleet["vintage_costs"] = {k: v for k, v in vintage.items() if k != "table"}
+    cand_caps = apply_candidate_caps(n, cfg, repo, nodes) if "candidates" in R else None   # S4B-2 (decisions 78, 79): geothermal / new hydro / new PHS caps (proxies from the stock above), nuclear plan caps switch
+    hydro_inflow = apply_hydro_inflow_normalization(n, cfg, repo)   # S4C-2 (decision 83): national hydro inflow = Ember median x 1.1 by capacity share (main); new-build proxies from the corrected country stock
+    # 4. S2 layers
+    co2 = add_co2_layer(n, costs, S2, registry, nodes, cc, candidates=candidates)
+    pipelines = dict(topology=P.get("topology", "h2_pipeline_routes"), length_factor=float(P.get("length_factor", 1.25)), length_factor_source=P.get("length_factor_source", ""),
+---- scripts_project/s2_network.py:400,420
+    lao_vn = apply_lao_vn_store(n, cfg, registry)   # S4F-2 c (decision 97 c): Lao rail transit to the Vietnamese coast, then the Vietnamese national store (trade)
+    lao_th = apply_lao_th_store(n, cfg, registry)   # S4G-2 (decision 99 b): existing_port sensitivity only - Lao transit ending at a Thai port, then the Thai national store
+    liquids = add_liquid_shipping(n, cfg, registry)   # V3 (decision 161): ships between the national liquid buses, Lao rail transit (asean_pool = v2)
+    cost_s4c1 = apply_cost_layer_s4c1(n, costs, cfg, repo)   # S4C-1 (decision 82) + supplement 01 (decision 16): electric-base candidates on the cost layer, offshore connection cost, corridor subsea shares
+    # 5. network switches, transmission, carbon metadata
+    tags = tag_cross_border(n)
+    xb = apply_cross_border_switches_s2(n, R["cross_border"], corridors, R["existing_cross_border_electricity"], costs)
+    lv = set_transmission_s2(n, R["transmission"])
+    n.meta["transmission_limit"] = jsonable(lv)
+    max_ext = apply_max_extension(n, cfg, registry, repo)   # S4F-1 (decision 96): PyPSA-Eur individual line / DC-link extension limit (lines.max_extension = 20000 MW, increment); apg_plans = sensitivity
+    dc_conv = apply_dc_converter_rule(n, cfg)   # S4J-3 rewritten (decisions 105 b, 107 a): research.network.th_my_hvdc - TH-MY DC bidirectional, converter B2B fixed at the DC extension limit (before the lossy split)
+    losses = apply_transmission_losses(n, cfg)   # S4J-2 (decision 105 a): PyPSA-Eur transmission losses (DC efficiency, H2 / gas compression, lossy bidirectional split; AC losses at solve time) | none
+    ac_losses = apply_ac_losses(n, cfg, losses)   # S4K-1 (decision 108): research.network.ac_losses - AC linear loss proxy (per-line lambda, hook research_ac_loss_proxy) | pypsa_tangent (S4J) | none
+    dedicated = add_dedicated_plant_lines(n, cfg, repo, costs, R["existing_cross_border_electricity"])   # V3 X1b (decisions 172, 173): fixed Lao IPP export lines, not in the disconnected network
+    carbon_meta = install_carbon_metadata(n, R["carbon"])
+    scaling = apply_cost_scaling(n, R["cost_scaling"])
+    typhoon = apply_typhoon_premium(n, cfg, repo)   # S4B-4 (decision 76): off (main) | on (+25 % capital cost of wind candidates at typhoon-exposed nodes; implemented only)
+    fuel_prices = check_fuel_prices(n, cfg, registry, cost_ledger)   # S4C-0 (decision 85): one WEO scenario for gas / oil / coal, network prices = registry values (asserted)
+    finance = apply_wacc_mode(n, costs, cfg, repo)   # S4C-0 (decision 90): uniform (main) | country_specific (implemented only)
+    dust = apply_dust_cleanup(n, cfg)   # S4L-1 (decision 113 (1)): research.numerics.dust_cleanup off (default) | on - near-zero inventory always, cleanup when on (last layer: after every component-adding layer)
+    if gap_diagnostic:
+---- scripts_project/s2_network.py:422,424
+    n.meta.update(**jsonable(dict(artifact_role=("GAP_DIAGNOSTIC_UNSOLVED" if gap_diagnostic else "S2_SCENARIO_UNSOLVED"), asset_role="S2_SCENARIO_UNSOLVED", stage="S2", skeleton_status=S2["status"],
+                                  scenario=scenario, solver_allowed=False, scientific_results_allowed=False, fullsc_network_complete=False, input_coverage_complete=False,
+                                  research_config=R, research_config_sha256=config_sha(R), research_config_subset_sha256=config_subset_sha256(R),   # M08a A8: GATES_V6 G2.2 subset hash
+---- scripts_project/s2_network.py:449,449
+                                  interim_notice="S2_SECTOR_COUPLED_SMOKE: smoke-test structure; results carry no scientific meaning before the cloud run (decision 47)")))
+---- scripts_project/s2_network.py:495,510
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(); p.add_argument("--repo", type=Path, default=HERE.parent); p.add_argument("--scenario", required=True, choices=["integrated", "disconnected", "baseline"]); p.add_argument("--output", typ
+    p.add_argument("--electric-base", type=Path, default=None); p.add_argument("--allocation", type=Path, default=None); p.add_argument("--survival", type=Path, default=None)
+    p.add_argument("--no-daily", action="store_true"); p.add_argument("--gap-diagnostic", action="store_true"); p.add_argument("--estimate-only", action="store_true")
+    p.add_argument("--override", action="append", default=[], help="research config override key=value (dotted path under research, e.g. s3.fuel_carbon_mode=producer_credit); recorded in the receipt")
+    a = p.parse_args(); repo = a.repo.resolve()
+    if a.estimate_only:
+        print(json.dumps(estimate_memory(a.output))); sys.exit(0)
+    eb = a.electric_base or repo / "results_project/assembly_v1/final_assets/electric_base_2050_unsolved.nc"
+    al = a.allocation or repo / "results_project/assembly_v1/final_allocation"
+    sv = a.survival or repo / "results_project/s1/S1_SELECTED_ASSET_SURVIVAL_2050.json"
+    hydro = json.loads((repo / "research_inputs/asset_survival/hydro_decisions.json").read_text())
+    n, r = build_scenario_s2(repo, a.scenario, a.output, eb, al, hydro, sv, daily=not a.no_daily, gap_diagnostic=a.gap_diagnostic, overrides=a.override)
+    print(json.dumps(dict(status=r["status"], network=r["network"]["sha256"], components=r["network"]["components"], seconds=round(r["build_seconds"], 1))))
+---- scripts_project/v5/gates_v6.py:34,43
+SUBSET_KEYS_GATES_V6 = ("scenario", "cross_border", "fuels.price_scenario", "finance", "sector", "s3", "renewable", "fleet", "nuclear", "candidates", "hydro",
+                        "hydrogen", "cost_layer.active", "numerics", "network", "corridors", "bunkers", "co2", "s2", "cost_scaling", "carbon", "demand",
+                        "transmission", "existing_cross_border_electricity", "solver.scaling", "solver.interior")
+# ... plus the keys that also change the network / LP but are not in that list (M08a A8, by the G2.2 purpose "the configuration subset that
+# decides the network and the LP"; GATES_V6.md unchanged, listed for the user's confirmation): the whole cost_layer (rebase_index, layer files,
+# smr_cost_source, aeo8_price_year_factor - the literal list has cost_layer.active only), site_candidates, and the new variant sections
+# disconnected / coalition (decision 132). Excluded as in GATES_V6: solver.profile, solver.profiles, solver.acceptance, solver.run_rules,
+# stage / status labels, config_overrides (their effect is in the values).
+SUBSET_KEYS_M08A_ADDITIONS = ("cost_layer", "site_candidates", "disconnected", "coalition", "liquids")   # liquids: V3 (decision 161), decides the network
+SUBSET_KEYS = SUBSET_KEYS_GATES_V6 + SUBSET_KEYS_M08A_ADDITIONS
+---- scripts_project/s2_layers.py:187,204
+def geothermal_unit_table(survival_json: Path) -> pd.DataFrame:
+    S = jload(survival_json)
+    rec = [r for r in S["unit_evidence"]["records"] if r.get("Technology") == "Geothermal"]
+    cols = ["AssetID", "ParentAssetID", "Country", "OriginalCapacity", "CommissioningYear", "RetirementYear", "Lifetime", "LifetimeSource",
+            "SurvivalStatus", "OriginalMappedBus", "Source", "AgeBasis", "S1LifetimeRerun"]
+    df = pd.DataFrame(rec)
+    for c in cols:
+        if c not in df:
+            df[c] = ""
+    df = df[cols].copy()
+    df["in_service_2050"] = df.SurvivalStatus == "SURVIVES_2050"
+    df["judgement"] = np.where(df.SurvivalStatus == "SURVIVES_2050", "commissioning + 30 a > 2050: in service",
+                      np.where(df.SurvivalStatus == "NOT_ACTIVE_2050", "commissioning + 30 a <= 2050: retired",
+                      np.where(df.SurvivalStatus == "UNRESOLVED_COMMISSIONING", "no commissioning year: DATA_PENDING, not added", df.SurvivalStatus)))
+    return df
+
+
+def add_existing_geothermal(n, costs, survival_json: Path, capacity_factor: float, cf_source: str, bus_mapping: dict | None = None):
+---- configs/research/baseline.yaml:236,256
+    volume_limit_factor: 2.79                       # sensitivity: factor_of_existing with the frozen 2.79x (S1 inherit_reference_constant / existing volume)
+  renewable:                              # S4A-1 (L14, decisions 70-73): wind / solar availability profiles of the electric-base candidates
+    profile_variant: calibrated_modern    # S4B-3 (decision 74): calibrated_modern = onshore wind from the ERA5 100 m wind speed x country alpha calibrated on Ember 2019-2025 generation at the GEM farms (WIND_CALIBRATION
+    resource_classes: 3                   # S4B-3 (decision 75): 3 = per-node capacity-factor classes, node p_nom_max split by class potential (main) | 1 = one profile per node (PyPSA-Eur default, comparison); profiles_<
+    profile_dir: research_inputs/renewable_v5
+    typhoon_premium: "off"                # S4B-4 (decision 76): off (main) | on = +typhoon_premium_pct capital cost of onshore / offshore wind candidates at nodes with >= 50 % of their wind potential in cells passed by 
+    typhoon_premium_pct: 25.0             # Tarp-Johansen & Clausen (2006) DTU, +20-30 % for typhoon-class turbines; grade C, +-10 pp
+    typhoon_threshold_per_decade: 1.0     # default 1 per 10 years; sensitivity 0.5 / 2 (columns of the exposure table)
+    typhoon_node_table: research_inputs/renewable_v5/TYPHOON_EXPOSURE_BY_NODE.csv
+    offwind_distance_table: research_inputs/renewable_v5/OFFWIND_CONNECTION_DISTANCE_S4C1.csv   # S4C-1 (decision 82; user decision 2026-10-16): distance to shore per node x class, PyPSA-Eur v2025.07.0 formula on the S4A
+    solar_density: {built_mw_per_km2: 4.6, target_mw_per_km2: 5.1}   # M08a A6.1 (M08-7, decisions 129, 131; registry renewable_capacity_per_sqkm_solar): MAIN changes the PV capacity density only - ground-mounted 'solar'
+    offshore_rules: pypsa_eur_v2025_07    # M08a A6.2 (M08-7, decisions 129, 131; registry renewable_offshore_rule): pypsa_eur_v2025_07 (MAIN: PyPSA-Eur v2025.07.0 area rules, config lines 201-260 - fixed-bottom offwind-
+    offshore_dir: research_inputs/renewable_v5/offshore_m08a   # M08a A6.2: profiles_offshore_pypsa_eur_v2025_07_c<N>_3h.nc + OFFSHORE_CLASSES_pypsa_eur_v2025_07.csv (+ local AVAILABILITY_*.nc, SHA256 in the log)
+    clip_p_max_pu: 0.01                   # S4A-4 fix: availability below 0.01 set to 0, as in the original chain (pypsa-asean config.default.yaml 365/383/402/423, build_renewable_profiles.py 846-848) and PyPSA-Eur v2025
+  fleet:                                  # S4A-2 (L15): GEM GIPT 2026-09 units in service in 2050 (S1 lifetime rule) that are absent from the frozen electric base
+    gem_additions: true                   # true = add them (scripts_project/s4a_fleet.py) | false = frozen stock only (former main, comparison)
+    include_construction: true            # S4B-1 (decision 77): GEM status construction counts as 2050 stock when start year + lifetime > 2050 (S1 rule NOT_INHERITED_COMMITTED_OR_PLANNED relaxed for construction only; a
+    table: research_inputs/fleet_v5/FLEET_ADDITIONS_2050.csv
+    include_construction_no_start_year: true   # S4B-1 (decision 77): the 74 construction units without a start year (start >= 2026 from the 2026-09 status, in service in 2050 under every lifetime) are counted; the 170 o
+    construction_no_start_year_table: research_inputs/fleet_v5/FLEET_ADDITIONS_CONSTRUCTION_NO_START_YEAR_2050.csv
+    remove_not_operating_gipt2026: true   # S4B-1 (decision 77): remove the 11 frozen-stock units (2,854 MW) that GIPT 2026-09 lists as cancelled / mothballed / retired / absent (data correction); false = keep (S1 frozen
+---- configs/research/baseline.yaml:272,290
+      p_nom_max: .inf
+      status: PRICED_AEO8_GRADE_C
+  candidates:                             # S4B-2 (decisions 78, 79): caps of the site candidates below and the nuclear plan caps (scripts_project/s4b_candidates.py)
+    hydro_geothermal_cap: national_potential   # national_potential = A/B national potential - 2050 stock, GEM pipeline where no official potential (main) | national_potential_la_mem_18gw (LA hydro 18 GW) | gem_pipeline_
+    pipeline_cap_statuses: announced_preconstruction   # announced + pre-construction (main, confirmed by the user in S4C-0, decision 86 b: construction units are 2050 stock after decision 77) | announced_preconstruction
+    caps_table: research_inputs/potentials_v5/CANDIDATE_CAPS_S4B2_BY_NODE.csv
+    nuclear_cap: none                     # decision 79: none (main, decision 38) | national_plans (PH 4.8, VN 14.4, ID 10, TH 0.6 GW on nuclear + nuclear SMR, others 0; implemented only)
+    nuclear_caps_table: research_inputs/potentials_v5/NUCLEAR_NATIONAL_PLAN_CAPS_S4B2.csv
+  supply:                                 # V4 D2a (decision 220; V4 D1 PHS_PROPOSAL.md section 5): W19 sensitivity switch of the new pumped-storage candidates (scripts_project/s4b_candidates.py phs_asean_case)
+    phs_case: main                        # main (the S4B-2 candidates: GEM pipeline caps, 6 h, round trip 0.75, technology-data 2,297 EUR2020/kW) | asean (sensitivity, not main: Lu et al. 2021 power + energy costs in EU
+    phs_asean_table: research_inputs/potentials_v5/PHS_ASEAN_CASE_V4.csv
+  hydro:                                  # S4C-2 (decision 83; user decision 2026-10-17): data correction of the frozen electric base, deviating from the PyPSA-Earth runoff allocation
+    inflow_normalization: national_observed   # national_observed (main, option B: national inflow of the existing stock = Ember 2019-2025 median hydro generation x 1.1, allocated by capacity share, unit seasonal shape k
+    target_table: research_inputs/hydro_v5/HYDRO_NATIONAL_TARGET_S4C2.csv
+  site_candidates:                        # decision 39 structure; S4B-2 replaces the 0 caps (research.candidates) and sets the availability / inflow proxies
+    geothermal: {carrier: geothermal, component: Generator, cost_technology: geothermal, p_nom_max: 0.0, status: DATA_PENDING}
+    ror_new: {carrier: ror, component: Generator, cost_technology: ror, p_nom_max: 0.0, status: DATA_PENDING}
+    hydro_new: {carrier: hydro, component: StorageUnit, cost_technology: hydro, p_nom_max: 0.0, status: DATA_PENDING}
+    PHS_new: {carrier: PHS, component: StorageUnit, cost_technology: PHS, p_nom_max: 0.0, status: DATA_PENDING}
+---- configs/research/baseline.yaml:318,336
+    electric_base_candidates: cost_layer     # S4C-1 (decision 82, implementing decision 50): cost_layer = the new-build components inherited from the frozen electric base (onwind incl. classes, offwind-ac/dc with the pe
+    registry: research_inputs/registry_v5/DATA_REGISTRY.csv   # (S4C-3: moved back under cost_layer; the S4C-1 insertion of the corridors block had placed it under corridors - read by no script)
+  numerics:                               # S4L-1 (decision 113 (1); scripts_project/s4l_layers.py): near-zero quantities ('dust')
+    dust_cleanup: on                      # on (MAIN since the user decision 2026-10-19 after the S4L report: second-batch main run; S4L-1 inventory + cleanup at the end of the build with the corrected rule: near-zero fi
+    dust_energy_mwh: 1000                 # B-level threshold (S4L-1 point 2): finite pools / renewable potentials with < 1 GWh/a are near-zero; project choice (no PyPSA-Eur equivalent)
+    dust_capacity_mw: 1                   # B-level threshold: extendable candidates with p_nom_max < 1 MW are near-zero; PyPSA-Eur v2025.07.0 renewable.hydro.clip_min_inflow 1.0 MW (config line 300); existing_capacities
+  network:                                # S4F (decisions 96-97; scripts_project/s4f_layers.py)
+    max_extension: pypsa_eur              # S4F-1 (decision 96): pypsa_eur (main: PyPSA-Eur v2025.07.0 lines.max_extension = 20000 MW per line and per DC link above the existing capacity, prepare_sector_network.py limit_
+    apg_plan_caps_table: research_inputs/corridors/APG_PLAN_CAPS_S4F1.csv   # scripts_project/s4f_1_data.py
+    th_my_stock: apg_aims                 # S4F-2 a (decision 97 a): apg_aims (main: th_my_stock_table applied at build time - the four OSM 250878579 HVDC duplicates removed, line 91 = 80 MW (grade C, cluster artefact; =
+    th_my_stock_table: research_inputs/corridors/TH_MY_STOCK_S4F2.csv   # scripts_project/s4f_2_corridors.py
+    readjust_impedance: pypsa_eur         # S4G-1 (decision 98; scripts_project/s4g_layers.py): pypsa_eur (main: the 19 cross-border AC lines changed by the author's readjust_existing_interconnections get num_parallel = 
+    readjust_impedance_table: research_inputs/corridors/READJUST_IMPEDANCE_S4H2.csv   # S4H-2 b (decision 101): the 19 lines of READJUST_IMPEDANCE_S4G1.csv (scripts_project/s4g_1_data.py) + APG17_LA_MM (scripts_project/s
+    la_vn_stock: aims_zero                # S4H-1 (decision 100; scripts_project/s4h_layers.py): aims_zero (main: LA-VN grid-to-grid stock 0 by the AIMS basis; lines 59 / 60 / 63 / 64 as zero-capacity candidates - s_nom 
+    la_vn_stock_table: research_inputs/corridors/LA_VN_STOCK_S4H1.csv   # scripts_project/s4h_1_data.py
+    transmission_losses: pypsa_eur        # S4J-2 (decision 105 a; scripts_project/s4j_layers.py): pypsa_eur (main: PyPSA-Eur v2025.07.0 defaults - AC lines transmission_losses 2 at solve time; DC links 0.98 x 0.977^(L/1
+    th_my_hvdc: bidirectional_fixed_b2b   # S4J-3 rewritten (decisions 105 b, 107 a; scripts_project/s4j_layers.py): bidirectional_fixed_b2b (main: Khlong Ngae - Gurun bidirectional, lossy split with S4J-2; the converter
+    ac_losses: linear_proxy               # S4K-1 (decision 108; scripts_project/s4k_layers.py): linear_proxy (main: every AC line loss >= lambda * |flow|, <= lambda * s_max_pu * s_nom, half withdrawn at each end, PyPSA 
+    ac_loss_reference_loading: 0.5        # S4K-1 (decision 108): alpha, reference loading as a share of the allowed loading of one circuit (main 0.5; sensitivity 1.0 = upper bound)
+---- configs/research/baseline.yaml:370,386
+    lao_transit_mode: rail                # S4E-2 (95 d): rail (main, Stolaroff 2021 0.044 $/t-km + 2 $/t) | truck (sensitivity, 0.111 $/t-km)
+    lao_transit_vn_store: "on"            # S4F-2 c (decision 97 c): on (main: after the rail transit to a Vietnamese coastal node, Lao CO2 can enter the Vietnamese national store - land leg on the link 'CO2 transit rail
+    lao_transit_th_store: "on"            # S4G-2 (decision 99 b): on - effective only with lao_transit_destination = existing_port: LA nodes whose transit ends at a Thai port (Si Racha, TH2 3) can enter the Thai nationa
+  s2:                                   # S2 (2026-10-15): CO2, biomass, demand, industrial heat; S2 instruction + supplement 01
+    status: S2_SECTOR_COUPLED_SMOKE       # replaces INTERIM_S1_SKELETON; still SMOKE_TEST_ONLY until the cloud run (decision 47)
+    co2:
+      storage_years: 50                   # decisions 28-30: annual injection cap = potential / 50 (M08a A5: applied by the build to the unified table)
+      storage_potential_source: eria_gccsi_2024_unified   # M08a A5 (M08-4, decision 131; registry co2_storage_unified_table): eria_gccsi_2024_unified (MAIN: ERIA-GCCSI 2024 P50 - VN 5.30, PH 0.067, MY 128.8, ID 51.3, BN
+      storage_potential_table: research_inputs/co2_v5/CO2_STORAGE_POTENTIAL_UNIFIED.csv   # scripts_project/m08a_data.py a5
+      storage_potential_case: p50         # p50 (main) | low (ERIA P90 + net hydrocarbon) | high (ERIA P10; KH 45 Gt hydrodynamic case) - sensitivities
+      sequestration_cost_eur_per_t: 30.0  # PyPSA-Eur v2025.07.0 config.default.yaml sector.co2_sequestration_cost (grade C, +-50 %); ADB 2013 reference 17 USD2011/t
+      vent: false                         # S4B-0 (decision 70): PyPSA-Eur v2025.07.0 co2_vent false (config line 679); former S2 value true (captured CO2 vented to the capturing country's atmosphere; no confirmed decisi
+      dac: true                           # decision 11; sensitivity switch
+      dac_heat_mode: industry_heat_bus    # R6 (decision 60): DAC heat (technology-data heat-input 1.6 - compression-heat-output 0.2 MWh_th/t) from the node industrial low-T heat bus; electric_cop1 = S2 treatment kept as
+      cc_fraction_source: sector.cc_fraction
+      pipeline_topology: electricity_network_topology   # R5 (decision 59): see research.s2.pipelines (former: h2_pipeline_routes)
+      process_emissions_scope: [minerals, metals]   # 2.A and 2.C on the process bus; 2.B/2.D/4.C covered by feedstock carbon (method question)
+---- configs/research/baseline.yaml:512,536
+    anchor_table: research_inputs/demand_v5/DEMAND_ANCHOR_AEO8_ATS.csv   # M08b B1: per-country anchors; the build checks the base load and transport totals against it (1e-9)
+    nonindustrial_electricity: table_sectors   # S4J-1 (decision 104; scripts_project/s2_layers.py): table_sectors (main: per country the Astar base load is scaled to the 2050 demand-table electricity of the sectors not 
+    anchor_mode: ras                      # V4 W08 (decisions 210 item 3, 211 item 1; scripts_project/m08b_demand.py --anchor-mode): ras = IIa (RAS: AEO8 country TFEC rows and C.3 ASEAN sector columns; v3.1 with the v3.1
+    v4:                                   # V4 W08 (decisions 203-211; W08_IMPLEMENTATION_SPEC.md): enabled false = every v3.1 table (byte-identical; the keys below are ignored); enabled true = the build reads research_i
+      enabled: false
+      base: sdmx_2019                     # sdmx_2019 (UNSD SDMX current database, 210 item 1) | v3_1 (UNdata export capsule)
+      residue_boundary: true              # 210 item 4: self-produced residues (a) out of seed / cache / potential, anchor deduction where the national balance contains them, ID fuelwood (b) outside the anchor
+      id_paper_fuelwood: residue          # 211 item 2: residue (main: ID paper-row fuelwood = self-produced residue (a); the paper share of the 2010-2017 mean leaves the anchor, (b) item 17.67 TWh) | residue_literal (V4
+      household_gasoline: id_to_road      # 210 item 6: ID household motor gasoline -> road | none
+      rail_parent: children_only          # 209 F2 / F6 option b: rail parent out of the seed and the land-transport accounts | in_d1 (v3.1)
+      captive_coal: true                  # 204 / 208: captive coal option (b), reading I (research_inputs/industry_v4/CAPTIVE_COAL_2019.csv)
+      products: true                      # 204, 206, 208, 210 items 5 / 7: cement (ii) / BN (iii), nickel 2023, pulp and paper, HVC, methanol, new plants, MY ammonia duplicate, glass / alumina / copper / lime
+      vn_same_run: true                   # 208: VN hybrid split, T_v2 and decomposition from the same run
+      bio_cap_share: 0.99                 # 209 F7: overflow cap = share x solid-biomass potential (s3_0 and the build)
+      biomass_potential: v4_adjusted_t06  # 209 F3 / F4 + V4 D2a T04 (decision 220) + V4 D2b T05 (decision 221) + V4 D2c T06 (decision 223): v4_adjusted_t06 (main: BIOMASS_POTENTIAL_2050_V4_T06.csv = T05 with the oil pal
+      gas_caps: marketed                  # 209 F1: UNSD marketed production caps, fugitive factor on the same row (GAS_PRODUCTION_CAPS_2050_V4.csv) | gross
+      industry_curves: g5_main            # checklist section 9: G5 MAIN composite curves on industry electricity and the four industrial heat loads | flat | all_flat
+      mm_gasoline: false                  # sensitivity: MM household gasoline also to road
+      hvc_basis: b                        # V4 D1 (decision 214 items 8 / 9): b (main: HVC 2019 deduction 5.191, 2050 vector 4.627 MWh/t) | a (S2 basis 3.269 / 6.103; I2 sensitivity hvc_s2)
+      meoh_per_tco2: stoichiometric       # V4 D2a (decision 220): stoichiometric (v4 main: methanolisation MWh_MeOH per t CO2 = M_MeOH / M_CO2 x LHV_MeOH = 4.0248, registry ammonia_methanol_MWh_MeOH_per_tCO2_stoichiomet
+      lng_regas_adder: asean_tariffs      # V4 D2b (section 4.1): asean_tariffs (v4 main: registry v4_lng_regas_adder_asean_tariffs = median of the regulated LNG terminal tariffs TH ERC / MY ST / SG EMA-SLNG / ID Arun at
+      source_band_basis: post_product     # V4 D2b (section 3, Fable F-02 side note): post_product (v4 main: source band shares of the fixed industrial biomass = cement-kiln biomass / T_v2 biomass after the product vecto
+  biomass:                             # V4 D1 (decisions 212 item 5, 215 item 5): biomass pools whose registry cost is DATA_PENDING (s2_layers.add_biomass_layer)
+    missing_cost_rule: null             # zero (v3.1: an empty cost column enters at 0) | proxy (registry biomass_missing_cost_proxy, the uniform proxy of unsourced residues); null = the switch-set value (v4.enabled fals
