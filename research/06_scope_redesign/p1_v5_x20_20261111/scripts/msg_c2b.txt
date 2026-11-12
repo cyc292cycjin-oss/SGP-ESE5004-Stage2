@@ -1,0 +1,8 @@
+X20 X21 参照水平开关的系数表（决策 253）：ONWIND_REFERENCE_LEVEL_FACTORS_V5.csv
+
+- 由 C-2 预构建 F1（提交 9622c78d，builds/c2pre，2920 88e3ced5）按 ONWIND_SANITY 同一公式生成（v5_onwind_reference_data.py）：
+  v5 / 参照 0.507（BN）- 0.781（TH），全部 < 0.8；系数 = 参照 / v5 = 1.281 - 1.973；SG（34.7 MW）不适用 1 GW 门槛。
+- 主值 disabled 时网络不读此表；注册表 2,588 -> 2,599 行（11 国 SENSITIVITY 行）。测试 test_onwind_reference_table_values。
+- 最终 F1 / F2 与 v5off 在本提交上重建（注册表 SHA 进入网络 meta，所以系数行须在重建前提交）。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -461,6 +461,15 @@ def test_onwind_reference_factors_rule():
     assert not t.at["MY", "threshold_applies"] and t.at["MY", "potential_mw"] == 100.0                # threshold of decision 252: >= 1 GW
 
 
+def test_onwind_reference_table_values():
+    import numpy as np
+    import v5_layers as L
+    t = pd.read_csv(ROOT / L.ONWIND_REFERENCE_TABLE).set_index("country")
+    assert set(t.index) == {"BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN"} and set(t.profile_variant) == {"calibrated_gwa_v5q"}
+    assert np.allclose(t.factor * t.v5_over_reference, 1.0) and (t.factor > 0).all()
+    assert not bool(t.at["SG", "threshold_applies"]) and t.drop("SG").threshold_applies.astype(bool).all()   # decision 252: >= 1 GW
+
+
 def test_subgrid_mean_cf_above_mean_speed_cf_at_low_wind():
     import numpy as np
     from s4b_3_wind_calibration import dea2050_turbine
