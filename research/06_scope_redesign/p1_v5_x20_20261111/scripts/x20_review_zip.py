@@ -37,10 +37,11 @@ def main():
     members = [p for p in sorted(W.glob("*")) if p.is_file() and p.suffix in (".md", ".csv", ".json", ".txt") and not p.name.startswith("REVIEW_")]
     members += [p for p in sorted((W / "evidence").glob("*")) if p.is_file() and not p.name.startswith("REVIEW_ZIP_MANIFEST")]
     members += [p for p in sorted((W / "scripts").glob("*")) if p.is_file() and not p.name.startswith("msg_")]
-    members += [p for p in sorted((W / "smoke56").glob("*")) if p.is_file() and p.suffix in (".txt", ".json")]
-    for rid in ("F1", "F2"):
-        members += [W / "smoke56" / rid / f for f in SMOKE_FILES if (W / "smoke56" / rid / f).exists()]
-        members += [p for p in sorted((W / "smoke56" / rid / "m12_owen").glob("*")) if p.is_file() and p.suffix in (".json", ".csv", ".md")]
+    for sd in ("smoke56", "smoke56_c2"):   # B 段与 C 段回归（C 段 2026-11-12 加入）
+        members += [p for p in sorted((W / sd).glob("*")) if p.is_file() and p.suffix in (".txt", ".json")]
+        for rid in ("F1", "F2"):
+            members += [W / sd / rid / f for f in SMOKE_FILES if (W / sd / rid / f).exists()]
+            members += [p for p in sorted((W / sd / rid / "m12_owen").glob("*")) if p.is_file() and p.suffix in (".json", ".csv", ".md")]
     out = W / f"REVIEW_{rsha[:8]}.zip"
     man, hits = [], []
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:

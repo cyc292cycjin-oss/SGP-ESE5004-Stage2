@@ -19,6 +19,8 @@ import xarray as xr
 
 R = Path("/home/jin/wt_v5_x20"); sys.path.insert(0, str(R / "scripts_project"))
 W = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111")
+import os   # noqa: E402
+MAIN, OFF, TAG = os.environ.get("X20_MAIN", "v5main"), os.environ.get("X20_OFF", "v5off"), os.environ.get("X20_TAG", "")
 X03 = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x03_renew_20261111")
 COUNTRIES = ["BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN"]
 R_FARM = dict(TH=1.07, VN=1.44, PH=1.52)   # GWA gross / observed at the farm points of the three calibrated countries (X20_SPEC.md §5 4 (e), EXACT X03)
@@ -74,22 +76,23 @@ def table(n0, n5, tag) -> list:
         i0 = g0.index[(g0.carrier == "onwind") & g0.p_nom_extendable & (c0 == c)]; i5 = g5.index[(g5.carrier == "onwind") & g5.p_nom_extendable & (c5 == c)]
         if not len(i0) and not len(i5):
             continue
-        add("1-1", 241, "onwind_calibration: ember_country -> gwa_cell_ember", c, "onwind candidate CF, potential-weighted", "fraction",
+        add("1-1 / C-2", "241, 252, 253", "onwind_calibration: ember_country -> gwa_cell_ember; onwind_subgrid quantile10", c, "onwind candidate CF, potential-weighted", "fraction",
             wmean(cf(n0, i0), g0.p_nom_max) if len(i0) else None, wmean(cf(n5, i5), g5.p_nom_max) if len(i5) else None,
-            "renewable_v5/profiles_calibrated_gwa_v5_c3_3h.nc; S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv")
-        add("1-1", 241, "onwind_calibration: ember_country -> gwa_cell_ember", c, "onwind candidate potential (sum p_nom_max)", "MW",
+            "renewable_v5/profiles_calibrated_gwa_v5q_c3_3h.nc; S4A_PROFILE_CLASSES_calibrated_gwa_v5q_c3.csv")
+        add("1-1 / C-2", "241, 252, 253", "onwind_calibration: ember_country -> gwa_cell_ember; onwind_subgrid quantile10", c, "onwind candidate potential (sum p_nom_max)", "MW",
             g0.loc[i0, "p_nom_max"].sum(), g5.loc[i5, "p_nom_max"].sum(), "S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv (class shares x unchanged node potential)",
             "SG: classes 0 and 2 fall below the S4L-1 dust threshold (1 MW / 1 GWh a) and are removed" if c == "SG" else "")
         for k in (0, 1, 2):
             def cls(idx, g):
                 return [x for x in idx if (k == 0 and not str(x).endswith((" c1", " c2"))) or str(x).endswith(f" c{k}") and k > 0]
             a, b = cls(i0, g0), cls(i5, g5)
-            add("1-1", 241, "onwind_calibration", c, f"onwind candidate CF class {k}", "fraction", wmean(cf(n0, a), g0.p_nom_max) if a else None,
-                wmean(cf(n5, b), g5.p_nom_max) if b else None, "profiles_calibrated_gwa_v5_c3_3h.nc", "classes re-binned per node on the v5 cell CFs")
-            add("1-1", 241, "onwind_calibration", c, f"onwind candidate potential class {k}", "MW", g0.loc[a, "p_nom_max"].sum() if a else None,
+            add("1-1 / C-2", "241, 252, 253", "onwind_calibration + onwind_subgrid", c, f"onwind candidate CF class {k}", "fraction", wmean(cf(n0, a), g0.p_nom_max) if a else None,
+                wmean(cf(n5, b), g5.p_nom_max) if b else None, "profiles_calibrated_gwa_v5q_c3_3h.nc", "classes re-binned per node on the v5 cell CFs")
+            add("1-1 / C-2", "241, 252, 253", "onwind_calibration + onwind_subgrid", c, f"onwind candidate potential class {k}", "MW", g0.loc[a, "p_nom_max"].sum() if a else None,
                 g5.loc[b, "p_nom_max"].sum() if b else None, "S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv")
     # ①1 / ①2 existing onshore wind: CF v4 (class0, v4 curve) -> class0 on the v5 curve (only ①1) -> best class on the v5 curve (①1 + ①2)
-    ds = xr.open_dataset(R / "research_inputs/renewable_v5/profiles_calibrated_gwa_v5_c3_3h.nc"); prof = ds["onwind"].to_pandas(); ds.close()
+    pv = (n5.meta.get("research_renewable") or {}).get("profile_variant", "calibrated_gwa_v5")   # C-2: calibrated_gwa_v5q in the final v5 main set
+    ds = xr.open_dataset(R / f"research_inputs/renewable_v5/profiles_{pv}_c3_3h.nc"); prof = ds["onwind"].to_pandas(); ds.close()
     w = n5.snapshot_weightings.generators.values
     for c in COUNTRIES:
         e0 = g0.index[(g0.carrier == "onwind existing") & (c0 == c)]; e5 = g5.index[(g5.carrier == "onwind existing") & (c5 == c)]
@@ -105,10 +108,10 @@ def table(n0, n5, tag) -> list:
         v4cf = wmean(cf(n0, e0), g0.p_nom) if len(e0) else None
         v5cf = wmean(cf(n5, e5), g5.p_nom) if len(e5) else None
         mcf = wmean(mid, g5.p_nom) if len(mid) else None
-        add("1-1", 241, "onwind_calibration (existing wind, class0 kept)", c, "existing onwind CF, p_nom-weighted (v5 stock)", "fraction", v4cf, mcf,
-            "profiles_calibrated_gwa_v5_c3_3h.nc '<node>|0'", "intermediate: v5 curve, v4 class rule (class0); v4_value on the v4 stock")
+        add("1-1 / C-2", "241, 252, 253", "onwind_calibration + onwind_subgrid (existing wind, class0 kept)", c, "existing onwind CF, p_nom-weighted (v5 stock)", "fraction", v4cf, mcf,
+            "profiles_calibrated_gwa_v5q_c3_3h.nc <node>|0", "intermediate: v5 curve, v4 class rule (class0); v4_value on the v4 stock")
         add("1-2", 241, "existing_wind_profile: class0 -> best_class", c, "existing onwind CF, p_nom-weighted (v5 stock)", "fraction", mcf, v5cf,
-            "profiles_calibrated_gwa_v5_c3_3h.nc best class column", "from the class0 intermediate to the best class")
+            "profiles_calibrated_gwa_v5q_c3_3h.nc best class column", "from the class0 intermediate to the best class")
         add("2-5", 244, "lifetime_boundary: strict -> inclusive (GEM additions table)", c, "existing onwind capacity", "MW", g0.loc[e0, "p_nom"].sum(), g5.loc[e5, "p_nom"].sum(),
             "fleet_v5/FLEET_ADDITIONS_2050_V5.csv")
     # Q12 existing solar profile
@@ -136,7 +139,7 @@ def table(n0, n5, tag) -> list:
     nb0 = pd.DataFrame(n0.meta.get("research_hydro_inflow", {}).get("new_build", [])); nb5 = pd.DataFrame(n5.meta.get("research_hydro_inflow", {}).get("new_build", []))
     for (c, kind), d5 in nb5.groupby(["country", "kind"]):
         d0 = nb0[(nb0.country == c) & (nb0.kind == kind)]
-        add("1-5", 241, "hydro_inflow_denominator: all_stock -> operating_only", c, f"new-build {kind} inflow CF, p_nom_max-weighted (research_new_hydro_inflow_tie)", "fraction",
+        add("1-5 / C-1", "241, 252", "hydro_inflow_denominator operating_only; hydro_candidate_unit_inflow national_capacity", c, f"new-build {kind} inflow CF, p_nom_max-weighted (research_new_hydro_inflow_tie)", "fraction",
             float((d0.cf_after * d0.p_nom_max).sum() / d0.p_nom_max.sum()) if len(d0) else None, float((d5.cf_after * d5.p_nom_max).sum() / d5.p_nom_max.sum()),
             "meta research_hydro_inflow.new_build (s4c_layers L411-416)",
             f"{len(d5)} candidates, p_nom_max {d5.p_nom_max.sum():.0f} MW (unchanged); scopes {sorted(set(d5['scope']))}; inflow and p_nom_max written together")
@@ -269,7 +272,7 @@ def main():
     sub = dict(F1="integrated/integrated_2920_3h_unsolved.nc", F2="no_new_xb/no_new_xb_2920_3h_unsolved.nc")
     res = {}
     for tag in ("F1", "F2"):
-        n0 = pypsa.Network(str(W / "builds/v5off" / sub[tag])); n5 = pypsa.Network(str(W / "builds/v5main" / sub[tag]))
+        n0 = pypsa.Network(str(W / "builds" / OFF / sub[tag])); n5 = pypsa.Network(str(W / "builds" / MAIN / sub[tag]))
         res[tag] = pd.DataFrame(table(n0, n5, tag))
         if tag == "F1":
             s = onwind_sanity(n0, n5); s.to_csv(W / "ONWIND_SANITY_V5.csv", index=False, lineterminator="\n"); print(s.round(4).to_string())
@@ -281,7 +284,7 @@ def main():
     diff = m[(m._merge != "both") | ~np.isclose(m.v4_value.astype(float), m.v4_value_F2.astype(float), equal_nan=True, rtol=0, atol=1e-6)
              | ~np.isclose(m.v5_value.astype(float), m.v5_value_F2.astype(float), equal_nan=True, rtol=0, atol=1e-6)]
     chk = dict(rows_F1=len(b), rows_F2=len(f2), differing=diff[key + ["v4_value", "v4_value_F2", "v5_value", "v5_value_F2", "_merge"]].astype(str).to_dict("records"))
-    (W / "evidence/X20_BRIDGE_F2_CHECK.json").write_text(json.dumps(chk, indent=1) + "\n")
+    (W / f"evidence/X20_BRIDGE_F2_CHECK{TAG}.json").write_text(json.dumps(chk, indent=1) + "\n")
     print("rows", len(b), "F2 differing rows", len(chk["differing"]))
     print(b[b.delta.abs() > 1e-9].groupby("revision").size().to_string())
 

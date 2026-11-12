@@ -19,7 +19,9 @@ import pypsa
 R = Path("/home/jin/wt_v5_x20")
 sys.path.insert(0, str(R / "scripts_project"))
 W = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111")
-B = W / "builds/v5main"; B1 = W / "builds/v5off"; T56 = W / "trunc56"
+import os   # noqa: E402
+MAIN, OFF, TAG = os.environ.get("X20_MAIN", "v5main"), os.environ.get("X20_OFF", "v5off"), os.environ.get("X20_TAG", "")   # C segment: c2main / c2off / _C2
+B = W / "builds" / MAIN; B1 = W / "builds" / OFF; T56 = W / "trunc56"
 TRUNK = sorted(f"{c} biomass oil_palm_trunk" for c in ("ID", "KH", "MY", "PH", "TH"))
 
 
@@ -163,7 +165,7 @@ def main():
         print(tag, "C1", r["C1_industry_loads_vs_summary_max_abs_mwh"], "C2", r["C2_ev_vs_land_x_ev_factor_max_rel"], "C3", r["C3_max_ratio"], r["C3_no_new_zero_margin_pool"],
               "C4", r["C4_gas_caps_total_twh"], r["C4_gas_generators"], "C6v5", r["C6v5_meta"]["passed"], "C9", r["C9_trunk_at_proxy"], "C12", r["C12_lng_mc_change_max_dev_vs_v5off"], flush=True)
         del n365, n1; gc.collect()
-        cw = cut56(p, T56 / f"v5main_{sc}_56.nc"); co = cut56(q, T56 / f"v5off_{sc}_56.nc")
+        cw = cut56(p, T56 / f"{MAIN}_{sc}_56.nc"); co = cut56(q, T56 / f"{OFF}_{sc}_56.nc")
         a56 = pypsa.Network(cw["file"]); o56 = pypsa.Network(co["file"])
         w = a56.snapshot_weightings
         pools_unscaled = bool(np.array_equal(a56.stores.e_initial.to_numpy(), n.stores.e_initial.to_numpy()) and np.array_equal(a56.stores.e_nom.to_numpy(), n.stores.e_nom.to_numpy()))
@@ -173,8 +175,8 @@ def main():
                         pools_unscaled_vs_2920=pools_unscaled, static_checks=s56)
         print(tag, "T56", cw["sha256"][:12], "v5off", co["sha256"][:12], "weights", t56[tag]["weights_all_8760_over_56"], "pools unscaled", pools_unscaled, "C6v5", s56["C6v5_meta"]["passed"], flush=True)
         del a56, o56, n; gc.collect()
-    (W / "evidence/V5_STATIC_W14CHECKS.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
-    (W / "evidence/V5_TRUNC56.json").write_text(json.dumps(t56, indent=1, default=float) + "\n")
+    (W / f"evidence/V5_STATIC_W14CHECKS{TAG}.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
+    (W / f"evidence/V5_TRUNC56{TAG}.json").write_text(json.dumps(t56, indent=1, default=float) + "\n")
 
 
 if __name__ == "__main__":

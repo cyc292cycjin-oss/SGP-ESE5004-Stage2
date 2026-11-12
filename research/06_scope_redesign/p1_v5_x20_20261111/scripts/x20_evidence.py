@@ -37,7 +37,7 @@ def jl(p: Path):
 
 ev = dict(created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), instruction=rec(D / "V5_X20_INSTRUCTION.md", D),
           branch=git("branch", "--show-current"), base_commit=BASE, head_at_evidence=git("rev-parse", "HEAD"),
-          build_and_solve_commit="b05753a1c3e2ebf0689c2c2a5f6550bbafe6d1d7",
+          build_and_solve_commit="b05753a1c3e2ebf0689c2c2a5f6550bbafe6d1d7", final_build_and_solve_commit_c_segment="645c37e9505baf00bb64df51689d9c89f68ad08a",
           commits=[dict(sha=l.split(" ", 1)[0], subject=l.split(" ", 1)[1]) for l in git("log", "--reverse", "--format=%H %s", f"{BASE}..HEAD").splitlines()],
           note="the delivery commit that carries this file is recorded in PROGRESS.md (last row) and in the ledger entry")
 # code, configuration, tests and inputs changed since the W14 package commit
@@ -48,7 +48,7 @@ for l in git("diff", "--name-status", BASE, "HEAD", "--", "scripts_project", "co
 ev["changed_files_vs_w14"] = ch
 ev["changed_files_count"] = {k: sum(1 for x in ch if x["path"].startswith(k)) for k in ("scripts_project", "configs", "tests", "research_inputs")}
 # networks (D drive)
-ev["networks"] = [rec(p, D) for p in sorted(list((D / "builds/v5main").glob("*/*_unsolved.nc")) + list((D / "builds/v5off").glob("*/*_unsolved.nc")) + list((D / "trunc56").glob("*.nc")))]
+ev["networks"] = [rec(p, D) for p in sorted(list((D / "builds/v5main").glob("*/*_unsolved.nc")) + list((D / "builds/v5off").glob("*/*_unsolved.nc")) + list((D / "builds/c2main").glob("*/*_unsolved.nc")) + list((D / "builds/c2off").glob("*/*_unsolved.nc")) + list((D / "trunc56").glob("*.nc")))]
 # downloads of this step
 ev["downloads"] = [rec(p, D) for p in sorted((D / "downloads").rglob("*")) if p.is_file()]
 # deliverables, evidence, scripts
@@ -58,6 +58,7 @@ ev["scripts"] = [rec(p, D) for p in sorted((D / "scripts").glob("*")) if p.is_fi
 # summaries
 ev["tests"] = dict(base=dict(head="e4b590f8", result="1 failed / 875 passed / 56 skipped / 5 deselected", log="logs/ut_full_base.txt"),
                    v5=dict(head="b05753a1", result="1 failed / 919 passed / 55 skipped / 5 deselected", log="logs/ut_full_v5.txt"),
+                   v5_final_c_segment=dict(head="645c37e9", result="1 failed / 927 passed / 55 skipped / 5 deselected", log="logs/ut_full_v5_C2.txt"),
                    failed_both="tests/research/test_s1_built_networks.py::BuiltNetworks::test_static_validation_passes_on_reload")
 zs = jl(D / "evidence/ZERO_SLACK_CHECK_V5.json") or {}
 ev["static"] = dict(zero_slack_passed=zs.get("passed"), s3_6=(jl(D / "evidence/S3_6_GATES_V5.json") or {}).get("all_passed", "see file"),
@@ -71,6 +72,18 @@ for rid in ("F1", "F2"):
         v6 = jl(D / "smoke56" / rid / "V6_ACCEPTANCE.json") or {}
         sm[rid]["v6_label"] = v6.get("label") or v6.get("acceptance") or v6.get("decision")
 ev["smoke56"] = sm
+sm2 = {}
+for rid in ("F1", "F2"):
+    r = jl(D / "smoke56_c2" / rid / "SOLVE_RECEIPT.json")
+    if r:
+        sm2[rid] = {k: r.get(k) for k in ("scenario", "solver_profile", "status", "termination_condition", "objective", "objective_lp", "solve_seconds", "peak_rss_bytes", "decision", "optimize_calls", "retry")}
+        sm2[rid]["input_network"] = (r.get("input_network") or {}).get("sha256")
+        sm2[rid]["v6_label"] = (jl(D / "smoke56_c2" / rid / "V6_ACCEPTANCE.json") or {}).get("label")
+ev["smoke56_c_segment"] = sm2
+ev["smoke56_c_segment_status_file"] = (D / "smoke56_c2/STATUS.txt").read_text().splitlines() if (D / "smoke56_c2/STATUS.txt").exists() else None
+zs2 = jl(D / "evidence/ZERO_SLACK_CHECK_V5_C2.json") or {}
+ev["static_c_segment"] = dict(zero_slack_passed=zs2.get("passed"), files=sorted(str(x.relative_to(D)) for x in (D / "evidence").glob("*_C2.*")))
+ev["environment_audit"] = dict(file="evidence/WINDOWS_PYTHON_RERUN.json", all_equal=(jl(D / "evidence/WINDOWS_PYTHON_RERUN.json") or {}).get("all_equal"))
 ev["smoke56_status_file"] = (D / "smoke56/STATUS.txt").read_text().splitlines() if (D / "smoke56/STATUS.txt").exists() else None
 (D / "EVIDENCE.json").write_text(json.dumps(ev, indent=1, default=str) + "\n")
 print(json.dumps({k: (v if not isinstance(v, list) else f"{len(v)} items") for k, v in ev.items() if k not in ("smoke56_status_file",)}, indent=1, default=str)[:4000])

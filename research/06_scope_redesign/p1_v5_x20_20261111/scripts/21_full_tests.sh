@@ -4,7 +4,7 @@
 set -u
 TAG=${1:?tag}
 R=/home/jin/wt_v5_x20; PY=/home/jin/miniforge3/envs/pypsa-earth/bin/python
-D=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111; LOG=$D/logs/ut_full_$TAG.txt
+D=/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111; LOG=$D/logs/ut_full_$TAG${X20_TAG:-}.txt
 MAIN=/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model
 cd $R || exit 1
 [ "$(ps -eo args= | grep -cE '[s]2_solve\.py|[g]urobi_cl|[s]2_network\.py')" = 0 ] || { echo "REFUSED: a solve or build is running" | tee $LOG; exit 2; }
@@ -18,7 +18,7 @@ export PYTHONHASHSEED=0 PROJ_DATA=/home/jin/miniforge3/envs/pypsa-earth/share/pr
 # pytest 的捕获临时文件不能放在 9p（/mnt/d）上：TMPDIR 与 basetemp 用 WSL /tmp，跑完记录体积后删除
 BT=/tmp/x20_pytest_$TAG; rm -rf "$BT"
 if [ "$TAG" = base ]; then export V4_D2A_BUILD=$MAIN/results_project/v4w14/builds/main/integrated/integrated_365_24h_unsolved.nc
-else export V4_D2A_BUILD=$D/builds/v5main/integrated/integrated_365_24h_unsolved.nc; fi
+else export V4_D2A_BUILD=$D/builds/${X20_MAIN:-v5main}/integrated/integrated_365_24h_unsolved.nc; fi
 echo "HEAD $(git rev-parse HEAD) V4_D2A_BUILD=$V4_D2A_BUILD" >> $LOG
 start=$(date +%s)
 $PY -m pytest -q -p no:cacheprovider --basetemp=$BT tests/research --ignore=tests/research/test_m12_allocation.py \

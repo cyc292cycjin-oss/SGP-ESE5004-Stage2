@@ -11,7 +11,9 @@ import pandas as pd
 
 D = Path("/mnt/d/ResearchWorkspaces/ASEAN/work/p1_v5_x20_20261111")
 RP = Path("/home/jin/research/SGP_ESE5004_Stage2/phase2/research_model/results_project/v4d2c/smoke56")
-RUNS = dict(F1=(D / "smoke56/F1", RP / "v4d2c_F1"), F2=(D / "smoke56/F2", RP / "v4d2c_F2"))
+import os   # noqa: E402
+SMOKE, TAG = os.environ.get("X20_SMOKE", "smoke56"), os.environ.get("X20_TAG", "")   # C segment: smoke56_c2 / _C2 (also compared with the B-segment smoke56)
+RUNS = dict(F1=(D / SMOKE / "F1", RP / "v4d2c_F1"), F2=(D / SMOKE / "F2", RP / "v4d2c_F2"))
 W14_EXPECTED = dict(F1=363190038821.0828, F2=376143650003.4369)   # W14 HPC package smoke expectation = D2c smoke objectives (W14 §2.3)
 PLAYERS = ["BN", "ID", "KH", "LA", "MM", "MY", "PH", "SG", "TH", "TL", "VN", "BUNKER"]
 
@@ -55,8 +57,14 @@ for rid, (v5d, v4d) in RUNS.items():
     for p in PLAYERS:
         x, y = a["owen_allocation_alpha_half_eur"].get(p), b["owen_allocation_alpha_half_eur"].get(p)
         rows.append(dict(run=rid, player=p, quantity="Owen allocation alpha 0.5", v4_d2c_eur=y, v5_eur=x, v4_sign=sign(y), v5_sign=sign(x)))
-bn5, bn4 = jl(D / "smoke56/M12_BENEFIT/BENEFIT.json") or {}, jl(RP / "M12_BENEFIT/BENEFIT.json") or {}
+bn5, bn4 = jl(D / SMOKE / "M12_BENEFIT/BENEFIT.json") or {}, jl(RP / "M12_BENEFIT/BENEFIT.json") or {}
 res["B6"] = dict(v5=bn5.get("b6_eur"), v4_d2c=bn4.get("b6_eur"))
+if SMOKE != "smoke56":   # C segment: the B-segment smoke for comparison
+    res["B6"]["b_segment"] = (jl(D / "smoke56/M12_BENEFIT/BENEFIT.json") or {}).get("b6_eur")
+    for rid in ("F1", "F2"):
+        bo = (jl(D / "smoke56" / rid / "SOLVE_RECEIPT.json") or {}).get("objective")
+        res[rid]["b_segment_objective"] = bo
+        res[rid]["objective_minus_b_segment_eur"] = (res[rid]["v5"]["objective"] - bo) if bo and res[rid]["v5"]["objective"] else None
 for p in PLAYERS:
     def ben(bb):
         ow = bb.get("owen") or {}
@@ -65,13 +73,17 @@ for p in PLAYERS:
     x, xl, xh = ben(bn5); y, yl, yh = ben(bn4)
     rows.append(dict(run="F2-F1", player=p, quantity="Owen benefit alpha 0.5 (disconnected - integrated)", v4_d2c_eur=y, v5_eur=x, v4_sign=sign(y), v5_sign=sign(x),
                      v4_interval_signs=f"{sign(yl)}/{sign(yh)}", v5_interval_signs=f"{sign(xl)}/{sign(xh)}"))
-t = pd.DataFrame(rows); t.to_csv(D / "SMOKE56_OWEN_SIGNS_V5.csv", index=False, lineterminator="\n")
+t = pd.DataFrame(rows)
+if SMOKE != "smoke56" and (D / "SMOKE56_OWEN_SIGNS_V5.csv").exists():   # B-segment signs for comparison
+    bs = pd.read_csv(D / "SMOKE56_OWEN_SIGNS_V5.csv", keep_default_na=False)[["run", "player", "quantity", "v5_sign"]].rename(columns={"v5_sign": "b_segment_sign"})
+    t = t.merge(bs, on=["run", "player", "quantity"], how="left")
+t.to_csv(D / f"SMOKE56_OWEN_SIGNS_V5{TAG}.csv", index=False, lineterminator="\n")
 res["owen_sign_changes"] = t[(t.v4_sign != t.v5_sign)][["run", "player", "quantity", "v4_sign", "v5_sign"]].to_dict("records")
 # new-build hydro (research_new_hydro_inflow_tie candidates) built in the 56-snapshot solutions, v5 vs v4 (L-C10 signal; record only)
 import pypsa   # noqa: E402
 hy = []
 for rid, (v5d, v4d) in RUNS.items():
-    for lab, d in (("v5", v5d), ("v4_d2c", v4d)):
+    for lab, d in (("v5", v5d), ("v4_d2c", v4d)) + ((("b_segment", D / "smoke56" / rid),) if SMOKE != "smoke56" else ()):
         f = sorted(d.glob("*_SMOKE_TEST_ONLY_solved.nc"))
         if not f:
             continue
@@ -80,10 +92,10 @@ for rid, (v5d, v4d) in RUNS.items():
         for c, r in g.iterrows():
             hy.append(dict(run=rid, set=lab, country=c, new_hydro_cap_mw=float(r.cap_mw), new_hydro_built_mw=float(r.built_mw), built_share=float(r.built_mw / r.cap_mw) if r.cap_mw else None))
         del n
-H = pd.DataFrame(hy); H.to_csv(D / "evidence/SMOKE56_NEW_HYDRO_BUILT.csv", index=False, lineterminator="\n")
+H = pd.DataFrame(hy); H.to_csv(D / f"evidence/SMOKE56_NEW_HYDRO_BUILT{TAG}.csv", index=False, lineterminator="\n")
 res["new_hydro_built"] = H.pivot_table(index=["run", "country"], columns="set", values="new_hydro_built_mw").round(1).reset_index().to_dict("records") if len(H) else None
 res["note"] = "SMOKE_TEST_ONLY: no quantitative conclusion is drawn from the 56-snapshot runs (instruction section 3 step 6)"
-(D / "evidence/SMOKE56_V5_RESULTS.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+(D / f"evidence/SMOKE56_V5_RESULTS{TAG}.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
 print(json.dumps({k: v for k, v in res.items() if k in ("F1", "F2")}, indent=1, default=str)[:5000])
 print("B6", res["B6"]); print("sign changes", res["owen_sign_changes"])
 print(t.to_string())
