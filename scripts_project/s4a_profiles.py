@@ -69,8 +69,14 @@ VARIANTS = {
         "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_main",
                        alpha_table="research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv", cell_factor="research_inputs/renewable_v5/WIND_GWA_CELL_FACTOR_V5.nc"),
     },
+    # V5 X20 C-2 (decision 252, X20_C2_ONWIND_SUBGRID_SPEC.md): as calibrated_gwa_v5, but the cell CF is the area-weighted mean over the 10 equal-area quantile bins
+    # of the GWA pixel / ERA5 wind-speed ratio (WIND_GWA_CELL_QUANTILES_V5.nc): cf_c(t) = sum_q w_q,c PC(alpha_c f_q,c v_c(t)); same alpha table (calibration unchanged)
+    "calibrated_gwa_v5q": {
+        "onwind": dict(method="wind", turbine="DEA2050", correction_factor=1.0, add_cutout_windspeed=True, alpha="alpha_main",
+                       alpha_table="research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv", cell_quantiles="research_inputs/renewable_v5/WIND_GWA_CELL_QUANTILES_V5.nc"),
+    },
 }
-NON_ATLITE_KEYS = ("alpha", "cf_only", "alpha_table", "cell_factor")   # spec keys of this script, not passed to atlite
+NON_ATLITE_KEYS = ("alpha", "cf_only", "alpha_table", "cell_factor", "cell_quantiles")   # spec keys of this script, not passed to atlite
 
 
 def node_regions(nodes: pd.DataFrame, shapes: gpd.GeoDataFrame, kind: str) -> gpd.GeoDataFrame:
@@ -126,7 +132,7 @@ def alpha_cutout(cutout: atlite.Cutout, shapes: gpd.GeoDataFrame, table: Path, c
         if c in al.index and np.isfinite(al[c]):
             grid[(best == i) & has] = float(al[c])
     if cell_factor is not None:
-        f = xr.open_dataarray(cell_factor).transpose("y", "x")
+        f = (cell_factor if isinstance(cell_factor, xr.DataArray) else xr.open_dataarray(cell_factor)).transpose("y", "x")   # C-2: a quantile-bin factor grid in memory
         if f.shape != grid.shape or not (np.allclose(f.y.values, cutout.data.y.values) and np.allclose(f.x.values, cutout.data.x.values)):
             raise ValueError("V5 X20: the cell factor grid differs from the cutout grid")
         grid = grid * f.values.astype(np.float64)
@@ -174,6 +180,28 @@ def main():
 
     def plain(spec):
         return {kk: vv for kk, vv in spec.items() if kk not in NON_ATLITE_KEYS}
+
+    def quantile_runs(spec):   # V5 X20 C-2: one alpha x f_q scaled cutout per quantile bin (built and released one at a time) and the bin weight grid w_q(y, x)
+        import hashlib
+        qf = ROOT / spec["cell_quantiles"]; tab = ROOT / spec.get("alpha_table", a.alpha_table)
+        Q = xr.open_dataset(qf).load()
+        if not (np.allclose(Q.y.values, cutout.data.y.values) and np.allclose(Q.x.values, cutout.data.x.values)):
+            raise ValueError("V5 X20 C-2: the quantile grid differs from the cutout grid")
+        wsum = Q.weight.sum("q").values
+        if not np.allclose(wsum, 1.0, rtol=0, atol=1e-9):
+            raise ValueError("V5 X20 C-2: quantile weights do not sum to 1 per cell")
+        log.setdefault("v5_x20_c2", {})[spec["cell_quantiles"]] = dict(file=str(qf), sha256=hashlib.sha256(qf.read_bytes()).hexdigest(), nq=int(Q.sizes["q"]),
+                                                                       alpha_table=str(tab), alpha_table_sha256=hashlib.sha256(tab.read_bytes()).hexdigest())
+
+        def gen():
+            for j in Q.q.values:
+                f = xr.DataArray(Q.factor.sel(q=j).values, coords=dict(y=cutout.data.y, x=cutout.data.x), dims=["y", "x"])
+                w = xr.DataArray(Q.weight.sel(q=j).values, coords=dict(y=cutout.data.y, x=cutout.data.x), dims=["y", "x"])
+                cut_q, alphas = alpha_cutout(cutout, onshore, tab, spec["alpha"], f)
+                log["v5_x20_c2"][spec["cell_quantiles"]]["alpha"] = alphas
+                yield cut_q, w
+                del cut_q
+        return gen
     results = []
     for tech in a.techs:
         kind = TECHS[tech]; reg = regions[kind]
@@ -189,8 +217,17 @@ def main():
             if tech not in VARIANTS[var]:
                 continue
             spec = VARIANTS[var][tech]
-            corr, cf_cell = convert(cut_for(spec), plain(spec), capacity_factor=True)
-            cf_cell = (corr * cf_cell).fillna(0.0).load()
+            qruns = quantile_runs(spec) if spec.get("cell_quantiles") else None
+            if qruns is None:
+                corr, cf_cell = convert(cut_for(spec), plain(spec), capacity_factor=True)
+                cf_cell = (corr * cf_cell).fillna(0.0).load()
+            else:   # C-2: annual cell CF = sum_q w_q x CF_q (weights sum to 1 per cell)
+                acc = None
+                for cut_q, w_q in qruns():
+                    corr, cq = convert(cut_q, plain(spec), capacity_factor=True)
+                    term = (cq.fillna(0.0) * w_q).load()
+                    acc = term if acc is None else acc + term
+                cf_cell = (corr * acc).fillna(0.0)
             # float64: the cutout is float32 and numpy 1.x compares a float32 array against a float64 scalar in float32, where
             # cmax + 1e-9 rounds back to cmax and the best cell of a node falls out of the last class (found by the partition test)
             cfv = cf_cell.values.astype(np.float64)
@@ -216,7 +253,14 @@ def main():
                 mat = np.stack([r["_w"].reshape(-1) * cfv.reshape(-1) for r in rows]); mat = mat / mat.sum(axis=1, keepdims=True)
                 from scipy import sparse
                 M = sparse.csr_matrix(mat)
-                _, ts = convert(cut_for(spec), plain(spec), matrix=M, layout=xr.ones_like(cf_cell), index=pd.Index([f"{r['node']}|{r['cls']}" for r in rows], name="bus"), per_unit=True, return_capacity=False)
+                bidx = pd.Index([f"{r['node']}|{r['cls']}" for r in rows], name="bus")
+                if qruns is None:
+                    _, ts = convert(cut_for(spec), plain(spec), matrix=M, layout=xr.ones_like(cf_cell), index=bidx, per_unit=True, return_capacity=False)
+                else:   # C-2: atlite aggregates sum_c M[b,c] layout_c cf_c(t); layout = w_q and per_unit False, summed over q = M . (sum_q w_q cf_q(t)) (rows of M sum to 1)
+                    ts = None
+                    for cut_q, w_q in qruns():
+                        _, tq = convert(cut_q, plain(spec), matrix=M, layout=w_q, index=bidx, per_unit=False, return_capacity=False)
+                        tq = tq.load(); ts = tq if ts is None else ts + tq
                 ts = (corr * ts).clip(max=1.0)
                 ts3 = ts.resample(time="3h").mean()
                 ts3.to_netcdf(a.output / f"profile_{tech}_{var}_c{n_cls}_3h.nc"); ts.to_netcdf(a.output / f"profile_{tech}_{var}_c{n_cls}_1h.nc")

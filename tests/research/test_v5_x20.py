@@ -378,22 +378,97 @@ def test_wquantile():
     assert wquantile(v, w, 0.1) == 1.0 and wquantile(v, w, 0.5) == 2.0 and wquantile(v, w, 0.9) == 3.0 and wquantile(v, w, 0.25) == 1.0
 
 
-def test_calibrated_gwa_v5_profiles_and_classes():
+@pytest.mark.parametrize("var", ["calibrated_gwa_v5", "calibrated_gwa_v5q"])
+def test_calibrated_gwa_v5_profiles_and_classes(var):
     import numpy as np
     import xarray as xr
     for N in (1, 3):
-        new = xr.open_dataset(RV / f"profiles_calibrated_gwa_v5_c{N}_3h.nc"); ref = xr.open_dataset(RV / f"profiles_calibrated_modern_c{N}_3h.nc")
+        new = xr.open_dataset(RV / f"profiles_{var}_c{N}_3h.nc"); ref = xr.open_dataset(RV / f"profiles_calibrated_modern_c{N}_3h.nc")
         for k in ("offwind_ac", "offwind_dc", "solar"):   # offshore and solar = the pypsa_eur run, as in calibrated_modern
             assert np.array_equal(new[k].values, ref[k].values, equal_nan=True)
         assert list(new.onwind.bus.values) == list(ref.onwind.bus.values) and not np.array_equal(new.onwind.values, ref.onwind.values)
         assert float(new.onwind.min()) >= 0.0 and float(new.onwind.max()) <= 1.0
-        cls = pd.read_csv(RV / f"S4A_PROFILE_CLASSES_calibrated_gwa_v5_c{N}.csv")
-        assert set(cls.variant) == {"calibrated_gwa_v5"} and set(cls.tech) == {"onwind", "offwind-ac", "offwind-dc", "solar"}
+        cls = pd.read_csv(RV / f"S4A_PROFILE_CLASSES_{var}_c{N}.csv")
+        assert set(cls.variant) == {var} and set(cls.tech) == {"onwind", "offwind-ac", "offwind-dc", "solar"}
         s = cls[cls.tech == "onwind"].groupby("node").potential_share.sum()
         assert np.allclose(s.values, 1.0, atol=1e-9)                                                 # the classes partition the node potential
     import json
     man = json.loads((RV / "MANIFEST_V5.json").read_text())
-    assert all(man[f"profiles_calibrated_gwa_v5_c{N}_3h.nc"]["sha256"] == V.sha256(RV / f"profiles_calibrated_gwa_v5_c{N}_3h.nc") for N in (1, 3))
+    assert all(man[f"profiles_{var}_c{N}_3h.nc"]["sha256"] == V.sha256(RV / f"profiles_{var}_c{N}_3h.nc") for N in (1, 3))
+
+
+# ---- C-2 subgrid quantile bins (decision 252, X20_C2_ONWIND_SUBGRID_SPEC.md) ----------------------------------------------------
+def test_gwa_quantile_bins(monkeypatch):
+    import numpy as np
+    import v5_wind_gwa as G
+    rng = np.random.default_rng(0)
+    v = np.concatenate([rng.uniform(2.0, 9.0, 4000), np.full(500, 4.0)]); w = np.ones(len(v)); k = np.zeros(len(v), dtype=np.int64)   # cell 0 of a 1 x 2 grid
+    monkeypatch.setattr(G, "_land_pixels", lambda *a, **kw: iter([(k, w, v)]))
+    sw, swv = G.gwa_cell_quantiles(None, None, 0.0, 0.0, 1.0, 1.0, 2, 1, {"t0": 0.0})
+    assert sw.shape == (2, G.NQ) and sw[1].sum() == 0.0                                              # cell 1 has no pixel
+    share = sw[0] / sw[0].sum()
+    m = (swv[0] / np.maximum(sw[0], 1e-300))[sw[0] > 0]
+    assert abs(share.sum() - 1.0) < 1e-12 and np.all(np.diff(m) > 0)                                 # non-empty bins of increasing speed
+    assert share.max() < 0.25                                                                        # roughly equal-area (one histogram bin may hold a tie block)
+    assert (swv[0].sum() / sw[0].sum()) == pytest.approx(v.mean())                                   # sum_q w_q mean_q = cell mean
+    era5 = np.array([4.0, 4.0]); use = np.array([True, False]); fac = np.array([np.clip(v.mean() / 4.0, 0.5, 3.0), 1.0])
+    f, wq, raw = G.quantile_factors(sw, swv, era5, use, fac)
+    assert float((wq[0] * raw[0]).sum()) == pytest.approx(v.mean() / 4.0)                          # area-weighted bin factors = the cell factor
+    assert np.all(f[1] == 1.0) and np.allclose(wq[1], 1.0 / G.NQ)                                    # unused cell: factor 1 (as the cell rule)
+    assert f[0].min() >= G.CLIP[0] and f[0].max() <= G.CLIP[1]
+
+
+def _ref_net():
+    n = toy(("A 0",), "MY")
+    n.add("Bus", "B 0", carrier="AC", v_nom=380.0); n.buses.loc["B 0", "country"] = "TH"
+    n.add("Generator", "A 0 onwind-2025", bus="A 0", carrier="onwind", p_nom_extendable=True, p_nom_max=100.0)
+    n.add("Generator", "B 0 onwind-2025", bus="B 0", carrier="onwind", p_nom_extendable=True, p_nom_max=50.0)
+    n.add("Generator", "A 0 onwind existing", bus="A 0", carrier="onwind existing", p_nom=10.0)
+    n.generators_t.p_max_pu = pd.DataFrame({"A 0 onwind-2025": [0.2, 0.5, 0.8, 0.1], "B 0 onwind-2025": [0.3] * 4, "A 0 onwind existing": [0.4] * 4}, index=n.snapshots)
+    return n
+
+
+def test_onwind_reference_level(tmp_path):
+    import v5_layers as L
+    (tmp_path / "research_inputs/renewable_v5").mkdir(parents=True)
+    tab = tmp_path / L.ONWIND_REFERENCE_TABLE
+    pd.DataFrame(dict(country=["MY", "TH"], profile_variant=["calibrated_gwa_v5q"] * 2, factor=[1.5, 2.0])).to_csv(tab, index=False)
+    n = _ref_net(); led = L.apply_onwind_reference_level(n, cfg({"enabled": True}), tmp_path, "calibrated_gwa_v5q")   # main: disabled
+    assert led == {"switch": "disabled", "applied": False} and n.generators_t.p_max_pu["A 0 onwind-2025"].tolist() == [0.2, 0.5, 0.8, 0.1]
+    on = cfg({"enabled": True, "onwind_reference_level": "gwa_reference"})
+    assert not V.is_main_set(V.switches(on))                                                          # a sensitivity, not the main set
+    n = _ref_net(); led = L.apply_onwind_reference_level(n, on, tmp_path, "calibrated_gwa_v5q")
+    P = n.generators_t.p_max_pu
+    assert P["A 0 onwind-2025"].tolist() == pytest.approx([0.3, 0.75, 1.0, 0.15])                    # x 1.5, capped at 1 per snapshot
+    assert P["B 0 onwind-2025"].tolist() == pytest.approx([0.6] * 4) and P["A 0 onwind existing"].tolist() == [0.4] * 4   # existing wind unchanged
+    assert led["countries"]["MY"]["capped_share"] == pytest.approx(0.25) and led["countries"]["TH"]["factor"] == 2.0
+    with pytest.raises(ValueError, match="factor table belongs to"):
+        L.apply_onwind_reference_level(_ref_net(), on, tmp_path, "calibrated_gwa_v5")                  # factors of another profile variant
+    pd.DataFrame(dict(country=["MY"], profile_variant=["calibrated_gwa_v5q"], factor=[1.5])).to_csv(tab, index=False)
+    with pytest.raises(ValueError, match="no factor for TH"):
+        L.apply_onwind_reference_level(_ref_net(), on, tmp_path, "calibrated_gwa_v5q")
+
+
+def test_onwind_reference_factors_rule():
+    import v5_onwind_reference_data as R
+    n = _ref_net()
+    cells = pd.DataFrame(dict(country=["MY", "MY", "TH"], gwa_cf_iec3=[0.10, 0.30, 0.20], w_mw=[1.0, 1.0, 2.0]))
+    al = pd.read_csv(ROOT / "research_inputs/renewable_v5/WIND_CALIBRATION_ALPHA_V5.csv").set_index("country")
+    t = R.factors(n, cells, al).set_index("country")
+    assert t.at["TH", "r"] == 1.07 and t.at["TH", "reference"] == pytest.approx(0.20 / 1.07)
+    assert t.at["MY", "cf_v5"] == pytest.approx((0.2 + 0.5 + 0.8 + 0.1) / 4) and t.at["MY", "reference"] == pytest.approx(0.20 / t.at["MY", "r"])
+    assert t.at["MY", "factor"] == pytest.approx(t.at["MY", "reference"] / t.at["MY", "cf_v5"]) and t.at["MY", "factor"] == pytest.approx(1.0 / t.at["MY", "v5_over_reference"])
+    assert not t.at["MY", "threshold_applies"] and t.at["MY", "potential_mw"] == 100.0                # threshold of decision 252: >= 1 GW
+
+
+def test_subgrid_mean_cf_above_mean_speed_cf_at_low_wind():
+    import numpy as np
+    from s4b_3_wind_calibration import dea2050_turbine
+    t = dea2050_turbine(); V, P = np.asarray(t["V"], float), np.asarray(t["POW"], float) / float(t["P"])
+    pc = lambda x: np.interp(x, V, P)   # noqa: E731
+    f = np.linspace(0.7, 1.3, 10)                                                                     # bin factors around the cell mean 1.0, equal weights
+    for vm in (3.5, 4.5, 5.5):                                                                        # convex part of the curve (ASEAN cell means)
+        assert pc(f * vm).mean() >= pc(vm)                                                            # Jensen: the bin-mean CF exceeds the mean-speed CF
 
 
 def test_profile_variant_switch():
@@ -406,8 +481,12 @@ def test_profile_variant_switch():
     led4 = apply_renewable_profiles(n, base, ROOT)
     assert led4["profile_variant"] == "calibrated_modern" and "S4A_PROFILE_CLASSES_c3.csv" in led4["files"]
     c5 = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True}})}
-    led5 = apply_renewable_profiles(n, c5, ROOT)
-    assert led5["profile_variant"] == "calibrated_gwa_v5" and set(led5["files"]) == {"profiles_calibrated_gwa_v5_c3_3h.nc", "profiles_calibrated_gwa_v5_c1_3h.nc",
+    led5 = apply_renewable_profiles(n, c5, ROOT)   # v5 main: onwind_subgrid quantile10 (C-2)
+    assert led5["profile_variant"] == "calibrated_gwa_v5q" and set(led5["files"]) == {"profiles_calibrated_gwa_v5q_c3_3h.nc", "profiles_calibrated_gwa_v5q_c1_3h.nc",
+                                                                                      "S4A_PROFILE_CLASSES_calibrated_gwa_v5q_c3.csv"}
+    c5m = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True, "onwind_subgrid": "cell_mean"}})}
+    ledm = apply_renewable_profiles(n, c5m, ROOT)   # cell_mean = X20 B
+    assert ledm["profile_variant"] == "calibrated_gwa_v5" and set(ledm["files"]) == {"profiles_calibrated_gwa_v5_c3_3h.nc", "profiles_calibrated_gwa_v5_c1_3h.nc",
                                                                                      "S4A_PROFILE_CLASSES_calibrated_gwa_v5_c3.csv"}
     c5e = {"research": dict(base["research"], demand={"v4": {"enabled": True}, "v5": {"enabled": True, "onwind_calibration": "ember_country"}})}
     assert apply_renewable_profiles(n, c5e, ROOT)["profile_variant"] == "calibrated_modern"

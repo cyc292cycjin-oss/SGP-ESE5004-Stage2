@@ -7,6 +7,7 @@ returns at once with research.demand.v5 disabled (v5_common.V5_OFF), so a v5-off
   operating_share          1-5  share of a hydro component's capacity operating in 2025 (identities of existing_unit_components; s4c_layers)
   hydro_spill_tables / hydro_spill_report  1-5  bookkeeping part and true spill of a solved network (s2_solve HYDRO_SPILL.json, v5_hydro_spill.py)
   hydro_candidate_unit_inflow C-1 per-MW annual inflow of the new-build hydro / ror candidates (decision 252; HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv; s4c_layers)
+  apply_onwind_reference_level  X21 sensitivity (decision 253): onshore candidate p_max_pu x 1 / (v5 / reference) per country, capped at 1 (off in the main set)
 """
 from __future__ import annotations
 
@@ -20,6 +21,42 @@ from v5_common import switches
 ROOT = Path(__file__).resolve().parents[1]
 GEM_COORD_TABLE = "research_inputs/fleet_v5/GEM_COORD_CORRECTIONS_V5.csv"
 HYDRO_CANDIDATE_TABLE = "research_inputs/hydro_v5/HYDRO_CANDIDATE_UNIT_INFLOW_V5.csv"
+ONWIND_REFERENCE_TABLE = "research_inputs/renewable_v5/ONWIND_REFERENCE_LEVEL_FACTORS_V5.csv"
+
+
+def apply_onwind_reference_level(n, cfg, repo: Path = ROOT, profile_variant: str | None = None) -> dict:
+    """X21 sensitivity switch (decision 253; research.demand.v5.onwind_reference_level): gwa_reference = every extendable onshore-wind candidate ('onwind',
+    p_nom_extendable) of country c gets p_max_pu(t) x factor_c, capped at 1 per snapshot, factor_c = 1 / (v5 / reference) of ONWIND_REFERENCE_LEVEL_FACTORS_V5.csv
+    (reference = GWA IEC3 gross / r, X20 ONWIND_SANITY rule; scripts_project/v5_onwind_reference_data.py). Existing wind is not changed. The table was derived for
+    one profile variant; another variant stops the build. disabled (main) = no change. Returns the ledger (per country: candidates, factor, CF before / after,
+    share of capped snapshot values)."""
+    s = switches(cfg)
+    if not s["enabled"] or s["onwind_reference_level"] == "disabled":
+        return dict(switch=s["onwind_reference_level"], applied=False)
+    from v5_common import sha256
+    p = Path(repo) / ONWIND_REFERENCE_TABLE
+    t = pd.read_csv(p, keep_default_na=False)
+    var = set(t.profile_variant.astype(str))
+    if profile_variant is not None and var != {profile_variant}:
+        raise ValueError(f"onwind_reference_level gwa_reference: the factor table belongs to {sorted(var)}, the network uses {profile_variant}")
+    fac = {r.country: float(r.factor) for r in t.itertuples()}
+    g = n.generators
+    cty = g.bus.map(n.buses.country) if "country" in n.buses else g.bus.astype(str).str[:2]
+    cand = g.index[(g.carrier == "onwind") & g.p_nom_extendable]
+    P = n.generators_t.p_max_pu; w = n.snapshot_weightings.generators
+    led = dict(switch=s["onwind_reference_level"], applied=True, table=ONWIND_REFERENCE_TABLE, sha256=sha256(p), profile_variant=sorted(var), countries={})
+    for c, names in pd.Series(cand, index=cand).groupby(cty.reindex(cand)):
+        if c not in fac:
+            raise ValueError(f"onwind_reference_level gwa_reference: no factor for {c}, but {c} has onshore candidates")
+        cols = [x for x in names if x in P.columns]
+        before = P[cols].copy()
+        P[cols] = (before * fac[c]).clip(upper=1.0)
+        cap = g.loc[cols, "p_nom_max"].replace(np.inf, np.nan).fillna(0.0)
+        cf = lambda D: float(((D.mul(w, axis=0).sum() / w.sum()) * cap).sum() / cap.sum()) if cap.sum() > 0 else float("nan")   # noqa: E731
+        led["countries"][str(c)] = dict(candidates=len(cols), factor=fac[c], cf_before=cf(before), cf_after=cf(P[cols]),
+                                        capped_share=float(((before * fac[c]) > 1.0).to_numpy().mean()) if len(cols) else 0.0)
+    n.generators_t.p_max_pu = P
+    return led
 
 
 def hydro_candidate_unit_inflow(repo: Path = ROOT, multiplier_one: bool = False) -> dict:

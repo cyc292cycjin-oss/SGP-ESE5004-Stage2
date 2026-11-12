@@ -28,7 +28,7 @@ def export_v5(a, N, on_src, base):
     calibrated_gwa_v5 run, offshore wind and solar from the same pypsa_eur run as calibrated_modern (asserted equal to the committed
     profiles_calibrated_modern_c{N}_3h.nc arrays). The class table, manifest and run log are separate files (S4A_PROFILE_CLASSES_calibrated_gwa_v5_c{N}.csv,
     MANIFEST_V5.json, S4B3_PROFILES_LOG_calibrated_gwa_v5_c{N}.json), so every v4 input stays byte-identical."""
-    var = "calibrated_gwa_v5"; data = {}
+    var = a.variant; data = {}   # calibrated_gwa_v5 (X20 B) or calibrated_gwa_v5q (C-2, decision 252: quantile-bin cell CF)
     ref = xr.open_dataset(OUT / f"profiles_calibrated_modern_c{N}_3h.nc")
     for tech in TECHS:
         f = on_src / f"profile_{tech}_{var}_c{N}_3h.nc" if tech == "onwind" else base / f"profile_{tech}_pypsa_eur_c{N}_3h.nc"
@@ -39,9 +39,12 @@ def export_v5(a, N, on_src, base):
         if k != "onwind" and not (list(ds[k].bus.values) == list(ref[k].bus.values) and np.array_equal(ds[k].values, ref[k].values, equal_nan=True)):
             raise SystemExit(f"V5 X20: {k} of the pypsa_eur run differs from profiles_calibrated_modern_c{N}_3h.nc")
     ref.close()
-    ds.attrs.update(variant=var, classes=N, source="scripts_project/s4a_profiles.py (onwind V5 X20 calibrated_gwa_v5, others S4A pypsa_eur)", cutout="cutout-2013-era5 (Zenodo 10.5281/zenodo.20325289)",
-                    snapshots="2013 3h means", onwind="ERA5 100 m wind x GWA v4 cell factor (WIND_GWA_CELL_FACTOR_V5.nc) x country alpha (WIND_CALIBRATION_ALPHA_V5.csv alpha_main, farm-point "
-                                                      "calibration) + DEA 2050 turbine (6 MW, 165 m, hub 110 m)")
+    desc = ("ERA5 100 m wind x GWA v4 cell factor (WIND_GWA_CELL_FACTOR_V5.nc) x country alpha (WIND_CALIBRATION_ALPHA_V5.csv alpha_main, farm-point calibration) + DEA 2050 turbine "
+            "(6 MW, 165 m, hub 110 m)") if var == "calibrated_gwa_v5" else \
+           ("ERA5 100 m wind x GWA v4 quantile-bin factors (WIND_GWA_CELL_QUANTILES_V5.nc: 10 equal-area bins per cell, cell CF = area-weighted mean of the bin CFs) x country alpha "
+            "(WIND_CALIBRATION_ALPHA_V5.csv alpha_main, farm-point calibration) + DEA 2050 turbine (6 MW, 165 m, hub 110 m)")
+    ds.attrs.update(variant=var, classes=N, source=f"scripts_project/s4a_profiles.py (onwind V5 X20 {var}, others S4A pypsa_eur)", cutout="cutout-2013-era5 (Zenodo 10.5281/zenodo.20325289)",
+                    snapshots="2013 3h means", onwind=desc)
     out = OUT / f"profiles_{var}_c{N}_3h.nc"
     ds.to_netcdf(out, encoding={k: dict(zlib=True, complevel=6, dtype="float32") for k in ds.data_vars})
     cls = pd.read_csv(OUT / f"S4A_PROFILE_CLASSES_c{N}.csv"); new = pd.read_csv(on_src / "S4A_PROFILE_CLASSES.csv")
@@ -59,9 +62,9 @@ def export_v5(a, N, on_src, base):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--classes", type=int, required=True)
     ap.add_argument("--onwind-source", type=Path, default=None); ap.add_argument("--base-source", type=Path, default=None)
-    ap.add_argument("--variant", choices=("calibrated_modern", "calibrated_gwa_v5"), default="calibrated_modern")
+    ap.add_argument("--variant", choices=("calibrated_modern", "calibrated_gwa_v5", "calibrated_gwa_v5q"), default="calibrated_modern")
     a = ap.parse_args(); N = a.classes
-    if a.variant == "calibrated_gwa_v5":
+    if a.variant in ("calibrated_gwa_v5", "calibrated_gwa_v5q"):
         return export_v5(a, N, a.onwind_source, a.base_source or ROOT / f"results_project/s4a/profiles_full_c{N}_v2")
     on_src = a.onwind_source or ROOT / f"results_project/s4b/profiles_full_c{N}"; base = a.base_source or ROOT / f"results_project/s4a/profiles_full_c{N}_v2"
     data = {}

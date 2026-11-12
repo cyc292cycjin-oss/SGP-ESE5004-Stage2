@@ -38,7 +38,7 @@ def test_config_default_and_switch_validation():
     cfg = config(ROOT, "integrated")
     RN = cfg["research"]["renewable"]
     # S4B-3 (decisions 74, 75): main = calibrated_modern with 3 resource classes; the S4A variants stay available
-    assert RN["profile_variant"] == "calibrated_modern" and RN["resource_classes"] == 3 and set(VARIANTS) == {"original", "fork", "pypsa_eur", "calibrated_modern", "calibrated_gwa_v5"}   # V5 X20 (1-1): calibrated_gwa_v5 via research.demand.v5.onwind_calibration
+    assert RN["profile_variant"] == "calibrated_modern" and RN["resource_classes"] == 3 and set(VARIANTS) == {"original", "fork", "pypsa_eur", "calibrated_modern", "calibrated_gwa_v5", "calibrated_gwa_v5q"}   # V5 X20 (1-1): calibrated_gwa_v5 via research.demand.v5.onwind_calibration
 
 
 @pytest.mark.skipif(not EB.exists(), reason="electric base not available")

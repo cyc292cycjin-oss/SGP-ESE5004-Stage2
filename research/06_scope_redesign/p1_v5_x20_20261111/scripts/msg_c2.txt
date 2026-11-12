@@ -1,0 +1,15 @@
+X20 C-2（决策 252、253；L-C11）：陆上风电格点内分位档（开关 onwind_subgrid）与 X21 参照水平开关（onwind_reference_level）
+
+- 分位档：v5_wind_gwa.py --quantiles 每个 ERA5 格点取 GWA 陆地像元风速比的 10 个等面积档（两遍读：0.02 m/s 直方图定分位界，
+  再逐档累加）；factor 每档截断 [0.5, 3]，weight = 面积份额。重算的格点均值系数与已提交文件逐值相同，Sigma w f 与格点系数差 <= 1.7e-13。
+  -> WIND_GWA_CELL_QUANTILES_V5.nc / .csv / _LOG.json。
+- 剖面：s4a_profiles.py 新变体 calibrated_gwa_v5q（逐档缩放副本；年 CF = Sigma w_q CF_q；时间序列 = Sigma_q atlite 矩阵聚合，layout = w_q，
+  per_unit False）；风场校准与 alpha 不变。calibrated_modern 与 calibrated_gwa_v5 复现逐值相同。导出 profiles_calibrated_gwa_v5q_c{1,3}_3h.nc
+  与等级表（s4b_3_export.py --variant calibrated_gwa_v5q）。
+- 开关 onwind_subgrid：quantile10（v5 主值，决策 253）| cell_mean（X20 B）。预检（规格第 5、7 节）未通过：10 个适用国家 0.555-0.744 < 0.8；
+  按决策 253 采用，不改档数、alpha、参数或验收区间。
+- X21 开关 onwind_reference_level：disabled（主值）| gwa_reference（按国把候选 p_max_pu 乘 1 / (v5 / 参照)，逐时上限 1）；
+  v5_layers.apply_onwind_reference_level，系数脚本 v5_onwind_reference_data.py（系数表在预构建后生成）。
+- v5 主集开关 SHA bce04fb1 -> cda03925；注册表 2,581 -> 2,588 行。测试：test_v5_x20 新增 / 修改，定向 97 passed。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

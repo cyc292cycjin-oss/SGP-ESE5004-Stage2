@@ -74,6 +74,30 @@ def new_rows() -> Registry:
         file_row(r, f"renewable_profile_file_calibrated_gwa_v5_c{N}_3h", RV / f"profiles_calibrated_gwa_v5_c{N}_3h.nc", f"S4A-format profiles, variant calibrated_gwa_v5, {N} class(es): "
                  "onshore wind ERA5 x GWA cell factor x alpha V5 + DEA 2050 turbine; offshore and solar = pypsa_eur (equal to calibrated_modern)", "B", "241,246,251")
         file_row(r, f"renewable_profile_classes_calibrated_gwa_v5_c{N}", RV / f"S4A_PROFILE_CLASSES_calibrated_gwa_v5_c{N}.csv", f"class table of calibrated_gwa_v5, {N} class(es)", "B", "241")
+    # ---- C-2 (decisions 252, 253): subgrid quantile bins of the onshore cell CF; X21 reference-level switch
+    file_row(r, "v5_onwind_gwa_cell_quantiles", RV / "WIND_GWA_CELL_QUANTILES_V5.nc", "C-2: per ERA5 cell 10 equal-area bins of the land-pixel GWA v4 ws100 / ERA5 2013 time-mean "
+             "wnd100m (factor clipped [0.5, 3] per bin, weight = area share; all land pixels of the cell, not only the eligible land); scripts_project/v5_wind_gwa.py --quantiles", "B", "252,253")
+    for N in (1, 3):
+        file_row(r, f"renewable_profile_file_calibrated_gwa_v5q_c{N}_3h", RV / f"profiles_calibrated_gwa_v5q_c{N}_3h.nc", f"S4A-format profiles, variant calibrated_gwa_v5q, {N} class(es): "
+                 "onshore cell CF = area-weighted mean over the 10 GWA quantile bins of PC(alpha x f_q x ERA5 wind), DEA 2050 turbine; offshore and solar = pypsa_eur", "B", "252,253")
+        file_row(r, f"renewable_profile_classes_calibrated_gwa_v5q_c{N}", RV / f"S4A_PROFILE_CLASSES_calibrated_gwa_v5q_c{N}.csv", f"class table of calibrated_gwa_v5q, {N} class(es)", "B", "252,253")
+    rule_row(r, "v5_onwind_subgrid_rule", "research.demand.v5.onwind_subgrid: quantile10 (v5 main, decision 253: cell CF = sum_q w_q PC(alpha f_q v), 10 equal-area GWA quantile bins; the "
+             "class-table pre-check of X20_C2_ONWIND_SUBGRID_SPEC.md failed for all 10 countries >= 1 GW (v5 / reference 0.555-0.744 < 0.8), adopted by decision 253 without changing "
+             "bins, alpha or the band) | cell_mean (X20 B)", "quantile10", "decisions 252, 253; X20_C2_ONWIND_SUBGRID_SPEC.md", rel(HERE / "s4a_profiles.py"), sha256(HERE / "s4a_profiles.py"), "252,253", tier="C")
+    rule_row(r, "v5_onwind_reference_level_rule", "research.demand.v5.onwind_reference_level (X21 sensitivity, decision 253): disabled (main) | gwa_reference = onshore candidate "
+             "p_max_pu x 1 / (v5 / reference) per country, capped at 1 per snapshot (reference = GWA IEC3 gross / r, the X20 ONWIND_SANITY rule)", "disabled", "decision 253",
+             rel(HERE / "v5_layers.py"), sha256(HERE / "v5_layers.py"), "253", status="SENSITIVITY")
+    rf = RV / "ONWIND_REFERENCE_LEVEL_FACTORS_V5.csv"
+    if rf.exists():
+        ft = pd.read_csv(rf, keep_default_na=False).set_index("country"); hf = sha256(rf)
+        for c in COUNTRIES:
+            if c in ft.index and str(ft.at[c, "factor"]) not in ("", "nan"):
+                x = ft.loc[c]
+                r.add(f"v5_onwind_reference_factor_{c}", f"{c} X21 onwind reference-level factor = reference / v5 (v5 = candidate CF {float(x.cf_v5):.4f} of the {x.profile_variant} network, "
+                      f"reference = GWA IEC3 gross {float(x.gwa_iec3_gross):.4f} / r {float(x.r):.3f} ({x.r_basis}); v5 / reference {float(x.v5_over_reference):.3f}; candidate potential "
+                      f"{float(x.potential_mw):,.0f} MW, decision-252 threshold {'applies' if str(x.threshold_applies) == 'True' else 'does not apply (< 1 GW)'})", float(x.factor), "factor", "C",
+                      "X20 ONWIND_SANITY rule; GWA v4 IEC3 (X03 onwind_node_cells.csv)", "research_inputs/renewable_v5/ONWIND_REFERENCE_LEVEL_FACTORS_V5.csv", hf, country=c,
+                      decision_ref="253", status="SENSITIVITY")
     # ---- 1-2 / Q12
     rule_row(r, "v5_existing_wind_profile_rule", "research.demand.v5.existing_wind_profile: best_class (v5 main: existing onshore / offshore wind copies the highest class column of its node, "
              "falling back class by class) | class0 (v4: the worst class after the class split, X03 section 2)", "best_class", "X20_SPEC.md 1.2; X03 REPORT section 2", rel(SPEC), spec, "241", tier="C")

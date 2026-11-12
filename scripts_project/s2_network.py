@@ -319,7 +319,15 @@ def build_scenario_s2(repo, scenario, output, electric_base, allocation, hydro_d
         v5x["tables"].update({f"renewable_{k}": f"{pd_}/{k}" for k in renewable["files"]})
         v5x["tables"].update(onwind_alpha_v5=f"{pd_}/WIND_CALIBRATION_ALPHA_V5.csv", onwind_cell_factor=f"{pd_}/WIND_GWA_CELL_FACTOR_V5.nc",
                              onwind_effective_multiplier=f"{pd_}/WIND_EFFECTIVE_MULTIPLIER_V5.csv")
+        if renewable["v5_onwind_calibration"].get("used_variant") == "calibrated_gwa_v5q":   # V5 X20 C-2 (decision 252): quantile-bin factors
+            v5x["tables"]["onwind_cell_quantiles"] = f"{pd_}/WIND_GWA_CELL_QUANTILES_V5.nc"
         v5x["ledgers"]["onwind_1_1"] = renewable["v5_onwind_calibration"]
+    if v5s["enabled"]:   # V5 X20 X21 sensitivity switch (decision 253): onshore reference level (disabled in the main set)
+        from v5_layers import apply_onwind_reference_level
+        ref_led = apply_onwind_reference_level(n, cfg, repo, profile_variant=renewable.get("profile_variant"))
+        v5x["ledgers"]["onwind_reference_x21"] = ref_led
+        if ref_led.get("applied"):
+            v5x["tables"]["onwind_reference_level"] = ref_led["table"]
     corridors_path, domestic_path = corridor_tables(cfg)   # S4E-1 (decision 94): research.corridors.adjacency_completion on -> CORRIDORS_S4E1.csv + domestic candidates
     corridors = pd.read_csv(repo / corridors_path, float_precision="round_trip")
     corridors, optional_corridors = extend_optional_corridors(corridors, cfg, repo)   # S4F-2 d (decision 97 d): SG-VN / SG-KH second-batch candidates (off in the main run)
